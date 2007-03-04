@@ -26,8 +26,9 @@
 
  PatternView::PatternView( psy::core::Song *song_ )
  {
+     setAlignment( Qt::AlignLeft | Qt::AlignTop );
      scene_ = new QGraphicsScene(this);
-     scene_->setBackgroundBrush(Qt::black);
+     scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
      setSceneRect(0,0,width(),height());
      setScene(scene_);
 

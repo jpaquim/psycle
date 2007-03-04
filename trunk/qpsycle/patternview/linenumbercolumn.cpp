@@ -26,7 +26,6 @@
 LineNumberColumn::LineNumberColumn( PatternView *patView ) : dy_(0)
 {
     patternView = patView;
-    setPen( QPen( Qt::red ) );
 }
 
 LineNumberColumn::~ LineNumberColumn( )
@@ -42,9 +41,10 @@ void LineNumberColumn::paint( QPainter *painter,
                                const QStyleOptionGraphicsItem *option,
                                QWidget *widget )
 {
+    int columnWidth = 50;
 //    TimeSignature signature;
-    painter->setPen( QPen ( Qt::red ) );
-    painter->drawRect(0, 0, 60, patternView->height() );
+    painter->setPen( QPen ( Qt::black ) );
+    painter->drawRect(0, 0, columnWidth, patternView->height() );
 
 //    ngrs::Rect repaintRect = g.repaintArea().rectClipBox();
 			int ch      = patternView->height();
@@ -59,8 +59,16 @@ void LineNumberColumn::paint( QPainter *painter,
     
 //    qreal width = boundingRect.width();
     for (int i = startLine; i <= endLine; i++)
-        painter->drawLine( 0,(i+1)*patternView->rowHeight() - dy() -1,
-        60,(i+1)*patternView->rowHeight() -1 - dy() );
+    {
+        painter->setPen( QPen ( Qt::black ) );
+        painter->drawLine( 0, i*patternView->rowHeight(),
+                           columnWidth, i*patternView->rowHeight() );
+
+        QString text = QString::number( i );
+        QRectF textBound( 0, i*patternView->rowHeight(), columnWidth-2, patternView->rowHeight() );
+        painter->setPen( QPen ( Qt::white ) );
+        painter->drawText( textBound, text, QTextOption( Qt::AlignRight ) );
+   }
 
     for (int i = startLine; i <= endLine; i++) {
         //if (i+startLine == pView->cursor().line()) {
@@ -109,8 +117,6 @@ void LineNumberColumn::paint( QPainter *painter,
             }
         }*/
 //        int yp = (patternView->rowHeight() - g.textHeight()) / 2  + g.textAscent();
-        QString text = QString::number( i );
-        painter->drawText( 5, i*patternView->rowHeight()-dy(), text );
     }
 }
 
