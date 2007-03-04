@@ -45,6 +45,9 @@
      connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
      connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
      // FIXME: the above lines seem not the best way of doing things...
+
+     setSourceMacGui( sourceMacGui );
+     setDestMacGui( destMacGui );
  }
 
  WireGui::~WireGui()
