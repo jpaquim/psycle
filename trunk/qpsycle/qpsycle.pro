@@ -32,6 +32,7 @@ HEADERS += mainwindow.h \
            machineview/newmachinedlg.h \
            machineview/wiregui.h \
            machineview/mastergui.h \
+           machineview/effectgui.h \
            patternview/patternview.h \
            psycore/abstractmachinefactory.h \
            psycore/alsa_conditional_build.h \
@@ -113,6 +114,7 @@ SOURCES += mainwindow.cpp \
            machineview/newmachinedlg.cpp \
            machineview/wiregui.cpp \
            machineview/mastergui.cpp \
+           machineview/effectgui.cpp \
            patternview/patternview.cpp \
            psycore/abstractmachinefactory.cpp \
            psycore/alsaout.cpp \
