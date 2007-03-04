@@ -414,7 +414,7 @@ namespace psy
 			return Wire::id_type(-1);
 		}
 
-								bool Machine::AcceptsConnections()
+								bool Machine::acceptsConnections()
 								{
 												if (_mode == MACHMODE_FX || _mode == MACHMODE_MASTER) {
 																return true;
@@ -423,7 +423,7 @@ namespace psy
 												}
 								}
 
-								bool Machine::EmitsConnections()
+								bool Machine::emitsConnections()
 								{
 												if (_mode == MACHMODE_GENERATOR || _mode == MACHMODE_FX) {
 																return true;

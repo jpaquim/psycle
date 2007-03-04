@@ -158,6 +158,7 @@
             }
             scene_->addItem(macGui);
             machineGuis.push_back(macGui);
+            update();
             repaint();
      } else {
 //        don't bother.
@@ -175,14 +176,12 @@
 
  void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
  {
-     qDebug("machineview: new con");
      tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
      tempLine_->setVisible(true);
  }
 
  void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
  {
-     qDebug("machineview: close con");
      // See if we hit another machine gui.
      if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
          QGraphicsItem *itm = scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) );
@@ -196,19 +195,21 @@
 
  void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
  {
-    // Check there's not already a connection.
-    
-    // Make a connection in the song file..
-    
-    // Make a new wiregui connection.
-    WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui, this );
-    scene_->addItem( newWireGui );
+    if ( dstMacGui->mac()->acceptsConnections() ) {
+        // Check there's not already a connection.
+        // ...
+        
+        // Make a connection in the song file..
+        song_->InsertConnection( srcMacGui->mac()->_macIndex , dstMacGui->mac()->_macIndex, 1.0f);
+        
+        // Make a new wiregui connection.
+        WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui, this );
+        scene_->addItem( newWireGui );
+    }
  }
 
  void MachineView::deleteConnection( WireGui *wireGui )
  {
-    qDebug("deleting connection");
-
     // Delete the connection in the song file.
     
     // Delete the connection in the GUI.
