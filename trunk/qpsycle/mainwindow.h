@@ -22,13 +22,18 @@
 
  #include <QMainWindow>
 
+ #include "machineview.h"
+ #include "patternview.h"
+ #include "waveview.h"
+ #include "sequencerview.h"
+
+ #include "psycore/song.h"
+
  class QAction;
  class QListWidget;
  class QMenu;
  class QTextEdit;
  class QComboBox;
-
- #include "psycore/song.h"
 
  class MainWindow : public QMainWindow
  {
@@ -36,6 +41,9 @@
 
  public:
      MainWindow();
+
+ protected:
+    void keyPressEvent( QKeyEvent *event );
 
  private slots:
      void newSong();
@@ -81,6 +89,12 @@
      QComboBox *genCombo;
      QComboBox *fxCombo;
      QComboBox *sampCombo;
+
+     QTabWidget *views_;
+     MachineView *macView_;
+     PatternView *patView_;
+     WaveView *wavView_;
+     SequencerView *seqView_;
  };
 
  #endif
