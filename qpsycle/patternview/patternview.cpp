@@ -21,6 +21,7 @@
 #include <QtGui>
 
 #include "patternview.h"
+#include "header.h"
 
 #include "psycore/song.h"
 
@@ -33,7 +34,9 @@
      setScene(scene_);
 
      lineNumCol_ = new LineNumberColumn( this );
+     Header *trackHeader = new Header( this );
      scene_->addItem( lineNumCol_ );
+     scene_->addItem( trackHeader );
 
     // Create the toolbar.
     //     createToolBar();

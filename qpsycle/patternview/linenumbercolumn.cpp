@@ -42,12 +42,14 @@ void LineNumberColumn::paint( QPainter *painter,
                                QWidget *widget )
 {
     int columnWidth = 50;
+    int headerHeight = 20;
+    QColor lineColor( Qt::black );
+    QColor textColor( Qt::white );
 //    TimeSignature signature;
     painter->setPen( QPen ( Qt::black ) );
     painter->drawRect(0, 0, columnWidth, patternView->height() );
 
-//    ngrs::Rect repaintRect = g.repaintArea().rectClipBox();
-			int ch      = patternView->height();
+    int ch = patternView->height();
     
     // the start for whole repaint
     int start    = dy_ / patternView->rowHeight();
@@ -57,16 +59,15 @@ void LineNumberColumn::paint( QPainter *painter,
     int startLine = start;
     int endLine   = end;
     
-//    qreal width = boundingRect.width();
     for (int i = startLine; i <= endLine; i++)
     {
-        painter->setPen( QPen ( Qt::black ) );
-        painter->drawLine( 0, i*patternView->rowHeight(),
-                           columnWidth, i*patternView->rowHeight() );
+        painter->setPen( QPen ( lineColor ) );
+        painter->drawLine( 0, i*patternView->rowHeight() + headerHeight,
+                           columnWidth, i*patternView->rowHeight() + headerHeight );
 
         QString text = QString::number( i );
-        QRectF textBound( 0, i*patternView->rowHeight(), columnWidth-2, patternView->rowHeight() );
-        painter->setPen( QPen ( Qt::white ) );
+        QRectF textBound( 0, i*patternView->rowHeight() + headerHeight, columnWidth-2, patternView->rowHeight() );
+        painter->setPen( QPen ( textColor ) );
         painter->drawText( textBound, text, QTextOption( Qt::AlignRight ) );
    }
 
