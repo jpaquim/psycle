@@ -21,7 +21,7 @@ namespace psy
 	{
 		Song::Song()
 		{
-			tracks_= MAX_TRACKS;
+			tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 			_machineLock = false;
 			Invalided = false;
 			preview_vol = 0.25f;
