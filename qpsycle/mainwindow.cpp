@@ -71,8 +71,9 @@ void MainWindow::setupGui()
 
 
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget( views_, 0, 1, 0, 2 );
-    layout->setColumnStretch(1, 10);
+    layout->addWidget( views_ );
+    //layout->addWidget( views_, 0, 1, 0, 2 );
+    //layout->setColumnStretch(1, 15);
     workArea->setLayout(layout);
     setCentralWidget(workArea);
 
