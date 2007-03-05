@@ -55,6 +55,9 @@
 
  private:
     psy::core::Song *song_;
+
+    void setupSound();
+    void setupGui();
     
      void createActions();
      void createMenus();
