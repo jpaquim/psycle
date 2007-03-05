@@ -46,7 +46,7 @@
      setRect(QRectF(0, 0, 100, 60));
      setPos(left, top);
      setPen(QPen(Qt::white,1));
-     setBrush(QBrush(Qt::blue));
+     setBrush( Qt::blue );
      setFlag(ItemIsMovable);
      setFlag(ItemIsSelectable);
      setFlag(ItemIsFocusable);
@@ -193,5 +193,3 @@ psy::core::Machine* MachineGui::mac()
 {
     return mac_;
 }
-
-

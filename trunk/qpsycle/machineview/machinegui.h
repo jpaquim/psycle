@@ -75,6 +75,7 @@ signals:
      QList<WireGui *> wireGuiList;
      MachineTweakDlg *macTwkDlg_;
 
+    QColor backgroundColor_;
      QAction *showMacTwkDlgAct_;
  };
 
