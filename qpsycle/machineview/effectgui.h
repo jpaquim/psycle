@@ -27,6 +27,9 @@ class EffectGui : public MachineGui
 {
 public:
     EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+
+protected:
+
 };
 
 #endif

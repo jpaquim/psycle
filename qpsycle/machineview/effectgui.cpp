@@ -23,5 +23,5 @@
  EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : MachineGui(left, top, mac, macView)
  {
+    setBrush( QColor( 0, 180, 0 ) );
  }
-
