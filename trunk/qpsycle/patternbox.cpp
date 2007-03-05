@@ -22,6 +22,9 @@
 #include <QAction>
 #include <QGridLayout>
 #include <QToolBar>
+#include <QLineEdit>
+#include <QLabel>
+#include <QComboBox>
 
  #include "patternbox.h"
 
@@ -31,40 +34,43 @@
      createActions();
 
      QGridLayout *layout = new QGridLayout();
+     layout->setAlignment( Qt::AlignTop );
 
     createToolbar();
-    createPatternsTree();
+    createPatternTree();
+    createItemPropertiesBox();
 
-
-     layout->addWidget(patToolBar, 0, 0);
-     layout->addWidget(patBox, 1, 0, 2, 0);
-     layout->setRowStretch(1, 10);
-     setLayout(layout);
+    layout->addWidget( toolBar_, 0, 0);
+    layout->addWidget( patternTree_, 1, 0, 2, 0 );
+    layout->addWidget( itemProps_, 3, 0 );
+    layout->setRowStretch(1, 10);
+    layout->setRowStretch(3, 5);
+    setLayout(layout);
  }
 
 void PatternBox::createToolbar()
 {
-     patToolBar = new QToolBar();
-     patToolBar->addAction(newCatAct);
-     patToolBar->addSeparator();
-     patToolBar->addAction(newPatAct);
-     patToolBar->addAction(clnPatAct);
-     patToolBar->addAction(delPatAct);
-     patToolBar->addSeparator();
-     patToolBar->addAction(addPatToSeqAct);
+     toolBar_ = new QToolBar();
+     toolBar_->addAction(newCatAct);
+     toolBar_->addSeparator();
+     toolBar_->addAction(newPatAct);
+     toolBar_->addAction(clnPatAct);
+     toolBar_->addAction(delPatAct);
+     toolBar_->addSeparator();
+     toolBar_->addAction(addPatToSeqAct);
 }
 
-void PatternBox::createPatternsTree()
+void PatternBox::createPatternTree()
 {
-    patBox = new QTreeWidget();
-    patBox->setHeaderLabel( "Patterns" );
+    patternTree_ = new QTreeWidget();
+    patternTree_->setHeaderLabel( "Patterns" );
 
-    QTreeWidgetItem *testCat0 = new QTreeWidgetItem( patBox );
+    QTreeWidgetItem *testCat0 = new QTreeWidgetItem( patternTree_ );
     testCat0->setForeground( 0, QBrush( Qt::white ) );
     testCat0->setBackground( 0, QBrush( Qt::red ) );
     testCat0->setText( 0, "Category0" );
 
-    QTreeWidgetItem *testCat1 = new QTreeWidgetItem( patBox );
+    QTreeWidgetItem *testCat1 = new QTreeWidgetItem( patternTree_ );
     testCat1->setForeground( 0, QBrush( Qt::white ) );
     testCat1->setBackground( 0, QBrush( Qt::blue ) );
     testCat1->setText( 0, "Category1" );
@@ -73,6 +79,19 @@ void PatternBox::createPatternsTree()
     QTreeWidgetItem *testPattern1 = new QTreeWidgetItem( testCat1 );
     testPattern0->setText( 0, "Pattern0" );
     testPattern1->setText( 0, "Pattern1" );
+}
+
+void PatternBox::createItemPropertiesBox()
+{
+    itemProps_ = new QWidget( this );
+    QGridLayout *itemPropsLayout = new QGridLayout();
+    itemPropsLayout->setAlignment( Qt::AlignTop );
+    itemProps_->setLayout( itemPropsLayout );
+    //itemPropsLayout->addWidget( new QLabel( "Item Properties" ), 0, 0 );
+    itemPropsLayout->addWidget( new QLabel( "Name:" ), 1, 0, 1, 1 );
+    itemPropsLayout->addWidget( new QLineEdit(), 1, 1, 1, 3 );
+    itemPropsLayout->addWidget( new QLabel( "Colour:" ), 2, 0, 2, 1 );
+    itemPropsLayout->addWidget( new QComboBox(), 2, 1, 2, 3 );
 }
 
  void PatternBox::newCategory() { }

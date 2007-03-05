@@ -43,10 +43,12 @@
  private:
     void createActions();
     void createToolbar();
-    void createPatternsTree();
+    void createPatternTree();
+    void createItemPropertiesBox();
 
-     QToolBar *patToolBar;
-     QTreeWidget *patBox;
+     QToolBar *toolBar_;
+     QTreeWidget *patternTree_;
+     QWidget *itemProps_;
 
      QAction *newCatAct;
      QAction *newPatAct;
