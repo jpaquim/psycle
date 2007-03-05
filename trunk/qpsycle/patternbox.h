@@ -20,7 +20,9 @@
  #ifndef PATTERNBOX_H
  #define PATTERNBOX_H
 
- #include <QWidget>
+ #include <QAction>
+ #include <QToolBar>
+ #include <QTreeWidget>
 
  class QToolBar;
 
@@ -39,9 +41,12 @@
      void addPatternToSequencer();
 
  private:
-     void createActions();
+    void createActions();
+    void createToolbar();
+    void createPatternsTree();
 
      QToolBar *patToolBar;
+     QTreeWidget *patBox;
 
      QAction *newCatAct;
      QAction *newPatAct;

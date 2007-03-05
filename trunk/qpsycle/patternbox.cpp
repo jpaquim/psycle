@@ -18,7 +18,10 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <QtGui>
+#include <QTreeWidget>
+#include <QAction>
+#include <QGridLayout>
+#include <QToolBar>
 
  #include "patternbox.h"
 
@@ -29,6 +32,18 @@
 
      QGridLayout *layout = new QGridLayout();
 
+    createToolbar();
+    createPatternsTree();
+
+
+     layout->addWidget(patToolBar, 0, 0);
+     layout->addWidget(patBox, 1, 0, 2, 0);
+     layout->setRowStretch(1, 10);
+     setLayout(layout);
+ }
+
+void PatternBox::createToolbar()
+{
      patToolBar = new QToolBar();
      patToolBar->addAction(newCatAct);
      patToolBar->addSeparator();
@@ -37,14 +52,28 @@
      patToolBar->addAction(delPatAct);
      patToolBar->addSeparator();
      patToolBar->addAction(addPatToSeqAct);
+}
 
-     QTreeView *patBox = new QTreeView();
+void PatternBox::createPatternsTree()
+{
+    patBox = new QTreeWidget();
+    patBox->setHeaderLabel( "Patterns" );
 
-     layout->addWidget(patToolBar, 0, 0);
-     layout->addWidget(patBox, 1, 0, 2, 0);
-     layout->setRowStretch(1, 10);
-     setLayout(layout);
- }
+    QTreeWidgetItem *testCat0 = new QTreeWidgetItem( patBox );
+    testCat0->setForeground( 0, QBrush( Qt::white ) );
+    testCat0->setBackground( 0, QBrush( Qt::red ) );
+    testCat0->setText( 0, "Category0" );
+
+    QTreeWidgetItem *testCat1 = new QTreeWidgetItem( patBox );
+    testCat1->setForeground( 0, QBrush( Qt::white ) );
+    testCat1->setBackground( 0, QBrush( Qt::blue ) );
+    testCat1->setText( 0, "Category1" );
+
+    QTreeWidgetItem *testPattern0 = new QTreeWidgetItem( testCat0 );
+    QTreeWidgetItem *testPattern1 = new QTreeWidgetItem( testCat1 );
+    testPattern0->setText( 0, "Pattern0" );
+    testPattern1->setText( 0, "Pattern1" );
+}
 
  void PatternBox::newCategory() { }
  void PatternBox::newPattern() { }
