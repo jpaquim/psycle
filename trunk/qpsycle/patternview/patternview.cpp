@@ -38,6 +38,10 @@
      scene_->addItem( lineNumCol_ );
      scene_->addItem( trackHeader );
 
+     QGraphicsPixmapItem *pix = new QGraphicsPixmapItem();
+     pix->setPixmap( QPixmap( ":/images/pattern_header_skin.xpm" ) );
+     scene_->addItem( pix );
+
     // Create the toolbar.
     //     createToolBar();
  }

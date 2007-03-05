@@ -20,66 +20,69 @@
 
 #include <QtGui>
 
- #include "mainwindow.h"
- #include "patternbox.h"
+#include "mainwindow.h"
+#include "patternbox.h"
 
- #include "psycore/player.h"
- #include "psycore/alsaout.h"
+#include "psycore/player.h"
+#include "psycore/alsaout.h"
 
- MainWindow::MainWindow()
- {
-     song_ = new psy::core::Song();
-     int si = song_->instSelected;
-     song_->WavAlloc(si,"/home/neil/mymusic/samples/yeah.wav");
-     //song_->auxcolSelected = 0;
+MainWindow::MainWindow()
+{
+    song_ = new psy::core::Song();
+    int si = song_->instSelected;
+    song_->WavAlloc(si,"/home/neil/mymusic/samples/yeah.wav");
+    //song_->auxcolSelected = 0;
 
+    setupSound();
+    setupGui();
+}
 
-     psy::core::AudioDriver *driver = new psy::core::AlsaOut;
-        psy::core::AudioDriverSettings settings = driver->settings();
-        settings.setDeviceName( "plughw:0" );
-        driver->setSettings( settings );
-
-
+void MainWindow::setupSound() 
+{
+    psy::core::AudioDriver *driver = new psy::core::AlsaOut;
+    psy::core::AudioDriverSettings settings = driver->settings();
+    settings.setDeviceName( "plughw:0" );
+    driver->setSettings( settings );
 
     psy::core::Player::Instance()->song( song_ );
     psy::core::Player::Instance()->setDriver( *driver );  
+}
+
+void MainWindow::setupGui()
+{
+    QWidget *workArea = new QWidget();
+
+    QDockWidget *dock = new QDockWidget( "Pattern Box", this );
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    PatternBox *patternBox = new PatternBox();
+    dock->setWidget(patternBox);
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
+
+    macView_ = new MachineView( song_ );
+    patView_ = new PatternView( song_ );
+    wavView_ = new WaveView();
+    seqView_ = new SequencerView();
+
+    views_ = new QTabWidget();
+    views_->addTab( macView_, "Machine View" );
+    views_->addTab( patView_, "Pattern View" );
+    views_->addTab( wavView_, "Wave Editor" );
+    views_->addTab( seqView_, "Sequencer View" );
 
 
+    QGridLayout *layout = new QGridLayout;
+    layout->addWidget( views_, 0, 1, 0, 2 );
+    layout->setColumnStretch(1, 10);
+    workArea->setLayout(layout);
+    setCentralWidget(workArea);
 
+    createActions();
+    createMenus();
+    createToolBars();
+    createStatusBar();
 
-     QWidget *workArea = new QWidget();
-
-     QDockWidget *dock = new QDockWidget( "Pattern Box", this );
-     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-     PatternBox *patternBox = new PatternBox();
-     dock->setWidget(patternBox);
-     addDockWidget(Qt::LeftDockWidgetArea, dock);
-
-     macView_ = new MachineView( song_ );
-     patView_ = new PatternView( song_ );
-     wavView_ = new WaveView();
-     seqView_ = new SequencerView();
-
-     views_ = new QTabWidget();
-     views_->addTab( macView_, "Machine View" );
-     views_->addTab( patView_, "Pattern View" );
-     views_->addTab( wavView_, "Wave Editor" );
-     views_->addTab( seqView_, "Sequencer View" );
-
-     QGridLayout *layout = new QGridLayout;
-     layout->addWidget( views_, 0, 1, 0, 2 );
-     layout->setColumnStretch(1, 10);
-     workArea->setLayout(layout);
-     setCentralWidget(workArea);
-
-     createActions();
-     createMenus();
-     createToolBars();
-     createStatusBar();
-
-     setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q alpha ) "));
-
- }
+    setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001087 alpha ) "));
+}
 
  void MainWindow::newSong()
  {
