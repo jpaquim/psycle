@@ -22,14 +22,25 @@
 
  #include <QWidget>
 
+ #include "psycore/song.h"
+
  class WaveView : public QWidget
  {
      Q_OBJECT
 
  public:
-     WaveView(QWidget *parent = 0);
+     WaveView( psy::core::Song *song_, QWidget *parent = 0);
+
+     psy::core::Song* song();
+
+public slots:
+    void onLoadButtonClicked( bool checked );
+
+signals:
+    void sampleAdded();
 
  private:
+    psy::core::Song *song_;
 
  };
 

@@ -30,8 +30,6 @@ MainWindow::MainWindow()
 {
     song_ = new psy::core::Song();
     int si = song_->instSelected;
-    song_->WavAlloc(si,"/home/neil/mymusic/samples/yeah.wav");
-    //song_->auxcolSelected = 0;
 
     setupSound();
     setupGui();
@@ -60,7 +58,7 @@ void MainWindow::setupGui()
 
     macView_ = new MachineView( song_ );
     patView_ = new PatternView( song_ );
-    wavView_ = new WaveView();
+    wavView_ = new WaveView( song_ );
     seqView_ = new SequencerView();
 
     views_ = new QTabWidget();
@@ -68,6 +66,8 @@ void MainWindow::setupGui()
     views_->addTab( patView_, "Pattern View" );
     views_->addTab( wavView_, "Wave Editor" );
     views_->addTab( seqView_, "Sequencer View" );
+
+    connect( wavView_, SIGNAL( sampleAdded() ), this, SLOT( refreshSampleComboBox() ) );
 
 
     QGridLayout *layout = new QGridLayout;
@@ -207,7 +207,11 @@ void MainWindow::setupGui()
      machToolBar = addToolBar(tr("Machines"));
      genCombo = new QComboBox();
      fxCombo = new QComboBox();
-     sampCombo = new QComboBox();
+    sampCombo_ = new QComboBox();
+    initSampleCombo();
+    connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
+             this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
+
      QLabel *genLabel = new QLabel(" Gen: ");
      QLabel *fxLabel = new QLabel(" FX: ");
      QLabel *sampLabel = new QLabel(" Samples: ");
@@ -216,8 +220,7 @@ void MainWindow::setupGui()
      machToolBar->addWidget(fxLabel);
      machToolBar->addWidget(fxCombo);
      machToolBar->addWidget(sampLabel);
-     machToolBar->addWidget(sampCombo);
-
+     machToolBar->addWidget( sampCombo_ );
  }
 
 void MainWindow::createStatusBar()
@@ -242,4 +245,41 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         default:;
     }
+}
+
+void MainWindow::initSampleCombo()
+{
+    for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
+    {
+        sampCombo_->addItem( "empty" );
+    }
+}
+
+void MainWindow::refreshSampleComboBox()
+{
+//    std::ostringstream buffer;
+//    buffer.setf(std::ios::uppercase);
+
+    int listlen = 0;
+    for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
+    {
+      //  buffer.str("");
+       // buffer << std::setfill('0') << std::hex << std::setw(2);
+ //       buffer << i << ": " << song()->_pInstrument[i]->_sName;
+        QString name = QString::fromStdString( song_->_pInstrument[i]->_sName );
+        sampCombo_->setItemText( i, name );
+        listlen++;
+    }
+    if (song_->auxcolSelected >= listlen) {
+        song_->auxcolSelected = 0;
+    }    
+
+}
+
+void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
+{
+std::cout << "index: " << newIndex << std::endl;
+	song_->instSelected   = newIndex;
+    song_->auxcolSelected = newIndex;
+    // FIXME: when wave editor is more advanced, we need to notify it of this change.
 }
