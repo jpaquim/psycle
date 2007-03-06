@@ -42,6 +42,7 @@
  public:
      MainWindow();
 
+
  protected:
     void keyPressEvent( QKeyEvent *event );
 
@@ -52,12 +53,16 @@
      void undo();
      void redo();
      void about();
+     void refreshSampleComboBox();
+     void onSampleComboBoxIndexChanged( int newIndex );
 
  private:
     psy::core::Song *song_;
 
     void setupSound();
     void setupGui();
+
+    void initSampleCombo();
     
      void createActions();
      void createMenus();
@@ -91,7 +96,7 @@
 
      QComboBox *genCombo;
      QComboBox *fxCombo;
-     QComboBox *sampCombo;
+     QComboBox *sampCombo_;
 
      QTabWidget *views_;
      MachineView *macView_;
