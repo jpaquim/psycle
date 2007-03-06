@@ -21,9 +21,12 @@
 #include <QtGui>
 
 #include "patternview.h"
+#include "patterngrid.h"
 #include "header.h"
 
 #include "psycore/song.h"
+
+
 
  PatternView::PatternView( psy::core::Song *song_ )
  {
@@ -35,12 +38,12 @@
 
      lineNumCol_ = new LineNumberColumn( this );
      Header *trackHeader = new Header( this );
+     patGrid_ = new PatternGrid( this );
+     trackHeader->setPos( 50, 0 );
      scene_->addItem( lineNumCol_ );
      scene_->addItem( trackHeader );
-
-     QGraphicsPixmapItem *pix = new QGraphicsPixmapItem();
-     pix->setPixmap( QPixmap( ":/images/pattern_header_skin.xpm" ) );
-     scene_->addItem( pix );
+     scene_->addItem( patGrid_ );
+     patGrid_->setPos( 50, 20 );
 
     // Create the toolbar.
     //     createToolBar();
@@ -65,5 +68,20 @@
 int PatternView::rowHeight( ) const
 {
     return 13;
+}
+
+int PatternView::numberOfLines() const
+{
+    return 32;
+}
+
+int PatternView::numberOfTracks() const
+{
+    return 4;
+}
+
+int PatternView::trackWidth() const
+{
+    return 100;
 }
 

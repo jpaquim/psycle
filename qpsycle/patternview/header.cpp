@@ -17,23 +17,22 @@ void Header::paint( QPainter *painter,
 
     int trackWidth = 100;
     int trackHeight = 20;
-    int numTracks = 16;
-    int offsetForLineNumCol = 50;
+    int numTracks = pView->numberOfTracks();
 
     for ( int i = 0; i < numTracks; i++ )
     {
         painter->setPen( QPen( Qt::black ) );
         painter->setBrush( QBrush( Qt::transparent ) );
-        painter->drawRect( i*trackWidth + offsetForLineNumCol, 0, trackWidth, trackHeight ); 
+        painter->drawRect( i*trackWidth, 0, trackWidth, trackHeight ); 
         painter->setPen( QPen( Qt::white ) );
-        painter->drawText( i*trackWidth + offsetForLineNumCol+5, 15, QString::number(i) );
+        painter->drawText( i*trackWidth+5, 15, QString::number(i) );
         painter->setPen( QPen( Qt::gray ) );
         painter->setBrush( QBrush( Qt::red ) );
-        painter->drawEllipse( (i+1)*trackWidth + offsetForLineNumCol - 15, 5, 10, 10 ); 
+        painter->drawEllipse( (i+1)*trackWidth - 15, 5, 10, 10 ); 
         painter->setBrush( QBrush( Qt::yellow ) );
-        painter->drawEllipse( (i+1)*trackWidth + offsetForLineNumCol - 30, 5, 10, 10 ); 
+        painter->drawEllipse( (i+1)*trackWidth - 30, 5, 10, 10 ); 
         painter->setBrush( QBrush( Qt::green ) );
-        painter->drawEllipse( (i+1)*trackWidth + offsetForLineNumCol - 45, 5, 10, 10 ); 
+        painter->drawEllipse( (i+1)*trackWidth - 45, 5, 10, 10 ); 
     }
     /*DefaultBitmaps & icons = SkinReader::Instance()->bitmaps();
 
