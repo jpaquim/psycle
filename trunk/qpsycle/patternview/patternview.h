@@ -24,6 +24,7 @@
  #include <QGraphicsScene>
 
  #include "linenumbercolumn.h"
+#include "patterngrid.h"
  #include "psycore/song.h"
 
  class QToolBar;
@@ -32,6 +33,7 @@
  class QAction;
 
  class LineNumberColumn;
+ class PatternGrid;
 
  class PatternView : public QGraphicsView
  {
@@ -41,6 +43,9 @@
      PatternView( psy::core::Song *song_ );
 
      int rowHeight() const;
+     int numberOfLines() const;
+     int numberOfTracks() const;
+     int trackWidth() const;
 
  private:
     void createToolBar();
@@ -48,6 +53,7 @@
     QGraphicsScene *scene_;
 
     LineNumberColumn *lineNumCol_;
+    PatternGrid *patGrid_;
 
     QGridLayout *layout;
 
