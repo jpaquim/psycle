@@ -142,7 +142,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 {
     // do we have a pattern ?
     if ( patView_->pattern() ) {
-    //    drawCellBg( g, cursor()  );
+        drawCellBg( painter, cursor()  );
         // find start iterator
         psy::core::SinglePattern::iterator it = patView_->pattern()->find_lower_nearest(startLine);
     //    TimeSignature signature;
@@ -323,6 +323,22 @@ int PatternGrid::eventOffset( int eventnr, int col ) const {
     return -1;
 }
 
+int PatternGrid::eventColWidth( int eventnr ) const {
+    int eventColWidth_ = 0;
+    if ( eventnr < events_.size() ) {
+        const ColumnEvent & event = events_.at(eventnr);
+
+        switch ( event.type() ) {
+                                case ColumnEvent::hex2 : eventColWidth_= cellWidth(); 	break;
+                                case ColumnEvent::hex4 : eventColWidth_= cellWidth(); 	break;
+                                case ColumnEvent::note : eventColWidth_= noteCellWidth(); break;
+                                default: ;
+        }
+    }
+    return eventColWidth_;
+}
+
+
 int PatternGrid::noteCellWidth( ) const {            	
     return cellWidth() * 3;
 }
@@ -443,6 +459,30 @@ bool PatternGrid::lineGridEnabled() const
     return true;
 }
 
+void PatternGrid::drawCellBg( QPainter *painter, const PatCursor& cursor ) 
+{
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( cursor.track() );
+    if ( it == trackGeometrics().end() ) return;
+
+    //int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
+    int xOff = it->second.left() + 5 + 5 - 0;
+    //int yOff = cursor.line()  * lineHeight()  - dy();
+    int yOff = cursor.line()  * lineHeight()  - 0;
+    int colOffset = eventOffset( cursor.eventNr(), cursor.col() );
+    painter->setBrush( Qt::yellow );
+    painter->drawRect( xOff + colOffset, yOff, eventColWidth( cursor.eventNr() ), lineHeight() );
+}
+
+const PatCursor & PatternGrid::cursor() const {
+    return cursor_;
+}
+
+
+//
+//
+// TrackGeometry
+//
 
 TrackGeometry::TrackGeometry( ) :
 pGrid( 0 ),
@@ -524,7 +564,7 @@ int ColumnEvent::cols() const {
 // start of PatCursor class
 //
 PatCursor::PatCursor() :
-track_(0), 
+    track_(0), 
     line_(0), 
     eventNr_(0), 
     col_(0) 

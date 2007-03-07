@@ -10,7 +10,34 @@
 class PatternView;
 class TrackGeometry;
 class ColumnEvent;
-class PatCursor;
+
+class PatCursor {
+public:
+    PatCursor();
+    PatCursor( int track, int line, int eventNr, int col );
+    ~PatCursor();
+
+    void setPosition( int track, int line, int eventNr, int col );
+
+    void setTrack( int x );
+    int track() const;
+    void setLine( int y );
+    int line() const;
+    void setEventNr( int event );
+    int eventNr() const;
+    void setCol( int col );
+    int col() const;
+
+private:
+
+    int track_;
+    int line_;
+    int eventNr_;
+    int col_;
+
+};
+
+
 
 class PatternGrid : public QGraphicsItem {
 
@@ -33,13 +60,15 @@ public:
 void drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color);
 int cellWidth( ) const;
 int eventOffset( int eventnr, int col ) const;
+int eventColWidth( int eventnr ) const;
 int noteCellWidth( ) const;
 void drawStringData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color );
 std::string noteToString( int value, bool sharp );
 void drawString( QPainter *painter, int track, int line, int eventnr, const std::string & data , const QColor & color );
+void drawCellBg( QPainter *painter, const PatCursor& cursor );
 
 void addEvent( const ColumnEvent & event );
-
+const PatCursor & cursor() const;
 
 private:
     void setupTrackGeometrics( int numberOfTracks );
@@ -49,7 +78,7 @@ private:
 
     std::vector<ColumnEvent> events_;
 
-
+    PatCursor cursor_;
 };
 
 class TrackGeometry {
@@ -96,33 +125,6 @@ public:
 private:
 
     ColType type_;
-};
-
-
-class PatCursor {
-public:
-    PatCursor();
-    PatCursor( int track, int line, int eventNr, int col );
-    ~PatCursor();
-
-    void setPosition( int track, int line, int eventNr, int col );
-
-    void setTrack( int x );
-    int track() const;
-    void setLine( int y );
-    int line() const;
-    void setEventNr( int event );
-    int eventNr() const;
-    void setCol( int col );
-    int col() const;
-
-private:
-
-    int track_;
-    int line_;
-    int eventNr_;
-    int col_;
-
 };
 
 
