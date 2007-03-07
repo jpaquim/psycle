@@ -38,6 +38,7 @@ MainWindow::MainWindow()
     psy::core::PatternCategory* category1 = song_->patternSequence()->patternData()->createNewCategory("Category1");
     psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
     psy::core::SinglePattern* pattern1 = category1->createNewPattern("Pattern1");
+    std::cout << pattern0->beatZoom() << std::endl;
 
     int si = song_->instSelected;
 

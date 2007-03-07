@@ -417,10 +417,15 @@ namespace psy
 		}
 
 		SinglePattern::iterator SinglePattern::find_lower_nearest( int linenr ) {
+        std::cout << "1" << std::endl;
 			SinglePattern::iterator result;
+        std::cout << "2" << std::endl;
 
+        std::cout << "beat: " << beatZoom() << std::endl;
 			double low = (linenr - 0.5) / (float) beatZoom();
+        std::cout << "3" << std::endl;
 			double up  = (linenr + 0.5) / (float) beatZoom();
+        std::cout << "4" << std::endl;
 
 			result = lower_bound( low );
 

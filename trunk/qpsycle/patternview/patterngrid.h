@@ -35,6 +35,7 @@ int eventOffset( int eventnr, int col ) const;
 int noteCellWidth( ) const;
 void drawStringData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color );
 std::string noteToString( int value, bool sharp );
+void drawString( QPainter *painter, int track, int line, int eventnr, const std::string & data , const QColor & color );
 
 void addEvent( const ColumnEvent & event );
 
