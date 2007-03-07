@@ -46,6 +46,7 @@
      int rowHeight() const;
      int numberOfLines() const;
      int numberOfTracks() const;
+     void setNumberOfTracks( int numTracks );
      int trackWidth() const;
 
      void setPattern( psy::core::SinglePattern *pattern );
@@ -61,6 +62,7 @@
     PatternGrid *patGrid_;
     psy::core::SinglePattern *pattern_;
 
+    int numberOfTracks_;
     QGridLayout *layout;
 
     QToolBar *toolBar_;
