@@ -64,7 +64,7 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
         int rowHeight = patView_->rowHeight();
 
         int startLine = 0; 
-        int endLine = numberOfLines;
+        int endLine = numberOfLines - 1;
         int startTrack = 0;
         int endTrack = numberOfTracks - 1;
 
@@ -77,7 +77,7 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 
         drawGrid( painter, startLine, endLine, startTrack, endTrack );	
         //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
-//        drawPattern( painter, startLine, endLine, startTrack, endTrack );
+        drawPattern( painter, startLine, endLine, startTrack, endTrack );
         //drawRestArea(g, startLine, endLine, startTrack, endTrack);*/
 }
 
@@ -152,44 +152,44 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
         // find start iterator
         psy::core::SinglePattern::iterator it = patView_->pattern()->find_lower_nearest(startLine);
     //    TimeSignature signature;
-/*
 
-        int lastLine = -1;
+
+        int lastLinenum = -1;
         psy::core::PatternLine* line;
         psy::core::PatternLine emptyLine;
 
-        for ( int y = startLine; y <= endLine; y++) {
+        for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
             if ( it != patView_->pattern()->end() )	{
                 int liney = d2i (it->first * patView_->pattern()->beatZoom());
-                if (liney == y ) {
+                if (liney == curLinenum ) {
                     line = &it->second;
                     it++;
                 } else line = &emptyLine;
             } else line = &emptyLine;
 
 
-            if (y != lastLine) {
+            if (curLinenum != lastLinenum) {
                 QColor tColor = QColor( Qt::white );
                 //QColor tColor = textColor();
 
                 bool onBeat = false;
                 bool onBar  = false;
-/*                if ( !(y % beatZoom())) {
+/*                if ( !(curLinenum % beatZoom())) {
                     if (  it != patView_->pattern_->end() && pView->pattern()->barStart(it->first, signature) ) {
                         tColor = barColor();
                     } else {
                         onBeat = true;
                         tColor = beatTextColor();
                     }
-                }
+                }*/
 
                 // Check if this line is currently being played.
-/*                if ((y == patView_->playPos() && Player::Instance()->playing() ) ) {
+/*                if ((curLinenum == patView_->playPos() && Player::Instance()->playing() ) ) {
                     int trackWidth = xEndByTrack( endTrack ) - dx();
                     g.setForeground( playBarColor() );
                     g.fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
-                }
+                }*/
 
                 QColor stdColor = tColor;
                 QColor crColor = QColor( Qt::red );
@@ -199,35 +199,38 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                 psy::core::PatternEvent emptyEvent;
                 psy::core::PatternEvent* event;
 
-                for ( int x = startTrack; x <= endTrack; x++ ) {
-
+                for ( int curTracknum = startTrack; curTracknum <= endTrack; curTracknum++ ) 
+                {
                     if ( eventIt != line->notes().end() && eventIt->first <= endTrack ) {
                         int trackx = eventIt->first;
-                        if ( x == trackx) {
+                        if ( curTracknum == trackx ) {
                             event = &eventIt->second;
                             eventIt++;
                         } else {
                             event = &emptyEvent;
                         }
-                    } else event = &emptyEvent;
+                    } else {
+                    std::cout << "empty: " << curTracknum << std::endl;
+                        event = &emptyEvent;
+                    }
 
 
 /*                    if ( x >= selection().left() && x < selection().right() &&
-                        y >= selection().top() && y < selection().bottom() ) {
+                        curLinenum >= selection().top() && currentLine < selection().bottom() ) {
                             if ( !onBeat ) 
                                 tColor = patView_->colorInfo().sel_text_color;
                             else 
                                 tColor = patView_->colorInfo().sel_beat_text_color;
-                    }	else tColor = stdColor;
+                    }	else tColor = stdColor;*/
 
-                    drawData( painter, x, y, 0, event->note() ,event->isSharp(), tColor );
-                    if (event->instrument() != 255) drawData( painter, x, y, 1, event->instrument(), 1, tColor );
-                    if (event->machine() != 255) drawData( painter, x, y, 2, event->machine(), 1, tColor );
-                    if (event->volume() != 255) drawData( painter, x, y, 3, event->volume(), 1, tColor );
+                    drawData( painter, curTracknum, curLinenum, 0, event->note() ,event->isSharp(), tColor );
+                    if (event->instrument() != 255) drawData( painter, curTracknum, curLinenum, 1, event->instrument(), 1, tColor );
+                    if (event->machine() != 255) drawData( painter, curTracknum, curLinenum, 2, event->machine(), 1, tColor );
+                    if (event->volume() != 255) drawData( painter, curTracknum, curLinenum, 3, event->volume(), 1, tColor );
                     if (event->command() != 0 || event->parameter() != 0) {
-                        drawData( painter, x, y, 4, (event->command() << 8) | event->parameter(), 1, tColor );
+                        drawData( painter, curTracknum, curLinenum, 4, (event->command() << 8) | event->parameter(), 1, tColor );
                     }	else {
-//                        drawString( g, x, y, 4, "....", tColor );
+                        drawString( painter, curTracknum, curLinenum, 4, "....", tColor );
                     }									
 
                     psy::core::PatternEvent::PcmListType & pcList = event->paraCmdList();
@@ -238,13 +241,13 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                         int command = pc.first;
                         int parameter = pc.second;
                         if ( command != 0 || parameter != 0) {
-                            drawData( painter, x, y, 5+count, ( command << 8) | parameter , 1, tColor );
+                            drawData( painter, curTracknum, curLinenum, 5+count, ( command << 8) | parameter , 1, tColor );
                         }
                     }
                 }
-                lastLine = y;
+                lastLinenum = curLinenum;
             }
-        }*/
+        }
     }
 } // drawPattern
 
@@ -255,7 +258,7 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
     if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
     //int xOff = it->second.left() + 5 + trackLeftIdent() - dx();			// 5= colIdent
-    int xOff = 0;
+    int xOff = 8;
 
     if ( eventnr < events_.size() ) {
         const ColumnEvent & event = events_.at( eventnr );
@@ -294,7 +297,7 @@ void PatternGrid::drawBlockData( QPainter *painter, int xOff, int line, const st
 {					
 //    int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
 //    int yOff = line  * rowHeight() + yp  - dy();
-    int yOff = line  * lineHeight();
+    int yOff = (line+1)  * lineHeight();
     int col = 0;
     for (int i = 0; i < text.length(); i++) {
         painter->drawText(xOff + col,yOff, QString::fromStdString( text.substr(i,1) ) );
@@ -336,52 +339,65 @@ void PatternGrid::drawStringData( QPainter *painter, int xOff, int line, const s
 {
 //    int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
 //    int yOff = line  * rowHeight() + yp  - dy();
-    int yOff = line  * lineHeight();
+    int yOff = (line+1)  * lineHeight();
 
     painter->drawText(xOff,yOff, QString::fromStdString( text ) );
 }
 
+void PatternGrid::drawString( QPainter *painter, int track, int line, int eventnr, const std::string & data , const QColor & color ) 
+{
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( track );
+    if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
+
+//    int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
+    int xOff = 5;
+
+    drawStringData( painter, xOff + eventOffset(eventnr,0), line, data, color );
+}
+
 std::string PatternGrid::noteToString( int value, bool sharp )
 {
-/*    switch (value) {
-        case cdefTweakM : return "twk"; break;
-        case cdefTweakE : return "twf"; break;
-        case cdefMIDICC : return "mcm"; break;
-        case cdefTweakS : return "tws"; break;
+    switch (value) {
+//        case cdefTweakM : return "twk"; break;
+ //       case cdefTweakE : return "twf"; break;
+  //      case cdefMIDICC : return "mcm"; break;
+   //     case cdefTweakS : return "tws"; break;
         case 120        : return "off"; break;
         case 255        : return "---"; break;  // defaultNoteStr_; break;
-    }*/
+    }
 
     int octave = value / 12;
+    std::string octStr = QString::number( octave ).toStdString();
 
-/*    if (sharp) switch (value % 12) {
-        case 0:   return "C-" + stringify( octave ); break;
-        case 1:   return "C#" + stringify( octave ); break;
-        case 2:   return "D-" + stringify( octave ); break;
-        case 3:   return "D#" + stringify( octave ); break;
-        case 4:   return "E-" + stringify( octave ); break;
-        case 5:   return "F-" + stringify( octave ); break;
-        case 6:   return "F#" + stringify( octave ); break;
-        case 7:   return "G-" + stringify( octave ); break;
-        case 8:   return "G#" + stringify( octave ); break;
-        case 9:   return "A-" + stringify( octave ); break;
-        case 10:  return "A#" + stringify( octave ); break;
-        case 11:  return "B-" + stringify( octave ); break;
+    if (sharp) switch (value % 12) {
+        case 0:   return "C-" + octStr; break;
+        case 1:   return "C#" + octStr; break;
+        case 2:   return "D-" + octStr; break;
+        case 3:   return "D#" + octStr; break;
+        case 4:   return "E-" + octStr; break;
+        case 5:   return "F-" + octStr; break;
+        case 6:   return "F#" + octStr; break;
+        case 7:   return "G-" + octStr; break;
+        case 8:   return "G#" + octStr; break;
+        case 9:   return "A-" + octStr; break;
+        case 10:  return "A#" + octStr; break;
+        case 11:  return "B-" + octStr; break;
     } else
     switch (value % 12) {
-        case 0:   return "C-" + stringify(octave); break;
-        case 1:   return "Db" + stringify(octave); break;
-        case 2:   return "D-" + stringify(octave); break;
-        case 3:   return "Eb" + stringify(octave); break;
-        case 4:   return "E-" + stringify(octave); break;
-        case 5:   return "F-" + stringify(octave); break;
-        case 6:   return "Gb" + stringify(octave); break;
-        case 7:   return "G-" + stringify(octave); break;
-        case 8:   return "Ab" + stringify(octave); break;
-        case 9:   return "A-" + stringify(octave); break;
-        case 10:  return "Bb" + stringify(octave); break;
-        case 11:  return "B-" + stringify(octave); break;
-    }*/
+        case 0:   return "C-" + octStr; break;
+        case 1:   return "Db" + octStr; break;
+        case 2:   return "D-" + octStr; break;
+        case 3:   return "Eb" + octStr; break;
+        case 4:   return "E-" + octStr; break;
+        case 5:   return "F-" + octStr; break;
+        case 6:   return "Gb" + octStr; break;
+        case 7:   return "G-" + octStr; break;
+        case 8:   return "Ab" + octStr; break;
+        case 9:   return "A-" + octStr; break;
+        case 10:  return "Bb" + octStr; break;
+        case 11:  return "B-" + octStr; break;
+    }
     return "err";
 }
 

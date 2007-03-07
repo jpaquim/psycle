@@ -35,6 +35,30 @@
      scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
      setSceneRect(0,0,width(),height());
      setScene(scene_);
+     
+    psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("Category0");
+    psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
+    pattern_ = pattern0;
+
+    psy::core::PatternEvent event0 = pattern_->event( 0, 0 );
+    psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
+    event0.setNote( 4 * 12 + 0);
+    event0.setSharp( false );
+    if (tmac) event0.setMachine( tmac->_macIndex );
+    if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
+        event0.setInstrument( song_->instSelected );
+    }
+    pattern_->setEvent( 0, 0, event0 );
+
+    psy::core::PatternEvent event1 = pattern_->event( 2, 0 );
+    event1.setNote( 4 * 12 + 0);
+    event1.setSharp( false );
+    if (tmac) event1.setMachine( tmac->_macIndex );
+    if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
+        event1.setInstrument( song_->instSelected );
+    }
+    pattern_->setEvent( 2, 0, event1 );
+
 
      lineNumCol_ = new LineNumberColumn( this );
      Header *trackHeader = new Header( this );
@@ -72,12 +96,12 @@ int PatternView::rowHeight( ) const
 
 int PatternView::numberOfLines() const
 {
-    return 32;
+    return 4;
 }
 
 int PatternView::numberOfTracks() const
 {
-    return 4;
+    return 2;
 }
 
 int PatternView::trackWidth() const
