@@ -33,25 +33,24 @@
 
 MainWindow::MainWindow()
 {
+    song_ = new psy::core::Song();
     setupSong();
     setupSound();
+
+    macView_ = new MachineView( song_ );
+    patView_ = new PatternView( song_ );
+    wavView_ = new WaveView( song_ );
+    seqView_ = new SequencerView();
+    patternBox_ = new PatternBox( song_ );
+
     setupGui();
-}
+    setupSignals();
 
-void MainWindow::setupSound() 
-{
-    psy::core::AudioDriver *driver = new psy::core::AlsaOut;
-    psy::core::AudioDriverSettings settings = driver->settings();
-    settings.setDeviceName( "plughw:0" );
-    driver->setSettings( settings );
-
-    psy::core::Player::Instance()->song( song_ );
-    psy::core::Player::Instance()->setDriver( *driver );  
+    patternBox_->populatePatternTree(); // FIXME: here because of bad design?
 }
 
 void MainWindow::setupSong()
 {
-    song_ = new psy::core::Song();
     psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("Category0");
     psy::core::PatternCategory* category1 = song_->patternSequence()->patternData()->createNewCategory("Category1");
     psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
@@ -77,22 +76,26 @@ void MainWindow::setupSong()
     pattern0->setEvent( 2, 0, event1 );
 }
 
+void MainWindow::setupSound() 
+{
+    psy::core::AudioDriver *driver = new psy::core::AlsaOut;
+    psy::core::AudioDriverSettings settings = driver->settings();
+    settings.setDeviceName( "plughw:0" );
+    driver->setSettings( settings );
+
+    psy::core::Player::Instance()->song( song_ );
+    psy::core::Player::Instance()->setDriver( *driver );  
+}
+
 void MainWindow::setupGui()
 {
     QWidget *workArea = new QWidget();
 
     QDockWidget *dock = new QDockWidget( "Pattern Box", this );
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    PatternBox *patternBox = new PatternBox( song_ );
-    connect( patternBox, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
-             this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
-    dock->setWidget(patternBox);
+    dock->setWidget(patternBox_);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
 
-    macView_ = new MachineView( song_ );
-    patView_ = new PatternView( song_ );
-    wavView_ = new WaveView( song_ );
-    seqView_ = new SequencerView();
 
     views_ = new QTabWidget();
     views_->addTab( macView_, "Machine View" );
@@ -100,7 +103,6 @@ void MainWindow::setupGui()
     views_->addTab( wavView_, "Wave Editor" );
     views_->addTab( seqView_, "Sequencer View" );
 
-    connect( wavView_, SIGNAL( sampleAdded() ), this, SLOT( refreshSampleComboBox() ) );
 
 
     QGridLayout *layout = new QGridLayout;
@@ -116,6 +118,15 @@ void MainWindow::setupGui()
     createStatusBar();
 
     setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001087 alpha ) "));
+}
+
+void MainWindow::setupSignals()
+{
+    connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
+             this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
+
+    connect( wavView_, SIGNAL( sampleAdded() ), 
+             this, SLOT( refreshSampleComboBox() ) );
 }
 
  void MainWindow::newSong()
