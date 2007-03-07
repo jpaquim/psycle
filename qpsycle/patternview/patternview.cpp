@@ -77,7 +77,7 @@ int PatternView::rowHeight( ) const
 
 int PatternView::numberOfLines() const
 {
-    return ( pattern_ ) ? static_cast<int> ( pattern_->beatZoom() * pattern_->beats() ) : 1;  
+    return ( pattern_ ) ? static_cast<int> ( pattern_->beatZoom() * pattern_->beats() ) : 0;  
 }
 
 int PatternView::numberOfTracks() const
@@ -92,7 +92,7 @@ void PatternView::setNumberOfTracks( int numTracks )
 
 int PatternView::trackWidth() const
 {
-    return 100;
+    return 130;
 }
 
 psy::core::SinglePattern * PatternView::pattern( )

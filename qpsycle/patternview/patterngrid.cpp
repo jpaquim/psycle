@@ -37,7 +37,6 @@ PatternGrid::PatternGrid( PatternView *pView )
     addEvent( ColumnEvent::hex4 );
     addEvent( ColumnEvent::hex4 );
     // end of multi paraCmd
-
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -53,6 +52,7 @@ QRectF PatternGrid::boundingRect() const
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+    painter->setFont( QFont( "courier", 12 ) );
         if ( patView_->pattern() ) {
     //        TimeSignature signature;
             int numberOfTracks = patView_->numberOfTracks();
@@ -64,7 +64,7 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
             int endLine = numberOfLines - 1;
             int startTrack = 0;
             int endTrack = numberOfTracks - 1;
-
+            std::cout << "num track" << numberOfTracks - 1 << std::endl;
             //drawSelBg(g,selection());
 
 
@@ -106,7 +106,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 
     // Draw horizontal lines to demarcate the pattern lines.
     if ( lineGridEnabled() ) {
-        painter->setPen( Qt::gray );
+        painter->setPen( Qt::black );
         for (int y = startLine; y <= endLine; y++)
             painter->drawLine( 0, y * lineHeight(), gridWidth, y* lineHeight() );
     }
@@ -204,7 +204,6 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                             event = &emptyEvent;
                         }
                     } else {
-                    std::cout << "empty: " << curTracknum << std::endl;
                         event = &emptyEvent;
                     }
 
@@ -216,7 +215,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                             else 
                                 tColor = patView_->colorInfo().sel_beat_text_color;
                     }	else tColor = stdColor;*/
-
+                    painter->setPen( tColor );
                     drawData( painter, curTracknum, curLinenum, 0, event->note() ,event->isSharp(), tColor );
                     if (event->instrument() != 255) drawData( painter, curTracknum, curLinenum, 1, event->instrument(), 1, tColor );
                     if (event->machine() != 255) drawData( painter, curTracknum, curLinenum, 2, event->machine(), 1, tColor );
@@ -251,8 +250,7 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
     it = trackGeometrics().lower_bound( track );
     if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
-    //int xOff = it->second.left() + 5 + trackLeftIdent() - dx();			// 5= colIdent
-    int xOff = 8;
+    int xOff = it->second.left() + 5 + 5/*trackLeftIdent() - dx()*/;			// 5= colIdent
 
     if ( eventnr < events_.size() ) {
         const ColumnEvent & event = events_.at( eventnr );
@@ -344,8 +342,8 @@ void PatternGrid::drawString( QPainter *painter, int track, int line, int eventn
     it = trackGeometrics().lower_bound( track );
     if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
-//    int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
-    int xOff = 5;
+// ORIG    int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
+    int xOff = it->second.left() + 5 + 5 + 0;
 
     drawStringData( painter, xOff + eventOffset(eventnr,0), line, data, color );
 }
@@ -521,4 +519,67 @@ int ColumnEvent::cols() const {
     return cols_;
 }		
 // end of ColumnEvent
+
+//
+// start of PatCursor class
+//
+PatCursor::PatCursor() :
+track_(0), 
+    line_(0), 
+    eventNr_(0), 
+    col_(0) 
+{
+}
+
+PatCursor::PatCursor(int track, int line, int eventNr, int col) :
+track_( track ), 
+    line_( line ), 
+    eventNr_( eventNr ), 
+    col_( col ) 
+{
+}
+
+PatCursor::~PatCursor() {
+
+}
+
+void PatCursor::setPosition( int track, int line, int eventNr, int col ) {
+    track_ = track;
+    line_  = line;
+    eventNr_ = eventNr;
+    col_ = col;
+}
+
+void PatCursor::setTrack( int track ) {
+    track_ = track;
+}
+
+int PatCursor::track() const {
+    return track_;
+}
+
+void PatCursor::setLine( int line ) {
+    line_ = line;
+}
+
+int PatCursor::line() const {
+    return line_;
+}
+
+void PatCursor::setEventNr( int eventNr ) {
+    eventNr_ = eventNr;
+}
+
+int PatCursor::eventNr() const {
+    return eventNr_;
+}
+
+void PatCursor::setCol( int col) {
+    col_ = col;
+}
+
+int PatCursor::col() const {
+    return col_;
+}
+
 

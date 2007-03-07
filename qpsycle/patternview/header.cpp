@@ -15,7 +15,7 @@ void Header::paint( QPainter *painter,
 {
     painter->drawRect( 0, 0, pView->width(), 20 );
 
-    int trackWidth = 100;
+    int trackWidth = pView->trackWidth();
     int trackHeight = 20;
     int numTracks = pView->numberOfTracks();
 
