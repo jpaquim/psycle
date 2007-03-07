@@ -28,6 +28,7 @@
 #include "psycore/song.h"
 #include "psycore/singlepattern.h"
 #include "psycore/patterndata.h"
+#include "psycore/patternsequence.h"
 
 #include <QTreeWidgetItem>
 
@@ -47,6 +48,7 @@ MainWindow::MainWindow()
     setupSignals();
 
     patternBox_->populatePatternTree(); // FIXME: here because of bad design?
+	psy::core::Player::Instance()->start(0.0);
 }
 
 void MainWindow::setupSong()
@@ -86,6 +88,8 @@ void MainWindow::setupSong()
         event1.setInstrument( song_->instSelected );
     }
     pattern0->setEvent( 2, 1, event1 );
+
+    psy::core::SequenceLine *seqLine = song_->patternSequence()->createNewLine();
 }
 
 void MainWindow::setupSound() 
