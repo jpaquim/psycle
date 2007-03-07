@@ -33,15 +33,7 @@
 
 MainWindow::MainWindow()
 {
-    song_ = new psy::core::Song();
-    psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("Category0");
-    psy::core::PatternCategory* category1 = song_->patternSequence()->patternData()->createNewCategory("Category1");
-    psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
-    psy::core::SinglePattern* pattern1 = category1->createNewPattern("Pattern1");
-    std::cout << pattern0->beatZoom() << std::endl;
-
-    int si = song_->instSelected;
-
+    setupSong();
     setupSound();
     setupGui();
 }
@@ -57,6 +49,34 @@ void MainWindow::setupSound()
     psy::core::Player::Instance()->setDriver( *driver );  
 }
 
+void MainWindow::setupSong()
+{
+    song_ = new psy::core::Song();
+    psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("Category0");
+    psy::core::PatternCategory* category1 = song_->patternSequence()->patternData()->createNewCategory("Category1");
+    psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
+    psy::core::SinglePattern* pattern1 = category1->createNewPattern("Pattern1");
+
+    psy::core::PatternEvent event0 = pattern0->event( 0, 0 );
+    psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
+    event0.setNote( 4 * 12 + 0);
+    event0.setSharp( false );
+    if (tmac) event0.setMachine( tmac->_macIndex );
+    if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
+        event0.setInstrument( song_->instSelected );
+    }
+    pattern0->setEvent( 0, 0, event0 );
+
+    psy::core::PatternEvent event1 = pattern0->event( 2, 0 );
+    event1.setNote( 4 * 12 + 0);
+    event1.setSharp( false );
+    if (tmac) event1.setMachine( tmac->_macIndex );
+    if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
+        event1.setInstrument( song_->instSelected );
+    }
+    pattern0->setEvent( 2, 0, event1 );
+}
+
 void MainWindow::setupGui()
 {
     QWidget *workArea = new QWidget();
@@ -64,6 +84,8 @@ void MainWindow::setupGui()
     QDockWidget *dock = new QDockWidget( "Pattern Box", this );
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     PatternBox *patternBox = new PatternBox( song_ );
+    connect( patternBox, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
+             this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
     dock->setWidget(patternBox);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
 
@@ -293,4 +315,9 @@ std::cout << "index: " << newIndex << std::endl;
 	song_->instSelected   = newIndex;
     song_->auxcolSelected = newIndex;
     // FIXME: when wave editor is more advanced, we need to notify it of this change.
+}
+
+void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )
+{
+    patView_->setPattern( selectedPattern );
 }

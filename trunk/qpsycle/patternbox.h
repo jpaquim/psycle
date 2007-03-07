@@ -35,12 +35,18 @@
  public:
      PatternBox( psy::core::Song *song, QWidget *parent = 0);
 
+public slots:
+     void itemClicked( QTreeWidgetItem * item, int column );
+
  private slots:
      void newCategory();
      void newPattern();
      void clonePattern();
      void deletePattern();
      void addPatternToSequencer();
+
+signals:
+    void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
 
  private:
     void createActions();
@@ -49,6 +55,9 @@
     void createItemPropertiesBox();
 
     psy::core::Song *song_;
+    std::map<QTreeWidgetItem*, psy::core::PatternCategory*> categoryMap;
+    std::vector<QTreeWidgetItem*> catItems;
+    std::map<QTreeWidgetItem*, psy::core::SinglePattern*> patternMap;
 
      QToolBar *toolBar_;
      QWidget *itemProps_;

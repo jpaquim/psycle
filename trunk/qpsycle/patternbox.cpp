@@ -66,18 +66,26 @@ void PatternBox::createPatternTree()
 {
     patternTree_ = new QTreeWidget();
     patternTree_->setHeaderLabel( "Patterns" );
+    connect( patternTree_, SIGNAL( itemClicked( QTreeWidgetItem*, int ) ), 
+             this, SLOT( itemClicked( QTreeWidgetItem*, int ) ) );
+
+    categoryMap.clear();
+    catItems.clear();
+    patternMap.clear();
 
     std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence()->patternData()->begin();
     for ( ; it < song_->patternSequence()->patternData()->end(); ++it) {
         psy::core::PatternCategory* category = *it;
         QTreeWidgetItem *categoryItem = new QTreeWidgetItem( patternTree_ );
         categoryItem->setText( 0, QString::fromStdString( category->name() ) );
+        categoryMap[categoryItem] = category;
 
         std::vector<psy::core::SinglePattern*>::iterator patIt = category->begin();
         for ( ; patIt < category->end(); patIt++) {
             QTreeWidgetItem *patternItem = new QTreeWidgetItem( categoryItem );
 			psy::core::SinglePattern *pattern = *patIt;
 			patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
+            patternMap[patternItem] = pattern;
         }
     }
 
@@ -124,3 +132,18 @@ void PatternBox::createItemPropertiesBox()
      addPatToSeqAct->setStatusTip(tr("Add selected pattern to sequencer"));
      connect(addPatToSeqAct, SIGNAL(triggered()), this, SLOT(addPatternToSequencer()));
  }
+
+void PatternBox::itemClicked( QTreeWidgetItem * item, int column )
+{
+//    std::vector<CategoryItem*>::iterator it = find(catItems.begin(),catItems.end(),item);
+ //   if ( it != catItems.end() )  propertyBox_->setCategoryItem(*it);
+
+  //  if (item) propertyBox_->setName( item->text() );
+    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
+    if(itr!=patternMap.end()) {
+        psy::core::SinglePattern *pattern = itr->second;
+        // emit a signal for main window to tell pat view.
+        emit patternSelectedInPatternBox( pattern );
+    }
+}
+
