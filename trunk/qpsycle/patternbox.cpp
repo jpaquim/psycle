@@ -27,10 +27,12 @@
 #include <QComboBox>
 
  #include "patternbox.h"
+ #include "psycore/singlepattern.h"
 
- PatternBox::PatternBox(QWidget *parent) 
+ PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
     : QWidget(parent)
  {
+    song_ = song;
      createActions();
 
      QGridLayout *layout = new QGridLayout();
@@ -62,23 +64,19 @@ void PatternBox::createToolbar()
 
 void PatternBox::createPatternTree()
 {
-    patternTree_ = new QTreeWidget();
-    patternTree_->setHeaderLabel( "Patterns" );
+    std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence()->patternData()->begin();
+    for ( ; it < song_->patternSequence()->patternData()->end(); ++it) {
+        psy::core::PatternCategory* category = *it;
+        QTreeWidgetItem *categoryItem = new QTreeWidgetItem( patternTree_ );
+        categoryItem->setText( 0, QString::fromStdString( category->name() ) );
 
-    QTreeWidgetItem *testCat0 = new QTreeWidgetItem( patternTree_ );
-    testCat0->setForeground( 0, QBrush( Qt::white ) );
-    testCat0->setBackground( 0, QBrush( Qt::red ) );
-    testCat0->setText( 0, "Category0" );
-
-    QTreeWidgetItem *testCat1 = new QTreeWidgetItem( patternTree_ );
-    testCat1->setForeground( 0, QBrush( Qt::white ) );
-    testCat1->setBackground( 0, QBrush( Qt::blue ) );
-    testCat1->setText( 0, "Category1" );
-
-    QTreeWidgetItem *testPattern0 = new QTreeWidgetItem( testCat0 );
-    QTreeWidgetItem *testPattern1 = new QTreeWidgetItem( testCat1 );
-    testPattern0->setText( 0, "Pattern0" );
-    testPattern1->setText( 0, "Pattern1" );
+        std::vector<psy::core::SinglePattern*>::iterator patIt = category->begin();
+        for ( ; patIt < category->end(); patIt++) {
+            QTreeWidgetItem *patternItem = new QTreeWidgetItem( categoryItem );
+			psy::core::SinglePattern *pattern = *patIt;
+			patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
+        }
+    }
 }
 
 void PatternBox::createItemPropertiesBox()
