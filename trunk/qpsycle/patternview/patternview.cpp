@@ -47,6 +47,8 @@
      scene_->addItem( patGrid_ );
      patGrid_->setPos( 50, 20 );
 
+     setPattern( new psy::core::SinglePattern() );
+
     // Create the toolbar.
     //     createToolBar();
  }
@@ -97,5 +99,3 @@ void PatternView::setPattern( psy::core::SinglePattern *pattern )
     pattern_ = pattern;
     patGrid_->update();
 }
-
-

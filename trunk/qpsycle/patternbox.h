@@ -35,8 +35,10 @@
  public:
      PatternBox( psy::core::Song *song, QWidget *parent = 0);
 
+    void populatePatternTree();
+
 public slots:
-     void itemClicked( QTreeWidgetItem * item, int column );
+     void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
 
  private slots:
      void newCategory();
@@ -51,7 +53,6 @@ signals:
  private:
     void createActions();
     void createToolbar();
-    void createPatternTree();
     void createItemPropertiesBox();
 
     psy::core::Song *song_;

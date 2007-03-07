@@ -39,7 +39,11 @@
      layout->setAlignment( Qt::AlignTop );
 
     createToolbar();
-    createPatternTree();
+    patternTree_ = new QTreeWidget();
+    patternTree_->setSelectionMode( QAbstractItemView::SingleSelection );
+    patternTree_->setHeaderLabel( "Patterns" );
+    connect( patternTree_, SIGNAL( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ), 
+             this, SLOT( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ) );
     createItemPropertiesBox();
 
     layout->addWidget( toolBar_, 0, 0);
@@ -62,16 +66,13 @@ void PatternBox::createToolbar()
      toolBar_->addAction(addPatToSeqAct);
 }
 
-void PatternBox::createPatternTree()
+void PatternBox::populatePatternTree()
 {
-    patternTree_ = new QTreeWidget();
-    patternTree_->setHeaderLabel( "Patterns" );
-    connect( patternTree_, SIGNAL( itemClicked( QTreeWidgetItem*, int ) ), 
-             this, SLOT( itemClicked( QTreeWidgetItem*, int ) ) );
-
     categoryMap.clear();
     catItems.clear();
     patternMap.clear();
+
+    bool isFirst = true;
 
     std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence()->patternData()->begin();
     for ( ; it < song_->patternSequence()->patternData()->end(); ++it) {
@@ -86,9 +87,12 @@ void PatternBox::createPatternTree()
 			psy::core::SinglePattern *pattern = *patIt;
 			patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
             patternMap[patternItem] = pattern;
+            if (isFirst) {
+                patternTree_->setCurrentItem( patternItem );
+                isFirst = false;
+            }
         }
     }
-
 }
 
 void PatternBox::createItemPropertiesBox()
@@ -133,13 +137,13 @@ void PatternBox::createItemPropertiesBox()
      connect(addPatToSeqAct, SIGNAL(triggered()), this, SLOT(addPatternToSequencer()));
  }
 
-void PatternBox::itemClicked( QTreeWidgetItem * item, int column )
+void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem )
 {
 //    std::vector<CategoryItem*>::iterator it = find(catItems.begin(),catItems.end(),item);
  //   if ( it != catItems.end() )  propertyBox_->setCategoryItem(*it);
 
   //  if (item) propertyBox_->setName( item->text() );
-    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
+    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( currItem );
     if(itr!=patternMap.end()) {
         psy::core::SinglePattern *pattern = itr->second;
         // emit a signal for main window to tell pat view.

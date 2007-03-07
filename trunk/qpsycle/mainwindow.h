@@ -26,6 +26,7 @@
  #include "patternview.h"
  #include "waveview.h"
  #include "sequencerview.h"
+ #include "patternbox.h"
 
  #include "psycore/song.h"
 
@@ -63,6 +64,7 @@
     void setupSound();
     void setupSong();
     void setupGui();
+    void setupSignals();
 
     void initSampleCombo();
     
@@ -99,6 +101,8 @@
      QComboBox *genCombo;
      QComboBox *fxCombo;
      QComboBox *sampCombo_;
+
+     PatternBox *patternBox_;
 
      QTabWidget *views_;
      MachineView *macView_;
