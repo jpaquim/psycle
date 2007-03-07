@@ -48,6 +48,7 @@
      int numberOfTracks() const;
      int trackWidth() const;
 
+     void setPattern( psy::core::SinglePattern *pattern );
      psy::core::SinglePattern *pattern();
 
 

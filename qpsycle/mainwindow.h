@@ -55,11 +55,13 @@
      void about();
      void refreshSampleComboBox();
      void onSampleComboBoxIndexChanged( int newIndex );
+    void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
 
  private:
     psy::core::Song *song_;
 
     void setupSound();
+    void setupSong();
     void setupGui();
 
     void initSampleCombo();
