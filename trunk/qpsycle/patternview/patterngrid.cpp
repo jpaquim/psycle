@@ -24,6 +24,8 @@ int d2i(double d)
 PatternGrid::PatternGrid( PatternView *pView )
     : patView_( pView )
 {
+    setFlag(ItemIsFocusable);
+    setFlag(ItemIsSelectable);
     setupTrackGeometrics( patView_->numberOfTracks() );
 
     addEvent( ColumnEvent::note );
@@ -477,6 +479,75 @@ void PatternGrid::drawCellBg( QPainter *painter, const PatCursor& cursor )
 const PatCursor & PatternGrid::cursor() const {
     return cursor_;
 }
+
+void PatternGrid::keyPressEvent( QKeyEvent *event )
+{
+    switch ( event->key() ) {
+        case Qt::Key_Up:
+            moveCursor( 0, -1 );/*-patternStep()*/ ;
+        break;
+        case Qt::Key_Down:
+            moveCursor( 0, 1 );/*-patternStep()*/ ;
+        break;
+        default:;
+    }
+}
+
+void PatternGrid::moveCursor( int dx, int dy) {
+    // dx -1 left hex digit move
+    // dx +1 rigth hex digit move
+    // dy in lines
+    PatCursor oldCursor = cursor_;
+    int eventnr = cursor().eventNr();
+    if ( dx > 0 ) {			
+        if ( eventnr < events_.size() ) {
+            const ColumnEvent & event = events_.at( eventnr );
+            int maxCols = event.cols();
+            if ( cursor_.col() + dx < maxCols ) {
+                cursor_.setCol( cursor_.col() + dx);
+            } else
+                if (eventnr + 1 < 10/*visibleEvents( cursor_.track())*/ ) {
+                    cursor_.setCol( 0 );
+                    cursor_.setEventNr( eventnr + 1);
+                } else 
+                    if (cursor_.track()+1 < patView_->numberOfTracks() ) {
+                        cursor_.setTrack( cursor_.track() + 1 );
+                        cursor_.setEventNr(0);
+                        cursor_.setCol(0);
+                    }
+               //     window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), oldCursor.track(), cursor_.track()) );
+        }
+    } else 
+        if ( dx < 0 ) {
+            if ( cursor_.col() + dx >= 0 ) {
+                cursor_.setCol( cursor_.col() + dx);
+            } else 
+                if ( cursor_.eventNr() > 0 ) {
+                    cursor_.setEventNr( cursor_.eventNr() - 1 );
+                    const ColumnEvent & event = events_.at( cursor_.eventNr() );
+                    cursor_.setCol( event.cols() - 1 );					
+                } else {
+                    if ( cursor_.track() > 0 ) {
+                        cursor_.setTrack( cursor_.track() -1 );
+                        cursor_.setEventNr( 0/*visibleEvents( cursor_.track() -1 )-1*/ );
+                        const ColumnEvent & event = events_.at( cursor_.eventNr() );
+                        cursor_.setCol( event.cols() - 1 );
+                    }		
+                }
+                //window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), oldCursor.track()) );
+        }
+
+        if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
+            cursor_.setLine( std::min(cursor_.line() + dy, patView_->numberOfLines()-1));
+//            window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
+//            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
+        } else if (dy!=0) {
+//            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
+        }
+        update();
+//        updateStatusBar();
+}
+
 
 
 //

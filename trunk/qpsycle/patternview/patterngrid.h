@@ -2,6 +2,7 @@
 #define PATTERNGRID_H
 
 #include <QGraphicsItem>
+#include <QKeyEvent>
 
 #include "patternview.h"
 
@@ -69,6 +70,11 @@ void drawCellBg( QPainter *painter, const PatCursor& cursor );
 
 void addEvent( const ColumnEvent & event );
 const PatCursor & cursor() const;
+void moveCursor( int dx, int dy );
+
+public slots:
+    void keyPressEvent( QKeyEvent *event );
+
 
 private:
     void setupTrackGeometrics( int numberOfTracks );
