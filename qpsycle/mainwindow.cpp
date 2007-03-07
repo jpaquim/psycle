@@ -51,6 +51,18 @@ MainWindow::MainWindow()
 
 void MainWindow::setupSong()
 {
+    int fb = song_->GetFreeBus();
+    song_->CreateMachine(psy::core::MACH_SAMPLER, 100, 20, "SAMPLER", fb);  
+    psy::core::Machine *sampler0 = song_->_pMachine[fb];
+
+    fb = song_->GetFreeBus();
+    song_->CreateMachine(psy::core::MACH_SAMPLER, 300, 20, "SAMPLER", fb);  
+    psy::core::Machine *sampler1 = song_->_pMachine[fb];
+
+     psy::core::Machine *master = song_->_pMachine[psy::core::MASTER_INDEX] ; 
+     song_->InsertConnection( sampler0->_macIndex , master->_macIndex, 1.0f);
+     song_->InsertConnection( sampler1->_macIndex , master->_macIndex, 1.0f);
+
     psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("Category0");
     psy::core::PatternCategory* category1 = song_->patternSequence()->patternData()->createNewCategory("Category1");
     psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
@@ -66,14 +78,14 @@ void MainWindow::setupSong()
     }
     pattern0->setEvent( 0, 0, event0 );
 
-    psy::core::PatternEvent event1 = pattern0->event( 2, 0 );
+    psy::core::PatternEvent event1 = pattern0->event( 2, 1 );
     event1.setNote( 4 * 12 + 0);
     event1.setSharp( false );
     if (tmac) event1.setMachine( tmac->_macIndex );
     if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
         event1.setInstrument( song_->instSelected );
     }
-    pattern0->setEvent( 2, 0, event1 );
+    pattern0->setEvent( 2, 1, event1 );
 }
 
 void MainWindow::setupSound() 
