@@ -26,6 +26,7 @@
  #include "linenumbercolumn.h"
 #include "patterngrid.h"
  #include "psycore/song.h"
+ #include "psycore/singlepattern.h"
 
  class QToolBar;
  class QComboBox;
@@ -47,6 +48,9 @@
      int numberOfTracks() const;
      int trackWidth() const;
 
+     psy::core::SinglePattern *pattern();
+
+
  private:
     void createToolBar();
 
@@ -54,6 +58,7 @@
 
     LineNumberColumn *lineNumCol_;
     PatternGrid *patGrid_;
+    psy::core::SinglePattern *pattern_;
 
     QGridLayout *layout;
 
