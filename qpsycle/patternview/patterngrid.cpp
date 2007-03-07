@@ -47,38 +47,32 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 
 QRectF PatternGrid::boundingRect() const
 {
-    int numberOfTracks = patView_->numberOfTracks();
-    int trackWidth = patView_->trackWidth();
-    int numberOfLines = patView_->numberOfLines();
-    int gridWidth = trackWidth * numberOfTracks;//xEndByTrack( endTrack ) - dx();
-    int gridHeight = lineHeight() * numberOfLines;//((endLine +1) * rowHeight()) - dy();
-    return QRectF( 0, 0, gridWidth, gridHeight );
+    // FIXME: should come from somewhere else (i.e. that not hard-coded.)
+    return QRectF( 0, 0, 500, 500 );
 }
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-//        TimeSignature signature;
-        int numberOfTracks = patView_->numberOfTracks();
-        int trackWidth = patView_->trackWidth();
-        int numberOfLines = patView_->numberOfLines();
-        int rowHeight = patView_->rowHeight();
+        if ( patView_->pattern() ) {
+    //        TimeSignature signature;
+            int numberOfTracks = patView_->numberOfTracks();
+            int trackWidth = patView_->trackWidth();
+            int numberOfLines = patView_->numberOfLines();
+            int rowHeight = patView_->rowHeight();
 
-        int startLine = 0; 
-        int endLine = numberOfLines - 1;
-        int startTrack = 0;
-        int endTrack = numberOfTracks - 1;
+            int startLine = 0; 
+            int endLine = numberOfLines - 1;
+            int startTrack = 0;
+            int endTrack = numberOfTracks - 1;
 
-        //int gridWidth = trackWidth * numberOfTracks;//xEndByTrack( endTrack ) - dx();
-        int gridWidth = gridWidthByTrack( endTrack );// - dx();
-        int gridHeight = rowHeight * numberOfLines;//((endLine +1) * rowHeight()) - dy();
-
-        //drawSelBg(g,selection());
+            //drawSelBg(g,selection());
 
 
-        drawGrid( painter, startLine, endLine, startTrack, endTrack );	
-        //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
-        drawPattern( painter, startLine, endLine, startTrack, endTrack );
+            drawGrid( painter, startLine, endLine, startTrack, endTrack );	
+            //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
+            drawPattern( painter, startLine, endLine, startTrack, endTrack );
         //drawRestArea(g, startLine, endLine, startTrack, endTrack);*/
+        }
 }
 
 /** 

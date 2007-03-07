@@ -30,10 +30,11 @@
 
  PatternView::PatternView( psy::core::Song *song_ )
  {
+     setNumberOfTracks( 4 );
      setAlignment( Qt::AlignLeft | Qt::AlignTop );
      scene_ = new QGraphicsScene(this);
      scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
-     setSceneRect(0,0,width(),height());
+     //setSceneRect(0,0,width(),height());
      setScene(scene_);
      
 
@@ -76,12 +77,17 @@ int PatternView::rowHeight( ) const
 
 int PatternView::numberOfLines() const
 {
-    return 4;
+    return ( pattern_ ) ? static_cast<int> ( pattern_->beatZoom() * pattern_->beats() ) : 1;  
 }
 
 int PatternView::numberOfTracks() const
 {
-    return 2;
+    return numberOfTracks_;
+}
+
+void PatternView::setNumberOfTracks( int numTracks )
+{
+    numberOfTracks_ = numTracks; 
 }
 
 int PatternView::trackWidth() const
@@ -99,3 +105,5 @@ void PatternView::setPattern( psy::core::SinglePattern *pattern )
     pattern_ = pattern;
     patGrid_->update();
 }
+
+
