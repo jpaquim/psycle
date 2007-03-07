@@ -48,7 +48,6 @@ MainWindow::MainWindow()
     setupSignals();
 
     patternBox_->populatePatternTree(); // FIXME: here because of bad design?
-	psy::core::Player::Instance()->start(0.0);
 }
 
 void MainWindow::setupSong()
@@ -90,6 +89,7 @@ void MainWindow::setupSong()
     pattern0->setEvent( 2, 1, event1 );
 
     psy::core::SequenceLine *seqLine = song_->patternSequence()->createNewLine();
+	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
 }
 
 void MainWindow::setupSound() 
@@ -302,6 +302,9 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         case Qt::Key_F4:
             views_->setCurrentWidget( seqView_ );        
+        break;
+        case Qt::Key_Space:
+            psy::core::Player::Instance()->start( 0.0 );
         break;
         default:;
     }
