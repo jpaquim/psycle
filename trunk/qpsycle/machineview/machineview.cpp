@@ -52,17 +52,6 @@
 //     psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, ev->x(), ev->y() );
     
 
-    int fb = song_->GetFreeBus();
-    song_->CreateMachine(psy::core::MACH_SAMPLER, 100, 20, "SAMPLER", fb);  
-    psy::core::Machine *sampler0 = song_->_pMachine[fb];
-
-    fb = song_->GetFreeBus();
-    song_->CreateMachine(psy::core::MACH_SAMPLER, 300, 20, "SAMPLER", fb);  
-    psy::core::Machine *sampler1 = song_->_pMachine[fb];
-
-     psy::core::Machine *master = song_->_pMachine[psy::core::MASTER_INDEX] ; 
-     song_->InsertConnection( sampler0->_macIndex , master->_macIndex, 1.0f);
-     song_->InsertConnection( sampler1->_macIndex , master->_macIndex, 1.0f);
 
      newMachineDlg = new NewMachineDlg();
 
