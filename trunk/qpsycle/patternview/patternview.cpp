@@ -85,3 +85,9 @@ int PatternView::trackWidth() const
     return 100;
 }
 
+psy::core::SinglePattern * PatternView::pattern( )
+{
+    return pattern_;
+}
+
+

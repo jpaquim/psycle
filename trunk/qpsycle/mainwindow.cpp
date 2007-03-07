@@ -25,10 +25,16 @@
 
 #include "psycore/player.h"
 #include "psycore/alsaout.h"
+#include "psycore/song.h"
+#include "psycore/singlepattern.h"
 
 MainWindow::MainWindow()
 {
     song_ = new psy::core::Song();
+    psy::core::PatternCategory* category = song_->patternSequence()->patternData()->createNewCategory("category");
+    psy::core::SinglePattern* pattern = category->createNewPattern("Pattern");
+
+
     int si = song_->instSelected;
 
     setupSound();

@@ -9,6 +9,7 @@
 
 class PatternView;
 class TrackGeometry;
+class ColumnEvent;
 
 class PatternGrid : public QGraphicsItem {
 
@@ -18,13 +19,24 @@ public:
     QRectF boundingRect() const;
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
-    int dy() { return 0; }
-    void drawTrackGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
-    const std::map<int, TrackGeometry> & trackGeometrics() const;
+    void drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
+    void drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
+    void drawData( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack, bool sharp, const QColor & color );
 
+    const std::map<int, TrackGeometry> & trackGeometrics() const;
     int trackWidth() const;
     int lineHeight() const;
     bool lineGridEnabled() const;
+    int gridWidthByTrack( int track ) const;
+
+void drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color);
+int cellWidth( ) const;
+int eventOffset( int eventnr, int col ) const;
+int noteCellWidth( ) const;
+void drawStringData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color );
+std::string noteToString( int value, bool sharp );
+
+void addEvent( const ColumnEvent & event );
 
 
 private:
@@ -32,6 +44,8 @@ private:
     void alignTracks();
     PatternView *patView_;
     std::map<int, TrackGeometry> trackGeometryMap;
+
+    std::vector<ColumnEvent> events_;
 
 
 };
@@ -65,6 +79,25 @@ private:
     bool visible_;
 
 };
+
+class ColumnEvent {			
+public:
+    enum ColType { hex2 = 0, hex4 = 1, note = 2 };
+
+    ColumnEvent( ColType type );
+
+    ~ColumnEvent();
+
+    ColType type() const;
+    int cols() const;
+
+private:
+
+    ColType type_;
+};
+
+
+
 
 
 #endif
