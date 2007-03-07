@@ -80,14 +80,14 @@ void MainWindow::setupSong()
     song_->InsertConnection( sampler1->_macIndex , master->_macIndex, 1.0f);
 
     tmac = sampler1;
-    psy::core::PatternEvent event1 = pattern0->event( 2, 0 );
+    psy::core::PatternEvent event1 = pattern0->event( 2, 1 );
     event1.setNote( 4 * 12 + 0);
     event1.setSharp( false );
     if (tmac) event1.setMachine( tmac->_macIndex );
     if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
         event1.setInstrument( 1 );
     }
-    pattern0->setEvent( 2, 0, event1 );
+    pattern0->setEvent( 2, 2, event1 );
 
     tmac = sampler0;
     psy::core::PatternEvent event2 = pattern0->event( 4, 0 );

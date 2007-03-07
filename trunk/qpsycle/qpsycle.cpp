@@ -6,6 +6,7 @@
  {
      QApplication app(argc, argv);
      Q_INIT_RESOURCE(qpsycle);
+
      MainWindow mainWin;
      mainWin.show();
      return app.exec();
