@@ -64,6 +64,9 @@ void PatternBox::createToolbar()
 
 void PatternBox::createPatternTree()
 {
+    patternTree_ = new QTreeWidget();
+    patternTree_->setHeaderLabel( "Patterns" );
+
     std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence()->patternData()->begin();
     for ( ; it < song_->patternSequence()->patternData()->end(); ++it) {
         psy::core::PatternCategory* category = *it;
@@ -77,6 +80,7 @@ void PatternBox::createPatternTree()
 			patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
         }
     }
+
 }
 
 void PatternBox::createItemPropertiesBox()
