@@ -489,6 +489,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         case Qt::Key_Down:
             moveCursor( 0, 1 );/*-patternStep()*/ ;
         break;
+        case Qt::Key_Left:
+            moveCursor( -1, 0 );/*-patternStep()*/ ;
+        break;
+        case Qt::Key_Right:
+            moveCursor( 1, 0 );/*-patternStep()*/ ;
+        break;
         default:;
     }
 }
