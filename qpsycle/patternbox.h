@@ -24,6 +24,8 @@
  #include <QToolBar>
  #include <QTreeWidget>
 
+ #include "psycore/song.h"
+
  class QToolBar;
 
  class PatternBox : public QWidget
@@ -31,7 +33,7 @@
      Q_OBJECT
 
  public:
-     PatternBox(QWidget *parent = 0);
+     PatternBox( psy::core::Song *song, QWidget *parent = 0);
 
  private slots:
      void newCategory();
@@ -46,9 +48,11 @@
     void createPatternTree();
     void createItemPropertiesBox();
 
+    psy::core::Song *song_;
+
      QToolBar *toolBar_;
-     QTreeWidget *patternTree_;
      QWidget *itemProps_;
+     QTreeWidget *patternTree_;
 
      QAction *newCatAct;
      QAction *newPatAct;

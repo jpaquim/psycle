@@ -27,13 +27,17 @@
 #include "psycore/alsaout.h"
 #include "psycore/song.h"
 #include "psycore/singlepattern.h"
+#include "psycore/patterndata.h"
+
+#include <QTreeWidgetItem>
 
 MainWindow::MainWindow()
 {
     song_ = new psy::core::Song();
-    psy::core::PatternCategory* category = song_->patternSequence()->patternData()->createNewCategory("category");
-    psy::core::SinglePattern* pattern = category->createNewPattern("Pattern");
-
+    psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("Category0");
+    psy::core::PatternCategory* category1 = song_->patternSequence()->patternData()->createNewCategory("Category1");
+    psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
+    psy::core::SinglePattern* pattern1 = category1->createNewPattern("Pattern1");
 
     int si = song_->instSelected;
 
@@ -58,7 +62,7 @@ void MainWindow::setupGui()
 
     QDockWidget *dock = new QDockWidget( "Pattern Box", this );
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    PatternBox *patternBox = new PatternBox();
+    PatternBox *patternBox = new PatternBox( song_ );
     dock->setWidget(patternBox);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
 
