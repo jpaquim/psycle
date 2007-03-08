@@ -98,8 +98,7 @@
      QAction *playPatAct;
      QAction *stopAct;
 
-     QComboBox *genCombo;
-     QComboBox *fxCombo;
+     QComboBox *macCombo;
      QComboBox *sampCombo_;
 
      PatternBox *patternBox_;
