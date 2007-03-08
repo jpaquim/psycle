@@ -276,20 +276,16 @@ void MainWindow::setupSignals()
      playToolBar->addAction(stopAct);
 
      machToolBar = addToolBar(tr("Machines"));
-     genCombo = new QComboBox();
-     fxCombo = new QComboBox();
-    sampCombo_ = new QComboBox();
+     macCombo = new QComboBox();
+     sampCombo_ = new QComboBox();
     initSampleCombo();
     connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
              this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 
-     QLabel *genLabel = new QLabel(" Gen: ");
-     QLabel *fxLabel = new QLabel(" FX: ");
+     QLabel *macLabel = new QLabel(" Machines: ");
      QLabel *sampLabel = new QLabel(" Samples: ");
-     machToolBar->addWidget(genLabel);
-     machToolBar->addWidget(genCombo);
-     machToolBar->addWidget(fxLabel);
-     machToolBar->addWidget(fxCombo);
+     machToolBar->addWidget(macLabel);
+     machToolBar->addWidget(macCombo);
      machToolBar->addWidget(sampLabel);
      machToolBar->addWidget( sampCombo_ );
  }
