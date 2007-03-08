@@ -51,6 +51,7 @@
 
      setPattern( new psy::core::SinglePattern() );
 
+    setSelectedMachineIndex( 255 ); // FIXME: why 255?
     // Create the toolbar.
     //     createToolBar();
  }
@@ -123,3 +124,14 @@ void PatternView::enterNote( const PatCursor & cursor, int note )
 //        if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);   
     }
 }
+
+void PatternView::setSelectedMachineIndex( int idx )
+{
+    selectedMacIdx_ = idx;
+}
+
+int PatternView::selectedMachineIndex( ) const
+{
+    return selectedMacIdx_;
+}
+

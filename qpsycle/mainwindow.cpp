@@ -178,7 +178,7 @@ void MainWindow::setupSignals()
  {
      QString fileName = QFileDialog::getSaveFileName(this,
                          tr("Choose a file name"), ".",
-                         tr("HTML (*.html *.htm)"));
+                         tr("Psycle Songs (*.psy)"));
      if (fileName.isEmpty())
          return;
 
@@ -431,4 +431,5 @@ void MainWindow::onNewMachineCreated( int bus )
 {
     populateMachineCombo();
     macCombo_->setCurrentIndex( bus );
+    song_->seqBus = bus;
 }
