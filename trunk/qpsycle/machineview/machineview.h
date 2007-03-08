@@ -50,6 +50,8 @@
     void PlayNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
     void StopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
     psy::core::Song *song();
+    void setTheChosenOne( MachineGui* macGui ) { theChosenOne_ = macGui; }
+    MachineGui* theChosenOne() { return theChosenOne_; }
 
 
  protected:
@@ -62,16 +64,17 @@
     void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void deleteConnection( WireGui *wireGui );
-    void onMachineGuiFocused( MachineGui *macGui );
+    void onMachineGuiChosen( MachineGui *macGui );
     MachineGui* findMachineGuiByMachineIndex( int index );
 
 signals:
     void newMachineCreated( int bus );
-    void machineGuiFocused( MachineGui *macGui );
+    void machineGuiChosen( MachineGui *macGui );
 
 private:
     void createMachineGui( psy::core::Machine *mac );
     MachineGui* findByMachine( psy::core::Machine *mac );
+    MachineGui *theChosenOne_;
 
     psy::core::Song *song_;
     psy::core::PluginFinder pluginFinder_;
