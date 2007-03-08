@@ -51,6 +51,7 @@ public slots:
 
 signals:
     void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
+    void patternDeleted();
 
  private:
     void createActions();

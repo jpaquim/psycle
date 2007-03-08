@@ -156,6 +156,8 @@ void MainWindow::setupSignals()
 {
     connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
              this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
+    connect( patternBox_, SIGNAL( patternDeleted() ),
+             this, SLOT( onPatternDeleted() ) );
 
     connect( macView_, SIGNAL( newMachineCreated( int ) ), 
              this, SLOT( onNewMachineCreated( int ) ) );
@@ -458,4 +460,9 @@ void MainWindow::onMachineGuiChosen( MachineGui *macGui )
 {
     // FIXME: shouldn't rely on macCombo to set seqBus as we do here.
     macCombo_->setCurrentIndex( macGui->mac()->_macIndex );
+}
+
+void MainWindow::onPatternDeleted()
+{
+    patView_->setPattern( 0 );
 }

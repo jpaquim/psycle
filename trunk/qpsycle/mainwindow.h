@@ -60,6 +60,7 @@
     void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
     void onNewMachineCreated( int bus );
     void onMachineGuiChosen( MachineGui *macGui );
+    void onPatternDeleted();
 
  private:
     psy::core::Song *song_;
