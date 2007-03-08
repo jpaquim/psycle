@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Thu Mar 8 17:14:47 2007
+** Created: Thu Mar 8 17:31:55 2007
 **      by: The Qt Meta Object Compiler version 59 (Qt 4.2.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-      10,   10, // methods
+      11,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -35,16 +35,17 @@ static const uint qt_meta_data_MainWindow[] = {
       50,   11,   11,   11, 0x08,
       58,   11,   11,   11, 0x08,
       91,   82,   11,   11, 0x08,
-     141,  125,   11,   11, 0x08,
-     202,  198,   11,   11, 0x08,
+     126,   82,   11,   11, 0x08,
+     176,  160,   11,   11, 0x08,
+     237,  233,   11,   11, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_MainWindow[] = {
     "MainWindow\0\0newSong()\0open()\0save()\0undo()\0redo()\0about()\0"
-    "refreshSampleComboBox()\0newIndex\0onSampleComboBoxIndexChanged(int)\0"
-    "selectedPattern\0"
+    "refreshSampleComboBox()\0newIndex\0onMachineComboBoxIndexChanged(int)\0"
+    "onSampleComboBoxIndexChanged(int)\0selectedPattern\0"
     "onPatternSelectedInPatternBox(psy::core::SinglePattern*)\0bus\0"
     "onNewMachineCreated(int)\0"
 };
@@ -81,11 +82,12 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 4: redo(); break;
         case 5: about(); break;
         case 6: refreshSampleComboBox(); break;
-        case 7: onSampleComboBoxIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 8: onPatternSelectedInPatternBox((*reinterpret_cast< psy::core::SinglePattern*(*)>(_a[1]))); break;
-        case 9: onNewMachineCreated((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 7: onMachineComboBoxIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 8: onSampleComboBoxIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 9: onPatternSelectedInPatternBox((*reinterpret_cast< psy::core::SinglePattern*(*)>(_a[1]))); break;
+        case 10: onNewMachineCreated((*reinterpret_cast< int(*)>(_a[1]))); break;
         }
-        _id -= 10;
+        _id -= 11;
     }
     return _id;
 }
