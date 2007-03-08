@@ -63,6 +63,7 @@
     void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void deleteConnection( WireGui *wireGui );
     void onMachineGuiFocused( MachineGui *macGui );
+    MachineGui* findMachineGuiByMachineIndex( int index );
 
 signals:
     void newMachineCreated( int bus );

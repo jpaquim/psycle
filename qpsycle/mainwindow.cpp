@@ -424,6 +424,12 @@ void MainWindow::refreshSampleComboBox()
 void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
 {
     song_->seqBus = newIndex;
+
+    // Focus the necessary MachineGui in the MachineView.
+    std::cout << "we want: " << newIndex << std::endl;
+    MachineGui *macGui = macView_->findMachineGuiByMachineIndex( newIndex );
+    std::cout << "we got: " << macGui->mac()->_macIndex << std::endl;
+    macView_->scene()->setFocusItem( macGui );
 }
 
 void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
@@ -446,5 +452,6 @@ void MainWindow::onNewMachineCreated( int bus )
 
 void MainWindow::onMachineGuiFocused( MachineGui *macGui )
 {
+    // FIXME: shouldn't rely on macCombo to set seqBus as we do here.
     macCombo_->setCurrentIndex( macGui->mac()->_macIndex );
 }
