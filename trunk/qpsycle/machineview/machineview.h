@@ -64,7 +64,7 @@
     void deleteConnection( WireGui *wireGui );
 
 signals:
-    void newMachineCreated();
+    void newMachineCreated( int bus );
 
 private:
     void createMachineGui( psy::core::Machine *mac );
