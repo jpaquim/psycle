@@ -327,6 +327,8 @@ void MainWindow::initMachineCombo()
 {
     if (!song_) return;
 
+    macCombo_->clear();
+
     bool filled=false;
     bool found=false;
     int selected = -1;
@@ -390,16 +392,16 @@ void MainWindow::initSampleCombo()
 
 void MainWindow::refreshSampleComboBox()
 {
-//    std::ostringstream buffer;
-//    buffer.setf(std::ios::uppercase);
+    std::ostringstream buffer;
+    buffer.setf(std::ios::uppercase);
 
     int listlen = 0;
     for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
     {
-      //  buffer.str("");
-       // buffer << std::setfill('0') << std::hex << std::setw(2);
- //       buffer << i << ": " << song()->_pInstrument[i]->_sName;
-        QString name = QString::fromStdString( song_->_pInstrument[i]->_sName );
+        buffer.str("");
+        buffer << std::setfill('0') << std::hex << std::setw(2);
+        buffer << i << ": " << song_->_pInstrument[i]->_sName;
+        QString name = QString::fromStdString( buffer.str() );
         sampCombo_->setItemText( i, name );
         listlen++;
     }
@@ -411,7 +413,6 @@ void MainWindow::refreshSampleComboBox()
 
 void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 {
-std::cout << "index: " << newIndex << std::endl;
 	song_->instSelected   = newIndex;
     song_->auxcolSelected = newIndex;
     // FIXME: when wave editor is more advanced, we need to notify it of this change.
