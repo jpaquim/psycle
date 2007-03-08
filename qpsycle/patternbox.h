@@ -37,6 +37,7 @@
 
     void populatePatternTree();
     QTreeWidget* patternTree() { return patternTree_; }
+    psy::core::Song* song() { return song_; }
 
 public slots:
      void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
