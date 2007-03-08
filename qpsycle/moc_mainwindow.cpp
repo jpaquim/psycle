@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Thu Mar 8 23:00:16 2007
+** Created: Thu Mar 8 23:16:46 2007
 **      by: The Qt Meta Object Compiler version 59 (Qt 4.2.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-      12,   10, // methods
+      13,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -39,6 +39,7 @@ static const uint qt_meta_data_MainWindow[] = {
      176,  160,   11,   11, 0x08,
      237,  233,   11,   11, 0x08,
      269,  262,   11,   11, 0x08,
+     301,   11,   11,   11, 0x08,
 
        0        // eod
 };
@@ -49,6 +50,7 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "onSampleComboBoxIndexChanged(int)\0selectedPattern\0"
     "onPatternSelectedInPatternBox(psy::core::SinglePattern*)\0bus\0"
     "onNewMachineCreated(int)\0macGui\0onMachineGuiChosen(MachineGui*)\0"
+    "onPatternDeleted()\0"
 };
 
 const QMetaObject MainWindow::staticMetaObject = {
@@ -88,8 +90,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 9: onPatternSelectedInPatternBox((*reinterpret_cast< psy::core::SinglePattern*(*)>(_a[1]))); break;
         case 10: onNewMachineCreated((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 11: onMachineGuiChosen((*reinterpret_cast< MachineGui*(*)>(_a[1]))); break;
+        case 12: onPatternDeleted(); break;
         }
-        _id -= 12;
+        _id -= 13;
     }
     return _id;
 }

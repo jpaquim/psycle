@@ -139,8 +139,31 @@ void PatternBox::newPattern()
     }
 }
 
- void PatternBox::clonePattern() { }
- void PatternBox::deletePattern() { }
+void PatternBox::clonePattern() { }
+
+void PatternBox::deletePattern() 
+{ 
+    QTreeWidgetItem* patItem = patternTree()->currentItem();
+    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( patItem );
+
+    if ( patItr != patternMap.end() ) // only remove if it is a recognisable pattern item.
+    {
+        psy::core::SinglePattern* pattern = patItr->second;
+        patternMap.erase( patItr );
+
+        song()->patternSequence()->removeSinglePattern( pattern );
+        emit patternDeleted();
+
+        QTreeWidgetItem* parentCatItem = patItem->parent();
+        int indexOfChild = parentCatItem->indexOfChild( patItem );
+        parentCatItem->takeChild( indexOfChild );
+
+// FIXME: need some stuff here when seq gui is in place.
+/*        seqGui->removePattern(pattern);
+        seqGui->repaint();*/
+    }
+}
+
  void PatternBox::addPatternToSequencer() { }
 
  void PatternBox::createActions()
