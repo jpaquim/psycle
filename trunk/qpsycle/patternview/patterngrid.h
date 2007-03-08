@@ -3,6 +3,8 @@
 
 #include <QGraphicsItem>
 #include <QKeyEvent>
+#include <QFont>
+#include <QFontMetrics>
 
 #include "patternview.h"
 
@@ -71,6 +73,10 @@ void drawCellBg( QPainter *painter, const PatCursor& cursor );
 void addEvent( const ColumnEvent & event );
 const PatCursor & cursor() const;
 void moveCursor( int dx, int dy );
+int visibleEvents( int track ) const;
+const QFont & font() const;
+void setFont( QFont font );
+
 
 public slots:
     void keyPressEvent( QKeyEvent *event );
@@ -85,6 +91,7 @@ private:
     std::vector<ColumnEvent> events_;
 
     PatCursor cursor_;
+    QFont font_;
 };
 
 class TrackGeometry {
