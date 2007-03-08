@@ -35,13 +35,14 @@
 
  class LineNumberColumn;
  class PatternGrid;
+ class PatCursor;
 
  class PatternView : public QGraphicsView
  {
      Q_OBJECT
 
  public:
-     PatternView( psy::core::Song *song_ );
+     PatternView( psy::core::Song *song );
 
      int rowHeight() const;
      int numberOfLines() const;
@@ -52,9 +53,13 @@
      void setPattern( psy::core::SinglePattern *pattern );
      psy::core::SinglePattern *pattern();
 
+     void enterNote( const PatCursor & cursor, int note );
+
 
  private:
     void createToolBar();
+
+    psy::core::Song *song_;
 
     QGraphicsScene *scene_;
 

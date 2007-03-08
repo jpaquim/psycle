@@ -485,18 +485,38 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
     switch ( event->key() ) {
         case Qt::Key_Up:
             moveCursor( 0, -1 );/*-patternStep()*/ ;
+            return;
         break;
         case Qt::Key_Down:
             moveCursor( 0, 1 );/*-patternStep()*/ ;
+            return;
         break;
         case Qt::Key_Left:
             moveCursor( -1, 0 );/*-patternStep()*/ ;
+            return;
         break;
         case Qt::Key_Right:
             moveCursor( 1, 0 );/*-patternStep()*/ ;
+            return;
         break;
         default:;
     }
+    if ( cursor().eventNr() == 0 ) {
+        // A note event.
+        std::cout << "event #0 - note event" << std::endl;
+//        int note = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( ngrs::nsNone,event.scancode()));
+        int note = 0;
+/*        if ( note == cdefKeyStop ) {
+            pView->noteOffAny( cursor() );
+        } else*/
+            if (note >=0 && note < 120) {
+    //            pView->undoManager().addUndo( cursor() );
+                patView_->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
+                moveCursor(0,1);
+     //           pView->checkDownScroll( cursor() );
+            }
+    }
+
 }
 
 void PatternGrid::moveCursor( int dx, int dy) {
