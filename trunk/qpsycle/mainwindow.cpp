@@ -51,7 +51,7 @@ MainWindow::MainWindow()
     setupSignals();
 
     patternBox_->populatePatternTree(); // FIXME: here because of bad design?
-    initMachineCombo();
+    populateMachineCombo();
     initSampleCombo();
 }
 
@@ -156,6 +156,9 @@ void MainWindow::setupSignals()
 {
     connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
              this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
+
+    connect( macView_, SIGNAL( newMachineCreated() ), 
+             this, SLOT( onNewMachineCreated() ) );
 
     connect( wavView_, SIGNAL( sampleAdded() ), 
              this, SLOT( refreshSampleComboBox() ) );
@@ -323,7 +326,7 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
     }
 }
 
-void MainWindow::initMachineCombo() 
+void MainWindow::populateMachineCombo() 
 {
     if (!song_) return;
 
@@ -380,6 +383,7 @@ void MainWindow::initMachineCombo()
         selected=line;
     }
     macCombo_->setCurrentIndex(selected);
+    macCombo_->update();
 }
 
 void MainWindow::initSampleCombo()
@@ -421,4 +425,9 @@ void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )
 {
     patView_->setPattern( selectedPattern );
+}
+
+void MainWindow::onNewMachineCreated()
+{
+    populateMachineCombo();
 }

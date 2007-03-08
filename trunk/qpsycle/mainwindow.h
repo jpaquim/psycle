@@ -57,6 +57,7 @@
      void refreshSampleComboBox();
      void onSampleComboBoxIndexChanged( int newIndex );
     void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
+    void onNewMachineCreated();
 
  private:
     psy::core::Song *song_;
@@ -66,7 +67,7 @@
     void setupGui();
     void setupSignals();
 
-    void initMachineCombo();
+    void populateMachineCombo();
     void initSampleCombo();
     
      void createActions();
