@@ -109,7 +109,33 @@ void PatternBox::createItemPropertiesBox()
 }
 
  void PatternBox::newCategory() { }
- void PatternBox::newPattern() { }
+
+void PatternBox::newPattern() 
+{ 
+    if ( patternTree()->currentItem() ) {
+        QTreeWidgetItem *item = patternTree()->currentItem();
+
+        std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( item );
+        if( itr != categoryMap.end() ) 
+        {
+            QTreeWidgetItem* catItem = itr->first;
+            psy::core::PatternCategory* cat = itr->second;
+            psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
+            QString patName = QString( "Pattern" + QString::number( pattern->id() ) );
+            pattern->setName( patName.toStdString() );
+            QTreeWidgetItem *patItem = new QTreeWidgetItem( catItem );
+            patItem->setText( 0, QString::fromStdString( pattern->name() ) );
+            //item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
+//            catItem->addChild( patItem );
+            patternMap[patItem] = pattern;
+//            patternBox_->setSelectedItem( node, item );
+//            patternBox_->resize();
+//            patternBox_->repaint();
+//            counter++;
+        }
+    }
+}
+
  void PatternBox::clonePattern() { }
  void PatternBox::deletePattern() { }
  void PatternBox::addPatternToSequencer() { }
