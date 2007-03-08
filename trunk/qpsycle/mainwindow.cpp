@@ -32,6 +32,9 @@
 
 #include <QTreeWidgetItem>
 
+#include <iostream>
+#include <iomanip>
+
 MainWindow::MainWindow()
 {
     song_ = new psy::core::Song();
@@ -48,6 +51,8 @@ MainWindow::MainWindow()
     setupSignals();
 
     patternBox_->populatePatternTree(); // FIXME: here because of bad design?
+    initMachineCombo();
+    initSampleCombo();
 }
 
 void MainWindow::setupSong()
@@ -276,16 +281,15 @@ void MainWindow::setupSignals()
      playToolBar->addAction(stopAct);
 
      machToolBar = addToolBar(tr("Machines"));
-     macCombo = new QComboBox();
+     macCombo_ = new QComboBox();
      sampCombo_ = new QComboBox();
-    initSampleCombo();
     connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
              this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 
      QLabel *macLabel = new QLabel(" Machines: ");
      QLabel *sampLabel = new QLabel(" Samples: ");
      machToolBar->addWidget(macLabel);
-     machToolBar->addWidget(macCombo);
+     machToolBar->addWidget( macCombo_ );
      machToolBar->addWidget(sampLabel);
      machToolBar->addWidget( sampCombo_ );
  }
@@ -297,7 +301,9 @@ void MainWindow::createStatusBar()
 
 void MainWindow::keyPressEvent( QKeyEvent * event )
 {
-    switch ( event->key() ) {
+    int key = event->key();
+    int mods = event->modifiers();
+    switch ( key ) {
         case Qt::Key_F1:
             views_->setCurrentWidget( macView_ );        
         break;
@@ -315,6 +321,63 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         default:;
     }
+}
+
+void MainWindow::initMachineCombo() 
+{
+    if (!song_) return;
+
+    bool filled=false;
+    bool found=false;
+    int selected = -1;
+    int line = -1;
+    std::ostringstream buffer;
+    buffer.setf(std::ios::uppercase);
+
+    for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
+    {
+        if( song_->_pMachine[b]) {
+            buffer.str("");
+            buffer << std::setfill('0') << std::hex << std::setw(2);
+            buffer << b << ": " << song_->_pMachine[b]->_editName;
+            macCombo_->addItem( QString::fromStdString( buffer.str() ) );
+
+            //cb->SetItemData(cb->GetCount()-1,b);
+            if (!found) selected++;
+            if (song_->seqBus == b) found = true;
+            filled = true;
+        }
+    }
+
+    macCombo_->addItem( "--------------------------");
+    //cb->SetItemData(cb->GetCount()-1,65535);
+    if (!found)  {
+        selected++;
+        line = selected;
+    }
+
+    for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
+    {
+        if(song_->_pMachine[b]) {
+            buffer.str("");
+            buffer << std::setfill('0') << std::hex << std::setw(2);
+            buffer << b << ": " << song_->_pMachine[b]->_editName;
+            macCombo_->addItem( QString::fromStdString( buffer.str() ) );
+            //cb->SetItemData(cb->GetCount()-1,b);
+            if (!found) selected++;
+            if (song_->seqBus == b) found = true;
+            filled = true;
+        }
+    }
+
+    if (!filled) {
+//        macCombo_->removeChilds();
+        macCombo_->addItem( "No Machines Loaded" );
+        selected = 0;
+    } else if (!found)  {
+        selected=line;
+    }
+    macCombo_->setCurrentIndex(selected);
 }
 
 void MainWindow::initSampleCombo()

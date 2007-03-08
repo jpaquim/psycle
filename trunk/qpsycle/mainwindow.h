@@ -66,6 +66,7 @@
     void setupGui();
     void setupSignals();
 
+    void initMachineCombo();
     void initSampleCombo();
     
      void createActions();
@@ -98,7 +99,7 @@
      QAction *playPatAct;
      QAction *stopAct;
 
-     QComboBox *macCombo;
+     QComboBox *macCombo_;
      QComboBox *sampCombo_;
 
      PatternBox *patternBox_;
