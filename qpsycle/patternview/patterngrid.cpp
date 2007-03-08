@@ -54,7 +54,9 @@ QRectF PatternGrid::boundingRect() const
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-    painter->setFont( QFont( "courier", 12 ) );
+    font_ = QFont( "courier", 12 );
+    setFont( font_ );
+    painter->setFont( font_ ); 
         if ( patView_->pattern() ) {
     //        TimeSignature signature;
             int numberOfTracks = patView_->numberOfTracks();
@@ -299,13 +301,14 @@ void PatternGrid::drawBlockData( QPainter *painter, int xOff, int line, const st
     }
 }
 
-int PatternGrid::cellWidth( ) const {
-/*    ngrs::FontMetrics metrics( font( ) );
-    return metrics.maxCharWidth( );*/
-    return 10;
+int PatternGrid::cellWidth( ) const 
+{
+    QFontMetrics metrics( font() );
+    return metrics.maxWidth();
 }
 
-int PatternGrid::eventOffset( int eventnr, int col ) const {
+int PatternGrid::eventOffset( int eventnr, int col ) const 
+{
     std::vector<ColumnEvent>::const_iterator it = events_.begin();
     int nr = 0;
     int offset = 0;
@@ -325,7 +328,8 @@ int PatternGrid::eventOffset( int eventnr, int col ) const {
     return -1;
 }
 
-int PatternGrid::eventColWidth( int eventnr ) const {
+int PatternGrid::eventColWidth( int eventnr ) const 
+{
     int eventColWidth_ = 0;
     if ( eventnr < events_.size() ) {
         const ColumnEvent & event = events_.at(eventnr);
@@ -532,7 +536,7 @@ void PatternGrid::moveCursor( int dx, int dy) {
             if ( cursor_.col() + dx < maxCols ) {
                 cursor_.setCol( cursor_.col() + dx);
             } else
-                if (eventnr + 1 < 10/*visibleEvents( cursor_.track())*/ ) {
+                if (eventnr + 1 < visibleEvents( cursor_.track()) ) {
                     cursor_.setCol( 0 );
                     cursor_.setEventNr( eventnr + 1);
                 } else 
@@ -555,7 +559,7 @@ void PatternGrid::moveCursor( int dx, int dy) {
                 } else {
                     if ( cursor_.track() > 0 ) {
                         cursor_.setTrack( cursor_.track() -1 );
-                        cursor_.setEventNr( 0/*visibleEvents( cursor_.track() -1 )-1*/ );
+                        cursor_.setEventNr( visibleEvents( cursor_.track() -1 )-1 );
                         const ColumnEvent & event = events_.at( cursor_.eventNr() );
                         cursor_.setCol( event.cols() - 1 );
                     }		
@@ -570,9 +574,22 @@ void PatternGrid::moveCursor( int dx, int dy) {
         } else if (dy!=0) {
 //            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
         }
-        update();
+        update(); // FIXME: inefficient to update the whole grid here.
 //        updateStatusBar();
 }
+
+int PatternGrid::visibleEvents( int track ) const 
+{
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( track );
+
+    if ( it != trackGeometrics().end() )
+        return it->second.visibleColumns();
+    return 0;
+}
+
+const QFont & PatternGrid::font() const { return font_; }
+void PatternGrid::setFont( QFont font ) { font_ = font; };
 
 
 
