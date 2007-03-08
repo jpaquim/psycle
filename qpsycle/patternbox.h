@@ -36,6 +36,7 @@
      PatternBox( psy::core::Song *song, QWidget *parent = 0);
 
     void populatePatternTree();
+    QTreeWidget* patternTree() { return patternTree_; }
 
 public slots:
      void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
