@@ -62,9 +62,11 @@
     void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void deleteConnection( WireGui *wireGui );
+    void onMachineGuiFocused( MachineGui *macGui );
 
 signals:
     void newMachineCreated( int bus );
+    void machineGuiFocused( MachineGui *macGui );
 
 private:
     void createMachineGui( psy::core::Machine *mac );

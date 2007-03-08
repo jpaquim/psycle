@@ -159,12 +159,15 @@ void MainWindow::setupSignals()
 
     connect( macView_, SIGNAL( newMachineCreated( int ) ), 
              this, SLOT( onNewMachineCreated( int ) ) );
+    connect( macView_, SIGNAL( machineGuiFocused( MachineGui* ) ), 
+             this, SLOT( onMachineGuiFocused( MachineGui* ) ) );
 
     connect( wavView_, SIGNAL( sampleAdded() ), 
              this, SLOT( refreshSampleComboBox() ) );
 
     connect( macCombo_, SIGNAL( currentIndexChanged( int ) ),
              this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
+
     connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
              this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 }
@@ -439,4 +442,9 @@ void MainWindow::onNewMachineCreated( int bus )
 {
     populateMachineCombo();
     macCombo_->setCurrentIndex( bus );
+}
+
+void MainWindow::onMachineGuiFocused( MachineGui *macGui )
+{
+    macCombo_->setCurrentIndex( macGui->mac()->_macIndex );
 }

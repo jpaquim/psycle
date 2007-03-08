@@ -193,3 +193,8 @@ psy::core::Machine* MachineGui::mac()
 {
     return mac_;
 }
+
+void MachineGui::focusInEvent( QFocusEvent * event ) 
+{
+    emit focused( this );    
+}

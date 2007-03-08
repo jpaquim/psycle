@@ -50,6 +50,8 @@ public:
 
     psy::core::Machine* mac();
 
+    void focusInEvent ( QFocusEvent * event );
+
 
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
@@ -65,6 +67,7 @@ public slots:
 signals:
     void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
+    void focused( MachineGui *macGui );
 
  private:
      MachineView *machineView;

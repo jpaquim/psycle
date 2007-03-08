@@ -59,6 +59,7 @@
      void onSampleComboBoxIndexChanged( int newIndex );
     void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
     void onNewMachineCreated( int bus );
+    void onMachineGuiFocused( MachineGui *macGui );
 
  private:
     psy::core::Song *song_;
