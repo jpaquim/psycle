@@ -204,6 +204,15 @@ MachineGui *MachineView::findByMachine( psy::core::Machine *mac )
     return 0;
 }
 
+MachineGui *MachineView::findMachineGuiByMachineIndex( int index )
+{
+    for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
+        MachineGui* machineGui = *it;
+        if ( machineGui->mac()->_macIndex == index ) return machineGui;
+    }
+    return 0;
+}
+
 psy::core::Song *MachineView::song()
 {
     return song_;
