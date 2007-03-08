@@ -157,8 +157,8 @@ void MainWindow::setupSignals()
     connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
              this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
 
-    connect( macView_, SIGNAL( newMachineCreated() ), 
-             this, SLOT( onNewMachineCreated() ) );
+    connect( macView_, SIGNAL( newMachineCreated( int ) ), 
+             this, SLOT( onNewMachineCreated( int ) ) );
 
     connect( wavView_, SIGNAL( sampleAdded() ), 
              this, SLOT( refreshSampleComboBox() ) );
@@ -427,7 +427,8 @@ void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* select
     patView_->setPattern( selectedPattern );
 }
 
-void MainWindow::onNewMachineCreated()
+void MainWindow::onNewMachineCreated( int bus )
 {
     populateMachineCombo();
+    macCombo_->setCurrentIndex( bus );
 }

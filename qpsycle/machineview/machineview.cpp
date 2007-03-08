@@ -111,14 +111,15 @@ void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
     int accepted = newMachineDlg->exec();
     if (accepted) { // Add a new machine to the song.
          psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
-         // search for an unused machine slot
-         int fb = song_->GetFreeBus();
+
+        int freeBus = song_->GetFreeBus(); // This will be the bus the Machine is on. 
+                                           // FIXME: should ask the Machine for it after it is created.
 
 	    // Create machine, tell where to place the new machine--get from mouse.	  
 		psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, event->x(), event->y() );
         if ( mac ) {
             createMachineGui( mac );
-            emit newMachineCreated();
+            emit newMachineCreated( freeBus );
         }
         update();
         repaint();
