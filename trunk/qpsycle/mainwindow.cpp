@@ -314,15 +314,19 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
     int mods = event->modifiers();
     switch ( key ) {
         case Qt::Key_F1:
-            views_->setCurrentWidget( macView_ );        
+            qDebug( "huh" );
+            patternBox_->patternTree()->setFocus();        
         break;
         case Qt::Key_F2:
-            views_->setCurrentWidget( patView_ );        
+            views_->setCurrentWidget( macView_ );        
         break;
         case Qt::Key_F3:
-            views_->setCurrentWidget( wavView_ );        
+            views_->setCurrentWidget( patView_ );        
         break;
         case Qt::Key_F4:
+            views_->setCurrentWidget( wavView_ );        
+        break;
+        case Qt::Key_F5:
             views_->setCurrentWidget( seqView_ );        
         break;
         case Qt::Key_Space:
