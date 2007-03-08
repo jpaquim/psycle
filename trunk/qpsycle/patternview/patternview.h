@@ -58,6 +58,8 @@
     void setSelectedMachineIndex( int idx );
     int selectedMachineIndex() const;
 
+    PatternGrid* patternGrid() { return patGrid_; }
+
 
  private:
     void createToolBar();

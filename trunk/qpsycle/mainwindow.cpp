@@ -322,6 +322,7 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         case Qt::Key_F3:
             views_->setCurrentWidget( patView_ );        
+            patView_->setFocus();
         break;
         case Qt::Key_F4:
             views_->setCurrentWidget( wavView_ );        

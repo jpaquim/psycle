@@ -25,7 +25,6 @@ PatternGrid::PatternGrid( PatternView *pView )
     : patView_( pView )
 {
     setFlag(ItemIsFocusable);
-    setFlag(ItemIsSelectable);
     setupTrackGeometrics( patView_->numberOfTracks() );
 
     addEvent( ColumnEvent::note );
