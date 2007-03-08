@@ -159,8 +159,8 @@ void MainWindow::setupSignals()
 
     connect( macView_, SIGNAL( newMachineCreated( int ) ), 
              this, SLOT( onNewMachineCreated( int ) ) );
-    connect( macView_, SIGNAL( machineGuiFocused( MachineGui* ) ), 
-             this, SLOT( onMachineGuiFocused( MachineGui* ) ) );
+    connect( macView_, SIGNAL( machineGuiChosen( MachineGui* ) ), 
+             this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
 
     connect( wavView_, SIGNAL( sampleAdded() ), 
              this, SLOT( refreshSampleComboBox() ) );
@@ -425,11 +425,10 @@ void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
 {
     song_->seqBus = newIndex;
 
-    // Focus the necessary MachineGui in the MachineView.
-    std::cout << "we want: " << newIndex << std::endl;
+    // Choose the necessary MachineGui in the MachineView.
     MachineGui *macGui = macView_->findMachineGuiByMachineIndex( newIndex );
-    std::cout << "we got: " << macGui->mac()->_macIndex << std::endl;
-    macView_->scene()->setFocusItem( macGui );
+    macView_->setTheChosenOne( macGui );
+    macView_->update();
 }
 
 void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
@@ -450,7 +449,7 @@ void MainWindow::onNewMachineCreated( int bus )
     macCombo_->setCurrentIndex( bus );
 }
 
-void MainWindow::onMachineGuiFocused( MachineGui *macGui )
+void MainWindow::onMachineGuiChosen( MachineGui *macGui )
 {
     // FIXME: shouldn't rely on macCombo to set seqBus as we do here.
     macCombo_->setCurrentIndex( macGui->mac()->_macIndex );

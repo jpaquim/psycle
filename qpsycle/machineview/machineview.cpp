@@ -338,11 +338,11 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
     switch ( mac->mode() ) {							
         case psy::core::MACHMODE_GENERATOR:
             macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-            connect( macGui, SIGNAL( focused( MachineGui* ) ), this, SLOT( onMachineGuiFocused( MachineGui* ) ) );
+            connect( macGui, SIGNAL( chosen( MachineGui* ) ), this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
         break;
         case psy::core::MACHMODE_FX:
             macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-            connect( macGui, SIGNAL( focused( MachineGui* ) ), this, SLOT( onMachineGuiFocused( MachineGui* ) ) );
+            connect( macGui, SIGNAL( chosen( MachineGui* ) ), this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
         break;
         case psy::core::MACHMODE_MASTER: 
             macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
@@ -354,9 +354,9 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
     machineGuis.push_back(macGui);
 }
 
-void MachineView::onMachineGuiFocused( MachineGui *macGui )
+void MachineView::onMachineGuiChosen( MachineGui *macGui )
 {
-    // FIXME: do we have to go through MachineView to get to MainWindow?
-    // Can't MainWindow listen to the MacGuis?
-    emit machineGuiFocused( macGui );
+    setTheChosenOne( macGui );
+    emit machineGuiChosen( macGui );
+    update();
 }

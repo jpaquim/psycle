@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Thu Mar 8 18:42:32 2007
+** Created: Thu Mar 8 20:33:39 2007
 **      by: The Qt Meta Object Compiler version 59 (Qt 4.2.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -48,7 +48,7 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "refreshSampleComboBox()\0newIndex\0onMachineComboBoxIndexChanged(int)\0"
     "onSampleComboBoxIndexChanged(int)\0selectedPattern\0"
     "onPatternSelectedInPatternBox(psy::core::SinglePattern*)\0bus\0"
-    "onNewMachineCreated(int)\0macGui\0onMachineGuiFocused(MachineGui*)\0"
+    "onNewMachineCreated(int)\0macGui\0onMachineGuiChosen(MachineGui*)\0"
 };
 
 const QMetaObject MainWindow::staticMetaObject = {
@@ -87,7 +87,7 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 8: onSampleComboBoxIndexChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 9: onPatternSelectedInPatternBox((*reinterpret_cast< psy::core::SinglePattern*(*)>(_a[1]))); break;
         case 10: onNewMachineCreated((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 11: onMachineGuiFocused((*reinterpret_cast< MachineGui*(*)>(_a[1]))); break;
+        case 11: onMachineGuiChosen((*reinterpret_cast< MachineGui*(*)>(_a[1]))); break;
         }
         _id -= 12;
     }

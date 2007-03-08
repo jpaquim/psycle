@@ -51,11 +51,12 @@ public:
     psy::core::Machine* mac();
 
     void focusInEvent ( QFocusEvent * event );
-
+    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    void mousePressEvent( QGraphicsSceneMouseEvent * event );
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
@@ -67,7 +68,7 @@ public slots:
 signals:
     void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
-    void focused( MachineGui *macGui );
+    void chosen( MachineGui *macGui );
 
  private:
      MachineView *machineView;
@@ -80,6 +81,7 @@ signals:
 
     QColor backgroundColor_;
      QAction *showMacTwkDlgAct_;
+
  };
 
  #endif

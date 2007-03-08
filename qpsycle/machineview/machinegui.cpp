@@ -62,6 +62,16 @@
               machineView, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
  }
 
+ void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
+ {
+    if ( this == machineView->theChosenOne() ) {
+        setPen( QPen( Qt::red ) );
+    }
+    // Do the default painting business for a QGRectItem.
+    QGraphicsRectItem::paint( painter, option, widget );
+    setPen( QPen( Qt::white ) );
+ }
+
  void MachineGui::setName(const QString &name)
  {
      nameItem->setPlainText(name);
@@ -148,7 +158,13 @@ void MachineGui::keyPressEvent ( QKeyEvent * event )
     }
 }
 
-void MachineGui::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event )
+void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
+{
+    QGraphicsItem::mousePressEvent( event ); // Get the default behaviour.
+    emit chosen( this );    
+}
+
+void MachineGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
 { 
     showMacTwkDlgAct_->activate(QAction::Trigger);    
 }
@@ -196,5 +212,4 @@ psy::core::Machine* MachineGui::mac()
 
 void MachineGui::focusInEvent( QFocusEvent * event ) 
 {
-    emit focused( this );    
 }
