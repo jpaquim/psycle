@@ -108,7 +108,15 @@ void PatternBox::createItemPropertiesBox()
     itemPropsLayout->addWidget( new QComboBox(), 2, 1, 2, 3 );
 }
 
- void PatternBox::newCategory() { }
+void PatternBox::newCategory() 
+{ 
+    psy::core::PatternCategory* category = song()->patternSequence()->patternData()->createNewCategory("category");
+
+    QTreeWidgetItem* catItem = new QTreeWidgetItem( patternTree() );
+    catItem->setText( 0, "Category" );
+    categoryMap[catItem] = category;
+    catItems.push_back( catItem );
+}
 
 void PatternBox::newPattern() 
 { 
@@ -126,12 +134,7 @@ void PatternBox::newPattern()
             QTreeWidgetItem *patItem = new QTreeWidgetItem( catItem );
             patItem->setText( 0, QString::fromStdString( pattern->name() ) );
             //item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
-//            catItem->addChild( patItem );
             patternMap[patItem] = pattern;
-//            patternBox_->setSelectedItem( node, item );
-//            patternBox_->resize();
-//            patternBox_->repaint();
-//            counter++;
         }
     }
 }
