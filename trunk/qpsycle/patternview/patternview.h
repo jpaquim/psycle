@@ -55,6 +55,9 @@
 
      void enterNote( const PatCursor & cursor, int note );
 
+    void setSelectedMachineIndex( int idx );
+    int selectedMachineIndex() const;
+
 
  private:
     void createToolBar();
@@ -75,6 +78,8 @@
     QComboBox *patternCbx_;
 
     QAction *delBarAct_;
+
+    int selectedMacIdx_;
 
  };
 
