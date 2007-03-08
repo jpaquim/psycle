@@ -59,6 +59,7 @@ public:
     int lineHeight() const;
     bool lineGridEnabled() const;
     int gridWidthByTrack( int track ) const;
+    bool isNote( int key );
 
 void drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color);
 int cellWidth( ) const;
