@@ -106,24 +106,24 @@
      }
  }
 
- void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
- {
-     int accepted = newMachineDlg->exec();
-     if (accepted) {
-//        add a new machine.
-          psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
-          // search for an unused machine slot
-		  int fb = song_->GetFreeBus();
+void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
+{ 
+    int accepted = newMachineDlg->exec();
+    if (accepted) { // Add a new machine to the song.
+         psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
+         // search for an unused machine slot
+         int fb = song_->GetFreeBus();
 
-		// create machine, tell where to place the new machine--get from mouse.	  
-			psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, event->x(), event->y() );
-            if ( mac ) createMachineGui( mac );
-            update();
-            repaint();
-     } else {
-//        don't bother.
-     }
- }
+	    // Create machine, tell where to place the new machine--get from mouse.	  
+		psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, event->x(), event->y() );
+        if ( mac ) {
+            createMachineGui( mac );
+            emit newMachineCreated();
+        }
+        update();
+        repaint();
+    } 
+}
 
  void MachineView::scaleView(qreal scaleFactor) 
  {
