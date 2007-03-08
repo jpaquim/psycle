@@ -55,6 +55,7 @@
      void redo();
      void about();
      void refreshSampleComboBox();
+     void onMachineComboBoxIndexChanged( int newIndex );
      void onSampleComboBoxIndexChanged( int newIndex );
     void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
     void onNewMachineCreated( int bus );

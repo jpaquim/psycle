@@ -162,6 +162,11 @@ void MainWindow::setupSignals()
 
     connect( wavView_, SIGNAL( sampleAdded() ), 
              this, SLOT( refreshSampleComboBox() ) );
+
+    connect( macCombo_, SIGNAL( currentIndexChanged( int ) ),
+             this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
+    connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
+             this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 }
 
  void MainWindow::newSong()
@@ -286,8 +291,6 @@ void MainWindow::setupSignals()
      machToolBar = addToolBar(tr("Machines"));
      macCombo_ = new QComboBox();
      sampCombo_ = new QComboBox();
-    connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
-             this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 
      QLabel *macLabel = new QLabel(" Machines: ");
      QLabel *sampLabel = new QLabel(" Samples: ");
@@ -415,6 +418,11 @@ void MainWindow::refreshSampleComboBox()
 
 }
 
+void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
+{
+    song_->seqBus = newIndex;
+}
+
 void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 {
 	song_->instSelected   = newIndex;
@@ -431,5 +439,4 @@ void MainWindow::onNewMachineCreated( int bus )
 {
     populateMachineCombo();
     macCombo_->setCurrentIndex( bus );
-    song_->seqBus = bus;
 }
