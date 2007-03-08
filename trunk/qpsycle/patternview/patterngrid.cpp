@@ -486,7 +486,24 @@ const PatCursor & PatternGrid::cursor() const {
 
 void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
-    switch ( event->key() ) {
+    int key = event->key();
+
+    if ( cursor().eventNr() == 0 && isNote( key ) ) {
+        // A note event.
+        std::cout << "event #0 - note event" << std::endl;
+//        int note = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( ngrs::nsNone,event.scancode()));
+        int note = 0;
+/*        if ( note == cdefKeyStop ) {
+            pView->noteOffAny( cursor() );
+        } else*/
+            if (note >=0 && note < 120) {
+    //            pView->undoManager().addUndo( cursor() );
+                patView_->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
+                moveCursor(0,1);
+     //           pView->checkDownScroll( cursor() );
+            }
+    } 
+    switch ( key ) {
         case Qt::Key_Up:
             moveCursor( 0, -1 );/*-patternStep()*/ ;
             return;
@@ -503,24 +520,41 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             moveCursor( 1, 0 );/*-patternStep()*/ ;
             return;
         break;
-        default:;
-    }
-    if ( cursor().eventNr() == 0 ) {
-        // A note event.
-        std::cout << "event #0 - note event" << std::endl;
-//        int note = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( ngrs::nsNone,event.scancode()));
-        int note = 0;
-/*        if ( note == cdefKeyStop ) {
-            pView->noteOffAny( cursor() );
-        } else*/
-            if (note >=0 && note < 120) {
-    //            pView->undoManager().addUndo( cursor() );
-                patView_->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
-                moveCursor(0,1);
-     //           pView->checkDownScroll( cursor() );
-            }
+        default:
+            // If we got here, we didn't do anything with it, so pass to parent.
+            event->ignore();
     }
 
+}
+
+bool PatternGrid::isNote( int key )
+{
+    // FIXME: this will be different one the input handler is set up.
+    if ( key == Qt::Key_Z ||
+         key == Qt::Key_S ||
+         key == Qt::Key_X ||
+         key == Qt::Key_D ||
+         key == Qt::Key_C ||
+         key == Qt::Key_V ||
+         key == Qt::Key_G ||
+         key == Qt::Key_B ||
+         key == Qt::Key_N ||
+         key == Qt::Key_M ||
+         key == Qt::Key_Q ||
+         key == Qt::Key_W ||
+         key == Qt::Key_E ||
+         key == Qt::Key_R ||
+         key == Qt::Key_T ||
+         key == Qt::Key_Y ||
+         key == Qt::Key_U ||
+         key == Qt::Key_I ||
+         key == Qt::Key_O ||
+         key == Qt::Key_P )
+    {
+        return true;    
+    }
+
+    return false;
 }
 
 void PatternGrid::moveCursor( int dx, int dy) {

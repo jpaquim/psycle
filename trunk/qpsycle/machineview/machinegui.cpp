@@ -149,7 +149,9 @@ void MachineGui::keyPressEvent ( QKeyEvent * event )
         case Qt::Key_M: // B_0
             note = 12;
             break;
-        default: note = NULL;
+        default: 
+            note = NULL;
+            event->ignore();
     }
     int octave = 4;
     int velocity = 127;
@@ -208,8 +210,4 @@ QPointF MachineGui::centrePointInSceneCoords() {
 psy::core::Machine* MachineGui::mac()
 {
     return mac_;
-}
-
-void MachineGui::focusInEvent( QFocusEvent * event ) 
-{
 }
