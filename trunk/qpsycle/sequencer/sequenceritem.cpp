@@ -30,16 +30,19 @@
 
  SequencerItem::SequencerItem()
  {
-     setRect(QRectF(0, 0, 150, 30));
-     setPen(QPen(Qt::white,1));
-     setBrush(QBrush(Qt::red));
      setFlag(ItemIsMovable);
  }
 
+QRectF SequencerItem::boundingRect() const
+{
+    return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*5, parentItem()->boundingRect().height() );
+}
+
 void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-    QGraphicsRectItem::paint( painter, option, widget );
-    
+    painter->setPen( Qt::white ); 
+    painter->setBrush( Qt::red ); 
+    painter->drawRect( boundingRect() );
     painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
 }
 
