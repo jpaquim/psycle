@@ -120,9 +120,9 @@ void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
         if ( mac ) {
             createMachineGui( mac );
             emit newMachineCreated( freeBus );
+            scene()->update();
+//            update();
         }
-        update();
-        repaint();
     } 
 }
 
