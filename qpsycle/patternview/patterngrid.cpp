@@ -1,5 +1,6 @@
 #include "patterngrid.h"
 #include "psycore/singlepattern.h"
+#include "psycore/global.h"
 
 #include <iostream>
 #include <iomanip>
@@ -485,16 +486,15 @@ const PatCursor & PatternGrid::cursor() const {
 
 void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
-    int key = event->key();
+    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
 
-    if ( cursor().eventNr() == 0 && isNote( key ) ) {
+    if ( cursor().eventNr() == 0 && isNote( command ) ) {
         // A note event.
         std::cout << "event #0 - note event" << std::endl;
-//        int note = Global::pConfig()->inputHandler().getEnumCodeByKey(Key( ngrs::nsNone,event.scancode()));
-        int note = 0;
-/*        if ( note == cdefKeyStop ) {
-            pView->noteOffAny( cursor() );
-        } else*/
+        int note = command; // the cdefs for the keys correspond to the correct notes.
+        if ( note == psy::core::cdefKeyStop ) {
+            //pView->noteOffAny( cursor() );
+        } else
             if (note >=0 && note < 120) {
     //            pView->undoManager().addUndo( cursor() );
                 patView_->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
@@ -502,7 +502,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
      //           pView->checkDownScroll( cursor() );
             }
     } 
-    switch ( key ) {
+    switch ( event->key() ) {
         case Qt::Key_Up:
             moveCursor( 0, -1 );/*-patternStep()*/ ;
             return;
@@ -529,26 +529,37 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 bool PatternGrid::isNote( int key )
 {
     // FIXME: this will be different one the input handler is set up.
-    if ( key == Qt::Key_Z ||
-         key == Qt::Key_S ||
-         key == Qt::Key_X ||
-         key == Qt::Key_D ||
-         key == Qt::Key_C ||
-         key == Qt::Key_V ||
-         key == Qt::Key_G ||
-         key == Qt::Key_B ||
-         key == Qt::Key_N ||
-         key == Qt::Key_M ||
-         key == Qt::Key_Q ||
-         key == Qt::Key_W ||
-         key == Qt::Key_E ||
-         key == Qt::Key_R ||
-         key == Qt::Key_T ||
-         key == Qt::Key_Y ||
-         key == Qt::Key_U ||
-         key == Qt::Key_I ||
-         key == Qt::Key_O ||
-         key == Qt::Key_P )
+    if ( 
+         key == psy::core::cdefKeyC_0 ||
+         key == psy::core::cdefKeyCS0 ||
+         key == psy::core::cdefKeyD_0 ||
+         key == psy::core::cdefKeyDS0 ||
+         key == psy::core::cdefKeyE_0 ||
+         key == psy::core::cdefKeyF_0 ||
+         key == psy::core::cdefKeyFS0 ||
+         key == psy::core::cdefKeyG_0 ||
+         key == psy::core::cdefKeyGS0 ||
+         key == psy::core::cdefKeyA_0 ||
+         key == psy::core::cdefKeyAS0 ||
+         key == psy::core::cdefKeyB_0 ||
+         key == psy::core::cdefKeyC_1 ||
+         key == psy::core::cdefKeyCS1 ||
+         key == psy::core::cdefKeyD_1 ||
+         key == psy::core::cdefKeyDS1 ||
+         key == psy::core::cdefKeyE_1 ||
+         key == psy::core::cdefKeyF_1 ||
+         key == psy::core::cdefKeyFS1 ||
+         key == psy::core::cdefKeyG_1 ||
+         key == psy::core::cdefKeyGS1 ||
+         key == psy::core::cdefKeyA_1 ||
+         key == psy::core::cdefKeyAS1 ||
+         key == psy::core::cdefKeyB_1 ||
+         key == psy::core::cdefKeyC_2 ||
+         key == psy::core::cdefKeyCS2 ||
+         key == psy::core::cdefKeyD_2 ||
+         key == psy::core::cdefKeyDS2 ||
+         key == psy::core::cdefKeyE_2 
+    )
     {
         return true;    
     }
