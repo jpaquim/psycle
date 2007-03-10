@@ -17,19 +17,26 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
-#ifndef PSYCLEGLOBAL_H
-#define PSYCLEGLOBAL_H
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
 #include <iostream>
-
-#pragma once
-
-		/**
-		@author  Psycledelics
-		*/
+#include "configuration.h"
 
 namespace psy {
 	namespace core {
+
+    class Configuration;
+
+    class Global{
+    public:
+            Global();
+
+            ~Global();
+
+            static Configuration* pConfig();
+            static Configuration & configuration();
+    };
 
 	template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)
 	{
