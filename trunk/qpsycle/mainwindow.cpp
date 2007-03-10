@@ -57,52 +57,9 @@ MainWindow::MainWindow()
 
 void MainWindow::setupSong()
 {
-    psy::core::Machine *master = song_->_pMachine[psy::core::MASTER_INDEX] ; 
-
-    int fb = song_->GetFreeBus();
-    song_->CreateMachine(psy::core::MACH_SAMPLER, 100, 20, "SAMPLER", fb);  
-    psy::core::Machine *sampler0 = song_->_pMachine[fb];
-    song_->InsertConnection( sampler0->_macIndex , master->_macIndex, 1.0f);
-
+    // Setup a blank song.
     psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("Category0");
-    psy::core::PatternCategory* category1 = song_->patternSequence()->patternData()->createNewCategory("Category1");
     psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
-    psy::core::SinglePattern* pattern1 = category1->createNewPattern("Pattern1");
-
-    psy::core::PatternEvent event0 = pattern0->event( 0, 0 );
-    psy::core::Machine* tmac = sampler0;// song_->_pMachine[ song_->seqBus ];
-    event0.setNote( 4 * 12 + 0);
-    event0.setSharp( false );
-    if (tmac) event0.setMachine( tmac->_macIndex );
-    if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
-        event0.setInstrument( 0 );
-    }
-    pattern0->setEvent( 0, 0, event0 );
-
-    fb = song_->GetFreeBus();
-    song_->CreateMachine(psy::core::MACH_SAMPLER, 300, 20, "SAMPLER", fb);  
-    psy::core::Machine *sampler1 = song_->_pMachine[fb];
-    song_->InsertConnection( sampler1->_macIndex , master->_macIndex, 1.0f);
-
-    tmac = sampler1;
-    psy::core::PatternEvent event1 = pattern0->event( 2, 1 );
-    event1.setNote( 4 * 12 + 0);
-    event1.setSharp( false );
-    if (tmac) event1.setMachine( tmac->_macIndex );
-    if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
-        event1.setInstrument( 1 );
-    }
-    pattern0->setEvent( 2, 2, event1 );
-
-    tmac = sampler0;
-    psy::core::PatternEvent event2 = pattern0->event( 4, 0 );
-    event2.setNote( 4 * 12 + 0);
-    event2.setSharp( false );
-    if (tmac) event2.setMachine( tmac->_macIndex );
-    if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
-        event2.setInstrument( 2 );
-    }
-    pattern0->setEvent( 4, 0, event2 );
 
     psy::core::SequenceLine *seqLine = song_->patternSequence()->createNewLine();
 	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
