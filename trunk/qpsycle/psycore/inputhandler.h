@@ -161,7 +161,7 @@ namespace psy {
 			cdefColumnNext,		///< s-tab
 
 			cdefNavUp,
-			cdefNavDn,
+			cdefNavDown,
 			cdefNavLeft,
 			cdefNavRight,
 			cdefNavPageUp,	///< pgup
@@ -333,7 +333,7 @@ namespace psy {
 				case cdefColumnPrev:	return "Prev column";
 				case cdefColumnNext:	return "Next column";
 				case cdefNavUp:			return "Nav. Up";
-				case cdefNavDn:			return "Nav. Down";
+				case cdefNavDown:			return "Nav. Down";
 				case cdefNavLeft:		return "Nav. Left";
 				case cdefNavRight:		return "Nav. Right";
 				case cdefNavPageDn:		return "Nav. Down 16";

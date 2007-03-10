@@ -446,6 +446,13 @@ namespace psy {
 
 			inputHandler_.changeKeyCode( cdefPlayStart, Key( modifiers, Qt::Key_Space ) );
 
+			inputHandler_.changeKeyCode( cdefInstrDec, Key( Qt::ControlModifier, Qt::Key_Minus ) );
+			inputHandler_.changeKeyCode( cdefInstrInc, Key( Qt::ControlModifier, Qt::Key_Equal ) );
+
+			inputHandler_.changeKeyCode( cdefNavUp, Key( Qt::NoModifier, Qt::Key_Up ) );
+			inputHandler_.changeKeyCode( cdefNavDown, Key( Qt::NoModifier, Qt::Key_Down ) );
+			inputHandler_.changeKeyCode( cdefNavLeft, Key( Qt::NoModifier, Qt::Key_Left ) );
+			inputHandler_.changeKeyCode( cdefNavRight, Key( Qt::NoModifier, Qt::Key_Right ) );
         }
 
 /*		void Configuration::onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName )
