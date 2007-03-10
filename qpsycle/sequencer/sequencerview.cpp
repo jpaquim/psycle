@@ -33,6 +33,8 @@
  SequencerView::SequencerView( psy::core::Song *asong )
  {
     song_ = asong;
+    beatPxLength_ = 5;
+
     QGraphicsScene *scene_ = new QGraphicsScene(this);
     scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene_->setBackgroundBrush(Qt::black);
@@ -73,3 +75,9 @@
 //    scrollArea_->removeChilds();
 
  }
+
+int SequencerView::beatPxLength( ) const
+{
+    return beatPxLength_;
+}
+
