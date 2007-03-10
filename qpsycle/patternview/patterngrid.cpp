@@ -502,20 +502,20 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
      //           pView->checkDownScroll( cursor() );
             }
     } 
-    switch ( event->key() ) {
-        case Qt::Key_Up:
+    switch ( command ) {
+        case psy::core::cdefNavUp:
             moveCursor( 0, -1 );/*-patternStep()*/ ;
             return;
         break;
-        case Qt::Key_Down:
+        case psy::core::cdefNavDown:
             moveCursor( 0, 1 );/*-patternStep()*/ ;
             return;
         break;
-        case Qt::Key_Left:
+        case psy::core::cdefNavLeft:
             moveCursor( -1, 0 );/*-patternStep()*/ ;
             return;
         break;
-        case Qt::Key_Right:
+        case psy::core::cdefNavRight:
             moveCursor( 1, 0 );/*-patternStep()*/ ;
             return;
         break;

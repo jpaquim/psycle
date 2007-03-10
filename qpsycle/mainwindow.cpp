@@ -335,6 +335,12 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         case psy::core::cdefPlayStart:
             psy::core::Player::Instance()->start( 0.0 );
         break;
+        case psy::core::cdefInstrInc:
+            sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
+        break;
+        case psy::core::cdefInstrDec:
+            sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
+        break;
         default:;
     }
 }
