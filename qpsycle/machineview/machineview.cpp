@@ -121,7 +121,6 @@ void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
             createMachineGui( mac );
             emit newMachineCreated( freeBus );
             scene()->update();
-//            update();
         }
     } 
 }

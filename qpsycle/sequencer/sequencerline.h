@@ -22,16 +22,20 @@
 
 #include <QGraphicsItem>
 #include <QObject>
-#include "sequencerview.h"
 
- class SequencerLine : public QGraphicsRectItem
- {
+#include "psycore/patternsequence.h"
 
- public:
-     SequencerLine(SequencerView *seqView);
+class SequencerLine : public QGraphicsRectItem
+{
 
- private:
-     SequencerView *sequencerView;
- };
+public:
+    SequencerLine();
+
+    void setSequenceLine( psy::core::SequenceLine * line );
+
+private:
+
+    psy::core::SequenceLine *seqLine_;
+};
 
 #endif

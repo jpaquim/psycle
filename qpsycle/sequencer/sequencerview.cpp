@@ -22,23 +22,54 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <iostream>
+#include <vector>
 
  #include "sequencerview.h"
  #include "sequencerline.h"
  #include "sequenceritem.h"
+ #include "sequencerarea.h"
 
- SequencerView::SequencerView()
+
+ SequencerView::SequencerView( psy::core::Song *asong )
  {
-     QGraphicsScene *scene = new QGraphicsScene(this);
-     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-     scene->setBackgroundBrush(Qt::black);
+    song_ = asong;
+    QGraphicsScene *scene_ = new QGraphicsScene(this);
+    scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
+    scene_->setBackgroundBrush(Qt::black);
 
-     setAlignment ( Qt::AlignLeft | Qt::AlignTop );
-     setScene(scene);
-     setBackgroundBrush(Qt::black);
+    setAlignment ( Qt::AlignLeft | Qt::AlignTop );
+    setScene(scene_);
+    setSceneRect(0,0,500,500);
 
-     SequencerLine *seqLine = new SequencerLine(this);
-     SequencerItem *seqItem = new SequencerItem(this);
-     scene->addItem(seqLine);
-     scene->addItem(seqItem);
+    seqArea_ = new SequencerArea( this );
+
+    std::vector<psy::core::SequenceLine*>::iterator it = song()->patternSequence()->begin();
+    for ( ; it < song()->patternSequence()->end(); it++) {
+        psy::core::SequenceLine* seqLine = *it;
+        SequencerLine* line = new SequencerLine();
+        line->setParentItem( seqArea_ );
+        //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
+ //       lines.push_back(line);
+        line->setSequenceLine( seqLine );
+//        line->click.connect(this, &SequencerGUI::onSequencerLineClick);
+//        scrollArea_->resize();
+//        lastLine_ = line;
+ //       selectedLine_ = line;
+        // now iterate the sequence entries
+        psy::core::SequenceLine::iterator iter = seqLine->begin();
+        for(; iter!= seqLine->end(); ++iter)
+        {
+            psy::core::SequenceEntry* entry = iter->second;
+            SequencerItem* item = new SequencerItem();
+            item->setParentItem( line );
+//            item->click.connect(line,&SequencerGUI::SequencerLine::onSequencerItemClick);
+//            item->setSequenceEntry( entry );
+//            line->items.push_back(item);
+
+        }
+   }
+    scene_->addItem( seqArea_ );
+//    lines.clear();
+//    scrollArea_->removeChilds();
+
  }
