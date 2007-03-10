@@ -437,6 +437,15 @@ namespace psy {
             inputHandler_.changeKeyCode(cdefKeyG_2,Key(modifiers,Qt::Key_X));
             inputHandler_.changeKeyCode(cdefKeyGS2,Key(modifiers,Qt::Key_X));
             inputHandler_.changeKeyCode(cdefKeyA_2,Key(modifiers,Qt::Key_X));*/
+
+			inputHandler_.changeKeyCode( cdefShowPatternBox, Key( modifiers, Qt::Key_F1 ) );
+			inputHandler_.changeKeyCode( cdefShowMachineView, Key( modifiers, Qt::Key_F2 ) );
+			inputHandler_.changeKeyCode( cdefShowPatternView, Key( modifiers, Qt::Key_F3 ) );
+			inputHandler_.changeKeyCode( cdefShowWaveEditor, Key( modifiers, Qt::Key_F4 ) );
+			inputHandler_.changeKeyCode( cdefShowSequencerView, Key( modifiers, Qt::Key_F5 ) );
+
+			inputHandler_.changeKeyCode( cdefPlayStart, Key( modifiers, Qt::Key_Space ) );
+
         }
 
 /*		void Configuration::onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName )

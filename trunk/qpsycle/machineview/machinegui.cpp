@@ -205,6 +205,7 @@ void MachineGui::keyPressEvent ( QKeyEvent * event )
         default: 
             note = NULL;
             event->ignore();
+            return;
     }
     int octave = 4;
     int velocity = 127;

@@ -143,10 +143,12 @@ namespace psy {
 			cdefInfoPattern,
 			cdefInfoMachine,
 
-			cdefEditMachine,
-			cdefEditPattern,
-			cdefEditInstr,
-			cdefEditSequence,
+			cdefShowPatternBox,
+			cdefShowMachineView,
+			cdefShowPatternView,
+			cdefShowWaveEditor,
+			cdefShowSequencerView,
+
 			cdefAddMachine,
 
 			cdefPatternInc,
@@ -410,10 +412,11 @@ namespace psy {
 				case cdefInfoPattern:	return "Pattern Info";
 				case cdefInfoMachine:	return "Machine Info";
 
-				case cdefEditMachine:	return "Screen of Machines";
-				case cdefEditPattern:	return "Screen of Patterns";
-				case cdefEditSequence:	return "Screen of Sequencing";
-				case cdefEditInstr:		return "Edit Instrument";
+				case cdefShowPatternBox:	return "Show pattern box";
+				case cdefShowMachineView:	return "Screen of Machines";
+				case cdefShowPatternView:	return "Screen of Patterns";
+				case cdefShowWaveEditor:	return "Screen of Waves";
+				case cdefShowSequencerView:	return "Screen of Sequencing";
 				case cdefAddMachine:		return "Add New Machine";
 				case cdefMaxPattern:		return "Maximise Pattern View";
 
