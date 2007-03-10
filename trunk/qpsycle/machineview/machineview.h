@@ -22,9 +22,11 @@
 
  #include <vector>
 
- #include <QWidget>
  #include <QtGui/QGraphicsView>
  #include <QtGui/QGraphicsScene>
+ #include <QtGui/QGraphicsSceneMouseEvent>
+ #include <QtGui/QKeyEvent>
+ #include <QtGui/QMouseEvent>
 
  #include "newmachinedlg.h"
  #include "machinegui.h"

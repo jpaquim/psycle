@@ -26,6 +26,7 @@
 #include "psycore/song.h"
 
 #include <QtGui/QVBoxLayout>
+#include <QtGui/QToolBar>
 
 class SequencerDraw;
 
@@ -50,6 +51,7 @@ class SequencerDraw;
     SequencerDraw *seqDraw_;
 
     SequencerLine *selectedLine_;
+    QToolBar *toolBar_;
 
  };
 
