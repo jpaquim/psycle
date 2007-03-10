@@ -31,6 +31,13 @@ SequencerView::SequencerView( psy::core::Song *asong )
     layout_ = new QVBoxLayout();
 
     seqDraw_ = new SequencerDraw( this );
+    toolBar_ = new QToolBar();
+    toolBar_->addAction( "Insert Track" );
+    toolBar_->addAction( "Delete Track" );
+    toolBar_->addAction( "Move Track Down" );
+    toolBar_->addAction( "Move Track Up" );
+
+    layout_->addWidget( toolBar_ );
     layout_->addWidget( seqDraw_ );
 
     setLayout( layout_ );

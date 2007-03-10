@@ -18,8 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <QtGui>
-#include <QGraphicsScene>
+#include <QtGui/QGraphicsScene>
 #include <QPainter>
 #include <iostream>
 #include <QGraphicsLineItem>
@@ -47,11 +46,6 @@
      setSceneRect(0,0,width(),height());
      setScene(scene_);
      setBackgroundBrush(Qt::black);
-
-//     psy::core::PluginFinder *pluginFinder_ = new psy::core::PluginFinder();
-//     psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, ev->x(), ev->y() );
-    
-
 
      newMachineDlg = new NewMachineDlg();
 
