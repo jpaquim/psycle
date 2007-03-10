@@ -18,77 +18,32 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <QtGui>
-#include <QGraphicsScene>
-#include <QPainter>
 #include <iostream>
 #include <vector>
 
  #include "sequencerview.h"
  #include "sequencerline.h"
- #include "sequenceritem.h"
- #include "sequencerarea.h"
 
-
- SequencerView::SequencerView( psy::core::Song *asong )
- {
-    song_ = asong;
-    beatPxLength_ = 5;
-
-    QGraphicsScene *scene_ = new QGraphicsScene(this);
-    scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
-    scene_->setBackgroundBrush(Qt::black);
-
-    setAlignment ( Qt::AlignLeft | Qt::AlignTop );
-    setScene(scene_);
-    setSceneRect(0,0,500,500);
-
-    seqArea_ = new SequencerArea( this );
-
-    bool isFirst = true;
-    std::vector<psy::core::SequenceLine*>::iterator it = song()->patternSequence()->begin();
-    for ( ; it < song()->patternSequence()->end(); it++) {
-        psy::core::SequenceLine* seqLine = *it;
-        SequencerLine* line = new SequencerLine();
-        line->setParentItem( seqArea_ );
-        if (isFirst) {
-            selectedLine_ = line;
-            isFirst = false;
-        }
-        //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
- //       lines.push_back(line);
-        line->setSequenceLine( seqLine );
-//        line->click.connect(this, &SequencerGUI::onSequencerLineClick);
-//        scrollArea_->resize();
-//        lastLine_ = line;
- //       selectedLine_ = line;
-        // now iterate the sequence entries
-        psy::core::SequenceLine::iterator iter = seqLine->begin();
-        for(; iter!= seqLine->end(); ++iter)
-        {
-            psy::core::SequenceEntry* entry = iter->second;
-            SequencerItem* item = new SequencerItem();
-            item->setParentItem( line );
-//            item->click.connect(line,&SequencerGUI::SequencerLine::onSequencerItemClick);
-            item->setSequenceEntry( entry );
-//            line->items.push_back(item);
-
-        }
-   }
-    scene_->addItem( seqArea_ );
-//    lines.clear();
-//    scrollArea_->removeChilds();
-
- }
-
-int SequencerView::beatPxLength( ) const
+SequencerView::SequencerView( psy::core::Song *asong )
 {
-    return beatPxLength_;
+    song_ = asong;
+
+    layout_ = new QVBoxLayout();
+
+    seqDraw_ = new SequencerDraw( this );
+    layout_->addWidget( seqDraw_ );
+
+    setLayout( layout_ );
 }
 
 SequencerLine* SequencerView::selectedLine() 
 {
     return selectedLine_;
+}
+
+void SequencerView::setSelectedLine( SequencerLine *line ) 
+{
+    selectedLine_ = line;
 }
 
 void SequencerView::addPattern( psy::core::SinglePattern *pattern )

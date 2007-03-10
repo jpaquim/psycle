@@ -36,10 +36,11 @@
 
     setSelectedMachineIndex( 255 ); // FIXME: why 255?
     layout = new QVBoxLayout();
-    layout->addWidget( patDraw_ );
     setLayout( layout );
     // Create the toolbar.
-//    createToolBar();
+    createToolBar();
+    layout->addWidget(toolBar_);
+    layout->addWidget( patDraw_ );
  }
 
  void PatternView::createToolBar()
@@ -55,7 +56,6 @@
       toolBar_->addWidget(meterCbx_);
       toolBar_->addAction(delBarAct_);
 
-//      layout->addWidget(toolBar_);
   }
 
 int PatternView::rowHeight( ) const

@@ -20,19 +20,16 @@
  #ifndef SEQUENCERVIEW_H
  #define SEQUENCERVIEW_H
 
- #include <QWidget>
- #include <QtGui/QGraphicsView>
-
 #include "sequencerline.h"
-#include "sequencerarea.h"
+#include "sequencerdraw.h"
 
 #include "psycore/song.h"
 
-class SequencerArea;
-class SequencerLine;
-class SequencerItem;
+#include <QtGui/QVBoxLayout>
 
- class SequencerView : public QGraphicsView
+class SequencerDraw;
+
+ class SequencerView : public QWidget
  {
      Q_OBJECT
 
@@ -40,8 +37,8 @@ class SequencerItem;
      SequencerView( psy::core::Song *song );
 
      psy::core::Song* song() { return song_; }
-     int beatPxLength() const;
      SequencerLine *selectedLine();
+    void setSelectedLine( SequencerLine *line ) ;
 
     void addPattern( psy::core::SinglePattern *pattern );
 
@@ -49,14 +46,10 @@ class SequencerItem;
 
  private:
     psy::core::Song *song_;
-    QGraphicsScene *scene_;
+    QVBoxLayout *layout_;
+    SequencerDraw *seqDraw_;
 
-    SequencerArea *seqArea_;
-
-    SequencerLine *lastLine_;
     SequencerLine *selectedLine_;
-
-    int beatPxLength_;
 
  };
 
