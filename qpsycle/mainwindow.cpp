@@ -312,27 +312,26 @@ void MainWindow::createStatusBar()
 
 void MainWindow::keyPressEvent( QKeyEvent * event )
 {
-    int key = event->key();
-    int mods = event->modifiers();
-    switch ( key ) {
-        case Qt::Key_F1:
-            qDebug( "huh" );
+    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+
+    switch ( command ) {
+        case psy::core::cdefShowPatternBox:
             patternBox_->patternTree()->setFocus();        
         break;
-        case Qt::Key_F2:
+        case psy::core::cdefShowMachineView:
             views_->setCurrentWidget( macView_ );        
         break;
-        case Qt::Key_F3:
+        case psy::core::cdefShowPatternView:
             views_->setCurrentWidget( patView_ );        
             patView_->setFocus();
         break;
-        case Qt::Key_F4:
+        case psy::core::cdefShowWaveEditor:
             views_->setCurrentWidget( wavView_ );        
         break;
-        case Qt::Key_F5:
+        case psy::core::cdefShowSequencerView:
             views_->setCurrentWidget( seqView_ );        
         break;
-        case Qt::Key_Space:
+        case psy::core::cdefPlayStart:
             psy::core::Player::Instance()->start( 0.0 );
         break;
         default:;
