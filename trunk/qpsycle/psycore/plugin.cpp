@@ -20,7 +20,6 @@
 #include "plugin.h"
 //#include "configuration.h"
 //#include "inputhandler.h"
-//#include <ngrs/file.h>
 #ifdef __unix__
 #include <dlfcn.h>
 #else
@@ -529,7 +528,7 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
 		std::string withoutSuffix = psFileName.substr(0,i);
 		std::string soName = withoutSuffix + ".so";
 		psFileName = "lib-xpsycle.plugin."+soName;
-		psFileName = "/home/neil/code/xpsycle.plugins/" + psFileName; // FIXME: hardcoding.
+		psFileName = Global::configuration().pluginPath() + psFileName; 
 		int pos;
 		while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
 	} else {
@@ -547,7 +546,7 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
 					}
 			} else _psDllName = psFileName;
 
-    		psFileName = "/home/neil/code/xpsycle.plugins/" + psFileName; // FIXME: hardcoding
+    		psFileName = Global::configuration().pluginPath() + psFileName; 
 	}
 	#else
 	_psDllName = psFileName;

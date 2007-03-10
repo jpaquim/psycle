@@ -43,6 +43,7 @@ HEADERS += mainwindow.h \
            psycore/alsaseqin.h \
            psycore/audiodriver.h \
            psycore/binread.h \
+           psycore/configuration.h \
            psycore/constants.h \
            psycore/convert_internal_machines.h \
            psycore/cstdint.h \
@@ -127,12 +128,14 @@ SOURCES += mainwindow.cpp \
            psycore/alsaseqin.cpp \
            psycore/audiodriver.cpp \
            psycore/binread.cpp \
+           psycore/configuration.cpp \
            psycore/datacompression.cpp \
            psycore/dither.cpp \
            psycore/dsp.cpp \
            psycore/eventdriver.cpp \
            psycore/fileio.cpp \
            psycore/filter.cpp \
+           psycore/global.cpp \
            psycore/gstreamerout.cpp \
            psycore/helpers.cpp \
            psycore/inputhandler.cpp \

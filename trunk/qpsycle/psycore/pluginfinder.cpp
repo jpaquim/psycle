@@ -211,8 +211,7 @@ namespace psy
 
 		void PluginFinder::scanLadspa() {
 			///\todo this just uses the first path in getenv
-			//std::string ladspa_path = conf_.ladspaPath() ;			
-			std::string ladspa_path = "/usr/lib/ladspa/";
+			std::string ladspa_path = Global::configuration().ladspaPath();			
 			#ifdef __unix__
 			std::string::size_type dotpos = ladspa_path.find(':',0);
 			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
@@ -255,8 +254,7 @@ namespace psy
 		}
 
 		void PluginFinder::scanNatives() {
-//			std::string psycle_path = Global::pConfig()->pluginPath();
-			std::string psycle_path = "/home/neil/code/xpsycle.plugins/";
+			std::string psycle_path = Global::configuration().pluginPath();
 
 			std::vector<std::string> fileList;
 			fileList = File::fileList( psycle_path );
