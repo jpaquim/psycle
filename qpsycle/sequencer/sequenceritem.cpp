@@ -35,3 +35,15 @@
      setBrush(QBrush(Qt::red));
      setFlag(ItemIsMovable);
  }
+
+void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
+{
+    QGraphicsRectItem::paint( painter, option, widget );
+    
+    painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
+}
+
+void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
+{
+    sequenceEntry_ = sequenceEntry;
+}

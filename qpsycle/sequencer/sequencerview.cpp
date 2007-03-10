@@ -65,7 +65,7 @@
             SequencerItem* item = new SequencerItem();
             item->setParentItem( line );
 //            item->click.connect(line,&SequencerGUI::SequencerLine::onSequencerItemClick);
-//            item->setSequenceEntry( entry );
+            item->setSequenceEntry( entry );
 //            line->items.push_back(item);
 
         }
