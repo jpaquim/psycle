@@ -82,6 +82,15 @@
      connect( ladList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
               this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
 
+     connect( genList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
+              this, SLOT( accept() ) );
+     connect( efxList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
+              this, SLOT( accept() ) );
+     connect( intList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
+              this, SLOT( accept() ) );
+     connect( ladList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
+              this, SLOT( accept() ) );
+
      buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
                                       | QDialogButtonBox::Cancel);
      connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
