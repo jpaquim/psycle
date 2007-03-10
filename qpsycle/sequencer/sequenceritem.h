@@ -37,6 +37,9 @@
 
      void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
 
+protected: 
+    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+
  private:
     psy::core::SequenceEntry *sequenceEntry_;
  };

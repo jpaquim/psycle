@@ -47,3 +47,17 @@ void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
 {
     sequenceEntry_ = sequenceEntry;
 }
+
+void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
+{
+    QGraphicsItem::mouseMoveEvent( event ); // Do normal move event...
+
+    // But then constrain to parent.
+    int widthOfThisItem = boundingRect().width();
+    int widthOfParent = parentItem()->boundingRect().width();
+    int maximumLeftPos = widthOfParent - widthOfThisItem;
+    int currentLeftPos = pos().x();
+    int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
+    int newLeftPos = std::max( 0, desiredLeftPos );
+    setPos( newLeftPos, 0 );                 
+}
