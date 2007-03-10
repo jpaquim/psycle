@@ -27,12 +27,13 @@
 
 #include "psycore/patternsequence.h"
 
- class SequencerItem : public QGraphicsRectItem
+ class SequencerItem : public QGraphicsItem
  {
 
  public:
      SequencerItem();
 
+    QRectF boundingRect() const;
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
      void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
