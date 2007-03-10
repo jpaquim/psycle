@@ -18,26 +18,21 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
- #include <QGraphicsScene>
- #include <QGraphicsSceneMouseEvent>
- #include <QPainter>
- #include <QStyleOption>
- #include <QMessageBox>
- #include <QMouseEvent>
-
 #include "sequencerline.h"
 #include "sequencerview.h"
 #include "sequenceritem.h"
 
- SequencerLine::SequencerLine(SequencerView *seqView)
-     : sequencerView(seqView)
+#include "psycore/patternsequence.h"
+
+ SequencerLine::SequencerLine()
  {
-     setRect(QRectF(0, 0, sequencerView->width(), 30));
+     setRect(QRectF(0, 0, 500, 30));
      setPen(QPen(Qt::white,1));
      setBrush(QBrush(Qt::transparent));
-//     setFlag(ItemIsMovable);
-     setZValue(1);
-
-     SequencerItem *seqItem = new SequencerItem(sequencerView);
-     seqItem->setParentItem(this);
  }
+
+void SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
+{
+    seqLine_ = line;
+}
+

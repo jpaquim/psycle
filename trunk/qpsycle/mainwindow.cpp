@@ -44,7 +44,7 @@ MainWindow::MainWindow()
     macView_ = new MachineView( song_ );
     patView_ = new PatternView( song_ );
     wavView_ = new WaveView( song_ );
-    seqView_ = new SequencerView();
+    seqView_ = new SequencerView( song_ );
     patternBox_ = new PatternBox( song_ );
 
     setupGui();

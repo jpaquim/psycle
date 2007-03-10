@@ -23,16 +23,32 @@
  #include <QWidget>
  #include <QtGui/QGraphicsView>
 
+#include "sequencerline.h"
+#include "sequencerarea.h"
+
+#include "psycore/song.h"
+
+class SequencerArea;
+
  class SequencerView : public QGraphicsView
  {
      Q_OBJECT
 
  public:
-     SequencerView();
+     SequencerView( psy::core::Song *song );
+
+     psy::core::Song* song() { return song_; }
 
  protected:
 
  private:
+    psy::core::Song *song_;
+    QGraphicsScene *scene_;
+
+    SequencerArea *seqArea_;
+
+    SequencerLine *lastLine_;
+    SequencerLine *selectedLine_;
 
  };
 

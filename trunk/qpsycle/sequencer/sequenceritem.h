@@ -28,10 +28,9 @@
  {
 
  public:
-     SequencerItem(SequencerView *seqView);
+     SequencerItem();
 
  private:
-     SequencerView *sequencerView;
  };
 
 #endif
