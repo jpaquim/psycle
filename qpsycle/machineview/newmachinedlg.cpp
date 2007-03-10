@@ -64,6 +64,7 @@
               this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
 
      QListWidget *intList = new QListWidget();
+     intList->addItem( "Sampler" );
      connect( intList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
               this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
 
@@ -98,8 +99,11 @@
 
 void NewMachineDlg::currentItemChanged( QListWidgetItem *current, QListWidgetItem *previous )
 {
-    qDebug( "setting plugin." );
-	setPlugin ( current );
+    if ( current->text() == "Sampler" ) {
+		selectedKey_ = psy::core::PluginFinderKey::internalSampler();
+    } else {
+        setPlugin ( current );
+    }
 }
 
 void NewMachineDlg::setPlugin( QListWidgetItem* item ) 
