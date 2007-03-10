@@ -18,6 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include <QtCore> // For getting key binding stuff.
+
 #include "configuration.h"
 #include "song.h"
 #include "global.h"
@@ -42,6 +44,7 @@ namespace psy {
 		{
 //			setXmlDefaults();
 			setDefaults();
+			configureKeyBindings();
 			loadConfig();			
 			_RecordTweaks = false;
 			_RecordUnarmed = true;
@@ -396,486 +399,94 @@ namespace psy {
 			doEnableSound = true;
 		}*/
 
+
+        void Configuration::configureKeyBindings() // FIXME: Key bindings are host specific, should be moved?
+        {
+            int modifiers = Qt::NoModifier; // Don't like having Qt stuff in psycore...
+            inputHandler_.changeKeyCode( cdefKeyC_0, Key( modifiers, Qt::Key_Z ) );
+            inputHandler_.changeKeyCode( cdefKeyCS0, Key( modifiers, Qt::Key_S ) );
+            inputHandler_.changeKeyCode(cdefKeyD_0,Key(modifiers,Qt::Key_X));
+            inputHandler_.changeKeyCode(cdefKeyDS0,Key(modifiers,Qt::Key_D));
+            inputHandler_.changeKeyCode(cdefKeyE_0,Key(modifiers,Qt::Key_C));
+            inputHandler_.changeKeyCode(cdefKeyF_0,Key(modifiers,Qt::Key_V));
+            inputHandler_.changeKeyCode(cdefKeyFS0,Key(modifiers,Qt::Key_G));
+            inputHandler_.changeKeyCode(cdefKeyG_0,Key(modifiers,Qt::Key_B));
+            inputHandler_.changeKeyCode(cdefKeyGS0,Key(modifiers,Qt::Key_H));
+            inputHandler_.changeKeyCode(cdefKeyA_0,Key(modifiers,Qt::Key_N));
+            inputHandler_.changeKeyCode(cdefKeyAS0,Key(modifiers,Qt::Key_J));
+            inputHandler_.changeKeyCode(cdefKeyB_0,Key(modifiers,Qt::Key_M));
+            inputHandler_.changeKeyCode(cdefKeyC_1,Key(modifiers,Qt::Key_Q));
+            inputHandler_.changeKeyCode(cdefKeyCS1,Key(modifiers,Qt::Key_2));
+            inputHandler_.changeKeyCode(cdefKeyD_1,Key(modifiers,Qt::Key_W));
+            inputHandler_.changeKeyCode(cdefKeyDS1,Key(modifiers,Qt::Key_3));
+            inputHandler_.changeKeyCode(cdefKeyE_1,Key(modifiers,Qt::Key_E));
+            inputHandler_.changeKeyCode(cdefKeyF_1,Key(modifiers,Qt::Key_R));
+            inputHandler_.changeKeyCode(cdefKeyFS1,Key(modifiers,Qt::Key_5));
+            inputHandler_.changeKeyCode(cdefKeyG_1,Key(modifiers,Qt::Key_T));
+            inputHandler_.changeKeyCode(cdefKeyGS1,Key(modifiers,Qt::Key_6));
+            inputHandler_.changeKeyCode(cdefKeyA_1,Key(modifiers,Qt::Key_Y));
+            inputHandler_.changeKeyCode(cdefKeyAS1,Key(modifiers,Qt::Key_7));
+            inputHandler_.changeKeyCode(cdefKeyB_1,Key(modifiers,Qt::Key_U));
+            inputHandler_.changeKeyCode(cdefKeyC_2,Key(modifiers,Qt::Key_I));
+            inputHandler_.changeKeyCode(cdefKeyCS2,Key(modifiers,Qt::Key_9));
+            inputHandler_.changeKeyCode(cdefKeyD_2,Key(modifiers,Qt::Key_O));
+            inputHandler_.changeKeyCode(cdefKeyDS2,Key(modifiers,Qt::Key_0));
+            inputHandler_.changeKeyCode(cdefKeyE_2,Key(modifiers,Qt::Key_P));
+/*            inputHandler_.changeKeyCode(cdefKeyF_2,Key(modifiers,Qt::Key_X)); // no bindings for now.
+            inputHandler_.changeKeyCode(cdefKeyFS2,Key(modifiers,Qt::Key_X));
+            inputHandler_.changeKeyCode(cdefKeyG_2,Key(modifiers,Qt::Key_X));
+            inputHandler_.changeKeyCode(cdefKeyGS2,Key(modifiers,Qt::Key_X));
+            inputHandler_.changeKeyCode(cdefKeyA_2,Key(modifiers,Qt::Key_X));*/
+        }
+
 /*		void Configuration::onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName )
-		{
-			if ( tagName == "path" ) {
-				std::string id  = parser.getAttribValue("id"); 
-				std::string src = parser.getAttribValue("src");
+{
+if ( tagName == "path" ) {
+std::string id  = parser.getAttribValue("id"); 
+std::string src = parser.getAttribValue("src");
 
-				if ( id == "icondir" )   iconPath_   = src;
-									else  
-				if ( id == "plugindir" ) pluginPath_ = src;
-									else
-				if ( id == "prsdir" )    prsPath_    = src;
-									else
-				if ( id == "hlpdir" )    hlpPath_    = src; 
-									else
-				if ( id == "ladspadir" ) ladspaPath_ = src;
-			} else
-				if (tagName == "driver" && doEnableSound) {		
-					setDriverByName( parser.getAttribValue("name"));
-				} else
-					if (tagName == "alsa") {
-						std::string deviceName = parser.getAttribValue("device");
-						std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
-						if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
-							AudioDriverSettings settings = it->second->settings();
-							settings.setDeviceName( deviceName );
-							it->second->setSettings( settings );
-						}		
-					} else
-						if (tagName == "audio") {
-							std::string enableStr = parser.getAttribValue("enable");
-							int enable = 0;
-														if ( enableStr != "" ) enable = ngrs::str<int>(enableStr);
-							enableSound_ = enable;
-							if (enable == 0) {
-								setDriverByName( "silent" );
-								doEnableSound = false;
-							} else doEnableSound = true;
-						} else
-							if (tagName == "key") {
+if ( id == "icondir" )   iconPath_   = src;
+else  
+if ( id == "plugindir" ) pluginPath_ = src;
+else
+if ( id == "prsdir" )    prsPath_    = src;
+else
+if ( id == "hlpdir" )    hlpPath_    = src; 
+else
+if ( id == "ladspadir" ) ladspaPath_ = src;
+} else
+if (tagName == "driver" && doEnableSound) {		
+setDriverByName( parser.getAttribValue("name"));
+} else
+if (tagName == "alsa") {
+std::string deviceName = parser.getAttribValue("device");
+std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
+if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
+AudioDriverSettings settings = it->second->settings();
+settings.setDeviceName( deviceName );
+it->second->setSettings( settings );
+}		
+} else
+if (tagName == "audio") {
+std::string enableStr = parser.getAttribValue("enable");
+int enable = 0;
+if ( enableStr != "" ) enable = ngrs::str<int>(enableStr);
+enableSound_ = enable;
+if (enable == 0) {
+setDriverByName( "silent" );
+doEnableSound = false;
+} else doEnableSound = true;
+} else
+if (tagName == "key") {
+// moved to configureKeyBindings()
 
-								// the keycode id 
-								std::string id         = parser.getAttribValue("id");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
+}
+}
+*/
+InputHandler & Configuration::inputHandler() {
+return inputHandler_;
+}
 
-								// define special chars pressed in addition to this key function
-								std::string modInput    = parser.getAttribValue("mod");
-																int shift = ngrs::nsNone;
-								if (modInput == "ctrl")  {
-																	shift = ngrs::nsCtrl;   
-								} else
-								if (modInput == "shift") {
-																	shift = ngrs::nsShift;      
-								}
-
-								// the keycode      
-								int keyCode = 0;
-								std::string keyCodeStr = parser.getAttribValue("keycode");
-								if (keyCodeStr!="") keyCode = ngrs::str<int>(keyCodeStr);
-								std::string keyCharStr = parser.getAttribValue("keychar");
-
-								if (keyCharStr!="") {
-									keyCode = keyCharStr[0];
-									if ( keyCharStr == "NK_Left" )    keyCode = ngrs::NK_Left; else
-									if ( keyCharStr == "NK_Right")    keyCode = ngrs::NK_Right; else
-									if ( keyCharStr == "NK_Up" )       keyCode = ngrs::NK_Up; else
-									if ( keyCharStr == "NK_Down" )     keyCode = ngrs::NK_Down; else
-									if ( keyCharStr == "NK_Page_Up" )  keyCode = ngrs::NK_Page_Up; else
-									if ( keyCharStr == "NK_Page_Down" ) keyCode = ngrs::NK_Page_Down; else
-									if ( keyCharStr == "NK_Home" )      keyCode = ngrs::NK_Home; else
-									if ( keyCharStr == "NK_End" )       keyCode = ngrs::NK_End; else
-									if ( keyCharStr == "NK_Tab" )       keyCode = ngrs::NK_Tab; else
-#ifdef __unix__
-									if ( keyCharStr == "XK_ISO_Left_Tab" ) keyCode = XK_ISO_Left_Tab; else
-#endif
-									if ( keyCharStr == "NK_Insert" ) keyCode = ngrs::NK_Insert; else
-									if ( keyCharStr == "NK_BackSpace" ) keyCode = ngrs::NK_BackSpace; else
-									if ( keyCharStr == "NK_Delete" ) keyCode = ngrs::NK_Delete; else
-									if ( keyCharStr == "F1") keyCode = ngrs::NK_F1; else
-									if ( keyCharStr == "F2") keyCode = ngrs::NK_F2; else
-									if ( keyCharStr == "F3") keyCode = ngrs::NK_F3; else
-									if ( keyCharStr == "F4") keyCode = ngrs::NK_F4; else
-									if ( keyCharStr == "F5") keyCode = ngrs::NK_F5; else
-									if ( keyCharStr == "F6") keyCode = ngrs::NK_F6; else
-									if ( keyCharStr == "F7") keyCode = ngrs::NK_F7; else
-									if (keyCharStr == "F8") keyCode = ngrs::NK_F8; else
-									if (keyCharStr == "F9") keyCode = ngrs::NK_F9;
-																}
-	if (id == "add_new_machine") {
-	inputHandler_.changeKeyCode(cdefAddMachine,Key(shift,keyCode));
-	} else
-if (id == "block_copy") {
-											inputHandler_.changeKeyCode(cdefBlockCopy,Key(shift,keyCode));
-										} else
-											if (id == "block_cut") {
-												inputHandler_.changeKeyCode(cdefBlockCut,Key(shift,keyCode));
-											} else
-												if (id == "block_delete") {
-													inputHandler_.changeKeyCode(cdefBlockDelete,Key(shift,keyCode));
-												} else
-													if (id == "block_double") {
-														inputHandler_.changeKeyCode(cdefBlockDouble,Key(shift,keyCode));
-													} else
-														if (id == "block_end") {
-															inputHandler_.changeKeyCode(cdefBlockEnd,Key(shift,keyCode));
-														} else
-															if (id == "block_halve") {
-																inputHandler_.changeKeyCode(cdefBlockHalve,Key(shift,keyCode));
-															} else
-																if (id == "block_interpolate") {
-																	inputHandler_.changeKeyCode(cdefBlockInterpolate,Key(shift,keyCode));
-																} else
-																	if (id == "block_mix") {
-																		inputHandler_.changeKeyCode(cdefBlockMix,Key(shift,keyCode));
-																	} else
-																		if (id == "block_paste") {
-																			inputHandler_.changeKeyCode(cdefBlockPaste,Key(shift,keyCode));
-																		} else
-																			if (id == "block_select_all") {
-																				inputHandler_.changeKeyCode(cdefSelectAll,Key(shift,keyCode));
-																			} else
-																				if (id == "block_select_bar") {
-																					inputHandler_.changeKeyCode(cdefSelectBar,Key(shift,keyCode));
-																				} else
-																					if (id == "block_select_column") {
-																						inputHandler_.changeKeyCode(cdefSelectCol,Key(shift,keyCode));
-																					} else
-																						if (id == "block_select_up") {
-																							inputHandler_.changeKeyCode(cdefSelectUp,Key(shift,keyCode));
-																						} else
-																							if (id == "block_select_down") {
-																								inputHandler_.changeKeyCode(cdefSelectDn,Key(shift,keyCode));
-																							} else
-																								if (id == "block_select_left") {
-																									inputHandler_.changeKeyCode(cdefSelectLeft,Key(shift,keyCode));
-																								} else
-																									if (id == "block_select_right") {
-																										inputHandler_.changeKeyCode(cdefSelectRight,Key(shift,keyCode));
-																									} else
-																										if (id == "block_select_top") {
-																											inputHandler_.changeKeyCode(cdefSelectTop,Key(shift,keyCode));
-																										} else
-																											if (id == "block_select_bottom") {
-																												inputHandler_.changeKeyCode(cdefSelectBottom,Key(shift,keyCode));
-																											} else
-																												if (id == "block_set_instrument") {
-																													inputHandler_.changeKeyCode(cdefBlockSetInstr,Key(shift,keyCode));
-																												} else
-																													if (id == "block_set_machine") {
-																														inputHandler_.changeKeyCode(cdefBlockSetMachine,Key(shift,keyCode));
-																													} else
-																														if (id == "block_start") {
-																															inputHandler_.changeKeyCode(cdefBlockStart,Key(shift,keyCode));
-																														} else
-																															if (id == "block_unmark") {
-																																inputHandler_.changeKeyCode(cdefBlockUnMark,Key(shift,keyCode));
-																															} else
-																																if (id == "clear_row") {
-																																	inputHandler_.changeKeyCode(cdefRowClear,Key(shift,keyCode));
-																																} else
-																																	if (id == "current_instrument+1") {
-																																		inputHandler_.changeKeyCode(cdefInstrInc,Key(shift,keyCode));
-																																	} else
-																																		if (id == "current_instrument-1") {
-																																			inputHandler_.changeKeyCode(cdefInstrDec,Key(shift,keyCode));
-																																		} else
-																																			if (id == "current_machine+1") {
-																																				inputHandler_.changeKeyCode(cdefMachineInc,Key(shift,keyCode));
-																																			} else
-																																				if (id == "current_machine-1") {
-																																					inputHandler_.changeKeyCode(cdefMachineDec,Key(shift,keyCode));
-																																				} else
-																																					if (id == "current_octave+1") {
-																																						inputHandler_.changeKeyCode(cdefOctaveUp,Key(shift,keyCode));
-																																					} else
-																																						if (id == "current_octave-1") {
-																																							inputHandler_.changeKeyCode(cdefOctaveDn,Key(shift,keyCode));
-																																						} else
-																																							if (id == "current_pattern+1") {
-																																								inputHandler_.changeKeyCode(cdefPatternInc,Key(shift,keyCode));
-																																							} else
-																																								if (id == "current_pattern-1") {
-																																									inputHandler_.changeKeyCode(cdefPatternDec,Key(shift,keyCode));
-																																								} else
-																																									if (id == "delete_row") {
-																																										inputHandler_.changeKeyCode(cdefRowDelete,Key(shift,keyCode));
-																																									} else
-																																										if (id == "edit_instrument") {
-																																											inputHandler_.changeKeyCode(cdefEditInstr,Key(shift,keyCode));
-																																										} else
-																																											if (id == "edit_redo") {
-																																												inputHandler_.changeKeyCode(cdefRedo,Key(shift,keyCode));
-																																											} else
-																																												if (id == "edit_undo") {
-																																													inputHandler_.changeKeyCode(cdefUndo,Key(shift,keyCode));
-																																												} else
-																																													if (id == "edit_toggle") {
-																																														inputHandler_.changeKeyCode(cdefEditToggle,Key(shift,keyCode));
-																																													} else
-																																														if (id.find("oct")!=std::string::npos) {
-																																															if (id == "oct_C_0") {
-																																																inputHandler_.changeKeyCode(cdefKeyC_0,Key(shift,keyCode));
-																																															} else
-																																																if (id == "oct_CS0") {
-																																																	inputHandler_.changeKeyCode(cdefKeyCS0,Key(shift,keyCode));
-																																																} else
-																																																	if (id == "oct_D_0") {
-																																																		inputHandler_.changeKeyCode(cdefKeyD_0,Key(shift,keyCode));
-																																																	} else
-																																																		if (id == "oct_DS0") {
-																																																			inputHandler_.changeKeyCode(cdefKeyDS0,Key(shift,keyCode));
-																																																		} else
-																																																			if (id == "oct_E_0") {
-																																																				inputHandler_.changeKeyCode(cdefKeyE_0,Key(shift,keyCode));
-																																																			} else
-																																																				if (id == "oct_F_0") {
-																																																					inputHandler_.changeKeyCode(cdefKeyF_0,Key(shift,keyCode));
-																																																				} else
-																																																					if (id == "oct_FS0") {
-																																																						inputHandler_.changeKeyCode(cdefKeyFS0,Key(shift,keyCode));
-																																																					} else
-																																																						if (id == "oct_G_0") {
-																																																							inputHandler_.changeKeyCode(cdefKeyG_0,Key(shift,keyCode));
-																																																						} else
-																																																							if (id == "oct_GS0") {
-																																																								inputHandler_.changeKeyCode(cdefKeyGS0,Key(shift,keyCode));
-																																																							} else
-																																																								if (id == "oct_A_0") {
-																																																									inputHandler_.changeKeyCode(cdefKeyA_0,Key(shift,keyCode));
-																																																								} else
-																																																									if (id == "oct_AS0") {
-																																																										inputHandler_.changeKeyCode(cdefKeyAS0,Key(shift,keyCode));
-																																																									} else
-																																																										if (id == "oct_B_0") {
-																																																											inputHandler_.changeKeyCode(cdefKeyB_0,Key(shift,keyCode));
-																																																										}  else // and now the all again for octave 2
-																																																											if (id == "oct_C_1") {
-																																																												inputHandler_.changeKeyCode(cdefKeyC_1,Key(shift,keyCode));
-																																																											} else
-																																																												if (id == "oct_CS1") {
-																																																													inputHandler_.changeKeyCode(cdefKeyCS1,Key(shift,keyCode));
-																																																												} else
-																																																													if (id == "oct_D_1") {
-																																																														inputHandler_.changeKeyCode(cdefKeyD_1,Key(shift,keyCode));
-																																																													} else
-																																																														if (id == "oct_DS1") {
-																																																															inputHandler_.changeKeyCode(cdefKeyDS1,Key(shift,keyCode));
-																																																														} else
-																																																															if (id == "oct_E_1") {
-																																																																inputHandler_.changeKeyCode(cdefKeyE_1,Key(shift,keyCode));
-																																																															} else
-																																																																if (id == "oct_F_1") {
-																																																																	inputHandler_.changeKeyCode(cdefKeyF_1,Key(shift,keyCode));
-																																																																} else
-																																																																	if (id == "oct_FS1") {
-																																																																		inputHandler_.changeKeyCode(cdefKeyFS1,Key(shift,keyCode));
-																																																																	} else
-																																																																		if (id == "oct_G_1") {
-																																																																			inputHandler_.changeKeyCode(cdefKeyG_1,Key(shift,keyCode));
-																																																																		} else
-																																																																			if (id == "oct_GS1") {
-																																																																				inputHandler_.changeKeyCode(cdefKeyGS1,Key(shift,keyCode));
-																																																																			} else
-																																																																				if (id == "oct_A_1") {
-																																																																					inputHandler_.changeKeyCode(cdefKeyA_1,Key(shift,keyCode));
-																																																																				} else
-																																																																					if (id == "oct_AS1") {
-																																																																						inputHandler_.changeKeyCode(cdefKeyAS1,Key(shift,keyCode));
-																																																																					} else
-																																																																						if (id == "oct_B_1") {
-																																																																							inputHandler_.changeKeyCode(cdefKeyB_1,Key(shift,keyCode));
-																																																																						} else // and now again for octave 2
-																																																																							if (id == "oct_C_2") {
-																																																																								inputHandler_.changeKeyCode(cdefKeyC_2,Key(shift,keyCode));
-																																																																							} else
-																																																																								if (id == "oct_CS2") {
-																																																																									inputHandler_.changeKeyCode(cdefKeyCS2,Key(shift,keyCode));
-																																																																								} else
-																																																																									if (id == "oct_D_2") {
-																																																																										inputHandler_.changeKeyCode(cdefKeyD_2,Key(shift,keyCode));
-																																																																									} else
-																																																																										if (id == "oct_DS2") {
-																																																																											inputHandler_.changeKeyCode(cdefKeyDS2,Key(shift,keyCode));
-																																																																										} else
-																																																																											if (id == "oct_E_2") {
-																																																																												inputHandler_.changeKeyCode(cdefKeyE_2,Key(shift,keyCode));
-																																																																											} else
-																																																																												if (id == "oct_F_2") {
-																																																																													inputHandler_.changeKeyCode(cdefKeyF_2,Key(shift,keyCode));
-																																																																												} else
-																																																																													if (id == "oct_FS2") {
-																																																																														inputHandler_.changeKeyCode(cdefKeyFS2,Key(shift,keyCode));
-																																																																													} else
-																																																																														if (id == "oct_G_2") {
-																																																																															inputHandler_.changeKeyCode(cdefKeyG_2,Key(shift,keyCode));
-																																																																														} else
-																																																																															if (id == "oct_GS2") {
-																																																																																inputHandler_.changeKeyCode(cdefKeyGS2,Key(shift,keyCode));
-																																																																															} else
-																																																																																if (id == "oct_A_2") {
-																																																																																	inputHandler_.changeKeyCode(cdefKeyA_2,Key(shift,keyCode));
-																																																																																}
-																																														} else
-																																															if (id == "key_stop") {
-																																																inputHandler_.changeKeyCode(cdefKeyStop,Key(shift,keyCode));
-																																															} else
-																																																if (id == "key_stop_current") {
-																																																	inputHandler_.changeKeyCode(cdefKeyStopAny,Key(shift,keyCode)); // not sure or key_stop ?
-																																																}if (id == "machine_info") {
-																																																	inputHandler_.changeKeyCode(cdefInfoMachine,Key(shift,keyCode));
-																																																} else
-																																																	if (id == "maximise_pattern_view") {
-																																																		inputHandler_.changeKeyCode(cdefMaxPattern,Key(shift,keyCode));
-																																																	} else
-																																																		if (id == "mcm_midi_cc") {
-																																																			inputHandler_.changeKeyCode(cdefMIDICC,Key(shift,keyCode));
-																																																		} else
-																																																			if (id == "nav_bottom") {
-																																																				inputHandler_.changeKeyCode(cdefNavBottom,Key(shift,keyCode));
-																																																			} else
-																																																				if (id == "nav_down") {
-																																																					inputHandler_.changeKeyCode(cdefNavDn,Key(shift,keyCode));
-																																																				} else
-																																																					if (id == "nav_down_16") {
-																																																						inputHandler_.changeKeyCode(cdefNavPageDn,Key(shift,keyCode));
-																																																					} else
-																																																						if (id == "nav_left") {
-																																																							inputHandler_.changeKeyCode(cdefNavLeft,Key(shift,keyCode));
-																																																						} else
-																																																							if (id == "nav_right") {
-																																																								inputHandler_.changeKeyCode(cdefNavRight,Key(shift,keyCode));
-																																																							} else
-																																																								if (id == "nav_top") {
-																																																									inputHandler_.changeKeyCode(cdefNavTop,Key(shift,keyCode));
-																																																								} else
-																																																									if (id == "nav_up") {
-																																																										inputHandler_.changeKeyCode(cdefNavUp,Key(shift,keyCode));
-																																																									} else
-																																																										if (id == "nav_up_16") {
-																																																											inputHandler_.changeKeyCode(cdefNavPageUp,Key(shift,keyCode));
-																																																										} else
-																																																											if (id == "nav_firsttrack") {
-																																																												inputHandler_.changeKeyCode(cdefNavFirstTrack,Key(shift,keyCode));
-																																																											} else
-																																																												if (id == "nav_lasttrack") {
-																																																													inputHandler_.changeKeyCode(cdefNavLastTrack,Key(shift,keyCode));
-																																																												} else
-																																																													if (id == "next_column") {
-																																																														inputHandler_.changeKeyCode(cdefColumnNext,Key(shift,keyCode));
-																																																													} else
-																																																														if (id == "pattern_copy") {
-																																																															inputHandler_.changeKeyCode(cdefPatternCopy,Key(shift,keyCode));
-																																																														} else
-																																																															if (id == "pattern_cut") {
-																																																																inputHandler_.changeKeyCode(cdefPatternCut,Key(shift,keyCode));
-																																																															} else
-																																																																if (id == "pattern_delete") {
-																																																																	inputHandler_.changeKeyCode(cdefPatternDelete,Key(shift,keyCode));
-																																																																} else
-																																																																	if (id == "pattern_info") {
-																																																																		inputHandler_.changeKeyCode(cdefInfoPattern,Key(shift,keyCode));
-																																																																	} else
-																																																																		if (id == "pattern_mix_paste") {
-																																																																			inputHandler_.changeKeyCode(cdefPatternMixPaste,Key(shift,keyCode));
-																																																																		} else
-																																																																			if (id == "pattern_paste") {
-																																																																				inputHandler_.changeKeyCode(cdefPatternPaste,Key(shift,keyCode));
-																																																																			} else
-																																																																				if (id == "pattern_track_mute") {
-																																																																					inputHandler_.changeKeyCode(cdefPatternTrackMute,Key(shift,keyCode));
-																																																																				} else
-																																																																					if (id == "pattern_track_record") {
-																																																																						inputHandler_.changeKeyCode(cdefPatternTrackRecord,Key(shift,keyCode));
-																																																																					} else
-																																																																						if (id == "pattern_track_solo") {
-																																																																							inputHandler_.changeKeyCode(cdefPatternTrackSolo,Key(shift,keyCode));
-																																																																						} else
-																																																																							if (id == "patternstep_dec") {
-																																																																								inputHandler_.changeKeyCode(cdefPatternstepDec,Key(shift,keyCode));
-																																																																							} else
-																																																																								if (id == "patternstep_inc") {
-																																																																									inputHandler_.changeKeyCode(cdefPatternstepInc,Key(shift,keyCode));
-																																																																								} else
-																																																																									if (id == "play_current_note") {
-																																																																										inputHandler_.changeKeyCode(cdefPlayFromPos,Key(shift,keyCode));
-																																																																									} else
-																																																																										if (id == "play_current_row") {
-																																																																											inputHandler_.changeKeyCode(cdefPlayRowTrack,Key(shift,keyCode));
-																																																																										} else
-																																																																											if (id == "play_sel_pattern_looped") {
-																																																																												inputHandler_.changeKeyCode(cdefKeyStopAny,Key(shift,keyCode));
-																																																																											} else
-																																																																												if (id == "play_song_current") {
-																																																																													inputHandler_.changeKeyCode(cdefPlayFromPos,Key(shift,keyCode));
-																																																																												} else
-																																																																													if (id == "play_song_start") {
-																																																																														inputHandler_.changeKeyCode(cdefPlayStart,Key(shift,keyCode));
-																																																																													} else
-																																																																														if (id == "play_song_normal") {
-																																																																															inputHandler_.changeKeyCode(cdefPlaySong,Key(shift,keyCode));
-																																																																														} else
-																																																																															if (id == "position+1") {
-																																																																																inputHandler_.changeKeyCode(cdefSongPosInc,Key(shift,keyCode));
-																																																																															} else
-																																																																																if (id == "position-1") {
-																																																																																	inputHandler_.changeKeyCode(cdefSongPosDec,Key(shift,keyCode));
-																																																																																} else
-																																																																																	if (id == "prev_column") {
-																																																																																		inputHandler_.changeKeyCode(cdefColumnPrev,Key(shift,keyCode));
-																																																																																	} else
-																																																																																		if (id == "row_skip+1") {
-																																																																																			//inputHandler_.changeKeyCode(cdefKeyStopAny,Key(mod,keyCode));
-																																																																																		} else
-																																																																																			if (id == "row_skip-1") {
-																																																																																				//inputHandler_.changeKeyCode(cdefKeyStopAny,Key(mod,keyCode));
-																																																																																			} else
-																																																																																				if (id == "screen_machines") {
-																																																																																					inputHandler_.changeKeyCode(cdefEditMachine,Key(shift,keyCode));
-																																																																																				} else
-																																																																																					if (id == "screen_patterns") {
-																																																																																						inputHandler_.changeKeyCode(cdefEditPattern,Key(shift,keyCode));
-																																																																																					} else
-																																																																																						if (id == "screen_sequencer") {
-																																																																																							inputHandler_.changeKeyCode(cdefEditSequence,Key(shift,keyCode));
-																																																																																						} else
-																																																																																							if (id == "select_mac_in_cursor") {
-																																																																																								//inputHandler_.changeKeyCode(cdefKeyStopAny,Key(mod,keyCode));
-																																																																																							} else
-																																																																																								if (id == "show_error_log") {
-																																																																																									//inputHandler_.changeKeyCode(cdefKeyStopAny,Key(mod,keyCode));
-																																																																																								} else
-																																																																																									if (id == "stop_playback") {
-																																																																																										inputHandler_.changeKeyCode(cdefPlayStop,Key(shift,keyCode));
-																																																																																									} else
-																																																																																										if (id == "toggle_edit_mode") {
-																																																																																											//inputHandler_.changeKeyCode(cdefKeyStopAny,Key(mod,keyCode));
-																																																																																										} else
-																																																																																											if (id == "toggle_follow_song") {
-																																																																																												//inputHandler_.changeKeyCode(cdefKeyStopAny,Key(mod,keyCode));
-																																																																																											} else
-																																																																																												if (id == "transpose_block+1") {
-																																																																																													inputHandler_.changeKeyCode(cdefTransposeBlockInc,Key(shift,keyCode));
-																																																																																												} else
-																																																																																													if (id == "transpose_block+12") {
-																																																																																														inputHandler_.changeKeyCode(cdefTransposeBlockInc12,Key(shift,keyCode));
-																																																																																													} else
-																																																																																														if (id == "transpose_block-1") {
-																																																																																															inputHandler_.changeKeyCode(cdefTransposeBlockDec,Key(shift,keyCode));
-																																																																																														} else
-																																																																																															if (id == "transpose_block-12") {
-																																																																																																inputHandler_.changeKeyCode(cdefTransposeBlockDec12,Key(shift,keyCode));
-																																																																																															} else
-																																																																																																if (id == "transpose_channel+1") {
-																																																																																																	inputHandler_.changeKeyCode(cdefTransposeChannelInc,Key(shift,keyCode));
-																																																																																																} else
-																																																																																																	if (id == "transpose_channel+12") {
-																																																																																																		inputHandler_.changeKeyCode(cdefTransposeChannelInc12,Key(shift,keyCode));
-																																																																																																	} else
-																																																																																																		if (id == "transpose_channel-1") {
-																																																																																																			inputHandler_.changeKeyCode(cdefTransposeChannelDec,Key(shift,keyCode));
-																																																																																																		} else
-																																																																																																			if (id == "transpose_channel-12") {
-																																																																																																				inputHandler_.changeKeyCode(cdefTransposeChannelDec12,Key(shift,keyCode));
-																																																																																																			} else
-																																																																																																				if (id == "tweak_parameter") {
-																																																																																																					inputHandler_.changeKeyCode(cdefTweakM,Key(shift,keyCode));
-																																																																																																				} else
-																																																																																																					if (id == "tweak_smooth_paramater") {
-																																																																																																						inputHandler_.changeKeyCode(cdefTweakS,Key(shift,keyCode));
-																																																																																																					} else if (id == "mute_machine") {
-																																																																																																						inputHandler_.changeKeyCode(cdefMuteMachine,Key(shift,keyCode));
-
-																																																																																																					} else if (id == "solo_machine") {
-																																																																																																						inputHandler_.changeKeyCode(cdefSoloMachine,Key(shift,keyCode));
-
-																																																																																																																																																																																																										}
-							}
-		}
-		
-		InputHandler & Configuration::inputHandler() {
-			return inputHandler_;
-		}*/
-
-	}
+}
 }

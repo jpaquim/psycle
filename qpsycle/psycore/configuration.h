@@ -81,6 +81,7 @@ namespace psy {
 			std::string ladspaPath_;
 
 			void setDefaults();
+			void configureKeyBindings();
 //			void setXmlDefaults();
 //			void onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName );
 //			void loadConfig( const std::string & path );

@@ -17,7 +17,6 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "machinegui.h"
 
  #include <QGraphicsScene>
  #include <QGraphicsSceneMouseEvent>
@@ -29,7 +28,10 @@
  #include <QAction>
  #include <iostream>
 
+#include "machinegui.h"
  #include "machineview.h"
+#include "psycore/global.h"
+#include "psycore/inputhandler.h"
 
  MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : machineView(macView)
@@ -110,44 +112,95 @@
 
 void MachineGui::keyPressEvent ( QKeyEvent * event )
 {
-    int key = event->key();
+    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
     int note;
-    switch (key) { // FIXME: shouldn't be hardcoded.
-        case Qt::Key_Z: // C_0
+    switch ( command ) { 
+        case psy::core::cdefKeyC_0:
             note = 1;
             break;
-        case Qt::Key_S: // CS_0
+        case psy::core::cdefKeyCS0:
             note = 2;
             break;
-        case Qt::Key_X: // D_0
+        case psy::core::cdefKeyD_0:
             note = 3;
             break;
-        case Qt::Key_D: // DS_0
+        case psy::core::cdefKeyDS0:
             note = 4;
             break;
-        case Qt::Key_C: // E_0
+        case psy::core::cdefKeyE_0:
             note = 5;
             break;
-        case Qt::Key_V: // F_0
+        case psy::core::cdefKeyF_0:
             note = 6;
             break;
-        case Qt::Key_G: // FS_0
+        case psy::core::cdefKeyFS0:
             note = 7;
             break;
-        case Qt::Key_B: // G_0
+        case psy::core::cdefKeyG_0:
             note = 8;
             break;
-        case Qt::Key_H: // GS_0
+        case psy::core::cdefKeyGS0:
             note = 9;
             break;
-        case Qt::Key_N: // A_0
+        case psy::core::cdefKeyA_0:
             note = 10;
             break;
-        case Qt::Key_J: // AS_0
+        case psy::core::cdefKeyAS0:
             note = 11;
             break;
-        case Qt::Key_M: // B_0
+        case psy::core::cdefKeyB_0: 
             note = 12;
+            break;
+        case psy::core::cdefKeyC_1:
+            note = 13;
+            break;
+        case psy::core::cdefKeyCS1:
+            note = 14;
+            break;
+        case psy::core::cdefKeyD_1:
+            note = 15;
+            break;
+        case psy::core::cdefKeyDS1:
+            note = 16;
+            break;
+        case psy::core::cdefKeyE_1:
+            note = 17;
+            break;
+        case psy::core::cdefKeyF_1:
+            note = 18;
+            break;
+        case psy::core::cdefKeyFS1:
+            note = 19;
+            break;
+        case psy::core::cdefKeyG_1:
+            note = 20;
+            break;
+        case psy::core::cdefKeyGS1:
+            note = 21;
+            break;
+        case psy::core::cdefKeyA_1:
+            note = 22;
+            break;
+        case psy::core::cdefKeyAS1:
+            note = 23;
+            break;
+        case psy::core::cdefKeyB_1: 
+            note = 24;
+            break;
+        case psy::core::cdefKeyC_2:
+            note = 25;
+            break;
+        case psy::core::cdefKeyCS2:
+            note = 26;
+            break;
+        case psy::core::cdefKeyD_2:
+            note = 27;
+            break;
+        case psy::core::cdefKeyDS2:
+            note = 28;
+            break;
+        case psy::core::cdefKeyE_2:
+            note = 29;
             break;
         default: 
             note = NULL;
