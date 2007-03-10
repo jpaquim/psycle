@@ -24,6 +24,9 @@
 #include <QObject>
 
 #include "psycore/patternsequence.h"
+#include "sequenceritem.h"
+
+class SequencerItem;
 
 class SequencerLine : public QGraphicsRectItem
 {
@@ -31,11 +34,14 @@ class SequencerLine : public QGraphicsRectItem
 public:
     SequencerLine();
 
+    void addItem( psy::core::SinglePattern* pattern );
+
     void setSequenceLine( psy::core::SequenceLine * line );
+    psy::core::SequenceLine *sequenceLine(); 
 
 private:
-
     psy::core::SequenceLine *seqLine_;
+    std::list<SequencerItem*> items_;
 };
 
 #endif

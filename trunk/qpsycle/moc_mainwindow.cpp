@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Sat Mar 10 16:00:24 2007
+** Created: Sat Mar 10 18:52:45 2007
 **      by: The Qt Meta Object Compiler version 59 (Qt 4.2.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-      13,   10, // methods
+      14,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -40,6 +40,7 @@ static const uint qt_meta_data_MainWindow[] = {
      237,  233,   11,   11, 0x08,
      269,  262,   11,   11, 0x08,
      301,   11,   11,   11, 0x08,
+     320,   11,   11,   11, 0x08,
 
        0        // eod
 };
@@ -51,6 +52,7 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "onPatternSelectedInPatternBox(psy::core::SinglePattern*)\0bus\0"
     "onNewMachineCreated(int)\0macGui\0onMachineGuiChosen(MachineGui*)\0"
     "onPatternDeleted()\0"
+    "onAddPatternToSequencerRequest(psy::core::SinglePattern*)\0"
 };
 
 const QMetaObject MainWindow::staticMetaObject = {
@@ -91,8 +93,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 10: onNewMachineCreated((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 11: onMachineGuiChosen((*reinterpret_cast< MachineGui*(*)>(_a[1]))); break;
         case 12: onPatternDeleted(); break;
+        case 13: onAddPatternToSequencerRequest((*reinterpret_cast< psy::core::SinglePattern*(*)>(_a[1]))); break;
         }
-        _id -= 13;
+        _id -= 14;
     }
     return _id;
 }

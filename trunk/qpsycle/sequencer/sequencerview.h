@@ -29,6 +29,8 @@
 #include "psycore/song.h"
 
 class SequencerArea;
+class SequencerLine;
+class SequencerItem;
 
  class SequencerView : public QGraphicsView
  {
@@ -39,6 +41,9 @@ class SequencerArea;
 
      psy::core::Song* song() { return song_; }
      int beatPxLength() const;
+     SequencerLine *selectedLine();
+
+    void addPattern( psy::core::SinglePattern *pattern );
 
  protected:
 

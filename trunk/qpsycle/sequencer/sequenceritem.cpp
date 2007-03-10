@@ -42,7 +42,7 @@ void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * 
 {
     painter->setPen( Qt::white ); 
     painter->setBrush( Qt::red ); 
-    painter->drawRect( boundingRect() );
+    painter->drawRect( boundingRect() ); // FIXME: need to take border width into account.
     painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
 }
 

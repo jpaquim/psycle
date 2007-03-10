@@ -116,6 +116,8 @@ void MainWindow::setupSignals()
              this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
     connect( patternBox_, SIGNAL( patternDeleted() ),
              this, SLOT( onPatternDeleted() ) );
+    connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ),
+             this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
 
     connect( macView_, SIGNAL( newMachineCreated( int ) ), 
              this, SLOT( onNewMachineCreated( int ) ) );
@@ -429,4 +431,11 @@ void MainWindow::onMachineGuiChosen( MachineGui *macGui )
 void MainWindow::onPatternDeleted()
 {
     patView_->setPattern( 0 );
+}
+
+void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern )
+{
+    std::cout << pattern->name() << std::endl;
+    seqView_->addPattern( pattern );
+//    SequenceLine selectedLine = seqView_->selectedLine();
 }
