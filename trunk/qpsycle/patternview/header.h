@@ -3,11 +3,11 @@
 
 #include <QGraphicsRectItem>
 
-#include "patternview.h"
+#include "patterndraw.h"
 
 class Header: public QGraphicsRectItem {
 public:
-    Header(PatternView* pPatternView);
+    Header(PatternDraw* pPatternDraw);
     ~Header();
 
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
@@ -17,7 +17,7 @@ public:
 private:
 
     int skinColWidth_;
-    PatternView* pView;
+    PatternDraw* pDraw;
 
 //    void onSoloLedClick( int track );
  //   void onMuteLedClick( int track );

@@ -26,19 +26,12 @@
 
 #include "psycore/patternsequence.h"
 
- SequencerLine::SequencerLine()
- {
-     setRect(QRectF(0, 0, 500, 30));
-     setPen(QPen(Qt::white,1));
-     setBrush(QBrush(Qt::transparent));
-
-  //   QGraphicsItemGroup *itemsGroup_ = new QGraphicsItemGroup( this );
- //   SequencerItem* item = new SequencerItem();
-//    itemsGroup_->addToGroup( item );
-/*    SequencerItem *item = new SequencerItem();
-    item->setParentItem( this );
-    item->setPos(0, 0);//, static_cast<int>( pattern->beats() * 5 ), 20 );*/
- }
+SequencerLine::SequencerLine()
+{
+    setRect(QRectF(0, 0, 500, 30));
+    setPen(QPen(Qt::white,1));
+    setBrush(QBrush(Qt::transparent));
+}
 
 void SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
 {

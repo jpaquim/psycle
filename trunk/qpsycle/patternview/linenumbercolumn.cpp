@@ -23,9 +23,9 @@
 
 #include "linenumbercolumn.h"
 
-LineNumberColumn::LineNumberColumn( PatternView *patView ) : dy_(0)
+LineNumberColumn::LineNumberColumn( PatternDraw *patDraw ) : dy_(0)
 {
-    patternView = patView;
+    patternDraw_ = patDraw;
 }
 
 LineNumberColumn::~ LineNumberColumn( )
@@ -34,7 +34,8 @@ LineNumberColumn::~ LineNumberColumn( )
 
 QRectF LineNumberColumn::boundingRect() const 
 {
-    return QRectF( 0, 0, 60, patternView->height() );
+    int height = patternDraw_->patternView()->height();
+    return QRectF( 0, 0, 60, height );
 }
 
 void LineNumberColumn::paint( QPainter *painter,
@@ -46,15 +47,16 @@ void LineNumberColumn::paint( QPainter *painter,
     QColor lineColor( Qt::black );
     QColor textColor( Qt::white );
 //    TimeSignature signature;
+    int ch = patternDraw()->patternView()->height();
+    int rowHeight = patternDraw()->patternView()->rowHeight();
     painter->setPen( QPen ( Qt::black ) );
-    painter->drawRect(0, 0, columnWidth, patternView->height() );
+    painter->drawRect(0, 0, columnWidth, ch );
 
-    int ch = patternView->height();
     
     // the start for whole repaint
-    int start    = dy_ / patternView->rowHeight();
+    int start    = dy_ / rowHeight;
     // the endline for whole repaint
-    int end     = (dy_ + ch) / (patternView->rowHeight());
+    int end     = (dy_ + ch) / (rowHeight);
 
     int startLine = start;
     int endLine   = end;
@@ -62,11 +64,11 @@ void LineNumberColumn::paint( QPainter *painter,
     for (int i = startLine; i <= endLine; i++)
     {
         painter->setPen( QPen ( lineColor ) );
-        painter->drawLine( 0, i*patternView->rowHeight() + headerHeight,
-                           columnWidth, i*patternView->rowHeight() + headerHeight );
+        painter->drawLine( 0, i*rowHeight + headerHeight,
+                           columnWidth, i*rowHeight + headerHeight );
 
         QString text = QString::number( i );
-        QRectF textBound( 0, i*patternView->rowHeight() + headerHeight, columnWidth-2, patternView->rowHeight() );
+        QRectF textBound( 0, i*rowHeight + headerHeight, columnWidth-2, rowHeight );
         painter->setPen( QPen ( textColor ) );
         painter->drawText( textBound, text, QTextOption( Qt::AlignRight ) );
    }

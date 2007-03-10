@@ -6,11 +6,11 @@
 #include <QFont>
 #include <QFontMetrics>
 
-#include "patternview.h"
+#include "patterndraw.h"
 
 #include <map>
 
-class PatternView;
+class PatternDraw;
 class TrackGeometry;
 class ColumnEvent;
 
@@ -45,7 +45,7 @@ private:
 class PatternGrid : public QGraphicsItem {
 
 public:
-    PatternGrid( PatternView *patView );
+    PatternGrid( PatternDraw *pDraw );
 
     QRectF boundingRect() const;
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
@@ -86,7 +86,7 @@ public slots:
 private:
     void setupTrackGeometrics( int numberOfTracks );
     void alignTracks();
-    PatternView *patView_;
+    PatternDraw *patDraw_;
     std::map<int, TrackGeometry> trackGeometryMap;
 
     std::vector<ColumnEvent> events_;

@@ -21,8 +21,7 @@
 #include <QtGui>
 
 #include "patternview.h"
-#include "patterngrid.h"
-#include "header.h"
+#include "patterndraw.h"
 
 #include "psycore/song.h"
 
@@ -32,28 +31,15 @@
  {
     song_ = song;
      setNumberOfTracks( 4 );
-     setAlignment( Qt::AlignLeft | Qt::AlignTop );
-     scene_ = new QGraphicsScene(this);
-     scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
-     //setSceneRect(0,0,width(),height());
-     setScene(scene_);
-     
-
-
-     lineNumCol_ = new LineNumberColumn( this );
-     Header *trackHeader = new Header( this );
-     patGrid_ = new PatternGrid( this );
-     trackHeader->setPos( 50, 0 );
-     scene_->addItem( lineNumCol_ );
-     scene_->addItem( trackHeader );
-     scene_->addItem( patGrid_ );
-     patGrid_->setPos( 50, 20 );
-
+    patDraw_ = new PatternDraw( this );
      setPattern( new psy::core::SinglePattern() );
 
     setSelectedMachineIndex( 255 ); // FIXME: why 255?
+    layout = new QVBoxLayout();
+    layout->addWidget( patDraw_ );
+    setLayout( layout );
     // Create the toolbar.
-    //     createToolBar();
+//    createToolBar();
  }
 
  void PatternView::createToolBar()
@@ -69,7 +55,7 @@
       toolBar_->addWidget(meterCbx_);
       toolBar_->addAction(delBarAct_);
 
-      layout->addWidget(toolBar_);
+//      layout->addWidget(toolBar_);
   }
 
 int PatternView::rowHeight( ) const
@@ -105,7 +91,7 @@ psy::core::SinglePattern * PatternView::pattern( )
 void PatternView::setPattern( psy::core::SinglePattern *pattern )
 {
     pattern_ = pattern;
-    patGrid_->update();
+    patDraw_->patternGrid()->update();
 }
 
 
@@ -135,3 +121,17 @@ int PatternView::selectedMachineIndex( ) const
     return selectedMacIdx_;
 }
 
+void PatternView::keyPressEvent( QKeyEvent *event )
+{
+/*    switch ( event->key() ) {
+        case Qt::Key_A:
+        {
+            float position = patternGrid()->cursor().line() / (float) pattern()->beatZoom();
+            pattern()->removeBar(position);
+            patternGrid()->update();
+        }
+        break;
+        default:
+            QGraphicsView::keyPressEvent( event );
+    }*/
+}

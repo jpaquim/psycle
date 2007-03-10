@@ -17,35 +17,30 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef LINENUMBERCOLUMN_H
-#define LINENUMBERCOLUMN_H
 
-#include <QGraphicsRectItem>
+#include <QtGui>
 
+#include "patternview.h"
 #include "patterndraw.h"
+#include "patterngrid.h"
+#include "header.h"
 
-class PatternDraw;
-class PatternView;
+#include "psycore/song.h"
 
-class LineNumberColumn : public QGraphicsRectItem {
-public:
-    LineNumberColumn( PatternDraw *patDraw );
-    ~LineNumberColumn();
-
-    void setDy( int dy );
-    int dy() const;
-
-    virtual int preferredWidth() const;
-    QRectF boundingRect() const;
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
-
-    PatternDraw *patternDraw() { return patternDraw_; }
-
-
-private:
-
-    PatternDraw *patternDraw_;
-    int dy_;
-};
-
-#endif
+ PatternDraw::PatternDraw( PatternView *patView )
+ {
+     patView_ = patView; 
+     setAlignment( Qt::AlignLeft | Qt::AlignTop );
+     scene_ = new QGraphicsScene(this);
+     scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
+     setScene(scene_);
+     
+     lineNumCol_ = new LineNumberColumn( this );
+     Header *trackHeader = new Header( this );
+     patGrid_ = new PatternGrid( this );
+     trackHeader->setPos( 50, 0 );
+     scene_->addItem( lineNumCol_ );
+     scene_->addItem( trackHeader );
+     scene_->addItem( patGrid_ );
+     patGrid_->setPos( 50, 20 );
+ }

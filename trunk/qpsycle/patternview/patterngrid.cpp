@@ -22,11 +22,11 @@ int d2i(double d)
 
 
 
-PatternGrid::PatternGrid( PatternView *pView )
-    : patView_( pView )
+PatternGrid::PatternGrid( PatternDraw *pDraw )
+    : patDraw_( pDraw )
 {
     setFlag(ItemIsFocusable);
-    setupTrackGeometrics( patView_->numberOfTracks() );
+    setupTrackGeometrics( patDraw_->patternView()->numberOfTracks() );
 
     addEvent( ColumnEvent::note );
     addEvent( ColumnEvent::hex2 );
@@ -57,12 +57,12 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
     font_ = QFont( "courier", 12 );
     setFont( font_ );
     painter->setFont( font_ ); 
-        if ( patView_->pattern() ) {
+        if ( patDraw_->patternView()->pattern() ) {
     //        TimeSignature signature;
-            int numberOfTracks = patView_->numberOfTracks();
-            int trackWidth = patView_->trackWidth();
-            int numberOfLines = patView_->numberOfLines();
-            int rowHeight = patView_->rowHeight();
+            int numberOfTracks = patDraw_->patternView()->numberOfTracks();
+            int trackWidth = patDraw_->patternView()->trackWidth();
+            int numberOfLines = patDraw_->patternView()->numberOfLines();
+            int rowHeight = patDraw_->patternView()->rowHeight();
 
             int startLine = 0; 
             int endLine = numberOfLines - 1;
@@ -106,7 +106,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
         gridWidth = it->second.left() + it->second.width();
     }
 
-    int gridHeight = ( (endLine+1) * patView_->rowHeight() );
+    int gridHeight = ( (endLine+1) * patDraw_->patternView()->rowHeight() );
 
     // Draw horizontal lines to demarcate the pattern lines.
     if ( lineGridEnabled() ) {
@@ -145,10 +145,10 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack )
 {
     // do we have a pattern ?
-    if ( patView_->pattern() ) {
+    if ( patDraw_->patternView()->pattern() ) {
         drawCellBg( painter, cursor()  );
         // find start iterator
-        psy::core::SinglePattern::iterator it = patView_->pattern()->find_lower_nearest(startLine);
+        psy::core::SinglePattern::iterator it = patDraw_->patternView()->pattern()->find_lower_nearest(startLine);
     //    TimeSignature signature;
 
 
@@ -158,8 +158,8 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
         for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
-            if ( it != patView_->pattern()->end() )	{
-                int liney = d2i (it->first * patView_->pattern()->beatZoom());
+            if ( it != patDraw_->patternView()->pattern()->end() )	{
+                int liney = d2i (it->first * patDraw_->patternView()->pattern()->beatZoom());
                 if (liney == curLinenum ) {
                     line = &it->second;
                     it++;
@@ -452,12 +452,12 @@ const std::map<int, TrackGeometry> & PatternGrid::trackGeometrics() const {
 
 int PatternGrid::trackWidth() const
 {
-    return patView_->trackWidth();
+    return patDraw_->patternView()->trackWidth();
 }
 
 int PatternGrid::lineHeight() const
 {
-    return patView_->rowHeight();
+    return patDraw_->patternView()->rowHeight();
 }
 
 bool PatternGrid::lineGridEnabled() const
@@ -497,7 +497,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         } else
             if (note >=0 && note < 120) {
     //            pView->undoManager().addUndo( cursor() );
-                patView_->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
+                patDraw_->patternView()->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
                 moveCursor(0,1);
      //           pView->checkDownScroll( cursor() );
             }
@@ -584,7 +584,7 @@ void PatternGrid::moveCursor( int dx, int dy) {
                     cursor_.setCol( 0 );
                     cursor_.setEventNr( eventnr + 1);
                 } else 
-                    if (cursor_.track()+1 < patView_->numberOfTracks() ) {
+                    if (cursor_.track()+1 < patDraw_->patternView()->numberOfTracks() ) {
                         cursor_.setTrack( cursor_.track() + 1 );
                         cursor_.setEventNr(0);
                         cursor_.setCol(0);
@@ -612,7 +612,7 @@ void PatternGrid::moveCursor( int dx, int dy) {
         }
 
         if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
-            cursor_.setLine( std::min(cursor_.line() + dy, patView_->numberOfLines()-1));
+            cursor_.setLine( std::min(cursor_.line() + dy, patDraw_->patternView()->numberOfLines()-1));
 //            window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
 //            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
         } else if (dy!=0) {

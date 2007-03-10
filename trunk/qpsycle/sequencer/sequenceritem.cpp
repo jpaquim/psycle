@@ -28,10 +28,11 @@
 
  #include "sequencerview.h"
 
- SequencerItem::SequencerItem()
- {
-     setFlag(ItemIsMovable);
- }
+SequencerItem::SequencerItem()
+{
+    setFlag( ItemIsMovable );
+    setFlag( ItemIsSelectable );
+}
 
 QRectF SequencerItem::boundingRect() const
 {
