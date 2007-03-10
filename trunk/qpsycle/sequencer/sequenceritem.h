@@ -22,7 +22,10 @@
 
 #include <QGraphicsItem>
 #include <QObject>
+
 #include "sequencerview.h"
+
+#include "psycore/patternsequence.h"
 
  class SequencerItem : public QGraphicsRectItem
  {
@@ -30,7 +33,12 @@
  public:
      SequencerItem();
 
+    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+
+     void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
+
  private:
+    psy::core::SequenceEntry *sequenceEntry_;
  };
 
 #endif
