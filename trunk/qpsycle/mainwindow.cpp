@@ -53,6 +53,7 @@ MainWindow::MainWindow()
     patternBox_->populatePatternTree(); // FIXME: here because of bad design?
     populateMachineCombo();
     initSampleCombo();
+    patternBox_->patternTree()->setFocus();
 }
 
 void MainWindow::setupSong()
