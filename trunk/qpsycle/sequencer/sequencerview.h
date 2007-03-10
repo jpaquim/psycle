@@ -38,6 +38,7 @@ class SequencerArea;
      SequencerView( psy::core::Song *song );
 
      psy::core::Song* song() { return song_; }
+     int beatPxLength() const;
 
  protected:
 
@@ -49,6 +50,8 @@ class SequencerArea;
 
     SequencerLine *lastLine_;
     SequencerLine *selectedLine_;
+
+    int beatPxLength_;
 
  };
 
