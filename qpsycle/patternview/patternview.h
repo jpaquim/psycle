@@ -20,10 +20,10 @@
  #ifndef PATTERNVIEW_H
  #define PATTERNVIEW_H
 
- #include <QGraphicsView>
- #include <QGraphicsScene>
+ #include <QVBoxLayout>
 
  #include "linenumbercolumn.h"
+#include "patterndraw.h"
 #include "patterngrid.h"
  #include "psycore/song.h"
  #include "psycore/singlepattern.h"
@@ -34,10 +34,11 @@
  class QAction;
 
  class LineNumberColumn;
+ class PatternDraw;
  class PatternGrid;
  class PatCursor;
 
- class PatternView : public QGraphicsView
+ class PatternView : public QWidget
  {
      Q_OBJECT
 
@@ -54,26 +55,23 @@
      psy::core::SinglePattern *pattern();
 
      void enterNote( const PatCursor & cursor, int note );
+    void keyPressEvent( QKeyEvent *event );
 
     void setSelectedMachineIndex( int idx );
     int selectedMachineIndex() const;
 
-    PatternGrid* patternGrid() { return patGrid_; }
+    PatternDraw* patDraw() { return patDraw_; }
 
 
  private:
     void createToolBar();
+    PatternDraw *patDraw_;
+    psy::core::SinglePattern* pattern_;
 
     psy::core::Song *song_;
 
-    QGraphicsScene *scene_;
-
-    LineNumberColumn *lineNumCol_;
-    PatternGrid *patGrid_;
-    psy::core::SinglePattern *pattern_;
-
     int numberOfTracks_;
-    QGridLayout *layout;
+    QVBoxLayout *layout;
 
     QToolBar *toolBar_;
     QComboBox *meterCbx_;

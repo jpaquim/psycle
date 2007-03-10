@@ -283,8 +283,8 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         case psy::core::cdefShowPatternView:
             views_->setCurrentWidget( patView_ );        
-            patView_->setFocus();
-            patView_->scene()->setFocusItem( patView_->patternGrid() );
+            patView_->patDraw()->setFocus();
+           patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
         break;
         case psy::core::cdefShowWaveEditor:
             views_->setCurrentWidget( wavView_ );        

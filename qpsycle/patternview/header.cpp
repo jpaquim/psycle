@@ -1,8 +1,8 @@
 #include "header.h"
 
-Header::Header( PatternView * pPatternView ) : pView(pPatternView)
+Header::Header( PatternDraw * pPatternDraw ) : pDraw(pPatternDraw)
 {
-    setRect( 0, 0, pView->width(), 20 );
+    setRect( 0, 0, pDraw->patternView()->width(), 20 );
 }
 
 Header::~ Header( )
@@ -13,11 +13,11 @@ void Header::paint( QPainter *painter,
                     const QStyleOptionGraphicsItem *option,
                     QWidget *widget )
 {
-    painter->drawRect( 0, 0, pView->width(), 20 );
+    painter->drawRect( 0, 0, pDraw->patternView()->width(), 20 );
 
-    int trackWidth = pView->trackWidth();
+    int trackWidth = pDraw->patternView()->trackWidth();
     int trackHeight = 20;
-    int numTracks = pView->numberOfTracks();
+    int numTracks = pDraw->patternView()->numberOfTracks();
 
     for ( int i = 0; i < numTracks; i++ )
     {
@@ -39,14 +39,14 @@ void Header::paint( QPainter *painter,
     ngrs::Bitmap & bitmap = icons.pattern_header_skin();
     ngrs::Bitmap & patNav = icons.patNav();
 
-    int startTrack = pView->drawArea->findTrackByScreenX( scrollDx() );
+    int startTrack = pDraw->patternView()->drawArea->findTrackByScreenX( scrollDx() );
 
-    g.setForeground(pView->separatorColor());
+    g.setForeground(pDraw->patternView()->separatorColor());
 
     std::map<int, TrackGeometry>::const_iterator it;
-    it = pView->trackGeometrics().lower_bound( startTrack );
+    it = pDraw->patternView()->trackGeometrics().lower_bound( startTrack );
 
-    for ( ; it != pView->trackGeometrics().end() && it->first <= pView->trackNumber() - 1; it++) {
+    for ( ; it != pDraw->patternView()->trackGeometrics().end() && it->first <= pDraw->patternView()->trackNumber() - 1; it++) {
         const TrackGeometry & trackGeometry = it->second;
 
         const int trackX0 = it->first / 10;
@@ -64,19 +64,19 @@ void Header::paint( QPainter *painter,
                 track0X*coords_.noCoords.width(), coords_.noCoords.top());
 
             // blit the mute LED
-            if (  pView->pSong()->_trackMuted[it->first]) {
+            if (  pDraw->patternView()->pSong()->_trackMuted[it->first]) {
                 g.putBitmap(xOffc+coords_.dMuteCoords.x(),0+coords_.dMuteCoords.y(),coords_.sMuteCoords.width(),coords_.sMuteCoords.height(), bitmap,
                     coords_.sMuteCoords.left(), coords_.sMuteCoords.top());
             }
 
             // blit the solo LED
-            if ( pView->pSong()->_trackSoloed == it->first) {
+            if ( pDraw->patternView()->pSong()->_trackSoloed == it->first) {
                 g.putBitmap(xOffc+coords_.dSoloCoords.x(),0+coords_.dSoloCoords.y(),coords_.sSoloCoords.width(),coords_.sSoloCoords.height(), bitmap,
                     coords_.sSoloCoords.left(), coords_.sSoloCoords.top());
             }
 
             // blit the record LED
-            if ( pView->pSong()->_trackArmed[it->first]) {
+            if ( pDraw->patternView()->pSong()->_trackArmed[it->first]) {
                 g.putBitmap(xOffc+coords_.dRecCoords.x(),0+coords_.dRecCoords.y(),coords_.sRecCoords.width(),coords_.sRecCoords.height(), bitmap,
                     coords_.sRecCoords.left(), coords_.sRecCoords.top());
             }
@@ -95,13 +95,13 @@ void Header::paint( QPainter *painter,
     if (button == 1)
     {
         // determine the track column, the mousepress occured on
-        int track = pView->drawArea->findTrackByScreenX( x );
+        int track = pDraw->patternView()->drawArea->findTrackByScreenX( x );
 
         // find out the start offset of the header bitmap
         ngrs::Bitmap & patNav = icons.patNav();
-        ngrs::Point off( patNav.width()+ pView->drawArea->xOffByTrack( track ) + (pView->drawArea->trackWidth( track ) - patNav.width() - skinColWidth()) / 2,0);
+        ngrs::Point off( patNav.width()+ pDraw->patternView()->drawArea->xOffByTrack( track ) + (pDraw->patternView()->drawArea->trackWidth( track ) - patNav.width() - skinColWidth()) / 2,0);
         // find out the start offset of the nav buttons
-        ngrs::Point navOff( pView->drawArea->xOffByTrack( track ),0); 
+        ngrs::Point navOff( pDraw->patternView()->drawArea->xOffByTrack( track ),0); 
 
         ngrs::Rect decCol( navOff.x() , navOff.y(), 10, patNav.height() );
         ngrs::Rect incCol( navOff.x() +10, navOff.y(), 10, patNav.height() );
@@ -111,25 +111,25 @@ void Header::paint( QPainter *painter,
         ngrs::Rect solo(off.x() + coords_.dSoloCoords.x(), off.y() + coords_.dSoloCoords.y(), coords_.sSoloCoords.width(), coords_.sSoloCoords.height());
 
         std::map<int, TrackGeometry>::const_iterator it;
-        it = pView->trackGeometrics().lower_bound( track );
+        it = pDraw->patternView()->trackGeometrics().lower_bound( track );
 
         if (incCol.intersects(x,y)) {
-            int visibleEvents = pView->drawArea->visibleEvents( track );
-            pView->drawArea->setVisibleEvents( track,  visibleEvents +1);
-            pView->updateRange();
-            pView->repaint();
+            int visibleEvents = pDraw->patternView()->drawArea->visibleEvents( track );
+            pDraw->patternView()->drawArea->setVisibleEvents( track,  visibleEvents +1);
+            pDraw->patternView()->updateRange();
+            pDraw->patternView()->repaint();
         } else 
             if (decCol.intersects(x,y)) {
-                int visibleEvents = pView->drawArea->visibleEvents( track );
-                pView->drawArea->setVisibleEvents( track, std::max(1,visibleEvents -1));
-                pView->updateRange();
-                pView->repaint();
+                int visibleEvents = pDraw->patternView()->drawArea->visibleEvents( track );
+                pDraw->patternView()->drawArea->setVisibleEvents( track, std::max(1,visibleEvents -1));
+                pDraw->patternView()->updateRange();
+                pDraw->patternView()->repaint();
             } else
                 if (xCol.intersects(x,y)) {
-                    int visibleEvents = pView->drawArea->visibleEvents( track );
-                    pView->drawArea->setVisibleEvents( track, 1);
-                    pView->updateRange();
-                    pView->repaint();
+                    int visibleEvents = pDraw->patternView()->drawArea->visibleEvents( track );
+                    pDraw->patternView()->drawArea->setVisibleEvents( track, 1);
+                    pDraw->patternView()->updateRange();
+                    pDraw->patternView()->repaint();
                 }
 
                 // now check point intersection for solo
@@ -156,38 +156,38 @@ void Header::paint( QPainter *painter,
 
 void Header::onSoloLedClick( int track )
 {
-    if ( pView->pSong()->_trackSoloed != track )
+    if ( pDraw->patternView()->pSong()->_trackSoloed != track )
     {
         for ( int i=0;i<MAX_TRACKS;i++ ) {
-            pView->pSong()->_trackMuted[i] = true;
+            pDraw->patternView()->pSong()->_trackMuted[i] = true;
         }
-        pView->pSong()->_trackMuted[track] = false;
-        pView->pSong()->_trackSoloed = track;
+        pDraw->patternView()->pSong()->_trackMuted[track] = false;
+        pDraw->patternView()->pSong()->_trackSoloed = track;
     }
     else
     {
         for ( int i=0;i<MAX_TRACKS;i++ )
         {
-            pView->pSong()->_trackMuted[i] = false;
+            pDraw->patternView()->pSong()->_trackMuted[i] = false;
         }
-        pView->pSong()->_trackSoloed = -1;
+        pDraw->patternView()->pSong()->_trackSoloed = -1;
     }
     repaint();
 }
 
 void Header::onMuteLedClick( int track )
 {
-    pView->pSong()->_trackMuted[track] = !(pView->pSong()->_trackMuted[track]);
+    pDraw->patternView()->pSong()->_trackMuted[track] = !(pDraw->patternView()->pSong()->_trackMuted[track]);
     repaint();
 }
 
 void Header::onRecLedClick(int track) {
-    pView->pSong()->_trackArmed[track] = ! pView->pSong()->_trackArmed[track];
-    pView->pSong()->_trackArmedCount = 0;
+    pDraw->patternView()->pSong()->_trackArmed[track] = ! pDraw->patternView()->pSong()->_trackArmed[track];
+    pDraw->patternView()->pSong()->_trackArmedCount = 0;
     for ( int i=0;i<MAX_TRACKS;i++ ) {
-        if ( pView->pSong()->_trackArmed[i] )
+        if ( pDraw->patternView()->pSong()->_trackArmed[i] )
         {
-            pView->pSong()->_trackArmedCount++;
+            pDraw->patternView()->pSong()->_trackArmedCount++;
         }
     }
     repaint();

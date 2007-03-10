@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 by  Neil Mather   *
+*   Copyright (C) 2006 by  Neil Mather   *
 *   nmather@sourceforge   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -17,35 +17,45 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef LINENUMBERCOLUMN_H
-#define LINENUMBERCOLUMN_H
+ #ifndef PATTERNDRAW_H
+ #define PATTERNDRAW_H
 
-#include <QGraphicsRectItem>
+ #include <QGraphicsView>
+ #include <QGraphicsScene>
 
-#include "patterndraw.h"
+ #include "linenumbercolumn.h"
+#include "patterngrid.h"
+#include "patternview.h"
+ #include "psycore/song.h"
+ #include "psycore/singlepattern.h"
 
-class PatternDraw;
-class PatternView;
+ class QToolBar;
+ class QComboBox;
+ class QGridLayout;
+ class QAction;
 
-class LineNumberColumn : public QGraphicsRectItem {
-public:
-    LineNumberColumn( PatternDraw *patDraw );
-    ~LineNumberColumn();
+ class LineNumberColumn;
+ class PatternGrid;
+ class PatCursor;
+ class PatternView;
 
-    void setDy( int dy );
-    int dy() const;
+ class PatternDraw : public QGraphicsView
+ {
+     Q_OBJECT
 
-    virtual int preferredWidth() const;
-    QRectF boundingRect() const;
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+ public:
+     PatternDraw( PatternView *patView );
 
-    PatternDraw *patternDraw() { return patternDraw_; }
+     PatternView *patternView() { return patView_; }
+     PatternGrid *patternGrid() { return patGrid_; }
 
+ private:
+    QGraphicsScene *scene_;
+    PatternView *patView_;
 
-private:
+    LineNumberColumn *lineNumCol_;
+    PatternGrid *patGrid_;
+    psy::core::SinglePattern *pattern_;
+ };
 
-    PatternDraw *patternDraw_;
-    int dy_;
-};
-
-#endif
+ #endif
