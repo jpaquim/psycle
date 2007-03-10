@@ -45,11 +45,16 @@
 
     seqArea_ = new SequencerArea( this );
 
+    bool isFirst = true;
     std::vector<psy::core::SequenceLine*>::iterator it = song()->patternSequence()->begin();
     for ( ; it < song()->patternSequence()->end(); it++) {
         psy::core::SequenceLine* seqLine = *it;
         SequencerLine* line = new SequencerLine();
         line->setParentItem( seqArea_ );
+        if (isFirst) {
+            selectedLine_ = line;
+            isFirst = false;
+        }
         //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
  //       lines.push_back(line);
         line->setSequenceLine( seqLine );
@@ -81,3 +86,14 @@ int SequencerView::beatPxLength( ) const
     return beatPxLength_;
 }
 
+SequencerLine* SequencerView::selectedLine() 
+{
+    return selectedLine_;
+}
+
+void SequencerView::addPattern( psy::core::SinglePattern *pattern )
+{
+    if ( selectedLine() ) {
+        selectedLine()->addItem( pattern );
+    }
+}

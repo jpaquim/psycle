@@ -22,6 +22,8 @@
 #include "sequencerview.h"
 #include "sequenceritem.h"
 
+#include <QGraphicsScene>
+
 #include "psycore/patternsequence.h"
 
  SequencerLine::SequencerLine()
@@ -29,10 +31,36 @@
      setRect(QRectF(0, 0, 500, 30));
      setPen(QPen(Qt::white,1));
      setBrush(QBrush(Qt::transparent));
+
+  //   QGraphicsItemGroup *itemsGroup_ = new QGraphicsItemGroup( this );
+ //   SequencerItem* item = new SequencerItem();
+//    itemsGroup_->addToGroup( item );
+/*    SequencerItem *item = new SequencerItem();
+    item->setParentItem( this );
+    item->setPos(0, 0);//, static_cast<int>( pattern->beats() * 5 ), 20 );*/
  }
 
 void SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
 {
     seqLine_ = line;
+}
+
+psy::core::SequenceLine *SequencerLine::sequenceLine() 
+{
+    return seqLine_;
+}
+
+void SequencerLine::addItem( psy::core::SinglePattern* pattern )
+{
+    double endTick = sequenceLine()->tickLength();
+
+    SequencerItem *item = new SequencerItem();
+    item->setSequenceEntry( sequenceLine()->createEntry(pattern, endTick) );
+    scene()->addItem( item );
+    item->setParentItem( this );
+    item->setPos(5 * endTick, 0);//, static_cast<int>( pattern->beats() * 5 ), 20 );
+//    item->click.connect(this,&SequencerGUI::SequencerLine::onSequencerItemClick);
+    //item->setPos(200, /*sView->beatPxLength() * endTick)*/, 5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
+//    itemsGroup_->addToGroup( item );
 }
 

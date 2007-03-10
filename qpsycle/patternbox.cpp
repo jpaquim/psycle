@@ -164,7 +164,18 @@ void PatternBox::deletePattern()
     }
 }
 
- void PatternBox::addPatternToSequencer() { }
+void PatternBox::addPatternToSequencer() 
+{ 
+    QTreeWidgetItem* item = patternTree()->currentItem();
+    if ( item ) {
+        std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( item );
+        if ( itr!=patternMap.end() ) {
+            psy::core::SinglePattern *pattern = itr->second;
+            emit addPatternToSequencerRequest( pattern );
+        }
+    }
+}
+
 
  void PatternBox::createActions()
  {

@@ -61,6 +61,7 @@
     void onNewMachineCreated( int bus );
     void onMachineGuiChosen( MachineGui *macGui );
     void onPatternDeleted();
+    void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
 
  private:
     psy::core::Song *song_;
