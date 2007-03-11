@@ -70,7 +70,6 @@
         if (tmac) for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
         {
             if (tmac->_connection[w]) {
-                    std::cout << "hi" << std::endl;
                 MachineGui* srcMacGui = findByMachine(tmac);
                 if ( srcMacGui!=0 ) {
                     psy::core::Machine *pout = song_->_pMachine[tmac->_outputMachines[w]];
