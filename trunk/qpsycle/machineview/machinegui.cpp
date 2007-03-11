@@ -29,7 +29,7 @@
  #include <iostream>
 
 #include "machinegui.h"
- #include "machineview.h"
+#include "machineview.h"
 #include "psycore/global.h"
 #include "psycore/inputhandler.h"
 
@@ -66,12 +66,13 @@
 
  void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
  {
+    // FIXME: not a good idea to do anything intensive in the paint method...
     if ( this == machineView->theChosenOne() ) {
-        setPen( QPen( Qt::red ) );
+        painter->setPen( QPen( Qt::red ) );
     }
     // Do the default painting business for a QGRectItem.
     QGraphicsRectItem::paint( painter, option, widget );
-    setPen( QPen( Qt::white ) );
+    painter->setPen( QPen( Qt::white ) );
  }
 
  void MachineGui::setName(const QString &name)
