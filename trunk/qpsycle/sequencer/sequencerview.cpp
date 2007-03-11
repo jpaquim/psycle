@@ -32,6 +32,7 @@ SequencerView::SequencerView( psy::core::Song *asong )
 
     seqDraw_ = new SequencerDraw( this );
     toolBar_ = new QToolBar();
+    toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
     toolBar_->addAction( "Insert Track" );
     toolBar_->addAction( "Delete Track" );
     toolBar_->addAction( "Move Track Down" );
