@@ -78,6 +78,8 @@ int visibleEvents( int track ) const;
 const QFont & font() const;
 void setFont( QFont font );
 
+int beatZoom() const;
+
 
 public slots:
     void keyPressEvent( QKeyEvent *event );

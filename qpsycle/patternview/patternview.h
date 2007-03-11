@@ -61,6 +61,7 @@
     int selectedMachineIndex() const;
 
     PatternDraw* patDraw() { return patDraw_; }
+    int beatZoom() const;
 
 
  private:

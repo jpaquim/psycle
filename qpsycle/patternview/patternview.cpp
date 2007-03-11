@@ -126,7 +126,7 @@ void PatternView::keyPressEvent( QKeyEvent *event )
 /*    switch ( event->key() ) {
         case Qt::Key_A:
         {
-            float position = patternGrid()->cursor().line() / (float) pattern()->beatZoom();
+            float position = patternGrid()->cursor().line() / (float) beatZoom();
             pattern()->removeBar(position);
             patternGrid()->update();
         }
@@ -135,3 +135,12 @@ void PatternView::keyPressEvent( QKeyEvent *event )
             QGraphicsView::keyPressEvent( event );
     }*/
 }
+
+int PatternView::beatZoom( ) const
+{
+    if ( pattern_ )
+        return pattern_->beatZoom();
+    else
+        return 4;
+}
+
