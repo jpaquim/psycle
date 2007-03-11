@@ -64,6 +64,9 @@ void MainWindow::setupSong()
 
     psy::core::SequenceLine *seqLine = song_->patternSequence()->createNewLine();
 	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
+
+    psy::core::SequenceLine *seqLine1 = song_->patternSequence()->createNewLine();
+	psy::core::SequenceEntry *seqEntry1 = seqLine1->createEntry( pattern0, 0 );
 }
 
 void MainWindow::setupSound() 
