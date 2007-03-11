@@ -1,6 +1,7 @@
 #include "patterngrid.h"
 #include "psycore/singlepattern.h"
 #include "psycore/global.h"
+#include "psycore/player.h"
 
 #include <iostream>
 #include <iomanip>
@@ -58,7 +59,6 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
     setFont( font_ );
     painter->setFont( font_ ); 
         if ( patDraw_->patternView()->pattern() ) {
-    //        TimeSignature signature;
             int numberOfTracks = patDraw_->patternView()->numberOfTracks();
             int trackWidth = patDraw_->patternView()->trackWidth();
             int numberOfLines = patDraw_->patternView()->numberOfLines();
@@ -68,7 +68,8 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
             int endLine = numberOfLines - 1;
             int startTrack = 0;
             int endTrack = numberOfTracks - 1;
-            std::cout << "num track" << numberOfTracks - 1 << std::endl;
+
+
             //drawSelBg(g,selection());
 
 
@@ -99,6 +100,8 @@ int PatternGrid::gridWidthByTrack( int track ) const
  */
 void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  ) 
 {
+    psy::core::TimeSignature signature;
+
     std::map<int, TrackGeometry>::const_iterator it;
     it = trackGeometrics().lower_bound( endTrack );
     int gridWidth = 0;
@@ -106,7 +109,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
         gridWidth = it->second.left() + it->second.width();
     }
 
-    int gridHeight = ( (endLine+1) * patDraw_->patternView()->rowHeight() );
+    int gridHeight = ( (endLine+1) * lineHeight() );
 
     // Draw horizontal lines to demarcate the pattern lines.
     if ( lineGridEnabled() ) {
@@ -114,6 +117,37 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
         for (int y = startLine; y <= endLine; y++)
             painter->drawLine( 0, y * lineHeight(), gridWidth, y* lineHeight() );
     }
+    for (int y = startLine; y <= endLine; y++) {
+        float position = y / (float) beatZoom();
+        if (!(true/*y == patDraw_->pView->playPos()*/) || !psy::core::Player::Instance()->playing() ) {
+            if ( !(y % beatZoom())) {
+                if ((patDraw_->patternView()->pattern()->barStart(position, signature) )) {
+
+                    painter->setBrush( Qt::blue );//g.setForeground( barColor() );
+                    painter->drawRect( 0, y*lineHeight() /*- dy()*/, gridWidth, lineHeight());
+
+/*                    if ( y >= selection().top() && y < selection().bottom()) {
+                        int left  = xOffByTrack( selection().left() );
+                        int right = xOffByTrack( selection().right() );
+                        g.setForeground( pView->colorInfo().sel_bar_bg_color );
+                        g.fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
+                    }*/
+
+                } else {
+                    painter->setBrush( Qt::red );//g.setForeground( beatColor() );
+                    painter->drawRect( 0, y* lineHeight() /*- dy()*/, gridWidth, lineHeight() );
+
+                    /*if ( y >= selection().top() && y < selection().bottom()) {
+                        int left  = xOffByTrack( selection().left() );
+                        int right = xOffByTrack( selection().right() );
+                        g.setForeground( pView->colorInfo().sel_beat_bg_color );
+                        g.fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
+                    }*/
+                }
+            }
+        }
+    }
+
 
     // Draw the vertical track separators.
     painter->setPen( Qt::gray );
@@ -149,7 +183,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
         drawCellBg( painter, cursor()  );
         // find start iterator
         psy::core::SinglePattern::iterator it = patDraw_->patternView()->pattern()->find_lower_nearest(startLine);
-    //    TimeSignature signature;
+        psy::core::TimeSignature signature;
 
 
         int lastLinenum = -1;
@@ -159,7 +193,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
         for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
             if ( it != patDraw_->patternView()->pattern()->end() )	{
-                int liney = d2i (it->first * patDraw_->patternView()->pattern()->beatZoom());
+                int liney = d2i (it->first * beatZoom() );
                 if (liney == curLinenum ) {
                     line = &it->second;
                     it++;
@@ -173,14 +207,14 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
                 bool onBeat = false;
                 bool onBar  = false;
-/*                if ( !(curLinenum % beatZoom())) {
-                    if (  it != patView_->pattern_->end() && pView->pattern()->barStart(it->first, signature) ) {
-                        tColor = barColor();
+                if ( !(curLinenum % beatZoom())) {
+                    if (  it != patDraw_->patternView()->pattern()->end() && patDraw_->patternView()->pattern()->barStart(it->first, signature) ) {
+                        tColor = QColor( Qt::green );/*barColor()*/;
                     } else {
                         onBeat = true;
-                        tColor = beatTextColor();
+                        tColor = QColor( Qt::red );/*beatTextColor()*/;
                     }
-                }*/
+                }
 
                 // Check if this line is currently being played.
 /*                if ((curLinenum == patView_->playPos() && Player::Instance()->playing() ) ) {
@@ -634,6 +668,11 @@ int PatternGrid::visibleEvents( int track ) const
 
 const QFont & PatternGrid::font() const { return font_; }
 void PatternGrid::setFont( QFont font ) { font_ = font; };
+
+int PatternGrid::beatZoom() const {
+    return patDraw_->patternView()->beatZoom();
+}
+
 
 
 
