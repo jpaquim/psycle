@@ -40,6 +40,21 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     addEvent( ColumnEvent::hex4 );
     addEvent( ColumnEvent::hex4 );
     // end of multi paraCmd
+    
+    // FIXME: hardcoding these for now.
+     textColor_ = QColor( 255, 255, 255 );
+     separatorColor_ = QColor( 145, 147, 147 );
+     selectionColor_ = QColor( 149, 68, 41 );
+     cursorColor_ = QColor( 179, 217, 34 );
+     cursorTextColor_ = QColor( 0, 0, 0 );
+     barColor_ = QColor( 70, 71, 69 );
+     beatColor_ = QColor( 50, 51, 49 );
+     beatTextColor_ = QColor( 199, 199, 199 );
+     playBarColor_ = QColor( 182, 121, 88 );
+     bigTrackSeparatorColor_ = QColor( 145, 147, 147 );
+     smallTrackSeparatorColor_ = QColor( 105, 107, 107 );
+     lineSepColor_ = QColor( 145, 147, 147 );
+     restAreaColor_ = QColor( 24, 22, 25 );
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -113,7 +128,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 
     // Draw horizontal lines to demarcate the pattern lines.
     if ( lineGridEnabled() ) {
-        painter->setPen( Qt::black );
+        painter->setPen( separatorColor() );
         for (int y = startLine; y <= endLine; y++)
             painter->drawLine( 0, y * lineHeight(), gridWidth, y* lineHeight() );
     }
@@ -123,7 +138,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
             if ( !(y % beatZoom())) {
                 if ((patDraw_->patternView()->pattern()->barStart(position, signature) )) {
 
-                    painter->setBrush( Qt::blue );//g.setForeground( barColor() );
+                    painter->setBrush( barColor() );//g.setForeground( barColor() );
                     painter->drawRect( 0, y*lineHeight() /*- dy()*/, gridWidth, lineHeight());
 
 /*                    if ( y >= selection().top() && y < selection().bottom()) {
@@ -134,7 +149,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
                     }*/
 
                 } else {
-                    painter->setBrush( Qt::red );//g.setForeground( beatColor() );
+                    painter->setBrush( beatColor() );//g.setForeground( beatColor() );
                     painter->drawRect( 0, y* lineHeight() /*- dy()*/, gridWidth, lineHeight() );
 
                     /*if ( y >= selection().top() && y < selection().bottom()) {
@@ -150,8 +165,8 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 
 
     // Draw the vertical track separators.
-    painter->setPen( Qt::gray );
-    painter->setBrush( Qt::gray );
+    painter->setPen( separatorColor() );
+    painter->setBrush( separatorColor() );
     it = trackGeometrics().lower_bound( startTrack );
     for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) { //  oolIdent px space at begin of trackCol{
         TrackGeometry trackGeom = it->second;
@@ -202,17 +217,16 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
 
             if (curLinenum != lastLinenum) {
-                QColor tColor = QColor( Qt::white );
-                //QColor tColor = textColor();
+                QColor tColor = textColor();
 
                 bool onBeat = false;
                 bool onBar  = false;
                 if ( !(curLinenum % beatZoom())) {
                     if (  it != patDraw_->patternView()->pattern()->end() && patDraw_->patternView()->pattern()->barStart(it->first, signature) ) {
-                        tColor = QColor( Qt::green );/*barColor()*/;
+                        tColor = QColor( barColor() );
                     } else {
                         onBeat = true;
-                        tColor = QColor( Qt::red );/*beatTextColor()*/;
+                        tColor = QColor( beatTextColor() );
                     }
                 }
 
@@ -224,8 +238,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                 }*/
 
                 QColor stdColor = tColor;
-                QColor crColor = QColor( Qt::red );
-                //QColor crColor = patView_->colorInfo().cursor_text_color;
+                QColor crColor = cursorTextColor();
 
                 std::map<int, psy::core::PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
                 psy::core::PatternEvent emptyEvent;
@@ -296,25 +309,25 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
                                 case ColumnEvent::hex2 :
                                     drawBlockData( painter, xOff + eventOffset(eventnr,0), line, toHex(data,2), color );
                                     // check if cursor is on event and draw digit in cursortextColor
-/*                                    if ( cursor().track() == track && cursor().line() == line && 
+                                    if ( cursor().track() == track && cursor().line() == line && 
                                         cursor().eventNr() == eventnr && cursor().col() < 2 ) {
-                                            drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth() , line, toHex(data,2).substr(cursor().col(),1) ,cursorTextColor_ );
-                                    }*/
+                                            drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth() , line, toHex(data,2).substr(cursor().col(),1) ,cursorTextColor() );
+                                    }
                                     break;
                                 case ColumnEvent::hex4 :
                                     drawBlockData( painter, xOff + eventOffset(eventnr,0), line, toHex(data,4), color );
-/*                                    // check if cursor is on event and draw digit in cursortextColor
+                                    // check if cursor is on event and draw digit in cursortextColor
                                     if ( cursor().track() == track && cursor().line() == line && 
                                         cursor().eventNr() == eventnr && cursor().col() < 4 ) {
-                                            drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth(), line, toHex(data,4).substr(cursor().col(),1) ,cursorTextColor_ );
-                                    }*/
+                                            drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth(), line, toHex(data,4).substr(cursor().col(),1) ,cursorTextColor() );
+                                    }
 
                                     break;
                                 case ColumnEvent::note :					
-/*                                    if ( cursor().track() == track && cursor().line() == line && 
+                                    if ( cursor().track() == track && cursor().line() == line && 
                                         cursor().eventNr() == eventnr ) {
-                                            drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor_ );
-                                    } else*/
+                                            drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor() );
+                                    } else
                                         drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),color );
                                     break;
                                 default: ;
@@ -496,7 +509,7 @@ int PatternGrid::lineHeight() const
 
 bool PatternGrid::lineGridEnabled() const
 {
-    return true;
+    return false;
 }
 
 void PatternGrid::drawCellBg( QPainter *painter, const PatCursor& cursor ) 
@@ -510,7 +523,8 @@ void PatternGrid::drawCellBg( QPainter *painter, const PatCursor& cursor )
     //int yOff = cursor.line()  * lineHeight()  - dy();
     int yOff = cursor.line()  * lineHeight()  - 0;
     int colOffset = eventOffset( cursor.eventNr(), cursor.col() );
-    painter->setBrush( Qt::yellow );
+    painter->setBrush( cursorColor() );
+    painter->setPen( cursorTextColor() );
     painter->drawRect( xOff + colOffset, yOff, eventColWidth( cursor.eventNr() ), lineHeight() );
 }
 
@@ -672,6 +686,113 @@ void PatternGrid::setFont( QFont font ) { font_ = font; };
 int PatternGrid::beatZoom() const {
     return patDraw_->patternView()->beatZoom();
 }
+
+void PatternGrid::setSeparatorColor( const QColor & color ) {
+    separatorColor_ = color;
+}
+
+const QColor & PatternGrid::separatorColor() const {
+    return separatorColor_;
+}
+
+void PatternGrid::setSelectionColor( const QColor & selColor ) {
+    selectionColor_ = selColor;
+}
+
+const QColor & PatternGrid::selectionColor() const {
+    return selectionColor_;
+}
+
+void PatternGrid::setCursorColor( const QColor & cursorColor )
+{
+    cursorColor_ = cursorColor;
+}
+
+const QColor & PatternGrid::cursorTextColor() const {
+    return cursorTextColor_;
+}
+
+void PatternGrid::setCursorTextColor( const QColor & cursorTextColor )
+{
+    cursorTextColor_ = cursorTextColor;
+}
+
+void PatternGrid::setRestAreaColor( const QColor & color ) {
+    restAreaColor_ = color;
+}
+
+const QColor & PatternGrid::restArea() const {
+    return restAreaColor_;
+}
+
+const QColor & PatternGrid::cursorColor() const {
+    return cursorColor_;
+}
+
+void PatternGrid::setBarColor( const QColor & barColor ) {
+    barColor_ = barColor;
+}
+
+const QColor & PatternGrid::barColor() const {
+    return barColor_;
+}
+
+void PatternGrid::setBeatColor( const QColor & beatColor ) {
+    beatColor_ = beatColor;
+}
+
+const QColor & PatternGrid::beatColor() const {
+    return beatColor_;
+}
+
+void PatternGrid::setPlayBarColor( const QColor & playBarColor ) {
+    playBarColor_ = playBarColor;
+}
+
+const QColor & PatternGrid::playBarColor() const {
+    return playBarColor_;
+}
+
+void PatternGrid::setBigTrackSeparatorColor( const QColor & color ) {
+    bigTrackSeparatorColor_ = color;
+}
+
+const QColor & PatternGrid::bigTrackSeparatorColor() const {
+    return bigTrackSeparatorColor_;
+}
+
+void PatternGrid::setSmallTrackSeparatorColor( const QColor & color ) {
+    smallTrackSeparatorColor_ = color;
+}
+
+const QColor & PatternGrid::smallTrackSeparatorColor() const {
+    return smallTrackSeparatorColor_;
+}
+
+void PatternGrid::setLineSeparatorColor( const QColor & color ) {
+    lineSepColor_ = color;
+}
+
+const QColor & PatternGrid::lineSeparatorColor() const {
+    return lineSepColor_;
+}
+
+void PatternGrid::setTextColor( const QColor & color ) {
+    textColor_ = color;
+}
+
+const QColor & PatternGrid::textColor() const {
+    return textColor_;
+}
+
+void PatternGrid::setBeatTextColor( const QColor & color ) {
+    beatTextColor_ = color;
+}
+
+const QColor & PatternGrid::beatTextColor() {
+    return beatTextColor_;
+}
+
 
 
 
