@@ -70,7 +70,7 @@ QRectF PatternGrid::boundingRect() const
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-    font_ = QFont( "courier", 12 );
+    font_ = QFont( "courier", 9 );
     setFont( font_ );
     painter->setFont( font_ ); 
         if ( patDraw_->patternView()->pattern() ) {
@@ -301,7 +301,7 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
     it = trackGeometrics().lower_bound( track );
     if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
-    int xOff = it->second.left() + 5 + 5/*trackLeftIdent() - dx()*/;			// 5= colIdent
+    int xOff = it->second.left() + 5 + 5;/*trackLeftIdent() - dx()*/;			// 5= colIdent
 
     if ( eventnr < events_.size() ) {
         const ColumnEvent & event = events_.at( eventnr );
@@ -420,10 +420,10 @@ void PatternGrid::drawString( QPainter *painter, int track, int line, int eventn
 std::string PatternGrid::noteToString( int value, bool sharp )
 {
     switch (value) {
-//        case cdefTweakM : return "twk"; break;
- //       case cdefTweakE : return "twf"; break;
-  //      case cdefMIDICC : return "mcm"; break;
-   //     case cdefTweakS : return "tws"; break;
+        case psy::core::cdefTweakM : return "twk"; break;
+        case psy::core::cdefTweakE : return "twf"; break;
+        case psy::core::cdefMIDICC : return "mcm"; break;
+        case psy::core::cdefTweakS : return "tws"; break;
         case 120        : return "off"; break;
         case 255        : return "---"; break;  // defaultNoteStr_; break;
     }
@@ -549,7 +549,104 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 moveCursor(0,1);
      //           pView->checkDownScroll( cursor() );
             }
-    } 
+    } else
+        if ( isHex( QChar( event->text().at(0) ).toAscii() ) ) {
+            char key = QChar( event->text().at(0) ).toAscii();
+            if ( cursor().eventNr() == 1 ) {
+                // inst select
+                // i.e. a key is pressed in the instrument column.
+                std::cout << "eventnr 1 - inst select" << std::endl;
+
+                // Add the new data...
+                psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
+                unsigned char newByte = convertDigit( 0xFF, key, patEvent.instrument(), cursor().col() );
+                patEvent.setInstrument( newByte );
+                patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                // ...and move the cursor.
+                if (cursor().col() == 0) {
+                    moveCursor(1,0);			
+                } else {
+                    moveCursor(-1,1);
+//                    pView->checkDownScroll( cursor() );
+                }
+            } else 
+                if ( cursor().eventNr() == 2) {
+                    // mac select
+                    // i.e. a key is pressed in the machine column.
+                    std::cout << "event nr 2 - mach select" << std::endl;
+                    psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
+                    unsigned char newByte = convertDigit( 0xFF, key, patEvent.machine(), cursor().col() );
+                    patEvent.setMachine( newByte );
+                    patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                    if (cursor().col() == 0) {
+                        moveCursor(1,0);			
+                    } else {
+                        moveCursor(-1,1);
+  //                      pView->checkDownScroll( cursor() );
+                    }
+                } else
+                    if ( cursor().eventNr() == 3) {
+                        // mac select
+                        std::cout << "event nr 3 - mach select" << std::endl;
+                        psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
+                        unsigned char newByte = convertDigit( 0xFF, key, patEvent.volume(), cursor().col() );
+                        patEvent.setVolume( newByte );
+                        patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                        if (cursor().col() == 0) {
+                            moveCursor(1,0);			
+                        } else {
+                            moveCursor(-1,1);
+                        }
+ //                       pView->checkDownScroll( cursor() );
+                    } else
+                        if ( cursor().eventNr() >= 4) {
+                            // comand or parameter
+                            std::cout << "event nr >=4 - command or parameter" << std::endl;
+                            psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
+                            if (cursor().col() < 2 ) {
+                                int cmdValue;
+                                if (cursor().eventNr() == 4) {
+                                    cmdValue = patEvent.command();
+                                } else {
+                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                                    cmdValue = pc.first;
+                                }
+                                unsigned char newByte = convertDigit( 0x00, key, cmdValue, cursor().col() );
+                                if (cursor().eventNr() == 4) {
+                                    patEvent.setCommand( newByte );
+                                } else {
+                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                                    pc.first = newByte;					
+                                }
+                                patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                                moveCursor(1,0);
+                            }
+                            else {
+                                int paraValue;
+                                if (cursor().eventNr() == 4) {
+                                    paraValue = patEvent.parameter();
+                                } else {
+                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                                    paraValue = pc.second;
+                                }
+                                unsigned char newByte = convertDigit( 0x00, key, paraValue, cursor().col() - 2 );
+                                if (cursor().eventNr() == 4) {
+                                    patEvent.setParameter( newByte );
+                                } else {
+                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                                    pc.second = newByte;					
+                                }
+                                patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                                if (cursor().col() < 3) {
+                                    moveCursor(1,0);			
+                                } else {
+                                    moveCursor(-3,1);
+//                                    pView->checkDownScroll( cursor() );
+                                }
+                            }			
+                        }
+        }
+
     switch ( command ) {
         case psy::core::cdefNavUp:
             moveCursor( 0, -1 );/*-patternStep()*/ ;
@@ -792,6 +889,37 @@ void PatternGrid::setBeatTextColor( const QColor & color ) {
 const QColor & PatternGrid::beatTextColor() {
     return beatTextColor_;
 }
+
+bool PatternGrid::isHex( int c ) {
+    if ( ( (c >= 'a') && (c <='f') ) || ( (c>='0' && c <='9') ) ) return true;
+    return false;
+}
+
+char hex_value(char c) { 
+    if(c >= 'A') return 10 + c - 'A'; else return c - '0'; 
+}
+
+
+unsigned char PatternGrid::convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const 
+{
+    unsigned char newByte = 0;
+    if (col == 0) {
+        if (oldByte == defaultValue)
+            newByte = ( 0 & 0x0F ) | ( 0xF0 & (hex_value(scanCode) << 4 ) );
+        else
+            newByte = ( oldByte & 0x0F ) | ( 0xF0 & ( hex_value(scanCode) << 4) );
+    }
+    else {
+        if (oldByte == defaultValue)
+            newByte = ( 0 & 0xF0 ) | ( 0x0F & (hex_value(scanCode)) );
+        else
+            newByte = ( oldByte & 0xF0 ) | ( 0x0F & (hex_value(scanCode) ) );
+    }
+
+    return newByte;
+}
+
+
 
 
 
