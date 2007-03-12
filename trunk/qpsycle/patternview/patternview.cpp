@@ -123,17 +123,17 @@ int PatternView::selectedMachineIndex( ) const
 
 void PatternView::keyPressEvent( QKeyEvent *event )
 {
-/*    switch ( event->key() ) {
+    switch ( event->key() ) {
         case Qt::Key_A:
         {
-            float position = patternGrid()->cursor().line() / (float) beatZoom();
+            float position = patDraw()->patternGrid()->cursor().line() / (float) beatZoom();
             pattern()->removeBar(position);
-            patternGrid()->update();
+            patDraw()->patternGrid()->update();
         }
         break;
         default:
-            QGraphicsView::keyPressEvent( event );
-    }*/
+            event->ignore();
+    }
 }
 
 int PatternView::beatZoom( ) const

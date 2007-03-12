@@ -7,6 +7,7 @@
 #include <QFontMetrics>
 
 #include "patterndraw.h"
+#include "psycore/singlepattern.h"
 
 #include <map>
 
@@ -81,6 +82,7 @@ public:
     void setFont( QFont font );
 
     int beatZoom() const;
+    psy::core::SinglePattern *pattern();
 
     void setSeparatorColor( const QColor & color );
     const QColor & separatorColor() const;

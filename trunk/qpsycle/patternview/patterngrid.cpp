@@ -535,6 +535,7 @@ const PatCursor & PatternGrid::cursor() const {
 void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
+    int keyChar = QChar( event->text().at(0) ).toAscii();
 
     if ( cursor().eventNr() == 0 && isNote( command ) ) {
         // A note event.
@@ -550,18 +551,17 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
      //           pView->checkDownScroll( cursor() );
             }
     } else
-        if ( isHex( QChar( event->text().at(0) ).toAscii() ) ) {
-            char key = QChar( event->text().at(0) ).toAscii();
+        if ( isHex( keyChar ) ) {
             if ( cursor().eventNr() == 1 ) {
                 // inst select
-                // i.e. a key is pressed in the instrument column.
+                // i.e. a keyChar is pressed in the instrument column.
                 std::cout << "eventnr 1 - inst select" << std::endl;
 
                 // Add the new data...
-                psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
-                unsigned char newByte = convertDigit( 0xFF, key, patEvent.instrument(), cursor().col() );
+                psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+                unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.instrument(), cursor().col() );
                 patEvent.setInstrument( newByte );
-                patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
                 // ...and move the cursor.
                 if (cursor().col() == 0) {
                     moveCursor(1,0);			
@@ -572,12 +572,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             } else 
                 if ( cursor().eventNr() == 2) {
                     // mac select
-                    // i.e. a key is pressed in the machine column.
+                    // i.e. a keyChar is pressed in the machine column.
                     std::cout << "event nr 2 - mach select" << std::endl;
-                    psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
-                    unsigned char newByte = convertDigit( 0xFF, key, patEvent.machine(), cursor().col() );
+                    psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+                    unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.machine(), cursor().col() );
                     patEvent.setMachine( newByte );
-                    patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                    pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
                     if (cursor().col() == 0) {
                         moveCursor(1,0);			
                     } else {
@@ -587,11 +587,11 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 } else
                     if ( cursor().eventNr() == 3) {
                         // mac select
-                        std::cout << "event nr 3 - mach select" << std::endl;
-                        psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
-                        unsigned char newByte = convertDigit( 0xFF, key, patEvent.volume(), cursor().col() );
+                        std::cout << "event nr 3 - volume column" << std::endl;
+                        psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+                        unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.volume(), cursor().col() );
                         patEvent.setVolume( newByte );
-                        patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                        pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
                         if (cursor().col() == 0) {
                             moveCursor(1,0);			
                         } else {
@@ -602,7 +602,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                         if ( cursor().eventNr() >= 4) {
                             // comand or parameter
                             std::cout << "event nr >=4 - command or parameter" << std::endl;
-                            psy::core::PatternEvent patEvent = patDraw_->patternView()->pattern()->event( cursor().line(), cursor().track() );
+                            psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
                             if (cursor().col() < 2 ) {
                                 int cmdValue;
                                 if (cursor().eventNr() == 4) {
@@ -611,14 +611,14 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                                     psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                                     cmdValue = pc.first;
                                 }
-                                unsigned char newByte = convertDigit( 0x00, key, cmdValue, cursor().col() );
+                                unsigned char newByte = convertDigit( 0x00, keyChar, cmdValue, cursor().col() );
                                 if (cursor().eventNr() == 4) {
                                     patEvent.setCommand( newByte );
                                 } else {
                                     psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                                     pc.first = newByte;					
                                 }
-                                patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
                                 moveCursor(1,0);
                             }
                             else {
@@ -629,14 +629,14 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                                     psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                                     paraValue = pc.second;
                                 }
-                                unsigned char newByte = convertDigit( 0x00, key, paraValue, cursor().col() - 2 );
+                                unsigned char newByte = convertDigit( 0x00, keyChar, paraValue, cursor().col() - 2 );
                                 if (cursor().eventNr() == 4) {
                                     patEvent.setParameter( newByte );
                                 } else {
                                     psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
                                     pc.second = newByte;					
                                 }
-                                patDraw_->patternView()->pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
                                 if (cursor().col() < 3) {
                                     moveCursor(1,0);			
                                 } else {
@@ -899,7 +899,6 @@ char hex_value(char c) {
     if(c >= 'A') return 10 + c - 'A'; else return c - '0'; 
 }
 
-
 unsigned char PatternGrid::convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const 
 {
     unsigned char newByte = 0;
@@ -917,6 +916,10 @@ unsigned char PatternGrid::convertDigit( int defaultValue, int scanCode, unsigne
     }
 
     return newByte;
+}
+
+psy::core::SinglePattern* PatternGrid::pattern() {
+    return patDraw_->patternView()->pattern();
 }
 
 
