@@ -37,9 +37,12 @@ SequencerView::SequencerView( psy::core::Song *asong )
     toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
     QAction *insTrkAct = toolBar_->addAction( "Insert Track" );
     connect( insTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( insertTrack() ) );
-    toolBar_->addAction( "Delete Track" );
-    toolBar_->addAction( "Move Track Down" );
-    toolBar_->addAction( "Move Track Up" );
+    QAction *delTrkAct = toolBar_->addAction( "Delete Track" );
+    toolBar_->addAction( delTrkAct );
+    QAction *dnTrkAct = toolBar_->addAction( "Move Track Down" );
+    toolBar_->addAction( dnTrkAct );
+    QAction *upTrkAct = toolBar_->addAction( "Move Track Up" );
+    toolBar_->addAction( upTrkAct );
 
     layout_->addWidget( toolBar_ );
     layout_->addWidget( seqDraw_ );

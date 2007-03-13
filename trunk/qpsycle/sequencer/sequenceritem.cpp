@@ -63,5 +63,13 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     int currentLeftPos = pos().x();
     int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
     int newLeftPos = std::max( 0, desiredLeftPos );
+
     setPos( newLeftPos, 0 );                 
+
+    if ( true /*gridSnap()*/ ) {
+        int beatPos = pos().x() / 5/*beatPxLength*/;
+        int newItemLeft = beatPos * 5;//sView->beatPxLength();
+        setPos( newItemLeft, 0 );
+    }
+
 }
