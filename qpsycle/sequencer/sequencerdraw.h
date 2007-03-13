@@ -43,8 +43,13 @@ class SequencerView;
      SequencerView *sequencerView() { return seqView_; }
      int beatPxLength() const;
      SequencerLine *selectedLine();
+    void setSelectedLine( SequencerLine *line );
+    std::vector<SequencerLine*> lines();
 
     void addPattern( psy::core::SinglePattern *pattern );
+
+public slots:
+    void insertTrack();
 
  protected:
 
@@ -54,10 +59,12 @@ class SequencerView;
 
     SequencerArea *seqArea_;
 
+    std::vector<SequencerLine*> lines_;
     SequencerLine *lastLine_;
     SequencerLine *selectedLine_;
 
     int beatPxLength_;
+    int lineHeight_;
 
  };
 

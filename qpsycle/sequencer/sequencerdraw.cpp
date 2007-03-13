@@ -34,7 +34,7 @@
  {
     seqView_ = seqView;
     beatPxLength_ = 5;
-    int lineHeight_ = 30;
+    lineHeight_ = 30;
 
     QGraphicsScene *scene_ = new QGraphicsScene(this);
     scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -53,14 +53,13 @@
         psy::core::SequenceLine* seqLine = *it;
         SequencerLine* line = new SequencerLine();
         line->setParentItem( seqArea_ );
+        //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
+        lines_.push_back(line);
+        line->setPos( 0, count*lineHeight_ );
         if (isFirst) {
-            sequencerView()->setSelectedLine( line );
+            setSelectedLine( line ); 
             isFirst = false;
         }
-        //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
- //       lines.push_back(line);
-        line->setSequenceLine( seqLine );
-        line->setPos( 0, count*lineHeight_ );
 //        line->click.connect(this, &SequencerGUI::onSequencerLineClick);
 //        scrollArea_->resize();
 //        lastLine_ = line;
@@ -90,6 +89,11 @@ int SequencerDraw::beatPxLength( ) const
     return beatPxLength_;
 }
 
+void SequencerDraw::setSelectedLine( SequencerLine *line ) 
+{
+    selectedLine_ = line;
+}
+
 SequencerLine* SequencerDraw::selectedLine() 
 {
     return selectedLine_;
@@ -101,3 +105,37 @@ void SequencerDraw::addPattern( psy::core::SinglePattern *pattern )
         selectedLine()->addItem( pattern );
     }
 }
+
+std::vector<SequencerLine*> SequencerDraw::lines()
+{
+    return lines_;
+}
+
+void SequencerDraw::insertTrack()
+{
+    if ( lines_.size() == 0 ) {
+    //    addSequencerLine();
+//        resize();
+//        repaint();
+    } else
+        if ( selectedLine() ) {
+        qDebug("ins me");
+            SequencerLine* line = new SequencerLine();
+            line->setSequenceLine( seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() ) );
+            lines_.push_back( line );
+
+            scene()->addItem( line );
+            line->setParentItem( seqArea_ );
+            line->setPos( 0, (lines_.size()-1) * lineHeight_ );
+            //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
+  //          line->click.connect(this, &SequencerGUI::onSequencerLineClick);
+            setSelectedLine( line );
+/*            int index = selectedLine_->zOrder();
+            scrollArea_->insert(line, index);
+            scrollArea_->resize();
+            lastLine = line;*/
+//            resize();
+ //           scrollArea_->repaint();
+        }
+}
+

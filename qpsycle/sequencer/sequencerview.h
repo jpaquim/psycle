@@ -42,7 +42,7 @@ class SequencerDraw;
     void setSelectedLine( SequencerLine *line ) ;
 
     void addPattern( psy::core::SinglePattern *pattern );
-
+     
  protected:
 
  private:
@@ -51,6 +51,8 @@ class SequencerDraw;
     SequencerDraw *seqDraw_;
 
     SequencerLine *selectedLine_;
+    std::vector<SequencerLine*> *lines_;
+
     QToolBar *toolBar_;
 
  };
