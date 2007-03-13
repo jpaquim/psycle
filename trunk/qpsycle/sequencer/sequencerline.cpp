@@ -54,6 +54,5 @@ void SequencerLine::addItem( psy::core::SinglePattern* pattern )
     item->setPos(5 * endTick, 0);//, static_cast<int>( pattern->beats() * 5 ), 20 );
 //    item->click.connect(this,&SequencerGUI::SequencerLine::onSequencerItemClick);
     //item->setPos(200, /*sView->beatPxLength() * endTick)*/, 5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
-//    itemsGroup_->addToGroup( item );
 }
 

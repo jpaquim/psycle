@@ -21,6 +21,8 @@
 #include <iostream>
 #include <vector>
 
+#include <QAction>
+
  #include "sequencerview.h"
  #include "sequencerline.h"
 
@@ -33,7 +35,8 @@ SequencerView::SequencerView( psy::core::Song *asong )
     seqDraw_ = new SequencerDraw( this );
     toolBar_ = new QToolBar();
     toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
-    toolBar_->addAction( "Insert Track" );
+    QAction *insTrkAct = toolBar_->addAction( "Insert Track" );
+    connect( insTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( insertTrack() ) );
     toolBar_->addAction( "Delete Track" );
     toolBar_->addAction( "Move Track Down" );
     toolBar_->addAction( "Move Track Up" );
@@ -44,14 +47,10 @@ SequencerView::SequencerView( psy::core::Song *asong )
     setLayout( layout_ );
 }
 
+
 SequencerLine* SequencerView::selectedLine() 
 {
     return selectedLine_;
-}
-
-void SequencerView::setSelectedLine( SequencerLine *line ) 
-{
-    selectedLine_ = line;
 }
 
 void SequencerView::addPattern( psy::core::SinglePattern *pattern )
@@ -60,3 +59,4 @@ void SequencerView::addPattern( psy::core::SinglePattern *pattern )
         selectedLine()->addItem( pattern );
     }
 }
+
