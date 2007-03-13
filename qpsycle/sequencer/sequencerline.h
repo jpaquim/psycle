@@ -32,7 +32,7 @@ class SequencerLine : public QGraphicsRectItem
 {
 
 public:
-    SequencerLine();
+    SequencerLine( psy::core::SequenceLine * line );
 
     void addItem( psy::core::SinglePattern* pattern );
 

@@ -56,7 +56,7 @@ SequencerLine* SequencerView::selectedLine()
 void SequencerView::addPattern( psy::core::SinglePattern *pattern )
 {
     if ( selectedLine() ) {
-        selectedLine()->addItem( pattern );
+        seqDraw_->selectedLine()->addItem( pattern );
     }
 }
 

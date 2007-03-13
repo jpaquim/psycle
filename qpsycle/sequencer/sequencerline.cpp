@@ -26,8 +26,9 @@
 
 #include "psycore/patternsequence.h"
 
-SequencerLine::SequencerLine()
+SequencerLine::SequencerLine( psy::core::SequenceLine * line )
 {
+    setSequenceLine( line );
     setRect(QRectF(0, 0, 500, 30));
     setPen(QPen(Qt::white,1));
     setBrush(QBrush(Qt::transparent));
@@ -45,13 +46,22 @@ psy::core::SequenceLine *SequencerLine::sequenceLine()
 
 void SequencerLine::addItem( psy::core::SinglePattern* pattern )
 {
+    std::cout << "pat is " << pattern->name() << std::endl;
+    qDebug("dude");
+    std::cout << "dude0.5" << std::endl;
     double endTick = sequenceLine()->tickLength();
 
+    qDebug("dude1");
     SequencerItem *item = new SequencerItem();
+    qDebug("dude2");
     item->setSequenceEntry( sequenceLine()->createEntry(pattern, endTick) );
+    qDebug("dude3");
     scene()->addItem( item );
+    qDebug("dude4");
     item->setParentItem( this );
+    qDebug("dude5");
     item->setPos(5 * endTick, 0);//, static_cast<int>( pattern->beats() * 5 ), 20 );
+    qDebug("dude6");
 //    item->click.connect(this,&SequencerGUI::SequencerLine::onSequencerItemClick);
     //item->setPos(200, /*sView->beatPxLength() * endTick)*/, 5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
 }
