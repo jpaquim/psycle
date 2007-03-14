@@ -52,9 +52,14 @@ void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
     sequenceEntry_ = sequenceEntry;
 }
 
+psy::core::SequenceEntry *SequencerItem::sequenceEntry() {
+    return sequenceEntry_;
+}
+
 void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
     QGraphicsItem::mouseMoveEvent( event ); // Do normal move event...
+    int beatPxLength_ = 5; // FIXME: move to getter function
 
     // But then constrain to parent.
     int widthOfThisItem = boundingRect().width();
@@ -65,11 +70,15 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     int newLeftPos = std::max( 0, desiredLeftPos );
 
     setPos( newLeftPos, 0 );                 
-
+    
+    int newItemLeft = newLeftPos;
     if ( true /*gridSnap()*/ ) {
-        int beatPos = pos().x() / 5/*beatPxLength*/;
-        int newItemLeft = beatPos * 5;//sView->beatPxLength();
+        int beatPos = pos().x() / beatPxLength_;
+        newItemLeft = beatPos * beatPxLength_;
         setPos( newItemLeft, 0 );
     }
-
+ 
+    // FIXME: maybe do this on mouseReleaseEvent?
+    QPointF newPosInParentCoords = mapToParent( newItemLeft, 0 );
+    sequenceEntry()->track()->MoveEntry( sequenceEntry(), newPosInParentCoords.x() / beatPxLength_ );
 }
