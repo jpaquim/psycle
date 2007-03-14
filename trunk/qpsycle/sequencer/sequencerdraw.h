@@ -51,6 +51,7 @@ class SequencerView;
 public slots:
     void insertTrack();
     void onSequencerLineClick( SequencerLine *line );
+    void onSequencerItemDeleteRequest( SequencerItem *item );
 
  protected:
 

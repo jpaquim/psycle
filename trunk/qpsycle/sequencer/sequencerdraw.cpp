@@ -73,6 +73,8 @@
             SequencerItem* item = new SequencerItem();
             item->setParentItem( line );
 //            item->click.connect(line,&SequencerGUI::SequencerLine::onSequencerItemClick);
+            connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
+                     this, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
             item->setSequenceEntry( entry );
 //            line->items.push_back(item);
 
@@ -120,7 +122,6 @@ void SequencerDraw::insertTrack()
 //        repaint();
     } else
         if ( selectedLine() ) {
-        qDebug("ins me");
             psy::core::SequenceLine *seqLine = seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() ); 
             SequencerLine* line = new SequencerLine( seqLine );
             lines_.push_back( line );
@@ -143,4 +144,11 @@ void SequencerDraw::insertTrack()
 void SequencerDraw::onSequencerLineClick( SequencerLine *line )
 {
     setSelectedLine( line );
+}
+
+void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
+{
+    psy::core::SequenceEntry *entry = item->sequenceEntry();
+    entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
+    scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
 }
