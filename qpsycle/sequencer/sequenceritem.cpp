@@ -41,9 +41,14 @@ QRectF SequencerItem::boundingRect() const
 
 void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-    painter->setPen( Qt::white ); 
     painter->setBrush( Qt::red ); 
+    if ( isSelected() ) {
+        painter->setPen( Qt::blue ); 
+    } else {
+        painter->setPen( Qt::white ); 
+    }
     painter->drawRect( boundingRect() ); // FIXME: need to take border width into account.
+    painter->setPen( Qt::white ); 
     painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
 }
 
@@ -81,4 +86,9 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     // FIXME: maybe do this on mouseReleaseEvent?
     QPointF newPosInParentCoords = mapToParent( newItemLeft, 0 );
     sequenceEntry()->track()->MoveEntry( sequenceEntry(), newPosInParentCoords.x() / beatPxLength_ );
+}
+
+void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
+{
+    QGraphicsItem::mousePressEvent( event ); // Do normal business...
 }
