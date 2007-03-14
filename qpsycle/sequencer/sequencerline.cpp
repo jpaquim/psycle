@@ -21,13 +21,15 @@
 #include "sequencerline.h"
 #include "sequencerview.h"
 #include "sequenceritem.h"
+#include "sequencerdraw.h"
 
 #include <QGraphicsScene>
 
 #include "psycore/patternsequence.h"
 
-SequencerLine::SequencerLine( psy::core::SequenceLine * line )
+SequencerLine::SequencerLine( SequencerDraw *sDraw, psy::core::SequenceLine * line )
 {
+    sDraw_ = sDraw; // FIXME: don't really want this to be in here..  Feels too tightly-coupled...
     setSequenceLine( line );
     setRect(QRectF(0, 0, 500, 30));
     setPen(QPen(Qt::white,1));
@@ -53,8 +55,10 @@ void SequencerLine::addItem( psy::core::SinglePattern* pattern )
     scene()->addItem( item );
     item->setParentItem( this );
     item->setPos(5 * endTick, 0);
-//    item->click.connect(this,&SequencerGUI::SequencerLine::onSequencerItemClick);
     //item->setPos(200, /*sView->beatPxLength() * endTick)*/, 5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
+    items_.push_back( item );
+    connect( item, SIGNAL( deleteRequest( SequencerItem* ) ),
+             sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
 }
 
 void SequencerLine::mousePressEvent( QGraphicsSceneMouseEvent *event )

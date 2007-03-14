@@ -51,7 +51,7 @@
     std::vector<psy::core::SequenceLine*>::iterator it = sequencerView()->song()->patternSequence()->begin();
     for ( ; it < sequencerView()->song()->patternSequence()->end(); it++) {
         psy::core::SequenceLine* seqLine = *it;
-        SequencerLine* line = new SequencerLine( seqLine );
+        SequencerLine* line = new SequencerLine( this, seqLine );
 //        line->setSequenceLine( seqLine );
         line->setParentItem( seqArea_ );
         //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
@@ -123,7 +123,7 @@ void SequencerDraw::insertTrack()
     } else
         if ( selectedLine() ) {
             psy::core::SequenceLine *seqLine = seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() ); 
-            SequencerLine* line = new SequencerLine( seqLine );
+            SequencerLine* line = new SequencerLine( this, seqLine );
             lines_.push_back( line );
 
             scene()->addItem( line );
