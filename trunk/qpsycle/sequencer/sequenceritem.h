@@ -41,6 +41,7 @@
 
 protected: 
     void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+    void mousePressEvent( QGraphicsSceneMouseEvent *event );
 
  private:
     psy::core::SequenceEntry *sequenceEntry_;
