@@ -66,26 +66,34 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     QGraphicsItem::mouseMoveEvent( event ); // Do normal move event...
     int beatPxLength_ = 5; // FIXME: move to getter function
 
-    // But then constrain to parent.
-    int widthOfThisItem = boundingRect().width();
-    int widthOfParent = parentItem()->boundingRect().width();
-    int maximumLeftPos = widthOfParent - widthOfThisItem;
-    int currentLeftPos = pos().x();
-    int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
-    int newLeftPos = std::max( 0, desiredLeftPos );
+    QList<QGraphicsItem*> selItems = scene()->selectedItems();
+    QList<QGraphicsItem*>::iterator i;
+    for (i = selItems.begin(); i != selItems.end(); ++i)
+    {
+        QGraphicsItem *foo = *i;
+        SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); // FIXME: check if it's actually a SeqItem
 
-    setPos( newLeftPos, 0 );                 
-    
-    int newItemLeft = newLeftPos;
-    if ( true /*gridSnap()*/ ) {
-        int beatPos = pos().x() / beatPxLength_;
-        newItemLeft = beatPos * beatPxLength_;
-        setPos( newItemLeft, 0 );
-    }
- 
-    // FIXME: maybe do this on mouseReleaseEvent?
-    QPointF newPosInParentCoords = mapToParent( newItemLeft, 0 );
-    sequenceEntry()->track()->MoveEntry( sequenceEntry(), newPosInParentCoords.x() / beatPxLength_ );
+        // But then constrain to parent.
+        int widthOfThisItem = item->boundingRect().width();
+        int widthOfParent = item->parentItem()->boundingRect().width();
+        int maximumLeftPos = widthOfParent - widthOfThisItem;
+        int currentLeftPos = item->pos().x();
+        int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
+        int newLeftPos = std::max( 0, desiredLeftPos );
+
+        item->setPos( newLeftPos, 0 );                 
+        
+        int newItemLeft = newLeftPos;
+        if ( true /*gridSnap()*/ ) {
+            int beatPos = item->pos().x() / beatPxLength_;
+            newItemLeft = beatPos * beatPxLength_;
+            item->setPos( newItemLeft, 0 );
+        }
+     
+        // FIXME: maybe do this on mouseReleaseEvent?
+        QPointF newPosInParentCoords = item->mapToParent( newItemLeft, 0 );
+        item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newPosInParentCoords.x() / beatPxLength_ );
+        }
 }
 
 void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
