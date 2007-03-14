@@ -22,9 +22,7 @@
  #include <QGraphicsScene>
  #include <QGraphicsSceneMouseEvent>
  #include <QPainter>
- #include <QStyleOption>
- #include <QMessageBox>
- #include <QMouseEvent>
+#include <QMenu>
 
  #include "sequencerview.h"
 
@@ -102,5 +100,20 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     QGraphicsItem::mousePressEvent( event ); // Do normal business...
+
     emit clicked();
+}
+
+void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+     QMenu menu;
+     deleteEntryAction_ = new QAction( "Delete Entry", this );
+     connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
+      menu.addAction( deleteEntryAction_ );
+      QAction *a = menu.exec(event->screenPos());
+}
+
+void SequencerItem::onDeleteEntryActionTriggered()
+{
+    emit deleteRequest( this );
 }

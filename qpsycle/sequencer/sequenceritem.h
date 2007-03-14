@@ -22,6 +22,7 @@
 
 #include <QGraphicsItem>
 #include <QObject>
+#include <QAction>
 
 #include "sequencerview.h"
 
@@ -47,15 +48,22 @@
         return Type;
     }
 
+private slots:
+    void onDeleteEntryActionTriggered();
+
 signals:
     void clicked();
+    void deleteRequest( SequencerItem* );
 
 protected: 
     void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
+    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
 
  private:
     psy::core::SequenceEntry *sequenceEntry_;
+
+    QAction *deleteEntryAction_;
  };
 
 #endif
