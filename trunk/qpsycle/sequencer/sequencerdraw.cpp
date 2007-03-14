@@ -61,7 +61,7 @@
             setSelectedLine( line ); 
             isFirst = false;
         }
-//        line->click.connect(this, &SequencerGUI::onSequencerLineClick);
+        connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
 //        scrollArea_->resize();
 //        lastLine_ = line;
  //       selectedLine_ = line;
@@ -129,7 +129,7 @@ void SequencerDraw::insertTrack()
             line->setParentItem( seqArea_ );
             line->setPos( 0, (lines_.size()-1) * lineHeight_ );
             //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
-  //          line->click.connect(this, &SequencerGUI::onSequencerLineClick);
+            connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
             setSelectedLine( line );
 /*            int index = selectedLine_->zOrder();
             scrollArea_->insert(line, index);
@@ -140,3 +140,7 @@ void SequencerDraw::insertTrack()
         }
 }
 
+void SequencerDraw::onSequencerLineClick( SequencerLine *line )
+{
+    setSelectedLine( line );
+}

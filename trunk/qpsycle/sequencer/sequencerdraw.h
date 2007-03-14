@@ -50,6 +50,7 @@ class SequencerView;
 
 public slots:
     void insertTrack();
+    void onSequencerLineClick( SequencerLine *line );
 
  protected:
 

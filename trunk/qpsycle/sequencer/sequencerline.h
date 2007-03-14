@@ -28,9 +28,9 @@
 
 class SequencerItem;
 
-class SequencerLine : public QGraphicsRectItem
+class SequencerLine : public QObject, public QGraphicsRectItem
 {
-
+    Q_OBJECT
 public:
     SequencerLine( psy::core::SequenceLine * line );
 
@@ -38,6 +38,10 @@ public:
 
     void setSequenceLine( psy::core::SequenceLine * line );
     psy::core::SequenceLine *sequenceLine(); 
+    void mousePressEvent( QGraphicsSceneMouseEvent *event );
+
+signals:
+    void clicked( SequencerLine* );
 
 private:
     psy::core::SequenceLine *seqLine_;
