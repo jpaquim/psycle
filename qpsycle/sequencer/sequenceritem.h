@@ -37,6 +37,7 @@
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
      void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
+     psy::core::SequenceEntry *sequenceEntry(); 
 
 protected: 
     void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
