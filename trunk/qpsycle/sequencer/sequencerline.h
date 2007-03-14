@@ -25,20 +25,23 @@
 
 #include "psycore/patternsequence.h"
 #include "sequenceritem.h"
+#include "sequencerdraw.h"
 
+class SequencerDraw;
 class SequencerItem;
 
 class SequencerLine : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    SequencerLine( psy::core::SequenceLine * line );
+    SequencerLine( SequencerDraw *sDraw, psy::core::SequenceLine * line );
 
     void addItem( psy::core::SinglePattern* pattern );
 
     void setSequenceLine( psy::core::SequenceLine * line );
     psy::core::SequenceLine *sequenceLine(); 
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
+    SequencerDraw *sDraw_;
 
 signals:
     void clicked( SequencerLine* );

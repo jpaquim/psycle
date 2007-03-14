@@ -26,7 +26,7 @@
 
  #include "sequencerview.h"
 
-SequencerItem::SequencerItem()
+SequencerItem::SequencerItem() 
 {
     setFlag( ItemIsMovable );
     setFlag( ItemIsSelectable );
