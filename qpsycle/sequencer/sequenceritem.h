@@ -27,8 +27,9 @@
 
 #include "psycore/patternsequence.h"
 
- class SequencerItem : public QGraphicsItem
+ class SequencerItem : public QObject, public QGraphicsItem
  {
+    Q_OBJECT
 
  public:
      SequencerItem();
@@ -45,6 +46,9 @@
         // Enable the use of qgraphicsitem_cast with this item.
         return Type;
     }
+
+signals:
+    void clicked();
 
 protected: 
     void mouseMoveEvent( QGraphicsSceneMouseEvent *event );

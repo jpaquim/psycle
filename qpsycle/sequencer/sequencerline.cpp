@@ -57,3 +57,8 @@ void SequencerLine::addItem( psy::core::SinglePattern* pattern )
     //item->setPos(200, /*sView->beatPxLength() * endTick)*/, 5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
 }
 
+void SequencerLine::mousePressEvent( QGraphicsSceneMouseEvent *event )
+{
+    emit clicked( this );
+}
+
