@@ -64,9 +64,6 @@ void MainWindow::setupSong()
 
     psy::core::SequenceLine *seqLine = song_->patternSequence()->createNewLine();
 	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
-
-    psy::core::SequenceLine *seqLine1 = song_->patternSequence()->createNewLine();
-	psy::core::SequenceEntry *seqEntry1 = seqLine1->createEntry( pattern0, 0 );
 }
 
 void MainWindow::setupSound() 
@@ -121,6 +118,8 @@ void MainWindow::setupSignals()
              this, SLOT( onPatternDeleted() ) );
     connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ),
              this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
+    connect( patternBox_, SIGNAL( patternNameChanged() ),
+             this, SLOT( onPatternNameChanged() ) );
 
     connect( macView_, SIGNAL( newMachineCreated( int ) ), 
              this, SLOT( onNewMachineCreated( int ) ) );
@@ -441,4 +440,11 @@ void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *patte
     std::cout << pattern->name() << std::endl;
     seqView_->addPattern( pattern );
 //    SequenceLine selectedLine = seqView_->selectedLine();
+}
+
+void MainWindow::onPatternNameChanged()
+{
+    // FIXME: not efficient, don't need to repaint the whole thing...
+    seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
+
 }

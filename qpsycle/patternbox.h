@@ -48,11 +48,13 @@ public slots:
      void clonePattern();
      void deletePattern();
      void addPatternToSequencer();
+     void onPatternNameEdited( const QString & newText );
 
 signals:
     void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
     void patternDeleted();
     void addPatternToSequencerRequest( psy::core::SinglePattern *selectedPattern );
+    void patternNameChanged();
 
  private:
     void createActions();
@@ -66,6 +68,7 @@ signals:
 
      QToolBar *toolBar_;
      QWidget *itemProps_;
+     QLineEdit *nameEdit_;
      QTreeWidget *patternTree_;
 
      QAction *newCatAct;

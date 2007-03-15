@@ -103,7 +103,10 @@ void PatternBox::createItemPropertiesBox()
     itemProps_->setLayout( itemPropsLayout );
     //itemPropsLayout->addWidget( new QLabel( "Item Properties" ), 0, 0 );
     itemPropsLayout->addWidget( new QLabel( "Name:" ), 1, 0, 1, 1 );
-    itemPropsLayout->addWidget( new QLineEdit(), 1, 1, 1, 3 );
+    nameEdit_ = new QLineEdit();
+    connect( nameEdit_, SIGNAL( textChanged( const QString & ) ),
+             this, SLOT( onPatternNameEdited( const QString & ) ) );
+    itemPropsLayout->addWidget( nameEdit_, 1, 1, 1, 3 );
     itemPropsLayout->addWidget( new QLabel( "Colour:" ), 2, 0, 2, 1 );
     itemPropsLayout->addWidget( new QComboBox(), 2, 1, 2, 3 );
 }
@@ -202,15 +205,30 @@ void PatternBox::addPatternToSequencer()
 
 void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem )
 {
-//    std::vector<CategoryItem*>::iterator it = find(catItems.begin(),catItems.end(),item);
- //   if ( it != catItems.end() )  propertyBox_->setCategoryItem(*it);
-
-  //  if (item) propertyBox_->setName( item->text() );
     std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( currItem );
     if(itr!=patternMap.end()) {
         psy::core::SinglePattern *pattern = itr->second;
+        nameEdit_->setText( QString::fromStdString( pattern->name() ) );
         // emit a signal for main window to tell pat view.
         emit patternSelectedInPatternBox( pattern );
     }
 }
 
+void PatternBox::onPatternNameEdited( const QString & newText )
+{
+    QTreeWidgetItem *item = patternTree_->currentItem();
+
+    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
+    if( itr!=patternMap.end() ) {
+        psy::core::SinglePattern *pattern = itr->second;
+        item->setText( 0, newText );
+        pattern->setName( newText.toStdString() );
+        emit patternNameChanged();
+/*        std::vector<SequencerItem*> list = seqGui->guiItemsByPattern(itr->second);
+        std::vector<SequencerItem*>::iterator it = list.begin();
+        for ( ; it < list.end(); it++) {
+            SequencerItem* guiItem = *it;
+            guiItem->repaint();
+        }*/
+    }
+}
