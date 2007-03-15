@@ -64,6 +64,7 @@ protected:
     psy::core::SequenceEntry *sequenceEntry_;
 
     QAction *deleteEntryAction_;
+    const QColor & QColorFromLongColor( long longCol );
  };
 
 #endif

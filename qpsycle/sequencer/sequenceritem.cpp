@@ -39,15 +39,26 @@ QRectF SequencerItem::boundingRect() const
 
 void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-    painter->setBrush( Qt::red ); 
     if ( isSelected() ) {
         painter->setPen( Qt::blue ); 
     } else {
         painter->setPen( Qt::white ); 
     }
+    QColor col = QColorFromLongColor( sequenceEntry_->pattern()->category()->color() ); 
+    painter->setBrush( col ); 
     painter->drawRect( boundingRect() ); // FIXME: need to take border width into account.
     painter->setPen( Qt::white ); 
     painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
+}
+
+const QColor & SequencerItem::QColorFromLongColor( long longCol )
+{
+    unsigned int r, g, b;
+    b = (longCol>>16) & 0xff;
+    g = (longCol>>8 ) & 0xff;
+    r = (longCol    ) & 0xff;
+
+    return QColor( r, g, b );
 }
 
 void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
