@@ -62,6 +62,7 @@
     void onMachineGuiChosen( MachineGui *macGui );
     void onPatternDeleted();
     void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
+    void onPatternNameChanged();
 
  private:
     psy::core::Song *song_;

@@ -34,14 +34,14 @@ class SequencerDraw;
  {
      Q_OBJECT
 
- public:
-     SequencerView( psy::core::Song *song );
+public:
+    SequencerView( psy::core::Song *song );
 
-     psy::core::Song* song() { return song_; }
-     SequencerLine *selectedLine();
+    psy::core::Song* song() { return song_; }
+    SequencerLine *selectedLine();
     void setSelectedLine( SequencerLine *line ) ;
-
     void addPattern( psy::core::SinglePattern *pattern );
+    SequencerDraw *sequencerDraw() { return seqDraw_; }
      
  protected:
 
