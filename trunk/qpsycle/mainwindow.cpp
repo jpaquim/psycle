@@ -439,12 +439,11 @@ void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *patte
 {
     std::cout << pattern->name() << std::endl;
     seqView_->addPattern( pattern );
-//    SequenceLine selectedLine = seqView_->selectedLine();
 }
 
 void MainWindow::onPatternNameChanged()
 {
-    // FIXME: not efficient, don't need to repaint the whole thing...
+    // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
     seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
 
 }

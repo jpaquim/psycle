@@ -79,6 +79,8 @@ void PatternBox::populatePatternTree()
         psy::core::PatternCategory* category = *it;
         QTreeWidgetItem *categoryItem = new QTreeWidgetItem( patternTree_ );
         categoryItem->setText( 0, QString::fromStdString( category->name() ) );
+        QColor col = QColorFromLongColor( category->color() );
+        categoryItem->setBackground( 0, QBrush( col ) );
         categoryMap[categoryItem] = category;
 
         std::vector<psy::core::SinglePattern*>::iterator patIt = category->begin();
@@ -114,9 +116,14 @@ void PatternBox::createItemPropertiesBox()
 void PatternBox::newCategory() 
 { 
     psy::core::PatternCategory* category = song()->patternSequence()->patternData()->createNewCategory("category");
+    long defaultColor = 0x0000FF;
+    category->setColor( defaultColor );
+
 
     QTreeWidgetItem* catItem = new QTreeWidgetItem( patternTree() );
     catItem->setText( 0, "Category" );
+    QColor col = QColorFromLongColor( category->color() );
+    catItem->setBackground( 0, QBrush( col ) );
     categoryMap[catItem] = category;
     catItems.push_back( catItem );
 }
@@ -231,4 +238,15 @@ void PatternBox::onPatternNameEdited( const QString & newText )
             guiItem->repaint();
         }*/
     }
+}
+
+// FIXME: this is duplicated in SequencerItem.
+const QColor & PatternBox::QColorFromLongColor( long longCol )
+{
+    unsigned int r, g, b;
+    b = (longCol>>16) & 0xff;
+    g = (longCol>>8 ) & 0xff;
+    r = (longCol    ) & 0xff;
+
+    return QColor( r, g, b );
 }

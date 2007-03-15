@@ -60,6 +60,7 @@ signals:
     void createActions();
     void createToolbar();
     void createItemPropertiesBox();
+    const QColor & QColorFromLongColor( long longCol );
 
     psy::core::Song *song_;
     std::map<QTreeWidgetItem*, psy::core::PatternCategory*> categoryMap;
