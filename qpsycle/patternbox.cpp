@@ -25,6 +25,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QComboBox>
+#include <QColorDialog>
 
  #include "patternbox.h"
  #include "psycore/singlepattern.h"
@@ -110,7 +111,9 @@ void PatternBox::createItemPropertiesBox()
              this, SLOT( onPatternNameEdited( const QString & ) ) );
     itemPropsLayout->addWidget( nameEdit_, 1, 1, 1, 3 );
     itemPropsLayout->addWidget( new QLabel( "Colour:" ), 2, 0, 2, 1 );
-    itemPropsLayout->addWidget( new QComboBox(), 2, 1, 2, 3 );
+    colorBtn_ = new QPushButton();
+    connect( colorBtn_, SIGNAL( clicked() ), this, SLOT( onColorButtonClicked() ) );
+    itemPropsLayout->addWidget( colorBtn_, 2, 1, 2, 3 );
 }
 
 void PatternBox::newCategory() 
@@ -249,4 +252,30 @@ const QColor & PatternBox::QColorFromLongColor( long longCol )
     r = (longCol    ) & 0xff;
 
     return QColor( r, g, b );
+}
+
+long PatternBox::QColorToLongColor( const QColor & qCol )
+{
+    unsigned int r, g, b;
+    r = qCol.red();
+    g = qCol.green();
+    b = qCol.blue();
+    unsigned long longCol = (b << 16) | (g << 8) | (r); // FIXME: BGR??
+    
+
+    return longCol;
+}
+
+void PatternBox::onColorButtonClicked()
+{  
+    QColor color = QColorDialog::getColor();
+    QTreeWidgetItem *item = patternTree_->currentItem();
+    std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( item );
+    if( itr != categoryMap.end() ) 
+    {
+        psy::core::PatternCategory *category = itr->second;
+        category->setColor( QColorToLongColor( color ) );
+        item->setBackground( 0, QBrush( color ) );
+        // FIXME: also set colorBtn background.
+    }
 }

@@ -23,6 +23,7 @@
  #include <QAction>
  #include <QToolBar>
  #include <QTreeWidget>
+ #include <QPushButton>
 
  #include "psycore/song.h"
 
@@ -49,6 +50,7 @@ public slots:
      void deletePattern();
      void addPatternToSequencer();
      void onPatternNameEdited( const QString & newText );
+     void onColorButtonClicked(); 
 
 signals:
     void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
@@ -61,6 +63,7 @@ signals:
     void createToolbar();
     void createItemPropertiesBox();
     const QColor & QColorFromLongColor( long longCol );
+    long QColorToLongColor( const QColor & qCol );
 
     psy::core::Song *song_;
     std::map<QTreeWidgetItem*, psy::core::PatternCategory*> categoryMap;
@@ -70,6 +73,7 @@ signals:
      QToolBar *toolBar_;
      QWidget *itemProps_;
      QLineEdit *nameEdit_;
+     QPushButton *colorBtn_;
      QTreeWidget *patternTree_;
 
      QAction *newCatAct;
