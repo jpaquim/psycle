@@ -14,7 +14,5 @@
      <file>images/pb_clnpat.png</file>
      <file>images/pb_delpat.png</file>
      <file>images/pb_addpattoseq.png</file>
-     <file>images/pattern_header_skin.xpm</file>
-     <file>images/psyhead.png</file>
  </qresource>
  </RCC>
