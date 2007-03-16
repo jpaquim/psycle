@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Thu Mar 15 22:24:42 2007
+** Created: Fri Mar 16 17:43:51 2007
 **      by: The Qt Meta Object Compiler version 59 (Qt 4.2.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainWindow[] = {
        1,       // revision
        0,       // classname
        0,    0, // classinfo
-      15,   10, // methods
+      16,   10, // methods
        0,    0, // properties
        0,    0, // enums/sets
 
@@ -42,6 +42,7 @@ static const uint qt_meta_data_MainWindow[] = {
      301,   11,   11,   11, 0x08,
      320,   11,   11,   11, 0x08,
      378,   11,   11,   11, 0x08,
+     401,   11,   11,   11, 0x08,
 
        0        // eod
 };
@@ -54,7 +55,7 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "onNewMachineCreated(int)\0macGui\0onMachineGuiChosen(MachineGui*)\0"
     "onPatternDeleted()\0"
     "onAddPatternToSequencerRequest(psy::core::SinglePattern*)\0"
-    "onPatternNameChanged()\0"
+    "onPatternNameChanged()\0onCategoryColorChanged()\0"
 };
 
 const QMetaObject MainWindow::staticMetaObject = {
@@ -97,8 +98,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 12: onPatternDeleted(); break;
         case 13: onAddPatternToSequencerRequest((*reinterpret_cast< psy::core::SinglePattern*(*)>(_a[1]))); break;
         case 14: onPatternNameChanged(); break;
+        case 15: onCategoryColorChanged(); break;
         }
-        _id -= 15;
+        _id -= 16;
     }
     return _id;
 }

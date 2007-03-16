@@ -57,6 +57,7 @@ signals:
     void patternDeleted();
     void addPatternToSequencerRequest( psy::core::SinglePattern *selectedPattern );
     void patternNameChanged();
+    void categoryColorChanged();
 
  private:
     void createActions();

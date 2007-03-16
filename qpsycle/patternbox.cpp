@@ -281,5 +281,6 @@ void PatternBox::onColorButtonClicked()
         QPalette pal = colorBtn_->palette();
         pal.setColor( QPalette::Button, color );
         colorBtn_->setPalette( pal );
+        emit categoryColorChanged();
     }
 }

@@ -120,6 +120,8 @@ void MainWindow::setupSignals()
              this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
     connect( patternBox_, SIGNAL( patternNameChanged() ),
              this, SLOT( onPatternNameChanged() ) );
+    connect( patternBox_, SIGNAL( categoryColorChanged() ),
+             this, SLOT( onCategoryColorChanged() ) );
 
     connect( macView_, SIGNAL( newMachineCreated( int ) ), 
              this, SLOT( onNewMachineCreated( int ) ) );
@@ -442,6 +444,13 @@ void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *patte
 }
 
 void MainWindow::onPatternNameChanged()
+{
+    // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
+    seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
+
+}
+
+void MainWindow::onCategoryColorChanged()
 {
     // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
     seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
