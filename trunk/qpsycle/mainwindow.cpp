@@ -81,10 +81,10 @@ void MainWindow::setupGui()
 {
     QWidget *workArea = new QWidget();
 
-    QDockWidget *dock = new QDockWidget( "Pattern Box", this );
-    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock->setWidget(patternBox_);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
+    dock_ = new QDockWidget( "Pattern Box", this );
+    dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dock_->setWidget(patternBox_);
+    addDockWidget(Qt::LeftDockWidgetArea, dock_);
 
 
     views_ = new QTabWidget();
@@ -159,6 +159,7 @@ void MainWindow::open()
         song_->load( fileName.toStdString() );
 
         // update gui to new song FIXME: crappy way of doing it for now.
+        delete patternBox_;
         delete macView_;
         delete patView_;
         delete wavView_;
@@ -171,10 +172,13 @@ void MainWindow::open()
         views_->addTab( patView_, "Pattern View" );
         views_->addTab( wavView_, "Wave Editor" );
         views_->addTab( seqView_, "Sequencer View" );
+        patternBox_ = new PatternBox( song_ );
+        dock_->setWidget( patternBox_ );
         patternBox_->populatePatternTree();
         populateMachineCombo();
         initSampleCombo();
         patternBox_->patternTree()->setFocus();
+        setupSignals();
         // enable audio driver
         //Global::configuration()._pOutputDriver->Enable(true);
         // update file recent open sub menu
