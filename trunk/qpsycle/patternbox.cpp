@@ -239,18 +239,23 @@ void PatternBox::onPatternNameEdited( const QString & newText )
 {
     QTreeWidgetItem *item = patternTree_->currentItem();
 
+    // If current item is a pattern...
     std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
     if( itr!=patternMap.end() ) {
         psy::core::SinglePattern *pattern = itr->second;
         item->setText( 0, newText );
         pattern->setName( newText.toStdString() );
         emit patternNameChanged();
-/*        std::vector<SequencerItem*> list = seqGui->guiItemsByPattern(itr->second);
-        std::vector<SequencerItem*>::iterator it = list.begin();
-        for ( ; it < list.end(); it++) {
-            SequencerItem* guiItem = *it;
-            guiItem->repaint();
-        }*/
+        return;
+    }
+
+    // If current item is a category...
+    std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find(item);
+    if( catItr!=categoryMap.end() ) {
+        psy::core::PatternCategory *category = catItr->second;
+        item->setText( 0, newText );
+        category->setName( newText.toStdString() );
+        return;
     }
 }
 
