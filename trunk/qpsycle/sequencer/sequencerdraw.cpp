@@ -76,8 +76,7 @@
             connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
                      this, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
             item->setSequenceEntry( entry );
-//            line->items.push_back(item);
-
+			item->setPos( entry->tickPosition() * beatPxLength_, 0 );
         }
         count++;
    }
