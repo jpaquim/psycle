@@ -157,9 +157,24 @@ void MainWindow::open()
         // load the song
         song_ = new psy::core::Song();
         song_->load( fileName.toStdString() );
+
+        // update gui to new song FIXME: crappy way of doing it for now.
+        delete macView_;
+        delete patView_;
+        delete wavView_;
+        delete seqView_;
+        macView_ = new MachineView( song_ );
+        patView_ = new PatternView( song_ );
+        wavView_ = new WaveView( song_ );
+        seqView_ = new SequencerView( song_ );
+        views_->addTab( macView_, "Machine View" );
+        views_->addTab( patView_, "Pattern View" );
+        views_->addTab( wavView_, "Wave Editor" );
+        views_->addTab( seqView_, "Sequencer View" );
+        patternBox_->populatePatternTree();
         populateMachineCombo();
-        // update gui to new song
-    //    updateNewSong();
+        initSampleCombo();
+        patternBox_->patternTree()->setFocus();
         // enable audio driver
         //Global::configuration()._pOutputDriver->Enable(true);
         // update file recent open sub menu
