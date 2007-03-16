@@ -216,12 +216,22 @@ void PatternBox::addPatternToSequencer()
 
 void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem )
 {
-    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( currItem );
-    if(itr!=patternMap.end()) {
-        psy::core::SinglePattern *pattern = itr->second;
+    // If new item is a pattern...
+    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( currItem );
+    if( patItr != patternMap.end() ) {
+        psy::core::SinglePattern *pattern = patItr->second;
         nameEdit_->setText( QString::fromStdString( pattern->name() ) );
         // emit a signal for main window to tell pat view.
         emit patternSelectedInPatternBox( pattern );
+        return;
+    }
+
+    // If new item is a category...
+    std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( currItem );
+    if( catItr !=categoryMap.end() ) {
+        psy::core::PatternCategory *category = catItr->second;
+        nameEdit_->setText( QString::fromStdString( category->name() ) );
+        // emit a signal for main window to tell pat view.
     }
 }
 
