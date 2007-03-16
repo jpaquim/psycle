@@ -143,10 +143,30 @@ void MainWindow::setupSignals()
 
  }
 
- void MainWindow::open()
- {
+void MainWindow::open()
+{
+    QString fileName = QFileDialog::getOpenFileName( 
+                            this, "Open Song", "/home/neil", "Psy (*.psy)" );
 
- }
+    if ( fileName.toStdString() != "" ) {
+        // stop player
+        psy::core::Player::Instance()->stop();
+        // disable audio driver
+        //Global::configuration()._pOutputDriver->Enable(false);
+        // add a new Song tab
+        // load the song
+        song_ = new psy::core::Song();
+        song_->load( fileName.toStdString() );
+        populateMachineCombo();
+        // update gui to new song
+    //    updateNewSong();
+        // enable audio driver
+        //Global::configuration()._pOutputDriver->Enable(true);
+        // update file recent open sub menu
+        //recentFileMenu_->add(new ngrs::MenuItem(fileName));
+    }
+
+}
 
  void MainWindow::save()
  {
@@ -439,7 +459,6 @@ void MainWindow::onPatternDeleted()
 
 void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern )
 {
-    std::cout << pattern->name() << std::endl;
     seqView_->addPattern( pattern );
 }
 
