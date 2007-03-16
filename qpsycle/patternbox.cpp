@@ -112,6 +112,7 @@ void PatternBox::createItemPropertiesBox()
     itemPropsLayout->addWidget( nameEdit_, 1, 1, 1, 3 );
     itemPropsLayout->addWidget( new QLabel( "Colour:" ), 2, 0, 2, 1 );
     colorBtn_ = new QPushButton();
+    colorBtn_->setAutoFillBackground( true );
     connect( colorBtn_, SIGNAL( clicked() ), this, SLOT( onColorButtonClicked() ) );
     itemPropsLayout->addWidget( colorBtn_, 2, 1, 2, 3 );
 }
@@ -276,6 +277,9 @@ void PatternBox::onColorButtonClicked()
         psy::core::PatternCategory *category = itr->second;
         category->setColor( QColorToLongColor( color ) );
         item->setBackground( 0, QBrush( color ) );
-        // FIXME: also set colorBtn background.
+        // Change the colour of the colorBtn's background.
+        QPalette pal = colorBtn_->palette();
+        pal.setColor( QPalette::Button, color );
+        colorBtn_->setPalette( pal );
     }
 }
