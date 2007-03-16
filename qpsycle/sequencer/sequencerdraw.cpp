@@ -52,9 +52,7 @@
     for ( ; it < sequencerView()->song()->patternSequence()->end(); it++) {
         psy::core::SequenceLine* seqLine = *it;
         SequencerLine* line = new SequencerLine( this, seqLine );
-//        line->setSequenceLine( seqLine );
         line->setParentItem( seqArea_ );
-        //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
         lines_.push_back(line);
         line->setPos( 0, count*lineHeight_ );
         if (isFirst) {
@@ -62,29 +60,24 @@
             isFirst = false;
         }
         connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
-//        scrollArea_->resize();
 //        lastLine_ = line;
- //       selectedLine_ = line;
-        // now iterate the sequence entries
+
+        // Now iterate the sequence entries.
         psy::core::SequenceLine::iterator iter = seqLine->begin();
         for(; iter!= seqLine->end(); ++iter)
         {
             psy::core::SequenceEntry* entry = iter->second;
             SequencerItem* item = new SequencerItem();
             item->setParentItem( line );
-//            item->click.connect(line,&SequencerGUI::SequencerLine::onSequencerItemClick);
             connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
                      this, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
             item->setSequenceEntry( entry );
 			item->setPos( entry->tickPosition() * beatPxLength_, 0 );
         }
         count++;
-   }
+    }
     scene_->addItem( seqArea_ );
-//    lines.clear();
-//    scrollArea_->removeChilds();
-
- }
+}
 
 int SequencerDraw::beatPxLength( ) const
 {

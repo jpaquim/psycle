@@ -116,6 +116,8 @@
      PatternView *patView_;
      WaveView *wavView_;
      SequencerView *seqView_;
+
+     QDockWidget *dock_;
  };
 
  #endif

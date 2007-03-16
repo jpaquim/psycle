@@ -23,7 +23,7 @@
 #endif
 #if !defined XPSYCLE__NO_NETAUDIO
 #include "audiodriver.h"
-#include <audio/audiolib.h> // aka nas - net audio system
+#include <audio/audiolib.h>
 #include <pthread.h>
 #include <exception>
 namespace psy
