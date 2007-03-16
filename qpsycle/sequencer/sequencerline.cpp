@@ -49,7 +49,7 @@ psy::core::SequenceLine *SequencerLine::sequenceLine()
 void SequencerLine::addItem( psy::core::SinglePattern* pattern )
 {
     double endTick = sequenceLine()->tickLength();
-
+    qDebug("asdf");
     SequencerItem *item = new SequencerItem();
     item->setSequenceEntry( sequenceLine()->createEntry(pattern, endTick) );
     scene()->addItem( item );

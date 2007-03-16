@@ -158,7 +158,7 @@ void MainWindow::open()
         song_ = new psy::core::Song();
         song_->load( fileName.toStdString() );
 
-        // update gui to new song FIXME: crappy way of doing it for now.
+        // update gui to new song FIXME: very crappy way of doing it for now.
         delete patternBox_;
         delete macView_;
         delete patView_;
@@ -179,6 +179,7 @@ void MainWindow::open()
         initSampleCombo();
         patternBox_->patternTree()->setFocus();
         setupSignals();
+        psy::core::Player::Instance()->song( song_ );
         // enable audio driver
         //Global::configuration()._pOutputDriver->Enable(true);
         // update file recent open sub menu
