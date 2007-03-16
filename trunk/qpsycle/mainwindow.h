@@ -63,6 +63,7 @@
     void onPatternDeleted();
     void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
     void onPatternNameChanged();
+    void onCategoryColorChanged();
 
  private:
     psy::core::Song *song_;
