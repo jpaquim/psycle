@@ -52,6 +52,7 @@
     void PlayNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
     void StopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
     psy::core::Song *song();
+    void setSong( psy::core::Song *song ) { song_ = song; }
     void setTheChosenOne( MachineGui* macGui ) { theChosenOne_ = macGui; }
     MachineGui* theChosenOne() { return theChosenOne_; }
 
