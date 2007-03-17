@@ -677,7 +677,6 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             return;
         break;
         case psy::core::cdefTrackNext:
-            qDebug("eh");
             if ( cursor().track()+1 < patDraw_->patternView()->numberOfTracks() ) {
                 PatCursor oldCursor = cursor();
                 setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
@@ -687,7 +686,6 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             return;
         break;
         case psy::core::cdefTrackPrev:
-            qDebug("eh1");
             if ( cursor().track() > 0 ) {
                 PatCursor oldCursor = cursor();
                 setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );
@@ -696,6 +694,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             break;
             return;
         break;
+        case psy::core::cdefNavPageDn:
+            moveCursor( 0, 16 );
+            break;
+        case psy::core::cdefNavPageUp:
+            moveCursor( 0, -16 );
+            break;
         default:
             // If we got here, we didn't do anything with it, so pass to parent.
             event->ignore();
@@ -705,7 +709,6 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
 bool PatternGrid::isNote( int key )
 {
-    // FIXME: this will be different one the input handler is set up.
     if ( 
          key == psy::core::cdefKeyC_0 ||
          key == psy::core::cdefKeyCS0 ||
@@ -736,10 +739,7 @@ bool PatternGrid::isNote( int key )
          key == psy::core::cdefKeyD_2 ||
          key == psy::core::cdefKeyDS2 ||
          key == psy::core::cdefKeyE_2 
-    )
-    {
-        return true;    
-    }
+    ) { return true; }
 
     return false;
 }
@@ -792,6 +792,8 @@ void PatternGrid::moveCursor( int dx, int dy) {
             cursor_.setLine( std::min(cursor_.line() + dy, patDraw_->patternView()->numberOfLines()-1));
 //            window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
 //            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
+        } else if ( dy != 0 && (dy + cursor_.line() < 0) ) {
+            cursor_.setLine( std::max(cursor_.line() + dy, 0));
         } else if (dy!=0) {
 //            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
         }
