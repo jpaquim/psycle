@@ -28,6 +28,7 @@
 #include "sequencerline.h"
 #include "sequenceritem.h"
 #include "sequencerarea.h"
+#include "beatruler.h"
 
 
  SequencerDraw::SequencerDraw( SequencerView *seqView )
@@ -76,7 +77,13 @@
         }
         count++;
     }
+    BeatRuler *beatRuler = new BeatRuler( this );
+
+    scene_->addItem( beatRuler );
+    beatRuler->setPos( 0, 0 );
     scene_->addItem( seqArea_ );
+    seqArea_->setPos( 0, 20 );
+
 }
 
 int SequencerDraw::beatPxLength( ) const

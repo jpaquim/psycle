@@ -109,6 +109,7 @@ HEADERS += mainwindow.h \
            sequencer/sequenceritem.h \
            sequencer/sequencerline.h \
            sequencer/sequencerview.h \
+           sequencer/beatruler.h \
            waveview/waveview.h \
            psycore/helpers/scale.hpp \
            psycore/helpers/math/pi.hpp
@@ -182,5 +183,6 @@ SOURCES += mainwindow.cpp \
            sequencer/sequenceritem.cpp \
            sequencer/sequencerline.cpp \
            sequencer/sequencerview.cpp \
+           sequencer/beatruler.cpp \
            waveview/waveview.cpp
 RESOURCES += qpsycle.qrc
