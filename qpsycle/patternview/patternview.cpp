@@ -27,12 +27,13 @@
 
 
 
- PatternView::PatternView( psy::core::Song *song )
- {
+PatternView::PatternView( psy::core::Song *song )
+{
     song_ = song;
-     setNumberOfTracks( 4 );
+    pattern_ = 0;
+    setNumberOfTracks( 4 );
     patDraw_ = new PatternDraw( this );
-     setPattern( new psy::core::SinglePattern() );
+    setPattern( new psy::core::SinglePattern() );
 
     setSelectedMachineIndex( 255 ); // FIXME: why 255?
     layout = new QVBoxLayout();
@@ -41,7 +42,7 @@
     createToolBar();
     layout->addWidget(toolBar_);
     layout->addWidget( patDraw_ );
- }
+}
 
  void PatternView::createToolBar()
  {
