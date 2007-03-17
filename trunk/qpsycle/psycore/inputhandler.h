@@ -157,8 +157,8 @@ namespace psy {
 			cdefSongPosInc,
 			cdefSongPosDec,
 
-			cdefColumnPrev,		///< tab
-			cdefColumnNext,		///< s-tab
+			cdefTrackNext,		///< s-tab
+			cdefTrackPrev,		///< tab
 
 			cdefNavUp,
 			cdefNavDown,
@@ -330,8 +330,8 @@ namespace psy {
 				case cdefTweakS:  return "Tweak Smooth (Parameter)";
 				case cdefMIDICC:  return "Mcm (MIDI CC)";
 
-				case cdefColumnPrev:	return "Prev column";
-				case cdefColumnNext:	return "Next column";
+				case cdefTrackPrev:	return "Prev track";
+				case cdefTrackNext:	return "Next track";
 				case cdefNavUp:			return "Nav. Up";
 				case cdefNavDown:			return "Nav. Down";
 				case cdefNavLeft:		return "Nav. Left";
