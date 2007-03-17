@@ -158,6 +158,8 @@ public:
     void repaintSelection();
     void repaintCursor();
 
+    int patternStep() { return 1; }
+
 
 
 public slots:
