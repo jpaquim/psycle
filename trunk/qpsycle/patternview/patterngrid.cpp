@@ -65,7 +65,15 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 QRectF PatternGrid::boundingRect() const
 {
     // FIXME: should come from somewhere else (i.e. that not hard-coded.)
-    return QRectF( 0, 0, 500, 500 );
+    if ( patDraw_->patternView()->pattern() ) {
+        int numberOfTracks = patDraw_->patternView()->numberOfTracks();
+        int trackWidth = patDraw_->patternView()->trackWidth();
+        int numberOfLines = patDraw_->patternView()->numberOfLines();
+        int rowHeight = patDraw_->patternView()->rowHeight();
+        return QRectF( 0, 0, numberOfTracks*trackWidth, numberOfLines*rowHeight );
+    } else {
+        return QRectF( 0, 0, patDraw_->width(), patDraw_->height() );
+    }
 }
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
