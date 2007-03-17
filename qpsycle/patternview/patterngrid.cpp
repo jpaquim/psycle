@@ -712,11 +712,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 newRight = oldSelection_.right();
                 selection_.set( newLeft,newRight, newTop, newBottom ); 
             } else {
-                qDebug("hoi");
                 startKeybasedSelection(crs.track(), crs.track()+1,
                                         std::max(0,crs.line()-1), crs.line()+1);
             }
             newCursorLine = std::max(0,cursor().line() - 1);
+            setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+            update();
         }
         break;
 
