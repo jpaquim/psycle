@@ -103,8 +103,7 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             }
          
             // FIXME: maybe do this on mouseReleaseEvent?
-            QPointF newPosInParentCoords = item->mapToParent( newItemLeft, 0 );
-            item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newPosInParentCoords.x() / beatPxLength_ );
+            item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newItemLeft / beatPxLength_ );
         }
     }
 }
