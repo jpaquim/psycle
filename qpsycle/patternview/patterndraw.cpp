@@ -38,9 +38,12 @@
      lineNumCol_ = new LineNumberColumn( this );
      Header *trackHeader = new Header( this );
      patGrid_ = new PatternGrid( this );
-     trackHeader->setPos( 50, 0 );
+
      scene_->addItem( lineNumCol_ );
      scene_->addItem( trackHeader );
      scene_->addItem( patGrid_ );
+
+     trackHeader->setPos( 50, 0 );
+     lineNumCol_->setPos( 0, 20 );
      patGrid_->setPos( 50, 20 );
  }
