@@ -82,7 +82,7 @@
     scene_->addItem( beatRuler );
     beatRuler->setPos( 0, 0 );
     scene_->addItem( seqArea_ );
-    seqArea_->setPos( 0, 20 );
+    seqArea_->setPos( 0, 30 );
 
 }
 
