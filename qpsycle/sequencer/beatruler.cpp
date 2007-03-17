@@ -31,40 +31,41 @@ BeatRuler::~BeatRuler( )
 
 QRectF BeatRuler::boundingRect() const
 {
-    return QRectF( 0, 0, sDraw_->width(), 20 );
+    return QRectF( 0, 0, sDraw_->width(), preferredHeight() );
 }
 
 void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+    int cw = boundingRect().width();
+    int ch = boundingRect().height();
+
+
+    painter->setBrush( QColor( 230,230,230 ) );
+    painter->setPen( QColor( 230,230,230 ) );
     painter->drawRect( boundingRect() );
-/*    ngrs::Rect area = g.repaintArea().rectClipBox();
 
-    int cw = clientWidth();
-    int ch = clientHeight();
-
-    g.setForeground( ngrs::Color(220,220,220) );
-
-    g.drawLine(scrollDx(), ch - 10 , cw + scrollDx(), ch - 10);
-
-    int start = (area.left() - absoluteLeft() + scrollDx()) / sView->beatPxLength();
-    ///\ todo end seems not valid 
-    int end   = (area.left() + area.width() - absoluteLeft() + scrollDx() ) / sView->beatPxLength();
+    int start = 0;
+    int end   = sDraw_->width();
 
     for (int i = start ; i < end ; i++) {
         if (! (i % 16)) {
-            g.setForeground( ngrs::Color( 180, 180, 180) );
-            g.drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch);
-            std::string beatLabel = stringify(i/4);
-            int textWidth = g.textWidth(beatLabel);
-            g.drawText(i* sView->beatPxLength() - textWidth / 2, g.textAscent(), beatLabel);
+            painter->setPen( QColor( 180, 180, 180 ) );
+            painter->drawLine( i * sDraw_->beatPxLength(), ch-10, 
+                               i * sDraw_->beatPxLength(), ch-1 );
+            QString beatLabel = QString::number(i/4);
+            QRectF textRect = QRectF( i * sDraw_->beatPxLength()-10, 0, 20, ch-10 );
+            painter->setPen( QColor( 50, 50, 50 ) );
+            painter->drawText( textRect, Qt::AlignHCenter | Qt::AlignBottom, beatLabel );
         }
         else {
-            if (sView->beatPxLength() > 3) {
-                g.setForeground( ngrs::Color( 220, 220, 220) );
-                g.drawLine(i* sView->beatPxLength(),ch-10,d2i(i*sView->beatPxLength()), ch-5);
+            if ( sDraw_->beatPxLength() > 3 ) {
+                painter->setPen( QColor( 220, 220, 220 ) );
+                painter->drawLine( i * sDraw_->beatPxLength(), ch-10, i*sDraw_->beatPxLength(), ch-5);
             }
         }
-    }*/
+    }
+    painter->setPen( QColor( 220, 220, 220 ) );
+    painter->drawLine( 0, ch - 10 , cw, ch - 10 );
 }
 
 int BeatRuler::preferredHeight( ) const
@@ -72,7 +73,7 @@ int BeatRuler::preferredHeight( ) const
 //    ngrs::FontMetrics metrics(font());
 
 //    return metrics.textHeight() + 10;
-    return 20;
+    return 30;
 }
 
 // end of beat ruler
