@@ -15,6 +15,26 @@ class PatternDraw;
 class TrackGeometry;
 class ColumnEvent;
 
+class Selection {
+public:
+    Selection() {}
+
+    void set( int left, int right, int top, int bottom )
+    { left_ = left; right_ = right; top_ = top; bottom_ = bottom; }
+    int left() { return left_; }
+    int right() { return right_; }
+    int top() { return top_; }
+    int bottom() { return bottom_; }
+    void setLeft( int left ) { left_ = left; }
+    void setRight( int right ) { right_ = right; };
+    void setTop( int top ) { top_ = top; }
+    void setBottom( int bottom ){ bottom_ = bottom; }
+
+private:
+    int left_, right_, top_, bottom_;
+
+};
+
 class PatCursor {
 public:
     PatCursor();
@@ -54,7 +74,7 @@ public:
     void drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
     void drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
     void drawData( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack, bool sharp, const QColor & color );
-    void drawSelBg( QPainter *painter, const QRectF & selArea );
+    void drawSelBg( QPainter *painter, Selection selArea );
 
     const std::map<int, TrackGeometry> & trackGeometrics() const;
     int trackWidth() const;
@@ -143,9 +163,9 @@ public slots:
 
 
 private:
-    QRectF selection_;
-    QRectF oldSelection_;
-    const QRectF & selection() const;
+    Selection selection_;
+    Selection oldSelection_;
+    Selection selection() const;
     PatCursor selStartPoint_;
     PatCursor selCursor_;
 
@@ -224,7 +244,6 @@ private:
 
     ColType type_;
 };
-
 
 
 #endif
