@@ -27,7 +27,7 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     : patDraw_( pDraw )
 {
     setFlag(ItemIsFocusable);
-    setupTrackGeometrics( patDraw_->patternView()->numberOfTracks() );
+    setupTrackGeometrics( numberOfTracks() );
 
     addEvent( ColumnEvent::note );
     addEvent( ColumnEvent::hex2 );
@@ -40,11 +40,13 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     addEvent( ColumnEvent::hex4 );
     addEvent( ColumnEvent::hex4 );
     // end of multi paraCmd
+    //
+    selection_ = QRectF( 0,0,1,5 );
     
     // FIXME: hardcoding these for now.
      textColor_ = QColor( 255, 255, 255 );
      separatorColor_ = QColor( 145, 147, 147 );
-     selectionColor_ = QColor( 149, 68, 41 );
+     selectionColor_ = QColor( 149, 68, 41, 70 );
      cursorColor_ = QColor( 179, 217, 34 );
      cursorTextColor_ = QColor( 0, 0, 0 );
      barColor_ = QColor( 70, 71, 69 );
@@ -66,11 +68,9 @@ QRectF PatternGrid::boundingRect() const
 {
     // FIXME: should come from somewhere else (i.e. that not hard-coded.)
     if ( patDraw_->patternView()->pattern() ) {
-        int numberOfTracks = patDraw_->patternView()->numberOfTracks();
-        int trackWidth = patDraw_->patternView()->trackWidth();
-        int numberOfLines = patDraw_->patternView()->numberOfLines();
-        int rowHeight = patDraw_->patternView()->rowHeight();
-        return QRectF( 0, 0, numberOfTracks*trackWidth, numberOfLines*rowHeight );
+        int gridWidth = gridWidthByTrack( numberOfTracks() -1 );
+        int gridHeight = numberOfLines()*lineHeight();
+        return QRectF( 0, 0, gridWidth, gridHeight ); 
     } else {
         return QRectF( 0, 0, patDraw_->width(), patDraw_->height() );
     }
@@ -82,23 +82,16 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
     setFont( font_ );
     painter->setFont( font_ ); 
         if ( patDraw_->patternView()->pattern() ) {
-            int numberOfTracks = patDraw_->patternView()->numberOfTracks();
-            int trackWidth = patDraw_->patternView()->trackWidth();
-            int numberOfLines = patDraw_->patternView()->numberOfLines();
-            int rowHeight = patDraw_->patternView()->rowHeight();
 
             int startLine = 0; 
-            int endLine = numberOfLines - 1;
+            int endLine = numberOfLines() - 1;
             int startTrack = 0;
-            int endTrack = numberOfTracks - 1;
-
-
-            //drawSelBg(g,selection());
-
+            int endTrack = numberOfTracks() - 1;
 
             drawGrid( painter, startLine, endLine, startTrack, endTrack );	
             //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
             drawPattern( painter, startLine, endLine, startTrack, endTrack );
+            drawSelBg( painter, selection() );
         //drawRestArea(g, startLine, endLine, startTrack, endTrack);*/
         }
 }
@@ -125,14 +118,8 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 {
     psy::core::TimeSignature signature;
 
-    std::map<int, TrackGeometry>::const_iterator it;
-    it = trackGeometrics().lower_bound( endTrack );
-    int gridWidth = 0;
-    if ( it != trackGeometrics().end() ) {
-        gridWidth = it->second.left() + it->second.width();
-    }
-
-    int gridHeight = ( (endLine+1) * lineHeight() );
+    int gridWidth = boundingRect().width();
+    int gridHeight = boundingRect().height();
 
     // Draw horizontal lines to demarcate the pattern lines.
     if ( lineGridEnabled() ) {
@@ -175,6 +162,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
     // Draw the vertical track separators.
     painter->setPen( separatorColor() );
     painter->setBrush( separatorColor() );
+    std::map<int, TrackGeometry>::const_iterator it;
     it = trackGeometrics().lower_bound( startTrack );
     for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) { //  oolIdent px space at begin of trackCol{
         TrackGeometry trackGeom = it->second;
@@ -677,7 +665,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             return;
         break;
         case psy::core::cdefTrackNext:
-            if ( cursor().track()+1 < patDraw_->patternView()->numberOfTracks() ) {
+            if ( cursor().track()+1 < numberOfTracks() ) {
                 PatCursor oldCursor = cursor();
                 setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
             }
@@ -700,11 +688,53 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         case psy::core::cdefNavPageUp:
             moveCursor( 0, -16 );
             break;
+        case psy::core::cdefSelectUp:
+        {
+/*            oldSelection_ = selection_;
+            PatCursor crs = cursor();
+            int newLeft, newRight, newTop, newBottom;
+            int newCursorTrack = cursor().track();
+            int newCursorLine = cursor().line();
+            int newCursorCol = cursor().col();
+            if (doingKeybasedSelect()) {
+                // if above line is not already selected then select it...
+                if (!lineAlreadySelected(crs.line())) {
+                    // don't set selection out of bounds of grid...
+                    newTop = std::max(oldSelection_.top()-1, 0);
+                    newBottom = oldSelection_.bottom();
+                } else { // else if it is selected, deselect it...
+                    newTop = oldSelection_.top();
+                    newBottom = oldSelection_.bottom()-1;
+                }
+                newLeft = oldSelection_.left(); // left&right stay the same.
+                newRight = oldSelection_.right();
+                selection_.setRect(newLeft,newTop,newRight,newBottom); 
+            } else {
+                startKeybasedSelection(crs.track(), crs.track()+1,
+                    std::max(0,crs.line()-1),
+                    crs.line()+1);
+            }
+            newCursorLine = std::max(0,cursor().line() - 1);*/
+        }
+        break;
+
         default:
             // If we got here, we didn't do anything with it, so pass to parent.
             event->ignore();
     }
 
+}
+
+void PatternGrid::drawSelBg( QPainter *painter, const QRectF & selArea )
+{			
+    int x1Off = xOffByTrack( selArea.left() );
+    int y1Off = selArea.top()  * lineHeight() ;
+
+    int x2Off = xOffByTrack( selArea.right() );
+    int y2Off = selArea.bottom() * lineHeight();
+
+    painter->setBrush( selectionColor() );
+    painter->drawRect( x1Off, y1Off, x2Off-x1Off, y2Off-y1Off );
 }
 
 bool PatternGrid::isNote( int key )
@@ -761,7 +791,7 @@ void PatternGrid::moveCursor( int dx, int dy) {
                     cursor_.setCol( 0 );
                     cursor_.setEventNr( eventnr + 1);
                 } else 
-                    if (cursor_.track()+1 < patDraw_->patternView()->numberOfTracks() ) {
+                    if (cursor_.track()+1 < numberOfTracks() ) {
                         cursor_.setTrack( cursor_.track() + 1 );
                         cursor_.setEventNr(0);
                         cursor_.setCol(0);
@@ -789,7 +819,7 @@ void PatternGrid::moveCursor( int dx, int dy) {
         }
 
         if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
-            cursor_.setLine( std::min(cursor_.line() + dy, patDraw_->patternView()->numberOfLines()-1));
+            cursor_.setLine( std::min(cursor_.line() + dy, numberOfLines()-1));
 //            window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
 //            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
         } else if ( dy != 0 && (dy + cursor_.line() < 0) ) {
@@ -955,6 +985,59 @@ unsigned char PatternGrid::convertDigit( int defaultValue, int scanCode, unsigne
 psy::core::SinglePattern* PatternGrid::pattern() {
     return patDraw_->patternView()->pattern();
 }
+
+int PatternGrid::numberOfTracks() const
+{
+    return patDraw_->patternView()->numberOfTracks();
+}
+
+int PatternGrid::numberOfLines() const
+{
+    return patDraw_->patternView()->numberOfLines();
+}
+
+const QRectF & PatternGrid::selection() const 
+{
+    return selection_;
+}
+
+int PatternGrid::xOffByTrack( int track ) const 
+{
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( track );
+    int trackOff = 0;
+    if ( it != trackGeometrics().end() )
+        trackOff = it->second.left();
+    return trackOff;
+}
+
+bool PatternGrid::lineAlreadySelected( int lineNumber ) {
+    if ( lineNumber > selection_.top() && lineNumber < selection_.bottom() ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool PatternGrid::trackAlreadySelected( int trackNumber ) {
+    if ( trackNumber >= selection_.left() && trackNumber < selection_.right() ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// Start a new block selection using the keyboard.
+void PatternGrid::startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos) {
+    PatCursor crs = cursor();
+    selStartPoint_ = crs;
+    selCursor_ = crs;
+    doingKeybasedSelect_ = true;
+    selection_.setRect(leftPos-0, topPos-0, rightPos-leftPos, bottomPos-topPos);
+}
+
+
+
 
 
 
