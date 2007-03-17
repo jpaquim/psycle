@@ -698,7 +698,6 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             int newCursorLine = cursor().line();
             int newCursorCol = cursor().col();
             if (doingKeybasedSelect()) {
-                qDebug("hoi0");
                 // if above line is not already selected then select it...
                 if (!lineAlreadySelected(crs.line())) {
                     // don't set selection out of bounds of grid...
@@ -717,9 +716,111 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             }
             newCursorLine = std::max(0,cursor().line() - 1);
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
-            update();
+            update(); // FIXME: very inefficient to repaint whole grid.
         }
         break;
+        case psy::core::cdefSelectDn:
+        {
+            oldSelection_ = selection_;
+            PatCursor crs = cursor();
+            int newLeft, newRight, newTop, newBottom;
+            int newCursorTrack = cursor().track();
+            int newCursorLine = cursor().line();
+            int newCursorCol = cursor().col();
+            if (doingKeybasedSelect()) {
+                // if line beneath is not selected...
+                if (!lineAlreadySelected(crs.line()+1)) {
+                    // select line beneath.
+                    newTop = oldSelection_.top();
+                    newBottom = std::min(oldSelection_.bottom()+1,numberOfLines());
+                } else { // line beneath is selected...
+                    // deselect line beneath.
+                    newTop = oldSelection_.top()+1;
+                    newBottom = oldSelection_.bottom();
+                }
+                newLeft = oldSelection_.left(); // left&right stay the same.
+                newRight = oldSelection_.right();
+                selection_.set(newLeft,newRight,newTop,newBottom); 
+
+            } else {
+                startKeybasedSelection(crs.track(), crs.track()+1,
+                    crs.line(),
+                    std::min(numberOfLines(),crs.line()+2));
+            }
+            newCursorLine = std::min(numberOfLines()-1,cursor().line() + 1);
+            setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+            update(); // FIXME: very inefficient to repaint whole grid.
+        }
+        break;
+        case psy::core::cdefSelectLeft:
+        {
+            oldSelection_ = selection_;
+            PatCursor crs = cursor();
+            int newLeft, newRight, newTop, newBottom;
+            int newCursorTrack = cursor().track();
+            int newCursorLine = cursor().line();
+            int newCursorCol = cursor().col();
+            if (doingKeybasedSelect()) {
+                // if track to left is not selected...
+                if (!trackAlreadySelected(crs.track()-1)) {
+                    // select track to left.
+                    newLeft = std::max(0,oldSelection_.left()-1);
+                    newRight = oldSelection_.right();
+                } else { // track to left is selected...
+                    // deselect current track.
+                    newLeft = oldSelection_.left();
+                    newRight = oldSelection_.right()-1;
+                }
+                newTop = oldSelection_.top(); // top&bottom stay the same.
+                newBottom = oldSelection_.bottom();
+                selection_.set(newLeft,newRight,newTop,newBottom); 
+
+            } else { // start a keyboard-based selection. 
+                startKeybasedSelection(std::max(0,crs.track()-1),
+                    crs.track()+1,
+                    crs.line(), crs.line()+1);
+            }
+            newCursorTrack = std::max(0,cursor().track()-1);
+            newCursorLine = cursor().line(); 
+            setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+            update(); // FIXME: very inefficient to repaint whole grid.
+            //        newCursorCol = cursor().col()+1;
+        }
+        break;
+        case psy::core::cdefSelectRight:
+        {
+            oldSelection_ = selection_;
+            PatCursor crs = cursor();
+            int newLeft, newRight, newTop, newBottom;
+            int newCursorTrack = cursor().track();
+            int newCursorLine = cursor().line();
+            int newCursorCol = cursor().col();
+            if (doingKeybasedSelect()) {
+                // if track to right is not selected...
+                if (!trackAlreadySelected(crs.track()+1)) {
+                    // select track to right.
+                    newLeft = oldSelection_.left();
+                    newRight = std::min(oldSelection_.right()+1, numberOfTracks());
+                } else { // track to right is selected...
+                    // deselect current track.
+                    newLeft = oldSelection_.left()+1;
+                    newRight = oldSelection_.right();
+                }
+                newTop = oldSelection_.top(); // top&bottom stay the same.
+                newBottom = oldSelection_.bottom();
+                selection_.set(newLeft,newRight,newTop,newBottom); 
+            } else {
+                startKeybasedSelection(crs.track(), 
+                    std::min(numberOfTracks(),crs.track()+2),
+                    crs.line(), crs.line()+1);
+            }
+            newCursorTrack = std::min(numberOfTracks()-1,cursor().track()+1);
+            newCursorLine = cursor().line(); 
+            setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+            update(); // FIXME: very inefficient to repaint whole grid.
+        }
+        break;
+
 
         default:
             // If we got here, we didn't do anything with it, so pass to parent.
