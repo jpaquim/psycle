@@ -716,7 +716,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             }
             newCursorLine = std::max(0,cursor().line() - 1);
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
-            update(); // FIXME: very inefficient to repaint whole grid.
+            repaintSelection();
         }
         break;
         case psy::core::cdefSelectDn:
@@ -749,7 +749,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             }
             newCursorLine = std::min(numberOfLines()-1,cursor().line() + 1);
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
-            update(); // FIXME: very inefficient to repaint whole grid.
+            repaintSelection();
         }
         break;
         case psy::core::cdefSelectLeft:
@@ -783,7 +783,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             newCursorTrack = std::max(0,cursor().track()-1);
             newCursorLine = cursor().line(); 
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
-            update(); // FIXME: very inefficient to repaint whole grid.
+            repaintSelection();
             //        newCursorCol = cursor().col()+1;
         }
         break;
@@ -817,7 +817,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             newCursorTrack = std::min(numberOfTracks()-1,cursor().track()+1);
             newCursorLine = cursor().line(); 
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
-            update(); // FIXME: very inefficient to repaint whole grid.
+            repaintSelection();
         }
         break;
 
@@ -844,6 +844,21 @@ void PatternGrid::drawSelBg( QPainter *painter, Selection selArea )
     painter->setBrush( selectionColor() );
     painter->drawRect( x1Off, y1Off, x2Off-x1Off, y2Off-y1Off );
 }
+
+void PatternGrid::repaintSelection() {
+    int selLeft = selection_.left();
+    int selRight = selection_.right();
+    int selTop = selection_.top();
+    int selBottom = selection_.bottom();
+    int oldLeft = oldSelection_.left();
+    int oldRight = oldSelection_.right();
+    int oldTop = oldSelection_.top();
+    int oldBottom = oldSelection_.bottom();
+    update( xOffByTrack(selLeft), selTop*lineHeight(), xOffByTrack(selRight), selBottom*lineHeight() );
+    update( xOffByTrack(oldLeft), oldTop*lineHeight(), xOffByTrack(oldRight), oldBottom*lineHeight() );
+    oldSelection_ = selection_;
+}
+
 
 bool PatternGrid::isNote( int key )
 {

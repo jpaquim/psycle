@@ -155,6 +155,7 @@ public:
     bool lineAlreadySelected( int lineNumber );
     bool trackAlreadySelected( int trackNumber );
     void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
+    void repaintSelection();
 
 
 
