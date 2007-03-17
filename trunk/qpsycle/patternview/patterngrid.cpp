@@ -670,7 +670,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 PatCursor oldCursor = cursor();
                 setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
             }
-            update(); // FIXME: inefficient to update the whole grid here.
+            repaintCursor(); 
             break;
             return;
         break;
@@ -679,7 +679,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 PatCursor oldCursor = cursor();
                 setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );
             }
-            update(); // FIXME: inefficient to update the whole grid here.
+            repaintCursor();
             break;
             return;
         break;
@@ -859,6 +859,14 @@ void PatternGrid::repaintSelection() {
     oldSelection_ = selection_;
 }
 
+void PatternGrid::repaintCursor() {
+    // FIXME: could be done more accurately.
+    update( xOffByTrack(cursor_.track()), cursor_.line()*lineHeight(), 
+            xOffByTrack(cursor_.track()+1), (cursor_.line()+1)*lineHeight() );
+    update( xOffByTrack(oldCursor_.track()), oldCursor_.line()*lineHeight(), 
+            xOffByTrack(oldCursor_.track()+1), (oldCursor_.line()+1)*lineHeight() );
+}
+
 
 bool PatternGrid::isNote( int key )
 {
@@ -901,7 +909,7 @@ void PatternGrid::moveCursor( int dx, int dy) {
     // dx -1 left hex digit move
     // dx +1 rigth hex digit move
     // dy in lines
-    PatCursor oldCursor = cursor_;
+    oldCursor_ = cursor_;
     int eventnr = cursor().eventNr();
     if ( dx > 0 ) {			
         if ( eventnr < events_.size() ) {
@@ -919,7 +927,6 @@ void PatternGrid::moveCursor( int dx, int dy) {
                         cursor_.setEventNr(0);
                         cursor_.setCol(0);
                     }
-               //     window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), oldCursor.track(), cursor_.track()) );
         }
     } else 
         if ( dx < 0 ) {
@@ -938,20 +945,15 @@ void PatternGrid::moveCursor( int dx, int dy) {
                         cursor_.setCol( event.cols() - 1 );
                     }		
                 }
-                //window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), oldCursor.track()) );
         }
 
         if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
             cursor_.setLine( std::min(cursor_.line() + dy, numberOfLines()-1));
-//            window()->repaint(this,repaintTrackArea( oldCursor.line(), oldCursor.line(), oldCursor.track(), oldCursor.track()) );
-//            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
         } else if ( dy != 0 && (dy + cursor_.line() < 0) ) {
             cursor_.setLine( std::max(cursor_.line() + dy, 0));
         } else if (dy!=0) {
-//            window()->repaint(this,repaintTrackArea( cursor_.line(), cursor_.line(), cursor_.track(), cursor_.track()) );
         }
-        update(); // FIXME: inefficient to update the whole grid here.
-//        updateStatusBar();
+        repaintCursor(); 
 }
 
 int PatternGrid::visibleEvents( int track ) const 
