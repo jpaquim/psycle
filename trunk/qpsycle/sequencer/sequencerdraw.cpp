@@ -23,11 +23,11 @@
 #include <iostream>
 #include <vector>
 
- #include "sequencerview.h"
- #include "sequencerdraw.h"
- #include "sequencerline.h"
- #include "sequenceritem.h"
- #include "sequencerarea.h"
+#include "sequencerview.h"
+#include "sequencerdraw.h"
+#include "sequencerline.h"
+#include "sequenceritem.h"
+#include "sequencerarea.h"
 
 
  SequencerDraw::SequencerDraw( SequencerView *seqView )

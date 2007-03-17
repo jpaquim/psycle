@@ -31,7 +31,7 @@ SequencerLine::SequencerLine( SequencerDraw *sDraw, psy::core::SequenceLine * li
 {
     sDraw_ = sDraw; // FIXME: don't really want this to be in here..  Feels too tightly-coupled...
     setSequenceLine( line );
-    setRect(QRectF(0, 0, 500, 30));
+    setRect(QRectF(0, 0, sDraw_->width(), 30));
     setPen(QPen(Qt::white,1));
     setBrush(QBrush(Qt::transparent));
 }
@@ -49,13 +49,12 @@ psy::core::SequenceLine *SequencerLine::sequenceLine()
 void SequencerLine::addItem( psy::core::SinglePattern* pattern )
 {
     double endTick = sequenceLine()->tickLength();
-    qDebug("asdf");
+
     SequencerItem *item = new SequencerItem();
     item->setSequenceEntry( sequenceLine()->createEntry(pattern, endTick) );
     scene()->addItem( item );
     item->setParentItem( this );
-    item->setPos(5 * endTick, 0);
-    //item->setPos(200, /*sView->beatPxLength() * endTick)*/, 5, static_cast<int>( pattern->beats() * sView->beatPxLength() ) ,20);
+    item->setPos( sDraw_->beatPxLength() * endTick, 0 );
     items_.push_back( item );
     connect( item, SIGNAL( deleteRequest( SequencerItem* ) ),
              sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
@@ -65,4 +64,3 @@ void SequencerLine::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     emit clicked( this );
 }
-

@@ -30,11 +30,12 @@ SequencerItem::SequencerItem()
 {
     setFlag( ItemIsMovable );
     setFlag( ItemIsSelectable );
+    beatPxLength_ = 5;
 }
 
 QRectF SequencerItem::boundingRect() const
 {
-    return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*5, parentItem()->boundingRect().height() );
+    return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*beatPxLength_, parentItem()->boundingRect().height() );
 }
 
 void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )

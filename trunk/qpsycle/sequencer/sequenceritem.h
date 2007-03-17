@@ -65,6 +65,8 @@ protected:
 
     QAction *deleteEntryAction_;
     const QColor & QColorFromLongColor( long longCol );
+
+    int beatPxLength_;
  };
 
 #endif

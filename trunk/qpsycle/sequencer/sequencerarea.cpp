@@ -47,8 +47,8 @@ void SequencerArea::paint( QPainter *painter, const QStyleOptionGraphicsItem * o
 void SequencerArea::drawTimegrid( QPainter *painter )
 {
     QRectF br = boundingRect();
-    int start = ( br.left() /*- absoluteLeft() + scrollDx()*/) / beatPxLength_;
-    int end   = ( br.left() + boundingRect().width() /*- absoluteLeft() + scrollDx()*/ ) / beatPxLength_;
+    int start = 0;
+    int end   = sequencerDraw()->width();
 
     painter->setPen( QColor( 30, 30, 30 ) );
     for (int i = start ; i <= end ; i++) {
