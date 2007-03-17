@@ -650,19 +650,19 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
     switch ( command ) {
         case psy::core::cdefNavUp:
-            moveCursor( 0, -1 );/*-patternStep()*/ ;
+            moveCursor( 0, -patternStep() ); 
             return;
         break;
         case psy::core::cdefNavDown:
-            moveCursor( 0, 1 );/*-patternStep()*/ ;
+            moveCursor( 0, patternStep() );
             return;
         break;
         case psy::core::cdefNavLeft:
-            moveCursor( -1, 0 );/*-patternStep()*/ ;
+            moveCursor( -1, 0 );
             return;
         break;
         case psy::core::cdefNavRight:
-            moveCursor( 1, 0 );/*-patternStep()*/ ;
+            moveCursor( 1, 0 );
             return;
         break;
         case psy::core::cdefTrackNext:
@@ -846,25 +846,30 @@ void PatternGrid::drawSelBg( QPainter *painter, Selection selArea )
 }
 
 void PatternGrid::repaintSelection() {
+    // FIXME: do this much better.
     int selLeft = selection_.left();
     int selRight = selection_.right();
     int selTop = selection_.top();
     int selBottom = selection_.bottom();
+    int selWidth = 150 * (selRight-selLeft);
+    int selHeight = lineHeight() * (selBottom-selTop);
     int oldLeft = oldSelection_.left();
     int oldRight = oldSelection_.right();
     int oldTop = oldSelection_.top();
     int oldBottom = oldSelection_.bottom();
-    update( xOffByTrack(selLeft), selTop*lineHeight(), xOffByTrack(selRight), selBottom*lineHeight() );
-    update( xOffByTrack(oldLeft), oldTop*lineHeight(), xOffByTrack(oldRight), oldBottom*lineHeight() );
+    int oldWidth = 150 * (oldRight-oldLeft);
+    int oldHeight = lineHeight() * (oldBottom-oldTop);
+    update( xOffByTrack(selLeft), selTop*lineHeight(), selWidth, selHeight );
+    update( xOffByTrack(oldLeft), oldTop*lineHeight(), oldWidth, oldHeight );
     oldSelection_ = selection_;
 }
 
 void PatternGrid::repaintCursor() {
     // FIXME: could be done more accurately.
     update( xOffByTrack(cursor_.track()), cursor_.line()*lineHeight(), 
-            xOffByTrack(cursor_.track()+1), (cursor_.line()+1)*lineHeight() );
+            130/*fixme:trackwidth*/, lineHeight() );
     update( xOffByTrack(oldCursor_.track()), oldCursor_.line()*lineHeight(), 
-            xOffByTrack(oldCursor_.track()+1), (oldCursor_.line()+1)*lineHeight() );
+            130/*fixme:trackwidth*/, lineHeight() );
 }
 
 
