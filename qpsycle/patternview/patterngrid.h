@@ -156,6 +156,7 @@ public:
     bool trackAlreadySelected( int trackNumber );
     void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
     void repaintSelection();
+    void repaintCursor();
 
 
 
@@ -182,6 +183,7 @@ private:
     std::vector<ColumnEvent> events_;
 
     PatCursor cursor_;
+    PatCursor oldCursor_;
     QFont font_;
 
     QColor textColor_;
