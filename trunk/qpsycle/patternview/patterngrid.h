@@ -29,6 +29,7 @@ public:
     void setRight( int right ) { right_ = right; };
     void setTop( int top ) { top_ = top; }
     void setBottom( int bottom ){ bottom_ = bottom; }
+    void clear() { left_=0; right_=0; top_=0; bottom_=0; }
 
 private:
     int left_, right_, top_, bottom_;
