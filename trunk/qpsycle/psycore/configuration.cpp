@@ -457,6 +457,9 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefNavPageUp, Key( Qt::NoModifier, Qt::Key_PageUp ) );
 			inputHandler_.changeKeyCode( cdefTrackNext, Key( Qt::ControlModifier, Qt::Key_Right ) );
 			inputHandler_.changeKeyCode( cdefTrackPrev, Key( Qt::ControlModifier, Qt::Key_Left ) );
+
+			inputHandler_.changeKeyCode( cdefSelectUp, Key( Qt::ShiftModifier, Qt::Key_Up ) );
+			inputHandler_.changeKeyCode( cdefSelectDn, Key( Qt::ShiftModifier, Qt::Key_Down ) );
         }
 
 /*		void Configuration::onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName )

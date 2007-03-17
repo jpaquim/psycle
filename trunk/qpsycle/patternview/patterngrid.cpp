@@ -41,7 +41,8 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     addEvent( ColumnEvent::hex4 );
     // end of multi paraCmd
     //
-    selection_ = QRectF( 0,0,1,5 );
+    selection_.set( 0,1,0,5 );
+    doingKeybasedSelect_ = false;
     
     // FIXME: hardcoding these for now.
      textColor_ = QColor( 255, 255, 255 );
@@ -690,13 +691,14 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             break;
         case psy::core::cdefSelectUp:
         {
-/*            oldSelection_ = selection_;
+            oldSelection_ = selection_;
             PatCursor crs = cursor();
             int newLeft, newRight, newTop, newBottom;
             int newCursorTrack = cursor().track();
             int newCursorLine = cursor().line();
             int newCursorCol = cursor().col();
             if (doingKeybasedSelect()) {
+                qDebug("hoi0");
                 // if above line is not already selected then select it...
                 if (!lineAlreadySelected(crs.line())) {
                     // don't set selection out of bounds of grid...
@@ -708,13 +710,13 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 }
                 newLeft = oldSelection_.left(); // left&right stay the same.
                 newRight = oldSelection_.right();
-                selection_.setRect(newLeft,newTop,newRight,newBottom); 
+                selection_.set( newLeft,newRight, newTop, newBottom ); 
             } else {
+                qDebug("hoi");
                 startKeybasedSelection(crs.track(), crs.track()+1,
-                    std::max(0,crs.line()-1),
-                    crs.line()+1);
+                                        std::max(0,crs.line()-1), crs.line()+1);
             }
-            newCursorLine = std::max(0,cursor().line() - 1);*/
+            newCursorLine = std::max(0,cursor().line() - 1);
         }
         break;
 
@@ -725,8 +727,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
 }
 
-void PatternGrid::drawSelBg( QPainter *painter, const QRectF & selArea )
+void PatternGrid::drawSelBg( QPainter *painter, Selection selArea )
 {			
+    std::cout << selArea.left() << std::endl;
+    std::cout << selArea.top() << std::endl;
+    std::cout << selArea.right() << std::endl;
+    std::cout << selArea.bottom() << std::endl;
     int x1Off = xOffByTrack( selArea.left() );
     int y1Off = selArea.top()  * lineHeight() ;
 
@@ -996,7 +1002,7 @@ int PatternGrid::numberOfLines() const
     return patDraw_->patternView()->numberOfLines();
 }
 
-const QRectF & PatternGrid::selection() const 
+Selection PatternGrid::selection() const 
 {
     return selection_;
 }
@@ -1033,7 +1039,7 @@ void PatternGrid::startKeybasedSelection(int leftPos, int rightPos, int topPos, 
     selStartPoint_ = crs;
     selCursor_ = crs;
     doingKeybasedSelect_ = true;
-    selection_.setRect(leftPos-0, topPos-0, rightPos-leftPos, bottomPos-topPos);
+    selection_.set( leftPos, rightPos, topPos, bottomPos );
 }
 
 
