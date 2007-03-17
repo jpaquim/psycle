@@ -41,7 +41,7 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     addEvent( ColumnEvent::hex4 );
     // end of multi paraCmd
     //
-    selection_.set( 0,1,0,5 );
+    selection_.set( 0,0,0,0 );
     doingKeybasedSelect_ = false;
     
     // FIXME: hardcoding these for now.
@@ -959,6 +959,11 @@ void PatternGrid::moveCursor( int dx, int dy) {
         } else if (dy!=0) {
         }
         repaintCursor(); 
+        if ( doingKeybasedSelect() ) {
+            doingKeybasedSelect_ = false;
+            selection_.clear();
+            repaintSelection(); 
+        }
 }
 
 int PatternGrid::visibleEvents( int track ) const 
