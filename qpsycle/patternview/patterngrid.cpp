@@ -540,6 +540,10 @@ const PatCursor & PatternGrid::cursor() const {
     return cursor_;
 }
 
+void PatternGrid::setCursor( const PatCursor & cursor ) {
+    cursor_ = cursor;
+}
+
 void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
@@ -670,6 +674,26 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         break;
         case psy::core::cdefNavRight:
             moveCursor( 1, 0 );/*-patternStep()*/ ;
+            return;
+        break;
+        case psy::core::cdefTrackNext:
+            qDebug("eh");
+            if ( cursor().track()+1 < patDraw_->patternView()->numberOfTracks() ) {
+                PatCursor oldCursor = cursor();
+                setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
+            }
+            update(); // FIXME: inefficient to update the whole grid here.
+            break;
+            return;
+        break;
+        case psy::core::cdefTrackPrev:
+            qDebug("eh1");
+            if ( cursor().track() > 0 ) {
+                PatCursor oldCursor = cursor();
+                setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );
+            }
+            update(); // FIXME: inefficient to update the whole grid here.
+            break;
             return;
         break;
         default:

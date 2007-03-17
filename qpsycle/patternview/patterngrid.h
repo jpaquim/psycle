@@ -76,6 +76,7 @@ public:
 
     void addEvent( const ColumnEvent & event );
     const PatCursor & cursor() const;
+    void setCursor( const PatCursor & cursor );
     void moveCursor( int dx, int dy );
     int visibleEvents( int track ) const;
     const QFont & font() const;
