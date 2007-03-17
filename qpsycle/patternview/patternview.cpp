@@ -31,7 +31,7 @@ PatternView::PatternView( psy::core::Song *song )
 {
     song_ = song;
     pattern_ = 0;
-    setNumberOfTracks( 4 );
+    setNumberOfTracks( 6 );
     patDraw_ = new PatternDraw( this );
     setPattern( new psy::core::SinglePattern() );
 

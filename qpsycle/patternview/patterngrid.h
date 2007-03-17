@@ -54,6 +54,7 @@ public:
     void drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
     void drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
     void drawData( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack, bool sharp, const QColor & color );
+    void drawSelBg( QPainter *painter, const QRectF & selArea );
 
     const std::map<int, TrackGeometry> & trackGeometrics() const;
     int trackWidth() const;
@@ -81,6 +82,9 @@ public:
     int visibleEvents( int track ) const;
     const QFont & font() const;
     void setFont( QFont font );
+
+    int numberOfTracks() const;
+    int numberOfLines() const;
 
     int beatZoom() const;
     psy::core::SinglePattern *pattern();
@@ -127,6 +131,11 @@ public:
     void setBigTrackSeparatorWidth( int ident );
     int bigTrackSeparatorWidth() const;
 
+    bool doingKeybasedSelect() { return doingKeybasedSelect_; }
+    bool lineAlreadySelected( int lineNumber );
+    bool trackAlreadySelected( int trackNumber );
+    void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
+
 
 
 public slots:
@@ -134,8 +143,18 @@ public slots:
 
 
 private:
+    QRectF selection_;
+    QRectF oldSelection_;
+    const QRectF & selection() const;
+    PatCursor selStartPoint_;
+    PatCursor selCursor_;
+
+    bool doingKeybasedSelect_;
+
     void setupTrackGeometrics( int numberOfTracks );
     void alignTracks();
+    int xOffByTrack( int track ) const;
+
     PatternDraw *patDraw_;
     std::map<int, TrackGeometry> trackGeometryMap;
 
@@ -143,29 +162,6 @@ private:
 
     PatCursor cursor_;
     QFont font_;
-
-/*			mem +="<cursor bgcolor='179:217:34' textcolor='0:0:0' />";
-			mem +="<restarea bgcolor='24:22:25' />";
-			mem +="<bar bgcolor='70:71:69' sel_bgcolor='162:101:68'/>";
-			mem +="<beat bgcolor='50:51:49' sel_bgcolor='142:81:48' textcolor='199:199:199' sel_textcolor='216:154:120'/>";
-			mem +="<lines bgcolor='34:32:35' sel_bgcolor='140:68:41' textcolor='255:255:255' sel_textcolor='239:175:140'/>";
-			mem +="<playbar bgcolor='182:121:88' sel_bgcolor='0:0:200'/>";
-			mem +="<bigtrackseparator bgcolor='145:147:147' width='2' />";
-			mem +="<smalltrackseparator bgcolor='105:107:107' />";
-			mem +="<lineseparator enable='0' bgcolor='145:147:147'/>";
-			mem +="<colseparator enable='0' bgcolor='145:147:147'/>";
-			mem +="<trackident left ='2' right='2'/>";
-			mem +="<header src='/bitmaps/alk_orange_header_small.xpm'>";
-			mem +="<background_source coord='0:0:109:18'/>";
-			mem +="<number_0_source coord='0:18:7:12'/>";
-			mem +="<record_on_source coord='70:18:11:11'/>";
-			mem +="<mute_on_source coord='81:18:11:11'/>";
-			mem +="<solo_on_source coord='92:18:11:11'/>";
-			mem +="<digit_x0_dest coord='24:3'/>";
-			mem +="<digit_0x_dest coord='31:3'/>";
-			mem +="<record_on_dest coord='52:3'/>";
-			mem +="<mute_on_dest coord='75:3'/>";
-			mem +="<solo_on_dest coord='97:3'/>";*/
 
     QColor textColor_;
     QColor separatorColor_;
