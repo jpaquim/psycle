@@ -196,7 +196,9 @@ void MainWindow::open()
      if (fileName.isEmpty())
          return;
 
-     statusBar()->showMessage(tr("Saved '%1'").arg(fileName), 2000);
+    qDebug("saving");
+    std::cout << "filename is " << fileName.toStdString() << std::endl;
+    song_->save( fileName.toStdString() );
  }
 
  void MainWindow::undo()
