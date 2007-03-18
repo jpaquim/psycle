@@ -161,6 +161,8 @@ public:
 
     int patternStep() { return 1; }
 
+    void copyBlock( bool cutit );
+    void pasteBlock( int tx,int lx,bool mix );
 
 
 public slots:
@@ -175,6 +177,12 @@ private:
     PatCursor selCursor_;
 
     bool doingKeybasedSelect_;
+
+    bool isBlockCopied_;
+    psy::core::SinglePattern pasteBuffer;
+    float lastXmlLineBeatPos;
+    int xmlTracks;
+    float xmlBeats;
 
     void setupTrackGeometrics( int numberOfTracks );
     void alignTracks();

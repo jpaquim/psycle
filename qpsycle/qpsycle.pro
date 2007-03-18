@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = 
-LIBS = -lasound -lm -ldl -lpthread
+LIBS = -lasound -lm -ldl -lpthread -lxerces-c
 DEPENDPATH += . \
               machineview \
               patternview \
@@ -21,7 +21,8 @@ INCLUDEPATH += . \
                sequencer \
                psycore/helpers \
                psycore/helpers/math \
-               /usr/include/alsa
+               /usr/include/alsa \
+               /usr/include/xerces
 
 # Input
 HEADERS += mainwindow.h \
@@ -186,3 +187,5 @@ SOURCES += mainwindow.cpp \
            sequencer/beatruler.cpp \
            waveview/waveview.cpp
 RESOURCES += qpsycle.qrc
+
+QT += xml

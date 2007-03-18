@@ -6,6 +6,10 @@
 #include <iostream>
 #include <iomanip>
 
+#include <QApplication>
+#include <QClipboard>
+#include <QDomDocument>
+
 template<class T> inline std::string toHex(T value , int nums = 2) {
     std::ostringstream buffer;
     buffer.setf(std::ios::uppercase);
@@ -16,12 +20,20 @@ template<class T> inline std::string toHex(T value , int nums = 2) {
     return buffer.str();
 }
 
+template<class T> inline T str_hex(const std::string &  value) {
+    T result;
+
+    std::stringstream str;
+    str << value;
+    str >> std::hex >> result;
+
+    return result;
+}
+
 int d2i(double d)
 {
 		return (int) ( d<0?d-.5:d+.5);
 }
-
-
 
 PatternGrid::PatternGrid( PatternDraw *pDraw )
     : patDraw_( pDraw )
@@ -58,6 +70,7 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
      smallTrackSeparatorColor_ = QColor( 105, 107, 107 );
      lineSepColor_ = QColor( 145, 147, 147 );
      restAreaColor_ = QColor( 24, 22, 25 );
+
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -820,7 +833,14 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             repaintSelection();
         }
         break;
-
+        case psy::core::cdefBlockCopy: 
+            std::cout << "action: block copy" << std::endl;
+            copyBlock(false);
+            return;
+            break;
+        case psy::core::cdefBlockPaste: 
+            std::cout << "action: block paste" << std::endl;
+            pasteBlock( cursor().track(), cursor().line(), false );
 
         default:
             // If we got here, we didn't do anything with it, so pass to parent.
@@ -1169,6 +1189,80 @@ void PatternGrid::startKeybasedSelection(int leftPos, int rightPos, int topPos, 
     selCursor_ = crs;
     doingKeybasedSelect_ = true;
     selection_.set( leftPos, rightPos, topPos, bottomPos );
+}
+
+void PatternGrid::copyBlock( bool cutit )
+{  
+    isBlockCopied_=true;
+    pasteBuffer.clear();
+    psy::core::SinglePattern copyPattern = pattern()->block( selection().left(), selection().right(), selection().top(), selection().bottom() );
+
+    float start = selection().top()    / (float) pattern()->beatZoom();
+    float end   = selection().bottom() / (float) pattern()->beatZoom();
+
+    std::string xml = "<patsel beats='" + QString::number( end - start ).toStdString(); 
+    xml+= "' tracks='"+ QString::number( selection().right() - selection().left() ).toStdString();
+    xml+= "'>"; 
+    xml+= copyPattern.toXml();
+    xml+= "</patsel>";
+
+    QApplication::clipboard()->setText( QString::fromStdString( xml ) );
+
+    if (cutit) {
+    //    pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
+     //   pView->repaint();
+    }
+}
+
+void PatternGrid::pasteBlock(int tx,int lx,bool mix )
+{
+    // If the clipboard isn't empty...
+    if ( QApplication::clipboard()->text() != "" ) 
+    {
+        // Make a parser.
+        QDomDocument *doc = new QDomDocument();
+        doc->setContent( QApplication::clipboard()->text() );
+        std::cout << QApplication::clipboard()->text().toStdString() << std::endl;
+
+        lastXmlLineBeatPos = 0.0;
+        xmlTracks = 0;
+        xmlBeats = 0;
+
+        // Parse the clipboard text...
+        QDomElement patselEl = doc->firstChildElement( "patsel" );
+            xmlTracks = patselEl.attribute("tracks").toInt();
+            xmlBeats = patselEl.attribute("beats").toFloat();
+            std::cout << "tracks:" << xmlTracks << std::endl;
+            std::cout << "beats:" << xmlBeats << std::endl;
+        QDomNodeList patlines = patselEl.elementsByTagName( "patline" );
+        for ( int i = 0; i < patlines.count(); i++ )
+        {
+            QDomElement patLineElm = patlines.item( i ).toElement();
+            std::cout << patLineElm.attribute( "pos" ).toStdString() << std::endl;
+            lastXmlLineBeatPos = patLineElm.attribute("pos").toFloat();     
+
+            QDomNodeList patEvents = patselEl.elementsByTagName( "patevent" );
+            for ( int j = 0; j < patEvents.count(); j++ )
+            {
+                QDomElement patEventElm = patEvents.item( j ).toElement();
+                int trackNumber = str_hex<int> ( patEventElm.attribute("track").toStdString() );
+
+                psy::core::PatternEvent data;
+                data.setMachine( str_hex<int> (patEventElm.attribute("mac").toStdString() ) );
+                data.setInstrument( str_hex<int> (patEventElm.attribute("inst").toStdString() ) );
+                data.setNote( str_hex<int> (patEventElm.attribute("note").toStdString() ) );
+                data.setParameter( str_hex<int> (patEventElm.attribute("param").toStdString() ) );
+                data.setParameter( str_hex<int> (patEventElm.attribute("cmd").toStdString() ) );
+
+                pasteBuffer[lastXmlLineBeatPos].notes()[trackNumber]=data;
+            }
+        }
+
+        if (!mix)
+            pattern()->copyBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
+        else
+            pattern()->mixBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
+    }
 }
 
 
