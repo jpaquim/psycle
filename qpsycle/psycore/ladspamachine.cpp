@@ -207,7 +207,7 @@ namespace psy {
 			bool endsInSO, needsSlash;
 			size_t iFilenameLength;
 			void * pvResult(NULL);
-			std::cout << filename_ << std::endl;
+//			std::cout << filename_ << std::endl;
 			#ifdef __unix__
 			if (filename_.compare(filename_.length()-3,3,".so"))
 				filename_.append(".so");
@@ -215,7 +215,7 @@ namespace psy {
 			if (filename_.compare(filename_.length()-3,3,".dll"))
 				filename_.append(".dll");
 			#endif
-			std::cout << filename_ << std::endl;
+//			std::cout << filename_ << std::endl;
 			
 			#ifdef __unix__
 			if (filename_.c_str()[0] == '/') {
@@ -308,7 +308,7 @@ namespace psy {
 			#ifdef __unix__
 			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
 			if ( !libHandle_ ) {
-				std::cerr << "Cannot load library: " << dlerror() << std::endl;
+//				std::cerr << "Cannot load library: " << dlerror() << std::endl;
 				return false;
 			}
 			#else
@@ -319,7 +319,6 @@ namespace psy {
 			SetErrorMode( uOldErrorMode );
 			#endif
 
-			std::cout << "step two" << std::endl;
 			// Step two: Get the entry function.
 			#ifdef __unix__
 			LADSPA_Descriptor_Function pfDescriptorFunction =
@@ -330,10 +329,10 @@ namespace psy {
 			#endif
 		
 			if (!pfDescriptorFunction) {
-				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
-				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+//				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
+//				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
 				#ifdef __unix__
-				std::cerr << dlerror() << std::endl;				
+//				std::cerr << dlerror() << std::endl;				
 				dlclose( libHandle_ ); 
 				#else
 				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
@@ -346,7 +345,7 @@ namespace psy {
 			std::cout << "step three" << std::endl;
 			psDescriptor = pfDescriptorFunction(pluginIndex);
 			if (psDescriptor == NULL) {
-				std::cerr <<  "Unable to find the selected plugin  in the library file" << std::endl;
+//				std::cerr <<  "Unable to find the selected plugin  in the library file" << std::endl;
 				#ifdef __unix__
 				dlclose(libHandle_);
 				#else
@@ -388,14 +387,13 @@ namespace psy {
 			SetErrorMode( uOldErrorMode );
 			#endif
 			if ( !libHandle_ ) {
-				std::cerr << "Cannot load library: "
+/*				std::cerr << "Cannot load library: "
 					#ifdef __unix__
 					  <<  dlerror() 
 					#endif
-					<< std::endl;
+					<< std::endl;*/
 				return 0;
 			}
-			std::cout << "step two" << std::endl;
 			// Step two: Get the entry function.
 			LADSPA_Descriptor_Function pfDescriptorFunction =
 				 (LADSPA_Descriptor_Function)
@@ -407,10 +405,10 @@ namespace psy {
 				
 		
 			if (!pfDescriptorFunction) {
-				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
-				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+//				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
+//				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
 				#ifdef __unix__
-				std::cerr << dlerror() << std::endl;
+//				std::cerr << dlerror() << std::endl;
 				dlclose(libHandle_);
 				#else
 				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
