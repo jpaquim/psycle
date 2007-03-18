@@ -841,7 +841,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         case psy::core::cdefBlockPaste: 
             std::cout << "action: block paste" << std::endl;
             pasteBlock( cursor().track(), cursor().line(), false );
-
+            update(); // FIXME: inefficient, be more specific.
         default:
             // If we got here, we didn't do anything with it, so pass to parent.
             event->ignore();
@@ -1232,16 +1232,14 @@ void PatternGrid::pasteBlock(int tx,int lx,bool mix )
         QDomElement patselEl = doc->firstChildElement( "patsel" );
             xmlTracks = patselEl.attribute("tracks").toInt();
             xmlBeats = patselEl.attribute("beats").toFloat();
-            std::cout << "tracks:" << xmlTracks << std::endl;
-            std::cout << "beats:" << xmlBeats << std::endl;
+
         QDomNodeList patlines = patselEl.elementsByTagName( "patline" );
         for ( int i = 0; i < patlines.count(); i++ )
         {
             QDomElement patLineElm = patlines.item( i ).toElement();
-            std::cout << patLineElm.attribute( "pos" ).toStdString() << std::endl;
             lastXmlLineBeatPos = patLineElm.attribute("pos").toFloat();     
 
-            QDomNodeList patEvents = patselEl.elementsByTagName( "patevent" );
+            QDomNodeList patEvents = patLineElm.elementsByTagName( "patevent" );
             for ( int j = 0; j < patEvents.count(); j++ )
             {
                 QDomElement patEventElm = patEvents.item( j ).toElement();
