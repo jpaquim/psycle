@@ -89,6 +89,7 @@ HEADERS += mainwindow.h \
            psycore/preset.h \
            psycore/psy2filter.h \
            psycore/psy3filter.h \
+           psycore/psy4filter.h \
            psycore/psyfilter.h \
            psycore/riff.h \
            psycore/sampler.h \
@@ -166,6 +167,7 @@ SOURCES += mainwindow.cpp \
            psycore/preset.cpp \
            psycore/psy2filter.cpp \
            psycore/psy3filter.cpp \
+           psycore/psy4filter.cpp \
            psycore/psyfilter.cpp \
            psycore/riff.cpp \
            psycore/sampler.cpp \
