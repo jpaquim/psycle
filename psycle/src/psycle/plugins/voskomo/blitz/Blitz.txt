@@ -114,4 +114,4 @@
 
 
 
-                  (p)2005 Jan-Marco Edelmann [jme]
+                  (p)2005 jme
