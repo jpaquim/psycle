@@ -81,7 +81,7 @@ bool Plugin::Instance( const std::string & file_name )
 		#endif
 		if (!_dll) {
 				#ifdef __unix__
-				std::cerr << "Cannot load library: " << dlerror() << '\n';
+//				std::cerr << "Cannot load library: " << dlerror() << '\n';
 				#else
 				#endif
 				return false;
@@ -94,13 +94,13 @@ bool Plugin::Instance( const std::string & file_name )
 			#endif
 			if (!GetInfo) {
 				#ifdef __unix__
-				std::cerr << "Cannot load symbols: " << dlerror() << '\n';
+//				std::cerr << "Cannot load symbols: " << dlerror() << '\n';
 				#else
 				#endif
 				return false;
 			} else {
 				_pInfo = GetInfo();
-				std::cout << _pInfo->Author << std::endl;
+//				std::cout << _pInfo->Author << std::endl;
 
 				if(_pInfo->Version < MI_VERSION) std::cerr << "plugin format is too old" << _pInfo->Version << file_name <<std::endl;
 				fflush(stdout);
@@ -122,7 +122,7 @@ bool Plugin::Instance( const std::string & file_name )
 			#endif
 			if(!GetInterface) {
 					#ifdef __unix__
-					std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+//					std::cerr << "Cannot load symbol: " << dlerror() << "\n";
 					#else
 					#endif
 					return false;
