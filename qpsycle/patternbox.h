@@ -89,8 +89,7 @@ signals:
 
 class PatternTree : public QTreeWidget {
 public:
-    PatternTree();
-
+    PatternTree( QWidget *parent = 0 );
 };
 
- #endif
+#endif

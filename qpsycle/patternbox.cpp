@@ -314,3 +314,7 @@ void PatternBox::onColorButtonClicked()
         emit categoryColorChanged();
     }
 }
+
+PatternTree::PatternTree( QWidget *parent ) 
+    : QTreeWidget(parent)
+{ }
