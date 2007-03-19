@@ -159,7 +159,24 @@ void PatternBox::newPattern()
     }
 }
 
-void PatternBox::clonePattern() { }
+void PatternBox::clonePattern() 
+{ 
+    QTreeWidgetItem *item = patternTree()->currentItem();
+    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
+
+    if(itr!=patternMap.end())
+    {
+//        ngrs::NTreeNode* node = patternBox_->selectedTreeNode();
+        psy::core::SinglePattern* pattern = itr->second;
+        psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, pattern->name()+"clone" );
+        QTreeWidgetItem* newItem = new QTreeWidgetItem();
+        newItem->setText( 0, QString::fromStdString( pattern->name()+"clone" ) );
+        patternMap[newItem] = clonedPat;
+        QTreeWidgetItem *parentCat = item->parent();
+        parentCat->addChild( newItem );
+        patternTree()->setCurrentItem( newItem );
+    }
+}
 
 void PatternBox::deletePattern() 
 { 
@@ -315,6 +332,9 @@ void PatternBox::onColorButtonClicked()
     }
 }
 
+
+
 PatternTree::PatternTree( QWidget *parent ) 
     : QTreeWidget(parent)
 { }
+
