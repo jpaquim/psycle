@@ -13,7 +13,7 @@ namespace psycle
 	{
 		std::string hello::say_hello() const throw()
 		{
-			std::string const static s("From psycle's engine: Hello, I'm Psycle... and I know I'm ridiculous!");
+			std::string const static s("From psycle's engine: Hello World! I'm Psycle... and I know I'm ridiculous!");
 			return s;
 		}
 	}
