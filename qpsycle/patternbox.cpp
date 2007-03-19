@@ -115,7 +115,8 @@ void PatternBox::createItemPropertiesBox()
     connect( nameEdit_, SIGNAL( textChanged( const QString & ) ),
              this, SLOT( onPatternNameEdited( const QString & ) ) );
     itemPropsLayout->addWidget( nameEdit_, 1, 1, 1, 3 );
-    itemPropsLayout->addWidget( new QLabel( "Colour:" ), 2, 0, 2, 1 );
+    colorLbl_ = new QLabel( "Colour:" );
+    itemPropsLayout->addWidget( colorLbl_, 2, 0, 2, 1 );
     colorBtn_ = new QPushButton();
     colorBtn_->setAutoFillBackground( true );
     connect( colorBtn_, SIGNAL( clicked() ), this, SLOT( onColorButtonClicked() ) );
@@ -228,6 +229,8 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
         nameEdit_->setText( QString::fromStdString( pattern->name() ) );
         // emit a signal for main window to tell pat view.
         emit patternSelectedInPatternBox( pattern );
+        colorLbl_->setVisible( false );
+        colorBtn_->setVisible( false );
         return;
     }
 
@@ -242,6 +245,8 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
         QPalette pal = colorBtn_->palette();
         pal.setColor( QPalette::Button, color );
         colorBtn_->setPalette( pal );
+        colorLbl_->setVisible( true );
+        colorBtn_->setVisible( true );
     }
 }
 
