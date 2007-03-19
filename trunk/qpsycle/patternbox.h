@@ -24,6 +24,7 @@
  #include <QToolBar>
  #include <QTreeWidget>
  #include <QPushButton>
+ #include <QLabel>
 
  #include "psycore/song.h"
 
@@ -74,6 +75,7 @@ signals:
      QToolBar *toolBar_;
      QWidget *itemProps_;
      QLineEdit *nameEdit_;
+     QLabel *colorLbl_;
      QPushButton *colorBtn_;
      QTreeWidget *patternTree_;
 
