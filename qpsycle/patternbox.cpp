@@ -91,8 +91,13 @@ void PatternBox::populatePatternTree()
 			patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
             patternMap[patternItem] = pattern;
             if (isFirst) {
-                patternTree_->setCurrentItem( patternItem );
                 isFirst = false;
+                patternTree_->setCurrentItem( patternItem );
+                QColor color = QColorFromLongColor( category->color() );
+                // Change the colour of the colorBtn's background.
+                QPalette pal = colorBtn_->palette();
+                pal.setColor( QPalette::Button, color );
+                colorBtn_->setPalette( pal );
             }
         }
     }

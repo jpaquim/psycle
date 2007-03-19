@@ -88,7 +88,6 @@ namespace psy {
 
 		bool Psy4Filter::testFormat( const std::string & fileName )
 		{
-            qDebug( "#1" );
 			zipreader *z;
 			zipreader_file *f;
 			int fd = open( fileName.c_str(), O_RDONLY );
@@ -100,7 +99,6 @@ namespace psy {
 				zipreader_close( z );	
 				close( outFd );
 				close( fd );
-                qDebug( "#2" );
 				return false;
 			}			
 			close( outFd );
@@ -111,7 +109,6 @@ namespace psy {
 				zipreader_close( z );	
 				close( outFd );
 				close( fd );
-                qDebug( "#3" );
 				return false;
 			}			
 			close( outFd );
@@ -119,7 +116,6 @@ namespace psy {
 			zipreader_close( z );
 			close( fd );
 
-                qDebug( "#4" );
             QFile *file = new QFile( "psytemp.xml" );
             QDomDocument *doc = new QDomDocument();
             doc->setContent( file );
@@ -153,9 +149,7 @@ namespace psy {
 
             // Song info.
             QDomElement root = doc->firstChildElement();
-            std::cout << root.tagName().toStdString() << std::endl;
             QDomElement infoElm = root.firstChildElement( "info" );
-            std::cout << infoElm.tagName().toStdString() << std::endl;
             QDomElement nameElm = infoElm.firstChildElement( "name" );
 				attrib = nameElm.attribute( "text" ).toStdString();
                 std::cout << attrib << std::endl;
@@ -167,13 +161,11 @@ namespace psy {
 				attrib = commentElm.attribute( "text" ).toStdString();
 				song_->setComment( attrib );
 
-                qDebug("about to do patdata");
             // Pattern data.
             QDomElement patData = root.firstChildElement( "patterndata" );
             QDomNodeList categories = patData.elementsByTagName( "category" );
             for ( int i = 0; i < categories.count(); i++ )
             {
-                qDebug("hi");
                 QDomElement category = categories.item( i ).toElement();
 				std::string catName = category.attribute("name").toStdString();
 				std::string attrib = category.attribute("color").toStdString();
