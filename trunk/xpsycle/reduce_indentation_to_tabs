@@ -40,4 +40,4 @@ def do_one_file(path, spaces_to_tab):
 
 if __name__ == '__main__':
 	for path in sys.argv[1:]:
-		do_one_file(path, 2)
+		do_one_file(path, 4)
