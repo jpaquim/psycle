@@ -164,17 +164,23 @@ void PatternBox::clonePattern()
     QTreeWidgetItem *item = patternTree()->currentItem();
     std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
 
-    if(itr!=patternMap.end())
+    if ( itr!=patternMap.end() ) 
     {
-//        ngrs::NTreeNode* node = patternBox_->selectedTreeNode();
         psy::core::SinglePattern* pattern = itr->second;
-        psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, pattern->name()+"clone" );
+        std::string clonedPatName = pattern->name()+"clone";
+
+        // Clone the pattern in the song.
+        psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
+
+        // Add a clone item to the pattern tree.
         QTreeWidgetItem* newItem = new QTreeWidgetItem();
-        newItem->setText( 0, QString::fromStdString( pattern->name()+"clone" ) );
-        patternMap[newItem] = clonedPat;
+        newItem->setText( 0, QString::fromStdString( clonedPatName ) );
         QTreeWidgetItem *parentCat = item->parent();
         parentCat->addChild( newItem );
         patternTree()->setCurrentItem( newItem );
+
+        // Record the pattern <-> patitem pairing.
+        patternMap[newItem] = clonedPat;
     }
 }
 
