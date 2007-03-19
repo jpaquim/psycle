@@ -237,6 +237,11 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
         psy::core::PatternCategory *category = catItr->second;
         nameEdit_->setText( QString::fromStdString( category->name() ) );
         // emit a signal for main window to tell pat view.
+        // Change the colour of the colorBtn's background.
+        QColor color = QColorFromLongColor( category->color() );
+        QPalette pal = colorBtn_->palette();
+        pal.setColor( QPalette::Button, color );
+        colorBtn_->setPalette( pal );
     }
 }
 
