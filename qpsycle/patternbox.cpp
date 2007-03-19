@@ -40,7 +40,7 @@
      layout->setAlignment( Qt::AlignTop );
 
     createToolbar();
-    patternTree_ = new QTreeWidget();
+    patternTree_ = new PatternTree();
     patternTree_->setSelectionMode( QAbstractItemView::SingleSelection );
     patternTree_->setHeaderLabel( "Patterns" );
     connect( patternTree_, SIGNAL( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ), 
