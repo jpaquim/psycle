@@ -33,10 +33,19 @@
 class QToolBar;
 
 class PatternTree : public QTreeWidget {
+    Q_OBJECT
 public:
     PatternTree( QWidget *parent = 0 );
 protected:
     void contextMenuEvent( QContextMenuEvent *ev );
+
+public slots:
+    void onEditPatternNameActionTriggered();
+
+private:
+    QAction *editPatNameAct_;
+    QAction *editCatNameAct_;
+    QAction *editCatColorAct_;
 };
 
 class CategoryItem : public QTreeWidgetItem {

@@ -275,6 +275,7 @@ void PatternBox::addPatternToSequencer()
 
 void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem )
 {
+    patternTree()->closePersistentEditor( prevItem, 0 ); // Closes the persistent editor if it's open.
     // If new item is a pattern...
     if ( currItem->type() == QTreeWidgetItem::UserType + 1 )
     {
@@ -412,7 +413,14 @@ CategoryItem::CategoryItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 2 )
 
 PatternTree::PatternTree( QWidget *parent ) 
     : QTreeWidget(parent)
-{ }
+{ 
+    editPatNameAct_ = new QAction( "Edit pattern name", this );
+    editCatNameAct_ = new QAction( "Edit category name", this );
+    editCatColorAct_ = new QAction( "Edit color", this );
+
+    connect( editPatNameAct_, SIGNAL( triggered() ),
+             this, SLOT( onEditPatternNameActionTriggered() ) );
+}
 
 void PatternTree::contextMenuEvent( QContextMenuEvent *ev )
 {
@@ -422,13 +430,19 @@ void PatternTree::contextMenuEvent( QContextMenuEvent *ev )
         QMenu menu;
         if ( item->type() == QTreeWidgetItem::UserType + 1 )
         {
-            menu.addAction( "Edit Name" );
+            menu.addAction( editPatNameAct_ );
         }
         if ( item->type() == QTreeWidgetItem::UserType + 2 )
         {
-            menu.addAction( "Edit Name" );
-            menu.addAction( "Change Colour" );
+            menu.addAction( editCatNameAct_ );
+            menu.addAction( editCatColorAct_ ); 
         }
         QAction *a = menu.exec( ev->globalPos() );
     }
+}
+
+void PatternTree::onEditPatternNameActionTriggered()
+{
+    PatternItem *patItem = (PatternItem*)currentItem();
+    openPersistentEditor( patItem, 0 );
 }
