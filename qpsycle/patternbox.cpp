@@ -78,7 +78,8 @@ void PatternBox::populatePatternTree()
     std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence()->patternData()->begin();
     for ( ; it < song_->patternSequence()->patternData()->end(); ++it) {
         psy::core::PatternCategory* category = *it;
-        QTreeWidgetItem *categoryItem = new QTreeWidgetItem( patternTree_ );
+        CategoryItem *categoryItem = new CategoryItem();
+        patternTree()->addTopLevelItem( categoryItem );
         categoryItem->setText( 0, QString::fromStdString( category->name() ) );
         QColor col = QColorFromLongColor( category->color() );
         categoryItem->setBackground( 0, QBrush( col ) );
@@ -86,7 +87,8 @@ void PatternBox::populatePatternTree()
 
         std::vector<psy::core::SinglePattern*>::iterator patIt = category->begin();
         for ( ; patIt < category->end(); patIt++) {
-            QTreeWidgetItem *patternItem = new QTreeWidgetItem( categoryItem );
+            PatternItem *patternItem = new PatternItem();
+            categoryItem->addChild( patternItem );
 			psy::core::SinglePattern *pattern = *patIt;
 			patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
             patternMap[patternItem] = pattern;
@@ -130,7 +132,7 @@ void PatternBox::newCategory()
     category->setColor( defaultColor );
 
 
-    QTreeWidgetItem* catItem = new QTreeWidgetItem( patternTree() );
+    CategoryItem* catItem = new CategoryItem( patternTree() );
     catItem->setText( 0, "Category" );
     QColor col = QColorFromLongColor( category->color() );
     catItem->setBackground( 0, QBrush( col ) );
@@ -143,67 +145,83 @@ void PatternBox::newPattern()
     if ( patternTree()->currentItem() ) {
         QTreeWidgetItem *item = patternTree()->currentItem();
 
-        std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( item );
-        if( itr != categoryMap.end() ) 
+        if ( item->type() == QTreeWidgetItem::UserType + 2 )
         {
-            QTreeWidgetItem* catItem = itr->first;
-            psy::core::PatternCategory* cat = itr->second;
-            psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
-            QString patName = QString( "Pattern" + QString::number( pattern->id() ) );
-            pattern->setName( patName.toStdString() );
-            QTreeWidgetItem *patItem = new QTreeWidgetItem( catItem );
-            patItem->setText( 0, QString::fromStdString( pattern->name() ) );
-            //item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
-            patternMap[patItem] = pattern;
+            CategoryItem *catItem = (CategoryItem*)item;
+            std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( catItem );
+            if( itr != categoryMap.end() ) 
+            {
+                CategoryItem* catItem = itr->first;
+                psy::core::PatternCategory* cat = itr->second;
+                psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
+                QString patName = QString( "Pattern" + QString::number( pattern->id() ) );
+                pattern->setName( patName.toStdString() );
+                PatternItem *patItem = new PatternItem( catItem );
+                patItem->setText( 0, QString::fromStdString( pattern->name() ) );
+                //item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
+                patternMap[patItem] = pattern;
+            }
         }
     }
 }
 
 void PatternBox::clonePattern() 
 { 
-    QTreeWidgetItem *item = patternTree()->currentItem();
-    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
-
-    if ( itr!=patternMap.end() ) 
+    if ( patternTree()->currentItem() )
     {
-        psy::core::SinglePattern* pattern = itr->second;
-        std::string clonedPatName = pattern->name()+"clone";
+        QTreeWidgetItem *item = patternTree()->currentItem();
 
-        // Clone the pattern in the song.
-        psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
+        if ( item->type() == QTreeWidgetItem::UserType + 1 )
+        {
+            PatternItem *patItem = (PatternItem*)item;
+            std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr 
+                = patternMap.find( patItem ); 
 
-        // Add a clone item to the pattern tree.
-        QTreeWidgetItem* newItem = new QTreeWidgetItem();
-        newItem->setText( 0, QString::fromStdString( clonedPatName ) );
-        QTreeWidgetItem *parentCat = item->parent();
-        parentCat->addChild( newItem );
-        patternTree()->setCurrentItem( newItem );
+            if ( itr!=patternMap.end() ) 
+            {
+                psy::core::SinglePattern* pattern = itr->second;
+                std::string clonedPatName = pattern->name()+"clone";
 
-        // Record the pattern <-> patitem pairing.
-        patternMap[newItem] = clonedPat;
+                // Clone the pattern in the song.
+                psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
+
+                // Add a clone item to the pattern tree.
+                PatternItem* newItem = new PatternItem();
+                newItem->setText( 0, QString::fromStdString( clonedPatName ) );
+                CategoryItem *parentCat = (CategoryItem*)patItem->parent();
+                parentCat->addChild( newItem );
+                patternTree()->setCurrentItem( newItem );
+
+                // Record the pattern <-> patitem pairing.
+                patternMap[newItem] = clonedPat;
+            }
+        }
     }
 }
 
 void PatternBox::deletePattern() 
 { 
-    QTreeWidgetItem* patItem = patternTree()->currentItem();
-    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( patItem );
-
-    if ( patItr != patternMap.end() ) // only remove if it is a recognisable pattern item.
+    if ( patternTree()->currentItem() )
     {
-        psy::core::SinglePattern* pattern = patItr->second;
-        patternMap.erase( patItr );
+        PatternItem* patItem = (PatternItem*)patternTree()->currentItem();
+        std::map<PatternItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( patItem );
 
-        song()->patternSequence()->removeSinglePattern( pattern );
-        emit patternDeleted();
+        if ( patItr != patternMap.end() ) // only remove if it is a recognisable pattern item.
+        {
+            psy::core::SinglePattern* pattern = patItr->second;
+            patternMap.erase( patItr );
 
-        QTreeWidgetItem* parentCatItem = patItem->parent();
-        int indexOfChild = parentCatItem->indexOfChild( patItem );
-        parentCatItem->takeChild( indexOfChild );
+            song()->patternSequence()->removeSinglePattern( pattern );
+            emit patternDeleted();
 
-// FIXME: need some stuff here when seq gui is in place.
-/*        seqGui->removePattern(pattern);
-        seqGui->repaint();*/
+            CategoryItem* parentCatItem = (CategoryItem*)patItem->parent();
+            int indexOfChild = parentCatItem->indexOfChild( patItem );
+            parentCatItem->takeChild( indexOfChild );
+
+    // FIXME: need some stuff here when seq gui is in place.
+    /*        seqGui->removePattern(pattern);
+            seqGui->repaint();*/
+        }
     }
 }
 
@@ -211,7 +229,7 @@ void PatternBox::addPatternToSequencer()
 { 
     QTreeWidgetItem* item = patternTree()->currentItem();
     if ( item ) {
-        std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( item );
+        std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
         if ( itr!=patternMap.end() ) {
             psy::core::SinglePattern *pattern = itr->second;
             emit addPatternToSequencerRequest( pattern );
@@ -246,30 +264,35 @@ void PatternBox::addPatternToSequencer()
 void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem )
 {
     // If new item is a pattern...
-    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( currItem );
-    if( patItr != patternMap.end() ) {
-        psy::core::SinglePattern *pattern = patItr->second;
-        nameEdit_->setText( QString::fromStdString( pattern->name() ) );
-        // emit a signal for main window to tell pat view.
-        emit patternSelectedInPatternBox( pattern );
-        colorLbl_->setVisible( false );
-        colorBtn_->setVisible( false );
-        return;
+    if ( currItem->type() == QTreeWidgetItem::UserType + 1 )
+    {
+        std::map<PatternItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( (PatternItem*)currItem );
+        if( patItr != patternMap.end() ) {
+            psy::core::SinglePattern *pattern = patItr->second;
+            nameEdit_->setText( QString::fromStdString( pattern->name() ) );
+            // emit a signal for main window to tell pat view.
+            emit patternSelectedInPatternBox( pattern );
+            colorLbl_->setVisible( false );
+            colorBtn_->setVisible( false );
+        }
     }
 
     // If new item is a category...
-    std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( currItem );
-    if( catItr !=categoryMap.end() ) {
-        psy::core::PatternCategory *category = catItr->second;
-        nameEdit_->setText( QString::fromStdString( category->name() ) );
-        // emit a signal for main window to tell pat view.
-        // Change the colour of the colorBtn's background.
-        QColor color = QColorFromLongColor( category->color() );
-        QPalette pal = colorBtn_->palette();
-        pal.setColor( QPalette::Button, color );
-        colorBtn_->setPalette( pal );
-        colorLbl_->setVisible( true );
-        colorBtn_->setVisible( true );
+    if ( currItem->type() == QTreeWidgetItem::UserType + 2 )
+    {
+        std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)currItem );
+        if( catItr !=categoryMap.end() ) {
+            psy::core::PatternCategory *category = catItr->second;
+            nameEdit_->setText( QString::fromStdString( category->name() ) );
+            // emit a signal for main window to tell pat view.
+            // Change the colour of the colorBtn's background.
+            QColor color = QColorFromLongColor( category->color() );
+            QPalette pal = colorBtn_->palette();
+            pal.setColor( QPalette::Button, color );
+            colorBtn_->setPalette( pal );
+            colorLbl_->setVisible( true );
+            colorBtn_->setVisible( true );
+        }
     }
 }
 
@@ -278,7 +301,7 @@ void PatternBox::onPatternNameEdited( const QString & newText )
     QTreeWidgetItem *item = patternTree_->currentItem();
 
     // If current item is a pattern...
-    std::map<QTreeWidgetItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find(item);
+    std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
     if( itr!=patternMap.end() ) {
         psy::core::SinglePattern *pattern = itr->second;
         item->setText( 0, newText );
@@ -288,7 +311,7 @@ void PatternBox::onPatternNameEdited( const QString & newText )
     }
 
     // If current item is a category...
-    std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find(item);
+    std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)item );
     if( catItr!=categoryMap.end() ) {
         psy::core::PatternCategory *category = catItr->second;
         item->setText( 0, newText );
@@ -324,7 +347,7 @@ void PatternBox::onColorButtonClicked()
 {  
     QColor color = QColorDialog::getColor();
     QTreeWidgetItem *item = patternTree_->currentItem();
-    std::map<QTreeWidgetItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( item );
+    std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( (CategoryItem*) item );
     if( itr != categoryMap.end() ) 
     {
         psy::core::PatternCategory *category = itr->second;
@@ -338,6 +361,15 @@ void PatternBox::onColorButtonClicked()
     }
 }
 
+PatternItem::PatternItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 1)
+{}
+PatternItem::PatternItem( CategoryItem *parent ) : QTreeWidgetItem( parent )
+{}
+
+CategoryItem::CategoryItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 2 )
+{}
+CategoryItem::CategoryItem( PatternTree *patTree) : QTreeWidgetItem( patTree )
+{}
 
 
 PatternTree::PatternTree( QWidget *parent ) 
