@@ -31,11 +31,12 @@
  #include "psycore/song.h"
 
 class QToolBar;
+class PatternBox;
 
 class PatternTree : public QTreeWidget {
     Q_OBJECT
 public:
-    PatternTree( QWidget *parent = 0 );
+    PatternTree( PatternBox *patBox );
 protected:
     void contextMenuEvent( QContextMenuEvent *ev );
 
@@ -44,6 +45,7 @@ public slots:
     void onEditCategoryNameActionTriggered();
 
 private:
+    PatternBox *patBox_;
     QAction *editPatNameAct_;
     QAction *editCatNameAct_;
     QAction *editCatColorAct_;
@@ -88,7 +90,8 @@ public slots:
      void deletePattern();
      void addPatternToSequencer();
      void onPatternNameEdited( const QString & newText );
-     void onColorButtonClicked(); 
+    // void onColorButtonClicked(); 
+     void onEditCategoryColorActionTriggered();
 
 signals:
     void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
