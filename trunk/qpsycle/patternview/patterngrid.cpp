@@ -30,11 +30,6 @@ template<class T> inline T str_hex(const std::string &  value) {
     return result;
 }
 
-int d2i(double d)
-{
-		return (int) ( d<0?d-.5:d+.5);
-}
-
 PatternGrid::PatternGrid( PatternDraw *pDraw )
     : patDraw_( pDraw )
 {
@@ -80,7 +75,6 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 
 QRectF PatternGrid::boundingRect() const
 {
-    // FIXME: should come from somewhere else (i.e. that not hard-coded.)
     if ( patDraw_->patternView()->pattern() ) {
         int gridWidth = gridWidthByTrack( numberOfTracks() -1 );
         int gridHeight = numberOfLines()*lineHeight();
@@ -95,19 +89,18 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
     font_ = QFont( "courier", 9 );
     setFont( font_ );
     painter->setFont( font_ ); 
-        if ( patDraw_->patternView()->pattern() ) {
+    if ( pattern() ) {
+        int startLine = 0; 
+        int endLine = numberOfLines() - 1;
+        int startTrack = 0;
+        int endTrack = numberOfTracks() - 1;
 
-            int startLine = 0; 
-            int endLine = numberOfLines() - 1;
-            int startTrack = 0;
-            int endTrack = numberOfTracks() - 1;
-
-            drawGrid( painter, startLine, endLine, startTrack, endTrack );	
-            //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
-            drawPattern( painter, startLine, endLine, startTrack, endTrack );
-            drawSelBg( painter, selection() );
-        //drawRestArea(g, startLine, endLine, startTrack, endTrack);*/
-        }
+        drawGrid( painter, startLine, endLine, startTrack, endTrack );	
+        //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
+        drawPattern( painter, startLine, endLine, startTrack, endTrack );
+        drawSelBg( painter, selection() );
+    //drawRestArea(g, startLine, endLine, startTrack, endTrack);*/
+    }
 }
 
 /** 
@@ -143,11 +136,11 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
     }
     for (int y = startLine; y <= endLine; y++) {
         float position = y / (float) beatZoom();
-        if (!(true/*y == patDraw_->pView->playPos()*/) || !psy::core::Player::Instance()->playing() ) {
+        if (!(y == patDraw_->patternView()->playPos() ) || !psy::core::Player::Instance()->playing() ) {
             if ( !(y % beatZoom())) {
                 if ((patDraw_->patternView()->pattern()->barStart(position, signature) )) {
 
-                    painter->setBrush( barColor() );//g.setForeground( barColor() );
+                    painter->setBrush( barColor() );
                     painter->drawRect( 0, y*lineHeight() /*- dy()*/, gridWidth, lineHeight());
 
 /*                    if ( y >= selection().top() && y < selection().bottom()) {
@@ -158,7 +151,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
                     }*/
 
                 } else {
-                    painter->setBrush( beatColor() );//g.setForeground( beatColor() );
+                    painter->setBrush( beatColor() );
                     painter->drawRect( 0, y* lineHeight() /*- dy()*/, gridWidth, lineHeight() );
 
                     /*if ( y >= selection().top() && y < selection().bottom()) {
@@ -218,7 +211,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
         for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
             if ( it != patDraw_->patternView()->pattern()->end() )	{
-                int liney = d2i (it->first * beatZoom() );
+                int liney = it->first * beatZoom();
                 if (liney == curLinenum ) {
                     line = &it->second;
                     it++;
@@ -241,11 +234,11 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                 }
 
                 // Check if this line is currently being played.
-/*                if ((curLinenum == patView_->playPos() && Player::Instance()->playing() ) ) {
-                    int trackWidth = xEndByTrack( endTrack ) - dx();
-                    g.setForeground( playBarColor() );
-                    g.fillRect(0, y*rowHeight() - dy(), trackWidth, rowHeight());
-                }*/
+                if ((curLinenum == patDraw_->patternView()->playPos() && psy::core::Player::Instance()->playing() ) ) {
+                    int trackWidth = xEndByTrack( endTrack ) /*- dx()*/;
+                    painter->setBrush( playBarColor() );
+                    painter->drawRect( 0, curLinenum*lineHeight() /*- dy()*/, trackWidth, lineHeight() );
+                }
 
                 QColor stdColor = tColor;
                 QColor crColor = cursorTextColor();
@@ -1163,6 +1156,15 @@ int PatternGrid::xOffByTrack( int track ) const
     int trackOff = 0;
     if ( it != trackGeometrics().end() )
         trackOff = it->second.left();
+    return trackOff;
+}
+
+int PatternGrid::xEndByTrack( int track ) const {
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( track );
+    int trackOff = 0;
+    if ( it != trackGeometrics().end() )
+        trackOff = it->second.left() + it->second.width();
     return trackOff;
 }
 

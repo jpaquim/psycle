@@ -187,6 +187,7 @@ private:
     void setupTrackGeometrics( int numberOfTracks );
     void alignTracks();
     int xOffByTrack( int track ) const;
+    int xEndByTrack( int track ) const;
 
     PatternDraw *patDraw_;
     std::map<int, TrackGeometry> trackGeometryMap;

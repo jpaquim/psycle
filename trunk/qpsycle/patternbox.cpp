@@ -103,7 +103,7 @@ void PatternBox::populatePatternTree()
 
 void PatternBox::newCategory() 
 { 
-    psy::core::PatternCategory* category = song()->patternSequence()->patternData()->createNewCategory("category");
+    psy::core::PatternCategory* category = song()->patternSequence()->patternData()->createNewCategory("NewCategory");
     long defaultColor = 0x0000FF;
     category->setColor( defaultColor );
 

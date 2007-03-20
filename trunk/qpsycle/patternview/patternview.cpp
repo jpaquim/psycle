@@ -24,8 +24,12 @@
 #include "patterndraw.h"
 
 #include "psycore/song.h"
+#include "psycore/player.h"
 
-
+int d2i(double d)
+{
+		return (int) ( d<0?d-.5:d+.5);
+}
 
 PatternView::PatternView( psy::core::Song *song )
 {
@@ -34,6 +38,8 @@ PatternView::PatternView( psy::core::Song *song )
     setNumberOfTracks( 6 );
     patDraw_ = new PatternDraw( this );
     setPattern( new psy::core::SinglePattern() );
+
+    playPos_ = 0;
 
     setSelectedMachineIndex( 255 ); // FIXME: why 255?
     layout = new QVBoxLayout();
@@ -143,5 +149,22 @@ int PatternView::beatZoom( ) const
         return pattern_->beatZoom();
     else
         return 4;
+}
+
+void PatternView::onTick( double sequenceStart ) {
+    if ( pattern() ) {
+        int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * pattern()->beatZoom() );
+        std::cout << "liney " << liney << std::endl;
+        if ( liney != playPos_ ) {			
+            int oldPlayPos = playPos_;
+            playPos_ = liney;
+            std::cout << "playpos " << playPos_;
+            //int startTrack = drawArea->findTrackByScreenX( drawArea->dx() );
+            //int endTrack = drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
+            //window()->repaint( drawArea , drawArea->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ));	
+            //window()->repaint( drawArea , drawArea->repaintTrackArea( liney,liney, startTrack, endTrack ));
+            patDraw_->patternGrid()->update( patDraw_->patternGrid()->boundingRect() );
+        }
+    }
 }
 

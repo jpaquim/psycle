@@ -54,6 +54,8 @@ MainWindow::MainWindow()
     populateMachineCombo();
     initSampleCombo();
     patternBox_->patternTree()->setFocus();
+
+    startTimer( 10 );
 }
 
 void MainWindow::setupSong()
@@ -496,4 +498,21 @@ void MainWindow::onCategoryColorChanged()
     // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
     seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
 
+}
+
+void MainWindow::timerEvent( QTimerEvent *ev )
+{
+    if ( psy::core::Player::Instance()->playing() ) {
+        seqView_->updatePlayPos();				
+
+        psy::core::SinglePattern* visiblePattern = 0;
+        visiblePattern = patView_->pattern();
+        if ( visiblePattern ) {			
+            double entryStart = 0;
+            bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
+            if ( isPlayPattern ) {
+                patView_->onTick( entryStart );
+            }			
+        }
+    }
 }
