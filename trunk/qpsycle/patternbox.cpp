@@ -403,18 +403,32 @@ PatternItem::PatternItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 1 )
 {
     setFlags( Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled );
 }
-PatternItem::PatternItem( CategoryItem *parent ) : QTreeWidgetItem( parent )
-{}
 
 CategoryItem::CategoryItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 2 )
 {
     setFlags( Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled );
 }
-CategoryItem::CategoryItem( PatternTree *patTree) : QTreeWidgetItem( patTree )
-{}
 
 
 PatternTree::PatternTree( QWidget *parent ) 
     : QTreeWidget(parent)
 { }
 
+void PatternTree::contextMenuEvent( QContextMenuEvent *ev )
+{
+    QTreeWidgetItem *item = this->itemAt( ev->pos() );
+    if ( item )
+    {
+        QMenu menu;
+        if ( item->type() == QTreeWidgetItem::UserType + 1 )
+        {
+            menu.addAction( "Edit Name" );
+        }
+        if ( item->type() == QTreeWidgetItem::UserType + 2 )
+        {
+            menu.addAction( "Edit Name" );
+            menu.addAction( "Change Colour" );
+        }
+        QAction *a = menu.exec( ev->globalPos() );
+    }
+}

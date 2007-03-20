@@ -25,6 +25,8 @@
  #include <QTreeWidget>
  #include <QPushButton>
  #include <QLabel>
+#include <QContextMenuEvent>
+#include <QMenu>
 
  #include "psycore/song.h"
 
@@ -33,6 +35,8 @@ class QToolBar;
 class PatternTree : public QTreeWidget {
 public:
     PatternTree( QWidget *parent = 0 );
+protected:
+    void contextMenuEvent( QContextMenuEvent *ev );
 };
 
 class CategoryItem : public QTreeWidgetItem {
