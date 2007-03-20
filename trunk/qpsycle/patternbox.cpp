@@ -40,7 +40,7 @@
      layout->setAlignment( Qt::AlignTop );
 
     createToolbar();
-    patternTree_ = new PatternTree();
+    patternTree_ = new PatternTree( this );
     patternTree_->setSelectionMode( QAbstractItemView::SingleSelection );
     patternTree_->setHeaderLabel( "Patterns" );
     connect( patternTree_, SIGNAL( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ), 
@@ -123,7 +123,6 @@ void PatternBox::createItemPropertiesBox()
     itemPropsLayout->addWidget( colorLbl_, 2, 0, 2, 1 );
     colorBtn_ = new QPushButton();
     colorBtn_->setAutoFillBackground( true );
-    connect( colorBtn_, SIGNAL( clicked() ), this, SLOT( onColorButtonClicked() ) );
     itemPropsLayout->addWidget( colorBtn_, 2, 1, 2, 3 );
 }
 
@@ -356,24 +355,6 @@ long PatternBox::QColorToLongColor( const QColor & qCol )
     return longCol;
 }
 
-void PatternBox::onColorButtonClicked()
-{  
-    QColor color = QColorDialog::getColor();
-    QTreeWidgetItem *item = patternTree_->currentItem();
-    std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( (CategoryItem*) item );
-    if( itr != categoryMap.end() ) 
-    {
-        psy::core::PatternCategory *category = itr->second;
-        category->setColor( QColorToLongColor( color ) );
-        item->setBackground( 0, QBrush( color ) );
-        // Change the colour of the colorBtn's background.
-        QPalette pal = colorBtn_->palette();
-        pal.setColor( QPalette::Button, color );
-        colorBtn_->setPalette( pal );
-        emit categoryColorChanged();
-    }
-}
-
 void PatternBox::onItemEdited( QTreeWidgetItem *item, int column )
 {
     // If current item is a pattern...
@@ -411,9 +392,10 @@ CategoryItem::CategoryItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 2 )
 }
 
 
-PatternTree::PatternTree( QWidget *parent ) 
-    : QTreeWidget(parent)
+PatternTree::PatternTree( PatternBox *patBox ) 
+    : QTreeWidget( patBox )
 { 
+    patBox_ = patBox;
     editPatNameAct_ = new QAction( "Edit pattern name", this );
     editCatNameAct_ = new QAction( "Edit category name", this );
     editCatColorAct_ = new QAction( "Edit color", this );
@@ -422,6 +404,8 @@ PatternTree::PatternTree( QWidget *parent )
              this, SLOT( onEditPatternNameActionTriggered() ) );
     connect( editCatNameAct_, SIGNAL( triggered() ),
              this, SLOT( onEditCategoryNameActionTriggered() ) );
+    connect( editCatColorAct_, SIGNAL( triggered() ), 
+             patBox_, SLOT( onEditCategoryColorActionTriggered() ) );
 }
 
 void PatternTree::contextMenuEvent( QContextMenuEvent *ev )
@@ -454,3 +438,25 @@ void PatternTree::onEditCategoryNameActionTriggered()
     CategoryItem *catItem = (CategoryItem*)currentItem();
     openPersistentEditor( catItem, 0 );
 }
+
+void PatternBox::onEditCategoryColorActionTriggered()
+{  
+    QColor color = QColorDialog::getColor();
+    if ( color.isValid() )
+    {
+        CategoryItem *item = (CategoryItem*)patternTree_->currentItem();
+        std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( (CategoryItem*) item );
+        if( itr != categoryMap.end() ) 
+        {
+            psy::core::PatternCategory *category = itr->second;
+            category->setColor( QColorToLongColor( color ) );
+            item->setBackground( 0, QBrush( color ) );
+            // Change the colour of the colorBtn's background.
+            QPalette pal = colorBtn_->palette();
+            pal.setColor( QPalette::Button, color );
+            colorBtn_->setPalette( pal );
+            emit categoryColorChanged();
+        }
+    }
+}
+
