@@ -164,6 +164,7 @@ public:
     void copyBlock( bool cutit );
     void pasteBlock( int tx,int lx,bool mix );
 
+    QRectF repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
 
 public slots:
     void keyPressEvent( QKeyEvent *event );

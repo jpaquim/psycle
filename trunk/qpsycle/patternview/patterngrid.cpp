@@ -1265,6 +1265,17 @@ void PatternGrid::pasteBlock(int tx,int lx,bool mix )
     }
 }
 
+QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {
+    int top    = startLine    * lineHeight()  + 0;//absoluteTop() - dy_;
+    int bottom = (endLine+1)  * lineHeight()  + 0;//absoluteTop();//  - dy_;
+    int left   = xOffByTrack( startTrack)  + 0;//absoluteLeft() - dx_;
+    int right  = xEndByTrack( endTrack  )  + 0;//absoluteLeft() - dx_;
+
+    return QRectF( left, top, right - left, bottom - top );
+}
+
+
+
 
 
 

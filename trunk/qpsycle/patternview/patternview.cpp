@@ -154,16 +154,13 @@ int PatternView::beatZoom( ) const
 void PatternView::onTick( double sequenceStart ) {
     if ( pattern() ) {
         int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * pattern()->beatZoom() );
-        std::cout << "liney " << liney << std::endl;
         if ( liney != playPos_ ) {			
             int oldPlayPos = playPos_;
             playPos_ = liney;
-            std::cout << "playpos " << playPos_;
-            //int startTrack = drawArea->findTrackByScreenX( drawArea->dx() );
-            //int endTrack = drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
-            //window()->repaint( drawArea , drawArea->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ));	
-            //window()->repaint( drawArea , drawArea->repaintTrackArea( liney,liney, startTrack, endTrack ));
-            patDraw_->patternGrid()->update( patDraw_->patternGrid()->boundingRect() );
+            int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
+            int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
+            patDraw_->patternGrid()->update( patDraw_->patternGrid()->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ) );
+            patDraw_->patternGrid()->update( patDraw_->patternGrid()->repaintTrackArea( liney, liney, startTrack, endTrack ) );
         }
     }
 }
