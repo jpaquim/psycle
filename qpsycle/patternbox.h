@@ -113,10 +113,6 @@ signals:
     std::map<PatternItem*, psy::core::SinglePattern*> patternMap;
 
      QToolBar *toolBar_;
-     QWidget *itemProps_;
-     QLineEdit *nameEdit_;
-     QLabel *colorLbl_;
-     QPushButton *colorBtn_;
      PatternTree *patternTree_;
 
      QAction *newCatAct;
