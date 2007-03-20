@@ -67,8 +67,7 @@ public:
 
 public slots:
      void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
-
- private slots:
+     void onItemEdited( QTreeWidgetItem *item, int column );
      void newCategory();
      void newPattern();
      void clonePattern();
