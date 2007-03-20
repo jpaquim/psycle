@@ -132,7 +132,8 @@ void PatternBox::newCategory()
     category->setColor( defaultColor );
 
 
-    CategoryItem* catItem = new CategoryItem( patternTree() );
+    CategoryItem* catItem = new CategoryItem();
+    patternTree()->addTopLevelItem( catItem );
     catItem->setText( 0, "Category" );
     QColor col = QColorFromLongColor( category->color() );
     catItem->setBackground( 0, QBrush( col ) );
@@ -145,22 +146,30 @@ void PatternBox::newPattern()
     if ( patternTree()->currentItem() ) {
         QTreeWidgetItem *item = patternTree()->currentItem();
 
-        if ( item->type() == QTreeWidgetItem::UserType + 2 )
+        CategoryItem *catItem = 0;
+        if ( item->type() == QTreeWidgetItem::UserType + 1 )
         {
-            CategoryItem *catItem = (CategoryItem*)item;
-            std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( catItem );
-            if( itr != categoryMap.end() ) 
-            {
-                CategoryItem* catItem = itr->first;
-                psy::core::PatternCategory* cat = itr->second;
-                psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
-                QString patName = QString( "Pattern" + QString::number( pattern->id() ) );
-                pattern->setName( patName.toStdString() );
-                PatternItem *patItem = new PatternItem( catItem );
-                patItem->setText( 0, QString::fromStdString( pattern->name() ) );
-                //item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
-                patternMap[patItem] = pattern;
-            }
+            PatternItem *currentPatItem = (PatternItem*)item;
+            catItem = (CategoryItem*)currentPatItem->parent();
+        } else if ( item->type() == QTreeWidgetItem::UserType + 2 )
+        {
+            catItem = (CategoryItem*)item;
+        }
+
+        std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( catItem );
+        if( itr != categoryMap.end() ) 
+        {
+            CategoryItem* catItem = itr->first;
+            psy::core::PatternCategory* cat = itr->second;
+            psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
+            QString patName = QString( "Pattern" + QString::number( pattern->id() ) );
+            pattern->setName( patName.toStdString() );
+            PatternItem *patItem = new PatternItem();
+            catItem->addChild( patItem );
+            patItem->setText( 0, QString::fromStdString( pattern->name() ) );
+            //item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
+            patternMap[patItem] = pattern;
+            patternTree()->setCurrentItem( patItem );
         }
     }
 }
