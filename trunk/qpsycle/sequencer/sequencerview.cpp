@@ -22,9 +22,17 @@
 #include <vector>
 
 #include <QAction>
+#include <QGraphicsScene>
 
  #include "sequencerview.h"
  #include "sequencerline.h"
+
+ #include "psycore/player.h"
+
+/*int d2i(double d)
+{
+		return (int) ( d<0?d-.5:d+.5);
+}*/
 
 SequencerView::SequencerView( psy::core::Song *asong )
 {
@@ -64,15 +72,17 @@ void SequencerView::addPattern( psy::core::SinglePattern *pattern )
 }
 
 void SequencerView::updatePlayPos() {
-/*    if ( patternSequence() /*&& scrollArea() && !scrollArea()->lockPlayLine() ) {
-        int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), psy::core::Player::Instance()->playPos() * beatPxLength()));
-        int oxPos = d2i(std::min(patternSequence()->tickLength()* beatPxLength(), oldPlayPos_ * beatPxLength()));
+    if ( song()->patternSequence() /*&& scrollArea() && !scrollArea()->lockPlayLine()*/ ) {
+        int beatPxLength = seqDraw_->beatPxLength();
+        int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
+        int oxPos = std::min(song()->patternSequence()->tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
         if (oxPos != xPos) {
-            scrollArea()->pLine()->setPosition( xPos, scrollArea()->scrollDy(),1,scrollArea()->clientHeight());
-            window()->repaint( scrollArea(), ngrs::Rect( scrollArea()->absoluteLeft() + oxPos, scrollArea()->absoluteTop(), 1, scrollArea()->clientHeight() ) );
-            scrollArea()->pLine()->repaint();
+            seqDraw_->pLine()->setLine( xPos, 0, xPos, seqDraw_->height() );
+            //window()->repaint( scrollArea(), ngrs::Rect( scrollArea()->absoluteLeft() + oxPos, scrollArea()->absoluteTop(), 1, scrollArea()->clientHeight() ) );
+            //scrollArea()->pLine()->repaint();
+            seqDraw_->scene()->update( seqDraw_->scene()->itemsBoundingRect() );
         }
-        oldPlayPos_ = Player::Instance()->playPos();
-    }*/
+        oldPlayPos_ = psy::core::Player::Instance()->playPos();
+    }
 }
 

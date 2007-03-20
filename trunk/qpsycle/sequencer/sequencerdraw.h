@@ -47,6 +47,7 @@ class SequencerView;
     std::vector<SequencerLine*> lines();
 
     void addPattern( psy::core::SinglePattern *pattern );
+    QGraphicsLineItem* pLine() { return pLine_; }
 
 public slots:
     void insertTrack();
@@ -67,6 +68,8 @@ public slots:
 
     int beatPxLength_;
     int lineHeight_;
+
+    QGraphicsLineItem *pLine_;
 
  };
 

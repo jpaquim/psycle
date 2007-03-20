@@ -79,6 +79,10 @@
     }
     BeatRuler *beatRuler = new BeatRuler( this );
 
+    pLine_ = new QGraphicsLineItem();
+    pLine_->setPen( QColor( Qt::red ) );
+    scene_->addItem( pLine_ );
+
     scene_->addItem( beatRuler );
     beatRuler->setPos( 0, 0 );
     scene_->addItem( seqArea_ );

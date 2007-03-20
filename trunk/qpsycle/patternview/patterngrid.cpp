@@ -236,6 +236,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                 // Check if this line is currently being played.
                 if ((curLinenum == patDraw_->patternView()->playPos() && psy::core::Player::Instance()->playing() ) ) {
                     int trackWidth = xEndByTrack( endTrack ) /*- dx()*/;
+                    painter->setPen( playBarColor() );
                     painter->setBrush( playBarColor() );
                     painter->drawRect( 0, curLinenum*lineHeight() /*- dy()*/, trackWidth, lineHeight() );
                 }

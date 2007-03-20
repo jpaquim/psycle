@@ -56,6 +56,7 @@ public:
 
     QToolBar *toolBar_;
 
+    double oldPlayPos_;
  };
 
  #endif
