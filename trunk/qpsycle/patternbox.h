@@ -28,7 +28,31 @@
 
  #include "psycore/song.h"
 
- class QToolBar;
+class QToolBar;
+
+class PatternTree : public QTreeWidget {
+public:
+    PatternTree( QWidget *parent = 0 );
+};
+
+class CategoryItem : public QTreeWidgetItem {
+public:
+    CategoryItem();
+    CategoryItem( PatternTree *patTree );
+
+    enum { Type = QTreeWidgetItem::UserType + 2 };
+    int type() const { return Type; }
+};
+
+class PatternItem : public QTreeWidgetItem {
+public:
+    PatternItem();
+    PatternItem( CategoryItem *parent );
+
+    enum { Type = QTreeWidgetItem::UserType + 1 };
+    int type() const { return Type; }
+};
+
 
  class PatternBox : public QWidget
  {
@@ -38,7 +62,7 @@
      PatternBox( psy::core::Song *song, QWidget *parent = 0);
 
     void populatePatternTree();
-    QTreeWidget* patternTree() { return patternTree_; }
+    PatternTree* patternTree() { return patternTree_; }
     psy::core::Song* song() { return song_; }
 
 public slots:
@@ -68,16 +92,16 @@ signals:
     long QColorToLongColor( const QColor & qCol );
 
     psy::core::Song *song_;
-    std::map<QTreeWidgetItem*, psy::core::PatternCategory*> categoryMap;
-    std::vector<QTreeWidgetItem*> catItems;
-    std::map<QTreeWidgetItem*, psy::core::SinglePattern*> patternMap;
+    std::map<CategoryItem*, psy::core::PatternCategory*> categoryMap;
+    std::vector<CategoryItem*> catItems;
+    std::map<PatternItem*, psy::core::SinglePattern*> patternMap;
 
      QToolBar *toolBar_;
      QWidget *itemProps_;
      QLineEdit *nameEdit_;
      QLabel *colorLbl_;
      QPushButton *colorBtn_;
-     QTreeWidget *patternTree_;
+     PatternTree *patternTree_;
 
      QAction *newCatAct;
      QAction *newPatAct;
@@ -85,11 +109,7 @@ signals:
      QAction *delPatAct;
      QAction *addPatToSeqAct;
 
- };
-
-class PatternTree : public QTreeWidget {
-public:
-    PatternTree( QWidget *parent = 0 );
 };
+
 
 #endif
