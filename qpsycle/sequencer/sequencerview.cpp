@@ -63,3 +63,16 @@ void SequencerView::addPattern( psy::core::SinglePattern *pattern )
     }
 }
 
+void SequencerView::updatePlayPos() {
+/*    if ( patternSequence() /*&& scrollArea() && !scrollArea()->lockPlayLine() ) {
+        int xPos =  d2i(std::min(patternSequence()->tickLength()* beatPxLength(), psy::core::Player::Instance()->playPos() * beatPxLength()));
+        int oxPos = d2i(std::min(patternSequence()->tickLength()* beatPxLength(), oldPlayPos_ * beatPxLength()));
+        if (oxPos != xPos) {
+            scrollArea()->pLine()->setPosition( xPos, scrollArea()->scrollDy(),1,scrollArea()->clientHeight());
+            window()->repaint( scrollArea(), ngrs::Rect( scrollArea()->absoluteLeft() + oxPos, scrollArea()->absoluteTop(), 1, scrollArea()->clientHeight() ) );
+            scrollArea()->pLine()->repaint();
+        }
+        oldPlayPos_ = Player::Instance()->playPos();
+    }*/
+}
+

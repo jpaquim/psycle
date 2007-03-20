@@ -42,6 +42,7 @@ public:
     void setSelectedLine( SequencerLine *line ) ;
     void addPattern( psy::core::SinglePattern *pattern );
     SequencerDraw *sequencerDraw() { return seqDraw_; }
+    void updatePlayPos();
      
  protected:
 

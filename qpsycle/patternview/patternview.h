@@ -63,6 +63,9 @@
     PatternDraw* patDraw() { return patDraw_; }
     int beatZoom() const;
 
+    void onTick( double sequenceStart );
+    int playPos() { return playPos_; }
+
 
  private:
     void createToolBar();
@@ -81,6 +84,8 @@
     QAction *delBarAct_;
 
     int selectedMacIdx_;
+
+    int playPos_;
 
  };
 
