@@ -41,6 +41,7 @@ protected:
 
 public slots:
     void onEditPatternNameActionTriggered();
+    void onEditCategoryNameActionTriggered();
 
 private:
     QAction *editPatNameAct_;
