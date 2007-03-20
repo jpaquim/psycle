@@ -420,6 +420,8 @@ PatternTree::PatternTree( QWidget *parent )
 
     connect( editPatNameAct_, SIGNAL( triggered() ),
              this, SLOT( onEditPatternNameActionTriggered() ) );
+    connect( editCatNameAct_, SIGNAL( triggered() ),
+             this, SLOT( onEditCategoryNameActionTriggered() ) );
 }
 
 void PatternTree::contextMenuEvent( QContextMenuEvent *ev )
@@ -445,4 +447,10 @@ void PatternTree::onEditPatternNameActionTriggered()
 {
     PatternItem *patItem = (PatternItem*)currentItem();
     openPersistentEditor( patItem, 0 );
+}
+
+void PatternTree::onEditCategoryNameActionTriggered()
+{
+    CategoryItem *catItem = (CategoryItem*)currentItem();
+    openPersistentEditor( catItem, 0 );
 }
