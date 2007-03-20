@@ -45,6 +45,8 @@
     patternTree_->setHeaderLabel( "Patterns" );
     connect( patternTree_, SIGNAL( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ), 
              this, SLOT( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ) );
+    connect( patternTree_, SIGNAL( itemChanged( QTreeWidgetItem*, int ) ), 
+             this, SLOT( onItemEdited( QTreeWidgetItem*, int ) ) );
     createItemPropertiesBox();
 
     layout->addWidget( toolBar_, 0, 0);
@@ -165,6 +167,7 @@ void PatternBox::newPattern()
             QString patName = QString( "Pattern" + QString::number( pattern->id() ) );
             pattern->setName( patName.toStdString() );
             PatternItem *patItem = new PatternItem();
+
             catItem->addChild( patItem );
             patItem->setText( 0, QString::fromStdString( pattern->name() ) );
             //item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
@@ -370,13 +373,43 @@ void PatternBox::onColorButtonClicked()
     }
 }
 
-PatternItem::PatternItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 1)
-{}
+void PatternBox::onItemEdited( QTreeWidgetItem *item, int column )
+{
+    // If current item is a pattern...
+    if ( item->type() == QTreeWidgetItem::UserType + 1 )
+    {
+        std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
+        if( itr!=patternMap.end() ) {
+            psy::core::SinglePattern *pattern = itr->second;
+            pattern->setName( item->text( 0 ).toStdString() );
+            emit patternNameChanged();
+            return;
+        }
+    }
+
+    if ( item->type() == QTreeWidgetItem::UserType + 2 )
+    {
+        // If current item is a category...
+        std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)item );
+        if( catItr!=categoryMap.end() ) {
+            psy::core::PatternCategory *category = catItr->second;
+            category->setName( item->text( 0 ).toStdString() );
+            return;
+        }
+    }
+}
+
+PatternItem::PatternItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 1 )
+{
+    setFlags( Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+}
 PatternItem::PatternItem( CategoryItem *parent ) : QTreeWidgetItem( parent )
 {}
 
 CategoryItem::CategoryItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 2 )
-{}
+{
+    setFlags( Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled );
+}
 CategoryItem::CategoryItem( PatternTree *patTree) : QTreeWidgetItem( patTree )
 {}
 
