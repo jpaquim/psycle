@@ -340,8 +340,12 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         case psy::core::cdefShowSequencerView:
             views_->setCurrentWidget( seqView_ );        
         break;
+        // Play controls.
         case psy::core::cdefPlayStart:
             psy::core::Player::Instance()->start( 0.0 );
+        break;
+        case psy::core::cdefPlayStop:
+            psy::core::Player::Instance()->stop();
         break;
         case psy::core::cdefInstrInc:
             sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
@@ -349,6 +353,7 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         case psy::core::cdefInstrDec:
             sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
         break;
+
         default:;
     }
 }
