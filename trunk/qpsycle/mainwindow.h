@@ -65,7 +65,7 @@
     void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
     void onPatternNameChanged();
     void onCategoryColorChanged();
-    void onOctaveComboBoxIndexChanged( int newOctave );
+    void onOctaveComboBoxIndexChanged( int newIndex );
 
  private:
     psy::core::Song *song_;
