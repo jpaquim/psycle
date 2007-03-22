@@ -159,7 +159,7 @@ public:
     void repaintSelection();
     void repaintCursor();
 
-    int patternStep() { return 1; }
+    int patternStep(); 
 
     void copyBlock( bool cutit );
     void pasteBlock( int tx,int lx,bool mix );
