@@ -364,6 +364,12 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         case psy::core::cdefInstrDec:
             sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
         break;
+        case psy::core::cdefOctaveUp:
+            octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
+        break;
+        case psy::core::cdefOctaveDn:
+            octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
+        break;
 
         default:;
     }
@@ -533,7 +539,7 @@ void MainWindow::timerEvent( QTimerEvent *ev )
     }
 }
 
-void MainWindow::onOctaveComboBoxIndexChanged( int newOctave )
+void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
 {
-    patView_->setOctave( newOctave );
+    patView_->setOctave( newIndex - 1 );
 }

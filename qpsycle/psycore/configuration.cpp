@@ -451,6 +451,9 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefInstrDec, Key( Qt::ControlModifier, Qt::Key_Minus ) );
 			inputHandler_.changeKeyCode( cdefInstrInc, Key( Qt::ControlModifier, Qt::Key_Equal ) );
 
+			inputHandler_.changeKeyCode( cdefOctaveDn, Key( Qt::KeypadModifier, Qt::Key_Slash ) );
+			inputHandler_.changeKeyCode( cdefOctaveUp, Key( Qt::KeypadModifier, Qt::Key_Asterisk ) );
+
             // PatternView.
 			inputHandler_.changeKeyCode( cdefNavUp, Key( Qt::NoModifier, Qt::Key_Up ) );
 			inputHandler_.changeKeyCode( cdefNavDown, Key( Qt::NoModifier, Qt::Key_Down ) );
