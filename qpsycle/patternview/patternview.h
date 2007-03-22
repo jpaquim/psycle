@@ -47,7 +47,6 @@ public:
     void enterNote( const PatCursor & cursor, int note );
     void onTick( double sequenceStart );
 
-
     // Getters.
     psy::core::Song *song() { return song_; }
     psy::core::SinglePattern *pattern() const { return pattern_; }
@@ -60,14 +59,19 @@ public:
     int selectedMachineIndex() const;
     int playPos() { return playPos_; }
     int beatZoom() const;
+    int patternStep() const;
 
     // Setters.
     void setSelectedMachineIndex( int idx );
     void setPattern( psy::core::SinglePattern *pattern );
     void setNumberOfTracks( int numTracks );
+    void setPatternStep( int newStep );
 
     // GUI events.
     void keyPressEvent( QKeyEvent *event );
+
+public slots:
+    void onPatternStepComboBoxIndexChanged( int newIndex );
 
 private:
     void createToolBar();
@@ -75,14 +79,16 @@ private:
     psy::core::Song *song_;
     psy::core::SinglePattern* pattern_;
 
+    int patternStep_;
     int numberOfTracks_;
     int selectedMacIdx_;
     int playPos_;
 
+    // GUI items.
     PatternDraw *patDraw_;
     QVBoxLayout *layout;
     QToolBar *toolBar_;
-    QComboBox *meterCbx_;
+    QComboBox *patStepCbx_;
     QComboBox *patternCbx_;
     QAction *delBarAct_;
 

@@ -1275,6 +1275,10 @@ QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, i
     return QRectF( left, top, right - left, bottom - top );
 }
 
+int PatternGrid::patternStep()
+{
+    return patDraw_->patternView()->patternStep();
+}
 
 
 

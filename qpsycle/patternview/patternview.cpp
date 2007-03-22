@@ -35,6 +35,7 @@ PatternView::PatternView( psy::core::Song *song )
 {
     song_ = song;
     pattern_ = 0;
+    patternStep_ = 1;
     setNumberOfTracks( 6 );
     patDraw_ = new PatternDraw( this );
     setPattern( new psy::core::SinglePattern() );
@@ -46,22 +47,28 @@ PatternView::PatternView( psy::core::Song *song )
     setLayout( layout );
     // Create the toolbar.
     createToolBar();
-    layout->addWidget(toolBar_);
+    layout->addWidget( toolBar_ );
     layout->addWidget( patDraw_ );
 }
 
 void PatternView::createToolBar()
 {
     toolBar_ = new QToolBar();
-    meterCbx_ = new QComboBox();
-    meterCbx_->addItem("4/4");
-    meterCbx_->addItem("3/4");
 
-    delBarAct_ = new QAction(tr("Delete Bar"), this);
-    delBarAct_->setStatusTip(tr("Delete a bar"));
+    patStepCbx_ = new QComboBox();
+    for ( int i = 0; i < 17; i++ ) {
+        patStepCbx_->addItem( QString::number( i ) );
+    }
+    patStepCbx_->setCurrentIndex( 1 );
+    connect( patStepCbx_, SIGNAL( currentIndexChanged( int ) ),
+             this, SLOT( onPatternStepComboBoxIndexChanged( int ) ) );
 
-    toolBar_->addWidget(meterCbx_);
-    toolBar_->addAction(delBarAct_);
+    delBarAct_ = new QAction( "Delete Bar", this );
+    delBarAct_->setStatusTip( "Delete a bar" );
+
+    toolBar_->addWidget( new QLabel( "Pattern Step: " ) );
+    toolBar_->addWidget( patStepCbx_ );
+    toolBar_->addAction( delBarAct_ );
 
 }
 
@@ -135,6 +142,11 @@ PatternGrid* PatternView::patternGrid()
     return patDraw()->patternGrid(); 
 }
 
+int PatternView::patternStep( ) const
+{
+    return patternStep_;
+}
+
 
 
 
@@ -155,7 +167,17 @@ void PatternView::setSelectedMachineIndex( int idx )
     selectedMacIdx_ = idx;
 }
 
+void PatternView::setPatternStep( int newStep )
+{
+    patternStep_ = newStep;
+}
+
 // GUI events.
+void PatternView::onPatternStepComboBoxIndexChanged( int newIndex )
+{
+    setPatternStep( newIndex );
+}
+
 void PatternView::keyPressEvent( QKeyEvent *event )
 {
     switch ( event->key() ) {
