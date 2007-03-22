@@ -352,3 +352,13 @@ void MachineView::onMachineGuiChosen( MachineGui *macGui )
     emit machineGuiChosen( macGui );
     update();
 }
+
+int MachineView::octave() const
+{
+    return octave_;
+}
+
+void MachineView::setOctave( int newOctave )
+{
+    octave_ = newOctave;
+}

@@ -208,10 +208,9 @@ void MachineGui::keyPressEvent ( QKeyEvent * event )
             event->ignore();
             return;
     }
-    int octave = 4;
     int velocity = 127;
     if (note) {
-        machineView->PlayNote( octave * 12 + note, velocity, false, mac() );   
+        machineView->PlayNote( machineView->octave() * 12 + note, velocity, false, mac() );   
     }
 }
 
