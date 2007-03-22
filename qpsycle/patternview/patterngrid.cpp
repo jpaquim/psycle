@@ -555,7 +555,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             if (note >=0 && note < 120) {
     //            pView->undoManager().addUndo( cursor() );
                 patDraw_->patternView()->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
-                moveCursor(0,1);
+                moveCursor( 0, patternStep() );
      //           pView->checkDownScroll( cursor() );
             }
     } else
@@ -572,9 +572,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
                 // ...and move the cursor.
                 if (cursor().col() == 0) {
-                    moveCursor(1,0);			
+                    moveCursor(1, patternStep() );			
                 } else {
-                    moveCursor(-1,1);
+                    moveCursor(-1, patternStep() );
 //                    pView->checkDownScroll( cursor() );
                 }
             } else 
@@ -589,7 +589,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                     if (cursor().col() == 0) {
                         moveCursor(1,0);			
                     } else {
-                        moveCursor(-1,1);
+                        moveCursor(-1, patternStep() );
   //                      pView->checkDownScroll( cursor() );
                     }
                 } else
@@ -603,7 +603,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                         if (cursor().col() == 0) {
                             moveCursor(1,0);			
                         } else {
-                            moveCursor(-1,1);
+                            moveCursor(-1, patternStep() );
                         }
  //                       pView->checkDownScroll( cursor() );
                     } else
@@ -648,7 +648,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                                 if (cursor().col() < 3) {
                                     moveCursor(1,0);			
                                 } else {
-                                    moveCursor(-3,1);
+                                    moveCursor(-3, patternStep() );
 //                                    pView->checkDownScroll( cursor() );
                                 }
                             }			
