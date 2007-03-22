@@ -451,6 +451,7 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefInstrDec, Key( Qt::ControlModifier, Qt::Key_Minus ) );
 			inputHandler_.changeKeyCode( cdefInstrInc, Key( Qt::ControlModifier, Qt::Key_Equal ) );
 
+            // PatternView.
 			inputHandler_.changeKeyCode( cdefNavUp, Key( Qt::NoModifier, Qt::Key_Up ) );
 			inputHandler_.changeKeyCode( cdefNavDown, Key( Qt::NoModifier, Qt::Key_Down ) );
 			inputHandler_.changeKeyCode( cdefNavLeft, Key( Qt::NoModifier, Qt::Key_Left ) );
@@ -459,6 +460,8 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefNavPageUp, Key( Qt::NoModifier, Qt::Key_PageUp ) );
 			inputHandler_.changeKeyCode( cdefTrackNext, Key( Qt::ControlModifier, Qt::Key_Right ) );
 			inputHandler_.changeKeyCode( cdefTrackPrev, Key( Qt::ControlModifier, Qt::Key_Left ) );
+			inputHandler_.changeKeyCode( cdefPatternstepDec, Key( Qt::NoModifier, Qt::Key_BracketLeft ) );
+			inputHandler_.changeKeyCode( cdefPatternstepInc, Key( Qt::NoModifier, Qt::Key_BracketRight ) );
 
 			inputHandler_.changeKeyCode( cdefSelectUp, Key( Qt::ShiftModifier, Qt::Key_Up ) );
 			inputHandler_.changeKeyCode( cdefSelectDn, Key( Qt::ShiftModifier, Qt::Key_Down ) );

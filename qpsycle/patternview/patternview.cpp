@@ -180,13 +180,20 @@ void PatternView::onPatternStepComboBoxIndexChanged( int newIndex )
 
 void PatternView::keyPressEvent( QKeyEvent *event )
 {
-    switch ( event->key() ) {
-        case Qt::Key_A:
+    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    switch ( command ) {
+/*        case Qt::Key_A:
         {
             float position = patternGrid()->cursor().line() / (float) beatZoom();
             pattern()->removeBar(position);
             patternGrid()->update();
-        }
+            break;
+        }*/
+        case psy::core::cdefPatternstepDec:
+            patStepCbx_->setCurrentIndex( std::max( 0, patternStep() - 1 ) );
+        break;
+        case psy::core::cdefPatternstepInc:
+            patStepCbx_->setCurrentIndex( std::min( 16, patternStep() + 1 ) );
         break;
         default:
             event->ignore();
