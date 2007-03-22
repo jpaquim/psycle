@@ -55,6 +55,8 @@
     void setSong( psy::core::Song *song ) { song_ = song; }
     void setTheChosenOne( MachineGui* macGui ) { theChosenOne_ = macGui; }
     MachineGui* theChosenOne() { return theChosenOne_; }
+    int octave() const;
+    void setOctave( int newOctave );
 
 
  protected:
@@ -82,6 +84,8 @@ private:
     psy::core::Song *song_;
     psy::core::PluginFinder pluginFinder_;
     std::vector<MachineGui*> machineGuis;
+
+    int octave_;
     
     NewMachineDlg *newMachineDlg;
     QGraphicsScene *scene_;

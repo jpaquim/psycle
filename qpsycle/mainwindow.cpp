@@ -56,6 +56,9 @@ MainWindow::MainWindow()
     patternBox_->patternTree()->setFocus();
 
     startTimer( 10 );
+
+    macView_->setOctave( 4 );
+    patView_->setOctave( 4 );
 }
 
 void MainWindow::setupSong()
@@ -542,4 +545,5 @@ void MainWindow::timerEvent( QTimerEvent *ev )
 void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
 {
     patView_->setOctave( newIndex - 1 );
+    macView_->setOctave( newIndex - 1 );
 }
