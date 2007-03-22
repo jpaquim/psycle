@@ -304,6 +304,7 @@ void MainWindow::open()
      machToolBar = addToolBar(tr("Machines"));
      macCombo_ = new QComboBox();
      sampCombo_ = new QComboBox();
+     octCombo_ = new QComboBox();
 
      QLabel *macLabel = new QLabel(" Machines: ");
      QLabel *sampLabel = new QLabel(" Samples: ");
@@ -311,6 +312,14 @@ void MainWindow::open()
      machToolBar->addWidget( macCombo_ );
      machToolBar->addWidget(sampLabel);
      machToolBar->addWidget( sampCombo_ );
+     
+     octToolBar_ = addToolBar( "Octave" );
+     octToolBar_->addWidget( new QLabel( "Octave: " ) );
+     octToolBar_->addWidget( octCombo_ );
+     for ( int i = 0; i < 9; i++ ) {
+         octCombo_->addItem( QString::number( i ) );
+     }
+     octCombo_->setCurrentIndex( 4 );
  }
 
 void MainWindow::createStatusBar()

@@ -66,8 +66,9 @@ void PatternView::createToolBar()
     delBarAct_ = new QAction( "Delete Bar", this );
     delBarAct_->setStatusTip( "Delete a bar" );
 
-    toolBar_->addWidget( new QLabel( "Pattern Step: " ) );
+    toolBar_->addWidget( new QLabel( "Step: " ) );
     toolBar_->addWidget( patStepCbx_ );
+    toolBar_->addSeparator();
     toolBar_->addAction( delBarAct_ );
 
 }
