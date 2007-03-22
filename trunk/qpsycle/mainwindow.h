@@ -94,6 +94,7 @@
      QToolBar *editToolBar;
      QToolBar *playToolBar;
      QToolBar *machToolBar;
+     QToolBar *octToolBar_;
 
      QAction *newAct;
      QAction *openAct;
@@ -109,6 +110,7 @@
 
      QComboBox *macCombo_;
      QComboBox *sampCombo_;
+     QComboBox *octCombo_;
 
      PatternBox *patternBox_;
 
