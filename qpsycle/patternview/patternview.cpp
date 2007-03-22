@@ -78,14 +78,14 @@ void PatternView::enterNote( const PatCursor & cursor, int note )
     if ( pattern() ) {
         psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
         psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
-        event.setNote( 4/*editOctave()*/ * 12 + note );
+        event.setNote( octave() * 12 + note );
         event.setSharp( false/*drawArea->sharpMode()*/ );
         if (tmac) event.setMachine( tmac->_macIndex );
         if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
             event.setInstrument( song_->instSelected );
         }
         pattern()->setEvent( cursor.line(), cursor.track(), event );
-//        if (tmac) PlayNote( editOctave() * 12 + note, 127, false, tmac);   
+//        if (tmac) PlayNote( octave() * 12 + note, 127, false, tmac);   
     }
 }
 
@@ -148,6 +148,11 @@ int PatternView::patternStep( ) const
     return patternStep_;
 }
 
+int PatternView::octave( ) const
+{
+    return octave_;
+}
+
 
 
 
@@ -171,6 +176,11 @@ void PatternView::setSelectedMachineIndex( int idx )
 void PatternView::setPatternStep( int newStep )
 {
     patternStep_ = newStep;
+}
+
+void PatternView::setOctave( int newOctave )
+{
+    octave_ = newOctave;
 }
 
 // GUI events.

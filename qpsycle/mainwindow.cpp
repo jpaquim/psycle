@@ -319,6 +319,8 @@ void MainWindow::open()
      for ( int i = 0; i < 9; i++ ) {
          octCombo_->addItem( QString::number( i ) );
      }
+     connect( octCombo_, SIGNAL( currentIndexChanged( int ) ),
+              this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
      octCombo_->setCurrentIndex( 4 );
  }
 
@@ -529,4 +531,9 @@ void MainWindow::timerEvent( QTimerEvent *ev )
             }			
         }
     }
+}
+
+void MainWindow::onOctaveComboBoxIndexChanged( int newOctave )
+{
+    patView_->setOctave( newOctave );
 }

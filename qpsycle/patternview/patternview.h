@@ -60,12 +60,14 @@ public:
     int playPos() { return playPos_; }
     int beatZoom() const;
     int patternStep() const;
+    int octave() const;
 
     // Setters.
     void setSelectedMachineIndex( int idx );
     void setPattern( psy::core::SinglePattern *pattern );
     void setNumberOfTracks( int numTracks );
     void setPatternStep( int newStep );
+    void setOctave( int newOctave );
 
     // GUI events.
     void keyPressEvent( QKeyEvent *event );
@@ -91,6 +93,8 @@ private:
     QComboBox *patStepCbx_;
     QComboBox *patternCbx_;
     QAction *delBarAct_;
+
+    int octave_;
 
 };
 
