@@ -77,16 +77,18 @@
         }
         count++;
     }
+    pLine_ = new QGraphicsLineItem();
+    pLine_->setCursor( Qt::SizeHorCursor );
+    pLine_->setPen( QColor( Qt::red ) );
+    pLine_->setZValue( 100 );
+    scene_->addItem( pLine_ );
+
     BeatRuler *beatRuler = new BeatRuler( this );
 
     scene_->addItem( beatRuler );
     beatRuler->setPos( 0, 0 );
     scene_->addItem( seqArea_ );
     seqArea_->setPos( 0, 30 );
-
-    pLine_ = new QGraphicsLineItem();
-    pLine_->setPen( QColor( Qt::red ) );
-    scene_->addItem( pLine_ );
 
 
 }
