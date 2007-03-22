@@ -50,57 +50,20 @@ PatternView::PatternView( psy::core::Song *song )
     layout->addWidget( patDraw_ );
 }
 
- void PatternView::createToolBar()
- {
-      toolBar_ = new QToolBar();
-      meterCbx_ = new QComboBox();
-      meterCbx_->addItem("4/4");
-      meterCbx_->addItem("3/4");
-
-      delBarAct_ = new QAction(tr("Delete Bar"), this);
-      delBarAct_->setStatusTip(tr("Delete a bar"));
-
-      toolBar_->addWidget(meterCbx_);
-      toolBar_->addAction(delBarAct_);
-
-  }
-
-int PatternView::rowHeight( ) const
+void PatternView::createToolBar()
 {
-    return 13;
-}
+    toolBar_ = new QToolBar();
+    meterCbx_ = new QComboBox();
+    meterCbx_->addItem("4/4");
+    meterCbx_->addItem("3/4");
 
-int PatternView::numberOfLines() const
-{
-    return ( pattern_ ) ? static_cast<int> ( pattern_->beatZoom() * pattern_->beats() ) : 0;  
-}
+    delBarAct_ = new QAction(tr("Delete Bar"), this);
+    delBarAct_->setStatusTip(tr("Delete a bar"));
 
-int PatternView::numberOfTracks() const
-{
-    return numberOfTracks_;
-}
+    toolBar_->addWidget(meterCbx_);
+    toolBar_->addAction(delBarAct_);
 
-void PatternView::setNumberOfTracks( int numTracks )
-{
-    numberOfTracks_ = numTracks; 
 }
-
-int PatternView::trackWidth() const
-{
-    return 130;
-}
-
-psy::core::SinglePattern * PatternView::pattern( )
-{
-    return pattern_;
-}
-
-void PatternView::setPattern( psy::core::SinglePattern *pattern )
-{
-    pattern_ = pattern;
-    patDraw_->patternGrid()->update();
-}
-
 
 void PatternView::enterNote( const PatCursor & cursor, int note ) 
 {
@@ -118,9 +81,40 @@ void PatternView::enterNote( const PatCursor & cursor, int note )
     }
 }
 
-void PatternView::setSelectedMachineIndex( int idx )
+void PatternView::onTick( double sequenceStart ) {
+    if ( pattern() ) {
+        int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * beatZoom() );
+        if ( liney != playPos_ ) {			
+            int oldPlayPos = playPos_;
+            playPos_ = liney;
+            int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
+            int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
+            patternGrid()->update( patternGrid()->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ) );
+            patternGrid()->update( patternGrid()->repaintTrackArea( liney, liney, startTrack, endTrack ) );
+        }
+    }
+}
+
+
+// Getters.
+int PatternView::rowHeight( ) const
 {
-    selectedMacIdx_ = idx;
+    return 13;
+}
+
+int PatternView::numberOfLines() const
+{
+    return ( pattern() ) ? static_cast<int> ( pattern()->beatZoom() * pattern()->beats() ) : 0;  
+}
+
+int PatternView::numberOfTracks() const
+{
+    return numberOfTracks_;
+}
+
+int PatternView::trackWidth() const
+{
+    return 130;
 }
 
 int PatternView::selectedMachineIndex( ) const
@@ -128,40 +122,52 @@ int PatternView::selectedMachineIndex( ) const
     return selectedMacIdx_;
 }
 
+int PatternView::beatZoom( ) const
+{
+    if ( pattern() )
+        return pattern()->beatZoom();
+    else
+        return 4;
+}
+
+PatternGrid* PatternView::patternGrid() 
+{ 
+    return patDraw()->patternGrid(); 
+}
+
+
+
+
+// Setters.
+void PatternView::setNumberOfTracks( int numTracks )
+{
+    numberOfTracks_ = numTracks;
+}
+
+void PatternView::setPattern( psy::core::SinglePattern *pattern )
+{
+    pattern_ = pattern;
+    patternGrid()->update();
+}
+
+void PatternView::setSelectedMachineIndex( int idx )
+{
+    selectedMacIdx_ = idx;
+}
+
+// GUI events.
 void PatternView::keyPressEvent( QKeyEvent *event )
 {
     switch ( event->key() ) {
         case Qt::Key_A:
         {
-            float position = patDraw()->patternGrid()->cursor().line() / (float) beatZoom();
+            float position = patternGrid()->cursor().line() / (float) beatZoom();
             pattern()->removeBar(position);
-            patDraw()->patternGrid()->update();
+            patternGrid()->update();
         }
         break;
         default:
             event->ignore();
-    }
-}
-
-int PatternView::beatZoom( ) const
-{
-    if ( pattern_ )
-        return pattern_->beatZoom();
-    else
-        return 4;
-}
-
-void PatternView::onTick( double sequenceStart ) {
-    if ( pattern() ) {
-        int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * pattern()->beatZoom() );
-        if ( liney != playPos_ ) {			
-            int oldPlayPos = playPos_;
-            playPos_ = liney;
-            int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
-            int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
-            patDraw_->patternGrid()->update( patDraw_->patternGrid()->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ) );
-            patDraw_->patternGrid()->update( patDraw_->patternGrid()->repaintTrackArea( liney, liney, startTrack, endTrack ) );
-        }
     }
 }
 
