@@ -1,12 +1,40 @@
+Psycle authors through the ages
+-------------------------------
+
 Please add your name if you did/do any dev...
 
+The family:
+-----------
 
-qpsycle: Neil Mather, ( your name here ;) 
+Josep Ma. AntolíSegura jaz001       Project Admin   All-Hands Person
+Johan Boulé johan-boule Project Admin   Porter (Cross Platform Devel.)
+jeremy evers        pooplog     Project Admin   Developer
+Stefan Nattkemper   prodos   xpsycle
+Neil Mather         ngmather qpsycle
 
-based on
+James Redfern          alkenstein      plugin, fixes and small aditions.
+Jose Enrique        sampler     fixes and small aditions.
+Guido Vranken       guidovranken    Code for mute/bypass, interpolation. Interested in special pattern modes.
+TranceMyriad        trancemyriad    New "Add Machine" dialog, work in multi-io.
+Magnus Jonsson  zealmange   Improvements in source code (std::), made it more C++, fixed bugs.
+dw_aley         dw_aley     <@bohan> he did the 3D arrows; xpsycle
 
-xpsycle: Stefan Nattkemper, dw_aley, Josep Ma
 
-based on
+Non Active Developers:
+----------------------
 
-psycle: Josep Ma, Johan Boule, ..., all the original psycle authors :)
+J. A. Arguelles Rius    arguru      Needs presentation? The creator.
+Mats Hojlund        cbr         Coder for version 1.1 and 1.11 of Psycle.
+Daniel Arena        dubdub  Coder for version 1.6, InputHandler, and gui/code improvements.
+Lukasz Langa        lukasz_langa    Also known as kSh. He made changes in the cpu clock functions.
+Martin          lobywang    <@bohan> lobywang -- crop command in the wave editor
+Mark MkCommack      -------------   Coded the MIDI implementation.
+Marcin Kowalski     -------------   Also known as Fideloop. Made the Wave editor.
+
+
+Plugin Coders :
+---------------
+
+Joakim Dahlströdruttis  
+sartorius       sartorius   
+Jan-Marco Edelmann  voskomo     
