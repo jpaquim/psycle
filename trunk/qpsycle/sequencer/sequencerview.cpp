@@ -77,7 +77,7 @@ void SequencerView::updatePlayPos() {
         int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
         int oxPos = std::min(song()->patternSequence()->tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
         if (oxPos != xPos) {
-            seqDraw_->pLine()->setLine( xPos, 0, xPos, seqDraw_->height() );
+            seqDraw_->pLine()->setPos( xPos, 0 );
             seqDraw_->pLine()->update( seqDraw_->pLine()->boundingRect() );
         }
         oldPlayPos_ = psy::core::Player::Instance()->playPos();

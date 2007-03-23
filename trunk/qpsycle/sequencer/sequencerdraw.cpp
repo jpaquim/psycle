@@ -19,6 +19,7 @@
 ***************************************************************************/
 
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <iostream>
 #include <vector>
@@ -77,10 +78,9 @@
         }
         count++;
     }
-    pLine_ = new QGraphicsLineItem();
-    pLine_->setCursor( Qt::SizeHorCursor );
-    pLine_->setPen( QColor( Qt::red ) );
-    pLine_->setZValue( 100 );
+    pLine_ = new PlayLine();
+//    pLine_->setCursor( Qt::SizeHorCursor );
+    pLine_->setRect( 0, 0, 1, height() );
     scene_->addItem( pLine_ );
 
     BeatRuler *beatRuler = new BeatRuler( this );
@@ -157,4 +157,19 @@ void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
     psy::core::SequenceEntry *entry = item->sequenceEntry();
     entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
     scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
+}
+
+PlayLine::PlayLine()
+{ 
+    setFlags( QGraphicsItem::ItemIsMovable );
+    setCursor( Qt::SizeHorCursor );
+    setPen( QColor( Qt::red ) );
+    setBrush( QColor( Qt::red ) );
+    setZValue( 100 );
+}
+
+void PlayLine::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
+{
+    QGraphicsItem::mouseMoveEvent( event );
+    setPos( pos().x(), 0 );
 }

@@ -85,7 +85,6 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
         {
             SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); 
 
-            // But then constrain to parent.
             int widthOfThisItem = item->boundingRect().width();
             int widthOfParent = item->parentItem()->boundingRect().width();
             int maximumLeftPos = widthOfParent - widthOfThisItem;
