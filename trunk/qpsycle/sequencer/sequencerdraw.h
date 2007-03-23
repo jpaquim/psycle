@@ -32,6 +32,7 @@ class SequencerArea;
 class SequencerLine;
 class SequencerItem;
 class SequencerView;
+class PlayLine;
 
  class SequencerDraw : public QGraphicsView
  {
@@ -47,12 +48,13 @@ class SequencerView;
     std::vector<SequencerLine*> lines();
 
     void addPattern( psy::core::SinglePattern *pattern );
-    QGraphicsRectItem* pLine() { return pLine_; }
+    PlayLine *pLine() { return pLine_; }
 
 public slots:
     void insertTrack();
     void onSequencerLineClick( SequencerLine *line );
     void onSequencerItemDeleteRequest( SequencerItem *item );
+    void onPlayLineMoved( double newXPos );
 
  protected:
 
@@ -67,19 +69,25 @@ public slots:
     SequencerLine *selectedLine_;
 
     int beatPxLength_;
+    double newBeatPos_;
     int lineHeight_;
 
-    QGraphicsRectItem *pLine_;
+    PlayLine *pLine_;
 
  };
 
-class PlayLine : public QGraphicsRectItem {
+class PlayLine : public QObject, public QGraphicsRectItem {
+    Q_OBJECT
 public:
     PlayLine(); 
  //   QRectF boundingRect() const;
 
 protected:
-    void mouseMoveEvent ( QGraphicsSceneMouseEvent *event );
+    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+
+signals:
+    void playLineMoved( double );
     
 
 };

@@ -402,7 +402,7 @@ namespace psy {
 
         void Configuration::configureKeyBindings() // FIXME: Key bindings are host specific, should be moved?
         {
-            int modifiers = Qt::NoModifier; // Don't like having Qt stuff in psycore...
+            int modifiers = Qt::NoModifier; // Shouldn't have Qt stuff in psycore in the future.
             inputHandler_.changeKeyCode( cdefKeyC_0, Key( modifiers, Qt::Key_Z ) );
             inputHandler_.changeKeyCode( cdefKeyCS0, Key( modifiers, Qt::Key_S ) );
             inputHandler_.changeKeyCode(cdefKeyD_0,Key(modifiers,Qt::Key_X));
@@ -446,6 +446,7 @@ namespace psy {
 
             // Play control commands.
 			inputHandler_.changeKeyCode( cdefPlayStart, Key( Qt::NoModifier, Qt::Key_Space ) );
+			inputHandler_.changeKeyCode( cdefPlayFromPos, Key( Qt::NoModifier, Qt::Key_F6 ) );
 			inputHandler_.changeKeyCode( cdefPlayStop, Key( Qt::NoModifier, Qt::Key_F8 ) );
 
 			inputHandler_.changeKeyCode( cdefInstrDec, Key( Qt::ControlModifier, Qt::Key_Minus ) );

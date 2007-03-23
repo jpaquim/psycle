@@ -358,6 +358,9 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         case psy::core::cdefPlayStart:
             psy::core::Player::Instance()->start( 0.0 );
         break;
+        case psy::core::cdefPlayFromPos:
+            psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
+        break;
         case psy::core::cdefPlayStop:
             psy::core::Player::Instance()->stop();
         break;

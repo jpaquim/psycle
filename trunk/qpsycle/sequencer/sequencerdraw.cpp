@@ -31,6 +31,8 @@
 #include "sequencerarea.h"
 #include "beatruler.h"
 
+#include "psycore/player.h"
+
 
  SequencerDraw::SequencerDraw( SequencerView *seqView )
  {
@@ -81,6 +83,8 @@
     pLine_ = new PlayLine();
 //    pLine_->setCursor( Qt::SizeHorCursor );
     pLine_->setRect( 0, 0, 1, height() );
+    connect( pLine_, SIGNAL( playLineMoved( double ) ),
+             this, SLOT( onPlayLineMoved( double ) ) );
     scene_->addItem( pLine_ );
 
     BeatRuler *beatRuler = new BeatRuler( this );
@@ -159,9 +163,15 @@ void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
     scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
 }
 
+void SequencerDraw::onPlayLineMoved( double newXPos )
+{
+    psy::core::Player::Instance()->stop();
+    psy::core::Player::Instance()->setPlayPos( newXPos / beatPxLength_ );
+}
+
 PlayLine::PlayLine()
 { 
-    setFlags( QGraphicsItem::ItemIsMovable );
+    setFlags( ItemIsMovable | ItemIsFocusable );
     setCursor( Qt::SizeHorCursor );
     setPen( QColor( Qt::red ) );
     setBrush( QColor( Qt::red ) );
@@ -172,4 +182,10 @@ void PlayLine::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
     QGraphicsItem::mouseMoveEvent( event );
     setPos( pos().x(), 0 );
+}
+
+void PlayLine::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
+{
+    QGraphicsItem::mouseReleaseEvent( event );
+    emit playLineMoved( pos().x() );
 }
