@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2006 by Psycledelics   and others                    *
+*   Copyright (C) 2007 by Psycledelics   and others                    *
 *   psycle.sf.net   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *

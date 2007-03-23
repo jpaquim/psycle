@@ -2,7 +2,7 @@
 ///\brief implementation file for psy::core::Player
 
 /***************************************************************************
-	*   Copyright (C) 2006 by  Psycledelics  , Josep Maria Antolin Segura, D.W. Aley			
+	*   Copyright (C) 2007 Psycledelics  , Josep Maria Antolin Segura, D.W. Aley			
 	*   psycle.sf.net   *
 	*                                                                         *
 	*   This program is free software; you can redistribute it and/or modify  *

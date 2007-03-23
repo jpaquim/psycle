@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 by  Psycledelics Natttkemper  *
+*   Copyright (C) 2007 Psycledelics Natttkemper  *
 *   psycle.sf.net   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
