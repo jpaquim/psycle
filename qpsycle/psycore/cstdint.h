@@ -1,7 +1,7 @@
 #ifndef _MSC_VER // [
 
 /***************************************************************************
-*   Copyright (C) 2006 by  Psycledelics   *
+*   Copyright (C) 2007 Psycledelics   *
 *   psycle.sf.net   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -43,7 +43,7 @@ namespace std
 // ISO C9x  compliant stdint.h for Miscrosoft Visual Studio
 // Based on ISO/IEC 9899:TC2 Committee draft (May 6, 2005) WG14/N1124 
 // 
-//  Copyright (c) 2006 Alexander Chemeris
+//  Copyright (c) 2007 Alexander Chemeris
 // 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:

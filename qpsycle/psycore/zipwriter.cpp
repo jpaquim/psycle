@@ -2,7 +2,7 @@
 	* zipwriter
 	* a library for writing zipfiles
 	*
-	* copyright (c) 2006 Mrs. Brisby <mrs.brisby@nimh.org>
+	* copyright (c) 2007 Mrs. Brisby <mrs.brisby@nimh.org>
 	*
 	* This program is free software; you can redistribute it and/or modify
 	* it under the terms of the GNU General Public License as published by

@@ -3,7 +3,7 @@
 /// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 
 /***************************************************************************
-	*   Copyright (C) 2006 by  Psycledelics  , Josep Maria Antolín Segura, D.W. Aley			
+	*   Copyright (C) 2007 Psycledelics  , Josep Maria Antolín Segura, D.W. Aley			
 	*   psycle.sf.net   *
 	*                                                                         *
 	*   This program is free software; you can redistribute it and/or modify  *

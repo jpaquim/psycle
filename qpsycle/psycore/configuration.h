@@ -1,5 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 by  Neil Mather   *
+*   Copyright (C) 2007 Psycledelics Community   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *

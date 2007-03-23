@@ -1,7 +1,7 @@
 //
 // File: alsaseqin.h
 // Created by: User <Email>
-// Created on: Thu Jul 20 13:35:01 2006
+// Created on: Thu Jul 20 13:35:01 2007
 //
 
 #ifndef XPSYCLE__ALSASEQIN
