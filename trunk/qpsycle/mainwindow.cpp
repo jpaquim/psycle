@@ -73,13 +73,9 @@ void MainWindow::setupSong()
 
 void MainWindow::setupSound() 
 {
-    psy::core::AudioDriver *driver = new psy::core::AlsaOut;
-    psy::core::AudioDriverSettings settings = driver->settings();
-    settings.setDeviceName( "plughw:0" );
-    driver->setSettings( settings );
-
     psy::core::Player::Instance()->song( song_ );
-    psy::core::Player::Instance()->setDriver( *driver );  
+    psy::core::AudioDriver *outDriver = psy::core::Global::pConfig()->_pOutputDriver;
+    psy::core::Player::Instance()->setDriver( *outDriver );  
 }
 
 void MainWindow::setupGui()
