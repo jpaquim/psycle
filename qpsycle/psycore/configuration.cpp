@@ -30,7 +30,7 @@
 //#include "esoundout.h"
 #include "wavefileout.h" ///\ todo pthread wrapper
 #else
-#include "mswaveout.h"
+//#include "mswaveout.h"
 #endif
 #include <cstdlib>
 #include <stdexcept>
