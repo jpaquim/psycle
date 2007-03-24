@@ -75,7 +75,7 @@ bool Plugin::Instance( const std::string & file_name )
 		if ( file_name.find(".dll") == std::string::npos) return false;
 		// Set error mode to disable system error pop-ups (for LoadLibrary)
 		UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-		_dll = LoadLibrary( file_name.c_str() );
+		_dll = LoadLibraryA( file_name.c_str() );
 		// Restore previous error mode
 		SetErrorMode( uOldErrorMode );
 		#endif
