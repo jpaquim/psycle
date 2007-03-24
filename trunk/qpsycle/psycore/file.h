@@ -45,8 +45,8 @@ namespace core {
     static bool fileIsReadable(const std::string & file);
     static std::string parentWorkingDir();
     static void cd( const std::string & path );
-    static void cdHome();
-    static std::string home();
+//    static void cdHome();
+//    static std::string home();
     static std::string replaceTilde(const std::string & path);
     static std::string env(const std::string & envName);
     #ifdef __unix__

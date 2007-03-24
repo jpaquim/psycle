@@ -108,13 +108,13 @@ namespace core {
     putchar('\n');
     closedir(dhandle);
 #else
-    WIN32_FIND_DATA dir;
+    WIN32_FIND_DATAA dir;
     HANDLE fhandle;
     char directory[8196];
     // unsecure, better if there snprintf
     sprintf(directory,"%s\\*.*",path.c_str());
     // Handle to directory
-    if ((fhandle=FindFirstFile(directory,&dir)) != INVALID_HANDLE_VALUE) {
+    if ((fhandle=FindFirstFileA(directory,&dir)) != INVALID_HANDLE_VALUE) {
       do {  // readout directory
         if (			
           ( ( fMode & nDirs ) && ( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
@@ -124,7 +124,7 @@ namespace core {
         {
           destination.push_back( dir.cFileName );
         }
-      } while(FindNextFile(fhandle,&dir));
+      } while(FindNextFileA(fhandle,&dir));
     }
     FindClose(fhandle);
 #endif
@@ -133,7 +133,7 @@ namespace core {
     return destination;
   }
 
-  std::string File::home() {
+/*  std::string File::home() {
 #ifdef __unix__
     char home[8000]; 
     strncpy(home,getenv("HOME"),7999);
@@ -180,11 +180,11 @@ namespace core {
     }    
     return "";
 #endif
-  }            
+  }  */          
 
-  void File::cdHome() { 
+/*  void File::cdHome() { 
     cd( home() );
-  }
+  }*/
 
   void File::cd( const std::string & path )
   {
@@ -215,7 +215,7 @@ namespace core {
   {
     std::string nvr(path);
     if(!path.length() || path[0] != '~') return nvr;
-    nvr.replace( 0, 1, home().c_str() );
+    //nvr.replace( 0, 1, home().c_str() );
     return nvr;
   }
 
