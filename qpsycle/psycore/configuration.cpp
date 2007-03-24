@@ -75,6 +75,10 @@ namespace psy {
 			return ladspaPath_;
 		}
 
+		const std::string & Configuration::songPath() const {
+			return songPath_;
+		}
+
 		bool Configuration::enableSound() const {
 			return enableSound_;
 		}
@@ -289,13 +293,11 @@ namespace psy {
 			pluginPath_ = "/home/neil/code/xpsycle.plugins/";
 			prsPath_ = "";
 			ladspaPath_ = "/usr/lib/ladspa/";
+			songPath_ = "/home/neil/code/xpsycle/qpsycle/";
 
+//   FIXME: just hardcoding it here for now.
             setDriverByName( "alsa" );
-/*            psy::core::AudioDriver *driver = new psy::core::AlsaOut;
-            psy::core::AudioDriverSettings settings = driver->settings();
-            settings.setDeviceName( "plughw:0" );
-            driver->setSettings( settings );
-            std::string deviceName = parser.getAttribValue("device");*/
+//            std::string deviceName = parser.getAttribValue("device");
             std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
             if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
                 AudioDriverSettings settings = it->second->settings();
