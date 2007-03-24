@@ -88,7 +88,6 @@ HEADERS += mainwindow.h \
            psycore/songstructs.h \
            psycore/steinberg_asio_conditional_build.h \
            psycore/timesignature.h \
-           psycore/wavefileout.h \
            psycore/xminstrument.h \
            psycore/xmsampler.h \
            psycore/zipreader.h \
@@ -157,7 +156,6 @@ SOURCES += mainwindow.cpp \
            psycore/singlepattern.cpp \
            psycore/song.cpp \
            psycore/timesignature.cpp \
-           psycore/wavefileout.cpp \
            psycore/xminstrument.cpp \
            psycore/xmsampler.cpp \
            psycore/zipreader.cpp \
@@ -184,10 +182,12 @@ unix {
            psycore/alsaout.h \
            psycore/alsaseqin.h \
            psycore/netaudio_conditional_build.h \
-           psycore/netaudioout.h 
+           psycore/netaudioout.h \
+           psycore/wavefileout.h 
     SOURCES += psycore/alsaout.cpp \
            psycore/alsaseqin.cpp \
-           psycore/netaudioout.cpp 
+           psycore/netaudioout.cpp \
+           psycore/wavefileout.cpp 
 }
 win32 {
     INCLUDEPATH += C:/Qt/4.2.2/src/3rdparty/zlib
