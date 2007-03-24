@@ -24,7 +24,6 @@
 #include "patternbox.h"
 
 #include "psycore/player.h"
-#include "psycore/alsaout.h"
 #include "psycore/song.h"
 #include "psycore/singlepattern.h"
 #include "psycore/patterndata.h"
