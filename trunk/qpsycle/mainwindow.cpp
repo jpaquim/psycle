@@ -146,8 +146,9 @@ void MainWindow::setupSignals()
 
 void MainWindow::open()
 {
+    QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
     QString fileName = QFileDialog::getOpenFileName( 
-                            this, "Open Song", "/home/neil", "Psy (*.psy)" );
+                            this, "Open Song", songPath, "Psy (*.psy)" );
 
     if ( fileName.toStdString() != "" ) {
         // stop player
@@ -191,8 +192,9 @@ void MainWindow::open()
 
  void MainWindow::save()
  {
+    QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
      QString fileName = QFileDialog::getSaveFileName(this,
-                         tr("Choose a file name"), ".",
+                         tr("Choose a file name"), songPath,
                          tr("Psycle Songs (*.psy)"));
      if (fileName.isEmpty())
          return;

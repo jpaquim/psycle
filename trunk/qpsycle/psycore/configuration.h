@@ -60,6 +60,7 @@ namespace psy {
 			const std::string & ladspaPath() const;
 			const std::string & prsPath() const;
 			const std::string & hlpPath() const;
+			const std::string & songPath() const;
 
 			bool enableSound() const;
 
@@ -79,6 +80,7 @@ namespace psy {
 			std::string prsPath_;
 			std::string hlpPath_;
 			std::string ladspaPath_;
+			std::string songPath_;
 
 			void setDefaults();
 			void configureKeyBindings();
