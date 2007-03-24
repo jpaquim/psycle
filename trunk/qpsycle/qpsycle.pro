@@ -4,7 +4,6 @@
 
 TEMPLATE = app
 TARGET = 
-LIBS = 
 DEPENDPATH += . \
               machineview \
               patternview \
@@ -177,7 +176,8 @@ RESOURCES += qpsycle.qrc
 QT += xml
 
 unix {
-    LIBS += -lasound -lm -ldl -lpthread 
+    CONFIG += link_pkgconfig
+    PKGCONFIG += alsa 
     INCLUDEPATH += /usr/include/alsa 
     HEADERS += psycore/alsa_conditional_build.h \
            psycore/alsaout.h \
