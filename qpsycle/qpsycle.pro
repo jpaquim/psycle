@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = 
-LIBS = -lasound -lm -ldl -lpthread 
+LIBS = 
 DEPENDPATH += . \
               machineview \
               patternview \
@@ -21,8 +21,6 @@ INCLUDEPATH += . \
                sequencer \
                psycore/helpers \
                psycore/helpers/math \
-               /usr/include/alsa \
-               /usr/include/xerces
 
 # Input
 HEADERS += mainwindow.h \
@@ -40,9 +38,6 @@ HEADERS += mainwindow.h \
            patternview/patterngrid.h \
            patternview/patterndraw.h \
            psycore/abstractmachinefactory.h \
-           psycore/alsa_conditional_build.h \
-           psycore/alsaout.h \
-           psycore/alsaseqin.h \
            psycore/audiodriver.h \
            psycore/binread.h \
            psycore/configuration.h \
@@ -70,12 +65,6 @@ HEADERS += mainwindow.h \
            psycore/ladspamachine.h \
            psycore/machine.h \
            psycore/mersennetwister.h \
-           psycore/microsoft_direct_sound_conditional_build.h \
-           psycore/microsoft_direct_sound_out.h \
-           psycore/msdirectsound.h \
-           psycore/mswaveout.h \
-           psycore/netaudio_conditional_build.h \
-           psycore/netaudioout.h \
            psycore/pattern.h \
            psycore/patterndata.h \
            psycore/patternevent.h \
@@ -131,8 +120,6 @@ SOURCES += mainwindow.cpp \
            patternview/patterngrid.cpp \
            patternview/patterndraw.cpp \
            psycore/abstractmachinefactory.cpp \
-           psycore/alsaout.cpp \
-           psycore/alsaseqin.cpp \
            psycore/audiodriver.cpp \
            psycore/binread.cpp \
            psycore/configuration.cpp \
@@ -152,10 +139,6 @@ SOURCES += mainwindow.cpp \
            psycore/ladspamachine.cpp \
            psycore/machine.cpp \
            psycore/mersennetwister.cpp \
-           psycore/microsoft_direct_sound_out.cpp \
-           psycore/msdirectsound.cpp \
-           psycore/mswaveout.cpp \
-           psycore/netaudioout.cpp \
            psycore/patterndata.cpp \
            psycore/patternevent.cpp \
            psycore/patternline.cpp \
@@ -188,6 +171,30 @@ SOURCES += mainwindow.cpp \
            sequencer/sequencerview.cpp \
            sequencer/beatruler.cpp \
            waveview/waveview.cpp
+
 RESOURCES += qpsycle.qrc
 
 QT += xml
+
+unix {
+    LIBS += -lasound -lm -ldl -lpthread 
+    INCLUDEPATH += /usr/include/alsa 
+    HEADERS += psycore/alsa_conditional_build.h \
+           psycore/alsaout.h \
+           psycore/alsaseqin.h \
+           psycore/netaudio_conditional_build.h \
+           psycore/netaudioout.h 
+    SOURCES += psycore/alsaout.cpp \
+           psycore/alsaseqin.cpp \
+           psycore/netaudioout.cpp 
+}
+win32 {
+    INCLUDEPATH += C:/Qt/4.2.2/src/3rdparty/zlib
+    HEADERS += psycore/microsoft_direct_sound_conditional_build.h \
+           psycore/microsoft_direct_sound_out.h \
+           psycore/msdirectsound.h \
+           psycore/mswaveout.h 
+    SOURCES += psycore/microsoft_direct_sound_out.cpp \
+           psycore/msdirectsound.cpp \
+           psycore/mswaveout.cpp 
+}
