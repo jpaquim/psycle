@@ -229,7 +229,7 @@ namespace psy {
 				#else
 				// Set error mode to disable system error pop-ups (for LoadLibrary)
 				UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-				pvResult = LoadLibrary( filename_.c_str() );
+				pvResult = LoadLibraryA( filename_.c_str() );
 				// Restore previous error mode
 				SetErrorMode( uOldErrorMode );
 				#endif
@@ -273,7 +273,7 @@ namespace psy {
 				#else
 				// Set error mode to disable system error pop-ups (for LoadLibrary)
 				UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-				pvResult = LoadLibrary( fullname.c_str() );
+				pvResult = LoadLibraryA( fullname.c_str() );
 				// Restore previous error mode
 				SetErrorMode( uOldErrorMode );
 				#endif
@@ -294,7 +294,7 @@ namespace psy {
 			#else
 			// Set error mode to disable system error pop-ups (for LoadLibrary)
 			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-			pvResult = LoadLibrary( pcFilename );
+			pvResult = LoadLibraryA( pcFilename );
 			// Restore previous error mode
 			SetErrorMode( uOldErrorMode );
 			#endif
@@ -314,7 +314,7 @@ namespace psy {
 			#else
 			// Set error mode to disable system error pop-ups (for LoadLibrary)
 			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-			libHandle_ = LoadLibrary( fileName.c_str() );
+			libHandle_ = LoadLibraryA( fileName.c_str() );
 			// Restore previous error mode
 			SetErrorMode( uOldErrorMode );
 			#endif
@@ -382,7 +382,7 @@ namespace psy {
 			#else
 			// Set error mode to disable system error pop-ups (for LoadLibrary)
 			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-			libHandle_ = LoadLibrary( fileName.c_str() );
+			libHandle_ = LoadLibraryA( fileName.c_str() );
 			// Restore previous error mode
 			SetErrorMode( uOldErrorMode );
 			#endif

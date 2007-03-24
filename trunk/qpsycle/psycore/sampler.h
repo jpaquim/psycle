@@ -10,8 +10,8 @@
 #ifdef __unix__
 #else
 	#include <windows.h>
-	#undef min
-	#undef max
+//	#undef min
+//	#undef max
 #endif
 
 namespace psy
