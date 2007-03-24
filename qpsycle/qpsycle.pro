@@ -4,6 +4,7 @@
 
 TEMPLATE = app
 TARGET = 
+OBJECTS_DIR = build # Where the .o files go.
 DEPENDPATH += . \
               machineview \
               patternview \
