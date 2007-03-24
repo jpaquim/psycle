@@ -81,7 +81,6 @@
         count++;
     }
     pLine_ = new PlayLine();
-//    pLine_->setCursor( Qt::SizeHorCursor );
     pLine_->setRect( 0, 0, 1, height() );
     connect( pLine_, SIGNAL( playLineMoved( double ) ),
              this, SLOT( onPlayLineMoved( double ) ) );

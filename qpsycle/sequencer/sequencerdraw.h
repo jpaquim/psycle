@@ -80,7 +80,6 @@ class PlayLine : public QObject, public QGraphicsRectItem {
     Q_OBJECT
 public:
     PlayLine(); 
- //   QRectF boundingRect() const;
 
 protected:
     void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
