@@ -23,7 +23,6 @@
  #include <QPainter>
  #include <QStyleOption>
  #include <QMessageBox>
- #include <QMouseEvent>
  #include <QMenu>
  #include <QAction>
  #include <iostream>
@@ -49,10 +48,7 @@
      setPos(left, top);
      setPen(QPen(Qt::white,1));
      setBrush( Qt::blue );
-     setFlag(ItemIsMovable);
-     setFlag(ItemIsSelectable);
-     setFlag(ItemIsFocusable);
-     setZValue(1);
+     setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
 
      macTwkDlg_ = new MachineTweakDlg(machineView);
      showMacTwkDlgAct_ = new QAction("Tweak Machine", this);
@@ -238,9 +234,6 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    std::cout << event->buttons() << std::endl;
-    std::cout << event->button() << std::endl;
-    std::cout << event->modifiers() << std::endl;
     if (event->button() == Qt::MidButton) {
         qDebug("ending new wire con..");
         emit closeNewConnection(this, event);

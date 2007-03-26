@@ -39,7 +39,7 @@
  MachineView::MachineView(psy::core::Song *song)
  {
     song_ = song;
-     scene_ = new QGraphicsScene(this);
+     scene_ = new MachineScene(this);
      scene_->setBackgroundBrush(Qt::black);
 
      setDragMode(QGraphicsView::RubberBandDrag);
@@ -47,7 +47,6 @@
      setScene(scene_);
      setBackgroundBrush(Qt::black);
 
-     newMachineDlg = new NewMachineDlg();
 
      // A temporary line to display when user is making a new connection.
      tempLine_ = new QGraphicsLineItem(0, 0, 0, 0);
@@ -99,24 +98,6 @@
      }
  }
 
-void MachineView::mouseDoubleClickEvent(QMouseEvent *event)
-{ 
-    int accepted = newMachineDlg->exec();
-    if (accepted) { // Add a new machine to the song.
-         psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
-
-        int freeBus = song_->GetFreeBus(); // This will be the bus the Machine is on. 
-                                           // FIXME: should ask the Machine for it after it is created.
-
-	    // Create machine, tell where to place the new machine--get from mouse.	  
-		psy::core::Machine *mac = song_->createMachine( pluginFinder_, key, event->x(), event->y() );
-        if ( mac ) {
-            createMachineGui( mac );
-            emit newMachineCreated( freeBus );
-            scene()->update();
-        }
-    } 
-}
 
  void MachineView::scaleView(qreal scaleFactor) 
  {
@@ -362,3 +343,34 @@ void MachineView::setOctave( int newOctave )
 {
     octave_ = newOctave;
 }
+
+MachineScene::MachineScene( MachineView *macView )
+    : QGraphicsScene( macView )
+{
+    macView_ = macView;
+    newMachineDlg = new NewMachineDlg();
+}
+
+void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
+{ 
+    QGraphicsScene::mouseDoubleClickEvent( event );
+    if ( !event->isAccepted() )
+    {
+        int accepted = newMachineDlg->exec();
+        if (accepted) { // Add a new machine to the song.
+             psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
+
+            int freeBus = macView_->song()->GetFreeBus(); // This will be the bus the Machine is on. 
+                                               // FIXME: should ask the Machine for it after it is created.
+
+            // Create machine, tell where to place the new machine--get from mouse.	  
+            psy::core::Machine *mac = macView_->song()->createMachine( pluginFinder_, key, event->scenePos().x(), event->scenePos().y() );
+            if ( mac ) {
+                macView_->createMachineGui( mac );
+                emit newMachineCreated( freeBus );
+                update();
+            }
+        } 
+    }
+}
+

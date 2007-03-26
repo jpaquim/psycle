@@ -123,7 +123,7 @@ void MainWindow::setupSignals()
     connect( patternBox_, SIGNAL( categoryColorChanged() ),
              this, SLOT( onCategoryColorChanged() ) );
 
-    connect( macView_, SIGNAL( newMachineCreated( int ) ), 
+    connect( macView_->scene(), SIGNAL( newMachineCreated( int ) ), 
              this, SLOT( onNewMachineCreated( int ) ) );
     connect( macView_, SIGNAL( machineGuiChosen( MachineGui* ) ), 
              this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
