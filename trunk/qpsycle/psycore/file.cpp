@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005, 2007, 2007 by  Stefan Nattkemper  *
- *   natti@linux   *
+ *   Copyright (C) 2007 Psycledelics Community
+ *   psycle.sf.net
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
