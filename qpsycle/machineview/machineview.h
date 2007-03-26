@@ -57,11 +57,11 @@
     MachineGui* theChosenOne() { return theChosenOne_; }
     int octave() const;
     void setOctave( int newOctave );
+    void createMachineGui( psy::core::Machine *mac );
 
 
  protected:
     void keyPressEvent(QKeyEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
 
     void scaleView(qreal scaleFactor);
 
@@ -73,24 +73,35 @@
     MachineGui* findMachineGuiByMachineIndex( int index );
 
 signals:
-    void newMachineCreated( int bus );
     void machineGuiChosen( MachineGui *macGui );
 
 private:
-    void createMachineGui( psy::core::Machine *mac );
     MachineGui* findByMachine( psy::core::Machine *mac );
     MachineGui *theChosenOne_;
 
     psy::core::Song *song_;
-    psy::core::PluginFinder pluginFinder_;
     std::vector<MachineGui*> machineGuis;
 
     int octave_;
     
-    NewMachineDlg *newMachineDlg;
     QGraphicsScene *scene_;
     QGraphicsLineItem *tempLine_;
 
+};
+
+class MachineScene : public QGraphicsScene {
+    Q_OBJECT
+public:
+    MachineScene( MachineView *macView );
+protected:
+    void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+signals:
+    void newMachineCreated( int bus );
+
+private:
+    MachineView *macView_;
+    NewMachineDlg *newMachineDlg;
+    psy::core::PluginFinder pluginFinder_;
 };
 
  #endif

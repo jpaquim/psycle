@@ -55,10 +55,10 @@ public:
  protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
-    void mousePressEvent( QGraphicsSceneMouseEvent * event );
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
+    void mousePressEvent( QGraphicsSceneMouseEvent *event );
+    void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
     void keyPressEvent ( QKeyEvent *event );
 
 public slots:
