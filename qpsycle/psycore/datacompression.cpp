@@ -1,22 +1,13 @@
-/***************************************************************************
-	*   Copyright (C) 2007 Psycledelics   *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+///\file
+     ///\brief implementation file for beerz77-2 algorithm.
+     /// beerz77-2 algorithm by jeremy evers, loosely based on lz77
+     /// -2 designates the smaller window, faster compression version
+     /// designed for decompression on gameboy advance
+     /// due to it's efficient decompression, it is usefull for many other things... like pattern data.
+     ///
+     /// SoundSquash and SoundDesquash by jeremy evers
+     /// designed with speed in mind
+     /// simple, non adaptave delta predictor, less effective with high frequency content
 #include "datacompression.h"
 #include <cstring>
 
