@@ -1,10 +1,12 @@
-#include "patterngrid.h"
 #include "psycore/singlepattern.h"
 #include "psycore/global.h"
 #include "psycore/player.h"
 
+#include "patterngrid.h"
+
 #include <iostream>
 #include <iomanip>
+#include <memory> // auto_ptr
 
 #include <QApplication>
 #include <QClipboard>
@@ -1198,7 +1200,7 @@ void PatternGrid::copyBlock( bool cutit )
 {  
     isBlockCopied_=true;
     pasteBuffer.clear();
-    psy::core::SinglePattern copyPattern = pattern()->block( selection().left(), selection().right(), selection().top(), selection().bottom() );
+    std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( selection().left(), selection().right(), selection().top(), selection().bottom() ));
 
     float start = selection().top()    / (float) pattern()->beatZoom();
     float end   = selection().bottom() / (float) pattern()->beatZoom();
@@ -1206,7 +1208,7 @@ void PatternGrid::copyBlock( bool cutit )
     std::string xml = "<patsel beats='" + QString::number( end - start ).toStdString(); 
     xml+= "' tracks='"+ QString::number( selection().right() - selection().left() ).toStdString();
     xml+= "'>"; 
-    xml+= copyPattern.toXml();
+    xml+= copyPattern->toXml();
     xml+= "</patsel>";
 
     QApplication::clipboard()->setText( QString::fromStdString( xml ) );

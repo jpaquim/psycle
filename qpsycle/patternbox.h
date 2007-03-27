@@ -20,6 +20,8 @@
  #ifndef PATTERNBOX_H
  #define PATTERNBOX_H
 
+ #include "psycore/song.h"
+
  #include <QAction>
  #include <QToolBar>
  #include <QTreeWidget>
@@ -27,8 +29,6 @@
  #include <QLabel>
 #include <QContextMenuEvent>
 #include <QMenu>
-
- #include "psycore/song.h"
 
 class QToolBar;
 class PatternBox;

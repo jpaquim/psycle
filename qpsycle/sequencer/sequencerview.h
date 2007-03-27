@@ -20,10 +20,10 @@
  #ifndef SEQUENCERVIEW_H
  #define SEQUENCERVIEW_H
 
+#include "psycore/song.h"
+
 #include "sequencerline.h"
 #include "sequencerdraw.h"
-
-#include "psycore/song.h"
 
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QToolBar>

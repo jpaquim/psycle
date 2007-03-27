@@ -85,9 +85,22 @@ namespace psy
 			idCounter++;
 		}
 
+    // Explicit copy constructor needed because boost::signal is noncopyable
+    SinglePattern::SinglePattern(SinglePattern const& other)
+      : std::map<double,PatternLine>(other)
+      , beatZoom_(other.beatZoom_)
+      , name_(other.name_)
+      , category_(other.category_)
+      , timeSignatures_(other.timeSignatures_)
+      , zeroTime(other.zeroTime)
+      , id_(other.id_)
+      , tweakInfoMap(other.tweakInfoMap)
+    {
+    }
 
 		SinglePattern::~SinglePattern()
 		{
+      wasDeleted(this);
 		}
 
 		void SinglePattern::setBeatZoom( int zoom )
@@ -490,7 +503,7 @@ namespace psy
 
 
 	
-		SinglePattern SinglePattern::block( int left, int right, int top, int bottom )
+    std::auto_ptr<SinglePattern> SinglePattern::block( int left, int right, int top, int bottom )
 		{
 			// copies a given block into a new Pattern
 			// the range is:
@@ -498,7 +511,7 @@ namespace psy
 
 			float topBeat = top / (float) beatZoom();
 
-			SinglePattern newPattern;
+      std::auto_ptr<SinglePattern> newPattern(new SinglePattern());
 
 			for( SinglePattern::iterator lineIt = find_lower_nearest( top )
 					; lineIt != end() ; ++lineIt )
@@ -512,9 +525,9 @@ namespace psy
 	          ; entryIt != line.notes().end() && entryIt->first < right
 	          ; ++entryIt)
 				{
-			      newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
+          newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
 		  	}   
-				newPattern.insert( SinglePattern::value_type( lineIt->first-topBeat, newLine ) );
+				newPattern->insert( SinglePattern::value_type( lineIt->first-topBeat, newLine ) );
 			}
 			return newPattern;
 		}

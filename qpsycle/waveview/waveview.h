@@ -20,9 +20,9 @@
  #ifndef WAVEVIEW_H
  #define WAVEVIEW_H
 
- #include <QWidget>
+#include "psycore/song.h"
 
- #include "psycore/song.h"
+#include <QWidget>
 
  class WaveView : public QWidget
  {

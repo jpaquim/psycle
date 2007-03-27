@@ -21,10 +21,10 @@
 #ifndef WIREGUI_H
  #define WIREGUI_H
 
+ #include "machineview.h"
+
  #include <QGraphicsItem>
  #include <QAction>
-
- #include "machineview.h"
 
  class MachineGui;
  class MachineView;

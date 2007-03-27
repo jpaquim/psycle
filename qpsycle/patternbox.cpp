@@ -18,6 +18,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "psycore/singlepattern.h"
+#include "patternbox.h"
+
 #include <QTreeWidget>
 #include <QAction>
 #include <QGridLayout>
@@ -26,9 +29,6 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QColorDialog>
-
- #include "patternbox.h"
- #include "psycore/singlepattern.h"
 
  PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
     : QWidget(parent)

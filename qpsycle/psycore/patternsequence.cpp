@@ -109,6 +109,7 @@ namespace psy
 
 		SequenceEntry::~ SequenceEntry( )
 		{
+      wasDeleted(this);
 		}
 
 		void SequenceEntry::setPattern( SinglePattern * pattern )

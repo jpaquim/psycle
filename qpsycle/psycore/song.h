@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psy::core::Song based on Revision 2730
 #pragma once
+#include "patternsequence.h"
 #include "songstructs.h"
 #include "instrument.h"
 #include "instpreview.h"
@@ -9,7 +10,6 @@
 #include "fileio.h"
 #include "cstdint.h"
 #include "patterndata.h"
-#include "patternsequence.h"
 //#include "sigslot.h"
 
 namespace psy

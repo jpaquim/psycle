@@ -1,9 +1,9 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-#include <QGraphicsRectItem>
-
 #include "patterndraw.h"
+
+#include <QGraphicsRectItem>
 
 class Header: public QGraphicsRectItem {
 public:

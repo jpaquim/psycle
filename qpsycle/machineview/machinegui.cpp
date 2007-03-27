@@ -18,6 +18,12 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "psycore/global.h"
+#include "psycore/inputhandler.h"
+
+#include "machinegui.h"
+#include "machineview.h"
+
  #include <QGraphicsScene>
  #include <QGraphicsSceneMouseEvent>
  #include <QPainter>
@@ -26,11 +32,6 @@
  #include <QMenu>
  #include <QAction>
  #include <iostream>
-
-#include "machinegui.h"
-#include "machineview.h"
-#include "psycore/global.h"
-#include "psycore/inputhandler.h"
 
  MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : machineView(macView)
