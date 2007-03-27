@@ -17,20 +17,23 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+
 #include "sequenceritem.h"
+#include "sequencerview.h"
 
- #include <QGraphicsScene>
- #include <QGraphicsSceneMouseEvent>
- #include <QPainter>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
+#include <QPainter>
 #include <QMenu>
-
- #include "sequencerview.h"
 
 SequencerItem::SequencerItem() 
 {
     setFlag( ItemIsMovable );
     setFlag( ItemIsSelectable );
     beatPxLength_ = 5;
+}
+
+SequencerItem::~SequencerItem() {
 }
 
 QRectF SequencerItem::boundingRect() const

@@ -20,13 +20,13 @@
 #ifndef SEQUENCERITEM_H
 #define SEQUENCERITEM_H
 
-#include <QGraphicsItem>
-#include <QObject>
-#include <QAction>
+#include "psycore/patternsequence.h"
 
 #include "sequencerview.h"
 
-#include "psycore/patternsequence.h"
+#include <QGraphicsItem>
+#include <QObject>
+#include <QAction>
 
  class SequencerItem : public QObject, public QGraphicsItem
  {
@@ -34,6 +34,7 @@
 
  public:
      SequencerItem();
+     ~SequencerItem();
 
     QRectF boundingRect() const;
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );

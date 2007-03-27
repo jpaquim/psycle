@@ -20,14 +20,15 @@
  #ifndef PATTERNDRAW_H
  #define PATTERNDRAW_H
 
- #include <QGraphicsView>
- #include <QGraphicsScene>
+#include "psycore/song.h"
+#include "psycore/singlepattern.h"
 
- #include "linenumbercolumn.h"
+#include "linenumbercolumn.h"
 #include "patterngrid.h"
 #include "patternview.h"
- #include "psycore/song.h"
- #include "psycore/singlepattern.h"
+
+#include <QGraphicsView>
+#include <QGraphicsScene>
 
  class QToolBar;
  class QComboBox;

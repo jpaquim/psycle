@@ -20,9 +20,9 @@
 #ifndef LINENUMBERCOLUMN_H
 #define LINENUMBERCOLUMN_H
 
-#include <QGraphicsRectItem>
-
 #include "patterndraw.h"
+
+#include <QGraphicsRectItem>
 
 class PatternDraw;
 class PatternView;

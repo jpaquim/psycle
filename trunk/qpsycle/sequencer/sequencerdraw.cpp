@@ -18,11 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <QGraphicsScene>
-#include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include <iostream>
-#include <vector>
+#include "psycore/player.h"
 
 #include "sequencerview.h"
 #include "sequencerdraw.h"
@@ -31,8 +27,12 @@
 #include "sequencerarea.h"
 #include "beatruler.h"
 
-#include "psycore/player.h"
+#include <iostream>
+#include <vector>
 
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
+#include <QPainter>
 
  SequencerDraw::SequencerDraw( SequencerView *seqView )
  {
@@ -55,9 +55,11 @@
     std::vector<psy::core::SequenceLine*>::iterator it = sequencerView()->song()->patternSequence()->begin();
     for ( ; it < sequencerView()->song()->patternSequence()->end(); it++) {
         psy::core::SequenceLine* seqLine = *it;
-        SequencerLine* line = new SequencerLine( this, seqLine );
-        line->setParentItem( seqArea_ );
+        SequencerLine* line = new SequencerLine( this);
+        scene()->addItem(line);
+        line->setSequenceLine(seqLine);
         lines_.push_back(line);
+        line->setParentItem( seqArea_ );
         line->setPos( 0, count*lineHeight_ );
         if (isFirst) {
             setSelectedLine( line ); 
@@ -65,19 +67,6 @@
         }
         connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
 //        lastLine_ = line;
-
-        // Now iterate the sequence entries.
-        psy::core::SequenceLine::iterator iter = seqLine->begin();
-        for(; iter!= seqLine->end(); ++iter)
-        {
-            psy::core::SequenceEntry* entry = iter->second;
-            SequencerItem* item = new SequencerItem();
-            item->setParentItem( line );
-            connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
-                     this, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
-            item->setSequenceEntry( entry );
-			item->setPos( entry->tickPosition() * beatPxLength_, 0 );
-        }
         count++;
     }
     pLine_ = new PlayLine();
@@ -113,6 +102,7 @@ SequencerLine* SequencerDraw::selectedLine()
 
 void SequencerDraw::addPattern( psy::core::SinglePattern *pattern )
 {
+  printf("SequencerDraw::addPattern called");
     if ( selectedLine() ) {
         selectedLine()->addItem( pattern );
     }
@@ -132,10 +122,11 @@ void SequencerDraw::insertTrack()
     } else
         if ( selectedLine() ) {
             psy::core::SequenceLine *seqLine = seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() ); 
-            SequencerLine* line = new SequencerLine( this, seqLine );
+            SequencerLine* line = new SequencerLine( this );
+            scene()->addItem( line );
+            line->setSequenceLine( seqLine);
             lines_.push_back( line );
 
-            scene()->addItem( line );
             line->setParentItem( seqArea_ );
             line->setPos( 0, (lines_.size()-1) * lineHeight_ );
             //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);

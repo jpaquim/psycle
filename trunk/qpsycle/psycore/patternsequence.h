@@ -20,6 +20,7 @@
 #ifndef PATTERNSEQUENCE_H
 #define PATTERNSEQUENCE_H
 
+#include "signalslib.h"
 #include "singlepattern.h"
 #include "patterndata.h"
 #include <vector>
@@ -83,6 +84,8 @@ namespace psy
 			SequenceEntry();
 			SequenceEntry(SequenceLine* line);
 			~SequenceEntry();
+
+      boost::signal1<void,SequenceEntry*> wasDeleted;
 
 			double tickPosition() const;
 

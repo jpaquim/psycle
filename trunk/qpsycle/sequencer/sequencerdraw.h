@@ -20,13 +20,13 @@
  #ifndef SEQUENCERDRAW_H
  #define SEQUENCERDRAW_H
 
- #include <QtGui/QGraphicsView>
+#include "psycore/song.h"
 
 #include "sequencerview.h"
 #include "sequencerline.h"
 #include "sequencerarea.h"
 
-#include "psycore/song.h"
+#include <QtGui/QGraphicsView>
 
 class SequencerArea;
 class SequencerLine;

@@ -20,10 +20,10 @@
  #ifndef SEQUENCERAREA_H
  #define SEQUENCERAREA_H
 
- #include <QtGui/QGraphicsItem>
-
  #include "sequencerdraw.h"
  #include "sequencerview.h"
+
+ #include <QtGui/QGraphicsItem>
 
  class SequencerView;
  class SequencerDraw;

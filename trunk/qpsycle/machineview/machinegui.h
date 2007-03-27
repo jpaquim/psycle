@@ -21,16 +21,16 @@
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
-#include <QGraphicsItem>
-#include <QAction>
-#include <QObject>
-#include <QPointF>
+#include "psycore/machine.h"
 
 #include "machineview.h"
 #include "wiregui.h"
 #include "machinetweakdlg.h"
 
-#include "psycore/machine.h"
+#include <QGraphicsItem>
+#include <QAction>
+#include <QObject>
+#include <QPointF>
 
 class MachineView;
 class WireGui;

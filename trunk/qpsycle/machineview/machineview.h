@@ -22,21 +22,20 @@
 
  #include <vector>
 
- #include <QtGui/QGraphicsView>
- #include <QtGui/QGraphicsScene>
- #include <QtGui/QGraphicsSceneMouseEvent>
- #include <QtGui/QKeyEvent>
- #include <QtGui/QMouseEvent>
-
- #include "newmachinedlg.h"
- #include "machinegui.h"
- #include "wiregui.h"
-
  #include "psycore/song.h"
  #include "psycore/machine.h"
  #include "psycore/patternevent.h"
  #include "psycore/pluginfinder.h"
 
+ #include "newmachinedlg.h"
+ #include "machinegui.h"
+ #include "wiregui.h"
+
+ #include <QtGui/QGraphicsView>
+ #include <QtGui/QGraphicsScene>
+ #include <QtGui/QGraphicsSceneMouseEvent>
+ #include <QtGui/QKeyEvent>
+ #include <QtGui/QMouseEvent>
 
  class MachineGui;
  class WireGui;

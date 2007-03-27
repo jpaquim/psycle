@@ -21,9 +21,9 @@
 #ifndef BEATRULER_H
 #define BEATRULER_H
 
-#include <QtGui/QGraphicsItem>
-
 #include "sequencerdraw.h"
+
+#include <QtGui/QGraphicsItem>
 
 class BeatRuler : public QGraphicsItem {
 

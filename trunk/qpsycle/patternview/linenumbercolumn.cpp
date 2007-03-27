@@ -18,10 +18,10 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "linenumbercolumn.h"
+
 #include <QPen>
 #include <QRectF>
-
-#include "linenumbercolumn.h"
 
 LineNumberColumn::LineNumberColumn( PatternDraw *patDraw ) : dy_(0)
 {

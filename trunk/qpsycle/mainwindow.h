@@ -20,7 +20,7 @@
  #ifndef MAINWINDOW_H
  #define MAINWINDOW_H
 
- #include <QMainWindow>
+ #include "psycore/song.h"
 
  #include "machineview.h"
  #include "patternview.h"
@@ -28,7 +28,7 @@
  #include "sequencerview.h"
  #include "patternbox.h"
 
- #include "psycore/song.h"
+ #include <QMainWindow>
 
  class QAction;
  class QListWidget;

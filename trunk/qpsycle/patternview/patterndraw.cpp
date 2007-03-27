@@ -18,14 +18,14 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <QtGui>
+#include "psycore/song.h"
 
 #include "patternview.h"
 #include "patterndraw.h"
 #include "patterngrid.h"
 #include "header.h"
 
-#include "psycore/song.h"
+#include <QtGui>
 
  PatternDraw::PatternDraw( PatternView *patView )
  {

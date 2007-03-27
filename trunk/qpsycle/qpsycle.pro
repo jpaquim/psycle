@@ -176,7 +176,8 @@ QT += xml
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += alsa 
+    PKGCONFIG += alsa
+    LIBS += -lboost_signals
     INCLUDEPATH += /usr/include/alsa 
     HEADERS += psycore/alsa_conditional_build.h \
            psycore/alsaout.h \

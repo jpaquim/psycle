@@ -18,23 +18,23 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "psycore/song.h"
+#include "psycore/player.h"
+#include "psycore/sampler.h"
+#include "psycore/constants.h"
+#include "psycore/machine.h"
+#include "psycore/pluginfinder.h"
+
+#include "machineview.h"
+#include "machinegui.h"
+#include "mastergui.h"
+#include "effectgui.h"
+#include "wiregui.h"
+
 #include <QtGui/QGraphicsScene>
 #include <QPainter>
 #include <iostream>
 #include <QGraphicsLineItem>
-
- #include "machineview.h"
- #include "machinegui.h"
- #include "mastergui.h"
- #include "effectgui.h"
- #include "wiregui.h"
-
- #include "psycore/song.h"
- #include "psycore/player.h"
- #include "psycore/sampler.h"
- #include "psycore/constants.h"
- #include "psycore/machine.h"
- #include "psycore/pluginfinder.h"
 
  MachineView::MachineView(psy::core::Song *song)
  {

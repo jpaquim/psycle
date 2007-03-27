@@ -18,8 +18,6 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <QtCore> // For getting key binding stuff.
-
 #include "configuration.h"
 #include "song.h"
 #include "global.h"
@@ -36,6 +34,9 @@
 #include <stdexcept>
 #include <sstream>
 #include <exception>
+
+#include <QtCore> // For getting key binding stuff.
+                  // Ideally however psycore should not depend on qt
 
 namespace psy {
 	namespace core {

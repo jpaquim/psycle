@@ -20,26 +20,29 @@
 #ifndef SEQUENCERLINE_H
 #define SEQUENCERLINE_H
 
-#include <QGraphicsItem>
-#include <QObject>
-
 #include "psycore/patternsequence.h"
 #include "sequenceritem.h"
 #include "sequencerdraw.h"
 
+#include <QGraphicsItem>
+#include <QObject>
+
 class SequencerDraw;
 class SequencerItem;
 
-class SequencerLine : public QObject, public QGraphicsRectItem
+class SequencerLine : public QObject, public QGraphicsRectItem, public boost::signalslib::trackable
 {
     Q_OBJECT
 public:
-    SequencerLine( SequencerDraw *sDraw, psy::core::SequenceLine * line );
+    SequencerLine( SequencerDraw *sDraw );
+
+    // don't call setSequenceLine until you have added
+    // this SequencerLine to a scene
+    void setSequenceLine( psy::core::SequenceLine * line );
+    psy::core::SequenceLine *sequenceLine(); 
 
     void addItem( psy::core::SinglePattern* pattern );
 
-    void setSequenceLine( psy::core::SequenceLine * line );
-    psy::core::SequenceLine *sequenceLine(); 
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     SequencerDraw *sDraw_;
 
@@ -47,8 +50,15 @@ signals:
     void clicked( SequencerLine* );
 
 private:
+    // does not take ownership of entry.
+    void addEntry( psy::core::SequenceEntry* entry );
+
+    // does not delete entry.
+    void removeEntry(psy::core::SequenceEntry* entry);
+
     psy::core::SequenceLine *seqLine_;
     std::list<SequencerItem*> items_;
+    typedef std::list<SequencerItem*>::iterator items_iterator;
 };
 
 #endif

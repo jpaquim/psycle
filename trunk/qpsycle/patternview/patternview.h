@@ -20,13 +20,15 @@
 #ifndef PATTERNVIEW_H
 #define PATTERNVIEW_H
 
-#include <QVBoxLayout>
+#include "psycore/song.h"
+#include "psycore/singlepattern.h"
 
 #include "linenumbercolumn.h"
 #include "patterndraw.h"
 #include "patterngrid.h"
-#include "psycore/song.h"
-#include "psycore/singlepattern.h"
+
+#include <QVBoxLayout>
+#include <QWidget>
 
 class QToolBar;
 class QComboBox;

@@ -18,15 +18,15 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "wiregui.h"
+#include "machinegui.h"
+
+#include <math.h>
+
 #include <QPainter>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
 #include <QAction>
-
- #include "wiregui.h"
- #include "machinegui.h"
-
- #include <math.h>
 
  static const double Pi = 3.14159265358979323846264338327950288419717;
  static double TwoPi = 2.0 * Pi;

@@ -18,10 +18,10 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "waveview.h"
+
 #include <QtGui>
 #include <iostream>
-
- #include "waveview.h"
 
  WaveView::WaveView( psy::core::Song *song, QWidget *parent) 
     : QWidget(parent)

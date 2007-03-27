@@ -20,12 +20,14 @@
 #ifndef SINGLEPATTERN_H
 #define SINGLEPATTERN_H
 
+#include "signalslib.h"
 #include "patternline.h"
 #include "timesignature.h"
 //#include "sigslot.h"
 #include <map>
 #include <vector>
 #include <string>
+#include <memory>
 
 /**
 @author  Psycledelics  
@@ -66,8 +68,11 @@ namespace psy
 		class SinglePattern : public std::map<double, PatternLine> {
 		public:
 			SinglePattern();
+			SinglePattern(SinglePattern const& other);
 
 			virtual ~SinglePattern();
+
+      boost::signal1<void,SinglePattern*> wasDeleted;
 
 			void setID(int id);
 			int id() const;
@@ -124,7 +129,7 @@ namespace psy
 
 			std::string toXml() const;
 
-			SinglePattern block( int left, int right, int top, int bottom );
+      std::auto_ptr<SinglePattern> block( int left, int right, int top, int bottom );
 			void copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
 			void mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
 

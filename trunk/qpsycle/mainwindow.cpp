@@ -18,16 +18,16 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <QtGui>
-
-#include "mainwindow.h"
-#include "patternbox.h"
-
 #include "psycore/player.h"
 #include "psycore/song.h"
 #include "psycore/singlepattern.h"
 #include "psycore/patterndata.h"
 #include "psycore/patternsequence.h"
+
+#include "mainwindow.h"
+#include "patternbox.h"
+
+#include <QtGui>
 
 #include <QTreeWidgetItem>
 
