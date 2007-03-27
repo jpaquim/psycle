@@ -21,14 +21,25 @@
 #ifndef MACHINETWEAKDLG_H
 #define MACHINETWEAKDLG_H
 
+#include "psycore/machine.h"
+
 #include <QDialog>
 #include <QWidget>
+
+class Knob : public QWidget {
+public:
+    Knob( QWidget *parent = 0 );
+};
+class FHeader : public QWidget {
+public:
+    FHeader( QWidget *parent = 0 );
+};
 
 class MachineTweakDlg : public QDialog {
     Q_OBJECT
 
 public:
-    MachineTweakDlg(QWidget *parent = 0);
+    MachineTweakDlg( psy::core::Machine *mac, QWidget *parent = 0 );
 
 };
 

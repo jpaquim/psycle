@@ -20,8 +20,15 @@
 
 #include "machinetweakdlg.h"
 
-MachineTweakDlg::MachineTweakDlg(QWidget *parent) 
+MachineTweakDlg::MachineTweakDlg( psy::core::Machine *mac, QWidget *parent ) 
     : QDialog(parent)
 {
     setWindowTitle("Machine tweak");
 }
+
+Knob::Knob( QWidget *parent )
+    : QWidget( parent )
+{}
+FHeader::FHeader( QWidget *parent )
+    : QWidget( parent )
+{}

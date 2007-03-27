@@ -45,13 +45,14 @@
      QString string = QString::fromStdString( mac->GetEditName() );
      setName( QString(string) );
 
+     setZValue( 1 );
      setRect(QRectF(0, 0, 100, 60));
      setPos(left, top);
      setPen(QPen(Qt::white,1));
      setBrush( Qt::blue );
      setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
 
-     macTwkDlg_ = new MachineTweakDlg(machineView);
+     macTwkDlg_ = new MachineTweakDlg( mac_, machineView );
      showMacTwkDlgAct_ = new QAction("Tweak Machine", this);
      connect(showMacTwkDlgAct_, SIGNAL(triggered()), this, SLOT(showMacTwkDlg()));
 
