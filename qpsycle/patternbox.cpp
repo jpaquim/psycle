@@ -110,6 +110,7 @@ void PatternBox::newCategory()
 
     CategoryItem* catItem = new CategoryItem();
     patternTree()->addTopLevelItem( catItem );
+    patternTree()->setCurrentItem(catItem);
     catItem->setText( 0, "Category" );
     QColor col = QColorFromLongColor( category->color() );
     catItem->setBackground( 0, QBrush( col ) );
