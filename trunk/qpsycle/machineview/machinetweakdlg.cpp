@@ -56,7 +56,7 @@ void MachineTweakDlg::initParameterGui()
     int x = 0;
     int y = 0;
 
-    for (int knobIdx =0; knobIdx < cols*rows; knobIdx++) {
+    for ( int knobIdx =0; knobIdx < cols*rows; knobIdx++ ) {
         int min_v,max_v;
 
         if ( knobIdx < numParameters ) {
@@ -78,6 +78,8 @@ void MachineTweakDlg::initParameterGui()
                 pMachine_->GetParamValue( knobIdx, buffer );
                 knobGroup->setNameText(parName);
                 knobGroupMap[ knobIdx ] = knobGroup;
+                connect( knobGroup, SIGNAL( changed( KnobGroup* ) ),
+                         this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
                 layout->addWidget( knobGroup, x, y );
             }					
         } else {
@@ -112,9 +114,25 @@ void MachineTweakDlg::updateValues( )
     knobPanel->repaint();
 }
 
+void MachineTweakDlg::onKnobGroupChanged( KnobGroup *kGroup ) 
+{
+    int param = kGroup->knob()->param();
+    int value = kGroup->knob()->value();
+    pMachine_->SetParameter( param, value );
+    char buffer[128];
+    int val_v = pMachine_->GetParamValue( param );
+    pMachine_->GetParamValue( param, buffer );
+    kGroup->setValueText( QString::fromStdString( buffer ) );
+}
 
-Knob::Knob( int param ) 
-{}
+void MachineTweakDlg::showEvent( QShowEvent *event )
+{
+    // FIXME: can adjustSize() be called somewhere else?
+    adjustSize();
+    QWidget::showEvent( event );
+}
+
+
 
 KnobGroup::KnobGroup( int param )
 {
@@ -125,16 +143,12 @@ KnobGroup::KnobGroup( int param )
     nameLbl = new QLabel();
     valueLbl = new QLabel();
 
+    connect( knob_, SIGNAL( valueChanged( int ) ),
+             this, SLOT( onKnobChanged() ) );
+
     layout->addWidget( knob_, 0, 0, 2, 2 );
     layout->addWidget( nameLbl, 0, 2, 1, 6 );
     layout->addWidget( valueLbl, 1, 2, 2, 6 );
-}
-
-void MachineTweakDlg::showEvent( QShowEvent *event )
-{
-    // FIXME: can adjustSize() be called somewhere else?
-    adjustSize();
-    QWidget::showEvent( event );
 }
 
 void KnobGroup::setKnob( Knob *inKnob )
@@ -157,11 +171,28 @@ void KnobGroup::setValueText( const QString & text )
     valueLbl->setText( text );
 }
 
+void KnobGroup::onKnobChanged()
+{
+    emit changed( this );
+}
+
+/**
+ * Knob class.
+ * 
+ */
+Knob::Knob( int param ) 
+    : param_( param )
+{}
+
 QSize Knob::sizeHint() const
 {
     return QSize( 20, 20 );
 }
 
+/**
+ * FHeader class.
+ * 
+ */
 FHeader::FHeader( QWidget *parent )
     : QLabel( parent )
 {}
