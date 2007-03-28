@@ -65,8 +65,6 @@
          QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
          list->addItem(item);
          pluginIdentify_[item] = key;
-         connect( list, SIGNAL( itemSelectionChanged( ) ), 
-         this, SLOT( itemSelectionChanged( ) ) );
        }
      }
 
@@ -75,8 +73,8 @@
      QListWidget* lists[4] = { genList, efxList, intList, ladList };
 
      for(int i=0;i<4;i++) {
-       connect( lists[i], SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
-                this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+       connect( lists[i], SIGNAL( itemSelectionChanged( ) ), 
+                this, SLOT( itemSelectionChanged( ) ) );
 
        connect( lists[i], SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
                 this, SLOT( accept() ) );
