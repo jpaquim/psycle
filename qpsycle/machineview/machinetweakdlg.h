@@ -31,9 +31,14 @@ class Knob : public QDial {
 public:
     Knob( int param );
     QSize sizeHint() const;
+    int param() { return param_; }
+
+private:
+    int param_;
 };
 
 class KnobGroup : public QWidget {
+    Q_OBJECT
 public:
     KnobGroup( int param );
 
@@ -41,6 +46,13 @@ public:
     void setValueText( const QString & text );
     void setKnob( Knob *knob );
     Knob *knob();
+
+public slots:
+    void onKnobChanged();
+
+signals:
+    void changed( KnobGroup *kGroup );
+
 private:
     Knob *knob_;
     QLabel *nameLbl;
@@ -61,6 +73,9 @@ public:
 protected:
     void showEvent( QShowEvent *event );
 
+public slots: 
+    void onKnobGroupChanged( KnobGroup *kGroup );
+
 private:
     void initParameterGui();
     void updateValues();
@@ -70,8 +85,6 @@ private:
 
     std::map<int, KnobGroup*> knobGroupMap;
     std::map<int, FHeader*> headerMap;
-
-
 };
 
 #endif
