@@ -135,6 +135,7 @@ namespace psy
 //			const Configuration & conf_;
 						std::map< PluginFinderKey, PluginInfo > map_;
 
+            void scanInternal();
 			void scanLadspa();
 			void scanNatives();
 

@@ -41,19 +41,24 @@ class NewMachineDlg : public QDialog
     const psy::core::PluginFinderKey & pluginKey() const;
 
 public slots:
-    void currentItemChanged( QListWidgetItem *current, QListWidgetItem *previous );
+    void itemSelectionChanged( );
 
  private:
      QDialogButtonBox *buttonBox;
     const psy::core::PluginFinder *finder_;
 
 
+    QListWidgetItem* selectedItem;
     psy::core::PluginFinderKey selectedKey_;
 	std::map< QListWidgetItem* , psy::core::PluginFinderKey > pluginIdentify_;
 
     void setPlugin( QListWidgetItem* item );
 
-
+    QListWidget* genList;
+    QListWidget* efxList;
+    QListWidget* intList;
+    QListWidget* ladList;
+    bool inItemSelectionChanged;
 };
 
  #endif
