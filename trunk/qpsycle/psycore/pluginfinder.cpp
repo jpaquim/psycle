@@ -205,9 +205,18 @@ namespace psy
 		}
 
 		void PluginFinder::scanAll() {
+      scanInternal();
 			scanNatives();
 			scanLadspa();		
 		}
+
+    void PluginFinder::scanInternal() {
+      PluginFinderKey key = PluginFinderKey::internalSampler();
+      PluginInfo info;
+      info.setType( MACH_SAMPLER );
+      info.setName( key.name() );
+      map_[key]=info;
+    }
 
 		void PluginFinder::scanLadspa() {
 			///\todo this just uses the first path in getenv

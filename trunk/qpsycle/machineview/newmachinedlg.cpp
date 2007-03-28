@@ -25,103 +25,120 @@
 
  NewMachineDlg::NewMachineDlg(QWidget *parent) 
     : QDialog(parent)
+    , selectedItem(NULL)
  {
      setWindowTitle(tr("Choose New Machine"));
      resize(500, 500);
      
      QGridLayout *layout = new QGridLayout();
 
+     // Should we use a tree layout instead of tabs?
      QTabWidget *machineTabs = new QTabWidget();
 
      finder_ = new psy::core::PluginFinder();
 
-     QListWidget *genList = new QListWidget();
+     genList = new QListWidget();
+     efxList = new QListWidget();
+     intList = new QListWidget();
+     ladList = new QListWidget();
+
      std::map< psy::core::PluginFinderKey, psy::core::PluginInfo >::const_iterator it = finder_->begin();
-				for ( ; it != finder_->end(); it++ ) {
-					const psy::core::PluginFinderKey & key = it->first;
-					const psy::core::PluginInfo & info = it->second;
-					if ( info.type() == psy::core::MACH_PLUGIN && info.mode() == psy::core::MACHMODE_GENERATOR ) {
-						QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
-						genList->addItem( item );
-						pluginIdentify_[item] = key;
-                    }
-                }
-     connect( genList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
-              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+     for ( ; it != finder_->end(); it++ ) {
+       const psy::core::PluginFinderKey & key = it->first;
+       const psy::core::PluginInfo & info = it->second;
+       QListWidget* list=NULL;
 
-     QListWidget *efxList = new QListWidget();
-                it = finder_->begin();
-				for ( ; it != finder_->end(); it++ ) {
-					const psy::core::PluginFinderKey & key = it->first;
-					const psy::core::PluginInfo & info = it->second;
-					if ( info.type() == psy::core::MACH_PLUGIN && info.mode() == psy::core::MACHMODE_FX ) {
-						QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
-						efxList->addItem( item );
-						pluginIdentify_[item] = key;
-                    }
-                }
-     connect( efxList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
-              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+       switch(info.type()) {
+       case psy::core::MACH_SAMPLER:
+         list=intList;
+         break;
+       case psy::core::MACH_PLUGIN:
+         switch(info.mode()) {
+         case psy::core::MACHMODE_GENERATOR: list = genList; break;
+         case psy::core::MACHMODE_FX: list = efxList; break;
+         }
+         break;
+       case psy::core::MACH_LADSPA: list = ladList; break;
+       };
 
-     QListWidget *intList = new QListWidget();
-     intList->addItem( "Sampler" );
-     connect( intList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
-              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+       if (list) {
+         QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
+         list->addItem(item);
+         pluginIdentify_[item] = key;
+         connect( list, SIGNAL( itemSelectionChanged( ) ), 
+         this, SLOT( itemSelectionChanged( ) ) );
+       }
+     }
 
-     QListWidget *ladList = new QListWidget();
-                it = finder_->begin();
-				for ( ; it != finder_->end(); it++ ) {
-					const psy::core::PluginFinderKey & key = it->first;
-					const psy::core::PluginInfo & info = it->second;
-					if ( info.type() == psy::core::MACH_LADSPA ) {
-						QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
-						ladList->addItem( item );
-						pluginIdentify_[item] = key;
-                    }
-                }
-     connect( ladList, SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
-              this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+     inItemSelectionChanged = false;
 
-     connect( genList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
-              this, SLOT( accept() ) );
-     connect( efxList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
-              this, SLOT( accept() ) );
-     connect( intList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
-              this, SLOT( accept() ) );
-     connect( ladList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
-              this, SLOT( accept() ) );
+     QListWidget* lists[4] = { genList, efxList, intList, ladList };
+
+     for(int i=0;i<4;i++) {
+       connect( lists[i], SIGNAL( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ), 
+                this, SLOT( currentItemChanged( QListWidgetItem*, QListWidgetItem* ) ) );
+
+       connect( lists[i], SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
+                this, SLOT( accept() ) );
+     }
 
      buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
                                       | QDialogButtonBox::Cancel);
      connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
      connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-
+     
      machineTabs->addTab(genList, "Generators");
      machineTabs->addTab(efxList, "Effects");
      machineTabs->addTab(intList, "Internal");
      machineTabs->addTab(ladList, "Ladspa");
-
+     
      layout->addWidget(machineTabs);
      layout->addWidget(buttonBox);
      setLayout(layout);
  }
 
-void NewMachineDlg::currentItemChanged( QListWidgetItem *current, QListWidgetItem *previous )
+void NewMachineDlg::itemSelectionChanged()
 {
-    if ( current->text() == "Sampler" ) {
-		selectedKey_ = psy::core::PluginFinderKey::internalSampler();
-    } else {
-        setPlugin ( current );
+  // prevent reentry
+  if(inItemSelectionChanged) {
+    return;
+  }
+  inItemSelectionChanged = true;
+
+  QListWidget* lists[4] = { genList, efxList, intList, ladList };
+  QListWidgetItem* newItem=0;
+
+  for(int i=0;i<4;i++) {
+    QList<QListWidgetItem*> selections = lists[i]->selectedItems();
+    if (selections.count() > 0) {
+      assert(selections.count() <= 1);
+      QListWidgetItem* item=selections.at(0);
+      if (item != selectedItem) {
+        newItem = item;
+        break;
+      }
     }
+  }
+  if (newItem) {
+    // remove selection from previous listWidget
+    if (selectedItem) {
+      selectedItem->listWidget()->setItemSelected(selectedItem,false);
+    }
+    // remember which item is selected now
+    selectedItem = newItem;
+    setPlugin(selectedItem);
+  }
+
+  inItemSelectionChanged = false;
 }
 
 void NewMachineDlg::setPlugin( QListWidgetItem* item ) 
 {
-		std::map< QListWidgetItem*, psy::core::PluginFinderKey >::iterator it;		
+  std::map< QListWidgetItem*, psy::core::PluginFinderKey >::iterator it;		
 	it = pluginIdentify_.find( item );
-
-		if ( it != pluginIdentify_.end() ) {
-		const psy::core::PluginInfo & info = finder_->info( it->second );
+  
+  if ( it != pluginIdentify_.end() ) {
+    const psy::core::PluginInfo & info = finder_->info( it->second );
 		const psy::core::PluginFinderKey & key = it->second;
 
 /*		name->setText( info.name() );
@@ -131,8 +148,10 @@ void NewMachineDlg::setPlugin( QListWidgetItem* item )
 		apiVersion->setText( info.version() ); */
 
 		selectedKey_ = key;
-		}
-
+  }
+  else {
+    fprintf(stderr,"Unable to find plugin for QListWidgetItem\n");
+  }
 }
 
 const psy::core::PluginFinderKey & NewMachineDlg::pluginKey() const {
