@@ -23,6 +23,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QDial>
+#include <QKeyEvent>
 
 MachineTweakDlg::MachineTweakDlg( psy::core::Machine *mac, QWidget *parent ) 
     : QDialog( parent )
@@ -130,6 +131,15 @@ void MachineTweakDlg::showEvent( QShowEvent *event )
     // FIXME: can adjustSize() be called somewhere else?
     adjustSize();
     QWidget::showEvent( event );
+}
+
+void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
+{
+    if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
+        reject();
+    } else {
+        QDialog::keyPressEvent( event ); 
+    }
 }
 
 
