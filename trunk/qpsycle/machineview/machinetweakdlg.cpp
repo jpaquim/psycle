@@ -52,6 +52,8 @@ void MachineTweakDlg::initParameterGui()
 
     knobPanel = new QWidget( this );
     QGridLayout *layout = new QGridLayout();
+    layout->setMargin( 0 );
+    layout->setSpacing( 0 );
     knobPanel->setLayout( layout );
 
     int x = 0;
@@ -147,6 +149,8 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 KnobGroup::KnobGroup( int param )
 {
     QGridLayout *layout = new QGridLayout();
+    layout->setMargin( 0 );
+    layout->setSpacing( 0 );
     setLayout( layout );
 
     knob_ = new Knob( param );
@@ -186,6 +190,11 @@ void KnobGroup::onKnobChanged()
     emit changed( this );
 }
 
+QSize KnobGroup::sizeHint() const
+{
+    return QSize( K_XSIZE + LABEL_WIDTH, K_YSIZE );
+}
+
 /**
  * Knob class.
  * 
@@ -196,7 +205,7 @@ Knob::Knob( int param )
 
 QSize Knob::sizeHint() const
 {
-    return QSize( 20, 20 );
+    return QSize( K_XSIZE, K_YSIZE );
 }
 
 /**
