@@ -249,7 +249,7 @@ void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void MachineGui::showMacTwkDlg()
 {
-    macTwkDlg_->exec();
+    macTwkDlg_->show();
 }
 
 QPointF MachineGui::centrePointInSceneCoords() {
