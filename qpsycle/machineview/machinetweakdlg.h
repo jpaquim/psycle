@@ -27,6 +27,12 @@
 #include <QDial>
 #include <QLabel>
 
+const int K_XSIZE = 28;
+const int K_YSIZE = 28;
+const int K_NUMFRAMES = 63;
+const int W_ROWWIDTH = 150;
+const int LABEL_WIDTH = 150;
+
 class Knob : public QDial {
 public:
     Knob( int param );
@@ -46,6 +52,7 @@ public:
     void setValueText( const QString & text );
     void setKnob( Knob *knob );
     Knob *knob();
+    QSize sizeHint() const;
 
 public slots:
     void onKnobChanged();
