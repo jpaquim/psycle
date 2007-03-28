@@ -24,13 +24,30 @@
 #include "psycore/machine.h"
 
 #include <QDialog>
-#include <QWidget>
+#include <QDial>
+#include <QLabel>
 
-class Knob : public QWidget {
+class Knob : public QDial {
 public:
-    Knob( QWidget *parent = 0 );
+    Knob( int param );
+    QSize sizeHint() const;
 };
-class FHeader : public QWidget {
+
+class KnobGroup : public QWidget {
+public:
+    KnobGroup( int param );
+
+    void setNameText( const QString & text );
+    void setValueText( const QString & text );
+    void setKnob( Knob *knob );
+    Knob *knob();
+private:
+    Knob *knob_;
+    QLabel *nameLbl;
+    QLabel *valueLbl;
+};
+
+class FHeader : public QLabel {
 public:
     FHeader( QWidget *parent = 0 );
 };
@@ -40,6 +57,20 @@ class MachineTweakDlg : public QDialog {
 
 public:
     MachineTweakDlg( psy::core::Machine *mac, QWidget *parent = 0 );
+
+protected:
+    void showEvent( QShowEvent *event );
+
+private:
+    void initParameterGui();
+    void updateValues();
+
+    QWidget *knobPanel;
+    psy::core::Machine *pMachine_;
+
+    std::map<int, KnobGroup*> knobGroupMap;
+    std::map<int, FHeader*> headerMap;
+
 
 };
 
