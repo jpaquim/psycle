@@ -245,8 +245,6 @@ void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     }
 }
 
-//void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-
 void MachineGui::showMacTwkDlg()
 {
     macTwkDlg_->show();

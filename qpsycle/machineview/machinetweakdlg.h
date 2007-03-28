@@ -64,6 +64,9 @@ public:
     FHeader( QWidget *parent = 0 );
 };
 
+/**
+ * MachineTweakDlg
+ */
 class MachineTweakDlg : public QDialog {
     Q_OBJECT
 
@@ -72,6 +75,7 @@ public:
 
 protected:
     void showEvent( QShowEvent *event );
+    void keyPressEvent( QKeyEvent *event );
 
 public slots: 
     void onKnobGroupChanged( KnobGroup *kGroup );
