@@ -20,7 +20,10 @@
 #ifndef ALSAOUT_H
 #define ALSAOUT_H
 
+#if defined QPSYCLE__ALSA_AVAILABLE
+
 #include "audiodriver.h"
+
 
 #include <alsa/asoundlib.h>
 #include <pthread.h>
@@ -111,4 +114,5 @@ private:
 
 }}
 
+#endif // defined QPSYCLE__ALSA_AVAILABLE
 #endif   

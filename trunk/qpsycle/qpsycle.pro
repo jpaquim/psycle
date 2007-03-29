@@ -176,20 +176,30 @@ QT += xml
 
 unix {
     CONFIG += link_pkgconfig debug
-    PKGCONFIG += alsa jack
+    system( pkg-config --exists alsa ) {
+        message( "pkg-config things alsa libs are available..." )
+        DEFINES += QPSYCLE__ALSA_AVAILABLE # This is used in the source to determine when
+                                           # to include alsa-specific things.
+        PKGCONFIG += alsa 
+        INCLUDEPATH += /usr/include/alsa 
+        HEADERS += psycore/alsaout.h \
+                   psycore/alsaseqin.h 
+        SOURCES += psycore/alsaout.cpp \
+                   psycore/alsaseqin.cpp 
+    }
+    system( pkg-config --exists jack ) {
+        message( "pkg-config thinks jack libs are available..." )
+        DEFINES += QPSYCLE__JACK_AVAILABLE # This is used in the source to determine when
+                                           # to include jack-specific things.
+        PKGCONFIG += jack 
+        HEADERS += psycore/jackout.h 
+        SOURCES += psycore/jackout.cpp 
+    }
     LIBS += -lboost_signals
-    INCLUDEPATH += /usr/include/alsa 
-    HEADERS += psycore/alsa_conditional_build.h \
-           psycore/alsaout.h \
-           psycore/jackout.h \
-           psycore/alsaseqin.h \
-           psycore/netaudio_conditional_build.h \
+    HEADERS += psycore/netaudio_conditional_build.h \
            psycore/netaudioout.h \
            psycore/wavefileout.h 
-    SOURCES += psycore/alsaout.cpp \
-           psycore/jackout.cpp \
-           psycore/alsaseqin.cpp \
-           psycore/netaudioout.cpp \
+    SOURCES += psycore/netaudioout.cpp \
            psycore/wavefileout.cpp 
 }
 win32 {

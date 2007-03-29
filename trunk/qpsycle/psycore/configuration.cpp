@@ -244,14 +244,15 @@ namespace psy {
 				driver = new WaveFileOut();
 				driverMap_[ driver->info().name() ] = driver;
 
+#if defined QPSYCLE__ALSA_AVAILABLE
 				driver = new AlsaOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
+				std::cout << "Driver registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 #endif
 
-#if !defined XPSYCLE__NO_JACK
+#if defined QPSYCLE__JACK_AVAILABLE
 				driver = new JackOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
+				std::cout << "Driver registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 #endif
 /*
@@ -264,18 +265,18 @@ namespace psy {
 				driver = new ESoundOut;
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
-#endif		
+#endif		*/
 
-#else
-				driver = new MsWaveOut();
+#else // !ifdef __unix__
+/*				driver = new MsWaveOut();
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 
-				/*				driver = new MsDirectSound();
+								driver = new MsDirectSound();
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 #endif
-				/*		#if !defined XPSYCLE__NO_NETAUDIO
+						#if !defined XPSYCLE__NO_NETAUDIO
 				driver = new NetAudioOut;
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
@@ -283,8 +284,9 @@ namespace psy {
 				/*#if !defined XPSYCLE__NO_MICROSOFT_DIRECT_SOUND
 				driver = new MicrosoftDirectSoundOut;
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-				#endif*/
+				driverMap_[ driver->info().name() ] = driver;*/
+
+#endif // end of ifdef __unix__
 
 
 			setDriverByName("silent");
