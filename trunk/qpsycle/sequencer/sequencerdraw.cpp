@@ -80,8 +80,17 @@
       (boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
     patternSequence->newLineInserted.connect
       (boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
+    /*
+      Does not work because of a boost bug in boost 1.33
+      as of Mar 28 2007.
+      This bug is fixed in boost SVN. I put a workaround in
+      makeSequencerLine instead.
+      / Magnus
+
     patternSequence->lineRemoved.connect
       (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+    */
+
     patternSequence->linesSwapped.connect
       (boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 }
@@ -160,6 +169,7 @@ SequencerLine* SequencerDraw::makeSequencerLine(psy::core::SequenceLine* seqLine
   line->setSequenceLine(seqLine);
   line->setParentItem( seqArea_ );
   connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
+  seqLine->wasDeleted.connect(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
   return line;
 }
 
