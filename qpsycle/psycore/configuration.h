@@ -36,6 +36,7 @@ namespace psy {
 			~Configuration();
 
 			void loadConfig();
+            void loadConfig( const std::string & path );
 
 			void setDriverByName( const std::string & driverName );        
 
@@ -85,8 +86,6 @@ namespace psy {
 			void setDefaults();
 			void configureKeyBindings();
 //			void setXmlDefaults();
-//			void onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName );
-//			void loadConfig( const std::string & path );
 
 		};
 

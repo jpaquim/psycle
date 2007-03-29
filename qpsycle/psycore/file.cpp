@@ -133,7 +133,7 @@ namespace core {
     return destination;
   }
 
-/*  std::string File::home() {
+  std::string File::home() {
 #ifdef __unix__
     char home[8000]; 
     strncpy(home,getenv("HOME"),7999);
@@ -180,7 +180,7 @@ namespace core {
     }    
     return "";
 #endif
-  }  */          
+  }            
 
 /*  void File::cdHome() { 
     cd( home() );
@@ -215,7 +215,7 @@ namespace core {
   {
     std::string nvr(path);
     if(!path.length() || path[0] != '~') return nvr;
-    //nvr.replace( 0, 1, home().c_str() );
+    nvr.replace( 0, 1, home().c_str() );
     return nvr;
   }
 

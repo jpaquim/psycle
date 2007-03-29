@@ -20,6 +20,7 @@
 
 #include "configuration.h"
 #include "song.h"
+#include "file.h"
 #include "global.h"
 #ifdef __unix__
 #include "alsaout.h"
@@ -35,8 +36,9 @@
 #include <sstream>
 #include <exception>
 
+// FIXME: Ideally psycore should not depend on qt.
 #include <QtCore> // For getting key binding stuff.
-                  // Ideally however psycore should not depend on qt
+#include <QDomDocument> 
 
 namespace psy {
 	namespace core {
@@ -232,10 +234,10 @@ namespace psy {
 		{
 			enableSound_ = 0;      
 
-				AudioDriver* driver = 0;
-				driver = new AudioDriver;
-				_pSilentDriver = driver;
-				driverMap_[ driver->info().name() ] = driver;
+            AudioDriver* driver = 0;
+            driver = new AudioDriver;
+            _pSilentDriver = driver;
+            driverMap_[ driver->info().name() ] = driver;
 
 
 #ifdef __unix__
@@ -287,15 +289,6 @@ namespace psy {
 			setDriverByName("silent");
 			enableSound_ = false;
 
-			// we don't have any information about the installation paths,
-			// so, we can only assume everything is at a fixed place, like under the user home dir
-			hlpPath_ = "";
-			iconPath_ = "";
-			pluginPath_ = "/home/neil/code/xpsycle.plugins/";
-			prsPath_ = "";
-			ladspaPath_ = "/usr/lib/ladspa/";
-			songPath_ = "/home/neil/code/xpsycle/qpsycle/";
-
 //   FIXME: just hardcoding it here for now.
             setDriverByName( "alsa" );
 //            std::string deviceName = parser.getAttribValue("device");
@@ -326,32 +319,15 @@ namespace psy {
 
 		void Configuration::loadConfig()
 		{
-			// system-wide
-
-			// environment
-			// this is most useful for developpers.
-			// you can test xpsycle directly from within the build dir,
-			// pointing various paths to the source or build dir.
-/*			char const * const xpsycleenv(std::getenv("XPSYCLE__CONFIGURATION"));
-			std::string path= (xpsycleenv?xpsycleenv:"");
-			if(path.length()!=0) {
-				try {
-					loadConfig(path);
-				}
-				catch(std::exception const & e)
-				{
-					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
-				}
-			} else {
-							path = ngrs::File::replaceTilde("~" + ngrs::File::slash() + ".xpsycle.xml");
-			  if (path.length()!=0) {
-					try {
-											loadConfig( ngrs::File::replaceTilde( "~" + ngrs::File::slash() + ".xpsycle.xml") );
-					}
-					catch( std::exception const & e ) {
-						std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
-					}
-				} else {
+            std::string path = File::replaceTilde("~" + File::slash() + ".xpsycle.xml");
+            if (path.length()!=0) {
+                try {
+                        loadConfig( File::replaceTilde( "~" + File::slash() + ".xpsycle.xml") );
+                }
+                catch( std::exception const & e ) {
+                    std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
+                }
+            } else {
 
 					/*  	path=XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
 					if (path.length()!=0){
@@ -362,58 +338,41 @@ namespace psy {
 					{
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 					}
-					}
-				}
-			}*/
+					}*/
+			}
 		}
 
-/*		void Configuration::loadConfig( const std::string & path )
+		void Configuration::loadConfig( const std::string & path )
 		{
-						ngrs::XmlParser parser;   
-			parser.tagParse.connect(this,&Configuration::onConfigTagParse);
+            QFile *file = new QFile( QString::fromStdString( path ) );
+            if (file->open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QDomDocument *doc = new QDomDocument();
+                doc->setContent( file );
+                QDomElement root = doc->firstChildElement();
 
-			// check whether the file is readable
-						if( !ngrs::File::fileIsReadable( path ) )
-			{
-				std::ostringstream s;
-				s << "cannot read file: " << path;
-				throw std::runtime_error(s.str());
-			}
-
-			// parse the file
-			try
-			{
-				parser.parseFile( path );
-			}
-			catch( std::exception const & e )
-			{
-				std::ostringstream s;
-				s <<
-					"an error occured while parsing xml configuration file " << path << " ; "
-					"the settings might have been only partially loaded ; "
-					"message: " << e.what();
-				throw std::runtime_error(s.str());
-			} catch(...)
-			{
-				std::ostringstream s;
-				s <<
-					"an unidentified error occured while parsing xml configuration file " << path << " ; "
-					"the settings might have been only partially loaded";
-				throw std::runtime_error(s.str());
-			}
-
-#if !defined NDEBUG
-			std::cout
-				<< "xpsycle: configuration: after loading file: " << path << "\n"
-				<< "xpsycle: configuration: pixmap dir: " << iconPath_ << "\n"
-				<< "xpsycle: configuration: plugin dir: " << pluginPath_ << "\n"
-				<< "xpsycle: configuration: preset dir: " << prsPath_ << "\n"
-				<< "xpsycle: configuration: doc    dir: " << hlpPath_ << "\n"
-				<< "xpsycle: configuration: ladspa dir: " << ladspaPath_ << "\n";
-#endif
+                // Paths.
+                QDomNodeList paths = root.elementsByTagName( "path" );
+                for ( int i = 0; i < paths.count(); i++ )
+                {
+                    QDomElement path = paths.item( i ).toElement();
+                    std::string id = path.attribute("id").toStdString();
+                    std::string src = path.attribute("src").toStdString();
+                    if ( id == "icondir" )   iconPath_   = src;
+                    else  
+                    if ( id == "plugindir" ) pluginPath_ = src;
+                    else
+                    if ( id == "prsdir" )    prsPath_    = src;
+                    else
+                    if ( id == "hlpdir" )    hlpPath_    = src; 
+                    else
+                    if ( id == "ladspadir" ) ladspaPath_ = src;
+                    else  
+                    if ( id == "songdir" )   songPath_   = src;
+                }
+            }
 
 			doEnableSound = true;
-		}*/
+		}
 
 
         void Configuration::configureKeyBindings() // FIXME: Key bindings are host specific, should be moved?
@@ -492,51 +451,6 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefBlockPaste, Key( Qt::ControlModifier, Qt::Key_V ) );
         }
 
-/*		void Configuration::onConfigTagParse( const ngrs::XmlParser & parser, const std::string & tagName )
-{
-if ( tagName == "path" ) {
-std::string id  = parser.getAttribValue("id"); 
-std::string src = parser.getAttribValue("src");
-
-if ( id == "icondir" )   iconPath_   = src;
-else  
-if ( id == "plugindir" ) pluginPath_ = src;
-else
-if ( id == "prsdir" )    prsPath_    = src;
-else
-if ( id == "hlpdir" )    hlpPath_    = src; 
-else
-if ( id == "ladspadir" ) ladspaPath_ = src;
-} else
-if (tagName == "driver" && doEnableSound) {		
-setDriverByName( parser.getAttribValue("name"));
-} else
-if (tagName == "alsa") {
-std::string deviceName = parser.getAttribValue("device");
-std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
-if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
-AudioDriverSettings settings = it->second->settings();
-settings.setDeviceName( deviceName );
-it->second->setSettings( settings );
-}		
-} else
-if (tagName == "audio") {
-std::string enableStr = parser.getAttribValue("enable");
-int enable = 0;
-if ( enableStr != "" ) enable = ngrs::str<int>(enableStr);
-enableSound_ = enable;
-if (enable == 0) {
-setDriverByName( "silent" );
-doEnableSound = false;
-} else doEnableSound = true;
-} else
-if (tagName == "key") {
-// moved to configureKeyBindings()
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    }
-}
-}
-*/
 InputHandler & Configuration::inputHandler() {
 return inputHandler_;
 }
