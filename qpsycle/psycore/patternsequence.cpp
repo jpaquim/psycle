@@ -204,6 +204,7 @@ namespace psy
 		{
 			iterator it = begin();
 			for ( it; it != end(); it++) delete it->second;
+      wasDeleted(this);
 		}
 
 		SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double position )

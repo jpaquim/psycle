@@ -130,6 +130,8 @@ namespace psy
 			SequenceLine(PatternSequence* patSeq);
 			~SequenceLine();
 
+      boost::signal1<void,SequenceLine*> wasDeleted;
+
 			SequenceEntry* createEntry(SinglePattern* pattern, double position);
 			void removeSinglePatternEntries(SinglePattern* pattern);
 
