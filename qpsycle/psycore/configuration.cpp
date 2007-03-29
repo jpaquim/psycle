@@ -24,7 +24,7 @@
 #include "global.h"
 #ifdef __unix__
 #include "alsaout.h"
-//#include "jackout.h"
+#include "jackout.h"
 //#include "gstreamerout.h"
 //#include "esoundout.h"
 #include "wavefileout.h" ///\ todo pthread wrapper
@@ -248,12 +248,13 @@ namespace psy {
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 #endif
-/*
+
 #if !defined XPSYCLE__NO_JACK
 				driver = new JackOut;
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 #endif
+/*
 #if !defined XPSYCLE__NO_GSTREAMER
 				driver = new GStreamerOut;
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
