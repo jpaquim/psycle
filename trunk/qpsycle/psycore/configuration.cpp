@@ -288,16 +288,6 @@ namespace psy {
 
 			setDriverByName("silent");
 			enableSound_ = false;
-
-//   FIXME: just hardcoding it here for now.
-            setDriverByName( "alsa" );
-//            std::string deviceName = parser.getAttribValue("device");
-            std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
-            if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
-                AudioDriverSettings settings = it->second->settings();
-                settings.setDeviceName( "plughw:0" );
-                it->second->setSettings( settings );
-            }
 		}
 
 		void Configuration::setDriverByName( const std::string & driverName )
@@ -369,6 +359,33 @@ namespace psy {
                     else  
                     if ( id == "songdir" )   songPath_   = src;
                 }
+
+                // Audio.
+                QDomElement audioElm = root.firstChildElement( "audio" );
+                std::string enableStr = audioElm.attribute( "enable" ).toStdString();
+                int enable = 0;
+                if ( enableStr != "" ) enable = QString::fromStdString( enableStr ).toInt();
+                enableSound_ = enable;
+                if (enable == 0) {
+                    setDriverByName( "silent" );
+                    doEnableSound = false;
+                } else {
+                    doEnableSound = true;
+                }
+                QDomElement driverElm = root.firstChildElement( "driver" );
+                if ( doEnableSound ) {		
+                    setDriverByName( driverElm.attribute("name").toStdString() );
+                } 
+
+                // Alsa.  FIXME: assuming for now that alsa options are set in config.
+                QDomElement alsaElm = root.firstChildElement( "alsa" );
+                std::string deviceName = alsaElm.attribute("device").toStdString();
+                std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
+                if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
+                        AudioDriverSettings settings = it->second->settings();
+                        settings.setDeviceName( deviceName );
+                        it->second->setSettings( settings );
+                }		
             }
 
 			doEnableSound = true;
