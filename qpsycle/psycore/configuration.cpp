@@ -377,15 +377,18 @@ namespace psy {
                     setDriverByName( driverElm.attribute("name").toStdString() );
                 } 
 
-                // Alsa.  FIXME: assuming for now that alsa options are set in config.
-                QDomElement alsaElm = root.firstChildElement( "alsa" );
-                std::string deviceName = alsaElm.attribute("device").toStdString();
-                std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
-                if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
-                        AudioDriverSettings settings = it->second->settings();
-                        settings.setDeviceName( deviceName );
-                        it->second->setSettings( settings );
-                }		
+                // Alsa.  
+                if ( _pOutputDriver->info().name() == "alsa" ) {
+                    // FIXME: what if alsa settings are missing from xml file?
+                    QDomElement alsaElm = root.firstChildElement( "alsa" ); 
+                    std::string deviceName = alsaElm.attribute("device").toStdString();
+                    std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
+                    if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
+                            AudioDriverSettings settings = it->second->settings();
+                            settings.setDeviceName( deviceName );
+                            it->second->setSettings( settings );
+                    }		
+                }
             }
 
 			doEnableSound = true;
