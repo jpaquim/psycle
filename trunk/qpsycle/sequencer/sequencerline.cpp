@@ -36,6 +36,10 @@ SequencerLine::SequencerLine( SequencerDraw *sDraw)
     setBrush(QBrush(Qt::transparent));
 }
 
+SequencerLine::~SequencerLine() {
+  printf("~SequencerLine %p\n",this);
+}
+
 void SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
 {
   seqLine_ = line;
@@ -69,26 +73,36 @@ void SequencerLine::addEntry( psy::core::SequenceEntry* entry)
   item->setSequenceEntry( entry );
   item->setParentItem( this );
   items_.push_back( item );
-  assert(scene());
-  scene()->addItem( item );
-  scene()->update();
   connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
            sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
+  connect( item, SIGNAL( clicked( SequencerItem*) ),
+           this, SLOT( onItemClicked( SequencerItem*) ) );
   item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 
   entry->wasDeleted.connect(boost::bind(&SequencerLine::removeEntry,this,_1));
+  assert(scene());
+  scene()->addItem( item );
+  scene()->update();
 }
 
 void SequencerLine::removeEntry(psy::core::SequenceEntry* entry) {
-  for(items_iterator i=items_.begin();i!=items_.end();i++) {
+  printf("SequencerLine(this=%p)::removeEntry(%p)",this,entry);
+  for(items_iterator i=items_.begin();i!=items_.end();++i) {
+    printf("item: %p\n",*i); // gives address 0x0000001 which is clearly wrong!
     assert(*i);
     if((*i)->sequenceEntry() == entry) {
       scene()->removeItem(*i);
-      delete *i; // removes item from the scene as well.
+      delete *i;
       // need to make line redraw itself?
-      items_.erase(i--);
+      items_.erase(i);
+      scene()->update();
+      return;
     }
   }
+}
+
+void SequencerLine::onItemClicked(SequencerItem* item) {
+  emit clicked ( this );
 }
 
 void SequencerLine::mousePressEvent( QGraphicsSceneMouseEvent *event )

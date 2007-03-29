@@ -491,6 +491,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			std::cout << " driver initialized" << std::endl;
 	  		if (!driver_->Configured())
 	  		{
+          std::cout << "asking driver to configure itself" << std::endl;
 			      	driver_->Configure();
 //					SampleRate(driver_->_samplesPerSec);
 				//   _outputActive = true;
@@ -501,7 +502,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				std::cout << "driver enabled " << driver_->info().name() << std::endl;
 			//   _outputActive = true;
 			} else {
-				std::cout << "setting null driver " << std::endl;
+				std::cout << "driver failed to enable. setting null driver " << std::endl;
 				if (driver_) delete driver_;
 				driver_ = new AudioDriver();
 			}

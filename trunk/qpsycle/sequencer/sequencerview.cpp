@@ -47,10 +47,13 @@ SequencerView::SequencerView( psy::core::Song *asong )
     connect( insTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( insertTrack() ) );
     QAction *delTrkAct = toolBar_->addAction( "Delete Track" );
     toolBar_->addAction( delTrkAct );
-    QAction *dnTrkAct = toolBar_->addAction( "Move Track Down" );
-    toolBar_->addAction( dnTrkAct );
+    connect( delTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( deleteTrack() ) );
     QAction *upTrkAct = toolBar_->addAction( "Move Track Up" );
     toolBar_->addAction( upTrkAct );
+    connect( upTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveUpTrack() ) );
+    QAction *dnTrkAct = toolBar_->addAction( "Move Track Down" );
+    toolBar_->addAction( dnTrkAct );
+    connect( dnTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveDownTrack() ) );
 
     layout_->addWidget( toolBar_ );
     layout_->addWidget( seqDraw_ );

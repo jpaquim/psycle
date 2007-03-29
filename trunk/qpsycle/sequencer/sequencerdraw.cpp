@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include <vector>
+#include <boost/bind.hpp>
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -50,25 +51,18 @@
 
     seqArea_ = new SequencerArea( this );
 
-    bool isFirst = true;
-    int count = 0;
-    std::vector<psy::core::SequenceLine*>::iterator it = sequencerView()->song()->patternSequence()->begin();
-    for ( ; it < sequencerView()->song()->patternSequence()->end(); it++) {
+    psy::core::PatternSequence* patternSequence = sequencerView()->song()->patternSequence();
+
+    std::vector<psy::core::SequenceLine*>::iterator it = patternSequence->begin();
+    for ( ; it < patternSequence->end(); it++) {
         psy::core::SequenceLine* seqLine = *it;
-        SequencerLine* line = new SequencerLine( this);
-        scene()->addItem(line);
-        line->setSequenceLine(seqLine);
-        lines_.push_back(line);
-        line->setParentItem( seqArea_ );
-        line->setPos( 0, count*lineHeight_ );
-        if (isFirst) {
-            setSelectedLine( line ); 
-            isFirst = false;
-        }
-        connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
-//        lastLine_ = line;
-        count++;
+        onNewLineCreated(seqLine);
     }
+    
+    if(!lines_.empty()) {
+      setSelectedLine(lines_[0]);
+    }
+
     pLine_ = new PlayLine();
     pLine_->setRect( 0, 0, 1, height() );
     connect( pLine_, SIGNAL( playLineMoved( double ) ),
@@ -82,7 +76,14 @@
     scene_->addItem( seqArea_ );
     seqArea_->setPos( 0, 30 );
 
-
+    patternSequence->newLineCreated.connect
+      (boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
+    patternSequence->newLineInserted.connect
+      (boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
+    patternSequence->lineRemoved.connect
+      (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+    patternSequence->linesSwapped.connect
+      (boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 }
 
 int SequencerDraw::beatPxLength( ) const
@@ -92,6 +93,7 @@ int SequencerDraw::beatPxLength( ) const
 
 void SequencerDraw::setSelectedLine( SequencerLine *line ) 
 {
+  printf("setSelectedLine %p\n", line);
     selectedLine_ = line;
 }
 
@@ -121,24 +123,44 @@ void SequencerDraw::insertTrack()
 //        repaint();
     } else
         if ( selectedLine() ) {
-            psy::core::SequenceLine *seqLine = seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() ); 
-            SequencerLine* line = new SequencerLine( this );
-            scene()->addItem( line );
-            line->setSequenceLine( seqLine);
-            lines_.push_back( line );
-
-            line->setParentItem( seqArea_ );
-            line->setPos( 0, (lines_.size()-1) * lineHeight_ );
-            //line->itemClick.connect(this, &SequencerGUI::onSequencerItemClick);
-            connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
-            setSelectedLine( line );
+          // will cause onNewLineInserted to be fired:
+          seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() );
 /*            int index = selectedLine_->zOrder();
             scrollArea_->insert(line, index);
             scrollArea_->resize();
-            lastLine = line;*/
+*/
 //            resize();
  //           scrollArea_->repaint();
         }
+}
+
+void SequencerDraw::deleteTrack() {
+  if(selectedLine()) {
+    // will trigger onLineRemoved
+    seqView_->song()->patternSequence()->removeLine(selectedLine()->sequenceLine());
+  }
+}
+
+void SequencerDraw::moveDownTrack() {
+  if(selectedLine()) {
+    // will trigger onLinesSwapped
+    seqView_->song()->patternSequence()->moveDownLine(selectedLine()->sequenceLine());
+  }
+}
+void SequencerDraw::moveUpTrack() {
+  if(selectedLine()) {
+    // will trigger onLinesSwapped
+    seqView_->song()->patternSequence()->moveUpLine(selectedLine()->sequenceLine());
+  }
+}
+
+SequencerLine* SequencerDraw::makeSequencerLine(psy::core::SequenceLine* seqLine) {
+  SequencerLine* line = new SequencerLine( this);
+  scene()->addItem(line);
+  line->setSequenceLine(seqLine);
+  line->setParentItem( seqArea_ );
+  connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
+  return line;
 }
 
 void SequencerDraw::onSequencerLineClick( SequencerLine *line )
@@ -151,6 +173,75 @@ void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
     psy::core::SequenceEntry *entry = item->sequenceEntry();
     entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
     scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
+}
+
+void SequencerDraw::onNewLineCreated(psy::core::SequenceLine* seqLine)
+{
+  SequencerLine* line = makeSequencerLine(seqLine);
+  line->setPos( 0, lines_.size()*lineHeight_ );
+  lines_.push_back(line);
+  setSelectedLine( line );
+}
+
+void SequencerDraw::onNewLineInserted(psy::core::SequenceLine* seqLine, psy::core::SequenceLine* position)
+{
+  printf("onNewLineInserted(%p,%p)\n",seqLine,position);
+  SequencerLine* line = makeSequencerLine(seqLine);
+  int numLines = lines_.size();
+  for(int i=0;i<numLines;i++) {
+    if (lines_[i]->sequenceLine() == position) {
+      printf("%ith line\n",i);
+      SequencerLine* l=line;
+      for(int j=i;j<numLines;j++) {
+        l->setPos( 0, j*lineHeight_ );
+        std::swap(l,lines_[j]);
+      }
+      l->setPos( 0, numLines*lineHeight_ );
+      lines_.push_back(l);
+      break;
+    }
+  }
+
+  setSelectedLine( line );
+}
+
+void SequencerDraw::onLineRemoved(psy::core::SequenceLine* seqLine)
+{
+  if (selectedLine() && selectedLine()->sequenceLine() == seqLine)
+    setSelectedLine( NULL );
+  int numLines = lines_.size();
+  for(int i=0;i<numLines;i++) {
+    if (lines_[i]->sequenceLine() == seqLine) {
+      for(int j=i;j<numLines-1;j++) {
+        std::swap(lines_[j],lines_[j+1]);
+        lines_[j]->setPos( 0, j*lineHeight_ );
+      }
+      delete lines_.back();
+      lines_.pop_back();
+      break;
+    }
+  }
+}
+
+void SequencerDraw::onLinesSwapped(psy::core::SequenceLine* a,
+                                   psy::core::SequenceLine* b)
+{
+  lines_iterator ita = lines_.end();
+  lines_iterator itb = lines_.end();
+  for(lines_iterator i=lines_.begin();i != lines_.end();i++) {
+    psy::core::SequenceLine* sl = (*i)->sequenceLine();
+    if (sl == a)
+      ita = i;
+    if (sl == b)
+      itb = i;
+  }
+  if (ita != lines_.end() && itb != lines_.end()) {
+    QPointF posa = (*ita)->pos();
+    QPointF posb = (*itb)->pos();
+    (*ita)->setPos(posb);
+    (*itb)->setPos(posa);
+    std::swap(*ita,*itb);
+  }
 }
 
 void SequencerDraw::onPlayLineMoved( double newXPos )

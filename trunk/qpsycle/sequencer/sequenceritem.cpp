@@ -114,7 +114,7 @@ void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     QGraphicsItem::mousePressEvent( event ); // Do normal business...
 
-    emit clicked();
+    emit clicked(this);
 }
 
 void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
