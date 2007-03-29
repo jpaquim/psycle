@@ -176,16 +176,18 @@ QT += xml
 
 unix {
     CONFIG += link_pkgconfig debug
-    PKGCONFIG += alsa
+    PKGCONFIG += alsa jack
     LIBS += -lboost_signals
     INCLUDEPATH += /usr/include/alsa 
     HEADERS += psycore/alsa_conditional_build.h \
            psycore/alsaout.h \
+           psycore/jackout.h \
            psycore/alsaseqin.h \
            psycore/netaudio_conditional_build.h \
            psycore/netaudioout.h \
            psycore/wavefileout.h 
     SOURCES += psycore/alsaout.cpp \
+           psycore/jackout.cpp \
            psycore/alsaseqin.cpp \
            psycore/netaudioout.cpp \
            psycore/wavefileout.cpp 
