@@ -315,6 +315,7 @@ namespace psy
 		{
 			SequenceLine* line = new SequenceLine(this);
 			push_back(line);
+      newLineCreated(line);
 			return line;
 		}
 
@@ -324,6 +325,7 @@ namespace psy
 			if ( it != end() ) {
 				line = new SequenceLine(this);
 				insert( it,  line);
+        newLineInserted(line,selectedLine);
 			}
 			return line;
 		}
@@ -333,6 +335,7 @@ namespace psy
 			iterator it = find(begin(), end(), line);
 			if ( it != end() ) {
 				erase(it);
+        lineRemoved(line);
 				delete line;
 			}
 		}
@@ -504,6 +507,7 @@ namespace psy
 		void PatternSequence::removeAll( )
 		{
 			for(iterator it = begin(); it != end(); ++it) {
+        lineRemoved(*it);
 				delete *it;
 			}
 			clear();
@@ -523,27 +527,21 @@ namespace psy
 		void PatternSequence::moveUpLine(SequenceLine* line) {
 		iterator it = find( begin(), end(), line);
 			if ( it != begin() ) {
-				it--;
-				SequenceLine* swapLine = *it;
-				it++;
-				erase( it );      
-				//a std::vector isnt iterator safe so search again
-				iterator it = find( begin(), end(), swapLine);		
-				insert( it, line );
+        iterator prev = it;
+        --prev;
+        std::swap(*prev,*it);
+        linesSwapped(*it,*prev);
 			}
 		}
 
 		void PatternSequence::moveDownLine(SequenceLine* line) {
 			iterator it = find( begin(), end(), line);
 			if ( it != end() ) {			
-				it++;
-				if ( it != end() ) {
-					SequenceLine* swapLine = *it;
-					it--;
-					erase( it );
-					iterator it = find( begin(), end(), swapLine);
-					it++;
-					insert( it, line );				
+				iterator next=it;
+        ++next;
+				if ( next != end() ) {
+          std::swap(*it,*next);
+          linesSwapped(*next,*it);
 				}
 			}
 		}

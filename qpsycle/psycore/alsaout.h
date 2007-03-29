@@ -59,7 +59,6 @@ private:
 
 
 		bool _initialized;
-//    bool _running;
 
 		
 		void setDefault();
@@ -83,14 +82,13 @@ private:
 
 		snd_pcm_t *handle;
 
-		static int enablePlayer; // -1: has stopped, 0: stop!, 1: play!, 2: is playing
-		static bool running;
+		volatile int enablePlayer; // -3: thread not running, -2: stop thread!, -1: has stopped, 0: stop!, 1: play!, 2: is playing
 		int method;       // 0:WRITE 1:WRITE&POLL 2:ASYNC 3:async_direct 4:direct_interleaved
 											// 5:direct_noninterleaved 6:DIRECT_WRITE
 		signed short *samples;
 		snd_pcm_channel_area_t *areas;
 
-		void FillBuffer(const snd_pcm_channel_area_t *areas, snd_pcm_uframes_t offset, int count);
+		void FillBuffer(snd_pcm_uframes_t offset, int count);
 
 
 		int id;
@@ -101,12 +99,12 @@ private:
 		int audioStart( );
 		int audioStop();
 
-		int set_hwparams(snd_pcm_t *handle, snd_pcm_hw_params_t *params, snd_pcm_access_t access);
-		int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams);
-		int xrun_recovery(snd_pcm_t *handle, int err);
-		int write_loop(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
+		int set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access);
+		int set_swparams(snd_pcm_sw_params_t *swparams);
+		int xrun_recovery(int err);
+    int write_loop();
 
-		static int audioOutThread(void * ptr);
+		static void* audioOutThread(void * ptr);
 //    void setValues();
 
 };

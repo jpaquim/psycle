@@ -35,6 +35,7 @@ class SequencerLine : public QObject, public QGraphicsRectItem, public boost::si
     Q_OBJECT
 public:
     SequencerLine( SequencerDraw *sDraw );
+    ~SequencerLine();
 
     // don't call setSequenceLine until you have added
     // this SequencerLine to a scene
@@ -48,6 +49,9 @@ public:
 
 signals:
     void clicked( SequencerLine* );
+
+private slots:
+    void onItemClicked(SequencerItem*);
 
 private:
     // does not take ownership of entry.

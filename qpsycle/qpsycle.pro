@@ -175,7 +175,7 @@ RESOURCES += qpsycle.qrc
 QT += xml
 
 unix {
-    CONFIG += link_pkgconfig
+    CONFIG += link_pkgconfig debug
     PKGCONFIG += alsa
     LIBS += -lboost_signals
     INCLUDEPATH += /usr/include/alsa 

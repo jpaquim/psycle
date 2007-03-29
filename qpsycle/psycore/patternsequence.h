@@ -161,9 +161,12 @@ namespace psy
 			typedef GlobalMap::iterator GlobalIter;
 
 			SequenceLine* createNewLine();
+      boost::signal1<void,SequenceLine*> newLineCreated;
 			SequenceLine* insertNewLine( SequenceLine* selectedLine );
+      boost::signal2<void,SequenceLine*,SequenceLine*> newLineInserted; // new line, line it is inserted before
 			
 			void removeLine(SequenceLine* line);
+      boost::signal1<void,SequenceLine*> lineRemoved;
 			void removeAll();
 
 			// heart of patternsequence
@@ -192,6 +195,7 @@ namespace psy
 
 			void moveDownLine(SequenceLine* line);
 			void moveUpLine(SequenceLine* line);
+      boost::signal2<void,SequenceLine*,SequenceLine*> linesSwapped;
 
 			std::string toXml() const;
 

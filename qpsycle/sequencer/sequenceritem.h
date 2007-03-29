@@ -53,7 +53,7 @@ private slots:
     void onDeleteEntryActionTriggered();
 
 signals:
-    void clicked();
+    void clicked(SequencerItem*);
     void deleteRequest( SequencerItem* );
 
 protected: 
