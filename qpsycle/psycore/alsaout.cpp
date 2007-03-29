@@ -17,10 +17,7 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
-#if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/alsa_conditional_build.h>
-#endif
-#if !defined XPSYCLE__NO_ALSA
+#if defined QPSYCLE__ALSA_AVAILABLE
 
 #include "alsaout.h"
 //#include "global.h"
@@ -499,6 +496,4 @@ namespace psy {
   }
 }
 
-
-
-#endif // !defined XPSYCLE__NO_ALSA
+#endif // defined QPSYCLE__ALSA_AVAILABLE

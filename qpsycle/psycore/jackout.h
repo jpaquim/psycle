@@ -20,10 +20,7 @@
 #ifndef JACKOUT_H
 #define JACKOUT_H
 
-#if defined XPSYCLE__CONFIGURATION
-				#include <xpsycle/jack_conditional_build.h>
-#endif
-#if !defined XPSYCLE__NO_JACK
+#if defined QPSYCLE__JACK_AVAILABLE
 
 #include "audiodriver.h"
 #include <jack/jack.h>
@@ -77,5 +74,5 @@ private:
 } // namespace psy
 
 
-#endif // !defined XPSYCLE__NO_JACK
+#endif // defined QPSYCLE__JACK_AVAILABLE
 #endif
