@@ -195,10 +195,10 @@ unix {
         HEADERS += psycore/jackout.h 
         SOURCES += psycore/jackout.cpp 
     }
-    system( esd-config --libs ) {
+    system( pkg-config --exists esound ) {
         message( "esd-config thinks esd libs are available..." )
-        LIBS += $$system( esd-config --libs )
         DEFINES += QPSYCLE__ESD_AVAILABLE  
+        PKG-CONFIG += esound
         HEADERS += psycore/esoundout.h 
         SOURCES += psycore/esoundout.cpp 
     }
