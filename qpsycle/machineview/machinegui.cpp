@@ -100,10 +100,11 @@ void MachineGui::onRenameMachineActionTriggered()
     QString text = QInputDialog::getText( machineView, "Rename machine",
                                           "Name: ", QLineEdit::Normal,
                                           QString::fromStdString( mac()->GetEditName() ), &ok);
-    if (ok && !text.isEmpty()) {
+    if ( ok && !text.isEmpty() ) {
         setName( text );
         mac()->SetEditName( text.toStdString() );
     }
+    emit renamed();
 }
 
 QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)

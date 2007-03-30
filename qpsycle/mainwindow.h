@@ -67,6 +67,7 @@ private slots:
     void onCategoryColorChanged();
     void onOctaveComboBoxIndexChanged( int newIndex );
     void onMachineDeleted( int macIndex );
+    void onMachineRenamed();
 
  private:
     psy::core::Song *song_;

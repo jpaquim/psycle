@@ -71,10 +71,12 @@
     void onMachineGuiChosen( MachineGui *macGui );
     MachineGui* findMachineGuiByMachineIndex( int index );
     void onDeleteMachineRequest( MachineGui *macGui );
+    void onMachineRenamed();
 
 signals:
     void machineGuiChosen( MachineGui *macGui );
     void machineDeleted( int macIndex );
+    void machineRenamed();
 
 private:
     MachineGui* findByMachine( psy::core::Machine *mac );

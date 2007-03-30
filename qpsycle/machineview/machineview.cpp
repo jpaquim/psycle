@@ -158,6 +158,11 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
     emit machineDeleted( index ); 
 }
 
+void MachineView::onMachineRenamed()
+{
+    emit machineRenamed();
+}
+
 void MachineView::deleteConnection( WireGui *wireGui )
 {
     // Delete the connection in the song file.
@@ -327,11 +332,9 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
     switch ( mac->mode() ) {							
         case psy::core::MACHMODE_GENERATOR:
             macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-            connect( macGui, SIGNAL( chosen( MachineGui* ) ), this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
         break;
         case psy::core::MACHMODE_FX:
             macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-            connect( macGui, SIGNAL( chosen( MachineGui* ) ), this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
         break;
         case psy::core::MACHMODE_MASTER: 
             macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
@@ -339,8 +342,12 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
         default:
             macGui = 0;
     }
+    connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
+             this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
     connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
              this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
+    connect( macGui, SIGNAL( renamed() ),
+             this, SLOT( onMachineRenamed() ) );
     scene_->addItem(macGui);
     machineGuis.push_back(macGui);
 }

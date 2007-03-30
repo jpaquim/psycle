@@ -129,6 +129,8 @@ void MainWindow::setupSignals()
              this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
     connect( macView_, SIGNAL( machineDeleted( int ) ), 
              this, SLOT( onMachineDeleted( int ) ) );
+    connect( macView_, SIGNAL( machineRenamed( ) ), 
+             this, SLOT( onMachineRenamed( ) ) );
 
     connect( wavView_, SIGNAL( sampleAdded() ), 
              this, SLOT( refreshSampleComboBox() ) );
@@ -551,6 +553,11 @@ void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
 }
 
 void MainWindow::onMachineDeleted( int macIndex )
+{
+    populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
+}
+
+void MainWindow::onMachineRenamed()
 {
     populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
 }
