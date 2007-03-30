@@ -70,6 +70,7 @@
     void deleteConnection( WireGui *wireGui );
     void onMachineGuiChosen( MachineGui *macGui );
     MachineGui* findMachineGuiByMachineIndex( int index );
+    void onDeleteMachineRequest( MachineGui *macGui );
 
 signals:
     void machineGuiChosen( MachineGui *macGui );
