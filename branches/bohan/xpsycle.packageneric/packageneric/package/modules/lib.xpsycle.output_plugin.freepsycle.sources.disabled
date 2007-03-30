@@ -1,3 +1,0 @@
-#! /bin/sh
-echo xpsycle/output_plugins/*.cpp &&
-find xpsycle/output_plugins/ \( -type d -name todo -prune \) -or \( -name \*.cpp -print \)
