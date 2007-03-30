@@ -545,7 +545,6 @@ void PatternGrid::setCursor( const PatCursor & cursor ) {
 void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
-//    int keyChar = QChar( event->text().at(0) ).toAscii();
 
     if ( cursor().eventNr() == 0 && isNote( command ) ) {
         // A note event.
@@ -560,8 +559,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 moveCursor( 0, patternStep() );
      //           pView->checkDownScroll( cursor() );
             }
-    } /*else
-        if ( isHex( keyChar ) ) {
+    } else
+        if ( isHex( event ) ) {
+            int keyChar = QChar( event->text().at(0) ).toAscii();
             if ( cursor().eventNr() == 1 ) {
                 // inst select
                 // i.e. a keyChar is pressed in the instrument column.
@@ -596,7 +596,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                     }
                 } else
                     if ( cursor().eventNr() == 3) {
-                        // mac select
+                        // volume col
                         std::cout << "event nr 3 - volume column" << std::endl;
                         psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
                         unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.volume(), cursor().col() );
@@ -655,7 +655,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                                 }
                             }			
                         }
-        }*/
+        }
 
     switch ( command ) {
         case psy::core::cdefNavUp:
@@ -1105,8 +1105,28 @@ const QColor & PatternGrid::beatTextColor() {
     return beatTextColor_;
 }
 
-bool PatternGrid::isHex( int c ) {
-    if ( ( (c >= 'a') && (c <='f') ) || ( (c>='0' && c <='9') ) ) return true;
+bool PatternGrid::isHex( QKeyEvent *ev ) {
+    if ( ev->modifiers() != Qt::NoModifier ) return false;
+
+    int key = ev->key();
+    if ( key == Qt::Key_A ||
+         key == Qt::Key_B ||
+         key == Qt::Key_C ||
+         key == Qt::Key_D ||
+         key == Qt::Key_E ||
+         key == Qt::Key_F ||
+         key == Qt::Key_0 ||
+         key == Qt::Key_1 ||
+         key == Qt::Key_2 ||
+         key == Qt::Key_3 ||
+         key == Qt::Key_4 ||
+         key == Qt::Key_5 ||
+         key == Qt::Key_6 ||
+         key == Qt::Key_7 ||
+         key == Qt::Key_8 ||
+         key == Qt::Key_9 
+       ) return true;
+
     return false;
 }
 
