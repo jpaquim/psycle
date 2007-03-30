@@ -25,8 +25,8 @@
 #ifdef __unix__
 #include "alsaout.h"
 #include "jackout.h"
+#include "esoundout.h"
 //#include "gstreamerout.h"
-//#include "esoundout.h"
 #include "wavefileout.h" ///\ todo pthread wrapper
 #else
 //#include "mswaveout.h"
@@ -255,17 +255,17 @@ namespace psy {
 				std::cout << "Driver registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
 #endif
+#if defined QPSYCLE__ESD_AVAILABLE
+				driver = new ESoundOut;
+				std::cout << "Driver registered:" <<  driver->info().name() << std::endl;
+				driverMap_[ driver->info().name() ] = driver;
+#endif		
 /*
 #if !defined XPSYCLE__NO_GSTREAMER
 				driver = new GStreamerOut;
 				std::cout << "registered:" <<  driver->info().name() << std::endl;
 				driverMap_[ driver->info().name() ] = driver;
-#endif
-#if !defined XPSYCLE__NO_ESOUND
-				driver = new ESoundOut;
-				std::cout << "registered:" <<  driver->info().name() << std::endl;
-				driverMap_[ driver->info().name() ] = driver;
-#endif		*/
+#endif*/
 
 #else // !ifdef __unix__
 /*				driver = new MsWaveOut();

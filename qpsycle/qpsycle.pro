@@ -195,6 +195,13 @@ unix {
         HEADERS += psycore/jackout.h 
         SOURCES += psycore/jackout.cpp 
     }
+    system( esd-config --libs ) {
+        message( "esd-config thinks esd libs are available..." )
+        LIBS += $$system( esd-config --libs )
+        DEFINES += QPSYCLE__ESD_AVAILABLE  
+        HEADERS += psycore/esoundout.h 
+        SOURCES += psycore/esoundout.cpp 
+    }
     LIBS += -lboost_signals
     HEADERS += psycore/netaudio_conditional_build.h \
            psycore/netaudioout.h \
