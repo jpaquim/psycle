@@ -545,7 +545,7 @@ void PatternGrid::setCursor( const PatCursor & cursor ) {
 void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
-    int keyChar = QChar( event->text().at(0) ).toAscii();
+//    int keyChar = QChar( event->text().at(0) ).toAscii();
 
     if ( cursor().eventNr() == 0 && isNote( command ) ) {
         // A note event.
@@ -560,7 +560,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                 moveCursor( 0, patternStep() );
      //           pView->checkDownScroll( cursor() );
             }
-    } else
+    } /*else
         if ( isHex( keyChar ) ) {
             if ( cursor().eventNr() == 1 ) {
                 // inst select
@@ -655,7 +655,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
                                 }
                             }			
                         }
-        }
+        }*/
 
     switch ( command ) {
         case psy::core::cdefNavUp:
