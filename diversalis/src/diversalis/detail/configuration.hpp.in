@@ -1,5 +1,0 @@
-/* see ./src/+autoheader.private.hpp.in for the -- commented -- file generated from configure.ac by autoheader. */
-
-///\file
-///\brief configuration for diversalis
-#pragma once
