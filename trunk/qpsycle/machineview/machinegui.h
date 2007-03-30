@@ -71,6 +71,7 @@ signals:
     void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
     void chosen( MachineGui *macGui );
     void deleteRequest( MachineGui *macGui );
+    void renamed();
 
 private:
     MachineView *machineView;
