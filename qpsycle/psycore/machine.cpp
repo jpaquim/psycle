@@ -359,9 +359,19 @@ namespace psy
 			return true;
 		}
 
-		bool Machine::Disconnect(Machine& dst_machine)
+		bool Machine::Disconnect( Machine& dstMac )
 		{
-			return false; // \todo o_O`
+            int wireIndex = FindOutputWire( dstMac._macIndex );
+            int dstWireIndex = dstMac.FindInputWire( _macIndex );
+
+            _connection[wireIndex] = false;
+            _outputMachines[wireIndex] = -1;
+            _connectedOutputs--;
+
+            dstMac._inputCon[dstWireIndex] = false;
+            dstMac._inputMachines[dstWireIndex]=-1;
+            dstMac._connectedInputs--;
+			return true; // \todo o_O`
 		}
 
 		void Machine::InitWireVolume(Machine::type_type type, Wire::id_type wire, float value)

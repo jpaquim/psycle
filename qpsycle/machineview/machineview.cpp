@@ -167,22 +167,9 @@ void MachineView::deleteConnection( WireGui *wireGui )
 {
     // Delete the connection in the song file.
     psy::core::Player::Instance()->lock();
-
     psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
     psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
     srcMac->Disconnect( *dstMac );
-
-    int wireIndex = srcMac->FindOutputWire( dstMac->_macIndex );
-    int dstWireIndex = dstMac->FindInputWire( srcMac->_macIndex );
-
-    srcMac->_connection[wireIndex] = false;
-    srcMac->_outputMachines[wireIndex] = -1;
-    srcMac->_connectedOutputs--;
-
-    dstMac->_inputCon[dstWireIndex] = false;
-    dstMac->_inputMachines[dstWireIndex]=-1;
-    dstMac->_connectedInputs--;
-
     psy::core::Player::Instance()->unlock();
 
     // Delete the connection in the GUI.
