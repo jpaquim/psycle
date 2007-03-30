@@ -154,7 +154,8 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
     foreach ( WireGui *wireGui, macGui->wireGuiList() ) {
         scene()->removeItem( wireGui );
     }
-//    machineDeleted.emit( index ); 
+
+    emit machineDeleted( index ); 
 }
 
 void MachineView::deleteConnection( WireGui *wireGui )

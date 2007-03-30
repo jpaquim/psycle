@@ -74,6 +74,7 @@
 
 signals:
     void machineGuiChosen( MachineGui *macGui );
+    void machineDeleted( int macIndex );
 
 private:
     MachineGui* findByMachine( psy::core::Machine *mac );

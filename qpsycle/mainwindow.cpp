@@ -127,6 +127,8 @@ void MainWindow::setupSignals()
              this, SLOT( onNewMachineCreated( int ) ) );
     connect( macView_, SIGNAL( machineGuiChosen( MachineGui* ) ), 
              this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
+    connect( macView_, SIGNAL( machineDeleted( int ) ), 
+             this, SLOT( onMachineDeleted( int ) ) );
 
     connect( wavView_, SIGNAL( sampleAdded() ), 
              this, SLOT( refreshSampleComboBox() ) );
@@ -547,3 +549,10 @@ void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
     patView_->setOctave( newIndex - 1 );
     macView_->setOctave( newIndex - 1 );
 }
+
+void MainWindow::onMachineDeleted( int macIndex )
+{
+    populateMachineCombo();
+//    genCombo_->repaint();
+}
+
