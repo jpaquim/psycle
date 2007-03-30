@@ -175,9 +175,10 @@ RESOURCES += qpsycle.qrc
 QT += xml
 
 unix {
+    message("System is: unix.")
     CONFIG += link_pkgconfig debug
     system( pkg-config --exists alsa ) {
-        message( "pkg-config things alsa libs are available..." )
+        message( "pkg-config thinks alsa libs are available..." )
         DEFINES += QPSYCLE__ALSA_AVAILABLE # This is used in the source to determine when
                                            # to include alsa-specific things.
         PKGCONFIG += alsa 
@@ -198,11 +199,12 @@ unix {
     system( pkg-config --exists esound ) {
         message( "esd-config thinks esd libs are available..." )
         DEFINES += QPSYCLE__ESD_AVAILABLE  
-        PKG-CONFIG += esound
+        LIBS += $$system( esd-config --libs )
         HEADERS += psycore/esoundout.h 
         SOURCES += psycore/esoundout.cpp 
     }
     LIBS += -lboost_signals
+    # FIXME: not sure how to test for netaudio...
     HEADERS += psycore/netaudio_conditional_build.h \
            psycore/netaudioout.h \
            psycore/wavefileout.h 
