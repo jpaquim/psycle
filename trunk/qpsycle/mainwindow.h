@@ -17,47 +17,47 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef MAINWINDOW_H
- #define MAINWINDOW_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
- #include "psycore/song.h"
+#include "psycore/song.h"
 
- #include "machineview.h"
- #include "patternview.h"
- #include "waveview.h"
- #include "sequencerview.h"
- #include "patternbox.h"
+#include "machineview.h"
+#include "patternview.h"
+#include "waveview.h"
+#include "sequencerview.h"
+#include "patternbox.h"
 
- #include <QMainWindow>
+#include <QMainWindow>
 
- class QAction;
- class QListWidget;
- class QMenu;
- class QTextEdit;
- class QComboBox;
+class QAction;
+class QListWidget;
+class QMenu;
+class QTextEdit;
+class QComboBox;
 
- class MainWindow : public QMainWindow
- {
-     Q_OBJECT
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
 
- public:
-     MainWindow();
+public:
+    MainWindow();
 
 
- protected:
-    void keyPressEvent( QKeyEvent *event );
-    void timerEvent( QTimerEvent *ev );
+protected:
+   void keyPressEvent( QKeyEvent *event );
+   void timerEvent( QTimerEvent *ev );
 
- private slots:
-     void newSong();
-     void open();
-     void save();
-     void undo();
-     void redo();
-     void about();
-     void refreshSampleComboBox();
-     void onMachineComboBoxIndexChanged( int newIndex );
-     void onSampleComboBoxIndexChanged( int newIndex );
+private slots:
+    void newSong();
+    void open();
+    void save();
+    void undo();
+    void redo();
+    void about();
+    void refreshSampleComboBox();
+    void onMachineComboBoxIndexChanged( int newIndex );
+    void onSampleComboBoxIndexChanged( int newIndex );
     void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
     void onNewMachineCreated( int bus );
     void onMachineGuiChosen( MachineGui *macGui );
@@ -66,6 +66,7 @@
     void onPatternNameChanged();
     void onCategoryColorChanged();
     void onOctaveComboBoxIndexChanged( int newIndex );
+    void onMachineDeleted( int macIndex );
 
  private:
     psy::core::Song *song_;
