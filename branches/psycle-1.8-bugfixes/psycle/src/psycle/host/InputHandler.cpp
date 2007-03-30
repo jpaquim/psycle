@@ -31,11 +31,10 @@ namespace psycle
 				notetrack[i]=120;
 			outtrack=0;
 
-			if(!ConfigRestore())
-			{
-				TRACE("Building default keys");
-				BuildCmdLUT();
-			}
+			TRACE("Building default keys");
+			// It is important to build the default keys, in order for the commands to exist.
+			BuildCmdLUT();
+			ConfigRestore();
 		}
 
 		InputHandler::~InputHandler()
@@ -182,17 +181,14 @@ namespace psycle
 		CmdDef InputHandler::StringToCmd(LPCTSTR str)
 		{
 			CmdDef ret;
-			int i,j;
-			for(j=0;j<MOD_MAX;j++)
+			int i;
+			for(i=0;i<max_cmds;i++)
 			{
-				for(i=0;i<256;i++)
+				ret.ID = CmdSet(i);
+				if(ret.IsValid())
 				{
-					ret=cmdLUT[j][i];
-					if(ret.IsValid())
-					{
-						if(!strcmp(ret.GetName(),str))
-							return ret;
-					}
+					if(!strcmp(ret.GetName(),str))
+						return ret;
 				}
 			}
 			ret.ID = cdefNull;
@@ -362,8 +358,9 @@ namespace psycle
 				for(i=0;i<max_cmds;i++)
 				{
 					cmd.ID = CmdSet(i);
-					cmdDefn = cmd.GetName();
-					if(cmdDefn!="Invalid")
+//					cmdDefn = cmd.GetName();
+//					if(cmdDefn!="Invalid")
+					if (cmd.IsValid())
 					{
 						key.Format("n%03d",i);
 						cmddata= GetPrivateProfileInt(sect,key,cdefNull,sDefaultCfgName);

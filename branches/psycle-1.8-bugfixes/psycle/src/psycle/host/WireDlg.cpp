@@ -53,9 +53,10 @@ NAMESPACE__BEGIN(psycle)
 			scope_peak_rate = 20;
 			scope_osc_freq = 5;
 			scope_osc_rate = 20;
-			scope_spec_bands = 16;
+			scope_spec_bands = 32;
 			scope_spec_rate = 25;
 			scope_phase_rate = 20;
+			InitSpectrum();
 
 			Inval = false;
 			m_volslider.SetRange(0,256*4);
@@ -204,6 +205,29 @@ NAMESPACE__BEGIN(psycle)
 			return int(f);
 		}
 
+		void CWireDlg::InitSpectrum()
+		{
+			int constant2 = MAX_SCOPE_BANDS/scope_spec_bands;
+			for (int i=0;i<SCOPE_SPEC_SAMPLES;i++)
+			{ 
+				float constant = (F_PI/(SCOPE_SPEC_SAMPLES/2))*(i-(SCOPE_SPEC_SAMPLES/2)); 
+				int j=0;
+				for(int h=0;h<scope_spec_bands;h++)
+				{ 
+					float th=((float(j*j)/MAX_SCOPE_BANDS)+1.0f)*constant; 
+					cth[i][h] = cosf(th);
+					sth[i][h] = sinf(th);
+					j+=constant2;
+				}
+			}
+			int j=0;
+			for(int h=0;h<scope_spec_bands;h++)
+			{ 
+				heightcompensation[h]=96.0f + 128.0f*(log(1.0+((float)j*2.0/MAX_SCOPE_BANDS))/log(2.0));
+				j+=constant2;
+			}
+		}
+
 		void CWireDlg::OnTimer(UINT nIDEvent) 
 		{
 			if ( nIDEvent == 2304+this_index )
@@ -224,6 +248,7 @@ NAMESPACE__BEGIN(psycle)
 
 				clrDC.SelectObject(oldbmp2);
 				clrDC.DeleteDC();
+				CFont *oldFont=0;
 
 				switch (scope_mode)
 				{
@@ -232,155 +257,106 @@ NAMESPACE__BEGIN(psycle)
 						// now draw our scope
 
 						int index = _pSrcMachine->_scopeBufferIndex;
-						float tawl,tawr;
-						tawl = 0;
-						tawr = 0;
+						float curpeakl,curpeakr;
+						curpeakl = curpeakr = 0;
+						float vucorrection= invol*mult*5329.0f/32768.0f;
 						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
 						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float awl=fabsf(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
-							float awr=fabsf(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
+							float awl=fabsf(pSamplesL[index]*_pSrcMachine->_lVol);///32768; 
+							float awr=fabsf(pSamplesR[index]*_pSrcMachine->_rVol);///32768; 
 
-							if (awl>tawl)
-							{
-								tawl = awl;
-							}
-							if (awl>peak2L)
-							{
-								peak2L = awl;
-								peakLifeL = 2048;
-								peakL = awl;
-							}
-							else if (awl>peakL)
-							{
-								peakL = awl;
+							if (awl>curpeakl)	{	curpeakl = awl;	}
+							if (awr>curpeakr)	{	curpeakr = awr;	}
 							}
 
-							if (awr>tawr)
-							{
-								tawr = awr;
-							}
-							if (awr>peak2R)
-							{
-								peak2R = awr;
-								peakLifeR = 2048;
-								peakR = awr;
-							}
-							else if (awr>peakR)
-							{
-								peakR = awr;
-							}
-						}
+						curpeakl=128-f2i(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
+						curpeakr=128-f2i(sqrtf(curpeakr*vucorrection));
 
-						// ok draw our meters
+						if (curpeakl<peak2L) //  it is a cardinal value, so smaller means higher peak.
+							{
+							if (curpeakl<0) curpeakl=0;
+							peak2L = peakL = curpeakl;		peakLifeL = 100; //100 paints. 2 seconds at 50Hz
+							}
+						else if (curpeakl<peakL)	{	peakL = curpeakl;	}
+
+						if (curpeakr<peak2R)//  it is a cardinal value, so smaller means higher peak.
+							{
+							if (curpeakr<0) curpeakr=0;
+							peak2R = peakR = curpeakr;		peakLifeR = 100;
+							}
+						else if (curpeakr<peakR)	{	peakR = curpeakr;	}
 
 						RECT rect;
 
-						int y;
-
-						y = 128-f2i(sqrtf(peak2L/6));
-						if (y < 0)
-						{
-							y = 0;
-						}
-
-						int cd = (peakLifeL/17);
-						COLORREF lbColor = 0x804000+(128-y)+(cd<<16|cd<<8|cd)+((y<32+23)?32:0);
+						// LEFT CHANNEL
 						rect.left = 128-32-24;
 						rect.right = rect.left+48;
-						rect.top = y;
 
-						y = 128-f2i(sqrtf(peakL/6));
-						if (y < 0)
+						if (peak2L<128)
 						{
-							y = 0;
+							CPen *oldpen = bufDC.SelectObject(&linepenL);
+							bufDC.MoveTo(rect.left-1,peak2L);
+							bufDC.LineTo(rect.right-1,peak2L);
+							bufDC.SelectObject(oldpen);
 						}
 
-						rect.bottom = y;
-						bufDC.FillSolidRect(&rect,lbColor);
-
-						rect.top = rect.bottom;
-						lbColor = 0xb07030+(128-y)+((y<32+23)?32:0);
-
-						y = 128-f2i(sqrtf(tawl/6));
-						if (y < 0)
-						{
-							y = 0;
-						}
-
-						rect.bottom = y;
+						rect.top = peakL;
+						rect.bottom = curpeakl;
+						COLORREF lbColor = 0x00503000 + ((peakL<32+23)?0x60:0x30);
 						bufDC.FillSolidRect(&rect,lbColor);
 
 						rect.top = rect.bottom;
 						rect.bottom = 128;
-						lbColor = 0xd09048+(128-y)+((y<32+23)?32:0);
-
+						lbColor = 0xC08000+((curpeakl<32+23)?0xF0:0x80);
 						bufDC.FillSolidRect(&rect,lbColor);
 
-						y = 128-f2i(sqrtf(peak2R/6));
-						if (y < 0)
-						{
-							y = 0;
-						}
-
-						cd = (peakLifeR/17);
-						lbColor = 0x408000+(128-y)+(cd<<16|cd<<8|cd)+((y<32+23)?32:0);
-
+						// RIGHT CHANNEL 
 						rect.left = 128+32-24;
 						rect.right = rect.left+48;
-						rect.top = y;
 
-						y = 128-f2i(sqrtf(peakR/6));
-						if (y < 0)
+						if (peak2R<128)
 						{
-							y = 0;
+							CPen *oldpen = bufDC.SelectObject(&linepenR);
+							bufDC.MoveTo(rect.left-1,peak2R);
+							bufDC.LineTo(rect.right-1,peak2R);
+							bufDC.SelectObject(oldpen);
 						}
 
-						rect.bottom = y;
+						rect.top = peakR;
+						rect.bottom = curpeakr;
+
+						lbColor = 0x00406000 + ((peakR<32+23)?0x60:0x10);
 						bufDC.FillSolidRect(&rect,lbColor);
 
-						rect.top = rect.bottom;
-						lbColor = 0x70b030+(128-y)+((y<32+23)?32:0);
-
-						y = 128-f2i(sqrtf(tawr/6));
-						if (y < 0)
-						{
-							y = 0;
-						}
-
-						rect.bottom = y;
-						bufDC.FillSolidRect(&rect,lbColor);
 
 						rect.top = rect.bottom;
 						rect.bottom = 128;
-						lbColor = 0x90d048+(128-y)+((y<32+23)?32:0);
+						lbColor = 0x90D000+((curpeakr<32+23)?0xD0:0x20);
 						bufDC.FillSolidRect(&rect,lbColor);
 
+						// UPDATE PEAK.
 						if (!hold)
 						{
-							peakL -= (scope_peak_rate*scope_peak_rate);///2;
-							peakR -= (scope_peak_rate*scope_peak_rate);///2;
-							peakLifeL -= scope_peak_rate;
-							peakLifeR -= scope_peak_rate;
-							if (peakLifeL < 0)
+							if ( peakL < 128) peakL++;
+							if ( peakR < 128) peakR++;
+							if  (peakLifeL>0 ||peakLifeR>0)
 							{
-								peak2L = 0;
+								peakLifeL--;
+								peakLifeR--;
+								if (peakLifeL <= 0)	{	peak2L = 128;	}
+								if (peakLifeR <= 0)	{	peak2R = 128;	}
 							}
-							if (peakLifeR < 0)
-							{
-								peak2R = 0;
 							}
 						}
-
 						char buf[64];
 						sprintf(buf,"Refresh %.2fhz",1000.0f/scope_peak_rate);
-						CFont* oldFont= bufDC.SelectObject(&font);
+					oldFont= bufDC.SelectObject(&font);
 						bufDC.SetBkMode(TRANSPARENT);
 						bufDC.SetTextColor(0x505050);
 						bufDC.TextOut(4, 128-14, buf);
 						bufDC.SelectObject(oldFont);
-					}
 					break;
 				case 1: // oscilloscope
 					{
@@ -445,7 +421,7 @@ NAMESPACE__BEGIN(psycle)
 
 						char buf[64];
 						sprintf(buf,"Frequency %dhz Refresh %.2fhz",freq,1000.0f/scope_osc_rate);
-						CFont* oldFont= bufDC.SelectObject(&font);
+						oldFont= bufDC.SelectObject(&font);
 						bufDC.SetBkMode(TRANSPARENT);
 						bufDC.SetTextColor(0x505050);
 						bufDC.TextOut(4, 128-14, buf);
@@ -455,6 +431,7 @@ NAMESPACE__BEGIN(psycle)
 
 				case 2: // spectrum analyzer
 					{
+						int width = 128/scope_spec_bands;
 						float aal[MAX_SCOPE_BANDS]; 
 						float aar[MAX_SCOPE_BANDS]; 
 						float bbl[MAX_SCOPE_BANDS]; 
@@ -466,6 +443,7 @@ NAMESPACE__BEGIN(psycle)
 						memset (aar,0,sizeof(aar));
 						memset (bbr,0,sizeof(bbr));
 
+						const float mult2=9.0f*mult/32768.0f;
 					// calculate our bands using same buffer chasing technique
 
 					int index = _pSrcMachine->_scopeBufferIndex;
@@ -473,28 +451,25 @@ NAMESPACE__BEGIN(psycle)
 					{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
-							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
-							int im = i-(SCOPE_SPEC_SAMPLES/2); 
+							float wl=(pSamplesL[index]*invol*mult2*_pSrcMachine->_lVol);///+-9.0f, to be used with a log10()
+							float wr=(pSamplesR[index]*invol*mult2*_pSrcMachine->_rVol);///+-9.0f, to be used with a log10()
 							for(int h=0;h<scope_spec_bands;h++) 
 							{ 
-								float th=((F_PI/(SCOPE_SPEC_SAMPLES/2))*((float(h*h)/scope_spec_bands)+1.0f))*im; 
-								float cth = cosf(th);
-								float sth = sinf(th);
-								aal[h]+=wl*cth; 
-								bbl[h]+=wl*sth; 
-								aar[h]+=wr*cth; 
-								bbr[h]+=wr*sth; 
+								aal[h]+=wl*cth[i][h];
+								bbl[h]+=wl*sth[i][h];
+								aar[h]+=wr*cth[i][h];
+								bbr[h]+=wr*sth[i][h];
 							} 
 						} 
+
 						for (int h=0;h<scope_spec_bands;h++) 
 						{
 							ampl[h]= sqrtf(aal[h]*aal[h]+bbl[h]*bbl[h])/(SCOPE_SPEC_SAMPLES/2); 
 							ampr[h]= sqrtf(aar[h]*aar[h]+bbr[h]*bbr[h])/(SCOPE_SPEC_SAMPLES/2); 
 						}
-						int width = 128/scope_spec_bands;
-						COLORREF cl = 0xa06060;
-						COLORREF cr = 0x60a060;
+
+						COLORREF cl = 0x402020;
+						COLORREF cr = 0x204020;
 
 						RECT rect;
 						rect.left = 0;
@@ -503,7 +478,8 @@ NAMESPACE__BEGIN(psycle)
 
 						for (int i = 0; i < scope_spec_bands; i++)
 						{
-							int aml = 128-f2i(sqrtf(ampl[i]));
+							int aml = 128 - (log(1+ampl[i])*heightcompensation[i]);
+//							int aml = 128-f2i(sqrtf(ampl[i]));
 							if (aml < 0)
 							{
 								aml = 0;
@@ -520,11 +496,12 @@ NAMESPACE__BEGIN(psycle)
 
 							rect.top = rect.bottom;
 							rect.bottom = 128;
-							bufDC.FillSolidRect(&rect,cl+0x303030);
+							bufDC.FillSolidRect(&rect,cl+0x804040);
 							
 							rect.left+=width;
 
-							int amr = 128-f2i(sqrtf(ampr[i]));
+							int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
+//							int amr = 128-f2i(sqrtf(ampr[i]));
 							if (amr < 0)
 							{
 								amr = 0;
@@ -541,28 +518,21 @@ NAMESPACE__BEGIN(psycle)
 
 							rect.top = rect.bottom;
 							rect.bottom = 128;
-							bufDC.FillSolidRect(&rect,cr+0x303030);
+							bufDC.FillSolidRect(&rect,cr+0x408040);
 
 							rect.left+=width;
 
-							int add=0x000001*MAX_SCOPE_BANDS/scope_spec_bands;
-
-							cl += add;
-							cl -= add<<16|add<<8;
-							cr += add;
-							cr -= add<<16|add<<8;
-
 							if (!hold)
 							{
-								bar_heightsl[i]+=scope_spec_rate/10;
+								bar_heightsl[i]+=6;
 								if (bar_heightsl[i] > 128)
 								{
-									bar_heightsl[i] = 128+1;
+									bar_heightsl[i] = 128;
 								}
-								bar_heightsr[i]+=scope_spec_rate/10;
+								bar_heightsr[i]+=6;
 								if (bar_heightsr[i] > 128)
 								{
-									bar_heightsr[i] = 128+1;
+									bar_heightsr[i] = 128;
 								}
 							}
 						}
@@ -792,7 +762,7 @@ NAMESPACE__BEGIN(psycle)
 
 						char buf[64];
 						sprintf(buf,"Refresh %.2fhz",1000.0f/scope_phase_rate);
-						CFont* oldFont= bufDC.SelectObject(&font);
+						oldFont= bufDC.SelectObject(&font);
 						bufDC.SetBkMode(TRANSPARENT);
 						bufDC.SetTextColor(0x505050);
 						bufDC.TextOut(4, 128-14, buf);
@@ -823,6 +793,7 @@ NAMESPACE__BEGIN(psycle)
 				break;
 			case 2:
 				scope_spec_bands = m_slider.GetPos();
+				InitSpectrum();
 				break;
 			}
 		//	m_pParent->SetFocus();	
@@ -996,10 +967,12 @@ NAMESPACE__BEGIN(psycle)
 				m_slider2.SetRange(10,100);
 				m_slider2.SetPos(scope_peak_rate);
 				sprintf(buf,"Scope Mode");
-				peakL = peakR = peak2L = peak2R = 0.0f;
+				peakL = peakR = peak2L = peak2R = 128.0f;
 				_pSrcMachine->_pScopeBufferL = pSamplesL;
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
 				SetTimer(2304+this_index,scope_peak_rate,0);
+				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
+				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
 				break;
 			case 1:
 				// oscilloscope
@@ -1052,7 +1025,7 @@ NAMESPACE__BEGIN(psycle)
 						bar_heightsr[i]=256;
 					}
 				}
-				m_slider.SetRange(4, MAX_SCOPE_BANDS);
+				m_slider.SetRange(16, MAX_SCOPE_BANDS);
 				m_slider.SetPos(scope_spec_bands);
 				m_slider2.SetRange(10,100);
 				m_slider2.SetPos(scope_spec_rate);

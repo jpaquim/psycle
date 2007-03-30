@@ -106,12 +106,12 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	sprintf(tmp,"%.0f",wave.PanFactor()*128.0f);
 	((CSliderCtrl*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);
 	((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATORATE))->SetPos(wave.VibratoRate());
-	if ( wave.VibratoRate()>0 ) sprintf(tmp,"%d",wave.VibratoRate());
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATORATE))->SetPos(wave.VibratoAttack());
+	if ( wave.VibratoAttack()>0 ) sprintf(tmp,"%d",wave.VibratoAttack());
 	else strcpy(tmp,"Disabled");
 	((CSliderCtrl*)GetDlgItem(IDC_LVIBRATORATE))->SetWindowText(tmp);
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetPos(wave.VibratoSweep());
-	sprintf(tmp,"%d",wave.VibratoSweep());
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetPos(wave.VibratoSpeed());
+	sprintf(tmp,"%d",wave.VibratoSpeed());
 	((CSliderCtrl*)GetDlgItem(IDC_LVIBRATOSWEEP))->SetWindowText(tmp);
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetPos(wave.VibratoDepth());
 	sprintf(tmp,"%d",wave.VibratoDepth());
@@ -183,9 +183,9 @@ void XMSamplerUISample::OnNMCustomdrawVibratorate(NMHDR *pNMHDR, LRESULT *pResul
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATORATE);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
-	wave.VibratoRate(slid->GetPos());
+	wave.VibratoAttack(slid->GetPos());
 	char tmp[40];
-	if ( wave.VibratoRate()>0 ) sprintf(tmp,"%d",wave.VibratoRate());
+	if ( wave.VibratoAttack()>0 ) sprintf(tmp,"%d",wave.VibratoAttack());
 	else strcpy(tmp,"Disabled");
 	((CSliderCtrl*)GetDlgItem(IDC_LVIBRATORATE))->SetWindowText(tmp);
 	*pResult = 0;
@@ -197,7 +197,7 @@ void XMSamplerUISample::OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResu
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED);
 	int i= m_SampleList.GetCurSel();
 	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
-	wave.VibratoSweep(slid->GetPos());
+	wave.VibratoSpeed(slid->GetPos());
 	char tmp[40];
 	sprintf(tmp,"%d",slid->GetPos());
 	((CSliderCtrl*)GetDlgItem(IDC_LVIBRATOSWEEP))->SetWindowText(tmp);

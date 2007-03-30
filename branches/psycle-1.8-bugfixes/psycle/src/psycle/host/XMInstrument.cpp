@@ -53,8 +53,8 @@ namespace psycle
 			riffFile->Read(m_PanEnabled);
 			riffFile->Read(m_PanFactor);
 
-			riffFile->Read(m_VibratoRate);
-			riffFile->Read(m_VibratoSweep);
+			riffFile->Read(m_VibratoAttack);
+			riffFile->Read(m_VibratoAttack);
 			riffFile->Read(m_VibratoDepth);
 			riffFile->Read(m_VibratoType);
 
@@ -121,8 +121,8 @@ namespace psycle
 			riffFile->Write(m_PanEnabled);
 			riffFile->Write(m_PanFactor);
 
-			riffFile->Write(m_VibratoRate);
-			riffFile->Write(m_VibratoSweep);
+			riffFile->Write(m_VibratoAttack);
+			riffFile->Write(m_VibratoSpeed);
 			riffFile->Write(m_VibratoDepth);
 			riffFile->Write(m_VibratoType);
 
@@ -148,7 +148,7 @@ namespace psycle
 		* @param value		: Desired point Value.
 		* @return			: New point index.
 		*/
-		const int  XMInstrument::Envelope::SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal)
+		const int  XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
 		{
 			ASSERT(pointIndex < (int)m_Points.size());
 			if(pointIndex < (int)m_Points.size())
@@ -158,20 +158,19 @@ namespace psycle
 				m_Points[pointIndex].second = pointVal;
 
 				prevtime=(pointIndex == 0)?m_Points[pointIndex].first:m_Points[pointIndex-1].first;
-				nextime=(pointIndex == (int)(m_Points.size())-1 )?m_Points[pointIndex].first:m_Points[pointIndex+1].first;
+				nextime=(pointIndex == (unsigned int)(m_Points.size())-1 )?m_Points[pointIndex].first:m_Points[pointIndex+1].first;
 					
 				// Initialization done. Check if we have to move the point to a new index:
 
 
 				// Is the Time already between the previous and next?
-				if(    pointTime >= m_Points[pointIndex - 1].first 
-					&& pointTime <= m_Points[pointIndex + 1].first)
+				if( pointTime >= prevtime && pointTime <= nextime)
 				{
 					return pointIndex;
 				}
 
 				// Else, we have some work to do.
-				int	new_index = pointIndex;
+				unsigned int	new_index = pointIndex;
 
 				// If we have to move it backwards:
 				if (pointTime < prevtime)
@@ -265,7 +264,7 @@ namespace psycle
 		* @param value		: Point Value.
 		* @return			: New point index.
 		*/
-		const int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
+		const int XMInstrument::Envelope::Insert(const unsigned int pointTime,const ValueType pointVal)
 		{
 			int _new_index;
 			for(_new_index = 0;_new_index < (int)m_Points.size();_new_index++)
@@ -311,10 +310,10 @@ namespace psycle
 		/** 
 		* @param pointIndex : point index to be deleted.
 		*/
-		void XMInstrument::Envelope::Delete(const int pointIndex)
+		void XMInstrument::Envelope::Delete(const unsigned int pointIndex)
 		{
-			ASSERT(pointIndex < (int)m_Points.size());
-			if(pointIndex < (int)m_Points.size())
+			assert(pointIndex < m_Points.size());
+			if(pointIndex < m_Points.size())
 			{
 				m_Points.erase(m_Points.begin() + pointIndex);
 				if(pointIndex == m_SustainBegin || pointIndex == m_SustainEnd)
@@ -418,8 +417,8 @@ namespace psycle
 
 			m_PanEnabled=false;
 			m_InitPan = 0.5f;
-			m_PitchPanCenter = 60;
-			m_PitchPanSep = 0;
+			m_NoteModPanCenter = 60;
+			m_NoteModPanSep = 0;
 
 			m_FilterCutoff = 127;
 			m_FilterResonance = 0;
@@ -468,8 +467,8 @@ namespace psycle
 
 			riffFile->Read(m_InitPan);
 			riffFile->Read(m_PanEnabled);
-			riffFile->Read(m_PitchPanCenter);
-			riffFile->Read(&m_PitchPanSep,sizeof(compiler::sint8));
+			riffFile->Read(m_NoteModPanCenter);
+			riffFile->Read(&m_NoteModPanSep,sizeof(compiler::sint8));
 
 			riffFile->Read(m_FilterCutoff);
 			riffFile->Read(m_FilterResonance);
@@ -526,8 +525,8 @@ namespace psycle
 
 			riffFile->Write(m_InitPan);
 			riffFile->Write(m_PanEnabled);
-			riffFile->Write(m_PitchPanCenter);
-			riffFile->Write(m_PitchPanSep);
+			riffFile->Write(m_NoteModPanCenter);
+			riffFile->Write(m_NoteModPanSep);
 
 			riffFile->Write(m_FilterCutoff);
 			riffFile->Write(m_FilterResonance);

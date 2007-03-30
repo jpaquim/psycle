@@ -17,6 +17,7 @@ public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const compiler::uint32 VERSION = 0x00010000;
+	static const float SURROUND_THRESHOLD;
 
 /*
 * = remembers its last value when called with param 00.
@@ -46,7 +47,7 @@ XMSampler::Channel::PerformFX().
 		VOLUME				=	0x0C,// Set Volume
 		VOLUMESLIDE			=	0x0D,// Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx)	 (*t)
 		EXTENDED			=	0x0E,// Extend Command
-		MIDI_MACRO			=	0x0F,// see MIDI.TXT						(p)
+		MIDI_MACRO			=	0x0F,// Impulse Tracker MIDI macro			(p)
 		ARPEGGIO			=	0x10,//	Arpeggio							(*t)
 		RETRIG				=	0x11,// Retrigger Note						(*t)
 		SET_GLOBAL_VOLUME	=	0x12,// Sets Global Volume
@@ -56,7 +57,7 @@ XMSampler::Channel::PerformFX().
 							//0x16
 		TREMOR				=	0x17,// Tremor								(*t)
 		PANBRELLO			=	0x18,// Panbrello							(*t)
-		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (n)
+		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
 	};
 	struct CMD_E
@@ -120,16 +121,16 @@ XMSampler::Channel::PerformFX().
 		VOL_VOLUME3			=	0x30, // 0x30..0x3F (63)  ||
 		VOL_VOLSLIDEUP		=	0x40, // 0x40..0x4F (16)
 		VOL_VOLSLIDEDOWN	=	0x50, // 0x50..0x5F (16)
-		VOL_PITCH_SLIDE_UP	=	0x60, // 0x60..0x6F (16)
-		VOL_PITCH_SLIDE_DOWN=	0x70, // 0x70..0x7F (16)
+		VOL_FINEVOLSLIDEUP	=	0x60, // 0x60..0x6F (16)
+		VOL_FINEVOLSLIDEDOWN=	0x70, // 0x70..0x7F (16)
 		VOL_PANNING			=	0x80, // 0x80..0x8F (16)
 		VOL_PANSLIDELEFT	=	0x90, // 0x90..0x9F (16)
 		VOL_PANSLIDERIGHT	=	0xA0, // 0xA0..0xAF (16)
-							  //0xB0
-		VOL_VIBRATO_SPEED	=	0xC0, // 0xC0..0xCF (16) Linked to Vibrato Sx = 4xy
-		VOL_VIBRATO			=	0xD0, // 0xD0..0xDF (16) Linked to Vibrato Vy = 4xy 
-		VOL_TONEPORTAMENTO	=	0xE0 // 0xE0..0xEF (16) Linked to Porta2Note 
-								// 0xFF -> Blank.
+		VOL_VIBRATO			=	0xB0, // 0xB0..0xBF (16) Linked to Vibrato Vy = 4xy 
+		VOL_TONEPORTAMENTO	=	0xC0, // 0xC0..0xCF (16) Linked to Porta2Note 
+		VOL_PITCH_SLIDE_UP	=	0xD0, // 0xD0..0xDF (16)
+		VOL_PITCH_SLIDE_DOWN=	0xE0, // 0xE0..0xEF (16)
+		// 0xFF -> Blank.
 		};
 	};
 
@@ -171,13 +172,9 @@ XMSampler::Channel::PerformFX().
 			}
 
 			// Update Position
-			if(CurrentLoopDirection() == LoopDirection::FORWARD){
+			if(CurrentLoopDirection() == LoopDirection::FORWARD)
+			{
 				m_Position.QuadPart+=Speed();
-			} else {
-				m_Position.QuadPart-=Speed();
-			}
-
-			// Loop handler
 			const int curIntPos = m_Position.HighPart;
 			switch(m_CurrentLoopType)
 			{
@@ -190,29 +187,44 @@ XMSampler::Channel::PerformFX().
 				break;
 			case XMInstrument::WaveData::LoopType::BIDI:
 
-				if(CurrentLoopDirection() == LoopDirection::FORWARD)
-				{
 					if(curIntPos  >= m_CurrentLoopEnd)
 					{
 						Position(m_CurrentLoopEnd-(curIntPos-m_CurrentLoopEnd));
 						CurrentLoopDirection(LoopDirection::BACKWARD);
 					} 
+					break;
+				case XMInstrument::WaveData::LoopType::DO_NOT:
+
+					if (curIntPos >= Length()-1)
+					{
+						Playing(false);
+					}
+				default:
+					break;
+				}
 				} else {
+				m_Position.QuadPart-=Speed();
+				const int curIntPos = m_Position.HighPart;
+				switch(m_CurrentLoopType)
+				{
+				case XMInstrument::WaveData::LoopType::NORMAL:
+				case XMInstrument::WaveData::LoopType::BIDI:
+
 					if(curIntPos <= m_CurrentLoopStart)
 					{
 						Position(m_CurrentLoopStart+(m_CurrentLoopStart-curIntPos));
 						CurrentLoopDirection(LoopDirection::FORWARD);
 					} 
-				}
 				break;
 			case XMInstrument::WaveData::LoopType::DO_NOT:
 
-				if (curIntPos >= Length()-1)
+					if (curIntPos <= 0)
 				{
 					Playing(false);
 				}
 			default:
 				break;
+			}
 			}
 		};
 
@@ -311,7 +323,7 @@ XMSampler::Channel::PerformFX().
 			};
 		};*/
 		EnvelopeController(){;};
-		virtual ~EnvelopeController(){;};
+		~EnvelopeController(){;};
 
 		void Init(XMInstrument::Envelope *pEnvelope = NULL);
 
@@ -325,72 +337,44 @@ XMSampler::Channel::PerformFX().
 		{
 			if(m_Stage&EnvelopeStage::DOSTEP)
 			{
-				if(m_Samples++ >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
+				if(++m_Samples >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
 				{
 					m_PositionIndex++;
-					//  continue with the sustain loop.
-					if (m_PositionIndex == m_pEnvelope->SustainEnd() )
+					if (m_Stage&EnvelopeStage::HASSUSTAIN && !(m_Stage&EnvelopeStage::RELEASE))
 					{
-						if (m_Stage&EnvelopeStage::HASSUSTAIN)
+						if (m_PositionIndex == m_pEnvelope->SustainEnd())
 						{
-							if ( m_NoteOff)
-							{ 
-								if ( m_Stage&EnvelopeStage::HASLOOP )
-								{
-									m_PositionIndex = m_pEnvelope->LoopStart();
-									if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
+							// if the begin==end, pause the envelope.
+							if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
 									{
 										m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-										return;
 									}
-								}
-								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::HASSUSTAIN);
-								m_SustainEnd = false;
-							}
-							// if the begin==end, pause the envelope.
-							else if ( m_pEnvelope->SustainBegin() == m_PositionIndex )
-							{
-								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-								return;
-							}
 							else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
-						}
-						else if (m_Stage&EnvelopeStage::HASLOOP && m_pEnvelope->LoopEnd() <= m_PositionIndex)
+								}
+							}
+					else if (m_Stage&EnvelopeStage::HASLOOP)
+							{
+						if ( m_PositionIndex >= m_pEnvelope->LoopEnd())
 						{
-							m_PositionIndex = m_pEnvelope->LoopStart();
 							if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
 							{
 								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-								return;
 							}
-						}
-						else if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
-						{
-							m_Stage = EnvelopeStage::OFF;
-							m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
-							m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
-							return;
+							else { m_PositionIndex = m_pEnvelope->LoopStart(); }
 						}
 					}
-					else if( m_PositionIndex == m_pEnvelope->LoopEnd() && !(m_Stage&EnvelopeStage::HASSUSTAIN))
+					if (m_Stage & EnvelopeStage::DOSTEP) 
 					{
-						if ( m_pEnvelope->LoopStart() == m_PositionIndex )
-						{
-							m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
-							return;
-						}
-						else m_PositionIndex = m_pEnvelope->LoopStart();
-					}
-					else if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
+						if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
 					{
 						m_Stage = EnvelopeStage::OFF;
+							//This ensures that the envelope is really inplace.
 						m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
-						m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
-						return;
+							CalcStep(m_PositionIndex,m_PositionIndex);
 					}
-					m_Samples = m_pEnvelope->GetTime(m_PositionIndex) * SRateDeviation();
-					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
-					CalcStep(m_PositionIndex,m_PositionIndex + 1);
+						else CalcStep(m_PositionIndex,m_PositionIndex + 1);
+					}
+					else CalcStep(m_PositionIndex,m_PositionIndex);
 				}
 				else 
 				{
@@ -409,9 +393,11 @@ XMSampler::Channel::PerformFX().
 		void Stage(const EnvelopeStage value){m_Stage = value;};
 		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;};
 		inline void CalcStep(const int start,const int  end);
-		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Samples= m_NextEventSample; }
+		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; }; // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
+		int GetPosition(void) { return m_PositionIndex; };
+		void SetPositionInSamples(const int samplePos);
+		int GetPositionInSamples();
 		void RecalcDeviation();
-		bool HasSustainEnded() { return m_SustainEnd; }
 	private:
 		inline float SRateDeviation() { return m_sRateDeviation; };
 
@@ -421,8 +407,6 @@ XMSampler::Channel::PerformFX().
 		int m_PositionIndex;
 		int m_NextEventSample;
 		EnvelopeStage m_Stage;
-		bool m_NoteOff;
-		bool m_SustainEnd; // m_Sustain is used to detect when the sustain loop has ended.
 
 		XMInstrument::Envelope * m_pEnvelope;
 
@@ -466,7 +450,7 @@ XMSampler::Channel::PerformFX().
 		const XMInstrument::NewNoteAction NNA() { return m_NNA;};
 		void NNA(const XMInstrument::NewNoteAction value){ m_NNA = value;};
 		
-		void ResetVolAndPan(compiler::sint16 playvol);
+		void ResetVolAndPan(compiler::sint16 playvol,bool reset=true);
 		void UpdateSpeed();
 		double PeriodToSpeed(int period);
 
@@ -511,12 +495,28 @@ XMSampler::Channel::PerformFX().
 		XMSampler::EnvelopeController& AmplitudeEnvelope(){return m_AmplitudeEnvelope;};
 		XMSampler::EnvelopeController& FilterEnvelope(){return m_FilterEnvelope;};
 		XMSampler::EnvelopeController& PitchEnvelope(){return m_PitchEnvelope;};
-		XMSampler::EnvelopeController& PanEnvelope(){return m_PitchEnvelope;};
+		XMSampler::EnvelopeController& PanEnvelope(){return m_PanEnvelope;};
 
 		WaveDataController& rWave(){return m_WaveDataController;};
 
 		const bool IsPlaying(){ return m_bPlay;};
-		void IsPlaying(const bool value){ m_bPlay = value;};
+		void IsPlaying(const bool value)
+		{ 
+			if ( value == false )
+			{
+				if ( rChannel().ForegroundVoice() == this) 
+				{
+					rChannel().LastVoicePanFactor(m_PanFactor);
+					rChannel().LastVoiceVolume(m_Volume);
+					rChannel().LastAmpEnvelopePosInSamples(0);
+					rChannel().LastPanEnvelopePosInSamples(0);
+					rChannel().LastFilterEnvelopePosInSamples(0);
+					rChannel().LastPitchEnvelopePosInSamples(0);
+					rChannel().ForegroundVoice(NULL);
+				}
+			}
+			m_bPlay = value;
+		};
 
 		const bool IsBackground() { return m_Background; };
 		void IsBackground(const bool background){ m_Background = background; };
@@ -638,6 +638,7 @@ XMSampler::Channel::PerformFX().
 		int m_PanbrelloDepth;
 		float m_PanbrelloAmount;
 		int m_PanbrelloPos;
+		int m_PanbrelloRandomCounter;
 
 		/// Tremor 
 		int m_TremorOnTicks;
@@ -652,9 +653,6 @@ XMSampler::Channel::PerformFX().
 		int m_AutoVibratoPos;
 
 		int m_RetrigTicks;
-		int m_RetrigVol;
-		int m_RetrigOperation;
-
 
 		static const int m_FineSineData[256];
 		static const int m_FineRampDownData[256];
@@ -711,14 +709,14 @@ XMSampler::Channel::PerformFX().
 		void GlobalVolSlide(int speed);
 		void PanningSlide(int speed);
 		void ChannelVolumeSlide(int speed);
-		void PitchSlide(bool bUp,int speed,int note=255);
+		void PitchSlide(bool bUp,int speed,int note=notecommands::empty);
 		void VolumeSlide(int speed);
 		void Tremor(int parameter);
 		void Vibrato(int speed,int depth = 0);
 		void Tremolo(int speed,int depth);
 		void Panbrello(int speed,int depth);
 		void Arpeggio(const int param);
-		void Retrigger(const int ticks,const int volumeModifier);
+		void Retrigger(const int param);
 		void NoteCut(const int ntick);
 		void DelayedNote(PatternEntry data);
 
@@ -754,7 +752,7 @@ XMSampler::Channel::PerformFX().
 		const int Note(){ return m_Note;};
 		void Note(const int note)
 		{	m_Note = note;
-			m_Period = ForegroundVoice()->NoteToPeriod(note);
+			if (ForegroundVoice()) m_Period = ForegroundVoice()->NoteToPeriod(note);
 		};
 		const double Period(){return m_Period;};
 		void Period(const double value){m_Period = value;};
@@ -763,6 +761,8 @@ XMSampler::Channel::PerformFX().
 		void Volume(const float value){m_Volume = value;};
 		const int DefaultVolume(){return m_ChannelDefVolume;};
 		void DefaultVolume(const int value){m_ChannelDefVolume = value; Volume(value/64.0f);};
+		const int LastVoiceVolume(){return m_LastVoiceVolume;};
+		void LastVoiceVolume(const int value){m_LastVoiceVolume = value;};
 
 		const float PanFactor(){return 	m_PanFactor;};
 		void PanFactor(const float value){
@@ -770,7 +770,29 @@ XMSampler::Channel::PerformFX().
 			if ( ForegroundVoice()) ForegroundVoice()->PanFactor(value);
 		};
 		const int DefaultPanFactor(){return m_DefaultPanFactor;};
-		void DefaultPanFactor(const int value){m_DefaultPanFactor = value; PanFactor(value/64.0f); };
+		void DefaultPanFactor(const int value){
+			m_DefaultPanFactor = value; 
+			if (value == 80 ) IsSurround(true);
+			else if (value <= 0x40 ) PanFactor(value/64.0f);
+			//\todo : else  set mute.
+		};
+		const float LastVoicePanFactor(){return m_LastVoicePanFactor;};
+		void LastVoicePanFactor(const float value){m_LastVoicePanFactor = value;};
+
+		const int LastAmpEnvelopePosInSamples() { return m_LastAmpEnvelopePosInSamples; };
+		void LastAmpEnvelopePosInSamples(const int value) { m_LastAmpEnvelopePosInSamples = value; };
+
+		const int LastPanEnvelopePosInSamples() { return m_LastPanEnvelopePosInSamples; };
+		void LastPanEnvelopePosInSamples(const int value) { m_LastPanEnvelopePosInSamples = value; };
+
+		const int LastFilterEnvelopePosInSamples() { return m_LastFilterEnvelopePosInSamples; };
+		void LastFilterEnvelopePosInSamples(const int value) { m_LastFilterEnvelopePosInSamples = value; };
+
+		const int LastPitchEnvelopePosInSamples() { return m_LastPitchEnvelopePosInSamples; };
+		void LastPitchEnvelopePosInSamples(const int value) { m_LastPitchEnvelopePosInSamples = value; };
+
+		const int OffsetMem() { return m_OffsetMem; };
+		void OffsetMem(const int value) { m_OffsetMem=value; };
 
 		const bool IsSurround(){ return m_bSurround;};
 		void IsSurround(const bool value){
@@ -808,8 +830,6 @@ XMSampler::Channel::PerformFX().
 /*		void VibratoAmount(const double value){m_VibratoAmount = value;};
 		const double VibratoAmount(){return m_VibratoAmount;};
 */
-		void Slide2NoteDestNote(const int note) { m_Slide2NoteDestNote = note; };
-		const int Slide2NoteDestNote() { return m_Slide2NoteDestNote; };
 
 	private:
 
@@ -824,10 +844,17 @@ XMSampler::Channel::PerformFX().
 
 		float m_Volume;///<  (0 - 1.0f)
 		int m_ChannelDefVolume;///< (0.0f - 64)
+		int m_LastVoiceVolume;
 
 		float m_PanFactor;// value used for Playback
 		int m_DefaultPanFactor; // value used for Storage //  0..64 .  80 == Surround. >127 = Mute.
+		float m_LastVoicePanFactor;
 		bool m_bSurround;
+
+		int m_LastAmpEnvelopePosInSamples;
+		int m_LastPanEnvelopePosInSamples;
+		int m_LastFilterEnvelopePosInSamples;
+		int m_LastPitchEnvelopePosInSamples;
 
 		bool m_bGrissando;
 		int m_VibratoType;///< vibrato type 
@@ -838,19 +865,12 @@ XMSampler::Channel::PerformFX().
 		int m_EffectFlags;
 
 		int	m_PitchSlideSpeed;
-		int m_Slide2NoteDestNote;
 
 		/// Global Volume Slide Speed
 		float m_GlobalVolSlideSpeed;
 		float m_ChanVolSlideSpeed;
 		float m_PanSlideSpeed;
 
-/*		int m_VibratoSpeed;
-		int m_VibratoDepth;
-		int m_VibratoPos;
-		double m_VibratoAmount;
-		double m_AutoVibratoAmount;
-*/
 		int m_TremoloSpeed;
 		int m_TremoloDepth;
 		float m_TremoloDelta;
@@ -869,6 +889,8 @@ XMSampler::Channel::PerformFX().
 		int m_NoteCutTick;
 		PatternEntry m_DelayedNote;
 
+		int m_RetrigOperation;
+		int m_RetrigVol;
 
 		int m_PanSlideMem;
 		int m_ChanVolSlideMem;
@@ -885,6 +907,8 @@ XMSampler::Channel::PerformFX().
 		int m_VolumeSlideMem;
 		int m_GlobalVolSlideMem;
 		int m_ArpeggioMem;
+		int m_RetrigMem;
+		int m_OffsetMem;
 
 		int m_MIDI_Set;
 		int m_Cutoff;
@@ -900,6 +924,14 @@ XMSampler::Channel::PerformFX().
 	//////////////////////////////////////////////////////////////////////////
 	//  XMSampler Declaration
 
+	enum PanningMode
+	{
+		Linear=0,
+		TwoWay,
+		EqualPower
+	};
+
+
 	XMSampler(int index);
 
 	virtual void Init(void);
@@ -909,7 +941,7 @@ XMSampler::Channel::PerformFX().
 	virtual void Work(int numSamples);
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
-	virtual TCHAR* GetName(void) { return _psName; };
+	virtual char* GetName(void) { return _psName; };
 	virtual void SetSampleRate(int sr);
 
 	virtual bool Load(RiffFile& riffFile);
@@ -997,6 +1029,9 @@ XMSampler::Channel::PerformFX().
 	}
 	const bool UseFilters(void) { return m_UseFilters; };
 	void UseFilters(bool usefilters) { m_UseFilters = usefilters; };
+	int PanningMode() { return m_PanningMode;};
+	void PanningMode(const int value) { m_PanningMode= value;};
+
 	void SetZxxMacro(int index,int mode, int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; };
 	ZxxMacro GetMap(int index) { return zxxMap[index]; };
 
@@ -1010,6 +1045,8 @@ XMSampler::Channel::PerformFX().
 
 	void CurrentTick(const int value){m_TickCount = value;};// Current Tracker Tick number
 	const int CurrentTick(){ return m_TickCount;};// ""
+
+	int GetDeltaTick() { return m_DeltaTick; };
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 protected:
@@ -1032,6 +1069,7 @@ private:
 	bool m_bAmigaSlides;// Using Linear or Amiga Slides.
 	bool m_UseFilters;
 	int m_GlobalVolume;
+	int m_PanningMode;
 /*	int m_BPM;
 	int m_TicksPerRow;	// Tracker Ticks. Also called "speed".
 */

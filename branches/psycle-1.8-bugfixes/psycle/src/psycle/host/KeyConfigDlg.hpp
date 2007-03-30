@@ -50,8 +50,8 @@ NAMESPACE__BEGIN(psycle)
 			BOOL bInit;
 			long m_prvIdx;
 			void UpdateHotKey();	
-			void SaveHotKey(long idx,WORD & key,WORD & mods);
-			void FindKey(long idx,WORD & key,WORD & mods);
+			void SaveHotKey(long idx,WORD key,WORD mods);
+			void FindKey(long idx,WORD &key,WORD &mods);
 			CmdDef FindCmd(long idx);
 			// Generated message map functions
 			//{{AFX_MSG(CKeyConfigDlg)

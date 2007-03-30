@@ -17,6 +17,7 @@ namespace psycle
 */
 
 		TCHAR* XMSampler::_psName = _T("Sampulse");
+		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
 			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
@@ -75,36 +76,34 @@ namespace psycle
 		};
 
 
-		// Random wave table
-		//\todo: convert this table to IT compatible.
+		// Random wave table (randomly choosen values. Not official)
 		const int XMSampler::Voice::m_RandomTable[256] =	{
-			98 ,-127 ,-43 ,88 ,102 ,41 ,-65 ,-94 ,125 ,20 ,-71 ,-86 ,-70 ,-32 ,-16 ,-96 ,
-			17 ,72 ,107 ,-5 ,116 ,-69 ,-62 ,-40 ,10 ,-61 ,65 ,109 ,-18 ,-38 ,-13 ,-76 ,
-			-23 ,88 ,21 ,-94 ,8 ,106 ,21 ,-112 ,6 ,109 ,20 ,-88 ,-30 ,9 ,-127 ,118 ,
-			42 ,-34 ,89 ,-4 ,-51 ,-72 ,21 ,-29 ,112 ,123 ,84 ,-101 ,-92 ,98 ,-54 ,-95 ,
-			98 ,-127 ,-43 ,88 ,102 ,41 ,-65 ,-94 ,125 ,20 ,-71 ,-86 ,-70 ,-32 ,-16 ,-96 ,
-			17 ,72 ,107 ,-5 ,116 ,-69 ,-62 ,-40 ,10 ,-61 ,65 ,109 ,-18 ,-38 ,-13 ,-76 ,
-			-23 ,88 ,21 ,-94 ,8 ,106 ,21 ,-112 ,6 ,109 ,20 ,-88 ,-30 ,9 ,-127 ,118 ,
-			42 ,-34 ,89 ,-4 ,-51 ,-72 ,21 ,-29 ,112 ,123 ,84 ,-101 ,-92 ,98 ,-54 ,-95 ,
-			98 ,-127 ,-43 ,88 ,102 ,41 ,-65 ,-94 ,125 ,20 ,-71 ,-86 ,-70 ,-32 ,-16 ,-96 ,
-			17 ,72 ,107 ,-5 ,116 ,-69 ,-62 ,-40 ,10 ,-61 ,65 ,109 ,-18 ,-38 ,-13 ,-76 ,
-			-23 ,88 ,21 ,-94 ,8 ,106 ,21 ,-112 ,6 ,109 ,20 ,-88 ,-30 ,9 ,-127 ,118 ,
-			42 ,-34 ,89 ,-4 ,-51 ,-72 ,21 ,-29 ,112 ,123 ,84 ,-101 ,-92 ,98 ,-54 ,-95 ,
-			98 ,-127 ,-43 ,88 ,102 ,41 ,-65 ,-94 ,125 ,20 ,-71 ,-86 ,-70 ,-32 ,-16 ,-96 ,
-			17 ,72 ,107 ,-5 ,116 ,-69 ,-62 ,-40 ,10 ,-61 ,65 ,109 ,-18 ,-38 ,-13 ,-76 ,
-			-23 ,88 ,21 ,-94 ,8 ,106 ,21 ,-112 ,6 ,109 ,20 ,-88 ,-30 ,9 ,-127 ,118 ,
-			42 ,-34 ,89 ,-4 ,-51 ,-72 ,21 ,-29 ,112 ,123 ,84 ,-101 ,-92 ,98 ,-54 ,-95 
+			 48,-64,-21, 45, 51, 20,-32,-57, 62, 13,-35,-43,-33,-16, -8,-48,
+			  8, 36, 52, -3, 58,-34,-31,-20,  5,-30, 32, 54, -9,-19, -6,-38,
+			-11, 43, 10,-47,  2, 53, 11,-56,  3, 55,  9,-44,-15,  4,-63, 59,
+             21,-17, 44, -2,-25,-36, 12,-14, 56, 61, 42,-50,-46, 49,-27,-45,
+			 30, 63,-28, 29, 33, 22,-41, 57, 47, 19,-51,-54,-42,-22, -7,-61,
+			 14, 25, 34, -4, 40,-49,-40,-26,  7,-39, 24, 37, -10,-24, -5,-53,
+			 -12, 27, 16,-59,  0, 35, 17, 50,  1, 38, 15,-55,-18,  6, 60, 41,
+			 23,-23, 28, -1,-29,-52, 18,-13, 39, 46, 26,-62,-58, 31,-37,-59,
+			 30, 63,-28, 29, 33, 22,-41, 57, 47, 19,-51,-54,-42,-22, -7,-61,
+			 21,-17, 44, -2,-25,-36, 12,-14, 56, 61, 42,-50,-46, 49,-27,-45,
+			 14, 25, 34, -4, 40,-49,-40,-26,  7,-39, 24, 37, -10,-24, -5,-53,
+			 -11, 43, 10,-47,  2, 53, 11,-56,  3, 55,  9,-44,-15,  4,-63, 59,
+			 -12, 27, 16,-59,  0, 35, 17, 50,  1, 38, 15,-55,-18,  6, 60, 41,
+			 8, 36, 52, -3, 58,-34,-31,-20,  5,-30, 32, 54, -9,-19, -6,-38,
+			 23,-23, 28, -1,-29,-52, 18,-13, 39, 46, 26,-62,-58, 31,-37,-59,
+			 48,-64,-21, 45, 51, 20,-32,-57, 62, 13,-35,-43,-33,-16, -8,-48,
 		};
 
 
-
 		// calculated table from the following formula:
-		// period =  pow(2.0,double(15.74154-(note/12.0f)));
-		// 15.74154 comes from  5 + 10.7415, being 5 = the middle octave, and
-		// 10.74154 = log2(2*7159090.5/8363) , being 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate.
-		// why multiplied by 2? well.. it should be a 4 (the amiga period was shifted two octaves up in newer trackers),
-		// so i am not sure. The rest of the logic is perfectly clear.
-		// 5 also represents the middle octave, and pow(2,10.74146698) = 1712 ( middle C period )
+		// period =  pow(2.0,double(5-(note/12.0f))) * (2*7159090.5/8363);
+		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
+		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
+		// Why multiplied by 2? well.. I really don't know, but it's on the docs.
+		// The original table takes the lower octave values and multiplies them by two. 
+		// This doesn't take care of the roundings of the values.
 
 		const float XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			54787,	51712,	48809,	46070,	43484,	41044,	38740,	36566,	34514,	32576,	30748,	29022,
@@ -116,7 +115,7 @@ namespace psycle
 			856,	808,	763,	720,	679,	641,	605,	571,	539,	509,	480,	453,
 			428,	404,	381,	360,	340,	321,	303,	286,	270,	255,	240,	227,
 			214,	202,	191,	180,	170,	160,	151,	143,	135,	127,	120,	113,
-			107,	101,	95,		90,		85,		80,		76,		71,		67,		63,		60,		57 
+			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		57 
 
 		};
 		// Original table
@@ -236,14 +235,13 @@ namespace psycle
 				m_pEnvelope = pEnvelope;
 			}
 			m_Samples = 0;
-			m_NoteOff = false;
-			m_SustainEnd = false;
 //			m_Mode = EnvelopeMode::TICK;
 			m_PositionIndex = 0;
 			m_ModulationAmount = 0;
 			m_Step = 0;
 			m_NextEventSample=0;
 			m_Stage = EnvelopeStage::OFF;
+			m_sRateDeviation=0;
 		}
 
 		/// NoteOn EnvelopeStage
@@ -253,12 +251,11 @@ namespace psycle
 		//  Second, if there are more points in the envelope, let's enable the joy!
 		void XMSampler::EnvelopeController::NoteOn()
 		{
-			m_Samples = 0;
+			m_Samples = -1;
 			m_PositionIndex = -1;
 			m_NextEventSample = 0;
 			m_Stage = EnvelopeStage::OFF;
-			m_NoteOff = false;
-			m_SustainEnd = false;
+			RecalcDeviation();
 
 			// if there are no points, there is nothing to do.
 			if ( m_pEnvelope->NumOfPoints() > 0 && m_pEnvelope->IsEnabled())
@@ -300,11 +297,10 @@ namespace psycle
 					if ( m_Stage&EnvelopeStage::HASSUSTAIN)
 					{
 						m_Stage = EnvelopeStage(m_Stage | EnvelopeStage::DOSTEP);
-						m_Samples--;
+						m_Samples=m_NextEventSample-1;
 						m_PositionIndex--;
 					}
 				}
-				m_NoteOff = true;
 			}
 		}
 
@@ -323,8 +319,37 @@ namespace psycle
 			const XMInstrument::Envelope::ValueType ystep = (m_pEnvelope->GetValue(end) - m_pEnvelope->GetValue(start));
 			const XMInstrument::Envelope::ValueType xstep = (m_pEnvelope->GetTime(end) - m_pEnvelope->GetTime(start));
 			RecalcDeviation();
+			m_Samples = m_pEnvelope->GetTime(start) * SRateDeviation();
 			m_NextEventSample = m_pEnvelope->GetTime(end)* SRateDeviation();
-			m_Step = ystep / (xstep * SRateDeviation());
+			m_ModulationAmount = m_pEnvelope->GetValue(start);
+			if ( xstep != 0) m_Step = ystep / (xstep * SRateDeviation());
+			else m_Step=0;
+		}
+		void XMSampler::EnvelopeController::SetPositionInSamples(const int samplePos)
+		{
+			int i=0;
+			while (m_pEnvelope->GetTime(i) != XMInstrument::Envelope::INVALID)
+			{
+				if (m_pEnvelope->GetTime(i)* SRateDeviation() > samplePos ) break;
+				i++;
+			}
+			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is either zero or INVALID, and samplePos is positive.
+			m_PositionIndex=i-2;
+			m_Stage = EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); 
+			m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
+			Work();
+			m_Samples=samplePos;//and this sets the real position, once all vars are setup.
+//			TRACE("ModAmount Before:%f.",m_ModulationAmount);
+			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
+//			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
+//			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
+
+		}
+		int XMSampler::EnvelopeController::GetPositionInSamples()
+		{
+			//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
+//			TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
+			return m_Samples;
 		}
 
 
@@ -353,7 +378,7 @@ namespace psycle
 			m_Background = false;
 			m_Stopping = false;
 			m_Period=0;
-			m_Note = 255;
+			m_Note = notecommands::empty;
 			m_Volume = 128;
 			m_RealVolume = 1.0f;
 
@@ -388,6 +413,8 @@ namespace psycle
 			m_PanbrelloDepth=0;
 			m_PanbrelloAmount=0.0f;
 			m_PanbrelloPos=0;
+			m_PanbrelloRandomCounter = 0;
+
 			// Tremor
 			m_TremorOnTicks = 0;
 			m_TremorOffTicks = 0;
@@ -399,8 +426,6 @@ namespace psycle
 			m_AutoVibratoDepth = 0; 
 
 			m_RetrigTicks=0;
-			m_RetrigVol=0;
-			m_RetrigOperation=0;
 
 		}
 		void XMSampler::Voice::VoiceInit(int channelNum, int instrumentNum)
@@ -429,20 +454,20 @@ namespace psycle
 			{
 				CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
 			}
-			else*/ if (_inst.FilterCutoff() < 127 || _inst.FilterResonance() > 0)
+			else*/ if (_inst.FilterCutoff() < 127)
 			{
 				CutOff(_inst.FilterCutoff());
-				Ressonance(_inst.FilterResonance());
+//				Ressonance(_inst.FilterResonance());
 				FilterType(_inst.FilterType());
-			} else if ( rChannel().Cutoff() < 127 || rChannel().Ressonance() > 0)
+			} else if ( rChannel().Cutoff() < 127)
 			{
 				FilterType(rChannel().FilterType());
 				CutOff(rChannel().Cutoff());
-				Ressonance(rChannel().Ressonance());
+//				Ressonance(rChannel().Ressonance());
 			}
 			else
 			{
-				CutOff(127);Ressonance(0);
+				CutOff(127);
 			}
 
 			
@@ -450,13 +475,22 @@ namespace psycle
 			{
 				m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
 			}
+			else */ if (_inst.FilterResonance() > 0)
+			{
+//				CutOff(_inst.FilterCutoff());
+				Ressonance(_inst.FilterResonance());
+				FilterType(_inst.FilterType());
+			} else if ( rChannel().Ressonance() > 0)
+			{
+				FilterType(rChannel().FilterType());
+//				CutOff(rChannel().Cutoff());
+				Ressonance(rChannel().Ressonance());
+			}
 			else
 			{
-				m_Filter._q = _inst.FilterResonance();
+				//CutOff(127);
+				Ressonance(0);
 			}
-*/
-//			_coModify = (float)_inst.FilterEnvAmount()/128.0f;
-//			m_Filter.Update();
 
 			ResetEffects();
 			
@@ -494,17 +528,14 @@ namespace psycle
 				// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 
 				float volume = RealVolume() * rChannel().Volume();
-				if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
+				if(m_AmplitudeEnvelope.Envelope().IsEnabled())
+				{
 					m_AmplitudeEnvelope.Work();
 					volume *= m_AmplitudeEnvelope.ModulationAmount();
-					if ( m_VolumeFadeSpeed == 0)
+					if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF)
 					{
-						if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF ||
-							m_AmplitudeEnvelope.HasSustainEnded())
-						{
-							IsStopping(true);
-							NoteFadeout();
-						}
+						if ( m_AmplitudeEnvelope.ModulationAmount() <= 0.0f){ IsPlaying(false); return; }
+						else if (m_VolumeFadeSpeed == 0.0f) NoteFadeout();
 					}
 				}
 				// Volume Fade Out
@@ -516,18 +547,37 @@ namespace psycle
 				}
 				
 				// Panning Envelope 
-				// (actually, the correct word for panning is panoramization. 
-				//  "panning" comes from the diminutive "pan")
-				float rvol =  m_PanFactor + m_PanbrelloAmount;
+				// (actually, the correct word for panning is panoramization. "panning" comes from the diminutive "pan")
+				// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
+				float rvol = PanFactor() + m_PanbrelloAmount;
+				
 				if(m_PanEnvelope.Envelope().IsEnabled()){
 					m_PanEnvelope.Work();
-
-					// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, pitchpan sep, and channel pan)
-					// PanRange() is a Range delimiter, which is set when at voice init and when a panning command comes in.
+					// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
 					rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
 				}
 
-				float lvol = 1.0f - rvol;
+				float lvol=0;
+				if ( m_pSampler->PanningMode()== PanningMode::Linear) {
+					lvol = (1.0f - rvol);
+				} else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
+					//using std::min;
+					lvol = min(1.0f, (1.0f - rvol)*2.0);
+				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
+					//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
+					lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
+				}
+
+				// PanningMode::Linear is already on rvol, so we omit the case.
+				if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
+					rvol = min(1.0f, rvol*2.0f);
+				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
+					//rvol = powf(rvol, 0.5f);// This is the commonly used one
+					rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
+				}
+
+				left_output *=  volume;
+				right_output *= volume;
 
 				// Filter section
 				if (m_Filter.Type() != dsp::F_NONE)
@@ -558,35 +608,22 @@ namespace psycle
 				}
 
 				
-
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 3: Add the processed data to the sampler's buffer.
-
-				// Monoaural output‚ copy left to right output.
 				if(!m_WaveDataController.IsStereo()){
+				// Monoaural output‚ copy left to right output.
 					right_output = left_output;
 				}
-				try{
-					left_output *= lvol * volume;
-					right_output *= rvol * volume;
-				} catch(operating_system::exceptions::translated const & e){switch(e.code())
-				{ 
-					case STATUS_FLOAT_DENORMAL_OPERAND:
-					case STATUS_FLOAT_INVALID_OPERATION:
-						left_output = 0;
-						right_output = 0;
-						break;
-					default: throw;
-				}}				
-				*pSamplesL++ += left_output;
+
 				if(m_pChannel->IsSurround()){
+				*pSamplesL++ += left_output;
 					*pSamplesR++ -= right_output;
 				} else {
-					*pSamplesR++ += right_output;
+					*pSamplesL++ += left_output*lvol;
+					*pSamplesR++ += right_output*rvol;
 				}
 
 				if (!m_WaveDataController.Playing()) {
-					if ( rChannel().ForegroundVoice() == this) rChannel().ForegroundVoice(NULL);
 					IsPlaying(false); return; 
 				}
 
@@ -602,6 +639,7 @@ namespace psycle
 		{
 			m_bTremorMute = false;
 			m_VibratoAmount = 0;
+			if ( IsAutoVibrato()) AutoVibrato();
 			UpdateSpeed();
 			m_AmplitudeEnvelope.RecalcDeviation();
 			m_PanEnvelope.RecalcDeviation();
@@ -620,34 +658,27 @@ namespace psycle
 			m_NNA = rInstrument().NNA();
 			//\todo : add pInstrument().LinesMode
 
-			//\todo: implement autovibrato.
+			ResetVolAndPan(playvol,reset);
+
 			if ( rWave().Wave().IsAutoVibrato())
 			{
+				m_AutoVibratoPos=0;
+				m_AutoVibratoDepth=rWave().Wave().VibratoDepth();
+				AutoVibrato();
 			}
-
-			if ( reset ) ResetVolAndPan(playvol);
-
-			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
-				m_AmplitudeEnvelope.NoteOn();
-			}
-
-			if(m_PanEnvelope.Envelope().IsEnabled()){
-				m_PanEnvelope.NoteOn();
-			}
-
-			if(m_FilterEnvelope.Envelope().IsEnabled()){
-				m_FilterEnvelope.NoteOn();
-			}
-
-			if(m_PitchEnvelope.Envelope().IsEnabled()){
-				m_PitchEnvelope.NoteOn();
-			}
-			//Important, put it after m_PitchEnvelope.NoteOn();
+			//Important, put it after m_PitchEnvelope.NoteOn(); (currently done inside ResetVolAndPan)
 			UpdateSpeed();
+			// Attempt at Self-filtered samples. It filters too much.
+			//if  (m_Filter.Type() == dsp::F_NONE && m_pSampler->UseFilters()) m_Filter.Type(dsp::F_LOWPASS12);
+
 			m_WaveDataController.Playing(true);
 			IsPlaying(true);
 		}
-		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol)
+
+		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol,bool reset)
+		{
+			float fpan=0.5f;
+			if ( reset)
 		{
 			if ( playvol != -1)
 			{
@@ -655,37 +686,70 @@ namespace psycle
 			} else { 
 				Volume(rWave().Wave().WaveVolume());
 			}
-			// Impulse Tracker panning had the following pan controls: All these are bypassed if
+				// Impulse Tracker panning had the following pan controls. All these are bypassed if
 			// a panning command is explicitely put in a channel.
 			// Note : m_pChannel->PanFactor() returns the panFactor of the last panning command (if any) or
 			// in its absence, the pan position of the channel.
-			if ( rWave().Wave().PanEnabled() ) m_PanFactor = rWave().Wave().PanFactor();
-			else if ( rInstrument().PanEnabled() ) m_PanFactor = rInstrument().Pan();
-			else m_PanFactor = m_pChannel->PanFactor();
+				if ( rWave().Wave().PanEnabled() ) fpan = rWave().Wave().PanFactor();
+				else if ( rInstrument().PanEnabled() ) fpan = rInstrument().Pan();
+				else fpan = m_pChannel->PanFactor();
 
-			//\todo : pitchpansep is in the range -32..32, being 8=one step (0..64) each seminote.
-			m_PanFactor += (m_Note-rInstrument().PitchPanCenter())*rInstrument().PitchPanSep()/512.0f;
-			m_PanFactor += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
+				if ( fpan > 1)
+				{
+				//\todo :
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//				Check the whole panning system. Concretely, what is related to surround.
+//				Question is about using a specific "IsSurround" for wave, instrument, channel and voice
+//				or use an extended range ( pan >= SURROUND ) in wave, instrument and channel, while using
+//				the IsSurround in Voice.
+//				Channel is the special case, because effects modify the m_PanFactor variable.
+//				Do not forget to check the IT loading when this is solved.
+//				In a related note, check range of Panbrello.
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
-			if ( m_PanFactor > 1.0f ) m_PanFactor = 1.0f;
-			else if ( m_PanFactor < 0.0f ) m_PanFactor = 0.0f;
 
-			m_PanRange = 1.0f -(fabs(0.5-m_PanFactor)*2);
+				}
+
+				//NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
+				fpan += (m_Note-rInstrument().NoteModPanCenter())*rInstrument().NoteModPanSep()/512.0f;
+				fpan += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
+
+				if ( fpan > 1.0f ) fpan = 1.0f;
+				else if ( fpan < 0.0f ) fpan = 0.0f;
+			}
+			else
+			{
+				Volume(rChannel().LastVoiceVolume());
+				fpan = rChannel().LastVoicePanFactor();
+			}
+			PanFactor(fpan);
 
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 				m_AmplitudeEnvelope.NoteOn();
+				if (m_AmplitudeEnvelope.Envelope().IsCarry() || !reset)
+					m_AmplitudeEnvelope.SetPositionInSamples(rChannel().LastAmpEnvelopePosInSamples());
 			}
 
 			if(m_PanEnvelope.Envelope().IsEnabled()){
 				m_PanEnvelope.NoteOn();
+				if (m_PanEnvelope.Envelope().IsCarry() || !reset)
+					m_PanEnvelope.SetPositionInSamples(rChannel().LastPanEnvelopePosInSamples());
 			}
 
 			if(m_FilterEnvelope.Envelope().IsEnabled()){
 				m_FilterEnvelope.NoteOn();
+				if (m_FilterEnvelope.Envelope().IsCarry() || !reset)
+					m_FilterEnvelope.SetPositionInSamples(rChannel().LastFilterEnvelopePosInSamples());
 			}
 
 			if(m_PitchEnvelope.Envelope().IsEnabled()){
 				m_PitchEnvelope.NoteOn();
+				if (m_PitchEnvelope.Envelope().IsCarry() || !reset)
+					m_PitchEnvelope.SetPositionInSamples(rChannel().LastPitchEnvelopePosInSamples());
 			}
 
 		}
@@ -699,7 +763,8 @@ namespace psycle
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled())
 			{
 				m_AmplitudeEnvelope.NoteOff();
-				if ( m_AmplitudeEnvelope.Stage() & XMSampler::EnvelopeController::EnvelopeStage::HASLOOP)
+				// IT Type envelopes only do a fadeout() when it reaches the end of the envelope, except if it is looped.
+				if ( m_AmplitudeEnvelope.Stage() & EnvelopeController::EnvelopeStage::HASLOOP)
 				{
 					NoteFadeout();
 				}
@@ -735,7 +800,6 @@ namespace psycle
 			m_WaveDataController.NoteOff();
 		}
 
-		//\todo : see if this function really does what Impulse Tracker means by "NNA fadeout"
 		void XMSampler::Voice::NoteFadeout()
 		{
 			IsStopping(true);
@@ -749,7 +813,6 @@ namespace psycle
 			if ( RealVolume() == 0.0f ) IsPlaying(false);
 			m_VolumeFadeAmount -= m_VolumeFadeSpeed;
 			if( m_VolumeFadeAmount <= 0){
-				if ( rChannel().ForegroundVoice() == this) rChannel().ForegroundVoice(NULL);
 				IsPlaying(false);
 			}
 		}
@@ -774,67 +837,6 @@ namespace psycle
 			}
 		}// Porta2Note() -------------------------------------------------------
 
-		void XMSampler::Voice::Vibrato()
-		{
-			int vdelta = GetDelta(rChannel().VibratoType(),m_VibratoPos);
-
-			vdelta = vdelta * m_VibratoDepth;
-			m_VibratoAmount=(double)vdelta / 32.0f;
-			m_VibratoPos = (m_VibratoPos - m_VibratoSpeed) & 0xFF;
-			UpdateSpeed();
-
-		}// Vibrato() -------------------------------------
-
-		void XMSampler::Voice::Tremolo()
-		{
-
-			int vdelta = GetDelta(rChannel().TremoloType(),m_TremoloPos);
-
-			vdelta = (vdelta * m_TremoloDepth);
-			m_TremoloAmount = vdelta / 2048.0f;
-			m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0xFF;
-
-
-		};// Tremolo() -------------------------------------------
-
-		void XMSampler::Voice::Panbrello()
-		{
-/*
-\todo:
-The random pan position can be achieved by setting the
-waveform to 3 (ie. a S53 command). In this case *ONLY*, the
-speed actually is interpreted as a delay in frames before
-another random value is found. so S14 will be a very QUICK
-panbrello, and S44 will be a slower panbrello.
-*/
-			int vdelta = GetDelta(rChannel().PanbrelloType(),m_PanbrelloPos);
-
-			vdelta = vdelta * m_PanbrelloDepth;
-			m_PanbrelloAmount = vdelta / 2048.0f; // 64*16*2
-			m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0xFF;
-
-
-		}// Panbrello() -------------------------------------------
-
-		void XMSampler::Voice::Tremor()
-		{
-			//\todo: according to Impulse Tracker, this command uses its own counter, so being with
-			// speed 3, we can specify the command I41 ( x/y > speed), which, with the current implementation, doesn't work,
-			if ( pSampler()->CurrentTick() >= m_TremorTickChange ) 
-			{
-				if ( m_bTremorMute )
-				{
-					m_TremorTickChange = pSampler()->CurrentTick()+m_TremorOnTicks;
-					m_bTremorMute = false;
-				}
-				else
-				{
-					m_TremorTickChange = pSampler()->CurrentTick()+m_TremorOffTicks;
-					m_bTremorMute = true;
-				}
-			}
-		}
-
 		void XMSampler::Voice::VolumeSlide()
 		{
 			if(m_VolumeSlideSpeed >0){
@@ -852,40 +854,109 @@ panbrello, and S44 will be a slower panbrello.
 		}
 		void XMSampler::Voice::VolumeUp(const int value){
 			int vol = Volume() +value;
-			if(vol > 255){
-				vol = 255;
+			if(vol > 0x80){
+				vol = 0x80;
 			}
 			Volume(vol);	
 		}
 
-		void XMSampler::Voice::Retrig()
-		{
-
-		}
 		void XMSampler::Voice::AutoVibrato()
 		{
-			/*			
-			int vdelta = GetDelta(_inst.AutoVibratoType(),m_AutoVibratoPos & 0x3F);
+			int vdelta = GetDelta(rWave().Wave().VibratoType(),m_AutoVibratoPos);
 
-			if(_inst.AutoVibratoSweep())
+			if(rWave().Wave().VibratoAttack())
 			{
-				m_AutoVibratoDepth += (_inst.AutoVibratoDepth() << 8) / _inst.AutoVibratoSweep();
-				if((m_AutoVibratoDepth >> 8) > _inst.AutoVibratoDepth()){
-					m_AutoVibratoDepth = _inst.AutoVibratoDepth() << 8;
+				m_AutoVibratoDepth += rWave().Wave().VibratoAttack()<<1;
+				if((m_AutoVibratoDepth) > rWave().Wave().VibratoDepth()<<8)
+				{
+					m_AutoVibratoDepth = rWave().Wave().VibratoDepth()<<8;
 				}
 			} else {
-				m_AutoVibratoDepth = _inst.AutoVibratoDepth() << 8;
+				m_AutoVibratoDepth = rWave().Wave().VibratoDepth()<<8;
 			}
 
-			vdelta = ((vdelta * m_AutoVibratoDepth) >> 14);
+			vdelta = vdelta * (m_AutoVibratoDepth>>8);
+			m_AutoVibratoAmount=(double)vdelta / 128.0;
+			m_AutoVibratoPos = (m_AutoVibratoPos - (rWave().Wave().VibratoSpeed())) & 0xFF;
+			UpdateSpeed();
 
-			rChannel().AutoVibratoAmount((double)vdelta);
+		}
 
-			m_AutoVibratoPos = (m_AutoVibratoPos + _inst.AutoVibratoRate());
-			*/
+		void XMSampler::Voice::Vibrato()
+		{
+			int vdelta = GetDelta(rChannel().VibratoType(),m_VibratoPos);
 
-		}//XMSampler::Voice::AutoVibrato() -------------------------------------
+			vdelta = vdelta * m_VibratoDepth;
+			m_VibratoAmount=(double)vdelta / 32.0;
+			m_VibratoPos = (m_VibratoPos - m_VibratoSpeed) & 0xFF;
+			UpdateSpeed();
 
+		}// Vibrato() -------------------------------------
+
+		void XMSampler::Voice::Tremolo()
+		{
+			//\todo: verify that final volume doesn't go out of range (Redo RealVolume() ?)
+			int vdelta = GetDelta(rChannel().TremoloType(),m_TremoloPos);
+
+			vdelta = (vdelta * m_TremoloDepth);
+			m_TremoloAmount = (double)vdelta / 2048.0;
+			m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0xFF;
+
+
+		};// Tremolo() -------------------------------------------
+
+		void XMSampler::Voice::Panbrello()
+		{
+		//Yxy   Panbrello with speed x, depth y.
+		//The random pan position can be achieved by setting the
+		//waveform to 3 (ie. a S53 command). In this case *ONLY*, the
+		//speed actually is interpreted as a delay in frames before
+		//another random value is found. so Y14 will be a very QUICK
+		//panbrello, and Y44 will be a slower panbrello.
+
+			//\todo: verify that final pan doesn't go out of range (make a RealPan() similar to RealVolume() ?)
+			int vdelta = GetDelta(rChannel().PanbrelloType(),m_PanbrelloPos);
+
+			vdelta = vdelta * m_PanbrelloDepth;
+			m_PanbrelloAmount = vdelta / 2048.0f; // 64*16*2
+			if (rChannel().PanbrelloType() != XMInstrument::WaveData::WaveForms::RANDOM) 
+			{
+			m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0xFF;
+			}
+			else if (++m_PanbrelloRandomCounter >= m_PanbrelloSpeed )
+			{
+				m_PanbrelloPos++;
+				m_PanbrelloRandomCounter = 0;
+			}
+
+		}// Panbrello() -------------------------------------------
+
+		void XMSampler::Voice::Tremor()
+		{
+			//\todo: according to Impulse Tracker, this command uses its own counter, so with
+			// speed 3, we can specify the command I41 ( x/y > speed), which, with the current implementation, doesn't work,
+			if ( pSampler()->CurrentTick() >= m_TremorTickChange ) 
+			{
+				if ( m_bTremorMute )
+				{
+					m_TremorTickChange = pSampler()->CurrentTick()+m_TremorOnTicks;
+					m_bTremorMute = false;
+				}
+				else
+				{
+					m_TremorTickChange = pSampler()->CurrentTick()+m_TremorOffTicks;
+					m_bTremorMute = true;
+				}
+			}
+		}
+
+		void XMSampler::Voice::Retrig()
+		{
+			if ( pSampler()->CurrentTick()%m_RetrigTicks == 0 ) 
+			{
+				NoteOn(m_Note,-1,false);
+				}
+			}
 
 		int XMSampler::Voice::GetDelta(int wavetype,int wavepos)
 		{
@@ -894,7 +965,7 @@ panbrello, and S44 will be a slower panbrello.
 			case XMInstrument::WaveData::WaveForms::SAWDOWN:
 				return m_FineRampDownData[wavepos];
 			case XMInstrument::WaveData::WaveForms::SAWUP:
-				return m_FineRampDownData[0x3F - wavepos];
+				return m_FineRampDownData[0xFF - wavepos];
 			case XMInstrument::WaveData::WaveForms::SQUARE:
 				return m_FineSquareTable[wavepos];
 			case XMInstrument::WaveData::WaveForms::RANDOM:
@@ -918,23 +989,25 @@ panbrello, and S44 will be a slower panbrello.
 				int _note = PeriodToNote(_period);
 				_period = NoteToPeriod(_note);
 			}
-			_period = _period + AutoVibratoAmount() + VibratoAmount() - (m_PitchEnvelope.ModulationAmount()*1024.0f);
+			//\todo: Attention, AutoVibrato uses linear slides with IT. This needs to be fixed.
+			_period = _period + AutoVibratoAmount() +  VibratoAmount();
 			if ( _period > 65535) _period = 65535;
 			else if ( _period < 32 ) _period = 32;
 
-			rWave().Speed(PeriodToSpeed(_period));
+			const double speed=PeriodToSpeed(_period);
+			rWave().Speed(speed);
+			// Attempt at Self-filtered samples. It filters too much.
+//			m_Filter.SampleSpeed(speed*(double)Global::player().SampleRate());
 		}
 
 		double XMSampler::Voice::PeriodToSpeed(int period)
 		{
 			if(m_pSampler->IsAmigaSlides()){
 				// amiga period mode
-				// 14317456 = 8363Hz* 1712(center-period), got from xm-form.txt
-				// In fs3mdoc there's the value 14317056 , which i assume wrong.
-				// and still, in fmoddoc there's the value 7159090.5, which attains for
-				//  856 (center-period/2) * 8363.42....Hz.
-				// So the question is if mod is incorrect or XM is rounded.
-				return ( 14317456  / period ) / (double)Global::pPlayer->SampleRate();
+				// 14318181 = 7159090.5*2 (clockspeed*2)
+				// in xm-form.txt, there is 14317456 = 8363Hz* 1712(center-period),
+				// and in fs3mdoc there's the value 14317056 , which i assume wrong.
+				return ( 14318181  / period ) / (double)Global::player().SampleRate() * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0);
 			} else {
 				// Linear Frequency
 				// 8363*2^((5*12*64 - Period) / (12*64))
@@ -942,9 +1015,10 @@ panbrello, and S44 will be a slower panbrello.
 				// 12*64 = 12 notes * 64 finetune steps.
 				// 7 = 12-middle_C ( if C-4 is middle_C, then, 8*12*64, if C-3, then 9*12*64, etc..) (12 "12-middle_C" is number of octaves)
 				return	pow(2.0,
-							(5376 - period ) /768.0
+							((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
+							 /768.0)
 						)
-						* 8363 / (double)Global::pPlayer->SampleRate();
+						* 8363 / (double)Global::player().SampleRate();
 			}
 		}
 
@@ -1000,15 +1074,22 @@ panbrello, and S44 will be a slower panbrello.
 			m_InstrumentNo = 255;
 			m_pForegroundVoice = NULL;
 
-			m_Note = 255;
+			m_Note = notecommands::empty;
 			m_Period = 0;
 
 			m_Volume = 1.0f;
 			m_ChannelDefVolume = 64;//
+			m_LastVoiceVolume = 0;
 
 			m_PanFactor = 0.5f;
 			m_DefaultPanFactor = 32;
+			m_LastVoicePanFactor = 0.0f;
 			m_bSurround = false;
+
+			m_LastAmpEnvelopePosInSamples=0;
+			m_LastPanEnvelopePosInSamples=0;
+			m_LastFilterEnvelopePosInSamples=0;
+			m_LastPitchEnvelopePosInSamples=0;
 
 			m_bGrissando = false;
 			m_VibratoType = XMInstrument::WaveData::WaveForms::SINUS;
@@ -1029,22 +1110,17 @@ panbrello, and S44 will be a slower panbrello.
 			m_PanbrelloSpeedMem = 0;
 			m_VolumeSlideMem = 0;
 			m_ArpeggioMem = 0;
+			m_RetrigMem = 0;
+			m_OffsetMem = 0;
 
 			m_EffectFlags = 0;
 
 			m_PitchSlideSpeed = 0;
-			m_Slide2NoteDestNote = 0;
 
 			m_GlobalVolSlideSpeed = 0.0f;
 			m_ChanVolSlideSpeed = 0.0f;
 			m_PanSlideSpeed = 0.0f;
 
-/*			m_VibratoSpeed = 0;
-			m_VibratoDepth = 0;
-			m_VibratoPos = 0;
-			m_VibratoAmount = 0;
-			m_AutoVibratoAmount = 0;
-*/
 			m_TremoloSpeed = 0;
 			m_TremoloDepth = 0;
 			m_TremoloDelta = 0;
@@ -1054,6 +1130,9 @@ panbrello, and S44 will be a slower panbrello.
 			m_PanbrelloDepth = 0;
 			m_PanbrelloDelta = 0;
 			m_PanbrelloPos = 0;
+
+			m_RetrigOperation = 0;
+			m_RetrigVol = 0;
 
 			m_ArpeggioPeriod[0] = 0.0;
 			m_ArpeggioPeriod[1] = 0.0;
@@ -1099,6 +1178,8 @@ panbrello, and S44 will be a slower panbrello.
 			m_VolumeSlideMem = 0;
 			m_ArpeggioMem = 0;
 			m_GlobalVolSlideMem = 0;
+			m_RetrigMem = 0;
+			m_OffsetMem = 0;
 			m_Cutoff = m_DefaultCutoff;
 			m_Ressonance = m_DefaultRessonance;
 			m_FilterType = m_DefaultFilterType;
@@ -1116,9 +1197,11 @@ panbrello, and S44 will be a slower panbrello.
 				PanFactor((volcmd&0x0F)/15.0f);
 				break;
 			case CMD_VOL::VOL_PANSLIDELEFT:
+				//this command is actually fine pan slide
 				PanningSlide((volcmd&0x0F)<<4);
 				break;
 			case CMD_VOL::VOL_PANSLIDERIGHT:
+				//this command is actually fine pan slide
 				PanningSlide(volcmd&0x0F);
 				break;
 			default:
@@ -1177,7 +1260,7 @@ panbrello, and S44 will be a slower panbrello.
 					PanFactor((parameter&0xf)/15.0f);
 					break;
 				case CMD_E::E_SET_MIDI_MACRO:
-					m_MIDI_Set = parameter;
+					m_MIDI_Set = parameter&0x0F;
 					//\todo : implement.
 					break;
 				case CMD_E::E_GLISSANDO_TYPE:
@@ -1236,6 +1319,7 @@ panbrello, and S44 will be a slower panbrello.
 			}
 
 			// 2nd Check. Commands that require a voice.
+			int slidval=0;
 			if ( voice )
 			{
 				switch(volcmd&0xF0)
@@ -1252,20 +1336,38 @@ panbrello, and S44 will be a slower panbrello.
 				case CMD_VOL::VOL_VOLSLIDEDOWN:
 					VolumeSlide(volcmd&0x0F);
 					break;
-				case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
-					PitchSlide(false,volcmd&0x0F);
+				case CMD_VOL::VOL_FINEVOLSLIDEUP:
+					voice->m_VolumeSlideSpeed = (volcmd & 0x0F)<<1;
+					voice->VolumeSlide();
 					break;
-				case CMD_VOL::VOL_PITCH_SLIDE_UP:
-					PitchSlide(true,volcmd&0x0F);
+				case CMD_VOL::VOL_FINEVOLSLIDEDOWN:
+					voice->m_VolumeSlideSpeed = -((volcmd & 0x0F)<<1);
+					voice->VolumeSlide();
 					break;
-				case CMD_VOL::VOL_VIBRATO_SPEED:
+/*				case CMD_VOL::VOL_VIBRATO_SPEED:
 					Vibrato(volcmd&0x0F,0); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
 					break;
+*/
 				case CMD_VOL::VOL_VIBRATO:
 					Vibrato(0,(volcmd & 0x0F)<<2);
 					break;
 				case CMD_VOL::VOL_TONEPORTAMENTO:
-					PitchSlide(voice->Period()>voice->NoteToPeriod(Slide2NoteDestNote()),volcmd&0x0F,Slide2NoteDestNote());
+					// Portamento to (Gx) affects the memory for Gxx and has the equivalent
+					// slide given by this table:
+					// SlideTable      DB      1, 4, 8, 16, 32, 64, 96, 128, 255
+					if ( volcmd&0x0F == 0 ) slidval=0;
+					else if ( volcmd&0x0F == 1)  slidval=1;
+					else if ( volcmd&0x0F < 9) slidval=powf(2.0f,volcmd&0x0F);
+					else slidval=255;
+					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),slidval,Note());
+					break;
+				case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
+					// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
+					// up/down of x is equivalent to a normal slide by x*4
+					PitchSlide(false,(volcmd&0x0F)<<2);
+					break;
+				case CMD_VOL::VOL_PITCH_SLIDE_UP:
+					PitchSlide(true,(volcmd&0x0F)<<2);
 					break;
 				default:
 					break;
@@ -1278,10 +1380,14 @@ panbrello, and S44 will be a slower panbrello.
 					voice->Volume(parameter);
 					break;
 				case CMD::SET_ENV_POSITION:
-					voice->AmplitudeEnvelope().SetPosition(parameter);
-					voice->PanEnvelope().SetPosition(parameter);
-					voice->PitchEnvelope().SetPosition(parameter);
-					voice->FilterEnvelope().SetPosition(parameter);
+					if (voice->AmplitudeEnvelope().Envelope().IsEnabled())
+						voice->AmplitudeEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
+					if (voice->PanEnvelope().Envelope().IsEnabled())
+						voice->PanEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
+					if (voice->PitchEnvelope().Envelope().IsEnabled())
+						voice->PitchEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
+					if (voice->FilterEnvelope().Envelope().IsEnabled())
+						voice->FilterEnvelope().SetPositionInSamples(parameter*m_pSampler->GetDeltaTick());
 					break;
 				case CMD::EXTENDED:
 					switch(parameter&0xF0)
@@ -1293,6 +1399,11 @@ panbrello, and S44 will be a slower panbrello.
 							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::FORWARD);
 							break;
 						case CMD_E9::E9_PLAY_BACKWARD:
+							if (voice->rWave().LoopType() == XMInstrument::WaveData::LoopType::DO_NOT &&
+								voice->rWave().Position() == 0)
+							{
+								voice->rWave().Position(voice->rWave().Length());
+							}
 							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::BACKWARD);
 							break;
 						}
@@ -1338,14 +1449,14 @@ panbrello, and S44 will be a slower panbrello.
 					PitchSlide(false,parameter);
 					break;
 				case CMD::PORTA2NOTE:
-					PitchSlide(voice->Period()>voice->NoteToPeriod(Slide2NoteDestNote()),parameter,Slide2NoteDestNote());
+					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),parameter,Note());
 					break;
 				case CMD::VOLUMESLIDE:
 					VolumeSlide(parameter);
 					break;
 				case CMD::TONEPORTAVOL:
 					VolumeSlide(parameter);
-					PitchSlide(voice->PeriodToNote(voice->Period())<Slide2NoteDestNote(),0,Slide2NoteDestNote());
+					PitchSlide(voice->PeriodToNote(voice->Period())<Note(),0,Note());
 					break;
 				case CMD::VIBRATOVOL:
 					VolumeSlide(parameter);
@@ -1364,7 +1475,7 @@ panbrello, and S44 will be a slower panbrello.
 					Tremolo((parameter>> 4) & 0x0F,(parameter & 0x0F));
 					break;
 				case CMD::RETRIG:
-					Retrigger((parameter & 0x0F),(parameter>> 4) & 0x0F);
+					Retrigger(parameter);
 					break;
 				case CMD::PANBRELLO:
 					Panbrello((parameter>> 4) & 0x0F,(parameter & 0x0F));
@@ -1374,7 +1485,7 @@ panbrello, and S44 will be a slower panbrello.
 					break;
 				}
 			}
-			//3nd check: It is not needed that the voice is playing, but it applies to the last instrument.
+			//3rd check: It is not needed that the voice is playing, but it applies to the last instrument.
 			if ( InstrumentNo() != 255 && cmd == CMD::EXTENDED && (parameter&0xF0) == CMD_E::EE)
 			{
 				switch(parameter&0x0F)
@@ -1453,6 +1564,31 @@ panbrello, and S44 will be a slower panbrello.
 				}
 				if(EffectFlags() & EffectFlag::RETRIG)
 				{
+					LastVoicePanFactor(ForegroundVoice()->PanFactor());
+
+					if ( m_RetrigOperation < 2)
+					{
+						int tmp = ForegroundVoice()->Volume()+m_RetrigVol;
+						if ( tmp <0 ) tmp =0;
+						else if ( tmp > 128 ) tmp=128;
+						LastVoiceVolume(tmp);
+					}
+					else //if ( m_RetrigOperation == 2)
+					{
+						int tmp = ForegroundVoice()->Volume()*m_RetrigVol;
+						if ( tmp <0 ) tmp =0;
+						else if ( tmp > 128 ) tmp=128;
+						LastVoiceVolume(tmp);
+					}
+
+					if (ForegroundVoice()->AmplitudeEnvelope().Envelope().IsEnabled())
+						LastAmpEnvelopePosInSamples(ForegroundVoice()->AmplitudeEnvelope().GetPositionInSamples());
+					if (ForegroundVoice()->PanEnvelope().Envelope().IsEnabled())
+						LastPanEnvelopePosInSamples(ForegroundVoice()->PanEnvelope().GetPositionInSamples());
+					if (ForegroundVoice()->FilterEnvelope().Envelope().IsEnabled())
+						LastFilterEnvelopePosInSamples(ForegroundVoice()->FilterEnvelope().GetPositionInSamples());
+					if (ForegroundVoice()->PitchEnvelope().Envelope().IsEnabled())
+						LastPitchEnvelopePosInSamples(ForegroundVoice()->PitchEnvelope().GetPositionInSamples());
 					ForegroundVoice()->Retrig();
 				}
 			}
@@ -1489,13 +1625,13 @@ panbrello, and S44 will be a slower panbrello.
 			if ( (speed & 0x0F) == 0 ){ // Slide up
 				speed = (speed & 0xF0)>>4;
 				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
-				m_GlobalVolSlideSpeed = speed/128.0f;
+				m_GlobalVolSlideSpeed = speed;
 				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
 			else if ( (speed & 0xF0) == 0 )  { // Slide down
 				speed = (speed & 0x0F);
 				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
-				m_GlobalVolSlideSpeed = -speed/128.0f;
+				m_GlobalVolSlideSpeed = -speed;
 				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
 			else if ( (speed & 0x0F) == 0xF ) { // FineSlide up
@@ -1573,17 +1709,17 @@ panbrello, and S44 will be a slower panbrello.
 			}
 			else m_PitchSlideMem = speed &0xff;
 
-			if ( speed < 0xE0 || note !=255)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
+			if ( speed < 0xE0 || note !=notecommands::empty)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
 			{									// Porta to note does not have Fine.
 				speed<<=2;
 				if ( ForegroundVoice()) { ForegroundVoice()->m_PitchSlideSpeed= bUp?-speed:speed; }
-				if ( note != 255 ) 
+				if ( note != notecommands::empty ) 
 				{
 					if ( ForegroundVoice())	{ ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
 					m_EffectFlags |= EffectFlag::SLIDE2NOTE;
 				}
 				else m_EffectFlags |= EffectFlag::PITCHSLIDE;
-			} else if ( speed < 0xF0 ) {
+			} else if ( speed < 0xF0) {
 				speed= speed&0xf;
 				if ( ForegroundVoice())
 				{
@@ -1735,9 +1871,21 @@ panbrello, and S44 will be a slower panbrello.
 			}
 			m_EffectFlags |= EffectFlag::ARPEGGIO;
 		};
-		void XMSampler::Channel::Retrigger(const int ticks,const int volumeModifier)
+		void XMSampler::Channel::Retrigger(const int parameter)
 		{
+			int ticks,volumeModifier;
 			int effretVol,effretMode;
+
+			if ( parameter == 0 )
+			{
+				ticks = (m_RetrigMem & 0x0F);
+				volumeModifier = (m_RetrigMem>> 4) & 0x0F;
+			}
+			else {
+				ticks = (parameter & 0x0F);
+				volumeModifier = (parameter>> 4) & 0x0F;
+				m_RetrigMem = parameter;
+			}
 			switch (volumeModifier) 
 			{
 			case 1:
@@ -1760,16 +1908,19 @@ panbrello, and S44 will be a slower panbrello.
 			}
 			if ( ForegroundVoice())
 			{
-				ForegroundVoice()->m_RetrigTicks = ticks;
-				ForegroundVoice()->m_RetrigVol = effretVol;
-				ForegroundVoice()->m_RetrigOperation = effretMode;
+				ForegroundVoice()->m_RetrigTicks = ticks!=0?ticks:1;
 			}
-			m_EffectFlags &= EffectFlag::RETRIG;
+			m_RetrigVol = effretVol;
+			m_RetrigOperation = effretMode;
+			m_EffectFlags |= EffectFlag::RETRIG;
 		}
 		void XMSampler::Channel::NoteCut(const int ntick){
 			m_NoteCutTick = ntick;
 			if(ntick == 0){
-				Volume(0);
+				if ( ForegroundVoice())
+				{
+					ForegroundVoice()->Volume(0);
+				}
 				return;
 			}
 			m_EffectFlags |= EffectFlag::NOTECUT;
@@ -1836,7 +1987,6 @@ panbrello, and S44 will be a slower panbrello.
 			_numPars = 0;
 			_type = MACH_XMSAMPLER;
 			_mode = MACHMODE_GENERATOR;
-			_stprintf(_editName, _T(_psName));
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 
@@ -1846,6 +1996,7 @@ panbrello, and S44 will be a slower panbrello.
 			m_TickCount = 0;
 			m_bAmigaSlides = false;
 			m_UseFilters = true;
+			m_PanningMode = PanningMode::Linear;
 
 			int i;
 			for (i = 0; i < XMSampler::MAX_POLYPHONY; i++)
@@ -1901,7 +2052,7 @@ panbrello, and S44 will be a slower panbrello.
 			m_DeltaTick = Global::pPlayer->SampleRate() * 60
 				/ (Global::pPlayer->bpm * 24/*ticksPerBeat*/);
 
-			NextSampleTick(m_DeltaTick);
+			NextSampleTick(m_DeltaTick+1);// +1 is to avoid one Tick too much at the end, because m_DeltaTick is rounded down.
 
 			for (int channel=0;channel<MAX_TRACKS;channel++)
 			{
@@ -1921,16 +2072,16 @@ panbrello, and S44 will be a slower panbrello.
 
 			if (Global::_pSong->IsInvalided()) { return; }
 
-			// don't process twk , twf of Mcm Commands
-			if ( pData->_note > 120 )
+			// don't process twk , twf, Mcm Commands, or empty lines.
+			if ( pData->_note > notecommands::release )
 			{
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-				if ((pData->_cmd == 0 && pData->_volume == 255) || pData->_note != 255 )return; // Return in everything but commands!
+				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != notecommands::empty )return; // Return in everything but commands!
 	#else
-				if (pData->_cmd == 0 || pData->_note != 255 )return; // Return in everything but commands!
+				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != notecommands::empty )return; // Return in everything but commands!
 	#endif
 #endif
 			}
@@ -1946,18 +2097,24 @@ panbrello, and S44 will be a slower panbrello.
 			bool bPortaEffect = (pData->_cmd == CMD::PORTA2NOTE);
 	#endif
 #endif
-			bool bPorta2Note = (pData->_note < 120) && bPortaEffect;
-			bool bNoteOn = (pData->_note < 120) && !bPorta2Note;
+			bool bPorta2Note = (pData->_note <= notecommands::b9) && bPortaEffect;
+			bool bNoteOn = (pData->_note <= notecommands::b9) && !bPorta2Note;
 
 
 			Voice* currentVoice = NULL;
 			Voice* newVoice = NULL;
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
-
+			if(bInstrumentSet)
+			{
+				if ( pData->_inst != thisChannel.InstrumentNo() && thisChannel.Note() !=0)
+				{
+					bNoteOn=true;
+				}
+				thisChannel.InstrumentNo(pData->_inst); // Instrument is always set, even if no new note comes.
+			}
 
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
 			currentVoice = GetCurrentVoice(channelNum);
-//			currentVoice = thisChannel.ForegroundVoice();
 			if ( currentVoice )
 			{
 				// Is a new note coming? Then apply the NNA to the playing one.
@@ -1984,6 +2141,8 @@ panbrello, and S44 will be a slower panbrello.
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
 						break;
+					default:
+						break;
 					}
 				
 					switch (currentVoice->NNA())
@@ -2001,13 +2160,21 @@ panbrello, and S44 will be a slower panbrello.
 						currentVoice->IsBackground(true);
 						break;
 					}
-				} else if(pData->_note == 120 ){
+				} else if(pData->_note == notecommands::release ){
 					currentVoice->NoteOff();
 				}
-				else if ( bPorta2Note && currentVoice->IsStopping())
+				else 
 				{
-					bNoteOn = true;
-					newVoice = currentVoice;
+					if (bInstrumentSet)
+				{
+						currentVoice->ResetVolAndPan(-1);
+					}
+					if ( bPorta2Note ) 
+					{
+						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
+						//		  and the position reset to 0.
+						thisChannel.Note(pData->_note);
+					}
 				}
 			}
 			else if ( bPorta2Note )
@@ -2019,54 +2186,79 @@ panbrello, and S44 will be a slower panbrello.
 			// STEP B: Get a Voice to work with, and initialize it if needed.
 			if(bNoteOn)
 			{
-				thisChannel.Slide2NoteDestNote(pData->_note);
 				if (( pData->_cmd == CMD::EXTENDED) && ((pData->_parameter & 0xf0) == CMD_E::E_NOTE_DELAY))
 				{
 					thisChannel.DelayedNote(*pData);
 				}
 				else
 				{
-					if ( !bPorta2Note ) newVoice = GetFreeVoice();
+					if ( pData->_note != notecommands::empty ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
+					newVoice = GetFreeVoice();
 					if ( newVoice )
 					{
-						if(bInstrumentSet){
-							thisChannel.InstrumentNo(pData->_inst);
-						} else if(thisChannel.InstrumentNo() == 255)
+						if(thisChannel.InstrumentNo() == 255)
 						{	//this is a note to an undefined instrument. we can't continue.
+							//\todo : actually, we should check for commands!
 							return;
 						}
-						//\todo: if the instrument is not set, some initializations do not take effect.
-						newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
-						thisChannel.EffectInit();
 
-						XMInstrument & _inst = m_Instruments[newVoice->InstrumentNum()];
+						XMInstrument & _inst = m_Instruments[thisChannel.InstrumentNo()];
 						int _layer = _inst.NoteToSample(pData->_note).second;
 						int twlength = m_rWaveLayer[_layer].WaveLength();
 						if(twlength > 0)
 						{
+							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
 							thisChannel.ForegroundVoice(newVoice);
+							if (currentVoice)
+							{
+								thisChannel.LastVoicePanFactor(currentVoice->PanFactor());
+								thisChannel.LastVoiceVolume(currentVoice->Volume());
+
+								XMInstrument::Envelope *pEnv = &currentVoice->AmplitudeEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastAmpEnvelopePosInSamples(currentVoice->AmplitudeEnvelope().GetPositionInSamples());
+								else thisChannel.LastAmpEnvelopePosInSamples(0);
+								pEnv = &currentVoice->PanEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastPanEnvelopePosInSamples(currentVoice->PanEnvelope().GetPositionInSamples());
+								else thisChannel.LastPanEnvelopePosInSamples(0);
+								pEnv = &currentVoice->FilterEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastFilterEnvelopePosInSamples(currentVoice->FilterEnvelope().GetPositionInSamples());
+								else thisChannel.LastFilterEnvelopePosInSamples(0);
+								pEnv = &currentVoice->PitchEnvelope().Envelope();
+								if (pEnv->IsEnabled() && pEnv->IsCarry())
+									thisChannel.LastPitchEnvelopePosInSamples(currentVoice->PitchEnvelope().GetPositionInSamples());
+								else thisChannel.LastPitchEnvelopePosInSamples(0);
+
+							}
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-							if ( pData->_volume<0x40) newVoice->NoteOn(pData->_note,pData->_volume<<1);
-							else newVoice->NoteOn(pData->_note);
+							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.Note(),pData->_volume<<1,bInstrumentSet);
+							else newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#else
-							newVoice->NoteOn(pData->_note);
+							newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#endif
 #endif
-							thisChannel.Note(pData->_note);
+							thisChannel.Note(thisChannel.Note()); //this forces a recalc of the m_Period.
 
 							// Add Here any command that is limited to the scope of the new note.
 							// An offset is a good candidate, but a volume is not (volume can apply to an existing note)
-							if (pData->_cmd == CMD::OFFSET)
+							if ((pData->_cmd&0xF0) == CMD::OFFSET)
 							{
 								int offset = ((pData->_cmd&0x0F) << 16) +pData->_parameter<<8;
+								if ( offset != 0 )
+								{
+									thisChannel.OffsetMem(offset);
+								}
+								else offset = thisChannel.OffsetMem();
 								if ( offset < twlength)
 								{
 									newVoice->rWave().Position(offset);
 								}
-								else { newVoice->rWave().Position(0);	}
+								else { newVoice->rWave().Position(twlength);	}
 							}else{ newVoice->rWave().Position(0); }
 						}
 						else 
@@ -2083,22 +2275,8 @@ panbrello, and S44 will be a slower panbrello.
 						if ( pData->_cmd == 0 ) return;
 					}
 				}
-			} else {
-				newVoice = currentVoice;
-				if ( bPorta2Note ) 
-				{
-					thisChannel.Slide2NoteDestNote(pData->_note);
 				}
-				if (bInstrumentSet && currentVoice)
-				{
-					currentVoice->ResetVolAndPan(-1);
-					currentVoice->rWave().Playing(true);
-					currentVoice->IsPlaying(true);
-				}
-			}
-
-			//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
-			//		  and the position reset to 0.
+			if ( newVoice == NULL ) newVoice = currentVoice;
 			// Effect Command
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
@@ -2380,10 +2558,10 @@ panbrello, and S44 will be a slower panbrello.
 			riffFile->Write(_numVoices); // numSubtracks
 			switch (_resampler.GetQuality())
 			{
-			case dsp::R_NONE:	temp = 0;break;
-			case dsp::R_SPLINE:	temp = 2;break;
+				case dsp::R_NONE:   temp = 0; break;
+				case dsp::R_SPLINE: temp = 2; break;
 			case dsp::R_LINEAR:
-			default:			temp = 1;break;
+				default:            temp = 1; break;
 			}
 			riffFile->Write(temp); // quality
 

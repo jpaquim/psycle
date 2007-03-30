@@ -72,6 +72,7 @@ namespace psycle
 			MACH_SCOPE = 11,
 			MACH_XMSAMPLER = 12,
 			MACH_DUPLICATOR = 13,
+			MACH_MIXER		= 14,
 			MACH_DUMMY = 255
 		};
 
@@ -107,6 +108,22 @@ namespace psycle
 				FINE_PATTERN_DELAY=	0xF0 // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
 			};
 		};
+
+		namespace notecommands
+		{
+			enum notecommands {
+				c0 = 0,
+				b9 = 119,
+				release = 120,
+				tweak,
+				tweakeffect, //old. for compatibility only.
+				midicc,
+				tweakslide,
+				//maintain these two as the last ones
+				invalid,
+				empty = 255
+			};
+		}
 
 		#pragma pack(pop)
 	}

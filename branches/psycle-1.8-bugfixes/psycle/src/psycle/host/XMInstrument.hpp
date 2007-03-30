@@ -76,28 +76,30 @@ namespace psycle
 				m_WaveSusLoopStart = 0;
 				m_WaveSusLoopEnd = 0;
 				m_WaveSusLoopType = DO_NOT;
-				//todo: replace tune and finetune by samplerate. 
+				//todo: Add SampleRate functionality, and change WaveTune's one.
 				// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
+				m_WaveSampleRate = 8363;
 				m_WaveTune = 0;
 				m_WaveFineTune = 0;	
 				m_WaveStereo = false;
 				m_PanFactor = 0.5f;
 				m_PanEnabled = false;
-				m_VibratoRate = 0;
-				m_VibratoSweep = 0;
+				m_VibratoAttack = 0;
+				m_VibratoSpeed = 0;
 				m_VibratoDepth = 0;
 				m_VibratoType = 0;
 			};
 
 			/// Destructor
-			virtual ~WaveData(){
+			~WaveData(){
 				DeleteWaveData();
 			};
 
 			//	Object Functions
 			void DeleteWaveData(){
-				zapArray(m_pWaveDataL);
-				zapArray(m_pWaveDataR);
+				delete[] m_pWaveDataL;
+				delete[] m_pWaveDataR;
+				m_WaveLength = 0;
 			};
 
 			void AllocWaveData(const int iLen,const bool bStereo)
@@ -129,8 +131,8 @@ namespace psycle
 				m_WaveTune = source.m_WaveTune;
 				m_WaveFineTune = source.m_WaveFineTune;	
 				m_WaveStereo = source.m_WaveStereo;
-				m_VibratoRate = source.m_VibratoRate;
-				m_VibratoSweep = source.m_VibratoSweep;
+				m_VibratoAttack = source.m_VibratoAttack;
+				m_VibratoSpeed = source.m_VibratoSpeed;
 				m_VibratoDepth = source.m_VibratoDepth;
 				m_VibratoType = source.m_VibratoType;
 
@@ -155,7 +157,7 @@ namespace psycle
 			const compiler::uint16 WaveVolume(){ return m_WaveDefVolume;};
 			void WaveVolume(const compiler::uint16 value){m_WaveDefVolume = value;};
 
-			const float PanFactor(){ return m_PanFactor;};
+			const float PanFactor(){ return m_PanFactor;};// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 			void PanFactor(const float value){m_PanFactor = value;};
 			bool PanEnabled(){ return m_PanEnabled;};
 			void PanEnabled(bool pan){ m_PanEnabled=pan;};
@@ -183,16 +185,16 @@ namespace psycle
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;};
 
 			const compiler::uint8 VibratoType(){return m_VibratoType;};
-			const compiler::uint8 VibratoSweep(){return m_VibratoSweep;};
+			const compiler::uint8 VibratoSpeed(){return m_VibratoSpeed;};
 			const compiler::uint8 VibratoDepth(){return m_VibratoDepth;};
-			const compiler::uint8 VibratoRate(){return m_VibratoRate;};
+			const compiler::uint8 VibratoAttack(){return m_VibratoAttack;};
 
 			void VibratoType(const compiler::uint8 value){m_VibratoType = value ;};
-			void VibratoSweep(const compiler::uint8 value){m_VibratoSweep = value ;};
+			void VibratoSpeed(const compiler::uint8 value){m_VibratoSpeed = value ;};
 			void VibratoDepth(const compiler::uint8 value){m_VibratoDepth = value ;};
-			void VibratoRate(const compiler::uint8 value){m_VibratoRate = value ;};
+			void VibratoAttack(const compiler::uint8 value){m_VibratoAttack = value ;};
 
-			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoRate;};
+			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoSpeed;};
 
 			const signed short * pWaveDataL(){ return m_pWaveDataL;};
 			const signed short * pWaveDataR(){ return m_pWaveDataR;};
@@ -215,6 +217,7 @@ namespace psycle
 			compiler::uint32 m_WaveSusLoopStart;
 			compiler::uint32 m_WaveSusLoopEnd;
 			LoopType m_WaveSusLoopType;
+			compiler::uint32 m_WaveSampleRate;
 			compiler::sint16 m_WaveTune;
 			compiler::sint16 m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
 			bool m_WaveStereo;
@@ -222,8 +225,8 @@ namespace psycle
 			signed short *m_pWaveDataR;
 			bool m_PanEnabled;
 			float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right
-			compiler::uint8 m_VibratoRate;
-			compiler::uint8 m_VibratoSweep;
+			compiler::uint8 m_VibratoAttack;
+			compiler::uint8 m_VibratoSpeed;
 			compiler::uint8 m_VibratoDepth;
 			compiler::uint8 m_VibratoType;
 
@@ -253,7 +256,7 @@ namespace psycle
 				operator=(other);
 			}
 
-			virtual ~Envelope(){;}
+			~Envelope(){;}
 
 			// Init
 			void Init()
@@ -269,28 +272,26 @@ namespace psycle
 			// Object Functions.
 
 			// Gets the time at which the pointIndex point is located.
-			const int GetTime(const int pointIndex)
+			const int GetTime(const unsigned int pointIndex)
 			{	
-				if(pointIndex >= 0 && pointIndex < (int)m_Points.size()){
-					return m_Points[pointIndex].first;
-				}
+				if(pointIndex >= 0 && pointIndex < m_Points.size()) return m_Points[pointIndex].first;
 				return INVALID;
 			}
 			// Sets a new time for an existing pointIndex point.
-			const int SetTime(const int pointIndex,const int pointTime)
+			const int SetTime(const unsigned int pointIndex,const int pointTime)
 			{ 
 				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				m_Points[pointIndex].first = pointTime;
 				return SetTimeAndValue(pointIndex,pointTime,m_Points[pointIndex].second);
 			}
 			// Gets the value of the pointIndex point.
-			const ValueType GetValue(const int pointIndex)
+			const ValueType GetValue(const unsigned int pointIndex)
 			{ 
 				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				return m_Points[pointIndex].second;
 			}
 			// Sets the value pointVal to pointIndex point.
-			void SetValue(const int pointIndex,const ValueType pointVal)
+			void SetValue(const unsigned int pointIndex,const ValueType pointVal)
 			{
 				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
 				m_Points[pointIndex].second = pointVal;
@@ -306,13 +307,13 @@ namespace psycle
 			};
 
 			/// Helper to set a new time for an existing index.
-			const int SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal);
+			const int SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal);
 
 			/// Inserts a new point to the points Array.
-			const int Insert(const int pointIndex,const ValueType pointVal);
+			const int Insert(const unsigned int pointIndex,const ValueType pointVal);
 
 			/// Removes a point from the points Array.
-			void Delete(const int pointIndex);
+			void Delete(const unsigned int pointIndex);
 
 			/// Clears the points Array
 			void Clear()
@@ -320,21 +321,21 @@ namespace psycle
 				m_Points.clear();
 			};
 			// Set or Get the point Index for Sustain and Loop.
-			const int SustainBegin(){ return m_SustainBegin;};
+			const unsigned int SustainBegin(){ return m_SustainBegin;};
 			// value has to be an existing point!
-			void SustainBegin(const int value){m_SustainBegin = value;};
+			void SustainBegin(const unsigned int value){m_SustainBegin = value;};
 
-			const int SustainEnd(){ return m_SustainEnd;};
+			const unsigned int SustainEnd(){ return m_SustainEnd;};
 			// value has to be an existing point!
-			void SustainEnd(const int value){m_SustainEnd = value;};
+			void SustainEnd(const unsigned int value){m_SustainEnd = value;};
 
-			const int LoopStart(){return m_LoopStart;};
+			const unsigned int LoopStart(){return m_LoopStart;};
 			// value has to be an existing point!
-			void LoopStart(const int value){m_LoopStart = value;};
+			void LoopStart(const unsigned int value){m_LoopStart = value;};
 
-			const int LoopEnd(){return m_LoopEnd;};
+			const unsigned int LoopEnd(){return m_LoopEnd;};
 			// value has to be an existing point!
-			void LoopEnd(const int value){m_LoopEnd = value;};
+			void LoopEnd(const unsigned int value){m_LoopEnd = value;};
 
 			const int NumOfPoints(){ return m_Points.size();};
 
@@ -396,7 +397,7 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument Class declaration
 		XMInstrument();
-		virtual ~XMInstrument();
+		~XMInstrument();
 
 		void Init();
 
@@ -421,8 +422,8 @@ namespace psycle
 			m_PanEnvelope = other.m_PanEnvelope;
 			m_InitPan = other.m_InitPan;
 			m_PanEnabled=other.m_PanEnabled;
-			m_PitchPanCenter=other.m_PitchPanCenter;
-			m_PitchPanSep=other.m_PitchPanSep;
+			m_NoteModPanCenter=other.m_NoteModPanCenter;
+			m_NoteModPanSep=other.m_NoteModPanSep;
 
 			// Pitch/Filter Envelope
 			m_PitchEnvelope = other.m_PitchEnvelope;
@@ -468,14 +469,14 @@ namespace psycle
 		const float VolumeFadeSpeed() { return m_VolumeFadeSpeed;};
 		void VolumeFadeSpeed(const float value){ m_VolumeFadeSpeed = value;};
 
-		const float Pan() { return m_InitPan;};
+		const float Pan() { return m_InitPan;};// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 		void Pan(const float pan) { m_InitPan = pan;};
 		const bool PanEnabled() { return m_PanEnabled;};
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;};
-		const compiler::uint8 PitchPanCenter() { return m_PitchPanCenter;};
-		void PitchPanCenter(const compiler::uint8 pan) { m_PitchPanCenter = pan;};
-		const compiler::sint8 PitchPanSep() { return m_PitchPanSep;};
-		void PitchPanSep(const compiler::sint8 pan) { m_PitchPanSep = pan;};
+		const compiler::uint8 NoteModPanCenter() { return m_NoteModPanCenter;};
+		void NoteModPanCenter(const compiler::uint8 pan) { m_NoteModPanCenter = pan;};
+		const compiler::sint8 NoteModPanSep() { return m_NoteModPanSep;};
+		void NoteModPanSep(const compiler::sint8 pan) { m_NoteModPanSep = pan;};
 
 		const compiler::uint8 FilterCutoff(){ return m_FilterCutoff;};
 		void FilterCutoff(const compiler::uint8 value){m_FilterCutoff = value;};
@@ -486,14 +487,14 @@ namespace psycle
 		const dsp::FilterType FilterType(){ return m_FilterType;};
 		void FilterType(const dsp::FilterType value){ m_FilterType = value;};
 
-		const compiler::uint8 RandomVolume(){return  m_RandomVolume;};
-		void RandomVolume(const compiler::uint8 value){m_RandomVolume = value;};
-		const compiler::uint8 RandomPanning(){return  m_RandomPanning;};
-		void RandomPanning(const compiler::uint8 value){m_RandomPanning = value;};
-		const compiler::uint8 RandomCutoff(){return m_RandomCutoff;};
-		void RandomCutoff(const compiler::uint8 value){m_RandomCutoff = value;};
-		const compiler::uint8 RandomResonance(){return m_RandomResonance;};
-		void RandomResonance(const compiler::uint8 value){m_RandomResonance = value;};
+		const float RandomVolume(){return  m_RandomVolume;};
+		void RandomVolume(const float value){m_RandomVolume = value;};
+		const float RandomPanning(){return  m_RandomPanning;};
+		void RandomPanning(const float value){m_RandomPanning = value;};
+		const float RandomCutoff(){return m_RandomCutoff;};
+		void RandomCutoff(const float value){m_RandomCutoff = value;};
+		const float RandomResonance(){return m_RandomResonance;};
+		void RandomResonance(const float value){m_RandomResonance = value;};
 
 		const NewNoteAction NNA() { return m_NNA;};
 		void NNA(const NewNoteAction value){ m_NNA = value;};
@@ -523,8 +524,8 @@ namespace psycle
 		// Paninng
 		bool m_PanEnabled;
 		float m_InitPan;					// Initial panFactor (if enabled) [-1..1]
-		compiler::uint8 m_PitchPanCenter;	// Note number for center pan position
-		compiler::sint8 m_PitchPanSep;		// -32..32. 1/256th of panFactor change per seminote.
+		compiler::uint8 m_NoteModPanCenter;	// Note number for center pan position
+		compiler::sint8 m_NoteModPanSep;		// -32..32. 1/256th of panFactor change per seminote.
 
 		compiler::uint8 m_FilterCutoff;		// Cutoff Frequency [0..127]
 		compiler::uint8 m_FilterResonance;	// Resonance [0..127]
@@ -532,14 +533,15 @@ namespace psycle
 		dsp::FilterType m_FilterType;		// Filter Type [0..4]
 
 		// Randomness. Applies on new notes.
-		compiler::uint8 m_RandomVolume;		// Random Volume % [ 0 -> No randomize. 100 = randomize full scale.]
-		compiler::uint8 m_RandomPanning;	// Random Panning  (same)
-		compiler::uint8 m_RandomCutoff;		// Random CutOff	(same)
-		compiler::uint8 m_RandomResonance;	// Random Resonance	(same)
+		float m_RandomVolume;		// Random Volume % [ 0.0 -> No randomize. 1.0 = randomize full scale.]
+		float m_RandomPanning;		// Random Panning  (same)
+		float m_RandomCutoff;		// Random CutOff	(same)
+		float m_RandomResonance;	// Random Resonance	(same)
 
-		NewNoteAction m_NNA;
+		NewNoteAction m_NNA; // Action to take on the playing voice when any new note comes in the same channel.
 		DCType m_DCT;
-		NewNoteAction m_DCA;
+		NewNoteAction m_DCA; // Action to take on the playing voice when a new note comes in the same channel 
+							 // and the element defined by m_DCT is the same. (like the same note value).
 
 		/// Table of mapped notes to samples
 		// (note number=first, sample number=second)
@@ -553,7 +555,7 @@ namespace psycle
 	class SampleList{
 	public:
 		SampleList(){top=0;};
-		virtual ~SampleList(){};
+		~SampleList(){};
 		int AddSample(XMInstrument::WaveData &wave)
 		{
 			if ( top+1<MAX_INSTRUMENTS)
@@ -581,7 +583,7 @@ namespace psycle
 	class InstrumentList {
 	public:
 		InstrumentList(){top=0;}
-		virtual ~InstrumentList(){};
+		~InstrumentList(){};
 		int AddIns(XMInstrument &ins)
 		{
 			if ( top+1<MAX_INSTRUMENTS)

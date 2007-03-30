@@ -243,6 +243,7 @@ IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 				// o_O`
 			}
 			UpdateOne();
+			mainView->SetFocus();
 		}
 
 		void CDefaultVstGui::OnCloseupCombo1() 

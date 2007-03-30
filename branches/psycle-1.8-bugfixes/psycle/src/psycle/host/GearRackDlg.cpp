@@ -638,14 +638,14 @@ NAMESPACE__BEGIN(psycle)
 				// and replace the index in any machine that pointed to this one.
 				for (int i=0; i < MAX_CONNECTIONS; i++)
 				{
-					if ( tmp1->_inputCon[i])
+					if ( tmp2->_inputCon[i])
 					{
-						Machine* cmp = Global::_pSong->_pMachine[tmp1->_inputMachines[i]];
+						Machine* cmp = Global::_pSong->_pMachine[tmp2->_inputMachines[i]];
 						cmp->_outputMachines[cmp->FindOutputWire(two)]=one;
 					}
-					if ( tmp1->_connection[i])
+					if ( tmp2->_connection[i])
 					{
-						Machine* cmp = Global::_pSong->_pMachine[tmp1->_outputMachines[i]];
+						Machine* cmp = Global::_pSong->_pMachine[tmp2->_outputMachines[i]];
 						cmp->_inputMachines[cmp->FindInputWire(two)]=one;
 					}
 				}

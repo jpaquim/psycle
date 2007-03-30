@@ -19,13 +19,13 @@ namespace psycle
 			virtual ~Player() throw();
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
-			/// Initial Loop. Read new line and Interpretate the Global commands.
+			/// Initial Loop. Read new line and execute Global commands/tweaks.
 			void ExecuteGlobalCommands(void);
 			/// Notify all machines that a new Tick() comes.
 			void NotifyNewLine(void);
-			/// Final Loop. Read new line for notes to send to the Machines
+			/// Final Loop. Read the line again for notes to send to the Machines
 			void ExecuteNotes(void);
-			/// Function to englobe all the three functions above.
+			/// Function to encapsulate all the three functions above.
 			void ExecuteLine();
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;

@@ -21,13 +21,13 @@
 //#include <psycle/engine/XMSampler.hpp>
 //#include <psycle/engine/plugin.hpp>
 #include "vsthost24.hpp"
-namespace seib{
+/*namespace seib{
 	namespace vst{
 		extern const char* hostCanDos [];
 		extern const char* plugCanDos [];
 	}
 }
-
+*/
 namespace psycle
 {
 	namespace host
@@ -138,6 +138,7 @@ namespace psycle
 
 			bool host::OnCanDo(CEffect &pEffect, const char *ptr)
 			{
+				using namespace seib::vst::HostCanDos;
 				bool value =  CVSTHost::OnCanDo(pEffect,ptr);
 				if (value) return value;
 				else if (
@@ -145,18 +146,18 @@ namespace psycle
 					//||	(!strcmp(ptr, hostCanDos[4] )) // "receiveVstMidiEvent",
 					//||	(!strcmp(ptr, hostCanDos[5] )) // "receiveVstTimeInfo",
 
-					(!strcmp(ptr, hostCanDos[6] )) // "reportConnectionChanges",
+					(!strcmp(ptr, canDoReportConnectionChanges )) // "reportConnectionChanges",
 					//||	(!strcmp(ptr, hostCanDos[7] )) // "acceptIOChanges",
-					||	(!strcmp(ptr, hostCanDos[8] )) // "sizeWindow",
+					||	(!strcmp(ptr, canDoSizeWindow )) // "sizeWindow",
 
 					//||	(!strcmp(ptr, hostCanDos[9] )) // "asyncProcessing",
 					//||	(!strcmp(ptr, hostCanDos[10] )) // "offline",
-					||	(!strcmp(ptr, hostCanDos[11] )) // "supplyIdle",
+//					||	(!strcmp(ptr, canDoSupplyIdle )) // "supplyIdle",
 					//||	(!strcmp(ptr, hostCanDos[12] )) // "supportShell",
-					||	(!strcmp(ptr, hostCanDos[13] )) // "openFileSelector"
+					||	(!strcmp(ptr, canDoOpenFileSelector )) // "openFileSelector"
 					//||	(!strcmp(ptr, hostCanDos[14] )) // "editFile",
-					||	(!strcmp(ptr, hostCanDos[15] )) // "closeFileSelector"
-					||	(!strcmp(ptr, hostCanDos[16] )) // "startStopProcess"
+					||	(!strcmp(ptr, canDoCloseFileSelector )) // "closeFileSelector"
+					||	(!strcmp(ptr, canDoStartStopProcess )) // "startStopProcess"
 					)
 					return true;
 				return false;                           /* per default, no.                  */
@@ -420,7 +421,7 @@ namespace psycle
 					trackNote[i].key = 255; // No Note.
 					trackNote[i].midichan = 0;
 				}
-				_sDllName=loadstruct.sFileName;
+				_sDllName= (char*)(loadstruct.pluginloader->sFileName);
 				char temp[64];
 				if (GetEffectName(temp) && temp[0])_sProductName=temp;
 				else if(GetProductString(temp) && temp[0]) _sProductName=temp;

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/* CVSTHost.cpp: implementation of the CVSTHost class (for VST SDK 2.4).     */
+/* CVSTHost.cpp: implementation for CVSTHost/CEffect classes (VST SDK 2.4).  */
 /* Work Derived from vsthost (1.16i).										 */
 /* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
@@ -15,8 +15,8 @@
 #include <project.private.hpp>
 #include "CVSTHost.Seib.hpp"                   /* private prototypes                */
 // Unneeded sources:
-#include "global.hpp" // for debug loggers.
-#include "machine.hpp"// for trhow.
+//#include "global.hpp" // for debug loggers.
+#include "machine.hpp"// for throw.
 
 #ifdef WIN32
 	#pragma warning(push)
@@ -34,6 +34,8 @@ namespace seib {
 		bool CFxBase::NeedsBSwap;
 		int CVSTHost::quantization = 0x40000000;
 		VstTimeInfo CVSTHost::vstTimeInfo;
+
+		CVSTHost * CVSTHost::pHost = NULL;      /* pointer to the one and only host  */
 
 		namespace exceptions
 		{
@@ -134,6 +136,7 @@ namespace seib {
 			const char* canDoBypass = "bypass"; ///< plug-in supports function #setBypass ()
 		}
 
+
 		/*===========================================================================*/
 		/* CFxBase class members                                                     */
 		/*===========================================================================*/
@@ -158,23 +161,31 @@ namespace seib {
 			version=org.version;
 			fxID=org.fxID;
 			fxVersion=org.fxVersion;
+			return *this;
 		}
-		template <class T>
-		void CFxBase::SwapBytes(T &l)
-		{	///\todo: could this be improved?
+		void CFxBase::SwapBytes(VstInt32 &l)
+		{
+			///\todo: could this be improved?
 			unsigned char *b = (unsigned char *)&l;
-			T intermediate =  ((T)b[0] << 24) |
-				((T)b[1] << 16) |
-				((T)b[2] << 8) |
-				(T)b[3];
+			VstInt32 intermediate =  ((VstInt32)b[0] << 24) |
+				((VstInt32)b[1] << 16) |
+				((VstInt32)b[2] << 8) |
+				(VstInt32)b[3];
 			l = intermediate;
+		}
+
+		void CFxBase::SwapBytes(float &f)
+		{
+			VstInt32 *pl = (VstInt32 *)&f;
+			SwapBytes(*pl);
 		}
 
 		template <class T>
 		bool CFxBase::Read(T &f,bool allowswap)	{ int i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap && allowswap) SwapBytes(f); return (bool)i; }
+		template <class T>
 		bool CFxBase::Write(T f, bool allowswap)	{ if (NeedsBSwap && allowswap) SwapBytes(f); int i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
-		void CFxBase::Rewind(int bytes) { fseek(pf,-bytes,SEEK_CUR); }
-		void CFxBase::Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
+		bool CFxBase::ReadArray(void* f,int size)	{ int i=fread(&f,size,1,pf); return (bool)i; }
+		bool CFxBase::WriteArray(void* f, int size)	{ int i=fwrite(&f,size,1,pf);  return (bool)i; }
 		bool CFxBase::ReadHeader()
 		{
 			VstInt32 chunkMagic(0),byteSize(0);
@@ -186,6 +197,7 @@ namespace seib {
 			Read(version);
 			Read(fxID);
 			Read(fxVersion);
+			return true;
 		}
 		bool CFxBase::WriteHeader()
 		{
@@ -195,6 +207,7 @@ namespace seib {
 			Write(version);
 			Write(fxID);
 			Write(fxVersion);
+			return true;
 		}
 
 		bool CFxBase::Load(const char *pszFile)
@@ -223,7 +236,8 @@ namespace seib {
 		/* CFxProgram class members                                                  */
 		/*===========================================================================*/
 
-		CFxProgram::CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool=isChunk=false, void*data=0):CFxBase(1,_fxID, _fxVersion)
+		CFxProgram::CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool isChunk, void*data)
+			:CFxBase(1,_fxID, _fxVersion)
 		{
 			Init();
 			if (!data)
@@ -234,8 +248,8 @@ namespace seib {
 			}
 			else
 			{
-				if (isChunk) SetCunk(data,size);
-				else SetParameters(data,size);
+				if (isChunk) SetChunk(data,size);
+				else SetParameters(static_cast<const float*>(data),size);
 			}
 		}
 		
@@ -269,7 +283,7 @@ namespace seib {
 		CFxProgram & CFxProgram::DoCopy(const CFxProgram &org)
 		{
 			CFxBase::DoCopy(org);
-			memcpy(prgName,org.prgName,sizeof(prgName))
+			memcpy(prgName,org.prgName,sizeof(prgName));
 			if (org.pChunk)
 			{
 				SetChunk(org.pChunk);
@@ -287,10 +301,10 @@ namespace seib {
 			if (nPars <=0 )
 				return false;
 			ParamMode();
-			float *pParams = new float[nPars];
-			if (!newpars)
+			pParams = new float[nPars];
+			if (!pParams)
 				return false;
-			numParams = nParams;
+			numParams = nPars;
 			return true;
 		}
 		bool CFxProgram::SetParameter(int nParm, float val)
@@ -309,42 +323,36 @@ namespace seib {
 			if (!SetNumParams(params))
 				return false;
 			memcpy(pParams,pnewparams,sizeof(pParams));
+			return true;
 		}
-		bool CFxProgram::SetChunkSize(vstInt32 size)
+		//Don't need to set size except if sizeof(chunk) isn't the size of your data.
+		bool CFxProgram::SetChunk(const void *chunk, VstInt32 size)
 		{
-			if (nPars <=0 )
+			return false;
+		}
+
+		bool CFxProgram::SetChunkSize(VstInt32 size)
+		{
+			if (size <=0 )
 				return false;
 			ChunkMode();
 			pChunk = new unsigned char[size];
 			return !!pChunk;
 
 		}
-		bool CFxProgram::SetChunk(void *chunk,vstInt32 size)
-		{
-			if(!chunk)
-				return false;
-			if (!size)
-				if (!SetChunkSize(sizeof(chunk)))
-					return false;
-			else
-				if (!SetChunkSize(size))
-					return false;
-			CopyChunk(chunk);
-			return true;
-		}
 
 		bool CFxProgram::LoadData()
 		{
 			CFxBase::LoadData();
 			Read(numParams);
-			Read(prgName);
+			ReadArray(prgName,sizeof(prgName));
 			if(IsChunk())
 			{
 				VstInt32 size;
 				Read(size);
 				if (!SetChunkSize(size))
 					return false;
-				Read(pCunk,false);
+				ReadArray(pChunk,size);
 			}
 			else
 			{
@@ -359,11 +367,12 @@ namespace seib {
 		{
 			CFxBase::SaveData();
 			Write(numParams);
-			Write(prgName);
+			WriteArray(prgName,sizeof(prgName));
 			if(IsChunk())
 			{
-				Write(GetChunkSize());
-				Write(pChunk,false);
+				const int size = GetChunkSize();
+				Write(size);
+				WriteArray(pChunk,size);
 			}
 			else
 			{
@@ -378,27 +387,18 @@ namespace seib {
 		/* CFxBank class members                                                     */
 		/*===========================================================================*/
 
-		/*****************************************************************************/
-		/* CFxBank : constructor                                                     */
-		/*****************************************************************************/
-
-		CFxBank::CFxBank(const char *pszFile)
+		CFxBank::CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, int _chunkSize, VOID*_data)
+			: CFxBase(2,_fxID, _fxVersion)
+			, numPrograms(_numPrograms)
 		{
-			Init();                                 /* initialize data areas             */
-			if (pszFile)                            /* if a file name has been passed    */
-				Load(pszFile);                    /* load the corresponding bank       */
-		}
-
-		CFxBank::CFxBank(int nPrograms, int nParams)
-		{
-			Init();                                 /* initialize data areas             */
-			SetSize(nPrograms, nParams);            /* set new size                      */
-		}
-
-		CFxBank::CFxBank(int nChunkSize)
-		{
-			Init();                                 /* initialize data areas             */
-			SetSize(nChunkSize);                    /* set new size                      */
+			currentProgram=0;
+			if (_chunkSize)
+			{
+				ChunkMode();
+				SetChunkSize(_chunkSize);
+				if (_data) SetChunk(_data);
+			}
+			else { ProgramMode(); pChunk=0; }
 		}
 
 		/*****************************************************************************/
@@ -407,7 +407,7 @@ namespace seib {
 
 		CFxBank::~CFxBank()
 		{
-			Unload();                               /* unload all data                   */
+			FreeMemory();                               /* unload all data                   */
 		}
 
 		/*****************************************************************************/
@@ -416,23 +416,26 @@ namespace seib {
 
 		void CFxBank::Init()
 		{
-			bBank = NULL;                           /* no bank data loaded               */
-			Unload();                               /* reset all parameters              */
+			pChunk=0;
+			numPrograms=0;
+			currentProgram=0;
+			programs.clear();
 		}
 
 
 		/*****************************************************************************/
-		/* Unload : removes a loaded bank from memory                                */
+		/* FreMemory : removes a loaded bank from memory                                */
 		/*****************************************************************************/
 
-		void CFxBank::Unload()
+		void CFxBank::FreeMemory()
 		{
-			if (bBank)
-				delete[] bBank;
-			*szFileName = '\0';                     /* reset file name                   */
-			bBank = NULL;                           /* reset bank pointer                */
-			nBankLen = 0;                           /* reset bank length                 */
-			bChunk = false;                         /* and of course it's no chunk.      */
+			if (pChunk)
+				delete[] pChunk;
+//			*szFileName = '\0';                     /* reset file name                   */
+			pChunk = 0;                           /* reset bank pointer                */
+//			nBankLen = 0;                           /* reset bank length                 */
+//			bChunk = false;                         /* and of course it's no chunk.      */
+			programs.clear();
 		}
 
 		/*****************************************************************************/
@@ -441,19 +444,16 @@ namespace seib {
 
 		CFxBank & CFxBank::DoCopy(const CFxBank &org)
 		{
-			unsigned char *nBank = NULL;
-			if (org.nBankLen)
+			CFxBase::DoCopy(org);
+			if (org.pChunk)
 			{
-				unsigned char *nBank = new unsigned char[org.nBankLen];
-				if (!nBank)
-					throw(int)1;
-				memcpy(nBank, org.bBank, org.nBankLen);
+				SetChunkSize(sizeof(org.pChunk));
+				SetChunk(org.pChunk);
 			}
-			Unload();                               /* remove previous data              */
-			bBank = nBank;                          /* and copy in the other one's       */
-			bChunk = org.bChunk;
-			nBankLen = org.nBankLen;
-			strcpy(szFileName, org.szFileName);
+			numPrograms=org.numPrograms;
+			currentProgram=org.currentProgram;
+
+			//strcpy(szFileName, org.szFileName);
 			return *this;
 		}
 
@@ -461,64 +461,13 @@ namespace seib {
 		/* SetSize : sets new size                                                   */
 		/*****************************************************************************/
 
-		bool CFxBank::SetSize(int nPrograms, int nParams)
+		bool CFxBank::SetChunkSize(VstInt32 size)
 		{
-			int nTotLen = sizeof(fxBank) - sizeof(fxProgram);
-			int nProgLen = sizeof(fxProgram) + (nParams - 1) * sizeof(float);
-			nTotLen += nPrograms * nProgLen;
-			unsigned char *nBank = new unsigned char[nTotLen];
+			unsigned char *nBank = new unsigned char[size];
 			if (!nBank)
 				return false;
 
-			Unload();
-			bBank = nBank;
-			nBankLen = nTotLen;
-			bChunk = false;
-
-			memset(nBank, 0, nTotLen);              /* initialize new bank               */
-			fxBank *pSet = (fxBank *)bBank;
-			pSet->chunkMagic = cMagic;
-			pSet->byteSize = 0;
-			pSet->fxMagic = bankMagic;
-			pSet->version = FxBankVersion;
-			pSet->numPrograms = nPrograms;
-
-			unsigned char *bProg = (unsigned char *)pSet->content.programs;
-			for (int i = 0; i < nPrograms; i++)
-			{
-				fxProgram * pProg = (fxProgram *)(bProg + i * nProgLen);
-				pProg->chunkMagic = cMagic;
-				pProg->byteSize = 0;
-				pProg->fxMagic = fMagic;
-				pProg->version = FxProgramVersion;
-				pProg->numParams = nParams;
-				for (int j = 0; j < nParams; j++)
-					pProg->content.params[j] = 0.0;
-			}
-			return true;
-		}
-
-		bool CFxBank::SetSize(int nChunkSize)
-		{
-			int nTotLen = sizeof(fxBank) + nChunkSize - 8;
-			unsigned char *nBank = new unsigned char[nTotLen];
-			if (!nBank)
-				return false;
-
-			Unload();
-			bBank = nBank;
-			nBankLen = nTotLen;
-			bChunk = true;
-
-			memset(nBank, 0, nTotLen);              /* initialize new bank               */
-			fxBank *pSet = (fxBank *)bBank;
-			pSet->chunkMagic = cMagic;
-			pSet->byteSize = 0;
-			pSet->fxMagic = chunkBankMagic;
-			pSet->version = FxBankVersion;
-			pSet->numPrograms = 1;
-			pSet->content.data.size = nChunkSize;
-
+			pChunk= nBank;
 			return true;
 		}
 
@@ -526,221 +475,40 @@ namespace seib {
 		/* LoadBank : loads a bank file                                              */
 		/*****************************************************************************/
 
-		bool CFxBank::Load(const char *pszFile)
+		bool CFxBank::LoadData()
 		{
-			FILE *fp = fopen(pszFile, "rb");        /* try to open the file              */
-			if (!fp)                                /* upon error                        */
-				return false;                         /* return an error                   */
-			bool brc = true;                        /* default to OK                     */
-			unsigned char *nBank = NULL;
-			try
+			Read(numPrograms);
+			if (version == 2) { Read(currentProgram); Forward(124); }
+			else Forward(128);
+
+			if (version == chunkBankMagic)
 			{
-				fseek(fp, 0, SEEK_END);               /* get file size                     */
-				size_t tLen = (size_t)ftell(fp);
-				rewind(fp);
-
-				nBank = new unsigned char[tLen];      /* allocate storage                  */
-				if (!nBank)
-					throw (int)1;
-				/* read chunk set to determine cnt.  */
-				if (fread(nBank, 1, tLen, fp) != tLen)
-					throw (int)1;
-				fxBank *pSet = (fxBank *)nBank;         /* position on set                   */
-				if (NeedsBSwap)                       /* eventually swap necessary bytes   */
-				{
-					SwapBytes(pSet->chunkMagic);
-					SwapBytes(pSet->byteSize);
-					SwapBytes(pSet->fxMagic);
-					SwapBytes(pSet->version);
-					SwapBytes(pSet->fxID);
-					SwapBytes(pSet->fxVersion);
-					SwapBytes(pSet->numPrograms);
-				}
-				if ((pSet->chunkMagic != cMagic) ||   /* if erroneous data in there        */
-					(pSet->version > FxBankVersion) ||
-					((pSet->fxMagic != bankMagic) &&
-					(pSet->fxMagic != chunkBankMagic)))
-					throw (int)1;                       /* get out                           */
-
-				if (pSet->fxMagic == bankMagic)
-				{
-					fxProgram * pProg = pSet->content.programs; /* position on 1st program           */
-					int nProg = 0;
-					while (nProg < pSet->numPrograms)   /* walk program list                 */
-					{
-						if (NeedsBSwap)                   /* eventually swap necessary bytes   */
-						{
-							SwapBytes(pProg->chunkMagic);
-							SwapBytes(pProg->byteSize);
-							SwapBytes(pProg->fxMagic);
-							SwapBytes(pProg->version);
-							SwapBytes(pProg->fxID);
-							SwapBytes(pProg->fxVersion);
-							SwapBytes(pProg->numParams);
-						}
-						/* if erroneous data                 */
-						if ((pProg->chunkMagic != cMagic)|| 
-							(pProg->fxMagic != fMagic))
-							throw (int)1;                   /* get out                           */
-						if (NeedsBSwap)                   /* if necessary                      */
-						{                               /* swap all parameter bytes          */
-							int j;
-							for (j = 0; j < pProg->numParams; j++)
-								SwapBytes(pProg->content.params[j]);
-						}
-						unsigned char *pNext = (unsigned char *)(pProg + 1);
-						pNext += (sizeof(float) * (pProg->numParams - 1));
-						if (pNext > nBank + tLen)         /* VERY simple fuse                  */
-							throw (int)1;
-
-						pProg = (fxProgram *)pNext;
-						nProg++;
-					}
-				}
-				/* if it's a chunk file              */
-				else if (pSet->fxMagic == chunkBankMagic)
-				{
-					fxBank * pCSet = (fxBank *)nBank;
-					if (NeedsBSwap)                     /* eventually swap necessary bytes   */
-					{
-						SwapBytes(pCSet->content.data.size);
-						/* size check - must not be too large*/
-						if (pCSet->content.data.size + sizeof(*pCSet) - 8 > tLen)
-							throw (int)1;
-					}
-				}
-
-				Unload();                             /* otherwise remove eventual old data*/
-				bBank = nBank;                        /* and put in new data               */
-				nBankLen = (int)tLen;
-				bChunk = (pSet->fxMagic == chunkBankMagic);
+				VstInt32 size;
+				Read(size);
+				SetChunkSize(size);
+				ReadArray(pChunk,size);
 			}
-			catch(...)
+			else
 			{
-				brc = false;                          /* if any error occured, say NOPE    */
-				if (nBank)                            /* and remove loaded data            */
-					delete[] nBank;
+				for (int i=0; i< numPrograms; i++)
+				{
+					///\todo: 
+					/// There's one problem. i can't use LoadData() from CFxProgram the way it is now.
+					//programs[i]=
+				}
 			}
-
-			fclose(fp);                             /* close the file                    */
-			return brc;                             /* and return                        */
+			return true;
 		}
 
 		/*****************************************************************************/
 		/* SaveBank : save bank to file                                              */
 		/*****************************************************************************/
 
-		bool CFxBank::Save(const char *pszFile)
+		bool CFxBank::SaveData()
 		{
-			if (!IsLoaded())
-				return false;
-			/* create internal copy for mod      */
-			unsigned char *nBank = new unsigned char[nBankLen];
-			if (!nBank)                             /* if impossible                     */
-				return false;
-			memcpy(nBank, bBank, nBankLen);
-
-			fxBank *pSet = (fxBank *)nBank;           /* position on set                   */
-			int numPrograms = pSet->numPrograms;
-			if (NeedsBSwap)                         /* if byte-swapping needed           */
-			{
-				SwapBytes(pSet->chunkMagic);
-				SwapBytes(pSet->byteSize);
-				SwapBytes(pSet->fxMagic);
-				SwapBytes(pSet->version);
-				SwapBytes(pSet->fxID);
-				SwapBytes(pSet->fxVersion);
-				SwapBytes(pSet->numPrograms);
-			}
-			if (bChunk)
-			{
-				fxBank *pCSet = (fxBank *)nBank;
-				if (NeedsBSwap)                       /* if byte-swapping needed           */
-					SwapBytes(pCSet->content.data.size);
-			}
-			else
-			{
-				fxProgram * pProg = pSet->content.programs;   /* position on 1st program           */
-				int numParams = pProg->numParams;
-				int nProg = 0;
-				while (nProg < numPrograms)           /* walk program list                 */
-				{
-					if (NeedsBSwap)                     /* eventually swap all necessary     */
-					{
-						SwapBytes(pProg->chunkMagic);
-						SwapBytes(pProg->byteSize);
-						SwapBytes(pProg->fxMagic);
-						SwapBytes(pProg->version);
-						SwapBytes(pProg->fxID);
-						SwapBytes(pProg->fxVersion);
-						SwapBytes(pProg->numParams);
-						for (int j = 0; j < numParams; j++)
-							SwapBytes(pProg->content.params[j]);
-					}
-					unsigned char *pNext = (unsigned char *)(pProg + 1);
-					pNext += (sizeof(float) * (numParams - 1));
-					if (pNext > nBank + nBankLen)       /* VERY simple fuse                  */
-						break;
-
-					pProg = (fxProgram *)pNext;
-					nProg++;
-				}
-			}
-
-			bool brc = true;                        /* default to OK                     */
-			FILE *fp = NULL;
-			try
-			{
-				fp = fopen(pszFile, "wb");            /* try to open the file              */
-				if (!fp)                              /* upon error                        */
-					throw (int)1;                       /* return an error                   */
-				if (fwrite(nBank, 1, nBankLen, fp) != (size_t)nBankLen)
-					throw (int)1;
-			}
-			catch(...)
-			{
-				brc = false;
-			}
-			if (fp)
-				fclose(fp);
-			delete[] nBank;
-
-			return brc;
-		}
-
-		/*****************************************************************************/
-		/* GetProgram : returns pointer to one of the loaded programs                */
-		/*****************************************************************************/
-
-		fxProgram * CFxBank::GetProgram(int nProgNum)
-		{
-			if ((!IsLoaded()) || (bChunk))          /* if nothing loaded or chunk file   */
-				return NULL;                          /* return OUCH                       */
-
-			fxBank *pSet = (fxBank *)bBank;           /* position on set                   */
-			fxProgram * pProg = pSet->content.programs;     /* position on 1st program           */
-		#if 1
-			int nProgLen = sizeof(fxProgram) + (pProg->numParams - 1) * sizeof(float);
-			unsigned char *pThatProg = ((unsigned char *)pProg) + (nProgNum * nProgLen);
-			pProg = (fxProgram *)pThatProg;
-		#else
-			/*---------------------------------------------------------------------------*/
-			/* presumably, the following logic is overkill; if all programs have the     */
-			/* same number of parameters, a simple multiplication would do.              */
-			/* But that's not stated anywhere in the VST SDK...                          */
-			/*---------------------------------------------------------------------------*/
-			int i;
-			for (i = 0; i < nProgNum; i++)
-			{
-				unsigned char *pNext = (unsigned char *)(pProg + 1);
-				pNext += (sizeof(float) * (pProg->numParams - 1));
-				if (pNext > bBank + nBankLen)         /* VERY simple fuse                  */
-					return NULL;
-
-				pProg = (fxProgram *)pNext;
-			}
-		#endif
-			return pProg;
+			///\todo
+			/// There are two problems. One, use WriteData() from CFxProgram. the other, write the chunk size.
+			return false;
 		}
 
 		/*===========================================================================*/
@@ -792,7 +560,7 @@ namespace seib {
 			ploader=loadstruct.pluginloader;
 
 		#ifdef WIN32
-			char const * name = loadstruct.sFileName;
+			char const * name = (char*)(loadstruct.pluginloader->sFileName);
 			char const * const p = strrchr(name, '\\');
 			if (p)
 			{
@@ -805,9 +573,6 @@ namespace seib {
 			}
 			else { sDir = new char[1]; ((char*)sDir)[0]='\0'; }
 
-//			sFileName = new char[strlen(name) + 1];
-//			if (sFileName)
-//				strcpy(sFileName, name);
 		#elif MAC
 			// yet to be done
 		#endif
@@ -816,9 +581,9 @@ namespace seib {
 			// I am unsure what other hosts use for resvd1 and resvd2
 			aEffect->resvd1 = ToVstPtr(this);
 
+			SetSampleRate(CVSTHost::pHost->GetSampleRate()); /* adjust its sample rate            */
+			SetBlockSize(CVSTHost::pHost->GetBlockSize());
 			Open();                     /* open the effect                   */
-			SetSampleRate(loadstruct.pHost->GetSampleRate()); /* adjust its sample rate            */
-			SetBlockSize(loadstruct.pHost->GetBlockSize());
 			//6 :        Host to Plug, canDo ( bypass )   returned : 0
 			//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
 
@@ -840,10 +605,6 @@ namespace seib {
 			{
 				delete[] sDir;	sDir = NULL;
 			}
-//			if (sFileName)                              /* reset name                 */
-//			{
-//				delete[] sFileName;	sFileName = NULL;
-//			}
 		#elif MAC
 			// yet to be done!
 		#endif
@@ -855,18 +616,9 @@ namespace seib {
 
 		bool CEffect::LoadBank(const char *name)
 		{
-			try
-			{
-				CFxBank fx(name);                     /* load the bank                     */
-				if (!fx.IsLoaded())                   /* if error loading                  */
-					throw (int)1;
-			}
-			catch(...)                              /* if any error occured              */
-			{
-				return false;                         /* return NOT!!!                     */
-			}
+			//BeginLoadBank()//EndLoadBank
+			return false;                         /* return NOT!!!                     */
 
-			return true;                            /* pass back OK                      */
 		}
 
 		/*****************************************************************************/
@@ -962,8 +714,6 @@ namespace seib {
 		/* CVSTHost class members                                                    */
 		/*===========================================================================*/
 
-		CVSTHost * CVSTHost::pHost = NULL;      /* pointer to the one and only host  */
-
 		/*****************************************************************************/
 		/* CVSTHost : constructor                                                    */
 		/*****************************************************************************/
@@ -989,6 +739,8 @@ namespace seib {
 			vstTimeInfo.samplesToNextClock = 0;
 			vstTimeInfo.flags = 0;
 
+			loadingShellId = 0;
+			loadingEffect = false;
 			pHost = this;                           /* install this instance as the one  */
 		}
 
@@ -998,7 +750,7 @@ namespace seib {
 
 		CVSTHost::~CVSTHost()
 		{
-			if (pHost == this)                      /* if we're the chosen one           */
+			if (pHost == this)                      /* if we are the chosen one           */
 				pHost = NULL;                         /* remove ourselves from pointer     */
 		}
 
@@ -1006,7 +758,7 @@ namespace seib {
 		/* LoadPlugin : loads and initializes a plugin                               */
 		/*****************************************************************************/
 
-		CEffect* CVSTHost::LoadPlugin(const char * sName)
+		CEffect* CVSTHost::LoadPlugin(const char * sName,VstInt32 shellIdx)
 		{
 			PluginLoader* loader = new PluginLoader;
 			if (!loader->loadLibrary(sName))
@@ -1015,9 +767,8 @@ namespace seib {
 				std::ostringstream s; s
 					<< "Couldn't open the library: " << sName << std::endl;
 				throw psycle::host::exceptions::library_errors::loading_error(s.str());
-//				delete loader;
-//				return 0;
 			}
+
 			PluginEntryProc mainEntry = loader->getMainEntry ();
 			if(!mainEntry)
 			{
@@ -1025,10 +776,10 @@ namespace seib {
 				std::ostringstream s; s
 					<< "couldn't locate the main entry to VST: " << sName << std::endl;
 					throw psycle::host::exceptions::library_errors::loading_error(s.str());
-//				delete loader;
-//				return 0;
 			}
 
+			loadingEffect = true;
+			loadingShellId = shellIdx;
 			AEffect* effect = mainEntry (AudioMasterCallback);
 			if (effect && (effect->magic != kEffectMagic))
 			{
@@ -1039,18 +790,15 @@ namespace seib {
 			{
 				LoadedAEffect loadstruct;
 				loadstruct.aEffect = effect;
-				loadstruct.pHost = pHost;
 				loadstruct.pluginloader = loader;
-				loadstruct.sFileName = sName;
-				return CreateEffect(loadstruct);
+				CEffect*neweffect = CreateEffect(loadstruct);
+				loadingEffect=false;
+				return neweffect;
 			}
 			delete loader;
 			std::ostringstream s; s
 				<< "VST main call returned a null/wrong AEffect: " << sName << std::endl;
 			throw psycle::host::exceptions::library_errors::loading_error(s.str());
-			
-//			delete loader;
-//			return 0;
 		}
 
 
@@ -1168,14 +916,18 @@ namespace seib {
 			CEffect *pEffect=0;
 			bool fakeeffect=false;
 
-			// audioMasterVersion is called when the effect hasn't been created yet, so it is allowed to call audioMaster with a null effect.
-			if ( opcode != audioMasterVersion)
+			if (pHost->loadingEffect)
+			{
+				fakeeffect = true;
+				pEffect = pHost->CreateEffect(effect);
+			}
+			else
 			{
 				if ( !effect )
 				{
 					std::stringstream s; s
 						<< "AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin)" << std::endl
-						<< "opcode is number " << exceptions::dispatch_errors::operation_description(opcode)
+						<< "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
 						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
@@ -1191,18 +943,22 @@ namespace seib {
 
 				if ( !pEffect ) 
 				{
-					char name[65]={0};
-					bool read=false;;
-					//1279872582
-					if ( effect->uniqueID != 1315915110) // rm III seems to generate the strings dynamically, and they aren't ready here.
+					char name[5]={0};
+					//bool read=false;
+					memcpy(name,&(effect->uniqueID),4);
+					name[4]='\0';
+
+/*					if ( effect->uniqueID != CCONST("NoEf")) // How good is a plugin that calls an audiomaster function before identifying itself?
 					{
 						read =effect->dispatcher(effect,effGetEffectName,0,0,name,0);
 						if (!read) read = effect->dispatcher(effect,effGetProductString,0,0,name,0);
 						if (!read) memset(name,0,sizeof(name));
 					}
+					else strcpy(name,"Unknown Effect");
+*/
 					std::stringstream s; s
 						<< "AudioMaster call, with unknown pEffect (most probably, a call from the plugin constructor)" << std::endl
-						<< "Aeffect: " << name << "opcode is number " << exceptions::dispatch_errors::operation_description(opcode)
+						<< "Aeffect: " << name << "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
 						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
@@ -1215,9 +971,9 @@ namespace seib {
 					//	the created object, you need to be careful what functions are called within the constructor of the
 					//	plug-in. You may be talking but no-one is listening.
 					// [/QUOTE]
-					// The truth is that most plugins call different audioMaster operations, and some even disallowed operations,
-					// so this tries to alleviate this problem, as much as it can.
-
+					// The truth is that most plugins call different audioMaster operations, and some even disallowed operations (WantEvents!),
+					// so this tries to alleviate the- problem, as much as it can.
+					
 					fakeeffect=true;
 					pEffect= pHost->CreateEffect(effect);
 				}
@@ -1232,7 +988,8 @@ namespace seib {
 			case audioMasterVersion :
 				return pHost->OnGetVSTVersion();
 			case audioMasterCurrentId :
-				result = pHost->OnCurrentId(*pEffect);
+				if (pHost->loadingEffect) result = pHost->loadingShellId;
+				else result = pHost->OnCurrentId(*pEffect);
 				if (fakeeffect )delete pEffect;
 				return result;
 			case audioMasterIdle :
@@ -1442,10 +1199,11 @@ namespace seib {
 
 		bool CVSTHost::OnCanDo(CEffect &pEffect, const char *ptr)
 		{
+			using namespace HostCanDos;
 			// For the host, according to audioeffectx.cpp , "!= 0 -> true", so there isn't "-1 : can't do".
-			if (	(!strcmp(ptr, hostCanDos[0] )) // "sendVstEvents"
-				||	(!strcmp(ptr, hostCanDos[1] )) // "sendVstMidiEvent"
-				||	(!strcmp(ptr, hostCanDos[2] )) // "sendVstTimeInfo",
+			if (	(!strcmp(ptr, canDoSendVstEvents )) // "sendVstEvents"
+				||	(!strcmp(ptr, canDoSendVstMidiEvent )) // "sendVstMidiEvent"
+				||	(!strcmp(ptr, canDoSendVstTimeInfo )) // "sendVstTimeInfo",
 				//||	(!strcmp(ptr, hostCanDos[3] )) // "receiveVstEvents",
 				//||	(!strcmp(ptr, hostCanDos[4] )) // "receiveVstMidiEvent",
 				//||	(!strcmp(ptr, hostCanDos[5] )) // "receiveVstTimeInfo",

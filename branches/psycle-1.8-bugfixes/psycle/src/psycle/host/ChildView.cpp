@@ -1742,7 +1742,14 @@ NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Module Songs\0*.xm;*.it;*.s3m\0FastTracker II Songs\0*.xm\0Impulse Tracker Songs\0*.it\0Scream Tracker Songs\0*.s3m\0All\0*.*\0";
+			ofn.lpstrFilter =
+				"All Module Songs (*.xm *.it *.s3m *.mod)" "\0" "*.xm;*.it;*.s3m;*.mod" "\0"
+				"FastTracker II Songs (*.xm)"              "\0" "*.xm"                  "\0"
+				"Impulse Tracker Songs (*.it)"             "\0" "*.it"                  "\0"
+				"Scream Tracker Songs (*.s3m)"             "\0" "*.s3m"                 "\0"
+				"Original Mod Format Songs (*.mod)"        "\0" "*.mod"                 "\0"
+				"All (*)"                                  "\0" "*"                     "\0"
+				;
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -1831,6 +1838,23 @@ NAMESPACE__BEGIN(psycle)
 							Global::_pSong->Comment
 							);
 						MessageBox(buffer, "S3M file imported", MB_OK);
+					} else if (ext.CompareNoCase("MOD") == 0)
+					{
+						MODSongLoader modfile;
+						modfile.Open(ofn.lpstrFile);
+						Global::_pSong->New();
+						editPosition=0;
+						modfile.Load(*_pSong);
+						modfile.Close();
+						char buffer[512];		
+						std::sprintf
+							(
+							buffer,"%s\n\n%s\n\n%s",
+							Global::song().Name,
+							Global::song().Author,
+							Global::song().Comment
+							);
+						MessageBox(buffer, "MOD file imported", MB_OK);
 					}
 				}
 

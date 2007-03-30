@@ -188,6 +188,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
+				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[LastType0],TVGN_CARET);
 			}
 			else
@@ -239,6 +240,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
+				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[LastType1],TVGN_CARET);
 			}
 			Outputmachine = -1;
@@ -295,6 +297,19 @@ NAMESPACE__BEGIN(psycle)
 				m_dllnameLabel.SetWindowText("Internal Machine");
 				m_versionLabel.SetWindowText("V1.0");
 				Outputmachine = MACH_DUPLICATOR;
+				OutBus = true;
+				LastType0 = 0;
+				LastType1 = 0;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+			}
+			if (tHand == hInt[4])
+			{
+				m_nameLabel.SetWindowText("Send-Return Mixer");
+				m_descLabel.SetWindowText("Allows to mix the audio with a typical mixer table, with send/return effects");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V1.0");
+				Outputmachine = MACH_MIXER;
 				OutBus = true;
 				LastType0 = 0;
 				LastType1 = 0;

@@ -7,9 +7,9 @@ NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		class CChildView;
 
-		#define MAX_SCOPE_BANDS 64
+		#define MAX_SCOPE_BANDS 128
 		#define SCOPE_BUF_SIZE 4096
-		#define SCOPE_SPEC_SAMPLES	256
+		#define SCOPE_SPEC_SAMPLES	512
 
 		class Song;
 
@@ -68,6 +68,7 @@ NAMESPACE__BEGIN(psycle)
 		protected:
 			inline int GetY(float f);
 			void SetMode();
+			void InitSpectrum();
 			CChildView* m_pParent;
 			CBitmap* bufBM;
 			CBitmap* clearBM;
@@ -77,12 +78,14 @@ NAMESPACE__BEGIN(psycle)
 			CPen linepenbR;
 			CRect rc;
 			CFont font;
-			CFont* oldFont;
 			BOOL hold;
 			BOOL clip;
 			int pos;
 			int bar_heightsl[MAX_SCOPE_BANDS];
 			int bar_heightsr[MAX_SCOPE_BANDS];
+			float sth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
+			float cth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
+			float heightcompensation[MAX_SCOPE_BANDS];
 			// Generated message map functions
 			//{{AFX_MSG(CWireDlg)
 			virtual BOOL OnInitDialog();

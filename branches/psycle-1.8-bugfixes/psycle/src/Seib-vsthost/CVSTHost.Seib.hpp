@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/* CVSTHost.hpp: interface for the CVSTHost class (for VST SDK 2.4).		 */
+/* CVSTHost.hpp: interface for CVSTHost/CEffect classes (for VST SDK 2.4).	 */
 /* Work Derived from vsthost (1.16i).										 */
 /* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
@@ -20,12 +20,45 @@
 
 namespace seib {
 	namespace vst {
+		/*! hostCanDos strings Plug-in -> Host */
+		namespace HostCanDos
+		{
+			extern const char* canDoSendVstEvents;
+			extern const char* canDoSendVstMidiEvent;
+			extern const char* canDoSendVstTimeInfo;
+			extern const char* canDoReceiveVstEvents;
+			extern const char* canDoReceiveVstMidiEvent;
+			extern const char* canDoReportConnectionChanges;
+			extern const char* canDoAcceptIOChanges;
+			extern const char* canDoSizeWindow;
+			extern const char* canDoOffline;
+			extern const char* canDoOpenFileSelector;
+			extern const char* canDoCloseFileSelector;
+			extern const char* canDoStartStopProcess;
+			extern const char* canDoShellCategory;
+			extern const char* canDoSendVstMidiEventFlagIsRealtime;
+		}
 
+		//-------------------------------------------------------------------------------------------------------
+		/*! plugCanDos strings Host -> Plug-in */
+		namespace PlugCanDos
+		{
+			extern const char* canDoSendVstEvents;
+			extern const char* canDoSendVstMidiEvent;
+			extern const char* canDoReceiveVstEvents;
+			extern const char* canDoReceiveVstMidiEvent;
+			extern const char* canDoReceiveVstTimeInfo;
+			extern const char* canDoOffline;
+			extern const char* canDoMidiProgramNames;
+			extern const char* canDoBypass;
+		}
 		/*****************************************************************************/
 		/* CFxBase : base class for FX Bank / Program Files                          */
 		/*****************************************************************************/
 		class CFxBase
 		{
+		protected:
+			CFxBase(){}
 		public:
 			CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion);
 			CFxBase(const char *pszFile);
@@ -46,7 +79,12 @@ namespace seib {
 			virtual bool SaveData() { return WriteHeader(); }
 			template <class T>
 			bool Read(T &f,bool allowswap=true);
+			template <class T>
 			bool Write(T f,bool allowswap=true);
+			bool ReadArray(void *f,int size);	
+			bool WriteArray(void *f, int size);
+			void Rewind(int bytes) { fseek(pf,-bytes,SEEK_CUR); }
+			void Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
 			bool ReadHeader();
 			bool WriteHeader();
 		private:
@@ -54,8 +92,8 @@ namespace seib {
 		private:
 			bool Load(const char *pszFile);
 			FILE* pf;
-			template <class T>
-			void SwapBytes(T &f);
+			void SwapBytes(VstInt32 &f);
+			void SwapBytes(float &f);
 		};
 
 		/*****************************************************************************/
@@ -68,8 +106,8 @@ namespace seib {
 			// Create a CFxProgram from parameters.
 			// If data==0 , create an empty Program of size "size", else, copy the contents of "data" to the new arrays.
 			// isChunk tells if this is going to act as a regular program or a chunk one.
-			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool=isChunk=false, void*data=0):CFxBase(1,_fxID, _fxVersion);
-			CFxProgram(CFxProgram const &org){ DoCopy(org); }
+			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool isChunk=false, void*data=0);
+			CFxProgram(CFxProgram const &org):CFxBase(){ DoCopy(org); }
 			virtual ~CFxProgram();
 			CFxProgram & operator=(CFxProgram const &org) { FreeMemory(); return DoCopy(org); }
 
@@ -106,9 +144,10 @@ namespace seib {
 			void ChunkMode() { FreeMemory(); fxMagic = chunkPresetMagic; }
 			void ParamMode() { FreeMemory(); fxMagic = fMagic; }
 			bool SetParameters(const float* pnewparams,int params);
+			//Don't need to set size except if sizeof(chunk) isn't the size of your data.
 			bool SetChunk(const void *chunk, VstInt32 size=0);
 			bool SetNumParams(VstInt32 nPars);
-			void SetChunkSize(VstInt32 size);
+			bool SetChunkSize(VstInt32 size);
 		};
 
 
@@ -119,72 +158,52 @@ namespace seib {
 		class CFxBank : public CFxBase
 		{
 		public:
-			CFxBank(const char *pszFile = 0):CFxBase(pszFile){ }
+			CFxBank(const char *pszFile = 0):CFxBase(pszFile){  }
 			// Create a CFxBank from parameters.
-			// If isChunk == false, it creates and empty bank of "size" programs, and data is ignored.
-			// else, creates a chunk of size "size", and copies the contents of "data" if it is not zero.
-			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool=isChunk=false, void*data=0):CFxBase(2,_fxID, _fxVersion);
+			// If chunkSize is zero, the Bank is created as a regular bank of numPrograms. data is ignored.
+			// else, creates a chunk of size "chunkSize", and copies the contents of "data" if it is not zero.
+			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, int _chunkSize=0, void*_data=0);
 			CFxBank(CFxBank const &org) { DoCopy(org); }
 			virtual ~CFxBank();
 			CFxBank & operator=(CFxBank const &org) { FreeMemory(); return DoCopy(org); }
-		public:
-			virtual bool IsLoaded() { return !!bBank; }
-
-			bool IsChunk() { return !!bChunk; }
 
 			// access functions
-		public:
 			long GetNumPrograms() { return numPrograms; }
-			long GetChunkSize() { if (!bChunk) return 0; return ((fxBank *)bBank)->content.data.size; }
-			void *GetChunk() { if (!bChunk) return 0; return ((fxBank *)bBank)->content.data.chunk; }
-			//Don't need to set size except if sizeof(chunk) isn't the size of your data.
-			bool SetChunk(void *chunk,VstInt32 size=0) { if (!bChunk) return false; memcpy(((fxBank *)bBank)->content.data.chunk, chunk, ((fxBank *)bBank)->content.data.size); return true; }
+			
+			long GetChunkSize() { sizeof(pChunk); }
+			const void *GetChunk() { return pChunk; }
+			// Copy the data from "chunk" to the internal chunk. Size of the chunk is set at construction time
+			bool SetChunk(const void *chunk) { if(!chunk) return false;  memcpy(pChunk,chunk,sizeof(pChunk)); return true; }
+			bool IsChunk() { return !!pChunk; }
 
-			fxProgram * GetProgram(int nProgNum);
-			char * GetProgramName(int nProgram)
+			// if nProgNum is not specified (i.e, it is -1) , currentProgram is used as index.
+			const CFxProgram * GetProgram(VstInt32 nProgNum=-1)
 			{
-				fxProgram *p = GetProgram(nProgram);
-				if (!p)
-					return NULL;
-				return p->prgName;
+				if ( nProgNum==-1) return &programs[currentProgram];
+				else if (nProgNum<numPrograms) return &programs[nProgNum];
 			}
-			void SetProgramName(int nProgram, char *name = "")
-			{
-				fxProgram *p = GetProgram(nProgram);
-				if (!p)
-					return;
-				strncpy(p->prgName, name, sizeof(p->prgName));
-				p->prgName[sizeof(p->prgName)-1] = '\0';
-			}
-			float GetProgParm(int nProgram, int nParm)
-			{
-				fxProgram *p = GetProgram(nProgram);
-				if (!p || nParm > p->numParams)
-					return 0;
-				return p->content.params[nParm];
-			}
-			bool SetProgParm(int nProgram, int nParm, float val = 0.0)
-			{
-				fxProgram *p = GetProgram(nProgram);
-				if (!p || nParm > p->numParams)
-					return false;
-				if (val < 0.0)
-					val = 0.0;
-				if (val > 1.0)
-					val = 1.0;
-				p->content.params[nParm] = val;
-				return true;
-			}
+			void SetProgramIndex(VstInt32 nProgNum) { if (nProgNum < numPrograms ) currentProgram = nProgNum; }
+			VstInt32 GetProgramIndex() { return currentProgram;	}
+
 
 		protected:
 			VstInt32 numPrograms;
-			VstInt32 currentProgram
+			VstInt32 currentProgram;
 			unsigned char * pChunk;
-			CFxProgram* pPrograms
+			std::vector<CFxProgram> programs;
 
 		protected:
 			void Init();
 			CFxBank & DoCopy(CFxBank const &org);
+			bool SetChunkSize(VstInt32 size);
+			void FreeMemory();
+			virtual bool LoadData();
+			virtual bool SaveData();
+
+		private:
+			void ChunkMode() { FreeMemory(); fxMagic = chunkBankMagic; }
+			void ProgramMode() { FreeMemory(); fxMagic = bankMagic; }
+
 		};
 
 		//-------------------------------------------------------------------------------------------------------
@@ -195,9 +214,11 @@ namespace seib {
 		struct PluginLoader
 		{
 			void* module;
+			void* sFileName;
 
 			PluginLoader ()
 				: module (0)
+				, sFileName (0)
 			{}
 
 			virtual ~PluginLoader ()
@@ -211,12 +232,23 @@ namespace seib {
 					CFRelease ((CFBundleRef)module);
 				#endif
 				}
+				if (sFileName)
+				{
+				#if _WIN32
+					delete sFileName;
+				#elif TARGET_API_MAC_CARBON
+					///\todo:
+				#endif
+				}
 			}
 
 			bool loadLibrary (const char* fileName)
 			{
 			#if _WIN32
 				module = LoadLibrary (fileName);
+				sFileName = new char[strlen(fileName) + 1];
+				if (sFileName)
+					strcpy((char*)sFileName, fileName);
 			#elif TARGET_API_MAC_CARBON
 				CFStringRef fileNameString = CFStringCreateWithCString (NULL, fileName, kCFStringEncodingUTF8);
 				if (fileNameString == 0)
@@ -251,8 +283,8 @@ namespace seib {
 		};
 		/*****************************************************************************/
 		/* LoadedAEffect:															 */
-		/*		Struct definition to ease  CEffect creation/destruction				 */
-		/* Sometimes it might be preferable to create the CEffect *after* the        */
+		/*		Struct definition to ease  CEffect creation/destruction.			 */
+		/* Sometimes it might be prefferable to create the CEffect *after* the       */
 		/* AEffect has been loaded, in order to have different subclasses for        */
 		/* different types. Yet, it might be necessary that the plugin frees the     */
 		/* library once it is destroyed. This is why it requires this information	 */
@@ -262,9 +294,7 @@ namespace seib {
 		typedef struct LoadedAEffect LoadedAEffect;
 		struct LoadedAEffect {
 			AEffect *aEffect;
-			CVSTHost *pHost;
 			PluginLoader *pluginloader;
-			const char *sFileName;
 		};
 
 		/*****************************************************************************/
@@ -273,28 +303,13 @@ namespace seib {
 		class CEffect
 		{
 		public:
-			// Do not use the AEffect constructor on a usual basis.
+			// Try to avoid to use the AEffect constructor. It acts as a wrapper then, not as an object.
 			CEffect(AEffect *effect);
 			CEffect(LoadedAEffect &loadstruct);
 			virtual ~CEffect();
 		protected:
 			virtual void Load(LoadedAEffect &loadstruct);
 			virtual void Unload();
-
-		protected:
-			AEffect *aEffect;
-			PluginLoader* ploader;
-			void *sDir;
-//		#ifdef WIN32
-//			char *sFileName;
-//		#elif MAC
-//			// yet to do
-//			// no idea how things look here...
-//		#endif
-
-			bool bEditOpen;
-			bool bNeedIdle;
-			bool bWantMidi;
 
 		public:
 			virtual bool LoadBank(const char *name);
@@ -329,7 +344,9 @@ namespace seib {
 
 			// the real plugin ID.
 			VstInt32 uniqueId()		{	if (!aEffect)	throw (int)1;	return aEffect->uniqueID;		}
-			// version() is rarely used (from my experience) with VST2, in favour of GetVendorVersion(). Yet, it hasn't been deprecated in 2.4.
+			VstInt32 getShellId()	{	return iShellUniqueID;		}
+			VstInt32 setShellId(VstInt32 newid)	{	iShellUniqueID = newid;		}
+			// version() is rarely used (from my experience) in VST2x, in favour of GetVendorVersion(). Yet, it hasn't been deprecated in 2.4.
 			VstInt32 version()		{	if (!aEffect)	throw (int)1;	return aEffect->version;		}
 			VstInt32 initialDelay() {	if (!aEffect)	throw (int)1;	return aEffect->initialDelay;	}
 
@@ -476,14 +493,24 @@ namespace seib {
 			virtual bool OnUpdateDisplay() { return false; }
 			virtual void * OnOpenWindow(VstWindow* window) { return 0; }
 			virtual bool OnCloseWindow(VstWindow* window) { return false; }
-			virtual bool IsInputConnected(int input) { return true; }
-			virtual bool IsOutputConnected(int input) { return true; }
+			virtual bool IsInputConnected(int input) { return false; } //Note that false means connected, for compatibility with VST 1.0
+			virtual bool IsOutputConnected(int input) { return false; }// ""
 			// AEffect asks host about its input/outputspeakers.
 			virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
 			virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
 			// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 			virtual bool OnIOChanged() { return false; }
 
+		protected:
+			AEffect *aEffect;
+			PluginLoader* ploader;
+			void *sDir;
+
+			bool bEditOpen;
+			bool bNeedIdle;
+			bool bWantMidi;
+			VstInt32 iShellUniqueID;		// Unique ID for shell type plugs
+			CEffect* pMasterEffect;		// for Shell type plugs.
 		};
 
 		/*****************************************************************************/
@@ -502,11 +529,13 @@ namespace seib {
 			static CVSTHost * pHost;
 		protected:
 			static int quantization;
+			bool loadingEffect;
+			VstInt32 loadingShellId;
 
 			CEffect *DECLARE_VST_DEPRECATED(GetPreviousPlugIn)(CEffect &pEffect,int pinIndex){ return 0;};
 			CEffect *DECLARE_VST_DEPRECATED(GetNextPlugIn)(CEffect &pEffect, int pinIndex){ return 0;};
 		public:
-			CEffect* CVSTHost::LoadPlugin(const char * sName);
+			CEffect* LoadPlugin(const char * sName,VstInt32 shellIdx=0);
 
 			static VstTimeInfo vstTimeInfo;
 			static VstIntPtr VSTCALLBACK AudioMasterCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
@@ -530,18 +559,17 @@ namespace seib {
 			}
 
 			// text is a string up to kVstMaxVendorStrLen chars + \0 delimiter
-			virtual bool OnGetVendorString(char *text) { strcpy(text, "Seib-Psycledelics"); return true; } // forgive this little vanity :-)
+			virtual bool OnGetVendorString(char *text) { strcpy(text, "Seib-Psycledelics"); return true; }
 			// text is a string up to kVstMaxProductStrLen chars + \0 delimiter
 			virtual bool OnGetProductString(char *text) { strcpy(text, "Default CVSTHost."); return true; }
-			virtual long OnGetHostVendorVersion() { return 1000; }
+			virtual long OnGetHostVendorVersion() { return 1169; } // 1.16i
 			virtual long OnHostVendorSpecific(CEffect &pEffect, long lArg1, long lArg2, void* ptrArg, float floatArg) { return 0; }
 			virtual long OnGetVSTVersion();
 
 			// Plugin calls this function when it has changed one parameter (usually, from the GUI)in order for the host to record it.
 			virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value) { return; }
-			//\todo: investigate. SDK says " returns the Unique ID of the plugin currently being loaded". uniqueId as in "aEffect->uniqueId" ?
-			// It might end being an old (unused now) function, since it is from VST1.0.
-			virtual long OnCurrentId(CEffect &pEffect) { return 0; }
+			// Function used for "Shell" type plugins, in order to identify which one is to be loaded. Returns the Index of the sub-plugin.
+			virtual long OnCurrentId(CEffect &pEffect) { return pEffect.getShellId(); }
 			// Call application idle routine (this will call effEditIdle for all open editors too)
 			// Feedback to the host application and to call the idle's function of this editor (thru host application (MAC/WINDOWS/MOTIF)). The idle frequency is between 10Hz and 20Hz
 			//\todo: From the above sentences, this call would set a flag to update all the editors in the Idle (GUI, OnPaint) thread.
@@ -569,8 +597,8 @@ namespace seib {
 			virtual bool DECLARE_VST_DEPRECATED(OnNeedIdle)(CEffect &pEffect);
 			virtual bool OnSizeWindow(CEffect &pEffect, long width, long height);
 			// Will cause application to call AudioEffect's  setSampleRate/setBlockSize method (when implemented).
-			virtual long OnUpdateSampleRate(CEffect &pEffect){ /* not all vst's like this, mostly their fault: pEffect.SetSampleRate(vstTimeInfo.sampleRate);*/ return vstTimeInfo.sampleRate; }
-			virtual long OnUpdateBlockSize(CEffect &pEffect) { pEffect.SetBlockSize(lBlockSize); return lBlockSize; }
+			virtual long OnUpdateSampleRate(CEffect &pEffect){ return vstTimeInfo.sampleRate; }
+			virtual long OnUpdateBlockSize(CEffect &pEffect) { return lBlockSize; }
 			//	Returns the ASIO input latency values.
 			virtual long OnGetInputLatency(CEffect &pEffect) { return 0; }
 			// Returns the ASIO output latency values. To be used mostly for GUI sync with audio.
@@ -611,9 +639,8 @@ namespace seib {
 			virtual void * OnGetDirectory(CEffect &pEffect);
 			//\todo: "Something has changed, update 'multi-fx' display." ???
 			virtual bool OnUpdateDisplay(CEffect &pEffect);
-//			virtual long OnAudioMasterCallback(CEffect &pEffect, long opcode, long index, long value, void *ptr, float opt);
 			// VST 2.1 Extensions
-			// Notifies that "setParameterAutoMated" is gonna be called. (once per mouse clic)
+			// Notifies that "setParameterAutoMated" is going to be called. (once per mouse clic)
 			virtual bool OnBeginEdit(CEffect &pEffect,long index) { return false; }
 			virtual bool OnEndEdit(CEffect &pEffect,long index) { return false; }
 			virtual bool OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr) { return false; }
