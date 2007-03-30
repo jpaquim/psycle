@@ -24,14 +24,15 @@
 #include "machinegui.h"
 #include "machineview.h"
 
- #include <QGraphicsScene>
- #include <QGraphicsSceneMouseEvent>
- #include <QPainter>
- #include <QStyleOption>
- #include <QMessageBox>
- #include <QMenu>
- #include <QAction>
- #include <iostream>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
+#include <QPainter>
+#include <QStyleOption>
+#include <QMessageBox>
+#include <QMenu>
+#include <QAction>
+#include <QInputDialog>
+#include <iostream>
 
  MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : machineView(macView)
@@ -55,8 +56,10 @@
      macTwkDlg_ = new MachineTweakDlg( mac_, machineView );
      showMacTwkDlgAct_ = new QAction("Tweak Parameters", this);
      deleteMachineAct_ = new QAction("Delete", this);
+     renameMachineAct_ = new QAction("Rename", this);
      connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
      connect( deleteMachineAct_, SIGNAL( triggered() ), this, SLOT( onDeleteMachineActionTriggered() ) );
+     connect( renameMachineAct_, SIGNAL( triggered() ), this, SLOT( onRenameMachineActionTriggered() ) );
 
      connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
               machineView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
@@ -91,6 +94,18 @@ QList<WireGui *> MachineGui::wireGuiList()
     return wireGuiList_;
 }
 
+void MachineGui::onRenameMachineActionTriggered()
+{
+    bool ok;
+    QString text = QInputDialog::getText( machineView, "Rename machine",
+                                          "Name: ", QLineEdit::Normal,
+                                          QString::fromStdString( mac()->GetEditName() ), &ok);
+    if (ok && !text.isEmpty()) {
+        setName( text );
+        mac()->SetEditName( text.toStdString() );
+    }
+}
+
 QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     switch (change) {
@@ -108,7 +123,7 @@ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value
   void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
   {
      QMenu menu;
-      menu.addAction("Rename");
+      menu.addAction( renameMachineAct_ );
       menu.addAction("Clone");
       menu.addAction( deleteMachineAct_ );
       menu.addSeparator();

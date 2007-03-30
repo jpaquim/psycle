@@ -552,7 +552,6 @@ void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
 
 void MainWindow::onMachineDeleted( int macIndex )
 {
-    populateMachineCombo();
-//    genCombo_->repaint();
+    populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
 }
 
