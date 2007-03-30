@@ -36,8 +36,8 @@
 #include <iostream>
 #include <QGraphicsLineItem>
 
- MachineView::MachineView(psy::core::Song *song)
- {
+MachineView::MachineView(psy::core::Song *song)
+{
     song_ = song;
      scene_ = new MachineScene(this);
      scene_->setBackgroundBrush(Qt::black);
@@ -108,42 +108,57 @@
      scale(scaleFactor, scaleFactor);
  }
 
- void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
- {
-     tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
-     tempLine_->setVisible(true);
- }
+void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
+{
+    tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
+    tempLine_->setVisible(true);
+}
 
- void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
- {
-     // See if we hit another machine gui.
-     if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
-         QGraphicsItem *itm = scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) );
-         if (itm->type() == 65537) { // FIXME: un-hardcode this
-            MachineGui *dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
-            connectMachines(srcMacGui, dstMacGui); 
-         }
-     }
-     tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
- }
-
- void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
- {
-    if ( dstMacGui->mac()->acceptsConnections() ) {
-        // Check there's not already a connection.
-        // ...
-        
-        // Make a connection in the song file..
-        song_->InsertConnection( srcMacGui->mac()->_macIndex , dstMacGui->mac()->_macIndex, 1.0f);
-        
-        // Make a new wiregui connection.
-        WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui, this );
-        scene_->addItem( newWireGui );
+void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
+{
+    // See if we hit another machine gui.
+    if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
+        QGraphicsItem *itm = scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) );
+        if (itm->type() == 65537) { // FIXME: un-hardcode this
+           MachineGui *dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
+           connectMachines(srcMacGui, dstMacGui); 
+        }
     }
- }
+    tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
+}
 
- void MachineView::deleteConnection( WireGui *wireGui )
- {
+void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
+{
+   if ( dstMacGui->mac()->acceptsConnections() ) {
+       // Check there's not already a connection.
+       // ...
+       
+       // Make a connection in the song file..
+       song_->InsertConnection( srcMacGui->mac()->_macIndex , dstMacGui->mac()->_macIndex, 1.0f);
+       
+       // Make a new wiregui connection.
+       WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui, this );
+       scene_->addItem( newWireGui );
+   }
+}
+
+void MachineView::onDeleteMachineRequest( MachineGui *macGui )
+{
+    int index = macGui->mac()->_macIndex;
+
+    // Remove machine and connections from the Song. 
+    song()->DestroyMachine( index );
+    scene()->removeItem( macGui );
+
+    // Remove machine and connections from the gui. 
+    foreach ( WireGui *wireGui, macGui->wireGuiList() ) {
+        scene()->removeItem( wireGui );
+    }
+//    machineDeleted.emit( index ); 
+}
+
+void MachineView::deleteConnection( WireGui *wireGui )
+{
     // Delete the connection in the song file.
     psy::core::Player::Instance()->lock();
 
@@ -166,7 +181,7 @@
 
     // Delete the connection in the GUI.
     scene_->removeItem( wireGui ); // FIXME: do we need to do more here?
- }
+}
 
 MachineGui *MachineView::findByMachine( psy::core::Machine *mac )
 {
@@ -323,6 +338,8 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
         default:
             macGui = 0;
     }
+    connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
+             this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
     scene_->addItem(macGui);
     machineGuis.push_back(macGui);
 }

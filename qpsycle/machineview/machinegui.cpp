@@ -53,8 +53,10 @@
      setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
 
      macTwkDlg_ = new MachineTweakDlg( mac_, machineView );
-     showMacTwkDlgAct_ = new QAction("Tweak Machine", this);
-     connect(showMacTwkDlgAct_, SIGNAL(triggered()), this, SLOT(showMacTwkDlg()));
+     showMacTwkDlgAct_ = new QAction("Tweak Parameters", this);
+     deleteMachineAct_ = new QAction("Delete", this);
+     connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
+     connect( deleteMachineAct_, SIGNAL( triggered() ), this, SLOT( onDeleteMachineActionTriggered() ) );
 
      connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
               machineView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
@@ -78,35 +80,40 @@
      nameItem->setPlainText(name);
  }
 
-  void MachineGui::addWireGui(WireGui *wireGui)
- {
-     wireGuiList << wireGui;
-     wireGui->adjust();
- }
+void MachineGui::addWireGui(WireGui *wireGui)
+{
+    wireGuiList_ << wireGui;
+    wireGui->adjust();
+}
 
- QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)
- {
-     switch (change) {
-     case ItemPositionChange:
-         foreach (WireGui *wireGui, wireGuiList)
-             wireGui->adjust();
-         break;
-     default:
-         break;
-     };
+QList<WireGui *> MachineGui::wireGuiList()
+{
+    return wireGuiList_;
+}
 
-     return QGraphicsItem::itemChange(change, value);
- }
+QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+    switch (change) {
+    case ItemPositionChange:
+        foreach (WireGui *wireGui, wireGuiList_)
+            wireGui->adjust();
+        break;
+    default:
+        break;
+    };
+
+    return QGraphicsItem::itemChange(change, value);
+}
     
   void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
   {
      QMenu menu;
       menu.addAction("Rename");
       menu.addAction("Clone");
-      menu.addAction("Delete");
+      menu.addAction( deleteMachineAct_ );
       menu.addSeparator();
-      menu.addAction(showMacTwkDlgAct_);
-      QAction *a = menu.exec(event->screenPos());
+      menu.addAction( showMacTwkDlgAct_ );
+      QAction *a = menu.exec( event->screenPos() );
   }
 
 void MachineGui::keyPressEvent ( QKeyEvent * event )
@@ -257,4 +264,9 @@ QPointF MachineGui::centrePointInSceneCoords() {
 psy::core::Machine* MachineGui::mac()
 {
     return mac_;
+}
+
+void MachineGui::onDeleteMachineActionTriggered()
+{
+    emit deleteRequest( this );
 }

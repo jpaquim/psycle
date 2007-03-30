@@ -37,13 +37,13 @@ class WireGui;
 
 class MachineGui : public QObject, public QGraphicsRectItem
 {
-Q_OBJECT
-
+    Q_OBJECT
 public:
-     MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
-     void addWireGui(WireGui *wireGui);
-     void setName(const QString &name);
-     QPointF centrePointInSceneCoords();
+    MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+    void addWireGui(WireGui *wireGui);
+    void setName(const QString &name);
+    QPointF centrePointInSceneCoords();
+    QList<WireGui *> wireGuiList();
     enum { Type = UserType + 1 };
 
     int type() const { return Type; }
@@ -52,7 +52,7 @@ public:
 
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
- protected:
+protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
@@ -63,24 +63,27 @@ public:
 
 public slots:
     void showMacTwkDlg();
+    void onDeleteMachineActionTriggered();
 
 signals:
     void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
     void chosen( MachineGui *macGui );
+    void deleteRequest( MachineGui *macGui );
 
- private:
-     MachineView *machineView;
-     psy::core::Machine *mac_;
-     QGraphicsTextItem *nameItem;
-     int left_;
-     int top_;
-     QList<WireGui *> wireGuiList;
-     MachineTweakDlg *macTwkDlg_;
+private:
+    MachineView *machineView;
+    psy::core::Machine *mac_;
+    QGraphicsTextItem *nameItem;
+    int left_;
+    int top_;
+    QList<WireGui *> wireGuiList_;
+    MachineTweakDlg *macTwkDlg_;
 
     QColor backgroundColor_;
-     QAction *showMacTwkDlgAct_;
+    QAction *showMacTwkDlgAct_;
+    QAction *deleteMachineAct_;
 
- };
+};
 
- #endif
+#endif
