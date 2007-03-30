@@ -83,7 +83,7 @@ public:
     bool lineGridEnabled() const;
     int gridWidthByTrack( int track ) const;
     bool isNote( int key );
-    bool isHex( int c );
+    bool isHex( QKeyEvent *ev );
     unsigned char convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const;
 
     void drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color);

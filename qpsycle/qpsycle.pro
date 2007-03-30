@@ -4,6 +4,7 @@
 
 TEMPLATE = app
 TARGET = 
+CONFIG += warn_off
 OBJECTS_DIR = build # Where the .o files go.
 DEPENDPATH += . \
               machineview \
