@@ -89,8 +89,11 @@ namespace psy {
     
     bool AlsaOut::Start( )
     {
-      if (enablePlayer == -3)
-        audioStart();
+      // start thread (might already be running, but that is ok.)
+      if (!audioStart())
+        return false;
+
+      // make thread start using the callback
       enablePlayer = 1;
       while(enablePlayer != 2) {
         usleep(1000);
@@ -128,7 +131,6 @@ namespace psy {
       period_size=0;
       output = NULL;
       //    AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
-      if (areas) { areas[0]=areas[0]; }
     }
     
     int AlsaOut::audioStop( )
@@ -143,10 +145,12 @@ namespace psy {
       return 1;
     }
     
+    // starts the alsa thread
     int AlsaOut::audioStart(  )
     {
-      if (enablePlayer == 2)
+      if (enablePlayer >= -1)
         return 1;
+      enablePlayer = -3;
       int err;
       snd_pcm_hw_params_t *hwparams;
       snd_pcm_sw_params_t *swparams;
@@ -201,7 +205,6 @@ namespace psy {
         printf("No enough memory\n");
         exit(EXIT_FAILURE);
       }
-      if (areas) { areas[0]=areas[0]; }
       
       std::cout << "step6" << std::endl;
       
@@ -213,25 +216,21 @@ namespace psy {
       
       std::cout << "step7" << std::endl;
       
-      if (areas) { areas[0]=areas[0]; }
-      
-      if (0 == pthread_create(&threadid, NULL,&AlsaOut::audioOutThread, (void*) this))
-        {	
-          if (areas) { areas[0]=areas[0]; }
-          enablePlayer = 1;
-          return EXIT_SUCCESS;
+      enablePlayer = 0;
+      if (0 != pthread_create(&threadid, NULL,&AlsaOut::audioOutThread, (void*) this))
+        {
+          enablePlayer = -3;
+          printf("alsa driver: failed to create thread.");
+          return 0;
         }
-      if (areas) { areas[0]=areas[0]; }
       return 1;
     }
     
     void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count )
     {
-      if (areas) { areas[0]=areas[0]; }
       signed short *samples[channels];
       int steps[channels];
       unsigned int chn;
-      if (areas) { areas[0]=areas[0]; }
       // verify and prepare the contents of areas */
       for (chn = 0; chn < channels; chn++) {
         if ((areas[chn].first % 8) != 0) {
@@ -264,7 +263,6 @@ namespace psy {
       unsigned int rrate;
       snd_pcm_uframes_t size;
       int err, dir;
-      if (areas) { areas[0]=areas[0]; }
       
       std::cout << "step2.1" << std::endl;
       // choose all parameters
@@ -352,7 +350,6 @@ namespace psy {
       std::cout << "step2.10" << std::endl;
       period_size = size;
       std::cout << "step2.10.1" << std::endl;
-      if (areas) { areas[0]=areas[0]; }
       // write the parameters to device
       err = snd_pcm_hw_params(handle, params);
       if (err < 0) {
@@ -367,7 +364,6 @@ namespace psy {
     int AlsaOut::set_swparams(snd_pcm_sw_params_t *swparams)
     {
       int err;
-      if (areas) { areas[0]=areas[0]; }
       // get the current swparams
       err = snd_pcm_sw_params_current(handle, swparams);
       if (err < 0) {
@@ -399,7 +395,6 @@ namespace psy {
         printf("Unable to set sw params for playback: %s\n", snd_strerror(err));
         return err;
       }
-      if (areas) { areas[0]=areas[0]; }
       return 0;
     }
     
@@ -410,7 +405,6 @@ namespace psy {
     
     int AlsaOut::xrun_recovery(int err)
     {
-      if (areas) { areas[0]=areas[0]; }
       if (err == -EPIPE) {    /* under-run */
         err = snd_pcm_prepare(handle);
         if (err < 0) printf("Can't recovery from underrun, prepare failed: %s\n", snd_strerror(err));
@@ -422,7 +416,6 @@ namespace psy {
           err = snd_pcm_prepare(handle);
           if (err < 0) printf("Can't recovery from suspend, prepare failed: %s\n", snd_strerror(err));
         }
-        if (areas) { areas[0]=areas[0]; }
         return 0;
       }
       return err;
@@ -432,9 +425,7 @@ namespace psy {
     {
       signed short *ptr;
       int err, cptr;
-      if (areas) { areas[0]=areas[0]; }
       while (1) {
-        if (areas) { areas[0]=areas[0]; }
         //    in = true;
         if (enablePlayer >0) {
           enablePlayer = 2;
@@ -488,8 +479,6 @@ namespace psy {
     
     bool AlsaOut::Initialized( )
     {
-      if (areas) { areas[0]=areas[0]; }
-      
       return _initialized;
     }
     
