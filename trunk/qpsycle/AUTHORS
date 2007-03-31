@@ -3,37 +3,36 @@ Psycle authors through the ages
 
 Please add your name if you did/do any dev...
 
-The family:
+Active Developers:
 -----------
 
-Josep Ma. AntolÃ­Segura jaz001       Project Admin   All-Hands Person
-Johan BoulÃ© johan-boule Project Admin   Porter (Cross Platform Devel.)
-jeremy evers        pooplog     Project Admin   Developer
-Neil Mather         nmather qpsycle
-
-James Redfern          alkenstein      plugin, fixes and small aditions.
-Jose Enrique        sampler     fixes and small aditions.
-Guido Vranken       guidovranken    Code for mute/bypass, interpolation. Interested in special pattern modes.
-TranceMyriad        trancemyriad    New "Add Machine" dialog, work in multi-io.
-Magnus Jonsson  zealmange   Improvements in source code (std::), made it more C++, fixed bugs.
-dw_aley         dw_aley     <@bohan> he did the 3D arrows; xpsycle
+Josep Ma. Antolín Segura	jaz001		Psycle from 1.5 to 1.9, parts of xpsycle
+Johan Boulé			johan-boule	Psycle from 1.7.6 to 1.9. freepsycle, porting (Cross Platform Development)
+Neil Mather			nmather		qpsycle lead coder
+Magnus Jonsson			zealmange	Improvements in Psycle's source code (std:: C++). qpsycle
 
 
-Non Active Developers:
+Non-Active developers / small contributors:
 ----------------------
 
-J. A. Arguelles Rius    arguru      Needs presentation? The creator.
-Mats Hojlund        cbr         Coder for version 1.1 and 1.11 of Psycle.
-Daniel Arena        dubdub  Coder for version 1.6, InputHandler, and gui/code improvements.
-Lukasz Langa        lukasz_langa    Also known as kSh. He made changes in the cpu clock functions.
-Martin          lobywang    <@bohan> lobywang -- crop command in the wave editor
-Mark MkCommack      -------------   Coded the MIDI implementation.
-Marcin Kowalski     -------------   Also known as Fideloop. Made the Wave editor.
+J. A. Arguelles Rius		arguru		Creator and developer until 1.0
+Mats Hojlund			cbr		Psycle version 1.1 and 1.11 of Psycle.
+Daniel Arena			dubdub		Coder in Psycle in version 1.6, InputHandler, and gui/code improvements.
+jeremy evers			pooplog		Developer in versions 1.7.x
+Lukasz Langa			lukasz_langa	Also known as kSh. He made changes in the cpu clock functions.
+Martin				lobywang	crop command in the wave editor
+Mark MkCommack			--------	 Coded the MIDI implementation.
+Marcin Kowalski			--------	Also known as Fideloop. Made the Wave editor.
+James Redfern			alkenstein	 plugin, fixes and small aditions.
+Jose Enrique			sampler		fixes and small aditions.
+Guido Vranken			guidovranken	Code for mute/bypass, interpolation. Interested in special pattern modes.
+TranceMyriad			trancemyriad	New "Add Machine" dialog, work in multi-io.
+dw_aley				dw_aley		he did the 3D arrows; xpsycle
 
 
 Plugin Coders :
 ---------------
 
-Joakim DahlstrÃ¶druttis  
-sartorius       sartorius   
-Jan-Marco Edelmann  voskomo     
+Joakim Dahlström		druttis  
+sartorius			sartorius   
+Jan-Marco Edelmann		voskomo     
