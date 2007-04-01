@@ -11,6 +11,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDomDocument>
+#include <QGraphicsSceneMouseEvent>
 
 template<class T> inline std::string toHex(T value , int nums = 2) {
     std::ostringstream buffer;
@@ -1207,15 +1208,6 @@ bool PatternGrid::trackAlreadySelected( int trackNumber ) {
     }
 }
 
-// Start a new block selection using the keyboard.
-void PatternGrid::startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos) {
-    PatCursor crs = cursor();
-    selStartPoint_ = crs;
-    selCursor_ = crs;
-    doingKeybasedSelect_ = true;
-    selection_.set( leftPos, rightPos, topPos, bottomPos );
-}
-
 void PatternGrid::copyBlock( bool cutit )
 {  
     isBlockCopied_=true;
@@ -1302,6 +1294,102 @@ int PatternGrid::patternStep()
     return patDraw_->patternView()->patternStep();
 }
 
+// Start a new block selection using the keyboard.
+void PatternGrid::startKeybasedSelection( int leftPos, int rightPos, int topPos, int bottomPos ) {
+    PatCursor crs = cursor();
+    selStartPoint_ = crs;
+    selCursor_ = crs;
+    doingKeybasedSelect_ = true;
+    selection_.set( leftPos, rightPos, topPos, bottomPos );
+}
+
+PatCursor PatternGrid::intersectCell( int x, int y ) 
+{
+    int track = findTrackByXPos( x );
+    int line  = y / lineHeight();
+    int colOff   = x - xOffByTrack(track);
+
+    std::vector<ColumnEvent>::const_iterator it = events_.begin();
+    int nr = 0;
+    int offset = 3/*colIdent*/ + 10/*trackLeftIdent()*/;
+    int lastOffset = 3/*colIdent*/ + 10/*trackLeftIdent()*/;
+    for ( ; it < events_.end(); it++, nr++ ) 
+    {				
+        const ColumnEvent & event = *it;				
+        switch ( event.type() ) 
+        {
+            case ColumnEvent::hex2 : offset+= 2*cellWidth(); 	break;
+            case ColumnEvent::hex4 : offset+= 4*cellWidth(); 	break;
+            case ColumnEvent::note : offset+= noteCellWidth(); break;
+            default: ;
+        }
+        if (offset > colOff) {
+            // found our event
+            if ( event.type() == ColumnEvent::note ) 
+                return PatCursor(track,line,nr,0);
+            else {
+                int cellStart = colOff - lastOffset;
+                int col = cellStart  / cellWidth();
+                return PatCursor(track,line,nr,col);
+            }			
+        }
+        lastOffset = offset;
+    }
+    return PatCursor();
+}
+
+int PatternGrid::findTrackByXPos( int x ) const 
+{
+    // todo write a binary search here
+    // is used from intersectCell
+    std::map<int, TrackGeometry>::const_iterator it = trackGeometryMap.begin();
+    int offset = 0;
+    for ( ; it != trackGeometryMap.end(); it++ ) {
+        const TrackGeometry & geometry = it->second;
+        offset+= geometry.width();				
+        if ( offset > x ) return it->first;
+    }
+    return -1; // no track found
+}
+
+void PatternGrid::startMouseSelection( const PatCursor & p )
+{
+    selStartPoint_ = p;
+    selCursor_ = p;
+    selection_.set( p.track(), p.track(), p.line(), p.line() );
+
+    oldSelection_ = selection_;
+    doingMouseSelect_ = true;
+    doingKeybasedSelect_ = false;
+}
+
+
+void PatternGrid::mousePressEvent( QGraphicsSceneMouseEvent *event )
+{
+    if ( event->button() == Qt::LeftButton ) {
+        PatCursor crs = intersectCell( event->lastPos().x(), event->lastPos().y() );
+        startMouseSelection( crs );
+    }
+}
+
+void PatternGrid::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
+{
+    if ( event->buttons() == Qt::LeftButton ) {
+        PatCursor mouseCurrentCrs = intersectCell( event->pos().x(), event->pos().y() );
+        selection_.setRight( mouseCurrentCrs.track()+1 );
+        selection_.setBottom( mouseCurrentCrs.line()+1 ); // FIXME: do +1s indicate a logic error somewhere?
+        update( boundingRect() );
+    }
+}
+
+void PatternGrid::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
+{
+    if ( event->button() == Qt::LeftButton ) {
+        PatCursor mouseCurrentCrs = intersectCell( event->scenePos().x(), event->scenePos().y() );
+        doingMouseSelect_ = false;
+    }
+}
+
 
 
 
@@ -1378,16 +1466,16 @@ ColumnEvent::ColType ColumnEvent::type() const {
 int ColumnEvent::cols() const {
     int cols_ = 1;
     switch ( type_ ) {
-                        case ColumnEvent::hex2 : 
-                            cols_ = 2; 
-                            break;
-                        case ColumnEvent::hex4 : 
-                            cols_ = 4; 
-                            break;
-                        case ColumnEvent::note : 
-                            cols_ = 1; 
-                            break;
-                        default: ;
+        case ColumnEvent::hex2 : 
+            cols_ = 2; 
+            break;
+        case ColumnEvent::hex4 : 
+            cols_ = 4; 
+            break;
+        case ColumnEvent::note : 
+            cols_ = 1; 
+            break;
+        default: ;
     }
     return cols_;
 }		

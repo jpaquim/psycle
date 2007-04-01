@@ -1,15 +1,16 @@
 #ifndef PATTERNGRID_H
 #define PATTERNGRID_H
 
+#include "patterndraw.h"
+#include "psycore/singlepattern.h"
+
+#include <map>
+
 #include <QGraphicsItem>
 #include <QKeyEvent>
 #include <QFont>
 #include <QFontMetrics>
 
-#include "patterndraw.h"
-#include "psycore/singlepattern.h"
-
-#include <map>
 
 class PatternDraw;
 class TrackGeometry;
@@ -156,8 +157,11 @@ public:
     bool lineAlreadySelected( int lineNumber );
     bool trackAlreadySelected( int trackNumber );
     void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
+    void startMouseSelection( const PatCursor & p );
     void repaintSelection();
     void repaintCursor();
+    PatCursor intersectCell( int x, int y );
+    int findTrackByXPos( int x ) const;
 
     int patternStep(); 
 
@@ -166,7 +170,11 @@ public:
 
     QRectF repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
 
-public slots:
+
+protected:
+    void mousePressEvent( QGraphicsSceneMouseEvent *event );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
     void keyPressEvent( QKeyEvent *event );
 
 
@@ -178,6 +186,7 @@ private:
     PatCursor selCursor_;
 
     bool doingKeybasedSelect_;
+    bool doingMouseSelect_;
 
     bool isBlockCopied_;
     psy::core::SinglePattern pasteBuffer;
