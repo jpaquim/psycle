@@ -1298,6 +1298,9 @@ void PatternGrid::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     if ( event->button() == Qt::LeftButton ) {
         PatCursor crs = intersectCell( event->lastPos().x(), event->lastPos().y() );
+        oldCursor_ = cursor();
+        setCursor( crs );
+        repaintCursor();
         startMouseSelection( crs );
     }
 }
