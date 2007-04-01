@@ -30,33 +30,76 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 
- class QToolBar;
- class QComboBox;
- class QGridLayout;
- class QAction;
+class QToolBar;
+class QComboBox;
+class QGridLayout;
+class QAction;
 
- class LineNumberColumn;
- class PatternGrid;
- class PatCursor;
- class PatternView;
+class LineNumberColumn;
+class PatternGrid;
+class PatCursor;
+class PatternView;
 
- class PatternDraw : public QGraphicsView
- {
-     Q_OBJECT
+/**
+ * TrackGeometry.
+ */
+class TrackGeometry {
+public:			
+    TrackGeometry();
 
- public:
-     PatternDraw( PatternView *patView );
+    TrackGeometry( PatternDraw & patternDraw );
 
-     PatternView *patternView() { return patView_; }
-     PatternGrid *patternGrid() { return patGrid_; }
+    ~TrackGeometry();
 
- private:
-    QGraphicsScene *scene_;
-    PatternView *patView_;
+    void setLeft( int left );
+    int left() const;
 
-    LineNumberColumn *lineNumCol_;
-    PatternGrid *patGrid_;
-    psy::core::SinglePattern *pattern_;
- };
+    void setWidth( int width );
+    int width() const;			
 
- #endif
+    void setVisibleColumns( int cols );
+    int visibleColumns() const;
+
+    void setVisible( bool on);
+    bool visible() const;
+
+private:
+
+    PatternDraw *pDraw;
+    int left_;
+    int width_;
+    int visibleColumns_;
+    bool visible_;
+
+};
+
+
+class PatternDraw : public QGraphicsView
+{
+   Q_OBJECT
+
+public:
+    PatternDraw( PatternView *patView );
+
+    PatternView *patternView() { return patView_; }
+    PatternGrid *patternGrid() { return patGrid_; }
+
+    const std::map<int, TrackGeometry> & trackGeometrics() const;
+
+    void setupTrackGeometrics( int numberOfTracks );
+    void alignTracks();
+
+    int gridWidthByTrack( int track ) const;
+
+private:
+   std::map<int, TrackGeometry> trackGeometryMap;
+
+   QGraphicsScene *scene_;
+   PatternView *patView_;
+
+   LineNumberColumn *lineNumCol_;
+   PatternGrid *patGrid_;
+   psy::core::SinglePattern *pattern_;
+};
+
+#endif
