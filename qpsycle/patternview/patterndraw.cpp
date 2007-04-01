@@ -96,6 +96,40 @@ int PatternDraw::gridWidthByTrack( int track ) const
     return gridWidth;
 }
 
+int PatternDraw::findTrackByXPos( int x ) const 
+{
+    // todo write a binary search here
+    // is used from intersectCell
+    std::map<int, TrackGeometry>::const_iterator it = trackGeometrics().begin();
+    int offset = 0;
+    for ( ; it != trackGeometrics().end(); it++ ) {
+        const TrackGeometry & geometry = it->second;
+        offset+= geometry.width();				
+        if ( offset > x ) return it->first;
+    }
+    return -1; // no track found
+}
+
+int PatternDraw::xOffByTrack( int track ) const 
+{
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( track );
+    int trackOff = 0;
+    if ( it != trackGeometrics().end() )
+        trackOff = it->second.left();
+    return trackOff;
+}
+
+int PatternDraw::xEndByTrack( int track ) const {
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( track );
+    int trackOff = 0;
+    if ( it != trackGeometrics().end() )
+        trackOff = it->second.left() + it->second.width();
+    return trackOff;
+}
+
+
 
 
 //

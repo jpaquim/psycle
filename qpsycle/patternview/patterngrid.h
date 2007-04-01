@@ -139,7 +139,6 @@ public:
     // Geometry.
     QRectF boundingRect() const;
     const std::map<int, TrackGeometry> & trackGeometrics() const;
-    int trackWidth() const;
     int lineHeight() const;
     bool isNote( int key );
     bool isHex( QKeyEvent *ev );
@@ -149,10 +148,6 @@ public:
     int noteCellWidth( ) const;
     void setBigTrackSeparatorWidth( int ident );
     int bigTrackSeparatorWidth() const;
-    int trackPaddingLeft() const { return 5; }
-    int trackPaddingRight() const { return 5; }
-    int xOffByTrack( int track ) const;
-    int xEndByTrack( int track ) const;
 
     // Settings.
     bool lineGridEnabled() const;
@@ -205,7 +200,6 @@ public:
     void repaintSelection();
     void repaintCursor();
     PatCursor intersectCell( int x, int y );
-    int findTrackByXPos( int x ) const;
     int visibleColWidth( int maxEvents ) const;
 
     // Actions.
