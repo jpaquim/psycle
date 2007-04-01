@@ -162,6 +162,7 @@ public:
     void repaintCursor();
     PatCursor intersectCell( int x, int y );
     int findTrackByXPos( int x ) const;
+    int visibleColWidth( int maxEvents ) const;
 
     int patternStep(); 
 
@@ -169,6 +170,9 @@ public:
     void pasteBlock( int tx,int lx,bool mix );
 
     QRectF repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;
+
+    int trackPaddingLeft() const { return 5; }
+    int trackPaddingRight() const { return 5; }
 
 
 protected:
