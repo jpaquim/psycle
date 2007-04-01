@@ -56,7 +56,6 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     : patDraw_( pDraw )
 {
     setFlag(ItemIsFocusable);
-    setupTrackGeometrics( numberOfTracks() );
 
     addEvent( ColumnEvent::note );
     addEvent( ColumnEvent::hex2 );
@@ -98,7 +97,7 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 QRectF PatternGrid::boundingRect() const
 {
     if ( patDraw_->patternView()->pattern() ) {
-        int gridWidth = gridWidthByTrack( numberOfTracks() -1 );
+        int gridWidth = patDraw_->gridWidthByTrack( numberOfTracks() -1 );
         int gridHeight = numberOfLines()*lineHeight();
         return QRectF( 0, 0, gridWidth, gridHeight ); 
     } else {
@@ -117,28 +116,13 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
         int startTrack = 0;
         int endTrack = numberOfTracks() - 1;
 
-        alignTracks();
+        patDraw_->alignTracks();
         drawGrid( painter, startLine, endLine, startTrack, endTrack );	
         //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
         drawPattern( painter, startLine, endLine, startTrack, endTrack );
         drawSelBg( painter, selection() );
     //drawRestArea(g, startLine, endLine, startTrack, endTrack);*/
     }
-}
-
-/** 
- * Get the width of the grid up until and including the given track.
- */
-int PatternGrid::gridWidthByTrack( int track ) const 
-{
-    std::map<int, TrackGeometry>::const_iterator it;
-    it = trackGeometrics().lower_bound( track );
-    int gridWidth = 0;
-    if ( it != trackGeometrics().end() ) {
-        TrackGeometry trackGeom = it->second;
-        gridWidth = trackGeom.left() + trackGeom.width();
-    }
-    return gridWidth;
 }
 
 /**
@@ -489,42 +473,6 @@ std::string PatternGrid::noteToString( int value, bool sharp )
         case 11:  return "B-" + octStr; break;
     }
     return "err";
-}
-
-
-
-
-void PatternGrid::setupTrackGeometrics( int numberOfTracks ) 
-{
-    for ( int newTrack = 0; newTrack < numberOfTracks; newTrack++ ) {
-        TrackGeometry trackGeometry( *this );
-        trackGeometry.setVisibleColumns( 6 );
-        trackGeometryMap[ newTrack ] = trackGeometry;
-    }
-
-    std::map<int, TrackGeometry>::iterator it;
-    it = trackGeometryMap.lower_bound( numberOfTracks );
-    while ( it != trackGeometryMap.end() ) {
-        trackGeometryMap.erase( it++ );
-    }			
-
-    alignTracks();
-}
-void PatternGrid::alignTracks() 
-{
-    std::map<int, TrackGeometry>::iterator it = trackGeometryMap.begin();
-    int offset = 0;
-    for ( ; it != trackGeometryMap.end(); it++ ) {
-        TrackGeometry & geometry = it->second;
-        geometry.setLeft( offset );
-        std::cout << "tw: " << geometry.width() << std::endl;
-        offset+= std::max( 50, geometry.width() );		// 50 is track min width
-    }
-}
-
-
-const std::map<int, TrackGeometry> & PatternGrid::trackGeometrics() const {
-    return trackGeometryMap;
 }
 
 int PatternGrid::trackWidth() const
@@ -1361,9 +1309,9 @@ int PatternGrid::findTrackByXPos( int x ) const
 {
     // todo write a binary search here
     // is used from intersectCell
-    std::map<int, TrackGeometry>::const_iterator it = trackGeometryMap.begin();
+    std::map<int, TrackGeometry>::const_iterator it = trackGeometrics().begin();
     int offset = 0;
-    for ( ; it != trackGeometryMap.end(); it++ ) {
+    for ( ; it != trackGeometrics().end(); it++ ) {
         const TrackGeometry & geometry = it->second;
         offset+= geometry.width();				
         if ( offset > x ) return it->first;
@@ -1429,68 +1377,22 @@ int PatternGrid::visibleColWidth( int maxEvents ) const
     return offset /* + colIdent*/ + trackPaddingLeft() + trackPaddingRight();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-//
-//
-// TrackGeometry
-//
-
-TrackGeometry::TrackGeometry( ) :
-pGrid( 0 ),
-    left_(0),
-    width_(0),
-    visibleColumns_(0),
-    visible_(1)
-{ }
-
-TrackGeometry::TrackGeometry( PatternGrid & patternGrid ) :
-pGrid( &patternGrid ),
-    left_(0),
-    width_(0),
-    visibleColumns_(0),
-    visible_(1)
-{ }
-
-TrackGeometry::~TrackGeometry() { }
-
-void TrackGeometry::setLeft( int left ) {
-    left_ = left;
+const std::map<int, TrackGeometry> & PatternGrid::trackGeometrics() const
+{
+    return patDraw_->trackGeometrics();
 }
 
-int TrackGeometry::left() const {
-    return left_;
-}
 
-int TrackGeometry::width() const {
-    return pGrid->visibleColWidth( visibleColumns() );
-    //return pGrid->trackWidth();
-}
 
-void TrackGeometry::setVisibleColumns( int cols ) {
-    visibleColumns_= cols;
-}
 
-int TrackGeometry::visibleColumns() const {
-    return visibleColumns_;
-}
 
-void TrackGeometry::setVisible( bool on) {
-    visible_ = on;
-}
 
-bool TrackGeometry::visible() const {
-    return visible_;
-}
+
+
+
+
+
+
 
 ColumnEvent::ColumnEvent( ColumnEvent::ColType type ) {
     type_ = type;

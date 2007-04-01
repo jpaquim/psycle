@@ -34,6 +34,7 @@
 
 class PatternDraw;
 class PatternGrid;
+class TrackGeometry;
 
 /**
  * Selection.
@@ -89,40 +90,6 @@ private:
 };
 
 /**
- * TrackGeometry.
- */
-class TrackGeometry {
-public:			
-    TrackGeometry();
-
-    TrackGeometry( PatternGrid & patternGrid );
-
-    ~TrackGeometry();
-
-    void setLeft( int left );
-    int left() const;
-
-    void setWidth( int width );
-    int width() const;			
-
-    void setVisibleColumns( int cols );
-    int visibleColumns() const;
-
-    void setVisible( bool on);
-    bool visible() const;
-
-private:
-
-    PatternGrid *pGrid;
-    int left_;
-    int width_;
-    int visibleColumns_;
-    bool visible_;
-
-};
-
-
-/**
  * ColumnEvent.
  */
 class ColumnEvent {			
@@ -174,7 +141,6 @@ public:
     const std::map<int, TrackGeometry> & trackGeometrics() const;
     int trackWidth() const;
     int lineHeight() const;
-    int gridWidthByTrack( int track ) const;
     bool isNote( int key );
     bool isHex( QKeyEvent *ev );
     int cellWidth( ) const;
@@ -269,11 +235,8 @@ private:
     int xmlTracks;
     float xmlBeats;
 
-    void setupTrackGeometrics( int numberOfTracks );
-    void alignTracks();
 
     PatternDraw *patDraw_;
-    std::map<int, TrackGeometry> trackGeometryMap;
 
     std::vector<ColumnEvent> events_;
 
