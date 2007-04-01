@@ -2,25 +2,32 @@
 
 Header::Header( PatternDraw * pPatternDraw ) : pDraw(pPatternDraw)
 {
-    setRect( 0, 0, pDraw->patternView()->width(), 20 );
+//    setRect( 0, 0, pDraw->patternView()->width(), 20 );
 }
 
 Header::~ Header( )
+{ }
+
+QRectF Header::boundingRect() const
 {
+    return QRectF( 0, 0, 
+                   pDraw->patternGrid()->xEndByTrack( pDraw->patternView()->numberOfTracks() ), 20 );
 }
 
 void Header::paint( QPainter *painter,
                     const QStyleOptionGraphicsItem *option,
                     QWidget *widget )
 {
-    painter->drawRect( 0, 0, pDraw->patternView()->width(), 20 );
-
-    int trackWidth = pDraw->patternView()->trackWidth();
     int trackHeight = 20;
     int numTracks = pDraw->patternView()->numberOfTracks();
 
+    painter->drawRect( 0, 0, 
+                   pDraw->patternGrid()->xEndByTrack( numTracks ), trackHeight );
+
+
     for ( int i = 0; i < numTracks; i++ )
     {
+        int trackWidth = pDraw->patternGrid()->xEndByTrack( i ) - pDraw->patternGrid()->xOffByTrack( i );
         painter->setPen( QPen( Qt::black ) );
         painter->setBrush( QBrush( Qt::transparent ) );
         painter->drawRect( i*trackWidth, 0, trackWidth, trackHeight ); 
