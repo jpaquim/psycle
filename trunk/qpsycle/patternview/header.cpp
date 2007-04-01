@@ -11,7 +11,7 @@ Header::~ Header( )
 QRectF Header::boundingRect() const
 {
     return QRectF( 0, 0, 
-                   pDraw->patternGrid()->xEndByTrack( pDraw->patternView()->numberOfTracks() ), 20 );
+                   pDraw->xEndByTrack( pDraw->patternView()->numberOfTracks() ), 20 );
 }
 
 void Header::paint( QPainter *painter,
@@ -22,12 +22,12 @@ void Header::paint( QPainter *painter,
     int numTracks = pDraw->patternView()->numberOfTracks();
 
     painter->drawRect( 0, 0, 
-                   pDraw->patternGrid()->xEndByTrack( numTracks ), trackHeight );
+                   pDraw->xEndByTrack( numTracks ), trackHeight );
 
 
     for ( int i = 0; i < numTracks; i++ )
     {
-        int trackWidth = pDraw->patternGrid()->xEndByTrack( i ) - pDraw->patternGrid()->xOffByTrack( i );
+        int trackWidth = pDraw->xEndByTrack( i ) - pDraw->xOffByTrack( i );
         painter->setPen( QPen( Qt::black ) );
         painter->setBrush( QBrush( Qt::transparent ) );
         painter->drawRect( i*trackWidth, 0, trackWidth, trackHeight ); 
