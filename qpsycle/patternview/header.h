@@ -11,6 +11,7 @@ public:
     ~Header();
 
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+    QRectF boundingRect() const;
 
    // virtual void onMousePress(int x, int y, int button);
 
