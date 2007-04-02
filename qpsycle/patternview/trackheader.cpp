@@ -1,28 +1,27 @@
-#include "header.h"
+#include "trackheader.h"
 
-Header::Header( PatternDraw * pPatternDraw ) : pDraw(pPatternDraw)
+TrackHeader::TrackHeader( PatternDraw * pPatternDraw ) : pDraw(pPatternDraw)
 {
 //    setRect( 0, 0, pDraw->patternView()->width(), 20 );
 }
 
-Header::~ Header( )
+TrackHeader::~ TrackHeader( )
 { }
 
-QRectF Header::boundingRect() const
+QRectF TrackHeader::boundingRect() const
 {
     return QRectF( 0, 0, 
-                   pDraw->xEndByTrack( pDraw->patternView()->numberOfTracks() ), 20 );
+                   pDraw->xEndByTrack( pDraw->patternView()->numberOfTracks()-1 ), 20 );
 }
 
-void Header::paint( QPainter *painter,
+void TrackHeader::paint( QPainter *painter,
                     const QStyleOptionGraphicsItem *option,
                     QWidget *widget )
 {
     int trackHeight = 20;
     int numTracks = pDraw->patternView()->numberOfTracks();
 
-    painter->drawRect( 0, 0, 
-                   pDraw->xEndByTrack( numTracks ), trackHeight );
+    painter->drawRect( 0, 0, pDraw->xEndByTrack( numTracks-1 ), trackHeight );
 
 
     for ( int i = 0; i < numTracks; i++ )

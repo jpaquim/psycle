@@ -23,10 +23,15 @@
 #include "patternview.h"
 #include "patterndraw.h"
 #include "patterngrid.h"
-#include "header.h"
+#include "trackheader.h"
 
 #include <QtGui>
 
+/**
+ * PatternDraw.  This is where the drawing of the pattern
+ * is done, including the header, the grid, the line number
+ * column, etc.
+ */
 PatternDraw::PatternDraw( PatternView *patView )
 {
     patView_ = patView; 
@@ -38,14 +43,14 @@ PatternDraw::PatternDraw( PatternView *patView )
     setupTrackGeometrics( patView_->numberOfTracks() );
     
     lineNumCol_ = new LineNumberColumn( this );
-    Header *trackHeader = new Header( this );
+    trackHeader_ = new TrackHeader( this );
     patGrid_ = new PatternGrid( this );
 
-    scene_->addItem( lineNumCol_ );
-    scene_->addItem( trackHeader );
     scene_->addItem( patGrid_ );
+    scene_->addItem( lineNumCol_ );
+    scene_->addItem( trackHeader_ );
 
-    trackHeader->setPos( 50, 0 );
+    trackHeader_->setPos( 50, 0 );
     lineNumCol_->setPos( 0, 20 );
     patGrid_->setPos( 50, 20 );
 }
@@ -72,7 +77,6 @@ void PatternDraw::alignTracks()
     for ( ; it != trackGeometryMap.end(); it++ ) {
         TrackGeometry & geometry = it->second;
         geometry.setLeft( offset );
-        std::cout << "tw: " << geometry.width() << std::endl;
         offset+= std::max( 50, geometry.width() );		// 50 is track min width
     }
 }
@@ -123,10 +127,10 @@ int PatternDraw::xOffByTrack( int track ) const
 int PatternDraw::xEndByTrack( int track ) const {
     std::map<int, TrackGeometry>::const_iterator it;
     it = trackGeometrics().lower_bound( track );
-    int trackOff = 0;
+    int trackEnd = 0;
     if ( it != trackGeometrics().end() )
-        trackOff = it->second.left() + it->second.width();
-    return trackOff;
+        trackEnd = it->second.left() + it->second.width();
+    return trackEnd;
 }
 
 

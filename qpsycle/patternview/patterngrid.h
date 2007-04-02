@@ -205,6 +205,8 @@ public:
     // Actions.
     void copyBlock( bool cutit );
     void pasteBlock( int tx,int lx,bool mix );
+    void checkRightScroll( const PatCursor & cursor );
+    void checkLeftScroll( const PatCursor & cursor );
 
 
 protected:
