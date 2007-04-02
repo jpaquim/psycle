@@ -693,6 +693,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             }
             newCursorLine = std::max(0,cursor().line() - 1);
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+            checkUpScroll( cursor() );
             repaintSelection();
         }
         break;
@@ -726,6 +727,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             }
             newCursorLine = std::min(numberOfLines()-1,cursor().line() + 1);
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+            checkDownScroll( cursor() );
             repaintSelection();
         }
         break;
@@ -761,6 +763,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             newCursorLine = cursor().line(); 
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
             repaintSelection();
+            checkLeftScroll( cursor() );
             //        newCursorCol = cursor().col()+1;
         }
         break;
@@ -773,13 +776,10 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             int newCursorLine = cursor().line();
             int newCursorCol = cursor().col();
             if (doingKeybasedSelect()) {
-                // if track to right is not selected...
-                if (!trackAlreadySelected(crs.track()+1)) {
-                    // select track to right.
-                    newLeft = oldSelection_.left();
+                if (!trackAlreadySelected(crs.track()+1)) { // if track to right is not selected...
+                    newLeft = oldSelection_.left();         // select track to right.
                     newRight = std::min(oldSelection_.right()+1, numberOfTracks());
-                } else { // track to right is selected...
-                    // deselect current track.
+                } else { // track to right is selected... so deselect current track.
                     newLeft = oldSelection_.left()+1;
                     newRight = oldSelection_.right();
                 }
@@ -794,6 +794,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             newCursorTrack = std::min(numberOfTracks()-1,cursor().track()+1);
             newCursorLine = cursor().line(); 
             setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+            checkRightScroll( cursor() );
             repaintSelection();
         }
         break;
@@ -807,7 +808,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             pasteBlock( cursor().track(), cursor().line(), false );
             update(); // FIXME: inefficient, be more specific.
         default:
-            // If we got here, we didn't do anything with it, so pass to parent.
+            // If we got here, we didn't do anything with it, so officially ignore it.
             event->ignore();
     }
 
