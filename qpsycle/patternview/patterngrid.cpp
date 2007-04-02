@@ -514,116 +514,110 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
 
-    if ( cursor().eventNr() == 0 && isNote( command ) ) {
+    if ( cursor().eventNr() == 0 && isNote( command ) ) 
+    {
         // A note event.
         std::cout << "event #0 - note event" << std::endl;
         int note = command; // the cdefs for the keys correspond to the correct notes.
         if ( note == psy::core::cdefKeyStop ) {
             //pView->noteOffAny( cursor() );
-        } else
-            if (note >=0 && note < 120) {
-    //            pView->undoManager().addUndo( cursor() );
+        } else if (note >=0 && note < 120) {
                 patDraw_->patternView()->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
                 moveCursor( 0, patternStep() );
-     //           pView->checkDownScroll( cursor() );
-            }
-    } else
-        if ( isHex( event ) ) {
-            int keyChar = QChar( event->text().at(0) ).toAscii();
-            if ( cursor().eventNr() == 1 ) {
-                // inst select
-                // i.e. a keyChar is pressed in the instrument column.
-                std::cout << "eventnr 1 - inst select" << std::endl;
-
-                // Add the new data...
-                psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
-                unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.instrument(), cursor().col() );
-                patEvent.setInstrument( newByte );
-                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-                // ...and move the cursor.
-                if (cursor().col() == 0) {
-                    moveCursor(1, patternStep() );			
-                } else {
-                    moveCursor(-1, patternStep() );
-//                    pView->checkDownScroll( cursor() );
-                }
-            } else 
-                if ( cursor().eventNr() == 2) {
-                    // mac select
-                    // i.e. a keyChar is pressed in the machine column.
-                    std::cout << "event nr 2 - mach select" << std::endl;
-                    psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
-                    unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.machine(), cursor().col() );
-                    patEvent.setMachine( newByte );
-                    pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-                    if (cursor().col() == 0) {
-                        moveCursor(1,0);			
-                    } else {
-                        moveCursor(-1, patternStep() );
-  //                      pView->checkDownScroll( cursor() );
-                    }
-                } else
-                    if ( cursor().eventNr() == 3) {
-                        // volume col
-                        std::cout << "event nr 3 - volume column" << std::endl;
-                        psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
-                        unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.volume(), cursor().col() );
-                        patEvent.setVolume( newByte );
-                        pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-                        if (cursor().col() == 0) {
-                            moveCursor(1,0);			
-                        } else {
-                            moveCursor(-1, patternStep() );
-                        }
- //                       pView->checkDownScroll( cursor() );
-                    } else
-                        if ( cursor().eventNr() >= 4) {
-                            // comand or parameter
-                            std::cout << "event nr >=4 - command or parameter" << std::endl;
-                            psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
-                            if (cursor().col() < 2 ) {
-                                int cmdValue;
-                                if (cursor().eventNr() == 4) {
-                                    cmdValue = patEvent.command();
-                                } else {
-                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
-                                    cmdValue = pc.first;
-                                }
-                                unsigned char newByte = convertDigit( 0x00, keyChar, cmdValue, cursor().col() );
-                                if (cursor().eventNr() == 4) {
-                                    patEvent.setCommand( newByte );
-                                } else {
-                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
-                                    pc.first = newByte;					
-                                }
-                                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-                                moveCursor(1,0);
-                            }
-                            else {
-                                int paraValue;
-                                if (cursor().eventNr() == 4) {
-                                    paraValue = patEvent.parameter();
-                                } else {
-                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
-                                    paraValue = pc.second;
-                                }
-                                unsigned char newByte = convertDigit( 0x00, keyChar, paraValue, cursor().col() - 2 );
-                                if (cursor().eventNr() == 4) {
-                                    patEvent.setParameter( newByte );
-                                } else {
-                                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
-                                    pc.second = newByte;					
-                                }
-                                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
-                                if (cursor().col() < 3) {
-                                    moveCursor(1,0);			
-                                } else {
-                                    moveCursor(-3, patternStep() );
-//                                    pView->checkDownScroll( cursor() );
-                                }
-                            }			
-                        }
+                checkDownScroll( cursor() );
         }
+    } else if ( isHex( event ) ) {
+        int keyChar = QChar( event->text().at(0) ).toAscii();
+        if ( cursor().eventNr() == 1 ) {
+            // inst select
+            // i.e. a keyChar is pressed in the instrument column.
+            std::cout << "eventnr 1 - inst select" << std::endl;
+
+            // Add the new data...
+            psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+            unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.instrument(), cursor().col() );
+            patEvent.setInstrument( newByte );
+            pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+            // ...and move the cursor.
+            if (cursor().col() == 0) {
+                moveCursor(1, patternStep() );			
+            } else {
+                moveCursor(-1, patternStep() );
+                checkDownScroll( cursor() );
+            }
+        } else if ( cursor().eventNr() == 2) {
+            // mac select
+            // i.e. a keyChar is pressed in the machine column.
+            std::cout << "event nr 2 - mach select" << std::endl;
+            psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+            unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.machine(), cursor().col() );
+            patEvent.setMachine( newByte );
+            pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+            if (cursor().col() == 0) {
+                moveCursor(1,0);			
+            } else {
+                moveCursor(-1, patternStep() );
+                checkDownScroll( cursor() );
+            }
+        } else if ( cursor().eventNr() == 3) {
+            // volume col
+            std::cout << "event nr 3 - volume column" << std::endl;
+            psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+            unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.volume(), cursor().col() );
+            patEvent.setVolume( newByte );
+            pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+            if (cursor().col() == 0) {
+                moveCursor(1,0);			
+            } else {
+                moveCursor(-1, patternStep() );
+            }
+            checkDownScroll( cursor() );
+        } else if ( cursor().eventNr() >= 4) {
+            // comand or parameter
+            std::cout << "event nr >=4 - command or parameter" << std::endl;
+            psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+            if (cursor().col() < 2 ) {
+                int cmdValue;
+                if (cursor().eventNr() == 4) {
+                    cmdValue = patEvent.command();
+                } else {
+                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                    cmdValue = pc.first;
+                }
+                unsigned char newByte = convertDigit( 0x00, keyChar, cmdValue, cursor().col() );
+                if (cursor().eventNr() == 4) {
+                    patEvent.setCommand( newByte );
+                } else {
+                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                    pc.first = newByte;					
+                }
+                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                moveCursor(1,0);
+            } else {
+                int paraValue;
+                if (cursor().eventNr() == 4) {
+                    paraValue = patEvent.parameter();
+                } else {
+                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                    paraValue = pc.second;
+                }
+                unsigned char newByte = convertDigit( 0x00, keyChar, paraValue, cursor().col() - 2 );
+                if (cursor().eventNr() == 4) {
+                    patEvent.setParameter( newByte );
+                } else {
+                    psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+                    pc.second = newByte;					
+                }
+                pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+                if (cursor().col() < 3) {
+                    moveCursor(1,0);			
+                } else {
+                    moveCursor(-3, patternStep() );
+                    checkDownScroll( cursor() );
+                }
+            }			
+        }
+    }
 
     switch ( command ) {
         case psy::core::cdefNavUp:
@@ -666,9 +660,11 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         break;
         case psy::core::cdefNavPageDn:
             moveCursor( 0, 16 );
+            checkDownScroll( cursor() );
             break;
         case psy::core::cdefNavPageUp:
             moveCursor( 0, -16 );
+            checkUpScroll( cursor() );
             break;
         case psy::core::cdefSelectUp:
         {
