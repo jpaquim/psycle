@@ -315,6 +315,7 @@ namespace psycle
 			bool node::on_event(GdkEvent * event)
 			{
 				if(Gnome::Canvas::Group::on_event(event)) return true;
+				#if 0
 				switch(event->type)
 				{
 					case GDK_ENTER_NOTIFY:
@@ -353,6 +354,7 @@ namespace psycle
 					break;
 					default: ;
 				}
+				#endif
 				return false;
 			}
 
@@ -392,6 +394,7 @@ namespace psycle
 			{
 				if(Gnome::Canvas::Group::on_event(event)) return true;
 				real x(event->button.x), y(event->button.y);
+				#if 0
 				switch(event->type)
 				{
 					case GDK_ENTER_NOTIFY:
@@ -430,6 +433,7 @@ namespace psycle
 					break;
 					default: ;
 				}
+				#endif
 				return false;
 			}
 
