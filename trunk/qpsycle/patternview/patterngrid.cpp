@@ -628,10 +628,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
     switch ( command ) {
         case psy::core::cdefNavUp:
             moveCursor( 0, -patternStep() ); 
+            checkUpScroll( cursor() );
             return;
         break;
         case psy::core::cdefNavDown:
             moveCursor( 0, patternStep() );
+            checkDownScroll( cursor() );
             return;
         break;
         case psy::core::cdefNavLeft:
@@ -1346,17 +1348,8 @@ const std::map<int, TrackGeometry> & PatternGrid::trackGeometrics() const
     return patDraw_->trackGeometrics();
 }
 
-void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
-{
-    //check for scroll
-    if ( patDraw_->xOffByTrack( std::max( cursor.track()+1, 0 ) ) > patDraw_->width() ) {
-        patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , numberOfTracks()-1)) - patDraw_->width() );
-    }
-}
-
 void PatternGrid::checkLeftScroll( const PatCursor & cursor ) 
 {
-    // check for scroll
     int sceneX = patDraw_->xOffByTrack( cursor.track() );
     QPoint foo = patDraw_->mapFromScene( sceneX, 0 ); 
     int viewX = foo.x();
@@ -1364,6 +1357,35 @@ void PatternGrid::checkLeftScroll( const PatCursor & cursor )
         patDraw_->horizontalScrollBar()->setValue( patDraw_->xOffByTrack( std::max( cursor.track(), 0 ) ) );
     }	
 }
+
+void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
+{
+    if ( patDraw_->xOffByTrack( std::max( cursor.track()+1, 0 ) ) > patDraw_->width() ) {
+        patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , numberOfTracks()-1)) - patDraw_->width() );
+    }
+}
+
+void PatternGrid::checkUpScroll( const PatCursor & cursor ) 
+{
+    int sceneY = cursor.line() * lineHeight(); 
+    QPoint foo = patDraw_->mapFromScene( 0, sceneY ); 
+    int viewY = foo.y();
+    if ( viewY * lineHeight() < 0 ) {
+        patDraw_->verticalScrollBar()->setValue( std::max( 0, cursor.line() ) * lineHeight() );
+    }
+}
+
+void PatternGrid::checkDownScroll( const PatCursor & cursor ) 
+{
+    int sceneY = cursor.line() * lineHeight(); 
+    QPoint foo = patDraw_->mapFromScene( 0, sceneY ); 
+    int viewY = foo.y();
+    if ( viewY > patDraw_->height() ) {
+        patDraw_->verticalScrollBar()->setValue( ( std::min( cursor.line(),numberOfLines()-1) +1 ) * lineHeight() );
+    }
+}
+
+
 
 
 
