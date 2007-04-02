@@ -31,6 +31,7 @@
 #include <QClipboard>
 #include <QDomDocument>
 #include <QGraphicsSceneMouseEvent>
+#include <QScrollBar>
 
 template<class T> inline std::string toHex(T value , int nums = 2) {
     std::ostringstream buffer;
@@ -205,10 +206,10 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack )
 {
     // do we have a pattern ?
-    if ( patDraw_->patternView()->pattern() ) {
+    if ( pattern() ) {
         drawCellBg( painter, cursor()  );
         // find start iterator
-        psy::core::SinglePattern::iterator it = patDraw_->patternView()->pattern()->find_lower_nearest(startLine);
+        psy::core::SinglePattern::iterator it = pattern()->find_lower_nearest(startLine);
         psy::core::TimeSignature signature;
 
 
@@ -218,7 +219,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
         for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
-            if ( it != patDraw_->patternView()->pattern()->end() )	{
+            if ( it != pattern()->end() )	{
                 int liney = it->first * beatZoom();
                 if (liney == curLinenum ) {
                     line = &it->second;
@@ -233,7 +234,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                 bool onBeat = false;
                 bool onBar  = false;
                 if ( !(curLinenum % beatZoom())) {
-                    if (  it != patDraw_->patternView()->pattern()->end() && patDraw_->patternView()->pattern()->barStart(it->first, signature) ) {
+                    if (  it != pattern()->end() && pattern()->barStart(it->first, signature) ) {
                         tColor = QColor( barColor() );
                     } else {
                         onBeat = true;
@@ -395,10 +396,10 @@ int PatternGrid::eventColWidth( int eventnr ) const
         const ColumnEvent & event = events_.at(eventnr);
 
         switch ( event.type() ) {
-                                case ColumnEvent::hex2 : eventColWidth_= cellWidth(); 	break;
-                                case ColumnEvent::hex4 : eventColWidth_= cellWidth(); 	break;
-                                case ColumnEvent::note : eventColWidth_= noteCellWidth(); break;
-                                default: ;
+            case ColumnEvent::hex2 : eventColWidth_= cellWidth(); 	break;
+            case ColumnEvent::hex4 : eventColWidth_= cellWidth(); 	break;
+            case ColumnEvent::note : eventColWidth_= noteCellWidth(); break;
+            default: ;
         }
     }
     return eventColWidth_;
@@ -641,21 +642,23 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             moveCursor( 1, 0 );
             return;
         break;
-        case psy::core::cdefTrackNext:
-            if ( cursor().track()+1 < numberOfTracks() ) {
-                PatCursor oldCursor = cursor();
-                setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
-            }
-            repaintCursor(); 
-            break;
-            return;
-        break;
         case psy::core::cdefTrackPrev:
             if ( cursor().track() > 0 ) {
                 PatCursor oldCursor = cursor();
                 setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );
             }
             repaintCursor();
+            checkLeftScroll( cursor() );
+            break;
+            return;
+        break;
+        case psy::core::cdefTrackNext:
+            if ( cursor().track()+1 < numberOfTracks() ) {
+                PatCursor oldCursor = cursor();
+                setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
+            }
+            repaintCursor(); 
+            checkRightScroll( cursor() );
             break;
             return;
         break;
@@ -673,7 +676,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             int newCursorTrack = cursor().track();
             int newCursorLine = cursor().line();
             int newCursorCol = cursor().col();
-            if (doingKeybasedSelect()) {
+            if ( doingKeybasedSelect() ) {
                 // if above line is not already selected then select it...
                 if (!lineAlreadySelected(crs.line())) {
                     // don't set selection out of bounds of grid...
@@ -889,60 +892,56 @@ bool PatternGrid::isNote( int key )
     return false;
 }
 
-void PatternGrid::moveCursor( int dx, int dy) {
+void PatternGrid::moveCursor( int dx, int dy) 
+{
     // dx -1 left hex digit move
     // dx +1 rigth hex digit move
     // dy in lines
     oldCursor_ = cursor_;
     int eventnr = cursor().eventNr();
     if ( dx > 0 ) {			
-        if ( eventnr < events_.size() ) {
+        if ( eventnr < events_.size() ) 
+        {
             const ColumnEvent & event = events_.at( eventnr );
             int maxCols = event.cols();
             if ( cursor_.col() + dx < maxCols ) {
                 cursor_.setCol( cursor_.col() + dx);
-            } else
-                if (eventnr + 1 < visibleEvents( cursor_.track()) ) {
-                    cursor_.setCol( 0 );
-                    cursor_.setEventNr( eventnr + 1);
-                } else 
-                    if (cursor_.track()+1 < numberOfTracks() ) {
-                        cursor_.setTrack( cursor_.track() + 1 );
-                        cursor_.setEventNr(0);
-                        cursor_.setCol(0);
-                    }
+            } else if (eventnr + 1 < visibleEvents( cursor_.track()) ) {
+                cursor_.setCol( 0 );
+                cursor_.setEventNr( eventnr + 1);
+            } else if (cursor_.track()+1 < numberOfTracks() ) {
+                cursor_.setTrack( cursor_.track() + 1 );
+                cursor_.setEventNr(0);
+                cursor_.setCol(0);
+            }
         }
-    } else 
-        if ( dx < 0 ) {
-            if ( cursor_.col() + dx >= 0 ) {
-                cursor_.setCol( cursor_.col() + dx);
-            } else 
-                if ( cursor_.eventNr() > 0 ) {
-                    cursor_.setEventNr( cursor_.eventNr() - 1 );
-                    const ColumnEvent & event = events_.at( cursor_.eventNr() );
-                    cursor_.setCol( event.cols() - 1 );					
-                } else {
-                    if ( cursor_.track() > 0 ) {
-                        cursor_.setTrack( cursor_.track() -1 );
-                        cursor_.setEventNr( visibleEvents( cursor_.track() -1 )-1 );
-                        const ColumnEvent & event = events_.at( cursor_.eventNr() );
-                        cursor_.setCol( event.cols() - 1 );
-                    }		
-                }
+    } else if ( dx < 0 ) {
+        if ( cursor_.col() + dx >= 0 ) {
+            cursor_.setCol( cursor_.col() + dx);
+        } else if ( cursor_.eventNr() > 0 ) {
+            cursor_.setEventNr( cursor_.eventNr() - 1 );
+            const ColumnEvent & event = events_.at( cursor_.eventNr() );
+            cursor_.setCol( event.cols() - 1 );					
+        } else if ( cursor_.track() > 0 ) {
+                cursor_.setTrack( cursor_.track() -1 );
+                cursor_.setEventNr( visibleEvents( cursor_.track() -1 )-1 );
+                const ColumnEvent & event = events_.at( cursor_.eventNr() );
+                cursor_.setCol( event.cols() - 1 );
         }
+    }
 
-        if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
-            cursor_.setLine( std::min(cursor_.line() + dy, numberOfLines()-1));
-        } else if ( dy != 0 && (dy + cursor_.line() < 0) ) {
-            cursor_.setLine( std::max(cursor_.line() + dy, 0));
-        } else if (dy!=0) {
-        }
-        repaintCursor(); 
-        if ( doingKeybasedSelect() ) {
-            doingKeybasedSelect_ = false;
-            selection_.clear();
-            repaintSelection(); 
-        }
+    if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
+        cursor_.setLine( std::min(cursor_.line() + dy, numberOfLines()-1));
+    } else if ( dy != 0 && (dy + cursor_.line() < 0) ) {
+        cursor_.setLine( std::max(cursor_.line() + dy, 0));
+    } else if (dy!=0) {
+    }
+    repaintCursor(); 
+    if ( doingKeybasedSelect() ) {
+        doingKeybasedSelect_ = false;
+        selection_.clear();
+        repaintSelection(); 
+    }
 }
 
 int PatternGrid::visibleEvents( int track ) const 
@@ -1338,7 +1337,6 @@ int PatternGrid::visibleColWidth( int maxEvents ) const
             default: ;
         }
     }
-    std::cout << "in vcw offset = " << offset << std::endl;
 
     return offset /* + colIdent*/ + patDraw_->trackPaddingLeft() + patDraw_->trackPaddingRight();
 }
@@ -1347,6 +1345,27 @@ const std::map<int, TrackGeometry> & PatternGrid::trackGeometrics() const
 {
     return patDraw_->trackGeometrics();
 }
+
+void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
+{
+    //check for scroll
+    if ( patDraw_->xOffByTrack( std::max( cursor.track()+1, 0 ) ) > patDraw_->width() ) {
+        patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , numberOfTracks()-1)) - patDraw_->width() );
+    }
+}
+
+void PatternGrid::checkLeftScroll( const PatCursor & cursor ) 
+{
+    // check for scroll
+    int sceneX = patDraw_->xOffByTrack( cursor.track() );
+    QPoint foo = patDraw_->mapFromScene( sceneX, 0 ); 
+    int viewX = foo.x();
+    if ( viewX < 0 ) {
+        patDraw_->horizontalScrollBar()->setValue( patDraw_->xOffByTrack( std::max( cursor.track(), 0 ) ) );
+    }	
+}
+
+
 
 
 

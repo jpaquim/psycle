@@ -1,16 +1,16 @@
-#ifndef HEADER_H
-#define HEADER_H
+#ifndef TRACKHEADER_H
+#define TRACKHEADE_H
 
 #include "patterndraw.h"
 
 #include <QGraphicsRectItem>
 
-class Header: public QGraphicsRectItem {
+class TrackHeader: public QGraphicsItem {
 public:
-    Header(PatternDraw* pPatternDraw);
-    ~Header();
+    TrackHeader(PatternDraw* pPatternDraw);
+    ~TrackHeader();
 
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0 );
     QRectF boundingRect() const;
 
    // virtual void onMousePress(int x, int y, int button);

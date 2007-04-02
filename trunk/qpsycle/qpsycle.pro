@@ -35,7 +35,7 @@ HEADERS += mainwindow.h \
            machineview/effectgui.h \
            patternview/patternview.h \
            patternview/linenumbercolumn.h \
-           patternview/header.h \
+           patternview/trackheader.h \
            patternview/patterngrid.h \
            patternview/patterndraw.h \
            psycore/abstractmachinefactory.h \
@@ -116,7 +116,7 @@ SOURCES += mainwindow.cpp \
            machineview/effectgui.cpp \
            patternview/patternview.cpp \
            patternview/linenumbercolumn.cpp \
-           patternview/header.cpp \
+           patternview/trackheader.cpp \
            patternview/patterngrid.cpp \
            patternview/patterndraw.cpp \
            psycore/abstractmachinefactory.cpp \

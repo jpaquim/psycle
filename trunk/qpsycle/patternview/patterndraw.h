@@ -39,6 +39,7 @@ class LineNumberColumn;
 class PatternGrid;
 class PatCursor;
 class PatternView;
+class TrackHeader;
 
 /**
  * TrackGeometry.
@@ -103,6 +104,7 @@ private:
    PatternView *patView_;
 
    LineNumberColumn *lineNumCol_;
+   TrackHeader *trackHeader_;
    PatternGrid *patGrid_;
    psy::core::SinglePattern *pattern_;
 };
