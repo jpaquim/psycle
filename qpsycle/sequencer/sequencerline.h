@@ -47,6 +47,13 @@ public:
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     SequencerDraw *sDraw_;
 
+    enum { Type = UserType + 6 };
+    int type() const  // Enable the use of qgraphicsitem_cast with this item.
+    {
+
+        return Type;
+    }
+
 signals:
     void clicked( SequencerLine* );
 

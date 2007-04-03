@@ -186,6 +186,16 @@ namespace psy
 			return xml.str();
 		}
 
+        SequenceLine *SequenceEntry::line() 
+        {
+            return line_;     
+        }
+
+        void SequenceEntry::setSequenceLine( SequenceLine *newLine ) 
+        {
+            line_ = newLine;     
+        }
+
 		// end of PatternEntry
 
 		// represents one track/line in the sequencer

@@ -76,37 +76,75 @@ psy::core::SequenceEntry *SequencerItem::sequenceEntry() {
 
 void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    QGraphicsItem::mouseMoveEvent( event ); // Do normal move event...
-    int beatPxLength_ = 5; // FIXME: move to getter function
-
-    QList<QGraphicsItem*> selItems = scene()->selectedItems();
-    QList<QGraphicsItem*>::iterator i;
-    for (i = selItems.begin(); i != selItems.end(); ++i)
+    if ( event->modifiers() == Qt::NoModifier ) // Movement constrained to current line.
     {
-        QGraphicsItem *foo = *i;
-        if ( qgraphicsitem_cast<SequencerItem *>( foo ) ) // Make sure it's a SeqItem.
+        QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
+        int beatPxLength_ = 5; // FIXME: move to getter function
+
+        QList<QGraphicsItem*> selItems = scene()->selectedItems();
+        QList<QGraphicsItem*>::iterator i;
+        for (i = selItems.begin(); i != selItems.end(); ++i)
         {
-            SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); 
+            QGraphicsItem *foo = *i;
+            if ( qgraphicsitem_cast<SequencerItem *>( foo ) ) // Make sure it's a SeqItem.
+            {
+                SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); 
 
-            int widthOfThisItem = item->boundingRect().width();
-            int widthOfParent = item->parentItem()->boundingRect().width();
-            int maximumLeftPos = widthOfParent - widthOfThisItem;
-            int currentLeftPos = item->pos().x();
-            int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
-            int newLeftPos = std::max( 0, desiredLeftPos );
+                int widthOfThisItem = item->boundingRect().width();
+                int widthOfParent = item->parentItem()->boundingRect().width();
+                int maximumLeftPos = widthOfParent - widthOfThisItem;
+                int currentLeftPos = item->pos().x();
+                int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
+                int newLeftPos = std::max( 0, desiredLeftPos );
 
-            item->setPos( newLeftPos, 0 );                 
-            
-            int newItemLeft = newLeftPos;
-            if ( true /*gridSnap()*/ ) {
-                int beatPos = item->pos().x() / beatPxLength_;
-                newItemLeft = beatPos * beatPxLength_;
-                item->setPos( newItemLeft, 0 );
+                item->setPos( newLeftPos, 0 );                 
+                
+                int newItemLeft = newLeftPos;
+                if ( true /*gridSnap()*/ ) {
+                    int beatPos = item->pos().x() / beatPxLength_;
+                    newItemLeft = beatPos * beatPxLength_;
+                    item->setPos( newItemLeft, 0 );
+                }
+             
+                // FIXME: maybe do this on mouseReleaseEvent?
+                item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newItemLeft / beatPxLength_ );
             }
-         
-            // FIXME: maybe do this on mouseReleaseEvent?
-            item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newItemLeft / beatPxLength_ );
         }
+    }
+    if ( event->modifiers() == Qt::ControlModifier ) // Movement allowed between lines.
+    {
+        QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
+
+        int widthOfThisItem = boundingRect().width();
+        int widthOfParent = parentItem()->boundingRect().width();
+        int maximumLeftPos = widthOfParent - widthOfThisItem;
+        int currentLeftPos = pos().x();
+        int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
+        int newLeftPos = std::max( 0, desiredLeftPos );
+
+        setPos( newLeftPos, 0 );                 
+        
+        int newItemLeft = newLeftPos;
+        if ( true /*gridSnap()*/ ) {
+            int beatPos = pos().x() / beatPxLength_;
+            newItemLeft = beatPos * beatPxLength_;
+            setPos( newItemLeft, 0 );
+        }
+     
+        SequencerLine *parentLine = (SequencerLine*)parentItem();
+        SequencerLine *lineUnderCursor = 0;
+        QList<QGraphicsItem*> itemsUnderCursor = scene()->items( event->scenePos() );
+        for ( int i = 0; i < itemsUnderCursor.size(); ++i ) {
+            if ( itemsUnderCursor.at(i)->type() == UserType + 6 ) { // FIXME: abstract out usertype + 6
+                lineUnderCursor = (SequencerLine*)itemsUnderCursor.at(i);
+            }
+        }
+        if ( parentLine != lineUnderCursor && lineUnderCursor != 0 ) {
+            setParentItem( lineUnderCursor );
+            sequenceEntry()->setSequenceLine( lineUnderCursor->sequenceLine() );
+        }
+        // FIXME: maybe do this on mouseReleaseEvent?
+        sequenceEntry()->track()->MoveEntry( sequenceEntry(), newItemLeft / beatPxLength_ );
     }
 }
 

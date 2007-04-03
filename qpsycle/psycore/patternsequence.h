@@ -108,6 +108,9 @@ namespace psy
 
 			std::string toXml(double pos) const;
 
+            SequenceLine* line();
+            void setSequenceLine( SequenceLine *newLine );
+
 		private:
 
 			SequenceLine* line_; 			// the sequence track , the sequence belongs to
