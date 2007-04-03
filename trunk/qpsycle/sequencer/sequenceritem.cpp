@@ -79,34 +79,19 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     if ( event->modifiers() == Qt::NoModifier ) // Movement constrained to current line.
     {
         QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
-        int beatPxLength_ = 5; // FIXME: move to getter function
 
         QList<QGraphicsItem*> selItems = scene()->selectedItems();
         QList<QGraphicsItem*>::iterator i;
-        for (i = selItems.begin(); i != selItems.end(); ++i)
+        for (i = selItems.begin(); i != selItems.end(); ++i) // For each selected item...
         {
             QGraphicsItem *foo = *i;
             if ( qgraphicsitem_cast<SequencerItem *>( foo ) ) // Make sure it's a SeqItem.
             {
                 SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); 
-
-                int widthOfThisItem = item->boundingRect().width();
-                int widthOfParent = item->parentItem()->boundingRect().width();
-                int maximumLeftPos = widthOfParent - widthOfThisItem;
-                int currentLeftPos = item->pos().x();
-                int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
-                int newLeftPos = std::max( 0, desiredLeftPos );
-
-                item->setPos( newLeftPos, 0 );                 
-                
-                int newItemLeft = newLeftPos;
-                if ( true /*gridSnap()*/ ) {
-                    int beatPos = item->pos().x() / beatPxLength_;
-                    newItemLeft = beatPos * beatPxLength_;
-                    item->setPos( newItemLeft, 0 );
-                }
+                item->constrainToParent();
              
                 // FIXME: maybe do this on mouseReleaseEvent?
+                int newItemLeft = item->pos().x(); 
                 item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newItemLeft / beatPxLength_ );
             }
         }
@@ -115,36 +100,44 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     {
         QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
 
-        int widthOfThisItem = boundingRect().width();
-        int widthOfParent = parentItem()->boundingRect().width();
-        int maximumLeftPos = widthOfParent - widthOfThisItem;
-        int currentLeftPos = pos().x();
-        int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
-        int newLeftPos = std::max( 0, desiredLeftPos );
-
-        setPos( newLeftPos, 0 );                 
-        
-        int newItemLeft = newLeftPos;
-        if ( true /*gridSnap()*/ ) {
-            int beatPos = pos().x() / beatPxLength_;
-            newItemLeft = beatPos * beatPxLength_;
-            setPos( newItemLeft, 0 );
-        }
+        constrainToParent();
      
-        SequencerLine *parentLine = (SequencerLine*)parentItem();
+        SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine*>( parentItem() );
         SequencerLine *lineUnderCursor = 0;
         QList<QGraphicsItem*> itemsUnderCursor = scene()->items( event->scenePos() );
         for ( int i = 0; i < itemsUnderCursor.size(); ++i ) {
-            if ( itemsUnderCursor.at(i)->type() == UserType + 6 ) { // FIXME: abstract out usertype + 6
-                lineUnderCursor = (SequencerLine*)itemsUnderCursor.at(i);
+            if ( qgraphicsitem_cast<SequencerLine *>( itemsUnderCursor.at(i) ) ) { // Make sure it's a SeqLine.
+                lineUnderCursor = qgraphicsitem_cast<SequencerLine*>( itemsUnderCursor.at(i) );
             }
         }
         if ( parentLine != lineUnderCursor && lineUnderCursor != 0 ) {
             setParentItem( lineUnderCursor );
             sequenceEntry()->setSequenceLine( lineUnderCursor->sequenceLine() );
         }
+
         // FIXME: maybe do this on mouseReleaseEvent?
+        int newItemLeft = pos().x(); 
         sequenceEntry()->track()->MoveEntry( sequenceEntry(), newItemLeft / beatPxLength_ );
+    }
+}
+
+void SequencerItem::constrainToParent() 
+{
+    // Constrain to parent.
+    int widthOfThisItem = boundingRect().width();
+    int widthOfParent = parentItem()->boundingRect().width();
+    int maximumLeftPos = widthOfParent - widthOfThisItem;
+    int currentLeftPos = pos().x();
+    int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
+    int newLeftPos = std::max( 0, desiredLeftPos );
+
+    setPos( newLeftPos, 0 );                 
+    
+    int newItemLeft = newLeftPos;
+    if ( true /*gridSnap()*/ ) {
+        int beatPos = pos().x() / beatPxLength_;
+        newItemLeft = beatPos * beatPxLength_;
+        setPos( newItemLeft, 0 );
     }
 }
 

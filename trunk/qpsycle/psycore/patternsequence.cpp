@@ -186,17 +186,16 @@ namespace psy
 			return xml.str();
 		}
 
-        SequenceLine *SequenceEntry::line() 
+        void SequenceEntry::setSequenceLine( SequenceLine *newLine )
         {
-            return line_;     
+            line_->moveEntryToNewLine( this, newLine );
+            line_ = newLine;
         }
 
-        void SequenceEntry::setSequenceLine( SequenceLine *newLine ) 
-        {
-            line_ = newLine;     
-        }
+		// end of SequenceEntry
 
-		// end of PatternEntry
+
+
 
 		// represents one track/line in the sequencer
 		SequenceLine::SequenceLine( )
@@ -224,6 +223,23 @@ namespace psy
 			insert(value_type(position, entry));
 			return entry;
 		}
+
+        void SequenceLine::insertEntry( SequenceEntry *entry )
+        {
+			insert(value_type(entry->startPos(), entry));
+        }
+
+        void SequenceLine::moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine )
+        {
+            newLine->insertEntry( entry );
+			iterator it = begin();
+			for( ; it!= end(); ++it )
+			{
+				if ( it->second==entry )
+				break;
+			}
+            erase( it ); // Removes entry from this SequenceLine, but doesn't delete it.
+        }
 
 		void SequenceLine::removeSinglePatternEntries( SinglePattern* pattern )
 		{
