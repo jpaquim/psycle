@@ -172,7 +172,11 @@ SequencerLine* SequencerDraw::makeSequencerLine(psy::core::SequenceLine* seqLine
 
 void SequencerDraw::onSequencerLineClick( SequencerLine *line )
 {
+    QRectF oldLineRect = selectedLine()->mapToScene( selectedLine()->boundingRect() ).boundingRect();
+    QRectF newLineRect = line->mapToScene( line->boundingRect() ).boundingRect();
     setSelectedLine( line );
+    scene()->update( oldLineRect );
+    scene()->update( newLineRect );
 }
 
 void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )

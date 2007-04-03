@@ -30,12 +30,15 @@
 class SequencerDraw;
 class SequencerItem;
 
-class SequencerLine : public QObject, public QGraphicsRectItem, public boost::signalslib::trackable
+class SequencerLine : public QObject, public QGraphicsItem, public boost::signalslib::trackable
 {
     Q_OBJECT
 public:
     SequencerLine( SequencerDraw *sDraw );
     ~SequencerLine();
+
+    QRectF boundingRect() const;
+    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0 );
 
     // don't call setSequenceLine until you have added
     // this SequencerLine to a scene

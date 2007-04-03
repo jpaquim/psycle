@@ -31,13 +31,27 @@
 SequencerLine::SequencerLine( SequencerDraw *sDraw)
 {
     sDraw_ = sDraw; // FIXME: don't really want this to be in here..  Feels too tightly-coupled...
-    setRect(QRectF(0, 0, sDraw_->width(), 30));
-    setPen(QPen(Qt::white,1));
-    setBrush(QBrush(Qt::transparent));
 }
 
 SequencerLine::~SequencerLine() {
   printf("~SequencerLine %p\n",this);
+}
+
+QRectF SequencerLine::boundingRect() const 
+{
+    return QRectF( 0, 0, sDraw_->width(), 30 );
+}
+
+void SequencerLine::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
+{
+    if ( sDraw_->selectedLine() == this ) {
+        painter->setBrush( QBrush( QColor( 200, 200, 50, 100 ) ) );
+    } else {
+        painter->setBrush( QBrush( Qt::transparent ) );
+    }
+    painter->setPen( QPen( Qt::white, 1 ) );
+
+    painter->drawRect( boundingRect() );
 }
 
 void SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
