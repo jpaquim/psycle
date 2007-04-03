@@ -28,19 +28,20 @@
 #include <QObject>
 #include <QAction>
 
- class SequencerItem : public QObject, public QGraphicsItem
- {
-    Q_OBJECT
+class SequencerItem : public QObject, public QGraphicsItem
+{
+   Q_OBJECT
 
- public:
-     SequencerItem();
-     ~SequencerItem();
+public:
+    SequencerItem();
+    ~SequencerItem();
 
     QRectF boundingRect() const;
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-     void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
-     psy::core::SequenceEntry *sequenceEntry(); 
+    void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
+    psy::core::SequenceEntry *sequenceEntry(); 
+    void constrainToParent();
 
     enum { Type = UserType + 5 };
     int type() const

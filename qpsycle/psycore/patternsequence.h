@@ -96,6 +96,7 @@ namespace psy
 			float patternBeats() const;
 
 			SequenceLine* track() {return line_;}
+            void setSequenceLine( SequenceLine *newLine );
 
 			void setStartPos( float pos );
 			float startPos() const;
@@ -108,8 +109,6 @@ namespace psy
 
 			std::string toXml(double pos) const;
 
-            SequenceLine* line();
-            void setSequenceLine( SequenceLine *newLine );
 
 		private:
 
@@ -136,6 +135,8 @@ namespace psy
       boost::signal1<void,SequenceLine*> wasDeleted;
 
 			SequenceEntry* createEntry(SinglePattern* pattern, double position);
+            void insertEntry( SequenceEntry *entry );
+            void moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine );
 			void removeSinglePatternEntries(SinglePattern* pattern);
 
 			double tickLength() const;
