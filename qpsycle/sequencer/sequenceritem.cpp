@@ -100,7 +100,8 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     {
         QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
 
-        constrainToParent();
+        constrainToParent(); // Note: we constrain the entry to its parent, but the parent
+                             // can change depending on the mouse position.
      
         SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine*>( parentItem() );
         SequencerLine *lineUnderCursor = 0;
@@ -123,7 +124,6 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 
 void SequencerItem::constrainToParent() 
 {
-    // Constrain to parent.
     int widthOfThisItem = boundingRect().width();
     int widthOfParent = parentItem()->boundingRect().width();
     int maximumLeftPos = widthOfParent - widthOfThisItem;
@@ -133,11 +133,10 @@ void SequencerItem::constrainToParent()
 
     setPos( newLeftPos, 0 );                 
     
-    int newItemLeft = newLeftPos;
     if ( true /*gridSnap()*/ ) {
         int beatPos = pos().x() / beatPxLength_;
-        newItemLeft = beatPos * beatPxLength_;
-        setPos( newItemLeft, 0 );
+        int snappedLeftPos = beatPos * beatPxLength_;
+        setPos( snappedLeftPos, 0 );
     }
 }
 
@@ -150,11 +149,11 @@ void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 
 void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-     QMenu menu;
-     deleteEntryAction_ = new QAction( "Delete Entry", this );
-     connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
-      menu.addAction( deleteEntryAction_ );
-      QAction *a = menu.exec(event->screenPos());
+    QMenu menu;
+    deleteEntryAction_ = new QAction( "Delete Entry", this );
+    connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
+    menu.addAction( deleteEntryAction_ );
+    QAction *a = menu.exec(event->screenPos());
 }
 
 void SequencerItem::onDeleteEntryActionTriggered()
