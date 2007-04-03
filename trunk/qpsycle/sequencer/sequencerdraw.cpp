@@ -130,17 +130,14 @@ void SequencerDraw::insertTrack()
     //    addSequencerLine();
 //        resize();
 //        repaint();
-    } else
-        if ( selectedLine() ) {
+    } else if ( selectedLine() ) {
           // will cause onNewLineInserted to be fired:
           seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() );
 /*            int index = selectedLine_->zOrder();
             scrollArea_->insert(line, index);
             scrollArea_->resize();
 */
-//            resize();
- //           scrollArea_->repaint();
-        }
+    }
 }
 
 void SequencerDraw::deleteTrack() {
