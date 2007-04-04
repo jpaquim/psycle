@@ -66,6 +66,7 @@ public slots:
     void onDeleteMachineActionTriggered();
     void onRenameMachineActionTriggered();
     void onToggleMuteActionTriggered();
+    void onToggleSoloActionTriggered();
 
 signals:
     void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
@@ -88,6 +89,7 @@ private:
     QAction *deleteMachineAct_;
     QAction *renameMachineAct_;
     QAction *toggleMuteAct_;
+    QAction *toggleSoloAct_;
 
 };
 
