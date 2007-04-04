@@ -272,8 +272,13 @@ PlayLine::PlayLine()
 
 void PlayLine::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    QGraphicsItem::mouseMoveEvent( event );
-    setPos( pos().x(), 0 );
+    if ( event->buttons() & Qt::LeftButton )
+    {
+        QPointF newPos(mapToParent(event->pos()) - matrix().map(event->buttonDownPos(Qt::LeftButton)));
+        setPos( std::max( 0, (int)newPos.x() ), 0 ); // x can't be less than 0; y is always 0.
+    } else {
+        event->ignore();
+    }
 }
 
 void PlayLine::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
