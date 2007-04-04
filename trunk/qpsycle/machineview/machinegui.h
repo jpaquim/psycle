@@ -65,6 +65,7 @@ public slots:
     void showMacTwkDlg();
     void onDeleteMachineActionTriggered();
     void onRenameMachineActionTriggered();
+    void onToggleMuteActionTriggered();
 
 signals:
     void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
@@ -86,6 +87,7 @@ private:
     QAction *showMacTwkDlgAct_;
     QAction *deleteMachineAct_;
     QAction *renameMachineAct_;
+    QAction *toggleMuteAct_;
 
 };
 
