@@ -99,6 +99,34 @@ void SequencerLine::addEntry( psy::core::SequenceEntry* entry)
   scene()->update();
 }
 
+void SequencerLine::insertItem( SequencerItem *item )
+{
+  item->setParentItem( this );
+  items_.push_back( item );
+  connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
+           sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
+  connect( item, SIGNAL( clicked( SequencerItem*) ),
+           this, SLOT( onItemClicked( SequencerItem*) ) );
+  //item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
+
+  scene()->update();
+}
+
+// FIXME: design-wise, this may be better as SequencerItem::moveToNewLine.
+void SequencerLine::moveItemToNewLine( SequencerItem *item, SequencerLine *newLine ) 
+{
+  for( items_iterator i=items_.begin(); i!=items_.end(); ++i ) {
+    assert(*i);
+    if( (*i) == item ) {
+      item->sequenceEntry()->setSequenceLine( newLine->sequenceLine() );
+      newLine->insertItem( item );
+      items_.erase(i);
+      scene()->update();
+      return;
+    }
+  }
+}
+
 void SequencerLine::removeEntry(psy::core::SequenceEntry* entry) {
   printf("SequencerLine(this=%p)::removeEntry(%p)",this,entry);
   for(items_iterator i=items_.begin();i!=items_.end();++i) {
