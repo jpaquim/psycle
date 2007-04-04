@@ -54,12 +54,18 @@
      setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
 
      macTwkDlg_ = new MachineTweakDlg( mac_, machineView );
-     showMacTwkDlgAct_ = new QAction("Tweak Parameters", this);
-     deleteMachineAct_ = new QAction("Delete", this);
-     renameMachineAct_ = new QAction("Rename", this);
+
+     showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
+     deleteMachineAct_ = new QAction( "Delete", this );
+     renameMachineAct_ = new QAction( "Rename", this );
+     QString muteText;   
+     mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
+     toggleMuteAct_ = new QAction( muteText, this );
+
      connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
      connect( deleteMachineAct_, SIGNAL( triggered() ), this, SLOT( onDeleteMachineActionTriggered() ) );
      connect( renameMachineAct_, SIGNAL( triggered() ), this, SLOT( onRenameMachineActionTriggered() ) );
+     connect( toggleMuteAct_, SIGNAL( triggered() ), this, SLOT( onToggleMuteActionTriggered() ) );
 
      connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
               machineView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
@@ -129,6 +135,8 @@ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value
       menu.addAction( deleteMachineAct_ );
       menu.addSeparator();
       menu.addAction( showMacTwkDlgAct_ );
+      menu.addSeparator();
+      menu.addAction( toggleMuteAct_ );
       QAction *a = menu.exec( event->screenPos() );
   }
 
@@ -286,3 +294,21 @@ void MachineGui::onDeleteMachineActionTriggered()
 {
     emit deleteRequest( this );
 }
+
+void MachineGui::onToggleMuteActionTriggered() 
+{
+    mac()->_mute = !mac()->_mute;
+    if ( mac()->_mute ) 
+    {
+        mac()->_volumeCounter = 0.0f;
+        mac()->_volumeDisplay = 0;
+        if ( mac()->song()->machineSoloed == mac()->_macIndex ) {
+            mac()->song()->machineSoloed = -1;
+        }
+    }
+    QString muteText;
+    mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
+    toggleMuteAct_->setText( muteText );
+    update( boundingRect() );
+}
+
