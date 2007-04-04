@@ -61,11 +61,15 @@
      QString muteText;   
      mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
      toggleMuteAct_ = new QAction( muteText, this );
+     QString soloText;   
+     mac_->song()->machineSoloed == mac_->_macIndex ? soloText = "Unsolo" : soloText = "Solo";
+     toggleSoloAct_ = new QAction( soloText, this );
 
      connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
      connect( deleteMachineAct_, SIGNAL( triggered() ), this, SLOT( onDeleteMachineActionTriggered() ) );
      connect( renameMachineAct_, SIGNAL( triggered() ), this, SLOT( onRenameMachineActionTriggered() ) );
      connect( toggleMuteAct_, SIGNAL( triggered() ), this, SLOT( onToggleMuteActionTriggered() ) );
+     connect( toggleSoloAct_, SIGNAL( triggered() ), this, SLOT( onToggleSoloActionTriggered() ) );
 
      connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
               machineView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
@@ -127,18 +131,27 @@ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value
     return QGraphicsItem::itemChange(change, value);
 }
     
-  void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-  {
-     QMenu menu;
-      menu.addAction( renameMachineAct_ );
-      menu.addAction("Clone");
-      menu.addAction( deleteMachineAct_ );
-      menu.addSeparator();
-      menu.addAction( showMacTwkDlgAct_ );
-      menu.addSeparator();
-      menu.addAction( toggleMuteAct_ );
-      QAction *a = menu.exec( event->screenPos() );
-  }
+void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    QString muteText;
+    mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
+    toggleMuteAct_->setText( muteText );
+
+    QString soloText;   
+    mac_->song()->machineSoloed == mac_->_macIndex ? soloText = "Unsolo" : soloText = "Solo";
+    toggleSoloAct_->setText( soloText );
+
+    QMenu menu;
+    menu.addAction( renameMachineAct_ );
+    menu.addAction("Clone");
+    menu.addAction( deleteMachineAct_ );
+    menu.addSeparator();
+    menu.addAction( showMacTwkDlgAct_ );
+    menu.addSeparator();
+    menu.addAction( toggleMuteAct_ );
+    menu.addAction( toggleSoloAct_ );
+    QAction *a = menu.exec( event->screenPos() );
+}
 
 void MachineGui::keyPressEvent ( QKeyEvent * event )
 {
@@ -306,9 +319,39 @@ void MachineGui::onToggleMuteActionTriggered()
             mac()->song()->machineSoloed = -1;
         }
     }
-    QString muteText;
-    mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
-    toggleMuteAct_->setText( muteText );
+
     update( boundingRect() );
 }
+
+void MachineGui::onToggleSoloActionTriggered() 
+{
+    if (mac()->song()->machineSoloed == mac()->_macIndex ) // Unsolo it.
+    {
+        mac()->song()->machineSoloed = -1;
+        for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
+            if ( mac()->song()->_pMachine[i] ) {
+                if (( mac()->song()->_pMachine[i]->_mode == psy::core::MACHMODE_GENERATOR )) {
+                    mac()->song()->_pMachine[i]->_mute = false;
+                }
+            }
+        }
+    } else { // Solo it.
+        for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
+            if ( mac()->song()->_pMachine[i] )
+            {
+                if (( mac()->song()->_pMachine[i]->_mode == psy::core::MACHMODE_GENERATOR ) && (i != mac()->_macIndex))
+                {
+                    mac()->song()->_pMachine[i]->_mute = true;
+                    mac()->song()->_pMachine[i]->_volumeCounter=0.0f;
+                    mac()->song()->_pMachine[i]->_volumeDisplay=0;
+                }
+            }
+        }
+        mac()->_mute = false;
+        mac()->song()->machineSoloed = mac()->_macIndex;
+    }
+
+    update( boundingRect() );
+}
+
 
