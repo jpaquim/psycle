@@ -96,7 +96,7 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             }
         }
     }
-    if ( event->modifiers() == Qt::ControlModifier ) // Movement allowed between lines.
+    if ( event->modifiers() == Qt::ShiftModifier ) // Movement allowed between lines.
     {
         QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
 
