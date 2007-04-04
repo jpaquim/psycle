@@ -93,4 +93,10 @@ private:
 
 };
 
+class GeneratorGui : public MachineGui {
+public:
+    GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+};
+
 #endif

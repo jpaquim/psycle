@@ -351,7 +351,19 @@ void MachineGui::onToggleSoloActionTriggered()
         mac()->song()->machineSoloed = mac()->_macIndex;
     }
 
-    update( boundingRect() );
+    scene()->update(); // FIXME: possibly more efficient to update individual machines in the loop above.
 }
 
 
+GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
+    : MachineGui(left, top, mac, macView)
+{}
+
+void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
+{
+    MachineGui::paint( painter, option, widget );
+    mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
+    painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
+    mac()->song()->machineSoloed == mac()->_macIndex ?painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
+    painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
+}

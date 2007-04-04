@@ -318,7 +318,7 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
     MachineGui *macGui;
     switch ( mac->mode() ) {							
         case psy::core::MACHMODE_GENERATOR:
-            macGui = new MachineGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+            macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
         break;
         case psy::core::MACHMODE_FX:
             macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
