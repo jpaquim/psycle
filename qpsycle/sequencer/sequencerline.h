@@ -46,6 +46,8 @@ public:
     psy::core::SequenceLine *sequenceLine(); 
 
     void addItem( psy::core::SinglePattern* pattern );
+    void insertItem( SequencerItem *item );
+    void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
 
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     SequencerDraw *sDraw_;

@@ -112,8 +112,7 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             }
         }
         if ( parentLine != lineUnderCursor && lineUnderCursor != 0 ) {
-            setParentItem( lineUnderCursor );
-            sequenceEntry()->setSequenceLine( lineUnderCursor->sequenceLine() );
+            parentLine->moveItemToNewLine( this, lineUnderCursor );
         }
 
         // FIXME: maybe do this on mouseReleaseEvent?

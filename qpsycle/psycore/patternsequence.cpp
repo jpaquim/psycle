@@ -188,8 +188,10 @@ namespace psy
 
         void SequenceEntry::setSequenceLine( SequenceLine *newLine )
         {
+            printf("line before %p\n", line_);
             line_->moveEntryToNewLine( this, newLine );
             line_ = newLine;
+            printf("line after %p\n", line_);
         }
 
 		// end of SequenceEntry
