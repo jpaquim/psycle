@@ -131,27 +131,6 @@ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value
     return QGraphicsItem::itemChange(change, value);
 }
     
-void MachineGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-{
-    QString muteText;
-    mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
-    toggleMuteAct_->setText( muteText );
-
-    QString soloText;   
-    mac_->song()->machineSoloed == mac_->_macIndex ? soloText = "Unsolo" : soloText = "Solo";
-    toggleSoloAct_->setText( soloText );
-
-    QMenu menu;
-    menu.addAction( renameMachineAct_ );
-    menu.addAction("Clone");
-    menu.addAction( deleteMachineAct_ );
-    menu.addSeparator();
-    menu.addAction( showMacTwkDlgAct_ );
-    menu.addSeparator();
-    menu.addAction( toggleMuteAct_ );
-    menu.addAction( toggleSoloAct_ );
-    QAction *a = menu.exec( event->screenPos() );
-}
 
 void MachineGui::keyPressEvent ( QKeyEvent * event )
 {
@@ -368,6 +347,28 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
     painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
 }
 
+void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    QString muteText;
+    mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
+    toggleMuteAct_->setText( muteText );
+
+    QString soloText;   
+    mac_->song()->machineSoloed == mac_->_macIndex ? soloText = "Unsolo" : soloText = "Solo";
+    toggleSoloAct_->setText( soloText );
+
+    QMenu menu;
+    menu.addAction( renameMachineAct_ );
+    menu.addAction("Clone");
+    menu.addAction( deleteMachineAct_ );
+    menu.addSeparator();
+    menu.addAction( showMacTwkDlgAct_ );
+    menu.addSeparator();
+    menu.addAction( toggleMuteAct_ );
+    menu.addAction( toggleSoloAct_ );
+    QAction *a = menu.exec( event->screenPos() );
+}
+
 // FIXME: should be in EffectGui, but Qt fails to recognise it there.
 void MachineGui::onToggleBypassActionTriggered() 
 {
@@ -377,5 +378,6 @@ void MachineGui::onToggleBypassActionTriggered()
         mac()->_volumeCounter=0.0f;	
         mac()->_volumeDisplay=0;
     }
+    update( boundingRect() );
 }
 

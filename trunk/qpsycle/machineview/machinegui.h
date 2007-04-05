@@ -63,12 +63,16 @@ public slots:
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
     void keyPressEvent ( QKeyEvent *event );
+
+    MachineView *machineView;
+    psy::core::Machine *mac_;
+
+    MachineTweakDlg *macTwkDlg_;
 
     QAction *showMacTwkDlgAct_;
     QAction *deleteMachineAct_;
@@ -76,30 +80,31 @@ protected:
     QAction *toggleMuteAct_;
     QAction *toggleSoloAct_;
 
+    QGraphicsTextItem *nameItem;
+    int left_;
+    int top_;
+    QList<WireGui *> wireGuiList_;
+
+    QColor backgroundColor_;
+
 signals:
-    void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
-    void closeNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
+    void startNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
+    void closeNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
     void chosen( MachineGui *macGui );
     void deleteRequest( MachineGui *macGui );
     void renamed();
 
 private:
-    MachineView *machineView;
-    psy::core::Machine *mac_;
-    QGraphicsTextItem *nameItem;
-    int left_;
-    int top_;
-    QList<WireGui *> wireGuiList_;
-    MachineTweakDlg *macTwkDlg_;
-
-    QColor backgroundColor_;
 
 };
 
 class GeneratorGui : public MachineGui {
 public:
-    GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+    GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+
+protected:
+    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
 };
 
 #endif

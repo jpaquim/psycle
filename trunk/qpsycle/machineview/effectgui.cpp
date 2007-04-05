@@ -31,6 +31,15 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
     connect( toggleBypassAct_, SIGNAL( triggered() ), this, SLOT( onToggleBypassActionTriggered() ) );
 }
 
+void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
+{
+    MachineGui::paint( painter, option, widget );
+    mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
+    painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
+    mac()->_bypass ? painter->setBrush( Qt::yellow ) : painter->setBrush( QColor( 100, 100, 0 ) );
+    painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
+}
+
 void EffectGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     QString muteText;

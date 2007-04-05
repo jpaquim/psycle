@@ -27,6 +27,7 @@ class EffectGui : public MachineGui
 {
 public:
     EffectGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
+    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
