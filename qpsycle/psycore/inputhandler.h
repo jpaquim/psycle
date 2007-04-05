@@ -231,7 +231,8 @@ namespace psy {
 			cdefPatternTrackRecord,
 			cdefSelectBar,
 			cdefMuteMachine,
-			cdefSoloMachine
+			cdefSoloMachine,
+			cdefBypassMachine
 
 		};
 

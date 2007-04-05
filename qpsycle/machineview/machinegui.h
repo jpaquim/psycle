@@ -105,6 +105,7 @@ public:
 
 protected:
     void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
+    void keyPressEvent( QKeyEvent * event );
 };
 
 #endif

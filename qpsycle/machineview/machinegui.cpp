@@ -224,6 +224,8 @@ void MachineGui::keyPressEvent ( QKeyEvent * event )
         case psy::core::cdefKeyE_2:
             note = 29;
             break;
+        case psy::core::cdefMuteMachine:
+            toggleMuteAct_->trigger();
         default: 
             note = NULL;
             event->ignore();
@@ -367,6 +369,20 @@ void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.addAction( toggleMuteAct_ );
     menu.addAction( toggleSoloAct_ );
     QAction *a = menu.exec( event->screenPos() );
+}
+
+void GeneratorGui::keyPressEvent( QKeyEvent * event )
+{
+    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    switch ( command ) { 
+        case psy::core::cdefMuteMachine:
+            toggleMuteAct_->trigger();
+            break;
+        case psy::core::cdefSoloMachine:
+            toggleSoloAct_->trigger();
+            break;
+        default:;
+    }
 }
 
 // FIXME: should be in EffectGui, but Qt fails to recognise it there.
