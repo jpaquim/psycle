@@ -89,7 +89,10 @@ private:
     
     QGraphicsScene *scene_;
     QGraphicsLineItem *tempLine_;
-
+    
+    /// For multi-key playback state.
+    int notetrack[psy::core::MAX_TRACKS];
+    int outtrack;
 };
 
 class MachineScene : public QGraphicsScene {

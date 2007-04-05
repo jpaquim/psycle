@@ -82,6 +82,10 @@ MachineView::MachineView(psy::core::Song *song)
         }
     }
 
+    outtrack = 0;
+    notetrack[psy::core::MAX_TRACKS];
+    for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
+
  }
 
  void MachineView::keyPressEvent(QKeyEvent *event)
@@ -201,10 +205,6 @@ psy::core::Song *MachineView::song()
 
 void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Machine *pMachine )
 {
-    qDebug("playing note.");
-    int outtrack = 0;
-    int notetrack[psy::core::MAX_TRACKS];
-    for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
 
     // stop any notes with the same value
     StopNote(note,bTranspose,pMachine);
@@ -273,6 +273,7 @@ void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Ma
 
 void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMachine )
 {
+
     int notetrack[psy::core::MAX_TRACKS];
     for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
 
@@ -303,7 +304,6 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
                 entry.setParameter( 0 );
 
                 // play it
-
                 if (pMachine) {
                     pMachine->Tick( i, entry );
                 }
