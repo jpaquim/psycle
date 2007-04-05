@@ -367,3 +367,15 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
     mac()->song()->machineSoloed == mac()->_macIndex ?painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
     painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
 }
+
+// FIXME: should be in EffectGui, but Qt fails to recognise it there.
+void MachineGui::onToggleBypassActionTriggered() 
+{
+    mac()->_bypass = !mac()->_bypass;
+    if (mac()->_bypass)
+    {
+        mac()->_volumeCounter=0.0f;	
+        mac()->_volumeDisplay=0;
+    }
+}
+

@@ -18,10 +18,38 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
- #include "effectgui.h"
+#include "effectgui.h"
 
- EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
+#include <QMenu>
+
+EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : MachineGui(left, top, mac, macView)
- {
+{
     setBrush( QColor( 0, 180, 0 ) );
- }
+
+    toggleBypassAct_ = new QAction( "Bypass", this );
+    connect( toggleBypassAct_, SIGNAL( triggered() ), this, SLOT( onToggleBypassActionTriggered() ) );
+}
+
+void EffectGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    QString muteText;
+    mac()->_mute ? muteText = "Unmute" : muteText = "Mute";
+    toggleMuteAct_->setText( muteText );
+
+    QString bypassText;
+    mac()->_bypass ? bypassText = "Unbypass" : bypassText = "Bypass";
+    toggleBypassAct_->setText( bypassText );
+
+    QMenu menu;
+    menu.addAction( renameMachineAct_ );
+    menu.addAction("Clone");
+    menu.addAction( deleteMachineAct_ );
+    menu.addSeparator();
+    menu.addAction( showMacTwkDlgAct_ );
+    menu.addSeparator();
+    menu.addAction( toggleMuteAct_ );
+    menu.addAction( toggleBypassAct_ );
+    QAction *a = menu.exec( event->screenPos() );
+}
+
