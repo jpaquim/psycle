@@ -26,10 +26,13 @@
 class EffectGui : public MachineGui
 {
 public:
-    EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+    EffectGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
 
 protected:
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
+private:
+    QAction *toggleBypassAct_;
 };
 
 #endif

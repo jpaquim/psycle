@@ -52,6 +52,15 @@ public:
 
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
+public slots:
+    void showMacTwkDlg();
+    void onDeleteMachineActionTriggered();
+    void onRenameMachineActionTriggered();
+    void onToggleMuteActionTriggered();
+    void onToggleSoloActionTriggered();
+    void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
+                                          // but Qt fails to find it there.
+
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -61,12 +70,11 @@ protected:
     void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
     void keyPressEvent ( QKeyEvent *event );
 
-public slots:
-    void showMacTwkDlg();
-    void onDeleteMachineActionTriggered();
-    void onRenameMachineActionTriggered();
-    void onToggleMuteActionTriggered();
-    void onToggleSoloActionTriggered();
+    QAction *showMacTwkDlgAct_;
+    QAction *deleteMachineAct_;
+    QAction *renameMachineAct_;
+    QAction *toggleMuteAct_;
+    QAction *toggleSoloAct_;
 
 signals:
     void startNewConnection(MachineGui *macGui, QGraphicsSceneMouseEvent *event);
@@ -85,11 +93,6 @@ private:
     MachineTweakDlg *macTwkDlg_;
 
     QColor backgroundColor_;
-    QAction *showMacTwkDlgAct_;
-    QAction *deleteMachineAct_;
-    QAction *renameMachineAct_;
-    QAction *toggleMuteAct_;
-    QAction *toggleSoloAct_;
 
 };
 
