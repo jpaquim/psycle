@@ -632,10 +632,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         break;
         case psy::core::cdefNavLeft:
             moveCursor( -1, 0 );
+            checkLeftScroll( cursor() );
             return;
         break;
         case psy::core::cdefNavRight:
             moveCursor( 1, 0 );
+            checkRightScroll( cursor() );
             return;
         break;
         case psy::core::cdefTrackPrev:

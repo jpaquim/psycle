@@ -62,3 +62,17 @@ void EffectGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     QAction *a = menu.exec( event->screenPos() );
 }
 
+void EffectGui::keyPressEvent( QKeyEvent * event )
+{
+    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    switch ( command ) { 
+        case psy::core::cdefMuteMachine:
+            toggleMuteAct_->trigger();
+            break;
+        case psy::core::cdefBypassMachine:
+            toggleBypassAct_->trigger();
+            break;
+        default:;
+    }
+}
+

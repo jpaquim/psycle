@@ -442,7 +442,7 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefShowWaveEditor, Key( modifiers, Qt::Key_F4 ) );
 			inputHandler_.changeKeyCode( cdefShowSequencerView, Key( modifiers, Qt::Key_F5 ) );
 
-            // Play control commands.
+            /** Play control commands. **/
 			inputHandler_.changeKeyCode( cdefPlayStart, Key( Qt::NoModifier, Qt::Key_Space ) );
 			inputHandler_.changeKeyCode( cdefPlayFromPos, Key( Qt::NoModifier, Qt::Key_F6 ) );
 			inputHandler_.changeKeyCode( cdefPlayStop, Key( Qt::NoModifier, Qt::Key_F8 ) );
@@ -453,7 +453,12 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefOctaveDn, Key( Qt::KeypadModifier, Qt::Key_Slash ) );
 			inputHandler_.changeKeyCode( cdefOctaveUp, Key( Qt::KeypadModifier, Qt::Key_Asterisk ) );
 
-            // PatternView.
+            /** Machine View. **/
+			inputHandler_.changeKeyCode( cdefMuteMachine, Key( Qt::ShiftModifier, Qt::Key_M ) );
+			inputHandler_.changeKeyCode( cdefSoloMachine, Key( Qt::ShiftModifier, Qt::Key_S ) );
+			inputHandler_.changeKeyCode( cdefBypassMachine, Key( Qt::ShiftModifier, Qt::Key_B ) );
+
+            /** Pattern View. **/
 			inputHandler_.changeKeyCode( cdefNavUp, Key( Qt::NoModifier, Qt::Key_Up ) );
 			inputHandler_.changeKeyCode( cdefNavDown, Key( Qt::NoModifier, Qt::Key_Down ) );
 			inputHandler_.changeKeyCode( cdefNavLeft, Key( Qt::NoModifier, Qt::Key_Left ) );
