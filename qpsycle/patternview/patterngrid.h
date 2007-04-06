@@ -156,6 +156,8 @@ public:
     int numberOfLines() const;
     int beatZoom() const;
     int patternStep(); 
+    int navStep();
+    bool ignorePatStepForNav();
 
     // Cursor.
     const PatCursor & cursor() const;

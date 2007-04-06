@@ -621,12 +621,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
     switch ( command ) {
         case psy::core::cdefNavUp:
-            moveCursor( 0, -patternStep() ); 
+            moveCursor( 0, -navStep() ); 
             checkUpScroll( cursor() );
             return;
         break;
         case psy::core::cdefNavDown:
-            moveCursor( 0, patternStep() );
+            moveCursor( 0, navStep() );
             checkDownScroll( cursor() );
             return;
         break;
@@ -713,6 +713,8 @@ void PatternGrid::drawSelBg( QPainter *painter, Selection selArea )
 
 void PatternGrid::selectUp()
 {
+    int step = navStep();
+
     oldSelection_ = selection_;
     PatCursor crs = cursor();
     int newLeft, newRight, newTop, newBottom;
@@ -721,57 +723,59 @@ void PatternGrid::selectUp()
     int newCursorCol = cursor().col();
     if ( doingKeybasedSelect() ) {
         // if above line is not already selected then select it...
-        if (!lineAlreadySelected(crs.line())) {
+        if ( !lineAlreadySelected( crs.line() ) ) {
             // don't set selection out of bounds of grid...
-            newTop = std::max(oldSelection_.top()-patternStep(), 0);
+            newTop = std::max( oldSelection_.top()-step, 0 );
             newBottom = oldSelection_.bottom();
         } else { // else if it is selected, deselect it...
             newTop = oldSelection_.top();
-            newBottom = oldSelection_.bottom()-patternStep();
+            newBottom = oldSelection_.bottom() - step;
         }
         newLeft = oldSelection_.left(); // left&right stay the same.
         newRight = oldSelection_.right();
         selection_.set( newLeft,newRight, newTop, newBottom ); 
     } else {
-        startKeybasedSelection(crs.track(), crs.track()+1,
-                                std::max(0,crs.line()-patternStep()), crs.line()+1);
+        startKeybasedSelection( crs.track(), crs.track()+1,
+                                std::max( 0, crs.line() - step ), crs.line()+1 );
     }
-    newCursorLine = std::max(0,cursor().line() - patternStep());
-    setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+    newCursorLine = std::max( 0,cursor().line() - step );
+    setCursor( PatCursor( newCursorTrack, newCursorLine, 0, 0 ) );
     checkUpScroll( cursor() );
     repaintSelection();
 }
 
 void PatternGrid::selectDown()
 {
+    int step = navStep();
+
     oldSelection_ = selection_;
     PatCursor crs = cursor();
     int newLeft, newRight, newTop, newBottom;
     int newCursorTrack = cursor().track();
     int newCursorLine = cursor().line();
     int newCursorCol = cursor().col();
-    if (doingKeybasedSelect()) {
+    if ( doingKeybasedSelect() ) {
         // if line beneath is not selected...
-        if (!lineAlreadySelected(crs.line()+1)) {
+        if ( !lineAlreadySelected( crs.line()+1 ) ) {
             // select line beneath.
             newTop = oldSelection_.top();
-            newBottom = std::min(oldSelection_.bottom()+patternStep(),numberOfLines());
+            newBottom = std::min( oldSelection_.bottom() + step,numberOfLines() );
         } else { // line beneath is selected...
             // deselect line beneath.
-            newTop = oldSelection_.top()+patternStep();
+            newTop = oldSelection_.top() + step;
             newBottom = oldSelection_.bottom();
         }
         newLeft = oldSelection_.left(); // left&right stay the same.
         newRight = oldSelection_.right();
-        selection_.set(newLeft,newRight,newTop,newBottom); 
+        selection_.set( newLeft,newRight,newTop,newBottom ); 
 
     } else {
-        startKeybasedSelection(crs.track(), crs.track()+1,
+        startKeybasedSelection( crs.track(), crs.track()+1,
             crs.line(),
-            std::min(numberOfLines(),crs.line()+patternStep()+1));
+            std::min( numberOfLines(), crs.line() + step + 1 ) );
     }
-    newCursorLine = std::min(numberOfLines()-1,cursor().line() + patternStep());
-    setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
+    newCursorLine = std::min( numberOfLines()-1, cursor().line() + step );
+    setCursor( PatCursor( newCursorTrack, newCursorLine, 0, 0 ) );
     checkDownScroll( cursor() );
     repaintSelection();
 }
@@ -841,6 +845,16 @@ void PatternGrid::selectRight()
     setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
     checkRightScroll( cursor() );
     repaintSelection();
+}
+
+int PatternGrid::navStep()
+{
+    return ignorePatStepForNav() ? 1 : patternStep(); 
+}
+
+bool PatternGrid::ignorePatStepForNav()
+{
+    return false; // FIXME: will come from a configuration option in future.
 }
 
 void PatternGrid::repaintSelection() {
