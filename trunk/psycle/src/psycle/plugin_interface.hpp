@@ -106,7 +106,6 @@ namespace psycle
 		class CFxCallback
 		{
 			public:
-				virtual inline ~CFxCallback() throw() {}
 				virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
 				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
 				/// unused slot kept for binary compatibility.
@@ -119,6 +118,7 @@ namespace psycle
 				virtual int GetTPB(){return 4;}
 				// Don't get fooled by the above return values.
 				// You get a pointer to a subclass of this one that returns the correct ones.
+				virtual inline ~CFxCallback() throw() {}
 		};
 
 		//////////////////////////////////////////////////////////////////////////
