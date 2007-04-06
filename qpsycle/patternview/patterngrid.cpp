@@ -632,7 +632,7 @@ void PatternGrid::doInstrumentEvent( int keyChar )
 
     // Move the cursor.
     if ( cursor().col() == 0 ) {
-        moveCursor(1, patternStep() );			
+        moveCursor( 1, 0 );			
     } else {
         moveCursor( -1, patternStep() );
         checkDownScroll( cursor() );
