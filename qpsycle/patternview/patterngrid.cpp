@@ -802,15 +802,16 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         break;
         case psy::core::cdefBlockCopy: 
             copyBlock( false );
-            return;
             break;
         case psy::core::cdefBlockCut: 
             copyBlock( true );
-            return;
             break;
         case psy::core::cdefBlockPaste: 
             pasteBlock( cursor().track(), cursor().line(), false );
-            update(); // FIXME: inefficient, be more specific.
+            break;
+        case psy::core::cdefBlockDelete: 
+            deleteBlock();
+            break;
         default:
             // If we got here, we didn't do anything with it, so officially ignore it.
             event->ignore();
@@ -1185,7 +1186,6 @@ void PatternGrid::pasteBlock(int tx,int lx,bool mix )
         // Make a parser.
         QDomDocument *doc = new QDomDocument();
         doc->setContent( QApplication::clipboard()->text() );
-        std::cout << QApplication::clipboard()->text().toStdString() << std::endl;
 
         lastXmlLineBeatPos = 0.0;
         xmlTracks = 0;
@@ -1224,6 +1224,18 @@ void PatternGrid::pasteBlock(int tx,int lx,bool mix )
         else
             pattern()->mixBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
     }
+    update( boundingRect() ); // FIXME: inefficient, be more specific.
+}
+
+void PatternGrid::deleteBlock( )
+{
+    int right = selection().right();
+    int left = selection().left();
+    double top = selection().top() / (double) beatZoom();
+    double bottom = selection().bottom() / (double) beatZoom();
+
+    pattern()->deleteBlock(left, right, top, bottom);
+    update( boundingRect() ); // FIXME: be more specific.
 }
 
 QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {

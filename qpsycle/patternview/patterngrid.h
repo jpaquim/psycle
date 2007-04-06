@@ -205,6 +205,7 @@ public:
     // Actions.
     void copyBlock( bool cutit );
     void pasteBlock( int tx,int lx,bool mix );
+    void deleteBlock( );
     void checkLeftScroll( const PatCursor & cursor );
     void checkRightScroll( const PatCursor & cursor );
     void checkUpScroll( const PatCursor & cursor );
