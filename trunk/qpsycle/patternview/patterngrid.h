@@ -121,6 +121,8 @@ public:
 
     void addEvent( const ColumnEvent & event );
     psy::core::SinglePattern *pattern();
+    enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
+
 
     // Painting.
     void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
@@ -204,6 +206,7 @@ public:
     void startMouseSelection( const PatCursor & p );
     void repaintSelection();
     void repaintCursor();
+    const PatCursor & selStartPoint() const;
     PatCursor intersectCell( int x, int y );
     int visibleColWidth( int maxEvents ) const;
 

@@ -1383,21 +1383,40 @@ void PatternGrid::startMouseSelection( const PatCursor & p )
 void PatternGrid::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     if ( event->button() == Qt::LeftButton ) {
-        PatCursor crs = intersectCell( event->lastPos().x(), event->lastPos().y() );
         oldCursor_ = cursor();
+        PatCursor crs = intersectCell( event->lastPos().x(), event->lastPos().y() );
         setCursor( crs );
         repaintCursor();
-        startMouseSelection( crs );
     }
 }
 
 void PatternGrid::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
     if ( event->buttons() == Qt::LeftButton ) {
-        PatCursor mouseCurrentCrs = intersectCell( event->pos().x(), event->pos().y() );
-        selection_.setRight( mouseCurrentCrs.track()+1 );
-        selection_.setBottom( mouseCurrentCrs.line()+1 ); // FIXME: do +1s indicate a logic error somewhere?
-        update( boundingRect() );
+        if ( !doingMouseSelect_ ) {
+            startMouseSelection( intersectCell( event->buttonDownPos( Qt::LeftButton ).x(), event->buttonDownPos( Qt::LeftButton ).y() ) );
+        } else {
+            PatCursor p = intersectCell( event->pos().x(), event->pos().y() );
+
+			if ( p.track() < selStartPoint().track() ) {
+				selection_.setLeft( std::max(p.track(),0) ); 
+			} else if (p.track() == selStartPoint_.track()) {
+					selection_.setLeft (std::max(p.track(),0));
+					selection_.setRight(std::min(p.track(), endTrackNumber()));
+            } else if (p.track() > selStartPoint_.track()) {
+                selection_.setRight(std::min(p.track(), endTrackNumber()));
+            } 
+
+            if (p.line() < selStartPoint_.line()) {
+                selection_.setTop(std::max(p.line(),0));
+                selection_.setBottom( std::min(selection_.bottom(), selStartPoint_.line()));
+            } else if (p.line() > selStartPoint_.line()) {
+                selection_.setBottom(std::min(p.line(), endLineNumber()));
+                selection_.setTop( std::max(selection_.top(), selStartPoint_.line()));
+            }
+
+            update( boundingRect() );
+        }
     }
 }
 
@@ -1468,6 +1487,10 @@ void PatternGrid::checkDownScroll( const PatCursor & cursor )
     if ( viewY > patDraw_->height() ) {
         patDraw_->verticalScrollBar()->setValue( ( std::min( cursor.line(),endLineNumber()) +1 ) * lineHeight() );
     }
+}
+
+const PatCursor & PatternGrid::selStartPoint() const {
+    return selStartPoint_;
 }
 
 
