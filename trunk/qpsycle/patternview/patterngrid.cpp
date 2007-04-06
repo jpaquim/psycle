@@ -98,7 +98,7 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 QRectF PatternGrid::boundingRect() const
 {
     if ( patDraw_->patternView()->pattern() ) {
-        int gridWidth = patDraw_->gridWidthByTrack( numberOfTracks() -1 );
+        int gridWidth = patDraw_->gridWidthByTrack( endTrackNumber() );
         int gridHeight = numberOfLines()*lineHeight();
         return QRectF( 0, 0, gridWidth, gridHeight ); 
     } else {
@@ -113,9 +113,9 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->setFont( font_ ); 
     if ( pattern() ) {
         int startLine = 0; 
-        int endLine = numberOfLines() - 1;
+        int endLine = endLineNumber();
         int startTrack = 0;
-        int endTrack = numberOfTracks() - 1;
+        int endTrack = endTrackNumber();
 
         patDraw_->alignTracks();
         drawGrid( painter, startLine, endLine, startTrack, endTrack );	
@@ -719,14 +719,16 @@ void PatternGrid::doCommandOrParameterEvent( int keyChar )
 
 void PatternGrid::drawSelBg( QPainter *painter, Selection selArea )
 {			
-    int xStart = patDraw_->xOffByTrack( selArea.left() );
-    int yStart = selArea.top()  * lineHeight() ;
+    if ( !selArea.isEmpty() ) {
+        int xStart = patDraw_->xOffByTrack( selArea.left() );
+        int yStart = selArea.top()  * lineHeight() ;
 
-    int xEnd = patDraw_->xEndByTrack( selArea.right() );
-    int yEnd = (selArea.bottom()+1) * lineHeight();
+        int xEnd = patDraw_->xEndByTrack( selArea.right() );
+        int yEnd = (selArea.bottom()+1) * lineHeight();
 
-    painter->setBrush( selectionColor() );
-    painter->drawRect( xStart, yStart, xEnd-xStart, yEnd-yStart );
+        painter->setBrush( selectionColor() );
+        painter->drawRect( xStart, yStart, xEnd-xStart, yEnd-yStart );
+    }
 }
 
 void PatternGrid::selectUp()
@@ -777,7 +779,7 @@ void PatternGrid::selectDown()
         if ( !lineAlreadySelected( crs.line()+1 ) ) {
             // select line beneath.
             newTop = oldSelection_.top();
-            newBottom = std::min( oldSelection_.bottom() + step, numberOfLines()-1 );
+            newBottom = std::min( oldSelection_.bottom() + step, endLineNumber() );
         } else { // line beneath is selected...
             // deselect line beneath.
             newTop = oldSelection_.top() + step;
@@ -790,9 +792,9 @@ void PatternGrid::selectDown()
     } else {
         startKeybasedSelection( crs.track(), crs.track(),
             crs.line(),
-            std::min( numberOfLines()-1, crs.line() + step ) );
+            std::min( endLineNumber(), crs.line() + step ) );
     }
-    newCursorLine = std::min( numberOfLines()-1, cursor().line() + step );
+    newCursorLine = std::min( endLineNumber(), cursor().line() + step );
     setCursor( PatCursor( newCursorTrack, newCursorLine, 0, 0 ) );
     checkDownScroll( cursor() );
     repaintSelection();
@@ -845,7 +847,7 @@ void PatternGrid::selectRight()
     if (doingKeybasedSelect()) {
         if (!trackAlreadySelected(crs.track()+1)) { // if track to right is not selected...
             newLeft = oldSelection_.left();         // select track to right.
-            newRight = std::min(oldSelection_.right()+1, numberOfTracks()-1 );
+            newRight = std::min(oldSelection_.right()+1, endTrackNumber() );
         } else { // track to right is selected... so deselect current track.
             newLeft = oldSelection_.left()+1;
             newRight = oldSelection_.right();
@@ -858,7 +860,7 @@ void PatternGrid::selectRight()
             std::min(numberOfTracks(),crs.track()+1),
             crs.line(), crs.line());
     }
-    newCursorTrack = std::min( numberOfTracks()-1, cursor().track()+1 );
+    newCursorTrack = std::min( endTrackNumber(), cursor().track()+1 );
     newCursorLine = cursor().line(); 
     setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
     checkRightScroll( cursor() );
@@ -870,7 +872,7 @@ void PatternGrid::selectAll()
     doingKeybasedSelect_ = true;
     // FIXME: selects but doesn't repaint properly.
     // Try with numberOfTracks()-1, repaints fine.
-    selection_.set( 0, numberOfTracks()-1, 0, numberOfLines() );
+    selection_.set( 0, endTrackNumber(), 0, endLineNumber() );
 
     repaintSelection();
 
@@ -992,7 +994,7 @@ void PatternGrid::moveCursor( int dx, int dy)
     }
 
     if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
-        cursor_.setLine( std::min(cursor_.line() + dy, numberOfLines()-1));
+        cursor_.setLine( std::min(cursor_.line() + dy, endLineNumber()));
     } else if ( dy != 0 && (dy + cursor_.line() < 0) ) {
         cursor_.setLine( std::max(cursor_.line() + dy, 0));
     } else if (dy!=0) {
@@ -1180,14 +1182,20 @@ psy::core::SinglePattern* PatternGrid::pattern() {
     return patDraw_->patternView()->pattern();
 }
 
-int PatternGrid::numberOfTracks() const
-{
+int PatternGrid::numberOfTracks() const {
     return patDraw_->patternView()->numberOfTracks();
 }
 
-int PatternGrid::numberOfLines() const
-{
+int PatternGrid::endTrackNumber() const {
+    return patDraw_->patternView()->numberOfTracks() - 1;
+}
+
+int PatternGrid::numberOfLines() const {
     return patDraw_->patternView()->numberOfLines();
+}
+
+int PatternGrid::endLineNumber() const {
+    return patDraw_->patternView()->numberOfLines() - 1;
 }
 
 Selection PatternGrid::selection() const 
@@ -1434,7 +1442,7 @@ void PatternGrid::checkLeftScroll( const PatCursor & cursor )
 void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
 {
     if ( patDraw_->xOffByTrack( std::max( cursor.track()+1, 0 ) ) > patDraw_->width() ) {
-        patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , numberOfTracks()-1)) - patDraw_->width() );
+        patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , endTrackNumber())) - patDraw_->width() );
     }
 }
 
@@ -1454,7 +1462,7 @@ void PatternGrid::checkDownScroll( const PatCursor & cursor )
     QPoint foo = patDraw_->mapFromScene( 0, sceneY ); 
     int viewY = foo.y();
     if ( viewY > patDraw_->height() ) {
-        patDraw_->verticalScrollBar()->setValue( ( std::min( cursor.line(),numberOfLines()-1) +1 ) * lineHeight() );
+        patDraw_->verticalScrollBar()->setValue( ( std::min( cursor.line(),endLineNumber()) +1 ) * lineHeight() );
     }
 }
 

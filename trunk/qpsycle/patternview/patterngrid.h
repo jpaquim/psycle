@@ -54,6 +54,7 @@ public:
     void setTop( int top ) { top_ = top; }
     void setBottom( int bottom ){ bottom_ = bottom; }
     void clear() { left_=0; right_=0; top_=0; bottom_=0; }
+    bool isEmpty() { return left_ || right_ || top_ || bottom_ ? false : true; }
 
 private:
     int left_, right_, top_, bottom_;
@@ -153,7 +154,9 @@ public:
     bool lineGridEnabled() const;
     int visibleEvents( int track ) const;
     int numberOfTracks() const;
+    int endTrackNumber() const;
     int numberOfLines() const;
+    int endLineNumber() const;
     int beatZoom() const;
     int patternStep(); 
     int navStep();
