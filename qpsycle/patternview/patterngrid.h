@@ -206,6 +206,11 @@ public:
     void copyBlock( bool cutit );
     void pasteBlock( int tx,int lx,bool mix );
     void deleteBlock( );
+
+    void selectUp();
+    void selectDown();
+    void selectLeft();
+    void selectRight();
     void checkLeftScroll( const PatCursor & cursor );
     void checkRightScroll( const PatCursor & cursor );
     void checkUpScroll( const PatCursor & cursor );
