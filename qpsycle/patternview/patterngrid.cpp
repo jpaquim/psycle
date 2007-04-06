@@ -801,12 +801,14 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         }
         break;
         case psy::core::cdefBlockCopy: 
-            std::cout << "action: block copy" << std::endl;
-            copyBlock(false);
+            copyBlock( false );
+            return;
+            break;
+        case psy::core::cdefBlockCut: 
+            copyBlock( true );
             return;
             break;
         case psy::core::cdefBlockPaste: 
-            std::cout << "action: block paste" << std::endl;
             pasteBlock( cursor().track(), cursor().line(), false );
             update(); // FIXME: inefficient, be more specific.
         default:
@@ -1170,8 +1172,8 @@ void PatternGrid::copyBlock( bool cutit )
     QApplication::clipboard()->setText( QString::fromStdString( xml ) );
 
     if (cutit) {
-    //    pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
-     //   pView->repaint();
+        pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
+        update( boundingRect() ); // FIXME: just update the selection.
     }
 }
 
