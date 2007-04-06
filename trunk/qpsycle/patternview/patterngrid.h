@@ -205,6 +205,12 @@ public:
     int visibleColWidth( int maxEvents ) const;
 
     // Actions.
+    void doNoteEvent( int note );
+    void doInstrumentEvent( int keyChar );
+    void doMachineSelectionEvent( int keyChar );
+    void doVolumeEvent( int keyChar );
+    void doCommandOrParameterEvent( int keyChar );
+
     void copyBlock( bool cutit );
     void pasteBlock( int tx,int lx,bool mix );
     void deleteBlock( );
