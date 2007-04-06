@@ -474,11 +474,13 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefSelectDn, Key( Qt::ShiftModifier, Qt::Key_Down ) );
 			inputHandler_.changeKeyCode( cdefSelectLeft, Key( Qt::ShiftModifier, Qt::Key_Left ) );
 			inputHandler_.changeKeyCode( cdefSelectRight, Key( Qt::ShiftModifier, Qt::Key_Right ) );
+			inputHandler_.changeKeyCode( cdefSelectAll, Key( Qt::ControlModifier, Qt::Key_A ) );
 
 			inputHandler_.changeKeyCode( cdefBlockCopy, Key( Qt::ControlModifier, Qt::Key_C ) );
 			inputHandler_.changeKeyCode( cdefBlockCut, Key( Qt::ControlModifier, Qt::Key_X ) );
 			inputHandler_.changeKeyCode( cdefBlockPaste, Key( Qt::ControlModifier, Qt::Key_V ) );
 			inputHandler_.changeKeyCode( cdefBlockDelete, Key( Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_X ) );
+
         }
 
 InputHandler & Configuration::inputHandler() {

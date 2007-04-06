@@ -219,6 +219,7 @@ public:
     void selectDown();
     void selectLeft();
     void selectRight();
+    void selectAll();
     void checkLeftScroll( const PatCursor & cursor );
     void checkRightScroll( const PatCursor & cursor );
     void checkUpScroll( const PatCursor & cursor );
