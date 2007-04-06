@@ -592,6 +592,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         case psy::core::cdefSelectRight:
             selectRight();
         break;
+        case psy::core::cdefSelectTrack:
+            selectTrack();
+        break;
         case psy::core::cdefSelectAll:
             selectAll();
         break;
@@ -602,6 +605,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             copyBlock( true );
             break;
         case psy::core::cdefBlockPaste: 
+            qDebug( "hi" );
             pasteBlock( cursor().track(), cursor().line(), false );
             break;
         case psy::core::cdefBlockDelete: 
@@ -870,22 +874,22 @@ void PatternGrid::selectRight()
 void PatternGrid::selectAll() 
 {
     doingKeybasedSelect_ = true;
-    // FIXME: selects but doesn't repaint properly.
-    // Try with numberOfTracks()-1, repaints fine.
-    selection_.set( 0, endTrackNumber(), 0, endLineNumber() );
+    startKeybasedSelection( 0, endTrackNumber(), 0, endLineNumber() );
 
     repaintSelection();
-
     selCursor_ = cursor();
 }
 
-int PatternGrid::navStep()
-{
+void PatternGrid::selectTrack() {
+    startKeybasedSelection( cursor().track(), cursor().track(), 0, endLineNumber() );
+    repaintSelection();
+}
+
+int PatternGrid::navStep() {
     return ignorePatStepForNav() ? 1 : patternStep(); 
 }
 
-bool PatternGrid::ignorePatStepForNav()
-{
+bool PatternGrid::ignorePatStepForNav() {
     return false; // FIXME: will come from a configuration option in future.
 }
 
@@ -1227,13 +1231,13 @@ void PatternGrid::copyBlock( bool cutit )
 {  
     isBlockCopied_=true;
     pasteBuffer.clear();
-    std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( selection().left(), selection().right(), selection().top(), selection().bottom() ));
+    std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
 
     float start = selection().top()    / (float) pattern()->beatZoom();
     float end   = selection().bottom() / (float) pattern()->beatZoom();
 
     std::string xml = "<patsel beats='" + QString::number( end - start ).toStdString(); 
-    xml+= "' tracks='"+ QString::number( selection().right() - selection().left() ).toStdString();
+    xml+= "' tracks='"+ QString::number( selection().right()+1 - selection().left() ).toStdString();
     xml+= "'>"; 
     xml+= copyPattern->toXml();
     xml+= "</patsel>";
@@ -1241,7 +1245,7 @@ void PatternGrid::copyBlock( bool cutit )
     QApplication::clipboard()->setText( QString::fromStdString( xml ) );
 
     if (cutit) {
-        pattern()->deleteBlock( selection().left(), selection().right(), selection().top(), selection().bottom() );
+        pattern()->deleteBlock( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 );
         update( boundingRect() ); // FIXME: just update the selection.
     }
 }

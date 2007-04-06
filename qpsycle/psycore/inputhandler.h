@@ -210,7 +210,7 @@ namespace psy {
 			cdefBlockSetInstr,
 			
 			cdefSelectAll,
-			cdefSelectCol,
+			cdefSelectTrack,
 			cdefSelectUp,
 			cdefSelectDn,
 			cdefSelectLeft,
@@ -375,7 +375,7 @@ namespace psy {
 				case cdefBlockSetInstr:		return "Block Set Instrument";
 
 				case cdefSelectAll:		return "Block Select All";
-				case cdefSelectCol:		return "Block Select Column";
+				case cdefSelectTrack:		return "Block Select Track";
 				case cdefSelectBar:		return "Block Select Bar";
 
 				case cdefEditQuantizeDec:	return "Row-skip -1";
