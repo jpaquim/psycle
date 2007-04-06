@@ -232,7 +232,6 @@ namespace psycle
 				class Host
 				{
 					public:
-						virtual inline ~Host() throw() {}
 						/// you can ask the host to display a message.
 						virtual void message(char const message[], char const caption[], unsigned int type = 0) const {}
 					private:
@@ -251,6 +250,7 @@ namespace psycle
 						virtual int const sequencer_beats_per_minute() const { return 0; }
 						/// asks the host to return this value.
 						virtual int const sequencer_ticks_per_sequencer_beat() const { return 0; }
+						virtual inline ~Host() throw() {}
 				} const * host_;
 		}; // class Host_Plugin
 

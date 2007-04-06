@@ -332,6 +332,7 @@ bool CreateWaveform(WAVESPEC *pspec)
 	partialindex = totalpartials;
 	lastnumpartials = 0;
 	pin = 0;
+	pout = 0;
 	for (n = 128; --n >= 0; )
 	{
 		freq = 440.0f * (float) pow(2.0, (double) (n - 69) / 12.0);
@@ -450,7 +451,8 @@ bool GetWaveform(int index, WAVEFORM *pwave)
 	if (!pwave)
 	{
 		//\todo: OUCH! pwave?
-		DisableWaveform(pwave->index);
+//		DisableWaveform(pwave->index);
+		return false;
 	}
 	if ((index < 0) || (index >= NUMWAVEFORMS))
 	{
