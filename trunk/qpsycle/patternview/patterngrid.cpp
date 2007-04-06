@@ -592,6 +592,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         case psy::core::cdefSelectRight:
             selectRight();
         break;
+        case psy::core::cdefSelectAll:
+            selectAll();
+        break;
         case psy::core::cdefBlockCopy: 
             copyBlock( false );
             break;
@@ -716,14 +719,14 @@ void PatternGrid::doCommandOrParameterEvent( int keyChar )
 
 void PatternGrid::drawSelBg( QPainter *painter, Selection selArea )
 {			
-    int x1Off = patDraw_->xOffByTrack( selArea.left() );
-    int y1Off = selArea.top()  * lineHeight() ;
+    int xStart = patDraw_->xOffByTrack( selArea.left() );
+    int yStart = selArea.top()  * lineHeight() ;
 
-    int x2Off = patDraw_->xOffByTrack( selArea.right() );
-    int y2Off = selArea.bottom() * lineHeight();
+    int xEnd = patDraw_->xEndByTrack( selArea.right() );
+    int yEnd = (selArea.bottom()+1) * lineHeight();
 
     painter->setBrush( selectionColor() );
-    painter->drawRect( x1Off, y1Off, x2Off-x1Off, y2Off-y1Off );
+    painter->drawRect( xStart, yStart, xEnd-xStart, yEnd-yStart );
 }
 
 void PatternGrid::selectUp()
@@ -750,10 +753,10 @@ void PatternGrid::selectUp()
         newRight = oldSelection_.right();
         selection_.set( newLeft,newRight, newTop, newBottom ); 
     } else {
-        startKeybasedSelection( crs.track(), crs.track()+1,
-                                std::max( 0, crs.line() - step ), crs.line()+1 );
+        startKeybasedSelection( crs.track(), crs.track(),
+                                std::max( 0, crs.line() - step ), crs.line() );
     }
-    newCursorLine = std::max( 0,cursor().line() - step );
+    newCursorLine = std::max( 0, cursor().line() - step );
     setCursor( PatCursor( newCursorTrack, newCursorLine, 0, 0 ) );
     checkUpScroll( cursor() );
     repaintSelection();
@@ -774,7 +777,7 @@ void PatternGrid::selectDown()
         if ( !lineAlreadySelected( crs.line()+1 ) ) {
             // select line beneath.
             newTop = oldSelection_.top();
-            newBottom = std::min( oldSelection_.bottom() + step,numberOfLines() );
+            newBottom = std::min( oldSelection_.bottom() + step, numberOfLines()-1 );
         } else { // line beneath is selected...
             // deselect line beneath.
             newTop = oldSelection_.top() + step;
@@ -782,12 +785,12 @@ void PatternGrid::selectDown()
         }
         newLeft = oldSelection_.left(); // left&right stay the same.
         newRight = oldSelection_.right();
-        selection_.set( newLeft,newRight,newTop,newBottom ); 
+        selection_.set( newLeft, newRight, newTop, newBottom ); 
 
     } else {
-        startKeybasedSelection( crs.track(), crs.track()+1,
+        startKeybasedSelection( crs.track(), crs.track(),
             crs.line(),
-            std::min( numberOfLines(), crs.line() + step + 1 ) );
+            std::min( numberOfLines()-1, crs.line() + step ) );
     }
     newCursorLine = std::min( numberOfLines()-1, cursor().line() + step );
     setCursor( PatCursor( newCursorTrack, newCursorLine, 0, 0 ) );
@@ -807,7 +810,7 @@ void PatternGrid::selectLeft()
         // if track to left is not selected...
         if (!trackAlreadySelected(crs.track()-1)) {
             // select track to left.
-            newLeft = std::max(0,oldSelection_.left()-1);
+            newLeft = std::max( 0, oldSelection_.left()-1 );
             newRight = oldSelection_.right();
         } else { // track to left is selected...
             // deselect current track.
@@ -820,8 +823,8 @@ void PatternGrid::selectLeft()
 
     } else { // start a keyboard-based selection. 
         startKeybasedSelection(std::max(0,crs.track()-1),
-            crs.track()+1,
-            crs.line(), crs.line()+1);
+            crs.track(),
+            crs.line(), crs.line());
     }
     newCursorTrack = std::max(0,cursor().track()-1);
     newCursorLine = cursor().line(); 
@@ -842,7 +845,7 @@ void PatternGrid::selectRight()
     if (doingKeybasedSelect()) {
         if (!trackAlreadySelected(crs.track()+1)) { // if track to right is not selected...
             newLeft = oldSelection_.left();         // select track to right.
-            newRight = std::min(oldSelection_.right()+1, numberOfTracks());
+            newRight = std::min(oldSelection_.right()+1, numberOfTracks()-1 );
         } else { // track to right is selected... so deselect current track.
             newLeft = oldSelection_.left()+1;
             newRight = oldSelection_.right();
@@ -852,14 +855,26 @@ void PatternGrid::selectRight()
         selection_.set(newLeft,newRight,newTop,newBottom); 
     } else {
         startKeybasedSelection(crs.track(), 
-            std::min(numberOfTracks(),crs.track()+2),
-            crs.line(), crs.line()+1);
+            std::min(numberOfTracks(),crs.track()+1),
+            crs.line(), crs.line());
     }
-    newCursorTrack = std::min(numberOfTracks()-1,cursor().track()+1);
+    newCursorTrack = std::min( numberOfTracks()-1, cursor().track()+1 );
     newCursorLine = cursor().line(); 
     setCursor(PatCursor(newCursorTrack, newCursorLine, 0, 0));
     checkRightScroll( cursor() );
     repaintSelection();
+}
+
+void PatternGrid::selectAll() 
+{
+    doingKeybasedSelect_ = true;
+    // FIXME: selects but doesn't repaint properly.
+    // Try with numberOfTracks()-1, repaints fine.
+    selection_.set( 0, numberOfTracks()-1, 0, numberOfLines() );
+
+    repaintSelection();
+
+    selCursor_ = cursor();
 }
 
 int PatternGrid::navStep()
@@ -888,6 +903,7 @@ void PatternGrid::repaintSelection() {
     int oldHeight = lineHeight() * (oldBottom-oldTop);
     update( patDraw_->xOffByTrack(selLeft), selTop*lineHeight(), selWidth, selHeight );
     update( patDraw_->xOffByTrack(oldLeft), oldTop*lineHeight(), oldWidth, oldHeight );
+    update( boundingRect() );
     oldSelection_ = selection_;
 }
 
@@ -1180,15 +1196,18 @@ Selection PatternGrid::selection() const
 }
 
 
-bool PatternGrid::lineAlreadySelected( int lineNumber ) {
-    if ( lineNumber > selection_.top() && lineNumber < selection_.bottom() ) {
+bool PatternGrid::lineAlreadySelected( int lineNumber ) 
+{
+    std::cout << "line " << lineNumber << std::endl;
+    if ( lineNumber > selection_.top() && lineNumber <= selection_.bottom() ) {
         return true;
     } else {
         return false;
     }
 }
 
-bool PatternGrid::trackAlreadySelected( int trackNumber ) {
+bool PatternGrid::trackAlreadySelected( int trackNumber ) 
+{
     if ( trackNumber >= selection_.left() && trackNumber < selection_.right() ) {
         return true;
     } else {
