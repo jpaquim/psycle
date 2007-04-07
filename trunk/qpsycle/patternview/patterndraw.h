@@ -97,6 +97,9 @@ public:
     int trackPaddingLeft() const { return 5; }
     int trackPaddingRight() const { return 5; }
 
+protected:
+    void scrollContentsBy ( int dx, int dy );
+
 private:
    std::map<int, TrackGeometry> trackGeometryMap;
 
