@@ -27,7 +27,7 @@
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
-#include "audiodriver.h"
+#include "../audiodrivers/audiodriver.h" // FIXME: doesn't belong in psycore
 #include "playertimeinfo.h"
 
 namespace psy
@@ -55,7 +55,9 @@ namespace psy
 			}
 		// Singleton pattern end
 
-			void setDriver(  const AudioDriver & driver );
+      // FIXME: player should not need to know about the audio driver.
+      // Player should export a callback to generate audio instead.
+      void setDriver(  const AudioDriver & driver );
 			AudioDriver & driver();
 
 			Song inline & song() {
@@ -82,10 +84,10 @@ namespace psy
 			double playPos() const;
 
 			// for wave render set the filename
-			void setFileName( const std::string & fileName);
+			void setFileName( const std::string & fileName); // FIXME: maybe this shouldn't be in player either.
 			
 			// gets the wave to render filename
-			const std::string fileName() const;
+			const std::string fileName() const; // FIXME: maybe this shouldn't be in player either.
 
 			void setAutoRecording( bool on );
 			void startRecording( );

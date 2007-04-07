@@ -19,7 +19,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#include "audiodriver.h"
+#include "../audiodrivers/audiodriver.h" // FIXME: doesn't belong in psycore
 #include "inputhandler.h"
 
 #include <vector>
