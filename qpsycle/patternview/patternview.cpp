@@ -89,6 +89,16 @@ void PatternView::enterNote( const PatCursor & cursor, int note )
     }
 }
 
+void PatternView::clearNote( const PatCursor & cursor) {
+    if ( pattern() ) {
+        psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+        psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
+        event.setNote(255);
+        event.setSharp( false/*drawArea->sharpMode()*/ );
+        pattern()->setEvent( cursor.line(), cursor.track(), event );
+    }
+}
+
 void PatternView::onTick( double sequenceStart ) {
     if ( pattern() ) {
         int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * beatZoom() );

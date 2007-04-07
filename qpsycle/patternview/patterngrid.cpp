@@ -513,12 +513,20 @@ void PatternGrid::setCursor( const PatCursor & cursor ) {
 void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
+    
+    printf("PatternGrid::keyPressEvent command: %i\n", command);
 
     if ( cursor().eventNr() == 0 && isNote( command ) ) 
     {
         int note = command; // The cdefs for the keys correspond to the correct notes.
         doNoteEvent( note );
-    } else if ( isHex( event ) ) {
+    }
+    else if ( cursor().eventNr() == 0 && command == psy::core::cdefRowClear) {
+      patDraw_->patternView()->clearNote( cursor()); // FIXME: better to emit a signal here?
+      moveCursor( 0, patternStep() );
+      checkDownScroll( cursor() );
+    }
+    else if ( isHex( event ) ) {
         int keyChar = QChar( event->text().at(0) ).toAscii();
         if ( cursor().eventNr() == 1 ) {
             doInstrumentEvent( keyChar );

@@ -47,6 +47,7 @@ public:
     PatternView( psy::core::Song *song );
 
     void enterNote( const PatCursor & cursor, int note );
+    void clearNote( const PatCursor & cursor);
     void onTick( double sequenceStart );
 
     // Getters.
