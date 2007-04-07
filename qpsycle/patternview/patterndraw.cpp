@@ -26,6 +26,7 @@
 #include "trackheader.h"
 
 #include <QtGui>
+#include <QDebug>
 
 /**
  * PatternDraw.  This is where the drawing of the pattern
@@ -46,17 +47,22 @@ PatternDraw::PatternDraw( PatternView *patView )
 
     setupTrackGeometrics( patView_->numberOfTracks() );
     
-    lineNumCol_ = new LineNumberColumn( this );
-    trackHeader_ = new TrackHeader( this );
+    lineNumCol_ = new LineNumberColumn( this, this );
+    lineNumCol_->setGeometry( 0, 22, 50, height() );
+//    trackHeader_ = new TrackHeader( this, this );
     patGrid_ = new PatternGrid( this );
 
+//    layout()->addWidget( lineNumCol_ );
+//    viewport()->addWidget( lineNumCol_ );
+//    scene_->addItem( lineNumCol_ );
+//    scene_->addItem( trackHeader_ );
     scene_->addItem( patGrid_ );
-    scene_->addItem( lineNumCol_ );
-    scene_->addItem( trackHeader_ );
 
-    trackHeader_->setPos( 50, 0 );
-    lineNumCol_->setPos( 0, 20 );
-    patGrid_->setPos( 50, 20 );
+//    trackHeader_->setPos( 50, 0 );
+ //   lineNumCol_->setPos( 0, 20 );
+    patGrid_->setPos( 0, 0 );
+
+    setViewportMargins( 50, 20, 0, 0);
 }
 
 void PatternDraw::setupTrackGeometrics( int numberOfTracks ) 
@@ -137,6 +143,11 @@ int PatternDraw::xEndByTrack( int track ) const {
     return trackEnd;
 }
 
+void PatternDraw::scrollContentsBy ( int dx, int dy ) 
+{
+    lineNumCol_->update();
+    QGraphicsView::scrollContentsBy( dx, dy );
+}
 
 
 

@@ -22,22 +22,17 @@
 
 #include "patterndraw.h"
 
-#include <QGraphicsRectItem>
+#include <QWidget>
 
 class PatternDraw;
 class PatternView;
 
-class LineNumberColumn : public QGraphicsRectItem {
+class LineNumberColumn : public QWidget {
 public:
-    LineNumberColumn( PatternDraw *patDraw );
+    LineNumberColumn( PatternDraw *patDraw, QWidget *parent = 0 );
     ~LineNumberColumn();
 
-    void setDy( int dy );
-    int dy() const;
-
-    virtual int preferredWidth() const;
-    QRectF boundingRect() const;
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+    void paintEvent( QPaintEvent *event );
 
     PatternDraw *patternDraw() { return patternDraw_; }
 
@@ -45,7 +40,6 @@ public:
 private:
 
     PatternDraw *patternDraw_;
-    int dy_;
 };
 
 #endif

@@ -1,12 +1,16 @@
 #include "trackheader.h"
 
+#include <QScrollBar>
+#include <QDebug>
+
 TrackHeader::TrackHeader( PatternDraw * pPatternDraw ) : pDraw(pPatternDraw)
 {
-//    setRect( 0, 0, pDraw->patternView()->width(), 20 );
 }
 
 TrackHeader::~ TrackHeader( )
-{ }
+{ 
+    setZValue( 1050 );
+}
 
 QRectF TrackHeader::boundingRect() const
 {
@@ -21,6 +25,7 @@ void TrackHeader::paint( QPainter *painter,
     int trackHeight = 20;
     int numTracks = pDraw->patternView()->numberOfTracks();
 
+    painter->setBrush( QBrush( Qt::black ) );
     painter->drawRect( 0, 0, pDraw->xEndByTrack( numTracks-1 ), trackHeight );
 
 
@@ -28,7 +33,7 @@ void TrackHeader::paint( QPainter *painter,
     {
         int trackWidth = pDraw->xEndByTrack( i ) - pDraw->xOffByTrack( i );
         painter->setPen( QPen( Qt::black ) );
-        painter->setBrush( QBrush( Qt::transparent ) );
+        painter->setBrush( QBrush( Qt::black ) );
         painter->drawRect( i*trackWidth, 0, trackWidth, trackHeight ); 
         painter->setPen( QPen( Qt::white ) );
         painter->drawText( i*trackWidth+5, 15, QString::number(i) );
