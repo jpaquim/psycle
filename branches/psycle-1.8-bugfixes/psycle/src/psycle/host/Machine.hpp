@@ -161,6 +161,7 @@ namespace psycle
 			virtual int FindOutputWire(int macIndex);
 			virtual const char * const GetDllName() const throw() { return "built-in"; };
 			virtual char * GetName() = 0;
+			const char * GetEditName() { return _editName; }
 			virtual int GetNumParams() { return _numPars; };
 			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
 			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };

@@ -1,9 +1,9 @@
 #pragma once
-#include "constants.hpp"
 #include "XMSamplerUIGeneral.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
+#include "constants.hpp"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
@@ -14,10 +14,13 @@ class XMSampler;
 class XMSamplerUI : public CPropertySheet
 	{
 	DECLARE_DYNAMIC(XMSamplerUI)
+
 	public:
 		XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-		// Attributes
+
+				enum { IDD = IDD_XM_SAMPLER };
+
 	private:
 		XMSampler* _pMachine;
 		XMSamplerUIGeneral m_General;
@@ -25,26 +28,15 @@ class XMSamplerUI : public CPropertySheet
 		XMSamplerUISample m_Sample;
 		XMSamplerMixerPage m_Mixer;
 		bool init;
-		// Operations
+
 	public:
-		void Init(Configuration* pConfig);
+		void Init(XMSampler* pMachine);
 		void UpdateUI(void);
 		XMSampler* GetMachine(){ return _pMachine; }
-		// Overrides
-		// ClassWizard generated virtual function overrides
-		//{{AFX_VIRTUAL(CConfigDlg)
-	public:
-		virtual int DoModal();
-		//}}AFX_VIRTUAL
-		// Implementation
-	public:
-		virtual ~XMSamplerUI();
-		void Init(XMSampler* pMachine);
-		// Generated message map functions
+
 	protected:
-		//{{AFX_MSG(CConfigDlg)
-		// NOTE - the ClassWizard will add and remove member functions here.
-		//}}AFX_MSG
+		afx_msg void OnDestroy();
+
 		DECLARE_MESSAGE_MAP()
 	};
 

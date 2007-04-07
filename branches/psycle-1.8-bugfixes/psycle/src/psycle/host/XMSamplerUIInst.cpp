@@ -1,4 +1,4 @@
-// XMSamplerUIInst.cpp : XMSamplerUIInst ÇÃé¿ëï
+// XMSamplerUIInst.cpp : XMSamplerUIInst
 /** @file
  *  @brief implementation file
  *  $Date$
@@ -6,23 +6,20 @@
  */
 #include <project.private.hpp>
 #include "Psycle.hpp"
-
+#include "Player.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "XMSamplerUIInst.hpp"
-#include ".\xmsampleruiinst.hpp"
 
 //using namespace Gdiplus;
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
-#if 0
 // XMSamplerUIInst
 IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()
 : CPropertyPage(XMSamplerUIInst::IDD)
 , m_bInitialized(false)
-, m_CurrentInstNo(0)
 {
 }
 
@@ -33,831 +30,1117 @@ XMSamplerUIInst::~XMSamplerUIInst()
 void XMSamplerUIInst::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_GLOBVOL, m_SlGlobVol);
-	DDX_Control(pDX, IDC_FADEOUT, m_SlFadeout);
-	DDX_Control(pDX, IDC_DEFPAN, m_SlDefPan);
-	DDX_Control(pDX, IDC_PITCHPANMOD, m_SlPitchPanMod);
-	DDX_Control(pDX, IDC_CUTOFF, m_SlCutoff);
-	DDX_Control(pDX, IDC_RESSONANCE, m_SlRessonance);
-	DDX_Control(pDX, IDC_FILTERMOD, m_SlFilterMod);
+
+	DDX_Control(pDX, IDC_INSTRUMENTLIST, m_InstrumentList);
+
+	DDX_Control(pDX, IDC_FILTERTYPE, m_FilterType);
+	DDX_Control(pDX, IDC_VOLCUTOFFPAN, m_SlVolCutoffPan);
+	DDX_Control(pDX, IDC_SWING1, m_SlSwing1Glide);
+	DDX_Control(pDX, IDC_FADEOUTRES, m_SlFadeoutRes);
+	DDX_Control(pDX, IDC_SWING2, m_SlSwing2);
+
+	DDX_Control(pDX, IDC_SLNOTEMODNOTE, m_SlNoteModNote);
+	DDX_Control(pDX, IDC_NOTEMOD, m_SlNoteMod);
+
+	DDX_Control(pDX, IDC_ADSRBASE, m_SlADSRBase);
+	DDX_Control(pDX, IDC_ADSRMOD, m_SlADSRMod);
+	DDX_Control(pDX, IDC_ADSRATT, m_SlADSRAttack);
+	DDX_Control(pDX, IDC_ADSRDEC, m_SlADSRDecay);
+	DDX_Control(pDX, IDC_ADSRSUS, m_SlADSRSustain);
+	DDX_Control(pDX, IDC_ADSRREL, m_SlADSRRelease);
+
+	DDX_Control(pDX, IDC_INS_NAME, m_InstrumentName);
+	DDX_Control(pDX, IDC_INS_NNACOMBO, m_NNA);
+	DDX_Control(pDX, IDC_INS_DCTCOMBO, m_DCT);
+	DDX_Control(pDX, IDC_INS_DCACOMBO, m_DCA);
+	DDX_Control(pDX, IDC_CUTOFFPAN, m_cutoffPan);
+	DDX_Control(pDX, IDC_RESSONANCE, m_Ressonance);
+	DDX_Control(pDX, IDC_ENVCHECK, m_EnvEnabled);
+
+	DDX_Control(pDX, IDC_INS_ENVELOPE, m_EnvelopeEditor);
+	DDX_Control(pDX, IDC_INS_NOTEMAP, m_SampleAssign);
+
+	DDX_Control(pDX, IDC_INS_NOTESCROLL, m_SampleAssign.m_scBar);
 }
 
 BEGIN_MESSAGE_MAP(XMSamplerUIInst, CPropertyPage)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_GLOBVOL, OnNMCustomdrawGlobvol)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FADEOUT, OnNMCustomdrawFadeout)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_DEFPAN, OnNMCustomdrawDefPan)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PITCHPANMOD, OnNMCustomdrawPitchPanMod)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_CUTOFF, OnNMCustomdrawCutoff)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_RESSONANCE, OnNMCustomdrawRessonance)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FILTERMOD, OnNMCustomdrawFilterMod)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VOLCUTOFFPAN, OnNMCustomdrawVolCutoffPan)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SWING1, OnNMCustomdrawSwing1Glide)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FADEOUTRES, OnNMCustomdrawFadeoutRes)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SWING2, OnNMCustomdrawSwing2)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLNOTEMODNOTE, OnNMCustomdrawNotemodnote)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_NOTEMOD, OnNMCustomdrawNoteMod)
+
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ADSRBASE, OnNMCustomdrawADSRBase)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ADSRMOD, OnNMCustomdrawADSRMod)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ADSRATT, OnNMCustomdrawADSRAttack)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ADSRDEC, OnNMCustomdrawADSRDecay)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ADSRSUS, OnNMCustomdrawADSRSustain)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_ADSRREL, OnNMCustomdrawADSRRelease)
+	ON_LBN_SELCHANGE(IDC_INSTRUMENTLIST, OnLbnSelchangeInstrumentlist)
+	ON_EN_CHANGE(IDC_INS_NAME, OnEnChangeInsName)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE, OnCbnSelendokFiltertype)
+	ON_BN_CLICKED(IDC_ENVCHECK, OnBnClickedEnvcheck)
+	ON_CBN_SELENDOK(IDC_INS_NNACOMBO, OnCbnSelendokInsNnacombo)
+	ON_CBN_SELENDOK(IDC_INS_DCTCOMBO, OnCbnSelendokInsDctcombo)
+	ON_CBN_SELENDOK(IDC_INS_DCACOMBO, OnCbnSelendokInsDcacombo)
+	ON_BN_CLICKED(IDC_LOADINS, OnBnClickedLoadins)
+	ON_BN_CLICKED(IDC_SAVEINS, OnBnClickedSaveins)
+	ON_BN_CLICKED(IDC_DUPEINS, OnBnClickedDupeins)
+	ON_BN_CLICKED(IDC_DELETEINS, OnBnClickedDeleteins)
+	ON_BN_CLICKED(IDC_INS_TGENERAL, OnBnClickedInsTgeneral)
+	ON_BN_CLICKED(IDC_INS_TAMP, OnBnClickedInsTamp)
+	ON_BN_CLICKED(IDC_INS_TPAN, OnBnClickedInsTpan)
+	ON_BN_CLICKED(IDC_INS_TFILTER, OnBnClickedInsTfilter)
+	ON_BN_CLICKED(IDC_INS_TPITCH, OnBnClickedInsTpitch)
+	ON_BN_CLICKED(IDC_ENVADSR, OnBnClickedEnvadsr)
+	ON_BN_CLICKED(IDC_ENVFREEFORM, OnBnClickedEnvfreeform)
+	ON_WM_HSCROLL()
+
 END_MESSAGE_MAP()
 
-void XMSamplerUIInst::OnNMCustomdrawGlobvol(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
-	*pResult = 0;
-}
-void XMSamplerUIInst::OnNMCustomdrawFadeout(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
-	*pResult = 0;
-}
-void XMSamplerUIInst::OnNMCustomdrawDefPan(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
-	*pResult = 0;
-}
-
-void XMSamplerUIInst::OnNMCustomdrawPitchPanMod(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
-	*pResult = 0;
-}
-void XMSamplerUIInst::OnNMCustomdrawCutoff(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
-	*pResult = 0;
-}
-void XMSamplerUIInst::OnNMCustomdrawRessonance(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
-	*pResult = 0;
-}
-void XMSamplerUIInst::OnNMCustomdrawFilterMod(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	// TODO: Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
-	*pResult = 0;
-}
-
-
-LRESULT XMSamplerUIInst::OnInitDialog(HWND hwnd,LPARAM lparam)
-{
-	ExecuteDlgInit(IDD);
-
-	m_InstNo.Attach(GetDlgItem(IDC_INST_NO));
-	
-	m_InstNo.SetWindowText(_T("0"));
-
-	m_InstName.Attach(GetDlgItem(IDC_INST_NAME));
-	m_InstName.SetLimitText(31);
-
-	m_FilterType.Attach(GetDlgItem(IDC_SLIDER_MODE));
-	m_FilterType.SetRange(0,4);
-
-	
-//	m_FilterType.AddString(_T("***** [bohan] iso-(10)646 encoding only please! *****"));
-//	m_FilterType.AddString(_T("***** [bohan] iso-(10)646 encoding only please! *****"));
-//	m_FilterType.AddString(_T("***** [bohan] iso-(10)646 encoding only please! *****"));
-//	m_FilterType.AddString(_T("***** [bohan] iso-(10)646 encoding only please! *****"));
-//	m_FilterType.AddString(_T("ñ≥Çµ"));
-
-	
-	m_NNA.Attach(GetDlgItem(IDC_XM_NNA_COMBO));
-	m_NNA.AddString(_T("Note Cut"));
-	m_NNA.AddString(_T("Note Continue"));
-	m_NNA.AddString(_T("Note Off"));
-	m_NNA.AddString(_T("Note Fadeout"));
-
-//	m_Pan.Initialize(GetDlgItem(IDC_PANSLIDER));
-	m_Pan.Attach(GetDlgItem(IDC_PANSLIDER));
-	m_Pan.SetRange(0,100);
-
-	m_Cutoff.Attach(GetDlgItem(IDC_CUTOFF));
-	m_Cutoff.SetRange(0,127);
-
-	m_Q.Attach(GetDlgItem(IDC_Q));
-	m_Q.SetRange(0,127);
-	
-	m_Envelope.Attach(GetDlgItem(IDC_ENVELOPE));
-	m_Envelope.SetRange(0,256);
-	
-	m_RandomPanning.Attach(GetDlgItem(IDC_RPAN));
-	m_RandomVCFCuttoff.Attach(GetDlgItem(IDC_RCUT));
-	m_RandomVCFResonance.Attach(GetDlgItem(IDC_RRES));
-	
-	m_SampleAssignEditor.SubclassWindow(GetDlgItem(IDC_SAMPLE_ASSIGN_EDITOR));
-	//m_SampleAssignEditor.Create(m_hWnd, rcDefault, NULL,
-    //        WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-    //        WS_EX_CLIENTEDGE);
-	m_SampleAssignEditor.Initialize(m_pMachine,0);
-
-	//m_SampleAssignEditor.Initialize(m_pMachine);
-
-	m_EnvelopeEditor.SubclassWindow(GetDlgItem(IDC_XM_EDIT_ENVELOPE));
-	m_EnvelopeEditor.Initialize(m_pMachine,m_pMachine->Instrument(0).AmpEnvelope());
-
-
-// 
-	m_InstNoUpDown.Attach(GetDlgItem(IDC_SPIN_INST));
-	m_InstNoUpDown.SetBuddy(m_InstNo);
-	m_InstNoUpDown.SetRange32(0,255);
-	m_InstNoUpDown.SetPos(0);
-	m_InstNoUpDown.SetBase(10);
-	
-	m_CutoffLabel.Attach(GetDlgItem(IDC_CUTOFF_LBL));
-	m_QLabel.Attach(GetDlgItem(IDC_Q_LBL));
-	m_EnvelopeLabel.Attach(GetDlgItem(IDC_ENV_LBL));
-	m_PanLabel.Attach(GetDlgItem(IDC_PAN_LBL));
-	m_ModeLabel.Attach(GetDlgItem(IDC_MODE_LBL));
-
-	SetInstrumentData(0);
-
-	m_bInitialized = true;
-	UpdateWindow();
-	return 0;
-}
 
 void XMSamplerUIInst::SetInstrumentData(const int instno)
 {
 	m_bInitialized = false;
-	XMInstrument& _inst = m_pMachine->Instrument(instno);
-	
-	m_InstName.SetWindowText(_inst.Name().c_str());
-	//m_InstName.SetWindowText(_T("Test"));
-	
-	SetNNACombo(_inst.NNA());
-	
-	m_FilterType.SetPos(4 - _inst.FilterType());
-	
-	//SetFilterModeCombo(_inst.FilterType());
+	XMInstrument& inst = m_pMachine->rInstrument(instno);
 
-	m_Pan.SetPos((int)(_inst.Pan() * 100.0f));
-	
-	m_Cutoff.SetPos(_inst.FilterCutoff());
-	m_Q.SetPos(_inst.FilterResonance());
-	
-	//m_Envelope.SetPos(_inst.EnSetRange(0,256);
-	
-	m_RandomPanning.SetCheck(_inst.IsRandomPanning());
-	m_RandomVCFCuttoff.SetCheck(_inst.IsRandomCutoff());
-	m_RandomVCFResonance.SetCheck(_inst.IsRandomResonance());
-	m_CurrentInstNo = instno;
+	m_InstrumentName.SetWindowText(inst.Name().c_str());
+	SetNewNoteAction(inst.NNA(),inst.DCT(),inst.DCA());
+	m_SampleAssign.Initialize(m_pMachine,&m_pMachine->rInstrument(instno),this);
+
+	m_FilterType.SetCurSel((int)inst.FilterType());
+
+	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
+		AssignAmplitudeValues(inst);
+	else if (((CButton*)GetDlgItem(IDC_INS_TPAN))->GetCheck())
+		AssignPanningValues(inst);
+	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
+		AssignFilterValues(inst);
+	else if (((CButton*)GetDlgItem(IDC_INS_TPITCH))->GetCheck())
+		AssignPitchValues(inst);
 
 	m_bInitialized = true;
 }
 
-void XMSamplerUIInst::SetNNACombo(const int nna)
+void XMSamplerUIInst::SetNewNoteAction(const int nna,const int dct,const int dca)
 {
-	switch(nna)
-	{
-	case 0:m_NNA.SelectString(0,_T("Note Cut"));break;
-	case 1:m_NNA.SelectString(0,_T("Note Continue"));break;
-	case 2:m_NNA.SelectString(0,_T("Note Off"));break;
-	case 2:m_NNA.SelectString(0,_T("Note Fadeout"));break;
-	}
+	m_NNA.SetCurSel(nna);
+	m_DCT.SetCurSel(dct);
+	m_DCA.SetCurSel(dca);
 }
 
-//void XMSamplerUIInst::SetFilterModeCombo(const int mode)
-//{
-//	switch(mode)
-//	{
-//	case 0:
-//		m_FilterType.SelectString(0,_T("LPF"));
-//		break;
-//	case 1:
-//		m_FilterType.SelectString(0,_T("HPF"));
-//		break;
-//	case 2:
-//		m_FilterType.SelectString(0,_T("BPF"));
-//		break;
-//	case 3:
-//		m_FilterType.SelectString(0,_T("NBF"));
-//		break;
-//	case 4:
-//		m_FilterType.SelectString(0,_T("OFF"));
-//		break;
-//	}
-//
-//}
-
-void XMSamplerUIInst::OnChangeInstNo(UINT id,int command,HWND hwnd)
+void XMSamplerUIInst::AssignAmplitudeValues(XMInstrument& inst)
 {
-	
-	TCHAR _buffer[5];
+	m_SlVolCutoffPan.SetPos(inst.GlobVol()*128.0f);
+	m_SlFadeoutRes.SetPos(inst.VolumeFadeSpeed()*1024.0f);
+	m_SlSwing1Glide.SetPos(inst.RandomVolume()*100.0f);
+	//m_SlNoteModNote.SetPos(inst.NoteModVolCenter());
+	//m_SlNoteMod.SetPos(inst.NoteModVolSep());
 
-	if(m_bInitialized){
-		m_InstNo.GetWindowText(_buffer,4);
-	
-		int _instNo = boost::lexical_cast<int>(_buffer);
-	
-		if(_instNo > (XMSampler::MAX_INSTRUMENT - 1))
+	m_EnvelopeEditor.Initialize(m_pMachine,inst.AmpEnvelope());
+	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRBase.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRBASE))->ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_STATIC7))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRMod.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRMOD))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC8))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRAttack.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRATT))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC9))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRDecay.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRDEC))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC10))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRSustain.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRSUS))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC11))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRRelease.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRREL))->ShowWindow(SW_SHOW); 
+}
+void XMSamplerUIInst::AssignPanningValues(XMInstrument& inst)
+{
+	m_cutoffPan.SetCheck(inst.PanEnabled());
+	m_SlVolCutoffPan.SetPos((inst.Pan()*128.0f)-64.0f);
+	m_SlSwing1Glide.SetPos(inst.RandomPanning()*100.0f);
+	m_SlNoteModNote.SetPos(inst.NoteModPanCenter());
+	m_SlNoteMod.SetPos(inst.NoteModPanSep());
+
+	m_EnvelopeEditor.Initialize(m_pMachine,inst.PanEnvelope());
+	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRBase.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRBASE))->ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_STATIC7))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRMod.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRMOD))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC8))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRAttack.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRATT))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC9))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRDecay.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRDEC))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC10))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRSustain.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRSUS))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC11))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRRelease.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRREL))->ShowWindow(SW_SHOW); 
+}
+void XMSamplerUIInst::AssignFilterValues(XMInstrument& inst)
+{
+	m_SlVolCutoffPan.SetPos(inst.FilterCutoff()&0x7F);
+	if (inst.FilterCutoff()) m_cutoffPan.SetCheck(!(inst.FilterCutoff()&0x80));
+	else m_cutoffPan.SetCheck(0);
+
+	m_SlFadeoutRes.SetPos(inst.FilterResonance()&0x7F);
+	if (inst.FilterResonance()) m_Ressonance.SetCheck(!(inst.FilterResonance()&0x80));
+	else m_Ressonance.SetCheck(0);
+	m_SlSwing1Glide.SetPos(inst.RandomCutoff()*100.0f);
+	m_SlSwing2.SetPos(inst.RandomResonance()*100.0f);
+	//m_SlNoteModNote.SetPos(inst.NoteModFilterCenter());
+	//m_SlNoteMod.SetPos(inst.NoteModFilterSep());
+
+	m_EnvelopeEditor.Initialize(m_pMachine,inst.FilterEnvelope());
+	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRBase.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRBASE))->ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_STATIC7))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRMod.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRMOD))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC8))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRAttack.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRATT))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC9))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRDecay.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRDEC))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC10))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRSustain.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRSUS))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC11))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRRelease.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRREL))->ShowWindow(SW_SHOW); 
+}
+void XMSamplerUIInst::AssignPitchValues(XMInstrument& inst)
+{
+	//m_SlVolCutoffPan.SetPos(inst.Tune());
+	//m_SlSwing1Glide.SetPos(inst.Glide());
+	m_SlNoteMod.SetPos(inst.Lines());
+
+	m_EnvelopeEditor.Initialize(m_pMachine,inst.PitchEnvelope());
+	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRBase.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRBASE))->ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_STATIC7))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRMod.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRMOD))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC8))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRAttack.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRATT))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC9))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRDecay.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRDEC))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC10))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRSustain.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRSUS))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC11))->ShowWindow(SW_SHOW); //ENVADSR
+	m_SlADSRRelease.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LADSRREL))->ShowWindow(SW_SHOW); 
+}
+
+
+// Controladores de mensajes de XMSamplerUISample
+BOOL XMSamplerUIInst::OnSetActive()
+{
+	if ( m_bInitialized == false )
+	{
+		((CEdit*)GetDlgItem(IDC_INS_NAME))->SetLimitText(31);
+		m_FilterType.AddString(_T("LowPass"));
+		m_FilterType.AddString(_T("HighPass"));
+		m_FilterType.AddString(_T("BandPass"));
+		m_FilterType.AddString(_T("NotchBand"));
+		m_FilterType.AddString(_T("Off"));
+
+		m_NNA.AddString(_T("Note Cut"));
+		m_NNA.AddString(_T("Note Continue"));
+		m_NNA.AddString(_T("Note Off"));
+		m_NNA.AddString(_T("Note Fadeout"));
+
+		m_DCT.AddString(_T("Disabled"));
+		m_DCT.AddString(_T("Note"));
+		m_DCT.AddString(_T("Sample"));
+		m_DCT.AddString(_T("Instrument"));
+
+		m_DCA.AddString(_T("Note Cut"));
+		m_DCA.AddString(_T("Note Continue"));
+		m_DCA.AddString(_T("Note Off"));
+		m_DCA.AddString(_T("Note Fadeout"));
+
+		m_SlSwing2.SetRangeMax(100);
+
+		m_SlNoteModNote.SetRangeMin(0);
+		m_SlNoteModNote.SetRangeMax(119);
+
+		m_SlNoteMod.SetRangeMax(32);
+		m_SlNoteMod.SetRangeMin(-32);
+		m_SlNoteMod.SetPos(1);
+
+		m_SlADSRBase.SetRangeMax(256);
+		m_SlADSRMod.SetRangeMax(256);
+		m_SlADSRMod.SetRangeMin(-256);
+		m_SlADSRAttack.SetRangeMax(512);
+		m_SlADSRDecay.SetRangeMax(512);
+		m_SlADSRSustain.SetRangeMax(256);
+		m_SlADSRRelease.SetRangeMax(512);
+
+		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 		{
-			_instNo = 255;
-			m_InstNo.SetWindowText((boost::lexical_cast<SF::string>(_instNo)).c_str());
+			char line[48];
+			XMInstrument& inst = m_pMachine->rInstrument(i);
+			sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
+			strcat(line,inst.Name().c_str());
+			m_InstrumentList.AddString(line);
 		}
+		m_InstrumentList.SetCurSel(0);
 
-		if(_instNo < 0){
-			_instNo = 0;
-			m_InstNo.SetWindowText((boost::lexical_cast<SF::string>(_instNo)).data());
-		}
-
-		SetInstrumentData(_instNo);
-		m_EnvelopeEditor.Initialize(m_pMachine,m_pMachine->Instrument(_instNo).AmpEnvelope());
-		m_SampleAssignEditor.Initialize(m_pMachine,_instNo);
-		
-		m_CurrentInstNo = _instNo;
-	}
-
-}
-
-void XMSamplerUIInst::OnChangeInstName(UINT id,int command,HWND hwnd)
-{
-	if(m_bInitialized){
-		XMInstrument& _inst = m_pMachine->Instrument(m_CurrentInstNo);
-		TCHAR _buf[256];
-		m_InstName.GetWindowText(_buf,sizeof(_buf));
-		_inst.Name(SF::string(_buf));
-	}
-}
-
-LRESULT XMSamplerUIInst::OnCustomdrawSliderCutoff(NMHDR* pNMHDR) 
-{
-	XMInstrument& _inst = m_pMachine->Instrument(m_CurrentInstNo);
-
-	_inst.FilterCutoff(m_Cutoff.GetPos());
-
-	m_CutoffLabel.SetWindowText((boost::lexical_cast<SF::string>(_inst.FilterCutoff())).c_str());
-
-	return TRUE;
-
-}// XMSamplerUIInst::OnCustomdrawSliderCutoff
-
-LRESULT XMSamplerUIInst::OnCustomdrawSliderQ(NMHDR* pNMHDR) 
-{
-	XMInstrument& _inst = m_pMachine->Instrument(m_CurrentInstNo);
-
-	_inst.FilterResonance(m_Q.GetPos());
-
-	m_QLabel.SetWindowText
-		((SF::format(_T("%.0f%%")) % ((float)m_Q.GetPos() * 0.78740f )).str().c_str());
-
-	return TRUE;
-}
-
-
-LRESULT XMSamplerUIInst::OnCustomdrawEnvelope(NMHDR* pNMHDR) 
-{
-	XMInstrument& _inst = m_pMachine->Instrument(m_CurrentInstNo);
-	_inst.FilterEnvAmount(m_Envelope.GetPos() - 128);
-	m_EnvelopeLabel.SetWindowText
-		((SF::format(_T("%.0f")) % ((float)_inst.FilterEnvAmount() * 0.78125f )).str().c_str());
-	return TRUE;
-}// XMSamplerUIInst::OnCustomdrawEnvelope
-
-LRESULT XMSamplerUIInst::OnCustomdrawPan(NMHDR* pNMHDR)
-{
-	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	ATLTRACE2(_T("OnCustomdrawPan"));
-	switch(pNMCD->dwDrawStage)
-	{
-	case CDDS_PREPAINT:
-		ATLTRACE2(_T("CDDS_REPAINT\n"));
-		return 	CDRF_NOTIFYITEMDRAW;
-		break;
-	case CDDS_ITEMPREPAINT:
-		ATLTRACE2(_T("CDDS_ITEMPREPAINT\n"));
-		if (pNMCD->dwItemSpec == TBCD_THUMB)
-		{
-			ATLTRACE2(_T("TBCD_THUMB\n"));
-			return CDRF_NOTIFYPOSTPAINT;
-		}
-
-		return CDRF_DODEFAULT;
-		break;
-	case CDDS_ITEMPREERASE:
-		ATLTRACE2(_T("CDDS_ITEMPREERASE\n"));
-		break;
-
-	}
-	ATLTRACE2((SF::tformat(_T("%d %d %d %d %d \n")) % pNMCD->dwItemSpec % pNMCD->rc.top % pNMCD->rc.left % pNMCD->rc.right % pNMCD->rc.bottom).str().c_str());
-	XMInstrument& _inst = m_pMachine->Instrument(m_CurrentInstNo);
+		((CButton*)GetDlgItem(IDC_INS_TGENERAL))->SetCheck(1);
+		OnBnClickedInsTgeneral();
 	
-	_inst.Pan((float)m_Pan.GetPos() * 0.01f);
-	m_PanLabel.SetWindowText
-		((SF::format(_T("%d%%")) % ((float)_inst.Pan() * 100.0f)).str().c_str());
-	SetMsgHandled(true);
-	return CDRF_DODEFAULT;
-//	return CDRF_SKIPDEFAULT;
-
-}//XMSamplerUIInst::OnCustomdrawPan
-
-LRESULT XMSamplerUIInst::OnCustomdrawMode(NMHDR* pNMHDR)
-{
-	XMInstrument& _inst = m_pMachine->Instrument(m_CurrentInstNo);
-	
-	_inst.FilterType(4 - m_FilterType.GetPos());
-
-	SF::string _mode_str;
-	switch(_inst.FilterType())
-	{
-	case 0:
-		_mode_str = _T("LPF");
-		break;
-	case 1:
-		_mode_str = _T("HPF");
-		break;
-	case 2:
-		_mode_str = _T("BPF");
-		break;
-	case 3:
-		_mode_str = _T("NBF");
-		break;
-	case 4:
-		_mode_str = _T("OFF");
-		break;
-	}
-
-	m_ModeLabel.SetWindowText(_mode_str.c_str());
-
-	return TRUE;
-}//XMSamplerUIInst::OnCustomdrawMode
-
-//////////////////////////////////////////////////////////////////////////////
-// EnvelopeEditor ------------------------------------------------------------
-//////////////////////////////////////////////////////////////////////////////
-XMSamplerUIInst::EnvelopeEditor::EnvelopeEditor() : m_Color(255, 0, 0, 255)
-{
-	m_bInitialized = false;
-	m_bPointEditing = false;
-	
-	m_pEnvelope = NULL;
-	m_pXMSampler = NULL;
-
-	// ***** [bohan] iso-(10)646 encoding only please! *****
-	// SubclassWindowÇ***** [bohan] iso-(10)646 encoding only please! *****
-	::WNDCLASSEX _wc = GetWndClassInfo().m_wc;
-	_wc.lpfnWndProc = &DummyWindowProc;
-	::RegisterClassEx(&_wc);
-}// XMSamplerUIInst::EnvelopeEditor::EnvelopeEditor
-
-void XMSamplerUIInst::EnvelopeEditor::Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope)
-{
-	m_bInitialized = false;
-	// 
-	WTL::CRect _rect_client;
-
-	// ***** [bohan] iso-(10)646 encoding only please! *****
-	GetClientRect(&_rect_client);
-	// H ScrollBar ***** [bohan] iso-(10)646 encoding only please! *****
-	SetScrollSize(_rect_client.Width() * 2,_rect_client.Height(),false);
-	// ***** [bohan] iso-(10)646 encoding only please! ***** client size ***** [bohan] iso-(10)646 encoding only please! *****
-	GetClientRect(&_rect_client);
-	// H ScrollBar ***** [bohan] iso-(10)646 encoding only please! *****
-	SetScrollSize(_rect_client.Width(),_rect_client.Height(),false);
-	// ***** [bohan] iso-(10)646 encoding only please! ***** client size ***** [bohan] iso-(10)646 encoding only please! *****
-	GetClientRect(&_rect_client);
-	// ***** [bohan] iso-(10)646 encoding only please! *****
-	SetScrollSize(_rect_client.Width(),_rect_client.Height(),false);
-	// ***** [bohan] iso-(10)646 encoding only please! *****
-
-	//LPVOID lpMsgBuf;
-	//if (_ret == 0 && FormatMessage( 
- //   FORMAT_MESSAGE_ALLOCATE_BUFFER | 
- //   FORMAT_MESSAGE_FROM_SYSTEM | 
- //   FORMAT_MESSAGE_IGNORE_INSERTS,
- //   NULL,
- //   GetLastError(),
- //   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
- //   (LPTSTR) &lpMsgBuf,
- //   0,
- //   NULL ))
-	//{
-	//	MessageBox( (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION );
-	//	::LocalFree(lpMsgBuf);
-	//}
-
-	m_pXMSampler = pSampler;
-	m_CurrentScrollWidth = 0;
-	m_CurrentScrollHeight = 0;
-	EditEnvelope(pEnvelope);
-
-	m_Zoom = 0.005f;
-
-	//ShowScrollBar(SB_HORZ);
-	//EnableScrollBar(SB_HORZ);
-
-	//if(m_pEnvelope->IsEnabled()){
-	
-	int _num_pts = m_pEnvelope->NumOfPoints();
-	int _max = 0;
-
-	//if(_num_pts > 0){
-	//	_scroll_size.cx = (int)(m_Zoom *  (float)(pEnvelope->Point(_num_pts - 1)));
-	//	_scroll_size.cx += 100 /* pixel */; 
-	//} else {
-
-	//	_scroll_size.cx = _rect_client.right;
-	//}
-
-	//_scroll_size.cy = _rect_client.bottom; 
-	//
-	//m_CurrentScrollWidth = _scroll_size.cx;
-	//m_CurrentScrollHeight = _scroll_size.cy;
-	
-	//SetScrollSize(_scroll_size);
-///*
-	
-	if(_num_pts > 0){
-		AdjustScrollRect((int)(m_Zoom *  (float)(m_pEnvelope->Point(_num_pts - 1))));
-	} else {
-
-		m_CurrentScrollWidth = _rect_client.Width();
-		m_CurrentScrollHeight = _rect_client.Height();
-		
-		SetScrollSize(_rect_client.Width(),_rect_client.Height(),false);
-	}
-  
-		//SetScrollLine(1,1);
-		//SetScrollPage(1,1);
-		//ShowScrollBar(SB_HORZ,TRUE);
-
-
-//*/
-		
-		//::SCROLLINFO _info;
-	/*
-		ZeroMemory(&_info,sizeof(::SCROLLINFO));
-		_info.cbSize = sizeof(SCROLLINFO);
-		_info.fMask = SIF_RANGE | SIF_PAGE | SIF_POS ;
-		_info.nMin = 0;
-		_info.nMax = 2048;
-		_info.nPage = 2;
-		_info.nPos = 0;*/
-
-
-		//this->SetScrollInfo(SB_HORZ,&_info);
-		
-		//m_pEnvelope = pEnvelope;
-
-		//if(!m_bInitialized)
-		//{
-		//	 ÉeÉNÉXÉ`ÉÉÇì«Ç›çûÇﬁ
-		//	LPDIRECT3DDEVICE9 const _pDevice = D3D::GetInstance().pD3DDevice();
-		//	HRESULT hr = S_OK;
-
-		//	hr = ::D3DXCreateTextureFromFile(_pDevice, "c:\\test.png", &m_pTexture);
-		//	hr = ::D3DXCreateLine(_pDevice,&m_pLine);
-		//	 lineÇÃstyleÇê›íËÇ∑ÇÈ
-		//	m_pLine->SetAntialias(TRUE);
-		//	m_pLine->SetGLLines(TRUE);
-		//	m_pLine->SetPattern(1);
-		//	m_pLine->SetWidth(2.0f);
-		//	m_pLine->SetPatternScale(0.25f);
-		//}
-
-		//m_Vect[0].x = 0.0f;
-		//m_Vect[0].y = 0.0f;
-		//m_Vect[1].x = 1024.0f;
-		//m_Vect[1].y = 768.0f;
+		SetInstrumentData(0);
 		m_bInitialized = true;
-	//}
 
-	Invalidate();
-	//OnPaint(NULL);
-}// XMSamplerUIInst::EnvelopeEditor::Initialize
-
-	
-	void XMSamplerUIInst::EnvelopeEditor::EditEnvelope(XMInstrument::Envelope * const pEnvelope)
-	{
-		m_pEnvelope = pEnvelope;
 	}
 
-	/** ÉGÉìÉxÉçÅ[ÉvÉGÉfÉBÉ^Çï`âÊÇµÇ‹Ç∑ÅB 
-	 * @param CDCHandle Device Context */
-	void XMSamplerUIInst::EnvelopeEditor::DoPaint(CDCHandle dc)
-	{
+	return CPropertyPage::OnSetActive();
+}
 
-		if(m_bInitialized){
-			
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			HDC hdc = dc.m_hDC;
-			CPoint _pt_viewport_org;
-			dc.GetViewportOrg(&_pt_viewport_org);// ***** [bohan] iso-(10)646 encoding only please! *****
-			WTL::CRect _rect;
-			GetClientRect(&_rect);
+void XMSamplerUIInst::OnBnClickedInsTgeneral()
+{
+	m_bInitialized = false;
 	
-			Graphics graphics(hdc);
+	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_SHOW);//Instrument Name
+	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_SHOW);//Instrument Name
+	((CStatic*)GetDlgItem(IDC_STATIC15))->ShowWindow(SW_SHOW);
+	m_NNA.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_STATIC16))->ShowWindow(SW_SHOW);
+	m_DCT.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_STATIC17))->ShowWindow(SW_SHOW);
+	m_DCA.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_INS_NOTEMAP))->ShowWindow(SW_SHOW);
 
-			Pen      _line_pen(m_Color,1.0);
-			Pen      _gridpen(Gdiplus::Color(32, 0, 0, 255),1.0);
-			Pen      _gridpen1(Gdiplus::Color(32, 255, 0, 0),1.0);
-			Pen      _gridpen2(Gdiplus::Color(64, 255, 0, 0),1.0);
+	((CStatic*)GetDlgItem(IDC_STATIC1))->ShowWindow(SW_HIDE); //FilterType
+	m_FilterType.ShowWindow(SW_HIDE);
+
+	((CStatic*)GetDlgItem(IDC_STATIC12))->ShowWindow(SW_HIDE); //Volume
+	m_cutoffPan.ShowWindow(SW_HIDE);
+	m_SlVolCutoffPan.ShowWindow(SW_HIDE);
+	m_SlVolCutoffPan.SetRangeMax(128);
+	m_SlVolCutoffPan.SetRangeMin(0);
+	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC2))->ShowWindow(SW_HIDE); //Swing1
+	m_SlSwing1Glide.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LSWING))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC13))->ShowWindow(SW_HIDE); //Fadeout
+	m_Ressonance.ShowWindow(SW_HIDE);
+	m_SlFadeoutRes.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC18))->ShowWindow(SW_HIDE); //Swing2
+	m_SlSwing2.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LSWING2))->ShowWindow(SW_HIDE); //Volume
+
+	((CStatic*)GetDlgItem(IDC_STATIC3))->ShowWindow(SW_HIDE); //NOTEMOD
+	m_SlNoteModNote.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->ShowWindow(SW_HIDE); //NOTEMOD
+	((CStatic*)GetDlgItem(IDC_STATIC5))->ShowWindow(SW_HIDE); //NOTEMOD
+	m_SlNoteMod.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->ShowWindow(SW_HIDE); //NOTEMOD
+
+	m_EnvEnabled.ShowWindow(SW_HIDE);
+	((CButton*)GetDlgItem(IDC_ENVADSR))->ShowWindow(SW_HIDE);
+	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->ShowWindow(SW_HIDE);
+
+	((CStatic*)GetDlgItem(IDC_INS_ENVELOPE))->ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_HIDE); //ENVADSR
+	m_SlADSRBase.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LADSRBASE))->ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC7))->ShowWindow(SW_HIDE); //ENVADSR
+	m_SlADSRMod.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LADSRMOD))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC8))->ShowWindow(SW_HIDE); //ENVADSR
+	m_SlADSRAttack.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LADSRATT))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC9))->ShowWindow(SW_HIDE); //ENVADSR
+	m_SlADSRDecay.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LADSRDEC))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC10))->ShowWindow(SW_HIDE); //ENVADSR
+	m_SlADSRSustain.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LADSRSUS))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC11))->ShowWindow(SW_HIDE); //ENVADSR
+	m_SlADSRRelease.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LADSRREL))->ShowWindow(SW_HIDE); 
+
+	m_bInitialized = true;
+	
+}
+void XMSamplerUIInst::OnBnClickedInsTamp()
+{
+	m_bInitialized = false;
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& inst = m_pMachine->rInstrument(i);
+
+	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
+	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name
+	((CStatic*)GetDlgItem(IDC_STATIC15))->ShowWindow(SW_HIDE);
+	m_NNA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC16))->ShowWindow(SW_HIDE);
+	m_DCT.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC17))->ShowWindow(SW_HIDE);
+	m_DCA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_INS_NOTEMAP))->ShowWindow(SW_HIDE);
+
+
+	((CStatic*)GetDlgItem(IDC_STATIC1))->ShowWindow(SW_HIDE); //FilterType
+	m_FilterType.ShowWindow(SW_HIDE);
+
+	((CStatic*)GetDlgItem(IDC_STATIC12))->ShowWindow(SW_SHOW); //Volume
+	((CStatic*)GetDlgItem(IDC_STATIC12))->SetWindowText("Global Volume");
+	m_cutoffPan.ShowWindow(SW_HIDE);
+	m_SlVolCutoffPan.ShowWindow(SW_SHOW);
+	m_SlVolCutoffPan.SetRangeMax(128);
+	m_SlVolCutoffPan.SetRangeMin(0);
+	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC2))->ShowWindow(SW_SHOW); //Swing1
+	((CStatic*)GetDlgItem(IDC_STATIC2))->SetWindowText("Swing (Randomize)");
+	m_SlSwing1Glide.ShowWindow(SW_SHOW);
+	m_SlSwing1Glide.SetRangeMax(100);
+	((CStatic*)GetDlgItem(IDC_LSWING))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC13))->ShowWindow(SW_SHOW); //Fadeout
+	m_Ressonance.ShowWindow(SW_HIDE);
+	m_SlFadeoutRes.ShowWindow(SW_SHOW);
+	m_SlFadeoutRes.SetRangeMax(256);
+	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC18))->ShowWindow(SW_HIDE); //Swing2
+	m_SlSwing2.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LSWING2))->ShowWindow(SW_HIDE); 
+
+	((CStatic*)GetDlgItem(IDC_STATIC3))->ShowWindow(SW_SHOW); //NOTEMOD
+	m_SlNoteModNote.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->ShowWindow(SW_SHOW); //NOTEMOD
+	((CStatic*)GetDlgItem(IDC_STATIC5))->ShowWindow(SW_SHOW); //NOTEMOD
+	m_SlNoteMod.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->ShowWindow(SW_SHOW); //NOTEMOD
+
+	m_EnvEnabled.ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVADSR))->ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->ShowWindow(SW_SHOW);
+
+	((CStatic*)GetDlgItem(IDC_INS_ENVELOPE))->ShowWindow(SW_SHOW);
+
+	AssignAmplitudeValues(inst);
+	m_bInitialized = true;
+}
+
+void XMSamplerUIInst::OnBnClickedInsTpan()
+{
+	m_bInitialized = false;
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& inst = m_pMachine->rInstrument(i);
+	
+	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
+	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name
+	((CStatic*)GetDlgItem(IDC_STATIC15))->ShowWindow(SW_HIDE);
+	m_NNA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC16))->ShowWindow(SW_HIDE);
+	m_DCT.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC17))->ShowWindow(SW_HIDE);
+	m_DCA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_INS_NOTEMAP))->ShowWindow(SW_HIDE);
+
+
+	((CStatic*)GetDlgItem(IDC_STATIC1))->ShowWindow(SW_HIDE); //FilterType
+	m_FilterType.ShowWindow(SW_HIDE);
+
+	((CStatic*)GetDlgItem(IDC_STATIC12))->ShowWindow(SW_HIDE); //Volume
+	m_cutoffPan.ShowWindow(SW_SHOW);
+	m_cutoffPan.SetWindowText("Instrument Pan");
+	m_SlVolCutoffPan.ShowWindow(SW_SHOW);
+	m_SlVolCutoffPan.SetRangeMax(64);
+	m_SlVolCutoffPan.SetRangeMin(-64);
+	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC2))->ShowWindow(SW_SHOW); //Swing1
+	((CStatic*)GetDlgItem(IDC_STATIC2))->SetWindowText("Swing (Randomize)");
+	m_SlSwing1Glide.ShowWindow(SW_SHOW);
+	m_SlSwing1Glide.SetRangeMax(100);
+	((CStatic*)GetDlgItem(IDC_LSWING))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC13))->ShowWindow(SW_HIDE); //Fadeout
+	m_Ressonance.ShowWindow(SW_HIDE);
+	m_SlFadeoutRes.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC18))->ShowWindow(SW_HIDE); //Swing2
+	m_SlSwing2.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LSWING2))->ShowWindow(SW_HIDE); 
+
+	((CStatic*)GetDlgItem(IDC_STATIC3))->ShowWindow(SW_SHOW); //NOTEMOD
+	m_SlNoteModNote.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->ShowWindow(SW_SHOW); //NOTEMOD
+	((CStatic*)GetDlgItem(IDC_STATIC5))->ShowWindow(SW_SHOW); //NOTEMOD
+	m_SlNoteMod.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->ShowWindow(SW_SHOW); //NOTEMOD
+
+	m_EnvEnabled.ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVADSR))->ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_INS_ENVELOPE))->ShowWindow(SW_SHOW);
+	
+	AssignPanningValues(inst);
+	m_bInitialized = true;
+}
+	
+void XMSamplerUIInst::OnBnClickedInsTfilter()
+{
+	m_bInitialized = false;
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& inst = m_pMachine->rInstrument(i);
+	
+	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
+	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name
+	((CStatic*)GetDlgItem(IDC_STATIC15))->ShowWindow(SW_HIDE);
+	m_NNA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC16))->ShowWindow(SW_HIDE);
+	m_DCT.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC17))->ShowWindow(SW_HIDE);
+	m_DCA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_INS_NOTEMAP))->ShowWindow(SW_HIDE);
+
+
+	((CStatic*)GetDlgItem(IDC_STATIC1))->ShowWindow(SW_SHOW); //FilterType
+	m_FilterType.ShowWindow(SW_SHOW);
+
+	((CStatic*)GetDlgItem(IDC_STATIC12))->ShowWindow(SW_HIDE); //Volume
+	m_cutoffPan.ShowWindow(SW_SHOW);
+	m_cutoffPan.SetWindowText("Filter Cutoff");
+	m_SlVolCutoffPan.ShowWindow(SW_SHOW);
+	m_SlVolCutoffPan.SetRangeMax(127);
+	m_SlVolCutoffPan.SetRangeMin(0);
+	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC2))->ShowWindow(SW_SHOW); //Swing1
+	((CStatic*)GetDlgItem(IDC_STATIC2))->SetWindowText("Swing (Randomize)");
+	m_SlSwing1Glide.ShowWindow(SW_SHOW);
+	m_SlSwing1Glide.SetRangeMax(100);
+	((CStatic*)GetDlgItem(IDC_LSWING))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC13))->ShowWindow(SW_HIDE); //Fadeout
+	m_Ressonance.ShowWindow(SW_SHOW);
+	m_SlFadeoutRes.ShowWindow(SW_SHOW);
+	m_SlFadeoutRes.SetRangeMax(127);
+	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC18))->ShowWindow(SW_SHOW); //Swing2
+	m_SlSwing2.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LSWING2))->ShowWindow(SW_SHOW); 
+
+	((CStatic*)GetDlgItem(IDC_STATIC3))->ShowWindow(SW_SHOW); //NOTEMOD
+	m_SlNoteModNote.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->ShowWindow(SW_SHOW); //NOTEMOD
+	((CStatic*)GetDlgItem(IDC_STATIC5))->ShowWindow(SW_SHOW); //NOTEMOD
+	m_SlNoteMod.ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->ShowWindow(SW_SHOW); //NOTEMOD
+
+	m_EnvEnabled.ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVADSR))->ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->ShowWindow(SW_SHOW);
+	((CScrollView*)GetDlgItem(IDC_INS_ENVELOPE))->ShowWindow(SW_SHOW);
+
+	AssignFilterValues(inst);
+	m_bInitialized = true;
+}
+	
+void XMSamplerUIInst::OnBnClickedInsTpitch()
+{
+	m_bInitialized = false;
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& inst = m_pMachine->rInstrument(i);
+	
+	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
+	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name
+	((CStatic*)GetDlgItem(IDC_STATIC15))->ShowWindow(SW_HIDE);
+	m_NNA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC16))->ShowWindow(SW_HIDE);
+	m_DCT.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_STATIC17))->ShowWindow(SW_HIDE);
+	m_DCA.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_INS_NOTEMAP))->ShowWindow(SW_HIDE);
+
+	((CStatic*)GetDlgItem(IDC_STATIC1))->ShowWindow(SW_HIDE); //FilterType
+	m_FilterType.ShowWindow(SW_HIDE);
+
+	((CStatic*)GetDlgItem(IDC_STATIC12))->ShowWindow(SW_SHOW); //Volume/Tune
+	((CStatic*)GetDlgItem(IDC_STATIC12))->SetWindowText("Seminote Tunning");
+	m_cutoffPan.ShowWindow(SW_HIDE);
+	m_SlVolCutoffPan.ShowWindow(SW_SHOW);
+	m_SlVolCutoffPan.SetRangeMax(48);
+	m_SlVolCutoffPan.SetRangeMin(-48);
+	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC2))->ShowWindow(SW_SHOW); //Swing1
+	((CStatic*)GetDlgItem(IDC_STATIC2))->SetWindowText("Note Glide");
+	m_SlSwing1Glide.ShowWindow(SW_SHOW);
+	m_SlSwing1Glide.SetRangeMax(256);
+	((CStatic*)GetDlgItem(IDC_LSWING))->ShowWindow(SW_SHOW); 
+	((CStatic*)GetDlgItem(IDC_STATIC13))->ShowWindow(SW_HIDE); //Fadeout
+	m_Ressonance.ShowWindow(SW_HIDE);
+	m_SlFadeoutRes.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->ShowWindow(SW_HIDE); 
+	((CStatic*)GetDlgItem(IDC_STATIC18))->ShowWindow(SW_HIDE); //Swing2
+	m_SlSwing2.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LSWING2))->ShowWindow(SW_HIDE);
+
+	((CStatic*)GetDlgItem(IDC_STATIC3))->ShowWindow(SW_HIDE); //NOTEMOD
+	m_SlNoteModNote.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->ShowWindow(SW_HIDE); //NOTEMOD
+	((CStatic*)GetDlgItem(IDC_STATIC5))->ShowWindow(SW_HIDE); //NOTEMOD
+	m_SlNoteMod.ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->ShowWindow(SW_HIDE); //NOTEMOD
+
+	m_EnvEnabled.ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVADSR))->ShowWindow(SW_SHOW);
+	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->ShowWindow(SW_SHOW);
+	((CStatic*)GetDlgItem(IDC_INS_ENVELOPE))->ShowWindow(SW_SHOW);
+	
+	AssignPitchValues(inst);
+
+	m_bInitialized = true;
+}
+
+void XMSamplerUIInst::OnCbnSelendokFiltertype()
+{
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
+
+	_inst.FilterType((dsp::FilterType)m_FilterType.GetCurSel());
+}
+
+
+void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
+	char tmp[64];
+	
+	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
+		{
+		sprintf(tmp,"%d",m_SlVolCutoffPan.GetPos());
+		_inst.GlobVol(m_SlVolCutoffPan.GetPos()/128.0f);
+		}
+	else if (((CButton*)GetDlgItem(IDC_INS_TPAN))->GetCheck())
+	{
+		switch(m_SlVolCutoffPan.GetPos()+64)
+		{
+		case 0: sprintf(tmp,"||%02d  ",m_SlVolCutoffPan.GetPos()); break;
+		case 64: sprintf(tmp," |%02d| ",m_SlVolCutoffPan.GetPos()); break;
+		case 128: sprintf(tmp,"  %02d||",m_SlVolCutoffPan.GetPos()); break;
+		default:
+			if ( m_SlVolCutoffPan.GetPos() < -32) sprintf(tmp,"<<%02d  ",m_SlVolCutoffPan.GetPos());
+			else if ( m_SlVolCutoffPan.GetPos() < 0) sprintf(tmp," <%02d< ",m_SlVolCutoffPan.GetPos());
+			else if ( m_SlVolCutoffPan.GetPos() <= 32) sprintf(tmp," >%02d> ",m_SlVolCutoffPan.GetPos());
+			else sprintf(tmp,"  %02d>>",m_SlVolCutoffPan.GetPos());
+			break;
+		}
+		_inst.Pan((m_SlVolCutoffPan.GetPos()+64)/128.0f);
+	}
+	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
+	{
+		sprintf(tmp,"%d",m_SlVolCutoffPan.GetPos());
+		_inst.FilterCutoff(m_SlVolCutoffPan.GetPos());
+	}
+	else if (((CButton*)GetDlgItem(IDC_INS_TPITCH))->GetCheck())
+	{
+		sprintf(tmp,"%d",m_SlVolCutoffPan.GetPos());
+		//_inst.Tune(m_SlVolCutoffPan.GetPos());
+	}
+
+	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->SetWindowText(tmp);
+
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
+	char tmp[64];
+
+	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
+	{
+//		1024 / getpos() = number of ticks that needs to decrease to 0.
+//		(24.0f * Global::player().bpm/60.0f) = number of ticks in a second.
+//		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::player().bpm/60.0f));
+		if (m_SlFadeoutRes.GetPos() == 0) strcpy(tmp,"off");
+		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::pPlayer->bpm *m_SlFadeoutRes.GetPos()) );
+
+		_inst.VolumeFadeSpeed(m_SlFadeoutRes.GetPos()/1024.0f);
+	}
+	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
+	{
+		sprintf(tmp,"%d",m_SlFadeoutRes.GetPos());
+		_inst.FilterResonance(m_SlFadeoutRes.GetPos());
+	}
+
+	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->SetWindowText(tmp);
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
+
+	char tmp[64];
+
+	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
+	{
+		sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
+		_inst.RandomVolume(m_SlSwing1Glide.GetPos()/100.0f);
+	}
+	else if (((CButton*)GetDlgItem(IDC_INS_TPAN))->GetCheck())
+		{
+		sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
+		_inst.RandomPanning(m_SlSwing1Glide.GetPos()/100.0f);
+		}
+	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
+	{
+		sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
+		_inst.RandomCutoff(m_SlSwing1Glide.GetPos()/100.0f);
+	}
+	else if (((CButton*)GetDlgItem(IDC_INS_TPITCH))->GetCheck())
+	{
+		sprintf(tmp,"%d",m_SlSwing1Glide.GetPos());
+		//_inst.Glide(m_SlVolCutoffPan.GetPos());
+	}
+
+	((CStatic*)GetDlgItem(IDC_LSWING))->SetWindowText(tmp);
+	*pResult = 0;
+}
+
+void XMSamplerUIInst::OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	int i= m_InstrumentList.GetCurSel();
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
+	
+	char tmp[64];
+	if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
+	{
+		sprintf(tmp,"%d%",m_SlSwing2.GetPos());
+		_inst.RandomResonance(m_SlSwing2.GetPos()/100.0f);
+	}
+
+	((CStatic*)GetDlgItem(IDC_LSWING2))->SetWindowText(tmp);
+	*pResult = 0;
+}
+
+void XMSamplerUIInst::OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+
+	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SLNOTEMODNOTE);
+
+	/*
+	if ()
+	{
+	}
+	else
+	{
+	}
+	*/
+	char tmp[40], tmp2[40];
+	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+	sprintf(tmp,"%s",notes[slid->GetPos()%12]);
+	sprintf(tmp2,"%s%d",tmp,(slid->GetPos()/12));
+	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->SetWindowText(tmp2);
+	
+	
+	*pResult = 0;
+}
+
+void XMSamplerUIInst::OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+		
+	/*
+	if ()
+	{
+	}
+	else
+	{
+	}
+	*/
+  
+	char tmp[40];
+	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_NOTEMOD);
+	sprintf(tmp,"%.02f%%",(slid->GetPos()/2.56f));
+	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->SetWindowText(tmp);
+
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnBnClickedEnvcheck()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+
+void XMSamplerUIInst::OnBnClickedEnvadsr()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+		
+void XMSamplerUIInst::OnBnClickedEnvfreeform()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+
+void XMSamplerUIInst::OnNMCustomdrawADSRBase(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawADSRMod(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawADSRAttack(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawADSRDecay(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawADSRSustain(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+void XMSamplerUIInst::OnNMCustomdrawADSRRelease(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+	*pResult = 0;
+}
+
+	
+void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
+{
+	if(m_bInitialized)
+	{
+		SetInstrumentData(m_InstrumentList.GetCurSel());
+	}
+}
+
+void XMSamplerUIInst::OnEnChangeInsName()
+{
+	if(m_bInitialized)
+	{
+		int i= m_InstrumentList.GetCurSel();
+		XMInstrument& _inst = m_pMachine->rInstrument(i);
+		TCHAR _buf[256];
+		m_InstrumentName.GetWindowText(_buf,sizeof(_buf));
+		_inst.Name(_buf);
+	}
+}
+
 			
-			Gdiplus::SolidBrush  brush(Gdiplus::Color(255, 255, 255, 255));
+void XMSamplerUIInst::OnCbnSelendokInsNnacombo()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+	
+void XMSamplerUIInst::OnCbnSelendokInsDctcombo()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
 
-			//graphics.DrawLine(&_line_pen, 0, 0, 255, 255);
+void XMSamplerUIInst::OnCbnSelendokInsDcacombo()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+			
+void XMSamplerUIInst::OnBnClickedLoadins()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+
+void XMSamplerUIInst::OnBnClickedSaveins()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+
+void XMSamplerUIInst::OnBnClickedDupeins()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+
+void XMSamplerUIInst::OnBnClickedDeleteins()
+{
+	///\todo Agregue aquÌ su cÛdigo de controlador de notificaciÛn de control
+}
+void XMSamplerUIInst::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	m_SampleAssign.OnHScroll(nSBCode,nPos,pScrollBar);
+}
+			
+//////////////////////////////////////////////////////////////////////////////
+// CEnvelopeEditor -----------------------------------------------------------
+//////////////////////////////////////////////////////////////////////////////
+XMSamplerUIInst::CEnvelopeEditor::CEnvelopeEditor()
+: m_pEnvelope(NULL)
+, m_pXMSampler(NULL)
+, m_bInitialized(false)
+, m_bPointEditing(false)
+, m_EditPoint(0)
+{
+	_line_pen.CreatePen(PS_SOLID,0,RGB(0,0,255));
+	_gridpen.CreatePen(PS_SOLID,0,RGB(224,224,255));
+	_gridpen1.CreatePen(PS_SOLID,0,RGB(255,224,224));
+	_point_brush.CreateSolidBrush(RGB(0,0,255));
+}
+XMSamplerUIInst::CEnvelopeEditor::~CEnvelopeEditor(){
+	_line_pen.DeleteObject();
+	_gridpen.DeleteObject();
+	_gridpen1.DeleteObject();
+	_point_brush.DeleteObject();
+}
+			
+BEGIN_MESSAGE_MAP(XMSamplerUIInst::CEnvelopeEditor, CStatic)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_CONTEXTMENU()
+	ON_COMMAND(ID__ENV_ADDNEWPOINT, OnPopAddPoint)
+	ON_COMMAND(ID__ENV_SETSUSTAINBEGIN, OnPopSustainStart)
+	ON_COMMAND(ID__ENV_SETSUSTAINEND, OnPopSustainEnd)
+	ON_COMMAND(ID__ENV_SETLOOPSTART, OnPopLoopStart)
+	ON_COMMAND(ID__ENV_SETLOOPEND, OnPopLoopEnd)
+	ON_COMMAND(ID__ENV_REMOVEPOINT, OnPopRemovePoint)
+	ON_COMMAND(ID__ENV_REMOVESUSTAIN, OnPopRemoveSustain)
+	ON_COMMAND(ID__ENV_REMOVELOOP, OnPopRemoveLoop)
+	ON_COMMAND(ID__ENV_REMOVEENVELOPE, OnPopRemoveEnvelope)
+END_MESSAGE_MAP()
+			
+			
+void XMSamplerUIInst::CEnvelopeEditor::Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope)
+{
+	m_pXMSampler =pSampler;
+	m_pEnvelope = pEnvelope;
+			
+	CRect _rect;
+	GetClientRect(&_rect);
+	m_WindowHeight = _rect.Height();
+	m_WindowWidth = _rect.Width();
+			
+	m_Zoom = 8.0f;
+	const int _points =  m_pEnvelope->NumOfPoints();
+	m_EditPoint = _points;
+
+	if (_points > 0 )
+				{
+		while (m_Zoom * m_pEnvelope->GetTime(_points-1) > m_WindowWidth)
+					{
+			m_Zoom= m_Zoom/2.0f;
+				}
+			}
+
+	m_bInitialized = true;
+	Invalidate();
+			
+}
+void XMSamplerUIInst::CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
+{
+	if(m_bInitialized){
+		if (m_pEnvelope && lpDrawItemStruct->itemAction == ODA_DRAWENTIRE)
+			{
+			CDC dc;
+			dc.Attach(lpDrawItemStruct->hDC);
+			CPen *oldpen= dc.SelectObject(&_gridpen);
+			
+			CRect _rect;
+			GetClientRect(&_rect);
+
+//			dc.FillRect(&_rect,&brush);
+			dc.FillSolidRect(&_rect,RGB(255,255,255));
+			dc.SetBkMode(TRANSPARENT);
+			
+			// ***** Background lines *****
+			float _stepy = ((float)(m_WindowHeight)) / 100.0f * 10.0f;
+			
+			for(float i = 0; i <= (float)m_WindowHeight; i += _stepy)
+			{
+				dc.MoveTo(0,i);
+				dc.LineTo(m_WindowWidth,i);
+			}
+			
 			const int _points =  m_pEnvelope->NumOfPoints();
 
+			int _mod = 0.0f;
+			float tenthsec = m_Zoom*0.04*Global::player().bpm;
+			int _sec = 0;
 
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			
-			graphics.Clear(Gdiplus::Color(255,255,255,255));
-			graphics.SetRenderingOrigin(_pt_viewport_org.x,_pt_viewport_org.y);
-			
-			// Draw Grid
-			
-			Gdiplus::SolidBrush  _fontbrush(Gdiplus::Color(255, 0, 0, 255));
-			Gdiplus::FontFamily  fontFamily(L"Times New Roman");
-			Gdiplus::Font        font(&fontFamily, 8, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
-			Gdiplus::PointF      pointF(10.0f, 20.0f);
-			
-			// ***** [bohan] iso-(10)646 encoding only please! ***** Alias
-			graphics.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
-			
-			const REAL _stepx = (REAL)(4410.0 * m_Zoom );
-			const REAL _width = (m_CurrentScrollWidth > _rect.right)?m_CurrentScrollWidth:(REAL)_rect.right;
-			int _mod = 0;
-			float _sec = 0.0f;
-			
-			std::wstring _str;
-
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			if(_stepx >= 4.0){
-				for(REAL i = 0.0; i < _width; i += _stepx)
+			for(float i = 0; i < m_WindowWidth; i+=tenthsec)
+			{
+				if (_mod == 5 )
 				{
-					if(_mod == 5)
-					{
-						graphics.DrawLine(&_gridpen1,i,0.0,i,(REAL)m_CurrentScrollHeight);
-						_mod++;
-
-						// ***** [bohan] iso-(10)646 encoding only please! *****
-						_sec += 0.5f;
-						_str = boost::lexical_cast<std::wstring,float>(_sec);		
-						graphics.DrawString(_str.c_str(),_str.length(),&font,PointF(i,0),&_fontbrush);
-
-					} else if(_mod == 10) {
-						_mod = 1;
-						graphics.DrawLine(&_gridpen2,i,0.0,i,(REAL)m_CurrentScrollHeight);
-						// ***** [bohan] iso-(10)646 encoding only please! *****
-						_sec += 0.5f;
-						_str = boost::lexical_cast<std::wstring,float>(_sec);		
-						graphics.DrawString(_str.c_str(),_str.length(),&font,PointF(i,0),&_fontbrush);
-					} else {
-						graphics.DrawLine(&_gridpen,i,0.0,i,(REAL)m_CurrentScrollHeight);
-						_mod++;
-					}
+					dc.MoveTo(i,0);
+					dc.LineTo(i,m_WindowHeight);
+				} else if(_mod == 10 ) {
+					_mod = 0;
+					dc.SelectObject(&_gridpen1);
+					dc.MoveTo(i,0);
+					dc.LineTo(i,m_WindowHeight);
+					dc.SelectObject(&_gridpen);
+					// *****  *****
+					_sec += 1;
+					CString string;
+					string.Format("%ds",_sec);
+					dc.TextOut(i,m_WindowHeight-20,string);
+				} else {
+					dc.MoveTo(i,m_WindowHeight-5);
+					dc.LineTo(i,m_WindowHeight);
 				}
-			}
-
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			REAL _stepy = ((REAL)(m_CurrentScrollHeight)) / 100.0f * 10.0f;
-			
-			for(REAL i = (REAL)_rect.top; i <= (REAL)m_CurrentScrollHeight; i += _stepy)
-			{
-				graphics.DrawLine(&_gridpen,0.0,i,_width,i);
-			}
-
-			
-			Gdiplus::Point _pt_start(0,m_CurrentScrollHeight);
-			Gdiplus::SolidBrush  _point_brush(Gdiplus::Color(255, 255, 128, 128));
-			Gdiplus::SolidBrush  _point_edit_brush(Gdiplus::Color(255, 128, 64, 64));
-			Pen _point_pen(Gdiplus::Color(128, 255, 128, 255),1.0);
-			Pen _point_edit_pen(Gdiplus::Color(128, 255, 128, 255),1.0);
-
-			graphics.SetSmoothingMode(SmoothingModeAntiAlias);
-			
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			
-			for(int i = 0;i < _points ;i++)
-			{
-				Point _pt_end;
-				_pt_end.Y = (int)((float)m_CurrentScrollHeight * (1.0f - m_pEnvelope->Value(i)));
-				_pt_end.X = (int)(m_Zoom * (float)m_pEnvelope->Point(i)); 
-				graphics.DrawLine(&_line_pen,_pt_start,_pt_end);
-				_pt_start = _pt_end;
-		
+				_mod++;
 			}
 			
-
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			if(m_bPointEditing){// ***** [bohan] iso-(10)646 encoding only please! *****
-				_pt_start.X = 0;
-				_pt_start.Y = m_CurrentScrollHeight;
-				// ***** [bohan] iso-(10)646 encoding only please! *****
-				for(int i = 0;i < _points ;i++)
-				{
-					Point _pt_end;
-					_pt_end.Y = (int)((float)m_CurrentScrollHeight * (1.0f - m_EnvelopeEditing.Value(i)));
-					_pt_end.X = (int)(m_Zoom * (float)m_EnvelopeEditing.Point(i)); 
-					graphics.DrawLine(&_point_edit_pen,_pt_start,_pt_end);
-					_pt_start = _pt_end;
-				}
-			}
-			
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			for(int i = 0;i < _points ;i++)
-			{
-				Point _pt(
-					/* X */ (int)(m_Zoom * (float)m_pEnvelope->Point(i)), 
-					/* Y */ (int)((float)m_CurrentScrollHeight * (1.0f - m_pEnvelope->Value(i)))
-				);
-				graphics.FillRectangle(&_point_brush,_pt.X - POINT_SIZE / 2,_pt.Y - POINT_SIZE / 2,POINT_SIZE,POINT_SIZE);
-			}
-			
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			
-			if(m_bPointEditing)
-			{
-				Point _pt_org((int)(m_Zoom * (float)m_pEnvelope->Point(m_EditPointOrig)),(int)((float)m_CurrentScrollHeight * (1.0f - m_pEnvelope->Value(m_EditPointOrig))));
-				Point _pt_edit(m_EditPointX,m_EditPointY);
-				Pen _edit_line_pen(Gdiplus::Color(64, 64, 64, 64),1.0);
-				REAL dashValues[2] = {2,2};
-				_edit_line_pen.SetDashPattern(dashValues, 2);
-				graphics.DrawLine(&_edit_line_pen,_pt_org,_pt_edit);
-				
-				graphics.FillRectangle(&_point_brush,_pt_edit.X - POINT_SIZE / 2,_pt_edit.Y - POINT_SIZE / 2,POINT_SIZE,POINT_SIZE);
-				graphics.FillRectangle(&_point_edit_brush,_pt_org.X - POINT_SIZE / 2,_pt_org.Y - POINT_SIZE / 2,POINT_SIZE,POINT_SIZE);
-
-			}
-			
-			// Sustain Point ***** [bohan] iso-(10)646 encoding only please! *****
+			// Sustain Point *****  *****
 
 			if(m_pEnvelope->SustainBegin() != XMInstrument::Envelope::INVALID)
 			{
-				Point _pt_st(
-					/* X */(int)(m_Zoom * (float)m_pEnvelope->Point(m_pEnvelope->SustainBegin())), 
-					/* Y */(int)((float)m_CurrentScrollHeight * (1.0f - m_pEnvelope->Value(m_pEnvelope->SustainBegin())))
-				);
+				const int _pt_start_x = (m_Zoom * (float)m_pEnvelope->GetTime(m_pEnvelope->SustainBegin()));
+				const int _pt_end_x = (m_Zoom * (float)m_pEnvelope->GetTime(m_pEnvelope->SustainEnd()));
 
-				Point _pt_st_lbl;
+				CPen _edit_line_pen(PS_DOT,0,RGB(64,192,128));
 
-				if(_pt_st.X > m_CurrentScrollWidth / 2)
-				{
-					_pt_st_lbl.X = _pt_st.X  - 5;
-				} else {
-					_pt_st_lbl.X = _pt_st.X  + 5;
-				}
-				
-				if(_pt_st.Y < m_CurrentScrollHeight / 8)
-				{
-					_pt_st_lbl.Y = _pt_st.Y + m_CurrentScrollHeight / 8;
-				} else {
-					/* 3 / 4*/
-					_pt_st_lbl.Y = _pt_st.Y - m_CurrentScrollHeight / 8 ;
-				}
-
-
-				// Envelope Point ***** [bohan] iso-(10)646 encoding only please! ***** Sustain Label ***** [bohan] iso-(10)646 encoding only please! *****
-				Pen _edit_line_pen(Gdiplus::Color(96, 128, 128, 64),1.0);
-				REAL dashValues[2] = {2,2};
-				_edit_line_pen.SetDashPattern(dashValues, 2);
-
-				graphics.DrawLine(&_edit_line_pen,_pt_st,_pt_st_lbl);
-				
-				// ***** [bohan] iso-(10)646 encoding only please! *****
-				Gdiplus::FontFamily  _font_family_sustain(L"Times New Roman");
-				Gdiplus::Font        _font_sustain(&_font_family_sustain, 10, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
-				Gdiplus::SolidBrush  _font_sustain_brush(Gdiplus::Color(255, 255, 128, 64));
-			
-				graphics.DrawString(L"Sustain",7,&_font_sustain,PointF((float)_pt_st_lbl.X,(float)_pt_st_lbl.Y - 3),&_font_sustain_brush);
-	
+				dc.SelectObject(&_edit_line_pen);
+				dc.MoveTo(_pt_start_x,0);
+				dc.LineTo(_pt_start_x,m_WindowHeight);
+				dc.MoveTo(_pt_end_x,0);
+				dc.LineTo(_pt_end_x,m_WindowHeight);
 			}
 			
-			// Loop Start ***** [bohan] iso-(10)646 encoding only please! ***** Loop End ***** [bohan] iso-(10)646 encoding only please! *****
-
+			// Loop Start *****  ***** Loop End *****
+			
 			if(m_pEnvelope->LoopStart() != XMInstrument::Envelope::INVALID && 
 				m_pEnvelope->LoopEnd() != XMInstrument::Envelope::INVALID)
 			{
-				const int _pt_loop_start_x = m_Zoom * (float)m_pEnvelope->Point(m_pEnvelope->LoopStart());
-				const int _pt_loop_start_y = (int)((float)m_CurrentScrollHeight * (1.0f - m_pEnvelope->Value(m_pEnvelope->LoopStart())));
+				const int _pt_loop_start_x = m_Zoom * (float)m_pEnvelope->GetTime(m_pEnvelope->LoopStart());
+				const int _pt_loop_end_x = m_Zoom * (float)m_pEnvelope->GetTime(m_pEnvelope->LoopEnd());
+				
+				// Envelope Point *****  ***** Sustain Label *****  *****
+				CPen _loop_pen(PS_SOLID,0,RGB(64,192,128));
 
-				const int _pt_loop_end_x = m_Zoom * (float)m_pEnvelope->Point(m_pEnvelope->LoopEnd());
-				const int _pt_loop_end_y = (int)((float)m_CurrentScrollHeight * (1.0f - m_pEnvelope->Value(m_pEnvelope->LoopEnd())));
-
-				// Envelope Point ***** [bohan] iso-(10)646 encoding only please! ***** Sustain Label ***** [bohan] iso-(10)646 encoding only please! *****
-				Pen _loop_pen(Gdiplus::Color(255, 0, 192, 0),1.0);
-				REAL dashValues[2] = {2,2};
-				_loop_pen.SetDashPattern(dashValues, 2);
-
-				Gdiplus::SolidBrush  _loop_brush(Gdiplus::Color(64, 0, 128, 0));
-				graphics.FillRectangle(&_loop_brush,_pt_loop_start_x,0,_pt_loop_end_x - _pt_loop_start_x,m_CurrentScrollHeight);
-
-				graphics.DrawLine(&_loop_pen,_pt_loop_start_x,0,_pt_loop_start_x,m_CurrentScrollHeight);
-				graphics.DrawLine(&_loop_pen,_pt_loop_end_x,0,_pt_loop_end_x,m_CurrentScrollHeight);
+				/*				This would be to show the loop range, but without alpha blending, this is not nice.
+				CBrush  _loop_brush;
+				_loop_brush.CreateSolidBrush(RGB(64, 0, 128));
+				CRect rect(_pt_loop_start_x,0,_pt_loop_end_x - _pt_loop_start_x,m_WindowHeight);
+				dc.FillRect(&rect,&_loop_brush);
 			
-				Gdiplus::FontFamily  _font_family_loop(L"Times New Roman");
-				Gdiplus::Font        _font_loop(&_font_family_loop, 10, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
-				Gdiplus::SolidBrush  _font_loop_brush(Gdiplus::Color(255, 0, 64, 0));
-
-				graphics.DrawString(L"Loop",4,&_font_loop,
-					PointF(	(float)((_pt_loop_end_x - _pt_loop_start_x) / 2 + _pt_loop_start_x - 20),
-							(float)(m_CurrentScrollHeight / 2)),&_font_loop_brush);
+				dc.TextOut(((_pt_loop_end_x - _pt_loop_start_x) / 2 + _pt_loop_start_x - 20),(m_WindowHeight / 2),"Loop");
+				_loop_brush.DeleteObject();
+				*/
+				dc.SelectObject(&_loop_pen);
+				dc.MoveTo(_pt_loop_start_x,0);
+				dc.LineTo(_pt_loop_start_x,m_WindowHeight);
+				dc.MoveTo(_pt_loop_end_x,0);
+				dc.LineTo(_pt_loop_end_x,m_WindowHeight);
 
 			}
 
-//			Gdiplus::SolidBrush  _fontbrush(Gdiplus::Color(255, 0, 0, 255));
-			
-			//Gdiplus::SolidBrush  brush(Gdiplus::Color(255, 0, 0, 255));
-			//Gdiplus::FontFamily  fontFamily(L"Times New Roman");
-			//Gdiplus::Font        font(&fontFamily, 24, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
-			//Gdiplus::PointF      pointF(10.0f, 20.0f);
-			//graphics.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
-	// 		graphics.DrawString(L"Hello World!", -1, &font, pointF, &brush);
 
-	//		XMInstrument& _inst = m_pMachine->Instrument(instno);
+			// ***** Draw Envelope line and points *****
+			CPoint _pt_start;
+			if ( _points > 0 ) 
+				{
+				_pt_start.x=0;
+				_pt_start.y=(int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(0)));
+				}
+			for(int i = 1;i < _points ;i++)
+				{
+				CPoint _pt_end;
+				_pt_end.x = (int)(m_Zoom * (float)m_pEnvelope->GetTime(i)); 
+				_pt_end.y = (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
+				dc.SelectObject(&_line_pen);
+				dc.MoveTo(_pt_start);
+				dc.LineTo(_pt_end);
+				_pt_start = _pt_end;
+				}
 
-			//LPDIRECT3DDEVICE9 const _pDevice = D3D::GetInstance().pD3DDevice();
-
-	//		_pDevice->Clear( 0L, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,
-	//								0x00000000, 1.0f, 0L );
-	//		_pDevice->BeginScene();
-	//		D3D::GetInstance().Render(*this);
-	//		m_pLine->Begin();
-	//
-	//		HRESULT hr = _pDevice->SetTexture(0, m_pTexture);	// ***** [bohan] iso-(10)646 encoding only please! *****
-	//
-	//		// ***** [bohan] iso-(10)646 encoding only please! *****
-	//		hr = _pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-	////		hr = _pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_ADD);
-	//		hr = _pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	//		hr = _pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTSS_COLOROP);
-	//		hr = _pDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
-	//		hr = _pDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_ADD);
-	//		hr = _pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	//		hr = _pDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-	//		hr = _pDevice->SetRenderState(D3DRS_DESTBLEND,D3DBLEND_ONE);
-	//		hr = _pDevice->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_ONE);
-	//		RECT _rect,_rect1;
-	//		GetClientRect(&_rect);
-	//
-	//		m_Vect[1].x = _rect.right;
-	//		m_Vect[1].y = _rect.bottom;
-	//		
-	//		m_pLine->Draw(m_Vect,2,D3DCOLOR(0xffffffff));
-	//		
-	//		m_pLine->End();
-	//		_pDevice->EndScene();
-	//
-	//		_rect1 = _rect;
-
-	//		_rect1.top += 1.0f;
-	//		_rect1.bottom += 1.0f;
-			
-	//		_rect1.left += 2.0f;
-	//		_rect1.right -= 6.0f;
-
-			//D3D::GetInstance().Window().GetClientRect(&_rect1);
-	//		_pDevice->Present(&_rect1,NULL,m_hWnd,NULL);
-	//		_pDevice->Present(NULL,NULL,m_hWnd,NULL);
-			// EndPaint(&ps);
-		}
-		SetMsgHandled(false);
-	}// XMSamplerUIInst::EnvelopeEditor::OnPaint
-
-	/** ***** [bohan] iso-(10)646 encoding only please! *****
-	 * @param vKey ***** [bohan] iso-(10)646 encoding only please! *****
-	 * @param position ***** [bohan] iso-(10)646 encoding only please! ***** */
-	void XMSamplerUIInst::EnvelopeEditor::OnLButtonDown(const UINT vKey, WTL::CPoint position)
-	{
-		
-		SetFocus();
-
-		if(!m_bPointEditing){
-			const int _points =  m_pEnvelope->NumOfPoints();
-			WTL::CRect _rect;
-			GetClientRect(&_rect);
-			POINT _offset;
-			GetScrollOffset(_offset);
-			position.x += _offset.x;
-			position.y += _offset.y;
-
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			EnvelopePointIndex _edit_point = GetEnvelopePointIndexAtPoint(position.x,position.y);
-			if(_edit_point)
+			for(int i = 0;i < _points ;i++)
 			{
-				m_bPointEditing = true;
-				SetCapture();
-				m_EditPointOrig = m_EditPoint = *_edit_point;
-				m_EnvelopeEditing = *m_pEnvelope;
-
+				CPoint _pt(
+					(int)(m_Zoom * (float)m_pEnvelope->GetTime(i)), 
+					(int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)))
+					);
+				CRect rect(_pt.x - (POINT_SIZE / 2),_pt.y - (POINT_SIZE / 2),_pt.x + (POINT_SIZE / 2),_pt.y + (POINT_SIZE / 2));
+				if ( m_EditPoint == i )
+				{
+					CBrush _edit_brush;
+					_edit_brush.CreateSolidBrush(RGB(0,192,192));
+					dc.FillRect(&rect,&_edit_brush);
+					_edit_brush.DeleteObject();
+				}
+				else dc.FillRect(&rect,&_point_brush);
 			}
-		}
 
-	}
 	
-	/** ***** [bohan] iso-(10)646 encoding only please! *****
-	 * @param vKey ***** [bohan] iso-(10)646 encoding only please! *****
-	 * @param position ***** [bohan] iso-(10)646 encoding only please! ***** */
-	void XMSamplerUIInst::EnvelopeEditor::OnLButtonUp(const UINT vKey, WTL::CPoint position)
-	{
+			dc.SelectObject(oldpen);
+			dc.Detach();
+		}
+			}
+}
+
+void XMSamplerUIInst::CEnvelopeEditor::OnLButtonDown( UINT nFlags, CPoint point )
+{
+	SetFocus();
+			
+	if(!m_bPointEditing){
+		const int _points =  m_pEnvelope->NumOfPoints();
+
+		int _edit_point = GetEnvelopePointIndexAtPoint(point.x,point.y);
+		if(_edit_point != _points)
+			{
+			m_bPointEditing = true;
+			SetCapture();
+			m_EditPoint = _edit_point;
+		}
+		else 
+			{
+			m_EditPoint = _points;
+			Invalidate();
+		}
+	}
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnLButtonUp( UINT nFlags, CPoint point )
+{
 		if(m_bPointEditing){
 			ReleaseCapture();
 			m_bPointEditing =  false;
-			CPoint _offset;
-			GetScrollOffset(_offset);
 				
-			position.x += _offset.x;
-			position.y += _offset.y;
+		if (point.x > m_WindowWidth ) m_Zoom = m_Zoom /2.0f;
+		else if ( m_pEnvelope->GetTime(m_pEnvelope->NumOfPoints()-1)*m_Zoom < m_WindowWidth/2 && m_Zoom < 8.0f) m_Zoom = m_Zoom *2.0f;
 			
-			int _new_point = (int)((float)position.x / m_Zoom);
-			float _new_value = (1.0f - (float)position.y / (float)m_CurrentScrollHeight);
+		/*
+		//\todo: verify the necessity of this code, when it is already present in MouseMove.
+		int _new_point = (int)((float)point.x / m_Zoom);
+		float _new_value = (1.0f - (float)point.y / (float)m_WindowHeight);
 			
 			if(_new_value > 1.0f)
 			{
@@ -873,148 +1156,98 @@ void XMSamplerUIInst::EnvelopeEditor::Initialize(XMSampler * const pSampler,XMIn
 			{
 				_new_point = 0;
 			}
-
-			m_EnvelopeEditing.PointAndValue(m_EditPoint,_new_point,_new_value);
-
-			*m_pEnvelope = m_EnvelopeEditing;
-			
-			if(m_pEnvelope->NumOfPoints() > 0){
-				AdjustScrollRect((int)(m_Zoom *  (float)(m_pEnvelope->Point(m_pEnvelope->NumOfPoints() - 1))));
-			}
-
+		m_pEnvelope->SetTimeAndValue(m_EditPoint,_new_point,_new_value);
+		*/
 			Invalidate();
 		}
-	}
-
-	void XMSamplerUIInst::EnvelopeEditor::OnMouseMove(const UINT vKey, WTL::CPoint position)
-	{
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnMouseMove( UINT nFlags, CPoint point )
+{
 		if(m_bPointEditing)
 		{
-			CPoint _offset;
-			GetScrollOffset(_offset);
-			
-			m_EditPointX = position.x + _offset.x;
-			m_EditPointY = position.y + _offset.y;
-			m_EditPoint = m_EnvelopeEditing.PointAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
-				(1.0f - (float)m_EditPointY / (float)m_CurrentScrollHeight));
-
-			//m_pEnvelope->Value(m_EditPoint,	(1.0f - (float)position.y / (float)m_CurrentScrollHeight));
-			//_pt.x = (int)(m_Zoom * (float)m_pEnvelope->Point(i));
-			//m_pEnvelope->Point(m_EditPoint, (int)((float)position.x / m_Zoom));
-
-			Invalidate();
-
-		}
-	}
-
-	/** Scroll Size ***** [bohan] iso-(10)646 encoding only please! *****
-	* ***** [bohan] iso-(10)646 encoding only please! *****W(maxPoint)***** [bohan] iso-(10)646 encoding only please! *****Scroll***** [bohan] iso-(10)646 encoding only please! *****Scroll***** [bohan] iso-(10)646 encoding only please! *****maxPoint + 100***** [bohan] iso-(10)646 encoding only please! *****
-	* ***** [bohan] iso-(10)646 encoding only please! *****W(maxPoint)***** [bohan] iso-(10)646 encoding only please! *****Scroll***** [bohan] iso-(10)646 encoding only please! *****Scroll***** [bohan] iso-(10)646 encoding only please! *****maxPoint + 100***** [bohan] iso-(10)646 encoding only please! *****Adjust
-	*/
-	void XMSamplerUIInst::EnvelopeEditor::AdjustScrollRect(const int maxPoint)
-	{
-		
-		bool _bchanged = false;
-		SIZE _scroll_size;
-		CPoint _pt_scroll_offset;
-		GetScrollSize(_scroll_size);
-		GetScrollOffset(_pt_scroll_offset);
-
-		WTL::CRect _rect;
-		GetClientRect(&_rect);
-	
-		if((maxPoint + MARGIN_RIGHT) > _scroll_size.cx){
-			_scroll_size.cx = maxPoint;
-			_scroll_size.cx += MARGIN_RIGHT /* pixel */;
-			if(_scroll_size.cx < _rect.Width()){
-				_scroll_size.cx = _rect.Width();
-			}
-			_bchanged = true;
-		} else if(maxPoint < (_scroll_size.cx - MARGIN_RIGHT))
+		if(point.y > m_WindowHeight)
 		{
-			_scroll_size.cx = maxPoint + MARGIN_RIGHT;
-			if(_scroll_size.cx < _rect.Width())
-			{
-				_scroll_size.cx = _rect.Width();
-			}
-			_bchanged = true;
-		}
-
-		if(_bchanged){
-
-			GetClientRect(_rect);
-
-			if(_scroll_size.cy < _rect.Height()){
-				_scroll_size.cy = _rect.Height();
-			}
-			
-			m_CurrentScrollWidth = _scroll_size.cx;
-			m_CurrentScrollHeight = _scroll_size.cy;
-
-			SetScrollSize(_scroll_size.cx,_scroll_size.cy,false);
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			if(_scroll_size.cx > _rect.Width())
-			{
-				SetScrollOffset(_pt_scroll_offset,false);
-			}
-			Invalidate();
-
-		}
-
+			point.y = m_WindowHeight;
 	}
 
-	/** ***** [bohan] iso-(10)646 encoding only please! ***** */
-	void XMSamplerUIInst::EnvelopeEditor::OnRButtonDown(const UINT vKey, WTL::CPoint position)
+		if(point.y < 0)
 	{
-		if(!m_bPointEditing){
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			m_EditPointX = position.x;
-			m_EditPointY = position.y;
-			
-			CPoint _offset;
-			GetScrollOffset(_offset);
-
-			m_EditPointX += _offset.x;
-			m_EditPointY += _offset.y;
-	        
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			ClientToScreen(&position);
-	        
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			CMenu _menuPopup;
-			_menuPopup.LoadMenu(IDR_MENU_ENV_EDIT);
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			EnvelopePointIndex _edit_point = GetEnvelopePointIndexAtPoint(m_EditPointX,m_EditPointY);
-			if(!_edit_point)
-			{
-				_menuPopup.EnableMenuItem(ID_SET_SUSTAIN,MF_GRAYED);
-				_menuPopup.EnableMenuItem(ID_SET_LOOPSTART,MF_GRAYED);
-				_menuPopup.EnableMenuItem(ID_SET_LOOPEND,MF_GRAYED);
-				_menuPopup.EnableMenuItem(ID_DEL_POINT,MF_GRAYED);
+			point.y = 0;
 			}
 
-			_menuPopup.GetSubMenu(0).TrackPopupMenu(
-				TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON, position.x, position.y, m_hWnd);
-		}
-
-	}
-
-    void XMSamplerUIInst::EnvelopeEditor::OnAddPoint(const UINT uNotifyCode,const int nID,const  HWND hWndCtl)
-	{
-		if(m_pEnvelope->NumOfPoints() > XMInstrument::Envelope::MAX_POINT)
+		if( point.x < 0)
 		{
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			return;
+			point.x = 0;
 		}
+		if ( point.x > m_WindowWidth)
+			{
+			//what to do? unzoom... but what about the mouse?
+			}
+		if ( m_EditPoint == 0 )
+		{
+			point.x=0;
+		}
+		m_EditPointX = point.x;
+		m_EditPointY = point.y;
+		m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
+			(1.0f - (float)m_EditPointY / (float)m_WindowHeight));
 
-		CPoint _offset;
-		GetScrollOffset(_offset);
+		Invalidate();
+			}
+}
 			
-		m_EditPointX += _offset.x;
-		m_EditPointY += _offset.y;
+void XMSamplerUIInst::CEnvelopeEditor::OnContextMenu(CWnd* pWnd, CPoint point) 
+{
+	CPoint tmp;
+	tmp = point;
+	ScreenToClient(&tmp);
+
+	CMenu menu;
+	VERIFY(menu.LoadMenu(IDR_MENU_ENV_EDIT));
+	int _edit_point = GetEnvelopePointIndexAtPoint(tmp.x,tmp.y);
+	m_EditPointX = tmp.x;
+	m_EditPointY = tmp.y;
+	m_EditPoint = _edit_point;
+
+	CMenu* pPopup = menu.GetSubMenu(0);
+	assert(pPopup);
+
+	// The ON_UPDATE_COMMAND_UI message handlers only work with CFrameWnd's, and CStatic is a CWnd.
+	// This is documented to be the case, by Microsoft.
+	if ( m_EditPoint == m_pEnvelope->NumOfPoints() 
+		|| m_pEnvelope->SustainBegin() == m_EditPoint) menu.EnableMenuItem(ID__ENV_SETSUSTAINBEGIN,MF_GRAYED);
+
+	if ( m_EditPoint == m_pEnvelope->NumOfPoints()
+		|| m_pEnvelope->SustainEnd() == m_EditPoint) menu.EnableMenuItem(ID__ENV_SETSUSTAINEND,MF_GRAYED);
+			
+	if ( m_EditPoint == m_pEnvelope->NumOfPoints() 
+		|| m_pEnvelope->LoopStart() == m_EditPoint) menu.EnableMenuItem(ID__ENV_SETLOOPSTART,MF_GRAYED);
+
+	if ( m_EditPoint == m_pEnvelope->NumOfPoints()
+		|| m_pEnvelope->LoopEnd() == m_EditPoint) menu.EnableMenuItem(ID__ENV_SETLOOPEND,MF_GRAYED);
+	        
+	if ( m_EditPoint == m_pEnvelope->NumOfPoints()) menu.EnableMenuItem(ID__ENV_REMOVEPOINT,MF_GRAYED);
+	        
+	if(m_pEnvelope->SustainBegin() == XMInstrument::Envelope::INVALID) menu.EnableMenuItem(ID__ENV_REMOVESUSTAIN,MF_GRAYED);
+
+	if(m_pEnvelope->LoopStart() == XMInstrument::Envelope::INVALID) menu.EnableMenuItem(ID__ENV_REMOVELOOP,MF_GRAYED);
+
+	if ( m_pEnvelope->NumOfPoints() == 0 ) menu.EnableMenuItem(ID__ENV_REMOVEENVELOPE,MF_GRAYED);
+	//
+
+	pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	menu.DestroyMenu();
+
+	CWnd::OnContextMenu(pWnd,point);
+}
+
+			
+void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint()
+{
 		
 		int _new_point = (int)((float)m_EditPointX / m_Zoom);
-		float _new_value = (1.0f - (float)m_EditPointY / (float)m_CurrentScrollHeight);
+	float _new_value = (1.0f - (float)m_EditPointY / (float)m_WindowHeight);
+
 		
 		if(_new_value > 1.0f)
 		{
@@ -1032,448 +1265,399 @@ void XMSamplerUIInst::EnvelopeEditor::Initialize(XMSampler * const pSampler,XMIn
 		}
 
 		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
-		m_pEnvelope->Insert(_new_point,_new_value);
-		Invalidate();
+	//\todo : Verify that we aren't trying to add an existing point!!!
 
-	}
-
-    /** Envelope Point ÇçÌèúÇ∑ÇÈ 
-	* @param uNotifyCode í ímÉRÅ[Éh
-	* ÉÅÉbÉZÅ[ÉWÇ™ÉRÉìÉgÉçÅ[ÉãÇ©ÇÁëóÇÁÇÍÇƒÇ¢ÇÈèÍçáÇ…ÇÕÅAÉRÉìÉgÉçÅ[ÉãÇ©ÇÁÇÃí ímÉRÅ[ÉhÇ™éwíËÇ≥ÇÍÇ‹Ç∑ÅB
-	* ÉAÉNÉZÉâÉåÅ[É^Ç©ÇÁëóÇÁÇÍÇΩèÍçáÇ…ÇÕ 1 Ç™éwíËÇ≥ÇÍÇ‹Ç∑ÅBÉÅÉjÉÖÅ[Ç©ÇÁëóÇÁÇÍÇΩèÍçáÇÕ 0 Ç™éwíËÇ≥ÇÍÇ‹Ç∑ÅB
-	* @param nID ÉRÉìÉgÉçÅ[ÉãID
-	* ÉÅÉjÉÖÅ[ÉAÉCÉeÉÄÅAÉRÉìÉgÉçÅ[ÉãÅAÉAÉNÉZÉâÉåÅ[É^Å[ÇÃ ID Ç™éwíËÇ≥ÇÍÇ‹Ç∑ÅB
-	* @param hWndCtl ÉRÉìÉgÉçÅ[ÉãÇÃÉEÉBÉìÉhÉEÉnÉìÉhÉã
-	* 
-	*/
-	void XMSamplerUIInst::EnvelopeEditor::OnDelPoint(const UINT uNotifyCode, const int nID, const HWND hWndCtl)
-	{
-		if(m_pEnvelope->NumOfPoints() == 0)
-		{
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			return;
-		}
-
-		const int _points =  m_pEnvelope->NumOfPoints();
-		WTL::CRect _rect;
-		GetClientRect(&_rect);
-
-		EnvelopePointIndex _delete_point = GetEnvelopePointIndexAtPoint(m_EditPointX,m_EditPointY);
-		if(_delete_point)
+	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);
+	m_EditPoint = m_pEnvelope->Insert(_new_point,_new_value);
+	Invalidate();
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainStart()
+{
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
 			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
-			m_pEnvelope->Delete(*_delete_point);
+		m_pEnvelope->SustainBegin(m_EditPoint);
+		if (m_pEnvelope->SustainEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainEnd(m_EditPoint);
+		else if (m_pEnvelope->SustainEnd() < m_EditPoint )m_pEnvelope->SustainEnd(m_EditPoint);
 			Invalidate();
 		}
-
-	}
-
-
-    /** ***** [bohan] iso-(10)646 encoding only please! ***** */
-	void XMSamplerUIInst::EnvelopeEditor::OnSetSustain(const UINT uNotifyCode, const int nID, const HWND hWndCtl)
-	{
-		ATLTRACE2("OnSetSustain\n");
-
-		EnvelopePointIndex _sustain_index = GetEnvelopePointIndexAtPoint(m_EditPointX,m_EditPointY);
-		if(_sustain_index)
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainEnd()
+{
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
 			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
-			m_pEnvelope->SustainBegin(*_sustain_index);
-			m_pEnvelope->SustainEnd(*_sustain_index);
+		if (m_pEnvelope->SustainBegin()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainBegin(m_EditPoint);
+		else if (m_pEnvelope->SustainBegin() > m_EditPoint )m_pEnvelope->SustainBegin(m_EditPoint);
+		m_pEnvelope->SustainEnd(m_EditPoint);
 			Invalidate();
 		}
-
-	}
-
-	/** ***** [bohan] iso-(10)646 encoding only please! ***** */ 
-	void XMSamplerUIInst::EnvelopeEditor::OnRemoveSustain(const UINT uNotifyCode, const int nID, const HWND hWndCtl)
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopStart()
+{
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 	{
-		ATLTRACE2("OnRemoveSustain\n");
 		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
-		m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
-		m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
+		m_pEnvelope->LoopStart(m_EditPoint);
+		if (m_pEnvelope->LoopEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopEnd(m_EditPoint);
+		else if (m_pEnvelope->LoopEnd() < m_EditPoint )m_pEnvelope->LoopEnd(m_EditPoint);
 		Invalidate();
-
 	}
-	/** ***** [bohan] iso-(10)646 encoding only please! ***** */   
-	void XMSamplerUIInst::EnvelopeEditor::OnSetLoopStart(const UINT uNotifyCode, const int nID, const HWND hWndCtl)
-	{
-		ATLTRACE2("OnSetLoopStart\n");
-
-		EnvelopePointIndex _loop_index = GetEnvelopePointIndexAtPoint(m_EditPointX,m_EditPointY);
-		if(_loop_index)
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopEnd()
+{
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
 			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
-			m_pEnvelope->LoopStart(*_loop_index);
+		if (m_pEnvelope->LoopStart()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopStart(m_EditPoint);
+		else if (m_pEnvelope->LoopStart() > m_EditPoint )m_pEnvelope->LoopStart(m_EditPoint);
+		m_pEnvelope->LoopEnd(m_EditPoint);
 			Invalidate();
 		}
-
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
+{
+	const int _points =  m_pEnvelope->NumOfPoints();
+	if(_points == 0)
+	{
+		return;
 	}
 
-    /** ***** [bohan] iso-(10)646 encoding only please! ***** */
-	void XMSamplerUIInst::EnvelopeEditor::OnSetLoopEnd(const UINT uNotifyCode, const int nID, const HWND hWndCtl)
-	{
-		ATLTRACE2("OnSetLoopEnd\n");
+	CRect _rect;
+	GetClientRect(&_rect);
 
-		EnvelopePointIndex _loop_index = GetEnvelopePointIndexAtPoint(m_EditPointX,m_EditPointY);
-		if(_loop_index)
+
+	if(m_EditPoint != _points)
 		{
 			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
-			m_pEnvelope->LoopEnd(*_loop_index);
+		m_pEnvelope->Delete(m_EditPoint);
+		m_EditPoint = _points;
 			Invalidate();
 		}
-
-	}
-
-	/** Loop***** [bohan] iso-(10)646 encoding only please! *****  */
-	void XMSamplerUIInst::EnvelopeEditor::OnRemoveLoop(const UINT uNotifyCode, const int nID, const HWND hWndCtl)
-	{
-		ATLTRACE2("OnRemoveLoop\n");
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveSustain()
+{ 
+	boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+	m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
+	m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
+	Invalidate();
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveLoop()
+{ 
 		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
 		m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
 		Invalidate();
+}
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveEnvelope()
+{
+	boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+	m_pEnvelope->Clear();
+	Invalidate();
+}
 
-	}
+//////////////////////////////////////////////////////////////////////////////
+// SampleAssignEditor ------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////////////
 
-	/** ***** [bohan] iso-(10)646 encoding only please! *****
-	 * @brief Envelope Editor Ç™Dialog API Ç***** [bohan] iso-(10)646 encoding only please! *****Application ***** [bohan] iso-(10)646 encoding only please! *****
-	 */
-	LRESULT CALLBACK XMSamplerUIInst::EnvelopeEditor::DummyWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-	{
-	//	if(msg == WM_CREATE){
-	//		::ShowScrollBar(hWnd,SB_HORZ,TRUE);
-	//		RECT _rect;
-	//		::GetClientRect(hWnd,&_rect);
-	//		SCROLLINFO si = { sizeof(si), SIF_ALL | SIF_DISABLENOSCROLL, 0,_rect.right - _rect.left ,0,0,0};
-	//	
+//static const unsigned int XMSamplerUIInst::CSampleAssignEditor::m_Sharpkey_Xpos[5]= {27,96,190,246,304};
+//const unsigned int XMSamplerUIInst::CSampleAssignEditor::m_Sharpkey_Xpos[]= {16,55,110,148,185};
+const int XMSamplerUIInst::CSampleAssignEditor::m_SharpKey_Xpos[]= {15,44,92,121,150};
+const XMSamplerUIInst::CSampleAssignEditor::TNoteKey XMSamplerUIInst::CSampleAssignEditor::m_NoteAssign[]=
+{XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,
+XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey,XMSamplerUIInst::CSampleAssignEditor::SharpKey,XMSamplerUIInst::CSampleAssignEditor::NaturalKey};
+const int XMSamplerUIInst::CSampleAssignEditor::m_noteAssignindex[m_KeysPerOctave] = {0,0,1,1,2,3,2,4,3,5,4,6};
 
-	//		int _ret = ::SetScrollInfo(hWnd,SB_HORZ,&si,TRUE);
-	//		int _ret1 = ::ShowScrollBar(hWnd,SB_HORZ,TRUE);
-	////			::SetScrollRange(hWnd,SB_HORZ,0,_rect.right,TRUE);
-	//		return 0;
-	//	}
-		return ::DefWindowProc(hWnd,msg,wParam,lParam);
-	}
+XMSamplerUIInst::CSampleAssignEditor::CSampleAssignEditor()
+: m_bInitialized(false)
+, m_Octave(3)
+{
+	m_NaturalKey.LoadBitmap(IDB_KEYS_NORMAL);
+	m_SharpKey.LoadBitmap(IDB_KEYS_SHARP);
+	m_BackKey.LoadBitmap(IDB_KEYS_BACK);
 
-#if 0
-	//////////////////////////////////////////////////////////////////////////////
-	// SampleAssignEditor ------------------------------------------------------------
-	//////////////////////////////////////////////////////////////////////////////
+	BITMAP _bmp, _bmp2;
+	m_NaturalKey.GetBitmap(&_bmp);
+	m_SharpKey.GetBitmap(&_bmp2);
+	m_naturalkey_width = _bmp.bmWidth;
+	m_naturalkey_height = _bmp.bmHeight;
+	m_sharpkey_width = _bmp2.bmWidth;
+	m_sharpkey_height = _bmp2.bmHeight;
 
-	//boost::shared_ptr<Gdiplus::Image> XMSamplerUIInst::SampleAssignEditor::m_pNaturalKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-	//boost::shared_ptr<Gdiplus::Image> XMSamplerUIInst::SampleAssignEditor::m_pSharpKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-	Gdiplus::Bitmap* XMSamplerUIInst::SampleAssignEditor::m_pNaturalKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-	Gdiplus::Bitmap* XMSamplerUIInst::SampleAssignEditor::m_pSharpKey;///< ***** [bohan] iso-(10)646 encoding only please! *****
-	const UINT XMSamplerUIInst::SampleAssignEditor::SHARPKEY_XPOS[SHARP_KEY_PER_OCTAVE] = {27,96,190,246,304};
-	const int XMSamplerUIInst::SampleAssignEditor::m_NoteAssign[KEY_PER_OCTAVE] 
-	= {NATURAL_KEY /*îí*/,SHARP_KEY /*çï*/,NATURAL_KEY,SHARP_KEY,NATURAL_KEY,NATURAL_KEY,SHARP_KEY,NATURAL_KEY,SHARP_KEY,NATURAL_KEY,SHARP_KEY,NATURAL_KEY};
-	int XMSamplerUIInst::SampleAssignEditor::m_CreateCount = 0;///< ***** [bohan] iso-(10)646 encoding only please! *****
+	m_octave_width = m_naturalkey_width * m_NaturalKeysPerOctave;
+}
+XMSamplerUIInst::CSampleAssignEditor::~CSampleAssignEditor()
+{
+	m_NaturalKey.DeleteObject();
+	m_SharpKey.DeleteObject();
+	m_BackKey.DeleteObject();
+}
 
-	/** ***** [bohan] iso-(10)646 encoding only please! ***** */
-	XMSamplerUIInst::SampleAssignEditor::SampleAssignEditor() : m_FocusKeyIndex()
-	{
-		// ***** [bohan] iso-(10)646 encoding only please! *****
-		//SubclassWindow***** [bohan] iso-(10)646 encoding only please! *****
-		::WNDCLASSEX _wc = GetWndClassInfo().m_wc;
-		m_pWndProcBackup = _wc.lpfnWndProc;
-		_wc.lpfnWndProc = &::DefWindowProc;
-		::RegisterClassEx(&_wc);
-		m_pXMSampler = NULL;
-		
-
-		m_bInitialized = false;
-		if(m_CreateCount == 0)
-		{
-			std::wstring _note_fname = CT2CW(::Global::CurrentDirectory().c_str());
-			_note_fname += L"\\Plugins\\SF\\XMSampler\\Resources\\notekey.png";
-
-			std::wstring _sharpkey_fname = CT2CW(::Global::CurrentDirectory().c_str());
-			_sharpkey_fname += L"\\Plugins\\SF\\XMSampler\\Resources\\sharpkey.png";
-			//m_pNaturalKey.reset(Image::FromFile(_note_fname.c_str()));
-			m_pNaturalKey = Bitmap::FromFile(_note_fname.c_str());
-			//m_pSharpKey.reset(Image::FromFile(_sharpkey_fname.c_str()));
-			m_pSharpKey = Bitmap::FromFile(_sharpkey_fname.c_str());
-		}
-		m_CreateCount++;
-	}
-
-	/** ~SampleAssignEditor() */
-	XMSamplerUIInst::SampleAssignEditor::~SampleAssignEditor()
-	{
-		m_CreateCount--;
-		if(m_CreateCount == 0)
-		{
-			delete m_pNaturalKey;
-			delete m_pSharpKey;
-		}
-	}
+BEGIN_MESSAGE_MAP(XMSamplerUIInst::CSampleAssignEditor, CStatic)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_HSCROLL()
+END_MESSAGE_MAP()
+/*
+BEGIN_MESSAGE_MAP(XMSamplerUIInst::CEnvelopeEditor, CStatic)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_CONTEXTMENU()
+	ON_COMMAND(ID__ENV_ADDNEWPOINT, OnPopAddPoint)
+	ON_COMMAND(ID__ENV_SETSUSTAINBEGIN, OnPopSustainStart)
+	ON_COMMAND(ID__ENV_SETSUSTAINEND, OnPopSustainEnd)
+	ON_COMMAND(ID__ENV_SETLOOPSTART, OnPopLoopStart)
+	ON_COMMAND(ID__ENV_SETLOOPEND, OnPopLoopEnd)
+	ON_COMMAND(ID__ENV_REMOVEPOINT, OnPopRemovePoint)
+	ON_COMMAND(ID__ENV_REMOVESUSTAIN, OnPopRemoveSustain)
+	ON_COMMAND(ID__ENV_REMOVELOOP, OnPopRemoveLoop)
+	ON_COMMAND(ID__ENV_REMOVEENVELOPE, OnPopRemoveEnvelope)
+END_MESSAGE_MAP()
+*/
 	
-	/** WM_PAINT ***** [bohan] iso-(10)646 encoding only please! ***** */
-	void XMSamplerUIInst::SampleAssignEditor::DoPaint(CDCHandle dc)
-	{
+void XMSamplerUIInst::CSampleAssignEditor::Initialize(XMSampler * const pSampler,XMInstrument * const pInstrument,CWnd* pParent)
+{
+	m_pSampler = pSampler;
+	m_pInst = pInstrument;
+	m_bInitialized=true;
+	SCROLLINFO info;
+	m_scBar.GetScrollInfo(&info, SIF_PAGE|SIF_RANGE);
+	info.fMask = SIF_RANGE|SIF_POS;
+	info.nMin = 0;
+	info.nMax  = 8;
+	info.nPos = m_Octave;
+	m_scBar.SetScrollInfo(&info, false);
+	Invalidate();
+}
 	
+void XMSamplerUIInst::CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
+{
 		if(m_bInitialized){
-			ATLASSERT(m_pXMSampler != NULL);
-
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			HDC hdc = dc.m_hDC;
-			
-			CPoint _pt_viewport_org;
-			dc.GetViewportOrg(&_pt_viewport_org);// åªç›ÇÃ
-			WTL::CRect _rect;
+		if (lpDrawItemStruct->itemAction == ODA_DRAWENTIRE)
+		{
+			CDC dc;
+			dc.Attach(lpDrawItemStruct->hDC);
+			CRect _rect;
 			GetClientRect(&_rect);
+			dc.FillSolidRect(&_rect,RGB(0,0,0));
+			dc.SetBkMode(TRANSPARENT);
 	
-			Graphics graphics(hdc);
+			const CString _Key_name[m_KeysPerOctave] = {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
+			const CString _NaturalKey_name[m_NaturalKeysPerOctave] = {"C","D","E","F","G","A","B"};
+			const int _NaturalKey_index[m_NaturalKeysPerOctave] = {0,2,4,5,7,9,11};
+//			const CString _SharpKey_name[m_SharpKeysPerOctave] = {"C#","D#","F#","G#","A#"};
+			const int _SharpKey_index[m_SharpKeysPerOctave] = {1,3,6,8,10};
+//			const unsigned int _end = 2*m_NaturalKeysPerOctave;//show two octaves.
+//			const unsigned int _ends = 2*m_SharpKeysPerOctave;//show two octaves.
 
-			//Pen      _line_pen(m_Color,1.0);
-			//Pen      _gridpen(Gdiplus::Color(32, 0, 0, 255),1.0);
-			//Pen      _gridpen1(Gdiplus::Color(32, 255, 0, 0),1.0);
-			//Pen      _gridpen2(Gdiplus::Color(64, 255, 0, 0),1.0);
-			//
-			//Gdiplus::SolidBrush  brush(Gdiplus::Color(255, 255, 255, 255));
 
-			// ***** [bohan] iso-(10)646 encoding only please! *****
-			//graphics.Clear(Gdiplus::Color(255,255,255,255));
-			graphics.SetRenderingOrigin(_pt_viewport_org.x,_pt_viewport_org.y);
-			graphics.SetSmoothingMode(SmoothingModeAntiAlias);
-			// ***** [bohan] iso-(10)646 encoding only please! ***** Anti Alias ***** [bohan] iso-(10)646 encoding only please! *****
-			graphics.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
-			
-			// Draw Grid
-			
-			//Gdiplus::SolidBrush  _fontbrush(Gdiplus::Color(255, 0, 0, 255));
-			//Gdiplus::FontFamily  fontFamily(L"Times New Roman");
-			//Gdiplus::Font        font(&fontFamily, 8, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
-			//Gdiplus::PointF      pointF(10.0f, 20.0f);
-			
+			CDC memDC;
+			memDC.CreateCompatibleDC(&dc);
+			CBitmap* oldbmp = memDC.SelectObject(&m_BackKey);
+			dc.SetTextColor(RGB(255,255,255));
 
-			const UINT _width = m_pNaturalKey->GetWidth();
-//			const UINT _end = XMInstrument::MAX_NOTES / 12 * NATURAL_KEY_PER_OCTAVE * _width;
-			const UINT _end = XMInstrument::MAX_NOTES / 12 * NATURAL_KEY_PER_OCTAVE;
-
-			const std::wstring _natural_key_name[NATURAL_KEY_PER_OCTAVE] = {L"C",L"D",L"E",L"F",L"G",L"A",L"B"};
-			const int _natural_key_index[NATURAL_KEY_PER_OCTAVE] = {0,2,4,5,7,9,11};
-			Gdiplus::FontFamily  _font_family_keyname(L"Times New Roman");
-			Gdiplus::Font        _font_keyname(&_font_family_keyname, 10, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
-			Gdiplus::SolidBrush  _font_keyname_brush(Gdiplus::Color(128, 0, 0, 0));
-
-			CachedBitmap _cache_natural_key(m_pNaturalKey,&graphics);
-			std::wstring _tmp_str;
+			CString _tmp_str;
 			int _index = 0,_octave = 0;
-			for(UINT i = 0;i < _end;i++)
+
+			//Draw top background image.
+			for(int i = 0;i < _rect.Width() && m_Octave+_octave<10;i+=26)
 			{
-//				graphics.DrawString(_natural_key_name[(i / _width) % 7].c_str()) 
-				_tmp_str = _natural_key_name[_index];
-				int _note = _natural_key_index[_index] + _octave * KEY_PER_OCTAVE;
-				_tmp_str += boost::lexical_cast<std::wstring>(i / NATURAL_KEY_PER_OCTAVE);
-				//graphics.DrawCachedBitmap(&_cache_natural_key,i,0);
-
-				if(m_FocusKeyIndex && *m_FocusKeyIndex == _note){
-					SolidBrush _brush(Color(128,255,255,255));
-					
-					// GDI+ 1.1 ***** [bohan] iso-(10)646 encoding only please! *****
-					//REAL srcWidth = (REAL)m_pNaturalKey->GetWidth();
-					//REAL srcHeight = (REAL)m_pNaturalKey->GetHeight();
-					//RectF srcRect(0.0f, 0.0f, srcWidth, srcHeight);
-					//Matrix myMatrix(1.0f, 0.0f, 0.0f, 1.0f, i, 0);
-
-					//BrightnessContrastParams briConParams;
-					//briConParams.brightnessLevel = 50;
-					//briConParams.contrastLevel = 25;
-					//BrightnessContrast briCon;
-					//briCon.SetParameters(&briConParams);
-
-					//graphics.DrawImage(m_pNaturalKey, &srcRect, &myMatrix, &briCon, NULL, UnitPixel);
-					graphics.DrawCachedBitmap(&_cache_natural_key,i * _width,0);
-					graphics.FillRectangle(&_brush,i * _width,0,m_pNaturalKey->GetWidth(),m_pNaturalKey->GetHeight());
-
-				} else {
-					graphics.DrawCachedBitmap(&_cache_natural_key,i * _width,0);
+				dc.BitBlt(i,0, 	26,20, 	&memDC, 0,0,	SRCCOPY);
+				_tmp_str.Format("%s%d",_NaturalKey_name[_index],_octave+m_Octave);
+				if (m_FocusKeyRect.left>=i && m_FocusKeyRect.left<i+26 && m_FocusKeyRect.left!=m_FocusKeyRect.right){
+					dc.SetTextColor(RGB(255,255,0));
+					dc.TextOut(i+7,4,_tmp_str);
+					dc.SetTextColor(RGB(255,255,255));
 				}
-				graphics.DrawString(_tmp_str.c_str(),_tmp_str.length(),&_font_keyname,
-					PointF(	(float)(i * _width + 5),98.0f),&_font_keyname_brush);
-				_index++;
-				if(_index == NATURAL_KEY_PER_OCTAVE){
-					_index = 0;
-					_octave++;
-				}
-			}
-
-			CachedBitmap _cache_sharpkey(m_pSharpKey,&graphics);
-			
-			//const UINT _blkey_xpos[5] = {27,96,190,246,304};
-			const std::wstring _sharpkey_name[5] = {L"C#",L"D#",L"F#",L"G#",L"A#"};
-			const int _sharpkey_index[SHARP_KEY_PER_OCTAVE] = {1,3,6,8,10};
-
-			Gdiplus::SolidBrush  _font_sharpkeyname_brush(Gdiplus::Color(128, 255, 255, 255));
-
-			_index = 0;_octave = 0;
-			for(UINT i = 0;i < 10/*octave*/ * 5 /*key*/;i++)
-			{
-				_tmp_str = _sharpkey_name[_index];
-				_tmp_str += boost::lexical_cast<std::wstring>(_octave);
+				else { dc.TextOut(i+7,4,_tmp_str); }
 				
-				int _sharpkey = _sharpkey_index[_index] + _octave * KEY_PER_OCTAVE;
-
-				graphics.DrawCachedBitmap(&_cache_sharpkey,
-					SHARPKEY_XPOS[_index] + _width * NATURAL_KEY_PER_OCTAVE * _octave ,0);
-				if(m_FocusKeyIndex && *m_FocusKeyIndex == _sharpkey)
-				{
-					SolidBrush _brush(Color(128,255,255,255));
-					graphics.FillRectangle(&_brush,SHARPKEY_XPOS[_index] + _width * NATURAL_KEY_PER_OCTAVE * _octave,0,m_pSharpKey->GetWidth(),m_pSharpKey->GetHeight());
-				}
-				graphics.DrawString(_tmp_str.c_str(),_tmp_str.length(),&_font_keyname,
-					PointF(	(float)(SHARPKEY_XPOS[_index] + _width * NATURAL_KEY_PER_OCTAVE * _octave),55.0f),
-					&_font_sharpkeyname_brush);
-
 				_index++;
-				if(_index == SHARP_KEY_PER_OCTAVE){
+				if(_index == m_NaturalKeysPerOctave){
 					_index = 0;
 					_octave++;
 				}
 			}
 
-		} else {
-			InitializeScrollWindow();
-		}
-		SetMsgHandled(FALSE);
-	}
+			BITMAP _bmp, _bmps;
+			m_NaturalKey.GetBitmap(&_bmp);
+			m_SharpKey.GetBitmap(&_bmps);
 
-	void XMSamplerUIInst::SampleAssignEditor::Initialize(XMSampler* const pXMSampler)
-	{
-		
-		m_bInitialized = false;
-		GetSystemSettings();
-		m_pXMSampler = pXMSampler;
-	};
+			memDC.SelectObject(&m_NaturalKey);
+			dc.SetTextColor(RGB(128,96,32));
 
-	/** ***** [bohan] iso-(10)646 encoding only please! *****
-	 * ***** [bohan] iso-(10)646 encoding only please! ***** ScrollBar ***** [bohan] iso-(10)646 encoding only please! *****
-	 * ***** [bohan] iso-(10)646 encoding only please! *****
-	 */
-	void XMSamplerUIInst::SampleAssignEditor::InitializeScrollWindow()
-	{
-		WTL::CRect _rect_client;
-
-		const UINT _width = m_pNaturalKey->GetWidth();
-		const UINT _width_total = XMInstrument::MAX_NOTES / KEY_PER_OCTAVE * NATURAL_KEY_PER_OCTAVE * _width;
-
-		GetClientRect(&_rect_client);
-		// H ScrollBar ***** [bohan] iso-(10)646 encoding only please! *****
-		SetScrollSize(_width_total,_rect_client.Height());
-		// ***** [bohan] iso-(10)646 encoding only please! *****
-		SetScrollSize(_width_total,_rect_client.Height());
-		// ***** [bohan] iso-(10)646 encoding only please! ***** Client Height ***** [bohan] iso-(10)646 encoding only please! *****
-		GetClientRect(&_rect_client);
-		// ***** [bohan] iso-(10)646 encoding only please! ***** Client Height ***** [bohan] iso-(10)646 encoding only please! *****
-		SetScrollSize(_width_total,_rect_client.Height());
-
-		m_bInitialized = true;
-
-		Invalidate();
-	}
-
-	void XMSamplerUIInst::SampleAssignEditor::OnLButtonUp(const UINT vKey, WTL::CPoint position)
-	{
-		ATLTRACE2("XMSamplerUIInst::SampleAssignEditor::OnLButtonUp\n");
-	}
-
-	void XMSamplerUIInst::SampleAssignEditor::OnMouseMove(const UINT vKey, WTL::CPoint position)
-	{
-		ATLTRACE2("XMSamplerUIInst::SampleAssignEditor::OnMouseMove\n");
-		CPoint _offset;
-		GetScrollOffset(_offset);
-
-		position.x += _offset.x;
-		position.y += _offset.y;
-		
-		//// ***** [bohan] iso-(10)646 encoding only please! *****
-		//if(m_FocusKeyIndex)
-		//{
-		//	// ***** [bohan] iso-(10)646 encoding only please! *****
-		//	// ***** [bohan] iso-(10)646 encoding only please! *****
-		//	// ***** [bohan] iso-(10)646 encoding only please! *****
-		//	// ***** [bohan] iso-(10)646 encoding only please! *****
-		//	if(position.x >= m_FocusKeyRect.left && position.x <= m_FocusKeyRect.right 
-		//		&& position.y >= m_FocusKeyRect.top && position.y <= m_FocusKeyRect.bottom){
-		//		return;
-		//	}
-		//}
-
-		boost::optional<int> _index(GetKeyIndexAtPoint(position.x,position.y,m_FocusKeyRect));
-		if(_index)
-		{
-			if(!m_FocusKeyIndex || *m_FocusKeyIndex != *_index){
-				m_FocusKeyIndex = _index;
-				Invalidate(FALSE);
-			}
-		} else {
-			if(!m_FocusKeyIndex){
-				return;
-			} else {
-				m_FocusKeyIndex = _index;
-				Invalidate(FALSE);
-			}
-		}
-	}
-
-	void XMSamplerUIInst::SampleAssignEditor::OnRButtonDown(const UINT vKey, WTL::CPoint position)
-	{
-		ATLTRACE2("XMSamplerUIInst::SampleAssignEditor::OnRButtonDown\n");
-
-	}
-
-	void XMSamplerUIInst::SampleAssignEditor::OnLButtonDown(const UINT vKey, WTL::CPoint position)
-	{
-		ATLTRACE2("SampleAssignEditor::OnLButtonDown()\n");
-
-		SetFocus();
-	}
-
-	/// ***** [bohan] iso-(10)646 encoding only please! *****
-	const boost::optional<int> XMSamplerUIInst::SampleAssignEditor::GetKeyIndexAtPoint(const int x,const int y,WTL::CRect& keyRect)
-	{
-		const int _octave_width = m_pNaturalKey->GetWidth() * NATURAL_KEY_PER_OCTAVE;
-
-		// ***** [bohan] iso-(10)646 encoding only please! *****
-		const int _sharpkey_num = 10 /* octave */ * SHARP_KEY_PER_OCTAVE /* sharpkeys per octave */; 
-		const int _sharpkey_offset[SHARP_KEY_PER_OCTAVE] = {1,3,6,8,10};
-		const int _sharpkey_width = m_pSharpKey->GetWidth();
-		const int _sharpkey_height = m_pSharpKey->GetHeight();
-
-		for(int i = 0;i < _sharpkey_num;i++)
-		{
-			const int _xpos = SHARPKEY_XPOS[i % SHARP_KEY_PER_OCTAVE] + (i / SHARP_KEY_PER_OCTAVE) * _octave_width;
-			if(x >= _xpos && x <= (_xpos + _sharpkey_width) && y >= 0 && y <= _sharpkey_height)
+			_index = 0,_octave = 0;
+			for(int i = 0;i*_bmp.bmWidth < _rect.Width() && m_Octave+_octave<10;i++)
 			{
-				keyRect.top = 0;
-				keyRect.bottom = _sharpkey_height;
-				keyRect.left = _xpos;
-				keyRect.right = _xpos + _sharpkey_width;
+				dc.BitBlt(i*_bmp.bmWidth,20, 
+					_bmp.bmWidth,_bmp.bmHeight, &memDC, 0,0,	SRCCOPY);
+				_tmp_str.Format("%s-%d"
+					,_Key_name[m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).first%12]
+					,m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).first/12);
+				dc.TextOut(7+i*_bmp.bmWidth,68,_tmp_str);
+				int _sample = m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).second;
+				if ( _sample == 255 ) _tmp_str="--";
+				else _tmp_str.Format("%02X",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).second);
+				dc.TextOut(7+i*_bmp.bmWidth,80,_tmp_str);
+				_index++;
+				if(_index == m_NaturalKeysPerOctave){
+					_index = 0;
+					_octave++;
+				}
+				}
 
-				return _sharpkey_offset[i % SHARP_KEY_PER_OCTAVE] + (i / SHARP_KEY_PER_OCTAVE) * KEY_PER_OCTAVE;
-			}
-		}
-
-		// ***** [bohan] iso-(10)646 encoding only please! *****
-		const int _notekey_num = 10 /* octave */ * NATURAL_KEY_PER_OCTAVE ; 
-		const int _notekey_offset[NATURAL_KEY_PER_OCTAVE] = {0,2,4,5,7,9,11};
-		const int _note_width = m_pNaturalKey->GetWidth();
-		const int _note_height = m_pNaturalKey->GetHeight();
-
-		for(int i = 0;i < _notekey_num;i++)
-		{
-			const int _xpos = _note_width * (i % NATURAL_KEY_PER_OCTAVE) + (i / NATURAL_KEY_PER_OCTAVE) * _octave_width;
-			if(x >= _xpos && x <= (_xpos + _note_width) && y >= 0 && y <= _note_height)
+			_index = 0,_octave = 0;
+			memDC.SelectObject(&m_SharpKey);
+			for(int i = 0;m_SharpKey_Xpos[_index]+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave < _rect.Width() && m_Octave+_octave<10;i++)
 			{
-				keyRect.top = 0;
-				keyRect.bottom = _note_height;
-				keyRect.left = _xpos;
-				keyRect.right = _xpos + _note_width;
-
-				return _notekey_offset[i % NATURAL_KEY_PER_OCTAVE] + (i / NATURAL_KEY_PER_OCTAVE) * KEY_PER_OCTAVE;
+				dc.BitBlt(m_SharpKey_Xpos[_index]+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave,20, 
+				_bmps.bmWidth,	_bmps.bmHeight, 	&memDC,		0,0,	SRCCOPY);
+				_tmp_str.Format("%s%d"
+					,_Key_name[m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).first%12]
+					,m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).first/12);
+				dc.TextOut(m_SharpKey_Xpos[_index]-10+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave,24,_tmp_str);
+				
+				int _sample=m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).second;
+				if ( _sample == 255 ) _tmp_str="--";
+				else  _tmp_str.Format("%02X",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).second);
+				dc.TextOut(m_SharpKey_Xpos[_index]-10+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave,36,_tmp_str);
+				_index++;
+				if(_index == m_SharpKeysPerOctave){
+					_index = 0;
+					_octave++;
+				}
 			}
+
+			//
+			memDC.SelectObject(oldbmp);
+			dc.Detach();
+		}
+	}
+}
+
+int XMSamplerUIInst::CSampleAssignEditor::GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect)
+{
+	if ( y < 20 || y > 20+m_naturalkey_height ) return notecommands::empty;
+
+	//Get the X position in natural key notes.
+	int notenatural= ((x/m_octave_width)*m_NaturalKeysPerOctave);
+	int indexnote = ((x%m_octave_width)/m_naturalkey_width);
+	notenatural+=indexnote;
+
+	keyRect.top = 20;
+	keyRect.bottom = 20+m_naturalkey_height;
+	keyRect.left = (notenatural)*m_naturalkey_width;
+	keyRect.right = keyRect.left+m_naturalkey_width;
+
+	//Adapt the index note to a 12note range instead of 7note.
+	int note = ((x/m_octave_width)*m_KeysPerOctave);
+	int cnt=0;
+	while(m_noteAssignindex[cnt]!= indexnote) cnt++;
+	indexnote=cnt;
+	note += cnt;
+
+	if ( y > 20+m_sharpkey_height ) 
+	{
+		return note+(m_Octave*m_KeysPerOctave);
+	}
+
+
+	//If the code reaches here, we have to check if it is a sharp key or a natural one.
+
+	//Check previous sharp note
+	if (indexnote > 0 && m_NoteAssign[indexnote-1]==SharpKey)
+	{
+		const int _xpos = m_SharpKey_Xpos[m_noteAssignindex[indexnote-1]] + (note / m_KeysPerOctave) * m_octave_width;
+		if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
+	{
+			keyRect.bottom = m_sharpkey_height;
+			keyRect.left = _xpos;
+			keyRect.right = _xpos + m_sharpkey_width;
+			return note-1+(m_Octave*m_KeysPerOctave);
+			}
+			}
+	//Check next sharp note
+	if ( indexnote+1<m_KeysPerOctave && m_NoteAssign[indexnote+1]==SharpKey)
+	{
+		const int _xpos = m_SharpKey_Xpos[m_noteAssignindex[indexnote+1]] + (note / m_KeysPerOctave) * m_octave_width;
+		if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
+		{
+			keyRect.bottom = m_sharpkey_height;
+			keyRect.left = _xpos;
+			keyRect.right = _xpos + m_sharpkey_width;
+			return note+1+(m_Octave*m_KeysPerOctave);
+		}
+	}
+	//Not a valid sharp note. Return the already found note.
+	return note+(m_Octave*m_KeysPerOctave);
+}
+void XMSamplerUIInst::CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )
+{
+	int tmp = m_FocusKeyIndex;
+	m_FocusKeyIndex=GetKeyIndexAtPoint(point.x,point.y,m_FocusKeyRect);
+	if  ( tmp != m_FocusKeyIndex) Invalidate();
+}
+void XMSamplerUIInst::CSampleAssignEditor::OnLButtonDown( UINT nFlags, CPoint point )
+{
+MessageBox("hola");
+}
+void XMSamplerUIInst::CSampleAssignEditor::OnLButtonUp( UINT nFlags, CPoint point )
+{
+MessageBox("hola");
+}
+
+void XMSamplerUIInst::CSampleAssignEditor::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+{
+		switch(nSBCode)
+	{
+		case SB_TOP:
+			m_Octave=0;
+			m_scBar.SetScrollPos(m_Octave);
+			Invalidate();
+			break;
+		case SB_BOTTOM:
+			m_Octave=8;
+			m_scBar.SetScrollPos(m_Octave);
+			Invalidate();
+			break;
+		case SB_LINERIGHT:
+		case SB_PAGERIGHT:
+			if ( m_Octave < 8)
+	{
+				m_Octave++;
+				m_scBar.SetScrollPos(m_Octave);
+				Invalidate();
+	}
+			break;
+		case SB_LINELEFT:
+		case SB_PAGELEFT:
+			if ( m_Octave>0 )
+	{
+				m_Octave--;
+				m_scBar.SetScrollPos(m_Octave);
+				Invalidate();
+			}
+			break;
+		case SB_THUMBPOSITION:
+		case SB_THUMBTRACK:
+			if (m_Octave!= (int)nPos)
+		{
+				m_Octave=(int)nPos;
+				if (m_Octave > 8)
+			{
+					m_Octave = 8;
+			}
+				else if (m_Octave < 0)
+			{
+					m_Octave = 0;
+				}
+				m_scBar.SetScrollPos(m_Octave);
+				Invalidate();
+			}
+			break;
+		default: 
+			break;
 		}
 	
 		//for(int i = 0;i < XMInstrument::MAX_NOTES;i++)
@@ -1488,10 +1672,8 @@ void XMSamplerUIInst::EnvelopeEditor::Initialize(XMSampler * const pSampler,XMIn
 		//	}
 		//}
 
-		return boost::optional<int>();//ñ≥å¯Ç»ílÇï‘Ç∑ÅB
 	};
-#endif
-#endif
+
 NAMESPACE__END
 NAMESPACE__END
 

@@ -55,6 +55,7 @@ namespace psycle
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			ExecuteLine();
+			_samplesRemaining = SamplesPerRow();
 		}
 
 		void Player::Stop(void)
@@ -473,11 +474,10 @@ namespace psycle
 					{
 						if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount);
 					}
-					if(pSong->PW_Stage == 1)
-					{
-						// Mixing preview WAV
-						pSong->PW_Work(pSong->_pMachine[MASTER_INDEX]->_pSamplesL,pSong->_pMachine[MASTER_INDEX]->_pSamplesR, amount);
-					}
+
+					//\todo: Sampler::DoPreviews( amount );
+					pSong->DoPreviews( amount );
+
 					// Inject Midi input data
 					if(!CMidiInput::Instance()->InjectMIDI( amount ))
 					{

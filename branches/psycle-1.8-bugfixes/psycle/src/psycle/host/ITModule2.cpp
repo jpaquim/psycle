@@ -71,8 +71,8 @@ namespace psycle
 		bool ITModule2::LoadITModule(Song *song)
 		{
 			s=song;
-			if (Read(&itFileH,sizeof(itFileH))==0 ) return 0;
-			if (itFileH.tag != IMPM_ID ) return 0;
+			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
+			if (itFileH.tag != IMPM_ID ) return false;
 
 			strcpy(s->Name,itFileH.songName);
 			strcpy(s->Author,"");
@@ -158,7 +158,7 @@ Special:  Bit 0: On = song message attached.
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
 			{
-				Read((s->playOrder+i),1); // 254 = ++ (skip), 255 = --- (end of tune).
+				s->playOrder[i]=ReadChar(); // 254 = ++ (skip), 255 = --- (end of tune).
 				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
 			}
 			Skip(itFileH.ordNum-j);
@@ -916,6 +916,8 @@ Special:  Bit 0: On = song message attached.
 					*pData = pent;
 					pent=pempty;
 
+					numchans = max(channel,numchans);
+
 					Read(&newEntry,1);
 				}
 			}
@@ -1375,7 +1377,7 @@ OFFSET              Count TYPE   Description
 						Read(smpbuf,iLen);
 						for(j=0;j<iLen;j++)
 						{			
-							wNew = (smpbuf[j+1]<<8)+offset;
+							wNew = (smpbuf[j]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					} else {

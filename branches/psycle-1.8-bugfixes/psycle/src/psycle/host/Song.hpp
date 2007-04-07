@@ -5,6 +5,7 @@
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
+#include "InstPreview.hpp"
 
 
 
@@ -52,9 +53,6 @@ namespace psycle
 			int m_LinesPerBeat;
 			/// \todo This is a GUI thing... should not be here.
 			char currentOctave;
-			// The volume of the preview wave in the wave load dialog.
-			/// \todo This is a GUI thing... should not be here.
-			float preview_vol; 
 			/// Array of Pattern data.
 			unsigned char * ppPatternData[MAX_PATTERNS];
 			/// Length, in patterns, of the sequence.
@@ -161,19 +159,19 @@ namespace psycle
 			bool Save(RiffFile* pFile,bool autosave=false);
 			/// Used to detect if an especific pattern index contains any data.
 			bool IsPatternUsed(int i);
-			///\name previews waving
+			///\name wave file previewing
+			///\todo shouldn't belong to the song class.
 			///\{
-			/// Function Work of the preview Wav.
-			void PW_Work(float *psamplesL, float *pSamplesR, int numSamples);
-			/// Start the playback of the preview wav
-			void PW_Play();
-			/// Current playback position, in samples
-			int PW_Phase;
-			/// Stage. 0 = Stopped. 1 = Playing.
-			int PW_Stage;
-			/// Stores the length of the preview wav.
-			int PW_Length;
+		public:
+			//todo these ought to be dynamically allocated
+			/// Wave preview.
+			InstPreview wavprev;
+			/// Wave editor playback.
+			InstPreview waved;
+			/// runs the wave previewing.
+			void DoPreviews(int amount);
 			///\}
+
 			/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
 			/// This function now is the same as doing &pPatternData[ps]
 			inline unsigned char * _ppattern(int ps){

@@ -1208,16 +1208,18 @@ NAMESPACE__BEGIN(psycle)
 			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
 			{
 				// Stopping wavepreview if not stopped.
-				if(_pSong->PW_Stage)
+				_pSong->wavprev.Stop();
+	/*			if(_pSong->PW_Stage)
 				{
 					_pSong->PW_Stage=0;
-					_pSong->Invalided=true;
+					_pSong->IsInvalided(true);
 					Sleep(LOCK_LATENCY);
 				}
+	*/
 
 				//Delete it.
 				_pSong->DeleteLayer(PREV_WAV_INS);
-				_pSong->Invalided=false;
+				_pSong->IsInvalided(false);
 			}
 
 
@@ -1403,17 +1405,20 @@ NAMESPACE__BEGIN(psycle)
 						break;
 					case MACH_XMSAMPLER:
 						{
-						XMSamplerUI dlg(ma->_editName);
-						m_wndView.XMSamplerMachineDialog = &dlg;
-						isguiopen[tmac] = true;
-						dlg.Init((XMSampler*)ma);
-						//display the property sheet by calling CPropertySheet::DoModal for a modal property sheet,
-						//or CPropertySheet::Create for a modeless property sheet.						
-						dlg.DoModal();
-						isguiopen[tmac] = false;
-						m_wndView.XMSamplerMachineDialog = NULL;
-						break;
+						if (m_wndView.XMSamplerMachineDialog)
+						{
+							if (m_wndView.XMSamplerMachineDialog->GetMachine() != (XMSampler*)ma)
+							{
+								m_wndView.XMSamplerMachineDialog->DestroyWindow();
+							}
 						}
+						//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
+						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName(),&m_wndView);
+						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
+						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
+						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
+						}
+						break;
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
 						{
@@ -1559,6 +1564,12 @@ NAMESPACE__BEGIN(psycle)
 					case MACH_SAMPLER:
 						if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
 						break;
+					case MACH_XMSAMPLER:
+						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
+					case MACH_DUPLICATOR:
+//					case MACH_LFO:
+//					case MACH_AUTOMATOR:
+					case MACH_MIXER:
 					case MACH_PLUGIN:
 					case MACH_VST:
 					case MACH_VSTFX:

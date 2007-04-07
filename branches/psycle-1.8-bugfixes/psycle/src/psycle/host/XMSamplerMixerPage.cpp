@@ -154,7 +154,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 	CStatic* name = (CStatic*)GetDlgItem(dlgName[index]);
 	if ( ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck()) 
 	{
-		sprintf(chname,"%d",index+m_ChannelOffset+1);
+		sprintf(chname,"%d",index+m_ChannelOffset);
 		name->SetWindowText(chname);
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
 		sld->SetPos(64-int(rChan.DefaultVolume()));
@@ -168,6 +168,11 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			int defpos = rChan.DefaultPanFactor()&0x7F;
 			sld->SetPos(defpos);
 			surr->SetCheck(false);
+			if ( rChan.DefaultPanFactor() > 0x7F )
+			{
+				CButton* mute = (CButton*)GetDlgItem(dlgMute[index]);
+				mute->SetCheck(true);
+			}
 		}
 
 		sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
@@ -181,7 +186,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		int defpos;
 		if ( !voice )
 		{
-			sprintf(chname,"(%d)",index+m_ChannelOffset+1);
+			sprintf(chname,"(%d)",index+m_ChannelOffset);
 			name->SetWindowText(chname);
 			sld->SetPos(64);
 			defpos = int(rChan.PanFactor()*64.0f);
@@ -191,7 +196,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			sld->SetPos(rChan.Cutoff());
 		} else {
 			std::string tmpstr = voice->rInstrument().Name();
-			sprintf(chname,"%02d:%s",voice->InstrumentNum(),tmpstr.c_str());
+			sprintf(chname,"%02X:%s",voice->InstrumentNum(),tmpstr.c_str());
 			name->SetWindowText(chname);
 			sld->SetPos(64-int(voice->RealVolume()*64.0f));
 			defpos = int(voice->PanFactor()*64.0f);
@@ -237,7 +242,6 @@ void XMSamplerMixerPage::OnNMCustomdrawSlCutoff8(NMHDR *pNMHDR, LRESULT *pResult
 void XMSamplerMixerPage::SliderCutoff(NMHDR *pNMHDR, LRESULT *pResult,int offset)
 {
 //	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgCut[offset]);
 	if ( !m_UpdatingGraphics)
 	{
 		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
@@ -262,7 +266,6 @@ void XMSamplerMixerPage::OnNMCustomdrawSlRes8(NMHDR *pNMHDR, LRESULT *pResult) {
 void XMSamplerMixerPage::SliderRessonance(NMHDR *pNMHDR, LRESULT *pResult,int offset)
 {
 //	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgRes[offset]);
 	if ( !m_UpdatingGraphics)
 	{
 		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
@@ -332,10 +335,22 @@ void XMSamplerMixerPage::OnBnClickedChMute7() { ClickMute(6); }
 void XMSamplerMixerPage::OnBnClickedChMute8() { ClickMute(7); }
 void XMSamplerMixerPage::ClickMute(int offset)
 {
-	CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
 	if ( !m_UpdatingGraphics)
 	{
-		// TODO: Agregue aquí su código de controlador de notificación de control
+		CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
+		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+		if ( ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck()) 
+		{
+			if ( mute->GetCheck() == 0 ) 
+			{
+				rChan.DefaultPanFactor(rChan.DefaultPanFactor()&0x7F);
+			}
+			else
+			{
+				rChan.DefaultPanFactor(rChan.DefaultPanFactor()|0x80);
+			}
+		}		
+		else {}
 	}
 }
 void XMSamplerMixerPage::OnNMCustomdrawSlVol1(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,0); }

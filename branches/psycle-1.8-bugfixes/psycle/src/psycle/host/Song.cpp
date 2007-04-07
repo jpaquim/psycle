@@ -180,11 +180,6 @@ namespace psycle
 		{
 			_machineLock = false;
 			Invalided = false;
-			PW_Phase = 0;
-			PW_Stage = 0;
-			PW_Length = 0;
-			// setting the preview wave volume to 25%
-			preview_vol = 0.25f;
 			
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
@@ -2434,51 +2429,17 @@ namespace psycle
 			return true;
 		}
 
-		void Song::PW_Play()
+		void Song::DoPreviews(int amount)
 		{
-			if (PW_Stage==0)
+			//todo do better.. use a vector<InstPreview*> or something instead
+			if(wavprev.IsEnabled())
 			{
-				PW_Length=_pInstrument[PREV_WAV_INS]->waveLength;
-				if (PW_Length>0 )
-				{
-					PW_Stage=1;
-					PW_Phase=0;
-				}
+				wavprev.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
 			}
-		}
-
-		void Song::PW_Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
-		{
-			float *pSamplesL = pInSamplesL;
-			float *pSamplesR = pInSamplesR;
-			--pSamplesL;
-			--pSamplesR;
-			
-			signed short *wl=_pInstrument[PREV_WAV_INS]->waveDataL;
-			signed short *wr=_pInstrument[PREV_WAV_INS]->waveDataR;
-			bool const stereo=_pInstrument[PREV_WAV_INS]->waveStereo;
-			float ld=0;
-			float rd=0;
-				
-			do
+			if(waved.IsEnabled())
 			{
-				ld=(*(wl+PW_Phase))*preview_vol;
-				
-				if(stereo)
-					rd=(*(wr+PW_Phase))*preview_vol;
-				else
-					rd=ld;
-					
-				*++pSamplesL+=ld;
-				*++pSamplesR+=rd;
-					
-				if(++PW_Phase>=PW_Length)
-				{
-					PW_Stage=0;
-					return;
-				}
-				
-			}while(--numSamples);
+				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+			}
 		}
 
 		bool Song::CloneMac(int src,int dst)

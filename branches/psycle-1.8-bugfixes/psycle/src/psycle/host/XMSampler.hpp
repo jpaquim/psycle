@@ -933,6 +933,7 @@ XMSampler::Channel::PerformFX().
 
 
 	XMSampler(int index);
+	~XMSampler(){};
 
 	virtual void Init(void);
 	

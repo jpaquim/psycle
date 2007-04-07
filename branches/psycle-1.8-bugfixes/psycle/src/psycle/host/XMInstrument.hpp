@@ -180,6 +180,8 @@ namespace psycle
 			void WaveTune(const compiler::sint16 value){m_WaveTune = value;};
 			const compiler::sint16 WaveFineTune(){return m_WaveFineTune;};
 			void WaveFineTune(const compiler::sint16 value){m_WaveFineTune = value;};
+			const compiler::uint32 WaveSampleRate(){return m_WaveSampleRate;};
+			void WaveSampleRate(const compiler::uint32 value){m_WaveSampleRate = value;};
 
 			const bool IsWaveStereo(){ return m_WaveStereo;};
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;};

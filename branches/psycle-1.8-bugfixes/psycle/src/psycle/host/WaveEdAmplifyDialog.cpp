@@ -38,7 +38,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdAmplifyDialog::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			char tmp[6];
+			char tmp[10];
 			float db;
 			db =  (float) (m_slider.GetPos()-9600)*0.01f;
 			_gcvt(db ,4 ,tmp);

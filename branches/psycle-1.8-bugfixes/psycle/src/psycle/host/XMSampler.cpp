@@ -2016,6 +2016,7 @@ namespace psycle
 				zxxMap[i].mode=0;
 				zxxMap[i].value=0;
 			}
+			sprintf(_editName, _psName);
 //			xdsp.Init(Global::pPlayer->SampleRate(), 1.0 / (1 << 20));
 		}
 

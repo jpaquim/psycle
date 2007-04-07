@@ -47,7 +47,7 @@ NAMESPACE__BEGIN(psycle)
 			void Generate();
 			CChildView *wndView;
 			UINT MachineIndex;
-			bool* _pActive;
+			bool* _pActive;	// It is used to help the program know if this window is open or not.
 		// Overrides
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CFrameMachine)
