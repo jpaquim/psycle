@@ -39,7 +39,7 @@ HEADERS += mainwindow.h \
            patternview/patterngrid.h \
            patternview/patterndraw.h \
            psycore/abstractmachinefactory.h \
-           psycore/audiodriver.h \
+           audiodrivers/audiodriver.h \
            psycore/binread.h \
            psycore/configuration.h \
            psycore/constants.h \
@@ -47,14 +47,14 @@ HEADERS += mainwindow.h \
            psycore/cstdint.h \
            psycore/datacompression.h \
            psycore/dither.h \
-           psycore/dsound.h \
+           audiodrivers/dsound.h \
            psycore/dsp.h \
            psycore/eventdriver.h \
            psycore/fileio.h \
            psycore/filter.h \
            psycore/global.h \
-           psycore/gstreamer_conditional_build.h \
-           psycore/gstreamerout.h \
+           audiodrivers/gstreamer_conditional_build.h \
+           audiodrivers/gstreamerout.h \
            psycore/helpers.h \
            psycore/inputhandler.h \
            psycore/install_paths.h \
@@ -87,7 +87,7 @@ HEADERS += mainwindow.h \
            psycore/singlepattern.h \
            psycore/song.h \
            psycore/songstructs.h \
-           psycore/steinberg_asio_conditional_build.h \
+           audiodrivers/steinberg_asio_conditional_build.h \
            psycore/timesignature.h \
            psycore/xminstrument.h \
            psycore/xmsampler.h \
@@ -120,7 +120,7 @@ SOURCES += mainwindow.cpp \
            patternview/patterngrid.cpp \
            patternview/patterndraw.cpp \
            psycore/abstractmachinefactory.cpp \
-           psycore/audiodriver.cpp \
+           audiodrivers/audiodriver.cpp \
            psycore/binread.cpp \
            psycore/configuration.cpp \
            psycore/datacompression.cpp \
@@ -130,7 +130,7 @@ SOURCES += mainwindow.cpp \
            psycore/fileio.cpp \
            psycore/filter.cpp \
            psycore/global.cpp \
-           psycore/gstreamerout.cpp \
+           audiodrivers/gstreamerout.cpp \
            psycore/helpers.cpp \
            psycore/inputhandler.cpp \
            psycore/instpreview.cpp \
@@ -184,41 +184,41 @@ unix {
                                            # to include alsa-specific things.
         PKGCONFIG += alsa 
         INCLUDEPATH += /usr/include/alsa 
-        HEADERS += psycore/alsaout.h \
-                   psycore/alsaseqin.h 
-        SOURCES += psycore/alsaout.cpp \
-                   psycore/alsaseqin.cpp 
+        HEADERS += audiodrivers/alsaout.h \
+                   mididrivers/alsaseqin.h 
+        SOURCES += audiodrivers/alsaout.cpp \
+                   mididrivers/alsaseqin.cpp 
     }
     system( pkg-config --exists jack ) {
         message( "pkg-config thinks jack libs are available..." )
         DEFINES += QPSYCLE__JACK_AVAILABLE # This is used in the source to determine when
                                            # to include jack-specific things.
         PKGCONFIG += jack 
-        HEADERS += psycore/jackout.h 
-        SOURCES += psycore/jackout.cpp 
+        HEADERS += audiodrivers/jackout.h 
+        SOURCES += audiodrivers/jackout.cpp 
     }
     system( pkg-config --exists esound ) {
         message( "esd-config thinks esd libs are available..." )
         DEFINES += QPSYCLE__ESD_AVAILABLE  
         LIBS += $$system( esd-config --libs )
-        HEADERS += psycore/esoundout.h 
-        SOURCES += psycore/esoundout.cpp 
+        HEADERS += audiodrivers/esoundout.h 
+        SOURCES += audiodrivers/esoundout.cpp 
     }
     LIBS += -lboost_signals
     # FIXME: not sure how to test for netaudio...
-    HEADERS += psycore/netaudio_conditional_build.h \
-           psycore/netaudioout.h \
-           psycore/wavefileout.h 
-    SOURCES += psycore/netaudioout.cpp \
-           psycore/wavefileout.cpp 
+    HEADERS += audiodrivers/netaudio_conditional_build.h \
+           audiodrivers/netaudioout.h \
+           audiodrivers/wavefileout.h 
+    SOURCES += audiodrivers/netaudioout.cpp \
+           audiodrivers/wavefileout.cpp 
 }
 win32 {
     INCLUDEPATH += C:/Qt/4.2.2/src/3rdparty/zlib
-    HEADERS += psycore/microsoft_direct_sound_conditional_build.h \
-           psycore/microsoft_direct_sound_out.h \
-           psycore/msdirectsound.h \
-           psycore/mswaveout.h 
-    SOURCES += psycore/microsoft_direct_sound_out.cpp \
-           psycore/msdirectsound.cpp \
-           psycore/mswaveout.cpp 
+    HEADERS += audiodrivers/microsoft_direct_sound_conditional_build.h \
+           audiodrivers/microsoft_direct_sound_out.h \
+           audiodrivers/msdirectsound.h \
+           audiodrivers/mswaveout.h 
+    SOURCES += audiodrivers/microsoft_direct_sound_out.cpp \
+           audiodrivers/msdirectsound.cpp \
+           audiodrivers/mswaveout.cpp 
 }
