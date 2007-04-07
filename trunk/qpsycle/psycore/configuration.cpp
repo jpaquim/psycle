@@ -23,12 +23,14 @@
 #include "file.h"
 #include "global.h"
 #ifdef __unix__
-#include "alsaout.h"
-#include "jackout.h"
-#include "esoundout.h"
-//#include "gstreamerout.h"
-#include "wavefileout.h" ///\ todo pthread wrapper
+// FIXME: these audio drivers don't belong in psycore
+#include "../audiodrivers/alsaout.h"
+#include "../audiodrivers/jackout.h"
+#include "../audiodrivers/esoundout.h"
+//#include "../audiodrivers/gstreamerout.h"
+#include "../audiodrivers/wavefileout.h" ///\ todo pthread wrapper
 #else
+// FIXME: these audio drivers don't belong in psycore
 //#include "mswaveout.h"
 #endif
 #include <cstdlib>
