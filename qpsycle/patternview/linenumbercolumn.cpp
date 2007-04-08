@@ -66,8 +66,9 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 			int startLine = start;
 			int endLine   = end;
 
-			for (int i = startLine; i <= endLine; i++)
+			for (int i = startLine; i <= endLine; i++) {
 				painter.drawLine(0,(i+1)*rowHeight - dy_ -1, width(),(i+1)*rowHeight -1 - dy_ );
+            }
 
 //			g.setForeground(pView->separatorColor());
 //			g.drawLine(0,0,0,clientHeight() );
