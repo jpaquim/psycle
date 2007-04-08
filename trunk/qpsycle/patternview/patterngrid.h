@@ -166,6 +166,7 @@ public:
     int navStep();
     bool ignorePatStepForNav();
     bool ft2HomeEndBehaviour();
+    void setFt2HomeEndBehaviour( bool setit );
 
     // Cursor.
     const PatCursor & cursor() const;

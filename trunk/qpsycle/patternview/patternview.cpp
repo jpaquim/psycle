@@ -49,6 +49,8 @@ PatternView::PatternView( psy::core::Song *song )
     createToolBar();
     layout->addWidget( toolBar_ );
     layout->addWidget( patDraw_ );
+
+    patDraw_->patternGrid()->setFt2HomeEndBehaviour( psy::core::Global::pConfig()->ft2HomeEndBehaviour() );
 }
 
 void PatternView::createToolBar()
