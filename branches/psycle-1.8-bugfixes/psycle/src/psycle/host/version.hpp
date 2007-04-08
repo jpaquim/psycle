@@ -25,8 +25,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 2
-#define PSYCLE__VERSION__QUALITY "Release with bugfixes"
+#define PSYCLE__VERSION__PATCH 3
+#define PSYCLE__VERSION__QUALITY "beta"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
