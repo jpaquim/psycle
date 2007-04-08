@@ -47,16 +47,18 @@ PatternDraw::PatternDraw( PatternView *patView )
 
     setupTrackGeometrics( patView_->numberOfTracks() );
     
+    patGrid_ = new PatternGrid( this );
+    scene_->addItem( patGrid_ );
+
     lineNumCol_ = new LineNumberColumn( this, this );
     lineNumCol_->setGeometry( 0, 22, 50, height() );
-//    trackHeader_ = new TrackHeader( this, this );
-    patGrid_ = new PatternGrid( this );
+    trackHeader_ = new TrackHeader( this, this );
+    trackHeader_->setGeometry( 50, 0, width(), 20 );
 
 //    layout()->addWidget( lineNumCol_ );
 //    viewport()->addWidget( lineNumCol_ );
 //    scene_->addItem( lineNumCol_ );
 //    scene_->addItem( trackHeader_ );
-    scene_->addItem( patGrid_ );
 
 //    trackHeader_->setPos( 50, 0 );
  //   lineNumCol_->setPos( 0, 20 );
@@ -146,6 +148,7 @@ int PatternDraw::xEndByTrack( int track ) const {
 void PatternDraw::scrollContentsBy ( int dx, int dy ) 
 {
     lineNumCol_->update();
+    trackHeader_->update();
     QGraphicsView::scrollContentsBy( dx, dy );
 }
 
