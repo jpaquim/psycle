@@ -101,20 +101,16 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 QRectF PatternGrid::boundingRect() const
 {
     if ( patDraw_->patternView()->pattern() ) {
-        qDebug() << "pg tips ";
-        qDebug() << "etn " << endTrackNumber();
         int gridWidth = patDraw_->gridWidthByTrack( endTrackNumber() );
         int gridHeight = numberOfLines()*lineHeight();
         return QRectF( 0, 0, gridWidth, gridHeight ); 
     } else {
-        qDebug() << "pg shits ";
         return QRectF( 0, 0, patDraw_->width(), patDraw_->height() );
     }
 }
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-    qDebug() << "pg width " << boundingRect().width();
     painter->setFont( font_ ); 
     if ( pattern() ) {
         int startLine = 0; 
@@ -122,7 +118,6 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
         int startTrack = 0;
         int endTrack = endTrackNumber();
 
-//        patDraw_->alignTracks();
         drawGrid( painter, startLine, endLine, startTrack, endTrack );	
         //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
         drawPattern( painter, startLine, endLine, startTrack, endTrack );
@@ -155,57 +150,24 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
                 if ((patDraw_->patternView()->pattern()->barStart(position, signature) )) {
 
                     painter->setBrush( barColor() );
-                    painter->drawRect( 0, y*lineHeight() /*- dy()*/, gridWidth, lineHeight());
-
-/*                    if ( y >= selection().top() && y < selection().bottom()) {
-                        int left  = patDraw_->xOffByTrack( selection().left() );
-                        int right = patDraw_->xOffByTrack( selection().right() );
-                        g.setForeground( pView->colorInfo().sel_bar_bg_color );
-                        g.fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
-                    }*/
-
+                    painter->drawRect( 0, y*lineHeight(), gridWidth, lineHeight());
                 } else {
                     painter->setBrush( beatColor() );
-                    painter->drawRect( 0, y* lineHeight() /*- dy()*/, gridWidth, lineHeight() );
-
-                    /*if ( y >= selection().top() && y < selection().bottom()) {
-                        int left  = patDraw_->xOffByTrack( selection().left() );
-                        int right = patDraw_->xOffByTrack( selection().right() );
-                        g.setForeground( pView->colorInfo().sel_beat_bg_color );
-                        g.fillRect( left - dx(), y*rowHeight() - dy(), right - left, rowHeight());
-                    }*/
+                    painter->drawRect( 0, y* lineHeight(), gridWidth, lineHeight() );
                 }
             }
         }
     }
-
 
     // Draw the vertical track separators.
     painter->setPen( separatorColor() );
     painter->setBrush( separatorColor() );
     std::map<int, TrackGeometry>::const_iterator it;
     it = trackGeometrics().lower_bound( startTrack );
-    for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) { //  oolIdent px space at begin of trackCol{
+    for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) { 
         TrackGeometry trackGeom = it->second;
         painter->drawRect( trackGeom.left(), 0, 5, gridHeight );
     }
-
-/*    painter->setBrush( Qt::red );
-    it = trackGeometrics().lower_bound( startTrack );
-    for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) {
-        // now refill the left and right ident areas
-//        g.fillRect( it->second.left() - dx() + colIdent,0,trackLeftIdent(),lineHeight);
-        // the right
-        g.fillRect( it->second.left() + std::max( it->second.width(), trackMinWidth_ ) - trackRightIdent() - dx(),0,trackRightIdent(),lineHeight);
-    }
-
-    g.setForeground( smallTrackSeparatorColor() );
-    it = trackGeometrics().lower_bound( startTrack );
-    for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++) // track small separators
-        g.drawLine( it->second.left()-dx(),0, it->second.left()-dx(),lineHeight);
-
-    g.setForeground( foreground( ) );
-*/
 }
 
 void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack )
@@ -216,7 +178,6 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
         // find start iterator
         psy::core::SinglePattern::iterator it = pattern()->find_lower_nearest(startLine);
         psy::core::TimeSignature signature;
-
 
         int lastLinenum = -1;
         psy::core::PatternLine* line;
@@ -277,13 +238,14 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
                     }
 
 
-/*                    if ( x >= selection().left() && x < selection().right() &&
-                        curLinenum >= selection().top() && currentLine < selection().bottom() ) {
+                    if ( curTracknum >= selection().left() && curTracknum < selection().right() &&
+                        curLinenum >= selection().top() && curLinenum < selection().bottom() ) {
                             if ( !onBeat ) 
-                                tColor = patView_->colorInfo().sel_text_color;
+                                tColor = QColor( 239,175,140 );
                             else 
-                                tColor = patView_->colorInfo().sel_beat_text_color;
-                    }	else tColor = stdColor;*/
+                                tColor = QColor( 216,154,120 );
+                    }	else tColor = stdColor;
+
                     painter->setPen( tColor );
                     drawData( painter, curTracknum, curLinenum, 0, event->note() ,event->isSharp(), tColor );
                     if (event->instrument() != 255) drawData( painter, curTracknum, curLinenum, 1, event->instrument(), 1, tColor );
@@ -319,7 +281,7 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
     it = trackGeometrics().lower_bound( track );
     if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
-    int xOff = it->second.left() + patDraw_->trackPaddingLeft() + 5;/*dx()*/;		
+    int xOff = it->second.left() + patDraw_->trackPaddingLeft() + 5;		
 
     if ( eventnr < events_.size() ) {
         const ColumnEvent & event = events_.at( eventnr );
@@ -342,9 +304,8 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
 
                 break;
             case ColumnEvent::note :					
-                if ( cursor().track() == track && cursor().line() == line && 
-                    cursor().eventNr() == eventnr ) {
-                        drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor() );
+                if ( cursor().track() == track && cursor().line() == line && cursor().eventNr() == eventnr ) {
+                    drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor() );
                 } else
                     drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),color );
                 break;
@@ -353,18 +314,6 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
     }
 } // drawData
 
-
-void PatternGrid::drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color)
-{					
-//    int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
-//    int yOff = line  * rowHeight() + yp  - dy();
-    int yOff = (line+1)  * lineHeight();
-    int col = 0;
-    for (int i = 0; i < text.length(); i++) {
-        painter->drawText(xOff + col,yOff, QString::fromStdString( text.substr(i,1) ) );
-        col += cellWidth();
-    }
-}
 
 int PatternGrid::cellWidth( ) const 
 {
@@ -415,25 +364,39 @@ int PatternGrid::noteCellWidth( ) const {
     return cellWidth() * 3;
 }
 
+void PatternGrid::drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color)
+{					
+    painter->setPen( color );
+    int col = 0;
+    int yOff = line * lineHeight();
+    for (int i = 0; i < text.length(); i++) {
+        QRectF textRect = QRectF( xOff+col, yOff, cellWidth(), lineHeight() );
+        painter->drawText( textRect, Qt::AlignCenter, QString::fromStdString( text.substr(i,1) ) );
+        col += cellWidth();
+    }
+}
+
 void PatternGrid::drawStringData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color )
 {
-//    int yp = ( rowHeight() - g.textHeight()) / 2  + g.textAscent();
-//    int yOff = line  * rowHeight() + yp  - dy();
-    int yOff = (line+1)  * lineHeight();
+    painter->setPen( color );
+    int yOff = line * lineHeight();
 
-    painter->drawText(xOff,yOff, QString::fromStdString( text ) );
+    QRectF textRect = QRectF( xOff, yOff, noteCellWidth(), lineHeight() );
+    painter->drawText( textRect, Qt::AlignCenter, QString::fromStdString( text ) );
 }
 
 void PatternGrid::drawString( QPainter *painter, int track, int line, int eventnr, const std::string & data , const QColor & color ) 
 {
+    int yOff = line * lineHeight();
+    painter->setPen( color );
     std::map<int, TrackGeometry>::const_iterator it;
     it = trackGeometrics().lower_bound( track );
     if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
-// ORIG    int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
-    int xOff = it->second.left() + 5 + 5 + 0;
-
-    drawStringData( painter, xOff + eventOffset(eventnr,0), line, data, color );
+    int xOff = it->second.left() + 5 + patDraw_->trackPaddingLeft();
+    QRectF textRect = QRectF( xOff + eventOffset(eventnr,0), yOff, cellWidth()*4, lineHeight() );
+    painter->drawText( textRect, Qt::AlignCenter, QString::fromStdString( data ) );
+//    drawStringData( painter, xOff + eventOffset(eventnr,0), line, data, color );
 }
 
 std::string PatternGrid::noteToString( int value, bool sharp )
