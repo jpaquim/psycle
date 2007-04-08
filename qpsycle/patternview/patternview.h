@@ -84,6 +84,7 @@ private:
     psy::core::Song *song_;
     psy::core::SinglePattern* pattern_;
 
+    // Settings.
     int patternStep_;
     int numberOfTracks_;
     int selectedMacIdx_;

@@ -88,6 +88,10 @@ namespace psy {
 			return enableSound_;
 		}
 
+		bool Configuration::ft2HomeEndBehaviour() const {
+			return ft2HomeEndBehaviour_;
+		}
+
 /*		void Configuration::setXmlDefaults() {     
 			std::string xml_mem_;   
 
@@ -393,6 +397,16 @@ namespace psy {
                             settings.setDeviceName( deviceName );
                             it->second->setSettings( settings );
                     }		
+                }
+
+                // Options.
+                QDomNodeList options = root.elementsByTagName( "option" );
+                for ( int i = 0; i < options.count(); i++ )
+                {
+                    QDomElement option = options.item( i ).toElement();
+                    QString value = option.attribute("value");
+                    if ( option.attribute("id") == "ft2-home-end-behaviour" )
+                        ft2HomeEndBehaviour_ = value.toInt();     
                 }
             }
 

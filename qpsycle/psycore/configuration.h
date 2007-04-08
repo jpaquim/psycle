@@ -64,6 +64,7 @@ namespace psy {
 			const std::string & songPath() const;
 
 			bool enableSound() const;
+			bool ft2HomeEndBehaviour() const;
 
 			InputHandler & inputHandler();
 
@@ -87,6 +88,8 @@ namespace psy {
 			void configureKeyBindings();
 //			void setXmlDefaults();
 
+            // Settings.
+            bool ft2HomeEndBehaviour_;
 		};
 
 	}

@@ -1524,6 +1524,9 @@ void PatternGrid::navBottom()
 bool PatternGrid::ft2HomeEndBehaviour() {
     return ft2HomeEndBehaviour_;
 }
+void PatternGrid::setFt2HomeEndBehaviour( bool setit ) {
+    ft2HomeEndBehaviour_ = setit;
+}
 
 
 
