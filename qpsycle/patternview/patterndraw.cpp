@@ -137,6 +137,16 @@ int PatternDraw::xEndByTrack( int track ) const {
     return trackEnd;
 }
 
+int PatternDraw::trackWidthByTrack( int track ) const 
+{
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( track );
+    int trackWidth = 0;
+    if ( it != trackGeometrics().end() )
+        trackWidth = it->second.width();
+    return trackWidth;
+}
+
 void PatternDraw::scrollContentsBy ( int dx, int dy ) 
 {
     lineNumCol_->update();

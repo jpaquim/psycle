@@ -35,6 +35,7 @@
 class PatternDraw;
 class PatternGrid;
 class TrackGeometry;
+class BehaviourStrategy;
 
 /**
  * Selection.
@@ -122,6 +123,7 @@ public:
     void addEvent( const ColumnEvent & event );
     psy::core::SinglePattern *pattern();
     enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
+    PatternDraw *patDraw() { return patDraw_; }
 
 
     // Painting.
@@ -163,6 +165,7 @@ public:
     int patternStep(); 
     int navStep();
     bool ignorePatStepForNav();
+    bool ft2HomeEndBehaviour();
 
     // Cursor.
     const PatCursor & cursor() const;
@@ -200,12 +203,16 @@ public:
     const QColor & textColor() const;
 
     bool doingKeybasedSelect() { return doingKeybasedSelect_; }
+    void setDoingKeybasedSelect( bool setit ) { doingKeybasedSelect_ = setit; }
     bool lineAlreadySelected( int lineNumber );
     bool trackAlreadySelected( int trackNumber );
     void startKeybasedSelection(int leftPos, int rightPos, int topPos, int bottomPos);
     void startMouseSelection( const PatCursor & p );
     void repaintSelection();
+    Selection selection() const;
     void repaintCursor();
+    void setOldCursor( const PatCursor & p ) { oldCursor_ = p; }
+    std::vector<ColumnEvent> events() { return events_; }
     const PatCursor & selStartPoint() const;
     PatCursor intersectCell( int x, int y );
     int visibleColWidth( int maxEvents ) const;
@@ -227,6 +234,8 @@ public:
     void selectRight();
     void selectTrack();
     void selectAll();
+    void navTop();
+    void navBottom();
     void checkLeftScroll( const PatCursor & cursor );
     void checkRightScroll( const PatCursor & cursor );
     void checkUpScroll( const PatCursor & cursor );
@@ -242,12 +251,13 @@ protected:
 private:
     Selection selection_;
     Selection oldSelection_;
-    Selection selection() const;
     PatCursor selStartPoint_;
     PatCursor selCursor_;
 
     bool doingKeybasedSelect_;
     bool doingMouseSelect_;
+
+    bool ft2HomeEndBehaviour_;
 
     bool isBlockCopied_;
     psy::core::SinglePattern pasteBuffer;
@@ -279,7 +289,5 @@ private:
     QColor restAreaColor_ ;
 
 };
-
-
 
 #endif

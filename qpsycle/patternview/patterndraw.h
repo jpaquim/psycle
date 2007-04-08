@@ -94,6 +94,7 @@ public:
     int findTrackByXPos( int x ) const;
     int xOffByTrack( int track ) const;
     int xEndByTrack( int track ) const;
+    int trackWidthByTrack( int track ) const; 
     int trackPaddingLeft() const { return 5; }
     int trackPaddingRight() const { return 5; }
 

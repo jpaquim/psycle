@@ -91,6 +91,8 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
      smallTrackSeparatorColor_ = QColor( 105, 107, 107 );
      lineSepColor_ = QColor( 145, 147, 147 );
      restAreaColor_ = QColor( 24, 22, 25 );
+
+     ft2HomeEndBehaviour_ = true;
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -460,10 +462,8 @@ void PatternGrid::drawCellBg( QPainter *painter, const PatCursor& cursor )
     it = trackGeometrics().lower_bound( cursor.track() );
     if ( it == trackGeometrics().end() ) return;
 
-    //int xOff = it->second.left() + colIdent + trackLeftIdent() - dx();
-    int xOff = it->second.left() + 5 + 5 - 0;
-    //int yOff = cursor.line()  * lineHeight()  - dy();
-    int yOff = cursor.line()  * lineHeight()  - 0;
+    int xOff = it->second.left() + 5/*colIndent*/ + patDraw_->trackPaddingLeft();
+    int yOff = cursor.line()  * lineHeight();
     int colOffset = eventOffset( cursor.eventNr(), cursor.col() );
     painter->setBrush( cursorColor() );
     painter->setPen( cursorTextColor() );
@@ -530,17 +530,16 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         break;
         case psy::core::cdefTrackPrev:
             if ( cursor().track() > 0 ) {
-                PatCursor oldCursor = cursor();
+                setOldCursor( cursor() );
                 setCursor( PatCursor( cursor().track()-1, cursor().line(),0,0 ) );
             }
             repaintCursor();
             checkLeftScroll( cursor() );
-            break;
             return;
         break;
         case psy::core::cdefTrackNext:
             if ( cursor().track()+1 < numberOfTracks() ) {
-                PatCursor oldCursor = cursor();
+                setOldCursor( cursor() );
                 setCursor( PatCursor( cursor().track()+1, cursor().line(),0,0 ) );
             }
             repaintCursor(); 
@@ -555,6 +554,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         case psy::core::cdefNavPageUp:
             moveCursor( 0, -16 );
             checkUpScroll( cursor() );
+            break;
+        case psy::core::cdefNavTop:
+            navTop();
+            break;
+        case psy::core::cdefNavBottom:
+            navBottom();
             break;
         case psy::core::cdefSelectUp:
             selectUp();
@@ -892,9 +897,9 @@ void PatternGrid::repaintSelection() {
 void PatternGrid::repaintCursor() {
     // FIXME: could be done more accurately.
     update( patDraw_->xOffByTrack(cursor_.track()), cursor_.line()*lineHeight(), 
-            patDraw_->xEndByTrack(cursor_.track()), lineHeight() );
+            patDraw_->trackWidthByTrack(cursor_.track()), lineHeight() );
     update( patDraw_->xOffByTrack(oldCursor_.track()), oldCursor_.line()*lineHeight(), 
-            patDraw_->xEndByTrack(cursor_.track()), lineHeight() );
+            patDraw_->trackWidthByTrack(oldCursor_.track()), lineHeight() );
 }
 
 
@@ -1362,6 +1367,7 @@ void PatternGrid::mousePressEvent( QGraphicsSceneMouseEvent *event )
         oldCursor_ = cursor();
         PatCursor crs = intersectCell( event->lastPos().x(), event->lastPos().y() );
         setCursor( crs );
+        qDebug() << "crscol" << cursor().col() << " crsevnr " << cursor().eventNr();
         repaintCursor();
     }
 }
@@ -1440,9 +1446,11 @@ void PatternGrid::checkLeftScroll( const PatCursor & cursor )
 
 void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
 {
-    if ( patDraw_->xOffByTrack( std::max( cursor.track()+1, 0 ) ) > patDraw_->width() ) {
+    if ( patDraw_->xOffByTrack( std::min( cursor.track()+1, endTrackNumber() ) ) > patDraw_->width() ) {
         patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , endTrackNumber())) - patDraw_->width() );
     }
+    if ( cursor.track() == endTrackNumber() )
+        patDraw_->horizontalScrollBar()->setValue( patDraw_->horizontalScrollBar()->maximum() );
 }
 
 void PatternGrid::checkUpScroll( const PatCursor & cursor ) 
@@ -1467,6 +1475,54 @@ void PatternGrid::checkDownScroll( const PatCursor & cursor )
 
 const PatCursor & PatternGrid::selStartPoint() const {
     return selStartPoint_;
+}
+
+void PatternGrid::navTop()
+{
+    setOldCursor( cursor() );
+    if ( ft2HomeEndBehaviour() ) {
+        cursor_.setLine( 0 ); 
+        checkUpScroll( cursor() );
+    } else {
+        if ( cursor().col() != 0 ) {
+            cursor_.setCol(0);
+            cursor_.setEventNr(0);
+        } else if ( cursor().track() != 0 ) {
+                cursor_.setTrack(0);
+                checkLeftScroll( cursor() );
+        } else {
+                cursor_.setLine(0);
+                checkUpScroll( cursor() );
+        }
+    }
+    repaintCursor();
+}
+
+void PatternGrid::navBottom()
+{
+    setOldCursor( cursor() );
+    if ( ft2HomeEndBehaviour() ) {
+        cursor_.setLine( endLineNumber() );
+        checkDownScroll( cursor() );
+    } else {		
+        if ( cursor().col() != 6 ) {
+            cursor_.setCol(6);
+            cursor_.setEventNr( ColumnEvent::hex4 );
+        } else if ( cursor().track() != endTrackNumber() ) {
+            cursor_.setTrack( endTrackNumber() );
+            cursor_.setCol( 6 );
+            cursor_.setEventNr( ColumnEvent::hex4 );
+            checkRightScroll( cursor() );
+        } else {
+            cursor_.setLine( endLineNumber() );
+            checkDownScroll( cursor() );
+        }
+    }
+    repaintCursor();
+}
+
+bool PatternGrid::ft2HomeEndBehaviour() {
+    return ft2HomeEndBehaviour_;
 }
 
 
@@ -1526,7 +1582,7 @@ PatCursor::PatCursor() :
 }
 
 PatCursor::PatCursor(int track, int line, int eventNr, int col) :
-track_( track ), 
+    track_( track ), 
     line_( line ), 
     eventNr_( eventNr ), 
     col_( col ) 
@@ -1575,5 +1631,4 @@ void PatCursor::setCol( int col) {
 int PatCursor::col() const {
     return col_;
 }
-
 
