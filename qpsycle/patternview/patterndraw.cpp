@@ -44,27 +44,19 @@ PatternDraw::PatternDraw( PatternView *patView )
     setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // FIXME: set to always on as AsNeeded has a bug in 4.2.2
     setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // Will be fixed in 4.3.
     // see: http://www.trolltech.com/developer/task-tracker/index_html?method=entry&id=152477
+    setViewportMargins( 50, 20, 0, 0);
 
-    setupTrackGeometrics( patView_->numberOfTracks() );
-    
     patGrid_ = new PatternGrid( this );
-    scene_->addItem( patGrid_ );
-
     lineNumCol_ = new LineNumberColumn( this, this );
     lineNumCol_->setGeometry( 0, 22, 50, height() );
     trackHeader_ = new TrackHeader( this, this );
     trackHeader_->setGeometry( 50, 0, width(), 20 );
 
-//    layout()->addWidget( lineNumCol_ );
-//    viewport()->addWidget( lineNumCol_ );
-//    scene_->addItem( lineNumCol_ );
-//    scene_->addItem( trackHeader_ );
-
-//    trackHeader_->setPos( 50, 0 );
- //   lineNumCol_->setPos( 0, 20 );
+    setupTrackGeometrics( patView_->numberOfTracks() );
+    alignTracks();
+    
+    scene_->addItem( patGrid_ );
     patGrid_->setPos( 0, 0 );
-
-    setViewportMargins( 50, 20, 0, 0);
 }
 
 void PatternDraw::setupTrackGeometrics( int numberOfTracks ) 

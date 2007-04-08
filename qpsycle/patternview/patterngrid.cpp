@@ -32,6 +32,7 @@
 #include <QDomDocument>
 #include <QGraphicsSceneMouseEvent>
 #include <QScrollBar>
+#include <QDebug>
 
 template<class T> inline std::string toHex(T value , int nums = 2) {
     std::ostringstream buffer;
@@ -72,6 +73,9 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     //
     selection_.set( 0,0,0,0 );
     doingKeybasedSelect_ = false;
+
+    font_ = QFont( "courier", 9 );
+    setFont( font_ );
     
     // FIXME: hardcoding these for now.
      textColor_ = QColor( 255, 255, 255 );
@@ -87,7 +91,6 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
      smallTrackSeparatorColor_ = QColor( 105, 107, 107 );
      lineSepColor_ = QColor( 145, 147, 147 );
      restAreaColor_ = QColor( 24, 22, 25 );
-
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -98,18 +101,20 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 QRectF PatternGrid::boundingRect() const
 {
     if ( patDraw_->patternView()->pattern() ) {
+        qDebug() << "pg tips ";
+        qDebug() << "etn " << endTrackNumber();
         int gridWidth = patDraw_->gridWidthByTrack( endTrackNumber() );
         int gridHeight = numberOfLines()*lineHeight();
         return QRectF( 0, 0, gridWidth, gridHeight ); 
     } else {
+        qDebug() << "pg shits ";
         return QRectF( 0, 0, patDraw_->width(), patDraw_->height() );
     }
 }
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-    font_ = QFont( "courier", 9 );
-    setFont( font_ );
+    qDebug() << "pg width " << boundingRect().width();
     painter->setFont( font_ ); 
     if ( pattern() ) {
         int startLine = 0; 
@@ -117,7 +122,7 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
         int startTrack = 0;
         int endTrack = endTrackNumber();
 
-        patDraw_->alignTracks();
+//        patDraw_->alignTracks();
         drawGrid( painter, startLine, endLine, startTrack, endTrack );	
         //drawColumnGrid(g, startLine, endLine, startTrack, endTrack);
         drawPattern( painter, startLine, endLine, startTrack, endTrack );
