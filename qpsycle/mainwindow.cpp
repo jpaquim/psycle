@@ -86,7 +86,6 @@ void MainWindow::setupGui()
     dock_->setWidget(patternBox_);
     addDockWidget(Qt::LeftDockWidgetArea, dock_);
 
-
     views_ = new QTabWidget();
     views_->addTab( macView_, "Machine View" );
     views_->addTab( patView_, "Pattern View" );
@@ -339,7 +338,18 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 
     switch ( command ) {
         case psy::core::cdefShowPatternBox:
-            patternBox_->patternTree()->setFocus();        
+        {
+            if ( !dock_->isVisible() ) {
+                dock_->setVisible( true );
+                patternBox_->patternTree()->setFocus();
+            } else {
+                if ( patternBox_->patternTree()->hasFocus() ) {
+                    dock_->setVisible( false );
+                } else {
+                    patternBox_->patternTree()->setFocus();
+                }
+            }
+        }
         break;
         case psy::core::cdefShowMachineView:
             views_->setCurrentWidget( macView_ );        

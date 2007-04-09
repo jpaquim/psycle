@@ -111,6 +111,8 @@ private slots:
      QAction *playPatAct;
      QAction *stopAct;
 
+     QAction *togglePatBox_;
+
      QComboBox *macCombo_;
      QComboBox *sampCombo_;
      QComboBox *octCombo_;

@@ -822,7 +822,7 @@ void PatternGrid::selectAll()
     doingKeybasedSelect_ = true;
     startKeybasedSelection( 0, endTrackNumber(), 0, endLineNumber() );
 
-    repaintSelection();
+    update( 0, 0, patDraw_->xEndByTrack( endTrackNumber() ), endLineNumber()*lineHeight() );
     selCursor_ = cursor();
 }
 

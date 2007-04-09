@@ -30,14 +30,14 @@
 #include <QComboBox>
 #include <QColorDialog>
 
- PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
+PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
     : QWidget(parent)
- {
+{
     song_ = song;
-     createActions();
+    createActions();
 
-     QGridLayout *layout = new QGridLayout();
-     layout->setAlignment( Qt::AlignTop );
+    QGridLayout *layout = new QGridLayout();
+    layout->setAlignment( Qt::AlignTop );
 
     createToolbar();
     patternTree_ = new PatternTree( this );
@@ -53,7 +53,7 @@
     layout->setRowStretch(1, 10);
     layout->setRowStretch(3, 5);
     setLayout(layout);
- }
+}
 
 void PatternBox::createToolbar()
 {
