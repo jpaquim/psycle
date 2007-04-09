@@ -163,7 +163,9 @@ namespace psycle
 			virtual char * GetName() = 0;
 			const char * GetEditName() { return _editName; }
 			virtual int GetNumParams() { return _numPars; };
+			virtual int GetNumCols() { return _nCols; };
 			virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
+			virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
 			virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
 			virtual int GetParamValue(int numparam) { return 0; };
 			virtual bool SetParameter(int numparam, int value) { return false;}; 
@@ -201,6 +203,7 @@ namespace psycle
 			int _y;
 			char _editName[32];
 			int _numPars;
+			int _nCols;
 			/// Incoming connections Machine number
 			int _inputMachines[MAX_CONNECTIONS];	
 			/// Outgoing connections Machine number
@@ -269,6 +272,7 @@ namespace psycle
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
+			virtual void GetParamRange(int numparam, int &minval, int &maxval);
 			virtual void GetParamValue(int numparam,char *parVal);
 			virtual int GetParamValue(int numparam);
 			virtual bool SetParameter(int numparam,int value);
@@ -400,6 +404,7 @@ namespace psycle
 			virtual char* GetName(void) { return _psName; };
 			void FxSend(int numSamples);
 			void Mix(int numSamples);
+			std::string GetAudioInputName(int port);
 			virtual int GetNumCols();
 			virtual void GetParamName(int numparam,char *name);
 			virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };

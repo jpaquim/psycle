@@ -7,7 +7,6 @@
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
 #include "Plugin.hpp"
-#include "VSTHost24.hpp"
 #include "InputHandler.hpp"
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
@@ -18,18 +17,11 @@ NAMESPACE__BEGIN(psycle)
 
 		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)
 
-		CFrameMachine::CFrameMachine()
-		{
-		}
-
-		CFrameMachine::~CFrameMachine()
-		{
-		}
-
 		BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
 			//{{AFX_MSG_MAP(CFrameMachine)
 			ON_WM_PAINT()
 			ON_WM_LBUTTONDOWN()
+			ON_WM_LBUTTONDBLCLK()
 			ON_WM_MOUSEMOVE()
 			ON_WM_LBUTTONUP()
 			ON_WM_RBUTTONUP()
@@ -47,19 +39,34 @@ NAMESPACE__BEGIN(psycle)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
-		void CFrameMachine::Generate()
+		CFrameMachine::CFrameMachine()
 		{
+			//do not use! Use OnCreate Instead.
+		}
+
+		CFrameMachine::~CFrameMachine()
+		{
+			//do not use! Use OnDestroy Instead.
+		}
+
+		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+		{
+			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+			{
+				return -1;
+			}
 			istweak=false;
 			tweakpar=0;
 			tweakbase=0;
+			minval=0;
+			maxval=0;
+			prevval=0;
 			finetweak=false;
 			ultrafinetweak=false;
-			
-/*			if (Global::pConfig->bBmpDial)
-				wndView->LoadMachineDial();
-			else
-				wndView->machinedial.LoadBitmap(IDB_KNOB);
-*/
+			numParameters=0;
+			ncol=0;
+			parspercol=0;
+
 			b_font.CreatePointFont(80,"Tahoma");
 //			b_font_bold.CreatePointFont(80,"Tahoma Bold");
 			CString sFace("Tahoma");
@@ -69,7 +76,46 @@ NAMESPACE__BEGIN(psycle)
 			lf.lfQuality = NONANTIALIASED_QUALITY;
 			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
 			if(!b_font_bold.CreatePointFontIndirect(&lf))
+			{
+				b_font_bold.CreatePointFont(80,"Tahoma Bold");
+			}
 
+			SetTimer(2104+MachineIndex,100,0);
+			return 0;
+		}
+
+		void CFrameMachine::OnDestroy() 
+		{
+			if ( _pActive != NULL ) *_pActive = false;
+			b_font.DeleteObject();
+			b_font_bold.DeleteObject();
+			KillTimer(2104+MachineIndex);
+			CFrameWnd::OnDestroy();
+		}
+
+		void CFrameMachine::OnTimer(UINT nIDEvent) 
+		{
+			if ( nIDEvent == 2104+MachineIndex )
+			{
+				Invalidate(false);
+			}
+			CFrameWnd::OnTimer(nIDEvent);
+		}
+
+		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
+		{
+			CFrameWnd::OnSetFocus(pOldWnd);
+			Invalidate(false);
+		}
+		void CFrameMachine::Generate()
+		{
+
+			
+/*			if (Global::pConfig->bBmpDial)
+				wndView->LoadMachineDial();
+			else
+				wndView->machinedial.LoadBitmap(IDB_KNOB);
+*/
 
 			UpdateWindow();
 		}
@@ -79,30 +125,27 @@ NAMESPACE__BEGIN(psycle)
 			_pMachine = pMachine;
 
 			// Get NumParameters
-			ncol=1;
+
 			numParameters = _pMachine->GetNumParams();
+			ncol = _pMachine->GetNumCols();
+			parspercol = numParameters/ncol;
 
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
-				ncol = ((Plugin*)_pMachine)->GetInfo()->numCols;
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
 				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
-			}
-			else if ( _pMachine->_type == MACH_DUPLICATOR)
-			{
-				ncol = 2;
-			}
-			parspercol = numParameters/ncol;
-			if (parspercol>24)	// check for "too big" windows
-			{
-				parspercol=24;
-				ncol=numParameters/24;
-				if (ncol*24 != numParameters)
+				parspercol = numParameters/ncol;
+				if (parspercol>24)	// check for "too big" windows
 				{
-					ncol++;
+					parspercol=24;
+					ncol=numParameters/24;
+					if (ncol*24 != numParameters)
+					{
+						ncol++;
+					}
 				}
 			}
 			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
@@ -160,22 +203,6 @@ NAMESPACE__BEGIN(psycle)
 				);
 		}
 
-		void CFrameMachine::OnDestroy() 
-		{
-			if ( _pActive != NULL ) *_pActive = false;
-			KillTimer(2104+MachineIndex);
-			CFrameWnd::OnDestroy();
-		}
-
-		void CFrameMachine::OnTimer(UINT nIDEvent) 
-		{
-			if ( nIDEvent == 2104+MachineIndex )
-			{
-				Invalidate(false);
-			}
-			CFrameWnd::OnTimer(nIDEvent);
-		}
-
 
 		///////////////////////////////////////////////////////////////////////
 		// PAINT GUI HERE
@@ -185,7 +212,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			CPaintDC dc(this); // device context for painting
 
-			dc.SelectObject(&b_font);
+			CFont* oldfont=dc.SelectObject(&b_font);
 
 			CRect rect;
 			GetClientRect(&rect);
@@ -213,72 +240,13 @@ NAMESPACE__BEGIN(psycle)
 				int min_v=1;
 				int max_v=1;
 				int val_v=1;
-				if( _pMachine->_type == MACH_PLUGIN )
-				{
-					Plugin & plugin(*static_cast<Plugin*>(_pMachine));
-					if(plugin.GetInfo()->Parameters[c]->Flags & MPF_STATE)
-					{
-						min_v = plugin.GetInfo()->Parameters[c]->MinValue;
-						max_v = plugin.GetInfo()->Parameters[c]->MaxValue;
-						try
-						{
-							val_v = plugin.proxy().Vals()[c];
-						}
-						catch(const std::exception &)
-						{
-							val_v = 0; // hmm
-						}
-						try
-						{
-							if(!plugin.proxy().DescribeValue(buffer, c, val_v))
-								std::sprintf(buffer,"%d",val_v);
-						}
-						catch(const std::exception &)
-						{
-							std::strcpy(buffer,"fucked up");
-						}
-					}
-					else
-					{
-						bDrawKnob = FALSE;
-					}
-					std::strcpy(parName, plugin.GetInfo()->Parameters[c]->Name);
-				}
-				else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-				{
-					vst::plugin & plugin(*static_cast<vst::plugin*>(_pMachine));
-					min_v = 0;
-					max_v = vst::quantization;
-					try
-					{
-						val_v = _pMachine->GetParamValue(c);
-					}
-					catch(const std::exception &)
-					{
-						val_v = 0; // hmm
-					}
-					std::memset(buffer,0,sizeof(buffer));
-					if(!plugin.DescribeValue(c, buffer))
-					{
-						std::sprintf(buffer,"%d",val_v);
-					}
-					try
-					{
-						_pMachine->GetParamName(c, parName);
-					}
-					catch(const std::exception &)
-					{
-						std::strcpy(buffer,"fucked up");
-					}
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR)
-				{
-					if ( c < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
-					else if ( c < 16) { min_v = -48; max_v = 48; }
-					val_v = _pMachine->GetParamValue(c);
-					_pMachine->GetParamValue(c,buffer);
-					_pMachine->GetParamName(c,parName);
-				}
+
+				_pMachine->GetParamName(c,parName);
+				_pMachine->GetParamRange(c,min_v,max_v);
+				val_v = _pMachine->GetParamValue(c);
+				_pMachine->GetParamValue(c,buffer);
+				bDrawKnob = (min_v==max_v)?false:true;
+
 				if(bDrawKnob && (max_v - min_v)>0)
 				{
 					int const amp_v = max_v - min_v;
@@ -330,7 +298,6 @@ NAMESPACE__BEGIN(psycle)
 						dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
 					}
 					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
-				
 				}
 				else
 				{
@@ -399,24 +366,25 @@ NAMESPACE__BEGIN(psycle)
 			}
 			memDC.SelectObject(oldbmp);
 			memDC.DeleteDC();
+			dc.SelectObject(oldfont);
 		}
 
+		int CFrameMachine::ConvertXYtoParam(int x, int y)
+		{
+			if ((y/K_YSIZE) >= parspercol ) return -1; //this if for VST's that use the native gui.
+			return (y/K_YSIZE) + ((x/150)*parspercol);
+		}
 		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
-			tweakpar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
+			tweakpar = ConvertXYtoParam(point.x,point.y);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				sourcepoint = point.y;
-
-				try
-				{
-					tweakbase = _pMachine->GetParamValue(tweakpar);
-				}
-				catch(const std::exception &)
-				{
-					tweakbase = 0;
-				}
+				tweakbase = _pMachine->GetParamValue(tweakpar);
+				prevval = tweakbase;
+				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
+				wndView->AddMacViewUndo();
 				SetCapture();
 			}
 			else
@@ -426,53 +394,44 @@ NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnLButtonDown(nFlags, point);
 		}
 
+
+	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
+		{
+			if( _pMachine->_type == MACH_PLUGIN)
+			{
+				int par = ConvertXYtoParam(point.x,point.y);
+				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
+				{
+					wndView->AddMacViewUndo();
+					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
+				}
+			}
+			Invalidate(false);
+
+			CFrameWnd::OnLButtonDblClk(nFlags, point);
+		}
+
+
 		void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point) 
 		{
 			if (istweak)
 			{
-				int min_v=1;
-				int max_v=1;
-				if ( _pMachine->_type == MACH_PLUGIN )
-				{
-					min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue;
-					max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MaxValue;
-				}
-				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-				{
-					min_v = 0;
-					max_v = vst::quantization;
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR)
-				{
-					if ( tweakpar < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
-					else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
-				}
+				int curval = _pMachine->GetParamValue(tweakpar);
+				tweakbase -= prevval-curval;					//adjust base for tweaks from somewhere else
+				if(tweakbase<minval) tweakbase=minval;
+				if(tweakbase>maxval) tweakbase=maxval;
 
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{
-					try
-					{
-						tweakbase=_pMachine->GetParamValue(tweakpar);
-					}
-					catch(const std::exception &)
-					{
-						tweakbase = 0;
-					}
+					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
 				}
 				else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
 					( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
 				{
-					try
-					{
-						tweakbase=_pMachine->GetParamValue(tweakpar);
-					}
-					catch(const std::exception &)
-					{
-						tweakbase = 0;
-					}
+					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					finetweak=!finetweak;
 				}
@@ -480,87 +439,30 @@ NAMESPACE__BEGIN(psycle)
 				double freak;
 				int screenh = wndView->CH;
 				if ( ultrafinetweak ) freak = 0.5f;
-				else if (max_v-min_v < screenh/4) freak = (max_v-min_v)/float(screenh/4);
-				else if (max_v-min_v < screenh*2/3) freak = (max_v-min_v)/float(screenh/3);
-				else freak = (max_v-min_v)/float(screenh*3/5);
+				else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
+				else if (maxval-minval < screenh*2/3) freak = (maxval-minval)/float(screenh/3);
+				else freak = (maxval-minval)/float(screenh*3/5);
 				if (finetweak) freak/=5;
 
 				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
 
-				if (nv < min_v)
-				{
-					nv = min_v;
-				}
-				if (nv > max_v)
-				{
-					nv=max_v;
-				}
+				if (nv < minval) nv = minval;
+				if (nv > maxval) nv = maxval;
 
+				_pMachine->SetParameter(tweakpar,(int) nv);
+				prevval=(int)nv;
 				wndView->AddMacViewUndo();
-				if ( _pMachine->_type == MACH_PLUGIN )
+				if (Global::pConfig->_RecordTweaks)
 				{
-					try
+					if (Global::pConfig->_RecordMouseTweaksSmooth)
 					{
-						((Plugin*)_pMachine)->proxy().ParameterTweak(tweakpar, (int) nv);
+						wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
 					}
-					catch(const std::exception &)
+					else
 					{
-						// o_O`
-					}
-					// well, this isn't so hard... just put the twk record here
-					if (Global::pConfig->_RecordTweaks)
-					{
-						if (Global::pConfig->_RecordMouseTweaksSmooth)
-						{
-							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
-						else
-						{
-							wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
+						wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-minval);
 					}
 				}
-				else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-				{
-					try
-					{
-						_pMachine->SetParameter(tweakpar,nv);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					// well, this isn't so hard... just put the twk record here
-					if (Global::pConfig->_RecordTweaks)
-					{
-						if (Global::pConfig->_RecordMouseTweaksSmooth)
-						{
-							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, (int)nv);
-						}
-						else
-						{
-							wndView->MousePatternTweak(MachineIndex, tweakpar, (int)nv);
-						}
-					}
-				}
-				else if ( _pMachine->_type == MACH_DUPLICATOR)
-				{
-					_pMachine->SetParameter(tweakpar,(int) nv);
-
-					// well, this isn't so hard... just put the twk record here
-					if (Global::pConfig->_RecordTweaks)
-					{
-						if (Global::pConfig->_RecordMouseTweaksSmooth)
-						{
-							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
-						else
-						{
-							wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-min_v);
-						}
-					}
-				}
-
 				Invalidate(false);
 			}
 			CFrameWnd::OnMouseMove(nFlags, point);
@@ -576,7 +478,8 @@ NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 		{
-			tweakpar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
+			tweakpar = ConvertXYtoParam(point.x,point.y);
+
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				if (nFlags & MK_CONTROL)
@@ -590,59 +493,20 @@ NAMESPACE__BEGIN(psycle)
 				}
 				else 
 				{		
-					int const thispar = (point.y/K_YSIZE) + ((point.x/150)*parspercol);
 					int min_v=1;
 					int max_v=1;
 					char name[64];
 					memset(name,0,64);
 					CNewVal dlg;
 
-					if ( _pMachine->_type == MACH_PLUGIN )
-					{
-						min_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MinValue;
-						max_v = ((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->MaxValue;
-						strcpy(name ,((Plugin*)_pMachine)->GetInfo()->Parameters[thispar]->Name);
-						try
-						{
-							dlg.m_Value = ((Plugin*)_pMachine)->proxy().Vals()[thispar];
-						}
-						catch(const std::exception &)
-						{
-							dlg.m_Value = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-					{
-						min_v = 0;
-						max_v = vst::quantization;
-						try
-						{
-							_pMachine->GetParamName(thispar, name);
-						}
-						catch(const std::exception &)
-						{
-							std::strcpy(name, "fucked up");
-						}
-						try
-						{
-							dlg.m_Value = _pMachine->GetParamValue(thispar);
-						}
-						catch(const std::exception &)
-						{
-							dlg.m_Value = 0;
-						}
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						if ( tweakpar < 8) { min_v = -1; max_v = (MAX_BUSES*2)-1;}
-						else if ( tweakpar < 16) { min_v = -48; max_v = 48; }
-						_pMachine->GetParamName(thispar,name);
-						dlg.m_Value = _pMachine->GetParamValue(thispar);
-					}
+					_pMachine->GetParamName(tweakpar,name);
+					_pMachine->GetParamRange(tweakpar,min_v,max_v);
+					dlg.m_Value = _pMachine->GetParamValue(tweakpar);
+
 					std::sprintf
 						(
 							dlg.title, "Param:'%.2x:%s' (Range from %d to %d)\0",
-							thispar,
+							tweakpar,
 							name,
 							min_v,
 							max_v
@@ -651,145 +515,24 @@ NAMESPACE__BEGIN(psycle)
 					dlg.max = max_v;
 					dlg.macindex = MachineIndex;
 					dlg.paramindex = tweakpar;
-					dlg.DoModal();
-					int nv = dlg.m_Value;
-					if (nv < min_v)
+					if ( dlg.DoModal() == IDOK)
 					{
-						nv = min_v;
-					}
-					if (nv > max_v)
-					{
-						nv = max_v;
-					}
-					wndView->AddMacViewUndo();
-					if ( _pMachine->_type == MACH_PLUGIN )
-					{
-						try
+						int nv = dlg.m_Value;
+						if (nv < min_v)
 						{
-							((Plugin*)_pMachine)->proxy().ParameterTweak(thispar, nv);
+							nv = min_v;
 						}
-						catch(const std::exception &)
+						if (nv > max_v)
 						{
-							// o_O`
+							nv = max_v;
 						}
-					}
-					else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-					{
-						try
-						{
-							_pMachine->SetParameter(thispar,nv);
-						}
-						catch(const std::exception &)
-						{
-							// o_O`
-						}
-						SetFocus();
-					}
-					else if ( _pMachine->_type == MACH_DUPLICATOR)
-					{
-						_pMachine->SetParameter(thispar,(int)nv);
+						wndView->AddMacViewUndo();
+						_pMachine->SetParameter(tweakpar,(int)nv);
 					}
 					Invalidate(false);
 				}
 			}
 			CFrameWnd::OnRButtonUp(nFlags, point);
-		}
-
-		void CFrameMachine::OnParametersRandomparameters() 
-		{
-			if ( _pMachine->_type == MACH_PLUGIN)
-			{
-				// Randomize controls
-				for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
-				{
-					int minran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MinValue;
-					int maxran = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->MaxValue;
-
-					int dif = (maxran-minran);
-
-					float randsem = (float)rand()*0.000030517578125f;
-
-					float roffset = randsem*(float)dif;
-
-					wndView->AddMacViewUndo();
-					try
-					{
-						((Plugin*)_pMachine)->proxy().ParameterTweak(c, minran+int(roffset));
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-				}
-			}
-			Invalidate(false);
-		}
-
-		void CFrameMachine::OnParametersResetparameters() 
-		{
-			if ( _pMachine->_type == MACH_PLUGIN)
-			{
-				for (int c=0; c<((Plugin*)_pMachine)->GetInfo()->numParameters; c++)
-				{
-					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
-					wndView->AddMacViewUndo();
-					try
-					{
-						((Plugin*)_pMachine)->proxy().ParameterTweak(c,dv);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-				}
-			}
-			if (istweak)
-			{
-				istweak = false;
-			}
-			Invalidate(false);
-		}
-
-		void CFrameMachine::OnParametersCommand() 
-		{
-			if ( _pMachine->_type == MACH_PLUGIN)
-			{
-				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
-				try
-				{
-					((Plugin*)_pMachine)->proxy().Command();
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-			}
-		}
-
-		void CFrameMachine::OnMachineAboutthismachine() 
-		{
-			if (istweak)
-			{
-				istweak = false;
-			}
-			if ( _pMachine->_type == MACH_PLUGIN)
-			{
-				MessageBox
-					(
-						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
-						"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
-					);
-			}
-		}
-
-		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-		{
-			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
-			{
-				return -1;
-			}
-			SetTimer(2104+MachineIndex,100,0);
-			return 0;
 		}
 
 		void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -839,6 +582,78 @@ NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
+		void CFrameMachine::OnParametersRandomparameters() 
+		{
+			int numpars = _pMachine->GetNumParams();
+			for (int c=0; c<numpars; c++)
+			{
+				int minran,maxran;
+				_pMachine->GetParamRange(c,minran,maxran);
+
+					int dif = (maxran-minran);
+
+					float randsem = (float)rand()*0.000030517578125f;
+
+					float roffset = randsem*(float)dif;
+
+					wndView->AddMacViewUndo();
+				_pMachine->SetParameter(c,minran+int(roffset));
+			}
+			Invalidate(false);
+		}
+
+		void CFrameMachine::OnParametersResetparameters() 
+		{
+			if ( _pMachine->_type == MACH_PLUGIN)
+			{
+				int numpars = _pMachine->GetNumParams();
+				for (int c=0; c<numpars; c++)
+				{
+					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
+					wndView->AddMacViewUndo();
+					_pMachine->SetParameter(c,dv);
+				}
+			}
+			if (istweak)
+			{
+				istweak = false;
+			}
+			Invalidate(false);
+		}
+
+		void CFrameMachine::OnParametersCommand() 
+		{
+			if ( _pMachine->_type == MACH_PLUGIN)
+			{
+				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
+				try
+				{
+					((Plugin*)_pMachine)->proxy().Command();
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+			}
+		}
+
+		void CFrameMachine::OnMachineAboutthismachine() 
+		{
+			if (istweak)
+			{
+				istweak = false;
+			}
+			if ( _pMachine->_type == MACH_PLUGIN)
+			{
+				MessageBox
+					(
+						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
+						"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
+					);
+			}
+		}
+
+
 		void CFrameMachine::OnParametersShowpreset() 
 		{
 			CPresetsDlg dlg;
@@ -847,10 +662,5 @@ NAMESPACE__BEGIN(psycle)
 			dlg.DoModal();
 		}
 
-		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
-		{
-			CFrameWnd::OnSetFocus(pOldWnd);
-			Invalidate(false);
-		}
 	NAMESPACE__END
 NAMESPACE__END

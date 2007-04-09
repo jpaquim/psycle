@@ -138,7 +138,7 @@ NAMESPACE__BEGIN(psycle)
 								break;
 							case 1:
 								int max = x2 - x; 
-								int kf0, kf1, kf2, kf3;
+								int kf0, kf1, kf2, kf3=0;
 								kf1 = y; kf2 = y2;
 								int curvept;
 								
@@ -213,7 +213,7 @@ NAMESPACE__BEGIN(psycle)
 				//check if user has clicked on a point
 
 				bool bPointAllowed = false;
-				bool bPointFound = false;
+//				bool bPointFound = false;
 				int pos = 0;
 
 				CClientDC dc(this);

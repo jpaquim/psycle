@@ -304,6 +304,12 @@ IDB_SAMPULSE            BITMAP                  "sampulse.bmp"
 IDB_KEYS_SHARP          BITMAP                  "sharpkey.bmp"
 IDB_KEYS_NORMAL         BITMAP                  "notekey.bmp"
 IDB_KEYS_BACK           BITMAP                  "keys_bac.bmp"
+IDB_VUMETEROFF          BITMAP                  "Slider\\VuOff.bmp"
+IDB_VUMETERON           BITMAP                  "Slider\\VuOn.bmp"
+IDB_SLIDERKNOBV         BITMAP                  "Slider\\sliderB.bmp"
+IDB_SLIDERBACKV         BITMAP                  "Slider\\sliderP.bmp"
+IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
+IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
 IDR_WAVEDFRAME          BITMAP                  "./toolbar1.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2325,6 +2331,7 @@ BEGIN
     LTEXT           "End",IDC_STATIC_DESTENDLABEL,178,37,14,10
 END
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
@@ -2630,6 +2637,7 @@ BEGIN
         RIGHTMARGIN, 517
         BOTTOMMARGIN, 297
     END
+
     IDD_INTERPOLATE_CURVE, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -3017,7 +3025,7 @@ BEGIN
     ID_SELECTION_FADEOUT    "Linear fade out"
     ID_SELECTION_NORMALIZE  "Maximize peak samples value"
     ID_SELECTION_REMOVEDC   "Remove DC"
-	ID_SELECCION_ZOOMOUT    "Zoom out view"
+    ID_SELECCION_ZOOMOUT    "Zoom out view"
     ID_SELECTION_SHOWALL    "Show entire wave"
 END
 
@@ -3049,12 +3057,23 @@ BEGIN
     ID_POP_COPY             "Copy the selected rows to the buffer\nCopy Selection"
     ID_POP_PASTE            "Paste (overwriting) the content the buffer to the pattern\nPaste Selection"
     ID_POP_INTERPOLATE      "Interpolates the values from first selected to last selected\nInterpolate values"
-    ID_POP_INTERPOLATE_CURVE "Interpolates the values using an user defined curve\nInterpolate values"
     ID_POP_CHANGEGENERATOR  "Changes the Generator to the current selected\nChange Generator"
     ID_POP_CHANGEINSTRUMENT "Changes the Instrument to the current selected\nChange Instrument"
     ID_POP_TRANSPOSE1       "Transposes the notes 1 seminote up\nTraspose +1"
     ID_POP_TRANSPOSE12      "Transposes the notes 12 seminotes up (1 octave)\nTraspose +12"
     ID_POP_TRANSPOSE_12     "Transposes the notes 12 seminotes down (1 octave)\nTraspose -12"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_POP_INTERPOLATE_CURVE 
+                            "Interpolates the values using an user defined curve\nInterpolate values"
+    ID_SELECCION_ZOOMIN     "Zoom In"
+    ID_SELECTION_ZOOMSEL    "Zoom to Selection"
+    ID_PASTE_MIX            "Mix with Clipboard Data"
+    ID_PASTE_OVERWRITE      "Overwrite with Clipboard Data"
+    ID_PASTE_CROSSFADE      "Crossfade with Clipboard Data"
+    ID_EDIT_SNAPTOZERO      "Set/Unset Snap to Zero"
 END
 
 STRINGTABLE 
@@ -3104,16 +3123,6 @@ BEGIN
     ID_EDIT_CROP            "Cut everything but selection"
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
-END
-
-STRINGTABLE 
-BEGIN
-    ID_SELECCION_ZOOMIN     "Zoom In"
-    ID_SELECTION_ZOOMSEL    "Zoom to Selection"
-    ID_PASTE_MIX            "Mix with Clipboard Data"
-    ID_PASTE_OVERWRITE      "Overwrite with Clipboard Data"
-    ID_PASTE_CROSSFADE      "Crossfade with Clipboard Data"
-    ID_EDIT_SNAPTOZERO      "Set/Unset Snap to Zero"
 END
 
 STRINGTABLE 

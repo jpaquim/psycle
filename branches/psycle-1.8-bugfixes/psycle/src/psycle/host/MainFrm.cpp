@@ -9,6 +9,7 @@
 #include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
 #include "VstEditorDlg.hpp"
+#include "FrameMixerMachine.hpp"
 #include "Helpers.hpp"
 #include "WireDlg.hpp"
 #include "GearRackDlg.hpp"
@@ -1437,6 +1438,27 @@ NAMESPACE__BEGIN(psycle)
 							sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
 													,ma->_editName);
 							((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
+							isguiopen[tmac] = true;
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						}
+						break;
+					case MACH_MIXER:
+						{
+							m_pWndMac[tmac] = new CFrameMixerMachine(tmac);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+							((CFrameMixerMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
+							((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
+
+							m_pWndMac[tmac]->LoadFrame(
+								IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION,
+								this);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate();
+							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
+							std::ostringstream winname;
+							winname<<std::setfill('0') << std::setw(2) << std::hex;
+							winname << ((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->_editName;
+							((CFrameMixerMachine*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
 							isguiopen[tmac] = true;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}

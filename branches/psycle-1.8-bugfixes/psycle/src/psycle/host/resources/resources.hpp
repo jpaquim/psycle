@@ -102,6 +102,12 @@
 #define IDB_KEYS_SHARP                  232
 #define IDB_KEYS_BACK                   234
 #define IDD_INTERPOLATE_CURVE           240
+#define IDB_VUMETEROFF                  243
+#define IDB_VUMETERON                   244
+#define IDB_SLIDERKNOBV                 249
+#define IDB_SLIDERBACKV                 250
+#define IDB_SLIDERKNOBH                 251
+#define IDB_SLIDERBACKH                 252
 #define IDD_WAVED_MIX                   255
 #define IDD_WAVED_INSERTSILENCE         257
 #define IDD_WAVED_CROSSFADE             258

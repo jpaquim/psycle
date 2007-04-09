@@ -73,7 +73,7 @@ NAMESPACE__BEGIN(psycle)
 			static int pluginOrder;
 			static bool pluginName;
 			static void learnDllName(const std::string & fullpath);
-			static bool lookupDllName(const std::string &, std::string & result);
+			static bool lookupDllName(const std::string, std::string & result);
 			static void DestroyPluginInfo();
 			static void LoadPluginInfo();
 			static int LastType0;

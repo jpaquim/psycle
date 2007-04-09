@@ -42,10 +42,14 @@ NAMESPACE__BEGIN(psycle)
 		//\todo : Important: There can exists dlls with the same name (there is a phantom.dll which is a VST).
 		//        what about adding a new parameter indicating if we want a VST or a Psycle plugin?
 		//		  or maybe if found more than one entry, ask the user which one he wants to use?
-		bool CNewMachine::lookupDllName(const std::string & name, std::string & result)
+		bool CNewMachine::lookupDllName(const std::string name, std::string & result)
 		{
+			std::string tmp = name;
+			// transform string to lower case
+			std::transform(tmp.begin(),tmp.end(),tmp.begin(),std::tolower);
+			
 			std::map<std::string,std::string>::iterator iterator
-				= dllNames.find(name);
+				= dllNames.find(tmp);
 			if(iterator != dllNames.end())
 			{
 				result=iterator->second;
@@ -188,7 +192,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
-				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, hNodes[0], TVI_SORT);
+				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
 				m_browser.Select(hNodes[LastType0],TVGN_CARET);
 			}
 			else
@@ -240,7 +244,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
-				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, hNodes[0], TVI_SORT);
+				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
 				m_browser.Select(hNodes[LastType1],TVGN_CARET);
 			}
 			Outputmachine = -1;
@@ -310,9 +314,8 @@ NAMESPACE__BEGIN(psycle)
 				m_dllnameLabel.SetWindowText("Internal Machine");
 				m_versionLabel.SetWindowText("V1.0");
 				Outputmachine = MACH_MIXER;
-				OutBus = true;
 				LastType0 = 0;
-				LastType1 = 0;
+				LastType1 = 1;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}

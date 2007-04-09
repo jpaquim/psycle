@@ -2473,7 +2473,8 @@ namespace psycle
 
 			// save our file
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
-
+			///\todo: Wrong song dir causes "machine cloning failed"! 
+			///\todo: the process should be chagned and save the data in memory.
 			CString filepath = Global::pConfig->GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);

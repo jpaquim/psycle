@@ -117,6 +117,7 @@ namespace psycle
 			, _x(0)
 			, _y(0)
 			, _numPars(0)
+			, _nCols(1)
 			, _numInputs(0)
 			, _numOutputs(0)
 			, TWSSamples(0)
@@ -783,6 +784,11 @@ namespace psycle
 			}
 			else name[0] = '\0';
 		}
+		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval)
+		{
+			if ( numparam < 8) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if ( numparam < 16) { minval = -48; maxval = 48; }
+		}
 		int DuplicatorMac::GetParamValue(int numparam)
 		{
 			if (numparam >=0 && numparam<8)
@@ -1199,6 +1205,25 @@ namespace psycle
 			return rettxt;
 		}
 */
+		std::string Mixer::GetAudioInputName(int port)
+		{
+			std::string rettxt;
+			if (port < return1 )
+			{	
+				rettxt = "Input ";
+				rettxt += ('0'+port-chan1);
+				return rettxt;
+			}
+			else if ( port <= return12)
+			{
+				rettxt = "Return ";
+				rettxt += ('0'+port-return1);
+				return rettxt;
+			}
+			rettxt = "-";
+			return rettxt;
+		}
+
 		int Mixer::GetNumCols()
 		{
 			int cols=0;

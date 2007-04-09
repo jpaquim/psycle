@@ -156,26 +156,11 @@ NAMESPACE__BEGIN(psycle)
 
 			if ((src < MAX_BUSES) && (src >=0))
 			{
-				// we need to find an empty slot
-				for (int i = 0; i < MAX_BUSES; i++)
-				{
-					if (!Global::_pSong->_pMachine[i])
-					{
-						dst = i;
-						break;
-					}
-				}
+				dst = Global::_pSong->GetFreeBus();
 			}
 			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
 			{
-				for (int i = MAX_BUSES; i < MAX_BUSES*2; i++)
-				{
-					if (!Global::_pSong->_pMachine[i])
-					{
-						dst = i;
-						break;
-					}
-				}
+				dst = Global::_pSong->GetFreeFxBus();
 			}
 			if (dst >= 0)
 			{

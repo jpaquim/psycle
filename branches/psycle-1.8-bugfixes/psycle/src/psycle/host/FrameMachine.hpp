@@ -22,7 +22,7 @@ NAMESPACE__BEGIN(psycle)
 		// Attributes
 		public:
 			CFrameMachine(int dum){MachineIndex = dum;};
-		private:
+		protected:
 			Machine* _pMachine;
 			//CBitmap b_knob;
 			CFont	b_font;
@@ -36,15 +36,18 @@ NAMESPACE__BEGIN(psycle)
 			bool ultrafinetweak;
 			int tweakpar;
 			int tweakbase;
+			int minval;
+			int maxval;
 			int sourcepoint;
+			int prevval;
 			
 			int ncol;
 			int parspercol;
 		// Operations
 		public:
-			void LoadMachineDial();
-			void SelectMachine(Machine* pMachine);
-			void Generate();
+			virtual void SelectMachine(Machine* pMachine);
+			virtual void Generate();
+			virtual int ConvertXYtoParam(int x, int y);
 			CChildView *wndView;
 			UINT MachineIndex;
 			bool* _pActive;	// It is used to help the program know if this window is open or not.
@@ -59,6 +62,7 @@ NAMESPACE__BEGIN(psycle)
 			//{{AFX_MSG(CFrameMachine)
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+			afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 			afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
