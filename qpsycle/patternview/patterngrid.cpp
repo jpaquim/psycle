@@ -370,10 +370,10 @@ void PatternGrid::drawBlockData( QPainter *painter, int xOff, int line, const st
 {					
     painter->setPen( color );
     int col = 0;
-    int yOff = line * lineHeight();
+    int yOff = (line+1) * lineHeight();
+    QRectF textRect = QRectF( xOff+col, yOff, cellWidth(), lineHeight() );
     for (int i = 0; i < text.length(); i++) {
-        QRectF textRect = QRectF( xOff+col, yOff, cellWidth(), lineHeight() );
-        painter->drawText( textRect, Qt::AlignCenter, QString::fromStdString( text.substr(i,1) ) );
+        painter->drawText( xOff+col, yOff, QString::fromStdString( text.substr(i,1) ) );
         col += cellWidth();
     }
 }
@@ -381,10 +381,9 @@ void PatternGrid::drawBlockData( QPainter *painter, int xOff, int line, const st
 void PatternGrid::drawStringData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color )
 {
     painter->setPen( color );
-    int yOff = line * lineHeight();
+    int yOff = (line+1) * lineHeight();
 
-    QRectF textRect = QRectF( xOff, yOff, noteCellWidth(), lineHeight() );
-    painter->drawText( textRect, Qt::AlignCenter, QString::fromStdString( text ) );
+    painter->drawText( xOff, yOff, QString::fromStdString( text ) );
 }
 
 void PatternGrid::drawString( QPainter *painter, int track, int line, int eventnr, const std::string & data , const QColor & color ) 
@@ -396,9 +395,7 @@ void PatternGrid::drawString( QPainter *painter, int track, int line, int eventn
     if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
     int xOff = it->second.left() + 5 + patDraw_->trackPaddingLeft();
-    QRectF textRect = QRectF( xOff + eventOffset(eventnr,0), yOff, cellWidth()*4, lineHeight() );
-    painter->drawText( textRect, Qt::AlignCenter, QString::fromStdString( data ) );
-//    drawStringData( painter, xOff + eventOffset(eventnr,0), line, data, color );
+    drawStringData( painter, xOff + eventOffset(eventnr,0), line, data, color );
 }
 
 std::string PatternGrid::noteToString( int value, bool sharp )
