@@ -104,7 +104,7 @@ int PatternDraw::gridWidthByTrack( int track ) const
     return gridWidth;
 }
 
-int PatternDraw::findTrackByXPos( int x ) const 
+int PatternDraw::findTrackByXPos( int x ) const  // FIXME: change to findTrackNumberByXPos
 {
     // todo write a binary search here
     // is used from intersectCell
@@ -145,6 +145,16 @@ int PatternDraw::trackWidthByTrack( int track ) const
     if ( it != trackGeometrics().end() )
         trackWidth = it->second.width();
     return trackWidth;
+}
+
+TrackGeometry PatternDraw::findTrackGeomByTrackNum( int trackNum )
+{ // FIXME: just use a std::map operation?
+    std::map<int, TrackGeometry>::const_iterator it;
+    it = trackGeometrics().lower_bound( trackNum );
+    if ( it != trackGeometrics().end() ) {
+        return it->second;
+    }
+    return TrackGeometry( *this );
 }
 
 void PatternDraw::scrollContentsBy ( int dx, int dy ) 

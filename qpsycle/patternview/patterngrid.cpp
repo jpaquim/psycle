@@ -1484,7 +1484,7 @@ void PatternGrid::navTop()
         cursor_.setLine( 0 ); 
         checkUpScroll( cursor() );
     } else {
-        if ( cursor().col() != 0 ) {
+        if ( cursor_.eventNr() != 0 ) {
             cursor_.setCol(0);
             cursor_.setEventNr(0);
         } else if ( cursor().track() != 0 ) {
@@ -1505,13 +1505,15 @@ void PatternGrid::navBottom()
         cursor_.setLine( endLineNumber() );
         checkDownScroll( cursor() );
     } else {		
-        if ( cursor().col() != 6 ) {
-            cursor_.setCol(6);
-            cursor_.setEventNr( ColumnEvent::hex4 );
+        TrackGeometry trackGeom = patDraw()->findTrackGeomByTrackNum( cursor().track() );
+
+        if ( cursor().eventNr() != trackGeom.visibleColumns() - 1 ) {
+            cursor_.setEventNr( trackGeom.visibleColumns() - 1 );
+            cursor_.setCol(3);
         } else if ( cursor().track() != endTrackNumber() ) {
             cursor_.setTrack( endTrackNumber() );
-            cursor_.setCol( 6 );
-            cursor_.setEventNr( ColumnEvent::hex4 );
+            cursor_.setEventNr( trackGeom.visibleColumns() - 1 );
+            cursor_.setCol(3);
             checkRightScroll( cursor() );
         } else {
             cursor_.setLine( endLineNumber() );
