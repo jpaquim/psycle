@@ -6,8 +6,7 @@
 
 <!-- audio configuration -->
 
-<audio enable='1' />
-<!--<driver name='jack' /> -->
+<audio enable='0' />
 <driver name='alsa' />
 <alsa device = 'plughw:0' />
 
@@ -16,6 +15,10 @@
 <path id='icondir' src='/home/neil/code/xpsycle/xpsycle/pixmaps/' />
 <path id='plugindir' src='/home/neil/code/xpsycle.plugins/' />
 <path id='ladspadir' src='/usr/lib/ladspa' />
+
+<!-- pattern view options -->
+
+<option id="ft2-home-end-behaviour" value="0" />
 
 <!-- keyHandler configuration -->
 
