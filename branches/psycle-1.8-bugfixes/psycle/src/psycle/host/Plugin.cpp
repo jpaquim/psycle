@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::Plugin
 #include <project.private.hpp>
 #include "FileIO.hpp"
-#include "Plugin.hpp"
 #include "InputHandler.hpp"
 #include <operating_system/exceptions/code_description.hpp>
 #include "Song.hpp"
@@ -15,6 +14,7 @@
 #include <cstdlib> // for environment variables functions
 #include <string>
 #include <sstream>
+#include "Plugin.hpp"
 namespace psycle
 {
 	namespace host

@@ -368,6 +368,9 @@ NAMESPACE__BEGIN(psycle)
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
+						else if( pMachine->_type == MACH_XMSAMPLER )
+						{
+						}
 						else
 						{
 							// n/a

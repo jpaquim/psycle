@@ -492,12 +492,18 @@ namespace psycle
 					{
 						float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
 						float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
+						if(pThis->_dodither)
+						{
+							pThis->dither.Process(pL, amount);
+							pThis->dither.Process(pR, amount);
+						}
 						int i;
 						switch(Global::pConfig->_pOutputDriver->_channelmode)
 						{
 						case 0: // mono mix
 							for(i=0; i<amount; i++)
 							{
+								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
 								if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->StopRecording(false);
 							}
 							break;
@@ -525,23 +531,29 @@ namespace psycle
 					numSamplex -= amount;
 				}
 				 pThis->_samplesRemaining -= amount;
-				 //if(pThis->_playing) pThis->_samplesRemaining -= amount;
 			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
-
 			return pThis->_pBuffer;
 		}
 
-		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode)
+		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape)
 		{
 			if(!_recording)
 			{
 				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
+				//       ensure correct re/initialization of variables (concretely, player::m_SampleRate and AudioDriver::_samplesPerSec)
 				backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
 				backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
 				backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
 				if(samplerate > 0) { SampleRate(samplerate); Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate; }
 				if(bitdepth > 0) Global::pConfig->_pOutputDriver->_bitDepth = bitdepth;
 				if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
+				if(_dodither=dodither)	//(not a typo)
+				{
+					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
+					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->_bitDepth);
+					dither.SetPdf((dsp::Dither::Pdf)ditherpdf);
+					dither.SetNoiseShaping((dsp::Dither::NoiseShape)noiseshape);
+				}
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
 				Stop();

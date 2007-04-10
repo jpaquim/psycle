@@ -1588,6 +1588,7 @@ NAMESPACE__BEGIN(psycle)
 						break;
 					case MACH_XMSAMPLER:
 						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
+						break;
 					case MACH_DUPLICATOR:
 //					case MACH_LFO:
 //					case MACH_AUTOMATOR:
@@ -2512,6 +2513,9 @@ NAMESPACE__BEGIN(psycle)
 								
 								if (_pSong->_pInstrument[toffset[1]]->_sName[0])
 									oss <<  " - " << _pSong->_pInstrument[toffset[1]]->_sName;
+							}
+							else if (_pSong->_pMachine[machine]->_type == MACH_XMSAMPLER)
+							{
 							}
 							else
 							{

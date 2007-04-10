@@ -733,7 +733,7 @@ NAMESPACE__BEGIN(psycle)
 					Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
 					if (tmac)
 					{
-						if (tmac->_type == MACH_SAMPLER)
+						if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 						{
 							entry._inst = _pSong->auxcolSelected;
 						}
@@ -832,7 +832,7 @@ NAMESPACE__BEGIN(psycle)
 			Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
 			if (tmac)
 			{
-				if (tmac->_type == MACH_SAMPLER)
+				if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 				{
 					entry->_inst = _pSong->auxcolSelected;
 				}

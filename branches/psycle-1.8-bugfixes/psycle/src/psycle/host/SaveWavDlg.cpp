@@ -21,6 +21,8 @@ NAMESPACE__BEGIN(psycle)
 		int CSaveWavDlg::channelmode = -1;
 		int CSaveWavDlg::rate = -1;
 		int CSaveWavDlg::bits = -1;
+		int CSaveWavDlg::noiseshape = 0;
+		int CSaveWavDlg::ditherpdf = (int)pdf::triangular;
 		BOOL CSaveWavDlg::savewires = false;
 		BOOL CSaveWavDlg::savetracks = false;
 		BOOL CSaveWavDlg::savegens = false;
@@ -50,6 +52,9 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_COMBO_BITS, m_bits);
 			DDX_Control(pDX, IDC_COMBO_CHANNELS, m_channelmode);
 			DDX_Control(pDX, IDC_TEXT, m_text);
+			DDX_Control(pDX, IDC_CHECK_DITHER, m_dither);
+			DDX_Control(pDX, IDC_COMBO_PDF, m_pdf);
+			DDX_Control(pDX, IDC_COMBO_NOISESHAPING, m_noiseshaping);
 			DDX_Radio(pDX, IDC_RECSONG, m_recmode);
 			//}}AFX_DATA_MAP
 		}
@@ -64,9 +69,12 @@ NAMESPACE__BEGIN(psycle)
 			ON_CBN_SELCHANGE(IDC_COMBO_BITS, OnSelchangeComboBits)
 			ON_CBN_SELCHANGE(IDC_COMBO_CHANNELS, OnSelchangeComboChannels)
 			ON_CBN_SELCHANGE(IDC_COMBO_RATE, OnSelchangeComboRate)
+			ON_CBN_SELCHANGE(IDC_COMBO_PDF, OnSelchangeComboPdf)
+			ON_CBN_SELCHANGE(IDC_COMBO_NOISESHAPING, OnSelchangeComboNoiseShaping)
 			ON_BN_CLICKED(IDC_SAVETRACKSSEPARATED, OnSavetracksseparated)
 			ON_BN_CLICKED(IDC_SAVEWIRESSEPARATED, OnSavewiresseparated)
 			ON_BN_CLICKED(IDC_SAVEGENERATORSEPARATED, OnSavegensseparated)
+			ON_BN_CLICKED(IDC_CHECK_DITHER,	OnToggleDither)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
@@ -89,9 +97,9 @@ NAMESPACE__BEGIN(psycle)
 			name+=".wav";
 			m_filename.SetWindowText(name.c_str());
 			
-			m_rangeend.EnableWindow(FALSE);
-			m_rangestart.EnableWindow(FALSE);
-			m_patnumber.EnableWindow(FALSE);
+			m_rangeend.EnableWindow(false);
+			m_rangestart.EnableWindow(false);
+			m_patnumber.EnableWindow(false);
 			
 			char num[3];
 			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
@@ -178,14 +186,27 @@ NAMESPACE__BEGIN(psycle)
 			}
 			m_channelmode.SetCurSel(channelmode);
 
+			m_dither.SetCheck(BST_CHECKED);
+
+			m_pdf.AddString("Triangular");
+			m_pdf.AddString("Rectangular");
+			m_pdf.AddString("Gaussian");
+			ditherpdf = (int)pdf::triangular;
+			m_pdf.SetCurSel(ditherpdf);
+
+			m_noiseshaping.AddString("None");
+			m_noiseshaping.AddString("High-Pass Contour");
+			noiseshape=0;
+			m_noiseshaping.SetCurSel(noiseshape);
+
 			m_savetracks.SetCheck(savetracks);
 			m_savegens.SetCheck(savegens);
 			m_savewires.SetCheck(savewires);
 
 			m_text.SetWindowText("");
 			
-			return TRUE;  // return TRUE unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return FALSE
+			return true;  // return true unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return false
 		}
 
 		void CSaveWavDlg::OnFilebrowse() 
@@ -206,25 +227,25 @@ NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::OnSelAllSong() 
 		{
-			m_rangeend.EnableWindow(FALSE);
-			m_rangestart.EnableWindow(FALSE);
-			m_patnumber.EnableWindow(FALSE);
+			m_rangeend.EnableWindow(false);
+			m_rangestart.EnableWindow(false);
+			m_patnumber.EnableWindow(false);
 			m_recmode=0;
 		}
 
 		void CSaveWavDlg::OnSelPattern() 
 		{
-			m_rangeend.EnableWindow(FALSE);
-			m_rangestart.EnableWindow(FALSE);
-			m_patnumber.EnableWindow(TRUE);
+			m_rangeend.EnableWindow(false);
+			m_rangestart.EnableWindow(false);
+			m_patnumber.EnableWindow(true);
 			m_recmode=1;
 		}
 
 		void CSaveWavDlg::OnSelRange() 
 		{
-			m_rangeend.EnableWindow(TRUE);
-			m_rangestart.EnableWindow(TRUE);
-			m_patnumber.EnableWindow(FALSE);
+			m_rangeend.EnableWindow(true);
+			m_rangestart.EnableWindow(true);
+			m_patnumber.EnableWindow(false);
 			m_recmode=2;
 		}
 
@@ -233,7 +254,7 @@ NAMESPACE__BEGIN(psycle)
 			Song *pSong = Global::_pSong;
 			Player *pPlayer = Global::pPlayer;
 
-			m_savewave.EnableWindow(FALSE);
+			m_savewave.EnableWindow(false);
 			m_cancel.SetWindowText("Stop");
 			
 			autostop = Global::pConfig->autoStopMachines;
@@ -263,23 +284,26 @@ NAMESPACE__BEGIN(psycle)
 			const int real_rate[]={8192,11025,22050,44100,48000,96000};
 			const int real_bits[]={8,16,24,32};
 
-			GetDlgItem(IDC_RECSONG)->EnableWindow(FALSE);
-			GetDlgItem(IDC_RECPATTERN)->EnableWindow(FALSE);
-			GetDlgItem(IDC_RECRANGE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
+			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
+			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
 
-			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(FALSE);
+			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
 
-			m_filename.EnableWindow(FALSE);
-			m_savetracks.EnableWindow(FALSE);
-			m_savegens.EnableWindow(FALSE);
-			m_savewires.EnableWindow(FALSE);
-			m_rate.EnableWindow(FALSE);
-			m_bits.EnableWindow(FALSE);
-			m_channelmode.EnableWindow(FALSE);
+			m_filename.EnableWindow(false);
+			m_savetracks.EnableWindow(false);
+			m_savegens.EnableWindow(false);
+			m_savewires.EnableWindow(false);
+			m_rate.EnableWindow(false);
+			m_bits.EnableWindow(false);
+			m_channelmode.EnableWindow(false);
+			m_pdf.EnableWindow(false);
+			m_noiseshaping.EnableWindow(false);
+			m_dither.EnableWindow(false);
 
-			m_rangeend.EnableWindow(FALSE);
-			m_rangestart.EnableWindow(FALSE);
-			m_patnumber.EnableWindow(FALSE);
+			m_rangeend.EnableWindow(false);
+			m_rangestart.EnableWindow(false);
+			m_patnumber.EnableWindow(false);
 
 			if (m_savetracks.GetCheck())
 			{
@@ -297,11 +321,11 @@ NAMESPACE__BEGIN(psycle)
 						{
 							if (j != i)
 							{
-								pSong->_trackMuted[j] = TRUE;
+								pSong->_trackMuted[j] = true;
 							}
 							else
 							{
-								pSong->_trackMuted[j] = FALSE;
+								pSong->_trackMuted[j] = false;
 							}
 						}
 /*
@@ -346,7 +370,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 					}
 					else
 					{
-						_Muted[i] = TRUE;
+						_Muted[i] = true;
 					}
 				}
 
@@ -361,11 +385,11 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 							{
 								if (j != i)
 								{
-									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = TRUE;
+									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
 								}
 								else
 								{
-									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = FALSE;
+									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
 								}
 							}
 						}
@@ -392,7 +416,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 					}
 					else
 					{
-						_Muted[i] = TRUE;
+						_Muted[i] = true;
 					}
 				}
 
@@ -407,11 +431,11 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 							{
 								if (j != i)
 								{
-									pSong->_pMachine[j]->_mute = TRUE;
+									pSong->_pMachine[j]->_mute = true;
 								}
 								else
 								{
-									pSong->_pMachine[j]->_mute = FALSE;
+									pSong->_pMachine[j]->_mute = false;
 								}
 							}
 						}
@@ -450,7 +474,8 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 				m_text.SetWindowText(file.substr(pos+1).c_str());
 			}
 
-			pPlayer->StartRecording(file,bits,rate,channelmode);
+			pPlayer->StartRecording(file,bits,rate,channelmode,
+									m_dither.GetCheck()==BST_CHECKED, ditherpdf, noiseshape);
 
 			int tmp;
 			int cont;
@@ -597,11 +622,11 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 						{
 							if (j != i)
 							{
-								pSong->_trackMuted[j] = TRUE;
+								pSong->_trackMuted[j] = true;
 							}
 							else
 							{
-								pSong->_trackMuted[j] = FALSE;
+								pSong->_trackMuted[j] = false;
 							}
 						}
 						// now save the song
@@ -632,11 +657,11 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 							{
 								if (j != i)
 								{
-									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = TRUE;
+									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
 								}
 								else
 								{
-									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = FALSE;
+									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
 								}
 							}
 						}
@@ -675,11 +700,11 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 							{
 								if (j != i)
 								{
-									pSong->_pMachine[j]->_mute = TRUE;
+									pSong->_pMachine[j]->_mute = true;
 								}
 								else
 								{
-									pSong->_pMachine[j]->_mute = FALSE;
+									pSong->_pMachine[j]->_mute = false;
 								}
 							}
 						}
@@ -702,41 +727,44 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 
 			m_text.SetWindowText("");
 
-			GetDlgItem(IDC_RECSONG)->EnableWindow(TRUE);
-			GetDlgItem(IDC_RECPATTERN)->EnableWindow(TRUE);
-			GetDlgItem(IDC_RECRANGE)->EnableWindow(TRUE);
+			GetDlgItem(IDC_RECSONG)->EnableWindow(true);
+			GetDlgItem(IDC_RECPATTERN)->EnableWindow(true);
+			GetDlgItem(IDC_RECRANGE)->EnableWindow(true);
 
-			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(TRUE);
+			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(true);
 
-			m_filename.EnableWindow(TRUE);
-			m_savetracks.EnableWindow(TRUE);
-			m_savegens.EnableWindow(TRUE);
-			m_savewires.EnableWindow(TRUE);
-			m_rate.EnableWindow(TRUE);
-			m_bits.EnableWindow(TRUE);
-			m_channelmode.EnableWindow(TRUE);
+			m_filename.EnableWindow(true);
+			m_savetracks.EnableWindow(true);
+			m_savegens.EnableWindow(true);
+			m_savewires.EnableWindow(true);
+			m_rate.EnableWindow(true);
+			m_bits.EnableWindow(true);
+			m_channelmode.EnableWindow(true);
+			m_pdf.EnableWindow(m_dither.GetCheck());
+			m_noiseshaping.EnableWindow(m_dither.GetCheck());
+			m_dither.EnableWindow(true);
 
 			switch (m_recmode)
 			{
 			case 0:
-				m_rangeend.EnableWindow(FALSE);
-				m_rangestart.EnableWindow(FALSE);
-				m_patnumber.EnableWindow(FALSE);
+				m_rangeend.EnableWindow(false);
+				m_rangestart.EnableWindow(false);
+				m_patnumber.EnableWindow(false);
 				break;
 			case 1:
-				m_rangeend.EnableWindow(FALSE);
-				m_rangestart.EnableWindow(FALSE);
-				m_patnumber.EnableWindow(TRUE);
+				m_rangeend.EnableWindow(false);
+				m_rangestart.EnableWindow(false);
+				m_patnumber.EnableWindow(true);
 				break;
 			case 2:
-				m_rangeend.EnableWindow(TRUE);
-				m_rangestart.EnableWindow(TRUE);
-				m_patnumber.EnableWindow(FALSE);
+				m_rangeend.EnableWindow(true);
+				m_rangestart.EnableWindow(true);
+				m_patnumber.EnableWindow(false);
 				break;
 			}
 
 			m_progress.SetPos(0);
-			m_savewave.EnableWindow(TRUE);
+			m_savewave.EnableWindow(true);
 			m_cancel.SetWindowText("Close");
 		}
 
@@ -778,14 +806,27 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			rate = m_rate.GetCurSel();
 		}
 
+		void CSaveWavDlg::OnSelchangeComboPdf()
+		{
+			ditherpdf = m_pdf.GetCurSel();
+		}
+		void CSaveWavDlg::OnSelchangeComboNoiseShaping()
+		{
+			noiseshape = m_noiseshaping.GetCurSel();
+		}
+		void CSaveWavDlg::OnToggleDither()
+		{
+			m_noiseshaping.EnableWindow(m_dither.GetCheck());
+			m_pdf.EnableWindow(m_dither.GetCheck());
+		}
 		void CSaveWavDlg::OnSavetracksseparated() 
 		{
 			if (savetracks = m_savetracks.GetCheck())
 			{
-				m_savewires.SetCheck(FALSE);
-				savewires = FALSE;
-				m_savegens.SetCheck(FALSE);
-				savegens = FALSE;
+				m_savewires.SetCheck(false);
+				savewires = false;
+				m_savegens.SetCheck(false);
+				savegens = false;
 			}
 		}
 
@@ -793,10 +834,10 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 		{
 			if (savewires = m_savewires.GetCheck())
 			{
-				m_savetracks.SetCheck(FALSE);
-				savetracks = FALSE;
-				m_savegens.SetCheck(FALSE);
-				savegens = FALSE;
+				m_savetracks.SetCheck(false);
+				savetracks = false;
+				m_savegens.SetCheck(false);
+				savegens = false;
 			}
 		}
 
@@ -804,10 +845,10 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 		{
 			if (savewires = m_savegens.GetCheck())
 			{
-				m_savetracks.SetCheck(FALSE);
-				savetracks = FALSE;
-				m_savewires.SetCheck(FALSE);
-				savewires = FALSE;
+				m_savetracks.SetCheck(false);
+				savetracks = false;
+				m_savewires.SetCheck(false);
+				savewires = false;
 			}
 		}
 	NAMESPACE__END
