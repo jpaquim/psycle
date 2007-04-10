@@ -346,7 +346,7 @@ namespace psycle
 				{
 					if(!dst_machine._inputCon[c]) dfreebus = c;
 					// Checking if the destination machine is connected with the source machine to avoid a loop.
-					else if(dst_machine._outputMachines[c] == this->id()) error = true;
+					if(dst_machine._connection[c] && dst_machine._outputMachines[c] == this->id()) error = true;
 				}
 				// lamely abandon
 				if(dfreebus == -1 || error) return false;
@@ -365,7 +365,17 @@ namespace psycle
 
 		bool Machine::Disconnect(Machine& dst_machine)
 		{
-			return false; // \todo o_O`
+			int wireIndex = FindOutputWire( dstMac._macIndex );
+			int dstWireIndex = dstMac.FindInputWire( _macIndex );
+
+			_connection[wireIndex] = false;
+			_outputMachines[wireIndex] = -1;
+			_connectedOutputs--;
+
+			dstMac._inputCon[dstWireIndex] = false;
+			dstMac._inputMachines[dstWireIndex]=-1;
+			dstMac._connectedInputs--;
+			return true; 
 		}
 
 		void Machine::InitWireVolume(Machine::class_type msubclass, Wire::id_type wire, float value)

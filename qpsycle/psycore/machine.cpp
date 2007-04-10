@@ -342,7 +342,7 @@ namespace psy
 				{
 					if(!dst_machine._inputCon[c]) dfreebus = c;
 					// Checking if the destination machine is connected with the source machine to avoid a loop.
-					else if(dst_machine._outputMachines[c] == this->id()) error = true;
+					if(dst_machine._connection[c] && dst_machine._outputMachines[c] == this->id()) error = true;
 				}
 				// lamely abandon
 				if(dfreebus == -1 || error) return false;
@@ -371,7 +371,7 @@ namespace psy
             dstMac._inputCon[dstWireIndex] = false;
             dstMac._inputMachines[dstWireIndex]=-1;
             dstMac._connectedInputs--;
-			return true; // \todo o_O`
+			return true; 
 		}
 
 		void Machine::InitWireVolume(Machine::type_type type, Wire::id_type wire, float value)
