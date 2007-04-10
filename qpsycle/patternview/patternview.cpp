@@ -34,11 +34,28 @@ int d2i(double d)
 PatternView::PatternView( psy::core::Song *song )
 {
     song_ = song;
-    pattern_ = 0;
+    pattern_ = NULL;
     patternStep_ = 1;
     setNumberOfTracks( 6 );
     patDraw_ = new PatternDraw( this );
-    setPattern( new psy::core::SinglePattern() );
+
+    // Find the first pattern in the first non-empty category and
+    // use that as the current pattern. Maybe this should somehow be
+    // synchronized with the patternbox? If so then eventually this
+    // code may belong somewhere else.
+    if (song_) {
+      psy::core::PatternData* patternData = song_->patternSequence()->patternData();
+      for(int i=0;!pattern_ && i<patternData->size();i++) {
+        psy::core::PatternCategory* category = patternData->at(i);
+        for(int j=0;!pattern_ && j<category->size();j++) {
+          setPattern(category->at(j));
+        }
+      }
+    }
+    if(!pattern_) {
+      // FIXME: memory leak
+      setPattern( new psy::core::SinglePattern() );
+    }
 
     playPos_ = 0;
 
