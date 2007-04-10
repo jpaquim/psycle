@@ -167,6 +167,8 @@ public:
     bool ignorePatStepForNav();
     bool ft2HomeEndBehaviour();
     void setFt2HomeEndBehaviour( bool setit );
+    bool shiftArrowForSelect();
+    void setShiftArrowForSelect( bool setit );
 
     // Cursor.
     const PatCursor & cursor() const;
@@ -225,6 +227,11 @@ public:
     void doVolumeEvent( int keyChar );
     void doCommandOrParameterEvent( int keyChar );
 
+    void startBlock( const PatCursor & cursor );
+    void changeBlock( const PatCursor & cursor );
+    void endBlock( const PatCursor & cursor );
+    void unmarkBlock();
+
     void copyBlock( bool cutit );
     void pasteBlock( int tx,int lx,bool mix );
     void deleteBlock( );
@@ -259,6 +266,9 @@ private:
     bool doingMouseSelect_;
 
     bool ft2HomeEndBehaviour_;
+    bool shiftArrowForSelect_;
+
+    bool blockSelected_;
 
     bool isBlockCopied_;
     psy::core::SinglePattern pasteBuffer;

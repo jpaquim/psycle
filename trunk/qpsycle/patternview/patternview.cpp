@@ -50,6 +50,7 @@ PatternView::PatternView( psy::core::Song *song )
     layout->addWidget( patDraw_ );
 
     patDraw_->patternGrid()->setFt2HomeEndBehaviour( psy::core::Global::pConfig()->ft2HomeEndBehaviour() );
+    patDraw_->patternGrid()->setShiftArrowForSelect( psy::core::Global::pConfig()->shiftArrowForSelect() );
 }
 
 void PatternView::createToolBar()

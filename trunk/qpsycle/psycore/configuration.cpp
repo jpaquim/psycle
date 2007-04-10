@@ -92,6 +92,10 @@ namespace psy {
 			return ft2HomeEndBehaviour_;
 		}
 
+		bool Configuration::shiftArrowForSelect() const {
+			return shiftArrowForSelect_;
+		}
+
 /*		void Configuration::setXmlDefaults() {     
 			std::string xml_mem_;   
 
@@ -404,9 +408,12 @@ namespace psy {
                 for ( int i = 0; i < options.count(); i++ )
                 {
                     QDomElement option = options.item( i ).toElement();
+                    QString id = option.attribute("id");
                     QString value = option.attribute("value");
-                    if ( option.attribute("id") == "ft2-home-end-behaviour" )
+                    if ( id == "ft2-home-end-behaviour" )
                         ft2HomeEndBehaviour_ = value.toInt();     
+                    if ( id == "shift-arrow-for-select" )
+                        shiftArrowForSelect_ = value.toInt();     
                 }
             }
 
@@ -495,6 +502,9 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefSelectRight, Key( Qt::ShiftModifier, Qt::Key_Right ) );
 			inputHandler_.changeKeyCode( cdefSelectTrack, Key( Qt::ControlModifier, Qt::Key_R ) );
 			inputHandler_.changeKeyCode( cdefSelectAll, Key( Qt::ControlModifier, Qt::Key_A ) );
+			inputHandler_.changeKeyCode( cdefBlockStart, Key( Qt::ControlModifier, Qt::Key_B ) );
+			inputHandler_.changeKeyCode( cdefBlockEnd, Key( Qt::ControlModifier, Qt::Key_E ) );
+			inputHandler_.changeKeyCode( cdefBlockUnMark, Key( Qt::ControlModifier, Qt::Key_U ) );
 
 			inputHandler_.changeKeyCode( cdefBlockCopy, Key( Qt::ControlModifier, Qt::Key_C ) );
 			inputHandler_.changeKeyCode( cdefBlockCut, Key( Qt::ControlModifier, Qt::Key_X ) );

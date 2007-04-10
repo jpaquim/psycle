@@ -73,6 +73,7 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     //
     selection_.set( 0,0,0,0 );
     doingKeybasedSelect_ = false;
+    blockSelected_ = false;
 
     font_ = QFont( "courier", 9 );
     setFont( font_ );
@@ -91,8 +92,6 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
      smallTrackSeparatorColor_ = QColor( 105, 107, 107 );
      lineSepColor_ = QColor( 145, 147, 147 );
      restAreaColor_ = QColor( 24, 22, 25 );
-
-     ft2HomeEndBehaviour_ = true;
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -559,16 +558,16 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
             navBottom();
             break;
         case psy::core::cdefSelectUp:
-            selectUp();
+            if ( shiftArrowForSelect() ) selectUp();
             break;
         case psy::core::cdefSelectDn:
-            selectDown();
+            if ( shiftArrowForSelect() ) selectDown();
             break;
         case psy::core::cdefSelectLeft:
-            selectLeft();
+            if ( shiftArrowForSelect() ) selectLeft();
             break;
         case psy::core::cdefSelectRight:
-            selectRight();
+            if ( shiftArrowForSelect() ) selectRight();
         break;
         case psy::core::cdefSelectTrack:
             selectTrack();
@@ -576,6 +575,15 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
         case psy::core::cdefSelectAll:
             selectAll();
         break;
+        case psy::core::cdefBlockStart:
+            if ( !shiftArrowForSelect() ) startBlock( cursor() );
+            break;
+        case psy::core::cdefBlockEnd:
+            if ( !shiftArrowForSelect() ) endBlock( cursor() );
+            break;
+        case psy::core::cdefBlockUnMark:
+            if ( !shiftArrowForSelect() ) unmarkBlock();
+            break;
         case psy::core::cdefBlockCopy: 
             copyBlock( false );
             break;
@@ -1492,6 +1500,81 @@ bool PatternGrid::ft2HomeEndBehaviour() {
 void PatternGrid::setFt2HomeEndBehaviour( bool setit ) {
     ft2HomeEndBehaviour_ = setit;
 }
+
+bool PatternGrid::shiftArrowForSelect() {
+    return shiftArrowForSelect_;
+}
+void PatternGrid::setShiftArrowForSelect( bool setit ) {
+    shiftArrowForSelect_ = setit;
+}
+
+void PatternGrid::startBlock( const PatCursor & cursor  )
+{
+    selection_.setLeft( cursor.track() );
+    selection_.setTop( cursor.line() );
+
+    if ( blockSelected_ )
+    {
+        if( selection_.bottom() < selection_.top() )
+            selection_.setBottom( selection().top() );
+        
+        if( selection_.right() < selection_.left() )
+            selection_.setRight( selection_.left() );
+    }
+    else
+    {
+        selection_.setBottom( cursor.line() );
+        selection_.setRight( cursor.track() );
+    }
+    blockSelected_ = true;
+
+    update( boundingRect() );
+}
+
+void PatternGrid::endBlock( const PatCursor & crs )
+{
+    int track = crs.track();
+    int line = crs.line();
+
+    selection_.setRight( track );
+    selection_.setBottom( line );
+    
+    if ( blockSelected_ )
+    {
+        if( selection_.bottom() < selection_.top() )
+        {
+            int tmp = selection_.top();
+            selection_.setTop( selection_.bottom() );
+            selection_.setBottom( tmp );
+        }
+        
+        if( selection_.right() < selection_.left() )
+        {
+            int tmp = selection_.left();
+            selection_.setLeft( selection_.right() );
+            selection_.setRight( tmp );
+        }
+        
+    }
+    else
+    {
+        selection_.setLeft( track );
+        selection_.setTop( line );
+    }
+
+    blockSelected_ = true;
+
+    update( boundingRect() );
+}
+
+void PatternGrid::unmarkBlock()
+{
+    blockSelected_ = false;
+    selection_.clear();
+
+    update( boundingRect() );
+}
+
 
 
 
