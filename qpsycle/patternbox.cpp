@@ -32,6 +32,7 @@
 
 PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
     : QWidget(parent)
+    , currentPattern_(NULL)
 {
     song_ = song;
     createActions();
@@ -257,6 +258,7 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
         std::map<PatternItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( (PatternItem*)currItem );
         if( patItr != patternMap.end() ) {
             psy::core::SinglePattern *pattern = patItr->second;
+            currentPattern_ = pattern;
             // emit a signal for main window to tell pat view.
             emit patternSelectedInPatternBox( pattern );
         }
