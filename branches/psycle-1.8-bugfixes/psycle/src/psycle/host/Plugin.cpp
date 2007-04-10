@@ -367,6 +367,11 @@ namespace psycle
 		void Plugin::Work(int numSamples)
 		{
 			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
+			else
+			{
+				if (!_mute) _stopped = false;
+				else _stopped = true;
+			}
 			CPUCOST_INIT(cost);
 			if (!_mute) 
 			{
@@ -590,7 +595,6 @@ namespace psycle
 							_volumeDisplay = 0;
 							_stopped = true;
 						}
-						else _stopped = false;
 					}
 				}
 			}

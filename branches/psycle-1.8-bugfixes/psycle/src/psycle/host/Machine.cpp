@@ -396,7 +396,6 @@ namespace psycle
 								std::memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
 							}
 							*/
-							pInMachine->_waitingForSound = false;
 						}
 						if(!pInMachine->_stopped) _stopped = false;
 						if(!_mute && !_stopped)
@@ -410,6 +409,7 @@ namespace psycle
 					}
 				}
 			}
+			_waitingForSound = false;
 			CPUCOST_INIT(wcost);
 			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 			CPUCOST_CALC(wcost,numSamples);
@@ -435,12 +435,12 @@ namespace psycle
 #endif
 								pInMachine->Work(numSamples);
 							}
-							pInMachine->_waitingForSound = false;
 						}
 						if(!pInMachine->_stopped) _stopped = false;
 					}
 				}
 			}
+			_waitingForSound = false;
 		}
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -831,6 +831,7 @@ namespace psycle
 		void DuplicatorMac::Work(int numSamples)
 		{
 			_worked = true;
+			_stopped = false;
 		}
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
 		{

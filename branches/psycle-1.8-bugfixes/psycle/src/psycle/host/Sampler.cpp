@@ -185,6 +185,7 @@ namespace psycle
 				}
 			}
 
+			else _stopped = true;
 			CPUCOST_CALC(cost, numSamples);
 			_cpuCost += cost;
 			_worked = true;
