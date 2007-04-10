@@ -168,6 +168,9 @@ void MainWindow::open()
         delete patView_;
         delete wavView_;
         delete seqView_;
+
+        psy::core::Player::Instance()->song( song_ );
+
         macView_ = new MachineView( song_ );
         patView_ = new PatternView( song_ );
         wavView_ = new WaveView( song_ );
@@ -183,7 +186,6 @@ void MainWindow::open()
         initSampleCombo();
         patternBox_->patternTree()->setFocus();
         setupSignals();
-        psy::core::Player::Instance()->song( song_ );
         // enable audio driver
         //Global::configuration()._pOutputDriver->Enable(true);
         // update file recent open sub menu
