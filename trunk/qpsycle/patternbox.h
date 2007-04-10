@@ -80,6 +80,7 @@ public:
     void populatePatternTree();
     PatternTree* patternTree() { return patternTree_; }
     psy::core::Song* song() { return song_; }
+    psy::core::SinglePattern* currentPattern() { return currentPattern_; }
 
 public slots:
      void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
@@ -108,6 +109,7 @@ signals:
     long QColorToLongColor( const QColor & qCol );
 
     psy::core::Song *song_;
+    psy::core::SinglePattern* currentPattern_;
     std::map<CategoryItem*, psy::core::PatternCategory*> categoryMap;
     std::vector<CategoryItem*> catItems;
     std::map<PatternItem*, psy::core::SinglePattern*> patternMap;

@@ -182,6 +182,7 @@ void MainWindow::open()
         patternBox_ = new PatternBox( song_ );
         dock_->setWidget( patternBox_ );
         patternBox_->populatePatternTree();
+        patView_->setPattern(patternBox_->currentPattern());
         populateMachineCombo();
         initSampleCombo();
         patternBox_->patternTree()->setFocus();
