@@ -421,7 +421,7 @@ namespace psycle
 						smac->_connectedOutputs--;
 
 						_pMachine[wiredest]->_inputCon[wireindex] = false;
-						_pMachine[wiredest]->_inputMachines[wireindex] = 255;
+						_pMachine[wiredest]->_inputMachines[wireindex] = -1;
 						_pMachine[wiredest]->_connectedInputs--;
 					}
 					/*
