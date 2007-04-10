@@ -451,12 +451,14 @@ namespace psy {
 				{
 					 // Only Stereo for now.
 					// note, the connections are inverted because we do an inversion in PreWork() (in order to avoid the BROKEN_INPLACE problems)
-					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)  && indexoutput < 2 )
+					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)  && indexoutput < 2 ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
 						   ppbuffersOut[indexoutput++]);
-					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)  && indexinput < 2 )
+          }
+					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)  && indexinput < 2 ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
 						   ppbuffersIn[indexinput++]);
+          }
 				}
 			}
 			_nCols = (GetNumParams()/12)+1;
@@ -477,19 +479,16 @@ namespace psy {
 		
 		void LADSPAMachine::PreWork(int numSamples)
 		{
-			float *tmpbufL(_pSamplesL),*tmpbufR(_pSamplesR);
-			_pSamplesL=pOutSamplesL; _pSamplesR=pOutSamplesR;
-			pOutSamplesL=tmpbufL; pOutSamplesR=tmpbufR;
+      std::swap(_pSamplesL,pOutSamplesL);
+      std::swap(_pSamplesR,pOutSamplesR);
 			Machine::PreWork(numSamples);
-			dsp::Clear(pOutSamplesL,sizeof(pOutSamplesL));dsp::Clear(pOutSamplesR,sizeof(pOutSamplesR));
 		}
 		
 		int LADSPAMachine::GenerateAudio(int numSamples )
 		{
-			float *tmpbufL(_pSamplesL),*tmpbufR(_pSamplesR);
 			psDescriptor->run(pluginHandle,numSamples);
-			_pSamplesL=pOutSamplesL; _pSamplesR=pOutSamplesR;
-			pOutSamplesL=tmpbufL; pOutSamplesR=tmpbufR;
+      std::swap(_pSamplesL,pOutSamplesL);
+      std::swap(_pSamplesR,pOutSamplesR);
 			return numSamples;
 		}
 		void  LADSPAMachine::GetParamName(int numparam, char * name)
