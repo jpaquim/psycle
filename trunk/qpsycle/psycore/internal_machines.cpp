@@ -190,6 +190,7 @@ namespace psy {
 		int DuplicatorMac::GenerateAudio( int numSamples )
 		{
 			_worked = true;
+			_stopped = false;
 			return numSamples;
 		}
 

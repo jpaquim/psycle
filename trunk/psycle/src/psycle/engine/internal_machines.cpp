@@ -185,6 +185,7 @@ namespace psycle {
 		void DuplicatorMac::Work(int numSamples)
 		{
 			_worked = true;
+			_stopped = false;
 		}
 
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)

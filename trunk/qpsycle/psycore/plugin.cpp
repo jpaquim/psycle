@@ -154,13 +154,18 @@ void Plugin::Init( )
 
 int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
-			int ns = numSamples;
-			int us = startSample;
+	int ns = numSamples;
+	int us = startSample;
+	if(_mode == MACHMODE_GENERATOR)
+	{
+		if (!_mute) _stopped = false;
+		else _stopped = true;
+	}
+
 	if (!_mute) {
 		if((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
-
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
-		  }
+			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
+		}
 	}
 	return numSamples;
 /*

@@ -903,8 +903,10 @@ namespace psycle
 			// Format of FastTracker points is :
 			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 			// Value : 0..64. , divide by 64 to use it as a multiplier.
-			for(int i = 0; i < envelope_point_num;i++){
-				inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
+			inst.AmpEnvelope()->Append((int)sampleHeader.venv[0] ,(float)sampleHeader.venv[1] / 64.0f);
+			for(int i = 1; i < envelope_point_num;i++){
+				if ( sampleHeader.venv[i*2] > sampleHeader.venv[(i-1)*2] )// Some rare modules have erroneous points. This tries to solve that.
+					inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
 			}
 
 			if(sampleHeader.vtype & 2){

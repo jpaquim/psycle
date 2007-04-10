@@ -553,7 +553,6 @@ namespace psy
 								std::memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
 							}
 							*/
-							pInMachine->_waitingForSound = false;
 						}
 						if(!pInMachine->_stopped) _stopped = false;
 						if(!_mute && !_stopped)
@@ -567,6 +566,7 @@ namespace psy
 					}
 				}
 			}
+			_waitingForSound = false;
 			{
 //				PSYCLE__CPU_COST__INIT(wcost);
 					dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
@@ -595,12 +595,12 @@ namespace psy
 								#endif
 								pInMachine->Work( numSamples );
 							}
-							pInMachine->_waitingForSound = false;
 						}
 						if(!pInMachine->_stopped) _stopped = false;
 					}
 				}
 			}
+			_waitingForSound = false;
 		}
 
 		void Machine::DefineStereoInput(int numinputs)

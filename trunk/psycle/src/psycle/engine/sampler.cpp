@@ -184,6 +184,7 @@ namespace psycle
 					else _stopped=false;
 				}
 			}
+			else _stopped = true;
 
 			cost = cpu::cycles() - cost;
 			work_cpu_cost(work_cpu_cost() + cost);

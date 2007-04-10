@@ -401,6 +401,11 @@ namespace psycle
 		void Plugin::Work(int numSamples)
 		{
 			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
+			else
+			{
+				if (!_mute) _stopped = false;
+				else _stopped = true;
+			}
 			cpu::cycles_type cost(cpu::cycles());
 			if (!_mute) 
 			{
