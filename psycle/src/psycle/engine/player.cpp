@@ -59,6 +59,7 @@ namespace psycle
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			ExecuteLine();
+			_samplesRemaining = SamplesPerRow();					
 		}
 
 		void Player::Stop(void)

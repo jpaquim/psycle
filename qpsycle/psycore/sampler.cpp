@@ -181,6 +181,7 @@ namespace psy
 					else _stopped=false;
 				}
 			}
+			else _stopped = true;
 
 //			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 //			work_cpu_cost(work_cpu_cost() + cost);
