@@ -368,7 +368,7 @@ namespace psycle
 			{
 				if(!dstMac->_inputCon[c]) dfreebus = c;
 				// Checking if the destination machine is connected with the source machine to avoid a loop.
-				else if(dstMac->_outputMachines[c] == src) error = true;
+				if(dstMac->_connection[c] && dstMac->_outputMachines[c] == src) error = true;
 			}
 			if(dfreebus == -1 || error) return false;
 			// Calibrating in/out properties
@@ -397,9 +397,11 @@ namespace psycle
 					{
 						// delete the old wire
 						_pMachine[wiresource]->_connection[wireindex] = FALSE;
+						_pMachine[wiresource]->_outputMachines[wireindex] = -1;
 						_pMachine[wiresource]->_numOutputs--;
 
 						dmac->_inputCon[w] = FALSE;
+						dmac->_inputMachines[w] = -1;
 						dmac->_numInputs--;
 					}
 /*						else
@@ -424,10 +426,14 @@ namespace psycle
 					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
 						// delete the old wire
-						smac->_connection[smac->FindOutputWire(wiredest)] = FALSE;
+						int t = smac->FindOutputWire(wiredest);
+						smac->_connection[t] = FALSE;
+						smac->_outputMachines[t] = -1;
+
 						smac->_numOutputs--;
 
 						_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
+						_pMachine[wiredest]->_inputMachines[wireindex] = -1;
 						_pMachine[wiredest]->_numInputs--;
 					}
 /*						else
@@ -470,6 +476,7 @@ namespace psycle
 									if( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
 									{
 										iMac2->_connection[x] = false;
+										iMac2->_outputMachines[x] = -1;
 										iMac2->_numOutputs--;
 										break;
 									}
@@ -490,6 +497,7 @@ namespace psycle
 									if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
 									{
 										iMac2->_inputCon[x] = false;
+										iMac2->_inputMachines[x] = -1;
 										iMac2->_numInputs--;
 										break;
 									}
@@ -1238,12 +1246,12 @@ namespace psycle
 								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 								{
 									_pMachine[i]->_connection[c] = FALSE;
-									_pMachine[i]->_outputMachines[c] = 255;
+									_pMachine[i]->_outputMachines[c] = -1;
 								}
 								else if(!_pMachine[_pMachine[i]->_outputMachines[c]])
 								{
 									_pMachine[i]->_connection[c] = FALSE;
-									_pMachine[i]->_outputMachines[c] = 255;
+									_pMachine[i]->_outputMachines[c] = -1;
 								}
 								else 
 								{
@@ -1252,7 +1260,7 @@ namespace psycle
 							}
 							else
 							{
-								_pMachine[i]->_outputMachines[c] = 255;
+								_pMachine[i]->_outputMachines[c] = -1;
 							}
 
 							if (_pMachine[i]->_inputCon[c])
@@ -1260,12 +1268,12 @@ namespace psycle
 								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
 								{
 									_pMachine[i]->_inputCon[c] = FALSE;
-									_pMachine[i]->_inputMachines[c] = 255;
+									_pMachine[i]->_inputMachines[c] = -1;
 								}
 								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
 								{
 									_pMachine[i]->_inputCon[c] = FALSE;
-									_pMachine[i]->_inputMachines[c] = 255;
+									_pMachine[i]->_inputMachines[c] = -1;
 								}
 								else
 								{
@@ -1274,7 +1282,7 @@ namespace psycle
 							}
 							else
 							{
-								_pMachine[i]->_inputMachines[c] = 255;
+								_pMachine[i]->_inputMachines[c] = -1;
 							}
 						}
 					}
@@ -2037,12 +2045,12 @@ namespace psycle
 								if (_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 								{
 									_pMachine[i]->_connection[c]=FALSE;
-									_pMachine[i]->_outputMachines[c]=255;
+									_pMachine[i]->_outputMachines[c]=-1;
 								}
 								else if (!_pMachine[_pMachine[i]->_outputMachines[c]])
 								{
 									_pMachine[i]->_connection[c]=FALSE;
-									_pMachine[i]->_outputMachines[c]=255;
+									_pMachine[i]->_outputMachines[c]=-1;
 								}
 								else 
 								{
@@ -2051,7 +2059,7 @@ namespace psycle
 							}
 							else
 							{
-								_pMachine[i]->_outputMachines[c]=255;
+								_pMachine[i]->_outputMachines[c]=-1;
 							}
 
 							if (_pMachine[i]->_inputCon[c])
@@ -2059,12 +2067,12 @@ namespace psycle
 								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES-1)
 								{
 									_pMachine[i]->_inputCon[c]=FALSE;
-									_pMachine[i]->_inputMachines[c]=255;
+									_pMachine[i]->_inputMachines[c]=-1;
 								}
 								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
 								{
 									_pMachine[i]->_inputCon[c]=FALSE;
-									_pMachine[i]->_inputMachines[c]=255;
+									_pMachine[i]->_inputMachines[c]=-1;
 								}
 								else
 								{
@@ -2073,7 +2081,7 @@ namespace psycle
 							}
 							else
 							{
-								_pMachine[i]->_inputMachines[c]=255;
+								_pMachine[i]->_inputMachines[c]=-1;
 							}
 						}
 					}
@@ -2601,13 +2609,13 @@ namespace psycle
 				if (_pMachine[dst]->_connection[i])
 				{
 					_pMachine[dst]->_connection[i] = false;
-					_pMachine[dst]->_outputMachines[i] = 255;
+					_pMachine[dst]->_outputMachines[i] = -1;
 				}
 
 				if (_pMachine[dst]->_inputCon[i])
 				{
 					_pMachine[dst]->_inputCon[i] = false;
-					_pMachine[dst]->_inputMachines[i] = 255;
+					_pMachine[dst]->_inputMachines[i] = -1;
 				}
 			}
 

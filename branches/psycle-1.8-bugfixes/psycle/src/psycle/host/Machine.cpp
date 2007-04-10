@@ -186,6 +186,8 @@ namespace psycle
 			// Clearing connections
 			for(int i=0; i<MAX_CONNECTIONS; i++)
 			{
+				_inputMachines[i]=-1;
+				_outputMachines[i]=-1;
 				_inputConVol[i] = 1.0f;
 				_wireMultiplier[i] = 1.0f;
 				_connection[i] = false;
