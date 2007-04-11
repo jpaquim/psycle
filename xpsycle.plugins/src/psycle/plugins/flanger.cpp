@@ -119,7 +119,6 @@ protected:
 	enum Channels { left, right, channels };
 	std::vector<Real> buffers_[channels];
 	int delay_in_samples_, writes_[channels];
-	Real weight; //<Sartorius> for interpolation
 	Real modulation_amplitude_in_samples_, modulation_radians_per_sample_, modulation_phase_;
 	math::sinus_sequence sin_sequences_[channels];
 };
@@ -177,7 +176,6 @@ void Flanger::parameter(const int & parameter)
 inline void Flanger::resize(const Real & delay)
 {
 	delay_in_samples_ = static_cast<int>(delay * samples_per_second());
-	weight = delay * samples_per_second() - floor(delay * samples_per_second()); //<Sartorius> for interpolation
 	modulation_amplitude_in_samples_ = (*this)(modulation_amplitude) * delay_in_samples_;
 	for(int channel(0) ; channel < channels ; ++channel)
 	{
@@ -198,124 +196,83 @@ void Flanger::process(Sample l[], Sample r[], int samples, int)
 
 inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw()
 {
-	#if 0 // disabled for now because some assertion is failing
-		//<Sartorius> linear interpolation
-
-		const int size(buffer.size());
-		for(int sample(0) ; sample < samples ; ++sample)
+	const int size(static_cast<int>(buffer.size()));
+	switch((*this)[interpolation])
+	{
+	case yes: /// \todo interpolation not done for now
 		{
-			const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
-
-			assert(-1 <= sin);
-			assert(sin <= 1);
-			assert(0 <= write);
-			assert(write < static_cast<int>(buffer.size()));
-			assert(0 <= modulation_amplitude_in_samples_);
-			assert(modulation_amplitude_in_samples_ <= delay_in_samples_);
-
-			int read;
-			//if(sin < 0) read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin);
-			//else read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin) - 1;
-			read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
-			if(read < 0) read += size; else if(read >= size) read -= size;
-
-			assert(0 <= read);
-			assert(read < static_cast<int>(buffer.size()));
-			
-			/*const */ Real buffer_read(0);
-			if ((*this)[interpolation]==yes) 
+			for(int sample(0) ; sample < samples ; ++sample)
 			{
-				///\todo [bohan] this assertion is failing
-				assert(read+1 < static_cast<int>(buffer.size()));
-				buffer_read = buffer[read] * (1.0 - weight) + buffer[read+1] * weight;
-			} else {
-				buffer_read = buffer[read];
-			}
-			Sample & input_sample = input[sample];
-			buffer[write] = input_sample + feedback * buffer_read;
-			++write %= size;
-			input_sample *= (*this)(dry);
-			input_sample += (*this)(wet) * buffer_read;
-			math::erase_all_nans_infinities_and_denormals(input_sample);
-		}
-
-	#else
-		// no interpolation
-
-		switch((*this)[interpolation])
-		{
-			case yes: /// \todo interpolation not done for now
-				#if 0 // this is the original code of the internal plugin. needs to be made portable, and to have access to the resampler
-					ULARGE_INTEGER tmposcL;
-					tmposcL.QuadPart = (__int64)((y0L*_fLfoAmp) *0x100000000);
-					int _delayedCounterL = _counter - _time + tmposcL.HighPart;
-
-					if (_delayedCounterL < 0) _delayedCounterL += 2048;
-					int c = (_delayedCounterL==2047) ? 0 : _delayedCounterL+1;
-
-					float y_l = pResamplerWork( 0 ,
-						_pBufferL[_delayedCounterL],
-						_pBufferL[c], 0,
-						tmposcL.LowPart, _delayedCounterL, 2050); // Since we already take care or buffer overrun, we set the length bigger.
-					if (IS_DENORMAL(y_l) ) y_l=0.0f;
-
-					ULARGE_INTEGER tmposcR;
-					tmposcR.QuadPart = (__int64)((y0R*_fLfoAmp) *0x100000000);
-					int _delayedCounterR = _counter - _time + tmposcR.HighPart;
-
-					if (_delayedCounterR < 0) _delayedCounterR += 2048;
-					c = (_delayedCounterR==2047) ? 0 : _delayedCounterR+1;
-
-					float y_r = pResamplerWork(	0,
-						_pBufferR[_delayedCounterR],
-						_pBufferR[c], 0,
-						tmposcR.LowPart, _delayedCounterR, 2050); // Since we already take care or buffer overrun, we set the length bigger.
-					if (IS_DENORMAL(y_r) ) y_r=0.0f;
-				#endif
-			case no:
-			default:
+				const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
+				Real integral_part(0);
+				const Real fraction_part = std::modf(modulation_amplitude_in_samples_ * sin,&integral_part);
+				int read = write - delay_in_samples_ + integral_part;
+				int nextvalue = read+1;
+				if(read < 0)
 				{
-					const int size(static_cast<int>(buffer.size()));
-					for(int sample(0) ; sample < samples ; ++sample)
-					{
-						const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
-						/* test without optimized sinus sequence...
-						Real sin;
-						if(&sin_sequence == &sin_sequences_[left])
-							sin = std::sin(modulation_phase_);
-						else
-							sin = std::sin(modulation_phase_ + (*this)(modulation_stereo_dephase));
-						*/
-
-						assert(-1 <= sin);
-						assert(sin <= 1);
-						assert(0 <= write);
-						assert(write < static_cast<int>(buffer.size()));
-						assert(0 <= modulation_amplitude_in_samples_);
-						assert(modulation_amplitude_in_samples_ <= delay_in_samples_);
-
-						int read;
-						//if(sin < 0) read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin);
-						//else read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin) - 1;
-						read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
-						if(read < 0) read += size; else if(read >= size) read -= size;
-
-						assert(0 <= read);
-						assert(read < static_cast<int>(buffer.size()));
-
-						const Real buffer_read(buffer[read]);
-						Sample & input_sample = input[sample];
-						buffer[write] = input_sample + feedback * buffer_read;
-						++write %= size;
-						input_sample *= (*this)(dry);
-						input_sample += (*this)(wet) * buffer_read;
-						math::erase_all_nans_infinities_and_denormals(input_sample);
-					}
+					read += size;
+					if ( nextvalue < 0 )
+						nextvalue += size;
 				}
-				break;
-		}
+				else if(nextvalue >= size)
+				{
+					nextvalue -= size;
+					if ( read >= size)
+						read -= size;
+				}
 
-	#endif
+				const Real buffer_read = buffer[read]*(1-fraction_part) + buffer[nextvalue]*fraction_part;
+
+				Sample & input_sample = input[sample];
+				buffer[write] = input_sample + feedback * buffer_read;
+				++write %= size;
+				input_sample *= (*this)(dry);
+				input_sample += (*this)(wet) * buffer_read;
+				math::erase_all_nans_infinities_and_denormals(input_sample);
+			}
+		}
+		break;
+	case no:
+	default:
+		{
+			for(int sample(0) ; sample < samples ; ++sample)
+			{
+				const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
+				/* test without optimized sinus sequence...
+				Real sin;
+				if(&sin_sequence == &sin_sequences_[left])
+					sin = std::sin(modulation_phase_);
+				else
+					sin = std::sin(modulation_phase_ + (*this)(modulation_stereo_dephase));
+				*/
+
+				assert(-1 <= sin);
+				assert(sin <= 1);
+				assert(0 <= write);
+				assert(write < static_cast<int>(buffer.size()));
+				assert(0 <= modulation_amplitude_in_samples_);
+				assert(modulation_amplitude_in_samples_ <= delay_in_samples_);
+
+				int read;
+				//if(sin < 0) read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin);
+				//else read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin) - 1;
+				read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
+				if(read < 0) read += size; else if(read >= size) read -= size;
+
+				assert(0 <= read);
+				assert(read < static_cast<int>(buffer.size()));
+
+				const Real buffer_read(buffer[read]);
+				Sample & input_sample = input[sample];
+				buffer[write] = input_sample + feedback * buffer_read;
+				++write %= size;
+				input_sample *= (*this)(dry);
+				input_sample += (*this)(wet) * buffer_read;
+				math::erase_all_nans_infinities_and_denormals(input_sample);
+			}
+		}
+		break;
+	}
 }
 
 }}
