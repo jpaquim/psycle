@@ -205,7 +205,8 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 			{
 				const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
 				Real integral_part(0);
-				const Real fraction_part = std::modf(modulation_amplitude_in_samples_ * sin,&integral_part);
+				Real fraction_part = std::modf(modulation_amplitude_in_samples_ * sin,&integral_part);
+				if (fraction_part < 0) fraction_part = 1.0+fraction_part;
 				int read = write - delay_in_samples_ + integral_part;
 				int nextvalue = read+1;
 				if(read < 0)
@@ -221,14 +222,18 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 						read -= size;
 				}
 
-				const Real buffer_read = buffer[read]*(1-fraction_part) + buffer[nextvalue]*fraction_part;
-
+				const Real buffer_read = buffer[read]*(1.0-fraction_part) + buffer[nextvalue]*fraction_part;
+				
 				Sample & input_sample = input[sample];
-				buffer[write] = input_sample + feedback * buffer_read;
+				Sample buffer_write = input_sample + feedback * buffer_read + 1.0e-9;
+				buffer_write-= 1.0e-9; 
+//				Sample buffer_write = input_sample + feedback * buffer_read;
+//				math::erase_all_nans_infinities_and_denormals(buffer_write);
+				buffer[write] = buffer_write;
 				++write %= size;
 				input_sample *= (*this)(dry);
 				input_sample += (*this)(wet) * buffer_read;
-				math::erase_all_nans_infinities_and_denormals(input_sample);
+//				math::erase_all_nans_infinities_and_denormals(input_sample);
 			}
 		}
 		break;
@@ -264,11 +269,15 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 
 				const Real buffer_read(buffer[read]);
 				Sample & input_sample = input[sample];
-				buffer[write] = input_sample + feedback * buffer_read;
+				Sample buffer_write = input_sample + feedback * buffer_read + 1.0e-9;
+				buffer_write -= 1.0e-9;
+//				Sample buffer_write = input_sample + feedback * buffer_read;
+//				math::erase_all_nans_infinities_and_denormals(buffer_write);
+				buffer[write] = buffer_write;
 				++write %= size;
 				input_sample *= (*this)(dry);
 				input_sample += (*this)(wet) * buffer_read;
-				math::erase_all_nans_infinities_and_denormals(input_sample);
+//				math::erase_all_nans_infinities_and_denormals(input_sample);
 			}
 		}
 		break;
