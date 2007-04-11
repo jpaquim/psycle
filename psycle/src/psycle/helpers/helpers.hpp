@@ -37,7 +37,7 @@ namespace psycle
 					else	
 						return iByte * 0.00390625f;
 				}
-				/// maps a byte (0 to 255) to a float (O to 100).
+				/// maps a byte (0 to 255) to a float (0 to 100).
 				static inline float Map_255_100(int iByte)
 				{
 					if(iByte >= 0 && iByte <= 256)
