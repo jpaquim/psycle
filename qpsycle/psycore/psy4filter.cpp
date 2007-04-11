@@ -391,7 +391,7 @@ namespace psy {
 				{
 					if (!song._pMachine[MASTER_INDEX] )
 					{
-						song._pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
+						song._pMachine[MASTER_INDEX] = new Master( MASTER_INDEX, &song );
 						song._pMachine[MASTER_INDEX]->Init();
 					}
 					std::ostringstream s;
