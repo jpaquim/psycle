@@ -23,6 +23,7 @@
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
+#include "internal_machines.h"
 
 #include <QFile>
 #include <QDomDocument>
@@ -388,6 +389,11 @@ namespace psy {
 				//progress.emit(5,0,"");
 				if(chunkcount)
 				{
+					if (!song._pMachine[MASTER_INDEX] )
+					{
+						song._pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
+						song._pMachine[MASTER_INDEX]->Init();
+					}
 					std::ostringstream s;
 					s << "Error reading from file '" << file.file_name() << "'" << std::endl;
 					s << "some chunks were missing in the file";

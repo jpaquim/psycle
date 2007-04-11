@@ -4,6 +4,7 @@
 #include <psycle/engine/FileIO.hpp>
 #include <psycle/engine/song.hpp>
 #include <psycle/helpers/DataCompression.hpp>
+#include <psycle/engine/internal_machines.hpp>
 
 namespace psycle {
 	namespace host {
@@ -208,6 +209,11 @@ namespace psycle {
 			progress.emit(5,0,"");
 			if(chunkcount)
 			{
+				if (!song._pMachine[MASTER_INDEX] )
+				{
+					song._pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
+					song._pMachine[MASTER_INDEX]->Init();
+				}
 				std::ostringstream s;
 				s << "Error reading from file '" << file->file_name() << "'" << std::endl;
 				s << "some chunks were missing in the file";

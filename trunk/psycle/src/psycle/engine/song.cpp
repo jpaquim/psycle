@@ -1335,6 +1335,11 @@ namespace psycle
 				progress.emit(5,0,"");
 				if(chunkcount)
 				{
+					if (!_pMachine[MASTER_INDEX] )
+					{
+						_pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
+						_pMachine[MASTER_INDEX]->Init();
+					}
 					std::ostringstream s;
 					s << "Error reading from file '" << pFile->file_name() << "'" << std::endl;
 					s << "some chunks were missing in the file";
