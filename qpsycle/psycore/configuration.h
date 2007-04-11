@@ -66,6 +66,7 @@ namespace psy {
 			bool enableSound() const;
 			bool ft2HomeEndBehaviour() const;
 			bool shiftArrowForSelect() const;
+            bool wrapAround() const;
 
 			InputHandler & inputHandler();
 
@@ -92,6 +93,7 @@ namespace psy {
             // Settings.
             bool ft2HomeEndBehaviour_;
             bool shiftArrowForSelect_;
+            bool wrapAround_;
 		};
 
 	}

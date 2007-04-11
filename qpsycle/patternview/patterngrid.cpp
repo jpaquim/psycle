@@ -929,10 +929,15 @@ void PatternGrid::moveCursor( int dx, int dy)
             } else if (eventnr + 1 < visibleEvents( cursor_.track()) ) {
                 cursor_.setCol( 0 );
                 cursor_.setEventNr( eventnr + 1);
-            } else if (cursor_.track()+1 < numberOfTracks() ) {
+            } else if ( cursor_.track()+1 < numberOfTracks() ) {
                 cursor_.setTrack( cursor_.track() + 1 );
                 cursor_.setEventNr(0);
                 cursor_.setCol(0);
+            } else if ( wrapAround() ) {
+                cursor_.setTrack( 0 );
+                cursor_.setEventNr(0);
+                cursor_.setCol(0);
+                checkLeftScroll( cursor() );
             }
         }
     } else if ( dx < 0 ) {
@@ -947,15 +952,31 @@ void PatternGrid::moveCursor( int dx, int dy)
                 cursor_.setEventNr( visibleEvents( cursor_.track() -1 )-1 );
                 const ColumnEvent & event = events_.at( cursor_.eventNr() );
                 cursor_.setCol( event.cols() - 1 );
+        } else if ( wrapAround() ) {
+            cursor_.setTrack( endTrackNumber() );
+            TrackGeometry trackGeom = patDraw()->findTrackGeomByTrackNum( cursor().track() );
+            cursor_.setEventNr( trackGeom.visibleColumns() - 1 );
+            cursor_.setCol(3);
+            checkRightScroll( cursor() );
         }
     }
 
-    if ( dy != 0 && (dy + cursor_.line() >= 0) ) {
-        cursor_.setLine( std::min(cursor_.line() + dy, endLineNumber()));
-    } else if ( dy != 0 && (dy + cursor_.line() < 0) ) {
-        cursor_.setLine( std::max(cursor_.line() + dy, 0));
-    } else if (dy!=0) {
+    if ( dy > 0 ) {
+        if ( ( cursor_.line() + dy > endLineNumber() ) && wrapAround() ) {
+            cursor_.setLine( dy - ( endLineNumber() - cursor_.line()+1 )  );
+        } else {
+            cursor_.setLine( std::min(cursor_.line() + dy, endLineNumber()) );
+        }
+        checkUpScroll( cursor() );
+    } else if ( dy < 0 ) {
+        if ( ( (cursor_.line() + dy) < 0 ) && wrapAround() ) {
+            cursor_.setLine( endLineNumber() - ( (dy*-1) - (cursor_.line()+1) ) );
+        } else {
+            cursor_.setLine( std::max(cursor_.line() + dy, 0) );
+        }
+        checkDownScroll( cursor() );
     }
+
     repaintCursor(); 
     if ( doingKeybasedSelect() ) {
         doingKeybasedSelect_ = false;
@@ -1506,6 +1527,13 @@ bool PatternGrid::shiftArrowForSelect() {
 }
 void PatternGrid::setShiftArrowForSelect( bool setit ) {
     shiftArrowForSelect_ = setit;
+}
+
+bool PatternGrid::wrapAround() {
+    return wrapAround_;
+}
+void PatternGrid::setWrapAround( bool setit ) {
+    wrapAround_ = setit;
 }
 
 void PatternGrid::startBlock( const PatCursor & cursor  )

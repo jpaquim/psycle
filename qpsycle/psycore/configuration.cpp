@@ -96,6 +96,10 @@ namespace psy {
 			return shiftArrowForSelect_;
 		}
 
+		bool Configuration::wrapAround() const {
+			return wrapAround_;
+		}
+
 /*		void Configuration::setXmlDefaults() {     
 			std::string xml_mem_;   
 
@@ -414,6 +418,8 @@ namespace psy {
                         ft2HomeEndBehaviour_ = value.toInt();     
                     if ( id == "shift-arrow-for-select" )
                         shiftArrowForSelect_ = value.toInt();     
+                    if ( id == "wrap-around" )
+                        wrapAround_ = value.toInt();     
                 }
             }
 
