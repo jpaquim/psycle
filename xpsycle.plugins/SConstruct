@@ -81,12 +81,6 @@ class plugin_module(module):
 	def add_plugin_sources(self, include_patterns, exclude_patterns = None):
 		self.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', include_pattern) for include_pattern in include_patterns], exclude_patterns))
 
-	def variant(self, name, defines):
-		source = project.file_from_value(name + '.cpp', ''.join(['#define %s 1\n' % define for define in defines] + ['#include <%s>\n' % source_.relative() for source_ in self.sources()]))
-		result = self.__class__(name, self.description() + ' (variant: ' + name.replace('_', ' ') + ')')
-		result.add_sources([find.file('.', source)])
-		return result
-
 project.trace('plugins time 0') ; import time ; t = time.time ; t0 = t()
 
 plugin_module('gainer', 'ayeternal gainer').add_plugin_sources(['gainer.cpp'])
@@ -140,15 +134,11 @@ plugin_module('pooplog_filter', 'pooplog filter').add_plugin_sources([os.path.jo
 plugin_module('pooplog_lofi_processor', 'pooplog lo-fi processor').add_plugin_sources([os.path.join('pooplog_lofi', '*.cpp')])
 plugin_module('pooplog_scratch_master', 'pooplog scratch master').add_plugin_sources([os.path.join('pooplog_scratch', '*.cpp')])
 plugin_module('pooplog_scratch_master_2', 'pooplog scratch master 2').add_plugin_sources([os.path.join('pooplog_scratch_2', '*.cpp')])
-
-pooplog_delay = plugin_module('pooplog_delay', 'pooplog delay')
-pooplog_delay.add_plugin_sources([os.path.join('pooplog_delay', '*.cpp')])
-pooplog_delay.variant('pooplog_delay_light', ['LIGHT'])
-
-pooplog_fm_laboratory = plugin_module('pooplog_fm_laboratory', 'pooplog fm laboratory')
-pooplog_fm_laboratory.add_plugin_sources([os.path.join('pooplog_synth', '*.cpp')])
-pooplog_fm_laboratory.variant('pooplog_fm_light', ['SYNTH_LIGHT'])
-pooplog_fm_laboratory.variant('pooplog_fm_ultralight', ['SYNTH_LIGHT', 'SYNTH_ULTRALIGHT'])
+plugin_module('pooplog_delay', 'pooplog delay').add_plugin_sources([os.path.join('pooplog_delay', '*.cpp')])
+plugin_module('pooplog_delay_light', 'pooplog delay light').add_plugin_sources([os.path.join('pooplog_delay_light', '*.cpp')])
+plugin_module('pooplog_fm_laboratory', 'pooplog fm laboratory').add_plugin_sources([os.path.join('pooplog_synth', '*.cpp')])
+plugin_module('pooplog_fm_light', 'pooplog fm laboratory light').add_plugin_sources([os.path.join('pooplog_synth_light', '*.cpp')])
+plugin_module('pooplog_fm_ultralight', 'pooplog fm laboratory ultralight').add_plugin_sources([os.path.join('pooplog_synth_ultralight', '*.cpp')])
 
 druttis_band_limited_wave_tables_module = module(source_package,
 	name = 'druttis_band_limited_wave_tables',
