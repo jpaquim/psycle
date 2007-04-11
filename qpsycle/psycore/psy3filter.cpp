@@ -22,6 +22,7 @@
 #include "datacompression.h"
 #include "global.h" // for zapArray shit
 #include "inputhandler.h"
+#include "internal_machines.h"
 
 namespace psy
 {
@@ -267,6 +268,11 @@ namespace psy
 //			song.progress.emit(5,0,"");
 			if(chunkcount)
 			{
+				if (!song._pMachine[MASTER_INDEX] )
+				{
+					song._pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
+					song._pMachine[MASTER_INDEX]->Init();
+				}
 				std::ostringstream s;
 				s << "Error reading from file '" << file.file_name() << "'" << std::endl;
 				s << "some chunks were missing in the file";
