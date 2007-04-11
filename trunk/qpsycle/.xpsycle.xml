@@ -7,7 +7,7 @@
 <!-- audio configuration -->
 
 <audio enable='1' />
-<driver name='alsa' />
+<driver name='jack' />
 <alsa device = 'plughw:0' />
 
 <!-- gui configuration -->
@@ -20,6 +20,7 @@
 
 <option id="ft2-home-end-behaviour" value="0" />
 <option id="shift-arrow-for-select" value="0" />
+<option id="wrap-around" value="1" />
 
 <!-- keyHandler configuration -->
 

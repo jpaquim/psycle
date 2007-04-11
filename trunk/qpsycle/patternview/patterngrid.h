@@ -169,6 +169,8 @@ public:
     void setFt2HomeEndBehaviour( bool setit );
     bool shiftArrowForSelect();
     void setShiftArrowForSelect( bool setit );
+    bool wrapAround();
+    void setWrapAround( bool setit );
 
     // Cursor.
     const PatCursor & cursor() const;
@@ -267,6 +269,7 @@ private:
 
     bool ft2HomeEndBehaviour_;
     bool shiftArrowForSelect_;
+    bool wrapAround_;
 
     bool blockSelected_;
 
