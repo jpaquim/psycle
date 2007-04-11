@@ -204,9 +204,13 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 			for(int sample(0) ; sample < samples ; ++sample)
 			{
 				const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
-				Real integral_part(0);
-				Real fraction_part = std::modf(modulation_amplitude_in_samples_ * sin,&integral_part);
-				if (fraction_part < 0) fraction_part = 1.0+fraction_part;
+				Real fraction_part = modulation_amplitude_in_samples_ * sin;
+				int integral_part = static_cast<int>(fraction_part);
+				fraction_part = fraction_part-integral_part;
+				if (fraction_part < 0) { fraction_part += 1; integral_part -= 1; }
+//				Real integral_part(0);
+//				Real fraction_part = std::modf(modulation_amplitude_in_samples_ * sin,&integral_part);
+//				if (fraction_part < 0) fraction_part = 1.0+fraction_part;
 				int read = write - delay_in_samples_ + integral_part;
 				int nextvalue = read+1;
 				if(read < 0)
@@ -261,7 +265,10 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				int read;
 				//if(sin < 0) read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin);
 				//else read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin) - 1;
-				read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
+//				read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
+				int integral_part = static_cast<int>(modulation_amplitude_in_samples_ * sin);
+				read = write - delay_in_samples_ + integral_part;
+
 				if(read < 0) read += size; else if(read >= size) read -= size;
 
 				assert(0 <= read);
