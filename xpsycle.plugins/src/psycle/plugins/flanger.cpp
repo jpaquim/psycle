@@ -47,7 +47,7 @@ public:
 			Information::Parameter::linear("mod. amplitude", 0, 0, 1),
 			Information::Parameter::exponential("mod. frequency", 0.0001 * math::pi * 2, 0, 100 * math::pi * 2),
 			Information::Parameter::linear("mod. stereodephase", 0, 0, math::pi),
-			Information::Parameter::discrete("interpolation", no, yes),
+			Information::Parameter::discrete("interpolation", yes, yes),
 			Information::Parameter::linear("dry", -1, 1, 1),
 			Information::Parameter::linear("wet", -1, 0, 1),
 			Information::Parameter::linear("feedback left", -1, 0, 1),
@@ -199,7 +199,7 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 	const int size(static_cast<int>(buffer.size()));
 	switch((*this)[interpolation])
 	{
-	case yes: /// \todo interpolation not done for now
+	case yes:
 		{
 			for(int sample(0) ; sample < samples ; ++sample)
 			{
