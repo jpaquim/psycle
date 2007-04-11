@@ -1296,6 +1296,11 @@ namespace psycle
 				Progress.OnCancel();
 				if((!pFile->Close()) || (chunkcount))
 				{
+					if (!_pMachine[MASTER_INDEX] )
+					{
+						_pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
+						_pMachine[MASTER_INDEX]->Init();
+					}
 					std::ostringstream s;
 					s << "Error reading from file '" << pFile->szName << "'" << std::endl;
 					if(chunkcount) s << "some chunks were missing in the file";
