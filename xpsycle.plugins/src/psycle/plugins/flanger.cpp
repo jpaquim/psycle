@@ -158,6 +158,7 @@ void Flanger::parameter(const int & parameter)
 	case modulation_radians_per_second:
 		modulation_radians_per_sample_ = (*this)(modulation_radians_per_second) * seconds_per_sample();
 		sin_sequences_[left](modulation_phase_, modulation_radians_per_sample_);
+	case modulation_stereo_dephase:
 		sin_sequences_[right](modulation_phase_ + (*this)(modulation_stereo_dephase), modulation_radians_per_sample_);
 		break;
 	case interpolation:
@@ -179,7 +180,7 @@ inline void Flanger::resize(const Real & delay)
 	modulation_amplitude_in_samples_ = (*this)(modulation_amplitude) * delay_in_samples_;
 	for(int channel(0) ; channel < channels ; ++channel)
 	{
-		buffers_[channel].resize(1 + delay_in_samples_ + static_cast<int>(::ceil(modulation_amplitude_in_samples_)), 0);
+		buffers_[channel].resize(1 + delay_in_samples_ + static_cast<int>(std::ceil(modulation_amplitude_in_samples_)), 0);
 			// resizes the buffer at least to 1, the smallest length possible for the algorithm to work
 		writes_[channel] %= buffers_[channel].size();
 	}
