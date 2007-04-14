@@ -41,8 +41,8 @@ PatternDraw::PatternDraw( PatternView *patView )
     scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
     setScene(scene_);
         
-    setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // FIXME: set to always on as AsNeeded has a bug in 4.2.2
-    setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // Will be fixed in 4.3.
+    setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // FIXME: set to always on as AsNeeded has a bug in 4.2.2
+    setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
     // see: http://www.trolltech.com/developer/task-tracker/index_html?method=entry&id=152477
     setViewportMargins( 50, 20, 0, 0);
 

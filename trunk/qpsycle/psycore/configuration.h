@@ -67,6 +67,7 @@ namespace psy {
 			bool ft2HomeEndBehaviour() const;
 			bool shiftArrowForSelect() const;
             bool wrapAround() const;
+            bool centerCursor() const;
 
 			InputHandler & inputHandler();
 
@@ -74,7 +75,6 @@ namespace psy {
 
 			InputHandler inputHandler_;
 
-			// a map, that holds available drivers ..
 			std::map<std::string, AudioDriver*> driverMap_;
 			bool enableSound_;
 			bool doEnableSound;
@@ -94,7 +94,9 @@ namespace psy {
             bool ft2HomeEndBehaviour_;
             bool shiftArrowForSelect_;
             bool wrapAround_;
+            bool centerCursor_;
 		};
+
 
 	}
 }

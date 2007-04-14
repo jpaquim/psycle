@@ -100,6 +100,10 @@ namespace psy {
 			return wrapAround_;
 		}
 
+		bool Configuration::centerCursor() const {
+			return centerCursor_;
+		}
+
 /*		void Configuration::setXmlDefaults() {     
 			std::string xml_mem_;   
 
@@ -420,6 +424,8 @@ namespace psy {
                         shiftArrowForSelect_ = value.toInt();     
                     if ( id == "wrap-around" )
                         wrapAround_ = value.toInt();     
+                    if ( id == "center-cursor" )
+                        centerCursor_ = value.toInt();     
                 }
             }
 
