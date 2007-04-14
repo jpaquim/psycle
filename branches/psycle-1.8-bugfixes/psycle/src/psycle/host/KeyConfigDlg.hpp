@@ -53,8 +53,6 @@ NAMESPACE__BEGIN(psycle)
 			void SaveHotKey(long idx,WORD key,WORD mods);
 			void FindKey(long idx,WORD &key,WORD &mods);
 			CmdDef FindCmd(long idx);
-			// Generated message map functions
-			//{{AFX_MSG(CKeyConfigDlg)
 			virtual BOOL OnInitDialog();
 			afx_msg void OnSelchangeCmdlist();
 			virtual void OnCancel();
@@ -62,12 +60,11 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnImportreg();
 			afx_msg void OnExportreg();
 			afx_msg void OnDefaults();
+			afx_msg void OnBnClickedSpecialKeys();
 			afx_msg void OnNone();
 			afx_msg void OnUpdateNumLines();
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		public:
-			//afx_msg void OnBnClickedMoveCursorPaste();
 			// number of beats to show a full row in the pattern editor.
 			CComboBox m_timesig;
 		};

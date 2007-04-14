@@ -5,7 +5,7 @@
 #include "KeyConfigDlg.hpp"
 #include "inputhandler.hpp"
 #include "Configuration.hpp"
-#include ".\keyconfigdlg.hpp"
+#include "SpecialKeys.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
@@ -49,15 +49,13 @@ NAMESPACE__BEGIN(psycle)
 		}
 
 		BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
-			//{{AFX_MSG_MAP(CKeyConfigDlg)
 			ON_LBN_SELCHANGE(IDC_CMDLIST, OnSelchangeCmdlist)
 			ON_BN_CLICKED(IDC_IMPORTREG, OnImportreg)
 			ON_BN_CLICKED(IDC_EXPORTREG, OnExportreg)
 			ON_BN_CLICKED(IDC_DEFAULTS, OnDefaults)
+			ON_BN_CLICKED(IDC_SPECIALKEYS, OnBnClickedSpecialKeys)
 			ON_BN_CLICKED(IDC_NONE, OnNone)
 			ON_EN_UPDATE(IDC_EDIT_DEFLINES, OnUpdateNumLines)
-			//}}AFX_MSG_MAP
-			//ON_BN_CLICKED(IDC_MOVE_CURSOR_PASTE, OnBnClickedMoveCursorPaste)
 		END_MESSAGE_MAP()
 
 		void CKeyConfigDlg::FillCmdList()
@@ -198,11 +196,12 @@ NAMESPACE__BEGIN(psycle)
 			// what command is selected?
 			CmdDef cmd = FindCmd(idx);
 
-			m_lstCmds.SetItemData(idx,nMod*256+new_key);
-
 			// save key definition
 			if(cmd.IsValid())
+			{
+				m_lstCmds.SetItemData(idx,nMod*256+new_key);
 				Global::pInputHandler->SetCmd(cmd,new_key,nMod);
+			}
 		}
 
 		void CKeyConfigDlg::FindKey(long idx,WORD&key,WORD&mods)
@@ -249,7 +248,28 @@ NAMESPACE__BEGIN(psycle)
 			}
 			return cmd;
 		}
+		void CKeyConfigDlg::OnBnClickedSpecialKeys()
+		{
+			CSpecialKeys dlg;
+			dlg.DoModal();
+			int idx = m_lstCmds.GetCurSel();
+			CmdDef cmd = FindCmd(idx);
 
+			// save key definition
+			if(cmd.IsValid())
+			{
+				m_lstCmds.SetItemData(idx,dlg.mod*256+dlg.key);
+				Global::pInputHandler->SetCmd(cmd,dlg.key,dlg.mod);
+			}
+			WORD mods=0;
+			if(dlg.mod&MOD_S)
+				mods|=HOTKEYF_SHIFT;
+			if(dlg.mod&MOD_C)
+				mods|=HOTKEYF_CONTROL;				
+			if(dlg.mod&MOD_E)
+				mods|=HOTKEYF_EXT;
+			m_hotkey0.SetHotKey(dlg.key,mods);
+		}
 		void CKeyConfigDlg::OnCancel() 
 		{
 			// user cancelled,
@@ -483,3 +503,4 @@ NAMESPACE__BEGIN(psycle)
 		}
 	NAMESPACE__END
 NAMESPACE__END
+

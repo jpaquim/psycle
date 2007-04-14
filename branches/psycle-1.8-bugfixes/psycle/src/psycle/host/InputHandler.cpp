@@ -367,7 +367,7 @@ namespace psycle
 						if (cmddata != cdefNull)
 						{
 							modi=cmddata/256;
-							SetCmd(cmd.ID,cmddata%256,modi,false);
+							SetCmd(cmd.ID,cmddata%256,modi,true);
 						}
 					}
 				}

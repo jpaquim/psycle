@@ -1161,7 +1161,7 @@ BEGIN
     CONTROL         "HotKey1",IDC_KEY0,"msctls_hotkey32",WS_BORDER | 
                     WS_TABSTOP,29,239,95,15
     PUSHBUTTON      "None",IDC_NONE,8,258,55,12
-    PUSHBUTTON      "Lookup",IDC_DEFAULTS3,68,258,55,12,WS_DISABLED
+    PUSHBUTTON      "Special Keys",IDC_SPECIALKEYS,68,258,55,12
     GROUPBOX        "Behaviour",IDC_STATIC,133,3,183,169
     CONTROL         "Right CTRL= play . Edit Toggle = stop",IDC_PLAY_R_CTRL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,13,172,10
@@ -2331,6 +2331,33 @@ BEGIN
     LTEXT           "End",IDC_STATIC_DESTENDLABEL,178,37,14,10
 END
 
+IDD_SPECIALKEYS DIALOGEX 0, 0, 237, 92
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Selector for Special Hotkeys"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Space bar",IDC_SPKEYS_SPACE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,23,17,48,10
+    CONTROL         "Delete",IDC_SPKEYS_DELETE,"Button",BS_AUTORADIOBUTTON,
+                    23,33,37,10
+    CONTROL         "Return",IDC_SPKEYS_RETURN,"Button",BS_AUTORADIOBUTTON,
+                    23,49,38,10
+    CONTROL         "Tabulator",IDC_SPKEYS_TAB,"Button",BS_AUTORADIOBUTTON,
+                    87,17,47,10
+    CONTROL         "Backspace",IDC_SPKEYS_BACKSPACE,"Button",
+                    BS_AUTORADIOBUTTON,87,33,49,10
+    CONTROL         "Intro",IDC_SPKEYS_INTRO,"Button",BS_AUTORADIOBUTTON,87,
+                    49,32,10
+    CONTROL         "Shift",IDC_SPKEYS_SHIFT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,174,17,31,10
+    CONTROL         "Control",IDC_SPKEYS_CONTROL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,174,33,39,10
+    DEFPUSHBUTTON   "Aceptar",IDOK,129,71,50,14
+    PUSHBUTTON      "Cancelar",IDCANCEL,180,71,50,14
+    GROUPBOX        "Hotkey",IDC_STATIC,7,3,152,66
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2676,6 +2703,14 @@ BEGIN
         RIGHTMARGIN, 278
         TOPMARGIN, 7
         BOTTOMMARGIN, 155
+    END
+
+    IDD_SPECIALKEYS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 230
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 85
     END
 END
 #endif    // APSTUDIO_INVOKED
