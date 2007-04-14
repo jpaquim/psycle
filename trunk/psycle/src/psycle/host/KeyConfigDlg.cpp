@@ -238,7 +238,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int i = m_lstCmds.GetItemData(idx)%256;
 
 			if ( i != 0 || j != 0)
-			CmdDef cmd = pinp->cmdLUT[j][i];
+				cmd = pinp->cmdLUT[j][i];
 			else
 			{
 				// get command string
