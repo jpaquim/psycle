@@ -1006,7 +1006,7 @@ void PatternGrid::moveCursor( int dx, int dy)
         }
         if ( centerCursor() ) {
             centerOnCursor();
-        } else { checkUpScroll( cursor() ); }
+        } else { checkDownScroll( cursor() ); }
     } else if ( dy < 0 ) {
         if ( ( (cursor_.line() + dy) < 0 ) && wrapAround() ) {
             cursor_.setLine( endLineNumber() - ( (dy*-1) - (cursor_.line()+1) ) );
@@ -1016,7 +1016,7 @@ void PatternGrid::moveCursor( int dx, int dy)
 
         if ( centerCursor() ) {
             centerOnCursor();
-        } else { checkDownScroll( cursor() ); }
+        } else { checkUpScroll( cursor() ); }
     }
 
     repaintCursor(); 
