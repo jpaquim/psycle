@@ -24,6 +24,7 @@
 #include <QLabel>
 #include <QDial>
 #include <QKeyEvent>
+#include <QPainter>
 
 MachineTweakDlg::MachineTweakDlg( psy::core::Machine *mac, QWidget *parent ) 
     : QDialog( parent )
@@ -72,7 +73,7 @@ void MachineTweakDlg::initParameterGui()
                 char parName[64];
                 pMachine_->GetParamName(knobIdx,parName);
                 cell->setText(parName);
-                layout->addWidget( cell, x, y );
+                layout->addWidget( cell, y, x );
             } else if ( knobIdx < numParameters ) {
                 KnobGroup *knobGroup = new KnobGroup( knobIdx );
                 char parName[64];
@@ -83,11 +84,11 @@ void MachineTweakDlg::initParameterGui()
                 knobGroupMap[ knobIdx ] = knobGroup;
                 connect( knobGroup, SIGNAL( changed( KnobGroup* ) ),
                          this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
-                layout->addWidget( knobGroup, x, y );
+                layout->addWidget( knobGroup, y, x );
             }					
         } else {
             // knob hole
-            layout->addWidget( new QLabel(""), x, y );
+            layout->addWidget( new QLabel(""), y, x );
         }
         y++;
         if ( !(y % rows) ) {
@@ -152,17 +153,38 @@ KnobGroup::KnobGroup( int param )
     layout->setMargin( 0 );
     layout->setSpacing( 0 );
     setLayout( layout );
+    setFixedSize( LABEL_WIDTH, K_YSIZE ); // FIXME: unfix the size.
 
     knob_ = new Knob( param );
+
     nameLbl = new QLabel();
+    QPalette plt = nameLbl->palette();
+    plt.setBrush( QPalette::Window, QBrush( QColor( 194, 190, 210 ) ) );
+    plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
+    nameLbl->setPalette( plt );
+    nameLbl->setFont( QFont( "Verdana", 8 ) );
+    nameLbl->setFixedSize( 150, K_XSIZE/2 );
+    nameLbl->setIndent( 5 );
+    nameLbl->setAutoFillBackground( true );
+
+//			framemachine_info_.machineGUIBottomColor.setHCOLORREF(0x009C796D);
+//			framemachine_info_.machineGUIFontBottomColor.setHCOLORREF(0x00FFFFFF);
     valueLbl = new QLabel();
+    QPalette plt1 = valueLbl->palette();
+    plt1.setBrush( QPalette::Window, QBrush( QColor( 121, 109, 156 ) ) );
+    plt1.setBrush( QPalette::WindowText, QBrush( Qt::white ) );
+    valueLbl->setPalette( plt1 );
+    valueLbl->setFont( QFont( "Verdana", 8 ) );
+    valueLbl->setFixedSize( 150, K_YSIZE/2 );
+    valueLbl->setIndent( 5 );
+    valueLbl->setAutoFillBackground( true );
 
     connect( knob_, SIGNAL( valueChanged( int ) ),
              this, SLOT( onKnobChanged() ) );
 
-    layout->addWidget( knob_, 0, 0, 2, 2 );
-    layout->addWidget( nameLbl, 0, 2, 1, 6 );
-    layout->addWidget( valueLbl, 1, 2, 2, 6 );
+    layout->addWidget( knob_, 0, 0, 2, 2, Qt::AlignLeft );
+    layout->addWidget( nameLbl, 0, 2, 1, 7, Qt::AlignLeft );
+    layout->addWidget( valueLbl, 1, 2, 1, 7, Qt::AlignLeft );
 }
 
 void KnobGroup::setKnob( Knob *inKnob )
@@ -192,7 +214,7 @@ void KnobGroup::onKnobChanged()
 
 QSize KnobGroup::sizeHint() const
 {
-    return QSize( K_XSIZE + LABEL_WIDTH, K_YSIZE );
+    return QSize( LABEL_WIDTH, K_YSIZE );
 }
 
 /**
@@ -201,7 +223,27 @@ QSize KnobGroup::sizeHint() const
  */
 Knob::Knob( int param ) 
     : param_( param )
-{}
+{
+    setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
+}
+
+void Knob::paintEvent( QPaintEvent *ev )
+{
+    QPainter painter(this);
+    QRectF target( 0, 0, K_XSIZE, K_YSIZE );
+    QPixmap pixmap(":/images/TbMainKnob.png");
+
+    int amp = maximum() - minimum();
+    int rel = value() - minimum();
+
+    if ( amp > 0 ) {
+        int frame = ( K_NUMFRAMES * rel )/amp;
+        int xn = frame * K_XSIZE;
+        QRectF source( xn, 0, K_XSIZE, K_YSIZE );
+
+        painter.drawPixmap( target, pixmap, source );
+    }
+}
 
 QSize Knob::sizeHint() const
 {
