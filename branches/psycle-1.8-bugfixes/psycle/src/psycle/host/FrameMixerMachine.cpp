@@ -142,8 +142,8 @@ NAMESPACE__BEGIN(host)
 	void CFrameMixerMachine::VuMeter::Draw(CDC *dc,int x, int y, float value)
 	{
 		int ypos = (1-value)*height;
-		dc->BitBlt(x+6,y+22,width,ypos,&VuOff,0,0,SRCCOPY);
-		dc->BitBlt(x+6,y+22+ypos,width,height,&VuOn,0,ypos,SRCCOPY);
+		dc->BitBlt(x+7,y+22,width,ypos,&VuOff,0,0,SRCCOPY);
+		dc->BitBlt(x+7,y+22+ypos,width,height,&VuOn,0,ypos,SRCCOPY);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -526,10 +526,12 @@ NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::OnLButtonUp(UINT nFlags, CPoint point) 
 	{
-		istweak = false;
-		Invalidate(false);	
+		CFrameMachine::OnLButtonDown(nFlags,point);
+/*		istweak = false;
+		Invalidate(false);
 		ReleaseCapture();
 		CFrameWnd::OnLButtonUp(nFlags, point);
+*/
 	}
 
 	void CFrameMixerMachine::OnRButtonUp(UINT nFlags, CPoint point) 

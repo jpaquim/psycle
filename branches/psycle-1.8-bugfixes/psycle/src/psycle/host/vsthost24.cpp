@@ -226,12 +226,14 @@ namespace psycle
 					OPENFILENAME ofn = {0}; // common dialog box structure
 					ofn.lStructSize = sizeof(OPENFILENAME);
 
-					std::ostringstream filefilter;
+					std::string filefilter;
 					for (int i=0;i<ptr->nbFileTypes;i++)
 					{
-						filefilter << ptr->fileTypes[i].name << "\0" << ptr->fileTypes[i].dosType << "\0";
+						filefilter = ptr->fileTypes[i].name; filefilter.push_back('\0');
+						filefilter += "*."; filefilter += ptr->fileTypes[i].dosType; filefilter.push_back('\0');
 					}
-					filefilter << "All (*.*)"<< "\0" << "*" << "\0";
+					filefilter += "All (*.*)"; filefilter.push_back('\0');
+					filefilter += "*.*"; filefilter.push_back('\0');
 
 					if (ptr->command == kVstMultipleFilesLoad)
 						filePath = new char [_MAX_PATH * 100];
@@ -244,12 +246,15 @@ namespace psycle
 
 					ofn.lpstrFile = filePath;
 					ofn.nMaxFile    = sizeof (filePath) - 1;
-					ofn.lpstrFilter =filefilter.str().c_str();
+					ofn.lpstrFilter =filefilter.c_str();
 					ofn.nFilterIndex = 1;
 					ofn.lpstrTitle = ptr->title;
 					ofn.lpstrFileTitle = fileName;
 					ofn.nMaxFileTitle = sizeof(fileName) - 1;
-					ofn.lpstrInitialDir = ptr->initialPath;
+					if ( ptr->initialPath != 0)
+						ofn.lpstrInitialDir = ptr->initialPath;
+					else
+						ofn.lpstrInitialDir =  (char*)pEffect.OnGetDirectory();
 					if (ptr->nbFileTypes >= 1)
 						ofn.lpstrDefExt = ptr->fileTypes[0].dosType;
 					if (ptr->command == kVstFileSave)

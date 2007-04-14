@@ -206,7 +206,11 @@ namespace psycle
 			//CString desc;		// string description     
 			//void * callback;	// function callback, not currently used
 			
-			CmdDef(CmdSet _ID=cdefNull)
+			CmdDef()
+			{
+				ID=cdefNull;
+			}
+			CmdDef(CmdSet _ID)
 			{
 				ID=_ID;
 			}
@@ -259,9 +263,9 @@ namespace psycle
 				case cdefKeyFS0: return "Key (Oct.0) F#";
 				case cdefKeyG_0: return "Key (Oct.0) G";
 				case cdefKeyGS0: return "Key (Oct.0) G#";
-				case cdefKeyA_0: return "Key (Oct.0) A";
-				case cdefKeyAS0: return "Key (Oct.0) A#";
-				case cdefKeyB_0: return "Key (Oct.0) B";
+				case cdefKeyA_0: return "Key (Oct.0)-A";
+				case cdefKeyAS0: return "Key (Oct.0)-A#";
+				case cdefKeyB_0: return "Key (Oct.0)-B";
 				case cdefKeyC_1: return "Key (Oct.1) C";
 				case cdefKeyCS1: return "Key (Oct.1) C#";
 				case cdefKeyD_1: return "Key (Oct.1) D";
@@ -271,9 +275,9 @@ namespace psycle
 				case cdefKeyFS1: return "Key (Oct.1) F#";
 				case cdefKeyG_1: return "Key (Oct.1) G";
 				case cdefKeyGS1: return "Key (Oct.1) G#";
-				case cdefKeyA_1: return "Key (Oct.1) A";
-				case cdefKeyAS1: return "Key (Oct.1) A#";
-				case cdefKeyB_1: return "Key (Oct.1) B";
+				case cdefKeyA_1: return "Key (Oct.1)-A";
+				case cdefKeyAS1: return "Key (Oct.1)-A#";
+				case cdefKeyB_1: return "Key (Oct.1)-B";
 				case cdefKeyC_2: return "Key (Oct.2) C";
 				case cdefKeyCS2: return "Key (Oct.2) C#";
 				case cdefKeyD_2: return "Key (Oct.2) D";
@@ -282,8 +286,8 @@ namespace psycle
 				case cdefKeyF_2: return "Key (Oct.2) F";
 				case cdefKeyFS2: return "Key (Oct.2) F#";
 				case cdefKeyG_2: return "Key (Oct.2) G";
-				case cdefKeyGS2: return "Key (Oct.2) G#";
-				case cdefKeyA_2: return "Key (Oct.2) A";
+				case cdefKeyGS2: return "Key (Oct.2)-G#";
+				case cdefKeyA_2: return "Key (Oct.2)-A";
 
 				case cdefKeyStop: return "Key Stop";
 				case cdefKeyStopAny: return "Key Stop Current";

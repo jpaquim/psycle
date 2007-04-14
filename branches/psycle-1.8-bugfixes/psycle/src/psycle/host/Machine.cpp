@@ -739,6 +739,7 @@ namespace psycle
 		{
 			_macIndex = index;
 			_numPars = 16;
+			_nCols = 2;
 			_type = MACH_DUPLICATOR;
 			_mode = MACHMODE_GENERATOR;
 			bisTicking = false;

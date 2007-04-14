@@ -372,7 +372,7 @@ NAMESPACE__BEGIN(psycle)
 		int CFrameMachine::ConvertXYtoParam(int x, int y)
 		{
 			if ((y/K_YSIZE) >= parspercol ) return -1; //this if for VST's that use the native gui.
-			return (y/K_YSIZE) + ((x/150)*parspercol);
+			return (y/K_YSIZE) + ((x/W_ROWWIDTH)*parspercol);
 		}
 		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
@@ -416,11 +416,13 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (istweak)
 			{
-				int curval = _pMachine->GetParamValue(tweakpar);
+				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
+				///       It should be interesting to know what is "somewhere else".
+/*				int curval = _pMachine->GetParamValue(tweakpar);
 				tweakbase -= prevval-curval;					//adjust base for tweaks from somewhere else
 				if(tweakbase<minval) tweakbase=minval;
 				if(tweakbase>maxval) tweakbase=maxval;
-
+*/
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{

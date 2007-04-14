@@ -70,8 +70,6 @@ kSh
 
 
 
-! problem with directories http://psycle.pastnotecut.org/thread.php?threadid=1088&boardid=2&styleid=&page=1#5
-
 
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
@@ -128,13 +126,7 @@ tested and categorized and sorted
 Machines
 ========
 
-**	flanger: <bohan> there's a bug in the current source code of the flanger plugin (the bug is not present in the distributed binary).
-*	flanger: <bohan> <[JAZ]> Flanger Machine could become unstable and use all the CPU avaiable when the feedback was higher than 50% and the input sound stopped.
-		<bohan> i wonder if that bug is back in the plugin... there's no denormal check.
-+	flanger: <bohan> add interpolation to the flanger plugin.
-
-**	cyanphase vibrasynth has an access violation bug
-	[ I need source to fix]
+*	cyanphase vibrasynth has an access violation bug [ Source code is no available. Fix is not possible]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
 **	JMDrum is buggy (Crashes after changing settings sometimes)
 **                <lobyaway> ah, it bugs if i hold down a note while editing (to fill the pattern with notes)
@@ -163,18 +155,11 @@ Sampulse Machine
 Wave Editor
 ===========
 
-* <[alk]> bug, open the wave ed , then the instrument editor, change to the next sample (using the '>'
-	button in the inst ed, and select some of the sample wav, the display goes blank
-* Paste wont work (grayed) in the sample editor if there is already a wave loaded - it should append data to the current sample or overwrite it (or have the both functions)
 !	alk: escape to close wave ed
 		[JAZ : It's a window, not a dialog]
-+++	<_sue_> prolly some already sugested this but, a play button in the wave editor is really needed
-		[Problem: Needs a sampler Machine. The wave preview is not adecuated
-		 it doesn't loop, and doesn't take note into consideration ]
 +	ALK waveed: remove silence from start and end of wave
 +	Mystic - import .mp3 format for samples
 +	Easier way to load Samples.
-+	Toolbar for the Wave Editor.
 +       Wave-Editor Paste at the end (or any other part) of the current sample.
 +	better way to set loop points. (+ ping-pong loops)
 
@@ -195,8 +180,6 @@ GUI (pattern)
 + <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking
-+	D says: When you highlight something in Psycle would it be possible to make it so you can drag and
-		drop that highlighted area?
 +	Xerox replace, allow multiple - it replaces the selected pattern(s) with an identical new one
 +	Xerox multiple
 +	In FT2, the cursor Jumps to the top of a pattern when you move from one to another (Kris)
@@ -230,7 +213,7 @@ GUI (machines)
 !!	machine param enter dialog should be modeless.
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
-+	VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
++	VST/Native machine Windows : ESC = close [Problem: can't close within the CWnd!!!]
 +	Option to hide Parameters in VST GUI.
 +	Add Presets in a "tab" under Parameters (easy switching/testing)!
 +	<_sue_> native mahcines gui should have sliders...it would change a lot....
@@ -248,14 +231,9 @@ Player Engine
 +++	<Alk^> do u think the recording with subtracting the buffer delay will be doable? - use fdxx command
 +++	option for note-record to take command FD into account like ft2
 +++FF?	DirectX effects, intstruments
-++	ALK tracker command to bypass an fx, mute command for machines
-		[Currently machines are disconnected when doing so. If we do the commands, they should be just muted]
-++	Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
-		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
-		 (asked by Pikari)
 ++FF	DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
 	machines ....
-+	pattern repeat (loop) and song repeat (asked by Vir|us)
++	song repeat (asked by Vir|us)
 +	alk: global Delay Trigger, that affects every note (not just the one on this channel)
 		[this seems hard, because the player will have to scan all tracks for this command, then go back and
 		play the tracks
@@ -387,7 +365,8 @@ About the MIDI CC : now that they are transmitted directly as MCM it could be ni
 ======================================
 Interface (contains pattern stuff too)
 ======================================
-
+* If the song directory is incorrect/invalid, cloning machines doesn't work
+	[one option is to not store a .psy, and work completely in memory for cloning]
 **	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new
 	psycle opens..
 	[ DDE ? mmmm... ]
@@ -411,13 +390,9 @@ Isn't that simple?
 	in the "note" column.
 	[Is it useful to enter numbers while playing and follow song? what about just adding notes
 	 wherever the position of the cursor is?]
-* screen should be made so 800x600 works
-	[ detacheable sequence menu? ]
 *	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
 	[Quantization errors, due to that the sliders have a range of 256. maybe I should make the
 	 range bigger]
-*	<alk> in keyboard settings, try setting transpose channel +1 to 'alt f12', display Alt f12, but then if you
-	move to another function and back it displays f12
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
@@ -479,7 +454,6 @@ Importing
 
 *	It doesn't add the machines necessary to play all notes.
 ++ .mid import/export
-+	.mid import
 +	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring
 		pattern data and other settings, this possible? (yes, but will require new song parser...)
 + <angelus> In this threat I suggest an option to import a XM or IT file into differents
