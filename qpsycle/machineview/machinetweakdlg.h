@@ -39,6 +39,9 @@ public:
     QSize sizeHint() const;
     int param() { return param_; }
 
+protected: 
+    void paintEvent( QPaintEvent *ev );
+
 private:
     int param_;
 };
