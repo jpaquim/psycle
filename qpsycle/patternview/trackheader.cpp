@@ -63,8 +63,6 @@ void TrackHeader::paintEvent( QPaintEvent *event )
     int scrollDx = pDraw->horizontalScrollBar()->value();
     int spacingWidth = 5;
     int startTrack = pDraw->findTrackByXPos( scrollDx );
-    qDebug() << "strt trk" << startTrack;
-    qDebug() << "sdx" << scrollDx;
     std::map<int, TrackGeometry>::const_iterator it;
     it = pDraw->trackGeometrics().lower_bound( startTrack );
 

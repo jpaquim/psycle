@@ -45,8 +45,8 @@ public:
 
 
 protected:
-   void keyPressEvent( QKeyEvent *event );
-   void timerEvent( QTimerEvent *ev );
+    void keyPressEvent( QKeyEvent *event );
+    void timerEvent( QTimerEvent *ev );
 
 private slots:
     void newSong();

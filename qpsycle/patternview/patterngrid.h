@@ -149,6 +149,7 @@ public:
     bool isHex( QKeyEvent *ev );
     int cellWidth( ) const;
     int eventOffset( int eventnr, int col ) const;
+    int eventWidth( int eventnr ) const;
     int eventColWidth( int eventnr ) const;
     int noteCellWidth( ) const;
     void setBigTrackSeparatorWidth( int ident );
@@ -171,6 +172,8 @@ public:
     void setShiftArrowForSelect( bool setit );
     bool wrapAround();
     void setWrapAround( bool setit );
+    bool centerCursor();
+    void setCenterCursor( bool setit );
 
     // Cursor.
     const PatCursor & cursor() const;
@@ -246,6 +249,9 @@ public:
     void selectAll();
     void navTop();
     void navBottom();
+    void trackPrev();
+    void trackNext();
+    void centerOnCursor();
     void checkLeftScroll( const PatCursor & cursor );
     void checkRightScroll( const PatCursor & cursor );
     void checkUpScroll( const PatCursor & cursor );
@@ -253,6 +259,7 @@ public:
 
 
 protected:
+    bool event(QEvent *event);
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
     void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
@@ -270,6 +277,7 @@ private:
     bool ft2HomeEndBehaviour_;
     bool shiftArrowForSelect_;
     bool wrapAround_;
+    bool centerCursor_;
 
     bool blockSelected_;
 
@@ -278,6 +286,8 @@ private:
     float lastXmlLineBeatPos;
     int xmlTracks;
     float xmlBeats;
+
+    int cellWidth_;
 
 
     PatternDraw *patDraw_;

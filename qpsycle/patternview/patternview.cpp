@@ -52,6 +52,7 @@ PatternView::PatternView( psy::core::Song *song )
     patDraw_->patternGrid()->setFt2HomeEndBehaviour( psy::core::Global::pConfig()->ft2HomeEndBehaviour() );
     patDraw_->patternGrid()->setShiftArrowForSelect( psy::core::Global::pConfig()->shiftArrowForSelect() );
     patDraw_->patternGrid()->setWrapAround( psy::core::Global::pConfig()->wrapAround() );
+    patDraw_->patternGrid()->setCenterCursor( psy::core::Global::pConfig()->centerCursor() );
 }
 
 void PatternView::createToolBar()
@@ -224,4 +225,3 @@ void PatternView::keyPressEvent( QKeyEvent *event )
             event->ignore();
     }
 }
-

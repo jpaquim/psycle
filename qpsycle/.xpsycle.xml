@@ -7,7 +7,7 @@
 <!-- audio configuration -->
 
 <audio enable='1' />
-<driver name='jack' />
+<driver name='alsa' />
 <alsa device = 'plughw:0' />
 
 <!-- gui configuration -->
@@ -19,8 +19,9 @@
 <!-- pattern view options -->
 
 <option id="ft2-home-end-behaviour" value="0" />
-<option id="shift-arrow-for-select" value="0" />
-<option id="wrap-around" value="1" />
+<option id="shift-arrow-for-select" value="1" />
+<option id="wrap-around" value="0" />
+<option id="center-cursor" value="0" />
 
 <!-- keyHandler configuration -->
 
