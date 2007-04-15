@@ -167,8 +167,6 @@ KnobGroup::KnobGroup( int param )
     nameLbl->setIndent( 5 );
     nameLbl->setAutoFillBackground( true );
 
-//			framemachine_info_.machineGUIBottomColor.setHCOLORREF(0x009C796D);
-//			framemachine_info_.machineGUIFontBottomColor.setHCOLORREF(0x00FFFFFF);
     valueLbl = new QLabel();
     QPalette plt1 = valueLbl->palette();
     plt1.setBrush( QPalette::Window, QBrush( QColor( 121, 109, 156 ) ) );
@@ -181,6 +179,10 @@ KnobGroup::KnobGroup( int param )
 
     connect( knob_, SIGNAL( valueChanged( int ) ),
              this, SLOT( onKnobChanged() ) );
+    connect( knob_, SIGNAL( sliderPressed() ),
+             this, SLOT( onKnobPressed() ) );
+    connect( knob_, SIGNAL( sliderReleased() ),
+             this, SLOT( onKnobReleased() ) );
 
     layout->addWidget( knob_, 0, 0, 2, 2, Qt::AlignLeft );
     layout->addWidget( nameLbl, 0, 2, 1, 7, Qt::AlignLeft );
@@ -210,6 +212,32 @@ void KnobGroup::setValueText( const QString & text )
 void KnobGroup::onKnobChanged()
 {
     emit changed( this );
+}
+
+void KnobGroup::onKnobPressed()
+{
+    QPalette plt = nameLbl->palette();
+    plt.setBrush( QPalette::Window, QBrush( QColor( 169, 148, 172 ) ) );
+    plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
+    nameLbl->setPalette( plt );
+
+    QPalette plt1 = valueLbl->palette();
+    plt1.setBrush( QPalette::Window, QBrush( QColor( 114, 90, 139 ) ) );
+    plt1.setBrush( QPalette::WindowText, QBrush( QColor( 255, 238, 68 ) ) );
+    valueLbl->setPalette( plt1 );
+}
+
+void KnobGroup::onKnobReleased()
+{
+    QPalette plt = nameLbl->palette();
+    plt.setBrush( QPalette::Window, QBrush( QColor( 194, 190, 210 ) ) );
+    plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
+    nameLbl->setPalette( plt );
+
+    QPalette plt1 = valueLbl->palette();
+    plt1.setBrush( QPalette::Window, QBrush( QColor( 121, 109, 156 ) ) );
+    plt1.setBrush( QPalette::WindowText, QBrush( Qt::white ) );
+    valueLbl->setPalette( plt1 );
 }
 
 QSize KnobGroup::sizeHint() const
@@ -249,6 +277,8 @@ QSize Knob::sizeHint() const
 {
     return QSize( K_XSIZE, K_YSIZE );
 }
+
+
 
 /**
  * FHeader class.

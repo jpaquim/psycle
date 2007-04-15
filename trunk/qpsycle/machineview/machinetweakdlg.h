@@ -59,6 +59,8 @@ public:
 
 public slots:
     void onKnobChanged();
+    void onKnobPressed();
+    void onKnobReleased();
 
 signals:
     void changed( KnobGroup *kGroup );
