@@ -67,7 +67,7 @@ void MachineTweakDlg::initParameterGui()
             pMachine_->GetParamRange( knobIdx,min_v,max_v);
             bool bDrawKnob = (min_v==max_v)?false:true;
 
-            if (!bDrawKnob) {
+            if ( !bDrawKnob ) {
                 FHeader* cell = new FHeader();
                 headerMap[ knobIdx ] = cell;
                 char parName[64];
@@ -286,4 +286,19 @@ QSize Knob::sizeHint() const
  */
 FHeader::FHeader( QWidget *parent )
     : QLabel( parent )
-{}
+{
+    setFont( QFont( "Verdana", 8 ) );
+    setIndent( 10 );
+}
+
+void FHeader::paintEvent( QPaintEvent *ev )
+{
+    QPainter painter(this);
+
+    painter.fillRect( 0, 0, width(), height()/4, QColor( 194, 190, 210 ) );
+    painter.fillRect( 0, height()/4, width(), height()/2, Qt::black );
+    QRectF textRect( indent(), height()/4, width(), height()/2 );
+    painter.setPen( Qt::white );
+    painter.drawText( textRect, Qt::AlignLeft | Qt::AlignVCenter, text() );
+    painter.fillRect( 0, (height()*3)/4, width(), height()/4, QColor( 121, 109, 156 ) );
+}
