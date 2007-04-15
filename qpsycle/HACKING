@@ -1,0 +1,35 @@
+HACKING ON QPSYCLE
+------------------
+
+These are some guidelines to bear in mind when coding
+in qpsycle.
+
+
+
+include files
+-------------
+
+In the GUI files, include psycore files first, followed by
+other GUI files, followed by standard library includes,
+followed by Qt includes.
+
+For example:
+
+#include "psycore/song.h"
+
+#include "machineview/machineview.h"
+
+#include <map>
+
+#include <QLabel>
+
+psycore has to go before Qt due to a conflict between
+boost::signals and Qt.
+
+
+Adding yourself as an author
+----------------------------
+
+If you add some code to qpsycle, please add your name to
+the AUTHORS file with a note of what you added.  Don't
+put your name in the actual code file.
