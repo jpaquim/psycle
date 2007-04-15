@@ -74,6 +74,8 @@ private:
 class FHeader : public QLabel {
 public:
     FHeader( QWidget *parent = 0 );
+protected:
+    void paintEvent( QPaintEvent *ev );
 };
 
 /**
