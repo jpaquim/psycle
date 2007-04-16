@@ -83,7 +83,7 @@ namespace psycle
 */
 			void host::CalcTimeInfo(long lMask)
 			{
-				// Move TranportPlaying, cycleactive and recording to a "Start()" function.
+				///\todo: Move TranportPlaying, cycleactive and recording to a "Start()" function.
 				// create(?) a "tick" function called each work cycle in order to reset transportchanged,
 				// automationwriting and automationreading.
 				//
@@ -108,31 +108,37 @@ namespace psycle
 					vstTimeInfo.samplePos = ((Master *) (Global::song()._pMachine[MASTER_INDEX]))->sampleCount;
 				}
 				else vstTimeInfo.samplePos = 0;
-
-				//\todo : ensure that samplePos is correct before calling it.
-				// The base class function gives SampleRate, kVstTimeSigValid, kVstSmpteValid and kVstPpqPosValid
-				CVSTHost::CalcTimeInfo(lMask);
+				vstTimeInfo.sampleRate = Global::pConfig->GetSamplesPerSec();
 
 				if(lMask & kVstTempoValid)
 				{
 					vstTimeInfo.flags |= kVstTempoValid;
 					vstTimeInfo.tempo = Global::player().bpm;
 				}
+				if(lMask & kVstTimeSigValid)
+				{
+					vstTimeInfo.flags |= 	kVstTimeSigValid;
+					vstTimeInfo.timeSigNumerator = 4;
+					vstTimeInfo.timeSigDenominator = 4;
+				}
 				//kVstCyclePosValid			= 1 << 12,	// start and end
 				//	cyclestart // locator positions in quarter notes.
 				//	cycleend   // locator positions in quarter notes.
 
-				if(lMask & kVstNanosValid)
+/*				if(lMask & kVstNanosValid)
 				{
 					vstTimeInfo.flags |= kVstNanosValid;
 					vstTimeInfo.nanoSeconds = cpu::cycles() / Global::cpu_frequency() * 1e9; //::GetTickCount(); ::timeGetTime(); // error C3861: 'timeGetTime': identifier not found, even with argument-dependent lookup
 				}
-
+*/
 				//kVstBarsValid				= 1 << 11,
 				//	barstartpos,  ( 10.25ppq , 1ppq = 1 beat). Seems like ppqPos, but instead of sample pos, the last bar.
 				//kVstClockValid 				= 1 << 15
 				//	samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat )
 
+				// The base class function gives kVstPpqPosValid, kVstBarsValid, kVstClockValid, kVstSmpteValid, and kVstNanosValid
+				// Ensure that samplePos, sampleRate, tempo, and timesigNumerator/Denominator are correct before calling it.
+				CVSTHost::CalcTimeInfo(lMask);
 			}
 
 

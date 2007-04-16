@@ -1,9 +1,8 @@
 /*****************************************************************************/
-/* CVSTHost.hpp: interface for CVSTHost/CEffect classes (for VST SDK 2.4).	 */
-/* Work Derived from vsthost (1.16i).										 */
+/* CVSTHost.hpp: interface for CVSTHost/CEffect classes (for VST SDK 2.4r2). */
+/* Work Derived from the LGPL host "vsthost (1.16l)".						 */
 /* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/* Please, read file src/Seib-vsthost/readme.txt before using these sources	 */
 /*****************************************************************************/
 /*                                                                           */
 /* $Revision: 2718 $ */
@@ -58,10 +57,11 @@ namespace seib {
 		class CFxBase
 		{
 		protected:
-			CFxBase(){}
+			CFxBase();
 		public:
 			CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion);
 			CFxBase(const char *pszFile);
+			CFxBase(FILE* pFileHandle);
 			CFxBase & operator=(CFxBase const &org) { return DoCopy(org); }
 			CFxBase & DoCopy(const CFxBase &org);
 
@@ -69,12 +69,17 @@ namespace seib {
 			long GetVersion() { return version; }
 			long GetFxID() {  return fxID; }
 			long GetFxVersion() { return fxVersion; }
+			// This function would normally be protected, but it is needed in the saving of Programs from a Bank.
+			virtual bool SaveData(FILE* pFileHandle) { pf = pFileHandle; return SaveData(); }
 		protected:
 			VstInt32 fxMagic;			///< 'FxCk' (regular) or 'FPCh' (opaque chunk)
 			VstInt32 version;			///< format version
 			VstInt32 fxID;				///< fx unique ID
 			VstInt32 fxVersion;			///< fx version
+			// pf would normally be private, but it is needed in the loading of Programs from a Bank.
+			FILE* pf;
 		protected:
+			bool Load(const char *pszFile);
 			virtual bool LoadData() { return ReadHeader(); }
 			virtual bool SaveData() { return WriteHeader(); }
 			template <class T>
@@ -87,11 +92,10 @@ namespace seib {
 			void Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
 			bool ReadHeader();
 			bool WriteHeader();
+			virtual void CreateInitialized();
 		private:
 			static bool NeedsBSwap;
 		private:
-			bool Load(const char *pszFile);
-			FILE* pf;
 			void SwapBytes(VstInt32 &f);
 			void SwapBytes(float &f);
 		};
@@ -102,29 +106,32 @@ namespace seib {
 		class CFxProgram : public CFxBase
 		{
 		public:
-			CFxProgram(const char *pszFile = 0):CFxBase(pszFile){ }
+			CFxProgram(const char *pszFile = 0):CFxBase(){ Init(); Load(pszFile); }
+			CFxProgram(FILE *pFileHandle);
 			// Create a CFxProgram from parameters.
 			// If data==0 , create an empty Program of size "size", else, copy the contents of "data" to the new arrays.
 			// isChunk tells if this is going to act as a regular program or a chunk one.
 			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool isChunk=false, void*data=0);
-			CFxProgram(CFxProgram const &org):CFxBase(){ DoCopy(org); }
+			CFxProgram(CFxProgram const &org):CFxBase(){ Init(); DoCopy(org); }
 			virtual ~CFxProgram();
 			CFxProgram & operator=(CFxProgram const &org) { FreeMemory(); return DoCopy(org); }
 
 			// access functions
-			const char * GetProgramName()	{ return prgName;	}
+			const char * GetProgramName() const	{ return prgName;	}
 			void SetProgramName(const char *name = "")
 			{
 				//leave last char for null.
 				std::strncpy(prgName, name, sizeof(prgName)-1);
 			}
-			long GetNumParams() { return numParams; }
-			float GetParameter(VstInt32 nParm) {  return (nParm < numParams) ? pParams[nParm] : 0; }
+			long GetNumParams() const{ return numParams; }
+			float GetParameter(VstInt32 nParm) const{  return (nParm < numParams) ? pParams[nParm] : 0; }
 			bool SetParameter(VstInt32 nParm, float val = 0.0);
-			long GetChunkSize() { return sizeof(pChunk); }
+			long GetChunkSize() const{ return sizeof(pChunk); }
 			void *GetChunk() { return pChunk; }
 			bool CopyChunk(const void *chunk) { memcpy(pChunk,chunk,sizeof(pChunk)); }
-			bool IsChunk() { return !!pChunk; }
+			bool IsChunk() const{ return !!pChunk; }
+
+			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pf); }
 
 		protected:
 			char prgName[28];			///< program name (null-terminated ASCII string)
@@ -158,12 +165,13 @@ namespace seib {
 		class CFxBank : public CFxBase
 		{
 		public:
-			CFxBank(const char *pszFile = 0):CFxBase(pszFile){  }
+			CFxBank(const char *pszFile = 0):CFxBase(){ Init(); Load(pszFile); }
+			CFxBank(FILE* pFileHandle);
 			// Create a CFxBank from parameters.
 			// If chunkSize is zero, the Bank is created as a regular bank of numPrograms. data is ignored.
 			// else, creates a chunk of size "chunkSize", and copies the contents of "data" if it is not zero.
 			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, int _chunkSize=0, void*_data=0);
-			CFxBank(CFxBank const &org) { DoCopy(org); }
+			CFxBank(CFxBank const &org) { Init(); DoCopy(org); }
 			virtual ~CFxBank();
 			CFxBank & operator=(CFxBank const &org) { FreeMemory(); return DoCopy(org); }
 
@@ -181,9 +189,11 @@ namespace seib {
 			{
 				if ( nProgNum==-1) return &programs[currentProgram];
 				else if (nProgNum<numPrograms) return &programs[nProgNum];
+				return 0;
 			}
 			void SetProgramIndex(VstInt32 nProgNum) { if (nProgNum < numPrograms ) currentProgram = nProgNum; }
 			VstInt32 GetProgramIndex() { return currentProgram;	}
+			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pf); }
 
 
 		protected:
@@ -379,7 +389,7 @@ namespace seib {
 			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu) / 32767.0f; }
 			inline bool EditGetRect(ERect **ptr) { return Dispatch(effEditGetRect, 0, 0, ptr)==1?true:false; }
 			// return value is true (succeeded) or false.
-			inline bool EditOpen(void *ptr) { VstInt32 l = Dispatch(effEditOpen, 0, 0, ptr); if (l > 0) bEditOpen = true; return bEditOpen; }
+			inline bool EditOpen(void *ptr) { /*VstInt32 l =*/ Dispatch(effEditOpen, 0, 0, ptr); /*if (l > 0)*/ bEditOpen = true; return bEditOpen; }
 			inline void EditClose() { Dispatch(effEditClose); bEditOpen = false; }
 			// This has to be called repeatedly from the idle process ( usually the UI thread, with idle priority )
 			// The plugins usually have checks so that it skips the call if no update is required.
@@ -597,8 +607,12 @@ namespace seib {
 			virtual bool DECLARE_VST_DEPRECATED(OnNeedIdle)(CEffect &pEffect);
 			virtual bool OnSizeWindow(CEffect &pEffect, long width, long height);
 			// Will cause application to call AudioEffect's  setSampleRate/setBlockSize method (when implemented).
-			virtual long OnUpdateSampleRate(CEffect &pEffect){ return vstTimeInfo.sampleRate; }
-			virtual long OnUpdateBlockSize(CEffect &pEffect) { return lBlockSize; }
+			virtual long OnUpdateSampleRate(CEffect &pEffect){
+				///\todo : "if (pEffect is not being loaded)" pEffect->EffSetSampleRate(fSampleRate);
+				return vstTimeInfo.sampleRate; }
+			virtual long OnUpdateBlockSize(CEffect &pEffect) {
+				///\todo : "if (pEffect is not being loaded)" pEffect->EffSetBlockSize(lBlockSize);
+				return lBlockSize; }
 			//	Returns the ASIO input latency values.
 			virtual long OnGetInputLatency(CEffect &pEffect) { return 0; }
 			// Returns the ASIO output latency values. To be used mostly for GUI sync with audio.

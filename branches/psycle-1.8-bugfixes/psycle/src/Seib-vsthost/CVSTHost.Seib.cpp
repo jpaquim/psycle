@@ -1,9 +1,8 @@
 /*****************************************************************************/
-/* CVSTHost.cpp: implementation for CVSTHost/CEffect classes (VST SDK 2.4).  */
-/* Work Derived from vsthost (1.16i).										 */
+/* CVSTHost.cpp: implementation for CVSTHost/CEffect classes (VST SDK 2.4r2).*/
+/* Work Derived from the LGPL host "vsthost (1.16l)".						 */
 /* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/* Please, read file src/Seib-vsthost/readme.txt before using these sources	 */
 /*****************************************************************************/
 /*                                                                           */
 /* $Revision: 2718 $ */
@@ -141,11 +140,21 @@ namespace seib {
 		/* CFxBase class members                                                     */
 		/*===========================================================================*/
 
+		CFxBase::CFxBase()
+		{ CreateInitialized(); }
+		void CFxBase::CreateInitialized()
+		{
+			fxMagic=0; version = 0; fxID = 0; fxVersion = 0; pf = 0;
+			const char szChnk[] = "CcnK";
+			const long lChnk = cMagic;
+			NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
+		}
 		CFxBase::CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion)
 			: fxMagic(0)
 			, version(_version)
 			, fxID(_fxID)
 			, fxVersion(_fxVersion)
+			, pf(0)
 		{
 			const char szChnk[] = "CcnK";
 			const long lChnk = cMagic;
@@ -153,7 +162,16 @@ namespace seib {
 		}
 		CFxBase::CFxBase(const char *pszFile)
 		{
+			CreateInitialized();
 			Load(pszFile);
+		}
+		CFxBase::CFxBase(FILE* pFileHandle)
+		{
+			CreateInitialized();
+			pf = pFileHandle;
+			if (!pf)
+				return;
+			LoadData();
 		}
 		CFxBase & CFxBase::DoCopy(const CFxBase &org)
 		{
@@ -184,8 +202,8 @@ namespace seib {
 		bool CFxBase::Read(T &f,bool allowswap)	{ int i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap && allowswap) SwapBytes(f); return (bool)i; }
 		template <class T>
 		bool CFxBase::Write(T f, bool allowswap)	{ if (NeedsBSwap && allowswap) SwapBytes(f); int i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
-		bool CFxBase::ReadArray(void* f,int size)	{ int i=fread(&f,size,1,pf); return (bool)i; }
-		bool CFxBase::WriteArray(void* f, int size)	{ int i=fwrite(&f,size,1,pf);  return (bool)i; }
+		bool CFxBase::ReadArray(void* f,int size)	{ int i=fread(f,size,1,pf); return (bool)i; }
+		bool CFxBase::WriteArray(void* f, int size)	{ int i=fwrite(f,size,1,pf);  return (bool)i; }
 		bool CFxBase::ReadHeader()
 		{
 			VstInt32 chunkMagic(0),byteSize(0);
@@ -251,6 +269,15 @@ namespace seib {
 				if (isChunk) SetChunk(data,size);
 				else SetParameters(static_cast<const float*>(data),size);
 			}
+		}
+		CFxProgram::CFxProgram(FILE *pFileHandle)
+			:CFxBase()
+		{
+			Init();
+			pf = pFileHandle;
+			if (!pf)
+				return;
+			LoadData();
 		}
 		
 		CFxProgram::~CFxProgram()
@@ -365,6 +392,7 @@ namespace seib {
 		}
 		bool CFxProgram::SaveData()
 		{
+			///\todo: update the "bytesize" value!
 			CFxBase::SaveData();
 			Write(numParams);
 			WriteArray(prgName,sizeof(prgName));
@@ -399,6 +427,16 @@ namespace seib {
 				if (_data) SetChunk(_data);
 			}
 			else { ProgramMode(); pChunk=0; }
+		}
+
+		CFxBank::CFxBank(FILE *pFileHandle)
+			:CFxBase()
+		{
+			Init();
+			pf = pFileHandle;
+			if (!pf)
+				return;
+			LoadData();
 		}
 
 		/*****************************************************************************/
@@ -477,11 +515,12 @@ namespace seib {
 
 		bool CFxBank::LoadData()
 		{
+			CFxBase::LoadData();
 			Read(numPrograms);
 			if (version == 2) { Read(currentProgram); Forward(124); }
-			else Forward(128);
+			else { currentProgram = 0; Forward(128); }
 
-			if (version == chunkBankMagic)
+			if (fxMagic == chunkBankMagic)
 			{
 				VstInt32 size;
 				Read(size);
@@ -492,9 +531,8 @@ namespace seib {
 			{
 				for (int i=0; i< numPrograms; i++)
 				{
-					///\todo: 
-					/// There's one problem. i can't use LoadData() from CFxProgram the way it is now.
-					//programs[i]=
+					CFxProgram loadprog(pf);
+					programs.push_back(loadprog);
 				}
 			}
 			return true;
@@ -506,9 +544,26 @@ namespace seib {
 
 		bool CFxBank::SaveData()
 		{
-			///\todo
-			/// There are two problems. One, use WriteData() from CFxProgram. the other, write the chunk size.
-			return false;
+			///\todo: update the "bytesize" value!
+			CFxBase::SaveData();
+			Write(numPrograms);
+			if (version == 2) { Write(currentProgram); Forward(124); }
+			else Forward(128);
+
+			if (fxMagic == chunkBankMagic)
+			{
+				VstInt32 size = sizeof(pChunk);
+				Write(size);
+				WriteArray(pChunk,size);
+			}
+			else
+			{
+				for (int i=0; i< numPrograms; i++)
+				{
+					programs[i].SaveData(pf);
+				}
+			}
+			return true;
 		}
 
 		/*===========================================================================*/

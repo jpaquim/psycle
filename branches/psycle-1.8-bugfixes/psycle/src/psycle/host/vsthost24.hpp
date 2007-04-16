@@ -133,7 +133,7 @@ namespace psycle
 			class host : public CVSTHost
 			{
 			public:
-				host(){	quantization = 65535; };
+				host(){	quantization = 65535; SetBlockSize(STREAM_SIZE); };
 				virtual ~host(){;}
 
 				virtual plugin* host::GetPreviousPlugIn(CEffect & pEffect, int pinIndex);
