@@ -23,10 +23,6 @@
 #include "psycore/song.h"
 #include "psycore/singlepattern.h"
 
-#include "linenumbercolumn.h"
-#include "patterngrid.h"
-#include "patternview.h"
-
 #include <QGraphicsView>
 #include <QGraphicsScene>
 
@@ -39,6 +35,7 @@ class LineNumberColumn;
 class PatternGrid;
 class PatCursor;
 class PatternView;
+class PatternDraw;
 class TrackHeader;
 
 /**

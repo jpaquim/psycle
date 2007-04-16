@@ -23,10 +23,6 @@
 #include "psycore/song.h"
 #include "psycore/singlepattern.h"
 
-#include "linenumbercolumn.h"
-#include "patterndraw.h"
-#include "patterngrid.h"
-
 #include <QVBoxLayout>
 #include <QWidget>
 

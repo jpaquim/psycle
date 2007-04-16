@@ -24,6 +24,7 @@
 #include "patterndraw.h"
 #include "patterngrid.h"
 #include "trackheader.h"
+#include "linenumbercolumn.h"
 
 #include <QtGui>
 #include <QDebug>

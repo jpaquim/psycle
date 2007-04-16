@@ -19,6 +19,9 @@
 ***************************************************************************/
 
 #include "linenumbercolumn.h"
+#include "patterndraw.h"
+#include "patternview.h"
+#include "patterngrid.h"
 
 #include <QPen>
 #include <QRectF>

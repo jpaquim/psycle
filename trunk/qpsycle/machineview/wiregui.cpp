@@ -20,6 +20,7 @@
 
 #include "wiregui.h"
 #include "machinegui.h"
+#include "machineview.h"
 
 #include <math.h>
 
@@ -34,17 +35,21 @@
  WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView)
      : arrowSize(20), machineView(macView)
  {
-     setAcceptedMouseButtons(0);
      source = sourceMacGui;
      dest = destMacGui;
      source->addWireGui(this);
      dest->addWireGui(this);
      adjust();
 
-     delConnAct_ = new QAction("Delete Connection", this);
+     delConnAct_ = new QAction( "Delete Connection", this );
+     rewireDstAct_ = new QAction( "Rewire Connection Destination", this );
+
      connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
      connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
-     // FIXME: the above lines seem not the best way of doing things...
+     // FIXME: the above lines seem not the best way of doing things.
+     // (i.e. should delete signal go direct to the machineView? )
+     
+     connect( rewireDstAct_, SIGNAL( triggered() ), this, SLOT( onRewireDestActionTriggered() ) );
 
      setSourceMacGui( sourceMacGui );
      setDestMacGui( destMacGui );
@@ -76,31 +81,65 @@
      adjust();
  }
 
-  void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-  {
-     QMenu menu;
-      menu.addAction( delConnAct_ );
-      menu.addSeparator();
-      menu.addAction("Rewire Connection Source");
-      menu.addAction("Rewire Connection Destination");
-      QAction *a = menu.exec(event->screenPos());
-  }
+void WireGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
+{
+    if ( event->button() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier )
+    {
+        state_ = 1;
+//        emit startRewiringDest( this, event );
+    }
+}
 
- void WireGui::adjust()
- {
-     if (!source || !dest)
-         return;
+void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
+{
+    if ( event->buttons() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier )
+    {
+        if ( state_ = 1 ) {
+            destPoint = event->lastScenePos();    
+            update( boundingRect() );
+        }
+    }
+}
 
-     QLineF line(mapFromItem(source, source->boundingRect().width()/2, source->boundingRect().height()/2), 
-                 mapFromItem(dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2)); 
-     qreal length = line.length();
-     QPointF wireGuiOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
+void WireGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
+{
+    if ( state_ = 1 ) {
+        if ( false ) {
+        } else {
+            destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
+    //        adjust();
+        }
+        scene()->update( scene()->itemsBoundingRect() );
+        state_ = 0;
+    }
+}
 
-     removeFromIndex();
-     sourcePoint = line.p1() + wireGuiOffset;
-     destPoint = line.p2() - wireGuiOffset;
-     addToIndex();
- }
+void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    event->accept();
+    QMenu menu;
+    menu.addAction( delConnAct_ );
+    menu.addSeparator();
+    menu.addAction( "Rewire Connection Source" );
+    menu.addAction( rewireDstAct_ );
+    QAction *a = menu.exec( event->screenPos() );
+}
+
+void WireGui::adjust()
+{
+    if (!source || !dest)
+        return;
+
+    QLineF line(mapFromItem(source, source->boundingRect().width()/2, source->boundingRect().height()/2), 
+                mapFromItem(dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2)); 
+    qreal length = line.length();
+    QPointF wireGuiOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
+
+    removeFromIndex();
+    sourcePoint = line.p1() + wireGuiOffset;
+    destPoint = line.p2() - wireGuiOffset;
+    addToIndex();
+}
 
  QRectF WireGui::boundingRect() const
  {
@@ -143,8 +182,13 @@
      painter->drawPolygon(QPolygonF() << midPoint << arrowP1 << arrowP2);
  }
 
- void WireGui::deleteConnectionRequest()
- {
-    emit deleteConnectionRequest(this);
- }
+void WireGui::deleteConnectionRequest()
+{
+   emit deleteConnectionRequest(this);
+}
+
+void WireGui::onRewireDestActionTriggered()
+{
+   //emit startRewiringDest(this);
+}
 

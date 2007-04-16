@@ -34,6 +34,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <QGraphicsItem>
 
  SequencerDraw::SequencerDraw( SequencerView *seqView )
  {

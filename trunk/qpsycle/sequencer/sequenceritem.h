@@ -22,11 +22,12 @@
 
 #include "psycore/patternsequence.h"
 
-#include "sequencerview.h"
 
 #include <QGraphicsItem>
 #include <QObject>
 #include <QAction>
+
+class SequencerView;
 
 class SequencerItem : public QObject, public QGraphicsItem
 {

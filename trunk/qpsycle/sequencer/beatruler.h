@@ -21,9 +21,11 @@
 #ifndef BEATRULER_H
 #define BEATRULER_H
 
-#include "sequencerdraw.h"
+#include "psycore/signalslib.h"
 
 #include <QtGui/QGraphicsItem>
+
+class SequencerDraw;
 
 class BeatRuler : public QGraphicsItem {
 

@@ -22,16 +22,17 @@
 
  #include "psycore/song.h"
 
- #include <QAction>
- #include <QToolBar>
- #include <QTreeWidget>
- #include <QPushButton>
- #include <QLabel>
+#include <QAction>
+#include <QToolBar>
+#include <QTreeWidget>
+#include <QPushButton>
+#include <QLabel>
 #include <QContextMenuEvent>
 #include <QMenu>
 
-class QToolBar;
 class PatternBox;
+
+class QToolBar;
 
 class PatternTree : public QTreeWidget {
     Q_OBJECT

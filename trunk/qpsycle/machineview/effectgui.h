@@ -23,6 +23,10 @@
 
 #include "machinegui.h"
 
+class QPainter;
+class QKeyEvent;
+class QGraphicsSceneContextMenuEvent;
+
 class EffectGui : public MachineGui
 {
 public:

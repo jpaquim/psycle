@@ -21,6 +21,7 @@
 #include "psycore/player.h"
 
 #include "sequencerview.h"
+#include "sequencerdraw.h"
 #include "sequencerline.h"
 
 #include <iostream>

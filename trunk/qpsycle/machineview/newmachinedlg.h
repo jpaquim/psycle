@@ -20,6 +20,8 @@
 #ifndef NEWMACHINEDLG_H
 #define NEWMACHINEDLG_H
 
+#include "psycore/pluginfinder.h"
+
 #include <map>
 
 #include <QWidget>
@@ -27,7 +29,6 @@
 #include <QDialogButtonBox>
 #include <QListWidgetItem>
 
-#include "pluginfinder.h"
 
 class QDialog;
 

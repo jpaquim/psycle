@@ -26,10 +26,17 @@
 
 #include "mainwindow.h"
 #include "patternbox.h"
+#include "machineview.h"
+#include "patternview.h"
+#include "patterndraw.h"
+#include "patterngrid.h"
+#include "waveview.h"
+#include "sequencerview.h"
+#include "sequencerdraw.h"
+#include "patternbox.h"
+#include "machinegui.h"
 
 #include <QtGui>
-
-#include <QTreeWidgetItem>
 
 #include <iostream>
 #include <iomanip>

@@ -22,8 +22,10 @@
 
 #include "sequencerarea.h"
 #include "sequencerview.h"
+#include "sequencerdraw.h"
 #include "sequencerline.h"
 #include "sequenceritem.h"
+
 
 #include <vector>
 

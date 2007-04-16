@@ -21,7 +21,9 @@
 #include "psycore/global.h"
 #include "psycore/player.h"
 
+#include "patternview.h"
 #include "patterngrid.h"
+#include "patterndraw.h"
 
 #include <iostream>
 #include <iomanip>

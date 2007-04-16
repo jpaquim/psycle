@@ -19,6 +19,7 @@
 ***************************************************************************/
 
 #include "beatruler.h"
+#include "sequencerdraw.h"
 
 BeatRuler::BeatRuler( SequencerDraw* seqDraw )
 {

@@ -22,19 +22,21 @@
 
 #include "psycore/song.h"
 
-#include "machineview.h"
-#include "patternview.h"
-#include "waveview.h"
-#include "sequencerview.h"
-#include "patternbox.h"
-
-#include <QMainWindow>
+class MachineView;
+class MachineGui;
+class PatternView;
+class WaveView;
+class SequencerView;
+class PatternBox;
 
 class QAction;
 class QListWidget;
 class QMenu;
 class QTextEdit;
 class QComboBox;
+class QTabWidget;
+
+#include <QMainWindow>
 
 class MainWindow : public QMainWindow
 {

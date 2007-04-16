@@ -17,11 +17,17 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "psycore/signalslib.h"
+
 #include "trackheader.h"
+#include "patterndraw.h"
+#include "patterngrid.h"
+#include "patternview.h"
 
 #include <QScrollBar>
 #include <QDebug>
 #include <QPainter>
+#include <QGraphicsRectItem>
 
 TrackHeader::TrackHeader( PatternDraw * pPatternDraw, QWidget *parent ) 
     : pDraw(pPatternDraw), QWidget(parent)

@@ -20,9 +20,12 @@
 #ifndef TRACKHEADER_H
 #define TRACKHEADER_H
 
-#include "patterndraw.h"
+class PatternDraw;
 
-#include <QGraphicsRectItem>
+class QGraphicsRectItem;
+class QPaintEvent;
+
+#include <QWidget>
 
 class TrackHeader: public QWidget {
 public:
