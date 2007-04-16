@@ -20,10 +20,10 @@
 
 #include "psycore/patternsequence.h"
 
-#include "sequencerline.h"
 #include "sequencerview.h"
-#include "sequenceritem.h"
 #include "sequencerdraw.h"
+#include "sequencerline.h"
+#include "sequenceritem.h"
 
 #include <QGraphicsScene>
 #include <boost/bind.hpp>

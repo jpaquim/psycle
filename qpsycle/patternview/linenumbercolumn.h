@@ -20,7 +20,7 @@
 #ifndef LINENUMBERCOLUMN_H
 #define LINENUMBERCOLUMN_H
 
-#include "patterndraw.h"
+#include "psycore/signalslib.h"
 
 #include <QWidget>
 

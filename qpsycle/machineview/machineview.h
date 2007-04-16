@@ -17,28 +17,25 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef MACHINEVIEW_H
- #define MACHINEVIEW_H
+#ifndef MACHINEVIEW_H
+#define MACHINEVIEW_H
 
- #include <vector>
+#include "psycore/song.h"
+#include "psycore/machine.h"
+#include "psycore/patternevent.h"
+#include "psycore/pluginfinder.h"
 
- #include "psycore/song.h"
- #include "psycore/machine.h"
- #include "psycore/patternevent.h"
- #include "psycore/pluginfinder.h"
+#include <vector>
 
- #include "newmachinedlg.h"
- #include "machinegui.h"
- #include "wiregui.h"
+#include <QtGui/QGraphicsView>
+#include <QtGui/QGraphicsScene>
+#include <QtGui/QGraphicsSceneMouseEvent>
+#include <QtGui/QKeyEvent>
+#include <QtGui/QMouseEvent>
 
- #include <QtGui/QGraphicsView>
- #include <QtGui/QGraphicsScene>
- #include <QtGui/QGraphicsSceneMouseEvent>
- #include <QtGui/QKeyEvent>
- #include <QtGui/QMouseEvent>
-
- class MachineGui;
- class WireGui;
+class NewMachineDlg;
+class MachineGui;
+class WireGui;
 
  class MachineView : public QGraphicsView
  {
@@ -57,17 +54,19 @@
     int octave() const;
     void setOctave( int newOctave );
     void createMachineGui( psy::core::Machine *mac );
+    WireGui* createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui );
 
 
- protected:
+protected:
     void keyPressEvent(QKeyEvent *event);
 
     void scaleView(qreal scaleFactor);
 
- public slots:
+public slots:
     void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
     void deleteConnection( WireGui *wireGui );
+//    void startRewiringDest( WireGui *wireGui );
     void onMachineGuiChosen( MachineGui *macGui );
     MachineGui* findMachineGuiByMachineIndex( int index );
     void onDeleteMachineRequest( MachineGui *macGui );

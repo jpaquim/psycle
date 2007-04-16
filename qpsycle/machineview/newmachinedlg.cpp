@@ -20,8 +20,7 @@
 
 #include <QtGui>
 
- #include "newmachinedlg.h"
- #include "psycore/pluginfinder.h"
+#include "newmachinedlg.h"
 
  NewMachineDlg::NewMachineDlg(QWidget *parent) 
     : QDialog(parent)

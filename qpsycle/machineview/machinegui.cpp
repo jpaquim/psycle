@@ -20,9 +20,12 @@
 
 #include "psycore/global.h"
 #include "psycore/inputhandler.h"
+#include "psycore/signalslib.h"
 
 #include "machinegui.h"
 #include "machineview.h"
+#include "wiregui.h"
+#include "machinetweakdlg.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>

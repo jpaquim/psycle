@@ -23,9 +23,6 @@
 
 #include "psycore/machine.h"
 
-#include "machineview.h"
-#include "wiregui.h"
-#include "machinetweakdlg.h"
 
 #include <QGraphicsItem>
 #include <QAction>
@@ -34,6 +31,7 @@
 
 class MachineView;
 class WireGui;
+class MachineTweakDlg;
 
 class MachineGui : public QObject, public QGraphicsRectItem
 {

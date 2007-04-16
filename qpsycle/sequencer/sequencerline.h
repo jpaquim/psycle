@@ -21,9 +21,6 @@
 #define SEQUENCERLINE_H
 
 #include "psycore/patternsequence.h"
-#include "sequenceritem.h"
-#include "sequencerdraw.h"
-
 #include <QGraphicsItem>
 #include <QObject>
 

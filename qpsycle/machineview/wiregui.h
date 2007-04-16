@@ -19,15 +19,15 @@
 ***************************************************************************/
 
 #ifndef WIREGUI_H
- #define WIREGUI_H
+#define WIREGUI_H
 
- #include "machineview.h"
+#include "psycore/signalslib.h"
 
- #include <QGraphicsItem>
- #include <QAction>
+#include <QGraphicsItem>
+#include <QAction>
 
- class MachineGui;
- class MachineView;
+class MachineGui;
+class MachineView;
 
  class WireGui : public QObject, public QGraphicsItem
  {
@@ -44,16 +44,21 @@
 
      void adjust();
 
- signals:
-    void deleteConnectionRequest( WireGui *wireGui );
+signals:
+   void deleteConnectionRequest( WireGui *wireGui );
+   void startRewiringDest( WireGui *wireGui, QGraphicsSceneMouseEvent *event );
 
- public slots:
-    void deleteConnectionRequest();
+public slots:
+   void deleteConnectionRequest();
+   void onRewireDestActionTriggered();
 
- protected:
-     QRectF boundingRect() const;
-     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+protected:
+    QRectF boundingRect() const;
+    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
+    void mousePressEvent( QGraphicsSceneMouseEvent *event );
+    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
  private:
      MachineView *machineView;
@@ -65,6 +70,9 @@
      qreal arrowSize;
 
      QAction *delConnAct_;
+     QAction *rewireDstAct_;
+
+     int state_;
  };
 
  #endif

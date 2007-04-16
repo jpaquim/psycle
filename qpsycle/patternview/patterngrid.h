@@ -22,8 +22,6 @@
 
 #include "psycore/singlepattern.h"
 
-#include "patterndraw.h"
-
 #include <map>
 
 #include <QGraphicsItem>
@@ -32,6 +30,7 @@
 #include <QFontMetrics>
 
 
+class PatternView;
 class PatternDraw;
 class PatternGrid;
 class TrackGeometry;

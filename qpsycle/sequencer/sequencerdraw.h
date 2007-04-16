@@ -22,17 +22,16 @@
 
 #include "psycore/song.h"
 
-#include "sequencerview.h"
-#include "sequencerline.h"
-#include "sequencerarea.h"
-
 #include <QtGui/QGraphicsView>
+#include <QtGui/QGraphicsRectItem>
 
+class SequencerView;
 class SequencerArea;
 class SequencerLine;
 class SequencerItem;
-class SequencerView;
 class PlayLine;
+
+class QGraphicsSceneMouseEvent;
 
 class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
  {

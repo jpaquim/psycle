@@ -25,11 +25,12 @@
 #include "psycore/machine.h"
 #include "psycore/pluginfinder.h"
 
-#include "machineview.h"
 #include "machinegui.h"
+#include "machineview.h"
 #include "mastergui.h"
 #include "effectgui.h"
 #include "wiregui.h"
+#include "newmachinedlg.h"
 
 #include <QtGui/QGraphicsScene>
 #include <QPainter>
@@ -74,7 +75,7 @@ MachineView::MachineView(psy::core::Song *song)
                     psy::core::Machine *pout = song_->_pMachine[tmac->_outputMachines[w]];
                     MachineGui* dstMacGui = findByMachine(pout);
                     if ( dstMacGui != 0 ) {
-                        WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
+                        WireGui *wireGui = createWireGui( srcMacGui, dstMacGui );
                         scene_->addItem( wireGui );
                     }
                 }
@@ -87,6 +88,14 @@ MachineView::MachineView(psy::core::Song *song)
     for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
 
  }
+
+WireGui *MachineView::createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui )
+{
+    WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
+/*    connect( wireGui, SIGNAL( startRewiringDest( WireGui* ) ), 
+             this, SLOT( startRewiringDest( WireGui* ) ) );*/
+    return wireGui;
+}
 
  void MachineView::keyPressEvent(QKeyEvent *event)
  {
@@ -131,6 +140,11 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
     tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
 }
 
+/*void MachineView::startRewiringDest( WireGui *wireGui, QGraphicsSceneMouseEvent *event )
+{
+    qDebug( "rewire dest" );
+}*/
+
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
    if ( dstMacGui->mac()->acceptsConnections() ) {
@@ -141,7 +155,7 @@ void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui 
        song_->InsertConnection( srcMacGui->mac()->_macIndex , dstMacGui->mac()->_macIndex, 1.0f);
        
        // Make a new wiregui connection.
-       WireGui *newWireGui = new WireGui( srcMacGui, dstMacGui, this );
+       WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );
        scene_->addItem( newWireGui );
    }
 }

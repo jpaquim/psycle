@@ -23,6 +23,9 @@
 
 #include "patternview.h"
 #include "patterndraw.h"
+#include "patterngrid.h"
+#include "linenumbercolumn.h"
+
 
 #include <QtGui>
 

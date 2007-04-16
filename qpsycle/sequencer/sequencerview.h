@@ -22,13 +22,11 @@
 
 #include "psycore/song.h"
 
-#include "sequencerline.h"
-#include "sequencerdraw.h"
-
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QToolBar>
 
 class SequencerDraw;
+class SequencerLine;
 
  class SequencerView : public QWidget
  {
