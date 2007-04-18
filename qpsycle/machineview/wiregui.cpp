@@ -85,18 +85,25 @@
 
 void WireGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( event->button() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier )
+    if ( event->button() == Qt::LeftButton ) 
     {
-        state_ = 1;
+        if ( event->modifiers() & Qt::ShiftModifier )
+            state_ = 1;
+        else if ( event->modifiers() & Qt::ControlModifier )
+            state_ = 2;
     }
 }
 
 void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( event->buttons() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier )
+    if ( event->buttons() == Qt::LeftButton )
     {
-        if ( state_ = 1 ) {
+        if ( ( event->modifiers() & Qt::ShiftModifier ) && state_ == 1 ) {
             destPoint = event->lastScenePos();    
+            update( boundingRect() );
+        }
+        if ( ( event->modifiers() & Qt::ControlModifier ) && state_ == 2 ) {
+            sourcePoint = event->lastScenePos();    
             update( boundingRect() );
         }
     }
@@ -104,24 +111,27 @@ void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 
 void WireGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( state_ = 1 ) {
-        if ( scene()->itemAt( event->scenePos() ) ) {
-            QGraphicsItem *itm = scene()->itemAt( event->scenePos() );
-            if (itm->type() == 65537) { // FIXME: un-hardcode this
-                MachineGui *newDestGui = qgraphicsitem_cast<MachineGui *>(itm);
-                if ( newDestGui->mac()->acceptsConnections() )
-                {
-                    rewireDest( newDestGui );
-                } else {
-                    destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
-                }
+    if ( scene()->itemAt( event->scenePos() ) ) 
+    {
+        QGraphicsItem *item = scene()->itemAt( event->scenePos() );
+        if ( item->type() == 65537 ) // FIXME: un-hardcode this
+        {
+            MachineGui *hitMacGui = qgraphicsitem_cast<MachineGui *>(item);
+            if ( state_ == 1 ) { // rewire dest
+                if ( hitMacGui->mac()->acceptsConnections() ) {
+                    rewireDest( hitMacGui );
+                } else destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
+            } else if ( state_ == 2 ) { // rewire src
+                if ( hitMacGui->mac()->emitsConnections() ) {
+                    rewireSource( hitMacGui );
+                } else sourcePoint = mapFromItem( source, source->boundingRect().width()/2, source->boundingRect().height()/2 ); 
             }
-        } else {
-            destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
-        }
-        scene()->update( scene()->itemsBoundingRect() );
-        state_ = 0;
+            state_ = 0;
+        } else adjust();
+    } else {
+        adjust();
     }
+    scene()->update( scene()->itemsBoundingRect() );
 }
 
 void WireGui::rewireDest( MachineGui *newDestGui )
@@ -138,6 +148,23 @@ void WireGui::rewireDest( MachineGui *newDestGui )
     psy::core::Player::Instance()->lock();
     int oldDstWireIndex = srcMac->FindOutputWire( oldDestGui->mac()->_macIndex );
     machineView->song()->ChangeWireDestMac( srcMac->_macIndex, newDstMac->_macIndex, oldDstWireIndex );
+    psy::core::Player::Instance()->unlock();
+}
+
+void WireGui::rewireSource( MachineGui *newSrcGui )
+{
+    // Update GUI connection.
+    MachineGui *oldSrcGui = sourceMacGui();
+    int wireGuiIndex = oldSrcGui->wireGuiList().indexOf( this );
+    oldSrcGui->wireGuiList().removeAt( wireGuiIndex );
+    source = newSrcGui; 
+    source->addWireGui(this);
+    // Update song connection.
+    psy::core::Machine *newSrcMac = newSrcGui->mac();
+    psy::core::Machine *dstMac = destMacGui()->mac();
+    psy::core::Player::Instance()->lock();
+    int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->_macIndex );
+    machineView->song()->ChangeWireSourceMac( newSrcMac->_macIndex, dstMac->_macIndex, oldSrcWireIndex );
     psy::core::Player::Instance()->unlock();
 }
 

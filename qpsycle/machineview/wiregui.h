@@ -43,6 +43,7 @@ public:
     void setDestMacGui(MachineGui *macGui);
 
     void rewireDest( MachineGui *newDstGui );
+    void rewireSource( MachineGui *newSrcGui );
 
     void adjust();
 
