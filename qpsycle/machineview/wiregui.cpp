@@ -18,6 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "psycore/player.h"
+
 #include "wiregui.h"
 #include "machinegui.h"
 #include "machineview.h"
@@ -86,7 +88,6 @@ void WireGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
     if ( event->button() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier )
     {
         state_ = 1;
-//        emit startRewiringDest( this, event );
     }
 }
 
@@ -104,14 +105,40 @@ void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 void WireGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
     if ( state_ = 1 ) {
-        if ( false ) {
+        if ( scene()->itemAt( event->scenePos() ) ) {
+            QGraphicsItem *itm = scene()->itemAt( event->scenePos() );
+            if (itm->type() == 65537) { // FIXME: un-hardcode this
+                MachineGui *newDestGui = qgraphicsitem_cast<MachineGui *>(itm);
+                if ( newDestGui->mac()->acceptsConnections() )
+                {
+                    rewireDest( newDestGui );
+                } else {
+                    destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
+                }
+            }
         } else {
             destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
-    //        adjust();
         }
         scene()->update( scene()->itemsBoundingRect() );
         state_ = 0;
     }
+}
+
+void WireGui::rewireDest( MachineGui *newDestGui )
+{
+    // Update GUI connection.
+    MachineGui *oldDestGui = destMacGui();
+    int wireGuiIndex = oldDestGui->wireGuiList().indexOf( this );
+    oldDestGui->wireGuiList().removeAt( wireGuiIndex );
+    dest = newDestGui; 
+    dest->addWireGui(this);
+    // Update song connection.
+    psy::core::Machine *srcMac = sourceMacGui()->mac();
+    psy::core::Machine *newDstMac = newDestGui->mac();
+    psy::core::Player::Instance()->lock();
+    int oldDstWireIndex = srcMac->FindOutputWire( oldDestGui->mac()->_macIndex );
+    machineView->song()->ChangeWireDestMac( srcMac->_macIndex, newDstMac->_macIndex, oldDstWireIndex );
+    psy::core::Player::Instance()->unlock();
 }
 
 void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
