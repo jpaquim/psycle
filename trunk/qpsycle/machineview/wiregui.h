@@ -29,20 +29,22 @@
 class MachineGui;
 class MachineView;
 
- class WireGui : public QObject, public QGraphicsItem
- {
+class WireGui : public QObject, public QGraphicsItem
+{
     Q_OBJECT
- public:
-     WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView);
-     ~WireGui();
+public:
+    WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView);
+    ~WireGui();
 
-     MachineGui *sourceMacGui() const;
-     void setSourceMacGui(MachineGui *macGui);
+    MachineGui *sourceMacGui() const;
+    void setSourceMacGui(MachineGui *macGui);
 
-     MachineGui *destMacGui() const;
-     void setDestMacGui(MachineGui *macGui);
+    MachineGui *destMacGui() const;
+    void setDestMacGui(MachineGui *macGui);
 
-     void adjust();
+    void rewireDest( MachineGui *newDstGui );
+
+    void adjust();
 
 signals:
    void deleteConnectionRequest( WireGui *wireGui );

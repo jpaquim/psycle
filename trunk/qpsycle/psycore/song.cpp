@@ -331,12 +331,6 @@ namespace psy
 						dmac->_inputMachines[w] = -1;
 						dmac->_connectedInputs--;
 					}
-					/*
-					else
-					{
-						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-					}
-					*/
 				}
 			}
 			return 0;
