@@ -20,7 +20,10 @@
  #ifndef SEQUENCERVIEW_H
  #define SEQUENCERVIEW_H
 
-#include "psycore/song.h"
+namespace psy { namespace core {
+class Song;
+class SinglePattern;
+}}
 
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QToolBar>
