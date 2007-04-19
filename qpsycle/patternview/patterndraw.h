@@ -20,8 +20,12 @@
  #ifndef PATTERNDRAW_H
  #define PATTERNDRAW_H
 
-#include "psycore/song.h"
-#include "psycore/singlepattern.h"
+namespace psy { namespace core {
+class Song;
+class SinglePattern;
+}}
+
+#include <map>
 
 #include <QGraphicsView>
 #include <QGraphicsScene>

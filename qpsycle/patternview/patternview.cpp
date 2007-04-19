@@ -19,6 +19,7 @@
 ***************************************************************************/
 
 #include "psycore/song.h"
+#include "psycore/singlepattern.h"
 #include "psycore/player.h"
 
 #include "patternview.h"
