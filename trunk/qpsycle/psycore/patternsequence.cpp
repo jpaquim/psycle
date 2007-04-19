@@ -149,6 +149,11 @@ namespace psy
 			return 0;
 		}
 
+		double SequenceEntry::tickEndPosition( ) const
+		{
+			return tickPosition() + patternBeats();
+		}
+
 		void SequenceEntry::setTranspose( int offset )
 		{
 			transpose_ = offset;

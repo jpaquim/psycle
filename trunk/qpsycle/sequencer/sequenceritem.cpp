@@ -18,6 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "psycore/player.h"
+
 #include "sequencerview.h"
 #include "sequencerline.h"
 #include "sequenceritem.h"
@@ -150,10 +152,26 @@ void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     QMenu menu;
+    if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
+        loopEntryAction_ = new QAction( "Unloop Entry", this );
+    } else {
+        loopEntryAction_ = new QAction( "Loop Entry", this );
+    }
     deleteEntryAction_ = new QAction( "Delete Entry", this );
+    connect( loopEntryAction_, SIGNAL( triggered() ), this, SLOT( onLoopEntryActionTriggered() ) );
     connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
+    menu.addAction( loopEntryAction_ );
     menu.addAction( deleteEntryAction_ );
     QAction *a = menu.exec(event->screenPos());
+}
+
+void SequencerItem::onLoopEntryActionTriggered()
+{
+    if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
+        psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
+    } else {
+        psy::core::Player::Instance()->setLoopSequenceEntry( sequenceEntry() );
+    }
 }
 
 void SequencerItem::onDeleteEntryActionTriggered()

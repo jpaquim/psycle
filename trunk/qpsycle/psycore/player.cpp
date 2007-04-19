@@ -45,7 +45,8 @@ namespace psy
 			song_(0),
 			_playing(false),
 			Tweaker(false),
-			_samplesRemaining(0)
+			_samplesRemaining(0),
+            loopSequenceEntry_(0)
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 			_doDither = false;
@@ -303,6 +304,14 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 			if (_playing)
 			{
+                if ( loopSequenceEntry() ) {
+                    if ( timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition()
+                         || timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition() ) {
+                        setPlayPos( loopSequenceEntry()->tickPosition() );
+                    }
+                } else if ( loopSong() && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
+                    setPlayPos( 0.0 );
+                }
 				std::multimap<double, PatternLine> events;
 				std::vector<GlobalEvent*> globals;
 
@@ -366,9 +375,6 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 //				if (playPos> "signumerator") playPos-=signumerator;
 			}
 
-			if ( loopSong() && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
-		        setPlayPos( 0.0 );
-			}
 
 			inWork_ = false;
 			return _pBuffer;
@@ -488,6 +494,14 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 		bool Player::loopSong() const {
 			return loopSong_;
+		}
+
+		void Player::setLoopSequenceEntry( SequenceEntry *seqEntry ) {
+			loopSequenceEntry_ = seqEntry;
+		}
+
+		SequenceEntry *Player::loopSequenceEntry() const {
+			return loopSequenceEntry_;
 		}
 
 		void Player::setDriver(  const AudioDriver & driver ) {

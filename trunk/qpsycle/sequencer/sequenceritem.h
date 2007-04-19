@@ -52,6 +52,7 @@ public:
     }
 
 private slots:
+    void onLoopEntryActionTriggered();
     void onDeleteEntryActionTriggered();
 
 signals:
@@ -67,6 +68,7 @@ protected:
     psy::core::SequenceEntry *sequenceEntry_;
 
     QAction *deleteEntryAction_;
+    QAction *loopEntryAction_;
     const QColor & QColorFromLongColor( long longCol );
 
     int beatPxLength_;
