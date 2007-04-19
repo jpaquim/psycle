@@ -20,8 +20,10 @@
 #ifndef PATTERNVIEW_H
 #define PATTERNVIEW_H
 
-#include "psycore/song.h"
-#include "psycore/singlepattern.h"
+namespace psy { namespace core {
+class Song;
+class SinglePattern;
+}}
 
 #include <QVBoxLayout>
 #include <QWidget>
