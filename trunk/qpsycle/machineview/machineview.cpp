@@ -24,6 +24,8 @@
 #include "psycore/constants.h"
 #include "psycore/machine.h"
 #include "psycore/pluginfinder.h"
+#include "psycore/patternevent.h"
+
 
 #include "machinegui.h"
 #include "machineview.h"

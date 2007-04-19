@@ -21,7 +21,11 @@
 #ifndef MACHINETWEAKDLG_H
 #define MACHINETWEAKDLG_H
 
-#include "psycore/machine.h"
+namespace psy { namespace core {
+class Machine;
+}}
+
+#include <map>
 
 #include <QDialog>
 #include <QDial>

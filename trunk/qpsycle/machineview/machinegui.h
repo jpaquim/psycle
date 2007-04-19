@@ -21,7 +21,9 @@
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
-#include "psycore/machine.h"
+namespace psy { namespace core {
+class Machine;
+}}
 
 
 #include <QGraphicsItem>
