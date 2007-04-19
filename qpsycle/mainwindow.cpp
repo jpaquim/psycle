@@ -379,6 +379,7 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         // Play controls.
         case psy::core::cdefPlayStart:
+            psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
             psy::core::Player::Instance()->start( 0.0 );
         break;
         case psy::core::cdefPlayFromPos:
@@ -386,6 +387,9 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         case psy::core::cdefPlayStop:
             psy::core::Player::Instance()->stop();
+        break;
+        case psy::core::cdefLoopEntry:
+//            psy::core::Player::Instance()->setLoopSequenceEntry( ... );
         break;
         case psy::core::cdefInstrInc:
             sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );

@@ -139,6 +139,7 @@ namespace psy {
 			cdefPlayFromPos,
 			cdefPlayBlock,
 			cdefPlayStop,
+			cdefLoopEntry,
 
 			cdefInfoPattern,
 			cdefInfoMachine,

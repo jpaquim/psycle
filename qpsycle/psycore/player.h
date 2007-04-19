@@ -39,7 +39,7 @@ namespace psy
 		{
 		// Singleton Pattern
 					private:
-								Player();          
+                    Player();          
 			        ~Player();
 		
 								Player( Player const & );
@@ -97,6 +97,9 @@ namespace psy
             void setLoopSong( bool setit );
 			bool loopSong() const;
 
+            void setLoopSequenceEntry( SequenceEntry *seqEntry );
+			SequenceEntry *loopSequenceEntry() const;
+
 			const PlayerTimeInfo & timeInfo() const;
 
 			void setBpm( double bpm );
@@ -129,6 +132,7 @@ namespace psy
 			bool autoRecord_;
 			bool recording_;
 			bool loopSong_;
+            SequenceEntry *loopSequenceEntry_;
 
 			// Final Loop. Read new line for notes to send to the Machines
 			void ExecuteNotes( double beatOffset , PatternLine & line );

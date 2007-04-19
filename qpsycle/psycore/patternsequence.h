@@ -88,6 +88,7 @@ namespace psy
       boost::signal1<void,SequenceEntry*> wasDeleted;
 
 			double tickPosition() const;
+            double tickEndPosition( ) const;
 
 			void setPattern(SinglePattern* pattern);
 			SinglePattern* pattern();
