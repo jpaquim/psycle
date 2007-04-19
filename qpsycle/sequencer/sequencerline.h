@@ -20,7 +20,14 @@
 #ifndef SEQUENCERLINE_H
 #define SEQUENCERLINE_H
 
-#include "psycore/patternsequence.h"
+namespace psy { namespace core {
+class SequenceLine;
+class SequenceEntry; 
+class SinglePattern;
+}}
+
+#include "psycore/signalslib.h"
+
 #include <QGraphicsItem>
 #include <QObject>
 

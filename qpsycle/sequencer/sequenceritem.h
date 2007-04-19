@@ -20,8 +20,9 @@
 #ifndef SEQUENCERITEM_H
 #define SEQUENCERITEM_H
 
-#include "psycore/patternsequence.h"
-
+namespace psy { namespace core {
+class SequenceEntry;
+}}
 
 #include <QGraphicsItem>
 #include <QObject>
