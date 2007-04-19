@@ -20,9 +20,12 @@
 #ifndef MACHINEVIEW_H
 #define MACHINEVIEW_H
 
-#include "psycore/song.h"
-#include "psycore/machine.h"
-#include "psycore/patternevent.h"
+namespace psy { namespace core {
+class Song;
+class Machine;
+class PatternEvent;
+}}
+
 #include "psycore/pluginfinder.h"
 
 #include <vector>

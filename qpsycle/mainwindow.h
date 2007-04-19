@@ -20,7 +20,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "psycore/song.h"
+namespace psy { namespace core {
+class Song;
+class SinglePattern;
+}}
 
 class MachineView;
 class MachineGui;

@@ -17,11 +17,18 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef PATTERNBOX_H
- #define PATTERNBOX_H
+#ifndef PATTERNBOX_H
+#define PATTERNBOX_H
 
- #include "psycore/song.h"
+namespace psy { namespace core {
+class Song;
+class SinglePattern;
+class PatternCategory;
+}}
 
+class PatternBox;
+
+class QToolBar;
 #include <QAction>
 #include <QToolBar>
 #include <QTreeWidget>
@@ -29,10 +36,6 @@
 #include <QLabel>
 #include <QContextMenuEvent>
 #include <QMenu>
-
-class PatternBox;
-
-class QToolBar;
 
 class PatternTree : public QTreeWidget {
     Q_OBJECT
