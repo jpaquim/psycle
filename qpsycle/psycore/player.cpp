@@ -121,6 +121,7 @@ namespace psy
 			timeInfo_.setLinesPerBeat( song().LinesPerBeat() );
 			SampleRate( driver_->settings().samplesPerSec() );
 			if (autoRecord_) stopRecording();
+            printf("stop");
 		}
 
 		bool Player::playing() const {
@@ -288,6 +289,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 			if ( lock_ ) return _pBuffer;
 
+
 			inWork_ = true;
 
 			// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
@@ -362,6 +364,10 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				Process(numSamples);
 //				playPos+=beatLength;
 //				if (playPos> "signumerator") playPos-=signumerator;
+			}
+
+			if ( loopSong() && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
+		        setPlayPos( 0.0 );
 			}
 
 			inWork_ = false;
@@ -474,6 +480,14 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 		bool Player::recording() const {
 			return recording_;
+		}
+
+		void Player::setLoopSong( bool setit ) {
+			loopSong_ = setit;
+		}
+
+		bool Player::loopSong() const {
+			return loopSong_;
 		}
 
 		void Player::setDriver(  const AudioDriver & driver ) {

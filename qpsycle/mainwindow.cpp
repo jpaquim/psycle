@@ -46,6 +46,7 @@ MainWindow::MainWindow()
     song_ = new psy::core::Song();
     setupSong();
     setupSound();
+    psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
 
     macView_ = new MachineView( song_ );
     patView_ = new PatternView( song_ );
@@ -82,6 +83,7 @@ void MainWindow::setupSound()
     psy::core::Player::Instance()->song( song_ );
     psy::core::AudioDriver *outDriver = psy::core::Global::pConfig()->_pOutputDriver;
     psy::core::Player::Instance()->setDriver( *outDriver );  
+
 }
 
 void MainWindow::setupGui()

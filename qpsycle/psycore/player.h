@@ -94,6 +94,9 @@ namespace psy
 			void stopRecording( );
 			bool recording() const;
 
+            void setLoopSong( bool setit );
+			bool loopSong() const;
+
 			const PlayerTimeInfo & timeInfo() const;
 
 			void setBpm( double bpm );
@@ -125,6 +128,7 @@ namespace psy
 			bool _playing;
 			bool autoRecord_;
 			bool recording_;
+			bool loopSong_;
 
 			// Final Loop. Read new line for notes to send to the Machines
 			void ExecuteNotes( double beatOffset , PatternLine & line );
