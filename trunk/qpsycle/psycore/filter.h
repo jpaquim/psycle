@@ -25,48 +25,17 @@ namespace psy
 		{
 		public:
 			float _coeffs[5][128][128][5];
-			FilterCoeff() { _inited = false; };
-			inline void Init(void)
-			{
-				if (!_inited)
-				{
-					_inited = true;
-					for (int r=0; r<5; r++)
-					{
-						for (int f=0; f<128; f++)
-						{
-							for (int q=0; q<128; q++)
-							{
-								ComputeCoeffs(f, q, r);
-								_coeffs[r][f][q][0] = (float)_coeff[0];
-								_coeffs[r][f][q][1] = (float)_coeff[1];
-								_coeffs[r][f][q][2] = (float)_coeff[2];
-								_coeffs[r][f][q][3] = (float)_coeff[3];
-								_coeffs[r][f][q][4] = (float)_coeff[4];
-							}
-						}
-					}
-				}
-			};
+			FilterCoeff();
+			void setSampleRate(float samplerate);
+			static FilterCoeff singleton;
 		private:
-			bool _inited;
+      float samplerate;
 			double _coeff[5];
 			void ComputeCoeffs(int freq, int r, int t);
 
-			static inline float Cutoff(int v)
-			{
-				return float(pow( (v+5)/(127.0+5), 1.7)*13000+30);
-			};
-			
-			static inline float Resonance(float v)
-			{
-				return float(pow( v/127.0, 4)*150+0.1);
-			};
-			
-			static inline float Bandwidth(int v)
-			{
-				return float(pow( v/127.0, 4)*4+0.1);
-			};
+			static float Cutoff(int v);
+			static float Resonance(float v);
+			static float Bandwidth(int v);
 		};
 
 		/// filter.
@@ -78,8 +47,7 @@ namespace psy
 			int _q;
 
 			Filter();
-
-			void Init(void);
+			void Init();
 			void Update(void);
 			inline float Work(float x)
 			{
@@ -106,7 +74,6 @@ namespace psy
 				r = b;
 			};
 		protected:
-			static FilterCoeff _coeffs;
 			float _coeff0;
 			float _coeff1;
 			float _coeff2;

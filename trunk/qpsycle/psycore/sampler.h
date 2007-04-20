@@ -134,6 +134,7 @@ namespace psy
 			int effOld;
 		};
 
+
 		/// sampler.
 		class Sampler : public Machine
 		{
@@ -141,6 +142,7 @@ namespace psy
 			void Tick( );
 			Sampler(Machine::id_type id, Song* song);
 			virtual void Init();
+      // \todo implement SetSampleRate     
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
