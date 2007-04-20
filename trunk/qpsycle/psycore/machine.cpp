@@ -993,7 +993,7 @@ void Machine::reallocateRemainingEvents(double beatOffset)
 		{
 			_volumeCounter = Dsp::GetMaxVolAccurate(_pSamplesL, _pSamplesR, numSamples);
 		};
-    /*
+    */
 
 
 	}
