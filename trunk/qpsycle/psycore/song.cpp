@@ -123,7 +123,14 @@ namespace psy
 			}
 			return _pMachine[fb];
 		}
-
+    Machine & Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, int pluginIndex) throw(std::exception)
+    {
+      Machine::id_type const array_index(GetFreeMachine());
+      if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
+      if(!CreateMachine(type, x, y, plugin_name, array_index, pluginIndex))
+        throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
+      return *_pMachine[array_index];
+    }
 		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index, int pluginIndex)
 		{
 			Machine * machine(0);
@@ -1107,7 +1114,7 @@ namespace psy
 			name_ = name;
 		}
 
-		const std::string & Song::name( ) const
+		std::string Song::name( ) const
 		{
 			return name_;
 		}
@@ -1117,7 +1124,7 @@ namespace psy
 			author_ = author;
 		}
 
-		const std::string & Song::author( ) const
+		std::string Song::author( ) const
 		{
 			return author_;
 		}
@@ -1127,7 +1134,7 @@ namespace psy
 			comment_ = comment;
 		}
 
-		const std::string & Song::comment( ) const
+	  std::string Song::comment( ) const
 		{
 			return comment_;
 		}
@@ -1142,6 +1149,17 @@ namespace psy
 		{
 			return bpm_;
 		}
+
+    int Song::LinesPerBeat() const{
+      return m_LinesPerBeat;
+    }
+
+    void Song::LinesPerBeat(const int value)
+    {
+      if ( value < 1 )m_LinesPerBeat = 1;
+      else if ( value > 31 ) m_LinesPerBeat = 31;
+      else m_LinesPerBeat = value;
+    };
 
 }
 }

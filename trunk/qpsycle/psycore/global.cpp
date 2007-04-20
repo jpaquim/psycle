@@ -18,6 +18,7 @@
 ***************************************************************************/
 
 #include "global.h"
+#include "configuration.h"
 
 namespace psy {
 	namespace core {

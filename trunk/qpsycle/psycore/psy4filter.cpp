@@ -24,6 +24,7 @@
 #include "zipwriterstream.h"
 #include "zipreader.h"
 #include "internal_machines.h"
+#include "song.h"
 
 #include <QFile>
 #include <QDomDocument>

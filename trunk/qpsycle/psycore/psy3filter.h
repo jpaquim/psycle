@@ -21,6 +21,7 @@
 #define PSY3FILTER_H
 
 #include "psyfilter.h"
+#include "cstdint.h"
 
 /**
 @author  Psycledelics  
@@ -32,6 +33,9 @@ namespace psy
 	{
 
 		class RiffFile;
+    class PatternCategory;
+    class SequenceLine;
+    class PatternEvent;
 
 		class Psy3Filter : public PsyFilter
 		{

@@ -25,10 +25,8 @@
 #include <map>
 
 #include <QGraphicsItem>
-#include <QKeyEvent>
+class QKeyEvent;
 #include <QFont>
-#include <QFontMetrics>
-
 
 class PatternView;
 class PatternDraw;

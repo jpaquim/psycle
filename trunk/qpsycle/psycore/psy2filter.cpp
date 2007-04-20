@@ -28,6 +28,7 @@
 //#include "VSTHost.h"
 //todo:
 //#include "cacheddllfinder.h"
+#include "song.h"
 #include <algorithm>
 #include <cctype>
 
@@ -147,9 +148,9 @@ namespace psy
 			if( tmp <= 0)
 			{
 				// Shouldn't happen but has happened.
-				song.m_LinesPerBeat = 4;
+				song.LinesPerBeat(4);
 			}
-			else song.m_LinesPerBeat = static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) );
+			else song.LinesPerBeat(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) ));
 
 			file->Read(oct);
 			song.currentOctave = oct;
@@ -204,9 +205,9 @@ namespace psy
 					indexStr = o.str();
 				SinglePattern* pat =
 						singleCat->createNewPattern(std::string(patternName)+indexStr);
-				pat->setBeatZoom(song.m_LinesPerBeat);
+				pat->setBeatZoom(song.LinesPerBeat());
 				TimeSignature & sig =  pat->timeSignatures().back();
-				float beats = numLines / (float) song.m_LinesPerBeat;
+				float beats = numLines / (float) song.LinesPerBeat();
 				pat->setID(index);
 				sig.setCount((int) (beats / 4) );
 				float uebertrag = beats - ((int) beats);
@@ -221,7 +222,7 @@ namespace psy
 						file->Read(entry);
 						PatternEvent event = convertEntry(entry);
 						if (!event.empty()) {
-							float position = y / (float) song.m_LinesPerBeat;
+							float position = y / (float) song.LinesPerBeat();
 							(*pat)[position].notes()[x] = event;
 						}
 					}

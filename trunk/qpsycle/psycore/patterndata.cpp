@@ -19,6 +19,7 @@
 	***************************************************************************/
 #include "patterndata.h"
 #include "psyfilter.h"
+#include "singlepattern.h"
 #include <algorithm>
 #include <sstream>
 

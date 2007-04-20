@@ -42,11 +42,11 @@ namespace psy
 
 				//authorship
 				void setName(const std::string & name);
-				const std::string & name() const;
+				std::string name() const;
 				void setAuthor(const std::string & author);
-				const std::string & author() const;
+				std::string author() const;
 				void setComment(const std::string & comment);
-				const std::string & comment() const;
+				std::string comment() const;
 
 				// The number of tracks in each pattern of this song.
 				unsigned int tracks() const;
@@ -90,14 +90,7 @@ namespace psy
 					Machine* createMachine( const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
 
 					/// creates a new machine in this song. .. deprecated
-					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy", int pluginIndex = 0) throw(std::exception)
-					{
-						Machine::id_type const array_index(GetFreeMachine());
-						if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
-						if(!CreateMachine(type, x, y, plugin_name, array_index, pluginIndex))
-							throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
-						return *_pMachine[array_index];
-					}
+					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy", int pluginIndex = 0) throw(std::exception);
 
 					/// creates a new machine in this song.
 					bool CreateMachine(Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type, int pluginIndex);
@@ -294,19 +287,14 @@ namespace psy
 
 			///\name deprecated by multiseq for appregio we need an workaround
 			///\{
+      private:
+        int m_LinesPerBeat;
 			public:
 				/// the initial ticks per beat (TPB) when the song is started playing.
 				/// This can be changed in patterns using a command, but this value will not be affected.
-				int m_LinesPerBeat;
-						const int LinesPerBeat(){return m_LinesPerBeat;};
-						void LinesPerBeat(const int value)
-						{
-							if ( value < 1 )m_LinesPerBeat = 1;
-							else if ( value > 31 ) m_LinesPerBeat = 31;
-							else m_LinesPerBeat = value;
-						};
-
-						void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
+        int LinesPerBeat() const;
+        void LinesPerBeat(int value);
+        void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 
 		};
 	}

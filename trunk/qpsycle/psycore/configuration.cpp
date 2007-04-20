@@ -19,9 +19,7 @@
 ***************************************************************************/
 
 #include "configuration.h"
-#include "song.h"
 #include "file.h"
-#include "global.h"
 #ifdef __unix__
 // FIXME: these audio drivers don't belong in psycore
 #include "../audiodrivers/alsaout.h"
@@ -37,10 +35,11 @@
 #include <stdexcept>
 #include <sstream>
 #include <exception>
+#include <iostream>
 
 // FIXME: Ideally psycore should not depend on qt.
 #include <QtCore> // For getting key binding stuff.
-#include <QDomDocument> 
+#include <QDomDocument> // for reading XML file
 
 namespace psy {
 	namespace core {

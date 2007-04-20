@@ -23,11 +23,10 @@
 #include "signalslib.h"
 #include "patternline.h"
 #include "timesignature.h"
-//#include "sigslot.h"
+
 #include <map>
 #include <vector>
 #include <string>
-#include <memory>
 
 /**
 @author  Psycledelics  

@@ -19,6 +19,8 @@
 ***************************************************************************/
 
 #include "psycore/machine.h"
+#include "psycore/inputhandler.h"
+#include "psycore/configuration.h"
 #include "effectgui.h"
 
 #include <QMenu>

@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psy::core::Machine
 #include "machine.h"
+#include "player.h"
 #include "song.h"
 #include "dsp.h"
 //#include "configuration.h"
