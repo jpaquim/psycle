@@ -20,10 +20,8 @@
 #if defined QPSYCLE__ALSA_AVAILABLE
 
 #include "alsaout.h"
-//#include "global.h"
-//#include "configuration.h"
-#include "player.h"
 #include <memory.h> // bzero
+#include <iostream>
 
 namespace psy {
   namespace core {
