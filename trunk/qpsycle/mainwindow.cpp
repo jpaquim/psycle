@@ -348,6 +348,8 @@ void MainWindow::createStatusBar()
 
 void MainWindow::keyPressEvent( QKeyEvent * event )
 {
+    if ( event->key() == Qt::Key_Tab )
+        return;
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
 
     switch ( command ) {
@@ -391,7 +393,9 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
             psy::core::Player::Instance()->stop();
         break;
         case psy::core::cdefLoopEntry:
-//            psy::core::Player::Instance()->setLoopSequenceEntry( ... );
+        {
+//            psy::core::Player::Instance()->setLoopPatternEntry( ... );
+        }
         break;
         case psy::core::cdefInstrInc:
             sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );

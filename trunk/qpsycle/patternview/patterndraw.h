@@ -102,6 +102,7 @@ public:
 
 protected:
     void scrollContentsBy ( int dx, int dy );
+    bool event( QEvent *event );
 
 private:
    std::map<int, TrackGeometry> trackGeometryMap;

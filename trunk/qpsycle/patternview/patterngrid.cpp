@@ -72,9 +72,9 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
     addEvent( ColumnEvent::hex4 );
 
     // just for test !
-/*    addEvent( ColumnEvent::hex4 );
     addEvent( ColumnEvent::hex4 );
-    addEvent( ColumnEvent::hex4 );*/
+    addEvent( ColumnEvent::hex4 );
+    addEvent( ColumnEvent::hex4 );
     // end of multi paraCmd
     //
     selection_.set( 0,0,0,0 );
