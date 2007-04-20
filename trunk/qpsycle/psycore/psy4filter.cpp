@@ -129,7 +129,7 @@ namespace psy {
 			return isPsy4;		
 		}
 
-		bool Psy4Filter::load( const std::string & fileName, Song & song )
+		bool Psy4Filter::load( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
 		{
             qDebug( " but here we are" );
 			patMap.clear();
@@ -293,7 +293,7 @@ namespace psy {
 //						//progress.emit(2,0,"Loading... Song machines...");
 						if ((version&0xFF00) == 0x0000) // chunkformat v0
 						{
-								LoadMACDv0(&file,song,version&0x00FF);
+              LoadMACDv0(&file,song,version&0x00FF,callbacks);
 						}
 						//else if ( (version&0xFF00) == 0x0100 ) //and so on
 					}
@@ -393,7 +393,7 @@ namespace psy {
 				{
 					if (!song._pMachine[MASTER_INDEX] )
 					{
-						song._pMachine[MASTER_INDEX] = new Master( MASTER_INDEX, &song );
+						song._pMachine[MASTER_INDEX] = new Master( callbacks, MASTER_INDEX, &song );
 						song._pMachine[MASTER_INDEX]->Init();
 					}
 					std::ostringstream s;

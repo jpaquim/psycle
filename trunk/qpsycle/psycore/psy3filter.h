@@ -36,6 +36,7 @@ namespace psy
     class PatternCategory;
     class SequenceLine;
     class PatternEvent;
+    class MachineCallbacks;
 
 		class Psy3Filter : public PsyFilter
 		{
@@ -59,14 +60,14 @@ namespace psy
 		protected:
 
 				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(const std::string & fileName, Song & song);
+				virtual bool load(const std::string & fileName, Song & song, MachineCallbacks* callbacks);
 
 				virtual int LoadSONGv0(RiffFile* file,Song& song);
 				virtual bool LoadINFOv0(RiffFile* file,Song& song,int minorversion);
 				virtual bool LoadSNGIv0(RiffFile* file,Song& song,int minorversion);
 				virtual bool LoadSEQDv0(RiffFile* file,Song& song,int minorversion);
 				virtual bool LoadPATDv0(RiffFile* file,Song& song,int minorversion);
-				virtual bool LoadMACDv0(RiffFile* file,Song& song,int minorversion);
+				virtual bool LoadMACDv0(RiffFile* file,Song& song,int minorversion, MachineCallbacks* callbacks);
 				virtual bool LoadINSDv0(RiffFile* file,Song& song,int minorversion);
 
 

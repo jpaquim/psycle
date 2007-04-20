@@ -60,7 +60,7 @@ namespace psy {
 		class LADSPAMachine: public Machine {
 		public:
 						
-						LADSPAMachine( Machine::id_type id, Song* song );
+      LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id, Song* song );
 			virtual ~LADSPAMachine() throw();
 
 				public:

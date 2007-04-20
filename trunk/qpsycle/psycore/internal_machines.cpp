@@ -18,9 +18,9 @@ namespace psy {
 
 		std::string Dummy::_psName = "DummyPlug";
 
-		Dummy::Dummy(Machine::id_type id, Song* song)
+		Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
 			:
-		Machine(MACH_DUMMY, MACHMODE_FX, id, song)
+      Machine(callbacks, MACH_DUMMY, MACHMODE_FX, id, song)
 		{
 //			DefineStereoInput(1);
 //			DefineStereoOutput(1);
@@ -57,9 +57,9 @@ namespace psy {
 
 		std::string DuplicatorMac::_psName = "Dupe it!";
 
-		DuplicatorMac::DuplicatorMac(Machine::id_type id, Song* song)
+		DuplicatorMac::DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
 			:
-		Machine(MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
+      Machine(callbacks, MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
 		{
 			_numPars = 16;
 			_nCols = 2;
@@ -109,7 +109,7 @@ namespace psy {
 		}
 		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
 		{
-			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 /*			if ( !_mute && !bisTicking)
 			{
 				bisTicking=true;
@@ -219,9 +219,9 @@ namespace psy {
 
 		float * Master::_pMasterSamples = 0;
 
-		Master::Master(Machine::id_type id, Song* song)
+		Master::Master(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
 			:
-		Machine(MACH_MASTER, MACHMODE_MASTER, id, song),
+      Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
 			decreaseOnClip(false)
 		{
@@ -396,9 +396,9 @@ namespace psy {
 
 		std::string Mixer::_psName = "Mixer";
 
-		Mixer::Mixer(Machine::id_type id, Song* song )
+		Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id, Song* song )
 			:
-		Machine(MACH_MIXER, MACHMODE_FX, id, song)
+      Machine(callbacks, MACH_MIXER, MACHMODE_FX, id, song)
 		{
 			_numPars = 255;
 			_audiorange = 32768.0f;
@@ -452,7 +452,7 @@ namespace psy {
 			{
 				Mix(numSamples);
 				Machine::SetVolumeCounter(numSamples);
-				if ( Player::Instance()->autoStopMachines )
+				if ( callbacks->autoStopMachines() )
 				{
 					if (_volumeCounter < 8.0f)
 					{
@@ -477,8 +477,7 @@ namespace psy {
 
 		void Mixer::FxSend(int numSamples )
 		{
-
-			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{
@@ -790,9 +789,9 @@ namespace psy {
 #endif
 
 
-		LFO::LFO(Machine::id_type id, Song* song)
+		LFO::LFO(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
 			:
-		Machine(MACH_LFO, MACHMODE_GENERATOR, id, song)
+      Machine(callbacks, MACH_LFO, MACHMODE_GENERATOR, id, song)
 		{
 			_numPars = prms::num_params;
 			_nCols = 3;
@@ -1054,7 +1053,7 @@ namespace psy {
 				Player::Instance()->Tweaker=true;
 			bRedraw=false;
 
-			float minms = Player::Instance()->timeInfo().sampleRate() /1000.0f * 100.0f;	//100ms in samples
+			float minms = callbacks->timeInfo().sampleRate() /1000.0f * 100.0f;	//100ms in samples
 			lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
 			if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 

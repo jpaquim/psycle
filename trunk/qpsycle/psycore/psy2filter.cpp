@@ -86,7 +86,7 @@ namespace psy
 			singleLine = song.patternSequence()->createNewLine();
 		}
 
-		bool Psy2Filter::load(const std::string & fileName, Song & song)
+		bool Psy2Filter::load(const std::string & fileName, Song & song, MachineCallbacks* callbacks)
 		{
 			std::int32_t num;
 			RiffFile file;
@@ -116,7 +116,7 @@ namespace psy
 			convert_internal_machines::Converter converter;
 			#endif
 			#ifdef __unix__
-			LoadMACD(&file,song,&converter);
+			LoadMACD(&file,song,&converter,callbacks);
 			TidyUp(&file,song,&converter);
 			#endif
 			return true;
@@ -398,7 +398,7 @@ namespace psy
 		}
 		
 		#ifdef __unix__
-		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter)
+		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
 		{
 			std::int32_t i;
 			file->Read(_machineActive);
@@ -406,9 +406,9 @@ namespace psy
 
 			for (i=0; i<128; i++)
 			{
-				Sampler* pSampler;
-//				XMSampler* pXMSampler;
-				Plugin* pPlugin;
+				Sampler* pSampler=NULL;
+//				XMSampler* pXMSampler=NULL;
+				Plugin* pPlugin=NULL;
 //				vst::plugin * pVstPlugin(0);
 				std::int32_t x,y,type;
 				if (_machineActive[i])
@@ -426,7 +426,7 @@ namespace psy
 					{
 					case MACH_PLUGIN:
 					{
-						pMac[i] = pPlugin = new Plugin(i,&song);
+						pMac[i] = pPlugin = new Plugin(callbacks,i,&song);
 						// Should the "Init()" function go here? -> No. Needs to load the dll first.
 						if (!pMac[i]->LoadPsy2FileFormat(file))
 						{
@@ -447,7 +447,7 @@ namespace psy
 						pMac[i] = song._pMachine[MASTER_INDEX];
 						goto init_and_load;
 					case MACH_SAMPLER:
-						pMac[i] = pSampler = new Sampler(i,&song);
+						pMac[i] = pSampler = new Sampler(callbacks,i,&song);
 						goto init_and_load;
 //					case MACH_XMSAMPLER:
 //						pMac[i] = pXMSampler = new XMSampler(i);
@@ -456,11 +456,11 @@ namespace psy
 					case MACH_VSTFX:
 //						if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
 //						else if (type == MACH_VSTFX)	pMac[i] = pVstPlugin = new vst::fx(i);
-						pMac[i] = new Dummy(i,&song);
+						pMac[i] = new Dummy(callbacks,i,&song);
 						goto init_and_load_VST;
 					case MACH_SCOPE:
 					case MACH_DUMMY:
-						pMac[i] = new Dummy(i,&song);
+						pMac[i] = new Dummy(callbacks,i,&song);
 						goto init_and_load;
 					default:
 					{
@@ -468,7 +468,7 @@ namespace psy
 						s << "unkown machine type: " << type;
 //						MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 					}
-						pMac[i] = new Dummy(i,&song);
+          pMac[i] = new Dummy(callbacks,i,&song);
 		
 					init_and_load:
 						pMac[i]->Init();

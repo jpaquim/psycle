@@ -160,8 +160,8 @@ namespace psy {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-		LADSPAMachine::LADSPAMachine( Machine::id_type id, Song* song )
-		: Machine(MACH_LADSPA, MACHMODE_FX, id, song)
+		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id, Song* song )
+      : Machine(callbacks,MACH_LADSPA, MACHMODE_FX, id, song)
 		{
 			_audiorange = 1.0f;
 			_editName = "ladspa plug";

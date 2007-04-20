@@ -20,13 +20,13 @@ namespace psy {
       }
       Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff,Song &song) throw(std::exception)
       {
-        Plugin & plugin = * new Plugin(index,&song);
+        Plugin & plugin = * new Plugin(Player::Instance(),index,&song);
         Machine * pointer_to_machine = &plugin;
         try {
 					if(!plugin.LoadDll(const_cast<char *>((plugin_names()(type) + ".dll").c_str()))) {
             pointer_to_machine = 0; // for delete pointer_to_machine in the catch clause
             delete & plugin;
-            pointer_to_machine = new Dummy(index,&song);
+            pointer_to_machine = new Dummy(Player::Instance(), index,&song);
           }
           Machine & machine = *pointer_to_machine;
           machine_converted_from[&machine] = new int(type);

@@ -81,7 +81,7 @@ namespace psy
 			singleLine = song.patternSequence()->createNewLine();
 		}
 
-		bool Psy3Filter::load( const std::string & fileName, Song & song )
+		bool Psy3Filter::load( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
 		{
 			RiffFile file;
 			file.Open(fileName);
@@ -158,7 +158,7 @@ namespace psy
 //					song.progress.emit(2,0,"Loading... Song machines...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
-							LoadMACDv0(&file,song,version&0x00FF);
+            LoadMACDv0(&file,song,version&0x00FF,callbacks);
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -271,7 +271,7 @@ namespace psy
 			{
 				if (!song._pMachine[MASTER_INDEX] )
 				{
-					song._pMachine[MASTER_INDEX] = new Master( MASTER_INDEX, &song );
+					song._pMachine[MASTER_INDEX] = new Master( callbacks, MASTER_INDEX, &song );
 					song._pMachine[MASTER_INDEX]->Init();
 				}
 				std::ostringstream s;
@@ -485,7 +485,7 @@ namespace psy
 			return fileread;
 		}
 
-		bool Psy3Filter::LoadMACDv0(RiffFile* file,Song& song,int minorversion)
+		bool Psy3Filter::LoadMACDv0(RiffFile* file,Song& song,int minorversion, MachineCallbacks* callbacks)
 		{
 			std::uint32_t index = 0;
 
@@ -495,7 +495,7 @@ namespace psy
 				Machine::id_type const id(index);
 				///\todo: song.clear() creates an empty song with a Master Machine. This loader doesn't
 				// try to free that allocated machine.
-				song._pMachine[index] = Machine::LoadFileChunk(&song,file, id, minorversion, true);
+				song._pMachine[index] = Machine::LoadFileChunk(&song,file, callbacks, id, minorversion, true);
 			}
 			return (bool)song._pMachine[index];
 		}

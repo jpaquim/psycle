@@ -8,12 +8,12 @@
 #include "constants.h"
 #include "fileio.h"
 #include "cstdint.h"
+#include "playertimeinfo.h"
 #include <stdexcept>
 #include <vector>
 #include <deque>
 #include <cassert>
 #include <map>
-#include "global.h" // for zapArray
 
 namespace psy
 {
@@ -278,6 +278,12 @@ namespace psy
 
 		};
 
+    class MachineCallbacks {
+    public:
+			virtual const PlayerTimeInfo & timeInfo() const = 0;
+      virtual bool autoStopMachines() const = 0;
+    };
+
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
 		{
@@ -405,11 +411,13 @@ namespace psy
 			///\}
 
 			public:
-				Machine(type_type type, mode_type mode, id_type id, Song * song);
+        Machine(MachineCallbacks* callbacks, type_type type, mode_type mode, id_type id, Song * song);
 				virtual ~Machine() throw();
 				Song* song();
 
-			private:
+    protected:
+        MachineCallbacks* callbacks;
+    private:
 				Song* _pSong;
 
 			///\name the life cycle of a mahine
@@ -429,7 +437,7 @@ namespace psy
 				public:
 					virtual void SaveDllName(RiffFile * pFile);
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-					static Machine * LoadFileChunk(Song* pSong , RiffFile* pFile, Machine::id_type index, int version,bool fullopen=true);
+					static Machine * LoadFileChunk(Song* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
 					virtual void SaveFileChunk(RiffFile * pFile);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
 					/// Loader for psycle fileformat version 2.

@@ -36,6 +36,7 @@ namespace psy
     class SequenceLine;
     class Machine;
     class PatternEvent;
+    class MachineCallbacks;
 
 		#ifdef __unix__
 		namespace convert_internal_machines
@@ -77,7 +78,7 @@ namespace psy
 			protected:
 
 				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(const std::string & fileName, Song & song);
+				virtual bool load(const std::string & fileName, Song & song, MachineCallbacks* callbacks);
 
 				virtual bool LoadINFO(RiffFile* file,Song& song);
 				virtual bool LoadSNGI(RiffFile* file,Song& song);
@@ -87,7 +88,7 @@ namespace psy
 				virtual bool LoadWAVD(RiffFile* file,Song& song);
 				virtual bool PreLoadVSTs(RiffFile* file,Song& song);
 				#ifdef __unix__
-				virtual bool LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter);
+				virtual bool LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
 				virtual bool TidyUp(RiffFile* file,Song &song,convert_internal_machines::Converter* converter);
 								#endif				
 	
