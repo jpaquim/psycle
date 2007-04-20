@@ -500,8 +500,8 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefNavRight, Key( Qt::NoModifier, Qt::Key_Right ) );
 			inputHandler_.changeKeyCode( cdefNavPageDn, Key( Qt::NoModifier, Qt::Key_PageDown ) );
 			inputHandler_.changeKeyCode( cdefNavPageUp, Key( Qt::NoModifier, Qt::Key_PageUp ) );
-			inputHandler_.changeKeyCode( cdefTrackNext, Key( Qt::ControlModifier, Qt::Key_Right ) );
-			inputHandler_.changeKeyCode( cdefTrackPrev, Key( Qt::ControlModifier, Qt::Key_Left ) );
+			inputHandler_.changeKeyCode( cdefTrackNext, Key( Qt::NoModifier, Qt::Key_Tab ) );
+			inputHandler_.changeKeyCode( cdefTrackPrev, Key( Qt::ShiftModifier, Qt::Key_Backtab ) );
 			inputHandler_.changeKeyCode( cdefNavTop, Key( Qt::NoModifier, Qt::Key_Home ) );
 			inputHandler_.changeKeyCode( cdefNavBottom, Key( Qt::NoModifier, Qt::Key_End ) );
 

@@ -165,6 +165,24 @@ void PatternDraw::scrollContentsBy ( int dx, int dy )
     QGraphicsView::scrollContentsBy( dx, dy );
 }
 
+bool PatternDraw::event( QEvent *event )
+{
+    switch (event->type()) {
+        case QEvent::KeyPress: {
+            QKeyEvent *k = (QKeyEvent *)event;
+            QGraphicsView::keyPressEvent(k);
+            if (k->key() == Qt::Key_Backtab
+                || (k->key() == Qt::Key_Tab && (k->modifiers() & Qt::ShiftModifier))
+                || (k->key() == Qt::Key_Tab) ) {
+                event->accept();
+            }
+            return true;
+        }
+        default:
+            return QGraphicsView::event( event );
+    }
+}
+
 
 
 //
