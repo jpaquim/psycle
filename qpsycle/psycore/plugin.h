@@ -93,7 +93,7 @@ private:
 	public:
 			inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
 public:
-		Plugin(int index, Song* song);
+    Plugin(MachineCallbacks* callbacks, int index, Song* song);
 
 		virtual ~Plugin() throw();
 

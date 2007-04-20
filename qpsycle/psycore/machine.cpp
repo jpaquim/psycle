@@ -16,6 +16,7 @@
 //#include <psycle/host/engine/XMSampler.hpp>
 #include "plugin.h" //<psycle/host/engine/plugin.hpp>
 //#include <psycle/host/engine/VSTHost.hpp>
+#include "global.h" // for zapArray
 
 #ifdef _MSC_VER
 #undef min 
@@ -181,7 +182,7 @@ namespace psy
 //			parent_.Work(numSamples);
 		}
 
-		Machine::Machine(Machine::type_type type, Machine::mode_type mode, Machine::id_type id, Song * song)
+		Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, Song * song)
 		:
 			_type(type),
 			_mode(mode),
@@ -217,6 +218,7 @@ namespace psy
 			_pScopeBufferR(0),
 			_scopeBufferIndex(0),
 			_scopePrevNumSamples(0),
+      callbacks(callbacks),
 			_editName("")
 			
 		{
@@ -632,7 +634,7 @@ namespace psy
 			return true;
 		};
 
-		Machine* Machine::LoadFileChunk(Song* pSong, RiffFile* pFile, Machine::id_type index, int version,bool fullopen)
+		Machine* Machine::LoadFileChunk(Song* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
 		{
 			// assume version 0 for now
 			bool bDeleted(false);
@@ -646,41 +648,41 @@ namespace psy
 			{
 			case MACH_MASTER:
 				if (pSong->_pMachine[MASTER_INDEX]) pMachine = pSong->_pMachine[MASTER_INDEX];
-				else if ( !fullopen ) pMachine = new Dummy(index, pSong);
-				else pMachine = new Master(index, pSong);
+				else if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
+				else pMachine = new Master(callbacks, index, pSong);
 				break;
 			case MACH_SAMPLER:
-				if ( !fullopen ) pMachine = new Dummy(index, pSong);
-				else pMachine = new Sampler(index, pSong );
+				if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
+				else pMachine = new Sampler(callbacks, index, pSong );
 				break;
 			case MACH_XMSAMPLER:
 				//if ( !fullopen ) 
-				pMachine = new Dummy(index, pSong);
+				pMachine = new Dummy(callbacks, index, pSong);
 				type = MACH_DUMMY;
 				//else pMachine = new XMSampler(index);
 				break;
 			case MACH_DUPLICATOR:
-				if ( !fullopen ) pMachine = new Dummy(index, pSong);
-				else pMachine = new DuplicatorMac(index, pSong);
+				if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
+				else pMachine = new DuplicatorMac(callbacks, index, pSong);
 				break;
 			case MACH_MIXER:
-				if ( !fullopen ) pMachine = new Dummy(index, pSong);
-				else pMachine = new Mixer(index, pSong);
+				if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
+				else pMachine = new Mixer(callbacks, index, pSong);
 				break;
 			case MACH_LFO:
-				if ( !fullopen ) pMachine = new Dummy(index, pSong);
-				else pMachine = new LFO(index, pSong);
+				if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
+				else pMachine = new LFO(callbacks, index, pSong);
 				break;
 			case MACH_PLUGIN:
 				{
-					if(!fullopen) pMachine = new Dummy(index, pSong);
+					if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
 					else 
 					{
 						Plugin * p;
-						pMachine = p = new Plugin(index, pSong);
+						pMachine = p = new Plugin(callbacks, index, pSong);
 						if(!p->LoadDll(dllName))
 						{
-							pMachine = new Dummy(index, pSong);
+							pMachine = new Dummy(callbacks, index, pSong);
 							type = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
@@ -690,14 +692,14 @@ namespace psy
 				break;
 			case MACH_VST:
 				{
-					if(!fullopen) pMachine = new Dummy(index, pSong);
+					if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
 					else 
 					{
 //						vst::instrument * p;
 //						pMachine = p = new vst::instrument(index);
 //						if(!p->LoadDll(dllName))
 //						{
-							pMachine = new Dummy(index, pSong);
+              pMachine = new Dummy(callbacks, index, pSong);
 							type = MACH_DUMMY;
 //							delete p;
 //							bDeleted = true;
@@ -707,14 +709,14 @@ namespace psy
 				break;
 			case MACH_VSTFX:
 				{
-//					if(!fullopen) pMachine = new Dummy(index);
+//					if(!fullopen) pMachine = new Dummy(callbacks, index);
 //					else 
 //					{
 //						vst::fx * p;
-//						pMachine = p = new vst::fx(index);
+//						pMachine = p = new vst::fx(callbacks, index);
 //						if(!p->LoadDll(dllName))
 //						{
-							pMachine = new Dummy(index, pSong);
+          pMachine = new Dummy(callbacks, index, pSong);
 							type = MACH_DUMMY;
 //							delete p;
 //							bDeleted = true;
@@ -724,8 +726,8 @@ namespace psy
 				break;
 			default:
 //				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
-																std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
-				pMachine = new Dummy(index, pSong);
+        std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
+        pMachine = new Dummy(callbacks, index, pSong);
 				break;
 			}
 			pMachine->Init();
@@ -766,7 +768,7 @@ namespace psy
 																				std::cerr << s.str() << std::endl;
 					//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				}
-				Machine* p = new Dummy(index, pSong);
+				Machine* p = new Dummy(callbacks, index, pSong);
 				p->Init();
 				p->_type=MACH_DUMMY;
 				p->_mode=pMachine->_mode;

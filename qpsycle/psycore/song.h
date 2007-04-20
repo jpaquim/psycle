@@ -27,7 +27,7 @@ namespace psy
 		class Song 
 		{
 			public:
-				Song();
+				Song(MachineCallbacks*);
 
 				virtual ~Song();
 
@@ -87,7 +87,7 @@ namespace psy
 					//		failure : 0
 					// future  : iterator of machine (stl)container or at failure end()
 
-					Machine* createMachine( const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
+        Machine* createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
 
 					/// creates a new machine in this song. .. deprecated
 					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy", int pluginIndex = 0) throw(std::exception);
@@ -295,6 +295,9 @@ namespace psy
         int LinesPerBeat() const;
         void LinesPerBeat(int value);
         void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
+
+    private:
+        MachineCallbacks *machinecallbacks;
 
 		};
 	}

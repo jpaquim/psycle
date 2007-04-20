@@ -4,7 +4,6 @@
 //#include PACKAGENERIC
 #include "sampler.h"
 #include "song.h"
-#include "player.h"
 #include "fileio.h"
 
 namespace psy
@@ -13,9 +12,9 @@ namespace psy
 	{
 		std::string Sampler::_psName = "Sampler";
 
-		Sampler::Sampler(Machine::id_type id, Song* song)
+		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
 		:
-			Machine(MACH_SAMPLER, MACHMODE_GENERATOR, id, song)
+			Machine(callbacks, MACH_SAMPLER, MACHMODE_GENERATOR, id, song)
 		{
 			_audiorange = 32768.0f;
 //			DefineStereoOutput(1);
@@ -62,7 +61,7 @@ namespace psy
 
 		int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 		{
-			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 //			PSYCLE__CPU_COST__INIT(cost);
 			if (!_mute)
 			{
@@ -171,7 +170,7 @@ namespace psy
 					}
 				}
 				Machine::SetVolumeCounter(numSamples);
-				if ( Player::Instance()->autoStopMachines )
+				if ( callbacks->autoStopMachines() )
 				{
 					if (_volumeCounter < 8.0f)	{
 						_volumeCounter = 0.0f;
@@ -200,7 +199,7 @@ namespace psy
 
 		void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 		{
-			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
 			float* pSamplesL = _pSamplesL+startSample;
@@ -454,7 +453,7 @@ namespace psy
 
 		int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		{		
-			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 			PatternEvent pEntry = entry;
 
 			Voice* pVoice = &_voices[voice];
@@ -711,7 +710,7 @@ namespace psy
 
 		void Sampler::TickFilterEnvelope( int voice )
 		{
-			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 			Voice* pVoice = &_voices[voice];
 			switch (pVoice->_filterEnv._stage)
@@ -749,7 +748,7 @@ namespace psy
 
 		void Sampler::TickEnvelope( int voice )
 		{
-			const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 			Voice* pVoice = &_voices[voice];
 			switch (pVoice->_envelope._stage)
@@ -789,7 +788,7 @@ namespace psy
 			Voice* pVoice = &_voices[voice];
 			if (pVoice->_envelope._stage != ENV_OFF)
 			{
-				const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+				const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 				pVoice->_envelope._stage = ENV_RELEASE;
 				pVoice->_filterEnv._stage = ENV_RELEASE;

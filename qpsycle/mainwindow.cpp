@@ -24,6 +24,7 @@
 #include "psycore/patterndata.h"
 #include "psycore/patternsequence.h"
 #include "psycore/configuration.h"
+#include "psycore/global.h"
 
 #include "mainwindow.h"
 #include "patternbox.h"
@@ -44,7 +45,7 @@
 
 MainWindow::MainWindow()
 {
-    song_ = new psy::core::Song();
+  song_ = new psy::core::Song(psy::core::Player::Instance());
     setupSong();
     setupSound();
     psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
@@ -169,7 +170,7 @@ void MainWindow::open()
         //Global::configuration()._pOutputDriver->Enable(false);
         // add a new Song tab
         // load the song
-        song_ = new psy::core::Song();
+        song_ = new psy::core::Song(psy::core::Player::Instance());
         song_->load( fileName.toStdString() );
 
         // update gui to new song FIXME: very crappy way of doing it for now.

@@ -19,7 +19,8 @@ namespace psy
 {
 	namespace core
 	{
-		Song::Song()
+		Song::Song(MachineCallbacks* callbacks)
+      : machinecallbacks(callbacks)
 		{
 			tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 			_machineLock = false;
@@ -39,7 +40,7 @@ namespace psy
 		}
 
 
-		void Song::clear( )
+		void Song::clear()
 		{
 			_machineLock = false;
 			Invalided = false;
@@ -98,7 +99,7 @@ namespace psy
 		}
 
 
-		Machine * Song::createMachine( const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
+		Machine * Song::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
 			int fb = GetFreeBus();
 			if ( key == PluginFinderKey::internalSampler() ) {
 				// create internal Sampler
@@ -107,11 +108,11 @@ namespace psy
 			if ( finder.info( key ).type() == MACH_PLUGIN ) 
 			{
 				// create native Plugin
-				CreateMachine( MACH_PLUGIN, x, y, key.dllPath(), fb );
+				CreateMachine(MACH_PLUGIN, x, y, key.dllPath(), fb );
 			} else
 			if ( finder.info( key ).type() == MACH_LADSPA ){
 				// create ladspa plugin
-				LADSPAMachine* plugin = new LADSPAMachine( fb, this );
+				LADSPAMachine* plugin = new LADSPAMachine( machinecallbacks, fb, this );
 				if  ( plugin->loadDll( key.dllPath(), key.index() ) ) {
 				  plugin->SetPosX( x );
 				  plugin->SetPosY( y );
@@ -139,39 +140,39 @@ namespace psy
 				case MACH_MASTER:
 					if(_pMachine[MASTER_INDEX]) return false;
 					index = MASTER_INDEX;
-					machine = new Master(index, this);
+					machine = new Master(machinecallbacks, index, this);
 					break;
 				case MACH_SAMPLER:
-					machine = new Sampler(index,this);
+					machine = new Sampler(machinecallbacks, index,this);
 					break;
 				case MACH_XMSAMPLER:
-//					machine = new XMSampler(index);
+//					machine = new XMSampler(machinecallbacks, index);
 					break;
 				case MACH_DUPLICATOR:
-					machine = new DuplicatorMac(index, this);
+					machine = new DuplicatorMac(machinecallbacks, index, this);
 					break;
 				case MACH_MIXER:
-					machine = new Mixer(index, this);
+					machine = new Mixer(machinecallbacks, index, this);
 					break;
 				case MACH_LFO:
-					machine = new LFO(index, this);
+					machine = new LFO(machinecallbacks, index, this);
 					break;
 //				case MACH_AUTOMATOR:
-//					machine = new Automator(index);
+//					machine = new Automator(machinecallbacks, index);
 //					break;
 				case MACH_DUMMY:
-					machine = new Dummy(index, this);
+					machine = new Dummy(machinecallbacks, index, this);
 					break;
 				case MACH_PLUGIN:
 					{
-												Plugin* plugin = new Plugin( index, this );
-												plugin->LoadDll( plugin_name );
-												machine = plugin;
+            Plugin* plugin = new Plugin( machinecallbacks, index, this );
+            plugin->LoadDll( plugin_name );
+            machine = plugin;
 					}
 					break;
 				case MACH_LADSPA:
 					{
-						LADSPAMachine* plugin = new LADSPAMachine(index,this);
+						LADSPAMachine* plugin = new LADSPAMachine(machinecallbacks,index,this);
 						machine = plugin;
 						const char* pcLADSPAPath;
 						pcLADSPAPath = std::getenv("LADSPA_PATH");
@@ -191,8 +192,8 @@ namespace psy
 				case MACH_VSTFX:
 					{
 						vst::plugin * plugin(0);
-						if (type == MACH_VST) machine = plugin = new vst::instrument(index);
-						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(index);
+						if (type == MACH_VST) machine = plugin = new vst::instrument(machinecallbacks,index);
+						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(machinecallbacks,index);
 						if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
 						{
 							delete plugin;
@@ -219,7 +220,7 @@ namespace psy
 				default:
 //					loggers::warning("failed to create requested machine type");
 //					return false;
-					machine = new Dummy(index, this);
+					machine = new Dummy(machinecallbacks, index, this);
 					break;
 			}
 

@@ -55,9 +55,9 @@ int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().
 int PluginFxCallback::GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
 int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
 
-Plugin::Plugin(Machine::id_type id , Song* song)
+    Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , Song* song)
 			:
-				Machine(MACH_PLUGIN, MACHMODE_FX, id, song),
+      Machine(callbacks, MACH_PLUGIN, MACHMODE_FX, id, song),
 				_dll(0),
 				proxy_(*this)
 			{

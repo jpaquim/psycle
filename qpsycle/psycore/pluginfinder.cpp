@@ -242,7 +242,14 @@ namespace psy
 				if ( fileName.find( ".dll" ) == std::string::npos ) continue;
 				#endif
 
-				LADSPAMachine plugin(0, 0 );
+        class DummyCallbacks : public MachineCallbacks {
+          PlayerTimeInfo ti;
+        public:
+          const PlayerTimeInfo& timeInfo() const { return ti; }
+          bool autoStopMachines() const { return false; }
+        } dummycallbacks;
+
+				LADSPAMachine plugin(&dummycallbacks, 0, 0 );
 				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + File::slash() + fileName );
 
 				if (pfDescriptorFunction) {
@@ -278,7 +285,15 @@ namespace psy
 					if ( fileName.find( ".dll" ) == std::string::npos ) continue;
 				#endif
 
-				Plugin plugin(0, 0 );
+        class DummyCallbacks : public MachineCallbacks {
+          PlayerTimeInfo ti;
+        public:
+          const PlayerTimeInfo& timeInfo() const { return ti; }
+          bool autoStopMachines() const { return false; }
+        } dummycallbacks;
+
+
+				Plugin plugin(&dummycallbacks, 0, 0 );
 				if ( plugin.LoadDll( fileName ) ) {
 				PluginInfo info;
 				info.setType( MACH_PLUGIN );

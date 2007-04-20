@@ -14,8 +14,7 @@
 //	#undef max
 #endif
 
-namespace psy
-{
+namespace psy{
 	namespace core
 	{
 //		class CGearTracker; // forward declaration
@@ -140,7 +139,7 @@ namespace psy
 		{
 		public:
 			void Tick( );
-			Sampler(Machine::id_type id, Song* song);
+			Sampler(MachineCallbacks* callbacks, Machine::id_type id, Song* song);
 			virtual void Init();
       // \todo implement SetSampleRate     
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );

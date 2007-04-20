@@ -28,14 +28,13 @@
 #include "machine.h"
 #include "riff.h"
 #include "../audiodrivers/audiodriver.h" // FIXME: doesn't belong in psycore
-#include "playertimeinfo.h"
 
 namespace psy
 {
 	namespace core
 	{
 
-		class Player
+		class Player : public MachineCallbacks
 		{
 		// Singleton Pattern
 					private:
@@ -107,7 +106,10 @@ namespace psy
 
 			void SampleRate(const int sampleRate);
 
-			bool autoStopMachines;
+      bool autoStopMachines() const;
+    private:
+			bool autoStopMachines_;
+    public:
 
 			// work function. (Entrance for the callback function (audiodriver)
 			static float * Work(void* context, int& nsamples);

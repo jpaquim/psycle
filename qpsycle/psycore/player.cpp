@@ -53,7 +53,7 @@ namespace psy
 			autoRecord_ = false;
 			recording_ = false;
 			driver_ = 0;
-			autoStopMachines = false;
+			autoStopMachines_ = false;
 			lock_ = false;
 			inWork_ = false;
 		}
@@ -142,7 +142,10 @@ namespace psy
 				if(song()._pMachine[i]) song()._pMachine[i]->SetSampleRate( sampleRate );
 			}
 		}
-		
+    bool Player::autoStopMachines() const {
+      return autoStopMachines_;
+    }
+	
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
 			Machine::id_type mIndex;
