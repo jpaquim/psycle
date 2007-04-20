@@ -42,7 +42,7 @@ namespace psy
 			for (Instrument::id_type i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
 		}
 
-		void Sampler::Init(void)
+		void Sampler::Init()
 		{
 			Machine::Init();
 

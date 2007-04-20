@@ -2,14 +2,13 @@
 ///\brief implementation file for psy::core::Filter. based on Revision 2623
 //#include <packageneric/pre-compiled.private.hpp>
 //#include PACKAGENERIC
-#include "player.h"
 #include "filter.h"
-//#include "global.h"
 
 #ifdef _MSC_VER
 #undef min 
 #undef max
 #endif
+#include <algorithm>
 
 namespace psy
 {
@@ -17,12 +16,54 @@ namespace psy
 	{
 		namespace dsp
 		{
-			FilterCoeff Filter::_coeffs;
+			FilterCoeff FilterCoeff::singleton;
 
+      FilterCoeff::FilterCoeff() {
+        samplerate = -1;
+        setSampleRate(44100); // initializes table
+      };
+
+			void FilterCoeff::setSampleRate(float samplerate)
+			{
+				if (samplerate != this->samplerate)
+				{
+          this->samplerate = samplerate;
+					for (int r=0; r<5; r++)
+					{
+						for (int f=0; f<128; f++)
+						{
+							for (int q=0; q<128; q++)
+							{
+								ComputeCoeffs(f, q, r);
+								_coeffs[r][f][q][0] = (float)_coeff[0];
+								_coeffs[r][f][q][1] = (float)_coeff[1];
+								_coeffs[r][f][q][2] = (float)_coeff[2];
+								_coeffs[r][f][q][3] = (float)_coeff[3];
+								_coeffs[r][f][q][4] = (float)_coeff[4];
+							}
+						}
+					}
+				}
+			};
+
+			float FilterCoeff::Cutoff(int v)
+			{
+				return float(pow( (v+5)/(127.0+5), 1.7)*13000+30);
+			};
+			
+			float FilterCoeff::Resonance(float v)
+			{
+				return float(pow( v/127.0, 4)*150+0.1);
+			};
+			
+			float FilterCoeff::Bandwidth(int v)
+			{
+				return float(pow( v/127.0, 4)*4+0.1);
+			};
 
 			void FilterCoeff::ComputeCoeffs(int freq, int r, int t)
 			{
-				float omega = float(TPI*Cutoff(freq)/ Player::Instance()->timeInfo().sampleRate());
+				float omega = float(TPI*Cutoff(freq)/ samplerate);
 				float sn = (float)sin(omega);
 				float cs = (float)cos(omega);
 				float alpha;
@@ -80,10 +121,9 @@ namespace psy
 
 			Filter::Filter()
 			{
-				_coeffs.Init();
-				Init();
 				_x1 = _x2 = _y1 = _y2 = 0;
 				_a1 = _a2 = _b1 = _b2 = 0;
+        Init();
 			}
 			
 			void Filter::Init()
@@ -96,11 +136,11 @@ namespace psy
 
 			void Filter::Update()
 			{
-				_coeff0 = _coeffs._coeffs[_type][_cutoff][_q][0];
-				_coeff1 = _coeffs._coeffs[_type][_cutoff][_q][1];
-				_coeff2 = _coeffs._coeffs[_type][_cutoff][_q][2];
-				_coeff3 = _coeffs._coeffs[_type][_cutoff][_q][3];
-				_coeff4 = _coeffs._coeffs[_type][_cutoff][_q][4];
+				_coeff0 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][0];
+				_coeff1 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][1];
+				_coeff2 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][2];
+				_coeff3 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][3];
+				_coeff4 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][4];
 			}
 
 			void ITFilter::Update()
