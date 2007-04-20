@@ -160,7 +160,7 @@ namespace psy
 		/// Cure for malicious samples
 		/// Type : Filters Denormals, NaNs, Infinities
 		/// References : Posted by urs[AT]u-he[DOT]com
-		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const & inNumberOfSamples )
+		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int inNumberOfSamples )
 		{
 			unsigned int* inArrayOfFloats = (unsigned int*) inSamples;
 			unsigned int sample;
@@ -189,7 +189,7 @@ namespace psy
 				float id(float(1.0E-18));
 				pSamplesL[s] += id;
 				pSamplesR[s] += id;
-				id = -id;
+				id = -id;  // <magnus> This statement has no effect.
 			#endif
 		}
 
@@ -236,10 +236,7 @@ namespace psy
 			/// kind of interpolation.
 			ResamplerQuality _quality;
 			/// interpolation work function which does nothing.
-			static float T_None(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
-			{
-				return *pData;
-			}
+			static float T_None(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
 		};
 
 		/// cubic sample interpolator.
@@ -249,62 +246,13 @@ namespace psy
 			/// constructor.
 			Cubic();
 			/// refefinition.
-			virtual void SetQuality(ResamplerQuality quality)
-			{
-				_quality = quality;
-				switch (quality)
-				{
-					case R_NONE:
-					_pWorkFn = T_None;
-					break;
-				case R_LINEAR:
-					_pWorkFn = Linear;
-					break;
-				case R_SPLINE:
-					_pWorkFn = Spline;
-					break;
-				case R_BANDLIM:
-					_pWorkFn = Bandlimit;
-					break;
-				}
-			}
-			virtual ResamplerQuality GetQuality(void) { return _quality; }
+			virtual void SetQuality(ResamplerQuality quality);
+			virtual ResamplerQuality GetQuality(void);
 		protected:
 			/// interpolation work function which does linear interpolation.
-			static float Linear(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
-			{
-				float y0,y1;
-				y0 = *pData;
-				y1 = static_cast<float>( ( offset+1 == length )?0:*(pData+1) );
-				return (y0+(y1-y0)*_lTable[res>>21]);
-			}
+			static float Linear(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
 			/// interpolation work function which does spline interpolation.
-			static float Spline(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
-			{
-				float yo, y0,y1, y2;
-				res = res >> 21;
-			
-				yo = static_cast<float>( (offset==0)?0:*(pData-1) );
-				y0=*(pData);
-				y1= static_cast<float>( (offset+1 == length)?0:*(pData+1) );
-				y2= static_cast<float>( (offset+2 == length)?0:*(pData+2) );
-				return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
-			}
-			
-			// yo = y[-1] [sample at x-1]
-			// y0 = y[0]  [sample at x (input)]
-			// y1 = y[1]  [sample at x+1]
-			// y2 = y[2]  [sample at x+2]
-			
-			// res= distance between two neighboughing sample points [y0 and y1] 
-			//		,so [0...1.0]. You have to multiply this distance * RESOLUTION used
-			//		on the spline conversion table. [2048 by default]
-			// If you are using 2048 is asumed you are using 12 bit decimal
-			// fixed point offsets for resampling.
-			
-			// offset = sample offset [info to avoid go out of bounds on sample reading ]
-			// length = sample length [info to avoid go out of bounds on sample reading ]
-
+			static float Spline(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
 
 			//either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
 			//make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
@@ -313,38 +261,7 @@ namespace psy
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.
-			static float Bandlimit(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
-			{
-				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
-				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
-				if(offset<SINC_ZEROS) leftExtent=(int)(offset);
-				if(length-offset<SINC_ZEROS) rightExtent=(int)(length-offset);
-				
-				const int sincInc(SINC_RESOLUTION);
-				float newval(0.0);
-
-				newval += sincTable[res] * *(pData);
-				///\todo: Will weight be different than zero using the current code?
-				float sincIndex(sincInc+res);
-				float weight(sincIndex - floor(sincIndex));
-				for(	int i(1);
-						i < leftExtent;
-						++i, sincIndex+=sincInc
-						)
-					newval+= (sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData-i);
-
-				sincIndex = sincInc-res;
-				weight = sincIndex - floor(sincIndex);
-				for(	int i(1);
-						i < rightExtent;
-						++i, sincIndex+=sincInc
-						)
-					newval += ( sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData+i);
-
-				return newval;
-			}
-
-			
+			static float Bandlimit(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
 		private:
 
 			/// Currently is 2048

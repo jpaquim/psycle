@@ -161,13 +161,13 @@ namespace psy
 					/// clones an instrument.
 					bool CloneIns(Instrument::id_type src, Instrument::id_type dst);
 					/// resets the instrument and delete each sample/layer that it uses.
-					void /*Reset*/DeleteInstrument(Instrument::id_type id) { Invalided=true; _pInstrument[id]->Delete(); Invalided=false; }
+					void /*Reset*/DeleteInstrument(Instrument::id_type id);
 					/// resets the instrument and delete each sample/layer that it uses. (all instruments)
-					void /*Reset*/DeleteInstruments() { Invalided=true; for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) _pInstrument[id]->Delete(); Invalided=false; }
+					void /*Reset*/DeleteInstruments();
 					/// delete all instruments in this song.
-					void /*Delete*/DestroyAllInstruments() { for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) { delete _pInstrument[id]; _pInstrument[id] = 0; } }
+					void /*Delete*/DestroyAllInstruments();
 					// Removes the sample/layer of the instrument
-					void DeleteLayer(Instrument::id_type id) { _pInstrument[id]->DeleteLayer(); }
+					void DeleteLayer(Instrument::id_type id);
 			///\}
 
 			///\name wavetable

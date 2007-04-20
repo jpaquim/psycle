@@ -128,6 +128,101 @@ namespace psy
 				sincDelta[sincSize-1] = 0 - sincTable[sincSize-1];
 
 			}
+
+			float Resampler::T_None(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			{
+				return *pData;
+			}
+
+			void Cubic::SetQuality(ResamplerQuality quality)
+			{
+				_quality = quality;
+				switch (quality)
+				{
+					case R_NONE:
+					_pWorkFn = T_None;
+					break;
+				case R_LINEAR:
+					_pWorkFn = Linear;
+					break;
+				case R_SPLINE:
+					_pWorkFn = Spline;
+					break;
+				case R_BANDLIM:
+					_pWorkFn = Bandlimit;
+					break;
+				}
+			}
+			ResamplerQuality Cubic::GetQuality(void) { return _quality; }
+
+
+			/// interpolation work function which does linear interpolation.
+			float Cubic::Linear(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			{
+				float y0,y1;
+				y0 = *pData;
+				y1 = static_cast<float>( ( offset+1 == length )?0:*(pData+1) );
+				return (y0+(y1-y0)*_lTable[res>>21]);
+			}
+			/// interpolation work function which does spline interpolation.
+			float Cubic::Spline(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			{
+				float yo, y0,y1, y2;
+				res = res >> 21;
+			
+				yo = static_cast<float>( (offset==0)?0:*(pData-1) );
+				y0=*(pData);
+				y1= static_cast<float>( (offset+1 == length)?0:*(pData+1) );
+				y2= static_cast<float>( (offset+2 == length)?0:*(pData+2) );
+				return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
+			}
+			
+			// yo = y[-1] [sample at x-1]
+			// y0 = y[0]  [sample at x (input)]
+			// y1 = y[1]  [sample at x+1]
+			// y2 = y[2]  [sample at x+2]
+			
+			// res= distance between two neighboughing sample points [y0 and y1] 
+			//		,so [0...1.0]. You have to multiply this distance * RESOLUTION used
+			//		on the spline conversion table. [2048 by default]
+			// If you are using 2048 is asumed you are using 12 bit decimal
+			// fixed point offsets for resampling.
+			
+			// offset = sample offset [info to avoid go out of bounds on sample reading ]
+			// length = sample length [info to avoid go out of bounds on sample reading ]
+
+			/// interpolation work function which does band-limited interpolation.
+			float Cubic::Bandlimit(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			{
+				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
+				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
+				if(offset<SINC_ZEROS) leftExtent=(int)(offset);
+				if(length-offset<SINC_ZEROS) rightExtent=(int)(length-offset);
+				
+				const int sincInc(SINC_RESOLUTION);
+				float newval(0.0);
+
+				newval += sincTable[res] * *(pData);
+				///\todo: Will weight be different than zero using the current code?
+				float sincIndex(sincInc+res);
+				float weight(sincIndex - floor(sincIndex));
+				for(	int i(1);
+						i < leftExtent;
+						++i, sincIndex+=sincInc
+						)
+					newval+= (sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData-i);
+
+				sincIndex = sincInc-res;
+				weight = sincIndex - floor(sincIndex);
+				for(	int i(1);
+						i < rightExtent;
+						++i, sincIndex+=sincInc
+						)
+					newval += ( sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData+i);
+
+				return newval;
+			}
+
 		}
 	}
 }

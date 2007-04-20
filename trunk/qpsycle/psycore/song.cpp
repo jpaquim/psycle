@@ -1038,6 +1038,25 @@ namespace psy
 			return true;
 		}
 
+    void /*Reset*/Song::DeleteInstrument(Instrument::id_type id) {
+      Invalided=true;
+      _pInstrument[id]->Delete(); Invalided=false;
+    }
+    void /*Reset*/Song::DeleteInstruments() {
+      Invalided=true;
+      for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
+        _pInstrument[id]->Delete();
+      Invalided=false;
+    }
+    void /*Delete*/Song::DestroyAllInstruments() {
+      for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
+        delete _pInstrument[id];
+        _pInstrument[id] = 0;
+      }
+    }
+    void Song::DeleteLayer(Instrument::id_type id) {
+      _pInstrument[id]->DeleteLayer();
+    }
 		void Song::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
 		{
 				///\todo reowkr for multitracking
