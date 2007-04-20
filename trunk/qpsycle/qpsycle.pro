@@ -38,7 +38,6 @@ HEADERS += mainwindow.h \
            patternview/trackheader.h \
            patternview/patterngrid.h \
            patternview/patterndraw.h \
-           psycore/abstractmachinefactory.h \
            audiodrivers/audiodriver.h \
            psycore/binread.h \
            psycore/configuration.h \
@@ -53,16 +52,13 @@ HEADERS += mainwindow.h \
            psycore/fileio.h \
            psycore/filter.h \
            psycore/global.h \
-           audiodrivers/gstreamer_conditional_build.h \
            audiodrivers/gstreamerout.h \
            psycore/helpers.h \
            psycore/inputhandler.h \
-           psycore/install_paths.h \
            psycore/instpreview.h \
            psycore/instrument.h \
            psycore/internal_machines.h \
            psycore/ladspa.h \
-           psycore/ladspa_conditional_build.h \
            psycore/ladspamachine.h \
            psycore/machine.h \
            psycore/mersennetwister.h \
@@ -87,7 +83,6 @@ HEADERS += mainwindow.h \
            psycore/singlepattern.h \
            psycore/song.h \
            psycore/songstructs.h \
-           audiodrivers/steinberg_asio_conditional_build.h \
            psycore/timesignature.h \
            psycore/xminstrument.h \
            psycore/xmsampler.h \
@@ -119,7 +114,6 @@ SOURCES += mainwindow.cpp \
            patternview/trackheader.cpp \
            patternview/patterngrid.cpp \
            patternview/patterndraw.cpp \
-           psycore/abstractmachinefactory.cpp \
            audiodrivers/audiodriver.cpp \
            psycore/binread.cpp \
            psycore/convert_internal_machines.cpp \
@@ -207,16 +201,14 @@ unix {
     }
     LIBS += -lboost_signals
     # FIXME: not sure how to test for netaudio...
-    HEADERS += audiodrivers/netaudio_conditional_build.h \
-           audiodrivers/netaudioout.h \
+    HEADERS += audiodrivers/netaudioout.h \
            audiodrivers/wavefileout.h 
     SOURCES += audiodrivers/netaudioout.cpp \
            audiodrivers/wavefileout.cpp 
 }
 win32 {
     INCLUDEPATH += C:/Qt/4.2.2/src/3rdparty/zlib
-    HEADERS += audiodrivers/microsoft_direct_sound_conditional_build.h \
-           audiodrivers/microsoft_direct_sound_out.h \
+    HEADERS += audiodrivers/microsoft_direct_sound_out.h \
            audiodrivers/msdirectsound.h \
            audiodrivers/mswaveout.h 
     SOURCES += audiodrivers/microsoft_direct_sound_out.cpp \
