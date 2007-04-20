@@ -21,13 +21,14 @@
 #include "psycore/song.h"
 #include "psycore/singlepattern.h"
 #include "psycore/player.h"
+#include "psycore/configuration.h"
 
 #include "patternview.h"
 #include "patterndraw.h"
 #include "patterngrid.h"
 #include "linenumbercolumn.h"
 
-
+#include <QVBoxLayout>
 #include <QtGui>
 
 int d2i(double d)

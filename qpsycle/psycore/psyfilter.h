@@ -20,7 +20,6 @@
 #ifndef PSYFILTER_H
 #define PSYFILTER_H
 
-#include "song.h"
 #include <vector>
 
 /**
@@ -31,6 +30,7 @@ namespace psy
 {
 	namespace core
 	{
+    class Song;
 
 
 		class PsyFilter{

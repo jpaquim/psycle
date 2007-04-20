@@ -19,14 +19,13 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#include "../audiodrivers/audiodriver.h" // FIXME: doesn't belong in psycore
 #include "inputhandler.h"
 
-#include <vector>
 #include <string>
 
 namespace psy {
 	namespace core {
+    class AudioDriver;  // FIXME: doesn't belong in psycore
 
 		class Configuration {
 		public:

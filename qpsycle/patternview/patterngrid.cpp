@@ -17,9 +17,10 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "psycore/singlepattern.h"
 #include "psycore/global.h"
 #include "psycore/player.h"
+#include "psycore/inputhandler.h"
+#include "psycore/configuration.h"
 
 #include "patternview.h"
 #include "patterngrid.h"
@@ -29,6 +30,8 @@
 #include <iomanip>
 #include <memory> // auto_ptr
 
+#include <QKeyEvent>
+#include <QFontMetrics>
 #include <QApplication>
 #include <QClipboard>
 #include <QDomDocument>

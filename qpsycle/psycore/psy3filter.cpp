@@ -23,6 +23,7 @@
 #include "global.h" // for zapArray shit
 #include "inputhandler.h"
 #include "internal_machines.h"
+#include "song.h"
 
 namespace psy
 {
@@ -349,7 +350,7 @@ namespace psy
 			song.setBpm( BPMCoarse + temp16/100.0f );
 			// tpb
 			file->Read(temp);
-			song.m_LinesPerBeat = temp;
+			song.LinesPerBeat(temp);
 			// current octave
 			file->Read(temp);
 			song.currentOctave = temp;
@@ -379,7 +380,7 @@ namespace psy
 				fileread = file->Read(song._trackArmed[i]);
 				if(song._trackArmed[i]) ++song._trackArmedCount;
 			}
-//			Global::player().SetBPM(song.m_BeatsPerMin,song.m_LinesPerBeat);
+//			Global::player().SetBPM(song.m_BeatsPerMin,song.LinesPerBeat());
 			return fileread;
 		}
 
@@ -453,9 +454,9 @@ namespace psy
 					indexStr = o.str();
 				SinglePattern* pat =
 						singleCat->createNewPattern(std::string(patternName)+indexStr);
-				pat->setBeatZoom(song.m_LinesPerBeat);
+				pat->setBeatZoom(song.LinesPerBeat());
 				TimeSignature & sig =  pat->timeSignatures().back();
-				float beats = numLines / (float) song.m_LinesPerBeat;
+				float beats = numLines / (float) song.LinesPerBeat();
 				pat->setID(index);
 				sig.setCount((int) (beats / 4) );
 				float uebertrag = beats - ((int) beats);
@@ -470,7 +471,7 @@ namespace psy
 						std::memcpy( &entry, pSource, 5);
 						PatternEvent event = convertEntry(entry);
 						if (!event.empty()) {
-							float position = y / (float) song.m_LinesPerBeat;
+							float position = y / (float) song.LinesPerBeat();
 							if (event.note() == cdefTweakM) {
 							 (*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 							} else

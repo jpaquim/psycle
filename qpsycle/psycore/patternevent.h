@@ -20,7 +20,6 @@
 #ifndef PATTERNEVENT_H
 #define PATTERNEVENT_H
 
-#include "pattern.h"
 #include "cstdint.h"
 #include <vector>
 

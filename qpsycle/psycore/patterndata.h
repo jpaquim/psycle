@@ -20,8 +20,8 @@
 #ifndef PATTERNDATA_H
 #define PATTERNDATA_H
 
-#include "singlepattern.h"
 #include <vector>
+#include <string>
 
 /**
 @author  Psycledelics  
@@ -31,6 +31,7 @@ namespace psy
 {
 	namespace core
 	{
+    class SinglePattern;
 
 		class PatternCategory : public std::vector<SinglePattern*> {
 		public:

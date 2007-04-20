@@ -1,5 +1,6 @@
 #include "instpreview.h"
 #include "instrument.h"
+#include "cstdint.h"
 
 namespace psy
 {

@@ -18,8 +18,8 @@
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
 #include "plugin.h"
-//#include "configuration.h"
-//#include "inputhandler.h"
+#include "player.h"
+#include "configuration.h"
 #ifdef __unix__
 #include <dlfcn.h>
 #else
@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cctype>
+#include <cassert>
 
 // win32 note : mingw cannot load our shipped 1.8.2 binary plugins due c++ this and std calling convention
 
@@ -45,6 +46,14 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 
 
 PluginFxCallback Plugin::_callback;
+
+void PluginFxCallback::MessBox(char const* ptxt,char const* caption,unsigned int type) {
+  //MessageBox(hWnd,ptxt,caption,type); 
+}
+int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerRow()); }
+int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
+int PluginFxCallback::GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
+int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
 
 Plugin::Plugin(Machine::id_type id , Song* song)
 			:
@@ -721,5 +730,48 @@ bool Plugin::SetParameter(int numparam,int value)
 				delete[] pData;
 			}
 		};
+
+void Proxy::Init() throw()
+{ assert((*this)()); plugin().Init(); }
+CMachineInterface & Proxy::plugin() throw() { return *plugin_; }
+void Proxy::SequencerTick() throw() { plugin().SequencerTick(); }
+void Proxy::ParameterTweak(int par, int val) throw()
+{ assert((*this)()); plugin().ParameterTweak(par, val);  }
+Plugin & Proxy::host() throw() { return host_; }
+const Plugin & Proxy::host() const throw() { return host_; }
+
+void Proxy::callback() throw()
+		{ assert((*this)()); plugin().pCB = host().GetCallback(); }
+
+const bool Proxy::operator()() const throw() { return !!plugin_; }
+void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
+{
+	zapObject(this->plugin_,plugin);
+		//if((*this)())
+		if(plugin) {
+				callback();
+				//Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
+		}
+}
+
+void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw()
+{ assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }
+void Proxy::StopWave() throw()
+{ assert((*this)());plugin().StopWave(); }
+void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw()
+{ assert((*this)()); fflush(stdout); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
+int * Proxy::Vals() throw()
+{ assert((*this)()); return plugin().Vals; }
+void Proxy::Stop() throw()
+{ assert((*this)()); plugin().Stop();  }
+bool Proxy::DescribeValue(char * txt, const int param, const int value) throw()
+{ assert((*this)()); return plugin().DescribeValue(txt, param, value); }
+void Proxy::PutData(void * pData) throw()
+{ assert((*this)()); plugin().PutData(pData);  }
+void Proxy::GetData(void * pData) throw()
+{ assert((*this)()); plugin().GetData(pData); }
+int Proxy::GetDataSize() throw()
+{ assert((*this)()); return plugin().GetDataSize(); }
+
 }
 }

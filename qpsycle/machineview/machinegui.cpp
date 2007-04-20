@@ -24,6 +24,7 @@
 #include "psycore/machine.h"
 #include "psycore/song.h"
 #include "psycore/constants.h"
+#include "psycore/configuration.h"
 
 #include "machinegui.h"
 #include "machineview.h"

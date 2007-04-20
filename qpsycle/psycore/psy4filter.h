@@ -21,10 +21,8 @@
 #define PSY4FILTER_H
 
 #include "psy3filter.h"
-//#include <ngrs/xmlparser.h>
-#include <iostream>
 #include <fstream>
-#include <sstream>
+#include <map>
 
 /**
 @author  Stefan Nattkemper
@@ -32,6 +30,9 @@
 
 namespace psy {
 	namespace core {
+
+    class SinglePattern;
+    class Machine;
 
 		class Psy4Filter : public Psy3Filter
 		{

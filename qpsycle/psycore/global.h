@@ -20,9 +20,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <iostream>
-#include "configuration.h"
-
 namespace psy {
 	namespace core {
 

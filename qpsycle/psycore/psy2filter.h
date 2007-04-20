@@ -32,6 +32,11 @@ namespace psy
 	{
 
 		class RiffFile;
+    class PatternCategory;
+    class SequenceLine;
+    class Machine;
+    class PatternEvent;
+
 		#ifdef __unix__
 		namespace convert_internal_machines
 		{

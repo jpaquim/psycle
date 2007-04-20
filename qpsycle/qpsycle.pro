@@ -122,6 +122,7 @@ SOURCES += mainwindow.cpp \
            psycore/abstractmachinefactory.cpp \
            audiodrivers/audiodriver.cpp \
            psycore/binread.cpp \
+           psycore/convert_internal_machines.cpp \
            psycore/configuration.cpp \
            psycore/datacompression.cpp \
            psycore/dither.cpp \

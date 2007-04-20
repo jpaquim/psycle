@@ -6,6 +6,8 @@
 #include "datacompression.h"
 #include "filter.h"
 #include "cstdint.h"
+#include "fileio.h"
+#include "constants.h"
 #include <sstream>
 #include <iostream>
 #include <iomanip>

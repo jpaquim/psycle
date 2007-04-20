@@ -21,8 +21,8 @@
 #include "ladspamachine.h"
 #include "plugin.h"
 
-#include "psycore/file.h"
-//#include "configuration.h"
+#include "file.h"
+#include "configuration.h"
 //#include "global.h"
 
 namespace psy

@@ -20,13 +20,14 @@
 #ifndef PATTERNVIEW_H
 #define PATTERNVIEW_H
 
+class QVBoxLayout;
+#include <QWidget>
+
+
 namespace psy { namespace core {
 class Song;
 class SinglePattern;
 }}
-
-#include <QVBoxLayout>
-#include <QWidget>
 
 class QToolBar;
 class QComboBox;
