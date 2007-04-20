@@ -98,7 +98,8 @@ HEADERS += mainwindow.h \
            sequencer/beatruler.h \
            waveview/waveview.h \
            psycore/helpers/scale.hpp \
-           psycore/helpers/math/pi.hpp
+           psycore/helpers/math/pi.hpp \
+           psycore/helpers/xml.h
 SOURCES += mainwindow.cpp \
            patternbox.cpp \
            qpsycle.cpp \
@@ -164,7 +165,8 @@ SOURCES += mainwindow.cpp \
            sequencer/sequencerline.cpp \
            sequencer/sequencerview.cpp \
            sequencer/beatruler.cpp \
-           waveview/waveview.cpp
+           waveview/waveview.cpp \
+           psycore/helpers/xml.cpp
 
 RESOURCES += qpsycle.qrc
 
