@@ -25,6 +25,7 @@
 #include "zipreader.h"
 #include "internal_machines.h"
 #include "song.h"
+#include "helpers/xml.h"
 
 #include <QFile>
 #include <QDomDocument>

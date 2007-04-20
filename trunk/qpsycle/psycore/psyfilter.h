@@ -46,19 +46,6 @@ namespace psy
 //			sigslot::signal2<const std::string &, const std::string &> report;
 //			sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
 
-			// helper function for xml writing
-
-			// replaces entitys`s for xml writing
-			// There are 5 predefined entity references in XML:
-			// &lt; 	< 	less than 
-			// &gt; 	> 	greater than
-			// &amp; 	& 	ampersand 
-			// &apos; 	' 	apostrophe
-			// &quot; 	" 	quotation mark
-			// Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true replaces all.
-			static std::string replaceIllegalXmlChr( const std::string & text, bool strict = true );
-
-
 		protected:
 
 			virtual int version() const;
