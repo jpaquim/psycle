@@ -1,7 +1,6 @@
 ///\file
 ///\brief implementation file for psy::core::Machine
 #include "machine.h"
-#include "player.h"
 #include "song.h"
 #include "dsp.h"
 //#include "configuration.h"
@@ -889,6 +888,7 @@ int WorkEvent::track( ) const
 
 int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 {
+  assert(numsamples >= 0);
 	//std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
 	workEvents.clear();
 	return 0;
@@ -896,13 +896,15 @@ int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 
 int Machine::GenerateAudio( int numsamples )
 {
-	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+  assert(numsamples >= 0);
+	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 	//position [0.0-1.0] inside the current beat.
 	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 	//position [0.0-linesperbeat] converted to "Tick()" lines
-	const double positionInLines = positionInBeat*Player::Instance()->timeInfo().linesPerBeat();
+	const double positionInLines = positionInBeat*timeInfo.linesPerBeat();
 	//position in samples of the next "Tick()" Line
 	int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow() );
+  assert(nextLineInSamples >= 0);
 	//Next event, initialized to "out of scope".
 	int nextevent = numsamples+1;
 	int previousline = nextLineInSamples;
@@ -913,6 +915,7 @@ int Machine::GenerateAudio( int numsamples )
 	{
 		WorkEvent & workEvent = workEvents.front();
 		nextevent = static_cast<int>( workEvent.beatOffset() * timeInfo.samplesPerBeat() );
+    assert(nextevent >= 0);
 		// correcting rounding errors.
 		if ( nextevent == nextLineInSamples+1 ) nextLineInSamples = nextevent;
 	}
@@ -942,18 +945,23 @@ int Machine::GenerateAudio( int numsamples )
 					WorkEvent & workEvent1 = *workEvents.begin();
 				//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
 					nextevent = static_cast<int>( workEvent1.beatOffset() * timeInfo.samplesPerBeat() );
+          assert(nextevent >= processedsamples);
 				} else nextevent = numsamples+1;
 			} else nextevent = numsamples+1;
-		} 
+		}
+    assert(nextLineInSamples >= processedsamples);
+    assert(nextevent >= processedsamples);
 
 		//minimum between remaining samples, next "Tick()" and next event
 		samplestoprocess= std::min(numsamples,std::min(nextLineInSamples,nextevent))-processedsamples;
 //		samplestoprocess= std::min(numsamples,nextevent)-processedsamples;
-
+    assert(samplestoprocess >= 0);
+           /*
 		if ( (processedsamples !=0 && processedsamples+ samplestoprocess != numsamples) || samplestoprocess <= 0)
 		{
 			std::cout << "GenerateAudio:" << processedsamples << "-" << samplestoprocess << "-" << nextLineInSamples << "(" << previousline << ")" << "-" << nextevent << std::endl;
 		}
+           */
 		GenerateAudioInTicks( processedsamples, samplestoprocess );
 	}
 	// reallocate events remaining in the buffer, This happens when soundcard buffer is bigger than STREAM_SIZE (machine buffer).
