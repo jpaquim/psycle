@@ -40,7 +40,7 @@ namespace psy
 
 			virtual ~PsyFilter();
 
-			bool loadSong(const std::string & fileName, Song & song);
+			bool loadSong(const std::string & fileName, Song & song, MachineCallbacks* callbacks);
 			bool saveSong(const std::string & fileName, Song & song, int version);
 
 			//signals

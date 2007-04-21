@@ -18,8 +18,6 @@
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
 #include "song.h"
-#include "player.h"
-#include "machine.h" // for machine callbacks
 #include "psyfilter.h"
 
 #include "psy2filter.h"
@@ -74,14 +72,14 @@ namespace psy
 			return 0;
 		}
 
-		bool PsyFilter::loadSong( const std::string & fileName, Song & song )
+		bool PsyFilter::loadSong( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
 		{
 			if ( fileIsReadable( fileName ) ) {
 				std::vector<PsyFilter*>::iterator it = filters.begin();
 				for (  ; it < filters.end(); it++) {
 					PsyFilter* filter = *it;
 					if ( filter->testFormat(fileName) ) {
-						return filter->load(fileName,song, Player::Instance() );
+						return filter->load(fileName,song, callbacks);
 						break;
 					}
 				}
