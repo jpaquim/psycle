@@ -152,10 +152,14 @@ void MainWindow::setupSignals()
              this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 }
 
- void MainWindow::newSong()
- {
+void MainWindow::onNewSongRequest()
+{
+    // Check if need to save old song...
+    // ...
 
- }
+    psy::core::Song *blankSong = createBlankSong();
+    loadSong( blankSong );
+}
 
 void MainWindow::open()
 {
@@ -163,47 +167,59 @@ void MainWindow::open()
     QString fileName = QFileDialog::getOpenFileName( 
                             this, "Open Song", songPath, "Psy (*.psy)" );
 
-    if ( fileName.toStdString() != "" ) {
-        // stop player
+    if ( !fileName.isEmpty() ) {
         psy::core::Player::Instance()->stop();
-        // disable audio driver
-        //Global::configuration()._pOutputDriver->Enable(false);
-        // add a new Song tab
-        // load the song
-        song_ = new psy::core::Song(psy::core::Player::Instance());
-        song_->load( fileName.toStdString() );
-
-        // update gui to new song FIXME: very crappy way of doing it for now.
-        delete patternBox_;
-        delete macView_;
-        delete patView_;
-        delete wavView_;
-        delete seqView_;
-
-        psy::core::Player::Instance()->song( song_ );
-
-        macView_ = new MachineView( song_ );
-        patView_ = new PatternView( song_ );
-        wavView_ = new WaveView( song_ );
-        seqView_ = new SequencerView( song_ );
-        views_->addTab( macView_, "Machine View" );
-        views_->addTab( patView_, "Pattern View" );
-        views_->addTab( wavView_, "Wave Editor" );
-        views_->addTab( seqView_, "Sequencer View" );
-        patternBox_ = new PatternBox( song_ );
-        dock_->setWidget( patternBox_ );
-        patternBox_->populatePatternTree();
-        patView_->setPattern(patternBox_->currentPattern());
-        populateMachineCombo();
-        initSampleCombo();
-        patternBox_->patternTree()->setFocus();
-        setupSignals();
-        // enable audio driver
-        //Global::configuration()._pOutputDriver->Enable(true);
-        // update file recent open sub menu
-        //recentFileMenu_->add(new ngrs::MenuItem(fileName));
+        psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
+        song->load( fileName.toStdString() );
+        loadSong( song );
     }
 
+}
+
+psy::core::Song *MainWindow::createBlankSong() 
+{
+    psy::core::Song *blankSong = new psy::core::Song( psy::core::Player::Instance() );
+    psy::core::PatternCategory* category0 = blankSong->patternSequence()->patternData()->createNewCategory("Category0");
+    psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
+
+    psy::core::SequenceLine *seqLine = blankSong->patternSequence()->createNewLine();
+	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
+
+    return blankSong;
+}
+
+void MainWindow::loadSong( psy::core::Song *song )
+{
+    song_ = song;
+    // update gui to new song FIXME: very crappy way of doing it for now.
+    delete patternBox_;
+    delete macView_;
+    delete patView_;
+    delete wavView_;
+    delete seqView_;
+
+    psy::core::Player::Instance()->song( song_ );
+
+    macView_ = new MachineView( song_ );
+    patView_ = new PatternView( song_ );
+    wavView_ = new WaveView( song_ );
+    seqView_ = new SequencerView( song_ );
+    views_->addTab( macView_, "Machine View" );
+    views_->addTab( patView_, "Pattern View" );
+    views_->addTab( wavView_, "Wave Editor" );
+    views_->addTab( seqView_, "Sequencer View" );
+    patternBox_ = new PatternBox( song_ );
+    dock_->setWidget( patternBox_ );
+    patternBox_->populatePatternTree();
+    patView_->setPattern(patternBox_->currentPattern());
+    populateMachineCombo();
+    initSampleCombo();
+    patternBox_->patternTree()->setFocus();
+    setupSignals();
+    // enable audio driver
+    //Global::configuration()._pOutputDriver->Enable(true);
+    // update file recent open sub menu
+    //recentFileMenu_->add(new ngrs::MenuItem(fileName));
 }
 
  void MainWindow::save()
@@ -215,8 +231,6 @@ void MainWindow::open()
      if (fileName.isEmpty())
          return;
 
-    qDebug("saving");
-    std::cout << "filename is " << fileName.toStdString() << std::endl;
     song_->save( fileName.toStdString() );
  }
 
@@ -239,7 +253,7 @@ void MainWindow::open()
      newAct = new QAction(QIcon(":/images/new.png"), tr("&New Song"), this);
      newAct->setShortcut(tr("Ctrl+N"));
      newAct->setStatusTip(tr("Create a new song"));
-     connect(newAct, SIGNAL(triggered()), this, SLOT(newSong()));
+     connect( newAct, SIGNAL( triggered() ), this, SLOT( onNewSongRequest() ) );
 
      openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
      openAct->setShortcut(tr("Ctrl+O"));

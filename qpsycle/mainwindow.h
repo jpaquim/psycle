@@ -54,7 +54,7 @@ protected:
     void timerEvent( QTimerEvent *ev );
 
 private slots:
-    void newSong();
+    void onNewSongRequest();
     void open();
     void save();
     void undo();
@@ -81,6 +81,9 @@ private slots:
     void setupSong();
     void setupGui();
     void setupSignals();
+
+    psy::core::Song *createBlankSong();
+    void loadSong( psy::core::Song *song );
 
     void populateMachineCombo();
     void initSampleCombo();
