@@ -131,7 +131,6 @@ namespace psy {
 
 		bool Psy4Filter::load( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
 		{
-            qDebug( " but here we are" );
 			patMap.clear();
 
 			song.patternSequence()->patternData()->removeAll();
