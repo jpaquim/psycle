@@ -41,37 +41,22 @@
 		If the psycledelics community ever decides to use a licence, it will surely be some Free/Libre Software License, like for example the GNU Public Licence, which would strengthen its freedom.
 		<part caption='Binary raw packages'>
 			The builds here are distributed as raw archives (no installer). They contain the psycle application, all the open source native plugins, and the documentation.
-			<part caption='Latest Unstable Alpha' anchor='mfc-unstable'>
+			<!--part caption='Latest Unstable Alpha' anchor='mfc-unstable'>
 				<a href='./packages/microsoft/psycle.mfc.bin.zip'/>
-				(
-					<i>
-						updated on <!-- date bin.mfc --> UTC 2006 March 20 Monday 04:20:10
-					</i>
-				)
 				<br/>
 				The very latest build. This might be unstable ; use at your own risk ; you may very well trash your tune! ( It already happened to several people, so sure it will happen again. )
 				<br/>
 				This is built from the <code>trunk</code> directory of the subversion repository.
 				<br/>
 				<b>Note:</b> This might be compiled with SSE2 instructions of the x86 CPUs ; only recent CPUs have SSE2 support.
-			</part>
+			</part-->
 			<!--part caption='Candidate Release' anchor='mfc-release-candidate'>
-				(
-					<i>
-						updated on [!__ date bin.mfc.release-candidate __] UTC 2005 July 11 Monday 11:27:14
-					</i>
-				)
 				<br/>
 				This is built from the <code>tags/psycle-1.10.0-release-candidate</code> directory of the subversion repository.
 				It is an official candidate release, which means it's nearly stable.
 			</part-->
 			<part caption='Stable Release 1.8 with bugfixes' anchor='mfc-stable'>
 				<a href='./packages/microsoft/psycle.mfc.bin.release_1_8_bugfixes.tar.gz'/>
-				(
-					<i>
-						updated on <!-- date bin.mfc.stable --> UTC 2005 November 05 Saturday 16:01:13
-					</i>
-				)
 				<br/>
 				This is built from the <code>tags/psycle-1.8.2-stable</code> directory in the subversion repository, tagged from the branch directory <code>branches/psycle-1.8-bugfixes</code>.
 			</part>
@@ -86,30 +71,31 @@
 		The sources are distributed under the <a href='http://fsf.org/licenses/gpl.html'>GNU General Public Licence</a>.
 		<br/>
 		These are <b>work in progress</b>, so do not expect to be able to write songs with these now.
-		<part caption='psycle xi'>
-			Psycle xi runs on both unix-based systems and mswindows.
-			This is the successor of the microsoft-only psycle 1.9, and it adds new features, like an advanced sequencer, that did not exist in psycle 1.9.
+		<part caption='qpsycle'>
+			qpsycle runs on unix-based systems.
 			<br/>
-			Psycle xi is also known as xpsycle. 
+			This version adds new features, like an advanced sequencer, that did not exist in psycle 1.9.
+			<br/>
+			qpsycle may run on mswindows too. Although it is currently not a priority to support this operating system. 
 			<br/>
 			Please read the <a href='./wiki/'>wiki</a> for further information.
 		</part>
-		<part caption='freepsycle'>
+		<!--part caption='freepsycle'>
 			Please read the <a href='./wiki/'>wiki</a>.
-		</part>
+		</part-->
 	</part>
 	<part caption='Sources' anchor='sources'>
 		<part caption='Downloading the sources'>
 			To checkout the head of <code>trunk</code> (main branch) of the subversion repository, issue the following command:
 			<div class='indented'>
 				<code>
-					svn checkout https://svn.sourceforge.net/svnroot/psycle/trunk
+					svn checkout https://psycle.svn.sourceforge.net/svnroot/psycle/trunk psycle-trunk
 				</code>
 			</div>
 			Later, to update your local copy, you can just do:
 			<div class='indented'>
 				<code>
-					cd trunk
+					cd psycle-trunk
 					<br/>
 					svn update
 				</code>
@@ -117,7 +103,7 @@
 			Tip:
 			<div class='indented'>
 				You can retrieve a particular revision by checking out the url:
-				<code>https://svn.sourceforge.net/svnroot/psycle/tags/psycle-x.y.z-stable</code>
+				<code>https://psycle.svn.sourceforge.net/svnroot/psycle/tags/psycle-x.y.z-stable</code>
 				<br/>
 				Remember that if you do so, <code>svn update</code> will likely not give you any more changes, apart maybe bugfixes,
 				since stable versions are mostly frozen.
