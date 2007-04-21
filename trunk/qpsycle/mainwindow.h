@@ -74,6 +74,10 @@ private slots:
     void onMachineDeleted( int macIndex );
     void onMachineRenamed();
 
+    void playFromStart();
+    void playFromSeqPos();
+    void playStop();
+
  private:
     psy::core::Song *song_;
 
@@ -115,10 +119,10 @@ private slots:
      QAction *redoAct;
      QAction *aboutAct;
      QAction *quitAct;
-     QAction *playStartAct;
-     QAction *playAct;
+     QAction *playFromStartAct;
+     QAction *playFromSeqPosAct;
      QAction *playPatAct;
-     QAction *stopAct;
+     QAction *playStopAct;
 
      QAction *togglePatBox_;
 
