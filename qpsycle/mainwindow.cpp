@@ -246,6 +246,7 @@ void MainWindow::loadSong( psy::core::Song *song )
     populateMachineCombo();
     initSampleCombo();
     patternBox_->patternTree()->setFocus();
+    createActions();
     setupSignals();
     // enable audio driver
     //Global::configuration()._pOutputDriver->Enable(true);
@@ -315,10 +316,13 @@ void MainWindow::loadSong( psy::core::Song *song )
      aboutAct->setStatusTip(tr("About qpsycle"));
      connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-     playStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
-     playAct = new QAction(QIcon(":/images/play.png"), tr("Play from &edit position"), this);
-     playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
-     stopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
+     playFromStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
+     connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
+     playFromSeqPosAct = new QAction(QIcon(":/images/play.png"), tr("Play from &sequencer position"), this);
+     connect( playFromSeqPosAct, SIGNAL( triggered() ), this, SLOT( playFromSeqPos() ) );
+     playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
+     connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
+//     playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
 
  }
 
@@ -358,10 +362,10 @@ void MainWindow::loadSong( psy::core::Song *song )
      editToolBar->addAction(redoAct);
 
      playToolBar = addToolBar(tr("Play"));
-     playToolBar->addAction(playStartAct);
-     playToolBar->addAction(playAct);
-     playToolBar->addAction(playPatAct);
-     playToolBar->addAction(stopAct);
+     playToolBar->addAction(playFromStartAct);
+     playToolBar->addAction(playFromSeqPosAct);
+//     playToolBar->addAction(playPatAct);
+     playToolBar->addAction(playStopAct);
 
      machToolBar = addToolBar(tr("Machines"));
      macCombo_ = new QComboBox();
@@ -428,14 +432,13 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
         break;
         // Play controls.
         case psy::core::cdefPlayStart:
-            psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
-            psy::core::Player::Instance()->start( 0.0 );
+            playFromStartAct->trigger();
         break;
         case psy::core::cdefPlayFromPos:
-            psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
+            playFromSeqPosAct->trigger();
         break;
         case psy::core::cdefPlayStop:
-            psy::core::Player::Instance()->stop();
+            playStopAct->trigger();
         break;
         case psy::core::cdefLoopEntry:
         {
@@ -639,3 +642,18 @@ void MainWindow::onMachineRenamed()
     populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
 }
 
+void MainWindow::playFromStart()
+{
+    psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
+    psy::core::Player::Instance()->start( 0.0 );
+}
+
+void MainWindow::playFromSeqPos()
+{
+    psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
+}
+
+void MainWindow::playStop()
+{
+    psy::core::Player::Instance()->stop();
+}
