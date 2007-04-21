@@ -18,6 +18,7 @@
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
 #include "playertimeinfo.h"
+#include <cassert>
 
 /// class for play time informations
 
@@ -25,17 +26,17 @@ namespace psy
 {
 	namespace core
 	{
-
-
 		PlayerTimeInfo::PlayerTimeInfo( )
 			: playBeatPos_(0.0),
 				samplePos_(0),
 				lpb_(4),
 				bpm_(125.0),
 				sampleRate_(44100),
-				samplesPerBeat_((44100*60/125)),
-				samplesPerRow_((44100*60)/(125*4))			
+				samplesPerBeat_(0),
+				samplesPerRow_(0)
 		{
+      recalcSPB();
+      recalcSPR();
 		}
 
 		PlayerTimeInfo::~ PlayerTimeInfo( )		
@@ -44,6 +45,7 @@ namespace psy
 
 		void PlayerTimeInfo::setPlayBeatPos( double pos )
 		{
+      assert(pos >= 0);
 			playBeatPos_ = pos;
 		}
 
@@ -54,6 +56,7 @@ namespace psy
 
 		void PlayerTimeInfo::setSamplePos( int pos )
 		{
+      assert(pos >= 0);
 			samplePos_ = pos;
 		}
 
@@ -64,6 +67,7 @@ namespace psy
 
 		void PlayerTimeInfo::setLinesPerBeat( int lines )
 		{
+      assert(lines > 0);
 			lpb_ = lines;
 			recalcSPR();
 		}
@@ -75,6 +79,7 @@ namespace psy
 
 		void PlayerTimeInfo::setBpm( double bpm )
 		{
+      assert(bpm > 0);
 			bpm_ = bpm;
 			recalcSPB();
 			recalcSPR();
@@ -87,6 +92,7 @@ namespace psy
 
 		void PlayerTimeInfo::setSampleRate( int rate )
 		{
+      assert(rate > 0);
 			sampleRate_ = rate;
 			recalcSPB();
 			recalcSPR();
@@ -110,11 +116,13 @@ namespace psy
 		void PlayerTimeInfo::recalcSPB( )
 		{
 			samplesPerBeat_ = (sampleRate_*60) / bpm_;
+      assert(samplesPerBeat_ > 0);
 		}
 
 		void PlayerTimeInfo::recalcSPR( )
 		{
 			samplesPerRow_ = (sampleRate_*60)/(bpm_ * lpb_);
+      assert(samplesPerRow_ > 0);
 		}
 
 	} // end of hostnamespace

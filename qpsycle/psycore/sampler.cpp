@@ -61,6 +61,7 @@ namespace psy
 
 		int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 		{
+      assert(numSamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 //			PSYCLE__CPU_COST__INIT(cost);
 			if (!_mute)
@@ -199,6 +200,7 @@ namespace psy
 
 		void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 		{
+      assert(numsamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
