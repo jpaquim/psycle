@@ -82,6 +82,7 @@ private slots:
     void setupGui();
     void setupSignals();
 
+    bool songHasChanged();
     psy::core::Song *createBlankSong();
     void loadSong( psy::core::Song *song );
 
