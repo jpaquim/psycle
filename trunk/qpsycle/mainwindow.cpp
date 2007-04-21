@@ -169,17 +169,27 @@ void MainWindow::onNewSongRequest()
 
 void MainWindow::open()
 {
-    QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
-    QString fileName = QFileDialog::getOpenFileName( 
-                            this, "Open Song", songPath, "Psy (*.psy)" );
+    int response = QMessageBox::warning( this, "Save changes?",
+                   "The song has been modified.\n Do you want to save your changes?",
+                   QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+                   QMessageBox::Save ) ;
 
-    if ( !fileName.isEmpty() ) {
-        psy::core::Player::Instance()->stop();
-        psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
-        song->load( fileName.toStdString() );
-        loadSong( song );
+    if ( response == QMessageBox::Save ) {
+        save();
     }
 
+    if ( response == QMessageBox::Save || response == QMessageBox::Discard ) {
+        QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
+        QString fileName = QFileDialog::getOpenFileName( 
+                                this, "Open Song", songPath, "Psy (*.psy)" );
+
+        if ( !fileName.isEmpty() ) {
+            psy::core::Player::Instance()->stop();
+            psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
+            song->load( fileName.toStdString() );
+            loadSong( song );
+        }
+    }
 }
 
 psy::core::Song *MainWindow::createBlankSong() 
