@@ -738,7 +738,7 @@ namespace psy
 		bool Song::load(const std::string & fileName)
 		{
 			PsyFilter filter;
-			return filter.loadSong(fileName, *this);
+			return filter.loadSong(fileName, *this, machinecallbacks);
 		}
 
 		bool Song::save(const std::string & fileName)
