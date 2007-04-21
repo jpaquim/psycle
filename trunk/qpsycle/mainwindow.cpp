@@ -154,42 +154,57 @@ void MainWindow::setupSignals()
 
 void MainWindow::onNewSongRequest()
 {
-    int response = QMessageBox::warning( this, "Save changes?",
-                   "The song has been modified.\n Do you want to save your changes?",
-                   QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-                   QMessageBox::Save ) ;
+    if ( songHasChanged() )
+    {
+        int response = QMessageBox::warning( this, "Save changes?",
+                       "The song has been modified.\n Do you want to save your changes?",
+                       QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+                       QMessageBox::Save ) ;
 
-    if ( response == QMessageBox::Save ) {
-        save();
-    } else if ( response == QMessageBox::Discard ) {
-        psy::core::Song *blankSong = createBlankSong();
-        loadSong( blankSong );
+        if ( response == QMessageBox::Save ) {
+            save();
+        }
+
+        if ( response == QMessageBox::Cancel ) {
+            return;
+        }
     }
+
+    psy::core::Song *blankSong = createBlankSong();
+    loadSong( blankSong );
 }
 
 void MainWindow::open()
 {
-    int response = QMessageBox::warning( this, "Save changes?",
-                   "The song has been modified.\n Do you want to save your changes?",
-                   QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-                   QMessageBox::Save ) ;
+    if ( songHasChanged() )
+    {
+        int response = QMessageBox::warning( this, "Save changes?",
+                       "The song has been modified.\n Do you want to save your changes?",
+                       QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+                       QMessageBox::Save ) ;
 
-    if ( response == QMessageBox::Save ) {
-        save();
-    }
+        if ( response == QMessageBox::Save ) {
+            save();
+        }
 
-    if ( response == QMessageBox::Save || response == QMessageBox::Discard ) {
-        QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
-        QString fileName = QFileDialog::getOpenFileName( 
-                                this, "Open Song", songPath, "Psy (*.psy)" );
-
-        if ( !fileName.isEmpty() ) {
-            psy::core::Player::Instance()->stop();
-            psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
-            song->load( fileName.toStdString() );
-            loadSong( song );
+        if ( response == QMessageBox::Cancel ) {
+            return;
         }
     }
+
+    QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
+    QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psy (*.psy)" );
+
+    if ( !fileName.isEmpty() ) {
+        psy::core::Player::Instance()->stop();
+        psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
+        song->load( fileName.toStdString() );
+        loadSong( song );
+    }
+}
+
+bool MainWindow::songHasChanged() {
+    return true; // FIXME
 }
 
 psy::core::Song *MainWindow::createBlankSong() 
