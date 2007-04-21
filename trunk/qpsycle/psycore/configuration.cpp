@@ -477,8 +477,8 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefShowSequencerView, Key( modifiers, Qt::Key_F5 ) );
 
             /** Play control commands. **/
-			inputHandler_.changeKeyCode( cdefPlayStart, Key( Qt::NoModifier, Qt::Key_Space ) );
 			inputHandler_.changeKeyCode( cdefPlayFromPos, Key( Qt::NoModifier, Qt::Key_F6 ) );
+			inputHandler_.changeKeyCode( cdefPlayStart, Key( Qt::ShiftModifier, Qt::Key_F6 ) );
 			inputHandler_.changeKeyCode( cdefLoopEntry, Key( Qt::NoModifier, Qt::Key_F7 ) );
 			inputHandler_.changeKeyCode( cdefPlayStop, Key( Qt::NoModifier, Qt::Key_F8 ) );
 
