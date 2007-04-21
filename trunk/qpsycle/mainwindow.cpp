@@ -154,11 +154,17 @@ void MainWindow::setupSignals()
 
 void MainWindow::onNewSongRequest()
 {
-    // Check if need to save old song...
-    // ...
+    int response = QMessageBox::warning( this, "Save changes?",
+                   "The song has been modified.\n Do you want to save your changes?",
+                   QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+                   QMessageBox::Save ) ;
 
-    psy::core::Song *blankSong = createBlankSong();
-    loadSong( blankSong );
+    if ( response == QMessageBox::Save ) {
+        save();
+    } else if ( response == QMessageBox::Discard ) {
+        psy::core::Song *blankSong = createBlankSong();
+        loadSong( blankSong );
+    }
 }
 
 void MainWindow::open()

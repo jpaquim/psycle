@@ -33,7 +33,7 @@ namespace psy {
 		///\{
 		/// shift
 		const int MOD_S = 1<<0;
-		/// control
+		// control
 		const int MOD_C = 1<<1;
 		/// extended (???)
 		const int MOD_E = 1<<2;
