@@ -1,9 +1,32 @@
 HACKING ON QPSYCLE
-------------------
+==================
 
-These are some guidelines to bear in mind when coding
+These are some tips & guidelines to bear in mind when coding
 in qpsycle.
 
+
+Getting started
+---------------
+
+A good way to get started is to build and compile the
+program then spend some time playing around with it,
+trying to build a song, and making a note of any bugs
+and omissions that you notice.  Then, add 
+those to the bug tracker.  Then have a look at the 
+code and see if you think you can resolve any of them
+(or anything else on the bug tracker, for that matter :)
+
+Hopefully in future we may some more useful documents
+and diagrams to give an overview of the system.
+
+
+Avoiding duplication of work
+----------------------------
+
+Before you start working on something, it is a good
+idea to check the bug tracker to see whether someone
+else has already started working on that task.  This can help
+to avoid two people duplicating each others' work.
 
 
 include files
@@ -30,6 +53,9 @@ boost::signals and Qt.
 Adding yourself as an author
 ----------------------------
 
-If you add some code to qpsycle, please add your name to
-the AUTHORS file with a note of what you added.  Don't
-put your name in the actual code file.
+If you add some code to qpsycle, please feel free to add your 
+name to the AUTHORS file with a note of what you added.  Don't
+put your name in the actual code file; noone owns a particular
+piece of code, and it can sometimes put other potentional developers 
+off working on something if they think it "belongs" to someone else.
+
