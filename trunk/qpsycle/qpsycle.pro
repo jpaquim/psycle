@@ -203,6 +203,7 @@ unix {
     }
     LIBS += -lboost_signals
     # FIXME: not sure how to test for netaudio...
+    LIBS += -laudio
     HEADERS += audiodrivers/netaudioout.h \
            audiodrivers/wavefileout.h 
     SOURCES += audiodrivers/netaudioout.cpp \
