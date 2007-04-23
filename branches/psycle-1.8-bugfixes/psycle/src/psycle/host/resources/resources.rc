@@ -1230,14 +1230,14 @@ BEGIN
     CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
                     TVS_TRACKSELECT | WS_BORDER | WS_TABSTOP,7,13,187,261
-    GROUPBOX        "Machine Properties",IDC_STATIC,201,7,182,112
+    GROUPBOX        "Machine Properties",IDC_STATIC,201,7,182,125
     LTEXT           "Name",IDC_STATIC,223,19,20,8
     LTEXT           "",IDC_NAMELABEL,246,18,125,12,SS_SUNKEN
-    LTEXT           "Description",IDC_STATIC,206,34,35,8
+    LTEXT           "Description",IDC_STATIC,208,34,35,8
     LTEXT           "",IDC_DESCLABEL,246,30,125,19,SS_SUNKEN
-    LTEXT           "Dll Name",IDC_STATIC,212,54,30,8
+    LTEXT           "DllName",IDC_STATIC,217,54,26,8
     LTEXT           "",IDC_DLLNAMELABEL,246,49,125,21,SS_SUNKEN
-    LTEXT           "API Version",IDC_STATIC,206,71,38,8
+    LTEXT           "Version",IDC_STATIC,219,71,24,8
     LTEXT           "",IDC_VERSIONLABEL,246,70,125,12,SS_SUNKEN
     GROUPBOX        "List Machines by",IDC_STATIC,201,136,182,47
     CONTROL         "Library Name (Dll)",IDC_SHOWDLLNAME,"Button",
@@ -1255,7 +1255,9 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,297,280,86,16
     CONTROL         "Popup Warning if this plugin tries to load",
                     IDC_CHECK_ALLOW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    216,90,154,18
+                    216,99,154,17
+    LTEXT           "API Version",IDC_STATIC,205,84,38,8
+    LTEXT           "",IDC_APIVERSIONLABEL,246,83,125,12,SS_SUNKEN
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 323

@@ -985,9 +985,9 @@ NAMESPACE__BEGIN(psycle)
 								MessageBox("Cannot show the wire dialog. Too many of them opened!","Error!", MB_ICONERROR);
 							}
 						}
-						wiresource = -1;
 						// if no connection then Show new machine dialog
-						NewMachine(point.x,point.y);
+						else NewMachine(point.x,point.y);
+						wiresource = -1;
 		//				Repaint();
 					}
 				

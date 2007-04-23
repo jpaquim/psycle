@@ -622,6 +622,7 @@ namespace seib {
 			, bEditOpen(false)
 			, bNeedIdle(false)
 			, bWantMidi(false)
+			, iShellUniqueID(0)
 		{
 			Load(loadstruct);
 		}
@@ -676,9 +677,24 @@ namespace seib {
 			// I am unsure what other hosts use for resvd1 and resvd2
 			aEffect->resvd1 = ToVstPtr(this);
 
-			SetSampleRate(CVSTHost::pHost->GetSampleRate()); /* adjust its sample rate            */
-			SetBlockSize(CVSTHost::pHost->GetBlockSize());
-			Open();                     /* open the effect                   */
+			if ( GetPlugCategory() != kPlugCategShell )
+			{
+				SetSampleRate(CVSTHost::pHost->GetSampleRate()); /* adjust its sample rate            */
+				SetBlockSize(CVSTHost::pHost->GetBlockSize());
+				Open();                     /* open the effect                   */
+				// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
+				WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents) == 1);
+				MainsChanged(true);                   /* then force resume.                */
+				MainsChanged(false);                  /* suspend again...                  */
+				SetBlockSize(CVSTHost::pHost->GetBlockSize());   /* and block size                    */
+				MainsChanged(true);                   /* then force resume.                */
+
+			}
+			else
+			{
+				int i= 1;
+			}
+			
 			//6 :        Host to Plug, canDo ( bypass )   returned : 0
 			//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
 
@@ -834,8 +850,8 @@ namespace seib {
 			vstTimeInfo.samplesToNextClock = 0;
 			vstTimeInfo.flags = 0;
 
-			loadingShellId = 0;
 			loadingEffect = false;
+			loadingShellId = 0;
 			pHost = this;                           /* install this instance as the one  */
 		}
 
@@ -888,9 +904,12 @@ namespace seib {
 				loadstruct.pluginloader = loader;
 				CEffect*neweffect = CreateEffect(loadstruct);
 				loadingEffect=false;
+				loadingShellId=0;
 				return neweffect;
 			}
 			delete loader;
+			loadingEffect=false;
+			loadingShellId=0;
 			std::ostringstream s; s
 				<< "VST main call returned a null/wrong AEffect: " << sName << std::endl;
 			throw psycle::host::exceptions::library_errors::loading_error(s.str());
@@ -905,7 +924,7 @@ namespace seib {
 		{
 			// Either your player/sequencer or your overloaded member should update the following ones.
 			// They shouldn't need any calculations appart from your usual work procedures.
-			//sampleRate			(Via the SetSampeRate() function )
+			//sampleRate			(Via SetSampeRate() function )
 			//samplePos
 			//tempo
 			//cyclestart			// locator positions in quarter notes.
@@ -924,7 +943,7 @@ namespace seib {
 				//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
 				if(lMask & kVstBarsValid)
 				{
-					vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* (int)vstTimeInfo.ppqPos / (int)vstTimeInfo.timeSigDenominator;
+					vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* ((int)vstTimeInfo.ppqPos / (int)vstTimeInfo.timeSigDenominator);
 					vstTimeInfo.flags |= kVstBarsValid;
 				}
 				//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
@@ -938,7 +957,7 @@ namespace seib {
 //					const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1);								// Quantize ppqpos
 //					const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
 //					vstTimeInfo.samplestoNextClock = sampleclockpos - ppqclockpos;									// get the difference.
-					vstTimeInfo.flags |= kVstBarsValid;
+					vstTimeInfo.flags |= kVstClockValid;
 				}
 			}
 			//smpteOffset
@@ -967,17 +986,53 @@ namespace seib {
 			#endif
 			}
 		}
+		/*****************************************************************************/
+		/* GetPreviousPlugIn : returns predecessor to this plugin                    */
+		/* This function is identified in the VST docs as "for future expansion",	 */
+		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)	 */
+		/* where it forgets about the index completely.								 */
+		/*****************************************************************************/
+		CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, int pinIndex)
+		{
+			/* What this function might have to do:
+			if (pinIndex == -1)
+			return "Any-plugin-which-is-input-connected-to-this-one";
+			else if (pinIndex < numInputs ) 
+			return Input_plugin[pinIndex];
+			return 0;
+			*/
+			return 0;
+		}
 
+		/*****************************************************************************/
+		/* GetNextPlugIn : returns successor to this plugin                          */
+		/* This function is identified in the VST docs as "for future expansion",	 */
+		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)	 */
+		/* where it forgets about the index completely.								 */
+		/*****************************************************************************/
+
+		CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, int pinIndex)
+		{
+			/* What this function might have to do:
+			if (pinIndex == -1)
+			return "Any-plugin-which-is-output-connected-to-this-one";
+			else if (pinIndex < numOutputs ) 
+			return Output_plugin[pinIndex];
+			return 0;
+			*/
+			return 0;
+		}
 		/*****************************************************************************/
 		/* SetSampleRate : sets sample rate                                          */
 		/*****************************************************************************/
 
 		void CVSTHost::SetSampleRate(float fSampleRate)
 		{
-			//\todo : inform of the change? ( kVstTranportChanged )
 			if (fSampleRate == vstTimeInfo.sampleRate)   /* if no change                      */
 				return;                               /* do nothing.                       */
 			vstTimeInfo.sampleRate = fSampleRate;
+			///\todo: reset the flag.
+			vstTimeInfo.flags |= kVstTransportChanged;
 		}
 
 		/*****************************************************************************/
@@ -986,12 +1041,326 @@ namespace seib {
 
 		void CVSTHost::SetBlockSize(long lSize)
 		{
-			//\todo : inform of the change? ( kVstTranportChanged )
 			if (lSize == lBlockSize)                /* if no change                      */
 				return;                               /* do nothing.                       */
 			lBlockSize = lSize;                     /* remember new block size           */
 		}
 
+		void CVSTHost::SetTimeSignature(long numerator, long denominator)
+		{
+			vstTimeInfo.timeSigNumerator=numerator;
+			vstTimeInfo.timeSigDenominator=denominator; 
+			vstTimeInfo.flags |= kVstTimeSigValid;
+			vstTimeInfo.flags |= kVstTransportChanged;
+		}
+
+		/*****************************************************************************/
+		/* OnCanDo : returns whether the host can do a specific action               */
+		/*****************************************************************************/
+
+		bool CVSTHost::OnCanDo(CEffect &pEffect, const char *ptr)
+		{
+			using namespace HostCanDos;
+			// For the host, according to audioeffectx.cpp , "!= 0 -> true", so there isn't "-1 : can't do".
+			if (	(!strcmp(ptr, canDoSendVstEvents ))		// "sendVstEvents"
+				||	(!strcmp(ptr, canDoSendVstMidiEvent ))	// "sendVstMidiEvent"
+				||	(!strcmp(ptr, canDoSendVstTimeInfo ))	// "sendVstTimeInfo",
+				//||	(!strcmp(ptr, canDoReceiveVstEvents))	// "receiveVstEvents",
+				//||	(!strcmp(ptr, canDoReceiveVstMidiEvent ))// "receiveVstMidiEvent",
+				//||	(!strcmp(ptr, canDoReceiveVstTimeInfo ))// DEPRECATED
+
+				//||	(!strcmp(ptr, canDoReportConnectionChanges ))// "reportConnectionChanges",
+				//||	(!strcmp(ptr, canDoAcceptIOChanges ))	// "acceptIOChanges",
+				//||	(!strcmp(ptr, canDoSizeWindow ))		// "sizeWindow",
+
+				//||	(!strcmp(ptr, canDoAsyncProcessing ))	// DEPRECATED
+				//||	(!strcmp(ptr, canDoOffline] ))			// "offline",
+				//||	(!strcmp(ptr, canDoSupplyIdle ))		// DEPRECATED
+				//||	(!strcmp(ptr, canDoSupportShell ))		// DEPRECATED
+				||	(!strcmp(ptr, canDoOpenFileSelector ))	// "openFileSelector"
+				//||	(!strcmp(ptr, canDoEditFile ))			// "editFile",
+				||	(!strcmp(ptr, canDoCloseFileSelector ))	// "closeFileSelector"
+				//||	(!strcmp(ptr, canDoStartStopProcess ))	// "startStopProcess"
+				||	(!strcmp(ptr, canDoShellCategory ))
+				//||	(!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))
+
+				)
+				return true;
+			return false;                           /* per default, no.                  */
+		}
+
+
+		/*****************************************************************************/
+		/* OnWantEvents : called when the effect calls wantEvents()                  */
+		/*****************************************************************************/
+		// Generally, this is called on resume to indicate that the plugin is going to accept events.
+		void CVSTHost::OnWantEvents(CEffect & pEffect, long filter)
+		{
+			if ( filter == kVstMidiType )
+			{
+				pEffect.WantsMidi(true);
+				//				return true;
+			}
+			//			return false;
+		}
+
+		/*****************************************************************************/
+		/* OnIdle : idle processing                                                  */
+		/*****************************************************************************/
+		// Call application idle routine (this will call effEditIdle for all open editors too) 
+		void CVSTHost::OnIdle(CEffect & pEffect)
+		{
+			//			int j = GetSize();
+			//			for (int i = 0; i < j; i++)
+			//				pEffect.EditIdle();
+			//			return 0;
+		}
+
+		/*****************************************************************************/
+		/* OnNeedIdle : called when the effect calls needIdle()                      */
+		/*****************************************************************************/
+		// Ideally, this would only send a message to the "Idle" process to execute it.
+		// host::OnIdle and plug::EditIdle are 1.0 functions and host::needIdle and plug::idle are 2.0
+		// Seems that host::OnIdle is called for when it is required, and host::needidle for a permanent loop.
+		bool CVSTHost::OnNeedIdle(CEffect & pEffect)
+		{
+			pEffect.NeedsIdle(true);
+			pEffect.Idle();
+			return true;
+		}
+
+		/*****************************************************************************/
+		/* OnGetDirectory : called when the effect calls getDirectory()              */
+		/*****************************************************************************/
+
+		void * CVSTHost::OnGetDirectory(CEffect & pEffect)
+		{
+			return pEffect.OnGetDirectory();
+		}
+
+		/*****************************************************************************/
+		/* OnOpenWindow : called to open a new window                                */
+		/*****************************************************************************/
+
+		void * CVSTHost::OnOpenWindow(CEffect & pEffect, VstWindow* window)
+		{
+			return pEffect.OnOpenWindow(window);
+		}
+
+		/*****************************************************************************/
+		/* OnCloseWindow : called to close a window                                  */
+		/*****************************************************************************/
+
+		bool CVSTHost::OnCloseWindow(CEffect & pEffect, VstWindow* window)
+		{
+			return pEffect.OnCloseWindow(window);
+		}
+
+		/*****************************************************************************/
+		/* OnSizeWindow : called when the effect calls sizeWindow()                  */
+		/*****************************************************************************/
+
+		bool CVSTHost::OnSizeWindow(CEffect & pEffect, long width, long height)
+		{
+			return pEffect.OnSizeEditorWindow(width, height);
+		}
+
+
+		/*****************************************************************************/
+		/* OnUpdateDisplay : called when effect calls updateDisplay()                */
+		/*****************************************************************************/
+
+		bool CVSTHost::OnUpdateDisplay(CEffect & pEffect)
+		{
+			return pEffect.OnUpdateDisplay();
+		}
+
+		/*****************************************************************************/
+		/* OnOpenFileSelector : called when effect needs a file selector             */
+		/*																			 */
+		/*		This sourcecode is based on the VSTGUI3.0 source					 */
+		/*****************************************************************************/
+		bool CVSTHost::OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr)
+		{
+			if (!ptr)
+				throw (int)1;
+
+			char fileName[_MAX_PATH];
+			char *filePath;
+
+			if	((ptr->command == kVstFileLoad) 
+				||	(ptr->command == kVstFileSave)
+				||	(ptr->command == kVstMultipleFilesLoad))
+			{
+				OPENFILENAME ofn = {0}; // common dialog box structure
+				ofn.lStructSize = sizeof(OPENFILENAME);
+
+				std::string filefilter;
+				for (int i=0;i<ptr->nbFileTypes;i++)
+				{
+					filefilter = ptr->fileTypes[i].name; filefilter.push_back('\0');
+					filefilter += "*."; filefilter += ptr->fileTypes[i].dosType; filefilter.push_back('\0');
+				}
+				filefilter += "All (*.*)"; filefilter.push_back('\0');
+				filefilter += "*.*"; filefilter.push_back('\0');
+
+				if (ptr->command == kVstMultipleFilesLoad)
+					filePath = new char [_MAX_PATH * 100];
+				else
+					filePath = new char[_MAX_PATH];
+
+				filePath[0] = 0;
+				// Initialize OPENFILENAME
+				ofn.hwndOwner = MainWindow();
+
+				ofn.lpstrFile = filePath;
+				ofn.nMaxFile    = sizeof (filePath) - 1;
+				ofn.lpstrFilter =filefilter.c_str();
+				ofn.nFilterIndex = 1;
+				ofn.lpstrTitle = ptr->title;
+				ofn.lpstrFileTitle = fileName;
+				ofn.nMaxFileTitle = sizeof(fileName) - 1;
+				if ( ptr->initialPath != 0)
+					ofn.lpstrInitialDir = ptr->initialPath;
+				else
+					ofn.lpstrInitialDir =  (char*)pEffect.OnGetDirectory();
+				if (ptr->nbFileTypes >= 1)
+					ofn.lpstrDefExt = ptr->fileTypes[0].dosType;
+				if (ptr->command == kVstFileSave)
+					ofn.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
+				else
+					ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
+
+				// Display the Open dialog box. 
+				if(::GetOpenFileName(&ofn)==TRUE)
+				{
+					if (ptr->command == kVstMultipleFilesLoad)
+					{
+						char string[_MAX_PATH], directory[_MAX_PATH];
+						char *previous = ofn.lpstrFile;
+						long len;
+						bool dirFound = false;
+						ptr->returnMultiplePaths = new char*[_MAX_PATH];
+						long i = 0;
+						while (*previous != 0)
+						{
+							if (!dirFound) 
+							{
+								dirFound = true;
+								strcpy (directory, previous);
+								len = strlen (previous) + 1;  // including 0
+								previous += len;
+
+								if (*previous == 0)
+								{  // 1 selected file only		
+									ptr->returnMultiplePaths[i] = new char [strlen (directory) + 1];
+									strcpy (ptr->returnMultiplePaths[i++], directory);
+								}
+								else
+								{
+									if (directory[strlen (directory) - 1] != '\\')
+										strcat (directory, "\\");
+								}
+							}
+							else 
+							{
+								sprintf (string, "%s%s", directory, previous);
+								len = strlen (previous) + 1;  // including 0
+								previous += len;
+
+								ptr->returnMultiplePaths[i] = new char [strlen (string) + 1];
+								strcpy (ptr->returnMultiplePaths[i++], string);
+							}
+						}
+						ptr->nbReturnPath = i;
+						delete filePath;
+					}
+					else if ( ptr->returnPath == 0 )
+					{
+						ptr->reserved = 1;
+						ptr->returnPath = filePath;
+						ptr->sizeReturnPath = sizeof(filePath);
+						ptr->nbReturnPath = 1;
+					}
+					else 
+					{
+						strncpy(ptr->returnPath,filePath,ptr->sizeReturnPath);
+						ptr->nbReturnPath = 1;
+						delete filePath;
+					}
+					return true;
+				}
+				else delete filePath;
+			}
+			else if (ptr->command == kVstDirectorySelect)
+			{
+				LPMALLOC pMalloc;
+				// Gets the Shell's default allocator
+				//
+				if (::SHGetMalloc(&pMalloc) == NOERROR)
+				{
+					BROWSEINFO bi;
+					LPITEMIDLIST pidl;
+					if ( ptr->returnPath == 0)
+					{
+						ptr->reserved = 1;
+						ptr->returnPath = new char[_MAX_PATH];
+						ptr->sizeReturnPath = _MAX_PATH;
+						ptr->nbReturnPath = 1;
+					}
+					// Get help on BROWSEINFO struct - it's got all the bit settings.
+					//
+					bi.hwndOwner = MainWindow();
+
+					bi.pidlRoot = NULL;
+					bi.pszDisplayName = ptr->returnPath;
+					bi.lpszTitle = ptr->title;
+					bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
+					bi.lpfn = NULL;
+					bi.lParam = 0;
+					// This next call issues the dialog box.
+					//
+					if ((pidl = ::SHBrowseForFolder(&bi)) != NULL)
+					{
+						if (::SHGetPathFromIDList(pidl, ptr->returnPath))
+						{
+							return true;
+						}
+						// Free the PIDL allocated by SHBrowseForFolder.
+						//
+						pMalloc->Free(pidl);
+					}
+					if ( ptr->reserved ) { delete ptr->returnPath; ptr->reserved = 0; }
+					// Release the shell's allocator.
+					//
+					pMalloc->Release();
+				}
+			}
+			return false;
+		}
+		/*****************************************************************************/
+		/* OnCloseFileSelector : called when effect needs a file selector             */
+		/*																			 */
+		/*		This sourcecode is based on the VSTGUI3.0 source					 */
+		/*****************************************************************************/
+		bool CVSTHost::OnCloseFileSelector (CEffect &pEffect, VstFileSelect *ptr)
+		{
+			if ( ptr->command == kVstMultipleFilesLoad)
+			{
+				for (int i=0; i < ptr->nbReturnPath;i++)
+				{
+					delete[] ptr->returnMultiplePaths[i];
+				}
+				delete[] ptr->returnMultiplePaths;
+				return true;
+			}
+			else if ( ptr->reserved == 1) 
+			{
+				delete ptr->returnPath;
+				return true;
+			}
+			return false;
+		}
 		/*****************************************************************************/
 		/* AudioMasterCallback : callback to be called by plugins                    */
 		/*****************************************************************************/
@@ -1013,64 +1382,55 @@ namespace seib {
 
 			if (pHost->loadingEffect)
 			{
+				// The VST SDK 2.0 said this:
+				// [QUOTE]
+				//	Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the
+				//	plug-in about important system parameters like sample rate, and sample block size. Because the
+				//	audio effect object is constructed in our plug-in’s main(), before the host gets any information about
+				//	the created object, you need to be careful what functions are called within the constructor of the
+				//	plug-in. You may be talking but no-one is listening.
+				// [/QUOTE]
+				// The truth is that most plugins call different audioMaster operations, and some even disallowed operations (WantEvents!),
+				// so this tries to alleviate the problem, as much as it can.
 				fakeeffect = true;
-				pEffect = pHost->CreateEffect(effect);
+				pEffect = pHost->CreateWrapper(effect);
 			}
-			else
+			else if ( !effect )
 			{
-				if ( !effect )
-				{
-					std::stringstream s; s
-						<< "AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin)" << std::endl
-						<< "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
-						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
-					std::stringstream title; title
-						<< "Machine Error: ";
-					psycle::host::loggers::info(title.str() + '\n' + s.str());
-					
-					// As bad behaviour as this is, we try to simulate a pEffect plugin for this call, so that at least calls to
-					// GetProductString and similar can be answered.
-					// CEffect will throw an exception if the function requires a callback to the plugin.
-					fakeeffect=true;
-					pEffect = pHost->CreateEffect(0);
-				}
-				else pEffect = (CEffect*)(effect->resvd1);
+				std::stringstream s; s
+					<< "AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin)" << std::endl
+					<< "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
+					<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
+				std::stringstream title; title
+					<< "Machine Error: ";
+				psycle::host::loggers::info(title.str() + '\n' + s.str());
+				
+				// As bad behaviour as this is, we try to simulate a pEffect plugin for this call, so that at least calls to
+				// GetProductString and similar can be answered.
+				// CEffect will throw an exception if the function requires a callback to the plugin.
+				fakeeffect=true;
+				pEffect = pHost->CreateWrapper(0);
+			}
+			else 
+			{
+				pEffect = (CEffect*)(effect->resvd1);
 
 				if ( !pEffect ) 
 				{
 					char name[5]={0};
-					//bool read=false;
 					memcpy(name,&(effect->uniqueID),4);
 					name[4]='\0';
 
-/*					if ( effect->uniqueID != CCONST("NoEf")) // How good is a plugin that calls an audiomaster function before identifying itself?
-					{
-						read =effect->dispatcher(effect,effGetEffectName,0,0,name,0);
-						if (!read) read = effect->dispatcher(effect,effGetProductString,0,0,name,0);
-						if (!read) memset(name,0,sizeof(name));
-					}
-					else strcpy(name,"Unknown Effect");
-*/
 					std::stringstream s; s
-						<< "AudioMaster call, with unknown pEffect (most probably, a call from the plugin constructor)" << std::endl
+						<< "AudioMaster call, with unknown pEffect" << std::endl
 						<< "Aeffect: " << name << "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
 						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
 					psycle::host::loggers::info(title.str() + '\n' + s.str());
-					// The VST SDK 2.0 said this:
-					// [QUOTE]
-					//	Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the
-					//	plug-in about important system parameters like sample rate, and sample block size. Because the
-					//	audio effect object is constructed in our plug-in’s main(), before the host gets any information about
-					//	the created object, you need to be careful what functions are called within the constructor of the
-					//	plug-in. You may be talking but no-one is listening.
-					// [/QUOTE]
-					// The truth is that most plugins call different audioMaster operations, and some even disallowed operations (WantEvents!),
-					// so this tries to alleviate the- problem, as much as it can.
 					
 					fakeeffect=true;
-					pEffect= pHost->CreateEffect(effect);
+					pEffect= pHost->CreateWrapper(effect);
 				}
 			}
 
@@ -1091,6 +1451,7 @@ namespace seib {
 				pHost->OnIdle(*pEffect);
 				break;
 			case audioMasterPinConnected :
+				// for compatibility with VST 1.0, false means connected.
 				result = !((value) ? 
 					pHost->OnOutputConnected(*pEffect, index) :
 					pHost->OnInputConnected(*pEffect, index));
@@ -1153,11 +1514,13 @@ namespace seib {
 				if (fakeeffect )delete pEffect;
 				return result;
 			case audioMasterGetPreviousPlug :
-				result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index)->GetAEffect());
+				result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index));
+				if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index)->GetAEffect());
 				if (fakeeffect )delete pEffect;
 				return result;
 			case audioMasterGetNextPlug :
-				result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index)->GetAEffect());
+				result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index));
+				if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index)->GetAEffect());
 				if (fakeeffect )delete pEffect;
 				return result;
 			case audioMasterWillReplaceOrAccumulate :
@@ -1285,134 +1648,5 @@ namespace seib {
 			return 0L;
 		}
 
-
-
-
-		/*****************************************************************************/
-		/* OnCanDo : returns whether the host can do a specific action               */
-		/*****************************************************************************/
-
-		bool CVSTHost::OnCanDo(CEffect &pEffect, const char *ptr)
-		{
-			using namespace HostCanDos;
-			// For the host, according to audioeffectx.cpp , "!= 0 -> true", so there isn't "-1 : can't do".
-			if (	(!strcmp(ptr, canDoSendVstEvents )) // "sendVstEvents"
-				||	(!strcmp(ptr, canDoSendVstMidiEvent )) // "sendVstMidiEvent"
-				||	(!strcmp(ptr, canDoSendVstTimeInfo )) // "sendVstTimeInfo",
-				//||	(!strcmp(ptr, hostCanDos[3] )) // "receiveVstEvents",
-				//||	(!strcmp(ptr, hostCanDos[4] )) // "receiveVstMidiEvent",
-				//||	(!strcmp(ptr, hostCanDos[5] )) // "receiveVstTimeInfo",
-
-				//||	(!strcmp(ptr, hostCanDos[6] )) // "reportConnectionChanges",
-				//||	(!strcmp(ptr, hostCanDos[7] )) // "acceptIOChanges",
-				//||	(!strcmp(ptr, hostCanDos[8] )) // "sizeWindow",
-
-				//||	(!strcmp(ptr, hostCanDos[9] )) // "asyncProcessing",
-				//||	(!strcmp(ptr, hostCanDos[10] )) // "offline",
-				//||	(!strcmp(ptr, hostCanDos[11] )) // "supplyIdle",
-				//||	(!strcmp(ptr, hostCanDos[12] )) // "supportShell",
-				//||	(!strcmp(ptr, hostCanDos[13] )) // "openFileSelector"
-				//||	(!strcmp(ptr, hostCanDos[14] )) // "editFile",
-				//||	(!strcmp(ptr, hostCanDos[15] )) // "closeFileSelector"
-				//||	(!strcmp(ptr, hostCanDos[16] )) // "startStopProcess"
-				)
-				return true;
-			return false;                           /* per default, no.                  */
-		}
-
-
-		/*****************************************************************************/
-		/* OnWantEvents : called when the effect calls wantEvents()                  */
-		/*****************************************************************************/
-		// Generally, this is called on resume to indicate that the plugin is going to accept events.
-		void CVSTHost::OnWantEvents(CEffect & pEffect, long filter)
-		{
-			if ( filter == kVstMidiType )
-			{
-				pEffect.WantsMidi(true);
-//				return true;
-			}
-//			return false;
-		}
-
-		/*****************************************************************************/
-		/* OnIdle : idle processing                                                  */
-		/*****************************************************************************/
-		// Call application idle routine (this will call effEditIdle for all open editors too) 
-		void CVSTHost::OnIdle(CEffect & pEffect)
-		{
-//			int j = GetSize();
-//			for (int i = 0; i < j; i++)
-//				pEffect.EditIdle();
-//			return 0;
-		}
-
-		/*****************************************************************************/
-		/* OnNeedIdle : called when the effect calls needIdle()                      */
-		/*****************************************************************************/
-		// Ideally, this would only send a message to the "Idle" process to execute it.
-		// host::OnIdle and plug::EditIdle are 1.0 functions and host::needIdle and plug::idle are 2.0
-		// Seems that host::OnIdle is called for when it is required, and host::needidle for a permanent loop.
-		bool CVSTHost::OnNeedIdle(CEffect & pEffect)
-		{
-			pEffect.NeedsIdle(true);
-			pEffect.Idle();
-			return true;
-		}
-
-		/*****************************************************************************/
-		/* OnGetDirectory : called when the effect calls getDirectory()              */
-		/*****************************************************************************/
-
-		void * CVSTHost::OnGetDirectory(CEffect & pEffect)
-		{
-			return pEffect.OnGetDirectory();
-		}
-
-		/*****************************************************************************/
-		/* OnOpenWindow : called to open a new window                                */
-		/*****************************************************************************/
-
-		void * CVSTHost::OnOpenWindow(CEffect & pEffect, VstWindow* window)
-		{
-			return pEffect.OnOpenWindow(window);
-		}
-
-		/*****************************************************************************/
-		/* OnCloseWindow : called to close a window                                  */
-		/*****************************************************************************/
-
-		bool CVSTHost::OnCloseWindow(CEffect & pEffect, VstWindow* window)
-		{
-			return pEffect.OnCloseWindow(window);
-		}
-
-		/*****************************************************************************/
-		/* OnSizeWindow : called when the effect calls sizeWindow()                  */
-		/*****************************************************************************/
-
-		bool CVSTHost::OnSizeWindow(CEffect & pEffect, long width, long height)
-		{
-			return pEffect.OnSizeEditorWindow(width, height);
-		}
-
-
-		/*****************************************************************************/
-		/* OnUpdateDisplay : called when effect calls updateDisplay()                */
-		/*****************************************************************************/
-
-		bool CVSTHost::OnUpdateDisplay(CEffect & pEffect)
-		{
-			return pEffect.OnUpdateDisplay();
-		}
-
-		/*****************************************************************************/
-		/* OnGetVersion : returns the VST Host VST Version                           */
-		/*****************************************************************************/
-
-		long CVSTHost::OnGetVSTVersion()
-		{
-			return kVstVersion;
-		}
 	}
 }

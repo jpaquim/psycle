@@ -265,7 +265,10 @@
 #define IDC_BYTYPE                      1121
 #define IDC_BYCLASS                     1122
 #define IDC_SPIN1                       1123
+#define IDC_APIVERSIONLABEL2            1123
+#define IDC_APIVERSIONLABEL             1123
 #define IDC_LIST1                       1124
+#define IDC_VERSION2LABEL               1124
 #define IDC_TEXT                        1125
 #define IDC_INSTNAME                    1126
 #define IDC_INSTNUMBER                  1127

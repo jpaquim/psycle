@@ -258,7 +258,7 @@ NAMESPACE__BEGIN(psycle)
 						m_pParent->NewMachine(x,y,tmac);
 						// replace all the connection info
 
-						Machine * mac = Global::_pSong->_pMachine[tmac];
+						mac = Global::_pSong->_pMachine[tmac];
 						if (mac)
 						{
 							mac->_numOutputs = numOutputs;

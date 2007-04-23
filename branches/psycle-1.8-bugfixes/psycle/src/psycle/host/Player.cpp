@@ -7,10 +7,12 @@
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 #include "InputHandler.hpp"
+#include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
 namespace psycle
 {
 	namespace host
 	{
+		using namespace seib::vst;
 		Player::Player()
 		{
 			_playing = false;
@@ -56,6 +58,8 @@ namespace psycle
 			_playing = true;
 			ExecuteLine();
 			_samplesRemaining = SamplesPerRow();
+			CVSTHost::vstTimeInfo.flags |= kVstTransportPlaying;
+			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 		}
 
 		void Player::Stop(void)
@@ -73,6 +77,8 @@ namespace psycle
 			}
 			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+			CVSTHost::vstTimeInfo.flags &= ~kVstTransportPlaying;
+			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 		}
 
 		void Player::SampleRate(const int sampleRate)
@@ -86,6 +92,7 @@ namespace psycle
 				{
 					if(Global::_pSong->_pMachine[i]) Global::_pSong->_pMachine[i]->SetSampleRate(sampleRate);
 				}
+				CVSTHost::pHost->SetSampleRate(sampleRate);
 			}
 		}
 		void Player::SetBPM(int _bpm,int _tpb)
@@ -93,6 +100,8 @@ namespace psycle
 			if ( _tpb != 0) tpb=_tpb;
 			if ( _bpm != 0) bpm=_bpm;
 			RecalcSPR();
+			CVSTHost::vstTimeInfo.tempo = bpm;
+			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 			//\todo : Find out if we should notify the plugins of this change.
 		}
 
@@ -478,6 +487,7 @@ namespace psycle
 					//\todo: Sampler::DoPreviews( amount );
 					pSong->DoPreviews( amount );
 
+					CVSTHost::vstTimeInfo.samplePos = ((Master *) (pSong->_pMachine[MASTER_INDEX]))->sampleCount;
 					// Inject Midi input data
 					if(!CMidiInput::Instance()->InjectMIDI( amount ))
 					{
@@ -531,6 +541,7 @@ namespace psycle
 					numSamplex -= amount;
 				}
 				 pThis->_samplesRemaining -= amount;
+				 CVSTHost::vstTimeInfo.flags &= ~kVstTransportChanged;
 			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
 			return pThis->_pBuffer;
 		}

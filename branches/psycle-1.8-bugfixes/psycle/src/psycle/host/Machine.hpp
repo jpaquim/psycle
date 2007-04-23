@@ -102,7 +102,7 @@ namespace psycle
 			}
 		}
 
-		/// Internal Machines' Parameters' Class.
+		/// Class storing the parameter description of Internal Machines.
 		class CIntMachParam			
 		{
 		public:
@@ -160,6 +160,8 @@ namespace psycle
 			virtual int FindInputWire(int macIndex);
 			virtual int FindOutputWire(int macIndex);
 			virtual const char * const GetDllName() const throw() { return "built-in"; };
+			virtual int GetPluginCategory() { return 0; }
+			virtual bool IsShellPlugin() { return false; }
 			virtual char * GetName() = 0;
 			const char * GetEditName() { return _editName; }
 			virtual int GetNumParams() { return _numPars; };

@@ -24,6 +24,7 @@
 #include "MacProp.hpp"
 #include "NewMachine.hpp"
 #include "PatDlg.hpp"
+#include "vsthost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath> // SwingFill
 #include "SwingFillDlg.hpp"
 NAMESPACE__BEGIN(psycle)
@@ -360,28 +361,30 @@ NAMESPACE__BEGIN(psycle)
 //					}
 				}
 
-				if (Global::pPlayer->Tweaker)
+				for(int c=0; c<MAX_MACHINES; c++)
 				{
-					for(int c=0; c<MAX_MACHINES; c++)
+					if (_pSong->_pMachine[c])
 					{
-						if (_pSong->_pMachine[c])
+						if (pParentMain->isguiopen[c])
 						{
-							if (pParentMain->isguiopen[c])
+							if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
 							{
-								if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
-								{
+								if (Global::pPlayer->Tweaker)
 									pParentMain->m_pWndMac[c]->Invalidate(false);
-								}
-								else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
-										_pSong->_pMachine[c]->_type == MACH_VSTFX )
-								{
+							}
+							else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
+									_pSong->_pMachine[c]->_type == MACH_VSTFX )
+							{
+								((vst::plugin*)_pSong->_pMachine[c])->Idle();
+								((vst::plugin*)_pSong->_pMachine[c])->EditIdle();
+								if (Global::pPlayer->Tweaker)
 									((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
-								}
 							}
 						}
 					}
-					Global::pPlayer->Tweaker = false;
 				}
+				Global::pPlayer->Tweaker = false;
+
 				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
 				if (Global::pPlayer->_playing)
 				{
@@ -1340,6 +1343,7 @@ NAMESPACE__BEGIN(psycle)
 				int fb,xs,ys;
 				if (mac < 0)
 				{
+					AddMacViewUndo();
 					if (dlg.OutBus) 
 					{
 						fb = Global::_pSong->GetFreeBus();
@@ -1357,6 +1361,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					if ((mac >= MAX_BUSES) && !(dlg.OutBus))
 					{
+						AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords.sEffect.width;
 						ys = MachineCoords.sEffect.height;
@@ -1371,6 +1376,7 @@ NAMESPACE__BEGIN(psycle)
 					}
 					else if ((mac < MAX_BUSES) && (dlg.OutBus))
 					{
+						AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords.sGenerator.width;
 						ys = MachineCoords.sGenerator.height;
@@ -1389,7 +1395,6 @@ NAMESPACE__BEGIN(psycle)
 						return;
 					}
 				}
-				AddMacViewUndo();
 				// random position
 				if ((x < 0) || (y < 0))
 				{
@@ -1423,7 +1428,7 @@ NAMESPACE__BEGIN(psycle)
 				Global::pConfig->_pMidiInput->Close();
 				*/
 
-				if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb))
+				if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx))
 				{
 					MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}

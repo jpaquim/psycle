@@ -71,14 +71,14 @@ namespace psycle
 
 				/// It needs to use Process
 				bool requiresProcess;
-				/// It needs to use ProcessRepl
+				/// It needs to use ProcessReplacing
 				bool requiresRepl;		
 
 			public:
 				plugin(LoadedAEffect &loadstruct);
-				//this constructor is to be used with the old Song loading routine, in order to create an "emtpy" plugin.
+				//this constructor is to be used with the old Song loading routine, in order to create an "empty" plugin.
 				plugin(AEffect *effect):CEffect(effect),editorWnd(0) {};
-				virtual ~plugin();
+				virtual ~plugin() {};
 				// Actions
 				//////////////////////////////////////////////////////////////////////////
 				virtual void Init(){ Machine::Init();}
@@ -91,6 +91,8 @@ namespace psycle
 				virtual bool LoadFromMac(vst::plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
+				virtual bool IsShellPlugin() { return (GetPlugCategory() == kPlugCategShell); }
+				virtual int GetPluginCategory() { return GetPlugCategory(); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual void SaveDllName(RiffFile * pFile);
@@ -99,6 +101,7 @@ namespace psycle
 
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
+				bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 
 				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
 				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0);
@@ -111,7 +114,8 @@ namespace psycle
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
-				virtual const std::uint32_t GetVersion() { return GetVstVersion(); }
+				virtual const std::uint32_t GetAPIVersion() { return GetVstVersion(); }
+				virtual const std::uint32_t GetVersion() { return GetVendorVersion(); }
 				//
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; }
 				virtual int GetNumParams() { return numParams(); }
@@ -127,57 +131,53 @@ namespace psycle
 				virtual void SetParameter(int numparam, float value) { CEffect::SetParameter(numparam,value); }
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
+				virtual bool IsInputConnected(int input) { return (input < 2); } 
+				virtual bool IsOutputConnected(int input) { return (input < 2); }
+
 				CFrameWnd * editorWnd;
 			};
 
 			class host : public CVSTHost
 			{
 			public:
-				host(){	quantization = 65535; SetBlockSize(STREAM_SIZE); };
+				host(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; };
 				virtual ~host(){;}
-
-				virtual plugin* host::GetPreviousPlugIn(CEffect & pEffect, int pinIndex);
-				virtual plugin* host::GetNextPlugIn(CEffect & pEffect, int pinIndex);
 
 				///< Helper class for Machine Creation.
 				static Machine* CreateFromType(int _id, std::string _dllname);
 				virtual CEffect * CreateEffect(LoadedAEffect &loadstruct) { return new plugin(loadstruct); }
-				virtual CEffect * CreateEffect(AEffect *effect) { return new plugin(effect); }
-				virtual void CalcTimeInfo(long lMask = -1);
+				virtual CEffect * CreateWrapper(AEffect *effect) { return new plugin(effect); }
+
+				virtual HWND MainWindow();
 
 				///> Plugin gets Info from the host
 				virtual bool OnGetProductString(char *text) { strcpy(text, "Psycle"); return true; }
 				virtual long OnGetHostVendorVersion() { return 1850; }
 				virtual bool OnCanDo(CEffect &pEffect,const char *ptr);
 				virtual long OnGetHostLanguage() { return kVstLangEnglish; }
-
-				//\todo : Optimize it more to avoid recalculate when already done?
-				//virtual VstTimeInfo *OnGetTime(CEffect &pEffect, long lMask);
-				virtual long OnTempoAt(CEffect &pEffect, long pos);
-				virtual long OnGetNumAutomatableParameters(CEffect &pEffect);
+				virtual void CalcTimeInfo(long lMask = -1);
+				virtual long DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos);
+				virtual long DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(CEffect &pEffect) { return 0xFF; } // the size of the aux column.
 				virtual long OnGetAutomationState(CEffect &pEffect);
-				//virtual long OnGetInputLatency(CEffect &pEffect) { return 0; }
+				virtual long OnGetInputLatency(CEffect &pEffect);
 				virtual long OnGetOutputLatency(CEffect &pEffect);
 				//\todo : how can this function be implemented? :o
 				virtual long OnGetCurrentProcessLevel(CEffect &pEffect) { return 0; }
-				//\todo : returning the effect ID for now.
-				virtual long OnCurrentId(CEffect &pEffect) { return pEffect.uniqueId(); }
-				virtual long OnGetParameterQuantization(CEffect &pEffect) { return quantization; }
 				//\todo : determine how to reply to this function.
-				virtual bool OnWillProcessReplacing(CEffect &pEffect) { return false; }
+				virtual bool OnWillProcessReplacing(CEffect &pEffect) { return ((plugin*)&pEffect)->WillProcessReplace(); }
+
 				//\todo : investigate which file is this function really asking for.
-				virtual bool OnGetChunkFile(CEffect &pEffect, void * nativePath) { return false; }
+				virtual bool DECLARE_VST_DEPRECATED(OnGetChunkFile)(CEffect &pEffect, void * nativePath) { return false; }
 
 				///> Plugin sends actions to the host
+				// OnIdle 
 				virtual void OnIdle(CEffect &pEffect);
-				virtual bool OnNeedIdle(CEffect &pEffect);
+				virtual bool DECLARE_VST_DEPRECATED(OnNeedIdle)(CEffect &pEffect);
 
 				virtual bool OnProcessEvents(CEffect &pEffect, VstEvents* events) { return false; }
 				virtual bool OnBeginEdit(CEffect &pEffect,long index);
 				virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value);
 				virtual bool OnEndEdit(CEffect &pEffect,long index);
-				virtual bool OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr);
-				virtual bool OnCloseFileSelector (CEffect &pEffect, VstFileSelect *ptr);
 
 			};
 		}

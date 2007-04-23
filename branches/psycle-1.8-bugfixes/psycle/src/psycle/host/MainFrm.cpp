@@ -1879,11 +1879,13 @@ NAMESPACE__BEGIN(psycle)
 			int* litems = new int[selcount];
 			cc->GetSelItems(selcount,litems);
 
-  			// Moves all patterns after the selection, to make space.
+			// Moves all patterns after the selection, to make space.
 			for(int i(_pSong->playLength-1) ; i >= litems[selcount-1] ;--i)
 			{
 				_pSong->playOrder[i+selcount]=_pSong->playOrder[i];
 			}
+			_pSong->playLength+=selcount;
+
 
 			for(int i(0) ; i < selcount ; ++i)
 			{
@@ -1891,18 +1893,16 @@ NAMESPACE__BEGIN(psycle)
 				if (newpat < MAX_PATTERNS-1)
 				{
 					m_wndView.editPosition=litems[i];
-					
+
 					m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 					int oldpat = _pSong->playOrder[litems[i]];
-				
-				// now we copy the data
-				// we don't really need to be able to undo this, since it's a new pattern anyway.
-		//		m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-				_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
 
-				memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
+					// now we copy the data
+					// we don't really need to be able to undo this, since it's a new pattern anyway.
+					//m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+					_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
 
-					++_pSong->playLength;
+					memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
 
 					_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
 

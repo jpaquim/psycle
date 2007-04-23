@@ -52,7 +52,7 @@ namespace psycle
 			float * pars;
 		};
 
-		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index)
+		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
 		{
 			Machine* pMachine(0);
 			Master* pMaster(0);
@@ -66,24 +66,24 @@ namespace psycle
 			{
 			case MACH_MASTER:
 				if(_pMachine[MASTER_INDEX]) return false;
-				pMachine = pMaster = new Master(index);
-				index = MASTER_INDEX;
+				pMachine = pMaster = new Master(songIdx);
+				songIdx = MASTER_INDEX;
 				break;
 			case MACH_SAMPLER:
-				pMachine = pSampler = new Sampler(index);
+				pMachine = pSampler = new Sampler(songIdx);
 				break;
 			case MACH_XMSAMPLER:
-				pMachine = pXMSampler = new XMSampler(index);
+				pMachine = pXMSampler = new XMSampler(songIdx);
 				break;
 			case MACH_DUPLICATOR:
-				pMachine = pDuplicator = new DuplicatorMac(index);
+				pMachine = pDuplicator = new DuplicatorMac(songIdx);
 				break;
 			case MACH_MIXER:
-				pMachine = pMixer = new Mixer(index);
+				pMachine = pMixer = new Mixer(songIdx);
 				break;
 			case MACH_PLUGIN:
 				{
-					pMachine = pPlugin = new Plugin(index);
+					pMachine = pPlugin = new Plugin(songIdx);
 					if(!CNewMachine::TestFilename(psPluginDll))
 					{
 						zapObject(pMachine);
@@ -116,11 +116,11 @@ namespace psycle
 					}
 					try
 					{
-						pMachine = vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(psPluginDll));
+						pMachine = vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(psPluginDll,shellIdx));
 
 						if(vstPlug)
 						{
-							vstPlug->_macIndex=index;
+							vstPlug->_macIndex=songIdx;
 						}
 					}
 					catch(std::exception const & e)
@@ -137,17 +137,17 @@ namespace psycle
 					break;
 				}
 			case MACH_DUMMY:
-				pMachine = new Dummy(index);
+				pMachine = new Dummy(songIdx);
 				break;
 			default:
 				return false; ///< hmm?
 			}
-			if(index < 0)
+			if(songIdx < 0)
 			{
-				index =	GetFreeMachine();
-				if(index < 0) return false;
+				songIdx =	GetFreeMachine();
+				if(songIdx < 0) return false;
 			}
-			if(_pMachine[index]) DestroyMachine(index);
+			if(_pMachine[songIdx]) DestroyMachine(songIdx);
 			if(pMachine->_type == MACH_VSTFX || pMachine->_type == MACH_VST )
 			{
 				// Do not call VST Init() function after Instance.
@@ -157,7 +157,7 @@ namespace psycle
 			pMachine->_x = x;
 			pMachine->_y = y;
 			// Finally, activate the machine
-			_pMachine[index] = pMachine;
+			_pMachine[songIdx] = pMachine;
 			return true;
 		}
 
@@ -616,7 +616,9 @@ namespace psycle
 
 		int Song::GetBlankPatternUnused(int rval)
 		{
+			//Check for one unexistant pattern.
 			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
+			//if none found, try to find an empty used pattern.
 			PatternEntry blank;
 			bool bTryAgain(true);
 			while(bTryAgain && rval < MAX_PATTERNS - 1)

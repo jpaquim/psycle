@@ -66,6 +66,7 @@ NAMESPACE__BEGIN(psycle)
 			m_showdllName = pluginName;
 			//}}AFX_DATA_INIT
 			OutBus = false;
+			shellIdx = 0;
 			//pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
 				// It is initialized above, where it is declared.
 		}
@@ -87,6 +88,7 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_DLLNAMELABEL, m_dllnameLabel);
 			DDX_Radio(pDX, IDC_SHOWDLLNAME, m_showdllName);
 			//}}AFX_DATA_MAP
+			DDX_Control(pDX, IDC_APIVERSIONLABEL, m_APIversionLabel);
 		}
 
 		BEGIN_MESSAGE_MAP(CNewMachine, CDialog)
@@ -262,6 +264,7 @@ NAMESPACE__BEGIN(psycle)
 				m_descLabel.SetWindowText("Stereo Sampler Unit. Inserts new sampler.");
 				m_dllnameLabel.SetWindowText("Internal Machine");
 				m_versionLabel.SetWindowText("V0.5b");
+				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_SAMPLER;
 				OutBus = true;
 				LastType0 = 0;
@@ -275,6 +278,7 @@ NAMESPACE__BEGIN(psycle)
 				m_descLabel.SetWindowText("Replaces inexistent plugins");
 				m_dllnameLabel.SetWindowText("Internal Machine");
 				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_DUMMY;
 				LastType0 = 0;
 				LastType1 = 1;
@@ -286,7 +290,8 @@ NAMESPACE__BEGIN(psycle)
 				m_nameLabel.SetWindowText("Sampulse Sampler V2");
 				m_descLabel.SetWindowText("Sampler with the essence of FastTracker II and Impulse Tracker 2");
 				m_dllnameLabel.SetWindowText("Internal Machine");
-				m_versionLabel.SetWindowText("V0.5b");
+				m_versionLabel.SetWindowText("V0.8b");
+				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_XMSAMPLER;
 				OutBus = true;
 				LastType0 = 0;
@@ -300,6 +305,7 @@ NAMESPACE__BEGIN(psycle)
 				m_descLabel.SetWindowText("Repeats the Events received to the selected machines");
 				m_dllnameLabel.SetWindowText("Internal Machine");
 				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_DUPLICATOR;
 				OutBus = true;
 				LastType0 = 0;
@@ -313,6 +319,7 @@ NAMESPACE__BEGIN(psycle)
 				m_descLabel.SetWindowText("Allows to mix the audio with a typical mixer table, with send/return effects");
 				m_dllnameLabel.SetWindowText("Internal Machine");
 				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_MIXER;
 				LastType0 = 0;
 				LastType1 = 1;
@@ -331,6 +338,11 @@ NAMESPACE__BEGIN(psycle)
 					m_nameLabel.SetWindowText(_pPlugsInfo[i]->name.c_str());
 					m_descLabel.SetWindowText(_pPlugsInfo[i]->desc.c_str());
 					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
+					{
+						std::ostringstream s;
+						s << _pPlugsInfo[i]->APIversion;
+						m_APIversionLabel.SetWindowText(s.str().c_str());
+					}
 					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
 					{
 						Outputmachine = MACH_PLUGIN;
@@ -348,6 +360,7 @@ NAMESPACE__BEGIN(psycle)
 					else
 					{
 						LastType0 = 2;
+						shellIdx = _pPlugsInfo[i]->identifier;
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 						{
 							Outputmachine = MACH_VST;
@@ -658,27 +671,40 @@ NAMESPACE__BEGIN(psycle)
 								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
+								_pPlugsInfo[currentPlugsCount]->identifier = 0;
+								_pPlugsInfo[currentPlugsCount]->vendor = "???";
 								_pPlugsInfo[currentPlugsCount]->desc = "???";
 								_pPlugsInfo[currentPlugsCount]->version = "???";
+								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
 							}
 							else
 							{
 								_pPlugsInfo[currentPlugsCount]->allow = true;
 								_pPlugsInfo[currentPlugsCount]->name = plug.GetName();
+								_pPlugsInfo[currentPlugsCount]->identifier = 0;
+								_pPlugsInfo[currentPlugsCount]->vendor = plug.GetAuthor();
+								if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
 								{
 									std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
 									_pPlugsInfo[currentPlugsCount]->desc = s.str();
 								}
 								{
-									std::ostringstream s; s << plug.GetInfo()->Version; // API VERSION
+									std::ostringstream s; s << "0";
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
-								if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
-								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
-								out << plug.GetName() << " - successfully instanciated";
-								out.flush();
+								{
+									std::ostringstream s; s << plug.GetInfo()->Version;
+									_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
+								}
+								{
+									std::ostringstream s; s << "0";
+									_pPlugsInfo[currentPlugsCount]->version = s.str();
+								}
 							}
+							learnDllName(fileName);
+							out << plug.GetName() << " - successfully instanciated";
+							out.flush();
 							++currentPlugsCount;
 							// [bohan] plug is a stack object, so its destructor is called
 							// [bohan] at the end of its scope (this cope actually).
@@ -750,33 +776,91 @@ NAMESPACE__BEGIN(psycle)
 									<< "Machine crashed: " << fileName;
 								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
+								_pPlugsInfo[currentPlugsCount]->identifier = 0;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
+								_pPlugsInfo[currentPlugsCount]->vendor = "???";
 								_pPlugsInfo[currentPlugsCount]->desc = "???";
 								_pPlugsInfo[currentPlugsCount]->version = "???";
+								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
+								++currentPlugsCount;
 							}
 							else
 							{
-								_pPlugsInfo[currentPlugsCount]->allow = true;
-								_pPlugsInfo[currentPlugsCount]->name = vstPlug->GetName();
+								if (vstPlug->IsShellPlugin())
 								{
-									std::ostringstream s;
-									s << (vstPlug->IsSynth() ? "VST2 instrument" : "VST2 effect") << " by " << vstPlug->GetVendorName();
-									_pPlugsInfo[currentPlugsCount]->desc = s.str();
-								}
-								{
-									std::ostringstream s;
-									s << vstPlug->GetVersion();
-									_pPlugsInfo[currentPlugsCount]->version = s.str();
-								}
-								
-								if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+									char tempName[64] = {0}; 
+									VstInt32 plugUniqueID = 0;
+									bool firstrun = true;
+									while ((plugUniqueID = vstPlug->GetNextShellPlugin(tempName)) != 0)
+									{ 
+										if (tempName[0] != 0)
+										{
+											if ( !firstrun )
+											{
+												_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+												_pPlugsInfo[currentPlugsCount]->dllname = fileName;
+												_pPlugsInfo[currentPlugsCount]->FileTime = time;
+											}
 
-								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
+											_pPlugsInfo[currentPlugsCount]->allow = true;
+											{
+												std::ostringstream s;
+												s << vstPlug->GetVendorName() << " " << tempName;
+												_pPlugsInfo[currentPlugsCount]->name = s.str();
+											}
+											_pPlugsInfo[currentPlugsCount]->identifier = plugUniqueID;
+											_pPlugsInfo[currentPlugsCount]->vendor = vstPlug->GetVendorName();
+											if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+											else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+											{
+												std::ostringstream s;
+												s << (vstPlug->IsSynth() ? "VST Shell instrument" : "VST Shell effect") << " by " << vstPlug->GetVendorName();
+												_pPlugsInfo[currentPlugsCount]->desc = s.str();
+											}
+											{
+												std::ostringstream s;
+												s << vstPlug->GetVersion();
+												_pPlugsInfo[currentPlugsCount]->version = s.str();
+											}
+											{
+												std::ostringstream s;
+												s << vstPlug->GetVstVersion();
+												_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
+											}
+											++currentPlugsCount;
+											firstrun=false;
+										}
+									}
+								}
+								else
+								{
+									_pPlugsInfo[currentPlugsCount]->allow = true;
+									_pPlugsInfo[currentPlugsCount]->name = vstPlug->GetName();
+									_pPlugsInfo[currentPlugsCount]->identifier = vstPlug->uniqueId();
+									_pPlugsInfo[currentPlugsCount]->vendor = vstPlug->GetVendorName();
+									if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+									else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+									{
+										std::ostringstream s;
+										s << (vstPlug->IsSynth() ? "VST instrument" : "VST effect") << " by " << vstPlug->GetVendorName();
+										_pPlugsInfo[currentPlugsCount]->desc = s.str();
+									}
+									{
+										std::ostringstream s;
+										s << vstPlug->GetVersion();
+										_pPlugsInfo[currentPlugsCount]->version = s.str();
+									}
+									{
+										std::ostringstream s;
+										s << vstPlug->GetVstVersion();
+										_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
+									}
+									++currentPlugsCount;
+								}
+								learnDllName(fileName);
 								out << vstPlug->GetName() << " - successfully instanciated";
 								out.flush();
 							}
-							++currentPlugsCount;
 							// [bohan] vstPlug is a stack object, so its destructor is called
 							// [bohan] at the end of its scope (this cope actually).
 							// [bohan] The problem with destructors of any object of any class is that
@@ -891,7 +975,7 @@ NAMESPACE__BEGIN(psycle)
 
 			UINT version;
 			file.Read(&version,sizeof(version));
-			if (version > CURRENT_CACHE_MAP_VERSION)
+			if (version != CURRENT_CACHE_MAP_VERSION)
 			{
 				file.Close();
 				DeleteFile(cache.c_str());
@@ -920,14 +1004,19 @@ NAMESPACE__BEGIN(psycle)
 				file.Read(&p.mode,sizeof(p.mode));
 				file.Read(&p.type,sizeof(p.type));
 				file.ReadString(p.name);
+				file.Read(&p.identifier,sizeof(p.identifier));
+				file.ReadString(p.vendor);
 				file.ReadString(p.desc);
 				file.ReadString(p.version);
+				file.Read(&p.APIversion,sizeof(p.APIversion));
+				// Temp here contains the full path to the .dll
 				if(finder.FindFile(Temp))
 				{
 					FILETIME time;
 					finder.FindNextFile();
 					if (finder.GetLastWriteTime(&time))
 					{
+						// Only add the information to the cache if the dll hasn't been modified (say, a new version)
 						if
 							(
 								p.FileTime.dwHighDateTime == time.dwHighDateTime &&
@@ -954,8 +1043,11 @@ NAMESPACE__BEGIN(psycle)
 							_pPlugsInfo[currentPlugsCount]->mode = p.mode;
 							_pPlugsInfo[currentPlugsCount]->type = p.type;
 							_pPlugsInfo[currentPlugsCount]->name = p.name;
+							_pPlugsInfo[currentPlugsCount]->identifier = p.identifier;
+							_pPlugsInfo[currentPlugsCount]->vendor = p.vendor;
 							_pPlugsInfo[currentPlugsCount]->desc = p.desc;
 							_pPlugsInfo[currentPlugsCount]->version = p.version;
+							_pPlugsInfo[currentPlugsCount]->APIversion = p.APIversion;
 
 							if(p.error.empty())
 							{
@@ -1000,8 +1092,11 @@ NAMESPACE__BEGIN(psycle)
 				file.Write(&_pPlugsInfo[i]->mode,sizeof(_pPlugsInfo[i]->mode));
 				file.Write(&_pPlugsInfo[i]->type,sizeof(_pPlugsInfo[i]->type));
 				file.Write(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
+				file.Write(&_pPlugsInfo[i]->identifier,sizeof(_pPlugsInfo[i]->identifier));
+				file.Write(_pPlugsInfo[i]->vendor.c_str(),_pPlugsInfo[i]->vendor.length()+1);
 				file.Write(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
 				file.Write(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
+				file.Write(&_pPlugsInfo[i]->APIversion,sizeof(_pPlugsInfo[i]->APIversion));
 			}
 			file.Close();
 			return true;

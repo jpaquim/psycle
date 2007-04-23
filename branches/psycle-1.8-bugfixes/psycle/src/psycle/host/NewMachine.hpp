@@ -8,6 +8,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <map>
+#include "afxwin.h"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		const int MAX_BROWSER_NODES = 64;
@@ -27,12 +28,15 @@ NAMESPACE__BEGIN(psycle)
 			{
 			}
 			std::string dllname;
+			long identifier;
 			std::string error;
 			MachineMode mode;
 			MachineType type;
 			std::string name;
+			std::string vendor;
 			std::string desc;
 			std::string version;
+			std::string APIversion;
 			FILETIME FileTime;
 			bool allow;
 			/*
@@ -65,22 +69,7 @@ NAMESPACE__BEGIN(psycle)
 		public:
 			CNewMachine(CWnd* pParent = 0);
 			virtual ~CNewMachine();
-			CImageList imgList;
-			HTREEITEM tHand;
-			int Outputmachine;
-			std::string psOutputDll;
-			int OutBus;
-			static int pluginOrder;
-			static bool pluginName;
-			static void learnDllName(const std::string & fullpath);
-			static bool lookupDllName(const std::string, std::string & result);
-			static void DestroyPluginInfo();
-			static void LoadPluginInfo();
-			static int LastType0;
-			static int LastType1;
-			static bool TestFilename(const std::string & name);
-		// Dialog Data
-			//{{AFX_DATA(CNewMachine)
+
 			enum { IDD = IDD_NEWMACHINE };
 			CButton	m_Allow;
 			CStatic	m_nameLabel;
@@ -90,22 +79,33 @@ NAMESPACE__BEGIN(psycle)
 			int		m_orderby;
 			CStatic	m_dllnameLabel;
 			int		m_showdllName;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CNewMachine)
+			CStatic m_APIversionLabel;
 			protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
+		public:
+			CImageList imgList;
+			HTREEITEM tHand;
+			int Outputmachine;
+			std::string psOutputDll;
+			int shellIdx;
+			int OutBus;
+			static int pluginOrder;
+			static bool pluginName;
+
+			static void learnDllName(const std::string & fullpath);
+			static bool lookupDllName(const std::string, std::string & result);
+			static void DestroyPluginInfo();
+			static void LoadPluginInfo();
+			static int LastType0;
+			static int LastType1;
+			static bool TestFilename(const std::string & name);
 		protected:
 			static std::map<std::string,std::string> dllNames;
 			bool bAllowChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
 			HTREEITEM hInt[5];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
-			// Generated message map functions
-			//{{AFX_MSG(CNewMachine)
+
 			afx_msg void OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult);
 			virtual BOOL OnInitDialog();
 			afx_msg void OnRefresh();
@@ -117,7 +117,6 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnShowdllname();
 			afx_msg void OnShoweffname();
 			afx_msg void OnCheckAllow();
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
 			static int _numPlugins;
@@ -129,7 +128,5 @@ NAMESPACE__BEGIN(psycle)
 			void UpdateList(bool bInit = false);
 		};
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	NAMESPACE__END
 NAMESPACE__END

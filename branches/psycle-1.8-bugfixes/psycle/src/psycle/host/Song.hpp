@@ -114,7 +114,7 @@ namespace psycle
 			/// Gets the first free slot in the pMachine[] Array
 			int GetFreeMachine();
 			/// creates a new machine in this song.
-			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int index);
+			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
 			/// destroy a machine of this song.
 			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
