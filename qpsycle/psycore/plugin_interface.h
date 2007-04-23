@@ -145,11 +145,10 @@ public:
 		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT ::CMachineInterface *        PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION CreateMachine() { return new typename; } \
 		PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT void                         PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION DeleteMachine(::CMachineInterface & plugin) { delete &plugin; } \
 	}
-#if !defined _WINDOWS
+#if !defined _WIN64 && !defined _WIN32 && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
 	#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT
 	#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION
 #else
 	#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport)
 	#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
 #endif
-
