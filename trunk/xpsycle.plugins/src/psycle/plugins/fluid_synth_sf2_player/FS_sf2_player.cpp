@@ -54,7 +54,7 @@ CMachineParameter const paraInstr =
 
 CMachineParameter const paraChannel = 
 {
-        "No.", "Number", 0, MAXMIDICHAN-1, MPF_STATE, 1
+        "No.", "Number", 0, MAXMIDICHAN-1, MPF_STATE, 0
 };
 
 CMachineParameter const paraBank = 
@@ -504,15 +504,18 @@ void mi::ParameterTweak(int par, int val)
                         fluid_synth_pitch_wheel_sens(synth, globalpar.curChannel, globalpar.instr[globalpar.curChannel].wheel);
                         break;
                 case e_paraBank:
-                        if (Vals[par]>max_bank_index && max_bank_index!=-1)
-                        {
-                                Vals[e_paraBank] = max_bank_index;
-                        }
-                        globalpar.instr[globalpar.curChannel].bank = banks[Vals[e_paraBank]];
-                        globalpar.instr[globalpar.curChannel].prog = Vals[e_paraProgram] = progs[globalpar.instr[globalpar.curChannel].bank];
+						if ( max_bank_index != 1)
+						{
+							if (Vals[e_paraBank]>max_bank_index)
+							{
+								Vals[e_paraBank] = max_bank_index;
+							}
+							globalpar.instr[globalpar.curChannel].bank = banks[Vals[e_paraBank]];
+							globalpar.instr[globalpar.curChannel].prog = Vals[e_paraProgram] = progs[globalpar.instr[globalpar.curChannel].bank];
 
-						fluid_synth_bank_select(synth, globalpar.curChannel, globalpar.instr[globalpar.curChannel].bank);
-                        fluid_synth_program_change(synth, globalpar.curChannel, globalpar.instr[globalpar.curChannel].prog);
+							fluid_synth_bank_select(synth, globalpar.curChannel, globalpar.instr[globalpar.curChannel].bank);
+							fluid_synth_program_change(synth, globalpar.curChannel, globalpar.instr[globalpar.curChannel].prog);
+                        }
                         break;
                 case e_paraProgram:
                         globalpar.instr[globalpar.curChannel].prog = val;

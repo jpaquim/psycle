@@ -22,12 +22,13 @@ jeremy evers			pooplog		Developer in versions 1.7.x
 Lukasz Langa			lukasz_langa	Also known as kSh. He made changes in the cpu clock functions.
 Martin				lobywang	crop command in the wave editor
 Mark MkCommack			--------	 Coded the MIDI implementation.
-Marcin Kowalski			--------	Also known as Fideloop. Made the Wave editor.
-James Redfern			alkenstein	 plugin, fixes and small aditions.
+Marcin Kowalski			--------	Also known as Fideloop. Made the (original) Wave editor.
+James Redfern			alkenstein	plugin, fixes and small aditions.
 Jose Enrique			sampler		fixes and small aditions.
 Guido Vranken			guidovranken	Code for mute/bypass, interpolation. Interested in special pattern modes.
 TranceMyriad			trancemyriad	New "Add Machine" dialog, work in multi-io.
-dw_aley				dw_aley		he did the 3D arrows; xpsycle
+dw_aley				dw_aley		Several new internal machines (LFO, Automator), native UI, plugins, the new
+						Wave editor, parts of xpsycle
 
 
 Plugin Coders :
