@@ -5,6 +5,7 @@
 ///\see file graph.hpp to #include the real declarations
 #pragma once
 #include <psycle/detail/project.hpp>
+#include <psycle/engine/forward_declarations.hpp>
 namespace psycle
 {
 	namespace front_ends
@@ -23,6 +24,13 @@ namespace psycle
 					class single;
 					class multiple;
 				}
+			}
+			namespace underlying = engine;
+
+			namespace typenames
+			{
+				using namespace gui;
+				class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
 			}
 		}
 	}

@@ -6,6 +6,7 @@
 #pragma once
 #include "forward_declarations.hpp"
 #include "color.hpp"
+#include "contraption.hpp"
 #include <psycle/engine.hpp>
 #include <psycle/host.hpp>
 #include <universalis/compiler/cast.hpp>
@@ -29,8 +30,6 @@ namespace psycle
 	{
 		namespace gui
 		{
-			typedef ::guint time;
-			
 			typedef
 				Gnome::Canvas::
 					//Canvas
@@ -66,27 +65,6 @@ namespace psycle
 				private:
 					Gnome::Canvas::Line line_;
 			};
-			
-			namespace underlying = engine;
-
-			class graph;
-			class node;
-			class port;
-			namespace ports
-			{
-				class output;
-				namespace inputs
-				{
-					class single;
-					class multiple;
-				}
-			}
-
-			namespace typenames
-			{
-				using namespace gui;
-				class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
-			}
 
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
 			:
@@ -136,66 +114,6 @@ namespace psycle
 					Gtk::VBox box_;
 			};
 			
-			typedef universalis::compiler::numeric<>::floating_point real;
-
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK contraption : public Gnome::Canvas::Group
-			{
-				public:
-					contraption(Gnome::Canvas::Group & parent, real const & x, real const & y, color const &, std::string const & text);
-					
-				protected:
-					Gnome::Canvas::Rect inline & rectangle() throw() { return rectangle_; }
-				private:
-					Gnome::Canvas::Rect rectangle_;
-
-				///\name text
-				///\{
-					public:
-						void text(std::string const & text);
-					protected:
-						Gnome::Canvas::Text inline & text_shadow() throw() { return text_shadow_; }
-						Gnome::Canvas::Text inline & text_highlight() throw() { return text_highlight_; }
-					private:
-						Gnome::Canvas::Text text_shadow_, text_highlight_;
-				///\}
-
-				///\name colors
-				///\{
-					public:
-						color inline & fill_color() { return fill_color_; }
-						color inline & outline_color() { return outline_color_; }
-						color inline & highlight_fill_color() { return highlight_fill_color_; }
-						color inline & highlight_outline_color() { return highlight_outline_color_; }
-					private:
-						color fill_color_, outline_color_, highlight_fill_color_, highlight_outline_color_;
-				///\}
-
-				///\name signals
-				///\{
-					public:
-						boost::signal<void (contraption &)> inline & signal_enter()  { return signal_enter_; }
-						boost::signal<void (contraption &)> inline & signal_select() { return signal_select_; }
-						boost::signal<void (contraption &)> inline & signal_move()   { return signal_move_; }
-						boost::signal<void (contraption &)> inline & signal_leave()  { return signal_leave_; }
-					private:
-						boost::signal<void (contraption &)> signal_enter_, signal_move_, signal_select_, signal_leave_;
-					protected:
-						bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
-				///\}
-
-				///\name dragging
-				///\{
-					protected:
-						void dragging_start(real const & x, real const & y, time const & time);
-						void dragging(real const & x, real const & y);
-						void dragging_stop(time const & time);
-						bool inline const & dragging() { return dragging_; }
-					private:
-						bool dragging_;
-						real dragging_x_, dragging_y_;
-				///\}
-			};
-
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
 			:
 				public typenames::typenames::bases::port,
