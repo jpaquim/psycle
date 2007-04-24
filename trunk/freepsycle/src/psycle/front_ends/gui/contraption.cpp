@@ -35,7 +35,7 @@ namespace psycle
 					}
 					font_description = new Pango::FontDescription;
 					font_description->set_family("helvetica");
-					#if !defined OPERATING_SYSTEM__MICROSOFT
+					#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 						font_description->set_weight(Pango::WEIGHT_BOLD);
 					#else
 						font_description->set_weight(Pango::WEIGHT_ULTRABOLD);
