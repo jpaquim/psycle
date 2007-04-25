@@ -37,8 +37,8 @@
 #include <QPainter>
 #include <QGraphicsItem>
 
- SequencerDraw::SequencerDraw( SequencerView *seqView )
- {
+SequencerDraw::SequencerDraw( SequencerView *seqView )
+{
     seqView_ = seqView;
     beatPxLength_ = 5;
     lineHeight_ = 30;
@@ -49,7 +49,6 @@
 
     setAlignment ( Qt::AlignLeft | Qt::AlignTop );
     setScene(scene_);
-    setSceneRect( 0,0, width(), height() );
 
     seqArea_ = new SequencerArea( this );
 
@@ -265,6 +264,47 @@ void SequencerDraw::onPlayLineMoved( double newXPos )
     psy::core::Player::Instance()->stop();
     psy::core::Player::Instance()->setPlayPos( newXPos / beatPxLength_ );
 }
+
+void SequencerDraw::onItemMoved( SequencerItem* item, QGraphicsSceneMouseEvent *event ) 
+{
+    QPointF newPos(item->mapToParent(event->pos()) - item->matrix().map(event->buttonDownPos(Qt::LeftButton)));
+    QPointF diff = newPos - item->pos();
+    diff.setY( 0 );
+    if ( true /*gridSnap()*/ ) {
+        int beatDiff = diff.x() / 5;
+        int snappedBeatDiff = beatDiff * 5;
+        diff.setX( snappedBeatDiff );
+    }
+
+    QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
+
+    int leftMostX = 10000; // Of all selected items, find the left most x pos.
+    foreach ( QGraphicsItem *uncastItem, selectedItems )
+    {
+        if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+        {
+            if ( someItem->pos().x() < leftMostX ) leftMostX = someItem->pos().x();
+        }
+    }
+
+    int xMoveBy;
+    if ( leftMostX + diff.x() < 0 ) {
+        xMoveBy = -leftMostX;
+    } else {
+        xMoveBy = diff.x();
+    }
+
+    foreach ( QGraphicsItem *uncastItem, selectedItems )
+    {
+        if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+        {
+            someItem->moveBy( xMoveBy, 0 );
+            int newItemLeft = someItem->pos().x();
+            someItem->sequenceEntry()->track()->MoveEntry( someItem->sequenceEntry(), newItemLeft / beatPxLength() );
+        }
+    }
+}
+
 
 PlayLine::PlayLine()
 { 

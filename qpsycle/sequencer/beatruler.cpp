@@ -21,6 +21,8 @@
 #include "beatruler.h"
 #include "sequencerdraw.h"
 
+#include <QGraphicsScene>
+
 BeatRuler::BeatRuler( SequencerDraw* seqDraw )
 {
     sDraw_ = seqDraw;
@@ -32,7 +34,7 @@ BeatRuler::~BeatRuler( )
 
 QRectF BeatRuler::boundingRect() const
 {
-    return QRectF( 0, 0, sDraw_->width(), preferredHeight() );
+    return QRectF( 0, 0, sDraw_->scene()->width(), preferredHeight() ) ;
 }
 
 void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
@@ -43,7 +45,7 @@ void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option
 
     painter->setBrush( QColor( 230,230,230 ) );
     painter->setPen( QColor( 230,230,230 ) );
-    painter->drawRect( boundingRect() );
+    painter->fillRect( boundingRect(), QColor( 230, 230, 230 ) );
 
     int start = 0;
     int end   = sDraw_->width();

@@ -26,7 +26,11 @@
 #include "sequenceritem.h"
 
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <boost/bind.hpp>
+#include <QGraphicsItemGroup>
+
+#include <iostream>
 
 SequencerLine::SequencerLine( SequencerDraw *sDraw)
 {
@@ -39,7 +43,9 @@ SequencerLine::~SequencerLine() {
 
 QRectF SequencerLine::boundingRect() const 
 {
-    return QRectF( 0, 0, sDraw_->width(), 30 );
+    int b = 0.5;
+    int width = std::max( sDraw_->width(), (int)sDraw_->scene()->width() );
+    return QRectF( 1, 0-b, width, 30+b );
 }
 
 void SequencerLine::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
@@ -81,7 +87,7 @@ void SequencerLine::addItem( psy::core::SinglePattern* pattern )
   addEntry(entry);
 }
 
-void SequencerLine::addEntry( psy::core::SequenceEntry* entry)
+void SequencerLine::addEntry( psy::core::SequenceEntry* entry )
 {
   SequencerItem* item = new SequencerItem();
   item->setSequenceEntry( entry );
@@ -91,6 +97,8 @@ void SequencerLine::addEntry( psy::core::SequenceEntry* entry)
            sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
   connect( item, SIGNAL( clicked( SequencerItem*) ),
            this, SLOT( onItemClicked( SequencerItem*) ) );
+  connect( item, SIGNAL( moved( SequencerItem*, QGraphicsSceneMouseEvent* ) ),
+           sDraw_, SLOT( onItemMoved( SequencerItem*, QGraphicsSceneMouseEvent* ) ) );
   item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 
   entry->wasDeleted.connect(boost::bind(&SequencerLine::removeEntry,this,_1));
@@ -107,6 +115,8 @@ void SequencerLine::insertItem( SequencerItem *item )
            sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
   connect( item, SIGNAL( clicked( SequencerItem*) ),
            this, SLOT( onItemClicked( SequencerItem*) ) );
+  connect( item, SIGNAL( moved( SequencerItem*, QGraphicsSceneMouseEvent* ) ),
+           this, SLOT( onItemMoved( SequencerItem*, QGraphicsSceneMouseEvent* ) ) );
   //item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 
   scene()->update();
@@ -151,3 +161,4 @@ void SequencerLine::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     emit clicked( this );
 }
+

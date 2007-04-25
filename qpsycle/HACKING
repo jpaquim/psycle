@@ -59,3 +59,7 @@ put your name in the actual code file; noone owns a particular
 piece of code, and it can sometimes put other potentional developers 
 off working on something if they think it "belongs" to someone else.
 
+(p.s. putting your name in for little notes, queries, etc,
+related to part of the code is fine -- just don't put AUTHOR = ME
+in big letters at the top.)
+

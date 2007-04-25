@@ -28,6 +28,8 @@ class SequenceEntry;
 #include <QObject>
 #include <QAction>
 
+class QKeyEvent;
+class QGraphicsSceneMouseEvent;
 class SequencerView;
 
 class SequencerItem : public QObject, public QGraphicsItem
@@ -52,6 +54,12 @@ public:
         return Type;
     }
 
+protected: 
+    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+    void mousePressEvent( QGraphicsSceneMouseEvent *event );
+    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
+    void keyPressEvent( QKeyEvent *event );
+
 private slots:
     void onLoopEntryActionTriggered();
     void onDeleteEntryActionTriggered();
@@ -59,11 +67,8 @@ private slots:
 signals:
     void clicked(SequencerItem*);
     void deleteRequest( SequencerItem* );
+    void moved( SequencerItem*, QGraphicsSceneMouseEvent* );
 
-protected: 
-    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
-    void mousePressEvent( QGraphicsSceneMouseEvent *event );
-    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
 
  private:
     psy::core::SequenceEntry *sequenceEntry_;

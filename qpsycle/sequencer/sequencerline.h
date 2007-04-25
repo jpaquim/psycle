@@ -53,7 +53,6 @@ public:
     void insertItem( SequencerItem *item );
     void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
 
-    void mousePressEvent( QGraphicsSceneMouseEvent *event );
     SequencerDraw *sDraw_;
 
     enum { Type = UserType + 6 };
@@ -62,6 +61,9 @@ public:
 
         return Type;
     }
+
+protected:
+    void mousePressEvent( QGraphicsSceneMouseEvent *event );
 
 signals:
     void clicked( SequencerLine* );

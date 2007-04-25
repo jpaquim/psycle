@@ -63,6 +63,7 @@ public slots:
     void onSequencerLineClick( SequencerLine *line );
     void onSequencerItemDeleteRequest( SequencerItem *item );
     void onPlayLineMoved( double newXPos );
+    void onItemMoved( SequencerItem* item, QGraphicsSceneMouseEvent *event );
 
  protected:
 
