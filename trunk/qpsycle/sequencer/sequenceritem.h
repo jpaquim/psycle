@@ -67,7 +67,7 @@ private slots:
 signals:
     void clicked(SequencerItem*);
     void deleteRequest( SequencerItem* );
-    void moved( SequencerItem*, QGraphicsSceneMouseEvent* );
+    void moved( SequencerItem*, QPointF diff );
 
 
  private:

@@ -265,10 +265,8 @@ void SequencerDraw::onPlayLineMoved( double newXPos )
     psy::core::Player::Instance()->setPlayPos( newXPos / beatPxLength_ );
 }
 
-void SequencerDraw::onItemMoved( SequencerItem* item, QGraphicsSceneMouseEvent *event ) 
+void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff ) 
 {
-    QPointF newPos(item->mapToParent(event->pos()) - item->matrix().map(event->buttonDownPos(Qt::LeftButton)));
-    QPointF diff = newPos - item->pos();
     diff.setY( 0 );
     if ( true /*gridSnap()*/ ) {
         int beatDiff = diff.x() / 5;
