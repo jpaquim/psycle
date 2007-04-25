@@ -22,6 +22,7 @@
 #include "psycore/player.h"
 
 #include "sequencerview.h"
+#include "sequencerdraw.h"
 #include "sequencerline.h"
 #include "sequenceritem.h"
 
@@ -29,11 +30,12 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QMenu>
+#include <QKeyEvent>
+#include <QGraphicsItemGroup>
 
 SequencerItem::SequencerItem() 
 {
-    setFlag( ItemIsMovable );
-    setFlag( ItemIsSelectable );
+    setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
     beatPxLength_ = 5;
 }
 
@@ -82,23 +84,10 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
     if ( event->modifiers() == Qt::NoModifier ) // Movement constrained to current line.
     {
-        QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
-
-        QList<QGraphicsItem*> selItems = scene()->selectedItems();
-        QList<QGraphicsItem*>::iterator i;
-        for (i = selItems.begin(); i != selItems.end(); ++i) // For each selected item...
-        {
-            QGraphicsItem *foo = *i;
-            if ( qgraphicsitem_cast<SequencerItem *>( foo ) ) // Make sure it's a SeqItem.
-            {
-                SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); 
-                item->constrainToParent();
-             
-                // FIXME: maybe do this on mouseReleaseEvent?
-                int newItemLeft = item->pos().x(); 
-                item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newItemLeft / beatPxLength_ );
-            }
-        }
+        emit moved( this, event ); 
+        // <nmather> MoveEvent handling put in SequencerDraw -- seems more sensible
+        // as we may be moving groups of selected items (which this item shouldn't
+        // really know about).
     }
     if ( event->modifiers() == Qt::ShiftModifier ) // Movement allowed between lines.
     {
@@ -123,16 +112,18 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
         int newItemLeft = pos().x(); 
         sequenceEntry()->track()->MoveEntry( sequenceEntry(), newItemLeft / beatPxLength_ );
     }
+//    SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine*>( parentItem() );
+//    parentLine->sDraw_->ensureVisible( this, 0, 0 );
 }
 
 void SequencerItem::constrainToParent() 
 {
     int widthOfThisItem = boundingRect().width();
     int widthOfParent = parentItem()->boundingRect().width();
-    int maximumLeftPos = widthOfParent - widthOfThisItem;
+    //int maximumLeftPos = widthOfParent - widthOfThisItem;
     int currentLeftPos = pos().x();
-    int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
-    int newLeftPos = std::max( 0, desiredLeftPos );
+    //int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
+    int newLeftPos = std::max( 0, currentLeftPos );
 
     setPos( newLeftPos, 0 );                 
     
@@ -178,4 +169,56 @@ void SequencerItem::onLoopEntryActionTriggered()
 void SequencerItem::onDeleteEntryActionTriggered()
 {
     emit deleteRequest( this );
+}
+
+void SequencerItem::keyPressEvent( QKeyEvent *event )
+{
+    switch ( event->key() )
+    {
+        case Qt::Key_Left:
+        {
+            QList<QGraphicsItem*> selItems = scene()->selectedItems();
+            QList<QGraphicsItem*>::iterator i;
+            for (i = selItems.begin(); i != selItems.end(); ++i) // For each selected item...
+            {
+                QGraphicsItem *foo = *i;
+                if ( qgraphicsitem_cast<SequencerItem *>( foo ) ) // Make sure it's a SeqItem.
+                {
+                    SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); 
+                    item->constrainToParent();
+                 
+                    int newItemLeft = std::max( 0, (int)item->pos().x() - beatPxLength_ ); 
+                    item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newItemLeft / beatPxLength_ );
+                    item->setPos( newItemLeft, 0 );
+                    scene()->update( boundingRect() );
+                }
+            }
+        }
+        break;
+        case Qt::Key_Right :
+        {
+            QList<QGraphicsItem*> selItems = scene()->selectedItems();
+            QList<QGraphicsItem*>::iterator i;
+            for (i = selItems.begin(); i != selItems.end(); ++i) // For each selected item...
+            {
+                QGraphicsItem *foo = *i;
+                if ( qgraphicsitem_cast<SequencerItem *>( foo ) ) // Make sure it's a SeqItem.
+                {
+                    SequencerItem *item = qgraphicsitem_cast<SequencerItem *>( foo ); 
+                    item->constrainToParent();
+                 
+                    int newItemLeft = item->pos().x() + beatPxLength_; 
+                    item->sequenceEntry()->track()->MoveEntry( item->sequenceEntry(), newItemLeft / beatPxLength_ );
+                    item->moveBy( beatPxLength_, 0 );
+                    scene()->update( boundingRect() );
+                }
+            }
+        }
+        break;
+        case Qt::Key_Up:
+        {
+
+        }
+
+    }
 }

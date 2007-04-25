@@ -25,7 +25,7 @@
  class SequencerView;
  class SequencerDraw;
 
- class SequencerArea : public QGraphicsRectItem
+ class SequencerArea : public QGraphicsItem
  {
 
 public:
@@ -33,6 +33,7 @@ public:
 
     SequencerDraw* sequencerDraw() { return seqDraw_;} 
 
+    QRectF boundingRect() const;
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
     void drawTimegrid( QPainter *painter );
 

@@ -29,16 +29,18 @@
 
 #include <vector>
 
- SequencerArea::SequencerArea( SequencerDraw *seqDrawIn )
+SequencerArea::SequencerArea( SequencerDraw *seqDrawIn )
     : seqDraw_( seqDrawIn )
- {
-    int width = seqDraw_->sequencerView()->width();
-    int height = seqDraw_->sequencerView()->height();
-     setRect( 0, 0, width, height );
-     setBrush( QBrush( Qt::transparent ) );
-
+{
     beatPxLength_ = sequencerDraw()->beatPxLength();
- }
+}
+
+QRectF SequencerArea::boundingRect() const 
+{
+    int width = std::max( seqDraw_->width(), (int)childrenBoundingRect().width() );
+    int height = std::max( seqDraw_->height(), (int)childrenBoundingRect().height() );
+    return QRectF( 0, 0, width, height );
+}
 
 
 void SequencerArea::paint( QPainter *painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
@@ -50,7 +52,7 @@ void SequencerArea::drawTimegrid( QPainter *painter )
 {
     QRectF br = boundingRect();
     int start = 0;
-    int end   = sequencerDraw()->width();
+    int end   = (int)br.width();
 
     painter->setPen( QColor( 30, 30, 30 ) );
     for (int i = start ; i <= end ; i++) {
