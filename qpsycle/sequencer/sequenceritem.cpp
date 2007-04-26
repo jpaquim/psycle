@@ -188,9 +188,11 @@ void SequencerItem::keyPressEvent( QKeyEvent *event )
         }
         break;
         case Qt::Key_Up:
-        {
-
-        }
-
+            emit changedLine( this, 0 ); 
+            break;
+        case Qt::Key_Down:
+            emit changedLine( this, 1 );
+            break;
+        default:;
     }
 }

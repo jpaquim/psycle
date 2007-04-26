@@ -307,18 +307,22 @@ void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff )
 
 void SequencerDraw::onItemChangedLine( SequencerItem *item, int direction )
 {
+    // Note: for "direction", 0 = up, 1 = down.
     QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
-    int topMostY = 10000; // Of all selected items, find the top most line inhabited.
+
+    // Check that the item (or group) doesn't touch the top or bottom.
     bool allowMove = true;
     foreach ( QGraphicsItem *uncastItem, selectedItems )
     {
         if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
         {
             SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
-            if ( lines_[0] == parentLine ) 
+            if ( lines_[0] == parentLine ) {
                 if (direction == 0 ) allowMove = false;
-            if ( lines_[lines_.size()-1] == parentLine ) 
+            }
+            if ( lines_[lines_.size()-1] == parentLine ) {
                 if (direction == 1) allowMove = false;
+            }
         }
     }
 
@@ -331,17 +335,15 @@ void SequencerDraw::onItemChangedLine( SequencerItem *item, int direction )
                 SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
                 int parentPos;
                 for ( int i = 0; i < lines_.size(); i++ ) {
-                    if ( lines_[i] == parentLine )
+                    if ( lines_[i] == parentLine ) {
                         parentPos = i;
+                    }
                 }
                 SequencerLine *newLine;
                 if ( direction == 0 ) {
                     parentLine->moveItemToNewLine( someItem, lines_[parentPos-1] );
-                    printf("up");
-                }
-                if ( direction == 1 ) {
+                } else if ( direction == 1 ) {
                     parentLine->moveItemToNewLine( someItem, lines_[parentPos+1] );
-                    printf("down");
                 }
             }
         }
