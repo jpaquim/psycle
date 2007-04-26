@@ -178,6 +178,8 @@ void SequencerDraw::onSequencerLineClick( SequencerLine *line )
     setSelectedLine( line );
     scene()->update( oldLineRect );
     scene()->update( newLineRect );
+  for ( int i = 0; i < lines_.size(); i++ )
+      printf( "linelist %p\n", lines_[i] );
 }
 
 void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
@@ -299,6 +301,49 @@ void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff )
             someItem->moveBy( xMoveBy, 0 );
             int newItemLeft = someItem->pos().x();
             someItem->sequenceEntry()->track()->MoveEntry( someItem->sequenceEntry(), newItemLeft / beatPxLength() );
+        }
+    }
+}
+
+void SequencerDraw::onItemChangedLine( SequencerItem *item, int direction )
+{
+    QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
+    int topMostY = 10000; // Of all selected items, find the top most line inhabited.
+    bool allowMove = true;
+    foreach ( QGraphicsItem *uncastItem, selectedItems )
+    {
+        if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+        {
+            SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
+            if ( lines_[0] == parentLine ) 
+                if (direction == 0 ) allowMove = false;
+            if ( lines_[lines_.size()-1] == parentLine ) 
+                if (direction == 1) allowMove = false;
+        }
+    }
+
+    if ( allowMove )
+    {
+        foreach ( QGraphicsItem *uncastItem, selectedItems )
+        {
+            if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+            {
+                SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
+                int parentPos;
+                for ( int i = 0; i < lines_.size(); i++ ) {
+                    if ( lines_[i] == parentLine )
+                        parentPos = i;
+                }
+                SequencerLine *newLine;
+                if ( direction == 0 ) {
+                    parentLine->moveItemToNewLine( someItem, lines_[parentPos-1] );
+                    printf("up");
+                }
+                if ( direction == 1 ) {
+                    parentLine->moveItemToNewLine( someItem, lines_[parentPos+1] );
+                    printf("down");
+                }
+            }
         }
     }
 }

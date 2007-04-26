@@ -31,6 +31,7 @@ class SequenceEntry;
 class QKeyEvent;
 class QGraphicsSceneMouseEvent;
 class SequencerView;
+class SequencerLine;
 
 class SequencerItem : public QObject, public QGraphicsItem
 {
@@ -68,6 +69,7 @@ signals:
     void clicked(SequencerItem*);
     void deleteRequest( SequencerItem* );
     void moved( SequencerItem*, QPointF diff );
+    void changedLine( SequencerItem*, int );
 
 
  private:

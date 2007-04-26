@@ -64,6 +64,7 @@ public slots:
     void onSequencerItemDeleteRequest( SequencerItem *item );
     void onPlayLineMoved( double newXPos );
     void onItemMoved( SequencerItem* item, QPointF diff );
+    void onItemChangedLine( SequencerItem *item, int direction );
 
  protected:
 

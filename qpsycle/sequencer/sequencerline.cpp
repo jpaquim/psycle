@@ -99,6 +99,8 @@ void SequencerLine::addEntry( psy::core::SequenceEntry* entry )
            this, SLOT( onItemClicked( SequencerItem*) ) );
   connect( item, SIGNAL( moved( SequencerItem*, QPointF ) ),
            sDraw_, SLOT( onItemMoved( SequencerItem*, QPointF ) ) );
+  connect( item, SIGNAL( changedLine( SequencerItem*, int ) ),
+           sDraw_, SLOT( onItemChangedLine( SequencerItem*, int ) ) );
   item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 
   entry->wasDeleted.connect(boost::bind(&SequencerLine::removeEntry,this,_1));
@@ -111,20 +113,16 @@ void SequencerLine::insertItem( SequencerItem *item )
 {
   item->setParentItem( this );
   items_.push_back( item );
-  connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
-           sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
   connect( item, SIGNAL( clicked( SequencerItem*) ),
            this, SLOT( onItemClicked( SequencerItem*) ) );
-  connect( item, SIGNAL( moved( SequencerItem*, QGraphicsSceneMouseEvent* ) ),
-           this, SLOT( onItemMoved( SequencerItem*, QGraphicsSceneMouseEvent* ) ) );
-  //item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
-
   scene()->update();
 }
 
 // FIXME: design-wise, this may be better as SequencerItem::moveToNewLine.
 void SequencerLine::moveItemToNewLine( SequencerItem *item, SequencerLine *newLine ) 
 {
+  printf( "prevline %p\n", this );
+  printf( "newline %p\n", newLine );
   for( items_iterator i=items_.begin(); i!=items_.end(); ++i ) {
     assert(*i);
     if( (*i) == item ) {
