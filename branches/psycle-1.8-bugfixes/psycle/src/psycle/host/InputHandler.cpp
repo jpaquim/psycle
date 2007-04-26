@@ -46,12 +46,12 @@ namespace psycle
 		// in: command def, key, modifiers
 		// out: true if we had to remove another definition
 		///\todo more warnings if we are changing existing defs
-		bool InputHandler::SetCmd(CmdDef cmd, UINT key, UINT modifiers,bool checkforduplicates)
+		bool InputHandler::SetCmd(CmdDef &cmd, UINT key, UINT modifiers,bool checkforduplicates)
 		{	
 			// clear note?
 			if(!cmd.IsValid())
 			{
-				cmdLUT[modifiers][key].ID = cdefNull;
+				cmdLUT[modifiers][key].SetNull();
 				return false;
 			}
 
@@ -76,7 +76,7 @@ namespace psycle
 						if(cmdLUT[j][i]==cmd && ((j!=modifiers)|| (i!=key)))
 						{
 							TRACE("--> removing from [%d][%d]\n",j,i);
-							cmdLUT[j][i]=cdefNull;
+							cmdLUT[j][i].SetNull();
 							bCmdReplaced=true;
 						}
 					}
@@ -106,56 +106,70 @@ namespace psycle
 			// special: right control mapped to PLAY
 			if(bCtrlPlay && GetKeyState(VK_RCONTROL)<0)
 			{
-				CmdDef cmdPlay;
-				cmdPlay.ID = cdefPlaySong;
+				CmdDef cmdPlay(cdefPlaySong);
 				return cmdPlay;
 			}
 			else
 			{
 				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->_playing&&Global::pConfig->_followSong))
 				{
-					CmdDef cmdSel;
 					switch (nChar)
 					{
 					case VK_UP:
-						cmdSel.ID = cdefNavUp; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavUp);
+							bDoingSelection=true; 
+							return cmdSel;
+						}
 						break;
 					case VK_LEFT:
-						cmdSel.ID = cdefNavLeft; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavLeft);
+							bDoingSelection=true;
+							return cmdSel;
+						}
 						break;
 					case VK_DOWN:
-						cmdSel.ID = cdefNavDn; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavDn);
+							bDoingSelection=true; 
+							return cmdSel; 
+						}
 						break;
 					case VK_RIGHT:
-						cmdSel.ID = cdefNavRight; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavRight); 
+							bDoingSelection=true; 
+							return cmdSel; 
+						}
 						break;
 					case VK_HOME:
-						cmdSel.ID = cdefNavTop; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavTop); 
+							bDoingSelection=true; 
+							return cmdSel; 
+						}
 						break;
 					case VK_END:
-						cmdSel.ID = cdefNavBottom; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavBottom); 
+							bDoingSelection=true; 
+							return cmdSel; 
+						}
 						break;
 					case VK_PRIOR:
-						cmdSel.ID = cdefNavPageUp; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavPageUp); 
+							bDoingSelection=true; 
+							return cmdSel; 
+						}
 						break;
 					case VK_NEXT:
-						cmdSel.ID = cdefNavPageDn; 
-						bDoingSelection=true; 
-						return cmdSel; 
+						{
+							CmdDef cmdSel(cdefNavPageDn); 
+							bDoingSelection=true; 
+							return cmdSel; 
+						}
 						break;
 					}
 				}
@@ -180,25 +194,24 @@ namespace psycle
 		// OUT: command
 		CmdDef InputHandler::StringToCmd(LPCTSTR str)
 		{
-			CmdDef ret;
 			int i;
 			for(i=0;i<max_cmds;i++)
 			{
-				ret.ID = CmdSet(i);
+				CmdDef ret = CmdSet(i);
 				if(ret.IsValid())
 				{
 					if(!strcmp(ret.GetName(),str))
 						return ret;
 				}
 			}
-			ret.ID = cdefNull;
+			CmdDef ret(cdefNull);
 			return ret;
 		}
 
 		// CmdToKey
 		// IN: command def
 		// OUT: key/mod command is defined for, 0/0 if not defined
-		void InputHandler::CmdToKey(CmdDef cmd,WORD & key,WORD &mods)
+		void InputHandler::CmdToKey(CmdDef &cmd,WORD & key,WORD &mods)
 		{
 			key = 0;
 			mods = 0;
@@ -287,7 +300,7 @@ namespace psycle
 				{
 					if(cmdLUT[j][i].IsValid())
 					{
-						key.Format("n%03d",int(cmdLUT[j][i].ID));
+						key.Format("n%03d",int(cmdLUT[j][i].GetID()));
 						data.Format("%04d   ; cmd = '%s'",(j*256)+i,cmdLUT[j][i].GetName());
 						WritePrivateProfileString(sect,key,data,sDefaultCfgName);
 					}
@@ -343,7 +356,6 @@ namespace psycle
 			}
 			else
 			{
-				CmdDef cmd;
 				CString cmdDefn;
 				int cmddata, i,modi;
 				bool saveconfig(false);
@@ -357,7 +369,7 @@ namespace psycle
 				}
 				for(i=0;i<max_cmds;i++)
 				{
-					cmd.ID = CmdSet(i);
+					CmdDef cmd = CmdSet(i);
 //					cmdDefn = cmd.GetName();
 //					if(cmdDefn!="Invalid")
 					if (cmd.IsValid())
@@ -367,7 +379,7 @@ namespace psycle
 						if (cmddata != cdefNull)
 						{
 							modi=cmddata/256;
-							SetCmd(cmd.ID,cmddata%256,modi,true);
+							SetCmd(cmd.GetID(),cmddata%256,modi,true);
 						}
 					}
 				}
@@ -423,9 +435,9 @@ namespace psycle
 
 		// perform command
 		///\todo move to a callback system... this is disgustingly messy
-		void InputHandler::PerformCmd(CmdDef cmd, BOOL brepeat)
+		void InputHandler::PerformCmd(CmdDef &cmd, BOOL brepeat)
 		{
-			switch(cmd.ID)
+			switch(cmd.GetID())
 			{
 			case cdefNull:
 				break;
@@ -1237,14 +1249,9 @@ namespace psycle
 // Remove it from there when/if making a new system.
 		void InputHandler::BuildCmdLUT()
 		{
-			// initialize
-			CmdDef cmdNull;
-
-			UINT i;
-			UINT j;
-			for(i=0;i<MOD_MAX;i++)		
-				for(j=0;j<256;j++)
-					SetCmd(cmdNull,j,i);			
+			for(int i=0;i<MOD_MAX;i++)		
+				for(int j=0;j<256;j++)
+					cmdLUT[i][j].SetNull();
 
 			// immediate commands
 			SetCmd(cdefEditMachine,VK_F2,0,false);

@@ -200,7 +200,6 @@ namespace psycle
 							temp=_sDllName.substr(pos+1);
 						_sProductName=temp.substr(0,temp.rfind('.'));
 					}
-					MainsChanged(true);
 				}
 				else
 				{

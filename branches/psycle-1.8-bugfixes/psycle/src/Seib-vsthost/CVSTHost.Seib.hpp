@@ -321,12 +321,47 @@ namespace seib {
 		protected:
 			virtual void Load(LoadedAEffect &loadstruct);
 			virtual void Unload();
+		protected:
+			AEffect *aEffect;
+			PluginLoader* ploader;
+			void *sDir;
 
+			bool bEditOpen;
+			bool bNeedIdle;
+			bool bNeedEditIdle;
+			bool bWantMidi;
+
+			// overridables
 		public:
 			virtual bool LoadBank(const char *name);
 			virtual bool SaveBank(const char *name);
+			virtual void EnterCritical(){;}
+			virtual void LeaveCritical(){;}
 			virtual void WantsMidi(bool enable) { bWantMidi=enable; }
 			virtual void NeedsIdle(bool enable) { bNeedIdle=enable; }
+			virtual void NeedsEditIdle(bool enable) { bNeedIdle=enable; }
+
+			virtual void DECLARE_VST_DEPRECATED(Process)(float **inputs, float **outputs, VstInt32 sampleframes);
+			virtual void ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
+			virtual void ProcessDouble (double** inputs, double** outputs, VstInt32 sampleFrames);
+			virtual void SetParameter(VstInt32 index, float parameter);
+			virtual float GetParameter(VstInt32 index);
+
+			virtual void * OnGetDirectory();
+			virtual bool OnSizeEditorWindow(long width, long height) { return false; }
+			virtual bool OnUpdateDisplay() { return false; }
+			virtual void * OnOpenWindow(VstWindow* window) { return 0; }
+			virtual bool OnCloseWindow(VstWindow* window) { return false; }
+			virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return true; } 
+			virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int input) { return true; }
+			// AEffect asks host about its input/outputspeakers.
+			virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
+			virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
+			// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
+			virtual bool OnIOChanged() { return false; }
+
+			// Following comes the Wrapping of the VST Interface functions.
+		public:
 			// Not to be used, except if no other way.
 			AEffect	*GetAEffect() { return aEffect; }
 			//////////////////////////////////////////////////////////////////////////
@@ -354,10 +389,8 @@ namespace seib {
 			float DECLARE_VST_DEPRECATED(IORatio)() const			{	if (!aEffect)	throw (int)1;	return aEffect->ioRatio;			}
 
 			// the real plugin ID.
-			VstInt32 uniqueId() const			{	if (!aEffect)	throw (int)1;	return iShellUniqueID?iShellUniqueID:aEffect->uniqueID;		}
-			VstInt32 shellId() const			{	return iShellUniqueID;		}
-			VstInt32 SetShellId(VstInt32 newid)	{	iShellUniqueID = newid;		}
-			// version() is never used (from my experience). in favour of GetVendorVersion(). Yet, it hasn't been deprecated in 2.4.
+			VstInt32 uniqueId() const			{	if (!aEffect)	throw (int)1;	return aEffect->uniqueID;		}
+			// version() is never used (from my experience), in favour of GetVendorVersion(). Yet, it hasn't been deprecated in 2.4.
 			VstInt32 version() const			{	if (!aEffect)	throw (int)1;	return aEffect->version;		}
 			VstInt32 initialDelay() const		{	if (!aEffect)	throw (int)1;	return aEffect->initialDelay;	}
 
@@ -393,7 +426,7 @@ namespace seib {
 			inline void EditClose() { Dispatch(effEditClose); bEditOpen = false; }
 			// This has to be called repeatedly from the idle process ( usually the UI thread, with idle priority )
 			// The plugins usually have checks so that it skips the call if no update is required.
-			inline void EditIdle() { if (bEditOpen) Dispatch(effEditIdle); }
+			inline void EditIdle() { if (bEditOpen && bNeedEditIdle) Dispatch(effEditIdle); }
 		#if MAC
 			inline void DECLARE_VST_DEPRECATED(EditDraw)(void *rectarea) { Dispatch(effEditDraw, 0, 0, rectarea); }
 			inline long DECLARE_VST_DEPRECATED(EditMouse)(VstInt32 x, VstIntPtr y) { return Dispatch(effEditMouse, x, y); }
@@ -431,7 +464,7 @@ namespace seib {
 			inline bool OfflineNotify(VstAudioFile* ptr, long numAudioFiles, bool start) { return (bool)Dispatch(effOfflineNotify, start, numAudioFiles, ptr); }
 			inline bool OfflinePrepare(VstOfflineTask *ptr, long count) { return (bool)Dispatch(effOfflinePrepare, 0, count, ptr); }
 			inline bool OfflineRun(VstOfflineTask *ptr, long count) { return (bool)Dispatch(effOfflineRun, 0, count, ptr); }
-			//\todo: get more information about this function, and its relation with process and processReplacing.
+			/// This function is for Offline processing.
 			inline bool ProcessVarIo(VstVariableIo* varIo) { return (bool)Dispatch(effProcessVarIo, 0, 0, varIo); }
 			inline bool SetSpeakerArrangement(VstSpeakerArrangement* pluginInput, VstSpeakerArrangement* pluginOutput) { return (bool)Dispatch(effSetSpeakerArrangement, 0, (long)pluginInput, pluginOutput); }
 			inline void DECLARE_VST_DEPRECATED(SetBlockSizeAndSampleRate)(long blockSize, float sampleRate) { Dispatch(effSetBlockSizeAndSampleRate, 0, blockSize, 0, sampleRate); }
@@ -449,7 +482,7 @@ namespace seib {
 			//returns 0 -> don't know, 1 -> yes, -1 -> no. Use the PlugCanDo's strings.
 			inline long CanDo(const char *ptr) { return Dispatch(effCanDo, 0, 0, (void *)ptr); }
 			inline long GetTailSize() { return Dispatch(effGetTailSize); }
-			// "returns 0 by default"  ???
+			// Recursive Idle() call for plugin. bNeedIdle is set to true when the plugin calls "pHost->OnNeedIdle()"
 			inline void DECLARE_VST_DEPRECATED(Idle)() { VstInt32 l=0; if (bNeedIdle) l = Dispatch(effIdle); if (!l) bNeedIdle=false; }
 			inline long DECLARE_VST_DEPRECATED(GetIcon)() { return Dispatch(effGetIcon); }
 			inline long DECLARE_VST_DEPRECATED(SetViewPosition)(long x, long y) { return Dispatch(effSetViewPosition, x, y); }
@@ -485,44 +518,10 @@ namespace seib {
 			//-1  : 	The bank/program can't be loaded.
 			inline long BeginLoadBank(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadBank, 0, 0, ptr); }
 			inline long BeginLoadProgram(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadProgram, 0, 0, ptr); }
+		// VST 2.4 Extensions
 			inline bool SetProcessPrecision(VstProcessPrecision precision)	{ return Dispatch(effSetProcessPrecision,0,precision,0,0); }
 			inline long	GetNumMidiInputChannels() { return Dispatch(effGetNumMidiInputChannels,0,0,0,0); }
 			inline long	GetNumMidiOutputChannels() { return Dispatch(effGetNumMidiOutputChannels,0,0,0,0); }
-
-			// overridables
-		public:
-			virtual void EnterCritical(){;}
-			virtual void LeaveCritical(){;}
-
-			virtual void DECLARE_VST_DEPRECATED(Process)(float **inputs, float **outputs, VstInt32 sampleframes);
-			virtual void ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
-			virtual void ProcessDouble (double** inputs, double** outputs, VstInt32 sampleFrames);
-			virtual void SetParameter(VstInt32 index, float parameter);
-			virtual float GetParameter(VstInt32 index);
-
-			virtual void * OnGetDirectory();
-			virtual bool OnSizeEditorWindow(long width, long height) { return false; }
-			virtual bool OnUpdateDisplay() { return false; }
-			virtual void * OnOpenWindow(VstWindow* window) { return 0; }
-			virtual bool OnCloseWindow(VstWindow* window) { return false; }
-			virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return true; } 
-			virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int input) { return true; }
-			// AEffect asks host about its input/outputspeakers.
-			virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
-			virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
-			// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
-			virtual bool OnIOChanged() { return false; }
-
-		protected:
-			AEffect *aEffect;
-			PluginLoader* ploader;
-			void *sDir;
-
-			bool bEditOpen;
-			bool bNeedIdle;
-			bool bWantMidi;
-			VstInt32 iShellUniqueID;		// Unique ID for shell type plugs
-//			CEffect* pMasterEffect;		// for Shell type plugs.
 		};
 
 		/*****************************************************************************/
@@ -535,19 +534,18 @@ namespace seib {
 			CVSTHost();
 			virtual ~CVSTHost();
 
-		protected:
-			long lBlockSize;
 		public:
 			static CVSTHost * pHost;
+			static VstTimeInfo vstTimeInfo;
+
 		protected:
+			long lBlockSize;
 			static int quantization;
 			bool loadingEffect;
 			VstInt32 loadingShellId;
 
 		public:
 			CEffect* LoadPlugin(const char * sName,VstInt32 shellIdx=0);
-
-			static VstTimeInfo vstTimeInfo;
 			static VstIntPtr VSTCALLBACK AudioMasterCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 
 			// overridable functions
@@ -575,7 +573,8 @@ namespace seib {
 
 			// Plugin calls this function when it has changed one parameter (usually, from the GUI)in order for the host to record it.
 			virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value) { return; }
-			// Function used for "Shell" type plugins, in order to identify which one is to be loaded. Returns the Index of the sub-plugin.
+			// onCurrentId is used normally when loading Shell type plugins. This is taken care in the AudioMaster callback.
+			// the function here is called in any other cases.
 			virtual long OnCurrentId(CEffect &pEffect) { return pEffect.uniqueId(); }
 			// "Call application idle routine (this will call effEditIdle for all open editors too)"
 			// "Feedback to the host application and to call the idle's function of this editor (thru host application (MAC/WINDOWS/MOTIF)). The idle frequency is between 10Hz and 20Hz"
@@ -643,8 +642,8 @@ namespace seib {
 			virtual bool OnOfflineStart(CEffect &pEffect, VstAudioFile* audioFiles, long numAudioFiles, long numNewAudioFiles) { return false; }
 			virtual long OnOfflineGetCurrentPass(CEffect &pEffect) { return 0; }
 			virtual long OnOfflineGetCurrentMetaPass(CEffect &pEffect) { return 0; }
-			// Used for variable I/O processing.
-			virtual void DECLARE_VST_DEPRECATED(OnSetOutputSampleRate)(CEffect &pEffect, float sampleRate) { }
+			// Used for variable I/O processing. ( offline processing )
+			virtual void DECLARE_VST_DEPRECATED(OnSetOutputSampleRate)(CEffect &pEffect, float sampleRate) { return; }
 			virtual VstSpeakerArrangement* DECLARE_VST_DEPRECATED(OnGetOutputSpeakerArrangement)(CEffect &pEffect) { return pEffect.OnHostOutputSpeakerArrangement(); }
 			// Specification says 0 -> don't know, 1 ->yes, -1 : no, but audioeffectx.cpp says "!= 0 -> true", and since plugins use audioeffectx...
 			virtual bool OnCanDo(CEffect &pEffect,const char *ptr);
@@ -655,7 +654,7 @@ namespace seib {
 			//\todo: "Something has changed, update 'multi-fx' display." ???
 			virtual bool OnUpdateDisplay(CEffect &pEffect);
 			// VST 2.1 Extensions
-			// Notifies that "OnSetParameterAutoMated" is going to be called. (once per mouse clic)
+			// Notifies that "OnSetParameterAutomated" is going to be called. (once per mouse clic)
 			virtual bool OnBeginEdit(CEffect &pEffect,long index) { return false; }
 			virtual bool OnEndEdit(CEffect &pEffect,long index) { return false; }
 			virtual bool OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr);

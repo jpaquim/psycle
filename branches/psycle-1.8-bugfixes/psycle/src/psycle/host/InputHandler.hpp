@@ -199,20 +199,26 @@ namespace psycle
 		/// command definitions.
 		class CmdDef
 		{
-		public:
+		protected:
 			/// unique identifier
 			CmdSet ID;			
 			//int data;			// cmd specific data - e.g. note reference		
 			//CString desc;		// string description     
 			//void * callback;	// function callback, not currently used
+		public:
 			
 			CmdDef()
 			{
 				ID=cdefNull;
 			}
-			CmdDef(CmdSet _ID)
+			CmdDef::CmdDef(CmdSet _ID)
 			{
 				ID=_ID;
+				if (!strcmp(GetName(),"Invalid")) { ID=cdefNull; }
+			}
+			CmdDef(const CmdDef &other)
+			{
+				ID=other.ID;
 			}
 
 			CmdType GetType()
@@ -228,8 +234,21 @@ namespace psycle
 
 				return CT_Editor;
 			}
+			void SetNull()
+			{
+				ID=cdefNull;
+			}
+			CmdSet GetID()
+			{
+				return ID;
+			}
+			CmdDef& operator=(const CmdDef &other)
+			{
+				ID=other.ID;
+				return *this;
+			}
 
-			bool operator==(CmdDef other)
+			bool operator==(const CmdDef &other)
 			{
 				return (ID==other.ID);	
 			}
@@ -395,6 +414,7 @@ namespace psycle
 				case cdefNull:
 				default:
 					// This is a valid point. It is used when doing searches for name.
+					// Also, don't change it, or of you do, do it also in the CmdDef constructor
 					return "Invalid" ;
 				}
 			}
@@ -428,7 +448,12 @@ namespace psycle
 			///\name translation
 			///\{
 			/// .
-			void CmdToKey(CmdDef cse,WORD & key,WORD & mods);	
+			inline void CmdToKey(CmdSet cset,WORD & key,WORD & mods)
+			{
+				CmdDef cse(cset);
+				CmdToKey(cse,key,mods);
+			}
+			void CmdToKey(CmdDef &cse,WORD & key,WORD & mods);	
 			/// .
 			CmdDef KeyToCmd(UINT nChar, UINT nFlags);
 			/// .
@@ -436,7 +461,7 @@ namespace psycle
 			///\}
 		public:
 			/// control 	
-			void PerformCmd(CmdDef cmd,BOOL brepeat);
+			void PerformCmd(CmdDef &cmd,BOOL brepeat);
 			
 			///\name commands
 			///\{
@@ -455,7 +480,12 @@ namespace psycle
 			///\name store/load
 			///\{
 			/// .
-			bool SetCmd(CmdDef cmd, UINT key, UINT modifiers,bool checkforduplicates=true);
+			inline bool SetCmd(CmdSet cset, UINT key, UINT modifiers,bool checkforduplicates=true)
+			{
+				CmdDef cmd(cset);
+				return SetCmd(cmd,key,modifiers,checkforduplicates);
+			}
+			bool SetCmd(CmdDef &cmd, UINT key, UINT modifiers,bool checkforduplicates=true);
 			/// .
 			bool ConfigSave();
 			/// .

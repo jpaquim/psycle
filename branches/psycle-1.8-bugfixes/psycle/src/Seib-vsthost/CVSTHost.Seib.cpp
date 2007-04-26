@@ -622,7 +622,6 @@ namespace seib {
 			, bEditOpen(false)
 			, bNeedIdle(false)
 			, bWantMidi(false)
-			, iShellUniqueID(0)
 		{
 			Load(loadstruct);
 		}
@@ -687,6 +686,10 @@ namespace seib {
 				MainsChanged(true);                   /* then force resume.                */
 				MainsChanged(false);                  /* suspend again...                  */
 				SetBlockSize(CVSTHost::pHost->GetBlockSize());   /* and block size                    */
+				SetProcessPrecision(kVstProcessPrecision32);
+				//6 :        Host to Plug, canDo ( bypass )   returned : 0
+				//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
+				SetPanLaw(kLinearPanLaw,1.0f);
 				MainsChanged(true);                   /* then force resume.                */
 
 			}
@@ -933,8 +936,8 @@ namespace seib {
 			//timeSigDenominator	} ""	""
 			//smpteFrameRate		(See VstSmpteFrameRate in aeffectx.h)
 
-			//ppqPos	(sample pos in 1ppq units)
 			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
+			//ppqPos	(sample pos in 1ppq units)
 			if((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask && kVstClockValid))
 			{
 				vstTimeInfo.flags |= kVstPpqPosValid;
@@ -986,6 +989,38 @@ namespace seib {
 			#endif
 			}
 		}
+
+		/*****************************************************************************/
+		/* SetSampleRate : sets sample rate                                          */
+		/*****************************************************************************/
+
+		void CVSTHost::SetSampleRate(float fSampleRate)
+		{
+			if (fSampleRate == vstTimeInfo.sampleRate)   /* if no change                      */
+				return;                               /* do nothing.                       */
+			vstTimeInfo.sampleRate = fSampleRate;
+			vstTimeInfo.flags |= kVstTransportChanged;
+		}
+
+		/*****************************************************************************/
+		/* SetBlockSize : sets the block size                                        */
+		/*****************************************************************************/
+
+		void CVSTHost::SetBlockSize(long lSize)
+		{
+			if (lSize == lBlockSize)                /* if no change                      */
+				return;                               /* do nothing.                       */
+			lBlockSize = lSize;                     /* remember new block size           */
+		}
+
+		void CVSTHost::SetTimeSignature(long numerator, long denominator)
+		{
+			vstTimeInfo.timeSigNumerator=numerator;
+			vstTimeInfo.timeSigDenominator=denominator; 
+			vstTimeInfo.flags |= kVstTimeSigValid;
+			vstTimeInfo.flags |= kVstTransportChanged;
+		}
+
 		/*****************************************************************************/
 		/* GetPreviousPlugIn : returns predecessor to this plugin                    */
 		/* This function is identified in the VST docs as "for future expansion",	 */
@@ -1022,38 +1057,6 @@ namespace seib {
 			*/
 			return 0;
 		}
-		/*****************************************************************************/
-		/* SetSampleRate : sets sample rate                                          */
-		/*****************************************************************************/
-
-		void CVSTHost::SetSampleRate(float fSampleRate)
-		{
-			if (fSampleRate == vstTimeInfo.sampleRate)   /* if no change                      */
-				return;                               /* do nothing.                       */
-			vstTimeInfo.sampleRate = fSampleRate;
-			///\todo: reset the flag.
-			vstTimeInfo.flags |= kVstTransportChanged;
-		}
-
-		/*****************************************************************************/
-		/* SetBlockSize : sets the block size                                        */
-		/*****************************************************************************/
-
-		void CVSTHost::SetBlockSize(long lSize)
-		{
-			if (lSize == lBlockSize)                /* if no change                      */
-				return;                               /* do nothing.                       */
-			lBlockSize = lSize;                     /* remember new block size           */
-		}
-
-		void CVSTHost::SetTimeSignature(long numerator, long denominator)
-		{
-			vstTimeInfo.timeSigNumerator=numerator;
-			vstTimeInfo.timeSigDenominator=denominator; 
-			vstTimeInfo.flags |= kVstTimeSigValid;
-			vstTimeInfo.flags |= kVstTransportChanged;
-		}
-
 		/*****************************************************************************/
 		/* OnCanDo : returns whether the host can do a specific action               */
 		/*****************************************************************************/
@@ -1093,23 +1096,25 @@ namespace seib {
 		/*****************************************************************************/
 		/* OnWantEvents : called when the effect calls wantEvents()                  */
 		/*****************************************************************************/
-		// Generally, this is called on resume to indicate that the plugin is going to accept events.
+		// This is called by pre-2.4 VST plugins in when resume() to indicate that
+		// it is going to accept events.
 		void CVSTHost::OnWantEvents(CEffect & pEffect, long filter)
 		{
 			if ( filter == kVstMidiType )
 			{
 				pEffect.WantsMidi(true);
-				//				return true;
 			}
-			//			return false;
 		}
 
 		/*****************************************************************************/
 		/* OnIdle : idle processing                                                  */
 		/*****************************************************************************/
-		// Call application idle routine (this will call effEditIdle for all open editors too) 
+		// When a plugin calls OnIdle(), it needs that the host calls it's EditIdle()
+		// function in order to refresh the plugin UI. This is done in the "idle" thread.
+		// (the UI redrawing timer, usually)
 		void CVSTHost::OnIdle(CEffect & pEffect)
 		{
+			pEffect.NeedsEditIdle(true);
 			//			int j = GetSize();
 			//			for (int i = 0; i < j; i++)
 			//				pEffect.EditIdle();
@@ -1119,13 +1124,14 @@ namespace seib {
 		/*****************************************************************************/
 		/* OnNeedIdle : called when the effect calls needIdle()                      */
 		/*****************************************************************************/
-		// Ideally, this would only send a message to the "Idle" process to execute it.
+		// When a plugin calls OnNeedIdle(), it is requesting that the host calls its Idle()
+		// function during the host "idle" time. The plugin then tells if it should keep
+		// calling it or not, depending on the returned value (see CEffect::Idle() for more details).
 		// host::OnIdle and plug::EditIdle are 1.0 functions and host::needIdle and plug::idle are 2.0
-		// Seems that host::OnIdle is called for when it is required, and host::needidle for a permanent loop.
 		bool CVSTHost::OnNeedIdle(CEffect & pEffect)
 		{
 			pEffect.NeedsIdle(true);
-			pEffect.Idle();
+			//pEffect.Idle();
 			return true;
 		}
 

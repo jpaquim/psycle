@@ -77,7 +77,7 @@ NAMESPACE__BEGIN(psycle)
 					{
 						pos = m_lstCmds.AddString(LPCTSTR(pinp->cmdLUT[j][i].GetName()));
 						m_lstCmds.SetItemData(pos,j*256+i);
-						written[int(pinp->cmdLUT[j][i].ID)]=true;
+						written[int(pinp->cmdLUT[j][i].GetID())]=true;
 					}
 				}
 			}
@@ -85,10 +85,10 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if ( !written[i] )
 				{
-					CmdDef cmd;
+					
 					CString cmdDefn;
 					char bla[64];
-					cmd.ID = CmdSet(i);
+					CmdDef cmd = CmdSet(i);
 					cmdDefn = cmd.GetName();
 					if(cmdDefn!="Invalid")
 					{
@@ -167,6 +167,8 @@ NAMESPACE__BEGIN(psycle)
 			mods=0;
 			// update display for new key
 			m_prvIdx = m_lstCmds.GetCurSel();
+			FillCmdList();
+			m_lstCmds.SetCurSel(m_prvIdx);
 			FindKey(m_prvIdx,key,mods);
 			m_hotkey0.SetHotKey(key,mods);
 		}
@@ -251,24 +253,28 @@ NAMESPACE__BEGIN(psycle)
 		void CKeyConfigDlg::OnBnClickedSpecialKeys()
 		{
 			CSpecialKeys dlg;
-			dlg.DoModal();
-			int idx = m_lstCmds.GetCurSel();
-			CmdDef cmd = FindCmd(idx);
-
-			// save key definition
-			if(cmd.IsValid())
+			if ( dlg.DoModal() == IDOK )
 			{
-				m_lstCmds.SetItemData(idx,dlg.mod*256+dlg.key);
-				Global::pInputHandler->SetCmd(cmd,dlg.key,dlg.mod);
+				int idx = m_lstCmds.GetCurSel();
+				CmdDef cmd = FindCmd(idx);
+
+				// save key definition
+				if(cmd.IsValid())
+				{
+					m_lstCmds.SetItemData(idx,dlg.mod*256+dlg.key);
+					Global::pInputHandler->SetCmd(cmd,dlg.key,dlg.mod);
+					WORD mods=0;
+					if(dlg.mod&MOD_S)
+						mods|=HOTKEYF_SHIFT;
+					if(dlg.mod&MOD_C)
+						mods|=HOTKEYF_CONTROL;				
+					if(dlg.mod&MOD_E)
+						mods|=HOTKEYF_EXT;
+					m_hotkey0.SetHotKey(dlg.key,mods);
+				}
+				FillCmdList();
+				m_lstCmds.SetCurSel(m_prvIdx);
 			}
-			WORD mods=0;
-			if(dlg.mod&MOD_S)
-				mods|=HOTKEYF_SHIFT;
-			if(dlg.mod&MOD_C)
-				mods|=HOTKEYF_CONTROL;				
-			if(dlg.mod&MOD_E)
-				mods|=HOTKEYF_EXT;
-			m_hotkey0.SetHotKey(dlg.key,mods);
 		}
 		void CKeyConfigDlg::OnCancel() 
 		{
@@ -396,6 +402,8 @@ NAMESPACE__BEGIN(psycle)
 			
 			// update display for new key
 			m_prvIdx = m_lstCmds.GetCurSel();
+			FillCmdList();
+			m_lstCmds.SetCurSel(m_prvIdx);
 			FindKey(m_prvIdx,key,mods);
 			m_hotkey0.SetHotKey(key,mods);
 		}
@@ -443,7 +451,7 @@ NAMESPACE__BEGIN(psycle)
 					{
 						if(Global::pInputHandler->cmdLUT[j][i].IsValid())
 						{
-							fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",j,i,Global::pInputHandler->cmdLUT[j][i].ID,Global::pInputHandler->cmdLUT[j][i].GetName());
+							fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",j,i,Global::pInputHandler->cmdLUT[j][i].GetID(),Global::pInputHandler->cmdLUT[j][i].GetName());
 						}
 					}
 				}
