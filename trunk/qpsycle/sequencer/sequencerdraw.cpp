@@ -173,13 +173,13 @@ SequencerLine* SequencerDraw::makeSequencerLine(psy::core::SequenceLine* seqLine
 
 void SequencerDraw::onSequencerLineClick( SequencerLine *line )
 {
-    QRectF oldLineRect = selectedLine()->mapToScene( selectedLine()->boundingRect() ).boundingRect();
-    QRectF newLineRect = line->mapToScene( line->boundingRect() ).boundingRect();
+    if ( selectedLine() ) {
+        QRectF oldLineRect = selectedLine()->mapToScene( selectedLine()->boundingRect() ).boundingRect();
+        scene()->update( oldLineRect );
+    }
     setSelectedLine( line );
-    scene()->update( oldLineRect );
+    QRectF newLineRect = line->mapToScene( line->boundingRect() ).boundingRect();
     scene()->update( newLineRect );
-  for ( int i = 0; i < lines_.size(); i++ )
-      printf( "linelist %p\n", lines_[i] );
 }
 
 void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
