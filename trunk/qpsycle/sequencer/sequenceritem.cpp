@@ -93,11 +93,10 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     }
     if ( event->modifiers() == Qt::ShiftModifier ) // Movement allowed between lines.
     {
-        QGraphicsItem::mouseMoveEvent( event ); // Do normal move event.
+        QPointF newPos( mapToParent(event->pos()) - matrix().map( event->buttonDownPos(Qt::LeftButton) ) );
+        QPointF diff = newPos - pos();
+        emit moved( this, diff ); 
 
-        constrainToParent(); // Note: we constrain the entry to its parent, but the parent
-                             // can change depending on the mouse position.
-     
         SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine*>( parentItem() );
         SequencerLine *lineUnderCursor = 0;
         QList<QGraphicsItem*> itemsUnderCursor = scene()->items( event->scenePos() );
@@ -107,12 +106,11 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             }
         }
         if ( parentLine != lineUnderCursor && lineUnderCursor != 0 ) {
-            parentLine->moveItemToNewLine( this, lineUnderCursor );
+            if ( diff.y() < 0 ) 
+                emit changedLine( this, 0 );
+            if ( diff.y() > 0 ) 
+                emit changedLine( this, 1 );
         }
-
-        // FIXME: maybe do this on mouseReleaseEvent?
-        int newItemLeft = pos().x(); 
-        sequenceEntry()->track()->MoveEntry( sequenceEntry(), newItemLeft / beatPxLength_ );
     }
 }
 
@@ -137,6 +135,8 @@ void SequencerItem::constrainToParent()
 void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
     QGraphicsItem::mousePressEvent( event ); // Do normal business...
+      printf( "parentLine %p\n", qgraphicsitem_cast<SequencerLine*>(parentItem()) );
+      printf( "tickPos %f\n", sequenceEntry()->tickPosition() );
 
     emit clicked(this);
 }
