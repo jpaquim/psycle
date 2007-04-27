@@ -1,10 +1,10 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include "SynthTrack.hpp"
-#include <stdlib.h> ///\todo should be <cstdlib>
+#include <cstdlib>
 
-#define MAX_ENV_TIME	250000
-#define NUMPARAMETERS 28
+int const MAX_ENV_TIME = 250000;
+int const NUMPARAMETERS = 28;
 
 CMachineParameter const paraOSC1wave = 
 { 
@@ -342,7 +342,7 @@ CMachineInfo const MacInfo =
 	GENERATOR,								// flags
 	NUMPARAMETERS,							// numParameters
 	pParameters,							// Pointer to parameters
-#if defined _DEBUG ///< should use NDEBUG
+#if !defined NDEBUG
 	"Arguru Synth 2 final (debug build)",		// name
 #else
 	"Arguru Synth 2 final",						// name
