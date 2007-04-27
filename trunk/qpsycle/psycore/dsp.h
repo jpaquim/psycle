@@ -67,9 +67,14 @@ namespace psy
 		static inline int F2I(double d)
 		{
 			const double magic(6755399441055744.0); /// 2^51 + 2^52
-			/*const*/ double tmp((d-0.5) + magic);
-			return *reinterpret_cast<int*>(&tmp);
-		};
+			union tmp_union
+			{
+				double d;
+				int i;
+			} tmp;
+			tmp.d = (d-0.5) + magic;
+			return tmp.i;
+		}
 
 		/// finds the maximum amplitude in a signal buffer.
 		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
