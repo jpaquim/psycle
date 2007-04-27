@@ -62,9 +62,14 @@ inline void AnimateAFloat(afloat* p, float fac)
 inline int f2i(double d)
 {
 	const double magic = 6755399441055744.0;
-	register double tmp = (d - 0.5) + magic;
-	return *(int*) &tmp;
-};
+	union tmp_union
+	{
+		double d;
+		int i;
+	} tmp;
+	tmp.d = (d - 0.5) + magic;
+	return tmp.i;
+}
 //============================================================================
 //	Clips phase for wavetable
 //============================================================================
