@@ -23,6 +23,7 @@
 namespace psy { namespace core {
 class Song;
 class SinglePattern;
+class Machine;
 }}
 
 class MachineView;
@@ -64,7 +65,7 @@ private slots:
     void onMachineComboBoxIndexChanged( int newIndex );
     void onSampleComboBoxIndexChanged( int newIndex );
     void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
-    void onNewMachineCreated( int bus );
+    void onNewMachineCreated( psy::core::Machine *mac );
     void onMachineGuiChosen( MachineGui *macGui );
     void onPatternDeleted();
     void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
