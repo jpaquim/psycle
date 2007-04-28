@@ -19,6 +19,7 @@ namespace psycle
 
 		namespace vst
 		{
+			float plugin::junk[STREAM_SIZE];
 			using namespace seib::vst;
 
 /*			Machine* host::CreateFromType(int _id, std::string _dllname)
@@ -97,20 +98,14 @@ namespace psycle
 
 				return (pdriver->_numBlocks*pdriver->_blockSize)/4;
 			}
-			void host::OnIdle(CEffect &pEffect)
-			{	//\todo:
-				return CVSTHost::OnIdle(pEffect);
-			}
-			bool host::OnNeedIdle(CEffect &pEffect)
-			{	//\todo:
-				return CVSTHost::OnNeedIdle(pEffect);
-			}
 
-			// Get information about the following five functions, and especially on how the host automates the plugins
+
+			///\todo: Get information about the following five functions, and especially on how the host automates the plugins
 			// (i.e. the inverse step)
-			long host::OnGetAutomationState(CEffect &pEffect) { return 0; }
-			bool host::OnBeginEdit(CEffect &pEffect,long index) { return false; }
-			bool host::OnEndEdit(CEffect &pEffect,long index) { return false; }
+			long host::OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
+			// Accepting BeginEdit and EndEdit.
+			bool host::OnBeginEdit(CEffect &pEffect,long index) { return true; }
+			bool host::OnEndEdit(CEffect &pEffect,long index) { return true; }
 			void host::OnSetParameterAutomated(CEffect &pEffect, long index, float value)
 			{
 				Global::player().Tweaker = true;
@@ -136,7 +131,6 @@ namespace psycle
 				,queue_size(0)
 				,requiresRepl(0)
 				,requiresProcess(0)
-				, editorWnd(0)
 			{
 				if ( IsSynth())
 				{

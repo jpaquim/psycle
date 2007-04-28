@@ -64,7 +64,7 @@ namespace psycle
 				float * outputs[max_io];
 				float * _pOutSamplesL;
 				float * _pOutSamplesR;
-				float junk[STREAM_SIZE];
+				static float junk[STREAM_SIZE];
 				std::string _sDllName;
 				std::string _sProductName;
 				std::string _sVendorName;
@@ -77,7 +77,7 @@ namespace psycle
 			public:
 				plugin(LoadedAEffect &loadstruct);
 				//this constructor is to be used with the old Song loading routine, in order to create an "empty" plugin.
-				plugin(AEffect *effect):CEffect(effect),editorWnd(0) {};
+				plugin(AEffect *effect):CEffect(effect) {};
 				virtual ~plugin() {};
 				// Actions
 				//////////////////////////////////////////////////////////////////////////
@@ -98,10 +98,6 @@ namespace psycle
 				virtual void SaveDllName(RiffFile * pFile);
 //				virtual bool ConnectTo(Machine& dstMac,int dstport=0,int outport=0,float volume=1.0f);
 //				virtual bool Disconnect(Machine& dstMac);
-
-				virtual void EnterCritical() {;}
-				virtual void LeaveCritical() {;}
-				bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 
 				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
 				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0);
@@ -131,10 +127,22 @@ namespace psycle
 				virtual void SetParameter(int numparam, float value) { CEffect::SetParameter(numparam,value); }
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
-				virtual bool IsInputConnected(int input) { return (input < 2); } 
-				virtual bool IsOutputConnected(int input) { return (input < 2); }
 
-				CFrameWnd * editorWnd;
+				virtual void EnterCritical() {;}
+				virtual void LeaveCritical() {;}
+				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
+				virtual bool OnSizeEditorWindow(long width, long height) { return false; }
+				virtual bool OnUpdateDisplay() { return false; }
+				virtual void * DECLARE_VST_DEPRECATED(OnOpenWindow)(VstWindow* window) { return 0; }
+				virtual bool DECLARE_VST_DEPRECATED(OnCloseWindow)(VstWindow* window) { return false; }
+				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (numInputs!=0)); } 
+				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (numOutputs!=0)); }
+				// AEffect asks host about its input/outputspeakers.
+				virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
+				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
+				// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
+				virtual bool OnIOChanged() { return false; }
+
 			};
 
 			class host : public CVSTHost
@@ -144,7 +152,7 @@ namespace psycle
 				virtual ~host(){;}
 
 				///< Helper class for Machine Creation.
-				static Machine* CreateFromType(int _id, std::string _dllname);
+				//static Machine* CreateFromType(int _id, std::string _dllname);
 				virtual CEffect * CreateEffect(LoadedAEffect &loadstruct) { return new plugin(loadstruct); }
 				virtual CEffect * CreateWrapper(AEffect *effect) { return new plugin(effect); }
 
@@ -163,17 +171,11 @@ namespace psycle
 				virtual long OnGetOutputLatency(CEffect &pEffect);
 				//\todo : how can this function be implemented? :o
 				virtual long OnGetCurrentProcessLevel(CEffect &pEffect) { return 0; }
-				//\todo : determine how to reply to this function.
 				virtual bool OnWillProcessReplacing(CEffect &pEffect) { return ((plugin*)&pEffect)->WillProcessReplace(); }
-
 				//\todo : investigate which file is this function really asking for.
 				virtual bool DECLARE_VST_DEPRECATED(OnGetChunkFile)(CEffect &pEffect, void * nativePath) { return false; }
 
 				///> Plugin sends actions to the host
-				// OnIdle 
-				virtual void OnIdle(CEffect &pEffect);
-				virtual bool DECLARE_VST_DEPRECATED(OnNeedIdle)(CEffect &pEffect);
-
 				virtual bool OnProcessEvents(CEffect &pEffect, VstEvents* events) { return false; }
 				virtual bool OnBeginEdit(CEffect &pEffect,long index);
 				virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value);
