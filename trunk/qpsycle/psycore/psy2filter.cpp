@@ -577,7 +577,7 @@ namespace psy
 					busEffect[j] = 255;
 				}
 			}
-			// Patch 1.2: Fixes crash/inconsistence when deleting a machine which couldn't be loaded
+			// Patch 1.2: Fixes inconsistence when deleting a machine which couldn't be loaded
 			// (.dll not found, or Load failed), which is, then, replaced by a DUMMY machine.
 			int j=0;
 			for ( i=0;i<64;i++ ) 
@@ -586,13 +586,18 @@ namespace psy
 				{ // If there's a machine in the generators' bus that it is not a generator:
 					if (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR ) 
 					{
-						pMac[busMachine[i]]->_mode = MACHMODE_FX;
+						pMac[busMachine[i]]->_mode = MACHMODE_GENERATOR;
+						// Older code moved the dummy to the effects bus, because it couldn't work as
+						// a generator. Now there's no problem for that, and this way we can use the
+						// Create/Replace function of the GearRack dialog.
+/*						pMac[busMachine[i]]->_mode = MACHMODE_FX;
 						while (busEffect[j] != 255 && j<MAX_BUSES) 
 						{
 							j++;
 						}
 						busEffect[j]=busMachine[i];
 						busMachine[i]=255;
+*/
 					}
 				}
 			}
