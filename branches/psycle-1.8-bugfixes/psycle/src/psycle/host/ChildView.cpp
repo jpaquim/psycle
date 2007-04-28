@@ -2105,28 +2105,28 @@ NAMESPACE__BEGIN(psycle)
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath());
+			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath());
+			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath());
+			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath());
+			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
