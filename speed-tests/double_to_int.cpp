@@ -209,7 +209,12 @@ double measure(::clockid_t clock)
 	}
 	timespec result;
 	result.tv_sec = end.tv_sec - start.tv_sec;
-	result.tv_nsec = end.tv_nsec - start.tv_nsec;
+	if(end.tv_nsec >= start.tv_nsec) result.tv_nsec = end.tv_nsec - start.tv_nsec;
+	else
+	{
+		result.tv_nsec = 1000000000 - start.tv_nsec + end.tv_nsec;
+		--result.tv_sec;
+	}
 	return result.tv_sec + 1e-9 * result.tv_nsec;
 }
 
