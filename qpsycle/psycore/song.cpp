@@ -99,19 +99,21 @@ namespace psy
 		}
 
 
-		Machine * Song::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
-			int fb = GetFreeBus();
+		Machine * Song::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) 
+        {
+            int fb; 
 			if ( key == PluginFinderKey::internalSampler() ) {
-				// create internal Sampler
-				CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb);  
-			} else 
-			if ( finder.info( key ).type() == MACH_PLUGIN ) 
+                fb = GetFreeBus();
+				CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb );  
+			} else if ( finder.info( key ).type() == MACH_PLUGIN ) 
 			{
-				// create native Plugin
+                if ( finder.info( key ).mode() == MACHMODE_FX ) {
+                    fb = GetFreeFxBus();
+                } else fb = GetFreeBus();
 				CreateMachine(MACH_PLUGIN, x, y, key.dllPath(), fb );
-			} else
-			if ( finder.info( key ).type() == MACH_LADSPA ){
-				// create ladspa plugin
+			} else if ( finder.info( key ).type() == MACH_LADSPA ) 
+            {
+                fb = GetFreeFxBus();
 				LADSPAMachine* plugin = new LADSPAMachine( machinecallbacks, fb, this );
 				if  ( plugin->loadDll( key.dllPath(), key.index() ) ) {
 				  plugin->SetPosX( x );
@@ -124,15 +126,17 @@ namespace psy
 			}
 			return _pMachine[fb];
 		}
-    Machine & Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, int pluginIndex) throw(std::exception)
+
+    Machine & Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
     {
       Machine::id_type const array_index(GetFreeMachine());
       if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
-      if(!CreateMachine(type, x, y, plugin_name, array_index, pluginIndex))
+      if(!CreateMachine(type, x, y, plugin_name, array_index))
         throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
       return *_pMachine[array_index];
     }
-		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index, int pluginIndex)
+
+		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
 		{
 			Machine * machine(0);
 			switch (type)
@@ -170,7 +174,7 @@ namespace psy
             machine = plugin;
 					}
 					break;
-				case MACH_LADSPA:
+/*				case MACH_LADSPA:
 					{
 						LADSPAMachine* plugin = new LADSPAMachine(machinecallbacks,index,this);
 						machine = plugin;
@@ -187,7 +191,7 @@ namespace psy
 						if ( pcLADSPAPath ) path = pcLADSPAPath;
 						plugin->loadDll( path + plugin_name, pluginIndex);
 					}
-					break;
+					break;*/
 /*				case MACH_VST:
 				case MACH_VSTFX:
 					{
@@ -302,7 +306,6 @@ namespace psy
 
 		bool Song::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume)
 		{
-        std::cout << "in insert connection" << std::endl;
 			Machine *srcMac = _pMachine[src];
 			Machine *dstMac = _pMachine[dst];
 			if(!srcMac || !dstMac)

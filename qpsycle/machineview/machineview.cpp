@@ -382,20 +382,17 @@ MachineScene::MachineScene( MachineView *macView )
 void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 { 
     QGraphicsScene::mouseDoubleClickEvent( event );
-    if ( !event->isAccepted() )
+    if ( !event->isAccepted() ) // Check whether one of the items on the scene ate it.
     {
         int accepted = newMachineDlg->exec();
         if (accepted) { // Add a new machine to the song.
              psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
 
-            int freeBus = macView_->song()->GetFreeBus(); // This will be the bus the Machine is on. 
-                                               // FIXME: should ask the Machine for it after it is created.
-
             // Create machine, tell where to place the new machine--get from mouse.	  
             psy::core::Machine *mac = macView_->song()->createMachine( pluginFinder_, key, event->scenePos().x(), event->scenePos().y() );
             if ( mac ) {
                 macView_->createMachineGui( mac );
-                emit newMachineCreated( freeBus );
+                emit newMachineCreated( mac );
                 update();
             }
         } 

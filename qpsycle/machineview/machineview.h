@@ -104,7 +104,7 @@ public:
 protected:
     void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 signals:
-    void newMachineCreated( int bus );
+    void newMachineCreated( psy::core::Machine* mac );
 
 private:
     MachineView *macView_;

@@ -131,8 +131,8 @@ void MainWindow::setupSignals()
     connect( patternBox_, SIGNAL( categoryColorChanged() ),
              this, SLOT( onCategoryColorChanged() ) );
 
-    connect( macView_->scene(), SIGNAL( newMachineCreated( int ) ), 
-             this, SLOT( onNewMachineCreated( int ) ) );
+    connect( macView_->scene(), SIGNAL( newMachineCreated( psy::core::Machine* ) ), 
+             this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
     connect( macView_, SIGNAL( machineGuiChosen( MachineGui* ) ), 
              this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
     connect( macView_, SIGNAL( machineDeleted( int ) ), 
@@ -571,9 +571,10 @@ void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* select
     patView_->setPattern( selectedPattern );
 }
 
-void MainWindow::onNewMachineCreated( int bus )
+void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 {
     populateMachineCombo();
+    int bus = song_->FindBusFromIndex( mac->_macIndex );
     macCombo_->setCurrentIndex( bus );
 }
 

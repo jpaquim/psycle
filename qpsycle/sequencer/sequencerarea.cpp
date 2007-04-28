@@ -57,8 +57,8 @@ void SequencerArea::drawTimegrid( QPainter *painter )
     painter->setPen( QColor( 30, 30, 30 ) );
     for (int i = start ; i <= end ; i++) {
         if ( beatPxLength_ > 3 || (beatPxLength_ <= 3 && (!( i %16)))  ) {
-            painter->drawLine( i*beatPxLength_, 0/*-scrollDy()*/,
-                               i*beatPxLength_, br.height()/*+scrollDy()*/ );
+            painter->drawLine( i*beatPxLength_, 0,
+                               i*beatPxLength_, br.height() );
         }
     }
 }

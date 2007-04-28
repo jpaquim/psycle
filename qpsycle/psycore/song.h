@@ -90,10 +90,10 @@ namespace psy
         Machine* createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
 
 					/// creates a new machine in this song. .. deprecated
-					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy", int pluginIndex = 0) throw(std::exception);
+					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy" ) throw(std::exception);
 
 					/// creates a new machine in this song.
-					bool CreateMachine(Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type, int pluginIndex);
+					bool CreateMachine(Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type);
 
 					/// Gets the first free slot in the pMachine[] Array
 					///\todo it's low-level.. should be private.
