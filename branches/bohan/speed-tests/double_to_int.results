@@ -3,3 +3,11 @@
         f2i |  1.72 | 1.41 |  1.89  |  1.19
 static_cast | 10.05 | 0.45 |  2.36  |  0.38
       lrint |  0.83 | 1.17 |  0.71  |  0.94
+
+
+        | gcc options used
+--------+--------------------------------------------
+x87     | -O3        -mfpmath=387           -lm -lrt
+sse2    | -O3 -msse2 -mfpmath=sse           -lm -lrt
+k8 x87  | -O3        -mfpmath=387 -march=k8 -lm -lrt
+k8 sse2 | -O3 -msse2 -mfpmath=sse -march=k8 -lm -lrt
