@@ -1,13 +1,19 @@
-  gcc 4.1.2 |  x87  | sse2 | k8 x87 | k8 sse2
-------------+-------+------+--------+---------
-        f2i |  1.72 | 1.41 |  1.89  |  1.19
-static_cast | 10.05 | 0.45 |  2.36  |  0.38
-      lrint |  0.83 | 1.17 |  0.71  |  0.94
+amd64 gcc 4.1.2 |  x87  |  sse1 | sse2 | k8 x87 | k8 sse2
+----------------+-------+-------+------+--------+---------
+            f2i |  1.72 |       | 1.41 |  1.89  |  1.19
+    static_cast | 10.05 |       | 0.45 |  2.36  |  0.38
+          lrint |  0.83 |       | 1.17 |  0.71  |  0.94
 
+p3    gcc 4.1.2 |  x87  |  sse1
+----------------+-------+-------
+            f2i |  7.84 |  7.28
+    static_cast | 44.99 | 44.67
+          lrint |  6.68 |  8.23
 
         | gcc options used
 --------+--------------------------------------------------------
 x87     | -O3 -ffast-math        -mfpmath=387           -lm -lrt
+sse1    | -O3 -ffast-math -msse  -mfpmath=sse           -lm -lrt
 sse2    | -O3 -ffast-math -msse2 -mfpmath=sse           -lm -lrt
 k8 x87  | -O3 -ffast-math        -mfpmath=387 -march=k8 -lm -lrt
 k8 sse2 | -O3 -ffast-math -msse2 -mfpmath=sse -march=k8 -lm -lrt
