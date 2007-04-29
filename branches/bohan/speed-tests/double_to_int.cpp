@@ -7,6 +7,8 @@
 #include <cstring>
 #include <iostream>
 #include <iomanip>
+#include <cmath>
+#include <fenv.h> // ISO C 1999
 #include <unistd.h>
 
 namespace universalis
@@ -152,34 +154,40 @@ namespace universalis
 }
 
 template<unsigned int I>
-inline int test(double d)
+inline long int test(double d)
 {
 	return 123;
 }
 
 template<>
-inline int test<1>(double d)
+inline long int test<1>(double d)
 {
 	union u
 	{
 		double d;
-		int i;
+		long int i;
 	} u;
 	u.d = d + 6755399441055744.0;
 	return u.i;
 }
 
 template<>
-inline int test<2>(double d)
+inline long int test<2>(double d)
 {
-	return static_cast<int>(d);
+	return static_cast<long int>(d);
+}
+
+template<>
+inline long int test<3>(double d)
+{
+	return ::lrint(d);
 }
 
 template<typename T, unsigned int I>
 T loop()
 {
 	T result = T();
-	for(unsigned int i(1000000); i > 0; --i)
+	for(unsigned int i(500000); i > 0; --i)
 	{
 		double d(1000);
 		while(d >= -1000)
@@ -192,7 +200,7 @@ T loop()
 }
 
 template<unsigned int I>
-double measure(::clockid_t clock)
+double measure(::clockid_t clock, double empty_cost = 0)
 {
 	timespec start;
 	if(::clock_gettime(clock, &start))
@@ -215,11 +223,24 @@ double measure(::clockid_t clock)
 		result.tv_nsec = 1000000000 - start.tv_nsec + end.tv_nsec;
 		--result.tv_sec;
 	}
-	return result.tv_sec + 1e-9 * result.tv_nsec;
+	double const elapsed(result.tv_sec + 1e-9 * result.tv_nsec);
+	std::cout << "measure: " << I << ": " << std::setprecision(15) << elapsed - empty_cost << "s" << std::endl;
+	return elapsed;
 }
 
 int main()
 {
+	#if 0
+		std::cout << test<1>(1.1) << std::endl;
+		std::cout << test<1>(1.9) << std::endl;
+		std::cout << test<2>(1.1) << std::endl;
+		std::cout << test<2>(1.9) << std::endl;
+		std::cout << test<1>(-1.1) << std::endl;
+		std::cout << test<1>(-1.9) << std::endl;
+		std::cout << test<2>(-1.1) << std::endl;
+		std::cout << test<2>(-1.9) << std::endl;
+	#endif
+	
 	::clockid_t clock(universalis::operating_system::clock::best());
 	timespec result;
 	#if UNIVERSALIS__OPERATING_SYSTEM__CLOCK__DETAIL
@@ -235,26 +256,18 @@ int main()
 		result.tv_nsec = static_cast<long int>(1e9 / CLOCKS_PER_SEC);
 	#endif
 	std::cout << "clock resolution: " << std::setprecision(15) << result.tv_sec + 1e-9 * result.tv_nsec << "s" << std::endl;
-	double const elapsed0(measure<0>(clock));
-	if(elapsed0 < 0)
-	{
-		std::cout << "failed" << std::endl;
-		return 1;
-	}
-	std::cout << "elapsed0: " << std::setprecision(15) << elapsed0 << "s" << std::endl;
-	double const elapsed1(measure<1>(clock) - elapsed0);
-	if(elapsed1 < 0)
-	{
-		std::cout << "failed" << std::endl;
-		return 1;
-	}
-	std::cout << "elapsed1: " << std::setprecision(15) << elapsed1 << "s" << std::endl;
-	double const elapsed2(measure<2>(clock) - elapsed0);
-	if(elapsed2 < 0)
-	{
-		std::cout << "failed" << std::endl;
-		return 1;
-	}
-	std::cout << "elapsed2: " << std::setprecision(15) << elapsed2 << "s" << std::endl;
+	double const empty_cost(measure<0>(clock));
+	#define measure(i) measure<i>(clock, empty_cost)
+	measure(1);
+	measure(2);
+	#if defined FE_TONEAREST
+		int feround(::fegetround());
+		::fesetround(FE_TONEAREST);
+	#endif
+		measure(3);
+	#if defined FE_TONEAREST
+		::fesetround(feround);
+	#endif
+	#undef measure
 	return 0;
 }
