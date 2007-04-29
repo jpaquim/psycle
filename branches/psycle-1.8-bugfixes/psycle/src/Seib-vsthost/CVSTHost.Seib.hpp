@@ -1,15 +1,28 @@
 /*****************************************************************************/
 /* CVSTHost.hpp: interface for CVSTHost/CEffect classes (for VST SDK 2.4r2). */
+/*****************************************************************************/
+
+/*****************************************************************************/
 /* Work Derived from the LGPL host "vsthost (1.16l)".						 */
-/* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/*****************************************************************************/
-/*                                                                           */
-/* $Revision: 2718 $ */
-/* $Date: 2006-06-04 00:22:21 +0200 (dg., 04 juny 2006) $ */
-/* $Author: jaz001 $ */
-/*                                                                           */
-/*****************************************************************************/
+/* vsthost has the following lincense:										 *
+
+Copyright (C) 2006  Hermann Seib
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+******************************************************************************/
 
 #pragma once
 /// Tell the SDK that we want to support all the VST specs, not only VST2.4
@@ -331,6 +344,9 @@ namespace seib {
 			bool bNeedEditIdle;
 			bool bWantMidi;
 
+		public:
+			CFrameWnd * editorWnd;
+
 			// overridables
 		public:
 			virtual bool LoadBank(const char *name);
@@ -350,8 +366,8 @@ namespace seib {
 			virtual void * OnGetDirectory();
 			virtual bool OnSizeEditorWindow(long width, long height) { return false; }
 			virtual bool OnUpdateDisplay() { return false; }
-			virtual void * OnOpenWindow(VstWindow* window) { return 0; }
-			virtual bool OnCloseWindow(VstWindow* window) { return false; }
+			virtual void * OnOpenWindow(VstWindow* window);
+			virtual bool OnCloseWindow(VstWindow* window);
 			virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return true; } 
 			virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int input) { return true; }
 			// AEffect asks host about its input/outputspeakers.
@@ -626,12 +642,12 @@ namespace seib {
 			//	4 : 	Currently offline processing and thus in user thread.
 			//other : 	Not defined, but probably pre-empting user thread.
 			virtual long OnGetCurrentProcessLevel(CEffect &pEffect) { return 0; }
-			//	0 :  	Not supported.
-			//	1 : 	Off.
-			//	2 : 	Read.
-			//	3 : 	Write.
-			//	4 : 	Read/write.
-			virtual long OnGetAutomationState(CEffect &pEffect) { return 0; }
+			//	kVstAutomationUnsupported 	not supported by Host
+			//	kVstAutomationOff 	off
+			//	kVstAutomationRead 	read
+			//	kVstAutomationWrite 	write
+			//	kVstAutomationReadWrite 	read and write
+			virtual long OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
 			// As already seen, a single VstOfflineTask structure can be used both to read an existing file, and to overwrite it.
 			// Moreover, the offline specification states that it is possible, at any time, to read both the original samples
 			// and the new ones (the "overwritten" samples). This is the reason for the readSource parameter:

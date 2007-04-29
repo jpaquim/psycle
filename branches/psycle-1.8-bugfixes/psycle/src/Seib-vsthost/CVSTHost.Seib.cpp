@@ -1,15 +1,28 @@
 /*****************************************************************************/
 /* CVSTHost.cpp: implementation for CVSTHost/CEffect classes (VST SDK 2.4r2).*/
+/*****************************************************************************/
+
+/*****************************************************************************/
 /* Work Derived from the LGPL host "vsthost (1.16l)".						 */
-/* vsthost is Copyright (c) H. Seib, 2002-2006								 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/*****************************************************************************/
-/*                                                                           */
-/* $Revision: 2718 $ */
-/* $Date: 2006-06-04 00:22:21 +0200 (dg., 04 juny 2006) $ */
-/* $Author: jaz001 $ */
-/*                                                                           */
-/*****************************************************************************/
+/* vsthost has the following lincense:										 *
+
+Copyright (C) 2006  Hermann Seib
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+******************************************************************************/
 
 #include <project.private.hpp>
 #include "CVSTHost.Seib.hpp"                   /* private prototypes                */
@@ -621,7 +634,9 @@ namespace seib {
 			, sDir(0)
 			, bEditOpen(false)
 			, bNeedIdle(false)
+			, bNeedEditIdle(false)
 			, bWantMidi(false)
+			, editorWnd(0)
 		{
 			Load(loadstruct);
 		}
@@ -812,6 +827,67 @@ namespace seib {
 
 			return aEffect->getParameter(aEffect, index);
 		}
+
+		/*****************************************************************************/
+		/* OnOpenWindow : called to open yet another window                          */
+		/*****************************************************************************/
+
+		void * CEffect::OnOpenWindow(VstWindow* window)
+		{
+/*
+			CChildFrame *pFrame = GetFrameWnd();
+			if (pFrame)
+			{
+				CEffectWnd *pWnd;
+
+				pWnd = (CEffectWnd *)GetApp()->CreateChild(editorWnd ?
+					RUNTIME_CLASS(CEffSecWnd) :
+				RUNTIME_CLASS(CEffectWnd),
+					IDR_EFFECTTYPE,
+					pFrame->GetEditMenu());
+				if (pWnd)
+				{
+					HWND hWnd = pWnd->GetSafeHwnd();
+					///\todo: ignored at the moment: style, position
+					ERect rc = {0};
+					rc.right = window->width;
+					rc.bottom = window->height;
+					pWnd->ShowWindow(SW_SHOWNORMAL);
+					pWnd->SetEffect(pFrame->GetEffect());
+					pWnd->SetMain(pFrame);
+					pWnd->SetEffSize(&rc);
+					pWnd->SetupTitleText(window->title);
+					if (!pEditWnd)
+					{
+						pFrame->SetEditWnd(pWnd);
+						SetEditWnd(pWnd);
+						//    EffEditOpen(hWnd);
+					}
+					pWnd->SetupTitle();
+					window->winHandle = hWnd;
+					return pWnd->GetSafeHwnd();
+				}
+
+			}
+*/
+			return 0;                               /* no effect - no window.            */
+		}
+
+		/*****************************************************************************/
+		/* OnCloseWindow : called to close a window opened in OnOpenWindow           */
+		/*****************************************************************************/
+
+		bool CEffect::OnCloseWindow(VstWindow* window)
+		{
+/*			if ((!window) || (!::IsWindow((HWND)window->winHandle)))
+				return false;
+
+			::SendMessage((HWND)window->winHandle, WM_CLOSE, 0, 0);
+			window->winHandle = 0;
+*/
+			return true;
+		}
+
 
 		/*****************************************************************************/
 		/* OnGetDirectory : returns the plug's directory (char* on pc, FSSpec on mac)*/
@@ -1078,11 +1154,11 @@ namespace seib {
 
 				//||	(!strcmp(ptr, canDoAsyncProcessing ))	// DEPRECATED
 				//||	(!strcmp(ptr, canDoOffline] ))			// "offline",
-				//||	(!strcmp(ptr, canDoSupplyIdle ))		// DEPRECATED
-				//||	(!strcmp(ptr, canDoSupportShell ))		// DEPRECATED
-				||	(!strcmp(ptr, canDoOpenFileSelector ))	// "openFileSelector"
+				||	(!strcmp(ptr, "supplyIdle" ))				// DEPRECATED
+				//||	(!strcmp(ptr, "supportShell" ))			// DEPRECATED
+				||	(!strcmp(ptr, canDoOpenFileSelector ))		// "openFileSelector"
 				//||	(!strcmp(ptr, canDoEditFile ))			// "editFile",
-				||	(!strcmp(ptr, canDoCloseFileSelector ))	// "closeFileSelector"
+				||	(!strcmp(ptr, canDoCloseFileSelector ))		// "closeFileSelector"
 				//||	(!strcmp(ptr, canDoStartStopProcess ))	// "startStopProcess"
 				||	(!strcmp(ptr, canDoShellCategory ))
 				//||	(!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))

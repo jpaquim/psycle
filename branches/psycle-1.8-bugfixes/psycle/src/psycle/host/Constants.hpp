@@ -20,12 +20,16 @@ namespace psycle
 		#define PREV_WAV_INS			255
 		/// Number of tracks of the sequence (psycle just support one sequence now). Modify this, CURRENT_FILE_VERSION_SEQD and add the appropiated load and save code.
 		#define MAX_SEQUENCES			1
-		/// harcoded maximal number different patterns.
+		/// maximum number of different patterns. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
 		#define MAX_PATTERNS			256
 		/// Max number of pattern tracks
 		#define MAX_TRACKS				64
 		/// harcoded maximal number of lines per pattern
-		#define MAX_LINES				256
+		#define MAX_LINES				1024
+		/// maximum number of positions in the sequence. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
+		#define MAX_SONG_POSITIONS		256
+		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
+		#define MAX_CONNECTIONS		12
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
@@ -40,19 +44,15 @@ namespace psycle
 		#define OLD_MAX_TRACKS			32
 		#define OLD_MAX_WAVES			16
 		#define OLD_MAX_INSTRUMENTS		255
-		#define OLD_MAX_PLUGINS				256
-		/// \todo Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
-		#define LOCK_LATENCY			256
-		/// \todo changing this breaks file format
-		#define MAX_SONG_POSITIONS		128
-		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
-		#define MAX_CONNECTIONS		12
+		#define OLD_MAX_PLUGINS			256
 
 		/// Miscellaneous offset data.
 		#define MULTIPLY				MAX_TRACKS * EVENT_SIZE
 		#define MULTIPLY2				MULTIPLY * MAX_LINES		
 		#define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	
 
+		/// \todo Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
+		#define LOCK_LATENCY			256
 		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 		#define MAX_DELAY_BUFFER		65536
 		/// Sampler
@@ -61,17 +61,17 @@ namespace psycle
 		#define STREAM_SIZE				256
 
 		/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.
-		#define CURRENT_FILE_VERSION_INFO	0x0000
+		#define CURRENT_FILE_VERSION_INFO	0x0001
 		#define CURRENT_FILE_VERSION_SNGI	0x0000
 		#define CURRENT_FILE_VERSION_SEQD	0x0000
 		#define CURRENT_FILE_VERSION_PATD	0x0000
 		#define CURRENT_FILE_VERSION_MACD	0x0000
 		#define CURRENT_FILE_VERSION_INSD	0x0000
 		#define CURRENT_FILE_VERSION_WAVE	0x0000
-
-		#define CURRENT_CACHE_MAP_VERSION	0x0001
-
 		#define CURRENT_FILE_VERSION CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_WAVE
+
+		
+		#define CURRENT_CACHE_MAP_VERSION	0x0001
 
 		/// \todo add real detection of type size
 		typedef unsigned char byte;

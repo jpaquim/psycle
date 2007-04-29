@@ -159,9 +159,10 @@ namespace psycle
 			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
 			virtual int FindInputWire(int macIndex);
 			virtual int FindOutputWire(int macIndex);
-			virtual const char * const GetDllName() const throw() { return "built-in"; };
+			virtual const char * const GetDllName() const throw() { return ""; };
 			virtual int GetPluginCategory() { return 0; }
 			virtual bool IsShellPlugin() { return false; }
+			virtual int GetShellIdx() { return 0;	}
 			virtual char * GetName() = 0;
 			const char * GetEditName() { return _editName; }
 			virtual int GetNumParams() { return _numPars; };
@@ -177,7 +178,7 @@ namespace psycle
 
 			virtual void SaveFileChunk(RiffFile * pFile);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
-			virtual void SaveDllName(RiffFile * pFile);
+			virtual void SaveDllNameAndIndex(RiffFile * pFile,int index);
 		protected:
 			void SetVolumeCounter(int numSamples);
 			//void SetVolumeCounterAccurate(int numSamples);

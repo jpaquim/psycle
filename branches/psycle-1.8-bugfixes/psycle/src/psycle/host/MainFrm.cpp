@@ -892,7 +892,6 @@ NAMESPACE__BEGIN(psycle)
 							cb2->SetCurSel(AUX_WAVES);
 							_pSong->auxcolSelected = _pSong->instSelected;
 						}
-						/* This code is disabled because the MIDI channels are rarely used.
 						else if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_VST)
 						{
 							if ( cb2->GetCurSel() == AUX_WAVES)
@@ -901,7 +900,6 @@ NAMESPACE__BEGIN(psycle)
 								_pSong->auxcolSelected = _pSong->midiSelected;
 							}
 						}
-						*/
 						else
 						{
 							cb2->SetCurSel(AUX_PARAMS);

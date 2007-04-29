@@ -92,10 +92,10 @@ namespace psycle
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
 				virtual bool IsShellPlugin() { return (GetPlugCategory() == kPlugCategShell); }
+				virtual int GetShellIdx() { return uniqueId();	}
 				virtual int GetPluginCategory() { return GetPlugCategory(); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
-				virtual void SaveDllName(RiffFile * pFile);
 //				virtual bool ConnectTo(Machine& dstMac,int dstport=0,int outport=0,float volume=1.0f);
 //				virtual bool Disconnect(Machine& dstMac);
 

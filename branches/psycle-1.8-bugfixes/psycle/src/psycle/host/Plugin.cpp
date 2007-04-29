@@ -210,7 +210,8 @@ namespace psycle
 			std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),std::tolower);
 			std::string sPath2;
 			std::string sPath;
-			if(!CNewMachine::lookupDllName(psFileName,sPath)) 
+			int shellIdx=0;
+			if(!CNewMachine::lookupDllName(psFileName,sPath,shellIdx)) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
@@ -218,7 +219,7 @@ namespace psycle
 				sPath = psFileName;
 			}
 
-			if(!CNewMachine::TestFilename(sPath) ) 
+			if(!CNewMachine::TestFilename(sPath,shellIdx) ) 
 			{
 				return false;
 			}
@@ -266,14 +267,6 @@ namespace psycle
 			}
 			if(exception) throw *exception;
 		}
-
-		void Plugin::SaveDllName(RiffFile * pFile) 
-		{
-			CString str = _psDllName.c_str();
-			char str2[256];
-			strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
-			pFile->Write(&str2,strlen(str2)+1);
-		};
 
 		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -817,6 +810,7 @@ namespace psycle
 
 			char sDllName[256];
 			int numParameters;
+			int shellIdx=0;
 
 
 			pFile->Read(sDllName, sizeof(sDllName)); // Plugin dll name
@@ -848,7 +842,7 @@ namespace psycle
 			}
 			std::string sPath2;
 			CString sPath;
-			if ( !CNewMachine::lookupDllName(sDllName,sPath2) ) 
+			if ( !CNewMachine::lookupDllName(sDllName,sPath2,shellIdx) ) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
@@ -856,7 +850,7 @@ namespace psycle
 				sPath2 = sDllName;
 			}
 			
-			if ( !CNewMachine::TestFilename(sPath2) ) 
+			if ( !CNewMachine::TestFilename(sPath2,shellIdx) ) 
 			{
 				result = false;
 			}

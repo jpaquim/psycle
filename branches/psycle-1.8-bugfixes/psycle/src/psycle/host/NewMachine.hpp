@@ -93,12 +93,12 @@ NAMESPACE__BEGIN(psycle)
 			static bool pluginName;
 
 			static void learnDllName(const std::string & fullpath);
-			static bool lookupDllName(const std::string, std::string & result);
+			static bool lookupDllName(const std::string, std::string & result, int& shellIdx);
 			static void DestroyPluginInfo();
 			static void LoadPluginInfo();
 			static int LastType0;
 			static int LastType1;
-			static bool TestFilename(const std::string & name);
+			static bool TestFilename(const std::string & name,int shellIdx);
 		protected:
 			static std::map<std::string,std::string> dllNames;
 			bool bAllowChanged;

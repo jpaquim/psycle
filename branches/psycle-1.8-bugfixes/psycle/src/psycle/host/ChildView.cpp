@@ -123,6 +123,7 @@ NAMESPACE__BEGIN(psycle)
 			// Creates a new song object. The application Song.
 			//Global::_pSong->Reset(); It's already called in _pSong->New();
 			Global::_pSong->New();
+			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
@@ -365,21 +366,18 @@ NAMESPACE__BEGIN(psycle)
 				{
 					if (_pSong->_pMachine[c])
 					{
-						if (pParentMain->isguiopen[c])
+						if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
 						{
-							if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
-							{
-								if (Global::pPlayer->Tweaker)
-									pParentMain->m_pWndMac[c]->Invalidate(false);
-							}
-							else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
-									_pSong->_pMachine[c]->_type == MACH_VSTFX )
-							{
-								((vst::plugin*)_pSong->_pMachine[c])->Idle();
-								((vst::plugin*)_pSong->_pMachine[c])->EditIdle();
-								if (Global::pPlayer->Tweaker)
-									((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
-							}
+							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
+								pParentMain->m_pWndMac[c]->Invalidate(false);
+						}
+						else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
+								_pSong->_pMachine[c]->_type == MACH_VSTFX )
+						{
+							((vst::plugin*)_pSong->_pMachine[c])->Idle();
+							((vst::plugin*)_pSong->_pMachine[c])->EditIdle();
+							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
+								((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
 						}
 					}
 				}
@@ -1315,7 +1313,6 @@ NAMESPACE__BEGIN(psycle)
 					//Repaint(DMPatternHeader);
 				}
 			}
-
 		}
 
 		void CChildView::OnNewmachine() 

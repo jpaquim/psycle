@@ -506,7 +506,6 @@ namespace psycle
 							sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
 							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
 							delete p;
 							bDeleted = true;
 						}
@@ -521,17 +520,18 @@ namespace psycle
 					{
 						std::string sPath;
 						vst::plugin *vstPlug=0;
+						int shellIdx;
 
-						if(!CNewMachine::lookupDllName(dllName,sPath)) 
+						if(!CNewMachine::lookupDllName(dllName,sPath,shellIdx)) 
 						{
 							// Check Compatibility Table.
 							// Probably could be done with the dllNames lockup.
 							//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
 							sPath = dllName;
 						}
-						if(CNewMachine::TestFilename(sPath) ) 
+						if(CNewMachine::TestFilename(sPath,shellIdx) ) 
 						{
-							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath.c_str()));
+							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath.c_str(),shellIdx));
 						}
 
 						if(!vstPlug)
@@ -540,7 +540,7 @@ namespace psycle
 							sprintf(sError,"Replacing VST plug-in \"%s\" with Dummy.",dllName);
 							MessageBox(NULL,sError, "Loading Error", MB_OK);
 							pMachine = new Dummy(index);
-							type = MACH_DUMMY;
+							((Dummy*)pMachine)->wasVST=true;
 							bDeleted = true;
 						}
 						else
@@ -557,7 +557,11 @@ namespace psycle
 				break;
 			}
 			pMachine->Init();
-			pMachine->_type = type;
+			if(!bDeleted)
+			{
+				///\todo: Is it even necessary???
+				pMachine->_type = type;
+			}
 			pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
 			pFile->Read(&pMachine->_mute,sizeof(pMachine->_mute));
 			pFile->Read(&pMachine->_panning,sizeof(pMachine->_panning));
@@ -646,7 +650,7 @@ namespace psycle
 		void Machine::SaveFileChunk(RiffFile* pFile)
 		{
 			pFile->Write(&_type,sizeof(_type));
-			SaveDllName(pFile);
+			SaveDllNameAndIndex(pFile,GetShellIdx());
 			pFile->Write(&_bypass,sizeof(_bypass));
 			pFile->Write(&_mute,sizeof(_mute));
 			pFile->Write(&_panning,sizeof(_panning));
@@ -680,11 +684,28 @@ namespace psycle
 			}
 		};
 
-		void Machine::SaveDllName(RiffFile* pFile)
+		void Machine::SaveDllNameAndIndex(RiffFile* pFile,int index)
 		{
-			char temp=0;
-			pFile->Write(&temp,1);
-		};
+			CString str = GetDllName();
+			char str2[256];
+			if ( str.IsEmpty()) str2[0]=0;
+			else strcpy(str2,str.Mid(str.ReverseFind('\\')+1));
+
+			if (index != 0)
+			{
+				char idxtext[5];
+				int divisor=16777216;
+				idxtext[4]=0;
+				for (int i=0; i < 4; i++)
+				{
+					int residue = index%divisor;
+					idxtext[3-i]=index/divisor;
+					index = residue;
+					divisor=divisor/256;
+				}
+				strcat(str2,idxtext);
+			}
+			pFile->Write(&str2,strlen(str2)+1);		};
 
 
 
@@ -701,6 +722,7 @@ namespace psycle
 			_type = MACH_DUMMY;
 			_mode = MACHMODE_FX;
 			sprintf(_editName, _psName);
+			wasVST = false;
 		}
 		void Dummy::Work(int numSamples)
 		{
@@ -722,6 +744,9 @@ namespace psycle
 			_worked = true;
 		}
 
+		// Since Dummy is used by the loader to load broken/missing plugins, 
+		// its "LoadSpecificChunk" skips the data of the chunk so that the
+		// song loader can continue the sequence.
 		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;

@@ -68,8 +68,7 @@ namespace psycle
 					(!strcmp(ptr, canDoSizeWindow ))		// "sizeWindow",
 
 					//||	(!strcmp(ptr, canDoAsyncProcessing ))	// DEPRECATED
-					//||	(!strcmp(ptr, canDoOffline] ))			// "offline",
-					||	(!strcmp(ptr, "supplyIdle" ))		// DEPRECATED
+					//||	(!strcmp(ptr, canDoOffline ))			// "offline",
 					//||	(!strcmp(ptr, "supportShell" ))		// DEPRECATED
 					//||	(!strcmp(ptr, canDoEditFile ))			// "editFile",
 					//||	(!strcmp(ptr, canDoStartStopProcess ))	// "startStopProcess"
@@ -279,8 +278,6 @@ namespace psycle
 					size -= sizeof _program + sizeof count + sizeof(float) * count;
 					if(size)
 					{
-						// [bohan] why don't we just call LoadChunk?
-						// [bohan] hmm, shit, LoadCunk actually reads the chunk size too.
 						if(ProgramIsChunk())
 						{
 							char * data(new char[size]);
@@ -304,11 +301,13 @@ namespace psycle
 				UINT count(numParams());
 				unsigned char _program=0;
 				UINT size(sizeof _program + sizeof count + sizeof(float) * count);
+				UINT chunksize(0);
 				char * pData(0);
 				bool b = ProgramIsChunk();
 				if(b)
 				{
-					size += GetChunk((void**)&pData);
+					chunksize = GetChunk((void**)&pData);
+					size+=chunksize;
 				}
 				pFile->Write(&size, sizeof size);
 				_program = static_cast<unsigned char>(GetProgram());
@@ -321,16 +320,10 @@ namespace psycle
 				}
 				if(b)
 				{
-					pFile->Write(pData, size);
+					pFile->Write(pData, chunksize);
 				}
 			};
-			void plugin::SaveDllName(RiffFile * pFile) 
-			{
-				::CString str = GetDllName();
-				char str2[1 << 10];
-				std::strcpy(str2, str.Mid(str.ReverseFind('\\') + 1));
-				pFile->Write(str2, std::strlen(str2) + 1);
-			};
+
 			VstMidiEvent* plugin::reserveVstMidiEvent() {
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 				if(queue_size >= MAX_VST_EVENTS) {
@@ -777,40 +770,8 @@ namespace psycle
 
 
 
-			// Load for Old Psycle fileformat
-			bool plugin::LoadChunk(RiffFile * pFile)
-			{
-				bool b;
-				try
-				{
-					b = ProgramIsChunk();
-				}
-				catch(const std::exception &)
-				{
-					b = false;
-				}
-				if(!b) return false;
-				// read chunk size
-				long chunk_size;
-				pFile->Read(&chunk_size, sizeof chunk_size);
-				// read chunk data
-				char * chunk(new char[chunk_size]);
-				pFile->Read(chunk, chunk_size);
-				try
-				{
-					SetChunk(chunk,chunk_size);
-				}
-				catch(const std::exception &)
-				{
-					// [bohan] hmm, so, data just gets lost?
-					zapArray(chunk);
-					return false;
-				}
-				zapArray(chunk);
-				return true;
-			}
-
 			/// old file format vomit, don't look at it.
+			///////////////////////////////////////////////
 			bool plugin::PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance)
 			{
 				char junkdata[256];
@@ -889,6 +850,38 @@ namespace psycle
 				_numOutputs= pMac->_numOutputs;
 				
 				Machine::SetPan(pMac->_panning);
+				return true;
+			}
+			// Load for Old Psycle fileformat
+			bool plugin::LoadChunk(RiffFile * pFile)
+			{
+				bool b;
+				try
+				{
+					b = ProgramIsChunk();
+				}
+				catch(const std::exception &)
+				{
+					b = false;
+				}
+				if(!b) return false;
+				// read chunk size
+				long chunk_size;
+				pFile->Read(&chunk_size, sizeof chunk_size);
+				// read chunk data
+				char * chunk(new char[chunk_size]);
+				pFile->Read(chunk, chunk_size);
+				try
+				{
+					SetChunk(chunk,chunk_size);
+				}
+				catch(const std::exception &)
+				{
+					// [bohan] hmm, so, data just gets lost?
+					zapArray(chunk);
+					return false;
+				}
+				zapArray(chunk);
 				return true;
 			}
 		}

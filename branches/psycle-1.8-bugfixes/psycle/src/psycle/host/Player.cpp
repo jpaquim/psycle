@@ -27,9 +27,7 @@ namespace psycle
 			_loop_count=0;
 			_loop_line=0;
 			m_SampleRate=44100;
-			m_SamplesPerRow=(44100*60)/(125*4);
-			tpb=4;
-			bpm=125;
+			SetBPM(125,4);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 		}
 
@@ -102,6 +100,7 @@ namespace psycle
 			RecalcSPR();
 			CVSTHost::vstTimeInfo.tempo = bpm;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
+			CVSTHost::vstTimeInfo.flags |= kVstTempoValid;
 			//\todo : Find out if we should notify the plugins of this change.
 		}
 

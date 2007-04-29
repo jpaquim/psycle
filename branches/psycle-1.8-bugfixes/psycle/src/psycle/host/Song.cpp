@@ -84,7 +84,7 @@ namespace psycle
 			case MACH_PLUGIN:
 				{
 					pMachine = pPlugin = new Plugin(songIdx);
-					if(!CNewMachine::TestFilename(psPluginDll))
+					if(!CNewMachine::TestFilename(psPluginDll,shellIdx))
 					{
 						zapObject(pMachine);
 						return false;
@@ -109,7 +109,7 @@ namespace psycle
 			case MACH_VST:
 			case MACH_VSTFX:
 				{
-					if(!CNewMachine::TestFilename(psPluginDll)) 
+					if(!CNewMachine::TestFilename(psPluginDll,shellIdx)) 
 					{
 						zapObject(pMachine);
 						return false;
@@ -1018,11 +1018,18 @@ namespace psycle
 							//MessageBox(0, "Info Seqment of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
-						else
+						else 
 						{
 							pFile->ReadString(Name, sizeof Name);
 							pFile->ReadString(Author, sizeof Author);
 							pFile->ReadString(Comment,sizeof Comment);
+							if (version == 1)
+							{
+								///\todo: add bitmap handling.
+								int bitmapsize=0;
+								pFile->Read(&bitmapsize,sizeof bitmapsize);
+								pFile->Skip(bitmapsize);
+							}
 						}
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
@@ -1323,7 +1330,7 @@ namespace psycle
 				bool _machineActive[128];
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
-				New();
+//				New();
 				pFile->Read(&Name, 32);
 				pFile->Read(&Author, 32);
 				pFile->Read(&Comment, 128);
@@ -1332,13 +1339,14 @@ namespace psycle
 				if( sampR <= 0)
 				{
 					// Shouldn't happen but has happened.
-					m_LinesPerBeat= 4; sampR = 4315;
+					m_LinesPerBeat= 4;
 				}
-				else m_LinesPerBeat = 44100 * 15 * 4 / (sampR * m_BeatsPerMin);
-				Global::pPlayer->bpm = m_BeatsPerMin;
-				Global::pPlayer->tpb = m_LinesPerBeat;
 				// The old format assumes we output at 44100 samples/sec, so...
-				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
+				else m_LinesPerBeat = 44100 * 60 / (sampR * m_BeatsPerMin);
+				Global::pPlayer->SetBPM(m_BeatsPerMin,m_LinesPerBeat);
+//				Global::pPlayer->bpm = m_BeatsPerMin;
+//				Global::pPlayer->tpb = m_LinesPerBeat;
+//				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
 				pFile->Read(&currentOctave, sizeof currentOctave);
 				pFile->Read(&busMachine[0], sizeof busMachine);
 				pFile->Read(&playOrder, sizeof playOrder);
@@ -1599,7 +1607,8 @@ namespace psycle
 								// the newly created plugin.
 								pTempMac->PreLoad(pFile,program,instance);
 								assert(instance < OLD_MAX_PLUGINS);
-								if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp)))
+								int shellIdx=0;
+								if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp,shellIdx)))
 								{
 									berror=true;
 									sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
@@ -1607,16 +1616,16 @@ namespace psycle
 								else
 								{
 									strcpy(sPath,temp.c_str());
-									if (!CNewMachine::TestFilename(sPath))
+									if (!CNewMachine::TestFilename(sPath,shellIdx))
 									{
 										berror=true;
-										sprintf(sError,"This VST plug-in is Disabled\"%s\" - replacing with Dummy.",sPath);
+										sprintf(sError,"This VST plug-in is Disabled \"%s\" - replacing with Dummy.",sPath);
 									}
 									else
 									{
 										try
 										{
-											pMac[i] = pVstPlugin = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath));
+											pMac[i] = pVstPlugin = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath,shellIdx));
 
 											if (pVstPlugin)
 											{
@@ -2212,6 +2221,9 @@ namespace psycle
 			pFile->Write(&Name,strlen(Name)+1);
 			pFile->Write(&Author,strlen(Author)+1);
 			pFile->Write(&Comment,strlen(Comment)+1);
+			///\todo: save bitmap
+			int bitmapsize=0;
+			pFile->Write(&bitmapsize,sizeof bitmapsize);
 
 			if ( !autosave ) 
 			{

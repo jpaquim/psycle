@@ -87,7 +87,6 @@ namespace psycle
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
-			virtual void SaveDllName(RiffFile * pFile);
 
 			void Instance(std::string file_name) throw(...);
 			void Free() throw(...);

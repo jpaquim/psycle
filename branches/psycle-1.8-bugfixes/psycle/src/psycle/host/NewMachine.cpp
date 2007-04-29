@@ -42,9 +42,16 @@ NAMESPACE__BEGIN(psycle)
 		//\todo : Important: There can exists dlls with the same name (there is a phantom.dll which is a VST).
 		//        what about adding a new parameter indicating if we want a VST or a Psycle plugin?
 		//		  or maybe if found more than one entry, ask the user which one he wants to use?
-		bool CNewMachine::lookupDllName(const std::string name, std::string & result)
+		bool CNewMachine::lookupDllName(const std::string name, std::string & result, int& shellidx)
 		{
 			std::string tmp = name;
+			std::string extension = name.substr(name.size()-4,4);
+			if ( extension != ".dll")
+			{
+				shellidx =  extension[0] + extension[1]*256 + extension[2]*65536 + extension[3]*16777216;
+				tmp = name.substr(0,name.size()-4);
+			}
+
 			// transform string to lower case
 			std::transform(tmp.begin(),tmp.end(),tmp.begin(),std::tolower);
 			
@@ -1127,11 +1134,11 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		bool CNewMachine::TestFilename(const std::string & name)
+		bool CNewMachine::TestFilename(const std::string & name, const int shellIdx)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{
-				if(name == _pPlugsInfo[i]->dllname)
+				if(name == _pPlugsInfo[i]->dllname && shellIdx == _pPlugsInfo[i]->identifier)
 				{
 					// bad plugins always have allow = false
 					if(_pPlugsInfo[i]->allow) return true;
