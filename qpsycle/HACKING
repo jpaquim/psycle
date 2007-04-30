@@ -63,3 +63,17 @@ off working on something if they think it "belongs" to someone else.
 related to part of the code is fine -- just don't put AUTHOR = ME
 in big letters at the top.)
 
+
+Places to get general tips and advice
+-------------------------------------
+
+Regarding host/Qt: qtcentre.org is a very helpful forum for all kinds
+of Qt related questions.  You could also try asking mutilus on #psycle
+if he's around :)
+
+Regarding psycore: JosepMa is the man in the know here.
+
+General svn usage: http://svnbook.red-bean.com/
+
+Working on open-source: http://producingoss.com/
+
