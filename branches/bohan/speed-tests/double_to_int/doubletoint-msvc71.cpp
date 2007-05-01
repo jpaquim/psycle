@@ -97,7 +97,9 @@ int main()
 	int feround(::fegetround());
 	::fesetround(FE_TONEAREST);
 #endif
-//	measure(3);
+#if !defined _MSC_VER || _MSC_VER >= 1400
+	measure(3);
+#endif
 #if defined FE_TONEAREST
 	::fesetround(feround);
 #endif
