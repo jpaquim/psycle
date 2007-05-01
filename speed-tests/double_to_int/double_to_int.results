@@ -67,7 +67,7 @@ static_cast |  8.63 |  6.77 | 2.84
 ==============
 cl 13.10.3077
 x86-windows-xp
-amd64
+p4 willamette (non-HT)
 ==============
 
             |  x87  |  sse1 | sse2
