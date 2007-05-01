@@ -381,6 +381,117 @@ void GeneratorGui::keyPressEvent( QKeyEvent * event )
     }
 }
 
+void GeneratorGui::keyReleaseEvent( QKeyEvent * event )
+{
+    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int note = NULL;
+
+        switch ( command ) { 
+            case psy::core::cdefMuteMachine:
+                toggleMuteAct_->trigger();
+                break;
+            case psy::core::cdefSoloMachine:
+                toggleSoloAct_->trigger();
+                break;
+            case psy::core::cdefKeyC_0:
+                note = 1;
+                break;
+            case psy::core::cdefKeyCS0:
+                note = 2;
+                break;
+            case psy::core::cdefKeyD_0:
+                note = 3;
+                break;
+            case psy::core::cdefKeyDS0:
+                note = 4;
+                break;
+            case psy::core::cdefKeyE_0:
+                note = 5;
+                break;
+            case psy::core::cdefKeyF_0:
+                note = 6;
+                break;
+            case psy::core::cdefKeyFS0:
+                note = 7;
+                break;
+            case psy::core::cdefKeyG_0:
+                note = 8;
+                break;
+            case psy::core::cdefKeyGS0:
+                note = 9;
+                break;
+            case psy::core::cdefKeyA_0:
+                note = 10;
+                break;
+            case psy::core::cdefKeyAS0:
+                note = 11;
+                break;
+            case psy::core::cdefKeyB_0: 
+                note = 12;
+                break;
+            case psy::core::cdefKeyC_1:
+                note = 13;
+                break;
+            case psy::core::cdefKeyCS1:
+                note = 14;
+                break;
+            case psy::core::cdefKeyD_1:
+                note = 15;
+                break;
+            case psy::core::cdefKeyDS1:
+                note = 16;
+                break;
+            case psy::core::cdefKeyE_1:
+                note = 17;
+                break;
+            case psy::core::cdefKeyF_1:
+                note = 18;
+                break;
+            case psy::core::cdefKeyFS1:
+                note = 19;
+                break;
+            case psy::core::cdefKeyG_1:
+                note = 20;
+                break;
+            case psy::core::cdefKeyGS1:
+                note = 21;
+                break;
+            case psy::core::cdefKeyA_1:
+                note = 22;
+                break;
+            case psy::core::cdefKeyAS1:
+                note = 23;
+                break;
+            case psy::core::cdefKeyB_1: 
+                note = 24;
+                break;
+            case psy::core::cdefKeyC_2:
+                note = 25;
+                break;
+            case psy::core::cdefKeyCS2:
+                note = 26;
+                break;
+            case psy::core::cdefKeyD_2:
+                note = 27;
+                break;
+            case psy::core::cdefKeyDS2:
+                note = 28;
+                break;
+            case psy::core::cdefKeyE_2:
+                note = 29;
+                break;
+            default: 
+                event->ignore();
+                return;
+        }
+    if (note) {
+        machineView->StopNote( note );   
+    }
+    
+}
+
+
+
 // FIXME: should be in EffectGui, but Qt fails to recognise it there.
 void MachineGui::onToggleBypassActionTriggered() 
 {
