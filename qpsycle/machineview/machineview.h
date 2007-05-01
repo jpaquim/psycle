@@ -59,6 +59,8 @@ class WireGui;
     void createMachineGui( psy::core::Machine *mac );
     WireGui* createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui );
 
+    bool isCreatingWire() { return creatingWire_; }
+
 
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -91,6 +93,8 @@ private:
     
     QGraphicsScene *scene_;
     QGraphicsLineItem *tempLine_;
+
+    bool creatingWire_;
     
     /// For multi-key playback state.
     int notetrack[psy::core::MAX_TRACKS];

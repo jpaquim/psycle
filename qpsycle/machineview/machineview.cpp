@@ -89,6 +89,7 @@ MachineView::MachineView(psy::core::Song *song)
     notetrack[psy::core::MAX_TRACKS];
     for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
 
+    creatingWire_ = false;
  }
 
 WireGui *MachineView::createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui )
@@ -127,6 +128,7 @@ void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 {
     tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
     tempLine_->setVisible(true);
+    creatingWire_ = true;
 }
 
 void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
@@ -140,6 +142,7 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
         }
     }
     tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
+    creatingWire_ = false;
 }
 
 /*void MachineView::startRewiringDest( WireGui *wireGui, QGraphicsSceneMouseEvent *event )
