@@ -292,10 +292,6 @@ void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Ma
 
 void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMachine )
 {
-
-    int notetrack[psy::core::MAX_TRACKS];
-    for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
-
     if (!(note >=0 && note < 128)) return;
 
     // octave offset
