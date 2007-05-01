@@ -1,10 +1,15 @@
-        | gcc options used
---------+--------------------------------------------------------
-x87     | -O3 -ffast-math        -mfpmath=387           -lm -lrt
-sse1    | -O3 -ffast-math -msse  -mfpmath=sse           -lm -lrt
-sse2    | -O3 -ffast-math -msse2 -mfpmath=sse           -lm -lrt
-k8 x87  | -O3 -ffast-math        -mfpmath=387 -march=k8 -lm -lrt
-k8 sse2 | -O3 -ffast-math -msse2 -mfpmath=sse -march=k8 -lm -lrt
+variant   | gcc options used
+----------+--------------------------------------------------------
+x87       | -O3 -ffast-math        -mfpmath=387           -lm -lrt
+sse1      | -O3 -ffast-math -msse  -mfpmath=sse           -lm -lrt
+sse2      | -O3 -ffast-math -msse2 -mfpmath=sse           -lm -lrt
+k8 x87    | -O3 -ffast-math        -mfpmath=387 -march=k8 -lm -lrt
+k8 sse2   | -O3 -ffast-math -msse2 -mfpmath=sse -march=k8 -lm -lrt
+
+variant   | microsoft's compiler option used
+----------+-------------------------------------------------------------------------          
+cl14 x87  | -MT -GL -GS- -Ob2 -Oi -Ot -Oy -fp:fast            /link /LTCG winmm.lib
+cl14 sse2 | -MT -GL -GS- -Ob2 -Oi -Ot -Oy -fp:fast -arch:SSE2 /link /LTCG winmm.lib
 
 
 
