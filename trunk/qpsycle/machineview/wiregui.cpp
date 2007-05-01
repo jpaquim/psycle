@@ -99,12 +99,14 @@ void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     if ( event->buttons() == Qt::LeftButton )
     {
         if ( ( event->modifiers() & Qt::ShiftModifier ) && state_ == 1 ) {
+            scene()->update( boundingRect() );
             destPoint = event->lastScenePos();    
-            update( boundingRect() );
+            scene()->update( boundingRect() );
         }
         if ( ( event->modifiers() & Qt::ControlModifier ) && state_ == 2 ) {
+            scene()->update( boundingRect() );
             sourcePoint = event->lastScenePos();    
-            update( boundingRect() );
+            scene()->update( boundingRect() );
         }
     }
 }
@@ -174,8 +176,6 @@ void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     QMenu menu;
     menu.addAction( delConnAct_ );
     menu.addSeparator();
-    menu.addAction( "Rewire Connection Source" );
-    menu.addAction( rewireDstAct_ );
     QAction *a = menu.exec( event->screenPos() );
 }
 
