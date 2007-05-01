@@ -151,19 +151,17 @@ void MachineGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
 
 void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->buttons() & Qt::MidButton) {
-        qDebug("emitting new wire con..");
+    if ( ( event->buttons() == Qt::LeftButton ) && ( event->modifiers() == Qt::ShiftModifier ) ) {
         emit startNewConnection(this, event);
     } 
-    else { // business as usual
+    else { // Default implementation takes care of moving the MacGui.
         QGraphicsItem::mouseMoveEvent(event);
     }
 }
 
 void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->button() == Qt::MidButton) {
-        qDebug("ending new wire con..");
+    if ( ( event->button() == Qt::LeftButton ) && ( machineView->isCreatingWire() ) ) {
         emit closeNewConnection(this, event);
     } 
     else { // business as usual

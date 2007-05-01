@@ -93,8 +93,6 @@ signals:
     void deleteRequest( MachineGui *macGui );
     void renamed();
 
-private:
-
 };
 
 class GeneratorGui : public MachineGui {

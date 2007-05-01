@@ -40,7 +40,7 @@
      source = sourceMacGui;
      dest = destMacGui;
      source->addWireGui(this);
-     dest->addWireGui(this);
+     if ( dest ) dest->addWireGui(this);
      adjust();
 
      delConnAct_ = new QAction( "Delete Connection", this );
