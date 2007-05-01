@@ -41,11 +41,11 @@ inline long int test<2>(double d)
 	return static_cast<long int>(d);
 }
 
-#if 0 && !defined _MSC_VER || _MSC_VER >= 1400 //  lrint is not available in MSVC 7.1.
+#if 0 && (!defined _MSC_VER || _MSC_VER >= 1400) // lrint is not available in MSVC 7.1.
 template<>
 inline long int test<3>(double d)
 {
-	return ::lrint(d);
+	return lrint(d);
 }
 #endif
 
@@ -98,7 +98,7 @@ int main()
 	int feround(::fegetround());
 	::fesetround(FE_TONEAREST);
 #endif
-#if 0 && !defined _MSC_VER || _MSC_VER >= 1400
+#if 0 && (!defined _MSC_VER || _MSC_VER >= 1400)
 	measure(3);
 #endif
 #if defined FE_TONEAREST
