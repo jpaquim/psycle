@@ -230,17 +230,6 @@ double measure(::clockid_t clock, double empty_cost = 0)
 
 int main()
 {
-	#if 0
-		std::cout << test<1>(1.1) << std::endl;
-		std::cout << test<1>(1.9) << std::endl;
-		std::cout << test<2>(1.1) << std::endl;
-		std::cout << test<2>(1.9) << std::endl;
-		std::cout << test<1>(-1.1) << std::endl;
-		std::cout << test<1>(-1.9) << std::endl;
-		std::cout << test<2>(-1.1) << std::endl;
-		std::cout << test<2>(-1.9) << std::endl;
-	#endif
-	
 	::clockid_t clock(universalis::operating_system::clock::best());
 	timespec result;
 	#if UNIVERSALIS__OPERATING_SYSTEM__CLOCK__DETAIL
@@ -258,16 +247,16 @@ int main()
 	std::cout << "clock resolution: " << std::setprecision(15) << result.tv_sec + 1e-9 * result.tv_nsec << "s" << std::endl;
 	double const empty_cost(measure<0>(clock));
 	#define measure(i) measure<i>(clock, empty_cost)
-	measure(1);
-	measure(2);
-	#if defined FE_TONEAREST
-		int feround(::fegetround());
-		::fesetround(FE_TONEAREST);
-	#endif
-		measure(3);
-	#if defined FE_TONEAREST
-		::fesetround(feround);
-	#endif
+		measure(1);
+		measure(2);
+		#if defined FE_TONEAREST
+			int feround(::fegetround());
+			::fesetround(FE_TONEAREST);
+		#endif
+			measure(3);
+		#if defined FE_TONEAREST
+			::fesetround(feround);
+		#endif
 	#undef measure
 	return 0;
 }

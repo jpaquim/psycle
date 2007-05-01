@@ -4,18 +4,8 @@
 
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 #include <windows.h>
-
-namespace universalis
-{
-	namespace operating_system
-	{
-		void error(int const & code = errno)
-		{
-			std::cerr << "error: " << code << ": " << ::strerror(code) << std::endl;
-		}
-	}
-}
 
 template<unsigned int I>
 inline long int test(double d)
@@ -41,13 +31,24 @@ inline long int test<2>(double d)
 	return static_cast<long int>(d);
 }
 
-#if 0 && (!defined _MSC_VER || _MSC_VER >= 1400) // lrint is not available in MSVC 7.1.
+#if defined _MSC_VER && defined _M_IX86
+inline long lrint(double d)
+{
+	long int i;
+	__asm
+	{
+		fld d;
+		fistp i;
+	}
+	return i;
+}
+#endif
+
 template<>
 inline long int test<3>(double d)
 {
 	return lrint(d);
 }
-#endif
 
 template<typename T, unsigned int I>
 T loop()
@@ -79,31 +80,18 @@ double measure(double empty_cost = 0)
 
 int main()
 {
-#if 0
-	std::cout << test<1>(1.1) << std::endl;
-	std::cout << test<1>(1.9) << std::endl;
-	std::cout << test<2>(1.1) << std::endl;
-	std::cout << test<2>(1.9) << std::endl;
-	std::cout << test<1>(-1.1) << std::endl;
-	std::cout << test<1>(-1.9) << std::endl;
-	std::cout << test<2>(-1.1) << std::endl;
-	std::cout << test<2>(-1.9) << std::endl;
-#endif
-
 	double const empty_cost(measure<0>());
-#define measure(i) measure<i>(empty_cost)
-	measure(1);
-	measure(2);
-#if defined FE_TONEAREST
-	int feround(::fegetround());
-	::fesetround(FE_TONEAREST);
-#endif
-#if 0 && (!defined _MSC_VER || _MSC_VER >= 1400)
-	measure(3);
-#endif
-#if defined FE_TONEAREST
-	::fesetround(feround);
-#endif
-#undef measure
+	#define measure(i) measure<i>(empty_cost)
+		measure(1);
+		measure(2);
+		#if defined FE_TONEAREST
+			int feround(::fegetround());
+			::fesetround(FE_TONEAREST);
+		#endif
+		measure(3);
+		#if defined FE_TONEAREST
+			::fesetround(feround);
+		#endif
+	#undef measure
 	return 0;
 }
