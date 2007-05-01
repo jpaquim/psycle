@@ -183,6 +183,12 @@ inline long int test<3>(double d)
 	return ::lrint(d);
 }
 
+template<>
+inline long int test<4>(double d)
+{
+	return lround(d);
+}
+
 template<typename T, unsigned int I>
 T loop()
 {
@@ -257,6 +263,7 @@ int main()
 		#if defined FE_TONEAREST
 			::fesetround(feround);
 		#endif
+	measure(4);
 	#undef measure
 	return 0;
 }
