@@ -40,14 +40,15 @@ inline long int test<2>(double d)
 {
 	return static_cast<long int>(d);
 }
-/*
-//  lrint is not available in MSVC 7.1.
+
+#if !defined _MSC_VER || _MSC_VER >= 1400 //  lrint is not available in MSVC 7.1.
 template<>
 inline long int test<3>(double d)
 {
 	return ::lrint(d);
 }
-*/
+#endif
+
 template<typename T, unsigned int I>
 T loop()
 {
