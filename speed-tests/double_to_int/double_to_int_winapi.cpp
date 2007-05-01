@@ -74,7 +74,7 @@ double measure(double empty_cost = 0)
 	const unsigned long end=timeGetTime();
 
 	double const elapsed(end-start);
-	std::cout << "measure: " << I << ": " << std::setprecision(15) << elapsed - empty_cost << "s" << std::endl;
+	std::cout << "measure: " << I << ": " << std::setprecision(15) << elapsed - empty_cost << "ms" << std::endl;
 	return elapsed;
 }
 
