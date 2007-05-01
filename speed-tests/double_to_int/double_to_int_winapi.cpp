@@ -32,10 +32,10 @@ inline long int test<2>(double d)
 }
 
 #if defined _MSC_VER && defined _M_IX86
-inline long lrint(double d)
+inline long int lrint(double d)
 {
 	long int i;
-	__asm
+	__asm // note: this is not as fast as one might expect.
 	{
 		fld d;
 		fistp i;
