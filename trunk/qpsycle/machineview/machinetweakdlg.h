@@ -25,6 +25,8 @@ namespace psy { namespace core {
 class Machine;
 }}
 
+class MachineGui;
+
 #include <map>
 
 #include <QDialog>
@@ -89,14 +91,19 @@ class MachineTweakDlg : public QDialog {
     Q_OBJECT
 
 public:
-    MachineTweakDlg( psy::core::Machine *mac, QWidget *parent = 0 );
+    MachineTweakDlg( MachineGui *macGui, QWidget *parent = 0 );
 
 protected:
     void showEvent( QShowEvent *event );
     void keyPressEvent( QKeyEvent *event );
+    void keyReleaseEvent( QKeyEvent *event );
 
 public slots: 
     void onKnobGroupChanged( KnobGroup *kGroup );
+
+signals:
+    void notePress( int note, psy::core::Machine *mac );
+    void noteRelease( int note );
 
 private:
     void initParameterGui();
@@ -104,6 +111,7 @@ private:
 
     QWidget *knobPanel;
     psy::core::Machine *pMachine_;
+    MachineGui *m_macGui;
 
     std::map<int, KnobGroup*> knobGroupMap;
     std::map<int, FHeader*> headerMap;

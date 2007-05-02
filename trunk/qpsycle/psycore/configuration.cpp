@@ -168,7 +168,7 @@ namespace psy {
 			xml_mem_ += " <key id='oct_F_1' keychar='R'/>";
 			xml_mem_ += " <key id='oct_FS1' keychar='5'/>";
 			xml_mem_ += " <key id='oct_G_1' keychar='T'/>";
-			xml_mem_ += " <key id='oct_GS1' keychar='6'/>";
+			+1)xml_mem_ += " <key id='oct_GS1' keychar='6'/>";
 			xml_mem_ += " <key id='oct_A_1' keychar='Z'/>";
 			xml_mem_ += " <key id='oct_AS1' keychar='7'/>";
 			xml_mem_ += " <key id='oct_B_1' keychar='U'/>";
