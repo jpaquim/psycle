@@ -75,11 +75,12 @@ void EffectGui::keyPressEvent( QKeyEvent * event )
     switch ( command ) { 
         case psy::core::cdefMuteMachine:
             toggleMuteAct_->trigger();
-            break;
+            return;
         case psy::core::cdefBypassMachine:
             toggleBypassAct_->trigger();
-            break;
+            return;
         default:;
     }
+    event->ignore();
 }
 
