@@ -49,6 +49,7 @@ public:
     int type() const { return Type; }
 
     psy::core::Machine* mac();
+    int noteFromCommand( int command );
 
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
@@ -96,9 +97,15 @@ signals:
 };
 
 class GeneratorGui : public MachineGui {
+    Q_OBJECT
 public:
     GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+
+
+public slots:
+    void onNotePress( int note, psy::core::Machine* mac );
+    void onNoteRelease( int note );
 
 protected:
     void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );

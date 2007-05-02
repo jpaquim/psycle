@@ -60,7 +60,7 @@
      setBrush( Qt::blue );
      setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
 
-     macTwkDlg_ = new MachineTweakDlg( mac_, machineView );
+     macTwkDlg_ = new MachineTweakDlg( this, machineView );
 
      showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
      deleteMachineAct_ = new QAction( "Delete", this );
@@ -235,9 +235,20 @@ void MachineGui::onToggleSoloActionTriggered()
 }
 
 
+
+
+
+/**
+ * GeneratorGui
+ */
 GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
     : MachineGui(left, top, mac, macView)
-{}
+{
+    connect( macTwkDlg_, SIGNAL( notePress( int, psy::core::Machine* ) ),
+             this, SLOT( onNotePress( int, psy::core::Machine* ) ) );
+    connect( macTwkDlg_, SIGNAL( noteRelease( int ) ),
+             this, SLOT( onNoteRelease( int ) ) );
+}
 
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
@@ -272,222 +283,153 @@ void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 void GeneratorGui::keyPressEvent( QKeyEvent * event )
 {
-    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
-    int note = NULL;
+    if ( !event->isAutoRepeat() ) 
+    {
+        int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
 
-    if ( !event->isAutoRepeat() ) {
         switch ( command ) { 
             case psy::core::cdefMuteMachine:
                 toggleMuteAct_->trigger();
-                break;
+                return;
             case psy::core::cdefSoloMachine:
                 toggleSoloAct_->trigger();
-                break;
-            case psy::core::cdefKeyC_0:
-                note = 1;
-                break;
-            case psy::core::cdefKeyCS0:
-                note = 2;
-                break;
-            case psy::core::cdefKeyD_0:
-                note = 3;
-                break;
-            case psy::core::cdefKeyDS0:
-                note = 4;
-                break;
-            case psy::core::cdefKeyE_0:
-                note = 5;
-                break;
-            case psy::core::cdefKeyF_0:
-                note = 6;
-                break;
-            case psy::core::cdefKeyFS0:
-                note = 7;
-                break;
-            case psy::core::cdefKeyG_0:
-                note = 8;
-                break;
-            case psy::core::cdefKeyGS0:
-                note = 9;
-                break;
-            case psy::core::cdefKeyA_0:
-                note = 10;
-                break;
-            case psy::core::cdefKeyAS0:
-                note = 11;
-                break;
-            case psy::core::cdefKeyB_0: 
-                note = 12;
-                break;
-            case psy::core::cdefKeyC_1:
-                note = 13;
-                break;
-            case psy::core::cdefKeyCS1:
-                note = 14;
-                break;
-            case psy::core::cdefKeyD_1:
-                note = 15;
-                break;
-            case psy::core::cdefKeyDS1:
-                note = 16;
-                break;
-            case psy::core::cdefKeyE_1:
-                note = 17;
-                break;
-            case psy::core::cdefKeyF_1:
-                note = 18;
-                break;
-            case psy::core::cdefKeyFS1:
-                note = 19;
-                break;
-            case psy::core::cdefKeyG_1:
-                note = 20;
-                break;
-            case psy::core::cdefKeyGS1:
-                note = 21;
-                break;
-            case psy::core::cdefKeyA_1:
-                note = 22;
-                break;
-            case psy::core::cdefKeyAS1:
-                note = 23;
-                break;
-            case psy::core::cdefKeyB_1: 
-                note = 24;
-                break;
-            case psy::core::cdefKeyC_2:
-                note = 25;
-                break;
-            case psy::core::cdefKeyCS2:
-                note = 26;
-                break;
-            case psy::core::cdefKeyD_2:
-                note = 27;
-                break;
-            case psy::core::cdefKeyDS2:
-                note = 28;
-                break;
-            case psy::core::cdefKeyE_2:
-                note = 29;
-                break;
-            default: 
-                event->ignore();
                 return;
         }
-    }
-    if (note) {
-        int velocity = 127;
-        machineView->PlayNote( machineView->octave() * 12 + note, velocity, false, mac() );   
+
+        int note = NULL;
+        note = noteFromCommand( command );
+        if (note) {
+            onNotePress( note, mac() );
+        }
     }
 }
 
+// FIXME: this gets triggered even when you're still holding the key down.  
+// Most likely a Qt bug...
 void GeneratorGui::keyReleaseEvent( QKeyEvent * event )
 {
     int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
-    int note = NULL;
-
-        switch ( command ) { 
-            case psy::core::cdefMuteMachine:
-                toggleMuteAct_->trigger();
-                break;
-            case psy::core::cdefSoloMachine:
-                toggleSoloAct_->trigger();
-                break;
-            case psy::core::cdefKeyC_0:
-                note = 1;
-                break;
-            case psy::core::cdefKeyCS0:
-                note = 2;
-                break;
-            case psy::core::cdefKeyD_0:
-                note = 3;
-                break;
-            case psy::core::cdefKeyDS0:
-                note = 4;
-                break;
-            case psy::core::cdefKeyE_0:
-                note = 5;
-                break;
-            case psy::core::cdefKeyF_0:
-                note = 6;
-                break;
-            case psy::core::cdefKeyFS0:
-                note = 7;
-                break;
-            case psy::core::cdefKeyG_0:
-                note = 8;
-                break;
-            case psy::core::cdefKeyGS0:
-                note = 9;
-                break;
-            case psy::core::cdefKeyA_0:
-                note = 10;
-                break;
-            case psy::core::cdefKeyAS0:
-                note = 11;
-                break;
-            case psy::core::cdefKeyB_0: 
-                note = 12;
-                break;
-            case psy::core::cdefKeyC_1:
-                note = 13;
-                break;
-            case psy::core::cdefKeyCS1:
-                note = 14;
-                break;
-            case psy::core::cdefKeyD_1:
-                note = 15;
-                break;
-            case psy::core::cdefKeyDS1:
-                note = 16;
-                break;
-            case psy::core::cdefKeyE_1:
-                note = 17;
-                break;
-            case psy::core::cdefKeyF_1:
-                note = 18;
-                break;
-            case psy::core::cdefKeyFS1:
-                note = 19;
-                break;
-            case psy::core::cdefKeyG_1:
-                note = 20;
-                break;
-            case psy::core::cdefKeyGS1:
-                note = 21;
-                break;
-            case psy::core::cdefKeyA_1:
-                note = 22;
-                break;
-            case psy::core::cdefKeyAS1:
-                note = 23;
-                break;
-            case psy::core::cdefKeyB_1: 
-                note = 24;
-                break;
-            case psy::core::cdefKeyC_2:
-                note = 25;
-                break;
-            case psy::core::cdefKeyCS2:
-                note = 26;
-                break;
-            case psy::core::cdefKeyD_2:
-                note = 27;
-                break;
-            case psy::core::cdefKeyDS2:
-                note = 28;
-                break;
-            case psy::core::cdefKeyE_2:
-                note = 29;
-                break;
-            default: 
-                event->ignore();
-                return;
-        }
-    if (note) {
-        machineView->StopNote( note );   
+    switch ( command ) { 
+        case psy::core::cdefMuteMachine:
+            toggleMuteAct_->trigger();
+            return;
+        case psy::core::cdefSoloMachine:
+            toggleSoloAct_->trigger();
+            return;
+        default:;
     }
-    
+
+    int note = noteFromCommand( command );
+    if (note) {
+        onNoteRelease( note );
+    }
+    event->ignore();
+}
+
+void GeneratorGui::onNotePress( int note, psy::core::Machine* mac )
+{
+    machineView->PlayNote( machineView->octave() * 12 + note, 127, false, mac );   
+}
+
+void GeneratorGui::onNoteRelease( int note )
+{
+    machineView->StopNote( note );   
+}
+
+// FIXME: should be somewhere else, perhaps global.
+int MachineGui::noteFromCommand( int command )
+{
+    int note = NULL;
+    switch ( command ) {
+        case psy::core::cdefKeyC_0:
+            note = 1;
+            break;
+        case psy::core::cdefKeyCS0:
+            note = 2;
+            break;
+        case psy::core::cdefKeyD_0:
+            note = 3;
+            break;
+        case psy::core::cdefKeyDS0:
+            note = 4;
+            break;
+        case psy::core::cdefKeyE_0:
+            note = 5;
+            break;
+        case psy::core::cdefKeyF_0:
+            note = 6;
+            break;
+        case psy::core::cdefKeyFS0:
+            note = 7;
+            break;
+        case psy::core::cdefKeyG_0:
+            note = 8;
+            break;
+        case psy::core::cdefKeyGS0:
+            note = 9;
+            break;
+        case psy::core::cdefKeyA_0:
+            note = 10;
+            break;
+        case psy::core::cdefKeyAS0:
+            note = 11;
+            break;
+        case psy::core::cdefKeyB_0: 
+            note = 12;
+            break;
+        case psy::core::cdefKeyC_1:
+            note = 13;
+            break;
+        case psy::core::cdefKeyCS1:
+            note = 14;
+            break;
+        case psy::core::cdefKeyD_1:
+            note = 15;
+            break;
+        case psy::core::cdefKeyDS1:
+            note = 16;
+            break;
+        case psy::core::cdefKeyE_1:
+            note = 17;
+            break;
+        case psy::core::cdefKeyF_1:
+            note = 18;
+            break;
+        case psy::core::cdefKeyFS1:
+            note = 19;
+            break;
+        case psy::core::cdefKeyG_1:
+            note = 20;
+            break;
+        case psy::core::cdefKeyGS1:
+            note = 21;
+            break;
+        case psy::core::cdefKeyA_1:
+            note = 22;
+            break;
+        case psy::core::cdefKeyAS1:
+            note = 23;
+            break;
+        case psy::core::cdefKeyB_1: 
+            note = 24;
+            break;
+        case psy::core::cdefKeyC_2:
+            note = 25;
+            break;
+        case psy::core::cdefKeyCS2:
+            note = 26;
+            break;
+        case psy::core::cdefKeyD_2:
+            note = 27;
+            break;
+        case psy::core::cdefKeyDS2:
+            note = 28;
+            break;
+        case psy::core::cdefKeyE_2:
+            note = 29;
+            break;
+    }
+    return note;
 }
 
 

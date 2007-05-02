@@ -19,8 +19,12 @@
 ***************************************************************************/
 
 #include "psycore/machine.h"
+#include "psycore/inputhandler.h"
+#include "psycore/global.h"
+#include "psycore/configuration.h"
 
 #include "machinetweakdlg.h"
+#include "machinegui.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -28,10 +32,11 @@
 #include <QKeyEvent>
 #include <QPainter>
 
-MachineTweakDlg::MachineTweakDlg( psy::core::Machine *mac, QWidget *parent ) 
+MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
     : QDialog( parent )
 {
-    pMachine_ = mac;
+    pMachine_ = macGui->mac();
+    m_macGui = macGui;
     setWindowTitle( "Machine tweak" );
     initParameterGui();
 }
@@ -143,7 +148,26 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
     if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
         reject();
     } else {
-        QDialog::keyPressEvent( event ); 
+        if ( !event->isAutoRepeat() ) {
+            int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+            int note = NULL;
+            note = m_macGui->noteFromCommand( command );
+            if (note) {
+                emit notePress( note, pMachine_ );   
+            }
+        }
+    }
+}
+
+void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
+{
+    if ( !event->isAutoRepeat() ) {
+        int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+        int note = NULL;
+        note = m_macGui->noteFromCommand( command );
+        if (note) {
+            emit noteRelease( note );   
+        }
     }
 }
 
