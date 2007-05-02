@@ -233,7 +233,7 @@ void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Ma
     // octave offset
     if(note<120) {
         if(bTranspose)
-            note+= song()->currentOctave*12;
+            note+= octave()*12;
         if (note > 119)
             note = 119;
     }
@@ -242,7 +242,7 @@ void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Ma
     psy::core::PatternEvent entry;
     entry.setNote( note );
     entry.setInstrument( song()->auxcolSelected );
-    entry.setMachine( song()->seqBus );	// Not really needed.
+//    entry.setMachine( song()->seqBus );	// Not really needed.
 
     entry.setCommand( 0 );
     entry.setParameter( 0 );
@@ -296,7 +296,7 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
 
     // octave offset
     if(note<120) {
-        if(bTranspose) note+=song()->currentOctave*12;
+        if(bTranspose) note+= octave()*12;
         if (note > 119) note = 119;
     }
 

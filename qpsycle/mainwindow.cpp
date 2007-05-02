@@ -233,6 +233,8 @@ void MainWindow::loadSong( psy::core::Song *song )
     patView_ = new PatternView( song_ );
     wavView_ = new WaveView( song_ );
     seqView_ = new SequencerView( song_ );
+    macView_->setOctave( 4 );
+    patView_->setOctave( 4 );
     views_->addTab( macView_, "Machine View" );
     views_->addTab( patView_, "Pattern View" );
     views_->addTab( wavView_, "Wave Editor" );
@@ -247,7 +249,7 @@ void MainWindow::loadSong( psy::core::Song *song )
     createActions();
     setupSignals();
     // enable audio driver
-    //Global::configuration()._pOutputDriver->Enable(true);
+    //psy::core::Global::configuration()._pOutputDriver->Enable(true);
     // update file recent open sub menu
     //recentFileMenu_->add(new ngrs::MenuItem(fileName));
 }
@@ -627,8 +629,8 @@ void MainWindow::timerEvent( QTimerEvent *ev )
 
 void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
 {
-    patView_->setOctave( newIndex - 1 );
-    macView_->setOctave( newIndex - 1 );
+    patView_->setOctave( newIndex );
+    macView_->setOctave( newIndex );
 }
 
 void MainWindow::onMachineDeleted( int macIndex )
