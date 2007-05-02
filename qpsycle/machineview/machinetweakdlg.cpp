@@ -103,6 +103,7 @@ void MachineTweakDlg::initParameterGui()
             x++;
         }
     }
+    knobPanel->repaint();
     updateValues();
 }
 
@@ -117,8 +118,8 @@ void MachineTweakDlg::updateValues( )
         char buffer[128];
         pMachine_->GetParamValue( knobIdx, buffer );
         int val_v = pMachine_->GetParamValue( knobIdx );
-        kGroup->knob()->setValue(val_v);
         kGroup->knob()->setRange(min_v,max_v);
+        kGroup->knob()->setValue(val_v);
         kGroup->setValueText( QString::fromStdString( buffer ) );
     }
 
@@ -140,6 +141,7 @@ void MachineTweakDlg::showEvent( QShowEvent *event )
 {
     // FIXME: can adjustSize() be called somewhere else?
     adjustSize();
+//    updateValues();
     QWidget::showEvent( event );
 }
 
