@@ -27,6 +27,7 @@
 #include "song.h"
 #include "helpers/xml.h"
 
+// FIXME: remove Qt usage.
 #include <QFile>
 #include <QDomDocument>
 #include <QDomElement>
