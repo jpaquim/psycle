@@ -354,14 +354,11 @@ namespace seib {
 			virtual void EnterCritical(){;}
 			virtual void LeaveCritical(){;}
 			virtual void WantsMidi(bool enable) { bWantMidi=enable; }
+			virtual bool WantsMidi() { return bWantMidi; }
 			virtual void NeedsIdle(bool enable) { bNeedIdle=enable; }
+			virtual bool NeedsIdle(){ return bNeedIdle; }
 			virtual void NeedsEditIdle(bool enable) { bNeedIdle=enable; }
-
-			virtual void DECLARE_VST_DEPRECATED(Process)(float **inputs, float **outputs, VstInt32 sampleframes);
-			virtual void ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
-			virtual void ProcessDouble (double** inputs, double** outputs, VstInt32 sampleFrames);
-			virtual void SetParameter(VstInt32 index, float parameter);
-			virtual float GetParameter(VstInt32 index);
+			virtual bool NeedsEditIdle() { return bNeedEditIdle; }
 
 			virtual void * OnGetDirectory();
 			virtual bool OnSizeEditorWindow(long width, long height) { return false; }
@@ -376,7 +373,12 @@ namespace seib {
 			// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 			virtual bool OnIOChanged() { return false; }
 
-			// Following comes the Wrapping of the VST Interface functions.
+			virtual void DECLARE_VST_DEPRECATED(Process)(float **inputs, float **outputs, VstInt32 sampleframes);
+			virtual void ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
+			virtual void ProcessDouble (double** inputs, double** outputs, VstInt32 sampleFrames);
+			virtual void SetParameter(VstInt32 index, float parameter);
+			virtual float GetParameter(VstInt32 index);
+			// Following comes the Wrapping of the VST Dispatching functions.
 		public:
 			// Not to be used, except if no other way.
 			AEffect	*GetAEffect() { return aEffect; }
@@ -433,7 +435,8 @@ namespace seib {
 			inline void GetParamDisplay(VstInt32 index, char *ptr) { Dispatch(effGetParamDisplay, index, 0, ptr); }
 			// Name of the parameter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter (might be not followed by plugin devs)
 			inline void GetParamName(VstInt32 index, char *ptr) { Dispatch(effGetParamName, index, 0, ptr); }
-			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu) / 32767.0f; }
+			// Returns the vu value. Range [0-1] >1 -> clipped
+			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu); }
 			inline void SetSampleRate(float fSampleRate) { Dispatch(effSetSampleRate, 0, 0, 0, fSampleRate); }
 			inline void SetBlockSize(VstIntPtr value) { Dispatch(effSetBlockSize, 0, value); }
 			inline void MainsChanged(bool bOn) { Dispatch(effMainsChanged, 0, bOn); }
@@ -442,7 +445,7 @@ namespace seib {
 			inline void EditClose() { Dispatch(effEditClose); bEditOpen = false; }
 			// This has to be called repeatedly from the idle process ( usually the UI thread, with idle priority )
 			// The plugins usually have checks so that it skips the call if no update is required.
-			inline void EditIdle() { if (bEditOpen && bNeedEditIdle) Dispatch(effEditIdle); }
+			inline void EditIdle() { if(bEditOpen) Dispatch(effEditIdle); bNeedEditIdle=false; }
 		#if MAC
 			inline void DECLARE_VST_DEPRECATED(EditDraw)(void *rectarea) { Dispatch(effEditDraw, 0, 0, rectarea); }
 			inline long DECLARE_VST_DEPRECATED(EditMouse)(VstInt32 x, VstIntPtr y) { return Dispatch(effEditMouse, x, y); }
@@ -592,10 +595,7 @@ namespace seib {
 			// onCurrentId is used normally when loading Shell type plugins. This is taken care in the AudioMaster callback.
 			// the function here is called in any other cases.
 			virtual long OnCurrentId(CEffect &pEffect) { return pEffect.uniqueId(); }
-			// "Call application idle routine (this will call effEditIdle for all open editors too)"
-			// "Feedback to the host application and to call the idle's function of this editor (thru host application (MAC/WINDOWS/MOTIF)). The idle frequency is between 10Hz and 20Hz"
-			// "Give idle time to Host application, e.g. if plug-in editor is doing mouse tracking in a modal loop."
-			//\todo: From the above sentences, this call would set a flag to update all the editors in the Idle (GUI, OnPaint) thread.
+			// This callback forces an inmediate "EditIdle()" call for the plugins.
 			virtual void OnIdle(CEffect &pEffect);
 			virtual bool DECLARE_VST_DEPRECATED(OnInputConnected)(CEffect &pEffect, long input) { return pEffect.IsInputConnected(input); }
 			virtual bool DECLARE_VST_DEPRECATED(OnOutputConnected)(CEffect &pEffect, long output) { return pEffect.IsOutputConnected(output); }
@@ -616,8 +616,9 @@ namespace seib {
 			// The host could call a suspend (if the plugin was enabled (in resume state)) and then ask for getSpeakerArrangement
 			// and/or check the numInputs and numOutputs and initialDelay and then call a resume.
 			virtual bool OnIoChanged(CEffect &pEffect) { return pEffect.OnIOChanged(); }
-			// This function is called from a plugin when it needs a call to CEffect::Idle(). You should have a continuous call to CEffect::Idle() on your
-			// Idle Call. CVSTHost::OnNeedIdle() and CEffect::Idle() take care of calling only when needed.
+			// This function is called from a plugin when it needs one (or more)call(s) to CEffect::Idle().
+			// You should have a continuous call to CEffect::Idle() on your Idle Call.
+			// CVSTHost::OnNeedIdle() and CEffect::Idle() take care of calling only when needed.
 			virtual bool DECLARE_VST_DEPRECATED(OnNeedIdle)(CEffect &pEffect);
 			virtual bool OnSizeWindow(CEffect &pEffect, long width, long height);
 			// Will cause application to call AudioEffect's  setSampleRate/setBlockSize method (when implemented).

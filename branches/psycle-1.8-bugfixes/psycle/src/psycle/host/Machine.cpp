@@ -388,6 +388,15 @@ namespace psycle
 								#endif
 								pInMachine->Work(numSamples);
 							}
+							{
+								//Disable bad-behaving machines
+								///\todo: add a better approach later on, 
+								if (pInMachine->_cpuCost >= Global::_cpuHz && !Global::pPlayer->_recording)
+								{
+									if ( pInMachine->_mode == MACHMODE_GENERATOR) pInMachine->_mute=true;
+									else pInMachine->_bypass=true;
+								}
+							}
 							/*
 							This could be a different Undenormalize funtion, using the already calculated
 							"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
@@ -789,15 +798,27 @@ namespace psycle
 			if ( !_mute && !bisTicking)
 			{
 				bisTicking=true;
+				for (int j=0;j<MAX_MACHINES;j++)
+				{
+					channelcounter[j]=0;
+				}
 				for (int i=0;i<8;i++)
 				{
-					PatternEntry pTemp = *pData;
-					if ( pTemp._note < 120 )
+					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
 					{
-						pTemp._note+=noteOffset[i];
+						PatternEntry pTemp = *pData;
+						if ( pTemp._note < 120 )
+						{
+							int note = pTemp._note+noteOffset[i];
+							if ( note>=120) note=119;
+							else if (note<0 ) note=0;
+							pTemp._note=(uint8)note;
+						}
+						
+						if (Global::_pSong->_pMachine[macOutput[i]] != this)
+							Global::_pSong->_pMachine[macOutput[i]]->Tick(channelcounter[macOutput[i]],&pTemp);
+						channelcounter[macOutput[i]]++;
 					}
-					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL 
-						&& Global::_pSong->_pMachine[macOutput[i]] != this) Global::_pSong->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
 				}
 			}
 			bisTicking=false;

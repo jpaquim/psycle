@@ -287,6 +287,7 @@ namespace psycle
 			short noteOffset[8];
 			static char* _psName;
 			bool bisTicking;
+			int channelcounter[MAX_MACHINES];
 		};
 
 

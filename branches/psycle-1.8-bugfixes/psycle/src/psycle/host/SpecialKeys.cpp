@@ -36,6 +36,10 @@ void CSpecialKeys::OnBnClickedOk()
 	else if (((CButton *)GetDlgItem(IDC_SPKEYS_RETURN))->GetCheck()) key = 0x0d;
 	else if (((CButton *)GetDlgItem(IDC_SPKEYS_INTRO))->GetCheck())
 	{	key = 0x0d; mod=0x04;	}
+	else if (((CButton *)GetDlgItem(IDC_SPKEYS_PREVPAG))->GetCheck())
+	{ key = 0x21; mod=0x04; }
+	else if (((CButton *)GetDlgItem(IDC_SPKEYS_NEXTPAG))->GetCheck())
+	{ key = 0x22; mod=0x04; }
 
 	if ( ((CButton *)GetDlgItem(IDC_SPKEYS_SHIFT))->GetCheck() ) mod++;
 	if ( ((CButton *)GetDlgItem(IDC_SPKEYS_CONTROL))->GetCheck() ) mod+=2;

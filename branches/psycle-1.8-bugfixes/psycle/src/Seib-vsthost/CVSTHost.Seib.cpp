@@ -1185,16 +1185,14 @@ namespace seib {
 		/*****************************************************************************/
 		/* OnIdle : idle processing                                                  */
 		/*****************************************************************************/
-		// When a plugin calls OnIdle(), it needs that the host calls it's EditIdle()
+		// When a plugin calls OnIdle(), it needs that the host calls its EditIdle()
 		// function in order to refresh the plugin UI. This is done in the "idle" thread.
-		// (the UI redrawing timer, usually)
+		// (the UI redrawing timer, usually).
+		// Note that EditIdle() needs to be called repetitively. This just forces an
+		// inmediate (as soon as possible) 
 		void CVSTHost::OnIdle(CEffect & pEffect)
 		{
 			pEffect.NeedsEditIdle(true);
-			//			int j = GetSize();
-			//			for (int i = 0; i < j; i++)
-			//				pEffect.EditIdle();
-			//			return 0;
 		}
 
 		/*****************************************************************************/

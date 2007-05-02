@@ -135,8 +135,8 @@ namespace psycle
 				virtual bool OnUpdateDisplay() { return false; }
 				virtual void * DECLARE_VST_DEPRECATED(OnOpenWindow)(VstWindow* window) { return 0; }
 				virtual bool DECLARE_VST_DEPRECATED(OnCloseWindow)(VstWindow* window) { return false; }
-				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (numInputs!=0)); } 
-				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (numOutputs!=0)); }
+				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
+				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }
 				// AEffect asks host about its input/outputspeakers.
 				virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
 				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }

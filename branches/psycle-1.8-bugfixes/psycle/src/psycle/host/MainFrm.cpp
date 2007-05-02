@@ -371,6 +371,18 @@ NAMESPACE__BEGIN(psycle)
 			m_wndView.SetFocus();
 		//	m_wndView.EnableSound();
 			
+			CString filepath = Global::pConfig->GetSongDir().c_str();
+			filepath += "\\autosave.psy";
+
+			OldPsyFile file;
+			if(file.Open(filepath.GetBuffer(1)))
+			{
+				file.Close();
+				int val = MessageBox("An autosave.psy file has been found in the root song dir. Do you want to reload it? (Press \"No\" to delete it)","Song Recovery",MB_YESNOCANCEL);
+
+				if (val == IDYES ) m_wndView.FileLoadsongNamed(filepath.GetBuffer(1));
+				else if (val == IDNO ) DeleteFile(filepath);
+			}
 			return 0;
 		}
 
@@ -437,9 +449,14 @@ NAMESPACE__BEGIN(psycle)
 
 				//Recent File List;
 				((CPsycleApp*)AfxGetApp())->SaveRecent(this);
+
+				CString filepath = Global::pConfig->GetSongDir().c_str();
+				filepath += "\\autosave.psy";
+				DeleteFile(filepath);
 				
 				CFrameWnd::OnClose();
 			}
+
 		}
 
 		void CMainFrame::ClosePsycle()
