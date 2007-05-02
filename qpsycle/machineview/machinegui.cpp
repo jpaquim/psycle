@@ -302,6 +302,7 @@ void GeneratorGui::keyPressEvent( QKeyEvent * event )
             onNotePress( note, mac() );
         }
     }
+    event->ignore();
 }
 
 // FIXME: this gets triggered even when you're still holding the key down.  
