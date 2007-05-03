@@ -60,6 +60,7 @@ protected:
     void mousePressEvent( QGraphicsSceneMouseEvent *event );
     void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
     void keyPressEvent( QKeyEvent *event );
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 private slots:
     void onLoopEntryActionTriggered();

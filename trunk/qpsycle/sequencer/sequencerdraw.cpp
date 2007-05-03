@@ -269,7 +269,6 @@ void SequencerDraw::onPlayLineMoved( double newXPos )
 
 void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff ) 
 {
-    diff.setY( 0 );
     if ( true /*gridSnap()*/ ) {
         int beatDiff = diff.x() / 5;
         int snappedBeatDiff = beatDiff * 5;
