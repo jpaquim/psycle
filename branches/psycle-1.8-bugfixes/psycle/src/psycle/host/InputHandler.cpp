@@ -1263,7 +1263,6 @@ namespace psycle
 			SetCmd(cdefAddMachine,VK_F9,0,false);
 			SetCmd(cdefEditInstr,VK_F10,0,false);
 			SetCmd(cdefMaxPattern,VK_TAB,MOD_C,false);
-			SetCmd(cdefErrorLog,VK_F11,0,false);			
 
 			SetCmd(cdefOctaveUp,VK_MULTIPLY,0,false);
 			SetCmd(cdefOctaveDn,VK_DIVIDE,MOD_E,false);
@@ -1344,7 +1343,7 @@ namespace psycle
 
 			SetCmd(cdefSelectAll,'A',MOD_C,false);
 			SetCmd(cdefSelectCol,'R',MOD_C,false);
-			SetCmd(cdefSelectBar,'D',MOD_C,false);
+			SetCmd(cdefSelectBar,'K',MOD_C,false);
 
 			SetCmd(cdefEditQuantizeInc,221,0,false);    // lineskip + 1
 			SetCmd(cdefEditQuantizeDec,219,0,false);    // lineskip - 1

@@ -146,7 +146,6 @@ namespace psycle
 			cdefRedo,
 			cdefFollowSong,
 			cdefMaxPattern,
-			cdefErrorLog,
 
 			cdefTransposeChannelInc = CS_EDT_START,	
 			cdefTransposeChannelDec,
@@ -408,8 +407,6 @@ namespace psycle
 
 				case cdefUndo:		return "Edit Undo";
 				case cdefRedo:		return "Edit Redo";
-
-				case cdefErrorLog:	return "Show Error Log";
 
 				case cdefNull:
 				default:
