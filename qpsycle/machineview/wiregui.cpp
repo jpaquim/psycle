@@ -236,6 +236,24 @@ void WireGui::adjust()
      painter->drawPolygon(QPolygonF() << midPoint << arrowP1 << arrowP2);
  }
 
+QPainterPath WireGui::shape () const
+{
+    QPainterPath path;
+    // Making a rectangle with width = arrowSize, height = wire length.
+    qreal halfPolygonWidth = arrowSize/2;
+    qreal sideLength = sqrt((halfPolygonWidth*halfPolygonWidth)/2);
+    QPointF foo( sideLength, sideLength );
+    QPointF p0 = sourcePoint - foo;
+    QPointF p1 = sourcePoint + foo;
+    QPointF p2 = destPoint + foo;
+    QPointF p3 = destPoint - foo;
+    QPolygonF polygon;
+    polygon << p0 << p1 << p2 << p3;
+    path.addPolygon( polygon );
+    path.closeSubpath();
+    return path;
+}
+
 void WireGui::deleteConnectionRequest()
 {
    emit deleteConnectionRequest(this);
@@ -245,4 +263,3 @@ void WireGui::onRewireDestActionTriggered()
 {
    //emit startRewiringDest(this);
 }
-

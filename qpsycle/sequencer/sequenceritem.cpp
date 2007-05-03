@@ -196,3 +196,10 @@ void SequencerItem::keyPressEvent( QKeyEvent *event )
         default:;
     }
 }
+
+QVariant SequencerItem::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+    if (change == ItemPositionChange)
+        return QPointF(value.toPointF().x(), pos().y()); // Constrains an item to present y pos.
+    return QGraphicsItem::itemChange(change, value);
+}
