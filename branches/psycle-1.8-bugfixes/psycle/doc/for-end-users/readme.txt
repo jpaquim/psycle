@@ -16,8 +16,8 @@ contents:
 1. About Psycle:
 ----------------
 
-Psycle is a free, Open-Source, music creation program that offers multitude of
-possibilites to create your own music with ease, and with high quality.
+Psycle is a free, Open-Source, music creation program that offers an easy way to
+create your own music, fast, and with high quality.
 
 Psycle uses a classical tracker interface (a text grid of notes which are
 sequenced one after the other), coupled with modularity (plugins) that allow to
@@ -26,6 +26,10 @@ extend the sounds that you get from it.
 It supports three ways to get sound: its own native format, the VST Plugin
 standard, and recorded .wav samples using the sampler machine.
 
+Notes are entered in patterns, where you can also use commands (plugin specific,
+or global), as well as automating parameters via the mcm and twk commands.
+These patterns are then organized in a linear sequence, which becomes the
+song order.
 
 Here some features of Psycle:
 
@@ -42,6 +46,7 @@ Here some features of Psycle:
 - Exporting to wav, as well as recording realtime to .wav
 - Configurable Keyboard Layout
 - Midi-In Support ( control Psycle using a midi keyboard, or even a software
+- Themes and skins support
   sequencer)
 
 and much more.

@@ -1000,9 +1000,10 @@
 #define IDC_SPKEYS_RETURN               1778
 #define IDC_SPKEYS_BACKSPACE            1779
 #define IDC_SPKEYS_TAB                  1780
+#define IDC_DESCRLABEL                  1780
 #define IDC_SPKEYS_INTRO                1781
-#define IDC_SPKEYS_AVPAG                1782
 #define IDC_SPKEYS_NEXTPAG              1782
+#define IDC_DESCRLABEL2                 1782
 #define IDC_SPKEYS_PREVPAG              1783
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1141,9 +1142,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        265
+#define _APS_NEXT_RESOURCE_VALUE        266
 #define _APS_NEXT_COMMAND_VALUE         33048
-#define _APS_NEXT_CONTROL_VALUE         1777
+#define _APS_NEXT_CONTROL_VALUE         1782
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

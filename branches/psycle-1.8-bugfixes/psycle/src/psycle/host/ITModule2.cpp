@@ -74,10 +74,9 @@ namespace psycle
 			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
 
-			strcpy(s->Name,itFileH.songName);
-			strcpy(s->Author,"");
-			strcpy(s->Comment,"Imported from Impulse Tracker Module: ");
-			strcat(s->Comment,szName.c_str());
+			s->name = itFileH.songName;
+			s->author = "";
+			(s->comments = "Imported from Impulse Tracker Module: ") + szName;
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 			s->InsertConnection(0, MASTER_INDEX,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
@@ -1097,10 +1096,9 @@ Special:  Bit 0: On = song message attached.
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
 
 			s3mFileH.songName[28]='\0';
-			strcpy(s->Name,s3mFileH.songName);
-			strcpy(s->Author,"");
-			strcpy(s->Comment,"Imported from Scream Tracker 3 Module: ");
-			strcat(s->Comment,szName.c_str());
+			s->name = s3mFileH.songName;
+			s->author = "";
+			(s->comments = "Imported from Scream Tracker 3 Module: ") + szName;
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 			s->InsertConnection(0,MASTER_INDEX,(s3mFileH.mVol&0x7F)/128.0f);

@@ -979,7 +979,7 @@ namespace psycle
 
 					if (Global::pConfig->_RecordTweaks)
 					{
-						if (Global::pConfig->midi().raw())
+						if (Global::pConfig->midi().raw() && status != 0xFE )
 						{
 							frame.m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
 							return;

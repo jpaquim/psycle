@@ -1,26 +1,26 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
-0.x     |      | alpha, beta                 | arguru
-1.0/01  | 2000 | bugfix                      | arguru
-1.1/11  |      | bugfix                      | Mats
-1.5     | 2001 | alpha, beta, stable         | [JAZ] & Mark
-1.6     | 2002 | alpha, beta, stable         | [JAZ] & Dan/Dub & Fideloop
-1.6+/66 |      | maintenance                 | [JAZ]
-1.7     |      | release                     | pooplog & [JAZ]
-1.7.1/2 |      | bugfix                      | [JAZ]
-1.7.3   |      | beta                        | pooplog & [JAZ] & bohan
-1.7.4   | 2003 | stable                      | pooplog & [JAZ]
-1.7.5   |      | beta                        | pooplog & [JAZ]
-1.7.6   |      | stable                      | alk
-1.7.6.1 |      | bug fix                     | alk
-1.7.6.2 | 2004 | bug fix (w98 compatibility) | alk & bohan
-1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
-1.8     |      | stable                      | psycledelics combined effort :-)
-1.8.1   | 2005 | bugfix			     | bohan & plugin developers
-1.8.2	| 2006 | bugfix			     | [JAZ] & bohan & jme	
+0.x	| 2000 | alpha, beta                 | arguru
+1.0/01	|      | bugfix                      | arguru
+1.1/11	|      | code reestructure, release  | Mats
+1.5	| 2001 | alpha, beta, stable         | [JAZ] & Mark
+1.6	| 2002 | alpha, beta, stable         | [JAZ] & Dan/Dub & Fideloop
+1.6+/66	|      | maintenance                 | [JAZ]
+1.7	|      | release                     | pooplog & [JAZ]
+1.7.1/2	|      | bugfix                      | [JAZ]
+1.7.3	|      | beta                        | pooplog & [JAZ] & bohan
+1.7.4	| 2003 | stable                      | pooplog & [JAZ]
+1.7.5	|      | beta                        | pooplog & [JAZ]
+1.7.6	|      | stable                      | alk
+1.7.6.1	|      | bug fix                     | alk
+1.7.6.2	| 2004 | bug fix (w98 compatibility) | alk & bohan
+1.7.x	| 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
+1.8	|      | stable                      | psycledelics combined effort :-)
+1.8.1	| 2005 | bugfix			     | bohan & plugin developers
+1.8.2	| 2006 | bugfix			     | [JAZ] & bohan & jme
+1.8.3	| 2007 | beta                        | [JAZ]
 ----------------------------------------------------------------------------------------------------
-
 
 Versions are composed this way since 1.7.24:
 M.m.p , where:
@@ -36,6 +36,27 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.3 beta2
+-----------
+! fixed some problems when connecting machines which appeared after moving a wire.
++ Port of Wave Renderer from Psycle 1.9, with support for dithering.
+! Crash prevention when loading damaged files.
++ Added a special keys dialog to use some key configurations which can't be set using the standard box.
+! Bugfixes and Improvements in the VSTHost ( OpenFileDialog, GetTimeInfo, Shell Plugins)
++ .fxb and .fxp loading and saving routines are done. Pending the UI changes to use them.
++ Improved a bit the Song Properties dialog and the New Machine Dialog.
+! miscellaneous bugfixes.
+
+v1.8.3 beta1
+-----------
+* Incomplete (but functional) new VST Host based partially on Hermann Seib vsthost. UI part still from old one.
++ Port of Sampulse and module importing code from Psycle 1.9 sources.
++ Port of Mixer machine from Psycle 1.9 sources.
+! Fixed keyboard configuration save code.
++ Ported spectrum analyzer (in the wire dialog) from Psycle 1.9
+! Fixed bug in exchange function of the Gear Rack dialog.
+! some miscellaneous small changes
+
 v1.8.2
 ------
 ! Fix for the Message window appearing in the background sometimes. (It seemed that psycle hung up)

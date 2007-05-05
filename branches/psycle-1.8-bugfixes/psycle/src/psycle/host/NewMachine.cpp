@@ -13,6 +13,7 @@
 #include <fstream>
 #include <algorithm> //std::transform
 #include <cctype>	// std::tolower
+#include ".\newmachine.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		int CNewMachine::pluginOrder = 1;
@@ -68,10 +69,8 @@ NAMESPACE__BEGIN(psycle)
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
 		{
-			//{{AFX_DATA_INIT(CNewMachine)
 			m_orderby = pluginOrder;
 			m_showdllName = pluginName;
-			//}}AFX_DATA_INIT
 			OutBus = false;
 			shellIdx = 0;
 			//pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
@@ -85,21 +84,18 @@ NAMESPACE__BEGIN(psycle)
 		void CNewMachine::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CNewMachine)
 			DDX_Control(pDX, IDC_CHECK_ALLOW, m_Allow);
 			DDX_Control(pDX, IDC_NAMELABEL, m_nameLabel);
 			DDX_Control(pDX, IDC_BROWSER, m_browser);
 			DDX_Control(pDX, IDC_VERSIONLABEL, m_versionLabel);
-			DDX_Control(pDX, IDC_DESCLABEL, m_descLabel);
+			DDX_Control(pDX, IDC_DESCRLABEL, m_descLabel);
 			DDX_Radio(pDX, IDC_BYTYPE, m_orderby);
 			DDX_Control(pDX, IDC_DLLNAMELABEL, m_dllnameLabel);
 			DDX_Radio(pDX, IDC_SHOWDLLNAME, m_showdllName);
-			//}}AFX_DATA_MAP
 			DDX_Control(pDX, IDC_APIVERSIONLABEL, m_APIversionLabel);
 		}
 
 		BEGIN_MESSAGE_MAP(CNewMachine, CDialog)
-			//{{AFX_MSG_MAP(CNewMachine)
 			ON_NOTIFY(TVN_SELCHANGED, IDC_BROWSER, OnSelchangedBrowser)
 			ON_BN_CLICKED(IDC_REFRESH, OnRefresh)
 			ON_BN_CLICKED(IDC_BYCLASS, OnByclass)
@@ -109,7 +105,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_SHOWDLLNAME, OnShowdllname)
 			ON_BN_CLICKED(IDC_SHOWEFFNAME, OnShoweffname)
 			ON_BN_CLICKED(IDC_CHECK_ALLOW, OnCheckAllow)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CNewMachine::OnInitDialog() 
@@ -140,6 +135,7 @@ NAMESPACE__BEGIN(psycle)
 				hNodes[0] = m_browser.InsertItem("Internal Plugins",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Native plug-ins",2,2,TVI_ROOT,TVI_LAST);
 				hNodes[2] = m_browser.InsertItem("VST2 plug-ins",4,4,TVI_ROOT,TVI_LAST);
+				hNodes[3] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[0];
 				nodeindex = 3;
 				//The following is unfinished. It is for nested branches.
@@ -161,10 +157,10 @@ NAMESPACE__BEGIN(psycle)
 				*/
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i)
 				{
-					if(_pPlugsInfo[i]->error.empty())
+					int imgindex;
+					HTREEITEM hitem;
+					if ( _pPlugsInfo[i]->error.empty())
 					{
-						int imgindex;
-						HTREEITEM hitem;
 						if( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
 						{
 							if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
@@ -191,11 +187,16 @@ NAMESPACE__BEGIN(psycle)
 								hitem=hNodes[2];
 							}
 						}
-						if(pluginName)
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-						else
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					}
+					else
+					{
+						imgindex = 6;
+						hitem=hNodes[3];
+					}
+					if(pluginName && _pPlugsInfo[i]->error.empty())
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					else
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
@@ -208,14 +209,15 @@ NAMESPACE__BEGIN(psycle)
 			{
 				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
+				hNodes[2] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[1];
 				nodeindex=2;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
 				{
+					int imgindex;
+					HTREEITEM hitem;
 					if(_pPlugsInfo[i]->error.empty())
 					{
-						int imgindex;
-						HTREEITEM hitem;
 						if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
 						{
 							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
@@ -242,11 +244,16 @@ NAMESPACE__BEGIN(psycle)
 								hitem=hNodes[1]; 
 							}
 						}
-						if(pluginName)
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-						else
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					}
+					else
+					{
+						imgindex = 6;
+						hitem=hNodes[3];
+					}
+					if(pluginName && _pPlugsInfo[i]->error.empty())
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					else
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
@@ -337,17 +344,29 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if (tHand == hPlug[i])
 				{
-					std::string str = _pPlugsInfo[i]->dllname;
-					std::string::size_type pos = str.rfind('\\');
-					if(pos != std::string::npos)
-						str=str.substr(pos+1);
-					m_dllnameLabel.SetWindowText(str.c_str());
+					{ //  Strip the directory and put just the dll name.
+						std::string str = _pPlugsInfo[i]->dllname;
+						std::string::size_type pos = str.rfind('\\');
+						if(pos != std::string::npos)
+							str=str.substr(pos+1);
+						m_dllnameLabel.SetWindowText(str.c_str());
+					}
 					m_nameLabel.SetWindowText(_pPlugsInfo[i]->name.c_str());
-					m_descLabel.SetWindowText(_pPlugsInfo[i]->desc.c_str());
+					if ( _pPlugsInfo[i]->error.empty())
+						m_descLabel.SetWindowText(_pPlugsInfo[i]->desc.c_str());
+					else
+					{	// Strip the function, and show only the error.
+						std::string str = _pPlugsInfo[i]->error;
+						std::ostringstream s; s << std::endl;
+						std::string::size_type pos = str.find(s.str());
+						if(pos != std::string::npos)
+							str=str.substr(pos+1);
+
+						m_descLabel.SetWindowText(str.c_str());
+					}
 					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
-					{
-						std::ostringstream s;
-						s << _pPlugsInfo[i]->APIversion;
+					{	// convert integer to string.
+						std::ostringstream s; s << _pPlugsInfo[i]->APIversion;
 						m_APIversionLabel.SetWindowText(s.str().c_str());
 					}
 					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
@@ -1153,3 +1172,4 @@ NAMESPACE__BEGIN(psycle)
 		}
 	NAMESPACE__END
 NAMESPACE__END
+

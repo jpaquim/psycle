@@ -7,6 +7,8 @@
 #include <psycle/host/MainFrm.hpp> // Can this be removed?
 #include "VstEditorDlg.hpp"
 
+///\todo:  When inserting a note in a pattern, set the correct samplePos and ppqPos corresponding to the place the note is being put.
+//		(LiveSlice is a good example of what happens if it isn't correct)
 
 
 #include "vsthost24.hpp"
@@ -180,8 +182,8 @@ namespace psycle
 				if ( GetPlugCategory() != kPlugCategShell )
 				{
 
-					if (GetEffectName(temp) && temp[0])_sProductName=temp;
-					else if(GetProductString(temp) && temp[0]) _sProductName=temp;
+					if(GetProductString(temp) && temp[0]) _sProductName=temp;
+					else if (GetEffectName(temp) && temp[0])_sProductName=temp;
 					else
 					{
 						std::string temp;

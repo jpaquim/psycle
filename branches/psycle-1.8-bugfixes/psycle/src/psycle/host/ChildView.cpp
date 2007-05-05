@@ -1256,8 +1256,7 @@ NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnFileSongproperties() 
-		{	CSongpDlg dlg;
-			dlg._pSong=Global::_pSong;
+		{	CSongpDlg dlg(Global::_pSong);
 			dlg.DoModal();
 			pParentMain->StatusBarIdle();
 			//Repaint();
@@ -1789,9 +1788,9 @@ NAMESPACE__BEGIN(psycle)
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::_pSong->Name,
-							Global::_pSong->Author,
-							Global::_pSong->Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "XM file imported", MB_OK);
 					} else if (ext.CompareNoCase("IT") == 0)
@@ -1812,9 +1811,9 @@ NAMESPACE__BEGIN(psycle)
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::_pSong->Name,
-							Global::_pSong->Author,
-							Global::_pSong->Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "IT file imported", MB_OK);
 					} else if (ext.CompareNoCase("S3M") == 0)
@@ -1835,9 +1834,9 @@ NAMESPACE__BEGIN(psycle)
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::_pSong->Name,
-							Global::_pSong->Author,
-							Global::_pSong->Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "S3M file imported", MB_OK);
 					} else if (ext.CompareNoCase("MOD") == 0)
@@ -1852,9 +1851,9 @@ NAMESPACE__BEGIN(psycle)
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::song().Name,
-							Global::song().Author,
-							Global::song().Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "MOD file imported", MB_OK);
 					}
@@ -2045,13 +2044,17 @@ NAMESPACE__BEGIN(psycle)
 			SetTitleBarText();
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
-				std::ostringstream songLoaded;
-				songLoaded << '\'' << _pSong->Name << '\'' << std::endl
+				CSongpDlg dlg(Global::_pSong);
+				dlg.SetReadOnly();
+				dlg.DoModal();
+/*				std::ostringstream songLoaded;
+				songLoaded << '\'' << _pSong->name << '\'' << std::endl
 					<< std::endl
-					<< _pSong->Author << std::endl
+					<< _pSong->author << std::endl
 					<< std::endl
-					<< _pSong->Comment;
+					<< _pSong->comments;
 				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
+*/
 			}
 		}
 

@@ -289,12 +289,9 @@ namespace psycle
 			#endif
 			seqBus=0;
 			// Song reset
-			std::memset(&Name, 0, sizeof Name);
-			std::memset(&Author, 0, sizeof Author);
-			std::memset(&Comment, 0, sizeof Comment);
-			std::sprintf(Name, "Untitled");
-			std::sprintf(Author, "Unnamed");
-			std::sprintf(Comment, "No Comments");
+			name = "Untitled";
+			author = "Unnamed";
+			comments = "";
 			currentOctave=4;
 			// General properties
 			m_BeatsPerMin=125;
@@ -1018,18 +1015,16 @@ namespace psycle
 							//MessageBox(0, "Info Seqment of File is from a newer version of psycle!", 0, 0);
 							pFile->Skip(size);
 						}
-						else 
+						else
 						{
-							pFile->ReadString(Name, sizeof Name);
-							pFile->ReadString(Author, sizeof Author);
-							pFile->ReadString(Comment,sizeof Comment);
-							if (version == 1)
-							{
-								///\todo: add bitmap handling.
-								int bitmapsize=0;
-								pFile->Read(&bitmapsize,sizeof bitmapsize);
-								pFile->Skip(bitmapsize);
-							}
+							char name_[129]; char author_[65]; char comments_[65536];
+							pFile->ReadString(name_, sizeof name_);
+							pFile->ReadString(author_, sizeof author_);
+							pFile->ReadString(comments_,sizeof comments_);
+							name = name_;
+							author = author_;
+							comments = comments_;
+
 						}
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
@@ -1331,9 +1326,14 @@ namespace psycle
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
 //				New();
-				pFile->Read(&Name, 32);
-				pFile->Read(&Author, 32);
-				pFile->Read(&Comment, 128);
+				char name_[129]; char author_[65]; char comments_[65536];
+				pFile->Read(name_, 32);
+				pFile->Read(author_, 32);
+				pFile->Read(comments_,128);
+				name = name_;
+				author = author_;
+				comments = comments_;
+
 				pFile->Read(&m_BeatsPerMin, sizeof m_BeatsPerMin);
 				pFile->Read(&sampR, sizeof sampR);
 				if( sampR <= 0)
@@ -2214,16 +2214,14 @@ namespace psycle
 
 			pFile->Write("INFO",4);
 			version = CURRENT_FILE_VERSION_INFO;
-			size = strlen(Name)+strlen(Author)+strlen(Comment)+3;
+			size = name.length() + author.length() + comments.length() + 3*sizeof(int) + 3; // +3 for \0
+
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
 
-			pFile->Write(&Name,strlen(Name)+1);
-			pFile->Write(&Author,strlen(Author)+1);
-			pFile->Write(&Comment,strlen(Comment)+1);
-			///\todo: save bitmap
-			int bitmapsize=0;
-			pFile->Write(&bitmapsize,sizeof bitmapsize);
+			pFile->Write(name.c_str(),name.length()+1);
+			pFile->Write(name.c_str(),name.length()+1);
+			pFile->Write(comments.c_str(),comments.length()+1);
 
 			if ( !autosave ) 
 			{

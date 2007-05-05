@@ -37,11 +37,11 @@ namespace psycle
 			/// destructor.
 			virtual ~Song() throw();
 			/// the name of the song.
-			char Name[64];
+			std::string name;
 			/// the author of the song.
-			char Author[64];
+			std::string author;
 			/// the comments on the song
-			char Comment[256];
+			std::string comments;
 			unsigned cpuIdle;
 			unsigned _sampCount;
 			bool Invalided;

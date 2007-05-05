@@ -126,6 +126,10 @@ NAMESPACE__BEGIN(psycle)
 			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
 			static bool SaveCacheFile();
 			void UpdateList(bool bInit = false);
+		public:
+			afx_msg void OnEnChangeEdit1();
+			afx_msg void OnStnClickedNamelabel();
+			afx_msg void OnEnChangeRichedit21();
 		};
 
 	NAMESPACE__END

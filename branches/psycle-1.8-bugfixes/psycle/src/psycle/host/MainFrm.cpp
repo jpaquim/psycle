@@ -2511,7 +2511,7 @@ NAMESPACE__BEGIN(psycle)
 			if (_pSong)
 			{
 				std::ostringstream oss;
-				oss << _pSong->Name
+				oss << _pSong->name
 					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
 
 				if ((m_wndView.viewMode==VMPattern)	&& (!Global::pPlayer->_playing))

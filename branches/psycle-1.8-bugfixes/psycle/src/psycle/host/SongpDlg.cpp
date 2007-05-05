@@ -6,62 +6,61 @@
 #include "SongpDlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		CSongpDlg::CSongpDlg(CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
+		CSongpDlg::CSongpDlg(Song *song, CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
+		,readonlystate(false)
+		,_pSong(song)
 		{
-			//{{AFX_DATA_INIT(CSongpDlg)
-			//}}AFX_DATA_INIT
 		}
 
 		void CSongpDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CSongpDlg)
 			DDX_Control(pDX, IDC_EDIT4, m_songcomments);
 			DDX_Control(pDX, IDC_EDIT3, m_songcredits);
 			DDX_Control(pDX, IDC_EDIT1, m_songtitle);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CSongpDlg, CDialog)
-			//{{AFX_MSG_MAP(CSongpDlg)
-			ON_EN_CHANGE(IDC_EDIT1, OnChangeTitle)
-			ON_EN_CHANGE(IDC_EDIT3, OnChangeAuthor)
-			ON_EN_CHANGE(IDC_EDIT4, OnChangeComment)
-			ON_BN_CLICKED(IDC_BUTTON1, OnOk)
-			//}}AFX_MSG_MAP
+			ON_BN_CLICKED(IDOK, OnOk)
 		END_MESSAGE_MAP()
 
 		BOOL CSongpDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			m_songtitle.SetLimitText(64);
+			m_songtitle.SetLimitText(128);
 			m_songcredits.SetLimitText(64);
-			m_songcomments.SetLimitText(256);
-			m_songtitle.SetWindowText(_pSong->Name);
-			m_songcredits.SetWindowText(_pSong->Author);
-			m_songcomments.SetWindowText(_pSong->Comment);
+			m_songcomments.SetLimitText(65535);
+			m_songtitle.SetWindowText(_pSong->name.c_str());
+			m_songcredits.SetWindowText(_pSong->author.c_str());
+			m_songcomments.SetWindowText(_pSong->comments.c_str());
 			m_songtitle.SetFocus();
 			m_songtitle.SetSel(0,-1);
+
+			if ( readonlystate )
+			{
+				m_songtitle.SetReadOnly();
+				m_songcredits.SetReadOnly();
+				m_songcomments.SetReadOnly();
+				((CButton*)GetDlgItem(IDOK))->EnableWindow(false);
+				((CButton*)GetDlgItem(IDCANCEL))->SetWindowText("Close");
+			}
+
 			return FALSE;
 		}
-
-		void CSongpDlg::OnChangeTitle() 
+		void CSongpDlg::SetReadOnly()
 		{
-			m_songtitle.GetWindowText(_pSong->Name,64);
-		}
-
-		void CSongpDlg::OnChangeAuthor() 
-		{
-			m_songcredits.GetWindowText(_pSong->Author,64);
-		}
-
-		void CSongpDlg::OnChangeComment() 
-		{
-			m_songcomments.GetWindowText(_pSong->Comment,256);
+			readonlystate=true;
 		}
 
 		void CSongpDlg::OnOk() 
 		{
+			char name[129]; char author[65]; char comments[65536];
+			m_songtitle.GetWindowText(name,128);
+			m_songcredits.GetWindowText(author,64);
+			m_songcomments.GetWindowText(comments,65535);
+			_pSong->name = name;
+			_pSong->author = author;
+			_pSong->comments = comments;
 			CDialog::OnOK();
 		}
 	NAMESPACE__END

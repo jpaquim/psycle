@@ -61,7 +61,7 @@ namespace psycle
 		#define STREAM_SIZE				256
 
 		/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.
-		#define CURRENT_FILE_VERSION_INFO	0x0001
+		#define CURRENT_FILE_VERSION_INFO	0x0000
 		#define CURRENT_FILE_VERSION_SNGI	0x0000
 		#define CURRENT_FILE_VERSION_SEQD	0x0000
 		#define CURRENT_FILE_VERSION_PATD	0x0000
