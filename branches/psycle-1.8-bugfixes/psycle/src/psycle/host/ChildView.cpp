@@ -27,6 +27,7 @@
 #include "vsthost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath> // SwingFill
 #include "SwingFillDlg.hpp"
+#include "InterpolateCurveDlg.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		CMainFrame		*pParentMain;
@@ -204,6 +205,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
 			ON_COMMAND(ID_POP_DELETE, OnPopDelete)
 			ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
+			ON_COMMAND(ID_POP_INTERPOLATE_CURVE, OnPopInterpolateCurve)
 			ON_COMMAND(ID_POP_CHANGEGENERATOR, OnPopChangegenerator)
 			ON_COMMAND(ID_POP_CHANGEINSTRUMENT, OnPopChangeinstrument)
 			ON_COMMAND(ID_POP_TRANSPOSE1, OnPopTranspose1)
@@ -244,6 +246,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
 			ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdateCutCopy)
+			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE_CURVE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_CHANGEGENERATOR, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_CHANGEINSTRUMENT, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE1, OnUpdateCutCopy)
@@ -1629,6 +1632,16 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPopInterpolate() { BlockParamInterpolate(); }
 
+		void CChildView::OnPopInterpolateCurve()
+		{
+			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line);
+			if (dlg.DoModal() == IDOK )
+			{
+//				BlockParamInterpolate(dlg.kf);
+			}
+		}
+
+
 		void CChildView::OnPopChangegenerator() { BlockGenChange(_pSong->seqBus); }
 
 		void CChildView::OnPopChangeinstrument() { BlockInsChange(_pSong->auxcolSelected); }
@@ -1784,7 +1797,10 @@ NAMESPACE__BEGIN(psycle)
 						editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];		
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
@@ -1793,6 +1809,7 @@ NAMESPACE__BEGIN(psycle)
 							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "XM file imported", MB_OK);
+*/
 					} else if (ext.CompareNoCase("IT") == 0)
 					{
 						ITModule2 it;
@@ -1807,7 +1824,10 @@ NAMESPACE__BEGIN(psycle)
 							return;
 						}
 						it.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];		
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
@@ -1816,6 +1836,7 @@ NAMESPACE__BEGIN(psycle)
 							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "IT file imported", MB_OK);
+*/
 					} else if (ext.CompareNoCase("S3M") == 0)
 					{
 						ITModule2 s3m;
@@ -1830,7 +1851,10 @@ NAMESPACE__BEGIN(psycle)
 							return;
 						}
 						s3m.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
@@ -1839,6 +1863,7 @@ NAMESPACE__BEGIN(psycle)
 							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "S3M file imported", MB_OK);
+*/
 					} else if (ext.CompareNoCase("MOD") == 0)
 					{
 						MODSongLoader modfile;
@@ -1847,7 +1872,10 @@ NAMESPACE__BEGIN(psycle)
 						editPosition=0;
 						modfile.Load(*_pSong);
 						modfile.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];		
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
@@ -1856,6 +1884,7 @@ NAMESPACE__BEGIN(psycle)
 							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "MOD file imported", MB_OK);
+*/
 					}
 				}
 
@@ -3530,4 +3559,5 @@ NAMESPACE__END
 // User/Mouse Responses, private headers
 #include "keybhandler.private.hpp"
 #include "mouseHandler.private.hpp"
+
 

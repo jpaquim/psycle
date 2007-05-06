@@ -10,7 +10,7 @@ A)	The best way is using IRC - You need to install an IRC client. HydraIRC is a 
 	EFnet network and join the #psycle channel.
 	An alternative way to connect is through your browser to http://psycle.sourceforge.net/irc.html
 
-Q)	Is it possible to import/load S3M?/XM/IT files into Psycle?
+Q)	Is it possible to import/load S3M/XM/IT files into Psycle?
 
 A)	Latest 1.7.x alphas and all 1.8 versions include "Sampulse" and its importing routines.
 	Those should allow to import them with ease.

@@ -41,7 +41,7 @@ v1.8.3 beta2
 ! fixed some problems when connecting machines which appeared after moving a wire.
 + Port of Wave Renderer from Psycle 1.9, with support for dithering.
 ! Crash prevention when loading damaged files.
-+ Added a special keys dialog to use some key configurations which can't be set using the standard box.
++ Added a special keys dialog to use some keys which can't be set using the standard box.
 ! Bugfixes and Improvements in the VSTHost ( OpenFileDialog, GetTimeInfo, Shell Plugins)
 + .fxb and .fxp loading and saving routines are done. Pending the UI changes to use them.
 + Improved a bit the Song Properties dialog and the New Machine Dialog.

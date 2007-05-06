@@ -67,9 +67,11 @@
 
 	3) Open the gui for the machine you want to record tweaks from.
 
-	4) Go to the pattern editor and arm the track you want to record in.
+	4) Go to the pattern editor and arm the track you want to record in. (Select the record button
+	   on the track header)
 
-	5) Make sure the record button at the top is on.
+	5) Make sure you're in edit mode (See the record button in the playback toolbar, or the word "Edit"
+	    down right in the status bar).
 
 	6) Press play and start tweaking.
 
@@ -79,14 +81,10 @@
 	that you want to record.  You will need to know the parameter number for the machine
 	you are recording.
 
-	2) Make sure you have "record tweaks" checked in the right under the sequencer.
-
-	3) Go to the pattern editor and arm the track you want to record in.
-
-	4) Make sure the record button at the top is on.
-
-	5) Press play and start tweaking.
-
+	2) Do the same process than with mouse tweaking, except that you tweak with your hardware
+	    rather than with the mouse)
+	    
+	    
 - Knowing the Parameter number of a Machine
 -------------------------------------------
 
@@ -131,13 +129,8 @@
 	  Advise: As you'd see, if the knob's minimum value is not zero (Like, with the VCF Envmod), 
 	  0 = min value
 
-	* Psycle Internal machines: (The Mess)
-	  They usually have values between 0 and 128 (or 0 and 256).
-	  __Remember that you have to convert the given value to an hex value__
-	  
-	  To indicate a negative value, (for example, for the feedback) you can add 8000
-	  Example: 8004 means -4
-
+	* Psycle Internal machines: 
+	  Use the same procedure than with Native plugins.
 
 
 - Mcm Command. Use MIDI CC's to control VST Plugins
@@ -173,6 +166,30 @@
 				3C Means C-5 (3C in Hex = 60 in Dec)
 				7F Means the Velocity (volume) of the note.
 
+- Mcm Command with Native plugins. Send a command to a desired channel.
+-------------------------------------------------------------------
+
+	The Mcm command can also be used for another purpose with Native plugins.
+	It allows to send a command to another channel. This way, you can workaround
+	the limitation where you can only put one of them per channel.
+	
+	Syntax is as follows:
+	
+	If the following is a pattern Row,
+           
+	Description:   (1) (2)(3) (4)
+	Pattern Row : ---- .. .. ....
+
+	on (1) , you insert the Mcm command.
+	on (2), insert the channel (track) number where the command will be sent to.
+	on (3), insert the machine number
+	on (4), insert the command that you want to send.
+	
+	Example: Send command 0C50 to channel 02 of machine 06:
+	
+		mcm 02 06 0C50
+	
+
 - Pattern Commands
 ------------------
 
@@ -183,7 +200,15 @@
 	* Global/Tracker Commands: 
 
 	  FFxx	-	Change BPM
-	  FExx	-	Change Tick Per Beat
+	  FExx	-	Extended command:
+	  	FE0x
+	  	FE1x 	Change Tick Per Beat
+	  	FE2x	Set Bypass ( 0 off, else on)
+	  	FE3x	Set Mute (0 off, else on)
+	  	FEBx	Set Pattern Loop ( FEB0 set loop start, FEBx number of loops)
+	  	FEDx	Set Pattern Delay. ( x = number of lines+1 )
+	  	FEFx	Set Pattern Fine delay in ticks ( lines = 1+((ticks*linesperbeat)/24) )
+	  	
 	  FDxx  -	Delay Trigger (xx/256 ticks) (works with noteoffs too)
 	  FCxx	-	Change Global/Wire Volume
 			Examples:
@@ -194,7 +219,6 @@
 			Aux column indicates the wire number.
 			It is shown in the _title_ of the wire Dialog.
 	  
-
 	  FBxx	-	Retrigger (xx/256 ticks duration per trigger)
 	  FAxy  -	Retrigger Continue (x/16 = ticks duration per trigger, 
 				0 = use current) (y = acceleration, 1-8 pos, 9-f negative
@@ -204,6 +228,8 @@
 	  F8xx	-	Sets the indicated Machine's Panning
 			Example:
 			--- .. 05 F880 Sets the panning of Generator 5 to 80 (Middle)
+	  F3xx 	-	Jump to sequence order number xx.
+	  F2xx	-	Jump to next sequence order, and to the line xx.
 
 	* VST Commands:
 
