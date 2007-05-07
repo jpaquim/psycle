@@ -248,7 +248,7 @@ NAMESPACE__BEGIN(psycle)
 					else
 					{
 						imgindex = 6;
-						hitem=hNodes[3];
+						hitem=hNodes[2];
 					}
 					if(pluginName && _pPlugsInfo[i]->error.empty())
 						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);

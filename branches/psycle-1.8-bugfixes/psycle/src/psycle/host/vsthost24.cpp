@@ -182,8 +182,9 @@ namespace psycle
 				if ( GetPlugCategory() != kPlugCategShell )
 				{
 
-					if(GetProductString(temp) && temp[0]) _sProductName=temp;
-					else if (GetEffectName(temp) && temp[0])_sProductName=temp;
+					
+					if (GetEffectName(temp) && temp[0])_sProductName=temp;
+					else if(GetProductString(temp) && temp[0]) _sProductName=temp;
 					else
 					{
 						std::string temp;
