@@ -8,7 +8,7 @@ NAMESPACE__BEGIN(psycle)
 	class CInterpolateCurve : public CDialog
 	{
 		public:
-			CInterpolateCurve(int startsel, int endsel, CWnd* pParent = 0);
+			CInterpolateCurve(int startsel, int endsel, int _linesperbeat, CWnd* pParent = 0);
 			~CInterpolateCurve();
 			
 		// Dialog Data
@@ -29,32 +29,34 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnSelendokCurveType();
-			afx_msg void OnEnChangeVal();
-			afx_msg void OnEnChangePos();
+			afx_msg void OnEnKillfocusPos();
+			afx_msg void OnEnKillfocusVal();
 			DECLARE_MESSAGE_MAP()
 		private:
-			float HermiteCurveInterpolate(int kf0, int kf1, int kf2, int kf3, int curposition, int maxposition, float tangmult, bool interpolation);
-			RECT GetGPointRect(int i);
 			void AdjustPointToView(CPoint&point);
 			void AdjustRectToView(RECT&rect);
+			RECT GetGPointRect(int i);
 			int GetPointFromX(LONG x);
+			void GetNextkfvalue(int &startpos);
+			void FillReturnValues();
+			float HermiteCurveInterpolate(int kf0, int kf1, int kf2, int kf3, int curposition, int maxposition, float tangmult, bool interpolation);
 
 			int startIndex;
 			int numLines;
+			int linesperbeat;
 			RECT grapharea;
 			int	xoffset;
 			float xscale;
 			float yscale;
 			int selectedGPoint;
 			bool bDragging;
-		public:
 			typedef struct keyframesstruct {
 				int value;
 				int curvetype;
 			};
 			keyframesstruct *kf;
-			afx_msg void OnEnKillfocusPos();
-			afx_msg void OnEnKillfocusVal();
+		public:
+			int *kfresult;
 	};
 
 	NAMESPACE__END

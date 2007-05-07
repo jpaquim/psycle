@@ -161,7 +161,7 @@ namespace psycle
 			virtual int FindOutputWire(int macIndex);
 			virtual const char * const GetDllName() const throw() { return ""; };
 			virtual int GetPluginCategory() { return 0; }
-			virtual bool IsShellPlugin() { return false; }
+			virtual bool IsShellMaster() { return false; }
 			virtual int GetShellIdx() { return 0;	}
 			virtual char * GetName() = 0;
 			const char * GetEditName() { return _editName; }
@@ -271,6 +271,7 @@ namespace psycle
 			DuplicatorMac();
 			DuplicatorMac(int index);
 			virtual void Init(void);
+			virtual void Tick();
 			virtual void Tick( int channel,PatternEntry* pData);
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };

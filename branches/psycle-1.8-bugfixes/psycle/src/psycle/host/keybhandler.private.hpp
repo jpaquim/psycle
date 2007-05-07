@@ -1891,7 +1891,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CChildView::BlockParamInterpolate()
+		void CChildView::BlockParamInterpolate(int *points)
 		{
 			// UNDO CODE BLOCK INTERPOLATE
 			if (blockSelected)
@@ -1922,7 +1922,8 @@ NAMESPACE__BEGIN(psycle)
 						toffset[displace2]=note;
 						toffset[displace2+1]=aux;
 						toffset[displace2+2]=mac;
-						int val=f2i(initvalue+addvalue*(l-blockSel.start.line));
+						int val= (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
+						if ( val == -1 ) continue;
 						toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
 						toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
 						displace2+=MULTIPLY;
@@ -1935,7 +1936,8 @@ NAMESPACE__BEGIN(psycle)
 				{
 					for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
 					{
-						int val=f2i(initvalue+addvalue*(l-blockSel.start.line));
+						int val = (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
+						if ( val == -1 ) continue;
 						toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
 						toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
 						displace2+=MULTIPLY;

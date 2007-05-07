@@ -343,6 +343,7 @@ namespace seib {
 			bool bNeedIdle;
 			bool bNeedEditIdle;
 			bool bWantMidi;
+			bool bShellPlugin;
 
 		public:
 			CFrameWnd * editorWnd;
@@ -359,6 +360,8 @@ namespace seib {
 			virtual bool NeedsIdle(){ return bNeedIdle; }
 			virtual void NeedsEditIdle(bool enable) { bNeedIdle=enable; }
 			virtual bool NeedsEditIdle() { return bNeedEditIdle; }
+			virtual bool IsShellPlugin() { return bShellPlugin; }
+			virtual void IsShellPlugin(bool enable) { bShellPlugin = enable; }
 
 			virtual void * OnGetDirectory();
 			virtual bool OnSizeEditorWindow(long width, long height) { return false; }
@@ -562,6 +565,7 @@ namespace seib {
 			static int quantization;
 			bool loadingEffect;
 			VstInt32 loadingShellId;
+			bool isShell;
 
 		public:
 			CEffect* LoadPlugin(const char * sName,VstInt32 shellIdx=0);

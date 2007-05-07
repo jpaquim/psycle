@@ -197,10 +197,10 @@ BEGIN
     BEGIN
         MENUITEM "&Help\tF1",                   ID_PSYHELP, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "./doc/&readme.txt",           ID_HELP_README
-        MENUITEM "./doc/&keys.txt",             ID_HELP_KEYBTXT
-        MENUITEM "./doc/&tweaking.txt",         ID_HELP_TWEAKING
-        MENUITEM "./doc/&whatsnew.txt",         ID_HELP_WHATSNEW
+        MENUITEM "./docs/&readme.txt",          ID_HELP_README
+        MENUITEM "./docs/&keys.txt",            ID_HELP_KEYBTXT
+        MENUITEM "./docs/&tweaking.txt",        ID_HELP_TWEAKING
+        MENUITEM "./docs/&whatsnew.txt",        ID_HELP_WHATSNEW
         MENUITEM SEPARATOR
         MENUITEM "&About Psycle...",            ID_APP_ABOUT
         MENUITEM "&Greetings",                  ID_HELP_SALUDOS

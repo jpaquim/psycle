@@ -225,7 +225,7 @@ NAMESPACE__BEGIN(psycle)
 			void HalveLength();
 			void DoubleLength();
 			void BlockTranspose(int trp);
-			void BlockParamInterpolate();
+			void BlockParamInterpolate(int *points=0);
 			void StartBlock(int track,int line, int col);
 			void ChangeBlock(int track,int line, int col);	// This function allows a handier usage for Shift+Arrows and MouseSelection
 												// Params: current track, line and col
@@ -587,6 +587,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnPopInterpolateCurve();
 };
 
 

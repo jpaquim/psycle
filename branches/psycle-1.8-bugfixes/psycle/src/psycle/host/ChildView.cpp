@@ -1634,10 +1634,10 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPopInterpolateCurve()
 		{
-			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line);
+			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
 			if (dlg.DoModal() == IDOK )
 			{
-//				BlockParamInterpolate(dlg.kf);
+				BlockParamInterpolate(dlg.kfresult);
 			}
 		}
 

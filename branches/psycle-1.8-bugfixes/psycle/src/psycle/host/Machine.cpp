@@ -529,7 +529,7 @@ namespace psycle
 					{
 						std::string sPath;
 						vst::plugin *vstPlug=0;
-						int shellIdx;
+						int shellIdx=0;
 
 						if(!CNewMachine::lookupDllName(dllName,sPath,shellIdx)) 
 						{
@@ -793,15 +793,19 @@ namespace psycle
 				noteOffset[i]=0;
 			}
 		}
+		void DuplicatorMac::Tick()
+		{
+			for (int j=0;j<MAX_MACHINES;j++)
+			{
+				channelcounter[j]=0;
+			}
+		}
+
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
 			if ( !_mute && !bisTicking)
 			{
 				bisTicking=true;
-				for (int j=0;j<MAX_MACHINES;j++)
-				{
-					channelcounter[j]=0;
-				}
 				for (int i=0;i<8;i++)
 				{
 					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )

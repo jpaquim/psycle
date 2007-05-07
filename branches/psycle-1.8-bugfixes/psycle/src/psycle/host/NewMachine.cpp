@@ -52,6 +52,7 @@ NAMESPACE__BEGIN(psycle)
 				shellidx =  extension[0] + extension[1]*256 + extension[2]*65536 + extension[3]*16777216;
 				tmp = name.substr(0,name.size()-4);
 			}
+			else shellidx = 0;
 
 			// transform string to lower case
 			std::transform(tmp.begin(),tmp.end(),tmp.begin(),std::tolower);
@@ -289,7 +290,7 @@ NAMESPACE__BEGIN(psycle)
 			if (tHand == hInt[1])
 			{
 				m_nameLabel.SetWindowText("Dummy");
-				m_descLabel.SetWindowText("Replaces inexistent plugins");
+				m_descLabel.SetWindowText("Replaces non-existant plugins");
 				m_dllnameLabel.SetWindowText("Internal Machine");
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
@@ -812,7 +813,7 @@ NAMESPACE__BEGIN(psycle)
 							}
 							else
 							{
-								if (vstPlug->IsShellPlugin())
+								if (vstPlug->IsShellMaster())
 								{
 									char tempName[64] = {0}; 
 									VstInt32 plugUniqueID = 0;
@@ -1157,7 +1158,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{
-				if(name == _pPlugsInfo[i]->dllname && shellIdx == _pPlugsInfo[i]->identifier)
+				if(name == _pPlugsInfo[i]->dllname && (shellIdx == 0 || shellIdx == _pPlugsInfo[i]->identifier))
 				{
 					// bad plugins always have allow = false
 					if(_pPlugsInfo[i]->allow) return true;

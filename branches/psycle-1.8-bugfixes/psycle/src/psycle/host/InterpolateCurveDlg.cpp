@@ -3,23 +3,37 @@
 #include <project.private.hpp>
 #include "psycle.hpp"
 #include "InterpolateCurveDlg.hpp"
-#include ".\interpolatecurvedlg.hpp"
 
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 
-		CInterpolateCurve::CInterpolateCurve(int startsel, int endsel,CWnd* pParent)
+		CInterpolateCurve::CInterpolateCurve(int startsel, int endsel,int _linesperbeat,CWnd* pParent)
 			: CDialog(CInterpolateCurve::IDD, pParent)
 			, startIndex(startsel)
 			, numLines(endsel-startsel+1)
-			, selectedGPoint(-1)
+			, linesperbeat(_linesperbeat)
+			, selectedGPoint(0)
 			, bDragging(false)
 		{
 			kf = new keyframesstruct[numLines];
+			kfresult = new int[numLines];
+			//set default keyframe values
+			kf[0].value = 32768;
+			kf[0].curvetype = 1;
+			for (int i = 1;i < numLines-1;i++)
+			{
+				kf[i].value = -1;
+				kf[i].curvetype = 1;
+			}
+			kf[numLines-1].value = 32768;
+			kf[numLines-1].curvetype = 1;
+
 		}
 
 		CInterpolateCurve::~CInterpolateCurve()
 		{
+			delete kf;
+			delete kfresult;
 		}
 
 		void CInterpolateCurve::DoDataExchange(CDataExchange* pDX)
@@ -38,8 +52,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_WM_MOUSEMOVE()
 			ON_WM_RBUTTONDOWN()
 			ON_CBN_SELENDOK(IDC_CURVE_TYPE, OnSelendokCurveType)
-			ON_EN_CHANGE(IDC_VAL, OnEnChangeVal)
-			ON_EN_CHANGE(IDC_POS, OnEnChangePos)
 			ON_EN_KILLFOCUS(IDC_POS, OnEnKillfocusPos)
 			ON_EN_KILLFOCUS(IDC_VAL, OnEnKillfocusVal)
 		END_MESSAGE_MAP()
@@ -53,13 +65,6 @@ NAMESPACE__BEGIN(psycle)
 			m_CurveType.AddString ("Hermite Curve");
 			m_CurveType.SetCurSel (1);
 
-			//set default keyframe values
-			for (int i = 0;i < numLines;i++)
-			{
-				kf[i].value = -1;
-				kf[i].curvetype = 1;
-			}
-			
 			//determine scaling factor
 			GetClientRect(&grapharea);
 			AdjustRectToView(grapharea);
@@ -73,7 +78,8 @@ NAMESPACE__BEGIN(psycle)
 		
 		void CInterpolateCurve::OnOk()
 		{
-			///\todo: fill all the kf values.
+			FillReturnValues();
+			for (int i=0;i< numLines;i++) kfresult[i]=kf[i].value;
 			OnOK();		
 		}
 
@@ -147,105 +153,90 @@ NAMESPACE__BEGIN(psycle)
 			tmprect.top -= 10; tmprect.bottom += 10;
 			dc.FillSolidRect (&tmprect, 0x00FFFFFF);
 			dc.Rectangle (&tmprect);
+
 			//draw gridlines
-			//vertical
-			for (int h = 0; h < numLines;h++)
-			{
-				dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DDDDDD);
-			}
 			//horizontal
 			for (int j = 0; j < 17; j++)  //line every 0x00001000
 			{
 				dc.FillSolidRect (grapharea.left, grapharea.top + int(j * yscale * 4096), grapharea.right - grapharea.left, 1, 0x00DDDDDD);
 			}
-			// Draw keyframe points.
-			for (int i = 0;i < numLines; i++)
+			//vertical
+			for (int h = 0; h < numLines;h++)
 			{
-				if (kf[i].value >= 0)
-				{
-					RECT pointrect = GetGPointRect(i);
-					dc.FillSolidRect (&pointrect, 0);
-				}
+				if ( (startIndex+h) % linesperbeat == 0)
+					dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DD0000);
+				else
+					dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DDDDDD);
 			}
-			//draw lines between points
-			for (int i = 0; i < numLines; i++)
+
+			// Draw points and lines between points
+			int pos0=0, pos1=0, pos2=0, pos3=0;
+
+			GetNextkfvalue(pos1);
+			if ( pos1 >= numLines ) return;
+
+			int x = grapharea.left + int(xscale * pos1);
+			int y = grapharea.top + int(yscale * (65535 - kf[pos1].value));
+
+			dc.MoveTo (x, y);
+			RECT pointrect = GetGPointRect(pos1);
+			dc.FillSolidRect (&pointrect, 0);
+
+			pos0=pos1;
+			pos2=pos1;
+			GetNextkfvalue(++pos2);
+			if ( pos2 < numLines )
 			{
-				int x = grapharea.left + int(xscale * i);
-				int y = grapharea.top + int(yscale * (65535 - kf[i].value));
-				
-				if (kf[i].value >= 0)
+				pos3=pos2;
+				GetNextkfvalue(++pos3);
+				while (pos3 < numLines)
 				{
-					dc.MoveTo (x, y);
-					for (int h = i + 1; h <= numLines; h++)  //find next occupied pos
+					switch (kf[pos1].curvetype)
 					{
-						if (kf[h].value >= 0)
+					case 0:
+						x = grapharea.left + int(xscale * pos2);
+						y = grapharea.top + int(yscale * (65535 - kf[pos2].value));
+						dc.LineTo(x,y);
+						break;
+					case 1:
+						int distance = grapharea.left + int(xscale * pos2) - x;
+						for (int i=1; i < distance; i++)
 						{
-							int x2 = grapharea.left + int(xscale * h);
-							int y2 = grapharea.top + int(yscale * (65535 - kf[h].value));
-
-							switch (kf[i].curvetype)
-							{
-							case 0:
-								dc.LineTo (x2, y2);
-								break;
-							case 1:
-								int max = x2 - x; 
-								int kf0=0, kf1, kf2, kf3=0;
-								kf1 = y; kf2 = y2;
-								int curvept;
-								
-								// find kf3;
-								bool bPt3Found = false;
-								int k = h+1;
-								while (k < numLines)
-								{
-									if (kf[k].value >= 0)
-									{
-										//found next point
-										kf3 = grapharea.top + int(yscale * (65535 - kf[k].value));
-										k = numLines;//force loop to end
-										bPt3Found = true;
-									}
-									k++;
-								}
-								if (bPt3Found == false)
-								{
-									//at second last keyframe, so kf3 = kf2;
-									kf3 = kf2;
-								}
-
-								//find k0
-								bool bPt0Found = false;
-								int l = i-1;
-								while (l >=0)
-								{
-									if (kf[l].value >= 0)
-									{
-										kf0 = grapharea.top + int(yscale * (65535 - kf[l].value));
-										l = -1; //force loop to end
-										bPt0Found = true;
-									}
-									l--;
-								}
-								if (bPt0Found == false)
-								{
-									kf0 = kf1;
-								}
-
-								for (int g = 0;g < max; g++)
-								{
-									curvept = HermiteCurveInterpolate(kf0,kf1,kf2,kf3,g,max, 0, true);
-									dc.LineTo (g + x, curvept);
-								}
-
-								break;
-							}
-							h = numLines ; //make loop end prematurely.
+							int curveval=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,distance, 0, true);
+							dc.LineTo(x+i,grapharea.top + int(yscale * (65535 - curveval)));
 						}
+						x = grapharea.left + int(xscale * pos2);
+						break;
 					}
+					pointrect = GetGPointRect(pos2);
+					dc.FillSolidRect (&pointrect, 0);
+
+					pos0=pos1;
+					pos1=pos2;
+					pos2=pos3;
+					GetNextkfvalue(++pos3);
 				}
-			} 
-			
+
+				pos3=pos2;
+				switch (kf[pos1].curvetype)
+				{
+				case 0:
+					x = grapharea.left + int(xscale * pos2);
+					y = grapharea.top + int(yscale * (65535 - kf[pos2].value));
+					dc.LineTo(x,y);
+					break;
+				case 1:
+					int distance = grapharea.left + int(xscale * pos2) - x;
+					for (int i=1; i < distance; i++)
+					{
+						int curveval=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,distance, 0, true);
+						dc.LineTo(x+i,grapharea.top + int(yscale * (65535 - curveval)));
+					}
+					break;
+				}
+				pointrect = GetGPointRect(pos2);
+				dc.FillSolidRect (&pointrect, 0);
+			}
 
 			//draw selected item
 			if (selectedGPoint > -1)
@@ -315,8 +306,9 @@ NAMESPACE__BEGIN(psycle)
 			AdjustPointToView(point);
 			int pos = GetPointFromX(point.x);
 
-			if (pos >= 0)
+			if (pos > 0 && pos < numLines-1)  // First and last point are not allowed to be removed.
 				kf[pos].value = -1;
+			else return;
 
 			if (pos == selectedGPoint)
 			{
@@ -342,13 +334,6 @@ NAMESPACE__BEGIN(psycle)
 				}
 				Invalidate();
 			}
-		}
-		void CInterpolateCurve::OnEnChangeVal()
-		{
-
-		}
-		void CInterpolateCurve::OnEnChangePos()
-		{
 		}
 
 		void CInterpolateCurve::OnEnKillfocusPos()
@@ -415,106 +400,72 @@ NAMESPACE__BEGIN(psycle)
 
 
 
-/*		void CInterpolateCurve::FillKeyFrame()
+		void CInterpolateCurve::GetNextkfvalue(int &startpos)
 		{
-			int kf0=-1, kf1=-1, kf2=-1, kf3=-1;
-
-			int i=0;
-			while (i < numLines && kf[i].value <0) i++;
-			if ( i >= numLines ) break;
-
-			for (; i < numLines;)
+			for (; startpos <= numLines; startpos++)
 			{
-				
-
-
-
-
-				for (int h = i + 1; h <= numLines; h++)  //find next occupied pos
+				if (kf[startpos].value >= 0)
 				{
-					if (kf[h].value >= 0)
-					{
-
-				if ( i == 0)
-				{
-
+					return;
 				}
-				
-				if ( kf[i].value < 0)
-				{
-					kf[i].value = 0;
-				}
-				else
-				{
-					for (int h = i + 1; h <= numLines; h++)  //find next occupied pos
-					{
-						if (kf[h].value >= 0)
-						{
-							int x2 = grapharea.left + int(xscale * h);
-							int y2 = grapharea.top + int(yscale * (65535 - kf[h].value));
-
-							switch (kf[i].curvetype)
-							{
-							case 0:
-								dc.LineTo (x2, y2);
-								break;
-							case 1:
-								int max = x2 - x; 
-								int kf0=0, kf1, kf2, kf3=0;
-								kf1 = y; kf2 = y2;
-								int curvept;
-
-								// find kf3;
-								bool bPt3Found = false;
-								int k = h+1;
-								while (k < numLines)
-								{
-									if (kf[k].value >= 0)
-									{
-										//found next point
-										kf3 = grapharea.top + int(yscale * (65535 - kf[k].value));
-										k = numLines;//force loop to end
-										bPt3Found = true;
-									}
-									k++;
-								}
-								if (bPt3Found == false)
-								{
-									//at second last keyframe, so kf3 = kf2;
-									kf3 = kf2;
-								}
-
-								//find k0
-								bool bPt0Found = false;
-								int l = i-1;
-								while (l >=0)
-								{
-									if (kf[l].value >= 0)
-									{
-										kf0 = grapharea.top + int(yscale * (65535 - kf[l].value));
-										l = -1; //force loop to end
-										bPt0Found = true;
-									}
-									l--;
-								}
-								if (bPt0Found == false)
-								{
-									kf0 = kf1;
-								}
-
-								for (int g = 0;g < max; g++)
-								{
-									curvept = HermiteCurveInterpolate(kf0,kf1,kf2,kf3,g,max, 0, true);
-									dc.LineTo (g + x, curvept);
-								}
-
-								break;
-							}
-							h = numLines ; //make loop end prematurely.
+			}
 		}
 
-*/
+		void CInterpolateCurve::FillReturnValues()
+		{
+			int pos0=0, pos1=0, pos2=0, pos3=0;
 
+			GetNextkfvalue(pos1);
+			if ( pos1 >= numLines ) return;
+
+			pos0=pos1;
+			pos2=pos1;
+			GetNextkfvalue(++pos2);
+			if ( pos2 >= numLines ) return;
+
+			pos3=pos2;
+			GetNextkfvalue(++pos3);
+			while (pos3 < numLines)
+			{
+				switch (kf[pos1].curvetype)
+				{
+				case 0:
+					for (int i=1; i < (pos2-pos1); i++)
+					{
+						kf[pos1+i].value=kf[pos1].value + (((kf[pos2].value-kf[pos1].value)*i)/(pos2-pos1));
+					}
+					break;
+				case 1:
+					for (int i=1; i < (pos2-pos1); i++)
+					{
+						kf[pos1+i].value=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,pos2-pos1, 0, true);
+					}
+					break;
+				}
+
+				pos0=pos1;
+				pos1=pos2;
+				pos2=pos3;
+				GetNextkfvalue(++pos3);
+			}
+			
+			pos3=pos2;
+			switch (kf[pos1].curvetype)
+			{
+			case 0:
+				for (int i=1; i < (pos2-pos1); i++)
+				{
+					kf[pos1+i].value=kf[pos1].value + (((kf[pos2].value-kf[pos1].value)*i)/(pos2-pos1));
+				}
+				break;
+			case 1:
+				for (int i=1; i < (pos2-pos1); i++)
+				{
+					kf[pos1+i].value=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,pos2-pos1, 0, true);
+				}
+				break;
+			}
+		}
 
 NAMESPACE__END
 NAMESPACE__END

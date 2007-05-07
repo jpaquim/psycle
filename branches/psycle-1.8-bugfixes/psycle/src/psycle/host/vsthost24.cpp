@@ -179,10 +179,15 @@ namespace psycle
 				}
 				_sDllName= (char*)(loadstruct.pluginloader->sFileName);
 				char temp[64];
+				memset(temp,0,sizeof(temp));
 				if ( GetPlugCategory() != kPlugCategShell )
 				{
 
-					
+					// GetEffectName is the better option to GetProductString.
+					// To the few that they show different values in these,
+					// synthedit plugins show only "SyntheditVST" in GetProductString()
+					// and others like battery 1 or psp-nitro, don't have GetProductString(),
+					// so it's almost a no-go.
 					if (GetEffectName(temp) && temp[0])_sProductName=temp;
 					else if(GetProductString(temp) && temp[0]) _sProductName=temp;
 					else

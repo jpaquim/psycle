@@ -1347,11 +1347,11 @@ namespace psycle
 //				Global::pPlayer->bpm = m_BeatsPerMin;
 //				Global::pPlayer->tpb = m_LinesPerBeat;
 //				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
-				pFile->Read(&currentOctave, sizeof currentOctave);
-				pFile->Read(&busMachine[0], sizeof busMachine);
-				pFile->Read(&playOrder, sizeof playOrder);
-				pFile->Read(&playLength, sizeof playLength);
-				pFile->Read(&SONGTRACKS, sizeof SONGTRACKS);
+				pFile->Read(&currentOctave, sizeof(char));
+				pFile->Read(busMachine, 64);
+				pFile->Read(playOrder, 128);
+				pFile->Read(&playLength, sizeof(int));
+				pFile->Read(&SONGTRACKS, sizeof(int));
 				// Patterns
 				pFile->Read(&num, sizeof num);
 				for(i =0 ; i < num; ++i)

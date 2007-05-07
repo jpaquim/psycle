@@ -636,6 +636,7 @@ namespace seib {
 			, bNeedIdle(false)
 			, bNeedEditIdle(false)
 			, bWantMidi(false)
+			, bShellPlugin(false)
 			, editorWnd(0)
 		{
 			Load(loadstruct);
@@ -931,6 +932,7 @@ namespace seib {
 
 			loadingEffect = false;
 			loadingShellId = 0;
+			isShell = false;
 			pHost = this;                           /* install this instance as the one  */
 		}
 
@@ -970,6 +972,7 @@ namespace seib {
 
 			loadingEffect = true;
 			loadingShellId = shellIdx;
+			isShell = false;
 			AEffect* effect = mainEntry (AudioMasterCallback);
 			if (effect && (effect->magic != kEffectMagic))
 			{
@@ -982,6 +985,7 @@ namespace seib {
 				loadstruct.aEffect = effect;
 				loadstruct.pluginloader = loader;
 				CEffect*neweffect = CreateEffect(loadstruct);
+				if (isShell) neweffect->IsShellPlugin(true);
 				loadingEffect=false;
 				loadingShellId=0;
 				return neweffect;
@@ -1523,7 +1527,7 @@ namespace seib {
 			case audioMasterVersion :
 				return pHost->OnGetVSTVersion();
 			case audioMasterCurrentId :
-				if (pHost->loadingEffect) result = pHost->loadingShellId;
+				if (pHost->loadingEffect) { result = pHost->loadingShellId; pHost->isShell = true; }
 				else result = pHost->OnCurrentId(*pEffect);
 				if (fakeeffect )delete pEffect;
 				return result;

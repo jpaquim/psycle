@@ -91,8 +91,8 @@ namespace psycle
 				virtual bool LoadFromMac(vst::plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
-				virtual bool IsShellPlugin() { return (GetPlugCategory() == kPlugCategShell); }
-				virtual int GetShellIdx() { return uniqueId();	}
+				virtual bool IsShellMaster() { return (GetPlugCategory() == kPlugCategShell); }
+				virtual int GetShellIdx() { return ( IsShellPlugin()) ? uniqueId() : 0;	}
 				virtual int GetPluginCategory() { return GetPlugCategory(); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
