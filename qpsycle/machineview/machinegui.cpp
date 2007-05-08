@@ -64,6 +64,7 @@
 
      showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
      deleteMachineAct_ = new QAction( "Delete", this );
+     cloneMachineAct_ = new QAction( "Clone", this );
      renameMachineAct_ = new QAction( "Rename", this );
      QString muteText;   
      mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
@@ -77,6 +78,7 @@
      connect( renameMachineAct_, SIGNAL( triggered() ), this, SLOT( onRenameMachineActionTriggered() ) );
      connect( toggleMuteAct_, SIGNAL( triggered() ), this, SLOT( onToggleMuteActionTriggered() ) );
      connect( toggleSoloAct_, SIGNAL( triggered() ), this, SLOT( onToggleSoloActionTriggered() ) );
+     connect( cloneMachineAct_, SIGNAL( triggered() ), this, SLOT( onCloneMachineActionTriggered() ) );
 
      connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
               machineView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
@@ -234,7 +236,10 @@ void MachineGui::onToggleSoloActionTriggered()
     scene()->update(); // FIXME: possibly more efficient to update individual machines in the loop above.
 }
 
-
+void MachineGui::onCloneMachineActionTriggered()
+{
+  emit cloneRequest( this );
+}
 
 
 
@@ -271,7 +276,7 @@ void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     QMenu menu;
     menu.addAction( renameMachineAct_ );
-    menu.addAction("Clone");
+    menu.addAction( cloneMachineAct_ );
     menu.addAction( deleteMachineAct_ );
     menu.addSeparator();
     menu.addAction( showMacTwkDlgAct_ );

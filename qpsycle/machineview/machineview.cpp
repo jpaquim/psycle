@@ -350,6 +350,8 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
              this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
     connect( macGui, SIGNAL( renamed() ),
              this, SLOT( onMachineRenamed() ) );
+    connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
+             this, SLOT( cloneMachine( MachineGui* ) ) );
     scene_->addItem(macGui);
     machineGuis.push_back(macGui);
 }
@@ -398,3 +400,46 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
     }
 }
 
+void MachineView::cloneMachine( MachineGui *macGui )
+{
+  qDebug("in clone machine");
+  psy::core::Machine *pMachine = macGui->mac();
+  psy::core::Machine::id_type src( pMachine->id() );
+  psy::core::Machine::id_type dst(-1);
+
+  if ((src < psy::core::MAX_BUSES) && (src >=0))
+    {
+      // we need to find an empty slot
+      for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
+	{
+	  if (!song_->_pMachine[i])
+	    {
+	      dst = i;
+	      break;
+	    }
+	}
+    }
+  else if ((src < psy::core::MAX_BUSES*2) && (src >= psy::core::MAX_BUSES))
+    {
+      for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
+	{
+	  if (!song_->_pMachine[i])
+	    {
+	      dst = i;
+	      break;
+	    }
+	}
+    }
+  if (dst >= 0)
+    {
+      
+      if (!song_->CloneMac(src,dst))
+	{
+	  qDebug("Cloning failed");
+	}
+      else {
+	qDebug("Cloning doesn't work yet."); // See Song::CloneMac().
+      }
+    } 
+
+}

@@ -61,6 +61,7 @@ public slots:
     void onToggleSoloActionTriggered();
     void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
                                           // but Qt fails to find it there.
+    void onCloneMachineActionTriggered();
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
@@ -77,6 +78,7 @@ protected:
     QAction *showMacTwkDlgAct_;
     QAction *deleteMachineAct_;
     QAction *renameMachineAct_;
+    QAction *cloneMachineAct_;
     QAction *toggleMuteAct_;
     QAction *toggleSoloAct_;
 
@@ -93,6 +95,7 @@ signals:
     void chosen( MachineGui *macGui );
     void deleteRequest( MachineGui *macGui );
     void renamed();
+    void cloneRequest( MachineGui *macGui );
 
 };
 

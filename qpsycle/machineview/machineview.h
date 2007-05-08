@@ -76,6 +76,7 @@ public slots:
     MachineGui* findMachineGuiByMachineIndex( int index );
     void onDeleteMachineRequest( MachineGui *macGui );
     void onMachineRenamed();
+    void cloneMachine( MachineGui *macGui );
 
 signals:
     void machineGuiChosen( MachineGui *macGui );
