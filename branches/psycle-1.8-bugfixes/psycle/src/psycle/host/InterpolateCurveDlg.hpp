@@ -39,6 +39,8 @@ NAMESPACE__BEGIN(psycle)
 			int GetPointFromX(LONG x);
 			void GetNextkfvalue(int &startpos);
 			void FillReturnValues();
+			void SetPosText(int i);
+			void SetValText(int i);
 			float HermiteCurveInterpolate(int kf0, int kf1, int kf2, int kf3, int curposition, int maxposition, float tangmult, bool interpolation);
 
 			int startIndex;

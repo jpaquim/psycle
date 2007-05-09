@@ -26,7 +26,7 @@
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH 3
-#define PSYCLE__VERSION__QUALITY "beta2"
+#define PSYCLE__VERSION__QUALITY "beta3"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \

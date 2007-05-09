@@ -772,89 +772,162 @@ namespace psycle
 		DuplicatorMac::DuplicatorMac(int index)
 		{
 			_macIndex = index;
-			_numPars = 16;
+			_numPars = NUMMACHINES*2;
 			_nCols = 2;
 			_type = MACH_DUPLICATOR;
 			_mode = MACHMODE_GENERATOR;
 			bisTicking = false;
 			sprintf(_editName, _psName);
-			for (int i=0;i<8;i++)
+			for (int i=0;i<NUMMACHINES;i++)
 			{
 				macOutput[i]=-1;
 				noteOffset[i]=0;
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					allocatedchans[j][i] = -1;
+				}
+			}
+			for (int i=0;i<MAX_MACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					availablechans[i][j] = true;
+				}
 			}
 		}
 		void DuplicatorMac::Init()
 		{
 			Machine::Init();
-			for (int i=0;i<8;i++)
+			for (int i=0;i<NUMMACHINES;i++)
 			{
 				macOutput[i]=-1;
 				noteOffset[i]=0;
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					allocatedchans[j][i] = -1;
+				}
+			}
+			for (int i=0;i<MAX_MACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					availablechans[i][j] = true;
+				}
+			}
+		}
+		void DuplicatorMac::Stop()
+		{
+			for (int i=0;i<NUMMACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					allocatedchans[j][i] = -1;
+				}
+			}
+			for (int i=0;i<MAX_MACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					availablechans[i][j] = true;
+				}
 			}
 		}
 		void DuplicatorMac::Tick()
 		{
-			for (int j=0;j<MAX_MACHINES;j++)
-			{
-				channelcounter[j]=0;
-			}
+
 		}
 
 		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
 		{
-			if ( !_mute && !bisTicking)
+			if ( !_mute && !bisTicking) // Prevent possible loops of dupe machines.
 			{
 				bisTicking=true;
-				for (int i=0;i<8;i++)
+				for (int i=0;i<NUMMACHINES;i++)
 				{
 					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
 					{
 						PatternEntry pTemp = *pData;
 						if ( pTemp._note < 120 )
 						{
+							AllocateVoice(channel,i);
 							int note = pTemp._note+noteOffset[i];
 							if ( note>=120) note=119;
 							else if (note<0 ) note=0;
 							pTemp._note=(uint8)note;
 						}
 						
-						if (Global::_pSong->_pMachine[macOutput[i]] != this)
-							Global::_pSong->_pMachine[macOutput[i]]->Tick(channelcounter[macOutput[i]],&pTemp);
-						channelcounter[macOutput[i]]++;
+						// the first part can happen if the paramter is the machine itself. The sencond with a noteoff
+						// after a noteoff.
+						if (Global::_pSong->_pMachine[macOutput[i]] != this && allocatedchans[channel][i] != -1) 
+						{
+							assert(allocatedchans[channel][i]!=-1);
+							Global::_pSong->_pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
+							if (pTemp._note == 120 )
+							{
+								DeallocateVoice(channel,i);
+
+							}
+						}
 					}
 				}
 			}
 			bisTicking=false;
 		}
+		void DuplicatorMac::AllocateVoice(int channel,int machine)
+		{
+			// If this channel already has allocated channels, use them.
+			if ( allocatedchans[channel][machine] != -1 )
+				return;
+			// If not, search an available channel
+			int j=channel;
+			while (j<MAX_TRACKS && !availablechans[macOutput[machine]][j]) j++;
+			if (!availablechans[macOutput[machine]][j])
+			{
+				j=0;
+				while (j<MAX_TRACKS && !availablechans[macOutput[machine]][j]) j++;
+				if (!availablechans[macOutput[machine]][j])
+				{
+					j= MAX_TRACKS * static_cast<unsigned int>(rand())/((RAND_MAX+1)*2);
+				}
+			}
+			allocatedchans[channel][machine]=j;
+			availablechans[macOutput[machine]][channel]=false;
+		}
+		void DuplicatorMac::DeallocateVoice(int channel, int machine)
+		{
+			if ( allocatedchans[channel][machine] == -1 )
+				return;
+			availablechans[macOutput[machine]][allocatedchans[channel][machine]]= true;
+			allocatedchans[channel][machine]=-1;
+		}
 		void DuplicatorMac::GetParamName(int numparam,char *name)
 		{
-			if (numparam >=0 && numparam<8)
+			if (numparam >=0 && numparam<NUMMACHINES)
 			{
 				sprintf(name,"Output Machine %d",numparam);
-			} else if (numparam >=8 && numparam<16) {
-				sprintf(name,"Note Offset %d",numparam-8);
+			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
+				sprintf(name,"Note Offset %d",numparam-NUMMACHINES);
 			}
 			else name[0] = '\0';
 		}
 		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval)
 		{
-			if ( numparam < 8) { minval = -1; maxval = (MAX_BUSES*2)-1;}
-			else if ( numparam < 16) { minval = -48; maxval = 48; }
+			if ( numparam < NUMMACHINES) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if ( numparam < NUMMACHINES*2) { minval = -48; maxval = 48; }
 		}
 		int DuplicatorMac::GetParamValue(int numparam)
 		{
-			if (numparam >=0 && numparam<8)
+			if (numparam >=0 && numparam<NUMMACHINES)
 			{
 				return macOutput[numparam];
-			} else if (numparam >=8 && numparam <16) {
-				return noteOffset[numparam-8];
+			} else if (numparam >=NUMMACHINES && numparam <NUMMACHINES*2) {
+				return noteOffset[numparam-NUMMACHINES];
 			}
 			else return 0;
 		}
 		void DuplicatorMac::GetParamValue(int numparam, char *parVal)
 		{
-			if (numparam >=0 && numparam <8)
+			if (numparam >=0 && numparam <NUMMACHINES)
 			{
 				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
 				{
@@ -862,20 +935,20 @@ namespace psycle
 				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
-			} else if (numparam >=8 && numparam <16) {
+			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*2) {
 				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-8]+60)%12],(noteOffset[numparam-8]+60)/12);
+				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-NUMMACHINES]+60)%12],(noteOffset[numparam-NUMMACHINES]+60)/12);
 			}
 			else parVal[0] = '\0';
 		}
 		bool DuplicatorMac::SetParameter(int numparam, int value)
 		{
-			if (numparam >=0 && numparam<8)
+			if (numparam >=0 && numparam<NUMMACHINES)
 			{
 				macOutput[numparam]=value;
 				return true;
-			} else if (numparam >=8 && numparam<16) {
-				noteOffset[numparam-8]=value;
+			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
+				noteOffset[numparam-NUMMACHINES]=value;
 				return true;
 			}
 			else return false;

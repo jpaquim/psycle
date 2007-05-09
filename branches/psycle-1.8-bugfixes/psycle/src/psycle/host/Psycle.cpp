@@ -240,7 +240,7 @@ NAMESPACE__BEGIN(psycle)
 			ProcessCmdLine(pFrame); // Process Command Line
 
 			LoadRecent(pFrame); // Import recent files from registry.
-
+			pFrame->CheckForAutosave();
 			return TRUE;
 		}
 

@@ -3,6 +3,7 @@
 #include <project.private.hpp>
 #include "psycle.hpp"
 #include "InterpolateCurveDlg.hpp"
+#include "Helpers.hpp"
 
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
@@ -72,6 +73,9 @@ NAMESPACE__BEGIN(psycle)
 			xoffset = ((grapharea.right - grapharea.left) - (xscale*(numLines-1)))/2;
 			yscale = (grapharea.bottom - grapharea.top) / float(65535); ///total height divided by max param value.
 			grapharea.left+=xoffset;grapharea.right-=xoffset;
+
+			SetPosText(0);
+			SetValText(kf[0].value);
 			
 			return true;			
 		}
@@ -142,7 +146,18 @@ NAMESPACE__BEGIN(psycle)
 				return kf1;
 			}
 		}
-
+		void CInterpolateCurve::SetPosText(int i)
+		{
+			char val[5];
+			sprintf (val, "%d", i+startIndex);
+			m_Pos.SetWindowText (val);
+		}
+		void CInterpolateCurve::SetValText(int i)
+		{
+			char val[5];
+			sprintf (val, "%04X", i);
+			m_Value.SetWindowText (val);
+		}
 		void CInterpolateCurve::OnPaint()
 		{
 			CPaintDC dc(this); // device context for painting
@@ -156,7 +171,7 @@ NAMESPACE__BEGIN(psycle)
 
 			//draw gridlines
 			//horizontal
-			for (int j = 0; j < 17; j++)  //line every 0x00001000
+			for (int j = 0; j < 17; j++)  //line every 0x1000
 			{
 				dc.FillSolidRect (grapharea.left, grapharea.top + int(j * yscale * 4096), grapharea.right - grapharea.left, 1, 0x00DDDDDD);
 			}
@@ -257,11 +272,8 @@ NAMESPACE__BEGIN(psycle)
                     kf[pos].value = 65535 - int((point.y)/yscale);
 					selectedGPoint = pos;
 					
-					char val[5];
-					sprintf (val, "%d", pos+startIndex);
-					m_Pos.SetWindowText (val);
-					sprintf (val, "%04X", kf[pos].value);
-					m_Value.SetWindowText (val);
+					SetPosText(pos);
+					SetValText(kf[pos].value);
 
 					switch (kf[pos].curvetype)
 					{
@@ -340,9 +352,9 @@ NAMESPACE__BEGIN(psycle)
 		{
 			CString text;
 			m_Pos.GetWindowText(text);
-			int pos=atoi(text);
+			int pos=atoi(text)-startIndex;
 
-			if ( pos >=startIndex && pos <startIndex+numLines)
+			if ( pos >=0 && pos <numLines)
 			{
 				if ( kf[pos].value == -1)
 				{
@@ -356,21 +368,22 @@ NAMESPACE__BEGIN(psycle)
 					else 
 					{
 						kf[pos].value= 0;
-						std::string text2;
-						text2 =  kf[pos].value;
-						m_Value.SetWindowText(text2.c_str());
+						SetValText(0);
 					}
 				}
 				else
 				{
-					std::string text2;
-					text2 =  kf[pos].value;
-					m_Value.SetWindowText(text2.c_str());
+					SetValText(kf[pos].value);
 				}
 				selectedGPoint = pos;
 				RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
 				temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
 				InvalidateRect(&temp, 0);
+			}
+			else
+			{
+				SetPosText(selectedGPoint);
+				SetValText(kf[selectedGPoint].value);
 			}
 
 		}
@@ -381,7 +394,9 @@ NAMESPACE__BEGIN(psycle)
 			{
 				CString text;
 				m_Value.GetWindowText(text);
-				int value=atoi(text);
+				std::string text2 = text;
+				int value=0;
+				hexstring_to_integer(text2,value);
 				if ( value >=0 && value < 65536)
 				{
 					kf[selectedGPoint].value = value;
@@ -391,9 +406,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					std::string text2;
-					text2 =  kf[selectedGPoint].value;
-					m_Value.SetWindowText(text2.c_str());
+					SetValText(kf[selectedGPoint].value);
 				}
 			}
 		}

@@ -54,6 +54,7 @@ NAMESPACE__BEGIN(psycle)
 			int seqcopybufferlength;
 
 			void ClosePsycle();
+			void CheckForAutosave();
 			void WaveEditorBackUpdate();
 			void CloseMacGui(int mac,bool closewiredialogs=true);
 			void CloseAllMacGuis();

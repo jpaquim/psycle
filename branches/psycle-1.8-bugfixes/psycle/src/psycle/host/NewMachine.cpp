@@ -46,11 +46,11 @@ NAMESPACE__BEGIN(psycle)
 		bool CNewMachine::lookupDllName(const std::string name, std::string & result, int& shellidx)
 		{
 			std::string tmp = name;
-			std::string extension = name.substr(name.size()-4,4);
+			std::string extension = name.substr(name.length()-4,4);
 			if ( extension != ".dll")
 			{
 				shellidx =  extension[0] + extension[1]*256 + extension[2]*65536 + extension[3]*16777216;
-				tmp = name.substr(0,name.size()-4);
+				tmp = name.substr(0,name.length()-4);
 			}
 			else shellidx = 0;
 

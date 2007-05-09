@@ -273,6 +273,7 @@ namespace psycle
 			virtual void Init(void);
 			virtual void Tick();
 			virtual void Tick( int channel,PatternEntry* pData);
+			virtual void Stop();
 			virtual void Work(int numSamples);
 			virtual char* GetName(void) { return _psName; };
 			virtual void GetParamName(int numparam,char *name);
@@ -284,11 +285,17 @@ namespace psycle
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
 		protected:
-			short macOutput[8];
-			short noteOffset[8];
+			static const int NUMMACHINES=8;
+			void AllocateVoice(int channel, int machine);
+			void DeallocateVoice(int channel, int machine);
+			short macOutput[NUMMACHINES];
+			short noteOffset[NUMMACHINES];
 			static char* _psName;
 			bool bisTicking;
-			int channelcounter[MAX_MACHINES];
+			// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
+			int allocatedchans[MAX_TRACKS][NUMMACHINES];
+			// indicates if the channel of the specified machine is in use or not
+			bool availablechans[MAX_MACHINES][MAX_TRACKS];
 		};
 
 
