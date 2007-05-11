@@ -122,8 +122,8 @@ BOOL XMSamplerMixerPage::OnSetActive()
 	if ( ((CButton*)GetDlgItem(IDC_R_SHOWVOICE))->GetCheck() == 0 ) { ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->SetCheck(1); }
 	for (int i=0;i<8;i++)
 	{
-		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(64);
-		((CSliderCtrl*)GetDlgItem(dlgPan[i]))->SetRangeMax(64);
+		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(200);
+		((CSliderCtrl*)GetDlgItem(dlgPan[i]))->SetRangeMax(200);
 		((CSliderCtrl*)GetDlgItem(dlgRes[i]))->SetRangeMax(127);
 		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(127);
 		UpdateChannel(i);
@@ -157,22 +157,25 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		sprintf(chname,"%d",index+m_ChannelOffset);
 		name->SetWindowText(chname);
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
-		sld->SetPos(64-int(rChan.DefaultVolume()));
-
-		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
+		sld->SetPos(200-(rChan.DefaultVolumeFloat()*200.0f));
+		CButton* mute = (CButton*)GetDlgItem(dlgMute[index]);
+		if ( rChan.DefaultIsMute() )
+		{
+			mute->SetCheck(true);
+		}
+		else
+		{
+			mute->SetCheck(false);
+		}
 		sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
-		if ( rChan.DefaultPanFactor()&0x7F == 80)
+		int defpos = int(rChan.DefaultPanFactorFloat()*200.0f);
+		sld->SetPos(defpos);
+		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
+		if ( rChan.DefaultIsSurround())
 		{
 			surr->SetCheck(true);
 		} else {
-			int defpos = rChan.DefaultPanFactor()&0x7F;
-			sld->SetPos(defpos);
 			surr->SetCheck(false);
-			if ( rChan.DefaultPanFactor() > 0x7F )
-			{
-				CButton* mute = (CButton*)GetDlgItem(dlgMute[index]);
-				mute->SetCheck(true);
-			}
 		}
 
 		sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
@@ -294,9 +297,10 @@ void XMSamplerMixerPage::SliderPanning(NMHDR *pNMHDR, LRESULT *pResult, int offs
 		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
 		{
 			CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgPan[offset]);
-			sampler->rChannel(m_ChannelOffset+offset).DefaultPanFactor(slid->GetPos());
+			XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+			rChan.DefaultPanFactorFloat(slid->GetPos()/200.0f);
+			*pResult = 0;
 		}
-		*pResult = 0;
 	}
 }
 
@@ -313,14 +317,12 @@ void XMSamplerMixerPage::ClickSurround(int offset)
 	if ( !m_UpdatingGraphics)
 	{
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[offset]);
-		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
-		{
-			if ( surr->GetCheck()) sampler->rChannel(m_ChannelOffset+offset).DefaultPanFactor(80);
-			else sampler->rChannel(m_ChannelOffset+offset).DefaultPanFactor(32);
+		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+		if ( surr->GetCheck() == 0 ) {
+			rChan.DefaultIsSurround(false);
 		}
-		else
-		{
-			sampler->rChannel(m_ChannelOffset+offset).IsSurround(surr->GetCheck()?true:false);
+		else {
+			rChan.DefaultIsSurround(true);
 		}
 	}
 }
@@ -339,18 +341,12 @@ void XMSamplerMixerPage::ClickMute(int offset)
 	{
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
 		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-		if ( ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck()) 
-		{
-			if ( mute->GetCheck() == 0 ) 
-			{
-				rChan.DefaultPanFactor(rChan.DefaultPanFactor()&0x7F);
-			}
-			else
-			{
-				rChan.DefaultPanFactor(rChan.DefaultPanFactor()|0x80);
-			}
-		}		
-		else {}
+		if ( mute->GetCheck() == 0 ) {
+			rChan.DefaultIsMute(false);
+		}
+		else {
+			rChan.DefaultIsMute(true);
+		}
 	}
 }
 void XMSamplerMixerPage::OnNMCustomdrawSlVol1(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,0); }
@@ -368,7 +364,8 @@ void XMSamplerMixerPage::SliderVolume(NMHDR *pNMHDR, LRESULT *pResult, int offse
 		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
 		{
 			CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgVol[offset]);
-			sampler->rChannel(m_ChannelOffset+offset).DefaultVolume(64-slid->GetPos());
+			XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+			rChan.DefaultVolumeFloat((200-slid->GetPos())/200.0f);
 		}
 	}
 	*pResult = 0;

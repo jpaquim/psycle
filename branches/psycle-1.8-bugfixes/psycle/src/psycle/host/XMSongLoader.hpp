@@ -16,6 +16,7 @@ namespace host{
 		virtual ~XMSongLoader(void);
 		/// RIFF 
 		virtual void Load(Song& song,const bool fullopen = true);
+		const void LoadInstrumentFromFile(XMSampler & sampler, const int idx) { ; }
 	private:
 		const bool IsValid();
 

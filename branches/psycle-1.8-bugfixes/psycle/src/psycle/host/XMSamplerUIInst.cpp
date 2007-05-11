@@ -10,7 +10,8 @@
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "XMSamplerUIInst.hpp"
-
+#include "XMSongLoader.hpp"
+#include "Configuration.hpp"
 //using namespace Gdiplus;
 
 NAMESPACE__BEGIN(psycle)
@@ -878,6 +879,53 @@ void XMSamplerUIInst::OnCbnSelendokInsDcacombo()
 			
 void XMSamplerUIInst::OnBnClickedLoadins()
 {
+	/*
+	OPENFILENAME ofn; // common dialog box structure
+	char szFile[_MAX_PATH]; // buffer for file name
+	szFile[0]='\0';
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = this->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter =
+		"All Instrument types (*.xi *.iti" "\0" "*.xi;*.iti;" "\0"
+		"FastTracker II Instruments (*.xi)"              "\0" "*.xi"                  "\0"
+		"Impulse Tracker Instruments (*.iti)"             "\0" "*.iti"                  "\0"
+		"All (*)"                                  "\0" "*"                     "\0"
+		;
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	std::string tmpstr = Global::pConfig->GetCurrentInstrumentDir();
+	ofn.lpstrInitialDir = tmpstr.c_str();
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	// Display the Open dialog box. 
+	if (GetOpenFileName(&ofn)==TRUE)
+	{
+		CString str = ofn.lpstrFile;
+		int index = str.ReverseFind('.');
+		if (index != -1)
+		{
+			CString ext = str.Mid(index+1);
+			if (ext.CompareNoCase("XI") == 0)
+			{
+				XMSongLoader xmsong;
+				xmsong.Open(ofn.lpstrFile);
+				xmsong.LoadInstrumentFromFile(*pMachine(),m_InstrumentList.GetCurSel());
+				xmsong.Close();
+			}
+			else if (ext.CompareNoCase("ITI") == 0)
+			{
+				ITModule2 itsong;
+				song.Open(ofn.lpstrFile);
+				bool LoadITInstFromFile(pMachine(),m_InstrumentList.GetCurSel());
+			}
+		}
+	}
+*/
+	
 	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
@@ -1083,7 +1131,7 @@ void XMSamplerUIInst::CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStru
 				_pt_start = _pt_end;
 				}
 
-			for(int i = 0;i < _points ;i++)
+			for(unsigned int i = 0;i < _points ;i++)
 			{
 				CPoint _pt(
 					(int)(m_Zoom * (float)m_pEnvelope->GetTime(i)), 

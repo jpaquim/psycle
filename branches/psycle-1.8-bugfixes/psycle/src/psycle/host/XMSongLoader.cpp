@@ -656,9 +656,9 @@ namespace host{
 
 	const LONG XMSongLoader::LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int &curSample)
 	{
-		// read header
 		Seek(iStart);
 
+		// read header
 		int iInstrSize = ReadInt4();
 //		ASSERT(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
 		TCHAR sInstrName[23];
@@ -755,7 +755,7 @@ namespace host{
 		char iFlags = ReadInt1();
 		unsigned char iPanning = ReadInt1();
 		char iRelativeNote = ReadInt1();
-		char iReserved = ReadInt1();	
+		Skip(1);//char iReserved = ReadInt1();
 
 		// sample name
 		char * cName = AllocReadStr(22);
@@ -1034,8 +1034,8 @@ namespace host{
 
 		for (int i = 0; i< song.SONGTRACKS ; i++ )
 		{
-			if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactor(12);
-			else m_pSampler->rChannel(i).DefaultPanFactor(48);
+			if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactorFloat(0.25f,true);
+			else m_pSampler->rChannel(i).DefaultPanFactorFloat(0.75,true);
 		}
 
 

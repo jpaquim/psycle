@@ -846,26 +846,23 @@ namespace psycle
 				{
 					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
 					{
+						AllocateVoice(channel,i);
 						PatternEntry pTemp = *pData;
 						if ( pTemp._note < 120 )
 						{
-							AllocateVoice(channel,i);
 							int note = pTemp._note+noteOffset[i];
 							if ( note>=120) note=119;
 							else if (note<0 ) note=0;
 							pTemp._note=(uint8)note;
 						}
 						
-						// the first part can happen if the paramter is the machine itself. The sencond with a noteoff
-						// after a noteoff.
-						if (Global::_pSong->_pMachine[macOutput[i]] != this && allocatedchans[channel][i] != -1) 
+						// the first part can happen if the parameter is the machine itself.
+						if (Global::_pSong->_pMachine[macOutput[i]] != this) 
 						{
-							assert(allocatedchans[channel][i]!=-1);
 							Global::_pSong->_pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
-							if (pTemp._note == 120 )
+							if (pTemp._note >= 120 )
 							{
 								DeallocateVoice(channel,i);
-
 							}
 						}
 					}
@@ -881,17 +878,17 @@ namespace psycle
 			// If not, search an available channel
 			int j=channel;
 			while (j<MAX_TRACKS && !availablechans[macOutput[machine]][j]) j++;
-			if (!availablechans[macOutput[machine]][j])
+			if ( j == MAX_TRACKS)
 			{
 				j=0;
 				while (j<MAX_TRACKS && !availablechans[macOutput[machine]][j]) j++;
-				if (!availablechans[macOutput[machine]][j])
+				if (j == MAX_TRACKS)
 				{
 					j= MAX_TRACKS * static_cast<unsigned int>(rand())/((RAND_MAX+1)*2);
 				}
 			}
 			allocatedchans[channel][machine]=j;
-			availablechans[macOutput[machine]][channel]=false;
+			availablechans[macOutput[machine]][j]=false;
 		}
 		void DuplicatorMac::DeallocateVoice(int channel, int machine)
 		{

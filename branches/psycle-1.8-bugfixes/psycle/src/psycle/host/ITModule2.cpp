@@ -137,19 +137,22 @@ Special:  Bit 0: On = song message attached.
 				{
 					if (itFileH.chanPan[i]==ChanFlags::IS_SURROUND )
 					{
-						sampler->rChannel(i).IsSurround(true);
-						sampler->rChannel(i).DefaultPanFactor(32);
+						sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
+						sampler->rChannel(i).DefaultIsSurround(true);
 					}
-					else sampler->rChannel(i).DefaultPanFactor(itFileH.chanPan[i]&0x7F);
+					else if ( !(itFileH.chanPan[i]&ChanFlags::IS_DISABLED) )
+					{
+						sampler->rChannel(i).DefaultPanFactorFloat((itFileH.chanPan[i]&0x7F)/64.0f,true);
+					}
 				}
-				else
-					sampler->rChannel(i).DefaultPanFactor(32);
-				
+				else{
+					sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
+				}
+				sampler->rChannel(i).DefaultVolumeFloat(itFileH.chanVol[i]/64.0f,true);
 				if ( (itFileH.chanPan[i]&ChanFlags::IS_DISABLED) ) 
 				{
-					; //  Mute channel.
+					sampler->rChannel(i).DefaultIsMute(true);
 				}
-				sampler->rChannel(i).DefaultVolume(itFileH.chanVol[i]);
 				sampler->rChannel(i).DefaultFilterType(dsp::F_LOWPASS12);
 			}
 
@@ -1135,21 +1138,25 @@ Special:  Bit 0: On = song message attached.
 				if (stereo)
 				{
 					if (s3mFileH.chanSet[i]&S3MChanType::ISRIGHTCHAN)
-						sampler->rChannel(i).DefaultPanFactor(48);
+						sampler->rChannel(i).DefaultPanFactorFloat(0.75f,true);
 					else if ( !(s3mFileH.chanSet[i]&S3MChanType::ISADLIBCHAN))
-						sampler->rChannel(i).DefaultPanFactor(16);
+						sampler->rChannel(i).DefaultPanFactorFloat(0.25f,true);
 					else 
-						sampler->rChannel(i).DefaultPanFactor(32);
+						sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
 				}
 				else
-					sampler->rChannel(i).DefaultPanFactor(32);
-				if ( !(s3mFileH.chanSet[i]&S3MChanType::ISDISABLED) && s3mFileH.chanSet[i]!=S3MChanType::ISUNUSED) 
+					sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
+				if ( s3mFileH.chanSet[i]!=S3MChanType::ISUNUSED) 
 				{
 					numchans=i+1; // topmost used channel.
+					if((s3mFileH.chanSet[i]&S3MChanType::ISDISABLED))
+					{
+						sampler->rChannel(i).DefaultIsMute(true);
+					}
 				}
 				else
 				{
-					; //  Disable channel.
+					sampler->rChannel(i).DefaultIsMute(true);
 				}
 			}
 			s->SONGTRACKS=max(numchans,4);
@@ -1165,7 +1172,7 @@ Special:  Bit 0: On = song message attached.
 						if (chansettings[i]&S3MChanType::HASCUSTOMPOS)
 						{
 							float flttmp=(chansettings[i]&0x0F)/15.0f;
-							sampler->rChannel(i).DefaultPanFactor(int(flttmp*64.0f));
+							sampler->rChannel(i).DefaultPanFactorFloat(flttmp,true);
 						}
 					}
 				}

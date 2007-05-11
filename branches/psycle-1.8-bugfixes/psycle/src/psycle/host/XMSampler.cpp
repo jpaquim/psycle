@@ -616,11 +616,16 @@ namespace psycle
 				}
 
 				if(m_pChannel->IsSurround()){
-				*pSamplesL++ += left_output;
+					*pSamplesL++ += left_output;
 					*pSamplesR++ -= right_output;
-				} else {
+				} else if (!m_pChannel->IsMute()){
 					*pSamplesL++ += left_output*lvol;
 					*pSamplesR++ += right_output*rvol;
+				}
+				else
+				{
+					pSamplesL++;
+					pSamplesR++;
 				}
 
 				if (!m_WaveDataController.Playing()) {
@@ -1078,11 +1083,12 @@ namespace psycle
 			m_Period = 0;
 
 			m_Volume = 1.0f;
-			m_ChannelDefVolume = 64;//
+			m_ChannelDefVolume = 200;//
 			m_LastVoiceVolume = 0;
+			m_bMute = false;
 
 			m_PanFactor = 0.5f;
-			m_DefaultPanFactor = 32;
+			m_DefaultPanFactor = 100;
 			m_LastVoicePanFactor = 0.0f;
 			m_bSurround = false;
 
@@ -1158,10 +1164,11 @@ namespace psycle
 		}
 		void XMSampler::Channel::Restore()
 		{
-			m_Volume = m_ChannelDefVolume/64.0f;
+			m_Volume = (m_ChannelDefVolume&0xFF)/200.0f;
+			if ((m_ChannelDefVolume&0x100)) m_bMute = true;
 
-			if ( m_DefaultPanFactor != 80 ) m_PanFactor = (m_DefaultPanFactor&0x7F)/64.0f;
-			else if ( m_DefaultPanFactor == 80) m_bSurround = true;
+			m_PanFactor = (m_DefaultPanFactor&0xFF)/200.0f;
+			if ((m_DefaultPanFactor&0x100)) m_bSurround = true;
 
 			m_PanSlideMem = 0;
 			m_ChanVolSlideMem = 0;
@@ -1975,6 +1982,34 @@ namespace psycle
 				}
 			}
 		}
+		bool XMSampler::Channel::Load(RiffFile& riffFile)
+		{
+			char temp[6];
+			int size=0;
+			riffFile.Read(temp,4); temp[4]='\0';
+			riffFile.Read(size);
+			if (strcmp(temp,"CHAN")) return false;
+
+			riffFile.Read(m_ChannelDefVolume);
+			riffFile.Read(m_DefaultPanFactor);
+			riffFile.Read(m_DefaultCutoff);
+			riffFile.Read(m_DefaultRessonance);
+			riffFile.Read(&m_DefaultFilterType,sizeof(dsp::FilterType));
+
+			return true;
+		}
+		void XMSampler::Channel::Save(RiffFile& riffFile)
+		{
+			int size=5*sizeof(int);
+			riffFile.Write("CHAN",4);
+			riffFile.Write(size);
+			riffFile.Write(m_ChannelDefVolume);
+			riffFile.Write(m_DefaultPanFactor);
+			riffFile.Write(m_DefaultCutoff);
+			riffFile.Write(m_DefaultRessonance);
+			riffFile.Write(&m_DefaultFilterType,sizeof(dsp::FilterType));
+		}
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -2541,39 +2576,46 @@ namespace psycle
 			m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24);
 		}
 */
-		bool XMSampler::Load(RiffFile& riffFile)
+		bool XMSampler::Load(RiffFile* riffFile)
 		{
-			ASSERT(false);
+			assert(false);
 			//The function "Load()" is used for Songs made with Psycle earlier than 1.7
 			// It cannot happen that one of those has this new Sampler.
-			return true;
+			return false;
 		}
 
 
 		void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 		{
 			int temp;
-			//\todo: save ID and size.
-//		UINT size = 2 * sizeof(temp);
-//		riffFile.Write(&size,sizeof(size));
+			// we cannot calculate the size previous to save, so we write done a placeholder
+			// and seek back to write the correct value.
+			UINT size = 0;
+			UINT filepos = riffFile->GetPos();
+			riffFile->Write(&size,sizeof(size));
 			riffFile->Write(VERSION);
 			riffFile->Write(_numVoices); // numSubtracks
 			switch (_resampler.GetQuality())
 			{
 				case dsp::R_NONE:   temp = 0; break;
 				case dsp::R_SPLINE: temp = 2; break;
-			case dsp::R_LINEAR:
+				case dsp::R_LINEAR:
 				default:            temp = 1; break;
 			}
 			riffFile->Write(temp); // quality
 
+			for (int i=0; i < 128; i++) riffFile->Write(&zxxMap[i],sizeof(ZxxMacro));
 			riffFile->Write(m_bAmigaSlides);
 			riffFile->Write(m_UseFilters);
+			riffFile->Write(m_GlobalVolume);
+			riffFile->Write(m_PanningMode);
 
-			//\todo : Save default Channel Parameters!
+			for(int i = 0;i < MAX_TRACKS;i++){
+				m_Channel[i].Save(*riffFile);
+			}
 
 			// Instrument Data Save
-			int numInstruments = 0;		
+			int numInstruments = 0;	
 			for(int i = 0;i < MAX_INSTRUMENT;i++){
 				if(m_Instruments[i].IsEnabled()){
 					numInstruments++;
@@ -2585,44 +2627,103 @@ namespace psycle
 			for(int i = 0;i < MAX_INSTRUMENT;i++){
 				if(m_Instruments[i].IsEnabled()){
 					riffFile->Write(i);
-					m_Instruments[i].Save(riffFile);
+					m_Instruments[i].Save(*riffFile);
 				}
 			}
+
+			// Instrument Data Save
+			int numSamples = 0;	
+			for(int i = 0;i < MAX_INSTRUMENT;i++){
+				if(m_rWaveLayer[i].WaveLength() != 0){
+					numSamples++;
+				}
+			}
+
+			riffFile->Write(numSamples);
+
+			for(int i = 0;i < MAX_INSTRUMENT;i++){
+				if(m_rWaveLayer[i].WaveLength() != 0){
+					riffFile->Write(i);
+					m_rWaveLayer[i].Save(*riffFile);
+				}
+			}
+
+			int endpos = riffFile->GetPos();
+			riffFile->Seek(filepos);
+			size = endpos - filepos -sizeof(size);
+			riffFile->Write(&size,sizeof(size));
+			riffFile->Seek(endpos);
 
 		}//void SaveSpecificChunk(RiffFile& riffFile) 
 
 		bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 		{
 			int temp;
-
-			//if ( version ... )
-			riffFile->Read(_numVoices); // numSubtracks
-			riffFile->Read(temp); // quality
-
-			switch (temp)
+			bool wrongState=false;
+			compiler::uint32 filevers;
+			long filepos;
+			int size=0;
+			riffFile->Read(&size,sizeof(size));
+			filepos=riffFile->GetPos();
+			riffFile->Read(filevers);
+			
+			// Check higher bits of version (AAAABBBB). 
+			// different A, incompatible, different B, compatible
+ 			if ( (filevers&0x11110000) == (VERSION&0x11110000) )
 			{
-			case 2:	_resampler.SetQuality(dsp::R_SPLINE); break;
-			case 0:	_resampler.SetQuality(dsp::R_NONE);	  break;
-			default:
-			case 1: _resampler.SetQuality(dsp::R_LINEAR); break;
+				riffFile->Read(_numVoices); // numSubtracks
+				riffFile->Read(temp); // quality
+
+				switch (temp)
+				{
+				case 2:	_resampler.SetQuality(dsp::R_SPLINE); break;
+				case 0:	_resampler.SetQuality(dsp::R_NONE);	  break;
+				default:
+				case 1: _resampler.SetQuality(dsp::R_LINEAR); break;
+				}
+
+				for (int i=0; i < 128; i++) riffFile->Read(&zxxMap[i],sizeof(ZxxMacro));
+
+				riffFile->Read(m_bAmigaSlides);
+				riffFile->Read(m_UseFilters);
+				riffFile->Read(m_GlobalVolume);
+				riffFile->Read(m_PanningMode);
+
+				for(int i = 0;i < MAX_TRACKS;i++){
+					m_Channel[i].Load(*riffFile);
+				}
+
+				// Instrument Data Load
+				int numInstruments;
+				riffFile->Read(numInstruments);
+				int idx;
+				for(int i = 0;i < numInstruments;i++)
+				{
+					riffFile->Read(idx);
+					if (!m_Instruments[idx].Load(*riffFile)) { wrongState=true; break; }
+					//m_Instruments[idx].IsEnabled(true); // done in the loader.
+				}
+				if (!wrongState)
+				{
+					int numSamples;
+					riffFile->Read(numSamples);
+					int idx;
+					for(int i = 0;i < numSamples;i++)
+					{
+						riffFile->Read(idx);
+						if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
+					}
+				}
 			}
+			else wrongState=true;
 
-			riffFile->Read(m_bAmigaSlides);
-			riffFile->Read(m_UseFilters);
-
-			//\todo : Save default Channel Parameters!
-
-			// Instrument Data Load
-			int numInstruments;
-			riffFile->Read(numInstruments);
-			int idx;
-			for(int i = 0;i < numInstruments;i++){
-				riffFile->Read(idx);
-				m_Instruments[idx].Load(riffFile);
-				m_Instruments[idx].IsEnabled(true);
+			if (!wrongState)
+				return true;
+			else
+			{
+				riffFile->Seek(filepos+size);
+				return false;
 			}
-
-			return TRUE;
 		}
 	}
 }

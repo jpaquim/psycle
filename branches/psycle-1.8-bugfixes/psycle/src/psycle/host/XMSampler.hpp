@@ -688,7 +688,8 @@ XMSampler::Channel::PerformFX().
 			m_Index = 0;
 			Init();
 		};
-
+		bool Load(RiffFile& riffFile);
+		void Save(RiffFile& riffFile);
 		void Init();
 		void EffectInit();
 		void Restore();
@@ -759,8 +760,24 @@ XMSampler::Channel::PerformFX().
 
 		const float Volume(){return m_Volume;};
 		void Volume(const float value){m_Volume = value;};
-		const int DefaultVolume(){return m_ChannelDefVolume;};
-		void DefaultVolume(const int value){m_ChannelDefVolume = value; Volume(value/64.0f);};
+		inline const int DefaultVolume(){return m_ChannelDefVolume;};
+		void DefaultVolume(const int value){
+			m_ChannelDefVolume = value; 
+			if (DefaultIsMute() ) IsMute(true);
+			Volume(DefaultVolumeFloat());
+		};
+		inline const float DefaultVolumeFloat() { return (m_ChannelDefVolume&0xFF)/200.0f; }
+		void DefaultVolumeFloat(float value,bool ignoremute=false)
+		{
+			if ( DefaultIsMute() && !ignoremute ) m_ChannelDefVolume = int(value*200) | 0x100;
+			else m_ChannelDefVolume = int(value*200);
+		}
+		inline const bool DefaultIsMute() { return m_ChannelDefVolume&0x100; }
+		void DefaultIsMute(bool mute)
+		{
+			if (mute) m_ChannelDefVolume |= 0x100;
+			else m_ChannelDefVolume &=0xFF;
+		}
 		const int LastVoiceVolume(){return m_LastVoiceVolume;};
 		void LastVoiceVolume(const int value){m_LastVoiceVolume = value;};
 
@@ -769,13 +786,26 @@ XMSampler::Channel::PerformFX().
 			m_PanFactor = value;
 			if ( ForegroundVoice()) ForegroundVoice()->PanFactor(value);
 		};
-		const int DefaultPanFactor(){return m_DefaultPanFactor;};
+		inline const int DefaultPanFactor() { return m_DefaultPanFactor; }
 		void DefaultPanFactor(const int value){
-			m_DefaultPanFactor = value; 
-			if (value == 80 ) IsSurround(true);
-			else if (value <= 0x40 ) PanFactor(value/64.0f);
-			//\todo : else  set mute.
+			m_DefaultPanFactor = value;
+			PanFactor(DefaultPanFactorFloat());
+			if (DefaultIsSurround() ) IsSurround(true);
 		};
+		inline const float DefaultPanFactorFloat() { return (m_DefaultPanFactor&0xFF)/200.0f; }
+		void DefaultPanFactorFloat(float value,bool ignoresurround=false)
+		{
+			if ( DefaultIsSurround() && !ignoresurround )  m_DefaultPanFactor = int(value*200) | 0x100;
+			else m_DefaultPanFactor = int(value*200);
+		}
+
+		inline const bool DefaultIsSurround() { return (m_DefaultPanFactor&0x100); }
+		void DefaultIsSurround(bool surr)
+		{
+			if (surr) m_DefaultPanFactor |= 0x100;
+			else m_DefaultPanFactor &=0xFF;
+		}
+
 		const float LastVoicePanFactor(){return m_LastVoicePanFactor;};
 		void LastVoicePanFactor(const float value){m_LastVoicePanFactor = value;};
 
@@ -798,9 +828,14 @@ XMSampler::Channel::PerformFX().
 		void IsSurround(const bool value){
 			if ( value )
 			{
+				///\todo:
 				/* if ( STANDARDSURROUND ) */ m_PanFactor = 0.5f;
 			}
 			m_bSurround = value;
+		};
+		const bool IsMute(){ return m_bMute;};
+		void IsMute(const bool value){
+			m_bMute = value;
 		};
 
 		const int Cutoff() { return m_Cutoff;};
@@ -843,11 +878,12 @@ XMSampler::Channel::PerformFX().
 		double m_Period;
 
 		float m_Volume;///<  (0 - 1.0f)
-		int m_ChannelDefVolume;///< (0.0f - 64)
+		int m_ChannelDefVolume;///< (0..200)   &0x100 = Mute.
 		int m_LastVoiceVolume;
+		bool m_bMute;
 
 		float m_PanFactor;// value used for Playback
-		int m_DefaultPanFactor; // value used for Storage //  0..64 .  80 == Surround. >127 = Mute.
+		int m_DefaultPanFactor;  // value used for Storage //  0..200 .  &0x100 == Surround.
 		float m_LastVoicePanFactor;
 		bool m_bSurround;
 
@@ -945,7 +981,7 @@ XMSampler::Channel::PerformFX().
 	virtual char* GetName(void) { return _psName; };
 	virtual void SetSampleRate(int sr);
 
-	virtual bool Load(RiffFile& riffFile);
+	virtual bool Load(RiffFile* riffFile);
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
 	virtual void SaveSpecificChunk(RiffFile* riffFile);
 

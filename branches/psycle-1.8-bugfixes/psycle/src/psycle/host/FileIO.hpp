@@ -42,8 +42,8 @@ namespace psycle
 			virtual void Read(int &value){int _t;Read(&_t,sizeof(int));value =  _t;};
 			virtual void Read(char &value){char _t;Read(&_t,sizeof(char));value =  _t;};
 			virtual void Read(unsigned char &value){unsigned char _t;Read(&_t,sizeof(unsigned char));value =  _t;};
-			virtual void Read(short &value){int _t;Read(&_t,sizeof(short));value =  _t;};
-			virtual void Read(unsigned short &value){int _t;Read(&_t,sizeof(unsigned short));value =  _t;};
+			virtual void Read(short &value){short _t;Read(&_t,sizeof(short));value =  _t;};
+			virtual void Read(unsigned short &value){unsigned short _t;Read(&_t,sizeof(unsigned short));value =  _t;};
 			virtual void Read(bool &value){bool _t;Read(&_t,sizeof(bool));value =  _t;};
 			virtual void Read(UINT &value){UINT _t;Read(&_t,sizeof(UINT));value =  _t;};
 			virtual void Read(float &value){float _t;Read(&_t,sizeof(float));value =  _t;};

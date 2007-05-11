@@ -111,8 +111,8 @@ namespace psycle
 				m_WaveLength  = iLen;
 			};
 
-			void Load(RiffFile* riffFile);
-			void Save(RiffFile* riffFile);
+			bool Load(RiffFile& riffFile);
+			void Save(RiffFile& riffFile);
 
 			/// Wave Data Copy Operator
 			void operator= (const WaveData& source)
@@ -309,13 +309,13 @@ namespace psycle
 			};
 
 			/// Helper to set a new time for an existing index.
-			const int SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal);
+			const int SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal);
 
 			/// Inserts a new point to the points Array.
-			const int Insert(const unsigned int pointIndex,const ValueType pointVal);
+			const int Insert(const int pointIndex,const ValueType pointVal);
 
 			/// Removes a point from the points Array.
-			void Delete(const unsigned int pointIndex);
+			void Delete(const int pointIndex);
 
 			/// Clears the points Array
 			void Clear()
@@ -323,26 +323,26 @@ namespace psycle
 				m_Points.clear();
 			};
 			// Set or Get the point Index for Sustain and Loop.
-			const unsigned int SustainBegin(){ return m_SustainBegin;};
+			const int SustainBegin(){ return m_SustainBegin;};
 			// value has to be an existing point!
-			void SustainBegin(const unsigned int value){m_SustainBegin = value;};
+			void SustainBegin(const int value){m_SustainBegin = value;};
 
-			const unsigned int SustainEnd(){ return m_SustainEnd;};
+			const int SustainEnd(){ return m_SustainEnd;};
 			// value has to be an existing point!
-			void SustainEnd(const unsigned int value){m_SustainEnd = value;};
+			void SustainEnd(const int value){m_SustainEnd = value;};
 
-			const unsigned int LoopStart(){return m_LoopStart;};
+			const int LoopStart(){return m_LoopStart;};
 			// value has to be an existing point!
-			void LoopStart(const unsigned int value){m_LoopStart = value;};
+			void LoopStart(const int value){m_LoopStart = value;};
 
-			const unsigned int LoopEnd(){return m_LoopEnd;};
+			const int LoopEnd(){return m_LoopEnd;};
 			// value has to be an existing point!
-			void LoopEnd(const unsigned int value){m_LoopEnd = value;};
+			void LoopEnd(const int value){m_LoopEnd = value;};
 
 			const int NumOfPoints(){ return m_Points.size();};
 
-			void Load(RiffFile* riffFile,const UINT version);
-			void Save(RiffFile* riffFile,const UINT version);
+			void Load(RiffFile& riffFile,const UINT version);
+			void Save(RiffFile& riffFile,const UINT version);
 
 			// overloaded copy function
 			Envelope& operator=(const Envelope& other)
@@ -403,8 +403,8 @@ namespace psycle
 
 		void Init();
 
-		void Load(RiffFile* riffFile);
-		void Save(RiffFile* riffFile);
+		bool Load(RiffFile& riffFile);
+		void Save(RiffFile& riffFile);
 
 		void operator= (const XMInstrument & other)
 		{
