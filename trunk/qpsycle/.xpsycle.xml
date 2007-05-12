@@ -8,7 +8,7 @@
 
 <!-- for help, read the page at http://psycle.sourceforge.net/wiki/Qpsycle/setup/alpha/Configuring_sound -->
 <audio enable='1' />
-<driver name='alsa' /> <!-- name='alsa' or name='jack' or name='esd' -->
+<driver name='alsa' /> <!-- name='alsa' or name='jack' or name='esd' or name='dsound' or name='mmewaveout' -->
 <alsa device = 'plughw:0' />
 
 <!-- gui configuration -->

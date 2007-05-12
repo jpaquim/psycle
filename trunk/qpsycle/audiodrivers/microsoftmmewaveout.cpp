@@ -34,7 +34,7 @@ namespace psy
 
 		AudioDriverInfo MsWaveOut::info( ) const
 		{
-			return AudioDriverInfo("mswaveout","Microsoft WaveOut Driver","Microsoft standard output driver",true);
+			return AudioDriverInfo("mmewaveout","Microsoft MME WaveOut Driver","Microsoft legacy output driver",true);
 		}      
 
 		MsWaveOut::MsWaveOut()		
