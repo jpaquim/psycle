@@ -10,7 +10,7 @@ import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always m
 # project
 
 from packageneric.generic.scons.project import project
-project = project(name = 'xpsycle.plugins')
+project = project(name = 'psycle-plugins')
 
 # source package
 
