@@ -256,15 +256,21 @@ win32 {
         win32-g++ {
             !exists($$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002) {
                 warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+                # remove our local include path
+                INCLUDEPATH -= $$BOOST_DIR/include
             }
             LIBPATH += $$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002
         } else:win32-msvc {
             !exists($$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400) {
                 warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+                # remove our local include path
+                INCLUDEPATH -= $$BOOST_DIR/include
             }
             LIBPATH += $$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400
         } else {
             warning("We do not have boost libs built for your compiler. Make sure you have them installed.")
+            # remove our local include path
+            INCLUDEPATH -= $$BOOST_DIR/include
         }
     }
     win32-g++ {
