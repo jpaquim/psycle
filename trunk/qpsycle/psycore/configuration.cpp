@@ -22,6 +22,7 @@
 #include "file.h"
 #ifdef __unix__
 // FIXME: these audio drivers don't belong in psycore
+#include "../audiodrivers/audiodriver.h"
 #include "../audiodrivers/alsaout.h"
 #include "../audiodrivers/jackout.h"
 #include "../audiodrivers/esoundout.h"
