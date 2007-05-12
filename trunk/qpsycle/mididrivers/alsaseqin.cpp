@@ -6,7 +6,7 @@
 
 #include "alsaseqin.h"
 
-#if !defined XPSYCLE__NO_ALSA
+#if defined PSYCLE__ALSA_AVAILABLE
 
 AlsaSeqIn::AlsaSeqIn()
 {
@@ -181,4 +181,4 @@ SND_SEQ_EVENT_USR_VAR4 	reserved for user apps; event data type = snd_seq_ev_ext
 SND_SEQ_EVENT_NONE 	NOP; ignored in any case
 */
 
-#endif // !defined XPSYCLE__NO_ALSA
+#endif // defined PSYCLE__ALSA_AVAILABLE

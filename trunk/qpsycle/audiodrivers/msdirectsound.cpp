@@ -17,12 +17,9 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-
-#if defined QPSYCLE__MSDIRECTSOUND_AVAILABLE
-
+#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "msdirectsound.h"
 #include "cstdint.h"
-
 namespace psy
 {
 	namespace core
@@ -432,5 +429,4 @@ namespace psy
 		}
 	}
 }
-
 #endif

@@ -1,8 +1,5 @@
 #pragma once
-#if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/gstreamer_conditional_build.h>
-#endif
-#if !defined XPSYCLE__NO_GSTREAMER
+#if defined PSYCLE__GSTREAMER_AVAILABLE
 #include "audiodriver.h"
 namespace psy
 	{
@@ -18,4 +15,4 @@ namespace psy
 			};
 	}
 }
-#endif // !defined XPSYCLE__NO_GSTREAMER
+#endif // defined XPSYCLE__GSTREAMER_AVAILABLE

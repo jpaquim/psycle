@@ -1,11 +1,11 @@
 /*==========================================================================;
-	*
-	*  Copyright (c) Microsoft Corporation.  All rights reserved.
-	*
-	*  File:       dsound.h
-	*  Content:    DirectSound include file
-	*
-	**************************************************************************/
+*
+*  Copyright (c) Microsoft Corporation.  All rights reserved.
+*
+*  File:       dsound.h
+*  Content:    DirectSound include file
+*
+**************************************************************************/
 
 #define COM_NO_WINDOWS_H
 #include <objbase.h>

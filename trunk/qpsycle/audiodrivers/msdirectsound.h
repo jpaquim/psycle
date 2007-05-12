@@ -18,14 +18,11 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #pragma once
-
-#if defined QPSYCLE__MSDIRECTSOUND_AVAILABLE
-
+#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "audiodriver.h"
 #include "windows.h"
 #include <mmsystem.h>
 #include "dsound.h"
-
 namespace psy
 {
 	namespace core
@@ -97,5 +94,4 @@ namespace psy
 		};
 	}
 }
-
 #endif

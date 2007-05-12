@@ -1,11 +1,15 @@
 # Use qmake to generate your Makefile from this file.
-# N.B. dont run qpsycle --project! It will overwrite 
+# N.B. dont run qmake --project! It will overwrite 
 # this file and we don't want that.
 
-TEMPLATE = app
+TEMPLATE = app # This project builds an executable program.
 TARGET = 
-CONFIG += warn_off debug
-OBJECTS_DIR = build # Where the .o files go.
+CONFIG += warn_off debug thread
+BUILD_DIR = build
+OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
+MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
+#DESTDIR = $$BUILD_DIR # Where the final executable goes.
+
 DEPENDPATH += . \
               machineview \
               patternview \
@@ -176,72 +180,143 @@ QT += xml
 
 unix {
     message("System is: unix.")
-    CONFIG += link_pkgconfig
+    CONFIG += link_pkgconfig # adds support for pkg-config via the PKG_CONFIG var
+
+    LIBS += -lboost_signals
+
     system( pkg-config --exists alsa ) {
         message( "pkg-config thinks alsa libs are available..." )
-        DEFINES += QPSYCLE__ALSA_AVAILABLE # This is used in the source to determine when
-                                           # to include alsa-specific things.
         PKGCONFIG += alsa 
-        INCLUDEPATH += /usr/include/alsa 
+        DEFINES += PSYCLE__ALSA_AVAILABLE # This is used in the source to determine when to include alsa-specific things.
         HEADERS += audiodrivers/alsaout.h \
                    mididrivers/alsaseqin.h 
         SOURCES += audiodrivers/alsaout.cpp \
                    mididrivers/alsaseqin.cpp 
     }
+
     system( pkg-config --exists jack ) {
         message( "pkg-config thinks jack libs are available..." )
-        DEFINES += QPSYCLE__JACK_AVAILABLE # This is used in the source to determine when
-                                           # to include jack-specific things.
         PKGCONFIG += jack 
-        HEADERS += audiodrivers/jackout.h 
+        DEFINES += PSYCLE__JACK_AVAILABLE # This is used in the source to determine when to include jack-specific things.
+        HEADERS += audiodrivers/jackout.h
         SOURCES += audiodrivers/jackout.cpp 
     }
+
     system( pkg-config --exists esound ) {
-        message( "esd-config thinks esd libs are available..." )
-        DEFINES += QPSYCLE__ESD_AVAILABLE  
-        LIBS += $$system( esd-config --libs )
-        HEADERS += audiodrivers/esoundout.h 
+        message( "pkg-config thinks esound libs are available..." )
+        PKGCONFIG += esound
+        DEFINES += PSYCLE__ESOUND_AVAILABLE # This is used in the source to determine when to include esound-specific things.
+        HEADERS += audiodrivers/esoundout.h
         SOURCES += audiodrivers/esoundout.cpp 
     }
-    LIBS += -lboost_signals
-    # FIXME: not sure how to test for netaudio...
-    LIBS += -laudio
-    HEADERS += audiodrivers/netaudioout.h
-    SOURCES += audiodrivers/netaudioout.cpp
+
+    false { # gstreamer output is unfinished
+        system( pkg-config --exists gstreamer ) {
+            message( "pkg-config thinks gstreamer libs are available..." )
+            PKGCONFIG += gstreamer
+            DEFINES += PSYCLE__GSTREAMER_AVAILABLE # This is used in the source to determine when to include gstreamer-specific things.
+            HEADERS += audiodrivers/gstreamerout.h
+            SOURCES += audiodrivers/gstreamerout.cpp 
+        }
+    }
+
+    false { # note: the net audio output driver is probably not (well) polished/tested anyway. esound is a good alternative.
+        # FIXME: not sure how to test for netaudio...
+        exists(/usr/include/audio/audiolib.h) {
+            LIBS += -laudio
+            DEFINES += PSYCLE__NET_AUDIO_AVAILABLE # This is used in the source to determine when to include net-audio-specific things.
+            HEADERS += audiodrivers/netaudioout.h
+            SOURCES += audiodrivers/netaudioout.cpp
+        }
+    }
 }
 win32 {
-    LIBS += -llibboost_signals-mgw-mt-1_33_1
-    LIBS += -lWinMM
-    LIBS += -lDsound
-    LIBS += -luuid
-
-    INCLUDEPATH += ../external-packages/boost-1.33.1/include
-    # for mingw
-    LIBPATH += ../external-packages/boost-1.33.1/lib-mswindows-mingw-cxxabi-1002
-    # for msvc
-    #LIBPATH += ../external-packages/boost-1.33.1/lib-mswindows-msvc-8.0-cxxabi-1400
-
-    # FIXME: not sure how to get these from the environment...
-    LIBPATH += D:/Boost/lib
-    INCLUDEPATH += D:/boost_1_33_1
-
+    message("System is: win32.")
+    win32-g++ {
+        message("Compiler is: g++.")
+    } else:win32-msvc {
+        message("Compiler is: msvc.")
+    } else {
+        warning("Untested compiler.")
+    }
+    
+    debug:CONFIG += console # opens a console so that we can see debugging messages
+    
+    PWD = $$system(echo %CD%)
+    EXTERNAL_PKG_DIR = $$PWD/../external_packages
+    
+    BOOST_DIR = $$EXTERNAL_PKG_DIR/boost-1.33.1
+    !exists($$BOOST_DIR) {
+        warning("The local boost dir does not exist: $$BOOST_DIR. Make sure you have boost libs installed.")
+    } else {
+        !exists($$BOOST_DIR)/include {
+            warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+        }
+        INCLUDEPATH += $$BOOST_DIR/include
+        win32-g++ {
+            LIBPATH += $$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002
+            LIBS += -llibboost_signals-mgw-mt-1_33_1
+            #FIXME: is there any reason not to use the following instead?
+            #LIBS += -lboost_signals-mgw-mt-1_33_1
+        } else:win32-msvc {
+            LIBPATH += $$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400
+            #LIBS += # we can use auto linking
+        } else {
+            warning("We do not have boost libs built for your compiler. Make sure you have them installed.")
+        }
+    }
+    
     INCLUDEPATH += $(QTDIR)/include
     INCLUDEPATH += $(QTDIR)/include/Qt
     INCLUDEPATH += $(QTDIR)/include/QtCore
     INCLUDEPATH += $(QTDIR)/include/QtGui
     INCLUDEPATH += $(QTDIR)/include/QtXml
     INCLUDEPATH += $(QTDIR)/src/3rdparty/zlib
-    # FIXME: not sure how to test for any of these...
-    {
-        message( "compiling mswaveout..." )
-        DEFINES += QPSYCLE__MSWAVEOUT_AVAILABLE
-        HEADERS += audiodrivers/mswaveout.h
-        SOURCES += audiodrivers/mswaveout.cpp
+
+    DSOUND_DIR = $$EXTERNAL_PKG_DIR/dsound-9
+    !exists($$DSOUND_DIR) {
+        warning("The local dsound dir does not exist: $$DSOUND_DIR. Make sure you have the dsound lib installed.")
+    } else {
+        INCLUDEPATH += $$DSOUND_DIR/include
+        win32-g++ {
+            LIBPATH += $$DSOUND_DIR/lib-mswindows-mingw-cxxabi-1002
+            LIBS *= -ldsound
+            LIBS *= -lwinmm # is this one needed?
+            LIBS *= -luuid
+        } else {
+            LIBPATH += $$DSOUND_DIR/lib-mswindows-msvc-cxxabi
+            LIBS *= dsound.lib
+            LIBS *= winmm.lib # is this one needed?
+            LIBS *= uuid.lib
+        }
+        DEFINES += PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE # This is used in the source to determine when to include direct-sound-specific things.
+        HEADERS += audiodrivers/microsoftdirectsoundout.h
+        SOURCES += audiodrivers/microsoftdirectsoundout.cpp
     }
-    {
-        message( "compiling msdirectsound..." )
-        DEFINES += QPSYCLE__MSDIRECTSOUND_AVAILABLE
-        HEADERS += audiodrivers/msdirectsound.h
-        SOURCES += audiodrivers/msdirectsound.cpp
+    
+    true { # FIXME: not sure how to test for mme...
+        message( "Assuming you have microsoft mme." )
+        win32-g++ {
+            LIBS *= -lwinmm # is this one needed?
+            LIBS *= -luuid
+        } else {
+            LIBS *= winmm.lib # is this one needed?
+            LIBS *= uuid.lib
+        }
+        DEFINES += PSYCLE__MICROSOFT_MME_AVAILABLE # This is used in the source to determine when to include mme-specific things.
+        HEADERS += audiodrivers/microsoftmmewaveout.h
+        SOURCES += audiodrivers/microsoftmmewaveout.cpp
+    }
+
+    false { # FIXME: asio needs to be built as a lib, which is rather cubersome, or embeeded into qpsycle itself, which sucks...
+        message( "Blergh... steinberg asio." )
+        win32-g++ {
+            LIBS *= -lasio
+        } else {
+            LIBS *= asio.lib
+        }
+        DEFINES += PSYCLE__STEINBERG_ASIO_AVAILABLE # This is used in the source to determine when to include asio-specific things.
+        HEADERS += audiodrivers/steinbergasioout.h
+        SOURCES += audiodrivers/steinbergasioout.cpp
     }
 }

@@ -21,18 +21,25 @@
 #include "configuration.h"
 #include "file.h"
 
-#ifdef __unix__
 // FIXME: these audio drivers don't belong in psycore
 #include "../audiodrivers/audiodriver.h"
-#include "../audiodrivers/alsaout.h"
-#include "../audiodrivers/jackout.h"
-#include "../audiodrivers/esoundout.h"
-//#include "../audiodrivers/gstreamerout.h"
-#else
-// FIXME: these audio drivers don't belong in psycore
-#include "../audiodrivers/audiodriver.h"
-#include "../audiodrivers/mswaveout.h"
-#include "../audiodrivers/msdirectsound.h"
+#if defined PSYCLE__ALSA_AVAILABLE
+	#include "../audiodrivers/alsaout.h"
+#endif
+#if defined PSYCLE__JACK_AVAILABLE
+	#include "../audiodrivers/jackout.h"
+#endif
+#if defined PSYCLE__ESOUND_AVAILABLE
+	#include "../audiodrivers/esoundout.h"
+#endif
+#if defined PSYCLE__GSTREAMER_AVAILABLE
+	#include "../audiodrivers/gstreamerout.h"
+#endif
+#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
+	#include "../audiodrivers/msdirectsound.h"
+#endif
+#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
+	#include "../audiodrivers/mswaveout.h"
 #endif
 
 #include "../audiodrivers/wavefileout.h"
@@ -52,7 +59,7 @@ namespace psy {
 
 		Configuration::Configuration()
 		{
-			//			setXmlDefaults();
+			//setXmlDefaults();
 			setDefaults();
 			configureKeyBindings();
 			loadConfig();			
@@ -269,41 +276,30 @@ namespace psy {
 			setDriverByName("silent");
 			enableSound_ = false;
 
-#ifdef __unix__
-
-#if defined QPSYCLE__ALSA_AVAILABLE
+#if defined PSYCLE__ALSA_AVAILABLE
 			addAudioDriver(new AlsaOut);
 #endif
-
-#if defined QPSYCLE__JACK_AVAILABLE
+#if defined PSYCLE__JACK_AVAILABLE
 			addAudioDriver(new JackOut);
 #endif
-
-#if defined QPSYCLE__ESD_AVAILABLE
+#if defined PSYCLE__ESOUND_AVAILABLE
 			addAudioDriver(new ESoundOut);
 #endif		
-#if defined QPSYCLE__GSTREAMER_AVAILABLE
+#if defined PSYCLE__GSTREAMER_AVAILABLE
 			addAudioDriver(new GStreamerOut);
 #endif
-
-#else // !ifdef __unix__
-
-#if defined QPSYCLE__MSWAVEOUT_AVAILABLE
-			addAudioDriver(new MsWaveOut);
-#endif
-
-#if defined QPSYCLE__MSDIRECTSOUND_AVAILABLE
+#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 			addAudioDriver(new MsDirectSound);
-#endif
-
-#if defined QPSYCLE__NETAUDIO_AVAILABLE
-			addAudioDriver(new NetAudioOut);
-#endif
-
+			// use dsound by default
 			setDriverByName("dsound");
 			enableSound_ = true;
-
-#endif // end of ifdef __unix__
+#endif
+#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
+			addAudioDriver(new MsWaveOut);
+#endif
+#if defined PSYCLE__NET_AUDIO_AVAILABLE
+			addAudioDriver(new NetAudioOut);
+#endif
 		}
 
 		void Configuration::setDriverByName( const std::string & driverName )
@@ -334,8 +330,9 @@ namespace psy {
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 				}
 			} else {
-
-				/* path=XPSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
+#if defined PSYCLE__INSTALL_PATHS__CONFIGURATION
+				path = PSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
+#endif
 				if (path.length()!=0){
 					try {
 						loadConfig(path);

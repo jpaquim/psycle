@@ -1,22 +1,22 @@
 /***************************************************************************
-	*   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
-#if defined QPSYCLE__ESD_AVAILABLE
+*   Copyright (C) 2006 by Stefan Nattkemper, Johan Boule                  *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
+#if defined PSYCLE__ESOUND_AVAILABLE
 #include "esoundout.h"
 #include <esd.h>
 #include <stdexcept>
@@ -25,9 +25,8 @@
 #include <cassert>
 #include <cerrno>
 #include <cstdint.h>
-
 namespace psy {
-namespace core {
+	namespace core {
 
 		ESoundOut::ESoundOut()
 		:
@@ -224,7 +223,6 @@ namespace core {
 			pthread_exit(0);
 		}
 
-} // namespace core
+	} // namespace core
 } // namespace psy
-
-#endif // defined QPSYCLE__ESD_AVAILABLE
+#endif // defined PSYCLE__ESOUND_AVAILABLE

@@ -19,15 +19,12 @@
 ***************************************************************************/
 #ifndef JACKOUT_H
 #define JACKOUT_H
-
-#if defined QPSYCLE__JACK_AVAILABLE
-
+#if defined PSYCLE__JACK_AVAILABLE
 #include "audiodriver.h"
 #include <jack/jack.h>
 #include <string>
-
 namespace psy {
-namespace core {
+	namespace core {
 
 class JackOut : public AudioDriver {
 public:
@@ -70,9 +67,7 @@ private:
 
 };
 
-} // namespace core
+	} // namespace core
 } // namespace psy
-
-
-#endif // defined QPSYCLE__JACK_AVAILABLE
+#endif // defined PSYCLE__JACK_AVAILABLE
 #endif

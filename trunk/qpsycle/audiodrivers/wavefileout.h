@@ -19,15 +19,12 @@
 ***************************************************************************/
 #ifndef WAVEFILEOUT_H
 #define WAVEFILEOUT_H
-
 #include "audiodriver.h"
-
 #ifdef __unix__
-#include <unistd.h>
+	#include <unistd.h>
 #else
-#include "windows.h"
+	#include "windows.h"
 #endif
-
 namespace psy
 {
 	namespace core
@@ -79,5 +76,4 @@ namespace psy
 
 	}
 }
-
 #endif
