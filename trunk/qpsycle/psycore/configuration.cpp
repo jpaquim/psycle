@@ -330,6 +330,7 @@ namespace psy {
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 				}
 			} else {
+#if 0
 #if defined PSYCLE__INSTALL_PATHS__CONFIGURATION
 				path = PSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
 #endif
@@ -341,9 +342,9 @@ namespace psy {
 					{
 					std::cerr << "xpsycle: configuration: error: " << e.what() << std::endl;
 					}
-				}*/
+				}
+#endif
 			}
-
 		}
 
 
