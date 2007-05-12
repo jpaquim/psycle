@@ -250,20 +250,29 @@ win32 {
         warning("The local boost dir does not exist: $$BOOST_DIR. Make sure you have boost libs installed.")
     } else {
         !exists($$BOOST_DIR)/include {
-            warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+            warning("The boost headers are not unpacked. See the dir $$BOOST_DIR".)
         }
         INCLUDEPATH += $$BOOST_DIR/include
         win32-g++ {
+            !exists($$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002) {
+                warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+            }
             LIBPATH += $$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002
-            LIBS += -llibboost_signals-mgw-mt-1_33_1
-            #FIXME: is there any reason not to use the following instead?
-            #LIBS += -lboost_signals-mgw-mt-1_33_1
         } else:win32-msvc {
+            !exists($$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400) {
+                warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+            }
             LIBPATH += $$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400
-            #LIBS += # we can use auto linking
         } else {
             warning("We do not have boost libs built for your compiler. Make sure you have them installed.")
         }
+    }
+    win32-g++ {
+        LIBS += -llibboost_signals-mgw-mt-1_33_1
+        #FIXME: is there any reason not to use the following instead?
+        #LIBS += -lboost_signals-mgw-mt-1_33_1
+    } else {
+        #LIBS += # we can use auto linking with most other compilers
     }
     
     INCLUDEPATH += $(QTDIR)/include
@@ -277,14 +286,20 @@ win32 {
     !exists($$DSOUND_DIR) {
         warning("The local dsound dir does not exist: $$DSOUND_DIR. Make sure you have the dsound lib installed.")
     } else {
+        CONFIG += dsound
         INCLUDEPATH += $$DSOUND_DIR/include
         win32-g++ {
             LIBPATH += $$DSOUND_DIR/lib-mswindows-mingw-cxxabi-1002
+        } else {
+            LIBPATH += $$DSOUND_DIR/lib-mswindows-msvc-cxxabi
+        }
+    }
+    CONFIG(dsound) {
+        win32-g++ {
             LIBS *= -ldsound
             LIBS *= -lwinmm # is this one needed?
             LIBS *= -luuid
         } else {
-            LIBPATH += $$DSOUND_DIR/lib-mswindows-msvc-cxxabi
             LIBS *= dsound.lib
             LIBS *= winmm.lib # is this one needed?
             LIBS *= uuid.lib
