@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #if defined QPSYCLE__MICROSOFT_MME_AVAILABLE
-#include "mswaveout.h"
+#include "microsoftmmewaveout.h"
 namespace psy
 {
 	namespace core

@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
-#include "msdirectsound.h"
+#include "microsoftdirectsoundout.h"
 #include "cstdint.h"
 namespace psy
 {
