@@ -1,22 +1,22 @@
 /***************************************************************************
-	*   Copyright (C) 2007 by Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 by Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef WAVEFILEOUT_H
 #define WAVEFILEOUT_H
 
@@ -24,6 +24,8 @@
 
 #ifdef __unix__
 #include <unistd.h>
+#else
+#include "windows.h"
 #endif
 
 namespace psy
@@ -37,40 +39,41 @@ namespace psy
 
 		class WaveFileOut : public AudioDriver
 		{
-			public:
-				WaveFileOut();
+		public:
+			WaveFileOut();
 
-				~WaveFileOut();
+			~WaveFileOut();
 
-				virtual WaveFileOut* clone()  const;   // Uses the copy constructor
+			virtual WaveFileOut* clone()  const;   // Uses the copy constructor
 
-				virtual AudioDriverInfo info() const;
+			virtual AudioDriverInfo info() const;
 
-				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 
-				virtual bool Initialized();
+			virtual bool Initialized();
 
-				// starts stops file writing
-				virtual bool Enable(bool e);
+			// starts stops file writing
+			virtual bool Enable(bool e);
 
 
-			private:
+		private:
 
-				void* _callbackContext; // Player callback
-				AUDIODRIVERWORKFN _pCallback;
-				
-				#ifdef __unix__
-				int iret1;				
-				pthread_t threadid;
-				#endif
+			void* _callbackContext; // Player callback
+			AUDIODRIVERWORKFN _pCallback;
 
-			  static volatile int kill_thread;
-				static volatile int threadOpen;
-				bool _initialized;
-				
-				static int audioOutThread(void * ptr);
+#ifdef __unix__
+			pthread_t threadid;
+#else
+			DWORD threadid;
+#endif
 
-				void writeBuffer();
+			static volatile int kill_thread;
+			static volatile int threadOpen;
+			bool _initialized;
+
+			static int audioOutThread(void * ptr);
+
+			void writeBuffer();
 
 		};
 

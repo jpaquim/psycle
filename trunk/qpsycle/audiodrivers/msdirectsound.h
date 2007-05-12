@@ -17,37 +17,34 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef MSDIRECTSOUND_H
-#define MSDIRECTSOUND_H
+#pragma once
 
-#if defined WIN64 || defined WIN32
+#if defined QPSYCLE__MSDIRECTSOUND_AVAILABLE
 
 #include "audiodriver.h"
-
 #include "windows.h"
 #include <mmsystem.h>
 #include "dsound.h"
-
 
 namespace psy
 {
 	namespace core
 	{
-							
-				///\todo  this driver is (over)filling the buffer to fast
-							
+
+		///\todo  this driver is (over)filling the buffer to fast
+
 		/// output device interface implemented by direct sound.
 		class MsDirectSound : public AudioDriver
 		{
 		public:
-								
+
 			MsDirectSound();
-			
+
 			~MsDirectSound();
-			
+
 			AudioDriverInfo info( ) const;
 			MsDirectSound * clone( ) const;
-			
+
 			virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
 			virtual void Reset();
 			virtual bool Enable( bool );
@@ -62,10 +59,7 @@ namespace psy
 		private:
 			bool _initialized;
 			bool _configured;
-		
 
-			HWND _hwnd;
-			MMRESULT _timer;
 			bool _running;
 			bool _playing;
 			bool _timerActive;
@@ -91,21 +85,17 @@ namespace psy
 			AUDIODRIVERWORKFN _pCallback;
 
 			static DWORD WINAPI PollerThread(void* pDirectSound);
-		//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
+			//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
 			void ReadConfig();
 			void WriteConfig();
-			void Error(const char msg[]);
+			void Error(const WCHAR msg[]);
 			void DoBlocks();
 			bool Start();
 			bool Stop();
-			
+
 			void quantize(float *pin, int *piout, int c);
-
 		};
-		
-	} // end of host namespace
-} // end of psycle namespace
-
-#endif // end of windows platform detection
+	}
+}
 
 #endif

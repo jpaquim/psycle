@@ -52,10 +52,9 @@ namespace psy
 	{
 		namespace dsp
 		{
-
-			/* Period parameters */  
-			#define N 624
-			#define M 397
+			/* Period parameters */
+			#define PERIOD_N 624
+			#define PERIOD_M 397
 			#define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 			#define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 			#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
@@ -67,7 +66,7 @@ namespace psy
 				MersenneTwister() {}
 				virtual ~MersenneTwister() {}
 
-				/* initializes mt[N] with a seed */
+				/* initializes mt[PERIOD_N] with a seed */
 				void init_genrand(unsigned long s);
 
 				/* initialize by an array with array-length */
@@ -95,7 +94,7 @@ namespace psy
 				void genrand_gaussian(double& out1, double& out2);
 
 			private:
-				static unsigned long mt[N]; /* the array for the state vector  */
+				static unsigned long mt[PERIOD_N]; /* the array for the state vector  */
 				static int mti;
 			};
 
