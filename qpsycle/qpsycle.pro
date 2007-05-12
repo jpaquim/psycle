@@ -294,6 +294,9 @@ win32 {
     DSOUND_DIR = $$EXTERNAL_PKG_DIR/dsound-9
     !exists($$DSOUND_DIR) {
         warning("The local dsound dir does not exist: $$DSOUND_DIR. Make sure you have the dsound lib installed.")
+        !CONFIG(dsound) {
+            message("Assuming you do not have dsound lib. Call qmake CONFIG+=dsound to enable dsound support.")
+        }
     } else {
         CONFIG += dsound
         INCLUDEPATH += $$DSOUND_DIR/include
