@@ -17,91 +17,87 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
-#ifndef MSWAVEOUT_H
-#define MSWAVEOUT_H
+#pragma once
+
+#if defined QPSYCLE__MSWAVEOUT_AVAILABLE
 
 #include "audiodriver.h"
-
-#if defined __unix__ && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
-#else
-
 #include <windows.h>
 #include <mmsystem.h>
 #undef min
 #undef max
+#include "cstdint.h"
+#include "helpers.h"
+#include <iostream>
 
 namespace psy
 {
 	namespace core
 	{                                      
-						
-				///\ todo work in progress
-				///\ status working, restarting etc not working
-				///\ todo : freeing and configure    
-						
-				class MsWaveOut : public AudioDriver
+		///\ todo work in progress
+		///\ status working, restarting etc not working
+		///\ todo : freeing and configure    
+
+		class MsWaveOut : public AudioDriver
 		{
 		public:
-									
 			MsWaveOut();
-			
-						~MsWaveOut();
-			
+
+			~MsWaveOut();
+
 			virtual MsWaveOut* clone()  const;   // Uses the copy constructor
-			
+
 			virtual AudioDriverInfo info() const;			
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-						bool Initialized( );
+			bool Initialized( );
 			virtual bool Enable( bool e );	
-						
+
 		private:
-			
+
 			char buffer[1024];   // intermediate buffer for reading
-			
+
 			// pointers for work callback
 			AUDIODRIVERWORKFN _pCallback;
 			void* _callbackContext;
 			bool _initialized;
-			
+
 			// mme variables
 			HWAVEOUT hWaveOut;   // device handle
-						static CRITICAL_SECTION waveCriticalSection;
-						static WAVEHDR*         waveBlocks; // array of header structure, 
-																								// that points to a block buffer
-						static volatile int     waveFreeBlockCount;
-						static int              waveCurrentBlock;
-						
-						// mme functions
-												
-						// waveOut interface notifies about device is opened, closed, 
-						// and what we handle here, when a block finishes.
-						static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
-						WAVEHDR* allocateBlocks();
-						static void freeBlocks( WAVEHDR* blockArray );
-						
-						// writes a intermediate buffer into a ring buffer to the sound card
-						void writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size );
-						
-						// thread , the writeAudio loop is in
-						// note : waveOutproc is a different, thread, too, but we cant
-						// use all winapi calls there we need due to restrictions of the winapi
-						HANDLE hThread_;
-						static DWORD WINAPI audioOutThread( void *pWaveOut );
-						static bool _running; // check, if thread loop should be left
-						void fillBuffer();
-						
-						bool _dither;
+			static CRITICAL_SECTION waveCriticalSection;
+			static WAVEHDR*         waveBlocks; // array of header structure, 
+			// that points to a block buffer
+			static volatile int     waveFreeBlockCount;
+			static int              waveCurrentBlock;
+
+			// mme functions
+
+			// waveOut interface notifies about device is opened, closed, 
+			// and what we handle here, when a block finishes.
+			static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
+			WAVEHDR* allocateBlocks();
+			static void freeBlocks( WAVEHDR* blockArray );
+
+			// writes a intermediate buffer into a ring buffer to the sound card
+			void writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size );
+
+			// thread , the writeAudio loop is in
+			// note : waveOutproc is a different, thread, too, but we cant
+			// use all winapi calls there we need due to restrictions of the winapi
+			HANDLE _hThread;
+			static DWORD WINAPI audioOutThread( void *pWaveOut );
+			static bool _running; // check, if thread loop should be left
+			void fillBuffer();
+
+			bool _dither;
 
 			bool start();
 			bool stop();
-			
+
 			void quantizeWithDither(float *pin, int *piout, int c);
 			void quantize(float *pin, int *piout, int c);
-			
+
 		};
 	}
 }
-
-#endif // end of windows detetection
 
 #endif

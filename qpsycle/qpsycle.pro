@@ -39,6 +39,7 @@ HEADERS += mainwindow.h \
            patternview/patterngrid.h \
            patternview/patterndraw.h \
            audiodrivers/audiodriver.h \
+           audiodrivers/wavefileout.h \
            psycore/binread.h \
            psycore/configuration.h \
            psycore/constants.h \
@@ -116,6 +117,7 @@ SOURCES += mainwindow.cpp \
            patternview/patterngrid.cpp \
            patternview/patterndraw.cpp \
            audiodrivers/audiodriver.cpp \
+           audiodrivers/wavefileout.cpp \
            psycore/binread.cpp \
            psycore/convert_internal_machines.cpp \
            psycore/configuration.cpp \
@@ -204,13 +206,14 @@ unix {
     LIBS += -lboost_signals
     # FIXME: not sure how to test for netaudio...
     LIBS += -laudio
-    HEADERS += audiodrivers/netaudioout.h \
-           audiodrivers/wavefileout.h 
-    SOURCES += audiodrivers/netaudioout.cpp \
-           audiodrivers/wavefileout.cpp 
+    HEADERS += audiodrivers/netaudioout.h
+    SOURCES += audiodrivers/netaudioout.cpp
 }
 win32 {
-    INCLUDEPATH += C:/Qt/4.2.2/src/3rdparty/zlib
+    LIBS += -llibboost_signals-mgw-mt-1_33_1
+    LIBS += -lWinMM
+    LIBS += -lDsound
+    LIBS += -luuid
 
     INCLUDEPATH += ../external-packages/boost-1.33.1/include
     # for mingw
@@ -218,10 +221,27 @@ win32 {
     # for msvc
     #LIBPATH += ../external-packages/boost-1.33.1/lib-mswindows-msvc-8.0-cxxabi-1400
 
-    HEADERS += audiodrivers/microsoft_direct_sound_out.h \
-           audiodrivers/msdirectsound.h \
-           audiodrivers/mswaveout.h 
-    SOURCES += audiodrivers/microsoft_direct_sound_out.cpp \
-           audiodrivers/msdirectsound.cpp \
-           audiodrivers/mswaveout.cpp 
+    # FIXME: not sure how to get these from the environment...
+    LIBPATH += D:/Boost/lib
+    INCLUDEPATH += D:/boost_1_33_1
+
+    INCLUDEPATH += $(QTDIR)/include
+    INCLUDEPATH += $(QTDIR)/include/Qt
+    INCLUDEPATH += $(QTDIR)/include/QtCore
+    INCLUDEPATH += $(QTDIR)/include/QtGui
+    INCLUDEPATH += $(QTDIR)/include/QtXml
+    INCLUDEPATH += $(QTDIR)/src/3rdparty/zlib
+    # FIXME: not sure how to test for any of these...
+    {
+        message( "compiling mswaveout..." )
+        DEFINES += QPSYCLE__MSWAVEOUT_AVAILABLE
+        HEADERS += audiodrivers/mswaveout.h
+        SOURCES += audiodrivers/mswaveout.cpp
+    }
+    {
+        message( "compiling msdirectsound..." )
+        DEFINES += QPSYCLE__MSDIRECTSOUND_AVAILABLE
+        HEADERS += audiodrivers/msdirectsound.h
+        SOURCES += audiodrivers/msdirectsound.cpp
+    }
 }

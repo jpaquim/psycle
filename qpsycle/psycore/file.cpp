@@ -147,23 +147,23 @@ namespace core {
     }
 
 
-    HKEY hKeyRoot = HKEY_CURRENT_USER;
-    LPCTSTR pszPath = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
+	HKEY hKeyRoot = HKEY_CURRENT_USER;
+    LPCWSTR pszPath = L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
 
-    HKEY m_hKey = NULL;
-    LONG ReturnValue =  RegOpenKeyEx (hKeyRoot, pszPath, 0L,
-      KEY_ALL_ACCESS, &m_hKey);
+	HKEY m_hKey = NULL;
+    LONG ReturnValue =  RegOpenKeyExW (hKeyRoot, pszPath, 0L,
+		KEY_ALL_ACCESS, &m_hKey);
 
     if(ReturnValue == ERROR_SUCCESS)
     {
-      LPCTSTR pszKey = "Personal";
-      std::string sVal;
+      LPCWSTR pszKey = L"Personal";
+	  std::string sVal;
 
       DWORD dwType;
       DWORD dwSize = 200;
       char  szString[255];
 
-      LONG lReturn = RegQueryValueEx (m_hKey, (LPSTR) pszKey, NULL,
+      LONG lReturn = RegQueryValueExW (m_hKey, pszKey, NULL,
         &dwType, (BYTE *) szString, &dwSize);
 
       if(lReturn == ERROR_SUCCESS)

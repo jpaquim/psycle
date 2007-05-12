@@ -85,6 +85,7 @@ namespace psy {
 			std::string ladspaPath_;
 			std::string songPath_;
 
+			void addAudioDriver(AudioDriver* driver);
 			void setDefaults();
 			void configureKeyBindings();
 //			void setXmlDefaults();

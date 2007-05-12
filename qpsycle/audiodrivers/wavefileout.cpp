@@ -1,30 +1,32 @@
 /***************************************************************************
-	*   Copyright (C) 2007 by Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 by Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #include "wavefileout.h"
 #include <iostream>
+#if !defined __unix__
+#include "windows.h"
+#endif
 
 namespace psy
 {
 	namespace core
 	{
-
 		volatile int WaveFileOut::kill_thread = 0;
 		volatile int WaveFileOut::threadOpen = 0;
 
@@ -36,16 +38,15 @@ namespace psy
 			_initialized = false;
 		}
 
-
 		WaveFileOut::~WaveFileOut()
 		{
 			while ( threadOpen ) {
 				kill_thread = 1;						
-				#if defined __unix__
-					usleep(200);
-				#else
-					Sleep(1);
-				#endif
+#if defined __unix__
+				usleep(200);
+#else
+				Sleep(1);
+#endif
 			}
 		}
 
@@ -53,7 +54,6 @@ namespace psy
 		{
 			return new WaveFileOut(*this);
 		}
-
 
 		AudioDriverInfo WaveFileOut::info( ) const
 		{
@@ -75,26 +75,26 @@ namespace psy
 		{
 			bool threadStarted = false;
 			if (e && !threadOpen) {
-					kill_thread = 0;
-					#if defined __unix__
-						pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
-					#else
-						// todo i'm too fed up of this to write code here. -- bohan
-					#endif
-					threadStarted = true;
+				kill_thread = 0;
+#if defined __unix__
+				pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
+#else
+				CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)audioOutThread, this, 0, &threadid);
+#endif
+				threadStarted = true;
 			} else
-			if (!e && threadOpen) {
-				kill_thread = 1;
-				threadStarted = false;
-				while ( threadOpen ) {
-					#if defined __unix__
+				if (!e && threadOpen) {
+					kill_thread = 1;
+					threadStarted = false;
+					while ( threadOpen ) {
+#if defined __unix__
 						usleep(10); // give thread time to close
-					#else
+#else
 						Sleep(1);
-					#endif
+#endif
+					}
 				}
-			}
-			return threadStarted;
+				return threadStarted;
 		}
 
 		int WaveFileOut::audioOutThread( void * ptr )
@@ -110,31 +110,23 @@ namespace psy
 
 			while(!(kill_thread))
 			{
-				#if defined __unix__
-					usleep(50); // give cpu time to breath, and not too much :)
-				#else
-					Sleep(1);
-				#endif
+#if defined __unix__
+				usleep(50); // give cpu time to breath, and not too much :)
+#else
+				Sleep(1);
+#endif
 				float const * input(_pCallback(_callbackContext, count));
 			}
 
 			threadOpen = 0;
 			std::cout << "closing thread" << std::endl;
-			#if defined __unix__
-				pthread_exit(0);
-			#else
-				// todo i'm too fed up of this to write code here. -- bohan
-			#endif
+#if defined __unix__
+			pthread_exit(0);
+#else
+			ExitThread(0);
+#endif
 		}
 
+	} // end of core namespace
 
-	} // end of host namespace
 } // end of psycle namespace
-
-
-
-
-
-
-
-

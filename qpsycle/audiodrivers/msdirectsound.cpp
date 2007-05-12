@@ -18,32 +18,26 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#if defined WIN64 || defined WIN32
+#if defined QPSYCLE__MSDIRECTSOUND_AVAILABLE
 
 #include "msdirectsound.h"
 #include "cstdint.h"
-#include <ngrs/napp.h>
-#include <ngrs/nwindow.h>
-
 
 namespace psy
 {
 	namespace core
 	{
-							
-				int const SHORT_MIN = -32768;
+		int const SHORT_MIN = -32768;
 		int const SHORT_MAX =  32767;      
-							
 
-							
-				AudioDriverInfo MsDirectSound::info( ) const
-				{
-						return AudioDriverInfo("dsound","Microsoft DirectSound Driver","Microsoft output driver",true);
-				}      
-
-		void MsDirectSound::Error(const char msg[])
+		AudioDriverInfo MsDirectSound::info( ) const
 		{
-			MessageBox(0, msg, "DirectSound Output driver", MB_OK | MB_ICONERROR);
+			return AudioDriverInfo("dsound","Microsoft DirectSound Driver","Microsoft output driver",true);
+		}      
+
+		void MsDirectSound::Error(const WCHAR msg[])
+		{
+			MessageBox(0, msg, L"DirectSound Output driver", MB_OK | MB_ICONERROR);
 		}
 
 		MsDirectSound::MsDirectSound()
@@ -59,18 +53,18 @@ namespace psy
 			_pCallback()
 		{
 		}
-		
+
 		MsDirectSound * MsDirectSound::clone( ) const
-				{
-					return new MsDirectSound(*this);
-				}
+		{
+			return new MsDirectSound(*this);
+		}
 
 		void MsDirectSound::Initialize( AUDIODRIVERWORKFN pCallback, void * context )
 		{
 			_callbackContext = context;
 			_pCallback = pCallback;
 			_running = false;
-			_hwnd = NApp::mainWindow()->win();
+			//_hwnd = NApp::mainWindow()->win();
 			ReadConfig();
 			_initialized = true;
 		}
@@ -87,23 +81,31 @@ namespace psy
 
 		bool MsDirectSound::Start()
 		{
-							GUID GUID_NULL;//guidNULL;
-							memset(&GUID_NULL,0,sizeof(GUID));
-							
-		//	CSingleLock lock(&_lock, true);
+			//	CSingleLock lock(&_lock, true);
 			if(_running) return true;
 			if(!_pCallback) return false;
 			if(FAILED(::DirectSoundCreate(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
 			{
-				Error("Failed to create DirectSound object");
+				Error(L"Failed to create DirectSound object");
 				return false;
 			}
+
+			HWND hwnd = ::GetWindow(NULL, 0);
+			if (!hwnd)
+			{
+				hwnd = ::GetForegroundWindow();
+			}
+			if (!hwnd)
+			{
+				hwnd = ::GetDesktopWindow();
+			}
+
 			if(_exclusive)
 			{
-				if(FAILED(_pDs->SetCooperativeLevel(_hwnd, DSSCL_WRITEPRIMARY)))
+				if(FAILED(_pDs->SetCooperativeLevel(hwnd, DSSCL_WRITEPRIMARY)))
 				{
 					// Don't report this, since we may have simply have lost focus
-					// Error("Failed to set DirectSound cooperative level");
+					// Error(L"Failed to set DirectSound cooperative level");
 					_pDs->Release();
 					_pDs = 0;
 					return false;
@@ -111,9 +113,9 @@ namespace psy
 			}
 			else
 			{
-				if(FAILED(_pDs->SetCooperativeLevel(_hwnd, DSSCL_PRIORITY)))
+				if(FAILED(_pDs->SetCooperativeLevel(hwnd, DSSCL_PRIORITY)))
 				{
-					Error("Failed to set DirectSound cooperative level");
+					Error(L"Failed to set DirectSound cooperative level");
 					_pDs->Release();
 					_pDs = 0;
 					return false;
@@ -141,10 +143,10 @@ namespace psy
 			desc.dwReserved = 0;
 			desc.lpwfxFormat = _exclusive ? 0 : &format;
 			desc.guid3DAlgorithm = GUID_NULL;
-			
+
 			if(FAILED(_pDs->CreateSoundBuffer(&desc, &_pBuffer, 0)))
 			{
-				Error("Failed to create DirectSound Buffer(s)");
+				Error(L"Failed to create DirectSound Buffer(s)");
 				_pDs->Release();
 				_pDs = 0;
 				return false;
@@ -155,7 +157,7 @@ namespace psy
 				_pBuffer->Stop();
 				if(FAILED(_pBuffer->SetFormat(&format)))
 				{
-					Error("Failed to set DirectSound Buffer format");
+					Error(L"Failed to set DirectSound Buffer format");
 					_pBuffer->Release();
 					_pBuffer = 0;
 					_pDs->Release();
@@ -165,7 +167,7 @@ namespace psy
 				caps.dwSize = sizeof(caps);
 				if(FAILED(_pBuffer->GetCaps(&caps)))
 				{
-					Error("Failed to get DirectSound Buffer capabilities");
+					Error(L"Failed to get DirectSound Buffer capabilities");
 					_pBuffer->Release();
 					_pBuffer = 0;
 					_pDs->Release();
@@ -185,8 +187,7 @@ namespace psy
 			//_event.ResetEvent();
 			_timerActive = true;
 			DWORD dwThreadId;
-						::CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
-//			::_beginthread(PollerThread, 0, this);
+			CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
 			_running = true;
 			return true;
 		}
@@ -201,17 +202,17 @@ namespace psy
 				::Sleep(1);
 			}
 			//_event.SetEvent();
-//			::_endthread();
-						return 0;
+			//			::_endthread();
+			return 0;
 		}
 
 		bool MsDirectSound::Stop()
 		{
-//			CSingleLock lock(&_lock, true);
+			//			CSingleLock lock(&_lock, true);
 			if(!_running) return true;
 			_running = false;
 			_timerActive = false;
-//			CSingleLock event(&_event, true);
+			//			CSingleLock event(&_event, true);
 			// Once we get here, the PollerThread should have stopped
 			if(_playing)
 			{
@@ -250,7 +251,7 @@ namespace psy
 						}
 						else
 						{
-							Error("DirectSoundBuffer::GetCurrentPosition failed");
+							Error(L"DirectSoundBuffer::GetCurrentPosition failed");
 							return;
 						}
 					}
@@ -271,20 +272,25 @@ namespace psy
 					while(true)
 					{
 						hr = _pBuffer->Lock((DWORD)currentOffset, (DWORD)_bufferSize,
-											(void**)&pBlock1, (DWORD*)&blockSize1,
-											(void**)&pBlock2, (DWORD*)&blockSize2,
-											0);
+							(void**)&pBlock1, (DWORD*)&blockSize1,
+							(void**)&pBlock2, (DWORD*)&blockSize2,
+							0);
 						if(FAILED(hr))
 						{
 							if(hr == DSERR_BUFFERLOST)
 							{
 								playing = false;
-								if(FAILED(_pBuffer->Restore())) return;
+								if(FAILED(_pBuffer->Restore()))
+								{
+									// Don't inform about this error, because it will
+									// appear each time the Psycle window loses focus in exclusive mode
+									return;
+								}
 								continue;
 							}
 							else
 							{
-								Error("Failed to lock DirectSoundBuffer");
+								Error(L"Failed to lock DirectSoundBuffer");
 								return;
 							}
 						}
@@ -296,8 +302,8 @@ namespace psy
 					{
 						int n = blockSize;
 						float *pFloatBlock = _pCallback(_callbackContext, n);
-//						if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else 
-												quantize(pFloatBlock, pBlock, n);
+						// if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else 
+						quantize(pFloatBlock, pBlock, n);
 						pBlock += n;
 						blockSize -= n;
 					}
@@ -307,12 +313,11 @@ namespace psy
 					{
 						int n = blockSize;
 						float *pFloatBlock = _pCallback(_callbackContext, n);
-						//if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else 
-												quantize(pFloatBlock, pBlock, n);
+					    // if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else 
+						quantize(pFloatBlock, pBlock, n);
 						pBlock += n;
 						blockSize -= n;
 					}
-			
 					_pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
 					_currentOffset += _bufferSize;
 					if(_currentOffset >= _dsBufferSize) _currentOffset -= _dsBufferSize;
@@ -326,8 +331,9 @@ namespace psy
 				if(!playing)
 				{
 					_playing = true;
-					_pBuffer->Play(0, 0, DSBPLAY_LOOPING);
+					hr = _pBuffer->Play(0, 0, DSBPLAY_LOOPING);
 				}
+
 			} // while (true)
 		}
 
@@ -338,19 +344,19 @@ namespace psy
 			device_guid = GUID(); // DSDEVID_DefaultPlayback <-- unresolved external symbol
 			_exclusive = false;
 			_dither = false;
-//			_bitDepth = 16;
-//			_channelmode = 3;
-//			_samplesPerSec = 44100;
+			//			_bitDepth = 16;
+			//			_channelmode = 3;
+			//			_samplesPerSec = 44100;
 			_bufferSize = 4096;
 			_numBuffers = 4;
 			_configured = true;
 
-		
+
 		}
 
 		void MsDirectSound::WriteConfig()
 		{
-			
+
 		}
 
 		void MsDirectSound::Configure()
@@ -361,7 +367,7 @@ namespace psy
 
 			ReadConfig();
 
-		
+
 		}
 
 		int MsDirectSound::GetPlayPos()
@@ -370,7 +376,7 @@ namespace psy
 			int playPos;
 			if(FAILED(_pBuffer->GetCurrentPosition((DWORD*)&playPos, 0)))
 			{
-				Error("DirectSoundBuffer::GetCurrentPosition failed");
+				Error(L"DirectSoundBuffer::GetCurrentPosition failed");
 				return 0;
 			}
 			return playPos;
@@ -382,7 +388,7 @@ namespace psy
 			int writePos;
 			if(FAILED(_pBuffer->GetCurrentPosition(0, (DWORD*)&writePos)))
 			{
-				Error("DirectSoundBuffer::GetCurrentPosition failed");
+				Error(L"DirectSoundBuffer::GetCurrentPosition failed");
 				return 0;
 			}
 			return writePos;
@@ -392,13 +398,13 @@ namespace psy
 		{
 			return e ? Start() : Stop();
 		}
-		
+
 		void MsDirectSound::quantize(float *pin, int *piout, int c)
 		{
 			do
 			{
 				int r = static_cast<int>( (pin[1]) );
-				
+
 				if (r < SHORT_MIN)
 				{
 					r = SHORT_MIN;
@@ -427,4 +433,4 @@ namespace psy
 	}
 }
 
-#endif // end of windows platform detection
+#endif
