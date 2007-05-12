@@ -43,9 +43,8 @@ SequencerLine::~SequencerLine() {
 
 QRectF SequencerLine::boundingRect() const 
 {
-    int b = 0.5;
     int width = std::max( sDraw_->width(), (int)sDraw_->scene()->width() );
-    return QRectF( 1, 0-b, width, 30+b );
+    return QRectF( 0, 0, width, sDraw_->lineHeight() );
 }
 
 void SequencerLine::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
