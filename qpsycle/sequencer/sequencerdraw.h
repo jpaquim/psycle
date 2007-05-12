@@ -48,6 +48,7 @@ public:
 
 	SequencerView *sequencerView() { return seqView_; }
 	int beatPxLength() const;
+	int lineHeight() const { return lineHeight_; }
 	SequencerLine *selectedLine();
 	void setSelectedLine( SequencerLine *line );
 	std::vector<SequencerLine*> lines();
