@@ -40,69 +40,74 @@ class PlayLine;
 class QGraphicsSceneMouseEvent;
 
 class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
- {
-     Q_OBJECT
+{
+Q_OBJECT
 
- public:
-     SequencerDraw( SequencerView *seqView );
-
-     SequencerView *sequencerView() { return seqView_; }
-     int beatPxLength() const;
-     SequencerLine *selectedLine();
-    void setSelectedLine( SequencerLine *line );
-    std::vector<SequencerLine*> lines();
-
-    void addPattern( psy::core::SinglePattern *pattern );
-    PlayLine *pLine() { return pLine_; }
-
-public slots:
-    void insertTrack();
-    void deleteTrack();
-    void moveUpTrack();
-    void moveDownTrack();
-    void onSequencerLineClick( SequencerLine *line );
-    void onSequencerItemDeleteRequest( SequencerItem *item );
-    void onPlayLineMoved( double newXPos );
-    void onItemMoved( SequencerItem* item, QPointF diff );
-    void onItemChangedLine( SequencerItem *item, int direction );
-
- protected:
-
- private:
-    SequencerView *seqView_;
-    QGraphicsScene *scene_;
-
-    SequencerArea *seqArea_;
-
-    std::vector<SequencerLine*> lines_;
-    typedef std::vector<SequencerLine*>::iterator lines_iterator;
-    SequencerLine *selectedLine_;
-
-    int beatPxLength_;
-    double newBeatPos_;
-    int lineHeight_;
-
-    PlayLine *pLine_;
-
-    SequencerLine* makeSequencerLine(psy::core::SequenceLine* seqLine);
-
-    void onNewLineCreated(psy::core::SequenceLine* seqLine);
-    void onNewLineInserted(psy::core::SequenceLine* newSeqLine, psy::core::SequenceLine* position);
-    void onLineRemoved(psy::core::SequenceLine* seqLine);
-    void onLinesSwapped(psy::core::SequenceLine* a, psy::core::SequenceLine* b);
- };
-
-class PlayLine : public QObject, public QGraphicsRectItem {
-    Q_OBJECT
 public:
-    PlayLine(); 
+	SequencerDraw( SequencerView *seqView );
+
+	SequencerView *sequencerView() { return seqView_; }
+	int beatPxLength() const;
+	SequencerLine *selectedLine();
+	void setSelectedLine( SequencerLine *line );
+	std::vector<SequencerLine*> lines();
+
+	void addPattern( psy::core::SinglePattern *pattern );
+	PlayLine *pLine() { return pLine_; }
+
+	public slots:
+	void insertTrack();
+	void deleteTrack();
+	void moveUpTrack();
+	void moveDownTrack();
+	void onSequencerLineClick( SequencerLine *line );
+	void onSequencerItemDeleteRequest( SequencerItem *item );
+	void onPlayLineMoved( double newXPos );
+	void onItemMoved( SequencerItem* item, QPointF diff );
+	void onItemChangedLine( SequencerItem *item, int direction );
 
 protected:
-    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
-    void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+
+private:
+	SequencerView *seqView_;
+	QGraphicsScene *scene_;
+
+	SequencerArea *seqArea_;
+
+	std::vector<SequencerLine*> lines_;
+	typedef std::vector<SequencerLine*>::iterator lines_iterator;
+	SequencerLine *selectedLine_;
+
+	int beatPxLength_;
+	double newBeatPos_;
+	int lineHeight_;
+
+	PlayLine *pLine_;
+
+	SequencerLine* makeSequencerLine(psy::core::SequenceLine* seqLine);
+
+	void onNewLineCreated(psy::core::SequenceLine* seqLine);
+	void onNewLineInserted(psy::core::SequenceLine* newSeqLine, psy::core::SequenceLine* position);
+	void onLineRemoved(psy::core::SequenceLine* seqLine);
+	void onLinesSwapped(psy::core::SequenceLine* a, psy::core::SequenceLine* b);
+};
+
+class PlayLine : public QObject, public QGraphicsItem {
+Q_OBJECT
+public:
+	PlayLine( QGraphicsView *seqDraw ); 
+	QRectF boundingRect() const;
+
+protected:
+	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 signals:
-    void playLineMoved( double );
+	void playLineMoved( double );
+
+private:
+	QGraphicsView *m_seqDraw;
     
 
 };

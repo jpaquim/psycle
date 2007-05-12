@@ -35,89 +35,89 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <QScrollBar>
 #include <QGraphicsItem>
 
 SequencerDraw::SequencerDraw( SequencerView *seqView )
 {
-    seqView_ = seqView;
-    beatPxLength_ = 5;
-    lineHeight_ = 30;
+	seqView_ = seqView;
+	beatPxLength_ = 5;
+	lineHeight_ = 30;
 
-    QGraphicsScene *scene_ = new QGraphicsScene(this);
-    scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
-    scene_->setBackgroundBrush(Qt::black);
+	QGraphicsScene *scene_ = new QGraphicsScene(this);
+	scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
+	scene_->setBackgroundBrush(Qt::black);
 
-    setAlignment ( Qt::AlignLeft | Qt::AlignTop );
-    setScene(scene_);
+	setAlignment ( Qt::AlignLeft | Qt::AlignTop );
+	setScene(scene_);
 
-    seqArea_ = new SequencerArea( this );
+	seqArea_ = new SequencerArea( this );
 
-    psy::core::PatternSequence* patternSequence = sequencerView()->song()->patternSequence();
+	psy::core::PatternSequence* patternSequence = sequencerView()->song()->patternSequence();
 
-    std::vector<psy::core::SequenceLine*>::iterator it = patternSequence->begin();
-    for ( ; it < patternSequence->end(); it++) {
-        psy::core::SequenceLine* seqLine = *it;
-        onNewLineCreated(seqLine);
-    }
+	std::vector<psy::core::SequenceLine*>::iterator it = patternSequence->begin();
+	for ( ; it < patternSequence->end(); it++) {
+		psy::core::SequenceLine* seqLine = *it;
+		onNewLineCreated(seqLine);
+	}
     
-    if(!lines_.empty()) {
-      setSelectedLine(lines_[0]);
-    }
+	if(!lines_.empty()) {
+		setSelectedLine(lines_[0]);
+	}
 
-    pLine_ = new PlayLine();
-    pLine_->setRect( 0, 0, 1, height() );
-    connect( pLine_, SIGNAL( playLineMoved( double ) ),
-             this, SLOT( onPlayLineMoved( double ) ) );
-    scene_->addItem( pLine_ );
+	pLine_ = new PlayLine( this );
+	connect( pLine_, SIGNAL( playLineMoved( double ) ),
+		 this, SLOT( onPlayLineMoved( double ) ) );
+	scene_->addItem( pLine_ );
 
-    BeatRuler *beatRuler = new BeatRuler( this );
+	BeatRuler *beatRuler = new BeatRuler( this );
 
-    scene_->addItem( beatRuler );
-    beatRuler->setPos( 0, 0 );
-    scene_->addItem( seqArea_ );
-    seqArea_->setPos( 0, 30 );
+	scene_->addItem( beatRuler );
+	beatRuler->setPos( 0, 0 );
+	scene_->addItem( seqArea_ );
+	seqArea_->setPos( 0, 30 );
 
-    patternSequence->newLineCreated.connect
-      (boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
-    patternSequence->newLineInserted.connect
-      (boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
-    /*
-      Does not work because of a boost bug in boost 1.33
-      as of Mar 28 2007.
-      This bug is fixed in boost SVN. I put a workaround in
-      makeSequencerLine instead.
-      / Magnus
+	patternSequence->newLineCreated.connect
+		(boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
+	patternSequence->newLineInserted.connect
+		(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
+	/*
+	  Does not work because of a boost bug in boost 1.33
+	  as of Mar 28 2007.
+	  This bug is fixed in boost SVN. I put a workaround in
+	  makeSequencerLine instead.
+	  / Magnus
 
-    patternSequence->lineRemoved.connect
-      (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
-    */
+	  patternSequence->lineRemoved.connect
+	  (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+	*/
 
-    patternSequence->linesSwapped.connect
-      (boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
+	patternSequence->linesSwapped.connect
+		(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 }
 
 int SequencerDraw::beatPxLength( ) const
 {
-    return beatPxLength_;
+	return beatPxLength_;
 }
 
 void SequencerDraw::setSelectedLine( SequencerLine *line ) 
 {
-  printf("setSelectedLine %p\n", line);
-    selectedLine_ = line;
+	printf("setSelectedLine %p\n", line);
+	selectedLine_ = line;
 }
 
 SequencerLine* SequencerDraw::selectedLine() 
 {
-    return selectedLine_;
+	return selectedLine_;
 }
 
 void SequencerDraw::addPattern( psy::core::SinglePattern *pattern )
 {
-  printf("SequencerDraw::addPattern called");
-    if ( selectedLine() ) {
-        selectedLine()->addItem( pattern );
-    }
+	printf("SequencerDraw::addPattern called");
+	if ( selectedLine() ) {
+		selectedLine()->addItem( pattern );
+	}
 }
 
 std::vector<SequencerLine*> SequencerDraw::lines()
@@ -127,25 +127,25 @@ std::vector<SequencerLine*> SequencerDraw::lines()
 
 void SequencerDraw::insertTrack()
 {
-    if ( lines_.size() == 0 ) {
-    //    addSequencerLine();
+	if ( lines_.size() == 0 ) {
+		//    addSequencerLine();
 //        resize();
 //        repaint();
-    } else if ( selectedLine() ) {
-          // will cause onNewLineInserted to be fired:
-          seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() );
+	} else if ( selectedLine() ) {
+		// will cause onNewLineInserted to be fired:
+		seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() );
 /*            int index = selectedLine_->zOrder();
-            scrollArea_->insert(line, index);
-            scrollArea_->resize();
+	      scrollArea_->insert(line, index);
+	      scrollArea_->resize();
 */
-    }
+	}
 }
 
 void SequencerDraw::deleteTrack() {
-  if(selectedLine()) {
-    // will trigger onLineRemoved
-    seqView_->song()->patternSequence()->removeLine(selectedLine()->sequenceLine());
-  }
+	if(selectedLine()) {
+		// will trigger onLineRemoved
+		seqView_->song()->patternSequence()->removeLine(selectedLine()->sequenceLine());
+	}
 }
 
 void SequencerDraw::moveDownTrack() {
@@ -350,28 +350,40 @@ void SequencerDraw::onItemChangedLine( SequencerItem *item, int direction )
 }
 
 
-PlayLine::PlayLine()
+PlayLine::PlayLine( QGraphicsView *seqDraw )
 { 
-    setFlags( ItemIsMovable | ItemIsFocusable );
-    setCursor( Qt::SizeHorCursor );
-    setPen( QColor( Qt::red ) );
-    setBrush( QColor( Qt::red ) );
-    setZValue( 100 );
+	m_seqDraw = seqDraw;
+	setFlags( ItemIsMovable | ItemIsFocusable );
+	setCursor( Qt::SizeHorCursor );
+	setZValue( 100 );
 }
 
 void PlayLine::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( event->buttons() & Qt::LeftButton )
-    {
-        QPointF newPos(mapToParent(event->pos()) - matrix().map(event->buttonDownPos(Qt::LeftButton)));
-        setPos( std::max( 0, (int)newPos.x() ), 0 ); // x can't be less than 0; y is always 0.
-    } else {
-        event->ignore();
-    }
+	if ( event->buttons() & Qt::LeftButton )
+	{
+		QPointF newPos(mapToParent(event->pos()) - matrix().map(event->buttonDownPos(Qt::LeftButton)));
+		setPos( std::max( 0, (int)newPos.x() ), 0 ); // x can't be less than 0; y is always 0.
+	} else {
+		event->ignore();
+	}
 }
 
 void PlayLine::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
-    QGraphicsItem::mouseReleaseEvent( event );
-    emit playLineMoved( pos().x() );
+	QGraphicsItem::mouseReleaseEvent( event );
+	emit playLineMoved( pos().x() );
 }
+
+QRectF PlayLine::boundingRect() const
+{
+	return QRectF( 0, m_seqDraw->verticalScrollBar()->value(), 1, m_seqDraw->height() );
+
+}
+
+void PlayLine::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget ) 
+{
+	painter->setPen( Qt::red );
+	painter->drawRect( boundingRect() );
+}
+
