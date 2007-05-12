@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = 
-CONFIG += warn_off
+CONFIG += warn_off debug
 OBJECTS_DIR = build # Where the .o files go.
 DEPENDPATH += . \
               machineview \
@@ -174,7 +174,7 @@ QT += xml
 
 unix {
     message("System is: unix.")
-    CONFIG += link_pkgconfig debug
+    CONFIG += link_pkgconfig
     system( pkg-config --exists alsa ) {
         message( "pkg-config thinks alsa libs are available..." )
         DEFINES += QPSYCLE__ALSA_AVAILABLE # This is used in the source to determine when
