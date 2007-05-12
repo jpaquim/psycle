@@ -22,7 +22,6 @@
 #if !defined __unix__
 #include "windows.h"
 #endif
-
 namespace psy
 {
 	namespace core
@@ -128,5 +127,4 @@ namespace psy
 		}
 
 	} // end of core namespace
-
 } // end of psycle namespace

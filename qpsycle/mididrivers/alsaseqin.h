@@ -4,13 +4,9 @@
 // Created on: Thu Jul 20 13:35:01 2007
 //
 
-#ifndef XPSYCLE__ALSASEQIN
-#define XPSYCLE__ALSASEQIN
-#if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/alsa_conditional_build.h>
-#endif
-#if !defined XPSYCLE__NO_ALSA
-
+#ifndef PSYCLE__ALSASEQIN
+#define PSYCLE__ALSASEQIN
+#if defined PSYCLE__ALSA_AVAILABLE
 #include <alsa/asoundlib.h>
 #include "eventdriver.h"
 
@@ -39,5 +35,5 @@ class AlsaSeqIn : public EventDriver
 	
 };
 
-#endif // !defined XPSYCLE__NO_ALSA
-#endif // !defined XPSYCLE__ALSASEQIN
+#endif // defined PSYCLE__ALSA_AVAILABLE
+#endif

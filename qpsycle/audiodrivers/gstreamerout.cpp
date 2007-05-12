@@ -1,7 +1,4 @@
-#if defined XPSYCLE__CONFIGURATION
-	#include <xpsycle/gstreamer_conditional_build.h>
-#endif
-#if !defined XPSYCLE__NO_GSTREAMER
+#if defined PSYCLE__GSTREAMER_AVAILABLE
 #include "gstreamerout.h"
 namespace psy
 {
@@ -18,8 +15,6 @@ namespace psy
 			return new GStreamerOut(*this);
 		}
 	
-	} // end of host namespace
-} // end of psycle namespace
-
-
-#endif // !defined XPSYCLE__NO_GSTREAMER
+	}
+}
+#endif // defined PSYCLE__GSTREAMER_AVAILABLE

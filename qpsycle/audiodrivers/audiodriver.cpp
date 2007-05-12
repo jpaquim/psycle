@@ -18,7 +18,6 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "audiodriver.h"
-
 namespace psy
 {
 	namespace core
@@ -151,5 +150,5 @@ namespace psy
 			return AudioDriverInfo("silent","NullDriver","no sound output",true);
 		}
 
-	} // end of host namespace
-} // end of psycle namespace
+	}
+}

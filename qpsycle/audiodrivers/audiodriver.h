@@ -19,7 +19,6 @@
 ***************************************************************************/
 #ifndef AUDIODRIVER_H
 #define AUDIODRIVER_H
-
 #include <string>
 
 /**
@@ -141,7 +140,6 @@ namespace psy
 
 		};
 
-	} // end of host namespace
-} // end of psycle namespace
-
+	}
+}
 #endif
