@@ -211,6 +211,8 @@ unix {
 }
 win32 {
     INCLUDEPATH += C:/Qt/4.2.2/src/3rdparty/zlib
+    INCLUDEPATH += ../external-packages/boost-1.33.1/include
+    LIBPATH += ../external-packages/boost-1.33.1/lib-mswindows-mingw-cxxabi-1002
     HEADERS += audiodrivers/microsoft_direct_sound_out.h \
            audiodrivers/msdirectsound.h \
            audiodrivers/mswaveout.h 
