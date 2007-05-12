@@ -36,10 +36,10 @@
 	#include "../audiodrivers/gstreamerout.h"
 #endif
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
-	#include "../audiodrivers/msdirectsound.h"
+	#include "../audiodrivers/microsoftdirectsoundout.h"
 #endif
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
-	#include "../audiodrivers/mswaveout.h"
+	#include "../audiodrivers/microsoftmmewaveout.h"
 #endif
 
 #include "../audiodrivers/wavefileout.h"
