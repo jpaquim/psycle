@@ -282,7 +282,7 @@ namespace psy {
 #if defined QPSYCLE__ESD_AVAILABLE
 			addAudioDriver(new ESoundOut);
 #endif		
-#if !defined XPSYCLE__NO_GSTREAMER
+#if defined QPSYCLE__GSTREAMER_AVAILABLE
 			addAudioDriver(new GStreamerOut);
 #endif
 
