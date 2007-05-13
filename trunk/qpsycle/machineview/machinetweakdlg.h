@@ -33,6 +33,12 @@ class MachineGui;
 #include <QDial>
 #include <QLabel>
 
+class QGridLayout;
+class QVBoxLayout;
+class QMenuBar;
+class QAction;
+class QMenu;
+
 const int K_XSIZE = 28;
 const int K_YSIZE = 28;
 const int K_NUMFRAMES = 63;
@@ -88,33 +94,43 @@ protected:
  * MachineTweakDlg
  */
 class MachineTweakDlg : public QDialog {
-    Q_OBJECT
+Q_OBJECT
 
-public:
-    MachineTweakDlg( MachineGui *macGui, QWidget *parent = 0 );
+	public:
+	MachineTweakDlg( MachineGui *macGui, QWidget *parent = 0 );
 
 protected:
-    void showEvent( QShowEvent *event );
-    void keyPressEvent( QKeyEvent *event );
-    void keyReleaseEvent( QKeyEvent *event );
+	void showEvent( QShowEvent *event );
+	void keyPressEvent( QKeyEvent *event );
+	void keyReleaseEvent( QKeyEvent *event );
 
-public slots: 
-    void onKnobGroupChanged( KnobGroup *kGroup );
+	public slots: 
+	void onKnobGroupChanged( KnobGroup *kGroup );
 
 signals:
-    void notePress( int note, psy::core::Machine *mac );
-    void noteRelease( int note );
+	void notePress( int note, psy::core::Machine *mac );
+	void noteRelease( int note );
 
 private:
-    void initParameterGui();
-    void updateValues();
+	void createActions();
+	void createMenus();
+	void initParameterGui();
+	void updateValues();
 
-    QWidget *knobPanel;
-    psy::core::Machine *pMachine_;
-    MachineGui *m_macGui;
+	QAction *paramsResetAction_;
+	QAction *paramsRandomAction_;
+	QAction *paramsOpenPrsAction_;
+	QMenuBar *menuBar;
+	QMenu *aboutMenu;
+	QMenu *paramsMenu;
+	QWidget *knobPanel;
+	QVBoxLayout *mainLayout;
+	QGridLayout *knobPanelLayout;
+	psy::core::Machine *pMachine_;
+	MachineGui *m_macGui;
 
-    std::map<int, KnobGroup*> knobGroupMap;
-    std::map<int, FHeader*> headerMap;
+	std::map<int, KnobGroup*> knobGroupMap;
+	std::map<int, FHeader*> headerMap;
 };
 
 #endif
