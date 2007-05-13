@@ -17,7 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#if defined QPSYCLE__MICROSOFT_MME_AVAILABLE
+#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "microsoftmmewaveout.h"
 namespace psy
 {
