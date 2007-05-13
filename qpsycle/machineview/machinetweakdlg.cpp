@@ -26,85 +26,120 @@
 #include "machinetweakdlg.h"
 #include "machinegui.h"
 
-#include <QGridLayout>
+#include <QVBoxLayout>
 #include <QLabel>
 #include <QDial>
 #include <QKeyEvent>
 #include <QPainter>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
 
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
-    : QDialog( parent )
+	: QDialog( parent )
 {
-    pMachine_ = macGui->mac();
-    m_macGui = macGui;
-    setWindowTitle( "Machine tweak" );
-    initParameterGui();
+	pMachine_ = macGui->mac();
+	m_macGui = macGui;
+	setWindowTitle( "Machine tweak" );
+
+
+	knobPanel = new QWidget( this );
+	mainLayout = new QVBoxLayout();
+	knobPanelLayout = new QGridLayout();
+
+	createActions();
+	createMenus();
+	
+	
+	mainLayout->setSpacing( 0 );
+	mainLayout->setMargin( 0 );
+	mainLayout->addWidget( menuBar );
+	mainLayout->addWidget( knobPanel );
+	setLayout( mainLayout );
+	initParameterGui();
+}
+
+void MachineTweakDlg::createMenus()
+{
+	menuBar = new QMenuBar( this );
+	aboutMenu = menuBar->addMenu( "About" );
+	paramsMenu = menuBar->addMenu( "Parameters" );
+	paramsMenu->addAction( paramsResetAction_ );
+	paramsMenu->addAction( paramsRandomAction_ );
+	paramsMenu->addAction( paramsOpenPrsAction_ );
+}
+
+void MachineTweakDlg::createActions() 
+{
+	paramsResetAction_ = new QAction( "&Reset parameters", this );
+	paramsRandomAction_ = new QAction( "Ra&ndom parameters", this );
+	paramsOpenPrsAction_ = new QAction( "&Open preset dialog", this );
 }
 
 void MachineTweakDlg::initParameterGui()
 {
-    int numParameters = pMachine_->GetNumParams();
-    int cols = pMachine_->GetNumCols();
-    int rows = numParameters/cols;
-    // Various checks for "non-standard" windows ( lots of parameters, or "odd" parameter numbers)
-    if (rows>24)	// check for "too big" windows
-    {
-        rows=24;
-        cols=numParameters/24;
-        if (cols*24 != numParameters)
-        {
-            cols++;
-        }
-    }
-    if ( rows*cols < numParameters) rows++; // check if all the parameters are visible.
 
-    knobPanel = new QWidget( this );
-    QGridLayout *layout = new QGridLayout();
-    layout->setMargin( 0 );
-    layout->setSpacing( 0 );
-    knobPanel->setLayout( layout );
+	knobPanelLayout->setMargin( 0 );
+	knobPanelLayout->setSpacing( 0 );
+	knobPanel->setLayout( knobPanelLayout );
 
-    int x = 0;
-    int y = 0;
+	int numParameters = pMachine_->GetNumParams();
+	int cols = pMachine_->GetNumCols();
+	int rows = numParameters/cols;
+	// Various checks for "non-standard" windows ( lots of parameters, or "odd" parameter numbers)
+	if (rows>24)	// check for "too big" windows
+	{
+		rows=24;
+		cols=numParameters/24;
+		if (cols*24 != numParameters)
+		{
+			cols++;
+		}
+	}
+	if ( rows*cols < numParameters) rows++; // check if all the parameters are visible.
 
-    for ( int knobIdx =0; knobIdx < cols*rows; knobIdx++ ) {
-        int min_v,max_v;
 
-        if ( knobIdx < numParameters ) {
-            pMachine_->GetParamRange( knobIdx,min_v,max_v);
-            bool bDrawKnob = (min_v==max_v)?false:true;
+	int x = 0;
+	int y = 0;
 
-            if ( !bDrawKnob ) {
-                FHeader* cell = new FHeader();
-                headerMap[ knobIdx ] = cell;
-                char parName[64];
-                pMachine_->GetParamName(knobIdx,parName);
-                cell->setText(parName);
-                layout->addWidget( cell, y, x );
-            } else if ( knobIdx < numParameters ) {
-                KnobGroup *knobGroup = new KnobGroup( knobIdx );
-                char parName[64];
-                pMachine_->GetParamName( knobIdx, parName );
-                char buffer[128];
-                pMachine_->GetParamValue( knobIdx, buffer );
-                knobGroup->setNameText(parName);
-                knobGroupMap[ knobIdx ] = knobGroup;
-                connect( knobGroup, SIGNAL( changed( KnobGroup* ) ),
-                         this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
-                layout->addWidget( knobGroup, y, x );
-            }					
-        } else {
-            // knob hole
-            layout->addWidget( new QLabel(""), y, x );
-        }
-        y++;
-        if ( !(y % rows) ) {
-            y = 0;
-            x++;
-        }
-    }
-    knobPanel->repaint();
-    updateValues();
+	for ( int knobIdx =0; knobIdx < cols*rows; knobIdx++ ) {
+		int min_v,max_v;
+
+		if ( knobIdx < numParameters ) {
+			pMachine_->GetParamRange( knobIdx,min_v,max_v);
+			bool bDrawKnob = (min_v==max_v)?false:true;
+
+			if ( !bDrawKnob ) {
+				FHeader* cell = new FHeader();
+				headerMap[ knobIdx ] = cell;
+				char parName[64];
+				pMachine_->GetParamName(knobIdx,parName);
+				cell->setText(parName);
+				knobPanelLayout->addWidget( cell, y, x );
+			} else if ( knobIdx < numParameters ) {
+				KnobGroup *knobGroup = new KnobGroup( knobIdx );
+				char parName[64];
+				pMachine_->GetParamName( knobIdx, parName );
+				char buffer[128];
+				pMachine_->GetParamValue( knobIdx, buffer );
+				knobGroup->setNameText(parName);
+				knobGroupMap[ knobIdx ] = knobGroup;
+				connect( knobGroup, SIGNAL( changed( KnobGroup* ) ),
+					 this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
+				knobPanelLayout->addWidget( knobGroup, y, x );
+			}					
+		} else {
+			// knob hole
+			knobPanelLayout->addWidget( new QLabel(""), y, x );
+		}
+		y++;
+		if ( !(y % rows) ) {
+			y = 0;
+			x++;
+		}
+	}
+	knobPanel->repaint();
+	updateValues();
 }
 
 void MachineTweakDlg::updateValues( )
