@@ -56,7 +56,14 @@ SequencerView::SequencerView( psy::core::Song *asong )
     QAction *dnTrkAct = toolBar_->addAction( "Move Track Down" );
     toolBar_->addAction( dnTrkAct );
     connect( dnTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveDownTrack() ) );
-
+	QAction *shTrkAct = toolBar_->addAction( "Shrink Track");
+	toolBar_->addAction (shTrkAct);
+//	connect( shTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( shrinkTrack() ) );
+	QAction *exTrkAct = toolBar_->addAction( "Expand Track");
+	toolBar_->addAction (exTrkAct);
+//	connect( exTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( expandTrack() ) );
+	
+	
     layout_->addWidget( toolBar_ );
     layout_->addWidget( seqDraw_ );
 
