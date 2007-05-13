@@ -22,7 +22,7 @@ Mats Hojlund                   cbr               Psycle version 1.1 and 1.11
 Daniel Arena                   dubdub            Coder in Psycle in version 1.6, InputHandler, and gui/code improvements.
 Jeremy Evers                   pooplog           Developer in Psycle versions 1.7.x
 Lukasz Langa                   lukasz_langa/kSh  Changes in the cpu clock functions.
-Martin                         lobywang          Crop command in the wave editor
+Martin E. J.                   lobywang          Crop command in the wave editor
 Mark MkCommack                 --------          Coded the MIDI implementation.
 Marcin Kowalski                fideloop          Made the (original) Wave editor.
 James Redfern                  alkenstein        Plugin, fixes and small aditions.
