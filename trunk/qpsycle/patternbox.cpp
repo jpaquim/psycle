@@ -106,7 +106,7 @@ void PatternBox::populatePatternTree()
 
 void PatternBox::newCategory() 
 { 
-    psy::core::PatternCategory* category = song()->patternSequence()->patternData()->createNewCategory("NewCategory");
+    psy::core::PatternCategory* category = song()->patternSequence()->patternData()->createNewCategory("New Category");
     long defaultColor = 0x0000FF;
     category->setColor( defaultColor );
 
@@ -114,7 +114,7 @@ void PatternBox::newCategory()
     CategoryItem* catItem = new CategoryItem();
     patternTree()->addTopLevelItem( catItem );
     patternTree()->setCurrentItem(catItem);
-    catItem->setText( 0, "Category" );
+    catItem->setText( 0, "New Category" );
     QColor col = QColorFromLongColor( category->color() );
     catItem->setBackground( 0, QBrush( col ) );
     categoryMap[catItem] = category;
