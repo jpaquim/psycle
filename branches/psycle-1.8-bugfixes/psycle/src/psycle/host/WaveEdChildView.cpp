@@ -1760,12 +1760,13 @@ NAMESPACE__BEGIN(psycle)
 			
 			blStart += blLength;
 			blLength = (wdLength - blStart);
-			OnEditDelete();
+			///\todo : fix the blLengths. There need to be some +1 and -1 throughout the source.
+			if (blLength > 2 ) OnEditDelete();
 			
 			blSelection = true;
 			blStart = 0;
 			blLength = blStartTemp;
-			OnEditDelete();
+			if (blLength > 2 ) OnEditDelete();
 		}
 
 		void CWaveEdChildView::OnEditPaste() 

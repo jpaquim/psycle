@@ -69,8 +69,8 @@ NAMESPACE__BEGIN(psycle)
 			//determine scaling factor
 			GetClientRect(&grapharea);
 			AdjustRectToView(grapharea);
-			xscale = (grapharea.right - grapharea.left) / (numLines-1);
-			xoffset = ((grapharea.right - grapharea.left) - (xscale*(numLines-1)))/2;
+			xscale = (grapharea.right - grapharea.left) / float(numLines-1);
+			xoffset = (float(grapharea.right - grapharea.left) - (xscale*(numLines-1)))/2.0f;
 			yscale = (grapharea.bottom - grapharea.top) / float(65535); ///total height divided by max param value.
 			grapharea.left+=xoffset;grapharea.right-=xoffset;
 

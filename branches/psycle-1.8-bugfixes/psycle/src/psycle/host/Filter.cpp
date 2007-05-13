@@ -97,6 +97,30 @@ namespace psycle
 
 			void ITFilter::Update()
 			{
+				#define PI 3.1415926535897932384626433832795
+				double fc;
+				if ( iRes >0 || iCutoff < 127 )
+				{
+					//double fc = 440.0*pow(2.0, (iCutoff - 69.0)/12.0); // suggested
+					//double fc = 440.0*pow(2.0, (iCutoff - 57.0)/12.0); // suggested, shifted one octave.
+					//double fc = 440.0*pow(2.0, (iCutoff - 57.0)/16.0); // variation in 16th's, not in octaves..
+					fc = 110.0 * pow(2.0,(iCutoff+6)/24.0); // ModPlug.
+					//double fc = 100.0* (pow(2.0,(iCutoff+10)/24.0));
+				}
+				else { fc = iSampleRate/2.0; }
+				// Attempt at Self-filtered samples. It filters too much.
+//				else { fc = iSampleCurrentSpeed/2.0; }
+
+				const double frequ = 2.0*sin(PI*min(0.25, fc/(iSampleRate*2)));  // the fs*2 is because it's double sampled
+//				fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.007874, 0.25)), min(2.0, 2.0/frequ - frequ*0.5));// original.
+				fCoeff[damp]  = min(exp(iRes/128.0*(-LN10*1.2)), min(2.0, 2.0/frequ - frequ*0.5));// exp instead of 1-pow.
+//				fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.0072, 0.25)), min(2.0, 2.0/frequ - frequ*0.5)); // lowered Q a bit.
+				fCoeff[freq] = frequ;
+
+				#undef PI
+			}
+			void ITFilter::UpdateOld()
+			{
 				double d,e;
 				if ( iRes >0 || iCutoff < 127 )
 				{
@@ -117,8 +141,19 @@ namespace psycle
 	
 	*/
 						
+// sample_freq*pow(0.5, 0.25 + cutoff*1/factor)*1/(2*pi*110.0)))
+// loss = exp(resonance*(-LOG10*1.2/128))
 	
-	//				const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
+//					fc = 110.0f * pow(2.0, 0.25f+((double)(pChn->nCutOff*(flt_modifier+256)))/(fx*512.0f));
+//					<@mrsbrisby> fc *= (double)(2.0*PI/fs);
+//					<@mrsbrisby> where pChn->nCutoff is the "cutoff" as set by channel
+//						<@mrsbrisby> and flt_modifier is the envelope value (after having -1 translated to 0x7C; although I think IT used 0x7F)
+//						<@mrsbrisby> fx is 0.21 in libmodplug's "extended filter range" and 0.24 for "it modules"
+//						<@mrsbrisby> but i think that's wrong, i think IT uses closer to 20.0 (but not exactly)
+
+
+
+					const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
 					const double dLoss = (float)exp(iRes*(-LN10*1.2/128.0));
 	
 	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/96.0)-1.0;
@@ -129,11 +164,11 @@ namespace psycle
 	//				const double dLoss = pow (10.0 , -((3.0*iRes) / 320.0)); // approx [1...0]  | -(iRes/128.0) * (24.0/20.0)
 	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-0.93; // approx [60..0]
 	//				const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-1.0; // approx [60..0]
-					const double dInvAngle = pow(2.0,(127.0-iCutoff)/22.0)-0.93; // approx [60..0]
+	//				const double dInvAngle = pow(2.0,(127.0-iCutoff)/22.0)-0.93; // approx [60..0]
 	//				const double dLoss = pow (2.0,(127.0-iCutoff)/127.0)-1.0;	// [1..0]
 				
 					e = dInvAngle* dInvAngle;
-					d = 1.4*( 1.0- dLoss) / dInvAngle;
+					d = 1.0*( 1.0- dLoss) / dInvAngle;
 					if (d > 2.0f) d = 2.0f;
 					d = (dLoss - d) * dInvAngle;
 	//				if ( d + e*2.0 < 0.0 ) d = -e*2.0;
@@ -147,9 +182,6 @@ namespace psycle
 				fCoeff[2]= -e * fCoeff[0];
 				fCoeff[1]= 1.0f - fCoeff[0] - fCoeff[2]; // equals to (d+e+e ) * fCoeff[0]
 
-
-
-#undef PI
 			}
 		}
 	}

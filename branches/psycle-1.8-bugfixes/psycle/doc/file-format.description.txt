@@ -2,7 +2,7 @@ Fileformat Documentation of .psy Files
 
 Psycle Version : 1.7+
 Document Version: 1.4
-Date:01-May-2007
+Date:12-May-2007
 
 This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle >= 1.7
 It is Riff-like, with independant versioning for each chunk, and a "total" version number for
@@ -249,7 +249,7 @@ float parameter[numParams];
 *if this plugin has extradata, then this follows:
 byte ExtraData[chunksize]; // extra data chunk
 
-version 0 doesn't store the size of the ExtraData, so it has to be guessed
+Note 1:  version 0 doesn't store the size of the ExtraData, so it has to be guessed
 substracting the size of the already written data. Here's an example:
 
 size -= sizeof(program) + sizeof(numParams) + sizeof(float) * count;
@@ -259,6 +259,11 @@ if(size)
 	readchunkdata(data,size);
 }
 
+Note 2: Since psycle 1.8.3beta3, Psycle doesn't store the 
+parameters if there is a chunk. To reflect this, numParams will
+be zero.
+This was done because albino3 didn't like to restore some of
+its parameters via SetParameter().
 
 ===================
 MACHINE SPECIFIC DATA(MACH_XMSAMPLER)
