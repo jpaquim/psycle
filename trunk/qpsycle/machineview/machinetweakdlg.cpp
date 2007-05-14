@@ -64,6 +64,8 @@ void MachineTweakDlg::createMenus()
 {
 	menuBar = new QMenuBar( this );
 	aboutMenu = menuBar->addMenu( "About" );
+	aboutMenu->addAction( aboutAction_ );
+	
 	paramsMenu = menuBar->addMenu( "Parameters" );
 	paramsMenu->addAction( paramsResetAction_ );
 	paramsMenu->addAction( paramsRandomAction_ );
@@ -72,10 +74,14 @@ void MachineTweakDlg::createMenus()
 
 void MachineTweakDlg::createActions() 
 {
+	aboutAction_ = new QAction( "About this machine", this );
+	
 	paramsResetAction_ = new QAction( "&Reset parameters", this );
 	paramsRandomAction_ = new QAction( "Ra&ndom parameters", this );
 	paramsOpenPrsAction_ = new QAction( "&Open preset dialog", this );
 	
+	connect( aboutAction_, SIGNAL( triggered() ),
+		 this, SLOT( showAboutDialog() ) );
 	connect( paramsResetAction_, SIGNAL( triggered() ),
 		 this, SLOT( resetParameters() ) );
 	connect( paramsRandomAction_, SIGNAL( triggered() ),
@@ -226,7 +232,6 @@ void MachineTweakDlg::randomiseParameters()
 
 		pMachine_->SetParameter(c,random);
 	}
-
 	updateValues();	
 }
 
@@ -245,6 +250,17 @@ void MachineTweakDlg::resetParameters()
 	
 }
 
+void MachineTweakDlg::showAboutDialog()
+{
+	
+	if ( pMachine_->type() == psy::core::MACH_PLUGIN )
+	{
+		QMessageBox::information( this,
+					  "About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo()->Name),
+					  "Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo()->Author) );
+	
+	}
+}
 
 
 KnobGroup::KnobGroup( int param )

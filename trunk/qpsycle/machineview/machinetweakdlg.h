@@ -32,6 +32,7 @@ class MachineGui;
 #include <QDialog>
 #include <QDial>
 #include <QLabel>
+#include <QMessageBox>
 
 class QGridLayout;
 class QVBoxLayout;
@@ -109,6 +110,7 @@ public slots:
 	void onKnobGroupChanged( KnobGroup *kGroup );
 	void randomiseParameters();
 	void resetParameters();
+	void showAboutDialog();
 
 signals:
 	void notePress( int note, psy::core::Machine *mac );
@@ -120,6 +122,7 @@ private:
 	void initParameterGui();
 	void updateValues();
 
+	QAction *aboutAction_;
 	QAction *paramsResetAction_;
 	QAction *paramsRandomAction_;
 	QAction *paramsOpenPrsAction_;
