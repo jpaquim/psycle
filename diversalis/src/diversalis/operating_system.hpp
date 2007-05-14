@@ -250,6 +250,10 @@
 							#error "if you set the minor number, you must also set the major number."
 						#endif
 					#endif
+					// set version 5 by default
+					#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
+						#define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR 5
+					#endif
 				// set the compatibility selection macro accordingly
 					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
 						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
