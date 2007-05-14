@@ -77,7 +77,8 @@ void PatternView::createToolBar()
     delBarAct_->setStatusTip( "Delete a bar" );
 	
 	recordCb_ = new QCheckBox( "Record", this);
-
+	recordCb_->setStatusTip( "Enable/Disable Recording");
+	
     toolBar_->addWidget( new QLabel( "Step: " ) );
     toolBar_->addWidget( patStepCbx_ );
     toolBar_->addSeparator();
@@ -89,7 +90,7 @@ void PatternView::createToolBar()
 
 void PatternView::enterNote( const PatCursor & cursor, int note ) 
 {
-if ( recordCb_->checkState() == Qt::Checked)
+if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the next line if recording is off...
 	{
 		if ( pattern() ) {
 			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
