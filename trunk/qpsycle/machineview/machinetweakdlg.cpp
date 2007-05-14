@@ -74,6 +74,8 @@ void MachineTweakDlg::createActions()
 	paramsResetAction_ = new QAction( "&Reset parameters", this );
 	paramsRandomAction_ = new QAction( "Ra&ndom parameters", this );
 	paramsOpenPrsAction_ = new QAction( "&Open preset dialog", this );
+	connect( paramsRandomAction_, SIGNAL( triggered() ),
+		 this, SLOT( randomiseParameters() ) );
 }
 
 void MachineTweakDlg::initParameterGui()
@@ -183,7 +185,7 @@ void MachineTweakDlg::showEvent( QShowEvent *event )
 void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 {
     if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
-        reject();
+        reject();		// Closes the dialog.
     } else {
         if ( !event->isAutoRepeat() ) {
             int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
@@ -208,6 +210,23 @@ void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
     }
 }
 
+void MachineTweakDlg::randomiseParameters() 
+{
+	qDebug("random");
+	
+	int numpars = pMachine_->GetNumParams();
+	for (int c=0; c<numpars; c++)
+	{
+		int minran,maxran;
+		pMachine_->GetParamRange(c,minran,maxran);
+		int range=(maxran-minran)+1; 
+		float random = minran+(range*(rand()/(RAND_MAX + 1.0))); 
+
+		pMachine_->SetParameter(c,random);
+	}
+	updateValues();
+	
+}
 
 
 KnobGroup::KnobGroup( int param )
