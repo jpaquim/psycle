@@ -108,6 +108,7 @@ protected:
 public slots: 
 	void onKnobGroupChanged( KnobGroup *kGroup );
 	void randomiseParameters();
+	void resetParameters();
 
 signals:
 	void notePress( int note, psy::core::Machine *mac );

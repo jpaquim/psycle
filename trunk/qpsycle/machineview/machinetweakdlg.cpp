@@ -19,6 +19,7 @@
 ***************************************************************************/
 
 #include "psycore/machine.h"
+#include "psycore/plugin.h"
 #include "psycore/inputhandler.h"
 #include "psycore/global.h"
 #include "psycore/configuration.h"
@@ -74,6 +75,9 @@ void MachineTweakDlg::createActions()
 	paramsResetAction_ = new QAction( "&Reset parameters", this );
 	paramsRandomAction_ = new QAction( "Ra&ndom parameters", this );
 	paramsOpenPrsAction_ = new QAction( "&Open preset dialog", this );
+	
+	connect( paramsResetAction_, SIGNAL( triggered() ),
+		 this, SLOT( resetParameters() ) );
 	connect( paramsRandomAction_, SIGNAL( triggered() ),
 		 this, SLOT( randomiseParameters() ) );
 }
@@ -227,6 +231,22 @@ void MachineTweakDlg::randomiseParameters()
 	updateValues();
 	
 }
+
+void MachineTweakDlg::resetParameters()
+{
+	if ( pMachine_->type() == psy::core::MACH_PLUGIN)
+	{
+		int numpars = pMachine_->GetNumParams();
+		for (int c=0; c<numpars; c++)
+		{
+			int dv = ((psy::core::Plugin*)pMachine_)->GetInfo()->Parameters[c]->DefValue;
+			pMachine_->SetParameter(c,dv);
+		}
+	}
+	updateValues();
+	
+}
+
 
 
 KnobGroup::KnobGroup( int param )
