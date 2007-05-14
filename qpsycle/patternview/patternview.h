@@ -22,6 +22,7 @@
 
 class QVBoxLayout;
 #include <QWidget>
+#include <QCheckBox>
 
 
 namespace psy { namespace core {
@@ -96,6 +97,7 @@ private:
     QComboBox *patStepCbx_;
     QComboBox *patternCbx_;
     QAction *delBarAct_;
+	QCheckBox *recordCb_;
 
     int octave_;
 
