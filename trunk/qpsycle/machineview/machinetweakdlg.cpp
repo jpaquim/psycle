@@ -216,8 +216,6 @@ void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
 
 void MachineTweakDlg::randomiseParameters() 
 {
-	qDebug("random");
-	
 	int numpars = pMachine_->GetNumParams();
 	for (int c=0; c<numpars; c++)
 	{
