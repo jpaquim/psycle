@@ -226,6 +226,7 @@ void MachineTweakDlg::randomiseParameters()
 
 		pMachine_->SetParameter(c,random);
 	}
+
 	updateValues();	
 }
 
