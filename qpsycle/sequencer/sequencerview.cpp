@@ -46,17 +46,22 @@ SequencerView::SequencerView( psy::core::Song *asong )
     toolBar_ = new QToolBar();
     toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
     QAction *insTrkAct = toolBar_->addAction( "Insert Track" );
+	insTrkAct->setStatusTip( "Insert a New Track Above Selction");
     connect( insTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( insertTrack() ) );
     QAction *delTrkAct = toolBar_->addAction( "Delete Track" );
+	delTrkAct->setStatusTip( "Delete Selected Track");
     toolBar_->addAction( delTrkAct );
     connect( delTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( deleteTrack() ) );
     QAction *upTrkAct = toolBar_->addAction( "Move Track Up" );
+	upTrkAct->setStatusTip( "Move Selected Track Up" );
     toolBar_->addAction( upTrkAct );
     connect( upTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveUpTrack() ) );
     QAction *dnTrkAct = toolBar_->addAction( "Move Track Down" );
+	dnTrkAct->setStatusTip( "Move Selected Track Down");
     toolBar_->addAction( dnTrkAct );
     connect( dnTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveDownTrack() ) );
 	QAction *ceTrkAct = toolBar_->addAction( "Collapse/Expand");
+	ceTrkAct->setStatusTip( "Collapse a Track or Expand a Collapsed Track");
 	toolBar_->addAction (ceTrkAct);
 //	connect( ceTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( shrinkTrack() ) );
 	
