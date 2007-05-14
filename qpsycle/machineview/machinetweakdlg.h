@@ -104,8 +104,10 @@ protected:
 	void keyPressEvent( QKeyEvent *event );
 	void keyReleaseEvent( QKeyEvent *event );
 
-	public slots: 
+
+public slots: 
 	void onKnobGroupChanged( KnobGroup *kGroup );
+	void randomiseParameters();
 
 signals:
 	void notePress( int note, psy::core::Machine *mac );
