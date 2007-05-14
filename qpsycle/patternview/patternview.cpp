@@ -78,6 +78,7 @@ void PatternView::createToolBar()
 	
 	recordCb_ = new QCheckBox( "Record", this);
 	recordCb_->setStatusTip( "Enable/Disable Recording");
+	recordCb_->setCheckState( Qt::Checked );
 	
     toolBar_->addWidget( new QLabel( "Step: " ) );
     toolBar_->addWidget( patStepCbx_ );
