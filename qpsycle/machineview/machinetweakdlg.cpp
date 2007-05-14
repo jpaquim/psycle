@@ -35,6 +35,10 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QCheckBox>
 
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
@@ -86,6 +90,9 @@ void MachineTweakDlg::createActions()
 		 this, SLOT( resetParameters() ) );
 	connect( paramsRandomAction_, SIGNAL( triggered() ),
 		 this, SLOT( randomiseParameters() ) );
+	connect( paramsOpenPrsAction_, SIGNAL( triggered() ),
+		 this, SLOT( showPresetsDialog() ) );
+	
 }
 
 void MachineTweakDlg::initParameterGui()
@@ -156,32 +163,32 @@ void MachineTweakDlg::initParameterGui()
 
 void MachineTweakDlg::updateValues( )
 {			
-    std::map<int, KnobGroup*>::iterator it = knobGroupMap.begin();
-    for ( ; it != knobGroupMap.end(); it++ ) {	
-        int knobIdx = it->first;
-        int min_v,max_v;
-        pMachine_->GetParamRange( knobIdx, min_v, max_v);
-        KnobGroup* kGroup = it->second;
-        char buffer[128];
-        pMachine_->GetParamValue( knobIdx, buffer );
-        int val_v = pMachine_->GetParamValue( knobIdx );
-        kGroup->knob()->setRange(min_v,max_v);
-        kGroup->knob()->setValue(val_v);
-        kGroup->setValueText( QString::fromStdString( buffer ) );
-    }
+	std::map<int, KnobGroup*>::iterator it = knobGroupMap.begin();
+	for ( ; it != knobGroupMap.end(); it++ ) {	
+		int knobIdx = it->first;
+		int min_v,max_v;
+		pMachine_->GetParamRange( knobIdx, min_v, max_v);
+		KnobGroup* kGroup = it->second;
+		char buffer[128];
+		pMachine_->GetParamValue( knobIdx, buffer );
+		int val_v = pMachine_->GetParamValue( knobIdx );
+		kGroup->knob()->setRange(min_v,max_v);
+		kGroup->knob()->setValue(val_v);
+		kGroup->setValueText( QString::fromStdString( buffer ) );
+	}
 
-    knobPanel->repaint();
+	knobPanel->repaint();
 }
 
 void MachineTweakDlg::onKnobGroupChanged( KnobGroup *kGroup ) 
 {
-    int param = kGroup->knob()->param();
-    int value = kGroup->knob()->value();
-    pMachine_->SetParameter( param, value );
-    char buffer[128];
-    int val_v = pMachine_->GetParamValue( param );
-    pMachine_->GetParamValue( param, buffer );
-    kGroup->setValueText( QString::fromStdString( buffer ) );
+	int param = kGroup->knob()->param();
+	int value = kGroup->knob()->value();
+	pMachine_->SetParameter( param, value );
+	char buffer[128];
+	int val_v = pMachine_->GetParamValue( param );
+	pMachine_->GetParamValue( param, buffer );
+	kGroup->setValueText( QString::fromStdString( buffer ) );
 }
 
 void MachineTweakDlg::showEvent( QShowEvent *event )
@@ -250,9 +257,15 @@ void MachineTweakDlg::resetParameters()
 	
 }
 
+void MachineTweakDlg::showPresetsDialog()
+{
+	prsDlg = new PresetsDialog( m_macGui, this );
+	prsDlg->exec();
+}
+
+
 void MachineTweakDlg::showAboutDialog()
 {
-	
 	if ( pMachine_->type() == psy::core::MACH_PLUGIN )
 	{
 		QMessageBox::information( this,
@@ -265,44 +278,44 @@ void MachineTweakDlg::showAboutDialog()
 
 KnobGroup::KnobGroup( int param )
 {
-    QGridLayout *layout = new QGridLayout();
-    layout->setMargin( 0 );
-    layout->setSpacing( 0 );
-    setLayout( layout );
-    setFixedSize( LABEL_WIDTH, K_YSIZE ); // FIXME: unfix the size.
+	QGridLayout *layout = new QGridLayout();
+	layout->setMargin( 0 );
+	layout->setSpacing( 0 );
+	setLayout( layout );
+	setFixedSize( LABEL_WIDTH, K_YSIZE ); // FIXME: unfix the size.
 
-    knob_ = new Knob( param );
+	knob_ = new Knob( param );
 
-    nameLbl = new QLabel();
-    QPalette plt = nameLbl->palette();
-    plt.setBrush( QPalette::Window, QBrush( QColor( 194, 190, 210 ) ) );
-    plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
-    nameLbl->setPalette( plt );
-    nameLbl->setFont( QFont( "Verdana", 8 ) );
-    nameLbl->setFixedSize( 150, K_XSIZE/2 );
-    nameLbl->setIndent( 5 );
-    nameLbl->setAutoFillBackground( true );
+	nameLbl = new QLabel();
+	QPalette plt = nameLbl->palette();
+	plt.setBrush( QPalette::Window, QBrush( QColor( 194, 190, 210 ) ) );
+	plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
+	nameLbl->setPalette( plt );
+	nameLbl->setFont( QFont( "Verdana", 8 ) );
+	nameLbl->setFixedSize( 150, K_XSIZE/2 );
+	nameLbl->setIndent( 5 );
+	nameLbl->setAutoFillBackground( true );
 
-    valueLbl = new QLabel();
-    QPalette plt1 = valueLbl->palette();
-    plt1.setBrush( QPalette::Window, QBrush( QColor( 121, 109, 156 ) ) );
-    plt1.setBrush( QPalette::WindowText, QBrush( Qt::white ) );
-    valueLbl->setPalette( plt1 );
-    valueLbl->setFont( QFont( "Verdana", 8 ) );
-    valueLbl->setFixedSize( 150, K_YSIZE/2 );
-    valueLbl->setIndent( 5 );
-    valueLbl->setAutoFillBackground( true );
+	valueLbl = new QLabel();
+	QPalette plt1 = valueLbl->palette();
+	plt1.setBrush( QPalette::Window, QBrush( QColor( 121, 109, 156 ) ) );
+	plt1.setBrush( QPalette::WindowText, QBrush( Qt::white ) );
+	valueLbl->setPalette( plt1 );
+	valueLbl->setFont( QFont( "Verdana", 8 ) );
+	valueLbl->setFixedSize( 150, K_YSIZE/2 );
+	valueLbl->setIndent( 5 );
+	valueLbl->setAutoFillBackground( true );
 
-    connect( knob_, SIGNAL( valueChanged( int ) ),
-             this, SLOT( onKnobChanged() ) );
-    connect( knob_, SIGNAL( sliderPressed() ),
-             this, SLOT( onKnobPressed() ) );
-    connect( knob_, SIGNAL( sliderReleased() ),
-             this, SLOT( onKnobReleased() ) );
+	connect( knob_, SIGNAL( valueChanged( int ) ),
+		 this, SLOT( onKnobChanged() ) );
+	connect( knob_, SIGNAL( sliderPressed() ),
+		 this, SLOT( onKnobPressed() ) );
+	connect( knob_, SIGNAL( sliderReleased() ),
+		 this, SLOT( onKnobReleased() ) );
 
-    layout->addWidget( knob_, 0, 0, 2, 2, Qt::AlignLeft );
-    layout->addWidget( nameLbl, 0, 2, 1, 7, Qt::AlignLeft );
-    layout->addWidget( valueLbl, 1, 2, 1, 7, Qt::AlignLeft );
+	layout->addWidget( knob_, 0, 0, 2, 2, Qt::AlignLeft );
+	layout->addWidget( nameLbl, 0, 2, 1, 7, Qt::AlignLeft );
+	layout->addWidget( valueLbl, 1, 2, 1, 7, Qt::AlignLeft );
 }
 
 void KnobGroup::setKnob( Knob *inKnob )
@@ -419,3 +432,40 @@ void FHeader::paintEvent( QPaintEvent *ev )
     painter.fillRect( 0, (height()*3)/4, width(), height()/4, QColor( 121, 109, 156 ) );
 }
 
+
+
+PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
+	: QDialog( parent )
+{
+	QGridLayout *lay = new QGridLayout();
+	QLabel *label = new QLabel( "Machine Presets" );
+	QLineEdit *lineEdit = new QLineEdit( this );
+	QListWidget *list = new QListWidget( this );
+	
+	QPushButton *saveBtn = new QPushButton( "Save", this );
+	QPushButton *delBtn = new QPushButton( "Delete", this );
+	QPushButton *impBtn = new QPushButton( "Import", this );
+	QPushButton *expBtn = new QPushButton( "Export", this);
+
+	QCheckBox *prevChk = new QCheckBox( "Preview", this );
+	
+
+	QPushButton *useBtn = new QPushButton( "Use", this );
+	QPushButton *clsBtn = new QPushButton( "Close", this );
+	
+	setLayout( lay );
+	lay->addWidget( label, 0, 0, 1, 3 );
+	lay->addWidget( lineEdit, 1, 0, 2, 2 );
+	lay->addWidget( list, 3, 0, 10, 2 );
+	lay->addWidget( saveBtn, 1, 2, 2, 3 );
+	lay->addWidget( delBtn, 2, 2, 3, 3 );
+	lay->addWidget( impBtn, 3, 2, 4, 3 );
+	lay->addWidget( expBtn, 4, 2, 5, 3 );
+	lay->addWidget( prevChk, 5, 2, 6, 3 );
+	
+	lay->addWidget( useBtn, 7, 2, 8, 3 );
+	lay->addWidget( clsBtn, 9, 2, 10, 3 );
+	
+	adjustSize();
+	
+}

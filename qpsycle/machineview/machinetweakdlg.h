@@ -91,6 +91,19 @@ protected:
     void paintEvent( QPaintEvent *ev );
 };
 
+
+/**
+ * PresetsDlg
+ */
+
+class PresetsDialog : public QDialog {
+public:
+	PresetsDialog( MachineGui *macGui, QWidget *parent = 0 );
+};
+
+
+
+
 /**
  * MachineTweakDlg
  */
@@ -111,6 +124,7 @@ public slots:
 	void randomiseParameters();
 	void resetParameters();
 	void showAboutDialog();
+	void showPresetsDialog();
 
 signals:
 	void notePress( int note, psy::core::Machine *mac );
@@ -134,6 +148,8 @@ private:
 	QGridLayout *knobPanelLayout;
 	psy::core::Machine *pMachine_;
 	MachineGui *m_macGui;
+
+	PresetsDialog *prsDlg;
 
 	std::map<int, KnobGroup*> knobGroupMap;
 	std::map<int, FHeader*> headerMap;
