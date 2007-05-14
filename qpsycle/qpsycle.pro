@@ -239,9 +239,7 @@ win32 {
     } else {
         warning("Untested compiler.")
     }
-    
-    debug:CONFIG += console # opens a console so that we can see debugging messages
-    
+       
     PWD = $$system(echo %CD%)
     EXTERNAL_PKG_DIR = $$PWD/../external-packages
     
