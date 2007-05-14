@@ -4,7 +4,7 @@
 
 TEMPLATE = app # This project builds an executable program.
 TARGET = 
-CONFIG += warn_off debug thread
+CONFIG += warn_off release thread
 BUILD_DIR = build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
@@ -243,7 +243,7 @@ win32 {
     debug:CONFIG += console # opens a console so that we can see debugging messages
     
     PWD = $$system(echo %CD%)
-    EXTERNAL_PKG_DIR = $$PWD/../external_packages
+    EXTERNAL_PKG_DIR = $$PWD/../external-packages
     
     BOOST_DIR = $$EXTERNAL_PKG_DIR/boost-1.33.1
     !exists($$BOOST_DIR) {
