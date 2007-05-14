@@ -401,3 +401,4 @@ void FHeader::paintEvent( QPaintEvent *ev )
     painter.drawText( textRect, Qt::AlignLeft | Qt::AlignVCenter, text() );
     painter.fillRect( 0, (height()*3)/4, width(), height()/4, QColor( 121, 109, 156 ) );
 }
+
