@@ -75,28 +75,35 @@ void PatternView::createToolBar()
 
     delBarAct_ = new QAction( "Delete Bar", this );
     delBarAct_->setStatusTip( "Delete a bar" );
+	
+	recordCb_ = new QCheckBox( "Record", this);
 
     toolBar_->addWidget( new QLabel( "Step: " ) );
     toolBar_->addWidget( patStepCbx_ );
     toolBar_->addSeparator();
     toolBar_->addAction( delBarAct_ );
+	toolBar_->addSeparator();
+	toolBar_->addWidget( recordCb_ );
 
 }
 
 void PatternView::enterNote( const PatCursor & cursor, int note ) 
 {
-    if ( pattern() ) {
-        psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
-        psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
-        event.setNote( octave() * 12 + note );
-        event.setSharp( false/*drawArea->sharpMode()*/ );
-        if (tmac) event.setMachine( tmac->_macIndex );
-        if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
-            event.setInstrument( song_->instSelected );
-        }
+if ( recordCb_->checkState() == Qt::Checked)
+	{
+		if ( pattern() ) {
+			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+			psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
+			event.setNote( octave() * 12 + note );
+			event.setSharp( false/*drawArea->sharpMode()*/ );
+			if (tmac) event.setMachine( tmac->_macIndex );
+			if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
+				event.setInstrument( song_->instSelected );
+			}
         pattern()->setEvent( cursor.line(), cursor.track(), event );
 //        if (tmac) PlayNote( octave() * 12 + note, 127, false, tmac);   
-    }
+		}
+	}
 }
 
 void PatternView::clearNote( const PatCursor & cursor) {
