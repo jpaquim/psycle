@@ -31,10 +31,20 @@ class QVBoxLayout;
      setLayout(layout_);
 	 
 	 toolBar_ = new QToolBar();
+	 
 	 loadSmp_ = new QAction( "Load Sample", this );
-	 connect( loadSmp_, SIGNAL( triggered() ),
-             this, SLOT( onLoadButtonClicked() ) );
+	 connect( loadSmp_, SIGNAL( triggered() ), this, SLOT( onLoadButtonClicked() ) );
+	 playsSmp_ = new QAction(QIcon(":/images/wave_playstart.png"), tr("Play From Start"), this);
+	 playSmp_ = new QAction(QIcon(":/images/wave_play.png"), tr("Play"), this);
+	 stopSmp_ = new QAction(QIcon(":/images/wave_stop.png"), tr("Stop"), this);
+			 
+			 
 	 toolBar_->addAction( loadSmp_ );
+	 toolBar_->addSeparator();
+	 toolBar_->addAction( playsSmp_ );
+	 toolBar_->addAction( playSmp_ );
+	 toolBar_->addAction( stopSmp_ );
+	 
 
      layout_->addWidget( toolBar_ );
  }

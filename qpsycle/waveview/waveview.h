@@ -46,7 +46,9 @@ signals:
 	QVBoxLayout *layout_;
     QToolBar *toolBar_;
 	QAction *loadSmp_;
-
+	QAction *playSmp_;	
+	QAction *playsSmp_;
+	QAction *stopSmp_;
  };
 
  #endif
