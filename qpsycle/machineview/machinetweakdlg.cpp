@@ -262,7 +262,8 @@ void MachineTweakDlg::resetParameters()
 void MachineTweakDlg::showPresetsDialog()
 {
 	prsDlg = new PresetsDialog( m_macGui, this );
-	prsDlg->exec();
+	if ( prsDlg->exec() == QDialog::Accepted )
+		updateValues();
 }
 
 
@@ -468,6 +469,9 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	lay->addWidget( useBtn, 7, 2, 8, 3 );
 	lay->addWidget( clsBtn, 9, 2, 10, 3 );
 
+	connect( useBtn, SIGNAL( pressed() ),
+		 this, SLOT( usePreset() ) );
+		 
 	connect( clsBtn, SIGNAL( pressed() ),
 		 this, SLOT( reject() ) );
 
@@ -476,7 +480,6 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 
 bool PresetsDialog::loadPresets()
 {
-	qDebug("loading presets");
 	std::string filename( m_macGui->mac()->GetDllName() );
 
 	std::string::size_type pos = filename.find('.')  ;
@@ -486,12 +489,10 @@ bool PresetsDialog::loadPresets()
 		filename = filename.substr(0,pos)+".prs";
 	}
 
-	std::cout << "prs " << psy::core::Global::pConfig()->prsPath() + filename << std::endl;
 	std::ifstream prsIn( std::string( psy::core::Global::pConfig()->prsPath() + filename).c_str() );
 	if ( !prsIn.is_open() )
 		return false; 
 
-	qDebug( "found some" );
 	psy::core::BinRead binIn( prsIn );
 
 	int numpresets = binIn.readInt4LE();
@@ -530,3 +531,15 @@ bool PresetsDialog::loadPresets()
 	}
 	return true;
 }
+
+void PresetsDialog::usePreset()
+{
+	if ( QListWidgetItem *selItem = prsList->currentItem() ) {
+		std::map<QListWidgetItem*,psy::core::Preset>::iterator itr;
+		if ( ( itr = presetMap.find( selItem ) ) != presetMap.end() ) {
+			if ( m_macGui->mac() ) itr->second.tweakMachine( *m_macGui->mac() );
+		}
+		accept();
+	}
+}
+	

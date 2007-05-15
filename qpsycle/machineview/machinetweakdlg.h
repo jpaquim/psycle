@@ -103,13 +103,19 @@ protected:
  */
 
 class PresetsDialog : public QDialog {
+Q_OBJECT
 public:
 	PresetsDialog( MachineGui *macGui, QWidget *parent = 0 );
 
 	bool loadPresets();
 
+public slots:
+	void usePreset();
+	
+
 private:
 	std::map< QListWidgetItem*, psy::core::Preset > presetMap;
+	psy::core::Preset m_selectedPreset;
 	QGridLayout *lay;
 	QLabel *label;
 	QLineEdit *lineEdit;
