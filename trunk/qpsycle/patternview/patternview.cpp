@@ -92,8 +92,8 @@ void PatternView::createToolBar()
 void PatternView::enterNote( const PatCursor & cursor, int note ) 
 {
 if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the next line if recording is off...
-	{
-		if ( pattern() ) {
+{
+			if ( pattern() ) {
 			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
 			psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
 			event.setNote( octave() * 12 + note );
@@ -105,7 +105,8 @@ if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the nex
         pattern()->setEvent( cursor.line(), cursor.track(), event );
 //        if (tmac) PlayNote( octave() * 12 + note, 127, false, tmac);   
 		}
-	}
+}
+	
 }
 
 void PatternView::clearNote( const PatCursor & cursor) {
