@@ -17,7 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-
+class QVBoxLayout;
 #include "waveview.h"
 
 #include <QtGui>
@@ -27,18 +27,19 @@
     : QWidget(parent)
  {
      song_ = song;
-     setPalette(QPalette(QColor(100, 100, 100)));
-     setAutoFillBackground(true);
-     QGridLayout *layout = new QGridLayout();
-     setLayout(layout);
+     layout_ = new QVBoxLayout();
+     setLayout(layout_);
+	 
+	 toolBar_ = new QToolBar();
+	 loadSmp_ = new QAction( "Load Sample", this );
+	 connect( loadSmp_, SIGNAL( triggered() ),
+             this, SLOT( onLoadButtonClicked() ) );
+	 toolBar_->addAction( loadSmp_ );
 
-     QPushButton *btn = new QPushButton( "Load Sample", this );
-     connect( btn, SIGNAL( clicked( bool ) ), this, SLOT( onLoadButtonClicked( bool ) ) );
-
-     layout->addWidget( btn );
+     layout_->addWidget( toolBar_ );
  }
 
-void WaveView::onLoadButtonClicked( bool checked )
+void WaveView::onLoadButtonClicked()
 {
      QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                 "/home/neil/mymusic/samples/",

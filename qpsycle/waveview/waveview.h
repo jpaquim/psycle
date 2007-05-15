@@ -21,7 +21,8 @@
  #define WAVEVIEW_H
 
 #include "psycore/song.h"
-
+#include <QVBoxLayout>
+#include <QToolBar>
 #include <QWidget>
 
  class WaveView : public QWidget
@@ -34,13 +35,17 @@
      psy::core::Song* song();
 
 public slots:
-    void onLoadButtonClicked( bool checked );
+    void onLoadButtonClicked();
 
 signals:
     void sampleAdded();
 
  private:
     psy::core::Song *song_;
+	
+	QVBoxLayout *layout_;
+    QToolBar *toolBar_;
+	QAction *loadSmp_;
 
  };
 
