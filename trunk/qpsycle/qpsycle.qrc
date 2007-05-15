@@ -15,5 +15,8 @@
      <file>images/pb_delpat.png</file>
      <file>images/pb_addpattoseq.png</file>
      <file>images/TbMainKnob.png</file>
+	 <file>images/wave_play.png</file>
+	 <file>images/wave_playstart.png</file>
+	 <file>images/wave_stop.png</file>
  </qresource>
  </RCC>
