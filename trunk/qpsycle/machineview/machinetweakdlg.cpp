@@ -23,6 +23,7 @@
 #include "psycore/inputhandler.h"
 #include "psycore/global.h"
 #include "psycore/configuration.h"
+#include "psycore/binread.h"
 
 #include "machinetweakdlg.h"
 #include "machinegui.h"
@@ -38,6 +39,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QListWidgetItem>
 #include <QCheckBox>
 
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
@@ -437,26 +439,26 @@ void FHeader::paintEvent( QPaintEvent *ev )
 PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	: QDialog( parent )
 {
-	QGridLayout *lay = new QGridLayout();
-	QLabel *label = new QLabel( "Machine Presets" );
-	QLineEdit *lineEdit = new QLineEdit( this );
-	QListWidget *list = new QListWidget( this );
+	m_macGui = macGui;
+	lay = new QGridLayout();
+	label = new QLabel( "Machine Presets" );
+	lineEdit = new QLineEdit( this );
+	prsList = new QListWidget( this );
+	saveBtn = new QPushButton( "Save", this );
+	delBtn = new QPushButton( "Delete", this );
+	impBtn = new QPushButton( "Import", this );
+	expBtn = new QPushButton( "Export", this);
 	
-	QPushButton *saveBtn = new QPushButton( "Save", this );
-	QPushButton *delBtn = new QPushButton( "Delete", this );
-	QPushButton *impBtn = new QPushButton( "Import", this );
-	QPushButton *expBtn = new QPushButton( "Export", this);
-
-	QCheckBox *prevChk = new QCheckBox( "Preview", this );
+	prevChk = new QCheckBox( "Preview", this );
 	
 
-	QPushButton *useBtn = new QPushButton( "Use", this );
-	QPushButton *clsBtn = new QPushButton( "Close", this );
+	useBtn = new QPushButton( "Use", this );
+	clsBtn = new QPushButton( "Close", this );
 	
 	setLayout( lay );
 	lay->addWidget( label, 0, 0, 1, 3 );
 	lay->addWidget( lineEdit, 1, 0, 2, 2 );
-	lay->addWidget( list, 3, 0, 10, 2 );
+	lay->addWidget( prsList, 3, 0, 10, 2 );
 	lay->addWidget( saveBtn, 1, 2, 2, 3 );
 	lay->addWidget( delBtn, 2, 2, 3, 3 );
 	lay->addWidget( impBtn, 3, 2, 4, 3 );
@@ -465,7 +467,66 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	
 	lay->addWidget( useBtn, 7, 2, 8, 3 );
 	lay->addWidget( clsBtn, 9, 2, 10, 3 );
-	
-	adjustSize();
-	
+
+	connect( clsBtn, SIGNAL( pressed() ),
+		 this, SLOT( reject() ) );
+
+	loadPresets();
+}
+
+bool PresetsDialog::loadPresets()
+{
+	qDebug("loading presets");
+	std::string filename( m_macGui->mac()->GetDllName() );
+
+	std::string::size_type pos = filename.find('.')  ;
+	if ( pos == std::string::npos ) {
+		filename  = filename + '.' + "prs";
+	} else {
+		filename = filename.substr(0,pos)+".prs";
+	}
+
+	std::cout << "prs " << psy::core::Global::pConfig()->prsPath() + filename << std::endl;
+	std::ifstream prsIn( std::string( psy::core::Global::pConfig()->prsPath() + filename).c_str() );
+	if ( !prsIn.is_open() )
+		return false; 
+
+	qDebug( "found some" );
+	psy::core::BinRead binIn( prsIn );
+
+	int numpresets = binIn.readInt4LE();
+	int filenumpars = binIn.readInt4LE();
+
+	if (numpresets >= 0) {
+		// old file format .. do not support so far ..
+	} else {
+		// new file format
+		if ( filenumpars == 1 ) {
+			int filepresetsize;
+			// new preset format version 1
+			// new preset format version 1
+
+			int numParameters = ((psy::core::Plugin*) m_macGui->mac())->GetInfo()->numParameters;
+			int sizeDataStruct = ((psy::core::Plugin *) m_macGui->mac())->proxy().GetDataSize();
+
+			int numpresets = binIn.readInt4LE();
+			filenumpars = binIn.readInt4LE();
+			filepresetsize = binIn.readInt4LE();
+
+			if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) 
+				return false;
+
+			while ( !prsIn.eof() ) {
+				qDebug("!prsIn.eof()");
+				psy::core::Preset newPreset(numParameters, sizeDataStruct);
+				if (newPreset.read( binIn )) {
+					qDebug("doin item");
+					QListWidgetItem *prsItm = new QListWidgetItem( QString::fromStdString( newPreset.name() ) );
+					prsList->addItem( prsItm );
+					presetMap[prsItm] = newPreset;
+				}
+			}
+		}
+	}
+	return true;
 }

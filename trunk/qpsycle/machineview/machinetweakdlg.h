@@ -25,6 +25,8 @@ namespace psy { namespace core {
 class Machine;
 }}
 
+#include "psycore/preset.h"
+
 class MachineGui;
 
 #include <map>
@@ -39,6 +41,10 @@ class QVBoxLayout;
 class QMenuBar;
 class QAction;
 class QMenu;
+class QCheckBox;
+class QLineEdit;
+class QListWidget;
+class QListWidgetItem;
 
 const int K_XSIZE = 28;
 const int K_YSIZE = 28;
@@ -99,6 +105,28 @@ protected:
 class PresetsDialog : public QDialog {
 public:
 	PresetsDialog( MachineGui *macGui, QWidget *parent = 0 );
+
+	bool loadPresets();
+
+private:
+	std::map< QListWidgetItem*, psy::core::Preset > presetMap;
+	QGridLayout *lay;
+	QLabel *label;
+	QLineEdit *lineEdit;
+	QListWidget *prsList;
+	
+	QPushButton *saveBtn;
+	QPushButton *delBtn;
+	QPushButton *impBtn;
+	QPushButton *expBtn;
+
+	QCheckBox *prevChk;
+	
+
+	QPushButton *useBtn;
+	QPushButton *clsBtn;
+
+	MachineGui *m_macGui;
 };
 
 
