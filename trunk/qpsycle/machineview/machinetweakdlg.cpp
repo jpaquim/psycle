@@ -41,6 +41,8 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QCheckBox>
+#include <QCompleter>
+#include <QModelIndex>
 
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
@@ -480,6 +482,16 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 		 this, SLOT( reject() ) );
 
 	loadPresets();
+
+	QCompleter *completer = new QCompleter( prsList->model(), this );
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setCompletionMode( QCompleter::PopupCompletion );
+	lineEdit->setCompleter(completer);
+	connect( completer, SIGNAL( activated( const QString& ) ),
+		 this, SLOT( onCompletionActivated( const QString& ) ) );
+// 	<nmather>says: it might be better to use QCompleter::activated( QModelIndex)
+// 		 but I had some trouble getting it to work.
+
 }
 
 bool PresetsDialog::loadPresets()
@@ -548,3 +560,10 @@ void PresetsDialog::usePreset()
 	}
 }
 	
+
+void PresetsDialog::onCompletionActivated( const QString &text ) 
+{
+	QList<QListWidgetItem*> items = prsList->findItems( text, Qt::MatchExactly );
+	QListWidgetItem *item = items.takeFirst();
+	prsList->setCurrentItem( item );
+}
