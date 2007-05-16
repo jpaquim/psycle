@@ -113,7 +113,8 @@ public:
 
 public slots:
 	void usePreset();
-	void onCompletionActivated( const QString &text );	
+	void onCompletionActivated( const QString &text );
+	void onItemClicked( QListWidgetItem *item );
 
 private:
 	std::map< QListWidgetItem*, psy::core::Preset > presetMap;

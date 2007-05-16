@@ -474,6 +474,8 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 
 	connect( prsList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
 		 this, SLOT( usePreset() ) );
+	connect( prsList, SIGNAL( itemClicked( QListWidgetItem* ) ),
+		 this, SLOT( onItemClicked( QListWidgetItem* ) ) );
 
 	connect( useBtn, SIGNAL( pressed() ),
 		 this, SLOT( usePreset() ) );
@@ -566,4 +568,9 @@ void PresetsDialog::onCompletionActivated( const QString &text )
 	QList<QListWidgetItem*> items = prsList->findItems( text, Qt::MatchExactly );
 	QListWidgetItem *item = items.takeFirst();
 	prsList->setCurrentItem( item );
+}
+
+void PresetsDialog::onItemClicked( QListWidgetItem *item )
+{
+	lineEdit->setText( item->text() );
 }
