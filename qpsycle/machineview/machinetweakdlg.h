@@ -35,6 +35,8 @@ class MachineGui;
 #include <QDial>
 #include <QLabel>
 #include <QMessageBox>
+#include <QModelIndex>
+#include <QListWidget>
 
 class QGridLayout;
 class QVBoxLayout;
@@ -98,10 +100,10 @@ protected:
 };
 
 
+
 /**
  * PresetsDlg
  */
-
 class PresetsDialog : public QDialog {
 Q_OBJECT
 public:
@@ -111,7 +113,7 @@ public:
 
 public slots:
 	void usePreset();
-	
+	void onCompletionActivated( const QString &text );	
 
 private:
 	std::map< QListWidgetItem*, psy::core::Preset > presetMap;
@@ -134,8 +136,6 @@ private:
 
 	MachineGui *m_macGui;
 };
-
-
 
 
 /**
