@@ -469,6 +469,10 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	lay->addWidget( useBtn, 7, 2, 8, 3 );
 	lay->addWidget( clsBtn, 9, 2, 10, 3 );
 
+
+	connect( prsList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
+		 this, SLOT( usePreset() ) );
+
 	connect( useBtn, SIGNAL( pressed() ),
 		 this, SLOT( usePreset() ) );
 		 
@@ -523,6 +527,7 @@ bool PresetsDialog::loadPresets()
 				if (newPreset.read( binIn )) {
 					qDebug("doin item");
 					QListWidgetItem *prsItm = new QListWidgetItem( QString::fromStdString( newPreset.name() ) );
+					
 					prsList->addItem( prsItm );
 					presetMap[prsItm] = newPreset;
 				}
