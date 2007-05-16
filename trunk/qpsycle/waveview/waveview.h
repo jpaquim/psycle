@@ -49,6 +49,8 @@ signals:
 	QAction *playSmp_;	
 	QAction *playsSmp_;
 	QAction *stopSmp_;
+	
+	QAction *ampEfx_;
  };
 
  #endif

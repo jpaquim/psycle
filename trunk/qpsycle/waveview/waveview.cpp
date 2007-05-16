@@ -32,18 +32,27 @@ class QVBoxLayout;
 	 
 	 toolBar_ = new QToolBar();
 	 
+	 //sample loading
+	 QLabel *playLabel = new QLabel("Play: ");
 	 loadSmp_ = new QAction( "Load Sample", this );
 	 connect( loadSmp_, SIGNAL( triggered() ), this, SLOT( onLoadButtonClicked() ) );
 	 playsSmp_ = new QAction(QIcon(":/images/wave_playstart.png"), tr("Play From Start"), this);
 	 playSmp_ = new QAction(QIcon(":/images/wave_play.png"), tr("Play"), this);
 	 stopSmp_ = new QAction(QIcon(":/images/wave_stop.png"), tr("Stop"), this);
-			 
+	 
+	 //effects
+	 QLabel *efxLabel = new QLabel("Effects: ");
+	 ampEfx_ = new QAction("Amplify", this);
 			 
 	 toolBar_->addAction( loadSmp_ );
 	 toolBar_->addSeparator();
+	 toolBar_->addWidget( playLabel);
 	 toolBar_->addAction( playsSmp_ );
 	 toolBar_->addAction( playSmp_ );
 	 toolBar_->addAction( stopSmp_ );
+	 toolBar_->addSeparator();
+	 toolBar_->addWidget( efxLabel );
+	 toolBar_->addAction( ampEfx_ );
 	 
 
      layout_->addWidget( toolBar_ );
