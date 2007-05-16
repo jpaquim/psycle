@@ -13,9 +13,9 @@
 
 <!-- gui configuration -->
 
-<path id='icondir' src='/home/neil/code/xpsycle/xpsycle/pixmaps/' />
-<path id='plugindir' src='/home/neil/code/xpsycle.plugins/' />
+<path id='plugindir' src='/path/to/psycle-plugins/' />
 <path id='ladspadir' src='/usr/lib/ladspa' />
+<path id='prsdir' src='/path/to/presets/' />
 
 <!-- pattern view options -->
 
