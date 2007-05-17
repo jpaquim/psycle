@@ -18,14 +18,15 @@ namespace psy {
 		std::string Dummy::_psName = "DummyPlug";
 
 		Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
-			:
-      Machine(callbacks, MACH_DUMMY, MACHMODE_FX, id, song)
+		:
+			Machine(callbacks, MACH_DUMMY, MACHMODE_FX, id, song)
 		{
+			SetEditName("Dummy");
 //			DefineStereoInput(1);
 //			DefineStereoOutput(1);
 			_audiorange = 32768.0f;
-			_editName = "Dummy";
 		}
+		
 		Dummy::~Dummy() throw()
 		{
 //			DestroyInputs();
@@ -57,19 +58,20 @@ namespace psy {
 		std::string DuplicatorMac::_psName = "Dupe it!";
 
 		DuplicatorMac::DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
-			:
-      Machine(callbacks, MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
+		:
+			Machine(callbacks, MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
 		{
+			SetEditName("Dupe it!");
 			_numPars = 16;
 			_nCols = 2;
 			bisTicking = false;
-			_editName = "Dupe it!";
 			for (int i=0;i<8;i++)
 			{
 				macOutput[i]=-1;
 				noteOffset[i]=0;
 			}
 		}
+		
 		DuplicatorMac::~DuplicatorMac() throw()
 		{
 		}
@@ -219,16 +221,17 @@ namespace psy {
 		float * Master::_pMasterSamples = 0;
 
 		Master::Master(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
-			:
-      Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
+		:
+			Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
 			decreaseOnClip(false)
 		{
-				  _outDry = 256;
+			SetEditName("Master");
+			_outDry = 256;
 			_audiorange = 32768.0f;
 //			DefineStereoInput(1);
-			_editName = "Master";
 		}
+		
 		Master::~Master() throw()
 		{
 		}
@@ -396,15 +399,16 @@ namespace psy {
 		std::string Mixer::_psName = "Mixer";
 
 		Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song )
-			:
-      Machine(callbacks, MACH_MIXER, MACHMODE_FX, id, song)
+		:
+			Machine(callbacks, MACH_MIXER, MACHMODE_FX, id, song)
 		{
+			SetEditName("Mixer");
 			_numPars = 255;
 			_audiorange = 32768.0f;
 //			DefineStereoInput(24);
 //			DefineStereoOutput(1);
-			_editName = "Mixer";
 		}
+		
 		Mixer::~Mixer() throw()
 		{
 		}
@@ -789,13 +793,13 @@ namespace psy {
 
 
 		LFO::LFO(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
-			:
-      Machine(callbacks, MACH_LFO, MACHMODE_GENERATOR, id, song)
+		:
+			Machine(callbacks, MACH_LFO, MACHMODE_GENERATOR, id, song)
 		{
+			SetEditName("LFO");
 			_numPars = prms::num_params;
 			_nCols = 3;
 			bisTicking = false;
-			_editName = "LFO";
 		}
 
 		LFO::~LFO() throw()

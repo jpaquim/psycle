@@ -16,9 +16,9 @@ namespace psy
 		:
 			Machine(callbacks, MACH_SAMPLER, MACHMODE_GENERATOR, id, song)
 		{
+			SetEditName("Sampler");
 			_audiorange = 32768.0f;
 //			DefineStereoOutput(1);
-			_editName = "Sampler";
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)

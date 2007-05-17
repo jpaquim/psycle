@@ -971,7 +971,7 @@ namespace psy
 		{
 			char edName[32];
 			pFile->ReadChunk(edName, 16); edName[15] = 0;
-			_editName=edName;
+			SetEditName(edName);
 
 			pFile->Read(_inputMachines);
 			pFile->Read(_outputMachines);
@@ -1026,7 +1026,7 @@ namespace psy
 		{
 			char edName[32];
 			pFile->ReadChunk(edName, 16); edName[15] = 0;
-			_editName=edName;
+			SetEditName(edName);
 			
 			pFile->Read(_inputMachines);
 			pFile->Read(_outputMachines);
@@ -1086,7 +1086,7 @@ namespace psy
 
 			char edName[32];
 			pFile->ReadChunk(edName, 16); edName[15] = 0;
-			_editName=edName;
+			SetEditName(edName);
 
 			pFile->Read(_inputMachines);
 			pFile->Read(_outputMachines);
@@ -1212,7 +1212,7 @@ namespace psy
 
 			char edName[32];
 			pFile->ReadChunk(edName, 16); edName[15] = 0;
-			_editName=edName;
+			SetEditName(edName);
 
 			pFile->Read(numParameters);
 			if(result)
@@ -1398,7 +1398,7 @@ namespace psy
 
 				char edName[32];
 				pFile->ReadChunk(edName, 16); edName[15] = 0;
-				_editName=edName;
+				SetEditName(edName);
 
 				pFile->Read(_inputMachines);
 				pFile->Read(_outputMachines);

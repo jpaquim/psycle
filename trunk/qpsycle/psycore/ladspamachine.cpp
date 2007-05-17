@@ -161,17 +161,17 @@ namespace psy {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song )
-      : Machine(callbacks,MACH_LADSPA, MACHMODE_FX, id, song)
+		:
+			Machine(callbacks,MACH_LADSPA, MACHMODE_FX, id, song)
 		{
+			SetEditName("ladspa plug");
 			_audiorange = 1.0f;
-			_editName = "ladspa plug";
 			psDescriptor = 0;
 			pluginHandle = 0;
 			libHandle_=0;
 			pOutSamplesL= new LADSPA_Data[STREAM_SIZE];
 			pOutSamplesR= new LADSPA_Data[STREAM_SIZE];
 		}
-		
 		
 		LADSPAMachine::~LADSPAMachine() throw()
 		{
@@ -370,7 +370,7 @@ namespace psy {
 		
 			if (psDescriptor->activate) psDescriptor->activate(pluginHandle);
 			libName_ = fileName;
-			_editName = label();
+			SetEditName(label());
 			return true;
 		} // end of loadPlugin
 		

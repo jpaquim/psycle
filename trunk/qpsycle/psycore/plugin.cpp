@@ -55,15 +55,15 @@ int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().
 int PluginFxCallback::GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
 int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
 
-    Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , CoreSong* song)
-			:
-      Machine(callbacks, MACH_PLUGIN, MACHMODE_FX, id, song),
-				_dll(0),
-				proxy_(*this)
-			{
-				_audiorange=32768.0f;
-				_editName = "native plugin";
-			}
+Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , CoreSong* song)
+:
+	Machine(callbacks, MACH_PLUGIN, MACHMODE_FX, id, song),
+	_dll(0),
+	proxy_(*this)
+{
+	SetEditName("native plugin");
+	_audiorange=32768.0f;
+}
 
 Plugin::~ Plugin( ) throw()
 {
@@ -120,7 +120,7 @@ bool Plugin::Instance( const std::string & file_name )
 			char buf[32];
 			strncpy(buf, _pInfo->ShortName,31);
 			buf[31]='\0';
-			_editName = buf;
+			SetEditName(buf);
 			_psAuthor = _pInfo->Author;
 			_psName = _pInfo->Name;
 			CREATEMACHINE GetInterface = 0;
