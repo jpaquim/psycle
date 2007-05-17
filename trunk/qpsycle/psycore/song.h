@@ -310,10 +310,6 @@ namespace psy
 
 				///\name undocumented/missplaced stuff
 				///\{
-					/// \todo doc
-					/// \todo If, whatever it is, is a GUI thing, it should not be here.
-					CPoint viewSize;
-
 					/// \todo This is a GUI thing... should not be here.
 					char currentOctave;
 
