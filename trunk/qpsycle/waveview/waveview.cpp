@@ -22,7 +22,8 @@ class QVBoxLayout;
 
 #include <QtGui>
 #include <iostream>
- #include <QWidget> //temp... just for testing...
+#include <QtGui/QGraphicsView> //temp... just for testing...
+#include <QGraphicsScene>
 
  WaveView::WaveView( psy::core::Song *song, QWidget *parent) 
     : QWidget(parent)
@@ -30,11 +31,14 @@ class QVBoxLayout;
      song_ = song;
      layout_ = new QVBoxLayout();
      setLayout(layout_);
-	 
-	 QWidget *waveformview = new QWidget(this, Qt::Widget);
-	 waveformview->setAutoFillBackground ( true );
+	 //TODO: this should be in the waveview.h and waveformview should be an object of WaveFormView
+	 QGraphicsView *waveformview = new QGraphicsView(this);
+	 QGraphicsScene *scene = new QGraphicsScene(waveformview);
+	 waveformview->setScene(scene);
+	 waveformview->setBackgroundBrush(QBrush(QColor(0,0,0, 255 ), Qt::SolidPattern) );
+//	 waveformview->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
 	 waveformview->adjustSize();
-	 
+
 	 toolBar_ = new QToolBar();
 	 
 	 //sample loading
@@ -79,6 +83,7 @@ class QVBoxLayout;
      layout_->addWidget( toolBar_ );
 	 layout_->addWidget( waveformview );
 	 layout_->addWidget( zoomBar_ );
+	 waveformview->show();
  }
 
 void WaveView::onLoadButtonClicked()

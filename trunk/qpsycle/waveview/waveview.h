@@ -26,6 +26,7 @@
 #include <QWidget>
 #include <QSlider>
 
+
  class WaveView : public QWidget
  {
      Q_OBJECT
