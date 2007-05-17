@@ -56,17 +56,17 @@ namespace psy {
 				virtual int version() const;
 
 				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(const std::string & fileName, Song & song, MachineCallbacks* callbacks);
-				virtual bool save( const std::string & fileName, const Song & song );
+				virtual bool load(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+				virtual bool save( const std::string & fileName, const CoreSong & song );
 
 			protected:
 
-				int LoadSONGv0(RiffFile* file,Song& song);
+				int LoadSONGv0(RiffFile* file,CoreSong& song);
 
-				bool saveSONGv0(RiffFile* file,const Song& song);
-				bool saveMACDv0(RiffFile* file,const Song& song,int index);
-				bool saveINSDv0(RiffFile* file,const Song& song,int index);
-				bool saveWAVEv0(RiffFile* file,const Song& song,int index);
+				bool saveSONGv0(RiffFile* file,const CoreSong& song);
+				bool saveMACDv0(RiffFile* file,const CoreSong& song,int index);
+				bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
+				bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
 
 			private:
 
@@ -81,7 +81,7 @@ namespace psy {
 
 				std::map<int, SinglePattern*> patMap;
 
-				Song* song_;
+				CoreSong* song_;
 
 		};
 

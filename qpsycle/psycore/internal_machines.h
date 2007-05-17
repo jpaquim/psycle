@@ -14,7 +14,7 @@ namespace psy {
 		class Dummy : public Machine
 		{
 		public:
-			Dummy(MachineCallbacks* callbacks, id_type index, Song* song);
+			Dummy(MachineCallbacks* callbacks, id_type index, CoreSong* song);
 			virtual ~Dummy() throw();
 			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
@@ -31,7 +31,7 @@ namespace psy {
 		{
 		public:
 			DuplicatorMac(MachineCallbacks* callbacks);
-			DuplicatorMac(MachineCallbacks* callbacks, id_type index, Song* song);
+			DuplicatorMac(MachineCallbacks* callbacks, id_type index, CoreSong* song);
 			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
@@ -59,7 +59,7 @@ namespace psy {
 		{
 		public:
 			Master(MachineCallbacks* callbacks);
-			Master(MachineCallbacks* callbacks, id_type index, Song* song);
+			Master(MachineCallbacks* callbacks, id_type index, CoreSong* song);
 			virtual ~Master() throw();
 			virtual void Init(void);
 			virtual void Stop();
@@ -123,7 +123,7 @@ namespace psy {
 				return12
 			};
 			Mixer(MachineCallbacks* callbacks);
-			Mixer(MachineCallbacks* callbacks, id_type index, Song* song);
+			Mixer(MachineCallbacks* callbacks, id_type index, CoreSong* song);
 			virtual ~Mixer() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
@@ -190,7 +190,7 @@ namespace psy {
 		{
 		public:
 			LFO(MachineCallbacks* callbacks);
-      LFO(MachineCallbacks* callbacks, id_type index, Song* song);
+      LFO(MachineCallbacks* callbacks, id_type index, CoreSong* song);
 			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );

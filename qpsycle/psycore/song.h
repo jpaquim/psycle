@@ -24,11 +24,11 @@ namespace psy
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines 
 		///and their initial parameters and coordinates, wavetables
-		class Song 
+		class CoreSong
 		{
 			public:
-				Song(MachineCallbacks*);
-				virtual ~Song();
+				CoreSong(MachineCallbacks*);
+				virtual ~CoreSong();
 
 				/// clears all song data
 				void clear();
@@ -269,34 +269,40 @@ namespace psy
 				///\name instruments
 				///\{
 					///\todo doc
-					Instrument::id_type instSelected;
-					///\todo doc
 					///\todo hardcoded limits and wastes
 					Instrument * _pInstrument[MAX_INSTRUMENTS];
+					///\todo doc
+					/// cannot be moved to the UI subclass because it gets saved in psy2 song files
+					Instrument::id_type instSelected;
 				///\}
+				
 				///\name various player-related stuff
 				///\{
-					/// The index of the selected MIDI program for note entering
-					/// \todo This is a gui thing... should not be here.
-					int midiSelected;
-					/// The index for the auxcolumn selected (would be waveselected, midiselected, or an index to a machine parameter)
-					/// \todo This is a gui thing... should not be here.
-					int auxcolSelected;
 					/// Wether each of the tracks is muted.
 					///\todo hardcoded limits and wastes
 					bool _trackMuted[MAX_TRACKS];
-					/// The number of tracks Armed (enabled for record)
-					/// \todo should this be here? (used exclusively in childview)
-					int _trackArmedCount;
-					/// Wether each of the tracks is armed (selected for recording data in)
-					///\todo hardcoded limits and wastes
-					bool _trackArmed[MAX_TRACKS];
 					/// The index of the machine which plays in solo.
 					///\todo ok it's saved in psycle "song" files, but that belongs to the player.
 					Machine::id_type machineSoloed;
 					/// The index of the track which plays in solo.
 					///\todo ok it's saved in psycle "song" files, but that belongs to the player.
 					int _trackSoloed;
+					/// The index of the selected MIDI program for note entering
+					/// \todo This is a gui thing... should not be here.
+					/// cannot be moved to the UI subclass because it gets saved in psy3 song files
+					int midiSelected;
+					/// The index for the auxcolumn selected (would be waveselected, midiselected, or an index to a machine parameter)
+					/// \todo This is a gui thing... should not be here.
+					/// cannot be moved to the UI subclass because it gets saved in psy3 song files
+					int auxcolSelected;
+					/// The number of tracks Armed (enabled for record)
+					/// \todo should this be here? (used exclusively in childview)
+					/// cannot be moved to the UI subclass because it gets saved in psy3 song files
+					int _trackArmedCount;
+					/// Wether each of the tracks is armed (selected for recording data in)
+					///\todo hardcoded limits and wastes
+					/// cannot be moved to the UI subclass because it gets saved in psy3 song files
+					bool _trackArmed[MAX_TRACKS];
 				///\}
 
 				///\name file-related stuff
@@ -324,6 +330,21 @@ namespace psy
 				private:
 					MachineCallbacks *machinecallbacks;
 			///\}
+		};
+		
+		/// UI stuff moved here
+		class UISong : public CoreSong
+		{
+			public:
+				UISong(MachineCallbacks* callbacks);
+		};
+		
+		/// the actual song class used by qpsycle. it's simply the UISong class
+		/// note that a simple typedef won't work due to the song class being forward-declared, as a class and not a typedef.
+		class Song : public UISong
+		{
+			public:
+				Song(MachineCallbacks* callbacks) : UISong(callbacks) {}
 		};
 	}
 }

@@ -17,27 +17,24 @@ namespace psy
 {
 	namespace core
 	{
-		Song::Song(MachineCallbacks* callbacks)
+		CoreSong::CoreSong(MachineCallbacks* callbacks)
 		: machinecallbacks(callbacks)
 		{
 			tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 			_machineLock = false;
 			Invalided = false;
-
 			for(int i(0) ; i < MAX_MACHINES ; ++i) _pMachine[i] = 0;
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
-
 			clear();
 		}
 
-		Song::~Song()
+		CoreSong::~CoreSong()
 		{
 			DestroyAllMachines();
 			DestroyAllInstruments();
 		}
 
-
-		void Song::clear()
+		void CoreSong::clear()
 		{
 			_machineLock = false;
 			Invalided = false;
@@ -70,27 +67,30 @@ namespace psy
 				_pMachine[i] = 0;
 			}
 
-			_trackArmedCount = 0;
-			for(int i(0) ; i < MAX_TRACKS; ++i)
-			{
-				_trackMuted[i] = false;
-				_trackArmed[i] = false;
-			}
 			machineSoloed = -1;
 			_trackSoloed = -1;
-
-			instSelected = 0;
-			midiSelected = 0;
-			auxcolSelected = 0;
 
 			_saved=false;
 			fileName = "Untitled.psy";
 			
 			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
 		}
+		
+		UISong::UISong(MachineCallbacks* callbacks)
+		: CoreSong(callbacks)
+		{
+			_trackArmedCount = 0;
+			for(int i(0) ; i < MAX_TRACKS; ++i)
+			{
+				_trackMuted[i] = false;
+				_trackArmed[i] = false;
+			}
+			instSelected = 0;
+			midiSelected = 0;
+			auxcolSelected = 0;
+		}
 
-
-		Machine * Song::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) 
+		Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) 
 		{
 			int fb; 
 			if ( key == PluginFinderKey::internalSampler() ) {
@@ -118,7 +118,7 @@ namespace psy
 			return _pMachine[fb];
 		}
 
-		Machine & Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
+		Machine & CoreSong::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
 		{
 			Machine::id_type const array_index(GetFreeMachine());
 			if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
@@ -127,7 +127,7 @@ namespace psy
 			return *_pMachine[array_index];
 		}
 
-		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
+		bool CoreSong::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
 		{
 			Machine * machine(0);
 			switch (type)
@@ -250,13 +250,13 @@ namespace psy
 			return true;
 		}
 
-		Machine::id_type Song::FindBusFromIndex(Machine::id_type smac)
+		Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac)
 		{
 			if(!_pMachine[smac]) return Machine::id_type(255);
 			return smac;
 		}
 
-		void Song::DestroyAllMachines(bool write_locked)
+		void CoreSong::DestroyAllMachines(bool write_locked)
 		{
 			_machineLock = true;
 			for(Machine::id_type c(0); c < MAX_MACHINES; ++c)
@@ -285,7 +285,7 @@ namespace psy
 			_machineLock = false;
 		}
 
-		Machine::id_type Song::GetFreeMachine()
+		Machine::id_type CoreSong::GetFreeMachine()
 		{
 			Machine::id_type tmac(0);
 			for(;;)
@@ -295,7 +295,7 @@ namespace psy
 			}
 		}
 
-		bool Song::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume)
+		bool CoreSong::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume)
 		{
 			Machine *srcMac = _pMachine[src];
 			Machine *dstMac = _pMachine[dst];
@@ -310,7 +310,7 @@ namespace psy
 			return srcMac->ConnectTo(*dstMac, InPort::id_type(0), OutPort::id_type(0), volume);
 		}
 
-		int Song::ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
+		int CoreSong::ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
 		{
 			Wire::id_type w;
 			float volume = 1.0f;
@@ -338,7 +338,7 @@ namespace psy
 			return 0;
 		}
 
-		int Song::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
+		int CoreSong::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
 		{
 			float volume = 1.0f;
 
@@ -372,7 +372,7 @@ namespace psy
 			return 0;
 		}
 
-		void Song::DestroyMachine(Machine::id_type mac, bool write_locked)
+		void CoreSong::DestroyMachine(Machine::id_type mac, bool write_locked)
 		{
 /*			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
 				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
@@ -439,13 +439,13 @@ namespace psy
 			zapObject(_pMachine[mac]);
 		}
 
-		int Song::GetFreeBus()
+		int CoreSong::GetFreeBus()
 		{
 			for(int c(0) ; c < MAX_BUSES ; ++c) if(!_pMachine[c]) return c;
 			return -1; 
 		}
 
-		int Song::GetFreeFxBus()
+		int CoreSong::GetFreeFxBus()
 		{
 			for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
 			return -1; 
@@ -492,7 +492,7 @@ namespace psy
 
 		*/
 
-		bool Song::IffAlloc(Instrument::id_type instrument,const char * str)
+		bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str)
 		{
 			if(instrument != PREV_WAV_INS)
 			{
@@ -575,7 +575,7 @@ namespace psy
 			return true;
 		}
 
-		bool Song::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
+		bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
 		{
 			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 			DeleteLayer(iInstr);
@@ -594,7 +594,7 @@ namespace psy
 			return true;
 		}
 
-		bool Song::WavAlloc(Instrument::id_type instrument,const char * Wavfile)
+		bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * Wavfile)
 		{ 
 			assert(Wavfile != 0);
 			WaveFile file;
@@ -728,19 +728,19 @@ namespace psy
 			return true;
 		}
 
-		bool Song::load(const std::string & fileName)
+		bool CoreSong::load(const std::string & fileName)
 		{
 			PsyFilter filter;
 			return filter.loadSong(fileName, *this, machinecallbacks);
 		}
 
-		bool Song::save(const std::string & fileName)
+		bool CoreSong::save(const std::string & fileName)
 		{
 			PsyFilter filter;
 			return filter.saveSong(fileName, *this,4);
 		}
 
-		void Song::DoPreviews(int amount)
+		void CoreSong::DoPreviews(int amount)
 		{
 			//todo do better.. use a vector<InstPreview*> or something instead
 			if(wavprev.IsEnabled())
@@ -754,7 +754,7 @@ namespace psy
 		}
 
 		///\todo mfc+winapi->std
-		bool Song::CloneMac(Machine::id_type src, Machine::id_type dst)
+		bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
 			if (_pMachine[src] && _pMachine[dst])
@@ -934,7 +934,7 @@ namespace psy
 		}
 
 		///\todo mfc+winapi->std
-		bool Song::CloneIns(Instrument::id_type src, Instrument::id_type dst)
+		bool CoreSong::CloneIns(Instrument::id_type src, Instrument::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
 		/*	if (!Global::song()._pInstrument[src]->Empty() && !Global::song()._pInstrument[dst]->Empty())
@@ -1032,13 +1032,13 @@ namespace psy
 			return true;
 		}
 
-		void /*Reset*/Song::DeleteInstrument(Instrument::id_type id)
+		void /*Reset*/CoreSong::DeleteInstrument(Instrument::id_type id)
 		{
 			Invalided=true;
 			_pInstrument[id]->Delete(); Invalided=false;
 		}
 	    
-	    void /*Reset*/Song::DeleteInstruments()
+	    void /*Reset*/CoreSong::DeleteInstruments()
 	    {
 			Invalided=true;
 			for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
@@ -1046,7 +1046,7 @@ namespace psy
 			Invalided=false;
 		}
 	    
-	    void /*Delete*/Song::DestroyAllInstruments()
+	    void /*Delete*/CoreSong::DestroyAllInstruments()
 	    {
 			for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 				delete _pInstrument[id];
@@ -1054,12 +1054,12 @@ namespace psy
 			}
 	    }
 	    
-	    void Song::DeleteLayer(Instrument::id_type id)
+	    void CoreSong::DeleteLayer(Instrument::id_type id)
 	    {
 			_pInstrument[id]->DeleteLayer();
 		}
 	
-		void Song::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
+		void CoreSong::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
 		{
 			///\todo reowkr for multitracking
 			/*  bool bEditMode = true;
@@ -1110,32 +1110,32 @@ namespace psy
 			}*/
 		}
 
-		void Song::setTracks( unsigned int trackCount )
+		void CoreSong::setTracks( unsigned int trackCount )
 		{
 			tracks_ = trackCount;
 		}
 
-		void Song::setName( const std::string & name )
+		void CoreSong::setName( const std::string & name )
 		{
 			name_ = name;
 		}
 
-		void Song::setAuthor( const std::string & author )
+		void CoreSong::setAuthor( const std::string & author )
 		{
 			author_ = author;
 		}
 
-		void Song::setComment( const std::string & comment )
+		void CoreSong::setComment( const std::string & comment )
 		{
 			comment_ = comment;
 		}
 
-		void Song::setBpm( float bpm )
+		void CoreSong::setBpm( float bpm )
 		{
 			if (bpm > 0 && bpm < 1000) bpm_ = bpm;
 		}
 
-		void Song::setLinesPerBeat(const unsigned int value)
+		void CoreSong::setLinesPerBeat(const unsigned int value)
 		{
 			if ( value < 1 ) linesPerBeat_ = 1;
 			else if ( value > 31 ) linesPerBeat_ = 31;

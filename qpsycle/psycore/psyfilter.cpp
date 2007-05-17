@@ -1,22 +1,22 @@
 /***************************************************************************
-	*   Copyright (C) 2007 Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #include "song.h"
 #include "psyfilter.h"
 
@@ -48,12 +48,12 @@ namespace psy
 		{
 		}
 
-		bool PsyFilter::load( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
+		bool PsyFilter::load( const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
 		{
 			return false;
 		}
 
-		bool PsyFilter::save( const std::string & fileName, const Song & song )
+		bool PsyFilter::save( const std::string & fileName, const CoreSong & song )
 		{
 			return false;
 		}
@@ -72,7 +72,7 @@ namespace psy
 			return 0;
 		}
 
-		bool PsyFilter::loadSong( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
+		bool PsyFilter::loadSong( const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
 		{
 			if ( fileIsReadable( fileName ) ) {
 				std::vector<PsyFilter*>::iterator it = filters.begin();
@@ -87,7 +87,7 @@ namespace psy
 			return false;
 		}
 
-		bool PsyFilter::saveSong( const std::string & fileName, Song & song, int version )
+		bool PsyFilter::saveSong( const std::string & fileName, CoreSong & song, int version )
 		{
 			std::vector<PsyFilter*>::iterator it = filters.begin();
 			for (  ; it < filters.end(); it++) {

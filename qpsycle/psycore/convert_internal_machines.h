@@ -26,9 +26,9 @@ namespace psy
 
 				virtual ~Converter() throw();
 
-        Machine & redirect(const int & index, const int & type, RiffFile & riff,Song &song) throw(std::exception);
+        Machine & redirect(const int & index, const int & type, RiffFile & riff,CoreSong &song) throw(std::exception);
 
-				void retweak(Song & song) const;
+				void retweak(CoreSong & song) const;
 
 			private:
 				class Plugin_Names : private std::map<const int, const std::string *>

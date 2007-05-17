@@ -30,7 +30,7 @@ namespace psy
 {
 	namespace core
 	{
-    class Song;
+    class CoreSong;
     class MachineCallbacks;
 
 
@@ -40,8 +40,8 @@ namespace psy
 
 			virtual ~PsyFilter();
 
-			bool loadSong(const std::string & fileName, Song & song, MachineCallbacks* callbacks);
-			bool saveSong(const std::string & fileName, Song & song, int version);
+			bool loadSong(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+			bool saveSong(const std::string & fileName, CoreSong & song, int version);
 
 			//signals
 //			sigslot::signal2<const std::string &, const std::string &> report;
@@ -51,8 +51,8 @@ namespace psy
 
 			virtual int version() const;
 			virtual bool testFormat(const std::string & fileName);
-			virtual bool load(const std::string & fileName, Song & song, MachineCallbacks *callbacks );
-			virtual bool save(const std::string & fileName, const Song & song);
+			virtual bool load(const std::string & fileName, CoreSong & song, MachineCallbacks *callbacks );
+			virtual bool save(const std::string & fileName, const CoreSong & song);
 
 			virtual std::string filePostfix() const;
 

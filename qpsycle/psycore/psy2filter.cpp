@@ -76,7 +76,7 @@ namespace psy
 			if (strcmp(Header,"PSY2SONG")==0) return true;
 			return false;
 		}
-		void Psy2Filter::preparePatternSequence( Song & song )
+		void Psy2Filter::preparePatternSequence( CoreSong & song )
 		{
 			seqList.clear();
 			song.patternSequence()->removeAll();
@@ -86,7 +86,7 @@ namespace psy
 			singleLine = song.patternSequence()->createNewLine();
 		}
 
-		bool Psy2Filter::load(const std::string & fileName, Song & song, MachineCallbacks* callbacks)
+		bool Psy2Filter::load(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks)
 		{
 			std::int32_t num;
 			RiffFile file;
@@ -122,7 +122,7 @@ namespace psy
 			return true;
 		}
 
-		bool Psy2Filter::LoadINFO(RiffFile* file,Song& song)
+		bool Psy2Filter::LoadINFO(RiffFile* file,CoreSong& song)
 		{
 			char Name[32];
 			char Author[32];
@@ -137,7 +137,7 @@ namespace psy
 			return err;
 		}
 
-		bool Psy2Filter::LoadSNGI(RiffFile* file,Song& song)
+		bool Psy2Filter::LoadSNGI(RiffFile* file,CoreSong& song)
 		{
 			std::int32_t tmp;
 			unsigned char oct;
@@ -158,7 +158,7 @@ namespace psy
 			file->Read(busMachine);
 			return true;
 		}
-		bool Psy2Filter::LoadSEQD(RiffFile* file,Song& song)
+		bool Psy2Filter::LoadSEQD(RiffFile* file,CoreSong& song)
 		{
 			std::int32_t length,tmp;
 			unsigned char playOrder[128];
@@ -186,7 +186,7 @@ namespace psy
 			return event;
 		}
 
-		bool Psy2Filter::LoadPATD(RiffFile* file,Song& song,int index)
+		bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 		{
 				std::int32_t numLines;
 				char patternName[32];
@@ -238,7 +238,7 @@ namespace psy
 */
 			return true;
 		}
-		bool Psy2Filter::LoadINSD(RiffFile* file,Song& song)
+		bool Psy2Filter::LoadINSD(RiffFile* file,CoreSong& song)
 		{
 			std::int32_t i;
 			file->Read(song.instSelected);
@@ -318,7 +318,7 @@ namespace psy
 			return true;
 		}
 				
-		bool Psy2Filter::LoadWAVD(RiffFile* file,Song& song)
+		bool Psy2Filter::LoadWAVD(RiffFile* file,CoreSong& song)
 		{
 			std::int32_t i;
 			// Skip wave selected
@@ -372,7 +372,7 @@ namespace psy
 			return true;
 		}
 
-		bool Psy2Filter::PreLoadVSTs(RiffFile* file,Song& song)
+		bool Psy2Filter::PreLoadVSTs(RiffFile* file,CoreSong& song)
 		{
 			std::int32_t i;
 			for (i=0; i<PSY2_MAX_PLUGINS; i++)
@@ -398,7 +398,7 @@ namespace psy
 		}
 		
 		#ifdef __unix__
-		bool Psy2Filter::LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
+		bool Psy2Filter::LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
 		{
 			std::int32_t i;
 			file->Read(_machineActive);
@@ -668,7 +668,7 @@ namespace psy
 			
 			return true;
 		}
-		bool Psy2Filter::TidyUp(RiffFile*file,Song&song,convert_internal_machines::Converter* converter)
+		bool Psy2Filter::TidyUp(RiffFile*file,CoreSong&song,convert_internal_machines::Converter* converter)
 		{
 			std::int32_t i;
 			// Clean "pars" array.
