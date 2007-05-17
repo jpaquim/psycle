@@ -39,7 +39,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QInputDialog>
+
 #include <iostream>
+#include <iomanip>
 
  MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : machineView(macView)
@@ -47,8 +49,11 @@
      mac_ = mac;
      left_ = left;
      top_ = top;
-     nameItem = new QGraphicsTextItem("", this);
+     nameItem = new QGraphicsTextItem("", this );
+     nameItem->setFont( QFont( "verdana", 7 ) );
      nameItem->setDefaultTextColor(Qt::white);
+     nameItem->setTextWidth( 90 );
+     nameItem->setPos( 5, 20 );
 
      QString string = QString::fromStdString( mac->GetEditName() );
      setName( QString(string) );
@@ -97,10 +102,16 @@
     painter->setPen( QPen( Qt::white ) );
  }
 
- void MachineGui::setName(const QString &name)
- {
-     nameItem->setPlainText(name);
- }
+void MachineGui::setName(const QString &name)
+{
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);
+	buffer.str("");
+	buffer << std::setfill('0') << std::hex << std::setw(2);
+	buffer << mac()->_macIndex << ": " << mac()->GetEditName();
+
+	nameItem->setPlainText( QString::fromStdString( buffer.str() ) );
+}
 
 void MachineGui::addWireGui(WireGui *wireGui)
 {
@@ -120,8 +131,8 @@ void MachineGui::onRenameMachineActionTriggered()
                                           "Name: ", QLineEdit::Normal,
                                           QString::fromStdString( mac()->GetEditName() ), &ok);
     if ( ok && !text.isEmpty() ) {
-        setName( text );
         mac()->SetEditName( text.toStdString() );
+        setName( text );
     }
     emit renamed();
 }
