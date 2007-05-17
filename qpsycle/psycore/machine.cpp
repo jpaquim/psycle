@@ -3,7 +3,6 @@
 #include "machine.h"
 #include "song.h"
 #include "dsp.h"
-//#include "configuration.h"
 #include <algorithm>
 //#include "analyzer.h"
 
