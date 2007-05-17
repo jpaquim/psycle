@@ -312,10 +312,6 @@ namespace psy
 				///\{
 					/// \todo This is a GUI thing... should not be here.
 					char currentOctave;
-
-					// The volume of the preview wave in the wave load dialog->
-					/// \todo This is a GUI thing... should not be here.
-					float preview_vol; 
 				///\}
 
 
