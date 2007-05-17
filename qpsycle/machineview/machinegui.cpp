@@ -51,6 +51,7 @@
      top_ = top;
 
      setHandlesChildEvents( true );
+
      nameItem = new QGraphicsTextItem("", this );
      nameItem->setFont( QFont( "verdana", 7 ) );
      nameItem->setDefaultTextColor(Qt::white);

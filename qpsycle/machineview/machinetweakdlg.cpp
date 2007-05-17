@@ -88,9 +88,13 @@ void MachineTweakDlg::createActions()
 {
 	aboutAction_ = new QAction( "About this machine", this );
 	
-	paramsResetAction_ = new QAction( "&Reset parameters", this );
-	paramsRandomAction_ = new QAction( "Ra&ndom parameters", this );
-	paramsOpenPrsAction_ = new QAction( "&Open preset dialog", this );
+	paramsResetAction_ = new QAction( "R&eset parameters", this );
+	paramsRandomAction_ = new QAction( "&Random parameters", this );
+	paramsOpenPrsAction_ = new QAction( "Open &preset dialog", this );
+
+	paramsOpenPrsAction_->setShortcut( tr("Ctrl+P") );
+	paramsRandomAction_->setShortcut( tr("Ctrl+R") );
+	paramsResetAction_->setShortcut( tr("Ctrl+E") );
 	
 	connect( aboutAction_, SIGNAL( triggered() ),
 		 this, SLOT( showAboutDialog() ) );
