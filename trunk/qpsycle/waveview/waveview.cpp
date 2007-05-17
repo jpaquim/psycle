@@ -33,10 +33,9 @@ class QVBoxLayout;
      setLayout(layout_);
 	 //TODO: this should be in the waveview.h and waveformview should be an object of WaveFormView
 	 QGraphicsView *waveformview = new QGraphicsView(this);
-	 QGraphicsScene *scene = new QGraphicsScene(waveformview);
+	 QGraphicsScene *scene = new QGraphicsScene(this);
 	 waveformview->setScene(scene);
-	 waveformview->setBackgroundBrush(QBrush(QColor(0,0,0, 255 ), Qt::SolidPattern) );
-//	 waveformview->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+	 waveformview->setBackgroundBrush( Qt::black );
 	 waveformview->adjustSize();
 
 	 toolBar_ = new QToolBar();
@@ -44,8 +43,13 @@ class QVBoxLayout;
 	 
 	 //sample loading
 	 QLabel *playLabel = new QLabel("Play: ");
+	 
 	 loadSmp_ = new QAction( "Load Sample", this );
 	 connect( loadSmp_, SIGNAL( triggered() ), this, SLOT( onLoadButtonClicked() ) );
+	 
+	 saveSmp_ = new QAction( "Save Sample", this);
+	 connect( saveSmp_, SIGNAL( triggered() ), this, SLOT( onSaveButtonClicked() ) );
+	 
 	 playsSmp_ = new QAction(QIcon(":/images/wave_playstart.png"), tr("Play From Start"), this);
 	 playSmp_ = new QAction(QIcon(":/images/wave_play.png"), tr("Play"), this);
 	 stopSmp_ = new QAction(QIcon(":/images/wave_stop.png"), tr("Stop"), this);
@@ -72,6 +76,7 @@ class QVBoxLayout;
 	 
 			 
 	 toolBar_->addAction( loadSmp_ );
+	 toolBar_->addAction( saveSmp_ );
 	 toolBar_->addSeparator();
 	 toolBar_->addWidget( playLabel );
 	 toolBar_->addAction( playsSmp_ );
@@ -108,6 +113,13 @@ void WaveView::onLoadButtonClicked()
 //					updateInstrumentCbx( song()->instSelected, true );
 	}
 	std::cout << fileName.toStdString() << std::endl;
+}
+
+void WaveView::onSaveButtonClicked()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+							"/home/neil/mymusic/samples/",
+							tr("Wave files (*.wav)"));
 }
 
 psy::core::Song* WaveView::song()
