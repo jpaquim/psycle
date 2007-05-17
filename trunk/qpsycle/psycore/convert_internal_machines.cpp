@@ -4,9 +4,6 @@
 #include "helpers/scale.hpp"
 #include "helpers/math/pi.hpp"
 #include "player.h"
-//\todo:
-//#include "configuration.h"
-
 namespace psy {
   namespace core {
     namespace convert_internal_machines {

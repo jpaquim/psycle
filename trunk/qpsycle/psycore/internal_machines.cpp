@@ -3,7 +3,6 @@
 ///\todo: These three includes need to be replaced by a "host" callback which gives such information.
 #include "song.h"
 #include "player.h"
-//#include "configuration.h"
 
 ///\todo : The information required from this include should go to constants.hpp
 #include "inputhandler.h"
