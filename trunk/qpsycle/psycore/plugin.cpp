@@ -62,7 +62,7 @@ Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , CoreSong* song
 	proxy_(*this)
 {
 	SetEditName("native plugin");
-	_audiorange=32768.0f;
+	SetAudioRange(32768.0f);
 }
 
 Plugin::~ Plugin( ) throw()

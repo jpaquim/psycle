@@ -165,7 +165,7 @@ namespace psy {
 			Machine(callbacks,MACH_LADSPA, MACHMODE_FX, id, song)
 		{
 			SetEditName("ladspa plug");
-			_audiorange = 1.0f;
+			SetAudioRange(1.0f);
 			psDescriptor = 0;
 			pluginHandle = 0;
 			libHandle_=0;

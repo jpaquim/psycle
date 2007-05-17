@@ -185,6 +185,8 @@ namespace psy
 			type_(type),
 			mode_(mode),
 			id_(id),
+			song_(song),
+			audio_range_(1.0f),
 			crashed_(),
 //			fpu_exception_mask_(),
 			_bypass(false),
@@ -192,9 +194,8 @@ namespace psy
 			_waitingForSound(false),
 			_stopped(false),
 			_worked(false),
-			_audiorange(1.0f),
-			_pSamplesL(0),
-			_pSamplesR(0),
+			_pSamplesL(new float[MAX_BUFFER_LENGTH]),
+			_pSamplesR(new float[MAX_BUFFER_LENGTH]),
 			_lVol(0),
 			_rVol(0),
 			_panning(0),
@@ -217,12 +218,9 @@ namespace psy
 			_scopeBufferIndex(0),
 			_scopePrevNumSamples(0),
 			callbacks(callbacks),
-			editName_()
+			editName_(),
+			_outDry(256)
 		{
-			_outDry = 256;
-			song_ = song;
-			_pSamplesL = new float[MAX_BUFFER_LENGTH];
-			_pSamplesR = new float[MAX_BUFFER_LENGTH];
 			// Clear machine buffer samples
 			for (int c=0; c<MAX_BUFFER_LENGTH; c++)
 			{
@@ -243,7 +241,6 @@ namespace psy
 				TWSCurrent[c] = 0;
 				TWSDestination[c] = 0;
 			}
-
 			for (int i = 0; i<MAX_CONNECTIONS; i++)
 			{
 				_inputMachines[i]=-1;
@@ -798,7 +795,6 @@ namespace psy
 			pMachine->SetPan(pMachine->_panning);
 			return pMachine;
 		}
-
 
 		void Machine::SaveFileChunk(RiffFile* pFile)
 		{

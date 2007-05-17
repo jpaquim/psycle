@@ -24,7 +24,7 @@ namespace psy {
 			SetEditName("Dummy");
 //			DefineStereoInput(1);
 //			DefineStereoOutput(1);
-			_audiorange = 32768.0f;
+			SetAudioRange(32768.0f);
 		}
 		
 		Dummy::~Dummy() throw()
@@ -228,7 +228,7 @@ namespace psy {
 		{
 			SetEditName("Master");
 			_outDry = 256;
-			_audiorange = 32768.0f;
+			SetAudioRange(32768.0f);
 //			DefineStereoInput(1);
 		}
 		
@@ -404,7 +404,7 @@ namespace psy {
 		{
 			SetEditName("Mixer");
 			_numPars = 255;
-			_audiorange = 32768.0f;
+			SetAudioRange(32768.0f);
 //			DefineStereoInput(24);
 //			DefineStereoOutput(1);
 		}

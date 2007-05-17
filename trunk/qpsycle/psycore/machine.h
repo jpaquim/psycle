@@ -450,7 +450,6 @@ namespace psy
 					virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 				protected:
 					friend class CoreSong;
-					
 			///\}
 
 			///\name connections ... ports
@@ -495,7 +494,16 @@ namespace psy
 					virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; };
 			///\}
 
-			virtual float GetAudioRange() { return _audiorange; }
+			///\name audio range
+			///\{
+				public:
+					///\todo doc
+					virtual float GetAudioRange() { return audio_range_; }
+				protected:
+					void SetAudioRange(float audio_range) { audio_range_ = audio_range; }
+				private:
+					float audio_range_;
+			///\}
 
 			///\name amplification of the signal in connections/wires
 			///\{
@@ -561,7 +569,6 @@ namespace psy
 			bool _waitingForSound;
 			bool _stopped;
 			bool _worked;
-			float _audiorange;
 			/// left data
 			float *_pSamplesL;
 			/// right data
