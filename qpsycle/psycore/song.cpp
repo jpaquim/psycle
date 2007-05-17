@@ -74,11 +74,7 @@ namespace psy
 			fileName = "Untitled.psy";
 			
 			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
-		}
-		
-		UISong::UISong(MachineCallbacks* callbacks)
-		: CoreSong(callbacks)
-		{
+
 			_trackArmedCount = 0;
 			for(int i(0) ; i < MAX_TRACKS; ++i)
 			{
@@ -88,6 +84,11 @@ namespace psy
 			instSelected = 0;
 			midiSelected = 0;
 			auxcolSelected = 0;
+		}
+		
+		UISong::UISong(MachineCallbacks* callbacks)
+		: CoreSong(callbacks)
+		{
 		}
 
 		Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) 
