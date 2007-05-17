@@ -39,7 +39,11 @@ namespace psy {
           riff.Read(machine._inputConVol);
           riff.Read(machine._connection);
           riff.Read(machine._inputCon);
-          riff.Read(machine._connectionPoint);
+          {
+                    std::int32_t dummy;
+                    riff.Read(dummy); // connection point x
+                    riff.Read(dummy); // connection point y
+          }
           riff.Read(machine._connectedInputs);
           riff.Read(machine._connectedOutputs);
           riff.Read(machine._panning);
