@@ -114,7 +114,7 @@ bool Plugin::Instance( const std::string & file_name )
 				if(_pInfo->Version < MI_VERSION) std::cerr << "plugin format is too old" << _pInfo->Version << file_name <<std::endl;
 				fflush(stdout);
 				_isSynth = _pInfo->Flags == 3;
-				if(_isSynth) _mode = MACHMODE_GENERATOR;
+				if(_isSynth) mode(MACHMODE_GENERATOR);
 			strncpy(_psShortName,_pInfo->ShortName,15);
 			_psShortName[15]='\0';
 			char buf[32];
@@ -165,21 +165,21 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
 	int ns = numSamples;
 	int us = startSample;
-	if(_mode == MACHMODE_GENERATOR)
+	if(mode() == MACHMODE_GENERATOR)
 	{
 		if (!_mute) _stopped = false;
 		else _stopped = true;
 	}
 
 	if (!_mute) {
-		if((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
+		if((mode() == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
 			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
 		}
 	}
 	return numSamples;
 /*
 	if (!_mute) {
-		if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
+		if ((mode() == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
 			int ns = numSamples;
 			int us = startSample;
 					while (ns)

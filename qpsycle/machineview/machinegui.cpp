@@ -227,7 +227,7 @@ void MachineGui::onToggleSoloActionTriggered()
         mac()->song()->machineSoloed = -1;
         for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
             if ( mac()->song()->_pMachine[i] ) {
-                if (( mac()->song()->_pMachine[i]->_mode == psy::core::MACHMODE_GENERATOR )) {
+                if (( mac()->song()->_pMachine[i]->mode() == psy::core::MACHMODE_GENERATOR )) {
                     mac()->song()->_pMachine[i]->_mute = false;
                 }
             }
@@ -236,7 +236,7 @@ void MachineGui::onToggleSoloActionTriggered()
         for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
             if ( mac()->song()->_pMachine[i] )
             {
-                if (( mac()->song()->_pMachine[i]->_mode == psy::core::MACHMODE_GENERATOR ) && (i != mac()->id()))
+                if (( mac()->song()->_pMachine[i]->mode() == psy::core::MACHMODE_GENERATOR ) && (i != mac()->id()))
                 {
                     mac()->song()->_pMachine[i]->_mute = true;
                     mac()->song()->_pMachine[i]->_volumeCounter=0.0f;

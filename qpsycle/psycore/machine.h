@@ -377,9 +377,9 @@ namespace psy
 				public:
 					///\see enum MachineType which defined somewhere outside
 					typedef MachineType type_type;
-					Machine::type_type inline type() const throw() { return type_; }
+					type_type inline type() const throw() { return type_; }
 				private:
-					void type(Machine::type_type type) { type_ = type; } friend class Psy2Filter;
+					void type(type_type type) { type_ = type; } friend class Psy2Filter;
 					type_type type_;
 			///\}
 
@@ -388,9 +388,10 @@ namespace psy
 				public:
 					///\see enum MachineMode which is defined somewhere outside
 					typedef MachineMode mode_type;
-					mode_type inline mode() const throw() { return _mode; }
-				//PSYCLE__PRIVATE:
-					mode_type _mode;
+					mode_type inline mode() const throw() { return mode_; }
+				private:
+					void mode(mode_type mode) { mode_ = mode; } friend class Plugin;
+					mode_type mode_;
 			///\}
 
 			///\name machine's numeric identifier used in the patterns and gui display
