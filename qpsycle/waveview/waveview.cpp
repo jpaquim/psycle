@@ -40,6 +40,7 @@ class QVBoxLayout;
 	 waveformview->adjustSize();
 
 	 toolBar_ = new QToolBar();
+	 toolBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	 
 	 //sample loading
 	 QLabel *playLabel = new QLabel("Play: ");
@@ -55,6 +56,7 @@ class QVBoxLayout;
 	 
 	 //zoom and various
 	 zoomBar_ = new QToolBar();
+	 zoomBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	 QLabel *zoomLabel = new QLabel("Zoom: ");
 	 zoomMore_ = new QAction( "+", this);
 	 zoomLess_ = new QAction("-", this);
@@ -88,23 +90,24 @@ class QVBoxLayout;
 
 void WaveView::onLoadButtonClicked()
 {
-     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-                                                "/home/neil/mymusic/samples/",
-                                                tr("Wave files (*.wav)"));
-   int si = song()->instSelected;
-std::cout << "inst sel: " << si << std::endl;
-				//added by sampler
-				if ( song()->_pInstrument[si]->waveLength != 0)
-				{
-					//if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
-				}
+	// FIXME: unhardcode the default sample directory.
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+							"/home/neil/mymusic/samples/",
+							tr("Wave files (*.wav)"));
+	int si = song()->instSelected;
+	std::cout << "inst sel: " << si << std::endl;
+	//added by sampler
+	if ( song()->_pInstrument[si]->waveLength != 0)
+	{
+		//if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
+	}
 
-				if ( song()->WavAlloc( si, fileName.toStdString().c_str() ) )
-				{
-					emit sampleAdded();
+	if ( song()->WavAlloc( si, fileName.toStdString().c_str() ) )
+	{
+		emit sampleAdded();
 //					updateInstrumentCbx( song()->instSelected, true );
-				}
-     std::cout << fileName.toStdString() << std::endl;
+	}
+	std::cout << fileName.toStdString() << std::endl;
 }
 
 psy::core::Song* WaveView::song()
