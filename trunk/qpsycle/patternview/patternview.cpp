@@ -98,7 +98,7 @@ if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the nex
 			psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
 			event.setNote( octave() * 12 + note );
 			event.setSharp( false/*drawArea->sharpMode()*/ );
-			if (tmac) event.setMachine( tmac->_macIndex );
+			if (tmac) event.setMachine( tmac->id() );
 			if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
 				event.setInstrument( song_->instSelected );
 			}

@@ -211,7 +211,7 @@ void MachineTweakDlg::showEvent( QShowEvent *event )
 	buffer.setf(std::ios::uppercase);
 	buffer.str("");
 	buffer << std::setfill('0') << std::hex << std::setw(2);
-	buffer << pMachine_->_macIndex << ": " << pMachine_->GetEditName();
+	buffer << pMachine_->id() << ": " << pMachine_->GetEditName();
 
 	setWindowTitle( QString::fromStdString( buffer.str() ) );
 

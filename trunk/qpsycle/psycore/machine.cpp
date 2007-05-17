@@ -184,7 +184,7 @@ namespace psy
 		:
 			_type(type),
 			_mode(mode),
-			_macIndex(id),
+			id_(id),
 			crashed_(),
 //			fpu_exception_mask_(),
 			_bypass(false),
@@ -361,8 +361,8 @@ namespace psy
 
 		bool Machine::Disconnect( Machine& dstMac )
 		{
-            int wireIndex = FindOutputWire( dstMac._macIndex );
-            int dstWireIndex = dstMac.FindInputWire( _macIndex );
+            int wireIndex = FindOutputWire(dstMac.id());
+            int dstWireIndex = dstMac.FindInputWire(this->id());
 
             _connection[wireIndex] = false;
             _outputMachines[wireIndex] = -1;
@@ -539,9 +539,9 @@ namespace psy
 								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
-								//std::cout << pInMachine->_macIndex << "before work" << numSamples << std::endl;
+								//std::cout << pInMachine->id() << "before work" << numSamples << std::endl;
 								pInMachine->Work( numSamples );
-								//std::cout << pInMachine->_macIndex << "after work" << numSamples << std::endl;
+								//std::cout << pInMachine->id() << "after work" << numSamples << std::endl;
 							}
 							/*
 							This could be a different Undenormalize funtion, using the already calculated

@@ -72,7 +72,7 @@ private slots:
     void onPatternNameChanged();
     void onCategoryColorChanged();
     void onOctaveComboBoxIndexChanged( int newIndex );
-    void onMachineDeleted( int macIndex );
+    void onMachineDeleted( int machine_id );
     void onMachineRenamed();
 
     void playFromStart();

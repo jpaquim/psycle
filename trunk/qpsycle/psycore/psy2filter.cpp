@@ -885,7 +885,7 @@ namespace psy
 			{
 				if (song._pMachine[i])
 				{
-					song._pMachine[i]->_macIndex = i;
+					song._pMachine[i]->id(i);
 					for (int j = i+1; j < MAX_MACHINES-1; j++)
 					{
 						if (song._pMachine[i] == song._pMachine[j])
