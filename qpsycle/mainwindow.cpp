@@ -482,7 +482,7 @@ void MainWindow::populateMachineCombo()
         if( song_->_pMachine[b]) {
             buffer.str("");
             buffer << std::setfill('0') << std::hex << std::setw(2);
-            buffer << b << ": " << song_->_pMachine[b]->_editName;
+            buffer << b << ": " << song_->_pMachine[b]->GetEditName();
             macCombo_->addItem( QString::fromStdString( buffer.str() ) );
 
             //cb->SetItemData(cb->GetCount()-1,b);
@@ -504,7 +504,7 @@ void MainWindow::populateMachineCombo()
         if(song_->_pMachine[b]) {
             buffer.str("");
             buffer << std::setfill('0') << std::hex << std::setw(2);
-            buffer << b << ": " << song_->_pMachine[b]->_editName;
+   	        buffer << b << ": " << song_->_pMachine[b]->GetEditName();
             macCombo_->addItem( QString::fromStdString( buffer.str() ) );
             //cb->SetItemData(cb->GetCount()-1,b);
             if (!found) selected++;

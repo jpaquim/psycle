@@ -69,7 +69,7 @@ namespace psy
 				_mute = true;
 			}
 			std::ostringstream s;
-			s << "Machine: " << _editName << ": " << GetDllName();
+			s << "Machine: " << GetEditName() << ": " << GetDllName();
 			s << std::endl << e.what() << std::endl;
 			if(minor_problem)
 			{
@@ -216,9 +216,8 @@ namespace psy
 			_pScopeBufferR(0),
 			_scopeBufferIndex(0),
 			_scopePrevNumSamples(0),
-      callbacks(callbacks),
-			_editName("")
-			
+			callbacks(callbacks),
+			editName_()
 		{
 			_outDry = 256;
 			song_ = song;
@@ -754,9 +753,9 @@ namespace psy
 				//it's still necessary to limit editname length, but i'm inclined to think 128 is plenty..
 				std::vector<char> nametemp(128);
 				pFile->ReadString(&nametemp[0], nametemp.size());
-				pMachine->_editName.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
+				pMachine->editName_.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
 			}
-			if(bDeleted) pMachine->_editName += " (replaced)";
+			if(bDeleted) pMachine->editName_ += " (replaced)";
 			if(!fullopen) return pMachine;
 			if(!pMachine->LoadSpecificChunk(pFile,version))
 			{
@@ -786,7 +785,7 @@ namespace psy
 					p->_connection[i]=pMachine->_connection[i];
 					p->_inputCon[i]=pMachine->_inputCon[i];
 				}
-				pMachine->_editName += " (replaced)";
+				pMachine->editName_ += " (replaced)";
 				p->_numPars = 0;
 				delete pMachine;
 				pMachine = p;

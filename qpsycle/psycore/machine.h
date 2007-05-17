@@ -510,10 +510,10 @@ namespace psy
 					virtual std::string GetName() const = 0;
 
 				public:
-					virtual std::string const &GetEditName() { return _editName; }
-					virtual void SetEditName(std::string editname) { _editName = editname; }
-				//PSYCLE__PRIVATE:
-					std::string  _editName;
+					virtual std::string const & GetEditName() { return editName_; }
+					virtual void SetEditName(std::string const & editName) { editName_ = editName; }
+				private:
+					std::string  editName_;
 			///\}
 
 			///\name parameters
@@ -546,7 +546,7 @@ namespace psy
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///\todo below are unencapsulated data members
 
-								public:
+		public:
 //		PSYCLE__PRIVATE:
 
 			InPort *inports;
@@ -647,9 +647,13 @@ namespace psy
 				///\todo hardcoded limits and wastes
 				float TWSDestination[MAX_TWS];
 			///\}
-											float _lMax;
-	             float _rMax;
+			
+			///\name please someone document these
+			///\{ 
+				float _lMax;
+				float _rMax;
 				int _outDry;
+			///\}
 		};
 	}
 }
