@@ -119,14 +119,6 @@ namespace psy
 			}*/
 		}
 
-		///\todo this comes from mfc and is probably not used anymore
-		class CPoint
-		{
-			public:
-					int x;
-					int y;
-		};
-
 		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
 		{
@@ -610,13 +602,6 @@ namespace psy
 				/// Outgoing connections activated
 				///\todo hardcoded limits and wastes
 				bool _connection[MAX_CONNECTIONS];
-			///\}
-
-			///\name misplaced gui stuff
-			///\{
-				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
-				///\todo hardcoded limits and wastes
-				CPoint _connectionPoint[MAX_CONNECTIONS];
 			///\}
 
 			///\name signal measurements, perhaps can be considered misplaced gui stuff

@@ -978,7 +978,11 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			pFile->Read(_connectionPoint);
+			{
+				std::int32_t dummy;
+				pFile->Read(dummy); // connection point x
+				pFile->Read(dummy); // connection point y
+			}
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 
@@ -1029,7 +1033,11 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			pFile->Read(_connectionPoint);
+			{
+				std::int32_t dummy;
+				pFile->Read(dummy); // connection point x
+				pFile->Read(dummy); // connection point y
+			}
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 			
@@ -1085,7 +1093,11 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			pFile->Read(_connectionPoint);
+			{
+				std::int32_t dummy;
+				pFile->Read(dummy); // connection point x
+				pFile->Read(dummy); // connection point y
+			}
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 
@@ -1298,7 +1310,11 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			pFile->Read(_connectionPoint);
+			{
+				std::int32_t dummy;
+				pFile->Read(dummy); // connection point x
+				pFile->Read(dummy); // connection point y
+			}
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 
@@ -1389,7 +1405,11 @@ namespace psy
 				pFile->Read(_inputConVol);
 				pFile->Read(_connection);
 				pFile->Read(_inputCon);
-				pFile->Read(_connectionPoint);
+				{
+					std::int32_t dummy;
+					pFile->Read(dummy); // connection point x
+					pFile->Read(dummy); // connection point y
+				}
 				pFile->Read(_connectedInputs);
 				pFile->Read(_connectedOutputs);
 
