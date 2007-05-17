@@ -353,10 +353,9 @@ namespace psy
 			song.setLinesPerBeat(temp);
 			// current octave
 			file->Read(temp);
-			song.currentOctave = temp;
+			// note: we don't change the current octave of the gui anymore when loading a song
 			// machineSoloed
-			//\todo:
-			// we need fix destroy machine, because it clears machineSoloed
+			///\todo we need fix destroy machine, because it clears machineSoloed
 			file->Read(temp);
 			song.machineSoloed = temp;
 			// trackSoloed

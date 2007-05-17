@@ -49,9 +49,6 @@ namespace psy
 			setAuthor("Unnamed");
 			setComment("No Comments");
 
-			/// gui stuff
-			currentOctave=4;
-
 			// General properties
 			{
 				setBpm(125.0f);
