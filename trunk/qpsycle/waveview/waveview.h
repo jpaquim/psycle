@@ -24,6 +24,7 @@
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QWidget>
+#include <QSlider>
 
  class WaveView : public QWidget
  {
@@ -44,6 +45,7 @@ signals:
     psy::core::Song *song_;
 	
 	QVBoxLayout *layout_;
+	
     QToolBar *toolBar_;
 	QAction *loadSmp_;
 	QAction *playSmp_;	
@@ -51,6 +53,12 @@ signals:
 	QAction *stopSmp_;
 	
 	QAction *ampEfx_;
+	
+	
+	QToolBar *zoomBar_;
+	QAction *zoomMore_;
+	QSlider *zoomSlide_;
+	QAction *zoomLess_;
  };
 
  #endif

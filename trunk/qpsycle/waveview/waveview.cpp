@@ -22,6 +22,7 @@ class QVBoxLayout;
 
 #include <QtGui>
 #include <iostream>
+ #include <QWidget> //temp... just for testing...
 
  WaveView::WaveView( psy::core::Song *song, QWidget *parent) 
     : QWidget(parent)
@@ -29,6 +30,10 @@ class QVBoxLayout;
      song_ = song;
      layout_ = new QVBoxLayout();
      setLayout(layout_);
+	 
+	 QWidget *waveformview = new QWidget(this, Qt::Widget);
+	 waveformview->setAutoFillBackground ( true );
+	 waveformview->adjustSize();
 	 
 	 toolBar_ = new QToolBar();
 	 
@@ -43,10 +48,26 @@ class QVBoxLayout;
 	 //effects
 	 QLabel *efxLabel = new QLabel("Effects: ");
 	 ampEfx_ = new QAction("Amplify", this);
+	 
+	 //zoom and various
+	 zoomBar_ = new QToolBar();
+	 QLabel *zoomLabel = new QLabel("Zoom: ");
+	 zoomMore_ = new QAction( "+", this);
+	 zoomLess_ = new QAction("-", this);
+	 zoomSlide_ = new QSlider(Qt::Horizontal, this);
+	 zoomSlide_->setMinimum(0);
+	 zoomSlide_->setMaximum(20);
+	 zoomSlide_->setPageStep(2);
+	 
+	 zoomBar_->addWidget( zoomLabel );
+	 zoomBar_->addAction( zoomLess_ );
+	 zoomBar_->addWidget( zoomSlide_ );
+	 zoomBar_->addAction( zoomMore_ );
+	 
 			 
 	 toolBar_->addAction( loadSmp_ );
 	 toolBar_->addSeparator();
-	 toolBar_->addWidget( playLabel);
+	 toolBar_->addWidget( playLabel );
 	 toolBar_->addAction( playsSmp_ );
 	 toolBar_->addAction( playSmp_ );
 	 toolBar_->addAction( stopSmp_ );
@@ -56,6 +77,8 @@ class QVBoxLayout;
 	 
 
      layout_->addWidget( toolBar_ );
+	 layout_->addWidget( waveformview );
+	 layout_->addWidget( zoomBar_ );
  }
 
 void WaveView::onLoadButtonClicked()
