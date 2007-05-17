@@ -71,7 +71,7 @@ namespace psy
 		}
 
 
-		void Psy3Filter::preparePatternSequence( Song & song )
+		void Psy3Filter::preparePatternSequence( CoreSong & song )
 		{
 			seqList.clear();
 			song.patternSequence()->removeAll();
@@ -81,7 +81,7 @@ namespace psy
 			singleLine = song.patternSequence()->createNewLine();
 		}
 
-		bool Psy3Filter::load( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
+		bool Psy3Filter::load( const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
 		{
 			RiffFile file;
 			file.Open(fileName);
@@ -283,7 +283,7 @@ namespace psy
 			return true;
 		}
 
-		int Psy3Filter::LoadSONGv0(RiffFile* file,Song& song)
+		int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& song)
 		{
 			std::uint32_t fileversion = 0;
 			std::uint32_t size = 0;
@@ -316,7 +316,7 @@ namespace psy
 
 
 
-		bool Psy3Filter::LoadINFOv0(RiffFile* file,Song& song,int minorversion)
+		bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 				char Name[64];
 				char Author[64];
@@ -330,7 +330,7 @@ namespace psy
 				song.setComment(Comment);
 				return err;
 		}
-		bool Psy3Filter::LoadSNGIv0(RiffFile* file,Song& song,int minorversion)
+		bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 			std::uint32_t temp(0);
 			std::uint16_t temp16(0);
@@ -384,7 +384,7 @@ namespace psy
 		}
 
 
-		bool Psy3Filter::LoadSEQDv0(RiffFile* file,Song& song,int minorversion)
+		bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 			std::uint32_t index = 0;
 			std::uint32_t temp;
@@ -419,7 +419,7 @@ namespace psy
 			return event;
 		}
 
-		bool Psy3Filter::LoadPATDv0(RiffFile* file,Song& song,int minorversion)
+		bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 			std::uint32_t index = 0;
 			std::uint32_t temp;
@@ -484,7 +484,7 @@ namespace psy
 			return fileread;
 		}
 
-		bool Psy3Filter::LoadMACDv0(RiffFile* file,Song& song,int minorversion, MachineCallbacks* callbacks)
+		bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks)
 		{
 			std::uint32_t index = 0;
 
@@ -498,7 +498,7 @@ namespace psy
 			}
 			return (bool)song._pMachine[index];
 		}
-		bool Psy3Filter::LoadINSDv0(RiffFile* file,Song& song,int minorversion)
+		bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 			std::uint32_t index = 0;
 			file->Read(index);

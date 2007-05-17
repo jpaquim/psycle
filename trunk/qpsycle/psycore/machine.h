@@ -30,7 +30,7 @@ namespace psy
 		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
 
 		class Machine; // forward declaration
-		class Song;
+		class CoreSong; // forward declaration
 
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error
@@ -119,11 +119,13 @@ namespace psy
 			}*/
 		}
 
-								class CPoint {
-								public:
-										int x;
-										int y;
-								};
+		///\todo this comes from mfc and is probably not used anymore
+		class CPoint
+		{
+			public:
+					int x;
+					int y;
+		};
 
 		/// Class for the Internal Machines' Parameters.
 		class CIntMachParam			
@@ -279,10 +281,10 @@ namespace psy
 		};
 
     class MachineCallbacks {
-    public:
+		public:
 			virtual const PlayerTimeInfo & timeInfo() const = 0;
-      virtual bool autoStopMachines() const = 0;
-    };
+			virtual bool autoStopMachines() const = 0;
+	};
 
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
@@ -410,15 +412,24 @@ namespace psy
 					id_type _macIndex;
 			///\}
 
-			public:
-        Machine(MachineCallbacks* callbacks, type_type type, mode_type mode, id_type id, Song * song);
-				virtual ~Machine() throw();
-				Song* song();
+			///\name ctor/dtor
+			///\{
+				public:
+					Machine(MachineCallbacks* callbacks, type_type type, mode_type mode, id_type id, CoreSong * song);
+					virtual ~Machine() throw();
+			///\}
+			
+		    protected:
+        		MachineCallbacks* callbacks;
 
-    protected:
-        MachineCallbacks* callbacks;
-    private:
-				Song* _pSong;
+			///\name song
+			///\{
+				public:
+					/// the song this machine belongs to
+					CoreSong* song() { return song_; }
+			    private:
+					CoreSong* song_;
+			///\}
 
 			///\name the life cycle of a mahine
 			///\{
@@ -437,13 +448,13 @@ namespace psy
 				public:
 					virtual void SaveDllName(RiffFile * pFile);
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-					static Machine * LoadFileChunk(Song* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
+					static Machine * LoadFileChunk(CoreSong* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
 					virtual void SaveFileChunk(RiffFile * pFile);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
 					/// Loader for psycle fileformat version 2.
 					virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 				protected:
-					friend class Song;
+					friend class CoreSong;
 					
 			///\}
 

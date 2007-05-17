@@ -18,7 +18,7 @@ namespace psy {
 
 		std::string Dummy::_psName = "DummyPlug";
 
-		Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
+		Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 			:
       Machine(callbacks, MACH_DUMMY, MACHMODE_FX, id, song)
 		{
@@ -57,7 +57,7 @@ namespace psy {
 
 		std::string DuplicatorMac::_psName = "Dupe it!";
 
-		DuplicatorMac::DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
+		DuplicatorMac::DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 			:
       Machine(callbacks, MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
 		{
@@ -219,7 +219,7 @@ namespace psy {
 
 		float * Master::_pMasterSamples = 0;
 
-		Master::Master(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
+		Master::Master(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 			:
       Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
@@ -396,7 +396,7 @@ namespace psy {
 
 		std::string Mixer::_psName = "Mixer";
 
-		Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id, Song* song )
+		Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song )
 			:
       Machine(callbacks, MACH_MIXER, MACHMODE_FX, id, song)
 		{
@@ -789,7 +789,7 @@ namespace psy {
 #endif
 
 
-		LFO::LFO(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
+		LFO::LFO(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 			:
       Machine(callbacks, MACH_LFO, MACHMODE_GENERATOR, id, song)
 		{

@@ -12,7 +12,7 @@ namespace psy
 	{
 		std::string Sampler::_psName = "Sampler";
 
-		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, Song* song)
+		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 		:
 			Machine(callbacks, MACH_SAMPLER, MACHMODE_GENERATOR, id, song)
 		{

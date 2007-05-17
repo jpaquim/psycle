@@ -1,22 +1,22 @@
 /***************************************************************************
-	*   Copyright (C) 2007 Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef PSY2FILTER_H
 #define PSY2FILTER_H
 
@@ -78,18 +78,18 @@ namespace psy
 			protected:
 
 				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(const std::string & fileName, Song & song, MachineCallbacks* callbacks);
+				virtual bool load(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
 
-				virtual bool LoadINFO(RiffFile* file,Song& song);
-				virtual bool LoadSNGI(RiffFile* file,Song& song);
-				virtual bool LoadSEQD(RiffFile* file,Song& song);
-				virtual bool LoadPATD(RiffFile* file,Song& song,int index);
-				virtual bool LoadINSD(RiffFile* file,Song& song);
-				virtual bool LoadWAVD(RiffFile* file,Song& song);
-				virtual bool PreLoadVSTs(RiffFile* file,Song& song);
+				virtual bool LoadINFO(RiffFile* file,CoreSong& song);
+				virtual bool LoadSNGI(RiffFile* file,CoreSong& song);
+				virtual bool LoadSEQD(RiffFile* file,CoreSong& song);
+				virtual bool LoadPATD(RiffFile* file,CoreSong& song,int index);
+				virtual bool LoadINSD(RiffFile* file,CoreSong& song);
+				virtual bool LoadWAVD(RiffFile* file,CoreSong& song);
+				virtual bool PreLoadVSTs(RiffFile* file,CoreSong& song);
 				#ifdef __unix__
-				virtual bool LoadMACD(RiffFile* file,Song& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
-				virtual bool TidyUp(RiffFile* file,Song &song,convert_internal_machines::Converter* converter);
+				virtual bool LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
+				virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
 								#endif				
 	
 
@@ -113,7 +113,7 @@ namespace psy
 				unsigned char busEffect[64];
 				VSTLoader vstL[256];
 
-				void preparePatternSequence(Song & song);
+				void preparePatternSequence(CoreSong & song);
 				PatternEvent convertEntry( unsigned char * data ) const;
 	
 	

@@ -127,7 +127,7 @@ namespace psy {
 			return isPsy4;		
 		}
 
-		bool Psy4Filter::load( const std::string & fileName, Song & song, MachineCallbacks* callbacks )
+		bool Psy4Filter::load( const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
 		{
 			patMap.clear();
 
@@ -405,7 +405,7 @@ namespace psy {
 		} // load
 
 
-		bool Psy4Filter::save( const std::string & file_Name, const Song & song )
+		bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 		{
 			std::string fileName = File::extractFileNameFromPath(file_Name);
 
@@ -499,7 +499,7 @@ namespace psy {
 					
 		}
 
-		int Psy4Filter::LoadSONGv0(RiffFile* file,Song& song)
+		int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& song)
 		{
 			std::uint32_t fileversion = 0;
 			std::uint32_t size = 0;
@@ -519,7 +519,7 @@ namespace psy {
 			return chunkcount;
 		}
 
-		bool Psy4Filter::saveSONGv0( RiffFile * file, const Song & song )
+		bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong & song )
 		{
 			std::uint32_t chunkcount;
 			std::uint32_t version, size;
@@ -542,7 +542,7 @@ namespace psy {
 			return true;
 		}
 
-		bool Psy4Filter::saveMACDv0( RiffFile * file, const Song & song, int index )
+		bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong & song, int index )
 		{
 			std::uint32_t version, size;
 			std::size_t pos;
@@ -573,7 +573,7 @@ namespace psy {
 			return true;
 		}
 
-		bool Psy4Filter::saveINSDv0( RiffFile * file, const Song & song, int index )
+		bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong & song, int index )
 		{
 			std::uint32_t version, size;
 			std::size_t pos;
@@ -604,7 +604,7 @@ namespace psy {
 			return true;
 		}
 
-		bool Psy4Filter::saveWAVEv0( RiffFile * file, const Song & song, int index )
+		bool Psy4Filter::saveWAVEv0( RiffFile * file, const CoreSong & song, int index )
 		{
 			return false;
 		}

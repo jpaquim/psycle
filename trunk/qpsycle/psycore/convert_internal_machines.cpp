@@ -18,7 +18,7 @@ namespace psy {
       {
         for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
       }
-      Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff,Song &song) throw(std::exception)
+      Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff,CoreSong &song) throw(std::exception)
       {
         Plugin & plugin = * new Plugin(Player::Instance(),index,&song);
         Machine * pointer_to_machine = &plugin;
@@ -142,7 +142,7 @@ namespace psy {
         }
       }
 
-      void Converter::retweak(Song & song) const {
+      void Converter::retweak(CoreSong & song) const {
 					/// \todo must each twk repeat the machine number ?
 					// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
 /*					for(int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)

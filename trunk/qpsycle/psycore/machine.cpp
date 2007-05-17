@@ -181,7 +181,7 @@ namespace psy
 //			parent_.Work(numSamples);
 		}
 
-		Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, Song * song)
+		Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
 		:
 			_type(type),
 			_mode(mode),
@@ -222,7 +222,7 @@ namespace psy
 			
 		{
 			_outDry = 256;
-			_pSong = song;
+			song_ = song;
 			_pSamplesL = new float[MAX_BUFFER_LENGTH];
 			_pSamplesR = new float[MAX_BUFFER_LENGTH];
 			// Clear machine buffer samples
@@ -448,7 +448,7 @@ namespace psy
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = _pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = song()->_pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -465,7 +465,7 @@ namespace psy
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = _pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = song()->_pMachine[_outputMachines[WireIndex]];
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -526,7 +526,7 @@ namespace psy
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = _pSong->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = song()->_pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						/*
@@ -586,7 +586,7 @@ namespace psy
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = _pSong->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = song()->_pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -633,7 +633,7 @@ namespace psy
 			return true;
 		};
 
-		Machine* Machine::LoadFileChunk(Song* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
+		Machine* Machine::LoadFileChunk(CoreSong* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
 		{
 			// assume version 0 for now
 			bool bDeleted(false);
@@ -969,11 +969,6 @@ int Machine::GenerateAudio( int numsamples )
 	reallocateRemainingEvents( numsamples/ timeInfo.samplesPerBeat() ); 
 	
 	return processedsamples;
-}
-
-Song * Machine::song( )
-{
-	return _pSong;
 }
 
 void Machine::reallocateRemainingEvents(double beatOffset)

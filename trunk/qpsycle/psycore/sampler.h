@@ -139,7 +139,7 @@ namespace psy{
 		{
 		public:
 			void Tick( );
-			Sampler(MachineCallbacks* callbacks, Machine::id_type id, Song* song);
+			Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song);
 			virtual void Init();
       // \todo implement SetSampleRate     
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );

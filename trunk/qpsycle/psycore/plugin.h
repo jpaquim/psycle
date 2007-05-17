@@ -1,22 +1,22 @@
 /***************************************************************************
-	*   Copyright (C) 2007 Psycledelics   *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 Psycledelics   *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
+***************************************************************************/
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
@@ -28,24 +28,21 @@
 @author  Psycledelics
 */
 
-namespace psy {
-	namespace core {
-
+namespace psy { namespace core {
 
 class PluginFxCallback : public CFxCallback
 {
 	public:
-		//HWND hWnd;
-  virtual void MessBox(char const* ptxt,char const* caption,unsigned int type);
-  virtual int GetTickLength();
-  virtual int GetSamplingRate();
-  virtual int GetBPM();
-  virtual int GetTPB();
+		virtual void MessBox(char const* ptxt,char const* caption,unsigned int type);
+	  	virtual int GetTickLength();
+		virtual int GetSamplingRate();
+		virtual int GetBPM();
+		virtual int GetTPB();
 };
 
-class Plugin;  // forward declaration
-/// Proxy between the host and a plugin.
+class Plugin; // forward declaration
 
+/// Proxy between the host and a plugin.
 class Proxy
 {
 	private:
@@ -56,10 +53,10 @@ class Proxy
 		const Plugin & host() const throw();
 		CMachineInterface & plugin() throw();
 		const CMachineInterface & plugin() const throw();
-public:
+	public:
 		Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
-
-		~Proxy() throw () { 
+		~Proxy() throw ()
+		{ 
 			// (*this)(0);  ///\todo this segfaults under windows .. investigate 
 		}
 		
@@ -86,14 +83,14 @@ public:
 		void callback() throw(); //exceptions::function_error);
 };
 
-
-class Plugin : public Machine{
-private:
-	static PluginFxCallback _callback;
+class Plugin : public Machine
+{
+	private:
+		static PluginFxCallback _callback;
 	public:
-			inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
-public:
-    Plugin(MachineCallbacks* callbacks, int index, Song* song);
+		inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
+	public:
+		Plugin(MachineCallbacks* callbacks, int index, CoreSong* song);
 
 		virtual ~Plugin() throw();
 
@@ -118,22 +115,19 @@ public:
 		bool Instance(const std::string & file_name);
 		bool LoadDll (std::string psFileName);
 
-///\name (de)serialization
-			///\{
-				public:
-					/// Loader for psycle fileformat version 2.
-					virtual bool LoadPsy2FileFormat(RiffFile* pFile);
-					virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-					virtual void SaveSpecificChunk(RiffFile * pFile);
-					virtual void SaveDllName      (RiffFile * pFile);
-			///\}
-
-
-
+		///\name (de)serialization
+		///\{
+			public:
+				/// Loader for psycle fileformat version 2.
+				virtual bool LoadPsy2FileFormat(RiffFile* pFile);
+				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+				virtual void SaveSpecificChunk(RiffFile * pFile);
+				virtual void SaveDllName      (RiffFile * pFile);
+		///\}
 
 		inline CMachineInfo * GetInfo() throw() { return _pInfo; };
-
-private:
+		
+	private:
 		void* _dll;
 		char _psShortName[16];
 		std::string _psAuthor;
@@ -144,7 +138,5 @@ private:
 		Proxy proxy_;
 };
 
-
-}
-}
+}}
 #endif
