@@ -28,6 +28,10 @@
 #include "machinetweakdlg.h"
 #include "machinegui.h"
 
+#include <iostream>
+#include <iomanip>
+
+
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDial>
@@ -44,12 +48,12 @@
 #include <QCompleter>
 #include <QModelIndex>
 
+
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
 {
 	pMachine_ = macGui->mac();
 	m_macGui = macGui;
-	setWindowTitle( "Machine tweak" );
 
 
 	knobPanel = new QWidget( this );
@@ -197,26 +201,33 @@ void MachineTweakDlg::onKnobGroupChanged( KnobGroup *kGroup )
 
 void MachineTweakDlg::showEvent( QShowEvent *event )
 {
-    // FIXME: can adjustSize() be called somewhere else?
-    adjustSize();
-//    updateValues();
-    QWidget::showEvent( event );
+	// FIXME: can adjustSize() be called somewhere else?
+	adjustSize();
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);
+	buffer.str("");
+	buffer << std::setfill('0') << std::hex << std::setw(2);
+	buffer << pMachine_->_macIndex << ": " << pMachine_->GetEditName();
+
+	setWindowTitle( QString::fromStdString( buffer.str() ) );
+
+	QWidget::showEvent( event );
 }
 
 void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 {
-    if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
-        reject();		// Closes the dialog.
-    } else {
-        if ( !event->isAutoRepeat() ) {
-            int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
-            int note = NULL;
-            note = m_macGui->noteFromCommand( command );
-            if (note) {
-                emit notePress( note, pMachine_ );   
-            }
-        }
-    }
+	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
+		reject();		// Closes the dialog.
+	} else {
+		if ( !event->isAutoRepeat() ) {
+			int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+			int note = NULL;
+			note = m_macGui->noteFromCommand( command );
+			if (note) {
+				emit notePress( note, pMachine_ );   
+			}
+		}
+	}
 }
 
 void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
@@ -573,4 +584,20 @@ void PresetsDialog::onCompletionActivated( const QString &text )
 void PresetsDialog::onItemClicked( QListWidgetItem *item )
 {
 	lineEdit->setText( item->text() );
+}
+
+
+void PresetsDialog::onSavePreset() 
+{
+// 	char str[32];
+// 	str = lineEdit->text().toStdString().c_str();
+// 	if ( str[0] == '\0' )
+// 	{
+// 		qDebug("no name");
+// 		//MessageBox("You have not specified any name. Operation Aborted.","Preset Save Error",MB_OK);
+// 		return;
+// 	}
+// // 	iniPreset.SetName(str);
+// // 	AddPreset(iniPreset);
+// 	SavePresets();	
 }

@@ -115,6 +115,7 @@ public slots:
 	void usePreset();
 	void onCompletionActivated( const QString &text );
 	void onItemClicked( QListWidgetItem *item );
+	void onSavePreset();
 
 private:
 	std::map< QListWidgetItem*, psy::core::Preset > presetMap;
@@ -136,6 +137,10 @@ private:
 	QPushButton *clsBtn;
 
 	MachineGui *m_macGui;
+
+	int const static MAX_PRESETS = 256;
+
+	psy::core::Preset iniPreset;
 };
 
 
