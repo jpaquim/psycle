@@ -133,161 +133,152 @@ void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 
 void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
 {
-    // See if we hit another machine gui.
-    if ( scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
-        QGraphicsItem *itm = scene_->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) );
-        if (itm->type() == 65537) { // FIXME: un-hardcode this
-           MachineGui *dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
-           connectMachines(srcMacGui, dstMacGui); 
-        }
-    }
-    tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
-    creatingWire_ = false;
+	// See if we hit another machine gui.
+	if ( QGraphicsItem *itm = scene()->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
+		if (itm->type() == 65537) { // FIXME: un-hardcode this
+			MachineGui *dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
+			connectMachines(srcMacGui, dstMacGui); 
+		}
+	}
+	tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
+	creatingWire_ = false;
 }
-
-/*void MachineView::startRewiringDest( WireGui *wireGui, QGraphicsSceneMouseEvent *event )
-{
-    qDebug( "rewire dest" );
-}*/
 
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
-   if ( dstMacGui->mac()->acceptsConnections() ) {
-       // Check there's not already a connection.
-       // ...
-       
-       // Make a connection in the song file..
-       song_->InsertConnection( srcMacGui->mac()->_macIndex , dstMacGui->mac()->_macIndex, 1.0f);
-       
-       // Make a new wiregui connection.
-       WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );
-       scene_->addItem( newWireGui );
-   }
+	if ( dstMacGui->mac()->acceptsConnections() ) {
+		if (song_->InsertConnection( srcMacGui->mac()->_macIndex , dstMacGui->mac()->_macIndex, 1.0f)			) 
+		{
+			// Make a new wiregui connection.
+			WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );
+			scene_->addItem( newWireGui );
+		}
+	}
 }
 
 void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 {
-    int index = macGui->mac()->_macIndex;
+	int index = macGui->mac()->_macIndex;
 
-    // Remove machine and connections from the Song. 
-    song()->DestroyMachine( index );
-    scene()->removeItem( macGui );
+	// Remove machine and connections from the Song. 
+	song()->DestroyMachine( index );
+	scene()->removeItem( macGui );
 
-    // Remove machine and connections from the gui. 
-    foreach ( WireGui *wireGui, macGui->wireGuiList() ) {
-        scene()->removeItem( wireGui );
-    }
+	// Remove machine and connections from the gui. 
+	foreach ( WireGui *wireGui, macGui->wireGuiList() ) {
+		scene()->removeItem( wireGui );
+	}
 
-    emit machineDeleted( index ); 
+	emit machineDeleted( index ); 
 }
 
 void MachineView::onMachineRenamed()
 {
-    emit machineRenamed();
+	emit machineRenamed();
 }
 
 void MachineView::deleteConnection( WireGui *wireGui )
 {
-    // Delete the connection in the song file.
-    psy::core::Player::Instance()->lock();
-    psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
-    psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
-    srcMac->Disconnect( *dstMac );
-    psy::core::Player::Instance()->unlock();
+	// Delete the connection in the song file.
+	psy::core::Player::Instance()->lock();
+	psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
+	psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
+	srcMac->Disconnect( *dstMac );
+	psy::core::Player::Instance()->unlock();
 
-    // Delete the connection in the GUI.
-    scene_->removeItem( wireGui ); // FIXME: do we need to do more here?
+	// Delete the connection in the GUI.
+	scene_->removeItem( wireGui ); // FIXME: do we need to do more here?
 }
 
 MachineGui *MachineView::findByMachine( psy::core::Machine *mac )
 {
-    for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
-        MachineGui* machineGui = *it;
-        if ( machineGui->mac() == mac ) return machineGui;
-    }
-    return 0;
+	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
+		MachineGui* machineGui = *it;
+		if ( machineGui->mac() == mac ) return machineGui;
+	}
+	return 0;
 }
 
 MachineGui *MachineView::findMachineGuiByMachineIndex( int index )
 {
-    for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
-        MachineGui* machineGui = *it;
-        if ( machineGui->mac()->_macIndex == index ) return machineGui;
-    }
-    return 0;
+	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
+		MachineGui* machineGui = *it;
+		if ( machineGui->mac()->_macIndex == index ) return machineGui;
+	}
+	return 0;
 }
 
 psy::core::Song *MachineView::song()
 {
-    return song_;
+	return song_;
 }
 
 void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Machine *pMachine )
 {
 
-    // stop any notes with the same value
-    StopNote(note,bTranspose,pMachine);
+	// stop any notes with the same value
+	StopNote(note,bTranspose,pMachine);
 
-    if(note<0) return;
+	if(note<0) return;
 
-    // octave offset
-    if(note<120) {
-        if(bTranspose)
-            note+= octave()*12;
-        if (note > 119)
-            note = 119;
-    }
+	// octave offset
+	if(note<120) {
+		if(bTranspose)
+			note+= octave()*12;
+		if (note > 119)
+			note = 119;
+	}
 
-    // build entry
-    psy::core::PatternEvent entry;
-    entry.setNote( note );
-    entry.setInstrument( song()->auxcolSelected );
+	// build entry
+	psy::core::PatternEvent entry;
+	entry.setNote( note );
+	entry.setInstrument( song()->auxcolSelected );
 //    entry.setMachine( song()->seqBus );	// Not really needed.
 
-    entry.setCommand( 0 );
-    entry.setParameter( 0 );
+	entry.setCommand( 0 );
+	entry.setParameter( 0 );
 
-    // play it
-    if(pMachine==NULL)
-    {
-        int mgn = song()->seqBus;
+	// play it
+	if(pMachine==NULL)
+	{
+		int mgn = song()->seqBus;
 
-        if (mgn < psy::core::MAX_MACHINES) {
-            pMachine = song()->_pMachine[mgn];
-        }
-    }
+		if (mgn < psy::core::MAX_MACHINES) {
+			pMachine = song()->_pMachine[mgn];
+		}
+	}
 
-    if (pMachine) {
-        // pick a track to play it on	
-        //        if(bMultiKey)
-        {
-            int i;
-            for (i = outtrack+1; i < song()->tracks(); i++)
-            {
-                if (notetrack[i] == 120) {
-                    break;
-                }
-            }
-            if (i >= song()->tracks()) {
-                for (i = 0; i <= outtrack; i++) {
-                    if (notetrack[i] == 120) {
-                        break;
-                    }
-                }
-            }
-            outtrack = i;
-        }// else  {
-        //   outtrack=0;
-        //}
-        // this should check to see if a note is playing on that track
-        if (notetrack[outtrack] < 120) {
-            StopNote(notetrack[outtrack], bTranspose, pMachine);
-        }
+	if (pMachine) {
+		// pick a track to play it on	
+		//        if(bMultiKey)
+		{
+			int i;
+			for (i = outtrack+1; i < song()->tracks(); i++)
+			{
+				if (notetrack[i] == 120) {
+					break;
+				}
+			}
+			if (i >= song()->tracks()) {
+				for (i = 0; i <= outtrack; i++) {
+					if (notetrack[i] == 120) {
+						break;
+					}
+				}
+			}
+			outtrack = i;
+		}// else  {
+		//   outtrack=0;
+		//}
+		// this should check to see if a note is playing on that track
+		if (notetrack[outtrack] < 120) {
+			StopNote(notetrack[outtrack], bTranspose, pMachine);
+		}
 
-        // play
-        notetrack[outtrack]=note;
-        pMachine->Tick(outtrack, entry );
-    }
+		// play
+		notetrack[outtrack]=note;
+		pMachine->Tick(outtrack, entry );
+	}
 }
 
 void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMachine )
