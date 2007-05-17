@@ -20,19 +20,19 @@
 	*/
 #include "zipreader.h"
 
-#include <stdio.h>
-#include <errno.h>
+#include <cstdio>
+#include <cerrno>
 #include <fcntl.h>
 #ifdef __unix__
-			#include <unistd.h>
-			#include <sys/types.h>
-#elif defined _WIN64 || defined _WIN32 || defined __MSDOS__
-			#include <io.h>
+	#include <unistd.h>
+	#include <sys/types.h>
+#elif defined _WIN64 || defined _WIN32
+	#include <io.h>
 #endif
 #include <sys/stat.h>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #include <zlib.h>
 
