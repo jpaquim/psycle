@@ -68,7 +68,7 @@ namespace psy {
 
 		void Preset::tweakMachine( Machine & mac )
 		{
-			if( mac._type == MACH_PLUGIN ) {
+			if( mac.type() == MACH_PLUGIN ) {
 				int i = 0;
 				for (std::vector<int>::iterator it = params_.begin(); it < params_.end(); it++) {
 					try {

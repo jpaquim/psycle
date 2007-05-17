@@ -182,7 +182,7 @@ namespace psy
 
 		Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
 		:
-			_type(type),
+			type_(type),
 			_mode(mode),
 			id_(id),
 			crashed_(),
@@ -355,7 +355,7 @@ namespace psy
 			dst_machine._inputMachines[dfreebus] = this->id();
 			dst_machine._inputCon[dfreebus] = true;
 			dst_machine._connectedInputs++;
-			dst_machine.InitWireVolume(_type, dfreebus, volume);
+			dst_machine.InitWireVolume(type(), dfreebus, volume);
 			return true;
 		}
 
@@ -378,7 +378,7 @@ namespace psy
 		{
 			if (type == MACH_VST || type == MACH_VSTFX  || type == MACH_LADSPA)
 			{
-				if (this->_type == MACH_VST || this->_type == MACH_VSTFX || this->_type == MACH_LADSPA) // VST to VST, no need to convert.
+				if (this->type() == MACH_VST || this->type() == MACH_VSTFX || this->type() == MACH_LADSPA) // VST to VST, no need to convert.
 				{
 					_inputConVol[wire] = value;
 					_wireMultiplier[wire] = 1.0f;
@@ -389,7 +389,7 @@ namespace psy
 					_wireMultiplier[wire] = 0.000030517578125f; // what is it?
 				}
 			}
-			else if (this->_type == MACH_VST || this->_type == MACH_VSTFX || this->_type == MACH_LADSPA ) // native to VST, divide.
+			else if (this->type() == MACH_VST || this->type() == MACH_VSTFX || this->type() == MACH_LADSPA ) // native to VST, divide.
 			{
 				_inputConVol[wire] = value * 0.000030517578125f; // what is it?
 				_wireMultiplier[wire] = 32768.0f;
@@ -729,7 +729,7 @@ namespace psy
 			}
 			pMachine->Init();
 			int temp;
-			pMachine->_type = type;
+			pMachine->type_ = type;
 			pFile->Read(pMachine->_bypass);
 			pFile->Read(pMachine->_mute);
 			pFile->Read(pMachine->_panning);
@@ -767,7 +767,7 @@ namespace psy
 				}
 				Machine* p = new Dummy(callbacks, index, pSong);
 				p->Init();
-				p->_type=MACH_DUMMY;
+				p->type_=MACH_DUMMY;
 				p->_mode=pMachine->_mode;
 				p->_bypass=pMachine->_bypass;
 				p->_mute=pMachine->_mute;
@@ -811,7 +811,7 @@ namespace psy
 
 		void Machine::SaveFileChunk(RiffFile* pFile)
 		{
-			pFile->Write(_type);
+			pFile->Write(type());
 			SaveDllName(pFile);
 			pFile->Write(_bypass);
 			pFile->Write(_mute);

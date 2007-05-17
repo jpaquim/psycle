@@ -99,7 +99,7 @@ if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the nex
 			event.setNote( octave() * 12 + note );
 			event.setSharp( false/*drawArea->sharpMode()*/ );
 			if (tmac) event.setMachine( tmac->id() );
-			if (tmac && tmac->_type == psy::core::MACH_SAMPLER ) {
+			if (tmac && tmac->type() == psy::core::MACH_SAMPLER ) {
 				event.setInstrument( song_->instSelected );
 			}
         pattern()->setEvent( cursor.line(), cursor.track(), event );

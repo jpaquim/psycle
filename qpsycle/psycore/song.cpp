@@ -234,9 +234,8 @@ namespace psy
 
 			///\todo init problem
 			{
-				if(machine->_type == MACH_VSTFX || machine->_type == MACH_VST )
+				if(machine->type() == MACH_VSTFX || machine->type() == MACH_VST )
 				{
-					
 					// Do not call VST Init() function after Instance.
 					machine->Machine::Init();
 				}

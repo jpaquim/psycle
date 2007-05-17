@@ -377,9 +377,10 @@ namespace psy
 				public:
 					///\see enum MachineType which defined somewhere outside
 					typedef MachineType type_type;
-					Machine::type_type inline type() const throw() { return _type; }
-				//PSYCLE__PRIVATE:
-					type_type _type;
+					Machine::type_type inline type() const throw() { return type_; }
+				private:
+					void type(Machine::type_type type) { type_ = type; } friend class Psy2Filter;
+					type_type type_;
 			///\}
 
 			///\name each machine has a mode attribute so that we can make yummy switch statements
