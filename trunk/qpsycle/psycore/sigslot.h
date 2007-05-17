@@ -26,7 +26,7 @@
 //
 //		PLATFORM NOTES
 //
-//			Win32						- On Win32, the WIN32 symbol must be #defined. Most mainstream
+//			Win32						- On Win32, the _WIN32 symbol must be #defined. All mainstream
 //										  compilers do this by default, but you may need to define it
 //										  yourself if your build environment is less standard. This causes
 //										  the Win32 thread support to be compiled in and used automatically.
@@ -81,9 +81,9 @@
 #include <set>
 #include <list>
 
-#if defined(SIGSLOT_PURE_ISO) || (!defined(WIN32) && !defined(__GNUG__) && !defined(SIGSLOT_USE_POSIX_THREADS))
+#if defined(SIGSLOT_PURE_ISO) || (!defined (_WIN64) && !defined(_WIN32) && !defined(__GNUG__) && !defined(SIGSLOT_USE_POSIX_THREADS))
 #	define _SIGSLOT_SINGLE_THREADED
-#elif defined(WIN32)
+#elif defined(_WIN64) || defined(_WIN32)
 #	define _SIGSLOT_HAS_WIN32_THREADS
 #	include <windows.h>
 #elif defined(__GNUG__) || defined(SIGSLOT_USE_POSIX_THREADS)

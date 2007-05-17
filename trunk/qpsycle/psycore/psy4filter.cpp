@@ -33,19 +33,16 @@
 #include <QDomElement>
 #include <QXmlInputSource>
 
-
-#ifdef __unix__
-			#include <unistd.h>
-			#include <sys/stat.h>
-			#include <sys/types.h>
-#elif __MSDOS__ || __WIN32__ || _MSC_VER
-			#include <io.h>
-			#include <sys\stat.h>
+#if defined __unix__
+	#include <unistd.h>
+	#include <sys/types.h>
+#elif defined _WIN64 || defined _WIN32
+	#include <io.h>
 #endif
 
 #include <fcntl.h>
-#include <stdlib.h>
-#include <errno.h>
+#include <cstdlib>
+#include <cerrno>
 #include "file.h"
 #include <sys/types.h>
 #include <sys/stat.h>
