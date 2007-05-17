@@ -566,7 +566,7 @@ namespace psy
 				int j=0;
 				for ( i=0;i<128;i++ ) 
 				{
-					if (_machineActive[i] && pMac[i]->_mode != MACHMODE_GENERATOR )
+					if (_machineActive[i] && pMac[i]->mode() != MACHMODE_GENERATOR )
 					{
 						busEffect[j]=i;	
 						j++;
@@ -584,13 +584,13 @@ namespace psy
 			{
 				if (busMachine[i] != 255 && _machineActive[busMachine[i]]) 
 				{ // If there's a machine in the generators' bus that it is not a generator:
-					if (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR ) 
+					if (pMac[busMachine[i]]->mode() != MACHMODE_GENERATOR ) 
 					{
-						pMac[busMachine[i]]->_mode = MACHMODE_GENERATOR;
+						pMac[busMachine[i]]->mode(MACHMODE_GENERATOR);
 						// Older code moved the dummy to the effects bus, because it couldn't work as
 						// a generator. Now there's no problem for that, and this way we can use the
 						// Create/Replace function of the GearRack dialog.
-/*						pMac[busMachine[i]]->_mode = MACHMODE_FX;
+/*						pMac[busMachine[i]]->mode(MACHMODE_FX);
 						while (busEffect[j] != 255 && j<MAX_BUSES) 
 						{
 							j++;
@@ -603,11 +603,11 @@ namespace psy
 			}
 			for ( i=0;i<64;i++ ) 
 			{
-				if ((busMachine[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)) 
+				if ((busMachine[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busMachine[i]]->mode() != MACHMODE_GENERATOR)) 
 				{
 					busMachine[i] = 255;
 				}
-				if ((busEffect[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busEffect[i]]->_mode != MACHMODE_FX)) 
+				if ((busEffect[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busEffect[i]]->mode() != MACHMODE_FX)) 
 				{
 					busEffect[i] = 255;
 				}
@@ -751,7 +751,7 @@ namespace psy
 				{
 					if (_machineActive[busMachine[i]])
 					{
-						if (pMac[busMachine[i]]->_mode == MACHMODE_GENERATOR)
+						if (pMac[busMachine[i]]->mode() == MACHMODE_GENERATOR)
 						{
 							song._pMachine[i] = pMac[busMachine[i]];
 							_machineActive[busMachine[i]] = false; // don't update this twice;
@@ -806,7 +806,7 @@ namespace psy
 				{
 					if (_machineActive[busEffect[i]])
 					{
-						if (pMac[busEffect[i]]->_mode == MACHMODE_FX)
+						if (pMac[busEffect[i]]->mode() == MACHMODE_FX)
 						{
 							song._pMachine[i+MAX_BUSES] = pMac[busEffect[i]];
 							_machineActive[busEffect[i]] = false; // don't do this again

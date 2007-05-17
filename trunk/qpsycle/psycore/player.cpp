@@ -160,12 +160,12 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				break;
 			case GlobalEvent::SET_BYPASS:
 				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->_mode == MACHMODE_FX )
+				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->mode() == MACHMODE_FX )
 					song()._pMachine[mIndex]->_bypass = true;
 				break;
 			case GlobalEvent::UNSET_BYPASS:
 				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->_mode == MACHMODE_FX )
+				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->mode() == MACHMODE_FX )
 					song()._pMachine[mIndex]->_bypass = false;
 				break;
 			case GlobalEvent::SET_MUTE:

@@ -183,7 +183,7 @@ namespace psy
 		Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
 		:
 			type_(type),
-			_mode(mode),
+			mode_(mode),
 			id_(id),
 			crashed_(),
 //			fpu_exception_mask_(),
@@ -311,7 +311,7 @@ namespace psy
 
 		bool Machine::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
 		{
-			if(dst_machine._mode == MACHMODE_GENERATOR)
+			if(dst_machine.mode() == MACHMODE_GENERATOR)
 			{
 				std::ostringstream s;
 				s << "attempted to use a generator as destination for wire" << this->id() << " -> " << dst_machine.id();
@@ -426,7 +426,7 @@ namespace psy
 
 								bool Machine::acceptsConnections()
 								{
-												if (_mode == MACHMODE_FX || _mode == MACHMODE_MASTER) {
+												if (mode() == MACHMODE_FX || mode() == MACHMODE_MASTER) {
 																return true;
 												} else {
 																return false;  
@@ -435,7 +435,7 @@ namespace psy
 
 								bool Machine::emitsConnections()
 								{
-												if (_mode == MACHMODE_GENERATOR || _mode == MACHMODE_FX) {
+												if (mode() == MACHMODE_GENERATOR || mode() == MACHMODE_FX) {
 																return true;
 												} else {
 																return false;  
@@ -767,8 +767,8 @@ namespace psy
 				}
 				Machine* p = new Dummy(callbacks, index, pSong);
 				p->Init();
-				p->type_=MACH_DUMMY;
-				p->_mode=pMachine->_mode;
+				p->type(MACH_DUMMY);
+				p->mode(pMachine->mode());
 				p->_bypass=pMachine->_bypass;
 				p->_mute=pMachine->_mute;
 				p->_panning=pMachine->_panning;
@@ -790,20 +790,11 @@ namespace psy
 				delete pMachine;
 				pMachine = p;
 			}
-			if(index < MAX_BUSES)
-			{
-				pMachine->_mode = MACHMODE_GENERATOR;
-			}
-			else if (index < MAX_BUSES*2)
-			{
-				pMachine->_mode = MACHMODE_FX;
-				
-			}
-			else
-			{
-				pMachine->_mode = MACHMODE_MASTER;
-				
-			}
+
+			if(index < MAX_BUSES) pMachine->mode(MACHMODE_GENERATOR);
+			else if (index < MAX_BUSES * 2) pMachine->mode(MACHMODE_FX);
+			else pMachine->mode(MACHMODE_MASTER);
+
 			pMachine->SetPan(pMachine->_panning);
 			return pMachine;
 		}
