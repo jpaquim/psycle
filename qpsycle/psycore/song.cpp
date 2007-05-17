@@ -23,7 +23,6 @@ namespace psy
 			tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 			_machineLock = false;
 			Invalided = false;
-			preview_vol = 0.25f;
 
 			for(int i(0) ; i < MAX_MACHINES ; ++i) _pMachine[i] = 0;
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
@@ -42,7 +41,6 @@ namespace psy
 		{
 			_machineLock = false;
 			Invalided = false;
-			preview_vol = 0.25f;
 
 			setTracks(MAX_TRACKS);
 			seqBus=0;
