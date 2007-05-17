@@ -436,7 +436,7 @@ namespace psy
 							std::stringstream s;
 							s << "X!" << pOldMachine->GetEditName();
 							pOldMachine->SetEditName(s.str());
-							pMac[i]->_type = MACH_DUMMY;
+							pMac[i]->type(MACH_DUMMY);
 							pOldMachine->_pSamplesL = NULL;
 							pOldMachine->_pSamplesR = NULL;
 							zapObject(pOldMachine);
@@ -735,7 +735,7 @@ namespace psy
 								val*=32768.0f; // BugFix
 							}
 
-							pMac[i]->InitWireVolume(pOrigMachine->_type,c,val);
+							pMac[i]->InitWireVolume(pOrigMachine->type(),c,val);
 						}
 					}
 				}
