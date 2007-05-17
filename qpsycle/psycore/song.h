@@ -1,5 +1,6 @@
 ///\file
-///\brief interface file for psy::core::Song based on Revision 2730
+///\brief interface file for psy::core::Song
+/// based on xpsycle revision 2730
 #pragma once
 #include "patternsequence.h"
 #include "songstructs.h"
@@ -10,84 +11,120 @@
 #include "fileio.h"
 #include "cstdint.h"
 #include "patterndata.h"
-//#include "sigslot.h"
-
+#if defined PSYCLE__CORE__SIGNALS
+	#include <boost/signals.hpp>
+#endif
 namespace psy
 {
 	namespace core
 	{
-
 		class PluginFinder;
 		class PluginFinderKey;
 
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines 
 		///and their initial parameters and coordinates, wavetables
-
 		class Song 
 		{
 			public:
 				Song(MachineCallbacks*);
-
 				virtual ~Song();
 
-				void clear(); // clears all song data
+				/// clears all song data
+				void clear();
 
-				PatternSequence* patternSequence();
-				const PatternSequence & patternSequence() const;
+			///\name pattern sequence
+			///\{
+				public:
+					/// pattern sequence
+					PatternSequence const & patternSequence() const { return patternSequence_; }
+					/// pattern sequence
+					PatternSequence * patternSequence() { return &patternSequence_; }
+				private:
+					PatternSequence patternSequence_;
+			///\}
 
-				// loads a song
-				bool load(const std::string & fileName);
-				bool save(const std::string & fileName);
+			///\name (de)serialisation
+			///\{
+				public:
+					/// loads the song
+					bool load(const std::string & fileName);
+					/// saves the song
+					bool save(const std::string & fileName);
+			///\}
 
-				//authorship
-				void setName(const std::string & name);
-				std::string name() const;
-				void setAuthor(const std::string & author);
-				std::string author() const;
-				void setComment(const std::string & comment);
-				std::string comment() const;
+			///\name name of the song
+			///\{
+				public:
+					/// name of the song
+					void setName(const std::string & name);
+					/// name of the song
+					std::string const & name() const { return name_; }
+				private:
+					std::string name_;
+			///\}
+				
+			///\name author of the song
+				public:
+					/// author of the song
+					void setAuthor(const std::string & author);
+					/// author of the song
+					std::string const & author() const { return author_; }
+				private:
+					std::string author_;
+			///\}
+							
+			///\name comment on the song
+			///\{
+				public:
+					/// comment on the song
+					std::string const & comment() const { return comment_; }
+					/// comment on the song
+					void setComment(const std::string & comment);
+				private:
+					std::string comment_;
+			///\}
+			
+			///\name bpm
+			///\{
+				public:
+					/// initial bpm for the song
+					/// can be overwritten through global bpm event
+					float bpm() const { return bpm_; }
+					/// initial bpm for the song
+					/// can be overwritten through global bpm event
+					void setBpm(float bpm);
+				private:
+					float bpm_;
+			///\}
 
-				// The number of tracks in each pattern of this song.
-				unsigned int tracks() const;
-				void setTracks( unsigned int trackCount) ;
-
-				// start bpm for song, can be overwritten through global bpm event
-				void setBpm(float bpm);
-				float bpm() const;
-
-				// signals
-//				sigslot::signal2<const std::string &, const std::string &> report;
-//				sigslot::signal3<const std::uint32_t& , const std::uint32_t& , const std::string& > progress;
-
-			private:
-
-				PatternSequence patternSequence_;
-
-				unsigned int tracks_;
-				float bpm_;
-
-				//authorship
-				std::string name_;
-				std::string author_;
-				std::string comment_;
-
-
+			///\name track count
+			///\{
+				public:
+					/// number of tracks in each pattern of this song.
+					unsigned int tracks() const { return tracks_; }
+					/// number of tracks in each pattern of this song.
+					void setTracks( unsigned int tracks);
+				private:
+					unsigned int tracks_;
+			///\}
+			
 			public:
+				// signals
+				#if defined PSYCLE__CORE__SIGNALS
+					boost::signal<void (const std::string &, const std::string &)> report;
+					boost::signal<void (const std::uint32_t& , const std::uint32_t& , const std::string&)> progress;
+				#endif
 
 			///\name machines
 			///\{
 				public:
 
-					// creates a new machine in this song
-					// requirements : PluginFinder 
-					//				  PluginFinderKey
-					// return values:
-					//		succes  : machine ptr
-					//		failure : 0
-					// future  : iterator of machine (stl)container or at failure end()
-
-        Machine* createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
+					/// creates a new machine in this song
+					/// requirements : PluginFinder, PluginFinderKey
+					///\return a pointer to a new machine upon success, 0 otherwise
+					// future : iterator of machine (stl)container or at failure end()
+					Machine* createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
 
 					/// creates a new machine in this song. .. deprecated
 					Machine & CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy" ) throw(std::exception);
@@ -144,19 +181,22 @@ namespace psy
 					Machine::id_type FindBusFromIndex(Machine::id_type smac);
 			///\}
 
-			///\name instruments
-			///\{
-				public:
-			///\name IsInvalided
+			///\name IsInvalid
 			///\todo doc ... what's that?
 			///\{
 				public:
+					///\name IsInvalid
+					///\todo doc ... what's that?
 					bool IsInvalided(){return Invalided;};
-					void IsInvalided(const bool value){Invalided = value;};
+					///\name IsInvalid
+					///\todo doc ... what's that?
+					void IsInvalided(const bool value) { Invalided = value; }
 				private:
-					/// \todo doc
 					bool Invalided;
 			///\}
+
+			///\name instruments
+			///\{
 				public:
 					/// clones an instrument.
 					bool CloneIns(Instrument::id_type src, Instrument::id_type dst);
@@ -164,9 +204,9 @@ namespace psy
 					void /*Reset*/DeleteInstrument(Instrument::id_type id);
 					/// resets the instrument and delete each sample/layer that it uses. (all instruments)
 					void /*Reset*/DeleteInstruments();
-					/// delete all instruments in this song.
+					/// deletes all instruments in this song.
 					void /*Delete*/DestroyAllInstruments();
-					// Removes the sample/layer of the instrument
+					/// removes the sample/layer of the instrument
 					void DeleteLayer(Instrument::id_type id);
 			///\}
 
@@ -194,7 +234,6 @@ namespace psy
 					void DoPreviews(int amount);
 			///\}
 
-
 			///\name cpu cost measurement
 			///\{
 				public:
@@ -210,9 +249,8 @@ namespace psy
 			///\}
 
 			///\todo below are unencapsulated data members
-
-//			PSYCLE__PRIVATE: preprocessor macro stuff sux more
-				public:
+			//PSYCLE__PRIVATE: preprocessor macro stuff sux more -- stefan
+			public:
 
 				///\name machines
 				///\{
@@ -287,18 +325,20 @@ namespace psy
 
 			///\name deprecated by multiseq for appregio we need an workaround
 			///\{
-      private:
-        int m_LinesPerBeat;
-			public:
-				/// the initial ticks per beat (TPB) when the song is started playing.
-				/// This can be changed in patterns using a command, but this value will not be affected.
-        int LinesPerBeat() const;
-        void LinesPerBeat(int value);
-        void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
+				public:
+					/// the initial ticks per beat (TPB) when the song is started playing.
+					/// This can be changed in patterns using a command, but this value will not be affected.
+					unsigned int linesPerBeat() const { return linesPerBeat_; }
+					void setLinesPerBeat(const unsigned int value);
+				private:
+					unsigned int linesPerBeat_;
 
-    private:
-        MachineCallbacks *machinecallbacks;
+				public:
+					void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 
+				private:
+					MachineCallbacks *machinecallbacks;
+			///\}
 		};
 	}
 }

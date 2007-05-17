@@ -13,14 +13,12 @@
 #include "pluginfinder.h"
 #include <cassert>
 #include <sstream>
-
-
 namespace psy
 {
 	namespace core
 	{
 		Song::Song(MachineCallbacks* callbacks)
-      : machinecallbacks(callbacks)
+		: machinecallbacks(callbacks)
 		{
 			tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 			_machineLock = false;
@@ -46,21 +44,20 @@ namespace psy
 			Invalided = false;
 			preview_vol = 0.25f;
 
-
-			tracks_= MAX_TRACKS;
+			setTracks(MAX_TRACKS);
 			seqBus=0;
 
-			name_    = "Untitled";
-			author_  = "Unnamed";
-			comment_ = "No Comments";
+			setName("Untitled");
+			setAuthor("Unnamed");
+			setComment("No Comments");
 
 			/// gui stuff
 			currentOctave=4;
 
 			// General properties
 			{
-				bpm_ = 125.0f;
-				m_LinesPerBeat=4;
+				setBpm(125.0f);
+				setLinesPerBeat(4);
 			}
 			// Clean up allocated machines.
 			DestroyAllMachines(true);
@@ -74,8 +71,8 @@ namespace psy
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
-					if (_pMachine[i]) delete _pMachine[i];
-					_pMachine[i] = 0;
+				if (_pMachine[i]) delete _pMachine[i];
+				_pMachine[i] = 0;
 			}
 
 			_trackArmedCount = 0;
@@ -86,7 +83,6 @@ namespace psy
 			}
 			machineSoloed = -1;
 			_trackSoloed = -1;
-
 
 			instSelected = 0;
 			midiSelected = 0;
@@ -100,41 +96,41 @@ namespace psy
 
 
 		Machine * Song::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) 
-        {
-            int fb; 
+		{
+			int fb; 
 			if ( key == PluginFinderKey::internalSampler() ) {
-                fb = GetFreeBus();
+				fb = GetFreeBus();
 				CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb );  
 			} else if ( finder.info( key ).type() == MACH_PLUGIN ) 
 			{
-                if ( finder.info( key ).mode() == MACHMODE_FX ) {
-                    fb = GetFreeFxBus();
-                } else fb = GetFreeBus();
+				if ( finder.info( key ).mode() == MACHMODE_FX ) {
+				fb = GetFreeFxBus();
+				} else fb = GetFreeBus();
 				CreateMachine(MACH_PLUGIN, x, y, key.dllPath(), fb );
-			} else if ( finder.info( key ).type() == MACH_LADSPA ) 
-            {
-                fb = GetFreeFxBus();
+			} else if ( finder.info( key ).type() == MACH_LADSPA )
+			{
+				fb = GetFreeFxBus();
 				LADSPAMachine* plugin = new LADSPAMachine( machinecallbacks, fb, this );
 				if  ( plugin->loadDll( key.dllPath(), key.index() ) ) {
-				  plugin->SetPosX( x );
-				  plugin->SetPosY( y );
-				  if( _pMachine[fb] )  DestroyMachine( fb );
-				  _pMachine[ fb ] = plugin;
+					plugin->SetPosX( x );
+					plugin->SetPosY( y );
+					if( _pMachine[fb] )  DestroyMachine( fb );
+					_pMachine[ fb ] = plugin;
 				} else {				 
-				  delete plugin;
+					delete plugin;
 				}
 			}
 			return _pMachine[fb];
 		}
 
-    Machine & Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
-    {
-      Machine::id_type const array_index(GetFreeMachine());
-      if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
-      if(!CreateMachine(type, x, y, plugin_name, array_index))
-        throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
-      return *_pMachine[array_index];
-    }
+		Machine & Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
+		{
+			Machine::id_type const array_index(GetFreeMachine());
+			if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
+			if(!CreateMachine(type, x, y, plugin_name, array_index))
+			throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
+			return *_pMachine[array_index];
+		}
 
 		bool Song::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
 		{
@@ -169,9 +165,9 @@ namespace psy
 					break;
 				case MACH_PLUGIN:
 					{
-            Plugin* plugin = new Plugin( machinecallbacks, index, this );
-            plugin->LoadDll( plugin_name );
-            machine = plugin;
+						Plugin* plugin = new Plugin( machinecallbacks, index, this );
+						plugin->LoadDll( plugin_name );
+						machine = plugin;
 					}
 					break;
 /*				case MACH_LADSPA:
@@ -265,7 +261,6 @@ namespace psy
 			return smac;
 		}
 
-
 		void Song::DestroyAllMachines(bool write_locked)
 		{
 			_machineLock = true;
@@ -281,7 +276,9 @@ namespace psy
 							{
 								std::ostringstream s;
 								s << c << " and " << j << " have duplicate pointers";
-//								report.emit(s.str(), "Song Delete Error");
+								#if defined PSYCLE__CORE__SIGNALS
+									report.emit(s.str(), "duplicate machine found");
+								#endif
 							}
 							_pMachine[j] = 0;
 						}
@@ -292,7 +289,6 @@ namespace psy
 			}
 			_machineLock = false;
 		}
-
 
 		Machine::id_type Song::GetFreeMachine()
 		{
@@ -447,7 +443,6 @@ namespace psy
 			// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 			zapObject(_pMachine[mac]);
 		}
-
 
 		int Song::GetFreeBus()
 		{
@@ -1042,29 +1037,37 @@ namespace psy
 			return true;
 		}
 
-    void /*Reset*/Song::DeleteInstrument(Instrument::id_type id) {
-      Invalided=true;
-      _pInstrument[id]->Delete(); Invalided=false;
-    }
-    void /*Reset*/Song::DeleteInstruments() {
-      Invalided=true;
-      for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
-        _pInstrument[id]->Delete();
-      Invalided=false;
-    }
-    void /*Delete*/Song::DestroyAllInstruments() {
-      for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
-        delete _pInstrument[id];
-        _pInstrument[id] = 0;
-      }
-    }
-    void Song::DeleteLayer(Instrument::id_type id) {
-      _pInstrument[id]->DeleteLayer();
-    }
+		void /*Reset*/Song::DeleteInstrument(Instrument::id_type id)
+		{
+			Invalided=true;
+			_pInstrument[id]->Delete(); Invalided=false;
+		}
+	    
+	    void /*Reset*/Song::DeleteInstruments()
+	    {
+			Invalided=true;
+			for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
+			_pInstrument[id]->Delete();
+			Invalided=false;
+		}
+	    
+	    void /*Delete*/Song::DestroyAllInstruments()
+	    {
+			for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
+				delete _pInstrument[id];
+				_pInstrument[id] = 0;
+			}
+	    }
+	    
+	    void Song::DeleteLayer(Instrument::id_type id)
+	    {
+			_pInstrument[id]->DeleteLayer();
+		}
+	
 		void Song::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
 		{
-				///\todo reowkr for multitracking
-		/*  bool bEditMode = true;
+			///\todo reowkr for multitracking
+			/*  bool bEditMode = true;
 
 			// UNDO CODE MIDI PATTERN TWEAK
 			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
@@ -1079,7 +1082,7 @@ namespace psy
 				{
 					if(_trackArmedCount)
 					{
-		//				SelectNextTrack();
+						//SelectNextTrack();
 					}
 					else if (!Global::pConfig()->_RecordUnarmed)
 					{	
@@ -1112,21 +1115,6 @@ namespace psy
 			}*/
 		}
 
-		PatternSequence * Song::patternSequence( )
-		{
-			return &patternSequence_;
-		}
-
-		const PatternSequence & Song::patternSequence( ) const
-		{
-			return patternSequence_;
-		}
-
-		unsigned int Song::tracks( ) const
-		{
-			return tracks_;
-		}
-
 		void Song::setTracks( unsigned int trackCount )
 		{
 			tracks_ = trackCount;
@@ -1137,19 +1125,9 @@ namespace psy
 			name_ = name;
 		}
 
-		std::string Song::name( ) const
-		{
-			return name_;
-		}
-
 		void Song::setAuthor( const std::string & author )
 		{
 			author_ = author;
-		}
-
-		std::string Song::author( ) const
-		{
-			return author_;
 		}
 
 		void Song::setComment( const std::string & comment )
@@ -1157,32 +1135,16 @@ namespace psy
 			comment_ = comment;
 		}
 
-	  std::string Song::comment( ) const
-		{
-			return comment_;
-		}
-
 		void Song::setBpm( float bpm )
 		{
-				if (bpm > 0 && bpm < 1000)
-					bpm_ = bpm;
+			if (bpm > 0 && bpm < 1000) bpm_ = bpm;
 		}
 
-		float Song::bpm( ) const
+		void Song::setLinesPerBeat(const unsigned int value)
 		{
-			return bpm_;
+			if ( value < 1 ) linesPerBeat_ = 1;
+			else if ( value > 31 ) linesPerBeat_ = 31;
+			else linesPerBeat_ = value;
 		}
-
-    int Song::LinesPerBeat() const{
-      return m_LinesPerBeat;
-    }
-
-    void Song::LinesPerBeat(const int value)
-    {
-      if ( value < 1 )m_LinesPerBeat = 1;
-      else if ( value > 31 ) m_LinesPerBeat = 31;
-      else m_LinesPerBeat = value;
-    };
-
-}
+	}
 }

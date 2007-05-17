@@ -1,22 +1,22 @@
 /***************************************************************************
-	*   Copyright (C) 2007 Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #include "psy2filter.h"
 #include "fileio.h"
 
@@ -148,9 +148,9 @@ namespace psy
 			if( tmp <= 0)
 			{
 				// Shouldn't happen but has happened.
-				song.LinesPerBeat(4);
+				song.setLinesPerBeat(4);
 			}
-			else song.LinesPerBeat(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) ));
+			else song.setLinesPerBeat(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) ));
 
 			file->Read(oct);
 			song.currentOctave = oct;
@@ -205,9 +205,9 @@ namespace psy
 					indexStr = o.str();
 				SinglePattern* pat =
 						singleCat->createNewPattern(std::string(patternName)+indexStr);
-				pat->setBeatZoom(song.LinesPerBeat());
+				pat->setBeatZoom(song.linesPerBeat());
 				TimeSignature & sig =  pat->timeSignatures().back();
-				float beats = numLines / (float) song.LinesPerBeat();
+				float beats = numLines / (float) song.linesPerBeat();
 				pat->setID(index);
 				sig.setCount((int) (beats / 4) );
 				float uebertrag = beats - ((int) beats);
@@ -222,7 +222,7 @@ namespace psy
 						file->Read(entry);
 						PatternEvent event = convertEntry(entry);
 						if (!event.empty()) {
-							float position = y / (float) song.LinesPerBeat();
+							float position = y / (float) song.linesPerBeat();
 							(*pat)[position].notes()[x] = event;
 						}
 					}
