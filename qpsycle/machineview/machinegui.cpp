@@ -49,11 +49,14 @@
      mac_ = mac;
      left_ = left;
      top_ = top;
+
+     setHandlesChildEvents( true );
      nameItem = new QGraphicsTextItem("", this );
      nameItem->setFont( QFont( "verdana", 7 ) );
      nameItem->setDefaultTextColor(Qt::white);
      nameItem->setTextWidth( 90 );
      nameItem->setPos( 5, 20 );
+     nameItem->setAcceptedMouseButtons(0);
 
      QString string = QString::fromStdString( mac->GetEditName() );
      setName( QString(string) );
