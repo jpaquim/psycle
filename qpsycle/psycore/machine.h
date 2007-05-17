@@ -398,10 +398,11 @@ namespace psy
 					/// legacy
 					///\todo should be unsigned but some functions return negative values to signal errors instead of throwing an exception
 					typedef int id_type;
-					id_type id() const throw() { return _macIndex; }
-//				PSYCLE__PRIVATE:
+					id_type id() const throw() { return id_; }
+				private:
 					/// it's currently actually used as an array index, but that shouldn't be part of the interface
-					id_type _macIndex;
+					id_type id_;
+					void id(id_type id) { id_ = id; } friend class Psy2Filter;
 			///\}
 
 			///\name ctor/dtor

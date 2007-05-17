@@ -578,14 +578,14 @@ void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* select
 void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 {
     populateMachineCombo();
-    int bus = song_->FindBusFromIndex( mac->_macIndex );
+    int bus = song_->FindBusFromIndex( mac->id() );
     macCombo_->setCurrentIndex( bus );
 }
 
 void MainWindow::onMachineGuiChosen( MachineGui *macGui )
 {
     // FIXME: shouldn't rely on macCombo to set seqBus as we do here.
-    macCombo_->setCurrentIndex( macGui->mac()->_macIndex );
+    macCombo_->setCurrentIndex( macGui->mac()->id() );
 }
 
 void MainWindow::onPatternDeleted()
@@ -635,7 +635,7 @@ void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
     macView_->setOctave( newIndex );
 }
 
-void MainWindow::onMachineDeleted( int macIndex )
+void MainWindow::onMachineDeleted( int id )
 {
     populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
 }

@@ -147,7 +147,7 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
 	if ( dstMacGui->mac()->acceptsConnections() ) {
-		if (song_->InsertConnection( srcMacGui->mac()->_macIndex , dstMacGui->mac()->_macIndex, 1.0f)			) 
+		if (song_->InsertConnection( srcMacGui->mac()->id(), dstMacGui->mac()->id(), 1.0f))
 		{
 			// Make a new wiregui connection.
 			WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );
@@ -158,18 +158,15 @@ void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui 
 
 void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 {
-	int index = macGui->mac()->_macIndex;
-
+	int id = macGui->mac()->id();
 	// Remove machine and connections from the Song. 
-	song()->DestroyMachine( index );
+	song()->DestroyMachine( id );
 	scene()->removeItem( macGui );
 
 	// Remove machine and connections from the gui. 
-	foreach ( WireGui *wireGui, macGui->wireGuiList() ) {
-		scene()->removeItem( wireGui );
-	}
+	foreach ( WireGui *wireGui, macGui->wireGuiList() ) scene()->removeItem( wireGui );
 
-	emit machineDeleted( index ); 
+	emit machineDeleted( id ); 
 }
 
 void MachineView::onMachineRenamed()
@@ -203,7 +200,7 @@ MachineGui *MachineView::findMachineGuiByMachineIndex( int index )
 {
 	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
 		MachineGui* machineGui = *it;
-		if ( machineGui->mac()->_macIndex == index ) return machineGui;
+		if ( machineGui->mac()->id() == index ) return machineGui;
 	}
 	return 0;
 }

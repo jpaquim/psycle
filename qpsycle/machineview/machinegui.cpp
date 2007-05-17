@@ -79,7 +79,7 @@
      mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
      toggleMuteAct_ = new QAction( muteText, this );
      QString soloText;   
-     mac_->song()->machineSoloed == mac_->_macIndex ? soloText = "Unsolo" : soloText = "Solo";
+     mac_->song()->machineSoloed == mac_->id() ? soloText = "Unsolo" : soloText = "Solo";
      toggleSoloAct_ = new QAction( soloText, this );
 
      connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
@@ -112,7 +112,7 @@ void MachineGui::setName(const QString &name)
 	buffer.setf(std::ios::uppercase);
 	buffer.str("");
 	buffer << std::setfill('0') << std::hex << std::setw(2);
-	buffer << mac()->_macIndex << ": " << mac()->GetEditName();
+	buffer << mac()->id() << ": " << mac()->GetEditName();
 
 	nameItem->setPlainText( QString::fromStdString( buffer.str() ) );
 }
@@ -212,7 +212,7 @@ void MachineGui::onToggleMuteActionTriggered()
     {
         mac()->_volumeCounter = 0.0f;
         mac()->_volumeDisplay = 0;
-        if ( mac()->song()->machineSoloed == mac()->_macIndex ) {
+        if ( mac()->song()->machineSoloed == mac()->id() ) {
             mac()->song()->machineSoloed = -1;
         }
     }
@@ -222,7 +222,7 @@ void MachineGui::onToggleMuteActionTriggered()
 
 void MachineGui::onToggleSoloActionTriggered() 
 {
-    if (mac()->song()->machineSoloed == mac()->_macIndex ) // Unsolo it.
+    if (mac()->song()->machineSoloed == mac()->id() ) // Unsolo it.
     {
         mac()->song()->machineSoloed = -1;
         for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
@@ -236,7 +236,7 @@ void MachineGui::onToggleSoloActionTriggered()
         for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
             if ( mac()->song()->_pMachine[i] )
             {
-                if (( mac()->song()->_pMachine[i]->_mode == psy::core::MACHMODE_GENERATOR ) && (i != mac()->_macIndex))
+                if (( mac()->song()->_pMachine[i]->_mode == psy::core::MACHMODE_GENERATOR ) && (i != mac()->id()))
                 {
                     mac()->song()->_pMachine[i]->_mute = true;
                     mac()->song()->_pMachine[i]->_volumeCounter=0.0f;
@@ -245,7 +245,7 @@ void MachineGui::onToggleSoloActionTriggered()
             }
         }
         mac()->_mute = false;
-        mac()->song()->machineSoloed = mac()->_macIndex;
+        mac()->song()->machineSoloed = mac()->id();
     }
 
     scene()->update(); // FIXME: possibly more efficient to update individual machines in the loop above.
@@ -275,7 +275,7 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
     MachineGui::paint( painter, option, widget );
     mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
     painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
-    mac()->song()->machineSoloed == mac()->_macIndex ?painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
+    mac()->song()->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
     painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
 }
 
@@ -286,7 +286,7 @@ void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     toggleMuteAct_->setText( muteText );
 
     QString soloText;   
-    mac_->song()->machineSoloed == mac_->_macIndex ? soloText = "Unsolo" : soloText = "Solo";
+    mac_->song()->machineSoloed == mac_->id() ? soloText = "Unsolo" : soloText = "Solo";
     toggleSoloAct_->setText( soloText );
 
     QMenu menu;
