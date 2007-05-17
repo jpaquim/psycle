@@ -1,6 +1,6 @@
 ///\file
 ///\brief interface file for psy::core::Song
-/// based on xpsycle revision 2730
+/// based on psycle mfc revision 2730
 #pragma once
 #include "patternsequence.h"
 #include "songstructs.h"
