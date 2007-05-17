@@ -153,7 +153,7 @@ namespace psy
 			else song.setLinesPerBeat(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) ));
 
 			file->Read(oct);
-			song.currentOctave = oct;
+			// note: we don't change the current octave of the gui anymore when loading a song
 
 			file->Read(busMachine);
 			return true;

@@ -308,13 +308,6 @@ namespace psy
 					bool _saved;
 				///\}
 
-				///\name undocumented/missplaced stuff
-				///\{
-					/// \todo This is a GUI thing... should not be here.
-					char currentOctave;
-				///\}
-
-
 			///\name deprecated by multiseq for appregio we need an workaround
 			///\{
 				public:
