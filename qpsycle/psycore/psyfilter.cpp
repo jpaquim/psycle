@@ -87,7 +87,7 @@ namespace psy
 			return false;
 		}
 
-		bool PsyFilter::saveSong( const std::string & fileName, CoreSong & song, int version )
+		bool PsyFilter::saveSong( const std::string & fileName, const CoreSong & song, int version )
 		{
 			std::vector<PsyFilter*>::iterator it = filters.begin();
 			for (  ; it < filters.end(); it++) {

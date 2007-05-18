@@ -60,7 +60,7 @@ MachineView::MachineView(psy::core::Song *song)
     // Create MachineGuis for the Machines in the Song.
     for(int c=0;c<psy::core::MAX_MACHINES;c++)
     {
-        psy::core::Machine* mac = song_->_pMachine[c];
+        psy::core::Machine* mac = song_->machine(c);
         if ( mac ) {
             createMachineGui( mac );
         }
@@ -68,13 +68,13 @@ MachineView::MachineView(psy::core::Song *song)
     // Create WireGuis for connections in Song file.
     for(int c=0;c<psy::core::MAX_MACHINES;c++)
     {
-        psy::core::Machine* tmac = song_->_pMachine[c];
+        psy::core::Machine* tmac = song_->machine(c);
         if (tmac) for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
         {
             if (tmac->_connection[w]) {
                 MachineGui* srcMacGui = findByMachine(tmac);
                 if ( srcMacGui!=0 ) {
-                    psy::core::Machine *pout = song_->_pMachine[tmac->_outputMachines[w]];
+                    psy::core::Machine *pout = song_->machine(tmac->_outputMachines[w]);
                     MachineGui* dstMacGui = findByMachine(pout);
                     if ( dstMacGui != 0 ) {
                         WireGui *wireGui = createWireGui( srcMacGui, dstMacGui );
@@ -241,7 +241,7 @@ void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Ma
 		int mgn = song()->seqBus;
 
 		if (mgn < psy::core::MAX_MACHINES) {
-			pMachine = song()->_pMachine[mgn];
+			pMachine = song()->machine(mgn);
 		}
 	}
 
@@ -292,7 +292,7 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
         int mgn = song()->seqBus;
 
         if (mgn < psy::core::MAX_MACHINES) {
-            pMachine = song()->_pMachine[mgn];
+            pMachine = song()->machine(mgn);
         }
 
         for(int i=0; i<song()->tracks(); i++) {
@@ -400,7 +400,7 @@ void MachineView::cloneMachine( MachineGui *macGui )
       // we need to find an empty slot
       for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
 	{
-	  if (!song_->_pMachine[i])
+	  if (!song_->machine(i))
 	    {
 	      dst = i;
 	      break;
@@ -411,7 +411,7 @@ void MachineView::cloneMachine( MachineGui *macGui )
     {
       for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
 	{
-	  if (!song_->_pMachine[i])
+	  if (!song_->machine(i))
 	    {
 	      dst = i;
 	      break;

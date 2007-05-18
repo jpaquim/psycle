@@ -132,7 +132,7 @@ namespace psy
 					/// creates a new machine in this song.
 					bool CreateMachine(Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type);
 
-					/// Gets the first free slot in the pMachine[] Array
+					/// Gets the first free slot in the machine array
 					///\todo it's low-level.. should be private.
 					/// we have higer-level CreateMachine and CloneMachine functions already
 					//PSYCLE__DEPRECATED("low-level")
@@ -177,8 +177,8 @@ namespace psy
 					int GetFreeBus();
 					/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
 					int GetFreeFxBus();
-					/// Returns the Bus index out of a pMachine index.
-					Machine::id_type FindBusFromIndex(Machine::id_type smac);
+					/// Returns the Bus index out of a machine id.
+					Machine::id_type FindBusFromIndex(Machine::id_type);
 			///\}
 
 			///\name IsInvalid
@@ -248,6 +248,27 @@ namespace psy
 					unsigned int _sampCount;
 			///\}
 
+			///\name machines
+			///\{
+				public:
+					/// access to the machines of the song
+					///\todo hardcoded limits and wastes
+					///\todo more lightweight with a std::vector<Machine*>
+					Machine * const machine(Machine::id_type id) { return machine_[id]; }
+					/// access to the machines of the song
+					///\todo hardcoded limits and wastes
+					///\todo more lightweight with a std::vector<Machine*>
+					Machine const * const machine(Machine::id_type id) const { return machine_[id]; }
+				private:
+					void machine(Machine::id_type id, Machine * machine)
+					{
+						machine_[id] = machine;
+						machine->id(id);
+					} friend class Psy2Filter; friend class Psy3Filter; friend class Psy4Filter;
+					
+					Machine * machine_[MAX_MACHINES];
+			///\}
+			
 			///\todo below are unencapsulated data members
 			//PSYCLE__PRIVATE: preprocessor macro stuff sux more -- stefan
 			public:
@@ -257,10 +278,6 @@ namespace psy
 					/// Sort of semaphore to not allow doing something with machines when they are changing (deleting,creating, etc..)
 					/// \todo change it by a real semaphore?
 					bool _machineLock;
-					/// the array of machines.
-					///\todo hardcoded limits and wastes
-					///\todo more lightweight with a std::vector<Machine*>
-					Machine* _pMachine[MAX_MACHINES];
 					/// Current selected machine number in the GUI
 					/// \todo This is a gui thing... should not be here.
 					Machine::id_type seqBus;

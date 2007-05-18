@@ -153,7 +153,7 @@ namespace psy
 					break;
 				}
 			}
-			ResamplerQuality Cubic::GetQuality(void) { return _quality; }
+			ResamplerQuality Cubic::GetQuality(void) const { return _quality; }
 
 
 			/// interpolation work function which does linear interpolation.

@@ -23,7 +23,7 @@ namespace psy
 			tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 			_machineLock = false;
 			Invalided = false;
-			for(int i(0) ; i < MAX_MACHINES ; ++i) _pMachine[i] = 0;
+			for(int i(0) ; i < MAX_MACHINES ; ++i) machine_[i] = 0;
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
 			clear();
 		}
@@ -63,8 +63,8 @@ namespace psy
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
-				if (_pMachine[i]) delete _pMachine[i];
-				_pMachine[i] = 0;
+				if (machine_[i]) delete machine_[i];
+				machine_[i] = 0;
 			}
 
 			machineSoloed = -1;
@@ -110,13 +110,13 @@ namespace psy
 				if  ( plugin->loadDll( key.dllPath(), key.index() ) ) {
 					plugin->SetPosX( x );
 					plugin->SetPosY( y );
-					if( _pMachine[fb] )  DestroyMachine( fb );
-					_pMachine[ fb ] = plugin;
+					if( machine_[fb] )  DestroyMachine( fb );
+					machine_[ fb ] = plugin;
 				} else {				 
 					delete plugin;
 				}
 			}
-			return _pMachine[fb];
+			return machine_[fb];
 		}
 
 		Machine & CoreSong::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
@@ -125,7 +125,7 @@ namespace psy
 			if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
 			if(!CreateMachine(type, x, y, plugin_name, array_index))
 			throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
-			return *_pMachine[array_index];
+			return *machine_[array_index];
 		}
 
 		bool CoreSong::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
@@ -134,7 +134,7 @@ namespace psy
 			switch (type)
 			{
 				case MACH_MASTER:
-					if(_pMachine[MASTER_INDEX]) return false;
+					if(machine_[MASTER_INDEX]) return false;
 					index = MASTER_INDEX;
 					machine = new Master(machinecallbacks, index, this);
 					break;
@@ -230,7 +230,7 @@ namespace psy
 				}
 			}
 
-			if(_pMachine[index]) DestroyMachine(index);
+			if(machine_[index]) DestroyMachine(index);
 
 			///\todo init problem
 			{
@@ -245,14 +245,14 @@ namespace psy
 			machine->SetPosY(y);
 
 			// Finally, activate the machine
-			_pMachine[index] = machine;
+			machine_[index] = machine;
 			
 			return true;
 		}
 
 		Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac)
 		{
-			if(!_pMachine[smac]) return Machine::id_type(255);
+			if(!machine_[smac]) return Machine::id_type(255);
 			return smac;
 		}
 
@@ -261,11 +261,11 @@ namespace psy
 			_machineLock = true;
 			for(Machine::id_type c(0); c < MAX_MACHINES; ++c)
 			{
-				if(_pMachine[c])
+				if(machine_[c])
 				{
 					for(Machine::id_type j(c + 1); j < MAX_MACHINES; ++j)
 					{
-						if(_pMachine[c] == _pMachine[j])
+						if(machine_[c] == machine_[j])
 						{
 							///\todo wtf? duplicate machine? could happen if loader messes up?
 							{
@@ -275,12 +275,12 @@ namespace psy
 									report.emit(s.str(), "duplicate machine found");
 								#endif
 							}
-							_pMachine[j] = 0;
+							machine_[j] = 0;
 						}
 					}
 					DestroyMachine(c, write_locked);
 				}
-				_pMachine[c] = 0;
+				machine_[c] = 0;
 			}
 			_machineLock = false;
 		}
@@ -290,15 +290,15 @@ namespace psy
 			Machine::id_type tmac(0);
 			for(;;)
 			{
-				if(!_pMachine[tmac]) return tmac;
+				if(!machine_[tmac]) return tmac;
 				if(tmac++ >= MAX_MACHINES) return Machine::id_type(-1); // that's why ids can't be unsigned :-(
 			}
 		}
 
 		bool CoreSong::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume)
 		{
-			Machine *srcMac = _pMachine[src];
-			Machine *dstMac = _pMachine[dst];
+			Machine *srcMac = machine_[src];
+			Machine *dstMac = machine_[dst];
 			if(!srcMac || !dstMac)
 			{
 				std::ostringstream s;
@@ -314,9 +314,9 @@ namespace psy
 		{
 			Wire::id_type w;
 			float volume = 1.0f;
-			if (_pMachine[wiresource])
+			if (machine_[wiresource])
 			{
-				Machine *dmac = _pMachine[_pMachine[wiresource]->_outputMachines[wireindex]];
+				Machine *dmac = machine_[machine_[wiresource]->_outputMachines[wireindex]];
 
 				if (dmac)
 				{
@@ -325,9 +325,9 @@ namespace psy
 					if (InsertConnection(wiresource, wiredest,volume)) ///\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
 						// delete the old wire
-						_pMachine[wiresource]->_connection[wireindex] = false;
-						_pMachine[wiresource]->_outputMachines[wireindex] = -1;
-						_pMachine[wiresource]->_connectedOutputs--;
+						machine_[wiresource]->_connection[wireindex] = false;
+						machine_[wiresource]->_outputMachines[wireindex] = -1;
+						machine_[wiresource]->_connectedOutputs--;
 
 						dmac->_inputCon[w] = false;
 						dmac->_inputMachines[w] = -1;
@@ -342,13 +342,13 @@ namespace psy
 		{
 			float volume = 1.0f;
 
-			if (_pMachine[wiredest])
+			if (machine_[wiredest])
 			{					
-				Machine *smac = _pMachine[_pMachine[wiredest]->_inputMachines[wireindex]];
+				Machine *smac = machine_[machine_[wiredest]->_inputMachines[wireindex]];
 
 				if (smac)
 				{
-					_pMachine[wiredest]->GetWireVolume(wireindex,volume);
+					machine_[wiredest]->GetWireVolume(wireindex,volume);
 					if (InsertConnection(wiresource, wiredest,volume)) ///\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
 					{
 						// delete the old wire
@@ -357,9 +357,9 @@ namespace psy
 						smac->_outputMachines[wire] = 255;
 						smac->_connectedOutputs--;
 
-						_pMachine[wiredest]->_inputCon[wireindex] = false;
-						_pMachine[wiredest]->_inputMachines[wireindex] = -1;
-						_pMachine[wiredest]->_connectedInputs--;
+						machine_[wiredest]->_inputCon[wireindex] = false;
+						machine_[wiredest]->_inputMachines[wireindex] = -1;
+						machine_[wiredest]->_connectedInputs--;
 					}
 					/*
 					else
@@ -383,7 +383,7 @@ namespace psy
 					CSingleLock lock(&door, true);
 				#endif
 			#endif*/
-			Machine *iMac = _pMachine[mac];
+			Machine *iMac = machine_[mac];
 			Machine *iMac2;
 			if(iMac)
 			{
@@ -395,7 +395,7 @@ namespace psy
 					{
 						if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
 						{
-							iMac2 = _pMachine[iMac->_inputMachines[w]];
+							iMac2 = machine_[iMac->_inputMachines[w]];
 							if(iMac2)
 							{
 								for(int x=0; x<MAX_CONNECTIONS; x++)
@@ -416,7 +416,7 @@ namespace psy
 					{
 						if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
 						{
-							iMac2 = _pMachine[iMac->_outputMachines[w]];
+							iMac2 = machine_[iMac->_outputMachines[w]];
 							if(iMac2)
 							{
 								for(int x=0; x<MAX_CONNECTIONS; x++)
@@ -436,18 +436,18 @@ namespace psy
 			}
 			if(mac == machineSoloed) machineSoloed = -1;
 			// If it's a (Vst)Plugin, the destructor calls to release the underlying library
-			zapObject(_pMachine[mac]);
+			zapObject(machine_[mac]);
 		}
 
 		int CoreSong::GetFreeBus()
 		{
-			for(int c(0) ; c < MAX_BUSES ; ++c) if(!_pMachine[c]) return c;
+			for(int c(0) ; c < MAX_BUSES ; ++c) if(!machine_[c]) return c;
 			return -1; 
 		}
 
 		int CoreSong::GetFreeFxBus()
 		{
-			for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
+			for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!machine_[c]) return c;
 			return -1; 
 		}
 
@@ -745,11 +745,11 @@ namespace psy
 			//todo do better.. use a vector<InstPreview*> or something instead
 			if(wavprev.IsEnabled())
 			{
-				wavprev.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+				wavprev.Work(machine_[MASTER_INDEX]->_pSamplesL, machine_[MASTER_INDEX]->_pSamplesR, amount);
 			}
 			if(waved.IsEnabled())
 			{
-				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+				waved.Work(machine_[MASTER_INDEX]->_pSamplesL, machine_[MASTER_INDEX]->_pSamplesR, amount);
 			}
 		}
 
@@ -757,17 +757,17 @@ namespace psy
 		bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
-			if (_pMachine[src] && _pMachine[dst])
+			if (machine_[src] && machine_[dst])
 			{
 				return false;
 			}
-			if (_pMachine[dst])
+			if (machine_[dst])
 			{
 				int temp = src;
 				src = dst;
 				dst = temp;
 			}
-			if (!_pMachine[src])
+			if (!machine_[src])
 			{
 				return false;
 			}
@@ -803,7 +803,7 @@ namespace psy
 			std::uint32_t index = dst; // index
 			file.Write(index);
 
-			_pMachine[src]->SaveFileChunk(&file);
+			machine_[src]->SaveFileChunk(&file);
 
 			std::fpos_t pos2 = file.GetPos(); 
 			size = pos2 - pos - sizeof size;
@@ -842,7 +842,7 @@ namespace psy
 						Machine::id_type id(index);
 						// we had better load it
 						DestroyMachine(id);
-						_pMachine[index] = Machine::LoadFileChunk(&file,id,version);
+						machine_[index] = Machine::LoadFileChunk(&file,id,version);
 					}
 					else
 					{
@@ -861,39 +861,39 @@ namespace psy
 			file.Close();
 			boost::filesystem::remove(path);
 
-			_pMachine[dst]->SetPosX(_pMachine[dst]->GetPosX()+32);
-			_pMachine[dst]->SetPosY(_pMachine[dst]->GetPosY()+8);
+			machine_[dst]->SetPosX(machine_[dst]->GetPosX()+32);
+			machine_[dst]->SetPosY(machine_[dst]->GetPosY()+8);
 
 			// delete all connections
 
-			_pMachine[dst]->_connectedInputs = 0;
-			_pMachine[dst]->_connectedOutputs = 0;
+			machine_[dst]->_connectedInputs = 0;
+			machine_[dst]->_connectedOutputs = 0;
 
 			for (int i = 0; i < MAX_CONNECTIONS; i++)
 			{
-				if (_pMachine[dst]->_connection[i])
+				if (machine_[dst]->_connection[i])
 				{
-					_pMachine[dst]->_connection[i] = false;
-					_pMachine[dst]->_outputMachines[i] = -1;
+					machine_[dst]->_connection[i] = false;
+					machine_[dst]->_outputMachines[i] = -1;
 				}
 
-				if (_pMachine[dst]->_inputCon[i])
+				if (machine_[dst]->_inputCon[i])
 				{
-					_pMachine[dst]->_inputCon[i] = false;
-					_pMachine[dst]->_inputMachines[i] = -1;
+					machine_[dst]->_inputCon[i] = false;
+					machine_[dst]->_inputMachines[i] = -1;
 				}
 			}
 
 			#if 1
 			{
 				std::stringstream s;
-				s << _pMachine[dst]->_editName << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
-				s >> _pMachine[dst]->_editName;
+				s << machine_[dst]->_editName << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
+				s >> machine_[dst]->_editName;
 			}
 			#else ///\todo rewrite this for std::string
 				int number = 1;
-				char buf[sizeof(_pMachine[dst]->_editName)+4];
-				strcpy (buf,_pMachine[dst]->_editName);
+				char buf[sizeof(machine_[dst]->_editName)+4];
+				strcpy (buf,machine_[dst]->_editName);
 				char* ps = strrchr(buf,' ');
 				if (ps)
 				{
@@ -905,7 +905,7 @@ namespace psy
 					else
 					{
 						ps[0] = 0;
-						ps = strchr(_pMachine[dst]->_editName,' ');
+						ps = strchr(machine_[dst]->_editName,' ');
 						ps[0] = 0;
 					}
 				}
@@ -914,20 +914,20 @@ namespace psy
 				{
 					if (i!=dst)
 					{
-						if (_pMachine[i])
+						if (machine_[i])
 						{
-							if (strcmp(_pMachine[i]->_editName,buf)==0)
+							if (strcmp(machine_[i]->_editName,buf)==0)
 							{
 								number++;
-								sprintf(buf,"%s %d",_pMachine[dst]->_editName.c_str(),number);
+								sprintf(buf,"%s %d",machine_[dst]->_editName.c_str(),number);
 								i = -1;
 							}
 						}
 					}
 				}
 
-				buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
-				strcpy(_pMachine[dst]->_editName,buf);
+				buf[sizeof(machine_[dst]->_editName)-1] = 0;
+				strcpy(machine_[dst]->_editName,buf);
 			#endif*/
 
 			return true;

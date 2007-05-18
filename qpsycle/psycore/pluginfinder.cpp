@@ -302,9 +302,9 @@ namespace psy
 				info.setLibName( plugin.GetDllName() );
 				std::ostringstream o;
 				std::string version;
-				if (!(o << plugin.GetInfo()->Version )) version = o.str();
+				if (!(o << plugin.GetInfo().Version )) version = o.str();
 				info.setVersion( version );
-				info.setAuthor( plugin.GetInfo()->Author );			
+				info.setAuthor( plugin.GetInfo().Author );			
 				///\todo .. path should here stored and not evaluated in plugin
 				PluginFinderKey key( plugin.GetDllName(), fileName );
 				map_[key] = info;               

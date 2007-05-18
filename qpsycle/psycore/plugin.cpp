@@ -38,8 +38,7 @@
 
 // win32 note : mingw cannot load our shipped 1.8.2 binary plugins due c++ this and std calling convention
 
-namespace psy {
-	namespace core {
+namespace psy { namespace core {
 
 typedef CMachineInfo * (* GETINFO) ();
 typedef CMachineInterface * (* CREATEMACHINE) ();
@@ -108,21 +107,21 @@ bool Plugin::Instance( const std::string & file_name )
 				#endif
 				return false;
 			} else {
-				_pInfo = GetInfo();
-//				std::cout << _pInfo->Author << std::endl;
+				info_ = GetInfo();
+//				std::cout << info_->Author << std::endl;
 
-				if(_pInfo->Version < MI_VERSION) std::cerr << "plugin format is too old" << _pInfo->Version << file_name <<std::endl;
+				if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << file_name <<std::endl;
 				fflush(stdout);
-				_isSynth = _pInfo->Flags == 3;
+				_isSynth = info_->Flags == 3;
 				if(_isSynth) mode(MACHMODE_GENERATOR);
-			strncpy(_psShortName,_pInfo->ShortName,15);
+			strncpy(_psShortName,info_->ShortName,15);
 			_psShortName[15]='\0';
 			char buf[32];
-			strncpy(buf, _pInfo->ShortName,31);
+			strncpy(buf, info_->ShortName,31);
 			buf[31]='\0';
 			SetEditName(buf);
-			_psAuthor = _pInfo->Author;
-			_psName = _pInfo->Name;
+			_psAuthor = info_->Author;
+			_psName = info_->Name;
 			CREATEMACHINE GetInterface = 0;
 			#ifdef __unix__
 			GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
@@ -154,9 +153,9 @@ void Plugin::Init( )
 	if(proxy()())
 	{
 		proxy().Init();
-		for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
+		for(int gbp(0) ; gbp < GetInfo().numParameters ; ++gbp)
 		{
-			proxy().ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
+			proxy().ParameterTweak(gbp, GetInfo().Parameters[gbp]->DefValue);
 		}
 	}
 }
@@ -420,11 +419,11 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 	}
 	if(pData.note() == notecommands::tweak || pData.note() == notecommands::tweakeffect)
 	{
-			if( pData.instrument() < _pInfo->numParameters)
+			if( pData.instrument() < info_->numParameters)
 			{
 				int nv = (pData.command() << 8) +pData.parameter();
-					int const min = _pInfo->Parameters[pData.instrument()]->MinValue;
-					int const max = _pInfo->Parameters[pData.instrument()]->MaxValue;
+					int const min = info_->Parameters[pData.instrument()]->MinValue;
+					int const max = info_->Parameters[pData.instrument()]->MaxValue;
 					nv += min;
 					if(nv > max) nv = max;
 					try
@@ -439,7 +438,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			}
 	else if(pData.note() == notecommands::tweakslide)
 			{
-				if(pData.instrument() < _pInfo->numParameters)
+				if(pData.instrument() < info_->numParameters)
 				{
 					int i;
 					if(TWSActive)
@@ -476,8 +475,8 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 					if (i < MAX_TWS)
 					{
 						TWSDestination[i] = float(pData.command() << 8)+pData.parameter();
-						float min = float(_pInfo->Parameters[pData.instrument()]->MinValue);
-						float max = float(_pInfo->Parameters[pData.instrument()]->MaxValue);
+						float min = float(info_->Parameters[pData.instrument()]->MinValue);
+						float max = float(info_->Parameters[pData.instrument()]->MaxValue);
 						TWSDestination[i] += min;
 						if (TWSDestination[i] > max)
 						{
@@ -499,8 +498,8 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 					{
 						// we have used all our slots, just send a twk
 						int nv = (pData.command() << 8)+pData.parameter();
-						int const min = _pInfo->Parameters[pData.instrument()]->MinValue;
-						int const max = _pInfo->Parameters[pData.instrument()]->MaxValue;
+						int const min = info_->Parameters[pData.instrument()]->MinValue;
+						int const max = info_->Parameters[pData.instrument()]->MaxValue;
 						nv += min;
 						if (nv > max) nv = max;
 						try
@@ -570,27 +569,28 @@ bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cau
 }
 
 
-void Plugin::GetParamName(int numparam, char * name)
+		void Plugin::GetParamName(int numparam, char * name) const
 		{
-			if( numparam < _pInfo->numParameters ) std::strcpy(name,_pInfo->Parameters[numparam]->Name);
+			if( numparam < info_->numParameters ) std::strcpy(name,info_->Parameters[numparam]->Name);
 			else std::strcpy(name, "Out of Range");
 
 		}
-		void Plugin::GetParamRange(int numparam,int &minval,int &maxval)
+		
+		void Plugin::GetParamRange(int numparam,int &minval,int &maxval) const
 		{
-			if(GetInfo()->Parameters[numparam]->Flags & MPF_STATE)
+			if(GetInfo().Parameters[numparam]->Flags & MPF_STATE)
 			{
-				minval = GetInfo()->Parameters[numparam]->MinValue;
-				maxval = GetInfo()->Parameters[numparam]->MaxValue;
+				minval = GetInfo().Parameters[numparam]->MinValue;
+				maxval = GetInfo().Parameters[numparam]->MaxValue;
 			}
 			else
 			{
 				minval = maxval = 0;
 			}
 		}
-		int Plugin::GetParamValue(int numparam)
+		int Plugin::GetParamValue(int numparam) const
 		{
-			if(numparam < _pInfo->numParameters)
+			if(numparam < info_->numParameters)
 			{
 				try
 				{
@@ -604,9 +604,9 @@ void Plugin::GetParamName(int numparam, char * name)
 			else return -1; // hmm
 		}
 
-		void Plugin::GetParamValue(int numparam, char * parval)
+		void Plugin::GetParamValue(int numparam, char * parval) const
 		{
-			if(numparam < _pInfo->numParameters)
+			if(numparam < info_->numParameters)
 			{
 				try
 				{
@@ -622,9 +622,9 @@ void Plugin::GetParamName(int numparam, char * name)
 			else std::strcpy(parval,"Out of Range");
 		}
 
-bool Plugin::SetParameter(int numparam,int value)
+		bool Plugin::SetParameter(int numparam,int value)
 		{
-			if(numparam < _pInfo->numParameters)
+			if(numparam < info_->numParameters)
 			{
 				try
 				{
@@ -640,7 +640,7 @@ bool Plugin::SetParameter(int numparam,int value)
 		}
 
 
-		void Plugin::SaveDllName(RiffFile * pFile) 
+		void Plugin::SaveDllName(RiffFile * pFile) const
 		{
 			pFile->WriteChunk(_psDllName.c_str(), _psDllName.length() + 1);
 		}
@@ -698,7 +698,7 @@ bool Plugin::SetParameter(int numparam,int value)
 			return true;
 		};
 
-		void Plugin::SaveSpecificChunk(RiffFile* pFile)
+		void Plugin::SaveSpecificChunk(RiffFile* pFile) const
 		{
 			std::uint32_t count = GetNumParams();
 			std::uint32_t size2(0);
@@ -730,48 +730,4 @@ bool Plugin::SetParameter(int numparam,int value)
 				delete[] pData;
 			}
 		};
-
-void Proxy::Init() throw()
-{ assert((*this)()); plugin().Init(); }
-CMachineInterface & Proxy::plugin() throw() { return *plugin_; }
-void Proxy::SequencerTick() throw() { plugin().SequencerTick(); }
-void Proxy::ParameterTweak(int par, int val) throw()
-{ assert((*this)()); plugin().ParameterTweak(par, val);  }
-Plugin & Proxy::host() throw() { return host_; }
-const Plugin & Proxy::host() const throw() { return host_; }
-
-void Proxy::callback() throw()
-		{ assert((*this)()); plugin().pCB = host().GetCallback(); }
-
-const bool Proxy::operator()() const throw() { return !!plugin_; }
-void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
-{
-	zapObject(this->plugin_,plugin);
-		//if((*this)())
-		if(plugin) {
-				callback();
-				//Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
-		}
-}
-
-void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw()
-{ assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }
-void Proxy::StopWave() throw()
-{ assert((*this)());plugin().StopWave(); }
-void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw()
-{ assert((*this)()); fflush(stdout); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
-int * Proxy::Vals() throw()
-{ assert((*this)()); return plugin().Vals; }
-void Proxy::Stop() throw()
-{ assert((*this)()); plugin().Stop();  }
-bool Proxy::DescribeValue(char * txt, const int param, const int value) throw()
-{ assert((*this)()); return plugin().DescribeValue(txt, param, value); }
-void Proxy::PutData(void * pData) throw()
-{ assert((*this)()); plugin().PutData(pData);  }
-void Proxy::GetData(void * pData) throw()
-{ assert((*this)()); plugin().GetData(pData); }
-int Proxy::GetDataSize() throw()
-{ assert((*this)()); return plugin().GetDataSize(); }
-
-}
-}
+}}

@@ -444,7 +444,7 @@ namespace psy
 						break;
 					}
 					case MACH_MASTER:
-						pMac[i] = song._pMachine[MASTER_INDEX];
+						pMac[i] = song.machine(MASTER_INDEX);
 						goto init_and_load;
 					case MACH_SAMPLER:
 						pMac[i] = pSampler = new Sampler(callbacks,i,&song);
@@ -753,46 +753,46 @@ namespace psy
 					{
 						if (pMac[busMachine[i]]->mode() == MACHMODE_GENERATOR)
 						{
-							song._pMachine[i] = pMac[busMachine[i]];
+							song.machine(i, pMac[busMachine[i]]);
 							_machineActive[busMachine[i]] = false; // don't update this twice;
 
 							for (int c=0; c<MAX_CONNECTIONS; c++)
 							{
-								if (song._pMachine[i]->_inputCon[c])
+								if (song.machine(i)->_inputCon[c])
 								{
 									for (int x=0; x<64; x++)
 									{
-										if (song._pMachine[i]->_inputMachines[c] == busMachine[x])
+										if (song.machine(i)->_inputMachines[c] == busMachine[x])
 										{
-											song._pMachine[i]->_inputMachines[c] = x;
+											song.machine(i)->_inputMachines[c] = x;
 											break;
 										}
-										else if (song._pMachine[i]->_inputMachines[c] == busEffect[x])
+										else if (song.machine(i)->_inputMachines[c] == busEffect[x])
 										{
-											song._pMachine[i]->_inputMachines[c] = x+MAX_BUSES;
+											song.machine(i)->_inputMachines[c] = x+MAX_BUSES;
 											break;
 										}
 									}
 								}
 
-								if (song._pMachine[i]->_connection[c])
+								if (song.machine(i)->_connection[c])
 								{
-									if (song._pMachine[i]->_outputMachines[c] == 0)
+									if (song.machine(i)->_outputMachines[c] == 0)
 									{
-										song._pMachine[i]->_outputMachines[c] = MASTER_INDEX;
+										song.machine(i)->_outputMachines[c] = MASTER_INDEX;
 									}
 									else
 									{
 										for (int x=0; x<64; x++)
 										{
-											if (song._pMachine[i]->_outputMachines[c] == busMachine[x])
+											if (song.machine(i)->_outputMachines[c] == busMachine[x])
 											{
-												song._pMachine[i]->_outputMachines[c] = x;
+												song.machine(i)->_outputMachines[c] = x;
 												break;
 											}
-											else if (song._pMachine[i]->_outputMachines[c] == busEffect[x])
+											else if (song.machine(i)->_outputMachines[c] == busEffect[x])
 											{
-												song._pMachine[i]->_outputMachines[c] = x+MAX_BUSES;
+												song.machine(i)->_outputMachines[c] = x+MAX_BUSES;
 												break;
 											}
 										}
@@ -808,45 +808,45 @@ namespace psy
 					{
 						if (pMac[busEffect[i]]->mode() == MACHMODE_FX)
 						{
-							song._pMachine[i+MAX_BUSES] = pMac[busEffect[i]];
+							song.machine(i+MAX_BUSES, pMac[busEffect[i]]);
 							_machineActive[busEffect[i]] = false; // don't do this again
 
 							for (int c=0; c<MAX_CONNECTIONS; c++)
 							{
-								if (song._pMachine[i+MAX_BUSES]->_inputCon[c])
+								if (song.machine(i+MAX_BUSES)->_inputCon[c])
 								{
 									for (int x=0; x<64; x++)
 									{
-										if (song._pMachine[i+MAX_BUSES]->_inputMachines[c] == busMachine[x])
+										if (song.machine(i+MAX_BUSES)->_inputMachines[c] == busMachine[x])
 										{
-											song._pMachine[i+MAX_BUSES]->_inputMachines[c] = x;
+											song.machine(i+MAX_BUSES)->_inputMachines[c] = x;
 											break;
 										}
-										else if (song._pMachine[i+MAX_BUSES]->_inputMachines[c] == busEffect[x])
+										else if (song.machine(i+MAX_BUSES)->_inputMachines[c] == busEffect[x])
 										{
-											song._pMachine[i+MAX_BUSES]->_inputMachines[c] = x+MAX_BUSES;
+											song.machine(i+MAX_BUSES)->_inputMachines[c] = x+MAX_BUSES;
 											break;
 										}
 									}
 								}
-								if (song._pMachine[i+MAX_BUSES]->_connection[c])
+								if (song.machine(i+MAX_BUSES)->_connection[c])
 								{
-									if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == 0)
+									if (song.machine(i+MAX_BUSES)->_outputMachines[c] == 0)
 									{
-										song._pMachine[i+MAX_BUSES]->_outputMachines[c] = MASTER_INDEX;
+										song.machine(i+MAX_BUSES)->_outputMachines[c] = MASTER_INDEX;
 									}
 									else
 									{
 										for (int x=0; x<64; x++)
 										{
-											if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == busMachine[x])
+											if (song.machine(i+MAX_BUSES)->_outputMachines[c] == busMachine[x])
 											{
-												song._pMachine[i+MAX_BUSES]->_outputMachines[c] = x;
+												song.machine(i+MAX_BUSES)->_outputMachines[c] = x;
 												break;
 											}
-											else if (song._pMachine[i+MAX_BUSES]->_outputMachines[c] == busEffect[x])
+											else if (song.machine(i+MAX_BUSES)->_outputMachines[c] == busEffect[x])
 											{
-												song._pMachine[i+MAX_BUSES]->_outputMachines[c] = x+MAX_BUSES;
+												song.machine(i+MAX_BUSES)->_outputMachines[c] = x+MAX_BUSES;
 												break;
 											}
 										}
@@ -859,18 +859,18 @@ namespace psy
 			}
 			for (int c=0; c<MAX_CONNECTIONS; c++)
 			{
-				if (song._pMachine[MASTER_INDEX]->_inputCon[c])
+				if (song.machine(MASTER_INDEX)->_inputCon[c])
 				{
 					for (int x=0; x<64; x++)
 					{
-						if (song._pMachine[MASTER_INDEX]->_inputMachines[c] == busMachine[x])
+						if (song.machine(MASTER_INDEX)->_inputMachines[c] == busMachine[x])
 						{
-							song._pMachine[MASTER_INDEX]->_inputMachines[c] = x;
+							song.machine(MASTER_INDEX)->_inputMachines[c] = x;
 							break;
 						}
-						else if (song._pMachine[MASTER_INDEX]->_inputMachines[c] == busEffect[x])
+						else if (song.machine(MASTER_INDEX)->_inputMachines[c] == busEffect[x])
 						{
-							song._pMachine[MASTER_INDEX]->_inputMachines[c] = x+MAX_BUSES;
+							song.machine(MASTER_INDEX)->_inputMachines[c] = x+MAX_BUSES;
 							break;
 						}
 					}
@@ -883,18 +883,18 @@ namespace psy
 
 			for (i = 0; i < MAX_MACHINES-1; i++)
 			{
-				if (song._pMachine[i])
+				if (song.machine(i))
 				{
-					song._pMachine[i]->id(i);
+					song.machine(i)->id(i);
 					for (int j = i+1; j < MAX_MACHINES-1; j++)
 					{
-						if (song._pMachine[i] == song._pMachine[j])
+						if (song.machine(i) == song.machine(j))
 						{
 							assert(false);
 							// we have duplicate machines...
 							// this should NEVER happen
 							// delete the second one :(
-							song._pMachine[j] = NULL;
+							song.machine(j, NULL);
 							// and we should remap anything that had wires to it to the first one
 						}
 					}
@@ -905,55 +905,55 @@ namespace psy
 			// test all connections for invalid machines. disconnect invalid machines.
 			for (i = 0; i < MAX_MACHINES; i++)
 			{
-				if (song._pMachine[i])
+				if (song.machine(i))
 				{
-					song._pMachine[i]->_connectedInputs = 0;
-					song._pMachine[i]->_connectedOutputs = 0;
+					song.machine(i)->_connectedInputs = 0;
+					song.machine(i)->_connectedOutputs = 0;
 
 					for (int c = 0; c < MAX_CONNECTIONS; c++)
 					{
-						if (song._pMachine[i]->_connection[c])
+						if (song.machine(i)->_connection[c])
 						{
-							if (song._pMachine[i]->_outputMachines[c] < 0 || song._pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
+							if (song.machine(i)->_outputMachines[c] < 0 || song.machine(i)->_outputMachines[c] >= MAX_MACHINES)
 							{
-								song._pMachine[i]->_connection[c]=false;
-								song._pMachine[i]->_outputMachines[c]=-1;
+								song.machine(i)->_connection[c]=false;
+								song.machine(i)->_outputMachines[c]=-1;
 							}
-							else if (!song._pMachine[song._pMachine[i]->_outputMachines[c]])
+							else if (!song.machine(song.machine(i)->_outputMachines[c]))
 							{
-								song._pMachine[i]->_connection[c]=false;
-								song._pMachine[i]->_outputMachines[c]=-1;
+								song.machine(i)->_connection[c]=false;
+								song.machine(i)->_outputMachines[c]=-1;
 							}
 							else 
 							{
-								song._pMachine[i]->_connectedOutputs++;
+								song.machine(i)->_connectedOutputs++;
 							}
 						}
 						else
 						{
-							song._pMachine[i]->_outputMachines[c]=255;
+							song.machine(i)->_outputMachines[c]=255;
 						}
 
-						if (song._pMachine[i]->_inputCon[c])
+						if (song.machine(i)->_inputCon[c])
 						{
-							if (song._pMachine[i]->_inputMachines[c] < 0 || song._pMachine[i]->_inputMachines[c] >= MAX_MACHINES-1)
+							if (song.machine(i)->_inputMachines[c] < 0 || song.machine(i)->_inputMachines[c] >= MAX_MACHINES-1)
 							{
-								song._pMachine[i]->_inputCon[c]=false;
-								song._pMachine[i]->_inputMachines[c]=-1;
+								song.machine(i)->_inputCon[c]=false;
+								song.machine(i)->_inputMachines[c]=-1;
 							}
-							else if (!song._pMachine[song._pMachine[i]->_inputMachines[c]])
+							else if (!song.machine(song.machine(i)->_inputMachines[c]))
 							{
-								song._pMachine[i]->_inputCon[c]=false;
-								song._pMachine[i]->_inputMachines[c]=-1;
+								song.machine(i)->_inputCon[c]=false;
+								song.machine(i)->_inputMachines[c]=-1;
 							}
 							else
 							{
-								song._pMachine[i]->_connectedInputs++;
+								song.machine(i)->_connectedInputs++;
 							}
 						}
 						else
 						{
-							song._pMachine[i]->_inputMachines[c]=255;
+							song.machine(i)->_inputMachines[c]=255;
 						}
 					}
 				}

@@ -479,10 +479,10 @@ void MainWindow::populateMachineCombo()
 
     for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
     {
-        if( song_->_pMachine[b]) {
+        if( song_->machine(b)) {
             buffer.str("");
             buffer << std::setfill('0') << std::hex << std::setw(2);
-            buffer << b << ": " << song_->_pMachine[b]->GetEditName();
+            buffer << b << ": " << song_->machine(b)->GetEditName();
             macCombo_->addItem( QString::fromStdString( buffer.str() ) );
 
             //cb->SetItemData(cb->GetCount()-1,b);
@@ -501,10 +501,10 @@ void MainWindow::populateMachineCombo()
 
     for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
     {
-        if(song_->_pMachine[b]) {
+        if(song_->machine(b)) {
             buffer.str("");
             buffer << std::setfill('0') << std::hex << std::setw(2);
-   	        buffer << b << ": " << song_->_pMachine[b]->GetEditName();
+   	        buffer << b << ": " << song_->machine(b)->GetEditName();
             macCombo_->addItem( QString::fromStdString( buffer.str() ) );
             //cb->SetItemData(cb->GetCount()-1,b);
             if (!found) selected++;

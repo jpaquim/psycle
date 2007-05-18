@@ -236,7 +236,7 @@ namespace psy
 			PRESAMPLERFN _pWorkFn;
 			/// sets the kind of interpolation.
 			virtual void SetQuality(ResamplerQuality quality) = 0;
-			virtual ResamplerQuality GetQuality(void) = 0;
+			virtual ResamplerQuality GetQuality(void) const = 0;
 		protected:
 			/// kind of interpolation.
 			ResamplerQuality _quality;
@@ -252,7 +252,7 @@ namespace psy
 			Cubic();
 			/// refefinition.
 			virtual void SetQuality(ResamplerQuality quality);
-			virtual ResamplerQuality GetQuality(void);
+			virtual ResamplerQuality GetQuality(void) const;
 		protected:
 			/// interpolation work function which does linear interpolation.
 			static float Linear(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);

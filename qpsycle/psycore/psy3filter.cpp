@@ -213,54 +213,54 @@ namespace psy
 			// test all connections for invalid machines. disconnect invalid machines.
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
-				if(song._pMachine[i])
+				if(song.machine(i))
 				{
-					song._pMachine[i]->_connectedInputs = 0;
-					song._pMachine[i]->_connectedOutputs = 0;
+					song.machine(i)->_connectedInputs = 0;
+					song.machine(i)->_connectedOutputs = 0;
 					for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
 					{
-						if(song._pMachine[i]->_connection[c])
+						if(song.machine(i)->_connection[c])
 						{
-							if(song._pMachine[i]->_outputMachines[c] < 0 || song._pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
+							if(song.machine(i)->_outputMachines[c] < 0 || song.machine(i)->_outputMachines[c] >= MAX_MACHINES)
 							{
-								song._pMachine[i]->_connection[c] = false;
-								song._pMachine[i]->_outputMachines[c] = -1;
+								song.machine(i)->_connection[c] = false;
+								song.machine(i)->_outputMachines[c] = -1;
 							}
-							else if(!song._pMachine[song._pMachine[i]->_outputMachines[c]])
+							else if(!song.machine(song.machine(i)->_outputMachines[c]))
 							{
-								song._pMachine[i]->_connection[c] = false;
-								song._pMachine[i]->_outputMachines[c] = -1;
+								song.machine(i)->_connection[c] = false;
+								song.machine(i)->_outputMachines[c] = -1;
 							}
 							else 
 							{
-								song._pMachine[i]->_connectedOutputs++;
+								song.machine(i)->_connectedOutputs++;
 							}
 						}
 						else
 						{
-							song._pMachine[i]->_outputMachines[c] = -1;
+							song.machine(i)->_outputMachines[c] = -1;
 						}
 
-						if (song._pMachine[i]->_inputCon[c])
+						if (song.machine(i)->_inputCon[c])
 						{
-							if (song._pMachine[i]->_inputMachines[c] < 0 || song._pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
+							if (song.machine(i)->_inputMachines[c] < 0 || song.machine(i)->_inputMachines[c] >= MAX_MACHINES)
 							{
-								song._pMachine[i]->_inputCon[c] = false;
-								song._pMachine[i]->_inputMachines[c] = -1;
+								song.machine(i)->_inputCon[c] = false;
+								song.machine(i)->_inputMachines[c] = -1;
 							}
-							else if (!song._pMachine[song._pMachine[i]->_inputMachines[c]])
+							else if (!song.machine(song.machine(i)->_inputMachines[c]))
 							{
-								song._pMachine[i]->_inputCon[c] = false;
-								song._pMachine[i]->_inputMachines[c] = -1;
+								song.machine(i)->_inputCon[c] = false;
+								song.machine(i)->_inputMachines[c] = -1;
 							}
 							else
 							{
-								song._pMachine[i]->_connectedInputs++;
+								song.machine(i)->_connectedInputs++;
 							}
 						}
 						else
 						{
-							song._pMachine[i]->_inputMachines[c] = -1;
+							song.machine(i)->_inputMachines[c] = -1;
 						}
 					}
 				}
@@ -269,10 +269,10 @@ namespace psy
 //			song.progress.emit(5,0,"");
 			if(chunkcount)
 			{
-				if (!song._pMachine[MASTER_INDEX] )
+				if (!song.machine(MASTER_INDEX) )
 				{
-					song._pMachine[MASTER_INDEX] = new Master( callbacks, MASTER_INDEX, &song );
-					song._pMachine[MASTER_INDEX]->Init();
+					song.machine(MASTER_INDEX, new Master( callbacks, MASTER_INDEX, &song ));
+					song.machine(MASTER_INDEX)->Init();
 				}
 				std::ostringstream s;
 				s << "Error reading from file '" << file.file_name() << "'" << std::endl;
@@ -494,10 +494,11 @@ namespace psy
 				Machine::id_type const id(index);
 				///\todo: song.clear() creates an empty song with a Master Machine. This loader doesn't
 				// try to free that allocated machine.
-				song._pMachine[index] = Machine::LoadFileChunk(&song,file, callbacks, id, minorversion, true);
+				song.machine(index, Machine::LoadFileChunk(&song,file, callbacks, id, minorversion, true));
 			}
-			return (bool)song._pMachine[index];
+			return song.machine(index) != 0;
 		}
+		
 		bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 			std::uint32_t index = 0;
