@@ -142,7 +142,7 @@ namespace psy {
 			value_ = fDefault;
 		}
 		
-		int LadspaParam::value() 
+		int LadspaParam::value() const
 		{ 
 			return (integer_)? value_ : 
 //							(logaritmic_)?  log10(1+((value_-minVal_)*rangeMultiplier_))*65535.0f:
@@ -454,11 +454,11 @@ namespace psy {
 					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)  && indexoutput < 2 ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
 						   ppbuffersOut[indexoutput++]);
-          }
+    			      }
 					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)  && indexinput < 2 ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
 						   ppbuffersIn[indexinput++]);
-          }
+    			      }
 				}
 			}
 			_nCols = (GetNumParams()/12)+1;
@@ -479,30 +479,30 @@ namespace psy {
 		
 		void LADSPAMachine::PreWork(int numSamples)
 		{
-      std::swap(_pSamplesL,pOutSamplesL);
-      std::swap(_pSamplesR,pOutSamplesR);
+    		  std::swap(_pSamplesL,pOutSamplesL);
+    		  std::swap(_pSamplesR,pOutSamplesR);
 			Machine::PreWork(numSamples);
 		}
 		
 		int LADSPAMachine::GenerateAudio(int numSamples )
 		{
 			psDescriptor->run(pluginHandle,numSamples);
-      std::swap(_pSamplesL,pOutSamplesL);
-      std::swap(_pSamplesR,pOutSamplesR);
+		      std::swap(_pSamplesL,pOutSamplesL);
+    		  std::swap(_pSamplesR,pOutSamplesR);
 			return numSamples;
 		}
-		void  LADSPAMachine::GetParamName(int numparam, char * name)
+		void  LADSPAMachine::GetParamName(int numparam, char * name) const
 		{
 			strcpy(name,values_[numparam].name());
 		}
-		void  LADSPAMachine::GetParamRange(int numparam,int &minval, int &maxval)
+		void  LADSPAMachine::GetParamRange(int numparam,int &minval, int &maxval) const
 		{
 			minval=values_[numparam].minval();
 			maxval=values_[numparam].maxval();
 		}
 		
-		int  LADSPAMachine::GetParamValue(int numparam) { return values_[numparam].value(); } 
-		void LADSPAMachine::GetParamValue(int numparam,char* parval) 
+		int  LADSPAMachine::GetParamValue(int numparam) const { return values_[numparam].value(); } 
+		void LADSPAMachine::GetParamValue(int numparam,char* parval) const
 		{
 			LADSPA_PortRangeHintDescriptor iHintDescriptor = values_[numparam].hint();
 			float value = values_[numparam].rawvalue();
@@ -532,7 +532,7 @@ namespace psy {
 			}
 		}
 		
-		void LADSPAMachine::SaveDllName(RiffFile * pFile) 
+		void LADSPAMachine::SaveDllName(RiffFile * pFile) const
 		{
 			std::string::size_type extpos=0;
 			std::string withoutSuffix;
@@ -575,7 +575,7 @@ namespace psy {
 			return true;
 		}
 		
-		void LADSPAMachine::SaveSpecificChunk(RiffFile* pFile)
+		void LADSPAMachine::SaveSpecificChunk(RiffFile* pFile) const
 		{
 			std::uint32_t count = GetNumParams();
 			std::uint32_t size = sizeof count  + sizeof(std::uint32_t) * count;

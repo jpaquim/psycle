@@ -41,7 +41,7 @@ namespace psy
 			virtual ~PsyFilter();
 
 			bool loadSong(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-			bool saveSong(const std::string & fileName, CoreSong & song, int version);
+			bool saveSong(const std::string & fileName, const CoreSong & song, int version);
 
 			//signals
 //			sigslot::signal2<const std::string &, const std::string &> report;

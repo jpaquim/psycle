@@ -443,7 +443,7 @@ namespace psy
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = song()->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -460,7 +460,7 @@ namespace psy
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = song()->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
 			if (_pDstMachine)
 			{
 				Wire::id_type c;
@@ -521,7 +521,7 @@ namespace psy
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = song()->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = song()->machine(_inputMachines[i]);
 					if (pInMachine)
 					{
 						/*
@@ -581,7 +581,7 @@ namespace psy
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = song()->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = song()->machine(_inputMachines[i]);
 					if (pInMachine)
 					{
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -641,7 +641,7 @@ namespace psy
 			switch (type)
 			{
 			case MACH_MASTER:
-				if (pSong->_pMachine[MASTER_INDEX]) pMachine = pSong->_pMachine[MASTER_INDEX];
+				if (pSong->machine(MASTER_INDEX)) pMachine = pSong->machine(MASTER_INDEX);
 				else if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
 				else pMachine = new Master(callbacks, index, pSong);
 				break;
@@ -796,7 +796,7 @@ namespace psy
 			return pMachine;
 		}
 
-		void Machine::SaveFileChunk(RiffFile* pFile)
+		void Machine::SaveFileChunk(RiffFile* pFile) const
 		{
 			pFile->Write(type());
 			SaveDllName(pFile);
@@ -821,7 +821,7 @@ namespace psy
 			SaveSpecificChunk(pFile);
 		}
 
-		void Machine::SaveSpecificChunk(RiffFile* pFile) 
+		void Machine::SaveSpecificChunk(RiffFile* pFile) const
 		{
 			std::uint32_t count = GetNumParams();
 			std::uint32_t const size(sizeof count  + count * sizeof(std::uint32_t));
@@ -834,7 +834,7 @@ namespace psy
 			}
 		}
 
-		void Machine::SaveDllName(RiffFile* pFile)
+		void Machine::SaveDllName(RiffFile* pFile) const
 		{
 			char temp=0;
 			pFile->Write(temp);

@@ -86,8 +86,8 @@ namespace psy
 			stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
 
-			((Master*)(song()._pMachine[MASTER_INDEX]))->_clip = false;
-			((Master*)(song()._pMachine[MASTER_INDEX]))->sampleCount = 0;
+			((Master*)(song().machine(MASTER_INDEX)))->_clip = false;
+			((Master*)(song().machine(MASTER_INDEX)))->sampleCount = 0;
 			
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
@@ -112,10 +112,10 @@ namespace psy
 			_playing = false;
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
-				if(song()._pMachine[i])
+				if(song().machine(i))
 				{
-					song()._pMachine[i]->Stop();
-					for(int c = 0; c < MAX_TRACKS; c++) song()._pMachine[i]->TriggerDelay[c].setCommand( 0 );
+					song().machine(i)->Stop();
+					for(int c = 0; c < MAX_TRACKS; c++) song().machine(i)->TriggerDelay[c].setCommand( 0 );
 				}
 			}
 			setBpm( song().bpm() );
@@ -139,7 +139,7 @@ namespace psy
 
 			for(int i(0) ; i < MAX_MACHINES; ++i)
 			{
-				if(song()._pMachine[i]) song()._pMachine[i]->SetSampleRate( sampleRate );
+				if(song().machine(i)) song().machine(i)->SetSampleRate( sampleRate );
 			}
 		}
     bool Player::autoStopMachines() const {
@@ -160,28 +160,28 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				break;
 			case GlobalEvent::SET_BYPASS:
 				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->mode() == MACHMODE_FX )
-					song()._pMachine[mIndex]->_bypass = true;
+				if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
+					song().machine(mIndex)->_bypass = true;
 				break;
 			case GlobalEvent::UNSET_BYPASS:
 				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] && song()._pMachine[mIndex]->mode() == MACHMODE_FX )
-					song()._pMachine[mIndex]->_bypass = false;
+				if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
+					song().machine(mIndex)->_bypass = false;
 				break;
 			case GlobalEvent::SET_MUTE:
 				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] )
-					song()._pMachine[mIndex]->_mute = true;
+				if ( mIndex < MAX_MACHINES && song().machine(mIndex) )
+					song().machine(mIndex)->_mute = true;
 				break;
 			case GlobalEvent::UNSET_MUTE:
 				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song()._pMachine[mIndex] )
-					song()._pMachine[mIndex]->_mute = false;
+				if ( mIndex < MAX_MACHINES && song().machine(mIndex) )
+					song().machine(mIndex)->_mute = false;
 				break;
 			case GlobalEvent::SET_VOLUME:
 				if(event.target() == 255)
 				{
-					((Master*)(song()._pMachine[MASTER_INDEX]))->_outDry = static_cast<int>( event.parameter() );
+					((Master*)(song().machine(MASTER_INDEX)))->_outDry = static_cast<int>( event.parameter() );
 				}
 				else 
 				{
@@ -189,13 +189,13 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					if(mIndex < MAX_MACHINES)
 					{
 						Wire::id_type wire( event.target2() );
-						if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1( static_cast<int>( event.parameter() )));
+						if(song().machine(mIndex)) song().machine(mIndex)->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1( static_cast<int>( event.parameter() )));
 					}
 				}
 			case GlobalEvent::SET_PANNING:
 				mIndex = event.target();
 				if(mIndex < MAX_MACHINES)
-					if(song()._pMachine[mIndex]) song()._pMachine[mIndex]->SetPan( static_cast<int>( event.parameter() ) );
+					if(song().machine(mIndex)) song().machine(mIndex)->SetPan( static_cast<int>( event.parameter() ) );
 				break;
 
 			default:
@@ -213,7 +213,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					int mac = entry.machine();
 					if(mac < MAX_MACHINES) //looks like a valid machine index?
 					{
-							Machine *pMachine = song()._pMachine[mac];
+							Machine *pMachine = song().machine(mac);
 							pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
 					}
 			}
@@ -232,7 +232,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					{
 						if(mac < MAX_MACHINES) //looks like a valid machine index?
 						{
-							Machine *pMachine = song()._pMachine[mac];
+							Machine *pMachine = song().machine(mac);
 							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
 							{
 								if(entry.command() == PatternCmd::NOTE_DELAY)
@@ -392,11 +392,11 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 				// Reset all machine buffers
 				for(int c=0; c<MAX_MACHINES; c++)
 				{
-					if(song()._pMachine[c]) song()._pMachine[c]->PreWork(amount);
+					if(song().machine(c)) song().machine(c)->PreWork(amount);
 				}
 
 				song().DoPreviews( amount );
-				song()._pMachine[MASTER_INDEX]->Work(amount );
+				song().machine(MASTER_INDEX)->Work(amount );
 
 				if ( (recording_ && !autoRecord_) || // controlled by record button
 						(recording_ && _playing && autoRecord_) ) { // controlled by play
@@ -425,8 +425,8 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 			if (!song_ && !driver_) return;
 
-			float* pL(song()._pMachine[MASTER_INDEX]->_pSamplesL);
-			float* pR(song()._pMachine[MASTER_INDEX]->_pSamplesR);
+			float* pL(song().machine(MASTER_INDEX)->_pSamplesL);
+			float* pR(song().machine(MASTER_INDEX)->_pSamplesR);
 			if(_doDither) {
 				dither.Process(pL, amount);
 				dither.Process(pR, amount);

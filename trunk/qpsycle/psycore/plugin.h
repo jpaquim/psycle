@@ -50,9 +50,9 @@ class Proxy
 		CMachineInterface * plugin_;
 	private:
 		Plugin & host() throw();
-		const Plugin & host() const throw();
+		Plugin const & host() const throw();
 		CMachineInterface & plugin() throw();
-		const CMachineInterface & plugin() const throw();
+		CMachineInterface const & plugin() const throw();
 	public:
 		Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 		~Proxy() throw ()
@@ -68,18 +68,19 @@ class Proxy
 		void Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(); //exceptions::function_error);
 		void Stop() throw(); //exceptions::function_error);
 		void PutData(void * pData) throw(); //exceptions::function_error);
-		void GetData(void * pData) throw(); //exceptions::function_error);
-		int GetDataSize() throw(); //exceptions::function_error);
+		void GetData(void * pData) const throw(); //exceptions::function_error);
+		int GetDataSize() const throw(); //exceptions::function_error);
 		void Command() throw(); //exceptions::function_error);
 		void MuteTrack(const int i) throw(); //exceptions::function_error);
 		bool IsTrackMuted(const int i) throw(); //exceptions::function_error);
 		void MidiNote(const int channel, const int value, const int velocity) throw(); //exceptions::function_error);
 		void Event(const dword data) throw(); //exceptions::function_error);
-		bool DescribeValue(char * txt, const int param, const int value) throw(); //exceptions::function_error);
+		bool DescribeValue(char * txt, const int param, const int value) const throw(); //exceptions::function_error);
 		bool PlayWave(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
 		void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
 		void StopWave() throw(); //exceptions::function_error);
-		int * Vals() throw(); //exceptions::function_error);
+		int const * const Vals() const throw(); //exceptions::function_error);
+		int * const Vals() throw(); //exceptions::function_error);
 		void callback() throw(); //exceptions::function_error);
 };
 
@@ -102,14 +103,15 @@ class Plugin : public Machine
 		inline virtual std::string GetDllName() const throw() { return _psDllName; }
 		virtual std::string GetName() const { return _psName; };
 
-		virtual int GetNumParams() { return GetInfo()->numParameters; };
-		virtual int GetNumCols() { return GetInfo()->numCols; };
-		virtual void GetParamName(int numparam, char * name);
-		virtual void GetParamRange(int numparam,int &minval, int &maxval);
-		virtual int GetParamValue(int numparam);
-		virtual void GetParamValue(int numparam,char* parval);
+		virtual int GetNumParams() const { return GetInfo().numParameters; };
+		virtual int GetNumCols() const { return GetInfo().numCols; };
+		virtual void GetParamName(int numparam, char * name) const;
+		virtual void GetParamRange(int numparam,int &minval, int &maxval) const;
+		virtual int GetParamValue(int numparam) const;
+		virtual void GetParamValue(int numparam,char* parval) const;
 		virtual bool SetParameter(int numparam,int value);
 
+		inline Proxy const & proxy() const throw() { return proxy_; };
 		inline Proxy & proxy() throw() { return proxy_; };
 
 		bool Instance(const std::string & file_name);
@@ -121,11 +123,11 @@ class Plugin : public Machine
 				/// Loader for psycle fileformat version 2.
 				virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-				virtual void SaveSpecificChunk(RiffFile * pFile);
-				virtual void SaveDllName      (RiffFile * pFile);
+				virtual void SaveSpecificChunk(RiffFile * pFile) const;
+				virtual void SaveDllName      (RiffFile * pFile) const;
 		///\}
 
-		inline CMachineInfo * GetInfo() throw() { return _pInfo; };
+		CMachineInfo const & GetInfo() const throw() { return *info_; };
 		
 	private:
 		void* _dll;
@@ -134,9 +136,38 @@ class Plugin : public Machine
 		std::string _psDllName;
 		std::string _psName;
 		bool _isSynth;
-		CMachineInfo * _pInfo;
+		CMachineInfo * info_;
 		Proxy proxy_;
 };
+
+inline void Proxy::Init() throw() { assert((*this)()); plugin().Init(); }
+inline CMachineInterface & Proxy::plugin() throw() { return *plugin_; }
+inline CMachineInterface const & Proxy::plugin() const throw() { return *plugin_; }
+inline void Proxy::SequencerTick() throw() { plugin().SequencerTick(); }
+inline void Proxy::ParameterTweak(int par, int val) throw() { assert((*this)()); plugin().ParameterTweak(par, val);  }
+inline Plugin & Proxy::host() throw() { return host_; }
+inline Plugin const & Proxy::host() const throw() { return host_; }
+inline void Proxy::callback() throw() { assert((*this)()); plugin().pCB = host().GetCallback(); }
+inline const bool Proxy::operator()() const throw() { return !!plugin_; }
+inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
+{
+	delete this->plugin_; this->plugin_ = plugin;
+	if(plugin)
+	{
+		callback();
+		//Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
+	}
+}
+inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw() { assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }
+inline void Proxy::StopWave() throw() { assert((*this)());plugin().StopWave(); }
+inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw() { assert((*this)()); fflush(stdout); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
+inline int * const Proxy::Vals() throw() { assert((*this)()); return plugin().Vals; }
+inline int const * const Proxy::Vals() const throw() { assert((*this)()); return plugin().Vals; }
+inline void Proxy::Stop() throw() { assert((*this)()); plugin().Stop();  }
+inline bool Proxy::DescribeValue(char * txt, const int param, const int value) const throw() { assert((*this)()); return const_cast<Proxy*>(this)->plugin().DescribeValue(txt, param, value); }
+inline void Proxy::PutData(void * pData) throw() { assert((*this)()); plugin().PutData(pData);  }
+inline void Proxy::GetData(void * pData) const throw() { assert((*this)()); const_cast<Proxy*>(this)->plugin().GetData(pData); }
+inline int Proxy::GetDataSize() const throw() { assert((*this)()); return const_cast<Proxy*>(this)->plugin().GetDataSize(); }
 
 }}
 #endif

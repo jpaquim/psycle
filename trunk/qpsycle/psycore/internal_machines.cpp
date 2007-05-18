@@ -75,6 +75,7 @@ namespace psy {
 		DuplicatorMac::~DuplicatorMac() throw()
 		{
 		}
+		
 		void DuplicatorMac::Init()
 		{
 			Machine::Init();
@@ -84,6 +85,7 @@ namespace psy {
 				noteOffset[i]=0;
 			}
 		}
+		
 		void DuplicatorMac::PreWork(int numSamples)
 		{
 			Machine::PreWork(numSamples);
@@ -101,13 +103,14 @@ namespace psy {
 						{
 							temp.setNote(temp.note() +noteOffset[i]);
 						}
-						if (macOutput[i] != -1 && song()->_pMachine[macOutput[i]] != NULL 
-							&& song()->_pMachine[macOutput[i]] != this) song()->_pMachine[macOutput[i]]->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
+						if (macOutput[i] != -1 && song()->machine(macOutput[i]) != NULL 
+							&& song()->machine(macOutput[i]) != this) song()->machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
 					}
 				}
 				bisTicking=false;
 			}
 		}
+		
 		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
 		{
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
@@ -121,15 +124,15 @@ namespace psy {
 					{
 						pTemp._note+=noteOffset[i];
 					}
-					if (macOutput[i] != -1 && song()->_pMachine[macOutput[i]] != NULL 
-						&& song()->_pMachine[macOutput[i]] != this) song()->_pMachine[macOutput[i]]->Tick(channel,&pTemp);
+					if (macOutput[i] != -1 && song()->machine(macOutput[i]) != NULL 
+						&& song()->machine(macOutput[i]) != this) song()->machine(macOutput[i])->Tick(channel,&pTemp);
 				}
 			}
 			bisTicking=false;
 */		
 		}
 
-		void DuplicatorMac::GetParamName(int numparam,char *name)
+		void DuplicatorMac::GetParamName(int numparam,char *name) const
 		{
 			if (numparam >=0 && numparam<8)
 			{
@@ -140,13 +143,13 @@ namespace psy {
 			else name[0] = '\0';
 		}
 
-		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval)
+		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval) const
 		{
 			if ( numparam < 8) { minval = -1; maxval = (MAX_BUSES*2)-1;}
 			else if ( numparam < 16) { minval = -48; maxval = 48; }
 		}
 
-		int DuplicatorMac::GetParamValue(int numparam)
+		int DuplicatorMac::GetParamValue(int numparam) const
 		{
 			if (numparam >=0 && numparam<8)
 			{
@@ -157,13 +160,13 @@ namespace psy {
 			else return 0;
 		}
 
-		void DuplicatorMac::GetParamValue(int numparam, char *parVal)
+		void DuplicatorMac::GetParamValue(int numparam, char *parVal) const
 		{
 			if (numparam >=0 && numparam <8)
 			{
-				if ((macOutput[numparam] != -1 ) &&( song()->_pMachine[macOutput[numparam]] != NULL))
+				if ((macOutput[numparam] != -1 ) &&( song()->machine(macOutput[numparam]) != NULL))
 				{
-					sprintf(parVal,"%X -%s", macOutput[numparam], song()->_pMachine[macOutput[numparam]]->GetEditName().c_str());
+					sprintf(parVal,"%X -%s", macOutput[numparam], song()->machine(macOutput[numparam])->GetEditName().c_str());
 				}
 				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
@@ -204,7 +207,7 @@ namespace psy {
 			return true;
 		}
 
-		void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile)
+		void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile) const
 		{
 			std::uint32_t const size(sizeof macOutput + sizeof noteOffset);
 			pFile->Write(size);
@@ -235,6 +238,7 @@ namespace psy {
 		Master::~Master() throw()
 		{
 		}
+		
 		void Master::Stop()
 		{
 			_clip = false;
@@ -254,6 +258,7 @@ namespace psy {
 			vuupdated = false;
 			_clip = false;
 		}
+		
 		void Master::Tick(int channel, const PatternEvent & data )
 		{
 			if ( data.note() == PatternCmd::SET_VOLUME )
@@ -384,7 +389,7 @@ namespace psy {
 			return true;
 		};
 
-		void Master::SaveSpecificChunk(RiffFile* pFile)
+		void Master::SaveSpecificChunk(RiffFile* pFile) const
 		{
 			std::uint32_t const size(sizeof _outDry + sizeof decreaseOnClip);
 			pFile->Write(size);
@@ -412,6 +417,7 @@ namespace psy {
 		Mixer::~Mixer() throw()
 		{
 		}
+		
 		void Mixer::Init()
 		{
 			Machine::Init();
@@ -486,7 +492,7 @@ namespace psy {
 			{
 				if (_sendValid[i])
 				{
-					Machine* pSendMachine = song()->_pMachine[_send[i]];
+					Machine* pSendMachine = song()->machine(_send[i]);
 					if (pSendMachine)
 					{
 						if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
@@ -498,7 +504,7 @@ namespace psy {
 								{
 									if (_inputCon[j])
 									{
-										Machine* pInMachine = song()->_pMachine[_inputMachines[j]];
+										Machine* pInMachine = song()->machine(_inputMachines[j]);
 										if (pInMachine)
 										{
 											if(!_mute && !_stopped && _sendGrid[j][send0+i]!= 0.0f)
@@ -544,7 +550,7 @@ namespace psy {
 			{
 				if (_sendValid[i])
 				{
-					Machine* pSendMachine = song()->_pMachine[_send[i]];
+					Machine* pSendMachine = song()->machine(_send[i]);
 					if (pSendMachine)
 					{
 						if(!_mute && !_stopped)
@@ -559,7 +565,7 @@ namespace psy {
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = song()->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = song()->machine(_inputMachines[i]);
 					if (pInMachine)
 					{
 						if(!_mute && !_stopped && _sendGrid[i][mix] != 0.0f)
@@ -599,7 +605,7 @@ namespace psy {
 			return rettxt;
 		}
 
-		int Mixer::GetNumCols()
+		int Mixer::GetNumCols() const
 		{
 			int cols=0;
 			for (int i=0; i<MAX_CONNECTIONS; i++)
@@ -613,7 +619,7 @@ namespace psy {
 			return cols==0?1:cols;
 		}
 
-		void Mixer::GetParamName(int numparam,char *name)
+		void Mixer::GetParamName(int numparam,char *name) const
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
 			int send=numparam%16; // 0 is for channel mix, others are send.
@@ -638,7 +644,7 @@ namespace psy {
 			}
 		}
 
-		int Mixer::GetParamValue(int numparam)
+		int Mixer::GetParamValue(int numparam) const
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
 			int send=numparam%16; // 0 is for channel mix, others are send.
@@ -662,7 +668,7 @@ namespace psy {
 			}
 		}
 
-		void Mixer::GetParamValue(int numparam, char *parVal)
+		void Mixer::GetParamValue(int numparam, char *parVal) const
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
 			int send=numparam%16; // 0 is for channel mix, others are send.
@@ -732,7 +738,7 @@ namespace psy {
 			return true;
 		}
 
-		void Mixer::SaveSpecificChunk(RiffFile* pFile)
+		void Mixer::SaveSpecificChunk(RiffFile* pFile) const
 		{
 			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _sendVol + sizeof _sendVolMulti + sizeof _sendValid);
 			pFile->Write(size);
@@ -747,14 +753,14 @@ namespace psy {
 		{
 			float vol;
 			GetWireVolume(idx,vol);
-			if ( _inputCon[idx] ) return (song()->_pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
+			if ( _inputCon[idx] ) return (song()->machine(_inputMachines[idx])->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
 
 		float Mixer::VuSend(Wire::id_type idx)
 		{
 			float vol = _sendVol[idx] * _sendVolMulti[idx];
-			if ( _sendValid[idx] ) return (song()->_pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
+			if ( _sendValid[idx] ) return (song()->machine(_send[idx])->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
 
@@ -835,7 +841,7 @@ namespace psy {
 			bisTicking=false;
 		}
 
-		void LFO::GetParamName(int numparam,char *name)
+		void LFO::GetParamName(int numparam,char *name) const
 		{
 			if(numparam==prms::wave)
 				sprintf(name,"Waveform");
@@ -852,7 +858,7 @@ namespace psy {
 			else name[0] = '\0';
 		}
 
-		void LFO::GetParamRange(int numparam,int &minval,int &maxval)
+		void LFO::GetParamRange(int numparam,int &minval,int &maxval) const
 		{
 			if(numparam==prms::wave) { minval = 0; maxval = lfo_types::num_lfos-1;}
 			else if (numparam==prms::speed) {minval = 0; maxval = MAX_SPEED;}
@@ -860,10 +866,10 @@ namespace psy {
 			else if (numparam <prms::level0)
 			{
 				minval = -1;
-				if(macOutput[numparam-prms::prm0]==-1 || song()->_pMachine[macOutput[numparam-prms::prm0]] == NULL)
+				if(macOutput[numparam-prms::prm0]==-1 || song()->machine(macOutput[numparam-prms::prm0]) == NULL)
 					maxval = -1;
 				else
-					maxval =  song()->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
+					maxval =  song()->machine(macOutput[numparam-prms::prm0])->GetNumParams()-1;
 			}
 
 			else if (numparam <prms::phase0){minval = 0; maxval = MAX_DEPTH*2;}
@@ -872,7 +878,7 @@ namespace psy {
 
 		}
 
-		int LFO::GetParamValue(int numparam)
+		int LFO::GetParamValue(int numparam) const
 		{
 			if(numparam==prms::wave)			return waveform;
 			else if(numparam==prms::speed)	return lSpeed;
@@ -883,7 +889,7 @@ namespace psy {
 			else return 0;
 		}
 
-		void LFO::GetParamValue(int numparam, char *parVal)
+		void LFO::GetParamValue(int numparam, char *parVal) const
 		{
 			if(numparam==prms::wave)
 			{
@@ -911,8 +917,8 @@ namespace psy {
 			} 
 			else if(numparam<prms::prm0)
 			{
-				if ((macOutput[numparam-prms::mac0] != -1 ) &&( song()->_pMachine[macOutput[numparam-prms::mac0]] != NULL))
-					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],song()->_pMachine[macOutput[numparam-prms::mac0]]->GetEditName().c_str());
+				if ((macOutput[numparam-prms::mac0] != -1 ) &&( song()->machine(macOutput[numparam-prms::mac0]) != NULL))
+					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],song()->machine(macOutput[numparam-prms::mac0])->GetEditName().c_str());
 				else if (macOutput[numparam-prms::mac0] != -1)
 					sprintf(parVal,"%X (none)",macOutput[numparam-prms::mac0]);
 				else 
@@ -921,13 +927,13 @@ namespace psy {
 			else if(numparam<prms::level0)
 			{
 				if(		(macOutput[numparam-prms::prm0] != -1) 
-					&&	(song()->_pMachine[macOutput[numparam-prms::prm0]] != NULL)
+					&&	(song()->machine(macOutput[numparam-prms::prm0]) != NULL)
 					&&  (paramOutput[numparam-prms::prm0] >= 0)	)
 				{
-					if		(paramOutput[numparam-prms::prm0] < song()->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
+					if		(paramOutput[numparam-prms::prm0] < song()->machine(macOutput[numparam-prms::prm0])->GetNumParams())
 					{
 						char name[128];
-						song()->_pMachine[macOutput[numparam-prms::prm0]]->GetParamName(paramOutput[numparam-prms::prm0], name);
+						song()->machine(macOutput[numparam-prms::prm0])->GetParamName(paramOutput[numparam-prms::prm0], name);
 						sprintf(parVal,"%X -%s", paramOutput[numparam-prms::prm0], name);
 					}
 					else
@@ -967,13 +973,13 @@ namespace psy {
 					//if we're increasing, increase until we hit an active machine
 					if(value>macOutput[numparam-prms::mac0])
 					{
-						for(newMac=value; newMac<MAX_MACHINES && song()->_pMachine[newMac]==NULL; ++newMac)
+						for(newMac=value; newMac<MAX_MACHINES && song()->machine(newMac)==NULL; ++newMac)
 							;
 					}
 					//if we're decreasing, or if we're increasing but didn't find anything, decrease until we find an active machine
 					if(value<macOutput[numparam-prms::mac0] || newMac>=MAX_MACHINES)
 					{
-						for(newMac=value;newMac>-1 && song()->_pMachine[newMac]==NULL; --newMac)
+						for(newMac=value;newMac>-1 && song()->machine(newMac)==NULL; --newMac)
 							;
 					}
 
@@ -985,9 +991,9 @@ namespace psy {
 			}
 			else if(numparam <prms::level0)
 			{
-				if( macOutput[numparam-prms::prm0]>-1 && song()->_pMachine[macOutput[numparam-prms::prm0]] )
+				if( macOutput[numparam-prms::prm0]>-1 && song()->machine(macOutput[numparam-prms::prm0]) )
 				{
-					if(value<song()->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams())
+					if(value<song()->machine(macOutput[numparam-prms::prm0])->GetNumParams())
 					{
 						ParamEnd(numparam-prms::prm0);
 						paramOutput[numparam-prms::prm0] = value;
@@ -996,7 +1002,7 @@ namespace psy {
 					else
 					{
 						ParamEnd(numparam-prms::prm0);
-						paramOutput[numparam-prms::prm0] = song()->_pMachine[macOutput[numparam-prms::prm0]]->GetNumParams()-1;
+						paramOutput[numparam-prms::prm0] = song()->machine(macOutput[numparam-prms::prm0])->GetNumParams()-1;
 						ParamStart(numparam-prms::prm0);
 					}
 				}
@@ -1031,11 +1037,11 @@ namespace psy {
 
 			for(int j(0);j<NUM_CHANS;++j)
 			{
-				if	(	macOutput[j] != -1		&&	song()->_pMachine[macOutput[j]] != NULL
-					&&  paramOutput[j] != -1	&&	paramOutput[j] < song()->_pMachine[macOutput[j]]->GetNumParams() )
+				if	( macOutput[j] != -1 && song()->machine(macOutput[j]) != NULL &&
+				    paramOutput[j] != -1 && paramOutput[j] < song()->machine(macOutput[j])->GetNumParams() )
 				{
-					song()->_pMachine[macOutput[j]]->GetParamRange(paramOutput[j], minVal, maxVal);
-					curVal = song()->_pMachine[macOutput[j]]->GetParamValue(paramOutput[j]);
+					song()->machine(macOutput[j])->GetParamRange(paramOutput[j], minVal, maxVal);
+					curVal = song()->machine(macOutput[j])->GetParamValue(paramOutput[j]);
 					curLFO = waveTable[	int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 					lfoAmt = (level[j]-MAX_DEPTH)/(float)MAX_DEPTH;
 
@@ -1046,7 +1052,7 @@ namespace psy {
 					if(newVal>maxVal) newVal=maxVal;
 					else if(newVal<minVal) newVal=minVal;
 
-					song()->_pMachine[macOutput[j]]->SetParameter(paramOutput[j], newVal);	//make it happen!
+					song()->machine(macOutput[j])->SetParameter(paramOutput[j], newVal);	//make it happen!
 					bRedraw=true;
 					prevVal[j] = newVal;
 				}
@@ -1083,7 +1089,7 @@ namespace psy {
 			return true;
 		}
 
-		void LFO::SaveSpecificChunk(RiffFile* pFile)
+		void LFO::SaveSpecificChunk(RiffFile* pFile) const
 		{
 			std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
 			pFile->Write(size);
@@ -1139,21 +1145,21 @@ namespace psy {
 			int destMac = macOutput[which];
 			int destParam = paramOutput[which];
 
-			if	(	destMac		!= -1	&&	song()->_pMachine[destMac] != NULL
-				&&  destParam	!= -1	&&	destParam < song()->_pMachine[destMac]->GetNumParams())
+			if	(	destMac		!= -1	&&	song()->machine(destMac) != NULL
+				&&  destParam	!= -1	&&	destParam < song()->machine(destMac)->GetNumParams())
 			{
 				int minVal, maxVal;
 				float curLFO, lfoAmt;
 
-				song()->_pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
+				song()->machine(destMac)->GetParamRange(destParam, minVal, maxVal);
 				curLFO = waveTable[	int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 				lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
 
 				//bad! bad!
-				//prevVal[which] = Global::song()._pMachine[macOutput[which]]->GetParamValue(paramOutput[which]);
+				//prevVal[which] = Global::song().machine(macOutput[which])->GetParamValue(paramOutput[which]);
 				//centerVal[which] = prevVal[which] - (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt);
 
-				centerVal[which] = song()->_pMachine[destMac]->GetParamValue(destParam);
+				centerVal[which] = song()->machine(destMac)->GetParamValue(destParam);
 				prevVal[which] = centerVal[which];
 
 				// the way i've set this up, a control will 'jump' if the lfo is at a peak or dip when a control is first selected.
@@ -1179,18 +1185,18 @@ namespace psy {
 			id_type destMac(macOutput[which]);
 			int destParam = paramOutput[which];
 
-			if	(	destMac		!= -1	&&	song()->_pMachine[destMac] != NULL
-				&&  destParam	!= -1	&&	destParam < song()->_pMachine[destMac]->GetNumParams())
+			if	(	destMac		!= -1	&&	song()->machine(destMac) != NULL
+				&&  destParam	!= -1	&&	destParam < song()->machine(destMac)->GetNumParams())
 			{
 				int minVal, maxVal;
 				int newVal;
-				song()->_pMachine[destMac]->GetParamRange(destParam, minVal, maxVal);
+				song()->machine(destMac)->GetParamRange(destParam, minVal, maxVal);
 				newVal = centerVal[which];
 				if(newVal<minVal) newVal=minVal;
 				else if(newVal>maxVal) newVal=maxVal;
 
 				if(destMac != this->id()) // craziness may ensue without this check.. folks routing the lfo to itself are on their own
-					song()->_pMachine[destMac]->SetParameter(destParam, newVal); //set to value at lfo==0
+					song()->machine(destMac)->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}
 	}

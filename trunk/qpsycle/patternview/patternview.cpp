@@ -95,7 +95,7 @@ if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the nex
 {
 			if ( pattern() ) {
 			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
-			psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
+			psy::core::Machine* tmac = song_->machine( song_->seqBus );
 			event.setNote( octave() * 12 + note );
 			event.setSharp( false/*drawArea->sharpMode()*/ );
 			if (tmac) event.setMachine( tmac->id() );
@@ -112,7 +112,7 @@ if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the nex
 void PatternView::clearNote( const PatCursor & cursor) {
     if ( pattern() ) {
         psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
-        psy::core::Machine* tmac = song_->_pMachine[ song_->seqBus ];
+        psy::core::Machine* tmac = song_->machine( song_->seqBus );
         event.setNote(255);
         event.setSharp( false/*drawArea->sharpMode()*/ );
         pattern()->setEvent( cursor.line(), cursor.track(), event );

@@ -38,13 +38,13 @@ namespace psy {
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
 			virtual std::string GetName() const { return _psName; };
-			virtual void GetParamName(int numparam,char *name);
-			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval);
-			virtual void GetParamValue(int numparam,char *parVal);
-			virtual int GetParamValue(int numparam);
+			virtual void GetParamName(int numparam,char *name) const;
+			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval) const;
+			virtual void GetParamValue(int numparam,char *parVal) const;
+			virtual int GetParamValue(int numparam) const;
 			virtual bool SetParameter(int numparam,int value);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 
 		protected:
 			short macOutput[8];
@@ -69,7 +69,7 @@ namespace psy {
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 
 			/// this is for the VstHost
 			double sampleCount;
@@ -131,11 +131,11 @@ namespace psy {
 			void FxSend(int numSamples );
 			void Mix(int numSamples);
 			virtual std::string GetName() const { return _psName; };
-			virtual int GetNumCols();
-			virtual void GetParamName(int numparam,char *name);
-			virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
-			virtual void GetParamValue(int numparam,char *parVal);
-			virtual int GetParamValue(int numparam);
+			virtual int GetNumCols() const;
+			virtual void GetParamName(int numparam,char *name) const;
+			virtual void GetParamRange(int numparam, int &minval, int &maxval) const { minval=0; maxval=100; };
+			virtual void GetParamValue(int numparam,char *parVal) const;
+			virtual int GetParamValue(int numparam) const;
 			virtual bool SetParameter(int numparam,int value);
 			virtual int GetAudioInputs() { return 24; };
 			virtual int GetAudioOutputs() { return 1; };
@@ -145,7 +145,7 @@ namespace psy {
 			virtual int GetSend(int i){ assert(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool SendValid(int i) { assert(i<MAX_CONNECTIONS); return _sendValid[i]; }
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 
 			virtual float VuChan(Wire::id_type idx);
 			virtual float VuSend(Wire::id_type idx);
@@ -197,13 +197,13 @@ namespace psy {
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
 			virtual std::string GetName() const { return _psName; };
-			virtual void GetParamName(int numparam,char *name);
-			virtual void GetParamRange(int numparam,int &minval,int &maxval);
-			virtual void GetParamValue(int numparam,char *parVal);
-			virtual int GetParamValue(int numparam);
+			virtual void GetParamName(int numparam,char *name) const;
+			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
+			virtual void GetParamValue(int numparam,char *parVal) const;
+			virtual int GetParamValue(int numparam) const;
 			virtual bool SetParameter(int numparam,int value);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-			virtual void SaveSpecificChunk(RiffFile * pFile);
+			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 
 
 			///\name constants

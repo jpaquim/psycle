@@ -268,7 +268,7 @@ void MachineTweakDlg::resetParameters()
 		int numpars = pMachine_->GetNumParams();
 		for (int c=0; c<numpars; c++)
 		{
-			int dv = ((psy::core::Plugin*)pMachine_)->GetInfo()->Parameters[c]->DefValue;
+			int dv = ((psy::core::Plugin*)pMachine_)->GetInfo().Parameters[c]->DefValue;
 			pMachine_->SetParameter(c,dv);
 		}
 	}
@@ -289,8 +289,8 @@ void MachineTweakDlg::showAboutDialog()
 	if ( pMachine_->type() == psy::core::MACH_PLUGIN )
 	{
 		QMessageBox::information( this,
-					  "About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo()->Name),
-					  "Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo()->Author) );
+					  "About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
+					  "Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
 	
 	}
 }
@@ -540,7 +540,7 @@ bool PresetsDialog::loadPresets()
 			// new preset format version 1
 			// new preset format version 1
 
-			int numParameters = ((psy::core::Plugin*) m_macGui->mac())->GetInfo()->numParameters;
+			int numParameters = ((psy::core::Plugin*) m_macGui->mac())->GetInfo().numParameters;
 			int sizeDataStruct = ((psy::core::Plugin *) m_macGui->mac())->proxy().GetDataSize();
 
 			int numpresets = binIn.readInt4LE();

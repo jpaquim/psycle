@@ -379,7 +379,7 @@ namespace psy
 					typedef MachineType type_type;
 					type_type inline type() const throw() { return type_; }
 				private:
-					void type(type_type type) { type_ = type; } friend class Psy2Filter;
+					void type(type_type type) { type_ = type; } friend class CoreSong;
 					type_type type_;
 			///\}
 
@@ -421,7 +421,8 @@ namespace psy
 			///\{
 				public:
 					/// the song this machine belongs to
-					CoreSong* song() { return song_; }
+					CoreSong const * const song() const { return song_; }
+					CoreSong * const song() { return song_; }
 			    private:
 					CoreSong* song_;
 			///\}
@@ -441,11 +442,11 @@ namespace psy
 			///\name (de)serialization
 			///\{
 				public:
-					virtual void SaveDllName(RiffFile * pFile);
+					virtual void SaveDllName(RiffFile * pFile) const;
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 					static Machine * LoadFileChunk(CoreSong* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
-					virtual void SaveFileChunk(RiffFile * pFile);
-					virtual void SaveSpecificChunk(RiffFile * pFile);
+					virtual void SaveFileChunk(RiffFile * pFile) const;
+					virtual void SaveSpecificChunk(RiffFile * pFile) const;
 					/// Loader for psycle fileformat version 2.
 					virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 				protected:
@@ -521,7 +522,7 @@ namespace psy
 					virtual std::string GetName() const = 0;
 
 				public:
-					virtual std::string const & GetEditName() { return editName_; }
+					virtual std::string const & GetEditName() const { return editName_; }
 					virtual void SetEditName(std::string const & editName) { editName_ = editName; }
 				private:
 					std::string  editName_;
@@ -530,12 +531,12 @@ namespace psy
 			///\name parameters
 			///\{
 				public:
-					virtual int GetNumCols() { return _nCols; };
-					virtual int GetNumParams() { return _numPars; };
-					virtual void GetParamName(int numparam, char * name) { name[0]='\0'; };
-					virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; };
-					virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; };
-					virtual int GetParamValue(int numparam) { return 0; };
+					virtual int GetNumCols() const { return _nCols; };
+					virtual int GetNumParams() const { return _numPars; };
+					virtual void GetParamName(int numparam, char * name) const { name[0]='\0'; };
+					virtual void GetParamRange(int numparam, int &minval, int &maxval) const {minval=0; maxval=0; };
+					virtual void GetParamValue(int numparam, char * parval) const { parval[0]='\0'; };
+					virtual int GetParamValue(int numparam) const { return 0; };
 					virtual bool SetParameter(int numparam, int value) { return false;}; 
 			///\}
 

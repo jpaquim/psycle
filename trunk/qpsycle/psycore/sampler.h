@@ -188,7 +188,7 @@ namespace psy{
 				return true;
 			}
 
-			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
+			inline virtual void SaveSpecificChunk(RiffFile* pFile) const
 			{
 				std::int32_t temp;
 				std::uint32_t size = 2 * sizeof temp;
