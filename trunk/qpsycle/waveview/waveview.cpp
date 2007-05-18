@@ -63,7 +63,11 @@ class QVBoxLayout;
 	 zoomBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	 QLabel *zoomLabel = new QLabel("Zoom: ");
 	 zoomMore_ = new QAction( "+", this);
+	 connect( zoomMore_, SIGNAL( triggered() ), this, SLOT( onPlusButtonClicked() ));
+	 
 	 zoomLess_ = new QAction("-", this);
+	 connect( zoomLess_, SIGNAL( triggered() ), this, SLOT( onMinusButtonClicked() ));
+
 	 zoomSlide_ = new QSlider(Qt::Horizontal, this);
 	 zoomSlide_->setMinimum(0);
 	 zoomSlide_->setMaximum(20);
@@ -120,6 +124,22 @@ void WaveView::onSaveButtonClicked()
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
 							"/home/neil/mymusic/samples/",
 							tr("Wave files (*.wav)"));
+}
+
+void WaveView::onPlusButtonClicked()
+{
+	if(zoomSlide_->value() < 20)
+	{
+		zoomSlide_->setValue(zoomSlide_->value() + 1);
+	}
+}
+
+void WaveView::onMinusButtonClicked()
+{
+	if (zoomSlide_->value() > 0)
+	{
+		zoomSlide_->setValue(zoomSlide_->value() - 1);
+	}
 }
 
 psy::core::Song* WaveView::song()
