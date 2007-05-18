@@ -39,6 +39,8 @@
 public slots:
     void onLoadButtonClicked();
 	void onSaveButtonClicked();
+	void onPlusButtonClicked();
+	void onMinusButtonClicked();
 
 signals:
     void sampleAdded();
@@ -56,7 +58,6 @@ signals:
 	QAction *stopSmp_;
 	
 	QAction *ampEfx_;
-	
 	
 	QToolBar *zoomBar_;
 	QAction *zoomMore_;
