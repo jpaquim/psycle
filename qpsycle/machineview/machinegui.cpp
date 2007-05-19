@@ -178,12 +178,12 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if ( ( event->button() == Qt::LeftButton ) && ( machineView->isCreatingWire() ) ) {
-        emit closeNewConnection(this, event);
-    } 
-    else { // business as usual
-        QGraphicsItem::mouseReleaseEvent(event);
-    }
+	if ( ( event->button() == Qt::LeftButton ) && ( machineView->isCreatingWire() ) ) {
+		emit closeNewConnection(this, event);
+	} 
+	else { // business as usual
+		QGraphicsItem::mouseReleaseEvent(event);
+	}
 }
 
 void MachineGui::showMacTwkDlg()

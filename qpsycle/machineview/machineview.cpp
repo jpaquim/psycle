@@ -135,8 +135,13 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 {
 	// See if we hit another machine gui.
 	if ( QGraphicsItem *itm = scene()->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
-		if (itm->type() == 65537) { // FIXME: un-hardcode this
-			MachineGui *dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
+		if (itm->type() == 65537 || itm->type() == 8 ) { // FIXME: un-hardcode this
+			MachineGui *dstMacGui;
+			if ( itm->type() == 8 ) {
+				dstMacGui = qgraphicsitem_cast<MachineGui *>(itm->parentItem());
+			} else {
+				dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
+			}
 			connectMachines(srcMacGui, dstMacGui); 
 		}
 	}
@@ -390,44 +395,44 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 
 void MachineView::cloneMachine( MachineGui *macGui )
 {
-  qDebug("in clone machine");
-  psy::core::Machine *pMachine = macGui->mac();
-  psy::core::Machine::id_type src( pMachine->id() );
-  psy::core::Machine::id_type dst(-1);
+	qDebug("in clone machine");
+	psy::core::Machine *pMachine = macGui->mac();
+	psy::core::Machine::id_type src( pMachine->id() );
+	psy::core::Machine::id_type dst(-1);
 
-  if ((src < psy::core::MAX_BUSES) && (src >=0))
-    {
-      // we need to find an empty slot
-      for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
+	if ((src < psy::core::MAX_BUSES) && (src >=0))
 	{
-	  if (!song_->machine(i))
-	    {
-	      dst = i;
-	      break;
-	    }
+		// we need to find an empty slot
+		for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
+		{
+			if (!song_->machine(i))
+			{
+				dst = i;
+				break;
+			}
+		}
 	}
-    }
-  else if ((src < psy::core::MAX_BUSES*2) && (src >= psy::core::MAX_BUSES))
-    {
-      for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
+	else if ((src < psy::core::MAX_BUSES*2) && (src >= psy::core::MAX_BUSES))
 	{
-	  if (!song_->machine(i))
-	    {
-	      dst = i;
-	      break;
-	    }
+		for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
+		{
+			if (!song_->machine(i))
+			{
+				dst = i;
+				break;
+			}
+		}
 	}
-    }
-  if (dst >= 0)
-    {
+	if (dst >= 0)
+	{
       
-      if (!song_->CloneMac(src,dst))
-	{
-	  qDebug("Cloning failed");
-	}
-      else {
-	qDebug("Cloning doesn't work yet."); // See Song::CloneMac().
-      }
-    } 
+		if (!song_->CloneMac(src,dst))
+		{
+			qDebug("Cloning failed");
+		}
+		else {
+			qDebug("Cloning doesn't work yet."); // See Song::CloneMac().
+		}
+	} 
 
 }
