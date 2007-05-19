@@ -24,16 +24,20 @@ class QVBoxLayout;
 #include <iostream>
 #include <QtGui/QGraphicsView> //temp... just for testing...
 #include <QGraphicsScene>
+ #include <QGraphicsRectItem>
 
  WaveView::WaveView( psy::core::Song *song, QWidget *parent) 
     : QWidget(parent)
  {
+
      song_ = song;
      layout_ = new QVBoxLayout();
      setLayout(layout_);
+	 
 	 //TODO: this should be in the waveview.h and waveformview should be an object of WaveFormView
 	 QGraphicsView *waveformview = new QGraphicsView(this);
 	 QGraphicsScene *scene = new QGraphicsScene(this);
+	 QGraphicsRectItem *separator = new QGraphicsRectItem(0, scene);
 	 waveformview->setScene(scene);
 	 waveformview->setBackgroundBrush( Qt::black );
 	 waveformview->adjustSize();
@@ -57,6 +61,10 @@ class QVBoxLayout;
 	 //effects
 	 QLabel *efxLabel = new QLabel("Effects: ");
 	 ampEfx_ = new QAction("Amplify", this);
+	 //scrollbar for the WaveFormView
+	 
+	 waveScroll_ = new QScrollBar(Qt::Horizontal, this);
+	 
 	 
 	 //zoom and various
 	 zoomBar_ = new QToolBar();
@@ -93,6 +101,7 @@ class QVBoxLayout;
 
      layout_->addWidget( toolBar_ );
 	 layout_->addWidget( waveformview );
+	 layout_->addWidget( waveScroll_);
 	 layout_->addWidget( zoomBar_ );
 	 waveformview->show();
  }
