@@ -77,10 +77,10 @@ class QVBoxLayout;
 	 zoomBar_ = new QToolBar();
 	 zoomBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	 QLabel *zoomLabel = new QLabel("Zoom: ");
-	 zoomMore_ = new QAction( "+", this);
+	 zoomMore_ = new QAction(QIcon(":/images/plus.png"), tr("Zoom More"), this);
 	 connect( zoomMore_, SIGNAL( triggered() ), this, SLOT( onPlusButtonClicked() ));
 	 
-	 zoomLess_ = new QAction("-", this);
+	 zoomLess_ = new QAction(QIcon(":/images/minus.png"), tr("Zoom Less"), this);
 	 connect( zoomLess_, SIGNAL( triggered() ), this, SLOT( onMinusButtonClicked() ));
 
 	 zoomSlide_ = new QSlider(Qt::Horizontal, this);
