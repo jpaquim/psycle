@@ -64,6 +64,7 @@ namespace seib {
 			extern const char* canDoMidiProgramNames;
 			extern const char* canDoBypass;
 		}
+
 		/*****************************************************************************/
 		/* CFxBase : base class for FX Bank / Program Files                          */
 		/*****************************************************************************/
@@ -79,9 +80,12 @@ namespace seib {
 			CFxBase & DoCopy(const CFxBase &org);
 
 			bool Save(const char *pszFile);
+			long GetMagic() { return version; }
 			long GetVersion() { return version; }
 			long GetFxID() {  return fxID; }
 			long GetFxVersion() { return fxVersion; }
+			bool Initialized() { return Initialized; }
+			std::string GetPathName() { return pathName; }
 			// This function would normally be protected, but it is needed in the saving of Programs from a Bank.
 			virtual bool SaveData(FILE* pFileHandle) { pf = pFileHandle; return SaveData(); }
 		protected:
@@ -89,6 +93,8 @@ namespace seib {
 			VstInt32 version;			///< format version
 			VstInt32 fxID;				///< fx unique ID
 			VstInt32 fxVersion;			///< fx version
+			std::string pathName;
+			bool initialized;
 			// pf would normally be private, but it is needed in the loading of Programs from a Bank.
 			FILE* pf;
 		protected:
@@ -122,8 +128,10 @@ namespace seib {
 			CFxProgram(const char *pszFile = 0):CFxBase(){ Init(); Load(pszFile); }
 			CFxProgram(FILE *pFileHandle);
 			// Create a CFxProgram from parameters.
-			// If data==0 , create an empty Program of size "size", else, copy the contents of "data" to the new arrays.
-			// isChunk tells if this is going to act as a regular program or a chunk one.
+			// _fxID and _fxVersion are mandatory. 
+			// if isChunk == false, size is the number of parameters, and data, if not empty, contains 
+			// an array of floats that correspond to the parameter values.
+			// if isChunk == true, size is the size of the chunk, and data, if not empty, contains the chunk data.
 			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool isChunk=false, void *data=0);
 			CFxProgram(CFxProgram const &org):CFxBase(){ Init(); DoCopy(org); }
 			virtual ~CFxProgram();
@@ -140,7 +148,7 @@ namespace seib {
 			float GetParameter(VstInt32 nParm) const{  return (nParm < numParams) ? pParams[nParm] : 0; }
 			bool SetParameter(VstInt32 nParm, float val = 0.0);
 			long GetChunkSize() const{ return chunkSize; }
-			void *GetChunk() { return pChunk; }
+			const void *GetChunk() const { return pChunk; }
 			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
 			bool IsChunk() const{ return fxMagic == chunkPresetMagic; }
 
@@ -181,32 +189,32 @@ namespace seib {
 			CFxBank(const char *pszFile = 0):CFxBase(){ Init(); Load(pszFile); }
 			CFxBank(FILE* pFileHandle);
 			// Create a CFxBank from parameters.
-			// If chunkSize is zero, the Bank is created as a regular bank of numPrograms. data is ignored.
-			// else, creates a chunk of size "chunkSize", and copies the contents of "data" if it is not zero.
-			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, int _chunkSize=0, void *_data=0);
+			// _fxID, _fxVersion and _numPrograms are mandatory.
+			// If isChunk == false, the Bank is created as a regular bank of numPrograms, _size is then the
+			// number of parameters of the program, and data can be zero, or an array of CFxPrograms to copy to the CFxBank.
+			// if isChunk == true ,create a chunk of size "_size", and copy the contents of "data".
+			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk=false, int _size=0, void *_data=0);
 			CFxBank(CFxBank const &org) { Init(); DoCopy(org); }
 			virtual ~CFxBank();
 			CFxBank & operator=(CFxBank const &org) { FreeMemory(); return DoCopy(org); }
 
 			// access functions
-			long GetNumPrograms() { return numPrograms; }
+			long GetNumPrograms() const { return numPrograms; }
 			
-			long GetChunkSize() { return chunkSize; }
-			const void *GetChunk() { return pChunk; }
+			long GetChunkSize() const { return chunkSize; }
+			void * const GetChunk() const { return pChunk; }
 			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
 			bool IsChunk() const{ return fxMagic == chunkBankMagic; }
 
 			// if nProgNum is not specified (i.e, it is -1) , currentProgram is used as index.
-			const CFxProgram * GetProgram(VstInt32 nProgNum=-1)
+			CFxProgram& GetProgram(VstInt32 nProgNum=-1)
 			{
-				if ( nProgNum==-1) return &programs[currentProgram];
-				else if (nProgNum<numPrograms) return &programs[nProgNum];
-				return 0;
+				if ( nProgNum < 0 || nProgNum >= numPrograms) return programs[currentProgram];
+				else return programs[nProgNum];
 			}
 			void SetProgramIndex(VstInt32 nProgNum) { if (nProgNum < numPrograms ) currentProgram = nProgNum; }
-			VstInt32 GetProgramIndex() { return currentProgram;	}
+			VstInt32 GetProgramIndex() const { return currentProgram;	}
 			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pf); }
-
 
 		protected:
 			VstInt32 numPrograms;
@@ -228,6 +236,13 @@ namespace seib {
 			void ChunkMode() { FreeMemory(); fxMagic = chunkBankMagic; }
 			void ProgramMode() { FreeMemory(); fxMagic = bankMagic; }
 
+		};
+
+		class CPatchChunkInfo : public VstPatchChunkInfo
+		{
+		public:
+			CPatchChunkInfo(CFxProgram fxstore);
+			CPatchChunkInfo(CFxBank fxstore);
 		};
 
 		//-------------------------------------------------------------------------------------------------------
@@ -324,6 +339,8 @@ namespace seib {
 		/*****************************************************************************/
 		/* CEffect : class definition for audio effect objects                       */
 		/*****************************************************************************/
+		class CEffectWnd;
+
 		class CEffect
 		{
 		public:
@@ -338,6 +355,7 @@ namespace seib {
 			AEffect *aEffect;
 			PluginLoader* ploader;
 			void *sDir;
+			std::string loadingChunkName;
 
 			bool bEditOpen;
 			bool bNeedIdle;
@@ -346,12 +364,14 @@ namespace seib {
 			bool bShellPlugin;
 
 		public:
-			CFrameWnd * editorWnd;
+			CEffectWnd * editorWnd;
 
 			// overridables
 		public:
-			virtual bool LoadBank(const char *name);
-			virtual bool SaveBank(const char *name);
+			virtual bool LoadBank(CFxBank& fxstore);
+			virtual bool LoadProgram(CFxProgram& fxstore);
+			virtual CFxBank SaveBank(bool preferchunk=false);
+			virtual CFxProgram SaveProgram(bool preferchunk=true);
 			virtual void EnterCritical(){;}
 			virtual void LeaveCritical(){;}
 			virtual void WantsMidi(bool enable) { bWantMidi=enable; }
@@ -362,9 +382,13 @@ namespace seib {
 			virtual bool NeedsEditIdle() { return bNeedEditIdle; }
 			virtual bool IsShellPlugin() { return bShellPlugin; }
 			virtual void IsShellPlugin(bool enable) { bShellPlugin = enable; }
+			virtual void SetChunkFile(const char * nativePath) { loadingChunkName = nativePath; }
 
+			// Overridable AEffect-to-host calls. (you can override them at the host level
+			// if your implementation needs that)
 			virtual void * OnGetDirectory();
-			virtual bool OnSizeEditorWindow(long width, long height) { return false; }
+			virtual bool OnGetChunkFile(char * nativePath);
+			virtual bool OnSizeEditorWindow(long width, long height);
 			virtual bool OnUpdateDisplay() { return false; }
 			virtual void * OnOpenWindow(VstWindow* window);
 			virtual bool OnCloseWindow(VstWindow* window);
@@ -376,44 +400,45 @@ namespace seib {
 			// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 			virtual bool OnIOChanged() { return false; }
 
+			//////////////////////////////////////////////////////////////////////////
+			// Following comes the Wrapping of the VST Interface functions.
 			virtual void DECLARE_VST_DEPRECATED(Process)(float **inputs, float **outputs, VstInt32 sampleframes);
 			virtual void ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
 			virtual void ProcessDouble (double** inputs, double** outputs, VstInt32 sampleFrames);
 			virtual void SetParameter(VstInt32 index, float parameter);
 			virtual float GetParameter(VstInt32 index);
-			// Following comes the Wrapping of the VST Dispatching functions.
 		public:
 			// Not to be used, except if no other way.
-			AEffect	*GetAEffect() { return aEffect; }
+			inline AEffect	*GetAEffect() { return aEffect; }
 			//////////////////////////////////////////////////////////////////////////
 			// AEffect Properties
 			// magic is only used in the loader to verify that it is a VST plugin
 			//long int magic()
-			VstInt32 numPrograms() const{	if (!aEffect)	throw (int)1;	return aEffect->numPrograms;	}
-			VstInt32 numParams() const	{	if (!aEffect)	throw (int)1;	return aEffect->numParams;		}
-			VstInt32 numInputs() const	{	if (!aEffect)	throw (int)1;	return aEffect->numInputs;		}
-			VstInt32 numOutputs() const	{	if (!aEffect)	throw (int)1;	return aEffect->numOutputs;		}
+			inline VstInt32 numPrograms() const	{	if (!aEffect)	throw (int)1;	return aEffect->numPrograms;	}
+			inline VstInt32 numParams() const	{	if (!aEffect)	throw (int)1;	return aEffect->numParams;		}
+			inline VstInt32 numInputs() const	{	if (!aEffect)	throw (int)1;	return aEffect->numInputs;		}
+			inline VstInt32 numOutputs() const	{	if (!aEffect)	throw (int)1;	return aEffect->numOutputs;		}
 			//flags
-			bool HasEditor()const							{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsHasEditor;			}
-			bool DECLARE_VST_DEPRECATED(HasClip)() const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsHasClip;			}
-			bool DECLARE_VST_DEPRECATED(HasVu)() const		{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsHasVu;				}
-			bool DECLARE_VST_DEPRECATED(CanInputMono)()const{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsCanMono;			}
-			bool CanProcessReplace() const					{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsCanReplacing;		}
-			bool ProgramIsChunk() const						{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsProgramChunks;		}
-			bool IsSynth() const							{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsIsSynth;			}
-			bool HasNoTail() const							{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsNoSoundInStop;		}
-			bool DECLARE_VST_DEPRECATED(ExternalAsync)() const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsExtIsAsync;			}
-			bool DECLARE_VST_DEPRECATED(ExternalBuffer)() const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsExtHasBuffer;		}
+			inline bool HasEditor()const						{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsHasEditor;			}
+			inline bool DECLARE_VST_DEPRECATED(HasClip)() const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsHasClip;			}
+			inline bool DECLARE_VST_DEPRECATED(HasVu)() const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsHasVu;				}
+			inline bool DECLARE_VST_DEPRECATED(CanInputMono)()const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsCanMono;			}
+			inline bool CanProcessReplace() const					{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsCanReplacing;		}
+			inline bool ProgramIsChunk() const						{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsProgramChunks;		}
+			inline bool IsSynth() const								{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsIsSynth;			}
+			inline bool HasNoTail() const							{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsNoSoundInStop;		}
+			inline bool DECLARE_VST_DEPRECATED(ExternalAsync)() const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsExtIsAsync;			}
+			inline bool DECLARE_VST_DEPRECATED(ExternalBuffer)() const	{	if (!aEffect)	throw (int)1;	return aEffect->flags & effFlagsExtHasBuffer;		}
 
-			VstInt32 DECLARE_VST_DEPRECATED(RealQualities)() const	{	if (!aEffect)	throw (int)1;	return aEffect->realQualities;		}
-			VstInt32 DECLARE_VST_DEPRECATED(OffQualities)() const	{	if (!aEffect)	throw (int)1;	return aEffect->offQualities;		}
-			float DECLARE_VST_DEPRECATED(IORatio)() const			{	if (!aEffect)	throw (int)1;	return aEffect->ioRatio;			}
+			inline VstInt32 DECLARE_VST_DEPRECATED(RealQualities)() const	{	if (!aEffect)	throw (int)1;	return aEffect->realQualities;		}
+			inline VstInt32 DECLARE_VST_DEPRECATED(OffQualities)() const	{	if (!aEffect)	throw (int)1;	return aEffect->offQualities;		}
+			inline float DECLARE_VST_DEPRECATED(IORatio)() const			{	if (!aEffect)	throw (int)1;	return aEffect->ioRatio;			}
 
 			// the real plugin ID.
-			VstInt32 uniqueId() const			{	if (!aEffect)	throw (int)1;	return aEffect->uniqueID;		}
+			inline VstInt32 uniqueId() const		{	if (!aEffect)	throw (int)1;	return aEffect->uniqueID;		}
 			// version() is never used (from my experience), in favour of GetVendorVersion(). Yet, it hasn't been deprecated in 2.4.
-			VstInt32 version() const			{	if (!aEffect)	throw (int)1;	return aEffect->version;		}
-			VstInt32 initialDelay() const		{	if (!aEffect)	throw (int)1;	return aEffect->initialDelay;	}
+			inline VstInt32 version() const			{	if (!aEffect)	throw (int)1;	return aEffect->version;		}
+			inline VstInt32 initialDelay() const	{	if (!aEffect)	throw (int)1;	return aEffect->initialDelay;	}
 
 		private:
 			virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index=0, VstIntPtr value=0, void* ptr=0, float opt=0.);
@@ -426,11 +451,12 @@ namespace seib {
 			// This is why i set it as protected, and calling it from the destructor.
 			inline void Close() { Dispatch(effClose); }
 		public:
-			inline void SetProgram(VstIntPtr lValue) { Dispatch(effSetProgram, 0, lValue); }
+			// sets the index of the program. Zero based.
+			inline void SetProgram(VstIntPtr lValue) { if (lValue >= 0 && lValue < numPrograms()) Dispatch(effSetProgram, 0, lValue); }
 			// returns the index of the program. Zero based.
 			inline VstInt32 GetProgram() { return Dispatch(effGetProgram); }
 			// size of ptr string limited to kVstMaxProgNameLen chars + \0 delimiter.
-			inline void SetProgramName(char *ptr) { Dispatch(effSetProgramName, 0, 0, ptr); }
+			inline void SetProgramName(const char *ptr) { Dispatch(effSetProgramName, 0, 0, const_cast<char*>(ptr) ); }
 			inline void GetProgramName(char *ptr) { Dispatch(effGetProgramName, 0, 0, ptr); }
 			// Unit of the paramter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter
 			inline void GetParamLabel(VstInt32 index, char *ptr) { Dispatch(effGetParamLabel, index, 0, ptr); }
@@ -461,7 +487,7 @@ namespace seib {
 			// returns "byteSize".
 			inline long GetChunk(void **ptr, bool onlyCurrentProgram = false) { return Dispatch(effGetChunk, onlyCurrentProgram, 0, ptr); }
 			// return value is not specified in the VST SDK. Don't assume anything.
-			inline long SetChunk(void *data, long byteSize, bool onlyCurrentProgram = false) { return Dispatch(effSetChunk, onlyCurrentProgram, byteSize, data); }
+			inline long SetChunk(const void *data, long byteSize, bool onlyCurrentProgram = false) { return Dispatch(effSetChunk, onlyCurrentProgram, byteSize, const_cast<void*>(data)); }
 		// VST 2.0
 			inline long ProcessEvents(VstEvents* ptr) { return Dispatch(effProcessEvents, 0, 0, ptr); }
 			inline bool CanBeAutomated(long index) { return (bool)Dispatch(effCanBeAutomated, index); }
@@ -683,7 +709,7 @@ namespace seib {
 			virtual bool OnCloseFileSelector (CEffect &pEffect, VstFileSelect *ptr);
 			// open an editor for audio (defined by XML text in ptr)
 			virtual bool DECLARE_VST_DEPRECATED(OnEditFile)(CEffect &pEffect, char *ptr) { return false; }
-			virtual bool DECLARE_VST_DEPRECATED(OnGetChunkFile)(CEffect &pEffect, void * nativePath) { return false; }
+			virtual bool DECLARE_VST_DEPRECATED(OnGetChunkFile)(CEffect &pEffect, void * nativePath) { return pEffect.OnGetChunkFile(static_cast<char*>(nativePath)); }
 			// VST 2.3 Extensions
 			virtual VstSpeakerArrangement *DECLARE_VST_DEPRECATED(OnGetInputSpeakerArrangement)(CEffect &pEffect) { return pEffect.OnHostInputSpeakerArrangement(); }
 		};

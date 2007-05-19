@@ -367,6 +367,7 @@ NAMESPACE__BEGIN(psycle)
 			cpen_me.DeleteObject();
 			cpen_hi.DeleteObject();
 			cpen_white.DeleteObject();
+			zoombar.DestroyWindow();
 		}
 
 

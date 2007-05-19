@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // Unneeded sources:
 //#include "global.hpp" // for debug loggers.
 #include "machine.hpp"// for throw.
+#include "EffectWnd.hpp"
 
 #ifdef WIN32
 	#pragma warning(push)
@@ -148,7 +149,22 @@ namespace seib {
 			const char* canDoBypass = "bypass"; ///< plug-in supports function #setBypass ()
 		}
 
-
+		CPatchChunkInfo::CPatchChunkInfo(CFxProgram fxstore)
+		{
+			version = 1;
+			pluginUniqueID=fxstore.GetFxID();
+			pluginVersion=fxstore.GetFxVersion();
+			numElements=fxstore.GetNumParams();
+			memset(future,0,sizeof(future));
+		}
+		CPatchChunkInfo::CPatchChunkInfo(CFxBank fxstore)
+		{
+			version = 1;
+			pluginUniqueID=fxstore.GetFxID();
+			pluginVersion=fxstore.GetFxVersion();
+			numElements=fxstore.GetNumPrograms();
+			memset(future,0,sizeof(future));
+		}
 		/*===========================================================================*/
 		/* CFxBase class members                                                     */
 		/*===========================================================================*/
@@ -161,6 +177,7 @@ namespace seib {
 			const char szChnk[] = "CcnK";
 			const long lChnk = cMagic;
 			NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
+			initialized = false;
 		}
 		CFxBase::CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion)
 			: fxMagic(0)
@@ -172,11 +189,12 @@ namespace seib {
 			const char szChnk[] = "CcnK";
 			const long lChnk = cMagic;
 			NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
+			initialized = false;
 		}
 		CFxBase::CFxBase(const char *pszFile)
 		{
 			CreateInitialized();
-			Load(pszFile);
+			if ( Load(pszFile) ) initialized = true;
 		}
 		CFxBase::CFxBase(FILE* pFileHandle)
 		{
@@ -184,7 +202,7 @@ namespace seib {
 			pf = pFileHandle;
 			if (!pf)
 				return;
-			LoadData();
+			if ( LoadData() ) initialized = true;
 		}
 		CFxBase & CFxBase::DoCopy(const CFxBase &org)
 		{
@@ -249,6 +267,7 @@ namespace seib {
 
 			bool retval = LoadData();
 			fclose(pf);
+			pathName=pszFile;
 			return retval;
 		}
 		bool CFxBase::Save(const char *pszFile)
@@ -259,6 +278,7 @@ namespace seib {
 
 			bool retval = SaveData();
 			fclose(pf);
+			pathName=pszFile;
 			return retval;
 		}
 
@@ -439,23 +459,34 @@ namespace seib {
 		/* CFxBank class members                                                     */
 		/*===========================================================================*/
 
-		CFxBank::CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, int _chunkSize, void*_data)
+		CFxBank::CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk, int _size, void*_data)
 			: CFxBase(2,_fxID, _fxVersion)
 			, numPrograms(_numPrograms)
 		{
-			numPrograms = _numPrograms;
 			currentProgram=0;
-			if (_chunkSize)
+			if (isChunk)
 			{
 				ChunkMode();
-				SetChunk(_data,_chunkSize);
+				SetChunk(_data,_size);
 			}
 			else
 			{
 				ProgramMode();
-				for ( int i = 0; i < _numPrograms ; i++)
+				if ( _data )
 				{
-					///\todo : think on a way to use void* _data to pass an array of programs.
+					for ( int i = 0; i < _numPrograms ; i++)
+					{
+						CFxProgram& prog = static_cast<CFxProgram*>(_data)[i];
+						programs.push_back(prog);
+					}
+				}
+				else
+				{
+					for ( int i = 0; i < _numPrograms ; i++)
+					{
+						CFxProgram prog(_fxID,_fxVersion,_size);
+						programs.push_back(prog);
+					}
 				}
 			}
 		}
@@ -647,10 +678,16 @@ namespace seib {
 		/*   This constructor is only used in the CVSTHost::AudioMaster callback     */
 		/*****************************************************************************/
 		CEffect::CEffect(AEffect *effect)
-			: ploader(0)
+			: aEffect(effect)
+			, ploader(0)
 			, sDir(0)
+			, bEditOpen(false)
+			, bNeedIdle(false)
+			, bNeedEditIdle(false)
+			, bWantMidi(false)
+			, bShellPlugin(false)
+			, editorWnd(0)
 		{
-			aEffect=effect;
 		}
 		/*****************************************************************************/
 		/* ~CEffect : destructor                                                     */
@@ -741,25 +778,161 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* LoadBank : loads a .fxb file ... IF it's for this effect                  */
+		/* LoadBank : loads a Bank from a CFxBank file								 */
 		/*****************************************************************************/
 
-		bool CEffect::LoadBank(const char *name)
+		bool CEffect::LoadBank(CFxBank& fxstore)
 		{
-			//BeginLoadBank()//EndLoadBank
-			return false;                         /* return NOT!!!                     */
-
+			if (uniqueId() != fxstore.GetFxID())
+			{
+//				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
+				return false;
+			}
+			if (fxstore.IsChunk())
+			{
+				if (!ProgramIsChunk())
+				{
+//					MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!",
+//						"Load Error", MB_ICONERROR);
+					return false;
+				}
+				CPatchChunkInfo pinfo(fxstore);
+				if (BeginLoadBank(&pinfo) == -1 )
+				{
+//					MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
+					return false;
+				}
+				SetChunk(fxstore.GetChunk(), fxstore.GetChunkSize());
+			}
+			else
+			{
+				CPatchChunkInfo pinfo(fxstore);
+				if (BeginLoadBank(&pinfo) == -1 )
+				{
+//					MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
+					return false;
+				}
+				int cProg = GetProgram();
+				for (int i = 0; i < fxstore.GetNumPrograms(); i++)
+				{
+					const CFxProgram &storep = fxstore.GetProgram(i);
+					CPatchChunkInfo pinfo(storep);
+					BeginLoadProgram(&pinfo);
+					if (storep.IsChunk())
+					{
+						if (!ProgramIsChunk())
+							SetChunk(storep.GetChunk(), storep.GetChunkSize(),true);
+					}
+					else 
+					{
+						int nParms = storep.GetNumParams();
+						BeginSetProgram();
+						SetProgram(i);
+						SetProgramName(storep.GetProgramName());
+						for (int j = 0; j < nParms; j++)
+							SetParameter(j, storep.GetParameter(j));
+						EndSetProgram();
+					}
+				}
+				SetProgram(cProg);
+			}
+			loadingChunkName = fxstore.GetPathName();
+			return true;
+		}
+		bool CEffect::LoadProgram(CFxProgram& fxstore)
+		{
+			if (uniqueId() != fxstore.GetFxID())
+			{
+//				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
+				return false;
+			}
+			if (fxstore.IsChunk())
+			{
+				if (!ProgramIsChunk())
+				{
+//					MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!",
+//						"Load Error", MB_ICONERROR);
+					return false;
+				}
+				CPatchChunkInfo pinfo(fxstore);
+				if (BeginLoadProgram(&pinfo) == -1 )
+				{
+//					MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
+					return false;
+				}
+				SetChunk(fxstore.GetChunk(), fxstore.GetChunkSize(),true);
+			}
+			else
+			{
+				CPatchChunkInfo pinfo(fxstore);
+				if (BeginLoadProgram(&pinfo) == -1 )
+				{
+//					MessageBox("Plugin didn't accept the program info data", "VST Preset Load Error", MB_ICONERROR);
+					return false;
+				}
+				BeginSetProgram();
+				SetProgramName(fxstore.GetProgramName());
+				int nParms = fxstore.GetNumParams();
+				for (int j = 0; j < nParms; j++)
+					SetParameter(j, fxstore.GetParameter(j));
+				EndSetProgram();
+			}
+			loadingChunkName = fxstore.GetPathName();
+			return true;
 		}
 
 		/*****************************************************************************/
-		/* SaveBank : saves current sound bank to a .fxb file                        */
+		/* SaveBank : saves current sound bank to CFxBank file					     */
 		/*****************************************************************************/
 
-		bool CEffect::SaveBank(const char *name)
+		CFxBank CEffect::SaveBank(bool preferchunk)
 		{
-			return false;                           /* return error for now              */
+			if (ProgramIsChunk() && preferchunk)
+			{
+				void *chunk=0;
+				int size=GetChunk(&chunk);
+				CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
+				return b;
+			}
+			else
+			{
+				CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
+				int cProg = GetProgram();
+				for (int i = 0; i < numPrograms(); i++)
+				{
+					CFxProgram &storep = b.GetProgram(i);
+					char name[kVstMaxProgNameLen];
+					GetProgramName(name);
+					storep.SetProgramName(name);
+					int nParms = numParams();
+					for (int j = 0; j < nParms; j++)
+						storep.SetParameter(j,GetParameter(j));
+				}
+				SetProgram(cProg);
+				return b;
+			}
 		}
-
+		CFxProgram CEffect::SaveProgram(bool preferchunk)
+		{
+			if (ProgramIsChunk() && preferchunk)
+			{
+				void *chunk=0;
+				int size=GetChunk(&chunk);
+				CFxProgram p(uniqueId(),version(),size,true,chunk);
+				return p;
+			}
+			else
+			{
+				CFxProgram storep(uniqueId(),version(),numParams());
+				char name[kVstMaxProgNameLen];
+				GetProgramName(name);
+				storep.SetProgramName(name);
+				int nParms = numParams();
+				for (int j = 0; j < nParms; j++)
+					storep.SetParameter(j,GetParameter(j));
+				return storep;
+			}
+		}
 		/*****************************************************************************/
 		/* EffDispatch : calls an effect's dispatcher                                */
 		/*****************************************************************************/
@@ -773,7 +946,7 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* EffProcess : calls an effect's process() function                        */
+		/* EffProcess : calls an effect's process() function                         */
 		/*****************************************************************************/
 
 		void CEffect::Process(float **inputs, float **outputs, VstInt32 sampleframes)
@@ -829,49 +1002,29 @@ namespace seib {
 			return aEffect->getParameter(aEffect, index);
 		}
 
+		bool CEffect::OnSizeEditorWindow(long width, long height)
+		{
+			if (editorWnd)
+			{
+				editorWnd->ResizeWindow(width,height);
+				return true;
+			}
+			return false;
+		}
+
+
 		/*****************************************************************************/
 		/* OnOpenWindow : called to open yet another window                          */
 		/*****************************************************************************/
 
 		void * CEffect::OnOpenWindow(VstWindow* window)
 		{
-/*
-			CChildFrame *pFrame = GetFrameWnd();
-			if (pFrame)
+			// Ensure we have an editor window opened.
+			if (editorWnd)
 			{
-				CEffectWnd *pWnd;
-
-				pWnd = (CEffectWnd *)GetApp()->CreateChild(editorWnd ?
-					RUNTIME_CLASS(CEffSecWnd) :
-				RUNTIME_CLASS(CEffectWnd),
-					IDR_EFFECTTYPE,
-					pFrame->GetEditMenu());
-				if (pWnd)
-				{
-					HWND hWnd = pWnd->GetSafeHwnd();
-					///\todo: ignored at the moment: style, position
-					ERect rc = {0};
-					rc.right = window->width;
-					rc.bottom = window->height;
-					pWnd->ShowWindow(SW_SHOWNORMAL);
-					pWnd->SetEffect(pFrame->GetEffect());
-					pWnd->SetMain(pFrame);
-					pWnd->SetEffSize(&rc);
-					pWnd->SetupTitleText(window->title);
-					if (!pEditWnd)
-					{
-						pFrame->SetEditWnd(pWnd);
-						SetEditWnd(pWnd);
-						//    EffEditOpen(hWnd);
-					}
-					pWnd->SetupTitle();
-					window->winHandle = hWnd;
-					return pWnd->GetSafeHwnd();
-				}
-
+				return editorWnd->OpenSecondaryWnd(*window);
 			}
-*/
-			return 0;                               /* no effect - no window.            */
+			return 0;
 		}
 
 		/*****************************************************************************/
@@ -880,13 +1033,11 @@ namespace seib {
 
 		bool CEffect::OnCloseWindow(VstWindow* window)
 		{
-/*			if ((!window) || (!::IsWindow((HWND)window->winHandle)))
-				return false;
-
-			::SendMessage((HWND)window->winHandle, WM_CLOSE, 0, 0);
-			window->winHandle = 0;
-*/
-			return true;
+			if (editorWnd)
+			{
+				return editorWnd->CloseSecondaryWnd(*window);
+			}
+			return false;
 		}
 
 
@@ -899,6 +1050,15 @@ namespace seib {
 			return sDir;
 		}
 
+		bool CEffect::OnGetChunkFile(char * nativePath)
+		{
+			if ( !loadingChunkName.empty())
+			{
+				strncpy(nativePath,loadingChunkName.c_str(),2048);
+				return true;
+			}
+			return false;
+		}
 
 
 		/*===========================================================================*/

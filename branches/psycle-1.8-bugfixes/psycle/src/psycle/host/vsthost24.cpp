@@ -3,8 +3,8 @@
 #include <project.private.hpp>
 #include "global.hpp"
 #include "player.hpp"
-#include <psycle/host/psycle.hpp> // Can this be removed?
-#include <psycle/host/MainFrm.hpp> // Can this be removed?
+#include "psycle.hpp"
+#include "MainFrm.hpp"
 #include "VstEditorDlg.hpp"
 
 ///\todo:  When inserting a note in a pattern, set the correct samplePos and ppqPos corresponding to the place the note is being put.
@@ -132,6 +132,7 @@ namespace psycle
 				,queue_size(0)
 				,requiresRepl(0)
 				,requiresProcess(0)
+				,editorwin(0)
 			{
 				if ( IsSynth())
 				{
@@ -218,7 +219,15 @@ namespace psycle
 				std::strcpy(_editName,_sProductName.c_str());
 
 			}
-
+			bool plugin::OnSizeEditorWindow(long width, long height)
+			{
+				if (editorwin)
+				{	
+					editorwin->Resize(width,height);
+					return true;
+				}
+				return false;
+			}
 			void plugin::GetParamValue(int numparam, char * parval)
 			{
 				try
@@ -277,15 +286,19 @@ namespace psycle
 
 					UINT count;
 					pFile->Read(&count, sizeof count);
-					for(UINT i(0) ; i < count ; ++i)
-					{
-						float temp;
-						pFile->Read(&temp, sizeof temp);
-						SetParameter(i, temp);
-					}
 					size -= sizeof _program + sizeof count + sizeof(float) * count;
-					if(size)
+					if(!size)
 					{
+						for(UINT i(0) ; i < count ; ++i)
+						{
+							float temp;
+							pFile->Read(&temp, sizeof temp);
+							SetParameter(i, temp);
+						}
+					}
+					else
+					{
+						pFile->Skip(sizeof(float) *count);
 						if(ProgramIsChunk())
 						{
 							char * data(new char[size]);
@@ -308,27 +321,36 @@ namespace psycle
 			{
 				UINT count(numParams());
 				unsigned char _program=0;
-				UINT size(sizeof _program + sizeof count + sizeof(float) * count);
+				UINT size(sizeof _program + sizeof count);
 				UINT chunksize(0);
 				char * pData(0);
 				bool b = ProgramIsChunk();
 				if(b)
 				{
+					count=0;
 					chunksize = GetChunk((void**)&pData);
 					size+=chunksize;
+				}
+				else
+				{
+					 size+=sizeof(float) * count;
 				}
 				pFile->Write(&size, sizeof size);
 				_program = static_cast<unsigned char>(GetProgram());
 				pFile->Write(&_program, sizeof _program);
 				pFile->Write(&count, sizeof count);
-				for(UINT i(0); i < count; ++i)
-				{
-					float temp = GetParameter(i);
-					pFile->Write(&temp, sizeof temp);
-				}
+
 				if(b)
 				{
 					pFile->Write(pData, chunksize);
+				}
+				else
+				{
+					for(UINT i(0); i < count; ++i)
+					{
+						float temp = GetParameter(i);
+						pFile->Write(&temp, sizeof temp);
+					}
 				}
 			};
 

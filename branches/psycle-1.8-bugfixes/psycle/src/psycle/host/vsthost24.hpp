@@ -1,23 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::vsthost
 #pragma once
-//#include <psycle/engine/detail/project.hpp>
-//#include <universalis/processor/exceptions/fpu.hpp>
-//#include <universalis/compiler/location.hpp>
 #include "machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
-//#include "SongStructs.hpp"
-//#include "constants.hpp"
-//#include <psycle/engine/global.hpp>
-//#include "FileIO.hpp"
-//#include <psycle/helpers/dsp.hpp>
-//#include <psycle/helpers/helpers.hpp>
-//#include <stdexcept>
 #include <cstring>
 namespace psycle
 {
 	namespace host
 	{
+		class CVstEditorDlg;
+
 		namespace vst
 		{
 			// Maximum number of Audio Input/outputs
@@ -68,6 +60,7 @@ namespace psycle
 				std::string _sDllName;
 				std::string _sProductName;
 				std::string _sVendorName;
+				CVstEditorDlg *editorwin;
 
 				/// It needs to use Process
 				bool requiresProcess;
@@ -77,7 +70,13 @@ namespace psycle
 			public:
 				plugin(LoadedAEffect &loadstruct);
 				//this constructor is to be used with the old Song loading routine, in order to create an "empty" plugin.
-				plugin(AEffect *effect):CEffect(effect) {};
+				plugin(AEffect *effect):CEffect(effect)
+				{
+					queue_size = 0;
+					requiresRepl = 0;
+					requiresProcess = 0;
+					editorwin = 0;
+				};
 				virtual ~plugin() {};
 				// Actions
 				//////////////////////////////////////////////////////////////////////////
@@ -131,10 +130,9 @@ namespace psycle
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
-				virtual bool OnSizeEditorWindow(long width, long height) { return false; }
+				bool SetEditorWindow(CVstEditorDlg* window) { editorwin = window; }
+				virtual bool OnSizeEditorWindow(long width, long height);
 				virtual bool OnUpdateDisplay() { return false; }
-				virtual void * DECLARE_VST_DEPRECATED(OnOpenWindow)(VstWindow* window) { return 0; }
-				virtual bool DECLARE_VST_DEPRECATED(OnCloseWindow)(VstWindow* window) { return false; }
 				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
 				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }
 				// AEffect asks host about its input/outputspeakers.
