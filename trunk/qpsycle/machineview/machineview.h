@@ -60,7 +60,7 @@ public:
 	WireGui* createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui );
 
 	bool isCreatingWire() { return creatingWire_; }
-
+	MachineGui *machineGuiAtPoint( QPointF point );
 
 protected:
 	void keyPressEvent(QKeyEvent *event);

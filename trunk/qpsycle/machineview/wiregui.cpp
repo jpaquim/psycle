@@ -113,27 +113,21 @@ void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 
 void WireGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( scene()->itemAt( event->scenePos() ) ) 
-    {
-        QGraphicsItem *item = scene()->itemAt( event->scenePos() );
-        if ( item->type() == 65537 ) // FIXME: un-hardcode this
-        {
-            MachineGui *hitMacGui = qgraphicsitem_cast<MachineGui *>(item);
-            if ( state_ == 1 ) { // rewire dest
-                if ( hitMacGui->mac()->acceptsConnections() ) {
-                    rewireDest( hitMacGui );
-                } else destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
-            } else if ( state_ == 2 ) { // rewire src
-                if ( hitMacGui->mac()->emitsConnections() ) {
-                    rewireSource( hitMacGui );
-                } else sourcePoint = mapFromItem( source, source->boundingRect().width()/2, source->boundingRect().height()/2 ); 
-            }
-            state_ = 0;
-        } else adjust();
-    } else {
-        adjust();
-    }
-    scene()->update( scene()->itemsBoundingRect() );
+	if ( MachineGui* hitMacGui = machineView->machineGuiAtPoint( event->scenePos() ) ) 
+	{
+		if ( state_ == 1 ) { // rewire dest
+			if ( hitMacGui->mac()->acceptsConnections() ) {
+				rewireDest( hitMacGui );
+			} else destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
+		} else if ( state_ == 2 ) { // rewire src
+			if ( hitMacGui->mac()->emitsConnections() ) {
+				rewireSource( hitMacGui );
+			} else sourcePoint = mapFromItem( source, source->boundingRect().width()/2, source->boundingRect().height()/2 ); 
+		}
+		state_ = 0;
+	} else adjust();
+	
+	scene()->update( scene()->itemsBoundingRect() );
 }
 
 void WireGui::rewireDest( MachineGui *newDestGui )

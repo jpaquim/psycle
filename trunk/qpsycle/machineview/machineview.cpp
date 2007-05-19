@@ -133,18 +133,25 @@ void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 
 void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
 {
+	MachineGui *dstMacGui = machineGuiAtPoint( tempLine_->line().p2() );
+	if ( dstMacGui ) {
+		connectMachines( srcMacGui, dstMacGui );
+	}
+	tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
+	creatingWire_ = false;
+}
+
+MachineGui *MachineView::machineGuiAtPoint( QPointF point )
+{
 	std::vector<MachineGui*>::iterator iter;
 	for( iter = machineGuis.begin(); iter != machineGuis.end(); iter++ ) {
 		MachineGui *macGui = *iter;
-		if ( macGui->contains( macGui->mapFromScene( tempLine_->line().p2() ) ) )
+		if ( macGui->contains( macGui->mapFromScene( point ) ) )
 		{
-			connectMachines( srcMacGui, macGui );
-			break;
+			return macGui;
 		}
 	}
-
-	tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
-	creatingWire_ = false;
+	return 0;
 }
 
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
