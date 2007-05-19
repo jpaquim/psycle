@@ -241,3 +241,4 @@ void PatternView::keyPressEvent( QKeyEvent *event )
             event->ignore();
     }
 }
+

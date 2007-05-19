@@ -23,5 +23,6 @@
  MasterGui::MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
      : MachineGui(left, top, mac, macView)
  {
+	 setBrush( QColor( 90, 90, 40 ) );
  }
 
