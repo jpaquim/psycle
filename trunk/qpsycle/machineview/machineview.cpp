@@ -133,18 +133,16 @@ void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 
 void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
 {
-	// See if we hit another machine gui.
-	if ( QGraphicsItem *itm = scene()->itemAt( tempLine_->mapToScene( tempLine_->line().p2() ) )  ) {
-		if (itm->type() == 65537 || itm->type() == 8 ) { // FIXME: un-hardcode this
-			MachineGui *dstMacGui;
-			if ( itm->type() == 8 ) {
-				dstMacGui = qgraphicsitem_cast<MachineGui *>(itm->parentItem());
-			} else {
-				dstMacGui = qgraphicsitem_cast<MachineGui *>(itm);
-			}
-			connectMachines(srcMacGui, dstMacGui); 
+	std::vector<MachineGui*>::iterator iter;
+	for( iter = machineGuis.begin(); iter != machineGuis.end(); iter++ ) {
+		MachineGui *macGui = *iter;
+		if ( macGui->contains( macGui->mapFromScene( tempLine_->line().p2() ) ) )
+		{
+			connectMachines( srcMacGui, macGui );
+			break;
 		}
 	}
+
 	tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.
 	creatingWire_ = false;
 }
