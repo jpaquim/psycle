@@ -85,8 +85,8 @@ class QVBoxLayout;
 
 	 zoomSlide_ = new QSlider(Qt::Horizontal, this);
 	 zoomSlide_->setMinimum(0);
-	 zoomSlide_->setMaximum(20);
-	 zoomSlide_->setPageStep(2);
+	 zoomSlide_->setMaximum(200);
+	 zoomSlide_->setPageStep(10);
 	 
 	 zoomBar_->addWidget( zoomLabel );
 	 zoomBar_->addAction( zoomLess_ );
