@@ -142,7 +142,7 @@ void PatternBox::newPattern()
             CategoryItem* catItem = itr->first;
             psy::core::PatternCategory* cat = itr->second;
             psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
-            QString patName = QString( "Pattern" + QString::number( pattern->id() ) );
+            QString patName = QString( "Pattern " + QString::number( pattern->id() ) );
             pattern->setName( patName.toStdString() );
             PatternItem *patItem = new PatternItem();
 
@@ -170,7 +170,7 @@ void PatternBox::clonePattern()
             if ( itr!=patternMap.end() ) 
             {
                 psy::core::SinglePattern* pattern = itr->second;
-                std::string clonedPatName = pattern->name()+"clone";
+                std::string clonedPatName = pattern->name()+" Clone";
 
                 // Clone the pattern in the song.
                 psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
