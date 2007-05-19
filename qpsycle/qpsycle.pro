@@ -4,7 +4,11 @@
 
 TEMPLATE = app # This project builds an executable program.
 TARGET = 
-CONFIG += warn_off release thread
+
+CONFIG += warn_off thread
+!release: CONFIG += release # release by default. for debug, invoke: qmake "CONFIG-=release" "CONFIG+=debug"
+message( "Config is $${CONFIG}." )
+
 BUILD_DIR = build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
@@ -245,15 +249,15 @@ win32 {
     
     BOOST_DIR = $$EXTERNAL_PKG_DIR/boost-1.33.1
     !exists($$BOOST_DIR) {
-        warning("The local boost dir does not exist: $$BOOST_DIR. Make sure you have boost libs installed.")
+        warning("The local boost dir does not exist: $${BOOST_DIR}. Make sure you have boost libs installed.")
     } else {
         !exists($$BOOST_DIR)/include {
-            warning("The boost headers are not unpacked. See the dir $$BOOST_DIR".)
+            warning("The boost headers are not unpacked. See the dir $${BOOST_DIR}.")
         } else {
             INCLUDEPATH += $$BOOST_DIR/include
             win32-g++ {
                 !exists($$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002) {
-                    warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+                    warning("The boost libraries are not unpacked. See the dir $${BOOST_DIR}.")
                     # remove our local include path
                     INCLUDEPATH -= $$BOOST_DIR/include
                 } else {
@@ -261,7 +265,7 @@ win32 {
                 }
             } else:win32-msvc {
                 !exists($$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400) {
-                    warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+                    warning("The boost libraries are not unpacked. See the dir $${BOOST_DIR}.")
                     # remove our local include path
                     INCLUDEPATH -= $$BOOST_DIR/include
                 } else {
@@ -291,7 +295,7 @@ win32 {
 
     DSOUND_DIR = $$EXTERNAL_PKG_DIR/dsound-9
     !exists($$DSOUND_DIR) {
-        warning("The local dsound dir does not exist: $$DSOUND_DIR. Make sure you have the dsound lib installed.")
+        warning("The local dsound dir does not exist: $${DSOUND_DIR}. Make sure you have the dsound lib installed.")
         !CONFIG(dsound) {
             message("Assuming you do not have dsound lib. Call qmake CONFIG+=dsound to enable dsound support.")
         }
