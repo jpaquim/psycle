@@ -424,3 +424,22 @@ void PatternBox::onEditCategoryColorActionTriggered()
     }
 }
 
+bool PatternBox::event( QEvent *event )
+{
+
+	switch (event->type()) {
+        case QEvent::KeyPress: {
+		QKeyEvent *k = (QKeyEvent *)event;
+		if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2
+		    || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
+		{
+			return true;
+		} else {
+			QWidget::keyPressEvent(k);
+			return true;
+		}
+        }
+        default:
+		return QWidget::event( event );
+	}
+}
