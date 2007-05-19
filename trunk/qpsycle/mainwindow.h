@@ -38,9 +38,20 @@ class QListWidget;
 class QMenu;
 class QTextEdit;
 class QComboBox;
-class QTabWidget;
 
+#include <QTabWidget>
 #include <QMainWindow>
+
+
+
+// Subclassing as we need to override event().
+class TabWidget : public QTabWidget {
+public:
+	TabWidget( QWidget *parent = 0 );
+protected:
+	bool event( QEvent *event );
+};
+
 
 class MainWindow : public QMainWindow
 {
@@ -133,7 +144,7 @@ private slots:
 
      PatternBox *patternBox_;
 
-     QTabWidget *views_;
+     TabWidget *views_;
      MachineView *macView_;
      PatternView *patView_;
      WaveView *wavView_;
@@ -141,5 +152,6 @@ private slots:
 
      QDockWidget *dock_;
  };
+
 
  #endif

@@ -97,7 +97,7 @@ void MainWindow::setupGui()
     dock_->setWidget(patternBox_);
     addDockWidget(Qt::LeftDockWidgetArea, dock_);
 
-    views_ = new QTabWidget();
+    views_ = new TabWidget();
     views_->addTab( macView_, "Machine View" );
     views_->addTab( patView_, "Pattern View" );
     views_->addTab( wavView_, "Wave Editor" );
@@ -659,4 +659,29 @@ void MainWindow::playFromSeqPos()
 void MainWindow::playStop()
 {
     psy::core::Player::Instance()->stop();
+}
+
+
+TabWidget::TabWidget( QWidget *parent )
+	: QTabWidget( parent )
+{}
+
+bool TabWidget::event( QEvent *event )
+{
+
+	switch (event->type()) {
+        case QEvent::KeyPress: {
+		QKeyEvent *k = (QKeyEvent *)event;
+		if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2
+		    || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
+		{
+			return true;
+		} else {
+			QTabWidget::keyPressEvent(k);
+			return true;
+		}
+        }
+        default:
+		return QTabWidget::event( event );
+	}
 }
