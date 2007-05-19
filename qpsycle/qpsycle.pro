@@ -6,7 +6,6 @@ TEMPLATE = app # This project builds an executable program.
 TARGET = 
 
 CONFIG += warn_off thread
-!release: CONFIG += release # release by default. for debug, invoke: qmake "CONFIG-=release" "CONFIG+=debug"
 message( "Config is $${CONFIG}." )
 
 BUILD_DIR = build
