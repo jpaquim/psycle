@@ -25,6 +25,7 @@
 #include <QToolBar>
 #include <QWidget>
 #include <QSlider>
+ #include <QScrollBar>
 
 
  class WaveView : public QWidget
@@ -58,6 +59,8 @@ signals:
 	QAction *stopSmp_;
 	
 	QAction *ampEfx_;
+	
+	QScrollBar *waveScroll_;
 	
 	QToolBar *zoomBar_;
 	QAction *zoomMore_;
