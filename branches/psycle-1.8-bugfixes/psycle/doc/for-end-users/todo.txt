@@ -34,6 +34,8 @@ New and unsorted and untested
 
 
 
++ ghost note : http://psycle.pastnotecut.org/thread.php?threadid=1894&boardid=2&styleid=1
+
 --------------------------------
 
 + option to disable popup on save.
