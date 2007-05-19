@@ -5,7 +5,8 @@
 TEMPLATE = app # This project builds an executable program.
 TARGET = 
 
-CONFIG += warn_off thread
+CONFIG += thread
+!warn_on: CONFIG += warn_off
 message( "Config is $${CONFIG}." )
 
 BUILD_DIR = build
