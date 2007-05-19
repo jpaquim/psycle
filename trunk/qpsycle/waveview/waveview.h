@@ -58,6 +58,11 @@ signals:
 	QAction *playsSmp_;
 	QAction *stopSmp_;
 	
+	QAction *cutAct_;
+	QAction *copyAct_;
+	QAction *pasteAct_;
+	QAction *selAct_;
+	
 	QAction *ampEfx_;
 	
 	QScrollBar *waveScroll_;

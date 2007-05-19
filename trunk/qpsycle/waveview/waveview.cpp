@@ -58,6 +58,13 @@ class QVBoxLayout;
 	 playSmp_ = new QAction(QIcon(":/images/wave_play.png"), tr("Play"), this);
 	 stopSmp_ = new QAction(QIcon(":/images/wave_stop.png"), tr("Stop"), this);
 	 
+	 //editing
+	 QLabel *editLabel = new QLabel("Edit: ", this);
+	 cutAct_ = new QAction("Cut", this);
+	 copyAct_ = new QAction("Copy", this);
+	 pasteAct_ = new QAction("Paste", this);
+	 selAct_ = new QAction("Select All", this);
+	 
 	 //effects
 	 QLabel *efxLabel = new QLabel("Effects: ");
 	 ampEfx_ = new QAction("Amplify", this);
@@ -94,6 +101,12 @@ class QVBoxLayout;
 	 toolBar_->addAction( playsSmp_ );
 	 toolBar_->addAction( playSmp_ );
 	 toolBar_->addAction( stopSmp_ );
+	 toolBar_->addSeparator();
+	 toolBar_->addWidget( editLabel );
+	 toolBar_->addAction( cutAct_ );
+	 toolBar_->addAction( copyAct_ );
+	 toolBar_->addAction( pasteAct_ );
+	 toolBar_->addAction( selAct_);
 	 toolBar_->addSeparator();
 	 toolBar_->addWidget( efxLabel );
 	 toolBar_->addAction( ampEfx_ );
