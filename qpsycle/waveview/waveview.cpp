@@ -85,7 +85,7 @@ class QVBoxLayout;
 
 	 zoomSlide_ = new QSlider(Qt::Horizontal, this);
 	 zoomSlide_->setMinimum(0);
-	 zoomSlide_->setMaximum(200);
+	 zoomSlide_->setMaximum(100);
 	 zoomSlide_->setPageStep(10);
 	 
 	 zoomBar_->addWidget( zoomLabel );
@@ -150,7 +150,7 @@ void WaveView::onSaveButtonClicked()
 
 void WaveView::onPlusButtonClicked()
 {
-	if(zoomSlide_->value() < 20)
+	if(zoomSlide_->value() < 100)
 	{
 		zoomSlide_->setValue(zoomSlide_->value() + 1);
 	}
