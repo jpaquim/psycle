@@ -18,5 +18,7 @@
 	 <file>images/wave_play.png</file>
 	 <file>images/wave_playstart.png</file>
 	 <file>images/wave_stop.png</file>
+	 <file>images/plus.png</file>
+	 <file>images/minus.png</file>
  </qresource>
  </RCC>
