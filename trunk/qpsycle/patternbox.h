@@ -98,6 +98,9 @@ public slots:
     // void onColorButtonClicked(); 
      void onEditCategoryColorActionTriggered();
 
+protected:
+     bool event( QEvent *event );
+
 signals:
     void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
     void patternDeleted();
