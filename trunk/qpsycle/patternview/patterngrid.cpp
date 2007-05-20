@@ -19,8 +19,8 @@
 ***************************************************************************/
 #include <psycore/player.h>
 
-#include "global.h"
-#include "configuration.h"
+#include "../global.h"
+#include "../configuration.h"
 #include "inputhandler.h"
 #include "patternview.h"
 #include "patterngrid.h"

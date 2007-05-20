@@ -22,8 +22,8 @@
 #include <psycore/plugin.h>
 #include <psycore/binread.h>
 
-#include "global.h"
-#include "configuration.h"
+#include "../global.h"
+#include "../configuration.h"
 #include "inputhandler.h"
 #include "machinetweakdlg.h"
 #include "machinegui.h"

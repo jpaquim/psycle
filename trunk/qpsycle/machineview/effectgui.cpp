@@ -21,9 +21,10 @@
 #include <psycore/machine.h>
 
 #include "effectgui.h"
-#include "global.h"
-#include "configuration.h"
-#include "inputhandler.h"
+
+#include "../configuration.h"
+#include "../global.h"
+#include "../inputhandler.h"
 
 #include <QMenu>
 #include <QPainter>
