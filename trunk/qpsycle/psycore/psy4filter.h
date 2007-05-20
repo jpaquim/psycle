@@ -66,7 +66,6 @@ namespace psy {
 
 			private:
 				std::fstream _stream;
-				bool isPsy4;
 
 				PatternCategory* lastCategory;
 				SinglePattern* lastPattern;
