@@ -19,7 +19,7 @@
 ***************************************************************************/
 
 #include "configuration.h"
-#include "file.h"
+#include <psycore/file.h>
 
 // FIXME: these audio drivers don't belong in psycore
 #include <audiodrivers/audiodriver.h>
