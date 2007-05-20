@@ -18,10 +18,10 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycore/player.h>
-#include <psycore/inputhandler.h>
 
 #include "global.h"
 #include "configuration.h"
+#include "inputhandler.h"
 #include "patternview.h"
 #include "patterngrid.h"
 #include "patterndraw.h"

@@ -20,11 +20,11 @@
 
 #include <psycore/machine.h>
 #include <psycore/plugin.h>
-#include <psycore/inputhandler.h>
 #include <psycore/binread.h>
 
 #include "global.h"
 #include "configuration.h"
+#include "inputhandler.h"
 #include "machinetweakdlg.h"
 #include "machinegui.h"
 

@@ -33,6 +33,8 @@ INCLUDEPATH += . \
 
 # Input
 HEADERS += mainwindow.h \
+           global.h \
+           inputhandler.h \
            patternbox.h \
            machineview/machinegui.h \
            machineview/machinetweakdlg.h \
@@ -46,8 +48,17 @@ HEADERS += mainwindow.h \
            patternview/trackheader.h \
            patternview/patterngrid.h \
            patternview/patterndraw.h \
+           sequencer/sequencerarea.h \
+           sequencer/sequencerdraw.h \
+           sequencer/sequenceritem.h \
+           sequencer/sequencerline.h \
+           sequencer/sequencerview.h \
+           sequencer/beatruler.h \
+           waveview/waveview.h \
            audiodrivers/audiodriver.h \
            audiodrivers/wavefileout.h \
+           audiodrivers/dsound.h \
+           audiodrivers/gstreamerout.h \
            psycore/binread.h \
            psycore/configuration.h \
            psycore/constants.h \
@@ -55,15 +66,11 @@ HEADERS += mainwindow.h \
            psycore/cstdint.h \
            psycore/datacompression.h \
            psycore/dither.h \
-           audiodrivers/dsound.h \
            psycore/dsp.h \
            psycore/eventdriver.h \
            psycore/fileio.h \
            psycore/filter.h \
-           global.h \
-           audiodrivers/gstreamerout.h \
            psycore/helpers.h \
-           psycore/inputhandler.h \
            psycore/instpreview.h \
            psycore/instrument.h \
            psycore/internal_machines.h \
@@ -99,17 +106,12 @@ HEADERS += mainwindow.h \
            psycore/zipwriter.h \
            psycore/zipwriterstream.h \
            psycore/file.h \
-           sequencer/sequencerarea.h \
-           sequencer/sequencerdraw.h \
-           sequencer/sequenceritem.h \
-           sequencer/sequencerline.h \
-           sequencer/sequencerview.h \
-           sequencer/beatruler.h \
-           waveview/waveview.h \
            psycore/helpers/scale.hpp \
            psycore/helpers/math/pi.hpp \
            psycore/helpers/xml.h
 SOURCES += mainwindow.cpp \
+           global.cpp \
+           inputhandler.cpp \
            patternbox.cpp \
            qpsycle.cpp \
            machineview/machinegui.cpp \
@@ -124,8 +126,16 @@ SOURCES += mainwindow.cpp \
            patternview/trackheader.cpp \
            patternview/patterngrid.cpp \
            patternview/patterndraw.cpp \
+           sequencer/sequencerarea.cpp \
+           sequencer/sequencerdraw.cpp \
+           sequencer/sequenceritem.cpp \
+           sequencer/sequencerline.cpp \
+           sequencer/sequencerview.cpp \
+           sequencer/beatruler.cpp \
+           waveview/waveview.cpp \
            audiodrivers/audiodriver.cpp \
            audiodrivers/wavefileout.cpp \
+           audiodrivers/gstreamerout.cpp \
            psycore/binread.cpp \
            psycore/convert_internal_machines.cpp \
            psycore/configuration.cpp \
@@ -135,10 +145,7 @@ SOURCES += mainwindow.cpp \
            psycore/eventdriver.cpp \
            psycore/fileio.cpp \
            psycore/filter.cpp \
-           global.cpp \
-           audiodrivers/gstreamerout.cpp \
            psycore/helpers.cpp \
-           psycore/inputhandler.cpp \
            psycore/instpreview.cpp \
            psycore/instrument.cpp \
            psycore/internal_machines.cpp \
@@ -169,13 +176,6 @@ SOURCES += mainwindow.cpp \
            psycore/zipwriter.cpp \
            psycore/zipwriterstream.cpp \
            psycore/file.cpp \
-           sequencer/sequencerarea.cpp \
-           sequencer/sequencerdraw.cpp \
-           sequencer/sequenceritem.cpp \
-           sequencer/sequencerline.cpp \
-           sequencer/sequencerview.cpp \
-           sequencer/beatruler.cpp \
-           waveview/waveview.cpp \
            psycore/helpers/xml.cpp
 
 RESOURCES += qpsycle.qrc
