@@ -1,5 +1,4 @@
 #pragma once
-#include <psycore/configuration.h>
 #include "inputhandler.h"
 #include <string>
 /// configuration for the user interface
@@ -10,12 +9,10 @@ namespace psy {
 }
 using psy::core::AudioDriver;
 /// configuration for the user interface
-class Configuration : public psy::core::Configuration
+class Configuration
 {
 	public:
 		Configuration();
-	protected:
-		/*override*/ void setDefaults();
 	
 	///\name configuration file
 	///\{
@@ -83,4 +80,10 @@ class Configuration : public psy::core::Configuration
 			bool doEnableSound;
 			void addAudioDriver(AudioDriver* driver);
 	///\}
+
+	public://private: ///\ todo private access
+		///\ todo put this in player ..
+		bool _RecordTweaks;
+		///\ todo put this in player ..
+		bool _RecordUnarmed;
 };

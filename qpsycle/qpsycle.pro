@@ -61,7 +61,6 @@ HEADERS += mainwindow.h \
            audiodrivers/dsound.h \
            audiodrivers/gstreamerout.h \
            psycore/binread.h \
-           psycore/configuration.h \
            psycore/constants.h \
            psycore/convert_internal_machines.h \
            psycore/cstdint.h \
@@ -140,7 +139,6 @@ SOURCES += mainwindow.cpp \
            audiodrivers/gstreamerout.cpp \
            psycore/binread.cpp \
            psycore/convert_internal_machines.cpp \
-           psycore/configuration.cpp \
            psycore/datacompression.cpp \
            psycore/dither.cpp \
            psycore/dsp.cpp \
