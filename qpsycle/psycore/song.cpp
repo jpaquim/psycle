@@ -439,7 +439,7 @@ namespace psy
 			}
 			if(mac == machineSoloed) machineSoloed = -1;
 			// If it's a (Vst)Plugin, the destructor calls to release the underlying library
-			zapObject(machine_[mac]);
+			delete machine_[mac]; machine_[mac] = 0;
 		}
 
 		int CoreSong::GetFreeBus()
