@@ -119,6 +119,8 @@ namespace psy {
 
 		bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
 		{
+			///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
+
 			patMap.clear();
 
 			song.patternSequence()->patternData()->removeAll();
