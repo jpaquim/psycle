@@ -85,7 +85,7 @@ namespace psy
 			SequenceEntry(SequenceLine* line);
 			~SequenceEntry();
 
-      boost::signal1<void,SequenceEntry*> wasDeleted;
+			boost::signal<void (SequenceEntry*)> wasDeleted;
 
 			double tickPosition() const;
             double tickEndPosition( ) const;
@@ -133,7 +133,7 @@ namespace psy
 			SequenceLine(PatternSequence* patSeq);
 			~SequenceLine();
 
-      boost::signal1<void,SequenceLine*> wasDeleted;
+			boost::signal<void (SequenceLine*)> wasDeleted;
 
 			SequenceEntry* createEntry(SinglePattern* pattern, double position);
             void insertEntry( SequenceEntry *entry );
@@ -168,12 +168,12 @@ namespace psy
 			typedef GlobalMap::iterator GlobalIter;
 
 			SequenceLine* createNewLine();
-      boost::signal1<void,SequenceLine*> newLineCreated;
+			boost::signal<void (SequenceLine*)> newLineCreated;
 			SequenceLine* insertNewLine( SequenceLine* selectedLine );
-      boost::signal2<void,SequenceLine*,SequenceLine*> newLineInserted; // new line, line it is inserted before
+			boost::signal<void (SequenceLine*, SequenceLine*)> newLineInserted; // new line, line it is inserted before
 			
 			void removeLine(SequenceLine* line);
-      boost::signal1<void,SequenceLine*> lineRemoved;
+			boost::signal<void (SequenceLine*)> lineRemoved;
 			void removeAll();
 
 			// heart of patternsequence
@@ -202,7 +202,7 @@ namespace psy
 
 			void moveDownLine(SequenceLine* line);
 			void moveUpLine(SequenceLine* line);
-      boost::signal2<void,SequenceLine*,SequenceLine*> linesSwapped;
+			boost::signal<void (SequenceLine*, SequenceLine*)> linesSwapped;
 
 			std::string toXml() const;
 
