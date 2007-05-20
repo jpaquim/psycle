@@ -20,7 +20,7 @@
 #ifndef NEWMACHINEDLG_H
 #define NEWMACHINEDLG_H
 
-#include "psycore/pluginfinder.h"
+#include <psycore/pluginfinder.h>
 
 #include <map>
 

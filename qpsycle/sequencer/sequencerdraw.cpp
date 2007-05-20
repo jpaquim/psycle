@@ -18,8 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include "psycore/song.h"
-#include "psycore/player.h"
+#include <psycore/song.h>
+#include <psycore/player.h>
 
 #include "sequencerview.h"
 #include "sequencerdraw.h"
