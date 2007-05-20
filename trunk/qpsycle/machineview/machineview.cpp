@@ -25,7 +25,8 @@
 #include "psycore/machine.h"
 #include "psycore/pluginfinder.h"
 #include "psycore/patternevent.h"
-
+#include "psycore/global.h"
+#include "psycore/configuration.h"
 
 #include "machinegui.h"
 #include "machineview.h"
@@ -372,7 +373,9 @@ void MachineView::setOctave( int newOctave )
 }
 
 MachineScene::MachineScene( MachineView *macView )
-    : QGraphicsScene( macView )
+:
+	QGraphicsScene( macView ),
+	pluginFinder_(psy::core::Global::configuration().pluginPath(), psy::core::Global::configuration().ladspaPath())
 {
     macView_ = macView;
     newMachineDlg = new NewMachineDlg();

@@ -83,7 +83,6 @@ namespace psy
 				std::string category_;
 		};
 
-
 		class PluginFinderKey
 		{
 			public:
@@ -108,10 +107,10 @@ namespace psy
 		class PluginFinder
 		{
 			public:
-				PluginFinder();
+				PluginFinder(std::string const & psycle_path, std::string const & ladspa_path);
 				~PluginFinder();
 
-				void scanAll();
+				void scanAll(std::string const & psycle_path, std::string const & ladspa_path);
 
 				PluginInfo info( const PluginFinderKey & key ) const;
 			
@@ -122,8 +121,8 @@ namespace psy
 				std::map< PluginFinderKey, PluginInfo > map_;
 
 				void scanInternal();
-				void scanLadspa();
-				void scanNatives();
+				void scanLadspa(std::string const & path);
+				void scanNatives(std::string const & path);
 		};
 	}
 }
