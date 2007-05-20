@@ -18,14 +18,14 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include "psycore/signalslib.h"
-#include "psycore/global.h"
-#include "psycore/inputhandler.h"
-#include "psycore/machine.h"
-#include "psycore/song.h"
-#include "psycore/constants.h"
-#include "psycore/configuration.h"
+#include <psycore/signalslib.h>
+#include <psycore/inputhandler.h>
+#include <psycore/machine.h>
+#include <psycore/song.h>
+#include <psycore/constants.h>
 
+#include "global.h"
+#include "configuration.h"
 #include "machinegui.h"
 #include "machineview.h"
 #include "wiregui.h"
@@ -305,7 +305,7 @@ void GeneratorGui::keyPressEvent( QKeyEvent * event )
 {
     if ( !event->isAutoRepeat() ) 
     {
-        int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+        int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
 
         switch ( command ) { 
             case psy::core::cdefMuteMachine:
@@ -329,7 +329,7 @@ void GeneratorGui::keyPressEvent( QKeyEvent * event )
 // Most likely a Qt bug...
 void GeneratorGui::keyReleaseEvent( QKeyEvent * event )
 {
-    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
     switch ( command ) { 
         case psy::core::cdefMuteMachine:
             toggleMuteAct_->trigger();

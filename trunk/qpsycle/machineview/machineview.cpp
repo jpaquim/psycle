@@ -18,16 +18,16 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include "psycore/song.h"
-#include "psycore/player.h"
-#include "psycore/sampler.h"
-#include "psycore/constants.h"
-#include "psycore/machine.h"
-#include "psycore/pluginfinder.h"
-#include "psycore/patternevent.h"
-#include "psycore/global.h"
-#include "psycore/configuration.h"
+#include <psycore/song.h>
+#include <psycore/player.h>
+#include <psycore/sampler.h>
+#include <psycore/constants.h>
+#include <psycore/machine.h>
+#include <psycore/pluginfinder.h>
+#include <psycore/patternevent.h>
 
+#include "global.h"
+#include "configuration.h"
 #include "machinegui.h"
 #include "machineview.h"
 #include "mastergui.h"
@@ -394,7 +394,7 @@ void MachineView::setOctave( int newOctave )
 MachineScene::MachineScene( MachineView *macView )
 :
 	QGraphicsScene( macView ),
-	pluginFinder_(psy::core::Global::configuration().pluginPath(), psy::core::Global::configuration().ladspaPath())
+	pluginFinder_(Global::configuration().pluginPath(), Global::configuration().ladspaPath())
 {
     macView_ = macView;
     newMachineDlg = new NewMachineDlg();

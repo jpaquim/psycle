@@ -60,7 +60,7 @@ HEADERS += mainwindow.h \
            psycore/eventdriver.h \
            psycore/fileio.h \
            psycore/filter.h \
-           psycore/global.h \
+           global.h \
            audiodrivers/gstreamerout.h \
            psycore/helpers.h \
            psycore/inputhandler.h \
@@ -135,7 +135,7 @@ SOURCES += mainwindow.cpp \
            psycore/eventdriver.cpp \
            psycore/fileio.cpp \
            psycore/filter.cpp \
-           psycore/global.cpp \
+           global.cpp \
            audiodrivers/gstreamerout.cpp \
            psycore/helpers.cpp \
            psycore/inputhandler.cpp \

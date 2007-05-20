@@ -18,12 +18,12 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include "psycore/song.h"
-#include "psycore/singlepattern.h"
-#include "psycore/player.h"
-#include "psycore/configuration.h"
-#include "psycore/global.h"
+#include <psycore/song.h>
+#include <psycore/singlepattern.h>
+#include <psycore/player.h>
 
+#include "global.h"
+#include "configuration.h"
 #include "patternview.h"
 #include "patterndraw.h"
 #include "patterngrid.h"
@@ -55,10 +55,10 @@ PatternView::PatternView( psy::core::Song *song )
     layout->addWidget( toolBar_ );
     layout->addWidget( patDraw_ );
 
-    patDraw_->patternGrid()->setFt2HomeEndBehaviour( psy::core::Global::pConfig()->ft2HomeEndBehaviour() );
-    patDraw_->patternGrid()->setShiftArrowForSelect( psy::core::Global::pConfig()->shiftArrowForSelect() );
-    patDraw_->patternGrid()->setWrapAround( psy::core::Global::pConfig()->wrapAround() );
-    patDraw_->patternGrid()->setCenterCursor( psy::core::Global::pConfig()->centerCursor() );
+    patDraw_->patternGrid()->setFt2HomeEndBehaviour( Global::configuration().ft2HomeEndBehaviour() );
+    patDraw_->patternGrid()->setShiftArrowForSelect( Global::configuration().shiftArrowForSelect() );
+    patDraw_->patternGrid()->setWrapAround( Global::configuration().wrapAround() );
+    patDraw_->patternGrid()->setCenterCursor( Global::configuration().centerCursor() );
 }
 
 void PatternView::createToolBar()
@@ -222,7 +222,7 @@ void PatternView::onPatternStepComboBoxIndexChanged( int newIndex )
 
 void PatternView::keyPressEvent( QKeyEvent *event )
 {
-    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
     switch ( command ) {
 /*        case Qt::Key_A:
         {
