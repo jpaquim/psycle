@@ -71,25 +71,15 @@ template<class T> inline T str_hex(const std::string &  value) {
 
 namespace psy {
 	namespace core {
-
-
 		Psy4Filter::Psy4Filter()
-		{
-			song_ = 0;
-		}
-
-
-		Psy4Filter::~Psy4Filter()
-		{
-		}
-
-		int Psy4Filter::version( ) const
-		{
-			return 4;
-		}
+		:
+			song_()
+		{}
 
 		bool Psy4Filter::testFormat( const std::string & fileName )
 		{
+			///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
+		
 			zipreader *z;
 			zipreader_file *f;
 			int fd = open( fileName.c_str(), O_RDONLY );
@@ -611,5 +601,4 @@ namespace psy {
 
 	}
 }
-
 

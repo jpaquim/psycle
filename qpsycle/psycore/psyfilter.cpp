@@ -17,8 +17,8 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "song.h"
 #include "psyfilter.h"
+#include "song.h"
 
 #include "psy2filter.h"
 #include "psy3filter.h"
@@ -28,58 +28,29 @@ namespace psy
 {
 	namespace core
 	{
-
-		std::vector<PsyFilter*> PsyFilter::filters;
-		int PsyFilter::c = 0;
-
-
-		PsyFilter::PsyFilter()
-		{
-			if (c==0) {
-				c++;
-				filters.push_back( Psy2Filter::Instance() );
-				filters.push_back( Psy3Filter::Instance() );
-				filters.push_back( Psy4Filter::Instance() );
+		namespace {
+			bool fileIsReadable( const std::string & file )
+			{
+				std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
+				if (!_stream.is_open ()) return false;
+				return true;
 			}
 		}
 
-
-		PsyFilter::~PsyFilter()
+		PsyFilters::PsyFilters()
 		{
+			filters.push_back( Psy2Filter::Instance() );
+			filters.push_back( Psy3Filter::Instance() );
+			filters.push_back( Psy4Filter::Instance() );
 		}
 
-		bool PsyFilter::load( const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
-		{
-			return false;
-		}
-
-		bool PsyFilter::save( const std::string & fileName, const CoreSong & song )
-		{
-			return false;
-		}
-
-		std::string  PsyFilter::filePostfix() const {
-			return "psy";
-		}
-
-		bool PsyFilter::testFormat( const std::string & fileName )
-		{
-			return false;
-		}
-
-		int PsyFilter::version( ) const
-		{
-			return 0;
-		}
-
-		bool PsyFilter::loadSong( const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
+		bool PsyFilters::loadSong(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
 		{
 			if ( fileIsReadable( fileName ) ) {
-				std::vector<PsyFilter*>::iterator it = filters.begin();
-				for (  ; it < filters.end(); it++) {
-					PsyFilter* filter = *it;
+				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+					PsyFilterBase* filter = *it;
 					if ( filter->testFormat(fileName) ) {
-						return filter->load(fileName,song, callbacks);
+						return filter->load(plugin_path, fileName,song, callbacks);
 						break;
 					}
 				}
@@ -87,11 +58,10 @@ namespace psy
 			return false;
 		}
 
-		bool PsyFilter::saveSong( const std::string & fileName, const CoreSong & song, int version )
+		bool PsyFilters::saveSong( const std::string & fileName, const CoreSong & song, int version )
 		{
-			std::vector<PsyFilter*>::iterator it = filters.begin();
-			for (  ; it < filters.end(); it++) {
-				PsyFilter* filter = *it;
+			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); it++) {
+				PsyFilterBase* filter = *it;
 				if ( filter->version() == version ) {
 					// check postfix
 					std::string newFileName = fileName;
@@ -99,20 +69,11 @@ namespace psy
 					if ( dotPos == std::string::npos ) 
 						// append postfix
 						newFileName = fileName + "." + filter->filePostfix();
-
 					return filter->save(newFileName,song);
 					break;
 				}
 			}
 			return false;
 		}
-
-
-		bool PsyFilter::fileIsReadable( const std::string & file )
-		{
-			std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
-			if (!_stream.is_open ()) return false;
-			return true;
-		}
-	} // end of host namespace
-} // end of psycle namespace
+	}
+}

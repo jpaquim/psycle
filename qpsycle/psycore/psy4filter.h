@@ -30,46 +30,41 @@
 
 namespace psy {
 	namespace core {
-
-    class SinglePattern;
-    class Machine;
+	    class SinglePattern;
+	    class Machine;
 
 		class Psy4Filter : public Psy3Filter
 		{
-				// Singleton Pattern
-			protected:
-	  		Psy4Filter();          
-				virtual ~Psy4Filter();
-
-			private:
-				Psy4Filter( Psy4Filter const & );
-				Psy4Filter& operator=(Psy4Filter const&);
+			///\name Singleton Pattern
+			///\{ 
+				protected:
+			  		Psy4Filter();
+				private:
+					Psy4Filter( Psy4Filter const & );
+					Psy4Filter& operator=(Psy4Filter const&);
+				public:
+						static Psy4Filter* Instance() {
+							// don`t use multithreaded
+							static Psy4Filter s;
+							return &s; 
+						}
+			///\}
 
 			public:
-					static Psy4Filter* Instance() {
-					// don`t use multithreaded
-						static Psy4Filter s;
-							return &s; 
-					}
-				// Singleton pattern end
-
-				/*override*/ int version() const;
-
+				/*override*/ int version() const { return 4; }
+				/*override*/ std::string filePostfix() const { return "psy"; }
 				/*override*/ bool testFormat(const std::string & fileName);
 				/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
 				/*override*/ bool save( const std::string & fileName, const CoreSong & song );
 
 			protected:
-
-				int LoadSONGv0(RiffFile* file,CoreSong& song);
-
+				/*override*/ int LoadSONGv0(RiffFile* file,CoreSong& song);
 				bool saveSONGv0(RiffFile* file,const CoreSong& song);
 				bool saveMACDv0(RiffFile* file,const CoreSong& song,int index);
 				bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
 				bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
 
 			private:
-
 				std::fstream _stream;
 				bool isPsy4;
 
@@ -82,10 +77,7 @@ namespace psy {
 				std::map<int, SinglePattern*> patMap;
 
 				CoreSong* song_;
-
 		};
-
 	}
 }
-
 #endif
