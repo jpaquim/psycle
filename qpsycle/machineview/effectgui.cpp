@@ -19,11 +19,11 @@
 ***************************************************************************/
 
 #include <psycore/machine.h>
-#include <psycore/inputhandler.h>
 
 #include "effectgui.h"
-#include "configuration.h"
 #include "global.h"
+#include "configuration.h"
+#include "inputhandler.h"
 
 #include <QMenu>
 #include <QPainter>

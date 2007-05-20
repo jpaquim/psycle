@@ -19,13 +19,13 @@
 ***************************************************************************/
 
 #include <psycore/signalslib.h>
-#include <psycore/inputhandler.h>
 #include <psycore/machine.h>
 #include <psycore/song.h>
 #include <psycore/constants.h>
 
 #include "global.h"
 #include "configuration.h"
+#include "inputhandler.h"
 #include "machinegui.h"
 #include "machineview.h"
 #include "wiregui.h"
