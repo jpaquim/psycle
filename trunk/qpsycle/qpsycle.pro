@@ -24,12 +24,9 @@ DEPENDPATH += . \
               psycore/helpers/math
 INCLUDEPATH += . \
                machineview \
-               psycore \
                patternview \
                waveview \
-               sequencer \
-               psycore/helpers \
-               psycore/helpers/math \
+               sequencer
 
 # Input
 HEADERS += mainwindow.h \
