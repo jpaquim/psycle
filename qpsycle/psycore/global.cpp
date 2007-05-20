@@ -29,7 +29,7 @@ Configuration* Global::pConfig() {
 	return c;
 }
 
-Configuration & Global::configuration() {
+Configuration const & Global::configuration() {
 	return *pConfig();
 }
 

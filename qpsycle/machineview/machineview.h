@@ -21,9 +21,9 @@
 #define MACHINEVIEW_H
 
 namespace psy { namespace core {
-class Song;
-class Machine;
-class PatternEvent;
+	class Song;
+	class Machine;
+	class PatternEvent;
 }}
 
 #include "psycore/pluginfinder.h"

@@ -18,14 +18,17 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#include "newmachinedlg.h"
+#include "psycore/global.h"
+#include "psycore/configuration.h"
+
 #include <QtGui>
 
-#include "newmachinedlg.h"
-
- NewMachineDlg::NewMachineDlg(QWidget *parent) 
-    : QDialog(parent)
-    , selectedItem(NULL)
- {
+NewMachineDlg::NewMachineDlg(QWidget *parent) 
+	:
+		QDialog(parent),
+		selectedItem(NULL)
+{
      setWindowTitle(tr("Choose New Machine"));
      resize(500, 500);
      
@@ -34,7 +37,7 @@
      // Should we use a tree layout instead of tabs?
      QTabWidget *machineTabs = new QTabWidget();
 
-     finder_ = new psy::core::PluginFinder();
+     finder_ = new psy::core::PluginFinder(psy::core::Global::configuration().pluginPath(), psy::core::Global::configuration().ladspaPath());
 
      genList = new QListWidget();
      efxList = new QListWidget();

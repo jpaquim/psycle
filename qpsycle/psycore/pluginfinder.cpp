@@ -21,7 +21,6 @@
 #include "ladspamachine.h"
 #include "plugin.h"
 #include "file.h"
-#include "configuration.h"
 namespace psy
 {
 	namespace core
@@ -168,9 +167,9 @@ namespace psy
 			return index_;
 		}
 
-		PluginFinder::PluginFinder()
+		PluginFinder::PluginFinder(std::string const & psycle_path, std::string const & ladspa_path)
 		{
-			scanAll();
+			scanAll(psycle_path, ladspa_path);
 		}
 
 		PluginFinder::~PluginFinder()
@@ -193,10 +192,10 @@ namespace psy
 				return PluginInfo();
 		}
 
-		void PluginFinder::scanAll() {
+		void PluginFinder::scanAll(std::string const & psycle_path, std::string const & ladspa_path) {
 			scanInternal();
-			scanNatives();
-			scanLadspa();		
+			scanNatives(psycle_path);
+			scanLadspa(ladspa_path);
 		}
 
 		void PluginFinder::scanInternal() {
@@ -207,12 +206,12 @@ namespace psy
 			map_[key]=info;
 		}
 
-		void PluginFinder::scanLadspa() {
+		void PluginFinder::scanLadspa(std::string const & ladspa_path_) {
+			std::string ladspa_path = ladspa_path_;
 			///\todo this just uses the first path in getenv
-			std::string ladspa_path = Global::configuration().ladspaPath();			
 			#ifdef __unix__
-			std::string::size_type dotpos = ladspa_path.find(':',0);
-			if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
+				std::string::size_type dotpos = ladspa_path.find(':',0);
+				if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
 			#else
 			#endif
 			const LADSPA_Descriptor * psDescriptor;
@@ -259,18 +258,16 @@ namespace psy
 			}
 		}
 
-		void PluginFinder::scanNatives() {
-			std::string psycle_path = Global::configuration().pluginPath();
-
+		void PluginFinder::scanNatives(std::string const & psycle_path) {
 			std::vector<std::string> fileList;
 			fileList = File::fileList( psycle_path );
 
 			std::vector<std::string>::iterator it = fileList.begin();
 
-			for ( ; it < fileList.end(); it++ ) {
+			for ( ; it < fileList.end(); ++it ) {
 				std::string fileName = *it;
 				#ifdef __unix__
-				// problem of so.0.0.x .. .so all three times todo
+					// problem of so.0.0.x .. .so all three times todo
 				#else
 					if ( fileName.find( ".dll" ) == std::string::npos ) continue;
 				#endif
