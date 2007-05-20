@@ -32,22 +32,22 @@ namespace psy
 	{
 
 		class RiffFile;
-    class PatternCategory;
-    class SequenceLine;
-    class Machine;
-    class PatternEvent;
-    class MachineCallbacks;
+	    class PatternCategory;
+	    class SequenceLine;
+	    class Machine;
+	    class PatternEvent;
+	    class MachineCallbacks;
 
 		#ifdef __unix__
-		namespace convert_internal_machines
-		{
-			class Converter;
-		}
-				#endif
+			namespace convert_internal_machines
+			{
+				class Converter;
+			}
+		#endif
 
-		class Psy2Filter : public PsyFilter
+		class Psy2Filter : public PsyFilterBase
 		{
-		protected:
+			protected:
 				class VSTLoader
 				{
 					public:
@@ -58,28 +58,29 @@ namespace psy
 				};
 
 
-			// Singleton Pattern
-		protected:
-	  	Psy2Filter();          
-			virtual ~Psy2Filter();
-
-		private:
-			Psy2Filter( Psy2Filter const & );
-			Psy2Filter& operator=(Psy2Filter const&);
-
-		public:
-			static Psy2Filter* Instance() {
-					// don`t use multithreaded
-					static Psy2Filter s;
-						return &s; 
-			}
-			// Singleton pattern end
+			///\name Singleton Pattern
+			///\{
+				protected:
+				  	Psy2Filter();
+				private:
+					Psy2Filter( Psy2Filter const & );
+					Psy2Filter& operator=(Psy2Filter const &);
+				public:
+					static Psy2Filter* Instance() {
+							// don`t use multithreaded
+							static Psy2Filter s;
+							return &s; 
+					}
+			///\}
 	
+			public:
+				/*override*/ int version() const { return 2; }
+				/*override*/ std::string filePostfix() const { return "psy"; }
+				/*override*/ bool testFormat(const std::string & fileName);
+				/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+				/*override*/ bool save(const std::string & fileName, const CoreSong & song) {  /* so saving for legacy file format */ return false; }
+
 			protected:
-
-				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-
 				virtual bool LoadINFO(RiffFile* file,CoreSong& song);
 				virtual bool LoadSNGI(RiffFile* file,CoreSong& song);
 				virtual bool LoadSEQD(RiffFile* file,CoreSong& song);
@@ -88,22 +89,19 @@ namespace psy
 				virtual bool LoadWAVD(RiffFile* file,CoreSong& song);
 				virtual bool PreLoadVSTs(RiffFile* file,CoreSong& song);
 				#ifdef __unix__
-				virtual bool LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
-				virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
-								#endif				
-	
+					virtual bool LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
+					virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
+				#endif
 
-		protected:
+			protected:
+				static std::string const FILE_FOURCC;
+				/// PSY2-fileformat Constants
+				static int const PSY2_MAX_TRACKS;
+				static int const PSY2_MAX_WAVES;
+				static int const PSY2_MAX_INSTRUMENTS;
+				static int const PSY2_MAX_PLUGINS;
 
-			static std::string const FILE_FOURCC;
-			/// PSY2-fileformat Constants
-			static int const PSY2_MAX_TRACKS;
-			static int const PSY2_MAX_WAVES;
-			static int const PSY2_MAX_INSTRUMENTS;
-			static int const PSY2_MAX_PLUGINS;
-
-		private:
-
+			private:
 				std::vector<int> seqList;
 				PatternCategory* singleCat;
 				SequenceLine* singleLine;
@@ -115,11 +113,7 @@ namespace psy
 
 				void preparePatternSequence(CoreSong & song);
 				PatternEvent convertEntry( unsigned char * data ) const;
-	
-	
 		};
-
 	}
 }
-
-#endif	//_PSY2FILTER_H_
+#endif

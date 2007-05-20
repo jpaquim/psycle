@@ -19,21 +19,16 @@
 ***************************************************************************/
 #include "psy2filter.h"
 #include "fileio.h"
-
 #include "machine.h"
 #include "internal_machines.h"
 #include "sampler.h"
-//#include"XMSampler.h"
 #include "plugin.h"
-//#include "VSTHost.h"
-//todo:
-//#include "cacheddllfinder.h"
 #include "song.h"
 #include <algorithm>
 #include <cctype>
 
 #ifdef __unix__
-#include "convert_internal_machines.h"
+	#include "convert_internal_machines.h"
 #endif
 
 namespace psy
@@ -42,9 +37,8 @@ namespace psy
 	{
 		struct ToLower
 	    {
-	      char operator() (char c) const  { return std::tolower(c); }
+			char operator() (char c) const  { return std::tolower(c); }
 	    };
-	
 
 		std::string const Psy2Filter::FILE_FOURCC = "PSY2";
 		const int Psy2Filter::PSY2_MAX_TRACKS = 32;
@@ -52,18 +46,11 @@ namespace psy
 		const int Psy2Filter::PSY2_MAX_INSTRUMENTS = 255;
 		const int Psy2Filter::PSY2_MAX_PLUGINS = 256;
 
-
-		Psy2Filter::Psy2Filter() : PsyFilter()
-		{
-			singleCat=0;
-			singleLine=0;
-		}
-
-
-		Psy2Filter::~Psy2Filter()
-		{
-			// TODO: put destructor code here
-		}
+		Psy2Filter::Psy2Filter()
+		:
+			singleCat(),
+			singleLine()
+		{}
 
 		bool Psy2Filter::testFormat(const std::string & fileName)
 		{
@@ -73,9 +60,9 @@ namespace psy
 			file.ReadChunk(&Header, 8);
 			Header[8]=0;
 			file.Close();
-			if (strcmp(Header,"PSY2SONG")==0) return true;
-			return false;
+			return !std::strcmp(Header,"PSY2SONG");
 		}
+		
 		void Psy2Filter::preparePatternSequence( CoreSong & song )
 		{
 			seqList.clear();
@@ -91,8 +78,8 @@ namespace psy
 			std::int32_t num;
 			RiffFile file;
 			file.Open(fileName);
-//			progress.emit(1,0,"");
-//			progress.emit(2,0,"Loading... psycle song fileformat version 2...");
+			//progress.emit(1,0,"");
+			//progress.emit(2,0,"Loading... psycle song fileformat version 2...");
 
 			song.clear();
 			preparePatternSequence(song);
@@ -113,11 +100,9 @@ namespace psy
 			LoadWAVD(&file,song);
 			PreLoadVSTs(&file,song);
 			#ifdef __unix__
-			convert_internal_machines::Converter converter(plugin_path);
-			#endif
-			#ifdef __unix__
-			LoadMACD(plugin_path, &file,song,&converter,callbacks);
-			TidyUp(&file,song,&converter);
+				convert_internal_machines::Converter converter(plugin_path);
+				LoadMACD(plugin_path, &file,song,&converter,callbacks);
+				TidyUp(&file,song,&converter);
 			#endif
 			return true;
 		}
@@ -158,6 +143,7 @@ namespace psy
 			file->Read(busMachine);
 			return true;
 		}
+
 		bool Psy2Filter::LoadSEQD(RiffFile* file,CoreSong& song)
 		{
 			std::int32_t length,tmp;
@@ -176,35 +162,29 @@ namespace psy
 		PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
 		{
 			PatternEvent event;
-
 			event.setNote(*data++);
 			event.setInstrument(*data++);
 			event.setMachine(*data++);
 			event.setCommand(*data++);
 			event.setParameter(*data++);
-
 			return event;
 		}
 
 		bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 		{
-				std::int32_t numLines;
-				char patternName[32];
-				file->Read(numLines);
-				file->ReadChunk(patternName, sizeof(patternName)); patternName[31]=0;
+			std::int32_t numLines;
+			char patternName[32];
+			file->Read(numLines);
+			file->ReadChunk(patternName, sizeof(patternName)); patternName[31]=0;
 
-				if(numLines > 0)
-				{
-				
+			if(numLines > 0)
+			{
 				// create a SinglePattern
 				std::string indexStr;
 				std::ostringstream o;
-				if (!(o << index))
-					indexStr = "error";
-				else
-					indexStr = o.str();
-				SinglePattern* pat =
-						singleCat->createNewPattern(std::string(patternName)+indexStr);
+				if (!(o << index)) indexStr = "error";
+				else indexStr = o.str();
+				SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 				pat->setBeatZoom(song.linesPerBeat());
 				TimeSignature & sig =  pat->timeSignatures().back();
 				float beats = numLines / (float) song.linesPerBeat();
@@ -230,14 +210,16 @@ namespace psy
 				}
 			}
 			///\todo: ?
-/*			else
+			/*
+			else
 			{
 				patternLines[i] = 64;
 				RemovePattern(i);
 			}
-*/
+			*/
 			return true;
 		}
+
 		bool Psy2Filter::LoadINSD(RiffFile* file,CoreSong& song)
 		{
 			std::int32_t i;

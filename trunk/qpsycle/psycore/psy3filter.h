@@ -31,37 +31,37 @@ namespace psy
 {
 	namespace core
 	{
-
 		class RiffFile;
-    class PatternCategory;
-    class SequenceLine;
-    class PatternEvent;
-    class MachineCallbacks;
+	    class PatternCategory;
+    	class SequenceLine;
+    	class PatternEvent;
+    	class MachineCallbacks;
 
-		class Psy3Filter : public PsyFilter
+		class Psy3Filter : public PsyFilterBase
 		{
-				// Singleton Pattern
-		protected:
-	  		Psy3Filter();          
-				virtual ~Psy3Filter();
-
-		private:
-				Psy3Filter( Psy3Filter const & );
-				Psy3Filter& operator=(Psy3Filter const&);
-
-		public:
-				static Psy3Filter* Instance() {
-					// don`t use multithreaded
-					static Psy3Filter s;
+			///\name Singleton Pattern
+			///\{
+				protected:
+	  				Psy3Filter();          
+				private:
+					Psy3Filter( Psy3Filter const & );
+					Psy3Filter& operator=(Psy3Filter const&);
+				public:
+					static Psy3Filter* Instance() {
+						// don`t use multithreaded
+						static Psy3Filter s;
 						return &s; 
-				}
-		// Singleton pattern end
+					}
+			///\}
 
-		protected:
+			protected:
+				/*override*/ int version() const { return 3; }
+				/*override*/ std::string filePostfix() const { return "psy"; }
+				/*override*/ bool testFormat(const std::string & fileName);
+				/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+				/*override*/ bool save(const std::string & fileName, const CoreSong & song) {  /* so saving for legacy file format */ return false; }
 
-				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-
+			protected:
 				virtual int LoadSONGv0(RiffFile* file,CoreSong& song);
 				virtual bool LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion);
 				virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion);
@@ -70,9 +70,7 @@ namespace psy
 				virtual bool LoadMACDv0(std::string const & plugin_path, RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
 				virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
 
-
-		protected:
-
+			protected:
 				static std::string const FILE_FOURCC;
 				static std::uint32_t const VERSION_INFO;
 				static std::uint32_t const VERSION_SNGI;
@@ -84,9 +82,7 @@ namespace psy
 
 				static std::uint32_t const FILE_VERSION;
 
-
-		private:
-
+			private:
 				std::vector<int> seqList;
 				PatternCategory* singleCat;
 				SequenceLine* singleLine;
@@ -94,10 +90,7 @@ namespace psy
 				PatternEvent convertEntry( unsigned char* data) const;
 
 				void preparePatternSequence(CoreSong & song);
-
 		};
-
-
-	} // end of host namespace
-} // end of psycle namespace
+	}
+}
 #endif

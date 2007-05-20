@@ -48,7 +48,7 @@ namespace psy
 			///\{
 				public:
 					/// loads the song
-					bool load(const std::string & fileName);
+					bool load(std::string const & plugin_path, const std::string & fileName);
 					/// saves the song
 					bool save(const std::string & fileName);
 			///\}

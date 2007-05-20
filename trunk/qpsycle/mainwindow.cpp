@@ -197,7 +197,7 @@ void MainWindow::open()
     if ( !fileName.isEmpty() ) {
         psy::core::Player::Instance()->stop();
         psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
-        song->load( fileName.toStdString() );
+        song->load(Global::configuration().pluginPath(), fileName.toStdString() );
         loadSong( song );
     }
 }

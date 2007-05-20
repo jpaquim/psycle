@@ -731,16 +731,18 @@ namespace psy
 			return true;
 		}
 
-		bool CoreSong::load(const std::string & fileName)
+		namespace {
+			PsyFilters filters;
+		}
+
+		bool CoreSong::load(std::string const & plugin_path, const std::string & fileName)
 		{
-			PsyFilter filter;
-			return filter.loadSong(fileName, *this, machinecallbacks);
+			return filters.loadSong(plugin_path, fileName, *this, machinecallbacks);
 		}
 
 		bool CoreSong::save(const std::string & fileName)
 		{
-			PsyFilter filter;
-			return filter.saveSong(fileName, *this,4);
+			return filters.saveSong(fileName, *this,4);
 		}
 
 		void CoreSong::DoPreviews(int amount)

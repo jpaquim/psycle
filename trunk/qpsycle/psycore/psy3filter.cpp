@@ -44,16 +44,10 @@ namespace psy
 			+ Psy3Filter::VERSION_PATD	+ Psy3Filter::VERSION_PATD + Psy3Filter::VERSION_MACD +	Psy3Filter::VERSION_INSD + Psy3Filter::VERSION_WAVE;
 
 		Psy3Filter::Psy3Filter()
-		 : PsyFilter()
-		{
-				singleCat  = 0;
-				singleLine = 0;
-		}
-
-
-		Psy3Filter::~Psy3Filter()
-		{
-		}
+		:
+			singleCat(),
+			singleLine()
+		{}
 
 		bool Psy3Filter::testFormat( const std::string & fileName )
 		{
