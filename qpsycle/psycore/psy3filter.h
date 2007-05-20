@@ -60,14 +60,14 @@ namespace psy
 		protected:
 
 				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+				virtual bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
 
 				virtual int LoadSONGv0(RiffFile* file,CoreSong& song);
 				virtual bool LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion);
 				virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion);
 				virtual bool LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion);
 				virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
-				virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
+				virtual bool LoadMACDv0(std::string const & plugin_path, RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
 				virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
 
 

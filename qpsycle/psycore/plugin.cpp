@@ -19,9 +19,8 @@
 ***************************************************************************/
 #include "plugin.h"
 #include "player.h"
-#include "configuration.h"
 #ifdef __unix__
-#include <dlfcn.h>
+	#include <dlfcn.h>
 #else
 	#include <windows.h>
 	#ifdef _MSC_VER
@@ -36,7 +35,7 @@
 #include <cctype>
 #include <cassert>
 
-// win32 note : mingw cannot load our shipped 1.8.2 binary plugins due c++ this and std calling convention
+// win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 
 namespace psy { namespace core {
 
@@ -518,52 +517,53 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 void Plugin::Stop( )
 {
 	try {
-			proxy().Stop();
-	}
-	catch(const std::exception &)
-	{
+		proxy().Stop();
+	} catch(const std::exception &) {
+		///\todo huh!
 	}
 	Machine::Stop();
 }
 
 struct ToLower
-		{
-			char operator() (char c) const  { return std::tolower(c); }
-		};
-
-bool Plugin::LoadDll( std::string psFileName ) // const is here not possible cause we modify it
 {
-	#ifdef __unix__        
-	std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
-	if (psFileName.find(".so")== std::string::npos) {
-		_psDllName = psFileName;
-		int i = psFileName.find(".dll");
-		std::string withoutSuffix = psFileName.substr(0,i);
-		std::string soName = withoutSuffix + ".so";
-		psFileName = "lib-xpsycle.plugin."+soName;
-		psFileName = Global::configuration().pluginPath() + psFileName; 
-		int pos;
-		while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
-	} else {
-			int i = psFileName.find("lib-xpsycle.plugin.");
-			if (i!=std::string::npos) {
-					int j = psFileName.find(".so");
-					if (j!=0) {
-						_psDllName = psFileName.substr(0,j);
-						_psDllName.erase(0,std::string("lib-xpsycle.plugin.").length());
-						_psDllName = _psDllName + ".dll";
-					} else {
-						_psDllName = psFileName;
-						_psDllName.erase(0,std::string("lib-xpsycle.plugin.").length());
-						_psDllName = _psDllName + ".dll";
-					}
-			} else _psDllName = psFileName;
+	char operator() (char c) const  { return std::tolower(c); }
+};
 
-    		psFileName = Global::configuration().pluginPath() + psFileName; 
-	}
+bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ ) // const is here not possible cause we modify it -- stefan
+{
+	std::string prefix = "lib-xpsycle.plugin.";
+	std::string psFileName = psFileName_;
+	#ifdef __unix__        
+		std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
+		if (psFileName.find(".so")== std::string::npos) {
+			_psDllName = psFileName;
+			int i = psFileName.find(".dll");
+			std::string withoutSuffix = psFileName.substr(0,i);
+			std::string soName = withoutSuffix + ".so";
+			psFileName = prefix + soName;
+			psFileName = path + psFileName; 
+			int pos;
+			while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
+		} else {
+				int i = psFileName.find(prefix);
+				if (i!=std::string::npos) {
+						int j = psFileName.find(".so");
+						if (j!=0) {
+							_psDllName = psFileName.substr(0,j);
+							_psDllName.erase(0, prefix.length());
+							_psDllName = _psDllName + ".dll";
+						} else {
+							_psDllName = psFileName;
+							_psDllName.erase(0, prefix.length());
+							_psDllName = _psDllName + ".dll";
+						}
+				} else _psDllName = psFileName;
+
+	    		psFileName = path + psFileName; 
+		}
 	#else
-	_psDllName = psFileName;
-	psFileName = Global::pConfig()->pluginPath() + psFileName;
+		_psDllName = psFileName;
+		psFileName = Global::pConfig()->pluginPath() + psFileName;
 	#endif   
 	return Instance(psFileName);
 }

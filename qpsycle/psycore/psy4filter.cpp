@@ -127,7 +127,7 @@ namespace psy {
 			return isPsy4;		
 		}
 
-		bool Psy4Filter::load( const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
+		bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
 		{
 			patMap.clear();
 
@@ -290,7 +290,7 @@ namespace psy {
 //						//progress.emit(2,0,"Loading... Song machines...");
 						if ((version&0xFF00) == 0x0000) // chunkformat v0
 						{
-              LoadMACDv0(&file,song,version&0x00FF,callbacks);
+              LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
 						}
 						//else if ( (version&0xFF00) == 0x0100 ) //and so on
 					}

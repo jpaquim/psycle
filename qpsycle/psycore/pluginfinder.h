@@ -110,19 +110,29 @@ namespace psy
 				PluginFinder(std::string const & psycle_path, std::string const & ladspa_path);
 				~PluginFinder();
 
-				void scanAll(std::string const & psycle_path, std::string const & ladspa_path);
+				void scanAll();
 
 				PluginInfo info( const PluginFinderKey & key ) const;
 			
 				std::map< PluginFinderKey, PluginInfo >::const_iterator begin() const;
 				std::map< PluginFinderKey, PluginInfo >::const_iterator end() const;
+				
+			public:
+				std::string const & psycle_path() const { return psycle_path_; }
+			private:
+				std::string const psycle_path_;
+				
+			public:
+				std::string const & ladspa_path() const { return ladspa_path_; }
+			private:
+				std::string const ladspa_path_;
 
 			private:
 				std::map< PluginFinderKey, PluginInfo > map_;
 
 				void scanInternal();
-				void scanLadspa(std::string const & path);
-				void scanNatives(std::string const & path);
+				void scanLadspa();
+				void scanNatives();
 		};
 	}
 }

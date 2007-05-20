@@ -10,20 +10,25 @@ namespace psy {
 			namespace math = common::math;
 			typedef common::Scale::Real Real;
 
-
+		Converter::Converter(std::string const & plugin_path)
+		:
+			plugin_path_(plugin_path)
+		{}
+		
       Converter::~Converter() throw()
       {
         for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
       }
-      Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff,CoreSong &song) throw(std::exception)
+      
+      Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff, CoreSong & song) throw(std::exception)
       {
-        Plugin & plugin = * new Plugin(Player::Instance(),index,&song);
+        Plugin & plugin = * new Plugin(Player::Instance(), index, &song);
         Machine * pointer_to_machine = &plugin;
         try {
-					if(!plugin.LoadDll(const_cast<char *>((plugin_names()(type) + ".dll").c_str()))) {
+			if(!plugin.LoadDll(plugin_path_, const_cast<char *>((plugin_names()(type) + ".dll").c_str()))) {
             pointer_to_machine = 0; // for delete pointer_to_machine in the catch clause
             delete & plugin;
-            pointer_to_machine = new Dummy(Player::Instance(), index,&song);
+            pointer_to_machine = new Dummy(Player::Instance(), index, &song);
           }
           Machine & machine = *pointer_to_machine;
           machine_converted_from[&machine] = new int(type);

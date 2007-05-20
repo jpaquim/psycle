@@ -86,7 +86,7 @@ namespace psy
 			singleLine = song.patternSequence()->createNewLine();
 		}
 
-		bool Psy2Filter::load(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks)
+		bool Psy2Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks)
 		{
 			std::int32_t num;
 			RiffFile file;
@@ -113,10 +113,10 @@ namespace psy
 			LoadWAVD(&file,song);
 			PreLoadVSTs(&file,song);
 			#ifdef __unix__
-			convert_internal_machines::Converter converter;
+			convert_internal_machines::Converter converter(plugin_path);
 			#endif
 			#ifdef __unix__
-			LoadMACD(&file,song,&converter,callbacks);
+			LoadMACD(plugin_path, &file,song,&converter,callbacks);
 			TidyUp(&file,song,&converter);
 			#endif
 			return true;
@@ -398,7 +398,7 @@ namespace psy
 		}
 		
 		#ifdef __unix__
-		bool Psy2Filter::LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
+		bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
 		{
 			std::int32_t i;
 			file->Read(_machineActive);
@@ -428,7 +428,7 @@ namespace psy
 					{
 						pMac[i] = pPlugin = new Plugin(callbacks,i,&song);
 						// Should the "Init()" function go here? -> No. Needs to load the dll first.
-						if (!pMac[i]->LoadPsy2FileFormat(file))
+						if (!pMac[i]->LoadPsy2FileFormat(plugin_path, file))
 						{
 							Machine* pOldMachine = pMac[i];
 							pMac[i] = new Dummy(*((Dummy*)pOldMachine));
@@ -472,10 +472,10 @@ namespace psy
 		
 					init_and_load:
 						pMac[i]->Init();
-						pMac[i]->LoadPsy2FileFormat(file);
+						pMac[i]->LoadPsy2FileFormat(plugin_path, file);
 						break;
 					init_and_load_VST:
-						pMac[i]->LoadPsy2FileFormat(file);
+						pMac[i]->LoadPsy2FileFormat(plugin_path, file);
 						std::stringstream s;
 						s << "X!" << pMac[i]->GetEditName();
 						pMac[i]->SetEditName(s.str());
@@ -967,7 +967,7 @@ namespace psy
 
 				#endif
 
-		bool Machine::LoadPsy2FileFormat(RiffFile* pFile)
+		bool Machine::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
 		{
 			char edName[32];
 			pFile->ReadChunk(edName, 16); edName[15] = 0;
@@ -1080,7 +1080,7 @@ namespace psy
 			return true;
 		}
 
-		bool Sampler::LoadPsy2FileFormat(RiffFile* pFile)
+		bool Sampler::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
 		{
 			int i;
 
@@ -1156,7 +1156,7 @@ namespace psy
 			return true;
 		}
 
-		bool Plugin::LoadPsy2FileFormat(RiffFile* pFile)
+		bool Plugin::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
 		{
 			bool result = true;
 			char junk[256];
@@ -1198,7 +1198,7 @@ namespace psy
 //			Global::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
 			try
 			{
-				result = LoadDll(strname);
+				result = LoadDll(plugin_path, strname);
 			}
 			catch(...)
 			{

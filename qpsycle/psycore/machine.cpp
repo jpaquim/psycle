@@ -628,7 +628,7 @@ namespace psy
 			return true;
 		};
 
-		Machine* Machine::LoadFileChunk(CoreSong* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
+		Machine* Machine::LoadFileChunk(std::string const & plugin_path, CoreSong* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
 		{
 			// assume version 0 for now
 			bool bDeleted(false);
@@ -674,7 +674,7 @@ namespace psy
 					{
 						Plugin * p;
 						pMachine = p = new Plugin(callbacks, index, pSong);
-						if(!p->LoadDll(dllName))
+						if(!p->LoadDll(plugin_path, dllName))
 						{
 							pMachine = new Dummy(callbacks, index, pSong);
 							type = MACH_DUMMY;
