@@ -7,7 +7,6 @@
 ///\todo : The information required from this include should go to constants.hpp
 #include "inputhandler.h"
 ///\todo : this is crap
-//#include "global.h"
 
 namespace psy {
 	namespace core {
@@ -1156,7 +1155,7 @@ namespace psy {
 				lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
 
 				//bad! bad!
-				//prevVal[which] = Global::song().machine(macOutput[which])->GetParamValue(paramOutput[which]);
+				//prevVal[which] = Gloxxxxxxxxxxxxxxxxxbal::song().machine(macOutput[which])->GetParamValue(paramOutput[which]);
 				//centerVal[which] = prevVal[which] - (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt);
 
 				centerVal[which] = song()->machine(destMac)->GetParamValue(destParam);
