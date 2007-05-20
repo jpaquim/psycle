@@ -23,7 +23,6 @@
 #include "psycore/singlepattern.h"
 #include "psycore/patterndata.h"
 #include "psycore/patternsequence.h"
-#include "psycore/configuration.h"
 
 #include "global.h"
 #include "configuration.h"
