@@ -22,10 +22,10 @@
 #define MACHINETWEAKDLG_H
 
 namespace psy { namespace core {
-class Machine;
+	class Machine;
 }}
 
-#include "psycore/preset.h"
+#include <psycore/preset.h>
 
 class MachineGui;
 

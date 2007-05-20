@@ -38,7 +38,7 @@ followed by Qt includes.
 
 For example:
 
-#include "psycore/song.h"
+#include <psycore/song.h>
 
 #include "machineview/machineview.h"
 

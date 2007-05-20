@@ -21,12 +21,12 @@
 #define SEQUENCERLINE_H
 
 namespace psy { namespace core {
-class SequenceLine;
-class SequenceEntry; 
-class SinglePattern;
+	class SequenceLine;
+	class SequenceEntry; 
+	class SinglePattern;
 }}
 
-#include "psycore/signalslib.h"
+#include <psycore/signalslib.h>
 
 #include <QGraphicsItem>
 #include <QObject>

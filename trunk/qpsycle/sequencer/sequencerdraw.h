@@ -21,12 +21,12 @@
  #define SEQUENCERDRAW_H
 
 namespace psy { namespace core {
-class Song;
-class SequenceLine;
-class SinglePattern;
+	class Song;
+	class SequenceLine;
+	class SinglePattern;
 }}
 
-#include "psycore/signalslib.h"
+#include <psycore/signalslib.h>
 
 #include <QtGui/QGraphicsView>
 #include <QtGui/QGraphicsRectItem>
