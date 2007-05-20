@@ -46,7 +46,7 @@ MachineView::MachineView(psy::core::Song *song)
 	scene_ = new MachineScene(this);
 	scene_->setBackgroundBrush(Qt::black);
 	setScene(scene_);
-
+	setAlignment( Qt::AlignLeft | Qt::AlignTop );
 	setDragMode( QGraphicsView::RubberBandDrag );
 	setBackgroundBrush(Qt::black);
 
