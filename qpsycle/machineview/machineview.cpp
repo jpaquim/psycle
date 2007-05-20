@@ -26,8 +26,8 @@
 #include <psycore/pluginfinder.h>
 #include <psycore/patternevent.h>
 
-#include "global.h"
-#include "configuration.h"
+#include "../global.h"
+#include "../configuration.h"
 #include "machinegui.h"
 #include "machineview.h"
 #include "mastergui.h"

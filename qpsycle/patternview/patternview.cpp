@@ -22,8 +22,8 @@
 #include <psycore/singlepattern.h>
 #include <psycore/player.h>
 
-#include "global.h"
-#include "configuration.h"
+#include "../global.h"
+#include "../configuration.h"
 #include "patternview.h"
 #include "patterndraw.h"
 #include "patterngrid.h"

@@ -19,8 +19,8 @@
 ***************************************************************************/
 
 #include "newmachinedlg.h"
-#include "global.h"
-#include "configuration.h"
+#include "../global.h"
+#include "../configuration.h"
 
 #include <QtGui>
 

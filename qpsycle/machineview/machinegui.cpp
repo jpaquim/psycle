@@ -23,8 +23,8 @@
 #include <psycore/song.h>
 #include <psycore/constants.h>
 
-#include "global.h"
-#include "configuration.h"
+#include "../global.h"
+#include "../configuration.h"
 #include "inputhandler.h"
 #include "machinegui.h"
 #include "machineview.h"
