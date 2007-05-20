@@ -115,13 +115,13 @@ class Plugin : public Machine
 		inline Proxy & proxy() throw() { return proxy_; };
 
 		bool Instance(const std::string & file_name);
-		bool LoadDll (std::string psFileName);
+		bool LoadDll (std::string const & path, std::string const & file_name);
 
 		///\name (de)serialization
 		///\{
 			public:
 				/// Loader for psycle fileformat version 2.
-				virtual bool LoadPsy2FileFormat(RiffFile* pFile);
+				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile) const;
 				virtual void SaveDllName      (RiffFile * pFile) const;

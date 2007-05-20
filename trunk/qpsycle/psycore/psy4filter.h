@@ -56,7 +56,7 @@ namespace psy {
 				virtual int version() const;
 
 				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+				virtual bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
 				virtual bool save( const std::string & fileName, const CoreSong & song );
 
 			protected:

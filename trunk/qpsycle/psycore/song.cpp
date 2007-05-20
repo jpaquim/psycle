@@ -73,7 +73,10 @@ namespace psy
 			_saved=false;
 			fileName = "Untitled.psy";
 			
-			CreateMachine(MACH_MASTER, 320, 200, "master", MASTER_INDEX);
+			{
+				std::string plugin_path = ""; // master machine is not a plugin at the moment
+				CreateMachine(plugin_path, MACH_MASTER, 320, 200, "master", MASTER_INDEX);
+			}
 
 			_trackArmedCount = 0;
 			for(int i(0) ; i < MAX_TRACKS; ++i)
@@ -96,13 +99,13 @@ namespace psy
 			int fb; 
 			if ( key == PluginFinderKey::internalSampler() ) {
 				fb = GetFreeBus();
-				CreateMachine(MACH_SAMPLER, x, y, "SAMPLER", fb );  
+				CreateMachine(finder.psycle_path(), MACH_SAMPLER, x, y, "SAMPLER", fb );  
 			} else if ( finder.info( key ).type() == MACH_PLUGIN ) 
 			{
 				if ( finder.info( key ).mode() == MACHMODE_FX ) {
 				fb = GetFreeFxBus();
 				} else fb = GetFreeBus();
-				CreateMachine(MACH_PLUGIN, x, y, key.dllPath(), fb );
+				CreateMachine(finder.psycle_path(), MACH_PLUGIN, x, y, key.dllPath(), fb );
 			} else if ( finder.info( key ).type() == MACH_LADSPA )
 			{
 				fb = GetFreeFxBus();
@@ -119,16 +122,16 @@ namespace psy
 			return machine_[fb];
 		}
 
-		Machine & CoreSong::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
+		Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
 		{
 			Machine::id_type const array_index(GetFreeMachine());
 			if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
-			if(!CreateMachine(type, x, y, plugin_name, array_index))
+			if(!CreateMachine(plugin_path, type, x, y, plugin_name, array_index))
 			throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
 			return *machine_[array_index];
 		}
 
-		bool CoreSong::CreateMachine(Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
+		bool CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
 		{
 			Machine * machine(0);
 			switch (type)
@@ -162,7 +165,7 @@ namespace psy
 				case MACH_PLUGIN:
 					{
 						Plugin* plugin = new Plugin( machinecallbacks, index, this );
-						plugin->LoadDll( plugin_name );
+						plugin->LoadDll( plugin_path, plugin_name );
 						machine = plugin;
 					}
 					break;

@@ -168,8 +168,11 @@ namespace psy
 		}
 
 		PluginFinder::PluginFinder(std::string const & psycle_path, std::string const & ladspa_path)
+		:
+			psycle_path_(psycle_path),
+			ladspa_path_(ladspa_path)
 		{
-			scanAll(psycle_path, ladspa_path);
+			scanAll();
 		}
 
 		PluginFinder::~PluginFinder()
@@ -192,10 +195,10 @@ namespace psy
 				return PluginInfo();
 		}
 
-		void PluginFinder::scanAll(std::string const & psycle_path, std::string const & ladspa_path) {
+		void PluginFinder::scanAll() {
 			scanInternal();
-			scanNatives(psycle_path);
-			scanLadspa(ladspa_path);
+			scanNatives();
+			scanLadspa();
 		}
 
 		void PluginFinder::scanInternal() {
@@ -206,7 +209,7 @@ namespace psy
 			map_[key]=info;
 		}
 
-		void PluginFinder::scanLadspa(std::string const & ladspa_path_) {
+		void PluginFinder::scanLadspa() {
 			std::string ladspa_path = ladspa_path_;
 			///\todo this just uses the first path in getenv
 			#ifdef __unix__
@@ -258,9 +261,9 @@ namespace psy
 			}
 		}
 
-		void PluginFinder::scanNatives(std::string const & psycle_path) {
+		void PluginFinder::scanNatives() {
 			std::vector<std::string> fileList;
-			fileList = File::fileList( psycle_path );
+			fileList = File::fileList( psycle_path_ );
 
 			std::vector<std::string>::iterator it = fileList.begin();
 
@@ -281,7 +284,7 @@ namespace psy
 				} dummycallbacks;
 
 				Plugin plugin(&dummycallbacks, 0, 0 );
-				if ( plugin.LoadDll( fileName ) ) {
+				if ( plugin.LoadDll( psycle_path_, fileName ) ) {
 					PluginInfo info;
 					info.setType( MACH_PLUGIN );
 					info.setName( plugin.GetName() );
