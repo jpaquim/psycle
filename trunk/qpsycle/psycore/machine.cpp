@@ -14,7 +14,6 @@
 //#include <psycle/host/engine/XMSampler.hpp>
 #include "plugin.h" //<psycle/host/engine/plugin.hpp>
 //#include <psycle/host/engine/VSTHost.hpp>
-#include "global.h" // for zapArray
 
 #ifdef _MSC_VER
 #undef min 
@@ -254,8 +253,8 @@ namespace psy
 
 		Machine::~Machine() throw ()
 		{
-			zapArray(_pSamplesL);
-			zapArray(_pSamplesR);
+			delete[] _pSamplesL; _pSamplesL = 0;
+			delete[] _pSamplesR; _pSamplesR = 0;
 		}
 
 		void Machine::Init()
@@ -928,7 +927,7 @@ int Machine::GenerateAudio( int numsamples )
 				if (!workEvents.empty())
 				{
 					WorkEvent & workEvent1 = *workEvents.begin();
-				//	nextevent = (workEvent.beatOffset() - beatOffset) * Global::player().SamplesPerBeat();
+					//nextevent = (workEvent.beatOffset() - beatOffset) * Gloxxxxxxxxxxxxxxxbal::player().SamplesPerBeat();
 					nextevent = static_cast<int>( workEvent1.beatOffset() * timeInfo.samplesPerBeat() );
           assert(nextevent >= processedsamples);
 				} else nextevent = numsamples+1;

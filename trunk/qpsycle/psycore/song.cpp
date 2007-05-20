@@ -788,7 +788,7 @@ namespace psy
 
 			// save our file
 
-/*			boost::filesystem::path path(Global::configuration().GetSongDir(), boost::filesystem::native);
+/*			boost::filesystem::path path(Gloxxxxxxxxxxxxxbal::configuration().GetSongDir(), boost::filesystem::native);
 			path /= "psycle.tmp";
 
 			boost::filesystem::remove(path);
@@ -940,24 +940,24 @@ namespace psy
 		bool CoreSong::CloneIns(Instrument::id_type src, Instrument::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
-		/*	if (!Global::song()._pInstrument[src]->Empty() && !Global::song()._pInstrument[dst]->Empty())
+		/*	if (!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
 			{
 				return false;
 			}
-			if (!Global::song()._pInstrument[dst]->Empty())
+			if (!Gloxxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
 			{
 				int temp = src;
 				src = dst;
 				dst = temp;
 			}
-			if (Global::song()._pInstrument[src]->Empty())
+			if (Gloxxxxxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty())
 			{
 				return false;
 			}
 			// ok now we get down to business
 			// save our file
 
-			CString filepath = Global::configuration().GetSongDir().c_str();
+			CString filepath = Gloxxxxxxxxxxxxxxxxxxxbal::configuration().GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			RiffFile file;
@@ -1074,15 +1074,15 @@ namespace psy
 			{ 
 				// write effect
 				const int ps = playOrder[patternPosition];
-				int line = Global::pPlayer()->_lineCounter;
+				int line = Gloxxxxxxxxxxxxxxxxxbal::pPlayer()->_lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer()->_playing&&Global::pConfig()->_followSong)
+				if (Gloxxxxxxxxxxxxxxxxxxxxbal::pPlayer()->_playing&&Gloxxxxxxxxxxxxxxxxxxbal::pConfig()->_followSong)
 				{
 					if(_trackArmedCount)
 					{
 						//SelectNextTrack();
 					}
-					else if (!Global::pConfig()->_RecordUnarmed)
+					else if (!Gloxxxxxxxxxxxxxxxxxxxxbal::pConfig()->_RecordUnarmed)
 					{	
 						return;
 					}

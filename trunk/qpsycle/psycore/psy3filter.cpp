@@ -20,16 +20,13 @@
 #include "psy3filter.h"
 #include "fileio.h"
 #include "datacompression.h"
-#include "global.h" // for zapArray shit
 #include "inputhandler.h"
 #include "internal_machines.h"
 #include "song.h"
-
 namespace psy
 {
 	namespace core
 	{
-
 		std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 		/// Current version of the Song file and its chunks.
 		/// format: 0xAABB
@@ -379,10 +376,9 @@ namespace psy
 				fileread = file->Read(song._trackArmed[i]);
 				if(song._trackArmed[i]) ++song._trackArmedCount;
 			}
-//			Global::player().SetBPM(song.m_BeatsPerMin,song.linesPerBeat());
+			//Gloxxxxxxxxxxxxxxxxbal::player().SetBPM(song.m_BeatsPerMin,song.linesPerBeat());
 			return fileread;
 		}
-
 
 		bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
@@ -443,7 +439,7 @@ namespace psy
 				fileread = file->ReadChunk(pSource, size);
 				unsigned char * pDest;
 				DataCompression::BEERZ77Decomp2(pSource, &pDest);
-				zapArray(pSource,pDest);
+				delete[] pSource,pDest; pSource,pDest = 0;
 				// create a SinglePattern
 				std::string indexStr;
 				std::ostringstream o;
@@ -479,7 +475,7 @@ namespace psy
 						pSource += EVENT_SIZE;
 					}
 				}
-				zapArray(pDest);
+				delete[] pDest; pDest = 0;
 			}
 			return fileread;
 		}

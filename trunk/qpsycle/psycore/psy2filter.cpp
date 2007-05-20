@@ -485,7 +485,7 @@ namespace psy
 						if ((pMac[i]->LoadOldFileFormat(file)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 						{
 							std::string path = vstL[pVstPlugin->_instance].dllName;
-							if(!Global::dllfinder().LookupDllPath(path,MACH_VST)) 
+							if(!Gloxxxxxxxxxxxxxxxxxxxxbal::dllfinder().LookupDllPath(path,MACH_VST)) 
 							{
 								try
 								{
@@ -1195,7 +1195,7 @@ namespace psy
 				wasAS2=true;
 			}
 
-//			Global::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
+//			Gloxxxxxxxxxxxxxxxxbal::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
 			try
 			{
 				result = LoadDll(plugin_path, strname);
