@@ -42,56 +42,75 @@
 
 MachineView::MachineView(psy::core::Song *song)
 {
-    song_ = song;
-     scene_ = new MachineScene(this);
-     scene_->setBackgroundBrush(Qt::black);
+	song_ = song;
+	scene_ = new MachineScene(this);
+	scene_->setBackgroundBrush(Qt::black);
+	setScene(scene_);
 
-     setDragMode(QGraphicsView::RubberBandDrag);
-     setSceneRect(0,0,width(),height());
-     setScene(scene_);
-     setBackgroundBrush(Qt::black);
+	setDragMode( QGraphicsView::RubberBandDrag );
+	setBackgroundBrush(Qt::black);
+
+	createMachineGuis();
+	createWireGuis();
+	createTempLine();
+	initKeyjazzSettings();
+}
+
+void MachineView::createMachineGuis()
+{
+	if ( song_ ) {
+		for(int c=0;c<psy::core::MAX_MACHINES;c++)
+		{
+			psy::core::Machine* mac = song_->machine(c);
+			if ( mac ) {
+				createMachineGui( mac );
+			}
+		}
+	}
+}
+
+void MachineView::createWireGuis() 
+{
+	if ( song_ ) {
+		for(int c=0;c<psy::core::MAX_MACHINES;c++)
+		{
+			psy::core::Machine* tmac = song_->machine(c);
+			if (tmac) for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
+				  {
+					  if (tmac->_connection[w]) {
+						  MachineGui* srcMacGui = findByMachine(tmac);
+						  if ( srcMacGui!=0 ) {
+							  psy::core::Machine *pout = song_->machine(tmac->_outputMachines[w]);
+							  MachineGui* dstMacGui = findByMachine(pout);
+							  if ( dstMacGui != 0 ) {
+								  WireGui *wireGui = createWireGui( srcMacGui, dstMacGui );
+								  scene_->addItem( wireGui );
+							  }
+						  }
+					  }
+				  }
+		}
+	}
+}
+
+void MachineView::createTempLine()
+{
+	// A temporary line to display when user is making a new connection.
+	tempLine_ = new QGraphicsLineItem(0, 0, 0, 0);
+	tempLine_->setPen(QPen(Qt::gray,2,Qt::DotLine));
+	tempLine_->setVisible(false);// We don't want it to be visible yet.
+	scene_->addItem(tempLine_);
+	creatingWire_ = false;
+}
 
 
-     // A temporary line to display when user is making a new connection.
-     tempLine_ = new QGraphicsLineItem(0, 0, 0, 0);
-     tempLine_->setPen(QPen(Qt::gray,2,Qt::DotLine));
-     tempLine_->setVisible(false);// We don't want it to be visible yet.
-     scene_->addItem(tempLine_);
+void MachineView::initKeyjazzSettings()
+{
+	outtrack = 0;
+	notetrack[psy::core::MAX_TRACKS];
+	for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
+}
 
-    // Create MachineGuis for the Machines in the Song.
-    for(int c=0;c<psy::core::MAX_MACHINES;c++)
-    {
-        psy::core::Machine* mac = song_->machine(c);
-        if ( mac ) {
-            createMachineGui( mac );
-        }
-    }
-    // Create WireGuis for connections in Song file.
-    for(int c=0;c<psy::core::MAX_MACHINES;c++)
-    {
-        psy::core::Machine* tmac = song_->machine(c);
-        if (tmac) for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
-        {
-            if (tmac->_connection[w]) {
-                MachineGui* srcMacGui = findByMachine(tmac);
-                if ( srcMacGui!=0 ) {
-                    psy::core::Machine *pout = song_->machine(tmac->_outputMachines[w]);
-                    MachineGui* dstMacGui = findByMachine(pout);
-                    if ( dstMacGui != 0 ) {
-                        WireGui *wireGui = createWireGui( srcMacGui, dstMacGui );
-                        scene_->addItem( wireGui );
-                    }
-                }
-            }
-        }
-    }
-
-    outtrack = 0;
-    notetrack[psy::core::MAX_TRACKS];
-    for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
-
-    creatingWire_ = false;
- }
 
 WireGui *MachineView::createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
