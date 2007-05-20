@@ -111,7 +111,7 @@ HEADERS += mainwindow.h \
            psycore/helpers/xml.h
 SOURCES += mainwindow.cpp \
            global.cpp \
-           configuration_ui.cpp \
+           configuration.cpp \
            inputhandler.cpp \
            patternbox.cpp \
            qpsycle.cpp \
