@@ -46,31 +46,32 @@
 #include "file.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-
-
-template<class T> inline T str(const std::string &  value) {
-		T result;
-
-		std::stringstream str;
-		str << value;
-		str >> result;
-
-		return result;
-}
-
-template<class T> inline T str_hex(const std::string &  value) {
-		T result;
-
-		std::stringstream str;
-		str << value;
-		str >> std::hex >> result;
-
-		return result;
-}
-
+#include <sstream>
 
 namespace psy {
 	namespace core {
+		namespace {
+			template<class T> inline T str(const std::string &  value) {
+					T result;
+
+					std::stringstream str;
+					str << value;
+					str >> result;
+
+					return result;
+			}
+
+			template<class T> inline T str_hex(const std::string &  value) {
+					T result;
+
+					std::stringstream str;
+					str << value;
+					str >> std::hex >> result;
+
+					return result;
+			}
+		}
+
 		Psy4Filter::Psy4Filter()
 		:
 			song_()
@@ -111,10 +112,8 @@ namespace psy {
             QFile *file = new QFile( "psytemp.xml" );
             QDomDocument *doc = new QDomDocument();
             doc->setContent( file );
-			isPsy4 = false;
             QDomElement psy4El = doc->documentElement();
-			if ( psy4El.tagName() == "psy4" ) isPsy4 = true;
-			return isPsy4;		
+			return psy4El.tagName() == "psy4";
 		}
 
 		bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
@@ -134,7 +133,7 @@ namespace psy {
 			std::cout << "psy4filter detected for load" << std::endl;
 
             QFile *file = new QFile( "psytemp.xml" );
-            if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) return 0;
+            if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) return false;
             QDomDocument *doc = new QDomDocument();
             doc->setContent( file );
 
@@ -282,7 +281,7 @@ namespace psy {
 //						//progress.emit(2,0,"Loading... Song machines...");
 						if ((version&0xFF00) == 0x0000) // chunkformat v0
 						{
-              LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
+							LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
 						}
 						//else if ( (version&0xFF00) == 0x0100 ) //and so on
 					}
@@ -310,7 +309,7 @@ namespace psy {
 					// For invalid version chunks, or chunks that haven't been read correctly/completely.
 					if  (file.GetPos() != fileposition+size)
 					{
-					//\todo: verify how it works with invalid data.
+					///\todo: verify how it works with invalid data.
 //					if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
 //					else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
 						file.Seek(fileposition+size);
@@ -393,9 +392,8 @@ namespace psy {
 				//\todo:
 			}
 
-			return isPsy4;
+			return true;
 		} // load
-
 
 		bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 		{
