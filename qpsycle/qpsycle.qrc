@@ -20,5 +20,9 @@
 	 <file>images/wave_stop.png</file>
 	 <file>images/plus.png</file>
 	 <file>images/minus.png</file>
+	 <file>images/pattern-editor.png</file>
+	 <file>images/machines.png</file>
+	 <file>images/sequencer.png</file>
+	 <file>images/waveed.png</file>
  </qresource>
  </RCC>

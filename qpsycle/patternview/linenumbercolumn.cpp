@@ -42,7 +42,7 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 {
     QPainter painter( this );
     int columnWidth = 50;
-    int ch      = height();//clientHeight();
+    int ch = height();//clientHeight();
     QColor lineColor( Qt::black );
     QColor textColor( QColor(200,200,200) );
 //    TimeSignature signature;
