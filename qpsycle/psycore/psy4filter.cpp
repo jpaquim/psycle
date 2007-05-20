@@ -84,7 +84,7 @@ namespace psy {
 			zipreader_file *f;
 			int fd = open( fileName.c_str(), O_RDONLY );
 			z = zipreader_open( fd );
-			int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT, 0666);
+			int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT, 0644);
 			f = zipreader_seek(z, "xml/song.xml");
 
 			if (!zipreader_extract(f, outFd )) {
@@ -96,7 +96,7 @@ namespace psy {
 			close( outFd );
 
 			f = zipreader_seek(z, "bin/song.bin");
-			outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT, 0666);
+			outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT, 0644);
 			if (!zipreader_extract(f, outFd )) {
 				zipreader_close( z );	
 				close( outFd );
@@ -412,7 +412,7 @@ namespace psy {
 			// ideally, you should create a temporary file on the same physical
 	  	// disk as the target zipfile... 
 
-			zipwriter *z = zipwriter_start(open(fileName.c_str(), O_RDWR|O_CREAT, 0666));
+			zipwriter *z = zipwriter_start(open(fileName.c_str(), O_RDWR|O_CREAT, 0644));
 			zipwriterfilestream xmlFile(z, "xml/song.xml" );
 
 			std::ostringstream xml;
