@@ -22,21 +22,13 @@
 
 namespace psy {
 	namespace core {
+		Configuration* Global::pConfig() {
+			static Configuration* c = new Configuration();
+			return c;
+		}
 
-
-Configuration* Global::pConfig() {
-	static Configuration* c = new Configuration();
-	return c;
+		Configuration const & Global::configuration() {
+			return *pConfig();
+		}
+	}
 }
-
-Configuration const & Global::configuration() {
-	return *pConfig();
-}
-
-Global::Global() { }
-
-Global::~Global() { }
-
-}
-}
-
