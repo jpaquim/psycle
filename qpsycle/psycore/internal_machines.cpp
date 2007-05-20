@@ -1,13 +1,8 @@
 #include "internal_machines.h"
-
-///\todo: These three includes need to be replaced by a "host" callback which gives such information.
+///\todo: These two includes need to be replaced by a "host" callback which gives such information.
 #include "song.h"
 #include "player.h"
-
-///\todo : The information required from this include should go to constants.hpp
-#include "inputhandler.h"
-///\todo : this is crap
-
+#include "commands.h"
 namespace psy {
 	namespace core {
 
@@ -436,13 +431,13 @@ namespace psy {
 
 		void Mixer::Tick( int channel, const PatternEvent & pData )
 		{
-			if(pData.note() == cdefTweakM)
+			if(pData.note() == commands::tweak)
 			{
 				int nv = (pData.command() << 8)+pData.parameter();
 				SetParameter(pData.instrument(), nv);
 				Player::Instance()->Tweaker = true;
 			}
-			else if( pData.note() == cdefTweakS)
+			else if( pData.note() == commands::tweak_slide)
 			{
 				///\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 			}

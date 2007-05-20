@@ -1,48 +1,48 @@
-#include "cstdint.h"
 #pragma once
+#include "cstdint.h"
+namespace psy {
+	namespace core {
 
-namespace psy { namespace core {
+		class PatternEntry
+		{
+			public:
+				inline PatternEntry()
+				:
+					_note(255),
+					_inst(255),
+					/*#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+						#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+					#else
+						#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+							_volume(255),
+						#endif
+					#endif*/
+					_mach(255),
+					_cmd(0),
+					_parameter(0)
+				{}
 
-class PatternEntry
-{
-public:
-	inline PatternEntry()
-		:
-		_note(255),
-		_inst(255),
-		/*#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-		#else
-			#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				_volume(255),
-			#endif
-		#endif*/
-		_mach(255),
-		_cmd(0),
-		_parameter(0)
-	{
-	}
-	std::uint8_t _note;
-	std::uint8_t _inst;
-/*	#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-		#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-	#else
-		#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			std::uint8_t _volume;
-			std::uint8_t _cmd;
-			std::uint8_t _parameter;
-			std::uint8_t _mach;
-		#else*/
-			std::uint8_t _mach;
-			std::uint8_t _cmd;
-			std::uint8_t _parameter;
-		//#endif
-	//#endif
-};
+				std::uint8_t _note;
+				std::uint8_t _inst;
+				/*	#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+					#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+				#else
+					#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+						std::uint8_t _volume;
+						std::uint8_t _cmd;
+						std::uint8_t _parameter;
+						std::uint8_t _mach;
+					#else*/
+						std::uint8_t _mach;
+						std::uint8_t _cmd;
+						std::uint8_t _parameter;
+					//#endif
+				//#endif
+		};
 
-
-namespace PatternCmd {
-			enum 
+		namespace PatternCmd
+		{
+			enum PatternCmd
 			{
 				EXTENDED      = 0xFE, // see below
 				SET_TEMPO     = 0xFF,
@@ -64,6 +64,6 @@ namespace PatternCmd {
 				PATTERN_DELAY      = 0xD0, // causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
 				FINE_PATTERN_DELAY = 0xF0  // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
 			};
-}		
-
-}}
+		}
+	}
+}

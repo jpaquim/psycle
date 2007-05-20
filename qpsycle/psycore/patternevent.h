@@ -26,106 +26,18 @@
 /**
 @author  Psycledelics  
 */
-
-
-///\todo code has no PatternEntry anymore, but we need still to integrate the enums in InputHandler, songstruct and pattern.h here
-///\todo this is just a work in progress, don`t use this enums, naming cdef seems weired to me
-
-//const int CS_KEY_START = 0;
-
-//const int CS_IMM_START = 256;
-
-//const int CS_EDT_START = 512;
-
-//const int CS_LAST = max_cmds;
-
 namespace psy
 {
 	namespace core
 	{
 
-		class PatternEvent{
-		public:
-
-		/// command set.
-		enum CmdSet
+		class PatternEvent
 		{
-			cdefNull = -1,
-			// keys
-			cdefKeyC_0 = 0, // CS_KEY_START,
-			cdefKeyCS0,
-			cdefKeyD_0,
-			cdefKeyDS0,
-			cdefKeyE_0,
-			cdefKeyF_0,
-			cdefKeyFS0,
-			cdefKeyG_0,
-			cdefKeyGS0,
-			cdefKeyA_0,
-			cdefKeyAS0,
-			cdefKeyB_0,
-			cdefKeyC_1, ///< 12
-			cdefKeyCS1,
-			cdefKeyD_1,
-			cdefKeyDS1,
-			cdefKeyE_1,
-			cdefKeyF_1,
-			cdefKeyFS1,
-			cdefKeyG_1,
-			cdefKeyGS1,
-			cdefKeyA_1,
-			cdefKeyAS1,
-			cdefKeyB_1,
-			cdefKeyC_2, ///< 24
-			cdefKeyCS2,
-			cdefKeyD_2,
-			cdefKeyDS2,
-			cdefKeyE_2,
-			cdefKeyF_2,
-			cdefKeyFS2,
-			cdefKeyG_2,
-			cdefKeyGS2,
-			cdefKeyA_2,	
-
-			cdefKeyStop = 120,	///< NOTE STOP
-			cdefTweakM = 121,	///< tweak
-			cdefTweakE = 122,	///< tweak effect. Old!
-			cdefMIDICC = 123,	///< Mcm Command (MIDI CC)
-			cdefTweakS = 124,	///< tweak slide command
-
-			};
-
-
-
-			enum Cmd
-			{
-				EXTENDED      = 0xFE, // see below
-				SET_TEMPO     = 0xFF,
-				NOTE_DELAY    = 0xFD,
-				RETRIGGER     = 0xFB,
-				RETR_CONT     = 0xFA,
-				SET_VOLUME    = 0x0FC,
-				SET_PANNING   = 0x0F8,
-				BREAK_TO_LINE = 0xF2,
-				JUMP_TO_ORDER = 0xF3,
-				ARPEGGIO      = 0xF0,
-
-				// Extended Commands from 0xFE
-				SET_LINESPERBEAT0  = 0x00, // 
-				SET_LINESPERBEAT1  = 0x10, // Range from FE00 to FE1F is reserved for changing lines per beat.
-				SET_BYPASS         = 0x20,
-				SET_MUTE           = 0x30,
-				PATTERN_LOOP       = 0xB0, // Loops the current pattern x times. 0xFEB0 sets the loop start point.
-				PATTERN_DELAY      = 0xD0, // causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
-				FINE_PATTERN_DELAY = 0xF0  // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
-			};
-
-
+			public:
 			typedef std::vector< std::pair<std::uint8_t,std::uint8_t> > PcmListType;
 			typedef std::pair<std::uint8_t,std::uint8_t> PcmType;
 
 			PatternEvent();
-
 			~PatternEvent();
 
 			void setNote(std::uint8_t value);
@@ -156,7 +68,6 @@ namespace psy
 			bool isSharp() const;
 
 		private:
-
 			std::uint8_t _note;
 			std::uint8_t _inst;
 			std::uint8_t _mach;
@@ -164,11 +75,8 @@ namespace psy
 			std::uint8_t _parameter;
 			std::uint8_t _volume;
 			bool _sharp;
-			
 			PcmListType paraCmdList_;
-
 		};
 	}
 }
-
 #endif
