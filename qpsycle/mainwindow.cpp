@@ -402,10 +402,10 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 {
     if ( event->key() == Qt::Key_Tab )
         return;
-    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
     switch ( command ) {
-        case psy::core::cdefShowPatternBox:
+        case commands::show_pattern_box:
         {
             if ( !dock_->isVisible() ) {
                 dock_->setVisible( true );
@@ -419,45 +419,45 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
             }
         }
         break;
-        case psy::core::cdefShowMachineView:
+        case commands::show_machine_view:
             views_->setCurrentWidget( macView_ );
         break;
-        case psy::core::cdefShowPatternView:
+        case commands::show_pattern_view:
             views_->setCurrentWidget( patView_ );
             patView_->patDraw()->setFocus();
            patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
         break;
-        case psy::core::cdefShowWaveEditor:
+        case commands::show_wave_editor:
             views_->setCurrentWidget( wavView_ );
         break;
-        case psy::core::cdefShowSequencerView:
+        case commands::show_sequencer_view:
             views_->setCurrentWidget( seqView_ );
         break;
         // Play controls.
-        case psy::core::cdefPlayStart:
+        case commands::play_start:
             playFromStartAct->trigger();
         break;
-        case psy::core::cdefPlayFromPos:
+        case commands::play_from_position:
             playFromSeqPosAct->trigger();
         break;
-        case psy::core::cdefPlayStop:
+        case commands::play_stop:
             playStopAct->trigger();
         break;
-        case psy::core::cdefLoopEntry:
+        case commands::play_loop_entry:
         {
 //            psy::core::Player::Instance()->setLoopPatternEntry( ... );
         }
         break;
-        case psy::core::cdefInstrInc:
+        case commands::instrument_inc:
             sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
         break;
-        case psy::core::cdefInstrDec:
+        case commands::instrument_dec:
             sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
         break;
-        case psy::core::cdefOctaveUp:
+        case commands::octave_up:
             octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
         break;
-        case psy::core::cdefOctaveDn:
+        case commands::octave_down:
             octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
         break;
 

@@ -222,19 +222,19 @@ void PatternView::onPatternStepComboBoxIndexChanged( int newIndex )
 
 void PatternView::keyPressEvent( QKeyEvent *event )
 {
-    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
     switch ( command ) {
-/*        case Qt::Key_A:
+		/*case Qt::Key_A:
         {
             float position = patternGrid()->cursor().line() / (float) beatZoom();
             pattern()->removeBar(position);
             patternGrid()->update();
             break;
         }*/
-        case psy::core::cdefPatternstepDec:
+        case commands::pattern_step_dec:
             patStepCbx_->setCurrentIndex( std::max( 0, patternStep() - 1 ) );
         break;
-        case psy::core::cdefPatternstepInc:
+        case commands::pattern_step_inc:
             patStepCbx_->setCurrentIndex( std::min( 16, patternStep() + 1 ) );
         break;
         default:

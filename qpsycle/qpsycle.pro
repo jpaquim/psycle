@@ -34,6 +34,7 @@ INCLUDEPATH += . \
 # Input
 HEADERS += mainwindow.h \
            global.h \
+           configuration.h \
            inputhandler.h \
            patternbox.h \
            machineview/machinegui.h \
@@ -111,6 +112,7 @@ HEADERS += mainwindow.h \
            psycore/helpers/xml.h
 SOURCES += mainwindow.cpp \
            global.cpp \
+           configuration_ui.cpp \
            inputhandler.cpp \
            patternbox.cpp \
            qpsycle.cpp \

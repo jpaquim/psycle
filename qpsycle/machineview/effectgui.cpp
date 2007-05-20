@@ -73,12 +73,12 @@ void EffectGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 void EffectGui::keyPressEvent( QKeyEvent * event )
 {
-    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
     switch ( command ) { 
-        case psy::core::cdefMuteMachine:
+        case commands::mute_machine:
             toggleMuteAct_->trigger();
             return;
-        case psy::core::cdefBypassMachine:
+        case commands::bypass_machine:
             toggleBypassAct_->trigger();
             return;
         default:;

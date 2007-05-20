@@ -222,7 +222,7 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 		reject();		// Closes the dialog.
 	} else {
 		if ( !event->isAutoRepeat() ) {
-			int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 			int note = NULL;
 			note = m_macGui->noteFromCommand( command );
 			if (note) {
@@ -235,7 +235,7 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
 {
     if ( !event->isAutoRepeat() ) {
-        int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+        int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
         int note = NULL;
         note = m_macGui->noteFromCommand( command );
         if (note) {
