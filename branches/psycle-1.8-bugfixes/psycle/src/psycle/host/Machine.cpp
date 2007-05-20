@@ -328,7 +328,7 @@ namespace psycle
 		{
 			_worked = false;
 			_waitingForSound= false;
-			CPUCOST_INIT(cost);
+			cpu::cycles_type wcost = cpu::cycles();
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
 				float *pSamplesL = _pSamplesL;   
@@ -357,9 +357,7 @@ namespace psycle
 			_scopePrevNumSamples=numSamples;
 			dsp::Clear(_pSamplesL, numSamples);
 			dsp::Clear(_pSamplesR, numSamples);
-			CPUCOST_CALC(cost, numSamples);
-			//_cpuCost = cost;
-			_wireCost+= cost;
+			_wireCost += cpu::cycles() - wcost;
 		}
 
 		/// Each machine is expected to produce its output in its own
@@ -411,20 +409,18 @@ namespace psycle
 						if(!pInMachine->_stopped) _stopped = false;
 						if(!_mute && !_stopped)
 						{
-							CPUCOST_INIT(wcost);
+							cpu::cycles_type wcost = cpu::cycles();
 							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-							CPUCOST_CALC(wcost,numSamples);
-							_wireCost+=wcost;
+							_wireCost += cpu::cycles() - wcost;
 						}
 					}
 				}
 			}
 			_waitingForSound = false;
-			CPUCOST_INIT(wcost);
+			cpu::cycles_type wcost = cpu::cycles();
 			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			CPUCOST_CALC(wcost,numSamples);
-			_wireCost+=wcost;
+			_wireCost += cpu::cycles() - wcost;
 		}
 
 		//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
@@ -736,7 +732,7 @@ namespace psycle
 		void Dummy::Work(int numSamples)
 		{
 			Machine::Work(numSamples);
-			CPUCOST_INIT(cost);
+			cpu::cycles_type cost = cpu::cycles();
 			Machine::SetVolumeCounter(numSamples);
 			if ( Global::pConfig->autoStopMachines )
 			{
@@ -748,8 +744,7 @@ namespace psycle
 				}
 			}
 			//else Machine::SetVolumeCounter(numSamples);
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 		}
 
@@ -1013,7 +1008,7 @@ namespace psycle
 				processor::fpu::exception_mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 			#endif
 			Machine::Work(numSamples);
-			CPUCOST_INIT(cost);
+			cpu::cycles_type cost = cpu::cycles();
 			//if(!_mute)
 			//{
 				float mv = CValueMapper::Map_255_1(_outDry);
@@ -1114,8 +1109,7 @@ namespace psycle
 				if( _rMax > currentpeak ) currentpeak = _rMax;
 			//}
 			sampleCount+=numSamples;
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 		}
 
@@ -1194,7 +1188,7 @@ namespace psycle
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
 			if(!_mute && !_stopped )
 			{
-				CPUCOST_INIT(cost);
+				cpu::cycles_type cost = cpu::cycles();
 				Mix(numSamples);
 				Machine::SetVolumeCounter(numSamples);
 				if ( Global::configuration().autoStopMachines )
@@ -1207,14 +1201,12 @@ namespace psycle
 					}
 					else _stopped = false;
 				}
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
+				_cpuCost += cpu::cycles() - cost;
 			}
 
-			CPUCOST_INIT(cost2);
+			cpu::cycles_type cost = cpu::cycles();
 			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			CPUCOST_CALC(cost2, numSamples);
-			_cpuCost += cost2;
+			_cpuCost += cpu::cycles() - cost;
 
 			_worked = true;
 		}
@@ -1232,7 +1224,7 @@ namespace psycle
 						{ 
 							// Mix all the inputs and route them to the send fx.
 							{
-								CPUCOST_INIT(cost);
+								cpu::cycles_type cost = cpu::cycles();
 								for (int j=0; j<MAX_CONNECTIONS; j++)
 								{
 									if (_inputCon[j])
@@ -1248,8 +1240,7 @@ namespace psycle
 										}
 									}
 								}
-								CPUCOST_CALC(cost, numSamples);
-								_cpuCost += cost;
+								_cpuCost += cpu::cycles() - cost ;
 							}
 
 							// tell the FX to work, now that the input is ready.
@@ -1261,12 +1252,11 @@ namespace psycle
 							}
 
 							{
-								CPUCOST_INIT(cost2);
+								cpu::cycles_type cost = cpu::cycles();
 								pSendMachine->_waitingForSound = false;
 								dsp::Clear(_pSamplesL, numSamples);
 								dsp::Clear(_pSamplesR, numSamples);
-								CPUCOST_CALC(cost2, numSamples);
-								_cpuCost += cost2;
+								_cpuCost += cpu::cycles() - cost;
 							}
 
 						}

@@ -241,8 +241,8 @@ namespace psycle
 			int _volumeMaxDisplay;
 			/// output peak level for display
 			int _volumeMaxCounterLife;
-			unsigned long int _cpuCost;
-			unsigned long int _wireCost;
+			std::uint64_t _cpuCost;
+			std::uint64_t _wireCost;
 			int _scopePrevNumSamples;
 			int	_scopeBufferIndex;
 			float *_pScopeBufferL;
@@ -326,29 +326,6 @@ namespace psycle
 		protected:
 			static char* _psName;
 		};
-
-		///\todo make that a naked inline function
-		#define CPUCOST_INIT(cost)	\
-			ULONG cost;				\
-			__asm rdtsc				\
-			__asm mov cost, eax
-		/*
-		///\todo make that a naked inline function
-		#define CPUCOST_CALC(cost, numSamples)	\
-			__asm {								\
-			__asm rdtsc							\
-			__asm sub eax, cost					\
-			__asm mov cost, eax					\
-			}									\
-			cost = cost* Global::pConfig->_pOutputDriver->_samplesPerSec/ numSamples
-		//	cost = (cost*1000)/(numSamples*(Global::_cpuHz/Global::pConfig->_pOutputDriver->_samplesPerSec));
-		*/
-		///\todo make that a naked inline function
-		#define CPUCOST_CALC(cost, numSamples)	\
-			__asm rdtsc							\
-			__asm sub eax, cost					\
-			__asm mov cost, eax
-
 
 		inline void Machine::SetVolumeCounter(int numSamples)
 		{
