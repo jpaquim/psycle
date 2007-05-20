@@ -53,11 +53,11 @@ namespace psy {
 					}
 				// Singleton pattern end
 
-				virtual int version() const;
+				/*override*/ int version() const;
 
-				virtual bool testFormat(const std::string & fileName);
-				virtual bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-				virtual bool save( const std::string & fileName, const CoreSong & song );
+				/*override*/ bool testFormat(const std::string & fileName);
+				/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+				/*override*/ bool save( const std::string & fileName, const CoreSong & song );
 
 			protected:
 
