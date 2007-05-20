@@ -50,135 +50,12 @@ NAMESPACE__BEGIN(psycle)
 			
 			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 			
-			// CPU Frequency setup
-			// redone by kSh
-			// based on the WMI; doesn't work on Win9x but falls back to the old method then
-			HRESULT hres;
+			LARGE_INTEGER frequency;
+			QueryPerformanceFrequency(&frequency);
+			Global::_cpuHz = frequency.QuadPart;
 
-			hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-			if (FAILED(hres))
-			{
-				GetNaiveCPUFreq();
-			}
-			else
-			{
-				hres = CoInitializeSecurity(
-					NULL, -1, NULL,	NULL, RPC_C_AUTHN_LEVEL_DEFAULT,
-					RPC_C_IMP_LEVEL_IMPERSONATE, NULL,	EOAC_NONE, NULL
-				);
-
-				if (FAILED(hres))
-				{
-					GetNaiveCPUFreq();
-					CoUninitialize();
-				}
-				else
-				{
-					IWbemLocator *pLoc = NULL;
-
-					hres = CoCreateInstance(
-						CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER,
-						IID_IWbemLocator, (LPVOID *) &pLoc
-					);
-
-					if (FAILED(hres))
-					{
-						GetNaiveCPUFreq();
-						CoUninitialize();
-					}
-					else
-					{
-						IWbemServices *pSvc = NULL;
-
-						hres = pLoc->ConnectServer(
-							_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0,
-							NULL, 0, 0, &pSvc
-						);
-
-						if (FAILED(hres))
-						{
-							GetNaiveCPUFreq();
-							pLoc->Release();
-							CoUninitialize();
-						}
-						else
-						{
-							hres = CoSetProxyBlanket(
-								pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE,
-								NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE,
-								NULL, EOAC_NONE
-							);
-
-							if (FAILED(hres))
-							{
-								GetNaiveCPUFreq();
-								pSvc->Release();
-								pLoc->Release();
-								CoUninitialize();
-							}
-							else
-							{
-								IEnumWbemClassObject* pEnumerator = NULL;
-								hres = pSvc->ExecQuery(
-									bstr_t("WQL"),
-									bstr_t("SELECT * FROM Win32_Processor"),
-									WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
-									NULL, &pEnumerator
-								);
-
-								if (FAILED(hres))
-								{
-									GetNaiveCPUFreq();
-									pSvc->Release();
-									pLoc->Release();
-									CoUninitialize();
-								}
-								else
-								{
-									IWbemClassObject *pclsObj=0;
-									ULONG uReturn = 0;
-
-									Global::_cpuHz = 0;
-									while (pEnumerator)
-									{
-										HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-										
-										if (0 == uReturn)
-										{
-											break;
-										}
-										
-										VARIANT vtProp;
-										VariantInit(&vtProp);
-
-										hr = pclsObj->Get(L"CurrentClockSpeed", 0, &vtProp, 0, 0);
-										if (!FAILED(hr))
-										{
-											Global::_cpuHz = 1000000 * vtProp.intVal;
-										}
-										VariantClear(&vtProp);
-									}
-
-									if (0 >= Global::_cpuHz)
-									{
-										GetNaiveCPUFreq();
-									}
-									
-									pSvc->Release();
-									pLoc->Release();
-									pEnumerator->Release();
-									pclsObj->Release();
-									CoUninitialize();
-								}
-							}
-						}
-					}
-				}
-			}
-			
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
-			
 			CMainFrame* pFrame = new CMainFrame;
 			m_pMainWnd = pFrame;
 
@@ -264,6 +141,12 @@ NAMESPACE__BEGIN(psycle)
 
 		void CPsycleApp::GetNaiveCPUFreq()
 		{
+			LARGE_INTEGER cost,next;
+			QueryPerformanceCounter(&cost);
+			Sleep(1000);
+			QueryPerformanceCounter(&next);
+			Global::_cpuHz = next.QuadPart - cost.QuadPart;
+/*			
 			ULONG cpuHz;
 			__asm rdtsc ///< read time stamp to EAX
 			__asm mov cpuHz, eax
@@ -272,6 +155,7 @@ NAMESPACE__BEGIN(psycle)
 			__asm sub eax, cpuHz ///< Find the difference
 			__asm mov cpuHz, eax
 			Global::_cpuHz = cpuHz;
+*/
 		}
 
 		/////////////////////////////////////////////////////////////////////////////

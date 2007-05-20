@@ -365,7 +365,7 @@ namespace psycle
 				if (!_mute) _stopped = false;
 				else _stopped = true;
 			}
-			CPUCOST_INIT(cost);
+			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
@@ -591,8 +591,7 @@ namespace psycle
 					}
 				}
 			}
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 		}
 

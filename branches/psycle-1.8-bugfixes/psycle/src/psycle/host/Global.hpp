@@ -30,26 +30,19 @@ namespace psycle
 		//\todo: move this source to a better place.
 		namespace cpu
 		{
-			//\todo: Microsoft Specific:
-			// QueryPerformanceFrequency()
-			// QueryPerformanceCounter()
-			typedef std::int64_t cycles_type;
+			typedef std::uint64_t cycles_type;
 			cycles_type inline cycles()
 			{
 				union result_type
 				{
-					std::uint64_t value;
 					struct split_type
 					{
 						std::uint32_t lo, hi;
 					} split;
+					std::uint64_t value;
 				} result;
-				__asm
-				{
-					rdtsc; // copies the x86 64-bit cpu cycle time stamp counter to edx and eax
-					mov result.split.hi, edx;
-					mov result.split.lo, eax;
-				}
+
+				QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&result));
 				return result.value;
 			}
 		}
@@ -65,7 +58,7 @@ namespace psycle
 			static Player * pPlayer;
 			static Configuration * pConfig;
 			static dsp::Resampler * pResampler;
-			static unsigned int _cpuHz;
+			static cpu::cycles_type _cpuHz;
 			static InputHandler* pInputHandler;
 			static vst::host* pVstHost;
 

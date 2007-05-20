@@ -128,7 +128,7 @@ namespace psycle
 					{
 					case PatternCmd::SET_TEMPO:
 						if(pEntry->_parameter != 0)
-						{	//\todo: implement the Tempo slide
+						{	///\todo: implement the Tempo slide
 							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
 							bpm = pEntry->_parameter;
 							RecalcSPR();
@@ -462,9 +462,7 @@ namespace psycle
 				// Processing plant
 				if(amount > 0)
 				{
-
-
-					CPUCOST_INIT(idletime);
+					cpu::cycles_type idletime = cpu::cycles();
 					if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
 					{
 						pSong->_sampCount =0;
@@ -494,8 +492,7 @@ namespace psycle
 						// Master machine initiates work
 						pSong->_pMachine[MASTER_INDEX]->Work(amount);
 					}
-					CPUCOST_CALC(idletime, amount);
-					pSong->cpuIdle = idletime;
+					pSong->cpuIdle = cpu::cycles() - idletime;
 					pSong->_sampCount += amount;
 					if((pThis->_playing) && (pThis->_recording))
 					{

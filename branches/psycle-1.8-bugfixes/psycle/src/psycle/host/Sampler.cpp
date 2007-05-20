@@ -65,8 +65,7 @@ namespace psycle
 		void Sampler::Work(
 			int numSamples)
 		{
-
-			CPUCOST_INIT(cost);
+			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute)
 			{
 				for (int voice=0; voice<_numVoices; voice++)
@@ -186,8 +185,7 @@ namespace psycle
 			}
 
 			else _stopped = true;
-			CPUCOST_CALC(cost, numSamples);
-			_cpuCost += cost;
+			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 		}
 

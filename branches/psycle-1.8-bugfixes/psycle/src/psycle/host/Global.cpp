@@ -17,7 +17,7 @@ namespace psycle
 		Player * Global::pPlayer(0);
 		dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
-		unsigned int Global::_cpuHz(1);
+		cpu::cycles_type Global::_cpuHz(1);
 		InputHandler * Global::pInputHandler(0);
 		vst::host *Global::pVstHost(0);
 

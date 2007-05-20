@@ -132,7 +132,6 @@ namespace psycle
 				,queue_size(0)
 				,requiresRepl(0)
 				,requiresProcess(0)
-				,editorwin(0)
 			{
 				if ( IsSynth())
 				{
@@ -218,15 +217,6 @@ namespace psycle
 				else _sVendorName = "Unknown vendor";
 				std::strcpy(_editName,_sProductName.c_str());
 
-			}
-			bool plugin::OnSizeEditorWindow(long width, long height)
-			{
-				if (editorwin)
-				{	
-					editorwin->Resize(width,height);
-					return true;
-				}
-				return false;
 			}
 			void plugin::GetParamValue(int numparam, char * parval)
 			{
@@ -584,7 +574,7 @@ namespace psycle
 					if (!_mute) _stopped = false;
 					else _stopped = true;
 				}
-				CPUCOST_INIT(cost);
+				cpu::cycles_type cost = cpu::cycles();
 				if((!_mute) && (!_stopped) && (!_bypass))
 				{
 					if(bNeedIdle) 
@@ -793,8 +783,8 @@ namespace psycle
 						}
 					}
 				}
-				CPUCOST_CALC(cost, numSamples);
-				_cpuCost += cost;
+				
+				_cpuCost += cpu::cycles() - cost;
 				_worked = true;
 			}
 

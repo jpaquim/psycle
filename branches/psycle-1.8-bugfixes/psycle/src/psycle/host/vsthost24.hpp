@@ -8,8 +8,6 @@ namespace psycle
 {
 	namespace host
 	{
-		class CVstEditorDlg;
-
 		namespace vst
 		{
 			// Maximum number of Audio Input/outputs
@@ -60,7 +58,6 @@ namespace psycle
 				std::string _sDllName;
 				std::string _sProductName;
 				std::string _sVendorName;
-				CVstEditorDlg *editorwin;
 
 				/// It needs to use Process
 				bool requiresProcess;
@@ -75,11 +72,12 @@ namespace psycle
 					queue_size = 0;
 					requiresRepl = 0;
 					requiresProcess = 0;
-					editorwin = 0;
 				};
 				virtual ~plugin() {};
-				// Actions
+
+				// Machine overloaded functions
 				//////////////////////////////////////////////////////////////////////////
+				// Actions
 				virtual void Init(){ Machine::Init();}
 				virtual void Work(int numSamples);
 				virtual void Tick() {;}
@@ -126,12 +124,10 @@ namespace psycle
 				virtual void SetParameter(int numparam, float value) { CEffect::SetParameter(numparam,value); }
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
-
+				// CEffect overloaded functions
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
-				bool SetEditorWindow(CVstEditorDlg* window) { editorwin = window; }
-				virtual bool OnSizeEditorWindow(long width, long height);
 				virtual bool OnUpdateDisplay() { return false; }
 				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
 				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }

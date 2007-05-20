@@ -42,7 +42,7 @@ namespace psycle
 			std::string author;
 			/// the comments on the song
 			std::string comments;
-			unsigned cpuIdle;
+			std::uint64_t cpuIdle;
 			unsigned _sampCount;
 			bool Invalided;
 			/// the initial beats per minute (BPM) when the song is started playing.

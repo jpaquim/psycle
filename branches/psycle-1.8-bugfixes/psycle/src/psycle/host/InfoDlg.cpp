@@ -51,6 +51,8 @@ NAMESPACE__BEGIN(psycle)
 			m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
 			
 			char buffer[128];
+			///\todo:  Using the Windows API to get clicks/CPU frequency doesn't give
+			// the real frequency in some cases. This has to be worked out.
 			sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
 			m_processor_label.SetWindowText(buffer);
 			
