@@ -53,9 +53,44 @@
 #include <QDomDocument> // for reading XML file
 
 Configuration::Configuration()
+:
+	_RecordTweaks(),
+	_RecordUnarmed()
 {
 	//setXmlDefaults();
-	setDefaults();
+
+	AudioDriver* driver = new AudioDriver;
+	addAudioDriver(driver);
+	_pSilentDriver = driver;
+	addAudioDriver(new psy::core::WaveFileOut);
+
+	setDriverByName("silent");
+	enableSound_ = false;
+
+	#if defined PSYCLE__ALSA_AVAILABLE
+		addAudioDriver(new psy::core::AlsaOut);
+	#endif
+	#if defined PSYCLE__JACK_AVAILABLE
+		addAudioDriver(new psy::core::JackOut);
+	#endif
+	#if defined PSYCLE__ESOUND_AVAILABLE
+		addAudioDriver(new psy::core::ESoundOut);
+	#endif		
+	#if defined PSYCLE__GSTREAMER_AVAILABLE
+		addAudioDriver(new psy::core::GStreamerOut);
+	#endif
+	#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
+		addAudioDriver(new psy::core::MsDirectSound);
+		// use dsound by default
+		setDriverByName("dsound");
+		enableSound_ = true;
+	#endif
+	#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
+		addAudioDriver(new psy::core::MsWaveOut);
+	#endif
+	#if defined PSYCLE__NET_AUDIO_AVAILABLE
+		addAudioDriver(new psy::core::NetAudioOut);
+	#endif
 	configureKeyBindings();
 	loadConfig();			
 }
@@ -212,43 +247,6 @@ void Configuration::addAudioDriver(AudioDriver* driver)
 {
 	std::cout << "psycle: configuration: audio driver registered: " <<  driver->info().name() << std::endl;
 	driverMap_[ driver->info().name() ] = driver;
-}
-
-void Configuration::setDefaults()
-{
-	psy::core::Configuration::setDefaults();
-	AudioDriver* driver = new AudioDriver;
-	addAudioDriver(driver);
-	_pSilentDriver = driver;
-	addAudioDriver(new psy::core::WaveFileOut);
-
-	setDriverByName("silent");
-	enableSound_ = false;
-
-	#if defined PSYCLE__ALSA_AVAILABLE
-		addAudioDriver(new psy::core::AlsaOut);
-	#endif
-	#if defined PSYCLE__JACK_AVAILABLE
-		addAudioDriver(new psy::core::JackOut);
-	#endif
-	#if defined PSYCLE__ESOUND_AVAILABLE
-		addAudioDriver(new psy::core::ESoundOut);
-	#endif		
-	#if defined PSYCLE__GSTREAMER_AVAILABLE
-		addAudioDriver(new psy::core::GStreamerOut);
-	#endif
-	#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
-		addAudioDriver(new psy::core::MsDirectSound);
-		// use dsound by default
-		setDriverByName("dsound");
-		enableSound_ = true;
-	#endif
-	#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
-		addAudioDriver(new psy::core::MsWaveOut);
-	#endif
-	#if defined PSYCLE__NET_AUDIO_AVAILABLE
-		addAudioDriver(new psy::core::NetAudioOut);
-	#endif
 }
 
 void Configuration::setDriverByName( const std::string & driverName )
