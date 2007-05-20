@@ -1,44 +1,42 @@
 /***************************************************************************
-	*   Copyright (C) 2007 Psycledelics   *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 Psycledelics   *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef INPUTHANDLER_H
 #define INPUTHANDLER_H
-
 #include <cassert>
 #include <map>
-
-namespace psy {
-	namespace core {
-
 /**
 @author  Psycledelics
 */
-///\name key modifiers
+namespace psy {
+	namespace core {
+
+		///\name key modifiers
 		///\{
-		/// shift
-		const int MOD_S = 1<<0;
-		// control
-		const int MOD_C = 1<<1;
-		/// extended (???)
-		const int MOD_E = 1<<2;
-		/// ???
-		const int MOD_MAX = 1<<3;
+			/// shift
+			const int MOD_S = 1<<0;
+			// control
+			const int MOD_C = 1<<1;
+			/// extended (???)
+			const int MOD_E = 1<<2;
+			/// ???
+			const int MOD_MAX = 1<<3;
 		///\}
 
 		/// ???
@@ -58,17 +56,17 @@ namespace psy {
 		};
 
 		///\name command definitions
-		/// IMPORTANT: the enum indexes determine what kind of
-		/// command it is, and for keys determine the note value
-		///\{
-		/// .
-		const int CS_KEY_START = 0;
-		/// .
-		const int CS_IMM_START = 256;
-		/// .
-		const int CS_EDT_START = 512;
-		/// .
-		const int CS_LAST = max_cmds;
+			/// IMPORTANT: the enum indexes determine what kind of
+			/// command it is, and for keys determine the note value
+			///\{
+			/// .
+			const int CS_KEY_START = 0;
+			/// .
+			const int CS_IMM_START = 256;
+			/// .
+			const int CS_EDT_START = 512;
+			/// .
+			const int CS_LAST = max_cmds;
 		///\}
 
 		/// command set.
@@ -240,73 +238,50 @@ namespace psy {
 		/// command definitions.
 		class CmdDef
 		{
-		public:
-			/// unique identifier
-			CmdSet ID;			
-			//int data;			// cmd specific data - e.g. note reference		
-			//CString desc;		// string description     
-			//void * callback;	// function callback, not currently used
-			
-			CmdDef(CmdSet _ID=cdefNull)
-			{
-				ID=_ID;
-			}
+			public:
+				/// unique identifier
+				CmdSet ID;			
+				//int data;			// cmd specific data - e.g. note reference		
+				//CString desc;		// string description     
+				//void * callback;	// function callback, not currently used
+				
+				CmdDef(CmdSet ID=cdefNull) : ID(ID) {}
 
-      CmdType GetType() const;
+				CmdType GetType() const;
 
-			bool operator==(CmdDef const& other) const
-			{
-				return (ID==other.ID);	
-			}
+				bool operator==(CmdDef const & other) const { return ID == other.ID; }
 
-			inline bool IsValid() const
-			{
-				return (ID!=cdefNull);
-			}
+				inline bool IsValid() const { return ID != cdefNull; }
 
-			int GetNote() const;
-			const char * GetName() const;
+				int GetNote() const;
+				const char * GetName() const;
 		};
 
-class Key {
-public:
+		class Key
+		{
+			public:
+				Key() : shift_(), vkey_() {}
+				Key( int shift, int key ) : shift(shift), key(key) {}
 
-		Key() : shift_( 0 ), vkey_( 0 ) {}
-		Key( int shift, int key );
+				bool operator<(const Key & key) const;
 
-		bool operator<(const Key & key) const;
+				int vkey() const { return vkey_; }
+				int shift() const { return shift_; }
 
-		int vkey() const {
-			return vkey_;
-		}
+			private:
+				int shift_;
+				int vkey_;
+		};
 
-		int shift() const {
-			return shift_;
-		}
-				
-private:
-		
-		int shift_;
-		int vkey_;
+		class InputHandler
+		{
+			public:
+				void changeKeyCode(int keyEnumCode, const Key & key);
+				int getEnumCodeByKey(const Key & key) const;
 
-};
-
-class InputHandler{
-public:
-		InputHandler();
-
-		~InputHandler();
-
-		void changeKeyCode(int keyEnumCode, const Key & key);
-		int getEnumCodeByKey(const Key & key) const;
-
-private:
-
-		std::map<Key,int> keyMap;
-
-};
-
+			private:
+				std::map<Key,int> keyMap;
+		};
+	}
 }
-}
-
 #endif
