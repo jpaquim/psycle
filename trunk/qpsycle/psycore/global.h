@@ -26,8 +26,6 @@ namespace psy {
 	    class Global
 	    {
 		    public:
-	            Global();
-	            ~Global();
 	            static Configuration* pConfig();
 	            static const Configuration & configuration();
 	    };
