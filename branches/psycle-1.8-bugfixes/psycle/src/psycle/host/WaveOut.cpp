@@ -109,6 +109,7 @@ namespace psycle
 			operating_system::exceptions::translated::new_thread("mme wave out");
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+			SetThreadAffinityMask(GetCurrentThread(), 1);
 			while(!pThis->_stopPolling)
 			{
 				pThis->DoBlocks();

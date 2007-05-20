@@ -160,6 +160,7 @@ namespace psycle
 			operating_system::exceptions::translated::new_thread("direct sound");
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+			SetThreadAffinityMask(GetCurrentThread(), 1);
 			while(pThis->_timerActive)
 			{
 				pThis->DoBlocks();

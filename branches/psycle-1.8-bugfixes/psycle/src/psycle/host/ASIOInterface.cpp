@@ -440,6 +440,7 @@ namespace psycle
 				if(!structured_exception_translator_set)
 				{
 					operating_system::exceptions::translated::new_thread("asio");
+					SetThreadAffinityMask(GetCurrentThread(), 1);
 					structured_exception_translator_set = true;
 				}
 				// the actual processing callback.
