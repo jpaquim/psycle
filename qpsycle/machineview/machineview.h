@@ -87,6 +87,12 @@ private:
 	MachineGui* findByMachine( psy::core::Machine *mac );
 	MachineGui *theChosenOne_;
 
+
+	void createMachineGuis();
+	void createWireGuis();
+	void createTempLine();
+	void initKeyjazzSettings();
+
 	psy::core::Song *song_;
 	std::vector<MachineGui*> machineGuis;
 
