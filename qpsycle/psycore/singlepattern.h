@@ -71,7 +71,7 @@ namespace psy
 
 			virtual ~SinglePattern();
 
-      boost::signal1<void,SinglePattern*> wasDeleted;
+			boost::signal<void (SinglePattern*)> wasDeleted;
 
 			void setID(int id);
 			int id() const;
