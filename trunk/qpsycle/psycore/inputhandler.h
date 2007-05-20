@@ -261,7 +261,7 @@ namespace psy {
 		{
 			public:
 				Key() : shift_(), vkey_() {}
-				Key( int shift, int key ) : shift(shift), key(key) {}
+				Key( int shift, int key ) : shift_(shift), key_(key) {}
 
 				bool operator<(const Key & key) const;
 
