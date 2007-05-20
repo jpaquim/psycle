@@ -1,47 +1,41 @@
 /***************************************************************************
-	*   Copyright (C) 2007 Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #include "pluginfinder.h"
 #include "ladspamachine.h"
 #include "plugin.h"
-
 #include "file.h"
 #include "configuration.h"
-//#include "global.h"
-
 namespace psy
 {
 	namespace core
 	{
-
-
-		PluginInfo::PluginInfo() :
+		PluginInfo::PluginInfo()
+		:
 			subclass_( MACH_UNDEFINED ),
 			mode_( MACHMODE_FX ),
 			fileTime_( 0 ),
 			allow_( 1 )
 		{
-
 		}
 
 		PluginInfo::~PluginInfo() {
-
 		}
 
 		void PluginInfo::setType( Machine::type_type type ) {
@@ -132,9 +126,6 @@ namespace psy
 			return category_;
 		}
 
-
-
-
 		PluginFinderKey::PluginFinderKey( ) : index_(0) {
 
 		}
@@ -165,7 +156,6 @@ namespace psy
 			return dllPath() == rhs.dllPath() && name()	== rhs.name() && index() == rhs.index();
 		}
 
-
 		const std::string & PluginFinderKey::name() const {
 			return name_;
 		}
@@ -183,18 +173,17 @@ namespace psy
 			scanAll();
 		}
 
-
 		PluginFinder::~PluginFinder()
 		{
 		}
 		
-				std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::begin() const {
-					return map_.begin();
-				}         
+		std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::begin() const {
+			return map_.begin();
+		}         
 				
-				std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::end() const {
-					return map_.end();
-				}         
+		std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::end() const {
+			return map_.end();
+		}         
 				
 		PluginInfo PluginFinder::info( const PluginFinderKey & key ) const {
 			std::map< PluginFinderKey, PluginInfo >::const_iterator it = map_.find( key );
@@ -205,18 +194,18 @@ namespace psy
 		}
 
 		void PluginFinder::scanAll() {
-      scanInternal();
+			scanInternal();
 			scanNatives();
 			scanLadspa();		
 		}
 
-    void PluginFinder::scanInternal() {
-      PluginFinderKey key = PluginFinderKey::internalSampler();
-      PluginInfo info;
-      info.setType( MACH_SAMPLER );
-      info.setName( key.name() );
-      map_[key]=info;
-    }
+		void PluginFinder::scanInternal() {
+			PluginFinderKey key = PluginFinderKey::internalSampler();
+			PluginInfo info;
+			info.setType( MACH_SAMPLER );
+			info.setName( key.name() );
+			map_[key]=info;
+		}
 
 		void PluginFinder::scanLadspa() {
 			///\todo this just uses the first path in getenv
@@ -237,17 +226,18 @@ namespace psy
 			for ( ; it < fileList.end(); it++ ) {
 				std::string fileName = *it;
 				#ifdef __unix__
-				// problem of so.0.0.x .. .so all three times todo
+					// problem of so.0.0.x .. .so all three times todo
 				#else
-				if ( fileName.find( ".dll" ) == std::string::npos ) continue;
+					if ( fileName.find( ".dll" ) == std::string::npos ) continue;
 				#endif
 
-        class DummyCallbacks : public MachineCallbacks {
-          PlayerTimeInfo ti;
-        public:
-          const PlayerTimeInfo& timeInfo() const { return ti; }
-          bool autoStopMachines() const { return false; }
-        } dummycallbacks;
+				class DummyCallbacks : public MachineCallbacks {
+					private:
+						PlayerTimeInfo ti;
+					public:
+						const PlayerTimeInfo& timeInfo() const { return ti; }
+						bool autoStopMachines() const { return false; }
+				} dummycallbacks;
 
 				LADSPAMachine plugin(&dummycallbacks, 0, 0 );
 				pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + File::slash() + fileName );
@@ -285,29 +275,29 @@ namespace psy
 					if ( fileName.find( ".dll" ) == std::string::npos ) continue;
 				#endif
 
-        class DummyCallbacks : public MachineCallbacks {
-          PlayerTimeInfo ti;
-        public:
-          const PlayerTimeInfo& timeInfo() const { return ti; }
-          bool autoStopMachines() const { return false; }
-        } dummycallbacks;
-
+				class DummyCallbacks : public MachineCallbacks {
+					private:
+						PlayerTimeInfo ti;
+					public:
+						const PlayerTimeInfo& timeInfo() const { return ti; }
+						bool autoStopMachines() const { return false; }
+				} dummycallbacks;
 
 				Plugin plugin(&dummycallbacks, 0, 0 );
 				if ( plugin.LoadDll( fileName ) ) {
-				PluginInfo info;
-				info.setType( MACH_PLUGIN );
-				info.setName( plugin.GetName() );
-				info.setMode( plugin.mode() );
-				info.setLibName( plugin.GetDllName() );
-				std::ostringstream o;
-				std::string version;
-				if (!(o << plugin.GetInfo().Version )) version = o.str();
-				info.setVersion( version );
-				info.setAuthor( plugin.GetInfo().Author );			
-				///\todo .. path should here stored and not evaluated in plugin
-				PluginFinderKey key( plugin.GetDllName(), fileName );
-				map_[key] = info;               
+					PluginInfo info;
+					info.setType( MACH_PLUGIN );
+					info.setName( plugin.GetName() );
+					info.setMode( plugin.mode() );
+					info.setLibName( plugin.GetDllName() );
+					std::ostringstream o;
+					std::string version;
+					if (!(o << plugin.GetInfo().Version )) version = o.str();
+					info.setVersion( version );
+					info.setAuthor( plugin.GetInfo().Author );			
+					///\todo .. path should here stored and not evaluated in plugin
+					PluginFinderKey key( plugin.GetDllName(), fileName );
+					map_[key] = info;               
 				}
 			}
 		}
