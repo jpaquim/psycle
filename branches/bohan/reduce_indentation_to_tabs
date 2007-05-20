@@ -23,7 +23,7 @@ def do_one_file(path, spaces_to_tab):
 						chars.append('\t')
 						spaces = 0
 					continue
-				elif char != ' ':
+				elif char != ' ' and char != '\t':
 					indentation = False
 					if spaces != 0: # sometimes indentation with spaces is inconsistent, using varying lengths
 						print sys.argv[0] + ':', 'inconsistent space indentation found in file:', path, '; line:', line_number
