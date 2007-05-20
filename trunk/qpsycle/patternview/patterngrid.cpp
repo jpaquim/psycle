@@ -418,12 +418,13 @@ void PatternGrid::drawString( QPainter *painter, int track, int line, int eventn
 std::string PatternGrid::noteToString( int value, bool sharp )
 {
     switch (value) {
-        case psy::core::cdefTweakM : return "twk"; break;
-        case psy::core::cdefTweakE : return "twf"; break;
-        case psy::core::cdefMIDICC : return "mcm"; break;
-        case psy::core::cdefTweakS : return "tws"; break;
-        case 120        : return "off"; break;
-        case 255        : return "---"; break;  // defaultNoteStr_; break;
+        case commands::tweak : return "twk"; break;
+        case commands::tweak_effect : return "twf"; break;
+        case commands::midi_cc : return "mcm"; break;
+        case commands::tweak_slide : return "tws"; break;
+        case 120        : return "off"; break; ///\todo hardcoded value
+        case 255        : return "---"; break; ///\todo hardcoded value
+          // defaultNoteStr_; break;
     }
 
     int octave = value / 12;
@@ -496,14 +497,14 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     event->accept();
 
-    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers() , event->key() ) );
     
     if ( cursor().eventNr() == 0 && isNote( command ) ) 
     {
         int note = command; // The cdefs for the keys correspond to the correct notes.
         doNoteEvent( note );
     }
-    else if ( cursor().eventNr() == 0 && command == psy::core::cdefRowClear) {
+    else if ( cursor().eventNr() == 0 && command == commands::row_clear) {
       patDraw_->patternView()->clearNote( cursor()); // FIXME: better to emit a signal here?
       moveCursor( 0, patternStep() );
       checkDownScroll( cursor() );
@@ -522,73 +523,73 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
     }
 
     switch ( command ) {
-        case psy::core::cdefNavUp:
+        case commands::navigate_up:
             moveCursor( 0, -navStep() ); 
         break;
-        case psy::core::cdefNavDown:
+        case commands::navigate_down:
             moveCursor( 0, navStep() );
         break;
-        case psy::core::cdefNavLeft:
+        case commands::navigate_left:
             moveCursor( -1, 0 );
         break;
-        case psy::core::cdefNavRight:
+        case commands::navigate_right:
             moveCursor( 1, 0 );
             break;
-        case psy::core::cdefTrackPrev:
+        case commands::track_prev:
             trackPrev();
             break;
-        case psy::core::cdefTrackNext:
+        case commands::track_next:
             trackNext();
             break;
-        case psy::core::cdefNavPageDn:
+        case commands::navigate_page_down:
             moveCursor( 0, 16 );
             break;
-        case psy::core::cdefNavPageUp:
+        case commands::navigate_page_up:
             moveCursor( 0, -16 );
             break;
-        case psy::core::cdefNavTop:
+        case commands::navigate_top:
             navTop();
             break;
-        case psy::core::cdefNavBottom:
+        case commands::navigate_bottom:
             navBottom();
             break;
-        case psy::core::cdefSelectUp:
+        case commands::select_up:
             if ( shiftArrowForSelect() ) selectUp();
             break;
-        case psy::core::cdefSelectDn:
+        case commands::select_down:
             if ( shiftArrowForSelect() ) selectDown();
             break;
-        case psy::core::cdefSelectLeft:
+        case commands::select_left:
             if ( shiftArrowForSelect() ) selectLeft();
             break;
-        case psy::core::cdefSelectRight:
+        case commands::select_right:
             if ( shiftArrowForSelect() ) selectRight();
         break;
-        case psy::core::cdefSelectTrack:
+        case commands::select_track:
             selectTrack();
         break;
-        case psy::core::cdefSelectAll:
+        case commands::select_all:
             selectAll();
         break;
-        case psy::core::cdefBlockStart:
+        case commands::block_start:
             if ( !shiftArrowForSelect() ) startBlock( cursor() );
             break;
-        case psy::core::cdefBlockEnd:
+        case commands::block_end:
             if ( !shiftArrowForSelect() ) endBlock( cursor() );
             break;
-        case psy::core::cdefBlockUnMark:
+        case commands::block_unmark:
             if ( !shiftArrowForSelect() ) unmarkBlock();
             break;
-        case psy::core::cdefBlockCopy: 
+        case commands::block_copy: 
             copyBlock( false );
             break;
-        case psy::core::cdefBlockCut: 
+        case commands::block_cut: 
             copyBlock( true );
             break;
-        case psy::core::cdefBlockPaste: 
+        case commands::block_paste: 
             pasteBlock( cursor().track(), cursor().line(), false );
             break;
-        case psy::core::cdefBlockDelete: 
+        case commands::block_delete: 
             deleteBlock();
             break;
         default:
@@ -601,7 +602,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
 void PatternGrid::doNoteEvent( int note )
 {
-    if ( note == psy::core::cdefKeyStop ) {
+    if ( note == commands::key_stop ) {
         //pView->noteOffAny( cursor() );
     } else if (note >=0 && note < 120) {
             patDraw_->patternView()->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
@@ -914,35 +915,35 @@ void PatternGrid::repaintCursor() {
 bool PatternGrid::isNote( int key )
 {
     if ( 
-         key == psy::core::cdefKeyC_0 ||
-         key == psy::core::cdefKeyCS0 ||
-         key == psy::core::cdefKeyD_0 ||
-         key == psy::core::cdefKeyDS0 ||
-         key == psy::core::cdefKeyE_0 ||
-         key == psy::core::cdefKeyF_0 ||
-         key == psy::core::cdefKeyFS0 ||
-         key == psy::core::cdefKeyG_0 ||
-         key == psy::core::cdefKeyGS0 ||
-         key == psy::core::cdefKeyA_0 ||
-         key == psy::core::cdefKeyAS0 ||
-         key == psy::core::cdefKeyB_0 ||
-         key == psy::core::cdefKeyC_1 ||
-         key == psy::core::cdefKeyCS1 ||
-         key == psy::core::cdefKeyD_1 ||
-         key == psy::core::cdefKeyDS1 ||
-         key == psy::core::cdefKeyE_1 ||
-         key == psy::core::cdefKeyF_1 ||
-         key == psy::core::cdefKeyFS1 ||
-         key == psy::core::cdefKeyG_1 ||
-         key == psy::core::cdefKeyGS1 ||
-         key == psy::core::cdefKeyA_1 ||
-         key == psy::core::cdefKeyAS1 ||
-         key == psy::core::cdefKeyB_1 ||
-         key == psy::core::cdefKeyC_2 ||
-         key == psy::core::cdefKeyCS2 ||
-         key == psy::core::cdefKeyD_2 ||
-         key == psy::core::cdefKeyDS2 ||
-         key == psy::core::cdefKeyE_2 
+         key == commands::key_C_0 ||
+         key == commands::key_CS0 ||
+         key == commands::key_D_0 ||
+         key == commands::key_DS0 ||
+         key == commands::key_E_0 ||
+         key == commands::key_F_0 ||
+         key == commands::key_FS0 ||
+         key == commands::key_G_0 ||
+         key == commands::key_GS0 ||
+         key == commands::key_A_0 ||
+         key == commands::key_AS0 ||
+         key == commands::key_B_0 ||
+         key == commands::key_C_1 ||
+         key == commands::key_CS1 ||
+         key == commands::key_D_1 ||
+         key == commands::key_DS1 ||
+         key == commands::key_E_1 ||
+         key == commands::key_F_1 ||
+         key == commands::key_FS1 ||
+         key == commands::key_G_1 ||
+         key == commands::key_GS1 ||
+         key == commands::key_A_1 ||
+         key == commands::key_AS1 ||
+         key == commands::key_B_1 ||
+         key == commands::key_C_2 ||
+         key == commands::key_CS2 ||
+         key == commands::key_D_2 ||
+         key == commands::key_DS2 ||
+         key == commands::key_E_2 
     ) { return true; }
 
     return false;

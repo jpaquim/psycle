@@ -305,13 +305,13 @@ void GeneratorGui::keyPressEvent( QKeyEvent * event )
 {
     if ( !event->isAutoRepeat() ) 
     {
-        int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+        int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
         switch ( command ) { 
-            case psy::core::cdefMuteMachine:
+            case commands::mute_machine:
                 toggleMuteAct_->trigger();
                 return;
-            case psy::core::cdefSoloMachine:
+            case commands::solo_machine:
                 toggleSoloAct_->trigger();
                 return;
         }
@@ -329,12 +329,12 @@ void GeneratorGui::keyPressEvent( QKeyEvent * event )
 // Most likely a Qt bug...
 void GeneratorGui::keyReleaseEvent( QKeyEvent * event )
 {
-    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
     switch ( command ) { 
-        case psy::core::cdefMuteMachine:
+        case commands::mute_machine:
             toggleMuteAct_->trigger();
             return;
-        case psy::core::cdefSoloMachine:
+        case commands::solo_machine:
             toggleSoloAct_->trigger();
             return;
         default:;
@@ -362,91 +362,91 @@ int MachineGui::noteFromCommand( int command )
 {
     int note = NULL;
     switch ( command ) {
-        case psy::core::cdefKeyC_0:
+        case commands::key_C_0:
             note = 1;
             break;
-        case psy::core::cdefKeyCS0:
+        case commands::key_CS0:
             note = 2;
             break;
-        case psy::core::cdefKeyD_0:
+        case commands::key_D_0:
             note = 3;
             break;
-        case psy::core::cdefKeyDS0:
+        case commands::key_DS0:
             note = 4;
             break;
-        case psy::core::cdefKeyE_0:
+        case commands::key_E_0:
             note = 5;
             break;
-        case psy::core::cdefKeyF_0:
+        case commands::key_F_0:
             note = 6;
             break;
-        case psy::core::cdefKeyFS0:
+        case commands::key_FS0:
             note = 7;
             break;
-        case psy::core::cdefKeyG_0:
+        case commands::key_G_0:
             note = 8;
             break;
-        case psy::core::cdefKeyGS0:
+        case commands::key_GS0:
             note = 9;
             break;
-        case psy::core::cdefKeyA_0:
+        case commands::key_A_0:
             note = 10;
             break;
-        case psy::core::cdefKeyAS0:
+        case commands::key_AS0:
             note = 11;
             break;
-        case psy::core::cdefKeyB_0: 
+        case commands::key_B_0: 
             note = 12;
             break;
-        case psy::core::cdefKeyC_1:
+        case commands::key_C_1:
             note = 13;
             break;
-        case psy::core::cdefKeyCS1:
+        case commands::key_CS1:
             note = 14;
             break;
-        case psy::core::cdefKeyD_1:
+        case commands::key_D_1:
             note = 15;
             break;
-        case psy::core::cdefKeyDS1:
+        case commands::key_DS1:
             note = 16;
             break;
-        case psy::core::cdefKeyE_1:
+        case commands::key_E_1:
             note = 17;
             break;
-        case psy::core::cdefKeyF_1:
+        case commands::key_F_1:
             note = 18;
             break;
-        case psy::core::cdefKeyFS1:
+        case commands::key_FS1:
             note = 19;
             break;
-        case psy::core::cdefKeyG_1:
+        case commands::key_G_1:
             note = 20;
             break;
-        case psy::core::cdefKeyGS1:
+        case commands::key_GS1:
             note = 21;
             break;
-        case psy::core::cdefKeyA_1:
+        case commands::key_A_1:
             note = 22;
             break;
-        case psy::core::cdefKeyAS1:
+        case commands::key_AS1:
             note = 23;
             break;
-        case psy::core::cdefKeyB_1: 
+        case commands::key_B_1: 
             note = 24;
             break;
-        case psy::core::cdefKeyC_2:
+        case commands::key_C_2:
             note = 25;
             break;
-        case psy::core::cdefKeyCS2:
+        case commands::key_CS2:
             note = 26;
             break;
-        case psy::core::cdefKeyD_2:
+        case commands::key_D_2:
             note = 27;
             break;
-        case psy::core::cdefKeyDS2:
+        case commands::key_DS2:
             note = 28;
             break;
-        case psy::core::cdefKeyE_2:
+        case commands::key_E_2:
             note = 29;
             break;
     }

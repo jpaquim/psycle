@@ -18,77 +18,22 @@
 ***************************************************************************/
 #ifndef PSYCLE__CORE__CONFIGURATION
 #define PSYCLE__CORE__CONFIGURATION
-
-#include "inputhandler.h"
-
-#include <string>
-
 namespace psy {
 	namespace core {
-		class AudioDriver;  // FIXME: doesn't belong in psycore
-
-		/// configuration for the user interface
+		/// configuration for the core
 		class Configuration
 		{
 			public:
 				Configuration();
-				~Configuration();
-				void loadConfig();
-	            void loadConfig( const std::string & path );
-				void setDriverByName( const std::string & driverName );        
+
+			protected:
+				virtual void setDefaults();
 
 			public://private: ///\ todo private access
-				AudioDriver* _pOutputDriver;
-				AudioDriver* _pSilentDriver;
 				///\ todo put this in player ..
 				bool _RecordTweaks;
+				///\ todo put this in player ..
 				bool _RecordUnarmed;
-				
-			public:
-				std::map<std::string, AudioDriver*> & driverMap() { return driverMap_; }
-
-				///\name paths
-				///\{
-					const std::string & iconPath() const;
-					const std::string & pluginPath() const;
-					const std::string & ladspaPath() const;
-					const std::string & prsPath() const;
-					const std::string & hlpPath() const;
-					const std::string & songPath() const;
-				///\}
-
-				bool enableSound() const;
-				bool ft2HomeEndBehaviour() const;
-				bool shiftArrowForSelect() const;
-	            bool wrapAround() const;
-	            bool centerCursor() const;
-
-				InputHandler const & inputHandler() const;
-
-			private:
-				InputHandler inputHandler_;
-
-				std::map<std::string, AudioDriver*> driverMap_;
-				bool enableSound_;
-				bool doEnableSound;
-
-				std::string iconPath_;
-				std::string pluginPath_;
-				std::string prsPath_;
-				std::string hlpPath_;
-				std::string ladspaPath_;
-				std::string songPath_;
-
-				void addAudioDriver(AudioDriver* driver);
-				void setDefaults();
-				void configureKeyBindings();
-				//void setXmlDefaults();
-
-	            // Settings.
-	            bool ft2HomeEndBehaviour_;
-    	        bool shiftArrowForSelect_;
-    	        bool wrapAround_;
-    	        bool centerCursor_;
 		};
 	}
 }

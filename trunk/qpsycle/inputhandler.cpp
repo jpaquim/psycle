@@ -18,198 +18,194 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "inputhandler.h"
-namespace psy {
-	namespace core {
-		int InputHandler::getEnumCodeByKey( const Key & key ) const
-		{
-			std::map<Key,int>::const_iterator itr;
-			if ( (itr = keyMap.find(key)) != keyMap.end() ) return itr->second;
-			return -1;
-		}
+int InputHandler::getEnumCodeByKey( const Key & key ) const
+{
+	std::map<Key,int>::const_iterator itr;
+	if ( (itr = keyMap.find(key)) != keyMap.end() ) return itr->second;
+	return -1;
+}
 
-		CmdType CmdDef::GetType() const
-		{
-			if(ID<CS_KEY_START) return CT_Null;
-			if(ID<CS_IMM_START) return CT_Note;
-			if(ID<CS_EDT_START) return CT_Immediate;
-			return CT_Editor;
-		}
+CmdType CmdDef::GetType() const
+{
+	if(ID<CS_KEY_START) return CT_Null;
+	if(ID<CS_IMM_START) return CT_Note;
+	if(ID<CS_EDT_START) return CT_Immediate;
+	return CT_Editor;
+}
 
-		int CmdDef::GetNote() const
-		{
-			if(GetType()==CT_Note) {
-				assert(ID >= 0 && ID < 128);
-				return ID;
-			}
-			return -1;
-		}
-
-		///\todo move to lookup table
-		const char * CmdDef::GetName() const
-		{
-			switch(ID) {
-				case cdefKeyC_0: return "Key (Oct.0) C";
-				case cdefKeyCS0: return "Key (Oct.0) C#";
-				case cdefKeyD_0: return "Key (Oct.0) D";
-				case cdefKeyDS0: return "Key (Oct.0) D#";
-				case cdefKeyE_0: return "Key (Oct.0) E";
-				case cdefKeyF_0: return "Key (Oct.0) F";
-				case cdefKeyFS0: return "Key (Oct.0) F#";
-				case cdefKeyG_0: return "Key (Oct.0) G";
-				case cdefKeyGS0: return "Key (Oct.0) G#";
-				case cdefKeyA_0: return "Key (Oct.0) A";
-				case cdefKeyAS0: return "Key (Oct.0) A#";
-				case cdefKeyB_0: return "Key (Oct.0) B";
-				case cdefKeyC_1: return "Key (Oct.1) C";
-				case cdefKeyCS1: return "Key (Oct.1) C#";
-				case cdefKeyD_1: return "Key (Oct.1) D";
-				case cdefKeyDS1: return "Key (Oct.1) D#";
-				case cdefKeyE_1: return "Key (Oct.1) E";
-				case cdefKeyF_1: return "Key (Oct.1) F";
-				case cdefKeyFS1: return "Key (Oct.1) F#";
-				case cdefKeyG_1: return "Key (Oct.1) G";
-				case cdefKeyGS1: return "Key (Oct.1) G#";
-				case cdefKeyA_1: return "Key (Oct.1) A";
-				case cdefKeyAS1: return "Key (Oct.1) A#";
-				case cdefKeyB_1: return "Key (Oct.1) B";
-				case cdefKeyC_2: return "Key (Oct.2) C";
-				case cdefKeyCS2: return "Key (Oct.2) C#";
-				case cdefKeyD_2: return "Key (Oct.2) D";
-				case cdefKeyDS2: return "Key (Oct.2) D#";
-				case cdefKeyE_2: return "Key (Oct.2) E";
-				case cdefKeyF_2: return "Key (Oct.2) F";
-				case cdefKeyFS2: return "Key (Oct.2) F#";
-				case cdefKeyG_2: return "Key (Oct.2) G";
-				case cdefKeyGS2: return "Key (Oct.2) G#";
-				case cdefKeyA_2: return "Key (Oct.2) A";
-
-				case cdefKeyStop:    return "Key Stop";
-				case cdefKeyStopAny: return "Key Stop Current";
-				
-				case cdefTweakM: return "Tweak (Parameter)";
-				case cdefTweakS: return "Tweak Smooth (Parameter)";
-				
-				case cdefMIDICC: return "Mcm (MIDI CC)";
-
-				case cdefTrackPrev: return "Prev track";
-				case cdefTrackNext: return "Next track";
-				case cdefNavUp:     return "Nav. Up";
-				case cdefNavDown:   return "Nav. Down";
-				case cdefNavLeft:   return "Nav. Left";
-				case cdefNavRight:  return "Nav. Right";
-				case cdefNavPageDn: return "Nav. Down 16";
-				case cdefNavPageUp: return "Nav. Up 16";
-				case cdefNavTop:    return "Nav. Top";
-				case cdefNavBottom: return "Nav. Bottom";
-
-				case cdefSelectMachine: return "Select Mac/Ins in Cursor Pos";
-							
-				case cdefRowInsert: return "Insert Row";
-				case cdefRowDelete: return "Delete Row";
-				case cdefRowClear:  return "Clear Row";
-
-				case cdefPatternCut:         return "Pattern Cut";
-				case cdefPatternCopy:        return "Pattern Copy";
-				case cdefPatternPaste:       return "Pattern Paste";
-				case cdefPatternMixPaste:    return "Pattern Mix Paste";
-				case cdefPatternTrackMute:   return "Pattern Track Mute";
-				case cdefPatternTrackSolo:   return "Pattern Track Solo";
-				case cdefPatternTrackRecord: return "Pattern Track Record";
-				case cdefPatternDelete:      return "Pattern Delete";
-
-				case cdefFollowSong: return "Toggle Follow Song";
-									
-				case cdefBlockCut:         return "Block Cut";
-				case cdefBlockCopy:        return "Block Copy";
-				case cdefBlockPaste:       return "Block Paste";
-				case cdefBlockDelete:      return "Block Delete";
-				case cdefBlockStart:       return "Block Start";
-				case cdefBlockEnd:         return "Block End";
-				case cdefBlockUnMark:      return "Block Unmark";
-				case cdefBlockDouble:      return "Block Double";
-				case cdefBlockHalve:       return "Block Halve";
-				case cdefBlockMix:         return "Block Mix";
-				case cdefBlockSwitch:      return "Block Switch";
-				case cdefBlockInterpolate: return "Block Interpolate";
-				case cdefBlockSetMachine:  return "Block Set Machine";
-				case cdefBlockSetInstr:    return "Block Set Instrument";
-
-				case cdefSelectAll:        return "Block Select All";
-				case cdefSelectTrack:      return "Block Select Track";
-				case cdefSelectBar:        return "Block Select Bar";
-
-				case cdefEditQuantizeDec: return "Row-skip -1";
-				case cdefEditQuantizeInc: return "Row-skip +1";
-
-				case cdefTransposeChannelInc:   return "Transpose Channel +1";
-				case cdefTransposeChannelDec:   return "Transpose Channel -1";
-				case cdefTransposeChannelInc12: return "Transpose Channel +12";	
-				case cdefTransposeChannelDec12: return "Transpose Channel -12";
-
-				case cdefTransposeBlockInc:     return "Transpose Block +1";
-				case cdefTransposeBlockDec:     return "Transpose Block -1";
-				case cdefTransposeBlockInc12:   return "Transpose Block +12";
-				case cdefTransposeBlockDec12:   return "Transpose Block -12";
-
-				case cdefEditToggle: return "Toggle Edit Mode";
-
-				case cdefOctaveDn: return "Current Octave -1";
-				case cdefOctaveUp: return "Current Octave +1";	
-
-				case cdefMachineDec: return "Current Machine -1";
-				case cdefMachineInc: return "Current Machine +1";
-
-				case cdefInstrDec: return "Current Instrument -1";
-				case cdefInstrInc: return "Current Instrument +1";
-
-				case cdefPlayRowTrack:   return "Play Current Note";
-				case cdefPlayRowPattern: return "Play Current Row";
-				case cdefPlayStart:      return "Play Song (from start)";
-				case cdefPlaySong:       return "Play Song (normal)";
-				case cdefPlayFromPos:    return "Play Song (from current row)";
-				case cdefPlayBlock:      return "Play Sel Pattern(s) Looped";
-				case cdefPlayStop:       return "Stop Playback";
-
-				case cdefInfoPattern: return "Pattern Info";
-				case cdefInfoMachine: return "Machine Info";
-
-				case cdefShowPatternBox:    return "Show pattern box";
-				case cdefShowMachineView:   return "Screen of Machines";
-				case cdefShowPatternView:   return "Screen of Patterns";
-				case cdefShowWaveEditor:    return "Screen of Waves";
-				case cdefShowSequencerView: return "Screen of Sequencing";
-				case cdefAddMachine:        return "Add New Machine";
-				case cdefMaxPattern:        return "Maximise Pattern View";
-
-				case cdefPatternInc: return "Current Pattern +1";
-				case cdefPatternDec: return "Current Pattern -1";
-				case cdefSongPosInc: return "Position +1";
-				case cdefSongPosDec: return "Position -1";
-
-				case cdefUndo: return "Edit Undo";
-				case cdefRedo: return "Edit Redo";
-
-				case cdefErrorLog: return "Show Error Log";
-
-				case cdefMuteMachine: return "Mute Machine";
-				case cdefSoloMachine: return "Solo Machine";
-
-				case cdefNull:
-				default:
-					// This is a valid point. It is used when searching for name.
-					return "Invalid" ;
-			}
-		}
-
-		void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
-		{
-			keyMap[key] = keyEnumCode;
-		}
-
-		bool Key::operator<(const Key & key) const {
-			long key1 = shift()     | vkey() << 8;
-			long key2 = key.shift() | key.vkey() <<8;
-			return key1 < key2;
-		}
+int CmdDef::GetNote() const
+{
+	if(GetType()==CT_Note) {
+		assert(ID >= 0 && ID < 128);
+		return ID;
 	}
+	return -1;
+}
+
+///\todo move to lookup table
+const char * CmdDef::GetName() const
+{
+	switch(ID) {
+		case commands::key_C_0: return "Key (Oct.0) C";
+		case commands::key_CS0: return "Key (Oct.0) C#";
+		case commands::key_D_0: return "Key (Oct.0) D";
+		case commands::key_DS0: return "Key (Oct.0) D#";
+		case commands::key_E_0: return "Key (Oct.0) E";
+		case commands::key_F_0: return "Key (Oct.0) F";
+		case commands::key_FS0: return "Key (Oct.0) F#";
+		case commands::key_G_0: return "Key (Oct.0) G";
+		case commands::key_GS0: return "Key (Oct.0) G#";
+		case commands::key_A_0: return "Key (Oct.0) A";
+		case commands::key_AS0: return "Key (Oct.0) A#";
+		case commands::key_B_0: return "Key (Oct.0) B";
+		case commands::key_C_1: return "Key (Oct.1) C";
+		case commands::key_CS1: return "Key (Oct.1) C#";
+		case commands::key_D_1: return "Key (Oct.1) D";
+		case commands::key_DS1: return "Key (Oct.1) D#";
+		case commands::key_E_1: return "Key (Oct.1) E";
+		case commands::key_F_1: return "Key (Oct.1) F";
+		case commands::key_FS1: return "Key (Oct.1) F#";
+		case commands::key_G_1: return "Key (Oct.1) G";
+		case commands::key_GS1: return "Key (Oct.1) G#";
+		case commands::key_A_1: return "Key (Oct.1) A";
+		case commands::key_AS1: return "Key (Oct.1) A#";
+		case commands::key_B_1: return "Key (Oct.1) B";
+		case commands::key_C_2: return "Key (Oct.2) C";
+		case commands::key_CS2: return "Key (Oct.2) C#";
+		case commands::key_D_2: return "Key (Oct.2) D";
+		case commands::key_DS2: return "Key (Oct.2) D#";
+		case commands::key_E_2: return "Key (Oct.2) E";
+		case commands::key_F_2: return "Key (Oct.2) F";
+		case commands::key_FS2: return "Key (Oct.2) F#";
+		case commands::key_G_2: return "Key (Oct.2) G";
+		case commands::key_GS2: return "Key (Oct.2) G#";
+		case commands::key_A_2: return "Key (Oct.2) A";
+
+		case commands::key_stop: return "Key Stop";
+		case commands::key_stop_any: return "Key Stop Current";
+		
+		case commands::tweak: return "Tweak (Parameter)";
+		case commands::tweak_slide: return "Tweak Smooth (Parameter)";
+		
+		case commands::midi_cc: return "Mcm (MIDI CC)";
+
+		case commands::track_prev: return "Prev track";
+		case commands::track_next: return "Next track";
+		case commands::navigate_up: return "Nav. Up";
+		case commands::navigate_down: return "Nav. Down";
+		case commands::navigate_left: return "Nav. Left";
+		case commands::navigate_right: return "Nav. Right";
+		case commands::navigate_page_down: return "Nav. Down 16";
+		case commands::navigate_page_up: return "Nav. Up 16";
+		case commands::navigate_top: return "Nav. Top";
+		case commands::navigate_bottom: return "Nav. Bottom";
+
+		case commands::select_machine: return "Select Mac/Ins in Cursor Pos";
+					
+		case commands::row_insert: return "Insert Row";
+		case commands::row_delete: return "Delete Row";
+		case commands::row_clear: return "Clear Row";
+
+		case commands::pattern_cut: return "Pattern Cut";
+		case commands::pattern_copy: return "Pattern Copy";
+		case commands::pattern_paste: return "Pattern Paste";
+		case commands::pattern_mix_paste: return "Pattern Mix Paste";
+		case commands::pattern_track_mute: return "Pattern Track Mute";
+		case commands::pattern_track_solo: return "Pattern Track Solo";
+		case commands::pattern_track_record: return "Pattern Track Record";
+		case commands::pattern_delete: return "Pattern Delete";
+
+		case commands::follow_sequence: return "Toggle Follow Song";
+							
+		case commands::block_cut: return "Block Cut";
+		case commands::block_copy: return "Block Copy";
+		case commands::block_paste: return "Block Paste";
+		case commands::block_delete: return "Block Delete";
+		case commands::block_start: return "Block Start";
+		case commands::block_end: return "Block End";
+		case commands::block_unmark: return "Block Unmark";
+		case commands::block_double: return "Block Double";
+		case commands::block_halve: return "Block Halve";
+		case commands::block_mix: return "Block Mix";
+		case commands::block_switch: return "Block Switch";
+		case commands::block_interpolate: return "Block Interpolate";
+		case commands::block_set_machine: return "Block Set Machine";
+		case commands::block_set_instrument: return "Block Set Instrument";
+
+		case commands::select_all: return "Block Select All";
+		case commands::select_track: return "Block Select Track";
+		case commands::select_bar: return "Block Select Bar";
+
+		case commands::edit_quantitize_dec: return "Row-skip -1";
+		case commands::edit_quantitize_inc: return "Row-skip +1";
+
+		case commands::transpose_channel_inc: return "Transpose Channel +1";
+		case commands::transpose_channel_dec: return "Transpose Channel -1";
+		case commands::transpose_channel_inc12: return "Transpose Channel +12";	
+		case commands::transpose_channel_dec12: return "Transpose Channel -12";
+
+		case commands::transpose_block_inc: return "Transpose Block +1";
+		case commands::transpose_block_dec: return "Transpose Block -1";
+		case commands::transpose_block_inc12: return "Transpose Block +12";
+		case commands::transpose_block_dec12: return "Transpose Block -12";
+
+		case commands::edit_toggle: return "Toggle Edit Mode";
+
+		case commands::octave_down: return "Current Octave -1";
+		case commands::octave_up: return "Current Octave +1";	
+
+		case commands::machine_dec: return "Current Machine -1";
+		case commands::machine_inc: return "Current Machine +1";
+
+		case commands::instrument_dec: return "Current Instrument -1";
+		case commands::instrument_inc: return "Current Instrument +1";
+
+		case commands::play_row_track: return "Play Current Note";
+		case commands::play_row_pattern: return "Play Current Row";
+		case commands::play_start: return "Play Song (from start)";
+		case commands::play_song: return "Play Song (normal)";
+		case commands::play_from_position: return "Play Song (from current row)";
+		case commands::play_block: return "Play Sel Pattern(s) Looped";
+		case commands::play_stop: return "Stop Playback";
+
+		case commands::info_pattern: return "Pattern Info";
+		case commands::info_machine: return "Machine Info";
+
+		case commands::show_pattern_box: return "Show pattern box";
+		case commands::show_machine_view: return "Screen of Machines";
+		case commands::show_pattern_view: return "Screen of Patterns";
+		case commands::show_wave_editor: return "Screen of Waves";
+		case commands::show_sequencer_view: return "Screen of Sequencing";
+		case commands::add_machine: return "Add New Machine";
+		case commands::max_pattern: return "Maximise Pattern View";
+
+		case commands::pattern_inc: return "Current Pattern +1";
+		case commands::pattern_dec: return "Current Pattern -1";
+		case commands::song_position_inc: return "Position +1";
+		case commands::song_position_dec: return "Position -1";
+
+		case commands::undo: return "Edit Undo";
+		case commands::redo: return "Edit Redo";
+
+		case commands::error_log: return "Show Error Log";
+
+		case commands::mute_machine: return "Mute Machine";
+		case commands::solo_machine: return "Solo Machine";
+
+		case commands::null:
+		default:
+			// This is a valid point. It is used when searching for name.
+			return "Invalid" ;
+	}
+}
+
+void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
+{
+	keyMap[key] = keyEnumCode;
+}
+
+bool Key::operator<(const Key & key) const {
+	long key1 = shift() | vkey() << 8;
+	long key2 = key.shift() | key.vkey() <<8;
+	return key1 < key2;
 }
