@@ -21,7 +21,6 @@
 #include "configuration.h"
 #include <psycore/file.h>
 
-// FIXME: these audio drivers don't belong in psycore
 #include <audiodrivers/audiodriver.h>
 #include <audiodrivers/wavefileout.h>
 #if defined PSYCLE__ALSA_AVAILABLE
