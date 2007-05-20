@@ -24,8 +24,9 @@
 #include "psycore/patterndata.h"
 #include "psycore/patternsequence.h"
 #include "psycore/configuration.h"
-#include "psycore/global.h"
 
+#include "global.h"
+#include "configuration.h"
 #include "mainwindow.h"
 #include "patternbox.h"
 #include "machineview.h"
@@ -83,7 +84,7 @@ void MainWindow::setupSong()
 void MainWindow::setupSound()
 {
     psy::core::Player::Instance()->song( song_ );
-    psy::core::AudioDriver *outDriver = psy::core::Global::pConfig()->_pOutputDriver;
+    psy::core::AudioDriver *outDriver = Global::configuration()._pOutputDriver;
     psy::core::Player::Instance()->setDriver( *outDriver );
 
 }
@@ -190,7 +191,7 @@ void MainWindow::open()
         }
     }
 
-    QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
+    QString songPath = QString::fromStdString( Global::configuration().songPath() );
     QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psy (*.psy)" );
 
     if ( !fileName.isEmpty() ) {
@@ -249,14 +250,14 @@ void MainWindow::loadSong( psy::core::Song *song )
     createActions();
     setupSignals();
     // enable audio driver
-    //psy::core::Global::configuration()._pOutputDriver->Enable(true);
+    //Global::configuration()._pOutputDriver->Enable(true);
     // update file recent open sub menu
     //recentFileMenu_->add(new ngrs::MenuItem(fileName));
 }
 
  void MainWindow::save()
  {
-    QString songPath = QString::fromStdString( psy::core::Global::pConfig()->songPath() );
+    QString songPath = QString::fromStdString( Global::configuration().songPath() );
      QString fileName = QFileDialog::getSaveFileName(this,
                          tr("Choose a file name"), songPath,
                          tr("Psycle Songs (*.psy)"));
@@ -401,7 +402,7 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 {
     if ( event->key() == Qt::Key_Tab )
         return;
-    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
 
     switch ( command ) {
         case psy::core::cdefShowPatternBox:

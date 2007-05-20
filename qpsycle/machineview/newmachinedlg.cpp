@@ -19,8 +19,8 @@
 ***************************************************************************/
 
 #include "newmachinedlg.h"
-#include "psycore/global.h"
-#include "psycore/configuration.h"
+#include "global.h"
+#include "configuration.h"
 
 #include <QtGui>
 
@@ -37,7 +37,7 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
      // Should we use a tree layout instead of tabs?
      QTabWidget *machineTabs = new QTabWidget();
 
-     finder_ = new psy::core::PluginFinder(psy::core::Global::configuration().pluginPath(), psy::core::Global::configuration().ladspaPath());
+     finder_ = new psy::core::PluginFinder(Global::configuration().pluginPath(), Global::configuration().ladspaPath());
 
      genList = new QListWidget();
      efxList = new QListWidget();

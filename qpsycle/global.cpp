@@ -1,6 +1,5 @@
 /***************************************************************************
-*   Copyright (C) 2007 Psycledelics   *
-*   psycle.sf.net   *
+*   Copyright (C) 2007 Psycledelics Community   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -17,30 +16,14 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__GLOBAL
-#define PSYCLE__CORE__GLOBAL
-namespace psy {
-	namespace core {
-	    class Configuration;
 
-	    class Global
-	    {
-		    public:
-	            static Configuration* pConfig();
-	            static const Configuration & configuration();
-	    };
-
-		template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)
-		{
-			if(pointer) delete pointer;
-			return pointer = new_value;
-		}
-
-		template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
-		{
-			if(pointer) delete [] pointer;
-			return pointer = new_value;
-		}
-	}
+#include "global.h"
+#include "configuration.h"
+Configuration* Global::pConfig() {
+	static Configuration* c = new Configuration();
+	return c;
 }
-#endif
+
+Configuration const & Global::configuration() {
+	return *pConfig();
+}

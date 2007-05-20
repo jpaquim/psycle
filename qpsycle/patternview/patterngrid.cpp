@@ -17,11 +17,11 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "psycore/global.h"
-#include "psycore/player.h"
-#include "psycore/inputhandler.h"
-#include "psycore/configuration.h"
+#include <psycore/player.h>
+#include <psycore/inputhandler.h>
 
+#include "global.h"
+#include "configuration.h"
 #include "patternview.h"
 #include "patterngrid.h"
 #include "patterndraw.h"
@@ -496,7 +496,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 {
     event->accept();
 
-    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers() , event->key() ) );
     
     if ( cursor().eventNr() == 0 && isNote( command ) ) 
     {

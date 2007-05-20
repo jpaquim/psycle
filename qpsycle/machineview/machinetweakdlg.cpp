@@ -18,19 +18,15 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include "psycore/machine.h"
-#include "psycore/plugin.h"
-#include "psycore/inputhandler.h"
-#include "psycore/global.h"
-#include "psycore/configuration.h"
-#include "psycore/binread.h"
+#include <psycore/machine.h>
+#include <psycore/plugin.h>
+#include <psycore/inputhandler.h>
+#include <psycore/binread.h>
 
+#include "global.h"
+#include "configuration.h"
 #include "machinetweakdlg.h"
 #include "machinegui.h"
-
-#include <iostream>
-#include <iomanip>
-
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -48,6 +44,8 @@
 #include <QCompleter>
 #include <QModelIndex>
 
+#include <iostream>
+#include <iomanip>
 
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
@@ -224,7 +222,7 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 		reject();		// Closes the dialog.
 	} else {
 		if ( !event->isAutoRepeat() ) {
-			int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+			int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
 			int note = NULL;
 			note = m_macGui->noteFromCommand( command );
 			if (note) {
@@ -237,7 +235,7 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
 {
     if ( !event->isAutoRepeat() ) {
-        int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+        int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
         int note = NULL;
         note = m_macGui->noteFromCommand( command );
         if (note) {
@@ -522,7 +520,7 @@ bool PresetsDialog::loadPresets()
 		filename = filename.substr(0,pos)+".prs";
 	}
 
-	std::ifstream prsIn( std::string( psy::core::Global::pConfig()->prsPath() + filename).c_str() );
+	std::ifstream prsIn( std::string( Global::configuration().prsPath() + filename).c_str() );
 	if ( !prsIn.is_open() )
 		return false; 
 

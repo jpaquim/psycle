@@ -57,7 +57,7 @@ namespace psy {
 
 	namespace core {
 
-		UIConfiguration::UIConfiguration()
+		Configuration::Configuration()
 		{
 			//setXmlDefaults();
 			setDefaults();
@@ -68,55 +68,55 @@ namespace psy {
 		}
 
 
-		UIConfiguration::~UIConfiguration()
+		Configuration::~Configuration()
 		{			
 		}
 
-		const std::string & UIConfiguration::iconPath() const {
+		const std::string & Configuration::iconPath() const {
 			return iconPath_;
 		}
 
-		const std::string & UIConfiguration::pluginPath() const {
+		const std::string & Configuration::pluginPath() const {
 			return pluginPath_;
 		}
 
-		const std::string & UIConfiguration::prsPath() const {
+		const std::string & Configuration::prsPath() const {
 			return prsPath_;
 		}
 
-		const std::string & UIConfiguration::hlpPath() const {
+		const std::string & Configuration::hlpPath() const {
 			return hlpPath_;
 		}
 
-		const std::string & UIConfiguration::ladspaPath() const {
+		const std::string & Configuration::ladspaPath() const {
 			return ladspaPath_;
 		}
 
-		const std::string & UIConfiguration::songPath() const {
+		const std::string & Configuration::songPath() const {
 			return songPath_;
 		}
 
-		bool UIConfiguration::enableSound() const {
+		bool Configuration::enableSound() const {
 			return enableSound_;
 		}
 
-		bool UIConfiguration::ft2HomeEndBehaviour() const {
+		bool Configuration::ft2HomeEndBehaviour() const {
 			return ft2HomeEndBehaviour_;
 		}
 
-		bool UIConfiguration::shiftArrowForSelect() const {
+		bool Configuration::shiftArrowForSelect() const {
 			return shiftArrowForSelect_;
 		}
 
-		bool UIConfiguration::wrapAround() const {
+		bool Configuration::wrapAround() const {
 			return wrapAround_;
 		}
 
-		bool UIConfiguration::centerCursor() const {
+		bool Configuration::centerCursor() const {
 			return centerCursor_;
 		}
 
-		/*		void UIConfiguration::setXmlDefaults() {     
+		/*		void Configuration::setXmlDefaults() {     
 		std::string xml_mem_;   
 
 		xml_mem_ =  " <!-- xpsycle configuration file --> ";
@@ -255,18 +255,18 @@ namespace psy {
 		ladspaPath_ = pcLADSPAPath;
 
 		ngrs::XmlParser parser;
-		parser.tagParse.connect(this,&UIConfiguration::onConfigTagParse);
+		parser.tagParse.connect(this,&Configuration::onConfigTagParse);
 		parser.parseString ( xml_mem_ );
 
 		}     */
 
-		void UIConfiguration::addAudioDriver(AudioDriver* driver)
+		void Configuration::addAudioDriver(AudioDriver* driver)
 		{
 			std::cout << "Driver registered:" <<  driver->info().name() << std::endl;
 			driverMap_[ driver->info().name() ] = driver;
 		}
 
-		void UIConfiguration::setDefaults()
+		void Configuration::setDefaults()
 		{
 			AudioDriver* driver = new AudioDriver;
 			addAudioDriver(driver);
@@ -302,7 +302,7 @@ namespace psy {
 #endif
 		}
 
-		void UIConfiguration::setDriverByName( const std::string & driverName )
+		void Configuration::setDriverByName( const std::string & driverName )
 		{
 			std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 
@@ -319,7 +319,7 @@ namespace psy {
 		}
 
 
-		void UIConfiguration::loadConfig()
+		void Configuration::loadConfig()
 		{
 			std::string path = File::replaceTilde("~" + File::slash() + ".xpsycle.xml");
 			if (path.length()!=0) {
@@ -348,7 +348,7 @@ namespace psy {
 		}
 
 
-		void UIConfiguration::loadConfig( const std::string & path )
+		void Configuration::loadConfig( const std::string & path )
 		{
 			QFile *file = new QFile( QString::fromStdString( path ) );
 			if (file->open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -428,7 +428,7 @@ namespace psy {
 		}
 
 
-		void UIConfiguration::configureKeyBindings() // FIXME: Key bindings are host specific, should be moved?
+		void Configuration::configureKeyBindings() // FIXME: Key bindings are host specific, should be moved?
 		{
 			int modifiers = Qt::NoModifier; // Shouldn't have Qt stuff in psycore in the future.
 			inputHandler_.changeKeyCode( cdefKeyC_0, Key( modifiers, Qt::Key_Z ) );
@@ -522,7 +522,7 @@ namespace psy {
 			inputHandler_.changeKeyCode( cdefRowClear, Key(Qt::NoModifier, Qt::Key_Delete) );
 		}
 
-		InputHandler & UIConfiguration::inputHandler() {
+		InputHandler const & Configuration::inputHandler() const {
 			return inputHandler_;
 		}
 

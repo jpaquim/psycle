@@ -18,11 +18,12 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include "psycore/machine.h"
-#include "psycore/inputhandler.h"
-#include "psycore/configuration.h"
-#include "psycore/global.h"
+#include <psycore/machine.h>
+#include <psycore/inputhandler.h>
+
 #include "effectgui.h"
+#include "configuration.h"
+#include "global.h"
 
 #include <QMenu>
 #include <QPainter>
@@ -71,7 +72,7 @@ void EffectGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 void EffectGui::keyPressEvent( QKeyEvent * event )
 {
-    int command = psy::core::Global::pConfig()->inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
+    int command = Global::configuration().inputHandler().getEnumCodeByKey( psy::core::Key( event->modifiers(), event->key() ) );
     switch ( command ) { 
         case psy::core::cdefMuteMachine:
             toggleMuteAct_->trigger();

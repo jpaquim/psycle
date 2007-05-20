@@ -27,17 +27,12 @@ namespace psy {
 	namespace core {
 		class AudioDriver;  // FIXME: doesn't belong in psycore
 
-		/// configuration for the core
-		class CoreConfiguration
-		{
-		};
-		
 		/// configuration for the user interface
-		class UIConfiguration : public CoreConfiguration
+		class Configuration
 		{
 			public:
-				UIConfiguration();
-				~UIConfiguration();
+				Configuration();
+				~Configuration();
 				void loadConfig();
 	            void loadConfig( const std::string & path );
 				void setDriverByName( const std::string & driverName );        
@@ -68,7 +63,7 @@ namespace psy {
 	            bool wrapAround() const;
 	            bool centerCursor() const;
 
-				InputHandler & inputHandler();
+				InputHandler const & inputHandler() const;
 
 			private:
 				InputHandler inputHandler_;
@@ -94,12 +89,6 @@ namespace psy {
     	        bool shiftArrowForSelect_;
     	        bool wrapAround_;
     	        bool centerCursor_;
-		};
-	
-		/// the actual configuration class used by qpsycle. it's simply the UIConfiguration class
-		/// note that a simple typedef won't work due to the configuration class being forward-declared, as a class and not a typedef.
-		class Configuration : public UIConfiguration
-		{
 		};
 	}
 }
