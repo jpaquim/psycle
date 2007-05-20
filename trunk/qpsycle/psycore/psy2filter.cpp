@@ -437,9 +437,9 @@ namespace psy
 							s << "X!" << pOldMachine->GetEditName();
 							pOldMachine->SetEditName(s.str());
 							pMac[i]->type(MACH_DUMMY);
-							pOldMachine->_pSamplesL = NULL;
-							pOldMachine->_pSamplesR = NULL;
-							zapObject(pOldMachine);
+							pOldMachine->_pSamplesL = 0;
+							pOldMachine->_pSamplesR = 0;
+							delete pOldMachine; pOldMachine = 0;
 						}
 						break;
 					}
@@ -676,7 +676,7 @@ namespace psy
 			{
 				if( vstL[i].valid )
 				{
-					zapObject(vstL[i].pars);
+					delete vstL[i].pars; vstL[i].pars = 0;
 				}
 			}
 			
@@ -699,7 +699,7 @@ namespace psy
 			{
 				if (!_machineActive[i])
 				{
-					zapObject(pMac[i]);
+					delete pMac[i]; pMac[i] = 0;
 				}
 				else if (!pMac[i])
 				{

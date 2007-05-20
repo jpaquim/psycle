@@ -22,7 +22,6 @@
 
 #include "machine.h"
 #include "plugin_interface.h"
-#include "global.h"
 
 /**
 @author  Psycledelics

@@ -291,7 +291,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 														catch(const std::exception &)
 														{
 														}
-														TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer()->SamplesPerRow())/256;
+														TriggerDelayCounter[i] = (RetriggerRate[i]*Gloxxxxxxxxxxxxxxxxxxxxbal::pPlayer()->SamplesPerRow())/256;
 													} else
 													{
 														TriggerDelayCounter[i] -= nextevent;
@@ -309,7 +309,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 														catch(const std::exception &)
 														{
 														}
-														TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer()->SamplesPerRow())/256;
+														TriggerDelayCounter[i] = (RetriggerRate[i]*Gloxxxxxxxxxxxxxxxxxxxxxxxbal::pPlayer()->SamplesPerRow())/256;
 														int parameter = TriggerDelay[i]._parameter&0x0f;
 														if (parameter < 9)
 														{
@@ -367,7 +367,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 																		ArpeggioCount[i]=0;
 																		break;
 																}
-																TriggerDelayCounter[i] = Global::pPlayer()->SamplesPerRow()*Global::pPlayer()->tpb/24;
+																TriggerDelayCounter[i] = Gloxxxxxxxxxxxxxxxbal::pPlayer()->SamplesPerRow()*Gloxxxxxxxxxxxxxxxxxxbal::pPlayer()->tpb/24;
 																} else {
 																		TriggerDelayCounter[i] -= nextevent;
 																}
@@ -377,7 +377,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 
 						}
 						Machine::SetVolumeCounter(numSamples);
-						if ( Global::pConfig()->autoStopMachines )
+						if ( Gloxxxxxxxxxxxxxxxxxxxxxxxxxxxbal::pConfig()->autoStopMachines )
 						{
 							if (_volumeCounter < 8.0f)
 							{
@@ -563,7 +563,7 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 		}
 	#else
 		_psDllName = psFileName;
-		psFileName = Global::pConfig()->pluginPath() + psFileName;
+		psFileName = path + psFileName;
 	#endif   
 	return Instance(psFileName);
 }
