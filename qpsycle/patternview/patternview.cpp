@@ -86,6 +86,7 @@ void PatternView::createToolBar()
     toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
 	toolBar_->addWidget( recordCb_ );
+	toolBar_->setSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed );
 
 }
 
