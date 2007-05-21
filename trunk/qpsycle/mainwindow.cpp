@@ -235,10 +235,10 @@ void MainWindow::loadSong( psy::core::Song *song )
     seqView_ = new SequencerView( song_ );
     macView_->setOctave( 4 );
     patView_->setOctave( 4 );
-    views_->addTab( macView_, "Machine View" );
-    views_->addTab( patView_, "Pattern View" );
-    views_->addTab( wavView_, "Wave Editor" );
-    views_->addTab( seqView_, "Sequencer View" );
+    views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
+    views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
+    views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
+    views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
     patternBox_ = new PatternBox( song_ );
     dock_->setWidget( patternBox_ );
     patternBox_->populatePatternTree();
