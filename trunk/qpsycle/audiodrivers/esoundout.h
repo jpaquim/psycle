@@ -25,65 +25,56 @@
 #include <unistd.h>
 namespace psy {
 	namespace core {
+		class ESoundOut : public AudioDriver
+		{
+			public:
+				ESoundOut();
+				~ESoundOut();
+				/*override*/ ESoundOut* clone()  const;
+				/*override*/ AudioDriverInfo info() const;
+				/*override*/ void Configure();
+				/*override*/ bool Enable(bool e);			
 
-class ESoundOut : public AudioDriver
-{
-    public:
-        ESoundOut();
-        ~ESoundOut();
-        
-        virtual ESoundOut* clone()  const;   // Uses the copy constructor
+			public:
+				/*override*/ void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+				/*override*/ bool Initialized();			
+			private:
+				bool initialized_;
+				
+			private:
+				unsigned int channels_;
+				int channelsFlag();
 
-        virtual AudioDriverInfo info() const;
+				unsigned int bits_;
+				int bitsFlag();
+				
+				unsigned int rate_;
+				
+				void setDefaults();
+				
+				int open();
+				int close();
+				std::string host_;
+				int port_;
+				std::string hostPort();
+				int output_;
+				int fd_;
 
+				pthread_t threadId_;
+				static int audioOutThreadStatic(void*);
+				void audioOutThread();
+				bool threadRunning_;
+				bool killThread_;
 
-    public:
-        virtual void Configure();
-
-    public:
-        virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-        virtual bool Initialized();			
-    private:
-        bool initialized_;
-        
-    public:		
-        virtual bool Enable(bool e);			
-        
-    private:
-        unsigned int channels_;
-        int channelsFlag();
-
-        unsigned int bits_;
-        int bitsFlag();
-        
-        unsigned int rate_;
-        
-        void setDefaults();
-        
-        int open();
-        int close();
-        std::string host_;
-        int port_;
-        std::string hostPort();
-        int output_;
-        int fd_;
-
-        pthread_t threadId_;
-        static int audioOutThreadStatic(void*);
-        void audioOutThread();
-        bool threadRunning_;
-        bool killThread_;
-
-        AUDIODRIVERWORKFN callback_;
-        void* callbackContext_; // Player callback
-        
-        int writeBuffer(char * buffer, long size);
-        long deviceBuffer_;
-
-        
-
-};
-	} // namespace core
-} // namespace psy
+				/// player callback
+				AUDIODRIVERWORKFN callback_;
+				/// player callback
+				void * callbackContext_; 
+				
+				int writeBuffer(char * buffer, long size);
+				long deviceBuffer_;
+		};
+	}
+}
 #endif // defined PSYCLE__ESOUND_AVAILABLE
 #endif
