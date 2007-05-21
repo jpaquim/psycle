@@ -26,6 +26,9 @@ int main(int argument_count, char * arguments[])
 	}
 
 	player.start(0);
+	std::cout << "psycle: player: playing...\n";
+
+	std::cout << "psycle: player: (enter anything to stop)\n";
 	std::string s; std::cin >> s;
 	
 	///\todo segfaults! ... this is time to implement proper thread synchronization
