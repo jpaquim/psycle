@@ -254,6 +254,7 @@ void Configuration::setDriverByName( const std::string & driverName )
 	if ( ( it = driverMap_.find( driverName ) ) != driverMap_.end() ) {
 		// driver found
 		_pOutputDriver = it->second;
+		std::cout << "psycle: configuration: audio driver set to: " << driverName << "\n";
 	}
 	else {
 		std::cerr << "psycle: configuration: audio driver not found: " << driverName << ", setting fallback: " << _pOutputDriver->info().name() << "\n";
