@@ -54,13 +54,13 @@ namespace psy {
 
 		AudioDriverInfo ESoundOut::info( ) const
 		{
-			return AudioDriverInfo("esd","Esound Driver","High Latency Network Driver",true);
+			return AudioDriverInfo("esd", "ESound Driver", "Driver with optional network capabilities (high latency)",true);
 		}
 
 		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)
 		{
 			#if !defined NDEBUG
-				std::cout << "xpsycle: esound: initializing\n";
+				std::cout << "psycle: esound: initializing\n";
 			#endif
 			assert(!threadRunning_);
 			callback_ = callback;
@@ -93,7 +93,7 @@ namespace psy {
 				case 16: return ESD_BITS16; break;
 				default:
 					{
-						std::cout << "unsupported audio bit depth: " << bits_ << " (must be 8 or 16)";
+						std::cerr << "psycle: esound: unsupported audio bit depth: " << bits_ << " (must be 8 or 16)\n";
 						return 0;
 					}
 			}
@@ -107,7 +107,7 @@ namespace psy {
 				case 2: return ESD_STEREO; break;
 				default:
 					{
-						std::cout << "unsupported audio channel count: " << channels_ << " (must be 1 or 2)" << std::endl;
+						std::cerr << "psycle: esound: unsupported audio channel count: " << channels_ << " (must be 1 or 2)\n";
 						return 0;
 					}
 			}
@@ -142,7 +142,7 @@ namespace psy {
 			if((output_ = esd_open_sound(hostPort().c_str())) < 0)
 			{
 				std::string s(std::strerror(errno));
-				std::cout << "failed to open esound output '" + hostPort() + "': " + s << std::endl;
+				std::cerr << "psycle: esound: failed to open output '" + hostPort() + "': " + s << "\n";
 				return 0;
 			}
 			{
@@ -154,7 +154,7 @@ namespace psy {
 			if((fd_ = esd_play_stream_fallback(format, rate_, hostPort().c_str(), "psycle")) < 0)
 			{
 				std::string s(std::strerror(errno));
-				std::cout << "failed to open esound output '" + hostPort() + "': " + s << std::endl;
+				std::cerr << "psycle: esound: failed to open output '" + hostPort() + "': " + s << "\n";
 				return 0;
 			}
 			return 1;
@@ -168,7 +168,7 @@ namespace psy {
 		bool ESoundOut::Enable(bool e)
 		{		
 			#if !defined NDEBUG
-				std::cout << "xpsycle: esound: " << (e ? "en" : "dis") << "abling\n";
+				std::cout << "psycle: esound: " << (e ? "en" : "dis") << "abling\n";
 			#endif
 			bool threadStarted = false;
 			if (e && !threadRunning_ && open() ) {
@@ -192,9 +192,9 @@ namespace psy {
 		void ESoundOut::audioOutThread()
 		{
 			threadRunning_ = true;
-			std::cout << "xpsycle: esound: device buffer: " << deviceBuffer_ << std::endl;
+			std::cout << "psycle: esound: device buffer: " << deviceBuffer_ << "\n";
 			int deviceBufferSamples(deviceBuffer_ * (3 - channels_) * 44100 / rate_);
-			std::cout << "xpsycle: esound: device buffer: samples: " << deviceBufferSamples << std::endl;
+			std::cout << "psycle: esound: device buffer: samples: " << deviceBufferSamples << "\n";
 			if (bits_ == 16) {
 				int bufSize = deviceBuffer_ / 2;
 				std::int16_t buf[bufSize];
@@ -205,7 +205,7 @@ namespace psy {
 					for (int i = 0; i < bufSize; i++) {
 						buf[i] = *input++;
 					}
-					if(write(fd_, buf, sizeof buf) < 0) std::cout << "xpsycle: esound: write failed.\n";
+					if(write(fd_, buf, sizeof buf) < 0) std::cerr << "psycle: esound: write failed.\n";
 				}
 			} else {
 				std::uint8_t buf[deviceBufferSamples];
@@ -215,14 +215,13 @@ namespace psy {
 				{
 					float const * input(callback_(callbackContext_, samples));
 					for (int i(0); i < samples; ++i) buf[i] = *input++ / 256 + 128;
-					if(write(fd_, buf, bytes) < 0) std::cout << "xpsycle: esound: write failed.\n";
+					if(write(fd_, buf, bytes) < 0) std::cout << "psycle: esound: write failed.\n";
 				}
 			}
 			close();
 			threadRunning_ = false;
 			pthread_exit(0);
 		}
-
-	} // namespace core
-} // namespace psy
+	}
+}
 #endif // defined PSYCLE__ESOUND_AVAILABLE
