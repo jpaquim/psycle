@@ -19,7 +19,7 @@
 ***************************************************************************/
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "microsoftdirectsoundout.h"
-#include "cstdint.h"
+#include <psycore/cstdint.h>
 namespace psy
 {
 	namespace core
