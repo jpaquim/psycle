@@ -36,23 +36,18 @@ namespace psy
 
 		class Player : public MachineCallbacks
 		{
-		// Singleton Pattern
-					private:
-                    Player();          
-			        ~Player();
-		
-								Player( Player const & );
-			        Player& operator=(Player const&);
+			public:
+				Player();
+				~Player();
 
-						public:
-								static Player* Instance() {
+			public:
+				static Player* Instance() {
 					// note keep sure a player instance is created from the gui
 					// before starting audiothread
 					// or use single threaded only
 					static Player s;
-						return &s; 
-			}
-		// Singleton pattern end
+					return &s; 
+				}
 
       // FIXME: player should not need to know about the audio driver.
       // Player should export a callback to generate audio instead.
