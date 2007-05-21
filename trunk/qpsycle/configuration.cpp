@@ -259,7 +259,7 @@ void Configuration::setDriverByName( const std::string & driverName )
 		// driver not found,  set silent default driver
 		_pOutputDriver = _pSilentDriver;
 	}
-	std::cout << "psycle: configuration: audio driver not found, setting fallback: " << _pOutputDriver->info().name() << std::endl;
+	std::cout << "psycle: configuration: audio driver not found: " << driverName << ", setting fallback: " << _pOutputDriver->info().name() << std::endl;
 }
 
 void Configuration::loadConfig()
