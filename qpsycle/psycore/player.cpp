@@ -42,17 +42,17 @@ namespace psy
 
 		Player::Player()
 		:
-			song_(0),
-			_playing(false),
-			Tweaker(false),
-			_samplesRemaining(0),
-            loopSequenceEntry_(0)
+			song_(),
+			driver_(),
+			_playing(),
+			Tweaker(),
+			_samplesRemaining(),
+            loopSequenceEntry_()
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
 			_doDither = false;
 			autoRecord_ = false;
 			recording_ = false;
-			driver_ = 0;
 			autoStopMachines_ = false;
 			lock_ = false;
 			inWork_ = false;
@@ -60,7 +60,7 @@ namespace psy
 
 		Player::~Player()
 		{
-			if ( driver_ ) delete driver_;
+			if ( driver_ ) delete driver_; ///\todo [bohan] i don't see why the player owns the driver.
 		}
 
 		const PlayerTimeInfo & Player::timeInfo( ) const
@@ -78,11 +78,18 @@ namespace psy
 			return timeInfo_.bpm();
 		}
 
-
 		void Player::start( double pos )
 		{
-			///\todo : && or || ??
-			if ( !song_ && !driver_ ) return;
+			if(!song_)
+			{
+				std::cerr << "psycle: core: player: no song to play\n";
+				return;
+			}
+			if(!driver_)
+			{
+				std::cerr << "psycle: core: player: no audio driver to output the song to\n";
+				return;
+			}
 			stop(); // This causes all machines to reset, and samplesperRow to init.
 			if (autoRecord_) startRecording();
 
@@ -105,8 +112,8 @@ namespace psy
 
 		void Player::stop( )
 		{
-			///\todo: && or || ??
-			if ( !song_  && driver_ ) return;
+			if ( !song_) return;
+			if ( !driver_ ) return;
 
 			// Stop song enviroment
 			_playing = false;
@@ -122,7 +129,7 @@ namespace psy
 			timeInfo_.setLinesPerBeat( song().linesPerBeat() );
 			SampleRate( driver_->settings().samplesPerSec() );
 			if (autoRecord_) stopRecording();
-            printf("stop");
+            //printf("stop\n");
 		}
 
 		bool Player::playing() const {
@@ -292,7 +299,6 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			if ( !song_ ) return _pBuffer;
 
 			if ( lock_ ) return _pBuffer;
-
 
 			inWork_ = true;
 
@@ -557,5 +563,5 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			lock_ = false;
 		}
 
-	} // end of host namespace
-} // end of psycle namespace
+	}
+}

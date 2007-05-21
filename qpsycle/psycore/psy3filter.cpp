@@ -305,8 +305,6 @@ namespace psy
 			return chunkcount;
 		}
 
-
-
 		bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 				char Name[64];
@@ -317,10 +315,11 @@ namespace psy
 				song.setName(Name);
 				file->ReadString(Author, 64);
 				song.setAuthor(Author);
-				bool err = file->ReadString(Comment, 256);
+				bool result = file->ReadString(Comment, 256);
 				song.setComment(Comment);
-				return err;
+				return result;
 		}
+
 		bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 			std::uint32_t temp(0);
@@ -500,6 +499,5 @@ namespace psy
 			return true;
 		}
 		
-	} // end of host namespace
+	}
 }
-	// end of psycle namespace

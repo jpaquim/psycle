@@ -26,24 +26,23 @@
 #include <algorithm>
 
 #ifdef __unix__
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <unistd.h>
 #else
-#include <windows.h>
-#include <winreg.h>
+	#include <windows.h>
+	#include <winreg.h>
 #endif
 
 #ifdef  _MSC_VER
-#include <direct.h> /* Visual C++ */
+	#include <direct.h> /* Visual C++ */
 #else
-#include <dirent.h>
+	#include <dirent.h>
 #endif
 
-using namespace std;
-
 namespace psy {
-namespace core {
+	namespace core {
+		using namespace std;
 
   File::File()
   {
