@@ -24,8 +24,8 @@
 #include <mmsystem.h>
 #undef min
 #undef max
-#include "cstdint.h"
-#include "helpers.h"
+#include <psycore/cstdint.h>
+#include <psycore/helpers.h>
 #include <iostream>
 namespace psy
 {
