@@ -37,6 +37,7 @@
 #include "sequencerdraw.h"
 #include "patternbox.h"
 #include "machinegui.h"
+#include "audioconfigdlg.h"
 
 #include <QtGui>
 
@@ -45,29 +46,31 @@
 
 MainWindow::MainWindow()
 {
-  song_ = new psy::core::Song(psy::core::Player::Instance());
-    setupSong();
-    setupSound();
-    psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
+	song_ = new psy::core::Song(psy::core::Player::Instance());
+	setupSong();
+	setupSound();
+	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
 
-    macView_ = new MachineView( song_ );
-    patView_ = new PatternView( song_ );
-    wavView_ = new WaveView( song_ );
-    seqView_ = new SequencerView( song_ );
-    patternBox_ = new PatternBox( song_ );
+	macView_ = new MachineView( song_ );
+	patView_ = new PatternView( song_ );
+	wavView_ = new WaveView( song_ );
+	seqView_ = new SequencerView( song_ );
+	patternBox_ = new PatternBox( song_ );
 
-    setupGui();
-    setupSignals();
+	setupGui();
+	setupSignals();
 
-    patternBox_->populatePatternTree(); // FIXME: here because of bad design?
-    populateMachineCombo();
-    initSampleCombo();
-    patternBox_->patternTree()->setFocus();
+	patternBox_->populatePatternTree(); // FIXME: here because of bad design?
+	populateMachineCombo();
+	initSampleCombo();
+	patternBox_->patternTree()->setFocus();
 
-    startTimer( 10 );
+	startTimer( 10 );
 
-    macView_->setOctave( 4 );
-    patView_->setOctave( 4 );
+	macView_->setOctave( 4 );
+	patView_->setOctave( 4 );
+
+	audioCnfDlg = new AudioConfigDlg( this );
 }
 
 void MainWindow::setupSong()
@@ -280,51 +283,56 @@ void MainWindow::loadSong( psy::core::Song *song )
              tr("It makes music and stuff."));
  }
 
- void MainWindow::createActions()
- {
-     newAct = new QAction(QIcon(":/images/new.png"), tr("&New Song"), this);
-     newAct->setShortcut(tr("Ctrl+N"));
-     newAct->setStatusTip(tr("Create a new song"));
-     connect( newAct, SIGNAL( triggered() ), this, SLOT( onNewSongRequest() ) );
+void MainWindow::createActions()
+{
+	newAct = new QAction(QIcon(":/images/new.png"), tr("&New Song"), this);
+	newAct->setShortcut(tr("Ctrl+N"));
+	newAct->setStatusTip(tr("Create a new song"));
+	connect( newAct, SIGNAL( triggered() ), this, SLOT( onNewSongRequest() ) );
 
-     openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
-     openAct->setShortcut(tr("Ctrl+O"));
-     openAct->setStatusTip(tr("Open an existing song"));
-     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+	openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
+	openAct->setShortcut(tr("Ctrl+O"));
+	openAct->setStatusTip(tr("Open an existing song"));
+	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
-     saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save..."), this);
-     saveAct->setShortcut(tr("Ctrl+S"));
-     saveAct->setStatusTip(tr("Save the current song"));
-     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+	saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save..."), this);
+	saveAct->setShortcut(tr("Ctrl+S"));
+	saveAct->setStatusTip(tr("Save the current song"));
+	connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
-     undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
-     undoAct->setShortcut(tr("Ctrl+Z"));
-     undoAct->setStatusTip(tr("Undo the last action"));
-     connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
+	undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
+	undoAct->setShortcut(tr("Ctrl+Z"));
+	undoAct->setStatusTip(tr("Undo the last action"));
+	connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
 
-     redoAct = new QAction(QIcon(":/images/redo.png"), tr("&Redo"), this);
-     redoAct->setShortcut(tr("Ctrl+Y"));
-     redoAct->setStatusTip(tr("Redo the last undone action"));
-     connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
+	redoAct = new QAction(QIcon(":/images/redo.png"), tr("&Redo"), this);
+	redoAct->setShortcut(tr("Ctrl+Y"));
+	redoAct->setStatusTip(tr("Redo the last undone action"));
+	connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
 
-     quitAct = new QAction(tr("&Quit"), this);
-     quitAct->setShortcut(tr("Ctrl+Q"));
-     quitAct->setStatusTip(tr("Quit the application"));
-     connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
+	quitAct = new QAction(tr("&Quit"), this);
+	quitAct->setShortcut(tr("Ctrl+Q"));
+	quitAct->setStatusTip(tr("Quit the application"));
+	connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-     aboutAct = new QAction(tr("&About qpsycle"), this);
-     aboutAct->setStatusTip(tr("About qpsycle"));
-     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+	audioConfAct = new QAction( tr("Audio Settings"), this );
+	connect( audioConfAct, SIGNAL( triggered() ),
+		 this, SLOT( showAudioConfigDlg() ) );
 
-     playFromStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
-     connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
-     playFromSeqPosAct = new QAction(QIcon(":/images/play.png"), tr("Play from &sequencer position"), this);
-     connect( playFromSeqPosAct, SIGNAL( triggered() ), this, SLOT( playFromSeqPos() ) );
-     playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
-     connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
+
+	aboutAct = new QAction(tr("&About qpsycle"), this);
+	aboutAct->setStatusTip(tr("About qpsycle"));
+	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+	playFromStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
+	connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
+	playFromSeqPosAct = new QAction(QIcon(":/images/play.png"), tr("Play from &sequencer position"), this);
+	connect( playFromSeqPosAct, SIGNAL( triggered() ), this, SLOT( playFromSeqPos() ) );
+	playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
+	connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
 //     playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
 
- }
+}
 
  void MainWindow::createMenus()
  {
@@ -341,6 +349,8 @@ void MainWindow::loadSong( psy::core::Song *song )
 
      viewMenu = menuBar()->addMenu(tr("&View"));
      configMenu = menuBar()->addMenu(tr("&Configuration"));
+     configMenu->addAction( audioConfAct );
+
      performMenu = menuBar()->addMenu(tr("&Performance"));
      communityMenu = menuBar()->addMenu(tr("&Community"));
 
@@ -684,4 +694,9 @@ bool TabWidget::event( QEvent *event )
         default:
 		return QTabWidget::event( event );
 	}
+}
+
+void MainWindow::showAudioConfigDlg()
+{
+	audioCnfDlg->exec();
 }

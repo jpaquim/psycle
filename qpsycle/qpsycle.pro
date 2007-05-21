@@ -34,6 +34,7 @@ HEADERS += mainwindow.h \
            configuration.h \
            inputhandler.h \
            patternbox.h \
+           audioconfigdlg.h \
            machineview/machinegui.h \
            machineview/machinetweakdlg.h \
            machineview/machineview.h \
@@ -111,6 +112,7 @@ SOURCES += mainwindow.cpp \
            configuration.cpp \
            inputhandler.cpp \
            patternbox.cpp \
+           audioconfigdlg.cpp \
            qpsycle.cpp \
            machineview/machinegui.cpp \
            machineview/machinetweakdlg.cpp \
