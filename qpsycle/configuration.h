@@ -1,6 +1,7 @@
 #pragma once
 #include "inputhandler.h"
 #include <string>
+#include <map>
 /// configuration for the user interface
 namespace psy {
 	namespace core {
