@@ -32,6 +32,7 @@ class PatternView;
 class WaveView;
 class SequencerView;
 class PatternBox;
+class AudioConfigDlg;
 
 class QAction;
 class QListWidget;
@@ -55,103 +56,108 @@ protected:
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
-public:
-    MainWindow();
+	public:
+	MainWindow();
 
 
 protected:
-    void keyPressEvent( QKeyEvent *event );
-    void timerEvent( QTimerEvent *ev );
+	void keyPressEvent( QKeyEvent *event );
+	void timerEvent( QTimerEvent *ev );
 
 private slots:
-    void onNewSongRequest();
-    void open();
-    void save();
-    void undo();
-    void redo();
-    void about();
-    void refreshSampleComboBox();
-    void onMachineComboBoxIndexChanged( int newIndex );
-    void onSampleComboBoxIndexChanged( int newIndex );
-    void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
-    void onNewMachineCreated( psy::core::Machine *mac );
-    void onMachineGuiChosen( MachineGui *macGui );
-    void onPatternDeleted();
-    void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
-    void onPatternNameChanged();
-    void onCategoryColorChanged();
-    void onOctaveComboBoxIndexChanged( int newIndex );
-    void onMachineDeleted( int machine_id );
-    void onMachineRenamed();
+	void onNewSongRequest();
+	void open();
+	void save();
+	void undo();
+	void redo();
+	void about();
+	void refreshSampleComboBox();
+	void onMachineComboBoxIndexChanged( int newIndex );
+	void onSampleComboBoxIndexChanged( int newIndex );
+	void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
+	void onNewMachineCreated( psy::core::Machine *mac );
+	void onMachineGuiChosen( MachineGui *macGui );
+	void onPatternDeleted();
+	void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
+	void onPatternNameChanged();
+	void onCategoryColorChanged();
+	void onOctaveComboBoxIndexChanged( int newIndex );
+	void onMachineDeleted( int machine_id );
+	void onMachineRenamed();
+	void showAudioConfigDlg();
 
-    void playFromStart();
-    void playFromSeqPos();
-    void playStop();
+	void playFromStart();
+	void playFromSeqPos();
+	void playStop();
 
- private:
-    psy::core::Song *song_;
+private:
+	psy::core::Song *song_;
 
-    void setupSound();
-    void setupSong();
-    void setupGui();
-    void setupSignals();
+	void setupSound();
+	void setupSong();
+	void setupGui();
+	void setupSignals();
 
-    bool songHasChanged();
-    psy::core::Song *createBlankSong();
-    void loadSong( psy::core::Song *song );
+	bool songHasChanged();
+	psy::core::Song *createBlankSong();
+	void loadSong( psy::core::Song *song );
 
-    void populateMachineCombo();
-    void initSampleCombo();
+	void populateMachineCombo();
+	void initSampleCombo();
     
-     void createActions();
-     void createMenus();
-     void createToolBars();
-     void createStatusBar();
+	void createActions();
+	void createMenus();
+	void createToolBars();
+	void createStatusBar();
 
-     QMenu *fileMenu;
-     QMenu *editMenu;
-     QMenu *viewMenu;
-     QMenu *configMenu;
-     QMenu *performMenu;
-     QMenu *communityMenu;
-     QMenu *helpMenu;
+	QMenu *fileMenu;
+	QMenu *editMenu;
+	QMenu *viewMenu;
+	QMenu *configMenu;
+	QMenu *performMenu;
+	QMenu *communityMenu;
+	QMenu *helpMenu;
 
-     QToolBar *fileToolBar;
-     QToolBar *editToolBar;
-     QToolBar *playToolBar;
-     QToolBar *machToolBar;
-     QToolBar *octToolBar_;
+	QToolBar *fileToolBar;
+	QToolBar *editToolBar;
+	QToolBar *playToolBar;
+	QToolBar *machToolBar;
+	QToolBar *octToolBar_;
 
-     QAction *newAct;
-     QAction *openAct;
-     QAction *saveAct;
-     QAction *undoAct;
-     QAction *redoAct;
-     QAction *aboutAct;
-     QAction *quitAct;
-     QAction *playFromStartAct;
-     QAction *playFromSeqPosAct;
-     QAction *playPatAct;
-     QAction *playStopAct;
+	QAction *newAct;
+	QAction *openAct;
+	QAction *saveAct;
+	QAction *undoAct;
+	QAction *redoAct;
+	QAction *aboutAct;
+	QAction *quitAct;
+	QAction *playFromStartAct;
+	QAction *playFromSeqPosAct;
+	QAction *playPatAct;
+	QAction *playStopAct;
 
-     QAction *togglePatBox_;
+	QAction *togglePatBox_;
 
-     QComboBox *macCombo_;
-     QComboBox *sampCombo_;
-     QComboBox *octCombo_;
+	QAction *audioConfAct;
 
-     PatternBox *patternBox_;
+	QComboBox *macCombo_;
+	QComboBox *sampCombo_;
+	QComboBox *octCombo_;
 
-     TabWidget *views_;
-     MachineView *macView_;
-     PatternView *patView_;
-     WaveView *wavView_;
-     SequencerView *seqView_;
+	PatternBox *patternBox_;
 
-     QDockWidget *dock_;
- };
+	TabWidget *views_;
+	MachineView *macView_;
+	PatternView *patView_;
+	WaveView *wavView_;
+	SequencerView *seqView_;
+
+	QDockWidget *dock_;
+
+	AudioConfigDlg *audioCnfDlg;
+};
 
 
  #endif
