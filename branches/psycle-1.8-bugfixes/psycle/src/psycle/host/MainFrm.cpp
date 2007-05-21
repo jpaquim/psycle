@@ -8,7 +8,8 @@
 #include "gearTracker.hpp"
 #include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
-#include "VstEditorDlg.hpp"
+//#include "VstEditorDlg.hpp"
+#include "VstEffectWnd.hpp"
 #include "FrameMixerMachine.hpp"
 #include "Helpers.hpp"
 #include "WireDlg.hpp"
@@ -470,6 +471,13 @@ NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnDestroy() 
 		{
+			m_wndInfo.DestroyWindow();
+			m_midiMonitorDlg.DestroyWindow();
+			m_wndInst.DestroyWindow();
+			m_wndToolBar.DestroyWindow();
+			m_wndControl.DestroyWindow();
+			m_wndControl2.DestroyWindow();
+			m_wndView.DestroyWindow();
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
 			CFrameWnd::OnDestroy();
@@ -1485,24 +1493,20 @@ NAMESPACE__BEGIN(psycle)
 					case MACH_VST:
 					case MACH_VSTFX:
 						{
-						m_pWndMac[tmac] = new CVstEditorDlg(0);
-						((CVstEditorDlg*)m_pWndMac[tmac])->_editorActive = &isguiopen[tmac];
-						((CVstEditorDlg*)m_pWndMac[tmac])->wndView = &m_wndView;
-						((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
-						((CVstEditorDlg*)m_pWndMac[tmac])->_pMachine = (vst::plugin*)ma;
-						((vst::plugin*)ma)->editorWnd = 0;
+							m_pWndMac[tmac] = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
 						
-						((CVstEditorDlg*)m_pWndMac[tmac])->LoadFrame(IDR_VSTFRAME,
+						((CVstEffectWnd*)m_pWndMac[tmac])->LoadFrame(IDR_VSTFRAME,
 								WS_POPUPWINDOW | WS_CAPTION | WS_SYSMENU,
 								this);
-						((vst::plugin*)ma)->editorWnd = m_pWndMac[tmac];
 						std::ostringstream winname;
 						winname << std::hex << std::setw(2)
-							<< ((CVstEditorDlg*)m_pWndMac[tmac])->MachineIndex
+							<< _pSong->FindBusFromIndex(tmac)
 							<< " : " << ma->_editName;
-						((CVstEditorDlg*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
-						((CVstEditorDlg*)m_pWndMac[tmac])->ShowWindow(SW_SHOWNORMAL);
-						isguiopen[tmac] = true;
+
+						((CVstEffectWnd*)m_pWndMac[tmac])->SetTitleText(winname.str().c_str());
+						((CVstEffectWnd*)m_pWndMac[tmac])->ShowWindow(SW_SHOWNORMAL);
+						((CVstEffectWnd*)m_pWndMac[tmac])->PostOpenWnd();
+
 						CenterWindowOnPoint(m_pWndMac[tmac], point);
 					break;
 						}

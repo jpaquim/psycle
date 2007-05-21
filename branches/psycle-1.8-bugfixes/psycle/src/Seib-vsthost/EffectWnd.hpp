@@ -35,10 +35,6 @@ typedef struct
 	unsigned char vstVirt;
 } VkeysT;
 
-class CWnd;
-class CSecEditWnd;
-class CParamEditWnd;
-
 class CEffectWnd
 {
 protected:
@@ -54,7 +50,6 @@ public:
 
 protected:
 	void ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode &keyCode);
-//	virtual bool GetWindowSize(CRect &rcFrame, CRect &rcClient, ERect *pRect = NULL);
 
 	void KeyDown(VstKeyCode keyCode) { pEffect->KeyDown(keyCode); }
 	void KeyUp(VstKeyCode keyCode) { pEffect->KeyUp(keyCode); }
@@ -65,18 +60,20 @@ protected:
 
 // Overridables
 public:
-	virtual void* OpenEditorWnd()=0;
 	virtual void CloseEditorWnd()=0;
+	virtual bool GetWindowSize(ERect &rcFrame, ERect &rcClient, ERect *pRect = NULL);
 	virtual void ResizeWindow(int width, int height){};
 	virtual void RefreshUI(){};
-	virtual bool OnSetParameterAutomated(long index, float value) { return false; }
-	virtual CWnd* OpenSecondaryWnd(VstWindow& window) { return 0; }
+	virtual bool BeginAutomating(long index){ return false; }
+	virtual bool SetParameterAutomated(long index, float value) { return false; }
+	virtual bool EndAutomating(long index) { return false; }
+	virtual bool OpenFileSelector (VstFileSelect *ptr) { return false; }
+	virtual bool CloseFileSelector (VstFileSelect *ptr) { return false; }
+	virtual void* OpenSecondaryWnd(VstWindow& window) { return 0; }
 	virtual bool CloseSecondaryWnd(VstWindow& window) { return false; }
 
 protected:
-	virtual void UpdateTitle() { ; }
-	virtual CWnd * CreateView() { return NULL; }
-	virtual void CreateMenu() { ; }
+	virtual void UpdateTitle(){};
 
 protected:
 	CEffect * pEffect;

@@ -399,6 +399,11 @@ namespace seib {
 			virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
 			// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 			virtual bool OnIOChanged() { return false; }
+			virtual bool OnBeginAutomating(long index);
+			virtual bool OnEndAutomating(long index);
+			virtual void OnSetParameterAutomated(long index, float value);
+			virtual bool OnOpenFileSelector (VstFileSelect *ptr);
+			virtual bool OnCloseFileSelector (VstFileSelect *ptr);
 
 			//////////////////////////////////////////////////////////////////////////
 			// Following comes the Wrapping of the VST Interface functions.
@@ -620,8 +625,8 @@ namespace seib {
 			virtual long OnHostVendorSpecific(CEffect &pEffect, long lArg1, long lArg2, void* ptrArg, float floatArg) { return 0; }
 			virtual long OnGetVSTVersion() { return kVstVersion; }
 
-			// Plugin calls this function when it has changed one parameter (usually, from the GUI)in order for the host to record it.
-			virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value) { return; }
+			// Plugin calls this function when it has changed one parameter (from the GUI)in order for the host to record it.
+			virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value) { pEffect.OnSetParameterAutomated(index,value); }
 			// onCurrentId is used normally when loading Shell type plugins. This is taken care in the AudioMaster callback.
 			// the function here is called in any other cases.
 			virtual long OnCurrentId(CEffect &pEffect) { return pEffect.uniqueId(); }
@@ -650,7 +655,7 @@ namespace seib {
 			// You should have a continuous call to CEffect::Idle() on your Idle Call.
 			// CVSTHost::OnNeedIdle() and CEffect::Idle() take care of calling only when needed.
 			virtual bool DECLARE_VST_DEPRECATED(OnNeedIdle)(CEffect &pEffect);
-			virtual bool OnSizeWindow(CEffect &pEffect, long width, long height);
+			virtual bool OnSizeWindow(CEffect &pEffect, long width, long height) { return pEffect.OnSizeEditorWindow(width, height); }
 			// Will cause application to call AudioEffect's  setSampleRate/setBlockSize method (when implemented).
 			virtual long OnUpdateSampleRate(CEffect &pEffect){
 				if (!loadingEffect) pEffect.SetSampleRate(vstTimeInfo.sampleRate);
@@ -695,18 +700,18 @@ namespace seib {
 			// Specification says 0 -> don't know, 1 ->yes, -1 : no, but audioeffectx.cpp says "!= 0 -> true", and since plugins use audioeffectx...
 			virtual bool OnCanDo(CEffect &pEffect,const char *ptr);
 			virtual long OnGetHostLanguage() { return kVstLangEnglish; }
-			virtual void * DECLARE_VST_DEPRECATED(OnOpenWindow)(CEffect &pEffect, VstWindow* window);
-			virtual bool DECLARE_VST_DEPRECATED(OnCloseWindow)(CEffect &pEffect, VstWindow* window);
-			virtual void * OnGetDirectory(CEffect &pEffect);
+			virtual void * DECLARE_VST_DEPRECATED(OnOpenWindow)(CEffect &pEffect, VstWindow* window) { return pEffect.OnOpenWindow(window); }
+			virtual bool DECLARE_VST_DEPRECATED(OnCloseWindow)(CEffect &pEffect, VstWindow* window) { return pEffect.OnCloseWindow(window); }
+			virtual void * OnGetDirectory(CEffect &pEffect) { return pEffect.OnGetDirectory(); }
 			//\todo: "Something has changed, update 'multi-fx' display." ???
-			virtual bool OnUpdateDisplay(CEffect &pEffect);
+			virtual bool OnUpdateDisplay(CEffect &pEffect) { return pEffect.OnUpdateDisplay(); }
 			// VST 2.1 Extensions
 			// Notifies that "OnSetParameterAutomated" is going to be called. (once per mouse clic)
-			virtual bool OnBeginEdit(CEffect &pEffect,long index) { return false; }
-			virtual bool OnEndEdit(CEffect &pEffect,long index) { return false; }
-			virtual bool OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr);
+			virtual bool OnBeginEdit(CEffect &pEffect,long index) { return pEffect.OnBeginAutomating(index); }
+			virtual bool OnEndEdit(CEffect &pEffect,long index) { return pEffect.OnEndAutomating(index); }
+			virtual bool OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr) { return pEffect.OnOpenFileSelector(ptr); }
 			// VST 2.2 Extensions
-			virtual bool OnCloseFileSelector (CEffect &pEffect, VstFileSelect *ptr);
+			virtual bool OnCloseFileSelector (CEffect &pEffect, VstFileSelect *ptr) { return pEffect.OnCloseFileSelector(ptr); }
 			// open an editor for audio (defined by XML text in ptr)
 			virtual bool DECLARE_VST_DEPRECATED(OnEditFile)(CEffect &pEffect, char *ptr) { return false; }
 			virtual bool DECLARE_VST_DEPRECATED(OnGetChunkFile)(CEffect &pEffect, void * nativePath) { return pEffect.OnGetChunkFile(static_cast<char*>(nativePath)); }

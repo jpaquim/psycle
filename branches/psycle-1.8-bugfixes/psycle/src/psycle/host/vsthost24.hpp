@@ -125,6 +125,7 @@ namespace psycle
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
 				// CEffect overloaded functions
+				//////////////////////////////////////////////////////////////////////////
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
@@ -166,15 +167,9 @@ namespace psycle
 				//\todo : how can this function be implemented? :o
 				virtual long OnGetCurrentProcessLevel(CEffect &pEffect) { return 0; }
 				virtual bool OnWillProcessReplacing(CEffect &pEffect) { return ((plugin*)&pEffect)->WillProcessReplace(); }
-				//\todo : investigate which file is this function really asking for.
-				virtual bool DECLARE_VST_DEPRECATED(OnGetChunkFile)(CEffect &pEffect, void * nativePath) { return false; }
 
 				///> Plugin sends actions to the host
 				virtual bool OnProcessEvents(CEffect &pEffect, VstEvents* events) { return false; }
-				virtual bool OnBeginEdit(CEffect &pEffect,long index);
-				virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value);
-				virtual bool OnEndEdit(CEffect &pEffect,long index);
-
 			};
 		}
 	}

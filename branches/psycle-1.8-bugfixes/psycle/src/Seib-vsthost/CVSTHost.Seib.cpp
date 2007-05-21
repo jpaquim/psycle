@@ -1060,6 +1060,28 @@ namespace seib {
 			return false;
 		}
 
+		bool CEffect::OnBeginAutomating(long index)
+		{
+			if (editorWnd) return editorWnd->BeginAutomating(index);
+			else return false;
+		}
+		bool CEffect::OnEndAutomating(long index)
+		{
+			if (editorWnd) return editorWnd->EndAutomating(index); 
+			else return false;
+		}
+		void CEffect::OnSetParameterAutomated(long index, float value)
+		{
+			if (editorWnd) editorWnd->SetParameterAutomated(index,value);
+		}
+		bool CEffect::OnOpenFileSelector (VstFileSelect *ptr) {
+			if (editorWnd) return editorWnd->OpenFileSelector(ptr);
+			else return false;
+		}
+		bool CEffect::OnCloseFileSelector (VstFileSelect *ptr) {
+			if (editorWnd) return editorWnd->CloseFileSelector(ptr);
+			else return false;
+		}
 
 		/*===========================================================================*/
 		/* CVSTHost class members                                                    */
@@ -1373,238 +1395,6 @@ namespace seib {
 			return true;
 		}
 
-		/*****************************************************************************/
-		/* OnGetDirectory : called when the effect calls getDirectory()              */
-		/*****************************************************************************/
-
-		void * CVSTHost::OnGetDirectory(CEffect & pEffect)
-		{
-			return pEffect.OnGetDirectory();
-		}
-
-		/*****************************************************************************/
-		/* OnOpenWindow : called to open a new window                                */
-		/*****************************************************************************/
-
-		void * CVSTHost::OnOpenWindow(CEffect & pEffect, VstWindow* window)
-		{
-			return pEffect.OnOpenWindow(window);
-		}
-
-		/*****************************************************************************/
-		/* OnCloseWindow : called to close a window                                  */
-		/*****************************************************************************/
-
-		bool CVSTHost::OnCloseWindow(CEffect & pEffect, VstWindow* window)
-		{
-			return pEffect.OnCloseWindow(window);
-		}
-
-		/*****************************************************************************/
-		/* OnSizeWindow : called when the effect calls sizeWindow()                  */
-		/*****************************************************************************/
-
-		bool CVSTHost::OnSizeWindow(CEffect & pEffect, long width, long height)
-		{
-			return pEffect.OnSizeEditorWindow(width, height);
-		}
-
-
-		/*****************************************************************************/
-		/* OnUpdateDisplay : called when effect calls updateDisplay()                */
-		/*****************************************************************************/
-
-		bool CVSTHost::OnUpdateDisplay(CEffect & pEffect)
-		{
-			return pEffect.OnUpdateDisplay();
-		}
-
-		/*****************************************************************************/
-		/* OnOpenFileSelector : called when effect needs a file selector             */
-		/*																			 */
-		/*		This sourcecode is based on the VSTGUI3.0 source					 */
-		/*****************************************************************************/
-		bool CVSTHost::OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr)
-		{
-			if (!ptr)
-				throw (int)1;
-
-			char fileName[_MAX_PATH];
-			char *filePath;
-
-			if	((ptr->command == kVstFileLoad) 
-				||	(ptr->command == kVstFileSave)
-				||	(ptr->command == kVstMultipleFilesLoad))
-			{
-				OPENFILENAME ofn = {0}; // common dialog box structure
-				ofn.lStructSize = sizeof(OPENFILENAME);
-
-				std::string filefilter;
-				for (int i=0;i<ptr->nbFileTypes;i++)
-				{
-					filefilter = ptr->fileTypes[i].name; filefilter.push_back('\0');
-					filefilter += "*."; filefilter += ptr->fileTypes[i].dosType; filefilter.push_back('\0');
-				}
-				filefilter += "All (*.*)"; filefilter.push_back('\0');
-				filefilter += "*.*"; filefilter.push_back('\0');
-
-				if (ptr->command == kVstMultipleFilesLoad)
-					filePath = new char [_MAX_PATH * 100];
-				else
-					filePath = new char[_MAX_PATH];
-
-				filePath[0] = 0;
-				// Initialize OPENFILENAME
-				ofn.hwndOwner = MainWindow();
-
-				ofn.lpstrFile = filePath;
-				ofn.nMaxFile    = sizeof (filePath) - 1;
-				ofn.lpstrFilter =filefilter.c_str();
-				ofn.nFilterIndex = 1;
-				ofn.lpstrTitle = ptr->title;
-				ofn.lpstrFileTitle = fileName;
-				ofn.nMaxFileTitle = sizeof(fileName) - 1;
-				if ( ptr->initialPath != 0)
-					ofn.lpstrInitialDir = ptr->initialPath;
-				else
-					ofn.lpstrInitialDir =  (char*)pEffect.OnGetDirectory();
-				if (ptr->nbFileTypes >= 1)
-					ofn.lpstrDefExt = ptr->fileTypes[0].dosType;
-				if (ptr->command == kVstFileSave)
-					ofn.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
-				else
-					ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
-
-				// Display the Open dialog box. 
-				if(::GetOpenFileName(&ofn)==TRUE)
-				{
-					if (ptr->command == kVstMultipleFilesLoad)
-					{
-						char string[_MAX_PATH], directory[_MAX_PATH];
-						char *previous = ofn.lpstrFile;
-						long len;
-						bool dirFound = false;
-						ptr->returnMultiplePaths = new char*[_MAX_PATH];
-						long i = 0;
-						while (*previous != 0)
-						{
-							if (!dirFound) 
-							{
-								dirFound = true;
-								strcpy (directory, previous);
-								len = strlen (previous) + 1;  // including 0
-								previous += len;
-
-								if (*previous == 0)
-								{  // 1 selected file only		
-									ptr->returnMultiplePaths[i] = new char [strlen (directory) + 1];
-									strcpy (ptr->returnMultiplePaths[i++], directory);
-								}
-								else
-								{
-									if (directory[strlen (directory) - 1] != '\\')
-										strcat (directory, "\\");
-								}
-							}
-							else 
-							{
-								sprintf (string, "%s%s", directory, previous);
-								len = strlen (previous) + 1;  // including 0
-								previous += len;
-
-								ptr->returnMultiplePaths[i] = new char [strlen (string) + 1];
-								strcpy (ptr->returnMultiplePaths[i++], string);
-							}
-						}
-						ptr->nbReturnPath = i;
-						delete filePath;
-					}
-					else if ( ptr->returnPath == 0 )
-					{
-						ptr->reserved = 1;
-						ptr->returnPath = filePath;
-						ptr->sizeReturnPath = sizeof(filePath);
-						ptr->nbReturnPath = 1;
-					}
-					else 
-					{
-						strncpy(ptr->returnPath,filePath,ptr->sizeReturnPath);
-						ptr->nbReturnPath = 1;
-						delete filePath;
-					}
-					return true;
-				}
-				else delete filePath;
-			}
-			else if (ptr->command == kVstDirectorySelect)
-			{
-				LPMALLOC pMalloc;
-				// Gets the Shell's default allocator
-				//
-				if (::SHGetMalloc(&pMalloc) == NOERROR)
-				{
-					BROWSEINFO bi;
-					LPITEMIDLIST pidl;
-					if ( ptr->returnPath == 0)
-					{
-						ptr->reserved = 1;
-						ptr->returnPath = new char[_MAX_PATH];
-						ptr->sizeReturnPath = _MAX_PATH;
-						ptr->nbReturnPath = 1;
-					}
-					// Get help on BROWSEINFO struct - it's got all the bit settings.
-					//
-					bi.hwndOwner = MainWindow();
-
-					bi.pidlRoot = NULL;
-					bi.pszDisplayName = ptr->returnPath;
-					bi.lpszTitle = ptr->title;
-					bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
-					bi.lpfn = NULL;
-					bi.lParam = 0;
-					// This next call issues the dialog box.
-					//
-					if ((pidl = ::SHBrowseForFolder(&bi)) != NULL)
-					{
-						if (::SHGetPathFromIDList(pidl, ptr->returnPath))
-						{
-							return true;
-						}
-						// Free the PIDL allocated by SHBrowseForFolder.
-						//
-						pMalloc->Free(pidl);
-					}
-					if ( ptr->reserved ) { delete ptr->returnPath; ptr->reserved = 0; }
-					// Release the shell's allocator.
-					//
-					pMalloc->Release();
-				}
-			}
-			return false;
-		}
-		/*****************************************************************************/
-		/* OnCloseFileSelector : called when effect needs a file selector             */
-		/*																			 */
-		/*		This sourcecode is based on the VSTGUI3.0 source					 */
-		/*****************************************************************************/
-		bool CVSTHost::OnCloseFileSelector (CEffect &pEffect, VstFileSelect *ptr)
-		{
-			if ( ptr->command == kVstMultipleFilesLoad)
-			{
-				for (int i=0; i < ptr->nbReturnPath;i++)
-				{
-					delete[] ptr->returnMultiplePaths[i];
-				}
-				delete[] ptr->returnMultiplePaths;
-				return true;
-			}
-			else if ( ptr->reserved == 1) 
-			{
-				delete ptr->returnPath;
-				return true;
-			}
-			return false;
-		}
 		/*****************************************************************************/
 		/* AudioMasterCallback : callback to be called by plugins                    */
 		/*****************************************************************************/

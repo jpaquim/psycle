@@ -7,7 +7,7 @@
 #include "MainFrm.hpp"
 #include "VstEditorDlg.hpp"
 
-///\todo:  When inserting a note in a pattern, set the correct samplePos and ppqPos corresponding to the place the note is being put.
+///\todo:  When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //		(LiveSlice is a good example of what happens if it isn't correct)
 
 
@@ -104,25 +104,6 @@ namespace psycle
 			///\todo: Get information about the following five functions, and especially on how the host automates the plugins
 			// (i.e. the inverse step)
 			long host::OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
-			// Accepting BeginEdit and EndEdit.
-			bool host::OnBeginEdit(CEffect &pEffect,long index) { return true; }
-			bool host::OnEndEdit(CEffect &pEffect,long index) { return true; }
-			void host::OnSetParameterAutomated(CEffect &pEffect, long index, float value)
-			{
-				Global::player().Tweaker = true;
-				if(index<0 || index >= pEffect.numParams()) {
-					psycle::host::loggers::info("error audioMasterAutomate: index<0 || index >= pEffect.numParams()");
-					return;
-				}
-				// Send the event to the IOhandler. It will know what to do. It's not the host's work.
-				if(Global::configuration()._RecordTweaks)
-				{
-					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(((plugin*)&pEffect)->_macIndex, index, f2i(value * quantization));
-					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(((plugin*)&pEffect)->_macIndex, index, f2i(value * quantization));
-				}
-			}
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

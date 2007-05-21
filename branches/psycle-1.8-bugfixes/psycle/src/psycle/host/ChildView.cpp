@@ -378,9 +378,8 @@ NAMESPACE__BEGIN(psycle)
 								_pSong->_pMachine[c]->_type == MACH_VSTFX )
 						{
 							((vst::plugin*)_pSong->_pMachine[c])->Idle();
-							((vst::plugin*)_pSong->_pMachine[c])->EditIdle();
-							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
-								((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
+//							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
+//								((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
 						}
 					}
 				}

@@ -131,32 +131,24 @@ void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstK
 }
 
 /*****************************************************************************/
-/* GetEffectEditWndSize : calculates the effect window's size                */
+/* GetWindowSize : calculates the effect window's size                       */
 /*****************************************************************************/
-/*
-bool CEffectWnd::GetWindowSize(CRect &rcFrame, CRect &rcClient, ERect *pRect)
+
+bool CEffectWnd::GetWindowSize(ERect &rcFrame, ERect &rcClient, ERect *pRect)
 {
-	if ((!pView) && (!pRect))
-	{
-		pEffect->EffEditGetRect(&pRect);
-	}
+	if (!pRect)
+		pEffect->EditGetRect(&pRect);
 	if (!pRect)
 		return false;
 
-	rcFrame.SetRect(pRect->left, pRect->top, pRect->right, pRect->bottom);
-	rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
-		2 * ::GetSystemMetrics(SM_CYFRAME) +
-		4 * ::GetSystemMetrics(SM_CYBORDER);
-	rcFrame.right += 2 * ::GetSystemMetrics(SM_CXFRAME) +
-		4 * ::GetSystemMetrics(SM_CXBORDER);
-
+	rcFrame.left = pRect->left; rcFrame.top = pRect->top;
+	rcFrame.right = pRect->right; rcFrame.bottom = pRect->bottom;
 	rcClient.left = rcClient.top = 0;
 	rcClient.right = pRect->right - pRect->left;
 	rcClient.bottom = pRect->bottom - pRect->top;
-
 	return true;
 }
-*/
+
 
 
 /*****************************************************************************/
