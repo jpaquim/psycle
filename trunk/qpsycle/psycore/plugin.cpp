@@ -77,7 +77,7 @@ bool Plugin::Instance( const std::string & file_name )
 {      
 		try {
 		#ifdef __unix__
-		_dll = dlopen(file_name.c_str(), RTLD_LAZY);
+			_dll = dlopen(file_name.c_str(), RTLD_LAZY);
 		#else
 		if ( file_name.find(".dll") == std::string::npos) return false;
 		// Set error mode to disable system error pop-ups (for LoadLibrary)
@@ -88,7 +88,7 @@ bool Plugin::Instance( const std::string & file_name )
 		#endif
 		if (!_dll) {
 				#ifdef __unix__
-//				std::cerr << "Cannot load library: " << dlerror() << '\n';
+					std::cerr << "Cannot load library: " << dlerror() << '\n';
 				#else
 				#endif
 				return false;
@@ -101,7 +101,7 @@ bool Plugin::Instance( const std::string & file_name )
 			#endif
 			if (!GetInfo) {
 				#ifdef __unix__
-//				std::cerr << "Cannot load symbols: " << dlerror() << '\n';
+					std::cerr << "Cannot load symbols: " << dlerror() << '\n';
 				#else
 				#endif
 				return false;
@@ -109,7 +109,7 @@ bool Plugin::Instance( const std::string & file_name )
 				info_ = GetInfo();
 //				std::cout << info_->Author << std::endl;
 
-				if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << file_name <<std::endl;
+				if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << file_name << "\n";
 				fflush(stdout);
 				_isSynth = info_->Flags == 3;
 				if(_isSynth) mode(MACHMODE_GENERATOR);
@@ -129,7 +129,7 @@ bool Plugin::Instance( const std::string & file_name )
 			#endif
 			if(!GetInterface) {
 					#ifdef __unix__
-//					std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+						std::cerr << "Cannot load symbol: " << dlerror() << "\n";
 					#else
 					#endif
 					return false;
@@ -140,6 +140,7 @@ bool Plugin::Instance( const std::string & file_name )
 		}
 	return true;
 	} catch (...) {
+		std::cerr << "exception while loading plugin\n";
 		return false;
 	}
 }
