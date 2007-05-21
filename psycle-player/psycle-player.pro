@@ -14,109 +14,112 @@ OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
-DEPENDPATH += . \
-	src/psycore \
-	src/psycore/helpers \
-	src/psycore/helpers/math
-	
 INCLUDEPATH += src
+#DEPENDPATH += src
 
 # Input
-HEADERS +=  \
-	configuration.h
-	psycore/binread.h \
-	psycore/constants.h \
-	psycore/convert_internal_machines.h \
-	psycore/cstdint.h \
-	psycore/datacompression.h \
-	psycore/dither.h \
-	psycore/dsp.h \
-	psycore/eventdriver.h \
-	psycore/fileio.h \
-	psycore/filter.h \
-	psycore/helpers.h \
-	psycore/instpreview.h \
-	psycore/instrument.h \
-	psycore/internal_machines.h \
-	psycore/ladspa.h \
-	psycore/ladspamachine.h \
-	psycore/machine.h \
-	psycore/mersennetwister.h \
-	psycore/pattern.h \
-	psycore/patterndata.h \
-	psycore/patternevent.h \
-	psycore/patternline.h \
-	psycore/patternsequence.h \
-	psycore/player.h \
-	psycore/playertimeinfo.h \
-	psycore/plugin.h \
-	psycore/plugin_interface.h \
-	psycore/pluginfinder.h \
-	psycore/preset.h \
-	psycore/psy2filter.h \
-	psycore/psy3filter.h \
-	psycore/psy4filter.h \
-	psycore/psyfilter.h \
-	psycore/riff.h \
-	psycore/sampler.h \
-	psycore/sigslot.h \
-	psycore/singlepattern.h \
-	psycore/song.h \
-	psycore/songstructs.h \
-	psycore/timesignature.h \
-	psycore/xminstrument.h \
-	psycore/xmsampler.h \
-	psycore/zipreader.h \
-	psycore/zipwriter.h \
-	psycore/zipwriterstream.h \
-	psycore/file.h \
-	psycore/helpers/scale.hpp \
-	psycore/helpers/math/pi.hpp \
-	psycore/helpers/xml.h
+HEADERS += \
+	src/psycle/player/configuration.h \
+	src/audiodrivers/audiodriver.h \
+	src/audiodrivers/wavefileout.h \
+	src/audiodrivers/dsound.h \
+	src/audiodrivers/gstreamerout.h \
+	src/psycore/binread.h \
+	src/psycore/constants.h \
+	src/psycore/convert_internal_machines.h \
+	src/psycore/cstdint.h \
+	src/psycore/datacompression.h \
+	src/psycore/dither.h \
+	src/psycore/dsp.h \
+	src/psycore/eventdriver.h \
+	src/psycore/fileio.h \
+	src/psycore/filter.h \
+	src/psycore/helpers.h \
+	src/psycore/instpreview.h \
+	src/psycore/instrument.h \
+	src/psycore/internal_machines.h \
+	src/psycore/ladspa.h \
+	src/psycore/ladspamachine.h \
+	src/psycore/machine.h \
+	src/psycore/mersennetwister.h \
+	src/psycore/pattern.h \
+	src/psycore/patterndata.h \
+	src/psycore/patternevent.h \
+	src/psycore/patternline.h \
+	src/psycore/patternsequence.h \
+	src/psycore/player.h \
+	src/psycore/playertimeinfo.h \
+	src/psycore/plugin.h \
+	src/psycore/plugin_interface.h \
+	src/psycore/pluginfinder.h \
+	src/psycore/preset.h \
+	src/psycore/psy2filter.h \
+	src/psycore/psy3filter.h \
+	src/psycore/psy4filter.h \
+	src/psycore/psyfilter.h \
+	src/psycore/riff.h \
+	src/psycore/sampler.h \
+	src/psycore/sigslot.h \
+	src/psycore/singlepattern.h \
+	src/psycore/song.h \
+	src/psycore/songstructs.h \
+	src/psycore/timesignature.h \
+	src/psycore/xminstrument.h \
+	src/psycore/xmsampler.h \
+	src/psycore/zipreader.h \
+	src/psycore/zipwriter.h \
+	src/psycore/zipwriterstream.h \
+	src/psycore/file.h \
+	src/psycore/helpers/scale.hpp \
+	src/psycore/helpers/math/pi.hpp \
+	src/psycore/helpers/xml.h
 	
 SOURCES += \
-	main.cpp
-	configuration.cpp \
-	psycore/binread.cpp \
-	psycore/convert_internal_machines.cpp \
-	psycore/datacompression.cpp \
-	psycore/dither.cpp \
-	psycore/dsp.cpp \
-	psycore/eventdriver.cpp \
-	psycore/fileio.cpp \
-	psycore/filter.cpp \
-	psycore/helpers.cpp \
-	psycore/instpreview.cpp \
-	psycore/instrument.cpp \
-	psycore/internal_machines.cpp \
-	psycore/ladspamachine.cpp \
-	psycore/machine.cpp \
-	psycore/mersennetwister.cpp \
-	psycore/patterndata.cpp \
-	psycore/patternevent.cpp \
-	psycore/patternline.cpp \
-	psycore/patternsequence.cpp \
-	psycore/player.cpp \
-	psycore/playertimeinfo.cpp \
-	psycore/plugin.cpp \
-	psycore/pluginfinder.cpp \
-	psycore/preset.cpp \
-	psycore/psy2filter.cpp \
-	psycore/psy3filter.cpp \
-	psycore/psy4filter.cpp \
-	psycore/psyfilter.cpp \
-	psycore/riff.cpp \
-	psycore/sampler.cpp \
-	psycore/singlepattern.cpp \
-	psycore/song.cpp \
-	psycore/timesignature.cpp \
-	psycore/xminstrument.cpp \
-	psycore/xmsampler.cpp \
-	psycore/zipreader.cpp \
-	psycore/zipwriter.cpp \
-	psycore/zipwriterstream.cpp \
-	psycore/file.cpp \
-	psycore/helpers/xml.cpp
+	src/psycle/player/main.cpp \
+	src/psycle/player/configuration.cpp \
+	src/audiodrivers/audiodriver.cpp \
+	src/audiodrivers/wavefileout.cpp \
+	src/audiodrivers/gstreamerout.cpp \
+	src/psycore/binread.cpp \
+	src/psycore/convert_internal_machines.cpp \
+	src/psycore/datacompression.cpp \
+	src/psycore/dither.cpp \
+	src/psycore/dsp.cpp \
+	src/psycore/eventdriver.cpp \
+	src/psycore/fileio.cpp \
+	src/psycore/filter.cpp \
+	src/psycore/helpers.cpp \
+	src/psycore/instpreview.cpp \
+	src/psycore/instrument.cpp \
+	src/psycore/internal_machines.cpp \
+	src/psycore/ladspamachine.cpp \
+	src/psycore/machine.cpp \
+	src/psycore/mersennetwister.cpp \
+	src/psycore/patterndata.cpp \
+	src/psycore/patternevent.cpp \
+	src/psycore/patternline.cpp \
+	src/psycore/patternsequence.cpp \
+	src/psycore/player.cpp \
+	src/psycore/playertimeinfo.cpp \
+	src/psycore/plugin.cpp \
+	src/psycore/pluginfinder.cpp \
+	src/psycore/preset.cpp \
+	src/psycore/psy2filter.cpp \
+	src/psycore/psy3filter.cpp \
+	src/psycore/psy4filter.cpp \
+	src/psycore/psyfilter.cpp \
+	src/psycore/riff.cpp \
+	src/psycore/sampler.cpp \
+	src/psycore/singlepattern.cpp \
+	src/psycore/song.cpp \
+	src/psycore/timesignature.cpp \
+	src/psycore/xminstrument.cpp \
+	src/psycore/xmsampler.cpp \
+	src/psycore/zipreader.cpp \
+	src/psycore/zipwriter.cpp \
+	src/psycore/zipwriterstream.cpp \
+	src/psycore/file.cpp \
+	src/psycore/helpers/xml.cpp
 
 QT += xml
 
@@ -130,26 +133,26 @@ unix {
         message( "pkg-config thinks alsa libs are available..." )
         PKGCONFIG += alsa 
         DEFINES += PSYCLE__ALSA_AVAILABLE # This is used in the source to determine when to include alsa-specific things.
-        HEADERS += audiodrivers/alsaout.h \
-                   mididrivers/alsaseqin.h 
-        SOURCES += audiodrivers/alsaout.cpp \
-                   mididrivers/alsaseqin.cpp 
+        HEADERS += src/audiodrivers/alsaout.h \
+                   src/mididrivers/alsaseqin.h 
+        SOURCES += src/audiodrivers/alsaout.cpp \
+                   src/mididrivers/alsaseqin.cpp 
     }
 
     system( pkg-config --exists jack ) {
         message( "pkg-config thinks jack libs are available..." )
         PKGCONFIG += jack 
         DEFINES += PSYCLE__JACK_AVAILABLE # This is used in the source to determine when to include jack-specific things.
-        HEADERS += audiodrivers/jackout.h
-        SOURCES += audiodrivers/jackout.cpp 
+        HEADERS += src/audiodrivers/jackout.h
+        SOURCES += src/audiodrivers/jackout.cpp 
     }
 
     system( pkg-config --exists esound ) {
         message( "pkg-config thinks esound libs are available..." )
         PKGCONFIG += esound
         DEFINES += PSYCLE__ESOUND_AVAILABLE # This is used in the source to determine when to include esound-specific things.
-        HEADERS += audiodrivers/esoundout.h
-        SOURCES += audiodrivers/esoundout.cpp 
+        HEADERS += src/audiodrivers/esoundout.h
+        SOURCES += src/audiodrivers/esoundout.cpp 
     }
 
     false { # gstreamer output is unfinished
@@ -157,8 +160,8 @@ unix {
             message( "pkg-config thinks gstreamer libs are available..." )
             PKGCONFIG += gstreamer
             DEFINES += PSYCLE__GSTREAMER_AVAILABLE # This is used in the source to determine when to include gstreamer-specific things.
-            HEADERS += audiodrivers/gstreamerout.h
-            SOURCES += audiodrivers/gstreamerout.cpp 
+            HEADERS += src/audiodrivers/gstreamerout.h
+            SOURCES += src/audiodrivers/gstreamerout.cpp 
         }
     }
 
@@ -167,8 +170,8 @@ unix {
         exists(/usr/include/audio/audiolib.h) {
             LIBS += -laudio
             DEFINES += PSYCLE__NET_AUDIO_AVAILABLE # This is used in the source to determine when to include net-audio-specific things.
-            HEADERS += audiodrivers/netaudioout.h
-            SOURCES += audiodrivers/netaudioout.cpp
+            HEADERS += src/audiodrivers/netaudioout.h
+            SOURCES += src/audiodrivers/netaudioout.cpp
         }
     }
 }
@@ -256,8 +259,8 @@ win32 {
             LIBS *= uuid.lib
         }
         DEFINES += PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE # This is used in the source to determine when to include direct-sound-specific things.
-        HEADERS += audiodrivers/microsoftdirectsoundout.h
-        SOURCES += audiodrivers/microsoftdirectsoundout.cpp
+        HEADERS += src/audiodrivers/microsoftdirectsoundout.h
+        SOURCES += src/audiodrivers/microsoftdirectsoundout.cpp
     }
     
     true { # FIXME: not sure how to test for mme...
@@ -270,8 +273,8 @@ win32 {
             LIBS *= uuid.lib
         }
         DEFINES += PSYCLE__MICROSOFT_MME_AVAILABLE # This is used in the source to determine when to include mme-specific things.
-        HEADERS += audiodrivers/microsoftmmewaveout.h
-        SOURCES += audiodrivers/microsoftmmewaveout.cpp
+        HEADERS += src/audiodrivers/microsoftmmewaveout.h
+        SOURCES += src/audiodrivers/microsoftmmewaveout.cpp
     }
 
     false { # FIXME: asio needs to be built as a lib, which is rather cubersome, or embeeded into qpsycle itself, which sucks...
@@ -282,7 +285,7 @@ win32 {
             LIBS *= asio.lib
         }
         DEFINES += PSYCLE__STEINBERG_ASIO_AVAILABLE # This is used in the source to determine when to include asio-specific things.
-        HEADERS += audiodrivers/steinbergasioout.h
-        SOURCES += audiodrivers/steinbergasioout.cpp
+        HEADERS += src/audiodrivers/steinbergasioout.h
+        SOURCES += src/audiodrivers/steinbergasioout.cpp
     }
 }
