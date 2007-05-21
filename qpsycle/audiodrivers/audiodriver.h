@@ -106,7 +106,8 @@ namespace psy
 			///\}
 
 			///\todo doc
-			int sampleSize() const;
+			public:
+				int sampleSize() const;
 
 			///\name buffer size
 			///\{
