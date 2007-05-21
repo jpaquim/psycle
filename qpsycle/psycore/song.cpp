@@ -218,6 +218,7 @@ namespace psy
 */
 				default:
 //					loggers::warning("failed to create requested machine type");
+					std::cerr << "psycle: failed to create requested machine type\n";
 //					return false;
 					machine = new Dummy(machinecallbacks, index, this);
 					break;
