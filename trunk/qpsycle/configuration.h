@@ -58,7 +58,7 @@ class Configuration
 			bool ft2HomeEndBehaviour() const { return ft2HomeEndBehaviour_; }
 			bool shiftArrowForSelect() const { return shiftArrowForSelect_; }
 			bool wrapAround() const { return wrapAround_; }
-			bool centerCursor() const { centerCursor_; }
+			bool centerCursor() const { return centerCursor_; }
 		private:
 			bool ft2HomeEndBehaviour_;
 			bool shiftArrowForSelect_;
