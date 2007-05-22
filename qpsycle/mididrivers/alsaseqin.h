@@ -8,7 +8,7 @@
 #define PSYCLE__ALSASEQIN
 #if defined PSYCLE__ALSA_AVAILABLE
 #include <alsa/asoundlib.h>
-#include "eventdriver.h"
+#include <psycore/eventdriver.h>
 
 class AlsaSeqIn : public EventDriver
 {
