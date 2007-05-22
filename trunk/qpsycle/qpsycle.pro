@@ -304,11 +304,14 @@ win32 {
     }
 
     win32-msvc2005 {
-        VC_DIR = $$system("reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\8.0 /v InstallDir|findstr REG_SZ")
-        VC_DIR -= InstallDir REG_SZ
+        VC_DIR = $$system("reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\8.0\Setup\VC /v ProductDir|findstr REG_SZ")
+        VC_DIR -= ProductDir  REG_SZ
+
+        #VC_DIR = $$system("reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\8.0 /v InstallDir|findstr REG_SZ")
+        #VC_DIR -= InstallDir REG_SZ
         exists($${VC_DIR}) {
-           VC_DIR = $$system("dir \"$${VC_DIR}..\..\VC\"|findstr Directory")
-           VC_DIR -= Directory of
+           #VC_DIR = $$system("dir \"$${VC_DIR}..\..\VC\"|findstr Directory")
+           #VC_DIR -= Directory of
            message("Existing VC_DIR is [$${VC_DIR}].")
            LIBPATH += "$${VC_DIR}/lib"
            LIBPATH += "$${VC_DIR}/PlatformSDK/lib"
