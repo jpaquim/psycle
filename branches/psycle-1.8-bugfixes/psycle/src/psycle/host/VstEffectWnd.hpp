@@ -9,6 +9,7 @@ NAMESPACE__BEGIN(psycle)
 	{
 		class plugin;
 	}
+	class CVstGui;
 
 		/// vst editor window.
 		class CVstEffectWnd : public CFrameWnd, public CEffectWnd
@@ -45,7 +46,7 @@ NAMESPACE__BEGIN(psycle)
 			virtual bool CloseSecondaryWnd(VstWindow& window);
 		protected:
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); };
-			virtual CWnd* CreateView() { return NULL; }
+			virtual CWnd* CreateView(CWnd* pParentWnd=NULL);
 			CWnd* pView;
 
 		// Implementation
@@ -57,7 +58,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
 			afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 			afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+//			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 			/*
 			afx_msg void OnLoadPreset();
 			afx_msg void OnSavePreset();

@@ -29,6 +29,7 @@ namespace psycle
 
 
 			class host;
+			class CVstEffectWnd;
 
 			class plugin : public Machine, public CEffect
 			{
@@ -50,6 +51,7 @@ namespace psycle
 				VstMidiEvent* reserveVstMidiEvent();
 				VstMidiEvent* reserveVstMidiEventAtFront(); // ugly hack
 
+				CVstEffectWnd* editorWindow;
 				float * inputs[max_io];
 				float * outputs[max_io];
 				float * _pOutSamplesL;
@@ -72,6 +74,7 @@ namespace psycle
 					queue_size = 0;
 					requiresRepl = 0;
 					requiresProcess = 0;
+					nCols=0;
 				};
 				virtual ~plugin() {};
 
@@ -137,6 +140,11 @@ namespace psycle
 				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
 				// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 				virtual bool OnIOChanged() { return false; }
+				virtual void SetEditWnd(CEffectWnd* wnd)
+				{
+					CEffect::SetEditWnd(wnd);
+					editorWindow = reinterpret_cast<CVstEffectWnd*>(wnd);
+				}
 
 			};
 

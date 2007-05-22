@@ -20,6 +20,7 @@
 #include "inputhandler.hpp"
 #include "KeyConfigDlg.hpp"
 #include "Plugin.hpp"
+#include "vsthost24.hpp"
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
@@ -1493,20 +1494,23 @@ NAMESPACE__BEGIN(psycle)
 					case MACH_VST:
 					case MACH_VSTFX:
 						{
-							m_pWndMac[tmac] = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
+							CVstEffectWnd* newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
 						
-						((CVstEffectWnd*)m_pWndMac[tmac])->LoadFrame(IDR_VSTFRAME,
-								WS_POPUPWINDOW | WS_CAPTION | WS_SYSMENU,
-								this);
+						newwin->LoadFrame(IDR_VSTFRAME,
+//							WS_OVERLAPPEDWINDOW,
+							WS_POPUPWINDOW | WS_CAPTION,
+							this);
+						reinterpret_cast<vst::plugin*>(ma)->SetEditWnd(newwin);
+
 						std::ostringstream winname;
 						winname << std::hex << std::setw(2)
 							<< _pSong->FindBusFromIndex(tmac)
 							<< " : " << ma->_editName;
-
-						((CVstEffectWnd*)m_pWndMac[tmac])->SetTitleText(winname.str().c_str());
-						((CVstEffectWnd*)m_pWndMac[tmac])->ShowWindow(SW_SHOWNORMAL);
-						((CVstEffectWnd*)m_pWndMac[tmac])->PostOpenWnd();
-
+						newwin->SetTitleText(winname.str().c_str());
+						newwin->ResizeWindow(0);
+						newwin->ShowWindow(SW_SHOWNORMAL);
+						newwin->PostOpenWnd();
+						m_pWndMac[tmac] = newwin;
 						CenterWindowOnPoint(m_pWndMac[tmac], point);
 					break;
 						}

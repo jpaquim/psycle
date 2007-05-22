@@ -114,6 +114,7 @@ namespace psycle
 				,requiresRepl(0)
 				,requiresProcess(0)
 			{
+				nCols=0;
 				if ( IsSynth())
 				{
 					_mode=MACHMODE_GENERATOR; _type=MACH_VST;

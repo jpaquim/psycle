@@ -357,14 +357,13 @@ namespace seib {
 			void *sDir;
 			std::string loadingChunkName;
 
+			CEffectWnd * editorWnd;
 			bool bEditOpen;
 			bool bNeedIdle;
 			bool bNeedEditIdle;
 			bool bWantMidi;
 			bool bShellPlugin;
 
-		public:
-			CEffectWnd * editorWnd;
 
 			// overridables
 		public:
@@ -383,6 +382,7 @@ namespace seib {
 			virtual bool IsShellPlugin() { return bShellPlugin; }
 			virtual void IsShellPlugin(bool enable) { bShellPlugin = enable; }
 			virtual void SetChunkFile(const char * nativePath) { loadingChunkName = nativePath; }
+			virtual void SetEditWnd(CEffectWnd* wnd) { editorWnd = wnd; }
 
 			// Overridable AEffect-to-host calls. (you can override them at the host level
 			// if your implementation needs that)

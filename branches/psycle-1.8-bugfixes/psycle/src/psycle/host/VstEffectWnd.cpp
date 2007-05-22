@@ -7,6 +7,7 @@
 #include "PresetsDlg.hpp"
 
 #include "VstEffectWnd.hpp"
+#include "VstGui.hpp"
 #include "vsthost24.hpp"
 
 
@@ -29,7 +30,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_WM_SETFOCUS()
 			ON_WM_KEYDOWN()
 			ON_WM_KEYUP()
-			ON_WM_LBUTTONDOWN()
+//			ON_WM_LBUTTONDOWN()
 /*
 			ON_COMMAND(ID_PARAMETERS_LOADPRESET, OnLoadPreset)
 			ON_COMMAND(ID_PARAMETERS_SAVEPRESET, OnSavePreset)
@@ -44,15 +45,23 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if ( CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
-			pView = CreateView();
-			ResizeWindow(0);
+			pView = CreateView(this);
 			SetTimer(449, 25, 0);
 			return 0;
 		}
 
+		CWnd* CVstEffectWnd::CreateView(CWnd* pParentWnd)
+		{
+			CWnd* gui = new CWnd;
+			gui->Create(NULL, NULL, WS_CHILD|WS_VISIBLE,
+				CRect(0, 0, 0, 0), pParentWnd, AFX_IDW_PANE_FIRST, NULL);
+			return gui;
+		}
+
 		void CVstEffectWnd::PostOpenWnd()
 		{
-			machine().EditOpen(GetSafeHwnd());
+			machine().EditOpen(pView->GetSafeHwnd());
+			ResizeWindow(0);
 		}
 		/**********************************************************/
 
@@ -60,12 +69,16 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (CEffectWnd::GetWindowSize(rcFrame,rcClient,pRect))
 			{
+
 				rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
 					::GetSystemMetrics(SM_CYMENUSIZE) +
-					2 * ::GetSystemMetrics(SM_CYFRAME) +
-					4 * ::GetSystemMetrics(SM_CYBORDER);
-				rcFrame.right += 2 * ::GetSystemMetrics(SM_CXFRAME) +
-					4 * ::GetSystemMetrics(SM_CXBORDER);
+//					4 * ::GetSystemMetrics(SM_CXDLGFRAME);
+					4 * ::GetSystemMetrics(SM_CYBORDER) +
+					2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
+				rcFrame.right += //4 * ::GetSystemMetrics(SM_CXDLGFRAME);
+					4 * ::GetSystemMetrics(SM_CXBORDER) +
+					2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
+
 				return true;
 			}
 			return false;
@@ -82,15 +95,15 @@ NAMESPACE__BEGIN(psycle)
 		}
 		void CVstEffectWnd::ResizeWindow(ERect *pRect)
 		{
-			ERect rcEffFrame,rcEffClient;
-			GetWindowSize(rcEffFrame, rcEffClient, pRect);
-
-			SetWindowPos(&wndTop, 0, 0, rcEffFrame.right - rcEffFrame.left, rcEffFrame.bottom - rcEffFrame.top,
-				SWP_NOACTIVATE | SWP_NOMOVE |
-				SWP_NOOWNERZORDER | SWP_NOZORDER);
+			ERect rcEffFrame={0,0,0,0},rcEffClient={0,0,0,0};
+			if (!GetWindowSize(rcEffFrame, rcEffClient, pRect))
+			{
+				rcEffFrame.right = 400; rcEffFrame.bottom = 300;
+				rcEffClient.right = 400; rcEffClient.bottom = 300;
+			}
+			MoveWindow(rcEffFrame.left,rcEffFrame.top,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top);
 			if (pView)
-				pView->MoveWindow(rcEffClient.left, rcEffClient.top,
-				rcEffClient.right, rcEffClient.bottom);
+				pView->MoveWindow(0,0, rcEffClient.right,rcEffClient.bottom,true);
 		}
 
 
@@ -295,9 +308,9 @@ NAMESPACE__BEGIN(psycle)
 				ERect rc = {0};
 				rc.right = window.width;
 				rc.bottom = window.height;
-				pWnd->ShowWindow(SW_SHOWNORMAL);
-				pWnd->MoveWindow(0,0,window.width,window.height);
 				pWnd->SetWindowText(window.title);
+				pWnd->ShowWindow(SW_SHOWNORMAL);
+				pWnd->MoveWindow(0,0,window.width,window.height,true);
 				window.winHandle = hWnd;
 				return hWnd;
 				///\todo: Maintain a list of opened windows, in case we need to close them
@@ -342,7 +355,6 @@ NAMESPACE__BEGIN(psycle)
 		void CVstEffectWnd::OnSetFocus(CWnd* pOldWnd) 
 		{
 			CFrameWnd::OnSetFocus(pOldWnd);
-//			pGui->SetFocus();
 		}
 		void CVstEffectWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
@@ -367,7 +379,6 @@ NAMESPACE__BEGIN(psycle)
 					break;
 				}
 			}
-
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 		}
 
@@ -384,12 +395,12 @@ NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
-		void CVstEffectWnd::OnLButtonDown(UINT nFlags, CPoint point) 
+/*		void CVstEffectWnd::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
 			this->SetFocus();
 			CFrameWnd::OnLButtonDown(nFlags, point);
 		}
-
+*/
 
 /*
 
