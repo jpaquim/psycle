@@ -239,52 +239,12 @@ win32 {
         message("Compiler is: g++.")
     } else:win32-msvc {
         message("Compiler is: msvc.")
+    } else:win32-msvc2005 {
+        message("Compiler is: Visual Studio 2005.")
     } else {
         warning("Untested compiler.")
     }
-       
-    PWD = $$system(echo %CD%)
-    EXTERNAL_PKG_DIR = $$PWD/../external-packages
-    
-    BOOST_DIR = $$EXTERNAL_PKG_DIR/boost-1.33.1
-    !exists($$BOOST_DIR) {
-        warning("The local boost dir does not exist: $${BOOST_DIR}. Make sure you have boost libs installed.")
-    } else {
-        !exists($$BOOST_DIR)/include {
-            warning("The boost headers are not unpacked. See the dir $${BOOST_DIR}.")
-        } else {
-            INCLUDEPATH += $$BOOST_DIR/include
-            win32-g++ {
-                !exists($$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002) {
-                    warning("The boost libraries are not unpacked. See the dir $${BOOST_DIR}.")
-                    # remove our local include path
-                    INCLUDEPATH -= $$BOOST_DIR/include
-                } else {
-                    LIBPATH += $$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002
-                }
-            } else:win32-msvc {
-                !exists($$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400) {
-                    warning("The boost libraries are not unpacked. See the dir $${BOOST_DIR}.")
-                    # remove our local include path
-                    INCLUDEPATH -= $$BOOST_DIR/include
-                } else {
-                    LIBPATH += $$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400
-                }
-            } else {
-                warning("We do not have boost libs built for your compiler. Make sure you have them installed.")
-                # remove our local include path
-                INCLUDEPATH -= $$BOOST_DIR/include
-            }
-        }
-    }
-    win32-g++ {
-        LIBS += -llibboost_signals-mgw-mt-1_33_1
-        #FIXME: is there any reason not to use the following instead?
-        #LIBS += -lboost_signals-mgw-mt-1_33_1
-    } else {
-        #LIBS += # we can use auto linking with most other compilers
-    }
-    
+
     INCLUDEPATH += $(QTDIR)/include
     INCLUDEPATH += $(QTDIR)/include/Qt
     INCLUDEPATH += $(QTDIR)/include/QtCore
@@ -292,21 +252,92 @@ win32 {
     INCLUDEPATH += $(QTDIR)/include/QtXml
     INCLUDEPATH += $(QTDIR)/src/3rdparty/zlib
 
-    DSOUND_DIR = $$EXTERNAL_PKG_DIR/dsound-9
-    !exists($$DSOUND_DIR) {
-        warning("The local dsound dir does not exist: $${DSOUND_DIR}. Make sure you have the dsound lib installed.")
-        !CONFIG(dsound) {
-            message("Assuming you do not have dsound lib. Call qmake CONFIG+=dsound to enable dsound support.")
-        }
-    } else {
-        CONFIG += dsound
-        INCLUDEPATH += $$DSOUND_DIR/include
-        win32-g++ {
-            LIBPATH += $$DSOUND_DIR/lib-mswindows-mingw-cxxabi-1002
+    PWD = $$system(cd)
+    EXTERNAL_PKG_DIR = $$PWD/../external-packages
+
+    exists($(BOOST_DIR)) {
+       message("Existing BOOST_DIR is [$(BOOST_DIR)].")
+       BOOST_DIR = $(BOOST_DIR)
+       INCLUDEPATH += $${BOOST_DIR}
+       LIBPATH += $${BOOST_DIR}/lib
+    }
+    else {
+        BOOST_DIR = $$EXTERNAL_PKG_DIR/boost-1.33.1
+        !exists($$BOOST_DIR) {
+        warning("The local boost dir does not exist: $${BOOST_DIR}. Make sure you have boost libs installed.")
         } else {
-            LIBPATH += $$DSOUND_DIR/lib-mswindows-msvc-cxxabi
+            !exists($$BOOST_DIR)/include {
+            warning("The boost headers are not unpacked. See the dir $${BOOST_DIR}.")
+            } else {
+                INCLUDEPATH += $$BOOST_DIR/include
+                win32-g++ {
+                    !exists($$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002) {
+                    warning("The boost libraries are not unpacked. See the dir $${BOOST_DIR}.")
+                        # remove our local include path
+                        INCLUDEPATH -= $$BOOST_DIR/include
+                    } else {
+                        LIBPATH += $$BOOST_DIR/lib-mswindows-mingw-cxxabi-1002
+                    }
+                } else:win32-msvc {
+                    !exists($$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400) {
+                    warning("The boost libraries are not unpacked. See the dir $${BOOST_DIR}.")
+                        # remove our local include path
+                        INCLUDEPATH -= $$BOOST_DIR/include
+                    } else {
+                        LIBPATH += $$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400
+                    }
+                } else:win32-msvc2005 {
+                    !exists($$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400) {
+                        warning("The boost libraries are not unpacked. See the dir $$BOOST_DIR".)
+                        # remove our local include path
+                        INCLUDEPATH -= $$BOOST_DIR/include
+                    } else {
+                        LIBPATH += $$BOOST_DIR/lib-mswindows-msvc-8.0-cxxabi-1400
+                    }
+                } else {
+                    warning("We do not have boost libs built for your compiler. Make sure you have them installed.")
+                    # remove our local include path
+                    INCLUDEPATH -= $$BOOST_DIR/include
+                }
+            }
         }
     }
+
+    win32-msvc2005 {
+        VC_DIR = $$system("reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\8.0 /v InstallDir|findstr REG_SZ")
+        VC_DIR -= InstallDir REG_SZ
+        exists($${VC_DIR}) {
+           VC_DIR = $$system("dir \"$${VC_DIR}..\..\VC\"|findstr Directory")
+           VC_DIR -= Directory of
+           message("Existing VC_DIR is [$${VC_DIR}].")
+           LIBPATH += "$${VC_DIR}/lib"
+           LIBPATH += "$${VC_DIR}/PlatformSDK/lib"
+        }
+    }
+
+    exists($(DXSDK_DIR)) {
+       message("Existing DXSDK_DIR is [$(DXSDK_DIR)].")
+       INCLUDEPATH += $(DXSDK_DIR)include
+       LIBPATH += $(DXSDK_DIR)lib
+    }
+    else {
+        DSOUND_DIR = $$EXTERNAL_PKG_DIR/dsound-9
+        !exists($$DSOUND_DIR) {
+        warning("The local dsound dir does not exist: $${DSOUND_DIR}. Make sure you have the dsound lib installed.")
+            !CONFIG(dsound) {
+                message("Assuming you do not have dsound lib. Call qmake CONFIG+=dsound to enable dsound support.")
+            }
+        } else {
+            CONFIG += dsound
+            INCLUDEPATH += $$DSOUND_DIR/include
+            win32-g++ {
+                LIBPATH += $$DSOUND_DIR/lib-mswindows-mingw-cxxabi-1002
+            } else {
+                LIBPATH += $$DSOUND_DIR/lib-mswindows-msvc-cxxabi
+            }
+        }
+    }
+
     CONFIG(dsound) {
         win32-g++ {
             LIBS *= -ldsound
@@ -314,7 +345,7 @@ win32 {
             LIBS *= -luuid
         } else {
             LIBS *= dsound.lib
-            LIBS *= winmm.lib # is this one needed?
+            LIBS *= winmm.lib
             LIBS *= uuid.lib
         }
         DEFINES += PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE # This is used in the source to determine when to include direct-sound-specific things.
@@ -347,4 +378,26 @@ win32 {
         HEADERS += audiodrivers/steinbergasioout.h
         SOURCES += audiodrivers/steinbergasioout.cpp
     }
+
+    win32-msvc2005 {
+        QMAKE_LFLAGS += /PDB:"release\QPsycle.pdb"
+    }
+
+    win32-g++ {
+        LIBS += -llibboost_signals-mgw-mt-1_33_1
+        #FIXME: is there any reason not to use the following instead?
+        #LIBS += -lboost_signals-mgw-mt-1_33_1
+    } else:win32-msvc2005 {
+        message( "LIBS are: [$${LIBS}]" )
+        LIBS += dsound.lib
+        LIBS += advapi32.lib
+        LIBS += user32.lib
+        LIBS += -lboost_signals-vc80-mt-1_33_1
+
+
+        message( "LIBS are: [$${LIBS}]" )
+    } else {
+        #LIBS += # we can use auto linking with most other compilers
+    }
+
 }
