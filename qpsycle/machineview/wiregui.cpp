@@ -148,7 +148,6 @@ void WireGui::rewireDest( MachineGui *newDestGui )
 {
 	// Update GUI connection.
 	MachineGui *oldDestGui = destMacGui();
-	int wireGuiIndex = 0;
 	std::vector<WireGui*>::iterator it = oldDestGui->wireGuiList_.begin();
 	for ( ; it != oldDestGui->wireGuiList_.end(); it++ ) {
 		if ( *it == this ) {
@@ -169,19 +168,24 @@ void WireGui::rewireDest( MachineGui *newDestGui )
 
 void WireGui::rewireSource( MachineGui *newSrcGui )
 {
-//     // Update GUI connection.
-//     MachineGui *oldSrcGui = sourceMacGui();
-//     int wireGuiIndex = oldSrcGui->wireGuiList().indexOf( this );
-//     oldSrcGui->wireGuiList().removeAt( wireGuiIndex );
-//     source = newSrcGui; 
-//     source->addWireGui(this);
-//     // Update song connection.
-//     psy::core::Machine *newSrcMac = newSrcGui->mac();
-//     psy::core::Machine *dstMac = destMacGui()->mac();
-//     psy::core::Player::Instance()->lock();
-//     int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->id() );
-//     machineView->song()->ChangeWireSourceMac( newSrcMac->id(), dstMac->id(), oldSrcWireIndex );
-//    psy::core::Player::Instance()->unlock();
+	// Update GUI connection.
+	MachineGui *oldSrcGui = sourceMacGui();
+	std::vector<WireGui*>::iterator it = oldSrcGui->wireGuiList_.begin();
+	for ( ; it != oldSrcGui->wireGuiList_.end(); it++ ) {
+		if ( *it == this ) {
+			oldSrcGui->wireGuiList_.erase( it );
+			break;
+		}
+	}
+	source = newSrcGui; 
+	source->addWireGui(this);
+	// Update song connection.
+	psy::core::Machine *newSrcMac = newSrcGui->mac();
+	psy::core::Machine *dstMac = destMacGui()->mac();
+	psy::core::Player::Instance()->lock();
+	int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->id() );
+	machineView->song()->ChangeWireSourceMac( newSrcMac->id(), dstMac->id(), oldSrcWireIndex );
+	psy::core::Player::Instance()->unlock();
 }
 
 void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
