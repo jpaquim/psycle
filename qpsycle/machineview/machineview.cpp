@@ -39,6 +39,9 @@
 #include <QPainter>
 #include <iostream>
 #include <QGraphicsLineItem>
+#include <QDebug>
+
+#include <algorithm>
 
 MachineView::MachineView(psy::core::Song *song)
 {
@@ -189,12 +192,32 @@ void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui 
 void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 {
 	int id = macGui->mac()->id();
-	// Remove machine and connections from the Song. 
-	song()->DestroyMachine( id );
-	scene()->removeItem( macGui );
 
 	// Remove machine and connections from the gui. 
-	foreach ( WireGui *wireGui, macGui->wireGuiList() ) scene()->removeItem( wireGui );
+	std::vector<WireGui*>::iterator wIt;
+	while ( true ) {
+		// Loop this way as deleteConnection removes
+		// wireGuis from the wireGuiList.
+		wIt = macGui->wireGuiList_.begin();
+		if ( wIt != macGui->wireGuiList_.end() ) {
+			deleteConnection( *wIt );
+		} else break;
+	}
+
+	std::vector<MachineGui*>::iterator it;
+	for ( it = machineGuis.begin(); it != machineGuis.end(); it++ ) {
+		if ( macGui == *it ) {
+			machineGuis.erase( it );
+			break;
+		}
+
+	}
+	scene()->removeItem( macGui );
+	delete macGui;
+
+	// Remove machine and connections from the Song. 
+	song()->DestroyMachine( id );
+
 
 	emit machineDeleted( id ); 
 }
@@ -206,15 +229,30 @@ void MachineView::onMachineRenamed()
 
 void MachineView::deleteConnection( WireGui *wireGui )
 {
-	// Delete the connection in the song file.
 	psy::core::Player::Instance()->lock();
+
 	psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
 	psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
-	srcMac->Disconnect( *dstMac );
-	psy::core::Player::Instance()->unlock();
 
 	// Delete the connection in the GUI.
-	scene_->removeItem( wireGui ); // FIXME: do we need to do more here?
+	std::vector<WireGui*>::iterator it;
+	it = std::find( wireGui->sourceMacGui()->wireGuiList_.begin(),
+			wireGui->sourceMacGui()->wireGuiList_.end(), wireGui );
+	if ( it != wireGui->sourceMacGui()->wireGuiList_.end() ) {
+		wireGui->sourceMacGui()->wireGuiList_.erase(it);	
+ 	}  
+	it = std::find( wireGui->destMacGui()->wireGuiList_.begin(),
+			wireGui->destMacGui()->wireGuiList_.end(), wireGui );
+	if ( it != wireGui->destMacGui()->wireGuiList_.end() ) {
+		wireGui->destMacGui()->wireGuiList_.erase(it);	
+ 	}  
+	scene_->removeItem( wireGui );
+	delete wireGui;
+
+	// Delete the connection in the song file.
+	srcMac->Disconnect( *dstMac );
+
+	psy::core::Player::Instance()->unlock();
 }
 
 MachineGui *MachineView::findByMachine( psy::core::Machine *mac )

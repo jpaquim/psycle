@@ -36,10 +36,10 @@ public:
     WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView);
     ~WireGui();
 
-    MachineGui *sourceMacGui() const;
+    MachineGui *sourceMacGui();
     void setSourceMacGui(MachineGui *macGui);
 
-    MachineGui *destMacGui() const;
+    MachineGui *destMacGui();
     void setDestMacGui(MachineGui *macGui);
 
     void rewireDest( MachineGui *newDstGui );
