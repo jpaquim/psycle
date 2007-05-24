@@ -34,42 +34,56 @@
 /*int d2i(double d)
 {
 		return (int) ( d<0?d-.5:d+.5);
-}*/
+		}*/
 
 SequencerView::SequencerView( psy::core::Song *asong )
 {
-    song_ = asong;
+	song_ = asong;
 
-    layout_ = new QVBoxLayout();
+	layout_ = new QVBoxLayout();
 
-    seqDraw_ = new SequencerDraw( this );
-    toolBar_ = new QToolBar();
-    toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
-    QAction *insTrkAct = toolBar_->addAction( "Insert Track" );
+	seqDraw_ = new SequencerDraw( this );
+	toolBar_ = new QToolBar();
+	toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
+
+	QAction *insTrkAct = toolBar_->addAction( QIcon(":images/seq-add-track.png" ),
+						  "Insert Track" );
 	insTrkAct->setStatusTip( "Insert a New Track Above Selction");
-    connect( insTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( insertTrack() ) );
-    QAction *delTrkAct = toolBar_->addAction( "Delete Track" );
+	connect( insTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( insertTrack() ) );
+	QAction *delTrkAct = toolBar_->addAction( QIcon(":images/seq-del-track.png" ),
+						  "Delete Track" );
 	delTrkAct->setStatusTip( "Delete Selected Track");
-    toolBar_->addAction( delTrkAct );
-    connect( delTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( deleteTrack() ) );
-    QAction *upTrkAct = toolBar_->addAction( "Move Track Up" );
+	toolBar_->addAction( delTrkAct );
+	connect( delTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( deleteTrack() ) );
+
+	toolBar_->addSeparator();
+
+	QAction *upTrkAct = toolBar_->addAction( QIcon(":images/seq-up-track.png" ),
+						 "Move Track Up" );
 	upTrkAct->setStatusTip( "Move Selected Track Up" );
-    toolBar_->addAction( upTrkAct );
-    connect( upTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveUpTrack() ) );
-    QAction *dnTrkAct = toolBar_->addAction( "Move Track Down" );
+	toolBar_->addAction( upTrkAct );
+	connect( upTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveUpTrack() ) );
+
+	QAction *dnTrkAct = toolBar_->addAction( QIcon(":images/seq-down-track.png" ),
+						 "Move Track Down" );
 	dnTrkAct->setStatusTip( "Move Selected Track Down");
-    toolBar_->addAction( dnTrkAct );
-    connect( dnTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveDownTrack() ) );
-	QAction *ceTrkAct = toolBar_->addAction( "Collapse/Expand");
+	toolBar_->addAction( dnTrkAct );
+	connect( dnTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveDownTrack() ) );
+
+	toolBar_->addSeparator();
+
+
+	QAction *ceTrkAct = toolBar_->addAction( QIcon(":images/seq-collapse.png" ),
+						 "Collapse/Expand");
 	ceTrkAct->setStatusTip( "Collapse a Track or Expand a Collapsed Track");
 	toolBar_->addAction (ceTrkAct);
 //	connect( ceTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( shrinkTrack() ) );
 	
 	
-    layout_->addWidget( toolBar_ );
-    layout_->addWidget( seqDraw_ );
+	layout_->addWidget( toolBar_ );
+	layout_->addWidget( seqDraw_ );
 
-    setLayout( layout_ );
+	setLayout( layout_ );
 }
 
 

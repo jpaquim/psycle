@@ -118,8 +118,6 @@ void MachineView::initKeyjazzSettings()
 WireGui *MachineView::createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
     WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
-/*    connect( wireGui, SIGNAL( startRewiringDest( WireGui* ) ), 
-             this, SLOT( startRewiringDest( WireGui* ) ) );*/
     return wireGui;
 }
 
