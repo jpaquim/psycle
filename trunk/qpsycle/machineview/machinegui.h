@@ -30,72 +30,76 @@ class Machine;
 #include <QAction>
 #include <QObject>
 #include <QPointF>
+#include <QList>
 
 class MachineView;
 class WireGui;
 class MachineTweakDlg;
 
-class MachineGui : public QObject, public QGraphicsRectItem
-{
-    Q_OBJECT
+class MachineGui : public QObject, public QGraphicsRectItem {
+Q_OBJECT
 public:
-    MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
-    void addWireGui(WireGui *wireGui);
-    void setName(const QString &name);
-    QPointF centrePointInSceneCoords();
-    QList<WireGui *> wireGuiList();
-    enum { Type = UserType + 1 };
+	MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+	~MachineGui();
 
-    int type() const { return Type; }
+	void addWireGui(WireGui *wireGui);
+	void setName(const QString &name);
+	QPointF centrePointInSceneCoords();
+	std::vector<WireGui *> wireGuiList();
+	enum { Type = UserType + 1 };
 
-    psy::core::Machine* mac();
-    int noteFromCommand( int command );
+	int type() const { return Type; }
 
-    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	psy::core::Machine* mac();
+	int noteFromCommand( int command );
+
+	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+
+	std::vector<WireGui *> wireGuiList_;
 
 public slots:
-    void showMacTwkDlg();
-    void onDeleteMachineActionTriggered();
-    void onRenameMachineActionTriggered();
-    void onToggleMuteActionTriggered();
-    void onToggleSoloActionTriggered();
-    void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
-                                          // but Qt fails to find it there.
-    void onCloneMachineActionTriggered();
+	void showMacTwkDlg();
+	void onDeleteMachineActionTriggered();
+	void onRenameMachineActionTriggered();
+	void onToggleMuteActionTriggered();
+	void onToggleSoloActionTriggered();
+	void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
+	// but Qt fails to find it there.
+	void onCloneMachineActionTriggered();
 
 protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-    void mousePressEvent( QGraphicsSceneMouseEvent *event );
-    void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+	void mousePressEvent( QGraphicsSceneMouseEvent *event );
+	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+	void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
-    MachineView *machineView;
-    psy::core::Machine *mac_;
+	MachineView *machineView;
+	psy::core::Machine *mac_;
 
-    MachineTweakDlg *macTwkDlg_;
+	MachineTweakDlg *macTwkDlg_;
 
-    QAction *showMacTwkDlgAct_;
-    QAction *deleteMachineAct_;
-    QAction *renameMachineAct_;
-    QAction *cloneMachineAct_;
-    QAction *toggleMuteAct_;
-    QAction *toggleSoloAct_;
+	QAction *showMacTwkDlgAct_;
+	QAction *deleteMachineAct_;
+	QAction *renameMachineAct_;
+	QAction *cloneMachineAct_;
+	QAction *toggleMuteAct_;
+	QAction *toggleSoloAct_;
 
-    QGraphicsTextItem *nameItem;
-    int left_;
-    int top_;
-    QList<WireGui *> wireGuiList_;
+	QGraphicsTextItem *nameItem;
+	int left_;
+	int top_;
 
-    QColor backgroundColor_;
+
+	QColor backgroundColor_;
 
 signals:
-    void startNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
-    void closeNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
-    void chosen( MachineGui *macGui );
-    void deleteRequest( MachineGui *macGui );
-    void renamed();
-    void cloneRequest( MachineGui *macGui );
+	void startNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
+	void closeNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
+	void chosen( MachineGui *macGui );
+	void deleteRequest( MachineGui *macGui );
+	void renamed();
+	void cloneRequest( MachineGui *macGui );
 
 };
 

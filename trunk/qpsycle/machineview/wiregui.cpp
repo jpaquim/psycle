@@ -57,11 +57,25 @@
      setDestMacGui( destMacGui );
  }
 
- WireGui::~WireGui()
- {
- }
+WireGui::~WireGui()
+{
+//	sourceMacGui()->wireGuiList().removeAll( this );
+//	destMacGui()->wireGuiList().removeAll( this );
+// 	QList<WireGui*>::iterator it = sourceMacGui()->wireGuiList().begin();
+// 	for ( ; it != sourceMacGui()->wireGuiList().end(); it++ ) {
+// 		if ( *it == this ) {
+// 			sourceMacGui()->wireGuiList().erase( it );
+// 		}
+// 	}
+// 	it = destMacGui()->wireGuiList().begin();
+// 	for ( ; it != destMacGui()->wireGuiList().end(); it++ ) {
+// 		if ( *it == this ) {
+// 			destMacGui()->wireGuiList().erase( it );
+// 		}
+// 	}
+}
 
- MachineGui *WireGui::sourceMacGui() const
+ MachineGui *WireGui::sourceMacGui() 
  {
      return source;
  }
@@ -72,7 +86,7 @@
      adjust();
  }
 
- MachineGui *WireGui::destMacGui() const
+ MachineGui *WireGui::destMacGui() 
  {
      return dest;
  }
@@ -132,7 +146,7 @@ void WireGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 
 void WireGui::rewireDest( MachineGui *newDestGui )
 {
-    // Update GUI connection.
+/*    // Update GUI connection.
     MachineGui *oldDestGui = destMacGui();
     int wireGuiIndex = oldDestGui->wireGuiList().indexOf( this );
     oldDestGui->wireGuiList().removeAt( wireGuiIndex );
@@ -144,12 +158,12 @@ void WireGui::rewireDest( MachineGui *newDestGui )
     psy::core::Player::Instance()->lock();
     int oldDstWireIndex = srcMac->FindOutputWire( oldDestGui->mac()->id() );
     machineView->song()->ChangeWireDestMac( srcMac->id(), newDstMac->id(), oldDstWireIndex );
-    psy::core::Player::Instance()->unlock();
+    psy::core::Player::Instance()->unlock();*/
 }
 
 void WireGui::rewireSource( MachineGui *newSrcGui )
 {
-    // Update GUI connection.
+/*    // Update GUI connection.
     MachineGui *oldSrcGui = sourceMacGui();
     int wireGuiIndex = oldSrcGui->wireGuiList().indexOf( this );
     oldSrcGui->wireGuiList().removeAt( wireGuiIndex );
@@ -161,7 +175,7 @@ void WireGui::rewireSource( MachineGui *newSrcGui )
     psy::core::Player::Instance()->lock();
     int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->id() );
     machineView->song()->ChangeWireSourceMac( newSrcMac->id(), dstMac->id(), oldSrcWireIndex );
-    psy::core::Player::Instance()->unlock();
+    psy::core::Player::Instance()->unlock();*/
 }
 
 void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
