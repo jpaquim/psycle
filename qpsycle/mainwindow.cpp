@@ -477,6 +477,7 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 void MainWindow::populateMachineCombo()
 {
 	if (!song_) return;
+	int currentIndex = macCombo_->currentIndex();
 
 	macCombo_->clear();
 
@@ -526,13 +527,12 @@ void MainWindow::populateMachineCombo()
 	}
 
 	if (!filled) {
-//        macCombo_->removeChilds();
 		macCombo_->addItem( "No Machines Loaded" );
 		selected = 0;
 	} else if (!found)  {
 		selected=line;
 	}
-	macCombo_->setCurrentIndex(selected);
+	macCombo_->setCurrentIndex( currentIndex );
 	macCombo_->update();
 }
 
@@ -589,14 +589,14 @@ void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* select
 
 void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 {
-    populateMachineCombo();
-    int bus = song_->FindBusFromIndex( mac->id() );
-    macCombo_->setCurrentIndex( bus );
+	populateMachineCombo();
+	int bus = song_->FindBusFromIndex( mac->id() );
+	if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
+		macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
 }
 
 void MainWindow::onMachineChosen( MachineGui *macGui )
 {
-	// FIXME: shouldn't rely on macCombo to set seqBus as we do here.
 	int comboIdx = macCombo_->findData( macGui->mac()->id() );
 	macCombo_->setCurrentIndex( comboIdx );
 }
