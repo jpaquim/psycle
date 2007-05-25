@@ -32,12 +32,12 @@
 #include <QGraphicsSceneContextMenuEvent>
 
 EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
-     : MachineGui(left, top, mac, macView)
+	: MachineGui(left, top, mac, macView)
 {
-    setBrush( QColor( 0, 180, 0 ) );
+	setBrush( QColor( 0, 180, 0 ) );
 
-    toggleBypassAct_ = new QAction( "Bypass", this );
-    connect( toggleBypassAct_, SIGNAL( triggered() ), this, SLOT( onToggleBypassActionTriggered() ) );
+	toggleBypassAct_ = new QAction( "Bypass", this );
+	connect( toggleBypassAct_, SIGNAL( triggered() ), this, SLOT( onToggleBypassActionTriggered() ) );
 }
 
 void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
@@ -86,3 +86,12 @@ void EffectGui::keyPressEvent( QKeyEvent * event )
     event->ignore();
 }
 
+void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
+{
+	if ( event->button() == Qt::LeftButton &&
+	     event->modifiers() == Qt::ControlModifier ) 
+	{
+		emit chosen( this );
+	}
+	QGraphicsItem::mousePressEvent( event );
+}

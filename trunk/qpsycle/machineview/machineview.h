@@ -52,8 +52,8 @@ public:
 	void StopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
 	psy::core::Song *song();
 	void setSong( psy::core::Song *song ) { song_ = song; }
-	void setTheChosenOne( MachineGui* macGui ) { theChosenOne_ = macGui; }
-	MachineGui* theChosenOne() { return theChosenOne_; }
+	void setChosenMachine( MachineGui* macGui ) { chosenMachine_ = macGui; }
+	MachineGui* chosenMachine() { return chosenMachine_; }
 	int octave() const;
 	void setOctave( int newOctave );
 	void createMachineGui( psy::core::Machine *mac );
@@ -71,21 +71,20 @@ public slots:
 	void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
 	void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
 	void deleteConnection( WireGui *wireGui );
-//    void startRewiringDest( WireGui *wireGui );
-	void onMachineGuiChosen( MachineGui *macGui );
+	void onMachineChosen( MachineGui *macGui );
 	MachineGui* findMachineGuiByMachineIndex( int index );
 	void onDeleteMachineRequest( MachineGui *macGui );
 	void onMachineRenamed();
 	void cloneMachine( MachineGui *macGui );
 
 signals:
-	void machineGuiChosen( MachineGui *macGui );
+	void machineChosen( MachineGui *macGui );
 	void machineDeleted( int macIndex );
 	void machineRenamed();
 
 private:
 	MachineGui* findByMachine( psy::core::Machine *mac );
-	MachineGui *theChosenOne_;
+	MachineGui *chosenMachine_;
 
 
 	void createMachineGuis();

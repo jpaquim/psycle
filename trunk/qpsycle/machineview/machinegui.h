@@ -104,20 +104,21 @@ signals:
 };
 
 class GeneratorGui : public MachineGui {
-    Q_OBJECT
+Q_OBJECT
 public:
-    GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
-    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
+	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 
 public slots:
-    void onNotePress( int note, psy::core::Machine* mac );
-    void onNoteRelease( int note );
+	void onNotePress( int note, psy::core::Machine* mac );
+	void onNoteRelease( int note );
 
 protected:
-    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
-    void keyPressEvent( QKeyEvent * event );
-    void keyReleaseEvent( QKeyEvent * event );
+	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
+	void keyPressEvent( QKeyEvent * event );
+	void keyReleaseEvent( QKeyEvent * event );
+	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 };
 
 #endif

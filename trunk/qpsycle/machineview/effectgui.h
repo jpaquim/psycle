@@ -27,18 +27,18 @@ class QPainter;
 class QKeyEvent;
 class QGraphicsSceneContextMenuEvent;
 
-class EffectGui : public MachineGui
-{
+class EffectGui : public MachineGui {
 public:
-    EffectGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
-    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	EffectGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
+	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 protected:
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
-    void keyPressEvent( QKeyEvent * event );
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+	void keyPressEvent( QKeyEvent * event );
+	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 
 private:
-    QAction *toggleBypassAct_;
+	QAction *toggleBypassAct_;
 };
 
 #endif

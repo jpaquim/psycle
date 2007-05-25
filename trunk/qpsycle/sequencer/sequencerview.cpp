@@ -77,6 +77,7 @@ SequencerView::SequencerView( psy::core::Song *asong )
 						 "Collapse/Expand");
 	ceTrkAct->setStatusTip( "Collapse a Track or Expand a Collapsed Track");
 	toolBar_->addAction (ceTrkAct);
+
 //	connect( ceTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( shrinkTrack() ) );
 	
 	

@@ -78,7 +78,7 @@ private slots:
 	void onSampleComboBoxIndexChanged( int newIndex );
 	void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
 	void onNewMachineCreated( psy::core::Machine *mac );
-	void onMachineGuiChosen( MachineGui *macGui );
+	void onMachineChosen( MachineGui *macGui );
 	void onPatternDeleted();
 	void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
 	void onPatternNameChanged();

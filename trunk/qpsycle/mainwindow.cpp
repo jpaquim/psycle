@@ -136,8 +136,8 @@ void MainWindow::setupSignals()
 
     connect( macView_->scene(), SIGNAL( newMachineCreated( psy::core::Machine* ) ),
              this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
-    connect( macView_, SIGNAL( machineGuiChosen( MachineGui* ) ),
-             this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
+    connect( macView_, SIGNAL( machineChosen( MachineGui* ) ),
+             this, SLOT( onMachineChosen( MachineGui* ) ) );
     connect( macView_, SIGNAL( machineDeleted( int ) ),
              this, SLOT( onMachineDeleted( int ) ) );
     connect( macView_, SIGNAL( machineRenamed( ) ),
@@ -544,40 +544,40 @@ void MainWindow::initSampleCombo()
 
 void MainWindow::refreshSampleComboBox()
 {
-    std::ostringstream buffer;
-    buffer.setf(std::ios::uppercase);
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);
 
-    int listlen = 0;
-    for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
-    {
-        buffer.str("");
-        buffer << std::setfill('0') << std::hex << std::setw(2);
-        buffer << i << ": " << song_->_pInstrument[i]->_sName;
-        QString name = QString::fromStdString( buffer.str() );
-        sampCombo_->setItemText( i, name );
-        listlen++;
-    }
-    if (song_->auxcolSelected >= listlen) {
-        song_->auxcolSelected = 0;
-    }
+	int listlen = 0;
+	for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
+	{
+		buffer.str("");
+		buffer << std::setfill('0') << std::hex << std::setw(2);
+		buffer << i << ": " << song_->_pInstrument[i]->_sName;
+		QString name = QString::fromStdString( buffer.str() );
+		sampCombo_->setItemText( i, name );
+		listlen++;
+	}
+	if (song_->auxcolSelected >= listlen) {
+		song_->auxcolSelected = 0;
+	}
 
 }
 
 void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
 {
-    song_->seqBus = newIndex;
+	song_->seqBus = newIndex;
 
-    // Choose the necessary MachineGui in the MachineView.
-    MachineGui *macGui = macView_->findMachineGuiByMachineIndex( newIndex );
-    macView_->setTheChosenOne( macGui );
-    macView_->update();
+	// Choose the necessary MachineGui in the MachineView.
+	MachineGui *macGui = macView_->findMachineGuiByMachineIndex( newIndex );
+	macView_->setChosenMachine( macGui );
+	macView_->update();
 }
 
 void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 {
 	song_->instSelected   = newIndex;
-    song_->auxcolSelected = newIndex;
-    // FIXME: when wave editor is more advanced, we need to notify it of this change.
+	song_->auxcolSelected = newIndex;
+	// FIXME: when wave editor is more advanced, we need to notify it of this change.
 }
 
 void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )
@@ -592,7 +592,7 @@ void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
     macCombo_->setCurrentIndex( bus );
 }
 
-void MainWindow::onMachineGuiChosen( MachineGui *macGui )
+void MainWindow::onMachineChosen( MachineGui *macGui )
 {
     // FIXME: shouldn't rely on macCombo to set seqBus as we do here.
     macCombo_->setCurrentIndex( macGui->mac()->id() );
