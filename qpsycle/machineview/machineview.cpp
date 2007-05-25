@@ -419,9 +419,10 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
 
 void MachineView::onMachineChosen( MachineGui *macGui )
 {
-    setChosenMachine( macGui );
-    emit machineChosen( macGui );
-    update();
+	song_->seqBus = song_->FindBusFromIndex( macGui->mac()->id() );
+	setChosenMachine( macGui );
+	emit machineChosen( macGui );
+	update();
 }
 
 int MachineView::octave() const

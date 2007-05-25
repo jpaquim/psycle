@@ -476,62 +476,64 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 
 void MainWindow::populateMachineCombo()
 {
-    if (!song_) return;
+	if (!song_) return;
 
-    macCombo_->clear();
+	macCombo_->clear();
 
-    bool filled=false;
-    bool found=false;
-    int selected = -1;
-    int line = -1;
-    std::ostringstream buffer;
-    buffer.setf(std::ios::uppercase);
+	bool filled=false;
+	bool found=false;
+	int selected = -1;
+	int line = -1;
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);
 
-    for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
-    {
-        if( song_->machine(b)) {
-            buffer.str("");
-            buffer << std::setfill('0') << std::hex << std::setw(2);
-            buffer << b << ": " << song_->machine(b)->GetEditName();
-            macCombo_->addItem( QString::fromStdString( buffer.str() ) );
+	for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
+	{
+		if( song_->machine(b)) {
+			buffer.str("");
+			buffer << std::setfill('0') << std::hex << std::setw(2);
+			buffer << b << ": " << song_->machine(b)->GetEditName();
+			macCombo_->addItem( QString::fromStdString( buffer.str() ),
+					    song_->machine(b)->id() );
 
-            //cb->SetItemData(cb->GetCount()-1,b);
-            if (!found) selected++;
-            if (song_->seqBus == b) found = true;
-            filled = true;
-        }
-    }
+			//cb->SetItemData(cb->GetCount()-1,b);
+			if (!found) selected++;
+			if (song_->seqBus == b) found = true;
+			filled = true;
+		}
+	}
 
-    macCombo_->addItem( "--------------------------");
-    //cb->SetItemData(cb->GetCount()-1,65535);
-    if (!found)  {
-        selected++;
-        line = selected;
-    }
+	macCombo_->addItem( "--------------------------");
+	//cb->SetItemData(cb->GetCount()-1,65535);
+	if (!found)  {
+		selected++;
+		line = selected;
+	}
 
-    for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
-    {
-        if(song_->machine(b)) {
-            buffer.str("");
-            buffer << std::setfill('0') << std::hex << std::setw(2);
-   	        buffer << b << ": " << song_->machine(b)->GetEditName();
-            macCombo_->addItem( QString::fromStdString( buffer.str() ) );
-            //cb->SetItemData(cb->GetCount()-1,b);
-            if (!found) selected++;
-            if (song_->seqBus == b) found = true;
-            filled = true;
-        }
-    }
+	for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
+	{
+		if(song_->machine(b)) {
+			buffer.str("");
+			buffer << std::setfill('0') << std::hex << std::setw(2);
+			buffer << b << ": " << song_->machine(b)->GetEditName();
+			macCombo_->addItem( QString::fromStdString( buffer.str() ),
+					    song_->machine(b)->id() );
+			//cb->SetItemData(cb->GetCount()-1,b);
+			if (!found) selected++;
+			if (song_->seqBus == b) found = true;
+			filled = true;
+		}
+	}
 
-    if (!filled) {
+	if (!filled) {
 //        macCombo_->removeChilds();
-        macCombo_->addItem( "No Machines Loaded" );
-        selected = 0;
-    } else if (!found)  {
-        selected=line;
-    }
-    macCombo_->setCurrentIndex(selected);
-    macCombo_->update();
+		macCombo_->addItem( "No Machines Loaded" );
+		selected = 0;
+	} else if (!found)  {
+		selected=line;
+	}
+	macCombo_->setCurrentIndex(selected);
+	macCombo_->update();
 }
 
 void MainWindow::initSampleCombo()
@@ -594,8 +596,9 @@ void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 
 void MainWindow::onMachineChosen( MachineGui *macGui )
 {
-    // FIXME: shouldn't rely on macCombo to set seqBus as we do here.
-    macCombo_->setCurrentIndex( macGui->mac()->id() );
+	// FIXME: shouldn't rely on macCombo to set seqBus as we do here.
+	int comboIdx = macCombo_->findData( macGui->mac()->id() );
+	macCombo_->setCurrentIndex( comboIdx );
 }
 
 void MainWindow::onPatternDeleted()
@@ -612,14 +615,12 @@ void MainWindow::onPatternNameChanged()
 {
     // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
     seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
-
 }
 
 void MainWindow::onCategoryColorChanged()
 {
     // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
     seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
-
 }
 
 void MainWindow::timerEvent( QTimerEvent *ev )
