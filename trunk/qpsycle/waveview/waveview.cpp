@@ -48,10 +48,10 @@ class QVBoxLayout;
 	 //sample loading
 	 QLabel *playLabel = new QLabel("Play: ");
 	 
-	 loadSmp_ = new QAction( "Load Sample", this );
+	 loadSmp_ = new QAction( QIcon(":images/wave-open.png"), "Load Sample", this );
 	 connect( loadSmp_, SIGNAL( triggered() ), this, SLOT( onLoadButtonClicked() ) );
 	 
-	 saveSmp_ = new QAction( "Save Sample", this);
+	 saveSmp_ = new QAction( QIcon(":images/wave-save.png"), "Save Sample", this);
 	 connect( saveSmp_, SIGNAL( triggered() ), this, SLOT( onSaveButtonClicked() ) );
 	 
 	 playsSmp_ = new QAction(QIcon(":/images/wave_playstart.png"), tr("Play From Start"), this);
@@ -60,9 +60,9 @@ class QVBoxLayout;
 	 
 	 //editing
 	 QLabel *editLabel = new QLabel("Edit: ", this);
-	 cutAct_ = new QAction("Cut", this);
-	 copyAct_ = new QAction("Copy", this);
-	 pasteAct_ = new QAction("Paste", this);
+	 cutAct_ = new QAction( QIcon(":images/wave-cut.png"), "Cut", this);
+	 copyAct_ = new QAction( QIcon(":images/wave-copy.png"), "Copy", this);
+	 pasteAct_ = new QAction( QIcon(":images/wave-paste.png"), "Paste", this);
 	 selAct_ = new QAction("Select All", this);
 	 
 	 //effects
