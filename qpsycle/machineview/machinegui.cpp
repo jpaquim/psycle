@@ -105,10 +105,6 @@ MachineGui::~MachineGui()
 
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-	// FIXME: not a good idea to do anything intensive in the paint method...
-	if ( this == machineView->theChosenOne() ) {
-		painter->setPen( QPen( Qt::red ) );
-	}
 	// Do the default painting business for a QGRectItem.
 	QGraphicsRectItem::paint( painter, option, widget );
 	painter->setPen( QPen( Qt::white ) );
@@ -171,7 +167,6 @@ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value
 void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
 {
 	QGraphicsItem::mousePressEvent( event ); // Get the default behaviour.
-	emit chosen( this );    
 }
 
 void MachineGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
@@ -285,11 +280,16 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-    MachineGui::paint( painter, option, widget );
-    mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
-    painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
-    mac()->song()->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
-    painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
+	// FIXME: not a good idea to do anything intensive in the paint method...
+	if ( this == machineView->chosenMachine() ) {
+		painter->setPen( QPen( Qt::red ) );
+	}
+
+	MachineGui::paint( painter, option, widget );
+	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
+	painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
+	mac()->song()->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
+	painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
 }
 
 void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
@@ -312,6 +312,14 @@ void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	menu.addAction( toggleMuteAct_ );
 	menu.addAction( toggleSoloAct_ );
 	QAction *a = menu.exec( event->screenPos() );
+}
+
+void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
+{
+	if ( event->button() == Qt::LeftButton ) {
+		emit chosen( this );    
+	}
+	QGraphicsItem::mousePressEvent( event );
 }
 
 void GeneratorGui::keyPressEvent( QKeyEvent * event )

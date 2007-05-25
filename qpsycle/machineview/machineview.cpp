@@ -72,6 +72,40 @@ void MachineView::createMachineGuis()
 	}
 }
 
+void MachineView::createMachineGui( psy::core::Machine *mac )
+{
+	MachineGui *macGui;
+	switch ( mac->mode() ) {							
+        case psy::core::MACHMODE_GENERATOR:
+		macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+		break;
+        case psy::core::MACHMODE_FX:
+		macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+		break;
+        case psy::core::MACHMODE_MASTER: 
+		macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+		break;
+        default:
+		macGui = 0;
+	}
+
+	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ||
+	     mac->mode() == psy::core::MACHMODE_FX ) {
+		connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
+			 this, SLOT( onMachineChosen( MachineGui* ) ) );
+		connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
+			 this, SLOT( onMachineChosen( MachineGui* ) ) );
+		connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
+			 this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
+		connect( macGui, SIGNAL( renamed() ),
+			 this, SLOT( onMachineRenamed() ) );
+		connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
+			 this, SLOT( cloneMachine( MachineGui* ) ) );
+	}
+	scene_->addItem(macGui);
+	machineGuis.push_back(macGui);
+}
+
 void MachineView::createWireGuis() 
 {
 	if ( song_ ) {
@@ -382,38 +416,11 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
     }
 }
 
-void MachineView::createMachineGui( psy::core::Machine *mac )
-{
-    MachineGui *macGui;
-    switch ( mac->mode() ) {							
-        case psy::core::MACHMODE_GENERATOR:
-            macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-        break;
-        case psy::core::MACHMODE_FX:
-            macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-        break;
-        case psy::core::MACHMODE_MASTER: 
-            macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
-        break;
-        default:
-            macGui = 0;
-    }
-    connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
-             this, SLOT( onMachineGuiChosen( MachineGui* ) ) );
-    connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
-             this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
-    connect( macGui, SIGNAL( renamed() ),
-             this, SLOT( onMachineRenamed() ) );
-    connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
-             this, SLOT( cloneMachine( MachineGui* ) ) );
-    scene_->addItem(macGui);
-    machineGuis.push_back(macGui);
-}
 
-void MachineView::onMachineGuiChosen( MachineGui *macGui )
+void MachineView::onMachineChosen( MachineGui *macGui )
 {
-    setTheChosenOne( macGui );
-    emit machineGuiChosen( macGui );
+    setChosenMachine( macGui );
+    emit machineChosen( macGui );
     update();
 }
 
