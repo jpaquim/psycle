@@ -1,4 +1,4 @@
-/***************************************************************************
+ /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
 *                                                                         *
@@ -506,4 +506,137 @@ void MachineView::cloneMachine( MachineGui *macGui )
 		}
 	} 
 
+}
+
+void MachineScene::keyPressEvent( QKeyEvent * event )
+{
+	if ( !event->isAutoRepeat() ) 
+	{
+		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+		int note = NULL;
+		note = macView_->noteFromCommand( command );
+		if (note) {
+			onNotePress( note, macView_->chosenMachine()->mac() );
+		}
+	}
+	event->ignore();
+}
+
+// FIXME: this gets triggered even when you're still holding the key down.  
+// Most likely a Qt bug...
+void MachineScene::keyReleaseEvent( QKeyEvent * event )
+{
+	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+
+	int note = macView_->noteFromCommand( command );
+	if (note) {
+		onNoteRelease( note );
+	}
+	event->ignore();
+}
+
+void MachineScene::onNotePress( int note, psy::core::Machine* mac )
+{
+	macView_->PlayNote( macView_->octave() * 12 + note, 127, false, mac );   
+}
+
+void MachineScene::onNoteRelease( int note )
+{
+	macView_->StopNote( note );   
+}
+
+// FIXME: should be somewhere else, perhaps global.
+int MachineView::noteFromCommand( int command )
+{
+	int note = NULL;
+	switch ( command ) {
+        case commands::key_C_0:
+		note = 1;
+		break;
+        case commands::key_CS0:
+		note = 2;
+		break;
+        case commands::key_D_0:
+		note = 3;
+		break;
+        case commands::key_DS0:
+		note = 4;
+		break;
+        case commands::key_E_0:
+		note = 5;
+		break;
+        case commands::key_F_0:
+		note = 6;
+		break;
+        case commands::key_FS0:
+		note = 7;
+		break;
+        case commands::key_G_0:
+		note = 8;
+		break;
+        case commands::key_GS0:
+		note = 9;
+		break;
+        case commands::key_A_0:
+		note = 10;
+		break;
+        case commands::key_AS0:
+		note = 11;
+		break;
+        case commands::key_B_0: 
+		note = 12;
+		break;
+        case commands::key_C_1:
+		note = 13;
+		break;
+        case commands::key_CS1:
+		note = 14;
+		break;
+        case commands::key_D_1:
+		note = 15;
+		break;
+        case commands::key_DS1:
+		note = 16;
+		break;
+        case commands::key_E_1:
+		note = 17;
+		break;
+        case commands::key_F_1:
+		note = 18;
+		break;
+        case commands::key_FS1:
+		note = 19;
+		break;
+        case commands::key_G_1:
+		note = 20;
+		break;
+        case commands::key_GS1:
+		note = 21;
+		break;
+        case commands::key_A_1:
+		note = 22;
+		break;
+        case commands::key_AS1:
+		note = 23;
+		break;
+        case commands::key_B_1: 
+		note = 24;
+		break;
+        case commands::key_C_2:
+		note = 25;
+		break;
+        case commands::key_CS2:
+		note = 26;
+		break;
+        case commands::key_D_2:
+		note = 27;
+		break;
+        case commands::key_DS2:
+		note = 28;
+		break;
+        case commands::key_E_2:
+		note = 29;
+		break;
+	}
+	return note;
 }

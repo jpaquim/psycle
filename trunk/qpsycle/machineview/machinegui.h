@@ -55,6 +55,8 @@ public:
 
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
+	MachineView *macView() { return machineView; }
+
 	std::vector<WireGui *> wireGuiList_;
 
 public slots:
@@ -111,8 +113,8 @@ public:
 
 
 public slots:
-	void onNotePress( int note, psy::core::Machine* mac );
-	void onNoteRelease( int note );
+//	void onNotePress( int note, psy::core::Machine* mac );
+	//void onNoteRelease( int note );
 
 protected:
 	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
