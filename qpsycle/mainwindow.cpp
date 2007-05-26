@@ -46,8 +46,7 @@
 
 MainWindow::MainWindow()
 {
-	song_ = new psy::core::Song(psy::core::Player::Instance());
-	setupSong();
+	song_ = createBlankSong();
 	setupSound();
 	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
 
@@ -71,16 +70,6 @@ MainWindow::MainWindow()
 	patView_->setOctave( 4 );
 
 	audioCnfDlg = new AudioConfigDlg( this );
-}
-
-void MainWindow::setupSong()
-{
-    // Setup a blank song.
-    psy::core::PatternCategory* category0 = song_->patternSequence()->patternData()->createNewCategory("New Category");
-    psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
-
-    psy::core::SequenceLine *seqLine = song_->patternSequence()->createNewLine();
-	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
 }
 
 void MainWindow::setupSound()
