@@ -47,9 +47,9 @@
 MachineView::MachineView(psy::core::Song *song)
 {
 	song_ = song;
-	scene_ = new MachineScene(this);
-	scene_->setBackgroundBrush(Qt::black);
-	setScene(scene_);
+	setScene( new MachineScene( this ) );
+	scene()->setBackgroundBrush(Qt::black);
+	
 	setAlignment( Qt::AlignLeft | Qt::AlignTop );
 	setDragMode( QGraphicsView::RubberBandDrag );
 	setBackgroundBrush(Qt::black);
@@ -62,10 +62,10 @@ MachineView::MachineView(psy::core::Song *song)
 
 void MachineView::createMachineGuis()
 {
-	if ( song_ ) {
-		for(int c=0;c<psy::core::MAX_MACHINES;c++)
+	if ( song() ) {
+		for( int m=0; m < psy::core::MAX_MACHINES; m++ )
 		{
-			psy::core::Machine* mac = song_->machine(c);
+			psy::core::Machine* mac = song()->machine(m);
 			if ( mac ) {
 				createMachineGui( mac );
 			}
@@ -111,24 +111,28 @@ MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 
 void MachineView::createWireGuis() 
 {
-	if ( song_ ) {
-		for(int c=0;c<psy::core::MAX_MACHINES;c++)
+	if ( song() ) 
+	{
+		for( int m=0; m < psy::core::MAX_MACHINES; m++ )
 		{
-			psy::core::Machine* tmac = song_->machine(c);
-			if (tmac) for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
-				  {
-					  if (tmac->_connection[w]) {
-						  MachineGui* srcMacGui = findByMachine(tmac);
-						  if ( srcMacGui!=0 ) {
-							  psy::core::Machine *pout = song_->machine(tmac->_outputMachines[w]);
-							  MachineGui* dstMacGui = findByMachine(pout);
-							  if ( dstMacGui != 0 ) {
-								  WireGui *wireGui = createWireGui( srcMacGui, dstMacGui );
-								  scene_->addItem( wireGui );
-							  }
-						  }
-					  }
-				  }
+			psy::core::Machine* tmac = song()->machine(m);
+			if (tmac) 
+			{ 
+				for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
+				{
+					if (tmac->_connection[w]) {
+						MachineGui* srcMacGui = findMachineGuiByCoreMachine(tmac);
+						if ( srcMacGui!=0 ) {
+							psy::core::Machine *pout = song()->machine(tmac->_outputMachines[w]);
+							MachineGui* dstMacGui = findMachineGuiByCoreMachine(pout);
+							if ( dstMacGui != 0 ) {
+								WireGui *wireGui = createWireGui( srcMacGui, dstMacGui );
+								scene()->addItem( wireGui );
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -139,7 +143,7 @@ void MachineView::createTempLine()
 	tempLine_ = new QGraphicsLineItem(0, 0, 0, 0);
 	tempLine_->setPen(QPen(Qt::gray,2,Qt::DotLine));
 	tempLine_->setVisible(false);// We don't want it to be visible yet.
-	scene_->addItem(tempLine_);
+	scene()->addItem(tempLine_);
 	creatingWire_ = false;
 }
 
@@ -147,7 +151,6 @@ void MachineView::createTempLine()
 void MachineView::initKeyjazzSettings()
 {
 	outtrack = 0;
-	notetrack[psy::core::MAX_TRACKS];
 	for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
 }
 
@@ -191,6 +194,7 @@ void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 
 void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
 {
+	Q_UNUSED( event );
 	MachineGui *dstMacGui = machineGuiAtPoint( tempLine_->line().p2() );
 	if ( dstMacGui ) {
 		connectMachines( srcMacGui, dstMacGui );
@@ -215,11 +219,11 @@ MachineGui *MachineView::machineGuiAtPoint( QPointF point )
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
 	if ( dstMacGui->mac()->acceptsConnections() ) {
-		if (song_->InsertConnection( srcMacGui->mac()->id(), dstMacGui->mac()->id(), 1.0f))
+		if (song()->InsertConnection( srcMacGui->mac()->id(), dstMacGui->mac()->id(), 1.0f))
 		{
 			// Make a new wiregui connection.
 			WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );
-			scene_->addItem( newWireGui );
+			scene()->addItem( newWireGui );
 		}
 	}
 }
@@ -281,7 +285,7 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	if ( it != wireGui->destMacGui()->wireGuiList_.end() ) {
 		wireGui->destMacGui()->wireGuiList_.erase(it);	
  	}  
-	scene_->removeItem( wireGui );
+	scene()->removeItem( wireGui );
 	delete wireGui;
 
 	// Delete the connection in the song file.
@@ -290,7 +294,7 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	psy::core::Player::Instance()->unlock();
 }
 
-MachineGui *MachineView::findByMachine( psy::core::Machine *mac )
+MachineGui *MachineView::findMachineGuiByCoreMachine( psy::core::Machine *mac )
 {
 	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
 		MachineGui* machineGui = *it;
@@ -299,7 +303,7 @@ MachineGui *MachineView::findByMachine( psy::core::Machine *mac )
 	return 0;
 }
 
-MachineGui *MachineView::findMachineGuiByMachineIndex( int index )
+MachineGui *MachineView::findMachineGuiByCoreMachineIndex( int index )
 {
 	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
 		MachineGui* machineGui = *it;
@@ -444,7 +448,7 @@ void MachineView::cloneMachine( MachineGui *macGui )
 		// we need to find an empty slot
 		for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
 		{
-			if (!song_->machine(i))
+			if (!song()->machine(i))
 			{
 				dst = i;
 				break;
@@ -455,7 +459,7 @@ void MachineView::cloneMachine( MachineGui *macGui )
 	{
 		for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
 		{
-			if (!song_->machine(i))
+			if (!song()->machine(i))
 			{
 				dst = i;
 				break;
@@ -465,7 +469,7 @@ void MachineView::cloneMachine( MachineGui *macGui )
 	if (dst >= 0)
 	{
       
-		if (!song_->CloneMac(src,dst))
+		if (!song()->CloneMac(src,dst))
 		{
 			qDebug("Cloning failed");
 		}
@@ -583,7 +587,7 @@ void MachineView::addNewMachineGui( psy::core::Machine *mac )
 
 	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
 		setChosenMachine( macGui );
-		song_->seqBus = song_->FindBusFromIndex( macGui->mac()->id() );
+		song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
 		emit newMachineCreated( mac );
 	}
 	scene()->update( scene()->itemsBoundingRect() );
@@ -592,7 +596,7 @@ void MachineView::addNewMachineGui( psy::core::Machine *mac )
 
 void MachineView::onMachineChosen( MachineGui *macGui )
 {
-	song_->seqBus = song_->FindBusFromIndex( macGui->mac()->id() );
+	song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
 
 	setChosenMachine( macGui );
 	scene()->update( scene()->itemsBoundingRect() );

@@ -65,6 +65,8 @@ public:
 	int noteFromCommand( int command );
 	void addNewMachineGui( psy::core::Machine *mac );
 
+	MachineGui* findMachineGuiByCoreMachineIndex( int index );
+
 protected:
 	void keyPressEvent(QKeyEvent *event);
 
@@ -75,7 +77,6 @@ public slots:
 	void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
 	void deleteConnection( WireGui *wireGui );
 	void onMachineChosen( MachineGui *macGui );
-	MachineGui* findMachineGuiByMachineIndex( int index );
 	void onDeleteMachineRequest( MachineGui *macGui );
 	void onMachineRenamed();
 	void cloneMachine( MachineGui *macGui );
@@ -87,7 +88,8 @@ signals:
 	void newMachineCreated( psy::core::Machine* mac );
 
 private:
-	MachineGui* findByMachine( psy::core::Machine *mac );
+	MachineGui* findMachineGuiByCoreMachine( psy::core::Machine *mac );
+
 	MachineGui *chosenMachine_;
 
 
