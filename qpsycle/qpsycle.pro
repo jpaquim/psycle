@@ -40,6 +40,7 @@ HEADERS += mainwindow.h \
            machineview/machineview.h \
            machineview/newmachinedlg.h \
            machineview/wiregui.h \
+           machineview/generatorgui.h \
            machineview/mastergui.h \
            machineview/effectgui.h \
            patternview/patternview.h \
@@ -119,6 +120,7 @@ SOURCES += mainwindow.cpp \
            machineview/machineview.cpp \
            machineview/newmachinedlg.cpp \
            machineview/wiregui.cpp \
+           machineview/generatorgui.cpp \
            machineview/mastergui.cpp \
            machineview/effectgui.cpp \
            patternview/patternview.cpp \
