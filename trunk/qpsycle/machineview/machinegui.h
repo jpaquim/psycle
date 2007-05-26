@@ -55,7 +55,7 @@ public:
 
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-	MachineView *macView() { return machineView; }
+	MachineView *macView() { return m_macView; }
 
 	std::vector<WireGui *> wireGuiList_;
 
@@ -76,10 +76,10 @@ protected:
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
-	MachineView *machineView;
-	psy::core::Machine *mac_;
+	MachineView *m_macView;
+	psy::core::Machine *m_mac;
 
-	MachineTweakDlg *macTwkDlg_;
+	MachineTweakDlg *m_macTwkDlg;
 
 	QAction *showMacTwkDlgAct_;
 	QAction *deleteMachineAct_;
@@ -105,22 +105,5 @@ signals:
 
 };
 
-class GeneratorGui : public MachineGui {
-Q_OBJECT
-public:
-	GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
-	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-
-
-public slots:
-//	void onNotePress( int note, psy::core::Machine* mac );
-	//void onNoteRelease( int note );
-
-protected:
-	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
-	void keyPressEvent( QKeyEvent * event );
-	void keyReleaseEvent( QKeyEvent * event );
-	void mousePressEvent( QGraphicsSceneMouseEvent *event );
-};
 
 #endif

@@ -44,9 +44,9 @@
 #include <iomanip>
 
 MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
-	: machineView(macView)
+	: m_macView(macView),
+	  m_mac(mac)
 {
-	mac_ = mac;
 	left_ = left;
 	top_ = top;
 
@@ -59,7 +59,7 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 	nameItem->setPos( 5, 20 );
 	nameItem->setAcceptedMouseButtons(0);
 
-	QString string = QString::fromStdString( mac->GetEditName() );
+	QString string = QString::fromStdString( m_mac->GetEditName() );
 	setName( QString(string) );
 
 	setZValue( 1 );
@@ -69,17 +69,17 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 	setBrush( Qt::blue );
 	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
 
-	macTwkDlg_ = new MachineTweakDlg( this, machineView );
+	m_macTwkDlg = new MachineTweakDlg( this, m_macView );
 
 	showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
 	deleteMachineAct_ = new QAction( "Delete", this );
 	cloneMachineAct_ = new QAction( "Clone", this );
 	renameMachineAct_ = new QAction( "Rename", this );
 	QString muteText;   
-	mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
+	m_mac->_mute ? muteText = "Unmute" : muteText = "Mute";
 	toggleMuteAct_ = new QAction( muteText, this );
 	QString soloText;   
-	mac_->song()->machineSoloed == mac_->id() ? soloText = "Unsolo" : soloText = "Solo";
+	m_mac->song()->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 	toggleSoloAct_ = new QAction( soloText, this );
 
 	connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
@@ -90,15 +90,15 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 	connect( cloneMachineAct_, SIGNAL( triggered() ), this, SLOT( onCloneMachineActionTriggered() ) );
 
 	connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
-		 machineView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+		 m_macView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 	connect( this, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
-		 machineView, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+		 m_macView, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 }
 
 
 MachineGui::~MachineGui()
 {
-	delete macTwkDlg_;
+	delete m_macTwkDlg;
 	// Note -- delete this here as it is parented to MachineView,
 	// not MachineGui (because MachineGui isn't a QWidget... :/ )
 }
@@ -106,7 +106,7 @@ MachineGui::~MachineGui()
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
 	// Do the default painting business for a QGRectItem.
-	if ( this == machineView->chosenMachine() ) {
+	if ( this == m_macView->chosenMachine() ) {
 		painter->setPen( QPen( Qt::red ) );
 	}
 
@@ -142,7 +142,7 @@ std::vector<WireGui *> MachineGui::wireGuiList()
 void MachineGui::onRenameMachineActionTriggered()
 {
 	bool ok;
-	QString text = QInputDialog::getText( machineView, "Rename machine",
+	QString text = QInputDialog::getText( m_macView, "Rename machine",
 					      "Name: ", QLineEdit::Normal,
 					      QString::fromStdString( mac()->GetEditName() ), &ok);
 	if ( ok && !text.isEmpty() ) {
@@ -175,12 +175,6 @@ void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
 {
 	QGraphicsItem::mousePressEvent( event ); // Get the default behaviour.
 }
-
-void MachineGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
-{ 
-	showMacTwkDlgAct_->trigger();
-}
-
 void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	if ( ( event->buttons() == Qt::LeftButton ) && ( event->modifiers() == Qt::ShiftModifier ) ) {
@@ -191,9 +185,10 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	}
 }
 
+
 void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-	if ( ( event->button() == Qt::LeftButton ) && ( machineView->isCreatingWire() ) ) {
+	if ( ( event->button() == Qt::LeftButton ) && ( m_macView->isCreatingWire() ) ) {
 		emit closeNewConnection(this, event);
 	} 
 	else { // business as usual
@@ -201,9 +196,14 @@ void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 	}
 }
 
+void MachineGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event )
+{ 
+	showMacTwkDlgAct_->trigger();
+}
+
 void MachineGui::showMacTwkDlg()
 {
-	macTwkDlg_->show();
+	m_macTwkDlg->show();
 }
 
 QPointF MachineGui::centrePointInSceneCoords() {
@@ -212,7 +212,7 @@ QPointF MachineGui::centrePointInSceneCoords() {
 
 psy::core::Machine* MachineGui::mac()
 {
-	return mac_;
+	return m_mac;
 }
 
 void MachineGui::onDeleteMachineActionTriggered()
@@ -273,84 +273,6 @@ void MachineGui::onCloneMachineActionTriggered()
 
 
 
-/**
- * GeneratorGui
- */
-GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
-	: MachineGui(left, top, mac, macView)
-{
-	connect( macTwkDlg_, SIGNAL( notePress( int, psy::core::Machine* ) ),
-		 this, SLOT( onNotePress( int, psy::core::Machine* ) ) );
-	connect( macTwkDlg_, SIGNAL( noteRelease( int ) ),
-		 this, SLOT( onNoteRelease( int ) ) );
-}
-
-void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
-{
-	MachineGui::paint( painter, option, widget );
-	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
-	painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
-	mac()->song()->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
-	painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
-}
-
-void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-{
-	QString muteText;
-	mac_->_mute ? muteText = "Unmute" : muteText = "Mute";
-	toggleMuteAct_->setText( muteText );
-
-	QString soloText;   
-	mac_->song()->machineSoloed == mac_->id() ? soloText = "Unsolo" : soloText = "Solo";
-	toggleSoloAct_->setText( soloText );
-
-	QMenu menu;
-	menu.addAction( renameMachineAct_ );
-	menu.addAction( cloneMachineAct_ );
-	menu.addAction( deleteMachineAct_ );
-	menu.addSeparator();
-	menu.addAction( showMacTwkDlgAct_ );
-	menu.addSeparator();
-	menu.addAction( toggleMuteAct_ );
-	menu.addAction( toggleSoloAct_ );
-	QAction *a = menu.exec( event->screenPos() );
-}
-
-void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
-{
-	if ( event->button() == Qt::LeftButton ) {
-		emit chosen( this );    
-	}
-	QGraphicsItem::mousePressEvent( event );
-}
-
-void GeneratorGui::keyPressEvent( QKeyEvent *event )
-{
-	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-
-	switch ( command ) { 
-	case commands::mute_machine:
-		toggleMuteAct_->trigger();
-		return;
-	case commands::solo_machine:
-		toggleSoloAct_->trigger();
-		return;
-	}
-}
-
-void GeneratorGui::keyReleaseEvent( QKeyEvent *event )
-{
-	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-	switch ( command ) { 
-        case commands::mute_machine:
-		toggleMuteAct_->trigger();
-		return;
-        case commands::solo_machine:
-		toggleSoloAct_->trigger();
-		return;
-        default:;
-	}
-}
 
 // FIXME: should be in EffectGui, but Qt fails to recognise it there.
 void MachineGui::onToggleBypassActionTriggered() 

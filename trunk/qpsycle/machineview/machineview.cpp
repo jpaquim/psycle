@@ -32,6 +32,7 @@
 #include "machineview.h"
 #include "mastergui.h"
 #include "effectgui.h"
+#include "generatorgui.h"
 #include "wiregui.h"
 #include "newmachinedlg.h"
 
