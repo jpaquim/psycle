@@ -3,6 +3,7 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "FrameMachine.hpp"
+#include "NativeGui.hpp"
 #include "Childview.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
@@ -224,7 +225,7 @@ NAMESPACE__BEGIN(psycle)
 			CBitmap* oldbmp;
 
 			memDC.CreateCompatibleDC(&dc);
-			oldbmp=memDC.SelectObject(&wndView->machinedial);
+			oldbmp=memDC.SelectObject(&CNativeGui::uiSetting().dial);
 
 			int y_knob = 0;
 			int x_knob = 0;
@@ -548,6 +549,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 				case CT_Note:
 					{
+						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
 						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);

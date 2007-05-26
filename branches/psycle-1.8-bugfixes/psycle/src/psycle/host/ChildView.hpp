@@ -282,7 +282,7 @@ NAMESPACE__BEGIN(psycle)
 			void OnFileLoadsongNamed(std::string fName, int fType);
 			HMENU hRecentMenu;
 
-			CBitmap machinedial; //the machine dial bitmap
+//			CBitmap machinedial; //the machine dial bitmap
 
 			CFrameWnd* pParentFrame;
 			Song* _pSong;

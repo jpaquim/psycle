@@ -66,6 +66,7 @@ NAMESPACE__BEGIN(psycle)
 			if ( CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
 			pView = CreateView();
+			machine().SetEditWnd(this);
 			SetTimer(449, 25, 0);
 			return 0;
 		}

@@ -1,6 +1,7 @@
 #include <project.private.hpp>
 #include "Psycle.hpp"
 #include "FrameMixerMachine.hpp"
+#include "NativeGui.hpp"
 #include "ChildView.hpp"
 #include "configuration.hpp"
 #include "song.hpp"
@@ -350,7 +351,7 @@ NAMESPACE__BEGIN(host)
 		CFont *oldfont=bufferDC.SelectObject(&b_font);
 
 		Knob::knobDC.CreateCompatibleDC(&bufferDC);
-		CBitmap *oldbmp=Knob::knobDC.SelectObject(&wndView->machinedial);
+		CBitmap *oldbmp=Knob::knobDC.SelectObject(&CNativeGui::uiSetting().dial);
 		GraphSlider::knobDC.CreateCompatibleDC(&bufferDC);
 		CBitmap *oldbmp2=GraphSlider::knobDC.SelectObject(&m_sliderknob);
 		VuMeter::VuOn.CreateCompatibleDC(&bufferDC);
