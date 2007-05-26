@@ -125,13 +125,6 @@ namespace psy
 					void writeSamplesToFile( int amount );
 			///\}
 
-			///\name bpm
-			///\{
-				public:
-					void setBpm( double bpm ) { timeInfo_.setBpm( bpm ); }
-					double bpm() const { return timeInfo_.bpm(); }
-			///\}
-			
 			///\name time info
 			///\{
 				public:
@@ -140,6 +133,22 @@ namespace psy
 					PlayerTimeInfo timeInfo_;
 			///\}
 
+			///\name time info ... play position
+			///\{
+				public:
+					/// sets the current play position
+					void setPlayPos( double pos ) { timeInfo_.setPlayBeatPos( pos ); }
+					/// the current play position
+					double playPos() const { return timeInfo_.playBeatPos(); }
+			///\}
+			
+			///\name time info ... bpm
+			///\{
+				public:
+					void setBpm( double bpm ) { timeInfo_.setBpm( bpm ); }
+					double bpm() const { return timeInfo_.bpm(); }
+			///\}
+			
 			///\name start/stop
 			///\{
 				public:
@@ -151,15 +160,6 @@ namespace psy
 					bool playing() const { return _playing; }
 				private:
 					bool _playing;
-			///\}
-			
-			///\name play position
-			///\{
-				public:
-					/// sets the current play position
-					void setPlayPos( double pos ) { timeInfo_.setPlayBeatPos( pos ); }
-					/// the current play position
-					double playPos() const { return timeInfo_.playBeatPos(); }
 			///\}
 			
 			///\name loop
