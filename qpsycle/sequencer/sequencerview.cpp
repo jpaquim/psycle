@@ -31,11 +31,6 @@
 #include <QAction>
 #include <QGraphicsScene>
 
-/*int d2i(double d)
-{
-		return (int) ( d<0?d-.5:d+.5);
-		}*/
-
 SequencerView::SequencerView( psy::core::Song *asong )
 {
 	song_ = asong;
@@ -90,26 +85,37 @@ SequencerView::SequencerView( psy::core::Song *asong )
 
 SequencerLine* SequencerView::selectedLine() 
 {
-    return selectedLine_;
+	return selectedLine_;
 }
 
 void SequencerView::addPattern( psy::core::SinglePattern *pattern )
 {
-    if ( seqDraw_->selectedLine() ) {
-        seqDraw_->selectedLine()->addItem( pattern );
-    }
+	if ( seqDraw_->selectedLine() ) {
+		seqDraw_->selectedLine()->addItem( pattern );
+	}
 }
 
 void SequencerView::updatePlayPos() {
-    if ( song()->patternSequence() /*&& scrollArea() && !scrollArea()->lockPlayLine()*/ ) {
-        int beatPxLength = seqDraw_->beatPxLength();
-        int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
-        int oxPos = std::min(song()->patternSequence()->tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
-        if (oxPos != xPos) {
-            seqDraw_->pLine()->setPos( xPos, 0 );
-            seqDraw_->pLine()->update( seqDraw_->pLine()->boundingRect() );
-        }
-        oldPlayPos_ = psy::core::Player::Instance()->playPos();
-    }
+	if ( song()->patternSequence() /*&& scrollArea() && !scrollArea()->lockPlayLine()*/ ) {
+		int beatPxLength = seqDraw_->beatPxLength();
+		int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
+		int oxPos = std::min(song()->patternSequence()->tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
+		if (oxPos != xPos) {
+			seqDraw_->pLine()->setPos( xPos, 0 );
+			seqDraw_->pLine()->update( seqDraw_->pLine()->boundingRect() );
+		}
+		oldPlayPos_ = psy::core::Player::Instance()->playPos();
+	}
 }
 
+void SequencerView::onPatternNameChanged()
+{
+	// FIXME: not efficient.
+	sequencerDraw()->scene()->update( sequencerDraw()->scene()->itemsBoundingRect() );
+}
+
+void SequencerView::onCategoryColorChanged()
+{
+	// FIXME: not efficient.
+	sequencerDraw()->scene()->update( sequencerDraw()->scene()->itemsBoundingRect() );
+}

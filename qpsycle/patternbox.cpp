@@ -410,18 +410,19 @@ void PatternTree::onEditCategoryNameActionTriggered()
 
 void PatternBox::onEditCategoryColorActionTriggered()
 {  
-    QColor color = QColorDialog::getColor();
-    if ( color.isValid() )
-    {
-        CategoryItem *item = (CategoryItem*)patternTree_->currentItem();
-        std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( (CategoryItem*) item );
-        if( itr != categoryMap.end() ) 
-        {
-            psy::core::PatternCategory *category = itr->second;
-            category->setColor( QColorToLongColor( color ) );
-            item->setBackground( 0, QBrush( color ) );
-        }
-    }
+	QColor color = QColorDialog::getColor();
+	if ( color.isValid() )
+	{
+		CategoryItem *item = (CategoryItem*)patternTree_->currentItem();
+		std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( (CategoryItem*) item );
+		if( itr != categoryMap.end() ) 
+		{
+			psy::core::PatternCategory *category = itr->second;
+			category->setColor( QColorToLongColor( color ) );
+			item->setBackground( 0, QBrush( color ) );
+		}
+		emit categoryColorChanged();
+	}
 }
 
 bool PatternBox::event( QEvent *event )
