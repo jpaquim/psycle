@@ -27,12 +27,12 @@
 #include "internal_machines.h"
 
 #ifdef __unix__
-#include <unistd.h> // for OpenBSD usleep()
+	#include <unistd.h> // for OpenBSD usleep()
 #endif
 
 #ifdef _MSC_VER
-#undef min 
-#undef max
+	#undef min 
+	#undef max
 #endif
 
 namespace psy
@@ -47,35 +47,20 @@ namespace psy
 			_playing(),
 			Tweaker(),
 			_samplesRemaining(),
-            loopSequenceEntry_()
+			loopSequenceEntry_(),
+			_doDither(),
+			autoRecord_(),
+			recording_(),
+			autoStopMachines_(),
+			lock_(),
+			inWork_()
 		{
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
-			_doDither = false;
-			autoRecord_ = false;
-			recording_ = false;
-			autoStopMachines_ = false;
-			lock_ = false;
-			inWork_ = false;
 		}
 
 		Player::~Player()
 		{
 			if ( driver_ ) delete driver_; ///\todo [bohan] i don't see why the player owns the driver.
-		}
-
-		const PlayerTimeInfo & Player::timeInfo( ) const
-		{
-			return timeInfo_;
-		}
-
-		void Player::setBpm( double bpm )
-		{
-			timeInfo_.setBpm( bpm );
-		}
-
-		double Player::bpm( ) const
-		{
-			return timeInfo_.bpm();
 		}
 
 		void Player::start( double pos )
@@ -129,7 +114,7 @@ namespace psy
 			timeInfo_.setLinesPerBeat( song().linesPerBeat() );
 			SampleRate( driver_->settings().samplesPerSec() );
 			if (autoRecord_) stopRecording();
-            //printf("stop\n");
+			//printf("stop\n");
 		}
 
 		bool Player::playing() const {
@@ -138,7 +123,7 @@ namespace psy
 
 		void Player::SampleRate(const int sampleRate)
 		{
-				if ( !song_ ) return;
+			if ( !song_ ) return;
 
 			///\todo update the source code of the plugins...
 
@@ -149,65 +134,65 @@ namespace psy
 				if(song().machine(i)) song().machine(i)->SetSampleRate( sampleRate );
 			}
 		}
-    bool Player::autoStopMachines() const {
-      return autoStopMachines_;
-    }
-	
+		
+		bool Player::autoStopMachines() const {
+			return autoStopMachines_;
+		}
+
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
 			Machine::id_type mIndex;
 			switch ( event.type() )
 			{
-			case GlobalEvent::BPM_CHANGE:
-				setBpm ( event.parameter() );
-std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new bpm: "<<event.parameter() <<std::endl;
-				break;
-			case GlobalEvent::JUMP_TO:
-				timeInfo_.setPlayBeatPos( event.parameter() );
-				break;
-			case GlobalEvent::SET_BYPASS:
-				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
-					song().machine(mIndex)->_bypass = true;
-				break;
-			case GlobalEvent::UNSET_BYPASS:
-				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
-					song().machine(mIndex)->_bypass = false;
-				break;
-			case GlobalEvent::SET_MUTE:
-				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song().machine(mIndex) )
-					song().machine(mIndex)->_mute = true;
-				break;
-			case GlobalEvent::UNSET_MUTE:
-				mIndex = event.target();
-				if ( mIndex < MAX_MACHINES && song().machine(mIndex) )
-					song().machine(mIndex)->_mute = false;
-				break;
-			case GlobalEvent::SET_VOLUME:
-				if(event.target() == 255)
-				{
-					((Master*)(song().machine(MASTER_INDEX)))->_outDry = static_cast<int>( event.parameter() );
-				}
-				else 
-				{
+				case GlobalEvent::BPM_CHANGE:
+					setBpm ( event.parameter() );
+					std::cout << "psycle: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter() << "\n";
+					break;
+				case GlobalEvent::JUMP_TO:
+					timeInfo_.setPlayBeatPos( event.parameter() );
+					break;
+				case GlobalEvent::SET_BYPASS:
+					mIndex = event.target();
+					if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
+						song().machine(mIndex)->_bypass = true;
+					break;
+				case GlobalEvent::UNSET_BYPASS:
+					mIndex = event.target();
+					if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
+						song().machine(mIndex)->_bypass = false;
+					break;
+				case GlobalEvent::SET_MUTE:
+					mIndex = event.target();
+					if ( mIndex < MAX_MACHINES && song().machine(mIndex) )
+						song().machine(mIndex)->_mute = true;
+					break;
+				case GlobalEvent::UNSET_MUTE:
+					mIndex = event.target();
+					if ( mIndex < MAX_MACHINES && song().machine(mIndex) )
+						song().machine(mIndex)->_mute = false;
+					break;
+				case GlobalEvent::SET_VOLUME:
+					if(event.target() == 255)
+					{
+						((Master*)(song().machine(MASTER_INDEX)))->_outDry = static_cast<int>( event.parameter() );
+					}
+					else 
+					{
+						mIndex = event.target();
+						if(mIndex < MAX_MACHINES)
+						{
+							Wire::id_type wire( event.target2() );
+							if(song().machine(mIndex)) song().machine(mIndex)->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1( static_cast<int>( event.parameter() )));
+						}
+					}
+				case GlobalEvent::SET_PANNING:
 					mIndex = event.target();
 					if(mIndex < MAX_MACHINES)
-					{
-						Wire::id_type wire( event.target2() );
-						if(song().machine(mIndex)) song().machine(mIndex)->SetDestWireVolume(mIndex,wire,CValueMapper::Map_255_1( static_cast<int>( event.parameter() )));
-					}
+						if(song().machine(mIndex)) song().machine(mIndex)->SetPan( static_cast<int>( event.parameter() ) );
+					break;
+				default:
+					break;
 				}
-			case GlobalEvent::SET_PANNING:
-				mIndex = event.target();
-				if(mIndex < MAX_MACHINES)
-					if(song().machine(mIndex)) song().machine(mIndex)->SetPan( static_cast<int>( event.parameter() ) );
-				break;
-
-			default:
-				break;
-			}
 		}
 
 		/// Final Loop. Read new line for notes to send to the Machines
@@ -215,14 +200,14 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 		{
 			std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
 			for ( ; trackItr != line.tweaks().end() ; ++trackItr) {
-					PatternEvent entry = trackItr->second;
-					int track = trackItr->first;
-					int mac = entry.machine();
-					if(mac < MAX_MACHINES) //looks like a valid machine index?
-					{
-							Machine *pMachine = song().machine(mac);
-							pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
-					}
+				PatternEvent entry = trackItr->second;
+				int track = trackItr->first;
+				int mac = entry.machine();
+				if(mac < MAX_MACHINES) //looks like a valid machine index?
+				{
+						Machine *pMachine = song().machine(mac);
+						pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
+				}
 			}
 
 			trackItr = line.notes().begin();
@@ -234,7 +219,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					int mac = entry.machine();
 					if(mac != 255) prevMachines[track] = mac;
 					else mac = prevMachines[track];
-//					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
+					//if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
 					if( mac != 255 ) // is there a machine number and it is either a note or a command?
 					{
 						if(mac < MAX_MACHINES) //looks like a valid machine index?
@@ -295,9 +280,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 		float * Player::Work(int numSamples)
 		{
-
 			if ( !song_ ) return _pBuffer;
-
 			if ( lock_ ) return _pBuffer;
 
 			inWork_ = true;
@@ -305,7 +288,7 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
 			Master::_pMasterSamples = _pBuffer;
 			double beatLength = numSamples/(double) timeInfo_.samplesPerBeat();
-//			CSingleLock crit(&song().door, true);
+			//CSingleLock crit(&song().door, true);
 
 			if (autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
 				stopRecording();
@@ -313,14 +296,14 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 			if (_playing)
 			{
-                if ( loopSequenceEntry() ) {
-                    if ( timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition()
-                         || timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition() ) {
-                        setPlayPos( loopSequenceEntry()->tickPosition() );
-                    }
-                } else if ( loopSong() && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
-                    setPlayPos( 0.0 );
-                }
+				if ( loopSequenceEntry() ) {
+					if ( timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition()
+							|| timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition() ) {
+						setPlayPos( loopSequenceEntry()->tickPosition() );
+					}
+				} else if ( loopSong() && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
+					setPlayPos( 0.0 );
+				}
 				std::multimap<double, PatternLine> events;
 				std::vector<GlobalEvent*> globals;
 
@@ -350,10 +333,10 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 					///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 					song().patternSequence()->GetLinesInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
 					for( std::multimap<double, PatternLine>::iterator lineIt=events.begin()
-					   ; lineIt!= events.end()
-					   ; ++lineIt) {
+						; lineIt!= events.end()
+						; ++lineIt) {
 						ExecuteNotes(lineIt->first - timeInfo_.playBeatPos(), lineIt->second);
-						}
+					}
 
 					if(chunkSampleSize>0)
 					{
@@ -367,8 +350,8 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 
 					//execute this batch of global events
 					for( std::vector<GlobalEvent*>::iterator globIt = globals.begin()
-					   ; globIt!=globals.end()
-					   ; ++globIt)
+						; globIt!=globals.end()
+						; ++globIt)
 					{
 						ProcessGlobalEvent(*(*globIt));
 					}
@@ -380,10 +363,9 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			{
 				///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 				Process(numSamples);
-//				playPos+=beatLength;
-//				if (playPos> "signumerator") playPos-=signumerator;
+				//playPos+=beatLength;
+				//if (playPos> "signumerator") playPos-=signumerator;
 			}
-
 
 			inWork_ = false;
 			return _pBuffer;
@@ -416,7 +398,6 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			}
 		}
 
-
 		// buffer to wav_file methods
 
 		void Player::setFileName( const std::string & fileName) {
@@ -446,27 +427,26 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 						//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither. 	 
 						if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) stopRecording();
 					}
-				break;
+					break;
 				case 1: // mono L
 					for( i = 0; i < amount; i++ )
 					{
 						if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) stopRecording();
 					}
-				break;
+					break;
 				case 2: // mono R
 					for( i = 0; i < amount; i++)
 					{
 						if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) stopRecording();
 					}
-				break;
+					break;
 				default: // stereo
 					for( i = 0; i < amount; i++)
 					{
 						if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) stopRecording();
 					}
-				break;
+					break;
 			}
-
 		}
 
 		void Player::setAutoRecording( bool on ) {
@@ -522,46 +502,43 @@ std::cout<<"bpm change event found. position: "<<timeInfo_.playBeatPos()<<", new
 			driver_ = driver.clone();
 			std::cout << "cloned driver " << std::endl;
 			if (!driver_->Initialized())
-				{
+			{
 				driver_->Initialize( Work, this );
 			}
 			std::cout << " driver initialized" << std::endl;
-	  		if (!driver_->Configured())
-	  		{
-          std::cout << "asking driver to configure itself" << std::endl;
-			      	driver_->Configure();
-//					SampleRate(driver_->_samplesPerSec);
-				//   _outputActive = true;
-	  		}
+			if (!driver_->Configured())
+			{
+				std::cout << "asking driver to configure itself" << std::endl;
+				driver_->Configure();
+				//SampleRate(driver_->_samplesPerSec);
+				//_outputActive = true;
+			}
 			std::cout << " driver configured" << std::endl;
 			if (driver_->Enable(true))
 			{
 				std::cout << "driver enabled " << driver_->info().name() << std::endl;
-			//   _outputActive = true;
+				//_outputActive = true;
 			} else {
 				std::cout << "driver failed to enable. setting null driver " << std::endl;
 				if (driver_) delete driver_;
 				driver_ = new AudioDriver();
 			}
-				SampleRate(driver_->settings().samplesPerSec());
-		}
-
-		AudioDriver & Player::driver() {
-			return *driver_;
+			SampleRate(driver_->settings().samplesPerSec());
 		}
 
 		void psy::core::Player::lock( )
 		{
+			///\todo this is bad
 			lock_ = true;
 			#ifdef __unix__
-			while ( inWork_) usleep( 200 );
+				while ( inWork_) usleep( 200 );
 			#endif
 		}
 
 		void psy::core::Player::unlock( )
 		{
+			///\todo this is bad
 			lock_ = false;
 		}
-
 	}
 }
