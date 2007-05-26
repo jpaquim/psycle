@@ -24,6 +24,6 @@ SOURCES += \
 	src/psycle/player/main.cpp \
 	src/psycle/player/configuration.cpp
 
-include(platform.pri)
-include(psycle-core.pri)
-include(psycle-audio-drivers.pri)
+include(qmake/platform.pri)
+include(qmake/psycle-core.pri)
+include(qmake/psycle-audio-drivers.pri)
