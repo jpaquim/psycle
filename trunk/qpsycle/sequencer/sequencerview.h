@@ -31,33 +31,34 @@ class SinglePattern;
 class SequencerDraw;
 class SequencerLine;
 
- class SequencerView : public QWidget
- {
-     Q_OBJECT
-
+class SequencerView : public QWidget
+{
+Q_OBJECT
 public:
-    SequencerView( psy::core::Song *song );
+	SequencerView( psy::core::Song *song );
 
-    psy::core::Song* song() { return song_; }
-    SequencerLine *selectedLine();
-    void setSelectedLine( SequencerLine *line ) ;
-    void addPattern( psy::core::SinglePattern *pattern );
-    SequencerDraw *sequencerDraw() { return seqDraw_; }
-    void updatePlayPos();
+	psy::core::Song* song() { return song_; }
+	SequencerLine *selectedLine();
+	void setSelectedLine( SequencerLine *line ) ;
+	void addPattern( psy::core::SinglePattern *pattern );
+	SequencerDraw *sequencerDraw() { return seqDraw_; }
+	void updatePlayPos();
+	void onPatternNameChanged();
+	void onCategoryColorChanged();
      
- protected:
+protected:
 
- private:
-    psy::core::Song *song_;
-    QVBoxLayout *layout_;
-    SequencerDraw *seqDraw_;
+private:
+	psy::core::Song *song_;
+	QVBoxLayout *layout_;
+	SequencerDraw *seqDraw_;
 
-    SequencerLine *selectedLine_;
-    std::vector<SequencerLine*> *lines_;
+	SequencerLine *selectedLine_;
+	std::vector<SequencerLine*> *lines_;
 
-    QToolBar *toolBar_;
+	QToolBar *toolBar_;
 
-    double oldPlayPos_;
- };
+	double oldPlayPos_;
+};
 
- #endif
+#endif

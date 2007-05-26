@@ -613,14 +613,12 @@ void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *patte
 
 void MainWindow::onPatternNameChanged()
 {
-    // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
-    seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
+	seqView_->onPatternNameChanged();
 }
 
 void MainWindow::onCategoryColorChanged()
 {
-    // FIXME: not good code, plus not efficient, don't need to repaint the whole thing...
-    seqView_->sequencerDraw()->scene()->update( seqView_->sequencerDraw()->scene()->itemsBoundingRect() );
+	seqView_->onCategoryColorChanged();
 }
 
 void MainWindow::timerEvent( QTimerEvent *ev )
