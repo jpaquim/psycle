@@ -137,6 +137,12 @@ void MachineView::createWireGuis()
 	}
 }
 
+WireGui *MachineView::createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui )
+{
+    WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
+    return wireGui;
+}
+
 void MachineView::createTempLine()
 {
 	// A temporary line to display when user is making a new connection.
@@ -155,35 +161,6 @@ void MachineView::initKeyjazzSettings()
 }
 
 
-WireGui *MachineView::createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui )
-{
-    WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
-    return wireGui;
-}
-
- void MachineView::keyPressEvent(QKeyEvent *event)
- {
-     switch (event->key()) {
-     case Qt::Key_Plus:
-         scaleView(1.2);
-         break;
-     case Qt::Key_Minus:
-         scaleView(1 / 1.2);
-         break;
-     default:
-         QGraphicsView::keyPressEvent(event);
-     }
- }
-
-
- void MachineView::scaleView(qreal scaleFactor) 
- {
-      qreal factor = matrix().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width();
-     if (factor < 0.07 || factor > 100)
-         return;
-
-     scale(scaleFactor, scaleFactor);
- }
 
 void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
 {
@@ -203,18 +180,6 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 	creatingWire_ = false;
 }
 
-MachineGui *MachineView::machineGuiAtPoint( QPointF point )
-{
-	std::vector<MachineGui*>::iterator iter;
-	for( iter = machineGuis.begin(); iter != machineGuis.end(); iter++ ) {
-		MachineGui *macGui = *iter;
-		if ( macGui->contains( macGui->mapFromScene( point ) ) )
-		{
-			return macGui;
-		}
-	}
-	return 0;
-}
 
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
@@ -261,11 +226,6 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 	emit machineDeleted( id ); 
 }
 
-void MachineView::onMachineRenamed()
-{
-	emit machineRenamed();
-}
-
 void MachineView::deleteConnection( WireGui *wireGui )
 {
 	psy::core::Player::Instance()->lock();
@@ -294,6 +254,81 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	psy::core::Player::Instance()->unlock();
 }
 
+void MachineView::onMachineRenamed()
+{
+	emit machineRenamed();
+}
+
+void MachineView::cloneMachine( MachineGui *macGui )
+{
+	qDebug("in clone machine");
+	psy::core::Machine *pMachine = macGui->mac();
+	psy::core::Machine::id_type src( pMachine->id() );
+	psy::core::Machine::id_type dst(-1);
+
+	if ((src < psy::core::MAX_BUSES) && (src >=0))
+	{
+		// we need to find an empty slot
+		for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
+		{
+			if (!song()->machine(i))
+			{
+				dst = i;
+				break;
+			}
+		}
+	}
+	else if ((src < psy::core::MAX_BUSES*2) && (src >= psy::core::MAX_BUSES))
+	{
+		// MAX_BUSES*2 is where FX begin.
+		for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
+		{
+			if (!song()->machine(i))
+			{
+				dst = i;
+				break;
+			}
+		}
+	}
+	if (dst >= 0)
+	{
+      
+		if (!song()->CloneMac(src,dst))
+		{
+			qDebug("Cloning failed");
+		}
+		else {
+			qDebug("Cloning doesn't work yet."); // See Song::CloneMac().
+		}
+	} 
+
+}
+
+void MachineView::addNewMachineGui( psy::core::Machine *mac )
+{
+	MachineGui *macGui = createMachineGui( mac );
+
+	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
+		setChosenMachine( macGui );
+		song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
+		emit newMachineCreated( mac );
+	}
+	scene()->update( scene()->itemsBoundingRect() );
+	emit newMachineCreated( mac );
+}
+
+void MachineView::onMachineChosen( MachineGui *macGui )
+{
+	song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
+
+	setChosenMachine( macGui );
+	scene()->update( scene()->itemsBoundingRect() );
+
+	emit machineChosen( macGui );
+}
+
+
+
 MachineGui *MachineView::findMachineGuiByCoreMachine( psy::core::Machine *mac )
 {
 	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
@@ -312,16 +347,26 @@ MachineGui *MachineView::findMachineGuiByCoreMachineIndex( int index )
 	return 0;
 }
 
-psy::core::Song *MachineView::song()
+MachineGui *MachineView::machineGuiAtPoint( QPointF point )
 {
-	return song_;
+	std::vector<MachineGui*>::iterator iter;
+	for( iter = machineGuis.begin(); iter != machineGuis.end(); iter++ ) {
+		MachineGui *macGui = *iter;
+		if ( macGui->contains( macGui->mapFromScene( point ) ) )
+		{
+			return macGui;
+		}
+	}
+	return 0;
 }
 
-void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Machine *pMachine )
+
+
+void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Machine *pMachine )
 {
 
 	// stop any notes with the same value
-	StopNote(note,bTranspose,pMachine);
+	stopNote(note,bTranspose,pMachine);
 
 	if(note<0) return;
 
@@ -376,7 +421,7 @@ void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Ma
 		//}
 		// this should check to see if a note is playing on that track
 		if (notetrack[outtrack] < 120) {
-			StopNote(notetrack[outtrack], bTranspose, pMachine);
+			stopNote(notetrack[outtrack], bTranspose, pMachine);
 		}
 
 		// play
@@ -385,7 +430,7 @@ void MachineView::PlayNote( int note,int velocity,bool bTranspose, psy::core::Ma
 	}
 }
 
-void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMachine )
+void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMachine )
 {
     if (!(note >=0 && note < 128)) return;
 
@@ -421,63 +466,6 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
         }
 
     }
-}
-
-
-
-int MachineView::octave() const
-{
-    return octave_;
-}
-
-void MachineView::setOctave( int newOctave )
-{
-    octave_ = newOctave;
-}
-
-
-void MachineView::cloneMachine( MachineGui *macGui )
-{
-	qDebug("in clone machine");
-	psy::core::Machine *pMachine = macGui->mac();
-	psy::core::Machine::id_type src( pMachine->id() );
-	psy::core::Machine::id_type dst(-1);
-
-	if ((src < psy::core::MAX_BUSES) && (src >=0))
-	{
-		// we need to find an empty slot
-		for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
-		{
-			if (!song()->machine(i))
-			{
-				dst = i;
-				break;
-			}
-		}
-	}
-	else if ((src < psy::core::MAX_BUSES*2) && (src >= psy::core::MAX_BUSES))
-	{
-		for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
-		{
-			if (!song()->machine(i))
-			{
-				dst = i;
-				break;
-			}
-		}
-	}
-	if (dst >= 0)
-	{
-      
-		if (!song()->CloneMac(src,dst))
-		{
-			qDebug("Cloning failed");
-		}
-		else {
-			qDebug("Cloning doesn't work yet."); // See Song::CloneMac().
-		}
-	} 
-
 }
 
 
@@ -576,33 +564,52 @@ int MachineView::noteFromCommand( int command )
 	return note;
 }
 
+void MachineView::keyPressEvent(QKeyEvent *event)
+{
+	switch (event->key()) {
+	case Qt::Key_Plus:
+		scaleView(1.2);
+		break;
+	case Qt::Key_Minus:
+		scaleView(1 / 1.2);
+		break;
+	default:
+		QGraphicsView::keyPressEvent(event);
+	}
+}
+
+
+void MachineView::scaleView(qreal scaleFactor) 
+{
+	qreal factor = matrix().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width();
+	if (factor < 0.07 || factor > 100)
+		return;
+
+	scale(scaleFactor, scaleFactor);
+}
+
+psy::core::Song *MachineView::song()
+{
+	return song_;
+}
+
+int MachineView::octave() const
+{
+    return octave_;
+}
+
+void MachineView::setOctave( int newOctave )
+{
+    octave_ = newOctave;
+}
+
 void MachineView::setChosenMachine( MachineGui *macGui )
 { 
 	chosenMachine_ = macGui;
 }
 
-void MachineView::addNewMachineGui( psy::core::Machine *mac )
-{
-	MachineGui *macGui = createMachineGui( mac );
 
-	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
-		setChosenMachine( macGui );
-		song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
-		emit newMachineCreated( mac );
-	}
-	scene()->update( scene()->itemsBoundingRect() );
-	emit newMachineCreated( mac );
-}
 
-void MachineView::onMachineChosen( MachineGui *macGui )
-{
-	song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
-
-	setChosenMachine( macGui );
-	scene()->update( scene()->itemsBoundingRect() );
-
-	emit machineChosen( macGui );
-}
 
 
 
@@ -667,10 +674,11 @@ void MachineScene::keyReleaseEvent( QKeyEvent * event )
 
 void MachineScene::onNotePress( int note, psy::core::Machine* mac )
 {
-	macView_->PlayNote( macView_->octave() * 12 + note, 127, false, mac );   
+	macView_->playNote( macView_->octave() * 12 + note, 127, false, mac );   
 }
 
 void MachineScene::onNoteRelease( int note )
 {
-	macView_->StopNote( note );   
+	macView_->stopNote( note );   
 }
+
