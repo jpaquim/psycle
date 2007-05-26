@@ -116,6 +116,9 @@ BEGIN
         MENUITEM "Random Parameters",           ID_PARAMETERS_RANDOMPARAMETERS
 
         MENUITEM SEPARATOR
+        MENUITEM "Parameter List Dialog",       ID_PARAMETERS_PARAMETERLISTDIALOG
+
+        MENUITEM SEPARATOR
         MENUITEM "Open Presets Dialog\tCtrl+P", ID_PARAMETERS_SHOWPRESET
     END
 END
@@ -311,6 +314,7 @@ IDB_SLIDERBACKV         BITMAP                  "Slider\\sliderP.bmp"
 IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
 IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
 IDR_WAVEDFRAME          BITMAP                  "./toolbar1.bmp"
+IDR_VSTFRAME            BITMAP                  "./bmp00001.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -930,7 +934,7 @@ BEGIN
     LTEXT           "Composer / Credits",IDC_STATIC,5,31,85,8
     EDITTEXT        IDC_EDIT3,5,43,186,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT4,7,71,324,241,ES_MULTILINE | ES_AUTOVSCROLL | 
-                    WS_VSCROLL
+                    ES_WANTRETURN | WS_VSCROLL
     PUSHBUTTON      "Ok",IDOK,335,280,55,16
     PUSHBUTTON      "Cancel",IDCANCEL,335,296,55,16
     LTEXT           "Extended comments",IDC_STATIC,7,59,74,8
@@ -1005,13 +1009,15 @@ BEGIN
     CTEXT           "Static",IDC_TEXT,4,20,256,14,SS_CENTERIMAGE | SS_SUNKEN
 END
 
-IDD_VSTRACK DIALOGEX 0, 0, 142, 203
-STYLE DS_SETFONT | WS_CHILD
+IDD_VSTRACK DIALOGEX 0, 0, 143, 201
+STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_CONTROLPARENT
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,5,3,11,
                     16
-    COMBOBOX        IDC_COMBO1,23,4,115,136,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO1,23,2,115,136,CBS_DROPDOWNLIST | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_VERT | 
                     WS_TABSTOP,3,19,20,171
@@ -2496,8 +2502,9 @@ BEGIN
     IDD_VSTRACK, DIALOG
     BEGIN
         LEFTMARGIN, 7
+        RIGHTMARGIN, 142
         TOPMARGIN, 7
-        BOTTOMMARGIN, 16
+        BOTTOMMARGIN, 14
     END
 
     IDD_PRESETS, DIALOG
@@ -2926,6 +2933,11 @@ BEGIN
     BUTTON      ID_WAVED_FASTFORWARD
 END
 
+IDR_VSTFRAME TOOLBAR  16, 15
+BEGIN
+    BUTTON      ID_BUTTON33049
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -3030,6 +3042,7 @@ BEGIN
     ID_HELP_TWEAKING        "Opens the ./doc/tweaking.txt File\nOpen ./doc/tweaking.txt"
     ID_HELP_KEYBTXT         "Opens the ./doc/keys.txt File, which describes the default keyboard configuration\nOpen ./doc/keys.txt"
     ID_BARREC               "Record Notes Mode\nRecord Notes Mode"
+    ID_FILE_REVERT          "Reloads the song from the saved version."
     ID_CONFIGURATION_OPENONLYVISUALCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG "THIS IS A TESTING ONLY OPTION"
     ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG "THIS IS A TESTING ONLY OPTION"
@@ -3204,6 +3217,35 @@ BEGIN
 END
 
 #endif    // Neutral (predeterminado) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Español resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ESN)
+#ifdef _WIN32
+LANGUAGE LANG_SPANISH, SUBLANG_SPANISH_MODERN
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_FORMVIEW DIALOGEX 0, 0, 185, 93
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTERMOUSE | 
+    WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
+MENU IDR_VSTFRAME
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "TODO: vista de formulario de diseño",IDC_STATIC,33,42,
+                    118,8
+END
+
+#endif    // Español resources
 /////////////////////////////////////////////////////////////////////////////
 
 

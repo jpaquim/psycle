@@ -2,14 +2,26 @@
 ///\brief interface file for psycle::host::CVstEditorDlg.
 #pragma once
 #include <seib-vsthost/EffectWnd.hpp>
+#include "NativeGui.hpp"
+
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-	using namespace seib::vst;
-	namespace vst
-	{
-		class plugin;
-	}
-	class CVstGui;
+		using namespace seib::vst;
+		namespace vst
+		{
+			class plugin;
+		}
+
+		class CVstGui : public CBaseGui
+		{
+		public:
+			CVstGui(vst::plugin*effect);
+			void Open();
+			bool GetViewSize(CRect& rect);
+			void WindowIdle();
+		protected:
+			vst::plugin* pEffect;
+		};
 
 		/// vst editor window.
 		class CVstEffectWnd : public CFrameWnd, public CEffectWnd
@@ -33,7 +45,7 @@ NAMESPACE__BEGIN(psycle)
 		public:
 			void PostOpenWnd();
 			virtual void CloseEditorWnd() { OnClose(); }
-			virtual bool GetWindowSize(ERect &rcFrame, ERect &rcClient, ERect *pRect = NULL);
+			virtual void GetWindowSize(CRect &rcFrame, CRect &rcClient, ERect *pRect = NULL);
 			virtual void ResizeWindow(int width, int height);
 			virtual void ResizeWindow(ERect* pRect);
 			virtual void RefreshUI(){};
@@ -46,8 +58,8 @@ NAMESPACE__BEGIN(psycle)
 			virtual bool CloseSecondaryWnd(VstWindow& window);
 		protected:
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); };
-			virtual CWnd* CreateView(CWnd* pParentWnd=NULL);
-			CWnd* pView;
+			virtual CBaseGui* CreateView();
+			CBaseGui* pView;
 
 		// Implementation
 		protected:
@@ -71,3 +83,4 @@ NAMESPACE__BEGIN(psycle)
 		};
 	NAMESPACE__END
 NAMESPACE__END
+

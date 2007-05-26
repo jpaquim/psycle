@@ -35,6 +35,20 @@ typedef struct
 	unsigned char vstVirt;
 } VkeysT;
 
+class CEffectGui
+{
+public:
+	CEffectGui(CEffect* effect): pEffect(effect){};
+	void Open() { 
+		pEffect->EditOpen(WindowPtr());
+	}
+	bool GetViewSize(ERect &rcClient, ERect *pRect);
+	void WindowIdle() { pEffect->EditIdle(); }
+protected:
+	virtual void* WindowPtr()=0;
+	CEffect* pEffect;
+};
+
 class CEffectWnd
 {
 protected:
@@ -50,20 +64,14 @@ public:
 
 protected:
 	void ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode &keyCode);
-
-	void KeyDown(VstKeyCode keyCode) { pEffect->KeyDown(keyCode); }
-	void KeyUp(VstKeyCode keyCode) { pEffect->KeyUp(keyCode); }
-	void ChangeProgram(int index) { pEffect->SetProgram(index); }
 	bool SaveBank(std::string file);
 	bool SaveProgram(std::string file);
-
 
 // Overridables
 public:
 	virtual void CloseEditorWnd()=0;
-	virtual bool GetWindowSize(ERect &rcFrame, ERect &rcClient, ERect *pRect = NULL);
-	virtual void ResizeWindow(int width, int height){};
-	virtual void RefreshUI(){};
+	virtual void ResizeWindow(int width, int height)=0;
+	virtual void RefreshUI()=0;
 	virtual bool BeginAutomating(long index){ return false; }
 	virtual bool SetParameterAutomated(long index, float value) { return false; }
 	virtual bool EndAutomating(long index) { return false; }
@@ -73,10 +81,10 @@ public:
 	virtual bool CloseSecondaryWnd(VstWindow& window) { return false; }
 
 protected:
-	virtual void UpdateTitle(){};
+	virtual void UpdateTitle()=0;
 
 protected:
-	CEffect * pEffect;
+	CEffect* pEffect;
 	std::string sTitle;
 	static VkeysT VKeys[];
 };

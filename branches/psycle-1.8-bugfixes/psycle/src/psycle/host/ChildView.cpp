@@ -18,6 +18,7 @@
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
 #include "MasterDlg.hpp"
+#include "NativeGui.hpp"
 #include "XMSamplerUI.hpp"
 #include "VstEditorDlg.hpp"
 #include "WireDlg.hpp"
@@ -3490,35 +3491,10 @@ NAMESPACE__BEGIN(psycle)
 			else
 				pCmdUI->SetCheck(0);	
 		}
-
 		void CChildView::LoadMachineDial()
 		{
-			machinedial.DeleteObject();
-			if ( hbmMachineDial) DeleteObject(hbmMachineDial);
-			if (Global::pConfig->bBmpDial)
-			{
-				Global::pConfig->bBmpDial=FALSE;
-				hbmMachineDial = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpDialFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-				if (hbmMachineDial)
-				{
-					if (machinedial.Attach(hbmMachineDial))
-					{	
-						BITMAP bm;
-						GetObject(hbmMachineDial,sizeof(BITMAP),&bm);
-
-						if ((bm.bmWidth == 1792) && (bm.bmHeight == 28))
-						{
-							Global::pConfig->bBmpDial=TRUE;
-						}
-						else
-							machinedial.LoadBitmap(IDB_KNOB);
-					}
-				}
-			}
-			else 
-				machinedial.LoadBitmap(IDB_KNOB);
+			CNativeGui::uiSetting().LoadMachineDial();
 		}
-
 
 		void CChildView::LoadMachineBackground()
 		{

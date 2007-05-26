@@ -406,7 +406,10 @@ void mi::Stop()
 
 void mi::SequencerTick()
 {
-// Called on each tick while sequencer is playing
+	for (int i=0; i < MAX_TRACKS; i++)
+	{
+		track[int].InitEffect(0,0);
+	}
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -630,9 +633,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-
 	track[channel].InitEffect(cmd,val);
-	
+
 	// Global scope synth pattern commands
 	switch(cmd)
 	{

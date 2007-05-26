@@ -1495,24 +1495,21 @@ NAMESPACE__BEGIN(psycle)
 					case MACH_VSTFX:
 						{
 							CVstEffectWnd* newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
-						
-						newwin->LoadFrame(IDR_VSTFRAME,
+							newwin->LoadFrame(IDR_VSTFRAME,
 //							WS_OVERLAPPEDWINDOW,
-							WS_POPUPWINDOW | WS_CAPTION,
-							this);
-						reinterpret_cast<vst::plugin*>(ma)->SetEditWnd(newwin);
-
-						std::ostringstream winname;
-						winname << std::hex << std::setw(2)
-							<< _pSong->FindBusFromIndex(tmac)
-							<< " : " << ma->_editName;
-						newwin->SetTitleText(winname.str().c_str());
-						newwin->ResizeWindow(0);
-						newwin->ShowWindow(SW_SHOWNORMAL);
-						newwin->PostOpenWnd();
-						m_pWndMac[tmac] = newwin;
-						CenterWindowOnPoint(m_pWndMac[tmac], point);
-					break;
+								WS_POPUPWINDOW | WS_CAPTION,
+								this);
+							std::ostringstream winname;
+							winname << std::hex << std::setw(2)
+								<< _pSong->FindBusFromIndex(tmac)
+								<< " : " << ma->_editName;
+							newwin->SetTitleText(winname.str().c_str());
+							newwin->ResizeWindow(0);
+							newwin->ShowWindow(SW_SHOWNORMAL);
+							newwin->PostOpenWnd();
+							m_pWndMac[tmac] = newwin;
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						break;
 						}
 					}
 				}

@@ -14,6 +14,7 @@
 #define ID_INDICATOR_TWEAKS             59
 #define ID_INDICATOR_OCTAVE             60
 #define IDR_MAINFRAME                   101
+#define IDD_FORMVIEW                    101
 #define IDD_PSYBAR                      102
 #define IDB_LESS                        103
 #define IDD_WAVED_ZOOMBAR               103
@@ -1134,6 +1135,8 @@
 #define ID_WAVED_REWIND                 33044
 #define ID_WAVED_FASTFORWARD            33045
 #define ID_POPUP_SELECTIONTOLOOP        33047
+#define ID_PARAMETERS_PARAMETERLISTDIALOG 33048
+#define ID_BUTTON33049                  33049
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1142,8 +1145,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        266
-#define _APS_NEXT_COMMAND_VALUE         33048
+#define _APS_NEXT_RESOURCE_VALUE        268
+#define _APS_NEXT_COMMAND_VALUE         33050
 #define _APS_NEXT_CONTROL_VALUE         1782
 #define _APS_NEXT_SYMED_VALUE           61
 #endif

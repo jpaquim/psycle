@@ -74,7 +74,7 @@ namespace psycle
 					queue_size = 0;
 					requiresRepl = 0;
 					requiresProcess = 0;
-					nCols=0;
+					_nCols=0;
 				};
 				virtual ~plugin() {};
 

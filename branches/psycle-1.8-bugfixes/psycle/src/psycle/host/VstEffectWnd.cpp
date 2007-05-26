@@ -7,15 +7,35 @@
 #include "PresetsDlg.hpp"
 
 #include "VstEffectWnd.hpp"
-#include "VstGui.hpp"
 #include "vsthost24.hpp"
 
 
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 
-		IMPLEMENT_DYNCREATE(CVstEffectWnd, CFrameWnd)
+		CVstGui::CVstGui(vst::plugin* effect)
+		:pEffect(effect)
+		{}
 
+		void CVstGui::Open()
+		{ 
+			pEffect->EditOpen(WindowPtr());
+		}
+		void CVstGui::WindowIdle() { pEffect->EditIdle(); }
+		bool CVstGui::GetViewSize(CRect& rect)
+		{
+			ERect* pRect;
+			pEffect->EditGetRect(&pRect);
+			if (!pRect)
+				return false;
+
+			rect.left = rect.top = 0;
+			rect.right = pRect->right - pRect->left;
+			rect.bottom = pRect->bottom - pRect->top;
+			return true;
+		}
+
+		IMPLEMENT_DYNCREATE(CVstEffectWnd, CFrameWnd)
 
 		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
 		, pView(0) , _machine(effect)
@@ -45,43 +65,63 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if ( CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
-			pView = CreateView(this);
+			pView = CreateView();
 			SetTimer(449, 25, 0);
 			return 0;
 		}
 
-		CWnd* CVstEffectWnd::CreateView(CWnd* pParentWnd)
+		CBaseGui* CVstEffectWnd::CreateView()
 		{
-			CWnd* gui = new CWnd;
-			gui->Create(NULL, NULL, WS_CHILD|WS_VISIBLE,
-				CRect(0, 0, 0, 0), pParentWnd, AFX_IDW_PANE_FIRST, NULL);
-			return gui;
+			if ( pEffect->HasEditor())
+			{
+				CVstGui* gui = new CVstGui(&machine());
+				gui->Create(NULL, NULL, WS_CHILD|WS_VISIBLE,
+					CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
+				return gui;
+			}
+			else
+			{
+				CNativeGui* gui = new CNativeGui(&machine());
+				gui->Create(NULL, NULL, WS_CHILD|WS_VISIBLE,
+					CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
+				return gui;
+			}
 		}
 
 		void CVstEffectWnd::PostOpenWnd()
 		{
-			machine().EditOpen(pView->GetSafeHwnd());
+			pView->Open();
 			ResizeWindow(0);
 		}
 		/**********************************************************/
 
-		bool CVstEffectWnd::GetWindowSize(ERect &rcFrame, ERect &rcClient, ERect *pRect)
+		void CVstEffectWnd::GetWindowSize(CRect &rcFrame, CRect &rcClient, ERect *pRect)
 		{
-			if (CEffectWnd::GetWindowSize(rcFrame,rcClient,pRect))
+			if ( !pRect )
 			{
+				if (!pView->GetViewSize(rcClient))
+				{
+					rcClient.top = 0; rcClient.left = 0;
+					rcClient.right = 400; rcClient.bottom = 300;
+				}
+				rcFrame = rcClient;
+			}
+			else 
+			{
+				rcFrame.left = pRect->left;
+				rcFrame.top = pRect->top;
+				rcFrame.right = pRect->right;
+				rcFrame.bottom = pRect->bottom;
+				rcClient.top = 0; rcClient.left = 0;
+				rcClient.right = pRect->right - pRect->left; rcClient.bottom = pRect->bottom - pRect->top;
+			}
 
-				rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
+			rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
 					::GetSystemMetrics(SM_CYMENUSIZE) +
-//					4 * ::GetSystemMetrics(SM_CXDLGFRAME);
 					4 * ::GetSystemMetrics(SM_CYBORDER) +
 					2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
-				rcFrame.right += //4 * ::GetSystemMetrics(SM_CXDLGFRAME);
-					4 * ::GetSystemMetrics(SM_CXBORDER) +
-					2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
-
-				return true;
-			}
-			return false;
+			rcFrame.right += 4 * ::GetSystemMetrics(SM_CXBORDER) +
+				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
 		}
 		void CVstEffectWnd::ResizeWindow(int w,int h)
 		{
@@ -95,15 +135,10 @@ NAMESPACE__BEGIN(psycle)
 		}
 		void CVstEffectWnd::ResizeWindow(ERect *pRect)
 		{
-			ERect rcEffFrame={0,0,0,0},rcEffClient={0,0,0,0};
-			if (!GetWindowSize(rcEffFrame, rcEffClient, pRect))
-			{
-				rcEffFrame.right = 400; rcEffFrame.bottom = 300;
-				rcEffClient.right = 400; rcEffClient.bottom = 300;
-			}
-			MoveWindow(rcEffFrame.left,rcEffFrame.top,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top);
-			if (pView)
-				pView->MoveWindow(0,0, rcEffClient.right,rcEffClient.bottom,true);
+			CRect rcEffFrame,rcEffClient;
+			GetWindowSize(rcEffFrame, rcEffClient, pRect);
+			MoveWindow(rcEffFrame.left,rcEffFrame.top,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,true);
+//			pView->MoveWindow(0,0, rcEffClient.right,rcEffClient.bottom,true);
 		}
 
 
@@ -340,6 +375,7 @@ NAMESPACE__BEGIN(psycle)
 //			machine().EnterCritical();             /* make sure we're not processing    */
 			machine().EditClose();              /* tell effect edit window's closed  */
 //			machine().LeaveCritical();             /* re-enable processing              */
+			pView->DestroyWindow();
 			CFrameWnd::OnClose();
 		}
 
@@ -347,7 +383,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if ( nIDEvent == 449 )
 			{
-				machine().EditIdle();
+				pView->WindowIdle();
 			}
 			CFrameWnd::OnTimer(nIDEvent);
 		}

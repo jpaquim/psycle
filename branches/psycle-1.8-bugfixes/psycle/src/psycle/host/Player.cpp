@@ -254,7 +254,8 @@ namespace psycle
 									int voice(pEntry->_inst);
 									// make a copy of the pattern entry, because we're going to modify it.
 									PatternEntry entry(*pEntry);
-									entry._inst = 0;
+									entry._note = 255;
+									entry._inst = 255;
 									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
 									if(voice < pSong->SONGTRACKS)
 									{
@@ -269,6 +270,8 @@ namespace psycle
 										}
 									}
 									else ; // probably an out of range voice value (with the classic tracker way, it's limited to the number of pattern tracks)
+									pMachine->TriggerDelayCounter[track] = 0;
+									pMachine->ArpeggioCount[track] = 0;
 								}
 								else // midi cc for vst, or other commands
 								{
@@ -313,8 +316,8 @@ namespace psycle
 					int mac = pEntry->_mach;
 					if(mac != 255) prevMachines[track] = mac;
 					else mac = prevMachines[track];
-//					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0x00) ) // is there a machine number and it is either a note or a command?
-					if( mac != 255 ) // is there a machine number and it is either a note or a command?
+					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
+//					if( mac != 255 ) // is there a machine number and it is either a note or a command?
 					{
 						if(mac < MAX_MACHINES) //looks like a valid machine index?
 						{

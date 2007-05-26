@@ -89,6 +89,24 @@ VkeysT CEffectWnd::VKeys[] =
 	//  { VK_EQUALS,    VKEY_EQUALS    },
 };
 
+
+/*****************************************************************************/
+/* GetWindowSize : calculates the effect window's size                       */
+/*****************************************************************************/
+
+bool CEffectGui::GetViewSize(ERect &rcClient, ERect *pRect)
+{
+	if (!pRect)
+		pEffect->EditGetRect(&pRect);
+	if (!pRect)
+		return false;
+
+	rcClient.left = rcClient.top = 0;
+	rcClient.right = pRect->right - pRect->left;
+	rcClient.bottom = pRect->bottom - pRect->top;
+	return true;
+}
+
 /*===========================================================================*/
 /* CEffectWnd class members                                                  */
 /*===========================================================================*/
@@ -101,6 +119,7 @@ CEffectWnd::~CEffectWnd()
 {
 	///?
 }
+
 
 /*****************************************************************************/
 /* MakeVstKeyCode : converts from Windows to VST                             */
@@ -129,27 +148,6 @@ void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstK
 			keyCode.modifier |= MODIFIER_ALTERNATE;
 	}
 }
-
-/*****************************************************************************/
-/* GetWindowSize : calculates the effect window's size                       */
-/*****************************************************************************/
-
-bool CEffectWnd::GetWindowSize(ERect &rcFrame, ERect &rcClient, ERect *pRect)
-{
-	if (!pRect)
-		pEffect->EditGetRect(&pRect);
-	if (!pRect)
-		return false;
-
-	rcFrame.left = pRect->left; rcFrame.top = pRect->top;
-	rcFrame.right = pRect->right; rcFrame.bottom = pRect->bottom;
-	rcClient.left = rcClient.top = 0;
-	rcClient.right = pRect->right - pRect->left;
-	rcClient.bottom = pRect->bottom - pRect->top;
-	return true;
-}
-
-
 
 /*****************************************************************************/
 /* SaveBank saves bank to file                                               */
