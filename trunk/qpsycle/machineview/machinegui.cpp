@@ -108,13 +108,11 @@ void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opt
 	// Do the default painting business for a QGRectItem.
 	if ( this == m_macView->chosenMachine() ) {
 		painter->setPen( QPen( Qt::red ) );
+	} else {
+		painter->setPen( QPen( Qt::white ) );
 	}
-
-	QGraphicsRectItem::paint( painter, option, widget );
-	painter->setPen( QPen( Qt::white ) );
-	// FIXME: not a good idea to do anything intensive in the paint method...
-
-
+	painter->setBrush( brush() );
+	painter->drawRect( boundingRect() );
 }
 
 void MachineGui::setName(const QString &name)
@@ -175,6 +173,7 @@ void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
 {
 	QGraphicsItem::mousePressEvent( event ); // Get the default behaviour.
 }
+
 void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	if ( ( event->buttons() == Qt::LeftButton ) && ( event->modifiers() == Qt::ShiftModifier ) ) {

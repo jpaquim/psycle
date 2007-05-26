@@ -73,7 +73,7 @@ void MachineView::createMachineGuis()
 	}
 }
 
-void MachineView::createMachineGui( psy::core::Machine *mac )
+MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 {
 	MachineGui *macGui;
 	switch ( mac->mode() ) {							
@@ -90,21 +90,23 @@ void MachineView::createMachineGui( psy::core::Machine *mac )
 		macGui = 0;
 	}
 
-	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ||
-	     mac->mode() == psy::core::MACHMODE_FX ) {
-		connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
-			 this, SLOT( onMachineChosen( MachineGui* ) ) );
-		connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
-			 this, SLOT( onMachineChosen( MachineGui* ) ) );
-		connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
-			 this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
-		connect( macGui, SIGNAL( renamed() ),
-			 this, SLOT( onMachineRenamed() ) );
-		connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
-			 this, SLOT( cloneMachine( MachineGui* ) ) );
+	if ( macGui ) {
+		if ( mac->mode() == psy::core::MACHMODE_GENERATOR ||
+		     mac->mode() == psy::core::MACHMODE_FX ) {
+			connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
+				 this, SLOT( onMachineChosen( MachineGui* ) ) );
+			connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
+				 this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
+			connect( macGui, SIGNAL( renamed() ),
+				 this, SLOT( onMachineRenamed() ) );
+			connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
+				 this, SLOT( cloneMachine( MachineGui* ) ) );
+		}
+		scene()->addItem(macGui);
+		machineGuis.push_back(macGui);
 	}
-	scene_->addItem(macGui);
-	machineGuis.push_back(macGui);
+
+	return macGui;
 }
 
 void MachineView::createWireGuis() 
@@ -418,13 +420,6 @@ void MachineView::StopNote( int note, bool bTranspose, psy::core::Machine * pMac
 }
 
 
-void MachineView::onMachineChosen( MachineGui *macGui )
-{
-	song_->seqBus = song_->FindBusFromIndex( macGui->mac()->id() );
-	setChosenMachine( macGui );
-	emit machineChosen( macGui );
-	update();
-}
 
 int MachineView::octave() const
 {
@@ -436,34 +431,6 @@ void MachineView::setOctave( int newOctave )
     octave_ = newOctave;
 }
 
-MachineScene::MachineScene( MachineView *macView )
-:
-	QGraphicsScene( macView ),
-	pluginFinder_(Global::configuration().pluginPath(), Global::configuration().ladspaPath())
-{
-    macView_ = macView;
-    newMachineDlg = new NewMachineDlg();
-}
-
-void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
-{ 
-    QGraphicsScene::mouseDoubleClickEvent( event );
-    if ( !event->isAccepted() ) // Check whether one of the items on the scene ate it.
-    {
-        int accepted = newMachineDlg->exec();
-        if (accepted) { // Add a new machine to the song.
-             psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
-
-            // Create machine, tell where to place the new machine--get from mouse.	  
-            psy::core::Machine *mac = macView_->song()->createMachine( pluginFinder_, key, event->scenePos().x(), event->scenePos().y() );
-            if ( mac ) {
-                macView_->createMachineGui( mac );
-                emit newMachineCreated( mac );
-                update();
-            }
-        } 
-    }
-}
 
 void MachineView::cloneMachine( MachineGui *macGui )
 {
@@ -509,44 +476,7 @@ void MachineView::cloneMachine( MachineGui *macGui )
 
 }
 
-void MachineScene::keyPressEvent( QKeyEvent * event )
-{
-	if ( !event->isAutoRepeat() ) 
-	{
-		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-		int note = NULL;
-		note = macView_->noteFromCommand( command );
-		if (note) {
-			onNotePress( note, macView_->chosenMachine()->mac() );
-		}
-	}
-	event->ignore();
-}
 
-// FIXME: this gets triggered even when you're still holding the key down.  
-// Most likely a Qt bug...
-void MachineScene::keyReleaseEvent( QKeyEvent * event )
-{
-	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-
-	int note = macView_->noteFromCommand( command );
-	if (note) {
-		onNoteRelease( note );
-	}
-	event->ignore();
-}
-
-void MachineScene::onNotePress( int note, psy::core::Machine* mac )
-{
-	macView_->PlayNote( macView_->octave() * 12 + note, 127, false, mac );   
-}
-
-void MachineScene::onNoteRelease( int note )
-{
-	macView_->StopNote( note );   
-}
-
-// FIXME: should be somewhere else, perhaps global.
 int MachineView::noteFromCommand( int command )
 {
 	int note = NULL;
@@ -640,4 +570,103 @@ int MachineView::noteFromCommand( int command )
 		break;
 	}
 	return note;
+}
+
+void MachineView::setChosenMachine( MachineGui *macGui )
+{ 
+	chosenMachine_ = macGui;
+}
+
+void MachineView::addNewMachineGui( psy::core::Machine *mac )
+{
+	MachineGui *macGui = createMachineGui( mac );
+
+	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
+		setChosenMachine( macGui );
+		song_->seqBus = song_->FindBusFromIndex( macGui->mac()->id() );
+		emit newMachineCreated( mac );
+	}
+	scene()->update( scene()->itemsBoundingRect() );
+	emit newMachineCreated( mac );
+}
+
+void MachineView::onMachineChosen( MachineGui *macGui )
+{
+	song_->seqBus = song_->FindBusFromIndex( macGui->mac()->id() );
+
+	setChosenMachine( macGui );
+	scene()->update( scene()->itemsBoundingRect() );
+
+	emit machineChosen( macGui );
+}
+
+
+
+
+/**
+   MachineScene.
+ */
+MachineScene::MachineScene( MachineView *macView )
+	:
+	QGraphicsScene( macView ),
+	pluginFinder_(Global::configuration().pluginPath(), Global::configuration().ladspaPath())
+{
+	macView_ = macView;
+	newMachineDlg = new NewMachineDlg();
+}
+
+void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
+{ 
+	QGraphicsScene::mouseDoubleClickEvent( event );
+	if ( !event->isAccepted() ) // Check whether one of the items on the scene ate it.
+	{
+		int accepted = newMachineDlg->exec();
+		if (accepted) { // Add a new machine to the song.
+			psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
+
+			// Create machine, tell where to place the new machine--get from mouse.	  
+			psy::core::Machine *mac = macView_->song()->createMachine( pluginFinder_, key, event->scenePos().x(), event->scenePos().y() );
+			if ( mac ) {
+				macView_->addNewMachineGui( mac );
+
+				update();
+			}
+		} 
+	}
+}
+void MachineScene::keyPressEvent( QKeyEvent * event )
+{
+	if ( !event->isAutoRepeat() ) 
+	{
+		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+		int note = NULL;
+		note = macView_->noteFromCommand( command );
+		if (note) {
+			onNotePress( note, macView_->chosenMachine()->mac() );
+		}
+	}
+	event->ignore();
+}
+
+// FIXME: this gets triggered even when you're still holding the key down.  
+// Most likely a Qt bug...
+void MachineScene::keyReleaseEvent( QKeyEvent * event )
+{
+	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+
+	int note = macView_->noteFromCommand( command );
+	if (note) {
+		onNoteRelease( note );
+	}
+	event->ignore();
+}
+
+void MachineScene::onNotePress( int note, psy::core::Machine* mac )
+{
+	macView_->PlayNote( macView_->octave() * 12 + note, 127, false, mac );   
+}
+
+void MachineScene::onNoteRelease( int note )
+{
+	macView_->StopNote( note );   
 }

@@ -53,16 +53,17 @@ public:
 	void StopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
 	psy::core::Song *song();
 	void setSong( psy::core::Song *song ) { song_ = song; }
-	void setChosenMachine( MachineGui* macGui ) { chosenMachine_ = macGui; }
+	void setChosenMachine( MachineGui* macGui );
 	MachineGui* chosenMachine() { return chosenMachine_; }
 	int octave() const;
 	void setOctave( int newOctave );
-	void createMachineGui( psy::core::Machine *mac );
+	MachineGui * createMachineGui( psy::core::Machine *mac );
 	WireGui* createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui );
 
 	bool isCreatingWire() { return creatingWire_; }
 	MachineGui *machineGuiAtPoint( QPointF point );
 	int noteFromCommand( int command );
+	void addNewMachineGui( psy::core::Machine *mac );
 
 protected:
 	void keyPressEvent(QKeyEvent *event);
@@ -83,6 +84,7 @@ signals:
 	void machineChosen( MachineGui *macGui );
 	void machineDeleted( int macIndex );
 	void machineRenamed();
+	void newMachineCreated( psy::core::Machine* mac );
 
 private:
 	MachineGui* findByMachine( psy::core::Machine *mac );
@@ -122,7 +124,7 @@ protected:
 	void keyReleaseEvent( QKeyEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 signals:
-	void newMachineCreated( psy::core::Machine* mac );
+
 
 private:
 	MachineView *macView_;

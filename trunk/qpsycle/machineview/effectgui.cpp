@@ -42,48 +42,49 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
 
 void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-    MachineGui::paint( painter, option, widget );
-    mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
-    painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
-    mac()->_bypass ? painter->setBrush( Qt::yellow ) : painter->setBrush( QColor( 100, 100, 0 ) );
-    painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
+	MachineGui::paint( painter, option, widget );
+	painter->setPen( Qt::white );
+	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
+	painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
+	mac()->_bypass ? painter->setBrush( Qt::yellow ) : painter->setBrush( QColor( 100, 100, 0 ) );
+	painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
 }
 
 void EffectGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-    QString muteText;
-    mac()->_mute ? muteText = "Unmute" : muteText = "Mute";
-    toggleMuteAct_->setText( muteText );
+	QString muteText;
+	mac()->_mute ? muteText = "Unmute" : muteText = "Mute";
+	toggleMuteAct_->setText( muteText );
 
-    QString bypassText;
-    mac()->_bypass ? bypassText = "Unbypass" : bypassText = "Bypass";
-    toggleBypassAct_->setText( bypassText );
+	QString bypassText;
+	mac()->_bypass ? bypassText = "Unbypass" : bypassText = "Bypass";
+	toggleBypassAct_->setText( bypassText );
 
-    QMenu menu;
-    menu.addAction( renameMachineAct_ );
-    menu.addAction("Clone");
-    menu.addAction( deleteMachineAct_ );
-    menu.addSeparator();
-    menu.addAction( showMacTwkDlgAct_ );
-    menu.addSeparator();
-    menu.addAction( toggleMuteAct_ );
-    menu.addAction( toggleBypassAct_ );
-    QAction *a = menu.exec( event->screenPos() );
+	QMenu menu;
+	menu.addAction( renameMachineAct_ );
+	menu.addAction("Clone");
+	menu.addAction( deleteMachineAct_ );
+	menu.addSeparator();
+	menu.addAction( showMacTwkDlgAct_ );
+	menu.addSeparator();
+	menu.addAction( toggleMuteAct_ );
+	menu.addAction( toggleBypassAct_ );
+	QAction *a = menu.exec( event->screenPos() );
 }
 
 void EffectGui::keyPressEvent( QKeyEvent * event )
 {
-    int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-    switch ( command ) { 
+	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+	switch ( command ) { 
         case commands::mute_machine:
-            toggleMuteAct_->trigger();
-            return;
+		toggleMuteAct_->trigger();
+		return;
         case commands::bypass_machine:
-            toggleBypassAct_->trigger();
-            return;
+		toggleBypassAct_->trigger();
+		return;
         default:;
-    }
-    event->ignore();
+	}
+	event->ignore();
 }
 
 void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
@@ -91,7 +92,8 @@ void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	if ( event->button() == Qt::LeftButton &&
 	     event->modifiers() == Qt::ControlModifier ) 
 	{
+		qDebug("yup");
 		emit chosen( this );
 	}
-	QGraphicsItem::mousePressEvent( event );
+	MachineGui::mousePressEvent( event );
 }

@@ -37,6 +37,7 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
 	MachineGui::paint( painter, option, widget );
+	painter->setPen( Qt::white );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
 	painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
 	mac()->song()->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
@@ -70,7 +71,7 @@ void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	if ( event->button() == Qt::LeftButton ) {
 		emit chosen( this );    
 	}
-	QGraphicsItem::mousePressEvent( event );
+	MachineGui::mousePressEvent( event );
 }
 
 void GeneratorGui::keyPressEvent( QKeyEvent *event )
