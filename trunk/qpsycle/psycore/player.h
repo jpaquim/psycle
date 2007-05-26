@@ -83,10 +83,10 @@ namespace psy
 			///\{
 				public:
 					/// entrance for the callback function (audiodriver)
-					static float * Work(void* context, int& nsamples) { return reinterpret_cast<Player*>(context)->Work(numSamples); }
+					static float * Work(void* context, int & samples) { return reinterpret_cast<Player*>(context)->Work(samples); }
 				private:
 					/// entrance for the callback function (audiodriver)
-					float * Work(int nsamples);
+					float * Work(int samples);
 			///\}
 				
 			///\name song
