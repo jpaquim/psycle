@@ -74,7 +74,7 @@ namespace psy
 			///\todo missplaced?
 			///\{
 				public:
-					void setAutoRecording( bool on );
+					void setAutoRecording( bool on ) { autoRecord_ = on; }
 				private:
 					bool autoRecord_;
 			///\}
@@ -83,7 +83,7 @@ namespace psy
 			///\{
 				public:
 					/// entrance for the callback function (audiodriver)
-					static float * Work(void* context, int& nsamples);
+					static float * Work(void* context, int& nsamples) { return reinterpret_cast<Player*>(context)->Work(numSamples); }
 				private:
 					/// entrance for the callback function (audiodriver)
 					float * Work(int nsamples);
@@ -100,6 +100,7 @@ namespace psy
 			///\}
 
 			///\name secondary output device, write to a file
+			///\todo maybe this shouldn't be in player either.
 			///\{
 				public:
 					/// starts the recording output device.
@@ -107,11 +108,11 @@ namespace psy
 					/// stops the recording output device.
 					void stopRecording( );
 					/// wether the recording device has been started.
-					bool recording() const;
+					bool recording() const { return recording_; }
 					/// for wave render set the filename
-					void setFileName( const std::string & fileName); // FIXME: maybe this shouldn't be in player either.
+					void setFileName( const std::string & fileName) { fileName_ = fileName; }
 					/// gets the wave to render filename
-					const std::string fileName() const; // FIXME: maybe this shouldn't be in player either.
+					const std::string fileName() const { return fileName_; }
 				private:
 					/// wether the recording device has been started.
 					bool recording_;
@@ -147,7 +148,7 @@ namespace psy
 					/// stops playing.
 					void stop();
 					/// is the player in playmode.
-					bool playing() const;
+					bool playing() const { return _playing; }
 				private:
 					bool _playing;
 			///\}
@@ -156,19 +157,19 @@ namespace psy
 			///\{
 				public:
 					/// sets the current play position
-					void setPlayPos( double pos );
+					void setPlayPos( double pos ) { timeInfo_.setPlayBeatPos( pos ); }
 					/// the current play position
-					double playPos() const;
+					double playPos() const { return timeInfo_.playBeatPos(); }
 			///\}
 			
 			///\name loop
 			///\{
 				public:			
-					void setLoopSong( bool setit );
-					bool loopSong() const;
+					void setLoopSong( bool setit ) { loopSong_ = setit; }
+					bool loopSong() const { return loopSong_; }
 
-					void setLoopSequenceEntry( SequenceEntry *seqEntry );
-					SequenceEntry *loopSequenceEntry() const;
+					void setLoopSequenceEntry( SequenceEntry *seqEntry ) { loopSequenceEntry_ = seqEntry; }
+					SequenceEntry *loopSequenceEntry() const { return loopSequenceEntry_; }
 				private:
 					bool loopSong_;
 					SequenceEntry *loopSequenceEntry_;
@@ -177,7 +178,7 @@ namespace psy
 			///\name auto stop
 			///\{
 				public:
-					bool autoStopMachines() const;
+					bool autoStopMachines() const { return autoStopMachines_; }
 				private:
 					bool autoStopMachines_;
 			///\}

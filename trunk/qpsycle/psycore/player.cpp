@@ -87,14 +87,6 @@ namespace psy
 			timeInfo_.setLinesPerBeat( song().linesPerBeat() );
 		}
 
-		void Player::setPlayPos( double pos ) {
-			timeInfo_.setPlayBeatPos( pos );
-		}
-
-		double Player::playPos() const { 
-			return timeInfo_.playBeatPos();
-		}
-
 		void Player::stop( )
 		{
 			if ( !song_) return;
@@ -117,10 +109,6 @@ namespace psy
 			//printf("stop\n");
 		}
 
-		bool Player::playing() const {
-			return _playing;
-		}
-
 		void Player::SampleRate(const int sampleRate)
 		{
 			if ( !song_ ) return;
@@ -135,10 +123,6 @@ namespace psy
 			}
 		}
 		
-		bool Player::autoStopMachines() const {
-			return autoStopMachines_;
-		}
-
 		void Player::ProcessGlobalEvent(const GlobalEvent & event)
 		{
 			Machine::id_type mIndex;
@@ -273,11 +257,6 @@ namespace psy
 			_samplesRemaining = static_cast<int>( timeInfo_.samplesPerRow() );
 		}
 
-		float * Player::Work(void* context, int & numSamples)
-		{
-			return reinterpret_cast<Player*>(context)->Work(numSamples);
-		}
-
 		float * Player::Work(int numSamples)
 		{
 			if ( !song_ ) return _pBuffer;
@@ -400,14 +379,6 @@ namespace psy
 
 		// buffer to wav_file methods
 
-		void Player::setFileName( const std::string & fileName) {
-			fileName_ = fileName;
-		}
-
-		const std::string Player::fileName() const {
-			return fileName_;
-		}
-
 		void Player::writeSamplesToFile( int amount ) {
 
 			if (!song_ && !driver_) return;
@@ -449,10 +420,6 @@ namespace psy
 			}
 		}
 
-		void Player::setAutoRecording( bool on ) {
-			autoRecord_ = on;
-		}
-
 		void Player::startRecording( ) {
 
 			if ( !song_ && !driver_ ) return;
@@ -471,26 +438,6 @@ namespace psy
 				_outputWaveFile.Close();
 				recording_ = false;
 			}
-		}
-
-		bool Player::recording() const {
-			return recording_;
-		}
-
-		void Player::setLoopSong( bool setit ) {
-			loopSong_ = setit;
-		}
-
-		bool Player::loopSong() const {
-			return loopSong_;
-		}
-
-		void Player::setLoopSequenceEntry( SequenceEntry *seqEntry ) {
-			loopSequenceEntry_ = seqEntry;
-		}
-
-		SequenceEntry *Player::loopSequenceEntry() const {
-			return loopSequenceEntry_;
 		}
 
 		void Player::setDriver(  const AudioDriver & driver ) {
