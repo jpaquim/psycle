@@ -264,8 +264,10 @@ win32 { # The horror begins...
 				LIBPATH *= "$${VC_DIR}/lib"
 				LIBPATH *= "$${VC_DIR}/PlatformSDK/lib"
 			}
-		LIBS *= advapi32.lib
-		LIBS *= user32.lib
+			
+			LIBS *= advapi32.lib
+			LIBS *= user32.lib
+		}
 	} else {
 		warning("Untested compiler.")
 	}
@@ -285,8 +287,7 @@ win32 { # The horror begins...
 		BOOST_DIR = $(BOOST_DIR)
 		INCLUDEPATH *= $${BOOST_DIR}
 		LIBPATH *= $${BOOST_DIR}/lib
-	}
-	else {
+	} else {
 		BOOST_DIR = $$EXTERNAL_PKG_DIR/boost-1.33.1
 		!exists($$BOOST_DIR) {
 			warning("The local boost dir does not exist: $${BOOST_DIR}. Make sure you have boost libs installed.")
@@ -333,8 +334,7 @@ win32 { # The horror begins...
 		INCLUDEPATH += $(DXSDK_DIR)/include
 		LIBPATH += $(DXSDK_DIR)/lib
 		CONFIG += dsound
-	}
-	else {
+	} else {
 		DSOUND_DIR = $$EXTERNAL_PKG_DIR/dsound-9
 		!exists($$DSOUND_DIR) {
 			warning("The local dsound dir does not exist: $${DSOUND_DIR}. Make sure you have the dsound lib installed.")
