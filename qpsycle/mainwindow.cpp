@@ -282,12 +282,12 @@ void MainWindow::createActions()
 	openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
 	openAct->setShortcut(tr("Ctrl+O"));
 	openAct->setStatusTip(tr("Open an existing song"));
-	connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+	connect(openAct, SIGNAL(triggered()), this, SLOT(onOpenSongRequest()));
 
 	saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save..."), this);
 	saveAct->setShortcut(tr("Ctrl+S"));
 	saveAct->setStatusTip(tr("Save the current song"));
-	connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
+	connect(saveAct, SIGNAL(triggered()), this, SLOT(onSaveSongRequest()));
 
 	undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
 	undoAct->setShortcut(tr("Ctrl+Z"));
@@ -311,7 +311,7 @@ void MainWindow::createActions()
 
 	aboutAct = new QAction(tr("&About qpsycle"), this);
 	aboutAct->setStatusTip(tr("About qpsycle"));
-	connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+	connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQpsycle()));
 
 	playFromStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
 	connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
@@ -492,7 +492,7 @@ void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
 	song_->seqBus = newIndex;
 
 	// Choose the necessary MachineGui in the MachineView.
-	MachineGui *macGui = macView_->findMachineGuiByMachineIndex( newIndex );
+	MachineGui *macGui = macView_->findMachineGuiByCoreMachineIndex( newIndex );
 	macView_->setChosenMachine( macGui );
 	macView_->update();
 }
