@@ -74,123 +74,134 @@ MainWindow::MainWindow()
 
 void MainWindow::setupSound()
 {
-    psy::core::Player::Instance()->song( song_ );
-    psy::core::AudioDriver *outDriver = Global::configuration()._pOutputDriver;
-    psy::core::Player::Instance()->setDriver( *outDriver );
-
+	psy::core::Player::Instance()->song( song_ );
+	psy::core::AudioDriver *outDriver = Global::configuration()._pOutputDriver;
+	psy::core::Player::Instance()->setDriver( *outDriver );
 }
 
 void MainWindow::setupGui()
 {
-    QWidget *workArea = new QWidget();
+	QWidget *workArea = new QWidget();
 
-    dock_ = new QDockWidget( "Pattern Box", this );
-    dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock_->setWidget(patternBox_);
-    addDockWidget(Qt::LeftDockWidgetArea, dock_);
+	dock_ = new QDockWidget( "Pattern Box", this );
+	dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	dock_->setWidget(patternBox_);
+	addDockWidget(Qt::LeftDockWidgetArea, dock_);
 
-    views_ = new TabWidget();
-    views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
-    views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
-    views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
-    views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
+	views_ = new TabWidget();
+	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
+	views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
+	views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
+	views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
 
 
 
-    QGridLayout *layout = new QGridLayout;
-    layout->addWidget( views_ );
-    workArea->setLayout(layout);
-    setCentralWidget(workArea);
+	QGridLayout *layout = new QGridLayout;
+	layout->addWidget( views_ );
+	workArea->setLayout(layout);
+	setCentralWidget(workArea);
 
-    createActions();
-    createMenus();
-    createToolBars();
-    createStatusBar();
+	createActions();
+	createMenus();
+	createToolBars();
+	createStatusBar();
 
-    setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001088 alpha ) "));
+	setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001088 alpha ) "));
 }
 
 void MainWindow::setupSignals()
 {
-    connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
-             this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
-    connect( patternBox_, SIGNAL( patternDeleted() ),
-             this, SLOT( onPatternDeleted() ) );
-    connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ),
-             this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
-    connect( patternBox_, SIGNAL( patternNameChanged() ),
-             this, SLOT( onPatternNameChanged() ) );
-    connect( patternBox_, SIGNAL( categoryColorChanged() ),
-             this, SLOT( onCategoryColorChanged() ) );
+	connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
+		 this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
+	connect( patternBox_, SIGNAL( patternDeleted() ),
+		 this, SLOT( onPatternDeleted() ) );
+	connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ),
+		 this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
+	connect( patternBox_, SIGNAL( patternNameChanged() ),
+		 this, SLOT( onPatternNameChanged() ) );
+	connect( patternBox_, SIGNAL( categoryColorChanged() ),
+		 this, SLOT( onCategoryColorChanged() ) );
 
-    connect( macView_, SIGNAL( newMachineCreated( psy::core::Machine* ) ),
-             this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
-    connect( macView_, SIGNAL( machineChosen( MachineGui* ) ),
-             this, SLOT( onMachineChosen( MachineGui* ) ) );
-    connect( macView_, SIGNAL( machineDeleted( int ) ),
-             this, SLOT( onMachineDeleted( int ) ) );
-    connect( macView_, SIGNAL( machineRenamed( ) ),
-             this, SLOT( onMachineRenamed( ) ) );
+	connect( macView_, SIGNAL( newMachineCreated( psy::core::Machine* ) ),
+		 this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
+	connect( macView_, SIGNAL( machineChosen( MachineGui* ) ),
+		 this, SLOT( onMachineChosen( MachineGui* ) ) );
+	connect( macView_, SIGNAL( machineDeleted( int ) ),
+		 this, SLOT( onMachineDeleted( int ) ) );
+	connect( macView_, SIGNAL( machineRenamed( ) ),
+		 this, SLOT( onMachineRenamed( ) ) );
 
-    connect( wavView_, SIGNAL( sampleAdded() ),
-             this, SLOT( refreshSampleComboBox() ) );
+	connect( wavView_, SIGNAL( sampleAdded() ),
+		 this, SLOT( refreshSampleComboBox() ) );
 
-    connect( macCombo_, SIGNAL( currentIndexChanged( int ) ),
-             this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
+	connect( macCombo_, SIGNAL( currentIndexChanged( int ) ),
+		 this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
 
-    connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
-             this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
+	connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
+		 this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 }
 
 void MainWindow::onNewSongRequest()
 {
-    if ( songHasChanged() )
-    {
-        int response = QMessageBox::warning( this, "Save changes?",
-                       "The song has been modified.\n Do you wish to save your changes?",
-                       QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-                       QMessageBox::Save ) ;
+	if ( songHasChanged() )
+	{
+		int response = QMessageBox::warning( this, "Save changes?",
+						     "The song has been modified.\n Do you wish to save your changes?",
+						     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+						     QMessageBox::Save ) ;
 
-        if ( response == QMessageBox::Save ) {
-            save();
-        }
+		if ( response == QMessageBox::Save ) {
+			onSaveSongRequest();
+		}
 
-        if ( response == QMessageBox::Cancel ) {
-            return;
-        }
-    }
+		if ( response == QMessageBox::Cancel ) {
+			return;
+		}
+	}
 
-    psy::core::Song *blankSong = createBlankSong();
-    loadSong( blankSong );
+	psy::core::Song *blankSong = createBlankSong();
+	loadSong( blankSong );
 }
 
-void MainWindow::open()
+void MainWindow::onOpenSongRequest()
 {
-    if ( songHasChanged() )
-    {
-        int response = QMessageBox::warning( this, "Save changes?",
-                       "The song has been modified.\n Do you wish to save your changes?",
-                       QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-                       QMessageBox::Save ) ;
+	if ( songHasChanged() )
+	{
+		int response = QMessageBox::warning( this, "Save changes?",
+						     "The song has been modified.\n Do you wish to save your changes?",
+						     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+						     QMessageBox::Save ) ;
 
-        if ( response == QMessageBox::Save ) {
-            save();
-        }
+		if ( response == QMessageBox::Save ) {
+			onSaveSongRequest();
+		}
 
-        if ( response == QMessageBox::Cancel ) {
-            return;
-        }
-    }
+		if ( response == QMessageBox::Cancel ) {
+			return;
+		}
+	}
 
-    QString songPath = QString::fromStdString( Global::configuration().songPath() );
-    QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psy (*.psy)" );
+	QString songPath = QString::fromStdString( Global::configuration().songPath() );
+	QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psy (*.psy)" );
 
-    if ( !fileName.isEmpty() ) {
-        psy::core::Player::Instance()->stop();
-        psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
-        song->load(Global::configuration().pluginPath(), fileName.toStdString() );
-        loadSong( song );
-    }
+	if ( !fileName.isEmpty() ) {
+		psy::core::Player::Instance()->stop();
+		psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
+		song->load(Global::configuration().pluginPath(), fileName.toStdString() );
+		loadSong( song );
+	}
+}
+
+void MainWindow::onSaveSongRequest()
+{
+	QString songPath = QString::fromStdString( Global::configuration().songPath() );
+	QString fileName = QFileDialog::getSaveFileName(this,
+							tr("Choose a file name"), songPath,
+							tr("Psycle Songs (*.psy)"));
+	if (fileName.isEmpty())
+		return;
+
+	song_->save( fileName.toStdString() );
 }
 
 bool MainWindow::songHasChanged() {
@@ -199,64 +210,53 @@ bool MainWindow::songHasChanged() {
 
 psy::core::Song *MainWindow::createBlankSong()
 {
-    psy::core::Song *blankSong = new psy::core::Song( psy::core::Player::Instance() );
-    psy::core::PatternCategory* category0 = blankSong->patternSequence()->patternData()->createNewCategory("New Category");
-    psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
+	psy::core::Song *blankSong = new psy::core::Song( psy::core::Player::Instance() );
+	psy::core::PatternCategory* category0 = blankSong->patternSequence()->patternData()->createNewCategory("New Category");
+	psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
 
-    psy::core::SequenceLine *seqLine = blankSong->patternSequence()->createNewLine();
+	psy::core::SequenceLine *seqLine = blankSong->patternSequence()->createNewLine();
 	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
 
-    return blankSong;
+	return blankSong;
 }
 
 void MainWindow::loadSong( psy::core::Song *song )
 {
-    song_ = song;
-    // update gui to new song FIXME: very crappy way of doing it for now.
-    delete patternBox_;
-    delete macView_;
-    delete patView_;
-    delete wavView_;
-    delete seqView_;
+	song_ = song;
+	// update gui to new song FIXME: very crappy way of doing it for now.
+	delete patternBox_;
+	delete macView_;
+	delete patView_;
+	delete wavView_;
+	delete seqView_;
 
-    psy::core::Player::Instance()->song( song_ );
+	psy::core::Player::Instance()->song( song_ );
 
-    macView_ = new MachineView( song_ );
-    patView_ = new PatternView( song_ );
-    wavView_ = new WaveView( song_ );
-    seqView_ = new SequencerView( song_ );
-    macView_->setOctave( 4 );
-    patView_->setOctave( 4 );
-    views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
-    views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
-    views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
-    views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
-    patternBox_ = new PatternBox( song_ );
-    dock_->setWidget( patternBox_ );
-    patternBox_->populatePatternTree();
-    patView_->setPattern(patternBox_->currentPattern());
-    populateMachineCombo();
-    initSampleCombo();
-    patternBox_->patternTree()->setFocus();
-    createActions();
-    setupSignals();
-    // enable audio driver
-    //Global::configuration()._pOutputDriver->Enable(true);
-    // update file recent open sub menu
-    //recentFileMenu_->add(new ngrs::MenuItem(fileName));
+	macView_ = new MachineView( song_ );
+	patView_ = new PatternView( song_ );
+	wavView_ = new WaveView( song_ );
+	seqView_ = new SequencerView( song_ );
+	macView_->setOctave( 4 );
+	patView_->setOctave( 4 );
+	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
+	views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
+	views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
+	views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
+	patternBox_ = new PatternBox( song_ );
+	dock_->setWidget( patternBox_ );
+	patternBox_->populatePatternTree();
+	patView_->setPattern(patternBox_->currentPattern());
+	populateMachineCombo();
+	initSampleCombo();
+	patternBox_->patternTree()->setFocus();
+	createActions();
+	setupSignals();
+	// enable audio driver
+	//Global::configuration()._pOutputDriver->Enable(true);
+	// update file recent open sub menu
+	//recentFileMenu_->add(new ngrs::MenuItem(fileName));
 }
 
- void MainWindow::save()
- {
-    QString songPath = QString::fromStdString( Global::configuration().songPath() );
-     QString fileName = QFileDialog::getSaveFileName(this,
-                         tr("Choose a file name"), songPath,
-                         tr("Psycle Songs (*.psy)"));
-     if (fileName.isEmpty())
-         return;
-
-    song_->save( fileName.toStdString() );
- }
 
  void MainWindow::undo()
  {
@@ -266,7 +266,7 @@ void MainWindow::loadSong( psy::core::Song *song )
  {
  }
 
- void MainWindow::about()
+ void MainWindow::aboutQpsycle()
  {
     QMessageBox::about(this, tr("About qpsycle"),
              tr("It makes music and stuff."));
@@ -396,73 +396,6 @@ void MainWindow::createStatusBar()
     statusBar()->showMessage(tr("Ready"));
 }
 
-void MainWindow::keyPressEvent( QKeyEvent * event )
-{
-    if ( event->key() == Qt::Key_Tab )
-        return;
-    int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-
-    switch ( command ) {
-        case commands::show_pattern_box:
-        {
-            if ( !dock_->isVisible() ) {
-                dock_->setVisible( true );
-                patternBox_->patternTree()->setFocus();
-            } else {
-                if ( patternBox_->patternTree()->hasFocus() ) {
-                    dock_->setVisible( false );
-                } else {
-                    patternBox_->patternTree()->setFocus();
-                }
-            }
-        }
-        break;
-        case commands::show_machine_view:
-            views_->setCurrentWidget( macView_ );
-        break;
-        case commands::show_pattern_view:
-            views_->setCurrentWidget( patView_ );
-            patView_->patDraw()->setFocus();
-           patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
-        break;
-        case commands::show_wave_editor:
-            views_->setCurrentWidget( wavView_ );
-        break;
-        case commands::show_sequencer_view:
-            views_->setCurrentWidget( seqView_ );
-        break;
-        // Play controls.
-        case commands::play_start:
-            playFromStartAct->trigger();
-        break;
-        case commands::play_from_position:
-            playFromSeqPosAct->trigger();
-        break;
-        case commands::play_stop:
-            playStopAct->trigger();
-        break;
-        case commands::play_loop_entry:
-        {
-//            psy::core::Player::Instance()->setLoopPatternEntry( ... );
-        }
-        break;
-        case commands::instrument_inc:
-            sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
-        break;
-        case commands::instrument_dec:
-            sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
-        break;
-        case commands::octave_up:
-            octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
-        break;
-        case commands::octave_down:
-            octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
-        break;
-
-        default:;
-    }
-}
-
 void MainWindow::populateMachineCombo()
 {
 	if (!song_) return;
@@ -527,10 +460,10 @@ void MainWindow::populateMachineCombo()
 
 void MainWindow::initSampleCombo()
 {
-    for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
-    {
-        sampCombo_->addItem( "Empty" );
-    }
+	for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
+	{
+		sampCombo_->addItem( "Empty" );
+	}
 }
 
 void MainWindow::refreshSampleComboBox()
@@ -576,6 +509,8 @@ void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* select
     patView_->setPattern( selectedPattern );
 }
 
+
+
 void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 {
 	populateMachineCombo();
@@ -590,49 +525,6 @@ void MainWindow::onMachineChosen( MachineGui *macGui )
 	macCombo_->setCurrentIndex( comboIdx );
 }
 
-void MainWindow::onPatternDeleted()
-{
-    patView_->setPattern( 0 );
-}
-
-void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern )
-{
-    seqView_->addPattern( pattern );
-}
-
-void MainWindow::onPatternNameChanged()
-{
-	seqView_->onPatternNameChanged();
-}
-
-void MainWindow::onCategoryColorChanged()
-{
-	seqView_->onCategoryColorChanged();
-}
-
-void MainWindow::timerEvent( QTimerEvent *ev )
-{
-    if ( psy::core::Player::Instance()->playing() ) {
-        seqView_->updatePlayPos();
-
-        psy::core::SinglePattern* visiblePattern = 0;
-        visiblePattern = patView_->pattern();
-        if ( visiblePattern ) {
-            double entryStart = 0;
-            bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
-            if ( isPlayPattern ) {
-                patView_->onTick( entryStart );
-            }
-        }
-    }
-}
-
-void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
-{
-    patView_->setOctave( newIndex );
-    macView_->setOctave( newIndex );
-}
-
 void MainWindow::onMachineDeleted( int id )
 {
     populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
@@ -640,24 +532,155 @@ void MainWindow::onMachineDeleted( int id )
 
 void MainWindow::onMachineRenamed()
 {
-    populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
+	populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
 }
+
+
+
+
+void MainWindow::onPatternDeleted()
+{
+	patView_->setPattern( 0 );
+}
+
+void MainWindow::onPatternNameChanged()
+{
+	seqView_->onPatternNameChanged();
+}
+
+
+
+void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern )
+{
+	seqView_->addPattern( pattern );
+}
+
+void MainWindow::onCategoryColorChanged()
+{
+	seqView_->onCategoryColorChanged();
+}
+
+
+void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
+{
+	patView_->setOctave( newIndex );
+	macView_->setOctave( newIndex );
+}
+
+
 
 void MainWindow::playFromStart()
 {
-    psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
-    psy::core::Player::Instance()->start( 0.0 );
+	psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
+	psy::core::Player::Instance()->start( 0.0 );
 }
 
 void MainWindow::playFromSeqPos()
 {
-    psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
+	psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
 }
 
 void MainWindow::playStop()
 {
-    psy::core::Player::Instance()->stop();
+	psy::core::Player::Instance()->stop();
 }
+
+
+
+
+void MainWindow::showAudioConfigDlg()
+{
+	audioCnfDlg->exec();
+}
+
+
+
+void MainWindow::keyPressEvent( QKeyEvent * event )
+{
+	if ( event->key() == Qt::Key_Tab )
+		return;
+	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+
+	switch ( command ) {
+        case commands::show_pattern_box:
+        {
+		if ( !dock_->isVisible() ) {
+			dock_->setVisible( true );
+			patternBox_->patternTree()->setFocus();
+		} else {
+			if ( patternBox_->patternTree()->hasFocus() ) {
+				dock_->setVisible( false );
+			} else {
+				patternBox_->patternTree()->setFocus();
+			}
+		}
+        }
+        break;
+        case commands::show_machine_view:
+		views_->setCurrentWidget( macView_ );
+		break;
+        case commands::show_pattern_view:
+		views_->setCurrentWidget( patView_ );
+		patView_->patDraw()->setFocus();
+		patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
+		break;
+        case commands::show_wave_editor:
+		views_->setCurrentWidget( wavView_ );
+		break;
+        case commands::show_sequencer_view:
+		views_->setCurrentWidget( seqView_ );
+		break;
+		// Play controls.
+        case commands::play_start:
+		playFromStartAct->trigger();
+		break;
+        case commands::play_from_position:
+		playFromSeqPosAct->trigger();
+		break;
+        case commands::play_stop:
+		playStopAct->trigger();
+		break;
+        case commands::play_loop_entry:
+        {
+//            psy::core::Player::Instance()->setLoopPatternEntry( ... );
+        }
+        break;
+        case commands::instrument_inc:
+		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
+		break;
+        case commands::instrument_dec:
+		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
+		break;
+        case commands::octave_up:
+		octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
+		break;
+        case commands::octave_down:
+		octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
+		break;
+
+        default:;
+	}
+}
+
+void MainWindow::timerEvent( QTimerEvent *ev )
+{
+	if ( psy::core::Player::Instance()->playing() ) {
+		seqView_->updatePlayPos();
+
+		psy::core::SinglePattern* visiblePattern = 0;
+		visiblePattern = patView_->pattern();
+		if ( visiblePattern ) {
+			double entryStart = 0;
+			bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
+			if ( isPlayPattern ) {
+				patView_->onTick( entryStart );
+			}
+		}
+	}
+}
+
+
+
 
 
 TabWidget::TabWidget( QWidget *parent )
@@ -682,9 +705,4 @@ bool TabWidget::event( QEvent *event )
         default:
 		return QTabWidget::event( event );
 	}
-}
-
-void MainWindow::showAudioConfigDlg()
-{
-	audioCnfDlg->exec();
 }

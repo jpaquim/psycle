@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -44,7 +45,6 @@ class QComboBox;
 #include <QMainWindow>
 
 
-
 // Subclassing as we need to override event().
 class TabWidget : public QTabWidget {
 public:
@@ -56,11 +56,9 @@ protected:
 
 class MainWindow : public QMainWindow
 {
-	Q_OBJECT
-
-	public:
+Q_OBJECT
+public:
 	MainWindow();
-
 
 protected:
 	void keyPressEvent( QKeyEvent *event );
@@ -68,29 +66,36 @@ protected:
 
 private slots:
 	void onNewSongRequest();
-	void open();
-	void save();
+	void onOpenSongRequest();
+	void onSaveSongRequest();
+
 	void undo();
 	void redo();
-	void about();
+
+	void aboutQpsycle();
+
 	void refreshSampleComboBox();
 	void onMachineComboBoxIndexChanged( int newIndex );
 	void onSampleComboBoxIndexChanged( int newIndex );
+	void onOctaveComboBoxIndexChanged( int newIndex );
+
 	void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
 	void onNewMachineCreated( psy::core::Machine *mac );
 	void onMachineChosen( MachineGui *macGui );
-	void onPatternDeleted();
-	void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
-	void onPatternNameChanged();
-	void onCategoryColorChanged();
-	void onOctaveComboBoxIndexChanged( int newIndex );
 	void onMachineDeleted( int machine_id );
 	void onMachineRenamed();
-	void showAudioConfigDlg();
+
+	void onPatternDeleted();
+	void onPatternNameChanged();
+
+	void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
+	void onCategoryColorChanged();
 
 	void playFromStart();
 	void playFromSeqPos();
 	void playStop();
+
+	void showAudioConfigDlg();
 
 private:
 	psy::core::Song *song_;
@@ -159,5 +164,4 @@ private:
 	AudioConfigDlg *audioCnfDlg;
 };
 
-
- #endif
+#endif
