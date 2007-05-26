@@ -26,6 +26,7 @@ namespace psy { namespace core {
 	class PatternEvent;
 }}
 
+#include <psycore/constants.h>
 #include <psycore/pluginfinder.h>
 
 #include <vector>
@@ -61,6 +62,7 @@ public:
 
 	bool isCreatingWire() { return creatingWire_; }
 	MachineGui *machineGuiAtPoint( QPointF point );
+	int noteFromCommand( int command );
 
 protected:
 	void keyPressEvent(QKeyEvent *event);
@@ -108,18 +110,24 @@ private:
 };
 
 class MachineScene : public QGraphicsScene {
-    Q_OBJECT
-public:
-    MachineScene( MachineView *macView );
+Q_OBJECT
+	public:
+	MachineScene( MachineView *macView );
+	void onNotePress( int note, psy::core::Machine* mac );
+	void onNoteRelease( int note );
+
+
 protected:
-    void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+	void keyPressEvent( QKeyEvent *event );
+	void keyReleaseEvent( QKeyEvent *event );
+	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 signals:
-    void newMachineCreated( psy::core::Machine* mac );
+	void newMachineCreated( psy::core::Machine* mac );
 
 private:
-    MachineView *macView_;
-    NewMachineDlg *newMachineDlg;
-    psy::core::PluginFinder pluginFinder_;
+	MachineView *macView_;
+	NewMachineDlg *newMachineDlg;
+	psy::core::PluginFinder pluginFinder_;
 };
 
  #endif

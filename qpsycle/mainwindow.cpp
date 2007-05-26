@@ -598,6 +598,7 @@ void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 void MainWindow::onMachineChosen( MachineGui *macGui )
 {
 	int comboIdx = macCombo_->findData( macGui->mac()->id() );
+	macView_->setChosenMachine( macGui );
 	macCombo_->setCurrentIndex( comboIdx );
 }
 

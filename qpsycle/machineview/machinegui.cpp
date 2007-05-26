@@ -106,8 +106,15 @@ MachineGui::~MachineGui()
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
 	// Do the default painting business for a QGRectItem.
+	if ( this == machineView->chosenMachine() ) {
+		painter->setPen( QPen( Qt::red ) );
+	}
+
 	QGraphicsRectItem::paint( painter, option, widget );
 	painter->setPen( QPen( Qt::white ) );
+	// FIXME: not a good idea to do anything intensive in the paint method...
+
+
 }
 
 void MachineGui::setName(const QString &name)
@@ -280,11 +287,6 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-	// FIXME: not a good idea to do anything intensive in the paint method...
-	if ( this == machineView->chosenMachine() ) {
-		painter->setPen( QPen( Qt::red ) );
-	}
-
 	MachineGui::paint( painter, option, widget );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
 	painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
@@ -322,33 +324,21 @@ void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	QGraphicsItem::mousePressEvent( event );
 }
 
-void GeneratorGui::keyPressEvent( QKeyEvent * event )
+void GeneratorGui::keyPressEvent( QKeyEvent *event )
 {
-	if ( !event->isAutoRepeat() ) 
-	{
-		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
-		switch ( command ) { 
-		case commands::mute_machine:
-			toggleMuteAct_->trigger();
-			return;
-		case commands::solo_machine:
-			toggleSoloAct_->trigger();
-			return;
-		}
-
-		int note = NULL;
-		note = noteFromCommand( command );
-		if (note) {
-			onNotePress( note, mac() );
-		}
+	switch ( command ) { 
+	case commands::mute_machine:
+		toggleMuteAct_->trigger();
+		return;
+	case commands::solo_machine:
+		toggleSoloAct_->trigger();
+		return;
 	}
-	event->ignore();
 }
 
-// FIXME: this gets triggered even when you're still holding the key down.  
-// Most likely a Qt bug...
-void GeneratorGui::keyReleaseEvent( QKeyEvent * event )
+void GeneratorGui::keyReleaseEvent( QKeyEvent *event )
 {
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 	switch ( command ) { 
@@ -360,121 +350,7 @@ void GeneratorGui::keyReleaseEvent( QKeyEvent * event )
 		return;
         default:;
 	}
-
-	int note = noteFromCommand( command );
-	if (note) {
-		onNoteRelease( note );
-	}
-	event->ignore();
 }
-
-void GeneratorGui::onNotePress( int note, psy::core::Machine* mac )
-{
-	machineView->PlayNote( machineView->octave() * 12 + note, 127, false, mac );   
-}
-
-void GeneratorGui::onNoteRelease( int note )
-{
-	machineView->StopNote( note );   
-}
-
-// FIXME: should be somewhere else, perhaps global.
-int MachineGui::noteFromCommand( int command )
-{
-	int note = NULL;
-	switch ( command ) {
-        case commands::key_C_0:
-		note = 1;
-		break;
-        case commands::key_CS0:
-		note = 2;
-		break;
-        case commands::key_D_0:
-		note = 3;
-		break;
-        case commands::key_DS0:
-		note = 4;
-		break;
-        case commands::key_E_0:
-		note = 5;
-		break;
-        case commands::key_F_0:
-		note = 6;
-		break;
-        case commands::key_FS0:
-		note = 7;
-		break;
-        case commands::key_G_0:
-		note = 8;
-		break;
-        case commands::key_GS0:
-		note = 9;
-		break;
-        case commands::key_A_0:
-		note = 10;
-		break;
-        case commands::key_AS0:
-		note = 11;
-		break;
-        case commands::key_B_0: 
-		note = 12;
-		break;
-        case commands::key_C_1:
-		note = 13;
-		break;
-        case commands::key_CS1:
-		note = 14;
-		break;
-        case commands::key_D_1:
-		note = 15;
-		break;
-        case commands::key_DS1:
-		note = 16;
-		break;
-        case commands::key_E_1:
-		note = 17;
-		break;
-        case commands::key_F_1:
-		note = 18;
-		break;
-        case commands::key_FS1:
-		note = 19;
-		break;
-        case commands::key_G_1:
-		note = 20;
-		break;
-        case commands::key_GS1:
-		note = 21;
-		break;
-        case commands::key_A_1:
-		note = 22;
-		break;
-        case commands::key_AS1:
-		note = 23;
-		break;
-        case commands::key_B_1: 
-		note = 24;
-		break;
-        case commands::key_C_2:
-		note = 25;
-		break;
-        case commands::key_CS2:
-		note = 26;
-		break;
-        case commands::key_D_2:
-		note = 27;
-		break;
-        case commands::key_DS2:
-		note = 28;
-		break;
-        case commands::key_E_2:
-		note = 29;
-		break;
-	}
-	return note;
-}
-
-
 
 // FIXME: should be in EffectGui, but Qt fails to recognise it there.
 void MachineGui::onToggleBypassActionTriggered() 

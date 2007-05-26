@@ -135,10 +135,10 @@ void WaveView::onLoadButtonClicked()
 
 	if ( song()->WavAlloc( si, fileName.toStdString().c_str() ) )
 	{
+		std::cout << "1" << fileName.toStdString() << std::endl;
 		emit sampleAdded();
-//					updateInstrumentCbx( song()->instSelected, true );
 	}
-	std::cout << fileName.toStdString() << std::endl;
+	std::cout << "2" << fileName.toStdString().c_str() << std::endl;
 }
 
 void WaveView::onSaveButtonClicked()

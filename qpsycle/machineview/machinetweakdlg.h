@@ -149,9 +149,10 @@ private:
  */
 class MachineTweakDlg : public QDialog {
 Q_OBJECT
-
 	public:
 	MachineTweakDlg( MachineGui *macGui, QWidget *parent = 0 );
+
+	int noteFromCommand( int command );
 
 protected:
 	void showEvent( QShowEvent *event );
@@ -159,7 +160,7 @@ protected:
 	void keyReleaseEvent( QKeyEvent *event );
 
 
-public slots: 
+	public slots: 
 	void onKnobGroupChanged( KnobGroup *kGroup );
 	void randomiseParameters();
 	void resetParameters();
