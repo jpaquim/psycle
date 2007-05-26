@@ -134,7 +134,7 @@ void MainWindow::setupSignals()
     connect( patternBox_, SIGNAL( categoryColorChanged() ),
              this, SLOT( onCategoryColorChanged() ) );
 
-    connect( macView_->scene(), SIGNAL( newMachineCreated( psy::core::Machine* ) ),
+    connect( macView_, SIGNAL( newMachineCreated( psy::core::Machine* ) ),
              this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
     connect( macView_, SIGNAL( machineChosen( MachineGui* ) ),
              this, SLOT( onMachineChosen( MachineGui* ) ) );
@@ -598,7 +598,6 @@ void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 void MainWindow::onMachineChosen( MachineGui *macGui )
 {
 	int comboIdx = macCombo_->findData( macGui->mac()->id() );
-	macView_->setChosenMachine( macGui );
 	macCombo_->setCurrentIndex( comboIdx );
 }
 
