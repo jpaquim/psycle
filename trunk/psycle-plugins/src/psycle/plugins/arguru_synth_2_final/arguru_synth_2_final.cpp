@@ -408,7 +408,7 @@ void mi::SequencerTick()
 {
 	for (int i=0; i < MAX_TRACKS; i++)
 	{
-		track[int].InitEffect(0,0);
+		track[i].InitEffect(0,0);
 	}
 }
 
