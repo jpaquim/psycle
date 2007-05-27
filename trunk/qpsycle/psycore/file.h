@@ -31,10 +31,6 @@ namespace core {
   
   class File{
   public:
-    File();
-
-    ~File();
-
     static std::string readFile(const std::string & filename);
     static std::vector<std::string> fileList( const std::string & path, int fMode = nFiles | nDirs );   
     static std::string workingDir();

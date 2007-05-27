@@ -44,15 +44,6 @@ namespace psy {
 	namespace core {
 		using namespace std;
 
-  File::File()
-  {
-  }
-
-
-  File::~File()
-  {
-  }
-
   std::string File::readFile( const std::string & filename )
   {
     std::stringstream buf;

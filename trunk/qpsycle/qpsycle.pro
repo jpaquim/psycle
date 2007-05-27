@@ -59,8 +59,6 @@ HEADERS += \
 	waveview/waveview.h \
 	audiodrivers/audiodriver.h \
 	audiodrivers/wavefileout.h \
-	audiodrivers/dsound.h \
-	audiodrivers/gstreamerout.h \
 	psycore/binread.h \
 	psycore/constants.h \
 	psycore/convert_internal_machines.h \
@@ -141,7 +139,6 @@ SOURCES += \
 	waveview/waveview.cpp \
 	audiodrivers/audiodriver.cpp \
 	audiodrivers/wavefileout.cpp \
-	audiodrivers/gstreamerout.cpp \
 	psycore/binread.cpp \
 	psycore/convert_internal_machines.cpp \
 	psycore/datacompression.cpp \
