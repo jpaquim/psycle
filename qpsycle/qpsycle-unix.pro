@@ -2,7 +2,7 @@
 	CONFIG += link_pkgconfig # adds support for pkg-config via the PKG_CONFIG var
 	
 	macx {
-		CONFIG += x86 ppc # make universal binaries on mac
+		#CONFIG += x86 ppc # make universal binaries on mac
 		
 		# It looks like xcode discards gcc's env vars, so we make sure they get in by copying them into qmake's vars
 		env_cpath = $$system(echo $CPATH | sed \'s,:, ,g\')
