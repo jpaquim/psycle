@@ -25,6 +25,7 @@ WaveFormView::WaveFormView(bool *mini, QWidget *parent); //inizialization file f
 	{
 		//if it is a miniwaveview set fixed sizes and dimension
 		this.setSizePolicies( QSizePolicy::Fixed , QSizePolicy::Preferred);
+		this.resize (this.width(), 200)
 	}
 	else
 	{
@@ -33,3 +34,12 @@ WaveFormView::WaveFormView(bool *mini, QWidget *parent); //inizialization file f
 	}
 }
 
+WaveFormView::LoadStereo()
+{
+
+}
+
+WaveFormView::LoadMono()
+{
+	//we need to add al line at the middle GraphicsView To Makethat loads a Mono file...
+}

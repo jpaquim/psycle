@@ -32,7 +32,8 @@ public:
      WaveView(bool *mini, QWidget *parent);
 
 public slots:
-	
+	void LoadStereo();
+	void LoadMono();
 
 signals:
 
