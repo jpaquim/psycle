@@ -113,6 +113,11 @@ void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opt
 	}
 	painter->setBrush( brush() );
 	painter->drawRect( boundingRect() );
+
+	if ( isSelected() ) {
+		painter->setBrush( QColor( 255, 255, 0, 100 ) );
+		painter->drawRect( boundingRect() );
+	}
 }
 
 void MachineGui::setName(const QString &name)
@@ -171,7 +176,7 @@ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value
     
 void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
 {
-	QGraphicsItem::mousePressEvent( event ); // Get the default behaviour.
+	QGraphicsRectItem::mousePressEvent( event ); // Get the default behaviour.
 }
 
 void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
