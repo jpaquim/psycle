@@ -1,7 +1,8 @@
 	message("System is: unix.")
 	CONFIG += link_pkgconfig # adds support for pkg-config via the PKG_CONFIG var
-
-	macx: LIBS += -lboost_signals-1_33_1
+	macx: CONFIG += x86 ppc #make universal binaries on mac
+	
+	macx: LIBS += -boost_signals-1_33_1
 	else: LIBS += -lboost_signals
 
 	system( pkg-config --exists alsa ) {
