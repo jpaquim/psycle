@@ -184,7 +184,7 @@ namespace psy {
 			return threadStarted;
 		}
 		
-		int ESoundOut::audioOutThreadStatic( void * ptr )
+		void ESoundOut::audioOutThreadStatic( void * ptr )
 		{
 			reinterpret_cast<ESoundOut*>(ptr)->audioOutThread();
 		}

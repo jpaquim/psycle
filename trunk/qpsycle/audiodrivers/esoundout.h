@@ -61,7 +61,7 @@ namespace psy {
 				int fd_;
 
 				pthread_t threadId_;
-				static int audioOutThreadStatic(void*);
+				static void audioOutThreadStatic(void*);
 				void audioOutThread();
 				bool threadRunning_;
 				bool killThread_;
