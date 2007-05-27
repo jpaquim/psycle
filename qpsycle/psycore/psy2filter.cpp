@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <cctype>
 
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include "convert_internal_machines.h"
 #endif
 
@@ -99,7 +99,7 @@ namespace psy
 			LoadINSD(&file,song);
 			LoadWAVD(&file,song);
 			PreLoadVSTs(&file,song);
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 				convert_internal_machines::Converter converter(plugin_path);
 				LoadMACD(plugin_path, &file,song,&converter,callbacks);
 				TidyUp(&file,song,&converter);
@@ -379,7 +379,7 @@ namespace psy
 			return true;
 		}
 		
-		#ifdef __unix__
+		#if defined __unix__ || defined __APPLE__
 		bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
 		{
 			std::int32_t i;

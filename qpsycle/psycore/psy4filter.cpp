@@ -33,7 +33,7 @@
 #include <QDomElement>
 #include <QXmlInputSource>
 
-#if defined __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 	#include <sys/types.h>
 #elif defined _WIN64 || defined _WIN32

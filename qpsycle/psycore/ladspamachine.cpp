@@ -21,7 +21,7 @@
 #include "player.h"
 #include "dsp.h"
 
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
 #else
 	#include <windows.h>	
@@ -183,7 +183,7 @@ namespace psy {
 				psDescriptor=0;
 			 }
 			if ( libHandle_ ) {
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 				dlclose(libHandle_);
 				#else
 				::FreeLibrary( static_cast<HINSTANCE> ( libHandle_ ) ) ;
@@ -208,7 +208,7 @@ namespace psy {
 			size_t iFilenameLength;
 			void * pvResult(NULL);
 //			std::cout << filename_ << std::endl;
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			if (filename_.compare(filename_.length()-3,3,".so"))
 				filename_.append(".so");
 			#else
@@ -217,14 +217,14 @@ namespace psy {
 			#endif
 //			std::cout << filename_ << std::endl;
 			
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			if (filename_.c_str()[0] == '/') {
 			#else
 			if (filename_.c_str()[0] == '\\') {
 			#endif
 					/* The filename is absolute. Assume the user knows what he/she is
 						   doing and simply dlopen() it. */
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 				pvResult = dlopen(filename_.c_str(), iFlag);
 				#else
 				// Set error mode to disable system error pop-ups (for LoadLibrary)
@@ -245,7 +245,7 @@ namespace psy {
 		
 			  pcLADSPAPath = std::getenv("LADSPA_PATH");
 			  if ( !pcLADSPAPath) {
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 				pcLADSPAPath = "/usr/lib/ladspa/";
 				#else
 				pcLADSPAPath = "C:\\Programme\\Audacity\\Plug-Ins\\";
@@ -258,7 +258,7 @@ namespace psy {
 			  dotpos = directory.find(':',dotindex++);
 			  do{
 				std::string fullname = directory.substr(prevdotpos,dotpos);
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 				if (fullname.c_str()[fullname.length()-1] != '/' )
 				   fullname.append("/");
 				#else
@@ -268,7 +268,7 @@ namespace psy {
 				fullname.append(filename_);
 				std::cout << fullname << std::endl;
 		
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 				pvResult = dlopen(fullname.c_str(), iFlag);
 				#else
 				// Set error mode to disable system error pop-ups (for LoadLibrary)
@@ -289,7 +289,7 @@ namespace psy {
 			   correct error message - and this should correspond to a call to
 			   dlopen() with the actual filename requested. */
 
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			pvResult = dlopen( pcFilename, iFlag);
 			#else
 			// Set error mode to disable system error pop-ups (for LoadLibrary)
@@ -305,7 +305,7 @@ namespace psy {
 		bool LADSPAMachine::loadDll( const std::string & fileName, int pluginIndex )
 		{	
 			// Step one: Open the shared library.
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
 			if ( !libHandle_ ) {
 //				std::cerr << "Cannot load library: " << dlerror() << std::endl;
@@ -320,7 +320,7 @@ namespace psy {
 			#endif
 
 			// Step two: Get the entry function.
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			LADSPA_Descriptor_Function pfDescriptorFunction =
 				 (LADSPA_Descriptor_Function)dlsym( libHandle_, "ladspa_descriptor");
 			#else			
@@ -331,7 +331,7 @@ namespace psy {
 			if (!pfDescriptorFunction) {
 //				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
 //				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 //				std::cerr << dlerror() << std::endl;				
 				dlclose( libHandle_ ); 
 				#else
@@ -346,7 +346,7 @@ namespace psy {
 			psDescriptor = pfDescriptorFunction(pluginIndex);
 			if (psDescriptor == NULL) {
 //				std::cerr <<  "Unable to find the selected plugin  in the library file" << std::endl;
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 				dlclose(libHandle_);
 				#else
 				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
@@ -377,7 +377,7 @@ namespace psy {
 		
 		LADSPA_Descriptor_Function LADSPAMachine::loadDescriptorFunction( const std::string & fileName ) {
 			// Step one: Open the shared library.
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
 			#else
 			// Set error mode to disable system error pop-ups (for LoadLibrary)
@@ -388,7 +388,7 @@ namespace psy {
 			#endif
 			if ( !libHandle_ ) {
 /*				std::cerr << "Cannot load library: "
-					#ifdef __unix__
+					#if defined __unix__ || defined __APPLE__
 					  <<  dlerror() 
 					#endif
 					<< std::endl;*/
@@ -397,7 +397,7 @@ namespace psy {
 			// Step two: Get the entry function.
 			LADSPA_Descriptor_Function pfDescriptorFunction =
 				 (LADSPA_Descriptor_Function)
-				#ifdef __unix__				 
+				#if defined __unix__ || defined __APPLE__				 
 				 dlsym(  libHandle_, "ladspa_descriptor");
 				#else
 				 GetProcAddress( static_cast<HINSTANCE>( libHandle_), "ladspa_descriptor");
@@ -407,7 +407,7 @@ namespace psy {
 			if (!pfDescriptorFunction) {
 //				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
 //				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 //				std::cerr << dlerror() << std::endl;
 				dlclose(libHandle_);
 				#else

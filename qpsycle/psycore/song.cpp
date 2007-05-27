@@ -176,7 +176,7 @@ namespace psy
 						const char* pcLADSPAPath;
 						pcLADSPAPath = std::getenv("LADSPA_PATH");
 						if ( !pcLADSPAPath) {
-						#ifdef __unix__
+						#if defined __unix__ || defined __APPLE__
 						pcLADSPAPath = "/usr/lib/ladspa/";
 						#else
 						pcLADSPAPath = "I:\\Archivos de Programa\\Multimedia\\Audacity\\Plug-Ins\\";

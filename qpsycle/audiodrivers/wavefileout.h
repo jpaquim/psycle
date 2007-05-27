@@ -20,7 +20,7 @@
 #ifndef WAVEFILEOUT_H
 #define WAVEFILEOUT_H
 #include "audiodriver.h"
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 #else
 	#include "windows.h"
@@ -58,7 +58,7 @@ namespace psy
 			void* _callbackContext; // Player callback
 			AUDIODRIVERWORKFN _pCallback;
 
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 			pthread_t threadid;
 #else
 			DWORD threadid;

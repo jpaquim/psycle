@@ -27,7 +27,7 @@
 
 #include <zlib.h>
 
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 	#include <sys/types.h>
 #elif defined _WIN64 || defined _WIN32
@@ -266,7 +266,7 @@ int zipwriter_finish(zipwriter *d)
 	free(d->compressor_state[0]);
 	free(d);
 	if (err) return 0;
-	#ifdef __unix__
+	#if defined __unix__ || defined __APPLE__
 	if (fsync(fd) == -1) return 0;
 	#else
 	if (_commit(fd) == -1) return 0;

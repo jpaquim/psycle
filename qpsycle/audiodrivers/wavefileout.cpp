@@ -19,8 +19,8 @@
 ***************************************************************************/
 #include "wavefileout.h"
 #include <iostream>
-#if !defined __unix__
-#include "windows.h"
+#if defined _WIN64 || defined _WIN32
+	#include "windows.h"
 #endif
 namespace psy
 {
@@ -41,7 +41,7 @@ namespace psy
 		{
 			while ( threadOpen ) {
 				kill_thread = 1;						
-#if defined __unix__
+#if defined __unix__ || defined __APPLE__
 				usleep(200);
 #else
 				Sleep(1);
@@ -75,7 +75,7 @@ namespace psy
 			bool threadStarted = false;
 			if (e && !threadOpen) {
 				kill_thread = 0;
-#if defined __unix__
+#if defined __unix__ || defined __APPLE__
 				pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
 #else
 				CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)audioOutThread, this, 0, &threadid);
@@ -86,7 +86,7 @@ namespace psy
 					kill_thread = 1;
 					threadStarted = false;
 					while ( threadOpen ) {
-#if defined __unix__
+#if defined __unix__ || defined __APPLE__
 						usleep(10); // give thread time to close
 #else
 						Sleep(1);
@@ -109,7 +109,7 @@ namespace psy
 
 			while(!(kill_thread))
 			{
-#if defined __unix__
+#if defined __unix__ || defined __APPLE__
 				usleep(50); // give cpu time to breath, and not too much :)
 #else
 				Sleep(1);
@@ -119,7 +119,7 @@ namespace psy
 
 			threadOpen = 0;
 			std::cout << "closing thread" << std::endl;
-#if defined __unix__
+#if defined __unix__ || defined __APPLE__
 			pthread_exit(0);
 #else
 			ExitThread(0);
