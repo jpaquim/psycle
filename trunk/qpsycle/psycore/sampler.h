@@ -7,7 +7,7 @@
 #include "dsp.h"
 #include "cstdint.h"
 
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 #else
 	#include <windows.h>
 //	#undef min
@@ -36,7 +36,7 @@ namespace psy{
 
 		// ms typedefs
 		
-		#ifdef __unix__
+		#if defined __unix__ || defined __APPLE__
 
 		typedef unsigned long ULONG;
 		typedef long long LONGLONG;

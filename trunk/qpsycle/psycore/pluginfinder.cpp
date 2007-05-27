@@ -212,7 +212,7 @@ namespace psy
 		void PluginFinder::scanLadspa() {
 			std::string ladspa_path = ladspa_path_;
 			///\todo this just uses the first path in getenv
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 				std::string::size_type dotpos = ladspa_path.find(':',0);
 				if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
 			#else
@@ -227,7 +227,7 @@ namespace psy
 			std::vector<std::string>::iterator it = fileList.begin();
 			for ( ; it < fileList.end(); it++ ) {
 				std::string fileName = *it;
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 					// problem of so.0.0.x .. .so all three times todo
 				#else
 					if ( fileName.find( ".dll" ) == std::string::npos ) continue;
@@ -269,7 +269,7 @@ namespace psy
 
 			for ( ; it < fileList.end(); ++it ) {
 				std::string fileName = *it;
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 					// problem of so.0.0.x .. .so all three times todo
 				#else
 					if ( fileName.find( ".dll" ) == std::string::npos ) continue;

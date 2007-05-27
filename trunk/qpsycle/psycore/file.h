@@ -41,7 +41,7 @@ namespace core {
     static std::string home();
     static std::string replaceTilde(const std::string & path);
     static std::string env(const std::string & envName);
-    #ifdef __unix__
+    #if defined __unix__ || defined __APPLE__
       static std::string extractFileNameFromPath( const std::string& fileName, bool slash = true );
     #else
       static std::string extractFileNameFromPath( const std::string& fileName, bool slash = false );

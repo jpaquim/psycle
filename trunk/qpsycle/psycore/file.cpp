@@ -25,7 +25,7 @@
 #include <iostream>
 #include <algorithm>
 
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <sys/types.h>
 	#include <sys/stat.h>
 	#include <unistd.h>
@@ -61,7 +61,7 @@ namespace psy {
     std::string saveCurrentDir = workingDir();
 
     std::vector<std::string> destination;
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 
     DIR *dhandle;
     struct dirent *drecord;
@@ -124,7 +124,7 @@ namespace psy {
   }
 
   std::string File::home() {
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
     char home[8000]; 
     strncpy(home,getenv("HOME"),7999);
     return home;
@@ -281,7 +281,7 @@ namespace psy {
   }
 
   std::string File::slash() {
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
     return "/";
 #else
     return "\\";

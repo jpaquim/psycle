@@ -226,7 +226,7 @@ void Configuration::setXmlDefaults() {
 
 	const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
 	if ( !pcLADSPAPath) {
-		#ifdef __unix__
+		#if defined __unix__ || defined __APPLE__
 			pcLADSPAPath = "/usr/lib/ladspa/";
 		#else
 			///\todo hardcoded path. if env isn't set, maybe look in the registry db.

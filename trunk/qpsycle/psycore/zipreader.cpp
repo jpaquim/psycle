@@ -23,7 +23,7 @@
 #include <cstdio>
 #include <cerrno>
 #include <fcntl.h>
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 	#include <sys/types.h>
 #elif defined _WIN64 || defined _WIN32

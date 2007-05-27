@@ -38,7 +38,7 @@ namespace psy
 	    class PatternEvent;
 	    class MachineCallbacks;
 
-		#ifdef __unix__
+		#if defined __unix__ || defined __APPLE__
 			namespace convert_internal_machines
 			{
 				class Converter;
@@ -88,7 +88,7 @@ namespace psy
 				virtual bool LoadINSD(RiffFile* file,CoreSong& song);
 				virtual bool LoadWAVD(RiffFile* file,CoreSong& song);
 				virtual bool PreLoadVSTs(RiffFile* file,CoreSong& song);
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 					virtual bool LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
 					virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
 				#endif

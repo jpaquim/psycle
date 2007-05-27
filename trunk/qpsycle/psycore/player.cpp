@@ -26,7 +26,7 @@
 #include "machine.h"
 #include "internal_machines.h"
 
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h> // for OpenBSD usleep()
 #endif
 
@@ -477,7 +477,7 @@ namespace psy
 		{
 			///\todo this is bad
 			lock_ = true;
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 				while ( inWork_) usleep( 200 );
 			#endif
 		}

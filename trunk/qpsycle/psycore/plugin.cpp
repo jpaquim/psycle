@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include "plugin.h"
 #include "player.h"
-#ifdef __unix__
+#if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
 #else
 	#include <windows.h>
@@ -65,7 +65,7 @@ Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , CoreSong* song
 
 Plugin::~ Plugin( ) throw()
 {
-		#ifdef __unix__
+		#if defined __unix__ || defined __APPLE__
 		#else
 		if  ( _dll ) {
 				::FreeLibrary( (HINSTANCE) _dll ) ;
@@ -76,7 +76,7 @@ Plugin::~ Plugin( ) throw()
 bool Plugin::Instance( const std::string & file_name )
 {      
 		try {
-		#ifdef __unix__
+		#if defined __unix__ || defined __APPLE__
 			_dll = dlopen(file_name.c_str(), RTLD_LAZY);
 		#else
 		if ( file_name.find(".dll") == std::string::npos) return false;
@@ -87,20 +87,20 @@ bool Plugin::Instance( const std::string & file_name )
 		SetErrorMode( uOldErrorMode );
 		#endif
 		if (!_dll) {
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 					std::cerr << "Cannot load library: " << dlerror() << '\n';
 				#else
 				#endif
 				return false;
 		} else {
 			GETINFO GetInfo  = 0;
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
 			#else
 			GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
 			#endif
 			if (!GetInfo) {
-				#ifdef __unix__
+				#if defined __unix__ || defined __APPLE__
 					std::cerr << "Cannot load symbols: " << dlerror() << '\n';
 				#else
 				#endif
@@ -122,13 +122,13 @@ bool Plugin::Instance( const std::string & file_name )
 			_psAuthor = info_->Author;
 			_psName = info_->Name;
 			CREATEMACHINE GetInterface = 0;
-			#ifdef __unix__
+			#if defined __unix__ || defined __APPLE__
 			GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
 			#else
 			GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)_dll, "CreateMachine" );
 			#endif
 			if(!GetInterface) {
-					#ifdef __unix__
+					#if defined __unix__ || defined __APPLE__
 						std::cerr << "Cannot load symbol: " << dlerror() << "\n";
 					#else
 					#endif
@@ -534,7 +534,7 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 {
 	std::string prefix = "lib-xpsycle.plugin.";
 	std::string psFileName = psFileName_;
-	#ifdef __unix__        
+	#if defined __unix__ || defined __APPLE__        
 		std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
 		if (psFileName.find(".so")== std::string::npos) {
 			_psDllName = psFileName;
