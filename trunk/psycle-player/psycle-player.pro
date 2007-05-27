@@ -18,7 +18,7 @@ INCLUDEPATH += src
 #DEPENDPATH += src
 
 HEADERS += \
-	src/psycle/player/configuration.h
+	src/psycle/player/configuration.hpp
 	
 SOURCES += \
 	src/psycle/player/main.cpp \
