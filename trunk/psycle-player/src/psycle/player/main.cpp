@@ -1,4 +1,4 @@
-#include "configuration.h"
+#include "configuration.hpp"
 #include <psycore/player.h>
 #include <psycore/song.h>
 #include <iostream>
