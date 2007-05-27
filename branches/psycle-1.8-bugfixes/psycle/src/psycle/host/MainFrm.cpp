@@ -1495,7 +1495,7 @@ NAMESPACE__BEGIN(psycle)
 					case MACH_VSTFX:
 						{
 							CVstEffectWnd* newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
-							newwin->LoadFrame(IDR_VSTFRAME,
+							newwin->LoadFrame(IDR_VSTFRAME, 
 //							WS_OVERLAPPEDWINDOW,
 								WS_POPUPWINDOW | WS_CAPTION,
 								this);
@@ -1505,10 +1505,10 @@ NAMESPACE__BEGIN(psycle)
 								<< " : " << ma->_editName;
 							newwin->SetTitleText(winname.str().c_str());
 							newwin->ResizeWindow(0);
-							newwin->ShowWindow(SW_SHOWNORMAL);
-							newwin->PostOpenWnd();
 							m_pWndMac[tmac] = newwin;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
+							newwin->ShowWindow(SW_SHOWNORMAL);
+							newwin->PostOpenWnd();
 						break;
 						}
 					}

@@ -1136,7 +1136,31 @@
 #define ID_WAVED_FASTFORWARD            33045
 #define ID_POPUP_SELECTIONTOLOOP        33047
 #define ID_PARAMETERS_PARAMETERLISTDIALOG 33048
-#define ID_BUTTON33049                  33049
+#define ID_ABOUT_EXTENDEDINFORMATION    33050
+#define ID_ABOUT_ABOUT                  33051
+#define ID_Menu                         33052
+#define ID_VIEW_PARAMETERLIST           33053
+#define ID_VIEW_BANKMANAGER             33054
+#define ID_VIEW_MIDICHANNELS            33055
+#define ID_PRESETS_AVAILABLEPROGRAMS    33059
+#define ID_ABOUT_EXTENDEDINFO           33060
+#define ID_OPERATIONS_ENABLED           33062
+#define ID_OPERATIONS_BYPASSED          33063
+#define ID_VIEWS_PARAMETERLIST          33064
+#define ID_VIEWS_BANKMANAGER            33065
+#define ID_VIEWS_MIDICHANNELS           33066
+#define ID_PROGRAMS_CURRENTPROGRAMS     33067
+#define ID_PROGRAMS_RANDOMIZEPROGRAM    33068
+#define ID_COMBO_PRG                    33075
+#define ID_PROGRAMS_OPENPRESET          33077
+#define ID_PROGRAMS_SAVEPRESET          33078
+#define ID_PROGRAMS_SELECTBANK          33079
+#define ID_ABOUT_ABOUTVST               33080
+#define ID_COMBO_BANK                   33082
+#define ID_PROGRAMS_SELECTBANK33083     33083
+#define ID_PROGRAMS_SELECTPROGRAM       33084
+#define ID_SELECTBANK_001               33087
+#define ID_SELECTPROGRAM_001            33088
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1146,7 +1170,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        268
-#define _APS_NEXT_COMMAND_VALUE         33050
+#define _APS_NEXT_COMMAND_VALUE         33090
 #define _APS_NEXT_CONTROL_VALUE         1782
 #define _APS_NEXT_SYMED_VALUE           61
 #endif

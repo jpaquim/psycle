@@ -109,17 +109,38 @@ END
 
 IDR_VSTFRAME MENU 
 BEGIN
-    POPUP "Parameters"
+    POPUP "Operations"
     BEGIN
-        MENUITEM "Reset Parameters",            ID_PARAMETERS_RESETPARAMETERS
-
-        MENUITEM "Random Parameters",           ID_PARAMETERS_RANDOMPARAMETERS
-
+        MENUITEM "Enabled",                     ID_OPERATIONS_ENABLED
+        MENUITEM "Bypassed",                    ID_OPERATIONS_BYPASSED
+    END
+    POPUP "Programs"
+    BEGIN
+        MENUITEM "Open Preset",                 ID_PROGRAMS_OPENPRESET
+        MENUITEM "Save Preset",                 ID_PROGRAMS_SAVEPRESET
         MENUITEM SEPARATOR
-        MENUITEM "Parameter List Dialog",       ID_PARAMETERS_PARAMETERLISTDIALOG
-
+        POPUP "Select Bank"
+        BEGIN
+            MENUITEM "asdf",                        ID_SELECTBANK_001
+        END
+        POPUP "Select Program"
+        BEGIN
+            MENUITEM "asdf",                        ID_SELECTPROGRAM_001
+        END
         MENUITEM SEPARATOR
-        MENUITEM "Open Presets Dialog\tCtrl+P", ID_PARAMETERS_SHOWPRESET
+        MENUITEM "Randomize Program",           ID_PROGRAMS_RANDOMIZEPROGRAM
+    END
+    POPUP "Views"
+    BEGIN
+        MENUITEM "Parameter List",              ID_VIEWS_PARAMETERLIST
+        MENUITEM "Bank Manager",                ID_VIEWS_BANKMANAGER
+        MENUITEM "Midi Channels",               ID_VIEWS_MIDICHANNELS
+    END
+    POPUP "About"
+    BEGIN
+        MENUITEM "Extended Info",               ID_ABOUT_EXTENDEDINFO
+        MENUITEM SEPARATOR
+        MENUITEM "About",                       ID_ABOUT_ABOUTVST
     END
 END
 
@@ -2933,9 +2954,21 @@ BEGIN
     BUTTON      ID_WAVED_FASTFORWARD
 END
 
-IDR_VSTFRAME TOOLBAR  16, 15
+IDR_VSTFRAME TOOLBAR  16, 16
 BEGIN
-    BUTTON      ID_BUTTON33049
+    BUTTON      ID_OPERATIONS_ENABLED
+    BUTTON      ID_OPERATIONS_BYPASSED
+    SEPARATOR
+    BUTTON      ID_VIEWS_PARAMETERLIST
+    BUTTON      ID_VIEWS_BANKMANAGER
+    BUTTON      ID_VIEWS_MIDICHANNELS
+    SEPARATOR
+    BUTTON      ID_ABOUT_EXTENDEDINFO
+    BUTTON      ID_ABOUT_ABOUTVST
+    SEPARATOR
+    BUTTON      ID_COMBO_BANK
+    SEPARATOR
+    BUTTON      ID_COMBO_PRG
 END
 
 
@@ -3214,6 +3247,25 @@ BEGIN
     ID_POPUP_SETLOOPSTART   "Set Point as Loop Start"
     ID_POPUP_SETLOOPEND     "Set Point as Loop End"
     ID_POPUP_ZOOMIN         "Zoom In"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_ABOUT_EXTENDEDINFO   "Gives extended information about this plugin"
+    ID_OPERATIONS_ENABLED   "Switches on or off the VST plugin."
+    ID_OPERATIONS_BYPASSED  "Sets or unsets the bypassed state, where the effect doesn't modify the audio"
+    ID_VIEWS_PARAMETERLIST  "Open the parameter list window"
+    ID_VIEWS_BANKMANAGER    "Open the bank manager window"
+    ID_VIEWS_MIDICHANNELS   "Open the midi channel assignation window"
+    ID_PROGRAMS_RANDOMIZEPROGRAM 
+                            "Randomizes the values of the current program"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_PROGRAMS_OPENPRESET  "Opens the Open file dialog box to load a new Bank/Program"
+    ID_PROGRAMS_SAVEPRESET  "Opens the Save file box to save the current bank/program"
+    ID_ABOUT_ABOUTVST       "Shows an about box about this plugin."
 END
 
 #endif    // Neutral (predeterminado) resources

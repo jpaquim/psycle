@@ -13,6 +13,8 @@
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 
+		//////////////////////////////////////////////////////////////////////////
+	
 		CVstGui::CVstGui(vst::plugin* effect)
 		:pEffect(effect)
 		{}
@@ -35,12 +37,10 @@ NAMESPACE__BEGIN(psycle)
 			return true;
 		}
 
-		IMPLEMENT_DYNCREATE(CVstEffectWnd, CFrameWnd)
+		//////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
 
-		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
-		, pView(0) , _machine(effect)
-		{
-		}
+		IMPLEMENT_DYNAMIC(CVstEffectWnd, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CVstEffectWnd, CFrameWnd)
 			ON_WM_CREATE()
@@ -50,21 +50,76 @@ NAMESPACE__BEGIN(psycle)
 			ON_WM_SETFOCUS()
 			ON_WM_KEYDOWN()
 			ON_WM_KEYUP()
+			ON_WM_SIZING()
 //			ON_WM_LBUTTONDOWN()
-/*
-			ON_COMMAND(ID_PARAMETERS_LOADPRESET, OnLoadPreset)
-			ON_COMMAND(ID_PARAMETERS_SAVEPRESET, OnSavePreset)
-			ON_COMMAND(ID_PARAMETERS_SAVEPRESETAS, OnSavePresetAs)
-			ON_COMMAND(ID_PARAMETERS_PARAMETERLISTDIALOG, OnParametersListDlg)
-			ON_COMMAND(ID_PARAMETERS_RANDOMPARAMETERS, OnParametersRandomparameters)
-			ON_COMMAND(ID_PARAMETERS_SHOWPRESET, OnParametersShowpreset)
-*/
+			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
+			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
+			ON_COMMAND(ID_OPERATIONS_BYPASSED, OnOperationsBypassed)
+			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_BYPASSED, OnUpdateOperationsBypassed)
+			ON_COMMAND(ID_PROGRAMS_OPENPRESET, OnProgramsOpenpreset)
+			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
+			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
+			ON_COMMAND(ID_VIEWS_PARAMETERLIST, OnViewsParameterlist)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERLIST, OnUpdateViewsParameterlist)
+			ON_COMMAND(ID_VIEWS_BANKMANAGER, OnViewsBankmanager)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_BANKMANAGER, OnUpdateViewsBankmanager)
+			ON_COMMAND(ID_VIEWS_MIDICHANNELS, OnViewsMidichannels)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_MIDICHANNELS, OnUpdateViewsMidichannels)
+			ON_COMMAND(ID_ABOUT_EXTENDEDINFO, OnAboutExtendedinfo)
+			ON_COMMAND(ID_ABOUT_ABOUTVST, OnAboutAboutvst)
 		END_MESSAGE_MAP()
+
+		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
+		, pView(0) , _machine(effect)
+		{
+		}
 
 		int CVstEffectWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{
 			if ( CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
+
+/*			if( !(toolBar.Create(this,WS_VISIBLE|CBRS_TOP|CBRS_FLYBY | CBRS_TOOLTIPS | CBRS_SIZE_DYNAMIC)) || !toolBar.LoadToolBar(IDR_VSTFRAME))
+				this->MessageBox("Error creating toolbar!", "whoops!", MB_OK);
+*/
+
+			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, WS_VISIBLE | CBRS_TOP | CBRS_FLYBY
+				|  CBRS_TOOLTIPS | CBRS_SIZE_DYNAMIC) ||
+				!toolBar.LoadToolBar(IDR_VSTFRAME))
+			{
+				TRACE0("Failed to create toolbar\n");
+				return -1;      // fail to create
+			}
+
+			CRect rect;
+			int nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_BANK);
+			toolBar.SetButtonInfo(nIndex, ID_COMBO_BANK, TBBS_SEPARATOR, 160);
+			toolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
+			rect.top = 1;
+			rect.bottom = rect.top + 400; //drop height
+
+			if(!comboBank.Create(CBS_DROPDOWNLIST | CBS_SORT | WS_VISIBLE |
+				WS_TABSTOP | WS_VSCROLL, rect, &toolBar, ID_COMBO_BANK))
+			{
+				TRACE0("Failed to create combobox\n");
+				return -1;      // fail to create
+			}
+
+			nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_PRG);
+			toolBar.SetButtonInfo(nIndex, ID_COMBO_PRG, TBBS_SEPARATOR, 160);
+			toolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
+			rect.top = 1;
+			rect.bottom = rect.top + 400; //drop height
+			if(!comboProgram.Create(CBS_DROPDOWNLIST | CBS_SORT | WS_VISIBLE |
+				WS_TABSTOP | WS_VSCROLL, rect, &toolBar, ID_COMBO_PRG))
+			{
+				TRACE0("Failed to create combobox\n");
+				return -1;      // fail to create
+			}
+
+			comboBank.AddString("Test text");
+			comboProgram.AddString("Test text");
+
 			pView = CreateView();
 			machine().SetEditWnd(this);
 			SetTimer(449, 25, 0);
@@ -76,15 +131,19 @@ NAMESPACE__BEGIN(psycle)
 			if ( pEffect->HasEditor())
 			{
 				CVstGui* gui = new CVstGui(&machine());
-				gui->Create(NULL, NULL, WS_CHILD|WS_VISIBLE,
-					CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
+				CRect rcClient;
+				gui->GetViewSize(rcClient);
+				gui->Create(NULL, "vstgui", WS_CHILD | WS_VISIBLE,
+					rcClient, this, AFX_IDW_PANE_FIRST, NULL);
 				return gui;
 			}
 			else
 			{
 				CNativeGui* gui = new CNativeGui(&machine());
-				gui->Create(NULL, NULL, WS_CHILD|WS_VISIBLE,
-					CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
+				CRect rcClient;
+				gui->GetViewSize(rcClient);
+				gui->Create(NULL, "nativegui", WS_CHILD | WS_VISIBLE,
+					rcClient, this, AFX_IDW_PANE_FIRST, NULL);
 				return gui;
 			}
 		}
@@ -116,12 +175,15 @@ NAMESPACE__BEGIN(psycle)
 				rcClient.top = 0; rcClient.left = 0;
 				rcClient.right = pRect->right - pRect->left; rcClient.bottom = pRect->bottom - pRect->top;
 			}
-
+			CRect tbRect;
+			toolBar.GetWindowRect(&tbRect);
+			rcClient.top+=tbRect.bottom - tbRect.top;
 			rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
 					::GetSystemMetrics(SM_CYMENUSIZE) +
-					4 * ::GetSystemMetrics(SM_CYBORDER) +
+					(tbRect.bottom-tbRect.top) +
+					6 * ::GetSystemMetrics(SM_CYBORDER) +
 					2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
-			rcFrame.right += 4 * ::GetSystemMetrics(SM_CXBORDER) +
+			rcFrame.right += 6 * ::GetSystemMetrics(SM_CXBORDER) +
 				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
 		}
 		void CVstEffectWnd::ResizeWindow(int w,int h)
@@ -133,13 +195,19 @@ NAMESPACE__BEGIN(psycle)
 			rc.left = (short)rcW.left;	rc.top = (short)rcW.top;
 			rc.right = rc.left + w;	rc.bottom = rc.top + h;
 			ResizeWindow(&rc);
+			pView->WindowIdle();
 		}
 		void CVstEffectWnd::ResizeWindow(ERect *pRect)
 		{
 			CRect rcEffFrame,rcEffClient;
 			GetWindowSize(rcEffFrame, rcEffClient, pRect);
-			MoveWindow(rcEffFrame.left,rcEffFrame.top,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,true);
-//			pView->MoveWindow(0,0, rcEffClient.right,rcEffClient.bottom,true);
+			SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
+			pView->SetWindowPos(NULL,0,rcEffClient.top,rcEffClient.right,rcEffClient.bottom,SWP_SHOWWINDOW);
+			pView->WindowIdle();
+		}
+		void CVstEffectWnd::OnSizing(UINT fwSide, LPRECT pRect)
+		{
+			pView->WindowIdle();
 		}
 
 
@@ -437,11 +505,70 @@ NAMESPACE__BEGIN(psycle)
 			this->SetFocus();
 			CFrameWnd::OnLButtonDown(nFlags, point);
 		}
+
+		void CVstEffectWnd::OnSavePreset() 
+		{
+			char tmp[1024];
+			machine().OnGetChunkFile(tmp);
+			std::string sFile = tmp;
+			if (sFile.empty())
+				OnSavePresetAs();
+			else
+			{
+				std::string ext = sFile.substr(sFile.size()-4,4);
+				if ( ext == ".fxb")
+					SaveBank(sFile);
+				else if ( ext == ".fxp")
+					SaveProgram(sFile);
+			}
+		}
+
+
+		void CVstEffectWnd::OnParametersListDlg()
+		{
+			if ( !pParamGui ) pParamGui= new CDefaultVstGui(wndView);
+			
+			pParamGui->_pMachine = _pMachine;
+			pParamGui->MachineIndex = MachineIndex;
+			pParamGui->childView=wndView;
+//			pParamGui->Create(this);
+			pParamGui->DoModal();
+//			pParamGui->Init();
+			delete pParamGui;
+			pParamGui=0;
+		}
+
+		void CVstEffectWnd::OnParametersShowpreset() 
+		{
+			CPresetsDlg dlg;
+			dlg._pMachine=_pMachine;
+			dlg.DoModal();
+//			pParamGui->UpdateOne();
+//			if (!editorgui) pGui->Invalidate(false);
+//			pGui->SetFocus();
+		}
 */
+		void CVstEffectWnd::OnOperationsEnabled()
+		{
+			// TODO: Agregue aquí su código de controlador de comandos
+		}
 
-/*
+		void CVstEffectWnd::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
+		{
+			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+		}
 
-		void CVstEffectWnd::OnLoadPreset()
+		void CVstEffectWnd::OnOperationsBypassed()
+		{
+			// TODO: Agregue aquí su código de controlador de comandos
+		}
+
+		void CVstEffectWnd::OnUpdateOperationsBypassed(CCmdUI *pCmdUI)
+		{
+			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+		}
+
+		void CVstEffectWnd::OnProgramsOpenpreset()
 		{
 			char tmp[1024];
 			machine().OnGetChunkFile(tmp);
@@ -471,24 +598,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CVstEffectWnd::OnSavePreset() 
-		{
-			char tmp[1024];
-			machine().OnGetChunkFile(tmp);
-			std::string sFile = tmp;
-			if (sFile.empty())
-				OnSavePresetAs();
-			else
-			{
-				std::string ext = sFile.substr(sFile.size()-4,4);
-				if ( ext == ".fxb")
-					SaveBank(sFile);
-				else if ( ext == ".fxp")
-					SaveProgram(sFile);
-			}
-		}
-
-		void CVstEffectWnd::OnSavePresetAs() 
+		void CVstEffectWnd::OnProgramsSavepreset()
 		{
 			char tmp[1024];
 			machine().OnGetChunkFile(tmp);
@@ -508,31 +618,13 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-
-
-
-
-
-		void CVstEffectWnd::OnParametersListDlg()
-		{
-			if ( !pParamGui ) pParamGui= new CDefaultVstGui(wndView);
-			
-			pParamGui->_pMachine = _pMachine;
-			pParamGui->MachineIndex = MachineIndex;
-			pParamGui->childView=wndView;
-//			pParamGui->Create(this);
-			pParamGui->DoModal();
-//			pParamGui->Init();
-			delete pParamGui;
-			pParamGui=0;
-		}
-		void CVstEffectWnd::OnParametersRandomparameters() 
+		void CVstEffectWnd::OnProgramsRandomizeprogram()
 		{
 			// Randomize controls
 			int numParameters;
 			try
 			{
-				numParameters = _pMachine->GetNumParams();
+				numParameters = machine().numParams();
 			}
 			catch(const std::exception &)
 			{
@@ -546,7 +638,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				try
 				{
-					_pMachine->SetParameter(c, rand());
+					machine().SetParameter(c, rand());
 				}
 				catch(const std::exception &)
 				{
@@ -560,16 +652,45 @@ NAMESPACE__BEGIN(psycle)
 			Invalidate(false);
 		}
 
-		void CVstEffectWnd::OnParametersShowpreset() 
+		void CVstEffectWnd::OnViewsParameterlist()
 		{
-			CPresetsDlg dlg;
-			dlg._pMachine=_pMachine;
-			dlg.DoModal();
-//			pParamGui->UpdateOne();
-//			if (!editorgui) pGui->Invalidate(false);
-//			pGui->SetFocus();
+			// TODO: Agregue aquí su código de controlador de comandos
 		}
-*/
+
+		void CVstEffectWnd::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
+		{
+			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+		}
+
+		void CVstEffectWnd::OnViewsBankmanager()
+		{
+			// TODO: Agregue aquí su código de controlador de comandos
+		}
+
+		void CVstEffectWnd::OnUpdateViewsBankmanager(CCmdUI *pCmdUI)
+		{
+			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+		}
+
+		void CVstEffectWnd::OnViewsMidichannels()
+		{
+			// TODO: Agregue aquí su código de controlador de comandos
+		}
+
+		void CVstEffectWnd::OnUpdateViewsMidichannels(CCmdUI *pCmdUI)
+		{
+			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+		}
+
+		void CVstEffectWnd::OnAboutExtendedinfo()
+		{
+			// TODO: Agregue aquí su código de controlador de comandos
+		}
+
+		void CVstEffectWnd::OnAboutAboutvst()
+		{
+			// TODO: Agregue aquí su código de controlador de comandos
+		}
 
 	NAMESPACE__END
 NAMESPACE__END

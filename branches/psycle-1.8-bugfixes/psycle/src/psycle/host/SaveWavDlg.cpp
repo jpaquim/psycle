@@ -114,7 +114,7 @@ NAMESPACE__BEGIN(psycle)
 
 			if ((rate < 0) || (rate >5))
 			{
-				if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8192)
+				if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8000)
 				{
 					rate = 0;
 				}
@@ -122,29 +122,44 @@ NAMESPACE__BEGIN(psycle)
 				{
 					rate = 1;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
+				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 16000)
 				{
 					rate = 2;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
+				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
 				{
 					rate = 3;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
+				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 32000)
 				{
 					rate = 4;
 				}
-				else 
+				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
 				{
 					rate = 5;
 				}
+				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
+				{
+					rate = 6;
+				}
+				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 88200)
+				{
+					rate = 7;
+				}
+				else 
+				{
+					rate = 8;
+				}
 			}
 
-			m_rate.AddString("8192 hz");
+			m_rate.AddString("8000 hz");
 			m_rate.AddString("11025 hz");
+			m_rate.AddString("16000 hz");
 			m_rate.AddString("22050 hz");
+			m_rate.AddString("32000 hz");
 			m_rate.AddString("44100 hz");
 			m_rate.AddString("48000 hz");
+			m_rate.AddString("88200 hz");
 			m_rate.AddString("96000 hz");
 			m_rate.SetCurSel(rate);
 
@@ -198,6 +213,13 @@ NAMESPACE__BEGIN(psycle)
 			m_noiseshaping.AddString("High-Pass Contour");
 			noiseshape=0;
 			m_noiseshaping.SetCurSel(noiseshape);
+
+			if (bits == 3 )
+			{
+				m_dither.EnableWindow(false);
+				m_pdf.EnableWindow(false);
+				m_noiseshaping.EnableWindow(false);
+			}
 
 			m_savetracks.SetCheck(savetracks);
 			m_savegens.SetCheck(savegens);
@@ -281,7 +303,7 @@ NAMESPACE__BEGIN(psycle)
 			rootname=rootname.substr(0,
 				std::max(std::string::size_type(0),rootname.length()-4));
 
-			const int real_rate[]={8192,11025,22050,44100,48000,96000};
+			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 			const int real_bits[]={8,16,24,32};
 
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
@@ -475,7 +497,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			}
 
 			pPlayer->StartRecording(file,bits,rate,channelmode,
-									m_dither.GetCheck()==BST_CHECKED, ditherpdf, noiseshape);
+									m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape);
 
 			int tmp;
 			int cont;
@@ -610,7 +632,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			{
 				Song *pSong = Global::_pSong;
 
-				const int real_rate[]={8192,11025,22050,44100,48000,96000};
+				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32};
 
 				for (int i = current+1; i < pSong->SONGTRACKS; i++)
@@ -643,7 +665,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			{
 				Song *pSong = Global::_pSong;
 
-				const int real_rate[]={8192,11025,22050,44100,48000,96000};
+				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32};
 
 				for (int i = current+1; i < MAX_CONNECTIONS; i++)
@@ -686,7 +708,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			{
 				Song *pSong = Global::_pSong;
 
-				const int real_rate[]={8192,11025,22050,44100,48000,96000};
+				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32};
 
 				for (int i = current+1; i < MAX_BUSES; i++)
@@ -794,6 +816,18 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 		void CSaveWavDlg::OnSelchangeComboBits() 
 		{
 			bits = m_bits.GetCurSel();
+			if (bits == 3 )
+			{
+				m_dither.EnableWindow(false);
+				m_pdf.EnableWindow(false);
+				m_noiseshaping.EnableWindow(false);
+			}
+			else
+			{
+				m_dither.EnableWindow(true);
+				m_pdf.EnableWindow(true);
+				m_noiseshaping.EnableWindow(true);
+			}
 		}
 
 		void CSaveWavDlg::OnSelchangeComboChannels() 
