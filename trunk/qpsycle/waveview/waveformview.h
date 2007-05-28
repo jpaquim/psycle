@@ -34,10 +34,7 @@ public:
 public slots:
 	void LoadStereo();
 	void LoadMono();
-
-signals:
-
-private:
+	void Clear();
 
 };
 
