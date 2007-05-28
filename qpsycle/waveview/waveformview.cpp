@@ -36,10 +36,15 @@ WaveFormView::WaveFormView(bool *mini, QWidget *parent); //inizialization file f
 
 WaveFormView::LoadStereo()
 {
-
+	//we need to add a line at the first quarter and one at the last quarter of GraphicsView To Make that loads a Stereo file...
 }
 
 WaveFormView::LoadMono()
 {
-	//we need to add al line at the middle GraphicsView To Makethat loads a Mono file...
+	//we need to add al line at the middle GraphicsView To Make that loads a Mono file...
+}
+
+WaveFormView::Clear()
+{
+	//clear the WaveFormView and restore initial state 
 }
