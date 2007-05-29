@@ -304,16 +304,12 @@ void Configuration::loadConfig( const std::string & path )
 			std::string id = path.attribute("id").toStdString();
 			std::string src = path.attribute("src").toStdString();
 			if ( id == "icondir" )   iconPath_   = src;
-			else  
-				if ( id == "plugindir" ) pluginPath_ = src;
-				else
-					if ( id == "prsdir" ) prsPath_ = src;
-					else
-						if ( id == "hlpdir" ) hlpPath_ = src; 
-						else
-							if ( id == "ladspadir" ) ladspaPath_ = src;
-							else  
-								if ( id == "songdir" ) songPath_ = src;
+			else if ( id == "plugindir" ) pluginPath_ = src;
+			else if ( id == "prsdir" ) prsPath_ = src;
+			else if ( id == "hlpdir" ) hlpPath_ = src; 
+			else if ( id == "ladspadir" ) ladspaPath_ = src;
+			else if ( id == "songdir" ) songPath_ = src;
+			else if ( id == "sampledir" ) samplePath_ = src;
 		}
 
 		// Audio.

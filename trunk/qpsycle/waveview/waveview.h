@@ -25,33 +25,33 @@
 #include <QToolBar>
 #include <QWidget>
 #include <QSlider>
- #include <QScrollBar>
+#include <QScrollBar>
 
 
- class WaveView : public QWidget
- {
-     Q_OBJECT
+class WaveView : public QWidget
+{
+	Q_OBJECT
 
- public:
-     WaveView( psy::core::Song *song_, QWidget *parent = 0);
+		public:
+	WaveView( psy::core::Song *song_, QWidget *parent = 0);
 
-     psy::core::Song* song();
+	psy::core::Song* song();
 
-public slots:
-    void onLoadButtonClicked();
+	public slots:
+	void onLoadButtonClicked();
 	void onSaveButtonClicked();
 	void onPlusButtonClicked();
 	void onMinusButtonClicked();
 
 signals:
-    void sampleAdded();
+	void sampleAdded();
 
- private:
-    psy::core::Song *song_;
+private:
+	psy::core::Song *song_;
 	
 	QVBoxLayout *layout_;
 	
-    QToolBar *toolBar_;
+	QToolBar *toolBar_;
 	QAction *loadSmp_;
 	QAction *saveSmp_;
 	QAction *playSmp_;	
@@ -71,6 +71,6 @@ signals:
 	QAction *zoomMore_;
 	QSlider *zoomSlide_;
 	QAction *zoomLess_;
- };
+};
 
- #endif
+#endif

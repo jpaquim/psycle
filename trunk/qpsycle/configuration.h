@@ -43,6 +43,7 @@ class Configuration
 			const std::string & prsPath() const { return prsPath_; }
 			const std::string & hlpPath() const { return hlpPath_; }
 			const std::string & songPath() const { return songPath_; }
+			const std::string & samplePath() const { return samplePath_; }
 		private:
 			std::string iconPath_;
 			std::string pluginPath_;
@@ -50,6 +51,7 @@ class Configuration
 			std::string hlpPath_;
 			std::string ladspaPath_;
 			std::string songPath_;
+			std::string samplePath_;
 	///\}
 
 	///\name misc behaviour flavour settings
