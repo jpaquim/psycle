@@ -134,7 +134,11 @@ void WaveView::onLoadButtonClicked()
 	//added by sampler
 	if ( song()->_pInstrument[si]->waveLength != 0)
 	{
-		//if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
+		int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
+                   tr("A sample is already loaded here.\n"
+                      "Do you want to overwrite the current sample?"),
+                   QMessageBox::Ok | QMessageBox::Cancel );
+		if ( ret == QMessageBox::Cancel ) return;
 	}
 	if ( song()->WavAlloc( si, fileName.toStdString().c_str() ) )
 	{
