@@ -75,7 +75,7 @@ namespace psycle
 							return factory::template create_on_stack< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-						typename Typenames::graph static & create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+						typename Typenames::graph static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
 							return factory::template create_on_stack< typename Typenames::graph BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
@@ -185,12 +185,12 @@ namespace psycle
 
 					#define constructor(_, count, __) \
 						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
-						Type static & create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+						Type static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
 							return factory::template create_on_stack< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-						typename Typenames::node static & create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+						typename Typenames::node static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
 							return factory::template create_on_stack< typename Typenames::node BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
@@ -342,7 +342,7 @@ namespace psycle
 								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 								Type static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
-									Type instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
+									Type instance(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 									instance.after_construction(); \
 									return instance; \
 								} \
@@ -364,7 +364,7 @@ namespace psycle
 
 					#define constructor(_, count, __) \
 						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
-						Type static & create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+						Type static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
 							return factory::template create_on_stack< Type >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
@@ -646,7 +646,7 @@ namespace psycle
 						public:
 							#define constructor(_, count, __) \
 								BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-								typename Typenames::ports::inputs::multiple static & create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+								typename Typenames::ports::inputs::multiple static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									return Typenames::ports::input::template create_on_stack< typename Typenames::ports::inputs::multiple>(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 								} \
