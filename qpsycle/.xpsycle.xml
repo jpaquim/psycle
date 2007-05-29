@@ -16,6 +16,7 @@
 <path id='plugindir' src='/path/to/psycle-plugins/' />
 <path id='ladspadir' src='/usr/lib/ladspa' />
 <path id='prsdir' src='/path/to/presets/' />
+<path id='sampledir' src='/path/to/samples/' />
 
 <!-- pattern view options -->
 
