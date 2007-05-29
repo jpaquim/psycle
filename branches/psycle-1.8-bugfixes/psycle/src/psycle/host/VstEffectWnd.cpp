@@ -2,16 +2,22 @@
 ///\brief implementation file for psycle::host::CVstEditorDlg.
 #include <project.private.hpp>
 #include "psycle.hpp"
+#include "vsthost24.hpp"
+#include "VstEffectWnd.hpp"
+
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
+
 #include "PresetsDlg.hpp"
 
-#include "VstEffectWnd.hpp"
-#include "vsthost24.hpp"
-
+///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+#include "MainFrm.hpp"
+#include "ChildView.hpp"
 
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
+
+		extern CPsycleApp theApp;
 
 		//////////////////////////////////////////////////////////////////////////
 	
@@ -122,6 +128,7 @@ NAMESPACE__BEGIN(psycle)
 
 			pView = CreateView();
 			machine().SetEditWnd(this);
+			*_pActive=true;
 			SetTimer(449, 25, 0);
 			return 0;
 		}
@@ -445,6 +452,7 @@ NAMESPACE__BEGIN(psycle)
 			machine().EditClose();              /* tell effect edit window's closed  */
 //			machine().LeaveCritical();             /* re-enable processing              */
 			pView->DestroyWindow();
+			*_pActive=false;
 			CFrameWnd::OnClose();
 		}
 
@@ -461,6 +469,26 @@ NAMESPACE__BEGIN(psycle)
 		{
 			CFrameWnd::OnSetFocus(pOldWnd);
 		}
+
+		bool CVstEffectWnd::SetParameterAutomated(long index, float value)
+		{
+			if(index>= 0 || index < machine().GetNumParams())
+			{
+				if(Global::configuration()._RecordTweaks)
+				{
+					if(Global::configuration()._RecordMouseTweaksSmooth)
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, f2i(value * vst::quantization));
+					else
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, f2i(value * vst::quantization));
+				}
+//				if(paramWnd)
+//					paramWnd->Refresh(index, value);
+				return true;
+			}
+			return false;
+		}
+
+
 		void CVstEffectWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
 			const BOOL bRepeat = nFlags&0x4000;

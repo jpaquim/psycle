@@ -609,7 +609,6 @@ namespace seib {
 			// The base class function gives kVstPpqPosValid, kVstBarsValid, kVstClockValid, kVstSmpteValid, and kVstNanosValid
 			// Ensure that samplePos, sampleRate, tempo, and timesigNumerator/Denominator are correct before calling it.
 			virtual void CalcTimeInfo(long lMask = -1);
-			virtual HWND MainWindow() = 0;
 		public:
 			virtual void SetSampleRate(float fSampleRate=44100.);
 			virtual void SetBlockSize(long lSize=1024);

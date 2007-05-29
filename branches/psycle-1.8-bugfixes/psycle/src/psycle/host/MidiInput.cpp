@@ -844,7 +844,7 @@ namespace psycle
 									// set?
 									if( gParameter >= 0 )
 									{
-										note = cdefTweakM;
+										note = notecommands::tweak;
 										cmd = gParameter;
 										parameter = data2;
 									}
@@ -1306,10 +1306,10 @@ namespace psycle
 					switch( note )
 					{
 						// TWEAK
-						case cdefTweakS:
+						case notecommands::tweakslide:
 							// *********
 							// midi doesn't get a tweak slide yet
-						case cdefTweakM:
+						case notecommands::tweak:
 						{
 							int min, max;
 

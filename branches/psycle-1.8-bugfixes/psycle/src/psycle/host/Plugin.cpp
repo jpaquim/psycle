@@ -694,7 +694,7 @@ namespace psycle
 			{
 				return;
 			}
-			if(pData->_note == cdefTweakM || pData->_note == cdefTweakE)
+			if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
 			{
 				if(pData->_inst < _pInfo->numParameters)
 				{
@@ -713,7 +713,7 @@ namespace psycle
 					Global::pPlayer->Tweaker = true;
 				}
 			}
-			else if(pData->_note == cdefTweakS)
+			else if(pData->_note == notecommands::tweakslide)
 			{
 				if(pData->_inst < _pInfo->numParameters)
 				{

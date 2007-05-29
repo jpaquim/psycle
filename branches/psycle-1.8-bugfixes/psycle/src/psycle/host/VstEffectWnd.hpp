@@ -36,6 +36,7 @@ NAMESPACE__BEGIN(psycle)
 		// Attributes
 		public:
 			inline vst::plugin& machine(){ return *_machine; }
+			bool *_pActive;
 		protected:
 			vst::plugin* _machine;
 
@@ -50,7 +51,7 @@ NAMESPACE__BEGIN(psycle)
 			virtual void ResizeWindow(ERect* pRect);
 			virtual void RefreshUI(){};
 			virtual bool BeginAutomating(long index){ return false; }
-			virtual bool SetParameterAutomated(long index, float value) { return false; }
+			virtual bool SetParameterAutomated(long index, float value);
 			virtual bool EndAutomating(long index) { return false; }
 			virtual bool OpenFileSelector (VstFileSelect *ptr);
 			virtual bool CloseFileSelector (VstFileSelect *ptr);

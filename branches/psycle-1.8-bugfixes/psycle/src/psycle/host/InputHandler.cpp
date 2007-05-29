@@ -1080,7 +1080,7 @@ namespace psycle
 		//		BOOL bRepeat = nFlags&0x4000;
 				if ( cmd.GetType() == CT_Note )
 				{
-		//			if ((!bRepeat) || (cmd.GetNote() == cdefTweakM) || (cmd.GetNote() == cdefTweakS) || (cmd.GetNote() == cdefMIDICC))
+		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
 		//			{
 						pChildView->EnterNote(cmd.GetNote());
 						return true;

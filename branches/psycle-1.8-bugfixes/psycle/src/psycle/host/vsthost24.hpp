@@ -51,7 +51,7 @@ namespace psycle
 				VstMidiEvent* reserveVstMidiEvent();
 				VstMidiEvent* reserveVstMidiEventAtFront(); // ugly hack
 
-				CVstEffectWnd* editorWindow;
+//				CVstEffectWnd* editorWindow;
 				float * inputs[max_io];
 				float * outputs[max_io];
 				float * _pOutSamplesL;
@@ -140,12 +140,13 @@ namespace psycle
 				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
 				// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 				virtual bool OnIOChanged() { return false; }
+/*
 				virtual void SetEditWnd(CEffectWnd* wnd)
 				{
 					CEffect::SetEditWnd(wnd);
 					editorWindow = reinterpret_cast<CVstEffectWnd*>(wnd);
 				}
-
+*/
 			};
 
 			class host : public CVSTHost
@@ -158,8 +159,6 @@ namespace psycle
 				//static Machine* CreateFromType(int _id, std::string _dllname);
 				virtual CEffect * CreateEffect(LoadedAEffect &loadstruct) { return new plugin(loadstruct); }
 				virtual CEffect * CreateWrapper(AEffect *effect) { return new plugin(effect); }
-
-				virtual HWND MainWindow();
 
 				///> Plugin gets Info from the host
 				virtual bool OnGetProductString(char *text) { strcpy(text, "Psycle"); return true; }

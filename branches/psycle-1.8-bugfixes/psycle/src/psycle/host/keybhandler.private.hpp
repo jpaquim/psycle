@@ -165,7 +165,7 @@ NAMESPACE__BEGIN(psycle)
 			entry._cmd = (value>>8)&255;
 			entry._parameter = value&255;
 			entry._inst = command;
-			entry._note = cdefTweakM;
+			entry._note = notecommands::tweak;
 
 			if(viewMode == VMPattern && bEditMode)
 			{ 
@@ -208,7 +208,7 @@ NAMESPACE__BEGIN(psycle)
 						|| (pentry->_cmd != entry._cmd)
 						|| (pentry->_parameter != entry._parameter) 
 						|| (pentry->_inst != entry._inst) 
-						|| ((pentry->_note != cdefTweakM) && (pentry->_note != cdefTweakE) && (pentry->_note != cdefTweakS)))
+						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
@@ -247,7 +247,7 @@ NAMESPACE__BEGIN(psycle)
 			entry._cmd = (value>>8)&255;
 			entry._parameter = value&255;
 			entry._inst = command;
-			entry._note = cdefTweakS;
+			entry._note = notecommands::tweakslide;
 
 			if(viewMode == VMPattern && bEditMode)
 			{ 
@@ -289,7 +289,7 @@ NAMESPACE__BEGIN(psycle)
 						|| (pentry->_cmd != entry._cmd)
 						|| (pentry->_parameter != entry._parameter) 
 						|| (pentry->_inst != entry._inst) 
-						|| ((pentry->_note != cdefTweakM) && (pentry->_note != cdefTweakE) && (pentry->_note != cdefTweakS)))
+						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
@@ -402,7 +402,7 @@ NAMESPACE__BEGIN(psycle)
 			entry._cmd = (value>>8)&0xFF;
 			entry._parameter = value&0xFF;
 			entry._inst = command;
-			entry._note = cdefMIDICC;
+			entry._note = notecommands::midicc;
 
 			if(viewMode == VMPattern && bEditMode)
 			{ 
@@ -444,7 +444,7 @@ NAMESPACE__BEGIN(psycle)
 						|| (pentry->_cmd != entry._cmd) 
 						|| (pentry->_parameter != entry._parameter) 
 						|| (pentry->_inst != entry._inst) 
-						|| (pentry->_note != cdefMIDICC))
+						|| (pentry->_note != notecommands::midicc))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
@@ -575,14 +575,14 @@ NAMESPACE__BEGIN(psycle)
 				PatternEntry *entry = (PatternEntry*) toffset;
 				if (entry->_note >= 120)
 				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->_mach = machine;
 						entry->_cmd = (value>>8)&255;
 						entry->_parameter = value&255;
 						entry->_inst = command;
-						entry->_note = cdefTweakM;
+						entry->_note = notecommands::tweak;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(DMData);
@@ -624,14 +624,14 @@ NAMESPACE__BEGIN(psycle)
 				PatternEntry *entry = (PatternEntry*) toffset;
 				if (entry->_note >= 120)
 				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->_mach = machine;
 						entry->_cmd = (value>>8)&255;
 						entry->_parameter = value&255;
 						entry->_inst = command;
-						entry->_note = cdefTweakS;
+						entry->_note = notecommands::tweakslide;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(DMData);
@@ -649,7 +649,7 @@ NAMESPACE__BEGIN(psycle)
 			const int ps = _ps();
 			unsigned char * toffset;
 			
-			if (note < 0 || note > cdefTweakS ) return;
+			if (note < 0 || note > notecommands::tweakslide ) return;
 
 			// octave offset
 			if(note<120)
@@ -756,7 +756,7 @@ NAMESPACE__BEGIN(psycle)
 			}
 			else 
 			{
-				if ((GetKeyState(VK_SHIFT)<0) && (note != cdefTweakM) && (note != cdefTweakE) && (note != cdefTweakS) && (note != cdefMIDICC))
+				if ((GetKeyState(VK_SHIFT)<0) && (note != notecommands::tweak) && (note != notecommands::tweakeffect) && (note != notecommands::tweakslide) && (note != notecommands::midicc))
 				{
 					if (ChordModeOffs == 0)
 					{
@@ -1912,7 +1912,7 @@ NAMESPACE__BEGIN(psycle)
 				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 				int displace2=(blockSel.start.track*EVENT_SIZE)+((blockSel.start.line+1)*MULTIPLY);
 				
-				if ( toffset[firstrow] == cdefTweakM || toffset[firstrow] == cdefTweakE || toffset[firstrow] == cdefTweakS ||toffset[firstrow] == cdefMIDICC)
+				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide ||toffset[firstrow] == notecommands::midicc)
 				{
 					unsigned char note = toffset[firstrow];
 					unsigned char aux = toffset[firstrow+1];

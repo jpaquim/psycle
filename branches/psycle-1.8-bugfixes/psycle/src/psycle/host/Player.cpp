@@ -122,7 +122,7 @@ namespace psycle
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(pEntry->_note < cdefTweakM || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
+				if(pEntry->_note < notecommands::tweak || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
 				{
 					switch(pEntry->_cmd)
 					{
@@ -247,7 +247,7 @@ namespace psycle
 							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine)
 							{
-								if(pEntry->_note == cdefMIDICC && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
+								if(pEntry->_note == notecommands::midicc && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
 								{
 									// for native machines,
 									// use the value in the "instrument" field of the event as a voice number
@@ -311,7 +311,7 @@ namespace psycle
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(( !pSong->_trackMuted[track]) && (pEntry->_note < cdefTweakM || pEntry->_note == 255)) // Is it not muted and is a note?
+				if(( !pSong->_trackMuted[track]) && (pEntry->_note < notecommands::tweak || pEntry->_note == 255)) // Is it not muted and is a note?
 				{
 					int mac = pEntry->_mach;
 					if(mac != 255) prevMachines[track] = mac;

@@ -4,8 +4,13 @@
 #include "global.hpp"
 #include "player.hpp"
 #include "psycle.hpp"
-#include "MainFrm.hpp"
-#include "VstEditorDlg.hpp"
+
+///\todo: these are required by the GetIn/OutLatency() functions. They should instead ask the player.
+#include "Configuration.hpp"
+#include "AudioDriver.hpp"
+
+//This is so wrong. It's needed because of the loop inside the code for retrigger inside the Work() function.
+#include "song.hpp"
 
 ///\todo:  When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //		(LiveSlice is a good example of what happens if it isn't correct)
@@ -30,7 +35,6 @@ namespace psycle
 				//return new;
 			}
 */
-			HWND host::MainWindow() { return ((CMainFrame *) theApp.m_pMainWnd)->m_hWnd; }
 			void host::CalcTimeInfo(long lMask)
 			{
 				///\todo: cycleactive and recording to a "Start()" function.
@@ -87,14 +91,14 @@ namespace psycle
 			}
 			long host::OnGetOutputLatency(CEffect &pEffect)
 			{
-				//\todo : return Global::pConfig->_pOutputDriver->LatencyInSamples();
+				//\todo : return Global::pPlayer->->LatencyInSamples();
 				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
 
 				return (pdriver->_numBlocks*pdriver->_blockSize)/4;
 			}
 			long host::OnGetInputLatency(CEffect &pEffect)
 			{
-				//\todo : return Global::pConfig->_pOutputDriver->LatencyInSamples();
+				//\todo : return Global::pPlayer->->LatencyInSamples();
 				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
 
 				return (pdriver->_numBlocks*pdriver->_blockSize)/4;
@@ -472,7 +476,7 @@ namespace psycle
 			void plugin::Tick(int channel, PatternEntry * pData)
 			{
 					const int note = pData->_note;
-					if(pData->_note == cdefMIDICC) // Mcm (MIDI CC) Command
+					if(pData->_note == notecommands::midicc) // Mcm (MIDI CC) Command
 					{
 						AddMIDI(pData->_inst, pData->_cmd, pData->_parameter);
 					}
@@ -502,13 +506,13 @@ namespace psycle
 						if(pData->_inst == 0xFF) AddNoteOff(channel);
 						else AddNoteOff(channel, pData->_inst & 0x0F);
 					}
-					else if(note == cdefTweakM || note == cdefTweakE) // Tweak Command
+					else if(note == notecommands::tweak || note == notecommands::tweakeffect) // Tweak Command
 					{
 						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
 						SetParameter(pData->_inst, value);
 						Global::pPlayer->Tweaker = true;
 					}
-					else if(note == cdefTweakS)
+					else if(note == notecommands::tweakslide)
 					{
 						int i;
 						if(TWSActive)
@@ -601,6 +605,9 @@ namespace psycle
 						tempinputs[i] = inputs[i];
 						tempoutputs[i] = outputs[i];
 					}
+
+
+					///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
 					int ns(numSamples);
 					while(ns)
 					{
@@ -755,6 +762,7 @@ namespace psycle
 					if(temp > 97) temp = 97;
 					if(temp > _volumeDisplay) _volumeDisplay = temp;
 					--_volumeDisplay;
+					///\todo: move autoStopMachines to player
 					if(Global::pConfig->autoStopMachines)
 					{
 						if(_volumeCounter < 8.0f)

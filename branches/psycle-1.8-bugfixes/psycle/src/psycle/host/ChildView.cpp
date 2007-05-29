@@ -20,7 +20,7 @@
 #include "MasterDlg.hpp"
 #include "NativeGui.hpp"
 #include "XMSamplerUI.hpp"
-#include "VstEditorDlg.hpp"
+//#include "VstEditorDlg.hpp"
 #include "WireDlg.hpp"
 #include "MacProp.hpp"
 #include "NewMachine.hpp"
