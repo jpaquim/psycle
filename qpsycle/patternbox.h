@@ -38,97 +38,94 @@ class QToolBar;
 #include <QMenu>
 
 class PatternTree : public QTreeWidget {
-    Q_OBJECT
-public:
-    PatternTree( PatternBox *patBox );
+Q_OBJECT
+	public:
+	PatternTree( PatternBox *patBox );
 protected:
-    void contextMenuEvent( QContextMenuEvent *ev );
+	void contextMenuEvent( QContextMenuEvent *ev );
 
-public slots:
-    void onEditPatternNameActionTriggered();
-    void onEditCategoryNameActionTriggered();
+	public slots:
+	void onEditPatternNameActionTriggered();
+	void onEditCategoryNameActionTriggered();
 
 private:
-    PatternBox *patBox_;
-    QAction *editPatNameAct_;
-    QAction *editCatNameAct_;
-    QAction *editCatColorAct_;
+	PatternBox *patBox_;
+	QAction *editPatNameAct_;
+	QAction *editCatNameAct_;
+	QAction *editCatColorAct_;
 };
 
 class CategoryItem : public QTreeWidgetItem {
 public:
-    CategoryItem();
-    CategoryItem( PatternTree *patTree );
+	CategoryItem();
+	CategoryItem( PatternTree *patTree );
 
-    enum { Type = QTreeWidgetItem::UserType + 2 };
-    int type() const { return Type; }
+	enum { Type = QTreeWidgetItem::UserType + 2 };
+	int type() const { return Type; }
 };
 
 class PatternItem : public QTreeWidgetItem {
 public:
-    PatternItem();
-    PatternItem( CategoryItem *parent );
+	PatternItem();
+	PatternItem( CategoryItem *parent );
 
-    enum { Type = QTreeWidgetItem::UserType + 1 };
-    int type() const { return Type; }
+	enum { Type = QTreeWidgetItem::UserType + 1 };
+	int type() const { return Type; }
 };
 
 
- class PatternBox : public QWidget
- {
-     Q_OBJECT
+class PatternBox : public QWidget {
+Q_OBJECT
+public:
+	PatternBox( psy::core::Song *song, QWidget *parent = 0);
 
- public:
-     PatternBox( psy::core::Song *song, QWidget *parent = 0);
-
-    void populatePatternTree();
-    PatternTree* patternTree() { return patternTree_; }
-    psy::core::Song* song() { return song_; }
-    psy::core::SinglePattern* currentPattern() { return currentPattern_; }
+	void populatePatternTree();
+	PatternTree* patternTree() { return patternTree_; }
+	psy::core::Song* song() { return song_; }
+	psy::core::SinglePattern* currentPattern() { return currentPattern_; }
 
 public slots:
-     void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
-     void onItemEdited( QTreeWidgetItem *item, int column );
-     void newCategory();
-     void newPattern();
-     void clonePattern();
-     void deletePattern();
-     void addPatternToSequencer();
-     void onPatternNameEdited( const QString & newText );
-    // void onColorButtonClicked(); 
-     void onEditCategoryColorActionTriggered();
+	void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
+	void onItemEdited( QTreeWidgetItem *item );
+	void newCategory();
+	void newPattern();
+	void clonePattern();
+	void deletePattern();
+	void addPatternToSequencer();
+	void onPatternNameEdited( const QString & newText );
+	void onEditCategoryColorActionTriggered();
 
 protected:
-     bool event( QEvent *event );
+	bool event( QEvent *event );
 
 signals:
-    void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
-    void patternDeleted();
-    void addPatternToSequencerRequest( psy::core::SinglePattern *selectedPattern );
-    void patternNameChanged();
-    void categoryColorChanged();
+	void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
+	void patternDeleted();
+	void addPatternToSequencerRequest( psy::core::SinglePattern *selectedPattern );
+	void patternNameChanged();
+	void categoryColorChanged();
 
- private:
-    void createActions();
-    void createToolbar();
-    void createItemPropertiesBox();
-    const QColor & QColorFromLongColor( long longCol );
-    long QColorToLongColor( const QColor & qCol );
+private:
+	void createActions();
+	void createToolbar();
+	void createItemPropertiesBox();
+	const QColor QColorFromLongColor( long longCol );
+	long QColorToLongColor( const QColor & qCol );
 
-    psy::core::Song *song_;
-    psy::core::SinglePattern* currentPattern_;
-    std::map<CategoryItem*, psy::core::PatternCategory*> categoryMap;
-    std::vector<CategoryItem*> catItems;
-    std::map<PatternItem*, psy::core::SinglePattern*> patternMap;
+	psy::core::Song *song_;
+	psy::core::SinglePattern* currentPattern_;
+	std::map<CategoryItem*, psy::core::PatternCategory*> categoryMap;
+	std::vector<CategoryItem*> catItems;
+	std::map<PatternItem*, psy::core::SinglePattern*> patternMap;
 
-     QToolBar *toolBar_;
-     PatternTree *patternTree_;
+	QToolBar *toolBar_;
+	PatternTree *patternTree_;
 
-     QAction *newCatAct;
-     QAction *newPatAct;
-     QAction *clnPatAct;
-     QAction *delPatAct;
-     QAction *addPatToSeqAct;
+	QAction *newCatAct;
+	QAction *newPatAct;
+	QAction *clnPatAct;
+	QAction *delPatAct;
+	QAction *addPatToSeqAct;
 
 };
 
