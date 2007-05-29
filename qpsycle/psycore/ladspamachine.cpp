@@ -471,7 +471,7 @@ namespace psy {
 		}
 		void LADSPAMachine::Tick(int channel, const PatternEvent & pEntry )
 		{
-			if ( pEntry.note() == psy::core::commands::tweak || pEntry.note() == psy::core::commands::tweakslide)
+			if ( pEntry.note() == psy::core::commands::tweak || pEntry.note() == psy::core::commands::tweak_slide)
 			{
 				SetParameter(pEntry.instrument(),pEntry.command()*0x100+pEntry.parameter());
 			}

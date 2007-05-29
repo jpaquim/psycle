@@ -417,7 +417,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 	{
 			return;
 	}
-	if(pData.note() == psy::core::commands::tweak || pData.note() == psy::core::commands::tweakeffect)
+	if(pData.note() == psy::core::commands::tweak || pData.note() == psy::core::commands::tweak_effect)
 	{
 			if( pData.instrument() < info_->numParameters)
 			{
