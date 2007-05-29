@@ -276,7 +276,7 @@ namespace psy
 			public:
 				virtual const PlayerTimeInfo & timeInfo() const = 0;
 				virtual bool autoStopMachines() const = 0;
-		;
+		};
 
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
