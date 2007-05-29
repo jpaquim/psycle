@@ -3,7 +3,7 @@
 /// based on psycle mfc revision 2730
 #pragma once
 #include "patternsequence.h"
-#include "songstructs.h"
+#include "commands.h"
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
