@@ -37,6 +37,11 @@
 
 		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__FACTORY(_, count, type) \
 			BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
+			typename type static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+			{ \
+				return type::template create_on_stack< typename type >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+			} \
+			BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 			typename type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 			{ \
 				return type::template create< typename type >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
@@ -44,12 +49,24 @@
 
 		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__FACTORY__VIRTUAL(_, count, nested_access) \
 			template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
+			Type static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+			{ \
+				return nested_access::template create_on_stack< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+			} \
+			template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 			Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 			{ \
 				return nested_access::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 			}
 
 		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__NEW(_, count, after_construction) \
+			template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
+			Type static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+			{ \
+				Type instance(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+				instance.after_construction(); \
+				return instance; \
+			} \
 			template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra)> \
 			Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 			{ \
