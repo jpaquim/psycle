@@ -46,7 +46,14 @@ namespace psycle
 						private: friend class graph;
 							#define constructor(_, count, __) \
 								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
-								Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+								Type static create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+								{ \
+									Type instance(BOOST_PP_ENUM_PARAMS(count, xtra)); \
+									instance.after_construction(); \
+									return instance; \
+								}
+								template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
+								Type static & create/*_on_heap*/(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 								{ \
 									Type & instance(*new Type(BOOST_PP_ENUM_PARAMS(count, xtra))); \
 									instance.after_construction(); \
