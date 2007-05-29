@@ -198,7 +198,7 @@ namespace psy
 			for ( ; trackItr != line.notes().end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
-				if(( !song()._trackMuted[track]) && (entry.note() < notecommands::tweak || entry.note() == 255)) // Is it not muted and is a note?
+				if(( !song()._trackMuted[track]) && (entry.note() < psy::core::commands::tweak || entry.note() == 255)) // Is it not muted and is a note?
 				{
 					int mac = entry.machine();
 					if(mac != 255) prevMachines[track] = mac;

@@ -417,7 +417,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 	{
 			return;
 	}
-	if(pData.note() == notecommands::tweak || pData.note() == notecommands::tweakeffect)
+	if(pData.note() == psy::core::commands::tweak || pData.note() == psy::core::commands::tweakeffect)
 	{
 			if( pData.instrument() < info_->numParameters)
 			{
@@ -436,7 +436,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 					Player::Instance()->Tweaker = true;
 				}
 			}
-	else if(pData.note() == notecommands::tweakslide)
+	else if(pData.note() == psy::core::commands::tweak_slide)
 			{
 				if(pData.instrument() < info_->numParameters)
 				{

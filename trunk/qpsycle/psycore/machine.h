@@ -2,7 +2,7 @@
 ///\brief interface file for psy::core::Machine
 #pragma once
 #include "patternevent.h"
-#include "songstructs.h"
+#include "commands.h"
 #include "dsp.h"
 #include "helpers.h"
 #include "constants.h"
@@ -272,11 +272,11 @@ namespace psy
 
 		};
 
-    class MachineCallbacks {
-		public:
-			virtual const PlayerTimeInfo & timeInfo() const = 0;
-			virtual bool autoStopMachines() const = 0;
-	};
+		class MachineCallbacks {
+			public:
+				virtual const PlayerTimeInfo & timeInfo() const = 0;
+				virtual bool autoStopMachines() const = 0;
+		;
 
 		/// Base class for "Machines", the audio producing elements.
 		class Machine

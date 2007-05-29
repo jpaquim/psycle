@@ -161,12 +161,12 @@ namespace psy {
 							for(int track(0); track < song.tracks() ; ++track)
 							{
 								PatternEntry & event(events[track]);
-								if(event._note == notecommands::tweakeffect)
+								if(event._note == psy::core::commands::tweak_effect)
 								{
 									event._mach += 0x40;
-									event._note = notecommands::tweak;
+									event._note = psy::core::commands::tweak;
 								}
-								if(event._note == notecommands::tweak)
+								if(event._note == psy::core::commands::tweak)
 								{
 									std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
 									if(i != machine_converted_from.end())
