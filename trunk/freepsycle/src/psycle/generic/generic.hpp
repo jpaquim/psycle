@@ -194,6 +194,7 @@ namespace psycle
 						{ \
 							return factory::template create_on_stack< typename Typenames::node BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 						} \
+						template<typename Type BOOST_PP_ENUM_TRAILING_PARAMS(count, typename Xtra) > \
 						Type static & create(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 						{ \
 							return factory::template create< Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
@@ -418,6 +419,7 @@ namespace psycle
 						typedef output output_type;
 
 						#define constructor(_, count, __) \
+							BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 							output(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: Typenames::port(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
 							BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
