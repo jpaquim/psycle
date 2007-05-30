@@ -16,7 +16,7 @@ MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 
 DEPENDPATH += . \
 	src/machineview \
-	patternview \
+	src/patternview \
 	psycore \
 	sequencer \
 	waveview \
@@ -45,11 +45,11 @@ HEADERS += \
 	src/gui/machineview/generatorgui.h \
 	src/gui/machineview/mastergui.h \
 	src/gui/machineview/effectgui.h \
-	patternview/patternview.h \
-	patternview/linenumbercolumn.h \
-	patternview/trackheader.h \
-	patternview/patterngrid.h \
-	patternview/patterndraw.h \
+	src/gui/patternview/patternview.h \
+	src/gui/patternview/linenumbercolumn.h \
+	src/gui/patternview/trackheader.h \
+	src/gui/patternview/patterngrid.h \
+	src/gui/patternview/patterndraw.h \
 	sequencer/sequencerarea.h \
 	sequencer/sequencerdraw.h \
 	sequencer/sequenceritem.h \
@@ -124,11 +124,11 @@ SOURCES += \
 	src/gui/machineview/generatorgui.cpp \
 	src/gui/machineview/mastergui.cpp \
 	src/gui/machineview/effectgui.cpp \
-	patternview/patternview.cpp \
-	patternview/linenumbercolumn.cpp \
-	patternview/trackheader.cpp \
-	patternview/patterngrid.cpp \
-	patternview/patterndraw.cpp \
+	src/gui/patternview/patternview.cpp \
+	src/gui/patternview/linenumbercolumn.cpp \
+	src/gui/patternview/trackheader.cpp \
+	src/gui/patternview/patterngrid.cpp \
+	src/gui/patternview/patterndraw.cpp \
 	sequencer/sequencerarea.cpp \
 	sequencer/sequencerdraw.cpp \
 	sequencer/sequenceritem.cpp \
