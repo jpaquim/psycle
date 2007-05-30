@@ -19,14 +19,14 @@ DEPENDPATH += . \
 	src/patternview \
 	psycore \
 	src/sequencer \
-	waveview \
+	src/waveview \
 	psycore/helpers \
 	psycore/helpers/math
 	
 INCLUDEPATH += . \
 	src/machineview \
 	src/patternview \
-	waveview \
+	src/waveview \
 	src/sequencer
 
 # Input
@@ -56,7 +56,7 @@ HEADERS += \
 	src/gui/sequencer/sequencerline.h \
 	src/gui/sequencer/sequencerview.h \
 	src/gui/sequencer/beatruler.h \
-	waveview/waveview.h \
+	src/gui/waveview/waveview.h \
 	audiodrivers/audiodriver.h \
 	audiodrivers/wavefileout.h \
 	psycore/binread.h \
@@ -135,7 +135,7 @@ SOURCES += \
 	src/gui/sequencer/sequencerline.cpp \
 	src/gui/sequencer/sequencerview.cpp \
 	src/gui/sequencer/beatruler.cpp \
-	waveview/waveview.cpp \
+	src/gui/waveview/waveview.cpp \
 	audiodrivers/audiodriver.cpp \
 	audiodrivers/wavefileout.cpp \
 	psycore/binread.cpp \
