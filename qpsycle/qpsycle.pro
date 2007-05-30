@@ -15,7 +15,7 @@ MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 #DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
 DEPENDPATH += . \
-	machineview \
+	src/machineview \
 	patternview \
 	psycore \
 	sequencer \
@@ -24,7 +24,7 @@ DEPENDPATH += . \
 	psycore/helpers/math
 	
 INCLUDEPATH += . \
-	machineview \
+	src/machineview \
 	patternview \
 	waveview \
 	sequencer
@@ -37,14 +37,14 @@ HEADERS += \
 	inputhandler.h \
 	patternbox.h \
 	audioconfigdlg.h \
-	machineview/machinegui.h \
-	machineview/machinetweakdlg.h \
-	machineview/machineview.h \
-	machineview/newmachinedlg.h \
-	machineview/wiregui.h \
-	machineview/generatorgui.h \
-	machineview/mastergui.h \
-	machineview/effectgui.h \
+	src/gui/machineview/machinegui.h \
+	src/gui/machineview/machinetweakdlg.h \
+	src/gui/machineview/machineview.h \
+	src/gui/machineview/newmachinedlg.h \
+	src/gui/machineview/wiregui.h \
+	src/gui/machineview/generatorgui.h \
+	src/gui/machineview/mastergui.h \
+	src/gui/machineview/effectgui.h \
 	patternview/patternview.h \
 	patternview/linenumbercolumn.h \
 	patternview/trackheader.h \
@@ -116,14 +116,14 @@ SOURCES += \
 	patternbox.cpp \
 	audioconfigdlg.cpp \
 	qpsycle.cpp \
-	machineview/machinegui.cpp \
-	machineview/machinetweakdlg.cpp \
-	machineview/machineview.cpp \
-	machineview/newmachinedlg.cpp \
-	machineview/wiregui.cpp \
-	machineview/generatorgui.cpp \
-	machineview/mastergui.cpp \
-	machineview/effectgui.cpp \
+	src/gui/machineview/machinegui.cpp \
+	src/gui/machineview/machinetweakdlg.cpp \
+	src/gui/machineview/machineview.cpp \
+	src/gui/machineview/newmachinedlg.cpp \
+	src/gui/machineview/wiregui.cpp \
+	src/gui/machineview/generatorgui.cpp \
+	src/gui/machineview/mastergui.cpp \
+	src/gui/machineview/effectgui.cpp \
 	patternview/patternview.cpp \
 	patternview/linenumbercolumn.cpp \
 	patternview/trackheader.cpp \
