@@ -23,27 +23,27 @@
 		PKGCONFIG += alsa 
 		DEFINES += PSYCLE__ALSA_AVAILABLE # This is used in the source to determine when to include alsa-specific things.
 		HEADERS += \
-			audiodrivers/alsaout.h \
-			mididrivers/alsaseqin.h 
+			src/audiodrivers/alsaout.h \
+			src/mididrivers/alsaseqin.h 
 		SOURCES += \
-			audiodrivers/alsaout.cpp \
-			mididrivers/alsaseqin.cpp 
+			src/audiodrivers/alsaout.cpp \
+			src/mididrivers/alsaseqin.cpp 
 	}
 
 	system( pkg-config --exists jack ) {
 		message( "pkg-config thinks jack libs are available..." )
 		PKGCONFIG += jack 
 		DEFINES += PSYCLE__JACK_AVAILABLE # This is used in the source to determine when to include jack-specific things.
-		HEADERS += audiodrivers/jackout.h
-		SOURCES += audiodrivers/jackout.cpp 
+		HEADERS += src/audiodrivers/jackout.h
+		SOURCES += src/audiodrivers/jackout.cpp 
 	}
 
 	system( pkg-config --exists esound ) {
 		message( "pkg-config thinks esound libs are available..." )
 		PKGCONFIG += esound
 		DEFINES += PSYCLE__ESOUND_AVAILABLE # This is used in the source to determine when to include esound-specific things.
-		HEADERS += audiodrivers/esoundout.h
-		SOURCES += audiodrivers/esoundout.cpp 
+		HEADERS += src/audiodrivers/esoundout.h
+		SOURCES += src/audiodrivers/esoundout.cpp 
 	}
 
 	false { # gstreamer output is unfinished
@@ -51,8 +51,8 @@
 			message( "pkg-config thinks gstreamer libs are available..." )
 			PKGCONFIG += gstreamer
 			DEFINES += PSYCLE__GSTREAMER_AVAILABLE # This is used in the source to determine when to include gstreamer-specific things.
-			HEADERS += audiodrivers/gstreamerout.h
-			SOURCES += audiodrivers/gstreamerout.cpp 
+			HEADERS += src/audiodrivers/gstreamerout.h
+			SOURCES += src/audiodrivers/gstreamerout.cpp 
 		}
 	}
 
@@ -61,8 +61,8 @@
 		exists(/usr/include/audio/audiolib.h) {
 			LIBS += -laudio
 			DEFINES += PSYCLE__NET_AUDIO_AVAILABLE # This is used in the source to determine when to include net-audio-specific things.
-			HEADERS += audiodrivers/netaudioout.h
-			SOURCES += audiodrivers/netaudioout.cpp
+			HEADERS += src/audiodrivers/netaudioout.h
+			SOURCES += src/audiodrivers/netaudioout.cpp
 		}
 	}
 

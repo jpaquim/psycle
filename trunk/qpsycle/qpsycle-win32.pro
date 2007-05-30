@@ -118,8 +118,8 @@
 			LIBS *= winmm.lib # is this one needed?
 		}
 		DEFINES += PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE # This is used in the source to determine when to include direct-sound-specific things.
-		HEADERS += audiodrivers/microsoftdirectsoundout.h
-		SOURCES += audiodrivers/microsoftdirectsoundout.cpp
+		HEADERS += src/audiodrivers/microsoftdirectsoundout.h
+		SOURCES += src/audiodrivers/microsoftdirectsoundout.cpp
 	}
 	
 	true { # FIXME: not sure how to test for mme...
@@ -132,8 +132,8 @@
 			LIBS *= uuid.lib # is this one needed?
 		}
 		DEFINES += PSYCLE__MICROSOFT_MME_AVAILABLE # This is used in the source to determine when to include mme-specific things.
-		HEADERS += audiodrivers/microsoftmmewaveout.h
-		SOURCES += audiodrivers/microsoftmmewaveout.cpp
+		HEADERS += src/audiodrivers/microsoftmmewaveout.h
+		SOURCES += src/audiodrivers/microsoftmmewaveout.cpp
 	}
 
 	false { # FIXME: asio needs to be built as a lib, which is rather cubersome, or embeeded into qpsycle itself, which sucks...
@@ -144,8 +144,8 @@
 			LIBS *= asio.lib
 		}
 		DEFINES += PSYCLE__STEINBERG_ASIO_AVAILABLE # This is used in the source to determine when to include asio-specific things.
-		HEADERS += audiodrivers/steinbergasioout.h
-		SOURCES += audiodrivers/steinbergasioout.cpp
+		HEADERS += src/audiodrivers/steinbergasioout.h
+		SOURCES += src/audiodrivers/steinbergasioout.cpp
 	}
 
 	win32-msvc* {
