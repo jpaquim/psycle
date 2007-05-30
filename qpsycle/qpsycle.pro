@@ -37,12 +37,12 @@ INCLUDEPATH += . \
 
 # Input
 HEADERS += \
-	mainwindow.h \
-	global.h \
-	configuration.h \
-	inputhandler.h \
-	patternbox.h \
-	audioconfigdlg.h \
+	src/gui/mainwindow.h \
+	src/gui/global.h \
+	src/gui/configuration.h \
+	src/gui/inputhandler.h \
+	src/gui/patternbox.h \
+	src/gui/audioconfigdlg.h \
 	src/gui/machineview/machinegui.h \
 	src/gui/machineview/machinetweakdlg.h \
 	src/gui/machineview/machineview.h \
@@ -115,12 +115,12 @@ HEADERS += \
 	psycore/helpers/xml.h
 
 SOURCES += \
-	mainwindow.cpp \
-	global.cpp \
-	configuration.cpp \
-	inputhandler.cpp \
-	patternbox.cpp \
-	audioconfigdlg.cpp \
+	src/gui/mainwindow.cpp \
+	src/gui/global.cpp \
+	src/gui/configuration.cpp \
+	src/gui/inputhandler.cpp \
+	src/gui/patternbox.cpp \
+	src/gui/audioconfigdlg.cpp \
 	qpsycle.cpp \
 	src/gui/machineview/machinegui.cpp \
 	src/gui/machineview/machinetweakdlg.cpp \
