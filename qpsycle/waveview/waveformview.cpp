@@ -25,13 +25,17 @@ WaveFormView::WaveFormView(bool *mini, QWidget *parent); //inizialization file f
 	{
 		//if it is a miniwaveview set fixed sizes and dimension
 		this.setSizePolicies( QSizePolicy::Fixed , QSizePolicy::Preferred);
-		this.resize (this.width(), 200)
+		this.resize (this.width(), 200);
 	}
 	else
 	{
 		//if it is not mini set size policies only
 		this.setSizePolicies( QSizePolicy::Preferred, QSizePolicy::Preferred);
 	}
+	*scene = new QGraphicsScene(this);
+	scene->setBackgroundBrush(Qt::black);
+    this.adjustSize();
+
 }
 
 WaveFormView::LoadStereo()
@@ -46,5 +50,5 @@ WaveFormView::LoadMono()
 
 WaveFormView::Clear()
 {
-	//clear the WaveFormView and restore initial state 
+	 
 }
