@@ -43,7 +43,7 @@
 
 #include <iostream>
 #include <iomanip>
-
+//poopoop
 MainWindow::MainWindow()
 {
 	song_ = createBlankSong();
@@ -127,7 +127,7 @@ void MainWindow::setupSignals()
 	connect( macView_, SIGNAL( machineChosen( MachineGui* ) ),
 		 this, SLOT( onMachineChosen( MachineGui* ) ) );
 	connect( macView_, SIGNAL( machineDeleted( int ) ),
-		 this, SLOT( onMachineDeleted( int ) ) );
+		 this, SLOT( onMachineDeleted() ) );
 	connect( macView_, SIGNAL( machineRenamed( ) ),
 		 this, SLOT( onMachineRenamed( ) ) );
 
@@ -205,7 +205,7 @@ void MainWindow::onSaveSongRequest()
 }
 
 bool MainWindow::songHasChanged() {
-    return true; // FIXME
+	return true; // FIXME
 }
 
 psy::core::Song *MainWindow::createBlankSong()
@@ -215,7 +215,7 @@ psy::core::Song *MainWindow::createBlankSong()
 	psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
 
 	psy::core::SequenceLine *seqLine = blankSong->patternSequence()->createNewLine();
-	psy::core::SequenceEntry *seqEntry = seqLine->createEntry( pattern0, 0 );
+	seqLine->createEntry( pattern0, 0 );
 
 	return blankSong;
 }
@@ -323,73 +323,73 @@ void MainWindow::createActions()
 
 }
 
- void MainWindow::createMenus()
- {
-     fileMenu = menuBar()->addMenu(tr("&File"));
-     fileMenu->addAction(newAct);
-     fileMenu->addAction(openAct);
-     fileMenu->addAction(saveAct);
-     fileMenu->addSeparator();
-     fileMenu->addAction(quitAct);
+void MainWindow::createMenus()
+{
+	fileMenu = menuBar()->addMenu(tr("&File"));
+	fileMenu->addAction(newAct);
+	fileMenu->addAction(openAct);
+	fileMenu->addAction(saveAct);
+	fileMenu->addSeparator();
+	fileMenu->addAction(quitAct);
 
-     editMenu = menuBar()->addMenu(tr("&Edit"));
-     editMenu->addAction(undoAct);
-     editMenu->addAction(redoAct);
+	editMenu = menuBar()->addMenu(tr("&Edit"));
+	editMenu->addAction(undoAct);
+	editMenu->addAction(redoAct);
 
-     viewMenu = menuBar()->addMenu(tr("&View"));
-     configMenu = menuBar()->addMenu(tr("&Configuration"));
-     configMenu->addAction( audioConfAct );
+	viewMenu = menuBar()->addMenu(tr("&View"));
+	configMenu = menuBar()->addMenu(tr("&Configuration"));
+	configMenu->addAction( audioConfAct );
 
-     performMenu = menuBar()->addMenu(tr("&Performance"));
-     communityMenu = menuBar()->addMenu(tr("&Community"));
+	performMenu = menuBar()->addMenu(tr("&Performance"));
+	communityMenu = menuBar()->addMenu(tr("&Community"));
 
-     menuBar()->addSeparator();
+	menuBar()->addSeparator();
 
-     helpMenu = menuBar()->addMenu(tr("&Help"));
-     helpMenu->addAction(aboutAct);
- }
+	helpMenu = menuBar()->addMenu(tr("&Help"));
+	helpMenu->addAction(aboutAct);
+}
 
- void MainWindow::createToolBars()
- {
-     fileToolBar = addToolBar(tr("File"));
-     fileToolBar->addAction(newAct);
-     fileToolBar->addAction(openAct);
-     fileToolBar->addAction(saveAct);
+void MainWindow::createToolBars()
+{
+	fileToolBar = addToolBar(tr("File"));
+	fileToolBar->addAction(newAct);
+	fileToolBar->addAction(openAct);
+	fileToolBar->addAction(saveAct);
 
-     editToolBar = addToolBar(tr("Edit"));
-     editToolBar->addAction(undoAct);
-     editToolBar->addAction(redoAct);
+	editToolBar = addToolBar(tr("Edit"));
+	editToolBar->addAction(undoAct);
+	editToolBar->addAction(redoAct);
 
-     playToolBar = addToolBar(tr("Play"));
-     playToolBar->addAction(playFromStartAct);
-     playToolBar->addAction(playFromSeqPosAct);
+	playToolBar = addToolBar(tr("Play"));
+	playToolBar->addAction(playFromStartAct);
+	playToolBar->addAction(playFromSeqPosAct);
 //     playToolBar->addAction(playPatAct);
-     playToolBar->addAction(playStopAct);
+	playToolBar->addAction(playStopAct);
 
-     machToolBar = addToolBar(tr("Machines"));
-     macCombo_ = new QComboBox();
-	 macCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-     sampCombo_ = new QComboBox();
-     octCombo_ = new QComboBox();
-	 sampCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	machToolBar = addToolBar(tr("Machines"));
+	macCombo_ = new QComboBox();
+	macCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	sampCombo_ = new QComboBox();
+	octCombo_ = new QComboBox();
+	sampCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
-     QLabel *macLabel = new QLabel(" Machines: ");
-     QLabel *sampLabel = new QLabel(" Samples: ");
-     machToolBar->addWidget(macLabel);
-     machToolBar->addWidget( macCombo_ );
-     machToolBar->addWidget(sampLabel);
-     machToolBar->addWidget( sampCombo_ );
+	QLabel *macLabel = new QLabel(" Machines: ");
+	QLabel *sampLabel = new QLabel(" Samples: ");
+	machToolBar->addWidget(macLabel);
+	machToolBar->addWidget( macCombo_ );
+	machToolBar->addWidget(sampLabel);
+	machToolBar->addWidget( sampCombo_ );
 
-     octToolBar_ = addToolBar( "Octave" );
-     octToolBar_->addWidget( new QLabel( "Octave: " ) );
-     octToolBar_->addWidget( octCombo_ );
-     for ( int i = 0; i < 9; i++ ) {
-         octCombo_->addItem( QString::number( i ) );
-     }
-     connect( octCombo_, SIGNAL( currentIndexChanged( int ) ),
-              this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
-     octCombo_->setCurrentIndex( 4 );
- }
+	octToolBar_ = addToolBar( "Octave" );
+	octToolBar_->addWidget( new QLabel( "Octave: " ) );
+	octToolBar_->addWidget( octCombo_ );
+	for ( int i = 0; i < 9; i++ ) {
+		octCombo_->addItem( QString::number( i ) );
+	}
+	connect( octCombo_, SIGNAL( currentIndexChanged( int ) ),
+		 this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
+	octCombo_->setCurrentIndex( 4 );
+}
 
 void MainWindow::createStatusBar()
 {
@@ -514,7 +514,6 @@ void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* select
 void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 {
 	populateMachineCombo();
-	int bus = song_->FindBusFromIndex( mac->id() );
 	if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
 		macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
 }
@@ -525,9 +524,9 @@ void MainWindow::onMachineChosen( MachineGui *macGui )
 	macCombo_->setCurrentIndex( comboIdx );
 }
 
-void MainWindow::onMachineDeleted( int id )
+void MainWindow::onMachineDeleted()
 {
-    populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
+	populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
 }
 
 void MainWindow::onMachineRenamed()
@@ -664,6 +663,7 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 
 void MainWindow::timerEvent( QTimerEvent *ev )
 {
+	Q_UNUSED( ev );
 	if ( psy::core::Player::Instance()->playing() ) {
 		seqView_->updatePlayPos();
 
