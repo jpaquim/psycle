@@ -1495,7 +1495,7 @@ NAMESPACE__BEGIN(psycle)
 					case MACH_VSTFX:
 						{
 							CVstEffectWnd* newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
-							((CVstEffectWnd*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+							newwin->_pActive = &isguiopen[tmac];
 							newwin->LoadFrame(IDR_VSTFRAME, 
 //							WS_OVERLAPPEDWINDOW,
 								WS_POPUPWINDOW | WS_CAPTION,

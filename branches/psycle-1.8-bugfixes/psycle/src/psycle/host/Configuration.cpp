@@ -16,6 +16,7 @@ namespace psycle
 	{
 		Configuration::Configuration()
 		{
+			_allowMultipleInstances = false;
 			_initialized = false;
 			_wrapAround = true;
 			_centerCursor = false;
@@ -140,6 +141,7 @@ namespace psycle
 			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
 			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.QueryValue("WrapAround", _wrapAround);
+			reg.QueryValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.QueryValue("CenterCursor", _centerCursor);
 			reg.QueryValue("FollowSong", _followSong);
 			reg.QueryValue("CursorAlwaysDown", _cursorAlwaysDown);
@@ -330,6 +332,7 @@ namespace psycle
 			reg.SetValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
 			reg.SetValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.SetValue("WrapAround", _wrapAround);
+			reg.SetValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.SetValue("CenterCursor", _centerCursor);
 			reg.SetValue("FollowSong", _followSong);
 			reg.SetValue("CursorAlwaysDown", _cursorAlwaysDown);

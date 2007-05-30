@@ -12,6 +12,7 @@
 #include <sstream>
 #include <comdef.h>
 #include <Wbemidl.h>
+#include "sinstance.h"
 
 # pragma comment(lib, "wbemuuid.lib")
 
@@ -22,7 +23,10 @@ NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 		END_MESSAGE_MAP()
 
+		CPsycleApp theApp; /// The one and only CPsycleApp object
+
 		CPsycleApp::CPsycleApp()
+		:m_uUserMessage(0)
 		{
 			operating_system::exceptions::translated::new_thread("mfc gui");
 			// support for unicode characters on mswin98
@@ -42,10 +46,23 @@ NAMESPACE__BEGIN(psycle)
 		{
 		}
 
-		CPsycleApp theApp; /// The one and only CPsycleApp object
-
 		BOOL CPsycleApp::InitInstance()
 		{
+			// Allow only one instance of the program
+			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
+
+			CInstanceChecker instanceChecker;
+			if (instanceChecker.PreviousInstanceRunning())
+			{
+//				AfxMessageBox(_T("Previous version detected, will now restore it"), MB_OK);
+				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
+				if(*(m_lpCmdLine) != 0)
+				{
+					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
+				}
+				return FALSE;
+			}
+
 			SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
 			
 			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
@@ -95,6 +112,8 @@ NAMESPACE__BEGIN(psycle)
 			pFrame->m_wndView.RecalcMetrics();
 			pFrame->m_wndView.RecalculateColourGrid();
 
+			instanceChecker.TrackFirstInstanceRunning();
+
 			// The one and only window has been initialized, so show and update it.
 
 			pFrame->ShowWindow(SW_MAXIMIZE);
@@ -106,20 +125,46 @@ NAMESPACE__BEGIN(psycle)
 			pFrame->UpdateWindow();
 			
 			CNewMachine::LoadPluginInfo();
+			ProcessCmdLine(m_lpCmdLine);
 
 			// Show splash screen
-			// If has been commented out for BETA builds..
 			if (Global::pConfig->_showAboutAtStart)
 			{
 				OnAppAbout();
 			}
 			
-			ProcessCmdLine(pFrame); // Process Command Line
+			ProcessCmdLine(m_lpCmdLine); // Process Command Line
 
 			LoadRecent(pFrame); // Import recent files from registry.
 			pFrame->CheckForAutosave();
 			return TRUE;
 		}
+
+		BOOL CPsycleApp::PreTranslateMessage(MSG* pMsg)
+		{
+			if( pMsg->message == m_uUserMessage )
+			{
+				ProcessCmdLine(reinterpret_cast<LPSTR>(pMsg->wParam));
+			}
+			return CWinApp::PreTranslateMessage(pMsg);
+		}
+
+		BOOL CPsycleApp::IsIdleMessage( MSG* pMsg )
+		{
+			if (!CWinApp::IsIdleMessage( pMsg ) || 
+				pMsg->message == WM_TIMER) 
+				return FALSE;
+			else
+				return TRUE;
+		}
+		BOOL CPsycleApp::OnIdle(LONG lCount)
+		{
+			BOOL bMore = CWinApp::OnIdle(lCount);
+
+			///\todo: 
+			return bMore;
+		}
+
 
 		/////////////////////////////////////////////////////////////////////////////
 		// CPsycleApp message handlers
@@ -157,46 +202,154 @@ NAMESPACE__BEGIN(psycle)
 			Global::_cpuHz = cpuHz;
 */
 		}
-
-		/////////////////////////////////////////////////////////////////////////////
-		// CAboutDlg dialog used for App About
-
-		class CAboutDlg : public CDialog
+		void CPsycleApp::ProcessCmdLine(LPSTR cmdline)
 		{
-		public:
-			CAboutDlg();
+			if (*(cmdline) != 0)
+			{
+				char * tmpName =new char[257];
+				strncpy(tmpName, m_lpCmdLine+1, strlen(m_lpCmdLine+1) -1 );
+				tmpName[strlen(m_lpCmdLine+1) -1 ] = 0;
+				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
+				zapArray(tmpName);
+			}
+		}
 
-		// Dialog Data
-			//{{AFX_DATA(CAboutDlg)
-			enum { IDD = IDD_ABOUTBOX };
-			CStatic	m_asio;
-			CEdit	m_sourceforge;
-			CEdit	m_psycledelics;
-			CStatic	m_steincopyright;
-			CStatic	m_headerdlg;
-			CButton	m_showabout;
-			CStatic	m_headercontrib;
-			CStatic	m_aboutbmp;
-			CEdit	m_contrib;
-			CStatic m_versioninfo;
-			//}}AFX_DATA
+		void CPsycleApp::LoadRecent(CMainFrame* pFrame)
+		{
+			//This one should be into Configuration class. It isn't, coz I'm not much
+			//into Psycle internal configuration loading routines.
+			//If YOU are, go and put it where it sould be put.
+			//
+			//I know there's a class "Registry" in psycle, but... I don't like using it.
+			//I think it's a little bit nonsense to use class that does not nuch more
+			//than API itself. The only one for plus is variable encapsulation.
+			//
+			//Fideloop.
+			//
+			::HMENU hRootMenuBar, hFileMenu;
+			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
+			hFileMenu = ::GetSubMenu(hRootMenuBar, 0);
+			pFrame->m_wndView.hRecentMenu = ::GetSubMenu(hFileMenu, 10);
 
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CAboutDlg)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
+			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
+			key += "\\recent-files";
+			HKEY RegKey;
+			if(::RegOpenKeyEx(HKEY_CURRENT_USER , key.c_str(), 0, KEY_READ, &RegKey) == ERROR_SUCCESS)
+			{
+				DWORD nValues = 0;
+				::RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
+				if(nValues)
+				{
+					::MENUITEMINFO hNewItemInfo;
+					int iCount = 0;
+					char cntBuff[3];
+					DWORD cntSize = sizeof cntBuff;
+					char nameBuff[1 << 10];
+					DWORD nameSize = sizeof nameBuff;
+					::DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
+					while
+						(
+						::RegEnumValue
+						(
+						RegKey,
+						iCount,
+						cntBuff,
+						&cntSize,
+						0,
+						0,
+						reinterpret_cast<unsigned char*>(nameBuff),
+						&nameSize
+						) == ERROR_SUCCESS
+						)
+					{
+						::UINT ids[] =
+						{
+							ID_FILE_RECENT_01,
+								ID_FILE_RECENT_02,
+								ID_FILE_RECENT_03,
+								ID_FILE_RECENT_04
+						};
+						hNewItemInfo.cbSize = sizeof hNewItemInfo;
+						hNewItemInfo.fMask = MIIM_ID | MIIM_TYPE;
+						hNewItemInfo.fType = MFT_STRING;
+						hNewItemInfo.wID = ids[iCount];
+						hNewItemInfo.cch = std::strlen(nameBuff);
+						hNewItemInfo.dwTypeData = nameBuff;
+						::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
+						cntSize = sizeof cntBuff;
+						nameSize = sizeof nameBuff;
+						++iCount;
+					}
+					::RegCloseKey(RegKey);
+				}
+			}
+		}
 
-		// Implementation
-		protected:
-			//{{AFX_MSG(CAboutDlg)
-			afx_msg void OnContributors();
-			virtual BOOL OnInitDialog();
-			afx_msg void OnShowatstartup();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
-		};
+		void CPsycleApp::SaveRecent(CMainFrame* pFrame)
+		{
+			HMENU hRootMenuBar, hFileMenu;
+			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
+			hFileMenu = GetSubMenu(hRootMenuBar, 0);
+			pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 10);
 
+			{
+				HKEY RegKey;
+				if(::RegOpenKeyEx(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
+				{
+					::RegDeleteKey(RegKey, "recent-files");
+				}
+				::RegCloseKey(RegKey);
+			}
+
+			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
+			key += "\\recent-files";
+			HKEY RegKey;
+			DWORD Effect;
+			if
+				(
+				::RegCreateKeyEx
+				(
+				HKEY_CURRENT_USER,
+				key.c_str(),
+				0,
+				0,
+				REG_OPTION_NON_VOLATILE,
+				KEY_ALL_ACCESS,
+				0,
+				&RegKey,
+				&Effect
+				) == ERROR_SUCCESS
+				)
+			{
+				if(GetMenuItemID(pFrame->m_wndView.hRecentMenu, 0) == ID_FILE_RECENT_NONE)
+				{
+					::RegCloseKey(RegKey);
+					return;
+				}
+
+				for(int iCount(0) ; iCount < ::GetMenuItemCount(pFrame->m_wndView.hRecentMenu) ; ++iCount)
+				{
+					UINT nameSize = ::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
+					char nameBuff[1 << 10];
+					::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
+					std::ostringstream s;
+					s << iCount;
+					::RegSetValueEx(RegKey, s.str().c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(nameBuff), nameSize);
+				}
+				::RegCloseKey(RegKey);
+			}
+		}
+
+		void CPsycleApp::OnAppAbout()
+		{
+			CAboutDlg dlg;
+			dlg.DoModal();
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
+		
 		CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 		{
 			//{{AFX_DATA_INIT(CAboutDlg)
@@ -227,16 +380,6 @@ NAMESPACE__BEGIN(psycle)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
-
-		/////////////////////////////////////////////////////////////////////////////
-		// CPsycleApp message handlers
-
-
-		void CPsycleApp::OnAppAbout()
-		{
-			CAboutDlg dlg;
-			dlg.DoModal();
-		}
 
 
 		void CAboutDlg::OnContributors() 
@@ -307,219 +450,5 @@ NAMESPACE__BEGIN(psycle)
 			else Global::pConfig->_showAboutAtStart=false;
 		}
 
-		void CPsycleApp::ProcessCmdLine(CMainFrame* pFrame)
-		{
-			if(*(m_lpCmdLine) != 0)
-			{
-				char * tmpName =new char[257];
-				strncpy(tmpName, m_lpCmdLine+1, strlen(m_lpCmdLine+1) -1 );
-				tmpName[strlen(m_lpCmdLine+1) -1 ] = 0;
-				pFrame->m_wndView.OnFileLoadsongNamed(tmpName, 1);
-				zapArray(tmpName);
-			}
-		}
-
-		void CPsycleApp::LoadRecent(CMainFrame* pFrame)
-		{
-			//This one should be into Configuration class. It isn't, coz I'm not much
-			//into Psycle internal configuration loading routines.
-			//If YOU are, go and put it where it sould be put.
-			//
-			//I know there's a class "Registry" in psycle, but... I don't like using it.
-			//I think it's a little bit nonsense to use class that does not nuch more
-			//than API itself. The only one for plus is variable encapsulation.
-			//
-			//Fideloop.
-			//
-			::HMENU hRootMenuBar, hFileMenu;
-			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
-			hFileMenu = ::GetSubMenu(hRootMenuBar, 0);
-			pFrame->m_wndView.hRecentMenu = ::GetSubMenu(hFileMenu, 10);
-
-			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
-			key += "\\recent-files";
-			HKEY RegKey;
-			if(::RegOpenKeyEx(HKEY_CURRENT_USER , key.c_str(), 0, KEY_READ, &RegKey) == ERROR_SUCCESS)
-			{
-				DWORD nValues = 0;
-				::RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
-				if(nValues)
-				{
-					::MENUITEMINFO hNewItemInfo;
-					int iCount = 0;
-					char cntBuff[3];
-					DWORD cntSize = sizeof cntBuff;
-					char nameBuff[1 << 10];
-					DWORD nameSize = sizeof nameBuff;
-					::DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
-					while
-					(
-						::RegEnumValue
-						(
-							RegKey,
-							iCount,
-							cntBuff,
-							&cntSize,
-							0,
-							0,
-							reinterpret_cast<unsigned char*>(nameBuff),
-							&nameSize
-						) == ERROR_SUCCESS
-					)
-					{
-						::UINT ids[] =
-						{
-							ID_FILE_RECENT_01,
-							ID_FILE_RECENT_02,
-							ID_FILE_RECENT_03,
-							ID_FILE_RECENT_04
-						};
-						hNewItemInfo.cbSize = sizeof hNewItemInfo;
-						hNewItemInfo.fMask = MIIM_ID | MIIM_TYPE;
-						hNewItemInfo.fType = MFT_STRING;
-						hNewItemInfo.wID = ids[iCount];
-						hNewItemInfo.cch = std::strlen(nameBuff);
-						hNewItemInfo.dwTypeData = nameBuff;
-						::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
-						cntSize = sizeof cntBuff;
-						nameSize = sizeof nameBuff;
-						++iCount;
-					}
-					::RegCloseKey(RegKey);
-				}
-			}
-		}
-
-		void CPsycleApp::SaveRecent(CMainFrame* pFrame)
-		{
-			HMENU hRootMenuBar, hFileMenu;
-			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
-			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 10);
-		
-			{
-				HKEY RegKey;
-				if(::RegOpenKeyEx(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
-				{
-					::RegDeleteKey(RegKey, "recent-files");
-				}
-				::RegCloseKey(RegKey);
-			}
-
-			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
-			key += "\\recent-files";
-			HKEY RegKey;
-			DWORD Effect;
-			if
-			(
-				::RegCreateKeyEx
-				(
-					HKEY_CURRENT_USER,
-					key.c_str(),
-					0,
-					0,
-					REG_OPTION_NON_VOLATILE,
-					KEY_ALL_ACCESS,
-					0,
-					&RegKey,
-					&Effect
-				) == ERROR_SUCCESS
-			)
-			{
-				if(GetMenuItemID(pFrame->m_wndView.hRecentMenu, 0) == ID_FILE_RECENT_NONE)
-				{
-					::RegCloseKey(RegKey);
-					return;
-				}
-
-				for(int iCount(0) ; iCount < ::GetMenuItemCount(pFrame->m_wndView.hRecentMenu) ; ++iCount)
-				{
-					UINT nameSize = ::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
-					char nameBuff[1 << 10];
-					::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-					std::ostringstream s;
-					s << iCount;
-					::RegSetValueEx(RegKey, s.str().c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(nameBuff), nameSize);
-				}
-				::RegCloseKey(RegKey);
-			}
-		}
 	NAMESPACE__END
 NAMESPACE__END
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// new gui ... just a test, anyone can freely throw this code away
-#if 0
-
-/*
-	in main class constructor add:
-
-			#if defined OPERATING_SYSTEM__CROSSPLATFORM
-			{
-				#if !defined NDEBUG
-					operating_system::terminal terminal;
-				#endif
-				(*new psycle::front_ends::gui::gui).start(); // starts the new gui in parallel with the mfc one, each in their own thread
-			}
-			#endif
-*/
-
-#undef OPERATING_SYSTEM__CROSSPLATFORM
-#if defined OPERATING_SYSTEM__CROSSPLATFORM
-	#include <operating_system/logger.hpp>
-	#include <psycle/front_ends/gui/gui.hpp>
-	#include <boost/thread/thread.hpp>
-	#include <boost/thread/mutex.hpp>
-	namespace psycle
-	{
-		namespace front_ends
-		{
-			namespace gui
-			{
-				class gui
-				{
-				public:
-					gui();
-					void start() throw(boost::thread_resource_error);
-					void operator()() throw();
-				private:
-					boost::thread * thread_;
-				};
-
-				gui::gui() : thread_(0) {}
-
-				void gui::operator()() throw()
-				{
-					softsynth::gui::main();
-				}
-
-				void gui::start() throw(boost::thread_resource_error)
-				{
-					if(thread_) return;
-					try
-					{
-						template<typename Functor> class thread
-						{
-						public:
-							inline thread(Functor & functor) : functor_(functor) {}
-							inline void operator()() throw() { functor_(); }
-						private:
-							Functor & functor_;
-						};
-						thread_ = new boost::thread(thread<gui>(*this));
-					}
-					catch(const boost::thread_resource_error & e)
-					{
-						std::cerr << typeid(e).name() << ": " << e.what() << std::endl;;
-						throw;
-					}
-				}
-			}
-		}
-	}
-#endif
-#endif // 0

@@ -25,6 +25,7 @@ namespace psycle
 			void CreateFonts();
 			bool CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic);
 			
+			bool _allowMultipleInstances;
 			bool autoStopMachines;
 			COLORREF mv_colour;
 			COLORREF mv_wirecolour;
