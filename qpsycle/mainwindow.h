@@ -82,7 +82,7 @@ private slots:
 	void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
 	void onNewMachineCreated( psy::core::Machine *mac );
 	void onMachineChosen( MachineGui *macGui );
-	void onMachineDeleted( int machine_id );
+	void onMachineDeleted();
 	void onMachineRenamed();
 
 	void onPatternDeleted();
