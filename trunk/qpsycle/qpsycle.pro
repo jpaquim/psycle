@@ -18,16 +18,16 @@ DEPENDPATH += . \
 	src/machineview \
 	src/patternview \
 	psycore \
-	sequencer \
+	src/sequencer \
 	waveview \
 	psycore/helpers \
 	psycore/helpers/math
 	
 INCLUDEPATH += . \
 	src/machineview \
-	patternview \
+	src/patternview \
 	waveview \
-	sequencer
+	src/sequencer
 
 # Input
 HEADERS += \
@@ -50,12 +50,12 @@ HEADERS += \
 	src/gui/patternview/trackheader.h \
 	src/gui/patternview/patterngrid.h \
 	src/gui/patternview/patterndraw.h \
-	sequencer/sequencerarea.h \
-	sequencer/sequencerdraw.h \
-	sequencer/sequenceritem.h \
-	sequencer/sequencerline.h \
-	sequencer/sequencerview.h \
-	sequencer/beatruler.h \
+	src/gui/sequencer/sequencerarea.h \
+	src/gui/sequencer/sequencerdraw.h \
+	src/gui/sequencer/sequenceritem.h \
+	src/gui/sequencer/sequencerline.h \
+	src/gui/sequencer/sequencerview.h \
+	src/gui/sequencer/beatruler.h \
 	waveview/waveview.h \
 	audiodrivers/audiodriver.h \
 	audiodrivers/wavefileout.h \
@@ -129,12 +129,12 @@ SOURCES += \
 	src/gui/patternview/trackheader.cpp \
 	src/gui/patternview/patterngrid.cpp \
 	src/gui/patternview/patterndraw.cpp \
-	sequencer/sequencerarea.cpp \
-	sequencer/sequencerdraw.cpp \
-	sequencer/sequenceritem.cpp \
-	sequencer/sequencerline.cpp \
-	sequencer/sequencerview.cpp \
-	sequencer/beatruler.cpp \
+	src/gui/sequencer/sequencerarea.cpp \
+	src/gui/sequencer/sequencerdraw.cpp \
+	src/gui/sequencer/sequenceritem.cpp \
+	src/gui/sequencer/sequencerline.cpp \
+	src/gui/sequencer/sequencerview.cpp \
+	src/gui/sequencer/beatruler.cpp \
 	waveview/waveview.cpp \
 	audiodrivers/audiodriver.cpp \
 	audiodrivers/wavefileout.cpp \
