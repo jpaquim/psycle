@@ -40,7 +40,6 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	//TODO: this should be in the waveview.h and waveformview should be an object of WaveFormView
 	QGraphicsView *waveformview = new QGraphicsView(this);
 	QGraphicsScene *scene = new QGraphicsScene(this);
-	QGraphicsRectItem *separator = new QGraphicsRectItem(0, scene);
 	waveformview->setScene(scene);
 	waveformview->setBackgroundBrush( Qt::black );
 	waveformview->adjustSize();

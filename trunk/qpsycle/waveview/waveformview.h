@@ -24,9 +24,11 @@
 
 #include <QGraphicsView>
 
+
 class WaveFormView : public QGraphicsView
 {
      Q_OBJECT
+
 
 public:
      WaveView(bool *mini, QWidget *parent);
@@ -35,7 +37,16 @@ public slots:
 	void LoadStereo();
 	void LoadMono();
 	void Clear();
-
+private:
+	QGraphicsScene *scene;
+	QGraphicsTextItem *nodata;
+	QGraphicsTextItem *left;
+    QGraphicsTextItem *right;
+	QGraphicsLineItem *mono_line;
+	QGraphicsLineItem *stereo_centerline;
+	QGraphicsLineItem *stereo_leftline;
+	QGraphicsLineItem *stereo_rightline;
+    
 };
 
 #endif
