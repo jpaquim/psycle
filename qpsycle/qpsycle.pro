@@ -97,7 +97,6 @@ HEADERS += \
 	psycore/sigslot.h \
 	psycore/singlepattern.h \
 	psycore/song.h \
-	psycore/songstructs.h \
 	psycore/timesignature.h \
 	psycore/xminstrument.h \
 	psycore/xmsampler.h \
