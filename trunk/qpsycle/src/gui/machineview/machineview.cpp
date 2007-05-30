@@ -26,8 +26,8 @@
 #include <psycore/pluginfinder.h>
 #include <psycore/patternevent.h>
 
-#include "../global.h"
-#include "../configuration.h"
+#include "../../../global.h"
+#include "../../../configuration.h"
 #include "machinegui.h"
 #include "machineview.h"
 #include "mastergui.h"
@@ -49,7 +49,7 @@ MachineView::MachineView(psy::core::Song *song)
 	song_ = song;
 	setScene( new MachineScene( this ) );
 	scene()->setBackgroundBrush(Qt::black);
-	
+
 	setAlignment( Qt::AlignLeft | Qt::AlignTop );
 	setDragMode( QGraphicsView::RubberBandDrag );
 	setBackgroundBrush(Qt::black);
