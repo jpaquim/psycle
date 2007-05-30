@@ -15,19 +15,25 @@ MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 #DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
 DEPENDPATH += . \
-	src/machineview \
-	src/patternview \
+    src/ \
+    src/gui \
+	src/gui/machineview \
+	src/gui/patternview \
 	psycore \
-	src/sequencer \
-	src/waveview \
+	src/gui/sequencer \
+	src/gui/waveview \
 	psycore/helpers \
 	psycore/helpers/math
 	
 INCLUDEPATH += . \
-	src/machineview \
-	src/patternview \
-	src/waveview \
-	src/sequencer
+    src/ \
+    src/gui \
+	src/gui/machineview \
+	src/gui/patternview \
+	src/gui/waveview \
+	src/gui/sequencer \
+    src/audiodrivers \
+    src/mididrivers
 
 # Input
 HEADERS += \
