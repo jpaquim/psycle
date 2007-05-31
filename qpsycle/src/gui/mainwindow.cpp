@@ -43,7 +43,7 @@
 
 #include <iostream>
 #include <iomanip>
-//poopoop
+
 MainWindow::MainWindow()
 {
 	song_ = createBlankSong();
