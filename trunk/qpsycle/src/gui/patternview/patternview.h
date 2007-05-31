@@ -39,67 +39,69 @@ class PatternDraw;
 class PatternGrid;
 class PatCursor;
 
-class PatternView : public QWidget
-{
-    Q_OBJECT
+class PatternView : public QWidget {
+Q_OBJECT
 
 public:
-    PatternView( psy::core::Song *song );
+	PatternView( psy::core::Song *song );
 
-    void enterNote( const PatCursor & cursor, int note );
-    void clearNote( const PatCursor & cursor);
-    void onTick( double sequenceStart );
+	void enterNote( const PatCursor & cursor, int note );
+	void clearNote( const PatCursor & cursor);
+	void onTick( double sequenceStart );
 
-    // Getters.
-    psy::core::Song *song() { return song_; }
-    psy::core::SinglePattern *pattern() const { return pattern_; }
-    PatternDraw* patDraw() { return patDraw_; }
-    PatternGrid* patternGrid(); 
-    int rowHeight() const;
-    int numberOfLines() const;
-    int numberOfTracks() const;
-    int trackWidth() const;
-    int selectedMachineIndex() const;
-    int playPos() { return playPos_; }
-    int beatZoom() const;
-    int patternStep() const;
-    int octave() const;
+	// Getters.
+	psy::core::Song *song() { return song_; }
+	psy::core::SinglePattern *pattern() const { return pattern_; }
+	PatternDraw* patDraw() { return patDraw_; }
+	PatternGrid* patternGrid(); 
+	int rowHeight() const;
+	int numberOfLines() const;
+	int numberOfTracks() const;
+	int trackWidth() const;
+	int selectedMachineIndex() const;
+	int playPos() { return playPos_; }
+	int beatZoom() const;
+	int patternStep() const;
+	int octave() const;
 
-    // Setters.
-    void setSelectedMachineIndex( int idx );
-    void setPattern( psy::core::SinglePattern *pattern );
-    void setNumberOfTracks( int numTracks );
-    void setPatternStep( int newStep );
-    void setOctave( int newOctave );
+	// Setters.
+	void setSelectedMachineIndex( int idx );
+	void setPattern( psy::core::SinglePattern *pattern );
+	void setNumberOfTracks( int numTracks );
+	void setPatternStep( int newStep );
+	void setOctave( int newOctave );
 
-    // GUI events.
-    void keyPressEvent( QKeyEvent *event );
+	// GUI events.
+	void keyPressEvent( QKeyEvent *event );
 
 public slots:
-    void onPatternStepComboBoxIndexChanged( int newIndex );
+	void onPatternStepComboBoxIndexChanged( int newIndex );
+
+protected:
+	void showEvent( QShowEvent * event );
 
 private:
-    void createToolBar();
+	void createToolBar();
 
-    psy::core::Song *song_;
-    psy::core::SinglePattern* pattern_;
+	psy::core::Song *song_;
+	psy::core::SinglePattern* pattern_;
 
-    // Settings.
-    int patternStep_;
-    int numberOfTracks_;
-    int selectedMacIdx_;
-    int playPos_;
+	// Settings.
+	int patternStep_;
+	int numberOfTracks_;
+	int selectedMacIdx_;
+	int playPos_;
 
-    // GUI items.
-    PatternDraw *patDraw_;
-    QVBoxLayout *layout;
-    QToolBar *toolBar_;
-    QComboBox *patStepCbx_;
-    QComboBox *patternCbx_;
-    QAction *delBarAct_;
+	// GUI items.
+	PatternDraw *patDraw_;
+	QVBoxLayout *layout;
+	QToolBar *toolBar_;
+	QComboBox *patStepCbx_;
+	QComboBox *patternCbx_;
+	QAction *delBarAct_;
 	QCheckBox *recordCb_;
 
-    int octave_;
+	int octave_;
 
 };
 
