@@ -136,6 +136,7 @@ namespace xml
 	class x
 	{
 		public:
+			#if 0
 			void parse_array(boost::spirit::rule<> const & rule, char const expr[])
 			{
 				boost::spirit::parse_info<char const *> result = boost::spirit::parse(expr, rule);
@@ -151,6 +152,7 @@ namespace xml
 					std::cout << "^--Here\n\n\n";
 				}
 			}
+			#endif
 
 			typedef wchar_t char_t;
 			typedef std::vector<char_t>::iterator iterator_t;
@@ -166,10 +168,11 @@ namespace xml
 				typedef boost::spirit::ast_match_policy<iterator_t, boost::spirit::node_iter_data_factory<> > match_policy_t;
 				typedef boost::spirit::scanner<iterator_t, boost::spirit::scanner_policies<boost::spirit::iteration_policy, match_policy_t> > scanner_t;
 				typedef boost::spirit::rule<scanner_t> rule_t;
-
+				
 				scanner_t scan(first, last);
+				std::cout << "parsing\n";
 				parse_tree_match_t hit = rule.parse(scan);
-
+				
 				if (hit && first == last) {
 					std::cout << "Parses OK\n";
 					print_tree(hit);
@@ -238,7 +241,7 @@ namespace xml
         	x.parse_file(g, argv[1]);
 	        return 0;
     	}
-    	
+		#if 0    	
 		std::cout << "The following should fail parsing:\n";
 		x.parse_array(g,
 				"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
@@ -261,6 +264,7 @@ namespace xml
 									"<heading>Reminder</heading>"
 										"<body>Don't forget me this weekend!</body>"
 									"</note>");
+		#endif
 		return 0;
 	}
 }

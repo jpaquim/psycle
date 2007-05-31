@@ -53,7 +53,7 @@ namespace psycle
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close()   throw(universalis::operating_system::exception);
 				private:
 					::IDirectSound        * direct_sound_;
-					::IDirectSound inline & direct_sound() throw() { assert(direct_sound_); return *direct_sound_; }
+					::IDirectSound inline & direct_sound_implementation() throw() { assert(direct_sound_); return *direct_sound_; }
 
 					typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
 					output_sample_type last_sample_;
