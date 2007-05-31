@@ -29,61 +29,42 @@
 #include <QPainter>
 #include <QGraphicsRectItem>
 
+
 TrackHeader::TrackHeader( PatternDraw * pPatternDraw, QWidget *parent ) 
-    : pDraw(pPatternDraw), QWidget(parent)
-{
-}
+	: QWidget(parent),
+	  pDraw(pPatternDraw)
+{}
 
 TrackHeader::~ TrackHeader( )
-{ 
-}
+{}
 
 void TrackHeader::paintEvent( QPaintEvent *event ) 
 {
-    int trackHeight = 20;
-    int numTracks = pDraw->patternView()->numberOfTracks();
+	Q_UNUSED( event );
+	int trackHeight = 20;
 
-    QPainter painter(this);
-    painter.setBrush( QBrush( QColor(30,30,30) ) );
-    painter.drawRect( 0, 0, width(), trackHeight );
+	QPainter painter(this);
+	painter.setBrush( QBrush( QColor(30,30,30) ) );
+	painter.drawRect( 0, 0, width(), trackHeight );
 
-/*    for ( int i = 0; i < numTracks; i++ )
-    {
-        int trackWidth = pDraw->xEndByTrack( i ) - pDraw->xOffByTrack( i );
-        painter->setPen( QPen( Qt::black ) );
-        painter->setBrush( QBrush( Qt::black ) );
-        painter->drawRect( i*trackWidth, 0, trackWidth, trackHeight ); 
-        painter->setPen( QPen( Qt::white ) );
-        painter->drawText( i*trackWidth+5, 15, QString::number(i) );
-        painter->setPen( QPen( Qt::gray ) );
-        painter->setBrush( QBrush( Qt::red ) );
-        painter->drawEllipse( (i+1)*trackWidth - 15, 5, 10, 10 ); 
-        painter->setBrush( QBrush( Qt::yellow ) );
-        painter->drawEllipse( (i+1)*trackWidth - 30, 5, 10, 10 ); 
-        painter->setBrush( QBrush( Qt::green ) );
-        painter->drawEllipse( (i+1)*trackWidth - 45, 5, 10, 10 ); 
-    }*/
+	int scrollDx = pDraw->horizontalScrollBar()->value();
+	int spacingWidth = 5;
+	int startTrack = pDraw->findTrackByXPos( scrollDx );
+	std::map<int, TrackGeometry>::const_iterator it;
+	it = pDraw->trackGeometrics().lower_bound( startTrack );
 
-    //g.setForeground(pDraw->patternView()->separatorColor());
+	for ( ; it != pDraw->trackGeometrics().end() && it->first <= pDraw->patternGrid()->endTrackNumber(); it++) 
+	{
+		const TrackGeometry & trackGeometry = it->second;
 
-    int scrollDx = pDraw->horizontalScrollBar()->value();
-    int spacingWidth = 5;
-    int startTrack = pDraw->findTrackByXPos( scrollDx );
-    std::map<int, TrackGeometry>::const_iterator it;
-    it = pDraw->trackGeometrics().lower_bound( startTrack );
+		int xOff = trackGeometry.left() - scrollDx + spacingWidth;
 
-    for ( ; it != pDraw->trackGeometrics().end() && it->first <= pDraw->patternGrid()->endTrackNumber(); it++) 
-    {
-        const TrackGeometry & trackGeometry = it->second;
-
-        int xOff = trackGeometry.left() - scrollDx + spacingWidth;
-
-        painter.setPen( QPen ( Qt::white ) );
-        QString text = QString::number( it->first );
-        QRectF textBound( xOff, 0, trackGeometry.width(), trackHeight );
-        painter.drawText( textBound, text, QTextOption( Qt::AlignCenter ) );
-        if (it->first!=0) {
-            painter.drawLine( xOff, 0, xOff, height() ); // col seperator*/
-        }
-    }
+		painter.setPen( QPen ( Qt::white ) );
+		QString text = QString::number( it->first );
+		QRectF textBound( xOff, 0, trackGeometry.width(), trackHeight );
+		painter.drawText( textBound, text, QTextOption( Qt::AlignCenter ) );
+		if (it->first!=0) {
+			painter.drawLine( xOff, 0, xOff, height() ); // col seperator*/
+		}
+	}
 }
