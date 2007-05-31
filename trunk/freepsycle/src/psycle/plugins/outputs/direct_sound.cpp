@@ -50,7 +50,7 @@ namespace psycle
 					write_primary_ = false; /// \todo parametrable
 					if(write_primary_)
 					{
-						if(error = direct_sound().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_WRITEPRIMARY))
+						if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_WRITEPRIMARY))
 						{
 							buffer_ = 0;
 							//throw universalis::operating_system::exceptions::runtime_error("direct sound set write primary cooperative level: " + operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
@@ -58,7 +58,7 @@ namespace psycle
 							return false; // \todo that sux.. we're just going to crash latter
 						}
 					}
-					else if(error = direct_sound().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_PRIORITY)) throw universalis::operating_system::exceptions::runtime_error("direct sound set priority cooperative level: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+					else if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_PRIORITY)) throw universalis::operating_system::exceptions::runtime_error("direct sound set priority cooperative level: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 					::DSBUFFERDESC description;
 					std::memset(&description, 0, sizeof description);
 					description.dwSize = sizeof description;
@@ -74,7 +74,7 @@ namespace psycle
 						description.lpwfxFormat = &format.wave_format_ex();
 						description.dwBufferBytes = total_buffer_size_ = buffers_ * samples_per_buffer_ * static_cast<unsigned long int>(format.bytes_per_sample());
 					}
-					if(FAILED(error = direct_sound().CreateSoundBuffer(&description, &buffer_, 0))) throw universalis::operating_system::exceptions::runtime_error("direct sound create sound buffer: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+					if(FAILED(error = direct_sound_implementation().CreateSoundBuffer(&description, &buffer_, 0))) throw universalis::operating_system::exceptions::runtime_error("direct sound create sound buffer: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 					if(error && loggers::warning()())
 					{
 						std::ostringstream s;
@@ -244,7 +244,7 @@ namespace psycle
 				}
 				if(direct_sound_)
 				{
-					if(HRESULT error = direct_sound().Release()) throw universalis::operating_system::exceptions::runtime_error("direct sound release: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+					if(HRESULT error = direct_sound_implementation().Release()) throw universalis::operating_system::exceptions::runtime_error("direct sound release: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 					direct_sound_ = 0;
 				}
 				resource::do_close();
