@@ -47,31 +47,31 @@ class TrackHeader;
  */
 class TrackGeometry {
 public:			
-    TrackGeometry();
+	TrackGeometry();
 
-    TrackGeometry( PatternDraw & patternDraw );
+	TrackGeometry( PatternDraw & patternDraw );
 
-    ~TrackGeometry();
+	~TrackGeometry();
 
-    void setLeft( int left );
-    int left() const;
+	void setLeft( int left );
+	int left() const;
 
-    void setWidth( int width );
-    int width() const;			
+	void setWidth( int width );
+	int width() const;			
 
-    void setVisibleColumns( int cols );
-    int visibleColumns() const;
+	void setVisibleColumns( int cols );
+	int visibleColumns() const;
 
-    void setVisible( bool on);
-    bool visible() const;
+	void setVisible( bool on);
+	bool visible() const;
 
 private:
 
-    PatternDraw *pDraw;
-    int left_;
-    int width_;
-    int visibleColumns_;
-    bool visible_;
+	PatternDraw *pDraw;
+	int left_;
+	int width_;
+	int visibleColumns_;
+	bool visible_;
 
 };
 
