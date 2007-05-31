@@ -18,6 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "waveformview.h"
+#include <QGraphicsView>
 
 WaveFormView::WaveFormView(bool *mini, QWidget *parent); //inizialization file for WaveFormView.
 {
@@ -46,6 +47,8 @@ WaveFormView::LoadStereo()
 WaveFormView::LoadMono()
 {
 	//we need to add al line at the middle GraphicsView To Make that loads a Mono file...
+	QGraphicsLineItem *line = new QGraphicsLineItem(0,this.height()/2,this.width(),this.height()/2, 0, scene);
+	scene->addItem(line);
 }
 
 WaveFormView::Clear()
