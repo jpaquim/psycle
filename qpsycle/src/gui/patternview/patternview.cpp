@@ -89,7 +89,7 @@ void PatternView::createToolBar()
 	toolBar_->setSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed );
 
 }
-
+//
 void PatternView::enterNote( const PatCursor & cursor, int note ) 
 {
 	if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the next line if recording is off...
@@ -113,7 +113,6 @@ void PatternView::enterNote( const PatCursor & cursor, int note )
 void PatternView::clearNote( const PatCursor & cursor) {
 	if ( pattern() ) {
 		psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
-		psy::core::Machine* tmac = song_->machine( song_->seqBus );
 		event.setNote(255);
 		event.setSharp( false/*drawArea->sharpMode()*/ );
 		pattern()->setEvent( cursor.line(), cursor.track(), event );
@@ -145,7 +144,7 @@ int PatternView::numberOfLines() const
 {
 	return ( pattern() ) ? static_cast<int> ( pattern()->beatZoom() * pattern()->beats() ) : 0;  
 }
-
+//
 int PatternView::numberOfTracks() const
 {
 	return numberOfTracks_;
@@ -245,6 +244,7 @@ void PatternView::keyPressEvent( QKeyEvent *event )
 
 void PatternView::showEvent( QShowEvent * event ) 
 {
+	Q_UNUSED( event );
 	patDraw()->setFocus();
 	patDraw()->scene()->setFocusItem( patDraw()->patternGrid() );
 }
