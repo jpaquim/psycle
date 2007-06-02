@@ -1,6 +1,6 @@
 #include "configuration.hpp"
-#include <psycore/player.h>
-#include <psycore/song.h>
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
 #include <iostream>
 #include <string>
 int main(int argument_count, char * arguments[])
