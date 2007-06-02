@@ -12,7 +12,7 @@ message( "Config is $${CONFIG}." )
 BUILD_DIR = build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
-#DESTDIR = $$BUILD_DIR # Where the final executable goes.
+DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
 DEPENDPATH += . \
 	src/ \
