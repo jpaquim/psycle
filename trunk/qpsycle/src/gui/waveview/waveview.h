@@ -20,7 +20,7 @@
  #ifndef WAVEVIEW_H
  #define WAVEVIEW_H
 
-#include <psycore/song.h>
+#include <psycle/core/song.h>
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QWidget>

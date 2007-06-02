@@ -26,8 +26,8 @@ namespace psy { namespace core {
 	class PatternEvent;
 }}
 
-#include <psycore/constants.h>
-#include <psycore/pluginfinder.h>
+#include <psycle/core/constants.h>
+#include <psycle/core/pluginfinder.h>
 
 #include <vector>
 

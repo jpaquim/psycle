@@ -18,10 +18,10 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <psycore/machine.h>
-#include <psycore/plugin.h>
-#include <psycore/binread.h>
-#include <psycore/constants.h>
+#include <psycle/core/machine.h>
+#include <psycle/core/plugin.h>
+#include <psycle/core/binread.h>
+#include <psycle/core/constants.h>
 
 #include "machinetweakdlg.h"
 #include "../global.h"

@@ -18,9 +18,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <psycore/signalslib.h>
-#include <psycore/machine.h>
-#include <psycore/song.h>
+#include <psycle/core/signalslib.h>
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
 
 #include "../global.h"
 #include "../configuration.h"

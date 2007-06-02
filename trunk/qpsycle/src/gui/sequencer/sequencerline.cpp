@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <psycore/patternsequence.h>
+#include <psycle/core/patternsequence.h>
 
 #include "sequencerview.h"
 #include "sequencerdraw.h"

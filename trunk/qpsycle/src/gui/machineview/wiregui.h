@@ -21,7 +21,7 @@
 #ifndef WIREGUI_H
 #define WIREGUI_H
 
-#include <psycore/signalslib.h>
+#include <psycle/core/signalslib.h>
 
 #include <QGraphicsItem>
 #include <QAction>

@@ -26,7 +26,7 @@ namespace psy { namespace core {
 	class SinglePattern;
 }}
 
-#include <psycore/signalslib.h>
+#include <psycle/core/signalslib.h>
 
 #include <QGraphicsItem>
 #include <QObject>

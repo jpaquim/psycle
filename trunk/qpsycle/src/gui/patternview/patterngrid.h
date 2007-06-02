@@ -20,7 +20,7 @@
 #ifndef PATTERNGRID_H
 #define PATTERNGRID_H
 
-#include <psycore/singlepattern.h>
+#include <psycle/core/singlepattern.h>
 
 #include <map>
 

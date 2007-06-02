@@ -21,7 +21,7 @@
 #ifndef BEATRULER_H
 #define BEATRULER_H
 
-#include <psycore/signalslib.h>
+#include <psycle/core/signalslib.h>
 
 #include <QtGui/QGraphicsItem>
 
