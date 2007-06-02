@@ -24,7 +24,7 @@
 #include <sstream>
 #include <cassert>
 #include <cerrno>
-#include <psycore/cstdint.h>
+#include <psycle/core/cstdint.h>
 namespace psy {
 	namespace core {
 
