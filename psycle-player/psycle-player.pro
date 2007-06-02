@@ -2,7 +2,7 @@
 # N.B. dont run qmake --project! It will overwrite 
 # this file and we don't want that.
 
-include(qmake/platform.pri)
+include(../psycle-core/qmake/platform.pri)
 
 TEMPLATE = app # This project builds an executable program.
 TARGET = 
