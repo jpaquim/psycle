@@ -26,7 +26,7 @@
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
-#include "../audiodrivers/audiodriver.h" ///\todo doesn't belong in psycore
+#include <psycle/audiodrivers/audiodriver.h> ///\todo doesn't belong in psycore
 
 namespace psy
 {

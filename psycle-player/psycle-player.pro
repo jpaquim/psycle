@@ -2,6 +2,8 @@
 # N.B. dont run qmake --project! It will overwrite 
 # this file and we don't want that.
 
+include(qmake/platform.pri)
+
 TEMPLATE = app # This project builds an executable program.
 TARGET = 
 
@@ -14,16 +16,16 @@ OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
-INCLUDEPATH += src ../psycle-core/src ../psycle-audiodrivers/src
-DEPENDPATH += src ../psycle-core/src ../psycle-audiodrivers/src
+PSYCLE_PLAYER_DIR = .
+INCLUDEPATH *= src
+DEPENDPATH *= src
 
 HEADERS += \
-	src/psycle/player/configuration.hpp
+	$$PSYCLE_PLAYER_DIR/src/psycle/player/configuration.hpp
 	
 SOURCES += \
-	src/psycle/player/main.cpp \
-	src/psycle/player/configuration.cpp
+	$$PSYCLE_PLAYER_DIR/src/psycle/player/main.cpp \
+	$$PSYCLE_PLAYER_DIR/src/psycle/player/configuration.cpp
 
-include(qmake/platform.pri)
 include(../psycle-core/qmake/psycle-core.pri)
 include(../psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
