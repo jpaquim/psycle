@@ -1,4 +1,6 @@
 	message("System is: unix.")
+	TOP_SRC_DIR = $$system(pwd)
+	
 	CONFIG += link_pkgconfig # adds support for pkg-config via the PKG_CONFIG var
 	
 	macx {
