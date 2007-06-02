@@ -43,15 +43,16 @@ SequencerDraw::SequencerDraw( SequencerView *seqView )
 	seqView_ = seqView;
 	beatPxLength_ = 5;
 	lineHeight_ = 30;
+	setAlignment ( Qt::AlignLeft | Qt::AlignTop );
 
 	QGraphicsScene *scene_ = new QGraphicsScene(this);
+	setScene(scene_);
 	scene_->setItemIndexMethod(QGraphicsScene::NoIndex);
 	scene_->setBackgroundBrush(Qt::black);
 
-	setAlignment ( Qt::AlignLeft | Qt::AlignTop );
-	setScene(scene_);
-
 	seqArea_ = new SequencerArea( this );
+	scene_->addItem( seqArea_ );
+	seqArea_->setPos( 0, 30 );
 
 	psy::core::PatternSequence* patternSequence = sequencerView()->song()->patternSequence();
 
@@ -60,7 +61,7 @@ SequencerDraw::SequencerDraw( SequencerView *seqView )
 		psy::core::SequenceLine* seqLine = *it;
 		onNewLineCreated(seqLine);
 	}
-    
+
 	if(!lines_.empty()) {
 		setSelectedLine(lines_[0]);
 	}
@@ -74,8 +75,6 @@ SequencerDraw::SequencerDraw( SequencerView *seqView )
 
 	scene_->addItem( beatRuler );
 	beatRuler->setPos( 0, 0 );
-	scene_->addItem( seqArea_ );
-	seqArea_->setPos( 0, 30 );
 
 	patternSequence->newLineCreated.connect
 		(boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
@@ -149,205 +148,209 @@ void SequencerDraw::deleteTrack() {
 }
 
 void SequencerDraw::moveDownTrack() {
-  if(selectedLine()) {
-    // will trigger onLinesSwapped
-    seqView_->song()->patternSequence()->moveDownLine(selectedLine()->sequenceLine());
-  }
+	if(selectedLine()) {
+		// will trigger onLinesSwapped
+		seqView_->song()->patternSequence()->moveDownLine(selectedLine()->sequenceLine());
+	}
 }
 void SequencerDraw::moveUpTrack() {
-  if(selectedLine()) {
-    // will trigger onLinesSwapped
-    seqView_->song()->patternSequence()->moveUpLine(selectedLine()->sequenceLine());
-  }
+	if(selectedLine()) {
+		// will trigger onLinesSwapped
+		seqView_->song()->patternSequence()->moveUpLine(selectedLine()->sequenceLine());
+	}
 }
 
 SequencerLine* SequencerDraw::makeSequencerLine(psy::core::SequenceLine* seqLine) {
-  SequencerLine* line = new SequencerLine( this);
-  scene()->addItem(line);
-  line->setSequenceLine(seqLine);
-  line->setParentItem( seqArea_ );
-  connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
-  seqLine->wasDeleted.connect(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
-  return line;
+	SequencerLine* line = new SequencerLine( this);
+	scene()->addItem(line);
+	line->setSequenceLine(seqLine);
+	line->setParentItem( seqArea_ );
+	connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
+	seqLine->wasDeleted.connect(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+	return line;
 }
 
 void SequencerDraw::onSequencerLineClick( SequencerLine *line )
 {
-    if ( selectedLine() ) {
-        QRectF oldLineRect = selectedLine()->mapToScene( selectedLine()->boundingRect() ).boundingRect();
-        scene()->update( oldLineRect );
-    }
-    setSelectedLine( line );
-    QRectF newLineRect = line->mapToScene( line->boundingRect() ).boundingRect();
-    scene()->update( newLineRect );
+	if ( selectedLine() ) {
+		QRectF oldLineRect = selectedLine()->mapToScene( selectedLine()->boundingRect() ).boundingRect();
+		scene()->update( oldLineRect );
+	}
+	setSelectedLine( line );
+	QRectF newLineRect = line->mapToScene( line->boundingRect() ).boundingRect();
+	scene()->update( newLineRect );
 }
 
 void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
 {
-    psy::core::SequenceEntry *entry = item->sequenceEntry();
-    if ( psy::core::Player::Instance()->loopSequenceEntry() == entry ) {
-        psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
-    }
-    entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
-    scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
+	psy::core::SequenceEntry *entry = item->sequenceEntry();
+	if ( psy::core::Player::Instance()->loopSequenceEntry() == entry ) {
+		psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
+	}
+	entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
+	scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
 }
 
 void SequencerDraw::onNewLineCreated(psy::core::SequenceLine* seqLine)
 {
-  SequencerLine* line = makeSequencerLine(seqLine);
-  line->setPos( 0, lines_.size()*lineHeight_ );
-  lines_.push_back(line);
-  setSelectedLine( line );
+	SequencerLine* line = makeSequencerLine(seqLine);
+	line->setPos( 0, lines_.size()*lineHeight_ );
+	lines_.push_back(line);
+	setSelectedLine( line );
 }
 
 void SequencerDraw::onNewLineInserted(psy::core::SequenceLine* seqLine, psy::core::SequenceLine* position)
 {
-  printf("onNewLineInserted(%p,%p)\n",seqLine,position);
-  SequencerLine* line = makeSequencerLine(seqLine);
-  int numLines = lines_.size();
-  for(int i=0;i<numLines;i++) {
-    if (lines_[i]->sequenceLine() == position) {
-      printf("%ith line\n",i);
-      SequencerLine* l=line;
-      for(int j=i;j<numLines;j++) {
-        l->setPos( 0, j*lineHeight_ );
-        std::swap(l,lines_[j]);
-      }
-      l->setPos( 0, numLines*lineHeight_ );
-      lines_.push_back(l);
-      break;
-    }
-  }
+	printf("onNewLineInserted(%p,%p)\n",seqLine,position);
+	SequencerLine* line = makeSequencerLine(seqLine);
+	int numLines = lines_.size();
+	for(int i=0;i<numLines;i++) {
+		if (lines_[i]->sequenceLine() == position) {
+			printf("%ith line\n",i);
+			SequencerLine* l=line;
+			for(int j=i;j<numLines;j++) {
+				l->setPos( 0, j*lineHeight_ );
+				std::swap(l,lines_[j]);
+			}
+			l->setPos( 0, numLines*lineHeight_ );
+			lines_.push_back(l);
+			break;
+		}
+	}
 
-  setSelectedLine( line );
+	setSelectedLine( line );
 }
 
 void SequencerDraw::onLineRemoved(psy::core::SequenceLine* seqLine)
 {
-  if (selectedLine() && selectedLine()->sequenceLine() == seqLine)
-    setSelectedLine( NULL );
-  int numLines = lines_.size();
-  for(int i=0;i<numLines;i++) {
-    if (lines_[i]->sequenceLine() == seqLine) {
-      for(int j=i;j<numLines-1;j++) {
-        std::swap(lines_[j],lines_[j+1]);
-        lines_[j]->setPos( 0, j*lineHeight_ );
-      }
-      delete lines_.back();
-      lines_.pop_back();
-      break;
-    }
-  }
+	if (selectedLine() && selectedLine()->sequenceLine() == seqLine)
+		setSelectedLine( NULL );
+	int numLines = lines_.size();
+	for(int i=0;i<numLines;i++) {
+		if (lines_[i]->sequenceLine() == seqLine) {
+			for(int j=i;j<numLines-1;j++) {
+				std::swap(lines_[j],lines_[j+1]);
+				lines_[j]->setPos( 0, j*lineHeight_ );
+			}
+			delete lines_.back();
+			lines_.pop_back();
+			break;
+		}
+	}
 }
 
 void SequencerDraw::onLinesSwapped(psy::core::SequenceLine* a,
                                    psy::core::SequenceLine* b)
 {
-  lines_iterator ita = lines_.end();
-  lines_iterator itb = lines_.end();
-  for(lines_iterator i=lines_.begin();i != lines_.end();i++) {
-    psy::core::SequenceLine* sl = (*i)->sequenceLine();
-    if (sl == a)
-      ita = i;
-    if (sl == b)
-      itb = i;
-  }
-  if (ita != lines_.end() && itb != lines_.end()) {
-    QPointF posa = (*ita)->pos();
-    QPointF posb = (*itb)->pos();
-    (*ita)->setPos(posb);
-    (*itb)->setPos(posa);
-    std::swap(*ita,*itb);
-  }
+	lines_iterator ita = lines_.end();
+	lines_iterator itb = lines_.end();
+	for(lines_iterator i=lines_.begin();i != lines_.end();i++) {
+		psy::core::SequenceLine* sl = (*i)->sequenceLine();
+		if (sl == a)
+			ita = i;
+		if (sl == b)
+			itb = i;
+	}
+	if (ita != lines_.end() && itb != lines_.end()) {
+		QPointF posa = (*ita)->pos();
+		QPointF posb = (*itb)->pos();
+		(*ita)->setPos(posb);
+		(*itb)->setPos(posa);
+		std::swap(*ita,*itb);
+	}
 }
 
 void SequencerDraw::onPlayLineMoved( double newXPos )
 {
-    psy::core::Player::Instance()->stop();
-    psy::core::Player::Instance()->setPlayPos( newXPos / beatPxLength_ );
+	psy::core::Player::Instance()->stop();
+	psy::core::Player::Instance()->setPlayPos( newXPos / beatPxLength_ );
 }
 
 void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff ) 
 {
-    if ( true /*gridSnap()*/ ) {
-        int beatDiff = diff.x() / 5;
-        int snappedBeatDiff = beatDiff * 5;
-        diff.setX( snappedBeatDiff );
-    }
+	if ( true /*gridSnap()*/ ) {
+		int beatDiff = diff.x() / 5;
+		int snappedBeatDiff = beatDiff * 5;
+		diff.setX( snappedBeatDiff );
+	}
 
-    QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
+	QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
 
-    int leftMostX = 10000; // Of all selected items, find the left most x pos.
-    foreach ( QGraphicsItem *uncastItem, selectedItems )
-    {
-        if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
-        {
-            if ( someItem->pos().x() < leftMostX ) leftMostX = someItem->pos().x();
-        }
-    }
+	int leftMostX = 10000; // Of all selected items, find the left most x pos.
+	foreach ( QGraphicsItem *uncastItem, selectedItems )
+	{
+		if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+		{
+			if ( someItem->pos().x() < leftMostX ) leftMostX = someItem->pos().x();
+		}
+	}
 
-    int xMoveBy;
-    if ( leftMostX + diff.x() < 0 ) {
-        xMoveBy = -leftMostX;
-    } else {
-        xMoveBy = diff.x();
-    }
+	int xMoveBy;
+	if ( leftMostX + diff.x() < 0 ) {
+		xMoveBy = -leftMostX;
+	} else {
+		xMoveBy = diff.x();
+	}
 
-    foreach ( QGraphicsItem *uncastItem, selectedItems )
-    {
-        if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
-        {
-            someItem->moveBy( xMoveBy, 0 );
-            int newItemLeft = someItem->pos().x();
-            someItem->sequenceEntry()->track()->MoveEntry( someItem->sequenceEntry(), newItemLeft / beatPxLength() );
-        }
-    }
+	foreach ( QGraphicsItem *uncastItem, selectedItems )
+	{
+		if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+		{
+			someItem->moveBy( xMoveBy, 0 );
+			int newItemLeft = someItem->pos().x();
+			someItem->sequenceEntry()->track()->MoveEntry( someItem->sequenceEntry(), newItemLeft / beatPxLength() );
+		}
+	}
 }
 
 void SequencerDraw::onItemChangedLine( SequencerItem *item, int direction )
 {
-    // Note: for "direction", 0 = up, 1 = down.
-    QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
+	// Note: for "direction", 0 = up, 1 = down.
+	QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
 
-    // Check that the item (or group) doesn't touch the top or bottom.
-    bool allowMove = true;
-    foreach ( QGraphicsItem *uncastItem, selectedItems )
-    {
-        if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
-        {
-            SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
-            if ( lines_[0] == parentLine ) {
-                if (direction == 0 ) allowMove = false;
-            }
-            if ( lines_[lines_.size()-1] == parentLine ) {
-                if (direction == 1) allowMove = false;
-            }
-        }
-    }
+	// Check that the item (or group) doesn't touch the top or bottom.
+	bool allowMove = true;
+	foreach ( QGraphicsItem *uncastItem, selectedItems )
+	{
+		if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+		{
+			SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
+			if ( lines_[0] == parentLine ) {
+				if (direction == 0 ) allowMove = false;
+			}
+			if ( lines_[lines_.size()-1] == parentLine ) {
+				if (direction == 1) allowMove = false;
+			}
+		}
+	}
 
-    if ( allowMove )
-    {
-        foreach ( QGraphicsItem *uncastItem, selectedItems )
-        {
-            if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
-            {
-                SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
-                int parentPos;
-                for ( int i = 0; i < lines_.size(); i++ ) {
-                    if ( lines_[i] == parentLine ) {
-                        parentPos = i;
-                    }
-                }
-                SequencerLine *newLine;
-                if ( direction == 0 ) {
-                    parentLine->moveItemToNewLine( someItem, lines_[parentPos-1] );
-                } else if ( direction == 1 ) {
-                    parentLine->moveItemToNewLine( someItem, lines_[parentPos+1] );
-                }
-            }
-        }
-    }
+	if ( allowMove )
+	{
+		foreach ( QGraphicsItem *uncastItem, selectedItems )
+		{
+			if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
+			{
+				SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
+				int parentPos;
+				for ( int i = 0; i < lines_.size(); i++ ) {
+					if ( lines_[i] == parentLine ) {
+						parentPos = i;
+					}
+				}
+				SequencerLine *newLine;
+				if ( direction == 0 ) {
+					parentLine->moveItemToNewLine( someItem, lines_[parentPos-1] );
+				} else if ( direction == 1 ) {
+					parentLine->moveItemToNewLine( someItem, lines_[parentPos+1] );
+				}
+			}
+		}
+	}
 }
+
+
+
+
 
 
 PlayLine::PlayLine( QGraphicsView *seqDraw )
