@@ -25,7 +25,7 @@ namespace psy { namespace core {
 	class Machine;
 }}
 
-#include <psycore/preset.h>
+#include <psycle/core/preset.h>
 
 class MachineGui;
 

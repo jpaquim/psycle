@@ -18,13 +18,13 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <psycore/song.h>
-#include <psycore/player.h>
-#include <psycore/sampler.h>
-#include <psycore/constants.h>
-#include <psycore/machine.h>
-#include <psycore/pluginfinder.h>
-#include <psycore/patternevent.h>
+#include <psycle/core/song.h>
+#include <psycle/core/player.h>
+#include <psycle/core/sampler.h>
+#include <psycle/core/constants.h>
+#include <psycle/core/machine.h>
+#include <psycle/core/pluginfinder.h>
+#include <psycle/core/patternevent.h>
 
 #include "../global.h"
 #include "../configuration.h"
