@@ -14,8 +14,8 @@ OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
-INCLUDEPATH += src
-#DEPENDPATH += src
+INCLUDEPATH += src ../psycle-core/src ../psycle-audiodrivers/src
+DEPENDPATH += src ../psycle-core/src ../psycle-audiodrivers/src
 
 HEADERS += \
 	src/psycle/player/configuration.hpp
