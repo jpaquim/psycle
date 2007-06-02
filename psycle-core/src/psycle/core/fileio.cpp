@@ -133,14 +133,14 @@ namespace psy
 			return true;
 		}
 
-		int RiffFile::Seek(int const & bytes)
+		int RiffFile::Seek(std::ptrdiff_t const & bytes)
 		{
 			if (write_mode) _stream.seekp(bytes, std::ios::beg); else _stream.seekg(bytes, std::ios::beg);
 			if (_stream.eof()) throw std::runtime_error("seek failed");
 			return GetPos();
 		}
 
-		int RiffFile::Skip(int const & bytes)
+		int RiffFile::Skip(std::ptrdiff_t const & bytes)
 		{
 			if (write_mode) _stream.seekp(bytes, std::ios::cur); else _stream.seekg(bytes, std::ios::cur);
 			if (_stream.eof()) throw std::runtime_error("seek failed");

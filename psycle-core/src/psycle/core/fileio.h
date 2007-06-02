@@ -69,7 +69,7 @@ namespace psy
 				bool Eof();
 				std::size_t FileSize();
 				std::size_t GetPos();
-				int Seek(int    const & bytes);
+				int Seek(std::ptrdiff_t const & bytes);
 				int Skip(std::ptrdiff_t const & bytes);
 
 				bool WriteChunk (void const *, std::size_t const &);
