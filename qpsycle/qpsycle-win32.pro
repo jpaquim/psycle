@@ -1,5 +1,7 @@
 # The horror begins...
 	message("System is: win32.")
+	TOP_SRC_DIR = $$system(cd)
+	
 	win32-g++ {
 		message("Compiler is: g++.")
 	} else:win32-msvc* {
@@ -35,8 +37,7 @@
 	INCLUDEPATH *= $(QTDIR)/include/QtXml
 	INCLUDEPATH *= $(QTDIR)/src/3rdparty/zlib
 
-	CWD = $$system(cd)
-	EXTERNAL_PKG_DIR = $$CWD/../external-packages
+	EXTERNAL_PKG_DIR = $$TOP_SRC_DIR/../external-packages
 
 	exists($(BOOST_DIR)) {
 		message("Existing BOOST_DIR is [$(BOOST_DIR)].")
