@@ -18,7 +18,7 @@
 ***************************************************************************/
 #if defined PSYCLE__NET_AUDIO_AVAILABLE
 #include "netaudioout.h"
-#include "cstdint.h"
+#include <psycle/core/cstdint.h>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
