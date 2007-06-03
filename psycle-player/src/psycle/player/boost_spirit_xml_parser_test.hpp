@@ -112,7 +112,7 @@ namespace xml
 								(ch_p(L('\'')) >> (str_p(L("yes")) | str_p(L("no"))) >> L('\'')) |
 								(ch_p(L('"'))  >> (str_p(L("yes")) | str_p(L("no"))) >> L('"')));
 						element = EmptyElemTag | STag >> content >> ETag;
-						STag = L('<') >> boost::spirit::token_node_d[Name] >> *(S >> Attribute) >> !S >> L('>');
+						STag = L('<') >> boost::spirit::root_node_d[Name] >> *(S >> Attribute) >> !S >> L('>');
 						Attribute = boost::spirit::token_node_d[Name] >> Eq >> AttValue;
 						ETag = str_p(L("</")) >> boost::spirit::token_node_d[Name] >> !S >> L('>');
 						content = !boost::spirit::token_node_d[CharData] >> *((element | Reference | CDSect | Comment) >> !boost::spirit::token_node_d[CharData]);
@@ -141,12 +141,6 @@ namespace xml
 						AttValue, CharData, Comment, CDSect,
 						CharRef, EntityRef, EncName, document,
 						Name, Comment1, S;
-					
-					void static out(typename Scanner::iterator_t begin, typename Scanner::iterator_t end)
-					{
-						std::string s(begin, end);
-						std::cout << s << "\n";
-					}
 			};
 	};
 	
