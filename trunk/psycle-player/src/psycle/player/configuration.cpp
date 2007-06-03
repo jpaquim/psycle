@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include "configuration2.hpp"
+#include "configuration.hpp"
 #include <psycle/core/file.h>
 
 #include <psycle/audiodrivers/audiodriver.h>
@@ -48,7 +48,13 @@
 #include <exception>
 #include <iostream>
 
-#include <libxml++/parsers/domparser.h>
+#if defined PSYCLE__LIBXMLPP_AVAILABLE
+	#include <libxml++/parsers/domparser.h>
+#elif defined QT_XML_LIB
+	#include <QDomDocument>
+#else
+	#error none of the supported xml parser libs appear to be available
+#endif
 
 Configuration::Configuration()
 {
@@ -122,7 +128,7 @@ void Configuration::loadConfig()
 			#if defined PSYCLE__INSTALL_PATHS__CONFIGURATION
 				path = PSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
 			#endif
-			if (path.length()!=0){
+			if (path.length()!=0) {
 				try {
 					loadConfig(path);
 				} catch(std::exception const & e) {
@@ -135,111 +141,147 @@ void Configuration::loadConfig()
 
 void Configuration::loadConfig( const std::string & path )
 {
-	try
-	{
-		xmlpp::DomParser parser;
-		parser.set_validate();
-		parser.set_substitute_entities(); // We just want the text to be resolved/unescaped automatically.
-		parser.parse_file(path);
-		if(parser)
-		{
-			xmlpp::Element const & root_element(*parser.get_document()->get_root_node()); // deleted by xmlpp::DomParser
-			
-			// paths
-			{
-				xmlpp::Node::NodeList const paths(root_element.get_children("path"));
-				for(xmlpp::Node::NodeList::const_iterator i(paths.begin()); i != paths.end(); ++i)
+	try {
+		#if defined PSYCLE__LIBXMLPP_AVAILABLE
+			xmlpp::DomParser parser;
+			//parser.set_validate();
+			parser.set_substitute_entities(); // We just want the text to be resolved/unescaped automatically.
+			parser.parse_file(path);
+			if(parser) {
+				xmlpp::Element const & root_element(*parser.get_document()->get_root_node()); // deleted by xmlpp::DomParser
+				// paths
 				{
-					xmlpp::Element const & path(dynamic_cast<xmlpp::Element const &>(**i));
-					xmlpp::Attribute const * const id_attribute(path.get_attribute("id"));
-					if(!id_attribute) std::cerr << "psycle: configuration: expected id attribute in path element\n";
-					else
-					{
-						std::string id(id_attribute->get_value());
-						xmlpp::Attribute const * const src_attribute(path.get_attribute("src"));
-						if(!src_attribute) std::cerr << "psycle: configuration: expected src attribute in path element\n";
-						else
-						{
-							std::string src(src_attribute->get_value());
-							if(id == "plugindir") pluginPath_ = src;
-							else if (id == "ladspadir") ladspaPath_ = src;
-						}
-					}
-				}
-			}
-			
-			// audio
-			{
-				// enable
-				{
-					xmlpp::Node::NodeList const audio_nodes(root_element.get_children("audio"));
-					if(audio_nodes.begin() != audio_nodes.end())
-					{
-						xmlpp::Element const & audio(dynamic_cast<xmlpp::Element const &>(**audio_nodes.begin());
-						xmlpp::Attribute const * const enable_attribute(audio.get_attribute("enable"));
-						if(!enable_attribute) std::cerr << "psycle: configuration: expected enable attribute in audio element\n";
-						else
-						{
-							std::string enable(enable_attribute->get_value());
-							if(enable != "" && enable != "0")
-							{
-								enableSound_ = true;
-								doEnableSound = true;
-							}
-							else
-							{
-								enableSound_ = false;
-								setDriverByName("silent");
-								doEnableSound = false;
+					xmlpp::Node::NodeList const paths(root_element.get_children("path"));
+					for(xmlpp::Node::NodeList::const_iterator i(paths.begin()); i != paths.end(); ++i) {
+						xmlpp::Element const & path(dynamic_cast<xmlpp::Element const &>(**i));
+						xmlpp::Attribute const * const id_attribute(path.get_attribute("id"));
+						if(!id_attribute) std::cerr << "psycle: configuration: expected id attribute in path element\n";
+						else {
+							std::string id(id_attribute->get_value());
+							xmlpp::Attribute const * const src_attribute(path.get_attribute("src"));
+							if(!src_attribute) std::cerr << "psycle: configuration: expected src attribute in path element\n";
+							else {
+								std::string src(src_attribute->get_value());
+								if(id == "plugindir") pluginPath_ = src;
+								else if (id == "ladspadir") ladspaPath_ = src;
 							}
 						}
 					}
 				}
-				// driver
+				// audio
 				{
-					xmlpp::Node::NodeList const driver_nodes(root_element.get_children("driver"));
-					if(driver_nodes.begin() != driver_nodes.end())
+					// enable
 					{
-						xmlpp::Element const & driver(dynamic_cast<xmlpp::Element const &>(**driver_nodes.begin());
-						xmlpp::Attribute const * const name_attribute(driver.get_attribute("name"));
-						if(!name_attribute) std::cerr << "psycle: configuration: expected name attribute in driver element\n";
-						else
-						{
-							std::string name(name_attribute->get_value());
-							if(doEnableSound) setDriverByName(name);
+						xmlpp::Node::NodeList const audio_nodes(root_element.get_children("audio"));
+						if(audio_nodes.begin() != audio_nodes.end()) {
+							xmlpp::Element const & audio(dynamic_cast<xmlpp::Element const &>(**audio_nodes.begin()));
+							xmlpp::Attribute const * const enable_attribute(audio.get_attribute("enable"));
+							if(!enable_attribute) std::cerr << "psycle: configuration: expected enable attribute in audio element\n";
+							else {
+								std::string enable(enable_attribute->get_value());
+								if(enable != "" && enable != "0") {
+									enableSound_ = true;
+									doEnableSound = true;
+								} else {
+									enableSound_ = false;
+									setDriverByName("silent");
+									doEnableSound = false;
+								}
+							}
 						}
 					}
-				}
-				// alsa driver
-				if(_pOutputDriver->info().name() == "alsa")
-				{
-					///\todo what if alsa settings are missing from xml document?
-					xmlpp::Node::NodeList const alsa_nodes(root_element.get_children("alsa"));
-					if(alsa_nodes.begin() != alsa_nodes.end())
+					// driver
 					{
-						xmlpp::Element const & alsa(dynamic_cast<xmlpp::Element const &>(**alsa_nodes.begin());
-						xmlpp::Attribute const * const device_attribute(alsa.get_attribute("device"));
-						if(!device_attribute) std::cerr << "psycle: configuration: expected device attribute in alsa element\n";
-						else
-						{
-							std::string device(device_attribute->get_value());
-							std::map<std::string, AudioDriver*>::iterator i(driverMap_.find("alsa"));
-							if(i != driverMap_.end())
-							{
-								psy::core::AudioDriver & audiodriver(*i->second);
-								psy::core::AudioDriverSettings settings(audiodriver.settings()); ///\todo why do we do a copy?
-								setttings.setDeviceName(device);
-								audiodriver.setSettings(settings); ///\todo why do we copy?
+						xmlpp::Node::NodeList const driver_nodes(root_element.get_children("driver"));
+						if(driver_nodes.begin() != driver_nodes.end()) {
+							xmlpp::Element const & driver(dynamic_cast<xmlpp::Element const &>(**driver_nodes.begin()));
+							xmlpp::Attribute const * const name_attribute(driver.get_attribute("name"));
+							if(!name_attribute) std::cerr << "psycle: configuration: expected name attribute in driver element\n";
+							else {
+								std::string name(name_attribute->get_value());
+								if(doEnableSound) setDriverByName(name);
+							}
+						}
+					}
+					// alsa driver
+					if(_pOutputDriver->info().name() == "alsa") {
+						///\todo what if alsa settings are missing from xml document?
+						xmlpp::Node::NodeList const alsa_nodes(root_element.get_children("alsa"));
+						if(alsa_nodes.begin() != alsa_nodes.end()) {
+							xmlpp::Element const & alsa(dynamic_cast<xmlpp::Element const &>(**alsa_nodes.begin()));
+							xmlpp::Attribute const * const device_attribute(alsa.get_attribute("device"));
+							if(!device_attribute) std::cerr << "psycle: configuration: expected device attribute in alsa element\n";
+							else {
+								std::string device(device_attribute->get_value());
+								std::map<std::string, AudioDriver*>::iterator i(driverMap_.find("alsa"));
+								if(i != driverMap_.end()) {
+									psy::core::AudioDriver & audiodriver(*i->second);
+									psy::core::AudioDriverSettings settings(audiodriver.settings()); ///\todo why do we do a copy?
+									settings.setDeviceName(device);
+									audiodriver.setSettings(settings); ///\todo why do we copy?
+								}
 							}
 						}
 					}
 				}
 			}
-		}
+		#elif defined QT_XML_LIB
+			///\todo this implementation lacks some checks. it may access null pointer if the xml document tree isn't as expected.
+			QFile *file = new QFile( QString::fromStdString( path ) );
+			if (file->open(QIODevice::ReadOnly | QIODevice::Text)) {
+				QDomDocument *doc = new QDomDocument();
+				doc->setContent( file );
+				QDomElement root = doc->firstChildElement();
+				// paths
+				{
+					QDomNodeList paths = root.elementsByTagName( "path" );
+					for ( int i = 0; i < paths.count(); i++ )
+					{
+						QDomElement path = paths.item( i ).toElement();
+						std::string id = path.attribute("id").toStdString();
+						std::string src = path.attribute("src").toStdString();
+						if ( id == "plugindir" ) pluginPath_ = src;
+						else if ( id == "ladspadir" ) ladspaPath_ = src;
+					}
+				}
+				// audio
+				{
+					// enable
+					{
+						QDomElement audioElm = root.firstChildElement( "audio" );
+						std::string enableStr = audioElm.attribute( "enable" ).toStdString();
+						int enable = 0;
+						if ( enableStr != "" ) enable = QString::fromStdString( enableStr ).toInt();
+						enableSound_ = enable;
+						if (enable == 0) {
+							setDriverByName( "silent" );
+							doEnableSound = false;
+						} else doEnableSound = true;
+					}
+					// driver
+					{
+						QDomElement driverElm = root.firstChildElement( "driver" );
+						if ( doEnableSound ) setDriverByName( driverElm.attribute("name").toStdString() );
+					}
+					// alsa driver
+					if ( _pOutputDriver->info().name() == "alsa" ) {
+						///\todo what if alsa settings are missing from xml document?
+						QDomElement alsaElm = root.firstChildElement( "alsa" ); 
+						std::string deviceName = alsaElm.attribute("device").toStdString();
+						std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
+						if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
+							psy::core::AudioDriverSettings settings = it->second->settings(); ///\todo why do we do a copy?
+							settings.setDeviceName( deviceName );
+							it->second->setSettings( settings ); ///\todo why do we copy?
+						}		
+					}
+				}
+			}
+		#else
+			#error none of the supported xml parser libs appear to be available
+		#endif
 		doEnableSound = true;
-	}
-	catch(std::exception const & e)
-	{
+	} catch(std::exception const & e) {
 		std::cerr << "psycle: configuration: exception while parsing: " << e.what() << "\n";
 	}
 }
