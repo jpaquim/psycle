@@ -37,6 +37,7 @@
 #include <boost/spirit/tree/ast.hpp>
 #include <cwchar>
 #include <vector>
+#include <map>
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -181,7 +182,7 @@ namespace xml
 				
 				if (hit && first == last) {
 					std::cout << "Parses OK\n";
-					print_tree(hit);
+					build_dom(hit);
 				} else {
 					std::cout << "Fails parsing\n";
 					for (int i = 0; i < 50; ++i) {
@@ -223,17 +224,34 @@ namespace xml
 				parse_stream(rule, in);
 			}
 
-			void print_tree(parse_tree_match_t hit)
+			class dom_node
 			{
-				print_node(hit.trees.begin());
+				public:
+					std::string value;
+					typedef std::map<std::string, dom_node> map_type;
+					map_type child_nodes;
+			};
+			dom_node dom_root_node;
+
+			void build_dom(parse_tree_match_t hit)
+			{
+				build_dom(dom_root_node, hit.trees.begin());
 			}
 
-			void print_node(node_iter_t const & i)
+			void build_dom(dom_node & dom_current_node, node_iter_t const & i)
 			{
 				if (i->children.begin() == i->children.end()) { // terminal node
 					std::copy(i->value.begin(), i->value.end(), std::ostream_iterator<char>(std::cout));
+					std::ostringstream s;
+					std::copy(i->value.begin(), i->value.end(), std::ostream_iterator<char>(s));
+					dom_current_node.value = s.str();
 				} else {
-					for(node_iter_t chi = i->children.begin(); chi != i->children.end(); ++chi) print_node(chi);
+					for(node_iter_t chi = i->children.begin(); chi != i->children.end(); ++chi)
+					{
+						dom_node child_node;
+						dom_current_node.child_nodes["?"] = child_node;
+						build_dom(child_node, chi);
+					}
 				}
 			}
 	};
