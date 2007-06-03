@@ -7,6 +7,19 @@ NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		class CChildView;
 
+
+		class CVolumeCtrl: public CSliderCtrl
+		{
+		public:
+			CVolumeCtrl():CSliderCtrl(),editing(false){}
+
+			DECLARE_MESSAGE_MAP()
+		public:
+			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+			bool editing;
+		};
+
 		/// master machine window.
 		class CMasterDlg : public CDialog
 		{
@@ -15,10 +28,13 @@ NAMESPACE__BEGIN(psycle)
 			BOOL Create();
 			void PaintNumbers(float val, int x, int y);
 			void PaintNumbersDC(CDC* dc,CDC* memDC,float val,int x,int y);
+			LRESULT DrawSliderGraphics(NMHDR* pNMHDR);
 			void PaintNames(char* name,int x,int y);
 			void SetSliderValues();
 			void UpdateUI(void);
 			CBitmap m_numbers;
+			CBitmap m_sliderknob;
+			CBitmap m_back;
 			CFont namesFont;
 			Master* _pMachine;
 			char macname[MAX_CONNECTIONS][32];
@@ -27,19 +43,19 @@ NAMESPACE__BEGIN(psycle)
 			//{{AFX_DATA(CMasterDlg)
 			enum { IDD = IDD_MASTERDLG };
 			CStatic	m_masterpeak;
-			CSliderCtrl	m_slidermaster;
-			CSliderCtrl	m_sliderm9;
-			CSliderCtrl	m_sliderm8;
-			CSliderCtrl	m_sliderm7;
-			CSliderCtrl	m_sliderm6;
-			CSliderCtrl	m_sliderm5;
-			CSliderCtrl	m_sliderm4;
-			CSliderCtrl	m_sliderm3;
-			CSliderCtrl	m_sliderm2;
-			CSliderCtrl	m_sliderm12;
-			CSliderCtrl	m_sliderm11;
-			CSliderCtrl	m_sliderm10;
-			CSliderCtrl	m_sliderm1;
+			CVolumeCtrl	m_slidermaster;
+			CVolumeCtrl	m_sliderm9;
+			CVolumeCtrl	m_sliderm8;
+			CVolumeCtrl	m_sliderm7;
+			CVolumeCtrl	m_sliderm6;
+			CVolumeCtrl	m_sliderm5;
+			CVolumeCtrl	m_sliderm4;
+			CVolumeCtrl	m_sliderm3;
+			CVolumeCtrl	m_sliderm2;
+			CVolumeCtrl	m_sliderm12;
+			CVolumeCtrl	m_sliderm11;
+			CVolumeCtrl	m_sliderm10;
+			CVolumeCtrl	m_sliderm1;
 			CStatic	m_mixerview;
 			CButton	m_autodec;
 			//}}AFX_DATA

@@ -15,7 +15,7 @@ namespace psycle
 	{
 		AudioDriverInfo WaveOut::_info = { "Windows WaveOut MME" };
 		AudioDriverEvent WaveOut::_event;
-		CCriticalSection WaveOut::_lock;
+//		CCriticalSection WaveOut::_lock;
 
 		void WaveOut::Error(char const msg[])
 		{
@@ -51,7 +51,7 @@ namespace psycle
 
 		bool WaveOut::Start()
 		{
-			CSingleLock lock(&_lock, TRUE);
+//			CSingleLock lock(&_lock, TRUE);
 			if(_running) return true;
 			if(!_pCallback) return false;
 
@@ -121,7 +121,7 @@ namespace psycle
 
 		bool WaveOut::Stop()
 		{
-			CSingleLock lock(&_lock, TRUE);
+//			CSingleLock lock(&_lock, TRUE);
 			if(!_running) return true;
 			_stopPolling = true;
 			CSingleLock event(&_event, TRUE);
@@ -139,7 +139,7 @@ namespace psycle
 					if((pBlock->pHeader->dwFlags & WHDR_DONE) == 0) alldone = false;
 				}
 				if(alldone) break;
-				::Sleep(20);
+				::Sleep(10);
 			}
 			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 			{
@@ -170,6 +170,7 @@ namespace psycle
 		void WaveOut::DoBlocks()
 		{
 			CBlock *pb = _blocks + _currentBlock;
+			int underruns=0;
 			while(pb->pHeader->dwFlags & WHDR_DONE)
 			{
 				if(pb->Prepared)
@@ -182,15 +183,9 @@ namespace psycle
 				}
 				int *pOut = (int *)pb->pData;
 				int bs = _blockSize / GetSampleSize();
-				do
-				{
-					int n = bs;
-					float * pBuf = _pCallback(_callbackContext, n);
-					if(_dither) QuantizeWithDither(pBuf, pOut, n); else Quantize(pBuf, pOut, n);
-					pOut += n;
-					bs -= n;
-				}
-				while(bs > 0);
+				float * pBuf = _pCallback(_callbackContext,bs);
+				if(_dither) QuantizeWithDither(pBuf, pOut,bs);
+				else Quantize(pBuf, pOut,bs);
 
 				_writePos += _blockSize / GetSampleSize();
 
@@ -212,6 +207,18 @@ namespace psycle
 				}
 				++pb;
 				if(pb == _blocks + _numBlocks) pb = _blocks;
+				if ( pb->pHeader->dwFlags & WHDR_DONE)
+				{
+					underruns++;
+					if ( underruns > _numBlocks )
+					{
+						// Audio dropout most likely happened
+						// (There's a possibility a dropout didn't happen, but the cpu usage
+						// is almost at 100%, so we force an exit of the loop for a "Sleep()" call,
+						// preventing psycle from being frozen.
+						break;
+					}
+				}
 			}
 			_currentBlock = pb - _blocks;
 		}
@@ -224,7 +231,7 @@ namespace psycle
 			_deviceID=0;
 			_numBlocks = 7;
 			_blockSize = 4096;
-			_pollSleep = 20;
+			_pollSleep = 10;
 			_dither = 0;
 			_channelmode = 3;
 			_bitDepth = 16;
@@ -359,5 +366,15 @@ namespace psycle
 		{
 			return e ? Start() : Stop();
 		}
+		MMRESULT WaveOut::IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID) 
+		{ 
+			return (waveOutOpen( 
+				NULL,                 // ptr can be NULL for query 
+				uDeviceID,            // the device identifier 
+				pwfx,                 // defines requested format 
+				NULL,                 // no callback 
+				NULL,                 // no instance data 
+				WAVE_FORMAT_QUERY));  // query only, do not open device 
+		} 
 	}
 }

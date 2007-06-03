@@ -105,7 +105,7 @@ namespace psycle
 				inline void SendMidi();
 				// Properties
 				//////////////////////////////////////////////////////////////////////////
-				virtual void SetSampleRate(int sr) { SetSampleRate((float)sr); }
+				virtual void SetSampleRate(int sr) { CEffect::SetSampleRate((float)sr); }
 				//\todo:
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
@@ -133,8 +133,12 @@ namespace psycle
 				virtual void LeaveCritical() {;}
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 				virtual bool OnUpdateDisplay() { return false; }
-				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
-				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }
+				///\todo: We need to implement a (Dis)ConnectWire function in order to call MainsChanged() and so that plugins can
+				// test against connected inputs. Else it only done at creation, and we reply "not connected".
+//				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
+//				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }
+				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return true; } 
+				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return true; }
 				// AEffect asks host about its input/outputspeakers.
 				virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
 				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }

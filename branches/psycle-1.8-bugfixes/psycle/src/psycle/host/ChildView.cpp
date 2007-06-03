@@ -112,7 +112,6 @@ NAMESPACE__BEGIN(psycle)
 			ChordModeOffs = 0;
 
 			Global::pInputHandler->SetChildView(this);
-			Global::pResampler->SetQuality(dsp::R_LINEAR);
 			_outputActive = false;
 
 			// just give arbitrary values so OnSize doesn't give /0 error
@@ -125,7 +124,6 @@ NAMESPACE__BEGIN(psycle)
 			// Creates a new song object. The application Song.
 			//Global::_pSong->Reset(); It's already called in _pSong->New();
 			Global::_pSong->New();
-			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
@@ -468,7 +466,8 @@ NAMESPACE__BEGIN(psycle)
 				dsp::RMSAccumulatedLeft=0;
 				dsp::RMSAccumulatedRight=0;
 #endif
-
+				Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			}
 		}
 

@@ -5,7 +5,7 @@ namespace psycle
 {
 	namespace host
 	{
-		typedef float* (*AUDIODRIVERWORKFN)(void* context, int& numSamples);
+		typedef float* (*AUDIODRIVERWORKFN)(void* context, int numSamples);
 
 		class AudioDriverInfo
 		{

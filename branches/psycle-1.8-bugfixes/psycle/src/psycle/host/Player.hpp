@@ -59,10 +59,12 @@ namespace psycle
 			bool _playBlock;
 			/// wheter this player should play the song/block in loop.
 			bool _loopSong;
+			/// Indicates if the player is processing audio right now (It is in work function)
+			bool _isWorking;
 			/// stops playing.
 			void Stop();
 			/// work function. (Entrance for the callback function (audiodriver)
-			static float * Work(void* context, int& nsamples);
+			static float * Work(void* context, int nsamples);
 			
 			void SetBPM(int _bpm,int _tpb=0);
 

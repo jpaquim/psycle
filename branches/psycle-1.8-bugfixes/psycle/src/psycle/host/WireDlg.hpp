@@ -9,7 +9,7 @@ NAMESPACE__BEGIN(psycle)
 
 		#define MAX_SCOPE_BANDS 128
 		#define SCOPE_BUF_SIZE 4096
-		#define SCOPE_SPEC_SAMPLES	512
+		#define SCOPE_SPEC_SAMPLES	256
 
 		class Song;
 
@@ -47,7 +47,6 @@ NAMESPACE__BEGIN(psycle)
 			float pSamplesL[SCOPE_BUF_SIZE];
 			float pSamplesR[SCOPE_BUF_SIZE];
 		// Dialog Data
-			//{{AFX_DATA(CWireDlg)
 			enum { IDD = IDD_WIREDIALOG };
 			CSliderCtrl	m_slider;
 			CSliderCtrl	m_slider2;
@@ -55,15 +54,11 @@ NAMESPACE__BEGIN(psycle)
 			CStatic	m_volabel_db;
 			CButton m_mode;
 			CSliderCtrl	m_volslider;
-			//}}AFX_DATA
 		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CWireDlg)
-			public:
+		public:
 			virtual BOOL PreTranslateMessage(MSG* pMsg);
-			protected:
+		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
 			inline int GetY(float f);
@@ -87,7 +82,6 @@ NAMESPACE__BEGIN(psycle)
 			float cth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
 			float heightcompensation[MAX_SCOPE_BANDS];
 			// Generated message map functions
-			//{{AFX_MSG(CWireDlg)
 			virtual BOOL OnInitDialog();
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnButton1();
@@ -98,11 +92,8 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnHold();
 			afx_msg void OnVolumeDb();
 			afx_msg void OnVolumePer();
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	NAMESPACE__END
 NAMESPACE__END

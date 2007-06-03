@@ -13,26 +13,20 @@ NAMESPACE__BEGIN(psycle)
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
-			//{{AFX_DATA_INIT(CWireDlg)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
 		}
 
 		void CWireDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CWireDlg)
 			DDX_Control(pDX, IDC_VOLUME_DB, m_volabel_db);
 			DDX_Control(pDX, IDC_VOLUME_PER, m_volabel_per);
 			DDX_Control(pDX, IDC_SLIDER1, m_volslider);
 			DDX_Control(pDX, IDC_SLIDER, m_slider);
 			DDX_Control(pDX, IDC_SLIDER2, m_slider2);
 			DDX_Control(pDX, IDC_BUTTON, m_mode);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
-			//{{AFX_MSG_MAP(CWireDlg)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
 			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
 			ON_WM_TIMER()
@@ -42,7 +36,6 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_BUTTON2, OnHold)
 			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
 			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CWireDlg::OnInitDialog() 
@@ -1097,7 +1090,6 @@ NAMESPACE__BEGIN(psycle)
 
 		BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
 		{
-			/*
 			if (pMsg->message == WM_KEYDOWN)
 			{
 				if (pMsg->wParam == VK_UP)
@@ -1109,7 +1101,7 @@ NAMESPACE__BEGIN(psycle)
 						v = 0;
 					}
 					m_volslider.SetPos(v);
-					return TRUE;
+					return true;
 				}
 				else if (pMsg->wParam == VK_DOWN)
 				{
@@ -1120,21 +1112,22 @@ NAMESPACE__BEGIN(psycle)
 						v = 256*4;
 					}
 					m_volslider.SetPos(v);
-					return TRUE;
+					return true;
 				}
 				else
 				{
 					m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+					return true;
 				}
 			}
 			else if (pMsg->message == WM_KEYUP)
 			{
+				if (pMsg->wParam == VK_UP ||pMsg->wParam == VK_DOWN)
+				{
+					return true;
+				}
 				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-			}
-			*/
-			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
-			{
-				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+				return true;
 			}
 			return CDialog::PreTranslateMessage(pMsg);
 		}
@@ -1170,3 +1163,5 @@ NAMESPACE__BEGIN(psycle)
 		}
 	NAMESPACE__END
 NAMESPACE__END
+
+

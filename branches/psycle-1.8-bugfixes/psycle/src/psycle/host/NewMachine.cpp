@@ -13,7 +13,13 @@
 #include <fstream>
 #include <algorithm> //std::transform
 #include <cctype>	// std::tolower
-#include ".\newmachine.hpp"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		int CNewMachine::pluginOrder = 1;
@@ -387,7 +393,6 @@ NAMESPACE__BEGIN(psycle)
 					else
 					{
 						LastType0 = 2;
-						shellIdx = _pPlugsInfo[i]->identifier;
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 						{
 							Outputmachine = MACH_VST;
@@ -401,6 +406,7 @@ NAMESPACE__BEGIN(psycle)
 						}
 					}
 
+					shellIdx = _pPlugsInfo[i]->identifier;
 					psOutputDll = _pPlugsInfo[i]->dllname;
 
 					m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
@@ -703,6 +709,7 @@ NAMESPACE__BEGIN(psycle)
 								_pPlugsInfo[currentPlugsCount]->desc = "???";
 								_pPlugsInfo[currentPlugsCount]->version = "???";
 								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
+								++currentBadPlugsCount;
 							}
 							else
 							{
@@ -732,7 +739,6 @@ NAMESPACE__BEGIN(psycle)
 							learnDllName(fileName);
 							out << plug.GetName() << " - successfully instanciated";
 							out.flush();
-							++currentPlugsCount;
 							// [bohan] plug is a stack object, so its destructor is called
 							// [bohan] at the end of its scope (this cope actually).
 							// [bohan] The problem with destructors of any object of any class is that
@@ -809,7 +815,7 @@ NAMESPACE__BEGIN(psycle)
 								_pPlugsInfo[currentPlugsCount]->desc = "???";
 								_pPlugsInfo[currentPlugsCount]->version = "???";
 								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
-								++currentPlugsCount;
+								++currentBadPlugsCount;
 							}
 							else
 							{
@@ -824,6 +830,7 @@ NAMESPACE__BEGIN(psycle)
 										{
 											if ( !firstrun )
 											{
+												++currentPlugsCount;
 												_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 												_pPlugsInfo[currentPlugsCount]->dllname = fileName;
 												_pPlugsInfo[currentPlugsCount]->FileTime = time;
@@ -854,7 +861,6 @@ NAMESPACE__BEGIN(psycle)
 												s << vstPlug->GetVstVersion();
 												_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
 											}
-											++currentPlugsCount;
 											firstrun=false;
 										}
 									}
@@ -882,7 +888,6 @@ NAMESPACE__BEGIN(psycle)
 										s << vstPlug->GetVstVersion();
 										_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
 									}
-									++currentPlugsCount;
 								}
 								learnDllName(fileName);
 								out << vstPlug->GetName() << " - successfully instanciated";
@@ -931,6 +936,7 @@ NAMESPACE__BEGIN(psycle)
 								host::loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
+						++currentPlugsCount;
 					}
 					catch(const std::exception & e)
 					{
@@ -1158,7 +1164,8 @@ NAMESPACE__BEGIN(psycle)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{
-				if(name == _pPlugsInfo[i]->dllname && (shellIdx == 0 || shellIdx == _pPlugsInfo[i]->identifier))
+				if ((name == _pPlugsInfo[i]->dllname) &&
+					(shellIdx == 0 || shellIdx == _pPlugsInfo[i]->identifier))
 				{
 					// bad plugins always have allow = false
 					if(_pPlugsInfo[i]->allow) return true;

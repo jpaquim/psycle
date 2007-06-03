@@ -125,18 +125,20 @@ NAMESPACE__BEGIN(psycle)
 			pFrame->UpdateWindow();
 			
 			CNewMachine::LoadPluginInfo();
-			ProcessCmdLine(m_lpCmdLine);
-
-			// Show splash screen
-			if (Global::pConfig->_showAboutAtStart)
-			{
-				OnAppAbout();
-			}
-			
-			ProcessCmdLine(m_lpCmdLine); // Process Command Line
 
 			LoadRecent(pFrame); // Import recent files from registry.
-			pFrame->CheckForAutosave();
+
+			if (*m_lpCmdLine)
+				ProcessCmdLine(m_lpCmdLine); // Process Command Line
+			else
+			{
+				// Show splash screen
+				if (Global::pConfig->_showAboutAtStart)
+				{
+					OnAppAbout();
+				}
+				pFrame->CheckForAutosave();
+			}
 			return TRUE;
 		}
 

@@ -18,6 +18,7 @@ namespace psycle
 			_playing = false;
 			_playBlock = false;
 			_recording = false;
+			_isWorking = false;
 			Tweaker = false;
 			_samplesRemaining=0;
 			_lineCounter=0;
@@ -421,13 +422,12 @@ namespace psycle
 			_lineChanged = true;
 		}
 
-		float * Player::Work(void* context, int & numSamples)
+		float * Player::Work(void* context, int numSamples)
 		{
 			int amount;
 			Player* pThis = (Player*)context;
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = pThis->_pBuffer;
-			int numSamplex = numSamples;
 			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
 				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
 			#else
@@ -439,7 +439,7 @@ namespace psycle
 			#endif
 			do
 			{
-				if(numSamplex > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamplex;
+				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;
 				// Tick handler function
 				if(amount >= pThis->_samplesRemaining) amount = pThis->_samplesRemaining;
 				//if((pThis->_playing) && (amount >= pThis->_samplesRemaining)) amount = pThis->_samplesRemaining;
@@ -537,11 +537,11 @@ namespace psycle
 						}
 					}
 					Master::_pMasterSamples += amount * 2;
-					numSamplex -= amount;
+					numSamples -= amount;
 				}
 				 pThis->_samplesRemaining -= amount;
 				 CVSTHost::vstTimeInfo.flags &= ~kVstTransportChanged;
-			} while(numSamplex>0); ///\todo this is strange. <JosepMa> It is not strange. Simply numSamples doesn't need anymore to be passed as reference.
+			} while(numSamples>0);
 			return pThis->_pBuffer;
 		}
 

@@ -15,9 +15,9 @@ namespace psycle
 		AudioDriverInfo DirectSound::_info = { "DirectSound Output" };
 		AudioDriverEvent DirectSound::_event;
 
-		void DirectSound::Error(const char msg[])
+		void DirectSound::Error(const TCHAR msg[])
 		{
-			MessageBox(0, msg, "DirectSound Output driver", MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, _T("DirectSound Output driver"), MB_OK | MB_ICONERROR);
 		}
 
 		DirectSound::DirectSound()
@@ -27,7 +27,7 @@ namespace psycle
 			_configured(),
 			_running(),
 			_playing(),
-			_timerActive(),
+			_threadRun(),
 			_pDs(),
 			_pBuffer(),
 			_pCallback()
@@ -56,12 +56,17 @@ namespace psycle
 
 		bool DirectSound::Start()
 		{
-			CSingleLock lock(&_lock, TRUE);
+//			CSingleLock lock(&_lock, TRUE);
 			if(_running) return true;
 			if(!_pCallback) return false;
-			if(FAILED(::DirectSoundCreate(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
+			if( FAILED( ::CoInitialize(NULL) ) )
 			{
-				Error("Failed to create DirectSound object");
+				Error(_T("(DirectSound) Failed to initialize COM"));
+				return false;
+			}
+			if(FAILED(::DirectSoundCreate8(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
+			{
+				Error(_T("Failed to create DirectSound object"));
 				return false;
 			}
 			if(_exclusive)
@@ -69,7 +74,7 @@ namespace psycle
 				if(FAILED(_pDs->SetCooperativeLevel(_hwnd, DSSCL_WRITEPRIMARY)))
 				{
 					// Don't report this, since we may have simply have lost focus
-					// Error("Failed to set DirectSound cooperative level");
+					// Error(_T("Failed to set DirectSound cooperative level");
 					_pDs->Release();
 					_pDs = 0;
 					return false;
@@ -79,19 +84,18 @@ namespace psycle
 			{
 				if(FAILED(_pDs->SetCooperativeLevel(_hwnd, DSSCL_PRIORITY)))
 				{
-					Error("Failed to set DirectSound cooperative level");
+					Error(_T("Failed to set DirectSound cooperative level"));
 					_pDs->Release();
 					_pDs = 0;
 					return false;
 				}
 			}
 
-			_dsBufferSize = _exclusive ? 0 : _bufferSize*_numBuffers;
-
 			DSBCAPS caps;
 			DSBUFFERDESC desc;
 			WAVEFORMATEX format;
-
+			// Set up wave format structure. 
+			memset(&format, 0, sizeof(WAVEFORMATEX)); 
 			format.wFormatTag = WAVE_FORMAT_PCM;
 			format.nChannels = 2;
 			format.wBitsPerSample = 16;//_bitDepth;
@@ -100,7 +104,10 @@ namespace psycle
 			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 			format.cbSize = 0;
 
-			desc.dwSize = sizeof desc;
+			_dsBufferSize = _exclusive ? 0 : _bufferSize*_numBuffers;
+			// Set up DSBUFFERDESC structure. 
+			memset(&desc, 0, sizeof(DSBUFFERDESC));
+			desc.dwSize = sizeof(DSBUFFERDESC); 
 			desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2;
 			desc.dwFlags |= _exclusive ? DSBCAPS_PRIMARYBUFFER : DSBCAPS_GLOBALFOCUS;
 			desc.dwBufferBytes = _dsBufferSize; 
@@ -108,9 +115,9 @@ namespace psycle
 			desc.lpwfxFormat = _exclusive ? 0 : &format;
 			desc.guid3DAlgorithm = GUID_NULL;
 			
-			if(FAILED(_pDs->CreateSoundBuffer(&desc, &_pBuffer, 0)))
+			if(FAILED(_pDs->CreateSoundBuffer(&desc, reinterpret_cast<LPDIRECTSOUNDBUFFER*>(&_pBuffer), 0)))
 			{
-				Error("Failed to create DirectSound Buffer(s)");
+				Error(_T("Failed to create DirectSound Buffer(s)"));
 				_pDs->Release();
 				_pDs = 0;
 				return false;
@@ -118,10 +125,10 @@ namespace psycle
 
 			if(_exclusive)
 			{
-				_pBuffer->Stop();
+//				_pBuffer->Stop();
 				if(FAILED(_pBuffer->SetFormat(&format)))
 				{
-					Error("Failed to set DirectSound Buffer format");
+					Error(_T("Failed to set DirectSound Buffer format"));
 					_pBuffer->Release();
 					_pBuffer = 0;
 					_pDs->Release();
@@ -131,7 +138,7 @@ namespace psycle
 				caps.dwSize = sizeof(caps);
 				if(FAILED(_pBuffer->GetCaps(&caps)))
 				{
-					Error("Failed to get DirectSound Buffer capabilities");
+					Error(_T("Failed to get DirectSound Buffer capabilities"));
 					_pBuffer->Release();
 					_pBuffer = 0;
 					_pDs->Release();
@@ -147,35 +154,36 @@ namespace psycle
 			_highMark = _bufferSize;
 			if(_highMark >= _dsBufferSize) _highMark = _dsBufferSize - 1;
 			_currentOffset = 0;
-			_buffersToDo = _numBuffers;
+			_buffersToDo = _exclusive ? 1 : _numBuffers;
 			_event.ResetEvent();
-			_timerActive = true;
-			::_beginthread(PollerThread, 0, this);
+			_threadRun = true;
+			DWORD dwThreadId;
+			CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
 			_running = true;
 			return true;
 		}
 
-		void DirectSound::PollerThread(void * pDirectSound)
+		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
 		{
 			operating_system::exceptions::translated::new_thread("direct sound");
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);
-			while(pThis->_timerActive)
+			while(pThis->_threadRun)
 			{
 				pThis->DoBlocks();
-				::Sleep(1);
+				::Sleep(10);
 			}
 			_event.SetEvent();
-			::_endthread();
+//			::_endthread();
+			return 0;
 		}
 
 		bool DirectSound::Stop()
 		{
-			CSingleLock lock(&_lock, TRUE);
+//			CSingleLock lock(&_lock, TRUE);
 			if(!_running) return true;
-			_running = false;
-			_timerActive = false;
+			_threadRun = false;
 			CSingleLock event(&_event, TRUE);
 			// Once we get here, the PollerThread should have stopped
 			if(_playing)
@@ -187,6 +195,10 @@ namespace psycle
 			_pBuffer = 0;
 			_pDs->Release();
 			_pDs = 0;
+			_running = false;
+			// Release COM
+			CoUninitialize();
+
 			return true;
 		}
 
@@ -195,29 +207,22 @@ namespace psycle
 			int pos;
 			HRESULT hr;
 			bool playing = _playing;
-			while(true)
-			{
+//			while(true)
+//			{
+				// Check if more audio is needed for the buffers.
 				while(true)
 				{
 					hr = _pBuffer->GetCurrentPosition((DWORD*)&pos, 0);
-					if(FAILED(hr))
+					if(hr == DSERR_BUFFERLOST)
 					{
-						if(hr == DSERR_BUFFERLOST)
-						{
-							playing = false;
-							if(FAILED(_pBuffer->Restore()))
-							{
-								// Don't inform about this error, because it will
-								// appear each time the Psycle window loses focus in exclusive mode
-								return;
-							}
-							continue;
-						}
-						else
-						{
-							Error("DirectSoundBuffer::GetCurrentPosition failed");
-							return;
-						}
+						playing = false;
+						if(FAILED(_pBuffer->Restore()))	return;
+						else continue;
+					}
+					else if (FAILED(hr))
+					{
+						Error(_T("DirectSoundBuffer::GetCurrentPosition failed"));
+						return;
 					}
 					break;
 				}
@@ -226,13 +231,16 @@ namespace psycle
 					if((pos > _lowMark) || (pos < _highMark)) return;
 				}
 				else if((pos > _lowMark) && (pos < _highMark)) return;
-				int* pBlock1;
-				int blockSize1;
-				int* pBlock2;
-				int blockSize2;
+
+
+				int* pBlock1 , *pBlock2;
+				int blockSize1, blockSize2;
 				int currentOffset = _currentOffset;
 				while (_buffersToDo != 0)
 				{
+					// Prepare buffer for writing operation.
+					// The buffer is get in two slices (pBlock1 and pBlock2) because it is circular
+					// and you get in two parts when it reaches the end.
 					while(true)
 					{
 						hr = _pBuffer->Lock((DWORD)currentOffset, (DWORD)_bufferSize,
@@ -249,33 +257,30 @@ namespace psycle
 							}
 							else
 							{
-								Error("Failed to lock DirectSoundBuffer");
+								Error(_T("Failed to lock DirectSoundBuffer"));
 								return;
 							}
 						}
 						break;
 					}
+
+					// Generate audio and put it into the buffer
 					int blockSize = blockSize1 / GetSampleSize();
 					int* pBlock = pBlock1;
-					while(blockSize > 0)
-					{
-						int n = blockSize;
-						float *pFloatBlock = _pCallback(_callbackContext, n);
-						if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else Quantize(pFloatBlock, pBlock, n);
-						pBlock += n;
-						blockSize -= n;
-					}
+					float *pFloatBlock = _pCallback(_callbackContext, blockSize);
+					if(_dither) QuantizeWithDither(pFloatBlock, pBlock, blockSize);
+					else Quantize(pFloatBlock, pBlock, blockSize);
+
 					blockSize = blockSize2 / GetSampleSize();
 					pBlock = pBlock2;
-					while(blockSize > 0)
+					if(blockSize > 0)
 					{
-						int n = blockSize;
-						float *pFloatBlock = _pCallback(_callbackContext, n);
-						if(_dither) QuantizeWithDither(pFloatBlock, pBlock, n); else Quantize(pFloatBlock, pBlock, n);
-						pBlock += n;
-						blockSize -= n;
+						float *pFloatBlock = _pCallback(_callbackContext, blockSize);
+						if(_dither) QuantizeWithDither(pFloatBlock, pBlock, blockSize);
+						else Quantize(pFloatBlock, pBlock, blockSize);
 					}
-			
+
+					// Unlock the buffer so that the audio driver can play it.
 					_pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
 					_currentOffset += _bufferSize;
 					if(_currentOffset >= _dsBufferSize) _currentOffset -= _dsBufferSize;
@@ -283,15 +288,16 @@ namespace psycle
 					if(_lowMark >= _dsBufferSize) _lowMark -= _dsBufferSize;
 					_highMark += _bufferSize;
 					if(_highMark >= _dsBufferSize) _highMark -= _dsBufferSize;
+
 					--_buffersToDo;
 				} // while (_buffersToDo != 0)
 				_buffersToDo = 1;
 				if(!playing)
 				{
 					_playing = true;
-					_pBuffer->Play(0, 0, DSBPLAY_LOOPING);
+					hr = _pBuffer->Play(0, 0, DSBPLAY_LOOPING);
 				}
-			} // while (true)
+//			} // while (true)
 		}
 
 		void DirectSound::ReadConfig()
@@ -430,7 +436,7 @@ namespace psycle
 			int playPos;
 			if(FAILED(_pBuffer->GetCurrentPosition((DWORD*)&playPos, 0)))
 			{
-				Error("DirectSoundBuffer::GetCurrentPosition failed");
+				Error(_T("DirectSoundBuffer::GetCurrentPosition failed"));
 				return 0;
 			}
 			return playPos;
@@ -442,7 +448,7 @@ namespace psycle
 			int writePos;
 			if(FAILED(_pBuffer->GetCurrentPosition(0, (DWORD*)&writePos)))
 			{
-				Error("DirectSoundBuffer::GetCurrentPosition failed");
+				Error(_T("DirectSoundBuffer::GetCurrentPosition failed"));
 				return 0;
 			}
 			return writePos;

@@ -28,6 +28,7 @@ namespace psycle
 			virtual bool Initialized() { return _initialized; };
 			virtual bool Configured() { return _configured; };
 			virtual AudioDriverInfo* GetInfo() { return &_info; };
+			MMRESULT IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID);
 		private:
 			class CBlock
 			{
@@ -42,7 +43,7 @@ namespace psycle
 			bool _configured;
 			static AudioDriverInfo _info;
 			static AudioDriverEvent _event;
-			static CCriticalSection _lock;
+//			static CCriticalSection _lock;
 
 			HWAVEOUT _handle;
 			int _deviceID;
