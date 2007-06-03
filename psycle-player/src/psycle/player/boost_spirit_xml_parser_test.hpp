@@ -45,6 +45,8 @@
 
 namespace xml
 {
+	int i;
+					
 	class grammar : public boost::spirit::grammar<grammar>
 	{
 		public:
@@ -82,8 +84,8 @@ namespace xml
 						S = +(Sch);
 						Name = (Letter | '_' | ':') >> *(NameChar);
 						AttValue =
-							L('"') >> *((anychar_p - (chset(L('<')) | L('&') | L('"'))) | Reference) >> L('"') |
-							L('\'') >> *((anychar_p - (chset(L('<')) | L('&') | L('\''))) | Reference) >> L('\'');
+								L('"') >> boost::spirit::token_node_d[*((anychar_p - (chset(L('<')) | L('&') | L('"'))) | Reference)] >> L('"') |
+								L('\'') >> boost::spirit::token_node_d[*((anychar_p - (chset(L('<')) | L('&') | L('\''))) | Reference)] >> L('\'');
 						chset CharDataChar(anychar_p - (chset(L('<')) | chset(L('&'))));
 						CharData = *(CharDataChar - str_p(L("]]>")));
 						Comment1 = *(
@@ -110,11 +112,11 @@ namespace xml
 								(ch_p(L('\'')) >> (str_p(L("yes")) | str_p(L("no"))) >> L('\'')) |
 								(ch_p(L('"'))  >> (str_p(L("yes")) | str_p(L("no"))) >> L('"')));
 						element = EmptyElemTag | STag >> content >> ETag;
-						STag = L('<') >> Name >> *(S >> Attribute) >> !S >> L('>');
-						Attribute = Name >> Eq >> AttValue;
-						ETag = str_p(L("</")) >> Name >> !S >> L('>');
-						content = !CharData >> *((element | Reference | CDSect | Comment) >> !CharData);
-						EmptyElemTag = L('<') >> Name >> *(S >> Attribute) >> !S >> str_p(L("/>"));
+						STag = L('<') >> boost::spirit::token_node_d[Name] >> *(S >> Attribute) >> !S >> L('>');
+						Attribute = boost::spirit::token_node_d[Name] >> Eq >> AttValue;
+						ETag = str_p(L("</")) >> boost::spirit::token_node_d[Name] >> !S >> L('>');
+						content = !boost::spirit::token_node_d[CharData] >> *((element | Reference | CDSect | Comment) >> !boost::spirit::token_node_d[CharData]);
+						EmptyElemTag = L('<') >> boost::spirit::token_node_d[Name] >> *(S >> Attribute) >> !S >> str_p(L("/>"));
 						CharRef =
 							str_p(L("&#")) >> +digit_p >> L(';') |
 							str_p(L("&#x")) >> +xdigit_p >> L(';');
@@ -125,6 +127,8 @@ namespace xml
 									ch_p(L('\'')) >> EncName >> L('\''));
 						chset EncNameCh = VersionNumCh - chset(L(':'));
 						EncName = alpha_p >> *(EncNameCh);
+						
+						i = 0;
 			        }
 
 			        boost::spirit::rule<Scanner> const & start() const { return document; }
@@ -137,6 +141,12 @@ namespace xml
 						AttValue, CharData, Comment, CDSect,
 						CharRef, EntityRef, EncName, document,
 						Name, Comment1, S;
+					
+					void static out(typename Scanner::iterator_t begin, typename Scanner::iterator_t end)
+					{
+						std::string s(begin, end);
+						std::cout << s << "\n";
+					}
 			};
 	};
 	
@@ -198,7 +208,7 @@ namespace xml
 			{
 				if (!in) throw std::runtime_error("cannot read input stream");
 
-				// Turn of white space skipping on the stream
+				// Turn off white space skipping on the stream
 				in.unsetf(std::ios::skipws);
 
 				typedef unsigned char stream_char;
@@ -241,15 +251,16 @@ namespace xml
 			void build_dom(dom_node & dom_current_node, node_iter_t const & i)
 			{
 				if (i->children.begin() == i->children.end()) { // terminal node
-					std::copy(i->value.begin(), i->value.end(), std::ostream_iterator<char>(std::cout));
-					std::ostringstream s;
-					std::copy(i->value.begin(), i->value.end(), std::ostream_iterator<char>(s));
-					dom_current_node.value = s.str();
+					//std::copy(i->value.begin(), i->value.end(), std::ostream_iterator<char>(std::cout));
+					std::string s(i->value.begin(), i->value.end());
+					dom_current_node.value = s;
+					std::cout << s << "\n";
 				} else {
 					for(node_iter_t chi = i->children.begin(); chi != i->children.end(); ++chi)
 					{
+						std::string s(i->value.begin(), i->value.end());
 						dom_node child_node;
-						dom_current_node.child_nodes["?"] = child_node;
+						dom_current_node.child_nodes[s] = child_node;
 						build_dom(child_node, chi);
 					}
 				}
