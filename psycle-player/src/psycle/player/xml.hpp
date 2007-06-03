@@ -1,3 +1,9 @@
+
+////////////////////////////////////////////////////
+// This file is a test of boost spirit to parse xml
+////////////////////////////////////////////////////
+
+
 // This source is a derived from the following:
 	/*=============================================================================
 		http://spirit.sourceforge.net/repository/applications/xml.zip
