@@ -63,6 +63,9 @@ private:
 	QAction *pasteAct_;
 	QAction *selAct_;
 	
+	QAction *tselAct_;
+	QAction *tzoomAct_;
+	
 	QToolBar *processBar_;
 	QAction *ampEfx_;
 	QAction *convEfx_;
