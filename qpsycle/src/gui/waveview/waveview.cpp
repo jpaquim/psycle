@@ -66,7 +66,12 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	copyAct_ = new QAction( QIcon(":images/wave-copy.png"), "Copy", this);
 	pasteAct_ = new QAction( QIcon(":images/wave-paste.png"), "Paste", this);
 	selAct_ = new QAction("Select All", this);
-	 
+	
+	//tools
+	QLabel *toolLabel = new QLabel("Tools :", this);
+	tselAct_ = new QAction( QIcon(":images/selector.png"), "Selector", this);
+	tzoomAct_ = new QAction (QIcon(":images/zoom-in.png"), "Zoom", this);
+	
 	//processing
 	processBar_ = new QToolBar();
 	processBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
@@ -78,7 +83,6 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	
 	//scrollbar for the WaveFormView
 	waveScroll_ = new QScrollBar(Qt::Horizontal, this);
-	 
 	 
 	//zoom and various
 	zoomBar_ = new QToolBar();
@@ -114,6 +118,10 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	toolBar_->addAction( copyAct_ );
 	toolBar_->addAction( pasteAct_ );
 	toolBar_->addAction( selAct_);
+	toolBar_->addSeparator();
+	toolBar_->addWidget( toolLabel );
+	toolBar_->addAction( tselAct_ );
+	toolBar_->addAction( tzoomAct_ );
 
 	processBar_->addWidget( efxLabel );
 	processBar_->addAction( ampEfx_ );

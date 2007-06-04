@@ -36,5 +36,6 @@
      <file>images/wave-paste.png</file>
      <file>images/wave-open.png</file>
      <file>images/wave-save.png</file>
+	 <file>images/selector.png</file>
  </qresource>
  </RCC>
