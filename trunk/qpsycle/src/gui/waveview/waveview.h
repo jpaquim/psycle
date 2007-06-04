@@ -63,7 +63,11 @@ private:
 	QAction *pasteAct_;
 	QAction *selAct_;
 	
+	QToolBar *processBar_;
 	QAction *ampEfx_;
+	QAction *convEfx_;
+	QAction *remdcEfx_;
+	QAction *invEfx_;
 	
 	QScrollBar *waveScroll_;
 	

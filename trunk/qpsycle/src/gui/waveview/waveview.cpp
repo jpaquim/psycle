@@ -67,11 +67,16 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	pasteAct_ = new QAction( QIcon(":images/wave-paste.png"), "Paste", this);
 	selAct_ = new QAction("Select All", this);
 	 
-	//effects
-	QLabel *efxLabel = new QLabel("Effects: ");
+	//processing
+	processBar_ = new QToolBar();
+	processBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
+	QLabel *efxLabel = new QLabel("Process: ");
 	ampEfx_ = new QAction("Amplify", this);
+	convEfx_ = new QAction("Convert to Mono", this);
+	remdcEfx_ = new QAction("Remove DC offset", this);
+	invEfx_ = new QAction("Invert Channels", this);
+	
 	//scrollbar for the WaveFormView
-	 
 	waveScroll_ = new QScrollBar(Qt::Horizontal, this);
 	 
 	 
@@ -109,12 +114,15 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	toolBar_->addAction( copyAct_ );
 	toolBar_->addAction( pasteAct_ );
 	toolBar_->addAction( selAct_);
-	toolBar_->addSeparator();
-	toolBar_->addWidget( efxLabel );
-	toolBar_->addAction( ampEfx_ );
-	 
+
+	processBar_->addWidget( efxLabel );
+	processBar_->addAction( ampEfx_ );
+	processBar_->addAction( convEfx_ );
+	processBar_->addAction( remdcEfx_ );
+	processBar_->addAction( invEfx_ );
 
 	layout_->addWidget( toolBar_ );
+	layout_->addWidget( processBar_ );
 	layout_->addWidget( waveformview );
 	layout_->addWidget( waveScroll_);
 	layout_->addWidget( zoomBar_ );
