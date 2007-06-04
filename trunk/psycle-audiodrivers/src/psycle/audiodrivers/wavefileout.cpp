@@ -100,6 +100,7 @@ namespace psy
 		{
 			WaveFileOut* waveFileOut = (WaveFileOut*) ptr;
 			waveFileOut->writeBuffer();
+			return 0;
 		}
 
 		void WaveFileOut::writeBuffer( )
