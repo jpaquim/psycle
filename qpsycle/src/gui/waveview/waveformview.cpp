@@ -20,15 +20,16 @@
 #include "waveformview.h"
 #include <QGraphicsView>
 
+
 WaveFormView::WaveFormView(bool *mini, QWidget *parent); //inizialization file for WaveFormView.
 {
-	if (mini = true)
+	if (mini == true)
 	{
 		//if it is a miniwaveview set fixed sizes and dimension
 		this.setSizePolicies( QSizePolicy::Fixed , QSizePolicy::Preferred);
 		this.resize (this.width(), 200);
-	}
-	else
+    }        
+    else
 	{
 		//if it is not mini set size policies only
 		this.setSizePolicies( QSizePolicy::Preferred, QSizePolicy::Preferred);
