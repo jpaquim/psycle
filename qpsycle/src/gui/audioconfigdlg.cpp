@@ -61,7 +61,6 @@ void AudioConfigDlg::initDriverList( )
 	std::map<std::string, psy::core::AudioDriver*>::iterator it = driverMap.begin();
 	for ( ; it != driverMap.end(); it++ ) {
 		QString driverName = QString::fromStdString( it->first );
-		std::cout << driverName.toStdString() << std::endl;
 		driverCbx_->addItem( driverName );
 	}
 }

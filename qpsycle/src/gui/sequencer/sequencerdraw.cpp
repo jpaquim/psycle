@@ -39,10 +39,10 @@
 #include <QGraphicsItem>
 
 SequencerDraw::SequencerDraw( SequencerView *seqView )
+	: seqView_(seqView),
+	  beatPxLength_(5),
+	  lineHeight_(30)
 {
-	seqView_ = seqView;
-	beatPxLength_ = 5;
-	lineHeight_ = 30;
 	setAlignment ( Qt::AlignLeft | Qt::AlignTop );
 
 	QGraphicsScene *scene_ = new QGraphicsScene(this);
@@ -64,17 +64,6 @@ SequencerDraw::SequencerDraw( SequencerView *seqView )
 
 	if(!lines_.empty()) {
 		setSelectedLine(lines_[0]);
-	}
-
-	pLine_ = new PlayLine( this );
-	connect( pLine_, SIGNAL( playLineMoved( double ) ),
-		 this, SLOT( onPlayLineMoved( double ) ) );
-	scene_->addItem( pLine_ );
-
-	BeatRuler *beatRuler = new BeatRuler( this );
-
-	scene_->addItem( beatRuler );
-	beatRuler->setPos( 0, 0 );
 
 	patternSequence->newLineCreated.connect
 		(boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
@@ -90,53 +79,37 @@ SequencerDraw::SequencerDraw( SequencerView *seqView )
 	  patternSequence->lineRemoved.connect
 	  (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 	*/
-
 	patternSequence->linesSwapped.connect
 		(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
+	}
+
+	pLine_ = new PlayLine( this );
+	connect( pLine_, SIGNAL( playLineMoved( double ) ),
+		 this, SLOT( onPlayLineMoved( double ) ) );
+	scene_->addItem( pLine_ );
+
+	BeatRuler *beatRuler = new BeatRuler( this );
+
+	scene_->addItem( beatRuler );
+	beatRuler->setPos( 0, 0 );
+	beatRuler->update( beatRuler->boundingRect() );
 }
 
-int SequencerDraw::beatPxLength( ) const
-{
-	return beatPxLength_;
-}
-
-void SequencerDraw::setSelectedLine( SequencerLine *line ) 
-{
-	printf("setSelectedLine %p\n", line);
-	selectedLine_ = line;
-}
-
-SequencerLine* SequencerDraw::selectedLine() 
-{
-	return selectedLine_;
-}
 
 void SequencerDraw::addPattern( psy::core::SinglePattern *pattern )
 {
-	printf("SequencerDraw::addPattern called");
 	if ( selectedLine() ) {
 		selectedLine()->addItem( pattern );
 	}
-}
-
-std::vector<SequencerLine*> SequencerDraw::lines()
-{
-    return lines_;
 }
 
 void SequencerDraw::insertTrack()
 {
 	if ( lines_.size() == 0 ) {
 		//    addSequencerLine();
-//        resize();
-//        repaint();
 	} else if ( selectedLine() ) {
 		// will cause onNewLineInserted to be fired:
 		seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() );
-/*            int index = selectedLine_->zOrder();
-	      scrollArea_->insert(line, index);
-	      scrollArea_->resize();
-*/
 	}
 }
 
@@ -160,12 +133,13 @@ void SequencerDraw::moveUpTrack() {
 	}
 }
 
-SequencerLine* SequencerDraw::makeSequencerLine(psy::core::SequenceLine* seqLine) {
-	SequencerLine* line = new SequencerLine( this);
+SequencerLine* SequencerDraw::makeSequencerLine( psy::core::SequenceLine* seqLine ) {
+	SequencerLine* line = new SequencerLine( this );
 	scene()->addItem(line);
 	line->setSequenceLine(seqLine);
 	line->setParentItem( seqArea_ );
 	connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
+
 	seqLine->wasDeleted.connect(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 	return line;
 }
@@ -268,8 +242,8 @@ void SequencerDraw::onPlayLineMoved( double newXPos )
 
 void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff ) 
 {
-	if ( true /*gridSnap()*/ ) {
-		int beatDiff = diff.x() / 5;
+	if ( gridSnap() ) {
+		int beatDiff = (int)diff.x() / 5;
 		int snappedBeatDiff = beatDiff * 5;
 		diff.setX( snappedBeatDiff );
 	}
@@ -281,7 +255,7 @@ void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff )
 	{
 		if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
 		{
-			if ( someItem->pos().x() < leftMostX ) leftMostX = someItem->pos().x();
+			if ( someItem->pos().x() < leftMostX ) leftMostX = (int)someItem->pos().x();
 		}
 	}
 
@@ -289,7 +263,7 @@ void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff )
 	if ( leftMostX + diff.x() < 0 ) {
 		xMoveBy = -leftMostX;
 	} else {
-		xMoveBy = diff.x();
+		xMoveBy = (int)diff.x();
 	}
 
 	foreach ( QGraphicsItem *uncastItem, selectedItems )
@@ -305,6 +279,7 @@ void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff )
 
 void SequencerDraw::onItemChangedLine( SequencerItem *item, int direction )
 {
+	Q_UNUSED( item );
 	// Note: for "direction", 0 = up, 1 = down.
 	QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
 
@@ -349,6 +324,35 @@ void SequencerDraw::onItemChangedLine( SequencerItem *item, int direction )
 }
 
 
+bool SequencerDraw::gridSnap() const 
+{
+	return true; // FIXME: hardcoded.
+}
+
+int SequencerDraw::beatPxLength( ) const
+{
+	return beatPxLength_;
+}
+
+void SequencerDraw::setSelectedLine( SequencerLine *line ) 
+{
+	printf("setSelectedLine %p\n", line);
+	selectedLine_ = line;
+}
+
+SequencerLine* SequencerDraw::selectedLine() 
+{
+	return selectedLine_;
+}
+
+std::vector<SequencerLine*> SequencerDraw::lines()
+{
+	return lines_;
+}
+
+
+
+
 
 
 
@@ -386,7 +390,7 @@ QRectF PlayLine::boundingRect() const
 
 void PlayLine::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget ) 
 {
+	Q_UNUSED( option ); Q_UNUSED( widget );
 	painter->setPen( Qt::red );
 	painter->drawRect( boundingRect() );
 }
-
