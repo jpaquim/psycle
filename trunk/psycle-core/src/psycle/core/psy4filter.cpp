@@ -27,7 +27,7 @@
 #include "song.h"
 #include "helpers/xml.h"
 
-#if defined PSYCLE__LIBXMLPP_AVAILABLE
+#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
 	#include <libxml++/parsers/domparser.h>
 #elif defined QT_XML_LIB
 	#include <QFile>
