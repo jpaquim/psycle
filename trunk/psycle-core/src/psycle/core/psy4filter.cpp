@@ -184,7 +184,78 @@ namespace psy {
 
 			// Pattern data.
 			#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
-				///\todo
+				xmlpp::Node::NodeList const & pattern_data_nodes(root_element.get_children("patterndata"));
+				if(pattern_data_node.begin() != pattern_data_nodes.end())
+				{
+					xmlpp::Element const & pattern_data(dynamic_cast<xmlpp::Element const &>(pattern_data_nodes.begin()));
+					xmlpp::Node::NodeList const & categories(pattern_data.get_children("category"));
+					for(xmlpp::Node::NodeList::const_iterator i = categories.begin(); i != categories.end(); ++i)
+					{
+						xmlpp::Element const & category(dynamic_cast<xmlpp::Element const &>(categories.begin()));
+						xmlpp::Attribute const * const name_attribute(path.get_attribute("name"));
+						if(!name_attribute) std::cerr << "expected name attribute in category element\n";
+						else {
+							lastCategory = song_->patternSequence()->patternData()->createNewCategory(name_attribute.get_value());
+							xmlpp::Attribute const * const color_attribute(path.get_attribute("color"));
+							if(color_attribute) lastCategory->setColor(str<long int>(color_attribute.get_value();));
+						}
+					}
+				}
+					///\todo unfinished conversion...
+					
+					QDomNodeList patterns = category.elementsByTagName( "pattern" );
+					for ( int i = 0; i < patterns.count(); i++ )
+					{
+						QDomElement pattern = patterns.item( i ).toElement();
+					
+						std::string patName = pattern.attribute("name").toStdString();
+						int beatZoom = str_hex<int> (pattern.attribute("zoom").toStdString());
+						lastPattern = lastCategory->createNewPattern(patName);
+						lastPattern->clearBars();
+						lastPattern->setBeatZoom(beatZoom);
+						int pat_id  = str_hex<int> (pattern.attribute("id").toStdString());
+						patMap[pat_id] = lastPattern;
+
+						QDomElement sign = pattern.firstChildElement( "sign" );
+						std::string freeStr = sign.attribute("free").toStdString();
+						if (freeStr != "") {
+							float free = str<float> (freeStr);
+							TimeSignature sig(free);
+							lastPattern->addBar(sig);
+						} else {
+							int num = str<int> (sign.attribute("num").toStdString());
+							int denom = str<int> (sign.attribute("denom").toStdString());
+							int count = str<int> (sign.attribute("count").toStdString());
+							TimeSignature sig(num,denom);
+							sig.setCount(count);
+							lastPattern->addBar(sig);
+						}
+
+						QDomNodeList patlines = pattern.elementsByTagName( "patline" );
+						for ( int i = 0; i < patlines.count(); i++ )
+						{
+							QDomElement patline = patlines.item( i ).toElement();
+							lastPatternPos = str<float> (patline.attribute("pos").toStdString());
+
+							QDomNodeList patevents = patline.elementsByTagName( "patevent" );
+							for ( int i = 0; i < patevents.count(); i++ )
+							{
+								QDomElement patevent = patevents.item( i ).toElement();
+								int trackNumber = str_hex<int> (patevent.attribute("track").toStdString());
+
+								PatternEvent data;
+								data.setMachine( str_hex<int> (patevent.attribute("mac").toStdString()) );
+								data.setInstrument( str_hex<int> (patevent.attribute("inst").toStdString()) );
+								data.setNote( str_hex<int> (patevent.attribute("note").toStdString()) );
+								data.setParameter( str_hex<int> (patevent.attribute("param").toStdString()) );
+								data.setParameter( str_hex<int> (patevent.attribute("cmd").toStdString()) );
+								data.setSharp( str_hex<bool> (patevent.attribute("sharp").toStdString()) );
+
+								(*lastPattern)[lastPatternPos].notes()[trackNumber]=data;
+							} // patevents
+						} // patlines
+					} // patterns
+				} // categories
 			#elif defined QT_XML_LIB
 				QDomElement patData = root.firstChildElement( "patterndata" );
 				QDomNodeList categories = patData.elementsByTagName( "category" );
@@ -255,36 +326,7 @@ namespace psy {
 
 			// Sequence data.
 			#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
-				QDomElement seqData = root.firstChildElement( "sequence" );
-				QDomNodeList seqlines = seqData.elementsByTagName( "seqline" );
-				for ( int i = 0; i < seqlines.count(); i++ )
-				{
-					QDomElement seqline = seqlines.item( i ).toElement();
-					lastSeqLine = song_->patternSequence()->createNewLine();
-					std::cout << "create seqline" << std::endl;
-
-					QDomNodeList seqentries = seqline.elementsByTagName( "seqentry" );
-					for ( int i = 0; i < seqentries.count(); i++ )
-					{
-						QDomElement seqentry = seqentries.item( i ).toElement();
-						double pos =  str<double> (seqentry.attribute("pos").toStdString());
-						int pat_id  = str<int> (seqentry.attribute("patid").toStdString());
-						float startPos = str<float> (seqentry.attribute("start").toStdString());
-						float endPos = str<float> (seqentry.attribute("end").toStdString());
-						int transpose  = str_hex<int> (seqentry.attribute("transpose").toStdString());
-						std::map<int, SinglePattern*>::iterator it = patMap.begin();
-						it = patMap.find( pat_id );
-						if ( it != patMap.end() ) {
-							SinglePattern* pattern = it->second; 
-							if (pattern) {
-								SequenceEntry* entry = lastSeqLine->createEntry(pattern, pos);
-								entry->setStartPos(startPos);
-								entry->setEndPos(endPos);
-								entry->setTranspose(transpose);
-							}
-						}
-					} // seqentries
-				} // seqlines
+				///\todo
 			#elif defined QT_XML_LIB
 				QDomElement seqData = root.firstChildElement( "sequence" );
 				QDomNodeList seqlines = seqData.elementsByTagName( "seqline" );
