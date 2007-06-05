@@ -251,7 +251,7 @@ namespace psy
 			}
 		}
 
-		Machine::~Machine() throw ()
+		Machine::~Machine()
 		{
 			delete[] _pSamplesL; _pSamplesL = 0;
 			delete[] _pSamplesR; _pSamplesR = 0;
