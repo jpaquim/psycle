@@ -36,6 +36,7 @@ SequencerView::SequencerView( psy::core::Song *asong )
 	song_ = asong;
 
 	layout_ = new QVBoxLayout();
+	setLayout( layout_ );
 
 	seqDraw_ = new SequencerDraw( this );
 	toolBar_ = new QToolBar();
@@ -79,13 +80,7 @@ SequencerView::SequencerView( psy::core::Song *asong )
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( seqDraw_ );
 
-	setLayout( layout_ );
-}
 
-
-SequencerLine* SequencerView::selectedLine() 
-{
-	return selectedLine_;
 }
 
 void SequencerView::addPattern( psy::core::SinglePattern *pattern )
@@ -96,7 +91,7 @@ void SequencerView::addPattern( psy::core::SinglePattern *pattern )
 }
 
 void SequencerView::updatePlayPos() {
-	if ( song()->patternSequence() /*&& scrollArea() && !scrollArea()->lockPlayLine()*/ ) {
+	if ( song()->patternSequence() ) {
 		int beatPxLength = seqDraw_->beatPxLength();
 		int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
 		int oxPos = std::min(song()->patternSequence()->tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
@@ -118,4 +113,10 @@ void SequencerView::onCategoryColorChanged()
 {
 	// FIXME: not efficient.
 	sequencerDraw()->scene()->update( sequencerDraw()->scene()->itemsBoundingRect() );
+}
+
+
+SequencerLine* SequencerView::selectedLine() 
+{
+	return selectedLine_;
 }

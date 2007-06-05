@@ -17,8 +17,8 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef SEQUENCERDRAW_H
- #define SEQUENCERDRAW_H
+#ifndef SEQUENCERDRAW_H
+#define SEQUENCERDRAW_H
 
 namespace psy { namespace core {
 	class Song;
@@ -46,17 +46,18 @@ Q_OBJECT
 public:
 	SequencerDraw( SequencerView *seqView );
 
+	void addPattern( psy::core::SinglePattern *pattern );
+
 	SequencerView *sequencerView() { return seqView_; }
+	PlayLine *pLine() { return pLine_; }
 	int beatPxLength() const;
 	int lineHeight() const { return lineHeight_; }
+	bool gridSnap() const;
 	SequencerLine *selectedLine();
 	void setSelectedLine( SequencerLine *line );
 	std::vector<SequencerLine*> lines();
 
-	void addPattern( psy::core::SinglePattern *pattern );
-	PlayLine *pLine() { return pLine_; }
-
-	public slots:
+public slots:
 	void insertTrack();
 	void deleteTrack();
 	void moveUpTrack();
@@ -72,18 +73,17 @@ protected:
 private:
 	SequencerView *seqView_;
 	QGraphicsScene *scene_;
-
 	SequencerArea *seqArea_;
+	PlayLine *pLine_;
 
 	std::vector<SequencerLine*> lines_;
 	typedef std::vector<SequencerLine*>::iterator lines_iterator;
+
 	SequencerLine *selectedLine_;
 
 	int beatPxLength_;
 	double newBeatPos_;
 	int lineHeight_;
-
-	PlayLine *pLine_;
 
 	SequencerLine* makeSequencerLine(psy::core::SequenceLine* seqLine);
 
@@ -92,6 +92,8 @@ private:
 	void onLineRemoved(psy::core::SequenceLine* seqLine);
 	void onLinesSwapped(psy::core::SequenceLine* a, psy::core::SequenceLine* b);
 };
+
+
 
 class PlayLine : public QObject, public QGraphicsItem {
 Q_OBJECT
@@ -102,7 +104,7 @@ public:
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
-	void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 signals:
 	void playLineMoved( double );
@@ -113,4 +115,4 @@ private:
 
 };
 
- #endif
+#endif

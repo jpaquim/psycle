@@ -33,9 +33,10 @@ public :
     BeatRuler( SequencerDraw* seqGui );
     ~BeatRuler();
 
-protected:
     QRectF boundingRect() const;
     void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+
+protected:
 
 private:
     SequencerDraw* sDraw_;
