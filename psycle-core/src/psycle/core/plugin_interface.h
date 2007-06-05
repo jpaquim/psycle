@@ -78,14 +78,14 @@ public:
 class CFxCallback
 {
 public:
-	virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
-	virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
-	virtual float *GetWaveLData(int inst,int wave){return 0;} ///\todo USELESS if you cannot get the length!
-	virtual float *GetWaveRData(int inst,int wave){return 0;} ///\todo USELESS if you cannot get the length!
-	virtual int GetTickLength(){return 2048;}
-	virtual int GetSamplingRate(){return 44100;}
-	virtual int GetBPM(){return 125;}
-	virtual int GetTPB(){return 4;}
+	virtual void MessBox(char * /*ptxt*/, char * /*caption*/, unsigned int /*type*/) {}
+	virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, int /*par3*/){ return 0; }
+	virtual float *GetWaveLData(int /*inst*/, int /*wave*/){ return 0; } ///\todo USELESS if you cannot get the length!
+	virtual float *GetWaveRData(int /*inst*/, int /*wave*/){ return 0; } ///\todo USELESS if you cannot get the length!
+	virtual int GetTickLength(){ return 2048; }
+	virtual int GetSamplingRate(){ return 44100; }
+	virtual int GetBPM(){ return 125; }
+	virtual int GetTPB(){ return 4; }
 	// Don't get fooled by the above return values.
 	// You get a pointer to a subclass of this one that returns the correct ones.
 	virtual inline ~CFxCallback() throw() {}
@@ -97,32 +97,32 @@ public:
 	virtual ~CMachineInterface() {}
 	virtual void Init() {}
 	virtual void SequencerTick() {}
-	virtual void ParameterTweak(int par, int val) {}
+	virtual void ParameterTweak(int /*par*/, int /*val*/) {}
 
 	/// Work function
-	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {}
+	virtual void Work(float * /*psamplesleft*/, float * /*psamplesright*/, int /*numsamples*/, int /*tracks*/) {}
 
 	virtual void Stop() {}
 
 	///\name Export / Import
 	///\{
-	virtual void PutData(void * pData) {}
-	virtual void GetData(void * pData) {}
+	virtual void PutData(void * /*pData*/) {}
+	virtual void GetData(void * /*pData*/) {}
 	virtual int GetDataSize() { return 0; }
 	///\}
 
 	virtual void Command() {}
 
-	virtual void MuteTrack(int const i) {} /// Not used (yet?)
-	virtual bool IsTrackMuted(int const i) const { return false; } 	// Not used (yet?)
+	virtual void MuteTrack(int const /*track*/) {} /// Not used (yet?)
+	virtual bool IsTrackMuted(int const /*track*/) const { return false; } 	// Not used (yet?)
 
-	virtual void MidiNote(int const channel, int const value, int const velocity) {} /// Not used (yet?)
-	virtual void Event(uint32 const data) {} /// Not used (yet?)
+	virtual void MidiNote(int const /*channel*/, int const /*value*/, int const /*velocity*/) {} /// Not used (yet?)
+	virtual void Event(uint32 const /*data*/) {} /// Not used (yet?)
 
-	virtual bool DescribeValue(char* txt,int const param, int const value) { return false; }
+	virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
 
-	virtual bool PlayWave(int const wave, int const note, float const volume) { return false; } /// Not used (prolly never)
-	virtual void SeqTick(int channel, int note, int ins, int cmd, int val) {}
+	virtual bool PlayWave(int const /*wave*/, int const /*note*/, float const /*volume*/) { return false; } /// Not used (prolly never)
+	virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
 
 	virtual void StopWave() {} 	/// Not used (prolly never)
 
