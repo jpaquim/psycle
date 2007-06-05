@@ -139,7 +139,7 @@ namespace psy
 					Machine::id_type GetFreeMachine();
 
 					/// destroy a machine of this song.
-					void DestroyMachine(Machine & machine, bool write_locked = false) { DestroyMachine(machine.id()); /* stupid circonvolution */ }
+					void DestroyMachine(Machine & machine, bool /*write_locked*/ = false) { DestroyMachine(machine.id()); /* stupid circonvolution */ }
 
 					/// destroy a machine of this song.
 					void DestroyMachine(Machine::id_type mac, bool write_locked = false);
@@ -148,7 +148,7 @@ namespace psy
 					void DestroyAllMachines(bool write_locked = false);
 
 					/// clones a machine.
-					bool CloneMac(Machine & src, Machine & dst) { CloneMac(src.id(), dst.id()); /* stupid circonvolution */ }
+					bool CloneMac(Machine & src, Machine & dst) { return CloneMac(src.id(), dst.id()); /* stupid circonvolution */ }
 
 					/// clones a machine.
 					bool CloneMac(Machine::id_type src, Machine::id_type dst);
