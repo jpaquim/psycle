@@ -191,71 +191,65 @@ namespace psy {
 					xmlpp::Node::NodeList const & categories(pattern_data.get_children("category"));
 					for(xmlpp::Node::NodeList::const_iterator i = categories.begin(); i != categories.end(); ++i)
 					{
-						xmlpp::Element const & category(dynamic_cast<xmlpp::Element const &>(categories.begin()));
-						xmlpp::Attribute const * const name_attribute(path.get_attribute("name"));
+						xmlpp::Element const & category(dynamic_cast<xmlpp::Element const &>(**i));
+						xmlpp::Attribute const * const name_attribute(category.get_attribute("name"));
 						if(!name_attribute) std::cerr << "expected name attribute in category element\n";
 						else {
 							lastCategory = song_->patternSequence()->patternData()->createNewCategory(name_attribute.get_value());
-							xmlpp::Attribute const * const color_attribute(path.get_attribute("color"));
+							xmlpp::Attribute const * const color_attribute(category.get_attribute("color"));
 							if(color_attribute) lastCategory->setColor(str<long int>(color_attribute.get_value();));
+						}
+						xmlpp::Node::NodeList const & patterns(category.get_children("pattern"));
+						for(xmlpp::Node::NodeList::const_iterator i = patterns.begin(); i != patterns.end(); ++i)
+						{
+							xmlpp::Element const & pattern(dynamic_cast<xmlpp::Element const &>(**i));
+							xmlpp::Attribute const * const name_attribute(pattern.get_attribute("name"));
+							if(!name_attribute) std::cerr << "expected name attribute in pattern element\n";
+							else {
+								lastPattern = lastCategory->createNewPattern(name_attribute.get_value());
+								lastPattern->clearBars(); ///\todo we just created it.. why does it need cleaning?
+								{
+									xmlpp::Attribute const * const zoom_attribute(pattern.get_attribute("zoom"));
+									if(zoom_attribute) lastPattern->setBeatZoom(str_hex<int>(zoom_attribute.get_value()));
+								}
+								{
+									xmlpp::Attribute const * const id_attribute(pattern.get_attribute("id"));
+									if(!id_attribute) std::cerr << "expected id attribute in pattern element\n";
+									else patMap[str_hex<int>(id_attribute.get_value())] = lastPattern;
+								}
+								{
+									xmlpp::Node::NodeList const & signatures(pattern.get_children("sign"));
+									if(signatures.begin() == signatures.end()) std::cerr << "expected sign innert element in enclosing pattern element\n";
+									{
+										xmlpp::Element const & signature(dynamic_cast<xmlpp::Element const &>(signatures.begin()));
+										xmlpp::Attribute const * const free_attribute(pattern.get_attribute("free"));
+										if(free_attribute) {
+											TimeSignature sig(str<float>(free_atribute.get_value()));
+											lastPattern->addBar(sig);
+										} else {
+											xmlpp::Attribute const * const num_attribute(pattern.get_attribute("num"));
+											if(!num_attribute) std::cerr << "expected num attribute in sign element\n";
+											else {
+												xmlpp::Attribute const * const denom_attribute(pattern.get_attribute("denom"));
+												if(!denom_attribute) std::cerr << "expected denom attribute in sign element\n";
+												else {
+													xmlpp::Attribute const * const count_attribute(pattern.get_attribute("count"));
+													if(!count_attribute) std::cerr << "expected count attribute in sign element\n";
+													else {
+														TimeSignature sig(str<int>(num_attribute.get_value()), str<int>(num_attribute.get_value()));
+														sig.setCount(str<int>(num_attribute.get_value());
+														lastPattern->addBar(sig);
+													}
+												}
+											}
+										}
+									}
+								}
+								///\todo unfinished conversion...
+							}
 						}
 					}
 				}
-					///\todo unfinished conversion...
-					
-					QDomNodeList patterns = category.elementsByTagName( "pattern" );
-					for ( int i = 0; i < patterns.count(); i++ )
-					{
-						QDomElement pattern = patterns.item( i ).toElement();
-					
-						std::string patName = pattern.attribute("name").toStdString();
-						int beatZoom = str_hex<int> (pattern.attribute("zoom").toStdString());
-						lastPattern = lastCategory->createNewPattern(patName);
-						lastPattern->clearBars();
-						lastPattern->setBeatZoom(beatZoom);
-						int pat_id  = str_hex<int> (pattern.attribute("id").toStdString());
-						patMap[pat_id] = lastPattern;
-
-						QDomElement sign = pattern.firstChildElement( "sign" );
-						std::string freeStr = sign.attribute("free").toStdString();
-						if (freeStr != "") {
-							float free = str<float> (freeStr);
-							TimeSignature sig(free);
-							lastPattern->addBar(sig);
-						} else {
-							int num = str<int> (sign.attribute("num").toStdString());
-							int denom = str<int> (sign.attribute("denom").toStdString());
-							int count = str<int> (sign.attribute("count").toStdString());
-							TimeSignature sig(num,denom);
-							sig.setCount(count);
-							lastPattern->addBar(sig);
-						}
-
-						QDomNodeList patlines = pattern.elementsByTagName( "patline" );
-						for ( int i = 0; i < patlines.count(); i++ )
-						{
-							QDomElement patline = patlines.item( i ).toElement();
-							lastPatternPos = str<float> (patline.attribute("pos").toStdString());
-
-							QDomNodeList patevents = patline.elementsByTagName( "patevent" );
-							for ( int i = 0; i < patevents.count(); i++ )
-							{
-								QDomElement patevent = patevents.item( i ).toElement();
-								int trackNumber = str_hex<int> (patevent.attribute("track").toStdString());
-
-								PatternEvent data;
-								data.setMachine( str_hex<int> (patevent.attribute("mac").toStdString()) );
-								data.setInstrument( str_hex<int> (patevent.attribute("inst").toStdString()) );
-								data.setNote( str_hex<int> (patevent.attribute("note").toStdString()) );
-								data.setParameter( str_hex<int> (patevent.attribute("param").toStdString()) );
-								data.setParameter( str_hex<int> (patevent.attribute("cmd").toStdString()) );
-								data.setSharp( str_hex<bool> (patevent.attribute("sharp").toStdString()) );
-
-								(*lastPattern)[lastPatternPos].notes()[trackNumber]=data;
-							} // patevents
-						} // patlines
-					} // patterns
-				} // categories
 			#elif defined QT_XML_LIB
 				QDomElement patData = root.firstChildElement( "patterndata" );
 				QDomNodeList categories = patData.elementsByTagName( "category" );
