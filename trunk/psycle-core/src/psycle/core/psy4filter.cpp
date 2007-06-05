@@ -119,7 +119,7 @@ namespace psy {
 				parser.parse_file("psytemp.xml");
 				if(!parser) return false;
 				xmlpp::Element const & root_element(*parser.get_document()->get_root_node());
-				return root_element.get_name() == "psy4
+				return root_element.get_name() == "psy4";
 			#elif defined QT_XML_LIB
 	            QFile *file = new QFile( "psytemp.xml" );
 	            QDomDocument *doc = new QDomDocument();
