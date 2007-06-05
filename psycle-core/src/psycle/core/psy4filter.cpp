@@ -27,11 +27,16 @@
 #include "song.h"
 #include "helpers/xml.h"
 
-// FIXME: remove Qt usage.
-#include <QFile>
-#include <QDomDocument>
-#include <QDomElement>
-#include <QXmlInputSource>
+#if defined PSYCLE__LIBXMLPP_AVAILABLE
+	#include <libxml++/parsers/domparser.h>
+#elif defined QT_XML_LIB
+	#include <QFile>
+	#include <QDomDocument>
+	#include <QDomElement>
+	#include <QXmlInputSource>
+#else
+	#error none of the supported xml parser libs appear to be available
+#endif
 
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
@@ -109,11 +114,21 @@ namespace psy {
 			zipreader_close( z );
 			close( fd );
 
-            QFile *file = new QFile( "psytemp.xml" );
-            QDomDocument *doc = new QDomDocument();
-            doc->setContent( file );
-            QDomElement psy4El = doc->documentElement();
-			return psy4El.tagName() == "psy4";
+			#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
+				xmlpp::DomParser parser;
+				parser.parse_file("psytemp.xml");
+				if(!parser) return false;
+				xmlpp::Element const & root_element(*parser.get_document()->get_root_node());
+				return root_element.get_name() == "psy4
+			#elif defined QT_XML_LIB
+	            QFile *file = new QFile( "psytemp.xml" );
+	            QDomDocument *doc = new QDomDocument();
+	            doc->setContent( file );
+	            QDomElement psy4El = doc->documentElement();
+				return psy4El.tagName() == "psy4";
+			#else
+				#error none of the supported xml parser libs appear to be available
+			#endif
 		}
 
 		bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
@@ -476,7 +491,7 @@ namespace psy {
 
 			// copy the bin data to the zip
 			f = zipwriter_addfile(z, std::string("bin/song.bin").c_str(), 9);
-	    zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
+			zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
 
 			if (!zipwriter_finish(z)) {
 				return false;
@@ -485,8 +500,8 @@ namespace psy {
 			// remove temp file
 			 if( std::remove("psycle_tmp.bin") == -1 )
 					std::cerr << "Error deleting temp file" << std::endl;
-	
 					
+			return true;
 		}
 
 		int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& song)
