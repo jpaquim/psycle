@@ -107,7 +107,7 @@ namespace psycle
 			, _bypass(false)
 			, _mute(false)
 			, _waitingForSound(false)
-			, _stopped(false)
+			, _standby(false)
 			, _worked(false)
 			, _pSamplesL(0)
 			, _pSamplesR(0)
@@ -178,8 +178,8 @@ namespace psycle
 			_cpuCost = 0;
 			_wireCost = 0;
 			_mute = false;
-			_stopped = false;
-			_bypass = false;
+			Standby(false);
+			Bypass(false);
 			_waitingForSound = false;
 			// Centering volume and panning
 			SetPan(64);
@@ -392,7 +392,7 @@ namespace psycle
 								if (pInMachine->_cpuCost >= Global::_cpuHz && !Global::pPlayer->_recording)
 								{
 									if ( pInMachine->_mode == MACHMODE_GENERATOR) pInMachine->_mute=true;
-									else pInMachine->_bypass=true;
+									else pInMachine->Bypass(true);
 								}
 							}
 							/*
@@ -406,8 +406,8 @@ namespace psycle
 							}
 							*/
 						}
-						if(!pInMachine->_stopped) _stopped = false;
-						if(!_mute && !_stopped)
+						if(!pInMachine->Standby()) Standby(false);
+						if(!_mute && !Standby())
 						{
 							cpu::cycles_type wcost = cpu::cycles();
 							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
@@ -443,7 +443,7 @@ namespace psycle
 								pInMachine->Work(numSamples);
 							}
 						}
-						if(!pInMachine->_stopped) _stopped = false;
+						if(!pInMachine->Standby()) Standby(false);
 					}
 				}
 			}
@@ -648,6 +648,7 @@ namespace psycle
 					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 			}
 			pMachine->SetPan(pMachine->_panning);
+			if (pMachine->_bypass) pMachine->Bypass(true);
 			return pMachine;
 		}
 
@@ -740,7 +741,7 @@ namespace psycle
 				if (_volumeCounter < 8.0f)	{
 					_volumeCounter = 0.0f;
 					_volumeDisplay = 0;
-					_stopped = true;
+					Standby(true);
 				}
 			}
 			//else Machine::SetVolumeCounter(numSamples);
@@ -949,7 +950,7 @@ namespace psycle
 		void DuplicatorMac::Work(int numSamples)
 		{
 			_worked = true;
-			_stopped = false;
+			Standby(true);
 		}
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -1186,7 +1187,7 @@ namespace psycle
 			// Step Two, prepare input signals for the Send Fx, and make them work
 			FxSend(numSamples);
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
-			if(!_mute && !_stopped )
+			if(!_mute && !Standby() )
 			{
 				cpu::cycles_type cost = cpu::cycles();
 				Mix(numSamples);
@@ -1197,9 +1198,9 @@ namespace psycle
 					{
 						_volumeCounter = 0.0f;
 						_volumeDisplay = 0;
-						_stopped = true;
+						Standby(true);
 					}
-					else _stopped = false;
+					else Standby(false);
 				}
 				_cpuCost += cpu::cycles() - cost;
 			}
@@ -1232,7 +1233,7 @@ namespace psycle
 										Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 										if (pInMachine)
 										{
-											if(!_mute && !_stopped && _sendGrid[j][send0+i]!= 0.0f)
+											if(!pInMachine->_mute && !pInMachine->Standby() && _sendGrid[j][send0+i]!= 0.0f)
 											{
 												dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
 												dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
@@ -1260,7 +1261,7 @@ namespace psycle
 							}
 
 						}
-						if(!pSendMachine->_stopped) _stopped = false;
+						if(!pSendMachine->Standby())Standby(false);
 					}
 				}
 			}
@@ -1275,7 +1276,7 @@ namespace psycle
 					Machine* pSendMachine = Global::song()._pMachine[_send[i]];
 					if (pSendMachine)
 					{
-						if(!_mute && !_stopped)
+						if(!pSendMachine->_mute && !pSendMachine->Standby())
 						{
 							dsp::Add(pSendMachine->_pSamplesL, _pSamplesL, numSamples, pSendMachine->_lVol*_sendVol[i]);
 							dsp::Add(pSendMachine->_pSamplesR, _pSamplesR, numSamples, pSendMachine->_rVol*_sendVol[i]);
@@ -1290,7 +1291,7 @@ namespace psycle
 					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
-						if(!_mute && !_stopped && _sendGrid[i][mix] != 0.0f)
+						if(!pInMachine->_mute && !pInMachine->Standby() && _sendGrid[i][mix] != 0.0f)
 						{
 							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]*_sendGrid[i][mix]);
 							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]*_sendGrid[i][mix]);

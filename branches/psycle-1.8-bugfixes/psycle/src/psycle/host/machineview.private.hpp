@@ -973,16 +973,10 @@ NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-							//code to visually mark a machine as being selected
 							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-
-
+//							devc->ExtTextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y,
+//								ETO_OPAQUE, CRect(x,y,x+68,y+13), CString(macname[i]), 0);
 							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
 						}
 						else
@@ -1038,7 +1032,7 @@ NAMESPACE__BEGIN(psycle)
 									MachineCoords.sEffectMute.x, 
 									MachineCoords.sEffectMute.y);
 					}
-					if (mac->_bypass)
+					if (mac->Bypass())
 					{
 						TransparentBlt(devc,
 									x+MachineCoords.dEffectBypass.x, 
@@ -1057,15 +1051,8 @@ NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-							//code to visually mark a machine as being selected
 							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
 						}
 						else
@@ -1145,18 +1132,8 @@ NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-
-							//code to visually mark a machine as being selected
-							// no longer needed
 							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-
-
 							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
 						}
 						else
@@ -1200,7 +1177,7 @@ NAMESPACE__BEGIN(psycle)
 									MachineCoords.sEffectMute.y, 
 									SRCCOPY);
 					}
-					if (mac->_bypass)
+					if (mac->Bypass())
 					{
 						devc->BitBlt(x+MachineCoords.dEffectBypass.x, 
 									y+MachineCoords.dEffectBypass.y, 
@@ -1218,16 +1195,8 @@ NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
 						if (Global::pConfig->draw_mac_index)
 						{
-							//code to visually mark a machine as being selected
-							//no longer needed as a box is drawn around the machine
 							char name[sizeof(mac->_editName)+6+3];
-				//			if (macnum == _pSong->seqBus) {						
-				//				sprintf(name," * %.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-				//			else {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-				//			}
-
 							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
 						}
 						else

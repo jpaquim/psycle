@@ -362,13 +362,13 @@ namespace psycle
 			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
 			else
 			{
-				if (!_mute) _stopped = false;
-				else _stopped = true;
+				if (!_mute) Standby(false);
+				else Standby(true);
 			}
 			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute) 
 			{
-				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !_stopped))
+				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !Standby()))
 				{
 					int ns = numSamples;
 					int us = 0;
@@ -586,7 +586,7 @@ namespace psycle
 						{
 							_volumeCounter = 0.0f;
 							_volumeDisplay = 0;
-							_stopped = true;
+							Standby(true);
 						}
 					}
 				}

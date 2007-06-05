@@ -366,8 +366,8 @@ NAMESPACE__BEGIN(psycle)
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectMute)) //Solo 
 							{
-								tmac->_bypass = !tmac->_bypass;
-								if (tmac->_bypass)
+								tmac->Bypass(!tmac->Bypass());
+								if (tmac->Bypass())
 								{
 									tmac->_volumeCounter=0.0f;	tmac->_volumeDisplay=0;
 								}
@@ -926,8 +926,8 @@ NAMESPACE__BEGIN(psycle)
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectBypass)) //Bypass
 							{
-								pMac->_bypass = !pMac->_bypass;
-								if (pMac->_bypass)
+								pMac->Bypass(!pMac->Bypass());
+								if (pMac->Bypass())
 								{
 									pMac->_volumeCounter=0.0f;
 									pMac->_volumeDisplay=0;

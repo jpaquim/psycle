@@ -152,6 +152,10 @@ namespace psycle
 			virtual void Tick(int track, PatternEntry * pData) {};
 			virtual void Stop() {};
 			virtual void SetPan(int newpan);
+			virtual bool Bypass(void) { return _bypass; }
+			virtual void Bypass(bool e) { _bypass=e; }
+			virtual bool Standby() { return _standby; }
+			virtual void Standby(bool e) { _standby=e;}
 			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
 			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
 			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
@@ -190,7 +194,7 @@ namespace psycle
 			bool _bypass;
 			bool _mute;
 			bool _waitingForSound;
-			bool _stopped;
+			bool _standby;
 			bool _worked;
 			/// left data
 			float *_pSamplesL;

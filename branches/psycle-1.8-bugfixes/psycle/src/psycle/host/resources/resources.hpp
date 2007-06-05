@@ -91,7 +91,6 @@
 #define IDD_NEW_VOLUME                  202
 #define IDD_SAVEWAVDLG                  203
 #define IDD_PROGRESS_DIALOG             204
-#define IDB_BETASPLASH                  208
 #define IDD_XM_SAMPLER                  214
 #define IDD_XM_GENERAL                  215
 #define IDD_XMSAMPLERUIINST             217
@@ -1159,8 +1158,10 @@
 #define ID_COMBO_BANK                   33082
 #define ID_PROGRAMS_SELECTBANK33083     33083
 #define ID_PROGRAMS_SELECTPROGRAM       33084
-#define ID_SELECTBANK_001               33087
-#define ID_SELECTPROGRAM_001            33088
+#define ID_SELECTBANK_0                 33090
+#define ID_SELECTPROGRAM_0              33091
+#define ID_PROGRAMS_SELECTPROGRAM33093  33094
+#define ID_PROGRAMS_SELECTBANK33092     33095
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1169,8 +1170,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        268
-#define _APS_NEXT_COMMAND_VALUE         33090
+#define _APS_NEXT_RESOURCE_VALUE        271
+#define _APS_NEXT_COMMAND_VALUE         33096
 #define _APS_NEXT_CONTROL_VALUE         1782
 #define _APS_NEXT_SYMED_VALUE           61
 #endif

@@ -685,6 +685,7 @@ namespace seib {
 			, bNeedIdle(false)
 			, bNeedEditIdle(false)
 			, bWantMidi(false)
+			, bCanBypass(false)
 			, bShellPlugin(false)
 			, editorWnd(0)
 		{
@@ -736,6 +737,7 @@ namespace seib {
 				Open();                     /* open the effect                   */
 				// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
 				WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents) == 1);
+				KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
 				MainsChanged(true);                   /* then force resume.                */
 				MainsChanged(false);                  /* suspend again...                  */
 				SetBlockSize(CVSTHost::pHost->GetBlockSize());   /* and block size                    */
@@ -1036,6 +1038,15 @@ namespace seib {
 			if (editorWnd)
 			{
 				return editorWnd->CloseSecondaryWnd(*window);
+			}
+			return false;
+		}
+		bool CEffect::OnUpdateDisplay()
+		{
+			if (editorWnd)
+			{
+				editorWnd->RefreshUI();
+				return true;
 			}
 			return false;
 		}

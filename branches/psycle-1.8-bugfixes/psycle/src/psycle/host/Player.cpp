@@ -149,9 +149,9 @@ namespace psycle
 								if ( mIndex < MAX_MACHINES && pSong->_pMachine[mIndex] && pSong->_pMachine[mIndex]->_mode == MACHMODE_FX )
 								{
 									if ( pEntry->_parameter&0x0F )
-										pSong->_pMachine[mIndex]->_bypass = true;
+										pSong->_pMachine[mIndex]->Bypass(true);
 									else
-										pSong->_pMachine[mIndex]->_bypass = false;
+										pSong->_pMachine[mIndex]->Bypass(false);
 								}
 							}
 

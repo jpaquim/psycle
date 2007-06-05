@@ -96,6 +96,8 @@ namespace psycle
 				virtual int GetPluginCategory() { return GetPlugCategory(); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
+				virtual bool Bypass(void) { return Machine::Bypass(); }
+				virtual void Bypass(bool e) { Machine::Bypass(e); if (aEffect) SetBypass(e); }
 //				virtual bool ConnectTo(Machine& dstMac,int dstport=0,int outport=0,float volume=1.0f);
 //				virtual bool Disconnect(Machine& dstMac);
 
@@ -132,7 +134,6 @@ namespace psycle
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
-				virtual bool OnUpdateDisplay() { return false; }
 				///\todo: We need to implement a (Dis)ConnectWire function in order to call MainsChanged() and so that plugins can
 				// test against connected inputs. Else it only done at creation, and we reply "not connected".
 //				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 

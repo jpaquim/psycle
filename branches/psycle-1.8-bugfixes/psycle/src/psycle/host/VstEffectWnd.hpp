@@ -49,7 +49,7 @@ NAMESPACE__BEGIN(psycle)
 			virtual void GetWindowSize(CRect &rcFrame, CRect &rcClient, ERect *pRect = NULL);
 			virtual void ResizeWindow(int width, int height);
 			virtual void ResizeWindow(ERect* pRect);
-			virtual void RefreshUI(){};
+			virtual void RefreshUI();
 			virtual bool BeginAutomating(long index){ return false; }
 			virtual bool SetParameterAutomated(long index, float value);
 			virtual bool EndAutomating(long index) { return false; }
@@ -60,6 +60,8 @@ NAMESPACE__BEGIN(psycle)
 		protected:
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); };
 			virtual CBaseGui* CreateView();
+			void FillProgramCombobox();
+			void FillPopup(CMenu* pPopupMenu);
 			CBaseGui* pView;
 			CToolBar toolBar;
 			CComboBox comboBank;
@@ -91,6 +93,9 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateViewsMidichannels(CCmdUI *pCmdUI);
 			afx_msg void OnAboutExtendedinfo();
 			afx_msg void OnAboutAboutvst();
+			afx_msg void OnSelchangeProgram();
+			afx_msg void OnSetProgram(UINT nID);
+			afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 			DECLARE_MESSAGE_MAP()
 		};
 	NAMESPACE__END

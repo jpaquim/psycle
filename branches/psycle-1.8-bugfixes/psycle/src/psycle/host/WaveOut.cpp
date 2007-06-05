@@ -187,7 +187,7 @@ namespace psycle
 				if(_dither) QuantizeWithDither(pBuf, pOut,bs);
 				else Quantize(pBuf, pOut,bs);
 
-				_writePos += _blockSize / GetSampleSize();
+				_writePos += bs;
 
 				pb->pHeader->dwFlags = 0;
 				pb->pHeader->lpData = (char *)pb->pData;

@@ -1244,7 +1244,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					if (Global::_pSong->_pMachine[c])
 					{
-						Global::_pSong->_pMachine[c]->_stopped=false;
+						Global::_pSong->_pMachine[c]->Standby(false);
 					}
 				}
 			}

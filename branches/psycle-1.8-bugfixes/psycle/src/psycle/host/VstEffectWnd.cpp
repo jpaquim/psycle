@@ -57,6 +57,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_WM_KEYDOWN()
 			ON_WM_KEYUP()
 			ON_WM_SIZING()
+			ON_WM_INITMENUPOPUP()
 //			ON_WM_LBUTTONDOWN()
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
 			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
@@ -73,6 +74,8 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_MIDICHANNELS, OnUpdateViewsMidichannels)
 			ON_COMMAND(ID_ABOUT_EXTENDEDINFO, OnAboutExtendedinfo)
 			ON_COMMAND(ID_ABOUT_ABOUTVST, OnAboutAboutvst)
+			ON_LBN_SELCHANGE(ID_COMBO_PRG, OnSelchangeProgram)
+			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+999, OnSetProgram)
 		END_MESSAGE_MAP()
 
 		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
@@ -89,8 +92,8 @@ NAMESPACE__BEGIN(psycle)
 				this->MessageBox("Error creating toolbar!", "whoops!", MB_OK);
 */
 
-			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, WS_VISIBLE | CBRS_TOP | CBRS_FLYBY
-				|  CBRS_TOOLTIPS | CBRS_SIZE_DYNAMIC) ||
+			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP
+				|  CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 				!toolBar.LoadToolBar(IDR_VSTFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
@@ -104,8 +107,8 @@ NAMESPACE__BEGIN(psycle)
 			rect.top = 1;
 			rect.bottom = rect.top + 400; //drop height
 
-			if(!comboBank.Create(CBS_DROPDOWNLIST | CBS_SORT | WS_VISIBLE |
-				WS_TABSTOP | WS_VSCROLL, rect, &toolBar, ID_COMBO_BANK))
+			if(!comboBank.Create( WS_CHILD | CBS_DROPDOWNLIST | WS_VISIBLE | CBS_AUTOHSCROLL 
+				| WS_VSCROLL, rect, &toolBar, ID_COMBO_BANK))
 			{
 				TRACE0("Failed to create combobox\n");
 				return -1;      // fail to create
@@ -116,15 +119,23 @@ NAMESPACE__BEGIN(psycle)
 			toolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
 			rect.top = 1;
 			rect.bottom = rect.top + 400; //drop height
-			if(!comboProgram.Create(CBS_DROPDOWNLIST | CBS_SORT | WS_VISIBLE |
-				WS_TABSTOP | WS_VSCROLL, rect, &toolBar, ID_COMBO_PRG))
+			if(!comboProgram.Create( WS_CHILD |  CBS_DROPDOWNLIST | WS_VISIBLE | CBS_AUTOHSCROLL 
+				 | WS_VSCROLL, rect, &toolBar, ID_COMBO_PRG))
 			{
 				TRACE0("Failed to create combobox\n");
 				return -1;      // fail to create
 			}
+			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+			CFont font;
+			font.Attach( hFont );
+			comboBank.SetFont(&font);
+			comboProgram.SetFont(&font);
 
-			comboBank.AddString("Test text");
-			comboProgram.AddString("Test text");
+			comboBank.AddString("Internal Programs");
+			comboBank.AddString("-----------------");
+			comboBank.SetCurSel(0);
+			FillProgramCombobox();
+
 
 			pView = CreateView();
 			machine().SetEditWnd(this);
@@ -132,7 +143,50 @@ NAMESPACE__BEGIN(psycle)
 			SetTimer(449, 25, 0);
 			return 0;
 		}
+		/*****************************************************************************/
+		/* OnInitMenuPopup : called when a popup menu is initialized                 */
+		/*****************************************************************************/
 
+		void CVstEffectWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
+		{
+			/* if Effect Edit menu popping up    */
+			if ((pPopupMenu->GetMenuItemCount() > 0) &&
+				(pPopupMenu->GetMenuItemID(0) == ID_PROGRAMS_OPENPRESET))
+			{
+				FillPopup(pPopupMenu);
+			}
+
+			CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+		}
+
+		void CVstEffectWnd::FillProgramCombobox()
+		{
+			comboProgram.ResetContent();
+
+			int nump;
+			nump = machine().numPrograms();
+			for(int i(0) ; i < nump; ++i)
+			{
+				char s1[256];
+				char s2[256];
+				machine().GetProgramNameIndexed(-1, i, s2);
+				std::sprintf(s1,"%d: %s",i,s2);
+				comboProgram.AddString(s1);
+			}
+			comboProgram.SetCurSel(machine().GetProgram());
+		}
+		void CVstEffectWnd::OnSelchangeProgram() 
+		{
+			int const se=comboProgram.GetCurSel();
+			machine().SetProgram(se);
+			SetFocus();
+		}
+
+		void CVstEffectWnd::RefreshUI()
+		{
+			///\todo: anything more?
+			FillProgramCombobox();
+		}
 		CBaseGui* CVstEffectWnd::CreateView()
 		{
 			if ( pEffect->HasEditor())
@@ -588,18 +642,23 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnOperationsBypassed()
 		{
+			machine().Bypass(!(machine().Bypass()));
 			// TODO: Agregue aquí su código de controlador de comandos
 		}
 
 		void CVstEffectWnd::OnUpdateOperationsBypassed(CCmdUI *pCmdUI)
 		{
-			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+			pCmdUI->SetCheck(machine().Bypass());
 		}
 
 		void CVstEffectWnd::OnProgramsOpenpreset()
 		{
 			char tmp[1024];
-			machine().OnGetChunkFile(tmp);
+			if (!machine().OnGetChunkFile(tmp))
+			{
+				std::strncpy(tmp,reinterpret_cast<char*>(machine().OnGetDirectory()),1024);
+				std::strcat(tmp,"\\fxb");
+			}
 			CFileDialog dlg(TRUE,
 				"fxb",
 				tmp,
@@ -609,14 +668,14 @@ NAMESPACE__BEGIN(psycle)
 			if (dlg.DoModal() != IDOK)
 				return;
 
-			if ( dlg.GetFileExt() == ".fxb" )
+			if ( dlg.GetFileExt() == "fxb" )
 			{
 				CFxBank b(dlg.GetPathName());
 				if ( b.Initialized() ) machine().LoadBank(b);
 				else
 					MessageBox("Error Loading file", NULL, MB_ICONERROR);
 			}
-			else if ( dlg.GetFileExt() == ".fxp" )
+			else if ( dlg.GetFileExt() == "fxp" )
 			{
 				CFxProgram p(dlg.GetPathName());
 				if ( p.Initialized() ) machine().LoadProgram(p);
@@ -624,6 +683,7 @@ NAMESPACE__BEGIN(psycle)
 					MessageBox("Error Loading file", NULL, MB_ICONERROR);
 
 			}
+			FillProgramCombobox();
 		}
 
 		void CVstEffectWnd::OnProgramsSavepreset()
@@ -639,9 +699,9 @@ NAMESPACE__BEGIN(psycle)
 				"Effect Bank Files (.fxb)|*.fxb|Effect Program Files (.fxp)|*.fxp|All Files|*.*||");
 			if (dlg.DoModal() == IDOK)
 			{
-				if ( dlg.GetFileExt() == ".fxb")
+				if ( dlg.GetFileExt() == "fxb")
 					SaveBank((char *)(LPCSTR)dlg.GetPathName());
-				else if ( dlg.GetFileExt() == ".fxp")
+				else if ( dlg.GetFileExt() == "fxp")
 					SaveProgram((char *)(LPCSTR)dlg.GetPathName());
 			}
 		}
@@ -679,7 +739,11 @@ NAMESPACE__BEGIN(psycle)
 			}
 			Invalidate(false);
 		}
-
+		void CVstEffectWnd::OnSetProgram(UINT nID)
+		{
+			machine().SetProgram(nID - ID_SELECTPROGRAM_0);
+			comboProgram.SetCurSel(nID - ID_SELECTPROGRAM_0);
+		}
 		void CVstEffectWnd::OnViewsParameterlist()
 		{
 			// TODO: Agregue aquí su código de controlador de comandos
@@ -719,6 +783,63 @@ NAMESPACE__BEGIN(psycle)
 		{
 			// TODO: Agregue aquí su código de controlador de comandos
 		}
+
+		void CVstEffectWnd::FillPopup(CMenu* pPopupMenu)
+		{
+			if (machine().numPrograms() > 1)
+			{
+				CMenu* popPrg=0;
+				// Find the popup menu for programs.
+				for (int i = pPopupMenu->GetMenuItemCount() - 1; i >= 2; i--)
+				{
+					if ((popPrg = pPopupMenu->GetSubMenu(i)))
+					{
+						CMenu* secMenu=0;
+						if (popPrg->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+						{
+							popPrg->RemoveMenu(0, MF_BYPOSITION);
+							break;
+						}
+						else if ((secMenu=popPrg->GetSubMenu(0)))
+						{
+							if (secMenu->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+							{
+								while (popPrg->GetSubMenu(0))
+								{
+									popPrg->DeleteMenu(0,MF_BYPOSITION);
+								}
+								break;
+							}
+						}
+					}
+				}
+				if (!popPrg)
+					return;
+
+				for (int i = 0; i < machine().numPrograms(); i += 16)
+				{
+					CMenu popup;
+					popup.CreatePopupMenu();
+					for (int j = i; (j < i + 16) && (j < machine().numPrograms()); j++)
+					{
+						char szProg[256] = "";
+						char szPgName[256] = "";
+						machine().GetProgramNameIndexed(-1, j, szPgName);
+						std::sprintf(szProg,"%d. %s",j,szPgName);
+						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, szProg);
+					}
+					char szSub[256] = "";;
+					std::sprintf(szSub,"Programs %d-%d",i,i+15);
+					popPrg->AppendMenu(MF_POPUP | MF_STRING,
+						(UINT)popup.Detach(),
+						szSub);
+				}
+				popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + machine().GetProgram(),
+					MF_CHECKED | MF_BYCOMMAND);
+			}
+		}
+
+
 
 	NAMESPACE__END
 NAMESPACE__END

@@ -2470,13 +2470,13 @@ namespace psycle
 					if (_volumeCounter < 8.0f)	{
 						_volumeCounter = 0.0f;
 						_volumeDisplay = 0;
-						_stopped = true;
+						Standby(true);
 					}
-					else _stopped=false;
+					else Standby(false);
 				}
 			}
 
-			else _stopped = true;
+			else Standby(true);
 			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 		}// XMSampler::Work()

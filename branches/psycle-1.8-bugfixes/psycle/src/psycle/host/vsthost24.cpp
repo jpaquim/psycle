@@ -526,7 +526,6 @@ namespace psycle
 							TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
 							TWSInst[i] = pData->_inst;
 							TWSCurrent[i] = GetParameter(TWSInst[i]);
-							TWSCurrent[i] = 0;
 							TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::pPlayer->SamplesPerRow();
 							TWSSamples = 0;
 							TWSActive = true;
@@ -557,11 +556,12 @@ namespace psycle
 				if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
 				else
 				{
-					if (!_mute) _stopped = false;
-					else _stopped = true;
+					if (!_mute) Standby(false);
+					else Standby(true);
 				}
 				cpu::cycles_type cost = cpu::cycles();
-				if((!_mute) && (!_stopped) && (!_bypass))
+				///\todo: to standby, or not to standby, that's the audible question.
+				if((!_mute) && (!Standby()) && (!_bypass || bCanBypass))
 				{
 					if(bNeedIdle) 
 					{
@@ -615,7 +615,7 @@ namespace psycle
 						if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
 						for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
 						{
-							if(TriggerDelay[i]._cmd) if(TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
+							if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 						}
 						if(nextevent > ns)
 						{
@@ -769,7 +769,7 @@ namespace psycle
 						{
 							_volumeCounter = 0.0f;
 							_volumeDisplay = 0;
-							_stopped = true;
+							Standby(true);
 						}
 					}
 				}

@@ -22,15 +22,15 @@ namespace psycle
 
 		DirectSound::DirectSound()
 		:
-			device_guid(), // DSDEVID_DefaultPlayback <-- undersolved external symbol
-			_initialized(),
-			_configured(),
-			_running(),
-			_playing(),
-			_threadRun(),
-			_pDs(),
-			_pBuffer(),
-			_pCallback()
+			device_guid(GUID_NULL), // DSDEVID_DefaultPlayback <-- undersolved external symbol
+			_initialized(false),
+			_configured(false),
+			_running(false),
+			_playing(false),
+			_threadRun(false),
+			_pDs(0),
+			_pBuffer(0),
+			_pCallback(0)
 		{
 		}
 
@@ -114,7 +114,6 @@ namespace psycle
 			desc.dwReserved = 0;
 			desc.lpwfxFormat = _exclusive ? 0 : &format;
 			desc.guid3DAlgorithm = GUID_NULL;
-			
 			if(FAILED(_pDs->CreateSoundBuffer(&desc, reinterpret_cast<LPDIRECTSOUNDBUFFER*>(&_pBuffer), 0)))
 			{
 				Error(_T("Failed to create DirectSound Buffer(s)"));
@@ -146,17 +145,24 @@ namespace psycle
 					return false;
 				}
 				_dsBufferSize = caps.dwBufferBytes;
-				WriteConfig();
+				//WriteConfig();
+
+				_runningBufSize = _dsBufferSize*0.5f;
+				_buffersToDo = 1;
 			}
+			else
+			{
+				_runningBufSize = _bufferSize;
+				_buffersToDo = _numBuffers;
+			}
+			_lowMark = 0;
+			_highMark = _runningBufSize;
+
 			_pBuffer->Initialize(_pDs,&desc);
 
-			_lowMark = 0;
-			_highMark = _bufferSize;
-			if(_highMark >= _dsBufferSize) _highMark = _dsBufferSize - 1;
-			_currentOffset = 0;
-			_buffersToDo = _exclusive ? 1 : _numBuffers;
 			_event.ResetEvent();
 			_threadRun = true;
+			_playing = false;
 			DWORD dwThreadId;
 			CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
 			_running = true;
@@ -169,9 +175,19 @@ namespace psycle
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);
+			//Prefill buffer:
+			for(int i=0; i< pThis->_buffersToDo;i++)
+				pThis->DoBlocks();
+
 			while(pThis->_threadRun)
 			{
-				pThis->DoBlocks();
+				int runs=0;
+				while(pThis->WantsMoreBlocks())
+				{
+					pThis->DoBlocks();
+					if (++runs > pThis->_numBuffers)
+						break;
+				}
 				::Sleep(10);
 			}
 			_event.SetEvent();
@@ -202,102 +218,76 @@ namespace psycle
 			return true;
 		}
 
+		bool DirectSound::WantsMoreBlocks()
+		{
+			// [_lowMark,_highMark] is the next buffer to be filled.
+			// if pos is still inside, we have to wait.
+			int pos=0;
+			HRESULT hr = _pBuffer->GetCurrentPosition((DWORD*)&pos, 0);
+			if(hr == DSERR_BUFFERLOST)
+			{
+				_playing = false;
+				if(FAILED(_pBuffer->Restore()))	return false;
+				hr = _pBuffer->GetCurrentPosition((DWORD*)&pos, 0);
+				if (FAILED(hr)) return false;
+				else return true;
+			}
+			if (FAILED(hr)) return false;
+			if(_highMark < _lowMark)
+			{
+				if((pos >= _lowMark) || (pos < _highMark)) return false;
+			}
+			else if((pos >= _lowMark) && (pos < _highMark))	return false;
+			return true;
+		}
+
 		void DirectSound::DoBlocks()
 		{
-			int pos;
-			HRESULT hr;
-			bool playing = _playing;
-//			while(true)
-//			{
-				// Check if more audio is needed for the buffers.
-				while(true)
+			int* pBlock1 , *pBlock2;
+			unsigned long blockSize1, blockSize2;
+			// Obtain write pointer. 
+			HRESULT hr = _pBuffer->Lock(_lowMark, _runningBufSize, 
+				(void**)&pBlock1, &blockSize1, 
+				(void**)&pBlock2, &blockSize2, 0);
+			if (DSERR_BUFFERLOST == hr) 
+			{ 
+				// If DSERR_BUFFERLOST is returned, restore and retry lock. 
+				_pBuffer->Restore(); 
+				_playing = false;
+				hr = _pBuffer->Lock(_lowMark, _runningBufSize, 
+					(void**)&pBlock1, &blockSize1, 
+					(void**)&pBlock2, &blockSize2, 0);
+			} 
+			if (SUCCEEDED(hr))
+			{ 
+				// Generate audio and put it into the buffer
+				int numSamples = blockSize1 / GetSampleSize();
+				float *pFloatBlock = _pCallback(_callbackContext, numSamples);
+				if(_dither) QuantizeWithDither(pFloatBlock, pBlock1, numSamples);
+				else Quantize(pFloatBlock, pBlock1, numSamples);
+				_lowMark += blockSize1;
+				if (blockSize2 > 0)
 				{
-					hr = _pBuffer->GetCurrentPosition((DWORD*)&pos, 0);
-					if(hr == DSERR_BUFFERLOST)
-					{
-						playing = false;
-						if(FAILED(_pBuffer->Restore()))	return;
-						else continue;
-					}
-					else if (FAILED(hr))
-					{
-						Error(_T("DirectSoundBuffer::GetCurrentPosition failed"));
-						return;
-					}
-					break;
+					numSamples = blockSize2 / GetSampleSize();
+					float *pFloatBlock = _pCallback(_callbackContext, numSamples);
+					if(_dither) QuantizeWithDither(pFloatBlock, pBlock2, numSamples);
+					else Quantize(pFloatBlock, pBlock2, numSamples);
+					_lowMark += blockSize2; // Because it wrapped around. 
 				}
-				if(_highMark < _lowMark)
-				{
-					if((pos > _lowMark) || (pos < _highMark)) return;
-				}
-				else if((pos > _lowMark) && (pos < _highMark)) return;
-
-
-				int* pBlock1 , *pBlock2;
-				int blockSize1, blockSize2;
-				int currentOffset = _currentOffset;
-				while (_buffersToDo != 0)
-				{
-					// Prepare buffer for writing operation.
-					// The buffer is get in two slices (pBlock1 and pBlock2) because it is circular
-					// and you get in two parts when it reaches the end.
-					while(true)
-					{
-						hr = _pBuffer->Lock((DWORD)currentOffset, (DWORD)_bufferSize,
-											(void**)&pBlock1, (DWORD*)&blockSize1,
-											(void**)&pBlock2, (DWORD*)&blockSize2,
-											0);
-						if(FAILED(hr))
-						{
-							if(hr == DSERR_BUFFERLOST)
-							{
-								playing = false;
-								if(FAILED(_pBuffer->Restore())) return;
-								continue;
-							}
-							else
-							{
-								Error(_T("Failed to lock DirectSoundBuffer"));
-								return;
-							}
-						}
-						break;
-					}
-
-					// Generate audio and put it into the buffer
-					int blockSize = blockSize1 / GetSampleSize();
-					int* pBlock = pBlock1;
-					float *pFloatBlock = _pCallback(_callbackContext, blockSize);
-					if(_dither) QuantizeWithDither(pFloatBlock, pBlock, blockSize);
-					else Quantize(pFloatBlock, pBlock, blockSize);
-
-					blockSize = blockSize2 / GetSampleSize();
-					pBlock = pBlock2;
-					if(blockSize > 0)
-					{
-						float *pFloatBlock = _pCallback(_callbackContext, blockSize);
-						if(_dither) QuantizeWithDither(pFloatBlock, pBlock, blockSize);
-						else Quantize(pFloatBlock, pBlock, blockSize);
-					}
-
-					// Unlock the buffer so that the audio driver can play it.
-					_pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
-					_currentOffset += _bufferSize;
-					if(_currentOffset >= _dsBufferSize) _currentOffset -= _dsBufferSize;
-					_lowMark += _bufferSize;
-					if(_lowMark >= _dsBufferSize) _lowMark -= _dsBufferSize;
-					_highMark += _bufferSize;
-					if(_highMark >= _dsBufferSize) _highMark -= _dsBufferSize;
-
-					--_buffersToDo;
-				} // while (_buffersToDo != 0)
-				_buffersToDo = 1;
-				if(!playing)
+				// Release the data back to DirectSound. 
+				hr = _pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
+				if (SUCCEEDED(hr) && !_playing)
 				{
 					_playing = true;
 					hr = _pBuffer->Play(0, 0, DSBPLAY_LOOPING);
 				}
-//			} // while (true)
+				_highMark = _lowMark + _runningBufSize;
+				if(_highMark > _dsBufferSize)
+				{
+					_highMark -= _dsBufferSize;
+					if ( _lowMark >= _dsBufferSize ) _lowMark -= _dsBufferSize;
+				}
+			}
 		}
 
 		void DirectSound::ReadConfig()

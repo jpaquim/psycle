@@ -51,7 +51,7 @@ namespace psycle
 			int _numBuffers;
 
 			int _dsBufferSize;
-			int _currentOffset;
+			int _runningBufSize;
 			int _lowMark;
 			int _highMark;
 			int _buffersToDo;
@@ -67,6 +67,7 @@ namespace psycle
 			void WriteConfig();
 			void Error(const TCHAR msg[]);
 			void DoBlocks();
+			bool WantsMoreBlocks();
 			bool Start();
 			bool Stop();
 		};

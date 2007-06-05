@@ -109,11 +109,6 @@ END
 
 IDR_VSTFRAME MENU 
 BEGIN
-    POPUP "Operations"
-    BEGIN
-        MENUITEM "Enabled",                     ID_OPERATIONS_ENABLED
-        MENUITEM "Bypassed",                    ID_OPERATIONS_BYPASSED
-    END
     POPUP "Programs"
     BEGIN
         MENUITEM "Open Preset",                 ID_PROGRAMS_OPENPRESET
@@ -121,25 +116,25 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "Select Bank"
         BEGIN
-            MENUITEM "asdf",                        ID_SELECTBANK_001
+            MENUITEM "Bank0",                       ID_SELECTBANK_0
         END
         POPUP "Select Program"
         BEGIN
-            MENUITEM "asdf",                        ID_SELECTPROGRAM_001
+            MENUITEM "Program 0",                   ID_SELECTPROGRAM_0
         END
         MENUITEM SEPARATOR
         MENUITEM "Randomize Program",           ID_PROGRAMS_RANDOMIZEPROGRAM
+        MENUITEM SEPARATOR
+        MENUITEM "Enable VST",                  ID_OPERATIONS_ENABLED
+        MENUITEM "Bypass VST",                  ID_OPERATIONS_BYPASSED
     END
     POPUP "Views"
     BEGIN
         MENUITEM "Parameter List",              ID_VIEWS_PARAMETERLIST
         MENUITEM "Bank Manager",                ID_VIEWS_BANKMANAGER
         MENUITEM "Midi Channels",               ID_VIEWS_MIDICHANNELS
-    END
-    POPUP "About"
-    BEGIN
-        MENUITEM "Extended Info",               ID_ABOUT_EXTENDEDINFO
         MENUITEM SEPARATOR
+        MENUITEM "Extended Info",               ID_ABOUT_EXTENDEDINFO
         MENUITEM "About",                       ID_ABOUT_ABOUTVST
     END
 END
@@ -323,7 +318,6 @@ IDB_MASTERSLIDER        BITMAP                  "./MasterMachine/slider.bmp"
 IDB_PATTERN_HEADER_SKIN BITMAP                  "./pattern_header_skin.bmp"
 IDB_MACHINE_SKIN        BITMAP                  "./machine_skin.bmp"
 IDB_ASIO                BITMAP                  "./AsioLogo.bmp"
-IDB_BETASPLASH          BITMAP                  "./beta.bmp"
 IDB_SAMPULSE            BITMAP                  "sampulse.bmp"
 IDB_KEYS_SHARP          BITMAP                  "sharpkey.bmp"
 IDB_KEYS_NORMAL         BITMAP                  "notekey.bmp"
@@ -1305,8 +1299,8 @@ BEGIN
     LTEXT           "Source Forge:",IDC_STATIC,19,144,46,8
     EDITTEXT        IDC_EDIT5,79,144,236,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
-    CONTROL         208,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
-                    WS_BORDER,0,0,335,186
+    CONTROL         142,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE,0,
+                    0,333,185
     LTEXT           "ASIO Audio Stream I/O API v2.1 (c)1996-2005 Steinberg",
                     IDC_ASIO,127,158,196,8,NOT WS_VISIBLE
     LTEXT           "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg",

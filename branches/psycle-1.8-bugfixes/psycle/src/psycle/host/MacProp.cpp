@@ -53,7 +53,7 @@ NAMESPACE__BEGIN(psycle)
 
 			m_muteCheck.SetCheck(pMachine->_mute);
 			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
-			m_bypassCheck.SetCheck(pMachine->_bypass);
+			m_bypassCheck.SetCheck(pMachine->Bypass());
 			if (pMachine->_mode == MACHMODE_GENERATOR ) 
 			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
@@ -101,7 +101,7 @@ NAMESPACE__BEGIN(psycle)
 		}
 		void CMacProp::OnBypass() 
 		{
-			pMachine->_bypass = (m_bypassCheck.GetCheck() == 1);
+			pMachine->Bypass(m_bypassCheck.GetCheck() == 1);
 			if ( m_view != NULL )
 			{
 				m_view->AddMacViewUndo();

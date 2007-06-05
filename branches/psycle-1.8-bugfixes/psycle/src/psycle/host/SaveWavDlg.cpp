@@ -287,7 +287,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					if (pSong->_pMachine[c])
 					{
-						pSong->_pMachine[c]->_stopped=false;
+						pSong->_pMachine[c]->Standby(false);
 					}
 				}
 			}

@@ -363,6 +363,7 @@ namespace seib {
 			bool bNeedEditIdle;
 			bool bWantMidi;
 			bool bShellPlugin;
+			bool bCanBypass;
 
 
 			// overridables
@@ -375,6 +376,8 @@ namespace seib {
 			virtual void LeaveCritical(){;}
 			virtual void WantsMidi(bool enable) { bWantMidi=enable; }
 			virtual bool WantsMidi() { return bWantMidi; }
+			virtual void KnowsToBypass(bool enable) { bCanBypass=enable; }
+			virtual bool KnowsToBypass() { return bCanBypass; }
 			virtual void NeedsIdle(bool enable) { bNeedIdle=enable; }
 			virtual bool NeedsIdle(){ return bNeedIdle; }
 			virtual void NeedsEditIdle(bool enable) { bNeedIdle=enable; }
@@ -389,7 +392,8 @@ namespace seib {
 			virtual void * OnGetDirectory();
 			virtual bool OnGetChunkFile(char * nativePath);
 			virtual bool OnSizeEditorWindow(long width, long height);
-			virtual bool OnUpdateDisplay() { return false; }
+			///\todo: You might need to overload the OnUpdateDisplay in order to check other changes.
+			virtual bool OnUpdateDisplay();
 			virtual void * OnOpenWindow(VstWindow* window);
 			virtual bool OnCloseWindow(VstWindow* window);
 			virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return true; } 
@@ -500,7 +504,19 @@ namespace seib {
 			inline bool String2Parameter(long index, char *text) { return (bool)Dispatch(effString2Parameter, index, 0, text); }
 			inline long DECLARE_VST_DEPRECATED(GetNumProgramCategories)() { return Dispatch(effGetNumProgramCategories); }
 			// text is a string up to kVstMaxProgNameLen chars + \0 delimiter
-			inline bool GetProgramNameIndexed(long category, long index, char* text) { return (bool)Dispatch(effGetProgramNameIndexed, index, category, text); }
+			inline bool GetProgramNameIndexed(long category, long index, char* text)
+			{
+				if (!Dispatch(effGetProgramNameIndexed, index, category, text))
+				{
+					VstInt32 cprog= GetProgram();
+					SetProgram(index);
+					GetProgramName(text);
+					SetProgram(cprog);
+					if (!*text)
+						sprintf(text, "Program %d", index);
+				}
+				return true;
+			}
 			// copy current program to the one in index.
 			inline bool DECLARE_VST_DEPRECATED(CopyProgram)(long index) { return (bool)Dispatch(effCopyProgram, index); }
 			//Input index has been (dis-)connected. The application may issue this call when implemented.
@@ -660,7 +676,7 @@ namespace seib {
 				if (!loadingEffect) pEffect.SetSampleRate(vstTimeInfo.sampleRate);
 				return vstTimeInfo.sampleRate; }
 			virtual long OnUpdateBlockSize(CEffect &pEffect) {
-				if (!loadingEffect) pEffect.SetBlockSize(lBlockSize);
+				pEffect.SetSampleRate(vstTimeInfo.sampleRate);
 				return lBlockSize; }
 			//	Returns the ASIO input latency values.
 			virtual long OnGetInputLatency(CEffect &pEffect) { return 0; }
