@@ -185,7 +185,7 @@ namespace psy
 				///\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
 				AudioPort(Machine & parent, int arrangement, std::string const & name) : parent_(parent),  arrangement_(arrangement), name_(name) {}
 				virtual ~AudioPort() {}
-				virtual void CollectData(int numSamples) {}
+				virtual void CollectData(int /*numSamples*/) {}
 				virtual void Connected(Wire * wire);
 				virtual void Disconnected(Wire * wire);
 				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires_.size()); return wires_[index]; }
@@ -276,6 +276,7 @@ namespace psy
 			public:
 				virtual const PlayerTimeInfo & timeInfo() const = 0;
 				virtual bool autoStopMachines() const = 0;
+				virtual ~MachineCallbacks() {}
 		};
 
 		/// Base class for "Machines", the audio producing elements.
@@ -435,7 +436,7 @@ namespace psy
 					virtual void Work(int numSamples );
 					virtual void WorkNoMix(int numSamples );
 					virtual void Tick( ) {};
-					virtual void Tick(int channel, const PatternEvent & data ) {}
+					virtual void Tick(int /*channel*/, const PatternEvent &) {}
 					virtual void Stop() { playCol.clear(); playColIndex =0; }
 			///\}
 
@@ -450,7 +451,7 @@ namespace psy
 					/// Loader for psycle fileformat version 2.
 					virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
 				protected:
-					friend class CoreSong;
+					// already friend class CoreSong;
 			///\}
 
 			///\name connections ... ports
@@ -481,7 +482,7 @@ namespace psy
 			// Properties
 
 			public:
-				virtual void SetSampleRate(int hertz) { /* \todo should this be a pure virtual function? */ };
+				virtual void SetSampleRate(int /*hertz*/) { /* \todo should this be a pure virtual function? */ };
 
 				///\todo 3 dimensional?
 				virtual void SetPan(int newpan);
@@ -531,13 +532,13 @@ namespace psy
 			///\name parameters
 			///\{
 				public:
-					virtual int GetNumCols() const { return _nCols; };
-					virtual int GetNumParams() const { return _numPars; };
-					virtual void GetParamName(int numparam, char * name) const { name[0]='\0'; };
-					virtual void GetParamRange(int numparam, int &minval, int &maxval) const {minval=0; maxval=0; };
-					virtual void GetParamValue(int numparam, char * parval) const { parval[0]='\0'; };
-					virtual int GetParamValue(int numparam) const { return 0; };
-					virtual bool SetParameter(int numparam, int value) { return false;}; 
+					virtual int GetNumCols() const { return _nCols; }
+					virtual int GetNumParams() const { return _numPars; }
+					virtual void GetParamName(int /*numparam*/, char * name) const { name[0] = '\0'; }
+					virtual void GetParamRange(int /*numparam*/, int & minval, int & maxval) const { minval = 0; maxval = 0; }
+					virtual void GetParamValue(int /*numparam*/, char * parval) const { parval[0] = '\0'; }
+					virtual int GetParamValue(int /*numparam*/) const { return 0; }
+					virtual bool SetParameter(int /*numparam*/, int /*value*/) { return false; }
 			///\}
 
 			///\name more misplaced gui stuff
