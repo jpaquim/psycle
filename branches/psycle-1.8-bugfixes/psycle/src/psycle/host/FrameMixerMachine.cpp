@@ -5,7 +5,7 @@
 #include "ChildView.hpp"
 #include "configuration.hpp"
 #include "song.hpp"
-#include "machine.hpp"
+#include "internal_machines.hpp"
 
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)

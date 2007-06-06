@@ -377,6 +377,7 @@ NAMESPACE__BEGIN(psycle)
 				if (nv > maxval) nv = maxval;
 
 				_pMachine->SetParameter(tweakpar,(int) nv);
+				///\todo:
 /*				prevval=(int)nv;
 				wndView->AddMacViewUndo();
 				if (Global::pConfig->_RecordTweaks)
@@ -424,39 +425,26 @@ NAMESPACE__BEGIN(psycle)
 				{		
 					int min_v=1;
 					int max_v=1;
-					char name[64];
+					char name[64],title[128];
 					memset(name,0,64);
-					CNewVal dlg;
 
-					_pMachine->GetParamName(tweakpar,name);
 					_pMachine->GetParamRange(tweakpar,min_v,max_v);
-					dlg.m_Value = _pMachine->GetParamValue(tweakpar);
-
+					_pMachine->GetParamName(tweakpar,name);
 					std::sprintf
 						(
-							dlg.title, "Param:'%.2x:%s' (Range from %d to %d)\0",
-							tweakpar,
-							name,
-							min_v,
-							max_v
+						title, "Param:'%.2x:%s' (Range from %d to %d)\0",
+						tweakpar,
+						name,
+						min_v,
+						max_v
 						);
-					dlg.min = min_v;
-					dlg.max = max_v;
-					dlg.macindex = machine()._macIndex;
-					dlg.paramindex = tweakpar;
+
+					CNewVal dlg(machine()._macIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v);
+					dlg.SetWindowText(title);
 					if ( dlg.DoModal() == IDOK)
 					{
-						int nv = dlg.m_Value;
-						if (nv < min_v)
-						{
-							nv = min_v;
-						}
-						if (nv > max_v)
-						{
-							nv = max_v;
-						}
 //						wndView->AddMacViewUndo();
-						_pMachine->SetParameter(tweakpar,(int)nv);
+						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
 					}
 					Invalidate(false);
 				}

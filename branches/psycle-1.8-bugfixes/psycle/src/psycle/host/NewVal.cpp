@@ -5,47 +5,31 @@
 #include "NewVal.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		CNewVal::CNewVal(CWnd* pParent)
+		CNewVal::CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,CWnd* pParent)
 			: CDialog(CNewVal::IDD, pParent)
+			, macindex(mindex) , paramindex(pindex), m_Value(vval) , v_min(vmin) , v_max(vmax)
 		{
-			//{{AFX_DATA_INIT(CNewVal)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
-			m_Value=0;
 		}
 
 		void CNewVal::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CNewVal)
 			DDX_Control(pDX, IDC_EDIT1, m_value);
 			DDX_Control(pDX, IDC_TEXT, m_text);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CNewVal, CDialog)
-			//{{AFX_MSG_MAP(CNewVal)
 			ON_EN_UPDATE(IDC_EDIT1, OnUpdateEdit1)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CNewVal::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			SetWindowText(title);
 			char buf[32];
 			sprintf(buf,"%d",m_Value);
 			m_value.SetWindowText(buf);
 			m_value.SetSel(-1,-1,false);
 			return TRUE;
-		}
-
-		void CNewVal::OnOK() 
-		{
-			char buffer[16];
-			m_value.GetWindowText(buffer,16);
-			m_Value=atoi(buffer);
-			CDialog::OnOK();
 		}
 
 		void CNewVal::OnUpdateEdit1() 
@@ -54,19 +38,19 @@ NAMESPACE__BEGIN(psycle)
 			m_value.GetWindowText(buffer,16);
 			m_Value=atoi(buffer);
 
-			if (m_Value < min)
+			if (m_Value < v_min)
 			{
-				m_Value = min;
-				sprintf(buffer,"Below Range. Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-min);
+				m_Value = v_min;
+				sprintf(buffer,"Below Range. Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-v_min);
 			}
-			else if(m_Value > max)
+			else if(m_Value > v_max)
 			{
-				m_Value = max;
-				sprintf(buffer,"Above Range. Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-min);
+				m_Value = v_max;
+				sprintf(buffer,"Above Range. Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-v_min);
 			}
 			else
 			{
-				sprintf(buffer,"Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-min);
+				sprintf(buffer,"Use this HEX value: twk %.2X %.2X %.4X",paramindex,macindex,m_Value-v_min);
 			}
 			m_text.SetWindowText(buffer);
 		}

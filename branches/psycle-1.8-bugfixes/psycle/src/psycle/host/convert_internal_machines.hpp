@@ -3,6 +3,7 @@
 #include <exception>
 #include <map>
 #include "../scale.hpp"
+#include "internal_machines.hpp"
 namespace psycle
 {
 	namespace host
