@@ -1,52 +1,49 @@
 ///\file
-///\brief interface file for psycle::host::CDefaultVstGui.
+///\brief interface file for psycle::host::CVstParamList.
 #pragma once
-#include "VSTHost24.hpp"
-#include "ChildView.hpp"
+
 #include <afxext.h>
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-/// default vst gui window.
-		class CDefaultVstGui : public CFormView
+
+		namespace vst
 		{
+			class plugin;
+		}
+
+		class CVstParamList : public CDialog
+		{
+		public:
+			CVstParamList(vst::plugin* effect);   // standard constructor
+			virtual ~CVstParamList();
+			virtual BOOL Create(CWnd *pParentWnd=NULL);
+
+			enum { IDD = IDD_VSTRACK };
+			CComboBox	m_program;
+			CSliderCtrl	m_slider;
+			CStatic		m_text;
+			CListBox	m_parlist;
+		
+		// Attributes
+		public:
+			inline vst::plugin& machine(){ return *_pMachine; }
+
 		protected:
-			CDefaultVstGui(); // protected constructor used by dynamic creation
-			DECLARE_DYNCREATE(CDefaultVstGui)
-		// Form Data
+			vst::plugin * _pMachine;
+			int _quantizedvalue;
+			CWnd* _mainView;
+
+		// Operations
 		public:
 			void Init();
 			void UpdateOne();
 			void UpdateParList();
 			void UpdateText(int value);
 			void UpdateNew(int par,float value);
-
-			int MachineIndex;
-			int nPar;
-			int previousProg;
-			vst::plugin * _pMachine;
-			bool updatingvalue;
-			CWnd* mainView;
-			CChildView* childView;
-			//{{AFX_DATA(CDefaultVstGui)
-			enum { IDD = IDD_VSTRACK };
-			CComboBox	m_program;
-			CComboBox	m_combo;
-			CSliderCtrl	m_slider;
-			CStatic	m_text;
-			CListBox	m_parlist;
-			//}}AFX_DATA
-		// Attributes
-		public:
-		// Operations
-		public:
 			void InitializePrograms(void);
-			virtual ~CDefaultVstGui();
 		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CDefaultVstGui)
-			protected:
+		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
 		#if !defined NDEBUG
@@ -54,19 +51,14 @@ NAMESPACE__BEGIN(psycle)
 			virtual void Dump(CDumpContext& dc) const;
 		#endif
 			// Generated message map functions
-			//{{AFX_MSG(CDefaultVstGui)
+			virtual BOOL OnInitDialog();
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-			afx_msg void OnSelchangeList1();
-			afx_msg void OnReleasedcaptureSlider1(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnSelchangeCombo1();
-			afx_msg void OnCloseupCombo1();
-			afx_msg void OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-			//}}AFX_MSG
+			afx_msg void OnSelchangeList();
+			afx_msg void OnReleasedcaptureSlider(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnSelchangeProgram();
+			afx_msg void OnCloseupProgram();
+			afx_msg void OnDeltaposSpin(NMHDR* pNMHDR, LRESULT* pResult);
 			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	NAMESPACE__END
 NAMESPACE__END

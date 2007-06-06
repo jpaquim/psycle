@@ -6,6 +6,8 @@
 
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
+		class CVstParamList;
+
 		using namespace seib::vst;
 		namespace vst
 		{
@@ -40,7 +42,6 @@ NAMESPACE__BEGIN(psycle)
 		protected:
 			vst::plugin* _machine;
 
-			//CParamEditWnd * pParamGui;
 			//CChildView * wndView;
 		// Overrides
 		public:
@@ -63,6 +64,7 @@ NAMESPACE__BEGIN(psycle)
 			void FillProgramCombobox();
 			void FillPopup(CMenu* pPopupMenu);
 			CBaseGui* pView;
+			CVstParamList* pParamGui;
 			CToolBar toolBar;
 			CComboBox comboBank;
 			CComboBox comboProgram;

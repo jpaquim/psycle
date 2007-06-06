@@ -217,6 +217,7 @@
 #define IDC_LABELQ                      1082
 #define IDC_A_A_LABEL7                  1083
 #define IDC_TEXT1                       1084
+#define IDC_STATUSPARAM                 1084
 #define IDC_AUTODEC                     1085
 #define IDC_STATIC1                     1086
 #define IDC_STATIC2                     1087
@@ -1004,7 +1005,11 @@
 #define IDC_SPKEYS_INTRO                1781
 #define IDC_SPKEYS_NEXTPAG              1782
 #define IDC_DESCRLABEL2                 1782
+#define IDC_CMBPROGRAM                  1782
 #define IDC_SPKEYS_PREVPAG              1783
+#define IDC_LISTPARAM                   1783
+#define IDC_SLIDERPARAM                 1784
+#define IDC_SPINPARAM                   1785
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1172,7 +1177,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        271
 #define _APS_NEXT_COMMAND_VALUE         33096
-#define _APS_NEXT_CONTROL_VALUE         1782
+#define _APS_NEXT_CONTROL_VALUE         1786
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

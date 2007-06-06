@@ -5,6 +5,8 @@
 #include "vsthost24.hpp"
 #include "VstEffectWnd.hpp"
 
+#include "VstParamList.hpp"
+
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
 
@@ -79,7 +81,7 @@ NAMESPACE__BEGIN(psycle)
 		END_MESSAGE_MAP()
 
 		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
-		, pView(0) , _machine(effect)
+		, pView(0) , _machine(effect) , pParamGui(0)
 		{
 		}
 
@@ -136,13 +138,83 @@ NAMESPACE__BEGIN(psycle)
 			comboBank.SetCurSel(0);
 			FillProgramCombobox();
 
-
 			pView = CreateView();
 			machine().SetEditWnd(this);
 			*_pActive=true;
 			SetTimer(449, 25, 0);
 			return 0;
 		}
+		void CVstEffectWnd::OnClose()
+		{
+			//			machine().EnterCritical();             /* make sure we're not processing    */
+			machine().EditClose();              /* tell effect edit window's closed  */
+			//			machine().LeaveCritical();             /* re-enable processing              */
+			pView->DestroyWindow();
+			if (pParamGui) pParamGui->DestroyWindow();
+			*_pActive=false;
+			CFrameWnd::OnClose();
+		}
+
+		void CVstEffectWnd::OnTimer(UINT nIDEvent)
+		{
+			if ( nIDEvent == 449 )
+			{
+				pView->WindowIdle();
+			}
+			CFrameWnd::OnTimer(nIDEvent);
+		}
+
+		void CVstEffectWnd::OnSetFocus(CWnd* pOldWnd) 
+		{
+			CFrameWnd::OnSetFocus(pOldWnd);
+		}
+
+		void CVstEffectWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+		{
+			const BOOL bRepeat = nFlags&0x4000;
+			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			if(!bRepeat && cmd.IsValid())
+			{
+				switch(cmd.GetType())
+				{
+				case CT_Note:
+					{
+						const int outnote = cmd.GetNote();
+						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+						{
+							Global::pInputHandler->PlayNote(outnote,127,true,&machine());
+						}
+						else Global::pInputHandler->PlayNote(outnote,127,true);
+					}
+					break;
+				case CT_Immediate:
+					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					break;
+				}
+			}
+			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+		}
+
+		void CVstEffectWnd::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+		{
+			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			const int outnote = cmd.GetNote();
+			if(outnote != -1) {
+				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+					Global::pInputHandler->StopNote(outnote, true, &machine());
+				else
+					Global::pInputHandler->StopNote(outnote, true);
+			}
+			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
+		}
+
+		/*		void CVstEffectWnd::OnLButtonDown(UINT nFlags, CPoint point) 
+		{
+		this->SetFocus();
+		CFrameWnd::OnLButtonDown(nFlags, point);
+		}
+		*/
+
 		/*****************************************************************************/
 		/* OnInitMenuPopup : called when a popup menu is initialized                 */
 		/*****************************************************************************/
@@ -498,32 +570,6 @@ NAMESPACE__BEGIN(psycle)
 			return true;
 		}
 
-		/***********************************************************************/
-
-		void CVstEffectWnd::OnClose()
-		{
-//			machine().EnterCritical();             /* make sure we're not processing    */
-			machine().EditClose();              /* tell effect edit window's closed  */
-//			machine().LeaveCritical();             /* re-enable processing              */
-			pView->DestroyWindow();
-			*_pActive=false;
-			CFrameWnd::OnClose();
-		}
-
-		void CVstEffectWnd::OnTimer(UINT nIDEvent)
-		{
-			if ( nIDEvent == 449 )
-			{
-				pView->WindowIdle();
-			}
-			CFrameWnd::OnTimer(nIDEvent);
-		}
-
-		void CVstEffectWnd::OnSetFocus(CWnd* pOldWnd) 
-		{
-			CFrameWnd::OnSetFocus(pOldWnd);
-		}
-
 		bool CVstEffectWnd::SetParameterAutomated(long index, float value)
 		{
 			if(index>= 0 || index < machine().GetNumParams())
@@ -543,93 +589,8 @@ NAMESPACE__BEGIN(psycle)
 		}
 
 
-		void CVstEffectWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
-			const BOOL bRepeat = nFlags&0x4000;
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			if(!bRepeat && cmd.IsValid())
-			{
-				switch(cmd.GetType())
-				{
-				case CT_Note:
-					{
-						const int outnote = cmd.GetNote();
-						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-						{
-							Global::pInputHandler->PlayNote(outnote,127,true,&machine());
-						}
-						else Global::pInputHandler->PlayNote(outnote,127,true);
-					}
-					break;
-				case CT_Immediate:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-					break;
-				}
-			}
-			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
-		}
+		/***********************************************************************/
 
-		void CVstEffectWnd::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			const int outnote = cmd.GetNote();
-			if(outnote != -1) {
-				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-					Global::pInputHandler->StopNote(outnote, true, &machine());
-				else
-					Global::pInputHandler->StopNote(outnote, true);
-			}
-			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
-		}
-
-/*		void CVstEffectWnd::OnLButtonDown(UINT nFlags, CPoint point) 
-		{
-			this->SetFocus();
-			CFrameWnd::OnLButtonDown(nFlags, point);
-		}
-
-		void CVstEffectWnd::OnSavePreset() 
-		{
-			char tmp[1024];
-			machine().OnGetChunkFile(tmp);
-			std::string sFile = tmp;
-			if (sFile.empty())
-				OnSavePresetAs();
-			else
-			{
-				std::string ext = sFile.substr(sFile.size()-4,4);
-				if ( ext == ".fxb")
-					SaveBank(sFile);
-				else if ( ext == ".fxp")
-					SaveProgram(sFile);
-			}
-		}
-
-
-		void CVstEffectWnd::OnParametersListDlg()
-		{
-			if ( !pParamGui ) pParamGui= new CDefaultVstGui(wndView);
-			
-			pParamGui->_pMachine = _pMachine;
-			pParamGui->MachineIndex = MachineIndex;
-			pParamGui->childView=wndView;
-//			pParamGui->Create(this);
-			pParamGui->DoModal();
-//			pParamGui->Init();
-			delete pParamGui;
-			pParamGui=0;
-		}
-
-		void CVstEffectWnd::OnParametersShowpreset() 
-		{
-			CPresetsDlg dlg;
-			dlg._pMachine=_pMachine;
-			dlg.DoModal();
-//			pParamGui->UpdateOne();
-//			if (!editorgui) pGui->Invalidate(false);
-//			pGui->SetFocus();
-		}
-*/
 		void CVstEffectWnd::OnOperationsEnabled()
 		{
 			// TODO: Agregue aquí su código de controlador de comandos
@@ -643,12 +604,19 @@ NAMESPACE__BEGIN(psycle)
 		void CVstEffectWnd::OnOperationsBypassed()
 		{
 			machine().Bypass(!(machine().Bypass()));
-			// TODO: Agregue aquí su código de controlador de comandos
 		}
 
 		void CVstEffectWnd::OnUpdateOperationsBypassed(CCmdUI *pCmdUI)
 		{
-			pCmdUI->SetCheck(machine().Bypass());
+			if (machine().IsSynth())
+			{
+				pCmdUI->Enable(false);
+			}
+			else
+			{
+				pCmdUI->Enable(true);
+				pCmdUI->SetCheck(machine().Bypass());
+			}
 		}
 
 		void CVstEffectWnd::OnProgramsOpenpreset()
@@ -705,39 +673,32 @@ NAMESPACE__BEGIN(psycle)
 					SaveProgram((char *)(LPCSTR)dlg.GetPathName());
 			}
 		}
-
+		/*
+		void CVstEffectWnd::OnSavePreset() 
+		{
+		char tmp[1024];
+		machine().OnGetChunkFile(tmp);
+		std::string sFile = tmp;
+		if (sFile.empty())
+		OnSavePresetAs();
+		else
+		{
+		std::string ext = sFile.substr(sFile.size()-4,4);
+		if ( ext == ".fxb")
+		SaveBank(sFile);
+		else if ( ext == ".fxp")
+		SaveProgram(sFile);
+		}
+		}
+		*/
 		void CVstEffectWnd::OnProgramsRandomizeprogram()
 		{
-			// Randomize controls
-			int numParameters;
-			try
-			{
-				numParameters = machine().numParams();
-			}
-			catch(const std::exception &)
-			{
-				numParameters = 0;
-			}
-			catch(...) // reinterpret_cast sucks
-			{
-				numParameters = 0;
-			}
+			int numParameters = machine().numParams();
 			for(int c(0); c < numParameters ; ++c)
 			{
-				try
-				{
-					machine().SetParameter(c, rand());
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-				catch(...) // reinterpret_cast sucks
-				{
-					// o_O`
-				}
+				machine().SetParameter(c, rand());
 			}
-			Invalidate(false);
+			UpdateWindow();
 		}
 		void CVstEffectWnd::OnSetProgram(UINT nID)
 		{
@@ -746,14 +707,32 @@ NAMESPACE__BEGIN(psycle)
 		}
 		void CVstEffectWnd::OnViewsParameterlist()
 		{
-			// TODO: Agregue aquí su código de controlador de comandos
+			CRect rc;
+			GetWindowRect(&rc);
+			if (!pParamGui)
+			{
+				pParamGui= new CVstParamList(&machine());
+				pParamGui->Create(this);
+			}
+			pParamGui->ShowWindow(SW_NORMAL);
+			pParamGui->SetWindowPos(NULL,rc.right+1,rc.top,0,0,SWP_NOSIZE);
 		}
 
 		void CVstEffectWnd::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
 		{
 			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
 		}
-
+		/*
+		void CVstEffectWnd::OnParametersShowpreset() 
+		{
+		CPresetsDlg dlg;
+		dlg._pMachine=_pMachine;
+		dlg.DoModal();
+		//			pParamGui->UpdateOne();
+		//			if (!editorgui) pGui->Invalidate(false);
+		//			pGui->SetFocus();
+		}
+		*/
 		void CVstEffectWnd::OnViewsBankmanager()
 		{
 			// TODO: Agregue aquí su código de controlador de comandos

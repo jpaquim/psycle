@@ -1,281 +1,207 @@
 ///\file
-///\brief implementation file for psycle::host::CDefaultVstGui.
+///\brief implementation file for psycle::host::CVstParamList.
 #include <project.private.hpp>
 #include "Psycle.hpp"
-#include "DefaultVstGui.hpp"
-#include "Helpers.hpp"
-#include "ChildView.hpp"
-#include "configuration.hpp"
+#include "VstParamList.hpp"
+#include "vsthost24.hpp"
+//#include "Helpers.hpp"
+//#include "ChildView.hpp"
+//#include "configuration.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-IMPLEMENT_DYNCREATE(CDefaultVstGui, CFormView)
 
-		CDefaultVstGui::CDefaultVstGui() : CFormView(CDefaultVstGui::IDD)
+/*****************************************************************************/
+/* Create : creates the dialog                                               */
+/*****************************************************************************/
+
+		CVstParamList::CVstParamList(vst::plugin* effect)
+		: _pMachine(effect)
+		, _mainView(0)
+		, _quantizedvalue(0)
 		{
-			//{{AFX_DATA_INIT(CDefaultVstGui)
-			//}}AFX_DATA_INIT
+		}
+		CVstParamList::~CVstParamList()
+		{
+		}
+		void CVstParamList::DoDataExchange(CDataExchange* pDX)
+		{
+			CDialog::DoDataExchange(pDX);
+			DDX_Control(pDX, IDC_CMBPROGRAM, m_program);
+			DDX_Control(pDX, IDC_SLIDERPARAM, m_slider);
+			DDX_Control(pDX, IDC_STATUSPARAM, m_text);
+			DDX_Control(pDX, IDC_LISTPARAM, m_parlist);
 		}
 
-		CDefaultVstGui::~CDefaultVstGui()
-		{
-		}
-
-		void CDefaultVstGui::DoDataExchange(CDataExchange* pDX)
-		{
-			CFormView::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CDefaultVstGui)
-			DDX_Control(pDX, IDC_COMBO1, m_program);
-			DDX_Control(pDX, IDC_SLIDER1, m_slider);
-			DDX_Control(pDX, IDC_TEXT1, m_text);
-			DDX_Control(pDX, IDC_LIST1, m_parlist);
-			//}}AFX_DATA_MAP
-		}
-
-		BEGIN_MESSAGE_MAP(CDefaultVstGui, CFormView)
-			//{{AFX_MSG_MAP(CDefaultVstGui)
+		BEGIN_MESSAGE_MAP(CVstParamList, CDialog)
 			ON_WM_VSCROLL()
-			ON_LBN_SELCHANGE(IDC_LIST1, OnSelchangeList1)
-			ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER1, OnReleasedcaptureSlider1)
-			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
-			ON_CBN_CLOSEUP(IDC_COMBO1, OnCloseupCombo1)
-			ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN1, OnDeltaposSpin1)
+			ON_LBN_SELCHANGE(IDC_LISTPARAM, OnSelchangeList)
+			ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDERPARAM, OnReleasedcaptureSlider)
+			ON_CBN_SELCHANGE(IDC_CMBPROGRAM, OnSelchangeProgram)
+			ON_CBN_CLOSEUP(IDC_CMBPROGRAM, OnCloseupProgram)
+			ON_NOTIFY(UDN_DELTAPOS, IDC_SPINPARAM, OnDeltaposSpin)
 			ON_WM_CREATE()
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		/////////////////////////////////////////////////////////////////////////////
-		// CDefaultVstGui diagnostics
+		// CVstParamList diagnostics
 
 		#if !defined  NDEBUG
-			void CDefaultVstGui::AssertValid() const
+			void CVstParamList::AssertValid() const
 			{
-				CFormView::AssertValid();
+				CDialog::AssertValid();
 			}
 
-			void CDefaultVstGui::Dump(CDumpContext& dc) const
+			void CVstParamList::Dump(CDumpContext& dc) const
 			{
-				CFormView::Dump(dc);
+				CDialog::Dump(dc);
 			}
 		#endif //!NDEBUG
 
-		void CDefaultVstGui::Init() 
+		BOOL CVstParamList::Create(CWnd* pParentWnd) 
+		{
+			return CDialog::Create(IDD, pParentWnd);
+		}
+
+		BOOL CVstParamList::OnInitDialog() 
+		{
+			CDialog::OnInitDialog();
+			Init();
+			return TRUE;
+		}
+
+		void CVstParamList::Init() 
 		{
 			UpdateParList();
 			InitializePrograms();
-			//init slider range
 			m_slider.SetRange(0, vst::quantization);
-			nPar=0;
 			UpdateOne();
 		}
 
-		void CDefaultVstGui::InitializePrograms()
+		void CVstParamList::InitializePrograms()
 		{
 			m_program.ResetContent();
 
-			int nump;
-			try
-			{
-				nump = _pMachine->numPrograms();
-			}
-			catch(const std::exception &)
-			{
-				nump = 0;
-			}
+			const int nump = machine().numPrograms();
 			for(int i(0) ; i < nump; ++i)
 			{
 				char s1[256];
 				char s2[256];
-				std::strcpy(s2, "<unnamed>");
-				try
-				{
-					/// \todo Not used but... needed? (to call before getprogramname)
-					//int categories = _pMachine->proxy().dispatcher(effGetNumProgramCategories); categories; // not used
-					_pMachine->GetProgramNameIndexed(-1, i, s2);
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-				std::sprintf(s1,"%d: %s",i+1,s2);
+				machine().GetProgramNameIndexed(-1, i, s2);
+				std::sprintf(s1,"%d: %s",i,s2);
 				m_program.AddString(s1);
 			}
-			try
-			{
-				m_program.SetCurSel(_pMachine->GetProgram());
-			}
-			catch(const std::exception &)
-			{
-				// o_O`
-			}
+			m_program.SetCurSel(machine().GetProgram());
 		}
 
-		void CDefaultVstGui::UpdateParList()
+		void CVstParamList::UpdateParList()
 		{
+			const int nPar= m_parlist.GetCurSel();
 			m_parlist.ResetContent();
 
-			long int params;
-			try
-			{
-				params = _pMachine->numParams();
-			}
-			catch(const std::exception &)
-			{
-				params = 0;
-			}
+			const long int params = machine().numParams();
 			for(int i(0) ; i < params; ++i)
 			{
 				char str[128], buf[128];
 				std::memset(str, 0, 64);
-				try
-				{
-					_pMachine->GetParamName(i, str);
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-				bool b;
-				try
-				{
-					b = _pMachine->CanBeAutomated(i);
-				}
-				catch(const std::exception &)
-				{
-					b = false;
-				}
+				machine().GetParamName(i, str);
+				bool b = machine().CanBeAutomated(i);
 				if(b) std::sprintf(buf, "(A)%.3X: %s", i, str);
 				else std::sprintf(buf, "(_)%.3X: %s", i, str);
 				m_parlist.AddString(buf);
 			}
-			nPar = 0;
-			m_parlist.SetCurSel(0);
+			if ( nPar != -1 )
+				m_parlist.SetCurSel(nPar);
+			else 
+				m_parlist.SetCurSel(0);
 		}
 
-		void CDefaultVstGui::UpdateText(int value)
+		void CVstParamList::UpdateText(int value)
 		{
 			char str[512],str2[32];
-			_pMachine->DescribeValue(nPar,str);
-			sprintf(str2,"\t[Hex: %4X]",value);
-			strcat(str,str2);
+			machine().DescribeValue(m_parlist.GetCurSel(),str);
+			std::sprintf(str2,"\t[Hex: %4X]",value);
+			std::strcat(str,str2);
 			m_text.SetWindowText(str);
 		}
 
-		void CDefaultVstGui::UpdateOne()
+		void CVstParamList::UpdateOne()
 		{
-			//update scroll bar with initial value
-			int value;
-			try
-			{
-				value = _pMachine->GetParamValue(nPar);
-			}
-			catch(const std::exception &)
-			{
-				value = 0; // hmm
-			}
+			int i = m_parlist.GetCurSel();
+			int value = machine().GetParamValue(m_parlist.GetCurSel());
 			UpdateText(value);
-			updatingvalue =true;
-			m_slider.SetPos(vst::quantization -value);
-			updatingvalue =false;
+			_quantizedvalue = value;
+			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
 
-		void CDefaultVstGui::UpdateNew(int par,float value)
+		void CVstParamList::UpdateNew(int par,float value)
 		{
-			if (par != nPar )
-			{
-				nPar=par;
+			if (par != m_parlist.GetCurSel() )
 				m_parlist.SetCurSel(par);
-			}
+
 			value *= vst::quantization;
 			UpdateText(value);
-			updatingvalue=true;
-			m_slider.SetPos(vst::quantization -(f2i(value)));
-			updatingvalue=false;
+			_quantizedvalue = (f2i(value));
+			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
-		void CDefaultVstGui::OnSelchangeList1() 
+		void CVstParamList::OnSelchangeList() 
 		{
-			nPar=m_parlist.GetCurSel();
 			UpdateOne();
-			assert(mainView);
-			mainView->SetFocus();
+			if (_mainView) _mainView->SetFocus();
 		}
 
-		void CDefaultVstGui::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+		void CVstParamList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
-			if(!updatingvalue)
+
+			const int nVal = vst::quantization - m_slider.GetPos();
+
+			if(nVal != _quantizedvalue)
 			{
-				int val1(vst::quantization - m_slider.GetPos());
-				try
+				machine().SetParameter(m_parlist.GetCurSel(), nVal);
+				UpdateText(nVal);
+				///\todo:
+/*				if(Global::pConfig->_RecordTweaks)
 				{
-					_pMachine->SetParameter(nPar, val1);
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-				UpdateText(val1);
-				// well, this isn't so hard... just put the twk record here
-				if(Global::pConfig->_RecordTweaks)
-				{
-					assert(mainView);
+					assert(childView);
 					if (Global::pConfig->_RecordMouseTweaksSmooth)
-						childView->MousePatternTweakSlide(MachineIndex, nPar, val1);
+						childView->MousePatternTweakSlide(MachineIndex, m_parlist.GetCurSel(), nVal);
 					else
-						childView->MousePatternTweak(MachineIndex, nPar, val1);
+						childView->MousePatternTweak(MachineIndex, m_parlist.GetCurSel(), nVal);
 				}
+*/
 			}
 		}
 
-		void CDefaultVstGui::OnReleasedcaptureSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CVstParamList::OnReleasedcaptureSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			mainView->SetFocus();
+			if (_mainView) _mainView->SetFocus();
 			*pResult = 0;
 		}
 
-		void CDefaultVstGui::OnSelchangeCombo1() 
+		void CVstParamList::OnSelchangeProgram() 
 		{
 			int const se=m_program.GetCurSel();
-			try
-			{
-				_pMachine->SetProgram(se);
-			}
-			catch(const std::exception &)
-			{
-				// o_O`
-			}
+			_pMachine->SetProgram(se);
 			UpdateOne();
-			mainView->SetFocus();
+			if (_mainView) _mainView->SetFocus();
 		}
 
-		void CDefaultVstGui::OnCloseupCombo1() 
+		void CVstParamList::OnCloseupProgram() 
 		{
-			assert(mainView);
-			mainView->SetFocus();
+			if (_mainView) _mainView->SetFocus();
 		}
 
-		void CDefaultVstGui::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CVstParamList::OnDeltaposSpin(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 			const int se(m_program.GetCurSel() + pNMUpDown->iDelta);
-			if(se >= 0)
+			if(se >= 0 && se < machine().numPrograms())
 			{
 				m_program.SetCurSel(se);
-				try
-				{
-					_pMachine->SetProgram(se);
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
+				machine().SetProgram(se);
 			}
+			if (_mainView) _mainView->SetFocus();
 			*pResult = 0;
-			mainView->SetFocus();
 		}
 
-		int CDefaultVstGui::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-		{
-			if(CFormView::OnCreate(lpCreateStruct) == -1) return -1;
-			return 0;
-		}
 	NAMESPACE__END
 NAMESPACE__END
