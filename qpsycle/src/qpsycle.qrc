@@ -37,5 +37,6 @@
      <file>images/wave-open.png</file>
      <file>images/wave-save.png</file>
 	 <file>images/selector.png</file>
+	 <file>images/psycle.png</file>
  </qresource>
  </RCC>
