@@ -87,16 +87,18 @@ void PatternView::createToolBar()
 	tracksCbx_->setCurrentIndex( 4 );
 	connect( tracksCbx_, SIGNAL( currentIndexChanged( int ) ),
 		 this, SLOT( onTracksComboBoxIndexChanged int ) );
-		 
+
+	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
+	toolBar_->addWidget ( tracksCbx_ );	 
+	toolBar_->addSeparator();
 	toolBar_->addWidget( new QLabel( "Step: " ) );
 	toolBar_->addWidget( patStepCbx_ );
 	toolBar_->addSeparator();
 	toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
 	toolBar_->addWidget( recordCb_ );
-	toolBar_->addSeparator();
-	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
-	toolBar_->addWidget ( tracksCbx_ );
+
+
 	toolBar_->setSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed );
 
 }
