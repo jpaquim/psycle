@@ -39,5 +39,9 @@
 	 <file>images/selector.png</file>
 	 <file>images/psycle.png</file>
 	 <file>images/plugin.png</file>
- </qresource>
+	 <file>images/efx-internal.png</file>
+	 <file>images/efx-native.png</file>
+	 <file>images/gen-internal.png</file>
+	 <file>images/gen-native.png</file>
+	 </qresource>
  </RCC>
