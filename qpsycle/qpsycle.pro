@@ -92,6 +92,10 @@ SOURCES += \
 	src/gui/waveview/waveview.cpp
 
 RESOURCES += qpsycle.qrc
+win32 {
+ message("Adding RC File for Icon")
+ RC_FILE = qpsycle.rc
+ }
 
 include(../psycle-core/qmake/psycle-core.pri)
 include(../psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
