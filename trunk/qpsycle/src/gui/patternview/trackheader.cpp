@@ -41,11 +41,14 @@ TrackHeader::~ TrackHeader( )
 void TrackHeader::paintEvent( QPaintEvent *event ) 
 {
 	Q_UNUSED( event );
+
+	int widgetWidth = pDraw->width();
 	int trackHeight = 20;
 
 	QPainter painter(this);
 	painter.setBrush( QBrush( QColor(30,30,30) ) );
-	painter.drawRect( 0, 0, width(), trackHeight );
+	setGeometry( 50, 0, widgetWidth, trackHeight );
+	painter.drawRect( 0, 0, widgetWidth, trackHeight );
 
 	int scrollDx = pDraw->horizontalScrollBar()->value();
 	int spacingWidth = 5;

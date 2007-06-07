@@ -33,7 +33,6 @@ public:
 	~TrackHeader();
 
 	void paintEvent( QPaintEvent *event );
-
 private:
 	PatternDraw* pDraw;
 };

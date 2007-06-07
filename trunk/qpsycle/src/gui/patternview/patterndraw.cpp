@@ -51,7 +51,6 @@ PatternDraw::PatternDraw( PatternView *patView )
 	lineNumCol_ = new LineNumberColumn( this, this );
 	lineNumCol_->setGeometry( 0, 22, 50, height() );
 	trackHeader_ = new TrackHeader( this, this );
-	trackHeader_->setGeometry( 50, 0, width(), 20 );
 
 	setupTrackGeometrics( patView_->numberOfTracks() );
 	alignTracks();
