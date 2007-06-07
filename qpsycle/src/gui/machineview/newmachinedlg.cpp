@@ -87,9 +87,9 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
      connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
      connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
      
-     machineTabs->addTab(genList, "Generators");
-     machineTabs->addTab(efxList, "Effects");
-     machineTabs->addTab(intList, "Internal");
+     machineTabs->addTab(genList, QIcon(":images/gen-native.png"), "Generators");
+     machineTabs->addTab(efxList, QIcon(":images/efx-native.png"), "Effects");
+     machineTabs->addTab(intList, QIcon(":images/gen-internal.png"), "Internal");
      machineTabs->addTab(ladList, "Ladspa");
      
      layout->addWidget(machineTabs);
