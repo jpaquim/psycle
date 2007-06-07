@@ -76,6 +76,7 @@ public:
 
 public slots:
 	void onPatternStepComboBoxIndexChanged( int newIndex );
+	void onTracksComboBoxIndexChanged( int index );
 
 protected:
 	void showEvent( QShowEvent * event );
@@ -100,6 +101,7 @@ private:
 	QComboBox *patternCbx_;
 	QAction *delBarAct_;
 	QCheckBox *recordCb_;
+	QComboBox *tracksCbx_;
 
 	int octave_;
 

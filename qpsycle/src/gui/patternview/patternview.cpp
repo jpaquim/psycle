@@ -80,12 +80,23 @@ void PatternView::createToolBar()
 	recordCb_->setStatusTip( "Enable/Disable Recording");
 	recordCb_->setCheckState( Qt::Checked );
 	
+	tracksCbx_ = new QComboBox();
+	for ( int e = 1; e < 65; e++ ) {
+		tracksCbx_->addItem( QString::number( e ) );
+	}
+	tracksCbx_->setCurrentIndex( 4 );
+	connect( tracksCbx_, SIGNAL( currentIndexChanged( int ) ),
+		 this, SLOT( onTracksComboBoxIndexChanged int ) );
+		 
 	toolBar_->addWidget( new QLabel( "Step: " ) );
 	toolBar_->addWidget( patStepCbx_ );
 	toolBar_->addSeparator();
 	toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
 	toolBar_->addWidget( recordCb_ );
+	toolBar_->addSeparator();
+	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
+	toolBar_->addWidget ( tracksCbx_ );
 	toolBar_->setSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed );
 
 }
@@ -220,6 +231,11 @@ void PatternView::onPatternStepComboBoxIndexChanged( int newIndex )
 	setPatternStep( newIndex );
 }
 
+void PatternView::onTracksComboBoxIndexChanged( int index )
+{
+	setNumberOfTracks( index );
+}
+
 void PatternView::keyPressEvent( QKeyEvent *event )
 {
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
@@ -230,7 +246,7 @@ void PatternView::keyPressEvent( QKeyEvent *event )
 		  pattern()->removeBar(position);
 		  patternGrid()->update();
 		  break;
-		  }*/
+		  }*/ //why is this commented?
         case commands::pattern_step_dec:
 		patStepCbx_->setCurrentIndex( std::max( 0, patternStep() - 1 ) );
 		break;
