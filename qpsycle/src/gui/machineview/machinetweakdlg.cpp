@@ -52,6 +52,7 @@
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
 {
+	 setWindowIcon( QIcon(":/images/plugin.png") );
 	pMachine_ = macGui->mac();
 	m_macGui = macGui;
 
