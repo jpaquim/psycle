@@ -30,9 +30,10 @@
 #include <QGraphicsRectItem>
 
 
-TrackHeader::TrackHeader( PatternDraw * pPatternDraw, QWidget *parent ) 
-	: QWidget(parent),
-	  pDraw(pPatternDraw)
+TrackHeader::TrackHeader( int height, PatternDraw * pPatternDraw ) 
+	: QWidget(pPatternDraw),
+	  pDraw(pPatternDraw),
+	  height_(height)
 {}
 
 TrackHeader::~ TrackHeader( )
@@ -42,13 +43,12 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 {
 	Q_UNUSED( event );
 
-	int widgetWidth = pDraw->width();
-	int trackHeight = 20;
+	int viewableWidth = pDraw->width();
 
 	QPainter painter(this);
 	painter.setBrush( QBrush( QColor(30,30,30) ) );
-	setGeometry( 50, 0, widgetWidth, trackHeight );
-	painter.drawRect( 0, 0, widgetWidth, trackHeight );
+	setGeometry( pDraw->lineNumColWidth(), 0, viewableWidth, pDraw->trackHeaderHeight() );
+	painter.drawRect( 0, 0, viewableWidth, pDraw->trackHeaderHeight() );
 
 	int scrollDx = pDraw->horizontalScrollBar()->value();
 	int spacingWidth = 5;
@@ -64,7 +64,7 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 
 		painter.setPen( QPen ( Qt::white ) );
 		QString text = QString::number( it->first );
-		QRectF textBound( xOff, 0, trackGeometry.width(), trackHeight );
+		QRectF textBound( xOff, 0, trackGeometry.width(), height_ );
 		painter.drawText( textBound, text, QTextOption( Qt::AlignCenter ) );
 		if (it->first!=0) {
 			painter.drawLine( xOff, 0, xOff, height() ); // col seperator*/

@@ -28,8 +28,8 @@
 #include <QPaintEvent>
 #include <QScrollBar>
 
-LineNumberColumn::LineNumberColumn( PatternDraw *patDraw, QWidget *parent ) 
-	: QWidget( parent )
+LineNumberColumn::LineNumberColumn( PatternDraw *patDraw ) 
+	: QWidget( patDraw )
 {
 	patternDraw_ = patDraw;
 }
