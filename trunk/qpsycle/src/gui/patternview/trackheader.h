@@ -29,12 +29,13 @@ class QPaintEvent;
 
 class TrackHeader: public QWidget {
 public:
-	TrackHeader(PatternDraw* pPatternDraw, QWidget *parent = 0 );
-	~TrackHeader();
+  TrackHeader( int height, PatternDraw* pPatternDraw );
+  ~TrackHeader();
 
 	void paintEvent( QPaintEvent *event );
 private:
 	PatternDraw* pDraw;
+	int height_;
 };
 
 #endif

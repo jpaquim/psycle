@@ -100,6 +100,9 @@ public:
     int trackPaddingLeft() const { return 5; }
     int trackPaddingRight() const { return 5; }
 
+    int lineNumColWidth() const { return lineNumColWidth_; }
+    int trackHeaderHeight() const { return trackHeaderHeight_; }
+
 protected:
     void scrollContentsBy ( int dx, int dy );
     bool event( QEvent *event );
@@ -113,6 +116,10 @@ private:
    LineNumberColumn *lineNumCol_;
    TrackHeader *trackHeader_;
    PatternGrid *patGrid_;
+
+   int lineNumColWidth_;
+   int trackHeaderHeight_;
+
    psy::core::SinglePattern *pattern_;
 };
 

@@ -29,7 +29,7 @@ class PatternView;
 
 class LineNumberColumn : public QWidget {
 public:
-	LineNumberColumn( PatternDraw *patDraw, QWidget *parent = 0 );
+	LineNumberColumn( PatternDraw *patDraw );
 	~LineNumberColumn();
 
 	void paintEvent( QPaintEvent *event );
