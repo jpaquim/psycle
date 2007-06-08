@@ -70,6 +70,7 @@ MainWindow::MainWindow()
 	patView_->setOctave( 4 );
 
 	audioCnfDlg = new AudioConfigDlg( this );
+	setAttribute( Qt::WA_DeleteOnClose );
 }
 
 void MainWindow::setupSound()

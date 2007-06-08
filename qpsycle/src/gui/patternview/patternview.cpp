@@ -86,7 +86,7 @@ void PatternView::createToolBar()
 	}
 	tracksCbx_->setCurrentIndex( 4 );
 	connect( tracksCbx_, SIGNAL( currentIndexChanged( int ) ),
-		 this, SLOT( onTracksComboBoxIndexChanged int ) );
+		 this, SLOT( onTracksComboBoxIndexChanged( int ) ) );
 
 	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
 	toolBar_->addWidget ( tracksCbx_ );	 
