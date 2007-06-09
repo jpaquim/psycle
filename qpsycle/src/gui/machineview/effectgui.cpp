@@ -106,7 +106,6 @@ void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 
 void EffectGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 {
-	qDebug("effectgui hi");
 	if ( event->button() == Qt::LeftButton )
 		showMacTwkDlgAct_->trigger();
 }
@@ -114,4 +113,15 @@ void EffectGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 void EffectGui::showMacTwkDlg()
 {
 	m_macTwkDlg->show();
+}
+
+void EffectGui::onToggleBypassActionTriggered() 
+{
+    mac()->_bypass = !mac()->_bypass;
+    if (mac()->_bypass)
+    {
+        mac()->_volumeCounter=0.0f;	
+        mac()->_volumeDisplay=0;
+    }
+    update( boundingRect() );
 }
