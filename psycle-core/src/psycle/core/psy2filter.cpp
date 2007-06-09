@@ -97,11 +97,9 @@ namespace psy
 			LoadINSD(&file,song);
 			LoadWAVD(&file,song);
 			PreLoadVSTs(&file,song);
-			#if defined __unix__ || defined __APPLE__
-				convert_internal_machines::Converter converter(plugin_path);
-				LoadMACD(plugin_path, &file,song,&converter,callbacks);
-				TidyUp(&file,song,&converter);
-			#endif
+			convert_internal_machines::Converter converter(plugin_path);
+			LoadMACD(plugin_path, &file,song,&converter,callbacks);
+			TidyUp(&file,song,&converter);
 			return true;
 		}
 
