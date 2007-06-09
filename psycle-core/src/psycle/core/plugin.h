@@ -120,7 +120,7 @@ class Plugin : public Machine
 		///\{
 			public:
 				/// Loader for psycle fileformat version 2.
-				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+/*				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);*/
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile) const;
 				virtual void SaveDllName      (RiffFile * pFile) const;
