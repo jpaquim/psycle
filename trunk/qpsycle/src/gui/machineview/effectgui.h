@@ -35,6 +35,7 @@ public:
 
 public slots:
 	void showMacTwkDlg();
+	void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
 
 protected:
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);

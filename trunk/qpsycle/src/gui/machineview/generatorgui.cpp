@@ -37,7 +37,6 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 	m_macTwkDlg = new MachineTweakDlg( this, macView );
 	showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
 	connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
-	qDebug("creating gen gui");
 }
 
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )

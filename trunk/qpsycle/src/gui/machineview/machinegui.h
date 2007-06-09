@@ -64,8 +64,6 @@ public slots:
 	void onRenameMachineActionTriggered();
 	void onToggleMuteActionTriggered();
 	void onToggleSoloActionTriggered();
-	void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
-	// but Qt fails to find it there.
 	void onCloneMachineActionTriggered();
 
 protected:
