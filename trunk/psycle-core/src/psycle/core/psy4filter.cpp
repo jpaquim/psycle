@@ -433,7 +433,7 @@ namespace psy {
 											xmlpp::Attribute const * const pos_attribute(sequencer_entry.get_attribute("pos"));
 											if(!pos_attribute) std::cerr << "expected pos attribute in seqentry element\n";
 											else {
-												SequenceEntry* entry = lastSeqLine->createEntry(pattern, str<double>(pos_attribute->get_value()));
+												SequenceEntry * entry = lastSeqLine->createEntry(pattern, str<double>(pos_attribute->get_value()));
 												{
 													xmlpp::Attribute const * const start_attribute(sequencer_entry.get_attribute("start"));
 													if(start_attribute) entry->setStartPos(str<float>(start_attribure->get_value()));
