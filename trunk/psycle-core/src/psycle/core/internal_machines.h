@@ -67,7 +67,7 @@ namespace psy {
 			virtual int GenerateAudio( int numSamples );
 			virtual std::string GetName() const { return _psName; };
 			/// Loader for psycle fileformat version 2.
-			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
+/*			virtual bool LoadPsy2FileFormat(RiffFile* pFile);*/
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 

@@ -449,7 +449,7 @@ namespace psy
 					virtual void SaveFileChunk(RiffFile * pFile) const;
 					virtual void SaveSpecificChunk(RiffFile * pFile) const;
 					/// Loader for psycle fileformat version 2.
-					virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+/*					virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);*/
 				protected:
 					// already friend class CoreSong;
 			///\}
