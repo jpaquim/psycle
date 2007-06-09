@@ -10,6 +10,3 @@ qmake
 echo QMake Complete
 make
 echo Make Complete
-echo
-echo Created By Gravity_0
-pause
