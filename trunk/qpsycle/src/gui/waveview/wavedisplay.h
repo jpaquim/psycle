@@ -21,7 +21,7 @@
 #define WAVEDISPLAY_H
 
 #include <QGraphicsView>
-#include <QGraphicsLineitem>
+#include <QGraphicsLineItem>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsScene> 
 class WaveDisplay : public QGraphicsView
@@ -30,7 +30,7 @@ class WaveDisplay : public QGraphicsView
 
 
 public:
-    WaveDisplay(bool mini, QWidget *parent);
+	WaveDisplay(bool mini, QWidget *parent);
 
 public slots:
 	void LoadStereo();
@@ -40,7 +40,7 @@ private:
 	QGraphicsScene *wavescene;
 	QGraphicsSimpleTextItem *nodata;
 	QGraphicsSimpleTextItem *left;
-    QGraphicsSimpleTextItem *right;
+	QGraphicsSimpleTextItem *right;
 	QGraphicsLineItem *mono_line;
 	QGraphicsLineItem *stereo_centerline;
 	QGraphicsLineItem *stereo_leftline;

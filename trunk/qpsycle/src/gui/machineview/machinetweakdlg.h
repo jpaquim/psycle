@@ -28,6 +28,7 @@ namespace psy { namespace core {
 #include <psycle/core/preset.h>
 
 class MachineGui;
+class MachineView;
 
 #include <map>
 
@@ -150,7 +151,7 @@ private:
 class MachineTweakDlg : public QDialog {
 Q_OBJECT
 	public:
-	MachineTweakDlg( MachineGui *macGui, QWidget *parent = 0 );
+	MachineTweakDlg( MachineGui *macGui, QWidget *parent );
 
 	int noteFromCommand( int command );
 

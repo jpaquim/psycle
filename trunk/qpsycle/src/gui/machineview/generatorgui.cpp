@@ -22,17 +22,23 @@
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
 
+#include "generatorgui.h"
 #include "../global.h"
 #include "../configuration.h"
-#include "generatorgui.h"
 #include "machineview.h"
+#include "machinetweakdlg.h"
 
 #include <QPainter>
 #include <QMenu>
 
 GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
-{}
+{
+	m_macTwkDlg = new MachineTweakDlg( this, macView );
+	showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
+	connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
+	qDebug("creating gen gui");
+}
 
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
@@ -100,4 +106,15 @@ void GeneratorGui::keyReleaseEvent( QKeyEvent *event )
 		return;
         default:;
 	}
+}
+
+void GeneratorGui::showMacTwkDlg()
+{
+	m_macTwkDlg->show();
+}
+
+void GeneratorGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
+{
+	if ( event->button() == Qt::LeftButton )
+		showMacTwkDlgAct_->trigger();
 }

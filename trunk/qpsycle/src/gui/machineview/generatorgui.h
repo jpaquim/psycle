@@ -28,7 +28,8 @@ namespace psy { namespace core {
 	}}
 
 
-class MachineView;
+//class MachineView;
+//class MachineTweakDlg;
 
 class QGraphicsSceneContextMenuEvent;
 class QKeyEvent;
@@ -42,11 +43,18 @@ public:
 	GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
+public slots:
+	void showMacTwkDlg();
+
 protected:
 	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
 	void keyPressEvent( QKeyEvent * event );
 	void keyReleaseEvent( QKeyEvent * event );
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
+	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+
+
+	MachineTweakDlg *m_macTwkDlg;
 };
 
 #endif

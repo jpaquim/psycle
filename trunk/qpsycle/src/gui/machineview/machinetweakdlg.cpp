@@ -28,6 +28,7 @@
 #include "../configuration.h"
 #include "../inputhandler.h"
 #include "machinegui.h"
+#include "effectgui.h"
 
 
 #include <QVBoxLayout>

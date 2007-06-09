@@ -161,8 +161,8 @@ void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
 	if ( psy::core::Player::Instance()->loopSequenceEntry() == entry ) {
 		psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
 	}
-	entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
-	scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
+	//entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
+	//scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
 }
 
 void SequencerDraw::onNewLineCreated(psy::core::SequenceLine* seqLine)

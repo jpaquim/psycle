@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include "wavedisplay.h"
 #include <QGraphicsView>
-#include <QGraphicsLineitem>
+#include <QGraphicsLineItem>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsScene> 
 
@@ -28,8 +28,8 @@ WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for W
 	setParent( parent);
 	wavescene = new QGraphicsScene(this);
 	wavescene->setBackgroundBrush(Qt::black);
-    setScene(wavescene);
-    adjustSize();
+	setScene(wavescene);
+	adjustSize();
 	Reset();
 	LoadMono();
 }

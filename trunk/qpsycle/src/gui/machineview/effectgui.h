@@ -28,17 +28,24 @@ class QKeyEvent;
 class QGraphicsSceneContextMenuEvent;
 
 class EffectGui : public MachineGui {
+Q_OBJECT
 public:
 	EffectGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+
+public slots:
+	void showMacTwkDlg();
 
 protected:
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 	void keyPressEvent( QKeyEvent * event );
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
-
+	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+	MachineTweakDlg *m_macTwkDlg;
 private:
 	QAction *toggleBypassAct_;
+
+
 };
 
 #endif
