@@ -22,7 +22,7 @@
 
 #include <QGraphicsView>
 #include <QGraphicsLineitem>
-#include <QGraphicsTextItem>
+#include <QGraphicsSimpleTextItem>
 #include <QGraphicsScene> 
 class WaveDisplay : public QGraphicsView
 {
@@ -38,9 +38,9 @@ public slots:
 	void Reset();
 private:
 	QGraphicsScene *wavescene;
-	QGraphicsTextItem *nodata;
-	QGraphicsTextItem *left;
-    QGraphicsTextItem *right;
+	QGraphicsSimpleTextItem *nodata;
+	QGraphicsSimpleTextItem *left;
+    QGraphicsSimpleTextItem *right;
 	QGraphicsLineItem *mono_line;
 	QGraphicsLineItem *stereo_centerline;
 	QGraphicsLineItem *stereo_leftline;
