@@ -26,10 +26,10 @@
 #include <psycle/core/pluginfinder.h>
 #include <psycle/core/patternevent.h>
 
+#include "machineview.h"
 #include "../global.h"
 #include "../configuration.h"
 #include "machinegui.h"
-#include "machineview.h"
 #include "mastergui.h"
 #include "effectgui.h"
 #include "generatorgui.h"

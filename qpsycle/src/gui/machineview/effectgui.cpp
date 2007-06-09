@@ -25,6 +25,8 @@
 #include "../configuration.h"
 #include "../global.h"
 #include "../inputhandler.h"
+#include "machinetweakdlg.h"
+#include "machineview.h"
 
 #include <QMenu>
 #include <QPainter>
@@ -34,6 +36,11 @@
 EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
 {
+	qDebug("creating effeect gui");
+	m_macTwkDlg = new MachineTweakDlg( this, macView );
+	showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
+	connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
+
 	setBrush( QColor( 0, 180, 0 ) );
 
 	toggleBypassAct_ = new QAction( "Bypass", this );
@@ -92,8 +99,19 @@ void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	if ( event->button() == Qt::LeftButton &&
 	     event->modifiers() == Qt::ControlModifier ) 
 	{
-		qDebug("yup");
 		emit chosen( this );
 	}
 	MachineGui::mousePressEvent( event );
+}
+
+void EffectGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
+{
+	qDebug("effectgui hi");
+	if ( event->button() == Qt::LeftButton )
+		showMacTwkDlgAct_->trigger();
+}
+
+void EffectGui::showMacTwkDlg()
+{
+	m_macTwkDlg->show();
 }

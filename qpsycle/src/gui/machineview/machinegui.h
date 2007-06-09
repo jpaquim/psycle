@@ -60,7 +60,6 @@ public:
 	std::vector<WireGui *> wireGuiList_;
 
 public slots:
-	void showMacTwkDlg();
 	void onDeleteMachineActionTriggered();
 	void onRenameMachineActionTriggered();
 	void onToggleMuteActionTriggered();
@@ -72,14 +71,11 @@ public slots:
 protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
-	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
 	MachineView *m_macView;
 	psy::core::Machine *m_mac;
-
-	MachineTweakDlg *m_macTwkDlg;
 
 	QAction *showMacTwkDlgAct_;
 	QAction *deleteMachineAct_;
