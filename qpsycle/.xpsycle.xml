@@ -12,7 +12,7 @@
 <alsa device = 'plughw:0' />
 
 <!-- gui configuration -->
-
+<theme id='windowsxp' /> <!-- windows, windowsxp, cleanlooks, macosx, cde, motif -->
 <path id='plugindir' src='/path/to/psycle-plugins/' />
 <path id='ladspadir' src='/usr/lib/ladspa' />
 <path id='prsdir' src='/path/to/presets/' />
