@@ -60,7 +60,8 @@ HEADERS += \
 	src/gui/sequencer/sequencerline.h \
 	src/gui/sequencer/sequencerview.h \
 	src/gui/sequencer/beatruler.h \
-	src/gui/waveview/waveview.h
+	src/gui/waveview/waveview.h \
+	src/gui/waveview/wavedisplay.h
 
 SOURCES += \
 	qpsycle.cpp \
@@ -89,11 +90,12 @@ SOURCES += \
 	src/gui/sequencer/sequencerline.cpp \
 	src/gui/sequencer/sequencerview.cpp \
 	src/gui/sequencer/beatruler.cpp \
-	src/gui/waveview/waveview.cpp
+	src/gui/waveview/waveview.cpp \
+	src/gui/waveview/wavedisplay.cpp
 
 RESOURCES += qpsycle.qrc
 win32 {
- message("Adding RC File for Icon")
+ message("Adding [$${RESOURCES}] for Icon")
  RC_FILE = qpsycle.rc
  }
 
