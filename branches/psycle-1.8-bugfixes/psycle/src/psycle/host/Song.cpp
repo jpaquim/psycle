@@ -2220,7 +2220,7 @@ namespace psycle
 			pFile->Write(&size,sizeof(size));
 
 			pFile->Write(name.c_str(),name.length()+1);
-			pFile->Write(name.c_str(),name.length()+1);
+			pFile->Write(author.c_str(),author.length()+1);
 			pFile->Write(comments.c_str(),comments.length()+1);
 
 			if ( !autosave ) 
