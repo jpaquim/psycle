@@ -1,6 +1,6 @@
 @REM Created By Graity_0... Released Under GPL Licence
 @echo off
-title Automaker QT 1.0
+title Automaker QT 1.0 - Windows
 COLOR 0%3
 echo Welcome to Gravity_0 Automaker for QT
 echo Qt is a registered trademaerk of Trolltech
