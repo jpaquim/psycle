@@ -48,7 +48,6 @@ void WaveDisplay::LoadMono()
 void WaveDisplay::Reset()
 {	
 	//Clear Oprions Not Avable Now
-	nodata = new QGraphicsTextItem(0, wavescene);
-	nodata->setPlainText("No Wave Data");
+	nodata = new QGraphicsTextItem("No Wave Data", 0, wavescene);
 	wavescene->addItem(nodata);
 }
