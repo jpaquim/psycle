@@ -17,42 +17,45 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "waveformview.h"
+#include "wavedisplay.h"
 #include <QGraphicsView>
 
-
-WaveFormView::WaveFormView(bool *mini, QWidget *parent); //inizialization file for WaveFormView.
+WaveDisplay::WaveDisplay(bool *mini, QWidget *parent); //inizialization file for WaveDisplay.
 {
+	setParent( parent);
 	if (mini == true)
 	{
 		//if it is a miniwaveview set fixed sizes and dimension
-		this.setSizePolicies( QSizePolicy::Fixed , QSizePolicy::Preferred);
-		this.resize (this.width(), 200);
+		setSizePolicies( QSizePolicy::Fixed , QSizePolicy::Preferred);
+		resize (this.width(), 200);
     }        
     else
 	{
 		//if it is not mini set size policies only
-		this.setSizePolicies( QSizePolicy::Preferred, QSizePolicy::Preferred);
+		setSizePolicies( QSizePolicy::Preferred, QSizePolicy::Preferred);
 	}
-	*scene = new QGraphicsScene(this);
+	scene = new QGraphicsScene(this);
 	scene->setBackgroundBrush(Qt::black);
-    this.adjustSize();
-
+    adjustSize();
+	Clear();
+	return;
 }
 
-WaveFormView::LoadStereo()
+void WaveDisplay::LoadStereo()
 {
 	//we need to add a line at the first quarter and one at the last quarter of GraphicsView To Make that loads a Stereo file...
 }
 
-WaveFormView::LoadMono()
+void WaveDisplay::LoadMono()
 {
 	//we need to add al line at the middle GraphicsView To Make that loads a Mono file...
 	QGraphicsLineItem *line = new QGraphicsLineItem(0,this.height()/2,this.width(),this.height()/2, 0, scene);
 	scene->addItem(line);
 }
 
-WaveFormView::Clear()
-{
-	 
+void WaveDisplay::Clear()
+{	
+	//Clear Oprions Not Avable Now
+	nodata = new QGraphicsTextItem ("No Wave Data", this, scene);
+	scnen->addItem(nodata);
 }
