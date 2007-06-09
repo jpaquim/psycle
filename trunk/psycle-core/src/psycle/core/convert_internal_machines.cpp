@@ -1,4 +1,4 @@
-#include "convert_internal_machines.h"
+#include "convert_internal_machines.private.hpp"
 #include "song.h"
 #include "machine.h"
 #include "helpers/scale.hpp"
