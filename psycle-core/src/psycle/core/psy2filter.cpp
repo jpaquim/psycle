@@ -27,9 +27,7 @@
 #include <algorithm>
 #include <cctype>
 
-#if defined __unix__ || defined __APPLE__
-	#include "convert_internal_machines.h"
-#endif
+#include "convert_internal_machines.h"
 
 namespace psy
 {
