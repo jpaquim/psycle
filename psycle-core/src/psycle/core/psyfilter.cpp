@@ -20,7 +20,7 @@
 #include "psyfilter.h"
 #include "song.h"
 
-#include "psy2filter.h"
+// broken: #include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
 
@@ -39,7 +39,7 @@ namespace psy
 
 		PsyFilters::PsyFilters()
 		{
-			filters.push_back( Psy2Filter::Instance() );
+			// borken: filters.push_back( Psy2Filter::Instance() );
 			filters.push_back( Psy3Filter::Instance() );
 			filters.push_back( Psy4Filter::Instance() );
 		}

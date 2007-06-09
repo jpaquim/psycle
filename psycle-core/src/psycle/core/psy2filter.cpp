@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <cctype>
 
-#include "convert_internal_machines.h"
+#include "convert_internal_machines.private.hpp"
 
 namespace psy
 {
