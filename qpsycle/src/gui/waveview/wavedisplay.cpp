@@ -19,26 +19,18 @@
 ***************************************************************************/
 #include "wavedisplay.h"
 #include <QGraphicsView>
+#include <QGraphicsLineitem>
+#include <QGraphicsTextItem>
+#include <QGraphicsScene> 
 
-WaveDisplay::WaveDisplay(bool *mini, QWidget *parent); //inizialization file for WaveDisplay.
+WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for WaveDisplay.
 {
 	setParent( parent);
-	if (mini == true)
-	{
-		//if it is a miniwaveview set fixed sizes and dimension
-		setSizePolicies( QSizePolicy::Fixed , QSizePolicy::Preferred);
-		resize (this.width(), 200);
-    }        
-    else
-	{
-		//if it is not mini set size policies only
-		setSizePolicies( QSizePolicy::Preferred, QSizePolicy::Preferred);
-	}
-	scene = new QGraphicsScene(this);
-	scene->setBackgroundBrush(Qt::black);
+	wavescene = new QGraphicsScene(this);
+	wavescene->setBackgroundBrush(Qt::black);
     adjustSize();
-	Clear();
-	return;
+	setScene(wavescene);
+	Reset();
 }
 
 void WaveDisplay::LoadStereo()
@@ -49,13 +41,14 @@ void WaveDisplay::LoadStereo()
 void WaveDisplay::LoadMono()
 {
 	//we need to add al line at the middle GraphicsView To Make that loads a Mono file...
-	QGraphicsLineItem *line = new QGraphicsLineItem(0,this.height()/2,this.width(),this.height()/2, 0, scene);
-	scene->addItem(line);
+	/*QGraphicsLineItem *line = new QGraphicsLineItem(0,this.height()/2,this.width(),this.height()/2, 0, wavescene);
+	wavescene->addItem(line);*/
 }
 
-void WaveDisplay::Clear()
+void WaveDisplay::Reset()
 {	
 	//Clear Oprions Not Avable Now
-	nodata = new QGraphicsTextItem ("No Wave Data", this, scene);
-	scnen->addItem(nodata);
+	nodata = new QGraphicsTextItem(0, wavescene);
+	nodata->setPlainText("No Wave Data");
+	wavescene->addItem(nodata);
 }

@@ -39,7 +39,7 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	setLayout(layout_);
 	 
 	//TODO: this should be in the waveview.h and waveformview should be an object of WaveFormView
-	QGraphicsView *wavedisp = new WaveDisplay(false, this);
+	WaveDisplay *wavedisp = new WaveDisplay(false, this);
 		
 	toolBar_ = new QToolBar();
 	toolBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
@@ -131,7 +131,6 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	layout_->addWidget( wavedisp );
 	layout_->addWidget( waveScroll_);
 	layout_->addWidget( zoomBar_ );
-	wavedisp->show();
 }
 
 void WaveView::onLoadButtonClicked()

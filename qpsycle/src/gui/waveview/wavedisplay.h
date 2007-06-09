@@ -21,7 +21,9 @@
 #define WAVEDISPLAY_H
 
 #include <QGraphicsView>
-
+#include <QGraphicsLineitem>
+#include <QGraphicsTextItem>
+#include <QGraphicsScene> 
 class WaveDisplay : public QGraphicsView
 {
      Q_OBJECT
@@ -33,9 +35,9 @@ public:
 public slots:
 	void LoadStereo();
 	void LoadMono();
-	void Clear();
+	void Reset();
 private:
-	QGraphicsScene *scene;
+	QGraphicsScene *wavescene;
 	QGraphicsTextItem *nodata;
 	QGraphicsTextItem *left;
     QGraphicsTextItem *right;
