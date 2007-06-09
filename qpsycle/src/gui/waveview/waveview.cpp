@@ -21,6 +21,7 @@
 #include "../global.h"
 #include "../configuration.h"
 #include "waveview.h"
+#include "wavedisplay.h"
 
 #include <QtGui>
 #include <iostream>
@@ -38,12 +39,8 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 	setLayout(layout_);
 	 
 	//TODO: this should be in the waveview.h and waveformview should be an object of WaveFormView
-	QGraphicsView *waveformview = new QGraphicsView(this);
-	QGraphicsScene *scene = new QGraphicsScene(this);
-	waveformview->setScene(scene);
-	waveformview->setBackgroundBrush( Qt::black );
-	waveformview->adjustSize();
-
+	QGraphicsView *wavedisp = new WaveDisplay(false, this);
+		
 	toolBar_ = new QToolBar();
 	toolBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	 
@@ -131,10 +128,10 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( processBar_ );
-	layout_->addWidget( waveformview );
+	layout_->addWidget( wavedisp );
 	layout_->addWidget( waveScroll_);
 	layout_->addWidget( zoomBar_ );
-	waveformview->show();
+	wavedisp->show();
 }
 
 void WaveView::onLoadButtonClicked()

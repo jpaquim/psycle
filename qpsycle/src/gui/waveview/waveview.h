@@ -20,6 +20,7 @@
  #ifndef WAVEVIEW_H
  #define WAVEVIEW_H
 
+#include "wavedisplay.h"
 #include <psycle/core/song.h>
 #include <QVBoxLayout>
 #include <QToolBar>
@@ -32,7 +33,7 @@ class WaveView : public QWidget
 {
 	Q_OBJECT
 
-		public:
+public:
 	WaveView( psy::core::Song *song_, QWidget *parent = 0);
 
 	psy::core::Song* song();

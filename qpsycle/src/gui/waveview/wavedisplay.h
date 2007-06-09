@@ -17,21 +17,18 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef WAVEFORMVIEW_H
-#define WAVEFORMVIEW_H
-
-#include "waveview.h"
+#ifndef WAVEDISPLAY_H
+#define WAVEDISPLAY_H
 
 #include <QGraphicsView>
 
-
-class WaveFormView : public QGraphicsView
+class WaveDisplay : public QGraphicsView
 {
      Q_OBJECT
 
 
 public:
-     WaveView(bool *mini, QWidget *parent);
+    WaveDisplay(bool mini, QWidget *parent);
 
 public slots:
 	void LoadStereo();
