@@ -94,11 +94,7 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 
 
 MachineGui::~MachineGui()
-{
-//	delete m_macTwkDlg;
-	// Note -- delete this here as it is parented to MachineView,
-	// not MachineGui (because MachineGui isn't a QWidget... :/ )
-}
+{}
 
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {

@@ -31,6 +31,7 @@ class EffectGui : public MachineGui {
 Q_OBJECT
 public:
 	EffectGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
+	~EffectGui();
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 public slots:

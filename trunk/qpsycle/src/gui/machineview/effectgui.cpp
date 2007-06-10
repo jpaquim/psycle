@@ -47,6 +47,11 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
 	connect( toggleBypassAct_, SIGNAL( triggered() ), this, SLOT( onToggleBypassActionTriggered() ) );
 }
 
+EffectGui::~EffectGui()
+{
+	delete m_macTwkDlg;
+}
+
 void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
 	MachineGui::paint( painter, option, widget );

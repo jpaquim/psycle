@@ -39,6 +39,11 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 	connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
 }
 
+GeneratorGui::~GeneratorGui()
+{
+	delete m_macTwkDlg;
+}
+
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
 	MachineGui::paint( painter, option, widget );
