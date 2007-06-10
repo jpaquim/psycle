@@ -41,6 +41,7 @@ class GeneratorGui : public MachineGui {
 Q_OBJECT
 public:
 	GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
+	~GeneratorGui();
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 public slots:
