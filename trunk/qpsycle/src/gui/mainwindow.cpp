@@ -408,7 +408,7 @@ void MainWindow::populateMachineCombo()
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
 
-	for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
+	for (int b=0; b<psy::core::MAX_BUSES; b++) // Generators.
 	{
 		if( song_->machine(b)) {
 			buffer.str("");
@@ -423,7 +423,7 @@ void MainWindow::populateMachineCombo()
 
 	macCombo_->addItem( "--------------------------");
 
-	for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
+	for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Effects.
 	{
 		if(song_->machine(b)) {
 			buffer.str("");
