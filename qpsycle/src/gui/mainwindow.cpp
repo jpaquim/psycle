@@ -404,10 +404,7 @@ void MainWindow::populateMachineCombo()
 
 	macCombo_->clear();
 
-	bool filled=false;
-	bool found=false;
-	int selected = -1;
-	int line = -1;
+	bool comboIsEmpty=true;
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
 
@@ -420,19 +417,11 @@ void MainWindow::populateMachineCombo()
 			macCombo_->addItem( QString::fromStdString( buffer.str() ),
 					    song_->machine(b)->id() );
 
-			//cb->SetItemData(cb->GetCount()-1,b);
-			if (!found) selected++;
-			if (song_->seqBus == b) found = true;
-			filled = true;
+			comboIsEmpty = false;
 		}
 	}
 
 	macCombo_->addItem( "--------------------------");
-	//cb->SetItemData(cb->GetCount()-1,65535);
-	if (!found)  {
-		selected++;
-		line = selected;
-	}
 
 	for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
 	{
@@ -442,18 +431,13 @@ void MainWindow::populateMachineCombo()
 			buffer << b << ": " << song_->machine(b)->GetEditName();
 			macCombo_->addItem( QString::fromStdString( buffer.str() ),
 					    song_->machine(b)->id() );
-			//cb->SetItemData(cb->GetCount()-1,b);
-			if (!found) selected++;
-			if (song_->seqBus == b) found = true;
-			filled = true;
+			comboIsEmpty = false;
 		}
 	}
 
-	if (!filled) {
+	if (comboIsEmpty) {
 		macCombo_->addItem( "No Machines Loaded" );
-		selected = 0;
-	} else if (!found)  {
-		selected=line;
+		currentIndex = 1;
 	}
 	macCombo_->setCurrentIndex( currentIndex );
 	macCombo_->update();
