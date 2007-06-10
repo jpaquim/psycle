@@ -61,6 +61,7 @@ PatternBox::PatternBox( psy::core::Song *song, QWidget *parent )
 void PatternBox::createToolbar()
 {
 	toolBar_ = new QToolBar();
+	toolBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	toolBar_->addAction(newCatAct);
 	toolBar_->addSeparator();
 	toolBar_->addAction(newPatAct);
