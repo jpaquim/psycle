@@ -84,7 +84,7 @@ void PatternView::createToolBar()
 	for ( int e = 1; e < 65; e++ ) {
 		tracksCbx_->addItem( QString::number( e ) );
 	}
-	tracksCbx_->setCurrentIndex( 4 );
+	tracksCbx_->setCurrentIndex( numberOfTracks()-1 );
 	connect( tracksCbx_, SIGNAL( currentIndexChanged( int ) ),
 		 this, SLOT( onTracksComboBoxIndexChanged( int ) ) );
 
@@ -157,7 +157,7 @@ int PatternView::numberOfLines() const
 {
 	return ( pattern() ) ? static_cast<int> ( pattern()->beatZoom() * pattern()->beats() ) : 0;  
 }
-//
+
 int PatternView::numberOfTracks() const
 {
 	return numberOfTracks_;
