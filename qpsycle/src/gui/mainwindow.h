@@ -119,7 +119,8 @@ private:
 	void createToolBars();
 	void createStatusBar();
 
-	void MainWindow::createUndoView();
+	void createUndoView();
+	void showUndoView();
 	
 	QMenu *fileMenu;
 	QMenu *editMenu;
