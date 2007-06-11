@@ -308,7 +308,7 @@ void MainWindow::createActions()
 	
 	showUnReAct = new QAction(tr("&Undo List"), this);
 	showUnReAct->setStatusTip(tr("Shows Undo/Redo Window"));
-
+	connect(showUnReAct, SIGNAL(triggered()), this, SLOT(showUndoView()));
 
 	quitAct = new QAction(tr("&Quit"), this);
 	quitAct->setShortcut(tr("Ctrl+Q"));
@@ -675,10 +675,6 @@ void MainWindow::timerEvent( QTimerEvent *ev )
 	}
 }
 
-
-
-
-
 TabWidget::TabWidget( QWidget *parent )
 	: QTabWidget( parent )
 {}
@@ -709,4 +705,16 @@ void MainWindow::createUndoView()
 	undoView->setWindowTitle(tr("Undo List"));
 	undoView->show();
 	undoView->setAttribute(Qt::WA_QuitOnClose, false);
+}
+
+void MainWindow::showUndoView() //is there a reason why this code isn't working????
+{
+	if (undoView->isVisible() == true)
+	{
+		undoView->setVisible(false);
+	}
+	else
+	{
+		undoView->setVisible(true);
+	}
 }
