@@ -46,6 +46,7 @@
 
 MainWindow::MainWindow()
 {
+	undoStack = new QUndoStack();
 	song_ = createBlankSong();
 	setupSound();
 	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
@@ -71,6 +72,7 @@ MainWindow::MainWindow()
 
 	audioCnfDlg = new AudioConfigDlg( this );
 	setAttribute( Qt::WA_DeleteOnClose );
+	createUndoView();
 }
 
 void MainWindow::setupSound()
@@ -690,4 +692,12 @@ bool TabWidget::event( QEvent *event )
         default:
 		return QTabWidget::event( event );
 	}
+}
+
+void MainWindow::createUndoView()
+{
+	undoView = new QUndoView( undoStack );
+	undoView->setWindowTitle(tr("Undo List"));
+	undoView->show();
+	undoView->setAttribute(Qt::WA_QuitOnClose, false);
 }

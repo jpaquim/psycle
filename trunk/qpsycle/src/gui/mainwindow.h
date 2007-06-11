@@ -43,8 +43,10 @@ class QComboBox;
 
 #include <QTabWidget>
 #include <QMainWindow>
-
-
+#include <QUndoCommand>
+#include <QUndoGroup>
+#include <QUndoView>
+ 
 // Subclassing as we need to override event().
 class TabWidget : public QTabWidget {
 public:
@@ -117,6 +119,8 @@ private:
 	void createToolBars();
 	void createStatusBar();
 
+	void MainWindow::createUndoView();
+	
 	QMenu *fileMenu;
 	QMenu *editMenu;
 	QMenu *viewMenu;
@@ -150,6 +154,9 @@ private:
 	QComboBox *macCombo_;
 	QComboBox *sampCombo_;
 	QComboBox *octCombo_;
+	
+	QUndoStack *undoStack;
+    QUndoView *undoView;
 
 	PatternBox *patternBox_;
 
