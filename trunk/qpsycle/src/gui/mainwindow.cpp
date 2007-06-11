@@ -307,8 +307,8 @@ void MainWindow::createActions()
 	connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
 	
 	showUnReAct = new QAction(tr("&Undo List"), this);
-	showUnReAct->setStatusTip(tr("Shows Undo/Redo Window"));
-	connect(showUnReAct, SIGNAL(triggered()), this, SLOT(showUndoView()));
+	showUnReAct->setStatusTip(tr("Shows/Hides the Undo/Redo Window"));
+//	connect(showUnReAct, SIGNAL(triggered()), undoView, SLOT(showUndoView()));
 
 	quitAct = new QAction(tr("&Quit"), this);
 	quitAct->setShortcut(tr("Ctrl+Q"));
@@ -709,7 +709,7 @@ void MainWindow::createUndoView()
 
 void MainWindow::showUndoView() //is there a reason why this code isn't working????
 {
-	if (undoView->isVisible() == true)
+	if (undoView->isVisible())
 	{
 		undoView->setVisible(false);
 	}
