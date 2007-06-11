@@ -11,6 +11,7 @@
 #include "riff.h"
 #include "ladspamachine.h"
 #include "pluginfinder.h"
+#include "file.h"
 #include <cassert>
 #include <sstream>
 namespace psy
@@ -18,7 +19,7 @@ namespace psy
 	namespace core
 	{
 		CoreSong::CoreSong(MachineCallbacks* callbacks)
-		: machinecallbacks(callbacks)
+			: machinecallbacks(callbacks)
 		{
 			tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 			_machineLock = false;
@@ -90,7 +91,7 @@ namespace psy
 		}
 		
 		UISong::UISong(MachineCallbacks* callbacks)
-		: CoreSong(callbacks)
+			: CoreSong(callbacks)
 		{
 		}
 
@@ -103,7 +104,7 @@ namespace psy
 			} else if ( finder.info( key ).type() == MACH_PLUGIN ) 
 			{
 				if ( finder.info( key ).mode() == MACHMODE_FX ) {
-				fb = GetFreeFxBus();
+					fb = GetFreeFxBus();
 				} else fb = GetFreeBus();
 				CreateMachine(finder.psycle_path(), MACH_PLUGIN, x, y, key.dllPath(), fb );
 			} else if ( finder.info( key ).type() == MACH_LADSPA )
@@ -127,7 +128,7 @@ namespace psy
 			Machine::id_type const array_index(GetFreeMachine());
 			if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
 			if(!CreateMachine(plugin_path, type, x, y, plugin_name, array_index))
-			throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
+				throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
 			return *machine_[array_index];
 		}
 
@@ -136,92 +137,92 @@ namespace psy
 			Machine * machine(0);
 			switch (type)
 			{
-				case MACH_MASTER:
-					if(machine_[MASTER_INDEX]) return false;
-					index = MASTER_INDEX;
-					machine = new Master(machinecallbacks, index, this);
-					break;
-				case MACH_SAMPLER:
-					machine = new Sampler(machinecallbacks, index,this);
-					break;
-				case MACH_XMSAMPLER:
+			case MACH_MASTER:
+				if(machine_[MASTER_INDEX]) return false;
+				index = MASTER_INDEX;
+				machine = new Master(machinecallbacks, index, this);
+				break;
+			case MACH_SAMPLER:
+				machine = new Sampler(machinecallbacks, index,this);
+				break;
+			case MACH_XMSAMPLER:
 //					machine = new XMSampler(machinecallbacks, index);
-					break;
-				case MACH_DUPLICATOR:
-					machine = new DuplicatorMac(machinecallbacks, index, this);
-					break;
-				case MACH_MIXER:
-					machine = new Mixer(machinecallbacks, index, this);
-					break;
-				case MACH_LFO:
-					machine = new LFO(machinecallbacks, index, this);
-					break;
+				break;
+			case MACH_DUPLICATOR:
+				machine = new DuplicatorMac(machinecallbacks, index, this);
+				break;
+			case MACH_MIXER:
+				machine = new Mixer(machinecallbacks, index, this);
+				break;
+			case MACH_LFO:
+				machine = new LFO(machinecallbacks, index, this);
+				break;
 //				case MACH_AUTOMATOR:
 //					machine = new Automator(machinecallbacks, index);
 //					break;
-				case MACH_DUMMY:
-					machine = new Dummy(machinecallbacks, index, this);
-					break;
-				case MACH_PLUGIN:
-					{
-						Plugin* plugin = new Plugin( machinecallbacks, index, this );
-						plugin->LoadDll( plugin_path, plugin_name );
-						machine = plugin;
-					}
-					break;
+			case MACH_DUMMY:
+				machine = new Dummy(machinecallbacks, index, this);
+				break;
+			case MACH_PLUGIN:
+			{
+				Plugin* plugin = new Plugin( machinecallbacks, index, this );
+				plugin->LoadDll( plugin_path, plugin_name );
+				machine = plugin;
+			}
+			break;
 /*				case MACH_LADSPA:
-					{
-						LADSPAMachine* plugin = new LADSPAMachine(machinecallbacks,index,this);
-						machine = plugin;
-						const char* pcLADSPAPath;
-						pcLADSPAPath = std::getenv("LADSPA_PATH");
-						if ( !pcLADSPAPath) {
-						#if defined __unix__ || defined __APPLE__
-						pcLADSPAPath = "/usr/lib/ladspa/";
-						#else
-						pcLADSPAPath = "I:\\Archivos de Programa\\Multimedia\\Audacity\\Plug-Ins\\";
-						#endif
-						}
-						std::string path;
-						if ( pcLADSPAPath ) path = pcLADSPAPath;
-						plugin->loadDll( path + plugin_name, pluginIndex);
-					}
-					break;*/
+				{
+				LADSPAMachine* plugin = new LADSPAMachine(machinecallbacks,index,this);
+				machine = plugin;
+				const char* pcLADSPAPath;
+				pcLADSPAPath = std::getenv("LADSPA_PATH");
+				if ( !pcLADSPAPath) {
+				#if defined __unix__ || defined __APPLE__
+				pcLADSPAPath = "/usr/lib/ladspa/";
+				#else
+				pcLADSPAPath = "I:\\Archivos de Programa\\Multimedia\\Audacity\\Plug-Ins\\";
+				#endif
+				}
+				std::string path;
+				if ( pcLADSPAPath ) path = pcLADSPAPath;
+				plugin->loadDll( path + plugin_name, pluginIndex);
+				}
+				break;*/
 /*				case MACH_VST:
 				case MACH_VSTFX:
-					{
-						vst::plugin * plugin(0);
-						if (type == MACH_VST) machine = plugin = new vst::instrument(machinecallbacks,index);
-						else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(machinecallbacks,index);
-						if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
-						{
-							delete plugin;
-							return false;
-						}
-						try
-						{
-							plugin->Instance(plugin_name);
-						}
-						catch(std::exception const & e)
-						{
+				{
+				vst::plugin * plugin(0);
+				if (type == MACH_VST) machine = plugin = new vst::instrument(machinecallbacks,index);
+				else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(machinecallbacks,index);
+				if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
+				{
+				delete plugin;
+				return false;
+				}
+				try
+				{
+				plugin->Instance(plugin_name);
+				}
+				catch(std::exception const & e)
+				{
 //							loggers::exception(e.what());
-							delete plugin;
-							return false;
-						}
-						catch(...)
-						{
-							delete plugin;
-							return false;
-						}
-						break;
-					}
+delete plugin;
+return false;
+}
+catch(...)
+{
+delete plugin;
+return false;
+}
+break;
+}
 */
-				default:
+			default:
 //					loggers::warning("failed to create requested machine type");
-					std::cerr << "psycle: failed to create requested machine type\n";
+				std::cerr << "psycle: failed to create requested machine type\n";
 //					return false;
-					machine = new Dummy(machinecallbacks, index, this);
-					break;
+				machine = new Dummy(machinecallbacks, index, this);
+				break;
 			}
 
 			if(index < 0)
@@ -275,9 +276,9 @@ namespace psy
 							{
 								std::ostringstream s;
 								s << c << " and " << j << " have duplicate pointers";
-								#if defined PSYCLE__CORE__SIGNALS
-									report.emit(s.str(), "duplicate machine found");
-								#endif
+#if defined PSYCLE__CORE__SIGNALS
+								report.emit(s.str(), "duplicate machine found");
+#endif
 							}
 							machine_[j] = 0;
 						}
@@ -366,10 +367,10 @@ namespace psy
 						machine_[wiredest]->_connectedInputs--;
 					}
 					/*
-					else
-					{
-						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-					}
+					  else
+					  {
+					  MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+					  }
 					*/
 				}
 			}
@@ -579,7 +580,7 @@ namespace psy
 			return true;
 		}
 
-		bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
+		bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * pathToWav)
 		{
 			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 			DeleteLayer(iInstr);
@@ -591,20 +592,32 @@ namespace psy
 				_pInstrument[iInstr]->waveStereo = false;
 			}
 			_pInstrument[iInstr]->waveLength = iSamplesPerChan;
-			std::strncpy(_pInstrument[iInstr]->waveName, sName, 31);
+
+
+			// Get the filename -- code adapted from: 
+			// http://www.programmersheaven.com/mb/CandCPP/318649/318649/readmessage.aspx
+			char fileName[255]; 
+			char slash = File::slash().c_str()[0];
+			char *ptr = strrchr( pathToWav, slash ); // locate filename part of path.
+			strcpy( fileName,ptr+1 );     // copy remainder of string
+			ptr = strchr( fileName,'.');  // strip file extension
+			if ( ptr != 0 ) *ptr = 0;     // if the extension exists, truncate it
+							
+
+			std::strncpy(_pInstrument[iInstr]->waveName, fileName, 31);
 			_pInstrument[iInstr]->waveName[31] = '\0';
-			std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
+			std::strncpy(_pInstrument[iInstr]->_sName, fileName, 31);
 			_pInstrument[iInstr]->_sName[31]='\0';
 			return true;
 		}
 
-		bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * Wavfile)
+		bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav)
 		{ 
-			assert(Wavfile != 0);
+			assert(pathToWav != 0);
 			WaveFile file;
 			ExtRiffChunkHeader hd;
 			// opens the file and read the format Header.
-			DDCRET retcode(file.OpenForRead(Wavfile));
+			DDCRET retcode(file.OpenForRead(pathToWav));
 			if(retcode != DDC_SUCCESS) 
 			{
 				Invalided = false;
@@ -617,7 +630,7 @@ namespace psy
 			int bits(file.BitsPerSample());
 			long int Datalen(file.NumSamples());
 			// Initializes the layer.
-			WavAlloc(instrument, st_type == 2, Datalen, Wavfile);
+			WavAlloc(instrument, st_type == 2, Datalen, pathToWav);
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
