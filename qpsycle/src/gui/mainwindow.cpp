@@ -207,9 +207,11 @@ void MainWindow::onSaveSongRequest()
 	song_->save( fileName.toStdString() );
 }
 
-bool MainWindow::songHasChanged() {
+bool MainWindow::songHasChanged()
+{
 	return true; // FIXME
 }
+
 
 psy::core::Song *MainWindow::createBlankSong()
 {
@@ -263,10 +265,12 @@ void MainWindow::loadSong( psy::core::Song *song )
 
  void MainWindow::undo()
  {
+ 
  }
 
  void MainWindow::redo()
  {
+ 
  }
 
  void MainWindow::aboutQpsycle()
@@ -301,6 +305,10 @@ void MainWindow::createActions()
 	redoAct->setShortcut(tr("Ctrl+Y"));
 	redoAct->setStatusTip(tr("Redo the last undone action"));
 	connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
+	
+	showUnReAct = new QAction(tr("&Undo List"), this);
+	showUnReAct->setStatusTip(tr("Shows Undo/Redo Window"));
+
 
 	quitAct = new QAction(tr("&Quit"), this);
 	quitAct->setShortcut(tr("Ctrl+Q"));
@@ -340,6 +348,7 @@ void MainWindow::createMenus()
 	editMenu->addAction(redoAct);
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
+	viewMenu->addAction( showUnReAct );
 	configMenu = menuBar()->addMenu(tr("&Configuration"));
 	configMenu->addAction( audioConfAct );
 

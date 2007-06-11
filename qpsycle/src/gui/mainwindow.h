@@ -142,6 +142,7 @@ private:
 	QAction *redoAct;
 	QAction *aboutAct;
 	QAction *quitAct;
+	QAction *showUnReAct;
 	QAction *playFromStartAct;
 	QAction *playFromSeqPosAct;
 	QAction *playPatAct;
