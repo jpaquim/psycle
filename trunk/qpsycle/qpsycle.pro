@@ -59,7 +59,6 @@ HEADERS += \
 	src/gui/sequencer/sequenceritem.h \
 	src/gui/sequencer/sequencerline.h \
 	src/gui/sequencer/sequencerview.h \
-	src/gui/sequencer/beatruler.h \
 	src/gui/waveview/waveview.h \
 	src/gui/waveview/wavedisplay.h
 

@@ -98,6 +98,7 @@ private slots:
 	void playStop();
 
 	void showAudioConfigDlg();
+	void showUndoView();
 
 private:
 	psy::core::Song *song_;
@@ -120,7 +121,7 @@ private:
 	void createStatusBar();
 
 	void createUndoView();
-	void showUndoView();
+
 	
 	QMenu *fileMenu;
 	QMenu *editMenu;
