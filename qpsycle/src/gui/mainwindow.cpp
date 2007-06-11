@@ -46,8 +46,7 @@
 
 MainWindow::MainWindow()
 {
-	undoStack = new QUndoStack();
-	song_ = createBlankSong();
+		song_ = createBlankSong();
 	setupSound();
 	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
 
@@ -59,6 +58,12 @@ MainWindow::MainWindow()
 
 	setupGui();
 	setupSignals();
+	
+	undoStack = new QUndoStack();
+	connect(undoStack, SIGNAL(canRedoChanged(bool)),
+             redoAct, SLOT(setEnabled(bool)));
+    connect(undoStack, SIGNAL(canUndoChanged(bool)),
+             undoAct, SLOT(setEnabled(bool)));
 
 	patternBox_->populatePatternTree(); // FIXME: here because of bad design?
 	populateMachineCombo();
@@ -704,6 +709,10 @@ void MainWindow::createUndoView()
 	undoView = new QUndoView( undoStack );
 	undoView->setWindowTitle(tr("Undo List"));
 	undoView->setAttribute(Qt::WA_QuitOnClose, false);
+	//should Stay On Top
+	
+	undoView->setEmptyLabel("<Initial State>");
+	undoView->show();
 }
 
 void MainWindow::showUndoView() 

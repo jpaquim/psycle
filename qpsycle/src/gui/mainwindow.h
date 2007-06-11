@@ -61,6 +61,7 @@ class MainWindow : public QMainWindow
 Q_OBJECT
 public:
 	MainWindow();
+	QUndoStack *undoStack;
 
 protected:
 	void keyPressEvent( QKeyEvent *event );
@@ -158,7 +159,6 @@ private:
 	QComboBox *sampCombo_;
 	QComboBox *octCombo_;
 	
-	QUndoStack *undoStack;
     QUndoView *undoView;
 
 	PatternBox *patternBox_;
