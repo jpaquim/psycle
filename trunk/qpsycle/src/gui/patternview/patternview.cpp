@@ -235,7 +235,8 @@ void PatternView::onPatternStepComboBoxIndexChanged( int newIndex )
 
 void PatternView::onTracksComboBoxIndexChanged( int index )
 {
-	setNumberOfTracks( index );
+	setNumberOfTracks( index+1 ); // +1 as combo index begins at 0.
+	patDraw_->scene()->update();
 }
 
 void PatternView::keyPressEvent( QKeyEvent *event )

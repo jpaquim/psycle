@@ -89,7 +89,7 @@ private:
 
 	// Settings.
 	int patternStep_;
-	int numberOfTracks_; //should not be private because when changing tracks other things od patternview should access this
+	int numberOfTracks_; 
 	int selectedMacIdx_;
 	int playPos_;
 
