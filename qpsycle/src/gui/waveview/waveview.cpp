@@ -135,14 +135,13 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 
 void WaveView::onLoadButtonClicked()
 {
-	// FIXME: unhardcode the default sample directory.
 	QString samplePath = QString::fromStdString( Global::configuration().samplePath() );
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
 							samplePath,
 							tr("Wave files (*.wav)"));
 	int si = song()->instSelected;
 	std::cout << "inst sel: " << si << std::endl;
-	//added by sampler
+
 	if ( song()->_pInstrument[si]->waveLength != 0)
 	{
 		int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
