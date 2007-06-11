@@ -709,9 +709,8 @@ void MainWindow::createUndoView()
 	undoView = new QUndoView( undoStack );
 	undoView->setWindowTitle(tr("Undo List"));
 	undoView->setAttribute(Qt::WA_QuitOnClose, false);
-	//should Stay On Top
-	
 	undoView->setEmptyLabel("<Initial State>");
+	undoView->setWindowFlags(Qt::WindowStaysOnTopHint);
 	undoView->show();
 }
 
