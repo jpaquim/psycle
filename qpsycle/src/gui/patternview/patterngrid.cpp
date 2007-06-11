@@ -606,9 +606,12 @@ void PatternGrid::doNoteEvent( int note )
 	if ( note == commands::key_stop ) {
 		//pView->noteOffAny( cursor() );
 	} else if (note >=0 && note < 120) {
-		patDraw_->patternView()->enterNote( cursor(), note ); // FIXME: better to emit a signal here?
-		moveCursor( 0, patternStep() );
-		checkDownScroll( cursor() );
+// FIXME: better to emit a signal rather than calling enterNote direct?
+		bool noteAdded = patDraw_->patternView()->enterNote( cursor(), note ); 
+		if ( noteAdded ) { 
+			moveCursor( 0, patternStep() );
+			checkDownScroll( cursor() );
+		}
 	}
 }
 
