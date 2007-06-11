@@ -102,8 +102,9 @@ void PatternView::createToolBar()
 	toolBar_->setSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed );
 
 }
-//
-void PatternView::enterNote( const PatCursor & cursor, int note ) 
+
+// Returns true if a note was successfully added.
+bool PatternView::enterNote( const PatCursor & cursor, int note ) 
 {
 	if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the next line if recording is off...
 	{
@@ -118,9 +119,11 @@ void PatternView::enterNote( const PatCursor & cursor, int note )
 			}
 			pattern()->setEvent( cursor.line(), cursor.track(), event );
 //        if (tmac) PlayNote( octave() * 12 + note, 127, false, tmac);   
+			return true;
 		}
 	}
-	
+
+	return false;
 }
 
 void PatternView::clearNote( const PatCursor & cursor) {
@@ -227,7 +230,6 @@ void PatternView::setOctave( int newOctave )
 	octave_ = newOctave;
 }
 
-// GUI events.
 void PatternView::onPatternStepComboBoxIndexChanged( int newIndex )
 {
 	setPatternStep( newIndex );
