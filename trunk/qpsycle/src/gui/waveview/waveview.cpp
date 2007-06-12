@@ -136,21 +136,21 @@ WaveView::WaveView( psy::core::Song *song, QWidget *parent)
 void WaveView::onLoadButtonClicked()
 {
 	QString samplePath = QString::fromStdString( Global::configuration().samplePath() );
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-							samplePath,
-							tr("Wave files (*.wav)"));
-	int si = song()->instSelected;
-	std::cout << "inst sel: " << si << std::endl;
+	QString pathToWavfile = QFileDialog::getOpenFileName( this, tr("Open File"),
+							      samplePath,
+							      tr("Wave files (*.wav)") );
+	int curInstrIndex = song()->instSelected;
+	std::cout << "inst sel: " << curInstrIndex << std::endl;
 
-	if ( song()->_pInstrument[si]->waveLength != 0)
+	if ( song()->_pInstrument[curInstrIndex]->waveLength != 0 )
 	{
 		int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
-                   tr("A sample is already loaded here.\n"
-                      "Do you want to overwrite the current sample?"),
-                   QMessageBox::Ok | QMessageBox::Cancel );
+					       tr("A sample is already loaded here.\n"
+						  "Do you want to overwrite the current sample?"),
+					       QMessageBox::Ok | QMessageBox::Cancel );
 		if ( ret == QMessageBox::Cancel ) return;
 	}
-	if ( song()->WavAlloc( si, fileName.toStdString().c_str() ) )
+	if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
 	{
 		emit sampleAdded();
 	}

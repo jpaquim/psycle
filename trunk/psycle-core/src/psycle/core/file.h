@@ -24,42 +24,34 @@
 #include <vector>
 
 namespace psy {
-namespace core {
+	namespace core {
 
-  const int nFiles = 1;
-  const int nDirs  = 2;
+		const int nFiles = 1;
+		const int nDirs  = 2;
   
-  class File{
-  public:
-    static std::string readFile(const std::string & filename);
-    static std::vector<std::string> fileList( const std::string & path, int fMode = nFiles | nDirs );   
-    static std::string workingDir();
-    static bool fileIsReadable(const std::string & file);
-    static std::string parentWorkingDir();
-    static void cd( const std::string & path );
-    static void cdHome();
-    static std::string home();
-    static std::string replaceTilde(const std::string & path);
-    static std::string env(const std::string & envName);
-    #if defined __unix__ || defined __APPLE__
-      static std::string extractFileNameFromPath( const std::string& fileName, bool slash = true );
-    #else
-      static std::string extractFileNameFromPath( const std::string& fileName, bool slash = false );
-    #endif
-    static std::string slash();
+		class File{
+		public:
+			static std::string readFile(const std::string & filename);
+			static std::vector<std::string> fileList( const std::string & path, int fMode = nFiles | nDirs );   
+			static std::string workingDir();
+			static bool fileIsReadable(const std::string & file);
+			static std::string parentWorkingDir();
+			static void cd( const std::string & path );
+			static void cdHome();
+			static std::string home();
+			static std::string replaceTilde(const std::string & path);
+			static std::string env(const std::string & envName);
+#if defined __unix__ || defined __APPLE__
+			static std::string extractFileNameFromPath( const std::string& fileName, bool slash = true );
+#else
+			static std::string extractFileNameFromPath( const std::string& fileName, bool slash = false );
+#endif
+			static std::string slash();
 
-    // replaces entitys`s for xml writing
-    // There are 5 predefined entity references in XML:
-    // &lt; 	< 	less than 
-    // &gt; 	> 	greater than
-    // &amp; 	& 	ampersand 
-    // &apos; 	' 	apostrophe
-    // &quot; 	" 	quotation mark
-    // Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true  replaces all.
-    static std::string replaceIllegalXmlChr( const std::string & text, bool strict = true );
-  };
+			static std::string replaceIllegalXmlChr( const std::string & text, bool strict = true );
+		};
 
-}
+	}
 }
 
 #endif

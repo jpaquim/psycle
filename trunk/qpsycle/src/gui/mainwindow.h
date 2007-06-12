@@ -33,6 +33,7 @@ class PatternView;
 class WaveView;
 class SequencerView;
 class PatternBox;
+class SampleBrowser;
 class AudioConfigDlg;
 
 class QAction;
@@ -159,9 +160,10 @@ private:
 	QComboBox *sampCombo_;
 	QComboBox *octCombo_;
 	
-    QUndoView *undoView;
-
+	QUndoView *undoView;
+	
 	PatternBox *patternBox_;
+	SampleBrowser *sampleBrowser_;
 
 	TabWidget *views_;
 	MachineView *macView_;
