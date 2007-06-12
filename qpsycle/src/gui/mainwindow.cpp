@@ -38,6 +38,7 @@
 #include "patternbox.h"
 #include "machinegui.h"
 #include "audioconfigdlg.h"
+#include "samplebrowser.h"
 
 #include <QtGui>
 
@@ -78,6 +79,7 @@ MainWindow::MainWindow()
 	audioCnfDlg = new AudioConfigDlg( this );
 	setAttribute( Qt::WA_DeleteOnClose );
 	createUndoView();
+
 }
 
 void MainWindow::setupSound()
@@ -96,12 +98,17 @@ void MainWindow::setupGui()
 	dock_->setWidget(patternBox_);
 	addDockWidget(Qt::LeftDockWidgetArea, dock_);
 
+	sampleBrowser_ = new SampleBrowser( song_, this );
+
 	views_ = new TabWidget();
 	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
 	views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
 	views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
 	views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
+	views_->addTab( sampleBrowser_, "Sample browser" );
 
+	connect( sampleBrowser_, SIGNAL( sampleAdded() ),
+		 this, SLOT( refreshSampleComboBox() ) );
 
 
 	QGridLayout *layout = new QGridLayout;

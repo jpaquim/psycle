@@ -41,6 +41,7 @@ HEADERS += \
 	src/gui/inputhandler.h \
 	src/gui/patternbox.h \
 	src/gui/audioconfigdlg.h \
+        src/gui/samplebrowser.h \
 	src/gui/machineview/machinegui.h \
 	src/gui/machineview/machinetweakdlg.h \
 	src/gui/machineview/machineview.h \
@@ -71,6 +72,7 @@ SOURCES += \
 	src/gui/inputhandler.cpp \
 	src/gui/patternbox.cpp \
 	src/gui/audioconfigdlg.cpp \
+        src/gui/samplebrowser.cpp \
 	src/gui/machineview/machinegui.cpp \
 	src/gui/machineview/machinetweakdlg.cpp \
 	src/gui/machineview/machineview.cpp \
