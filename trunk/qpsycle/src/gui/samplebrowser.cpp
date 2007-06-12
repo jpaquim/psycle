@@ -1,3 +1,23 @@
+/***************************************************************************
+*   Copyright (C) 2007 by Psycledelics Community   *
+*   psycle.sourceforge.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
+
 #include <psycle/core/constants.h>
 #include <psycle/core/song.h>
 
@@ -22,13 +42,27 @@
 
 SampleBrowser::SampleBrowser( psy::core::Song *song, QWidget *parent )
 	: QWidget( parent ),
-	  m_song( song )
+	  song_( song )
 {
 	QHBoxLayout *layout = new QHBoxLayout();
 	setLayout( layout );
 
-	loadedSamplesView = new QListView( this );
-	loadedSamplesModel = new QStandardItemModel( psy::core::MAX_INSTRUMENTS, 1 );
+	createLoadedSamplesList();
+	createActionsWidget();
+	createSampleBrowserTree();
+
+	layout->addWidget( loadedSamplesView_ );
+	layout->addWidget( actionsWidget_ );
+	layout->addWidget( dirTree_ );
+}
+
+SampleBrowser::~SampleBrowser() 
+{}
+
+void SampleBrowser::createLoadedSamplesList()
+{
+	loadedSamplesView_ = new QListView( this );
+	loadedSamplesModel_ = new QStandardItemModel( psy::core::MAX_INSTRUMENTS, 1 );
 
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
@@ -37,63 +71,60 @@ SampleBrowser::SampleBrowser( psy::core::Song *song, QWidget *parent )
 
 		buffer.str("");
 		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << row << ": " << song->_pInstrument[row]->_sName;
+		buffer << row << ": " << song()->_pInstrument[row]->_sName;
 		QString name = QString::fromStdString( buffer.str() );
 		QStandardItem *item = new QStandardItem( name );		
-		loadedSamplesModel->setItem( row, 0, item );
+		loadedSamplesModel_->setItem( row, 0, item );
 	}
-	loadedSamplesView->setModel( loadedSamplesModel );
-	loadedSamplesView->setCurrentIndex( loadedSamplesModel->index( 0, 0 ) );
+	loadedSamplesView_->setModel( loadedSamplesModel_ );
+	loadedSamplesView_->setCurrentIndex( loadedSamplesModel_->index( 0, 0 ) );
+}
 
-	QWidget *actionsWidget = new QWidget( this );
+void SampleBrowser::createActionsWidget()
+{
+	actionsWidget_ = new QWidget( this );
 	QVBoxLayout *actionsLayout = new QVBoxLayout();
-	actionsWidget->setLayout( actionsLayout );
+	actionsWidget_->setLayout( actionsLayout );
 	button_addToLoadedSamples = new QPushButton( "<<" );
 	connect( button_addToLoadedSamples, SIGNAL( clicked() ),
 		 this, SLOT( onAddToLoadedSamples() ) );
 
 	actionsLayout->addWidget( button_addToLoadedSamples );
 	actionsLayout->addWidget( new QPushButton("Remove sample") );
-
-
-	QStringList nameFilters("*");
-	dirModel = new QDirModel( nameFilters, QDir::AllEntries, QDir::Name );
-	dirTree = new QTreeView();
-	dirTree->setModel( dirModel );
-	dirTree->setSelectionMode( QAbstractItemView::ExtendedSelection );
-	dirTree->setColumnHidden( 1, true );
-	dirTree->setColumnHidden( 2, true );
-	dirTree->setColumnHidden( 3, true );
-	QString defaultSamplePath = QString::fromStdString( Global::configuration().samplePath() );
-	dirTree->setRootIndex( dirModel->index( defaultSamplePath ) );
-
-	layout->addWidget( loadedSamplesView );
-	layout->addWidget( actionsWidget );
-	layout->addWidget( dirTree );
 }
 
-SampleBrowser::~SampleBrowser()
+void SampleBrowser::createSampleBrowserTree()
 {
+	QStringList nameFilters("*");
+	dirModel_ = new QDirModel( nameFilters, QDir::AllEntries, QDir::Name );
+	dirTree_ = new QTreeView();
+	dirTree_->setModel( dirModel_ );
+	dirTree_->setSelectionMode( QAbstractItemView::ExtendedSelection );
+	dirTree_->setColumnHidden( 1, true );
+	dirTree_->setColumnHidden( 2, true );
+	dirTree_->setColumnHidden( 3, true );
+	QString defaultSamplePath = QString::fromStdString( Global::configuration().samplePath() );
+	dirTree_->setRootIndex( dirModel_->index( defaultSamplePath ) );
 }
 
 void SampleBrowser::onAddToLoadedSamples()
 {
-	QItemSelectionModel *selModel = dirTree->selectionModel();
+	QItemSelectionModel *selModel = dirTree_->selectionModel();
 	QModelIndexList selList = selModel->selectedRows();
 
 	for (int i = 0; i < selList.size(); ++i) 
 	{
-		if ( loadedSamplesView->currentIndex().isValid() ) 
+		if ( loadedSamplesView_->currentIndex().isValid() ) 
 		{
-			QFileInfo fileinfo = dirModel->fileInfo( selList.at(i) );
+			QFileInfo fileinfo = dirModel_->fileInfo( selList.at(i) );
 			if ( fileinfo.isFile() ) // Don't try to load directories.
 			{
-				QString pathToWavfile = dirModel->filePath( selList.at(i) );
-				int curInstrIndex = loadedSamplesView->currentIndex().row();
+				QString pathToWavfile = dirModel_->filePath( selList.at(i) );
+				int curInstrIndex = loadedSamplesView_->currentIndex().row();
 				if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
 				{
-					QModelIndex currentIndex = loadedSamplesView->currentIndex();
-					QStandardItem *item = loadedSamplesModel->itemFromIndex( currentIndex );
+					QModelIndex currentIndex = loadedSamplesView_->currentIndex();
+					QStandardItem *item = loadedSamplesModel_->itemFromIndex( currentIndex );
 					std::ostringstream buffer;
 					buffer.setf(std::ios::uppercase);			       
 					buffer.str("");
@@ -103,8 +134,8 @@ void SampleBrowser::onAddToLoadedSamples()
 					item->setText( name );
 				
 			
-					QModelIndex nextIndex = loadedSamplesModel->sibling( loadedSamplesView->currentIndex().row() + 1, 0, currentIndex );
-					loadedSamplesView->setCurrentIndex( nextIndex );
+					QModelIndex nextIndex = loadedSamplesModel_->sibling( loadedSamplesView_->currentIndex().row() + 1, 0, currentIndex );
+					loadedSamplesView_->setCurrentIndex( nextIndex );
 				}
 			}
 		}
