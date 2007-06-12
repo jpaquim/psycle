@@ -13,6 +13,8 @@
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QItemSelectionModel>
+#include <QModelIndexList>
 
 #include <iostream>
 #include <iomanip>
@@ -57,6 +59,7 @@ SampleBrowser::SampleBrowser( psy::core::Song *song, QWidget *parent )
 	dirModel = new QDirModel( nameFilters, QDir::AllEntries, QDir::Name );
 	dirTree = new QTreeView();
 	dirTree->setModel( dirModel );
+	dirTree->setSelectionMode( QAbstractItemView::ExtendedSelection );
 	dirTree->setColumnHidden( 1, true );
 	dirTree->setColumnHidden( 2, true );
 	dirTree->setColumnHidden( 3, true );
@@ -74,21 +77,33 @@ SampleBrowser::~SampleBrowser()
 
 void SampleBrowser::onAddToLoadedSamples()
 {
-	if ( loadedSamplesView->currentIndex().isValid() ) {
-		QString pathToWavfile = dirModel->filePath( dirTree->currentIndex() );
-		int curInstrIndex = loadedSamplesView->currentIndex().row();
-		if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
+	QItemSelectionModel *selModel = dirTree->selectionModel();
+	QModelIndexList selList = selModel->selectedRows();
+
+	for (int i = 0; i < selList.size(); ++i) 
+	{
+		if ( loadedSamplesView->currentIndex().isValid() ) 
 		{
-			QStandardItem *item = loadedSamplesModel->itemFromIndex( loadedSamplesView->currentIndex() );
-			std::ostringstream buffer;
-			buffer.setf(std::ios::uppercase);			       
-			buffer.str("");
-			buffer << std::setfill('0') << std::hex << std::setw(2);
-			buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
-			QString name = QString::fromStdString( buffer.str() );
-			item->setText( name );
-			emit sampleAdded();
+			QString pathToWavfile = dirModel->filePath( selList.at(i) );
+			int curInstrIndex = loadedSamplesView->currentIndex().row();
+			if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
+			{
+				QModelIndex currentIndex = loadedSamplesView->currentIndex();
+				QStandardItem *item = loadedSamplesModel->itemFromIndex( currentIndex );
+				std::ostringstream buffer;
+				buffer.setf(std::ios::uppercase);			       
+				buffer.str("");
+				buffer << std::setfill('0') << std::hex << std::setw(2);
+				buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
+				QString name = QString::fromStdString( buffer.str() );
+				item->setText( name );
+				
+			
+				QModelIndex nextIndex = loadedSamplesModel->sibling( loadedSamplesView->currentIndex().row() + 1, 0, currentIndex );
+				loadedSamplesView->setCurrentIndex( nextIndex );
+			}
 		}
 	}
+	emit sampleAdded();
 }
 
