@@ -468,9 +468,16 @@ void MainWindow::populateMachineCombo()
 
 void MainWindow::initSampleCombo()
 {
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);
+
 	for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
 	{
-		sampCombo_->addItem( "Empty" );
+		buffer.str("");
+		buffer << std::setfill('0') << std::hex << std::setw(2);
+		buffer << i << ": " << song_->_pInstrument[i]->_sName;
+		QString name = QString::fromStdString( buffer.str() );
+		sampCombo_->addItem( name );
 	}
 }
 
