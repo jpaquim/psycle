@@ -43,6 +43,7 @@ public:
 
 public slots:
 	void onAddToLoadedSamples();
+	void onClearInstrument();
 
 signals:
 	void sampleAdded();
@@ -60,6 +61,7 @@ private:
 	QTreeView *dirTree_;
 
 	QPushButton *button_addToLoadedSamples;
+	QPushButton *button_clearInstrument;
 
 	psy::core::Song *song_;
 
