@@ -597,8 +597,9 @@ break;
 			// Get the filename -- code adapted from: 
 			// http://www.programmersheaven.com/mb/CandCPP/318649/318649/readmessage.aspx
 			char fileName[255]; 
-			char slash = File::slash().c_str()[0];
-			char *ptr = strrchr( pathToWav, slash ); // locate filename part of path.
+			//char slash = File::slash().c_str()[0];  Note: a single forward slash seems to work
+			//						on both windows and linux.
+			char *ptr = strrchr( pathToWav, '/' ); // locate filename part of path.
 			strcpy( fileName,ptr+1 );     // copy remainder of string
 			ptr = strchr( fileName,'.');  // strip file extension
 			if ( ptr != 0 ) *ptr = 0;     // if the extension exists, truncate it
