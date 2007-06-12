@@ -86,11 +86,15 @@ void SampleBrowser::createActionsWidget()
 	QVBoxLayout *actionsLayout = new QVBoxLayout();
 	actionsWidget_->setLayout( actionsLayout );
 	button_addToLoadedSamples = new QPushButton( "<<" );
-	connect( button_addToLoadedSamples, SIGNAL( clicked() ),
+	button_clearInstrument = new QPushButton( "Clear instrument" );
+
+      	connect( button_addToLoadedSamples, SIGNAL( clicked() ),
 		 this, SLOT( onAddToLoadedSamples() ) );
+      	connect( button_clearInstrument, SIGNAL( clicked() ),
+		 this, SLOT( onClearInstrument() ) );
 
 	actionsLayout->addWidget( button_addToLoadedSamples );
-	actionsLayout->addWidget( new QPushButton("Remove sample") );
+	actionsLayout->addWidget( button_clearInstrument );
 }
 
 void SampleBrowser::createSampleBrowserTree()
@@ -143,3 +147,16 @@ void SampleBrowser::onAddToLoadedSamples()
 	emit sampleAdded();
 }
 
+void SampleBrowser::onClearInstrument() 
+{
+	int curInstrIndex = loadedSamplesView_->currentIndex().row();	
+	song()->DeleteInstrument( curInstrIndex );
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);			       
+	buffer.str("");
+	buffer << std::setfill('0') << std::hex << std::setw(2);
+	buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
+	QString name = QString::fromStdString( buffer.str() );
+	loadedSamplesModel_->item( curInstrIndex )->setText( name );
+	emit sampleAdded();
+}
