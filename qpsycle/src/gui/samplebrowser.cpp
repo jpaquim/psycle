@@ -84,23 +84,27 @@ void SampleBrowser::onAddToLoadedSamples()
 	{
 		if ( loadedSamplesView->currentIndex().isValid() ) 
 		{
-			QString pathToWavfile = dirModel->filePath( selList.at(i) );
-			int curInstrIndex = loadedSamplesView->currentIndex().row();
-			if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
+			QFileInfo fileinfo = dirModel->fileInfo( selList.at(i) );
+			if ( fileinfo.isFile() ) // Don't try to load directories.
 			{
-				QModelIndex currentIndex = loadedSamplesView->currentIndex();
-				QStandardItem *item = loadedSamplesModel->itemFromIndex( currentIndex );
-				std::ostringstream buffer;
-				buffer.setf(std::ios::uppercase);			       
-				buffer.str("");
-				buffer << std::setfill('0') << std::hex << std::setw(2);
-				buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
-				QString name = QString::fromStdString( buffer.str() );
-				item->setText( name );
+				QString pathToWavfile = dirModel->filePath( selList.at(i) );
+				int curInstrIndex = loadedSamplesView->currentIndex().row();
+				if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
+				{
+					QModelIndex currentIndex = loadedSamplesView->currentIndex();
+					QStandardItem *item = loadedSamplesModel->itemFromIndex( currentIndex );
+					std::ostringstream buffer;
+					buffer.setf(std::ios::uppercase);			       
+					buffer.str("");
+					buffer << std::setfill('0') << std::hex << std::setw(2);
+					buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
+					QString name = QString::fromStdString( buffer.str() );
+					item->setText( name );
 				
 			
-				QModelIndex nextIndex = loadedSamplesModel->sibling( loadedSamplesView->currentIndex().row() + 1, 0, currentIndex );
-				loadedSamplesView->setCurrentIndex( nextIndex );
+					QModelIndex nextIndex = loadedSamplesModel->sibling( loadedSamplesView->currentIndex().row() + 1, 0, currentIndex );
+					loadedSamplesView->setCurrentIndex( nextIndex );
+				}
 			}
 		}
 	}
