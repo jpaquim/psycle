@@ -43,6 +43,7 @@ SampleBrowser::SampleBrowser( psy::core::Song *song, QWidget *parent )
 		loadedSamplesModel->setItem( row, 0, item );
 	}
 	loadedSamplesView->setModel( loadedSamplesModel );
+	loadedSamplesView->setCurrentIndex( loadedSamplesModel->index( 0, 0 ) );
 
 	QWidget *actionsWidget = new QWidget( this );
 	QVBoxLayout *actionsLayout = new QVBoxLayout();
