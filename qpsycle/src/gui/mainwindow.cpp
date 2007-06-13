@@ -51,13 +51,15 @@ MainWindow::MainWindow()
 	setupSound();
 	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
 
+	createInstrumentsModel();
+
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
-	wavView_ = new WaveView( song_ );
+	wavView_ = new WaveView( instrumentsModel_, song_ );
 	seqView_ = new SequencerView( song_ );
 	patternBox_ = new PatternBox( song_ );
 
-	createInstrumentsModel();
+
 
 	setupGui();
 	setupSignals();
@@ -249,7 +251,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
-	wavView_ = new WaveView( song_ );
+	wavView_ = new WaveView( instrumentsModel_, song_ );
 	seqView_ = new SequencerView( song_ );
 	macView_->setOctave( 4 );
 	patView_->setOctave( 4 );

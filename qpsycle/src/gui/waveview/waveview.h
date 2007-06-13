@@ -28,13 +28,15 @@
 #include <QSlider>
 #include <QScrollBar>
 
+class QStandardItemModel;
 
 class WaveView : public QWidget
 {
 	Q_OBJECT
 
 public:
-	WaveView( psy::core::Song *song_, QWidget *parent = 0);
+	WaveView( QStandardItemModel *instrumentsModel_,
+		  psy::core::Song *song_, QWidget *parent = 0);
 
 	psy::core::Song* song();
 
@@ -79,6 +81,8 @@ private:
 	QAction *zoomMore_;
 	QSlider *zoomSlide_;
 	QAction *zoomLess_;
+
+	QStandardItemModel *instrumentsModel_;
 };
 
 #endif
