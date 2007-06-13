@@ -29,11 +29,14 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 
+#include <iostream>
+#include <iomanip>
 
-WaveView::WaveView( psy::core::Song *song, QWidget *parent) 
-	: QWidget(parent)
+
+WaveView::WaveView( QStandardItemModel *instrumentsModel, psy::core::Song *song, QWidget *parent) 
+	: QWidget(parent),
+	  instrumentsModel_( instrumentsModel )
 {
-
 	song_ = song;
 	layout_ = new QVBoxLayout();
 	setLayout(layout_);
@@ -142,7 +145,7 @@ void WaveView::onLoadButtonClicked()
 	int curInstrIndex = song()->instSelected;
 	std::cout << "inst sel: " << curInstrIndex << std::endl;
 
-	if ( song()->_pInstrument[curInstrIndex]->waveLength != 0 )
+	if ( !song()->_pInstrument[curInstrIndex]->Empty() )
 	{
 		int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
 					       tr("A sample is already loaded here.\n"
@@ -152,7 +155,14 @@ void WaveView::onLoadButtonClicked()
 	}
 	if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
 	{
-		emit sampleAdded();
+		QStandardItem *item = instrumentsModel_->item( curInstrIndex );
+		std::ostringstream buffer;
+		buffer.setf(std::ios::uppercase);			       
+		buffer.str("");
+		buffer << std::setfill('0') << std::hex << std::setw(2);
+		buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
+		QString name = QString::fromStdString( buffer.str() );
+		item->setText( name );
 	}
 }
 
