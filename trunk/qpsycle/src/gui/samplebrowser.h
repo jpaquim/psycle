@@ -36,7 +36,8 @@ class QTreeView;
 class SampleBrowser : public QWidget {
 Q_OBJECT
 public:
-	SampleBrowser( psy::core::Song *song, QWidget *parent = 0 );
+	SampleBrowser( QStandardItemModel *instrumentsModel,
+		       psy::core::Song *song, QWidget *parent = 0 );
 	~SampleBrowser();
 
 	psy::core::Song *song() { return song_; }
@@ -53,9 +54,10 @@ private:
 	void createActionsWidget();
 	void createSampleBrowserTree();
 
-	QStandardItemModel *loadedSamplesModel_;
+	QListView *instrumentsList_;
+	QStandardItemModel *instrumentsModel_;
+
 	QWidget *actionsWidget_;
-	QListView *loadedSamplesView_;
 
 	QDirModel *dirModel_;
 	QTreeView *dirTree_;

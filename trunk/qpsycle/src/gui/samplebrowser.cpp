@@ -40,9 +40,11 @@
 #include <iomanip>
 
 
-SampleBrowser::SampleBrowser( psy::core::Song *song, QWidget *parent )
+SampleBrowser::SampleBrowser( QStandardItemModel *instrumentsModel,
+			      psy::core::Song *song, QWidget *parent )
 	: QWidget( parent ),
-	  song_( song )
+	  song_( song ),
+	  instrumentsModel_( instrumentsModel )
 {
 	QHBoxLayout *layout = new QHBoxLayout();
 	setLayout( layout );
@@ -51,7 +53,7 @@ SampleBrowser::SampleBrowser( psy::core::Song *song, QWidget *parent )
 	createActionsWidget();
 	createSampleBrowserTree();
 
-	layout->addWidget( loadedSamplesView_ );
+	layout->addWidget( instrumentsList_ );
 	layout->addWidget( actionsWidget_ );
 	layout->addWidget( dirTree_ );
 }
@@ -61,23 +63,9 @@ SampleBrowser::~SampleBrowser()
 
 void SampleBrowser::createLoadedSamplesList()
 {
-	loadedSamplesView_ = new QListView( this );
-	loadedSamplesModel_ = new QStandardItemModel( psy::core::MAX_INSTRUMENTS, 1 );
-
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);
-
-	for (int row = 0; row < psy::core::MAX_INSTRUMENTS; ++row) {
-
-		buffer.str("");
-		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << row << ": " << song()->_pInstrument[row]->_sName;
-		QString name = QString::fromStdString( buffer.str() );
-		QStandardItem *item = new QStandardItem( name );		
-		loadedSamplesModel_->setItem( row, 0, item );
-	}
-	loadedSamplesView_->setModel( loadedSamplesModel_ );
-	loadedSamplesView_->setCurrentIndex( loadedSamplesModel_->index( 0, 0 ) );
+	instrumentsList_ = new QListView( this );
+	instrumentsList_->setModel( instrumentsModel_ );
+	instrumentsList_->setCurrentIndex( instrumentsModel_->index( 0, 0 ) );
 }
 
 void SampleBrowser::createActionsWidget()
@@ -118,17 +106,17 @@ void SampleBrowser::onAddToLoadedSamples()
 
 	for (int i = 0; i < selList.size(); ++i) 
 	{
-		if ( loadedSamplesView_->currentIndex().isValid() ) 
+		if ( instrumentsList_->currentIndex().isValid() ) 
 		{
 			QFileInfo fileinfo = dirModel_->fileInfo( selList.at(i) );
 			if ( fileinfo.isFile() ) // Don't try to load directories.
 			{
 				QString pathToWavfile = dirModel_->filePath( selList.at(i) );
-				int curInstrIndex = loadedSamplesView_->currentIndex().row();
+				int curInstrIndex = instrumentsList_->currentIndex().row();
 				if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
 				{
-					QModelIndex currentIndex = loadedSamplesView_->currentIndex();
-					QStandardItem *item = loadedSamplesModel_->itemFromIndex( currentIndex );
+					QModelIndex currentIndex = instrumentsList_->currentIndex();
+					QStandardItem *item = instrumentsModel_->itemFromIndex( currentIndex );
 					std::ostringstream buffer;
 					buffer.setf(std::ios::uppercase);			       
 					buffer.str("");
@@ -138,8 +126,8 @@ void SampleBrowser::onAddToLoadedSamples()
 					item->setText( name );
 				
 			
-					QModelIndex nextIndex = loadedSamplesModel_->sibling( loadedSamplesView_->currentIndex().row() + 1, 0, currentIndex );
-					loadedSamplesView_->setCurrentIndex( nextIndex );
+					QModelIndex nextIndex = instrumentsModel_->sibling( instrumentsList_->currentIndex().row() + 1, 0, currentIndex );
+					instrumentsList_->setCurrentIndex( nextIndex );
 				}
 			}
 		}
@@ -149,7 +137,7 @@ void SampleBrowser::onAddToLoadedSamples()
 
 void SampleBrowser::onClearInstrument() 
 {
-	int curInstrIndex = loadedSamplesView_->currentIndex().row();	
+	int curInstrIndex = instrumentsList_->currentIndex().row();	
 	song()->DeleteInstrument( curInstrIndex );
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);			       
@@ -157,6 +145,6 @@ void SampleBrowser::onClearInstrument()
 	buffer << std::setfill('0') << std::hex << std::setw(2);
 	buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
 	QString name = QString::fromStdString( buffer.str() );
-	loadedSamplesModel_->item( curInstrIndex )->setText( name );
+	instrumentsModel_->item( curInstrIndex )->setText( name );
 	emit sampleAdded();
 }
