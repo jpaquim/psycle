@@ -41,6 +41,7 @@ class QListWidget;
 class QMenu;
 class QTextEdit;
 class QComboBox;
+class QStandardItemModel;
 
 #include <QTabWidget>
 #include <QMainWindow>
@@ -78,7 +79,6 @@ private slots:
 
 	void aboutQpsycle();
 
-	void refreshSampleComboBox();
 	void onMachineComboBoxIndexChanged( int newIndex );
 	void onSampleComboBoxIndexChanged( int newIndex );
 	void onOctaveComboBoxIndexChanged( int newIndex );
@@ -109,6 +109,8 @@ private:
 	void setupSong();
 	void setupGui();
 	void setupSignals();
+
+	void createInstrumentsModel();
 
 	bool songHasChanged();
 	psy::core::Song *createBlankSong();
@@ -174,6 +176,8 @@ private:
 	QDockWidget *dock_;
 
 	AudioConfigDlg *audioCnfDlg;
+
+	QStandardItemModel *instrumentsModel_;
 };
 
 #endif

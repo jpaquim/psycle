@@ -57,8 +57,11 @@ MainWindow::MainWindow()
 	seqView_ = new SequencerView( song_ );
 	patternBox_ = new PatternBox( song_ );
 
+	createInstrumentsModel();
+
 	setupGui();
 	setupSignals();
+
 	
 	undoStack = new QUndoStack();
 	connect(undoStack, SIGNAL(canRedoChanged(bool)),
@@ -98,7 +101,7 @@ void MainWindow::setupGui()
 	dock_->setWidget(patternBox_);
 	addDockWidget(Qt::LeftDockWidgetArea, dock_);
 
-	sampleBrowser_ = new SampleBrowser( song_, this );
+	sampleBrowser_ = new SampleBrowser( instrumentsModel_, song_, this );
 
 	views_ = new TabWidget();
 	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
@@ -107,8 +110,6 @@ void MainWindow::setupGui()
 	views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
 	views_->addTab( sampleBrowser_, "Sample browser" );
 
-	connect( sampleBrowser_, SIGNAL( sampleAdded() ),
-		 this, SLOT( refreshSampleComboBox() ) );
 
 
 	QGridLayout *layout = new QGridLayout;
@@ -121,7 +122,7 @@ void MainWindow::setupGui()
 	createToolBars();
 	createStatusBar();
 
-	setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001088 alpha ) "));
+	setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001089 alpha ) "));
 }
 
 void MainWindow::setupSignals()
@@ -145,9 +146,6 @@ void MainWindow::setupSignals()
 		 this, SLOT( onMachineDeleted() ) );
 	connect( macView_, SIGNAL( machineRenamed( ) ),
 		 this, SLOT( onMachineRenamed( ) ) );
-
-	connect( wavView_, SIGNAL( sampleAdded() ),
-		 this, SLOT( refreshSampleComboBox() ) );
 
 	connect( macCombo_, SIGNAL( currentIndexChanged( int ) ),
 		 this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
@@ -270,26 +268,24 @@ void MainWindow::loadSong( psy::core::Song *song )
 	setupSignals();
 	// enable audio driver
 	//Global::configuration()._pOutputDriver->Enable(true);
-	// update file recent open sub menu
-	//recentFileMenu_->add(new ngrs::MenuItem(fileName));
 }
 
 
- void MainWindow::undo()
- {
+void MainWindow::undo()
+{
  
- }
+}
 
- void MainWindow::redo()
- {
+void MainWindow::redo()
+{
  
- }
+}
 
- void MainWindow::aboutQpsycle()
- {
-    QMessageBox::about(this, tr("About qpsycle"),
-             tr("It makes music and stuff."));
- }
+void MainWindow::aboutQpsycle()
+{
+	QMessageBox::about(this, tr("About qpsycle"),
+			   tr("It makes music and stuff."));
+}
 
 void MainWindow::createActions()
 {
@@ -417,7 +413,7 @@ void MainWindow::createToolBars()
 
 void MainWindow::createStatusBar()
 {
-    statusBar()->showMessage(tr("Ready"));
+	statusBar()->showMessage(tr("Ready"));
 }
 
 void MainWindow::populateMachineCombo()
@@ -468,38 +464,7 @@ void MainWindow::populateMachineCombo()
 
 void MainWindow::initSampleCombo()
 {
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);
-
-	for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
-	{
-		buffer.str("");
-		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << i << ": " << song_->_pInstrument[i]->_sName;
-		QString name = QString::fromStdString( buffer.str() );
-		sampCombo_->addItem( name );
-	}
-}
-
-void MainWindow::refreshSampleComboBox()
-{
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);
-
-	int listlen = 0;
-	for ( int i=0; i < psy::core::MAX_INSTRUMENTS; i++ ) // PREV_WAV_INS = 255
-	{
-		buffer.str("");
-		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << i << ": " << song_->_pInstrument[i]->_sName;
-		QString name = QString::fromStdString( buffer.str() );
-		sampCombo_->setItemText( i, name );
-		listlen++;
-	}
-	if (song_->auxcolSelected >= listlen) {
-		song_->auxcolSelected = 0;
-	}
-
+	sampCombo_->setModel( instrumentsModel_ );
 }
 
 void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
@@ -736,5 +701,22 @@ void MainWindow::showUndoView()
 	else
 	{
 		undoView->setVisible(true);
+	}
+}
+
+void MainWindow::createInstrumentsModel()
+{
+	instrumentsModel_ = new QStandardItemModel( psy::core::MAX_INSTRUMENTS, 1 );
+
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);
+
+	for (int row = 0; row < psy::core::MAX_INSTRUMENTS; ++row) {
+		buffer.str("");
+		buffer << std::setfill('0') << std::hex << std::setw(2);
+		buffer << row << ": " << song_->_pInstrument[row]->_sName;
+		QString name = QString::fromStdString( buffer.str() );
+		QStandardItem *item = new QStandardItem( name );		
+		instrumentsModel_->setItem( row, 0, item );
 	}
 }
