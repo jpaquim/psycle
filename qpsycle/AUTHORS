@@ -10,7 +10,7 @@ Josep Ma. Antolín Segura       jaz001            Psycle from 1.5 to 1.9, parts o
 Johan Boulé                    johan-boule       Psycle from 1.7.6 to 1.9. freepsycle, porting (Cross Platform Development), qpsycle (build system, ...)
 Magnus Jonsson                 zealmange         Psycle's source code improvements (std:: C++). qpsycle
 Neil Mather                    nmather           qpsycle lead coder
-Mattias                        gravity0          qpsycle GUI improvements and some string changes, windows general developement, windows static buld.
+Mattias                        gravity0          qpsycle GUI improvements and some string changes, windows general developement, windows static buld, wave editor, start of undo/redo, extreme windows testing.
 Mauro Ottaviani                ranamauro         qpsycle directsound support, ...
 
 
