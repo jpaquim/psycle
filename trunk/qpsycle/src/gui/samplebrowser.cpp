@@ -95,8 +95,11 @@ void SampleBrowser::createSampleBrowserTree()
 	dirTree_->setColumnHidden( 1, true );
 	dirTree_->setColumnHidden( 2, true );
 	dirTree_->setColumnHidden( 3, true );
-	QString defaultSamplePath = QString::fromStdString( Global::configuration().samplePath() );
-	dirTree_->setRootIndex( dirModel_->index( defaultSamplePath ) );
+	QString samplesPath = QString::fromStdString( Global::configuration().samplePath() );
+	if ( samplesPath.isEmpty() ) { // if sample path isn't set in config.
+		samplesPath = QDir::homePath();
+	}
+	dirTree_->setRootIndex( dirModel_->index( samplesPath ) );
 }
 
 void SampleBrowser::onAddToLoadedSamples()
