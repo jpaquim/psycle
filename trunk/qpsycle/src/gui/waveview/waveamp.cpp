@@ -28,7 +28,7 @@ WaveAmp::WaveAmp()
 	
 	QHBoxLayout *layout = new QHBoxLayout();
 	gain = new QLabel("Gain", this);
-	gainSli = new QSlider(-300, 300, 20, 0, Qt::Horizontal, 0);
+	gainSli = new QSlider( Qt::Horizontal );
 	ok = new QPushButton("Ok", this);
 	cancel = new QPushButton("Cancel", this);
 	

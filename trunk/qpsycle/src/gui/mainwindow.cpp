@@ -397,8 +397,9 @@ void MainWindow::createToolBars()
 	macCombo_ = new QComboBox();
 	macCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 	sampCombo_ = new QComboBox();
-	octCombo_ = new QComboBox();
 	sampCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+	sampCombo_->setMaxVisibleItems( 20 );
+	octCombo_ = new QComboBox();
 
 	QLabel *macLabel = new QLabel(" Machines: ");
 	QLabel *sampLabel = new QLabel(" Samples: ");

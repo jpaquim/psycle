@@ -38,6 +38,6 @@ private:
 	QLabel *percent;
 	QPushButton *ok;
 	QPushButton *cancel;
-}
+};
 
 #endif
