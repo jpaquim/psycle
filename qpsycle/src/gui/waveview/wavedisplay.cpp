@@ -27,9 +27,8 @@ WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for W
 {
 	setParent( parent);
 	wavescene = new QGraphicsScene(0, 0, width(), height());
-//	wavescene->setBackgroundBrush(Qt::black);
+	wavescene->setBackgroundBrush(Qt::black);
 	setScene(wavescene);
-	adjustSize();
 	Reset();
 }
 
@@ -48,7 +47,8 @@ void WaveDisplay::LoadMono()
 void WaveDisplay::Reset()
 {	
 	//Clear Oprions Not Avable Now
-	nodata = new QGraphicsSimpleTextItem("No Wave Data", 0, wavescene);
+	nodata = new QGraphicsTextItem("No Wave Data", 0);
+	nodata->setDefaultTextColor(Qt::white);
 	wavescene->addItem(nodata);
 }
 
