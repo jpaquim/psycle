@@ -26,7 +26,7 @@
 WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for WaveDisplay.
 {
 	setParent( parent);
-	wavescene = new QGraphicsScene(0, 0, width(), height());
+	wavescene = new QGraphicsScene();
 	wavescene->setBackgroundBrush(Qt::black);
 	setScene(wavescene);
 	Reset();

@@ -35,5 +35,4 @@ WaveAmp::WaveAmp()
 	layout->addWidget(gainSli);
 	layout->addWidget(ok);
 	layout->addWidget(cancel);
-	
 }
