@@ -19,11 +19,11 @@
 ***************************************************************************/
 
 #include <psycle/core/constants.h>
-#include <psycle/core/song.h>
 
 #include "global.h"
 #include "configuration.h"
 #include "samplebrowser.h"
+#include "instrumentsmodel.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -40,10 +40,9 @@
 #include <iomanip>
 
 
-SampleBrowser::SampleBrowser( QStandardItemModel *instrumentsModel,
-			      psy::core::Song *song, QWidget *parent )
+SampleBrowser::SampleBrowser( InstrumentsModel *instrumentsModel,
+			      QWidget *parent )
 	: QWidget( parent ),
-	  song_( song ),
 	  instrumentsModel_( instrumentsModel )
 {
 	QHBoxLayout *layout = new QHBoxLayout();
@@ -109,6 +108,7 @@ void SampleBrowser::onAddToLoadedSamples()
 
 	for (int i = 0; i < selList.size(); ++i) 
 	{
+		
 		if ( instrumentsList_->currentIndex().isValid() ) 
 		{
 			QFileInfo fileinfo = dirModel_->fileInfo( selList.at(i) );
@@ -116,20 +116,9 @@ void SampleBrowser::onAddToLoadedSamples()
 			{
 				QString pathToWavfile = dirModel_->filePath( selList.at(i) );
 				int curInstrIndex = instrumentsList_->currentIndex().row();
-				if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
+				if ( instrumentsModel_->loadInstrument( curInstrIndex, pathToWavfile ) )
 				{
-					QModelIndex currentIndex = instrumentsList_->currentIndex();
-					QStandardItem *item = instrumentsModel_->itemFromIndex( currentIndex );
-					std::ostringstream buffer;
-					buffer.setf(std::ios::uppercase);			       
-					buffer.str("");
-					buffer << std::setfill('0') << std::hex << std::setw(2);
-					buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
-					QString name = QString::fromStdString( buffer.str() );
-					item->setText( name );
-				
-			
-					QModelIndex nextIndex = instrumentsModel_->sibling( instrumentsList_->currentIndex().row() + 1, 0, currentIndex );
+					QModelIndex nextIndex = instrumentsModel_->sibling( instrumentsList_->currentIndex().row() + 1, 0, instrumentsList_->currentIndex() );
 					instrumentsList_->setCurrentIndex( nextIndex );
 				}
 			}
@@ -141,13 +130,6 @@ void SampleBrowser::onAddToLoadedSamples()
 void SampleBrowser::onClearInstrument() 
 {
 	int curInstrIndex = instrumentsList_->currentIndex().row();	
-	song()->DeleteInstrument( curInstrIndex );
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);			       
-	buffer.str("");
-	buffer << std::setfill('0') << std::hex << std::setw(2);
-	buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
-	QString name = QString::fromStdString( buffer.str() );
-	instrumentsModel_->item( curInstrIndex )->setText( name );
+	instrumentsModel_->clearInstrument( curInstrIndex );
 	emit sampleAdded();
 }

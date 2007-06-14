@@ -21,10 +21,6 @@
 #ifndef SAMPLEBROWSER_H
 #define SAMPLEBROWSER_H
 
-namespace psy { namespace core {
-		class Song;
-	}}
-
 #include <QWidget>
 
 class QPushButton;
@@ -33,14 +29,14 @@ class QListView;
 class QDirModel;
 class QTreeView;
 
+class InstrumentsModel;
+
 class SampleBrowser : public QWidget {
 Q_OBJECT
 public:
-	SampleBrowser( QStandardItemModel *instrumentsModel,
-		       psy::core::Song *song, QWidget *parent = 0 );
+	SampleBrowser( InstrumentsModel *instrumentsModel,
+		       QWidget *parent = 0 );
 	~SampleBrowser();
-
-	psy::core::Song *song() { return song_; }
 
 public slots:
 	void onAddToLoadedSamples();
@@ -55,7 +51,7 @@ private:
 	void createSampleBrowserTree();
 
 	QListView *instrumentsList_;
-	QStandardItemModel *instrumentsModel_;
+	InstrumentsModel *instrumentsModel_;
 
 	QWidget *actionsWidget_;
 
@@ -64,8 +60,6 @@ private:
 
 	QPushButton *button_addToLoadedSamples;
 	QPushButton *button_clearInstrument;
-
-	psy::core::Song *song_;
 
 };
 

@@ -43,6 +43,8 @@ class QTextEdit;
 class QComboBox;
 class QStandardItemModel;
 
+class InstrumentsModel;
+
 #include <QTabWidget>
 #include <QMainWindow>
 #include <QUndoCommand>
@@ -110,8 +112,6 @@ private:
 	void setupGui();
 	void setupSignals();
 
-	void createInstrumentsModel();
-
 	bool songHasChanged();
 	psy::core::Song *createBlankSong();
 	void loadSong( psy::core::Song *song );
@@ -177,7 +177,7 @@ private:
 
 	AudioConfigDlg *audioCnfDlg;
 
-	QStandardItemModel *instrumentsModel_;
+	InstrumentsModel *instrumentsModel_;
 };
 
 #endif

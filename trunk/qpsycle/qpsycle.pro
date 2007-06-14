@@ -18,6 +18,7 @@ DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
 DEPENDPATH += . \
 	src/ \
+        src/model \
 	src/gui \
 	src/gui/machineview \
 	src/gui/patternview \
@@ -26,6 +27,7 @@ DEPENDPATH += . \
 	
 INCLUDEPATH += . \
 	src/ \
+        src/model \
 	src/gui \
 	src/gui/machineview \
 	src/gui/patternview \
@@ -36,6 +38,7 @@ INCLUDEPATH += . \
 
 HEADERS += \
 	src/gui/mainwindow.h \
+        src/model/instrumentsmodel.h \
 	src/gui/global.h \
 	src/gui/configuration.h \
 	src/gui/inputhandler.h \
@@ -66,6 +69,7 @@ HEADERS += \
 
 SOURCES += \
 	qpsycle.cpp \
+        src/model/instrumentsmodel.cpp \
 	src/gui/mainwindow.cpp \
 	src/gui/global.cpp \
 	src/gui/configuration.cpp \
