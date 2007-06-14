@@ -43,6 +43,7 @@ public slots:
 	void onSaveButtonClicked();
 	void onPlusButtonClicked();
 	void onMinusButtonClicked();
+	void onAmpButtonClicked();
 
 signals:
 	void sampleAdded();

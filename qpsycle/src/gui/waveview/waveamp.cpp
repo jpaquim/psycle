@@ -25,10 +25,9 @@
 WaveAmp::WaveAmp()
 {
 	setWindowTitle("Amplify");
-	
 	QHBoxLayout *layout = new QHBoxLayout();
 	gain = new QLabel("Gain", this);
-	gainSli = new QSlider( Qt::Horizontal );
+	gainSli = new QSlider( Qt::Horizontal, this);
 	ok = new QPushButton("Ok", this);
 	cancel = new QPushButton("Cancel", this);
 	

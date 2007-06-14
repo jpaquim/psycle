@@ -22,6 +22,7 @@
 #include "../configuration.h"
 #include "waveview.h"
 #include "wavedisplay.h"
+#include "waveamp.h"
 #include "instrumentsmodel.h"
 
 #include <QtGui>
@@ -76,6 +77,7 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	processBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	QLabel *efxLabel = new QLabel("Process: ");
 	ampEfx_ = new QAction("Amplify", this);
+	connect( ampEfx_, SIGNAL( triggered() ), this, SLOT( onAmpButtonClicked() ));
 	convEfx_ = new QAction("Convert to Mono", this);
 	remdcEfx_ = new QAction("Remove DC offset", this);
 	invEfx_ = new QAction("Invert Channels", this);
@@ -172,4 +174,10 @@ void WaveView::onMinusButtonClicked()
 	{
 		zoomSlide_->setValue(zoomSlide_->value() - 1);
 	}
+}
+
+void WaveView::onAmpButtonClicked()
+{
+	WaveAmp *amp = new WaveAmp();
+	amp->show();
 }
