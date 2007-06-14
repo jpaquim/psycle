@@ -40,8 +40,7 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 {
 	layout_ = new QVBoxLayout();
 	setLayout(layout_);
-	 
-	//TODO: this should be in the waveview.h and waveformview should be an object of WaveFormView
+	
 	WaveDisplay *wavedisp = new WaveDisplay(false, this);
 		
 	toolBar_ = new QToolBar();
@@ -80,10 +79,7 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	convEfx_ = new QAction("Convert to Mono", this);
 	remdcEfx_ = new QAction("Remove DC offset", this);
 	invEfx_ = new QAction("Invert Channels", this);
-	
-	//scrollbar for the WaveFormView
-	waveScroll_ = new QScrollBar(Qt::Horizontal, this);
-	 
+		 
 	//zoom and various
 	zoomBar_ = new QToolBar();
 	zoomBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
@@ -132,7 +128,6 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( processBar_ );
 	layout_->addWidget( wavedisp );
-	layout_->addWidget( waveScroll_);
 	layout_->addWidget( zoomBar_ );
 }
 
