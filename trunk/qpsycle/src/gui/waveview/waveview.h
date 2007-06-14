@@ -71,8 +71,6 @@ private:
 	QAction *remdcEfx_;
 	QAction *invEfx_;
 	
-	QScrollBar *waveScroll_;
-	
 	QToolBar *zoomBar_;
 	QAction *zoomMore_;
 	QSlider *zoomSlide_;
