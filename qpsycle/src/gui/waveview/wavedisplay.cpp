@@ -26,12 +26,13 @@
 WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for WaveDisplay.
 {
 	setParent( parent);
-	wavescene = new QGraphicsScene(this);
-	wavescene->setBackgroundBrush(Qt::black);
+	wavescene = new QGraphicsScene(0, 0, width(), height());
+//	wavescene->setBackgroundBrush(Qt::black);
 	setScene(wavescene);
 	adjustSize();
 	Reset();
 	LoadMono();
+//	wavescene->update(0,0,wavescene->height(), wavescene->width());
 }
 
 void WaveDisplay::LoadStereo()
@@ -42,6 +43,7 @@ void WaveDisplay::LoadStereo()
 void WaveDisplay::LoadMono()
 {
 	//we need to add al line at the middle GraphicsView To Make that loads a Mono file...
+	wavescene->removeItem(nodata);
 	QGraphicsLineItem *line = new QGraphicsLineItem(0,height()/2,width(),height()/2, 0, wavescene);
 	wavescene->addItem(line);
 }
