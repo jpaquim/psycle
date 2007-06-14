@@ -39,6 +39,7 @@
 #include "machinegui.h"
 #include "audioconfigdlg.h"
 #include "samplebrowser.h"
+#include "instrumentsmodel.h"
 
 #include <QtGui>
 
@@ -51,7 +52,7 @@ MainWindow::MainWindow()
 	setupSound();
 	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
 
-	createInstrumentsModel();
+	instrumentsModel_ = new InstrumentsModel( song_, psy::core::MAX_INSTRUMENTS, 1 );
 
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
@@ -103,7 +104,7 @@ void MainWindow::setupGui()
 	dock_->setWidget(patternBox_);
 	addDockWidget(Qt::LeftDockWidgetArea, dock_);
 
-	sampleBrowser_ = new SampleBrowser( instrumentsModel_, song_, this );
+	sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );
 
 	views_ = new TabWidget();
 	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
@@ -706,19 +707,3 @@ void MainWindow::showUndoView()
 	}
 }
 
-void MainWindow::createInstrumentsModel()
-{
-	instrumentsModel_ = new QStandardItemModel( psy::core::MAX_INSTRUMENTS, 1 );
-
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);
-
-	for (int row = 0; row < psy::core::MAX_INSTRUMENTS; ++row) {
-		buffer.str("");
-		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << row << ": " << song_->_pInstrument[row]->_sName;
-		QString name = QString::fromStdString( buffer.str() );
-		QStandardItem *item = new QStandardItem( name );		
-		instrumentsModel_->setItem( row, 0, item );
-	}
-}
