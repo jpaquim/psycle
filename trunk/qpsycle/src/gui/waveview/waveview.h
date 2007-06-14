@@ -20,7 +20,6 @@
  #ifndef WAVEVIEW_H
  #define WAVEVIEW_H
 
-#include <psycle/core/song.h>
 #include "wavedisplay.h"
 #include <QVBoxLayout>
 #include <QToolBar>
@@ -29,18 +28,17 @@
 #include <QScrollBar>
 
 class QStandardItemModel;
+class InstrumentsModel;
 
 class WaveView : public QWidget
 {
 	Q_OBJECT
 
 public:
-	WaveView( QStandardItemModel *instrumentsModel_,
-		  psy::core::Song *song_, QWidget *parent = 0);
+	WaveView( InstrumentsModel *instrumentsModel_,
+		  QWidget *parent = 0);
 
-	psy::core::Song* song();
-
-	public slots:
+public slots:
 	void onLoadButtonClicked();
 	void onSaveButtonClicked();
 	void onPlusButtonClicked();
@@ -50,8 +48,6 @@ signals:
 	void sampleAdded();
 
 private:
-	psy::core::Song *song_;
-	
 	QVBoxLayout *layout_;
 	
 	QToolBar *toolBar_;
@@ -82,7 +78,7 @@ private:
 	QSlider *zoomSlide_;
 	QAction *zoomLess_;
 
-	QStandardItemModel *instrumentsModel_;
+	InstrumentsModel *instrumentsModel_;
 };
 
 #endif

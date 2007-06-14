@@ -55,3 +55,14 @@ void InstrumentsModel::clearInstrument( int instrIndex )
 	QString name = QString::fromStdString( buffer.str() );
 	item( instrIndex )->setText( name );
 }
+
+int InstrumentsModel::selectedInstrumentIndex()
+{
+	return song_->instSelected;
+}
+
+
+bool InstrumentsModel::slotIsEmpty( int instrIndex )
+{
+	return song_->_pInstrument[instrIndex]->Empty();
+}

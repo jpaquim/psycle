@@ -22,6 +22,7 @@
 #include "../configuration.h"
 #include "waveview.h"
 #include "wavedisplay.h"
+#include "instrumentsmodel.h"
 
 #include <QtGui>
 #include <iostream>
@@ -33,11 +34,10 @@
 #include <iomanip>
 
 
-WaveView::WaveView( QStandardItemModel *instrumentsModel, psy::core::Song *song, QWidget *parent) 
+WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent) 
 	: QWidget(parent),
 	  instrumentsModel_( instrumentsModel )
 {
-	song_ = song;
 	layout_ = new QVBoxLayout();
 	setLayout(layout_);
 	 
@@ -142,10 +142,9 @@ void WaveView::onLoadButtonClicked()
 	QString pathToWavfile = QFileDialog::getOpenFileName( this, tr("Open File"),
 							      samplePath,
 							      tr("Wave files (*.wav)") );
-	int curInstrIndex = song()->instSelected;
-	std::cout << "inst sel: " << curInstrIndex << std::endl;
+	int curInstrIndex = instrumentsModel_->selectedInstrumentIndex();
 
-	if ( !song()->_pInstrument[curInstrIndex]->Empty() )
+	if ( !instrumentsModel_->slotIsEmpty( curInstrIndex ) )
 	{
 		int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
 					       tr("A sample is already loaded here.\n"
@@ -153,17 +152,7 @@ void WaveView::onLoadButtonClicked()
 					       QMessageBox::Ok | QMessageBox::Cancel );
 		if ( ret == QMessageBox::Cancel ) return;
 	}
-	if ( song()->WavAlloc( curInstrIndex, pathToWavfile.toStdString().c_str() ) )
-	{
-		QStandardItem *item = instrumentsModel_->item( curInstrIndex );
-		std::ostringstream buffer;
-		buffer.setf(std::ios::uppercase);			       
-		buffer.str("");
-		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << curInstrIndex << ": " << song()->_pInstrument[curInstrIndex]->_sName;
-		QString name = QString::fromStdString( buffer.str() );
-		item->setText( name );
-	}
+	instrumentsModel_->loadInstrument( curInstrIndex, pathToWavfile );
 }
 
 void WaveView::onSaveButtonClicked()
@@ -188,9 +177,4 @@ void WaveView::onMinusButtonClicked()
 	{
 		zoomSlide_->setValue(zoomSlide_->value() - 1);
 	}
-}
-
-psy::core::Song* WaveView::song()
-{
-	return song_;
 }

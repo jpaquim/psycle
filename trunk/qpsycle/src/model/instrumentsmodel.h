@@ -15,6 +15,9 @@ public:
 
 	bool loadInstrument( int instrIndex, QString pathToWavfile );
 	void clearInstrument( int instrIndex );
+
+	int selectedInstrumentIndex();
+	bool slotIsEmpty( int instrIndex );
 		       
 private:
 	psy::core::Song *song_;

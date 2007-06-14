@@ -56,7 +56,7 @@ MainWindow::MainWindow()
 
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
-	wavView_ = new WaveView( instrumentsModel_, song_ );
+	wavView_ = new WaveView( instrumentsModel_ );
 	seqView_ = new SequencerView( song_ );
 	patternBox_ = new PatternBox( song_ );
 
@@ -252,7 +252,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
-	wavView_ = new WaveView( instrumentsModel_, song_ );
+	wavView_ = new WaveView( instrumentsModel_ );
 	seqView_ = new SequencerView( song_ );
 	macView_->setOctave( 4 );
 	patView_->setOctave( 4 );
