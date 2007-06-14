@@ -41,9 +41,9 @@ public slots:
 private:
 	QGraphicsScene *wavescene;
 	
-	QGraphicsSimpleTextItem *nodata;
-	QGraphicsSimpleTextItem *left;
-	QGraphicsSimpleTextItem *right;
+	QGraphicsTextItem *nodata;
+//	QGraphicsTextItem *left;
+//	QGraphicsTextItem *right;
 	
 	
 /*	QGraphicsLineItem *stereo_centerline;
