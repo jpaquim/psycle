@@ -2,7 +2,7 @@
 # Created By Graity_0... Released Under GPL Licence
 #Warning Not Complete!!!!!
 echo off
-echo "Welcome to Gravity_0 Automaker for QT - Linux Verion Bet"
+echo "Welcome to Gravity_0 Automaker for QT - Linux Verion Beta"
 echo "Qt is a registered trademaerk of Trolltech"
 echo " "
 echo "Running QMake"
