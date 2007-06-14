@@ -65,6 +65,7 @@ void SampleBrowser::createLoadedSamplesList()
 	instrumentsList_ = new QListView( this );
 	instrumentsList_->setModel( instrumentsModel_ );
 	instrumentsList_->setCurrentIndex( instrumentsModel_->index( 0, 0 ) );
+	instrumentsList_->setEditTriggers( QAbstractItemView::NoEditTriggers );
 }
 
 void SampleBrowser::createActionsWidget()
