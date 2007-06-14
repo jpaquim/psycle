@@ -61,6 +61,12 @@ int InstrumentsModel::selectedInstrumentIndex()
 	return song_->instSelected;
 }
 
+void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
+{
+	song_->instSelected   = newIndex;
+	song_->auxcolSelected = newIndex;
+}
+
 
 bool InstrumentsModel::slotIsEmpty( int instrIndex )
 {
