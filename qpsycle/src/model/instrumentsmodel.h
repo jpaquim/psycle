@@ -17,6 +17,7 @@ public:
 	void clearInstrument( int instrIndex );
 
 	int selectedInstrumentIndex();
+	void setSelectedInstrumentIndex( int newIndex );
 	bool slotIsEmpty( int instrIndex );
 		       
 private:

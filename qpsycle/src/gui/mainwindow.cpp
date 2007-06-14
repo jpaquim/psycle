@@ -242,18 +242,22 @@ void MainWindow::loadSong( psy::core::Song *song )
 {
 	song_ = song;
 	// update gui to new song FIXME: very crappy way of doing it for now.
+	delete instrumentsModel_;
 	delete patternBox_;
 	delete macView_;
 	delete patView_;
 	delete wavView_;
 	delete seqView_;
+	delete sampleBrowser_;
 
 	psy::core::Player::Instance()->song( song_ );
 
+	instrumentsModel_ = new InstrumentsModel( song_, psy::core::MAX_INSTRUMENTS, 1 );
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
 	wavView_ = new WaveView( instrumentsModel_ );
 	seqView_ = new SequencerView( song_ );
+	sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );
 	macView_->setOctave( 4 );
 	patView_->setOctave( 4 );
 	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
@@ -482,9 +486,7 @@ void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
 
 void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 {
-	song_->instSelected   = newIndex;
-	song_->auxcolSelected = newIndex;
-	// FIXME: when wave editor is more advanced, we need to notify it of this change.
+	instrumentsModel_->setSelectedInstrumentIndex( newIndex );
 }
 
 void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )
