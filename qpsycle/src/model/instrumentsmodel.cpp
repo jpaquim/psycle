@@ -26,8 +26,8 @@
 #include <iostream>
 #include <iomanip>
 
-InstrumentsModel::InstrumentsModel( psy::core::Song *song, int rows, int columns, QObject *parent )
-	: QStandardItemModel( rows, columns, parent ),
+InstrumentsModel::InstrumentsModel( psy::core::Song *song )
+	: QStandardItemModel(),
 	  song_( song )
 {
 	std::ostringstream buffer;
@@ -39,7 +39,7 @@ InstrumentsModel::InstrumentsModel( psy::core::Song *song, int rows, int columns
 		buffer << row << ": " << song_->_pInstrument[row]->_sName;
 		QString name = QString::fromStdString( buffer.str() );
 		QStandardItem *item = new QStandardItem( name );		
-		setItem( row, 0, item );
+		appendRow( item );
 	}
 }
 

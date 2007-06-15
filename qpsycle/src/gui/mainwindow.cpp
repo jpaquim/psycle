@@ -52,7 +52,7 @@ MainWindow::MainWindow()
 	setupSound();
 	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
 
-	instrumentsModel_ = new InstrumentsModel( song_, psy::core::MAX_INSTRUMENTS, 1 );
+	instrumentsModel_ = new InstrumentsModel( song_ );
 
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
@@ -252,7 +252,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 
 	psy::core::Player::Instance()->song( song_ );
 
-	instrumentsModel_ = new InstrumentsModel( song_, psy::core::MAX_INSTRUMENTS, 1 );
+	instrumentsModel_ = new InstrumentsModel( song_ );
 	macView_ = new MachineView( song_ );
 	patView_ = new PatternView( song_ );
 	wavView_ = new WaveView( instrumentsModel_ );

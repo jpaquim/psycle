@@ -39,7 +39,7 @@ namespace psy { namespace core {
 class InstrumentsModel : public QStandardItemModel {
 Q_OBJECT
 public:
-	InstrumentsModel( psy::core::Song *song, int rows, int columns, QObject * parent = 0 );
+	InstrumentsModel( psy::core::Song *song );
 	~InstrumentsModel();
 
 	bool loadInstrument( int instrIndex, QString pathToWavfile );
