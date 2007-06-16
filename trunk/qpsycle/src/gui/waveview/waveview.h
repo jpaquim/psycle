@@ -25,7 +25,7 @@
 #include <QToolBar>
 #include <QWidget>
 #include <QSlider>
-#include <QScrollBar>
+
 
 class QStandardItemModel;
 class InstrumentsModel;
