@@ -27,9 +27,6 @@
 
 #include <QtGui>
 #include <iostream>
-#include <QtGui/QGraphicsView> //temp... just for testing...
-#include <QGraphicsScene>
-#include <QGraphicsRectItem>
 
 #include <iostream>
 #include <iomanip>
