@@ -113,7 +113,8 @@ NAMESPACE__BEGIN(psycle)
 		//		totalCPU = _pSong->cpuIdle*0.1f+masterCPU;
 		//		totalCPU = ((float)_pSong->cpuIdle/Global::_cpuHz)*100+machsCPU;
 		//		totalCPU = machsCPU + wiresCPU+((float)_pSong->cpuIdle/Global::_cpuHz)*100;
-				totalCPU = machsCPU + wiresCPU+ ((float)_pSong->cpuIdle/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+		//		totalCPU = machsCPU + wiresCPU+ ((float)_pSong->cpuIdle/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+				totalCPU = machsCPU + wiresCPU;
 				
 				sprintf(buffer,"%.1f%%",totalCPU);
 				m_cpuidlelabel.SetWindowText(buffer);

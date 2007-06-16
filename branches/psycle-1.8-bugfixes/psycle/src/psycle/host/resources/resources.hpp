@@ -14,7 +14,6 @@
 #define ID_INDICATOR_TWEAKS             59
 #define ID_INDICATOR_OCTAVE             60
 #define IDR_MAINFRAME                   101
-#define IDD_FORMVIEW                    101
 #define IDD_PSYBAR                      102
 #define IDB_LESS                        103
 #define IDD_WAVED_ZOOMBAR               103
@@ -1010,6 +1009,8 @@
 #define IDC_LISTPARAM                   1783
 #define IDC_SLIDERPARAM                 1784
 #define IDC_SPINPARAM                   1785
+#define IDC_SHOWPATTERNAME              1786
+#define IDC_REPLACEMAC                  1787
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1161,12 +1162,10 @@
 #define ID_PROGRAMS_SELECTBANK          33079
 #define ID_ABOUT_ABOUTVST               33080
 #define ID_COMBO_BANK                   33082
-#define ID_PROGRAMS_SELECTBANK33083     33083
-#define ID_PROGRAMS_SELECTPROGRAM       33084
-#define ID_SELECTBANK_0                 33090
-#define ID_SELECTPROGRAM_0              33091
-#define ID_PROGRAMS_SELECTPROGRAM33093  33094
-#define ID_PROGRAMS_SELECTBANK33092     33095
+#define ID_SELECTBANK_0                 33100
+#define ID_SELECTPROGRAM_0              33200
+#define ID_PROGRAMMORE                  34200
+#define ID_PROGRAMLESS                  34201
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1176,8 +1175,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        271
-#define _APS_NEXT_COMMAND_VALUE         33096
-#define _APS_NEXT_CONTROL_VALUE         1786
+#define _APS_NEXT_COMMAND_VALUE         34204
+#define _APS_NEXT_CONTROL_VALUE         1788
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

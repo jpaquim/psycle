@@ -86,8 +86,9 @@ namespace psycle
 
 			long host::DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos)
 			{
-				//  pos in Sample frames, return bpm* 10000
-				return 0;
+				//\todo: return the real tempo in the future, not always the current one
+				// pos in Sample frames, return bpm* 10000
+				return vstTimeInfo.tempo * 10000;
 			}
 			long host::OnGetOutputLatency(CEffect &pEffect)
 			{
@@ -105,8 +106,7 @@ namespace psycle
 			}
 
 
-			///\todo: Get information about the following five functions, and especially on how the host automates the plugins
-			// (i.e. the inverse step)
+			///\todo: Get information about this function
 			long host::OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
 
 //////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ namespace psycle
 
 			bool plugin::DescribeValue(int parameter, char * psTxt)
 			{
-				if(parameter < numParams())
+				if(parameter >= 0 && parameter < numParams())
 				{
 					char par_display[64]={0};
 					char par_label[64]={0};
@@ -257,23 +257,27 @@ namespace psycle
 						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 						return false;
 					}
-					pFile->Read(&_program, sizeof _program);
-					SetProgram(_program);
-
 					UINT count;
+					pFile->Read(&_program, sizeof _program);
 					pFile->Read(&count, sizeof count);
 					size -= sizeof _program + sizeof count + sizeof(float) * count;
 					if(!size)
 					{
+						BeginSetProgram();
+						SetProgram(_program);
 						for(UINT i(0) ; i < count ; ++i)
 						{
 							float temp;
 							pFile->Read(&temp, sizeof temp);
 							SetParameter(i, temp);
 						}
+						EndSetProgram();
 					}
 					else
 					{
+						BeginSetProgram();
+						SetProgram(_program);
+						EndSetProgram();
 						pFile->Skip(sizeof(float) *count);
 						if(ProgramIsChunk())
 						{
@@ -288,10 +292,11 @@ namespace psycle
 							pFile->Skip(size);
 							return false;
 						}
+						MainsChanged(true);
 					}
 				}
 				return true;
-			};
+			}
 
 			void plugin::SaveSpecificChunk(RiffFile * pFile) 
 			{
@@ -303,9 +308,11 @@ namespace psycle
 				bool b = ProgramIsChunk();
 				if(b)
 				{
+					MainsChanged(false);
 					count=0;
 					chunksize = GetChunk((void**)&pData);
 					size+=chunksize;
+					MainsChanged(true);
 				}
 				else
 				{
@@ -328,7 +335,7 @@ namespace psycle
 						pFile->Write(&temp, sizeof temp);
 					}
 				}
-			};
+			}
 
 			VstMidiEvent* plugin::reserveVstMidiEvent() {
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
@@ -561,7 +568,7 @@ namespace psycle
 				}
 				cpu::cycles_type cost = cpu::cycles();
 				///\todo: to standby, or not to standby, that's the audible question.
-				if((!_mute) && (!Standby()) && (!_bypass || bCanBypass))
+				if((!_mute) && (!Standby()) && (!Bypass() || bCanBypass))
 				{
 					if(bNeedIdle) 
 					{

@@ -6,8 +6,9 @@
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 #include "ProgressDialog.hpp"
-#undef min //\todo : ???
-#undef max //\todo : ???
+// Undefining min and max. macros. We use the std:: functions instead.
+#undef min
+#undef max
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -25,15 +26,16 @@ NAMESPACE__BEGIN(psycle)
 		int CNewMachine::pluginOrder = 1;
 		bool CNewMachine::pluginName = 1;
 		int CNewMachine::_numPlugins = -1;
-		int CNewMachine::LastType0=0;
-		int CNewMachine::LastType1=0;
+		int CNewMachine::selectedClass=internal;
+		int CNewMachine::selectedMode=modegen;
 
 		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
 
-		std::map<std::string,std::string> CNewMachine::dllNames;
+		std::map<std::string,std::string> CNewMachine::NativeNames;
+		std::map<std::string,std::string> CNewMachine::VstNames;
 
 
-		void CNewMachine::learnDllName(const std::string & fullname)
+		void CNewMachine::learnDllName(const std::string & fullname,MachineType type)
 		{
 			std::string str=fullname;
 			// strip off path
@@ -44,12 +46,18 @@ NAMESPACE__BEGIN(psycle)
 			// transform string to lower case
 			std::transform(str.begin(),str.end(),str.begin(),std::tolower);
 
-			dllNames[str]=fullname;
+			switch(type)
+			{
+			case MACH_PLUGIN: NativeNames[str]=fullname;
+				break;
+			case MACH_VST:
+			case MACH_VSTFX:VstNames[str]=fullname;
+				break;
+			default:
+				break;
+			}
 		}
-		//\todo : Important: There can exists dlls with the same name (there is a phantom.dll which is a VST).
-		//        what about adding a new parameter indicating if we want a VST or a Psycle plugin?
-		//		  or maybe if found more than one entry, ask the user which one he wants to use?
-		bool CNewMachine::lookupDllName(const std::string name, std::string & result, int& shellidx)
+		bool CNewMachine::lookupDllName(const std::string name, std::string & result, MachineType type,int& shellidx)
 		{
 			std::string tmp = name;
 			std::string extension = name.substr(name.length()-4,4);
@@ -62,13 +70,32 @@ NAMESPACE__BEGIN(psycle)
 
 			// transform string to lower case
 			std::transform(tmp.begin(),tmp.end(),tmp.begin(),std::tolower);
-			
-			std::map<std::string,std::string>::iterator iterator
-				= dllNames.find(tmp);
-			if(iterator != dllNames.end())
+
+			switch(type)
 			{
-				result=iterator->second;
-				return true;
+			case MACH_PLUGIN:
+				{
+					std::map<std::string,std::string>::iterator iterator = NativeNames.find(tmp);
+					if(iterator != NativeNames.end())
+					{
+						result=iterator->second;
+						return true;
+					}
+					break;
+				}
+			case MACH_VST:
+			case MACH_VSTFX:
+				{
+					std::map<std::string,std::string>::iterator iterator = VstNames.find(tmp);
+					if(iterator != VstNames.end())
+					{
+						result=iterator->second;
+						return true;
+					}
+					break;
+				}
+			default:
+				break;
 			}
 			return false;
 		}
@@ -210,7 +237,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
-				m_browser.Select(hNodes[LastType0],TVGN_CARET);
+				m_browser.Select(hNodes[selectedClass],TVGN_CARET);
 			}
 			else
 			{
@@ -268,7 +295,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
-				m_browser.Select(hNodes[LastType1],TVGN_CARET);
+				m_browser.Select(hNodes[selectedMode],TVGN_CARET);
 			}
 			Outputmachine = -1;
 		}
@@ -288,8 +315,8 @@ NAMESPACE__BEGIN(psycle)
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_SAMPLER;
 				OutBus = true;
-				LastType0 = 0;
-				LastType1 = 0;
+				selectedClass = internal;
+				selectedMode = modegen;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -301,8 +328,8 @@ NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_DUMMY;
-				LastType0 = 0;
-				LastType1 = 1;
+				selectedClass = internal;
+				selectedMode = modefx;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -315,8 +342,8 @@ NAMESPACE__BEGIN(psycle)
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_XMSAMPLER;
 				OutBus = true;
-				LastType0 = 0;
-				LastType1 = 0;
+				selectedClass = internal;
+				selectedMode = modegen;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 				}
@@ -329,8 +356,8 @@ NAMESPACE__BEGIN(psycle)
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_DUPLICATOR;
 				OutBus = true;
-				LastType0 = 0;
-				LastType1 = 0;
+				selectedClass = internal;
+				selectedMode = modegen;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -342,8 +369,8 @@ NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_MIXER;
-				LastType0 = 0;
-				LastType1 = 1;
+				selectedClass = internal;
+				selectedMode = modefx;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -379,30 +406,30 @@ NAMESPACE__BEGIN(psycle)
 					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
 					{
 						Outputmachine = MACH_PLUGIN;
-						LastType0 = 1;
+						selectedClass = native;
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
 						{
 							OutBus = true;
-							LastType1 = 0;
+							selectedMode = modegen;
 						}
 						else
 						{
-							LastType1 = 1;
+							selectedMode = modefx;
 						}
 					}
 					else
 					{
-						LastType0 = 2;
+						selectedClass = vstmac;
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 						{
 							Outputmachine = MACH_VST;
 							OutBus = true;
-							LastType1 = 0;
+							selectedMode = modegen;
 						}
 						else
 						{
 							Outputmachine = MACH_VSTFX;
-							LastType1 = 1;
+							selectedMode = modefx;
 						}
 					}
 
@@ -570,7 +597,11 @@ NAMESPACE__BEGIN(psycle)
 					<< "=== Native Plugins ===" << std::endl
 					<< std::endl;
 				out.flush();
+
+				///\todo: put this inside a low priority thread and wait until it finishes.
 				FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, progressOpen ? &Progress : 0);
+
+
 				out.flush();
 				if(progressOpen)
 				{
@@ -584,7 +615,11 @@ NAMESPACE__BEGIN(psycle)
 					<< "=== VST Plugins ===" << std::endl
 					<< std::endl;
 				out.flush();
+
+				///\todo: put this inside a low priority thread and wait until it finishes.
 				FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, progressOpen ? &Progress : 0);
+
+
 				out.flush();
 				if(progressOpen)
 				{
@@ -736,7 +771,7 @@ NAMESPACE__BEGIN(psycle)
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
 							}
-							learnDllName(fileName);
+							learnDllName(fileName,type);
 							out << plug.GetName() << " - successfully instanciated";
 							out.flush();
 							// [bohan] plug is a stack object, so its destructor is called
@@ -889,7 +924,7 @@ NAMESPACE__BEGIN(psycle)
 										_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
 									}
 								}
-								learnDllName(fileName);
+								learnDllName(fileName,type);
 								out << vstPlug->GetName() << " - successfully instanciated";
 								out.flush();
 							}
@@ -974,7 +1009,8 @@ NAMESPACE__BEGIN(psycle)
 			{
 				zapObject(_pPlugsInfo[i]);
 			}
-			dllNames.clear();
+			NativeNames.clear();
+			VstNames.clear();
 			_numPlugins = -1;
 		}
 
@@ -1084,7 +1120,7 @@ NAMESPACE__BEGIN(psycle)
 
 							if(p.error.empty())
 							{
-								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname);
+								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname,_pPlugsInfo[currentPlugsCount]->type);
 							}
 							++currentPlugsCount;
 						}

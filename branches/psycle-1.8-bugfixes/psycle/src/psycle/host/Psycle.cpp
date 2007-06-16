@@ -52,16 +52,6 @@ NAMESPACE__BEGIN(psycle)
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
 
 			CInstanceChecker instanceChecker;
-			if (instanceChecker.PreviousInstanceRunning())
-			{
-//				AfxMessageBox(_T("Previous version detected, will now restore it"), MB_OK);
-				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
-				if(*(m_lpCmdLine) != 0)
-				{
-					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
-				}
-				return FALSE;
-			}
 
 			SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
 			
@@ -93,6 +83,21 @@ NAMESPACE__BEGIN(psycle)
 			{
 				pFrame->m_wndView._outputActive = true;
 			}
+			if (instanceChecker.PreviousInstanceRunning() && !Global::pConfig->_allowMultipleInstances)
+			{
+//				AfxMessageBox(_T("Previous version detected, will now restore it"), MB_OK);
+				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
+				if(*(m_lpCmdLine) != 0)
+				{
+					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
+				}
+				_global.pConfig->_pOutputDriver->Enable(false);
+				Sleep(LOCK_LATENCY);
+				_global.pConfig->_pMidiInput->Close();
+
+				return FALSE;
+			}
+
 
 			// create and load the frame with its resources
 			pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);
@@ -151,14 +156,18 @@ NAMESPACE__BEGIN(psycle)
 			return CWinApp::PreTranslateMessage(pMsg);
 		}
 
+		// Returning false on WM_TIMER prevents the statusbar from being updated. So it's disabled for now.
 		BOOL CPsycleApp::IsIdleMessage( MSG* pMsg )
 		{
 			if (!CWinApp::IsIdleMessage( pMsg ) || 
 				pMsg->message == WM_TIMER) 
-				return FALSE;
-			else
+			{
+//				return FALSE;
+			}
+//			else
 				return TRUE;
 		}
+
 		BOOL CPsycleApp::OnIdle(LONG lCount)
 		{
 			BOOL bMore = CWinApp::OnIdle(lCount);
@@ -209,7 +218,7 @@ NAMESPACE__BEGIN(psycle)
 			if (*(cmdline) != 0)
 			{
 				char * tmpName =new char[257];
-				strncpy(tmpName, m_lpCmdLine+1, strlen(m_lpCmdLine+1) -1 );
+				strncpy(tmpName, m_lpCmdLine+1, 256 );
 				tmpName[strlen(m_lpCmdLine+1) -1 ] = 0;
 				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
 				zapArray(tmpName);

@@ -157,28 +157,6 @@ NAMESPACE__BEGIN(psycle)
 			CRect rClient;
 			dsk->GetClientRect(&rClient);
 
-
-/*			\todo: For some reason, the compiler doesn't see PMENUBARINFO nor GetMenuBarInfo(). They are defined in Winuser.h (PlatformSDK).
-
-			PMENUBARINFO pinfo;
-			GetMenuBarInfo(OBJID_MENU,0,pinfo);
-			CRect rect
-				(
-					CPoint
-					(
-					rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
-					rClient.Height() / 2 - (48 + winh) / 2
-					),
-					CSize
-					(
-						W_ROWWIDTH * ncol + GetSystemMetrics(SM_CXFRAME),
-						winh + GetSystemMetrics(SM_CYCAPTION) +  (pinfo->rcBar.bottom-pinfo->rcBar.top) + GetSystemMetrics(SM_CYEDGE)
-					)
-				);
-
-			CalcWindowRect(&rect, adjustBorder);
-			MoveWindow(&rect, true);
-*/
 			CRect rect,rect2;
 			//Show the window in the usual way, without worrying about the exact sizes.
 			MoveWindow
@@ -452,7 +430,7 @@ NAMESPACE__BEGIN(psycle)
 				if (nv < minval) nv = minval;
 				if (nv > maxval) nv = maxval;
 
-				_pMachine->SetParameter(tweakpar,(int) nv);
+				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
 				prevval=(int)nv;
 				wndView->AddMacViewUndo();
 				if (Global::pConfig->_RecordTweaks)

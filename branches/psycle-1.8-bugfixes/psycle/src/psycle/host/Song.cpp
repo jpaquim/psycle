@@ -390,16 +390,13 @@ namespace psycle
 				{
 					w = dmac->FindInputWire(wiresource);
 					dmac->GetWireVolume(w,volume);
-					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+					//\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+					// Also, it would be nice to maintain the output wire index.
+					if (InsertConnection(wiresource, wiredest,volume))
 					{
 						// delete the old wire
-						_pMachine[wiresource]->_connection[wireindex] = FALSE;
-						_pMachine[wiresource]->_outputMachines[wireindex] = -1;
-						_pMachine[wiresource]->_numOutputs--;
-
-						dmac->_inputCon[w] = FALSE;
-						dmac->_inputMachines[w] = -1;
-						dmac->_numInputs--;
+						_pMachine[wiresource]->DeleteOutputWireIndex(wireindex);
+						dmac->DeleteInputWireIndex(w);
 					}
 /*						else
 					{
@@ -420,18 +417,12 @@ namespace psycle
 				if (smac)
 				{
 					_pMachine[wiredest]->GetWireVolume(wireindex,volume);
-					if (InsertConnection(wiresource, wiredest,volume)) //\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+					if (InsertConnection(wiresource, wiredest,volume))
 					{
 						// delete the old wire
 						int t = smac->FindOutputWire(wiredest);
-						smac->_connection[t] = FALSE;
-						smac->_outputMachines[t] = -1;
-
-						smac->_numOutputs--;
-
-						_pMachine[wiredest]->_inputCon[wireindex] = FALSE;
-						_pMachine[wiredest]->_inputMachines[wireindex] = -1;
-						_pMachine[wiredest]->_numInputs--;
+						smac->DeleteOutputWireIndex(t);
+						_pMachine[wiredest]->DeleteInputWireIndex(wireindex);
 					}
 /*						else
 					{
@@ -466,17 +457,12 @@ namespace psycle
 						if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
 						{
 							iMac2 = _pMachine[iMac->_inputMachines[w]];
-							if(iMac2)
+							if (iMac2)
 							{
-								for(int x=0; x<MAX_CONNECTIONS; x++)
+								int wix = iMac2->FindOutputWire(mac);
+								if (wix >=0)
 								{
-									if( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
-									{
-										iMac2->_connection[x] = false;
-										iMac2->_outputMachines[x] = -1;
-										iMac2->_numOutputs--;
-										break;
-									}
+									iMac2->DeleteOutputWireIndex(wix);
 								}
 							}
 						}
@@ -487,17 +473,12 @@ namespace psycle
 						if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
 						{
 							iMac2 = _pMachine[iMac->_outputMachines[w]];
-							if(iMac2)
+							if (iMac2)
 							{
-								for(int x=0; x<MAX_CONNECTIONS; x++)
+								int wix = iMac2->FindInputWire(mac);
+								if(wix >=0 )
 								{
-									if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
-									{
-										iMac2->_inputCon[x] = false;
-										iMac2->_inputMachines[x] = -1;
-										iMac2->_numInputs--;
-										break;
-									}
+									iMac2->DeleteInputWireIndex(wix);
 								}
 							}
 						}
@@ -801,8 +782,7 @@ namespace psycle
 
 		int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
 		{
-			///\todo what is ASSERT? some msicrosoft thingie?
-			ASSERT(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
+			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 			DeleteLayer(iInstr);
 			_pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
 			if(bStereo)
@@ -821,8 +801,7 @@ namespace psycle
 
 		int Song::WavAlloc(int instrument,const char * Wavfile)
 		{ 
-			///\todo what is ASSERT? some msicrosoft thingie?
-			ASSERT(Wavfile != 0);
+			assert(Wavfile != 0);
 			WaveFile file;
 			ExtRiffChunkHeader hd;
 			// opens the file and read the format Header.
@@ -1608,7 +1587,7 @@ namespace psycle
 								pTempMac->PreLoad(pFile,program,instance);
 								assert(instance < OLD_MAX_PLUGINS);
 								int shellIdx=0;
-								if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp,shellIdx)))
+								if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp,MACH_VST,shellIdx)))
 								{
 									berror=true;
 									sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);

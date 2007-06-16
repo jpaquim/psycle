@@ -2397,7 +2397,6 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnEditUndo() 
 		{
-			// TODO: Add your command handler code here
 			if (pUndoList)
 			{
 				switch (pUndoList->type)
@@ -2536,7 +2535,6 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnEditRedo() 
 		{
-			// TODO: Add your command handler code here
 			if (pRedoList)
 			{
 				switch (pRedoList->type)

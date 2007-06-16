@@ -25,6 +25,7 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#include ".\mainfrm.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		#define WM_SETMESSAGESTRING 0x0362
@@ -32,68 +33,67 @@ NAMESPACE__BEGIN(psycle)
 		IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
-		//{{AFX_MSG_MAP(CMainFrame)
-		ON_WM_CREATE()
-		ON_WM_SETFOCUS()
-		ON_BN_CLICKED(IDC_BUTTON1, OnBarButton1)
-		ON_BN_CLICKED(IDC_BUTTON3, OnBpmAddTen)
-		ON_BN_CLICKED(IDC_BUTTON14, OnBpmDecOne)
-		ON_BN_CLICKED(IDC_BUTTON15, OnBpmDecTen)
-		ON_CBN_SELCHANGE(IDC_SSCOMBO2, OnSelchangeSscombo2)
-		ON_CBN_CLOSEUP(IDC_SSCOMBO2, OnCloseupSscombo2)
-		ON_CBN_SELCHANGE(IDC_BAR_COMBOGEN, OnSelchangeBarCombogen)
-		ON_CBN_CLOSEUP(IDC_BAR_COMBOGEN, OnCloseupBarCombogen)
-		ON_CBN_SELCHANGE(IDC_BAR_COMBOINS, OnSelchangeBarComboins)
-		ON_CBN_CLOSEUP(IDC_BAR_COMBOINS, OnCloseupBarComboins)
-		ON_BN_CLICKED(IDC_CLIPBUT, OnClipbut)
-		ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
-		ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
-		ON_COMMAND(ID_PSYHELP, OnPsyhelp)
-		ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
-		ON_BN_CLICKED(IDC_EDITWAVE, OnEditwave)
-		ON_BN_CLICKED(IDC_GEAR_RACK, OnGearRack)
-		ON_BN_CLICKED(IDC_WAVEBUT, OnWavebut)
-		ON_WM_DESTROY()
-		ON_BN_CLICKED(IDC_B_DECGEN, OnBDecgen)
-		ON_BN_CLICKED(IDC_B_INCGEN, OnBIncgen)
-		ON_BN_CLICKED(IDC_B_DECWAV, OnBDecwav)
-		ON_BN_CLICKED(IDC_B_INCWAV, OnBIncwav)
-		ON_WM_CLOSE()
-		ON_LBN_SELCHANGE(IDC_SEQLIST, OnSelchangeSeqlist)
-		ON_LBN_DBLCLK(IDC_SEQLIST, OnDblclkSeqlist)
-		ON_BN_CLICKED(IDC_DECLEN, OnDeclen)
-		ON_BN_CLICKED(IDC_INCLEN, OnInclen)
-		ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
-		ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
-		ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
-		ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
-		ON_BN_CLICKED(IDC_SEQCUT, OnSeqcut)
-		ON_BN_CLICKED(IDC_SEQCOPY, OnSeqcopy)
-		ON_BN_CLICKED(IDC_SEQPASTE, OnSeqpaste)
-		ON_BN_CLICKED(IDC_SEQDELETE, OnSeqdelete)
-		ON_BN_CLICKED(IDC_SEQDUPLICATE, OnSeqduplicate)
-		ON_WM_ACTIVATE()
-		ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
-		ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
-		ON_BN_CLICKED(IDC_FOLLOW, OnFollowSong)
-		ON_BN_CLICKED(IDC_SEQCLR, OnSeqclr)
-		ON_BN_CLICKED(IDC_SEQSRT, OnSeqsort)
-		ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
-		ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
-		ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
-		ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
-		ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
-		ON_BN_CLICKED(IDC_DECLONG, OnDeclong)
-		ON_BN_CLICKED(IDC_INCLONG, OnInclong)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_SEQPOS, OnUpdateIndicatorSeqPos)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_PATTERN, OnUpdateIndicatorPattern)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_LINE, OnUpdateIndicatorLine)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME, OnUpdateIndicatorTime)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_EDIT, OnUpdateIndicatorEdit)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_FOLLOW, OnUpdateIndicatorFollow)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_NOTEOFF, OnUpdateIndicatorNoteoff)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_TWEAKS, OnUpdateIndicatorTweaks)
-		ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
+			ON_WM_CREATE()
+			ON_WM_SETFOCUS()
+			ON_BN_CLICKED(IDC_BUTTON1, OnBarButton1)
+			ON_BN_CLICKED(IDC_BUTTON3, OnBpmAddTen)
+			ON_BN_CLICKED(IDC_BUTTON14, OnBpmDecOne)
+			ON_BN_CLICKED(IDC_BUTTON15, OnBpmDecTen)
+			ON_CBN_SELCHANGE(IDC_SSCOMBO2, OnSelchangeSscombo2)
+			ON_CBN_CLOSEUP(IDC_SSCOMBO2, OnCloseupSscombo2)
+			ON_CBN_SELCHANGE(IDC_BAR_COMBOGEN, OnSelchangeBarCombogen)
+			ON_CBN_CLOSEUP(IDC_BAR_COMBOGEN, OnCloseupBarCombogen)
+			ON_CBN_SELCHANGE(IDC_BAR_COMBOINS, OnSelchangeBarComboins)
+			ON_CBN_CLOSEUP(IDC_BAR_COMBOINS, OnCloseupBarComboins)
+			ON_BN_CLICKED(IDC_CLIPBUT, OnClipbut)
+			ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
+			ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
+			ON_COMMAND(ID_PSYHELP, OnPsyhelp)
+			ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
+			ON_BN_CLICKED(IDC_EDITWAVE, OnEditwave)
+			ON_BN_CLICKED(IDC_GEAR_RACK, OnGearRack)
+			ON_BN_CLICKED(IDC_WAVEBUT, OnWavebut)
+			ON_WM_DESTROY()
+			ON_BN_CLICKED(IDC_B_DECGEN, OnBDecgen)
+			ON_BN_CLICKED(IDC_B_INCGEN, OnBIncgen)
+			ON_BN_CLICKED(IDC_B_DECWAV, OnBDecwav)
+			ON_BN_CLICKED(IDC_B_INCWAV, OnBIncwav)
+			ON_WM_CLOSE()
+			ON_LBN_SELCHANGE(IDC_SEQLIST, OnSelchangeSeqlist)
+			ON_LBN_DBLCLK(IDC_SEQLIST, OnDblclkSeqlist)
+			ON_BN_CLICKED(IDC_DECLEN, OnDeclen)
+			ON_BN_CLICKED(IDC_INCLEN, OnInclen)
+			ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
+			ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
+			ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
+			ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
+			ON_BN_CLICKED(IDC_SEQCUT, OnSeqcut)
+			ON_BN_CLICKED(IDC_SEQCOPY, OnSeqcopy)
+			ON_BN_CLICKED(IDC_SEQPASTE, OnSeqpaste)
+			ON_BN_CLICKED(IDC_SEQDELETE, OnSeqdelete)
+			ON_BN_CLICKED(IDC_SEQDUPLICATE, OnSeqduplicate)
+			ON_WM_ACTIVATE()
+			ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
+			ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
+			ON_BN_CLICKED(IDC_FOLLOW, OnFollowSong)
+			ON_BN_CLICKED(IDC_SEQCLR, OnSeqclr)
+			ON_BN_CLICKED(IDC_SEQSRT, OnSeqsort)
+			ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
+			ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
+			ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
+			ON_CBN_CLOSEUP(IDC_AUXSELECT, OnCloseupAuxselect)
+			ON_CBN_SELCHANGE(IDC_AUXSELECT, OnSelchangeAuxselect)
+			ON_BN_CLICKED(IDC_DECLONG, OnDeclong)
+			ON_BN_CLICKED(IDC_INCLONG, OnInclong)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_SEQPOS, OnUpdateIndicatorSeqPos)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_PATTERN, OnUpdateIndicatorPattern)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_LINE, OnUpdateIndicatorLine)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME, OnUpdateIndicatorTime)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_EDIT, OnUpdateIndicatorEdit)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_FOLLOW, OnUpdateIndicatorFollow)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_NOTEOFF, OnUpdateIndicatorNoteoff)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_TWEAKS, OnUpdateIndicatorTweaks)
+			ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 			ON_CBN_CLOSEUP(IDC_COMBOOCTAVE, OnCloseupCombooctave)
 			ON_CBN_SELCHANGE(IDC_COMBOOCTAVE, OnSelchangeCombooctave)
 			ON_WM_DROPFILES()
@@ -108,7 +108,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
 			ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_MASTERSLIDER, OnCustomdrawMasterslider)
-			//}}AFX_MSG_MAP
+			ON_BN_CLICKED(IDC_SHOWPATTERNAME, OnSeqShowpattername)
 		END_MESSAGE_MAP()
 
 		static UINT indicators[] =
@@ -149,6 +149,7 @@ NAMESPACE__BEGIN(psycle)
 			macComboInitialized = false;
 			
 			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
+			_bShowPatternNames=false;
 			
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
@@ -359,7 +360,7 @@ NAMESPACE__BEGIN(psycle)
 			
 			UpdatePlayOrder(true);
 			
-			DragAcceptFiles(TRUE);
+			DragAcceptFiles(true);
 
 			Global::pConfig->CreateFonts();
 
@@ -380,8 +381,6 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if( !CFrameWnd::PreCreateWindow(cs) )
 				return FALSE;
-			// TODO: Modify the Window class or styles here by modifying
-			//  the CREATESTRUCT cs
 			
 			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 			cs.lpszClass = AfxRegisterWndClass(0);
@@ -478,9 +477,11 @@ NAMESPACE__BEGIN(psycle)
 			m_wndToolBar.DestroyWindow();
 			m_wndControl.DestroyWindow();
 			m_wndControl2.DestroyWindow();
+			// m_pWndWed->DestroyWindow(); is called by the default CFrameWnd::OnClose() function, and the memory freed (no idea how...)
 			m_wndView.DestroyWindow();
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
+			DragAcceptFiles(false);
 			CFrameWnd::OnDestroy();
 		}
 
@@ -1646,10 +1647,21 @@ NAMESPACE__BEGIN(psycle)
 			int top = cc->GetTopIndex();
 			cc->ResetContent();
 			
-			for(int n=0;n<_pSong->playLength;n++)
+			if (_bShowPatternNames)
 			{
-				sprintf(buf,"%.2X: %.2X",n,_pSong->playOrder[n]);
-				cc->AddString(buf);
+				for(int n=0;n<_pSong->playLength;n++)
+				{
+					sprintf(buf,"%s",_pSong->patternName[_pSong->playOrder[n]]);
+					cc->AddString(buf);
+				}
+			}
+			else
+			{
+				for(int n=0;n<_pSong->playLength;n++)
+				{
+					sprintf(buf,"%.2X: %.2X",n,_pSong->playOrder[n]);
+					cc->AddString(buf);
+				}
 			}
 			
 			cc->SelItemRange(false,0,cc->GetCount()-1);
@@ -1895,57 +1907,56 @@ NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnSeqduplicate() 
 		{
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
-			int counter=0, selcount = cc->GetSelCount();
+			int selcount = cc->GetSelCount();
+			if (selcount == 0) return;
 			if ( _pSong->playLength+selcount >= MAX_SONG_POSITIONS)
 			{
 				MessageBox("Cannot clone the pattern(s). The maximum sequence length would be exceeded.","Clone Patterns");
+				m_wndView.SetFocus();
 				return;
 			}
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			// Moves all patterns after the selection, to make space.
 			int* litems = new int[selcount];
 			cc->GetSelItems(selcount,litems);
-
-			// Moves all patterns after the selection, to make space.
 			for(int i(_pSong->playLength-1) ; i >= litems[selcount-1] ;--i)
 			{
 				_pSong->playOrder[i+selcount]=_pSong->playOrder[i];
 			}
 			_pSong->playLength+=selcount;
 
-
 			for(int i(0) ; i < selcount ; ++i)
 			{
-				int newpat = _pSong->GetBlankPatternUnused();
-				if (newpat < MAX_PATTERNS-1)
+				int newpat = -1;
+				// This for loop is in order to clone sequences like: 00 00 01 01 and avoid duplication of same patterns.
+				for (int j(0); j < i; ++j)
 				{
-					m_wndView.editPosition=litems[i];
-
-					m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-					int oldpat = _pSong->playOrder[litems[i]];
-
-					// now we copy the data
-					// we don't really need to be able to undo this, since it's a new pattern anyway.
-					//m_wndView.AddUndo(newpat,0,0,MAX_TRACKS,_pSong->patternLines[newpat],m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-					_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
-
-					memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
-
-					_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
-
-					counter++;
+					if (_pSong->playOrder[litems[0]+j] == _pSong->playOrder[litems[0]+i])
+					{
+						newpat=_pSong->playOrder[litems[selcount-1]+j+1];
+					}
 				}
-				else 
+				if (newpat == -1 ) 
 				{
-					_pSong->playOrder[litems[selcount-1]+i+1]=0;
+					newpat = _pSong->GetBlankPatternUnused();
+					if (newpat < MAX_PATTERNS-1)
+					{
+						int oldpat = _pSong->playOrder[litems[i]];
+						_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
+						memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
+					}
+					else 
+					{
+						newpat=0;
+					}
 				}
+				_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
 			}
-			if(counter > 0)
-			{
-				m_wndView.editPosition=litems[selcount-1]+1;
-				UpdatePlayOrder(true);
-				UpdateSequencer(m_wndView.editPosition);
+			m_wndView.editPosition=litems[selcount-1]+1;
+			UpdatePlayOrder(true);
+			UpdateSequencer(m_wndView.editPosition);
+			m_wndView.Repaint(DMPattern);
 
-				m_wndView.Repaint(DMPattern);
-			}
 			zapArray(litems);
 			m_wndView.SetFocus();
 		}
@@ -2211,6 +2222,14 @@ NAMESPACE__BEGIN(psycle)
 			}
 			m_wndView.SetFocus();	
 		}
+		void CMainFrame::OnSeqShowpattername()
+		{
+			_bShowPatternNames=((CButton*)m_wndSeq.GetDlgItem(IDC_SHOWPATTERNAME))->GetCheck();
+			UpdateSequencer();
+			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			pls->SetSel(Global::pPlayer->_playPosition,true);
+			m_wndView.SetFocus();
+		}
 
 
 		void CMainFrame::OnMultichannelAudition() 
@@ -2353,7 +2372,11 @@ NAMESPACE__BEGIN(psycle)
 				const int ls=m_wndView.editPosition;
 				const int le=_pSong->playOrder[ls];
 				pls->DeleteString(ls);
-				sprintf(buffer,"%.2X: %.2X",ls,le);
+
+				if (_bShowPatternNames)
+					sprintf(buffer,"%s",_pSong->patternName[le]);
+				else
+					sprintf(buffer,"%.2X: %.2X",ls,le);
 				pls->InsertString(ls,buffer);
 				// Update sequencer selection	
 				pls->SelItemRange(false,0,pls->GetCount()-1);
@@ -2541,6 +2564,7 @@ NAMESPACE__BEGIN(psycle)
 							}
 							else if (_pSong->_pMachine[machine]->_type == MACH_XMSAMPLER)
 							{
+								int i=0;
 							}
 							else
 							{

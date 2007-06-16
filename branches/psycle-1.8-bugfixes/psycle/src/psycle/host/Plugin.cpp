@@ -211,7 +211,7 @@ namespace psycle
 			std::string sPath2;
 			std::string sPath;
 			int shellIdx=0;
-			if(!CNewMachine::lookupDllName(psFileName,sPath,shellIdx)) 
+			if(!CNewMachine::lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
@@ -368,7 +368,7 @@ namespace psycle
 			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute) 
 			{
-				if ((_mode == MACHMODE_GENERATOR) || (!_bypass && !Standby()))
+				if ((_mode == MACHMODE_GENERATOR) || (!Bypass() && !Standby()))
 				{
 					int ns = numSamples;
 					int us = 0;
@@ -841,7 +841,7 @@ namespace psycle
 			}
 			std::string sPath2;
 			CString sPath;
-			if ( !CNewMachine::lookupDllName(sDllName,sPath2,shellIdx) ) 
+			if ( !CNewMachine::lookupDllName(sDllName,sPath2,MACH_PLUGIN,shellIdx) ) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.

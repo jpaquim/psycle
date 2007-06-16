@@ -465,7 +465,6 @@ namespace psycle
 				// Processing plant
 				if(amount > 0)
 				{
-					cpu::cycles_type idletime = cpu::cycles();
 					if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
 					{
 						pSong->_sampCount =0;
@@ -495,7 +494,6 @@ namespace psycle
 						// Master machine initiates work
 						pSong->_pMachine[MASTER_INDEX]->Work(amount);
 					}
-					pSong->cpuIdle = cpu::cycles() - idletime;
 					pSong->_sampCount += amount;
 					if((pThis->_playing) && (pThis->_recording))
 					{

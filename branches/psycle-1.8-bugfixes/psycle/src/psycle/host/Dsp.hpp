@@ -3,6 +3,8 @@
 #pragma once
 #include <cmath>
 #include "Helpers.hpp"
+//#include <dspguru\resamp.h>
+//#include <dspguru\interp25.inc>
 namespace psycle
 {
 	namespace host
@@ -68,9 +70,14 @@ namespace psycle
 		static inline int F2I(double d)
 		{
 			const double magic(6755399441055744.0); /// 2^51 + 2^52
-			/*const*/ double tmp((d-0.5) + magic);
-			return *reinterpret_cast<int*>(&tmp);
-		};
+			union tmp_union
+			{
+				double d;
+				int i;
+			} tmp;
+			tmp.d = (d-0.5) + magic;
+			return tmp.i;
+		}
 
 		/// finds the maximum amplitude in a signal buffer.
 		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
@@ -227,7 +234,8 @@ namespace psycle
 			{
 				R_NONE  = 0,
 				R_LINEAR,
-				R_SPLINE
+				R_SPLINE,
+				R_BANDLIM
 			};
 
 		/// interpolator work function.
@@ -280,6 +288,9 @@ namespace psycle
 				case R_SPLINE:
 					_pWorkFn = Spline;
 					break;
+				case R_BANDLIM:
+					_pWorkFn = Bandlimit;
+					break;
 				}
 			}
 			virtual ResamplerQuality GetQuality(void) { return _quality; }
@@ -319,6 +330,113 @@ namespace psycle
 			// offset = sample offset [info to avoid go out of bounds on sample reading ]
 			// length = sample length [info to avoid go out of bounds on sample reading ]
 			
+
+			//either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
+			//make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
+			#define SINC_RESOLUTION 512	//sinc table values per zero crossing -- keep it a power of 2!!
+			#define SINC_ZEROS 12	//sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
+			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
+
+			/// interpolation work function which does band-limited interpolation.
+			static float Bandlimit(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			{
+				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
+				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
+				if(offset<SINC_ZEROS) leftExtent=offset;
+				if(length-offset<SINC_ZEROS) rightExtent=length-offset;
+				
+				const int sincInc(SINC_RESOLUTION);
+				float newval(0.0);
+
+				newval += sincTable[res] * *(pData);
+				float sincIndex(sincInc+res);
+				float weight(sincIndex - floor(sincIndex));
+				for(	int i(1);
+						i < leftExtent;
+						++i, sincIndex+=sincInc
+						)
+					newval+= (sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData-i);
+
+				sincIndex = sincInc-res;
+				weight = sincIndex - floor(sincIndex);
+				for(	int i(1);
+						i < rightExtent;
+						++i, sincIndex+=sincInc
+						)
+					newval += ( sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData+i);
+
+				return newval;
+			}
+
+
+			/****************************************************************************/
+/*
+			static float FIRResampling(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+
+			static float FIRResampling(
+				int interp_factor, int decim_factor, int inp_size, const double *p_H,
+				int H_size)
+			{
+				double *p_inp_real, *p_out_real, *p_Z_real,
+
+				int ii, num_out = 0, current_phase;
+				int num_phases = H_size / interp_factor;
+				int out_size = inp_size * interp_factor / decim_factor + 1;
+
+				// enforce input parameter assumptions
+				assert(interp_factor > 0);
+				assert(decim_factor > 0);
+				assert(inp_size > 0);
+				assert(p_H);
+				assert(H_size > 0);
+				assert(H_size % interp_factor == 0);
+
+				// allocate storage for inputs, outputs, and delay line
+				p_inp_real = calloc(inp_size, sizeof(double));
+				p_out_real = calloc(out_size, sizeof(double));
+				p_Z_real = calloc(num_phases, sizeof(double));
+
+				if (test_method == SINE_TEST) {
+					gen_complex_sine(inp_size, interp_factor, 1.0, inp_size, p_inp_real,
+						p_inp_imag);
+				} else {
+					gen_complex_impulse(inp_size, p_inp_real, p_inp_imag);
+				}
+
+				// clear Z delay line
+				for (ii = 0; ii < num_phases; ii++) {
+					p_Z_real[ii] = 0.0;
+				}
+
+			// set current_phase to interp_factor so that resampler will
+			//load new data into the delay line prior to calculating any
+			//outputs
+			current_phase = interp_factor;   
+			resamp_complex(interp_factor, decim_factor, num_phases,
+				&current_phase, p_H, p_Z_real, inp_size,
+				p_inp_real, p_out_real,
+				&num_out);
+
+				// free allocated storage
+				free(p_inp_real);
+				free(p_inp_imag);
+				free(p_out_real);
+				free(p_out_imag);
+				free(p_Z_real);
+				free(p_Z_imag);
+			}
+
+
+*/
+
+
+
+
+
+
+
+
+			
 		private:
 			/// Currently is 2048
 			static int _resolution;
@@ -329,6 +447,15 @@ namespace psycle
 			static float _cTable[CUBIC_RESOLUTION];
 			static float _dTable[CUBIC_RESOLUTION];
 			static float _lTable[CUBIC_RESOLUTION];
+
+			//sinc function table
+			static float sincTable[SINC_TABLESIZE];
+			//table of deltas between sincTable indices.. sincDelta[i] = sincTable[i+1] - sincTable[i]
+			//used to speed up linear interpolation of sinc table-- this idea stolen from libresampler
+			static float sincDelta[SINC_TABLESIZE];
+			//note: even with this optimization, interpolating the sinc table roughly doubles the cpu usage on my machine.
+			// since we're working in realtime here, it may be best to just make SINC_RESOLUTION a whole lot bigger, and drop
+			// the table interpolation altogether..
 		};
 		}
 	}

@@ -68,6 +68,7 @@ NAMESPACE__BEGIN(psycle)
 			CToolBar toolBar;
 			CComboBox comboBank;
 			CComboBox comboProgram;
+			std::list<HWND> secwinlist;
 
 		// Implementation
 		public:
@@ -82,8 +83,6 @@ NAMESPACE__BEGIN(psycle)
 //			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnOperationsEnabled();
 			afx_msg void OnUpdateOperationsEnabled(CCmdUI *pCmdUI);
-			afx_msg void OnOperationsBypassed();
-			afx_msg void OnUpdateOperationsBypassed(CCmdUI *pCmdUI);
 			afx_msg void OnProgramsOpenpreset();
 			afx_msg void OnProgramsSavepreset();
 			afx_msg void OnProgramsRandomizeprogram();
@@ -93,10 +92,13 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateViewsBankmanager(CCmdUI *pCmdUI);
 			afx_msg void OnViewsMidichannels();
 			afx_msg void OnUpdateViewsMidichannels(CCmdUI *pCmdUI);
-			afx_msg void OnAboutExtendedinfo();
 			afx_msg void OnAboutAboutvst();
 			afx_msg void OnSelchangeProgram();
 			afx_msg void OnSetProgram(UINT nID);
+			afx_msg void OnProgramLess();
+			afx_msg void OnUpdateProgramLess(CCmdUI *pCmdUI);
+			afx_msg void OnProgramMore();
+			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);
 			afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 			DECLARE_MESSAGE_MAP()
 		};

@@ -168,16 +168,10 @@ NAMESPACE__BEGIN(psycle)
 		void CWireDlg::OnButton1() 
 		{
 			m_pParent->AddMacViewUndo();
+			///\todo: Fix this for the Mixer Machine.
 			Inval = true;
-			_pSrcMachine->_connection[wireIndex] = false;
-			_pSrcMachine->_outputMachines[wireIndex] = -1;
-			_pSrcMachine->_numOutputs--;
-			
-			_pDstMachine->_inputCon[_dstWireIndex] = false;
-			_pDstMachine->_inputMachines[_dstWireIndex] = -1;
-			_pDstMachine->_numInputs--;
-
-
+			_pSrcMachine->DeleteOutputWireIndex(wireIndex);
+			_pDstMachine->DeleteInputWireIndex(_dstWireIndex);
 			OnCancel();
 		}
 

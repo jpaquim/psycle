@@ -57,7 +57,7 @@ namespace psycle
 		#define MAX_DELAY_BUFFER		65536
 		/// Sampler
 		#define OVERLAPTIME				128
-		/// \todo Size of audio blocks which are work'd together (max value). If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, appropiatedly.
+		/// \todo Maximum size of the audio block to be passed to the Work() function. If changed, change "MAX_BUFFER_LENGTH" in machineinterface.h, appropiatedly.
 		#define STREAM_SIZE				256
 
 		/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.

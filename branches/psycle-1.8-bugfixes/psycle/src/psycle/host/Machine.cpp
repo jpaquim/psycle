@@ -326,6 +326,19 @@ namespace psycle
 			return false;
 		}
 
+		void Machine::DeleteOutputWireIndex(int wireIndex)
+		{
+			_connection[wireIndex] = false;
+			_outputMachines[wireIndex] = -1;
+			_numOutputs--;
+		}
+		void Machine::DeleteInputWireIndex(int wireIndex)
+		{
+			_inputCon[wireIndex] = false;
+			_inputMachines[wireIndex] = -1;
+			_numInputs--;
+		}
+
 		void Machine::PreWork(int numSamples)
 		{
 			_worked = false;
@@ -529,7 +542,7 @@ namespace psycle
 						vst::plugin *vstPlug=0;
 						int shellIdx=0;
 
-						if(!CNewMachine::lookupDllName(dllName,sPath,shellIdx)) 
+						if(!CNewMachine::lookupDllName(dllName,sPath,MACH_VST,shellIdx)) 
 						{
 							// Check Compatibility Table.
 							// Probably could be done with the dllNames lockup.

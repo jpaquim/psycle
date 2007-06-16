@@ -949,17 +949,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		{
-			//todo: any ideas what this is for? blSelection gets turned off on the first LButtonDown unless control or
-			//		shift is down..  but if control is down on a dblclk, the display is changed into monochromatic modern art.
-			//		plus, it appears to set the selection to only the visible portion of the wave.  is it meant to be a 
-			//		shortcut to OnEditSelectAll()?
-/*			if(blSelection)
-			{
-				blStart=diStart;
-				blLength=diLength;
-				Invalidate(false);
-			}
-*/
+			OnEditSelectAll();
 		}
 
 		void CWaveEdChildView::OnMouseMove(UINT nFlags, CPoint point) //Fideloop's

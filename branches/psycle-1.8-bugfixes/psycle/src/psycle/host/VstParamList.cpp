@@ -5,10 +5,15 @@
 #include "VstParamList.hpp"
 #include "vsthost24.hpp"
 //#include "Helpers.hpp"
-//#include "ChildView.hpp"
 //#include "configuration.hpp"
+///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+#include "MainFrm.hpp"
+#include "ChildView.hpp"
+
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
+
+	extern CPsycleApp theApp;
 
 /*****************************************************************************/
 /* Create : creates the dialog                                               */
@@ -68,7 +73,19 @@ NAMESPACE__BEGIN(psycle)
 			Init();
 			return TRUE;
 		}
+/*
+	MSDN:
+ 	When you implement a modeless dialog box, always override the OnCancel member
+    function and call DestroyWindow from within it. Don't call the base class
+	CDialog::OnCancel, because it calls EndDialog, which will make the dialog box
+	invisible but will not destroy it. You should also override PostNcDestroy for
+	modeless dialog boxes in order to delete this, since modeless dialog boxes are
+	usually allocated with new. Modal dialog boxes are usually constructed on the
+	frame and do not need PostNcDestroy cleanup.
 
+	I don't do that, because the default behaviour of hiding, and deleting when the
+	parent window is closed is ok for this task.
+ */
 		void CVstParamList::Init() 
 		{
 			UpdateParList();
@@ -126,7 +143,6 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstParamList::UpdateOne()
 		{
-			int i = m_parlist.GetCurSel();
 			int value = machine().GetParamValue(m_parlist.GetCurSel());
 			UpdateText(value);
 			_quantizedvalue = value;
@@ -158,16 +174,14 @@ NAMESPACE__BEGIN(psycle)
 			{
 				machine().SetParameter(m_parlist.GetCurSel(), nVal);
 				UpdateText(nVal);
-				///\todo:
-/*				if(Global::pConfig->_RecordTweaks)
+				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+				if(Global::configuration()._RecordTweaks)
 				{
-					assert(childView);
-					if (Global::pConfig->_RecordMouseTweaksSmooth)
-						childView->MousePatternTweakSlide(MachineIndex, m_parlist.GetCurSel(), nVal);
+					if(Global::configuration()._RecordMouseTweaksSmooth)
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, m_parlist.GetCurSel(), nVal);
 					else
-						childView->MousePatternTweak(MachineIndex, m_parlist.GetCurSel(), nVal);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, m_parlist.GetCurSel(), nVal);
 				}
-*/
 			}
 		}
 

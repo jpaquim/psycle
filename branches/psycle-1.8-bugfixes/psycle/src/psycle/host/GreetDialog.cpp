@@ -65,7 +65,7 @@ NAMESPACE__BEGIN(psycle)
 			m_greetz.AddString("dazld");
 			m_greetz.AddString("dj_d [Beta testing]");
 			m_greetz.AddString("DJMirage");
-			m_greetz.AddString("Drax_D [for asking to be here ;·D]");
+			m_greetz.AddString("Drax_D [for asking to be here ;D]");
 			m_greetz.AddString("Druttis [Machines]");
 			m_greetz.AddString("Erodix");
 			m_greetz.AddString("Felix Kaplan / Spirit Of India");
@@ -84,7 +84,7 @@ NAMESPACE__BEGIN(psycle)
 			m_greetz.AddString("pooplog [Machines + Coding]");
 			m_greetz.AddString("sampler");
 			m_greetz.AddString("[SAS] SOLARiS [project-psy WebMaster]");
-			m_greetz.AddString("_sue_ [Extreme testing]");
+			m_greetz.AddString("hugo Vinagre [Extreme testing]");
 			m_greetz.AddString("TAo-AAS");
 			m_greetz.AddString("TimEr [Site Graphics and more]");
 			m_greetz.AddString("Vir|us");

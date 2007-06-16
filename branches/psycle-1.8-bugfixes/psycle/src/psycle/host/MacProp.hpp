@@ -45,6 +45,8 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnClone();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+		public:
+			afx_msg void OnBnClickedReplacemac();
 		};
 
 		//{{AFX_INSERT_LOCATION}}

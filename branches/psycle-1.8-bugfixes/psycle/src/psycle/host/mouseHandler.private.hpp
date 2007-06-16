@@ -1,5 +1,6 @@
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
+#include "internal_machines.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
@@ -104,7 +105,20 @@ NAMESPACE__BEGIN(psycle)
 						}
 						else
 						{
-							if (!_pSong->InsertConnection(wiresource, propMac))
+							Machine *tmac = _pSong->_pMachine[wiresource];
+							Machine *dmac = _pSong->_pMachine[propMac];
+							if ( tmac->_mode== MACHMODE_FX && dmac->_type == MACH_MIXER )
+							{
+								if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
+								{
+									reinterpret_cast<Mixer*>(dmac)->InsertFx(tmac);
+								}
+								else if (!_pSong->InsertConnection(wiresource, propMac))
+								{
+									MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+								}
+							}
+							else if (!_pSong->InsertConnection(wiresource, propMac))
 							{
 								MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 							}
@@ -475,7 +489,20 @@ NAMESPACE__BEGIN(psycle)
 					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
 						AddMacViewUndo();
-						if (!Global::_pSong->InsertConnection(wiresource, propMac))
+						Machine *tmac = _pSong->_pMachine[wiresource];
+						Machine *dmac = _pSong->_pMachine[propMac];
+						if ( tmac->_mode== MACHMODE_FX && dmac->_type == MACH_MIXER )
+						{
+							if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
+							{
+								reinterpret_cast<Mixer*>(dmac)->InsertFx(tmac);
+							}
+							else if (!_pSong->InsertConnection(wiresource, propMac))
+							{
+								MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+							}
+						}
+						else if (!_pSong->InsertConnection(wiresource, propMac))
 						{
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}

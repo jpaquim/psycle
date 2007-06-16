@@ -790,6 +790,8 @@ namespace seib {
 //				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
+			///\todo: needs to add checks not to suspend/resume if in suspended state
+			MainsChanged(false);
 			if (fxstore.IsChunk())
 			{
 				if (!ProgramIsChunk())
@@ -839,6 +841,8 @@ namespace seib {
 				SetProgram(cProg);
 			}
 			loadingChunkName = fxstore.GetPathName();
+			///\todo: needs to add checks not to suspend/resume if in suspended state
+			MainsChanged(true);
 			return true;
 		}
 		bool CEffect::LoadProgram(CFxProgram& fxstore)
@@ -848,6 +852,8 @@ namespace seib {
 //				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
+			///\todo: needs to add checks not to suspend/resume if in suspended state
+			MainsChanged(false);
 			if (fxstore.IsChunk())
 			{
 				if (!ProgramIsChunk())
@@ -880,6 +886,8 @@ namespace seib {
 				EndSetProgram();
 			}
 			loadingChunkName = fxstore.GetPathName();
+			///\todo: needs to add checks not to suspend/resume if in suspended state
+			MainsChanged(true);
 			return true;
 		}
 
@@ -891,13 +899,19 @@ namespace seib {
 		{
 			if (ProgramIsChunk() && preferchunk)
 			{
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(false);
 				void *chunk=0;
 				int size=GetChunk(&chunk);
 				CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(true);
 				return b;
 			}
 			else
 			{
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(false);
 				CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
 				int cProg = GetProgram();
 				for (int i = 0; i < numPrograms(); i++)
@@ -911,6 +925,8 @@ namespace seib {
 						storep.SetParameter(j,GetParameter(j));
 				}
 				SetProgram(cProg);
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(true);
 				return b;
 			}
 		}
@@ -918,13 +934,19 @@ namespace seib {
 		{
 			if (ProgramIsChunk() && preferchunk)
 			{
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(false);
 				void *chunk=0;
 				int size=GetChunk(&chunk);
 				CFxProgram p(uniqueId(),version(),size,true,chunk);
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(true);
 				return p;
 			}
 			else
 			{
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(false);
 				CFxProgram storep(uniqueId(),version(),numParams());
 				char name[kVstMaxProgNameLen];
 				GetProgramName(name);
@@ -932,6 +954,8 @@ namespace seib {
 				int nParms = numParams();
 				for (int j = 0; j < nParms; j++)
 					storep.SetParameter(j,GetParameter(j));
+				///\todo: needs to add checks not to suspend/resume if in suspended state
+				MainsChanged(true);
 				return storep;
 			}
 		}

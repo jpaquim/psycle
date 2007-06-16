@@ -101,6 +101,19 @@ NAMESPACE__BEGIN(host)
 			static CDC backDC;
 			static CDC knobDC;
 		};
+
+		class CheckedButton
+		{
+		public:
+			CheckedButton(){};
+			virtual ~CheckedButton(){};
+
+			static void Draw(CDC *dc,CFont* b_font_bold,int x, int y,const char*text,bool checked);
+
+			static int width;
+			static int height;
+		};
+
 		class VuMeter
 		{
 		public:

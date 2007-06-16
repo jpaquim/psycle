@@ -32,8 +32,6 @@
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		CMainFrame		*pParentMain;
-		//\todo: Investigate this variable ( and especially pSong->cpuIdle ). See if it is doing what it is supposed to.
-		unsigned idletime = 0;
 
 		CChildView::CChildView()
 		{
@@ -1329,11 +1327,11 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if (mac < MAX_BUSES)
 				{
-					dlg.LastType1 = 0;
+					dlg.selectedMode = modegen;
 				}
 				else
 				{
-					dlg.LastType1 = 1;
+					dlg.selectedMode = modefx;
 				}
 			}
 			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))

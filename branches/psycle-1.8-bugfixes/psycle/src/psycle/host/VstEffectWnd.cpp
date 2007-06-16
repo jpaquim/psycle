@@ -63,8 +63,6 @@ NAMESPACE__BEGIN(psycle)
 //			ON_WM_LBUTTONDOWN()
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
 			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
-			ON_COMMAND(ID_OPERATIONS_BYPASSED, OnOperationsBypassed)
-			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_BYPASSED, OnUpdateOperationsBypassed)
 			ON_COMMAND(ID_PROGRAMS_OPENPRESET, OnProgramsOpenpreset)
 			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
@@ -74,10 +72,15 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_BANKMANAGER, OnUpdateViewsBankmanager)
 			ON_COMMAND(ID_VIEWS_MIDICHANNELS, OnViewsMidichannels)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_MIDICHANNELS, OnUpdateViewsMidichannels)
-			ON_COMMAND(ID_ABOUT_EXTENDEDINFO, OnAboutExtendedinfo)
 			ON_COMMAND(ID_ABOUT_ABOUTVST, OnAboutAboutvst)
+//			ON_LBN_SELCHANGE(ID_COMBO_BANK, OnSelchangeBank)
+//			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
 			ON_LBN_SELCHANGE(ID_COMBO_PRG, OnSelchangeProgram)
 			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+999, OnSetProgram)
+			ON_COMMAND(ID_PROGRAMLESS, OnProgramLess)
+			ON_UPDATE_COMMAND_UI(ID_PROGRAMLESS, OnUpdateProgramLess)
+			ON_COMMAND(ID_PROGRAMMORE, OnProgramMore)
+			ON_UPDATE_COMMAND_UI(ID_PROGRAMMORE, OnUpdateProgramMore)
 		END_MESSAGE_MAP()
 
 		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
@@ -90,21 +93,25 @@ NAMESPACE__BEGIN(psycle)
 			if ( CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
 
-/*			if( !(toolBar.Create(this,WS_VISIBLE|CBRS_TOP|CBRS_FLYBY | CBRS_TOOLTIPS | CBRS_SIZE_DYNAMIC)) || !toolBar.LoadToolBar(IDR_VSTFRAME))
-				this->MessageBox("Error creating toolbar!", "whoops!", MB_OK);
-*/
-
-			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP
+			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 				|  CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 				!toolBar.LoadToolBar(IDR_VSTFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
 			}
+/*
+			nice, but will make the toolbar too big.
+			toolBar.SetButtonText(0,"blabla");
+			CRect temp;
+			toolBar.GetItemRect(0,&temp);
+			toolBar.GetToolBarCtrl().SetButtonSize(CSize(temp.Width(),
+				temp.Height()));
+*/
 
 			CRect rect;
-			int nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_BANK);
-			toolBar.SetButtonInfo(nIndex, ID_COMBO_BANK, TBBS_SEPARATOR, 160);
+/*			int nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_BANK);
+			toolBar.SetButtonInfo(nIndex, ID_COMBO_BANK, TBBS_SEPARATOR, 150);
 			toolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
 			rect.top = 1;
 			rect.bottom = rect.top + 400; //drop height
@@ -115,8 +122,9 @@ NAMESPACE__BEGIN(psycle)
 				TRACE0("Failed to create combobox\n");
 				return -1;      // fail to create
 			}
-
-			nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_PRG);
+*/
+			
+			int nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_PRG);
 			toolBar.SetButtonInfo(nIndex, ID_COMBO_PRG, TBBS_SEPARATOR, 160);
 			toolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
 			rect.top = 1;
@@ -130,14 +138,19 @@ NAMESPACE__BEGIN(psycle)
 			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
 			CFont font;
 			font.Attach( hFont );
-			comboBank.SetFont(&font);
+//			comboBank.SetFont(&font);
 			comboProgram.SetFont(&font);
 
-			comboBank.AddString("Internal Programs");
-			comboBank.AddString("-----------------");
-			comboBank.SetCurSel(0);
+//			comboBank.AddString("Internal Bank");
+//			comboBank.AddString("-----------------");
+//			comboBank.SetCurSel(0);
 			FillProgramCombobox();
 
+
+			toolBar.SetWindowText("Vst Toolbar");
+			toolBar.EnableDocking(CBRS_ALIGN_ANY);
+			EnableDocking(CBRS_ALIGN_TOP);
+			DockControlBar(&toolBar);
 			pView = CreateView();
 			machine().SetEditWnd(this);
 			*_pActive=true;
@@ -146,11 +159,17 @@ NAMESPACE__BEGIN(psycle)
 		}
 		void CVstEffectWnd::OnClose()
 		{
-			//			machine().EnterCritical();             /* make sure we're not processing    */
+//			machine().EnterCritical();             /* make sure we're not processing    */
 			machine().EditClose();              /* tell effect edit window's closed  */
-			//			machine().LeaveCritical();             /* re-enable processing              */
+//			machine().LeaveCritical();             /* re-enable processing              */
 			pView->DestroyWindow();
 			if (pParamGui) pParamGui->DestroyWindow();
+			std::list<HWND>::iterator it = secwinlist.begin();
+			while ( it != secwinlist.end() )
+			{
+				::SendMessage(*it, WM_CLOSE, 0, 0);
+				++it;
+			}
 			*_pActive=false;
 			CFrameWnd::OnClose();
 		}
@@ -230,7 +249,60 @@ NAMESPACE__BEGIN(psycle)
 
 			CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 		}
+		void CVstEffectWnd::FillPopup(CMenu* pPopupMenu)
+		{
+			if (machine().numPrograms() > 1)
+			{
+				CMenu* popPrg=0;
+				// Find the popup menu for programs.
+				for (int i = pPopupMenu->GetMenuItemCount() - 1; i >= 2; i--)
+				{
+					if ((popPrg = pPopupMenu->GetSubMenu(i)))
+					{
+						CMenu* secMenu=0;
+						if (popPrg->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+						{
+							popPrg->DeleteMenu(0, MF_BYPOSITION);
+							break;
+						}
+						else if ((secMenu=popPrg->GetSubMenu(0)))
+						{
+							if (secMenu->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+							{
+								while (popPrg->GetSubMenu(0))
+								{
+									popPrg->DeleteMenu(0,MF_BYPOSITION);
+								}
+								break;
+							}
+						}
+					}
+				}
+				if (!popPrg)
+					return;
 
+				for (int i = 0; i < machine().numPrograms(); i += 16)
+				{
+					CMenu popup;
+					popup.CreatePopupMenu();
+					for (int j = i; (j < i + 16) && (j < machine().numPrograms()); j++)
+					{
+						char szProg[256] = "";
+						char szPgName[256] = "";
+						machine().GetProgramNameIndexed(-1, j, szPgName);
+						std::sprintf(szProg,"%d. %s",j,szPgName);
+						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, szProg);
+					}
+					char szSub[256] = "";;
+					std::sprintf(szSub,"Programs %d-%d",i,i+15);
+					popPrg->AppendMenu(MF_POPUP | MF_STRING,
+						(UINT)popup.Detach(),
+						szSub);
+				}
+				popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + machine().GetProgram(),
+					MF_CHECKED | MF_BYCOMMAND);
+			}
+		}
 		void CVstEffectWnd::FillProgramCombobox()
 		{
 			comboProgram.ResetContent();
@@ -335,7 +407,7 @@ NAMESPACE__BEGIN(psycle)
 			CRect rcEffFrame,rcEffClient;
 			GetWindowSize(rcEffFrame, rcEffClient, pRect);
 			SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
-			pView->SetWindowPos(NULL,0,rcEffClient.top,rcEffClient.right,rcEffClient.bottom,SWP_SHOWWINDOW);
+			pView->SetWindowPos(NULL,0,rcEffClient.top,rcEffClient.right+1,rcEffClient.bottom+1,SWP_SHOWWINDOW);
 			pView->WindowIdle();
 		}
 		void CVstEffectWnd::OnSizing(UINT fwSide, LPRECT pRect)
@@ -549,6 +621,7 @@ NAMESPACE__BEGIN(psycle)
 				pWnd->ShowWindow(SW_SHOWNORMAL);
 				pWnd->MoveWindow(0,0,window.width,window.height,true);
 				window.winHandle = hWnd;
+				secwinlist.push_back(hWnd);
 				return hWnd;
 				///\todo: Maintain a list of opened windows, in case we need to close them
 				// in the OnClose event.
@@ -565,6 +638,7 @@ NAMESPACE__BEGIN(psycle)
 			if (!::IsWindow((HWND)window.winHandle))
 				return false;
 
+			secwinlist.remove((HWND)window.winHandle);
 			::SendMessage((HWND)window.winHandle, WM_CLOSE, 0, 0);
 			window.winHandle = 0;
 			return true;
@@ -572,6 +646,7 @@ NAMESPACE__BEGIN(psycle)
 
 		bool CVstEffectWnd::SetParameterAutomated(long index, float value)
 		{
+			///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 			if(index>= 0 || index < machine().GetNumParams())
 			{
 				if(Global::configuration()._RecordTweaks)
@@ -581,8 +656,8 @@ NAMESPACE__BEGIN(psycle)
 					else
 						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, f2i(value * vst::quantization));
 				}
-//				if(paramWnd)
-//					paramWnd->Refresh(index, value);
+				if(pParamGui)
+					pParamGui->UpdateNew(index, value);
 				return true;
 			}
 			return false;
@@ -593,35 +668,47 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnOperationsEnabled()
 		{
-			// TODO: Agregue aquí su código de controlador de comandos
+			if (machine().IsSynth())
+			{
+				machine()._mute = !machine()._mute;
+			}
+			else
+			{
+				machine().Bypass(!machine().Bypass());
+				if (machine()._mute) machine()._mute = false;
+			}
 		}
 
 		void CVstEffectWnd::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
 		{
-			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
-		}
-
-		void CVstEffectWnd::OnOperationsBypassed()
-		{
-			machine().Bypass(!(machine().Bypass()));
-		}
-
-		void CVstEffectWnd::OnUpdateOperationsBypassed(CCmdUI *pCmdUI)
-		{
+			pCmdUI->SetText("Operational");
 			if (machine().IsSynth())
 			{
-				pCmdUI->Enable(false);
+				if (machine()._mute)
+				{
+					pCmdUI->SetCheck(false);
+				}
+				else 
+				{
+					pCmdUI->SetCheck(true);
+				}
 			}
 			else
 			{
-				pCmdUI->Enable(true);
-				pCmdUI->SetCheck(machine().Bypass());
+				if (machine()._mute || machine().Bypass())
+				{
+					pCmdUI->SetCheck(false);
+				}
+				else
+				{
+					pCmdUI->SetCheck(true);
+				}
 			}
 		}
 
 		void CVstEffectWnd::OnProgramsOpenpreset()
 		{
-			char tmp[1024];
+			char tmp[2048];
 			if (!machine().OnGetChunkFile(tmp))
 			{
 				std::strncpy(tmp,reinterpret_cast<char*>(machine().OnGetDirectory()),1024);
@@ -656,8 +743,12 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnProgramsSavepreset()
 		{
-			char tmp[1024];
-			machine().OnGetChunkFile(tmp);
+			char tmp[2048];
+			if (!machine().OnGetChunkFile(tmp))
+			{
+				std::strncpy(tmp,reinterpret_cast<char*>(machine().OnGetDirectory()),1024);
+				std::strcat(tmp,"\\fxb");
+			}
 			CFileDialog dlg(FALSE,
 				"fxb",
 				tmp,
@@ -676,7 +767,7 @@ NAMESPACE__BEGIN(psycle)
 		/*
 		void CVstEffectWnd::OnSavePreset() 
 		{
-		char tmp[1024];
+		char tmp[2048];
 		machine().OnGetChunkFile(tmp);
 		std::string sFile = tmp;
 		if (sFile.empty())
@@ -705,6 +796,37 @@ NAMESPACE__BEGIN(psycle)
 			machine().SetProgram(nID - ID_SELECTPROGRAM_0);
 			comboProgram.SetCurSel(nID - ID_SELECTPROGRAM_0);
 		}
+		void CVstEffectWnd::OnProgramLess()
+		{
+			int numProgram = machine().GetProgram()-1;
+			machine().SetProgram(numProgram);
+			comboProgram.SetCurSel(numProgram);
+			UpdateWindow();
+		}
+		void CVstEffectWnd::OnUpdateProgramLess(CCmdUI *pCmdUI)
+		{
+			if ( machine().GetProgram() == 0)
+			{
+				pCmdUI->Enable(false);
+			}
+			else pCmdUI->Enable(true);
+		}
+		void CVstEffectWnd::OnProgramMore()
+		{
+			int numProgram = machine().GetProgram()+1;
+			machine().SetProgram(numProgram);
+			comboProgram.SetCurSel(numProgram);
+			UpdateWindow();
+		}
+		void CVstEffectWnd::OnUpdateProgramMore(CCmdUI *pCmdUI)
+		{
+			if ( machine().GetProgram()+1 == machine().numPrograms())
+			{
+				pCmdUI->Enable(false);
+			}
+			else pCmdUI->Enable(true);
+		}
+
 		void CVstEffectWnd::OnViewsParameterlist()
 		{
 			CRect rc;
@@ -712,27 +834,25 @@ NAMESPACE__BEGIN(psycle)
 			if (!pParamGui)
 			{
 				pParamGui= new CVstParamList(&machine());
-				pParamGui->Create(this);
+				pParamGui->Create();
 			}
-			pParamGui->ShowWindow(SW_NORMAL);
-			pParamGui->SetWindowPos(NULL,rc.right+1,rc.top,0,0,SWP_NOSIZE);
+			pParamGui->SetWindowPos(0,rc.right+1,rc.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
+			pParamGui->ShowWindow(SW_SHOWNORMAL); 
 		}
 
 		void CVstEffectWnd::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
 		{
-			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+			if ( pParamGui )
+			{
+				if (pParamGui->IsWindowVisible())
+					pCmdUI->SetCheck(true);
+				else
+					pCmdUI->SetCheck(false);
+			}
+			else
+				pCmdUI->SetCheck(false);
 		}
-		/*
-		void CVstEffectWnd::OnParametersShowpreset() 
-		{
-		CPresetsDlg dlg;
-		dlg._pMachine=_pMachine;
-		dlg.DoModal();
-		//			pParamGui->UpdateOne();
-		//			if (!editorgui) pGui->Invalidate(false);
-		//			pGui->SetFocus();
-		}
-		*/
+
 		void CVstEffectWnd::OnViewsBankmanager()
 		{
 			// TODO: Agregue aquí su código de controlador de comandos
@@ -740,7 +860,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnUpdateViewsBankmanager(CCmdUI *pCmdUI)
 		{
-			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
+			pCmdUI->Enable(false);
 		}
 
 		void CVstEffectWnd::OnViewsMidichannels()
@@ -750,75 +870,16 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnUpdateViewsMidichannels(CCmdUI *pCmdUI)
 		{
-			// TODO: Agregue aquí su código de controlador de IU para actualización de comandos
-		}
-
-		void CVstEffectWnd::OnAboutExtendedinfo()
-		{
-			// TODO: Agregue aquí su código de controlador de comandos
+			pCmdUI->Enable(false);
 		}
 
 		void CVstEffectWnd::OnAboutAboutvst()
 		{
-			// TODO: Agregue aquí su código de controlador de comandos
+			///\todo: made an informative dialog like in seib's vsthost.
+			std::string message;
+			(message = "Vst Plugin by " )+ machine().GetVendorName();
+			MessageBox(message.c_str(),"About");
 		}
-
-		void CVstEffectWnd::FillPopup(CMenu* pPopupMenu)
-		{
-			if (machine().numPrograms() > 1)
-			{
-				CMenu* popPrg=0;
-				// Find the popup menu for programs.
-				for (int i = pPopupMenu->GetMenuItemCount() - 1; i >= 2; i--)
-				{
-					if ((popPrg = pPopupMenu->GetSubMenu(i)))
-					{
-						CMenu* secMenu=0;
-						if (popPrg->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
-						{
-							popPrg->RemoveMenu(0, MF_BYPOSITION);
-							break;
-						}
-						else if ((secMenu=popPrg->GetSubMenu(0)))
-						{
-							if (secMenu->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
-							{
-								while (popPrg->GetSubMenu(0))
-								{
-									popPrg->DeleteMenu(0,MF_BYPOSITION);
-								}
-								break;
-							}
-						}
-					}
-				}
-				if (!popPrg)
-					return;
-
-				for (int i = 0; i < machine().numPrograms(); i += 16)
-				{
-					CMenu popup;
-					popup.CreatePopupMenu();
-					for (int j = i; (j < i + 16) && (j < machine().numPrograms()); j++)
-					{
-						char szProg[256] = "";
-						char szPgName[256] = "";
-						machine().GetProgramNameIndexed(-1, j, szPgName);
-						std::sprintf(szProg,"%d. %s",j,szPgName);
-						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, szProg);
-					}
-					char szSub[256] = "";;
-					std::sprintf(szSub,"Programs %d-%d",i,i+15);
-					popPrg->AppendMenu(MF_POPUP | MF_STRING,
-						(UINT)popup.Detach(),
-						szSub);
-				}
-				popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + machine().GetProgram(),
-					MF_CHECKED | MF_BYCOMMAND);
-			}
-		}
-
-
 
 	NAMESPACE__END
 NAMESPACE__END

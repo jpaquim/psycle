@@ -84,7 +84,7 @@ namespace seib {
 			long GetVersion() { return version; }
 			long GetFxID() {  return fxID; }
 			long GetFxVersion() { return fxVersion; }
-			bool Initialized() { return Initialized; }
+			bool Initialized() { return initialized; }
 			std::string GetPathName() { return pathName; }
 			// This function would normally be protected, but it is needed in the saving of Programs from a Bank.
 			virtual bool SaveData(FILE* pFileHandle) { pf = pFileHandle; return SaveData(); }
@@ -125,7 +125,7 @@ namespace seib {
 		class CFxProgram : public CFxBase
 		{
 		public:
-			CFxProgram(const char *pszFile = 0):CFxBase(){ Init(); Load(pszFile); }
+			CFxProgram(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
 			CFxProgram(FILE *pFileHandle);
 			// Create a CFxProgram from parameters.
 			// _fxID and _fxVersion are mandatory. 
@@ -142,7 +142,7 @@ namespace seib {
 			void SetProgramName(const char *name = "")
 			{
 				//leave last char for null.
-				std::strncpy(prgName, name, sizeof(prgName)-1);
+				std::strncpy(prgName, name, 27);
 			}
 			long GetNumParams() const{ return numParams; }
 			float GetParameter(VstInt32 nParm) const{  return (nParm < numParams) ? pParams[nParm] : 0; }
@@ -186,7 +186,7 @@ namespace seib {
 		class CFxBank : public CFxBase
 		{
 		public:
-			CFxBank(const char *pszFile = 0):CFxBase(){ Init(); Load(pszFile); }
+			CFxBank(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
 			CFxBank(FILE* pFileHandle);
 			// Create a CFxBank from parameters.
 			// _fxID, _fxVersion and _numPrograms are mandatory.

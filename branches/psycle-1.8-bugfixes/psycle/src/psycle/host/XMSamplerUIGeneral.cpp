@@ -49,6 +49,7 @@ BOOL XMSamplerUIGeneral::OnInitDialog()
 	m_interpol.AddString(_T("No Interpolation"));
 	m_interpol.AddString(_T("Linear Interpolation"));
 	m_interpol.AddString(_T("Spline Interpolation"));
+	m_interpol.AddString(_T("512p. Sinc Interpolation"));
 
 	m_interpol.SetCurSel(_pMachine->ResamplerQuality());
 

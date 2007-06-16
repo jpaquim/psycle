@@ -14,6 +14,17 @@ NAMESPACE__BEGIN(psycle)
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
 
+		enum selectionclasses
+		{
+			internal=0,
+			native=1,
+			vstmac=2
+		};
+		enum selectionmodes
+		{
+			modegen=0,
+			modefx
+		};
 		class PluginInfo
 		{
 		public:
@@ -92,15 +103,16 @@ NAMESPACE__BEGIN(psycle)
 			static int pluginOrder;
 			static bool pluginName;
 
-			static void learnDllName(const std::string & fullpath);
-			static bool lookupDllName(const std::string, std::string & result, int& shellIdx);
+			static void learnDllName(const std::string & fullpath, MachineType type);
+			static bool lookupDllName(const std::string, std::string & result, MachineType tye,int& shellIdx);
 			static void DestroyPluginInfo();
 			static void LoadPluginInfo();
-			static int LastType0;
-			static int LastType1;
+			static int selectedClass;
+			static int selectedMode;
 			static bool TestFilename(const std::string & name,int shellIdx);
 		protected:
-			static std::map<std::string,std::string> dllNames;
+			static std::map<std::string,std::string> NativeNames;
+			static std::map<std::string,std::string> VstNames;
 			bool bAllowChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
 			HTREEITEM hInt[5];

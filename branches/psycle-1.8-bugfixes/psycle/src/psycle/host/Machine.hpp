@@ -156,11 +156,14 @@ namespace psycle
 			virtual void Bypass(bool e) { _bypass=e; }
 			virtual bool Standby() { return _standby; }
 			virtual void Standby(bool e) { _standby=e;}
-			virtual void GetWireVolume(int wireIndex, float &value) { value = _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
+			virtual void GetWireVolume(int wireIndex, float &value) { value = GetWireVolume(wireIndex); };
+			virtual float GetWireVolume(int wireIndex) { return _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; };
 			virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
 			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
 			virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
 			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
+			virtual void DeleteOutputWireIndex(int wireIndex);
+			virtual void DeleteInputWireIndex(int wireIndex);
 			virtual int FindInputWire(int macIndex);
 			virtual int FindOutputWire(int macIndex);
 			virtual const char * const GetDllName() const throw() { return ""; };

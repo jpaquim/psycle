@@ -37,8 +37,9 @@ NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 
 			m_interpol.AddString("None [Lowest quality]");
-			m_interpol.AddString("Linear [Medium quality]");
-			m_interpol.AddString("Spline [Higher Quality]");
+			m_interpol.AddString("Linear [Low quality]");
+			m_interpol.AddString("Spline [Medium Quality]");
+			m_interpol.AddString("512p Sinc [Highest Quality]");
 
 			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
 

@@ -38,11 +38,8 @@ NAMESPACE__BEGIN(psycle)
 			void UpdatePlayOrder(bool mode);
 			void CenterWindowOnPoint(CWnd* pWnd, POINT point);
 		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CMainFrame)
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-			//}}AFX_VIRTUAL
 			friend class InputHandler;
 		// Implementation
 		public:
@@ -50,6 +47,7 @@ NAMESPACE__BEGIN(psycle)
 			bool isguiopen[MAX_MACHINES];
 			CFrameWnd	*m_pWndMac[MAX_MACHINES];
 			bool macComboInitialized;
+			bool _bShowPatternNames;
 			int seqcopybuffer[MAX_SONG_POSITIONS];
 			int seqcopybufferlength;
 
@@ -122,8 +120,6 @@ NAMESPACE__BEGIN(psycle)
 //			ULONG_PTR gdiplusToken; // GDI+ stuff
 
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CMainFrame)
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnSetFocus(CWnd *pOldWnd);
 			afx_msg void OnBarButton1();
@@ -176,6 +172,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSelchangeAuxselect();
 			afx_msg void OnDeclong();
 			afx_msg void OnInclong();
+			afx_msg void OnSeqShowpattername();
 			afx_msg void OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateIndicatorPattern(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateIndicatorLine(CCmdUI *pCmdUI);
@@ -204,11 +201,8 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnNotestoeffects();
 			afx_msg void OnMoveCursorPaste();
 			afx_msg void OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult);
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
-		};
+};
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	NAMESPACE__END
 NAMESPACE__END

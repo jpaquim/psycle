@@ -42,6 +42,7 @@ namespace psycle
 			std::string author;
 			/// the comments on the song
 			std::string comments;
+			///\todo: this variable was used in Player, but it didn't store a good value. Either try to fix it or remove.
 			std::uint64_t cpuIdle;
 			unsigned _sampCount;
 			bool Invalided;

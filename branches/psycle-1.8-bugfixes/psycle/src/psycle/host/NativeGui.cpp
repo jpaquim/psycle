@@ -7,8 +7,14 @@
 #include "InputHandler.hpp"
 #include "NativeGui.hpp"
 #include "NewVal.hpp"
+///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+#include "MainFrm.hpp"
+#include "ChildView.hpp"
+
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
+
+	extern CPsycleApp theApp;
 
 		BEGIN_MESSAGE_MAP(CNativeGui, CWnd)
 			ON_WM_CREATE()
@@ -376,22 +382,21 @@ NAMESPACE__BEGIN(psycle)
 				if (nv < minval) nv = minval;
 				if (nv > maxval) nv = maxval;
 
-				_pMachine->SetParameter(tweakpar,(int) nv);
-				///\todo:
-/*				prevval=(int)nv;
-				wndView->AddMacViewUndo();
-				if (Global::pConfig->_RecordTweaks)
+				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f));  // +0.5f to round correctly, not like "floor".
+				prevval=(int)nv;
+				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+//				wndView->AddMacViewUndo();
+				if(Global::configuration()._RecordTweaks)
 				{
-					if (Global::pConfig->_RecordMouseTweaksSmooth)
-					{
-						wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
-					}
+					if(Global::configuration()._RecordMouseTweaksSmooth)
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, tweakpar, prevval);
 					else
-					{
-						wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-minval);
-					}
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, tweakpar, prevval);
 				}
-*/
+//				if(pParamGui)
+//					pParamGui->UpdateNew(index, value);
+
+
 				Invalidate(false);
 			}
 			CWnd::OnMouseMove(nFlags, point);
