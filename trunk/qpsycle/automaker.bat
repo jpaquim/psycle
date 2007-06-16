@@ -9,4 +9,8 @@ echo Running QMake
 qmake
 echo QMake Complete
 make
+if ERRORLEVEL 1 goto ERROR
 echo Make Complete
+
+:ERROR1
+echo Make Failed
