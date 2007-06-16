@@ -320,6 +320,7 @@ NAMESPACE__BEGIN(psycle)
 
 			// Sequencer Bar
 			m_wndSeq.Create(this,IDD_SEQUENCER,CBRS_LEFT,AFX_IDW_DIALOGBAR);
+			BOOL bla = m_seqListbox.SubclassDlgItem(IDC_SEQLIST,&m_wndSeq );
 
 			// set multichannel audition checkbox status
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MULTICHANNEL_AUDITION);
@@ -1639,7 +1640,7 @@ NAMESPACE__BEGIN(psycle)
 		////////////////////
 
 
-		void CMainFrame::UpdateSequencer(int bottom)
+		void CMainFrame::UpdateSequencer(int selectedpos)
 		{
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			char buf[16];
@@ -1651,7 +1652,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				for(int n=0;n<_pSong->playLength;n++)
 				{
-					sprintf(buf,"%s",_pSong->patternName[_pSong->playOrder[n]]);
+					sprintf(buf,"%.2X:%s",n,_pSong->patternName[_pSong->playOrder[n]]);
 					cc->AddString(buf);
 				}
 			}
@@ -1669,18 +1670,16 @@ NAMESPACE__BEGIN(psycle)
 			{
 				if ( _pSong->playOrderSel[i]) cc->SetSel(i,true);
 			}
-			if (bottom >= 0)
+			if (selectedpos >= 0)
 			{
-				if (top < bottom-0x15)
-				{
-					top = bottom-0x15;
-				}
+				top = selectedpos - 0xC;
 				if (top < 0)
 				{
 					top = 0;
 				}
+				cc->SetTopIndex(top);
+				cc->SetSel(selectedpos);
 			}
-			cc->SetTopIndex(top);
 			StatusBarIdle();
 		}
 
@@ -2374,13 +2373,16 @@ NAMESPACE__BEGIN(psycle)
 				pls->DeleteString(ls);
 
 				if (_bShowPatternNames)
-					sprintf(buffer,"%s",_pSong->patternName[le]);
+					sprintf(buffer,"%.2X:%s",ls,_pSong->patternName[ls]);
 				else
 					sprintf(buffer,"%.2X: %.2X",ls,le);
 				pls->InsertString(ls,buffer);
 				// Update sequencer selection	
 				pls->SelItemRange(false,0,pls->GetCount()-1);
 				pls->SetSel(ls,true);
+				int top = ls - 0xC;
+				if (top < 0) top = 0;
+				pls->SetTopIndex(top);
 				memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 				_pSong->playOrderSel[ls] = true;
 			}

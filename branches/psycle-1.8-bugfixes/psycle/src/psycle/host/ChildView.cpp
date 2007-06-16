@@ -400,6 +400,9 @@ NAMESPACE__BEGIN(psycle)
 							{
 								pSeqList->SelItemRange(false,0,pSeqList->GetCount());
 								pSeqList->SetSel(Global::pPlayer->_playPosition,true);
+								int top = Global::pPlayer->_playPosition - 0xC;
+								if (top < 0) top = 0;
+								pSeqList->SetTopIndex(top);
 								editPosition=Global::pPlayer->_playPosition;
 								if ( viewMode == VMPattern ) 
 								{ 
@@ -1290,6 +1293,7 @@ NAMESPACE__BEGIN(psycle)
 
 			dlg.patLines= nlines;
 			strcpy(dlg.patName,name);
+			pParentMain->UpdateSequencer();
 			
 			if (dlg.DoModal() == IDOK)
 			{

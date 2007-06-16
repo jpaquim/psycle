@@ -29,6 +29,9 @@ NAMESPACE__BEGIN(host)
 	CDC CFrameMixerMachine::GraphSlider::backDC;
 	CDC CFrameMixerMachine::GraphSlider::knobDC;
 
+	int CFrameMixerMachine::CheckedButton::height(16);
+	int CFrameMixerMachine::CheckedButton::width(16);
+
 	int CFrameMixerMachine::VuMeter::height(90);
 	int CFrameMixerMachine::VuMeter::width(16);
 	CDC CFrameMixerMachine::VuMeter::VuOff;
@@ -42,7 +45,7 @@ NAMESPACE__BEGIN(host)
 		if (pixel >= 64) pixel=63;
 		pixel*=width;
 		dc->BitBlt(x_knob,y_knob,width,height,&knobDC,pixel,0,SRCCOPY);
-		dc->Draw3dRect(x_knob,y_knob+height-1,width,1,RGB(20,20,20),RGB(20,20,20));
+		dc->Draw3dRect(x_knob,y_knob+height-1,width,1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 	}
 	bool  CFrameMixerMachine::Knob::LButtonDown(UINT nFlags,int x,int y)
 	{
@@ -54,7 +57,7 @@ NAMESPACE__BEGIN(host)
 	void CFrameMixerMachine::InfoLabel::Draw(CDC* dc, int x, int y,const char *parName,const char *parValue)
 	{
 		const int half = height/2;
-		dc->Draw3dRect(x,y-1,width,height+1,RGB(20,20,20),RGB(20,20,20));
+		dc->Draw3dRect(x,y-1,width,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 //		dc->FillSolidRect(x, y, width-1, half,Global::configuration().machineGUITopColor);
 //		dc->FillSolidRect(x, y+half, width-1, half-1,Global::configuration().machineGUIBottomColor);
 
@@ -88,7 +91,7 @@ NAMESPACE__BEGIN(host)
 		dc->SelectObject(oldfont);
 
 		DrawHLightValue(dc,x,y,parValue);
-		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,RGB(20,20,20),RGB(20,20,20));
+		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 	}
 	void CFrameMixerMachine::InfoLabel::DrawHLightValue(CDC* dc, int x, int y,const char *parValue)
 	{
@@ -101,11 +104,12 @@ NAMESPACE__BEGIN(host)
 	
 	//////////////////////////////////////////////////////////////////////////
 	// HeaderInfoLabel class
-/*	void CFrameMixerMachine::InfoLabel::DrawHeader(CDC* dc, int x, int y,const char *parName, const char *parValue)
+/*	void CFrameMixerMachine::InfoLabel::DrawHeader(CDC* dc, int x, int y,const char *parName, const char *parValue, bool checked)
 	{
 		const int half = height/2;
 		const int quarter = height/4;
 		const int mywidth = width + Knob::width;
+
 		dc->FillSolidRect(x, y, mywidth, half,Global::configuration().machineGUITopColor);
 		dc->FillSolidRect(x, y+half, mywidth, half,Global::configuration().machineGUIBottomColor);
 
@@ -115,7 +119,7 @@ NAMESPACE__BEGIN(host)
 		dc->SelectObject(&b_font_bold);
 		dc->ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName), 0);
 		dc->SelectObject(&b_font);
-		dc->Draw3dRect(x-1,y-1,width+Knob::width+1,height+1,RGB(20,20,20),RGB(20,20,20));
+		dc->Draw3dRect(x-1,y-1,width+Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 
 	}
 */
@@ -125,7 +129,7 @@ NAMESPACE__BEGIN(host)
 	{
 		dc->BitBlt(x,y,width,height,&backDC,0,0,SRCCOPY);
 //		dc->FillSolidRect(x+width, y, InfoLabel::width, height-InfoLabel::height,Global::configuration().machineGUITopColor);
-		dc->Draw3dRect(x-1,y-1,width+1,height+1,RGB(20,20,20),RGB(20,20,20));
+		dc->Draw3dRect(x-1,y-1,width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 		DrawKnob(dc,x,y,value);
 	}
 	void CFrameMixerMachine::GraphSlider::DrawKnob(CDC *dc,int x, int y, float value)
@@ -138,13 +142,31 @@ NAMESPACE__BEGIN(host)
 		return false;
 	}
 
+	void CFrameMixerMachine::CheckedButton::Draw(CDC* dc, CFont* b_font_bold,int x, int y,const char* text,bool checked)
+	{
+		if ( checked )
+		{
+			dc->SetBkColor(Global::configuration().machineGUIHBottomColor);
+			dc->SetTextColor(Global::configuration().machineGUIHFontBottomColor);
+		}
+		else{
+			dc->SetBkColor(Global::configuration().machineGUITopColor);
+			dc->SetTextColor(Global::configuration().machineGUIFontTopColor);
+		}
+		CFont *oldfont =dc->SelectObject(b_font_bold);
+		dc->ExtTextOut(x+4, y+1, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+height-1), CString(text), 0);
+		dc->SelectObject(oldfont);
+		dc->Draw3dRect(x-1,y-1,width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
+	}
+
+
 	//////////////////////////////////////////////////////////////////////////
 	// Vumeter class
 	void CFrameMixerMachine::VuMeter::Draw(CDC *dc,int x, int y, float value)
 	{
 		int ypos = (1-value)*height;
-		dc->BitBlt(x+7,y+22,width,ypos,&VuOff,0,0,SRCCOPY);
-		dc->BitBlt(x+7,y+22+ypos,width,height,&VuOn,0,ypos,SRCCOPY);
+		dc->BitBlt(x+7,y+19,width,ypos,&VuOff,0,0,SRCCOPY);
+		dc->BitBlt(x+7,y+19+ypos,width,height,&VuOn,0,ypos,SRCCOPY);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -232,7 +254,7 @@ NAMESPACE__BEGIN(host)
 		UpdateSendsandChans();
 
 		int winh = InfoLabel::height + ((numSends+1) * Knob::height) + GraphSlider::height;
-		int winw = (numChans+numSends+1) * (Knob::width+InfoLabel::width);
+		int winw = (numChans+numSends+1+1) * (Knob::width+InfoLabel::width); // 1+1 -> labels column, plus master volume.
 		CRect rect;
 		GetWindowRect(&rect);
 		MoveWindow
@@ -265,9 +287,21 @@ NAMESPACE__BEGIN(host)
 		yoffset+=GraphSlider::height;
 		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,"Ch. Input","");
 
-		// Colums 1 onwards, controls
+		// Column 1 master Volume.
 		xoffset+=InfoLabel::width+Knob::width;
+		yoffset=0;
+		std::string mastertxt = "Master Out";
+		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,mastertxt.c_str(),"");
+		yoffset+=(numSends+1)*InfoLabel::height;
+		InfoLabel::Draw(&bufferDC,xoffset+Knob::width,yoffset+GraphSlider::height,"Level","");
+		yoffset+=InfoLabel::height;
+		GraphSlider::Draw(&bufferDC,xoffset,yoffset,0);
+		VuMeter::Draw(&bufferDC,xoffset+GraphSlider::width,yoffset,0);
+		bufferDC.Draw3dRect(xoffset-1,0-1,Knob::width+InfoLabel::width+1,yoffset+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 
+
+		// Columns 2 onwards, controls
+		xoffset+=InfoLabel::width+Knob::width;
 		for (int i=0; i<MAX_CONNECTIONS; i++)
 		{
 			yoffset=0;
@@ -300,7 +334,7 @@ NAMESPACE__BEGIN(host)
 			yoffset+=InfoLabel::height;
 			GraphSlider::Draw(&bufferDC,xoffset,yoffset,0);
 			VuMeter::Draw(&bufferDC,xoffset+GraphSlider::width,yoffset,0);
-			bufferDC.Draw3dRect(xoffset-1,0-1,Knob::width+InfoLabel::width+1,yoffset+1,RGB(20,20,20),RGB(20,20,20));
+			bufferDC.Draw3dRect(xoffset-1,0-1,Knob::width+InfoLabel::width+1,yoffset+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 			xoffset+=Knob::width+InfoLabel::width;
 		}
 	}
@@ -314,7 +348,7 @@ NAMESPACE__BEGIN(host)
 				updateBuffer=true;
 
 				int winh = InfoLabel::height + ((numSends+1) * Knob::height) + GraphSlider::height;
-				int winw = (numChans+numSends+1) * (Knob::width+InfoLabel::width);
+				int winw = (numChans+numSends+1+1) * (Knob::width+InfoLabel::width); // +1+1 -> labels column + master out
 
 				CRect rect;
 				GetWindowRect(&rect);
@@ -367,10 +401,21 @@ NAMESPACE__BEGIN(host)
 			Generate(bufferDC);
 			updateBuffer=false;
 		}
-		
-		// Colums 1 onwards, controls
+		// Column 1 Master volume
 		int xoffset(InfoLabel::width+Knob::width), yoffset(0);
 		char value[48];
+
+		yoffset=(numSends+1)*InfoLabel::height;
+		_pMixer->GetParamValue(0,value);
+		InfoLabel::DrawValue(&bufferDC,xoffset+Knob::width,yoffset+GraphSlider::height,value);
+		yoffset+=InfoLabel::height;
+		GraphSlider::Draw(&bufferDC,xoffset,yoffset,_pMixer->GetParamValue(0)/256.0f);
+		CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width,yoffset,"D",_pMixer->Bypass());
+		CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width+CheckedButton::width,yoffset,"W",_pMixer->GetMuteState(0));
+		VuMeter::Draw(&bufferDC,xoffset+GraphSlider::width,yoffset,_pMixer->_volumeDisplay/97.0f);
+
+		// Columns 2 onwards, controls
+		xoffset+=Knob::width+InfoLabel::width;
 		for (int i(0); i<MAX_CONNECTIONS; i++)
 		{
 			if (_pMixer->_inputCon[i])
@@ -393,6 +438,8 @@ NAMESPACE__BEGIN(host)
 				InfoLabel::DrawValue(&bufferDC,xoffset+Knob::width,yoffset+GraphSlider::height,value);
 				yoffset+=Knob::width;
 				GraphSlider::Draw(&bufferDC,xoffset,yoffset,_pMixer->GetParamValue(param)/100.0f);
+				CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width,yoffset,"S",_pMixer->GetSoloState(i));
+				CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width+CheckedButton::width,yoffset,"M",_pMixer->GetMuteState(i));
 				VuMeter::Draw(&bufferDC,xoffset+GraphSlider::width,yoffset,_pMixer->VuChan(i));
 				xoffset+=Knob::width+InfoLabel::width;
 			}
@@ -405,6 +452,8 @@ NAMESPACE__BEGIN(host)
 			InfoLabel::DrawValue(&bufferDC,xoffset+Knob::width,yoffset+GraphSlider::height,value);
 			yoffset+=InfoLabel::height;
 			GraphSlider::Draw(&bufferDC,xoffset,yoffset,_pMixer->GetParamValue(param)/100.0f);
+			CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width,yoffset,"S",_pMixer->GetSoloState(i+MAX_CONNECTIONS));
+			CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width+CheckedButton::width,yoffset,"M",_pMixer->GetMuteState(i+MAX_CONNECTIONS));
 			VuMeter::Draw(&bufferDC,xoffset+GraphSlider::width,yoffset,_pMixer->VuSend(i));
 			xoffset+=Knob::width+InfoLabel::width;
 		}
@@ -432,7 +481,8 @@ NAMESPACE__BEGIN(host)
 		int col=x/(Knob::width+InfoLabel::width);
 		xoffset=x%(Knob::width+InfoLabel::width);
 		if ( col == 0) return Mixer::collabels;
-		else if ( col <= numChans)
+		else if ( col == 1) return Mixer::colmastervol;
+		else if ( col-Mixer::chan1 < numChans)
 		{
 			col-=Mixer::chan1;
 			return Mixer::chan1+col;
@@ -441,7 +491,7 @@ NAMESPACE__BEGIN(host)
 		{
 			col-=numChans+Mixer::chan1;
 			return Mixer::return1+col;
-	}
+		}
 	}
 	int CFrameMixerMachine::GetRow(int y,int &yoffset)
 	{
@@ -457,14 +507,20 @@ NAMESPACE__BEGIN(host)
 		{
 			row-=numSends+send1;
 			if (row == 0 ) return dry;
-			else
+			else if (y < GraphSlider::width)
 			{
 				return slider;
 			}
+			else if ( y < GraphSlider::width+CheckedButton::width)
+			{
+				return Mixer::solo;
+			}
+			else return Mixer::mute;
 		}
 	}
 	int CFrameMixerMachine::GetParamFromPos(int col,int row)
 	{
+		if ( col == Mixer::colmastervol) return 0;
 		if ( col < Mixer::chan12)
 		{
 			if (row < dry) return (col-Mixer::chan1+1)*0x10+(row-send1+1);
@@ -527,7 +583,7 @@ NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::OnLButtonUp(UINT nFlags, CPoint point) 
 	{
-		CFrameMachine::OnLButtonDown(nFlags,point);
+		CFrameMachine::OnLButtonUp(nFlags,point);
 /*		istweak = false;
 		Invalidate(false);
 		ReleaseCapture();

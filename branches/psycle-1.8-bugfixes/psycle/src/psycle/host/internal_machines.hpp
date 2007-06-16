@@ -58,15 +58,155 @@ protected:
 class Mixer : public Machine
 {
 public:
+	class InputChannel
+	{
+	public:
+		InputChannel(){};
+		InputChannel(int sends)
+		{
+			sends_.resize(sends);
+		}
+		InputChannel(const InputChannel &in)
+		{
+			for(unsigned int i=0; i<in.sends_.size(); ++i)
+			{
+				sends_.push_back(in.sends_[i]);
+			}
+			mix_ = in.mix_;
+			mute_ = in.mute_;
+			drymix_ = in.drymix_;
+			wetmix_ = in.wetmix_;
+		}
+		inline float &Send(int i) { return sends_[i]; }
+		inline const float &Send(int i) const { return sends_[i]; }
+		inline float &Mix() { return mix_; }
+		inline bool &Mute() { return mute_; }
+		inline bool &DryMix() { return drymix_; }
+		inline bool &WetMix() { return wetmix_; }
+
+		void AddSend() { sends_.push_back(0); }
+		void resize(int sends) { sends_.resize(sends); }
+		void ExchangeSends(int send1,int send2)
+		{
+			float tmp = sends_[send1];
+			sends_[send1] = sends_[send2];
+			sends_[send2] = tmp;
+		}
+
+	protected:
+		std::vector<float> sends_;
+		float mix_;
+		bool mute_;
+		bool drymix_;
+		bool wetmix_;
+	};
+
+	class ReturnChannel
+	{
+	public:
+		ReturnChannel(){};
+		ReturnChannel(int sends)
+		{
+			sends_.resize(sends);
+		}
+		ReturnChannel(const ReturnChannel &in)
+		{
+			for(unsigned int i=0; i<in.sends_.size(); ++i)
+			{
+				sends_.push_back(in.sends_[i]);
+			}
+			mute_ = in.mute_;
+		}
+		inline const bool Send(int i) const { return sends_[i]; }
+		inline void Send(int i,bool value) { sends_[i]= value; }
+		inline bool &Mute() { return mute_; }
+
+		void AddSend() { sends_.push_back(false); }
+		void resize(int sends) { sends_.resize(sends); }
+		void ExchangeSends(int send1,int send2)
+		{
+			bool tmp = sends_[send1];
+			sends_[send1] = sends_[send2];
+			sends_[send2] = tmp;
+		}
+
+	protected:
+		std::vector<bool> sends_;
+		bool mute_;
+	};
+
+
+	class MixerGrid
+	{
+	public:
+		MixerGrid(){};
+		MixerGrid(int inputs, int sends)
+		{
+			for(int i=0; i<inputs; ++i)
+			{
+				inputs_.push_back(InputChannel(sends));
+			}
+		}
+		MixerGrid(MixerGrid& copy)
+		{
+			for(int i=0; i<copy.numsends(); ++i)
+			{
+				inputs_.push_back(copy.inputs_[i]);
+			}
+		}
+
+		inline InputChannel & Channel(int i) { return inputs_[i]; }
+		inline const InputChannel & Channel(int i) const { return inputs_[i]; }
+
+		int numinputs() const { }
+		int numsends() const { }
+
+		// other accessors, like at() ...
+
+		void resize(int inputs, int sends)
+		{
+			inputs_.resize(inputs);
+			for(int i = 0; i < inputs; ++i)
+				Channel(i).resize(sends);
+		}
+		void ExchangeChans(int chan1,int chan2)
+		{
+			InputChannel tmp = inputs_[chan1];
+			inputs_[chan1] = inputs_[chan2];
+			inputs_[chan2] = tmp;
+		}
+		void ExchangeSends(int send1,int send2)
+		{
+			for (unsigned int i(0); i < inputs_.size(); ++i)
+			{
+				inputs_[i].ExchangeSends(send1,send2);
+				returns_[i].ExchangeSends(send1,send2);
+			}
+		}
+		// other member functions, like reserve()....
+
+	private:
+		std::vector<InputChannel> inputs_;
+		std::vector<ReturnChannel> returns_;
+		int allocatedinputs;
+		int allocatedsends;
+		bool *inputvalid;
+		bool *sendvalid;
+	};
+
 	enum
 	{
 		mix=0,
 		send0,
-		sendmax=send0+MAX_CONNECTIONS
+		sendmax=send0+MAX_CONNECTIONS,
+		mute,
+		solo,
+		gain
 	};
 	enum 
 	{
 		collabels=0,
+		colmastervol,
 		chan1,
 		chan2,
 		chan3,
@@ -98,20 +238,32 @@ public:
 	virtual void Init(void);
 	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Work(int numSamples);
+	virtual void GetWireVolume(int wireIndex, float &value){ value = GetWireVolume(wireIndex); }
+	virtual float GetWireVolume(int wireIndex);
+	virtual void SetWireVolume(int wireIndex,float value);
+	virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
+	virtual int FindInputWire(int macIndex);
+	virtual void DeleteInputWireIndex(int wireIndex);
 	virtual char* GetName(void) { return _psName; };
 	void FxSend(int numSamples);
 	void Mix(int numSamples);
 	std::string GetAudioInputName(int port);
 	virtual int GetNumCols();
+	virtual int InsertFx(Machine* mac);
 	virtual void GetParamName(int numparam,char *name);
-	virtual void GetParamRange(int numparam, int &minval, int &maxval) { minval=0; maxval=100; };
+	virtual void GetParamRange(int numparam, int &minval, int &maxval)
+	{	minval=0;  maxval= (numparam==0)?256:100; };
 	virtual void GetParamValue(int numparam,char *parVal);
 	virtual int GetParamValue(int numparam);
 	virtual bool SetParameter(int numparam,int value);
+	virtual bool GetSoloState(int column) { return column==_solocolumn; }
+	virtual bool GetMuteState(int column) { return _mutestate[column]; }
+	virtual void SetSoloState(int column,bool solo) { _solocolumn= solo?column:-1; }
+	virtual void SetMuteState(int column,bool mute) { _mutestate[column]=mute; }
 	virtual int GetAudioInputs() { return 24; };
 	virtual int GetAudioOutputs() { return 1; };
-	virtual int GetSend(int i){ assert(i<MAX_CONNECTIONS); return _send[i]; }
-	virtual bool SendValid(int i) { assert(i<MAX_CONNECTIONS); return _send[i]; }
+	inline int GetSend(int i){ assert(i<MAX_CONNECTIONS); return _send[i]; }
+	inline bool SendValid(int i) { assert(i<MAX_CONNECTIONS); return _sendValid[i]; }
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
 
@@ -121,28 +273,39 @@ public:
 protected:
 	static char* _psName;
 
+	bool _wetmix;
+	bool _drymix;
+	int _masterVolume;
+	int _masterGain;
+
 	///\todo hardcoded limits and wastes
-	float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
+
+
+
+
+	float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry+gain) each.  (0 -> dry, 1+ -> sends) 
+	int _solocolumn;
+	bool _mutestate[MAX_CONNECTIONS*2]; // inputs and returns.
 	/// Incoming send, Machine number
 	///\todo hardcoded limits and wastes
 	int _send[MAX_CONNECTIONS];	
-	/// Incoming send, connection volume
-	///\todo hardcoded limits and wastes
-	float _sendVol[MAX_CONNECTIONS];	
 	/// Value to multiply _sendVol[] to have a 0.0..1.0 range
 	///\todo hardcoded limits and wastes
-	float _sendVolMulti[MAX_CONNECTIONS];
+	float _returnVolMulti[MAX_CONNECTIONS];
 	/// Incoming connections activated
 	///\todo hardcoded limits and wastes
 	bool _sendValid[MAX_CONNECTIONS];
+
+	// Internal variables
+	float _outGain;
+	float _returnVol[MAX_CONNECTIONS];	
+
 
 #if 0 // more lightweight
 	class send
 	{
 	private:
-		float grid;
-		/// Incoming send, Machine number
-		Machine::id_type incoming;
+		int sendmachine;
 		/// Incoming send, connection volume
 		float volume;
 		/// Value to multiply volume to have a 0.0..1.0 range

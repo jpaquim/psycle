@@ -5,6 +5,7 @@
 #include "InstrumentEditor.hpp"
 #include "InfoDlg.hpp"
 #include "MidiMonitorDlg.hpp"
+#include "ExListBox.h"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		class Song;
@@ -73,6 +74,7 @@ NAMESPACE__BEGIN(psycle)
 			BOOL StatusBarIdleText();
 			void StatusBarIdle();
 			void RedrawGearRackList();
+
 			virtual ~CMainFrame();
 		private:
 			void SaveRecent();
@@ -98,6 +100,7 @@ NAMESPACE__BEGIN(psycle)
 			CDialogBar	m_wndSeq;
 			CReBar      m_wndReBar;
 			std::string		szStatusIdle;
+			CExListBox	m_seqListbox;
 			
 			CInstrumentEditor	m_wndInst;
 			CInfoDlg	m_wndInfo;

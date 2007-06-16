@@ -277,10 +277,10 @@ namespace psycle
 		Mixer::Mixer(int id)
 		{
 			_macIndex = id;
+			_numPars = 0xff;
 			_type = MACH_MIXER;
 			_mode = MACHMODE_FX;
 			sprintf(_editName, _psName);
-
 		}
 
 		Mixer::~Mixer() throw()
@@ -290,6 +290,9 @@ namespace psycle
 		void Mixer::Init()
 		{
 			Machine::Init();
+			_outGain=1.0f;
+			_wetmix=false;
+
 			for (int j=0;j<MAX_CONNECTIONS;j++)
 			{
 				_sendGrid[j][mix]=1.0f;
@@ -298,9 +301,11 @@ namespace psycle
 					_sendGrid[j][i]=0.0f;
 				}
 				_send[j]=0;
-				_sendVol[j]=1.0f;
-				_sendVolMulti[j]=1.0f;
 				_sendValid[j]=false;
+				_returnVol[j]=1.0f;
+				_returnVolMulti[j]=1.0f;
+				_mutestate[j*2]=false;
+				_mutestate[j*2+1]=false;
 			}
 		}
 
@@ -320,6 +325,12 @@ namespace psycle
 
 		void Mixer::Work(int numSamples)
 		{
+			if ( _mute || Standby() || Bypass())
+			{
+				Machine::Work(numSamples);
+				return;
+			}
+
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
 			Machine::WorkNoMix(numSamples);
 			// Step Two, prepare input signals for the Send Fx, and make them work
@@ -354,7 +365,7 @@ namespace psycle
 		{
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{
-				if (_sendValid[i])
+				if (SendValid(i))
 				{
 					Machine* pSendMachine = Global::song()._pMachine[_send[i]];
 					if (pSendMachine)
@@ -373,8 +384,8 @@ namespace psycle
 										{
 											if(!pInMachine->_mute && !pInMachine->Standby() && _sendGrid[j][send0+i]!= 0.0f)
 											{
-												dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
-												dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+												dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+												dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
 											}
 										}
 									}
@@ -409,55 +420,141 @@ namespace psycle
 		{
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{
-				if (_sendValid[i])
+				if (SendValid(i))
 				{
 					Machine* pSendMachine = Global::song()._pMachine[_send[i]];
 					if (pSendMachine)
 					{
-						if(!pSendMachine->_mute && !pSendMachine->Standby())
+						if(!pSendMachine->_mute && !pSendMachine->Standby() && !_mutestate[i+MAX_CONNECTIONS])
 						{
-							dsp::Add(pSendMachine->_pSamplesL, _pSamplesL, numSamples, pSendMachine->_lVol*_sendVol[i]);
-							dsp::Add(pSendMachine->_pSamplesR, _pSamplesR, numSamples, pSendMachine->_rVol*_sendVol[i]);
+							dsp::Add(pSendMachine->_pSamplesL, _pSamplesL, numSamples, pSendMachine->_lVol*_returnVol[i]);
+							dsp::Add(pSendMachine->_pSamplesR, _pSamplesR, numSamples, pSendMachine->_rVol*_returnVol[i]);
 						}
 					}
 				}
 			}
-			for (int i=0; i<MAX_CONNECTIONS; i++)
+			if ( !_wetmix)
 			{
-				if (_inputCon[i])
+				for (int i=0; i<MAX_CONNECTIONS; i++)
 				{
-					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
-					if (pInMachine)
+					if (_inputCon[i])
 					{
-						if(!pInMachine->_mute && !pInMachine->Standby() && _sendGrid[i][mix] != 0.0f)
+						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
+						if (pInMachine)
 						{
-							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]*_sendGrid[i][mix]);
-							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]*_sendGrid[i][mix]);
+							if(!pInMachine->_mute && !pInMachine->Standby() && _sendGrid[i][mix] != 0.0f && !_mutestate[i])
+							{
+								dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]*_sendGrid[i][mix]);
+								dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]*_sendGrid[i][mix]);
+							}
 						}
 					}
 				}
+			}
+		}
+		int Mixer::InsertFx(Machine* mac)
+		{
+			int sendbus=-1;
+			int origbus=-1;
+			bool error=false;
+
+			// Get a free sendfx slot
+			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+			{
+				if(!SendValid(c)) sendbus = c;
+				// Checking that there's not a slot to the dest. machine already
+				else if(GetSend(c) == mac->_macIndex) error = true;
+			}
+			if(sendbus == -1 || error) return -1;
+			// Get a free output slot on the source machine
+			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+			{
+				if(!mac->_connection[c]) origbus = c;
+				// Checking that there's not an slot to the dest. machine already
+				else if(mac->_outputMachines[c] == _macIndex) error = true;
+			}
+			if(origbus == -1 || error) return false;
+
+			// Calibrating in/out properties
+			mac->_outputMachines[origbus] = _macIndex;
+			mac->_connection[origbus] = true;
+			mac->_numOutputs++;
+			_send[sendbus]=mac->_macIndex;
+			_sendValid[sendbus]=true;
+			InitWireVolume(mac->_type,MAX_CONNECTIONS+sendbus,1.0f);
+
+			return sendbus;
+		}
+
+		float Mixer::GetWireVolume(int wireIndex)
+		{
+			if (wireIndex< MAX_CONNECTIONS)
+				return Machine::GetWireVolume(wireIndex);
+			else
+				return _returnVol[wireIndex-MAX_CONNECTIONS] * _returnVolMulti[wireIndex-MAX_CONNECTIONS];
+		}
+		void Mixer::SetWireVolume(int wireIndex,float value)
+		{
+			if (wireIndex< MAX_CONNECTIONS)
+				Machine::SetWireVolume(wireIndex,value);
+			else
+				_returnVol[wireIndex-MAX_CONNECTIONS] = value / _returnVolMulti[wireIndex-MAX_CONNECTIONS];
+		}
+		void Mixer::InitWireVolume(MachineType mType,int wireIndex,float value)
+		{
+			if (wireIndex< MAX_CONNECTIONS)
+				Machine::InitWireVolume(mType,wireIndex,value);
+			else
+			{
+				wireIndex-=MAX_CONNECTIONS;
+				if (mType== MACH_VST || mType == MACH_VSTFX)
+				{
+					_returnVol[wireIndex]=value *32768.0f;
+					_returnVolMulti[wireIndex]=0.000030517578125f;
+				}
+				else
+				{
+					_returnVol[wireIndex]=value;
+					_returnVolMulti[wireIndex]=1.0f;
+				}
+
+				for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+				{
+					_sendGrid[c][send0+wireIndex]*=_returnVolMulti[wireIndex];
+				}
+			}
+		}
+		int Mixer::FindInputWire(int macIndex)
+		{
+			int ret=Machine::FindInputWire(macIndex);
+			if ( ret == -1)
+			{
+				for (int c=0; c<MAX_CONNECTIONS; c++)
+				{
+					if (SendValid(c))
+					{
+						if (GetSend(c) == macIndex)
+						{
+							ret = c+MAX_CONNECTIONS;
+							break;
+						}
+					}
+				}
+			}
+			return ret;
+		}
+		void Mixer::DeleteInputWireIndex(int wireIndex)
+		{
+			if ( wireIndex < MAX_CONNECTIONS)
+				Machine::DeleteInputWireIndex(wireIndex);
+			else
+			{
+				wireIndex-=MAX_CONNECTIONS;
+				_send[wireIndex]=-1;
+				_sendValid[wireIndex]=false;
 			}
 		}
 
-		/*		std::string Mixer::GetAudioInputName(int port)
-		{
-		std::string rettxt;
-		if (port < return1 )
-		{	
-		rettxt = "Input ";
-		rettxt += ('0'+port-chan1);
-		return rettxt;
-		}
-		else if ( port <= return12)
-		{
-		rettxt = "Return ";
-		rettxt += ('0'+port-return1);
-		return rettxt;
-		}
-		rettxt = "-";
-		return rettxt;
-		}
-		*/
 		std::string Mixer::GetAudioInputName(int port)
 		{
 			std::string rettxt;
@@ -486,7 +583,7 @@ namespace psycle
 			}
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{
-				if (_sendValid[i]) cols++;
+				if (SendValid(i)) cols++;
 			}
 			return cols==0?1:cols;
 		}
@@ -495,11 +592,19 @@ namespace psycle
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
 			int send=numparam%16; // 0 is for channel mix, others are send.
-			if ( channel == 0) { name[0] = '\0'; return; }
-			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			if ( channel == 0)
+			{
+				if (send == 0)
+				{
+					strcpy(name,"Master Output");
+				}
+				else
+					name[0] = '\0';
+			}
+			else if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
 			{
 				channel--;
-				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				if ( _inputCon[channel] && (send==mix || SendValid(send-send0)))
 				{
 					if ( send == mix )sprintf(name,"Channel %d - Mix",channel+1);
 					else sprintf(name,"Channel %d - Send %d",channel+1,send);
@@ -510,8 +615,8 @@ namespace psycle
 			else
 			{
 				send-=send0;
-				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(name,"Input level Ch %d",send+send0);
-				else if ( channel == 0x0F && send < MAX_CONNECTIONS && _sendValid[send]) sprintf(name,"Input level Fx %d",send+send0);
+				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(name,"Input level Chn %02d",send+send0);
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS && SendValid(send)) sprintf(name,"Input level Ret %02d",send+send0);
 				else name[0] = '\0';
 			}
 		}
@@ -520,13 +625,17 @@ namespace psycle
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
 			int send=numparam%16; // 0 is for channel mix, others are send.
-			if ( channel == 0) return 0;
-			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			if ( channel == 0)
+			{
+				if (send == 0) return static_cast<int>(_outGain*256.0f);
+				else return 0;
+			}
+			else if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
 			{
 				channel--;
-				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				if ( _inputCon[channel] && (send==mix || SendValid(send-send0)))
 				{
-					return (int)(_sendGrid[channel][send]*100.0f);
+					return (int)(_sendGrid[channel][send]*100.0f/_returnVolMulti[send-send0]);
 				}
 				else return 0;
 			}
@@ -535,7 +644,7 @@ namespace psycle
 			{
 				send-=send0;
 				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) return (int)(_inputConVol[send]*_wireMultiplier[send]*100.0f);
-				else if ( channel == 0x0F && send < MAX_CONNECTIONS && _sendValid[send]) return (int)(_sendVol[send]*_sendVolMulti[send]*100.0f);
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS && SendValid(send)) return (int)(_returnVol[send]*_returnVolMulti[send]*100.0f);
 				else return 0;
 			}
 		}
@@ -544,13 +653,17 @@ namespace psycle
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
 			int send=numparam%16; // 0 is for channel mix, others are send.
-			if ( channel == 0) { parVal[0] = '\0'; return; }
-			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			if ( channel == 0)
+			{
+				if (send == 0) sprintf(parVal,"%.01fdB",dsp::dB(_outGain));
+				else parVal[0] = '\0';
+			}
+			else if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
 			{
 				channel--;
-				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				if ( _inputCon[channel] && (send==mix || SendValid(send-send0)))
 				{
-					sprintf(parVal,"%.0f%%",_sendGrid[channel][send]*100.0f);
+					sprintf(parVal,"%.01fdB",dsp::dB(_sendGrid[channel][send]/_returnVolMulti[send-send0]));
 				}
 				else  parVal[0] = '\0';
 			}
@@ -558,67 +671,114 @@ namespace psycle
 			else
 			{
 				send-=send0;
-				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(parVal,"%.0f%%",_inputConVol[send]*_wireMultiplier[send]*100.0f);
-				else if ( channel == 0x0F && send < MAX_CONNECTIONS && _sendValid[send]) sprintf(parVal,"%.0f%%",_sendVol[send]*_sendVolMulti[send]*100.0f);
+				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(parVal,"%.01fdB",dsp::dB(_inputConVol[send]*_wireMultiplier[send]));
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS && SendValid(send)) sprintf(parVal,"%.01fdB",dsp::dB(_returnVol[send]*_returnVolMulti[send]));
 				else parVal[0] = '\0';
 			}
 		}
 
 		bool Mixer::SetParameter(int numparam, int value)
-		{
+		{	//channels:
+			//0  -> volume colum -> master volume , channels volume and master gain.
+			//1..12 -> channel column -> mix, sends , mute, solo and gain
+			//14 -> return column -> volume of each return
+			//15 -> return column -> gain of each return
+
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
-			int send(numparam % 16); // 0 is for channel mix, others are send.
-			if ( channel == 0) return false;
-			if ( value>100 ) value=100;
-			if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
+			int send(numparam % 16); // 0 is for channel mix, others are send, mute, solo and gain.
+			if ( channel == 0)
+			{
+				if (send == 0) _masterVolume = value;
+				else if (send == 15) _masterGain = value>4?4:value;
+				else
+				{
+					send-=send0;
+					if ( send < MAX_CONNECTIONS)
+					{
+						if ( value>100 ) value=100;
+						SetWireVolume(send,value/100.0f);
+						return true;
+					}
+					return false;
+				}
+				_outGain=_masterVolume/255.0f*_masterGain;
+				return true;
+			}
+			if ( channel <= MAX_CONNECTIONS && send-send0 < MAX_CONNECTIONS)
 			{
 				channel--;
-				if ( _inputCon[channel] && (send==mix || _sendValid[send-send0]))
+				if (!_inputCon[channel]) return false;
+				
+				if (send==mix) _sendGrid[channel][mix]=value/100.0f;
+				else if (SendValid(send-send0))
 				{
-					_sendGrid[channel][send]=value/100.0f;
-					return true;
+					_sendGrid[channel][send]=value/100.0f*_returnVolMulti[send-send0];
+				}
+				else if (send == solo)
+				{
+					_solocolumn=channel+1;
+				}
+				else if (send == mute)
+				{
+					_mutestate[channel]=value>0?true:false;
+				}
+				else if (send == gain)
+				{
+
 				}
 				else return false;
+				return true;
 			}
-			else if  ( send == 0) return false;
-			else
+			else if ( channel == 0x0E && send < MAX_CONNECTIONS) // vol
 			{
-				send-=send0;
-				if ( channel == 0x0E && send < MAX_CONNECTIONS)
-				{
-					SetWireVolume(send,value/100.0f);
-					return true;
-				}
-				else if ( channel == 0x0F && send < MAX_CONNECTIONS) 
-				{
-					_sendVol[send]= value / (_sendVolMulti[send] * 100.0f);
-					return true;
-				}
-				else return false;
+				_returnVol[send]= value / (_returnVolMulti[send] * 100.0f);
+				return true;
 			}
+			else if ( channel == 0x0F && send < MAX_CONNECTIONS) // gain
+			{
+				;
+				return true;
+			}
+			return false;
 		}
 
 		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			std::uint32_t size;
 			pFile->Read(&size,sizeof(size));
-			pFile->Read(_sendGrid,sizeof(_sendGrid));
-			pFile->Read(_send,sizeof(_send));
-			pFile->Read(_sendVol,sizeof(_sendVol));
-			pFile->Read(_sendVolMulti,sizeof(_sendVolMulti));
+			pFile->Read(&_outGain,sizeof(_outGain));
 			pFile->Read(_sendValid,sizeof(_sendValid));
+			pFile->Read(_send,sizeof(_send));
+			pFile->Read(_sendGrid,sizeof(_sendGrid));
+			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
+			/// returnvolmulti should be calculated by the loader.
+			pFile->Read(_returnVol,sizeof(_returnVol));
+			pFile->Read(_returnVolMulti,sizeof(_returnVolMulti));
+			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
+			{
+				_sendGrid[j][i+send0]*=_returnVolMulti[i];
+			}
 			return true;
 		}
 
 		void Mixer::SaveSpecificChunk(RiffFile* pFile)
 		{
-			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _sendVol + sizeof _sendVolMulti + sizeof _sendValid);
+			float sendGridTmp[MAX_CONNECTIONS][MAX_CONNECTIONS+1];
+			memcpy(sendGridTmp,_sendGrid,sizeof(_sendGrid));
+			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
+			{
+				sendGridTmp[j][i+send0]/=_returnVolMulti[i];
+			}
+			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _returnVol + sizeof _returnVolMulti + sizeof _sendValid + sizeof _outGain);
 			pFile->Write(&size,sizeof(size));
-			pFile->Write(_sendGrid,sizeof(_sendGrid));
-			pFile->Write(_send,sizeof(_send));
-			pFile->Write(_sendVol,sizeof(_sendVol));
-			pFile->Write(_sendVolMulti,sizeof(_sendVolMulti));
+			pFile->Write(&_outGain,sizeof(_outGain));
 			pFile->Write(_sendValid,sizeof(_sendValid));
+			pFile->Write(_send,sizeof(_send));
+			pFile->Write(sendGridTmp,sizeof(sendGridTmp));
+			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
+			/// returnvolmulti should be calculated by the loader.
+			pFile->Write(_returnVol,sizeof(_returnVol));
+			pFile->Write(_returnVolMulti,sizeof(_returnVolMulti));
 		}
 
 		float Mixer::VuChan(int idx)
@@ -631,8 +791,8 @@ namespace psycle
 
 		float Mixer::VuSend(int idx)
 		{
-			float vol = _sendVol[idx] * _sendVolMulti[idx];
-			if ( _sendValid[idx] ) return (Global::song()._pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
+			float vol = _returnVol[idx] * _returnVolMulti[idx];
+			if ( SendValid(idx) ) return (Global::song()._pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
 	}
