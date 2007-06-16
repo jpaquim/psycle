@@ -32,6 +32,7 @@
 AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	: QDialog( parent )
 {
+	setWindowTitle("Select Audio Driver");
 	config_ = Global::pConfig();
 	selectedDriver_ = 0;
 
