@@ -366,7 +366,8 @@
 		// operating systems following the posix standard
 		#if \
 			defined DIVERSALIS__OPERATING_SYSTEM__GNU || \
-			defined DIVERSALIS__OPERATING_SYSTEM__BSD
+			defined DIVERSALIS__OPERATING_SYSTEM__BSD || \
+			defined DIVERSALIS__OPERATING_SYSTEM__MACH
 			#define DIVERSALIS__OPERATING_SYSTEM__POSIX
 		#endif
 
