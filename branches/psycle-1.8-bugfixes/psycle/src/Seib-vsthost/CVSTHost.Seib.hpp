@@ -549,7 +549,8 @@ namespace seib {
 			inline long GetVendorVersion() { return Dispatch(effGetVendorVersion); }
 			inline long VendorSpecific(long index, long value, void *ptr, float opt) { return Dispatch(effVendorSpecific, index, value, ptr, opt); }
 			//returns 0 -> don't know, 1 -> yes, -1 -> no. Use the PlugCanDo's strings.
-			inline long CanDo(const char *ptr) { return Dispatch(effCanDo, 0, 0, (void *)ptr); }
+			inline long CanDoInt(const char *ptr) { return Dispatch(effCanDo, 0, 0, (void *)ptr); }
+			inline bool CanDo(const char *ptr) { return (Dispatch(effCanDo, 0, 0, (void *)ptr)>0); }
 			inline long GetTailSize() { return Dispatch(effGetTailSize); }
 			// Recursive Idle() call for plugin. bNeedIdle is set to true when the plugin calls "pHost->OnNeedIdle()"
 			inline void DECLARE_VST_DEPRECATED(Idle)() { VstInt32 l=0; if (bNeedIdle) l = Dispatch(effIdle); if (!l) bNeedIdle=false; }

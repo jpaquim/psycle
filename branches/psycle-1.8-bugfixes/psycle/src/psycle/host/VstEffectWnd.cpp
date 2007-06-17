@@ -681,7 +681,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
 		{
-			pCmdUI->SetText("Operational");
+			pCmdUI->SetText("Activated");
 			if (machine().IsSynth())
 			{
 				if (machine()._mute)

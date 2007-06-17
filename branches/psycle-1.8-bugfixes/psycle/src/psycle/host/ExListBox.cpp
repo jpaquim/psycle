@@ -1,10 +1,11 @@
 // ExListBox.cpp : implementation file
-// Code originary from ran wainstein:
+// Code originally from ran wainstein:
 // http://www.codeproject.com/combobox/cexlistboc.asp
 //
 
 #include <project.private.hpp>
-
+#include "psycle.hpp"
+#include "MainFrm.hpp"
 #include "ExListBox.h"
 #include "Global.hpp"
 #include "Song.hpp"
@@ -19,6 +20,22 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CExListBox
 using namespace psycle::host;
+CThisEdit::CThisEdit()
+{
+}
+CThisEdit::~CThisEdit()
+{
+}
+BEGIN_MESSAGE_MAP(CThisEdit, CEdit)
+	ON_WM_KEYDOWN()
+END_MESSAGE_MAP()
+
+void CThisEdit::OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags )
+{
+	if ( nChar == VK_ESCAPE || nChar == VK_RETURN)
+		GetParent()->SetFocus();
+}
+
 
 CExListBox::CExListBox()
 {
@@ -29,6 +46,9 @@ CExListBox::~CExListBox()
 }
 
 BEGIN_MESSAGE_MAP(CExListBox, CListBox)
+	ON_WM_RBUTTONDOWN()
+	ON_EN_CHANGE(IDC_SEQEDITBOX, OnChangePatternName)
+	ON_EN_KILLFOCUS(IDC_SEQEDITBOX,OnKillFocusPatternName)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipText)
 END_MESSAGE_MAP()
@@ -37,14 +57,42 @@ END_MESSAGE_MAP()
 
 void CExListBox::PreSubclassWindow() 
 {
-	// TODO: Add your specialized code here and/or call the base class
-	
-
 	CListBox::PreSubclassWindow();
 	EnableToolTips(TRUE);
+}
+void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
+{
+	BOOL tmp = FALSE;
+	int row = ItemFromPoint2(point,tmp);
+	if ( row == -1)
+		return;
+	
+	SetSel(row);
+	HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+	CFont font;
+	font.Attach( hFont );
 
+	RECT cellrect;
+	GetItemRect(row,&cellrect);
+
+	myedit.Create(WS_CHILD|WS_BORDER,cellrect,this,IDC_SEQEDITBOX);
+	myedit.SetFont(&font);
+	myedit.SetWindowText(Global::_pSong->patternName[row]);
+	myedit.ShowWindow(SW_SHOWNORMAL);
+	myedit.SetFocus();
+}
+void CExListBox::OnKillFocusPatternName()
+{
+	((CMainFrame*)GetParentFrame())->UpdateSequencer();
+	myedit.DestroyWindow();
 }
 
+void CExListBox::OnChangePatternName()
+{
+	CString string;
+	myedit.GetWindowText(string);
+	strncpy(Global::_pSong->patternName[GetCurSel()],string,32);
+}
 int CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
 	int row;
@@ -63,7 +111,6 @@ int CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	pTI->uId = (UINT)((row));   //The ‘uId’ is assigned a value according to the row value.
 	pTI->lpszText = LPSTR_TEXTCALLBACK;
 	return pTI->uId;
-
 }
 
 
@@ -103,8 +150,6 @@ UINT CExListBox::ItemFromPoint2(CPoint pt, BOOL& bOutside) const
 	//GetFirstAndLastIndex(nFirstIndex, nLastIndex);
 	nFirstIndex = GetTopIndex();
 	nLastIndex = nFirstIndex  + GetCount(); 
-
-
 	
 	bOutside = TRUE;
 	

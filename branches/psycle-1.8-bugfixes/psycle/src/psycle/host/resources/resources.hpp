@@ -1011,6 +1011,7 @@
 #define IDC_SPINPARAM                   1785
 #define IDC_SHOWPATTERNAME              1786
 #define IDC_REPLACEMAC                  1787
+#define IDC_SEQEDITBOX			1788
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1176,7 +1177,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        271
 #define _APS_NEXT_COMMAND_VALUE         34204
-#define _APS_NEXT_CONTROL_VALUE         1788
+#define _APS_NEXT_CONTROL_VALUE         1789
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

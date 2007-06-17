@@ -567,8 +567,7 @@ namespace psycle
 					else Standby(true);
 				}
 				cpu::cycles_type cost = cpu::cycles();
-				///\todo: to standby, or not to standby, that's the audible question.
-				if((!_mute) && (!Standby()) && (!Bypass() || bCanBypass))
+				if(!_mute && ((!Standby() && !Bypass()) || bCanBypass))
 				{
 					if(bNeedIdle) 
 					{

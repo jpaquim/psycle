@@ -97,7 +97,25 @@ namespace psycle
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual bool Bypass(void) { return Machine::Bypass(); }
-				virtual void Bypass(bool e) { Machine::Bypass(e); if (aEffect) SetBypass(e); }
+				virtual void Bypass(bool e)
+				{
+					Machine::Bypass(e);
+					if (aEffect) 
+					{
+//						if (!bCanBypass) MainsChanged(e);
+						SetBypass(e);
+					}
+				}
+				virtual bool Standby() { return Machine::Standby(); }
+				virtual void Standby(bool e)
+				{
+					Machine::Standby();
+					if (aEffect) 
+					{
+//						if (!bCanBypass) MainsChanged(e);
+						SetBypass(e);
+					}
+				}
 //				virtual bool ConnectTo(Machine& dstMac,int dstport=0,int outport=0,float volume=1.0f);
 //				virtual bool Disconnect(Machine& dstMac);
 

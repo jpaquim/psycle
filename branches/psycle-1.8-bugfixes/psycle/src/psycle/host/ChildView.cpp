@@ -1312,6 +1312,7 @@ NAMESPACE__BEGIN(psycle)
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{
 					strcpy(_pSong->patternName[patNum],dlg.patName);
+					pParentMain->UpdateSequencer();
 					pParentMain->StatusBarIdle();
 					//Repaint(DMPatternHeader);
 				}

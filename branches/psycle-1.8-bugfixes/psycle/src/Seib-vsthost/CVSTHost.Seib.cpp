@@ -667,6 +667,7 @@ namespace seib {
 			, bNeedIdle(false)
 			, bNeedEditIdle(false)
 			, bWantMidi(false)
+			, bCanBypass(false)
 			, bShellPlugin(false)
 			, editorWnd(0)
 		{
@@ -736,7 +737,7 @@ namespace seib {
 				SetBlockSize(CVSTHost::pHost->GetBlockSize());
 				Open();                     /* open the effect                   */
 				// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
-				WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents) == 1);
+				WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
 				KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
 				MainsChanged(true);                   /* then force resume.                */
 				MainsChanged(false);                  /* suspend again...                  */
