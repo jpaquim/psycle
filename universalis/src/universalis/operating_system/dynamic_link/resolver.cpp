@@ -101,8 +101,8 @@ namespace universalis
 				underlying_(0)
 			{
 				#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-					underlying_ = ::dlopen(this->path().native_file_string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
-					if(!opened()) open_error(this->path(), std::string(::dlerror()));
+					underlying_ = ::dlopen(path_.native_file_string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
+					if(!opened()) open_error(path_, std::string(::dlerror()));
 				#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					// we use \ here instead of / because ::LoadLibraryEx will not use the LOAD_WITH_ALTERED_SEARCH_PATH option if it does not see a \ character in the file path:
 					boost::filesystem::path const final_path(decorated_filename(path, version));
