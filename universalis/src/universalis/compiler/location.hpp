@@ -22,15 +22,13 @@ namespace universalis
 	namespace compiler
 	{
 #if 1
-		class location
-		:
-			public std::string
-		{
+		/// BOOST_STRONG_TYPEDEF(std::string, location)
+		class location : public std::string {
 			public:
 				explicit location(std::string const & where) : std::string(where) {}
 		};
 
-		/// location of current line of the source, within       a class.
+		/// location of current line of the source, within a class.
 		#define UNIVERSALIS__COMPILER__LOCATION            universalis::compiler::location(UNIVERSALIS__COMPILER__LOCATION__DETAIL(UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION          ))
 
 		/// location of current line of the source, outside of any class.
@@ -40,7 +38,7 @@ namespace universalis
 		//#region DETAIL
 			///\internal
 			#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__SEPARATOR " # "
-			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT ///\todo ansi terminals are available for microsoft's platform too.
 				///\internal
 				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__START "# "
 				///\internal
@@ -53,37 +51,32 @@ namespace universalis
 			#endif
 		//#endregion
 #else
-		class location
-		{
+		class location {
 			public:
-				location(std::string const & module, std::string const & function, std::string const & file, unsigned int const & line)
+				location(
+					std::string const & module,
+					std::string const & function,
+					std::string const & file,
+					unsigned int const & line
+				)
 				:
 					module_(module),
 					function_(function),
 					file_(file),
 					line_(line)
-				{
-				}
+				{}
 
-			public:
-				std::string const inline & module() const throw() { return module_; }
-			private:
-				std::string const          module_;
+			public:  std::string const & module() const throw() { return module_; }
+			private: std::string const   module_;
 
-			public:
-				std::string const inline & function() const throw() { return function_; }
-			private:
-				std::string const          function_;
+			public:  std::string const & function() const throw() { return function_; }
+			private: std::string const   function_;
 
-			public:
-				std::string const inline & file() const throw() { return file_; }
-			private:
-				std::string const          file_;
+			public:  std::string const & file() const throw() { return file_; }
+			private: std::string const   file_;
 
-			public:
-				unsigned int const inline & line() const throw() { return line_; }
-			private:
-				unsigned int const          line_;
+			public:  unsigned int const & line() const throw() { return line_; }
+			private: unsigned int const   line_;
 		};
 #endif
 		///\internal
@@ -122,8 +115,8 @@ namespace universalis
 			#if defined DIVERSALIS__COMPILER__GNU
 				// gcc is able to include the name of the current class implicitly
 				// so we use the same definition in both cases
-				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION            + std::string(__PRETTY_FUNCTION__) + //\todo use direct stringizaton ; report this to boost authors
-				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  + std::string(__PRETTY_FUNCTION__) + //\todo use direct stringizaton ; report this to boost authors
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION            + std::string(__PRETTY_FUNCTION__) + //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
+				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  + std::string(__PRETTY_FUNCTION__) + //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
 			#else
 				// include the name of the current class explicitly using rtti on the "this" pointer
 				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION + universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
