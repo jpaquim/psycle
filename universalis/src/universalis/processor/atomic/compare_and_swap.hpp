@@ -20,7 +20,7 @@ namespace universalis
 			template<typename Value>
 			bool inline compare_and_swap(Value * const address, Value const old_value, Value const new_value)
 			{
-				#if defined DIVERSALIS__COMPILER__GNU
+				#if defined DIVERSALIS__COMPILER__GNU // since 4.1
 					return __sync_bool_compare_and_swap(address, old_value, new_value);
 				#else
 					#error not yet implemented (could be emulated with locking primitives)
