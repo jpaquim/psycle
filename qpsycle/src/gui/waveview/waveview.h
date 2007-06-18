@@ -25,6 +25,7 @@
 #include <QToolBar>
 #include <QWidget>
 #include <QSlider>
+#include <QLabel>
 
 
 class QStandardItemModel;
@@ -76,6 +77,7 @@ private:
 	QAction *zoomMore_;
 	QSlider *zoomSlide_;
 	QAction *zoomLess_;
+	QLabel *sampName_;
 
 	InstrumentsModel *instrumentsModel_;
 };
