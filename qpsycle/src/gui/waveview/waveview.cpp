@@ -100,7 +100,10 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	zoomBar_->addAction( zoomLess_ );
 	zoomBar_->addWidget( zoomSlide_ );
 	zoomBar_->addAction( zoomMore_ );
-	zoomBar_->addWidget( spacer_);
+//	zoomBar_->addWidget( spacer_);
+// <nmather> hey gravity0, just commented out for now as
+// i'm not certain what widget you want to use for this
+// (you forgot to add it).
 	zoomBar_->addWidget( sampName_);
 			 
 	toolBar_->addAction( loadSmp_ );
