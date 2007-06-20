@@ -8,9 +8,9 @@ pause
 echo Running QMake
 qmake
 echo QMake Complete
-make
-if ERRORLEVEL 1 goto ERROR
+if "%1" == "debug" goto DEBUG
+make release
 echo Make Complete
 
-:ERROR1
-echo Make Failed
+:DEBUG
+make debug
