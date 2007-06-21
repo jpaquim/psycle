@@ -2,7 +2,7 @@
 // copyright 1999-2007 johan boule <bohan@jabber.org>
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
-///\interface universalis::processor::exception
+///\interface universalis::processor::atomic::compare_and_swap
 #pragma once
 #include <universalis/operating_system/exception.hpp>
 #include <diversalis/compiler.hpp>
