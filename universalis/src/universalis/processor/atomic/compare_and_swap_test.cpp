@@ -34,7 +34,7 @@
 		{
 			retry:
 			bool b(compare_and_swap(shared_counter_pointer, 1, 0));
-			if(!b) { sched_yield(); goto retry; }
+			if(!b) { /*sched_yield();*/ goto retry; }
 			std::cout << "thread id: " << pthread_self() << ", b: " << b << ", local counter: " << local_counter << "\n";
 		}
 	}
