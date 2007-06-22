@@ -31,7 +31,6 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QColorDialog>
-#include <QUndoCommand>
 
 PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
 	: QWidget(parent)
@@ -121,8 +120,6 @@ void PatternBox::newCategory()
 	categoryMap[catItem] = category;
 	catItems.push_back( catItem );
 	
-	QUndoCommand *newCatUndo = new QUndoCommand( "New Category");
-
 }
 
 void PatternBox::newPattern() 
@@ -157,7 +154,6 @@ void PatternBox::newPattern()
 			patternTree()->setCurrentItem( patItem );
 		}
 	}
-	QUndoCommand *newPatUndo = new QUndoCommand( "New Pattern");
 
 }
 
@@ -193,8 +189,6 @@ void PatternBox::clonePattern()
 			}
 		}
 	}
-	QUndoCommand *clonePatUndo = new QUndoCommand( "Cloned Pattern");
-
 }
 
 void PatternBox::deletePattern() 
@@ -221,7 +215,7 @@ void PatternBox::deletePattern()
 				  seqGui->repaint();*/
 		}
 	}
-	QUndoCommand *deletePatUndo = new QUndoCommand( "Deleted Pattern");
+
 }
 
 void PatternBox::addPatternToSequencer() 
@@ -234,7 +228,6 @@ void PatternBox::addPatternToSequencer()
             emit addPatternToSequencerRequest( pattern );
         }
     }
-	QUndoCommand *addPatUndo = new QUndoCommand( "Added Pattern To Sequencer");
 }
 
 
@@ -309,7 +302,6 @@ void PatternBox::onPatternNameEdited( const QString & newText )
 		category->setName( newText.toStdString() );
 		return;
 	}
-	QUndoCommand *namePatUndo = new QUndoCommand( "Cahnged Pattern Name");
 }
 
 // FIXME: this is duplicated in SequencerItem.
@@ -359,7 +351,7 @@ void PatternBox::onItemEdited( QTreeWidgetItem *item )
 			return;
 		}
 	}
-	QUndoCommand *editItemUndo = new QUndoCommand( "Edited Item");
+
 }
 
 PatternItem::PatternItem() : QTreeWidgetItem( QTreeWidgetItem::UserType + 1 )
