@@ -77,6 +77,7 @@ Plugin::~ Plugin( ) throw()
 bool Plugin::Instance( const std::string & file_name )
 {      
 	try {
+		#if 0
 		char const static path_env_var_name[] =
 		{
 			#if defined __unix__ || defined __APPLE__
@@ -107,14 +108,16 @@ bool Plugin::Instance( const std::string & file_name )
 			#else
 				#error unknown dynamic linker
 			#endif
-			///\todo + plugin path
 		}
+		
+		///\todo new_path += dir_name(file_name), using boost::filesystem::path for portability
 
 		// append the plugin dir to the path env var
 		if(::putenv((path_env_var_name + ("=" + new_path)).c_str()))
 		{
 			std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
 		}
+		#endif
 
 		#if defined __unix__ || defined __APPLE__
 			_dll = dlopen(file_name.c_str(), RTLD_LAZY /*RTLD_NOW*/);
@@ -127,11 +130,13 @@ bool Plugin::Instance( const std::string & file_name )
 			SetErrorMode( uOldErrorMode );
 		#endif
 
+		#if 0
 		// set the path env var back to its original value
 		if(::putenv((path_env_var_name + ("=" + old_path)).c_str()))
 		{
 			std::cerr << "psycle: plugin: warning: could not set " << path_env_var_name << " env var back to its original value.\n";
 		}
+		#endif
 
 		if (!_dll) {
 				#if defined __unix__ || defined __APPLE__
@@ -142,14 +147,15 @@ bool Plugin::Instance( const std::string & file_name )
 		} else {
 			GETINFO GetInfo  = 0;
 			#if defined __unix__ || defined __APPLE__
-			GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
+				GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
 			#else
-			GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
+				GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
 			#endif
 			if (!GetInfo) {
 				#if defined __unix__ || defined __APPLE__
 					std::cerr << "Cannot load symbols: " << dlerror() << '\n';
 				#else
+					///\todo readd the original code here!
 				#endif
 				return false;
 			} else {
