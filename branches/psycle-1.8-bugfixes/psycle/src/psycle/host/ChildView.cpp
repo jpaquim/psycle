@@ -1639,7 +1639,7 @@ NAMESPACE__BEGIN(psycle)
 			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
 			if (dlg.DoModal() == IDOK )
 			{
-				BlockParamInterpolate(dlg.kfresult);
+				BlockParamInterpolateCurve(dlg.kfresult);
 			}
 		}
 

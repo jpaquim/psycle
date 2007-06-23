@@ -226,6 +226,7 @@ NAMESPACE__BEGIN(psycle)
 			void DoubleLength();
 			void BlockTranspose(int trp);
 			void BlockParamInterpolate(int *points=0);
+			void BlockParamInterpolateCurve(int *points=0);
 			void StartBlock(int track,int line, int col);
 			void ChangeBlock(int track,int line, int col);	// This function allows a handier usage for Shift+Arrows and MouseSelection
 												// Params: current track, line and col

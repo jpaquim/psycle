@@ -1948,6 +1948,60 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
+		void CChildView::BlockParamInterpolateCurve(int *points)
+		{
+			// UNDO CODE BLOCK INTERPOLATE
+			if (blockSelected)
+			{
+				const int ps = _ps();
+				///////////////////////////////////////////////////////// Add ROW
+				unsigned char *toffset=_ppattern(ps);
+				
+				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				
+				const int initvalue = 
+					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.start.line*MULTIPLY+3) * 0x100 +
+					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.start.line*MULTIPLY+4);
+				const int endvalue =
+					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+3) * 0x100 +
+					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+4);
+				const float addvalue = (float)(endvalue -initvalue)/(blockSel.end.line-blockSel.start.line);
+				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
+				int displace = firstrow;
+				
+				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide ||toffset[firstrow] == notecommands::midicc)
+				{
+					unsigned char note = toffset[firstrow];
+					unsigned char aux = toffset[firstrow+1];
+					unsigned char mac = toffset[firstrow+2];
+					for (int l=blockSel.start.line;l<=blockSel.end.line;l++)
+					{
+						toffset[displace]=note;
+						toffset[displace+1]=aux;
+						toffset[displace+2]=mac;
+						int val= (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
+						if ( val == -1 ) continue;
+						toffset[displace+3]=static_cast<unsigned char>(val/0x100);
+						toffset[displace+4]=static_cast<unsigned char>(val%0x100);
+						displace+=MULTIPLY;
+					}
+				}
+				else
+				{
+					for (int l=blockSel.start.line;l<=blockSel.end.line;l++)
+					{
+						int val = (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
+						if ( val == -1 ) continue;
+						toffset[displace+3]=static_cast<unsigned char>(val/0x100);
+						toffset[displace+4]=static_cast<unsigned char>(val%0x100);
+						displace+=MULTIPLY;
+					}
+				}
+				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+				Repaint(DMData);
+			}
+		}
+
 
 		void CChildView::IncCurPattern()
 		{
