@@ -270,7 +270,7 @@ namespace psy
 			for ( ; it < fileList.end(); ++it ) {
 				std::string fileName = *it;
 				#if defined __unix__ || defined __APPLE__
-					// problem of so.0.0.x .. .so all three times todo
+					///\todo problem of so.x.y.z .. .so all three times todo
 				#else
 					if ( fileName.find( ".dll" ) == std::string::npos ) continue;
 				#endif
