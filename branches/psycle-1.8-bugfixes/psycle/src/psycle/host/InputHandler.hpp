@@ -193,6 +193,8 @@ namespace psycle
 			cdefPatternTrackRecord,
 			cdefSelectBar,
 
+			
+
 		};
 
 		/// command definitions.

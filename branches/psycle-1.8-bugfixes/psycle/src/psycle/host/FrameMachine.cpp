@@ -521,8 +521,21 @@ NAMESPACE__BEGIN(psycle)
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
 					}
 					break;
-
 				case CT_Immediate:
+				case CT_Editor:
+					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					break;
+				}
+			}
+			else if (cmd.IsValid())
+			{
+				switch(cmd.GetType())
+				{
+				case CT_Note:
+					//do nothing
+					break;
+				case CT_Immediate:
+				case CT_Editor:
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					break;
 				}
