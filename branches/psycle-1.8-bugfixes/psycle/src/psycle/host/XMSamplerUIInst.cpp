@@ -42,7 +42,7 @@ void XMSamplerUIInst::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_SLNOTEMODNOTE, m_SlNoteModNote);
 	DDX_Control(pDX, IDC_NOTEMOD, m_SlNoteMod);
-
+	
 	DDX_Control(pDX, IDC_ADSRBASE, m_SlADSRBase);
 	DDX_Control(pDX, IDC_ADSRMOD, m_SlADSRMod);
 	DDX_Control(pDX, IDC_ADSRATT, m_SlADSRAttack);
@@ -318,6 +318,8 @@ void XMSamplerUIInst::OnBnClickedInsTgeneral()
 {
 	m_bInitialized = false;
 	
+	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_SHOW);
+
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_SHOW);
 	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_SHOW);//Instrument Name
 	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_SHOW);//Instrument Name
@@ -389,6 +391,7 @@ void XMSamplerUIInst::OnBnClickedInsTamp()
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& inst = m_pMachine->rInstrument(i);
 
+	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
 	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name
@@ -447,7 +450,8 @@ void XMSamplerUIInst::OnBnClickedInsTpan()
 	m_bInitialized = false;
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& inst = m_pMachine->rInstrument(i);
-	
+
+	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
 	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name
@@ -505,6 +509,7 @@ void XMSamplerUIInst::OnBnClickedInsTfilter()
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& inst = m_pMachine->rInstrument(i);
 	
+	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
 	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name
@@ -563,6 +568,7 @@ void XMSamplerUIInst::OnBnClickedInsTpitch()
 	int i= m_InstrumentList.GetCurSel();
 	XMInstrument& inst = m_pMachine->rInstrument(i);
 	
+	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_STATIC14))->ShowWindow(SW_HIDE);//Instrument Name
 	((CEdit*)GetDlgItem(IDC_INS_NAME))->ShowWindow(SW_HIDE);//Instrument Name

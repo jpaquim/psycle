@@ -1925,7 +1925,7 @@ BEGIN
     PUSHBUTTON      "Duplicate",IDC_DUPEINS,87,283,39,14
     PUSHBUTTON      "Delete",IDC_DELETEINS,127,283,39,14
     CONTROL         "General",IDC_INS_TGENERAL,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE | WS_GROUP,171,6,68,13
+                    BS_PUSHLIKE | WS_GROUP,169,6,70,13
     CONTROL         "Amplitude",IDC_INS_TAMP,"Button",BS_AUTORADIOBUTTON | 
                     BS_PUSHLIKE,240,6,68,13
     CONTROL         "Panning",IDC_INS_TPAN,"Button",BS_AUTORADIOBUTTON | 
@@ -1933,7 +1933,7 @@ BEGIN
     CONTROL         "Filtering",IDC_INS_TFILTER,"Button",BS_AUTORADIOBUTTON | 
                     BS_PUSHLIKE,378,6,68,13
     CONTROL         "Pitch",IDC_INS_TPITCH,"Button",BS_AUTORADIOBUTTON | 
-                    BS_PUSHLIKE,447,6,68,13
+                    BS_PUSHLIKE,447,6,70,13
     GROUPBOX        "",IDC_STATIC,169,15,348,282
     GROUPBOX        "",IDC_STATIC,177,22,332,118
     GROUPBOX        "",IDC_STATIC,177,141,332,151
@@ -2231,7 +2231,7 @@ BEGIN
     RTEXT           "Filter Cutoff",IDC_STATIC,7,50,46,8
     RTEXT           "Filter Q (Res)",IDC_STATIC,7,64,46,8
     CONTROL         "",IDC_SL_CHANNELS,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,83,234,352,13
+                    TBS_NOTICKS | WS_TABSTOP,72,232,374,15
     CONTROL         "Mute",IDC_CH_MUTE8,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,418,105,32,10
     CONTROL         "Mute",IDC_CH_MUTE7,"Button",BS_AUTOCHECKBOX | 
