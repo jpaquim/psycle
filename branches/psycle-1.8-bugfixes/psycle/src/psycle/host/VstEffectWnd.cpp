@@ -207,6 +207,20 @@ NAMESPACE__BEGIN(psycle)
 					}
 					break;
 				case CT_Immediate:
+				case CT_Editor:
+					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					break;
+				}
+			}
+			else if (cmd.IsValid())
+			{
+				switch(cmd.GetType())
+				{
+				case CT_Note:
+					//do nothing
+					break;
+				case CT_Immediate:
+				case CT_Editor:
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					break;
 				}
