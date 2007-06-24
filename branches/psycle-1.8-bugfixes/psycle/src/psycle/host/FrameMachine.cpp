@@ -540,6 +540,8 @@ NAMESPACE__BEGIN(psycle)
 					break;
 				}
 			}
+		
+			this->SetFocus();
 
 			//wndView->KeyDown(nChar,nRepCnt,nFlags);
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	

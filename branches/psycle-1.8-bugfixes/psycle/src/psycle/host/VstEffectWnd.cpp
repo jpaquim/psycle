@@ -225,6 +225,9 @@ NAMESPACE__BEGIN(psycle)
 					break;
 				}
 			}
+
+			this->SetFocus();
+
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 		}
 
