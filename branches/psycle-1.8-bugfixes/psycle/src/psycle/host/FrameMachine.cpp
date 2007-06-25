@@ -507,11 +507,12 @@ NAMESPACE__BEGIN(psycle)
 			// ignore repeats: nFlags&0x4000
 			const BOOL bRepeat = nFlags&0x4000;
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			if(!bRepeat && cmd.IsValid())
+			if(cmd.IsValid())
 			{
 				switch(cmd.GetType())
 				{
 				case CT_Note:
+					if (!bRepeat)
 					{
 						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
@@ -521,26 +522,13 @@ NAMESPACE__BEGIN(psycle)
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
 					}
 					break;
+
 				case CT_Immediate:
 				case CT_Editor:
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					break;
 				}
 			}
-			else if (cmd.IsValid())
-			{
-				switch(cmd.GetType())
-				{
-				case CT_Note:
-					//do nothing
-					break;
-				case CT_Immediate:
-				case CT_Editor:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-					break;
-				}
-			}
-		
 			this->SetFocus();
 
 			//wndView->KeyDown(nChar,nRepCnt,nFlags);

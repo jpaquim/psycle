@@ -37,7 +37,7 @@ SONG INFO TEXT
 HEADER:
 id = "INFO"; 
 version = 0;
-size = strlen(Name)+strlen(Author)+strlen(Comment)+3;   //( +3 because of the NULL's )
+size = strlen(name)+strlen(author)+strlen(comment)+3;   //( +3 because of the NULL's )
 
 DATA:
 char name[]; // null terminated string, so read until you find NULL.
@@ -50,7 +50,7 @@ SONG INFO TEXT
 HEADER:
 id = "INFO"; 
 version = 1;
-size = strlen(Name)+strlen(Author)+strlen(Comment)+3;   //( +3 because of the NULL's )
+size = strlen(name)+strlen(author)+strlen(comment)+3 +sizeof(int) + bitmapsize;   //( +3 because of the NULL's )
 
 DATA:
 char name[]; // null terminated string, so read until you find NULL.
@@ -65,7 +65,7 @@ SONG PROPERTIES
 HEADER:
 id = "SNGI"; 
 version = 0;
-size = (11*sizeof(int))+(SONGTRACKS*(sizeof(bool)+sizeof(bool))); // Warning! .psy's previous to 1.8 saved this value as 6*sizeof(int)
+size = (11*sizeof(int))+(numTracks*(sizeof(bool)+sizeof(bool))); // Warning! .psy's previous to 1.8 saved this value as 6*sizeof(int)
 
 DATA:
 int numTracks; // Contains the number of tracks that the song has. In multipattern it would be total tracks	Values: from 4 to 64
@@ -89,7 +89,7 @@ SEQUENCE DATA
 HEADER:
 id = "SEQD"; 
 version = 0;
-size = (sequenceLength*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
+size = (lenght*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
 
 DATA:
 int index; // column index for multipattern stuff

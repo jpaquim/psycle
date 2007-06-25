@@ -11,6 +11,7 @@
 //#include "VstEditorDlg.hpp"
 #include "VstEffectWnd.hpp"
 #include "FrameMixerMachine.hpp"
+#include "WaveInMacDlg.hpp"
 #include "Helpers.hpp"
 #include "WireDlg.hpp"
 #include "GearRackDlg.hpp"
@@ -1442,12 +1443,30 @@ NAMESPACE__BEGIN(psycle)
 							{
 								m_wndView.XMSamplerMachineDialog->DestroyWindow();
 							}
+							else return;
 						}
 						//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
 						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName(),&m_wndView);
 						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
 						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
 						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
+						}
+						break;
+					case MACH_RECORDER:
+						{
+							if (m_wndView.WaveInMachineDialog)
+							{
+								if (m_wndView.WaveInMachineDialog->pRecorder != (AudioRecorder*)ma)
+								{
+									m_wndView.WaveInMachineDialog->DestroyWindow();
+								}
+								else return;
+							}
+							//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
+							m_wndView.WaveInMachineDialog = new CWaveInMacDlg(&m_wndView);
+							m_wndView.WaveInMachineDialog->pRecorder = (AudioRecorder*)ma;
+							m_wndView.WaveInMachineDialog->Create();
+							CenterWindowOnPoint(m_wndView.WaveInMachineDialog, point);
 						}
 						break;
 					case MACH_PLUGIN:

@@ -58,6 +58,7 @@ NAMESPACE__BEGIN(psycle)
 			MasterMachineDialog = NULL;
 			SamplerMachineDialog = NULL;
 			XMSamplerMachineDialog = NULL;
+			WaveInMachineDialog = NULL;
 
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -1639,7 +1640,7 @@ NAMESPACE__BEGIN(psycle)
 			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
 			if (dlg.DoModal() == IDOK )
 			{
-				BlockParamInterpolateCurve(dlg.kfresult);
+				BlockParamInterpolate(dlg.kfresult);
 			}
 		}
 

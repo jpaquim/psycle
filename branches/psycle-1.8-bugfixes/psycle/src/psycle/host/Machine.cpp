@@ -338,6 +338,47 @@ namespace psycle
 			_inputMachines[wireIndex] = -1;
 			_numInputs--;
 		}
+		void Machine::DeleteWires()
+		{
+			Machine *iMac;
+			// Deleting the connections to/from other machines
+			for(int w=0; w<MAX_CONNECTIONS; w++)
+			{
+				// Checking In-Wires
+				if(_inputCon[w])
+				{
+					if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
+					{
+						iMac = Global::_pSong->_pMachine[_inputMachines[w]];
+						if (iMac)
+						{
+							int wix = iMac->FindOutputWire(_macIndex);
+							if (wix >=0)
+							{
+								iMac->DeleteOutputWireIndex(wix);
+							}
+						}
+					}
+				}
+				// Checking Out-Wires
+				if(_connection[w])
+				{
+					if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
+					{
+						iMac = Global::_pSong->_pMachine[_outputMachines[w]];
+						if (iMac)
+						{
+							int wix = iMac->FindInputWire(_macIndex);
+							if(wix >=0 )
+							{
+								iMac->DeleteInputWireIndex(wix);
+							}
+						}
+					}
+				}
+			}
+
+		}
 
 		void Machine::PreWork(int numSamples)
 		{
@@ -512,6 +553,10 @@ namespace psycle
 			case MACH_MIXER:
 				if ( !fullopen ) pMachine = new Dummy(index);
 				else pMachine = new Mixer(index);
+				break;
+			case MACH_RECORDER:
+				if ( !fullopen ) pMachine = new Dummy(index);
+				else pMachine = new AudioRecorder(index);
 				break;
 			case MACH_PLUGIN:
 				{

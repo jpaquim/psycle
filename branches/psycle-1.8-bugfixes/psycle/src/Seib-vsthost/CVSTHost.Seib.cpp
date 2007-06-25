@@ -668,6 +668,7 @@ namespace seib {
 			, bNeedEditIdle(false)
 			, bWantMidi(false)
 			, bCanBypass(false)
+			, bMainsState(false)
 			, bShellPlugin(false)
 			, editorWnd(0)
 		{
@@ -687,6 +688,7 @@ namespace seib {
 			, bNeedEditIdle(false)
 			, bWantMidi(false)
 			, bCanBypass(false)
+			, bMainsState(false)
 			, bShellPlugin(false)
 			, editorWnd(0)
 		{
@@ -738,12 +740,12 @@ namespace seib {
 				Open();                     /* open the effect                   */
 				// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
 				WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
+				//6 :        Host to Plug, canDo ( bypass )   returned : 0
 				KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
 				MainsChanged(true);                   /* then force resume.                */
 				MainsChanged(false);                  /* suspend again...                  */
 				SetBlockSize(CVSTHost::pHost->GetBlockSize());   /* and block size                    */
 				SetProcessPrecision(kVstProcessPrecision32);
-				//6 :        Host to Plug, canDo ( bypass )   returned : 0
 				//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
 				SetPanLaw(kLinearPanLaw,1.0f);
 				MainsChanged(true);                   /* then force resume.                */
@@ -753,10 +755,6 @@ namespace seib {
 			{
 				int i= 1;
 			}
-			
-			//6 :        Host to Plug, canDo ( bypass )   returned : 0
-			//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
-
 		}
 
 		/*****************************************************************************/

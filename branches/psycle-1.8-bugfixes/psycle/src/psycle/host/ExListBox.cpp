@@ -32,8 +32,10 @@ END_MESSAGE_MAP()
 
 void CThisEdit::OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags )
 {
+	///\todo: the "if" code doesn't work, because those keys never call this function :OO
 	if ( nChar == VK_ESCAPE || nChar == VK_RETURN)
 		GetParent()->SetFocus();
+	else CEdit::OnKeyDown(nChar,nRepCnt,nFlags);
 }
 
 

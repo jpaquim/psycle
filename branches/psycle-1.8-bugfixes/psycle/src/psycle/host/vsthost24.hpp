@@ -102,7 +102,7 @@ namespace psycle
 					Machine::Bypass(e);
 					if (aEffect) 
 					{
-//						if (!bCanBypass) MainsChanged(e);
+						if (!bCanBypass) MainsChanged(!e);
 						SetBypass(e);
 					}
 				}
@@ -110,9 +110,12 @@ namespace psycle
 				virtual void Standby(bool e)
 				{
 					Machine::Standby();
-					if (aEffect) 
+					if (aEffect && _mode != MACHMODE_GENERATOR)
 					{
-//						if (!bCanBypass) MainsChanged(e);
+						// some plugins ( psp vintage warmer ) might not like to change the state too
+						// frequently, or might have a delay which mades fast switching unusable.
+						// This is why this is commented out until another solution is found.
+//						if (!bCanBypass) MainsChanged(!e);
 						SetBypass(e);
 					}
 				}

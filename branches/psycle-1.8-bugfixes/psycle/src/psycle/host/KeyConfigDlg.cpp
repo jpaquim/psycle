@@ -166,8 +166,11 @@ NAMESPACE__BEGIN(psycle)
 			key=0;
 			mods=0;
 			// update display for new key
+			///\todo: find a nicer way to do this (rather than regenerating the whole list)
+			int topidx = m_lstCmds.GetTopIndex();
 			m_prvIdx = m_lstCmds.GetCurSel();
 			FillCmdList();
+			m_lstCmds.SetTopIndex(topidx);
 			m_lstCmds.SetCurSel(m_prvIdx);
 			FindKey(m_prvIdx,key,mods);
 			m_hotkey0.SetHotKey(key,mods);

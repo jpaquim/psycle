@@ -192,11 +192,12 @@ NAMESPACE__BEGIN(psycle)
 		{
 			const BOOL bRepeat = nFlags&0x4000;
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			if(!bRepeat && cmd.IsValid())
+			if(cmd.IsValid())
 			{
 				switch(cmd.GetType())
 				{
 				case CT_Note:
+					if (!bRepeat)
 					{
 						const int outnote = cmd.GetNote();
 						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
@@ -212,20 +213,6 @@ NAMESPACE__BEGIN(psycle)
 					break;
 				}
 			}
-			else if (cmd.IsValid())
-			{
-				switch(cmd.GetType())
-				{
-				case CT_Note:
-					//do nothing
-					break;
-				case CT_Immediate:
-				case CT_Editor:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-					break;
-				}
-			}
-
 			this->SetFocus();
 
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);

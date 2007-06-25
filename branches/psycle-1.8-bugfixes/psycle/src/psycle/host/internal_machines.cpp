@@ -3,6 +3,7 @@
 #include "Configuration.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
+#include "AudioDriver.hpp"
 
 namespace psycle
 {
@@ -11,6 +12,7 @@ namespace psycle
 
 		char* Dummy::_psName = "DummyPlug";
 		char* DuplicatorMac::_psName = "Dupe it!";
+		char* AudioRecorder::_psName = "Recorder";
 		char* Mixer::_psName = "Mixer";
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,10 +144,10 @@ namespace psycle
 					{
 						AllocateVoice(channel,i);
 						PatternEntry pTemp = *pData;
-						if ( pTemp._note < 120 )
+						if ( pTemp._note < notecommands::release )
 						{
 							int note = pTemp._note+noteOffset[i];
-							if ( note>=120) note=119;
+							if ( note>=notecommands::release) note=119;
 							else if (note<0 ) note=0;
 							pTemp._note=(compiler::uint8)note;
 						}
@@ -154,7 +156,7 @@ namespace psycle
 						if (Global::_pSong->_pMachine[macOutput[i]] != this) 
 						{
 							Global::_pSong->_pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
-							if (pTemp._note >= 120 )
+							if (pTemp._note >= notecommands::release )
 							{
 								DeallocateVoice(channel,i);
 							}
@@ -267,8 +269,69 @@ namespace psycle
 			pFile->Write(&noteOffset,sizeof noteOffset);
 		}
 
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// AudioRecorder
 
-
+		AudioRecorder::AudioRecorder(int index)
+		{
+			_macIndex = index;
+			_numPars = 0;
+			_type = MACH_RECORDER;
+			_mode = MACHMODE_GENERATOR;
+			sprintf(_editName, _psName);
+			_initialized=false;
+			_captureidx=0;
+			pleftorig=_pSamplesL;
+			prightorig=_pSamplesR;
+			_gainvol=1.0f;
+		}
+		AudioRecorder::~AudioRecorder()
+		{
+			AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+			if (_initialized) mydriver.RemoveCapturePort(_captureidx);
+			_pSamplesL=pleftorig;
+			_pSamplesR=prightorig;
+		}
+		void AudioRecorder::Init(void)
+		{
+			Machine::Init();
+			if (!_initialized)
+			{
+				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+				mydriver.AddCapturePort(_captureidx);
+				_initialized=true;
+			}
+		}
+		void AudioRecorder::Work(int numSamples)
+		{
+			AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+			mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
+			// prevent crashing if the audio driver is not working.
+			if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
+			dsp::Mul(_pSamplesL,numSamples,_gainvol);
+			dsp::Mul(_pSamplesR,numSamples,_gainvol);
+			Machine::SetVolumeCounter(numSamples);
+			if ( Global::configuration().autoStopMachines )
+			{
+				if (_volumeCounter < 8.0f)
+				{
+					_volumeCounter = 0.0f;
+					_volumeDisplay = 0;
+					Standby(true);
+				}
+				else Standby(false);
+			}
+			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			_cpuCost = 1;
+			_worked = true;
+		}
+		bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
+		{
+			return false;
+		}
+		void AudioRecorder::SaveSpecificChunk(RiffFile * pFile)
+		{
+		}
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -290,9 +353,13 @@ namespace psycle
 		void Mixer::Init()
 		{
 			Machine::Init();
-			_outGain=1.0f;
-			_wetmix=false;
+			thegrid.Init(_inputCon);
 
+
+
+
+
+			solocolumn_=-1;
 			for (int j=0;j<MAX_CONNECTIONS;j++)
 			{
 				_sendGrid[j][mix]=1.0f;
@@ -307,6 +374,9 @@ namespace psycle
 				_mutestate[j*2]=false;
 				_mutestate[j*2+1]=false;
 			}
+
+
+
 		}
 
 		void Mixer::Tick( int channel,PatternEntry* pData)
@@ -336,25 +406,19 @@ namespace psycle
 			// Step Two, prepare input signals for the Send Fx, and make them work
 			FxSend(numSamples);
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
-			if(!_mute && !Standby() )
-			{
-				cpu::cycles_type cost = cpu::cycles();
-				Mix(numSamples);
-				Machine::SetVolumeCounter(numSamples);
-				if ( Global::configuration().autoStopMachines )
-				{
-					if (_volumeCounter < 8.0f)
-					{
-						_volumeCounter = 0.0f;
-						_volumeDisplay = 0;
-						Standby(true);
-					}
-					else Standby(false);
-				}
-				_cpuCost += cpu::cycles() - cost;
-			}
-
 			cpu::cycles_type cost = cpu::cycles();
+			Mix(numSamples);
+			Machine::SetVolumeCounter(numSamples);
+			if ( Global::configuration().autoStopMachines )
+			{
+				if (_volumeCounter < 8.0f)
+				{
+					_volumeCounter = 0.0f;
+					_volumeDisplay = 0;
+					Standby(true);
+				}
+				else Standby(false);
+			}
 			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 			_cpuCost += cpu::cycles() - cost;
 
@@ -382,10 +446,10 @@ namespace psycle
 										Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 										if (pInMachine)
 										{
-											if(!pInMachine->_mute && !pInMachine->Standby() && _sendGrid[j][send0+i]!= 0.0f)
+											if(!pInMachine->_mute && !pInMachine->Standby() && _sendGrid[j][send1+i]!= 0.0f)
 											{
-												dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
-												dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
+												dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send1+i]);
+												dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send1+i]);
 											}
 										}
 									}
@@ -520,7 +584,7 @@ namespace psycle
 
 				for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
 				{
-					_sendGrid[c][send0+wireIndex]*=_returnVolMulti[wireIndex];
+					_sendGrid[c][send1+wireIndex]*=_returnVolMulti[wireIndex];
 				}
 			}
 		}
@@ -554,7 +618,30 @@ namespace psycle
 				_sendValid[wireIndex]=false;
 			}
 		}
-
+		void Mixer::DeleteWires()
+		{
+			Machine::DeleteWires();
+			Machine *iMac;
+			for(int w=0; w<MAX_CONNECTIONS; w++)
+			{
+				// Checking send/return Wires
+				if(_sendValid[w])
+				{
+					if((_send[w] >= 0) && (_send[w] < MAX_MACHINES))
+					{
+						iMac = Global::_pSong->_pMachine[_send[w]];
+						if (iMac)
+						{
+							int wix = iMac->FindOutputWire(_macIndex);
+							if (wix >=0)
+							{
+								iMac->DeleteOutputWireIndex(wix);
+							}
+						}
+					}
+				}
+			}
+		}
 		std::string Mixer::GetAudioInputName(int port)
 		{
 			std::string rettxt;
@@ -564,7 +651,7 @@ namespace psycle
 				rettxt += ('0'+port-chan1);
 				return rettxt;
 			}
-			else if ( port <= return12)
+			else if ( port < returnmax)
 			{
 				rettxt = "Return ";
 				rettxt += ('0'+port-return1);
@@ -587,7 +674,9 @@ namespace psycle
 			}
 			return cols==0?1:cols;
 		}
-
+		void Mixer::GetParamRange(int numparam, int &minval, int &maxval)
+		{
+		}
 		void Mixer::GetParamName(int numparam,char *name)
 		{
 			int channel=numparam/16; // channel E is input level and channel F is "fx's" level.
@@ -604,7 +693,7 @@ namespace psycle
 			else if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
 			{
 				channel--;
-				if ( _inputCon[channel] && (send==mix || SendValid(send-send0)))
+				if ( _inputCon[channel] && (send==mix || SendValid(send-send1)))
 				{
 					if ( send == mix )sprintf(name,"Channel %d - Mix",channel+1);
 					else sprintf(name,"Channel %d - Send %d",channel+1,send);
@@ -614,9 +703,9 @@ namespace psycle
 			else if  ( send == 0){ name[0] = '\0'; return; }
 			else
 			{
-				send-=send0;
-				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(name,"Input level Chn %02d",send+send0);
-				else if ( channel == 0x0F && send < MAX_CONNECTIONS && SendValid(send)) sprintf(name,"Input level Ret %02d",send+send0);
+				send-=send1;
+				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(name,"Input level Chn %02d",send+send1);
+				else if ( channel == 0x0F && send < MAX_CONNECTIONS && SendValid(send)) sprintf(name,"Input level Ret %02d",send+send1);
 				else name[0] = '\0';
 			}
 		}
@@ -633,16 +722,16 @@ namespace psycle
 			else if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
 			{
 				channel--;
-				if ( _inputCon[channel] && (send==mix || SendValid(send-send0)))
+				if ( _inputCon[channel] && (send==mix || SendValid(send-send1)))
 				{
-					return (int)(_sendGrid[channel][send]*100.0f/_returnVolMulti[send-send0]);
+					return (int)(_sendGrid[channel][send]*100.0f/_returnVolMulti[send-send1]);
 				}
 				else return 0;
 			}
 			else if  ( send == 0) return 0;
 			else
 			{
-				send-=send0;
+				send-=send1;
 				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) return (int)(_inputConVol[send]*_wireMultiplier[send]*100.0f);
 				else if ( channel == 0x0F && send < MAX_CONNECTIONS && SendValid(send)) return (int)(_returnVol[send]*_returnVolMulti[send]*100.0f);
 				else return 0;
@@ -661,16 +750,16 @@ namespace psycle
 			else if ( channel <= MAX_CONNECTIONS && send <= MAX_CONNECTIONS)
 			{
 				channel--;
-				if ( _inputCon[channel] && (send==mix || SendValid(send-send0)))
+				if ( _inputCon[channel] && (send==mix || SendValid(send-send1)))
 				{
-					sprintf(parVal,"%.01fdB",dsp::dB(_sendGrid[channel][send]/_returnVolMulti[send-send0]));
+					sprintf(parVal,"%.01fdB",dsp::dB(_sendGrid[channel][send]/_returnVolMulti[send-send1]));
 				}
 				else  parVal[0] = '\0';
 			}
 			else if  ( send == 0) { parVal[0] = '\0'; return; }
 			else
 			{
-				send-=send0;
+				send-=send1;
 				if ( channel == 0x0E && send < MAX_CONNECTIONS && _inputCon[send]) sprintf(parVal,"%.01fdB",dsp::dB(_inputConVol[send]*_wireMultiplier[send]));
 				else if ( channel == 0x0F && send < MAX_CONNECTIONS && SendValid(send)) sprintf(parVal,"%.01fdB",dsp::dB(_returnVol[send]*_returnVolMulti[send]));
 				else parVal[0] = '\0';
@@ -692,7 +781,7 @@ namespace psycle
 				else if (send == 15) _masterGain = value>4?4:value;
 				else
 				{
-					send-=send0;
+					send-=send1;
 					if ( send < MAX_CONNECTIONS)
 					{
 						if ( value>100 ) value=100;
@@ -704,19 +793,19 @@ namespace psycle
 				_outGain=_masterVolume/255.0f*_masterGain;
 				return true;
 			}
-			if ( channel <= MAX_CONNECTIONS && send-send0 < MAX_CONNECTIONS)
+			if ( channel <= MAX_CONNECTIONS && send-send1 < MAX_CONNECTIONS)
 			{
 				channel--;
 				if (!_inputCon[channel]) return false;
 				
 				if (send==mix) _sendGrid[channel][mix]=value/100.0f;
-				else if (SendValid(send-send0))
+				else if (SendValid(send-send1))
 				{
-					_sendGrid[channel][send]=value/100.0f*_returnVolMulti[send-send0];
+					_sendGrid[channel][send]=value/100.0f*_returnVolMulti[send-send1];
 				}
 				else if (send == solo)
 				{
-					_solocolumn=channel+1;
+					solocolumn_=channel+1;
 				}
 				else if (send == mute)
 				{
@@ -742,45 +831,6 @@ namespace psycle
 			return false;
 		}
 
-		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
-		{
-			std::uint32_t size;
-			pFile->Read(&size,sizeof(size));
-			pFile->Read(&_outGain,sizeof(_outGain));
-			pFile->Read(_sendValid,sizeof(_sendValid));
-			pFile->Read(_send,sizeof(_send));
-			pFile->Read(_sendGrid,sizeof(_sendGrid));
-			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
-			/// returnvolmulti should be calculated by the loader.
-			pFile->Read(_returnVol,sizeof(_returnVol));
-			pFile->Read(_returnVolMulti,sizeof(_returnVolMulti));
-			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
-			{
-				_sendGrid[j][i+send0]*=_returnVolMulti[i];
-			}
-			return true;
-		}
-
-		void Mixer::SaveSpecificChunk(RiffFile* pFile)
-		{
-			float sendGridTmp[MAX_CONNECTIONS][MAX_CONNECTIONS+1];
-			memcpy(sendGridTmp,_sendGrid,sizeof(_sendGrid));
-			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
-			{
-				sendGridTmp[j][i+send0]/=_returnVolMulti[i];
-			}
-			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _returnVol + sizeof _returnVolMulti + sizeof _sendValid + sizeof _outGain);
-			pFile->Write(&size,sizeof(size));
-			pFile->Write(&_outGain,sizeof(_outGain));
-			pFile->Write(_sendValid,sizeof(_sendValid));
-			pFile->Write(_send,sizeof(_send));
-			pFile->Write(sendGridTmp,sizeof(sendGridTmp));
-			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
-			/// returnvolmulti should be calculated by the loader.
-			pFile->Write(_returnVol,sizeof(_returnVol));
-			pFile->Write(_returnVolMulti,sizeof(_returnVolMulti));
-		}
-
 		float Mixer::VuChan(int idx)
 		{
 			float vol;
@@ -795,5 +845,46 @@ namespace psycle
 			if ( SendValid(idx) ) return (Global::song()._pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
 			return 0.0f;
 		}
+
+		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			std::uint32_t size;
+			pFile->Read(&size,sizeof(size));
+			pFile->Read(&_outGain,sizeof(_outGain));
+			pFile->Read(_sendValid,sizeof(_sendValid));
+			pFile->Read(_send,sizeof(_send));
+			pFile->Read(_sendGrid,sizeof(_sendGrid));
+			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
+			/// returnvolmulti should be calculated by the loader.
+			pFile->Read(_returnVol,sizeof(_returnVol));
+			pFile->Read(_returnVolMulti,sizeof(_returnVolMulti));
+			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
+			{
+				_sendGrid[j][i+send1]*=_returnVolMulti[i];
+			}
+			return true;
+		}
+
+		void Mixer::SaveSpecificChunk(RiffFile* pFile)
+		{
+			float sendGridTmp[MAX_CONNECTIONS][MAX_CONNECTIONS+1];
+			memcpy(sendGridTmp,_sendGrid,sizeof(_sendGrid));
+			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
+			{
+				sendGridTmp[j][i+send1]/=_returnVolMulti[i];
+			}
+			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _returnVol + sizeof _returnVolMulti + sizeof _sendValid + sizeof _outGain);
+			pFile->Write(&size,sizeof(size));
+			pFile->Write(&_outGain,sizeof(_outGain));
+			pFile->Write(_sendValid,sizeof(_sendValid));
+			pFile->Write(_send,sizeof(_send));
+			pFile->Write(sendGridTmp,sizeof(sendGridTmp));
+			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
+			/// returnvolmulti should be calculated by the loader.
+			pFile->Write(_returnVol,sizeof(_returnVol));
+			pFile->Write(_returnVolMulti,sizeof(_returnVolMulti));
+		}
+
+
 	}
 }

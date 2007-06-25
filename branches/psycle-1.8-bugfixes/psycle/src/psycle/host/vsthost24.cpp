@@ -308,11 +308,12 @@ namespace psycle
 				bool b = ProgramIsChunk();
 				if(b)
 				{
-					MainsChanged(false);
+					// can't do this! we have  a thing called "autosave" and everything is stopped then.
+//					MainsChanged(false);
 					count=0;
 					chunksize = GetChunk((void**)&pData);
 					size+=chunksize;
-					MainsChanged(true);
+//					MainsChanged(true);
 				}
 				else
 				{
@@ -471,12 +472,12 @@ namespace psycle
 						}
 */
 #endif
+
 						mevents.events[q] = (VstEvent*) &midievent[q];
 					}
-
-					queue_size = 0;
 					//Finally Send the events.
-					ProcessEvents(reinterpret_cast<VstEvents*>(&mevents));
+					queue_size = 0;
+					WantsMidi(ProcessEvents(reinterpret_cast<VstEvents*>(&mevents)));
 				}
 			}
 
@@ -487,7 +488,7 @@ namespace psycle
 					{
 						AddMIDI(pData->_inst, pData->_cmd, pData->_parameter);
 					}
-					else if(note < 120) // Note on
+					else if(note < notecommands::release) // Note on
 					{
 						if(pData->_cmd == 0x10) // _OLD_ MIDI Command
 						{
@@ -508,7 +509,7 @@ namespace psycle
 							else AddNoteOn(channel, note, 127, pData->_inst & 0x0F);
 						}
 					}
-					else if(note == 120) // Note Off.
+					else if(note == notecommands::release) // Note Off. 
 					{
 						if(pData->_inst == 0xFF) AddNoteOff(channel);
 						else AddNoteOff(channel, pData->_inst & 0x0F);
@@ -580,7 +581,7 @@ namespace psycle
 							// o_O`
 						}
 					}
-					SendMidi();
+					if (WantsMidi()) SendMidi();
 					try
 					{
 						if(numInputs() == 1)

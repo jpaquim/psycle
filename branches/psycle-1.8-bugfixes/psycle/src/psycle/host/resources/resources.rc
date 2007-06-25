@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -192,7 +192,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Machine View\tF2",            ID_MACHINEVIEW
         MENUITEM "Pattern Editor\tF3",          ID_PATTERNVIEW
-        MENUITEM "Pattern Sequencer\tF4",       ID_SHOWPSEQ
         MENUITEM SEPARATOR
         MENUITEM "Add machine\tF9",             ID_NEWMACHINE
         MENUITEM "Instrument Editor\tF10",      ID_VIEW_INSTRUMENTEDITOR
@@ -449,34 +448,34 @@ BEGIN
     PUSHBUTTON      "Gear Rack",IDC_GEAR_RACK,190,2,43,12,0,WS_EX_STATICEDGE
 END
 
-IDD_WAVEOUTCONFIG DIALOGEX 0, 0, 272, 78
+IDD_WAVEOUTCONFIG DIALOGEX 0, 0, 278, 81
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle MME Audio Driver Configuration"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    LTEXT           "Device:",IDC_STATIC,11,5,26,13,SS_CENTERIMAGE
-    COMBOBOX        IDC_CONFIG_DEVICE,45,5,167,137,CBS_DROPDOWNLIST | 
+    LTEXT           "Device:",IDC_STATIC,13,9,26,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_CONFIG_DEVICE,45,7,167,137,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Audio Settings",IDC_STATIC,4,20,264,54
-    LTEXT           "Samplerate:",IDC_STATIC,24,33,38,8
-    COMBOBOX        IDC_CONFIG_SAMPLERATE,64,31,65,140,CBS_DROPDOWNLIST | 
+    GROUPBOX        "Audio Settings",IDC_STATIC,6,24,265,49
+    LTEXT           "Samplerate:",IDC_STATIC,19,35,38,8
+    COMBOBOX        IDC_CONFIG_SAMPLERATE,62,33,65,140,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Buffers:",IDC_STATIC,16,54,25,8
-    EDITTEXT        IDC_CONFIG_BUFNUM,48,53,31,12,ES_AUTOHSCROLL
+    LTEXT           "Buffers:",IDC_STATIC,32,54,25,8
+    EDITTEXT        IDC_CONFIG_BUFNUM,62,53,31,12,ES_AUTOHSCROLL
     CONTROL         "Spin1",IDC_CONFIG_BUFNUM_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,68,53,11,12
-    LTEXT           "*",IDC_STATIC,83,55,8,8
-    EDITTEXT        IDC_CONFIG_BUFSIZE,91,52,47,12,ES_AUTOHSCROLL
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,82,53,11,12
+    LTEXT           "*",IDC_STATIC,97,55,8,8
+    EDITTEXT        IDC_CONFIG_BUFSIZE,105,52,47,12,ES_AUTOHSCROLL
     CONTROL         "Spin2",IDC_CONFIG_BUFSIZE_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,127,52,11,12
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,141,52,11,12
     CONTROL         "&Dither",IDC_CONFIG_DITHER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,152,33,35,10
-    LTEXT           "Latency: 12345ms",IDC_CONFIG_LATENCY,143,54,60,8
-    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,208,34,35,30
-    DEFPUSHBUTTON   "OK",IDOK,217,5,50,14
+                    WS_TABSTOP,161,35,35,10
+    LTEXT           "Latency: 12345ms",IDC_CONFIG_LATENCY,161,54,60,8
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,230,33,35,30
+    DEFPUSHBUTTON   "OK",IDOK,221,7,50,14
 END
 
 IDD_INFO DIALOGEX 0, 0, 316, 238
@@ -535,24 +534,24 @@ BEGIN
     PUSHBUTTON      "%",IDC_VOLUME_PER,177,147,34,11,NOT WS_TABSTOP
 END
 
-IDD_MACPROP DIALOGEX 0, 0, 190, 70
+IDD_MACPROP DIALOGEX 0, 0, 173, 60
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    CTEXT           "Name",IDC_STATIC,5,8,19,8,SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT1,30,5,88,12,ES_AUTOHSCROLL
-    CONTROL         "Mute",IDC_MUTE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,30,
-                    30,33,12
+    CTEXT           "Name",IDC_STATIC,5,7,19,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT1,29,5,138,12,ES_AUTOHSCROLL
+    CONTROL         "Mute",IDC_MUTE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,47,
+                    23,33,12
     CONTROL         "Bypass",IDC_BYPASS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,68,30,39,12
-    CONTROL         "Solo",IDC_SOLO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,73,
-                    30,29,12
-    DEFPUSHBUTTON   "OK",IDOK,5,49,179,16
-    PUSHBUTTON      "Delete Machine",IDC_BUTTON1,123,5,61,15
-    PUSHBUTTON      "Clone Machine",IDC_CLONE,123,20,61,15
-    PUSHBUTTON      "Replace",IDC_REPLACEMAC,123,35,61,14
+                    WS_TABSTOP,85,23,39,12
+    CONTROL         "Solo",IDC_SOLO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,90,
+                    23,29,12
+    DEFPUSHBUTTON   "OK",IDOK,127,39,40,15
+    PUSHBUTTON      "Delete",IDC_BUTTON1,5,39,40,15
+    PUSHBUTTON      "Clone",IDC_CLONE,46,39,40,15
+    PUSHBUTTON      "Replace",IDC_REPLACEMAC,87,39,40,15
 END
 
 IDD_PATDLG DIALOGEX 0, 0, 184, 49
@@ -1391,10 +1390,10 @@ EXSTYLE WS_EX_TOOLWINDOW
 CAPTION "Psycle DirectX Audio Driver Configuration"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    LTEXT           "Device:",IDC_STATIC,11,5,26,13,SS_CENTERIMAGE
-    COMBOBOX        IDC_DSOUND_DEVICE,43,5,167,161,CBS_DROPDOWNLIST | 
+    LTEXT           "Device:",IDC_STATIC,12,7,26,13,SS_CENTERIMAGE
+    COMBOBOX        IDC_DSOUND_DEVICE,44,7,167,161,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         132,IDC_STATIC,"Static",SS_BITMAP,189,21,21,20,
+    CONTROL         132,IDC_STATIC,"Static",SS_BITMAP,237,49,21,20,
                     WS_EX_TRANSPARENT
     GROUPBOX        "Audio properties",IDC_STATIC,5,42,263,67
     RTEXT           "Samplerate:",IDC_STATIC,14,58,45,8,SS_CENTERIMAGE
@@ -1416,8 +1415,8 @@ BEGIN
                     WS_TABSTOP,118,74,60,10
     LTEXT           "Latency: 12345 ms",IDC_DSOUND_LATENCY,164,89,64,8,
                     SS_CENTERIMAGE
-    DEFPUSHBUTTON   "OK",IDOK,218,5,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,218,22,50,14
+    DEFPUSHBUTTON   "OK",IDOK,217,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,217,24,50,14
 END
 
 IDD_OUTPUT DIALOG  0, 0, 286, 122
@@ -2397,6 +2396,17 @@ BEGIN
                     BS_AUTORADIOBUTTON,87,65,49,10
 END
 
+IDD_MACWAVEIN DIALOGEX 0, 0, 186, 95
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_COMBO1,7,24,172,64,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Capture device:",IDC_STATIC,7,15,52,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2420,10 +2430,10 @@ BEGIN
 
     IDD_WAVEOUTCONFIG, DIALOG
     BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 265
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 271
         TOPMARGIN, 7
-        BOTTOMMARGIN, 75
+        BOTTOMMARGIN, 73
     END
 
     IDD_INFO, DIALOG
@@ -2445,9 +2455,9 @@ BEGIN
     IDD_MACPROP, DIALOG
     BEGIN
         LEFTMARGIN, 5
-        RIGHTMARGIN, 184
+        RIGHTMARGIN, 167
         TOPMARGIN, 5
-        BOTTOMMARGIN, 65
+        BOTTOMMARGIN, 55
     END
 
     IDD_PATDLG, DIALOG
@@ -2751,6 +2761,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 101
     END
+
+    IDD_MACWAVEIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2931,7 +2949,6 @@ BEGIN
     SEPARATOR
     BUTTON      ID_MACHINEVIEW
     BUTTON      ID_PATTERNVIEW
-    BUTTON      ID_SHOWPSEQ
     SEPARATOR
     BUTTON      ID_NEWMACHINE
     BUTTON      ID_VIEW_INSTRUMENTEDITOR
@@ -3259,7 +3276,7 @@ BEGIN
     ID_ABOUT_ABOUTVST       "Shows an about box about this plugin."
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

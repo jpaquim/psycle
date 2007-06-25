@@ -99,6 +99,19 @@ namespace psycle
 			}
 			while(--c);
 		}
+		void AudioDriver::DeQuantizeAndDeinterlace(int *pin, float *poutleft,float *poutright,int c)
+		{
+//			const float multiplier = (_bitDepth==24?0.00000011920928955078125f:(_bitDepth==16?0.000030517578125f:0.0078125f));
+			do
+			{
+				*poutleft++ = static_cast<short int>(*pin&0xFFFF);
+				*poutright++ = static_cast<short int>((*pin&0xFFFF0000)>>16);
+//				*poutleft++ = *(pin++)*multiplier;
+//				*poutright++ = *(pin++)*multiplier;
+				pin++;
+			}
+			while(--c);
+		}
 	}
 }
 

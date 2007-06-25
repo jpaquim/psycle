@@ -21,8 +21,8 @@ Legend
 item count
 ##########
 
-	rough bug count: ~30
-	aditional known vst bugs/buggy vsts: ~27
+	rough bug count: 28
+	aditional known vst bugs/buggy vsts: ~22
 
 
 
@@ -207,8 +207,6 @@ GUI (machines)
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
 !	VST/Native machine Windows : ESC = close [Problem: can't close within the CWnd!!!]
-!	Option to hide Parameters in VST GUI.
-!	Add Presets in a "tab" under Parameters (easy switching/testing)!
 +	<_sue_> native mahcines gui should have sliders...it would change a lot....
 		<pooplog> sliders, switches, and owner draw controls i say?
 +	Directories in "Add new machine" (Sorting with directories)
@@ -226,7 +224,6 @@ Player Engine
 +FF?	DirectX effects, intstruments
 ++FF	DocBexter: (machine interface) and it urgently needs 3. control/read of parameters of other
 		machines ....
-+	song repeat (asked by Vir|us)
 +	alk: global Delay Trigger, that affects every note (not just the one on this channel)
 		[this seems hard, because the player will have to scan all tracks for this command, then go back and
 		play the tracks
@@ -250,8 +247,6 @@ Vsts
 		will change its gui to rack view (wich is a smaller window). close the plugs gui. reopen the gui; 
 		the plug will crash with : "Acess violation at adress 0047F99C in module 'psycle.exe'. 
 		Read of adress 00000038" This crash happens with more plugs wich change the size of their gui.
-** 	When you Load a VST/VSTi preset file using a plug's built in preset manager, the preset names above 
-		the parameters box are not updated.
 ** 	Biskmark BS-16 VSTI (soundfont player) (and prolly BS-1 also) - when loading a track using BS-16 i 
 		get a window saying : "Error : file open". this windows has an "ok" button bellow. i click "ok" 
 		and the soundfont is loaded into BS-16. if i use 3 soundfonts in a song i have to click "ok" 3 
@@ -259,11 +254,8 @@ Vsts
 		(i think, note really sure of the ver). Now it reapeared with the new file format. This is the only 
 		bug im reporting that only happens in the latest beta 1.7.3 [May-16-2003]. all the previous
 		reports happened since previous versions.
-***	Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra and JAL7OH-)
-		[Fix:Basically, make ONLY .fxb for VST's.]
 ** 	BLOCKFISH crashes on connect
 ** 	DashSynthesis daAlfa2k VSTi v1.28b - crashes with user breakpoints and access violation on instance in debug build
-** 	ticky clav 1.1 causes random access violation crashes? - now i am not sure if it is ticky clav
 **	 phatmatic causes crashes when you open the gui after loading a sample into it.
 		[ also, when opening/closing the directory pane, it tries to change the window size and does a poor job.
 		  after a few tries it fucks up.  if you re-open it after it has fucked up, it crashes. ]
@@ -287,9 +279,6 @@ Vsts
 **	 ni pro53 sometimes crashes when loading a song that uses it.
 **	 ni spektral delay 1.0 crashes on effClose or effEditIdle messages.  notice a trend with NI plugins yet?
 **	 stylus locks up on fast songs, with looping sound
-*	JAL7OH- patches in the preset editor should not be sorted by name - most banks (fxb) are already
-		sorted by the authors.
-		[ should be resolved when using .fxb format directly and the new FrameWindow ]
 *	JAL7OH- vsampler3 vsti doesnt draw its popups and undocked windows properly
 		 (im experiencing the same problems with all previous releases alpha1,2 and beta1,2 of vsampler)
 *	New Note in Quadrasid does not reinitialize the Envelope.
@@ -320,9 +309,6 @@ MIDI related
 	binding midi routing presets to machines; (possibly: save the presets in the psy)
 ---------- nolwenn -------------
 
-I tested the "record midi raw data as mcm" in psycle 1.7.6.2 :
-Some hardware devices send continuous MIDI messages : midi cc FE "active sensing" , a cyclic midi test. So the pattern are continuously filled with mcmFE000000, preventing the insertion of normal cc tweaking .
-Psycle have to implement simple MIDI filtering input (i'm not into coding & i hope this is not difficult to do)
 About the MIDI CC : now that they are transmitted directly as MCM it could be nice to replace the old "midi controllers" setting windows and implement a MIDI learn (like in chainer standalone) for VSTs that are not cc mapped.
 
 ======================================
@@ -330,17 +316,6 @@ Interface (contains pattern stuff too)
 ======================================
 *	If the song directory is incorrect/invalid, cloning machines doesn't work
 		[one option is to not store a .psy, and work completely in memory for cloning]
-**	<Erodix> theres one little thing.. when psycle is playing and i double-click an song, a new
-	psycle opens..
-	[ DDE ? mmmm... ]
-	<Ksh>
-	Can someone at last do something with the little disturbing behaviour of opening new Psycle instances for files opened from the command line? If DDE is too complex then you could implement something very 	simple and still effective:
-	- when Psycle runs, it pops a mutex
-	- when another instance is launched, it sees that there is already one opened because there is already a mutex
-	- then it	 passes the command line arguments to the first instance by throwing a windows message and exits
-	- the first one receives the message and optionally asks user: "Save changes?", and then opens the new file
-	Isn't that simple?
-
 * <bdzld> the icon for play doesn reset the status if the stream doesnt open <pooplog> like of WME is busy or something?
 	<bdzld> yep, or if the sample rate is invalid
 * <alk> the bug where the pattern ed loses focus * what got the focus was the sequencer button (clone I think)
@@ -351,9 +326,6 @@ Interface (contains pattern stuff too)
 	in the "note" column.
 	[Is it useful to enter numbers while playing and follow song? what about just adding notes
 	 wherever the position of the cursor is?]
-*	<alk> in the master the vols dont match up with the wire vol, seems to be 0.1 bigger
-	[Quantization errors, due to that the sliders have a range of 256. maybe I should make the
-	 range bigger]
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
@@ -365,15 +337,14 @@ Interface (contains pattern stuff too)
 +	<sampler> Well, i've been playing and changing default hotkeys and now i think it would be good
 		enhance this feature.  I think the hotkeys list/dialog should show them in a better way, various
 		types of sorting, show the complete keys assigned (larger textbox)  , allow printing it....
-+	<Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
++	James says: i have an idea for that actually... seeing as there are so many configurable
+		keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight
+		what was assigned to it+	<Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
 +	<Alk> +alt to make the transposing only effect current machine/sample
 		i.e. ctrl+alt+f11 = transpose current gen/sample down 1 note
 		ctrl+alt+shift+f12 = transpose current gen/sample up 1 octave
 +	<dp|away> you could setup some standard buffers you know are solid and do like setting low -> high
 		and shield the user from the nastiness
-+	James says: i have an idea for that actually... seeing as there are so many configurable
-		keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight
-		what was assigned to it
 +	<alk_> the 'Apply' button is not implemented in the config dialog
 +	<alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
 *	<_sue_> centering the open file menus....
@@ -405,8 +376,6 @@ Driver Issues
 *	Output gets weird after a bit and start playing all crackly and doubletime
 		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
 		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
-*	DirectSound Output is a bit buggy.Crashes and bad sound reported.
-		[ still ? ]
 * 	asio float MSB order unsupported
 
 =========
@@ -462,7 +431,6 @@ Machines
 Audio/Control
 =============
 
-	+ audio record support (Like, from microphone)
 	+ "MIDI Controlling <-> Machine <-> Machine" Interface = MIDI mapping
 		  (allow to map midi commands to change different parameters)
 	+ Ogg/Winamp Plugin export?

@@ -364,6 +364,7 @@ namespace seib {
 			bool bWantMidi;
 			bool bShellPlugin;
 			bool bCanBypass;
+			bool bMainsState;
 
 
 			// overridables
@@ -477,7 +478,7 @@ namespace seib {
 			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu); }
 			inline void SetSampleRate(float fSampleRate) { Dispatch(effSetSampleRate, 0, 0, 0, fSampleRate); }
 			inline void SetBlockSize(VstIntPtr value) { Dispatch(effSetBlockSize, 0, value); }
-			inline void MainsChanged(bool bOn) { Dispatch(effMainsChanged, 0, bOn); }
+			inline void MainsChanged(bool bOn) { if (bOn != bMainsState) { Dispatch(effMainsChanged, 0, bOn); bMainsState=bOn; }}
 			inline bool EditGetRect(ERect **ptr) { return Dispatch(effEditGetRect, 0, 0, ptr)==1?true:false; }
 			inline void EditOpen(void *ptr) { Dispatch(effEditOpen, 0, 0, ptr); bEditOpen = true; }
 			inline void EditClose() { Dispatch(effEditClose); bEditOpen = false; }

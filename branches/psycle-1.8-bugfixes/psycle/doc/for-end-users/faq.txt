@@ -30,7 +30,7 @@ A)	The problem with sublime is that you need to copy the file blwtbl.dll file (w
 	some extra data that sublime uses to create sounds, and if it doesn't find it, it can't load.
 	
 
-- Samples And The Sampler Machine -
+- Samples and the Sampler Machine -
 --------------------------------
 Q)	I've loaded a sample but it doesn't make any sound.
 

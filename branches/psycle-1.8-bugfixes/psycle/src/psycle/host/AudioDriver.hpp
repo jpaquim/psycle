@@ -28,6 +28,10 @@ namespace psycle
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context) {};
 			virtual void Reset(void) {};
 			virtual bool Enable(bool e) { return false; };	
+			virtual void GetCapturePorts(std::vector<std::string> &ports) { ports.resize(0); }
+			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples) { pleft=0; pright=0; return; };
+			virtual bool AddCapturePort(int idx){ return false; }; 
+			virtual bool RemoveCapturePort(int idx){ return false; };
 			virtual int GetWritePos() { return 0; };
 			virtual int GetPlayPos() { return 0; };
 			virtual int GetNumBuffers() { return _numBlocks; };
@@ -40,6 +44,7 @@ namespace psycle
 			virtual AudioDriverInfo* GetInfo() { return &_info; };
 			static void QuantizeWithDither(float *pin, int *piout, int c);
 			static void Quantize(float *pin, int *piout, int c);
+			static void DeQuantizeAndDeinterlace(int *pin, float *poutleft,float *poutright,int c);
 		public:
 			int _numBlocks;
 			int _blockSize;

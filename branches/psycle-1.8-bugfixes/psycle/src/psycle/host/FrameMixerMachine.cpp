@@ -10,7 +10,7 @@
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
 
-	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameWnd)
+	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)
 
 	int CFrameMixerMachine::Knob::height(28);
 	int CFrameMixerMachine::Knob::width(28);
@@ -21,7 +21,7 @@ NAMESPACE__BEGIN(host)
 	int CFrameMixerMachine::InfoLabel::width(32);
 	int CFrameMixerMachine::InfoLabel::height(28);
 
-	int CFrameMixerMachine::GraphSlider::height(140);
+	int CFrameMixerMachine::GraphSlider::height(214);
 	int CFrameMixerMachine::GraphSlider::width(28);
 	int CFrameMixerMachine::GraphSlider::knobheight(21);
 	int CFrameMixerMachine::GraphSlider::knobwidth(16);
@@ -134,7 +134,9 @@ NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::GraphSlider::DrawKnob(CDC *dc,int x, int y, float value)
 	{
-		int ypos = (1.0-value)*(height-knobheight);
+		float dbs = -0.0166666f * (((value!=0)?dsp::dB(value):-48.0f) -12.0f);
+		if (dbs > 1.0f) dbs = 1.0f;
+		int ypos = dbs*(height-knobheight);
 		dc->BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&knobDC,0,0,SRCCOPY);
 	}
 	bool  CFrameMixerMachine::GraphSlider::LButtonDown(UINT nFlags,int x,int y)
@@ -165,8 +167,8 @@ NAMESPACE__BEGIN(host)
 	void CFrameMixerMachine::VuMeter::Draw(CDC *dc,int x, int y, float value)
 	{
 		int ypos = (1-value)*height;
-		dc->BitBlt(x+7,y+19,width,ypos,&VuOff,0,0,SRCCOPY);
-		dc->BitBlt(x+7,y+19+ypos,width,height,&VuOn,0,ypos,SRCCOPY);
+		dc->BitBlt(x+7,y+35,width,ypos,&VuOff,0,0,SRCCOPY);
+		dc->BitBlt(x+7,y+35+ypos,width,height,&VuOn,0,ypos,SRCCOPY);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -521,7 +523,7 @@ NAMESPACE__BEGIN(host)
 	int CFrameMixerMachine::GetParamFromPos(int col,int row)
 	{
 		if ( col == Mixer::colmastervol) return 0;
-		if ( col < Mixer::chan12)
+		if ( col < Mixer::chanmax)
 		{
 			if (row < dry) return (col-Mixer::chan1+1)*0x10+(row-send1+1);
 			else if ( row==dry) return (col-Mixer::chan1+1)*0x10;

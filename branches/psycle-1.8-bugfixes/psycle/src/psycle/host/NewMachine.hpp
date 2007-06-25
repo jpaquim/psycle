@@ -115,7 +115,7 @@ NAMESPACE__BEGIN(psycle)
 			static std::map<std::string,std::string> VstNames;
 			bool bAllowChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
-			HTREEITEM hInt[5];
+			HTREEITEM hInt[6];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
 
 			afx_msg void OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult);

@@ -32,6 +32,8 @@ namespace psycle
 			_pBuffer(0),
 			_pCallback(0)
 		{
+			_capEnums.resize(0);
+			_capPorts.resize(0);
 		}
 
 		void DirectSound::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context)
@@ -41,6 +43,7 @@ namespace psycle
 			_running = false;
 			_hwnd = hwnd;
 			ReadConfig();
+			DirectSoundCaptureEnumerate(DSEnumCallback,&_capEnums);
 			_initialized = true;
 		}
 
@@ -159,6 +162,8 @@ namespace psycle
 			_highMark = _runningBufSize;
 
 			_pBuffer->Initialize(_pDs,&desc);
+			for (unsigned int i=0; i<_capPorts.size();i++)
+				CreateCapturePort(_capPorts[i]);
 
 			_event.ResetEvent();
 			_threadRun = true;
@@ -211,11 +216,121 @@ namespace psycle
 			_pBuffer = 0;
 			_pDs->Release();
 			_pDs = 0;
+			for(unsigned int i=0; i<_capPorts.size(); i++)
+			{
+				_capPorts[i]._pBuffer->Stop();
+				_capPorts[i]._pBuffer->Release();
+				_capPorts[i]._pDs->Release();
+				_capPorts[i]._pDs=0;
+				delete _capPorts[i].pleft;
+				delete _capPorts[i].pright;
+			}
+			_capPorts.resize(0);
 			_running = false;
 			// Release COM
 			CoUninitialize();
 
 			return true;
+		}
+
+		void DirectSound::GetCapturePorts(std::vector<std::string>&ports)
+		{
+			for (unsigned int i=0;i<_capEnums.size();i++) ports.push_back(_capEnums[i].portname);
+		}
+		BOOL CALLBACK DirectSound::DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext)
+		{
+			std::vector<PortEnums>* ports=static_cast<std::vector<PortEnums>*>(lpContext);
+			PortEnums port(lpGuid,lpcstrDescription);
+			ports->push_back(port);
+			return TRUE;
+		}
+		bool DirectSound::AddCapturePort(int idx)
+		{
+			bool isplaying = _playing;
+			for (unsigned int i=0;i<_capPorts.size();++i)
+			{
+				if (_capPorts[i]._pGuid == _capEnums[idx].guid ) return false;
+			}
+			PortCapt port;
+			port._pGuid = _capEnums[idx].guid;
+			if (isplaying)
+			{
+				Stop();
+			}
+			_capPorts.push_back(port);
+			if (isplaying)
+			{
+				return Start();
+			}
+			return true;
+		}
+		bool DirectSound::RemoveCapturePort(int idx)
+		{
+			bool restartplayback = false;
+			std::vector<PortCapt> newports;
+			for (unsigned int i=0;i<_capPorts.size();++i)
+			{
+				if (_capPorts[i]._pGuid == _capEnums[idx].guid )
+				{
+					if (_playing)
+					{
+						Stop();
+						restartplayback=true;
+					}
+				}
+				else newports.push_back(_capPorts[i]);
+			}
+			_capPorts = newports;
+			if (restartplayback) Start();
+			return true;
+		}
+		bool DirectSound::CreateCapturePort(PortCapt &port)
+		{
+			HRESULT hr;
+			//not try to open a port twice
+			if (port._pDs) return true;
+
+			// Create IDirectSoundCapture using the preferred capture device
+			if( FAILED( hr = DirectSoundCaptureCreate8( port._pGuid, &port._pDs, NULL ) ) )
+			{
+				Error(_T("Failed to create Capture DirectSound Device"));
+				return false;
+			}
+
+			// Create the capture buffer
+			DSCBUFFERDESC dscbd;
+			WAVEFORMATEX format;
+			// Set up wave format structure. 
+			ZeroMemory(&format, sizeof(WAVEFORMATEX));
+			format.wFormatTag = WAVE_FORMAT_PCM;
+			format.nChannels = 2;
+			format.wBitsPerSample = 16;//_bitDepth;
+			format.nSamplesPerSec = _samplesPerSec;
+			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
+			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
+			format.cbSize = 0;
+
+			ZeroMemory( &dscbd, sizeof(dscbd) );
+			dscbd.dwSize        = sizeof(dscbd);
+			dscbd.dwBufferBytes = _dsBufferSize;
+			dscbd.lpwfxFormat   = &format;
+
+			if( FAILED( hr = port._pDs->CreateCaptureBuffer( &dscbd, reinterpret_cast<LPDIRECTSOUNDCAPTUREBUFFER*>(&port._pBuffer), NULL ) ) )
+			{
+				Error(_T("Failed to create Capture DirectSound Buffer(s)"));
+				return false;
+			}
+			hr = port._pBuffer->Start(DSCBSTART_LOOPING);
+			port.pleft = new float[_dsBufferSize];
+			port.pright = new float[_dsBufferSize];
+			return true;
+		}
+
+		void DirectSound::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples)
+		{
+			*pleft=_capPorts[idx].pleft+_capPorts[idx]._machinepos;
+			*pright=_capPorts[idx].pright+_capPorts[idx]._machinepos;
+			_capPorts[idx]._machinepos+=numsamples;
 		}
 
 		bool DirectSound::WantsMoreBlocks()
@@ -243,6 +358,40 @@ namespace psycle
 
 		void DirectSound::DoBlocks()
 		{
+			// First, do the capture buffers so that audio is available to wavein machines.
+			for (unsigned int i =0; i < _capPorts.size(); i++)
+			{
+				int* pBlock1 , *pBlock2;
+				unsigned long blockSize1, blockSize2;
+				HRESULT hr = _capPorts[i]._pBuffer->Lock(_capPorts[i]._lowMark, _runningBufSize, 
+					(void**)&pBlock1, &blockSize1, 
+					(void**)&pBlock2, &blockSize2, 0);
+				if (DSERR_BUFFERLOST == hr) 
+				{ 
+					hr = _capPorts[i]._pBuffer->Lock(_capPorts[i]._lowMark, _runningBufSize, 
+						(void**)&pBlock1, &blockSize1, 
+						(void**)&pBlock2, &blockSize2, 0);
+				} 
+				if (SUCCEEDED(hr))
+				{ 
+					// Put the audio in our float buffers.
+					int numSamples = blockSize1 / GetSampleSize();
+					DeQuantizeAndDeinterlace(pBlock1, _capPorts[i].pleft,_capPorts[i].pright, numSamples);
+					_capPorts[i]._lowMark += blockSize1;
+					if (blockSize2 > 0)
+					{
+						DeQuantizeAndDeinterlace(pBlock2, _capPorts[i].pleft+numSamples,_capPorts[i].pright+numSamples, blockSize2 / GetSampleSize());
+						_lowMark += blockSize2;
+					}
+					// Release the data back to DirectSound. 
+					hr = _capPorts[i]._pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
+
+					if ( _capPorts[i]._lowMark >= _dsBufferSize ) _capPorts[i]._lowMark -= _dsBufferSize;
+				}
+				_capPorts[i]._machinepos=0;
+			}
+
+			// Next, proceeed with the generation of audio
 			int* pBlock1 , *pBlock2;
 			unsigned long blockSize1, blockSize2;
 			// Obtain write pointer. 

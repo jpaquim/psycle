@@ -55,31 +55,29 @@ namespace psycle
 		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
 		{
 			Machine* pMachine(0);
-			Master* pMaster(0);
-			Sampler* pSampler(0);
-			XMSampler* pXMSampler(0);
-			DuplicatorMac* pDuplicator(0);
-			Mixer* pMixer(0);
 			Plugin* pPlugin(0);
 			vst::plugin *vstPlug(0);
 			switch (type)
 			{
 			case MACH_MASTER:
 				if(_pMachine[MASTER_INDEX]) return false;
-				pMachine = pMaster = new Master(songIdx);
+				pMachine = new Master(songIdx);
 				songIdx = MASTER_INDEX;
 				break;
 			case MACH_SAMPLER:
-				pMachine = pSampler = new Sampler(songIdx);
+				pMachine = new Sampler(songIdx);
 				break;
 			case MACH_XMSAMPLER:
-				pMachine = pXMSampler = new XMSampler(songIdx);
+				pMachine = new XMSampler(songIdx);
 				break;
 			case MACH_DUPLICATOR:
-				pMachine = pDuplicator = new DuplicatorMac(songIdx);
+				pMachine = new DuplicatorMac(songIdx);
 				break;
 			case MACH_MIXER:
-				pMachine = pMixer = new Mixer(songIdx);
+				pMachine = new Mixer(songIdx);
+				break;
+			case MACH_RECORDER:
+				pMachine = new AudioRecorder(songIdx);
 				break;
 			case MACH_PLUGIN:
 				{
@@ -445,49 +443,13 @@ namespace psycle
 				#endif
 			#endif
 			Machine *iMac = _pMachine[mac];
-			Machine *iMac2;
 			if(iMac)
 			{
-				// Deleting the connections to/from other machines
-				for(int w=0; w<MAX_CONNECTIONS; w++)
-				{
-					// Checking In-Wires
-					if(iMac->_inputCon[w])
-					{
-						if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
-						{
-							iMac2 = _pMachine[iMac->_inputMachines[w]];
-							if (iMac2)
-							{
-								int wix = iMac2->FindOutputWire(mac);
-								if (wix >=0)
-								{
-									iMac2->DeleteOutputWireIndex(wix);
-								}
-							}
-						}
-					}
-					// Checking Out-Wires
-					if(iMac->_connection[w])
-					{
-						if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
-						{
-							iMac2 = _pMachine[iMac->_outputMachines[w]];
-							if (iMac2)
-							{
-								int wix = iMac2->FindInputWire(mac);
-								if(wix >=0 )
-								{
-									iMac2->DeleteInputWireIndex(wix);
-								}
-							}
-						}
-					}
-				}
+				iMac->DeleteWires();
+				if(mac == machineSoloed) machineSoloed = -1;
+				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
+				zapObject(_pMachine[mac]);
 			}
-			if(mac == machineSoloed) machineSoloed = -1;
-			// If it's a (Vst)Plugin, the destructor calls to release the underlying library
-			zapObject(_pMachine[mac]);
 		}
 
 		void Song::DeleteAllPatterns()
@@ -1304,7 +1266,7 @@ namespace psycle
 				bool _machineActive[128];
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
-//				New();
+				New();
 				char name_[129]; char author_[65]; char comments_[65536];
 				pFile->Read(name_, 32);
 				pFile->Read(author_, 32);

@@ -237,6 +237,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
+				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[selectedClass],TVGN_CARET);
 			}
 			else
@@ -295,6 +296,7 @@ NAMESPACE__BEGIN(psycle)
 				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
+				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[selectedMode],TVGN_CARET);
 			}
 			Outputmachine = -1;
@@ -320,7 +322,7 @@ NAMESPACE__BEGIN(psycle)
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
-			if (tHand == hInt[1])
+			else if (tHand == hInt[1])
 			{
 				m_nameLabel.SetWindowText("Dummy");
 				m_descLabel.SetWindowText("Replaces non-existant plugins");
@@ -333,7 +335,7 @@ NAMESPACE__BEGIN(psycle)
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
-			if (tHand == hInt[2])
+			else if (tHand == hInt[2])
 				{
 				m_nameLabel.SetWindowText("Sampulse Sampler V2");
 				m_descLabel.SetWindowText("Sampler with the essence of FastTracker II and Impulse Tracker 2");
@@ -347,7 +349,7 @@ NAMESPACE__BEGIN(psycle)
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 				}
-			if (tHand == hInt[3])
+			else if (tHand == hInt[3])
 			{
 				m_nameLabel.SetWindowText("Note Duplicator");
 				m_descLabel.SetWindowText("Repeats the Events received to the selected machines");
@@ -361,7 +363,7 @@ NAMESPACE__BEGIN(psycle)
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
-			if (tHand == hInt[4])
+			else if (tHand == hInt[4])
 			{
 				m_nameLabel.SetWindowText("Send-Return Mixer");
 				m_descLabel.SetWindowText("Allows to mix the audio with a typical mixer table, with send/return effects");
@@ -374,7 +376,20 @@ NAMESPACE__BEGIN(psycle)
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
-			for (int i=0; i<_numPlugins; i++)
+			else if (tHand == hInt[5])
+			{
+				m_nameLabel.SetWindowText("Wave In Recorder");
+				m_descLabel.SetWindowText("Allows Psycle to get audio from an external source");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_RECORDER;
+				selectedClass = internal;
+				selectedMode = modegen;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+			}
+			else for (int i=0; i<_numPlugins; i++)
 			{
 				if (tHand == hPlug[i])
 				{

@@ -16,12 +16,39 @@ namespace psycle
 		/// output device interface implemented by direct sound.
 		class DirectSound : public AudioDriver
 		{
+			class PortEnums
+			{
+			public:
+				PortEnums():guid(0) {};
+				PortEnums(LPGUID _guid,std::string _pname):guid(_guid),portname(_pname){}
+				std::string portname;
+				LPGUID guid;
+			};
+			class PortCapt
+			{
+			public:
+				PortCapt():pleft(0),pright(0),_pGuid(0),_pDs(0),_pBuffer(0),_lowMark(0),_machinepos(0) {};
+
+				LPGUID _pGuid;
+				LPDIRECTSOUNDCAPTURE8 _pDs;
+				LPDIRECTSOUNDCAPTUREBUFFER8  _pBuffer;
+				int _lowMark;
+				float *pleft;
+				float *pright;
+				int _machinepos;
+			};
 		public:
 			DirectSound();
 			virtual ~DirectSound() throw();
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
 			virtual void Reset();
 			virtual bool Enable(bool e);
+			virtual void GetCapturePorts(std::vector<std::string>&ports);
+			virtual bool AddCapturePort(int idx);
+			virtual bool RemoveCapturePort(int idx);
+			virtual bool CreateCapturePort(PortCapt &port);
+			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+			static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
 //			int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
@@ -55,6 +82,10 @@ namespace psycle
 			int _lowMark;
 			int _highMark;
 			int _buffersToDo;
+
+
+			std::vector<PortEnums> _capEnums;
+			std::vector<PortCapt> _capPorts;
 
 			LPDIRECTSOUND8 _pDs;
 			LPDIRECTSOUNDBUFFER8 _pBuffer;

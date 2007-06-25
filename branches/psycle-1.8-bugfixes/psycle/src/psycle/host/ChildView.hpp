@@ -12,6 +12,7 @@ NAMESPACE__BEGIN(psycle)
 		class CWireDlg;
 		class CGearTracker;
 		class XMSamplerUI;
+		class CWaveInMacDlg;
 
 		#define MAX_WIRE_DIALOGS 16
 
@@ -226,7 +227,6 @@ NAMESPACE__BEGIN(psycle)
 			void DoubleLength();
 			void BlockTranspose(int trp);
 			void BlockParamInterpolate(int *points=0);
-			void BlockParamInterpolateCurve(int *points=0);
 			void StartBlock(int track,int line, int col);
 			void ChangeBlock(int track,int line, int col);	// This function allows a handier usage for Shift+Arrows and MouseSelection
 												// Params: current track, line and col
@@ -292,6 +292,7 @@ NAMESPACE__BEGIN(psycle)
 			CMasterDlg * MasterMachineDialog;
 			CGearTracker * SamplerMachineDialog;
 			XMSamplerUI* XMSamplerMachineDialog;
+			CWaveInMacDlg* WaveInMachineDialog;
 			CWireDlg * WireDialog[MAX_WIRE_DIALOGS];
 
 			bool blockSelected;

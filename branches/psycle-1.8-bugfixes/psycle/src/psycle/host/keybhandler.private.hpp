@@ -126,7 +126,7 @@ NAMESPACE__BEGIN(psycle)
 				if(viewMode == VMPattern && bEditMode)
 				{ 
 					// add note
-					if(velocity > 0 && outnote != 120)
+					if(velocity > 0 && outnote != notecommands::release)
 					{
 						EnterNote(outnote,velocity,false);
 					}
@@ -202,7 +202,7 @@ NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= 120)
+				if (pentry->_note >= notecommands::release)
 				{
 					if ((pentry->_mach != entry._mach) 
 						|| (pentry->_cmd != entry._cmd)
@@ -283,7 +283,7 @@ NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= 120)
+				if (pentry->_note >= notecommands::release)
 				{
 					if ((pentry->_mach != entry._mach) 
 						|| (pentry->_cmd != entry._cmd)
@@ -438,7 +438,7 @@ NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= 120)
+				if (pentry->_note >= notecommands::release)
 				{
 					if ((pentry->_mach != entry._mach) 
 						|| (pentry->_cmd != entry._cmd) 
@@ -573,7 +573,7 @@ NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
-				if (entry->_note >= 120)
+				if (entry->_note >= notecommands::release)
 				{
 					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
@@ -622,7 +622,7 @@ NAMESPACE__BEGIN(psycle)
 
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
-				if (entry->_note >= 120)
+				if (entry->_note >= notecommands::release)
 				{
 					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
@@ -652,7 +652,7 @@ NAMESPACE__BEGIN(psycle)
 			if (note < 0 || note > notecommands::tweakslide ) return;
 
 			// octave offset
-			if(note<120)
+			if(note<notecommands::release)
 			{
 				if(bTranspose)
 					note+=_pSong->currentOctave*12;
@@ -698,7 +698,7 @@ NAMESPACE__BEGIN(psycle)
 					entry._note = note;
 					entry._mach = _pSong->seqBus;
 
-					if ( note < 120)
+					if ( note < notecommands::release)
 					{
 						if (Global::pConfig->_RecordTweaks)
 						{
@@ -725,7 +725,7 @@ NAMESPACE__BEGIN(psycle)
 						}
 					}
 
-					if (note>120)
+					if (note>notecommands::release)
 					{
 						entry._inst = _pSong->auxcolSelected;
 					}
@@ -742,7 +742,7 @@ NAMESPACE__BEGIN(psycle)
 							entry._inst = _pSong->auxcolSelected;
 						}
 						
-						if ( note < 120)
+						if ( note < notecommands::release)
 						{
 							tmac->Tick(editcur.track, &entry);
 						}
@@ -791,13 +791,13 @@ NAMESPACE__BEGIN(psycle)
 				{
 					return;
 				}
-				note = 120;
+				note = notecommands::release;
 			}
 			AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
 			entry->_note = note;
 			entry->_mach = _pSong->seqBus;
 
-			if ( note < 120)
+			if ( note < notecommands::release)
 			{
 				if (Global::pConfig->_RecordTweaks)
 				{
@@ -824,7 +824,7 @@ NAMESPACE__BEGIN(psycle)
 				}
 			}
 
-			if (note>120)
+			if (note>notecommands::release)
 			{
 				entry->_inst = _pSong->auxcolSelected;
 			}
@@ -841,7 +841,7 @@ NAMESPACE__BEGIN(psycle)
 					entry->_inst = _pSong->auxcolSelected;
 				}
 				
-				if ( note < 120)
+				if ( note < notecommands::release)
 				{
 					tmac->Tick(editcur.track, entry);
 				}
@@ -870,7 +870,6 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (viewMode == VMPattern)
 			{
-				// UNDO CODE ENTER NOTE
 				const int ps = _ps();
 				unsigned char * toffset;
 				
@@ -887,9 +886,9 @@ NAMESPACE__BEGIN(psycle)
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
 				AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-				entry->_note = 120;
+				entry->_note = notecommands::release;
 
-				Global::pInputHandler->notetrack[editcur.track]=120;
+				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
@@ -1392,7 +1391,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					int not=*(soffset+c);
 					
-					if(not<120)
+					if(not<notecommands::release)
 					{
 						not+=trp;
 						if(not<0)not=0;
@@ -1815,7 +1814,7 @@ NAMESPACE__BEGIN(psycle)
 						
 						int not=*(toffset);
 					
-						if(not<120)
+						if(not<notecommands::release)
 						{
 							not+=trp;
 							if(not<0)not=0;
@@ -1893,64 +1892,6 @@ NAMESPACE__BEGIN(psycle)
 
 		void CChildView::BlockParamInterpolate(int *points)
 		{
-			// UNDO CODE BLOCK INTERPOLATE
-			if (blockSelected)
-			{
-				const int ps = _ps();
-				///////////////////////////////////////////////////////// Add ROW
-				unsigned char *toffset=_ppattern(ps);
-				
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
-				
-				const int initvalue = 
-					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.start.line*MULTIPLY+3) * 0x100 +
-					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.start.line*MULTIPLY+4);
-				const int endvalue =
-					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+3) * 0x100 +
-					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+4);
-				const float addvalue = (float)(endvalue -initvalue)/(blockSel.end.line-blockSel.start.line);
-				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
-				int displace2=(blockSel.start.track*EVENT_SIZE)+((blockSel.start.line+1)*MULTIPLY);
-				
-				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide ||toffset[firstrow] == notecommands::midicc)
-				{
-					unsigned char note = toffset[firstrow];
-					unsigned char aux = toffset[firstrow+1];
-					unsigned char mac = toffset[firstrow+2];
-					for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
-					{
-						toffset[displace2]=note;
-						toffset[displace2+1]=aux;
-						toffset[displace2+2]=mac;
-						int val= (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
-						if ( val == -1 ) continue;
-						toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
-						toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
-						displace2+=MULTIPLY;
-					}
-					toffset[displace2]=note;
-					toffset[displace2+1]=aux;
-					toffset[displace2+2]=mac;
-				}
-				else
-				{
-					for (int l=blockSel.start.line+1;l<blockSel.end.line;l++)
-					{
-						int val = (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
-						if ( val == -1 ) continue;
-						toffset[displace2+3]=static_cast<unsigned char>(val/0x100);
-						toffset[displace2+4]=static_cast<unsigned char>(val%0x100);
-						displace2+=MULTIPLY;
-					}
-				}
-				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
-			}
-		}
-
-		void CChildView::BlockParamInterpolateCurve(int *points)
-		{
-			// UNDO CODE BLOCK INTERPOLATE
 			if (blockSelected)
 			{
 				const int ps = _ps();

@@ -113,6 +113,7 @@
 #define IDR_WAVEDFRAME                  258
 #define IDR_WAVED_POPUP                 260
 #define IDD_SPECIALKEYS                 264
+#define IDD_MACWAVEIN                   271
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1011,7 +1012,7 @@
 #define IDC_SPINPARAM                   1785
 #define IDC_SHOWPATTERNAME              1786
 #define IDC_REPLACEMAC                  1787
-#define IDC_SEQEDITBOX			1788
+#define IDC_SEQEDITBOX                  1788
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1175,7 +1176,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        271
+#define _APS_NEXT_RESOURCE_VALUE        272
 #define _APS_NEXT_COMMAND_VALUE         34204
 #define _APS_NEXT_CONTROL_VALUE         1789
 #define _APS_NEXT_SYMED_VALUE           61

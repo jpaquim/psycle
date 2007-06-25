@@ -46,9 +46,8 @@ Here some features of Psycle:
 - Exporting to wav, as well as recording realtime to .wav
 - Configurable Keyboard Layout
 - Midi-In Support ( control Psycle using a midi keyboard, or even a software
-- Themes and skins support
   sequencer)
-
+- Themes and skins support
 and much more.
 
 
@@ -128,7 +127,8 @@ of an existing one. Arguru synth is an usual template.
 	     will serve as the next 1.9 codebase. It is expected to add
 	     multichannel audio input/output, audio recording (live input),
 	     separation of sources to different libs and multipattern sequence
-	     ability, without losing the tracker feeling.
+	     ability, without losing the tracker feeling. Don't expect a Cubase,
+	     instead, a tracker that would allow to make a pattern with pieces.
 
 * qpsycle (linux/QT windows/QT)
 
