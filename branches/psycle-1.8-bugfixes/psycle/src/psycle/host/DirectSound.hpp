@@ -9,6 +9,7 @@
 #include <dsound.h>
 #pragma comment(lib, "dsound")
 #include "AudioDriver.hpp"
+#include <map>
 namespace psycle
 {
 	namespace host
@@ -57,6 +58,18 @@ namespace psycle
 			virtual bool Configured() { return _configured; };
 			virtual AudioDriverInfo* GetInfo() { return &_info; };
 
+			static DWORD WINAPI PollerThread(void* pDirectSound);
+			//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
+			void ReadConfig();
+			void WriteConfig();
+			void Error(const TCHAR msg[]);
+			void DoBlocks();
+			bool WantsMoreBlocks();
+			void DoBlocksRecording(PortCapt& port);
+			bool WantsMoreBlocksRecording(PortCapt& port);
+			bool Start();
+			bool Stop();
+
 		private:
 			bool _initialized;
 			bool _configured;
@@ -86,21 +99,12 @@ namespace psycle
 
 			std::vector<PortEnums> _capEnums;
 			std::vector<PortCapt> _capPorts;
+			std::map<int,int> _portMapping;
 
 			LPDIRECTSOUND8 _pDs;
 			LPDIRECTSOUNDBUFFER8 _pBuffer;
 			void* _callbackContext;
 			AUDIODRIVERWORKFN _pCallback;
-
-			static DWORD WINAPI PollerThread(void* pDirectSound);
-		//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
-			void ReadConfig();
-			void WriteConfig();
-			void Error(const TCHAR msg[]);
-			void DoBlocks();
-			bool WantsMoreBlocks();
-			bool Start();
-			bool Stop();
 		};
 	}
 }

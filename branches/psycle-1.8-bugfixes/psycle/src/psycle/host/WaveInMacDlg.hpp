@@ -1,4 +1,6 @@
 #pragma once
+#include "afxwin.h"
+#include "afxcmn.h"
 NAMESPACE__BEGIN(psycle)
 NAMESPACE__BEGIN(host)
 /// gear rack window.
@@ -27,6 +29,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnCbnSelendokCombo1();
+	CStatic m_vollabel;
+	afx_msg void OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult);
+	CSliderCtrl m_volslider;
 };
 
 NAMESPACE__END

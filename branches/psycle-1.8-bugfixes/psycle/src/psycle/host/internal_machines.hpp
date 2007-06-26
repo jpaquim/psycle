@@ -60,11 +60,14 @@ public:
 	AudioRecorder();
 	AudioRecorder(int index);
 	virtual ~AudioRecorder();
+	virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); };
 	virtual void Init(void);
 	virtual void Work(int numSamples);
 	virtual char* GetName(void) { return _psName; };
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
+
+	virtual void ChangePort(int newport);
 
 	static char* _psName;
 

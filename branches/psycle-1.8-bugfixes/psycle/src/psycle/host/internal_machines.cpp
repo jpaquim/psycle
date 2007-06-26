@@ -302,26 +302,45 @@ namespace psycle
 				_initialized=true;
 			}
 		}
-		void AudioRecorder::Work(int numSamples)
+		void AudioRecorder::ChangePort(int newport)
 		{
 			AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-			mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
-			// prevent crashing if the audio driver is not working.
-			if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
-			dsp::Mul(_pSamplesL,numSamples,_gainvol);
-			dsp::Mul(_pSamplesR,numSamples,_gainvol);
-			Machine::SetVolumeCounter(numSamples);
-			if ( Global::configuration().autoStopMachines )
+			if ( _initialized )
 			{
-				if (_volumeCounter < 8.0f)
-				{
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
-				else Standby(false);
+				mydriver.Enable(false);
+				mydriver.RemoveCapturePort(_captureidx);
+				_initialized=false;
+				_pSamplesL=pleftorig;
+				_pSamplesR=prightorig;
 			}
-			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			mydriver.AddCapturePort(newport);
+			_captureidx = newport;
+			_initialized=true;
+			mydriver.Enable(true);
+		}
+		void AudioRecorder::Work(int numSamples)
+		{
+			if (_initialized)
+			{
+				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+				mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
+				// prevent crashing if the audio driver is not working.
+				if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
+				dsp::Mul(_pSamplesL,numSamples,_gainvol);
+				dsp::Mul(_pSamplesR,numSamples,_gainvol);
+				Machine::SetVolumeCounter(numSamples);
+				if ( Global::configuration().autoStopMachines )
+				{
+					if (_volumeCounter < 8.0f)
+					{
+						_volumeCounter = 0.0f;
+						_volumeDisplay = 0;
+						Standby(true);
+					}
+					else Standby(false);
+				}
+				dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			}
 			_cpuCost = 1;
 			_worked = true;
 		}
@@ -363,7 +382,7 @@ namespace psycle
 			for (int j=0;j<MAX_CONNECTIONS;j++)
 			{
 				_sendGrid[j][mix]=1.0f;
-				for (int i=send0;i<sendmax;i++)
+				for (int i=send1;i<sendmax;i++)
 				{
 					_sendGrid[j][i]=0.0f;
 				}

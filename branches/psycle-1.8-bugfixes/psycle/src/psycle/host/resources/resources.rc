@@ -2405,6 +2405,10 @@ BEGIN
     COMBOBOX        IDC_COMBO1,7,24,172,64,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Capture device:",IDC_STATIC,7,15,52,8
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,7,61,172,14
+    LTEXT           "Gain Control",IDC_STATIC,7,46,40,8
+    RTEXT           "0.0dB",IDC_VOLLABEL,134,46,39,8
 END
 
 

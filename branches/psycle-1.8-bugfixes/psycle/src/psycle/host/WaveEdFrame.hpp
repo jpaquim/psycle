@@ -9,12 +9,12 @@ NAMESPACE__BEGIN(psycle)
 		/// wave editor frame window.
 		class CWaveEdFrame : public CFrameWnd
 		{
+			DECLARE_DYNAMIC(CWaveEdFrame)
 		public:
-			CWaveEdFrame();
 			CWaveEdFrame(Song* _sng, CMainFrame* pframe);
 			virtual ~CWaveEdFrame() throw();
 		protected: 
-			DECLARE_DYNAMIC(CWaveEdFrame)
+			CWaveEdFrame();
 
 		public:
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);

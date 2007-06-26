@@ -145,7 +145,7 @@ namespace psycle
 			Machine(MachineType msubclass, MachineMode mode, int id);
 			virtual ~Machine() throw();
 			virtual void Init();
-			virtual void PreWork(int numSamples);
+			virtual void PreWork(int numSamples,bool clear=true);
 			virtual void Work(int numSamples);
 			virtual void WorkNoMix(int numSamples);
 			virtual void Tick() {};

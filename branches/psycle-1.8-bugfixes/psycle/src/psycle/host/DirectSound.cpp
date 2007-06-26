@@ -8,6 +8,7 @@
 #include "Configuration.hpp"
 #include <operating_system/exception.hpp>
 #include <process.h>
+#include "dsp.hpp"
 namespace psycle
 {
 	namespace host
@@ -174,32 +175,6 @@ namespace psycle
 			return true;
 		}
 
-		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
-		{
-			operating_system::exceptions::translated::new_thread("direct sound");
-			DirectSound * pThis = (DirectSound*) pDirectSound;
-			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
-			SetThreadAffinityMask(GetCurrentThread(), 1);
-			//Prefill buffer:
-			for(int i=0; i< pThis->_buffersToDo;i++)
-				pThis->DoBlocks();
-
-			while(pThis->_threadRun)
-			{
-				int runs=0;
-				while(pThis->WantsMoreBlocks())
-				{
-					pThis->DoBlocks();
-					if (++runs > pThis->_numBuffers)
-						break;
-				}
-				::Sleep(10);
-			}
-			_event.SetEvent();
-//			::_endthread();
-			return 0;
-		}
-
 		bool DirectSound::Stop()
 		{
 //			CSingleLock lock(&_lock, TRUE);
@@ -246,7 +221,7 @@ namespace psycle
 		}
 		bool DirectSound::AddCapturePort(int idx)
 		{
-			bool isplaying = _playing;
+			bool isplaying = _running;
 			for (unsigned int i=0;i<_capPorts.size();++i)
 			{
 				if (_capPorts[i]._pGuid == _capEnums[idx].guid ) return false;
@@ -258,6 +233,7 @@ namespace psycle
 				Stop();
 			}
 			_capPorts.push_back(port);
+			_portMapping[idx]=_capPorts.size()-1;
 			if (isplaying)
 			{
 				return Start();
@@ -328,9 +304,48 @@ namespace psycle
 
 		void DirectSound::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples)
 		{
-			*pleft=_capPorts[idx].pleft+_capPorts[idx]._machinepos;
-			*pright=_capPorts[idx].pright+_capPorts[idx]._machinepos;
-			_capPorts[idx]._machinepos+=numsamples;
+			*pleft=_capPorts[_portMapping[idx]].pleft+_capPorts[_portMapping[idx]]._machinepos;
+			*pright=_capPorts[_portMapping[idx]].pright+_capPorts[_portMapping[idx]]._machinepos;
+			_capPorts[_portMapping[idx]]._machinepos+=numsamples;
+		}
+
+		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
+		{
+			operating_system::exceptions::translated::new_thread("direct sound");
+			DirectSound * pThis = (DirectSound*) pDirectSound;
+			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+			SetThreadAffinityMask(GetCurrentThread(), 1);
+			//Prefill buffer:
+			for(int i=0; i< pThis->_buffersToDo;i++)
+			{
+				CSingleLock lock(&pThis->_lock, TRUE);
+				for (unsigned int i =0; i < pThis->_capPorts.size(); i++)
+				{
+					pThis->DoBlocksRecording(pThis->_capPorts[i]);
+				}
+				pThis->DoBlocks();
+			}
+
+			while(pThis->_threadRun)
+			{
+				int runs=0;
+
+				while(pThis->WantsMoreBlocks())
+				{
+					for (unsigned int i =0; i < pThis->_capPorts.size(); i++)
+					{
+						pThis->DoBlocksRecording(pThis->_capPorts[i]);
+					}
+
+					pThis->DoBlocks();
+					if (++runs > pThis->_numBuffers)
+						break;
+				}
+				::Sleep(10);
+			}
+			_event.SetEvent();
+			//			::_endthread();
+			return 0;
 		}
 
 		bool DirectSound::WantsMoreBlocks()
@@ -355,42 +370,65 @@ namespace psycle
 			else if((pos >= _lowMark) && (pos < _highMark))	return false;
 			return true;
 		}
-
-		void DirectSound::DoBlocks()
+		bool DirectSound::WantsMoreBlocksRecording(PortCapt& port)
 		{
-			// First, do the capture buffers so that audio is available to wavein machines.
-			for (unsigned int i =0; i < _capPorts.size(); i++)
+			// [_lowMark,_highMark] is the next buffer to be filled.
+			// if pos is still inside, we have to wait.
+/*			int pos=0;
+			HRESULT hr = port._pBuffer->GetCurrentPosition(0,(DWORD*)&pos);
+			if(hr == DSERR_BUFFERLOST)
 			{
-				int* pBlock1 , *pBlock2;
-				unsigned long blockSize1, blockSize2;
-				HRESULT hr = _capPorts[i]._pBuffer->Lock(_capPorts[i]._lowMark, _runningBufSize, 
+				_playing = false;
+				if(FAILED(port._pBuffer->Start(DSCBSTART_LOOPING)))	return false;
+				hr = port._pBuffer->GetCurrentPosition(0,(DWORD*)&pos);
+				if (FAILED(hr)) return false;
+				else return true;
+			}
+			if (FAILED(hr)) return false;
+			int _highMark= _lowMark+_runningBufSize;
+			if(_highMark < port._lowMark)
+			{
+				if((pos >= port._lowMark) || (pos < _highMark)) return false;
+			}
+			else if((pos >= port._lowMark) && (pos < _highMark))	return false;
+*/
+			return true;
+		}
+
+		// First, do the capture buffers so that audio is available to wavein machines.
+		void DirectSound::DoBlocksRecording(PortCapt& port)
+		{
+			int* pBlock1 , *pBlock2;
+			unsigned long blockSize1, blockSize2;
+			HRESULT hr = port._pBuffer->Lock(port._lowMark, _runningBufSize, 
+				(void**)&pBlock1, &blockSize1, 
+				(void**)&pBlock2, &blockSize2, 0);
+			if (DSERR_BUFFERLOST == hr) 
+			{ 
+				hr = port._pBuffer->Lock(port._lowMark, _runningBufSize, 
 					(void**)&pBlock1, &blockSize1, 
 					(void**)&pBlock2, &blockSize2, 0);
-				if (DSERR_BUFFERLOST == hr) 
-				{ 
-					hr = _capPorts[i]._pBuffer->Lock(_capPorts[i]._lowMark, _runningBufSize, 
-						(void**)&pBlock1, &blockSize1, 
-						(void**)&pBlock2, &blockSize2, 0);
-				} 
-				if (SUCCEEDED(hr))
-				{ 
-					// Put the audio in our float buffers.
-					int numSamples = blockSize1 / GetSampleSize();
-					DeQuantizeAndDeinterlace(pBlock1, _capPorts[i].pleft,_capPorts[i].pright, numSamples);
-					_capPorts[i]._lowMark += blockSize1;
-					if (blockSize2 > 0)
-					{
-						DeQuantizeAndDeinterlace(pBlock2, _capPorts[i].pleft+numSamples,_capPorts[i].pright+numSamples, blockSize2 / GetSampleSize());
-						_lowMark += blockSize2;
-					}
-					// Release the data back to DirectSound. 
-					hr = _capPorts[i]._pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
-
-					if ( _capPorts[i]._lowMark >= _dsBufferSize ) _capPorts[i]._lowMark -= _dsBufferSize;
+			} 
+			if (SUCCEEDED(hr))
+			{ 
+				// Put the audio in our float buffers.
+				int numSamples = blockSize1 / GetSampleSize();
+				DeQuantizeAndDeinterlace(pBlock1, port.pleft,port.pright, numSamples);
+				port._lowMark += blockSize1;
+				if (blockSize2 > 0)
+				{
+					DeQuantizeAndDeinterlace(pBlock2, port.pleft+numSamples,port.pright+numSamples, blockSize2 / GetSampleSize());
+					_lowMark += blockSize2;
 				}
-				_capPorts[i]._machinepos=0;
-			}
+				// Release the data back to DirectSound. 
+				hr = port._pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
 
+				if ( port._lowMark >= _dsBufferSize ) port._lowMark -= _dsBufferSize;
+			}
+			port._machinepos=0;
+		}
+		void DirectSound::DoBlocks()
+		{
 			// Next, proceeed with the generation of audio
 			int* pBlock1 , *pBlock2;
 			unsigned long blockSize1, blockSize2;

@@ -380,7 +380,7 @@ namespace psycle
 
 		}
 
-		void Machine::PreWork(int numSamples)
+		void Machine::PreWork(int numSamples,bool clear)
 		{
 			_worked = false;
 			_waitingForSound= false;
@@ -411,8 +411,11 @@ namespace psycle
 				} 
 			}
 			_scopePrevNumSamples=numSamples;
-			dsp::Clear(_pSamplesL, numSamples);
-			dsp::Clear(_pSamplesR, numSamples);
+			if (clear)
+			{
+				dsp::Clear(_pSamplesL, numSamples);
+				dsp::Clear(_pSamplesR, numSamples);
+			}
 			_wireCost += cpu::cycles() - wcost;
 		}
 
