@@ -197,8 +197,8 @@ namespace psycle
 				_capPorts[i]._pBuffer->Release();
 				_capPorts[i]._pDs->Release();
 				_capPorts[i]._pDs=0;
-				delete _capPorts[i].pleft;
-				delete _capPorts[i].pright;
+				delete[] _capPorts[i].pleft;
+				delete[] _capPorts[i].pright;
 			}
 			_capPorts.resize(0);
 			_running = false;
@@ -304,9 +304,12 @@ namespace psycle
 
 		void DirectSound::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples)
 		{
-			*pleft=_capPorts[_portMapping[idx]].pleft+_capPorts[_portMapping[idx]]._machinepos;
-			*pright=_capPorts[_portMapping[idx]].pright+_capPorts[_portMapping[idx]]._machinepos;
-			_capPorts[_portMapping[idx]]._machinepos+=numsamples;
+			if (_running)
+			{
+				*pleft=_capPorts[_portMapping[idx]].pleft+_capPorts[_portMapping[idx]]._machinepos;
+				*pright=_capPorts[_portMapping[idx]].pright+_capPorts[_portMapping[idx]]._machinepos;
+				_capPorts[_portMapping[idx]]._machinepos+=numsamples;
+			}
 		}
 
 		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
@@ -405,7 +408,8 @@ namespace psycle
 				(void**)&pBlock2, &blockSize2, 0);
 			if (DSERR_BUFFERLOST == hr) 
 			{ 
-				hr = port._pBuffer->Lock(port._lowMark, _runningBufSize, 
+				port._lowMark=0;
+				hr = port._pBuffer->Lock(0, _runningBufSize, 
 					(void**)&pBlock1, &blockSize1, 
 					(void**)&pBlock2, &blockSize2, 0);
 			} 

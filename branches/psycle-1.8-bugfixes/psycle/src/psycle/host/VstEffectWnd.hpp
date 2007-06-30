@@ -101,6 +101,8 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);
 			afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnViewsShowtoolbar();
+			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
 		};
 	NAMESPACE__END
 NAMESPACE__END

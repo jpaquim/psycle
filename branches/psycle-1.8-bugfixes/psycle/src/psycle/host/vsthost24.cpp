@@ -477,7 +477,8 @@ namespace psycle
 					}
 					//Finally Send the events.
 					queue_size = 0;
-					WantsMidi(ProcessEvents(reinterpret_cast<VstEvents*>(&mevents)));
+//					WantsMidi(ProcessEvents(reinterpret_cast<VstEvents*>(&mevents)));
+					ProcessEvents(reinterpret_cast<VstEvents*>(&mevents));
 				}
 			}
 

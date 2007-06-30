@@ -1,4 +1,4 @@
-///\file
+//\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
 #include <project.private.hpp>
 #include "psycle.hpp"
@@ -81,6 +81,8 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_PROGRAMLESS, OnUpdateProgramLess)
 			ON_COMMAND(ID_PROGRAMMORE, OnProgramMore)
 			ON_UPDATE_COMMAND_UI(ID_PROGRAMMORE, OnUpdateProgramMore)
+			ON_COMMAND(ID_VIEWS_SHOWTOOLBAR, OnViewsShowtoolbar)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
 		END_MESSAGE_MAP()
 
 		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
@@ -147,11 +149,12 @@ NAMESPACE__BEGIN(psycle)
 			FillProgramCombobox();
 
 
+			pView = CreateView();
 			toolBar.SetWindowText("Vst Toolbar");
 			toolBar.EnableDocking(CBRS_ALIGN_ANY);
 			EnableDocking(CBRS_ALIGN_TOP);
 			DockControlBar(&toolBar);
-			pView = CreateView();
+			if (!Global::pConfig->_toolbarOnVsts) ShowControlBar(&toolBar,FALSE,FALSE);
 			machine().SetEditWnd(this);
 			*_pActive=true;
 			SetTimer(449, 25, 0);
@@ -387,11 +390,22 @@ NAMESPACE__BEGIN(psycle)
 			CRect tbRect;
 			toolBar.GetWindowRect(&tbRect);
 			rcClient.top+=tbRect.bottom - tbRect.top;
-			rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
+			if ( Global::pConfig->_toolbarOnVsts)
+			{
+				rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
 					::GetSystemMetrics(SM_CYMENUSIZE) +
 					(tbRect.bottom-tbRect.top) +
 					6 * ::GetSystemMetrics(SM_CYBORDER) +
 					2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
+			}
+			else
+			{
+				rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
+					::GetSystemMetrics(SM_CYMENUSIZE) +
+					6 * ::GetSystemMetrics(SM_CYBORDER) +
+					2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
+				rcClient.top=0;
+			}
 			rcFrame.right += 6 * ::GetSystemMetrics(SM_CXBORDER) +
 				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
 		}
@@ -875,6 +889,20 @@ NAMESPACE__BEGIN(psycle)
 		void CVstEffectWnd::OnUpdateViewsMidichannels(CCmdUI *pCmdUI)
 		{
 			pCmdUI->Enable(false);
+		}
+
+		void CVstEffectWnd::OnViewsShowtoolbar()
+		{
+			Global::pConfig->_toolbarOnVsts = !Global::pConfig->_toolbarOnVsts;
+
+			if (Global::pConfig->_toolbarOnVsts) ShowControlBar(&toolBar,TRUE,FALSE);
+			else ShowControlBar(&toolBar,FALSE,FALSE);
+			ResizeWindow(0);
+		}
+
+		void CVstEffectWnd::OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI)
+		{
+			pCmdUI->SetCheck(Global::pConfig->_toolbarOnVsts);
 		}
 
 		void CVstEffectWnd::OnAboutAboutvst()

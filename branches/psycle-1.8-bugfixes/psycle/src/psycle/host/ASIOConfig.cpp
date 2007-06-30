@@ -59,9 +59,15 @@ NAMESPACE__BEGIN(psycle)
 			CString str;
 			CDialog::OnInitDialog();
 
-			for (int i = 0; i < pASIO->drivercount; i++)
+			for (unsigned int i(0); i < pASIO->_drivEnum.size(); ++i)
 			{
-				m_driverComboBox.AddString(pASIO->szFullName[i]);
+				char szFullName[160];
+				for (unsigned int j(0); j < pASIO->_drivEnum[i]._portout.size(); ++j)
+				{
+					strcpy(szFullName,pASIO->_drivEnum[i]._name.c_str());
+					strcat(szFullName,pASIO->_drivEnum[i]._portout[j].GetName().c_str());
+					m_driverComboBox.AddString(szFullName);
+				}
 			}
 
 			if (m_driverIndex < 0)
@@ -149,12 +155,13 @@ NAMESPACE__BEGIN(psycle)
 			int prefindex = 0;
 			char buf[8];
 			m_bufferSizeCombo.ResetContent();
-			int g = pASIO->Granularity[pASIO->driverindex[m_driverIndex]];
+			ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
+			int g = driver.granularity;
 			if (g < 0)
 			{
-				for (int i = pASIO->minSamples[pASIO->driverindex[m_driverIndex]]; i <= pASIO->maxSamples[pASIO->driverindex[m_driverIndex]]; i *= 2)
+				for (int i = driver.minSamples; i <= driver.maxSamples; i *= 2)
 				{
-					if (i < pASIO->currentSamples[pASIO->driverindex[m_driverIndex]])
+					if (i < pASIO->_ASIObufferSize)
 					{
 						prefindex++;
 					}
@@ -169,9 +176,9 @@ NAMESPACE__BEGIN(psycle)
 					g = 64;
 				}
 
-				for (int i = pASIO->minSamples[pASIO->driverindex[m_driverIndex]]; i <= pASIO->maxSamples[pASIO->driverindex[m_driverIndex]]; i += g)
+				for (int i = driver.minSamples; i <= driver.maxSamples; i += g)
 				{
-					if (i < pASIO->currentSamples[pASIO->driverindex[m_driverIndex]])
+					if (i < pASIO->_ASIObufferSize)
 					{
 						prefindex++;
 					}
@@ -192,7 +199,6 @@ NAMESPACE__BEGIN(psycle)
 			CString str;
 			m_bufferSizeCombo.GetWindowText(str);
 
-			pASIO->currentSamples[pASIO->driverindex[m_driverIndex]] = atoi(str);
 			m_driverIndex = m_driverComboBox.GetCurSel();
 
 			FillBufferBox();

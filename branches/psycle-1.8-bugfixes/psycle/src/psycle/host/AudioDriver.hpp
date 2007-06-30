@@ -38,6 +38,8 @@ namespace psycle
 			virtual int GetBufferSize() { return _blockSize; };
 			virtual int GetBufferSamples() { return _blockSize/GetSampleSize(); };
 			virtual int GetSampleSize() { return (_channelmode==3)?(_bitDepth/4):(_bitDepth/8); };
+			virtual int GetInputLatency() { return 0; }
+			virtual int GetOutputLatency() { return 0; }
 			virtual void Configure(void) {};
 			virtual bool Initialized(void) { return true; };
 			virtual bool Configured(void) { return true; };

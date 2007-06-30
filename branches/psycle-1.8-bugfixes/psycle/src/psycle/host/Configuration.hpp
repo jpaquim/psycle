@@ -27,6 +27,8 @@ namespace psycle
 			
 			bool _allowMultipleInstances;
 			bool autoStopMachines;
+			bool _bShowPatternNames;
+			bool _toolbarOnVsts;
 			COLORREF mv_colour;
 			COLORREF mv_wirecolour;
 			COLORREF mv_wireaacolour;

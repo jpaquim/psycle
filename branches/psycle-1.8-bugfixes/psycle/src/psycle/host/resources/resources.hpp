@@ -1169,6 +1169,7 @@
 #define ID_SELECTPROGRAM_0              33200
 #define ID_PROGRAMMORE                  34200
 #define ID_PROGRAMLESS                  34201
+#define ID_VIEWS_SHOWTOOLBAR            34206
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1178,7 +1179,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        272
-#define _APS_NEXT_COMMAND_VALUE         34204
+#define _APS_NEXT_COMMAND_VALUE         34207
 #define _APS_NEXT_CONTROL_VALUE         1790
 #define _APS_NEXT_SYMED_VALUE           61
 #endif

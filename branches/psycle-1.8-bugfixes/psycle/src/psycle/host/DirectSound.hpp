@@ -50,6 +50,8 @@ namespace psycle
 			virtual bool CreateCapturePort(PortCapt &port);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 			static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
+			virtual int GetInputLatency() { return _dsBufferSize; };
+			virtual int GetOutputLatency() { return _dsBufferSize; };
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
 //			int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
@@ -57,12 +59,13 @@ namespace psycle
 			virtual bool Initialized() { return _initialized; };
 			virtual bool Configured() { return _configured; };
 			virtual AudioDriverInfo* GetInfo() { return &_info; };
-
-			static DWORD WINAPI PollerThread(void* pDirectSound);
-			//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
+		protected:
 			void ReadConfig();
 			void WriteConfig();
 			void Error(const TCHAR msg[]);
+
+			static DWORD WINAPI PollerThread(void* pDirectSound);
+//	static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
 			void DoBlocks();
 			bool WantsMoreBlocks();
 			void DoBlocksRecording(PortCapt& port);

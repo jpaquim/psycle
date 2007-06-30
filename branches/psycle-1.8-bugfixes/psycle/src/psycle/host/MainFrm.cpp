@@ -150,7 +150,7 @@ NAMESPACE__BEGIN(psycle)
 			macComboInitialized = false;
 			
 			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
-			_bShowPatternNames=false;
+			Global::pConfig->_bShowPatternNames=false;
 			
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
@@ -1667,7 +1667,7 @@ NAMESPACE__BEGIN(psycle)
 			int top = cc->GetTopIndex();
 			cc->ResetContent();
 			
-			if (_bShowPatternNames)
+			if (Global::pConfig->_bShowPatternNames)
 			{
 				for(int n=0;n<_pSong->playLength;n++)
 				{
@@ -2242,7 +2242,7 @@ NAMESPACE__BEGIN(psycle)
 		}
 		void CMainFrame::OnSeqShowpattername()
 		{
-			_bShowPatternNames=((CButton*)m_wndSeq.GetDlgItem(IDC_SHOWPATTERNAME))->GetCheck();
+			Global::pConfig->_bShowPatternNames=((CButton*)m_wndSeq.GetDlgItem(IDC_SHOWPATTERNAME))->GetCheck();
 			UpdateSequencer();
 			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			pls->SetSel(Global::pPlayer->_playPosition,true);
@@ -2391,7 +2391,7 @@ NAMESPACE__BEGIN(psycle)
 				const int le=_pSong->playOrder[ls];
 				pls->DeleteString(ls);
 
-				if (_bShowPatternNames)
+				if (Global::pConfig->_bShowPatternNames)
 					sprintf(buffer,"%.2X:%s",ls,_pSong->patternName[ls]);
 				else
 					sprintf(buffer,"%.2X: %.2X",ls,le);

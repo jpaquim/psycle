@@ -17,6 +17,8 @@ namespace psycle
 		Configuration::Configuration()
 		{
 			_allowMultipleInstances = false;
+			_toolbarOnVsts = true;
+			_bShowPatternNames = false;
 			_initialized = false;
 			_wrapAround = true;
 			_centerCursor = false;
@@ -46,7 +48,7 @@ namespace psycle
 				_ppOutputDrivers[1] = new WaveOut;
 				_ppOutputDrivers[2] = new DirectSound;
 				_ppOutputDrivers[3] = new ASIOInterface;
-				if(((ASIOInterface*)(_ppOutputDrivers[3]))->drivercount <= 0)
+				if(((ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
 				{
 					_numOutputDrivers--;
 					zapObject(_ppOutputDrivers[3]);
@@ -155,6 +157,8 @@ namespace psycle
 			reg.QueryValue("RecordMouseTweaksSmooth", _RecordMouseTweaksSmooth);
 			reg.QueryValue("notesToEffects", _notesToEffects);
 			reg.QueryValue("RecordUnarmed", _RecordUnarmed);
+			reg.QueryValue("ShowPatternNames", _bShowPatternNames);
+			reg.QueryValue("toolbarOnVsts", _toolbarOnVsts);
 			//reg.QueryValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.QueryValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			// midi
@@ -346,6 +350,8 @@ namespace psycle
 			reg.SetValue("RecordMouseTweaksSmooth", _RecordMouseTweaksSmooth);
 			reg.SetValue("notesToEffects", _notesToEffects);
 			reg.SetValue("RecordUnarmed", _RecordUnarmed);
+			reg.SetValue("bShowPatternNames", _bShowPatternNames);
+			reg.SetValue("toolbarOnVsts", _toolbarOnVsts);
 			//reg.SetValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			reg.SetValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);

@@ -48,7 +48,6 @@ NAMESPACE__BEGIN(psycle)
 			bool isguiopen[MAX_MACHINES];
 			CFrameWnd	*m_pWndMac[MAX_MACHINES];
 			bool macComboInitialized;
-			bool _bShowPatternNames;
 			int seqcopybuffer[MAX_SONG_POSITIONS];
 			int seqcopybufferlength;
 

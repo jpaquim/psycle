@@ -127,11 +127,15 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Enable VST",                  ID_OPERATIONS_ENABLED
     END
+    MENUITEM "<<",                          ID_PROGRAMLESS
+    MENUITEM ">>",                          ID_PROGRAMMORE
     POPUP "Views"
     BEGIN
         MENUITEM "Parameter List",              ID_VIEWS_PARAMETERLIST
         MENUITEM "Bank Manager",                ID_VIEWS_BANKMANAGER
         MENUITEM "Midi Channels",               ID_VIEWS_MIDICHANNELS
+        MENUITEM SEPARATOR
+        MENUITEM "Show toolbar",                ID_VIEWS_SHOWTOOLBAR
         MENUITEM SEPARATOR
         MENUITEM "About",                       ID_ABOUT_ABOUTVST
     END

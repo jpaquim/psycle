@@ -77,6 +77,7 @@ void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
 	RECT cellrect;
 	GetItemRect(row,&cellrect);
 
+	myedit.DestroyWindow();
 	myedit.Create(WS_CHILD|WS_BORDER,cellrect,this,IDC_SEQEDITBOX);
 	myedit.SetFont(&font);
 	myedit.SetWindowText(Global::_pSong->patternName[row]);
