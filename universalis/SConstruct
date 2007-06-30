@@ -55,8 +55,6 @@ class module(base_module):
 	def __init__(self):
 		base_module.__init__(self, source_package,
 			name = source_package.name(),
-			version = source_package.version(),
-			description = source_package.description(),
 			dependencies = [diversalis, boost]
 	)
 
