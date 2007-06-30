@@ -35,6 +35,6 @@ pkg_config_package = pkg_config_package(project,
 )
 pkg_config_package.uninstalled_env().compilers().cxx().paths().add(['src'])
 
-project([pkg_config_package])
+project.default_targets([pkg_config_package])
 
 Return('pkg_config_package')
