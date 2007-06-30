@@ -310,6 +310,6 @@ if dlfcn.result():
 			self.add_sources(find(project, 'src', [os.path.join('psycle', 'plugin_check.cpp')]))
 	plugin_check_module = plugin_check_module()
 
-project(modules)
+project.default_targets(modules)
 
 Return('modules')

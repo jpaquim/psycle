@@ -292,4 +292,4 @@ if gtkmm.result() and gnomecanvasmm.result():
 			))
 	gui_front_end_module = gui_front_end_module()
 
-project(pkg_config_packages + front_end_modules)
+project.default_targets(pkg_config_packages + front_end_modules)

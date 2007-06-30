@@ -99,6 +99,6 @@ pkg_config_package = pkg_config_package(project,
 	modules = [module]
 )
 
-project([pkg_config_package])
+project.default_targets([pkg_config_package])
 
 Return('pkg_config_package')
