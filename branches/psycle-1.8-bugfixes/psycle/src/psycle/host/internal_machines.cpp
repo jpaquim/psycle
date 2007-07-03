@@ -320,7 +320,7 @@ namespace psycle
 		}
 		void AudioRecorder::Work(int numSamples)
 		{
-			if (_initialized)
+			if (!_mute &&_initialized)
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 				mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
@@ -346,10 +346,18 @@ namespace psycle
 		}
 		bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 		{
-			return false;
+			UINT size;
+			pFile->Read(&size, sizeof size); // size of this part params to load
+			pFile->Read(&_captureidx,sizeof _captureidx);
+			pFile->Read(&_gainvol,sizeof _gainvol);
+			return true;
 		}
 		void AudioRecorder::SaveSpecificChunk(RiffFile * pFile)
 		{
+			UINT size = sizeof _captureidx+ sizeof _gainvol;
+			pFile->Write(&size, sizeof size); // size of this part params to save
+			pFile->Write(&_captureidx,sizeof _captureidx);
+			pFile->Write(&_gainvol,sizeof _gainvol);
 		}
 
 
@@ -373,8 +381,6 @@ namespace psycle
 		{
 			Machine::Init();
 			thegrid.Init(_inputCon);
-
-
 
 
 
@@ -545,7 +551,7 @@ namespace psycle
 			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
 			{
 				if(!SendValid(c)) sendbus = c;
-				// Checking that there's not a slot to the dest. machine already
+				// Checking that there isn't a slot to the dest. machine already
 				else if(GetSend(c) == mac->_macIndex) error = true;
 			}
 			if(sendbus == -1 || error) return -1;
@@ -553,7 +559,7 @@ namespace psycle
 			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
 			{
 				if(!mac->_connection[c]) origbus = c;
-				// Checking that there's not an slot to the dest. machine already
+				// Checking that there isn't an slot to the dest. machine already
 				else if(mac->_outputMachines[c] == _macIndex) error = true;
 			}
 			if(origbus == -1 || error) return false;
@@ -852,6 +858,7 @@ namespace psycle
 
 		float Mixer::VuChan(int idx)
 		{
+			///\todo: use the new volume
 			float vol;
 			GetWireVolume(idx,vol);
 			if ( _inputCon[idx] ) return (Global::song()._pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
@@ -860,6 +867,7 @@ namespace psycle
 
 		float Mixer::VuSend(int idx)
 		{
+			///\todo: use the new volume
 			float vol = _returnVol[idx] * _returnVolMulti[idx];
 			if ( SendValid(idx) ) return (Global::song()._pMachine[_send[idx]]->_volumeDisplay/97.0f)*vol;
 			return 0.0f;

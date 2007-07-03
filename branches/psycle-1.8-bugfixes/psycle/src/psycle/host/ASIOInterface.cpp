@@ -238,12 +238,14 @@ namespace psycle
 			unsigned int i(0);
 			for (; i < _selectedins.size() ; ++i)
 			{
-				ASIObuffers[i] = AsioStereoBuffer(info[counter].buffers,info[counter+1].buffers,_selectedins[i].port->_info.type);
+				AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedins[i].port->_info.type);
+				ASIObuffers[i] = buffer;
 				_selectedins[i].pleft = new float[_ASIObufferSize];
 				_selectedins[i].pright = new float[_ASIObufferSize];
 				counter+=2;
 			}
-			ASIObuffers[i] = AsioStereoBuffer(info[counter].buffers,info[counter+1].buffers,_selectedout.port->_info.type);
+			AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedout.port->_info.type);
+			ASIObuffers[i] = buffer;
 
 			ASIOGetLatencies(&_inlatency,&_outlatency);
 			if(ASIOStart() != ASE_OK)
@@ -593,18 +595,46 @@ namespace psycle
 				{
 				case ASIOSTInt16LSB:
 					{
+						short* inl;
+						short* inr;
+						inl = (short*)ASIObuffers[counter].pleft[index];
+						inr = (short*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							*(_selectedins[counter].pleft+i) = (*inl++)*0.0000152587890625;
+							*(_selectedins[counter].pright+i) = (*inr++)*0.0000152587890625;
+						}
 					}
 					break;
 				case ASIOSTInt24LSB:		// used for 20 bits as well
 					{
+						char* inl;
+						char* inr;
+						inl = (char*)ASIObuffers[counter].pleft[index];
+						inr = (char*)ASIObuffers[counter].pright[index];
+						int t;
+						char* pt = (char*)&t;
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							pt[0] = *inl++;
+							pt[1] = *inl++;
+							pt[2] = *inl++;
+							*(_selectedins[counter].pleft+i) = t*0.00390625;
+
+							pt[0] = *inr++;
+							pt[1] = *inr++;
+							pt[2] = *inr++;
+							*(_selectedins[counter].pright+i) = t*0.00390625;
+
+						}
 					}
 					break;
 				case ASIOSTInt32LSB:
 					{
-						LONG* inl;
-						LONG* inr;
-						inl = (LONG*)ASIObuffers[counter].pleft[index];
-						inr = (LONG*)ASIObuffers[counter].pright[index];
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
 						for (i = 0; i < _ASIObufferSize; i++)
 						{
 							*(_selectedins[counter].pleft+i) = (*inl++)*0.0000152587890625;
@@ -619,57 +649,189 @@ namespace psycle
 					break;
 				case ASIOSTFloat64LSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
 					{
+						double* inl;
+						double* inr;
+						inl = (double*)ASIObuffers[counter].pleft[index];
+						inr = (double*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							*(_selectedins[counter].pleft+i) = (*inl++)*0.0000152587890625;
+							*(_selectedins[counter].pright+i) = (*inr++)*0.0000152587890625;
+						}
 					}
 					break;
 					// these are used for 32 bit data buffer, with different alignment of the data inside
 					// 32 bit PCI bus systems can more easily used with these
-				case ASIOSTInt32LSB16:		// 32 bit data with 18 bit alignment
+				case ASIOSTInt32LSB16:		// 32 bit data with 16 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							*(_selectedins[counter].pleft+i) = (*inl++);
+							*(_selectedins[counter].pright+i) = (*inr++);
+						}
 					}
 					break;
 				case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							*(_selectedins[counter].pleft+i) = (*inl++)*0.25;
+							*(_selectedins[counter].pright+i) = (*inr++)*0.25;
+						}
 					}
 					break;
 				case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							*(_selectedins[counter].pleft+i) = (*inl++)*0.0625;
+							*(_selectedins[counter].pright+i) = (*inr++)*0.0625;
+						}
 					}
 					break;
 				case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							*(_selectedins[counter].pleft+i) = (*inl++)*0.00390625;
+							*(_selectedins[counter].pright+i) = (*inr++)*0.00390625;
+						}
 					}
 					break;
 				case ASIOSTInt16MSB:
 					{
+						short* inl;
+						short* inr;
+						inl = (short*)ASIObuffers[counter].pleft[index];
+						inr = (short*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							short val=SwapShort(*inl++);
+							*(_selectedins[counter].pleft+i) = 	val*0.0000152587890625f;
+							val =SwapShort(*inr++);
+							*(_selectedins[counter].pright+i) = val*0.0000152587890625f;
+						}
 					}
 					break;
 				case ASIOSTInt24MSB:		// used for 20 bits as well
 					{
+						char* inl;
+						char* inr;
+						inl = (char*)ASIObuffers[counter].pleft[index];
+						inr = (char*)ASIObuffers[counter].pright[index];
+						int t;
+						char* pt = (char*)&t;
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							pt[2] = *inl++;
+							pt[1] = *inl++;
+							pt[0] = *inl++;
+							*(_selectedins[counter].pleft+i) = t*0.00390625;
+
+							pt[2] = *inr++;
+							pt[1] = *inr++;
+							pt[0] = *inr++;
+							*(_selectedins[counter].pright+i) = t*0.00390625;
+
+						}
 					}
 					break;
 				case ASIOSTInt32MSB:
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							long val = SwapLong(*inl++);
+							*(_selectedins[counter].pleft+i) = val *0.0000152587890625;
+							val = SwapLong(*inr++);
+							*(_selectedins[counter].pright+i) = val *0.0000152587890625;
+						}
 					}
 					break;
 				case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							*(_selectedins[counter].pleft+i) = SwapLong(*inl++);
+							*(_selectedins[counter].pright+i) = SwapLong(*inr++);
+						}
 					}
 					break;
 				case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							long val = SwapLong(*inl++);
+							*(_selectedins[counter].pleft+i) = val*0.25;
+							val = SwapLong(*inr++)
+							*(_selectedins[counter].pright+i) = val*0.25;
+						}
 					}
 					break;
 				case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							long val = SwapLong(*inl++);
+							*(_selectedins[counter].pleft+i) = val*0.0625;
+							val = SwapLong(*inr++)
+							*(_selectedins[counter].pright+i) = val*0.0625;
+						}
 					}
 					break;
 				case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
 					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSize; i++)
+						{
+							long val = SwapLong(*inl++);
+							*(_selectedins[counter].pleft+i) = val*0.00390625;
+							val = SwapLong(*inr++)
+							*(_selectedins[counter].pright+i) = val*0.00390625;
+						}
 					}
 					break;
 				case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
+					memset (_selectedins[counter].pleft, 0, _ASIObufferSize * 4);
+					memset (_selectedins[counter].pright, 0, _ASIObufferSize * 4);
 					break;
 				case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
+					memset (_selectedins[counter].pleft, 0, _ASIObufferSize * 8);
+					memset (_selectedins[counter].pright, 0, _ASIObufferSize * 8);
 					break;
 				}
 				_selectedins[counter].machinepos=0;

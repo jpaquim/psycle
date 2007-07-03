@@ -916,7 +916,7 @@ namespace seib {
 				for (int i = 0; i < numPrograms(); i++)
 				{
 					CFxProgram &storep = b.GetProgram(i);
-					char name[kVstMaxProgNameLen];
+					char name[kVstMaxProgNameLen+1];
 					GetProgramName(name);
 					storep.SetProgramName(name);
 					int nParms = numParams();
@@ -947,7 +947,7 @@ namespace seib {
 				///\todo: needs to add checks not to suspend/resume if in suspended state
 				MainsChanged(false);
 				CFxProgram storep(uniqueId(),version(),numParams());
-				char name[kVstMaxProgNameLen];
+				char name[kVstMaxProgNameLen+1];
 				GetProgramName(name);
 				storep.SetProgramName(name);
 				int nParms = numParams();

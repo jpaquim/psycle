@@ -102,7 +102,7 @@ namespace psycle
 
 			std::vector<PortEnums> _capEnums;
 			std::vector<PortCapt> _capPorts;
-			std::map<int,int> _portMapping;
+			std::vector<int> _portMapping;
 
 			LPDIRECTSOUND8 _pDs;
 			LPDIRECTSOUNDBUFFER8 _pBuffer;

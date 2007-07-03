@@ -41,8 +41,8 @@ NAMESPACE__BEGIN(psycle)
 				m_songtitle.SetReadOnly();
 				m_songcredits.SetReadOnly();
 				m_songcomments.SetReadOnly();
-				((CButton*)GetDlgItem(IDOK))->EnableWindow(false);
-				((CButton*)GetDlgItem(IDCANCEL))->SetWindowText("Close");
+				((CButton*)GetDlgItem(IDCANCEL))->ShowWindow(SW_HIDE);
+				((CButton*)GetDlgItem(IDOK))->SetWindowText("Close");
 				///\todo: find a way to set the "close" as the default button in this case.
 			}
 
@@ -55,14 +55,18 @@ NAMESPACE__BEGIN(psycle)
 
 		void CSongpDlg::OnOk() 
 		{
-			char name[129]; char author[65]; char comments[65536];
-			m_songtitle.GetWindowText(name,128);
-			m_songcredits.GetWindowText(author,64);
-			m_songcomments.GetWindowText(comments,65535);
-			_pSong->name = name;
-			_pSong->author = author;
-			_pSong->comments = comments;
-			CDialog::OnOK();
+			if (!readonlystate)
+			{
+				char name[129]; char author[65]; char comments[65536];
+				m_songtitle.GetWindowText(name,128);
+				m_songcredits.GetWindowText(author,64);
+				m_songcomments.GetWindowText(comments,65535);
+				_pSong->name = name;
+				_pSong->author = author;
+				_pSong->comments = comments;
+				CDialog::OnOK();
+			}
+			else CDialog::OnCancel();
 		}
 	NAMESPACE__END
 NAMESPACE__END

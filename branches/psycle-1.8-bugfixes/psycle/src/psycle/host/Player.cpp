@@ -37,24 +37,34 @@ namespace psycle
 			if(_recording) _outputWaveFile.Close();
 		}
 
-		void Player::Start(int pos, int line)
+		void Player::Start(int pos, int line,bool initialize)
 		{
-			Stop(); // This causes all machines to reset, and samplesperRow to init.
-			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
-			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
+			CSingleLock crit(&Global::_pSong->door, TRUE);
+			if (initialize)
+			{
+				Stop(); // This causes all machines to reset, and samplesperRow to init.
+				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
+				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
+			}
 			_lineChanged = true;
 			_lineCounter = line;
 			_SPRChanged = false;
 			_playPosition= pos;
 			_playPattern = Global::_pSong->playOrder[_playPosition];
-			_playTime = 0;
-			_playTimem = 0;
+			if (initialize)
+			{
+				_playTime = 0;
+				_playTimem = 0;
+			}
 			_loop_count =0;
 			_loop_line = 0;
-			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
-			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
-			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
-			_playing = true;
+			if (initialize)
+			{
+				SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+				SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+				for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
+				_playing = true;
+			}
 			ExecuteLine();
 			_samplesRemaining = SamplesPerRow();
 			CVSTHost::vstTimeInfo.flags |= kVstTransportPlaying;
@@ -63,6 +73,8 @@ namespace psycle
 
 		void Player::Stop(void)
 		{
+			CSingleLock crit(&Global::_pSong->door, TRUE);
+
 			// Stop song enviroment
 			_playing = false;
 			_playBlock = false;
@@ -87,11 +99,11 @@ namespace psycle
 			{
 				m_SampleRate = sampleRate;
 				RecalcSPR();
+				CVSTHost::pHost->SetSampleRate(sampleRate);
 				for(int i(0) ; i < MAX_MACHINES; ++i)
 				{
 					if(Global::_pSong->_pMachine[i]) Global::_pSong->_pMachine[i]->SetSampleRate(sampleRate);
 				}
-				CVSTHost::pHost->SetSampleRate(sampleRate);
 			}
 		}
 		void Player::SetBPM(int _bpm,int _tpb)

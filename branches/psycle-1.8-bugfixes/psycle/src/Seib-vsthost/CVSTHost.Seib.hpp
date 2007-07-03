@@ -381,7 +381,7 @@ namespace seib {
 			virtual bool KnowsToBypass() { return bCanBypass; }
 			virtual void NeedsIdle(bool enable) { bNeedIdle=enable; }
 			virtual bool NeedsIdle(){ return bNeedIdle; }
-			virtual void NeedsEditIdle(bool enable) { bNeedIdle=enable; }
+			virtual void NeedsEditIdle(bool enable) { bNeedEditIdle=enable; }
 			virtual bool NeedsEditIdle() { return bNeedEditIdle; }
 			virtual bool IsShellPlugin() { return bShellPlugin; }
 			virtual void IsShellPlugin(bool enable) { bShellPlugin = enable; }
@@ -469,16 +469,39 @@ namespace seib {
 			inline void SetProgramName(const char *ptr) { Dispatch(effSetProgramName, 0, 0, const_cast<char*>(ptr) ); }
 			inline void GetProgramName(char *ptr) { Dispatch(effGetProgramName, 0, 0, ptr); }
 			// Unit of the paramter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter
+			// NOTE-NOTE-NOTE-NOTE: Forget about the limit. Use the kVstMaxProgNameLen instead.
 			inline void GetParamLabel(VstInt32 index, char *ptr) { Dispatch(effGetParamLabel, index, 0, ptr); }
 			// Value of the parameter. size of ptr string limited to kVstMaxParamStrLen + \0 delimiter for safety.
+			// NOTE-NOTE-NOTE-NOTE: Forget about the limit. It is exceeded sometimes. Use the kVstMaxProgNameLen instead.
 			inline void GetParamDisplay(VstInt32 index, char *ptr) { Dispatch(effGetParamDisplay, index, 0, ptr); }
-			// Name of the parameter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter (might be not followed by plugin devs)
+			// Name of the parameter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter.
+			// NOTE-NOTE-NOTE-NOTE: Forget about the limit. It's *way* exceeded usually. Use the kVstMaxProgNameLen instead.
 			inline void GetParamName(VstInt32 index, char *ptr) { Dispatch(effGetParamName, index, 0, ptr); }
 			// Returns the vu value. Range [0-1] >1 -> clipped
 			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu); }
-			inline void SetSampleRate(float fSampleRate) { Dispatch(effSetSampleRate, 0, 0, 0, fSampleRate); }
-			inline void SetBlockSize(VstIntPtr value) { Dispatch(effSetBlockSize, 0, value); }
-			inline void MainsChanged(bool bOn) { if (bOn != bMainsState) { Dispatch(effMainsChanged, 0, bOn); bMainsState=bOn; }}
+			inline void SetSampleRate(float fSampleRate)
+			{
+				bool reinit=false;
+				if (bMainsState) { reinit=true; MainsChanged(false); }
+				Dispatch(effSetSampleRate, 0, 0, 0, fSampleRate);
+				if (reinit) MainsChanged(true);
+			}
+			inline void SetBlockSize(VstIntPtr value)
+			{
+				bool reinit=false;
+				if (bMainsState) { reinit=true; MainsChanged(false); }
+				Dispatch(effSetBlockSize, 0, value);
+				if (reinit) MainsChanged(true);
+			}
+			inline void MainsChanged(bool bOn)
+			{
+				if (bOn != bMainsState)
+				{
+					if (bOn) { Dispatch(effMainsChanged, 0, bOn); StartProcess(); }
+					else {  StopProcess(); Dispatch(effMainsChanged, 0, bOn); }
+					bMainsState=bOn;
+				}
+			}
 			inline bool EditGetRect(ERect **ptr) { return Dispatch(effEditGetRect, 0, 0, ptr)==1?true:false; }
 			inline void EditOpen(void *ptr) { Dispatch(effEditOpen, 0, 0, ptr); bEditOpen = true; }
 			inline void EditClose() { Dispatch(effEditClose); bEditOpen = false; }

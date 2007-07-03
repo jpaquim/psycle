@@ -35,8 +35,8 @@ NAMESPACE__BEGIN(psycle)
 		bool CVstGui::GetViewSize(CRect& rect)
 		{
 			ERect* pRect;
-			pEffect->EditGetRect(&pRect);
-			if (!pRect)
+			
+			if (!pEffect->EditGetRect(&pRect) || !pRect)
 				return false;
 
 			rect.left = rect.top = 0;
@@ -74,8 +74,10 @@ NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_MIDICHANNELS, OnUpdateViewsMidichannels)
 			ON_COMMAND(ID_ABOUT_ABOUTVST, OnAboutAboutvst)
 //			ON_LBN_SELCHANGE(ID_COMBO_BANK, OnSelchangeBank)
+//			ON_CBN_CLOSEUP(ID_COMBO_BANK, OnCloseupProgram)
 //			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
 			ON_LBN_SELCHANGE(ID_COMBO_PRG, OnSelchangeProgram)
+			ON_CBN_CLOSEUP(ID_COMBO_PRG, OnCloseupProgram)
 			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+999, OnSetProgram)
 			ON_COMMAND(ID_PROGRAMLESS, OnProgramLess)
 			ON_UPDATE_COMMAND_UI(ID_PROGRAMLESS, OnUpdateProgramLess)
@@ -294,8 +296,8 @@ NAMESPACE__BEGIN(psycle)
 					popup.CreatePopupMenu();
 					for (int j = i; (j < i + 16) && (j < machine().numPrograms()); j++)
 					{
-						char szProg[256] = "";
-						char szPgName[256] = "";
+						char szProg[kVstMaxProgNameLen+7] = "";
+						char szPgName[kVstMaxProgNameLen+1] = "";
 						machine().GetProgramNameIndexed(-1, j, szPgName);
 						std::sprintf(szProg,"%d. %s",j,szPgName);
 						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, szProg);
@@ -318,8 +320,8 @@ NAMESPACE__BEGIN(psycle)
 			nump = machine().numPrograms();
 			for(int i(0) ; i < nump; ++i)
 			{
-				char s1[256];
-				char s2[256];
+				char s1[kVstMaxProgNameLen+7];
+				char s2[kVstMaxProgNameLen+1];
 				machine().GetProgramNameIndexed(-1, i, s2);
 				std::sprintf(s1,"%d: %s",i,s2);
 				comboProgram.AddString(s1);
@@ -332,7 +334,10 @@ NAMESPACE__BEGIN(psycle)
 			machine().SetProgram(se);
 			SetFocus();
 		}
-
+		void CVstEffectWnd::OnCloseupProgram()
+		{
+			SetFocus();
+		}
 		void CVstEffectWnd::RefreshUI()
 		{
 			///\todo: anything more?

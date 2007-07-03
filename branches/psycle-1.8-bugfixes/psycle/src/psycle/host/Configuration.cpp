@@ -350,7 +350,7 @@ namespace psycle
 			reg.SetValue("RecordMouseTweaksSmooth", _RecordMouseTweaksSmooth);
 			reg.SetValue("notesToEffects", _notesToEffects);
 			reg.SetValue("RecordUnarmed", _RecordUnarmed);
-			reg.SetValue("bShowPatternNames", _bShowPatternNames);
+			reg.SetValue("ShowPatternNames", _bShowPatternNames);
 			reg.SetValue("toolbarOnVsts", _toolbarOnVsts);
 			//reg.SetValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);

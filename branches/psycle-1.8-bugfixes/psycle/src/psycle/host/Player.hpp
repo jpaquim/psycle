@@ -52,7 +52,7 @@ namespace psycle
 			/// Contains the number of samples until a line change comes in.
 			int _samplesRemaining;
 			/// starts to play.
-			void Start(int pos,int line);
+			void Start(int pos,int line,bool initialize=true);
 			/// wether this player has been started.
 			bool _playing;
 			/// wether this player should only play the selected block in the sequence.

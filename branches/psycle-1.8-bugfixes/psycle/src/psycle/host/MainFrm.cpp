@@ -150,7 +150,6 @@ NAMESPACE__BEGIN(psycle)
 			macComboInitialized = false;
 			
 			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
-			Global::pConfig->_bShowPatternNames=false;
 			
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
@@ -329,6 +328,9 @@ NAMESPACE__BEGIN(psycle)
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MOVECURSORPASTE);
 			cb->SetCheck(Global::pInputHandler->bMoveCursorPaste?1:0);
+
+			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_SHOWPATTERNAME);
+			cb->SetCheck(Global::pConfig->_bShowPatternNames?1:0);
 
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_RECORD_NOTEOFF);
 			cb->SetCheck(Global::pConfig->_RecordNoteoff?1:0);
@@ -1721,7 +1723,7 @@ NAMESPACE__BEGIN(psycle)
 				if ((Global::pPlayer->_playing) && (Global::pConfig->_followSong))
 				{
 					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(ep,0);
+					Global::pPlayer->Start(ep,0,false);
 					Global::pPlayer->_playBlock = b;
 				}
 				m_wndView.editPosition=ep;

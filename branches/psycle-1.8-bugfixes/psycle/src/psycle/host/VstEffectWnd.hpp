@@ -94,6 +94,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateViewsMidichannels(CCmdUI *pCmdUI);
 			afx_msg void OnAboutAboutvst();
 			afx_msg void OnSelchangeProgram();
+			afx_msg void OnCloseupProgram();
 			afx_msg void OnSetProgram(UINT nID);
 			afx_msg void OnProgramLess();
 			afx_msg void OnUpdateProgramLess(CCmdUI *pCmdUI);

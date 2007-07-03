@@ -101,8 +101,8 @@ NAMESPACE__BEGIN(psycle)
 			const int nump = machine().numPrograms();
 			for(int i(0) ; i < nump; ++i)
 			{
-				char s1[256];
-				char s2[256];
+				char s1[kVstMaxProgNameLen+7];
+				char s2[kVstMaxProgNameLen+1];
 				machine().GetProgramNameIndexed(-1, i, s2);
 				std::sprintf(s1,"%d: %s",i,s2);
 				m_program.AddString(s1);
@@ -118,8 +118,8 @@ NAMESPACE__BEGIN(psycle)
 			const long int params = machine().numParams();
 			for(int i(0) ; i < params; ++i)
 			{
-				char str[128], buf[128];
-				std::memset(str, 0, 64);
+				char str[kVstMaxProgNameLen+9], buf[kVstMaxProgNameLen+1];
+				std::memset(str, 0, kVstMaxProgNameLen+9);
 				machine().GetParamName(i, str);
 				bool b = machine().CanBeAutomated(i);
 				if(b) std::sprintf(buf, "(A)%.3X: %s", i, str);
@@ -134,7 +134,7 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstParamList::UpdateText(int value)
 		{
-			char str[512],str2[32];
+			char str[kVstMaxProgNameLen*3],str2[12];
 			machine().DescribeValue(m_parlist.GetCurSel(),str);
 			std::sprintf(str2,"\t[Hex: %4X]",value);
 			std::strcat(str,str2);

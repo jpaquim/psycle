@@ -222,6 +222,7 @@ namespace psycle
 		bool DirectSound::AddCapturePort(int idx)
 		{
 			bool isplaying = _running;
+			if ( idx >= _capPorts.size() ) return false;
 			for (unsigned int i=0;i<_capPorts.size();++i)
 			{
 				if (_capPorts[i]._pGuid == _capEnums[idx].guid ) return false;
@@ -244,6 +245,7 @@ namespace psycle
 		{
 			bool restartplayback = false;
 			std::vector<PortCapt> newports;
+			if ( idx >= _capPorts.size() ) return false;
 			for (unsigned int i=0;i<_capPorts.size();++i)
 			{
 				if (_capPorts[i]._pGuid == _capEnums[idx].guid )
@@ -254,8 +256,13 @@ namespace psycle
 						restartplayback=true;
 					}
 				}
-				else newports.push_back(_capPorts[i]);
+				else 
+				{
+					_portMapping[newports.size()]=_portMapping[i];
+					newports.push_back(_capPorts[i]);
+				}
 			}
+			_portMapping.resize(newports.size());
 			_capPorts = newports;
 			if (restartplayback) Start();
 			return true;
@@ -306,6 +313,7 @@ namespace psycle
 		{
 			if (_running)
 			{
+				if (idx >=_capPorts.size()) return;
 				*pleft=_capPorts[_portMapping[idx]].pleft+_capPorts[_portMapping[idx]]._machinepos;
 				*pright=_capPorts[_portMapping[idx]].pright+_capPorts[_portMapping[idx]]._machinepos;
 				_capPorts[_portMapping[idx]]._machinepos+=numsamples;
