@@ -289,13 +289,19 @@ namespace psycle
 			{
 				{
 					reg.QueryValue("MidiInputDriver", _midiDriverIndex);
-					if(0 > _midiDriverIndex || _midiDriverIndex > _numMidiDrivers) _midiDriverIndex = 0;
-					CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
+					if(0 > _midiDriverIndex || _midiDriverIndex > _numMidiDrivers) 
+					{
+					CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, - 1);
+					}
+					else CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
 				}
 				{
 					reg.QueryValue("MidiSyncDriver", _syncDriverIndex);
-					if(0 > _syncDriverIndex || _syncDriverIndex > _numMidiDrivers) _syncDriverIndex = 0;
-					CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
+					if(0 > _syncDriverIndex || _syncDriverIndex > _numMidiDrivers)
+					{
+						CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, - 1);
+					}
+					else CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				}
 				{
 					reg.QueryValue("MidiInputHeadroom", _midiHeadroom);
