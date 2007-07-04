@@ -45,13 +45,20 @@ namespace psycle
 				note trackNote[MAX_TRACKS];
 				VstMidiEvent midievent[MAX_VST_EVENTS];
 				VstEventsDynamic mevents;
+				bool NSActive;
+				int	NSSamples;
+				int NSDelta;
+				int NSDestination;
+				int NSCurrent;
+				static int pitchWheelCentre;
+				int rangeInSemis;
+				int oldNote;
 				int	queue_size;
 				/// reserves space for a new midi event in the queue.
 				/// \return midi event to be filled in, or null if queue is full.
 				VstMidiEvent* reserveVstMidiEvent();
 				VstMidiEvent* reserveVstMidiEventAtFront(); // ugly hack
 
-//				CVstEffectWnd* editorWindow;
 				float * inputs[max_io];
 				float * outputs[max_io];
 				float * _pOutSamplesL;
@@ -64,7 +71,7 @@ namespace psycle
 				/// It needs to use Process
 				bool requiresProcess;
 				/// It needs to use ProcessReplacing
-				bool requiresRepl;		
+				bool requiresRepl;
 
 			public:
 				plugin(LoadedAEffect &loadstruct);
@@ -82,8 +89,9 @@ namespace psycle
 				//////////////////////////////////////////////////////////////////////////
 				// Actions
 				virtual void Init(){ Machine::Init();}
+				virtual void PreWork(int numSamples,bool clear=true);
 				virtual void Work(int numSamples);
-				virtual void Tick() {;}
+				virtual void Tick() { Machine::Tick(); };
 				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
 				// old fileformat {
@@ -122,10 +130,19 @@ namespace psycle
 //				virtual bool ConnectTo(Machine& dstMac,int dstport=0,int outport=0,float volume=1.0f);
 //				virtual bool Disconnect(Machine& dstMac);
 
-				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0);
-				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0);
-				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false);
+				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0, unsigned int sampleoffset=0);
+				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0,bool slide=false, unsigned int sampleoffset=0);
+				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false, unsigned int sampleoffset=0);
 				inline void SendMidi();
+				int LSB(int val)
+				{				
+					return val & 0x7f;
+				}
+
+				int MSB(int val)
+				{				
+					return (val & 0x3F80) >> 7;
+				}
 				// Properties
 				//////////////////////////////////////////////////////////////////////////
 				virtual void SetSampleRate(int sr) { CEffect::SetSampleRate((float)sr); }
@@ -150,17 +167,23 @@ namespace psycle
 				virtual void SetParameter(int numparam, float value) { CEffect::SetParameter(numparam,value); }
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
+				virtual void InitWireVolume(MachineType mType,int wireIndex,float value)
+				{ MainsChanged(false); Machine::InitWireVolume(mType,wireIndex,value);  MainsChanged(true); }
+				virtual void DeleteOutputWireIndex(int wireIndex)
+				{ MainsChanged(false); Machine::DeleteOutputWireIndex(wireIndex);  MainsChanged(true); }
+				virtual void DeleteInputWireIndex(int wireIndex)
+				{ MainsChanged(false); Machine::DeleteInputWireIndex(wireIndex);  MainsChanged(true); }
+
+
 				// CEffect overloaded functions
 				//////////////////////////////////////////////////////////////////////////
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
-				///\todo: We need to implement a (Dis)ConnectWire function in order to call MainsChanged() and so that plugins can
-				// test against connected inputs. Else it only done at creation, and we reply "not connected".
-//				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
-//				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }
-				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return true; } 
-				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return true; }
+				/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
+				/// doing an "off/on" when a connection changes.
+				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
+				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }
 				// AEffect asks host about its input/outputspeakers.
 				virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
 				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
