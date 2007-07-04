@@ -113,10 +113,12 @@ namespace psycle
 				,queue_size(0)
 				,requiresRepl(0)
 				,requiresProcess(0)
-				,rangeInSemis(12)
+				,rangeInSemis(2)
+				,trackerPortamentoEnabled(false)
 				,NSActive(false)
 				,NSCurrent(pitchWheelCentre)
 				,NSDestination(pitchWheelCentre)
+				,NSTargetDistance(0)
 				,NSSamples(0)
 				,NSDelta(0)
 				,oldNote(-1)
@@ -490,7 +492,7 @@ namespace psycle
 				{
 					NSSamples=NSSamples%TWEAK_SLIDE_SAMPLES;
 					int ns = numSamples + NSSamples - TWEAK_SLIDE_SAMPLES;
-					while(ns>=0)
+					while(ns >= 0)
 					{
 						NSCurrent += NSDelta;
 						if(
@@ -502,7 +504,7 @@ namespace psycle
 							NSActive = false;
 						}
 						//currently just working with midichannel 0
-//						TRACE( "semislide = %d\n", NSCurrent);
+						//TRACE( "semislide = %d\n", NSCurrent);
 						AddMIDI(0xE0,LSB(NSCurrent),MSB(NSCurrent),NSSamples);
 						NSSamples+=min(TWEAK_SLIDE_SAMPLES,ns);
 						ns-=TWEAK_SLIDE_SAMPLES;
@@ -512,6 +514,19 @@ namespace psycle
 			void plugin::Tick(int channel, PatternEntry * pData)
 			{
 				const int note = pData->_note;
+
+				if(pData->_cmd == 0xC4) //set the pitch bend range
+				{
+					rangeInSemis = pData->_parameter;
+				}
+				else if(pData->_cmd == 0xC5)
+				{
+					if (pData->_parameter == 0)
+						trackerPortamentoEnabled = false;	//disable
+					else if (pData->_parameter == 1)
+						trackerPortamentoEnabled = true;	//enable
+				}
+
 				if(note < notecommands::release) // Note on
 				{
 					int semisToSlide(0);
@@ -521,70 +536,83 @@ namespace psycle
 					}
 					else if(pData->_cmd == 0x0C) //velocity
 					{
-						if (NSCurrent != pitchWheelCentre )
+						if ((NSCurrent != pitchWheelCentre) && trackerPortamentoEnabled)
 						{
 							NSActive = false;
 							if(pData->_inst == 0xFF) AddMIDI(0xE0,LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 							else AddMIDI(0xE0 | (pData->_inst &0x0F),LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 							NSCurrent = pitchWheelCentre;
 							NSDestination = NSCurrent;
+							currentSemi = 0;
 						}
+
 						if(pData->_inst == 0xFF) AddNoteOn(channel, note, pData->_parameter / 2);
 						else AddNoteOn(channel,note,pData->_parameter/2,pData->_inst&0x0F);
 					}
-					else if((pData->_cmd & 0xF0) == 0xD0 || (pData->_cmd & 0xF0) == 0xE0) //semislide
+					else if(((pData->_cmd & 0xF0) == 0xD0 || (pData->_cmd & 0xF0) == 0xE0) && trackerPortamentoEnabled) //semislide
 					{
-						if (NSCurrent != pitchWheelCentre )
+						if (NSCurrent != pitchWheelCentre)
 						{
 							if(pData->_inst == 0xFF) AddMIDI(0xE0,LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 							else AddMIDI(0xE0 | (pData->_inst &0x0F),LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 						}
-						semisToSlide = pData->_cmd & 0x0F;
-						if (semisToSlide>rangeInSemis)
-							semisToSlide = rangeInSemis;
+
+						currentSemi = 0;
+
+						if ((pData->_cmd & 0xF0) == 0xD0) //pitch slide down
+						{
+							semisToSlide = -(pData->_cmd & 0x0F);
+							if (semisToSlide < (-rangeInSemis - currentSemi))
+								semisToSlide = (-rangeInSemis - currentSemi);
+						}
+						else							  //pitch slide up
+						{
+							semisToSlide = pData->_cmd & 0x0F;
+							if (semisToSlide > (rangeInSemis - currentSemi))
+								semisToSlide = (rangeInSemis - currentSemi);
+						}
+
 						int speedToSlide = pData->_parameter;
-						if ((pData->_cmd & 0xF0) == 0xD0)
-							NSDestination = pitchWheelCentre - ((pitchWheelCentre / rangeInSemis) * semisToSlide);
-						else
-							NSDestination = pitchWheelCentre + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
-						NSCurrent = pitchWheelCentre;
+						
+						NSCurrent = pitchWheelCentre + (currentSemi * (pitchWheelCentre / rangeInSemis));
+						NSDestination = NSCurrent + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
 						NSDelta = ((NSDestination - NSCurrent) * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
 						NSSamples = 0;
 						NSActive = true;
-						
+						currentSemi = currentSemi + semisToSlide;
 						if(pData->_inst == 0xFF) AddNoteOn(channel, note, 127); // should be 100, but previous host used 127
 						else AddNoteOn(channel, note, 127, pData->_inst & 0x0F);
 					}
-					else if((pData->_cmd == 0xC3) &&(oldNote!=-1))//slide to note
+					else if(((pData->_cmd == 0xC3) && (oldNote!=-1)) && trackerPortamentoEnabled)//slide to note
 					{
 						semisToSlide = note - oldNote;
 						int speedToSlide = pData->_parameter;
 						NSDestination = NSDestination + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
-						NSDelta = ((NSDestination - NSCurrent) * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
+						NSTargetDistance = (NSDestination - NSCurrent);
+						NSDelta = (NSTargetDistance * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
 						NSSamples = 0;
 						NSActive = true;
 					}
 					else //basic note on
 					{
-						if (NSCurrent != pitchWheelCentre )
+						if ((NSCurrent != pitchWheelCentre) && trackerPortamentoEnabled)
 						{
 							NSActive = false;
 							if(pData->_inst == 0xFF) AddMIDI(0xE0,LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 							else AddMIDI(0xE0 | (pData->_inst &0x0F),LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 							NSCurrent = pitchWheelCentre;
 							NSDestination = NSCurrent;
+							currentSemi = 0;
 						}
-						else if(pData->_cmd == 0x08) //Panning
+						if(pData->_cmd == 0x08) //Panning
 						{
 							AddMIDI(0xB0,8,pData->_parameter*0.5f);
 						}
 						if(pData->_inst == 0xFF) AddNoteOn(channel, note, 127); // should be 100, but previous host used 127
 						else AddNoteOn(channel, note, 127, pData->_inst & 0x0F);
 					}
-					if ((pData->_cmd & 0xF0) == 0xD0) 
-						oldNote = note - semisToSlide;								
-					else if ((pData->_cmd & 0xF0) == 0xE0)
-						oldNote = note + semisToSlide;
+					if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
+						oldNote = note + semisToSlide;								
 					else
 						oldNote = note;
 				}
@@ -632,6 +660,8 @@ namespace psycle
 				}
 				else if(pData->_note == notecommands::empty)
 				{
+					int semisToSlide(0);
+
 					if (pData->_cmd == 0x10) // _OLD_ MIDI Command
 					{
 						AddMIDI(pData->_inst,pData->_parameter);
@@ -640,13 +670,48 @@ namespace psycle
 					{
 						AddMIDI(0xB0,8,pData->_parameter*0.5f);
 					}
-					else if (pData->_cmd == 0x0C)
+					else if (pData->_cmd == 0x0C) // velocity
 					{
 						AddMIDI(0xB0,7,pData->_parameter*0.5f);
 					}
-					else if(pData->_cmd == 0xC3) //slide to note . Used to change the speed/note
+					else if((pData->_cmd == 0xC3) && trackerPortamentoEnabled) //slide to note . Used to change the speed/note
 					{
+						int speedToSlide = pData->_parameter;
+						NSDelta = (NSTargetDistance * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
 					}
+					else if(((pData->_cmd & 0xF0) == 0xD0 || (pData->_cmd & 0xF0) == 0xE0) && trackerPortamentoEnabled) //semislide
+					{
+						if (NSCurrent != NSDestination)
+						{
+							if(pData->_inst == 0xFF) AddMIDI(0xE0,LSB(NSDestination),MSB(NSDestination));
+							else AddMIDI(0xE0 | (pData->_inst &0x0F),LSB(NSDestination),MSB(NSDestination));
+						}
+
+						if ((pData->_cmd & 0xF0) == 0xD0) //pitch slide down
+						{
+							semisToSlide = -(pData->_cmd & 0x0F);
+							if (semisToSlide < (-rangeInSemis - currentSemi))
+								semisToSlide = (-rangeInSemis - currentSemi);
+						}
+						else							  //pitch slide up
+						{
+							semisToSlide = pData->_cmd & 0x0F;
+							if (semisToSlide > (rangeInSemis - currentSemi))
+								semisToSlide = (rangeInSemis - currentSemi);
+						}
+
+						int speedToSlide = pData->_parameter;
+						
+						NSCurrent = pitchWheelCentre + (currentSemi * (pitchWheelCentre / rangeInSemis));
+						NSDestination = NSCurrent + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
+						NSDelta = ((NSDestination - NSCurrent) * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
+						NSSamples = 0;
+						NSActive = true;
+						currentSemi = currentSemi + semisToSlide;
+					}
+
+					if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
+						oldNote = oldNote + semisToSlide;								
 				}
 			}
 
