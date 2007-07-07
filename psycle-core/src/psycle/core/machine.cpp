@@ -1,4 +1,4 @@
-#error just testing build failure detection
+#error just testing build failure detection (bis)
 ///\file
 ///\brief implementation file for psy::core::Machine
 #include "machine.h"
