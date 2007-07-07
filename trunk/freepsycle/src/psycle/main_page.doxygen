@@ -1,7 +1,7 @@
 /// extensible modular audio frawework.
 namespace psycle
 {
-	/// functionalities shared by both the plugins and the host.
+	/// declarations shared by both the plugins and the host.
 	namespace engine
 	{
 		namespace math
@@ -9,12 +9,12 @@ namespace psycle
 		}
 	}
 	
-	/// functionalities used by the host side only, not by the plugins.
+	/// declarations used by the host side only, not by the plugins.
 	namespace host
 	{
 	}
 	
-	/// functionalities used by the plugin side only, not by the host.
+	/// declarations used by the plugin side only, not by the host.
 	/// Place your plugins in this namespace.
 	namespace plugins
 	{
