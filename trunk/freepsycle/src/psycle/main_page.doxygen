@@ -15,7 +15,7 @@ namespace psycle
 	}
 	
 	/// declarations used by the plugin side only, not by the host.
-	/// Place your plugins in this namespace.
+	/// Plugins are declared in this namespace.
 	namespace plugins
 	{
 		/// plugins driving an underlying output device.
