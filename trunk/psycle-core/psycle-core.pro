@@ -4,7 +4,7 @@
 
 include(qmake/platform.pri)
 
-TEMPLATE = lib # This project builds library.
+TEMPLATE = lib # This project builds a library.
 CONFIG *= plugin # This built lib is a loadable module.
 TARGET = 
 
