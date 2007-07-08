@@ -43,4 +43,4 @@ int main(int argument_count, char * arguments[])
 	return 0;
 }
 
-#error blame test
+#error blame test 2
