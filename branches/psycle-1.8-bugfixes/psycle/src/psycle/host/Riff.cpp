@@ -381,7 +381,7 @@ namespace psycle
 			case 32:
 				pcm_data.ckSize += 4;
 				d = int(SampleData * 65536.0f);
-				return Write ( &SampleData, 4 );
+				return Write ( &d, 4 );
 			}
 			return DDC_INVALID_CALL;
 		}

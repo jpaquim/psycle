@@ -735,20 +735,20 @@ namespace seib {
 
 			if ( GetPlugCategory() != kPlugCategShell )
 			{
-				SetSampleRate(CVSTHost::pHost->GetSampleRate()); /* adjust its sample rate            */
+				SetSampleRate(CVSTHost::pHost->GetSampleRate()); // adjust its sample rate            
 				SetBlockSize(CVSTHost::pHost->GetBlockSize());
-				Open();                     /* open the effect                   */
+				Open();                     // open the effect                   
 				// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
-				WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
+				if (GetVstVersion() >= 2400 ) WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
 				//6 :        Host to Plug, canDo ( bypass )   returned : 0
 				KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
-				MainsChanged(true);                   /* then force resume.                */
-				MainsChanged(false);                  /* suspend again...                  */
-				SetBlockSize(CVSTHost::pHost->GetBlockSize());   /* and block size                    */
+				MainsChanged(true);                 //   then force resume.                
+				MainsChanged(false);                //   suspend again...                  
+				SetBlockSize(CVSTHost::pHost->GetBlockSize()); //   and block size                    
 				SetProcessPrecision(kVstProcessPrecision32);
 				//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
 				SetPanLaw(kLinearPanLaw,1.0f);
-				MainsChanged(true);                   /* then force resume.                */
+				MainsChanged(true);                //    then force resume.                
 
 			}
 			else
@@ -1448,33 +1448,21 @@ namespace seib {
 			CEffect *pEffect=0;
 			bool fakeeffect=false;
 
-			if (pHost->loadingEffect)
+			if ( !effect )
 			{
-				// The VST SDK 2.0 said this:
-				// [QUOTE]
-				//	Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the
-				//	plug-in about important system parameters like sample rate, and sample block size. Because the
-				//	audio effect object is constructed in our plug-in’s main(), before the host gets any information about
-				//	the created object, you need to be careful what functions are called within the constructor of the
-				//	plug-in. You may be talking but no-one is listening.
-				// [/QUOTE]
-				// The truth is that most plugins call different audioMaster operations, and some even disallowed operations (WantEvents!),
-				// so this tries to alleviate the problem, as much as it can.
-				fakeeffect = true;
-				pEffect = pHost->CreateWrapper(effect);
-			}
-			else if ( !effect )
-			{
-				std::stringstream s; s
-					<< "AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin)" << std::endl
-					<< "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
-					<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
-				std::stringstream title; title
-					<< "Machine Error: ";
-				psycle::host::loggers::info(title.str() + '\n' + s.str());
+				if (!pHost->loadingEffect)
+				{
+					std::stringstream s; s
+						<< "AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin)" << std::endl
+						<< "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
+						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
+					std::stringstream title; title
+						<< "Machine Error: ";
+					psycle::host::loggers::info(title.str() + '\n' + s.str());
+				}
 				
-				// As bad behaviour as this is, we try to simulate a pEffect plugin for this call, so that at least calls to
-				// GetProductString and similar can be answered.
+				// We try to simulate a pEffect plugin for this call, so that calls to
+				// GetVersion, GetProductString and similar can be answered.
 				// CEffect will throw an exception if the function requires a callback to the plugin.
 				fakeeffect=true;
 				pEffect = pHost->CreateWrapper(0);
@@ -1496,6 +1484,16 @@ namespace seib {
 					std::stringstream title; title
 						<< "Machine Error: ";
 					psycle::host::loggers::info(title.str() + '\n' + s.str());
+					// The VST SDK 2.0 said this:
+					// [QUOTE]
+					//	Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the
+					//	plug-in about important system parameters like sample rate, and sample block size. Because the
+					//	audio effect object is constructed in our plug-in’s main(), before the host gets any information about
+					//	the created object, you need to be careful what functions are called within the constructor of the
+					//	plug-in. You may be talking but no-one is listening.
+					// [/QUOTE]
+					// The truth is that most plugins call different audioMaster operations, and some even disallowed operations (WantEvents!),
+					// so this tries to alleviate the problem, as much as it can.
 					
 					fakeeffect=true;
 					pEffect= pHost->CreateWrapper(effect);
