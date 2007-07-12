@@ -19,7 +19,8 @@
 ***************************************************************************/
 LogConsole::LogConsole()
 {
-
+	*logText = new QTextEdit(this);
+	logText->setReadOnly(true);
 }
 
 void LogConsole::AddText(QString text)

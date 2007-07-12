@@ -31,7 +31,7 @@ public:
 	void Clear();
 	
 private:	
-	QTextEdit LogText;	
+	QTextEdit *logText;	
 }
 
 #endif
