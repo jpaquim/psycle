@@ -17,6 +17,11 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+/*
+	to add some text to the logging console just call it's AddText(QString text) member
+	you don't need to add \n at the end.... this void adds it automatically at the end :) MATTIAS
+*/
+
 #ifndef LOGCONSOLE_H
 #define LOGCONSOLE_H
 
@@ -26,8 +31,9 @@
 
 class LogConsole : public QWidget
 {
+	Q_OBJECT
 public: 
-	void AddText(QString text); //you don't need to add \n at the end.... this void adds it automatically at the end :) MATTIAS
+	void AddText(QString text);
 	void Clear();
 	
 private:	
