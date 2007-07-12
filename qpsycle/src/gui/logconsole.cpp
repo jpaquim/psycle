@@ -20,9 +20,12 @@
 #include "logconsole.h"
 LogConsole::LogConsole()
 {
+	layOut_ = new QVBoxLayout(this);
 	logText = new QTextEdit(this);
 	logText->setReadOnly(true);
 	logText->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	layOut_->addWidget(logText);
+	setLayout(layOut_);
 }
 void LogConsole::AddText(QString text)
 {

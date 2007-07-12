@@ -28,6 +28,7 @@
 #include <QWidget>
 #include <QString>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
 class LogConsole : public QWidget
 {
@@ -37,8 +38,9 @@ public:
 	void AddText(QString text);
 	void Clear();
 	
-private:	
-	QTextEdit *logText;	
+private:
+	QVBoxLayout *layOut_;
+	QTextEdit *logText;
 };
 
 #endif
