@@ -255,6 +255,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 	delete wavView_;
 	delete seqView_;
 	delete sampleBrowser_;
+	delete logConsole_;
 
 	psy::core::Player::Instance()->song( song_ );
 
@@ -263,6 +264,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 	patView_ = new PatternView( song_ );
 	wavView_ = new WaveView( instrumentsModel_ );
 	seqView_ = new SequencerView( song_ );
+	logConsole_ = new LogConsole();
 	sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );
 	macView_->setOctave( 4 );
 	patView_->setOctave( 4 );
