@@ -37,6 +37,7 @@ HEADERS += src/gui/mainwindow.h \
     src/gui/patternbox.h \
     src/gui/audioconfigdlg.h \
     src/gui/samplebrowser.h \
+	src/gui/logconsole.h \
     src/gui/machineview/machinegui.h \
     src/gui/machineview/machinetweakdlg.h \
     src/gui/machineview/machineview.h \
@@ -68,6 +69,7 @@ SOURCES += qpsycle.cpp \
     src/gui/patternbox.cpp \
     src/gui/audioconfigdlg.cpp \
     src/gui/samplebrowser.cpp \
+	src/gui/logconsole.cpp \
     src/gui/machineview/machinegui.cpp \
     src/gui/machineview/machinetweakdlg.cpp \
     src/gui/machineview/machineview.cpp \

@@ -33,11 +33,12 @@ class LogConsole : public QWidget
 {
 	Q_OBJECT
 public: 
+	LogConsole();
 	void AddText(QString text);
 	void Clear();
 	
 private:	
 	QTextEdit *logText;	
-}
+};
 
 #endif

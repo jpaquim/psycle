@@ -39,6 +39,7 @@
 #include "machinegui.h"
 #include "audioconfigdlg.h"
 #include "samplebrowser.h"
+#include "logconsole.h"
 #include "instrumentsmodel.h"
 
 #include <QtGui>
@@ -59,8 +60,7 @@ MainWindow::MainWindow()
 	wavView_ = new WaveView( instrumentsModel_ );
 	seqView_ = new SequencerView( song_ );
 	patternBox_ = new PatternBox( song_ );
-
-
+	logConsole_ = new LogConsole();
 
 	setupGui();
 	setupSignals();
@@ -103,6 +103,12 @@ void MainWindow::setupGui()
 	dock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	dock_->setWidget(patternBox_);
 	addDockWidget(Qt::LeftDockWidgetArea, dock_);
+	
+	dockL_ = new QDockWidget("Logging Console", this);
+	dockL_->setAllowedAreas(Qt::BottomDockWidgetArea);
+	dockL_->setWidget(logConsole_);
+	addDockWidget(Qt::BottomDockWidgetArea, dockL_);
+	
 
 	sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );
 
