@@ -25,10 +25,11 @@ LogConsole::LogConsole()
 
 void LogConsole::AddText(QString text)
 {
-
+	text += "\n";
+	logText->append(text);
 }
 
 void LogConsole::Clear()
 {
-
+	logText->clear();
 }
