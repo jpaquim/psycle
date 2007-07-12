@@ -45,6 +45,8 @@ class QStandardItemModel;
 
 class InstrumentsModel;
 
+#include "logconsole.h"
+
 #include <QTabWidget>
 #include <QMainWindow>
 #include <QUndoCommand>
@@ -165,6 +167,7 @@ private:
 	QUndoView *undoView;
 	
 	PatternBox *patternBox_;
+	LogConsole *logConsole_;
 	SampleBrowser *sampleBrowser_;
 
 	TabWidget *views_;
@@ -174,6 +177,7 @@ private:
 	SequencerView *seqView_;
 
 	QDockWidget *dock_;
+	QDockWidget *dockL_;
 
 	AudioConfigDlg *audioCnfDlg;
 
