@@ -26,6 +26,7 @@ LogConsole::LogConsole()
 	logText->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	layOut_->addWidget(logText);
 	setLayout(layOut_);
+	logText->append("Logging Console is active\n");
 }
 void LogConsole::AddText(QString text)
 {
