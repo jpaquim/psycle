@@ -37,6 +37,7 @@ public:
 	LogConsole();
 	void AddText(QString text);
 	void Clear();
+	void SaveToFile();
 	
 private:
 	QVBoxLayout *layOut_;
