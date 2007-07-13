@@ -39,7 +39,7 @@ void LogConsole::Clear()
 	logText->clear();
 }
 
-void LogCosole::SaveToFile()
+void LogConsole::SaveToFile()
 {
 
 }
