@@ -43,3 +43,4 @@ void LogConsole::SaveToFile()
 {
 
 }
+#error test
