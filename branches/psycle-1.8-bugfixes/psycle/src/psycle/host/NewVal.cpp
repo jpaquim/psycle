@@ -5,10 +5,11 @@
 #include "NewVal.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		CNewVal::CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,CWnd* pParent)
+		CNewVal::CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,char* title, CWnd* pParent)
 			: CDialog(CNewVal::IDD, pParent)
 			, macindex(mindex) , paramindex(pindex), m_Value(vval) , v_min(vmin) , v_max(vmax)
 		{
+			strcpy(dlgtitle,title);
 		}
 
 		void CNewVal::DoDataExchange(CDataExchange* pDX)
@@ -25,6 +26,7 @@ NAMESPACE__BEGIN(psycle)
 		BOOL CNewVal::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
+			SetWindowText(dlgtitle);
 			char buf[32];
 			sprintf(buf,"%d",m_Value);
 			m_value.SetWindowText(buf);

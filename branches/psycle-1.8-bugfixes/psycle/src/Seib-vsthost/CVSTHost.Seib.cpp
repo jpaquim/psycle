@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Work Derived from the LGPL host "vsthost (1.16l)".						 */
+/* Work Derived from the LGPL host "vsthost (1.16m)".						 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /* vsthost has the following lincense:										 *
 
@@ -789,7 +789,7 @@ namespace seib {
 //				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
-			///\todo: needs to add checks not to suspend/resume if in suspended state
+			bool mainsstate = bMainsState;
 			MainsChanged(false);
 			if (fxstore.IsChunk())
 			{
@@ -840,8 +840,7 @@ namespace seib {
 				SetProgram(cProg);
 			}
 			loadingChunkName = fxstore.GetPathName();
-			///\todo: needs to add checks not to suspend/resume if in suspended state
-			MainsChanged(true);
+			if (mainsstate) MainsChanged(true);
 			return true;
 		}
 		bool CEffect::LoadProgram(CFxProgram& fxstore)
@@ -851,7 +850,7 @@ namespace seib {
 //				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
-			///\todo: needs to add checks not to suspend/resume if in suspended state
+			bool mainsstate = bMainsState;
 			MainsChanged(false);
 			if (fxstore.IsChunk())
 			{
@@ -885,8 +884,7 @@ namespace seib {
 				EndSetProgram();
 			}
 			loadingChunkName = fxstore.GetPathName();
-			///\todo: needs to add checks not to suspend/resume if in suspended state
-			MainsChanged(true);
+			if (mainsstate) MainsChanged(true);
 			return true;
 		}
 
@@ -898,18 +896,17 @@ namespace seib {
 		{
 			if (ProgramIsChunk() && preferchunk)
 			{
-				///\todo: needs to add checks not to suspend/resume if in suspended state
+				bool mainsstate = bMainsState;
 				MainsChanged(false);
 				void *chunk=0;
 				int size=GetChunk(&chunk);
 				CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
-				///\todo: needs to add checks not to suspend/resume if in suspended state
-				MainsChanged(true);
+				if (mainsstate) MainsChanged(true);
 				return b;
 			}
 			else
 			{
-				///\todo: needs to add checks not to suspend/resume if in suspended state
+				bool mainsstate = bMainsState;
 				MainsChanged(false);
 				CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
 				int cProg = GetProgram();
@@ -924,8 +921,8 @@ namespace seib {
 						storep.SetParameter(j,GetParameter(j));
 				}
 				SetProgram(cProg);
-				///\todo: needs to add checks not to suspend/resume if in suspended state
-				MainsChanged(true);
+				
+				if (mainsstate) MainsChanged(true);
 				return b;
 			}
 		}
@@ -933,18 +930,18 @@ namespace seib {
 		{
 			if (ProgramIsChunk() && preferchunk)
 			{
-				///\todo: needs to add checks not to suspend/resume if in suspended state
+				bool mainsstate = bMainsState;
 				MainsChanged(false);
 				void *chunk=0;
 				int size=GetChunk(&chunk);
 				CFxProgram p(uniqueId(),version(),size,true,chunk);
 				///\todo: needs to add checks not to suspend/resume if in suspended state
-				MainsChanged(true);
+				if (mainsstate) MainsChanged(true);
 				return p;
 			}
 			else
 			{
-				///\todo: needs to add checks not to suspend/resume if in suspended state
+				bool mainsstate = bMainsState;
 				MainsChanged(false);
 				CFxProgram storep(uniqueId(),version(),numParams());
 				char name[kVstMaxProgNameLen+1];
@@ -954,7 +951,7 @@ namespace seib {
 				for (int j = 0; j < nParms; j++)
 					storep.SetParameter(j,GetParameter(j));
 				///\todo: needs to add checks not to suspend/resume if in suspended state
-				MainsChanged(true);
+				if (mainsstate) MainsChanged(true);
 				return storep;
 			}
 		}
@@ -1379,7 +1376,7 @@ namespace seib {
 				||	(!strcmp(ptr, canDoOpenFileSelector ))		// "openFileSelector"
 				//||	(!strcmp(ptr, canDoEditFile ))			// "editFile",
 				||	(!strcmp(ptr, canDoCloseFileSelector ))		// "closeFileSelector"
-				//||	(!strcmp(ptr, canDoStartStopProcess ))	// "startStopProcess"
+				||	(!strcmp(ptr, canDoStartStopProcess ))	// "startStopProcess"
 				||	(!strcmp(ptr, canDoShellCategory ))
 				//||	(!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))
 

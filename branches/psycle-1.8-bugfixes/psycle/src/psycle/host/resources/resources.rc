@@ -332,6 +332,9 @@ IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
 IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
 IDR_WAVEDFRAME          BITMAP                  "./toolbar1.bmp"
 IDR_VSTFRAME            BITMAP                  "./bmp00001.bmp"
+IDB_SWITCHON            BITMAP                  "Slider\\imgOn.bmp"
+IDB_SWITCHOFF           BITMAP                  "Slider\\imgOff.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

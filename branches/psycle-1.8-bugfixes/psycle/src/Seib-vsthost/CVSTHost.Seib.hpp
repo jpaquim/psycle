@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Work Derived from the LGPL host "vsthost (1.16l)".						 */
+/* Work Derived from the LGPL host "vsthost (1.16m)".						 */
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /* vsthost has the following lincense:										 *
 

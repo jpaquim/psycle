@@ -114,6 +114,8 @@
 #define IDR_WAVED_POPUP                 260
 #define IDD_SPECIALKEYS                 264
 #define IDD_MACWAVEIN                   271
+#define IDB_SWITCHON                    274
+#define IDB_SWITCHOFF                   275
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1178,7 +1180,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        272
+#define _APS_NEXT_RESOURCE_VALUE        276
 #define _APS_NEXT_COMMAND_VALUE         34207
 #define _APS_NEXT_CONTROL_VALUE         1790
 #define _APS_NEXT_SYMED_VALUE           61

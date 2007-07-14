@@ -19,17 +19,17 @@ NAMESPACE__BEGIN(psycle)
 		public:
 			void Clear();
 			void Init(int num);
-			void Init(int num,char* newname,int* parameters,int size, byte* newdata);
-			void Init(int num,char* newname, float* parameters); // for VST .fxb's
+			void Init(int num,const char* newname,int* parameters,int size, byte* newdata);
+			void Init(int num,const char* newname, float* parameters); // for VST .fxb's
 			int GetNumPars() { return numPars; }
 			void GetParsArray(int* destarray) { if(numPars>0){ memcpy(destarray,params,numPars*sizeof(int)); }}
 			void GetDataArray(byte* destarray) {if(sizeData>0){ memcpy(destarray,data,sizeData); }}
 			byte* GetData() {return data;}
 			long int GetSizeData() {return sizeData;}
-			void SetName(char *setname) { strcpy(name,setname); }
+			void SetName(const char *setname) { strcpy(name,setname); }
 			void GetName(char *nname) { strcpy(nname,name); }
-			int GetParam(int n);
-			void SetParam(int n,int val);
+			int GetParam(const int n);
+			void SetParam(const int n,int val);
 			CPreset();
 			virtual ~CPreset();
 			void operator=(CPreset& newpreset);
@@ -40,9 +40,8 @@ NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			void AddPreset(CPreset& preset);
-			void AddPreset(char* name ,float* parameters);
-			void AddPreset(char* name,int* parameters, byte* newdata);
-			CFrameMachine* m_wndFrame;
+			void AddPreset(const char* name ,float* parameters);
+			void AddPreset(const char* name,int* parameters, byte* newdata);
 			Machine* _pMachine;
 			CPresetsDlg(CWnd* pParent = 0);
 		// Dialog Data

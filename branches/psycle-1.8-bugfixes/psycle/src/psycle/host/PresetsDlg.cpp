@@ -7,6 +7,9 @@
 #include "VSTHost24.hpp"
 #include "FrameMachine.hpp"
 #include "FileIO.hpp"
+
+using namespace seib::vst;
+
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
 		CPreset::CPreset()
@@ -51,7 +54,7 @@ NAMESPACE__BEGIN(psycle)
 			memset(name,0,32);
 		}
 
-		void CPreset::Init(int num,char* newname,int* parameters,int size, byte* newdata)
+		void CPreset::Init(int num,const char* newname,int* parameters,int size, byte* newdata)
 		{
 			if ( num > 0 )
 			{
@@ -79,7 +82,7 @@ NAMESPACE__BEGIN(psycle)
 			strcpy(name,newname);
 		}
 
-		void CPreset::Init(int num,char* newname,float* parameters)
+		void CPreset::Init(int num,const char* newname,float* parameters)
 		{
 			if ( num > 0 )
 			{
@@ -128,13 +131,13 @@ NAMESPACE__BEGIN(psycle)
 			strcpy(name,newpreset.name);
 		}
 
-		int CPreset::GetParam(int n)
+		int CPreset::GetParam(const int n)
 		{
 			if (( numPars != -1 ) && ( n < numPars )) return params[n];
 			return -1;
 		}
 
-		void CPreset::SetParam(int n,int val)
+		void CPreset::SetParam(const int n,int val)
 		{
 			if (( numPars != -1 ) && ( n < numPars )) params[n] = val;
 		}
@@ -244,6 +247,7 @@ NAMESPACE__BEGIN(psycle)
 					++i;
 				}
 				buffer = _pMachine->GetDllName();
+
 			}
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
@@ -302,6 +306,8 @@ NAMESPACE__BEGIN(psycle)
 
 		void CPresetsDlg::OnImport() 
 		{
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
+
 			OPENFILENAME ofn; // common dialog box structure
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
@@ -319,16 +325,8 @@ NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			if( _pMachine->_type == MACH_PLUGIN)
-			{
-				std::string tmpstr = Global::pConfig->GetPluginDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
-			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
-			{
-				std::string tmpstr = Global::pConfig->GetVstDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
+			std::string tmpstr = Global::pConfig->GetPluginDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
 			if(GetOpenFileName(&ofn) == TRUE)
@@ -492,72 +490,6 @@ NAMESPACE__BEGIN(psycle)
 					}
 					fclose(hfile);
 				}
-				else
-				{	// Check later for Fileformat explanation
-					RiffFile fxb;
-					if ( !fxb.Open(szFile) )
-					{
-						MessageBox("Couldn't open File! Operation Aborted.",".fxb File Load Error",MB_OK);
-						return;
-					}
-					if ( fxb._header._id != fxb.FourCC("CcnK") ) return;
-					RiffChunkHeader tmp;
-					fxb.Read(&tmp,8);
-					if ( tmp._id == fxb.FourCC("FBCh") ) // Bank Chunk
-					{
-						MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
-						// Possible structure
-						// CcnK, size, fxID, fxversion, numprograms, future[128], chunksize, chunk
-						// Can't be read program by program, so it has to be loaded directly.
-					}
-					else if ( tmp._id == fxb.FourCC("FxBk") )
-					{
-						fxb.Skip(8); // VST ID + VSTVersion
-
-						ULONGINV numpresets;
-						fxb.Read(&numpresets,4);
-						int intpresets = (numpresets.lohi*256) + numpresets.lolo;
-
-						ULONGINV filenumpars;
-						fxb.Skip(128);
-						fxb.Read(&filenumpars,0);
-
-						int i=0;
-		//				int init=m_preslist.GetCount();
-						char cbuf[29]; cbuf[28]='\0';
-						float* fbuf;
-						fbuf= new float[numParameters];
-						
-						while ( i < intpresets)
-						{
-							fxb.Skip(24);
-							fxb.Read(&filenumpars,4);
-
-							if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters)
-							{
-								MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
-								fxb.Close();
-								return;
-							}
-							fxb.Read(cbuf,28);
-							fxb.Read(fbuf,numParameters*sizeof(float));
-							for (int y=0;y<numParameters;y++)
-							{
-								float temp=fbuf[y];
-								((char*)&fbuf[y])[0]=((char*)&temp)[3];
-								((char*)&fbuf[y])[1]=((char*)&temp)[2];
-								((char*)&fbuf[y])[2]=((char*)&temp)[1];
-								((char*)&fbuf[y])[3]=((char*)&temp)[0];
-
-							}
-							AddPreset(cbuf,fbuf);
-							i++;
-						}
-						zapArray(fbuf);
-					}
-					fxb.Close();
-				}
-
 				UpdateList();
 				SavePresets();
 			}
@@ -587,7 +519,7 @@ NAMESPACE__BEGIN(psycle)
 				std::string tmpstr = Global::pConfig->GetPluginDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
+			else 
 			{
 				std::string tmpstr = Global::pConfig->GetVstDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
@@ -841,103 +773,6 @@ NAMESPACE__BEGIN(psycle)
 				}
 				fclose(hfile);
 			}
-
-		//  VST's fxb FILE.
-		// fxb Structure:
-		//
-		// struct FxSet
-		// {
-		//	long ChunkMagic;	// "CcnK"
-		//	long byteSize;		// size of this chunk, excluding ChunkMagic and byteSize
-		//
-		//	long fxMagic;		// "FxBk"
-		//	long version;
-		//	long fxID;			// Fx ID
-		//	long	fxVersion;
-		//
-		//	long numPrograms;
-		//  char	future[128];
-		//	FxProgram *programs;	// Variable no. of programs
-		// }
-		//
-		// struct FxProgram
-		// {
-		//	long ChunkMagic;	// "CcnK"
-		//	long byteSize;		// size of this chunk, excluding ChunkMagic and byteSize
-		//
-		//	long fxMagic;		// "FxCk"
-		//	long version;
-		//	long fxID;			// Fx ID
-		//	long fxVersion;
-		//	long numParams;
-		//	char prgName[28];
-		//	float *params		 //variable no. of params
-		// }
-
-			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
-			{
-				RiffFile fxb;
-				CString buffer = reinterpret_cast<vst::plugin *>(_pMachine)->GetDllName();
-				buffer = buffer.Left(buffer.GetLength()-4);
-				buffer += ".fxb";
-				char filename[_MAX_PATH];
-				std::sprintf(filename,buffer);
-				if( !fxb.Open(filename) ) return; // here it is read "CcnK" and its "size" (it is 0)
-				if( fxb._header._id != fxb.FourCC("CcnK") ) return;
-				RiffChunkHeader tmp;
-				fxb.Read(&tmp,8);
-				if(tmp._id == fxb.FourCC("FBCh")) // Bank Chunk
-				{
-					MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
-					// Possible structure
-					// CcnK, size, fxID, fxversion, numprograms, future[128], chunksize, chunk
-					// Can't be read program by program, so it has to be loaded directly.
-				}
-				else if( tmp._id == fxb.FourCC("FxBk"))
-				{
-					fxb.Skip(8); // VST ID + VSTVersion
-					ULONGINV numpresets;
-					fxb.Read(&numpresets,4);
-					int intpresets = (numpresets.lohi*256) + numpresets.lolo;
-					// well, I don't expect any file with more than 65535 presets.
-					fxb.Skip(128);
-
-					ULONGINV filenumpars;
-					fxb.Read(&filenumpars,0); // Just because it seems that one "Skip" after another cause problems.
-
-					char cbuf[29]; cbuf[28]='\0';
-					float* fbuf;
-					fbuf= new float[numParameters];
-					
-					intpresets+=i; // Global "i" to prevent deleting presets previously read from .prs file
-					while( i < intpresets)
-					{
-						fxb.Skip(24); // CcnK header + "size" +  FxCk header + fxbkVersion + VST ID + VSTVersion
-						fxb.Read(&filenumpars,4);
-						if(filenumpars.lohi * 256 + filenumpars.lolo != numParameters) // same here...
-						{
-							MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
-							fxb.Close();
-							return;
-						}
-						fxb.Read(cbuf,28); // Read Name
-						fxb.Read(fbuf,numParameters*sizeof(float)); // Read All params.
-						for (int y=0;y<numParameters;y++)
-						{
-							const float temp=fbuf[y];
-							((char*)&fbuf[y])[0]=((char*)&temp)[3];
-							((char*)&fbuf[y])[1]=((char*)&temp)[2];
-							((char*)&fbuf[y])[2]=((char*)&temp)[1];
-							((char*)&fbuf[y])[3]=((char*)&temp)[0];
-
-						}
-						AddPreset(cbuf, fbuf);
-						++i;
-					}
-					zapArray(fbuf);
-				}
-				fxb.Close();
-			}
 		}
 
 		void CPresetsDlg::SavePresets()
@@ -1016,56 +851,34 @@ NAMESPACE__BEGIN(psycle)
 		void CPresetsDlg::TweakMachine(CPreset &preset)
 		{
 			int num=preset.GetNumPars();
-			if(_pMachine->_type == MACH_PLUGIN)
+			for(int i(0) ; i < num ; ++i)
 			{
-				for(int i(0) ; i < num ; ++i)
+				try
 				{
-					try
-					{
-						reinterpret_cast<Plugin *>(_pMachine)->proxy().ParameterTweak(i, preset.GetParam(i));
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // reinterpret_cast sucks
-					{
-						// o_O`
-					}
+					_pMachine->SetParameter(i, preset.GetParam(i));
 				}
-				if(preset.GetData())
+				catch(const std::exception &)
 				{
-					try
-					{
-						reinterpret_cast<Plugin *>(_pMachine)->proxy().PutData(preset.GetData()); // Internal save
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // reinterpret_cast sucks
-					{
-						// o_O`
-					}
+					// o_O`
 				}
-				m_wndFrame->Invalidate(false);
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
+				}
 			}
-			else if(_pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			if(preset.GetData() && _pMachine->_type == MACH_PLUGIN)
 			{
-				for(int i(0) ; i < num ; ++i)
+				try
 				{
-					try
-					{
-						reinterpret_cast<vst::plugin *>(_pMachine)->SetParameter(i, preset.GetParam(i) / 65535.0f);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // reinterpret_cast sucks
-					{
-						// o_O`
-					}
+					reinterpret_cast<Plugin *>(_pMachine)->proxy().PutData(preset.GetData()); // Internal save
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
 				}
 			}
 			presetChanged = true;
@@ -1073,14 +886,14 @@ NAMESPACE__BEGIN(psycle)
 
 
 
-		void CPresetsDlg::AddPreset(char *name, int *parameters, byte *newdata)
+		void CPresetsDlg::AddPreset(const char *name, int *parameters, byte *newdata)
 		{
 			CPreset preset;
 			preset.Init(numParameters,name,parameters,sizeDataStruct,newdata);
 			AddPreset(preset);
 		}
 
-		void CPresetsDlg::AddPreset(char *name, float *parameters)
+		void CPresetsDlg::AddPreset(const char *name, float *parameters)
 		{
 			CPreset preset;
 			preset.Init(numParameters,name,parameters);

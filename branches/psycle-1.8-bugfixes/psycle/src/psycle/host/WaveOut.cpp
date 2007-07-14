@@ -28,6 +28,8 @@ namespace psycle
 			, _running(false)
 			, _pCallback(0)
 		{
+			_capEnums.resize(0);
+			_capPorts.resize(0);
 		}
 
 		void WaveOut::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context)
@@ -36,7 +38,18 @@ namespace psycle
 			_pCallback = pCallback;
 			_running = false;
 			ReadConfig();
+			EnumerateCapturePorts();
 			_initialized = true;
+		}
+		void WaveOut::EnumerateCapturePorts()
+		{
+			for (unsigned int i=0; i < waveInGetNumDevs(); ++i)
+			{
+				WAVEINCAPS caps;
+				waveInGetDevCaps(i,&caps,sizeof(caps));
+				PortEnums port(caps.szPname);
+				_capEnums.push_back(port);
+			}
 		}
 
 		void WaveOut::Reset()
@@ -96,27 +109,15 @@ namespace psycle
 				pBlock->Prepared = false;
 			}
 
+			for (unsigned int i=0; i<_capPorts.size();i++)
+				CreateCapturePort(_capPorts[i]);
+
 			_stopPolling = false;
 			_event.ResetEvent();
 			::_beginthread(PollerThread, 0, this);
 			_running = true;
 			CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
 			return true;
-		}
-
-		void WaveOut::PollerThread(void * pWaveOut)
-		{
-			operating_system::exceptions::translated::new_thread("mme wave out");
-			WaveOut * pThis = (WaveOut*) pWaveOut;
-			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
-			SetThreadAffinityMask(GetCurrentThread(), 1);
-			while(!pThis->_stopPolling)
-			{
-				pThis->DoBlocks();
-				::Sleep(pThis->_pollSleep);
-			}
-			_event.SetEvent();
-			::_endthread();
 		}
 
 		bool WaveOut::Stop()
@@ -163,8 +164,189 @@ namespace psycle
 				::GlobalUnlock(pBlock->HeaderHandle);
 				::GlobalFree(pBlock->HeaderHandle);
 			}
+			for(unsigned int i=0; i<_capPorts.size(); i++)
+			{
+				if(::waveInReset(_capPorts[i]._handle) != MMSYSERR_NOERROR)
+				{
+					Error("waveInReset() failed");
+					return false;
+				}
+				///\todo: wait until WHDR_DONE like with waveout?
+				waveInClose(_capPorts[i]._handle);
+				delete[] _capPorts[i].pleft;
+				delete[] _capPorts[i].pright;
+			}
+			_capPorts.resize(0);
+
 			_running = false;
 			return true;
+		}
+		void WaveOut::GetCapturePorts(std::vector<std::string>&ports)
+		{
+			for (unsigned int i=0;i<_capEnums.size();i++) ports.push_back(_capEnums[i].portname);
+		}
+		bool WaveOut::AddCapturePort(int idx)
+		{
+			bool isplaying = _running;
+			for (unsigned int i=0;i<_capPorts.size();++i)
+			{
+				if (_capPorts[i]._idx == idx ) return false;
+			}
+			PortCapt port;
+			port._idx = idx;
+			if (isplaying)
+			{
+				Stop();
+			}
+			_capPorts.push_back(port);
+			_portMapping[idx]=_capPorts.size()-1;
+			if (isplaying)
+			{
+				return Start();
+			}
+			return true;
+		}
+		bool WaveOut::RemoveCapturePort(int idx)
+		{
+			bool restartplayback = false;
+			std::vector<PortCapt> newports;
+			for (unsigned int i=0;i<_capPorts.size();++i)
+			{
+				if (_capPorts[i]._idx == idx )
+				{
+					if (_running)
+					{
+						Stop();
+						restartplayback=true;
+					}
+				}
+				else newports.push_back(_capPorts[i]);
+			}
+			_capPorts = newports;
+			if (restartplayback) Start();
+			return true;
+		}
+		bool WaveOut::CreateCapturePort(PortCapt &port)
+		{
+			HRESULT hr;
+			//not try to open a port twice
+			if (port._handle) return true;
+
+			WAVEFORMATEX format;
+			// Set up wave format structure. 
+			ZeroMemory(&format, sizeof(WAVEFORMATEX));
+			format.wFormatTag = WAVE_FORMAT_PCM;
+			format.nChannels = 2;
+			format.wBitsPerSample = 16;//_bitDepth;
+			format.nSamplesPerSec = _samplesPerSec;
+			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
+			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
+			format.cbSize = 0;
+
+			if ((hr = waveInOpen(&port._handle,port._idx,&format,NULL,NULL,CALLBACK_NULL)) != MMSYSERR_NOERROR )
+			{
+				Error(_T("Failed to create Capture DirectSound Device"));
+				return false;
+			}
+
+/*			waveInAddBuffer(port._handle
+				LPWAVEHDR pwh,  
+				UINT cbwh       
+				);
+*/
+			waveInStart(port._handle);
+
+			port.pleft = new float[_blockSize];
+			port.pright = new float[_blockSize];
+			return true;
+		}
+
+		void WaveOut::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples)
+		{
+			if  (_running)
+			{
+				*pleft=_capPorts[_portMapping[idx]].pleft+_capPorts[_portMapping[idx]]._machinepos;
+				*pright=_capPorts[_portMapping[idx]].pright+_capPorts[_portMapping[idx]]._machinepos;
+				_capPorts[_portMapping[idx]]._machinepos+=numsamples;
+			}
+		}
+
+		void WaveOut::PollerThread(void * pWaveOut)
+		{
+			operating_system::exceptions::translated::new_thread("mme wave out");
+			WaveOut * pThis = (WaveOut*) pWaveOut;
+			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+			SetThreadAffinityMask(GetCurrentThread(), 1);
+			while(!pThis->_stopPolling)
+			{
+				for (unsigned int i =0; i < pThis->_capPorts.size(); i++)
+				{
+					pThis->DoBlocksRecording(pThis->_capPorts[i]);
+				}
+				pThis->DoBlocks();
+				::Sleep(pThis->_pollSleep);
+			}
+			_event.SetEvent();
+			::_endthread();
+		}
+		void WaveOut::DoBlocksRecording(PortCapt& port)
+		{
+/*
+			PortCapt *pb = _capPorts[_currentBlock];
+			int underruns=0;
+			while(pb->pHeader->dwFlags & WHDR_DONE)
+			{
+				if(pb->Prepared)
+				{
+					if(::waveInUnprepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+					{
+						Error("waveOutUnprepareHeader() failed");
+					}
+					pb->Prepared = false;
+				}
+				int *pOut = (int *)pb->pData;
+				int bs = _blockSize / GetSampleSize();
+				float * pBuf = _pCallback(_callbackContext,bs);
+				if(_dither) QuantizeWithDither(pBuf, pOut,bs);
+				else Quantize(pBuf, pOut,bs);
+
+				_writePos += bs;
+
+				pb->pHeader->lpData = (char *)pb->pData;
+				pb->pHeader->dwBufferLength = _blockSize;
+				pb->pHeader->dwFlags = 0;
+				pb->pHeader->dwLoops = 0;
+
+				if(::waveOutPrepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+				{
+					Error("waveOutPrepareHeader() failed");
+				}
+				pb->Prepared = true;
+
+				if(::waveOutWrite(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+				{
+					Error("waveOutWrite() failed");
+				}
+				++pb;
+				if(pb == _blocks + _numBlocks) pb = _blocks;
+				if ( pb->pHeader->dwFlags & WHDR_DONE)
+				{
+					underruns++;
+					if ( underruns > _numBlocks )
+					{
+						// Audio dropout most likely happened
+						// (There's a possibility a dropout didn't happen, but the cpu usage
+						// is almost at 100%, so we force an exit of the loop for a "Sleep()" call,
+						// preventing psycle from being frozen.
+						break;
+					}
+				}
+			}
+			_currentBlock = pb - _blocks;
+
+			DeQuantizeAndDeinterlace(pBlock2, port.pleft+numSamples,port.pright+numSamples, blockSize2 / GetSampleSize());
+			port._machinepos=0;
+*/
 		}
 
 		void WaveOut::DoBlocks()
@@ -189,7 +371,6 @@ namespace psycle
 
 				_writePos += bs;
 
-				pb->pHeader->dwFlags = 0;
 				pb->pHeader->lpData = (char *)pb->pData;
 				pb->pHeader->dwBufferLength = _blockSize;
 				pb->pHeader->dwFlags = 0;

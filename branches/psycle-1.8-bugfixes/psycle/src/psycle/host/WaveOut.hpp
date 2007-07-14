@@ -7,6 +7,7 @@
 	#pragma comment(lib, "winmm")
 #pragma warning(pop)
 #include "AudioDriver.hpp"
+#include <map>
 namespace psycle
 {
 	namespace host
@@ -16,12 +17,45 @@ namespace psycle
 		/// output device interface implemented by mme.
 		class WaveOut : public AudioDriver
 		{
+			class PortEnums
+			{
+			public:
+				PortEnums() {};
+				PortEnums(std::string _pname):portname(_pname){}
+				std::string portname;
+			};
+			class PortCapt
+			{
+			public:
+				PortCapt():pleft(0),pright(0),_handle(0),_idx(0),_machinepos(0) {};
+
+				HWAVEIN _handle;
+				int _idx;
+				byte *pData;
+				WAVEHDR *pHeader;
+				HANDLE HeaderHandle;
+				bool Prepared;
+				float *pleft;
+				float *pright;
+				int _machinepos;
+			};
+
 		public:
 			WaveOut();
 			virtual ~WaveOut() throw();
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
 			virtual void Reset();
-			virtual bool Enable(bool e);	
+			virtual bool Enable(bool e);
+
+			virtual void GetCapturePorts(std::vector<std::string>&ports);
+			virtual bool AddCapturePort(int idx);
+			virtual bool RemoveCapturePort(int idx);
+			virtual bool CreateCapturePort(PortCapt &port);
+			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+			virtual void EnumerateCapturePorts();
+
+			virtual int GetInputLatency() { return _numBlocks * _blockSize; };
+			virtual int GetOutputLatency() { return _numBlocks * _blockSize; };
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
 			virtual void Configure();
@@ -29,6 +63,17 @@ namespace psycle
 			virtual bool Configured() { return _configured; };
 			virtual AudioDriverInfo* GetInfo() { return &_info; };
 			MMRESULT IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID);
+			static void PollerThread(void *pWaveOut);
+		protected:
+			void ReadConfig();
+			void WriteConfig();
+			void Error(const char msg[]);
+			void DoBlocks();
+			bool WantsMoreBlocks();
+			void DoBlocksRecording(PortCapt& port);
+			bool Start();
+			bool Stop();
+
 		private:
 			class CBlock
 			{
@@ -57,13 +102,11 @@ namespace psycle
 			void* _callbackContext;
 			AUDIODRIVERWORKFN _pCallback;
 
-			static void PollerThread(void *pWaveOut);
-			void ReadConfig();
-			void WriteConfig();
-			void Error(const char msg[]);
-			void DoBlocks();
-			bool Start();
-			bool Stop();
+
+			std::vector<PortEnums> _capEnums;
+			std::vector<PortCapt> _capPorts;
+			std::map<int,int> _portMapping;
+
 		};
 	}
 }

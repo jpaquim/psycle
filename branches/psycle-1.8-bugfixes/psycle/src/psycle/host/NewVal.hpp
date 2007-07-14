@@ -7,13 +7,14 @@ NAMESPACE__BEGIN(psycle)
 		class CNewVal : public CDialog
 		{
 		public:
-			CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,CWnd* pParent = 0);
+			CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,char *title,CWnd* pParent = 0);
 			int m_Value;
 		protected:
 			int v_min;
 			int v_max;
 			int macindex;
 			int paramindex;
+			char dlgtitle[256];
 			enum { IDD = IDD_NEWVAL };
 			CEdit	m_value;
 			CStatic m_text;

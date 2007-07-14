@@ -878,7 +878,9 @@ NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnViewsBankmanager()
 		{
-			// TODO: Agregue aquí su código de controlador de comandos
+			CPresetsDlg dlg;
+			dlg._pMachine=_machine;
+			dlg.DoModal();
 		}
 
 		void CVstEffectWnd::OnUpdateViewsBankmanager(CCmdUI *pCmdUI)

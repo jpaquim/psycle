@@ -5,7 +5,7 @@ namespace psycle
 {
 	namespace host
 	{
-
+//////////////////////////////////////////////////////////////////////////
 /// dummy machine.
 class Dummy : public Machine
 {
@@ -19,7 +19,8 @@ public:
 protected:
 	static char * _psName;
 };
-
+//////////////////////////////////////////////////////////////////////////
+/// Duplicator machine.
 class DuplicatorMac : public Machine
 {
 public:
@@ -53,7 +54,8 @@ protected:
 	bool availablechans[MAX_MACHINES][MAX_TRACKS];
 };
 
-
+//////////////////////////////////////////////////////////////////////////
+/// Audio Recorder
 class AudioRecorder : public Machine
 {
 public:
@@ -79,7 +81,6 @@ public:
 	
 };
 
-
 //////////////////////////////////////////////////////////////////////////
 /// mixer machine.
 class Mixer : public Machine
@@ -90,15 +91,8 @@ public:
 	{
 	public:
 		InputChannel(){ Init(); };
-		InputChannel(int sends)
-		{
-			Init();
-			sends_.resize(sends);
-		}
-		InputChannel(const InputChannel &in)
-		{
-			Copy(in);
-		}
+		InputChannel(int sends){ Init(); sends_.resize(sends); }
+		InputChannel(const InputChannel &in) { Copy(in); }
 		inline void Init()
 		{
 			if (sends_.size() != 0) sends_.resize(0);
@@ -109,11 +103,7 @@ public:
 			dryonly_=false;
 			wetonly_=false;
 		}
-		InputChannel& operator=(const InputChannel &in)
-		{
-			Copy(in);
-			return *this;
-		}
+		InputChannel& operator=(const InputChannel &in) { Copy(in); return *this; }
 		void Copy(const InputChannel &in)
 		{
 			for(unsigned int i=0; i<in.sends_.size(); ++i)
@@ -146,7 +136,6 @@ public:
 		}
 
 	protected:
-		///\todo: panning?
 		std::vector<float> sends_;
 		float volume_;
 		float panning_;
@@ -156,11 +145,11 @@ public:
 		bool wetonly_;
 	};
 
-	class ReturnWire
+	class MixerWire
 	{
 	public:
-		ReturnWire():machine_(-1),volume_(1.0f),normalize_(1.0f) {}
-		ReturnWire(int mac,float norm):machine_(mac),volume_(1.0f),normalize_(norm){}
+		MixerWire():machine_(-1),volume_(1.0f),normalize_(1.0f) {}
+		MixerWire(int mac,float norm):machine_(mac),volume_(1.0f),normalize_(norm){}
 		bool IsValid(){ return (machine_!=-1); }
 
 		int machine_;
@@ -172,33 +161,24 @@ public:
 	{
 	public:
 		ReturnChannel(){Init();}
-		ReturnChannel(int sends)
-		{
-			Init();
-			sends_.resize(sends);
-		}
-		ReturnChannel(const ReturnChannel &in)
-		{
-			Copy(in);
-		}
+		ReturnChannel(int sends) { Init(); sends_.resize(sends); }
+		ReturnChannel(const ReturnChannel &in) { Copy(in); }
 		void Init()
 		{
 			if (sends_.size()!=0) sends_.resize(0);
+			mastersend_=true;
 			volume_=1.0f;
 			panning_=0.5f;
 			mute_=false;
 		}
-		ReturnChannel& operator=(const ReturnChannel& in)
-		{
-			Copy(in);
-			return *this;
-		}
+		ReturnChannel& operator=(const ReturnChannel& in) { Copy(in); return *this; }
 		void Copy(const ReturnChannel& in)
 		{
 			for(unsigned int i=0; i<in.sends_.size(); ++i)
 			{
 				sends_.push_back(in.sends_[i]);
 			}
+			mastersend_ = in.mastersend_;
 			wire_ = in.wire_;
 			volume_ = in.volume_;
 			panning_ = in.panning_;
@@ -206,10 +186,11 @@ public:
 		}
 		inline void Send(int i,bool value) { sends_[i]= value; }
 		inline const bool Send(int i) const { return sends_[i]; }
+		inline bool &MasterSend() { return mastersend_; }
 		inline float &Volume() { return volume_; }
 		inline float &Panning() { return panning_; }
 		inline bool &Mute() { return mute_; }
-		inline ReturnWire &Wire() { return wire_; }
+		inline MixerWire &Wire() { return wire_; }
 		
 		bool IsValid() { return wire_.IsValid(); }
 
@@ -224,7 +205,8 @@ public:
 
 	protected:
 		std::vector<bool> sends_;
-		ReturnWire wire_;
+		bool mastersend_;
+		MixerWire wire_;
 		float volume_;
 		float panning_;
 		bool mute_;
@@ -248,196 +230,14 @@ public:
 		float gain_;
 	};
 
-	class Grid
-	{
-	public:
-		Grid(){ Init();};
-		Grid(int inputs, int sends)
-		{
-			for(int i=0; i<inputs; ++i)
-			{
-				inputs_.push_back(InputChannel(sends));
-			}
-			for(int i=0; i<sends; ++i)
-			{
-				returns_.push_back(ReturnChannel(sends));
-			}
-			master_.Init();
-		}
-		Grid(Grid& copy)
-		{
-			for(int i=0; i<copy.numinputs(); ++i)
-			{
-				inputs_.push_back(copy.inputs_[i]);
-			}
-			for(int i=0; i<copy.numreturns(); ++i)
-			{
-				returns_.push_back(copy.returns_[i]);
-			}
-		}
-		inline void Init(bool* inputs=0)
-		{
-			if (inputs_.size() != 0) inputs_.resize(0);
-			if (returns_.size() != 0) returns_.resize(0);
-			master_.Init();
-			inputvalid=inputs;
-		}
-		inline InputChannel & Channel(int i) { return inputs_[i]; }
-		inline const InputChannel & Channel(int i) const { return inputs_[i]; }
-		inline ReturnChannel & Return(int i) { return returns_[i]; }
-		inline const ReturnChannel & Return(int i) const { return returns_[i]; }
-		inline MasterChannel & Master() { return master_; }
-
-		int numinputs() const { return inputs_.size(); }
-		int numreturns() const { return returns_.size(); }
-		int numsends() const { return returns_.size(); }
-
-		// other accessors, like at() ...
-
-		bool ChannelValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numinputs() && inputvalid[i]); }
-		bool ReturnValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numreturns() && Return(i).IsValid()); }
-
-		void InsertChannel(int idx,InputChannel*input=0)
-		{
-			assert(idx<MAX_CONNECTIONS);
-			if ( idx >= numinputs()-1)
-			{
-				for(int i=numinputs()-1; i<idx; ++i)
-				{
-					inputs_.push_back(InputChannel(numsends()));
-				}
-				if (input) inputs_.push_back(*input);
-				else inputs_.push_back(InputChannel(numsends()));
-			}
-			else if (input) inputs_[idx]=*input;
-			///\todo: _inputCon and _inputMachines are updated by the Mixer class
-		}
-		void InsertReturn(int idx,ReturnChannel* retchan=0)
-		{
-			///\todo: return wire is updated by the Mixer class
-			assert(idx<MAX_CONNECTIONS);
-			if ( idx >= numreturns()-1)
-			{
-				for(int i=numreturns()-1; i<idx; ++i)
-				{
-					returns_.push_back(ReturnChannel(numsends()));
-				}
-				if (retchan) returns_.push_back(*retchan);
-				else returns_.push_back(ReturnChannel(numsends()));
-			}
-			else if (retchan) returns_[idx]=*retchan;
-			for(int i=0; i<numinputs(); ++i)
-			{
-				Channel(i).ResizeTo(numsends());
-			}
-			for(int i=0; i<numreturns(); ++i)
-			{
-				Return(i).ResizeTo(numsends());
-			}
-		}
-		void InsertReturn(int idx,ReturnWire wire)
-		{
-			InsertReturn(idx);
-			Return(idx).Wire()=wire;
-		}
-		void DiscardChannel(int idx)
-		{
-			///\todo: _inputCon and _inputMachines are updated by the Mixer class
-			assert(idx<MAX_CONNECTIONS);
-			if (idx!=numinputs()-1) return;
-			int i;
-			for (i = idx; i >= 0; i--)
-			{
-				if (inputvalid[i])
-					break;
-			}
-			inputs_.resize(i+1);
-		}
-		void DiscardReturn(int idx)
-		{
-			///\todo: return wire is updated by the Mixer class
-			assert(idx<MAX_CONNECTIONS);
-			if (idx!=numreturns()-1) return;
-			int i;
-			for (i = idx; i >= 0; i--)
-			{
-				if (Return(i).IsValid())
-					break;
-			}
-			returns_.resize(i+1);
-		}
-
-		void ExchangeChans(int chann1,int chann2)
-		{
-			InputChannel tmp = inputs_[chann1];
-			inputs_[chann1] = inputs_[chann2];
-			inputs_[chann2] = tmp;
-			/// Exchange wires
-		}
-		void ExchangeReturns(int chann1,int chann2)
-		{
-			ReturnChannel tmp = returns_[chann1];
-			returns_[chann1] = returns_[chann2];
-			returns_[chann2] = tmp;
-			ExchangeSends(chann1,chann2);
-		}
-		void ExchangeSends(int send1,int send2)
-		{
-			for (int i(0); i < numinputs(); ++i)
-			{
-				Channel(i).ExchangeSends(send1,send2);
-			}
-			for (int i(0); i < numreturns(); ++i)
-			{
-				Return(i).ExchangeSends(send1,send2);
-			}
-		}
-/*		void ResizeTo(int inputs, int sends)
-		{
-			inputs_.resize(inputs);
-			returns_.resize(sends);
-			for(int i=0; i<numinputs(); ++i)
-			{
-				Channel(i).ResizeTo(numsends());
-			}
-			for(int i=0; i<numreturns(); ++i)
-			{
-				Return(i).ResizeTo(numsends());
-			}
-		}
-*/		// other member functions, like reserve()....
-
-	private:
-		bool *inputvalid;
-		std::vector<InputChannel> inputs_;
-		std::vector<ReturnChannel> returns_;
-		MasterChannel master_;
-	};
-
-	enum
-	{
-		mix=0,
-		send1,
-		sendmax=send1+MAX_CONNECTIONS,
-		drymix,
-		wetmix,
-		mute,
-		///\todo: remove solo and gain
-		solo,
-		gain
-
-	};
 	enum 
 	{
-		labelcol=0,
-		mastervol,
-		chan1,
+		chan1=0,
 		chanmax = chan1+MAX_CONNECTIONS,
 		return1 = chan1+MAX_CONNECTIONS,
 		returnmax = return1+MAX_CONNECTIONS,
-		///\todo: remove collabels and colmaster
-		collabels=0,
-		colmastervol
+		send1 = return1+MAX_CONNECTIONS,
+		sendmax = send1+MAX_CONNECTIONS
 	};
 	Mixer();
 	Mixer(int index);
@@ -465,89 +265,91 @@ public:
 	virtual void GetParamValue(int numparam,char *parVal);
 	virtual int GetParamValue(int numparam);
 	virtual bool SetParameter(int numparam,int value);
-	virtual bool GetSoloState(int column) { return column==solocolumn_; }
-	virtual bool GetMuteState(int column)
-	{
-		if (column<MAX_CONNECTIONS)
-			return thegrid.Channel(column).Mute();
-		else
-			return thegrid.Return(column-MAX_CONNECTIONS).Mute();
-	}
-	virtual void SetSoloState(int column,bool solo)
+	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+	virtual void SaveSpecificChunk(RiffFile * pFile);
+
+	bool GetSoloState(int column) { return column==solocolumn_; }
+	void SetSoloState(int column,bool solo)
 	{
 		if (solo ==false && column== solocolumn_)
 			solocolumn_=-1;
 		else solocolumn_=column;
 	}
-	virtual void SetMuteState(int column,bool mute)
-	{
-		if (column<MAX_CONNECTIONS)
-			thegrid.Channel(column).Mute()=mute;
-		else
-			thegrid.Return(column-MAX_CONNECTIONS).Mute()=mute;
-	}
-	inline int GetSend(int i){ return thegrid.Return(i).Wire().machine_; }
-	inline bool SendValid(int i) { return thegrid.ReturnValid(i); }
-	virtual float VuChan(int idx);
-	virtual float VuSend(int idx);
+	float VuChan(int idx);
+	float VuSend(int idx);
 
-	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-	virtual void SaveSpecificChunk(RiffFile * pFile);
+	inline InputChannel & Channel(int i) { return inputs_[i]; }
+	inline const InputChannel & Channel(int i) const { return inputs_[i]; }
+	inline ReturnChannel & Return(int i) { return returns_[i]; }
+	inline const ReturnChannel & Return(int i) const { return returns_[i]; }
+	inline MixerWire & Send(int i) { return sends_[i]; }
+	inline const MixerWire & Send(int i) const { return sends_[i]; }
+	inline MasterChannel & Master() { return master_; }
+	inline int numinputs() const { return inputs_.size(); }
+	inline int numreturns() const { return returns_.size(); }
+	inline int numsends() const { return sends_.size(); }
+	inline bool ChannelValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numinputs() && _inputCon[i]); }
+	inline bool ReturnValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numreturns() && Return(i).IsValid()); }
+	inline bool SendValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numsends() && sends_[i].IsValid()); }
+
+	void InsertChannel(int idx,InputChannel*input=0);
+	void InsertReturn(int idx,ReturnChannel* retchan=0);
+	void InsertReturn(int idx,MixerWire rwire)
+	{
+		InsertReturn(idx);
+		Return(idx).Wire()=rwire;
+	}
+	void InsertSend(int idx,MixerWire swire);
+	void DiscardChannel(int idx);
+	void DiscardReturn(int idx);
+
+	void ExchangeChans(int chann1,int chann2);
+	void ExchangeReturns(int chann1,int chann2);
+	void ExchangeSends(int send1,int send2);
+	void ResizeTo(int inputs, int sends);
+
+	void RecalcMaster();
+	void RecalcReturn(int idx);
+	void RecalcChannel(int idx);
+	void RecalcSend(int chan,int send);
 
 
 protected:
 	static char* _psName;
 
 	int solocolumn_;
-	Grid thegrid;
+	std::vector<InputChannel> inputs_;
+	std::vector<ReturnChannel> returns_;
+	std::vector<MixerWire> sends_;
+	MasterChannel master_;
 
-	bool _wetmix;
-	bool _drymix;
-	int _masterVolume;
-	int _masterGain;
-
-	///\todo hardcoded limits and wastes
-
-	float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry+gain) each.  (0 -> dry, 1+ -> sends) 
-	bool _mutestate[MAX_CONNECTIONS*2]; // inputs and returns.
-	/// Incoming send, Machine number
-	///\todo hardcoded limits and wastes
-	int _send[MAX_CONNECTIONS];	
-	/// Value to multiply _sendVol[] to have a 0.0..1.0 range
-	///\todo hardcoded limits and wastes
-	float _returnVolMulti[MAX_CONNECTIONS];
-	/// Incoming connections activated
-	///\todo hardcoded limits and wastes
-	bool _sendValid[MAX_CONNECTIONS];
-
-	// Internal variables
-	float _outGain;
-	float _returnVol[MAX_CONNECTIONS];	
+	// Arrays of precalculated volume values for the FxSend and Mix functions
+	float _sendvolpl[MAX_CONNECTIONS][MAX_CONNECTIONS];
+	float _sendvolpr[MAX_CONNECTIONS][MAX_CONNECTIONS];
+	float mixvolpl[MAX_CONNECTIONS];
+	float mixvolpr[MAX_CONNECTIONS];
+	float mixvolretpl[MAX_CONNECTIONS];
+	float mixvolretpr[MAX_CONNECTIONS];
 
 };
-			/// tweaks:
-			/// [0]:
-			///  0 -> Master volume
-			///  1..12 -> Input volumes
-			///  13 -> master gain.
-			///  14 -> master drywetmix.
-			///  15 -> Solo channel.
-			/// [1..12]:
-			///  0 -> input wet mix.
-			///  1..12 -> sends
-			///  13, 14 -> dryonly, wetonly.
-			///  15 -> mute.
-			/// [13]:
-			///  0 -> return 0 mute.
-			///  1..12 -> input panning.
-			///  13..15 -> returns 1..3 mute.
-			/// [14]: 
-			///  0 -> return 4 mute
-			///  1..12 -> return volumes
-			///  13..15 -> returns 5..7 mute
-			/// [15]:
-			///  0 -> return 8 mute
-            ///  1..12 -> return panning
-			///  13..15 -> returns 8..11 mute
+	/// tweaks:
+	/// [0]:
+	///  0 -> Master volume
+	///  1..12 -> Input volumes
+	///  13 -> master drywetmix.
+	///  14 -> master gain.
+	///  15 -> master pan.
+	/// [1..12]:
+	///  0 -> input wet mix.
+	///  13 -> input drywetmix. ( 0 normal, 1 dryonly, 2 wetonly  3 mute)
+	///  14 -> input gain.
+	///  15 -> input panning.
+	/// [13]:
+	///  0 -> Solo channel.
+	///  1..12 -> return mute. // Eventually, the return grid array could be coded here, using bit0 -> mute, and bit 1..12 for the rerouting. bit 13 -> route to master
+	/// [14]: 
+	///  1..12 -> return volumes
+	/// [15]:
+	///  1..12 -> return panning
 	}
 }

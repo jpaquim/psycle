@@ -45,7 +45,6 @@ namespace psycle
 				note trackNote[MAX_TRACKS];
 				VstMidiEvent midievent[MAX_VST_EVENTS];
 				VstEventsDynamic mevents;
-				bool trackerPortamentoEnabled;
 				bool NSActive;
 				int	NSSamples;
 				int NSDelta;
@@ -166,8 +165,16 @@ namespace psycle
 						return f2i(GetParameter(numparam) * quantization);
 					return 0;
 				}
-				virtual bool SetParameter(int numparam, int value) { CEffect::SetParameter(numparam,float(value)/float(quantization)); return true; }
-				virtual void SetParameter(int numparam, float value) { CEffect::SetParameter(numparam,value); }
+				virtual bool SetParameter(int numparam, int value)
+				{
+					if(numparam < numParams())
+					{
+						CEffect::SetParameter(numparam,float(value)/float(quantization));
+						return true;
+					}
+					return false;
+				}
+				virtual void SetParameter(int numparam, float value) { if(numparam < numParams())CEffect::SetParameter(numparam,value); }
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
 				virtual void InitWireVolume(MachineType mType,int wireIndex,float value)

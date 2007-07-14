@@ -509,6 +509,7 @@ NAMESPACE__BEGIN(psycle)
 			cc2->SetCurSel(_pSong->currentOctave);
 			
 			UpdateComboGen();
+			UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 			
 		}
 
@@ -650,6 +651,9 @@ NAMESPACE__BEGIN(psycle)
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 				//((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
+				///\todo: this causes problems sometimes when loading songs.
+				// customdraw happening before updatemastervalue, so invalid value get set.
+				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
 				((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos();
 				m_wndView.SetFocus();
 			}

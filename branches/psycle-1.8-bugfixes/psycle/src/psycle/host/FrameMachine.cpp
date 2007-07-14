@@ -489,8 +489,7 @@ NAMESPACE__BEGIN(psycle)
 							min_v,
 							max_v
 						);
-					CNewVal dlg(MachineIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v);
-					dlg.SetWindowText(title);
+					CNewVal dlg(MachineIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
 						wndView->AddMacViewUndo();
@@ -629,7 +628,6 @@ NAMESPACE__BEGIN(psycle)
 		{
 			CPresetsDlg dlg;
 			dlg._pMachine=_pMachine;
-			dlg.m_wndFrame=this;
 			dlg.DoModal();
 		}
 

@@ -15,20 +15,24 @@ NAMESPACE__BEGIN(host)
 		{
 			rowlabels=0,
 			send1,
-			send2,
-			send3,
-			send4,
-			send5,
-			send6,
-			send7,
-			send8,
-			send9,
-			send10,
-			send11,
-			send12,
-			dry,
-			//some other buttons.
+			sendmax=send1+MAX_CONNECTIONS,
+			mix = sendmax,
+			gain,
+			pan,
 			slider,
+			solo,
+			mute,
+			dryonly,
+			wetonly
+		};
+		enum
+		{
+			collabels=0,
+			colmaster,
+			chan1,
+			chanmax=chan1+MAX_CONNECTIONS,
+			return1=chanmax,
+			returnmax=return1+MAX_CONNECTIONS
 		};
 		class Knob
 		{
@@ -102,6 +106,20 @@ NAMESPACE__BEGIN(host)
 			static CDC knobDC;
 		};
 
+		class SwitchButton
+		{
+		public:
+			SwitchButton(){};
+			virtual ~SwitchButton(){};
+			
+			static void Draw(CDC *dc,int x, int y, bool checked);
+
+			static int width;
+			static int height;
+			static CDC imgOff;
+			static CDC imgOn;
+		};
+
 		class CheckedButton
 		{
 		public:
@@ -136,9 +154,6 @@ NAMESPACE__BEGIN(host)
 		CFrameMixerMachine(int dum);
 	private:
 		Mixer* _pMixer;
-		int numChans;
-		int numSends;
-
 
 		// graphics
 		bool updateBuffer;
@@ -147,9 +162,15 @@ NAMESPACE__BEGIN(host)
 		CBitmap m_vumeteroff;
 		CBitmap m_sliderknob;
 		CBitmap m_vumeteron;
+		CBitmap m_switchon;
+		CBitmap m_switchoff;
 		CBitmap *bmpDC;
 
 		std::string sendNames[MAX_CONNECTIONS];
+		// used to know if they have changed since last paint.
+		int numSends;
+		// used to know if they have changed since last paint.
+		int numChans;
 
 		// Operations
 	public:
@@ -157,19 +178,16 @@ NAMESPACE__BEGIN(host)
 		virtual void Generate(){};
 		virtual int ConvertXYtoParam(int x, int y);
 		// Overrides
-		// ClassWizard generated virtual function overrides
-		//{{AFX_VIRTUAL(CFrameMixerMachine)
-		//}}AFX_VIRTUAL
 		// Implementation
 	protected:
+		virtual ~CFrameMixerMachine();
 		void Generate(CDC& dc);
 		bool UpdateSendsandChans();
 		int GetColumn(int x,int &xoffset);
-		int GetRow(int y,int &yoffset);
+		int GetRow(int x,int y,int &yoffset);
 		int GetParamFromPos(int col,int row);
-		virtual ~CFrameMixerMachine();
-		// Generated message map functions
-		//{{AFX_MSG(CFrameMixerMachine)
+		bool GetRouteState(int ret,int send);
+
 		afx_msg void OnPaint();
 		afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 		afx_msg void OnMouseMove(UINT nFlags, CPoint point);
@@ -181,11 +199,8 @@ NAMESPACE__BEGIN(host)
 		afx_msg void OnTimer(UINT nIDEvent);
 		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 		afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-		//}}AFX_MSG
 		DECLARE_MESSAGE_MAP()
 	};
 
-	//{{AFX_INSERT_LOCATION}}
-	// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	NAMESPACE__END
 NAMESPACE__END

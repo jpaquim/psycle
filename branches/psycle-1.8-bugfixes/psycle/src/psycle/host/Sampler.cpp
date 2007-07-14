@@ -400,7 +400,7 @@ namespace psycle
 					//
 					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
 					{
-						pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart;
+						pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart + (pVoice->_wave._pos.HighPart - pVoice->_wave._loopEnd);
 					}
 					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
 					{
