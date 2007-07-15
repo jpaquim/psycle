@@ -26,7 +26,7 @@ LogConsole::LogConsole()
 	logText->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	layOut_->addWidget(logText);
 	setLayout(layOut_);
-	logText->append("<b>Logging Console is active\n</b>");
+	logText->append("Logging Console is active\n");
 }
 void LogConsole::AddNormalText(QString text)
 {
@@ -36,13 +36,13 @@ void LogConsole::AddNormalText(QString text)
 
 void LogConsole::AddSuccessText(QString text)
 {
-	text = "<font color=green>" + text + "\n</font>";
+	text = "<font color=green><b>" + text + "\n</b></font>";
 	logText->append(text);
 }
 
 void LogConsole::AddErrorText(QString text)
 {
-	text = "<font color=red>" + text + "\n</font>";
+	text = "<font color=red><i>" + text + "\n</i></font>";
 	logText->append(text);
 }
 
