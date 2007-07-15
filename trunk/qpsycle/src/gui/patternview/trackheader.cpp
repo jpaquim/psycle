@@ -67,7 +67,7 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 		QRectF textBound( xOff, 0, trackGeometry.width(), height_ );
 		painter.drawText( textBound, text, QTextOption( Qt::AlignCenter ) );
 		if (it->first!=0) {
-			painter.drawLine( xOff, 0, xOff, height() ); // col seperator*/
+			painter.drawLine( xOff, 0, xOff, height() ); // col seperator
 		}
 	}
 }
