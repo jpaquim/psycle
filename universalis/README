@@ -1,4 +1,4 @@
-universalis platform abstraction layer library
+platform abstraction layer library
 
 universalis is a library which abstracts the few platform specificities
 which are not handled by the boost and glibmm libraries themselves.

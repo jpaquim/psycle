@@ -1,4 +1,4 @@
-diversalis preprocessor definitions describing the platform
+preprocessor definitions describing the platform
 
 diversalis is a set of preprocessor definitions which describe the platform.
 Platform specificities can be categorized into:
