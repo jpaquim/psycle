@@ -174,12 +174,12 @@ public:
 		ReturnChannel& operator=(const ReturnChannel& in) { Copy(in); return *this; }
 		void Copy(const ReturnChannel& in)
 		{
+			wire_ = in.wire_;
 			for(unsigned int i=0; i<in.sends_.size(); ++i)
 			{
 				sends_.push_back(in.sends_[i]);
 			}
 			mastersend_ = in.mastersend_;
-			wire_ = in.wire_;
 			volume_ = in.volume_;
 			panning_ = in.panning_;
 			mute_ = in.mute_;
@@ -204,9 +204,9 @@ public:
 		}
 
 	protected:
+		MixerWire wire_;
 		std::vector<bool> sends_;
 		bool mastersend_;
-		MixerWire wire_;
 		float volume_;
 		float panning_;
 		bool mute_;

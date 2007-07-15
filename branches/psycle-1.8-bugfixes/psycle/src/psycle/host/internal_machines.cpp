@@ -427,6 +427,7 @@ namespace psycle
 
 		void Mixer::FxSend(int numSamples)
 		{
+			///\todo: Implement "Solo"
 			for (int i=0; i<numsends(); i++)
 			{
 				if (sends_[i].IsValid())
@@ -492,6 +493,7 @@ namespace psycle
 
 		void Mixer::Mix(int numSamples)
 		{
+			///\todo: Implement "Solo"
 			if ( master_.DryWetMix() > 0.0f)
 			{
 				for (int i=0; i<numreturns(); i++)
@@ -726,7 +728,7 @@ namespace psycle
 			{
 				if ( param > 12) { minval=0; maxval=0; }
 				else if ( param == 0 ) { minval=0; maxval=24; }
-				else { minval=0; maxval=16767; }
+				else { minval=0; maxval=(1<<14)-1; }
 			}
 			else if ( channel == 14)
 			{
@@ -811,8 +813,14 @@ namespace psycle
 				else if (param == 0 ) return solocolumn_+1;
 				else 
 				{
-					//\todo: Add Route Values
-					return Return(param-1).Mute();
+					int val(0);
+					if (Return(param-1).Mute()) val|=1;
+					for (int i(0);i<numreturns();i++)
+					{
+						if (Return(param-1).Send(i)) val|=(2<<i);
+					}
+					if (Return(param-1).MasterSend()) val|=(1<<13);
+					return val;
 				}
 			}
 			else if ( channel == 14)
@@ -905,9 +913,21 @@ namespace psycle
 				else if (param == 0 ){ sprintf(parVal,"%d",solocolumn_+1); }
 				else 
 				{
-					///\todo: add Route values
-					if (Return(param-1).Mute() == false) { strcpy(parVal,"false"); }
-					else { strcpy(parVal,"true"); }
+					parVal[0]= (Return(param-1).Mute())?'M':' ';
+					parVal[1]= (Return(param-1).Send(0))?'1':' ';
+					parVal[2]= (Return(param-1).Send(1))?'2':' ';
+					parVal[3]= (Return(param-1).Send(2))?'3':' ';
+					parVal[4]= (Return(param-1).Send(3))?'4':' ';
+					parVal[5]= (Return(param-1).Send(4))?'5':' ';
+					parVal[6]= (Return(param-1).Send(5))?'6':' ';
+					parVal[7]= (Return(param-1).Send(6))?'7':' ';
+					parVal[8]= (Return(param-1).Send(7))?'8':' ';
+					parVal[9]= (Return(param-1).Send(8))?'9':' ';
+					parVal[10]= (Return(param-1).Send(9))?'A':' ';
+					parVal[11]= (Return(param-1).Send(10))?'B':' ';
+					parVal[12]= (Return(param-1).Send(11))?'C':' ';
+					parVal[13]= (Return(param-1).MasterSend())?'O':' ';
+					parVal[14]= '\0';
 				}
 			}
 			else if ( channel == 14)
@@ -965,8 +985,12 @@ namespace psycle
 				else if (param == 0) solocolumn_ = (value<=24)?value-1:23;
 				else 
 				{
-					///\todo: add Route values
-					Return(param-1).Mute() = (value>0)?true:false;
+					Return(param-1).Mute() = (value&1)?true:false;
+					for (int i(param);i<numreturns();i++)
+					{
+						Return(param-1).Send(i,(value&(2<<i))?true:false);
+					}
+					Return(param-1).MasterSend() = (value&(1<<13))?true:false;
 				}
 				return true;
 			}
@@ -1207,45 +1231,109 @@ namespace psycle
 		}
 		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-/*			std::uint32_t size;
-			pFile->Read(&size,sizeof(size));
-			pFile->Read(&_outGain,sizeof(_outGain));
-			pFile->Read(_sendValid,sizeof(_sendValid));
-			pFile->Read(_send,sizeof(_send));
-			pFile->Read(_sendGrid,sizeof(_sendGrid));
-			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
-			/// returnvolmulti should be calculated by the loader.
-			pFile->Read(_returnVol,sizeof(_returnVol));
-			pFile->Read(_returnVolMulti,sizeof(_returnVolMulti));
-			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
+			std::uint32_t filesize;
+			pFile->Read(&filesize,sizeof(filesize));
+
+			pFile->Read(&solocolumn_,sizeof(solocolumn_));
+			pFile->Read(&master_.Volume(),sizeof(float));
+			pFile->Read(&master_.Gain(),sizeof(float));
+			pFile->Read(&master_.DryWetMix(),sizeof(float));
+
+			int numins(0),numrets(0);
+			pFile->Read(&numins,sizeof(int));
+			pFile->Read(&numrets,sizeof(int));
+			if ( numins >0 ) InsertChannel(numins-1);
+			if ( numrets >0 ) InsertReturn(numrets-1);
+			if ( numrets >0 ) InsertSend(numrets-1,MixerWire());
+			for (int i(0);i<numinputs();i++)
 			{
-				_sendGrid[j][i+send1]*=_returnVolMulti[i];
+				for (int j(0);j<numsends();j++)
+				{
+					float send(0.0f);
+					pFile->Read(&send,sizeof(float));
+					Channel(i).Send(j)=send;
+				}
+				pFile->Read(&Channel(i).Volume(),sizeof(float));
+				pFile->Read(&Channel(i).Panning(),sizeof(float));
+				pFile->Read(&Channel(i).DryMix(),sizeof(float));
+				pFile->Read(&Channel(i).Mute(),sizeof(bool));
+				pFile->Read(&Channel(i).DryOnly(),sizeof(bool));
+				pFile->Read(&Channel(i).WetOnly(),sizeof(bool));
 			}
+			for (int i(0);i<numreturns();i++)
+			{
+				pFile->Read(&Return(i).Wire().machine_,sizeof(int));
+				pFile->Read(&Return(i).Wire().volume_,sizeof(float));
+				pFile->Read(&Return(i).Wire().normalize_,sizeof(float));
+				pFile->Read(&sends_[i].machine_,sizeof(int));
+				pFile->Read(&sends_[i].volume_,sizeof(float));
+				pFile->Read(&sends_[i].normalize_,sizeof(float));
+				for (int j(0);j<numsends();j++)
+				{
+					bool send(false);
+					pFile->Read(&send,sizeof(bool));
+					Return(i).Send(j,send);
+				}
+				pFile->Read(&Return(i).MasterSend(),sizeof(bool));
+				pFile->Read(&Return(i).Volume(),sizeof(float));
+				pFile->Read(&Return(i).Panning(),sizeof(float));
+				pFile->Read(&Return(i).Mute(),sizeof(bool));
+			}
+			RecalcMaster();
+			for (int i(0);i<numinputs();i++)
+				for(int j(0);j<numsends();j++)
+					RecalcSend(i,j);
 			return true;
-*/
-			return false;
 		}
 
 		void Mixer::SaveSpecificChunk(RiffFile* pFile)
 		{
-/*
-			float sendGridTmp[MAX_CONNECTIONS][MAX_CONNECTIONS+1];
-			memcpy(sendGridTmp,_sendGrid,sizeof(_sendGrid));
-			for (int i=0;i<MAX_CONNECTIONS;i++) for (int j=0;j<MAX_CONNECTIONS;j++)
-			{
-				sendGridTmp[j][i+send1]/=_returnVolMulti[i];
-			}
-			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _returnVol + sizeof _returnVolMulti + sizeof _sendValid + sizeof _outGain);
+			std::uint32_t size(sizeof(solocolumn_)+sizeof(master_)+2*sizeof(int));
+			size+=(3*sizeof(float)+3*sizeof(bool)+numsends()*sizeof(float))*numinputs();
+			size+=(2*sizeof(float)+2*sizeof(bool)+numsends()*sizeof(bool)+2*sizeof(float)+sizeof(int))*numreturns();
+			size+=(2*sizeof(float)+sizeof(int))*numsends();
 			pFile->Write(&size,sizeof(size));
-			pFile->Write(&_outGain,sizeof(_outGain));
-			pFile->Write(_sendValid,sizeof(_sendValid));
-			pFile->Write(_send,sizeof(_send));
-			pFile->Write(sendGridTmp,sizeof(sendGridTmp));
-			///\todo: not store returnvolmulti and store a 0..1.0 scale for _returnVol.
-			/// returnvolmulti should be calculated by the loader.
-			pFile->Write(_returnVol,sizeof(_returnVol));
-			pFile->Write(_returnVolMulti,sizeof(_returnVolMulti));
-*/
+
+			pFile->Write(&solocolumn_,sizeof(solocolumn_));
+			pFile->Write(&master_.Volume(),sizeof(float));
+			pFile->Write(&master_.Gain(),sizeof(float));
+			pFile->Write(&master_.DryWetMix(),sizeof(float));
+
+			const int numins = numinputs();
+			const int numrets = numreturns();
+			pFile->Write(&numins,sizeof(int));
+			pFile->Write(&numrets,sizeof(int));
+			for (int i(0);i<numinputs();i++)
+			{
+				for (int j(0);j<numsends();j++)
+				{
+					pFile->Write(&Channel(i).Send(j),sizeof(float));
+				}
+				pFile->Write(&Channel(i).Volume(),sizeof(float));
+				pFile->Write(&Channel(i).Panning(),sizeof(float));
+				pFile->Write(&Channel(i).DryMix(),sizeof(float));
+				pFile->Write(&Channel(i).Mute(),sizeof(bool));
+				pFile->Write(&Channel(i).DryOnly(),sizeof(bool));
+				pFile->Write(&Channel(i).WetOnly(),sizeof(bool));
+			}
+			for (int i(0);i<numreturns();i++)
+			{
+				pFile->Write(&Return(i).Wire().machine_,sizeof(int));
+				pFile->Write(&Return(i).Wire().volume_,sizeof(float));
+				pFile->Write(&Return(i).Wire().normalize_,sizeof(float));
+				pFile->Write(&sends_[i].machine_,sizeof(int));
+				pFile->Write(&sends_[i].volume_,sizeof(float));
+				pFile->Write(&sends_[i].normalize_,sizeof(float));
+				for (int j(0);j<numsends();j++)
+				{
+					bool send(Return(i).Send(j));
+					pFile->Write(&send,sizeof(bool));
+				}
+				pFile->Write(&Return(i).MasterSend(),sizeof(bool));
+				pFile->Write(&Return(i).Volume(),sizeof(float));
+				pFile->Write(&Return(i).Panning(),sizeof(float));
+				pFile->Write(&Return(i).Mute(),sizeof(bool));
+			}
 		}
 	}
 }
