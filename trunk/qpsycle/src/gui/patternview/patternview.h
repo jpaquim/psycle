@@ -100,7 +100,7 @@ private:
 	QComboBox *patStepCbx_;
 	QComboBox *patternCbx_;
 	QAction *delBarAct_;
-	QCheckBox *recordCb_;
+	QAction *recordCb_;
 	QComboBox *tracksCbx_;
 
 	int octave_;

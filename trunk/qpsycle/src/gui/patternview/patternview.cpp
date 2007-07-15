@@ -76,9 +76,10 @@ void PatternView::createToolBar()
 	delBarAct_ = new QAction( "Delete Bar", this );
 	delBarAct_->setStatusTip( "Delete a bar" );
 	
-	recordCb_ = new QCheckBox( "Record", this);
+	recordCb_ = new QAction(QIcon(":/images/recordnotes.png") ,tr("Record"), this);
+	recordCb_->setCheckable(true);
 	recordCb_->setStatusTip( "Enable/Disable Recording");
-	recordCb_->setCheckState( Qt::Checked );
+	recordCb_->setChecked(true);
 	
 	tracksCbx_ = new QComboBox();
 	for ( int e = 1; e < 65; e++ ) {
@@ -96,7 +97,7 @@ void PatternView::createToolBar()
 	toolBar_->addSeparator();
 	toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
-	toolBar_->addWidget( recordCb_ );
+	toolBar_->addAction( recordCb_ );
 
 
 	toolBar_->setSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed );
@@ -106,7 +107,7 @@ void PatternView::createToolBar()
 // Returns true if a note was successfully added.
 bool PatternView::enterNote( const PatCursor & cursor, int note ) 
 {
-	if ( recordCb_->checkState() == Qt::Checked) //FIXME: it shoul not go on the next line if recording is off...
+	if ( recordCb_->isChecked() == true)
 	{
 		if ( pattern() ) {
 			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
