@@ -439,9 +439,23 @@ namespace psycle
 						// Mix all the inputs and route them to the send fx.
 						{
 							cpu::cycles_type cost = cpu::cycles();
-							for (int j=0; j<numinputs(); j++)
+							if ( solocolumn_ >=0 && solocolumn_ < MAX_CONNECTIONS)
 							{
-								if (_inputCon[j] && !Channel(i).Mute() && !Channel(i).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
+								int j = solocolumn_;
+								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
+								{
+									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
+									assert(pInMachine);
+									if(!pInMachine->_mute && !pInMachine->Standby())
+									{
+										dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
+										dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
+									}
+								}
+							}
+							else for (int j=0; j<numinputs(); j++)
+							{
+								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
 									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 									assert(pInMachine);
@@ -454,7 +468,7 @@ namespace psycle
 							}
 							for (int j=0; j<i; j++)
 							{
-								if (Return(j).IsValid() && Return(j).Send(i) && !Return(i).Mute() && (mixvolretpl[j] != 0.0f || mixvolretpr[j] != 0.0f ))
+								if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j] != 0.0f || mixvolretpr[j] != 0.0f ))
 								{
 									Machine* pRetMachine = Global::song()._pMachine[Return(j).Wire().machine_];
 									assert(pRetMachine);
@@ -496,7 +510,21 @@ namespace psycle
 			///\todo: Implement "Solo"
 			if ( master_.DryWetMix() > 0.0f)
 			{
-				for (int i=0; i<numreturns(); i++)
+				if ( solocolumn_ >= MAX_CONNECTIONS)
+				{
+					int i= solocolumn_-MAX_CONNECTIONS;
+					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i] != 0.0f || mixvolretpr[i] != 0.0f ))
+					{
+						Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
+						assert(pRetMachine);
+						if(!pRetMachine->_mute && !pRetMachine->Standby())
+						{
+							dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[i]);
+							dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[i]);
+						}
+					}
+				}
+				else for (int i=0; i<numreturns(); i++)
 				{
 					if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i] != 0.0f || mixvolretpr[i] != 0.0f ))
 					{
@@ -510,9 +538,23 @@ namespace psycle
 					}
 				}
 			}
-			if ( master_.DryWetMix() < 1.0f)
+			if ( master_.DryWetMix() < 1.0f && solocolumn_ < MAX_CONNECTIONS)
 			{
-				for (int i=0; i<numinputs(); i++)
+				if ( solocolumn_ >= 0)
+				{
+					int i = solocolumn_;
+					if (ChannelValid(i) && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
+					{
+						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
+						assert(pInMachine);
+						if(!pInMachine->_mute && !pInMachine->Standby())
+						{
+							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*mixvolpl[i]);
+							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*mixvolpr[i]);
+						}
+					}
+				}
+				else for (int i=0; i<numinputs(); i++)
 				{
 					if (_inputCon[i] && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
@@ -573,6 +615,7 @@ namespace psycle
 				return Machine::GetWireVolume(wireIndex);
 			else if ( ReturnValid(wireIndex-MAX_CONNECTIONS) )
 				return Return(wireIndex-MAX_CONNECTIONS).Wire().volume_;
+			return 0;
 		}
 		void Mixer::SetWireVolume(int wireIndex,float value)
 		{
