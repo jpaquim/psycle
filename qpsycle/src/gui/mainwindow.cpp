@@ -131,7 +131,7 @@ void MainWindow::setupGui()
 	createToolBars();
 	createStatusBar();
 
-	setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001089 alpha ) "));
+	setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001090 alpha ) "));
 }
 
 void MainWindow::setupSignals()
