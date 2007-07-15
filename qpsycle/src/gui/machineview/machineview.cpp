@@ -110,7 +110,9 @@ MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 			connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
 				 this, SLOT( cloneMachine( MachineGui* ) ) );
 		}
+
 		scene()->addItem(macGui);
+		macGui->setPos( mac->GetPosX(), mac->GetPosY() );
 		machineGuis.push_back(macGui);
 	}
 

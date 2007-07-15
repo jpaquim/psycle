@@ -43,6 +43,10 @@
 #include <iostream>
 #include <iomanip>
 
+
+/**
+ * The graphical representation of a CoreSong machine in the GUI.
+ */
 MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: m_macView(macView),
 	  m_mac(mac)
@@ -64,7 +68,6 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 
 	setZValue( 1 );
 	setRect(QRectF(0, 0, 100, 60));
-	setPos(left, top);
 	setPen(QPen(Qt::white,1));
 	setBrush( Qt::blue );
 	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
@@ -98,7 +101,6 @@ MachineGui::~MachineGui()
 
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-	// Do the default painting business for a QGRectItem.
 	if ( this == m_macView->chosenMachine() ) {
 		painter->setPen( QPen( Qt::red ) );
 	} else {
