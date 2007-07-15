@@ -36,13 +36,13 @@ void LogConsole::AddNormalText(QString text)
 
 void LogConsole::AddSuccessText(QString text)
 {
-	text = "<font color=green><b>" + text + "\n</b></font>";
+	text = "<font color=green><i>" + text + "\n</i></font>";
 	logText->append(text);
 }
 
 void LogConsole::AddErrorText(QString text)
 {
-	text = "<font color=red><i>" + text + "\n</i></font>";
+	text = "<font color=red><b>" + text + "\n</b></font>";
 	logText->append(text);
 }
 
