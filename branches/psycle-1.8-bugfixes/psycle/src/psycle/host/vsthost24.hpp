@@ -45,16 +45,16 @@ namespace psycle
 				note trackNote[MAX_TRACKS];
 				VstMidiEvent midievent[MAX_VST_EVENTS];
 				VstEventsDynamic mevents;
-				bool NSActive;
-				int	NSSamples;
-				int NSDelta;
-				int NSDestination;
-				int NSTargetDistance;
-				int NSCurrent;
+				bool NSActive[16];
+				int	NSSamples[16];
+				int NSDelta[16];
+				int NSDestination[16];
+				int NSTargetDistance[16];
+				int NSCurrent[16];
 				static int pitchWheelCentre;
 				int rangeInSemis;
-				int currentSemi;
-				int oldNote;
+				int currentSemi[16];
+				int oldNote[16];
 				int	queue_size;
 				/// reserves space for a new midi event in the queue.
 				/// \return midi event to be filled in, or null if queue is full.
