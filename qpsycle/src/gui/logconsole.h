@@ -35,7 +35,9 @@ class LogConsole : public QWidget
 	Q_OBJECT
 public: 
 	LogConsole();
-	void AddText(QString text);
+	void AddNormalText(QString text);
+	void AddSuccessText(QString text);
+	void AddErrorText(QString text);
 	void Clear();
 	void SaveToFile();
 	
