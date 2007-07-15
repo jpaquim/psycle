@@ -43,7 +43,7 @@ PatternDraw::PatternDraw( PatternView *patView )
 	setScene(scene_);
         
 	setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // FIXME: set to always on as AsNeeded has a bug in 4.2
-	setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
+//	setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
 	// see: http://www.trolltech.com/developer/task-tracker/index_html?method=entry&id=152477
 	//Mattias: is there a reason why scrollbard were off???
 
