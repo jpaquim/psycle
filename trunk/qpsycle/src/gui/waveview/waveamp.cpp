@@ -20,19 +20,19 @@
 
 #include "waveamp.h"
 
-#include <QHBoxLayout>
+#include <QGridLayout>
 
 WaveAmp::WaveAmp()
 {
 	setWindowTitle("Amplify");
-	QHBoxLayout *layout = new QHBoxLayout(this);
+	QGridLayout *layout = new QGridLayout(this);
 	gain = new QLabel("Gain", this);
 	gainSli = new QSlider( Qt::Horizontal, this);
 	ok = new QPushButton("Ok", this);
 	cancel = new QPushButton("Cancel", this);
 	
-	layout->addWidget(gain);
-	layout->addWidget(gainSli);
-	layout->addWidget(ok);
-	layout->addWidget(cancel);
+	layout->addWidget(gain, 0, 0, 1, 1);
+	layout->addWidget(gainSli, 0, 1, 1, 1);
+	layout->addWidget(ok, 1, 0, 1, 1, Qt::AlignRight);
+	layout->addWidget(cancel, 1, 1, 1, 1, Qt::AlignRight);
 }
