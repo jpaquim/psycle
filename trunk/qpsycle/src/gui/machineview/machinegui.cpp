@@ -49,13 +49,25 @@
  */
 MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: m_macView(macView),
-	  m_mac(mac)
+	  m_mac(mac),
+	  left_(left),
+	  top_(top_)
 {
-	left_ = left;
-	top_ = top;
-
 	setHandlesChildEvents( true );
+	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
+	setZValue( 1 );
 
+	initGraphics();
+	initActions();
+	initSignals();
+}
+
+
+MachineGui::~MachineGui()
+{}
+
+void MachineGui::initGraphics()
+{
 	nameItem = new QGraphicsTextItem("", this );
 	nameItem->setFont( QFont( "verdana", 7 ) );
 	nameItem->setDefaultTextColor(Qt::white);
@@ -66,12 +78,13 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 	QString string = QString::fromStdString( m_mac->GetEditName() );
 	setName( QString(string) );
 
-	setZValue( 1 );
 	setRect(QRectF(0, 0, 100, 60));
 	setPen(QPen(Qt::white,1));
 	setBrush( Qt::blue );
-	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
+}
 
+void MachineGui::initActions()
+{
 	deleteMachineAct_ = new QAction( "Delete", this );
 	cloneMachineAct_ = new QAction( "Clone", this );
 	renameMachineAct_ = new QAction( "Rename", this );
@@ -81,8 +94,10 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 	QString soloText;   
 	m_mac->song()->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 	toggleSoloAct_ = new QAction( soloText, this );
+}
 
-
+void MachineGui::initSignals()
+{
 	connect( deleteMachineAct_, SIGNAL( triggered() ), this, SLOT( onDeleteMachineActionTriggered() ) );
 	connect( renameMachineAct_, SIGNAL( triggered() ), this, SLOT( onRenameMachineActionTriggered() ) );
 	connect( toggleMuteAct_, SIGNAL( triggered() ), this, SLOT( onToggleMuteActionTriggered() ) );
@@ -95,10 +110,9 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 		 m_macView, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 }
 
-
-MachineGui::~MachineGui()
-{}
-
+/**
+ * Note some paint operations are handled in subclasses.
+ */
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
 	if ( this == m_macView->chosenMachine() ) {
@@ -115,6 +129,9 @@ void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opt
 	}
 }
 
+/**
+ * Updates the name in the song and updates the GUI.
+ */
 void MachineGui::setName(const QString &name)
 {
 	std::ostringstream buffer;
@@ -126,17 +143,25 @@ void MachineGui::setName(const QString &name)
 	nameItem->setPlainText( QString::fromStdString( buffer.str() ) );
 }
 
+/**
+ * This gets called from WireGuis when they are created -- they
+ * add themselves to their parent's list.
+ */
 void MachineGui::addWireGui(WireGui *wireGui)
 {
 	wireGuiList_.push_back( wireGui );
 	wireGui->adjust();
 }
 
-std::vector<WireGui *> MachineGui::wireGuiList()
-{
-    return wireGuiList_;
+
+QPointF MachineGui::centrePointInSceneCoords() {
+	return mapToScene( QPointF( boundingRect().width()/2, boundingRect().height()/2 ) );
 }
 
+
+/**
+ * Rename machine and send out a signal.
+ */
 void MachineGui::onRenameMachineActionTriggered()
 {
 	bool ok;
@@ -150,65 +175,14 @@ void MachineGui::onRenameMachineActionTriggered()
 	emit renamed();
 }
 
-QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)
-{
-	switch (change) {
-	case ItemPositionChange:
-	{
-		std::vector<WireGui*>::iterator it = wireGuiList_.begin();
-		for ( ; it != wireGuiList_.end(); it++ ) {
-			WireGui *wireGui = *it;
-			wireGui->adjust();
-		}
-	}
-	break;
-	default:
-		break;
-	};
-
-	return QGraphicsItem::itemChange(change, value);
-}
-    
-void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
-{
-	QGraphicsRectItem::mousePressEvent( event ); // Get the default behaviour.
-}
-
-void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-	if ( ( event->buttons() == Qt::LeftButton ) && ( event->modifiers() == Qt::ShiftModifier ) ) {
-		emit startNewConnection(this, event);
-	} 
-	else { // Default implementation takes care of moving the MacGui.
-		QGraphicsItem::mouseMoveEvent(event);
-	}
-}
-
-
-void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-	if ( ( event->button() == Qt::LeftButton ) && ( m_macView->isCreatingWire() ) ) {
-		emit closeNewConnection(this, event);
-	} 
-	else { // business as usual
-		QGraphicsItem::mouseReleaseEvent(event);
-	}
-}
-
-QPointF MachineGui::centrePointInSceneCoords() {
-	return mapToScene( QPointF( boundingRect().width()/2, boundingRect().height()/2 ) );
-}
-
-psy::core::Machine* MachineGui::mac()
-{
-	return m_mac;
-}
-
 void MachineGui::onDeleteMachineActionTriggered()
 {
 	emit deleteRequest( this );
 }
 
+/**
+ * Mute/unmute in the CoreSong and update the GUI.
+ */
 void MachineGui::onToggleMuteActionTriggered() 
 {
 	mac()->_mute = !mac()->_mute;
@@ -224,6 +198,9 @@ void MachineGui::onToggleMuteActionTriggered()
 	update( boundingRect() );
 }
 
+/**
+ * Solo/unsolo in the CoreSong and update the GUI.
+ */
 void MachineGui::onToggleSoloActionTriggered() 
 {
 	if (mac()->song()->machineSoloed == mac()->id() ) // Unsolo it.
@@ -260,7 +237,68 @@ void MachineGui::onCloneMachineActionTriggered()
 	emit cloneRequest( this );
 }
 
+/**
+ * Called when the item changes in some way (we're interested in when it moves.)
+ * See QGraphicsItem::itemChange in the Qt API.
+ */
+QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+	switch (change) {
+	case ItemPositionChange:
+	{
+		std::vector<WireGui*>::iterator it = wireGuiList_.begin();
+		for ( ; it != wireGuiList_.end(); it++ ) {
+			WireGui *wireGui = *it;
+			wireGui->adjust();
+		}
+	}
+	break;
+	default:
+		break;
+	};
+
+	return QGraphicsItem::itemChange(change, value);
+}
+
+
+/**
+ * Gets subclassed by EffectGui, GeneratorGui etc.
+ */
+void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
+{
+	QGraphicsRectItem::mousePressEvent( event ); // Get the default behaviour.
+}
+
+void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+	if ( ( event->buttons() == Qt::LeftButton ) && ( event->modifiers() == Qt::ShiftModifier ) ) {
+		emit startNewConnection(this, event);
+	} 
+	else { // Default Qt implementation can take care of moving the MacGui.
+		QGraphicsItem::mouseMoveEvent(event);
+	}
+}
+
+
+void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+	if ( ( event->button() == Qt::LeftButton ) && ( m_macView->isCreatingWire() ) ) {
+		emit closeNewConnection(this, event);
+	} 
+	else { // business as usual
+		QGraphicsItem::mouseReleaseEvent(event);
+	}
+}
 
 
 
+// Getters.
+std::vector<WireGui *> MachineGui::wireGuiList()
+{
+    return wireGuiList_;
+}
 
+psy::core::Machine* MachineGui::mac()
+{
+	return m_mac;
+}
