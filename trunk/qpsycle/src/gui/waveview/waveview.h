@@ -45,6 +45,8 @@ public slots:
 	void onPlusButtonClicked();
 	void onMinusButtonClicked();
 	void onAmpButtonClicked();
+	void onSelectorButtonClicked();
+	void onZoomButtonClicked();
 
 signals:
 	void sampleAdded();

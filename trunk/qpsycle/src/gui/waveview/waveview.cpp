@@ -65,9 +65,15 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	selAct_ = new QAction("Select All", this);
 	
 	//tools
-	QLabel *toolLabel = new QLabel("Tools :", this);
+	QLabel *toolLabel = new QLabel("Tools : ", this);
 	tselAct_ = new QAction( QIcon(":images/selector.png"), "Selector", this);
+	tselAct_->setCheckable(true);
+	connect( tselAct_, SIGNAL(triggered()), this, SLOT(onSelectorButtonClicked()));
+	tselAct_->setChecked(true);
+	
 	tzoomAct_ = new QAction (QIcon(":images/zoom-in.png"), "Zoom", this);
+	tzoomAct_->setCheckable(true);
+	connect( tzoomAct_, SIGNAL(triggered()), this, SLOT(onZoomButtonClicked()));
 	
 	//processing
 	processBar_ = new QToolBar();
@@ -179,4 +185,16 @@ void WaveView::onAmpButtonClicked()
 {
 	WaveAmp *amp = new WaveAmp();
 	amp->show();
+}
+
+void WaveView::onSelectorButtonClicked()
+{
+	tselAct_->setChecked(true);
+	tzoomAct_->setChecked(false);
+}
+
+void WaveView::onZoomButtonClicked()
+{
+	tzoomAct_->setChecked(true);
+	tselAct_->setChecked(false);
 }
