@@ -136,6 +136,8 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	layout_->addWidget( processBar_ );
 	layout_->addWidget( wavedisp );
 	layout_->addWidget( zoomBar_ );
+	
+	
 }
 
 void WaveView::onLoadButtonClicked()

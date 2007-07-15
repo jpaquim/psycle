@@ -29,6 +29,7 @@ WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for W
 	wavescene = new QGraphicsScene();
 	wavescene->setBackgroundBrush(Qt::black);
 	setScene(wavescene);
+	setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
 	Reset();
 }
 
