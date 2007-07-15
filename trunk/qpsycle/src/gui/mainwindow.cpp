@@ -351,6 +351,7 @@ void MainWindow::createActions()
 	connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
 	playFromSeqPosAct = new QAction(QIcon(":/images/play.png"), tr("Play from &sequencer position"), this);
 	connect( playFromSeqPosAct, SIGNAL( triggered() ), this, SLOT( playFromSeqPos() ) );
+	playFromSeqPosAct->setCheckable(true);
 	playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
 	connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
 //     playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
@@ -564,17 +565,20 @@ void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
 
 void MainWindow::playFromStart()
 {
+	playFromSeqPosAct->setChecked(true);
 	psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
 	psy::core::Player::Instance()->start( 0.0 );
 }
 
 void MainWindow::playFromSeqPos()
 {
+	playFromSeqPosAct->setChecked(true);
 	psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
 }
 
 void MainWindow::playStop()
 {
+	playFromSeqPosAct->setChecked(false);
 	psy::core::Player::Instance()->stop();
 }
 
