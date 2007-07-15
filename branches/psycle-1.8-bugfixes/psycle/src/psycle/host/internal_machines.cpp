@@ -695,6 +695,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
+				Return(wireIndex).Wire().machine_=-1;
 				DiscardReturn(wireIndex);
 				///\todo: DiscardSend??
 			}
@@ -1257,6 +1258,7 @@ namespace psycle
 				mixvolpl[idx] *= (1.0f-Channel(idx).Panning())*2.0f;
 			}
 			else mixvolpr[idx] *= (Channel(idx).Panning())*2.0f;
+			for (int i(0);i<numsends();i++) RecalcSend(idx,i);
 		}
 		void Mixer::RecalcSend(int chan,int send)
 		{

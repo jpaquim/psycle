@@ -44,6 +44,7 @@ namespace psycle
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
 			virtual void Reset();
 			virtual bool Enable(bool e);
+			virtual bool Enabled() { return _running; };
 			virtual void GetCapturePorts(std::vector<std::string>&ports);
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);

@@ -438,6 +438,8 @@ NAMESPACE__BEGIN(psycle)
 			if (_outputActive)
 			{
 				AudioDriver* pOut = Global::pConfig->_pOutputDriver;
+				if (pOut->Enabled()) return;
+
 				_outputActive = false;
 				if (!pOut->Initialized())
 				{

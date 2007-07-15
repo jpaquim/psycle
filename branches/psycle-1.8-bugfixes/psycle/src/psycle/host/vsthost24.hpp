@@ -157,7 +157,7 @@ namespace psycle
 				//
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; }
 				virtual int GetNumParams() { return numParams(); }
-				virtual void GetParamName(int numparam, char * parval) { CEffect::GetParamName(numparam,parval); }
+				virtual void GetParamName(int numparam, char * parval) { if (numparam<numParams()) CEffect::GetParamName(numparam,parval); }
 				virtual void GetParamValue(int numparam, char * parval);
 				virtual int GetParamValue(int numparam)
 				{

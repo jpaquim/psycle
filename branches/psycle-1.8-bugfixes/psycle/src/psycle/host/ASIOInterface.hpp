@@ -101,6 +101,7 @@ namespace psycle
 			virtual void Configure();
 			inline virtual bool Initialized() { return _initialized; };
 			inline virtual bool Configured() { return _configured; };
+			virtual bool Enabled() { return _running; };
 			virtual int GetBufferSize();
 			virtual void GetCapturePorts(std::vector<std::string>&ports);
 			virtual bool AddCapturePort(int idx);

@@ -620,10 +620,17 @@ namespace psycle
 		}
 		void Plugin::GetParamRange(int numparam,int &minval,int &maxval)
 		{
-			if(GetInfo()->Parameters[numparam]->Flags & MPF_STATE)
+			if( numparam < _pInfo->numParameters )
 			{
-				minval = GetInfo()->Parameters[numparam]->MinValue;
-				maxval = GetInfo()->Parameters[numparam]->MaxValue;
+				if(GetInfo()->Parameters[numparam]->Flags & MPF_STATE)
+				{
+					minval = GetInfo()->Parameters[numparam]->MinValue;
+					maxval = GetInfo()->Parameters[numparam]->MaxValue;
+				}
+				else
+				{
+					minval = maxval = 0;
+				}
 			}
 			else
 			{

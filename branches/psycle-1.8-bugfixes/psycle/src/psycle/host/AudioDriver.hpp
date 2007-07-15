@@ -27,7 +27,8 @@ namespace psycle
 			virtual ~AudioDriver() {};
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context) {};
 			virtual void Reset(void) {};
-			virtual bool Enable(bool e) { return false; };	
+			virtual bool Enable(bool e) { return false; };
+			virtual bool Enabled() { return false; };
 			virtual void GetCapturePorts(std::vector<std::string> &ports) { ports.resize(0); }
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples) { pleft=0; pright=0; return; };
 			virtual bool AddCapturePort(int idx){ return false; }; 
