@@ -97,6 +97,11 @@ signals:
 	void renamed();
 	void cloneRequest( MachineGui *macGui );
 
+private:
+	void initGraphics();
+	void initActions();
+	void initSignals();
+
 };
 
 
