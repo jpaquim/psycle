@@ -385,7 +385,7 @@ namespace psycle
 				pevent->midiData[3] = 0;
 				return true;
 			}
-			bool plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel, bool slide,unsigned int sampleoffset)
+			bool plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel,unsigned int sampleoffset, bool slide)
 			{
 				if(trackNote[channel].key != 255 && !slide)
 					AddNoteOff(channel, trackNote[channel].key, true);
@@ -609,7 +609,7 @@ namespace psycle
 							NSSamples[midiChannel] = 0;
 							NSActive[midiChannel] = true;
 							currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
-							AddNoteOn(channel, note, 127, midiChannel,1);
+							AddNoteOn(channel, note, 127, midiChannel);
 						}
 						else if((pData->_cmd == 0xC3) && (oldNote[midiChannel]!=-1))//slide to note
 						{
@@ -632,7 +632,7 @@ namespace psycle
 								currentSemi[midiChannel] = 0;
 							}
 							AddMIDI(0xB0 | midiChannel,0x0B,0x7F); // reset expression
-							AddNoteOn(channel,note,(pData->_cmd == 0x0C)?pData->_parameter/2:127,midiChannel,1);
+							AddNoteOn(channel,note,(pData->_cmd == 0x0C)?pData->_parameter/2:127,midiChannel);
 						}
 						if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
 							oldNote[midiChannel] = note + semisToSlide;								

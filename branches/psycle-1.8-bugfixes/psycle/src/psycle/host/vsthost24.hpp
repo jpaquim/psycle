@@ -133,7 +133,7 @@ namespace psycle
 //				virtual bool Disconnect(Machine& dstMac);
 
 				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0, unsigned int sampleoffset=0);
-				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0,bool slide=false, unsigned int sampleoffset=0);
+				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0, unsigned int sampleoffset=0,bool slide=false);
 				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false, unsigned int sampleoffset=0);
 				inline void SendMidi();
 				int LSB(int val)
