@@ -73,7 +73,10 @@ void PatternView::createToolBar()
 	connect( patStepCbx_, SIGNAL( currentIndexChanged( int ) ),
 		 this, SLOT( onPatternStepComboBoxIndexChanged( int ) ) );
 
-	delBarAct_ = new QAction( "Delete Bar", this );
+	addBarAct_ = new QAction(QIcon(":images/pat_addbar.png"), "Add Bar", this );
+	addBarAct_->setStatusTip( "Add a bar" );	 
+		 
+	delBarAct_ = new QAction(QIcon(":images/pat_delbar.png"), "Delete Bar", this );
 	delBarAct_->setStatusTip( "Delete a bar" );
 	
 	recordCb_ = new QAction(QIcon(":/images/recordnotes.png") ,tr("Record"), this);
@@ -95,6 +98,7 @@ void PatternView::createToolBar()
 	toolBar_->addWidget( new QLabel( "Step: " ) );
 	toolBar_->addWidget( patStepCbx_ );
 	toolBar_->addSeparator();
+	toolBar_->addAction( addBarAct_ );	
 	toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
 	toolBar_->addAction( recordCb_ );

@@ -44,5 +44,7 @@
 	 <file>images/gen-internal.png</file>
 	 <file>images/gen-native.png</file>
 	 <file>images/recordnotes.png</file>
-	 </qresource>
+	 <file>images/pat_addbar.png</file>
+	 <file>images/pat_delbar.png</file>
+ </qresource>
  </RCC>
