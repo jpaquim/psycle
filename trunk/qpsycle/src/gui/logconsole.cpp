@@ -20,6 +20,7 @@
 #include "logconsole.h"
 LogConsole::LogConsole()
 {
+	setAttribute(Qt::WA_QuitOnClose, false);
 	layOut_ = new QVBoxLayout(this);
 	logText = new QTextEdit(this);
 	logText->setReadOnly(true);

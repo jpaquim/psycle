@@ -107,6 +107,7 @@ void MainWindow::setupGui()
 	dockL_ = new QDockWidget("Logging Console", this);
 	dockL_->setAllowedAreas(Qt::BottomDockWidgetArea);
 	dockL_->setWidget(logConsole_);
+	dockL_->setAttribute(Qt::WA_QuitOnClose, false);
 	addDockWidget(Qt::BottomDockWidgetArea, dockL_);
 	
 
@@ -332,6 +333,10 @@ void MainWindow::createActions()
 	showUnReAct = new QAction(tr("&Undo List"), this);
 	showUnReAct->setStatusTip(tr("Shows/Hides the Undo/Redo Window"));
 	connect(showUnReAct, SIGNAL(triggered()), this, SLOT(showUndoView()));
+	
+	showLogConsAct = new QAction(tr("&Logging Console"), this);
+	showLogConsAct->setStatusTip(tr("Shows/Hides Logging Console"));
+	connect(showLogConsAct, SIGNAL(triggered()), this, SLOT(showLogCons()));
 
 	quitAct = new QAction(tr("&Quit"), this);
 	quitAct->setShortcut(tr("Ctrl+Q"));
@@ -373,6 +378,8 @@ void MainWindow::createMenus()
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction( showUnReAct );
+	viewMenu->addAction( showLogConsAct );
+	
 	configMenu = menuBar()->addMenu(tr("&Configuration"));
 	configMenu->addAction( audioConfAct );
 
@@ -719,6 +726,18 @@ void MainWindow::showUndoView()
 	else
 	{
 		undoView->setVisible(true);
+	}
+}
+
+void MainWindow::showLogCons()
+{
+	if (dockL_->isVisible())
+	{
+		dockL_->setVisible(false);
+	}
+	else
+	{
+		dockL_->setVisible(true);
 	}
 }
 
