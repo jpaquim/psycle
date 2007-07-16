@@ -504,6 +504,7 @@ void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
 void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 {
 	instrumentsModel_->setSelectedInstrumentIndex( newIndex );
+	wavView_->sampName_->setText(sampCombo_->currentText());
 }
 
 void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )
