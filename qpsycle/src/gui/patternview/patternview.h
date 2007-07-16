@@ -99,6 +99,7 @@ private:
 	QToolBar *toolBar_;
 	QComboBox *patStepCbx_;
 	QComboBox *patternCbx_;
+	QAction *addBarAct_;
 	QAction *delBarAct_;
 	QAction *recordCb_;
 	QComboBox *tracksCbx_;
