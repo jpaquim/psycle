@@ -509,7 +509,6 @@ namespace psycle
 							}
 							//currently just working with midichannel 0
 							//TRACE( "semislide of channel %i = %d\n", midiChannel, NSCurrent[midiChannel]);
-//							AddMIDI(0xE0,LSB(NSCurrent),MSB(NSCurrent),NSSamples);
 							AddMIDI(0xE0 + midiChannel,LSB(NSCurrent[midiChannel]),MSB(NSCurrent[midiChannel]),NSSamples[midiChannel]);
 							 
 							NSSamples[midiChannel]+=min(TWEAK_SLIDE_SAMPLES,ns);
@@ -521,7 +520,9 @@ namespace psycle
 			void plugin::Tick(int channel, PatternEntry * pData)
 			{
 				const int note = pData->_note;
-				//const int midi = if(pData->_inst == 0xFF)
+				int midiChannel;
+				if (pData->_inst == 0xFF) midiChannel = 0;
+				else midiChannel = pData->_inst & 0x0F;
 
 				if(note == notecommands::tweak || note == notecommands::tweakeffect) // Tweak Command
 				{
@@ -561,19 +562,13 @@ namespace psycle
 				}
 				else
 				{
-					int midiChannel;
-					if (pData->_inst == 0xFF) midiChannel = 0;
-					else midiChannel = pData->_inst & 0x0F;
-
 					if(pData->_cmd == 0xC1) //set the pitch bend range
 					{
 						rangeInSemis = pData->_parameter;
 					}
 					else if(pData->_cmd == 0xC2) //Panning
 					{
-						//AddMIDI(0xB0,8,pData->_parameter*0.5f);
-						if(pData->_inst == 0xFF) AddMIDI(0xB0,8,pData->_parameter*0.5f);
-						else AddMIDI(0xB0 + midiChannel, 8,pData->_parameter*0.5f);						
+						AddMIDI(0xB0 | midiChannel, 0x0A,pData->_parameter*0.5f);
 					}
 
 					if(note < notecommands::release) // Note on
@@ -614,8 +609,7 @@ namespace psycle
 							NSSamples[midiChannel] = 0;
 							NSActive[midiChannel] = true;
 							currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
-							if(pData->_inst == 0xFF) AddNoteOn(channel, note, 127); // should be 100, but previous host used 127
-							else AddNoteOn(channel, note, 127, pData->_inst & 0x0F);
+							AddNoteOn(channel, note, 127, midiChannel);
 						}
 						else if((pData->_cmd == 0xC3) && (oldNote[midiChannel]!=-1))//slide to note
 						{
@@ -632,21 +626,13 @@ namespace psycle
 							if (NSCurrent[midiChannel] != pitchWheelCentre)
 							{
 								NSActive[midiChannel] = false;
-								AddMIDI(0xE0 + midiChannel,LSB(pitchWheelCentre),MSB(pitchWheelCentre));
+								AddMIDI(0xE0 | midiChannel,LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 								NSCurrent[midiChannel] = pitchWheelCentre;
 								NSDestination[midiChannel] = NSCurrent[midiChannel];
 								currentSemi[midiChannel] = 0;
 							}
-							if(pData->_cmd == 0x0C) //velocity
-							{
-								if(pData->_inst == 0xFF) AddNoteOn(channel, note, pData->_parameter / 2);
-								else AddNoteOn(channel,note,pData->_parameter/2,pData->_inst&0x0F);
-							}
-							else
-							{
-								if(pData->_inst == 0xFF) AddNoteOn(channel, note, 127); // should be 100, but previous host used 127
-								else AddNoteOn(channel, note, 127, pData->_inst & 0x0F);
-							}
+							AddMIDI(0xB0 | midiChannel,0x0B,0x7F); // reset expression
+							AddNoteOn(channel,note,(pData->_cmd == 0x0C)?pData->_parameter/2:127,midiChannel);
 						}
 						if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
 							oldNote[midiChannel] = note + semisToSlide;								
@@ -655,8 +641,7 @@ namespace psycle
 					}
 					else if(note == notecommands::release) // Note Off. 
 					{
-						if(pData->_inst == 0xFF) AddNoteOff(channel);
-						else AddNoteOff(channel, pData->_inst & 0x0F);
+						AddNoteOff(channel, midiChannel);
 						oldNote[midiChannel] = -1;
 					}
 					else if(pData->_note == notecommands::empty)
@@ -669,7 +654,7 @@ namespace psycle
 						}
 						else if (pData->_cmd == 0x0C) // channel volume.
 						{
-							AddMIDI(0xB0 + midiChannel,7,pData->_parameter*0.5f);
+							AddMIDI(0xB0 | midiChannel,0x0B,pData->_parameter*0.5f); // using MIDI Expression ( cc11 ) !
 						}
 						else if(pData->_cmd == 0xC3) //slide to note . Used to change the speed.
 						{
@@ -680,7 +665,7 @@ namespace psycle
 						{
 							if (NSCurrent[midiChannel] != NSDestination[midiChannel])
 							{
-								AddMIDI(0xE0 + midiChannel,LSB(NSDestination[midiChannel]),MSB(NSDestination[midiChannel]));
+								AddMIDI(0xE0 | midiChannel,LSB(NSDestination[midiChannel]),MSB(NSDestination[midiChannel]));
 							}
 
 							if ((pData->_cmd & 0xF0) == 0xD0) //pitch slide down
@@ -728,7 +713,8 @@ namespace psycle
 				cpu::cycles_type cost = cpu::cycles();
 				if(!_mute && ((!Standby() && !Bypass()) || bCanBypass))
 				{
-/*					if(bNeedIdle) 
+/*					The following is now being done in the OnTimer() thread of the UI.
+					if(bNeedIdle) 
 					{
 						try
 						{
