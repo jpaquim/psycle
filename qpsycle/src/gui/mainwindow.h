@@ -105,6 +105,7 @@ private slots:
 
 	void showAudioConfigDlg();
 	void showUndoView();
+	void showLogCons();
 
 private:
 	psy::core::Song *song_;
@@ -151,6 +152,7 @@ private:
 	QAction *aboutAct;
 	QAction *quitAct;
 	QAction *showUnReAct;
+	QAction *showLogConsAct;
 	QAction *playFromStartAct;
 	QAction *playFromSeqPosAct;
 	QAction *playPatAct;
