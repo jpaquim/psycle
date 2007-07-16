@@ -335,7 +335,6 @@ IDR_VSTFRAME            BITMAP                  "./bmp00001.bmp"
 IDB_SWITCHON            BITMAP                  "Slider\\imgOn.bmp"
 IDB_SWITCHOFF           BITMAP                  "Slider\\imgOff.bmp"
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
@@ -556,9 +555,9 @@ BEGIN
     CONTROL         "Solo",IDC_SOLO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,90,
                     23,29,12
     DEFPUSHBUTTON   "OK",IDOK,127,39,40,15
-    PUSHBUTTON      "Delete",IDC_BUTTON1,5,39,40,15
+    PUSHBUTTON      "Delete",IDC_BUTTON1,87,39,40,15
     PUSHBUTTON      "Clone",IDC_CLONE,46,39,40,15
-    PUSHBUTTON      "Replace",IDC_REPLACEMAC,87,39,40,15
+    PUSHBUTTON      "Replace",IDC_REPLACEMAC,5,39,40,15
 END
 
 IDD_PATDLG DIALOGEX 0, 0, 184, 49

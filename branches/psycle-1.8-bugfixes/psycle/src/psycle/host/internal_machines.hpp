@@ -234,9 +234,9 @@ public:
 	{
 		chan1=0,
 		chanmax = chan1+MAX_CONNECTIONS,
-		return1 = chan1+MAX_CONNECTIONS,
+		return1 = chanmax,
 		returnmax = return1+MAX_CONNECTIONS,
-		send1 = return1+MAX_CONNECTIONS,
+		send1 = returnmax,
 		sendmax = send1+MAX_CONNECTIONS
 	};
 	Mixer();

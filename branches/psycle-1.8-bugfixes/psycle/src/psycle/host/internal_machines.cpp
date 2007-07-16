@@ -653,7 +653,7 @@ namespace psycle
 					Return(wireIndex).Wire().volume_ = value;
 					Return(wireIndex).Wire().normalize_ = 0.000030517578125f;
 					sends_[wireIndex].volume_ = value;
-					sends_[wireIndex].normalize_ = 0.000030517578125f;
+					sends_[wireIndex].normalize_ = 32768.0f;
 				}
 				else
 				{
@@ -1233,7 +1233,7 @@ namespace psycle
 				wet *= (master_.DryWetMix())*2.0f;
 			}
 
-			mixvolretpl[idx] = mixvolretpr[idx] = Return(idx).Volume()*val*wet;
+			mixvolretpl[idx] = mixvolretpr[idx] = Return(idx).Volume()*val*wet/Return(idx).Wire().normalize_;
 			if (Return(idx).Panning() >= 0.5f )
 			{
 				mixvolretpl[idx] *= (1.0f-Return(idx).Panning())*2.0f;
@@ -1252,7 +1252,7 @@ namespace psycle
 				dry *= (1.0f-master_.DryWetMix())*2.0f;
 			}
 
-			mixvolpl[idx] = mixvolpr[idx] = Channel(idx).Volume()*val*Channel(idx).DryMix()*dry;
+			mixvolpl[idx] = mixvolpr[idx] = Channel(idx).Volume()*val*Channel(idx).DryMix()*dry/_wireMultiplier[idx];
 			if (Channel(idx).Panning() >= 0.5f )
 			{
 				mixvolpl[idx] *= (1.0f-Channel(idx).Panning())*2.0f;
@@ -1267,7 +1267,7 @@ namespace psycle
 			float val;
 			GetWireVolume(chan,val);
 
-			_sendvolpl[chan][send] =  _sendvolpr[chan][send] = Channel(chan).Volume()*val*Channel(chan).Send(send)/sends_[send].normalize_;
+			_sendvolpl[chan][send] =  _sendvolpr[chan][send] = Channel(chan).Volume()*val*Channel(chan).Send(send)/(sends_[send].normalize_*_wireMultiplier[chan]);
 			if (Channel(chan).Panning() >= 0.5f )
 			{
 				_sendvolpl[chan][send] *= (1.0f-Channel(chan).Panning())*2.0f;

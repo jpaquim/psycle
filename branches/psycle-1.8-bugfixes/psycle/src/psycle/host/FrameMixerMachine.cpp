@@ -569,7 +569,7 @@ NAMESPACE__BEGIN(host)
 				VuMeter::Draw(&bufferDC,xoffset+GraphSlider::width,yoffset+GraphSlider::height-InfoLabel::height-VuMeter::height,_pMixer->VuSend(i));
 				yoffset+=InfoLabel::height;
 				GraphSlider::Draw(&bufferDC,xoffset,yoffset,_pMixer->GetParamValue(param)/4096.0f);
-				CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width,yoffset,"S",_pMixer->GetSoloState(i+MAX_CONNECTIONS));
+				CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width,yoffset,"S",_pMixer->GetSoloState(i+Mixer::return1));
 				CheckedButton::Draw(&bufferDC,&b_font_bold,xoffset+GraphSlider::width+CheckedButton::width,yoffset,"M",_pMixer->Return(i).Mute());
 				xoffset+=Knob::width+InfoLabel::width;
 			}
@@ -661,6 +661,7 @@ NAMESPACE__BEGIN(host)
 				else return wetonly;
 			}
 		}
+		return -1;
 	}
 	int CFrameMixerMachine::GetParamFromPos(int col,int row)
 	{
@@ -709,6 +710,7 @@ NAMESPACE__BEGIN(host)
 			return _pMixer->Return(ret).Send(send);
 		else if ( send == 13)
 			return _pMixer->Return(ret).MasterSend();
+		return false;
 	}
 	void CFrameMixerMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 	{
