@@ -43,6 +43,7 @@ namespace psycle
 			if (initialize)
 			{
 				Stop(); // This causes all machines to reset, and samplesperRow to init.
+				Work(this,256);
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
 			}
@@ -65,10 +66,10 @@ namespace psycle
 				for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 				_playing = true;
 			}
-			ExecuteLine();
-			_samplesRemaining = SamplesPerRow();
 			CVSTHost::vstTimeInfo.flags |= kVstTransportPlaying;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
+			ExecuteLine();
+			_samplesRemaining = SamplesPerRow();
 		}
 
 		void Player::Stop(void)
