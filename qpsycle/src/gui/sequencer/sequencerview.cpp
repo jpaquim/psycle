@@ -69,14 +69,18 @@ SequencerView::SequencerView( psy::core::Song *asong )
 	toolBar_->addSeparator();
 
 
-	QAction *ceTrkAct = toolBar_->addAction( QIcon(":images/seq-collapse.png" ),
-						 "Collapse/Expand");
-	ceTrkAct->setStatusTip( "Collapse a Track or Expand a Collapsed Track");
-	toolBar_->addAction (ceTrkAct);
-
-//	connect( ceTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( shrinkTrack() ) );
+	QAction *cTrkAct = toolBar_->addAction( QIcon(":images/seq-collapse.png" ),
+						 "Shrink");
+	cTrkAct->setStatusTip( "Shrins a Track");
+	connect( cTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( onCollapseButtonCliked() ) );
+	toolBar_->addAction (cTrkAct);
 	
-	
+	QAction *eTrkAct = toolBar_->addAction( QIcon(":images/seq-expand.png" ),
+						 "Expand");
+	eTrkAct->setStatusTip( "Expand a Track");
+	connect( eTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( onExpandButtonCliked() ) );
+	toolBar_->addAction (eTrkAct); 
+		
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( seqDraw_ );
 

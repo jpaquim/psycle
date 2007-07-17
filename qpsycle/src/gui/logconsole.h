@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 /*
-	to add some text to the logging console just call it's AddText(QString text) member
+	to add some text to the logging console just call it's Add...(QString text) member
 	you don't need to add \n at the end.... this void adds it automatically at the end :) MATTIAS
 */
 
