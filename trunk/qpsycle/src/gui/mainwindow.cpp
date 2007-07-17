@@ -118,9 +118,7 @@ void MainWindow::setupGui()
 	views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
 	views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
 	views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
-	views_->addTab( sampleBrowser_, "Sample browser" );
-
-
+	views_->addTab( sampleBrowser_,	QIcon(":images/sample-borwser.png"), "Sample Browser" );
 
 	QGridLayout *layout = new QGridLayout;
 	layout->addWidget( views_ );
