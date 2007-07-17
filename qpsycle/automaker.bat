@@ -1,26 +1,30 @@
 @REM Created By Graity_0... Released Under GPL Licence
 @echo off
-title Automaker QT 1.15 - Windows
-COLOR 0%3
-echo Welcome to Gravity_0 Automaker for QT
-echo Qt is a registered trademaerk of Trolltech
+title Automaker QPsycle 1.16 Final - Windows
+echo Welcome to Gravity_0 Automaker for QPsycle
 pause
 if "%1" == "help" goto HELP
-echo Running QMake
-qmake
-echo QMake Complete
+
 if "%1" == "release" goto RELEASE
 if "%1" == "debug" goto DEBUG
 
 goto HELP
 
 :DEBUG
+echo Running QMake
+qmake
+echo QMake Complete
+echo Compiling Debug Version
 make debug
 echo Make Complete
 pause
 exit
 
 :RELEASE
+echo Running QMake
+qmake
+echo QMake Complete
+echo Compiling Release Version
 make release
 echo Make Complete
 pause
