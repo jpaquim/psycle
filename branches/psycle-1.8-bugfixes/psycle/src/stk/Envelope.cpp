@@ -9,11 +9,10 @@
     \e keyOff messages, ramping to 1.0 on
     keyOn and to 0.0 on keyOff.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2004.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Envelope.h"
 
 Envelope :: Envelope(void) : Generator()
@@ -24,8 +23,28 @@ Envelope :: Envelope(void) : Generator()
   state_ = 0;
 }
 
+Envelope :: Envelope ( const Envelope& e )
+{
+  target_ = 0.0;
+  value_ = 0.0;
+  rate_ = 0.001;
+  state_ = 0;
+}
+
 Envelope :: ~Envelope(void)
-{    
+{
+}
+
+Envelope& Envelope :: operator= ( const Envelope& e )
+{
+  if ( this != &e ) {
+    target_ = e.target_;
+    value_ = e.value_;
+    rate_ = e.rate_;
+    state_ = e.state_;
+  }
+
+  return *this;
 }
 
 void Envelope :: keyOn(void)
@@ -43,8 +62,8 @@ void Envelope :: keyOff(void)
 void Envelope :: setRate(StkFloat rate)
 {
   if (rate < 0.0) {
-    // errorString_ << "Envelope::setRate: negative rates not allowed ... correcting!";
-    // handleError( StkError::WARNING );
+    errorString_ << "Envelope::setRate: negative rates not allowed ... correcting!";
+    handleError( StkError::WARNING );
     rate_ = -rate;
   }
   else
@@ -54,8 +73,8 @@ void Envelope :: setRate(StkFloat rate)
 void Envelope :: setTime(StkFloat time)
 {
   if (time < 0.0) {
-    // errorString_ << "Envelope::setTime: negative times not allowed ... correcting!";
-    // handleError( StkError::WARNING );
+    errorString_ << "Envelope::setTime: negative times not allowed ... correcting!";
+    handleError( StkError::WARNING );
     rate_ = 1.0 / (-time * Stk::sampleRate());
   }
   else
@@ -80,7 +99,7 @@ int Envelope :: getState(void) const
   return state_;
 }
 
-StkFloat Envelope :: tick(void)
+StkFloat Envelope :: computeSample(void )
 {
   if (state_) {
     if (target_ > value_) {
@@ -101,14 +120,4 @@ StkFloat Envelope :: tick(void)
 
   lastOutput_ = value_;
   return value_;
-}
-
-StkFloat *Envelope :: tick(StkFloat *vector, unsigned int vectorSize)
-{
-  return Generator::tick( vector, vectorSize );
-}
-
-StkFrames& Envelope :: tick( StkFrames& frames, unsigned int channel )
-{
-  return Generator::tick( frames, channel );
 }

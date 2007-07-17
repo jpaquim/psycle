@@ -1,12 +1,3 @@
-// Modified for Psycle
-// see 
-//void Shakers :: noteOn(StkFloat frequency, StkFloat amplitude)
-//{
-//  // Yep ... pretty kludgey, but it works!
-//  //int noteNum = (int) ((12*log(frequency/220.0)/log(2.0)) + 57.01) % 32; // removed for Psycle
-//  int noteNum = (int)frequency; // added for Psycle
-
-
 /***************************************************/
 /*! \class Shakers
     \brief PhISEM and PhOLIES class.
@@ -60,10 +51,9 @@
     by Perry R. Cook, 1996 - 2004.
 */
 /***************************************************/
-
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Stk.h"
-#include <math.h>
+#include <cmath>
 
 int my_random(int max) //  Return Random Int Between 0 and max
 {
@@ -351,8 +341,8 @@ int Shakers :: setupName(char* instr)
   }
 
 #if defined(_STK_DEBUG_)
-//  errorString_ << "Shakers::setupName: setting instrument to " << instrs[which] << '.';
-//  handleError( StkError::DEBUG_WARNING );
+  errorString_ << "Shakers::setupName: setting instrument to " << instrs[which] << '.';
+  handleError( StkError::DEBUG_WARNING );
 #endif
 
   return this->setupNum(which);
@@ -806,7 +796,7 @@ int Shakers :: setupNum(int inst)
 void Shakers :: noteOn(StkFloat frequency, StkFloat amplitude)
 {
   // Yep ... pretty kludgey, but it works!
-  //int noteNum = (int) ((12*log(frequency/220.0)/log(2.0)) + 57.01) % 32; // for Psycle
+  //int noteNum = (int) ((12*log(frequency/220.0)/log(2.0)) + 57.01) % 32;
   int noteNum = (int)frequency;
   if (instType_ !=  noteNum) instType_ = this->setupNum(noteNum);
   shakeEnergy_ += amplitude * MAX_SHAKE * 0.1;
@@ -814,8 +804,8 @@ void Shakers :: noteOn(StkFloat frequency, StkFloat amplitude)
   if (instType_==10 || instType_==3) ratchetPos_ += 1;
 
 #if defined(_STK_DEBUG_)
-//  errorString_ << "Shakers::NoteOn: frequency = " << frequency << ", amplitude = " << amplitude << '.';
-//  handleError( StkError::DEBUG_WARNING );
+  errorString_ << "Shakers::NoteOn: frequency = " << frequency << ", amplitude = " << amplitude << '.';
+  handleError( StkError::DEBUG_WARNING );
 #endif
 }
 
@@ -827,7 +817,7 @@ void Shakers :: noteOff(StkFloat amplitude)
 
 const StkFloat MIN_ENERGY = 0.3;
 
-StkFloat Shakers :: tick()
+StkFloat Shakers :: computeSample()
 {
   StkFloat data;
   StkFloat temp_rand;
@@ -898,28 +888,18 @@ StkFloat Shakers :: tick()
   return lastOutput_;
 }
 
-StkFloat *Shakers :: tick(StkFloat *vector, unsigned int vectorSize)
-{
-  return Instrmnt::tick( vector, vectorSize );
-}
-
-StkFrames& Shakers :: tick( StkFrames& frames, unsigned int channel )
-{
-  return Instrmnt::tick( frames, channel );
-}
-
 void Shakers :: controlChange(int number, StkFloat value)
 {
   StkFloat norm = value * ONE_OVER_128;
   if ( norm < 0 ) {
     norm = 0.0;
-//    errorString_ << "Shakers::controlChange: control value less than zero ... setting to zero!";
-//    handleError( StkError::WARNING );
+    errorString_ << "Shakers::controlChange: control value less than zero ... setting to zero!";
+    handleError( StkError::WARNING );
   }
   else if ( norm > 1.0 ) {
     norm = 1.0;
-//    errorString_ << "Shakers::controlChange: control value greater than 128.0 ... setting to 128.0!";
-//    handleError( StkError::WARNING );
+    errorString_ << "Shakers::controlChange: control value greater than 128.0 ... setting to 128.0!";
+    handleError( StkError::WARNING );
   }
 
   StkFloat temp;
@@ -1006,13 +986,13 @@ void Shakers :: controlChange(int number, StkFloat value)
     this->setupNum(instType_);
   }                                       
   else {
-   // errorString_ << "Shakers::controlChange: undefined control number (" << number << ")!";
-   // handleError( StkError::WARNING );
+    errorString_ << "Shakers::controlChange: undefined control number (" << number << ")!";
+    handleError( StkError::WARNING );
   }
 
 #if defined(_STK_DEBUG_)
-//    errorString_ << "Shakers::controlChange: number = " << number << ", value = " << value << '.';
-//    handleError( StkError::DEBUG_WARNING );
+    errorString_ << "Shakers::controlChange: number = " << number << ", value = " << value << '.';
+    handleError( StkError::DEBUG_WARNING );
 #endif
 }
 

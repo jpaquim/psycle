@@ -642,9 +642,9 @@ namespace psycle
 
 		char vhdr_Id[4]		// "VHDR"
 		ULONGINV hlength	// of the data contained in the header "VHDR". it is 20 bytes
-		ULONGINV Samplength	// Lenght of the sample. It is in bytes, not in Samples.
+		ULONGINV Samplength	// length of the sample. It is in bytes, not in Samples.
 		ULONGINV loopstart	// Start point for the loop. It is in bytes, not in Samples.
-		ULONGINV loopLength	// Length of the loop (so loopEnd = loopstart+looplenght) In bytes.
+		ULONGINV loopLength	// Length of the loop (so loopEnd = loopstart+looplength) In bytes.
 		unsigned char unknown2[5]; //Always $20 $AB $01 $00 //
 		unsigned char volumeHiByte;
 		unsigned char volumeLoByte;

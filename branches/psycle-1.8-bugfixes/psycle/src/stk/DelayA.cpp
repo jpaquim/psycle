@@ -2,27 +2,23 @@
 /*! \class DelayA
     \brief STK allpass interpolating delay line class.
 
-    This Delay subclass implements a fractional-
-    length digital delay-line using a first-order
-    allpass filter.  A fixed maximum length
-    of 4095 and a delay of 0.5 is set using the
-    default constructor.  Alternatively, the
-    delay and maximum length can be set during
-    instantiation with an overloaded constructor.
+    This Delay subclass implements a fractional-length digital
+    delay-line using a first-order allpass filter.  A fixed maximum
+    length of 4095 and a delay of 0.5 is set using the default
+    constructor.  Alternatively, the delay and maximum length can be
+    set during instantiation with an overloaded constructor.
 
-    An allpass filter has unity magnitude gain but
-    variable phase delay properties, making it useful
-    in achieving fractional delays without affecting
-    a signal's frequency magnitude response.  In
-    order to achieve a maximally flat phase delay
-    response, the minimum delay possible in this
-    implementation is limited to a value of 0.5.
+    An allpass filter has unity magnitude gain but variable phase
+    delay properties, making it useful in achieving fractional delays
+    without affecting a signal's frequency magnitude response.  In
+    order to achieve a maximally flat phase delay response, the
+    minimum delay possible in this implementation is limited to a
+    value of 0.5.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2004.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "DelayA.h"
 
 DelayA :: DelayA() : Delay()
@@ -34,7 +30,6 @@ DelayA :: DelayA() : Delay()
 
 DelayA :: DelayA(StkFloat delay, unsigned long maxDelay)
 {
-/*
   if ( delay < 0.0 || maxDelay < 1 ) {
     errorString_ << "DelayA::DelayA: delay must be >= 0.0, maxDelay must be > 0!";
     handleError( StkError::FUNCTION_ARGUMENT );
@@ -44,7 +39,7 @@ DelayA :: DelayA(StkFloat delay, unsigned long maxDelay)
     errorString_ << "DelayA::DelayA: maxDelay must be > than delay argument!";
     handleError( StkError::FUNCTION_ARGUMENT );
   }
-*/
+
   // Writing before reading allows delays from 0 to length-1. 
   if ( maxDelay > inputs_.size()-1 ) {
     inputs_.resize( maxDelay+1 );
@@ -73,12 +68,16 @@ void DelayA :: setDelay(StkFloat delay)
   unsigned long length = inputs_.size();
 
   if ( delay > inputs_.size() - 1 ) { // The value is too big.
+    errorString_ << "DelayA::setDelay: argument (" << delay << ") too big ... setting to maximum!";
+    handleError( StkError::WARNING );
 
     // Force delay to maxLength
     outPointer = inPoint_ + 1.0;
     delay_ = length - 1;
   }
   else if (delay < 0.5) {
+    errorString_ << "DelayA::setDelay: argument (" << delay << ") less than 0.5 not possible!";
+    handleError( StkError::WARNING );
 
     outPointer = inPoint_ + 0.4999999999;
     delay_ = 0.5;
@@ -107,6 +106,11 @@ void DelayA :: setDelay(StkFloat delay)
     ((StkFloat) 1.0 + alpha_);         // coefficient for all pass
 }
 
+StkFloat DelayA :: getDelay(void) const
+{
+  return delay_;
+}
+
 StkFloat DelayA :: nextOut(void)
 {
   if ( doNextOut_ ) {
@@ -119,9 +123,9 @@ StkFloat DelayA :: nextOut(void)
   return nextOutput_;
 }
 
-StkFloat DelayA :: tick(StkFloat sample)
+StkFloat DelayA :: computeSample( StkFloat input )
 {
-  inputs_[inPoint_++] = sample;
+  inputs_[inPoint_++] = input;
 
   // Increment input pointer modulo length.
   if (inPoint_ == inputs_.size())
@@ -136,14 +140,4 @@ StkFloat DelayA :: tick(StkFloat sample)
     outPoint_ = 0;
 
   return outputs_[0];
-}
-
-StkFloat *DelayA :: tick(StkFloat *vector, unsigned int vectorSize)
-{
-  return Filter::tick( vector, vectorSize );
-}
-
-StkFrames& DelayA :: tick( StkFrames& frames, unsigned int channel )
-{
-  return Filter::tick( frames, channel );
 }

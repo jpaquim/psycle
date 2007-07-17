@@ -18,11 +18,10 @@
     order Lagrange interpolators can typically
     improve (minimize) this attenuation characteristic.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2004.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "DelayL.h"
 
 DelayL :: DelayL() : Delay()
@@ -32,7 +31,6 @@ DelayL :: DelayL() : Delay()
 
 DelayL :: DelayL(StkFloat delay, unsigned long maxDelay)
 {
-/*
   if ( delay < 0.0 || maxDelay < 1 ) {
     errorString_ << "DelayL::DelayL: delay must be >= 0.0, maxDelay must be > 0!";
     handleError( StkError::FUNCTION_ARGUMENT );
@@ -42,7 +40,7 @@ DelayL :: DelayL(StkFloat delay, unsigned long maxDelay)
     errorString_ << "DelayL::DelayL: maxDelay must be > than delay argument!";
     handleError( StkError::FUNCTION_ARGUMENT );
   }
-*/
+
   // Writing before reading allows delays from 0 to length-1. 
   if ( maxDelay > inputs_.size()-1 ) {
     inputs_.resize( maxDelay+1 );
@@ -63,12 +61,16 @@ void DelayL :: setDelay(StkFloat delay)
   StkFloat outPointer;
 
   if ( delay > inputs_.size() - 1 ) { // The value is too big.
+    errorString_ << "DelayL::setDelay: argument (" << delay << ") too big ... setting to maximum!";
+    handleError( StkError::WARNING );
 
     // Force delay to maxLength
     outPointer = inPoint_ + 1.0;
     delay_ = inputs_.size() - 1;
   }
   else if (delay < 0 ) {
+    errorString_ << "DelayL::setDelay: argument (" << delay << ") less than zero ... setting to zero!";
+    handleError( StkError::WARNING );
 
     outPointer = inPoint_;
     delay_ = 0;
@@ -108,9 +110,9 @@ StkFloat DelayL :: nextOut(void)
   return nextOutput_;
 }
 
-StkFloat DelayL :: tick(StkFloat sample)
+StkFloat DelayL :: computeSample( StkFloat input )
 {
-  inputs_[inPoint_++] = sample;
+  inputs_[inPoint_++] = input;
 
   // Increment input pointer modulo length.
   if (inPoint_ == inputs_.size())
@@ -126,12 +128,3 @@ StkFloat DelayL :: tick(StkFloat sample)
   return outputs_[0];
 }
 
-StkFloat *DelayL :: tick(StkFloat *vector, unsigned int vectorSize)
-{
-  return Filter::tick( vector, vectorSize );
-}
-
-StkFrames& DelayL :: tick( StkFrames& frames, unsigned int channel )
-{
-  return Filter::tick( frames, channel );
-}

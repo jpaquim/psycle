@@ -11,11 +11,10 @@
     envelope value reaches 0.0 in the
     ADSR::RELEASE state.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2004.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "ADSR.h"
 
 ADSR :: ADSR() : Envelope()
@@ -50,8 +49,8 @@ void ADSR :: keyOff()
 void ADSR :: setAttackRate(StkFloat rate)
 {
   if (rate < 0.0) {
-//    errorString_ << "ADSR::setAttackRate: negative rates not allowed ... correcting!";
-//    handleError( StkError::WARNING );
+    errorString_ << "ADSR::setAttackRate: negative rates not allowed ... correcting!";
+    handleError( StkError::WARNING );
     attackRate_ = -rate;
   }
   else attackRate_ = rate;
@@ -60,8 +59,8 @@ void ADSR :: setAttackRate(StkFloat rate)
 void ADSR :: setDecayRate(StkFloat rate)
 {
   if (rate < 0.0) {
-//    errorString_ << "ADSR::setDecayRate: negative rates not allowed ... correcting!";
-//    handleError( StkError::WARNING );
+    errorString_ << "ADSR::setDecayRate: negative rates not allowed ... correcting!";
+    handleError( StkError::WARNING );
     decayRate_ = -rate;
   }
   else decayRate_ = rate;
@@ -70,8 +69,8 @@ void ADSR :: setDecayRate(StkFloat rate)
 void ADSR :: setSustainLevel(StkFloat level)
 {
   if (level < 0.0 ) {
-    // errorString_ << "ADSR::setSustainLevel: level out of range ... correcting!";
-    // handleError( StkError::WARNING );
+    errorString_ << "ADSR::setSustainLevel: level out of range ... correcting!";
+    handleError( StkError::WARNING );
     sustainLevel_ = 0.0;
   }
   else sustainLevel_ = level;
@@ -80,8 +79,8 @@ void ADSR :: setSustainLevel(StkFloat level)
 void ADSR :: setReleaseRate(StkFloat rate)
 {
   if (rate < 0.0) {
-    // errorString_ << "ADSR::setReleaseRate: negative rates not allowed ... correcting!";
-    // handleError( StkError::WARNING );
+    errorString_ << "ADSR::setReleaseRate: negative rates not allowed ... correcting!";
+    handleError( StkError::WARNING );
     releaseRate_ = -rate;
   }
   else releaseRate_ = rate;
@@ -90,8 +89,8 @@ void ADSR :: setReleaseRate(StkFloat rate)
 void ADSR :: setAttackTime(StkFloat time)
 {
   if (time < 0.0) {
-    // errorString_ << "ADSR::setAttackTime: negative times not allowed ... correcting!";
-    // handleError( StkError::WARNING );
+    errorString_ << "ADSR::setAttackTime: negative times not allowed ... correcting!";
+    handleError( StkError::WARNING );
     attackRate_ = 1.0 / ( -time * Stk::sampleRate() );
   }
   else attackRate_ = 1.0 / ( time * Stk::sampleRate() );
@@ -100,8 +99,8 @@ void ADSR :: setAttackTime(StkFloat time)
 void ADSR :: setDecayTime(StkFloat time)
 {
   if (time < 0.0) {
-    // errorString_ << "ADSR::setDecayTime: negative times not allowed ... correcting!";
-    // handleError( StkError::WARNING );
+    errorString_ << "ADSR::setDecayTime: negative times not allowed ... correcting!";
+    handleError( StkError::WARNING );
     decayRate_ = 1.0 / ( -time * Stk::sampleRate() );
   }
   else decayRate_ = 1.0 / ( time * Stk::sampleRate() );
@@ -110,8 +109,8 @@ void ADSR :: setDecayTime(StkFloat time)
 void ADSR :: setReleaseTime(StkFloat time)
 {
   if (time < 0.0) {
-    // errorString_ << "ADSR::setReleaseTime: negative times not allowed ... correcting!";
-    // handleError( StkError::WARNING );
+    errorString_ << "ADSR::setReleaseTime: negative times not allowed ... correcting!";
+    handleError( StkError::WARNING );
     releaseRate_ = sustainLevel_ / ( -time * Stk::sampleRate() );
   }
   else releaseRate_ = sustainLevel_ / ( time * Stk::sampleRate() );
@@ -154,7 +153,7 @@ int ADSR :: getState(void) const
   return state_;
 }
 
-StkFloat ADSR :: tick()
+StkFloat ADSR :: computeSample()
 {
   switch (state_) {
 
@@ -187,14 +186,4 @@ StkFloat ADSR :: tick()
 
   lastOutput_ = value_;
   return value_;
-}
-
-StkFloat *ADSR :: tick(StkFloat *vector, unsigned int vectorSize)
-{
-  return Generator::tick( vector, vectorSize );
-}
-
-StkFrames& ADSR :: tick( StkFrames& frames, unsigned int channel )
-{
-  return Generator::tick( frames, channel );
 }

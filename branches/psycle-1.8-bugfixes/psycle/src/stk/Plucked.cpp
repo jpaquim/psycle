@@ -13,11 +13,10 @@
     Stanford, bearing the names of Karplus and/or
     Strong.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2004.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "Plucked.h"
 
 Plucked :: Plucked(StkFloat lowestFrequency)
@@ -44,8 +43,8 @@ void Plucked :: setFrequency(StkFloat frequency)
 {
   StkFloat freakency = frequency;
   if ( frequency <= 0.0 ) {
-//    errorString_ << "Plucked::setFrequency: parameter is less than or equal to zero!";
-//    handleError( StkError::WARNING );
+    errorString_ << "Plucked::setFrequency: parameter is less than or equal to zero!";
+    handleError( StkError::WARNING );
     freakency = 220.0;
   }
 
@@ -65,13 +64,13 @@ void Plucked :: pluck(StkFloat amplitude)
 {
   StkFloat gain = amplitude;
   if ( gain > 1.0 ) {
-  //  errorString_ << "Plucked::pluck: amplitude is greater than 1.0 ... setting to 1.0!";
-  //  handleError( StkError::WARNING );
+    errorString_ << "Plucked::pluck: amplitude is greater than 1.0 ... setting to 1.0!";
+    handleError( StkError::WARNING );
     gain = 1.0;
   }
   else if ( gain < 0.0 ) {
-  //  errorString_ << "Plucked::pluck: amplitude is < 0.0  ... setting to 0.0!";
-  //  handleError( StkError::WARNING );
+    errorString_ << "Plucked::pluck: amplitude is < 0.0  ... setting to 0.0!";
+    handleError( StkError::WARNING );
     gain = 0.0;
   }
 
@@ -88,8 +87,8 @@ void Plucked :: noteOn(StkFloat frequency, StkFloat amplitude)
   this->pluck( amplitude );
 
 #if defined(_STK_DEBUG_)
-//  errorString_ << "Plucked::NoteOn: frequency = " << frequency << ", amplitude = " << amplitude << ".";
-//  handleError( StkError::DEBUG_WARNING );
+  errorString_ << "Plucked::NoteOn: frequency = " << frequency << ", amplitude = " << amplitude << ".";
+  handleError( StkError::DEBUG_WARNING );
 #endif
 }
 
@@ -97,36 +96,26 @@ void Plucked :: noteOff(StkFloat amplitude)
 {
   loopGain_ = 1.0 - amplitude;
   if ( loopGain_ < 0.0 ) {
-  //  errorString_ << "Plucked::noteOff: amplitude is greater than 1.0 ... setting to 1.0!";
-  //  handleError( StkError::WARNING );
+    errorString_ << "Plucked::noteOff: amplitude is greater than 1.0 ... setting to 1.0!";
+    handleError( StkError::WARNING );
     loopGain_ = 0.0;
   }
   else if ( loopGain_ > 1.0 ) {
-  //  errorString_ << "Plucked::noteOff: amplitude is < 0.0  ... setting to 0.0!";
-  //  handleError( StkError::WARNING );
+    errorString_ << "Plucked::noteOff: amplitude is < 0.0  ... setting to 0.0!";
+    handleError( StkError::WARNING );
     loopGain_ = (StkFloat) 0.99999;
   }
 
 #if defined(_STK_DEBUG_)
-//  errorString_ << "Plucked::NoteOff: amplitude = " << amplitude << ".";
-//  handleError( StkError::DEBUG_WARNING );
+  errorString_ << "Plucked::NoteOff: amplitude = " << amplitude << ".";
+  handleError( StkError::DEBUG_WARNING );
 #endif
 }
 
-StkFloat Plucked :: tick()
+StkFloat Plucked :: computeSample()
 {
   // Here's the whole inner loop of the instrument!!
   lastOutput_ = delayLine_.tick( loopFilter_.tick( delayLine_.lastOut() * loopGain_ ) ); 
   lastOutput_ *= 3.0;
   return lastOutput_;
-}
-
-StkFloat *Plucked :: tick(StkFloat *vector, unsigned int vectorSize)
-{
-  return Instrmnt::tick( vector, vectorSize );
-}
-
-StkFrames& Plucked :: tick( StkFrames& frames, unsigned int channel )
-{
-  return Instrmnt::tick( frames, channel );
 }

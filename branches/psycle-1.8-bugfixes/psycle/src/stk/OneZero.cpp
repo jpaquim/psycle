@@ -8,11 +8,10 @@
     along the real axis of the z-plane while
     maintaining a constant filter gain.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2004.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
-#include <project.private.hpp>
+#include <packageneric/pre-compiled.private.hpp>
 #include "OneZero.h"
 
 OneZero :: OneZero() : Filter()
@@ -82,18 +81,13 @@ StkFloat OneZero :: lastOut(void) const
   return Filter::lastOut();
 }
 
-StkFloat OneZero :: tick(StkFloat sample)
+StkFloat OneZero :: tick( StkFloat input )
 {
-  inputs_[0] = gain_ * sample;
+  inputs_[0] = gain_ * input;
   outputs_[0] = b_[1] * inputs_[1] + b_[0] * inputs_[0];
   inputs_[1] = inputs_[0];
 
   return outputs_[0];
-}
-
-StkFloat *OneZero :: tick(StkFloat *vector, unsigned int vectorSize)
-{
-  return Filter::tick( vector, vectorSize );
 }
 
 StkFrames& OneZero :: tick( StkFrames& frames, unsigned int channel )
