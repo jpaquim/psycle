@@ -45,7 +45,7 @@ public:
 	void updatePlayPos();
 	void onPatternNameChanged();
 	void onCategoryColorChanged();
-     
+	
 protected:
 
 private:

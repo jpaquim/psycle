@@ -62,6 +62,8 @@ public slots:
 	void deleteTrack();
 	void moveUpTrack();
 	void moveDownTrack();
+	void onCollapseButtonCliked();
+	void onExpandButtonCliked();
 	void onSequencerLineClick( SequencerLine *line );
 	void onSequencerItemDeleteRequest( SequencerItem *item );
 	void onPlayLineMoved( double newXPos );

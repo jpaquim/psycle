@@ -133,6 +133,16 @@ void SequencerDraw::moveUpTrack() {
 	}
 }
 
+void SequencerDraw::onCollapseButtonCliked()
+{	
+	selectedLine()->scale(1.0f, 0.5f);
+}
+
+void SequencerDraw::onExpandButtonCliked()
+{
+	selectedLine()->scale(1.0f, 2.0f);
+}
+
 SequencerLine* SequencerDraw::makeSequencerLine( psy::core::SequenceLine* seqLine ) {
 	SequencerLine* line = new SequencerLine( this );
 	scene()->addItem(line);
