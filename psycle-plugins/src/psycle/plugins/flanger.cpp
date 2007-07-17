@@ -231,7 +231,7 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				
 				Sample & input_sample = input[sample];
 				Sample buffer_write = input_sample + feedback * buffer_read + 1.0e-9;
-				buffer_write-= 1.0e-9; 
+				buffer_write-= static_cast<Sample>(1.0e-9);
 //				Sample buffer_write = input_sample + feedback * buffer_read;
 //				math::erase_all_nans_infinities_and_denormals(buffer_write);
 				buffer[write] = buffer_write;
@@ -278,7 +278,7 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				const Real buffer_read(buffer[read]);
 				Sample & input_sample = input[sample];
 				Sample buffer_write = input_sample + feedback * buffer_read + 1.0e-9;
-				buffer_write -= 1.0e-9;
+				buffer_write -= static_cast<Sample>(1.0e-9);
 //				Sample buffer_write = input_sample + feedback * buffer_read;
 //				math::erase_all_nans_infinities_and_denormals(buffer_write);
 				buffer[write] = buffer_write;
