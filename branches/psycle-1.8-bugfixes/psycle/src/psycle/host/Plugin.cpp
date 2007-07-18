@@ -940,6 +940,7 @@ namespace psycle
 						proxy().ParameterTweak(17,Vals[17]+10);
 						proxy().ParameterTweak(24,0);
 						proxy().ParameterTweak(25,0);
+						proxy().ParameterTweak(27,1);
 					}
 					catch(const std::exception &)
 					{

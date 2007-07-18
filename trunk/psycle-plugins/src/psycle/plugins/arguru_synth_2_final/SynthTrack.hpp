@@ -149,7 +149,7 @@ inline void CSynthTrack::ArpTick()
 	OSC1Speed=(float)pow(2.0, note/12.0);
 
 	float note2=note+
-	(float)syntp->osc2finetune*0.0038962f+
+	(float)syntp->osc2finetune*0.0039062f+
 	(float)syntp->osc2detune;
 	OSC2Speed=(float)pow(2.0, note2/12.0);
 
@@ -330,11 +330,17 @@ inline float CSynthTrack::GetEnvAmp()
 		
 		if(AmpEnvValue<AmpEnvSustainLevel)
 		{
-			AmpEnvValue=AmpEnvSustainLevel;
-			AmpEnvStage=3;
-
-			if(!syntp->amp_env_sustain)
-			AmpEnvStage=0;
+			if(AmpEnvSustainLevel == 0.0f)
+			{
+				AmpEnvStage=0;
+				ROSC1Speed=0.0f;
+				ROSC2Speed=0.0f;
+			}
+			else
+			{
+				AmpEnvValue=AmpEnvSustainLevel;
+				AmpEnvStage=3;
+			}
 		}
 
 		return AmpEnvValue;
@@ -351,6 +357,8 @@ inline float CSynthTrack::GetEnvAmp()
 		{
 			AmpEnvValue=0.0f;
 			AmpEnvStage=0;
+			ROSC1Speed=0.0f;
+			ROSC2Speed=0.0f;
 		}
 
 		return AmpEnvValue;
@@ -364,6 +372,7 @@ inline float CSynthTrack::GetEnvAmp()
 			AmpEnvValue=0.0f;
 			AmpEnvStage=1;
 			AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
+			oscglide=256.0f;
 		}
 
 		return AmpEnvValue;

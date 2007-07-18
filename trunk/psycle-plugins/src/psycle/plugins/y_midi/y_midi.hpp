@@ -8,8 +8,8 @@
 #pragma warning(pop)
 #include <stdio.h>
 
-#define YMIDI_VERSION "1.0a"
-#define NUMPARAMETERS 1
+#define YMIDI_VERSION "1.1"
+#define NUMPARAMETERS 17
 #define MIDI_TRACKS 16					// Maximum tracks allowed.
 
 //===================================================================
@@ -26,48 +26,96 @@
 //===================================================================
 
 
+typedef	union
+{
+	struct split_mtype
+	{
+		unsigned char message;
+		unsigned char byte1;
+		unsigned char byte2;
+		unsigned char byte3;
+	} split;
+	unsigned long value;
+}MidiEvent;
 // =========================================
 // Midi channel class - will need 16 of them
 // =========================================
 class midichannel
 {
 public:
-	bool Playnote;		// when true plays the current note for this channel, false turns it off
-	int  Chan;
-	int	 Vol;
-	int  Note;
-	int	 Patch;
-
-	void Play(const int note, const int vol);
-	void Stop();
-	int	 GetVolume();
-	void Init(HMIDIOUT handle_in);
-	void SetChannel(const int channel);
-	void SetPatch(const int patchnum);
-
 	midichannel();
 	~midichannel();
 
-private:
-	HMIDIOUT handle;	// Midi device/channel handler.
-	void StartMidi();
+	void Init(HMIDIOUT handle_in, const int channel);
+	void Play(const int note, const int vol);
+	void Stop(const int note);
+	void SetPatch(const int patchnum);
 	void StopMidi();
-	DWORD BuildEvent2(const int eventtype, const int channel, const int p1, const int p2);
 
+private:
+	void SendMidi(MidiEvent event);
+	MidiEvent BuildEvent(const int eventtype, const int p1=0, const int p2=0);
+
+	int  Chan;
+	HMIDIOUT handle;	// Midi device/channel handler.
 };
 
-CMachineParameter const prNothing = {
-	"-",
-	"Nothing",
-	0,
-	1,
-	MPF_STATE,
-	0
-};
+typedef struct {
+	int portidx;
+	int patch1;
+	int patch2;
+	int patch3;
+	int patch4;
+	int patch5;
+	int patch6;
+	int patch7;
+	int patch8;
+	int patch9;
+	int patch10;
+	int patch11;
+	int patch12;
+	int patch13;
+	int patch14;
+	int patch15;
+	int patch16;
+}MacParams;
+CMachineParameter const prPort = {"Output Port","Output Port",0,15,MPF_STATE,0};
+CMachineParameter const prPatch1 = {"Program Channel 1","Program Channel 1",0,127,MPF_STATE,0};
+CMachineParameter const prPatch2 = {"Program Channel 2","Program Channel 2",0,127,MPF_STATE,0};
+CMachineParameter const prPatch3 = {"Program Channel 3","Program Channel 3",0,127,MPF_STATE,0};
+CMachineParameter const prPatch4 = {"Program Channel 4","Program Channel 4",0,127,MPF_STATE,0};
+CMachineParameter const prPatch5 = {"Program Channel 5","Program Channel 5",0,127,MPF_STATE,0};
+CMachineParameter const prPatch6 = {"Program Channel 6","Program Channel 6",0,127,MPF_STATE,0};
+CMachineParameter const prPatch7 = {"Program Channel 7","Program Channel 7",0,127,MPF_STATE,0};
+CMachineParameter const prPatch8 = {"Program Channel 8","Program Channel 8",0,127,MPF_STATE,0};
+CMachineParameter const prPatch9 = {"Program Channel 9","Program Channel 9",0,127,MPF_STATE,0};
+CMachineParameter const prPatch10 = {"Program Channel 10","Program Channel 10",0,127,MPF_STATE,0};
+CMachineParameter const prPatch11 = {"Program Channel 11","Program Channel 11",0,127,MPF_STATE,0};
+CMachineParameter const prPatch12 = {"Program Channel 12","Program Channel 12",0,127,MPF_STATE,0};
+CMachineParameter const prPatch13 = {"Program Channel 13","Program Channel 13",0,127,MPF_STATE,0};
+CMachineParameter const prPatch14 = {"Program Channel 14","Program Channel 14",0,127,MPF_STATE,0};
+CMachineParameter const prPatch15 = {"Program Channel 15","Program Channel 15",0,127,MPF_STATE,0};
+CMachineParameter const prPatch16 = {"Program Channel 16","Program Channel 16",0,127,MPF_STATE,0};
 
 CMachineParameter const *pParameters[] = 
 { 
-	&prNothing,
+	&prPort,
+	&prPatch1,
+	&prPatch2,
+	&prPatch3,
+	&prPatch4,
+	&prPatch5,
+	&prPatch6,
+	&prPatch7,
+	&prPatch8,
+	&prPatch9,
+	&prPatch10,
+	&prPatch11,
+	&prPatch12,
+	&prPatch13,
+	&prPatch14,
+	&prPatch15,
+	&prPatch16,
 };
 
 CMachineInfo const MacInfo =
@@ -83,7 +131,7 @@ CMachineInfo const MacInfo =
 		#endif
 		,
 	"YMidi" YMIDI_VERSION,
-	"YanniS on " __DATE__,
+	"YanniS and JosepMa on " __DATE__,
 	"Command Help",
 	1
 };
@@ -94,33 +142,29 @@ CMachineInfo const MacInfo =
 class mi : public CMachineInterface
 {
 public:
-	float OutVol;		// Master volume. Values between 0 and 1!
-	int Chan;
-	bool Started;		// Used only to avoid New notes to start when Machine is muted.
-
-//	void NoteOn(int note, chan int vol, int);
-	void NoteOff();
-
 	mi();
 	virtual ~mi();
 
 	virtual void Init();
 	virtual void SequencerTick();
+	virtual void ParameterTweak(int par, int val);
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int tracks);
+	virtual void Stop();
 	virtual bool DescribeValue(char* txt,int const param, int const value);
 	virtual void Command();
-	virtual void ParameterTweak(int par, int val);
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
-	virtual void Stop();
-	virtual void MidiNote(int const channel, int const value, int const velocity);
+
+protected:
+	void InitMidi();
+	void FreeMidi();
 
 private:
 	midichannel numChannel[MIDI_TRACKS];	// List of MAX_TRACKS (16 usually) which hold channel note information
-//	int numC[MIDI_TRACKS];	// Keep track of which channels are playing.
-	int numchannels;
-	bool midiopen;
-	HMIDIOUT handle;
+	int numC[MAX_TRACKS];					// Assignation of tracker track to midi channel.
+	int notes[MAX_TRACKS];					// Last note being played in this track.
+	MacParams pars;
 
-	void InitMidi();
-	void CloseMidi();
+	static int midiopencount;
+	static HMIDIOUT handle;
+
 };

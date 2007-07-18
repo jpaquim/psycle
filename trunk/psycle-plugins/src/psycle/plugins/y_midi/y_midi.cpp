@@ -1,125 +1,66 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "y_midi.hpp"
 
-DWORD midichannel::BuildEvent2(const int eventtype, const int channel, const int p1, const int p2)
-{
-	// int tmp=0; tmp+=A;tmp<<=8;tmp+=B;tmp<<=8;tmp+=C;
-	//((A)<<16)+((B)<<8)+((C)<<0)
-	//int tmp=0;tmp+=(A1)&3;tmp<<=4;tmp+=(A2)&3;
+int mi::midiopencount(0);
+HMIDIOUT mi::handle(0);
 
-	DWORD midievent;
-	int event_cmd=eventtype;
-	UCHAR u_p1 = p1&0xff;
-	UCHAR u_p2 = p2&0xff;
-
-	// build the 1 byte command from two nibbles 0x(midievent, channel)
-//	event_cmd+=(eventtype)&3;
-	event_cmd+=(channel)&3;
-	midievent = DWORD(((u_p2)<<16)+((u_p1)<<8)+((event_cmd)<<0));
-	return midievent;
-}
-
-// Method to start a note playing in the current channel
-void midichannel::StartMidi()
-{
-	DWORD midievent;
-	midievent = BuildEvent2(MIDI_NOTEON, Chan, Note, Vol);
-	midiOutShortMsg(handle, midievent);
-	Playnote = true;
-}
-
-// Method to call a note off for the current note in this channel.
-void midichannel::StopMidi()
-{
-	DWORD midievent;
-	midievent = BuildEvent2(MIDI_NOTEOFF, Chan, Note, Vol);
-	midiOutShortMsg(handle, midievent);
-	Playnote = false;
-}
-
-void mi::InitMidi()
-{
-
-	/* Open default MIDI Out device */
-	if (!midiOutOpen(&handle, (UINT)-1, 0, 0, CALLBACK_NULL) )
-	{
-		midiopen = true;
-	}
-	else
-	{
-		midiopen = false;
-	}
-}
-
-void mi::CloseMidi()
-{
-    if (midiopen) 
-	{
-		midiOutClose(handle);
-	}
-}
-
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
-
+//////////////////////////////////////////////////////////////////////////
+// midichannel class
 midichannel::midichannel()
+:Chan(0)
+,handle(0)
 {
-	Vol = 0;
-	Note = 0;
-	Playnote = false;
 }
 
 midichannel::~midichannel()
 {
-	Stop();
 }
 
-void midichannel::Init(HMIDIOUT handle_in)
+void midichannel::Init(HMIDIOUT handle_in, const int channel)
 {
-	Vol = 0;
-	Note = 0;
-	Playnote = false;
 	handle = handle_in;
-}
-
-int midichannel::GetVolume()
-{
-	return Vol;
-}
-
-void midichannel::SetPatch(const int patchnum)
-{
-	DWORD midievent;
-	if (Patch != patchnum)
-	{
-		Patch = patchnum;
-		midievent = BuildEvent2(MIDI_PATCHCHANGE, Chan, Patch, 0);
-		midiOutShortMsg(handle, midievent);
-	}
-}
-
-void midichannel::SetChannel(const int channel)
-{
 	Chan = channel;
-}
-
-// Call the channel to stop playing the last note.
-void midichannel::Stop()
-{
-	if (Playnote)
-	{
-		StopMidi();
-	}
 }
 
 void midichannel::Play(const int note, const int vol)
 {
-	Stop();		// Automatically stop old note playing first.
-	
-	// Set new note values after the old note has stopped!
-	Note = note;
-	Vol = vol;
-	StartMidi();
+	SendMidi(BuildEvent(MIDI_NOTEON,note,vol));
 }
+
+void midichannel::Stop(const int note)
+{
+	SendMidi(BuildEvent(MIDI_NOTEOFF,note));
+}
+
+void midichannel::SetPatch(const int patchnum)
+{
+	SendMidi(BuildEvent(MIDI_PATCHCHANGE,patchnum));
+}
+
+
+MidiEvent midichannel::BuildEvent(const int eventtype, const int p1, const int p2)
+{
+	MidiEvent mevent;
+	mevent.split.message= (eventtype&0xFF) | (Chan&0x0F);
+	mevent.split.byte1= p1&0xFF;
+	mevent.split.byte2= p2&0xFF;
+
+	return mevent;
+}
+
+void midichannel::SendMidi(MidiEvent event)
+{
+	midiOutShortMsg(handle, event.value);
+}
+void midichannel::StopMidi()
+{
+	SendMidi(BuildEvent(MIDI_CCONTROLLER,0x7B)); // All Notes Off
+}
+
+//////////////////////////////////////////////////////////////////////////
+//  mi machine class.
+
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -129,35 +70,24 @@ mi::mi()
 	InitMidi();
 	for(i=0;i<MIDI_TRACKS; i++)
 	{
-		numChannel[i].Init(handle);
-		numChannel[i].SetChannel(i);
+		numChannel[i].Init(handle,i);
 	};
-
-    // Output the C note (ie, sound the note)
-    midiOutShortMsg(handle, 0x00403C90);
-    midiOutShortMsg(handle, 0x00404090);
-    midiOutShortMsg(handle, 0x00404390);
-
-    // Here you should insert a delay so that you can hear the notes sounding 
-    Sleep(500);
-
-    // Now let's turn off those 3 notes 
-    midiOutShortMsg(handle, 0x00003C90);
-    midiOutShortMsg(handle, 0x00004090);
-    midiOutShortMsg(handle, 0x00004390);
+	for(i=0;i<MAX_TRACKS; i++)
+	{
+		numC[i]=0;
+		notes[i]=-1;
+	};
 }
 
 mi::~mi()
 {
-     /* Close the MIDI device */
-	CloseMidi();
-	delete Vals;
+	FreeMidi();
+	delete[] Vals;
 }
 
 void mi::Init()
 {
 // Initialize your stuff here
-//	InitMidi();
 }
 
 
@@ -170,10 +100,12 @@ char buffer[256];
 
 sprintf(
 
-		buffer,"%s%s%s",
-		"Supported Events\n\n",
-		"Note ON\n\n",
-		"Note OFFn"
+		buffer,"%s%s%s%s",
+		"Commands:\n",
+		"C1xx - Set Program to xx\n",
+		"C2xx - Set Midi Channel for this track\n\n",
+		"CCxx - Set Volume\n\n",
+		"Use the Aux column to force a midi channel for this note\n"
 		);
 
 pCB->MessBox(buffer,"·-=<YanniS> YMidi Midi Output v." YMIDI_VERSION "=-·",0);
@@ -191,52 +123,84 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 void mi::ParameterTweak(int par, int val)
 {
+	Vals[par]=val;
+	switch(par)
+	{
+	case 0:
+		{
+			///\todo: finish this.
+			pars.portidx = val;
+		}
+	case 1: numChannel[0].SetPatch(val);break;
+	case 2: numChannel[1].SetPatch(val);break;
+	case 3: numChannel[2].SetPatch(val);break;
+	case 4: numChannel[3].SetPatch(val);break;
+	case 5: numChannel[4].SetPatch(val);break;
+	case 6: numChannel[5].SetPatch(val);break;
+	case 7: numChannel[6].SetPatch(val);break;
+	case 8: numChannel[7].SetPatch(val);break;
+	case 9: numChannel[8].SetPatch(val);break;
+	case 10: numChannel[9].SetPatch(val);break;
+	case 11: numChannel[10].SetPatch(val);break;
+	case 12: numChannel[11].SetPatch(val);break;
+	case 13: numChannel[12].SetPatch(val);break;
+	case 14: numChannel[13].SetPatch(val);break;
+	case 15: numChannel[14].SetPatch(val);break;
+	case 16: numChannel[15].SetPatch(val);break;
+	default:break;
+	}
 }
 
 void mi::Stop()
 {
-	int i;
-	for (i=0;i<MIDI_TRACKS;i++)
+	for (int i=0;i<MIDI_TRACKS;i++)
 	{
-		numChannel[i].Stop();
+		numChannel[i].StopMidi();
 	}
 }
-
-void mi::MidiNote(int const channel, int const value, int const velocity)
-{
-	numChannel[channel&0x0F].Play(value, velocity);		// start new note
-}
-
 
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch(param)
 	{
-		case 0:
-		default : return false;
+		///\todo: finish this.
+	case 0:
+	default : return false;
 	}
 }
 
 // Process each sequence tick if note on or note off is pressed.
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	int Volume = val;
-	if (Volume == 0)
-	{
-		Volume = 0xFF;
-	};
+	if ( cmd == 0xC2 ) numC[channel]= val&0x0F;
+	else if ( ins != 255 ) numC[channel]= ins&0x0F;
+	else if (cmd == 0xC1) numChannel[numC[channel]].SetPatch(val&0x7F);
 
 	if(note<120) // Note on
 	{
-		switch (ins)
-		{
-			case 0x0A :
-				numChannel[channel].SetPatch(cmd);
-		};
-		MidiNote(channel, note, Volume); 
+		if (notes[channel]!= -1) numChannel[channel].Stop(notes[channel]);
+		numChannel[numC[channel]].Play(note, (cmd == 0xCC)?val&0x7F:0x64);
+		notes[channel]=note;
 	}
-	else if (note==120)
+	else if (note==120 && notes[channel]!=-1) // Note off
 	{
-		numChannel[channel].Stop(); // Note off
+		numChannel[channel].Stop(notes[channel]);
+	}
+}
+
+void mi::InitMidi()
+{
+	if (!midiOutOpen(&handle, (UINT)-1, 0, 0, CALLBACK_NULL) )
+	{
+		midiopencount++;
+	}
+}
+
+void mi::FreeMidi()
+{
+	midiopencount--;
+	if (!midiopencount) 
+	{
+		midiOutClose(handle);
 	}
 }
