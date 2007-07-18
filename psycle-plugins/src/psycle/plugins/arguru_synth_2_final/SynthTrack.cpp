@@ -6,6 +6,7 @@
 
 CSynthTrack::CSynthTrack()
 {
+	syntp=0;
 	output=0;
 	NoteCutTime=0;
 	NoteCut=false;
@@ -55,32 +56,31 @@ CSynthTrack::~CSynthTrack()
 
 void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 {
+	bool initenvelopes=false;
 	syntp=tspar;
-
-	synthglide = 256-syntp->synthglide;
 
 	InitLfo(syntp->vcf_lfo_speed,syntp->vcf_lfo_amplitude);
 
 	float nnote=(float)note+
-				(float)tspar->globalfinetune*0.0038962f+
-				(float)tspar->globaldetune;
-
+		(float)tspar->globalfinetune*0.0038962f+
+		(float)tspar->globaldetune;
 	OSC1Speed=(float)pow(2.0, (float)nnote/12.0);
 
 	float note2=nnote+
-				(float)tspar->osc2finetune*0.0038962f+
-				(float)tspar->osc2detune;
-
+		(float)tspar->osc2finetune*0.0038962f+
+		(float)tspar->osc2detune;
 	OSC2Speed=(float)pow(2.0, (float)note2/12.0);
 
-	if ( AmpEnvStage == 0 ) {
+	if ( AmpEnvStage == 0 || oscglide == 0.0f)
+	{
 		ROSC1Speed = OSC1Speed;
 		ROSC2Speed = OSC2Speed;
 		if (syntp->osc2sync) OSC2Position = 0;
 		else { OSC2Position-= OSC1Position;
-				if (OSC2Position<0) OSC2Position+=2048.0f;
+		if (OSC2Position<0) OSC2Position+=2048.0f;
 		}
 		OSC1Position = 0;
+		initenvelopes =true;
 	}
 
 	OSC2Vol=(float)syntp->osc_mix*0.0039062f;
@@ -103,7 +103,7 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 	Arp_samplespertick=2646000/(syntp->arp_bpm*4);
 	ArpCounter=1;
 
-	InitEnvelopes(true);
+	InitEnvelopes(initenvelopes);
 
 }
 
@@ -118,31 +118,31 @@ void CSynthTrack::InitEnvelopes(bool force)
 	AmpEnvSustainLevel=(float)syntp->amp_env_sustain*0.0039062f;
 	VcfEnvSustainLevel=(float)syntp->vcf_env_sustain*0.0039062f;
 	
-	if(AmpEnvStage==0 )
+	if ( AmpEnvStage != 0 && force)
+	{
+		AmpEnvStage=5;
+		AmpEnvCoef=AmpEnvValue/32.0f;
+
+		if(AmpEnvCoef<=0.0f) AmpEnvCoef=0.03125f;
+	}
+	else if(AmpEnvStage< 4 )
 	{
 		AmpEnvStage=1;
 		AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
 	}
-	else if ( AmpEnvStage < 4 || force)
-	{
-		AmpEnvStage=5;
-		AmpEnvCoef=AmpEnvValue/32.0f;
-	
-		if(AmpEnvCoef<=0.0f) AmpEnvCoef=0.03125f;
-	}
 
 	// Init Filter Envelope
-	if(VcfEnvStage==0)
-	{
-		VcfEnvStage=1;
-		VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
-	}
-	else if ( VcfEnvStage < 4 || force)
+	if ( AmpEnvStage != 0 && force)
 	{
 		VcfEnvStage=5;
 		VcfEnvCoef=VcfEnvValue/32.0f;
 
 		if(VcfEnvCoef<=0.0f) VcfEnvCoef=0.03125f;
+	}
+	else if(VcfEnvStage < 4)
+	{
+		VcfEnvStage=1;
+		VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
 	}
 }
 
@@ -378,12 +378,17 @@ void CSynthTrack::DoGlide()
 
 void CSynthTrack::PerformFx()
 {
+	/* 0x0E : NoteCut Time */
+	if(NoteCutTime<0)
+	{
+		NoteCutTime=0;
+		NoteCut=false;
+		NoteOff();
+	}
+
 	Vibrate();
 
 	float shift;
-
-	// Perform tone glide
-	DoGlide();
 
 	switch(sp_cmd)
 	{
@@ -403,15 +408,6 @@ void CSynthTrack::PerformFx()
 			if(OSC2Speed<0)OSC2Speed=0;
 			break;
 
-		/* 0x11 : Note Cut */
-		case 0x0E:
-			if(NoteCutTime<=0)
-			{
-				NoteCut=false;
-				NoteOff();
-			}
-			break;
-
 		/* 0x11 : CutOff Up */
 		case 0x11:
 			VcfCutoff+=sp_val;
@@ -424,6 +420,8 @@ void CSynthTrack::PerformFx()
 			if(VcfCutoff<0)VcfCutoff=0;
 			break;
 	}
+	// Perform tone glide
+	DoGlide();
 }
 
 void CSynthTrack::InitEffect(int cmd, int val)
@@ -432,9 +430,16 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	sp_val=val;
 
 	// Init glide
-	if (cmd==3)				oscglide= (float)(val*val)*0.001f;
-	else if(synthglide<256) oscglide= (synthglide*synthglide)*0.0000625f; //  1/(1000*16)
-	else					oscglide= 256.0f;
+	if (cmd==3) { if ( val != 0 ) oscglide= (float)(val*val)*0.001f; }
+	else 
+	{
+		if ( syntp )
+		{
+			synthglide = 256-syntp->synthglide;
+		}
+		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f;
+		else oscglide= 0.0f;
+	}
 
 	// Init vibrato
 	if (cmd==4)	ActiveVibrato(val>>4,val&0xf);

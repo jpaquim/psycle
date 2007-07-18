@@ -288,7 +288,7 @@ CMachineParameter const paraGlide =
 	"Glide Depth",
 	"Glide Depth",									// description
 	0,											// MinValue	
-	256,											// MaxValue
+	255,											// MaxValue
 	MPF_STATE,										// Flags
 	0
 };
@@ -375,6 +375,7 @@ private:
 	CSynthTrack track[MAX_TRACKS];
 	
 	SYNPAR globalpar;
+	bool reinitChannel[MAX_TRACKS];
 
 };
 
@@ -384,6 +385,10 @@ mi::mi()
 {
 	Vals=new int[NUMPARAMETERS];
 	InitWaveTable();
+	for (int i=0; i < MAX_TRACKS; i++)
+	{
+		reinitChannel[i] = false;
+	}
 }
 
 mi::~mi()
@@ -408,7 +413,7 @@ void mi::SequencerTick()
 {
 	for (int i=0; i < MAX_TRACKS; i++)
 	{
-		track[i].InitEffect(0,0);
+		reinitChannel[i] = true;
 	}
 }
 
@@ -458,7 +463,7 @@ void mi::Command()
 char buffer[2048];
 
 sprintf(
-		buffer,"%s%s%s%s%s%s%s%s%s%s",
+		buffer,"%s%s%s%s%s%s%s%s%s%s%s",
 		"Pattern commands\n",
 		"\n01xx : Pitch slide-up",
 		"\n02xx : Pitch slide-down",
@@ -467,6 +472,7 @@ sprintf(
 		"\n07xx : Change vcf env modulation [$00=-128, $80=0, $FF=+128]",
 		"\n08xx : Change vcf cutoff frequency",
 		"\n09xx : Change vcf resonance amount",
+		"\n0Exx : NoteCut in xx*32 samples",
 		"\n11xx : Vcf cutoff slide-up",
 		"\n12xx : Vcf cutoff slide-down\0"
 		);
@@ -485,7 +491,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 	{
 		if(track[c].AmpEnvStage)
 		{
-
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
 			--xpsamplesleft;
@@ -494,8 +499,10 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 			int xnumsamples=numsamples;
 		
 			CSynthTrack *ptrack=&track[c];
+			if (reinitChannel[c]) ptrack->InitEffect(0,0);
+			reinitChannel[c]=false;
 
-			if(ptrack->NoteCut) ptrack->NoteCutTime-=numsamples;
+			if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=numsamples;
 		
 			ptrack->PerformFx();
 
@@ -634,6 +641,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	track[channel].InitEffect(cmd,val);
+	reinitChannel[channel]=false;
 
 	// Global scope synth pattern commands
 	switch(cmd)
@@ -659,7 +667,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	track[channel].NoteOn(note-18,&globalpar,60);
 
 	// Note off
-	if(note==120)
+	else if(note==120)
 	track[channel].NoteOff();
 }
 
