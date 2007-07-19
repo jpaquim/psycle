@@ -1929,10 +1929,12 @@ NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
+					unsigned char mac = toffset[firstrow+2];
 					for (int l=blockSel.start.line;l<=blockSel.end.line;l++)
 					{
 						int val = (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
 						if ( val == -1 ) continue;
+						toffset[displace+2]=mac;
 						toffset[displace+3]=static_cast<unsigned char>(val/0x100);
 						toffset[displace+4]=static_cast<unsigned char>(val%0x100);
 						displace+=MULTIPLY;

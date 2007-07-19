@@ -25,6 +25,31 @@ namespace psycle
 					_parameter(0)
 				{
 				}
+
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+				inline PatternEntry(compiler::uint8 note,compiler::uint8 inst,compiler::uint8 volume,compiler::uint8 cmd,compiler::uint8 param,compiler::uint8 machine)
+#else
+				inline PatternEntry(compiler::uint8 note,compiler::uint8 inst,compiler::uint8 cmd,compiler::uint8 param,compiler::uint8 machine)
+#endif
+#endif
+				:
+				_note(note),
+				_inst(inst),
+#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+					_volume(volume),
+#endif
+#endif
+					_mach(machine),
+					_cmd(cmd),
+					_parameter(param)
+				{
+				}
 				compiler::uint8 _note;
 				compiler::uint8 _inst;
 #if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN

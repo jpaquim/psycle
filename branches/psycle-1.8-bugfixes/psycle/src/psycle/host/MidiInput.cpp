@@ -1055,9 +1055,14 @@ namespace psycle
 						if (pMachine)
 						{
 							if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
-					{
-						((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
+							{
+								((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
 								return;
+							}
+							else
+							{
+								PatternEntry pentry(ntecommands::midicc,)
+								pMachine->Tick(notecommands::midicc,status,data1,data2);
 							}
 						}
 					}
