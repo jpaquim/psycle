@@ -1,5 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "y_midi.hpp"
+#include "gmnames.h"
 
 int mi::midiopencount(0);
 HMIDIOUT mi::handle(0);
@@ -41,9 +42,9 @@ void midichannel::SetPatch(const int patchnum)
 MidiEvent midichannel::BuildEvent(const int eventtype, const int p1, const int p2)
 {
 	MidiEvent mevent;
-	mevent.split.message= (eventtype&0xFF) | (Chan&0x0F);
-	mevent.split.byte1= p1&0xFF;
-	mevent.split.byte2= p2&0xFF;
+	mevent.split.message= (eventtype&0xF0) | (Chan&0x0F);
+	mevent.split.byte1= p1&0x7F;
+	mevent.split.byte2= p2&0x7F;
 
 	return mevent;
 }
@@ -131,22 +132,22 @@ void mi::ParameterTweak(int par, int val)
 			///\todo: finish this.
 			pars.portidx = val;
 		}
-	case 1: numChannel[0].SetPatch(val);break;
-	case 2: numChannel[1].SetPatch(val);break;
-	case 3: numChannel[2].SetPatch(val);break;
-	case 4: numChannel[3].SetPatch(val);break;
-	case 5: numChannel[4].SetPatch(val);break;
-	case 6: numChannel[5].SetPatch(val);break;
-	case 7: numChannel[6].SetPatch(val);break;
-	case 8: numChannel[7].SetPatch(val);break;
-	case 9: numChannel[8].SetPatch(val);break;
-	case 10: numChannel[9].SetPatch(val);break;
-	case 11: numChannel[10].SetPatch(val);break;
-	case 12: numChannel[11].SetPatch(val);break;
-	case 13: numChannel[12].SetPatch(val);break;
-	case 14: numChannel[13].SetPatch(val);break;
-	case 15: numChannel[14].SetPatch(val);break;
-	case 16: numChannel[15].SetPatch(val);break;
+	case 1: numChannel[0].SetPatch(val); pars.patch1=val; break;
+	case 2: numChannel[1].SetPatch(val); pars.patch2=val; break;
+	case 3: numChannel[2].SetPatch(val); pars.patch3=val; break;
+	case 4: numChannel[3].SetPatch(val); pars.patch4=val; break;
+	case 5: numChannel[4].SetPatch(val); pars.patch5=val; break;
+	case 6: numChannel[5].SetPatch(val); pars.patch6=val; break;
+	case 7: numChannel[6].SetPatch(val); pars.patch7=val; break;
+	case 8: numChannel[7].SetPatch(val); pars.patch8=val; break;
+	case 9: numChannel[8].SetPatch(val); pars.patch9=val; break;
+	case 10: numChannel[9].SetPatch(val); pars.patch10=val; break;
+	case 11: numChannel[10].SetPatch(val); pars.patch11=val; break;
+	case 12: numChannel[11].SetPatch(val); pars.patch12=val; break;
+	case 13: numChannel[12].SetPatch(val); pars.patch13=val; break;
+	case 14: numChannel[13].SetPatch(val); pars.patch14=val; break;
+	case 15: numChannel[14].SetPatch(val); pars.patch15=val; break;
+	case 16: numChannel[15].SetPatch(val); pars.patch16=val; break;
 	default:break;
 	}
 }
@@ -164,7 +165,23 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	switch(param)
 	{
 		///\todo: finish this.
-	case 0:
+	case 0: return false;
+	case 1: strcpy(txt,GmNames[pars.patch1]); return true;break;
+	case 2: strcpy(txt,GmNames[pars.patch2]); return true;break;
+	case 3: strcpy(txt,GmNames[pars.patch3]); return true;break;
+	case 4: strcpy(txt,GmNames[pars.patch4]); return true;break;
+	case 5: strcpy(txt,GmNames[pars.patch5]); return true;break;
+	case 6: strcpy(txt,GmNames[pars.patch6]); return true;break;
+	case 7: strcpy(txt,GmNames[pars.patch7]); return true;break;
+	case 8: strcpy(txt,GmNames[pars.patch8]); return true;break;
+	case 9: strcpy(txt,GmNames[pars.patch9]); return true;break;
+	case 10: strcpy(txt,GmNames[pars.patch10]); return true;break;
+	case 11: strcpy(txt,GmNames[pars.patch11]); return true;break;
+	case 12: strcpy(txt,GmNames[pars.patch12]); return true;break;
+	case 13: strcpy(txt,GmNames[pars.patch13]); return true;break;
+	case 14: strcpy(txt,GmNames[pars.patch14]); return true;break;
+	case 15: strcpy(txt,GmNames[pars.patch15]); return true;break;
+	case 16: strcpy(txt,GmNames[pars.patch16]); return true;break;
 	default : return false;
 	}
 }
@@ -172,19 +189,36 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 // Process each sequence tick if note on or note off is pressed.
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	if ( cmd == 0xC2 ) numC[channel]= val&0x0F;
-	else if ( ins != 255 ) numC[channel]= ins&0x0F;
-	else if (cmd == 0xC1) numChannel[numC[channel]].SetPatch(val&0x7F);
+	if ( cmd == 0xC2 ) assignChannel(channel,val&0x0F);
+	else if ( ins != 255 ) assignChannel(channel,ins&0x0F);
+	else if (cmd == 0xC1)
+	{
+		Channel(channel).SetPatch(val&0x7F);
+		UpdatePatch(channel,val&0x7F);
+	}
 
 	if(note<120) // Note on
 	{
-		if (notes[channel]!= -1) numChannel[channel].Stop(notes[channel]);
-		numChannel[numC[channel]].Play(note, (cmd == 0xCC)?val&0x7F:0x64);
+		if (notes[channel]!= -1) Channel(channel).Stop(notes[channel]);
+		Channel(channel).Play(note, (cmd == 0xCC || cmd == 0x0C)?val*0.5f:0x64);
 		notes[channel]=note;
 	}
-	else if (note==120 && notes[channel]!=-1) // Note off
+	else if (note==120 && notes[channel]!= -1) // Note off
 	{
-		numChannel[channel].Stop(notes[channel]);
+		Channel(channel).Stop(notes[channel]);
+		notes[channel]=-1;
+	}
+	else if ( note == 123 )
+	{
+		channel = ins&0x0F;
+		int command = ins&0xF0;
+
+		if (command == MIDI_PATCHCHANGE)
+		{
+			Channel(channel).SetPatch(cmd&0x7F);
+			UpdatePatch(channel,cmd&0x7F);
+		}
+		else Channel(channel).SendMidi(Channel(channel).BuildEvent(ins,cmd,val));
 	}
 }
 
@@ -202,5 +236,28 @@ void mi::FreeMidi()
 	if (!midiopencount) 
 	{
 		midiOutClose(handle);
+	}
+}
+void mi::UpdatePatch(int channel,int patch)
+{
+	switch(channel)
+	{
+	case 0: pars.patch1=patch;break;
+	case 1: pars.patch1=patch;break;
+	case 2: pars.patch1=patch;break;
+	case 3: pars.patch1=patch;break;
+	case 4: pars.patch1=patch;break;
+	case 5: pars.patch1=patch;break;
+	case 6: pars.patch1=patch;break;
+	case 7: pars.patch1=patch;break;
+	case 8: pars.patch1=patch;break;
+	case 9: pars.patch1=patch;break;
+	case 10: pars.patch1=patch;break;
+	case 11: pars.patch1=patch;break;
+	case 12: pars.patch1=patch;break;
+	case 13: pars.patch1=patch;break;
+	case 14: pars.patch1=patch;break;
+	case 15: pars.patch1=patch;break;
+	default:break;
 	}
 }

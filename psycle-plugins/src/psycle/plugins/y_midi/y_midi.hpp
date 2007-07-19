@@ -51,10 +51,10 @@ public:
 	void Stop(const int note);
 	void SetPatch(const int patchnum);
 	void StopMidi();
-
-private:
 	void SendMidi(MidiEvent event);
 	MidiEvent BuildEvent(const int eventtype, const int p1=0, const int p2=0);
+
+private:
 
 	int  Chan;
 	HMIDIOUT handle;	// Midi device/channel handler.
@@ -157,6 +157,9 @@ public:
 protected:
 	void InitMidi();
 	void FreeMidi();
+	inline midichannel& Channel(int ch) { return numChannel[numC[ch]]; };
+	inline void assignChannel(int ch,int midich) { numC[ch]=midich; };
+	void UpdatePatch(int channel, int patch);
 
 private:
 	midichannel numChannel[MIDI_TRACKS];	// List of MAX_TRACKS (16 usually) which hold channel note information
