@@ -927,8 +927,7 @@ namespace psycle
 		{
 			// pipe MIDI note on messages into the pattern entry window
 
-			bool noteOff = false; noteOff; // not used
-			int note = 0;
+//			bool noteOff = false; noteOff; // not used
 
 			// branch on type of midi message
 			switch( uMsg )
@@ -944,48 +943,49 @@ namespace psycle
 
 					// assign uses
 					int status = p1LowWordLB;
-					int program = p1LowWordHB; program; // not used
-					int noteOn = p1HiWordLB;
+					int note = p1LowWordHB;
+					int velocity = p1HiWordLB;
 					int data1 = p1LowWordHB;
 					int data2 = p1HiWordLB;
 					int data = ((data2&0x7f)<<7)|(data1&0x7f);
 
-					int cmd = 0; cmd; // not used
-					int parameter = 0; parameter; // not used
-					note = p1LowWordHB;
+//					int cmd = 0; cmd; // not used
+//					int parameter = 0; parameter; // not used
 					
 					// and a bit more...
 					int statusHN = (status & 0xF0) >> 4;
 					int statusLN = (status & 0x0F);
-					int channel = statusLN; channel; // not used
+					int channel = statusLN;
 
 					CMainFrame & frame(*static_cast<CMainFrame*>(theApp.m_pMainWnd));
+					frame.ChangeIns(channel);
 
 					// branch on status code
 					switch( statusHN )
 					{
 						// (also) note off
 						case 0x08:		
-							noteOn=0;
+							velocity=0;
 						// note on/off
 						case 0x09:
     						// limit to playable range (above this is special codes)
     						if(note>119) 
     							note=119;
 							// TODO: watch this, it should be OK as long as we don't change things too much
-							frame.m_wndView.MidiPatternNote(note,noteOn);
+							frame.m_wndView.MidiPatternNote(note,velocity);
 							return;
+						default:break;
 					}
 
 					if (Global::pConfig->_RecordTweaks)
 					{
 						if (Global::pConfig->midi().raw() && status != 0xFE )
 						{
-							frame.m_wndView.MidiPatternMidiCommand(status,(data1<<8) | data2);
+							frame.m_wndView.MidiPatternMidiCommand(status,(data1 << 8) | data2);
 							return;
 						}
 						// branch on status code
-						switch(statusHN)
+						else switch(statusHN)
 						{
 							case 0x0B:
 								// mods
@@ -1045,28 +1045,30 @@ namespace psycle
 								}
 						}
 					}
-
-					// midi controllers pass-through
-					int mgn = Global::_pSong->seqBus;
-
-					if (mgn < MAX_MACHINES)
+					else
 					{
-						Machine* pMachine = Global::_pSong->_pMachine[mgn];
-						if (pMachine)
+						// midi controllers pass-through
+						int mgn = Global::_pSong->seqBus;
+
+						if (mgn < MAX_MACHINES)
 						{
-							if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
+							Machine* pMachine = Global::_pSong->_pMachine[mgn];
+							if (pMachine)
 							{
-								((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
-								return;
-							}
-							else
-							{
-								PatternEntry pentry(ntecommands::midicc,)
-								pMachine->Tick(notecommands::midicc,status,data1,data2);
+								if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
+								{
+									((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
+									return;
+								}
+								else
+								{
+									PatternEntry pentry(notecommands::midicc,status,pMachine->_macIndex,data1,data2);
+									pMachine->Tick(0,&pentry);
+								}
 							}
 						}
 					}
-				
+
 				}	// end of.. case NIM_DATA
 
 			}	// end of.. uMsg switch

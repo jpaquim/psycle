@@ -320,7 +320,7 @@ NAMESPACE__BEGIN(psycle)
 
 			// Sequencer Bar
 			m_wndSeq.Create(this,IDD_SEQUENCER,CBRS_LEFT,AFX_IDW_DIALOGBAR);
-			BOOL bla = m_seqListbox.SubclassDlgItem(IDC_SEQLIST,&m_wndSeq );
+			m_seqListbox.SubclassDlgItem(IDC_SEQLIST,&m_wndSeq );
 
 			// set multichannel audition checkbox status
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_MULTICHANNEL_AUDITION);
@@ -1161,6 +1161,8 @@ NAMESPACE__BEGIN(psycle)
 		{
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+
+			if ( cc->GetCurSel() == i) return;
 
 			if (cc2->GetCurSel() == AUX_MIDI )
 			{

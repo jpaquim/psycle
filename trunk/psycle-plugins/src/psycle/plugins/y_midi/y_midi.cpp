@@ -190,7 +190,6 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	if ( cmd == 0xC2 ) assignChannel(channel,val&0x0F);
-	else if ( ins != 255 ) assignChannel(channel,ins&0x0F);
 	else if (cmd == 0xC1)
 	{
 		Channel(channel).SetPatch(val&0x7F);
@@ -199,12 +198,14 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 	if(note<120) // Note on
 	{
+		if ( ins != 255 ) assignChannel(channel,ins&0x0F);
 		if (notes[channel]!= -1) Channel(channel).Stop(notes[channel]);
 		Channel(channel).Play(note, (cmd == 0xCC || cmd == 0x0C)?val*0.5f:0x64);
 		notes[channel]=note;
 	}
 	else if (note==120 && notes[channel]!= -1) // Note off
 	{
+		if ( ins != 255 ) assignChannel(channel,ins&0x0F);
 		Channel(channel).Stop(notes[channel]);
 		notes[channel]=-1;
 	}
@@ -242,22 +243,22 @@ void mi::UpdatePatch(int channel,int patch)
 {
 	switch(channel)
 	{
-	case 0: pars.patch1=patch;break;
-	case 1: pars.patch1=patch;break;
-	case 2: pars.patch1=patch;break;
-	case 3: pars.patch1=patch;break;
-	case 4: pars.patch1=patch;break;
-	case 5: pars.patch1=patch;break;
-	case 6: pars.patch1=patch;break;
-	case 7: pars.patch1=patch;break;
-	case 8: pars.patch1=patch;break;
-	case 9: pars.patch1=patch;break;
-	case 10: pars.patch1=patch;break;
-	case 11: pars.patch1=patch;break;
-	case 12: pars.patch1=patch;break;
-	case 13: pars.patch1=patch;break;
-	case 14: pars.patch1=patch;break;
-	case 15: pars.patch1=patch;break;
+	case 0: pars.patch1=patch; Vals[1]=patch; break;
+	case 1: pars.patch2=patch; Vals[2]=patch; break;
+	case 2: pars.patch3=patch; Vals[3]=patch; break;
+	case 3: pars.patch4=patch; Vals[4]=patch; break;
+	case 4: pars.patch5=patch; Vals[5]=patch; break;
+	case 5: pars.patch6=patch; Vals[6]=patch; break;
+	case 6: pars.patch7=patch; Vals[7]=patch; break;
+	case 7: pars.patch8=patch; Vals[8]=patch; break;
+	case 8: pars.patch9=patch; Vals[9]=patch; break;
+	case 9: pars.patch10=patch; Vals[10]=patch; break;
+	case 10: pars.patch11=patch; Vals[11]=patch; break;
+	case 11: pars.patch12=patch; Vals[12]=patch; break;
+	case 12: pars.patch13=patch; Vals[13]=patch; break;
+	case 13: pars.patch14=patch; Vals[14]=patch; break;
+	case 14: pars.patch15=patch; Vals[15]=patch; break;
+	case 15: pars.patch16=patch; Vals[16]=patch; break;
 	default:break;
 	}
 }

@@ -32,7 +32,7 @@ namespace psycle
 #if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
 				inline PatternEntry(compiler::uint8 note,compiler::uint8 inst,compiler::uint8 volume,compiler::uint8 cmd,compiler::uint8 param,compiler::uint8 machine)
 #else
-				inline PatternEntry(compiler::uint8 note,compiler::uint8 inst,compiler::uint8 cmd,compiler::uint8 param,compiler::uint8 machine)
+				inline PatternEntry(compiler::uint8 note,compiler::uint8 inst,compiler::uint8 machine,compiler::uint8 cmd,compiler::uint8 param)
 #endif
 #endif
 				:

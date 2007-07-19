@@ -394,12 +394,9 @@ NAMESPACE__BEGIN(psycle)
 		void CChildView::MidiPatternMidiCommand(int command, int value)
 		{
 			// UNDO CODE MIDI PATTERN TWEAK
-			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
-
 			PatternEntry entry;
 			entry._mach = _pSong->seqBus;
-			entry._cmd = (value>>8)&0xFF;
+			entry._cmd = (value&0xFF00)>>8;
 			entry._parameter = value&0xFF;
 			entry._inst = command;
 			entry._note = notecommands::midicc;
