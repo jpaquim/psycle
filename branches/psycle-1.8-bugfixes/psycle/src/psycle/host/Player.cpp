@@ -407,7 +407,6 @@ namespace psycle
 				_playTime-=60;
 				_playTimem++;
 			}
-			TRACE("_lineCount=%i _lineStop=%i\n", _lineCounter, _lineStop);
 			if(_lineCounter >= pSong->patternLines[_playPattern] || _lineCounter==_lineStop)
 			{
 				_lineCounter = 0;
