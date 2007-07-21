@@ -377,7 +377,35 @@ namespace psycle
 					}
 				}
 			}
+		}
 
+		void Machine::ExchangeInputWires(int first, int second)
+		{
+			int tmp = _inputMachines[first];
+			_inputMachines[first]=_inputMachines[second];
+			_inputMachines[second]=tmp;
+
+			float tmp2 = _inputConVol[first];
+			_inputConVol[first]=_inputConVol[second];
+			_inputConVol[second]=tmp2;
+
+			tmp2 = _wireMultiplier[first];
+			_wireMultiplier[first]=_wireMultiplier[second];
+			_wireMultiplier[second]=tmp2;
+
+			bool tmp3 = _inputCon[first];
+			_inputCon[first]=_inputCon[second];
+			_inputCon[second]=tmp3;
+		}
+		void Machine::ExchangeOutputWires(int first, int second)
+		{
+			int tmp = _outputMachines[first];
+			_outputMachines[first]=_outputMachines[second];
+			_outputMachines[second]=tmp;
+
+			bool tmp3 = _connection[first];
+			_connection[first]=_connection[second];
+			_connection[second]=tmp3;
 		}
 
 		void Machine::PreWork(int numSamples,bool clear)

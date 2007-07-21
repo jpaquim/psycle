@@ -346,7 +346,7 @@ protected:
 	///  15 -> input panning.
 	/// [13]:
 	///  0 -> Solo channel.
-	///  1..12 -> return mute. // Eventually, the return grid array could be coded here, using bit0 -> mute, and bit 1..12 for the rerouting. bit 13 -> route to master
+	///  1..12 -> return grid. // the return grid array grid represents: bit0 -> mute, bit 1..12 routing to send. bit 13 -> route to master
 	/// [14]: 
 	///  1..12 -> return volumes
 	/// [15]:

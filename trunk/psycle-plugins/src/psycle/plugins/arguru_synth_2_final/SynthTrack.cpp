@@ -71,7 +71,7 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 		(float)tspar->osc2detune;
 	OSC2Speed=(float)pow(2.0, (float)note2/12.0);
 
-	if ( AmpEnvStage == 0 || oscglide == 0.0f)
+	if ( AmpEnvStage == 0 || AmpEnvStage == 4 || oscglide == 0.0f)
 	{
 		ROSC1Speed = OSC1Speed;
 		ROSC2Speed = OSC2Speed;

@@ -162,6 +162,8 @@ namespace psycle
 			virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
 			virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
 			virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
+			virtual void ExchangeInputWires(int first,int second);
+			virtual void ExchangeOutputWires(int first,int second);
 			virtual void DeleteOutputWireIndex(int wireIndex);
 			virtual void DeleteInputWireIndex(int wireIndex);
 			virtual void DeleteWires();

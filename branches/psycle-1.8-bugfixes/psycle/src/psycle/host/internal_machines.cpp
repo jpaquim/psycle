@@ -1163,10 +1163,10 @@ namespace psycle
 
 		void Mixer::ExchangeChans(int chann1,int chann2)
 		{
+			ExchangeInputWires(chann1,chann2);
 			InputChannel tmp = inputs_[chann1];
 			inputs_[chann1] = inputs_[chann2];
 			inputs_[chann2] = tmp;
-			///\todo: Exchange wires? (done outside Mixer right now)
 			RecalcChannel(chann1);
 			RecalcChannel(chann2);
 

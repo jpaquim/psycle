@@ -60,6 +60,7 @@ NAMESPACE__BEGIN(host)
 			static void Draw(CDC *dc, int x, int y,const char *parName,const char *parValue);
 			static void DrawValue(CDC *dc, int x, int y,const char *parValue);
 			static void DrawHLight(CDC *dc,CFont *font_bold, int x, int y,const char *parName,const char *parValue);
+			static void DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue);
 			static void DrawHLightValue(CDC *dc, int x, int y,const char *parValue);
 //			static void DrawHeader(CDC *dc, int x, int y,const char *parName, const char *parValue);
 
@@ -171,6 +172,10 @@ NAMESPACE__BEGIN(host)
 		int numSends;
 		// used to know if they have changed since last paint.
 		int numChans;
+		int _swapstart;
+		int _swapend;
+		bool isslider;
+		bool refreshheaders;
 
 		// Operations
 	public:

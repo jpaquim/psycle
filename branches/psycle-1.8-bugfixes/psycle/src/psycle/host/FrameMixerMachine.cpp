@@ -54,6 +54,7 @@ NAMESPACE__BEGIN(host)
 	}
 	bool  CFrameMixerMachine::Knob::LButtonDown(UINT nFlags,int x,int y)
 	{
+		if ( x< width && y < height) return true;
 		return false;
 	}
 
@@ -91,6 +92,22 @@ NAMESPACE__BEGIN(host)
 
 		dc->SetBkColor(Global::configuration().machineGUITitleColor);
 		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
+		CFont *oldfont =dc->SelectObject(b_font_bold);
+		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
+		dc->SelectObject(oldfont);
+
+		DrawHLightValue(dc,x,y,parValue);
+		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
+	}
+	void CFrameMixerMachine::InfoLabel::DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue)
+	{
+		const int half = height/2;
+		const int mywidth = width + Knob::width;
+		//		dc->FillSolidRect(x, y, mywidth, half,Global::configuration().machineGUITitleColor);
+		//		dc->FillSolidRect(x, y+half, mywidth, half,Global::configuration().machineGUIBottomColor);
+
+		dc->SetBkColor(Global::configuration().machineGUIHTopColor);
+		dc->SetTextColor(Global::configuration().machineGUIHFontBottomColor);
 		CFont *oldfont =dc->SelectObject(b_font_bold);
 		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
 		dc->SelectObject(oldfont);
@@ -146,6 +163,7 @@ NAMESPACE__BEGIN(host)
 	}
 	bool  CFrameMixerMachine::GraphSlider::LButtonDown(UINT nFlags,int x,int y)
 	{
+		if ( x< width && y < height) return true;
 		return false;
 	}
 
@@ -212,6 +230,10 @@ NAMESPACE__BEGIN(host)
 		,numSends(0)
 		,numChans(0)
 		,updateBuffer(false)
+		,_swapstart(-1)
+		,_swapend(-1)
+		,isslider(false)
+		,refreshheaders(false)
 	{
 		MachineIndex = dum;
 	}
@@ -481,6 +503,25 @@ NAMESPACE__BEGIN(host)
 		xoffset+=Knob::width+InfoLabel::width;
 		for (int i(0); i<_pMixer->numinputs(); i++)
 		{
+			yoffset=0;
+			if ( _swapend != -1 || refreshheaders)
+			{
+				std::string chantxt = _pMixer->GetAudioInputName(int(i+Mixer::chan1));
+				if (_pMixer->ChannelValid(i))
+				{
+					if ( _swapend == i+chan1)
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
+					else 
+						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
+				}
+				else
+				{
+					if ( _swapend == i+chan1)
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
+					else
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
+				}
+			}
 			if (_pMixer->ChannelValid(i))
 			{
 				yoffset=InfoLabel::height;
@@ -547,6 +588,26 @@ NAMESPACE__BEGIN(host)
 		}
 		for (int i(0); i<_pMixer->numreturns(); i++)
 		{
+			yoffset=0;
+			if ( _swapend != -1  || refreshheaders)
+			{
+				std::string sendtxt = _pMixer->GetAudioInputName(int(i+Mixer::return1));
+				if (_pMixer->ReturnValid(i))
+				{
+					if ( _swapend == i+return1)
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+					else 
+						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+				}
+				else
+				{
+					if ( _swapend == i+return1)
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
+					else
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
+				}
+			}
+
 			if (_pMixer->ReturnValid(i))
 			{
 				yoffset=(2+i)*InfoLabel::height;
@@ -714,30 +775,96 @@ NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 	{
-		CFrameMachine::OnLButtonDown(nFlags,point);
+//		CFrameMachine::OnLButtonDown(nFlags,point);
 
-/*		int xoffset(0),yoffset(0);
+		int xoffset(0),yoffset(0);
 		const int col=GetColumn(point.x,xoffset);
-		const int row=GetRow(point.y,yoffset);
+		const int row=GetRow(xoffset,point.y,yoffset);
+		
+		istweak = false;
+		isslider = false;
 
-		if (row == rowlabels)  return;
-		else if ( col == collabels)
-	{
-			if ( row >=slider) {
-				//mute all
-				//unmute all
-				//mute returns
-				//mute dry
-			}
-		}
-		else if ( col <= chan12 )
+		if (col == collabels || (row == rowlabels && col == colmaster)) return;
+		if (row == rowlabels)
 		{
-			if ( row <= dry)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
-			else { istweak=GraphSlider::LButtonDown(nFlags,xoffset,yoffset); }
+			// move/swap channels.
+			_swapstart = _swapend = col;
+		}
+		else if (col == colmaster)
+		{
+			if ( row == mix)		{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == gain)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == pan)		{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == slider) { istweak=GraphSlider::LButtonDown(nFlags,xoffset,yoffset);isslider=istweak; }
+		}
+		else if ( col < chanmax )
+		{
+			int chan = col - chan1;
+			if ( row < sendmax)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == mix)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == gain)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == pan)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == slider) { istweak=GraphSlider::LButtonDown(nFlags,xoffset,yoffset); isslider=istweak;}
+			else if ( row == solo)
+			{
+				chan++;
+				tweakpar=GetParamFromPos(col,row);
+				int solo = _pMachine->GetParamValue(tweakpar);
+				_pMachine->SetParameter(tweakpar,(solo==chan)?0:chan);
+			}
+			else if ( row == mute)
+			{
+				tweakpar=GetParamFromPos(col,row);
+				int statebits = _pMachine->GetParamValue(tweakpar);
+				_pMachine->SetParameter(tweakpar,statebits==3?0:3);
+			}
+			else if ( row == dryonly)
+			{
+				tweakpar=GetParamFromPos(col,row);
+				int statebits = _pMachine->GetParamValue(tweakpar);
+				_pMachine->SetParameter(tweakpar,statebits==1?0:1);
+			}
+			else if ( row == wetonly)
+			{
+				tweakpar=GetParamFromPos(col,row);
+				int statebits = _pMachine->GetParamValue(tweakpar);
+				_pMachine->SetParameter(tweakpar,statebits==2?0:2);
+			}
 		}
 		else
 		{
-			if ( row > dry)	{ istweak=GraphSlider::LButtonDown(nFlags,xoffset,yoffset); }
+			int ret = col - return1;
+			if ( row < sendmax)
+			{
+				tweakpar=GetParamFromPos(col,row);
+				int statebits = _pMachine->GetParamValue(tweakpar);
+				// XOR to the "row+1"th bit.
+				_pMachine->SetParameter(tweakpar,(statebits & ~(1<<row)) | ((statebits&(1<<row)) ^ (1<<row)));
+			}
+			else if ( row == mix )
+			{
+				tweakpar=GetParamFromPos(col,row);
+				int statebits = _pMachine->GetParamValue(tweakpar);
+				// XOR to the 14th bit.
+				_pMachine->SetParameter(tweakpar,(statebits & ~(1<<13)) | ((statebits&(1<<13)) ^ (1<<13)));
+			}
+
+			else if ( row == pan)	{ istweak=Knob::LButtonDown(nFlags,xoffset,yoffset); }
+			else if ( row == slider) { istweak=GraphSlider::LButtonDown(nFlags,xoffset,yoffset); isslider=istweak; }
+			else if ( row == solo)
+			{
+				ret+=MAX_CONNECTIONS+1;
+				tweakpar=GetParamFromPos(col,row);
+				int solo = _pMachine->GetParamValue(tweakpar);
+				_pMachine->SetParameter(tweakpar,(solo==ret)?0:ret);
+			}
+			else if ( row == mute)
+			{
+				tweakpar=GetParamFromPos(col,row);
+				int statebits = _pMachine->GetParamValue(tweakpar);
+				// XOR to the 1st bit.
+				_pMachine->SetParameter(tweakpar,(statebits & ~0x1) | ((statebits&0x1) ^0x1));
+			}
 		}
 
 		if (istweak)
@@ -746,17 +873,75 @@ NAMESPACE__BEGIN(host)
 			sourcepoint=point.y;
 			tweakpar=GetParamFromPos(col,row); 
 			tweakbase = _pMachine->GetParamValue(tweakpar);
+			prevval = tweakbase;
 			_pMachine->GetParamRange(tweakpar,minval,maxval);
+			wndView->AddMacViewUndo();
 		}
 		CFrameWnd::OnLButtonDown(nFlags, point);
-*/
 	}
 	void CFrameMixerMachine::OnMouseMove(UINT nFlags, CPoint point) 
 	{
-		CFrameMachine::OnMouseMove(nFlags,point);
+		if (isslider)
+		{
+			if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
+				( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
+			{
+				tweakbase = _pMachine->GetParamValue(tweakpar);
+				sourcepoint=point.y;
+				ultrafinetweak=!ultrafinetweak;
+			}
+			else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
+				( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
+			{
+				tweakbase = _pMachine->GetParamValue(tweakpar);
+				sourcepoint=point.y;
+				finetweak=!finetweak;
+			}
+
+			double freak = (maxval-minval)/(GraphSlider::height-GraphSlider::knobheight);
+			if ( ultrafinetweak ) freak /= 10;
+			if (finetweak) freak/=4;
+
+			double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
+
+			if (nv < minval) nv = minval;
+			if (nv > maxval) nv = maxval;
+			_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
+			prevval=(int)nv;
+
+			Invalidate(false);
+			CFrameWnd::OnMouseMove(nFlags,point);
+		}
+		else if (_swapstart > -1)
+		{
+			int xoffset(0);
+			int col = GetColumn(point.x,xoffset);
+			if ( _swapstart < chanmax && col >= return1) _swapend = -1;
+			else if ( _swapstart >= return1 && col < chanmax) _swapend = -1;
+			else _swapend = col;
+		}
+		else CFrameMachine::OnMouseMove(nFlags,point);
 	}
 	void CFrameMixerMachine::OnLButtonUp(UINT nFlags, CPoint point) 
 	{
+		if ( _swapstart >= chan1 && _swapend >= chan1 && _swapstart != _swapend)
+		{
+			if ( _swapstart < chanmax)
+			{
+				_swapstart -=chan1; _swapend -= chan1; 
+				_pMixer->ExchangeChans(_swapstart,_swapend);
+			}
+			else 
+			{
+				_swapstart-=return1; _swapend -= return1;
+				_pMixer->ExchangeReturns(_swapstart,_swapend);
+			}
+		}
+		refreshheaders=true;
+		Invalidate();
+		_swapstart = -1;
+		_swapend = -1;
+		isslider = false;
 		CFrameMachine::OnLButtonUp(nFlags,point);
 /*		istweak = false;
 		Invalidate(false);

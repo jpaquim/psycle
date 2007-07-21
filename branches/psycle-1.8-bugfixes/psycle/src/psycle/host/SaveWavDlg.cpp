@@ -1,7 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CSaveWavDlg.
 #include <project.private.hpp>
-#include <childview.hpp>
 #include "psycle.hpp"
 #include "SaveWavDlg.hpp"
 //#include "Global.hpp"
@@ -12,9 +11,9 @@
 #include "Machine.hpp"
 #include "helpers.hpp"
 #include "MainFrm.hpp"
+#include <childview.hpp>
 #include <iostream>
 #include <iomanip>
-#include ".\savewavdlg.hpp"
 #undef max // ???
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)

@@ -4,7 +4,8 @@
 #include "constants.hpp"
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
-		class CChildview;
+		class CChildView;
+		class CSelection;
 
 		/// save wave dialog window.
 		class CSaveWavDlg : public CDialog
