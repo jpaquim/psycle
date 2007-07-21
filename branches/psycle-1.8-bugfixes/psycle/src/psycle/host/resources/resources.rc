@@ -1806,8 +1806,9 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CONTROL         "Output to file",IDC_OUTPUTFILE,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,15,16,56,10
-    CONTROL         "Output to clipboard",IDC_OUTPUTCLIPBOARD,"Button",
-                    BS_AUTORADIOBUTTON,15,111,76,10
+    CONTROL         "Output to clipboard (not implemented for now)",
+                    IDC_OUTPUTCLIPBOARD,"Button",BS_AUTORADIOBUTTON,15,111,
+                    159,10
     EDITTEXT        IDC_FILENAME,74,15,127,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse",IDC_FILEBROWSE,208,15,34,13
     CONTROL         "Save each unmuted input to master as a separated wav (wire number will be appended to filename)",
