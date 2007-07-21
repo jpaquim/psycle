@@ -49,7 +49,7 @@ namespace psycle
 			CSingleLock crit(&Global::_pSong->door, TRUE);
 			if (initialize)
 			{
-				Stop(); // This causes all machines to reset, and samplesperRow to init.
+				Stop(); // This causes all machines to reset, and samplesperRow to init.				
 				Work(this,256);
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
@@ -83,10 +83,12 @@ namespace psycle
 		{
 			CSingleLock crit(&Global::_pSong->door, TRUE);
 
+			if (_playing == true)
+				_lineStop = -1;
+
 			// Stop song enviroment
 			_playing = false;
-			_playBlock = false;
-			_lineStop = -1;
+			_playBlock = false;			
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
 				if(Global::_pSong->_pMachine[i])
@@ -405,7 +407,8 @@ namespace psycle
 				_playTime-=60;
 				_playTimem++;
 			}
-			if(_lineCounter >= pSong->patternLines[_playPattern])
+			TRACE("_lineCount=%i _lineStop=%i\n", _lineCounter, _lineStop);
+			if(_lineCounter >= pSong->patternLines[_playPattern] || _lineCounter==_lineStop)
 			{
 				_lineCounter = 0;
 				if(!_playBlock)

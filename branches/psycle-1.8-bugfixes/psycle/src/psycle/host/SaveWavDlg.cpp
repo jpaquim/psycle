@@ -570,7 +570,6 @@ NAMESPACE__BEGIN(psycle)
 			
 			int blockSLine;
 			int blockELine;
-			int blockNLines;
 
 			switch (m_recmode)
 			{
@@ -624,12 +623,7 @@ NAMESPACE__BEGIN(psycle)
 				break;
 			case 3:
 				blockSLine=pBlockSel->start.line;
-				blockELine=pBlockSel->end.line;
-				blockNLines=(pBlockSel->end.line-pBlockSel->start.line)+1;
-				
-				TRACE("blockSLine=%i", blockSLine);
-				TRACE("blockELine=%i", blockELine);
-				TRACE("blockNLines=%i", blockNLines);
+				blockELine=pBlockSel->end.line+1;			
 
 				pstart = pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition];
 				m_progress.SetRange(blockSLine,blockELine);
