@@ -47,7 +47,7 @@ MAKE_BINARY=$( which make )
 if [ "$MAKE_BINARY" == '' ]; then
   echo "You seem to be _not_ having make installed. Please install some development tools."
   echo "Bailing out."
-  exit 0
+  exit 1
 else
   echo "Executing make at $MAKE_BINARY."
 fi
