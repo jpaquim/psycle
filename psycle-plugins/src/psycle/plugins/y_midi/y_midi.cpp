@@ -165,7 +165,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	switch(param)
 	{
 		///\todo: finish this.
-	case 0: return false;
+	case 0: strcpy(txt,"unimplemented"); return false;break;
 	case 1: strcpy(txt,GmNames[pars.patch1]); return true;break;
 	case 2: strcpy(txt,GmNames[pars.patch2]); return true;break;
 	case 3: strcpy(txt,GmNames[pars.patch3]); return true;break;
