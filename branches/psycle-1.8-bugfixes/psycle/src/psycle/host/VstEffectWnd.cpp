@@ -34,9 +34,9 @@ NAMESPACE__BEGIN(psycle)
 		void CVstGui::WindowIdle() { pEffect->EditIdle(); }
 		bool CVstGui::GetViewSize(CRect& rect)
 		{
-			ERect* pRect;
-			
-			if (!pEffect->EditGetRect(&pRect) || !pRect)
+			ERect* pRect(0);
+			pEffect->EditGetRect(&pRect);
+			if (!pRect)
 				return false;
 
 			rect.left = rect.top = 0;
@@ -348,7 +348,7 @@ NAMESPACE__BEGIN(psycle)
 			if ( pEffect->HasEditor())
 			{
 				CVstGui* gui = new CVstGui(&machine());
-				CRect rcClient;
+				CRect rcClient(0,0,0,0);
 				gui->GetViewSize(rcClient);
 				gui->Create(NULL, "vstgui", WS_CHILD | WS_VISIBLE,
 					rcClient, this, AFX_IDW_PANE_FIRST, NULL);

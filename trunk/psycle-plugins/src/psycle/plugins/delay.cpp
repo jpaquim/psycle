@@ -41,7 +41,7 @@ public:
 			Information::Parameter::linear("feedback left", -1, 0, 1),
 			Information::Parameter::linear("delay right", 0, 0, delay_maximum),
 			Information::Parameter::linear("feedback right", -1, 0, 1),
-			Information::Parameter::discrete("snap to", 0, factors - 1)
+			Information::Parameter::discrete("snap to", 3, factors - 1)
 		};
 		static const Information information(Information::Types::effect, "ayeternal Dalay Delay", "Dalay Delay", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
 		return information;
@@ -123,7 +123,7 @@ inline void Delay::resize(const int & channel, const int & parameter)
 	const int snap1((*this)[snap] + 1);
 	const Real snap_delay(static_cast<int>((*this)(parameter) * snap1) / static_cast<Real>(snap1));
 	this->scaled_parameters_[parameter] = snap_delay;
-	this->parameters_[parameter] = information().parameter(parameter).scale.apply_inverse(snap_delay);
+	this->parameters_[parameter] = information().parameter(parameter).scale.apply_inverse(snap_delay)+1; // Round up.
 	resize(channel, snap_delay);
 }
 

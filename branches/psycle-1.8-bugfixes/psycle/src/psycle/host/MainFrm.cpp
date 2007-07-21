@@ -1699,14 +1699,11 @@ NAMESPACE__BEGIN(psycle)
 			}
 			if (selectedpos >= 0)
 			{
-				top = selectedpos - 0xC;
-				if (top < 0)
-				{
-					top = 0;
-				}
-				cc->SetTopIndex(top);
 				cc->SetSel(selectedpos);
+				top = selectedpos - 0xC;
+				if (top < 0) top = 0;
 			}
+			cc->SetTopIndex(top);
 			StatusBarIdle();
 		}
 
@@ -2254,6 +2251,10 @@ NAMESPACE__BEGIN(psycle)
 			UpdateSequencer();
 			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			pls->SetSel(Global::pPlayer->_playPosition,true);
+
+			int top = ((Global::pPlayer->_playing)?Global::pPlayer->_playPosition:m_wndView.editPosition) - 0xC;
+			if (top < 0) top = 0;
+			pls->SetTopIndex(top);
 			m_wndView.SetFocus();
 		}
 
@@ -2297,30 +2298,38 @@ NAMESPACE__BEGIN(psycle)
 			Global::pConfig->_followSong = ((CButton*)m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck()?true:false;
 			CListBox* pSeqList = (CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 
-			if (( Global::pConfig->_followSong ) && ( Global::pPlayer->_playing ))
+			if ( Global::pConfig->_followSong )
 			{
-				m_wndView.ChordModeOffs = 0;
-				m_wndView.bScrollDetatch=false;
-				if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+				if  ( Global::pPlayer->_playing )
+				{
+					m_wndView.ChordModeOffs = 0;
+					m_wndView.bScrollDetatch=false;
+					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+					{
+						pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
+						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
+					}
+					if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
+					{
+						m_wndView.editPosition=Global::pPlayer->_playPosition;
+						m_wndView.Repaint(DMPattern);
+					}
+					int top = Global::pPlayer->_playPosition - 0xC;
+					if (top < 0) top = 0;
+					pSeqList->SetTopIndex(top);
+				}
+				else
 				{
 					pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
-					pSeqList->SetSel(Global::pPlayer->_playPosition,true);
-				}
-				if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
-				{
-					m_wndView.editPosition=Global::pPlayer->_playPosition;
-					m_wndView.Repaint(DMPattern);
-				}
-			}
-			else if ( !Global::pPlayer->_playing )
-			{
-				pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
-				for (int i=0;i<MAX_SONG_POSITIONS;i++ )
-				{
-					if (_pSong->playOrderSel[i]) pSeqList->SetSel(i,true);
+					for (int i=0;i<MAX_SONG_POSITIONS;i++ )
+					{
+						if (_pSong->playOrderSel[i]) pSeqList->SetSel(i,true);
+					}
+					int top = m_wndView.editPosition - 0xC;
+					if (top < 0) top = 0;
+					pSeqList->SetTopIndex(top);
 				}
 			}
-
 			m_wndView.SetFocus();
 		}
 
@@ -2330,7 +2339,7 @@ NAMESPACE__BEGIN(psycle)
 			CStatic *ll_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ3);
 			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			CStatic *pLength = (CStatic*)m_wndSeq.GetDlgItem(IDC_LENGTH);
-			
+
 			int ll = _pSong->playLength;
 
 			char buffer[16];
@@ -2415,11 +2424,13 @@ NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
+				int top = pls->GetTopIndex();
 				pls->SelItemRange(false,0,pls->GetCount()-1);
 				for (int i=0;i<MAX_SONG_POSITIONS;i++ )
 				{
 					if (_pSong->playOrderSel[i]) pls->SetSel(i,true);
 				}
+				pls->SetTopIndex(top);
 			}
 			
 		}

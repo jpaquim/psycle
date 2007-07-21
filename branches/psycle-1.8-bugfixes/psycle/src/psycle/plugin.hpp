@@ -166,17 +166,17 @@ namespace psycle
 								/// creates a linear real scale.
 								static const Parameter & linear(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new psycle::scale::Linear(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new psycle::scale::Linear(static_cast<Real>(input_maximum_value+1), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 								/// creates an exponential scale.
 								static const Parameter & exponential(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new psycle::scale::Exponential(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new psycle::scale::Exponential(static_cast<Real>(input_maximum_value+1), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 								/// creates a logarithmic scale.
 								static const Parameter & logarithmic(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new psycle::scale::Logarithmic(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new psycle::scale::Logarithmic(static_cast<Real>(input_maximum_value+1), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 						}; // class Parameter
 				}; // class Information

@@ -44,15 +44,15 @@ namespace psycle
 			: Scale(input_maximum, output_minimum, output_maximum)
 			{
 				ratio_ = (output_maximum - output_minimum) / input_maximum;
-				offset_ = output_minimum / ratio_;
+				offset_ = output_minimum;
 			}
 			inline virtual const Real apply(const Real & sample) const
 			{
-				return (sample + offset_) * ratio_;
+				return sample * ratio_ + offset_;
 			}
 			inline virtual const Real apply_inverse(const Real & sample) const
 			{
-				return sample / ratio_ - offset_;
+				return (sample - offset_ )/ ratio_;
 			}
 		private:
 			Real offset_, ratio_;

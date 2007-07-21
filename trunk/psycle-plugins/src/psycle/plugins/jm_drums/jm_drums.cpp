@@ -473,7 +473,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			else sprintf(txt,"%d%%:100%%",(value-100)*(-1));
 			return true;
 		case 14:
-			sprintf(txt,"%0.1fms",value/10.0); return true;
+			sprintf(txt,"%0.1fms",value/10.0f); return true;
 		default: return false;
 	}
 }
@@ -499,6 +499,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 														//(List maintained in ::Work())
 		
 		DTrack[numT[channel]].Chan=channel; // set it up
+		DTrack[numT[channel]].Started=false;
 		globalpar.samplerate=pCB->GetSamplingRate();
 
 		float tmp=globalpar.OutVol;
