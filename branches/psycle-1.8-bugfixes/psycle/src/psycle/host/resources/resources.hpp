@@ -731,6 +731,7 @@
 #define IDC_VOLUME_DB11                 1515
 #define IDC_AUTOSAVE_MINS_SPIN          1516
 #define IDC_VOLUME_PER11                1516
+#define IDC_RECBLOCK                    1516
 #define IDC_CLONEMACHINE                1517
 #define IDC_VOLUME_DB12                 1517
 #define IDC_VOLUME_PER12                1518
@@ -1016,6 +1017,9 @@
 #define IDC_REPLACEMAC                  1787
 #define IDC_SEQEDITBOX                  1788
 #define IDC_VOLLABEL                    1789
+#define IDC_OUTPUTFILE                  1790
+#define IDC_RADIO2                      1791
+#define IDC_OUTPUTCLIPBOARD             1791
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1182,7 +1186,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        276
 #define _APS_NEXT_COMMAND_VALUE         34207
-#define _APS_NEXT_CONTROL_VALUE         1790
+#define _APS_NEXT_CONTROL_VALUE         1791
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

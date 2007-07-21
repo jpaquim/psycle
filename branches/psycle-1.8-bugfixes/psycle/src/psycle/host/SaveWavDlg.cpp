@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CSaveWavDlg.
 #include <project.private.hpp>
+#include <childview.hpp>
 #include "psycle.hpp"
 #include "SaveWavDlg.hpp"
 //#include "Global.hpp"
@@ -13,6 +14,7 @@
 #include "MainFrm.hpp"
 #include <iostream>
 #include <iomanip>
+#include ".\savewavdlg.hpp"
 #undef max // ???
 NAMESPACE__BEGIN(psycle)
 	NAMESPACE__BEGIN(host)
@@ -27,17 +29,21 @@ NAMESPACE__BEGIN(psycle)
 		BOOL CSaveWavDlg::savetracks = false;
 		BOOL CSaveWavDlg::savegens = false;
 
-		CSaveWavDlg::CSaveWavDlg(CWnd* pParent /* = 0 */) : CDialog(CSaveWavDlg::IDD, pParent)
+		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent /* = 0 */) : CDialog(CSaveWavDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CSaveWavDlg)
-			m_recmode = 0;
+			m_recmode = 0;		
+			m_outputtype = 0;
 			//}}AFX_DATA_INIT
+			this->pChildView = pChildView;
+			this->pBlockSel = pBlockSel;
 		}
 
 		void CSaveWavDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
 			//{{AFX_DATA_MAP(CSaveWavDlg)
+			DDX_Control(pDX, IDC_FILEBROWSE, m_browse);
 			DDX_Control(pDX, IDCANCEL, m_cancel);
 			DDX_Control(pDX, IDC_SAVEWAVE, m_savewave);
 			DDX_Control(pDX, IDC_SAVEWIRESSEPARATED, m_savewires);
@@ -56,6 +62,7 @@ NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_COMBO_PDF, m_pdf);
 			DDX_Control(pDX, IDC_COMBO_NOISESHAPING, m_noiseshaping);
 			DDX_Radio(pDX, IDC_RECSONG, m_recmode);
+			DDX_Radio(pDX, IDC_OUTPUTFILE, m_outputtype);
 			//}}AFX_DATA_MAP
 		}
 
@@ -65,6 +72,7 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_RECSONG, OnSelAllSong)
 			ON_BN_CLICKED(IDC_RECRANGE, OnSelRange)
 			ON_BN_CLICKED(IDC_RECPATTERN, OnSelPattern)
+			ON_BN_CLICKED(IDC_RECBLOCK, OnRecblock)
 			ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
 			ON_CBN_SELCHANGE(IDC_COMBO_BITS, OnSelchangeComboBits)
 			ON_CBN_SELCHANGE(IDC_COMBO_CHANNELS, OnSelchangeComboChannels)
@@ -75,7 +83,9 @@ NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_SAVEWIRESSEPARATED, OnSavewiresseparated)
 			ON_BN_CLICKED(IDC_SAVEGENERATORSEPARATED, OnSavegensseparated)
 			ON_BN_CLICKED(IDC_CHECK_DITHER,	OnToggleDither)
-			//}}AFX_MSG_MAP
+			ON_BN_CLICKED(IDC_OUTPUTFILE, OnOutputfile)
+			ON_BN_CLICKED(IDC_OUTPUTCLIPBOARD, OnOutputclipboard)
+			//}}AFX_MSG_MAP			
 		END_MESSAGE_MAP()
 
 		BOOL CSaveWavDlg::OnInitDialog() 
@@ -225,10 +235,43 @@ NAMESPACE__BEGIN(psycle)
 			m_savegens.SetCheck(savegens);
 			m_savewires.SetCheck(savewires);
 
-			m_text.SetWindowText("");
-			
+			m_text.SetWindowText("");		
+
+			if (pChildView->blockSelected)
+			{
+				//enable record block selection
+				GetDlgItem(IDC_RECBLOCK)->EnableWindow(true);
+			}
+			else
+			{
+				//disable record block selection
+				GetDlgItem(IDC_RECBLOCK)->EnableWindow(false);
+			}
+
 			return true;  // return true unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return false
+		}
+
+		void CSaveWavDlg::OnOutputfile()
+		{
+			m_outputtype=0;
+			m_savewires.EnableWindow(true);
+			m_savetracks.EnableWindow(true);
+			m_savegens.EnableWindow(true);
+			m_filename.EnableWindow(true);
+			m_browse.EnableWindow(true);
+				// TODO: Add your control notification handler code here
+		}
+
+		void CSaveWavDlg::OnOutputclipboard()
+		{
+			m_outputtype=1;
+			m_savewires.EnableWindow(false);
+			m_savetracks.EnableWindow(false);
+			m_savegens.EnableWindow(false);
+			m_filename.EnableWindow(false);
+			m_browse.EnableWindow(false);
+			// TODO: Add your control notification handler code here
 		}
 
 		void CSaveWavDlg::OnFilebrowse() 
@@ -271,6 +314,14 @@ NAMESPACE__BEGIN(psycle)
 			m_recmode=2;
 		}
 
+		void CSaveWavDlg::OnRecblock()
+		{
+			m_rangeend.EnableWindow(false);
+			m_rangestart.EnableWindow(false);
+			m_patnumber.EnableWindow(false);
+			m_recmode=3;
+		}
+
 		void CSaveWavDlg::OnSavewave() 
 		{
 			Song *pSong = Global::_pSong;
@@ -309,7 +360,6 @@ NAMESPACE__BEGIN(psycle)
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
 			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
-
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
 
 			m_filename.EnableWindow(false);
@@ -327,154 +377,163 @@ NAMESPACE__BEGIN(psycle)
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
 
-			if (m_savetracks.GetCheck())
-			{
-				memcpy(_Muted,pSong->_trackMuted,sizeof(pSong->_trackMuted));
-
-				int count = 0;
-
-				for (int i = 0; i < pSong->SONGTRACKS; i++)
+			if (m_outputtype == 0)
+			{	//record to file
+				if (m_savetracks.GetCheck())
 				{
-					if (!_Muted[i])
+					memcpy(_Muted,pSong->_trackMuted,sizeof(pSong->_trackMuted));
+
+					int count = 0;
+
+					for (int i = 0; i < pSong->SONGTRACKS; i++)
 					{
-						count++;
-						current = i;
-						for (int j = 0; j < pSong->SONGTRACKS; j++)
+						if (!_Muted[i])
 						{
-							if (j != i)
-							{
-								pSong->_trackMuted[j] = true;
-							}
-							else
-							{
-								pSong->_trackMuted[j] = false;
-							}
-						}
-/*
-similar conversions;
-\operating_system\exception.h(43)
-'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
-\include\string(603):
-'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
-with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
-[found using argument-dependent lookup];
-while trying to match the argument list
-'(std::ostringstream, std::string)'
-*/
-						// now save the song
-						std::ostringstream filename;
-						filename << rootname;
-						filename << "-track "
-							<< std::setprecision(2) << (unsigned)i;
-						SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode);
-/*
-'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
-'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
-with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
-[found using argument-dependent lookup]; while trying to match the argument list
-'(std::ostringstream, std::string)'
-*/
-						return;
-					}
-				}
-				current = 256;
-				SaveEnd();
-			}
-			else if (m_savewires.GetCheck())
-			{
-				// this is tricky - sort of
-				// back up our connections first
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
-					{
-						_Muted[i] = pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute;
-					}
-					else
-					{
-						_Muted[i] = true;
-					}
-				}
-
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					if (!_Muted[i])
-					{
-						current = i;
-						for (int j = 0; j < MAX_CONNECTIONS; j++)
-						{
-							if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j])
+							count++;
+							current = i;
+							for (int j = 0; j < pSong->SONGTRACKS; j++)
 							{
 								if (j != i)
 								{
-									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
+									pSong->_trackMuted[j] = true;
 								}
 								else
 								{
-									pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
+									pSong->_trackMuted[j] = false;
 								}
 							}
+	/*
+	similar conversions;
+	\operating_system\exception.h(43)
+	'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
+	\include\string(603):
+	'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
+	with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
+	[found using argument-dependent lookup];
+	while trying to match the argument list
+	'(std::ostringstream, std::string)'
+	*/
+							// now save the song
+							std::ostringstream filename;
+							filename << rootname;
+							filename << "-track "
+								<< std::setprecision(2) << (unsigned)i;
+							SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode);
+	/*
+	'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
+	'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
+	with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
+	[found using argument-dependent lookup]; while trying to match the argument list
+	'(std::ostringstream, std::string)'
+	*/
+							return;
 						}
-						// now save the song
-						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
-						return;
 					}
+					current = 256;
+					SaveEnd();
 				}
-				current = 256;
-				SaveEnd();
-			}
-			else if (m_savegens.GetCheck())
-			{
-				// this is tricky - sort of
-				// back up our connections first
-
-				for (int i = 0; i < MAX_BUSES; i++)
+				else if (m_savewires.GetCheck())
 				{
-					if (pSong->_pMachine[i])
+					// this is tricky - sort of
+					// back up our connections first
+					for (int i = 0; i < MAX_CONNECTIONS; i++)
 					{
-						_Muted[i] = pSong->_pMachine[i]->_mute;
-					}
-					else
-					{
-						_Muted[i] = true;
-					}
-				}
-
-				for (int i = 0; i < MAX_BUSES; i++)
-				{
-					if (!_Muted[i])
-					{
-						current = i;
-						for (int j = 0; j < MAX_BUSES; j++)
+						if (pSong->_pMachine[MASTER_INDEX]->_inputCon[i])
 						{
-							if (pSong->_pMachine[j])
+							_Muted[i] = pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute;
+						}
+						else
+						{
+							_Muted[i] = true;
+						}
+					}
+
+					for (int i = 0; i < MAX_CONNECTIONS; i++)
+					{
+						if (!_Muted[i])
+						{
+							current = i;
+							for (int j = 0; j < MAX_CONNECTIONS; j++)
 							{
-								if (j != i)
+								if (pSong->_pMachine[MASTER_INDEX]->_inputCon[j])
 								{
-									pSong->_pMachine[j]->_mute = true;
-								}
-								else
-								{
-									pSong->_pMachine[j]->_mute = false;
+									if (j != i)
+									{
+										pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
+									}
+									else
+									{
+										pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
+									}
 								}
 							}
+							// now save the song
+							char filename[MAX_PATH];
+							sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+							return;
 						}
-						// now save the song
-						char filename[MAX_PATH];
-						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
-						return;
 					}
+					current = 256;
+					SaveEnd();
 				}
-				current = 256;
-				SaveEnd();
+				else if (m_savegens.GetCheck())
+				{
+					// this is tricky - sort of
+					// back up our connections first
+
+					for (int i = 0; i < MAX_BUSES; i++)
+					{
+						if (pSong->_pMachine[i])
+						{
+							_Muted[i] = pSong->_pMachine[i]->_mute;
+						}
+						else
+						{
+							_Muted[i] = true;
+						}
+					}
+
+					for (int i = 0; i < MAX_BUSES; i++)
+					{
+						if (!_Muted[i])
+						{
+							current = i;
+							for (int j = 0; j < MAX_BUSES; j++)
+							{
+								if (pSong->_pMachine[j])
+								{
+									if (j != i)
+									{
+										pSong->_pMachine[j]->_mute = true;
+									}
+									else
+									{
+										pSong->_pMachine[j]->_mute = false;
+									}
+								}
+							}
+							// now save the song
+							char filename[MAX_PATH];
+							sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
+							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+							return;
+						}
+					}
+					current = 256;
+					SaveEnd();
+				}
+				else
+				{
+					SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
+				}
 			}
-			else
+			else //m_outputtype == 1
 			{
+				//record to clipboard
 				SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
 			}
+
 		}
 
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode)
@@ -509,6 +568,10 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			lastlinetick=0;
 			int i,j;
 			
+			int blockSLine;
+			int blockELine;
+			int blockNLines;
+
 			switch (m_recmode)
 			{
 			case 0:
@@ -558,6 +621,33 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 				pPlayer->Start(pstart,0);
 				pPlayer->_playBlock=true;
 				pPlayer->_loopSong=false;
+				break;
+			case 3:
+				blockSLine=pBlockSel->start.line;
+				blockELine=pBlockSel->end.line;
+				blockNLines=(pBlockSel->end.line-pBlockSel->start.line)+1;
+				
+				TRACE("blockSLine=%i", blockSLine);
+				TRACE("blockELine=%i", blockELine);
+				TRACE("blockNLines=%i", blockNLines);
+
+				pstart = pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition];
+				m_progress.SetRange(blockSLine,blockELine);
+				//<alk> what's this for? (start)
+				for (cont=0;cont<pSong->playLength;cont++)
+				{
+					if ( (int)pSong->playOrder[cont] == pstart)
+					{
+						pstart= cont;
+						break;
+					}
+				}
+				//(end)
+				lastpostick=pstart;
+				pSong->playOrderSel[cont]=true;
+				pPlayer->Start(pstart,blockSLine, blockELine);
+				pPlayer->_playBlock=true;
+				pPlayer->_loopSong=false;				
 				break;
 			default:
 				SaveEnd();
@@ -752,7 +842,7 @@ with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char
 			GetDlgItem(IDC_RECSONG)->EnableWindow(true);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(true);
 			GetDlgItem(IDC_RECRANGE)->EnableWindow(true);
-
+			GetDlgItem(IDC_RECBLOCK)->EnableWindow(true);
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(true);
 
 			m_filename.EnableWindow(true);

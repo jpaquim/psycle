@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -1799,62 +1799,69 @@ BEGIN
                     BS_PUSHLIKE,175,257,76,15
 END
 
-IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 303
+IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 345
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Render as Wav File"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    LTEXT           "Output Path",IDC_STATIC,5,7,39,10
-    EDITTEXT        IDC_FILENAME,49,5,157,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_FILEBROWSE,212,5,39,13
+    CONTROL         "Output to file",IDC_OUTPUTFILE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,15,16,56,10
+    CONTROL         "Output to clipboard",IDC_OUTPUTCLIPBOARD,"Button",
+                    BS_AUTORADIOBUTTON,15,111,76,10
+    EDITTEXT        IDC_FILENAME,74,15,127,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_FILEBROWSE,208,15,34,13
     CONTROL         "Save each unmuted input to master as a separated wav (wire number will be appended to filename)",
                     IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,9,25,231,21
-    GROUPBOX        "Record:",IDC_STATIC,5,104,246,61
-    EDITTEXT        IDC_PATNUMBER,107,130,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(in HEX value)",IDC_STATIC,137,133,47,10
-    EDITTEXT        IDC_RANGESTART,107,145,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_RANGEEND,149,145,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "to",IDC_STATIC,138,147,8,8
-    LTEXT           "(in HEX value)",IDC_STATIC,179,147,47,10
-    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
-                    0x1,5,265,245,9
-    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,156,282,50,14
-    PUSHBUTTON      "Close",IDCANCEL,211,282,41,14
-    CONTROL         "Record the entire song",IDC_RECSONG,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,13,117,112,10
-    CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
-                    BS_AUTORADIOBUTTON,13,132,89,10
-    CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
-                    BS_AUTORADIOBUTTON,13,147,93,10
-    RTEXT           "Sample Rate",IDC_STATIC,66,170,45,15,SS_CENTERIMAGE
-    RTEXT           "Channels",IDC_STATIC,61,200,50,15,SS_CENTERIMAGE
-    RTEXT           "Bit Depth",IDC_STATIC,61,185,50,15,SS_CENTERIMAGE
+                    BS_MULTILINE | WS_TABSTOP,34,32,213,21
     CONTROL         "Save each unmuted track as a separated wav (track number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
                     IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,9,47,230,24
-    COMBOBOX        IDC_COMBO_RATE,117,170,134,75,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_BITS,117,185,133,75,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_CHANNELS,117,200,133,75,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CTEXT           "Note: many filters screw up when rendering at low sample rates.",
-                    IDC_STATIC,12,170,50,45,WS_DISABLED
+                    BS_MULTILINE | WS_TABSTOP,34,55,205,24
     CONTROL         "Save each unmuted generator as a separated wav (generator number will be appended to filename) ** may suffer from 'delay bleed' - insert silence at the end of your file if this is a problem.",
                     IDC_SAVEGENERATORSEPARATED,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | WS_TABSTOP,9,76,230,24
-    RTEXT           "Prob. Distribution",IDC_STATIC,55,223,54,13,
+                    BS_MULTILINE | WS_TABSTOP,33,83,207,24
+    CONTROL         "Record the entire song",IDC_RECSONG,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,13,144,112,10
+    CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
+                    BS_AUTORADIOBUTTON,13,159,89,10
+    CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
+                    BS_AUTORADIOBUTTON,13,174,93,10
+    CONTROL         "Record selected block (only in regard to line numbers, not channels)",
+                    IDC_RECBLOCK,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,13,
+                    189,229,10,WS_EX_RTLREADING
+    EDITTEXT        IDC_PATNUMBER,107,157,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGESTART,107,172,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGEEND,149,172,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    COMBOBOX        IDC_COMBO_RATE,117,212,134,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_BITS,117,228,133,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_CHANNELS,117,242,133,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_PDF,117,265,127,47,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_COMBO_NOISESHAPING,117,281,128,41,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
+    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,155,325,50,14
+    PUSHBUTTON      "Close",IDCANCEL,211,325,41,14
+    LTEXT           "(in HEX value)",IDC_STATIC,137,160,47,10
+    LTEXT           "to",IDC_STATIC,137,174,8,8
+    LTEXT           "(in HEX value)",IDC_STATIC,179,174,47,10
+    GROUPBOX        "Record:",IDC_STATIC,5,131,246,76
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
+                    0x1,5,308,245,9
+    RTEXT           "Sample Rate",IDC_STATIC,65,212,45,15,SS_CENTERIMAGE
+    RTEXT           "Channels",IDC_STATIC,61,242,50,15,SS_CENTERIMAGE
+    RTEXT           "Bit Depth",IDC_STATIC,61,228,50,15,SS_CENTERIMAGE
+    CTEXT           "Note: many filters screw up when rendering at low sample rates.",
+                    IDC_STATIC,11,212,50,45,WS_DISABLED
+    RTEXT           "Prob. Distribution",IDC_STATIC,55,265,54,13,
                     SS_CENTERIMAGE
-    RTEXT           "Noise-shaping",IDC_STATIC,65,236,44,18,SS_CENTERIMAGE
-    GROUPBOX        "Dither",IDC_STATIC,5,215,245,42
-    LTEXT           "",IDC_TEXT,5,284,144,12
+    RTEXT           "Noise-shaping",IDC_STATIC,65,278,44,18,SS_CENTERIMAGE
+    GROUPBOX        "Dither",IDC_STATIC,5,257,245,42
+    LTEXT           "",IDC_TEXT,5,327,144,12
     CONTROL         "Enable",IDC_CHECK_DITHER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,12,232,39,9
-    COMBOBOX        IDC_COMBO_PDF,117,223,133,47,CBS_DROPDOWNLIST | 
-                    WS_TABSTOP
-    COMBOBOX        IDC_COMBO_NOISESHAPING,117,239,133,41,CBS_DROPDOWNLIST | 
-                    WS_TABSTOP
+                    WS_TABSTOP,11,274,39,9
+    GROUPBOX        "Output",IDC_STATIC,7,3,243,125
 END
 
 IDD_NEW_VOLUME DIALOG  0, 0, 114, 63
@@ -2674,7 +2681,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 250
         TOPMARGIN, 7
-        BOTTOMMARGIN, 245
+        BOTTOMMARGIN, 339
     END
 
     IDD_NEW_VOLUME, DIALOG
@@ -3286,7 +3293,7 @@ BEGIN
     ID_ABOUT_ABOUTVST       "Shows an about box about this plugin."
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

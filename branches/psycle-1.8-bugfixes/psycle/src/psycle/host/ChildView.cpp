@@ -921,7 +921,7 @@ NAMESPACE__BEGIN(psycle)
 			KillTimer(31);
 			KillTimer(159);
 			OnTimer(159); // Autosave
-			CSaveWavDlg dlg;
+			CSaveWavDlg dlg(this, &blockSel);
 			dlg.DoModal();
 			InitTimer();
 		}

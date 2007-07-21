@@ -22,6 +22,7 @@ namespace psycle
 			Tweaker = false;
 			_samplesRemaining=0;
 			_lineCounter=0;
+			_lineStop=-1;
 			_loopSong=true;
 			_patternjump=-1;
 			_linejump=-1;
@@ -37,7 +38,13 @@ namespace psycle
 			if(_recording) _outputWaveFile.Close();
 		}
 
-		void Player::Start(int pos, int line,bool initialize)
+		void Player::Start(int pos, int lineStart, int lineStop, bool initialize)
+		{
+			_lineStop = lineStop;
+			Start(pos, lineStart, initialize);
+		}
+
+		void Player::Start(int pos, int line, bool initialize)
 		{
 			CSingleLock crit(&Global::_pSong->door, TRUE);
 			if (initialize)
@@ -79,6 +86,7 @@ namespace psycle
 			// Stop song enviroment
 			_playing = false;
 			_playBlock = false;
+			_lineStop = -1;
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
 				if(Global::_pSong->_pMachine[i])

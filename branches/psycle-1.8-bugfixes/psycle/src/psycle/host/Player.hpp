@@ -34,6 +34,8 @@ namespace psycle
 			bool _SPRChanged;
 			/// the line currently being played in the current pattern
 			int _lineCounter;
+			/// the line at which to stop playing (used by save block to wav)
+			int _lineStop;
 			/// the sequence position currently being played
 			int _playPosition;
 			/// the pattern currently being played.
@@ -51,6 +53,8 @@ namespace psycle
 			int tpb;
 			/// Contains the number of samples until a line change comes in.
 			int _samplesRemaining;
+			/// starts to play, also specifying a line to stop playing at.
+			void Start(int pos,int lineStart,int lineStop,bool initialize=true);
 			/// starts to play.
 			void Start(int pos,int line,bool initialize=true);
 			/// wether this player has been started.
