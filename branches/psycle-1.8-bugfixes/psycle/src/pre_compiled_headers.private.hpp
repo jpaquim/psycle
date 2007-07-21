@@ -167,12 +167,15 @@
 // boost http://boost.org
 //////////////////////////
 
+#include <boost/version.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/read_write_mutex.hpp>
+#if BOOST_VERSION == 103200
+	#include <boost/thread/read_write_mutex.hpp>
+#endif
 #include <boost/thread/condition.hpp>
 // huge include! #include <boost/spirit.hpp>
 
