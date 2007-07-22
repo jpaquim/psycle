@@ -67,6 +67,7 @@ class MainWindow : public QMainWindow
 Q_OBJECT
 public:
 	MainWindow();
+	~MainWindow();
 	QUndoStack *undoStack;
 
 protected:
