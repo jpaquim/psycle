@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CInterpolateCurve.
-#include <project.private.hpp>
-#include "psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "InterpolateCurveDlg.hpp"
+#include "psycle.hpp"
 #include "Helpers.hpp"
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		CInterpolateCurve::CInterpolateCurve(int startsel, int endsel,int _linesperbeat,CWnd* pParent)
 			: CDialog(CInterpolateCurve::IDD, pParent)
@@ -480,6 +480,6 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 

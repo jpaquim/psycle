@@ -3,13 +3,14 @@
 #pragma once
 #include "AudioDriver.hpp"
 #include "version.hpp"
+#include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 #include <cstddef>
 namespace psycle
 {
 	namespace host
 	{
 		#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
-		#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" STRINGIZED(PSYCLE__VERSION__MAJOR) "." STRINGIZED(PSYCLE__VERSION__MINOR)
+		#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR)
 		#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 		#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 

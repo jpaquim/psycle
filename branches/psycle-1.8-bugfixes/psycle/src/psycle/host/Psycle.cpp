@@ -1,23 +1,27 @@
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
 #define _WIN32_DCOM
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "psycle.hpp"
 #include "version.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
 #include "midiinput.hpp"
 #include "NewMachine.hpp"
-#include <operating_system/exception.hpp>
+#include "sinstance.h"
+#include "loggers.hpp"
+#include <universalis/processor/exception.hpp>
+#include <diversalis/compiler.hpp>
 #include <sstream>
 #include <comdef.h>
-#include <Wbemidl.h>
-#include "sinstance.h"
 
-# pragma comment(lib, "wbemuuid.lib")
+#include <wbemidl.h>
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	# pragma comment(lib, "wbemuuid")
+#endif
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
@@ -28,7 +32,7 @@ NAMESPACE__BEGIN(psycle)
 		CPsycleApp::CPsycleApp()
 		:m_uUserMessage(0)
 		{
-			operating_system::exceptions::translated::new_thread("mfc gui");
+			universalis::processor::exception::new_thread("mfc gui");
 			// support for unicode characters on mswin98
 			{
 				#if 0
@@ -66,7 +70,7 @@ NAMESPACE__BEGIN(psycle)
 			CMainFrame* pFrame = new CMainFrame;
 			m_pMainWnd = pFrame;
 
-			host::loggers::info("build identifier: " EOL PSYCLE__BUILD__IDENTIFIER(EOL));
+			loggers::info("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
 
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
@@ -217,11 +221,10 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (*(cmdline) != 0)
 			{
-				char * tmpName =new char[257];
-				strncpy(tmpName, m_lpCmdLine+1, 256 );
-				tmpName[strlen(m_lpCmdLine+1) -1 ] = 0;
+				char tmpName [257];
+				std::strncpy(tmpName, m_lpCmdLine+1, 256 );
+				tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
 				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
-				zapArray(tmpName);
 			}
 		}
 
@@ -448,7 +451,7 @@ NAMESPACE__BEGIN(psycle)
 
 			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
-			m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER(EOL));
+			m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER("\r\n"));
 
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
@@ -461,5 +464,5 @@ NAMESPACE__BEGIN(psycle)
 			else Global::pConfig->_showAboutAtStart=false;
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,9 +1,12 @@
 ///\file
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
-#include "afxwin.h"
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+#include <afxwin.h>
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 /// key config window.
 class CSpecialKeys : public CDialog
 {
@@ -21,5 +24,6 @@ public:
 	int key;
 	int mod;
 };
-NAMESPACE__END
-NAMESPACE__END
+
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

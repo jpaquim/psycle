@@ -1,13 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiLearn.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "MidiLearn.hpp"
 #include "Psycle.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-#include "MidiLearn.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CMidiLearn::CMidiLearn(CWnd* pParent) : CDialog(CMidiLearn::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CMidiLearn)
@@ -36,5 +37,6 @@ NAMESPACE__BEGIN(psycle)
 			Message = -1;
 			CDialog::OnCancel();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

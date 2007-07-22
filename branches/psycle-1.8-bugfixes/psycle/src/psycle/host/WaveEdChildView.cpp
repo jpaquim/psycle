@@ -1,14 +1,15 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "WaveEdChildView.hpp"
 #include "psycle.hpp"
 #include "Helpers.hpp"
-#include "WaveEdChildView.hpp"
 #include "MainFrm.hpp"
+#include "zap.hpp"
 #include <mmreg.h>
 #include <math.h>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	
 		float const CWaveEdChildView::zoomBase = 1.06f;
@@ -1369,7 +1370,7 @@ NAMESPACE__BEGIN(psycle)
 				{
 					_pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
 					short *pTmp= new signed short[timeInSamps];
-					memset(pTmp, 0, timeInSamps*2 );
+					std::memset(pTmp, 0, timeInSamps*2 );
 					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
 					wdLength=timeInSamps;
 					wdStereo=false;
@@ -2709,5 +2710,5 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 	
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

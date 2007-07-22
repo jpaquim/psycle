@@ -1,14 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "InfoDlg.hpp"
 #include "Psycle.hpp"
 #include "configuration.hpp"
 #include "Song.hpp"
-#include "InfoDlg.hpp"
 #include "Machine.hpp"
-#include ".\infodlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CInfoDlg::CInfoDlg(CWnd* pParent)
 		: CDialog(CInfoDlg::IDD, pParent)
 		{
@@ -187,5 +186,5 @@ NAMESPACE__BEGIN(psycle)
 			}
 			itemcount = n;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

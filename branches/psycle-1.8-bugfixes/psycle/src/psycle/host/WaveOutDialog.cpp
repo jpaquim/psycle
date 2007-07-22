@@ -1,15 +1,27 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "WaveOutDialog.hpp"
-#pragma warning(push)
+#include "Psycle.hpp"
+#include <diversalis/compiler.hpp>
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#include <mmsystem.h>
+#endif
+
+#include <mmsystem.h>
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "winmm")
-#pragma warning(pop)
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#endif
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(pop)
+#endif
+
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CWaveOutDialog::CWaveOutDialog(CWnd* pParent) : CDialog(CWaveOutDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CWaveOutDialog)
@@ -183,5 +195,6 @@ NAMESPACE__BEGIN(psycle)
 			
 			RecalcLatency();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

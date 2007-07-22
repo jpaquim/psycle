@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "WaveOut.hpp"
 #include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
-#include <operating_system/exception.hpp>
+#include <universalis/processor/exception.hpp>
 #include <process.h>
 namespace psycle
 {
@@ -273,7 +273,7 @@ namespace psycle
 
 		void WaveOut::PollerThread(void * pWaveOut)
 		{
-			operating_system::exceptions::translated::new_thread("mme wave out");
+			universalis::processor::exception::new_thread("mme wave out");
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);

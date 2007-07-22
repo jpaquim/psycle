@@ -1,11 +1,23 @@
 ///\file
 ///\brief interface file for psycle::host::WaveOut.
 #pragma once
-#pragma warning(push)
+#include <diversalis/compiler.hpp>
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#include <mmsystem.h>
+#endif
+
+#include <mmsystem.h>
+
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "winmm")
-#pragma warning(pop)
+#endif
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(pop)
+#endif
+
 #include "AudioDriver.hpp"
 #include <map>
 namespace psycle

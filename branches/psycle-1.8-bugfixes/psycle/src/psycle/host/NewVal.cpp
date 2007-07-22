@@ -1,10 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewVal.
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "NewVal.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CNewVal::CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,char* title, CWnd* pParent)
 			: CDialog(CNewVal::IDD, pParent)
 			, macindex(mindex) , paramindex(pindex), m_Value(vval) , v_min(vmin) , v_max(vmax)
@@ -56,5 +57,6 @@ NAMESPACE__BEGIN(psycle)
 			}
 			m_text.SetWindowText(buffer);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

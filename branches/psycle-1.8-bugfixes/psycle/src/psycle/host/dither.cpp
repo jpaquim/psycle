@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::dsp::Dither
 
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "dither.hpp"
 
 namespace psycle

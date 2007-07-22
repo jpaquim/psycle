@@ -1,6 +1,6 @@
 ///\file
 ///\implementation psycle::host::Registry.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "Registry.hpp"
 namespace psycle
 {

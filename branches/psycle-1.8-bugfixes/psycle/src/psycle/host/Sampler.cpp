@@ -1,11 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "Sampler.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
+#include "global.hpp"
 namespace psycle
 {
 	namespace host

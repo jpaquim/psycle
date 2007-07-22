@@ -3,10 +3,10 @@
 // http://www.codeproject.com/combobox/cexlistboc.asp
 //
 
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "ExListBox.h"
 #include "psycle.hpp"
 #include "MainFrm.hpp"
-#include "ExListBox.h"
 #include "Global.hpp"
 #include "Song.hpp"
 

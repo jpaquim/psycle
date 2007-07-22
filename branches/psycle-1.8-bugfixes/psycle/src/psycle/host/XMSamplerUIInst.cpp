@@ -4,18 +4,18 @@
  *  $Date$
  *  $Revision$
  */
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "XMSamplerUIInst.hpp"
 #include "Psycle.hpp"
 #include "Player.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
-#include "XMSamplerUIInst.hpp"
 #include "XMSongLoader.hpp"
 #include "Configuration.hpp"
 //using namespace Gdiplus;
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 // XMSamplerUIInst
 IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()
@@ -1728,6 +1728,6 @@ void XMSamplerUIInst::CSampleAssignEditor::OnHScroll(UINT nSBCode, UINT nPos, CS
 
 	};
 
-NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 

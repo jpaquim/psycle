@@ -4,18 +4,16 @@
  *  $Revision$
  */
 
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "XMInstrument.hpp"
 #include "Configuration.hpp"
 //#include "IPsySongLoader.h"
 //#include "IPsySongSaver.h"
-#include "XMInstrument.hpp"
 #include "Filter.hpp"
 #include "DataCompression.hpp"
 #include "FileIO.hpp"
-
-// constructor
-#pragma unmanaged
-
+#include <cstdint>
+#include <cassert>
 namespace psycle
 {
 	namespace host
@@ -25,7 +23,7 @@ namespace psycle
 
 		bool XMInstrument::WaveData::Load(RiffFile& riffFile)
 		{	
-			compiler::uint32 size1,size2;
+			std::uint32_t size1,size2;
 			
 			char temp[6];
 			int size=0;
@@ -46,11 +44,11 @@ namespace psycle
 
 			riffFile.Read(m_WaveLoopStart);
 			riffFile.Read(m_WaveLoopEnd);
-			riffFile.Read(&m_WaveLoopType,sizeof(m_WaveLoopType));
+			riffFile.Read(&m_WaveLoopType, sizeof m_WaveLoopType); ///\todo make sure it's 1 byte
 
 			riffFile.Read(m_WaveSusLoopStart);
 			riffFile.Read(m_WaveSusLoopEnd);
-			riffFile.Read(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
+			riffFile.Read(&m_WaveSusLoopType, sizeof m_WaveSusLoopType); ///\todo make sure it's 1 byte
 
 			riffFile.Read(m_WaveTune);
 			riffFile.Read(m_WaveFineTune);
@@ -65,18 +63,17 @@ namespace psycle
 			riffFile.Read(m_VibratoType);
 
 			riffFile.Read(size1);
-			byte* pData;
-			pData = new byte[size1];
-			riffFile.Read((void *)pData,size1);
-			SoundDesquash(pData,&m_pWaveDataL);
+			unsigned char * pData = new unsigned char[size1];
+			riffFile.Read((void*)pData,size1);
+			SoundDesquash(pData, &m_pWaveDataL);
 			
 			if (m_WaveStereo)
 			{
 				delete pData;
 				riffFile.Read(size2);
-				pData = new byte[size2];
+				pData = new unsigned char[size2];
 				riffFile.Read(pData,size2);
-				SoundDesquash(pData,&m_pWaveDataR);
+				SoundDesquash(pData, &m_pWaveDataR);
 			}
 			delete pData;
 			return true;
@@ -84,10 +81,10 @@ namespace psycle
 
 		void XMInstrument::WaveData::Save(RiffFile& riffFile)
 		{
-			byte * pData1(0);
-			byte * pData2(0);
-			UINT size1= SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
-			UINT size2(0);
+			unsigned char * pData1(0);
+			unsigned char * pData2(0);
+			std::uint32_t size1= SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
+			std::uint32_t size2(0);
 
 			if (m_WaveStereo)
 			{
@@ -95,18 +92,19 @@ namespace psycle
 			}
 
 			CT2A _wave_name(m_WaveName.c_str());
-			UINT size = sizeof(XMInstrument::WaveData)
-				-sizeof(m_pWaveDataL)
-				-sizeof(m_pWaveDataR)
-				+(2*sizeof(size1))
-				+size1
-				+size2;
+			std::uint32_t size =
+				sizeof(XMInstrument::WaveData)
+				- sizeof m_pWaveDataL
+				- sizeof m_pWaveDataR
+				+ 2 * sizeof size1
+				+ size1
+				+ size2;
 
 			riffFile.Write("SMPD",4);
 			riffFile.Write(size);
 			//\todo: add version
 
-			riffFile.Write(_wave_name,strlen(_wave_name) + 1);
+			riffFile.Write(_wave_name, std::strlen(_wave_name) + 1);
 
 			riffFile.Write(m_WaveLength);
 			riffFile.Write(m_WaveGlobVolume);
@@ -114,11 +112,11 @@ namespace psycle
 
 			riffFile.Write(m_WaveLoopStart);
 			riffFile.Write(m_WaveLoopEnd);
-			riffFile.Write(&m_WaveLoopType,sizeof(m_WaveLoopType));
+			riffFile.Write(&m_WaveLoopType, sizeof m_WaveLoopType); ///\todo make sure it's 1 byte
 
 			riffFile.Write(m_WaveSusLoopStart);
 			riffFile.Write(m_WaveSusLoopEnd);
-			riffFile.Write(&m_WaveSusLoopType,sizeof(m_WaveSusLoopType));
+			riffFile.Write(&m_WaveSusLoopType, sizeof m_WaveSusLoopType); ///\todo make sure it's 1 byte
 
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
@@ -154,9 +152,9 @@ namespace psycle
 		* @param value		: Desired point Value.
 		* @return			: New point index.
 		*/
-		const int  XMInstrument::Envelope::SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal)
+		const int XMInstrument::Envelope::SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal)
 		{
-			ASSERT(pointIndex < (int)m_Points.size());
+			assert(pointIndex < (int)m_Points.size());
 			if(pointIndex < (int)m_Points.size())
 			{
 				int prevtime,nextime;
@@ -356,8 +354,8 @@ namespace psycle
 			}
 		}
 	
-		// Loading Procedure
-		void XMInstrument::Envelope::Load(RiffFile& riffFile,const UINT version)
+		/// Loading Procedure
+		void XMInstrument::Envelope::Load(RiffFile& riffFile,const std::uint32_t version)
 		{
 			riffFile.Read(m_Enabled);
 			riffFile.Read(m_Carry);
@@ -366,19 +364,19 @@ namespace psycle
 			riffFile.Read(m_SustainBegin);
 			riffFile.Read(m_SustainEnd);
 
-			int _num_of_points = 0;
-			riffFile.Read(_num_of_points);
-			for(int i = 0;i < _num_of_points ;i++)
+			std::int32_t num_of_points;
+			riffFile.Read(num_of_points);
+			for(int i = 0; i < num_of_points; i++)
 			{
-				PointValue _value;
-
-				riffFile.Read(_value.first);
-				riffFile.Read(_value.second);
-				m_Points.push_back(_value);
+				PointValue value;
+				riffFile.Read(value.first); // point
+				riffFile.Read(value.second); // value
+				m_Points.push_back(value);
 			}
 		}
-		// Saving Procedure
-		void XMInstrument::Envelope::Save(RiffFile& riffFile, const UINT version)
+
+		/// Saving Procedure
+		void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t version)
 		{
 			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 			riffFile.Write(m_Enabled);
@@ -389,10 +387,10 @@ namespace psycle
 			riffFile.Write(m_SustainEnd);
 			riffFile.Write(m_Points.size());
 
-			for(UINT i = 0;i < m_Points.size() ;i++)
+			for(int i = 0; i < m_Points.size(); i++)
 			{
-				riffFile.Write(m_Points[i].first);// point
-				riffFile.Write(m_Points[i].second);//value
+				riffFile.Write(m_Points[i].first); // point
+				riffFile.Write(m_Points[i].second); // value
 			}
 		}
 
@@ -403,13 +401,13 @@ namespace psycle
 			Init();
 		}
 
-		// destructor
+		/// destructor
 		XMInstrument::~XMInstrument()
 		{
 			// No need to delete anything, since we don't allocate memory explicitely.
 		}
 
-		// other functions
+		/// other functions
 		void XMInstrument::Init()
 		{
 			m_bEnabled = false;
@@ -454,7 +452,7 @@ namespace psycle
 
 		}
 
-		// load XMInstrument
+		/// load XMInstrument
 		bool XMInstrument::Load(RiffFile& riffFile)
 		{
 			char temp[6];
@@ -479,7 +477,7 @@ namespace psycle
 			riffFile.Read(m_InitPan);
 			riffFile.Read(m_PanEnabled);
 			riffFile.Read(m_NoteModPanCenter);
-			riffFile.Read(&m_NoteModPanSep,sizeof(compiler::sint8));
+			riffFile.Read(&m_NoteModPanSep,sizeof(std::int8_t));
 
 			riffFile.Read(m_FilterCutoff);
 			riffFile.Read(m_FilterResonance);
@@ -538,7 +536,7 @@ namespace psycle
 			riffFile.Write(m_InitPan);
 			riffFile.Write(m_PanEnabled);
 			riffFile.Write(m_NoteModPanCenter);
-			riffFile.Write(&m_NoteModPanSep,sizeof(compiler::sint8));
+			riffFile.Write(&m_NoteModPanSep,sizeof(std::int8_t));
 
 			riffFile.Write(m_FilterCutoff);
 			riffFile.Write(m_FilterResonance);

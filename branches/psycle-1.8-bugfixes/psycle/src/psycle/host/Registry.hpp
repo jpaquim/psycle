@@ -1,9 +1,9 @@
 ///\file
 ///\interface psycle::host::Registry.
 #pragma once
-#include <project.hpp>
 #include <string>
 #include <boost/static_assert.hpp>
+#include "loggers.hpp"
 namespace psycle
 {
 	namespace host

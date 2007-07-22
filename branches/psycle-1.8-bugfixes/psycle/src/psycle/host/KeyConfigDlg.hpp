@@ -2,9 +2,11 @@
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
 #include "InputHandler.hpp"
-#include "afxwin.h"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include <afxwin.h>
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		/// key config window.
 		class CKeyConfigDlg : public CPropertyPage
 		{
@@ -73,5 +75,6 @@ NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

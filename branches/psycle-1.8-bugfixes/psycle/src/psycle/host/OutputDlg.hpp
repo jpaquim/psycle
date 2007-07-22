@@ -2,8 +2,11 @@
 ///\interface file for psycle::host::COutputDlg.
 #pragma once
 #include "AudioDriver.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		/// audio device output config window.
 		class COutputDlg : public CPropertyPage
 		{
@@ -40,5 +43,6 @@ NAMESPACE__BEGIN(psycle)
 			virtual void OnCancel();
 			afx_msg void OnConfig();
 		};
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

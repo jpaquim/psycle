@@ -47,7 +47,7 @@
 //(c++-ified for psycle by dw aley)
 ///todo: inlining and such
 
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "mersennetwister.hpp"
 #include <cmath>
 

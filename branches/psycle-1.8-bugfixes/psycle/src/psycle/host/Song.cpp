@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "psycle.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
@@ -15,7 +15,7 @@
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
 #include "Riff.hpp" // for Wave file loading.
-
+#include "zap.hpp"
 namespace psycle
 {
 	namespace host
@@ -166,15 +166,6 @@ namespace psycle
 		}
 
 		Song::Song()
-		#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-			#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-		#else
-			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-				: read_write_mutex_(boost::read_write_scheduling_policy::alternating_single_read) // see: http://boost.org/doc/html/threads/concepts.html#threads.concepts.read-write-scheduling-policies.inter-class
-			#else // original implementation
-				// nothing
-			#endif
-		#endif
 		{
 			_machineLock = false;
 			Invalided = false;
@@ -276,15 +267,7 @@ namespace psycle
 
 		void Song::New()
 		{
-			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-			#else
-				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex());
-				#else // original implementation
-					CSingleLock lock(&door,TRUE);
-				#endif
-			#endif
+			CSingleLock lock(&door,TRUE);
 			seqBus=0;
 			// Song reset
 			name = "Untitled";
@@ -433,15 +416,7 @@ namespace psycle
 
 		void Song::DestroyMachine(int mac, bool write_locked)
 		{
-			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-			#else
-				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
-				#else // original implementation
-					CSingleLock lock(&door, TRUE);
-				#endif
-			#endif
+			CSingleLock lock(&door, TRUE);
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{

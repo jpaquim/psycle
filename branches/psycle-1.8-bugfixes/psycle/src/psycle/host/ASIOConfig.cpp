@@ -1,10 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CASIOConfig.
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "ASIOConfig.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		#define MIN_NUMBUF 1
 		#define MAX_NUMBUF 16
 
@@ -204,5 +205,5 @@ NAMESPACE__BEGIN(psycle)
 			FillBufferBox();
 
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

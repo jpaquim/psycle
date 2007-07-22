@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Player.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -8,6 +8,7 @@
 #include "MidiInput.hpp"
 #include "InputHandler.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
+#include "global.hpp"
 namespace psycle
 {
 	namespace host
@@ -451,15 +452,7 @@ namespace psycle
 			Player* pThis = (Player*)context;
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = pThis->_pBuffer;
-			#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-			#else
-				#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-			boost::read_write_mutex::scoped_read_write_lock lock(pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
-				#else // original implementation
-					CSingleLock crit(&Global::_pSong->door, TRUE);
-				#endif
-			#endif
+			CSingleLock crit(&Global::_pSong->door, TRUE);
 			do
 			{
 				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;

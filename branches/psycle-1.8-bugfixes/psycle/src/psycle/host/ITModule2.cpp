@@ -1,10 +1,12 @@
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "ITModule2.h"
 #include "Configuration.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
 #include "XMSampler.hpp"
-
+#include "Song.hpp"
+#include "configuration_options.hpp"
+#include <algorithm>
 namespace psycle
 {
 	namespace host
@@ -22,7 +24,7 @@ namespace psycle
 		bool ITModule2::BitsBlock::ReadBlock(OldPsyFile *pFile)
 		{
 			// block layout : uint16 size, <size> bytes data
-			compiler::uint16 size;
+			std::uint16_t size;
 			pFile->Read(&size,2);
 			pdata = new unsigned char[size];
 			if (!pdata) return false;
@@ -160,7 +162,7 @@ Special:  Bit 0: On = song message attached.
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
 			{
-				s->playOrder[i]=ReadChar(); // 254 = ++ (skip), 255 = --- (end of tune).
+				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
 				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
 			}
 			Skip(itFileH.ordNum-j);
@@ -272,7 +274,7 @@ Special:  Bit 0: On = song message attached.
 					LoadITPattern(i,numchans);
 				}
 			}
-			song->SONGTRACKS = max(numchans+1,4);
+			song->SONGTRACKS = std::max(numchans+1,4);
 
 			delete[] pointersi;
 			delete[] pointerss;
@@ -665,7 +667,7 @@ Special:  Bit 0: On = song message attached.
 					}
 				}
 			}
-			zapArray(smpbuf);
+			delete [] smpbuf; smpbuf = 0;
 			return true;
 		}
 
@@ -782,19 +784,19 @@ Special:  Bit 0: On = song message attached.
 			unsigned char lastcom[64];
 			unsigned char lasteff[64];
 			unsigned char mask[64];
-			memset(lastnote,255,sizeof(char)*64);
-			memset(lastinst,255,sizeof(char)*64);
-			memset(lastvol,255,sizeof(char)*64);
-			memset(lastcom,255,sizeof(char)*64);
-			memset(lasteff,255,sizeof(char)*64);
-			memset(mask,255,sizeof(char)*64);
+			std::memset(lastnote,255,sizeof(char)*64);
+			std::memset(lastinst,255,sizeof(char)*64);
+			std::memset(lastvol,255,sizeof(char)*64);
+			std::memset(lastcom,255,sizeof(char)*64);
+			std::memset(lasteff,255,sizeof(char)*64);
+			std::memset(mask,255,sizeof(char)*64);
 
 			PatternEntry pempty;
 			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
 			Skip(2); // packedSize
-			int rowCount=ReadInt(2);
+			std::int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
@@ -806,10 +808,10 @@ Special:  Bit 0: On = song message attached.
 				while ( newEntry )
 				{
 					unsigned char channel=(newEntry-1)&0x3F;
-					if (newEntry&0x80) mask[channel]=ReadChar();
+					if (newEntry&0x80) mask[channel]=ReadUInt8();
 					if(mask[channel]&1)
 					{
-						unsigned char note=ReadChar();
+						unsigned char note=ReadUInt8();
 						if (note==255) pent._note = notecommands::release;
 						else if (note==254) pent._note=notecommands::release; //\todo: Attention ! Psycle doesn't have a note-cut note.
 						else pent._note = note;
@@ -818,7 +820,7 @@ Special:  Bit 0: On = song message attached.
 					}
 					if (mask[channel]&2)
 					{
-						pent._inst=ReadChar()-1;
+						pent._inst=ReadUInt8()-1;
 						pent._mach=0;
 						lastinst[channel]=pent._inst;
 					}
@@ -827,7 +829,7 @@ Special:  Bit 0: On = song message attached.
 						unsigned char tmp;
 						pent._mach=0;
 						if (mask[channel]&0x40 ) tmp=lastvol[channel];
-						else tmp=ReadChar();
+						else tmp=ReadUInt8();
 						lastvol[channel]=tmp;
 						// Volume ranges from 0->64
 						// Panning ranges from 0->64, mapped onto 128->192
@@ -840,10 +842,10 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
 							pent._volume=tmp<64?tmp:63;
@@ -897,8 +899,8 @@ Special:  Bit 0: On = song message attached.
 					if(mask[channel]&8)
 					{
 						pent._mach=0;
-						unsigned char command=ReadInt(1);
-						unsigned char param=ReadInt(1);
+						std::uint8_t command=ReadUInt8();
+						std::uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,command,param,channel);
 						lastcom[channel]=pent._cmd;
@@ -918,7 +920,7 @@ Special:  Bit 0: On = song message attached.
 					*pData = pent;
 					pent=pempty;
 
-					numchans = max(channel,numchans);
+					numchans = std::max(static_cast<int>(channel),numchans);
 
 					Read(&newEntry,1);
 				}
@@ -1116,7 +1118,7 @@ Special:  Bit 0: On = song message attached.
 			int j,i=0;
 			for (j=0;j<s3mFileH.ordNum;j++)
 			{
-				s->playOrder[i]=ReadInt(1); // 254 = ++ (skip), 255 = --- (end of tune).
+				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
 				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
 			}
 			s->playLength=i;
@@ -1159,7 +1161,7 @@ Special:  Bit 0: On = song message attached.
 					sampler->rChannel(i).DefaultIsMute(true);
 				}
 			}
-			s->SONGTRACKS=max(numchans,4);
+			s->SONGTRACKS=std::max(numchans,4);
 
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
@@ -1188,8 +1190,8 @@ Special:  Bit 0: On = song message attached.
 				Seek(pointersp[i]<<4);
 				LoadS3MPatternX(i);
 			}
-			zapArray(pointersi);
-			zapArray(pointersp);
+			delete [] pointersi; pointersi = 0;
+			delete [] pointersp; pointersp = 0;
 
 			return true;
 		}
@@ -1337,8 +1339,8 @@ OFFSET              Count TYPE   Description
 					smpbuf = new char[iLen];
 					Read(smpbuf,iLen);
 				}
-				compiler::sint16 wNew;
-				compiler::sint16 offset;
+				std::int16_t wNew;
+				std::int16_t offset;
 				if ( s3mFileH.trackerInf==1) offset=0; // 1=[VERY OLD] signed samples, 2=unsigned samples
 				else offset=-32768;
 
@@ -1350,14 +1352,14 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<compiler::sint16*>(_wave.pWaveDataL()) + out) = wNew;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 						}
 						out=0;
 						Read(smpbuf,iLen*2);
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
-							*(const_cast<compiler::sint16*>(_wave.pWaveDataR()) + out) = wNew;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + out) = wNew;
 							out++;
 						}   
 					} else {
@@ -1397,7 +1399,7 @@ OFFSET              Count TYPE   Description
 				}
 
 				// cleanup
-				zapArray(smpbuf);
+				delete [] smpbuf; smpbuf = 0;
 				return true;
 			}
 			return false;
@@ -1422,20 +1424,20 @@ OFFSET              Count TYPE   Description
 					char channel=newEntry&31;
 					if(newEntry&32)
 					{
-						int note=ReadInt(1);  // hi=oct, lo=note, 255=empty note,	254=key off
+						std::uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
 						if (note==254) pent._note = notecommands::release;
 						else if (note==255) pent._note=255;
 						else pent._note = ((note/16)*12+(note%16)+12);  // +12 since ST3 C-4 is Psycle's C-5
-						pent._inst=ReadInt(1)-1;
+						pent._inst=ReadUInt8()-1;
 						pent._mach=0;
 					}
 					if(newEntry&64)
 					{
-						int tmp=ReadInt(1);
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+						std::uint8_t tmp=ReadUInt8();
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
 							pent._mach =0;
@@ -1454,8 +1456,8 @@ OFFSET              Count TYPE   Description
 					if(newEntry&128)
 					{
 						pent._mach=0;
-						unsigned char command=ReadInt(1);
-						unsigned char param=ReadInt(1);
+						std::uint8_t command=ReadUInt8();
+						std::uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,command,param,channel);
 						if ( pent._cmd == PatternCmd::BREAK_TO_LINE )

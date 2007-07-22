@@ -1,28 +1,21 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
-#include <project.private.hpp>
-#include "psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "NewMachine.hpp"
+#include "psycle.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 #include "ProgressDialog.hpp"
-// Undefining min and max. macros. We use the std:: functions instead.
-#undef min
-#undef max
+#include "loggers.hpp"
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <algorithm> //std::transform
 #include <cctype>	// std::tolower
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
 		int CNewMachine::pluginOrder = 1;
 		bool CNewMachine::pluginName = 1;
 		int CNewMachine::_numPlugins = -1;
@@ -511,7 +504,7 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if(_numPlugins == -1)
 			{
-				host::loggers::info("Scanning plugins ...");
+				loggers::info("Scanning plugins ...");
 
 				::AfxGetApp()->DoWaitCursor(1); 
 				int plugsCount(0);
@@ -559,11 +552,11 @@ NAMESPACE__BEGIN(psycle)
 					char c[1 << 10];
 					::GetCurrentDirectory(sizeof c, c);
 					std::string s(c);
-					host::loggers::info("Scanning plugins ... Current Directory: " + s);
+					loggers::info("Scanning plugins ... Current Directory: " + s);
 				}
-				host::loggers::info("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
-				host::loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
-				host::loggers::info("Scanning plugins ... Listing ...");
+				loggers::info("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
+				loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
+				loggers::info("Scanning plugins ... Listing ...");
 				if(progressOpen)
 				{
 					Progress.Create();
@@ -577,7 +570,7 @@ NAMESPACE__BEGIN(psycle)
 				int plugin_count = nativePlugs.size() + vstPlugs.size();
 
 				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
-				host::loggers::info(s.str());
+				loggers::info(s.str());
 				if(progressOpen) {
 					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
 					Progress.SetWindowText(s.str().c_str());
@@ -605,7 +598,7 @@ NAMESPACE__BEGIN(psycle)
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
-				host::loggers::info("Scanning plugins ... Testing Natives ...");
+				loggers::info("Scanning plugins ... Testing Natives ...");
 				out
 					<< std::endl
 					<< "======================" << std::endl
@@ -623,7 +616,7 @@ NAMESPACE__BEGIN(psycle)
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
-				host::loggers::info("Scanning plugins ... Testing VSTs ...");
+				loggers::info("Scanning plugins ... Testing VSTs ...");
 				out
 					<< std::endl
 					<< "===================" << std::endl
@@ -639,7 +632,7 @@ NAMESPACE__BEGIN(psycle)
 				if(progressOpen)
 				{
 					std::ostringstream s; s << "Scanned " << plugin_count << " plugins.";
-					host::loggers::info(s.str().c_str());
+					loggers::info(s.str().c_str());
 					Progress.SetWindowText(s.str().c_str());
 				}
 				out.close();
@@ -649,12 +642,12 @@ NAMESPACE__BEGIN(psycle)
 					Progress.m_Progress.SetPos(16384);
 					Progress.SetWindowText("Saving scan cache file ...");
 				}
-				host::loggers::info("Saving scan cache file ...");
+				loggers::info("Saving scan cache file ...");
 				SaveCacheFile();
 				if(progressOpen)
 					Progress.OnCancel();
 				::AfxGetApp()->DoWaitCursor(-1); 
-				host::loggers::info("Done.");
+				loggers::info("Done.");
 			}
 		}
 
@@ -706,7 +699,7 @@ NAMESPACE__BEGIN(psycle)
 									s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
 								out << s.str();
 								out.flush();
-								host::loggers::info(fileName + '\n' + s.str());
+								loggers::info(fileName + '\n' + s.str());
 								break;
 							}
 						}
@@ -718,7 +711,7 @@ NAMESPACE__BEGIN(psycle)
 					{
 						out << "new plugin added to cache ; ";
 						out.flush();
-						host::loggers::info(fileName + "\nnew plugin added to cache.");
+						loggers::info(fileName + "\nnew plugin added to cache.");
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 						_pPlugsInfo[currentPlugsCount]->dllname = fileName;
 						_pPlugsInfo[currentPlugsCount]->FileTime = time;
@@ -751,7 +744,7 @@ NAMESPACE__BEGIN(psycle)
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
+								loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
 								_pPlugsInfo[currentPlugsCount]->identifier = 0;
@@ -812,7 +805,7 @@ NAMESPACE__BEGIN(psycle)
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								host::loggers::exception(title.str() + '\n' + s.str());
+								loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
@@ -827,7 +820,7 @@ NAMESPACE__BEGIN(psycle)
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								host::loggers::exception(title.str() + '\n' + s.str());
+								loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
 						else if(type == MACH_VST)
@@ -857,7 +850,7 @@ NAMESPACE__BEGIN(psycle)
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								host::loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
+								loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								_pPlugsInfo[currentPlugsCount]->identifier = 0;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
@@ -968,7 +961,7 @@ NAMESPACE__BEGIN(psycle)
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								host::loggers::exception(title.str() + '\n' + s.str());
+								loggers::exception(title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
@@ -983,7 +976,7 @@ NAMESPACE__BEGIN(psycle)
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								host::loggers::exception(title.str() + '\n' + s.str());
+								loggers::exception(title.str() + '\n' + s.str());
 							}
 						}
 						++currentPlugsCount;
@@ -998,7 +991,7 @@ NAMESPACE__BEGIN(psycle)
 						out
 							<< s.str().c_str();
 						out.flush();
-						host::loggers::crash(s.str());
+						loggers::crash(s.str());
 					}
 					catch(...)
 					{
@@ -1009,7 +1002,7 @@ NAMESPACE__BEGIN(psycle)
 						out
 							<< s.str().c_str();
 						out.flush();
-						host::loggers::crash(s.str());
+						loggers::crash(s.str());
 					}
 				}
 				out << std::endl;
@@ -1022,7 +1015,8 @@ NAMESPACE__BEGIN(psycle)
 		{
 			for (int i=0; i<_numPlugins; i++)
 			{
-				zapObject(_pPlugsInfo[i]);
+				delete _pPlugsInfo[i];
+				_pPlugsInfo[i] = 0;
 			}
 			NativeNames.clear();
 			VstNames.clear();
@@ -1081,7 +1075,7 @@ NAMESPACE__BEGIN(psycle)
 						file.Read(chars, size);
 						chars[size] = '\0';
 						p.error = (const char*)chars;
-						zapArray(chars);
+						delete [] chars;
 					}
 				}
 				file.Read(&p.allow,sizeof(p.allow));
@@ -1229,6 +1223,6 @@ NAMESPACE__BEGIN(psycle)
 			}
 			return false;
 		}
-	NAMESPACE__END
-NAMESPACE__END
 
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

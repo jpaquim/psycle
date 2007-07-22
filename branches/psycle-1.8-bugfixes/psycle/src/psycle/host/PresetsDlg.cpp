@@ -1,38 +1,41 @@
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
-#include <project.private.hpp>
-#include "psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "PresetsDlg.hpp"
+#include "psycle.hpp"
 #include "Plugin.hpp"
 #include "VSTHost24.hpp"
 #include "FrameMachine.hpp"
 #include "FileIO.hpp"
+#include <cstring>
 
-using namespace seib::vst;
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+		using namespace seib::vst;
+
 		CPreset::CPreset()
+		:
+			params(),
+			data(),
+			numPars(-1),
+			dataSize()
 		{
-			params=NULL;
-			data=NULL;
-			numPars = -1;
-			sizeData = 0;
-			memset(name,0,32);
+			std::memset(name, 0, sizeof name * sizeof *name);
 		}
 
 		CPreset::~CPreset()
 		{
-			zapArray(params);
-			zapArray(data);
+			delete [] params;
+			delete [] data;
 		}
 
 		void CPreset::Clear()
 		{
-			zapArray(params);
+			delete [] params; params = 0;
 			numPars =-1;
-			zapArray(data);
-			sizeData = 0;
+			delete [] data; data = 0;
+			dataSize = 0;
 			std::memset(name,0,32);
 		}
 
@@ -40,66 +43,66 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if ( num > 0 )
 			{
-				zapArray(params,new int[num]);
+				delete [] params; params = new int[num];
 				numPars=num;
 			}
 			else
 			{
-				zapArray(params);
+				delete params; params = 0;
 				numPars =-1;
 			}
-			zapArray(data);
-			sizeData = 0;
+			delete [] data; data = 0;
+			dataSize = 0;
 
-			memset(name,0,32);
+			std::memset(name,0, sizeof name * sizeof *name);
 		}
 
-		void CPreset::Init(int num,const char* newname,int* parameters,int size, byte* newdata)
+		void CPreset::Init(int num,const char* newname,int* parameters,int size, void* newdata)
 		{
 			if ( num > 0 )
 			{
-				zapArray(params,new int[num]);
+				delete [] params; params = new int[num];
 				numPars=num;
-				memcpy(params,parameters,numPars*sizeof(int));
+				std::memcpy(params,parameters,numPars * sizeof *params);
 			}
 			else
 			{
-				zapArray(params);
+				delete [] params; params = 0;
 				numPars=-1;
 			}
 
 			if ( size > 0 )
 			{
-				zapArray(data, new byte[size]);
-				memcpy(data,newdata,size);
-				sizeData = size;
+				delete [] data; data = new unsigned char[size];
+				std::memcpy(data,newdata,size);
+				dataSize = size;
 			}
 			else
 			{
-				zapArray(data);
-				sizeData=0;
+				delete [] data; data = 0;
+				dataSize=0;
 			}
-			strcpy(name,newname);
+			std::strcpy(name,newname);
 		}
 
 		void CPreset::Init(int num,const char* newname,float* parameters)
 		{
 			if ( num > 0 )
 			{
-				zapArray(params,new int[num]);
+				delete [] params; params = new int[num];
 				numPars=num;
 				for(int x=0;x<num;x++) params[x]= f2i(parameters[x]*65535.0f);
 			}
 			else
 			{
-				zapArray(params);
+				delete [] params; params = 0;
 				numPars=-1;
 			}
 
-			zapArray(data);
-			sizeData = 0;
+			delete [] data; data = 0;
+			dataSize = 0;
 
-			strcpy(name,newname);
+			std::strcpy(name,newname);
 		}
 
 		void CPreset::operator=(CPreset& newpreset)
@@ -107,25 +110,25 @@ NAMESPACE__BEGIN(psycle)
 			if ( newpreset.numPars > 0 )
 			{
 				numPars=newpreset.numPars;
-				zapArray(params, new int[numPars]);
-				memcpy(params,newpreset.params,numPars*sizeof(int));
+				delete [] params; params = new int[numPars];
+				std::memcpy(params,newpreset.params,numPars * sizeof *params);
 			}
 			else
 			{
-				zapArray(params);
+				delete [] params; params = 0;
 				numPars=-1;
 			}
 
-			if ( newpreset.sizeData > 0 )
+			if ( newpreset.dataSize > 0 )
 			{
-				sizeData = newpreset.sizeData;
-				zapArray(data,new byte[sizeData]);
-				memcpy(data,newpreset.data,sizeData);
+				dataSize = newpreset.dataSize;
+				delete [] data; data = new unsigned char[dataSize];
+				std::memcpy(data,newpreset.data,dataSize);
 			}
 			else
 			{
-				zapArray(data);
-				sizeData = 0;
+				delete [] data; data = 0;
+				dataSize = 0;
 			}
 
 			strcpy(name,newpreset.name);
@@ -145,7 +148,7 @@ NAMESPACE__BEGIN(psycle)
 		CPresetsDlg::CPresetsDlg(CWnd* pParent) : CDialog(CPresetsDlg::IDD, pParent)
 		{
 			numParameters = -1;
-			sizeDataStruct = 0;
+			dataSizeStruct = 0;
 			//{{AFX_DATA_INIT(CPresetsDlg)
 			//}}AFX_DATA_INIT
 		}
@@ -184,19 +187,19 @@ NAMESPACE__BEGIN(psycle)
 			{
 				try
 				{
-					sizeDataStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
+					dataSizeStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
 				}
 				catch(const std::exception &)
 				{
-					sizeDataStruct = 0;
+					dataSizeStruct = 0;
 				}
-				if(sizeDataStruct > 0)
+				if(dataSizeStruct > 0)
 				{
-					byte* pData = new byte[sizeDataStruct];
+					void* pData = new char[dataSizeStruct];
 					try
 					{
 						reinterpret_cast<Plugin *>(_pMachine)->proxy().GetData(pData); // Internal Save
-						iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), sizeDataStruct, pData);
+						iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), dataSizeStruct, pData);
 					}
 					catch(const std::exception &)
 					{
@@ -206,7 +209,7 @@ NAMESPACE__BEGIN(psycle)
 					{
 						// o_O`
 					}
-					zapArray(pData);
+					delete pData;
 				}
 				else
 				{
@@ -308,15 +311,17 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
 
-			OPENFILENAME ofn; // common dialog box structure
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
+
+			///\todo unportable code
+			OPENFILENAME ofn; // common dialog box structure
 			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
+			std::memset(&ofn, 0, sizeof ofn);
+			ofn.lStructSize = sizeof ofn;
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
+			ofn.nMaxFile = sizeof szFile;
 			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
 				ofn.lpstrFilter = "Presets\0*.prs\0VST Banks\0*.fxb\0All\0*.*\0";
@@ -354,9 +359,9 @@ NAMESPACE__BEGIN(psycle)
 						//int init=m_preslist.GetCount();
 						char cbuf[32];
 						int* ibuf = new int[filenumpars];
-						byte* dbuf = new byte[sizeDataStruct];
+						byte* dbuf = new byte[dataSizeStruct];
 						iniPreset.GetDataArray(dbuf);
-						if (sizeDataStruct)
+						if (dataSizeStruct)
 						{
 							MessageBox("Files do not match! - this file is old format and this machine requires new format.","File Import Error",MB_OK);
 						}
@@ -403,8 +408,8 @@ NAMESPACE__BEGIN(psycle)
 							zapArray(ibuf2);
 							*/
 						}
-						zapArray(ibuf);
-						zapArray(dbuf);
+						delete [] ibuf; ibuf = 0;
+						delete [] dbuf; dbuf = 0;
 					}
 					else
 					{
@@ -418,11 +423,11 @@ NAMESPACE__BEGIN(psycle)
 		//				int init=m_preslist.GetCount();
 						char cbuf[32];
 						int* ibuf = new int[filenumpars];
-						byte* dbuf = new byte[sizeDataStruct > filepresetsize ? sizeDataStruct : filepresetsize];
+						byte* dbuf = new byte[dataSizeStruct > filepresetsize ? dataSizeStruct : filepresetsize];
 
 						if ( numParameters == filenumpars )
 						{
-							if (sizeDataStruct != filepresetsize)
+							if (dataSizeStruct != filepresetsize)
 							{
 								// should be warning
 								MessageBox("Files do not match!","File Import Error",MB_OK);
@@ -435,7 +440,7 @@ NAMESPACE__BEGIN(psycle)
 									fread(ibuf,filenumpars*sizeof(int),1,hfile);
 									fread(dbuf,filepresetsize,1,hfile);
 									/*
-									if (sizeDataStruct != filepresetsize)
+									if (dataSizeStruct != filepresetsize)
 									{
 										// there should be a warning for this
 										iniPreset.GetDataArray(dbuf);
@@ -460,7 +465,7 @@ NAMESPACE__BEGIN(psycle)
 									fread(cbuf,sizeof(cbuf),1,hfile);
 									fread(ibuf,filenumpars*sizeof(int),1,hfile);
 									fread(dbuf,filepresetsize,1,hfile);
-									if (sizeDataStruct != filepresetsize)
+									if (dataSizeStruct != filepresetsize)
 									{
 										// should be warning
 										iniPreset.GetDataArray(dbuf);
@@ -485,8 +490,8 @@ NAMESPACE__BEGIN(psycle)
 							zapArray(ibuf2);
 							*/
 						}
-						zapArray(ibuf);
-						zapArray(dbuf);
+						delete [] ibuf; ibuf = 0;
+						delete [] dbuf; dbuf = 0;
 					}
 					fclose(hfile);
 				}
@@ -567,7 +572,7 @@ NAMESPACE__BEGIN(psycle)
 					temp1 = 0;
 					fwrite(&temp1,sizeof(int),1,hfile);
 					fwrite(&numParameters,sizeof(int),1,hfile);
-					fwrite(&sizeDataStruct,sizeof(int),1,hfile);
+					fwrite(&dataSizeStruct,sizeof(int),1,hfile);
 					fseek(hfile,2*sizeof(int),SEEK_SET);
 					filepresets=-1;
 					fileparams=fileversion;
@@ -575,7 +580,7 @@ NAMESPACE__BEGIN(psycle)
 
 				if (filepresets >= 0)
 				{
-					if (( fileparams != numParameters ) || (sizeDataStruct))
+					if (( fileparams != numParameters ) || (dataSizeStruct))
 					{
 						MessageBox("Number of Parameters does not Match with file!","File Save Error",MB_OK);
 						fclose(hfile);
@@ -596,7 +601,7 @@ NAMESPACE__BEGIN(psycle)
 					fwrite(ibuf,numParameters*sizeof(int),1,hfile);
 
 					fclose(hfile);
-					zapArray(ibuf);
+					delete [] ibuf;
 				}
 				else
 				{
@@ -605,7 +610,7 @@ NAMESPACE__BEGIN(psycle)
 					fread(&fileparams,sizeof(int),1,hfile);
 					fread(&filedatasize,sizeof(int),1,hfile);
 
-					if (( fileparams != numParameters ) || (filedatasize != sizeDataStruct))
+					if (( fileparams != numParameters ) || (filedatasize != dataSizeStruct))
 					{
 						MessageBox("Number of Parameters does not Match with file!","File Save Error",MB_OK);
 						fclose(hfile);
@@ -613,8 +618,8 @@ NAMESPACE__BEGIN(psycle)
 					}
 					char cbuf[32];
 					int* ibuf = new int[numParameters];
-					byte* dbuf = NULL;
-					if ( sizeDataStruct > 0 ) dbuf = new byte[sizeDataStruct];
+					unsigned char * dbuf = 0;
+					if ( dataSizeStruct > 0 ) dbuf = new unsigned char[dataSizeStruct];
 					presets[selpreset].GetName(cbuf);
 					presets[selpreset].GetParsArray(ibuf);
 					presets[selpreset].GetDataArray(dbuf);
@@ -626,11 +631,11 @@ NAMESPACE__BEGIN(psycle)
 					fseek(hfile,0,SEEK_END);
 					fwrite(cbuf,sizeof(cbuf),1,hfile);
 					fwrite(ibuf,numParameters*sizeof(int),1,hfile);
-					if ( sizeDataStruct > 0 ) fwrite(dbuf,sizeDataStruct,1,hfile);
+					if ( dataSizeStruct > 0 ) fwrite(dbuf,dataSizeStruct,1,hfile);
 
 					fclose(hfile);
-					zapArray(ibuf);
-					zapArray(dbuf);
+					delete [] ibuf;
+					delete [] dbuf;
 				}
 			}
 		}
@@ -710,7 +715,7 @@ NAMESPACE__BEGIN(psycle)
 				char cbuf[32];
 				if (numpresets >= 0)
 				{
-					if (( filenumpars != numParameters )  || (sizeDataStruct))
+					if (( filenumpars != numParameters )  || (dataSizeStruct))
 					{
 						MessageBox("The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
 						fclose(hfile);
@@ -728,7 +733,7 @@ NAMESPACE__BEGIN(psycle)
 						AddPreset(cbuf,ibuf,0);
 						i++;
 					}
-					zapArray(ibuf);
+					delete [] ibuf;
 				}
 				else
 				{
@@ -742,7 +747,7 @@ NAMESPACE__BEGIN(psycle)
 						fread(&filenumpars,sizeof(int),1,hfile);
 						fread(&filepresetsize,sizeof(int),1,hfile);
 						// now it is time to check our file for compatability
-						if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct))
+						if (( filenumpars != numParameters )  || (filepresetsize != dataSizeStruct))
 						{
 							MessageBox("The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
 							fclose(hfile);
@@ -750,19 +755,19 @@ NAMESPACE__BEGIN(psycle)
 						}
 						// ok that works, so we should now load the names of all of the presets
 						int* ibuf= new int[numParameters];
-						byte* dbuf=NULL;
-						if ( sizeDataStruct > 0 ) dbuf = new byte[sizeDataStruct];
+						unsigned char * dbuf = 0;
+						if ( dataSizeStruct > 0 ) dbuf = new unsigned char[dataSizeStruct];
 
 						while ( i< numpresets && !feof(hfile) && !ferror(hfile) )
 						{
 							fread(cbuf,sizeof(cbuf),1,hfile);
 							fread(ibuf,numParameters*sizeof(int),1,hfile);
-							if ( sizeDataStruct > 0 )  fread(dbuf,sizeDataStruct,1,hfile);
+							if ( dataSizeStruct > 0 )  fread(dbuf,dataSizeStruct,1,hfile);
 							AddPreset(cbuf,ibuf,dbuf);
 							i++;
 						}
-						zapArray(ibuf);
-						zapArray(dbuf);
+						delete [] ibuf;
+						delete [] dbuf;
 					}
 					else
 					{
@@ -809,7 +814,7 @@ NAMESPACE__BEGIN(psycle)
 					i++;
 				}
 				fclose(hfile);
-				zapArray(ibuf);
+				delete [] ibuf;
 			}
 			else if (fileversion == 1)
 			{
@@ -824,13 +829,13 @@ NAMESPACE__BEGIN(psycle)
 				}
 				fwrite(&numpresets,sizeof(int),1,hfile);
 				fwrite(&numParameters,sizeof(int),1,hfile);
-				fwrite(&sizeDataStruct,sizeof(int),1,hfile);
+				fwrite(&dataSizeStruct,sizeof(int),1,hfile);
 				
 				int i=0;
 				char cbuf[32];
 				int* ibuf= new int[numParameters];
-				byte* dbuf=NULL;
-				if ( sizeDataStruct > 0 ) dbuf = new byte[sizeDataStruct];
+				unsigned char * dbuf = 0;
+				if ( dataSizeStruct > 0 ) dbuf = new byte[dataSizeStruct];
 
 				while ( i< numpresets && !feof(hfile) && !ferror(hfile) )
 				{
@@ -839,12 +844,12 @@ NAMESPACE__BEGIN(psycle)
 					presets[i].GetDataArray(dbuf);
 					fwrite(cbuf,sizeof(cbuf),1,hfile);
 					fwrite(ibuf,numParameters*sizeof(int),1,hfile);
-					if ( sizeDataStruct > 0 ) fwrite(dbuf,sizeDataStruct,1,hfile);
+					if ( dataSizeStruct > 0 ) fwrite(dbuf,dataSizeStruct,1,hfile);
 					i++;
 				}
 				fclose(hfile);
-				zapArray(ibuf);
-				zapArray(dbuf);
+				delete [] ibuf;
+				delete [] dbuf;
 			}
 		}
 
@@ -889,7 +894,7 @@ NAMESPACE__BEGIN(psycle)
 		void CPresetsDlg::AddPreset(const char *name, int *parameters, byte *newdata)
 		{
 			CPreset preset;
-			preset.Init(numParameters,name,parameters,sizeDataStruct,newdata);
+			preset.Init(numParameters,name,parameters,dataSizeStruct,newdata);
 			AddPreset(preset);
 		}
 
@@ -913,5 +918,6 @@ NAMESPACE__BEGIN(psycle)
 			}
 			presets[i2]=preset;;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

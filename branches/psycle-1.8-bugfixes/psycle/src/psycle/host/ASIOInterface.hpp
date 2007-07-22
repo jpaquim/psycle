@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::ASIOInterface.
 #pragma once
 #include "AudioDriver.hpp"
-#include <asio/asiodrivers.h>
-#include <asio/asio.h>
+#include <asiodrivers.h>
+#include <asio.h>
 #include <map>
 #pragma comment(lib, "asio")
 namespace psycle
@@ -12,7 +12,6 @@ namespace psycle
 	{
 		#define MAX_ASIO_DRIVERS 32
 		#define MAX_ASIO_OUTPUTS 128
-		using namespace asio;
 
 		/// output device interface implemented by asio.
 		class ASIOInterface : public AudioDriver
@@ -165,7 +164,7 @@ namespace psycle
 			bool _configured;
 			bool _running;
 //			int _driverID;
-			asio::AsioDrivers asioDrivers;
+			AsioDrivers asioDrivers;
 			long _inlatency;
 			long _outlatency;
 

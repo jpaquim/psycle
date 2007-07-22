@@ -1,13 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::CNativeGui.
 #pragma once
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#define K_XSIZE				28
-#define K_YSIZE				28
-#define K_NUMFRAMES			63
-#define W_ROWWIDTH			150
+		#define K_XSIZE     28
+		#define K_YSIZE     28
+		#define K_NUMFRAMES 63
+		#define W_ROWWIDTH  150
 
 		class Machine;
 
@@ -101,6 +102,6 @@ NAMESPACE__BEGIN(psycle)
 			int prevval;
 
 		};
-#undef BASEWINDOWCLASS
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

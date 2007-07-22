@@ -1,8 +1,11 @@
 #pragma once
-#include "afxwin.h"
-#include "afxcmn.h"
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+#include <afxwin.h>
+#include <afxcmn.h>
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 /// gear rack window.
 
 class AudioRecorder;
@@ -34,5 +37,5 @@ public:
 	CSliderCtrl m_volslider;
 };
 
-NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

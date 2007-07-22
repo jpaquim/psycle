@@ -2,8 +2,7 @@
 ///\brief interface file for psycle::host::Filter.
 #pragma once
 #include <cmath>
-#include <operating_system/exception.hpp>
-//#include <operating_system/exceptions/code_description.hpp>
+#include <universalis/processor/exception.hpp>
 #include <cfloat>
 namespace psycle
 {
@@ -217,7 +216,7 @@ namespace psycle
 					fLastSampleLeft[0] = fLastSampleLeft[1];
 					fLastSampleLeft[1] = fy - (sample * fCoeff[3]);
 					sample = fy;
-				} catch(operating_system::exceptions::translated const & e){switch(e.code())
+				} catch(universalis::processor::exception const & e){switch(e.code())
 				{
 					case STATUS_FLOAT_DENORMAL_OPERAND:
 					case STATUS_FLOAT_INVALID_OPERATION:
@@ -239,7 +238,7 @@ namespace psycle
 					fLastSampleRight[0] = fLastSampleRight[1];
 					fLastSampleRight[1] = fyR - (right * fCoeff[3]);
 					right = fyR;
-				} catch(operating_system::exceptions::translated const & e){switch(e.code())
+				} catch(universalis::processor::exception const & e){switch(e.code())
 				{
 					case STATUS_FLOAT_DENORMAL_OPERAND:
 						fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;

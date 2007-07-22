@@ -18,7 +18,7 @@ All rights reserved.
 
 
 /////////////////////////////////  Includes  //////////////////////////////////
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "sinstance.h"
 
 

@@ -4,6 +4,7 @@
 #include "Machine.hpp"
 #include "Filter.hpp"
 #include "XMInstrument.hpp"
+#include <cstdint>
 //#include "../../../include/xdsp/xdsp.h"
 
 namespace psycle
@@ -16,7 +17,7 @@ public:
 
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
 	static const int MAX_INSTRUMENT = 255;///< max instrument
-	static const compiler::uint32 VERSION = 0x00010000;
+	static const std::uint32_t VERSION = 0x00010000;
 	static const float SURROUND_THRESHOLD;
 
 /*
@@ -442,7 +443,7 @@ XMSampler::Channel::PerformFX().
 		// This one is Psycle's "Tick"
 		void NewLine();
 
-		void NoteOn(const compiler::uint8 note,const compiler::sint16 playvol=-1,bool reset=true);
+		void NoteOn(const std::uint8_t note,const std::int16_t playvol=-1,bool reset=true);
 		void NoteOff();
 		void NoteOffFast();
 		void NoteFadeout();
@@ -450,7 +451,7 @@ XMSampler::Channel::PerformFX().
 		const XMInstrument::NewNoteAction NNA() { return m_NNA;};
 		void NNA(const XMInstrument::NewNoteAction value){ m_NNA = value;};
 		
-		void ResetVolAndPan(compiler::sint16 playvol,bool reset=true);
+		void ResetVolAndPan(std::int16_t playvol,bool reset=true);
 		void UpdateSpeed();
 		double PeriodToSpeed(int period);
 
@@ -525,8 +526,8 @@ XMSampler::Channel::PerformFX().
 		void IsStopping(const bool stop) { m_Stopping = stop; };
 
 		// Volume of the current note.
-		const compiler::uint16 Volume() { return m_Volume; };
-		void Volume(const compiler::uint16 vol)
+		const std::uint16_t Volume() { return m_Volume; };
+		void Volume(const std::uint16_t vol)
 		{
 			m_Volume = vol;
 			m_RealVolume = rWave().Wave().WaveGlobVolume() * rInstrument().GlobVol() * (vol/128.0f);

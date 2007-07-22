@@ -4,13 +4,15 @@
 #include "resources/resources.hpp"
 #include "machine.hpp"
 #include "ProgressDialog.hpp"
+#include <afxwin.h>
 #include <afxcoll.h>
 #include <iostream>
 #include <typeinfo>
 #include <map>
-#include "afxwin.h"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
 
@@ -144,5 +146,5 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnEnChangeRichedit21();
 		};
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

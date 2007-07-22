@@ -1,33 +1,37 @@
 ///\file
 ///\brief interface file for psycle::host::CPresetsDlg.
 #pragma once
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include <cstring>
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		#define MAX_PRESETS 256
 
 		class Machine;
 		class CFrameMachine;
 
-		/// machine parameter preset
+		/// machine parameter preset \todo should we move it outside of gui classes?
 		class CPreset  
 		{
 			int numPars;
 			int* params;
-			long int sizeData;
-			byte* data;
+			long int dataSize;
+			unsigned char * data;
 			char name[32];
 		public:
 			void Clear();
 			void Init(int num);
-			void Init(int num,const char* newname,int* parameters,int size, byte* newdata);
+			void Init(int num,const char* newname,int* parameters,int size, void* newdata);
 			void Init(int num,const char* newname, float* parameters); // for VST .fxb's
 			int GetNumPars() { return numPars; }
-			void GetParsArray(int* destarray) { if(numPars>0){ memcpy(destarray,params,numPars*sizeof(int)); }}
-			void GetDataArray(byte* destarray) {if(sizeData>0){ memcpy(destarray,data,sizeData); }}
-			byte* GetData() {return data;}
-			long int GetSizeData() {return sizeData;}
-			void SetName(const char *setname) { strcpy(name,setname); }
-			void GetName(char *nname) { strcpy(nname,name); }
+			void GetParsArray(int* destarray) { if(numPars>0) std::memcpy(destarray, params, numPars * sizeof *params); }
+			void GetDataArray(void* destarray) {if(dataSize>0) std::memcpy(destarray, data, dataSize); }
+			void* GetData() {return data;}
+			long int GetDataSize() {return dataSize;}
+			void SetName(const char *setname) { std::strcpy(name,setname); }
+			void GetName(char *nname) { std::strcpy(nname,name); }
 			int GetParam(const int n);
 			void SetParam(const int n,int val);
 			CPreset();
@@ -60,7 +64,7 @@ NAMESPACE__BEGIN(psycle)
 		// Implementation
 		protected:
 			int numParameters;
-			long int sizeDataStruct;
+			long int dataSizeStruct;
 			int fileversion;
 			void TweakMachine(CPreset &preset);
 			void SavePresets();
@@ -87,5 +91,6 @@ NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

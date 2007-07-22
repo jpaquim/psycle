@@ -1,6 +1,6 @@
 ///\file
 ///\implementation psycle::host::Configuration.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "Configuration.hpp"
 #include "Registry.hpp"
 #include "WaveOut.hpp"
@@ -9,7 +9,7 @@
 #include "MidiInput.hpp"
 #include "Song.hpp"
 #include "NewMachine.hpp"
-
+#include "Global.hpp"
 namespace psycle
 {
 	namespace host
@@ -51,7 +51,7 @@ namespace psycle
 				if(((ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
 				{
 					_numOutputDrivers--;
-					zapObject(_ppOutputDrivers[3]);
+					delete _ppOutputDrivers[3]; _ppOutputDrivers[3] = 0;
 				}
 				_outputDriverIndex = 1;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
@@ -109,12 +109,9 @@ namespace psycle
 			seqFont.DeleteObject();
 			generatorFont.DeleteObject();
 			effectFont.DeleteObject();
-			if(_ppOutputDrivers)
-			{
-				for(int i(0) ; i < _numOutputDrivers ; ++i) zapObject(_ppOutputDrivers[i]);
-				zapArray(_ppOutputDrivers);
-			}
-			zapObject(_pMidiInput);
+			if(_ppOutputDrivers) ///\todo useless test since the delete operator does the check itself
+				delete [] _ppOutputDrivers;
+			delete _pMidiInput;
 		}
 
 		bool Configuration::Read()
@@ -291,7 +288,7 @@ namespace psycle
 					reg.QueryValue("MidiInputDriver", _midiDriverIndex);
 					if(0 > _midiDriverIndex || _midiDriverIndex > _numMidiDrivers) 
 					{
-					CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, - 1);
+					CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, -1);
 					}
 					else CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
 				}
@@ -299,7 +296,7 @@ namespace psycle
 					reg.QueryValue("MidiSyncDriver", _syncDriverIndex);
 					if(0 > _syncDriverIndex || _syncDriverIndex > _numMidiDrivers)
 					{
-						CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, - 1);
+						CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, -1);
 					}
 					else CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				}

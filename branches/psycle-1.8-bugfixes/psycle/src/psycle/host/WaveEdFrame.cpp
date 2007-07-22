@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "WaveEdFrame.hpp"
 #include "Psycle.hpp"
 #include "Song.hpp"
-#include "WaveEdFrame.hpp"
 #include "MainFrm.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
@@ -234,5 +234,5 @@ NAMESPACE__BEGIN(psycle)
 			wavview.SetCursorPos( 0 );
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CValueMapper.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "helpers.hpp"
 #include <cctype>
 namespace psycle

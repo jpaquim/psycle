@@ -1,18 +1,16 @@
 #pragma once
 #include <iostream>
 #include <boost/thread/mutex.hpp>
-#include "exception.hpp"
-#if defined OPERATING_SYSTEM__LOGGER
-	#include LIBRARY__EXPORT
-#else
-	#include LIBRARY__IMPORT
-#endif
+#include <universalis/compiler.hpp>
+#include <universalis/exception.hpp>
+#include <psycle/host/Global.hpp>
 ///\file
 ///\brief logger.
-namespace operating_system
-{
+namespace psycle { namespace legacy {
+	using universalis::exception;
+
 	/// logger.
-	class LIBRARY logger
+	class /*UNIVERSALIS__COMPILER__DEPRECATED("universalis")*/ logger
 	{
 	public:
 		static logger & default_logger() throw() { return default_logger_; }
@@ -42,7 +40,7 @@ namespace operating_system
 		boost::mutex mutex_;
 	};
 
-	class LIBRARY console
+	class /*UNIVERSALIS__COMPILER__DEPRECATED("universalis")*/ console
 	{
 	public:
 		static void open() throw(exception);
@@ -51,7 +49,6 @@ namespace operating_system
 	private:
 		static bool got_a_console_window_;
 		console();
-		///\todo: add "virtual" ?
 		~console();
 		static console singleton;
 	};
@@ -76,4 +73,4 @@ namespace operating_system
 			std::cerr << "logger: " << level << ": " << string;
 		}
 	}
-}
+}}

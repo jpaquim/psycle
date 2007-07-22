@@ -1,10 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CGreetDialog.
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "GreetDialog.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CGreetDialog::CGreetDialog(CWnd* pParent /* = 0 */) : CDialog(CGreetDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CGreetDialog)
@@ -90,5 +92,6 @@ NAMESPACE__BEGIN(psycle)
 			m_greetz.AddString("Vir|us");
 			return TRUE;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

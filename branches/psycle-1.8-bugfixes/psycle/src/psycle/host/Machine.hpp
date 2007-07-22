@@ -6,7 +6,12 @@
 #include "Helpers.hpp"
 #include "Constants.hpp"
 #include "FileIO.hpp"
-#include <processor/fpu.hpp>
+#include "configuration_options.hpp"
+#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+	#include <universalis/processor/exceptions/fpu.hpp>
+#endif
 #include <stdexcept>
 namespace psycle
 {
@@ -132,11 +137,15 @@ namespace psycle
 				private:
 					bool                crashed_;
 
-				public:
-					processor::fpu::exception_mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
-					processor::fpu::exception_mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
-				private:
-					processor::fpu::exception_mask::type                fpu_exception_mask_;
+				#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+					#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+				#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+					public:
+						universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
+						universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
+					private:
+						universalis::processor::fpu::exceptions::mask::type                fpu_exception_mask_;
+				#endif
 			///\}
 
 		public:

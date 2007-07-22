@@ -1,7 +1,18 @@
 ///\file
 ///\brief machine view graphic operations for psycle::host::CChildView, private header
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include <algorithm>
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+		namespace {
+			COLORREF inline rgb(int r, int g, int b) {
+				return RGB(
+					std::max(0, std::min(r, 255)),
+					std::max(0, std::min(g, 255)),
+					std::max(0, std::min(b, 255)));
+			}
+		}
+
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
 			if (Global::pConfig->draw_vus)
@@ -187,16 +198,18 @@ NAMESPACE__BEGIN(psycle)
 								int btcol = 240 - abs(dsp::F2I((altslope-0.79) * 32));
 
 								// brushes for the right side, left side, and bottom of the arrow (when pointed straight up).
-								CBrush rtBrush(RGB(max(0, min(255, rtcol * deltaColR)),
-									               max(0, min(255, rtcol * deltaColG)),
-												   max(0, min(255, rtcol * deltaColB))));
-								CBrush ltBrush(RGB(max(0, min(255, ltcol * deltaColR)),
-									               max(0, min(255, ltcol * deltaColG)),
-												   max(0, min(255, ltcol * deltaColB))));
-								CBrush btBrush(RGB(max(0, min(255, btcol * deltaColR)),
-									               max(0, min(255, btcol * deltaColG)),
-												   max(0, min(255, btcol * deltaColB))));
-
+								CBrush rtBrush(rgb(
+									rtcol * deltaColR,
+									rtcol * deltaColG,
+									rtcol * deltaColB));
+								CBrush ltBrush(rgb(
+									ltcol * deltaColR,
+									ltcol * deltaColG,
+									ltcol * deltaColB));
+								CBrush btBrush(rgb(
+									btcol * deltaColR,
+									btcol * deltaColG,
+									btcol * deltaColB));
 
 								CPoint pol[5];
 								CPoint fillpoly[7];
@@ -372,15 +385,18 @@ NAMESPACE__BEGIN(psycle)
 								int btcol = 240 - abs(dsp::F2I((altslope-0.79) * 32));
 
 								// brushes for the right side, left side, and bottom of the arrow (when pointed straight up).
-								CBrush rtBrush(RGB(max(0, min(255, rtcol * deltaColR)),
-									               max(0, min(255, rtcol * deltaColG)),
-												   max(0, min(255, rtcol * deltaColB))));
-								CBrush ltBrush(RGB(max(0, min(255, ltcol * deltaColR)),
-									               max(0, min(255, ltcol * deltaColG)),
-												   max(0, min(255, ltcol * deltaColB))));
-								CBrush btBrush(RGB(max(0, min(255, btcol * deltaColR)),
-									               max(0, min(255, btcol * deltaColG)),
-												   max(0, min(255, btcol * deltaColB))));
+								CBrush rtBrush(rgb(
+									rtcol * deltaColR,
+									rtcol * deltaColG,
+									rtcol * deltaColB));
+								CBrush ltBrush(rgb(
+									ltcol * deltaColR,
+									ltcol * deltaColG,
+									ltcol * deltaColB));
+								CBrush btBrush(rgb(
+									btcol * deltaColR,
+									btcol * deltaColG,
+									btcol * deltaColB));
 
 								CPoint pol[5];
 								CPoint fillpoly[7];
@@ -1305,5 +1321,6 @@ NAMESPACE__BEGIN(psycle)
 			wiresource = -1;
 			return -1;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

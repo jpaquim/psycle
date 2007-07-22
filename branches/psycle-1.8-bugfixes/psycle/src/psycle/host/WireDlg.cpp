@@ -1,15 +1,16 @@
 ///\file
 ///\brief implementation file for psycle::host::CWireDlg.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "WireDlg.hpp"
 #include "Psycle.hpp"
 #include "Machine.hpp"
-#include "WireDlg.hpp"
 #include "Helpers.hpp"
 #include "ChildView.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "zap.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
@@ -1155,7 +1156,7 @@ NAMESPACE__BEGIN(psycle)
 				m_volslider.SetPos(256*4-t);
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 
 

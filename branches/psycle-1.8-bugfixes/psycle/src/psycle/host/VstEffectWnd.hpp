@@ -3,9 +3,10 @@
 #pragma once
 #include <seib-vsthost/EffectWnd.hpp>
 #include "NativeGui.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
 		class CVstParamList;
 
 		using namespace seib::vst;
@@ -105,6 +106,7 @@ NAMESPACE__BEGIN(psycle)
 			afx_msg void OnViewsShowtoolbar();
 			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
 		};
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 

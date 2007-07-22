@@ -3,8 +3,9 @@
 #pragma once
 #include "FrameMachine.hpp"
 #include "Constants.hpp"
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	class Mixer;
 
@@ -207,5 +208,5 @@ NAMESPACE__BEGIN(host)
 		DECLARE_MESSAGE_MAP()
 	};
 
-	NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

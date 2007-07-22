@@ -1,13 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::CInstrumentEditor.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "InstrumentEditor.hpp"
 #include "Psycle.hpp"
 #include "MainFrm.hpp"
-#include "InstrumentEditor.hpp"
 #include "EnvDialog.hpp"
 #include "constants.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CInstrumentEditor::CInstrumentEditor(CWnd* pParent)
 			: CDialog(CInstrumentEditor::IDD, pParent)
 		{
@@ -420,5 +421,6 @@ NAMESPACE__BEGIN(psycle)
 			}
 			m_notelabel.SetWindowText(buffer);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

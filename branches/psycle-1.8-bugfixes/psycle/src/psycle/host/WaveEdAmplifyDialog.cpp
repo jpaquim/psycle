@@ -1,11 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdAmplifyDialog.
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "WaveEdAmplifyDialog.hpp"
+#include "Psycle.hpp"
 #include "Helpers.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CWaveEdAmplifyDialog::CWaveEdAmplifyDialog(CWnd* pParent)
 			: CDialog(CWaveEdAmplifyDialog::IDD, pParent)
 		{
@@ -65,5 +66,6 @@ NAMESPACE__BEGIN(psycle)
 			EndDialog( AMP_DIALOG_CANCEL );
 			//CDialog::OnCancel();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -30,7 +30,7 @@
 		==========================================================================
 	\endverbatim
 */
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "riff.hpp"
 #include <io.h>
 #include <stdio.h>

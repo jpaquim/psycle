@@ -3,10 +3,10 @@
 #pragma once
 #include "Machine.hpp"
 #include "../plugin_interface.hpp"
-//#include "Song.hpp"
 #include "Configuration.hpp"
 #include "Player.hpp"
-//#include "NewMachine.hpp"
+#include "global.hpp"
+#include <cstdint>
 namespace psycle
 {
 	namespace host
@@ -45,14 +45,14 @@ namespace psycle
 			inline void ParameterTweak(int par, int val) throw(exceptions::function_error);
 			inline void Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw(exceptions::function_error);
 			inline void Stop() throw(exceptions::function_error);
-			inline void PutData(byte * pData) throw(exceptions::function_error);
-			inline void GetData(byte * pData) throw(exceptions::function_error);
+			inline void PutData(void * pData) throw(exceptions::function_error);
+			inline void GetData(void * pData) throw(exceptions::function_error);
 			inline int GetDataSize() throw(exceptions::function_error);
 			inline void Command() throw(exceptions::function_error);
 			inline void MuteTrack(const int i) throw(exceptions::function_error);
 			inline bool IsTrackMuted(const int i) throw(exceptions::function_error);
 			inline void MidiNote(const int channel, const int value, const int velocity) throw(exceptions::function_error);
-			inline void Event(const dword data) throw(exceptions::function_error);
+			inline void Event(const std::uint32_t data) throw(exceptions::function_error);
 			inline bool DescribeValue(char * txt, const int param, const int value) throw(exceptions::function_error);
 			inline bool PlayWave(const int wave, const int note, const float volume) throw(exceptions::function_error);
 			inline void SeqTick(int channel, int note, int ins, int cmd, int val) throw(exceptions::function_error);
@@ -116,7 +116,7 @@ namespace psycle
 		inline const bool proxy::operator()() const throw() { return plugin_; }
 		inline void proxy::operator()(CMachineInterface * plugin) throw(exceptions::function_error)
 		{
-			zapObject(this->plugin_,plugin);
+			delete this->plugin_; this->plugin_ = plugin;
 			//if((*this)())
 			if(plugin)
 			{
@@ -156,9 +156,9 @@ namespace psycle
 		{ assert((*this)()); try { plugin().Work(psamplesleft, psamplesright, numsamples, tracks); } $catch$("Work") }
 		inline void proxy::Stop() throw(exceptions::function_error)
 		{ assert((*this)()); try { plugin().Stop(); } $catch$("Stop") }
-		inline void proxy::PutData(byte * pData) throw(exceptions::function_error)
+		inline void proxy::PutData(void * pData) throw(exceptions::function_error)
 		{ assert((*this)()); try { plugin().PutData(pData); } $catch$("PutData") }
-		inline void proxy::GetData(byte * pData) throw(exceptions::function_error)
+		inline void proxy::GetData(void * pData) throw(exceptions::function_error)
 		{ assert((*this)()); try { plugin().GetData(pData); } $catch$("GetData") }
 		inline int proxy::GetDataSize() throw(exceptions::function_error)
 		{ assert((*this)()); try { return plugin().GetDataSize(); } $catch$("GetDataSize") return 0; /* dummy return to avoid warning */ }
@@ -170,7 +170,7 @@ namespace psycle
 		{ assert((*this)()); try { return const_cast<const CMachineInterface &>(plugin()).IsTrackMuted(i); } $catch$("IsTrackMuted") return false; /* dummy return to avoid warning */ }
 		inline void proxy::MidiNote(const int channel, const int value, const int velocity) throw(exceptions::function_error)
 		{ assert((*this)()); try { plugin().MidiNote(channel, value, velocity); } $catch$("MidiNote") }
-		inline void proxy::Event(const dword data) throw(exceptions::function_error)
+		inline void proxy::Event(const std::uint32_t data) throw(exceptions::function_error)
 		{ assert((*this)()); try { plugin().Event(data); } $catch$("Event") }
 		inline bool proxy::DescribeValue(char * txt, const int param, const int value) throw(exceptions::function_error)
 		{ assert((*this)()); try { return plugin().DescribeValue(txt, param, value); } $catch$("DescribeValue") return false; /* dummy return to avoid warning */ }

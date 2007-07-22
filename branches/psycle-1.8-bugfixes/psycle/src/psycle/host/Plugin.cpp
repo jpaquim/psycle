@@ -1,20 +1,23 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "Plugin.hpp"
 #include "FileIO.hpp"
 #include "InputHandler.hpp"
-#include <operating_system/exceptions/code_description.hpp>
 #include "Song.hpp"
-//#include <algorithm>
-#include <cctype>
 //#include "psycle.hpp"
 #include "NewMachine.hpp"
+#include "loggers.hpp"
+#include "zap.hpp"
+#include <diversalis/operating_system.hpp>
+#include <universalis/operating_system/exceptions/code_description.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdlib> // for environment variables functions
 #include <string>
 #include <sstream>
-#include "Plugin.hpp"
+//#include <algorithm>
+#include <cctype>
 namespace psycle
 {
 	namespace host
@@ -74,9 +77,9 @@ namespace psycle
 		{
 			char const static path_env_var_name[] =
 			{
-				#if defined OPERATING_SYSTEM__LINUX
+				#if defined DIVERSALIS__OPERATING_SYSTEM__LINUX
 					"LD_LIBRARY_PATH"
-				#elif defined OPERATING_SYSTEM__MICROSOFT
+				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					"PATH"
 				#else
 					#error unknown dynamic linker
@@ -134,7 +137,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not load library: " << file_name << std::endl
-					<< operating_system::exceptions::code_description();
+					<< universalis::operating_system::exceptions::code_description();
 				throw exceptions::library_errors::loading_error(s.str());
 			}
 			GETINFO GetInfo = (GETINFO) GetProcAddress(_dll, "GetInfo");
@@ -143,7 +146,7 @@ namespace psycle
 				std::ostringstream s; s
 					<< "library is not a psycle native plugin:" << std::endl
 					<< "could not resolve symbol 'GetInfo' in library: " << file_name << std::endl
-					<< operating_system::exceptions::code_description();
+					<< universalis::operating_system::exceptions::code_description();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try
@@ -167,7 +170,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
-					<< operating_system::exceptions::code_description();
+					<< universalis::operating_system::exceptions::code_description();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try

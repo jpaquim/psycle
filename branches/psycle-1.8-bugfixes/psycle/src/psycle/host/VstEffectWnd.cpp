@@ -1,9 +1,9 @@
 //\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "VstEffectWnd.hpp"
 #include "psycle.hpp"
 #include "vsthost24.hpp"
-#include "VstEffectWnd.hpp"
 
 #include "VstParamList.hpp"
 
@@ -16,8 +16,8 @@
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		extern CPsycleApp theApp;
 
@@ -920,5 +920,5 @@ NAMESPACE__BEGIN(psycle)
 			MessageBox(message.c_str(),"About");
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

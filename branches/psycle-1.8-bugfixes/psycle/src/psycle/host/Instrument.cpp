@@ -1,9 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "Instrument.hpp"
 #include "DataCompression.hpp"
 #include "filter.hpp"
+#include "zap.hpp"
 namespace psycle
 {
 	namespace host

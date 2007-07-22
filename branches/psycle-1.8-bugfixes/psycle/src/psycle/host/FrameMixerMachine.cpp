@@ -1,14 +1,14 @@
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "FrameMixerMachine.hpp"
+#include "Psycle.hpp"
 #include "NativeGui.hpp"
 #include "ChildView.hpp"
 #include "configuration.hpp"
 #include "song.hpp"
 #include "internal_machines.hpp"
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)
 
@@ -968,5 +968,5 @@ NAMESPACE__BEGIN(host)
 		CFrameMachine::OnSetFocus(pOldWnd);
 	}
 
-NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,20 +1,20 @@
 ///\file
 ///\brief implementation file for psycle::host::CNativeGui.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "NativeGui.hpp"
 #include "psycle.hpp"
 #include "Machine.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
-#include "NativeGui.hpp"
 #include "NewVal.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-	extern CPsycleApp theApp;
+		extern CPsycleApp theApp;
 
 		BEGIN_MESSAGE_MAP(CNativeGui, CWnd)
 			ON_WM_CREATE()
@@ -506,6 +506,5 @@ NAMESPACE__BEGIN(psycle)
 			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
-
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

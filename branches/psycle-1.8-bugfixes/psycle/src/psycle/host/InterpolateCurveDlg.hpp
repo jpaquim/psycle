@@ -2,8 +2,10 @@
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
 #include "constants.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	class CInterpolateCurve : public CDialog
 	{
@@ -61,5 +63,5 @@ NAMESPACE__BEGIN(psycle)
 			int *kfresult;
 	};
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

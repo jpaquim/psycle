@@ -1,8 +1,8 @@
 //\file
 //\brief interface file for psycle::host::InstPreview
-
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class Instrument;
 
@@ -49,5 +49,5 @@ NAMESPACE__BEGIN(host)
 			float m_vol;
 		};
 
-NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
-#include <project.private.hpp>
-#include "psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "SkinDlg.hpp"
+#include "psycle.hpp"
 #include "Helpers.hpp"
 #include "Configuration.hpp"
-#include ".\skindlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		#define MAX_FONTS 256
 
 		IMPLEMENT_DYNCREATE(CSkinDlg, CPropertyPage)
@@ -767,12 +767,12 @@ NAMESPACE__BEGIN(psycle)
 				char buf[1 << 10];
 				while(std::fgets(buf, sizeof buf, hfile))
 				{
-					#if defined COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR <= 7
+					#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
 						// msvc 7.1 crashes because of the number of 'else if' statements
 						// so, we can't use 'else'
 						#define else
 					#endif
-					// [bohan] this is a horror of repetitive code :-(
+					// this is a horror of repetitive code :-(
 					if (std::strstr(buf,"\"pattern_fontface\"=\""))
 					{
 						char *q = std::strchr(buf,61); // =
@@ -1365,7 +1365,7 @@ NAMESPACE__BEGIN(psycle)
 							hexstring_to_integer(q+1, _effect_font_point);
 						}
 					}
-					#if defined else // this is the case for COMPILER__MICROSOFT && COMPILER__VERSION__MAJOR <= 7
+					#if defined else // this is the case for DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
 						// msvc 7.1 crashes because of the number of 'else if' statements
 						// so, we can't use 'else'
 						#undef else
@@ -1929,5 +1929,6 @@ NAMESPACE__BEGIN(psycle)
 		{
 			_triangle_size=m_triangle_size.GetCurSel()+8;
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "ASIOInterface.hpp"
 #include "resources/resources.hpp"
 #include "Registry.hpp"
@@ -9,13 +9,13 @@
 #include "MidiInput.hpp"
 #include "helpers.hpp"
 #include "Dsp.hpp"
-#include <operating_system/exception.hpp>
+#include <universalis/processor/exception.hpp>
+#include "Configuration.hpp"
 namespace psycle
 {
 	namespace host
 	{
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
-		using namespace asio;
 		#define ALLOW_NON_ASIO
 
 		AudioDriverInfo ASIOInterface::_info = { "ASIO 2.0 Output" };
@@ -580,7 +580,7 @@ namespace psycle
 			// about thread synchronization. This is omitted here for simplicity.
 			if(_firstrun)
 			{
-				operating_system::exceptions::translated::new_thread("asio");
+				universalis::processor::exception::new_thread("asio");
 				SetThreadAffinityMask(GetCurrentThread(), 1);
 				_firstrun = false;
 			}

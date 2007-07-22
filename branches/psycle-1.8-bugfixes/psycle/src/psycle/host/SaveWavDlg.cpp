@@ -1,9 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::CSaveWavDlg.
-#include <project.private.hpp>
-#include "psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "SaveWavDlg.hpp"
-//#include "Global.hpp"
+#include "psycle.hpp"
 #include "Song.hpp"
 #include "configuration.hpp"
 #include "MidiInput.hpp"
@@ -14,9 +13,10 @@
 #include <childview.hpp>
 #include <iostream>
 #include <iomanip>
-#undef max // ???
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		extern CPsycleApp theApp;
 		DWORD WINAPI __stdcall RecordThread(void *b);
 		int CSaveWavDlg::channelmode = -1;
@@ -968,5 +968,6 @@ NAMESPACE__BEGIN(psycle)
 				savewires = false;
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "XMSamplerUIGeneral.hpp"
+#include "Psycle.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
 
@@ -172,6 +172,6 @@ void XMSamplerUIGeneral::OnCbnSelendokXmpanningmode()
 	_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
 }
 
-NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 

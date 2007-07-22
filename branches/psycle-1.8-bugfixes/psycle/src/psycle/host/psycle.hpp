@@ -3,9 +3,10 @@
 #pragma once
 #include "resources/resources.hpp" // main symbols
 #include "global.hpp"
-#include <operating_system/logger.hpp>
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "loggers.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CMainFrame; // forward declaration
 
@@ -75,5 +76,5 @@ NAMESPACE__BEGIN(psycle)
 
 
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

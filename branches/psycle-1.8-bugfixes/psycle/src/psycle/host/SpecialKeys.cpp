@@ -1,8 +1,8 @@
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "specialkeys.hpp"
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 CSpecialKeys::CSpecialKeys(CWnd* pParent /* = 0 */) : CDialog(CSpecialKeys::IDD, pParent)
 ,key(0)
@@ -48,5 +48,5 @@ void CSpecialKeys::OnBnClickedOk()
 }
 
 
-NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

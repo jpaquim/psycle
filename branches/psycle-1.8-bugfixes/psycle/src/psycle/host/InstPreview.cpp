@@ -1,11 +1,10 @@
 //\file
 //\brief implementation file for psycle::host::InstPreview.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "InstPreview.hpp"
 #include "Instrument.hpp"
-
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		void InstPreview::Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 		{
@@ -67,5 +66,5 @@ NAMESPACE__BEGIN(host)
 			m_bLoop = false;
 		}
 
-NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

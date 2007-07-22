@@ -1,12 +1,13 @@
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
-#pragma unmanaged
-
+#include "global.hpp"
+#include <cstdint>
+#include <algorithm>
 namespace psycle
 {
 	namespace host
@@ -562,7 +563,7 @@ namespace psycle
 					lvol = (1.0f - rvol);
 				} else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
 					//using std::min;
-					lvol = min(1.0f, (1.0f - rvol)*2.0);
+					lvol = std::min(1.0f, (1.0f - rvol) * 2);
 				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
 					//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
 					lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
@@ -652,7 +653,7 @@ namespace psycle
 			m_FilterEnvelope.RecalcDeviation();
 		}
 
-		void XMSampler::Voice::NoteOn(const compiler::uint8 note,const compiler::sint16 playvol,bool reset)
+		void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
 		{
 			int wavelayer = rInstrument().NoteToSample(note).second;
 			if ( pSampler()->SampleData(wavelayer).WaveLength() == 0 ) return;
@@ -680,7 +681,7 @@ namespace psycle
 			IsPlaying(true);
 		}
 
-		void XMSampler::Voice::ResetVolAndPan(compiler::sint16 playvol,bool reset)
+		void XMSampler::Voice::ResetVolAndPan(std::int16_t playvol,bool reset)
 		{
 			float fpan=0.5f;
 			if ( reset)
@@ -2111,10 +2112,10 @@ namespace psycle
 			// don't process twk , twf, Mcm Commands, or empty lines.
 			if ( pData->_note > notecommands::release )
 			{
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != notecommands::empty )return; // Return in everything but commands!
 	#else
 				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != notecommands::empty )return; // Return in everything but commands!
@@ -2124,10 +2125,10 @@ namespace psycle
 
 			// define some variables to ease the case checking.
 			bool bInstrumentSet = (pData->_inst < 255);
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 			bool bPortaEffect = ((pData->_cmd == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
 	#else
 			bool bPortaEffect = (pData->_cmd == CMD::PORTA2NOTE);
@@ -2268,10 +2269,10 @@ namespace psycle
 								else thisChannel.LastPitchEnvelopePosInSamples(0);
 
 							}
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.Note(),pData->_volume<<1,bInstrumentSet);
 							else newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#else
@@ -2314,10 +2315,10 @@ namespace psycle
 				}
 			if ( newVoice == NULL ) newVoice = currentVoice;
 			// Effect Command
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 			thisChannel.SetEffect(newVoice,pData->_volume,pData->_cmd,pData->_parameter);
 	#else
 			thisChannel.SetEffect(newVoice,255,pData->_cmd,pData->_parameter);
@@ -2659,7 +2660,7 @@ namespace psycle
 		{
 			int temp;
 			bool wrongState=false;
-			compiler::uint32 filevers;
+			std::uint32_t filevers;
 			long filepos;
 			int size=0;
 			riffFile->Read(&size,sizeof(size));

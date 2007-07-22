@@ -4,8 +4,10 @@
 #include "Song.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		#define MAX_DRAW_MESSAGES 32
 
 		class CMasterDlg;
@@ -925,7 +927,6 @@ NAMESPACE__BEGIN(psycle)
 			return _pSong->_ppattern(_ps());
 		}
 
-
 		inline int CChildView::_xtoCol(int pointpos)
 		{
 			if ( pointpos < COLX[1] ) return 0;
@@ -948,13 +949,12 @@ NAMESPACE__BEGIN(psycle)
 		*/
 
 		}
+
 		inline bool CChildView::InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs)
 		{
-		return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
-			(_y >= _src.y) && (_y < _src.y+_src2.height);
+			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
+				(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

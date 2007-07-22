@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdMixDialog.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "WaveEdMixDialog.hpp"
 #include "psycle.hpp"
 #include "helpers.hpp"
 #include <iomanip>
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CWaveEdMixDialog::CWaveEdMixDialog(CWnd* pParent)
 			: CDialog(CWaveEdMixDialog::IDD, pParent)
 		{
@@ -133,5 +133,5 @@ NAMESPACE__BEGIN(host)
 			m_fadeInTime.EnableWindow(m_bFadeIn.GetCheck()==BST_CHECKED);
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

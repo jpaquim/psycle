@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdInsertSilenceDialog.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "WaveEdInsertSilenceDialog.hpp"
 #include "psycle.hpp"
 #include "helpers.hpp"
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CWaveEdInsertSilenceDialog::CWaveEdInsertSilenceDialog(CWnd* pParent)
 			: CDialog(CWaveEdInsertSilenceDialog::IDD, pParent)
 		{
@@ -60,5 +60,5 @@ NAMESPACE__BEGIN(host)
 		{
 			CDialog::OnCancel();
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

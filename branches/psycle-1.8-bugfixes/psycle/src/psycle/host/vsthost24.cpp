@@ -1,9 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "vsthost24.hpp"
 #include "global.hpp"
 #include "psycle.hpp"
 #include "player.hpp"
+#include "zap.hpp"
 
 ///\todo: these are required by the GetIn/OutLatency() functions. They should instead ask the player.
 #include "Configuration.hpp"
@@ -14,9 +16,6 @@
 
 ///\todo:  When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //		(LiveSlice is a good example of what happens if it isn't correct)
-
-
-#include "vsthost24.hpp"
 
 namespace psycle
 {

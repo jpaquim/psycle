@@ -1,12 +1,11 @@
 #pragma once
-#include "afxwin.h"
 #include "XMInstrument.hpp"
-#include "afxcmn.h"
-
-
-// XMSamplerUIInst
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include <afxwin.h>
+#include <afxcmn.h>
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 class XMSampler;
 	
@@ -245,6 +244,5 @@ protected:
 
 };
 
-NAMESPACE__END
-NAMESPACE__END
-
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

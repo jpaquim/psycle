@@ -1,8 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
-#include <project.private.hpp>
-#include "psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "MainFrm.hpp"
+#include "psycle.hpp"
 #include "WavFileDlg.hpp"
 #include "MasterDlg.hpp"
 #include "gearTracker.hpp"
@@ -26,9 +26,10 @@
 #include <cmath>
 #include <sstream>
 #include <iomanip>
-#include ".\mainfrm.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		#define WM_SETMESSAGESTRING 0x0362
 
 		IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
@@ -1980,7 +1981,7 @@ NAMESPACE__BEGIN(psycle)
 			UpdateSequencer(m_wndView.editPosition);
 			m_wndView.Repaint(DMPattern);
 
-			zapArray(litems);
+			delete [] litems; litems = 0;
 			m_wndView.SetFocus();
 		}
 
@@ -2604,7 +2605,7 @@ NAMESPACE__BEGIN(psycle)
 							}
 							else if (_pSong->_pMachine[machine]->_type == MACH_XMSAMPLER)
 							{
-								int i=0;
+								int i=0; ///\todo unused var
 							}
 							else
 							{
@@ -2722,5 +2723,6 @@ NAMESPACE__BEGIN(psycle)
 				pGearRackDialog->RedrawList();
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

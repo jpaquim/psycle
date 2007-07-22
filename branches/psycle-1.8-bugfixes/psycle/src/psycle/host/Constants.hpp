@@ -31,10 +31,10 @@ namespace psycle
 		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
 		#define MAX_CONNECTIONS		12
 		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 		#define EVENT_SIZE				6
 	#else
 		#define EVENT_SIZE				5
@@ -70,14 +70,6 @@ namespace psycle
 		#define CURRENT_FILE_VERSION_WAVE	0x0000
 		#define CURRENT_FILE_VERSION CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_WAVE
 
-		
 		#define CURRENT_CACHE_MAP_VERSION	0x0001
-
-		/// \todo add real detection of type size
-		typedef unsigned char byte;
-		/// \todo add real detection of type size
-		typedef unsigned short word;
-		/// \todo add real detection of type size
-		typedef unsigned long dword;
 	}
 }

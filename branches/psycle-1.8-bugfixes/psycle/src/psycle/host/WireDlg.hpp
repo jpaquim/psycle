@@ -3,8 +3,11 @@
 #pragma once
 #include "Machine.hpp"
 #include "constants.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		class CChildView;
 
 		#define MAX_SCOPE_BANDS 128
@@ -95,5 +98,5 @@ NAMESPACE__BEGIN(psycle)
 			DECLARE_MESSAGE_MAP()
 		};
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -24,14 +24,19 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ******************************************************************************/
 
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "CVSTHost.Seib.hpp"                   /* private prototypes                */
 // Unneeded sources:
 //#include "global.hpp" // for debug loggers.
-#include "machine.hpp"// for throw.
+#include <psycle/host/machine.hpp> // for throw.
+#include <psycle/host/loggers.hpp>
 #include "EffectWnd.hpp"
 
-#ifdef WIN32
+#if !(defined _WIN64 || defined _WIN32)
+	#error unimplemented
+#endif
+
+#if defined _WIN64 || defined _WIN32
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#include <MMSystem.h>
@@ -41,6 +46,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace seib {
 	namespace vst {
+		namespace loggers = psycle::loggers;
+
 		/*****************************************************************************/
 		/* Static Data                                                               */
 		/*****************************************************************************/
@@ -711,7 +718,7 @@ namespace seib {
 			aEffect=loadstruct.aEffect;
 			ploader=loadstruct.pluginloader;
 
-		#ifdef WIN32
+		#if defined _WIN64 || defined _WIN32
 			char const * name = (char*)(loadstruct.pluginloader->sFileName);
 			char const * const p = strrchr(name, '\\');
 			if (p)
@@ -724,9 +731,10 @@ namespace seib {
 				}
 			}
 			else { sDir = new char[1]; ((char*)sDir)[0]='\0'; }
-
-		#elif MAC
-			// yet to be done
+		#elif defined __APPLE__
+			#error yet to be done
+		#else
+			#error yet to be done
 		#endif
 
 			// The trick, store the CEffect's class instance so that the host can talk to us.
@@ -753,7 +761,7 @@ namespace seib {
 			}
 			else
 			{
-				int i= 1;
+				int i= 1; ///\todo unused var
 			}
 		}
 
@@ -768,13 +776,15 @@ namespace seib {
 			aEffect = NULL;                         /* and reset the pointer             */
 			delete ploader;
 
-		#ifdef WIN32
+		#if defined _WIN64 || defined _WIN32
 			if (sDir)                               /* reset directory            */
 			{
 				delete[] sDir;	sDir = NULL;
 			}
-		#elif MAC
-			// yet to be done!
+		#elif defined __APPLE__
+			#error yet to be done!
+		#else
+			#error yet to be done!
 		#endif
 		}
 
@@ -1274,11 +1284,11 @@ namespace seib {
 			//nanoseconds (system time)
 			if(lMask & kVstNanosValid)
 			{
-			#ifdef WIN32
+			#if defined _WIN64 || defined _WIN32
 				vstTimeInfo.nanoSeconds = timeGetTime();
 				vstTimeInfo.flags |= kVstNanosValid;
 			#else
-				//add the appropiate code.
+				#error add the appropiate code.
 			#endif
 			}
 		}
@@ -1455,7 +1465,7 @@ namespace seib {
 						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
-					psycle::host::loggers::info(title.str() + '\n' + s.str());
+					loggers::info(title.str() + '\n' + s.str());
 				}
 				
 				// We try to simulate a pEffect plugin for this call, so that calls to
@@ -1480,7 +1490,7 @@ namespace seib {
 						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
-					psycle::host::loggers::info(title.str() + '\n' + s.str());
+					loggers::info(title.str() + '\n' + s.str());
 					// The VST SDK 2.0 said this:
 					// [QUOTE]
 					//	Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the

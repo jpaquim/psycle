@@ -1,13 +1,11 @@
 #pragma once
 #include "SongStructs.hpp"
 #include "FileIO.hpp"
+#include <cstdint>
 
-class Song;
-
-namespace psycle
-	{
-	namespace host
-		{
+namespace psycle {
+	namespace host {
+		class Song;
 		class XMSampler;
 
 		class ITModule2 : public OldPsyFile
@@ -210,7 +208,7 @@ namespace psycle
 
 				struct itHeader
 				{
-					compiler::uint32 tag;
+					std::uint32_t tag;
 			char songName[26];
 			unsigned short pHiligt,ordNum,insNum,sampNum,patNum,trackerV,ffv,flags,special;
 			unsigned char gVol,mVol,iSpeed,iTempo,panSep,PWD;
@@ -252,27 +250,27 @@ namespace psycle
 
 				struct EmbeddedMIDIData
 		{
-					compiler::sint8 Start[32];
-					compiler::sint8 Stop[32];
-					compiler::sint8 Tick[32];
-					compiler::sint8 NoteOn[32];
-					compiler::sint8 NoteOff[32];
-					compiler::sint8 Volume[32];
-					compiler::sint8 Pan[32];
-					compiler::sint8 BankChange[32];
-					compiler::sint8 ProgramChange[32];
-					compiler::sint8 SFx[16][32];
+					std::int8_t Start[32];
+					std::int8_t Stop[32];
+					std::int8_t Tick[32];
+					std::int8_t NoteOn[32];
+					std::int8_t NoteOff[32];
+					std::int8_t Volume[32];
+					std::int8_t Pan[32];
+					std::int8_t BankChange[32];
+					std::int8_t ProgramChange[32];
+					std::int8_t SFx[16][32];
 			char Zxx[128][32];
 				};
 
 		typedef std::pair<char,char> ITNotePair;
 		typedef std::pair<char,char> ITNodePair1x;
 //		typedef std::pair<short,char> ITNodePair;
-		class ITNodePair { public: compiler::sint8 first; compiler::uint8 secondlo; compiler::uint8 secondhi; };
+		class ITNodePair { public: std::int8_t first; std::uint8_t secondlo; std::uint8_t secondhi; };
 
 				struct itInsHeader1x
 				{
-					compiler::uint32 tag;
+					std::uint32_t tag;
 			char fileName[13];
 			unsigned char flg,loopS,loopE,sustainS,sustainE;
 			unsigned short fadeout;
@@ -289,14 +287,14 @@ namespace psycle
 
 				struct ITEnvStruct
 				{
-					compiler::uint8 flg,numP,loopS,loopE,sustainS,sustainE;
+					std::uint8_t flg,numP,loopS,loopE,sustainS,sustainE;
 			ITNodePair nodes[25];
-					compiler::uint8 unused;
+					std::uint8_t unused;
 				};
 
 				struct itInsHeader2x
 				{
-					compiler::uint32 tag;
+					std::uint32_t tag;
 			char fileName[13];
 			unsigned char NNA,DCT,DCA;
 			unsigned short fadeout;
@@ -326,13 +324,13 @@ namespace psycle
 
 				struct itSampleHeader
 				{
-					compiler::uint32 tag;
+					std::uint32_t tag;
 			char fileName[13];
 			unsigned char gVol,flg,vol;
 			char sName[26];
-					compiler::uint8 cvt,dfp;
-					compiler::uint32 length,loopB,loopE,c5Speed,sustainB,sustainE,smpData;
-					compiler::uint8 vibS,vibD,vibR,vibT;
+					std::uint8_t cvt,dfp;
+					std::uint32_t length,loopB,loopE,c5Speed,sustainB,sustainE,smpData;
+					std::uint8_t vibS,vibD,vibR,vibT;
 				};
 
 		struct SampleFlags
@@ -384,26 +382,26 @@ namespace psycle
 			
 			
 			public:
-		// little-endian
-				static const compiler::uint32 SCRM_ID = 0x4D524353;
-				static const compiler::uint32 SCRS_ID = 0x53524353;
-				static const compiler::uint32 SCRI_ID = 0x49524353;
-		// big-endian
-				//static const compiler::uint32 SCRM_ID = 0x5343524D;
-				//static const compiler::uint32 SCRS_ID = 0x53435253;
-				//static const compiler::uint32 SCRI_ID = 0x53435249;
+				// little-endian
+					static const std::uint32_t SCRM_ID = 0x4D524353;
+					static const std::uint32_t SCRS_ID = 0x53524353;
+					static const std::uint32_t SCRI_ID = 0x49524353;
+				// big-endian
+					//static const std::uint32_t SCRM_ID = 0x5343524D;
+					//static const std::uint32_t SCRS_ID = 0x53435253;
+					//static const std::uint32_t SCRI_ID = 0x53435249;
 
 				struct s3mHeader
 				{
-			char songName[28];
-					compiler::uint8 end,type;
-					compiler::uint16 unused1;
-					compiler::uint16 ordNum,insNum,patNum,flags,trackerV,trackerInf;
-					compiler::uint32 tag; // SCRM
-					compiler::uint8 gVol,iSpeed,iTempo,mVol,uClick,defPan;
-					compiler::uint8 unused2[8];
-					compiler::uint16 pSpecial;
-					compiler::uint8 chanSet[32];
+					char songName[28];
+					std::uint8_t end,type;
+					std::uint16_t unused1;
+					std::uint16_t ordNum,insNum,patNum,flags,trackerV,trackerInf;
+					std::uint32_t tag; // SCRM
+					std::uint8_t gVol,iSpeed,iTempo,mVol,uClick,defPan;
+					std::uint8_t unused2[8];
+					std::uint16_t pSpecial;
+					std::uint8_t chanSet[32];
 				};
 
 		struct S3MFlags
@@ -435,14 +433,14 @@ namespace psycle
 
 				struct s3mInstHeader
 				{
-					compiler::uint8 type;
+					std::uint8_t type;
 			char fileName[12],data[35],sName[28];
-					compiler::uint32 tag;
+					std::uint32_t tag;
 				};
 
 				struct s3mSampleHeader
 				{
-					compiler::uint8 type;
+					std::uint8_t type;
 			char filename[12];
 			unsigned char hiMemSeg;
 			unsigned short lomemSeg;
@@ -454,7 +452,7 @@ namespace psycle
 			long unused2,internal,internal2;
 			char sName[28];
 					/// SCRS
-					compiler::uint32 tag;
+					std::uint32_t tag;
 				};
 
 		struct S3MSampleFlags
@@ -469,16 +467,16 @@ namespace psycle
 
 				struct s3madlibheader
 				{
-					compiler::uint8 type;
+					std::uint8_t type;
 					char filename[12];
-					compiler::uint8 unused[3];
-					compiler::uint8 D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D0A,D0B,vol;
-					compiler::uint8 unused2[3];
-					compiler::uint32 c2speed;
-					compiler::uint8 unused3[12];
+					std::uint8_t unused[3];
+					std::uint8_t D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D0A,D0B,vol;
+					std::uint8_t unused2[3];
+					std::uint32_t c2speed;
+					std::uint8_t unused3[12];
 					char sName[28];
 					/// SCRI
-					compiler::uint32 tag;
+					std::uint32_t tag;
 				};
 
 		public:

@@ -1,7 +1,8 @@
 ///\file
 ///\brief sequencer view graphic operations for psycle::host::CChildView, private header
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		#define SEQ_ROWHEIGHT  17
 		#define SEQ_YOFFSET 17
 
@@ -269,5 +270,6 @@ NAMESPACE__BEGIN(psycle)
 
 			devc->SelectObject(oldFont);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

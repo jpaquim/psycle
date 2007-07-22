@@ -5,8 +5,6 @@
 #pragma once
 #include "filter.h"
 
-typedef unsigned char byte;
-
 #define OVERDRIVEDIVISOR 512.0f
 
 #define FILTER_CALC_TIME	32

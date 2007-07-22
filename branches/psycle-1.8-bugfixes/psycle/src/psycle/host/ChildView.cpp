@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "ChildView.hpp"
 #include "version.hpp"
 #include "Psycle.hpp"
 #include "Configuration.hpp"
 #include "Player.hpp"
 //#include "Helpers.hpp"
 #include "MainFrm.hpp"
-#include "ChildView.hpp"
 //#include "Bitmap.hpp"
 #include "Inputhandler.hpp"
 #include "MidiInput.hpp"
@@ -29,8 +29,9 @@
 #include <cmath> // SwingFill
 #include "SwingFillDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CMainFrame		*pParentMain;
 
 		CChildView::CChildView()
@@ -142,7 +143,7 @@ NAMESPACE__BEGIN(psycle)
 				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
 				TRACE(buf);
 				bmpDC->DeleteObject();
-				zapObject(bmpDC);
+				delete bmpDC; bmpDC = 0;
 			}
 			patternheader.DeleteObject();
 			DeleteObject(hbmPatHeader);
@@ -318,19 +319,10 @@ NAMESPACE__BEGIN(psycle)
 		{
 			if (nIDEvent == 31)
 			{
-				#if !defined PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX
-					#error PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-				#else
-					#if PSYCLE__CONFIGURATION__OPTION__ENABLE__READ_WRITE_MUTEX // new implementation
-						boost::read_write_mutex::scoped_read_write_lock lock(Global::_pSong->read_write_mutex(),boost::read_write_lock_state::read_locked);
-					#else // original implementation
-						//\todo : IMPORTANT! change this lock to a more flexible one
-						// It is causing skips on sound when there is a pattern change because
-						// it is not allowing the player to work. Do the same in the one inside
-						// Player::Work()
-						CSingleLock lock(&_pSong->door,TRUE);
-					#endif
-				#endif
+				///\todo : IMPORTANT! change this lock to a more flexible one
+				// It is causing skips on sound when there is a pattern change because
+				// it is not allowing the player to work. Do the same in the one inside Player::Work()
+				CSingleLock lock(&_pSong->door,TRUE);
 				if (Global::_pSong->_pMachine[MASTER_INDEX])
 				{
 					pParentMain->UpdateVumeters
@@ -513,7 +505,7 @@ NAMESPACE__BEGIN(psycle)
 				sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
 				TRACE(buf);
 				bmpDC->DeleteObject();
-				zapObject(bmpDC);
+				delete bmpDC; bmpDC = 0;
 			}
 			if ( Global::pConfig->useDoubleBuffer )
 			{
@@ -636,7 +628,7 @@ NAMESPACE__BEGIN(psycle)
 			{
 				TRACE("CChildView::OnResize(). Deleted bmpDC");
 				bmpDC->DeleteObject();
-				zapObject(bmpDC);
+				delete bmpDC; bmpDC = 0;
 			}
 			if (viewMode == VMPattern)
 			{
@@ -2099,7 +2091,7 @@ NAMESPACE__BEGIN(psycle)
 			char* nameBuff = new char[nameSize];
 			GetMenuString(hRecentMenu, pos, nameBuff, nameSize, MF_BYPOSITION);
 			OnFileLoadsongNamed(nameBuff, 1);
-			zapArray(nameBuff);
+			delete [] nameBuff; nameBuff = 0;
 		}
 
 		void CChildView::SetTitleBarText()
@@ -3528,8 +3520,8 @@ NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 
 // graphics operations, private headers
 #include "machineview.private.hpp"
@@ -3539,5 +3531,3 @@ NAMESPACE__END
 // User/Mouse Responses, private headers
 #include "keybhandler.private.hpp"
 #include "mouseHandler.private.hpp"
-
-

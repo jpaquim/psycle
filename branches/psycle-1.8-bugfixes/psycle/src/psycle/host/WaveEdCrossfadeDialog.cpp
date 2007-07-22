@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdCrossfadeDialog.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "WaveEdCrossfadeDialog.hpp"
 #include "psycle.hpp"
 #include "helpers.hpp"
 #include <iomanip>
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CWaveEdCrossfadeDialog::CWaveEdCrossfadeDialog(CWnd* pParent)
 			: CDialog(CWaveEdCrossfadeDialog::IDD, pParent)
 		{
@@ -124,5 +124,5 @@ NAMESPACE__BEGIN(host)
 			*pResult = 0;
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

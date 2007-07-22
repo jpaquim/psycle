@@ -4,81 +4,96 @@
 #pragma once
 #include "constants.hpp"
 #include "songstructs.hpp"
-#pragma warning(push)
+#include <diversalis/compiler.hpp>
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+#endif
+
 	#include <mmsystem.h>
-	#pragma comment(lib, "winmm")
-#pragma warning(pop)
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "winmm")
+	#endif
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(pop)
+#endif
+
 #include <cassert>
+#include <cstdint>
 namespace psycle
 {
 	namespace host
 	{
-		#define	MAX_MIDI_CHANNELS	16
-		#define	MAX_CONTROLLERS		127
-		#define	MAX_PARAMETERS		127
+		#define MAX_MIDI_CHANNELS 16
+		#define MAX_CONTROLLERS   127
+		#define MAX_PARAMETERS    127
 
-		//\todo might want to make these two user-configurable rather than hard-coded values.
-		#define MIDI_BUFFER_SIZE	1024
-		#define	MIDI_PREDELAY_MS	200
+		///\todo might want to make these two user-configurable rather than hard-coded values.
+		#define MIDI_BUFFER_SIZE 1024
+		#define MIDI_PREDELAY_MS 200
 
-		#define	VERSION_STRING		"v2.2b"
+		#define VERSION_STRING "v2.2b"
 
 		///\name FLAGS
 		///\{
-		
-		/// are we waiting to inject MIDI?
-		#define	FSTAT_ACTIVE			0x0001			
-		/// the three MIDI sync codes
-		#define	FSTAT_FASTART			0x0002			
-		/// the three MIDI sync codes
-		#define	FSTAT_F8CLOCK			0x0004
-		/// the three MIDI sync codes
-		#define	FSTAT_FCSTOP			0x0008
+			/// are we waiting to inject MIDI?
+			#define FSTAT_ACTIVE                0x0001
+			/// the three MIDI sync codes
+			#define FSTAT_FASTART               0x0002
+			/// the three MIDI sync codes
+			#define FSTAT_F8CLOCK               0x0004
+			/// the three MIDI sync codes
+			#define FSTAT_FCSTOP                0x0008
 
-		/// Controller 121 - emulated FASTART
-		#define	FSTAT_EMULATED_FASTART	0x0010			
-		/// Controller 122 - emulated F8CLOCK
-		#define	FSTAT_EMULATED_F8CLOCK	0x0020			
-		/// Controller 124 - emulated FCSTOP
-		#define	FSTAT_EMULATED_FCSTOP	0x0040			
-		/// midi buffer overflow?
-		#define	FSTAT_BUFFER_OVERFLOW	0x0080			
+			/// Controller 121 - emulated FASTART
+			#define FSTAT_EMULATED_FASTART      0x0010
+			/// Controller 122 - emulated F8CLOCK
+			#define FSTAT_EMULATED_F8CLOCK      0x0020
+			/// Controller 124 - emulated FCSTOP
+			#define FSTAT_EMULATED_FCSTOP       0x0040
+			/// midi buffer overflow?
+			#define FSTAT_BUFFER_OVERFLOW       0x0080
 
-		/// midi data going into the buffer?
-		#define	FSTAT_IN_BUFFER			0x0100			
-		/// midi data going out of the buffer?
-		#define	FSTAT_OUT_BUFFER		0x0200			
-		/// midi data being cleared from the buffer?
-		#define	FSTAT_CLEAR_BUFFER		0x0400			
-		/// simulated tracker tick?
-		#define	FSTAT_SYNC_TICK			0x0800			
+			/// midi data going into the buffer?
+			#define FSTAT_IN_BUFFER             0x0100
+			/// midi data going out of the buffer?
+			#define FSTAT_OUT_BUFFER            0x0200
+			/// midi data being cleared from the buffer?
+			#define FSTAT_CLEAR_BUFFER          0x0400
+			/// simulated tracker tick?
+			#define FSTAT_SYNC_TICK             0x0800
 
-		/// syncing with the audio?
-		#define	FSTAT_SYNC				0x1000			
-		/// just resynced with the audio?
-		#define	FSTAT_RESYNC			0x2000			
-		/// we are receiving MIDI input data?
-		#define	FSTAT_MIDI_INPUT		0x4000			
+			/// syncing with the audio?
+			#define FSTAT_SYNC                  0x1000
+			/// just resynced with the audio?
+			#define FSTAT_RESYNC                0x2000
+			/// we are receiving MIDI input data?
+			#define FSTAT_MIDI_INPUT            0x4000
 
-		/// to clear correct flags
-		#define	FSTAT_CLEAR_WHEN_READ	0x0001
-
+			/// to clear correct flags
+			#define FSTAT_CLEAR_WHEN_READ       0x0001
 		///\}
 
 		class MIDI_BUFFER
 		{
 		public:
-			PatternEntry entry;		// tracker pattern info struct
-			DWORD timeStamp;		// MIDI input device's timestamp
-			int channel;			// MIDI channel
+			/// tracker pattern info struct
+			PatternEntry entry;
+			/// MIDI input device's timestamp
+			std::uint32_t timeStamp;
+			/// MIDI channel
+			int channel;
 		};
 
 		class MIDI_CONFIG
 		{
 		public:
-			char versionStr[ 16 ];	// version string (e.g. v2.0b)
-			int	midiHeadroom;		// milliseconds allowed for MIDI buffer fill
+			/// version string (e.g. v2.0b)
+			char versionStr[ 16 ];
+			/// milliseconds allowed for MIDI buffer fill
+			int midiHeadroom;
 		};
 
 		class MIDI_STATS
@@ -101,20 +116,20 @@ namespace psycle
 			/// strobe for the channel map list
 			bool channelMapUpdate;
 			/// 32 bits of boolean info (see FLAGS, CLEAR AFTER READ)
-			DWORD flags;			
+			std::uint32_t flags;			
 		};
 
 		enum MODES
 		{
-			MODE_REALTIME,			///< use Psycle as a cool softsynth via MIDI
-			MODE_STEP,				///< enter pattern notes using MIDI
+			MODE_REALTIME, ///< use Psycle as a cool softsynth via MIDI
+			MODE_STEP,     ///< enter pattern notes using MIDI
 			MAX_MODES
 		};
 
 		enum DRIVERS
 		{
-			DRIVER_MIDI,			///< the main MIDI input driver
-			DRIVER_SYNC,			///< the driver for MIDI Sync
+			DRIVER_MIDI, ///< the main MIDI input driver
+			DRIVER_SYNC, ///< the driver for MIDI Sync
 			MAX_DRIVERS
 		};
 
@@ -123,13 +138,13 @@ namespace psycle
 		{
 		public:
 			CMidiInput();
-			virtual	~CMidiInput();
+			virtual ~CMidiInput();
 
 			/// returns the current instance
-			static CMidiInput * Instance() { return s_Instance; }; 
+			static CMidiInput * Instance() { return s_Instance; }
 
 			/// set MIDI input device identifier
-			void SetDeviceId(int driver, UINT devId);	
+			void SetDeviceId(unsigned int driver, int devId);	
 			/// open the midi input devices
 			bool Open();				
 			/// start input (reset timestamps)
@@ -140,22 +155,22 @@ namespace psycle
 			bool Close( );				
 
 			/// find out if we are open
-			bool Active() { return m_midiInHandle!=NULL; };		
+			bool Active() { return m_midiInHandle!=NULL; }
 
 			/// for external access
-			MIDI_STATS * GetStatsPtr( void ){ return &m_stats; };		
+			MIDI_STATS * GetStatsPtr() { return &m_stats; }		
 			/// for external access
-			MIDI_CONFIG * GetConfigPtr( void ){ return &m_config; };	
+			MIDI_CONFIG * GetConfigPtr() { return &m_config; }
 
 			/// returns the number of midi devices on the system
 			int GetNumDevices( void );	
 			/// convert a name identifier into a index identifier (or -1 if fail)
 			int FindDevByName( CString nameString );	
 			/// fill a listbox with a list of the available input devices
-			UINT PopulateListbox( CComboBox * listbox );	
+			std::uint32_t PopulateListbox( CComboBox * listbox );	
 
 			/// return the current device handle
-			HMIDIIN GetHandle(int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; };	
+			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
 
 			/// set a instrument map
 			void SetInstMap( int machine, int inst );	
@@ -183,17 +198,17 @@ namespace psycle
 
 		private:
 			/// the midi callback functions (just a static linker to the instance one)
-			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 );
+			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, std::uint32_t dwInstance, std::uint32_t dwParam1, std::uint32_t dwParam2 );
 
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 );
+			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, std::uint32_t dwInstance, std::uint32_t dwParam1, std::uint32_t dwParam2 );
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 );
+			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, std::uint32_t dwInstance, std::uint32_t dwParam1, std::uint32_t dwParam2 );
 
 			/// interal engine resync process
-			void InternalReSync( DWORD dwParam2 );
+			void InternalReSync( std::uint32_t dwParam2 );
 			/// ???
-			void InternalClock( DWORD dwParam2 );
+			void InternalClock( std::uint32_t dwParam2 );
 
 			/// the current instance pointer
 			static CMidiInput * s_Instance;	
@@ -204,9 +219,9 @@ namespace psycle
 			bool m_midiInHandlesTried;	
 
 			/// channel->instrument map
-			UINT m_channelInstMap[ MAX_MACHINES ];				
+			std::uint32_t m_channelInstMap[ MAX_MACHINES ];				
 			/// channel->generator map
-			UINT m_channelGeneratorMap[ MAX_MIDI_CHANNELS ];	
+			std::uint32_t m_channelGeneratorMap[ MAX_MIDI_CHANNELS ];	
 			/// channel, note off setting
 			bool m_channelNoteOff[ MAX_MIDI_CHANNELS ];			
 			/// channel->controller->parameter map
@@ -214,16 +229,16 @@ namespace psycle
 
 			///\name audio-engine timing vars
 			///\{
-			/// .
-			DWORD m_timingCounter;
-			/// .
-			DWORD m_timingAccumulator;
-			/// .
-			DWORD m_prevTimingCounter;
-			/// the base sync stamp
-			DWORD m_baseStampTime;	
-			/// .
-			DWORD m_tickBase;
+				/// .
+				std::uint32_t m_timingCounter;
+				/// .
+				std::uint32_t m_timingAccumulator;
+				/// .
+				std::uint32_t m_prevTimingCounter;
+				/// the base sync stamp
+				std::uint32_t m_baseStampTime;	
+				/// .
+				std::uint32_t m_tickBase;
 			///\}
 
 			/// midi device identifiers
@@ -242,12 +257,12 @@ namespace psycle
 
 			///\name buffer indexes
 			///\{
-			/// .
-			int m_patIn;
-			/// .
-			int m_patOut;
-			/// .
-			int m_patCount;
+				/// .
+				int m_patIn;
+				/// .
+				int m_patOut;
+				/// .
+				int m_patCount;
 			///\}
 
 			/// external telling us we need a resync
@@ -259,16 +274,16 @@ namespace psycle
 
 			///\name syncronization variables
 			///\{
-			/// .
-			DWORD m_baseStampTimeFix;
-			/// .
-			int m_fixOffset;
-			/// .
-			int m_lastPlayPos;
-			/// .
-			int m_wraps;
-			/// adjusted play position
-			int m_adjustedPlayPos;	
+				/// .
+				std::uint32_t m_baseStampTimeFix;
+				/// .
+				int m_fixOffset;
+				/// .
+				int m_lastPlayPos;
+				/// .
+				int m_wraps;
+				/// adjusted play position
+				int m_adjustedPlayPos;	
 			///\}
 		};
 	}

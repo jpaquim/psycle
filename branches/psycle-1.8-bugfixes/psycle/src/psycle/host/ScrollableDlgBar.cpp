@@ -1,10 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::ScrollableDlgBar.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "ScrollableDlgBar.hpp"
 
-NAMESPACE__BEGIN(psycle)
-NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	LRESULT CScrollableDlgBar::WindowProc(UINT nMsg, WPARAM wParam, LPARAM lParam)
 	{
@@ -72,5 +72,5 @@ NAMESPACE__BEGIN(host)
 		return lResult;
 	}
 
-	NAMESPACE__END
-NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

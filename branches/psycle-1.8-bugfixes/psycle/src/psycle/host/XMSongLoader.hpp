@@ -3,12 +3,13 @@
 #include "SongStructs.hpp"
 #include "FileIO.hpp"
 #include "XMFile.hpp"
-class Song;
-class XMSampler;
-class XMInstrument;
+#include <cstdint>
 
-namespace psycle{
-namespace host{
+namespace psycle { namespace host {
+	class Song;
+	class XMSampler;
+	class XMInstrument;
+
 	class XMSongLoader : public OldPsyFile
 	{
 	public:
@@ -108,21 +109,21 @@ namespace host{
 		// inlines
 		const unsigned char ReadUInt1(LONG start=-1)
 		{	
-			compiler::uint8 i(0);
+			std::uint8_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,1)?i:0;
 		}
 
 		const unsigned short ReadUInt2(LONG start=-1)
 		{
-			compiler::uint16 i(0);
+			std::uint16_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,2)?i:0;
 		}
 
 		const unsigned int ReadUInt4(LONG start=-1)
 		{
-			compiler::uint32 i(0);
+			std::uint32_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,4)?i:0;
 		}
@@ -132,5 +133,4 @@ namespace host{
 		MODSAMPLEHEADER m_Samples[32];
 		XMSampler* m_pSampler;
 	};
-}
-}
+}}

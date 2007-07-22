@@ -3,15 +3,18 @@
  *  $Date$
  *  $Revision$
  */
-#include <project.private.hpp>
-#include <resources/resources.hpp>
+#include <psycle/project.private.hpp>
+#include "XMSongLoader.hpp"
 #include "ProgressDialog.hpp"
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
-#include "XMSongLoader.hpp"
 #include "Player.hpp"
+#include "configuration_options.hpp"
+#include "resources/resources.hpp"
+#include <algorithm>
+#include <cstring>
 
 namespace psycle{
 namespace host{
@@ -84,9 +87,9 @@ namespace host{
 		song.name = pSongName;
 		song.author = "";
 		(song.comments = "Imported from FastTracker II Module: ") + szName;
-		zapArray(pSongName);
+		delete [] pSongName; pSongName = 0;
 
-		LONG iInstrStart = LoadPatterns(song);
+		std::int32_t iInstrStart = LoadPatterns(song);
 		LoadInstruments(*m_pSampler,iInstrStart);
 
 	}
@@ -131,7 +134,7 @@ namespace host{
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		//using std::max;
-		song.SONGTRACKS = max(m_Header.channels,4);
+		song.SONGTRACKS = std::max(m_Header.channels, std::uint16_t(4));
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
 		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
@@ -161,7 +164,7 @@ namespace host{
 	}
 
 	// Load instruments
-	const bool XMSongLoader::LoadInstruments(XMSampler & sampler, LONG iInstrStart)
+	const bool XMSongLoader::LoadInstruments(XMSampler & sampler, std::int32_t iInstrStart)
 	{	
 		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
@@ -172,7 +175,7 @@ namespace host{
 		return true;
 	}
 
-	char * XMSongLoader::AllocReadStr(const LONG size, const LONG start)
+	char * XMSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];
@@ -199,7 +202,7 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	const LONG XMSongLoader::LoadSinglePattern(Song & song, const LONG start,const int patIdx,const int iTracks)
+	const std::int32_t XMSongLoader::LoadSinglePattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks)
 	{
 
 		int iHeaderLen = ReadInt4(start);
@@ -260,10 +263,10 @@ namespace host{
 					// translate
 					e._inst = instr;	
 					e._mach = 0;
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 					e._volume = 255;
 
 					// volume/command
@@ -618,10 +621,10 @@ namespace host{
 							break;	// transpose
 					}
 
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
 	#else
 					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
@@ -654,15 +657,14 @@ namespace host{
 		return true;
 	}	
 
-	const LONG XMSongLoader::LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int &curSample)
+	const std::int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, std::int32_t iStart, const int idx,int &curSample)
 	{
 		Seek(iStart);
 
 		// read header
 		int iInstrSize = ReadInt4();
-//		ASSERT(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
-		TCHAR sInstrName[23];
-		ZeroMemory(sInstrName,sizeof(sInstrName) * sizeof(TCHAR));
+		//assert(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
+		char sInstrName[23] = {0}; ///\todo it's probably useless to zero-initialise the array content
 		Read(sInstrName,22);
 		sInstrName[22]= 0;
 
@@ -680,7 +682,7 @@ namespace host{
 
         
 		XMSAMPLEHEADER _samph;
-		ZeroMemory(&_samph,sizeof(XMSAMPLEHEADER));
+		std::memset(&_samph, 0, sizeof _samph);
 		Read(&_samph,sizeof(XMSAMPLEHEADER));
 		
 		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
@@ -739,7 +741,7 @@ namespace host{
 		return iStart;
 	}
 
-	const LONG XMSongLoader::LoadSampleHeader(XMSampler & sampler, LONG iStart, const int iInstrIdx, const int iSampleIdx)
+	const std::int32_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, std::int32_t iStart, const int iInstrIdx, const int iSampleIdx)
 	{
 		// get sample header
 		Seek(iStart);
@@ -823,7 +825,7 @@ namespace host{
 
 	}
 
-	const LONG XMSongLoader::LoadSampleData(XMSampler & sampler, LONG iStart,const int iInstrIdx,const int iSampleIdx)
+	const std::int32_t XMSongLoader::LoadSampleData(XMSampler & sampler, std::int32_t iStart,const int iInstrIdx,const int iSampleIdx)
 	{
 		// parse
 		
@@ -1012,7 +1014,7 @@ namespace host{
 		song.name = pSongName;
 		song.author = "";
 		(song.comments = "Imported from MOD Module: ") + szName;
-		zapArray(pSongName);
+		delete [] pSongName; pSongName = 0;
 
 		// get data
 		Seek(20);
@@ -1086,7 +1088,7 @@ namespace host{
 		}
 	}
 
-	char * MODSongLoader::AllocReadStr(const LONG size, const LONG start)
+	char * MODSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];

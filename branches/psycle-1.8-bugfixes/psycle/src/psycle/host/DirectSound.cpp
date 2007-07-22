@@ -1,12 +1,11 @@
 ///\file
 ///\implementation psycle::host::DirectSound.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "DirectSound.hpp"
-//#include "resources/resources.hpp"
 #include "DSoundConfig.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
-#include <operating_system/exception.hpp>
+#include <universalis/processor/exception.hpp>
 #include <process.h>
 #include "dsp.hpp"
 namespace psycle
@@ -322,7 +321,7 @@ namespace psycle
 
 		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
 		{
-			operating_system::exceptions::translated::new_thread("direct sound");
+			universalis::processor::exception::new_thread("direct sound");
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);

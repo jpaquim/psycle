@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CPatDlg.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
+#include "PatDlg.hpp"
 #include "Psycle.hpp"
 #include "constants.hpp"
-#include "PatDlg.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CPatDlg)
@@ -102,5 +102,5 @@ NAMESPACE__BEGIN(psycle)
 				m_text.SetWindowText(buffer);
 			}
 		}
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

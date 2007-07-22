@@ -1,8 +1,9 @@
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
 #include "internal_machines.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
 			//Right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) extended by sampler.
@@ -1233,5 +1234,6 @@ NAMESPACE__BEGIN(psycle)
 
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 		}
-	NAMESPACE__END
-NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

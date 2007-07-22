@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Cubic.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "Dsp.hpp"
 namespace psycle
 {

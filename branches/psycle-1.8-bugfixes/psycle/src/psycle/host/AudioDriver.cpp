@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::AudioDriver.
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "AudioDriver.hpp"
 #include "helpers.hpp"
 #include "constants.hpp"
@@ -58,7 +58,7 @@ namespace psycle
 				{
 					l = SHORT_MAX;
 				}
-				*piout++ = (r << 16) | (word)l;
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
 			}
 			while(--c);
@@ -94,7 +94,7 @@ namespace psycle
 				{
 					l = SHORT_MAX;
 				}
-				*piout++ = (r << 16) | (word)l;
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
 			}
 			while(--c);

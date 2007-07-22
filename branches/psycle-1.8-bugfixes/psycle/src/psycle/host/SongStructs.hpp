@@ -1,5 +1,6 @@
 #pragma once
-#include <project.hpp>
+#include "configuration_options.hpp"
+#include <cstdint>
 namespace psycle
 {
 	namespace host
@@ -13,10 +14,10 @@ namespace psycle
 				:
 					_note(255),
 					_inst(255),
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 					_volume(255),
 	#endif
 #endif
@@ -26,22 +27,22 @@ namespace psycle
 				{
 				}
 
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-				inline PatternEntry(compiler::uint8 note,compiler::uint8 inst,compiler::uint8 volume,compiler::uint8 cmd,compiler::uint8 param,compiler::uint8 machine)
+#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t volume, std::uint8_t cmd, std::uint8_t param, std::uint8_t machine)
 #else
-				inline PatternEntry(compiler::uint8 note,compiler::uint8 inst,compiler::uint8 machine,compiler::uint8 cmd,compiler::uint8 param)
+				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t machine, std::uint8_t cmd, std::uint8_t param)
 #endif
 #endif
 				:
 				_note(note),
 				_inst(inst),
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
+#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 					_volume(volume),
 #endif
 #endif
@@ -50,20 +51,20 @@ namespace psycle
 					_parameter(param)
 				{
 				}
-				compiler::uint8 _note;
-				compiler::uint8 _inst;
-#if !defined PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+				std::uint8_t _note;
+				std::uint8_t _inst;
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__OPTION__VOLUME_COLUMN
-				compiler::uint8 _volume;
-				compiler::uint8 _cmd;
-				compiler::uint8 _parameter;
-				compiler::uint8 _mach;
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+				std::uint8_t _volume;
+				std::uint8_t _cmd;
+				std::uint8_t _parameter;
+				std::uint8_t _mach;
 	#else
-				compiler::uint8 _mach;
-				compiler::uint8 _cmd;
-				compiler::uint8 _parameter;
+				std::uint8_t _mach;
+				std::uint8_t _cmd;
+				std::uint8_t _parameter;
 	#endif
 #endif
 		};
@@ -84,21 +85,21 @@ namespace psycle
 		{
 			MACH_UNDEFINED = -1,
 			MACH_MASTER = 0,
-				MACH_SINE = 1,
-				MACH_DIST = 2,
+				MACH_SINE = 1, ///< now a plugin
+				MACH_DIST = 2, ///< now a plugin
 			MACH_SAMPLER = 3,
-				MACH_DELAY = 4,
-				MACH_2PFILTER = 5,
-				MACH_GAIN = 6,
-				MACH_FLANGER = 7,
+				MACH_DELAY = 4, ///< now a plugin
+				MACH_2PFILTER = 5, ///< now a plugin
+				MACH_GAIN = 6, ///< now a plugin
+				MACH_FLANGER = 7, ///< now a plugin
 			MACH_PLUGIN = 8,
 			MACH_VST = 9,
 			MACH_VSTFX = 10,
 			MACH_SCOPE = 11,
 			MACH_XMSAMPLER = 12,
 			MACH_DUPLICATOR = 13,
-			MACH_MIXER		= 14,
-			MACH_RECORDER	= 15,
+			MACH_MIXER = 14,
+			MACH_RECORDER = 15,
 			MACH_DUMMY = 255
 		};
 

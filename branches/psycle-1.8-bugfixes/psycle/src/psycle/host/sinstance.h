@@ -16,7 +16,7 @@ All rights reserved.
 
 
 #ifndef __AFXMT_H__
-#include "afxmt.h"
+#include <afxmt.h>
 #endif
 
 class CInstanceChecker : public CObject

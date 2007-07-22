@@ -1,10 +1,11 @@
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "internal_machines.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
 #include "AudioDriver.hpp"
-
+#include "global.hpp"
+#include <cstdint>
 namespace psycle
 {
 	namespace host
@@ -142,7 +143,7 @@ namespace psycle
 							int note = pTemp._note+noteOffset[i];
 							if ( note>=notecommands::release) note=119;
 							else if (note<0 ) note=0;
-							pTemp._note=(compiler::uint8)note;
+							pTemp._note = static_cast<std::uint8_t>(note);
 						}
 
 						// the first part can happen if the parameter is the machine itself.
@@ -484,9 +485,11 @@ namespace psycle
 
 						// tell the FX to work, now that the input is ready.
 						{
-#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-							universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
+							#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+								#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+							#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+							#endif
 							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 							pRetMachine->Work(numSamples);
 						}

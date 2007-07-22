@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
-#include <project.private.hpp>
+#include <psycle/project.private.hpp>
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way
@@ -22,6 +22,13 @@
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VSTHost24.hpp"
+#include "loggers.hpp"
+#include "configuration_options.hpp"
+#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+	#include <universalis/processor/exception.hpp>
+#endif
 namespace psycle
 {
 	namespace host
@@ -38,22 +45,26 @@ namespace psycle
 				exceptions::function_error const * const function_error(dynamic_cast<exceptions::function_error const * const>(&e));
 				if(function_error)
 				{
-					operating_system::exceptions::translated const * const translated(dynamic_cast<operating_system::exceptions::translated const * const>(function_error->exception()));
-					if(translated)
-					{
-						crash = true;
-						switch(translated->code())
+					#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+						#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+					#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+						universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
+						if(translated)
 						{
-							// grows the fpu exception mask so that each type of exception is only reported once
-							case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
-							case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
-							case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
-							case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
-							case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
-							case STATUS_FLOAT_STACK_CHECK:                                                                       break;
-							case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
+							crash = true;
+							switch(translated->code())
+							{
+								// grows the fpu exception mask so that each type of exception is only reported once
+								case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
+								case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
+								case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
+								case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
+								case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
+								case STATUS_FLOAT_STACK_CHECK:                                                                       break;
+								case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
+							}
 						}
-					}
+					#endif
 				}
 			}
 			if(!minor_problem)
@@ -71,7 +82,7 @@ namespace psycle
 			if(minor_problem)
 			{
 				s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
-				host::loggers::warning(s.str());
+				loggers::warning(s.str());
 			}
 			else
 			{
@@ -81,16 +92,16 @@ namespace psycle
 					<< "You should save your work to a new file, and restart the host.";
 				if(crash)
 				{
-					//host::loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
-					host::loggers::exception(s.str());
+					//loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
+					loggers::exception(s.str());
 				}
 				else
 				{
-					host::loggers::exception(s.str());
+					loggers::exception(s.str());
 				}
 			}
 			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
-			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
+			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered. Force this we need to use __except instead of catch.
 		}
 		Machine::Machine(MachineType msubclass, MachineMode mode, int id)
 		{
@@ -102,7 +113,11 @@ namespace psycle
 
 		Machine::Machine()
 			: crashed_()
-			, fpu_exception_mask_()
+			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+			#elif	PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				, fpu_exception_mask_()
+			#endif
 			, _macIndex(0)
 			, _type(MACH_UNDEFINED)
 			, _mode(MACHMODE_UNDEFINED)
@@ -170,8 +185,8 @@ namespace psycle
 
 		Machine::~Machine() throw()
 		{
-			zapArray(_pSamplesL);
-			zapArray(_pSamplesR);
+			delete [] _pSamplesL;
+			delete [] _pSamplesR;
 		}
 
 		void Machine::Init()
@@ -468,8 +483,10 @@ namespace psycle
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
 							{
-								#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
-									processor::fpu::exception_mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+								#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									universalis::processor::exceptions::fpu::mask::type fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 								#endif
 								pInMachine->Work(numSamples);
 							}
@@ -524,9 +541,11 @@ namespace psycle
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
 							{
-#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
+								#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+								#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
 								pInMachine->Work(numSamples);
 							}
 						}
@@ -843,8 +862,10 @@ namespace psycle
 
 		void Master::Work(int numSamples)
 		{
-			#if PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
-				processor::fpu::exception_mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+			#elif PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+				universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 			#endif
 			Machine::Work(numSamples);
 			cpu::cycles_type cost = cpu::cycles();

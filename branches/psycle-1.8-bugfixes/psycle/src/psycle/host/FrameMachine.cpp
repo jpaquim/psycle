@@ -1,8 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
-#include <project.private.hpp>
-#include "Psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "FrameMachine.hpp"
+#include "Psycle.hpp"
 #include "NativeGui.hpp"
 #include "Childview.hpp"
 #include "NewVal.hpp"
@@ -12,8 +12,9 @@
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
 #include "Machine.hpp"
-NAMESPACE__BEGIN(psycle)
-	NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)
@@ -631,5 +632,5 @@ NAMESPACE__BEGIN(psycle)
 			dlg.DoModal();
 		}
 
-	NAMESPACE__END
-NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
