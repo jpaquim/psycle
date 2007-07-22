@@ -42,6 +42,8 @@ else
   exit $QMAKE_RETVAL
 fi
 
+echo ""
+
 MAKE_BINARY=$( which make )
 
 if [ "$MAKE_BINARY" == '' ]; then
@@ -49,10 +51,8 @@ if [ "$MAKE_BINARY" == '' ]; then
   echo "Bailing out."
   exit 1
 else
-  echo "Executing make at $MAKE_BINARY."
+  echo "Using make at $MAKE_BINARY."
 fi
-
-echo "Running make."
 
 echo "---"
   $MAKE_BINARY
