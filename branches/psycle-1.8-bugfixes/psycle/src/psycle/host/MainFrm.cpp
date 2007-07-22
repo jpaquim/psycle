@@ -1535,11 +1535,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								<< _pSong->FindBusFromIndex(tmac)
 								<< " : " << ma->_editName;
 							newwin->SetTitleText(winname.str().c_str());
-							newwin->ResizeWindow(0);
+							// C_Tuner.dll crashes if asking size before opening.
+//							newwin->ResizeWindow(0);
 							m_pWndMac[tmac] = newwin;
-							CenterWindowOnPoint(m_pWndMac[tmac], point);
 							newwin->ShowWindow(SW_SHOWNORMAL);
 							newwin->PostOpenWnd();
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						break;
 						}
 					}

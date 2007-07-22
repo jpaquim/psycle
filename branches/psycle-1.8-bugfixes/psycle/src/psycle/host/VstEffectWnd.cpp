@@ -349,7 +349,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				CVstGui* gui = new CVstGui(&machine());
 				CRect rcClient(0,0,0,0);
-				gui->GetViewSize(rcClient);
+				// C_Tuner.dll crashes if asked before opening
+				//gui->GetViewSize(rcClient);
 				gui->Create(NULL, "vstgui", WS_CHILD | WS_VISIBLE,
 					rcClient, this, AFX_IDW_PANE_FIRST, NULL);
 				return gui;

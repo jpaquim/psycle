@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -127,8 +127,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Enable VST",                  ID_OPERATIONS_ENABLED
     END
-    MENUITEM "<<",                          ID_PROGRAMLESS
-    MENUITEM ">>",                          ID_PROGRAMMORE
+    MENUITEM "<",                           ID_PROGRAMLESS
+    MENUITEM ">",                           ID_PROGRAMMORE
     POPUP "Views"
     BEGIN
         MENUITEM "Parameter List",              ID_VIEWS_PARAMETERLIST
@@ -3294,7 +3294,7 @@ BEGIN
     ID_ABOUT_ABOUTVST       "Shows an about box about this plugin."
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
