@@ -10,7 +10,7 @@
 #include "Machine.hpp"
 #include "helpers.hpp"
 #include "MainFrm.hpp"
-#include <childview.hpp>
+#include "childview.hpp"
 #include <iostream>
 #include <iomanip>
 #include "mfc_namespace.hpp"
