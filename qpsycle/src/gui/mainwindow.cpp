@@ -90,7 +90,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-  std::cout << "~MainWindow()\n";
+  std::cout << "~MainWindow() " << this << "\n";
 }
 
 
