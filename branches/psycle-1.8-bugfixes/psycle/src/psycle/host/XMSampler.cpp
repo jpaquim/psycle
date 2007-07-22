@@ -1900,14 +1900,14 @@ namespace psycle
 			case 2:
 			case 3:
 			case 4:
-			case 5: effretVol = -(int)pow(2,volumeModifier-1); effretMode=1; break;
+			case 5: effretVol = -(int)std::pow(2.,volumeModifier-1); effretMode=1; break;
 			case 6: effretVol = 0.66666666f;	 effretMode=2; break;
 			case 7: effretVol = 0.5f;			 effretMode=2; break;
 			case 9:
 			case 10:
 			case 11:
 			case 12:
-			case 13: effretVol = (int)pow(2,volumeModifier - 9); effretMode=1; break;
+			case 13: effretVol = (int)std::pow(2.,volumeModifier - 9); effretMode=1; break;
 			case 14: effretVol = 1.5f;effretMode = 2; break;
 			case 15: effretVol = 2.0f;effretMode = 2; break;
 			case 0:
