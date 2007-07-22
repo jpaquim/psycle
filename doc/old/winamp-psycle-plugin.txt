@@ -1,0 +1,142 @@
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$.........
+$             $$      $$$      $$$     $.........
+$$    $$       $        $     $$.$   $$..........
+.$    $$$     $$       $$     $.$   $$...........
+.$    $.$     $       $$$$    $.$  $$ $..........
+.$    $.$     $  $    $$$$    $$$  $$$ $$........
+.$    $$$     $  $$$$  $$      $         $$......
+.$    $$$$$$$$$    $$$$$$$$$              $......
+.$    $....$$              $$     $$$    $.......
+.$     $$...$$$$$$$$       $$$$ $$$     $........
+.$$     $$..$$   $$$      $$..$$$$    $$.........
+$$$$     $$$$             $$..$$$    $$..........
+$$      $$$$              $..$$     $$...........
+.$$    $$..$$$          $$...$       $...........
+..$$$$$$.....$$$$$$$$$$$$....$      $$...........
+..$$$$$$$$...................$$    $$............
+..$$     $$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$.....
+...$        $$         $$     $$$$         $$....
+...$       $$$         $$     $$.$$         $$...
+..$$      $$ $          $     $$.$$  $       $$..
+..$       $  $      $   $     $$$$   $$$$     $..
+.$$       $  $      $$  $$$     $$    $.$$     $.
+.$       $$$  $$$    $$   $$     $$   $$$$     $$
+.$       $.$   $$    $$$  $$      $$   $$   $$$$.
+.$       $.$$   $$   $$$$$$$       $$   $$$$$....
+.$       $..$    $    $.$$.$       $$    $$......
+.$       $$$$  $$     $$...$     $$$     $$......
+.$       $..$ $$       $...$    $$      $$.......
+.$$$$$$$$$..$$ $$$$$$$$$...$$$$$$      $$........
+................................$$$$$$$..........
+( Thanks _Tao_ )
+
+\/ Description
+---------------
+
+	This Plugin allows you to play .psy files containing Psycle Songs.
+
+	It is based on the source code of Psycle 1.7.4.
+	It is faster than psycle (since this code doesn't calculate the CPU usage
+	nor the vumeters) but with winamp's eq and vis, it can become slower.
+
+	On a side note:
+	---------------
+	Winamp GENERIC EQ from versions previous to 2.9 destroys high frequencies,
+    as reported by other plugin developers.
+
+	If you want to see/hear it, connect the eq, put it on zero (all frequencies as well
+	as the PreAmp). In this position, the eq is internally disabled by winamp.
+	Now, move any slider a little up or down and you'll hear the big difference in the
+	high spectrum (and you'll be able to see it in the Vis as well).
+
+
+
+\/ Limitations
+---------------
+
+	This version of the plugin has the following limitations:
+
+	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
+	· Cannot save the info.
+	· Maybe others that I can't think of right now.
+	· It is known that it crashes a bit frequently, when loading a new song. We haven't
+	  been able to fix this for long, and now the only solution will come from the
+	  recoding of Psycle, which will start shortly.
+
+
+\/ Version Revision
+--------------------
+1.1 (15-07-2003)
+----------------
+· Engine update to 1.7.4. This allows the playback of old and new fileformat,
+  as well as the many improvements made to the host in this period of time.
+
+
+1.0 RC 2 (29-12-2002)
+---------------------
+·Fixed bug where the plugin didn't close all files (when checking
+if it was a .psy file or not) which made those files uneditable until
+Winamp was closed.
+
+
+1.0 RC 1 (25-12-2002)
+--------------------
+·Fixed some problems with playing some songs.
+·Some small changes in the info dialog.
+
+
+Beta 6 (10-12-2002)
+--------------------
+·Engine Update to Psycle 1.7
+·Added configuration Dialog
+·Added Info dialog
+·Fixed the "winamp refreshing always" problem.
+·Linked to MFC statically (hence the increase of size). Should
+ add for stability. Most of the code doesn't need it so it might
+ be possible in the future to remove MFC completely.
+
+
+Beta 5 (??-09-2002)
+--------------------
+·Engine Update to Psycle 1.66
+
+
+Beta 4 (30-03-2002)
+--------------------
+·Engine Update to Psycle 1.6Plus
+
+
+Beta 4 (20-03-2002)
+--------------------
+·Engine Update to Psycle 1.6Final
+·Source Code shared between the Plugin and the Tracker.
+
+
+Beta 3 (12-12-2001)
+--------------------
+·Engine Update to Psycle 1.6 RC1
+·Now it unloads the song when it finishes (frees memory)
+
+Beta 2 (13-06-2001)
+--------------------
+·Engine Update to Psycle 1.5 b3 R5
+
+Beta 1 (30-05-2001)
+--------------------
+·Initial Release
+
+
+\/ Ending
+----------
+
+	Plugin Created by Josep Mª [JAZ] on 13-June-2001
+
+	For any questions, suggestions or bugreports, use the boards on psycledelics:
+
+		http://psycle.pastnotecut.org/
+
+	or Contact me at jaz@pastnotecut.org
+
+	Source Code is avaiable on Psycle's SourceForge site:
+
+		http://sourceforge.net/projects/psycle/

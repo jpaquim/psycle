@@ -1,0 +1,31 @@
+/** \mainpage Welcome to Psycle Design and Source Code Documentation
+
+	http://psycle.sourceforge.net
+
+	\section section__news News
+		foo...,
+
+		\n
+		
+		bar....
+
+	\section section__intro Introduction
+
+		This is a modular music studio.
+
+	\section section__todo Todo and Wishes
+
+		\ref todo
+
+	\section section__tasks Tasks
+		As you can see in the sections above, there's a lot of work to do, and few people: \ref tasks
+
+*/
+
+/**	\page tasks Tasks
+	\verbatim
+	
+		Who does what?
+	
+	\endverbatim
+*/
