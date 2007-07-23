@@ -22,7 +22,7 @@
 
 // broken: #include "psy2filter.h"
 #include "psy3filter.h"
-#include "psy4filter.h"
+//#include "psy4filter.h"
 
 namespace psy
 {
@@ -41,7 +41,7 @@ namespace psy
 		{
 			// borken: filters.push_back( Psy2Filter::Instance() );
 			filters.push_back( Psy3Filter::Instance() );
-			filters.push_back( Psy4Filter::Instance() );
+			//filters.push_back( Psy4Filter::Instance() );
 		}
 
 		bool PsyFilters::loadSong(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )

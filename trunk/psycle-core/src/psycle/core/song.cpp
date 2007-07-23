@@ -596,13 +596,14 @@ break;
 
 			// Get the filename -- code adapted from: 
 			// http://www.programmersheaven.com/mb/CandCPP/318649/318649/readmessage.aspx
+			///\todo the code below is not nice
 			char fileName[255]; 
 			//char slash = File::slash().c_str()[0];  Note: a single forward slash seems to work
 			//						on both windows and linux.
-			char *ptr = strrchr( pathToWav, '/' ); // locate filename part of path.
-			strcpy( fileName,ptr+1 );     // copy remainder of string
-			ptr = strchr( fileName,'.');  // strip file extension
-			if ( ptr != 0 ) *ptr = 0;     // if the extension exists, truncate it
+			char const *ptr = std::strrchr( pathToWav, '/' ); // locate filename part of path.
+			std::strcpy( fileName,ptr+1 );     // copy remainder of string
+			ptr = std::strchr( fileName,'.');  // strip file extension
+			if ( ptr != 0 ) *const_cast<char*>(ptr) = 0;     // if the extension exists, truncate it
 							
 
 			std::strncpy(_pInstrument[iInstr]->waveName, fileName, 31);
