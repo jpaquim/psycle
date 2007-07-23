@@ -153,8 +153,7 @@ namespace psycle
 			{
 				_pInfo = GetInfo();
 			}
-			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "GetInfo", &e); }
-			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "GetInfo"); }
+			PSYCLE__HOST__CATCH_ALL(*this)
 			if(_pInfo->Version < MI_VERSION) throw std::runtime_error("plugin format is too old");
 			_isSynth = _pInfo->Flags == 3;
 			if(_isSynth) _mode = MACHMODE_GENERATOR;
@@ -177,8 +176,7 @@ namespace psycle
 			{
 				proxy()(GetInterface());
 			}
-			catch(std::exception const & e) { exceptions::function_errors::rethrow(*this, "CreateMachine", &e); }
-			catch(...) { exceptions::function_errors::rethrow<void*>(*this, "CreateMachine"); }
+			PSYCLE__HOST__CATCH_ALL(*this)
 		}
 
 		void Plugin::Init()
