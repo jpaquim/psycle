@@ -94,6 +94,7 @@ namespace psycle
 			bool _RecordMouseTweaksSmooth;
 			bool useDoubleBuffer;
 			bool _showAboutAtStart;
+			int _pageUpSteps;		// 0 -> one beat, 1 -> one bar , > 1 -> steps
 
 			int mv_triangle_size;
 			int pv_timesig;

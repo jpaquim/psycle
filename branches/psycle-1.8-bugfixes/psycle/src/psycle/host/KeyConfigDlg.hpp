@@ -5,6 +5,7 @@
 #include "resources/resources.hpp"
 #include <afxwin.h>
 #include "mfc_namespace.hpp"
+#include "afxwin.h"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		/// key config window.
@@ -71,6 +72,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		public:
 			// number of beats to show a full row in the pattern editor.
 			CComboBox m_timesig;
+			CComboBox m_pageupsteps;
+			CButton m_allowinstances;
 		};
 
 		//{{AFX_INSERT_LOCATION}}

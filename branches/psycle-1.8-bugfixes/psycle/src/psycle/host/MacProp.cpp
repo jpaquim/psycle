@@ -92,7 +92,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_view->AddMacViewUndo();
 				m_view->updatePar=thisMac;
-				m_view->Repaint(DMMacRefresh);
+				m_view->Repaint(draw_modes::machine);
 			}
 		}
 		void CMacProp::OnBypass() 
@@ -102,7 +102,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_view->AddMacViewUndo();
 				m_view->updatePar=thisMac;
-				m_view->Repaint(DMMacRefresh);
+				m_view->Repaint(draw_modes::machine);
 			}
 		}
 
@@ -141,7 +141,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if ( m_view != NULL )
 			{
-				m_view->Repaint(DMAllMacsRefresh);
+				m_view->Repaint(draw_modes::all_machines);
 			}
 		}
 
@@ -167,7 +167,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if ( m_view != NULL )
 				{
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
-					if (m_view->viewMode==VMMachine)
+					if (m_view->viewMode==view_modes::machine)
 					{
 						m_view->Repaint();
 					}
@@ -249,7 +249,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			pParentMain->UpdateEnvInfo();
 			pParentMain->UpdateComboGen();
-			if (m_view->viewMode==VMMachine)
+			if (m_view->viewMode==view_modes::machine)
 			{
 				m_view->Repaint();
 			}

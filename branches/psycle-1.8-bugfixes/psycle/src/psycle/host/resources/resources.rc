@@ -1184,14 +1184,14 @@ CAPTION "Keyboard and Misc."
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Keymap",IDC_STATIC,3,3,125,272
-    LISTBOX         IDC_CMDLIST,8,13,115,222,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+    LISTBOX         IDC_CMDLIST,7,13,115,222,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "Key:",IDC_STATIC,9,242,15,10
     CONTROL         "HotKey1",IDC_KEY0,"msctls_hotkey32",WS_BORDER | 
                     WS_TABSTOP,29,239,95,15
     PUSHBUTTON      "None",IDC_NONE,8,258,55,12
     PUSHBUTTON      "Special Keys",IDC_SPECIALKEYS,68,258,55,12
-    GROUPBOX        "Behaviour",IDC_STATIC,133,3,183,169
+    GROUPBOX        "Behaviour",IDC_STATIC,133,3,183,140
     CONTROL         "Right CTRL= play . Edit Toggle = stop",IDC_PLAY_R_CTRL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,13,172,10
     CONTROL         "FT2 Style Home/End Behaviour",IDC_FT2_HOME_END,"Button",
@@ -1207,28 +1207,28 @@ BEGIN
     CONTROL         "Cursor Always Moves Down in Effect Column",
                     IDC_CURSORDOWN,"Button",BS_AUTOCHECKBOX | BS_MULTILINE,
                     138,82,172,10
-    GROUPBOX        "Miscellaneous Options",IDC_STATIC,133,178,183,64
+    GROUPBOX        "Miscellaneous Options",IDC_STATIC,133,149,183,93
     CONTROL         "Autosave Current Song After (mins)",
                     IDC_AUTOSAVE_CURRENT_SONG,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,138,191,126,10
-    EDITTEXT        IDC_AUTOSAVE_MINS,276,190,36,12,ES_AUTOHSCROLL | 
+                    WS_TABSTOP,138,160,126,10
+    EDITTEXT        IDC_AUTOSAVE_MINS,276,159,36,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Spin1",IDC_AUTOSAVE_MINS_SPIN,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,286,190,10,12
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,301,160,10,12
     CONTROL         """Save File?"" Reminders on Load, New or Exit",
                     IDC_FILE_SAVE_REMINDERS,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE,138,203,172,10
+                    BS_MULTILINE,138,172,172,10
     CONTROL         "Show Song Info on Load",IDC_SHOW_INFO_ON_LOAD,"Button",
-                    BS_AUTOCHECKBOX | BS_MULTILINE,138,215,172,10
-    RTEXT           "Default New Pattern Lines:",IDC_STATIC,136,226,87,12,
+                    BS_AUTOCHECKBOX | BS_MULTILINE,138,184,172,10
+    RTEXT           "Default New Pattern Lines:",IDC_STATIC,144,195,87,12,
                     SS_CENTERIMAGE
-    EDITTEXT        IDC_EDIT_DEFLINES,226,226,41,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_EDIT_DEFLINES,235,195,32,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Spin1",IDC_SPIN_DEFLINES,"msctls_updown32",
                     UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
-                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,226,11,12
-    CTEXT           "",IDC_TEXT_DEFLINES,270,226,42,12,SS_CENTERIMAGE | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,196,11,12
+    CTEXT           "",IDC_TEXT_DEFLINES,270,195,42,12,SS_CENTERIMAGE | 
                     SS_SUNKEN
     GROUPBOX        "Keymap Presets",IDC_STATIC,133,247,184,28
     PUSHBUTTON      "Defaults",IDC_DEFAULTS,138,258,55,12
@@ -1243,9 +1243,14 @@ BEGIN
     CONTROL         "Pattern navigation ignores step (Always jumps one)",
                     IDC_NAVIGATION_IGNORES_STEP,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,138,115,175,11
-    LTEXT           "Time Signature (beats)",IDC_STATIC,150,130,72,8
-    COMBOBOX        IDC_COMBO1,229,129,37,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Bar Highlighting (beats/bar)",IDC_STATIC,145,226,87,8
+    COMBOBOX        IDC_COMBO1,235,225,33,75,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
+    CONTROL         "Allow Multiple Instances",IDC_MULTIPLEINSTANCES,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,138,210,175,11
+    COMBOBOX        IDC_PAGEUPSTEPS,252,128,58,167,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Page Up / Page Down step by",IDC_STATIC,150,129,98,8
 END
 
 IDD_NEWMACHINE DIALOGEX 0, 0, 390, 303
@@ -2937,6 +2942,72 @@ BEGIN
 0x3531, "\000" 
     IDC_COMBO1, 0x403, 3, 0
 0x3631, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 9, 0
+0x6e6f, 0x2065, 0x6562, 0x7461, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 8, 0
+0x6e6f, 0x2065, 0x6162, 0x0072, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0032, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0033, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0034, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0035, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0036, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0037, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0038, 
+    IDC_PAGEUPSTEPS, 0x403, 2, 0
+0x0039, 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3031, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3131, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3231, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3331, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3431, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3531, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3631, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3731, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3831, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3931, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3032, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3132, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3232, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3332, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3432, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3532, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3632, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3732, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3832, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3932, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3033, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3133, "\000" 
+    IDC_PAGEUPSTEPS, 0x403, 3, 0
+0x3233, "\000" 
     0
 END
 

@@ -6,6 +6,7 @@
 #include "inputhandler.hpp"
 #include "Configuration.hpp"
 #include "SpecialKeys.hpp"
+#include ".\keyconfigdlg.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -14,8 +15,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CKeyConfigDlg::CKeyConfigDlg() : CPropertyPage(CKeyConfigDlg::IDD)
 		{
 			m_prvIdx = 0;
-			//{{AFX_DATA_INIT(CKeyConfigDlg)
-			//}}AFX_DATA_INIT
 			bInit = FALSE;
 		}
 
@@ -24,7 +23,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//removed by alk
 			//DDX_Control(pDX, IDC_MOVE_CURSOR_PASTE, m_move_cursor_paste);
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CKeyConfigDlg)
 			DDX_Control(pDX, IDC_AUTOSAVE_MINS_SPIN, m_autosave_spin);
 			DDX_Control(pDX, IDC_AUTOSAVE_MINS, m_autosave_mins);
 			DDX_Control(pDX, IDC_AUTOSAVE_CURRENT_SONG, m_autosave);
@@ -45,8 +43,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_EDIT_DEFLINES, m_numlines);
 			DDX_Control(pDX, IDC_SPIN_DEFLINES, m_spinlines);
 			DDX_Control(pDX, IDC_TEXT_DEFLINES, m_textlines);
-			//}}AFX_DATA_MAP
 			DDX_Control(pDX, IDC_COMBO1, m_timesig);
+			DDX_Control(pDX, IDC_PAGEUPSTEPS, m_pageupsteps);
+			DDX_Control(pDX, IDC_MULTIPLEINSTANCES, m_allowinstances);
 		}
 
 		BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
@@ -105,41 +104,38 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CDialog::OnInitDialog();
 			
+			//TRACE("%d %d %d %d %d %d\n",HKCOMB_A,HKCOMB_C,HKCOMB_S,HKCOMB_CA,HKCOMB_SA,HKCOMB_SCA);
+			// prevent ALT in hotkey	
+			WORD rules=HKCOMB_A|HKCOMB_CA|HKCOMB_SA|HKCOMB_SCA;
+			WORD subst=0;
+			m_hotkey0.SetRules(rules,subst);
+
 			m_cmdCtrlPlay.SetCheck(Global::pInputHandler->bCtrlPlay?1:0);
 			m_cmdNewHomeBehaviour.SetCheck(Global::pInputHandler->bFT2HomeBehaviour?1:0);
 			m_cmdFT2Del.SetCheck(Global::pInputHandler->bFT2DelBehaviour?1:0);
 			m_cmdShiftArrows.SetCheck(Global::pInputHandler->bShiftArrowsDoSelect?1:0);
-
-			m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
-			m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
-			m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
-			//m_move_cursor_paste.SetCheck(Global::pConfig->_MoveCursorPaste?1:0);
-			m_navigation_ignores_step.SetCheck(Global::pConfig->_NavigationIgnoresStep?1:0);
-			m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
-			m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
-			
-			// prevent ALT in hotkey	
-
-			//TRACE("%d %d %d %d %d %d\n",HKCOMB_A,HKCOMB_C,HKCOMB_S,HKCOMB_CA,HKCOMB_SA,HKCOMB_SCA);
-
-			WORD rules=HKCOMB_A|HKCOMB_CA|HKCOMB_SA|HKCOMB_SCA;
-			WORD subst=0;
-
-			m_hotkey0.SetRules(rules,subst);
-
 			m_wrap.SetCheck(Global::pConfig->_wrapAround?1:0);
 			m_centercursor.SetCheck(Global::pConfig->_centerCursor?1:0);
 			m_cursordown.SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
+			m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
+			m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
+			m_navigation_ignores_step.SetCheck(Global::pConfig->_NavigationIgnoresStep?1:0);
 
-			m_spinlines.SetRange(1,MAX_LINES);
+			m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
 			m_autosave_spin.SetRange(1,60);
+			m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
+			//m_move_cursor_paste.SetCheck(Global::pConfig->_MoveCursorPaste?1:0);
+			m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
+			m_spinlines.SetRange(1,MAX_LINES);
+			m_allowinstances.SetCheck(Global::pConfig->_allowMultipleInstances?1:0);
 			
 			char buffer[16];
-			itoa(Global::pConfig->defaultPatLines,buffer,10);
-			m_numlines.SetWindowText(buffer);
 			itoa(Global::pConfig->autosaveSongTime,buffer,10);
 			m_autosave_mins.SetWindowText(buffer);
+			itoa(Global::pConfig->defaultPatLines,buffer,10);
+			m_numlines.SetWindowText(buffer);
 			m_timesig.SetCurSel(Global::pConfig->pv_timesig-1);
+			m_pageupsteps.SetCurSel(Global::pConfig->_pageUpSteps);
 			
 			UDACCEL acc;
 			acc.nSec = 4;
@@ -314,6 +310,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
 			Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;
 			Global::pConfig->pv_timesig = m_timesig.GetCurSel()+1;
+			Global::pConfig->_allowMultipleInstances = m_allowinstances.GetCheck()?true:false;
+			Global::pConfig->_pageUpSteps= m_pageupsteps.GetCurSel();
 			
 			char buffer[32];
 			m_numlines.GetWindowText(buffer,16);
@@ -516,4 +514,3 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
-

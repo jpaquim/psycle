@@ -8,8 +8,6 @@
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		#define MAX_DRAW_MESSAGES 32
-
 		class CMasterDlg;
 		class CWireDlg;
 		class CGearTracker;
@@ -18,48 +16,69 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		#define MAX_WIRE_DIALOGS 16
 
-		enum 
+		#define MAX_DRAW_MESSAGES 32
+
+		struct draw_modes
 		{
-			DMAll = 0,		// Repaints everything (means, slow). Used when switching views, or when a
-							// whole update is needed (For example, when changing pattern Properties, or TPB)
-			DMAllMacsRefresh, //Used to refresh all the machines, without refreshing the background/wires
-			DMMacRefresh,	// Used to refresh the image of one machine (mac num in "updatePar")
+			enum draw_mode
+			{
+				all, ///< Repaints everything (means, slow). Used when switching views, or when a
+				///< whole update is needed (For example, when changing pattern Properties, or TPB)
 
-			DMPattern,		// Use this when switching Patterns (changing from one to another)
-			DMData,			// Data has Changed. Which data to update is indicated with DrawLineStart/End
-							// and DrawTrackStart/End
-							// Use it when editing and copy/pasting
-			DMHScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
-							// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
-			DMVScroll,		// Refresh called by the scrollbars or by mouse scrolling (when selecting).
-							// New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
-		//	DMResize,		// Indicates the Refresh is called from the "OnSize()" event.
-			DMPlayback,		// Indicates it needs a refresh caused by Playback (update playback cursor)
-			DMPlaybackChange,// Indicates that while playing, a pattern switch is needed.
-			DMCursor,		// Indicates a movement of the cursor. update the values to "editcur" directly
-							// and call this function.
-							// this is arbitrary message as cursor is checked
-			DMSelection,	// The selection has changed. use "blockSel" to indicate the values.
-			DMTrackHeader,  // Track header refresh (mute/solo, Record updating)
-		//	DMPatternHeader,// Octave, Pattern name, Edit Mode on/off
-			DMNone			// Do not use this one directly. It is used to detect refresh calls from the OS.
+				all_machines, ///< Used to refresh all the machines, without refreshing the background/wires
 
-			// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
-			// "DrawPatternEditor()".
-			// Note: Modes are sorted by priority. (although it is not really used)
+				machine, ///< Used to refresh the image of one machine (mac num in "updatePar")
 
-			// !!!BIG ADVISE!!! : The execution of Repaint(mode) does not imply an instant refresh of
-			//						the Screen, and what's worse, you might end calling Repaint(anothermode)
-			//						previous of the first refresh. In PreparePatternRefresh() there's code
-			//						to avoid problems when two modes do completely different things. On
-			//						other cases, it still ends to wrong content being shown.
+				pattern, ///< Use this when switching Patterns (changing from one to another)
+
+				data, ///< Data has Changed. Which data to update is indicated with DrawLineStart/End
+				///< and DrawTrackStart/End
+				///< Use it when editing and copy/pasting
+
+				horizontal_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
+				///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+
+				vertical_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
+				///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+
+				//resize, ///< Indicates the Refresh is called from the "OnSize()" event.
+
+				playback, ///< Indicates it needs a refresh caused by Playback (update playback cursor)
+
+				playback_change, ///< Indicates that while playing, a pattern switch is needed.
+
+				cursor, ///< Indicates a movement of the cursor. update the values to "editcur" directly
+				///< and call this function.
+				///< this is arbitrary message as cursor is checked
+
+				selection, ///< The selection has changed. use "blockSel" to indicate the values.
+
+				track_header, ///< Track header refresh (mute/solo, Record updating)
+
+				//pattern_header, ///< Octave, Pattern name, Edit Mode on/off
+
+				none ///< Do not use this one directly. It is used to detect refresh calls from the OS.
+
+				// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
+				// "DrawPatternEditor()".
+				// Note: Modes are sorted by priority. (although it is not really used)
+
+				// !!!BIG ADVISE!!! : The execution of Repaint(mode) does not imply an instant refresh of
+				//						the Screen, and what's worse, you might end calling Repaint(anothermode)
+				//						previous of the first refresh. In PreparePatternRefresh() there's code
+				//						to avoid problems when two modes do completely different things. On
+				//						other cases, it still ends to wrong content being shown.
+			};
 		};
 
-		enum
+		struct view_modes
 		{
-			VMMachine,
-			VMPattern,
-			VMSequence
+			enum view_mode
+			{
+				machine,
+				pattern,
+				sequence
+			};
 		};
 
 		class CCursor
@@ -188,7 +207,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void InitTimer();
 			void ValidateParent();
 			void EnableSound();
-			void Repaint(int drawMode=DMAll);
+			void Repaint(draw_modes::draw_mode drawMode = draw_modes::all);
 
 			void ShowPatternDlg(void);
 			void BlockInsChange(int x);
@@ -235,7 +254,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 												// Result: Update the selected region depending on the new and old values.
 			void EndBlock(int track,int line, int col);
 			void CopyBlock(bool cutit);
-			void PasteBlock(int tx,int lx,bool mix);
+			void PasteBlock(int tx,int lx,bool mix,bool save=true);
+			void SwitchBlock(int tx, int lx);
 			void DeleteBlock();
 			void BlockUnmark(void);
 			void SaveBlock(FILE* file);
@@ -246,13 +266,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void IncPosition(bool bRepeat=false);
 			void DecPosition();
 
-			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=TRUE, int counter=0);
+			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
 
 			void AddMacViewUndo(); // place holder
@@ -299,6 +319,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			bool blockSelected;
 			bool blockStart;
+			bool blockswitch;
 			int blockSelectBarState; //This is used to remember the state of the select bar function
 			bool bScrollDetatch;
 			CCursor editcur;	// Edit Cursor Position in Pattern.
@@ -313,7 +334,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int ChordModeLine;
 			int ChordModeTrack;
 			int updateMode;
-			int updatePar;			// VMPattern: Display update mode. VMMachine: Machine number to update.
+			int updatePar;			// view_modes::pattern: Display update mode. view_modes::machine: Machine number to update.
 			int viewMode;
 			int XOFFSET;
 			int YOFFSET;
@@ -436,7 +457,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			// Enviroment variables
 			int smac;
-			int smacmode;
+			struct smacmodes
+			{
+				enum smacmode
+				{
+					move, //< moving a machine
+					panning //< panning on a machine
+				};
+			};
+			smacmodes::smacmode smacmode;
 			int wiresource;
 			int wiredest;
 			int wiremove;
@@ -466,6 +495,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int	blockNTracks;
 			int	blockNLines;
+			CSelection blockLastOrigin;
 			
 			unsigned char patBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int patBufferLines;
@@ -503,8 +533,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
-			// Generated message map functions
-			//{{AFX_MSG(CChildView)
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 			afx_msg void OnRButtonDown( UINT nFlags, CPoint point );
@@ -589,9 +617,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI);
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
+			afx_msg void OnPopBlockswitch();
+			afx_msg void OnUpdatePopBlockswitch(CCmdUI *pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
+			DECLARE_MESSAGE_MAP()
 };
 
 
@@ -607,7 +636,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			switch(note)
 			{
-			case 255: TXTFLAT(devc,szBlankNote,x,y,srx,sry);break;
+			case notecommands::empty: TXTFLAT(devc,szBlankNote,x,y,srx,sry);break;
 		//	case 255: TXTFLAT(devc,"   ",x,y,srx,sry);break;
 			case 0:   TXTFLAT(devc,"C-0",x,y,srx,sry);break;
 			case 1:   TXTFLAT(devc,"C#0",x,y,srx,sry);break;

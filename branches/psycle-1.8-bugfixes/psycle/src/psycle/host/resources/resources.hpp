@@ -285,6 +285,7 @@
 #define IDC_COMBO1                      1137
 #define IDC_PANLABEL                    1138
 #define IDC_COMBO5                      1138
+#define IDC_PAGEUPSTEPS                 1138
 #define IDC_NNA_COMBO                   1139
 #define IDC_RPAN                        1140
 #define IDC_RCUT                        1141
@@ -781,6 +782,8 @@
 #define IDC_COMBO2                      1551
 #define IDC_LISTSTYLE                   1551
 #define IDC_COMBO_NOISESHAPING          1551
+#define IDC_NAVIGATION_IGNORES_STEP2    1551
+#define IDC_MULTIPLEINSTANCES           1551
 #define IDC_COMBO3                      1552
 #define IDC_INS_NNACOMBO                1552
 #define IDC_COMBO4                      1553
@@ -1186,7 +1189,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        276
 #define _APS_NEXT_COMMAND_VALUE         34207
-#define _APS_NEXT_CONTROL_VALUE         1791
+#define _APS_NEXT_CONTROL_VALUE         1792
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

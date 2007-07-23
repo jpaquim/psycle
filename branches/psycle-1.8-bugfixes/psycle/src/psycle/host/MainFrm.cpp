@@ -1737,9 +1737,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				
 				if(cpid!=_pSong->playOrder[ep])
 				{
-					m_wndView.Repaint(DMPattern);
+					m_wndView.Repaint(draw_modes::pattern);
 					if (Global::pPlayer->_playing) {
-						m_wndView.Repaint(DMPlayback);
+						m_wndView.Repaint(draw_modes::playback);
 					}
 				}		
 			}
@@ -1758,7 +1758,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				_pSong->playOrder[sep]=ep;
 				UpdatePlayOrder(true);
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::pattern);
 			}
 			m_wndView.SetFocus();
 			*/		
@@ -1799,7 +1799,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::pattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1821,7 +1821,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::pattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1847,7 +1847,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::pattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1873,7 +1873,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			UpdatePlayOrder(false);
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::pattern);
 			m_wndView.SetFocus();
 		}
 
@@ -1902,7 +1902,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				UpdatePlayOrder(true);
 				UpdateSequencer(m_wndView.editPosition);
 
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::pattern);
 			}
 			m_wndView.SetFocus();
 		}
@@ -1924,7 +1924,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				UpdatePlayOrder(true);
 				UpdateSequencer(m_wndView.editPosition);
 
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::pattern);
 			}
 			m_wndView.SetFocus();
 		}
@@ -1980,7 +1980,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndView.editPosition=litems[selcount-1]+1;
 			UpdatePlayOrder(true);
 			UpdateSequencer(m_wndView.editPosition);
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::pattern);
 
 			delete [] litems; litems = 0;
 			m_wndView.SetFocus();
@@ -2041,7 +2041,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			UpdatePlayOrder(true);
 			UpdateSequencer(m_wndView.editPosition);
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::pattern);
 			m_wndView.SetFocus();
 		}
 
@@ -2105,7 +2105,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							_pSong->playOrderSel[i] = true;
 						}
 						UpdateSequencer(m_wndView.editPosition);
-						m_wndView.Repaint(DMPattern);
+						m_wndView.Repaint(draw_modes::pattern);
 
 					}
 				}
@@ -2133,7 +2133,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				_pSong->playLength=1;
 				UpdatePlayOrder(true);
 				UpdateSequencer();
-				m_wndView.Repaint(DMPattern);
+				m_wndView.Repaint(draw_modes::pattern);
 			}
 			m_wndView.SetFocus();
 			
@@ -2218,7 +2218,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			seqcopybufferlength = 0;
 			UpdateSequencer();
-			m_wndView.Repaint(DMPattern);
+			m_wndView.Repaint(draw_modes::pattern);
 			m_wndView.SetFocus();
 		}
 
@@ -2314,7 +2314,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
 					{
 						m_wndView.editPosition=Global::pPlayer->_playPosition;
-						m_wndView.Repaint(DMPattern);
+						m_wndView.Repaint(draw_modes::pattern);
 					}
 					int top = Global::pPlayer->_playPosition - 0xC;
 					if (top < 0) top = 0;
@@ -2589,7 +2589,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				oss << _pSong->name
 					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
 
-				if ((m_wndView.viewMode==VMPattern)	&& (!Global::pPlayer->_playing))
+				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::pPlayer->_playing))
 				{
 					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
 					int machine = toffset[2];

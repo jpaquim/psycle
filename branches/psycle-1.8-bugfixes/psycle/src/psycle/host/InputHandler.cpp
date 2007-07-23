@@ -596,31 +596,34 @@ namespace psycle
 				bDoingSelection = false;
 				break;
 			case cdefNavPageUp:
-				//if added by sampler to move backward 16 lines when playing
-				if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 				{
-					if (Global::pPlayer->_playBlock )
+					int stepsize(0);
+					if ( Global::pConfig->_pageUpSteps == 0) stepsize = Global::_pSong->LinesPerBeat();
+					else if ( Global::pConfig->_pageUpSteps == 1)stepsize = Global::_pSong->LinesPerBeat()*Global::pConfig->pv_timesig;
+					else stepsize = Global::pConfig->_pageUpSteps;
+
+					//if added by sampler to move backward 16 lines when playing
+					if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+					{
+						if (Global::pPlayer->_playBlock )
 						{
-							if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
 							else
 							{
 								Global::pPlayer->_lineCounter = 0;
 								Global::pPlayer->ExecuteLine();
 							}
 						}
-					else
-					{
-						if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
 						else
 						{
-							if (Global::pPlayer->_playPosition > 0)
-							{
-								Global::pPlayer->_playPosition -= 1;
-								Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - 16;												
-							}
+							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
 							else
 							{
-								if (Global::pPlayer->_lineCounter >= 16) Global::pPlayer->_lineCounter -= 16;
+								if (Global::pPlayer->_playPosition > 0)
+								{
+									Global::pPlayer->_playPosition -= 1;
+									Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - stepsize;												
+								}
 								else
 								{
 									Global::pPlayer->_lineCounter = 0;
@@ -629,47 +632,54 @@ namespace psycle
 							}
 						}
 					}
-				}
-				//end of if added by sampler
-				else
-				{
-					pChildView->bScrollDetatch=false;
-					pChildView->ChordModeOffs = 0;
-					
-					if ( bDoingSelection && !pChildView->blockSelected)
+					//end of if added by sampler
+					else
 					{
-						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						pChildView->bScrollDetatch=false;
+						pChildView->ChordModeOffs = 0;
+
+						if ( bDoingSelection && !pChildView->blockSelected)
+						{
+							pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						pChildView->PrevLine(stepsize,false);
+						if ( bDoingSelection )
+						{
+							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 					}
-					pChildView->PrevLine(16,false);
-					if ( bDoingSelection )
-					{
-						pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
-					}
-					else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				}
 				break;
 
 			case cdefNavPageDn:
-				//if added by sampler
-				if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 				{
-					Global::pPlayer->_lineCounter += 16;
-				}
-				//end of if added by sampler
-				else
-				{
-					pChildView->bScrollDetatch=false;
-					pChildView->ChordModeOffs = 0;
-					if ( bDoingSelection && !pChildView->blockSelected)
+					int stepsize(0);
+					if ( Global::pConfig->_pageUpSteps == 0) stepsize = Global::_pSong->LinesPerBeat();
+					else if ( Global::pConfig->_pageUpSteps == 1)stepsize = Global::_pSong->LinesPerBeat()*Global::pConfig->pv_timesig;
+					else stepsize = Global::pConfig->_pageUpSteps;
+
+					//if added by sampler
+					if (Global::pPlayer->_playing && Global::pConfig->_followSong)
 					{
-						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						Global::pPlayer->_lineCounter += stepsize;
 					}
-					pChildView->AdvanceLine(16,false);
-					if ( bDoingSelection )
+					//end of if added by sampler
+					else
 					{
-						pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						pChildView->bScrollDetatch=false;
+						pChildView->ChordModeOffs = 0;
+						if ( bDoingSelection && !pChildView->blockSelected)
+						{
+							pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						pChildView->AdvanceLine(stepsize,false);
+						if ( bDoingSelection )
+						{
+							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 					}
-					else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 				}
 				break;
 			
@@ -700,7 +710,7 @@ namespace psycle
 				}
 				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
-				pChildView->Repaint(DMCursor);
+				pChildView->Repaint(draw_modes::cursor);
 				break;
 			
 			case cdefNavBottom:
@@ -730,7 +740,7 @@ namespace psycle
 				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
 
 
-				pChildView->Repaint(DMCursor);
+				pChildView->Repaint(draw_modes::cursor);
 				break;
 			
 			case cdefRowInsert:
@@ -742,13 +752,27 @@ namespace psycle
 			case cdefRowDelete:
 				pChildView->bScrollDetatch=false;
 				pChildView->ChordModeOffs = 0;
-				pChildView->DeleteCurr();
+				if (pChildView->blockSelected)
+				{
+					pChildView->DeleteBlock();
+				}
+				else
+				{
+					pChildView->DeleteCurr();
+				}
 				break;
 
 			case cdefRowClear:
 				pChildView->bScrollDetatch=false;
 				pChildView->ChordModeOffs = 0;
-				pChildView->ClearCurr();		
+				if (pChildView->blockSelected)
+				{
+					pChildView->DeleteBlock();
+				}
+				else
+				{
+					pChildView->ClearCurr();		
+				}
 				break;
 
 			case cdefBlockStart:
@@ -937,7 +961,7 @@ namespace psycle
 				
 				if(bCtrlPlay) Stop();
 				
-		//		pChildView->Repaint(DMPatternHeader);
+		//		pChildView->Repaint(draw_modes::patternHeader);
 				break;
 
 			case cdefPlayStop:
@@ -964,7 +988,7 @@ namespace psycle
 				break;
 
 			case cdefInfoPattern:
-				if ( pChildView->viewMode == VMPattern )
+				if ( pChildView->viewMode == view_modes::pattern )
 				{
 					pChildView->OnPopPattenproperties();
 				}

@@ -10,7 +10,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
-				if(viewMode == VMPattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
+				if(viewMode == view_modes::pattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
 				{ 
 					EnterNote(outnote,0,true);	// note end
 				}
@@ -27,7 +27,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ChordModeOffs = 0;
 				AdvanceLine(patStep,Global::pConfig->_wrapAround,true);
 		//		pParentMain->StatusBarIdle();
-		//		Repaint(DMCursor);
+		//		Repaint(draw_modes::cursor);
 			}
 		}
 
@@ -43,7 +43,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// undo code not required, enter not and msbput handle it
 			BOOL bRepeat = nFlags&0x4000;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{
 				if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
 				{
@@ -58,7 +58,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
-			else if (viewMode == VMSequence && bEditMode)
+			else if (viewMode == view_modes::sequence && bEditMode)
 			{
 				bool success;
 				// add data
@@ -81,11 +81,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(cmd.IsValid())
 			{
 				if((cmd.GetType() == CT_Immediate) ||
-				(cmd.GetType() == CT_Editor && viewMode == VMPattern) ) 
+				(cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
 				{			
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 				}
-				else if (cmd.GetType() == CT_Note && viewMode != VMSequence)
+				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
 				{
 					if(!bRepeat) 
 					{	
@@ -124,7 +124,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 												// and outnote CAN NOT be negative since it's taken from
 												//	(dwParam1 & 0xFF00) >>8;
 			*/
-				if(viewMode == VMPattern && bEditMode)
+				if(viewMode == view_modes::pattern && bEditMode)
 				{ 
 					// add note
 					if(velocity > 0 && outnote != notecommands::release)
@@ -168,7 +168,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			entry._inst = command;
 			entry._note = notecommands::tweak;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -219,7 +219,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -250,7 +250,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			entry._inst = command;
 			entry._note = notecommands::tweakslide;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -300,7 +300,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -328,9 +328,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			entry._inst = _pSong->auxcolSelected;
 			entry._cmd = command;
 			entry._parameter = value;
-			entry._note = 255;
+			entry._note = notecommands::empty;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -376,7 +376,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pentry->_inst = entry._inst;
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-					Repaint(DMData);
+					Repaint(draw_modes::data);
 				}
 			}
 		//	else
@@ -402,7 +402,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			entry._inst = command;
 			entry._note = notecommands::midicc;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -452,7 +452,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -480,9 +480,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			entry._inst = value;
 			entry._cmd = 255;
 			entry._parameter = 255;
-			entry._note = 255;
+			entry._note = notecommands::empty;
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -524,7 +524,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pentry->_inst = entry._inst;
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-					Repaint(DMData);
+					Repaint(draw_modes::data);
 				}
 			}
 		//	else
@@ -545,7 +545,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -583,7 +583,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						entry->_note = notecommands::tweak;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -594,7 +594,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// UNDO CODE MIDI PATTERN TWEAK
 			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
-			if(viewMode == VMPattern && bEditMode)
+			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
 				const int ps = _ps();
@@ -632,7 +632,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						entry->_note = notecommands::tweakslide;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(DMData);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -647,7 +647,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int ps = _ps();
 			unsigned char * toffset;
 			
-			if (note < 0 || note > notecommands::tweakslide ) return;
+			if (note < 0 || note >= notecommands::invalid ) return;
 
 			// octave offset
 			if(note<notecommands::release)
@@ -678,6 +678,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								}
 							}
 						}
+						///\todo : errm.. == or !=  ????
 						if (i == _pSong->SONGTRACKS)
 						{
 							Global::pInputHandler->StopNote(note,false);
@@ -861,12 +862,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			bScrollDetatch=false;
 			Global::pInputHandler->bDoingSelection = false;
-			Repaint(DMData);
+			Repaint(draw_modes::data);
 		}
 
 		void CChildView::EnterNoteoffAny()
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::pattern)
 			{
 				const int ps = _ps();
 				unsigned char * toffset;
@@ -897,7 +898,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				bScrollDetatch=false;
 				Global::pInputHandler->bDoingSelection = false;
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -962,7 +963,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bScrollDetatch=false;
 			Global::pInputHandler->bDoingSelection = false;
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-			Repaint(DMData);
+			Repaint(draw_modes::data);
 			return true;
 		}
 
@@ -990,7 +991,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			Repaint(DMData);
+			Repaint(draw_modes::data);
 		}
 
 		void CChildView::DeleteCurr()
@@ -1022,7 +1023,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			Repaint(DMData);
+			Repaint(draw_modes::data);
 		}
 
 		void CChildView::InsertCurr()
@@ -1046,7 +1047,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			Repaint(DMData);
+			Repaint(draw_modes::data);
 		}
 
 
@@ -1124,7 +1125,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if (updateDisplay) 
 			{
-				Repaint(DMCursor);
+				Repaint(draw_modes::cursor);
 			}
 		}
 
@@ -1149,7 +1150,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if (updateDisplay) 
 			{
-				Repaint(DMCursor);
+				Repaint(draw_modes::cursor);
 			}
 		}
 
@@ -1174,7 +1175,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 			}
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::cursor);
 		}
 
 		void CChildView::AdvanceLine(int x,bool wrap,bool updateDisplay)
@@ -1210,7 +1211,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::cursor);
 		}
 
 		void CChildView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
@@ -1228,7 +1229,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::cursor);
 		}
 
 		void CChildView::PrevTrack(int x,bool wrap,bool updateDisplay)
@@ -1246,7 +1247,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			
 			pParentMain->StatusBarIdle();
-			if (updateDisplay) Repaint(DMCursor);
+			if (updateDisplay) Repaint(draw_modes::cursor);
 		}
 
 
@@ -1255,7 +1256,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::patCut()
 		{
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::pattern)
 			{
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
@@ -1276,13 +1277,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				patBufferCopy = true;
 
 				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
 		void CChildView::patCopy()
 		{
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::pattern)
 			{
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
@@ -1299,7 +1300,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::patPaste()
 		{
 			// UNDO CODE PATT PASTE
-			if(patBufferCopy && viewMode == VMPattern)
+			if(patBufferCopy && viewMode == view_modes::pattern)
 			{
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
@@ -1312,14 +1313,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
 
-				Repaint(DMPattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
 		void CChildView::patMixPaste()
 		{
 			// UNDO CODE PATT PASTE
-			if(patBufferCopy && viewMode == VMPattern)
+			if(patBufferCopy && viewMode == view_modes::pattern)
 			{
 				const int ps = _ps();
 				unsigned char* offset_target = _ppattern(ps);
@@ -1343,13 +1344,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					offset_source+= EVENT_SIZE;
 				}
 				
-				Repaint(DMPattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
 		void CChildView::patDelete()
 		{
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::pattern)
 			{
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
@@ -1368,7 +1369,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 
 				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -1378,7 +1379,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int ps = _ps();
 			unsigned char *soffset = _ppattern(ps);
 
-			if(viewMode == VMPattern)
+			if(viewMode == view_modes::pattern)
 			{
 				int pLines=_pSong->patternLines[ps];
 				int length=pLines*EVENT_SIZE*MAX_TRACKS;
@@ -1387,19 +1388,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				for	(int c=editcur.line*EVENT_SIZE*MAX_TRACKS;c<length;c+=EVENT_SIZE)
 				{
-					int not=*(soffset+c);
+					int note=*(soffset+c);
 					
-					if(not<notecommands::release)
+					if(note<notecommands::release)
 					{
-						not+=trp;
-						if(not<0)not=0;
-						if(not>119)not=119;
-						soffset[c]=static_cast<unsigned char>(not);
+						note+=trp;
+						if(note<0) note=0; else if(note>119) note=119;
+						soffset[c]=static_cast<unsigned char>(note);
 					}
 				}
 				NewPatternDraw(0,_pSong->SONGTRACKS,editcur.line,pLines-1);
 
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -1428,7 +1428,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			blockSelected=true;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::selection);
 		}
 		void CChildView::ChangeBlock(int track,int line, int col)
 		{
@@ -1465,7 +1465,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			blockSelected=true;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::selection);
 		}
 
 		void CChildView::EndBlock(int track,int line, int col)
@@ -1502,7 +1502,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			blockSelected=true;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::selection);
 		}
 
 		void CChildView::BlockUnmark()
@@ -1512,7 +1512,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//reinitialise the select bar state
 			CChildView::blockSelectBarState = 1;
 
-			Repaint(DMSelection);
+			Repaint(draw_modes::selection);
 		}
 
 		void CChildView::CopyBlock(bool cutit)
@@ -1523,6 +1523,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				isBlockCopied=true;
 				blockNTracks=(blockSel.end.track-blockSel.start.track)+1;
 				blockNLines=(blockSel.end.line-blockSel.start.line)+1;
+				blockLastOrigin = blockSel;
 				
 				int ps=_pSong->playOrder[editPosition];
 				
@@ -1555,7 +1556,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 
-					Repaint(DMData);
+					Repaint(draw_modes::data);
 				}
 			}
 		}
@@ -1578,11 +1579,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
-		void CChildView::PasteBlock(int tx,int lx,bool mix)
+		void CChildView::PasteBlock(int tx,int lx,bool mix,bool save)
 		{
 			if(isBlockCopied)
 			{
@@ -1590,7 +1591,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int nl = _pSong->patternLines[ps];
 
 				// UNDO CODE PASTE AND MIX PASTE
-				AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				if (save) AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int ls=0;
 				int ts=0;
@@ -1636,10 +1637,164 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				bScrollDetatch=false;
 				NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
-			
 		}
+
+		void CChildView::SwitchBlock(int tx, int lx)
+		{
+			if(blockSelected || isBlockCopied)// With shift+arrows, moving the cursor unselects the block, so in this case it is a three step
+			{									// operation: select, copy, switch, instead of select, switch.
+				int ps=_pSong->playOrder[editPosition];
+				int nl = _pSong->patternLines[ps];
+				bool bOverlapTrack = false;
+				bool bOverlapLine = false;
+				int ls=0;
+				int ts=0;
+				int startRT=0;
+				int startRL=0;
+				int startWT=0;
+				int startWL=0;
+				int stopT=0;
+				int stopL=0;
+				PatternEntry blank;
+
+				// Copy block(1) if not done already.
+				if (blockSelected) CopyBlock(false);
+
+				// We backup the data of the whole block.
+				AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+
+				// Detect Block sizes and see if they overlap, 
+				if (abs(blockLastOrigin.start.track-tx) < blockNTracks	&& abs(blockLastOrigin.start.line-lx) < blockNLines )
+				{
+					if 	( blockLastOrigin.start.track != tx )  //If they are equal, we don't need to move tracks.
+					{
+						//Tracks overlap
+						bOverlapTrack = true;
+
+						if ( blockLastOrigin.start.track > tx)
+						{
+							startRT=blockLastOrigin.start.track+blockNTracks;	startRL=lx;
+							startWT=blockLastOrigin.start.track;				startWL=blockLastOrigin.start.line;
+							stopT=tx;											stopL=blockLastOrigin.start.line+blockNLines;
+						}
+						else 
+						{
+							startRT=tx;							startRL=lx;
+							startWT=tx+blockNTracks;			startWL=blockLastOrigin.start.line;
+							stopT=blockLastOrigin.start.track;	stopL=lx+blockNLines;
+						}
+					}
+					if ( blockLastOrigin.start.line != lx )//If they are equal, we don't need to move lines.
+					{
+						//lines overlap
+						bOverlapLine = true;
+
+						if (bOverlapTrack)
+						{
+							int startRT2, startRL2, startWT2, startWL2, stopT2, stopL2;
+							//Most of the work Prepared. Only missing is moving some lines.
+							if ( blockLastOrigin.start.track > tx)
+							{
+								startRT2=blockLastOrigin.start.track; startWT2=blockLastOrigin.start.track; stopT2=tx+blockNTracks;
+								if ( blockLastOrigin.start.line > lx)
+								{
+									startRL2=lx;
+									startWL2=lx+blockNLines;
+									stopL2=blockLastOrigin.start.line;
+								}
+								else
+								{
+									startRL2=blockLastOrigin.start.line+blockNLines;
+									startWL2=blockLastOrigin.start.line;
+									stopL2=lx+blockNLines;
+								}
+							}
+							else
+							{
+								startRT2=tx;	startWT2=tx; stopT2=blockLastOrigin.start.track+blockNTracks;
+								if ( blockLastOrigin.start.line > lx)
+								{
+									startRL2=lx;
+									startWL2=+blockNLines;
+									stopL2=blockLastOrigin.start.line;
+								}
+								else
+								{
+									startRL2=blockLastOrigin.start.line+blockNLines;
+									startWL2=blockLastOrigin.start.line;
+									stopL2=lx+blockNLines;
+								}
+							}
+							ts = startWT2;
+							for (int t=startRT2;t<stopT2 && t<_pSong->SONGTRACKS;t++)
+							{
+								ls=startWL2;
+								for (int l=startRL2;l<stopL2 && l<nl;l++)
+								{
+									unsigned char *offset_target=_ptrackline(ps,ts,ls);
+									unsigned char *offset_source=_ptrackline(ps,t,l);
+
+									memcpy(offset_target,offset_source,EVENT_SIZE);
+
+									++ls;
+								}
+								++ts;
+							}
+						}
+						else
+						{
+							if ( blockLastOrigin.start.line > lx)
+							{
+								startRT=tx;								startRL=lx;
+								startWT=tx;								startWL=lx+blockNLines;
+								stopT=tx+blockNTracks;					stopL=blockLastOrigin.start.line;
+							}
+							else
+							{
+								startRT=tx;					startRL=blockLastOrigin.start.line+blockNLines;
+								startWT=tx;					startWL=blockLastOrigin.start.line;
+								stopT=tx+blockNTracks;		stopL=lx+blockNLines;
+							}
+						}
+					}
+					if (!bOverlapLine && !bOverlapTrack) return; // There is nothing to Swap. blocks are the same.
+				}
+			
+				if (!bOverlapLine && !bOverlapTrack)
+				{
+					// No overlapping, 
+					startRT=tx;								startRL=lx;
+					startWT=blockLastOrigin.start.track;	startWL=blockLastOrigin.start.line;
+					stopT=tx+blockNTracks;					stopL=lx+blockNLines;
+				}
+
+				// do Swap "inplace".
+				ts = startWT;
+				for (int t=startRT;t<stopT && t<_pSong->SONGTRACKS;t++)
+				{
+					ls=startWL;
+					for (int l=startRL;l<stopL && l<nl;l++)
+					{
+						unsigned char *offset_target=_ptrackline(ps,ts,ls);
+						unsigned char *offset_source=_ptrackline(ps,t,l);
+
+						memcpy(offset_target,offset_source,EVENT_SIZE);
+
+						++ls;
+					}
+					++ts;
+				}
+
+				// Finally, paste the Original selected block on the freed space.
+				PasteBlock(tx, lx, false,false);
+				
+				NewPatternDraw(0,_pSong->SONGTRACKS-1,0,nl-1);
+				Repaint(draw_modes::data);
+			}
+		}
+
 
 		void CChildView::SaveBlock(FILE* file)
 		{
@@ -1700,7 +1855,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						memcpy(offset_target,&blank,EVENT_SIZE);
 					}
 				}
-				Repaint(DMPattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -1744,7 +1899,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 
 			NewPatternDraw(st,et,sl,el);
-			Repaint(DMData);
+			Repaint(draw_modes::data);
 		}
 
 		void CChildView::HalveLength()
@@ -1791,7 +1946,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 
 			NewPatternDraw(st,et,sl,nl+sl);
-			Repaint(DMData);
+			Repaint(draw_modes::data);
 		}
 
 
@@ -1810,19 +1965,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						unsigned char *toffset=_ptrackline(ps,t,l);
 						
-						int not=*(toffset);
+						int note=*(toffset);
 					
-						if(not<notecommands::release)
+						if(note<notecommands::release)
 						{
-							not+=trp;
-							if(not<0)not=0;
-							if(not>119)not=119;
-							*toffset=static_cast<unsigned char>(not);
+							note+=trp;
+							if(note<0) note=0; else if(note>119) note=119;
+							*toffset=static_cast<unsigned char>(note);
 						}
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -1853,7 +2007,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -1884,7 +2038,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -1939,7 +2093,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(DMData);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -1951,7 +2105,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				++_pSong->playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -1963,7 +2117,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				--_pSong->playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -2001,9 +2155,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				_pSong->playOrderSel[editPosition]=true;
 
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::pattern);
 				if (Global::pPlayer->_playing) {
-					Repaint(DMPlayback);
+					Repaint(draw_modes::playback);
 				}
 			}
 		}
@@ -2034,17 +2188,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (!bRepeat) // This prevents adding patterns when only trying to reach the end.
 				{
-		//			editPosition = 0;
-					++editPosition;
-					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition-1);
-					int const ep=_pSong->GetBlankPatternUnused();
-					_pSong->playLength=editPosition+1;
-					_pSong->playOrder[editPosition]=ep;
-					if (_pSong->patternLines[editPosition]!=Global::pConfig->defaultPatLines)
+					if ( _pSong->playLength+1 > MAX_SONG_POSITIONS) return;
+
+					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
+					int patternum=_pSong->GetBlankPatternUnused();
+					if ( patternum>= MAX_PATTERNS )
 					{
-						AddUndoLength(editPosition,_pSong->patternLines[editPosition],editcur.track,editcur.line,editcur.col,editPosition);
-						_pSong->patternLines[editPosition]=Global::pConfig->defaultPatLines;
+						patternum=MAX_PATTERNS-1;
 					}
+					else 
+					{
+						_pSong->AllocNewPattern(patternum,"",Global::pConfig->defaultPatLines,false);
+					}
+			
+					++_pSong->playLength;
+					++editPosition;
+					_pSong->playOrder[editPosition]=patternum;
 					
 					pParentMain->UpdateSequencer();
 				}
@@ -2053,9 +2212,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				_pSong->playOrderSel[editPosition]=true;
 
 				pParentMain->UpdatePlayOrder(true);
-				Repaint(DMPattern);
+				Repaint(draw_modes::pattern);
 				if (Global::pPlayer->_playing) {
-					Repaint(DMPlayback);
+					Repaint(draw_modes::playback);
 				}
 			}
 		}
@@ -2397,7 +2556,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				switch (pUndoList->type)
 				{
 				case UNDO_PATTERN:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
 						AddRedo(pUndoList->pattern,pUndoList->x,pUndoList->y,pUndoList->tracks,pUndoList->lines,editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
 						// do undo
@@ -2421,13 +2580,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{
 							// display changes
 							NewPatternDraw(pUndoList->x,pUndoList->x+pUndoList->tracks,pUndoList->y,pUndoList->y+pUndoList->lines);
-							Repaint(DMData);
+							Repaint(draw_modes::data);
 						}
 						else
 						{
 							editPosition = pUndoList->seqpos;
 							pParentMain->UpdatePlayOrder(true);
-							Repaint(DMPattern);
+							Repaint(draw_modes::pattern);
 							
 						}
 						// delete undo from list
@@ -2438,7 +2597,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					break;
 				case UNDO_LENGTH:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
 						AddRedoLength(pUndoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
 						// do undo
@@ -2453,7 +2612,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							pParentMain->UpdatePlayOrder(true);
 						}
 						// display changes
-						Repaint(DMPattern);
+						Repaint(draw_modes::pattern);
 						
 						// delete undo from list
 						SPatternUndo* pTemp = pUndoList->pPrev;
@@ -2475,7 +2634,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::pattern);
 					
 					// delete undo from list
 					{
@@ -2511,7 +2670,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::pattern);
 					
 					// delete undo from list
 					{
@@ -2535,9 +2694,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				switch (pRedoList->type)
 				{
 				case UNDO_PATTERN:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,FALSE,pRedoList->counter);
+						AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do redo
 						unsigned char* pData = pRedoList->pData;
 
@@ -2560,13 +2719,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{
 							// display changes
 							NewPatternDraw(pRedoList->x,pRedoList->x+pRedoList->tracks,pRedoList->y,pRedoList->y+pRedoList->lines);
-							Repaint(DMData);
+							Repaint(draw_modes::data);
 						}
 						else
 						{
 							editPosition = pRedoList->seqpos;
 							pParentMain->UpdatePlayOrder(true);
-							Repaint(DMPattern);
+							Repaint(draw_modes::pattern);
 							
 						}
 						// delete redo from list
@@ -2577,9 +2736,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					break;
 				case UNDO_LENGTH:
-					if(viewMode == VMPattern)// && bEditMode)
+					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						AddUndoLength(pRedoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,FALSE,pRedoList->counter);
+						AddUndoLength(pRedoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do undo
 						_pSong->patternLines[pRedoList->pattern]=pRedoList->lines;
 						// set up cursor
@@ -2592,7 +2751,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							pParentMain->UpdatePlayOrder(true);
 						}
 						// display changes
-						Repaint(DMPattern);
+						Repaint(draw_modes::pattern);
 						
 						// delete redo from list
 						SPatternUndo* pTemp = pRedoList->pPrev;
@@ -2602,7 +2761,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						break;
 					}
 				case UNDO_SEQUENCE:
-					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,FALSE,pRedoList->counter);
+					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
 					// do undo
 					memcpy(_pSong->playOrder, pRedoList->pData, MAX_SONG_POSITIONS*sizeof(char));
 					_pSong->playLength = pRedoList->lines;
@@ -2614,7 +2773,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::pattern);
 					
 					{
 						// delete redo from list
@@ -2625,7 +2784,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					break;
 				case UNDO_SONG:
-					AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,FALSE,pRedoList->counter);
+					AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
 					// do undo
 					unsigned char * pData = pRedoList->pData;
 					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
@@ -2650,7 +2809,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
-					Repaint(DMPattern);
+					Repaint(draw_modes::pattern);
 					
 					{
 						// delete redo from list
@@ -2702,7 +2861,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_trackArmed[i])
 				{
-					if (Global::pInputHandler->notetrack[i] == 120)
+					if (Global::pInputHandler->notetrack[i] == notecommands::release)
 					{
 						break;
 					}
@@ -2714,7 +2873,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (_pSong->_trackArmed[i])
 					{
-						if (Global::pInputHandler->notetrack[i] == 120)
+						if (Global::pInputHandler->notetrack[i] == notecommands::release)
 						{
 							break;
 						}

@@ -10,11 +10,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			SetCapture();
 			
-			if(viewMode == VMMachine) // User is in machine view mode
+			if(viewMode == view_modes::machine) // User is in machine view mode
 			{
 				if (_pSong->_machineLock) return;
 				
-				smac = -1; 		smacmode = 0;
+				smac = -1; 		smacmode = smacmodes::move;
 				wiresource = -1; wiredest = -1;
 				wiremove = -1;
 				if (nFlags & MK_CONTROL) // Control+Rightclick. Action: Move the wire origin.
@@ -39,11 +39,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								case MACHMODE_FX:
 									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
 									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+									wireSX = point.x;
+									wireSY = point.y;
 									break;
 
 								case MACHMODE_MASTER:
 									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
 									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+									wireSX = point.x;
+									wireSY = point.y;
 									break;
 								}		
 							wiresource=-1;
@@ -65,16 +69,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						case MACHMODE_GENERATOR:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in master
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sMaster.height/2);
 							break;
 */							
+						default:
+							wiresource=-1;			//don't pretend we're drawing a wire if we're not..
+							break;
 						}
 //						OnMouseMove(nFlags,point);
 					}
@@ -87,7 +98,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			ReleaseCapture();
 
-			if (viewMode == VMMachine)
+			if (viewMode == view_modes::machine)
 			{
 				int propMac = GetMachine(point);
 
@@ -183,7 +194,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::pattern)
 			{
 				CMenu menu;
 				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
@@ -192,7 +203,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
 				
 				menu.DestroyMenu();
-		//		Repaint(DMCursor);
+		//		Repaint(draw_modes::cursor);
 			}
 			CWnd::OnContextMenu(pWnd,point);
 		}
@@ -202,11 +213,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			SetCapture();
 
-			if(viewMode == VMMachine)
+			if(viewMode == view_modes::machine)
 			{
 				if (_pSong->_machineLock) return;
 
-				smac = -1;		smacmode = 0;
+				smac = -1;		smacmode = smacmodes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 
@@ -245,11 +256,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							case MACHMODE_FX:
 								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
 								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+								wireSX = point.x;
+								wireSY = point.y;
 								break;
 
 							case MACHMODE_MASTER:
 								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
 								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+								wireSX = point.x;
+								wireSY = point.y;
 								break;
 							}		
 							wiresource=-1;
@@ -271,10 +286,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						case MACHMODE_GENERATOR:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
 							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireDX = point.x;
+							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in Master.
 							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
@@ -309,7 +328,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							tmpsrc.x=MachineCoords.dGeneratorPan.x; tmpsrc.y=MachineCoords.dGeneratorPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan,panning)) //changing panning
 							{
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorMute,MachineCoords.sGeneratorMute)) //Mute 
 							{
@@ -366,7 +385,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							tmpsrc.x=MachineCoords.dEffectPan.x; tmpsrc.y=MachineCoords.dEffectPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan,panning)) //changing panning
 							{
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 								OnMouseMove(nFlags,point);
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectMute,MachineCoords.sEffectMute)) //Mute 
@@ -377,7 +396,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									tmac->_volumeCounter=0.0f;	tmac->_volumeDisplay=0;
 								}
 								updatePar = smac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::machine);
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectMute)) //Solo 
 							{
@@ -387,7 +406,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									tmac->_volumeCounter=0.0f;	tmac->_volumeDisplay=0;
 								}
 								updatePar = smac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::machine);
 							}
 							break;
 
@@ -398,7 +417,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}// No Shift
 			}	
 
-			else if ( viewMode==VMPattern)
+			else if ( viewMode==view_modes::pattern)
 			{			
 				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
 				if ( ttm >= _pSong->SONGTRACKS ) ttm = _pSong->SONGTRACKS-1;
@@ -445,7 +464,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						}
 					}
 					oldm.track = -1;
-					Repaint(DMTrackHeader);
+					Repaint(draw_modes::track_header);
 				}
 				else if ( point.y >= YOFFSET )
 				{
@@ -458,11 +477,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 					oldm.col=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
 
-					blockStart = TRUE;
+					if (blockSelected
+						&& oldm.track >=blockSel.start.track && oldm.track <= blockSel.end.track
+						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line)
+					{
+						blockswitch=true;
+						CopyBlock(false);
+						editcur = oldm;
+					}
+					else blockStart = true;
 					if (nFlags & MK_SHIFT)
 					{
 						editcur = oldm;
-						Repaint(DMCursor);
+						Repaint(draw_modes::cursor);
 					}
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE if statement
@@ -473,7 +500,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			ReleaseCapture();
 			
-			if (viewMode == VMMachine )
+			if (viewMode == view_modes::machine )
 			{
 				int propMac = GetMachine(point);
 				if ( propMac != -1)
@@ -508,7 +535,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}
 					}
-					else if ( smacmode == 0 && smac != -1 ) // Are we moving a machine?
+					else if ( smacmode == smacmodes::move && smac != -1 ) // Are we moving a machine?
 					{
 						SSkinSource ssrc;
 						AddMacViewUndo();
@@ -539,13 +566,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 	
-				smac = -1;		smacmode = 0;
+				smac = -1;		smacmode = smacmodes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 				Repaint();
 
 			}
-			else if (viewMode == VMPattern)
+			else if (viewMode == view_modes::pattern)
 			{
 				
 				if ( (blockStart) &&
@@ -562,7 +589,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//			else if ( editcur.line < 0 ) editcur.line = 0;
 
 					editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
-					Repaint(DMCursor);
+					Repaint(draw_modes::cursor);
 					pParentMain->StatusBarIdle();
 					if (!(nFlags & MK_SHIFT))
 					{
@@ -571,8 +598,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						blockSel.end.track=0;
 						ChordModeOffs = 0;
 						bScrollDetatch=false;
-						Repaint(DMSelection);
+						Repaint(draw_modes::selection);
 					}
+				}
+				else if (blockswitch)
+				{
+					CCursor tmpcur;
+					tmpcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
+					tmpcur.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
+					blockSelected=false;//the block to swap is already in copyblock. It is not the currently selected one.
+					blockSel.end.line=0;
+					blockSel.end.track=0;
+					SwitchBlock(blockLastOrigin.start.track+(tmpcur.track-editcur.track),blockLastOrigin.start.line+(tmpcur.line-editcur.line));
+					blockswitch=false;
+					Repaint(draw_modes::selection);
 				}
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnLButtonUp(nFlags,point);
@@ -581,13 +620,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		{
-			if (viewMode == VMMachine)
+			if (viewMode == view_modes::machine)
 			{
 				if (smac > -1 && (nFlags & MK_LBUTTON))
 				{
 					if (_pSong->_pMachine[smac])
 					{
-						if (smacmode == 0)
+						if (smacmode == smacmodes::move)
 						{
 							_pSong->_pMachine[smac]->_x = point.x-mcd_x;
 							_pSong->_pMachine[smac]->_y = point.y-mcd_y;
@@ -597,7 +636,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							pParentMain->StatusBarText(buf);
 							Repaint();
 						}
-						else if ((smacmode == 1) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
+						else if ((smacmode == smacmodes::panning) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
 						{
 							int newpan = 64;
 							switch(_pSong->_pMachine[smac]->_mode)
@@ -636,7 +675,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								}
 								pParentMain->StatusBarText(buf);
 								updatePar = smac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::machine);
 							}
 						}
 					}
@@ -655,13 +694,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 			}
 
-			else if (viewMode == VMPattern)
+			else if (viewMode == view_modes::pattern)
 			{
 				if ((nFlags & MK_LBUTTON) && oldm.track != -1)
 				{
 					ntOff = tOff;
 					nlOff = lOff;
-					int paintmode = 0;
+					draw_modes::draw_mode paintmode = draw_modes::all;
 
 					int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
 					if ( point.x < XOFFSET ) ttm--; // 1/2 = 0 , -1/2 = 0 too!
@@ -672,7 +711,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						if ( ttm < 0 ) { ttm = 0; } // Out of Range
 						// and Scroll
 						ntOff = ttm;
-						if (ntOff != tOff) paintmode=DMHScroll;
+						if (ntOff != tOff) paintmode=draw_modes::horizontal_scroll;
 					}
 					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 					{
@@ -683,14 +722,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if ( tOff != ttm-VISTRACKS ) 
 							{ 
 								ntOff = ttm-VISTRACKS+1; 
-								paintmode=DMHScroll; 
+								paintmode=draw_modes::horizontal_scroll; 
 							}
 						}
 						else	//scroll
 						{	
 							ntOff = ttm-VISTRACKS+1;
 							if ( ntOff != tOff ) 
-								paintmode=DMHScroll;
+								paintmode=draw_modes::horizontal_scroll;
 						}
 					}
 					else // Not exceeded
@@ -710,14 +749,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if ( lOff != 0 ) 
 							{ 
 								nlOff = 0; 
-								paintmode=DMVScroll; 
+								paintmode=draw_modes::vertical_scroll; 
 							}
 						}
 						else	//scroll
 						{	
 							nlOff = llm;
 							if ( nlOff != lOff ) 
-								paintmode=DMVScroll;
+								paintmode=draw_modes::vertical_scroll;
 						}
 					}
 					else if ( llm - lOff >= VISLINES ) // Exceeded from bottom
@@ -728,14 +767,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if ( lOff != llm-VISLINES) 
 							{ 
 								nlOff = llm-VISLINES+1; 
-								paintmode=DMVScroll; 
+								paintmode=draw_modes::vertical_scroll; 
 							}
 						}
 						else	//scroll
 						{	
 							nlOff = llm-VISLINES+1;
 							if ( nlOff != lOff ) 
-								paintmode=DMVScroll;
+								paintmode=draw_modes::vertical_scroll;
 						}
 					}
 					
@@ -745,17 +784,27 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						if (blockStart) 
 						{
-							blockStart = FALSE;
+							blockStart = false;
 							blockSelected=false;
 							blockSel.end.line=0;
 							blockSel.end.track=0;
 							StartBlock(oldm.track,oldm.line,oldm.col);
 						}
-						ChangeBlock(ttm,llm,ccm);
+						else if ( blockswitch ) 
+						{
+							blockSelectBarState = 1;
+
+							blockSel.start.track=blockLastOrigin.start.track+(ttm-editcur.track);
+							blockSel.start.line=blockLastOrigin.start.line+(llm-editcur.line);
+							iniSelec = blockSel.start;
+
+							ChangeBlock(blockLastOrigin.end.track+(ttm-editcur.track),blockLastOrigin.end.line+(llm-editcur.line),ccm);
+						}
+						else ChangeBlock(ttm,llm,ccm);
 						oldm.track=ttm;
 						oldm.line=llm;
 						oldm.col=ccm;
-						paintmode=DMSelection;
+						paintmode=draw_modes::selection;
 					}
 
 					bScrollDetatch=true;
@@ -767,7 +816,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						editcur = detatchpoint;
 						if (!paintmode)
 						{
-							paintmode=DMCursor;
+							paintmode=draw_modes::cursor;
 						}
 					}
 
@@ -795,7 +844,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						else if (nPos < lOff )
 						{
@@ -808,7 +857,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						MBStart.y += delta*ROWHEIGHT;
 					}
@@ -828,7 +877,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						else if (nPos < tOff)
 						{
@@ -841,7 +890,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						MBStart.x += delta*ROWWIDTH;
 					}
@@ -858,7 +907,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			switch (viewMode)
 			{
-				case VMMachine: // User is in machine view mode
+				case view_modes::machine: // User is in machine view mode
 				
 					tmac = GetMachine(point);
 
@@ -873,7 +922,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan)) //changing panning
 							{
 								smac=tmac;
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}
@@ -890,7 +939,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									}
 								}
 								updatePar = tmac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::machine);
 								return;
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorSolo,MachineCoords.sGeneratorSolo)) //Solo 
@@ -927,7 +976,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									_pSong->machineSoloed = tmac;
 								}
 								updatePar = tmac;
-								Repaint(DMAllMacsRefresh);
+								Repaint(draw_modes::machine);
 								return;
 							}
 							break;
@@ -936,7 +985,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan)) //changing panning
 							{
 								smac=tmac;
-								smacmode = 1;
+								smacmode = smacmodes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}
@@ -949,7 +998,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									pMac->_volumeDisplay=0;
 								}
 								updatePar = tmac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::machine);
 								return;
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectBypass)) //Bypass
@@ -961,7 +1010,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									pMac->_volumeDisplay=0;
 								}
 								updatePar = tmac;
-								Repaint(DMMacRefresh);
+								Repaint(draw_modes::machine);
 								return;
 							}
 							break;
@@ -1023,7 +1072,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 					////////////////////////////////////////////////////////////////
 
-				case VMPattern: // User is in pattern view mode
+				case view_modes::pattern: // User is in pattern view mode
 					if (( point.y >= YOFFSET ) && (point.x >= XOFFSET))
 					{
 						const int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
@@ -1031,7 +1080,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 						StartBlock(ttm,0,0);
 						EndBlock(ttm,nl-1,8);
-						blockStart = FALSE;
+						blockStart = false;
 					}
 
 					break;
@@ -1045,7 +1094,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
 		{
-			if ( viewMode == VMPattern )
+			if ( viewMode == view_modes::pattern )
 			{
 				int nlines = _pSong->patternLines[_ps()];
 				int nPos = lOff - (zDelta/30);
@@ -1060,7 +1109,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					bScrollDetatch=true;
 					detatchpoint.track = ntOff+1;
 					detatchpoint.line = nlOff+1;
-					Repaint(DMVScroll);
+					Repaint(draw_modes::vertical_scroll);
 				}
 				else if (nPos < lOff )
 				{
@@ -1073,7 +1122,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					bScrollDetatch=true;
 					detatchpoint.track = ntOff+1;
 					detatchpoint.line = nlOff+1;
-					Repaint(DMVScroll);
+					Repaint(draw_modes::vertical_scroll);
 				}
 			}
 			return CWnd ::OnMouseWheel(nFlags, zDelta, pt);
@@ -1088,7 +1137,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
-			if ( viewMode == VMPattern )
+			if ( viewMode == view_modes::pattern )
 			{
 				switch(nSBCode)
 				{
@@ -1099,7 +1148,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_LINEUP:
@@ -1109,7 +1158,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_PAGEDOWN:
@@ -1124,7 +1173,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_PAGEUP:
@@ -1138,7 +1187,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_THUMBPOSITION:
@@ -1158,7 +1207,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMVScroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					default: 
@@ -1171,7 +1220,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
-			if ( viewMode == VMPattern )
+			if ( viewMode == view_modes::pattern )
 			{
 				switch(nSBCode)
 				{
@@ -1186,7 +1235,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						break;
 					case SB_LINELEFT:
@@ -1200,7 +1249,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						else PrevTrack(1,false);
 						break;
@@ -1224,7 +1273,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							Repaint(DMHScroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						break;
 					default: 

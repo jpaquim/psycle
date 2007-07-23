@@ -287,7 +287,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
-					if (m_pParent->viewMode==VMMachine)
+					if (m_pParent->viewMode==view_modes::machine)
 					{
 						m_pParent->Repaint();
 					}
@@ -323,7 +323,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						Global::_pSong->DestroyMachine(tmac);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
-						if (m_pParent->viewMode==VMMachine)
+						if (m_pParent->viewMode==view_modes::machine)
 						{
 							m_pParent->Repaint();
 						}
@@ -339,7 +339,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
-						if (m_pParent->viewMode==VMMachine)
+						if (m_pParent->viewMode==view_modes::machine)
 						{
 							m_pParent->Repaint();
 						}
@@ -378,7 +378,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					m_pParent->DoMacPropDialog(tmac);
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
-					if (m_pParent->viewMode==VMMachine)
+					if (m_pParent->viewMode==view_modes::machine)
 					{
 						m_pParent->Repaint();
 					}
@@ -390,7 +390,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					m_pParent->DoMacPropDialog(tmac+MAX_BUSES);
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
-					if (m_pParent->viewMode==VMMachine)
+					if (m_pParent->viewMode==view_modes::machine)
 					{
 						m_pParent->Repaint();
 					}
@@ -486,7 +486,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				ExchangeMacs(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
-				if (m_pParent->viewMode==VMMachine)
+				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
 				}
@@ -494,7 +494,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 1:
 				ExchangeMacs(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
 				pParentMain->UpdateComboGen(true);
-				if (m_pParent->viewMode==VMMachine)
+				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
 				}
@@ -719,7 +719,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				pParentMain->UpdateComboGen(true);
-				if (m_pParent->viewMode==VMMachine)
+				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
 				}
@@ -751,7 +751,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				pParentMain->UpdateComboGen(true);
-				if (m_pParent->viewMode==VMMachine)
+				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
 				}

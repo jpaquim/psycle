@@ -42,7 +42,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (bScrollDetatch)
 				{
-					if ( drawMode == DMHScroll )
+					if ( drawMode == draw_modes::horizontal_scroll )
 					{
 						rntOff = ntOff;
 						if ( rntOff >= snt-VISTRACKS ) 
@@ -78,7 +78,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (Global::pConfig->_centerCursor)
 				{
-					if ( drawMode == DMHScroll ) 
+					if ( drawMode == draw_modes::horizontal_scroll ) 
 						rntOff = ntOff;
 					else 
 						rntOff = editcur.track - (VISTRACKS/2);
@@ -99,7 +99,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if ( drawMode == DMHScroll )
+					if ( drawMode == draw_modes::horizontal_scroll )
 					{
 						rntOff = ntOff;
 						if ( rntOff >= snt-VISTRACKS ) 
@@ -144,7 +144,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (bScrollDetatch)
 				{
-					if ( drawMode == DMVScroll )
+					if ( drawMode == draw_modes::vertical_scroll )
 					{
 						rnlOff = nlOff;
 						if ( rnlOff >= plines-VISLINES ) 
@@ -184,7 +184,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (Global::pConfig->_centerCursor)
 				{
-					if ( drawMode == DMVScroll ) 
+					if ( drawMode == draw_modes::vertical_scroll ) 
 						rnlOff = nlOff;
 					else 
 						rnlOff = editcur.line - (VISLINES/2);
@@ -205,7 +205,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if ( drawMode == DMVScroll )
+					if ( drawMode == draw_modes::vertical_scroll )
 					{
 						rnlOff = nlOff;
 						if ( rnlOff >= plines-VISLINES ) 
@@ -247,7 +247,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			////////////////////////////////////////////////////////////////////
 			// Determines if background Scroll is needed or not.
 
-			if (drawMode != DMAll && drawMode != DMPattern)
+			if (drawMode != draw_modes::all && drawMode != draw_modes::pattern)
 			{
 				if ( rnlOff != lOff )
 				{
@@ -271,7 +271,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			switch (drawMode)
 			{
-			case DMAll: 
+			case draw_modes::all: 
 				// header
 				rect.top=0; 
 				rect.left=0;
@@ -299,7 +299,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					ShowScrollBar(SB_VERT,FALSE); 
 				}
 				break;
-			case DMPattern: 
+			case draw_modes::pattern: 
 				// all data
 				rect.top=YOFFSET;		
 				rect.left=0;
@@ -327,7 +327,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					ShowScrollBar(SB_VERT,FALSE); 
 				}
 				break;
-			case DMPlayback: 
+			case draw_modes::playback: 
 				{
 					int pos = Global::pPlayer->_lineCounter;
 					if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
@@ -374,7 +374,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				break;
-			case DMPlaybackChange: 
+			case draw_modes::playback_change: 
 				if (_pSong->playOrder[editPosition] == _pSong->playOrder[Global::pPlayer->_playPosition])
 				{
 					newplaypos= Global::pPlayer->_lineCounter;
@@ -410,7 +410,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					ShowScrollBar(SB_VERT,FALSE); 
 				}
 				break;
-			case DMSelection: 
+			case draw_modes::selection: 
 				// could optimize to only draw the changes
 				if (blockSelected)
 				{
@@ -799,7 +799,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					InvalidateRect(rect,false);
 				}
 				break;
-			case DMData: 
+			case draw_modes::data: 
 				{
 					SPatternDraw* pPD = &pPatternDraw[numPatternDraw-1];
 					
@@ -811,7 +811,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					InvalidateRect(rect,false);
 				}
 				break;
-			case DMTrackHeader: 
+			case draw_modes::track_header: 
 				// header
 				rect.top=0; 
 				rect.left=XOFFSET;
@@ -820,9 +820,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				updatePar |= DRAW_TRHEADER;
 				InvalidateRect(rect,false);
 				break;
-		//	case DMCursor: 
+		//	case draw_modes::cursor: 
 		//		break;
-			case DMNone: 
+			case draw_modes::none: 
 				break;
 			}
 
@@ -2239,7 +2239,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					TRACE("DRAW_DATA\n");
 		#endif
 					////////////////////////////////////////////////
-					// Draw Data Changed (DMDataChange)
+					// Draw Data Changed (draw_modes::dataChange)
 					for (int i = 0; i < numPatternDraw; i++)
 					{
 
@@ -2269,7 +2269,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			devc->SelectObject(oldFont);
 
-			updateMode = DMNone;
+			updateMode = draw_modes::none;
 			updatePar = 0;
 		}
 
@@ -2559,7 +2559,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd)
 		{
-			if (viewMode == VMPattern)
+			if (viewMode == view_modes::pattern)
 			{
 				if (!(updatePar & DRAW_FULL_DATA))
 				{
@@ -2586,7 +2586,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						// this should never have to happen with a 32 message buffer, but just incase....
 						numPatternDraw++;
-						PreparePatternRefresh(DMAll);
+						PreparePatternRefresh(draw_modes::all);
 					}
 				}
 			}

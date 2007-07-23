@@ -38,6 +38,7 @@ namespace psycle
 			bFileSaveReminders = true;
 			autosaveSong = true;
 			autosaveSongTime = 10;
+			_pageUpSteps = 1;
 
 			SetSkinDefaults();
 			// soundcard output device
@@ -201,6 +202,7 @@ namespace psycle
 			reg.QueryValue("bFileSaveReminders", bFileSaveReminders);
 			reg.QueryValue("autosaveSong", autosaveSong);
 			reg.QueryValue("autosaveSongTime", autosaveSongTime);
+			reg.QueryValue("pageupStepSize",_pageUpSteps);
 			reg.QueryValue("pv_timesig",pv_timesig);
 			reg.QueryValue("mv_colour", mv_colour);
 			reg.QueryValue("mv_wirecolour", mv_wirecolour);
@@ -390,6 +392,7 @@ namespace psycle
 			reg.SetValue("bFileSaveReminders", bFileSaveReminders);
 			reg.SetValue("autosaveSong", autosaveSong);
 			reg.SetValue("autosaveSongTime", autosaveSongTime);
+			reg.SetValue("pageupStepSize",_pageUpSteps);
 			reg.SetValue("pv_timesig",pv_timesig);
 			reg.SetValue("mv_colour", mv_colour);
 			reg.SetValue("mv_wirecolour", mv_wirecolour);

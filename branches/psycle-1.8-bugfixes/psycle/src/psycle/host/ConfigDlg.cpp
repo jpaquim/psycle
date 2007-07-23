@@ -285,6 +285,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
 				}
+				_pConfig->Write();
 			}
 			return retVal;
 		}
