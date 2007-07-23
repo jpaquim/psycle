@@ -57,7 +57,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			std::memset(name,0, sizeof name * sizeof *name);
 		}
 
-		void CPreset::Init(int num,const char* newname,int* parameters,int size, void* newdata)
+		void CPreset::Init(int num,const char* newname, int const * parameters,int size, void* newdata)
 		{
 			if ( num > 0 )
 			{
@@ -85,7 +85,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			std::strcpy(name,newname);
 		}
 
-		void CPreset::Init(int num,const char* newname,float* parameters)
+		void CPreset::Init(int num,const char* newname, float const * parameters)
 		{
 			if ( num > 0 )
 			{

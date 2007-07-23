@@ -23,8 +23,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		public:
 			void Clear();
 			void Init(int num);
-			void Init(int num,const char* newname,int* parameters,int size, void* newdata);
-			void Init(int num,const char* newname, float* parameters); // for VST .fxb's
+			void Init(int num,const char* newname,   int const * parameters,int size, void* newdata);
+			void Init(int num,const char* newname, float const * parameters); // for VST .fxb's
 			int GetNumPars() { return numPars; }
 			void GetParsArray(int* destarray) { if(numPars>0) std::memcpy(destarray, params, numPars * sizeof *params); }
 			void GetDataArray(void* destarray) {if(dataSize>0) std::memcpy(destarray, data, dataSize); }
