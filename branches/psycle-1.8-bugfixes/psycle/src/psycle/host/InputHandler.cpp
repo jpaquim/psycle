@@ -517,7 +517,7 @@ namespace psycle
 				if ( !bDoingSelection )
 				{
 					pChildView->PrevCol(Global::pConfig->_wrapAround);
-					if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+					if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 				}
 				else
 				{
@@ -537,7 +537,7 @@ namespace psycle
 				if ( !bDoingSelection )
 				{
 					pChildView->NextCol(Global::pConfig->_wrapAround);
-					if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+					if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 				}
 				else
 				{
@@ -570,7 +570,7 @@ namespace psycle
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
-				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 				bDoingSelection = false;
 				break;
 			case cdefNavDn:
@@ -592,7 +592,7 @@ namespace psycle
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
-				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 				bDoingSelection = false;
 				break;
 			case cdefNavPageUp:
@@ -647,7 +647,7 @@ namespace psycle
 						{
 							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 						}
-						else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+						else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 					}
 				}
 				break;
@@ -678,7 +678,7 @@ namespace psycle
 						{
 							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 						}
-						else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+						else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 					}
 				}
 				break;
@@ -708,7 +708,7 @@ namespace psycle
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
-				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 
 				pChildView->Repaint(draw_modes::cursor);
 				break;
@@ -737,7 +737,7 @@ namespace psycle
 				{
 					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 				}
-				else if ( bShiftArrowsDoSelect ) pChildView->BlockUnmark();
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
 
 
 				pChildView->Repaint(draw_modes::cursor);
@@ -752,7 +752,7 @@ namespace psycle
 			case cdefRowDelete:
 				pChildView->bScrollDetatch=false;
 				pChildView->ChordModeOffs = 0;
-				if (pChildView->blockSelected)
+				if (pChildView->blockSelected && Global::pConfig->_windowsBlocks)
 				{
 					pChildView->DeleteBlock();
 				}
@@ -765,7 +765,7 @@ namespace psycle
 			case cdefRowClear:
 				pChildView->bScrollDetatch=false;
 				pChildView->ChordModeOffs = 0;
-				if (pChildView->blockSelected)
+				if (pChildView->blockSelected && Global::pConfig->_windowsBlocks)
 				{
 					pChildView->DeleteBlock();
 				}

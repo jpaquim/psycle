@@ -362,7 +362,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
 						
-						// required? (instruments only apply for samplers)
 						if( pMachine->_type == MACH_SAMPLER )
 						{
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );

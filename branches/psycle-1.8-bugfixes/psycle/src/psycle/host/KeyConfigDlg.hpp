@@ -74,6 +74,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CComboBox m_timesig;
 			CComboBox m_pageupsteps;
 			CButton m_allowinstances;
+			CButton m_windowsblocks;
 		};
 
 		//{{AFX_INSERT_LOCATION}}

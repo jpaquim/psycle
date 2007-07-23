@@ -20,6 +20,7 @@ namespace psycle
 			_toolbarOnVsts = true;
 			_bShowPatternNames = false;
 			_initialized = false;
+			_windowsBlocks = true;
 			_wrapAround = true;
 			_centerCursor = false;
 			_cursorAlwaysDown = false;
@@ -142,6 +143,7 @@ namespace psycle
 			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("AllowMultipleInstances", _allowMultipleInstances);
+			reg.QueryValue("windowsBlocks", _windowsBlocks);
 			reg.QueryValue("CenterCursor", _centerCursor);
 			reg.QueryValue("FollowSong", _followSong);
 			reg.QueryValue("CursorAlwaysDown", _cursorAlwaysDown);
@@ -344,6 +346,7 @@ namespace psycle
 			reg.SetValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.SetValue("CenterCursor", _centerCursor);
 			reg.SetValue("FollowSong", _followSong);
+			reg.SetValue("windowsBlocks",_windowsBlocks);
 			reg.SetValue("CursorAlwaysDown", _cursorAlwaysDown);
 			reg.SetValue("useDoubleBuffer", useDoubleBuffer);
 			reg.SetValue("DisplayLineNumbers", _linenumbers);

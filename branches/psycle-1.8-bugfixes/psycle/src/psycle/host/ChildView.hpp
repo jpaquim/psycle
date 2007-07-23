@@ -296,20 +296,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void NewMachine(int x = -1, int y = -1, int mac = -1);
 			void DoMacPropDialog(int propMac);
 			void FileLoadsongNamed(std::string fName);
+			void OnFileLoadsongNamed(std::string fName, int fType);
 			
 		public:
-
-		//	char m_appdir[_MAX_PATH];
-
 			//RECENT!!!//
-			void OnFileLoadsongNamed(std::string fName, int fType);
 			HMENU hRecentMenu;
 
 //			CBitmap machinedial; //the machine dial bitmap
 
 			CFrameWnd* pParentFrame;
 			Song* _pSong;
-			bool useDoubleBuffer;
 		//	bool multiPattern;
 			CMasterDlg * MasterMachineDialog;
 			CGearTracker * SamplerMachineDialog;
@@ -348,6 +344,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int CH;
 			int CW;
 			int VISTRACKS;
+			int VISLINES;
 			int COLX[10];
 			bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 								// Its function is to prevent audio (and midi) operations while it is not
@@ -361,11 +358,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int textLeftEdge;
 
 		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CChildView)
 			protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-			//}}AFX_VIRTUAL
 
 		//////////////////////////////////////////////////////////////////////
 		// Private operations
@@ -436,7 +430,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
-			int VISLINES;
 
 			int bkgx;
 			int bkgy;
@@ -457,15 +450,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			// Enviroment variables
 			int smac;
-			struct smacmodes
+			struct smac_modes
 			{
-				enum smacmode
+				enum smac_mode
 				{
 					move, //< moving a machine
 					panning //< panning on a machine
 				};
 			};
-			smacmodes::smacmode smacmode;
+			smac_modes::smac_mode smacmode;
 			int wiresource;
 			int wiredest;
 			int wiremove;

@@ -46,6 +46,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_COMBO1, m_timesig);
 			DDX_Control(pDX, IDC_PAGEUPSTEPS, m_pageupsteps);
 			DDX_Control(pDX, IDC_MULTIPLEINSTANCES, m_allowinstances);
+			DDX_Control(pDX, IDC_WINDOWSBLOCKS, m_windowsblocks);
 		}
 
 		BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
@@ -120,6 +121,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
 			m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
 			m_navigation_ignores_step.SetCheck(Global::pConfig->_NavigationIgnoresStep?1:0);
+			m_windowsblocks.SetCheck(Global::pConfig->_windowsBlocks?1:0);
 
 			m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
 			m_autosave_spin.SetRange(1,60);
@@ -297,6 +299,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// save settings
 			Global::pInputHandler->ConfigSave();
 			
+			Global::pConfig->_windowsBlocks = m_windowsblocks.GetCheck()?true:false;
 			Global::pConfig->_wrapAround = m_wrap.GetCheck()?true:false;
 			Global::pConfig->_centerCursor = m_centercursor.GetCheck()?true:false;
 			Global::pConfig->_cursorAlwaysDown = m_cursordown.GetCheck()?true:false;

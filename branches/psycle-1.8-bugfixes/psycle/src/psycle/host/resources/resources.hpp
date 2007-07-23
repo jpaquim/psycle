@@ -158,6 +158,8 @@
 #define IDC_KEY0                        1036
 #define IDC_CMDLIST                     1037
 #define IDC_ROWC                        1038
+#define IDC_FT2DEL2                     1038
+#define IDC_WINDOWSBLOCKS               1038
 #define IDC_BEATC                       1039
 #define IDC_4BEAT                       1040
 #define IDC_PATTERN_FONTFACE            1041
@@ -782,7 +784,6 @@
 #define IDC_COMBO2                      1551
 #define IDC_LISTSTYLE                   1551
 #define IDC_COMBO_NOISESHAPING          1551
-#define IDC_NAVIGATION_IGNORES_STEP2    1551
 #define IDC_MULTIPLEINSTANCES           1551
 #define IDC_COMBO3                      1552
 #define IDC_INS_NNACOMBO                1552

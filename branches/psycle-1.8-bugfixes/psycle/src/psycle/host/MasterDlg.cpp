@@ -29,7 +29,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pParent = pParent;
 			//{{AFX_DATA_INIT(CMasterDlg)
 			//}}AFX_DATA_INIT
-			memset(macname,0,32*MAX_CONNECTIONS);
+			memset(macname,0,sizeof(macname));
 		}
 
 		void CMasterDlg::DoDataExchange(CDataExchange* pDX)

@@ -35,100 +35,88 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CMainFrame		*pParentMain;
 
 		CChildView::CChildView()
+			:pParentFrame(0)
+			,MasterMachineDialog(NULL)
+			,SamplerMachineDialog(NULL)
+			,XMSamplerMachineDialog(NULL)
+			,WaveInMachineDialog(NULL)
+			,blockSelected(false)
+			,blockStart(false)
+			,blockswitch(false)
+			,blockSelectBarState(1)
+			,bScrollDetatch(false)
+			,bEditMode(true)
+			,patStep(1)
+			,editPosition(0)
+			,prevEditPosition(0)
+			,ChordModeOffs(0)
+			,updateMode(0)
+			,updatePar(0)
+			,viewMode(view_modes::machine)
+			,_outputActive(false)
+			,CW(300)
+			,CH(200)
+			,maxView(false)
+			,textLeftEdge(2)
+			,hbmPatHeader(0)
+			,hbmMachineSkin(0)
+			,hbmMachineBkg(0)
+			,hbmMachineDial(0)
+			,bmpDC(NULL)
+			,playpos(-1)
+			,newplaypos(-1) 
+			,numPatternDraw(0)
+			,smac(-1)
+			,smacmode(smac_modes::move)
+			,wiresource(-1)
+			,wiredest(-1)
+			,wiremove(-1)
+			,wireSX(0)
+			,wireSY(0)
+			,wireDX(0)
+			,wireDY(0)
+			,maxt(1)
+			,maxl(1)
+			,tOff(0)
+			,lOff(0)
+			,ntOff(0)
+			,nlOff(0)
+			,rntOff(0)
+			,rnlOff(0)
+			,isBlockCopied(false)
+			,blockNTracks(0)
+			,blockNLines(0)
+			,mcd_x(0)
+			,mcd_y(0)
+			,pUndoList(NULL)
+			,pRedoList(NULL)
+			,UndoCounter(0)
+			,UndoSaved(0)
+			,UndoMacCounter(0)
+			,UndoMacSaved(0)
+			,patBufferLines(0)
+			,patBufferCopy(false)
 		{
-			// Set Gui Environment data
-
-			// Enviroment variables
-			smac=-1;
-			smacmode=smacmodes::move;
-			wiresource=-1;
-			wiredest=-1;
-			wiremove=-1;
-			wireSX=0;
-			wireSY=0;
-			wireDX=0;
-			wireDY=0;
-
-			maxView = false;
-			textLeftEdge = 2;
-
-			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
-			bmpDC = NULL;
-
-			viewMode=view_modes::machine;
-			MasterMachineDialog = NULL;
-			SamplerMachineDialog = NULL;
-			XMSamplerMachineDialog = NULL;
-			WaveInMachineDialog = NULL;
-
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
 				WireDialog[c] = NULL;
 			}
-
-			updateMode=0;
-			updatePar=0;
-			//multiPattern=true; // Long way till it can be finished!
-
-			patStep=1;
-			editPosition=0;
-			prevEditPosition=0;
-			bEditMode = true;
-
-			blockSelected=false;
-			isBlockCopied=false;
-			patBufferCopy=false;
-			blockNTracks=0;
-			blockNLines=0;
-			bScrollDetatch=false;
-
-			blockSelectBarState = 1;
-
-			pUndoList=NULL;
-			pRedoList=NULL;
-
-			UndoCounter=0;
-			UndoSaved=0;
-
-			UndoMacCounter=0;
-			UndoMacSaved=0;
-
-			//editcur.track=0; // Not needed to initialize, since the class does it already.
-			//editcur.col=0;
-			//editcur.line=0;
-			playpos=-1;
-			newplaypos=-1; 
+			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
 			selpos.bottom=0;
 			newselpos.bottom=0;
-			numPatternDraw=0;
-
-			//scrollT=0;
-			//scrollL=0;
-			tOff=0;
-			lOff=0;
-			ntOff=0;
-			nlOff=0;
-
-			ChordModeOffs = 0;
+			szBlankParam[0]='\0';
+			szBlankNote[0]='\0';
+			MBStart.x=0;
+			MBStart.y=0;
 
 			Global::pInputHandler->SetChildView(this);
-			_outputActive = false;
 
-			// just give arbitrary values so OnSize doesn't give /0 error
-			// they will be filled in correctly when we switch to pattern view
-			VISLINES = 2;
-			VISTRACKS = 8;
-
-			//_getcwd(m_appdir,_MAX_PATH);
-			
 			// Creates a new song object. The application Song.
-			//Global::_pSong->Reset(); It's already called in _pSong->New();
 			Global::_pSong->New();
-			
+
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
-
 		}
 
 		CChildView::~CChildView()
@@ -3254,13 +3242,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (Global::pConfig->pattern_draw_empty_data)
 			{
-				sprintf(szBlankParam,".");
-				sprintf(szBlankNote,"---");
+				strcpy(szBlankParam,".");
+				strcpy(szBlankNote,"---");
 			}
 			else
 			{
-				sprintf(szBlankParam," ");
-				sprintf(szBlankNote,"   ");
+				strcpy(szBlankParam," ");
+				strcpy(szBlankNote,"   ");
 			}
 			TEXTHEIGHT = Global::pConfig->pattern_font_y;
 			ROWHEIGHT = TEXTHEIGHT+1;

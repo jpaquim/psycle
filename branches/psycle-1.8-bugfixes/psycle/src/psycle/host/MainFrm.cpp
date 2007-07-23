@@ -162,6 +162,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				TRACE0("Failed to create view window\n");
 				return -1;
 			}
+			m_wndView.ValidateParent();
+
 			// Create Toolbars.
 			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP
 				| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
@@ -197,8 +199,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				TRACE0("Failed to create status bar\n");
 				return -1;      // fail to create
 			}
-
-			m_wndView.ValidateParent();
 
 			// CPU info Window
 			m_wndInfo._pSong=_pSong;

@@ -14,7 +14,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_machineLock) return;
 				
-				smac = -1; 		smacmode = smacmodes::move;
+				smac = -1; 		smacmode = smac_modes::move;
 				wiresource = -1; wiredest = -1;
 				wiremove = -1;
 				if (nFlags & MK_CONTROL) // Control+Rightclick. Action: Move the wire origin.
@@ -217,7 +217,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_machineLock) return;
 
-				smac = -1;		smacmode = smacmodes::move;
+				smac = -1;		smacmode = smac_modes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 
@@ -328,7 +328,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							tmpsrc.x=MachineCoords.dGeneratorPan.x; tmpsrc.y=MachineCoords.dGeneratorPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan,panning)) //changing panning
 							{
-								smacmode = smacmodes::panning;
+								smacmode = smac_modes::panning;
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorMute,MachineCoords.sGeneratorMute)) //Mute 
 							{
@@ -385,7 +385,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							tmpsrc.x=MachineCoords.dEffectPan.x; tmpsrc.y=MachineCoords.dEffectPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan,panning)) //changing panning
 							{
-								smacmode = smacmodes::panning;
+								smacmode = smac_modes::panning;
 								OnMouseMove(nFlags,point);
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectMute,MachineCoords.sEffectMute)) //Mute 
@@ -479,7 +479,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 					if (blockSelected
 						&& oldm.track >=blockSel.start.track && oldm.track <= blockSel.end.track
-						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line)
+						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line && Global::pConfig->_windowsBlocks)
 					{
 						blockswitch=true;
 						CopyBlock(false);
@@ -535,7 +535,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
 						}
 					}
-					else if ( smacmode == smacmodes::move && smac != -1 ) // Are we moving a machine?
+					else if ( smacmode == smac_modes::move && smac != -1 ) // Are we moving a machine?
 					{
 						SSkinSource ssrc;
 						AddMacViewUndo();
@@ -566,7 +566,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 	
-				smac = -1;		smacmode = smacmodes::move;
+				smac = -1;		smacmode = smac_modes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 				Repaint();
@@ -591,7 +591,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
 					Repaint(draw_modes::cursor);
 					pParentMain->StatusBarIdle();
-					if (!(nFlags & MK_SHIFT))
+					if (!(nFlags & MK_SHIFT) && Global::pConfig->_windowsBlocks)
 					{
 						blockSelected=false;
 						blockSel.end.line=0;
@@ -626,7 +626,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (_pSong->_pMachine[smac])
 					{
-						if (smacmode == smacmodes::move)
+						if (smacmode == smac_modes::move)
 						{
 							_pSong->_pMachine[smac]->_x = point.x-mcd_x;
 							_pSong->_pMachine[smac]->_y = point.y-mcd_y;
@@ -636,7 +636,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							pParentMain->StatusBarText(buf);
 							Repaint();
 						}
-						else if ((smacmode == smacmodes::panning) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
+						else if ((smacmode == smac_modes::panning) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
 						{
 							int newpan = 64;
 							switch(_pSong->_pMachine[smac]->_mode)
@@ -922,7 +922,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan)) //changing panning
 							{
 								smac=tmac;
-								smacmode = smacmodes::panning;
+								smacmode = smac_modes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}
@@ -985,7 +985,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan)) //changing panning
 							{
 								smac=tmac;
-								smacmode = smacmodes::panning;
+								smacmode = smac_modes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}

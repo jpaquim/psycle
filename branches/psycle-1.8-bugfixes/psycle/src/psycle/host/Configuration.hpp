@@ -86,6 +86,7 @@ namespace psycle
 			bool _centerCursor;
 			bool _cursorAlwaysDown;
 			bool _midiMachineViewSeqMode;
+			bool _windowsBlocks;
 			bool _RecordNoteoff;
 			bool _RecordTweaks;
 			bool _notesToEffects;
