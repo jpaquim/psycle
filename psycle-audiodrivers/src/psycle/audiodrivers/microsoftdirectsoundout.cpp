@@ -20,6 +20,7 @@
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "microsoftdirectsoundout.h"
 #include <psycle/core/cstdint.h>
+#pragma comment(lib, "dsound")
 namespace psy
 {
 	namespace core
@@ -34,7 +35,7 @@ namespace psy
 
 		void MsDirectSound::Error(const WCHAR msg[])
 		{
-			MessageBox(0, msg, L"DirectSound Output driver", MB_OK | MB_ICONERROR);
+			MessageBoxW(0, msg, L"DirectSound Output driver", MB_OK | MB_ICONERROR);
 		}
 
 		MsDirectSound::MsDirectSound()

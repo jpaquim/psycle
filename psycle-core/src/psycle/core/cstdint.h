@@ -1,3 +1,6 @@
+#ifdef _MSC_VER ///\todo check whether other scons and/or qmake projects use universalis
+#include <universalis/standard_library/stdint.hpp>
+#else
 #ifndef _MSC_VER // [
 
 /***************************************************************************
@@ -264,4 +267,5 @@ namespace std
 
 #endif // _MSC_STDINT_H_ ]
 
+#endif
 #endif
