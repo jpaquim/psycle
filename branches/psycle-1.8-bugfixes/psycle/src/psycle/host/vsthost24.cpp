@@ -631,7 +631,7 @@ namespace psycle
 								currentSemi[midiChannel] = 0;
 							}
 							AddMIDI(0xB0 | midiChannel,0x0B,0x7F); // reset expression
-							AddNoteOn(channel,note,(pData->_cmd == 0x0C)?pData->_parameter/2:127,midiChannel);
+							AddNoteOn(channel,note,(pData->_cmd == 0x0C)?pData->_parameter/2:127,midiChannel,0,(pData->_mach==0xFF));
 						}
 						if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
 							oldNote[midiChannel] = note + semisToSlide;								

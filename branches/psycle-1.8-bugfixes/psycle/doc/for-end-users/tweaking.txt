@@ -232,14 +232,26 @@
 	  F2xx	-	Jump to next sequence order, and to the line xx.
 
 	* VST Commands:
-
-	  0Cxx	-	Set volume (only works on NoteOn!)
+	
+	  0Cxx	-	Set volume ( Velocity on noteon, Expression otherwise )
+	  
+	  C1xx 	-	Set pitch bend range of the VST.
+	  C2xx 	-	Panning position for the midi channel.
+	  C3xx	- 	Slide to note with speed xx.
+	  Dxyy	-	Pitch slide down x number of semis, yy speed.
+	  Exyy	-	Pitch slide up x number of semis, yy speed.
 
 	  10xx	-	_OLD_ MIDI Command. Not documented anymore. Use the "Mcm" command.
-
-	  (More to come, someday)
-
-
+	  
+	  NOTE : 	If your VST supports legato, this effect can be triggered leaving the machine index empty:
+	  
+	  		Example: 
+	  		
+	  		C-5 00 02 ....
+	  		... .. .. ....
+	  		E-5 00 .. ....	<- this note legates (does not stop previous)
+	  		
+	  		
 	* Sampler Commands:
 
 	  01xx	-	Portamento Up
