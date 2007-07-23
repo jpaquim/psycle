@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <iostream>
 
-int main()
+int main() // http://www.microsoft.com/msj/0197/exception/exception.aspx
 {
 	__try {
 		std::cout << "in try\n";
