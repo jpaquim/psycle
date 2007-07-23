@@ -102,6 +102,19 @@ namespace psycle
 							Machine & machine_;
 					};
 				}
+
+				/// This macro is to be used in place of a catch statement
+				/// to catch an exception of any type thrown by a machine.
+				/// It performs the following operations:
+				/// - It catches everything.
+				/// - It marks the machine as crashed.
+				/// - It converts the exception to a std::exception (if needed).
+				/// - It throws the converted exception.
+				/// The usage is:
+				/// - for the proxy between the host and a machine:
+				///     try { some_machine.do_something(); } PSYCLE__HOST__CATCH_ALL(some_machine)
+				/// - for the host:
+				///     try { machine_proxy.do_something(); } catch(std::exception) { /* don't rethrow the exception */ }
 				#define PSYCLE__HOST__CATCH_ALL(machine) \
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor(machine))
 				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
