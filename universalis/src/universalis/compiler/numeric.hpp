@@ -6,13 +6,13 @@
 /// numeric types
 #pragma once
 #include <universalis/detail/project.hpp>
+//	#include <inttypes.h> // posix/unix
+//	#include <stdint.h> // C1999
+//	#include <cstdint> // C++0x
 #if 0
 	#include <cstdint>
 	namespace universalis { namespace compiler { namespace numerics { namespace detail { namespace implementation = std; } } } }
 #else
-//	#include <inttype.h>
-//	#include <stdint.h>
-//	#include <cstdint>
 	#include <boost/cstdint.hpp>
 	namespace universalis { namespace compiler { namespace numerics { namespace detail { namespace implementation = boost; } } } }
 #endif		
