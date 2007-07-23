@@ -36,7 +36,7 @@ namespace universalis
 					type;
 
 				/// id of current thread.
-				type UNIVERSALIS__COMPILER__DYNAMIC_LINK current();
+				UNIVERSALIS__COMPILER__DYNAMIC_LINK type current();
 			}
 		}
 	}
