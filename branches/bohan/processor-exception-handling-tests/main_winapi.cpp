@@ -7,7 +7,7 @@ int main()
 		std::cout << "in try\n";
 		int i = 0;
 		int j = 0;
-		int k = i / j;
+		std::cout << i / j << "\n";
 	} __except(UnhandledExceptionFilter(GetExceptionInformation())) {
 		std::cout << "in except\n";
 	}
