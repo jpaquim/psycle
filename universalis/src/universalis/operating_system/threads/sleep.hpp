@@ -17,7 +17,7 @@ namespace universalis
 			/// Makes the calling thread sleep for seconds.
 			///\param seconds the duration to make the thread sleep for.
 			///\throw exception on any error from the operating system. \todo elaborate on this... there are interruption signals
-			void UNIVERSALIS__COMPILER__DYNAMIC_LINK sleep(compiler::numeric<>::floating_point const & seconds) throw(exception);
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK void sleep(compiler::numeric<>::floating_point const & seconds) throw(exception);
 			
 			//class UNIVERSALIS__COMPILER__DYNAMIC_LINK interrupted : public std::exception {};
 			//void sleep_until_interrupted(compiler::numeric<>::floating_point const & seconds) throw(exception, interrupted);

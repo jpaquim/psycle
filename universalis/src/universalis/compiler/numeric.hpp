@@ -20,7 +20,7 @@ namespace universalis
 {
 	namespace compiler
 	{
-		template<unsigned int const = 0> struct numeric
+		template<unsigned int const bytes = 0> struct numeric
 		{
 			#if defined DIVERSALIS__COMPILER__FEATURE__TYPEOF
 				typedef typeof( 0) unsigned_int;
