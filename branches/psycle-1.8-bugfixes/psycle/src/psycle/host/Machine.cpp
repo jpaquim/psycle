@@ -384,7 +384,7 @@ namespace psycle
 			_inputMachines[wireIndex] = -1;
 			_numInputs--;
 		}
-		void Machine::DeleteWires()
+		void Machine::DeleteWires(bool initialize)
 		{
 			Machine *iMac;
 			// Deleting the connections to/from other machines
@@ -405,6 +405,7 @@ namespace psycle
 							}
 						}
 					}
+					if (initialize) DeleteInputWireIndex(w);
 				}
 				// Checking Out-Wires
 				if(_connection[w])
@@ -421,6 +422,7 @@ namespace psycle
 							}
 						}
 					}
+					if (initialize) DeleteOutputWireIndex(w);
 				}
 			}
 		}

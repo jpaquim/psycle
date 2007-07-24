@@ -260,7 +260,7 @@ public:
 	virtual int GetFreeInputWire(int slottype=0);
 	virtual int GetInputSlotTypes() { return 2; }
 	virtual void DeleteInputWireIndex(int wireIndex);
-	virtual void DeleteWires();
+	virtual void DeleteWires(bool initialize=true);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	std::string GetAudioInputName(int port);
 	virtual int GetAudioInputs() { return 24; };

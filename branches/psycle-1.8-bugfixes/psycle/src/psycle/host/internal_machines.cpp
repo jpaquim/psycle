@@ -613,10 +613,13 @@ namespace psycle
 		}
 		void Mixer::SetWireVolume(int wireIndex,float value)
 		{
-			if (ChannelValid(wireIndex))
+			if (wireIndex < MAX_CONNECTIONS)
 			{
-				Machine::SetWireVolume(wireIndex,value);
-				RecalcChannel(wireIndex);
+				if (ChannelValid(wireIndex))
+				{
+					Machine::SetWireVolume(wireIndex,value);
+					RecalcChannel(wireIndex);
+				}
 			}
 			else if (ReturnValid(wireIndex-MAX_CONNECTIONS))
 			{
@@ -676,9 +679,9 @@ namespace psycle
 			else 
 			{
 				// Get a free sendfx slot
-				for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+				for(int c(0) ; c < MAX_CONNECTIONS ; ++c)
 				{
-					if(!ReturnValid(c)) return c;
+					if(!ReturnValid(c)) return c+MAX_CONNECTIONS;
 				}
 				return -1;
 			}
@@ -695,13 +698,13 @@ namespace psycle
 			{
 				wireIndex-=MAX_CONNECTIONS;
 				Return(wireIndex).Wire().machine_=-1;
+				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
-				///\todo: DiscardSend??
 			}
 		}
-		void Mixer::DeleteWires()
+		void Mixer::DeleteWires(bool initialize)
 		{
-			Machine::DeleteWires();
+			Machine::DeleteWires(initialize);
 			Machine *iMac;
 			for(int w=0; w<numreturns(); w++)
 			{
@@ -717,6 +720,7 @@ namespace psycle
 							iMac->DeleteOutputWireIndex(wix);
 						}
 					}
+					DeleteInputWireIndex(w+MAX_CONNECTIONS);
 				}
 			}
 		}
@@ -1069,7 +1073,7 @@ namespace psycle
 			if ( SendValid(idx) )
 			{
 				float vol;
-				GetWireVolume(idx,vol);
+				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
 				return (Global::song()._pMachine[Return(idx).Wire().machine_]->_volumeDisplay/97.0f)*vol;
 			}

@@ -262,7 +262,7 @@ namespace psycle
 					virtual void ExchangeOutputWires(int first,int second);
 					virtual void DeleteOutputWireIndex(int wireIndex);
 					virtual void DeleteInputWireIndex(int wireIndex);
-					virtual void DeleteWires();
+					virtual void DeleteWires(bool initialize=true);
 					virtual int FindInputWire(int macIndex);
 					virtual int FindOutputWire(int macIndex);
 					virtual int GetFreeInputWire(int slottype=0);

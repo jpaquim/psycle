@@ -34,7 +34,6 @@ namespace psycle
 			class plugin : public Machine, public CEffect
 			{
 			protected:
-				CCriticalSection door;
 				class note
 				{
 				public:

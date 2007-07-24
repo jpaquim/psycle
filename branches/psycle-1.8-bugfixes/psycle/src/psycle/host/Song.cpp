@@ -181,6 +181,7 @@ namespace psycle
 
 		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
 		{
+			CSingleLock lock(&door,TRUE);
 			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
 			assert(origmac);
 
@@ -210,12 +211,8 @@ namespace psycle
 			}
 
 			if (!CreateMachine(type,x,y,psPluginDll,songIdx,shellIdx))
-			{
-				_pMachine[songIdx]=origmac;
 				return false;
-			}
 
-			delete origmac;
 			// replace all the connection info
 			Machine* newmac = Global::_pSong->_pMachine[songIdx];
 			if (newmac)
@@ -242,6 +239,7 @@ namespace psycle
 
 		bool Song::ExchangeMachines(int one, int two)
 		{
+			CSingleLock lock(&door,TRUE);
 			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
 			Machine *mac1 = _pMachine[one];
 			Machine *mac2 = _pMachine[two];
@@ -406,6 +404,8 @@ namespace psycle
 
 		void Song::ExchangeInstruments(int one, int two)
 		{
+			CSingleLock lock(&door,TRUE);
+
 			Song* pSong = Global::_pSong;
 			Instrument * tmpins;
 
@@ -534,7 +534,7 @@ namespace psycle
 
 		int Song::InsertConnection(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float value)
 		{
-
+			CSingleLock lock(&door,TRUE);
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
 			// Verify that the destination is not a generator
@@ -553,6 +553,7 @@ namespace psycle
 		}
 		bool Song::ChangeWireDestMac(Machine* srcMac,Machine* dstMac, int wiresrc,int wiredest)
 		{
+			CSingleLock lock(&door,TRUE);
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
 			// Verify that the destination is not a generator
@@ -582,6 +583,7 @@ namespace psycle
 		}
 		bool Song::ChangeWireSourceMac(Machine* srcMac,Machine* dstMac, int wiresrc, int wiredest)
 		{
+			CSingleLock lock(&door,TRUE);
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
 			// Verify that the destination is not a generator
@@ -616,7 +618,7 @@ namespace psycle
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{
-				iMac->DeleteWires();
+				iMac->DeleteWires(false);
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 				zapObject(_pMachine[mac]);
@@ -2692,7 +2694,7 @@ namespace psycle
 			file.Close();
 			DeleteFile(filepath);
 
-			// oh and randomize the dst's position
+			// randomize the dst's position
 
 			int xs,ys,x,y;
 			if (src >= MAX_BUSES)
@@ -2733,25 +2735,9 @@ namespace psycle
 			_pMachine[dst]->_x = x;
 			_pMachine[dst]->_y = y;
 
-			// oh and delete all connections
+			// delete all connections
 
-			_pMachine[dst]->_numInputs = 0;
-			_pMachine[dst]->_numOutputs = 0;
-
-			for (int i = 0; i < MAX_CONNECTIONS; i++)
-			{
-				if (_pMachine[dst]->_connection[i])
-				{
-					_pMachine[dst]->_connection[i] = false;
-					_pMachine[dst]->_outputMachines[i] = -1;
-				}
-
-				if (_pMachine[dst]->_inputCon[i])
-				{
-					_pMachine[dst]->_inputCon[i] = false;
-					_pMachine[dst]->_inputMachines[i] = -1;
-				}
-			}
+			_pMachine[dst]->DeleteWires(true);
 
 			int number = 1;
 			char buf[sizeof(_pMachine[dst]->_editName)+4];

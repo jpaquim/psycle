@@ -171,6 +171,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pParent->AddMacViewUndo();
 			///\todo: Fix this for the Mixer Machine.
 			Inval = true;
+			CSingleLock lock(&Global::_pSong->door,TRUE);
 			_pSrcMachine->DeleteOutputWireIndex(wireIndex);
 			_pDstMachine->DeleteInputWireIndex(_dstWireIndex);
 			OnCancel();
