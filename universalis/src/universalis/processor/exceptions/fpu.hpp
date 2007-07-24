@@ -5,14 +5,22 @@
 ///\interface universalis::processor::exceptions::fpu
 #pragma once
 #include <universalis/detail/project.hpp>
-#include <cfloat>
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+	#include <cfloat> // for _control*, _status* and _clear* functions
+	#if defined DIVERSALIS__PROCESSOR__X86 // #if DIVERSALIS__PROCESSOR__X86__SSE >= 2
+		///\todo use _*87_2 functions
+	#endif
+#else
+	///\todo
+	//#include <fenv.h> // C1999
+#endif
 namespace universalis
 {
 	namespace processor
 	{
 		namespace exceptions
 		{
-			/// name processor's floating point unit
+			/// processor's floating point unit
 			namespace fpu
 			{
 				/// fpu exception status
@@ -23,10 +31,14 @@ namespace universalis
 						{
 							#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 								::_clearfp();
+								//::_clear87();
 							#else
 								///\todo
+								// C1999 #include <fenv.h>
 							#endif
 						}
+
+						///\todo function to get current status
 				};
 
 				/// fpu exception mask
@@ -56,7 +68,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 										return value & mask;
 									#else
-										return true; ///\todo
+										return true; ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								void inline mask(underlying const & mask, bool b) throw()
@@ -64,7 +76,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 										value &= ~mask; if(b) value |= mask;
 									#else
-										///\todo
+										 ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 							public:
@@ -73,7 +85,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_DENORMAL);
 									#else
-										return true; ///\todo
+										return true; ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								void inline denormal(bool b) throw()
@@ -81,7 +93,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_DENORMAL, b);
 									#else
-										///\todo
+										///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								bool inline inexact() const throw()
@@ -89,7 +101,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_INEXACT);
 									#else
-										return true; ///\todo
+										return true; ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								void inline inexact(bool b) throw()
@@ -97,7 +109,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_INEXACT, b);
 									#else
-										///\todo
+										///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								bool inline divide_by_0() const throw()
@@ -105,7 +117,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_ZERODIVIDE);
 									#else
-										return true; ///\todo
+										return true; ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								void inline divide_by_0(bool b) throw()
@@ -121,7 +133,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_OVERFLOW);
 									#else
-										return true; ///\todo
+										return true; ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								void inline overflow(bool b) throw()
@@ -129,7 +141,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_OVERFLOW, b);
 									#else
-										///\todo
+										///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								bool inline underflow() const throw()
@@ -137,7 +149,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_UNDERFLOW);
 									#else
-										return true; ///\todo
+										return true; ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								void inline underflow(bool b) throw()
@@ -145,7 +157,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_UNDERFLOW, b);
 									#else
-										///\todo
+										///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								bool inline invalid() const throw()
@@ -153,7 +165,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										return mask(_EM_INVALID);
 									#else
-										return true; ///\todo
+										return true; ///\todo C1999 #include <fenv.h>
 									#endif
 								}
 								void inline invalid(bool b) throw()
@@ -161,29 +173,37 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 										mask(_EM_INVALID, b);
 									#else
-										///\todo
+										///\todo C1999 #include <fenv.h>
 									#endif
 								}
 						};
 
+						/// the exception mask currently active
 						type static inline current() throw()
 						{
 							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 								return ::_control87(0, 0);
 							#else
-								return type(); ///\todo
+								///\todo
+								//::_controlfp_s
+								//::_controlfp2
+								//::_controlfp
+								// C1999 #include <fenv.h>
+								return type();
 							#endif
 						}
 
+						/// begins a scoped mask
 						inline mask(type const & mask)
 							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 							:
-								save
+								save //\todo check the doc here. this might not return the previous control flags. ::_control87(0, 0) does it.
 								(
 									::_control87
 									(
-										    _RC_CHOP |     _PC_53  |       mask,
-										_MCW_RC      | _MCW_PC     | _MCW_EM
+										///\todo don't set the rounding mode and precision here
+										_RC_CHOP /* rounding mode to set  */ | _PC_53  /* precision to set  */ | mask    /* exception mask to set  */,
+										_MCW_RC  /* set the rounding mode */ | _MCW_PC /* set the precision */ | _MCW_EM /* set the exception mask */
 									)
 									// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_crt__control87.2c_._controlfp.asp
 									// rounding mode: toward zero (iso conformance) (_RC_CHOP, _MCW_RC)
@@ -193,16 +213,30 @@ namespace universalis
 								)
 							#else
 								///\todo
+								//::_controlfp_s
+								//::_controlfp2
+								//::_controlfp
+								// C1999 #include <fenv.h>
 							#endif
 						{
 						}
 
+						/// ends a scoped mask
 						inline ~mask() throw()
 						{
 							#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
-								::_control87(save, ~type());
+								::_control87
+								(
+									save, // values to set the control flags to
+									~type() // mask indicating which control flags to set
+									///\todo don't set back the rounding mode and precision here (pass _MCW_EM)
+								);
 							#else
 								///\todo
+								//::_controlfp_s
+								//::_controlfp2
+								//::_controlfp
+								// C1999 #include <fenv.h>
 							#endif
 						}
 
