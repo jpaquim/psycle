@@ -76,8 +76,9 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 		ROSC1Speed = OSC1Speed;
 		ROSC2Speed = OSC2Speed;
 		if (syntp->osc2sync) OSC2Position = 0;
-		else { OSC2Position-= OSC1Position;
-		if (OSC2Position<0) OSC2Position+=2048.0f;
+		else {
+			OSC2Position-= OSC1Position;
+			if (OSC2Position<0) OSC2Position+=2048.0f;
 		}
 		OSC1Position = 0;
 		initenvelopes =true;
