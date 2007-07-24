@@ -97,6 +97,7 @@ namespace psycle
 			Sampler(int index);
 			virtual void Init(void);
 			virtual void Work(int numSamples);
+			virtual float GetAudioRange(){ return 32768.0f; }
 			virtual void Stop(void);
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual char* GetName(void) { return _psName; };

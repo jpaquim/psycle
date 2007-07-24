@@ -979,6 +979,7 @@ XMSampler::Channel::PerformFX().
 	virtual void Work(int numSamples);
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
+	virtual float GetAudioRange() { return 32768; }
 	virtual char* GetName(void) { return _psName; };
 	virtual void SetSampleRate(int sr);
 

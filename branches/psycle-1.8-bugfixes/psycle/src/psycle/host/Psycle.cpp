@@ -105,11 +105,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			// create and load the frame with its resources
 			pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);
-				// For some reason, there'a First-Chance exception when
-				// another pFrame member is called after this LoadFrame
-				// (for example, pFrame->ShowWindow(SW_MAXIMIZE);)
 
 			// Sets Icon
+			instanceChecker.TrackFirstInstanceRunning();
 			HICON tIcon;
 			tIcon=LoadIcon(IDR_MAINFRAME);
 			pFrame->SetIcon(tIcon, true);
@@ -121,7 +119,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->m_wndView.RecalcMetrics();
 			pFrame->m_wndView.RecalculateColourGrid();
 
-			instanceChecker.TrackFirstInstanceRunning();
 
 			// The one and only window has been initialized, so show and update it.
 

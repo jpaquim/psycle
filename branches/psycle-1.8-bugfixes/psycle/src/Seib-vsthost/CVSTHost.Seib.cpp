@@ -750,13 +750,13 @@ namespace seib {
 				if (GetVstVersion() >= 2400 ) WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
 				//6 :        Host to Plug, canDo ( bypass )   returned : 0
 				KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
-				MainsChanged(true);                 //   then force resume.                
-				MainsChanged(false);                //   suspend again...                  
-				SetBlockSize(CVSTHost::pHost->GetBlockSize()); //   and block size                    
 				SetProcessPrecision(kVstProcessPrecision32);
 				//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
 				SetPanLaw(kLinearPanLaw,1.0f);
-				MainsChanged(true);                //    then force resume.                
+				MainsChanged(true);                 //   then force resume.                
+//				MainsChanged(false);                //   suspend again...                  
+//				SetBlockSize(CVSTHost::pHost->GetBlockSize()); //   and block size                    
+//				MainsChanged(true);                //    then force resume.                
 
 			}
 			else

@@ -12,8 +12,10 @@ class Dummy : public Machine
 public:
 	Dummy(int index);
 	virtual void Work(int numSamples);
+	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; };
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+
 	/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
 	bool wasVST;
 protected:
@@ -31,6 +33,7 @@ public:
 	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 	virtual void Work(int numSamples);
+	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; };
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
@@ -65,6 +68,7 @@ public:
 	virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); };
 	virtual void Init(void);
 	virtual void Work(int numSamples);
+	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; };
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
@@ -250,11 +254,14 @@ public:
 	virtual void GetWireVolume(int wireIndex, float &value){ value = GetWireVolume(wireIndex); }
 	virtual float GetWireVolume(int wireIndex);
 	virtual void SetWireVolume(int wireIndex,float value);
-	virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
-	virtual int InsertFx(Machine* mac);
+	virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier, float initialvol=1.0f);
+//	virtual int InsertFx(Machine* mac);
 	virtual int FindInputWire(int macIndex);
+	virtual int GetFreeInputWire(int slottype=0);
+	virtual int GetInputSlotTypes() { return 2; }
 	virtual void DeleteInputWireIndex(int wireIndex);
 	virtual void DeleteWires();
+	virtual float GetAudioRange(){ return 32768.0f; }
 	std::string GetAudioInputName(int port);
 	virtual int GetAudioInputs() { return 24; };
 	virtual int GetAudioOutputs() { return 1; };

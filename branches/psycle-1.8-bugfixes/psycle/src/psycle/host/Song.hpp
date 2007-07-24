@@ -104,23 +104,37 @@ namespace psycle
 			int GetFreeMachine();
 			/// creates a new machine in this song.
 			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
+			/// Creates a new machine, replacing an existing one.
+			bool ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
+			/// exchanges the position of two machines.
+			bool ExchangeMachines(int one, int two);
+			/// Creates a new machine cloned from an existing one.
+			Machine* CloneMachine(Machine* origmac);
 			/// destroy a machine of this song.
 			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
 			void DestroyAllMachines(bool write_locked = false);
 			/// the number of pattern used in this song.
 			int GetNumPatternsUsed();
-			/// creates a new connection between two machines.
-			bool InsertConnection(int src,int dst,float value = 1.0f);
-			/// Changes the destination of a wire connection. wiresource= source mac index, wiredest= new dest mac index, wireindex= index of the wire in wiresource to change.
-			int ChangeWireDestMac(int wiresource, int wiredest, int wireindex);
-			/// Changes the destination of a wire connection. wiredest= dest mac index, wiresource= new source mac index, wireindex= index of the wire in wiredest to change.
-			int ChangeWireSourceMac(int wiresource, int wiredest, int wireindex);
+			/// creates a new connection between two machines. returns index in the dest machine, or -1 if error.
+			int InsertConnection(Machine* srcMac,Machine* dstMac,int srctype=0, int dsttype=0,float value = 1.0f);
+			int InsertConnection(int srcMac,int dstMac,int srctype=0, int dsttype=0,float value = 1.0f)
+			{
+				if ( srcMac >= MAX_MACHINES || dstMac >= MAX_MACHINES) return -1;
+				if ( !_pMachine[srcMac] || !_pMachine[dstMac] ) return -1;
+				InsertConnection(_pMachine[srcMac],_pMachine[dstMac],srctype,dsttype,value);
+			}
+			/// Changes the destination of a wire connection. wireindex= index of the wire in wiresource to change.
+			/// returns index, or -1 if error. 
+			bool ChangeWireDestMac(Machine* srcMac, Machine* dstMac, int wiresrc, int wiredest);
+			/// Changes the destination of a wire connection. wireindex= index of the wire in wiredest to change.
+			/// returns index, or -1 if error. 
+			bool ChangeWireSourceMac(Machine* srcMac, Machine* dstMac, int wiresrc, int wiredest);
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			int GetFreeBus();
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
 			int GetFreeFxBus();
-			/// Returns the Bus index out of a pMachine index.
+			/// Returns the Bus index out of a pMachine index. (Legacy code. Used for validation purposes now)
 			int FindBusFromIndex(int smac);
 			/// Returns the first unused pattern in the pPatternData[] Array.
 			int GetBlankPatternUnused(int rval = 0);
@@ -130,6 +144,8 @@ namespace psycle
 			bool CloneMac(int src,int dst);
 			/// clones an instrument.
 			bool CloneIns(int src,int dst);
+			/// Exchanges the index of two instruments
+			void ExchangeInstruments(int one, int two);
 			/// deletes all the patterns of this song.
 			void DeleteAllPatterns();
 			/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses.

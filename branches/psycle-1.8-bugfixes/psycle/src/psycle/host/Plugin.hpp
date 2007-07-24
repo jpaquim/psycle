@@ -174,6 +174,7 @@ namespace psycle
 			///\{
 				public:
 					virtual void Work(int numSamples);
+					virtual float GetAudioRange(){ return 32768.0f; }
 					virtual void Tick();
 					virtual void Tick(int channel, PatternEntry * pEntry);
 					virtual void Stop();

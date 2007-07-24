@@ -11,8 +11,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class CGearRackDlg : public CDialog
 		{
 		public:
-			void ExchangeIns(int one,int two);
-			void ExchangeMacs(int one,int two);
 			CGearRackDlg(CChildView* pParent, CMainFrame* pMain);
 			CChildView* m_pParent;
 			CMainFrame* pParentMain;

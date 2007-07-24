@@ -217,7 +217,7 @@ namespace psycle
 					typedef int id_type;
 					id_type id() const throw() { return _macIndex; }
 				public:///\todo private:
-					/// it's currently actually used as an array index, but that shouldn't be part of the interface
+					/// it's actually used as an array index, but that shouldn't be part of the interface
 					id_type _macIndex;
 			///\}
 #else
@@ -253,7 +253,11 @@ namespace psycle
 			///\name connections ... wires
 			///\{
 				public:
-					virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
+					// Set or replace output wire
+					virtual void InsertOutputWireIndex(int wireIndex,int dstmac);
+					// Set or replace input wire
+					virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f);
+//					virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
 					virtual void ExchangeInputWires(int first,int second);
 					virtual void ExchangeOutputWires(int first,int second);
 					virtual void DeleteOutputWireIndex(int wireIndex);
@@ -261,6 +265,12 @@ namespace psycle
 					virtual void DeleteWires();
 					virtual int FindInputWire(int macIndex);
 					virtual int FindOutputWire(int macIndex);
+					virtual int GetFreeInputWire(int slottype=0);
+					virtual int GetFreeOutputWire(int slottype=0);
+					virtual int GetInputSlotTypes() { return 1; }
+					virtual int GetOutputSlotTypes() { return 1; }
+					virtual float GetAudioRange()=0;
+
 			///\}
 
 			///\name amplification of the signal in connections/wires
@@ -398,9 +408,9 @@ namespace psycle
 
 			///\name misc
 			///\{
-				///\todo doc
+				/// machine has started its work call, and is waiting for inputs to finish generating sound.
 				bool _waitingForSound;
-				///\todo doc
+				/// machine has finished working, and samples are ready in the buffers until next work call.
 				bool _worked;
 				/// left data
 				float *_pSamplesL;
@@ -444,6 +454,11 @@ namespace psycle
 				/// Incoming connections Machine vol
 				float _inputConVol[MAX_CONNECTIONS];	
 				/// Value to multiply _inputConVol[] with to have a 0.0...1.0 range
+				// The reason of the _wireMultiplier variable is because VSTs output wave data
+				// in the range -1.0 to +1.0, while natives and internals output at -32768.0 to +32768.0
+				// Initially (when the format was made), Psycle did convert this in the "Work" function,
+				// but since it already needs to multiply the output by inputConVol, I decided to remove
+				// that extra conversion and use directly the volume to do so.
 				float _wireMultiplier[MAX_CONNECTIONS];	
 			///\}
 
@@ -484,22 +499,23 @@ namespace psycle
 			Master(int index);
 			virtual void Init(void);
 			virtual void Work(int numSamples);
+			virtual float GetAudioRange(){ return 32768.0f; }
 			virtual char* GetName(void) { return _psName; };
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
-			/// this is for the VstHost
-			double sampleCount;
 			int _outDry;
+			bool vuupdated;
 			bool _clip;
 			bool decreaseOnClip;
-			static float* _pMasterSamples;
 			int peaktime;
 			float currentpeak;
 			float _lMax;
 			float _rMax;
-			bool vuupdated;
+			static float* _pMasterSamples;
+			/// this is for the VstHost
+			double sampleCount;
 		protected:
 			static char* _psName;
 		};

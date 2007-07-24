@@ -110,36 +110,58 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					else if (wiresource != -1) // Did we RButtonDown over a machine?
 					{
+						Machine *tmac = _pSong->_pMachine[wiresource];
+						Machine *dmac = _pSong->_pMachine[propMac];
 						AddMacViewUndo();
-						if (wiremove != -1)
+						if (wiremove != -1) //were we moving a wire?
 						{
-							_pSong->ChangeWireDestMac(wiresource,propMac,wiremove);
-						}
-						else
-						{
-							Machine *tmac = _pSong->_pMachine[wiresource];
-							Machine *dmac = _pSong->_pMachine[propMac];
-							if ( tmac->_mode== MACHMODE_FX && dmac->_type == MACH_MIXER )
+							int w(-1);
+							///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+							if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
 							{
 								if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
 								{
-									reinterpret_cast<Mixer*>(dmac)->InsertFx(tmac);
+									w = dmac->GetFreeInputWire(1);
 								}
-								else if (!_pSong->InsertConnection(wiresource, propMac))
+								else { w = dmac->GetFreeInputWire(0); }
+							}
+							else { w = dmac->GetFreeInputWire(0); }
+							if (!_pSong->ChangeWireDestMac(tmac,dmac,wiremove,w))
+							{
+								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
+							}
+						}
+						else
+						{
+							int dsttype=0;
+							///\todo: for multi-io.
+							//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
+							///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+							if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
+							{
+								if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
 								{
-									MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+									dsttype=1;
 								}
 							}
-							else if (!_pSong->InsertConnection(wiresource, propMac))
+							if (_pSong->InsertConnection(tmac, dmac,0,dsttype)== -1)
 							{
-								MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+								MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
 							}
 						}
 					}
 					else if ( wiremove != -1) //were we moving a wire then?
+					{
+						Machine *tmac = _pSong->_pMachine[propMac];
+						Machine *dmac = _pSong->_pMachine[wiredest];
+						int srctype=0;
+						///\todo: for multi-io.
+						//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
+						if (!_pSong->ChangeWireSourceMac(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
 						{
-							_pSong->ChangeWireSourceMac(propMac,wiredest,wiremove);
+							MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 						}
+					}
 				}
 				else
 				{					
@@ -510,29 +532,56 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						AddMacViewUndo();
 						if (wiredest == -1)
 						{
-							_pSong->ChangeWireDestMac(wiresource,propMac,wiremove);
+							Machine *tmac = _pSong->_pMachine[wiresource];
+							Machine *dmac = _pSong->_pMachine[propMac];
+							int w(-1);
+							///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+							if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
+							{
+								if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
+								{
+									w = dmac->GetFreeInputWire(1);
+								}
+								else { w = dmac->GetFreeInputWire(0); }
+							}
+							else { w = dmac->GetFreeInputWire(0); }
+							if (!_pSong->ChangeWireDestMac(tmac,dmac,wiremove,w))
+							{
+								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
+							}
 						}
-						else _pSong->ChangeWireSourceMac(propMac,wiredest,wiremove);
+						else
+						{
+							Machine *tmac = _pSong->_pMachine[propMac];
+							Machine *dmac = _pSong->_pMachine[wiredest];
+							int srctype=0;
+							///\todo: for multi-io.
+							//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
+							if (!_pSong->ChangeWireSourceMac(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
+							{
+								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
+							}
+						}
 					}
 					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
 						AddMacViewUndo();
 						Machine *tmac = _pSong->_pMachine[wiresource];
 						Machine *dmac = _pSong->_pMachine[propMac];
-						if ( tmac->_mode== MACHMODE_FX && dmac->_type == MACH_MIXER )
+						int dsttype=0;
+						///\todo: for multi-io.
+						//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
+						///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+						if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
 						{
 							if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
 							{
-								reinterpret_cast<Mixer*>(dmac)->InsertFx(tmac);
-							}
-							else if (!_pSong->InsertConnection(wiresource, propMac))
-							{
-								MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+								dsttype=1;
 							}
 						}
-						else if (!_pSong->InsertConnection(wiresource, propMac))
+						if (_pSong->InsertConnection(tmac, dmac,0,dsttype)== -1)
 						{
-							MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+							MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
 						}
 					}
 					else if ( smacmode == smac_modes::move && smac != -1 ) // Are we moving a machine?

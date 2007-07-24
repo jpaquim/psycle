@@ -479,17 +479,17 @@ namespace seib {
 			inline void GetParamName(VstInt32 index, char *ptr) { Dispatch(effGetParamName, index, 0, ptr); }
 			// Returns the vu value. Range [0-1] >1 -> clipped
 			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu); }
-			inline void SetSampleRate(float fSampleRate)
+			inline void SetSampleRate(float fSampleRate,bool ignorestate=false)
 			{
 				bool reinit=false;
-				if (bMainsState) { reinit=true; MainsChanged(false); }
+				if (bMainsState && !ignorestate) { reinit=true; MainsChanged(false); }
 				Dispatch(effSetSampleRate, 0, 0, 0, fSampleRate);
 				if (reinit) MainsChanged(true);
 			}
-			inline void SetBlockSize(VstIntPtr value)
+			inline void SetBlockSize(VstIntPtr value,bool ignorestate=false)
 			{
 				bool reinit=false;
-				if (bMainsState) { reinit=true; MainsChanged(false); }
+				if (bMainsState && !ignorestate) { reinit=true; MainsChanged(false); }
 				Dispatch(effSetBlockSize, 0, value);
 				if (reinit) MainsChanged(true);
 			}
@@ -497,9 +497,9 @@ namespace seib {
 			{
 				if (bOn != bMainsState)
 				{
+					bMainsState=bOn;
 					if (bOn) { Dispatch(effMainsChanged, 0, bOn); StartProcess(); }
 					else {  StopProcess(); Dispatch(effMainsChanged, 0, bOn); }
-					bMainsState=bOn;
 				}
 			}
 			inline bool EditGetRect(ERect **ptr) { return Dispatch(effEditGetRect, 0, 0, ptr)==1?true:false; }
@@ -698,10 +698,10 @@ namespace seib {
 			virtual bool OnSizeWindow(CEffect &pEffect, long width, long height) { return pEffect.OnSizeEditorWindow(width, height); }
 			// Will cause application to call AudioEffect's  setSampleRate/setBlockSize method (when implemented).
 			virtual long OnUpdateSampleRate(CEffect &pEffect){
-				if (!loadingEffect) pEffect.SetSampleRate(vstTimeInfo.sampleRate);
+				if (!loadingEffect) pEffect.SetSampleRate(vstTimeInfo.sampleRate,true);
 				return vstTimeInfo.sampleRate; }
 			virtual long OnUpdateBlockSize(CEffect &pEffect) {
-				pEffect.SetSampleRate(vstTimeInfo.sampleRate);
+				pEffect.SetSampleRate(vstTimeInfo.sampleRate,true);
 				return lBlockSize; }
 			//	Returns the ASIO input latency values.
 			virtual long OnGetInputLatency(CEffect &pEffect) { return 0; }

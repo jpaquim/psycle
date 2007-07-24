@@ -177,76 +177,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CMacProp::OnBnClickedReplacemac()
 		{
-			Global::_pSong->seqBus = pMachine->_macIndex;
-			int tmac = pMachine->_macIndex;
+			int index = pMachine->_macIndex;
+			m_view->NewMachine(pMachine->_x,pMachine->_y,index);
+			strcpy(txt,Global::_pSong->_pMachine[index]->_editName);
+
 			CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
-
-			Machine * mac = Global::_pSong->_pMachine[tmac];
-			if (mac)
-			{
-				int x = mac->_x;
-				int y = mac->_y;
-
-				// buffer all the connection info
-
-				int outputMachines[MAX_CONNECTIONS];
-				int inputMachines[MAX_CONNECTIONS];
-				float inputConVol[MAX_CONNECTIONS];
-				float outputConVol[MAX_CONNECTIONS];
-				bool connection[MAX_CONNECTIONS];
-				bool inputCon[MAX_CONNECTIONS];
-
-				int numOutputs = mac->_numOutputs;
-				int numInputs = mac->_numInputs;
-
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					outputMachines[i] = mac->_outputMachines[i];
-					inputMachines[i] = mac->_inputMachines[i];
-					inputConVol[i] = mac->_inputConVol[i]*mac->_wireMultiplier[i];
-					connection[i] = mac->_connection[i];
-					inputCon[i] = mac->_inputCon[i];
-					// store volumes coming back this way, they get destroyed by new machine
-					if (connection[i])
-					{
-						int j = Global::_pSong->_pMachine[outputMachines[i]]->FindInputWire(tmac);
-						if (j >= 0)
-						{
-							Global::_pSong->_pMachine[outputMachines[i]]->GetWireVolume(j, outputConVol[i]);
-						}
-					}
-				}
-
-				m_view->NewMachine(x,y,tmac);
-				// replace all the connection info
-
-				mac = Global::_pSong->_pMachine[tmac];
-				if (mac)
-				{
-					mac->_numOutputs = numOutputs;
-					mac->_numInputs = numInputs;
-
-					for (int i = 0; i < MAX_CONNECTIONS; i++)
-					{
-						// restore input connections
-						if (inputCon[i])
-						{
-							Global::_pSong->InsertConnection(inputMachines[i], tmac, inputConVol[i]);
-						}
-						// restore output connections
-						if (connection[i])
-						{
-							Global::_pSong->InsertConnection(tmac, outputMachines[i], outputConVol[i]);
-						}
-					}
-				}
-			}
-			else
-			{
-				m_view->NewMachine(-1,-1,tmac);
-			}
-			strcpy(txt,Global::_pSong->_pMachine[tmac]->_editName);
-
 			pParentMain->UpdateEnvInfo();
 			pParentMain->UpdateComboGen();
 			if (m_view->viewMode==view_modes::machine)

@@ -236,7 +236,38 @@ namespace psycle
 			}
 			_panning = newPan;
 		}
+		void Machine::InsertOutputWireIndex(int wireIndex, int dstmac)
+		{
+			if (!_connection[wireIndex]) _numOutputs++;
+			_outputMachines[wireIndex] = dstmac;
+			_connection[wireIndex] = true;
+		}
+		void Machine::InsertInputWireIndex(int wireIndex, int srcmac, float wiremultiplier,float initialvol)
+		{
+			if (!_inputCon[wireIndex]) _numInputs++;
+			_inputMachines[wireIndex] = srcmac;
+			_inputCon[wireIndex] = true;
+			_wireMultiplier[wireIndex] = wiremultiplier;
+			SetWireVolume(wireIndex,initialvol);
+		}
+		int Machine::GetFreeInputWire(int slottype)
+		{
+			for(int c=0; c<MAX_CONNECTIONS; c++)
+			{
+				if(!_inputCon[c]) return c;
+			}
+			return -1;
+		}
+		int Machine::GetFreeOutputWire(int slottype)
+		{
+			for(int c=0; c<MAX_CONNECTIONS; c++)
+			{
+				if(!_connection[c]) return c;
+			}
+			return -1;
+		}
 
+/*
 		void Machine::InitWireVolume(MachineType mType,int wireIndex,float value)
 		{
 			if ( mType == MACH_VST || mType == MACH_VSTFX )
@@ -268,7 +299,7 @@ namespace psycle
 			// but since it already needs to multiply the output by inputConVol, I decided to remove
 			// that extra conversion and use directly the volume to do so.
 		}
-
+*/
 		int Machine::FindInputWire(int macIndex)
 		{
 			for (int c=0; c<MAX_CONNECTIONS; c++)

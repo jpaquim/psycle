@@ -1354,7 +1354,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							x = Global::_pSong->_pMachine[fb]->_x;
 							y = Global::_pSong->_pMachine[fb]->_y;
 							pParentMain->CloseMacGui(fb);
-							Global::_pSong->DestroyMachine(fb);
 						}
 					}
 					else if ((mac < MAX_BUSES) && (dlg.OutBus))
@@ -1369,7 +1368,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							x = Global::_pSong->_pMachine[fb]->_x;
 							y = Global::_pSong->_pMachine[fb]->_y;
 							pParentMain->CloseMacGui(fb);
-							Global::_pSong->DestroyMachine(fb);
 						}
 					}
 					else
@@ -1411,45 +1409,58 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Global::pConfig->_pMidiInput->Close();
 				*/
 
-				if ( fb == -1 || !Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx))
+				if ( fb == -1)
 				{
 					MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
 				else
 				{
-					if ( dlg.OutBus)
+					bool created=false;
+					if (Global::_pSong->_pMachine[fb] )
 					{
-						Global::_pSong->seqBus = fb;
+						created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 					}
-
-					// make sure that no 2 machines have the same name, because that is irritating
-
-					int number = 1;
-					char buf[sizeof(_pSong->_pMachine[fb]->_editName)+4];
-					strcpy (buf,_pSong->_pMachine[fb]->_editName);
-
-					for (int i = 0; i < MAX_MACHINES-1; i++)
+					else 
 					{
-						if (i!=fb)
+						created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+					}
+					if (created)
+					{
+						if ( dlg.OutBus)
 						{
-							if (_pSong->_pMachine[i])
+							Global::_pSong->seqBus = fb;
+						}
+
+						// make sure that no 2 machines have the same name, because that is irritating
+
+						int number = 1;
+						char buf[sizeof(_pSong->_pMachine[fb]->_editName)+4];
+						strcpy (buf,_pSong->_pMachine[fb]->_editName);
+
+						for (int i = 0; i < MAX_MACHINES-1; i++)
+						{
+							if (i!=fb)
 							{
-								if (strcmp(_pSong->_pMachine[i]->_editName,buf)==0)
+								if (_pSong->_pMachine[i])
 								{
-									number++;
-									sprintf(buf,"%s %d",_pSong->_pMachine[fb]->_editName,number);
-									i = -1;
+									if (strcmp(_pSong->_pMachine[i]->_editName,buf)==0)
+									{
+										number++;
+										sprintf(buf,"%s %d",_pSong->_pMachine[fb]->_editName,number);
+										i = -1;
+									}
 								}
 							}
 						}
+
+						buf[sizeof(_pSong->_pMachine[fb]->_editName)-1] = 0;
+						strcpy(_pSong->_pMachine[fb]->_editName,buf);
+
+						pParentMain->UpdateComboGen();
+						Repaint(draw_modes::all);
+						//Repaint(draw_modes::all_machines); // Seems that this doesn't always work (multiple calls to Repaint?)
 					}
-
-					buf[sizeof(_pSong->_pMachine[fb]->_editName)-1] = 0;
-					strcpy(_pSong->_pMachine[fb]->_editName,buf);
-
-					pParentMain->UpdateComboGen();
-					Repaint(draw_modes::all);
-					//Repaint(draw_modes::all_machines); // Seems that this doesn't always work (multiple calls to Repaint?)
+					else MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
 				
 				/*

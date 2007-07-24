@@ -111,8 +111,14 @@ namespace psycle
 			seqFont.DeleteObject();
 			generatorFont.DeleteObject();
 			effectFont.DeleteObject();
-			if(_ppOutputDrivers) ///\todo useless test since the delete operator does the check itself
+			if(_numOutputDrivers)
+			{
+				for (int i(0);i<_numOutputDrivers;++i)
+				{
+					delete _ppOutputDrivers[i];
+				}
 				delete [] _ppOutputDrivers;
+			}
 			delete _pMidiInput;
 		}
 

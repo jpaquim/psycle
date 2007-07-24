@@ -2146,6 +2146,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
 			memset(newtoold,255,MAX_PATTERNS*sizeof(char));
 
+			if (Global::pPlayer->_playing)
+			{
+				Global::pPlayer->Stop();
+			}
+
+
 		// Part one, Read patterns from sequence and assign them a new ordered number.
 			unsigned char freep=0;
 			for ( int i=0 ; i<_pSong->playLength ; i++ )

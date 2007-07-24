@@ -634,8 +634,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 }
 
 //////////////////////////////////////////////////////////////////////
-// The SeqTick function where your notes and pattern command handlers
-// should be processed. Called each tick.
+// The SeqTick function is where your notes and pattern command handlers
+// should be processed.
 // Is called by the host sequencer
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)

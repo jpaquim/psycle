@@ -218,72 +218,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				tmac += MAX_BUSES;
 			case 0:
 				{
-					Global::_pSong->seqBus = tmac;
-
-					Machine * mac = Global::_pSong->_pMachine[tmac];
-					if (mac)
-					{
-						int x = mac->_x;
-						int y = mac->_y;
-
-						// buffer all the connection info
-
-						int outputMachines[MAX_CONNECTIONS];
-						int inputMachines[MAX_CONNECTIONS];
-						float inputConVol[MAX_CONNECTIONS];
-						float outputConVol[MAX_CONNECTIONS];
-						bool connection[MAX_CONNECTIONS];
-						bool inputCon[MAX_CONNECTIONS];
-
-						int numOutputs = mac->_numOutputs;
-						int numInputs = mac->_numInputs;
-
-						for (int i = 0; i < MAX_CONNECTIONS; i++)
-						{
-							outputMachines[i] = mac->_outputMachines[i];
-							inputMachines[i] = mac->_inputMachines[i];
-							inputConVol[i] = mac->_inputConVol[i]*mac->_wireMultiplier[i];
-							connection[i] = mac->_connection[i];
-							inputCon[i] = mac->_inputCon[i];
-							// store volumes coming back this way, they get destroyed by new machine
-							if (connection[i])
-							{
-								int j = Global::_pSong->_pMachine[outputMachines[i]]->FindInputWire(tmac);
-								if (j >= 0)
-								{
-									Global::_pSong->_pMachine[outputMachines[i]]->GetWireVolume(j, outputConVol[i]);
-								}
-							}
-						}
-
-						m_pParent->NewMachine(x,y,tmac);
-						// replace all the connection info
-
-						mac = Global::_pSong->_pMachine[tmac];
-						if (mac)
-						{
-							mac->_numOutputs = numOutputs;
-							mac->_numInputs = numInputs;
-
-							for (int i = 0; i < MAX_CONNECTIONS; i++)
-							{
-								// restore input connections
-								if (inputCon[i])
-								{
-									Global::_pSong->InsertConnection(inputMachines[i], tmac, inputConVol[i]);
-								}
-								// restore output connections
-								if (connection[i])
-								{
-									Global::_pSong->InsertConnection(tmac, outputMachines[i], outputConVol[i]);
-								}
-							}
-						}
-					}
-					else
-					{
-						m_pParent->NewMachine(-1,-1,tmac);
-					}
+					m_pParent->NewMachine(-1,-1,tmac);
 
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
@@ -484,7 +419,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			switch (DisplayMode) // should be necessary to rename opened parameter windows.
 			{
 			case 0:
-				ExchangeMacs(sel[0],sel[1]);
+				m_pParent->AddMacViewUndo();
+				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
@@ -492,7 +428,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 1:
-				ExchangeMacs(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
+				m_pParent->AddMacViewUndo();
+				Global::_pSong->ExchangeMachines(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
@@ -500,8 +437,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 2:
+				m_pParent->AddMacViewUndo();
 				Global::_pSong->Invalided=true;
-				ExchangeIns(sel[0],sel[1]);
+				Global::_pSong->ExchangeInstruments(sel[0],sel[1]);
 				
 				Global::_pSong->Invalided=false;
 				pParentMain->UpdateComboIns(true);
@@ -509,166 +447,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			
 			pParentMain->RedrawGearRackList();
-		}
-
-		void CGearRackDlg::ExchangeMacs(int one,int two)
-		{
-			Machine * tmp1 = Global::_pSong->_pMachine[one];
-			Machine * tmp2 = Global::_pSong->_pMachine[two];
-			
-			// if they are both valid
-			
-			if (tmp1 && tmp2)
-			{
-				m_pParent->AddMacViewUndo();
-				
-				// exchange positions
-				
-				int temp = tmp1->_x;
-				tmp1->_x = tmp2->_x;
-				tmp2->_x = temp;
-				
-				temp = tmp1->_y;
-				tmp1->_y = tmp2->_y;
-				tmp2->_y = temp;
-				
-				// exchange all connections
-				
-				float tmp1ivol[MAX_CONNECTIONS],tmp2ivol[MAX_CONNECTIONS], tmp1ovol[MAX_CONNECTIONS],tmp2ovol[MAX_CONNECTIONS];
-				
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					// Store the volumes of each wire and exchange.
-					if (tmp1->_connection[i]) {	tmp1->GetDestWireVolume(one,i,tmp1ovol[i]);	}
-					if (tmp2->_connection[i]) {	tmp2->GetDestWireVolume(two,i,tmp2ovol[i]); }				
-					tmp1->GetWireVolume(i,tmp1ivol[i]);
-					tmp2->GetWireVolume(i,tmp2ivol[i]);
-
-					temp = tmp1->_outputMachines[i];
-					tmp1->_outputMachines[i] = tmp2->_outputMachines[i];
-					tmp2->_outputMachines[i] = temp;
-					
-					temp = tmp1->_inputMachines[i];
-					tmp1->_inputMachines[i] = tmp2->_inputMachines[i];
-					tmp2->_inputMachines[i] = temp;
-					
-
-					bool btemp = tmp1->_connection[i];
-					tmp1->_connection[i] = tmp2->_connection[i];
-					tmp2->_connection[i] = btemp;
-					
-					btemp = tmp1->_inputCon[i];
-					tmp1->_inputCon[i] = tmp2->_inputCon[i];
-					tmp2->_inputCon[i] = btemp;
-					
-				}
-				
-				temp = tmp1->_numOutputs;
-				tmp1->_numOutputs = tmp2->_numOutputs;
-				tmp2->_numOutputs = temp;
-				
-				temp = tmp1->_numInputs;
-				tmp1->_numInputs = tmp2->_numInputs;
-				tmp2->_numInputs = temp;
-
-				// Exchange the Machine number.
-				Global::_pSong->_pMachine[one] = tmp2;
-				Global::_pSong->_pMachine[two] = tmp1;
-				
-				tmp1->_macIndex = two;
-				tmp2->_macIndex = one;
-
-				// Finally, Reinitialize the volumes of the wires. Remember that we have exchanged the wires, so the volume indexes are the opposite ones.
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					if (tmp1->_inputCon[i])
-					{
-						tmp1->InitWireVolume(Global::_pSong->_pMachine[tmp1->_inputMachines[i]]->_type,i,tmp2ivol[i]);
-					}
-					if (tmp2->_inputCon[i])
-					{
-						tmp2->InitWireVolume(Global::_pSong->_pMachine[tmp2->_inputMachines[i]]->_type,i,tmp1ivol[i]);
-					}
-
-					if (tmp1->_connection[i])
-					{
-						Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->_type,Global::_pSong->_pMachine[tmp1->_outputMachines[i]]->FindInputWire(two),tmp2ovol[i]);
-					}
-					if (tmp2->_connection[i])
-					{
-						Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->_type,Global::_pSong->_pMachine[tmp2->_outputMachines[i]]->FindInputWire(one),tmp1ovol[i]);
-					}					
-				}
-
-				return;
-			}
-			if (tmp1)
-			{
-				m_pParent->AddMacViewUndo();
-				// ok we gotta swap this one for a null one
-				Global::_pSong->_pMachine[one] = NULL;
-				Global::_pSong->_pMachine[two] = tmp1;
-
-				tmp1->_macIndex = two;
-
-				// and replace the index in any machine that pointed to this one.
-				for (int i=0; i < MAX_CONNECTIONS; i++)
-				{
-					if ( tmp1->_inputCon[i])
-					{
-						Machine* cmp = Global::_pSong->_pMachine[tmp1->_inputMachines[i]];
-						cmp->_outputMachines[cmp->FindOutputWire(one)]=two;
-					}
-					if ( tmp1->_connection[i])
-					{
-						Machine* cmp = Global::_pSong->_pMachine[tmp1->_outputMachines[i]];
-						cmp->_inputMachines[cmp->FindInputWire(one)]=two;
-					}
-				}
-				return;
-			}
-			if (tmp2)
-			{
-				m_pParent->AddMacViewUndo();
-				// ok we gotta swap this one for a null one
-				Global::_pSong->_pMachine[one] = tmp2;
-				Global::_pSong->_pMachine[two] = NULL;
-
-				tmp2->_macIndex = one;
-
-				// and replace the index in any machine that pointed to this one.
-				for (int i=0; i < MAX_CONNECTIONS; i++)
-				{
-					if ( tmp2->_inputCon[i])
-					{
-						Machine* cmp = Global::_pSong->_pMachine[tmp2->_inputMachines[i]];
-						cmp->_outputMachines[cmp->FindOutputWire(two)]=one;
-					}
-					if ( tmp2->_connection[i])
-					{
-						Machine* cmp = Global::_pSong->_pMachine[tmp2->_outputMachines[i]];
-						cmp->_inputMachines[cmp->FindInputWire(two)]=one;
-					}
-				}
-				return;
-			}
-		}
-
-		void CGearRackDlg::ExchangeIns(int one,int two)
-		{
-			Song* pSong = Global::_pSong;
-			Instrument * tmpins;
-
-			m_pParent->AddMacViewUndo();
-			
-			tmpins=pSong->_pInstrument[one];
-			pSong->_pInstrument[one]=pSong->_pInstrument[two];
-			pSong->_pInstrument[two]=tmpins;
-			//The above works because we are not creating new objects, just swaping them.
-			//this means that no new data is generated/deleted,and the information is just
-			//copied. If not, we would have had to define the operator=() function and take
-			//care of it.
-
 		}
 
 		void CGearRackDlg::OnClonemachine() 
@@ -700,15 +478,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (tmac2 < 0)
 				{
-					// we need to find an empty slot
-					for (int i = 0; i < MAX_BUSES; i++)
-					{
-						if (!Global::_pSong->_pMachine[i])
-						{
-							tmac2 = i;
-							break;
-						}
-					}
+					tmac2 = Global::_pSong->GetFreeBus();
 				}
 				if (tmac2 >= 0)
 				{
@@ -732,15 +502,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					// we need to find an empty slot
-					for (int i = MAX_BUSES; i < MAX_BUSES*2; i++)
-					{
-						if (!Global::_pSong->_pMachine[i])
-						{
-							tmac2 = i;
-							break;
-						}
-					}
+					tmac2 = Global::_pSong->GetFreeFxBus();
 				}
 				if (tmac2 >= 0)
 				{

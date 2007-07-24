@@ -572,6 +572,7 @@ namespace psycle
 				}
 			}
 		}
+/*
 		int Mixer::InsertFx(Machine* mac)
 		{
 			int returnbus=-1;
@@ -581,11 +582,12 @@ namespace psycle
 			// Get a free sendfx slot
 			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
 			{
-				if(!ReturnValid(c)) returnbus = c;
-				// Checking that there isn't a slot from the dest. machine already
-				else if(Return(c).Wire().machine_ == mac->_macIndex) error = true;
+			if(!ReturnValid(c)) returnbus = c;
+			// Checking that there isn't a slot from the dest. machine already
+			else if(Return(c).Wire().machine_ == mac->_macIndex) error = true;
 			}
 			if(returnbus == -1 || error) return -1;
+
 			// Get a free output slot on the source machine
 			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
 			{
@@ -593,25 +595,14 @@ namespace psycle
 				// Checking that there isn't an slot to the dest. machine already
 				else if(mac->_outputMachines[c] == _macIndex) error = true;
 			}
-			if(origbus == -1 || error) return false;
+			if(origbus == -1 || error) return -1;
 
 			// Calibrating in/out properties
-			mac->_outputMachines[origbus] = _macIndex;
-			mac->_connection[origbus] = true;
-			mac->_numOutputs++;
-			// Initializing a wire with macindex. normalization is set inside InitWireVolume()
-			MixerWire wire(mac->_macIndex,0);
-			InsertReturn(returnbus,wire);
-			InsertSend(returnbus,wire);
-			InitWireVolume(mac->_type,MAX_CONNECTIONS+returnbus,1.0f);
-			RecalcReturn(returnbus);
-			for (int i(0);i<numinputs();++i)
-			{
-				RecalcSend(i,returnbus);
-			}
+			mac->InsertOutputWireIndex(origbus,_macIndex);
+			InsertInputWireIndex(returnbus,mac->_macIndex,mac->GetAudioRange()/GetAudioRange());
 			return returnbus;
 		}
-
+*/
 		float Mixer::GetWireVolume(int wireIndex)
 		{
 			if (wireIndex< MAX_CONNECTIONS)
@@ -622,11 +613,10 @@ namespace psycle
 		}
 		void Mixer::SetWireVolume(int wireIndex,float value)
 		{
-			///\todo: recalc the precalculated values
-			if (wireIndex< MAX_CONNECTIONS)
+			if (ChannelValid(wireIndex))
 			{
 				Machine::SetWireVolume(wireIndex,value);
-				if ( _inputCon[wireIndex]) RecalcChannel(wireIndex);
+				RecalcChannel(wireIndex);
 			}
 			else if (ReturnValid(wireIndex-MAX_CONNECTIONS))
 			{
@@ -634,12 +624,11 @@ namespace psycle
 				RecalcReturn(wireIndex-MAX_CONNECTIONS);
 			}
 		}
-		void Mixer::InitWireVolume(MachineType mType,int wireIndex,float value)
+		void Mixer::InsertInputWireIndex(int wireIndex, int srcmac, float wiremultiplier,float initialvol)
 		{
-			///\todo: recalc the precalculated values
 			if (wireIndex< MAX_CONNECTIONS)
 			{
-				Machine::InitWireVolume(mType,wireIndex,value);
+				Machine::InsertInputWireIndex(wireIndex,srcmac,wiremultiplier,initialvol);
 				InsertChannel(wireIndex);
 				RecalcChannel(wireIndex);
 				for (int i(0);i<numsends();++i)
@@ -650,21 +639,13 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-
-				if (mType== MACH_VST || mType == MACH_VSTFX)
-				{
-					Return(wireIndex).Wire().volume_ = value;
-					Return(wireIndex).Wire().normalize_ = 0.000030517578125f;
-					sends_[wireIndex].volume_ = value;
-					sends_[wireIndex].normalize_ = 32768.0f;
-				}
-				else
-				{
-					Return(wireIndex).Wire().volume_ = value;
-					Return(wireIndex).Wire().normalize_ = 1.0f;
-					sends_[wireIndex].volume_ = value;
-					sends_[wireIndex].normalize_ = 1.0f;
-				}
+				MixerWire wire(srcmac,0);
+				InsertReturn(wireIndex,wire);
+				InsertSend(wireIndex,wire);
+				Return(wireIndex).Wire().volume_ = initialvol;
+				Return(wireIndex).Wire().normalize_ = wiremultiplier;
+				sends_[wireIndex].volume_ = 1.0f;
+				sends_[wireIndex].normalize_ = 1.0f/wiremultiplier;
 				RecalcReturn(wireIndex);
 				for(int c(0) ; c < numinputs() ; ++c)
 				{
@@ -672,6 +653,7 @@ namespace psycle
 				}
 			}
 		}
+
 		int Mixer::FindInputWire(int macIndex)
 		{
 			int ret=Machine::FindInputWire(macIndex);
@@ -688,6 +670,20 @@ namespace psycle
 			}
 			return ret;
 		}
+		int Mixer::GetFreeInputWire(int slottype)
+		{
+			if ( slottype == 0) return Machine::GetFreeInputWire(0);
+			else 
+			{
+				// Get a free sendfx slot
+				for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
+				{
+					if(!ReturnValid(c)) return c;
+				}
+				return -1;
+			}
+		}
+
 		void Mixer::DeleteInputWireIndex(int wireIndex)
 		{
 			if ( wireIndex < MAX_CONNECTIONS)

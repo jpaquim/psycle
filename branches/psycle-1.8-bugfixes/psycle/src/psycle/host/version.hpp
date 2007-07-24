@@ -28,8 +28,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 3
-#define PSYCLE__VERSION__QUALITY "beta3"
+#define PSYCLE__VERSION__PATCH 5
+#define PSYCLE__VERSION__QUALITY "RC"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \

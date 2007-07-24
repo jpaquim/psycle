@@ -172,12 +172,12 @@ namespace psycle
 							for(int track(0); track < song.SONGTRACKS ; ++track)
 							{
 								PatternEntry & event(events[track]);
-								if(event._note == cdefTweakE)
+								if(event._note == notecommands::tweakeffect)
 								{
 									event._mach += 0x40;
-									event._note = cdefTweakM;
+									event._note = notecommands::tweak;
 								}
-								if(event._note == cdefTweakM)
+								if(event._note == notecommands::tweak)
 								{
 									std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
 									if(i != machine_converted_from.end())

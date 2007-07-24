@@ -177,12 +177,16 @@ namespace psycle
 				virtual void SetParameter(int numparam, float value) { if(numparam < numParams())CEffect::SetParameter(numparam,value); }
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
-				virtual void InitWireVolume(MachineType mType,int wireIndex,float value)
-				{ MainsChanged(false); Machine::InitWireVolume(mType,wireIndex,value);  MainsChanged(true); }
+				virtual void InsertOutputWireIndex(int wireIndex,int dstmac)
+				{ MainsChanged(false); ConnectOutput(0,true); ConnectOutput(1,true); Machine::InsertOutputWireIndex(wireIndex,dstmac);  MainsChanged(true); }
+				virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f)
+				{ MainsChanged(false); ConnectInput(0,true); ConnectInput(1,true); Machine::InsertInputWireIndex(wireIndex,srcmac,wiremultiplier,initialvol);  MainsChanged(true); }
 				virtual void DeleteOutputWireIndex(int wireIndex)
-				{ MainsChanged(false); Machine::DeleteOutputWireIndex(wireIndex);  MainsChanged(true); }
+				{ MainsChanged(false); ConnectOutput(0,false); ConnectOutput(1,false); Machine::DeleteOutputWireIndex(wireIndex);  MainsChanged(true); }
 				virtual void DeleteInputWireIndex(int wireIndex)
-				{ MainsChanged(false); Machine::DeleteInputWireIndex(wireIndex);  MainsChanged(true); }
+				{ MainsChanged(false); ConnectInput(0,false); ConnectInput(1,false); Machine::DeleteInputWireIndex(wireIndex);  MainsChanged(true); }
+				virtual float GetAudioRange(){ return 1.0f; }
+
 
 
 				// CEffect overloaded functions

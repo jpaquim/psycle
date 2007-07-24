@@ -16,6 +16,7 @@
 #include "convert_internal_machines.hpp"
 #include "Riff.hpp" // for Wave file loading.
 #include "zap.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -35,14 +36,8 @@ namespace psycle
 			unsigned short wBlockAlign;
 			unsigned short wBitsPerSample;
 		};
-	}
-}
 
-namespace psycle
-{
-	namespace host
-	{
-		/// ???.
+		/// Helper class for the PSY2 loader.
 		class VSTLoader
 		{
 		public:
@@ -184,6 +179,206 @@ namespace psycle
 			DeleteAllPatterns();
 		}
 
+		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
+		{
+			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
+			assert(origmac);
+
+			// buffer all the connection info
+			int outputMachines[MAX_CONNECTIONS];
+			int inputMachines[MAX_CONNECTIONS];
+			float inputConVol[MAX_CONNECTIONS];
+			float outputConVol[MAX_CONNECTIONS];
+			bool connection[MAX_CONNECTIONS];
+			bool inputCon[MAX_CONNECTIONS];
+
+			int numOutputs = origmac->_numOutputs;
+			int numInputs = origmac->_numInputs;
+
+			for (int i = 0; i < MAX_CONNECTIONS; i++)
+			{
+				outputMachines[i] = origmac->_outputMachines[i];
+				inputMachines[i] = origmac->_inputMachines[i];
+				inputConVol[i] = origmac->_inputConVol[i]*origmac->_wireMultiplier[i];
+				connection[i] = origmac->_connection[i];
+				inputCon[i] = origmac->_inputCon[i];
+				// store out volumes aswell
+				if (connection[i])
+				{
+					origmac->GetDestWireVolume(songIdx,i,outputConVol[i]);
+				}
+			}
+
+			if (!CreateMachine(type,x,y,psPluginDll,songIdx,shellIdx))
+			{
+				_pMachine[songIdx]=origmac;
+				return false;
+			}
+
+			delete origmac;
+			// replace all the connection info
+			Machine* newmac = Global::_pSong->_pMachine[songIdx];
+			if (newmac)
+			{
+				newmac->_numOutputs = numOutputs;
+				newmac->_numInputs = numInputs;
+
+				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					// restore input connections
+					if (inputCon[i])
+					{
+						InsertConnection(_pMachine[inputMachines[i]], _pMachine[songIdx],0,0, inputConVol[i]);
+					}
+					// restore output connections
+					if (connection[i])
+					{
+						InsertConnection(_pMachine[songIdx], _pMachine[outputMachines[i]], 0,0, outputConVol[i]);
+					}
+				}
+			}
+			return true;
+		}
+
+		bool Song::ExchangeMachines(int one, int two)
+		{
+			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
+			Machine *mac1 = _pMachine[one];
+			Machine *mac2 = _pMachine[two];
+
+			// if they are both valid
+			if (mac1 && mac2)
+			{
+				// exchange positions
+				int temp = mac1->_x;
+				mac1->_x = mac2->_x;
+				mac2->_x = temp;
+
+				temp = mac1->_y;
+				mac1->_y = mac2->_y;
+				mac2->_y = temp;
+
+				float tmp1ivol[MAX_CONNECTIONS],tmp2ivol[MAX_CONNECTIONS], tmp1ovol[MAX_CONNECTIONS],tmp2ovol[MAX_CONNECTIONS];
+				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					// Store the volumes of each wire and exchange.
+					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(mac1->_macIndex,i,tmp1ovol[i]);	}
+					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(mac2->_macIndex,i,tmp2ovol[i]); }				
+					mac1->GetWireVolume(i,tmp1ivol[i]);
+					mac2->GetWireVolume(i,tmp2ivol[i]);
+
+					temp = mac1->_outputMachines[i];
+					mac1->_outputMachines[i] = mac2->_outputMachines[i];
+					mac2->_outputMachines[i] = temp;
+
+					temp = mac1->_inputMachines[i];
+					mac1->_inputMachines[i] = mac2->_inputMachines[i];
+					mac2->_inputMachines[i] = temp;
+
+
+					bool btemp = mac1->_connection[i];
+					mac1->_connection[i] = mac2->_connection[i];
+					mac2->_connection[i] = btemp;
+
+					btemp = mac1->_inputCon[i];
+					mac1->_inputCon[i] = mac2->_inputCon[i];
+					mac2->_inputCon[i] = btemp;
+
+				}
+
+				temp = mac1->_numOutputs;
+				mac1->_numOutputs = mac2->_numOutputs;
+				mac2->_numOutputs = temp;
+
+				temp = mac1->_numInputs;
+				mac1->_numInputs = mac2->_numInputs;
+				mac2->_numInputs = temp;
+
+				// Exchange the Machine number.
+				_pMachine[one] = mac2;
+				_pMachine[two] = mac1;
+
+				mac1->_macIndex = two;
+				mac2->_macIndex = one;
+
+				// Finally, Reinitialize the volumes of the wires. Remember that we have exchanged the wires, so the volume indexes are the opposite ones.
+				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					if (mac1->_inputCon[i])
+					{
+						Machine* macsrc = _pMachine[mac1->_inputMachines[i]];
+						mac1->InsertInputWireIndex(i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
+					}
+					if (mac2->_inputCon[i])
+					{
+						Machine* macsrc = _pMachine[mac2->_inputMachines[i]];
+						mac2->InsertInputWireIndex(i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
+					}
+
+					if (mac1->_connection[i])
+					{
+						Machine* macdst = _pMachine[mac1->_outputMachines[i]];
+						macdst->InsertInputWireIndex(macdst->FindInputWire(two),two,mac1->GetAudioRange()/macdst->GetAudioRange(),tmp2ovol[i]);
+					}
+					if (mac2->_connection[i])
+					{
+						Machine* macdst = _pMachine[mac2->_outputMachines[i]];
+						macdst->InsertInputWireIndex(macdst->FindInputWire(one),one,mac2->GetAudioRange()/macdst->GetAudioRange(),tmp1ovol[i]);
+					}					
+				}
+
+				return true;
+			}
+			else if (mac1)
+			{
+				// ok we gotta swap this one for a null one
+				_pMachine[one] = NULL;
+				_pMachine[two] = mac1;
+
+				mac1->_macIndex = two;
+
+				// and replace the index in any machine that pointed to this one.
+				for (int i=0; i < MAX_CONNECTIONS; i++)
+				{
+					if ( mac1->_inputCon[i])
+					{
+						Machine* cmp = _pMachine[mac1->_inputMachines[i]];
+						cmp->_outputMachines[cmp->FindOutputWire(one)]=two;
+					}
+					if ( mac1->_connection[i])
+					{
+						Machine* cmp = _pMachine[mac1->_outputMachines[i]];
+						cmp->_inputMachines[cmp->FindInputWire(one)]=two;
+					}
+				}
+				return true;
+			}
+			else if (mac2)
+			{
+				// ok we gotta swap this one for a null one
+				_pMachine[one] = mac2;
+				_pMachine[two] = NULL;
+
+				mac2->_macIndex = one;
+
+				// and replace the index in any machine that pointed to this one.
+				for (int i=0; i < MAX_CONNECTIONS; i++)
+				{
+					if ( mac2->_inputCon[i])
+					{
+						Machine* cmp = _pMachine[mac2->_inputMachines[i]];
+						cmp->_outputMachines[cmp->FindOutputWire(two)]=one;
+					}
+					if ( mac2->_connection[i])
+					{
+						Machine* cmp = _pMachine[mac2->_outputMachines[i]];
+						cmp->_inputMachines[cmp->FindInputWire(two)]=one;
+					}
+				}
+				return true;
+			}
+		}
+
 		void Song::DestroyAllMachines(bool write_locked)
 		{
 			_machineLock = true;
@@ -209,6 +404,20 @@ namespace psycle
 			_machineLock = false;
 		}
 
+		void Song::ExchangeInstruments(int one, int two)
+		{
+			Song* pSong = Global::_pSong;
+			Instrument * tmpins;
+
+			tmpins=pSong->_pInstrument[one];
+			pSong->_pInstrument[one]=pSong->_pInstrument[two];
+			pSong->_pInstrument[two]=tmpins;
+			//The above works because we are not creating new objects, just swaping them.
+			//this means that no new data is generated/deleted,and the information is just
+			//copied. If not, we would have had to define the operator=() function and take
+			//care of it.
+
+		}
 		void Song::DeleteLayer(int i)
 		{
 			_pInstrument[i]->DeleteLayer();
@@ -323,95 +532,82 @@ namespace psycle
 		}
 
 
-		bool Song::InsertConnection(int src, int dst, float value)
+		int Song::InsertConnection(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float value)
 		{
-			int freebus=-1;
-			int dfreebus=-1;
-			bool error=false;
-			Machine *srcMac = _pMachine[src];
-			Machine *dstMac = _pMachine[dst];
-			if(!srcMac || !dstMac) return false;
-			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
-			// Get a free output slot on the source machine
-			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
-			{
-				if(!srcMac->_connection[c]) freebus = c;
-				// Checking that there's not an slot to the dest. machine already
-				else if(srcMac->_outputMachines[c] == dst) error = true;
-			}
-			if(freebus == -1 || error) return false;
-			// Get a free input slot on the destination machine
-			error=false;
-			for(int c=MAX_CONNECTIONS-1; c>=0; c--)
-			{
-				if(!dstMac->_inputCon[c]) dfreebus = c;
-				// Checking if the destination machine is connected with the source machine to avoid a loop.
-				if(dstMac->_connection[c] && dstMac->_outputMachines[c] == src) error = true;
-			}
-			if(dfreebus == -1 || error) return false;
-			// Calibrating in/out properties
-			srcMac->_outputMachines[freebus] = dst;
-			srcMac->_connection[freebus] = true;
-			srcMac->_numOutputs++;
-			dstMac->_inputMachines[dfreebus] = src;
-			dstMac->_inputCon[dfreebus] = true;
-			dstMac->_numInputs++;
-			dstMac->InitWireVolume(srcMac->_type,dfreebus,value);
-			return true;
+
+			// Assert that we have two machines
+			assert(srcMac); assert(dstMac);
+			// Verify that the destination is not a generator
+			if(dstMac->_mode == MACHMODE_GENERATOR) return -1;
+			// Verify that src is not connected to dst already, and that destination is not connected to source.
+			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return -1;
+			// Try to get free indexes from each machine
+			int freebus=srcMac->GetFreeOutputWire(srctype);
+			int dfreebus=dstMac->GetFreeInputWire(dsttype);
+			if(freebus == -1 || dfreebus == -1 ) return -1;
+
+			// If everything went right, connect them.
+			srcMac->InsertOutputWireIndex(freebus,dstMac->_macIndex);
+			dstMac->InsertInputWireIndex(dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
+			return dfreebus;
 		}
-		int Song::ChangeWireDestMac(int wiresource, int wiredest, int wireindex)
+		bool Song::ChangeWireDestMac(Machine* srcMac,Machine* dstMac, int wiresrc,int wiredest)
 		{
+			// Assert that we have two machines
+			assert(srcMac); assert(dstMac);
+			// Verify that the destination is not a generator
+			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
+			// Verify that src is not connected to dst already, and that destination is not connected to source.
+			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
+
+			if (wiresrc == -1 || wiredest == -1 || srcMac->_outputMachines[wiresrc] == -1)
+				return false;
+
 			int w;
 			float volume = 1.0f;
-			if (_pMachine[wiresource])
+			///\todo: this assignation will need to change with multi-io.
+			Machine *oldmac = _pMachine[srcMac->_outputMachines[wiresrc]];
+			if (oldmac)
 			{
-				Machine *dmac = _pMachine[_pMachine[wiresource]->_outputMachines[wireindex]];
+				if ((w = oldmac->FindInputWire(srcMac->_macIndex))== -1)
+					return false;
 
-				if (dmac)
-				{
-					w = dmac->FindInputWire(wiresource);
-					dmac->GetWireVolume(w,volume);
-					//\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
-					// Also, it would be nice to maintain the output wire index.
-					if (InsertConnection(wiresource, wiredest,volume))
-					{
-						// delete the old wire
-						_pMachine[wiresource]->DeleteOutputWireIndex(wireindex);
-						dmac->DeleteInputWireIndex(w);
-					}
-/*						else
-					{
-						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-					}*/
-				}
+				oldmac->GetWireVolume(w,volume);
+				oldmac->DeleteInputWireIndex(w);
+				srcMac->InsertOutputWireIndex(wiresrc,dstMac->_macIndex);
+				dstMac->InsertInputWireIndex(wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				return true;
 			}
-			return 0;
+			return false;
 		}
-		int Song::ChangeWireSourceMac(int wiresource,int wiredest, int wireindex)
+		bool Song::ChangeWireSourceMac(Machine* srcMac,Machine* dstMac, int wiresrc, int wiredest)
 		{
+			// Assert that we have two machines
+			assert(srcMac); assert(dstMac);
+			// Verify that the destination is not a generator
+			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
+			// Verify that src is not connected to dst already, and that destination is not connected to source.
+			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
+
+			if (wiresrc == -1 || wiredest == -1 || dstMac->_inputMachines[wiredest] == -1)
+				return false;
+
+			int w;
 			float volume = 1.0f;
+			///\todo: this assignation will need to change with multi-io.
+			Machine *oldmac = _pMachine[dstMac->_inputMachines[wiredest]];
+			if (oldmac)
+			{
+				if ((w =oldmac->FindOutputWire(dstMac->_macIndex)) == -1)
+					return false;
 
-			if (_pMachine[wiredest])
-			{					
-				Machine *smac = _pMachine[_pMachine[wiredest]->_inputMachines[wireindex]];
-
-				if (smac)
-				{
-					_pMachine[wiredest]->GetWireVolume(wireindex,volume);
-					if (InsertConnection(wiresource, wiredest,volume))
-					{
-						// delete the old wire
-						int t = smac->FindOutputWire(wiredest);
-						smac->DeleteOutputWireIndex(t);
-						_pMachine[wiredest]->DeleteInputWireIndex(wireindex);
-					}
-/*						else
-					{
-						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-					}*/
-				}
+				oldmac->DeleteOutputWireIndex(w);
+				srcMac->InsertOutputWireIndex(wiresrc,dstMac->_macIndex);
+				dstMac->GetWireVolume(wiredest,volume);
+				dstMac->InsertInputWireIndex(wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				return true;
 			}
-			return 0;
+			return false;
 		}
 
 		void Song::DestroyMachine(int mac, bool write_locked)
@@ -1671,7 +1867,7 @@ namespace psycle
 									val*=32768.0f; // BugFix
 								}
 
-								pMac[i]->InitWireVolume(pOrigMachine->_type,c,val);
+								pMac[i]->InsertInputWireIndex(c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
 							}
 						}
 					}
