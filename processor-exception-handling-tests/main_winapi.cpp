@@ -72,15 +72,18 @@ int main() {
 				<< std::setw(w) << "quiet nan: " << l::quiet_NaN() << "\n";
 			{
 				(unsigned int) _clear87();
-				unsigned int control(
-					//::_control87(~_EM_DENORMAL, _EM_DENORMAL)
-					_control87(~_EM_DENORMAL, _MCW_EM)
-					//::_control87(~unsigned int(), _MCW_EM)
-				);
 				std::cout << "fp control: " << std::hex << _control87(0, 0) << std::endl;
+				unsigned int control(
+					//_control87(~unsigned int(_EM_DENORMAL), _EM_DENORMAL)
+					_control87(~unsigned int(_EM_DENORMAL), _MCW_EM)
+					//_control87(~unsigned int(), _MCW_EM)
+				);
+				std::cout << "fp control: " << std::hex << control << std::endl;
+				std::cout << "fp control: " << std::hex << _control87(0, 0) << std::endl;
+				//return 1;
 				unsigned int mode(SetErrorMode(0)); SetErrorMode(mode);
 				std::cout << "error mode: " << std::hex << mode << std::endl;
-				mode |= SEM_NOGPFAULTERRORBOX;// | SEM_FAILCRITICALERRORS);
+				//mode |= SEM_NOGPFAULTERRORBOX;// | SEM_FAILCRITICALERRORS);
 				SetErrorMode(mode); mode = SetErrorMode(mode);
 				std::cout << "error mode: " << std::hex << mode << std::endl;
 			}
