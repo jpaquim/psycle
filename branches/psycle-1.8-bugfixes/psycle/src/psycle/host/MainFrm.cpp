@@ -2256,6 +2256,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnSeqShowpattername()
 		{
 			Global::pConfig->_bShowPatternNames=((CButton*)m_wndSeq.GetDlgItem(IDC_SHOWPATTERNAME))->GetCheck();
+			
+			/*
+
+			//trying to set the size of the sequencer bar... how to do this!?
+
+			CRect borders;
+			((CDialog*)m_wndSeq.GetDlgItem(AFX_IDW_DIALOGBAR))->GetWindowRect(&borders);
+			TRACE("borders.right = %i", borders.right);
+			if (Global::pConfig->_bShowPatternNames)
+			{
+               //m_wndSeq.SetBorders(borders.left, borders.top, 6, borders.bottom);
+			}
+			else
+			{
+				//m_wndSeq.SetBorders(borders.left, borders.top, 3, borders.bottom);
+			}
+			*/
+
 			UpdateSequencer();
 			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			pls->SetSel(Global::pPlayer->_playPosition,true);
