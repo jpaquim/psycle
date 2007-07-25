@@ -88,7 +88,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_CHECK_DITHER,	OnToggleDither)
 			ON_BN_CLICKED(IDC_OUTPUTFILE, OnOutputfile)
 			ON_BN_CLICKED(IDC_OUTPUTCLIPBOARD, OnOutputclipboard)
+			ON_BN_CLICKED(IDC_OUTPUTSAMPLE, OnOutputsample)
 			//}}AFX_MSG_MAP			
+			
 		END_MESSAGE_MAP()
 
 		BOOL CSaveWavDlg::OnInitDialog() 
@@ -128,10 +130,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
 			m_patnumber2.SetWindowText(num);
-			sprintf(num,"%02x",pBlockSel->start.line);
-			m_linestart.SetWindowText(num);
-			sprintf(num,"%02x",pBlockSel->end.line+1);
-			m_lineend.SetWindowText(num);
+
+			if (pChildView->blockSelected)
+			{
+				sprintf(num,"%02x",pBlockSel->start.line);
+				m_linestart.SetWindowText(num);
+				sprintf(num,"%02x",pBlockSel->end.line+1);
+				m_lineend.SetWindowText(num);
+			}
+			else
+			{
+				sprintf(num,"%02x",0);
+				m_linestart.SetWindowText(num);
+				sprintf(num,"%02x",1);
+				m_lineend.SetWindowText(num);
+			}
 
 			m_progress.SetRange(0,1);
 			m_progress.SetPos(0);
@@ -251,23 +264,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			m_text.SetWindowText("");		
 
-			if (pChildView->blockSelected)
-			{
-				//enable record block selection
-				GetDlgItem(IDC_RECBLOCK)->EnableWindow(true);
-			}
-			else
-			{
-				//disable record block selection
-				GetDlgItem(IDC_RECBLOCK)->EnableWindow(false);
-			}
-
 			return true;  // return true unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return false
 		}
 
 		void CSaveWavDlg::OnOutputfile()
 		{
+			m_savewave.EnableWindow(true);
 			m_outputtype=0;
 			m_savewires.EnableWindow(true);
 			m_savetracks.EnableWindow(true);
@@ -278,7 +281,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::OnOutputclipboard()
 		{
+			m_savewave.EnableWindow(false);
 			m_outputtype=1;
+			m_savewires.EnableWindow(false);
+			m_savetracks.EnableWindow(false);
+			m_savegens.EnableWindow(false);
+			m_filename.EnableWindow(false);
+			m_browse.EnableWindow(false);
+		}
+		
+		void CSaveWavDlg::OnOutputsample()
+		{
+			m_savewave.EnableWindow(false);
+			m_outputtype=2;
 			m_savewires.EnableWindow(false);
 			m_savetracks.EnableWindow(false);
 			m_savegens.EnableWindow(false);
@@ -552,10 +567,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
 				}
 			}
-			else //m_outputtype == 1
+			else if (m_outputtype == 1)
 			{
-				//record to clipboard
-				SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
+				//record to clipboard				
+			}
+			else //m_outputtype == 2
+			{
+				//record to next free sample slot
 			}
 
 		}

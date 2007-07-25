@@ -121,8 +121,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnRecblock();
 			afx_msg void OnOutputfile();
 			afx_msg void OnOutputclipboard();
+			afx_msg void OnOutputsample();
 			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()					
+			DECLARE_MESSAGE_MAP()						
 };
 
 		//{{AFX_INSERT_LOCATION}}

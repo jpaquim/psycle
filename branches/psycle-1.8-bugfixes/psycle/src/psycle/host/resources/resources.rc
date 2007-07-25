@@ -1806,7 +1806,7 @@ BEGIN
                     BS_PUSHLIKE,175,257,76,15
 END
 
-IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 345
+IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 357
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Render as Wav File"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
@@ -1816,6 +1816,9 @@ BEGIN
     CONTROL         "Output to clipboard (not implemented for now)",
                     IDC_OUTPUTCLIPBOARD,"Button",BS_AUTORADIOBUTTON,15,111,
                     159,10
+    CONTROL         "Output to next free sample slot (not implemented for now)",
+                    IDC_OUTPUTSAMPLE,"Button",BS_AUTORADIOBUTTON,15,126,194,
+                    10
     EDITTEXT        IDC_FILENAME,74,15,127,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse",IDC_FILEBROWSE,208,15,34,13
     CONTROL         "Save each unmuted input to master as a separated wav (wire number will be appended to filename)",
@@ -1828,53 +1831,53 @@ BEGIN
                     IDC_SAVEGENERATORSEPARATED,"Button",BS_AUTOCHECKBOX | 
                     BS_MULTILINE | WS_TABSTOP,33,83,207,24
     CONTROL         "Record the entire song",IDC_RECSONG,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,13,144,112,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,13,158,112,10
     CONTROL         "Record pattern number",IDC_RECPATTERN,"Button",
-                    BS_AUTORADIOBUTTON,13,159,89,10
+                    BS_AUTORADIOBUTTON,13,173,89,10
     CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
-                    BS_AUTORADIOBUTTON,13,174,93,10
+                    BS_AUTORADIOBUTTON,13,188,93,10
     CONTROL         "Lines between",IDC_RECBLOCK,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,13,189,62,10,WS_EX_RTLREADING
-    EDITTEXT        IDC_PATNUMBER,107,157,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_RANGESTART,107,172,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_RANGEEND,149,172,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    COMBOBOX        IDC_COMBO_RATE,117,212,134,75,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP,13,203,62,10,WS_EX_RTLREADING
+    EDITTEXT        IDC_PATNUMBER,107,171,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGESTART,107,186,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGEEND,149,186,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_LINESTART,76,201,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_LINEEND,118,201,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           ", pattern",IDC_STATIC,147,203,47,10
+    COMBOBOX        IDC_COMBO_RATE,117,226,134,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_BITS,117,228,133,75,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_BITS,117,242,133,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_CHANNELS,117,242,133,75,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_COMBO_CHANNELS,117,256,133,75,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_COMBO_PDF,117,265,127,47,CBS_DROPDOWNLIST | 
-                    WS_TABSTOP
-    COMBOBOX        IDC_COMBO_NOISESHAPING,117,281,128,41,CBS_DROPDOWNLIST | 
-                    WS_TABSTOP
-    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,155,325,50,14
-    PUSHBUTTON      "Close",IDCANCEL,211,325,41,14
-    LTEXT           "(in HEX value)",IDC_STATIC,137,160,47,10
-    LTEXT           "to",IDC_STATIC,137,174,8,8
-    LTEXT           "(in HEX value)",IDC_STATIC,179,174,47,10
-    GROUPBOX        "Record:",IDC_STATIC,5,131,246,76
-    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
-                    0x1,5,308,245,9
-    RTEXT           "Sample Rate",IDC_STATIC,65,212,45,15,SS_CENTERIMAGE
-    RTEXT           "Channels",IDC_STATIC,61,242,50,15,SS_CENTERIMAGE
-    RTEXT           "Bit Depth",IDC_STATIC,61,228,50,15,SS_CENTERIMAGE
-    CTEXT           "Note: many filters screw up when rendering at low sample rates.",
-                    IDC_STATIC,11,212,50,45,WS_DISABLED
-    RTEXT           "Prob. Distribution",IDC_STATIC,55,265,54,13,
-                    SS_CENTERIMAGE
-    RTEXT           "Noise-shaping",IDC_STATIC,65,278,44,18,SS_CENTERIMAGE
-    GROUPBOX        "Dither",IDC_STATIC,5,257,245,42
-    LTEXT           "",IDC_TEXT,5,327,144,12
     CONTROL         "Enable",IDC_CHECK_DITHER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,11,274,39,9
-    GROUPBOX        "Output",IDC_STATIC,7,3,243,125
-    EDITTEXT        IDC_LINESTART,76,187,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    EDITTEXT        IDC_LINEEND,118,187,26,12,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "to",IDC_STATIC,106,189,8,8
-    LTEXT           ", pattern",IDC_STATIC,147,189,47,10
-    EDITTEXT        IDC_PATNUMBER2,179,187,26,13,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(in HEX)",IDC_STATIC,209,190,27,10
+                    WS_TABSTOP,11,288,39,9
+    COMBOBOX        IDC_COMBO_PDF,117,279,127,47,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_COMBO_NOISESHAPING,117,295,128,41,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
+    DEFPUSHBUTTON   "Save Wave",IDC_SAVEWAVE,155,337,50,14
+    PUSHBUTTON      "Close",IDCANCEL,211,337,41,14
+    LTEXT           "(in HEX value)",IDC_STATIC,137,174,47,10
+    LTEXT           "to",IDC_STATIC,137,188,8,8
+    LTEXT           "(in HEX value)",IDC_STATIC,179,188,47,10
+    GROUPBOX        "Record:",IDC_STATIC,5,145,246,76
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
+                    0x1,5,322,245,9
+    RTEXT           "Sample Rate",IDC_STATIC,65,226,45,15,SS_CENTERIMAGE
+    RTEXT           "Channels",IDC_STATIC,61,256,50,15,SS_CENTERIMAGE
+    RTEXT           "Bit Depth",IDC_STATIC,61,242,50,15,SS_CENTERIMAGE
+    CTEXT           "Note: many filters screw up when rendering at low sample rates.",
+                    IDC_STATIC,11,226,50,45,WS_DISABLED
+    RTEXT           "Prob. Distribution",IDC_STATIC,55,279,54,13,
+                    SS_CENTERIMAGE
+    RTEXT           "Noise-shaping",IDC_STATIC,65,292,44,18,SS_CENTERIMAGE
+    GROUPBOX        "Dither",IDC_STATIC,5,271,245,42
+    LTEXT           "",IDC_TEXT,5,339,144,12
+    GROUPBOX        "Output",IDC_STATIC,7,3,243,139
+    LTEXT           "to",IDC_STATIC,106,203,8,8
+    EDITTEXT        IDC_PATNUMBER2,179,201,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(all in HEX)",IDC_STATIC,208,204,41,10
 END
 
 IDD_NEW_VOLUME DIALOG  0, 0, 114, 63
@@ -2694,7 +2697,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 250
         TOPMARGIN, 7
-        BOTTOMMARGIN, 339
+        BOTTOMMARGIN, 351
     END
 
     IDD_NEW_VOLUME, DIALOG

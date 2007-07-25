@@ -1027,7 +1027,8 @@
 #define IDC_RADIO2                      1791
 #define IDC_OUTPUTCLIPBOARD             1791
 #define IDC_LINESTART                   1792
-#define IDC_PATNUMBERLINES              1793
+#define IDC_OUTPUTCLIPBOARD2            1793
+#define IDC_OUTPUTSAMPLE                1793
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
