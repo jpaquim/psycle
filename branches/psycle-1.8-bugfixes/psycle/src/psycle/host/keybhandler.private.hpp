@@ -2058,7 +2058,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				const int endvalue =
 					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+3) * 0x100 +
 					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.end.line*MULTIPLY+4);
-				const float addvalue = (float)(endvalue -initvalue)/(blockSel.end.line-blockSel.start.line);
+				const float addvalue = float(endvalue - initvalue) / (blockSel.end.line - blockSel.start.line);
 				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 				int displace = firstrow;
 				
@@ -2072,7 +2072,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						toffset[displace]=note;
 						toffset[displace+1]=aux;
 						toffset[displace+2]=mac;
-						int val= (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
+						int val= (points)? points[l-blockSel.start.line]: /* round toward zero */ static_cast<int>(initvalue+addvalue*(l-blockSel.start.line));
 						if ( val == -1 ) continue;
 						toffset[displace+3]=static_cast<unsigned char>(val/0x100);
 						toffset[displace+4]=static_cast<unsigned char>(val%0x100);
@@ -2084,7 +2084,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					unsigned char mac = toffset[firstrow+2];
 					for (int l=blockSel.start.line;l<=blockSel.end.line;l++)
 					{
-						int val = (points)? points[l-blockSel.start.line]: f2i(initvalue+addvalue*(l-blockSel.start.line));
+						int val = (points)? points[l-blockSel.start.line]: /* round toward zero */ static_cast<int>(initvalue+addvalue*(l-blockSel.start.line));
 						if ( val == -1 ) continue;
 						toffset[displace+2]=mac;
 						toffset[displace+3]=static_cast<unsigned char>(val/0x100);
