@@ -34,8 +34,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CButton m_dither;
 			CEdit	m_rangestart;
 			CEdit	m_rangeend;
+			CEdit	m_linestart;
+			CEdit	m_lineend;
 			CProgressCtrl	m_progress;
 			CEdit	m_patnumber;
+			CEdit	m_patnumber2;
 			CEdit	m_filename;
 			CStatic m_text;
 			int		m_recmode;

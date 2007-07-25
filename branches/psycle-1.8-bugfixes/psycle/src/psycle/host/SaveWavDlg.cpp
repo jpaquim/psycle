@@ -14,6 +14,7 @@
 #include <iostream>
 #include <iomanip>
 #include "mfc_namespace.hpp"
+#include ".\savewavdlg.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -50,8 +51,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_SAVEGENERATORSEPARATED, m_savegens);
 			DDX_Control(pDX, IDC_RANGESTART, m_rangestart);
 			DDX_Control(pDX, IDC_RANGEEND, m_rangeend);
+			DDX_Control(pDX, IDC_LINESTART, m_linestart);
+			DDX_Control(pDX, IDC_LINEEND, m_lineend);
 			DDX_Control(pDX, IDC_PROGRESS, m_progress);
 			DDX_Control(pDX, IDC_PATNUMBER, m_patnumber);
+			DDX_Control(pDX, IDC_PATNUMBER2, m_patnumber2);
 			DDX_Control(pDX, IDC_FILENAME, m_filename);
 			DDX_Control(pDX, IDC_COMBO_RATE, m_rate);
 			DDX_Control(pDX, IDC_COMBO_BITS, m_bits);
@@ -110,14 +114,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
 			
+			m_lineend.EnableWindow(false);
+			m_linestart.EnableWindow(false);
+			m_patnumber2.EnableWindow(false);
+
 			char num[3];
 			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
 			m_patnumber.SetWindowText(num);
 			sprintf(num,"%02x",0);
 			m_rangestart.SetWindowText(num);
 			sprintf(num,"%02x",pSong->playLength-1);
-			m_rangeend.SetWindowText(num);
-			
+			m_rangeend.SetWindowText(num);			
+
+			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
+			m_patnumber2.SetWindowText(num);
+			sprintf(num,"%02x",pBlockSel->start.line);
+			m_linestart.SetWindowText(num);
+			sprintf(num,"%02x",pBlockSel->end.line+1);
+			m_lineend.SetWindowText(num);
+
 			m_progress.SetRange(0,1);
 			m_progress.SetPos(0);
 
@@ -292,6 +307,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
+			m_lineend.EnableWindow(false);
+			m_linestart.EnableWindow(false);
+			m_patnumber2.EnableWindow(false);
 			m_recmode=0;
 		}
 
@@ -300,6 +318,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(true);
+			m_lineend.EnableWindow(false);
+			m_linestart.EnableWindow(false);
+			m_patnumber2.EnableWindow(false);
 			m_recmode=1;
 		}
 
@@ -308,6 +329,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_rangeend.EnableWindow(true);
 			m_rangestart.EnableWindow(true);
 			m_patnumber.EnableWindow(false);
+			m_lineend.EnableWindow(false);
+			m_linestart.EnableWindow(false);
+			m_patnumber2.EnableWindow(false);
 			m_recmode=2;
 		}
 
@@ -316,6 +340,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
+			m_lineend.EnableWindow(true);
+			m_linestart.EnableWindow(true);
+			m_patnumber2.EnableWindow(true);
 			m_recmode=3;
 		}
 
@@ -619,10 +646,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pPlayer->_loopSong=false;
 				break;
 			case 3:
-				blockSLine=pBlockSel->start.line;
-				blockELine=pBlockSel->end.line+1;			
+				m_patnumber.GetWindowText(name);
+				hexstring_to_integer(name.GetBuffer(2), pstart);
+				m_linestart.GetWindowText(name);
+				hexstring_to_integer(name.GetBuffer(2), blockSLine);
+				m_lineend.GetWindowText(name);
+				hexstring_to_integer(name.GetBuffer(2), blockELine);
 
-				pstart = pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition];
 				m_progress.SetRange(blockSLine,blockELine);
 				//<alk> what's this for? (start)
 				for (cont=0;cont<pSong->playLength;cont++)

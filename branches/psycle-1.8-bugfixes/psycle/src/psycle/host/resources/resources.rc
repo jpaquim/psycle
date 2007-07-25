@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (predeterminado) resources
+// Neutral (Default) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -1833,9 +1833,8 @@ BEGIN
                     BS_AUTORADIOBUTTON,13,159,89,10
     CONTROL         "Sequence positions from",IDC_RECRANGE,"Button",
                     BS_AUTORADIOBUTTON,13,174,93,10
-    CONTROL         "Record selected block (only in regard to line numbers, not channels)",
-                    IDC_RECBLOCK,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,13,
-                    189,229,10,WS_EX_RTLREADING
+    CONTROL         "Lines between",IDC_RECBLOCK,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,13,189,62,10,WS_EX_RTLREADING
     EDITTEXT        IDC_PATNUMBER,107,157,26,13,ES_RIGHT | ES_AUTOHSCROLL
     EDITTEXT        IDC_RANGESTART,107,172,26,12,ES_RIGHT | ES_AUTOHSCROLL
     EDITTEXT        IDC_RANGEEND,149,172,26,12,ES_RIGHT | ES_AUTOHSCROLL
@@ -1870,6 +1869,12 @@ BEGIN
     CONTROL         "Enable",IDC_CHECK_DITHER,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,11,274,39,9
     GROUPBOX        "Output",IDC_STATIC,7,3,243,125
+    EDITTEXT        IDC_LINESTART,76,187,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_LINEEND,118,187,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "to",IDC_STATIC,106,189,8,8
+    LTEXT           ", pattern",IDC_STATIC,147,189,47,10
+    EDITTEXT        IDC_PATNUMBER2,179,187,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(in HEX)",IDC_STATIC,209,190,27,10
 END
 
 IDD_NEW_VOLUME DIALOG  0, 0, 114, 63
@@ -3367,7 +3372,7 @@ BEGIN
     ID_ABOUT_ABOUTVST       "Shows an about box about this plugin."
 END
 
-#endif    // Neutral (predeterminado) resources
+#endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

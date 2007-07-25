@@ -739,8 +739,10 @@
 #define IDC_VOLUME_DB12                 1517
 #define IDC_VOLUME_PER12                1518
 #define IDC_VOLUME_DB13                 1519
+#define IDC_LINEEND                     1519
 #define IDC_EXCHANGE                    1520
 #define IDC_VOLUME_PER13                1520
+#define IDC_PATNUMBER2                  1520
 #define IDC_TWEAK_SMOOTH                1521
 #define IDC_VOLUME_DB14                 1521
 #define IDC_RADIO_GEN                   1522
@@ -1024,6 +1026,8 @@
 #define IDC_OUTPUTFILE                  1790
 #define IDC_RADIO2                      1791
 #define IDC_OUTPUTCLIPBOARD             1791
+#define IDC_LINESTART                   1792
+#define IDC_PATNUMBERLINES              1793
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1190,7 +1194,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        276
 #define _APS_NEXT_COMMAND_VALUE         34207
-#define _APS_NEXT_CONTROL_VALUE         1792
+#define _APS_NEXT_CONTROL_VALUE         1794
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
