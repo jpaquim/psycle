@@ -133,7 +133,13 @@ namespace psycle{ namespace host{
 		std::uint8_t order[256];
 	};
 
-
+	struct XMINSTRUMENTFILEHEADER
+	{
+		char extxi[21];		// Extended Instrument:
+		char name[23];		// Name, 1Ah
+		char trkname[20];	// FastTracker v2.00
+		std::uint16_t shsize;		// 0x0102
+	};
 	struct XMINSTRUMENTHEADER
 	{
 		std::uint32_t size;
@@ -142,7 +148,20 @@ namespace psycle{ namespace host{
 		std::uint8_t samples;
 		std::uint8_t samplesh;
 	};
-
+	struct XMSAMPLEFILEHEADER
+	{
+		std::uint8_t snum[96];
+		std::uint16_t venv[24];
+		std::uint16_t penv[24];
+		std::uint8_t vnum, pnum;
+		std::uint8_t vsustain, vloops, vloope, psustain, ploops, ploope;
+		std::uint8_t vtype, ptype;
+		std::uint8_t vibtype, vibsweep, vibdepth, vibrate;
+		std::uint16_t volfade;
+		std::uint16_t res;
+		std::uint8_t reserved1[20];
+		std::uint16_t reserved2;
+	};
 	struct XMSAMPLEHEADER
 	{
 		std::uint32_t shsize;

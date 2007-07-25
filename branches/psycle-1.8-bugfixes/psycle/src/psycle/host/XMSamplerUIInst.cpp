@@ -11,6 +11,7 @@
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "XMSongLoader.hpp"
+#include "ITModule2.h"
 #include "Configuration.hpp"
 //using namespace Gdiplus;
 
@@ -885,7 +886,6 @@ void XMSamplerUIInst::OnCbnSelendokInsDcacombo()
 			
 void XMSamplerUIInst::OnBnClickedLoadins()
 {
-	/*
 	OPENFILENAME ofn; // common dialog box structure
 	char szFile[_MAX_PATH]; // buffer for file name
 	szFile[0]='\0';
@@ -925,14 +925,11 @@ void XMSamplerUIInst::OnBnClickedLoadins()
 			else if (ext.CompareNoCase("ITI") == 0)
 			{
 				ITModule2 itsong;
-				song.Open(ofn.lpstrFile);
-				bool LoadITInstFromFile(pMachine(),m_InstrumentList.GetCurSel());
+				itsong.Open(ofn.lpstrFile);
+				itsong.LoadInstrumentFromFile(*pMachine(),m_InstrumentList.GetCurSel());
 			}
 		}
 	}
-*/
-	
-	///\todo Agregue aquí su código de controlador de notificación de control
 }
 
 void XMSamplerUIInst::OnBnClickedSaveins()

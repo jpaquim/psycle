@@ -64,7 +64,87 @@ namespace host{
 	{
 
 	}
-	
+	void XMSongLoader::LoadInstrumentFromFile(XMSampler & sampler, const int idx)
+	{
+		XMINSTRUMENTFILEHEADER fileheader;
+
+		Read(&fileheader,sizeof(XMINSTRUMENTFILEHEADER));
+		if ( !strcmp(fileheader.name,"Extended Instrument")) return;
+		sampler.rInstrument(idx).Init();
+		fileheader.name[22] = 0;
+		sampler.rInstrument(idx).Name(fileheader.name);
+
+		XMSAMPLEFILEHEADER _insheader;
+		Read(&_insheader,sizeof(XMSAMPLEFILEHEADER));
+		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
+			XMInstrument::WaveData::WaveForms::SQUARE,
+			XMInstrument::WaveData::WaveForms::SAWDOWN,
+			XMInstrument::WaveData::WaveForms::SAWUP
+		};
+		
+		XMSAMPLEHEADER _insheaderb;
+		memcpy(&_insheader,&_insheaderb+4,sizeof(XMSAMPLEFILEHEADER)-2);
+		SetEnvelopes(sampler.rInstrument(idx),_insheaderb);
+
+		std::uint32_t iSampleCount(0);
+		for (std::uint32_t i=0; i<96; i++)
+		{
+			if (_insheader.snum[i] > iSampleCount) iSampleCount = _insheader.snum[i];
+		}
+		iSampleCount++;
+		if (iSampleCount > 32) iSampleCount = 32;
+
+
+		unsigned char *sRemap = new unsigned char[iSampleCount];
+		unsigned int i;
+		int curSample(0);
+		// read instrument data	
+		for(i=0;i<iSampleCount;i++)
+		{
+			while (sampler.SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-1) curSample++;
+			LoadSampleHeader(sampler,GetPos(),idx,curSample);
+			// Only get REAL samples.
+			if ( smpLen[curSample] > 0 && curSample < MAX_INSTRUMENTS-2 ) {	sRemap[i]=curSample; }
+			else { sRemap[i]=MAX_INSTRUMENTS-1; }
+		}
+
+		// load individual samples
+		for(i=0;i<iSampleCount;i++)
+		{
+			if ( sRemap[i] < MAX_INSTRUMENTS-1)
+			{
+				sampler.rInstrument(idx).IsEnabled(true);
+				LoadSampleData(sampler,GetPos(),idx,sRemap[i]);
+
+				//\todo : Improve autovibrato. (correct depth? fix for sweep?)
+				XMInstrument::WaveData& _wave = sampler.SampleData(sRemap[i]);
+				_wave.VibratoAttack(_insheader.vibsweep!=0?255/_insheader.vibsweep:255);
+				_wave.VibratoDepth(_insheader.vibdepth<<1);
+				_wave.VibratoSpeed(_insheader.vibrate);
+				_wave.VibratoType(exchwave[_insheader.vibtype&3]);
+			}
+		}
+
+		XMInstrument::NotePair npair;
+		if ( _insheader.snum[0] < iSampleCount) npair.second=sRemap[_insheader.snum[0]];
+		else npair.second=0;
+		for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+			npair.first=i;
+			if (i< 12){
+				//npair.second=_samph.snum[0]; implicit.
+				sampler.rInstrument(idx).NoteToSample(i,npair);
+			} else if(i < 108){
+				if ( _insheader.snum[i] < iSampleCount) npair.second=sRemap[_insheader.snum[i-12]];
+				else npair.second=curSample-1;
+				sampler.rInstrument(idx).NoteToSample(i,npair);
+			} else {
+				//npair.second=_samph.snum[95]; implicit.
+				sampler.rInstrument(idx).NoteToSample(i,npair);
+			}
+		}
+		delete[] sRemap;
+	}
+
 	void XMSongLoader::Load(Song& song,const bool fullopen)
 	{
 

@@ -122,7 +122,7 @@ namespace psycle
 			{
 				if ( srcMac >= MAX_MACHINES || dstMac >= MAX_MACHINES) return -1;
 				if ( !_pMachine[srcMac] || !_pMachine[dstMac] ) return -1;
-				InsertConnection(_pMachine[srcMac],_pMachine[dstMac],srctype,dsttype,value);
+				return InsertConnection(_pMachine[srcMac],_pMachine[dstMac],srctype,dsttype,value);
 			}
 			/// Changes the destination of a wire connection. wireindex= index of the wire in wiresource to change.
 			/// returns index, or -1 if error. 

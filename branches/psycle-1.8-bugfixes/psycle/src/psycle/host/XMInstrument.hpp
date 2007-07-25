@@ -60,7 +60,7 @@ namespace psycle { namespace host {
 			};
 
 			/// Constructor
-			WaveData() : m_pWaveDataL(), m_pWaveDataR() {}
+			WaveData() : m_pWaveDataL(0), m_pWaveDataR(0),m_WaveLength(0) {}
 
 			/// Initialize
 			void Init(){

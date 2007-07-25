@@ -69,7 +69,38 @@ namespace psycle
 
 			return val;
 		}
+		void ITModule2::LoadInstrumentFromFile(XMSampler & sampler, const int idx)
+		{
+			itFileH.flags=0;
+			itInsHeader2x inshead;
+			Read(&inshead,sizeof(inshead));
+			Seek(0);
+			sampler.rInstrument(idx).Init();
+			LoadITInst(&sampler,idx);
+			Skip(2);
 
+			int curSample(0);
+			unsigned char *sRemap = new unsigned char[inshead.noS];
+			for (unsigned int i(0); i<inshead.noS; i++)
+			{
+				while (sampler.SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-1) curSample++;
+				LoadITSample(&sampler,curSample);
+				// Only get REAL samples.
+				if ( sampler.SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {	sRemap[i]=curSample; }
+				else { sRemap[i]=MAX_INSTRUMENTS-1; }
+			}
+
+			int i;
+			
+			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
+			{
+				XMInstrument::NotePair npair = sampler.rInstrument(idx).NoteToSample(i);
+				npair.second=sRemap[npair.second];
+				sampler.rInstrument(idx).NoteToSample(i,npair);
+			}
+			delete[] sRemap;
+
+		}
 		bool ITModule2::LoadITModule(Song *song)
 		{
 			s=song;
