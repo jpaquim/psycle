@@ -257,12 +257,12 @@ namespace psycle
 					virtual void InsertOutputWireIndex(int wireIndex,int dstmac);
 					// Set or replace input wire
 					virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f);
-//					virtual void InitWireVolume(MachineType mType,int wireIndex,float value);
 					virtual void ExchangeInputWires(int first,int second);
 					virtual void ExchangeOutputWires(int first,int second);
+					virtual void NotifyNewSendtoMixer(int callerMac,int senderMac);
 					virtual void DeleteOutputWireIndex(int wireIndex);
 					virtual void DeleteInputWireIndex(int wireIndex);
-					virtual void DeleteWires(bool initialize=true);
+					virtual void DeleteWires();
 					virtual int FindInputWire(int macIndex);
 					virtual int FindOutputWire(int macIndex);
 					virtual int GetFreeInputWire(int slottype=0);
@@ -412,6 +412,8 @@ namespace psycle
 				bool _waitingForSound;
 				/// machine has finished working, and samples are ready in the buffers until next work call.
 				bool _worked;
+				/// this machine is used by a send/return mixer. (Some things cannot be done on these machines)
+				bool _isMixerSend;
 				/// left data
 				float *_pSamplesL;
 				/// right data

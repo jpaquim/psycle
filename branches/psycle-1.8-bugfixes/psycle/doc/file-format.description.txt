@@ -89,11 +89,11 @@ SEQUENCE DATA
 HEADER:
 id = "SEQD"; 
 version = 0;
-size = (lenght*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
+size = (length*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
 
 DATA:
 int index; // column index for multipattern stuff
-int lenght; // lenght of the sequence. (1-256 ) // Psycle versions previous to 1.8.3 can only load up to 128 sequences.
+int length; // length of the sequence. (1-256 ) // Psycle versions previous to 1.8.3 can only load up to 128 sequences.
 char sequenceColumnName[]; // null terminated string, should be less than 32 chars long, It will be trucated on load.
 int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in 
 	// position 3, it plays the pattern 5th. (zero based)
@@ -327,7 +327,7 @@ unsigned int version;		// Version of this chunk ( yes, this is actually a name-l
 unsigned int size;			// size of this chunk.
 
 unsigned int index;			// sample index. (Non-used samples are not stored, so the index lets us know which one we are storing)
-unsigned int waveLenght;	// sample lenght, in samples.
+unsigned int wavelength;	// sample length, in samples.
 unsigned short waveVolume;	// sample volume. values from 0 onwards. 100 = 0db Psycle supports upto 512
 unsigned int waveLoopStart;// loop start point (in samples), if enabled.
 unsigned int waveLoopEnd;	// loop end point (in samples), if enabled.

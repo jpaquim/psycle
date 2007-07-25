@@ -941,18 +941,17 @@ namespace seib {
 			if (ProgramIsChunk() && preferchunk)
 			{
 				bool mainsstate = bMainsState;
-				MainsChanged(false);
+				if (mainsstate) MainsChanged(false);
 				void *chunk=0;
 				int size=GetChunk(&chunk);
 				CFxProgram p(uniqueId(),version(),size,true,chunk);
-				///\todo: needs to add checks not to suspend/resume if in suspended state
 				if (mainsstate) MainsChanged(true);
 				return p;
 			}
 			else
 			{
 				bool mainsstate = bMainsState;
-				MainsChanged(false);
+				if (mainsstate) MainsChanged(false);
 				CFxProgram storep(uniqueId(),version(),numParams());
 				char name[kVstMaxProgNameLen+1];
 				GetProgramName(name);
@@ -960,7 +959,6 @@ namespace seib {
 				int nParms = numParams();
 				for (int j = 0; j < nParms; j++)
 					storep.SetParameter(j,GetParameter(j));
-				///\todo: needs to add checks not to suspend/resume if in suspended state
 				if (mainsstate) MainsChanged(true);
 				return storep;
 			}

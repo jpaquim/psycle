@@ -391,6 +391,10 @@ namespace psycle
 			else if(pData->_note == notecommands::tweakslide)
 			{
 				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
+				// doing simply "tweak" for now..
+				int nv = (pData->_cmd<<8)+pData->_parameter;
+				SetParameter(pData->_inst,nv);
+				Global::player().Tweaker = true;
 			}
 		}
 
@@ -428,7 +432,6 @@ namespace psycle
 
 		void Mixer::FxSend(int numSamples)
 		{
-			///\todo: Implement "Solo"
 			for (int i=0; i<numsends(); i++)
 			{
 				if (sends_[i].IsValid())
@@ -510,7 +513,6 @@ namespace psycle
 
 		void Mixer::Mix(int numSamples)
 		{
-			///\todo: Implement "Solo"
 			if ( master_.DryWetMix() > 0.0f)
 			{
 				if ( solocolumn_ >= MAX_CONNECTIONS)
@@ -572,37 +574,6 @@ namespace psycle
 				}
 			}
 		}
-/*
-		int Mixer::InsertFx(Machine* mac)
-		{
-			int returnbus=-1;
-			int origbus=-1;
-			bool error=false;
-
-			// Get a free sendfx slot
-			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
-			{
-			if(!ReturnValid(c)) returnbus = c;
-			// Checking that there isn't a slot from the dest. machine already
-			else if(Return(c).Wire().machine_ == mac->_macIndex) error = true;
-			}
-			if(returnbus == -1 || error) return -1;
-
-			// Get a free output slot on the source machine
-			for(int c(MAX_CONNECTIONS - 1) ; c >= 0 ; --c)
-			{
-				if(!mac->_connection[c]) origbus = c;
-				// Checking that there isn't an slot to the dest. machine already
-				else if(mac->_outputMachines[c] == _macIndex) error = true;
-			}
-			if(origbus == -1 || error) return -1;
-
-			// Calibrating in/out properties
-			mac->InsertOutputWireIndex(origbus,_macIndex);
-			InsertInputWireIndex(returnbus,mac->_macIndex,mac->GetAudioRange()/GetAudioRange());
-			return returnbus;
-		}
-*/
 		float Mixer::GetWireVolume(int wireIndex)
 		{
 			if (wireIndex< MAX_CONNECTIONS)
@@ -642,6 +613,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
+				SetMixerSendFlag(Global::_pSong->_pMachine[srcmac]);
 				MixerWire wire(srcmac,0);
 				InsertReturn(wireIndex,wire);
 				InsertSend(wireIndex,wire);
@@ -697,14 +669,45 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
+				DeleteMixerSendFlag(Global::_pSong->_pMachine[Return(wireIndex).Wire().machine_]);
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
 			}
 		}
-		void Mixer::DeleteWires(bool initialize)
+		void Mixer::NotifyNewSendtoMixer(int callerMac,int senderMac)
 		{
-			Machine::DeleteWires(initialize);
+			// Mixer reached, set flags upwards.
+			SetMixerSendFlag(Global::_pSong->_pMachine[callerMac]);
+			for (int i(0); i < MAX_CONNECTIONS; i++)
+			{
+				if ( ReturnValid(i))
+				{
+					if (Return(i).Wire().machine_ == callerMac)
+						sends_[i].machine_ = senderMac;
+				}
+			}
+		}
+		void Mixer::SetMixerSendFlag(Machine* mac)
+		{
+			for (int i(0);i<MAX_CONNECTIONS;++i)
+			{
+				if (mac->_inputCon[i]) SetMixerSendFlag(Global::_pSong->_pMachine[mac->_inputMachines[i]]);
+			}
+			mac->_isMixerSend=true;
+		}
+		void Mixer::DeleteMixerSendFlag(Machine* mac)
+		{
+			for (int i(0);i<MAX_CONNECTIONS;++i)
+			{
+				if (mac->_inputCon[i]) DeleteMixerSendFlag(Global::_pSong->_pMachine[mac->_inputMachines[i]]);
+			}
+			mac->_isMixerSend=false;
+		}
+
+		void Mixer::DeleteWires()
+		{
+			Machine::DeleteWires();
 			Machine *iMac;
 			for(int w=0; w<numreturns(); w++)
 			{
@@ -834,8 +837,16 @@ namespace psycle
 			int param=numparam%16;
 			if ( channel == 0)
 			{
-				if (param == 0) return master_.Volume()*0x1000;
-				else if (param <= 12) return Channel(param-1).Volume()*0x1000;
+				if (param == 0)
+				{
+					float dbs = dsp::dB(master_.Volume());
+					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
+				}
+				else if (param <= 12)
+				{
+					float dbs = dsp::dB(Channel(param-1).Volume());
+					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
+				}
 				else if (param == 13) return master_.DryWetMix()*0x100;
 				else if (param == 14) return master_.Gain()*0x100;
 				else return _panning*2;
@@ -873,7 +884,11 @@ namespace psycle
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return 0;
-				else return Return(param-1).Volume()*0x1000;
+				else
+				{
+					float dbs = dsp::dB(Return(param-1).Volume());
+					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
+				}
 			}
 			else if ( channel == 15)
 			{
@@ -892,13 +907,21 @@ namespace psycle
 			{
 				if (param == 0)
 				{ 
-					float dbs = (((master_.Volume()>0.0003f)?dsp::dB(master_.Volume()):-72.0f));
-					sprintf(parVal,"%.01fdB",dbs);
+					if (master_.Volume() < 0.00002f ) strcpy(parVal,"-inf");
+					else
+					{
+						float dbs = dsp::dB(master_.Volume());
+						sprintf(parVal,"%.01fdB",dbs);
+					}
 				}
 				else if (param <= 12)
 				{ 
-					float dbs = (((Channel(param-1).Volume()>0.0003f)?dsp::dB(Channel(param-1).Volume()):-72.0f));
-					sprintf(parVal,"%.01fdB",dbs);
+					if (Channel(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
+					else
+					{
+						float dbs = dsp::dB(Channel(param-1).Volume());
+						sprintf(parVal,"%.01fdB",dbs);
+					}
 				}
 				else if (param == 13)
 				{
@@ -982,8 +1005,12 @@ namespace psycle
 				if ( param == 0 || param > 12) return;
 				else
 				{ 
-					float dbs = (((Return(param-1).Volume()>0.0003f)?dsp::dB(Return(param-1).Volume()):-72.0f));
-					sprintf(parVal,"%.01fdB",dbs);
+					if (Return(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
+					else
+					{
+						float dbs = dsp::dB(Return(param-1).Volume());
+						sprintf(parVal,"%.01fdB",dbs);
+					}
 				}
 			}
 			else if ( channel == 15)
@@ -1005,31 +1032,51 @@ namespace psycle
 			int param=numparam%16;
 			if ( channel == 0)
 			{
-				if (param == 0) { master_.Volume() = value/4096.0f; RecalcMaster(); }
-				else if (param <= 12) { Channel(param-1).Volume() = value/4096.0f; RecalcChannel(param-1); }
-				else if (param == 13) { master_.DryWetMix() = value/256.0f; RecalcMaster(); }
-				else if (param == 14) { master_.Gain() = value/256.0f; RecalcMaster(); }
+				if (param == 0)
+				{
+					if ( value >= 0x1000) master_.Volume()=1.0f;
+					else if ( value == 0) master_.Volume()=0.0f;
+					else
+					{
+						float dbs = (value/42.67f)-96.0f;
+						master_.Volume() = dsp::dB2Amp(dbs);
+						RecalcMaster();
+					}
+				}
+				else if (param <= 12)
+				{
+					if ( value >= 0x1000) Channel(param-1).Volume()=1.0f;
+					else if ( value == 0) Channel(param-1).Volume()=0.0f;
+					else
+					{
+						float dbs = (value/42.67f)-96.0f;
+						Channel(param-1).Volume() = dsp::dB2Amp(dbs);
+						RecalcChannel(param-1);
+					}
+				}
+				else if (param == 13) { master_.DryWetMix() = (value&0xFF)/256.0f; RecalcMaster(); }
+				else if (param == 14) { master_.Gain() = (value&0xFF)/256.0f; RecalcMaster(); }
 				else SetPan(value>>1);
 				return true;
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0) { Channel(channel-1).DryMix() = value/256.0f; RecalcChannel(channel-1); }
-				else if (param <= 12) { Channel(channel-1).Send(param-1) = value/256.0f; RecalcSend(channel-1,param-1); } 
+				if (param == 0) { Channel(channel-1).DryMix() = (value&0xFF)/256.0f; RecalcChannel(channel-1); }
+				else if (param <= 12) { Channel(channel-1).Send(param-1) = (value&0xFF)/256.0f; RecalcSend(channel-1,param-1); } 
 				else if (param == 13)
 				{
 					Channel(channel-1).Mute() = (value == 3)?true:false;
 					Channel(channel-1).WetOnly() = (value==2)?true:false;
 					Channel(channel-1).DryOnly() = (value==1)?true:false;
 				}
-				else if (param == 14) { float val=value/256.0f; SetWireVolume(channel-1,val); RecalcChannel(channel-1); }
-				else { Channel(channel-1).Panning() = value/256.0f; RecalcChannel(channel-1); }
+				else if (param == 14) { float val=(value&0xFF)/256.0f; SetWireVolume(channel-1,val); RecalcChannel(channel-1); }
+				else { Channel(channel-1).Panning() = (value&0xFF)/256.0f; RecalcChannel(channel-1); }
 				return true;
 			}
 			else if ( channel == 13)
 			{
 				if ( param > 12) return false;
-				else if (param == 0) solocolumn_ = (value<=24)?value-1:23;
+				else if (param == 0) solocolumn_ = (value<24)?value-1:23;
 				else 
 				{
 					Return(param-1).Mute() = (value&1)?true:false;
@@ -1044,13 +1091,23 @@ namespace psycle
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return false;
-				else { Return(param-1).Volume() = value/4096.0f; RecalcReturn(param-1); }
+				else
+				{
+					if ( value >= 0x1000) Return(param-1).Volume()=1.0f;
+					else if ( value == 0) Return(param-1).Volume()=0.0f;
+					else
+					{
+						float dbs = (value/42.67f)-96.0f;
+						Return(param-1).Volume() = dsp::dB2Amp(dbs);
+						RecalcReturn(param-1);
+					}
+				}
 				return true;
 			}
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return false;
-				else { Return(param-1).Panning() = value/256.0f; RecalcReturn(param-1); }
+				else { Return(param-1).Panning() = (value&0xFF)/256.0f; RecalcReturn(param-1); }
 				return true;
 			}
 			return false;

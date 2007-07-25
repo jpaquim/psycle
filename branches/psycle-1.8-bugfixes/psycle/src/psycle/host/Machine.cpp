@@ -126,6 +126,7 @@ namespace psycle
 			, _waitingForSound(false)
 			, _standby(false)
 			, _worked(false)
+			, _isMixerSend(false)
 			, _pSamplesL(0)
 			, _pSamplesR(0)
 			, _lVol(0)
@@ -249,6 +250,10 @@ namespace psycle
 			_inputCon[wireIndex] = true;
 			_wireMultiplier[wireIndex] = wiremultiplier;
 			SetWireVolume(wireIndex,initialvol);
+			if ( _isMixerSend )
+			{
+				NotifyNewSendtoMixer(_macIndex,srcmac);
+			}
 		}
 		int Machine::GetFreeInputWire(int slottype)
 		{
@@ -267,39 +272,6 @@ namespace psycle
 			return -1;
 		}
 
-/*
-		void Machine::InitWireVolume(MachineType mType,int wireIndex,float value)
-		{
-			if ( mType == MACH_VST || mType == MACH_VSTFX )
-			{
-				if (_type == MACH_VST || _type == MACH_VSTFX ) // VST to VST, no need to convert.
-				{
-					_inputConVol[wireIndex] = value;
-					_wireMultiplier[wireIndex] = 1.0f;
-				}
-				else											// VST to native, multiply
-				{
-					_inputConVol[wireIndex] = value*32768.0f;
-					_wireMultiplier[wireIndex] = 0.000030517578125f;
-				}
-			}
-			else if ( _type == MACH_VST || _type == MACH_VSTFX ) // native to VST, divide.
-			{
-				_inputConVol[wireIndex] = value*0.000030517578125f;
-				_wireMultiplier[wireIndex] = 32768.0f;
-			}
-			else												// native to native, no need to convert.
-			{
-				_inputConVol[wireIndex] = value;
-				_wireMultiplier[wireIndex] = 1.0f;
-			}	
-			// The reason of the conversions in the case of MACH_VST is because VST's output wave data
-			// in the range -1.0 to +1.0, while native and internal output at -32768.0 to +32768.0
-			// Initially (when the format was made), Psycle did convert this in the "Work" function,
-			// but since it already needs to multiply the output by inputConVol, I decided to remove
-			// that extra conversion and use directly the volume to do so.
-		}
-*/
 		int Machine::FindInputWire(int macIndex)
 		{
 			for (int c=0; c<MAX_CONNECTIONS; c++)
@@ -384,7 +356,7 @@ namespace psycle
 			_inputMachines[wireIndex] = -1;
 			_numInputs--;
 		}
-		void Machine::DeleteWires(bool initialize)
+		void Machine::DeleteWires()
 		{
 			Machine *iMac;
 			// Deleting the connections to/from other machines
@@ -405,7 +377,7 @@ namespace psycle
 							}
 						}
 					}
-					if (initialize) DeleteInputWireIndex(w);
+					DeleteInputWireIndex(w);
 				}
 				// Checking Out-Wires
 				if(_connection[w])
@@ -422,7 +394,7 @@ namespace psycle
 							}
 						}
 					}
-					if (initialize) DeleteOutputWireIndex(w);
+					DeleteOutputWireIndex(w);
 				}
 			}
 		}
@@ -454,6 +426,12 @@ namespace psycle
 			bool tmp3 = _connection[first];
 			_connection[first]=_connection[second];
 			_connection[second]=tmp3;
+		}
+		void Machine::NotifyNewSendtoMixer(int callerMac,int senderMac)
+		{
+			//Work down the connection wires until finding the mixer.
+			for (int i(0);i< MAX_CONNECTIONS; ++i)
+				if ( _connection[i]) Global::_pSong->_pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(_macIndex,senderMac);
 		}
 
 		void Machine::PreWork(int numSamples,bool clear)

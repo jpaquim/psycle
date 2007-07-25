@@ -130,6 +130,9 @@ namespace psycle
 			/// Changes the destination of a wire connection. wireindex= index of the wire in wiredest to change.
 			/// returns index, or -1 if error. 
 			bool ChangeWireSourceMac(Machine* srcMac, Machine* dstMac, int wiresrc, int wiredest);
+			/// Verifies that the new connection doesn't conflict with the mixer machine.
+			bool ValidateMixerSendCandidate(Machine* mac);
+			void RestoreMixerSendFlags();
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			int GetFreeBus();
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)

@@ -259,7 +259,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_savegens.EnableWindow(true);
 			m_filename.EnableWindow(true);
 			m_browse.EnableWindow(true);
-				// TODO: Add your control notification handler code here
 		}
 
 		void CSaveWavDlg::OnOutputclipboard()
@@ -270,7 +269,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_savegens.EnableWindow(false);
 			m_filename.EnableWindow(false);
 			m_browse.EnableWindow(false);
-			// TODO: Add your control notification handler code here
 		}
 
 		void CSaveWavDlg::OnFilebrowse() 

@@ -210,6 +210,7 @@ namespace psycle
 				}
 			}
 
+			// CreateMachine automatically deletes the previous machine if exists.
 			if (!CreateMachine(type,x,y,psPluginDll,songIdx,shellIdx))
 				return false;
 
@@ -375,6 +376,7 @@ namespace psycle
 				}
 				return true;
 			}
+			return false;
 		}
 
 		void Song::DestroyAllMachines(bool write_locked)
@@ -530,7 +532,41 @@ namespace psycle
 				if(tmac++ >= MAX_MACHINES) return -1;
 			}
 		}
-
+		bool Song::ValidateMixerSendCandidate(Machine* mac)
+		{
+			// Basically, we dissallow a send comming from a generator as well as multiple-outs for sends.
+			if ( mac->_mode == MACHMODE_GENERATOR) return false;
+			if ( mac->_numOutputs > 0 ) return false;
+			for (int i(0); i<MAX_CONNECTIONS; ++i)
+			{
+				if (mac->_inputCon[i])
+				{
+					if (!ValidateMixerSendCandidate(Global::_pSong->_pMachine[mac->_inputMachines[i]]))
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+		void Song::RestoreMixerSendFlags()
+		{
+			for (int i(0);i < MAX_MACHINES; ++i)
+			{
+				if (_pMachine[i])
+				{
+					if (_pMachine[i]->_type == MACH_MIXER)
+					{
+						Mixer* mac = static_cast<Mixer*>(_pMachine[i]);
+						for (int j(0); j<mac->numreturns(); ++j)
+						{
+							if ( mac->Return(j).IsValid())
+								mac->SetMixerSendFlag(_pMachine[mac->Return(j).Wire().machine_]);
+						}
+					}
+				}
+			}
+		}
 
 		int Song::InsertConnection(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float value)
 		{
@@ -541,6 +577,16 @@ namespace psycle
 			if(dstMac->_mode == MACHMODE_GENERATOR) return -1;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
 			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return -1;
+			// disallow mixer as a sender of another mixer
+			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && dsttype != 0) return -1;
+			// If source is in a mixer chain, dissallow the new connection.
+			if ( srcMac->_isMixerSend ) return -1;
+			// If destination is in a mixer chain (or the mixer itself), validate the sender first
+			if ( dstMac->_isMixerSend || dstMac->_type == MACH_MIXER)
+			{
+				if (!ValidateMixerSendCandidate(srcMac)) return -1;
+			}
+
 			// Try to get free indexes from each machine
 			int freebus=srcMac->GetFreeOutputWire(srctype);
 			int dfreebus=dstMac->GetFreeInputWire(dsttype);
@@ -618,7 +664,7 @@ namespace psycle
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{
-				iMac->DeleteWires(false);
+				iMac->DeleteWires();
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 				zapObject(_pMachine[mac]);
@@ -1344,7 +1390,7 @@ namespace psycle
 						// we are not at a valid header for some weird reason.  
 						// probably there is some extra data.
 						// shift back 3 bytes and try again
-						pFile->Skip(-3);
+						pFile->Seek(pFile->GetPos()-3);
 					}
 				}
 				// now that we have loaded all the modules, time to prepare them.
@@ -1406,6 +1452,7 @@ namespace psycle
 					}
 				}
 
+				RestoreMixerSendFlags();
 				// translate any data that is required
 				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
 				machineSoloed = solo;
@@ -2737,7 +2784,7 @@ namespace psycle
 
 			// delete all connections
 
-			_pMachine[dst]->DeleteWires(true);
+			_pMachine[dst]->DeleteWires();
 
 			int number = 1;
 			char buf[sizeof(_pMachine[dst]->_editName)+4];

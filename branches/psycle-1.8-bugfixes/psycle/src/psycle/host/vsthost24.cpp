@@ -386,7 +386,7 @@ namespace psycle
 			}
 			bool plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel,unsigned int sampleoffset, bool slide)
 			{
-				if(trackNote[channel].key != 255 && !slide)
+				if(trackNote[channel].key != notecommands::empty && !slide)
 					AddNoteOff(channel, trackNote[channel].key, true);
 
 				if(AddMIDI(0x90 | midichannel /*Midi On*/, key, velocity,sampleoffset)) {
@@ -401,7 +401,7 @@ namespace psycle
 
 			bool plugin::AddNoteOff(unsigned char channel, unsigned char midichannel, bool addatStart,unsigned int sampleoffset)
 			{
-				if(trackNote[channel].key == 255)
+				if(trackNote[channel].key == notecommands::empty)
 					return false;
 				VstMidiEvent * pevent;
 				if( addatStart)
@@ -630,7 +630,7 @@ namespace psycle
 								NSDestination[midiChannel] = NSCurrent[midiChannel];
 								currentSemi[midiChannel] = 0;
 							}
-							AddMIDI(0xB0 | midiChannel,0x0B,0x7F); // reset expression
+							//AddMIDI(0xB0 | midiChannel,0x07,127); // channel volume. Reset it for the new note.
 							AddNoteOn(channel,note,(pData->_cmd == 0x0C)?pData->_parameter/2:127,midiChannel,0,(pData->_mach==0xFF));
 						}
 						if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
@@ -651,9 +651,13 @@ namespace psycle
 						{
 							AddMIDI(pData->_inst,pData->_parameter);
 						}
-						else if (pData->_cmd == 0x0C) // channel volume.
+//						else if (pData->_cmd == 0x0C) // channel volume.
+//						{
+///							AddMIDI(0xB0 | midiChannel,0x07,pData->_parameter*0.5f);
+//						}
+						else if (pData->_cmd == 0x0C) // channel aftertouch.
 						{
-							AddMIDI(0xB0 | midiChannel,0x0B,pData->_parameter*0.5f); // using MIDI Expression ( cc11 ) !
+							AddMIDI(0xD0 | midiChannel,pData->_parameter*0.5f);
 						}
 						else if(pData->_cmd == 0xC3) //slide to note . Used to change the speed.
 						{

@@ -90,7 +90,6 @@ public:
 class Mixer : public Machine
 {
 public:
-	///\todo: variable initialization of all the classes.
 	class InputChannel
 	{
 	public:
@@ -255,12 +254,14 @@ public:
 	virtual float GetWireVolume(int wireIndex);
 	virtual void SetWireVolume(int wireIndex,float value);
 	virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier, float initialvol=1.0f);
-//	virtual int InsertFx(Machine* mac);
 	virtual int FindInputWire(int macIndex);
+	virtual void NotifyNewSendtoMixer(int callerMac,int senderMac);
 	virtual int GetFreeInputWire(int slottype=0);
 	virtual int GetInputSlotTypes() { return 2; }
 	virtual void DeleteInputWireIndex(int wireIndex);
-	virtual void DeleteWires(bool initialize=true);
+	virtual void DeleteMixerSendFlag(Machine* mac);
+	virtual void SetMixerSendFlag(Machine* mac);
+	virtual void DeleteWires();
 	virtual float GetAudioRange(){ return 32768.0f; }
 	std::string GetAudioInputName(int port);
 	virtual int GetAudioInputs() { return 24; };

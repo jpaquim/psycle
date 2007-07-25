@@ -647,8 +647,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				window.winHandle = hWnd;
 				secwinlist.push_back(hWnd);
 				return hWnd;
-				///\todo: Maintain a list of opened windows, in case we need to close them
-				// in the OnClose event.
 			}
 			return 0;
 		}

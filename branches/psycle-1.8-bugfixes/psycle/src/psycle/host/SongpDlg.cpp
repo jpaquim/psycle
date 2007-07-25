@@ -44,7 +44,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_songcomments.SetReadOnly();
 				((CButton*)GetDlgItem(IDCANCEL))->ShowWindow(SW_HIDE);
 				((CButton*)GetDlgItem(IDOK))->SetWindowText("Close");
-				///\todo: find a way to set the "close" as the default button in this case.
 			}
 
 			return FALSE;

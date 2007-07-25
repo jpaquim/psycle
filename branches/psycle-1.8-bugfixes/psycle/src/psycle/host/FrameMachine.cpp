@@ -432,7 +432,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (nv > maxval) nv = maxval;
 
 				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
-				prevval=(int)nv;
+				prevval=(int)(nv+0.5f);
 				wndView->AddMacViewUndo();
 				if (Global::pConfig->_RecordTweaks)
 				{

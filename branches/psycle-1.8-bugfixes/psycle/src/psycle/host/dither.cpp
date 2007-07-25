@@ -69,7 +69,7 @@ namespace psycle
 
 					*(inSamps+i) += randval*bdQ;
 
-					//todo: this seems inefficient.. we're essentially quantizing twice, once for practice to get the error, and again
+					//todo: this seems inefficient.. we're essentially quantizing twice, once to test the error, and again
 					//		for real when we write to the wave file.
 					if(noiseshape==highpass)
 					{

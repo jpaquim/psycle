@@ -35,10 +35,7 @@ New and unsorted and untested
 
 
 + ghost note : http://psycle.pastnotecut.org/thread.php?threadid=1894&boardid=2&styleid=1
-
---------------------------------
-
-+ option to disable popup on save.
+	[JosepMa: Done for VST's. Sampulse implements it, sampler doesn't. And natives would need it implemented one-by-one]
 
 ------------ <kSh> -------------
 1)
@@ -52,9 +49,6 @@ kSh
 --------------------------------
 
 
-
-* jmr2@macs.hw.ac.uk: * when playing a song and pressing sort causes it to play the wrong pattern 
-
 ** MIDI clock sync - does it work, or is it unsupported?
 
 ////////////////////
@@ -64,7 +58,7 @@ kSh
 <GabeCrowe> thats not complicated is it?
 <GabeCrowe> and, so that samples, of voice and such split over the patterns, can be easily located.
 
-++ <sampler> Show with a different colour the notes of the actual Generator/effect in patterns
+++ <sampler> Show with a different colour the notes of the current Generator/effect in patterns
 
 
 //////////////////////
@@ -76,8 +70,7 @@ kSh
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
 ++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
-*** songs saved with quadrasid sometimes freak out after loading...
-++ undos for machine and wave edit? 
+++ undos for wave edit? 
 
 *** <alk_> when Psycle is open hibernate does not work (windows crashes)
 
@@ -153,7 +146,6 @@ Wave Editor
 +	ALK waveed: remove silence from start and end of wave
 +	Mystic - import .mp3 format for samples
 +	Easier way to load Samples.
-+       Wave-Editor Paste at the end (or any other part) of the current sample.
 +	better way to set loop points. (+ ping-pong loops)
 
 
@@ -167,9 +159,6 @@ GUI (pattern)
 		cause the window to scroll by making the block go off the Bottom of the screen.
 		(notice the previous highlight moving up) now click another place.
 		[pooplog - cannot reproduce]
-*	Can't select with keyboard while follow song on, and playing.
-		[pooplog -  DUH The cursor is following the song, how are you going to select?!]
-		[[JAZ] We Need to differenciate what's follow song, and what's record notes to pattern]
 + <iliks> option to switch off effects column when you want thus obtaining more screen space for channels
 +	option to see waveform instead of notes in pattern editor for acid mode
 +	D says: maybe have some of the effects in a drop down or available by right clicking
@@ -240,6 +229,7 @@ Player Engine
 Vsts
 ====
 
+***	songs saved with quadrasid sometimes freak out after loading...
 **  	Waldorf PPG WAVE 2.V VSTI : psycle misses/skips notes ramdomly - to check this fill in all 64 
 		pattern ticks with notes and press play - ive tried this plug with aodix and it worked fine.
 *** 	if you have more than 1 stereo out selected on dr008, it can crash psycle.
@@ -329,7 +319,7 @@ Interface (contains pattern stuff too)
 !!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
-!	JAL7OH- the cycle lenght in the swing fill dialog set to lines per beat/2 by default
+!	JAL7OH- the cycle length in the swing fill dialog set to lines per beat/2 by default
 ++	<_sue_> something like selecting a generator and having some global edit functions (in the edit menu :)
 		like :  delete all notes / tranpose all + 12 / delete all tweaks .....stuff like this *for the entire song*
 ++	<sue> hotkeys for seq edit cut, copy, paste, etc?

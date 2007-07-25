@@ -2,13 +2,15 @@
 #include "FrameMixerMachine.hpp"
 #include "Psycle.hpp"
 #include "NativeGui.hpp"
-#include "ChildView.hpp"
 #include "configuration.hpp"
 #include "song.hpp"
 #include "internal_machines.hpp"
+///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+#include "ChildView.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)
 
@@ -156,9 +158,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::GraphSlider::DrawKnob(CDC *dc,int x, int y, float value)
 	{
-		float dbs = (((value>0.0010f)?dsp::dB(value):-60.0f));
-		dbs/=60.0f;
-		int ypos = dbs*(height-knobheight)*-1;
+		int ypos(0);
+		if ( value < 0.375 ) ypos = (height-knobheight);
+		else if ( value < 0.999) ypos = (((value-0.375f)*1.6f)-1.0f)*-1.0f*(height-knobheight);
 		dc->BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&knobDC,0,0,SRCCOPY);
 	}
 	bool  CFrameMixerMachine::GraphSlider::LButtonDown(UINT nFlags,int x,int y)
@@ -173,6 +175,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	{
 		if (checked){ dc->BitBlt(x,y,width,height,&imgOn,0,0,SRCCOPY); }
 		else { dc->BitBlt(x,y,width,height,&imgOff,0,0,SRCCOPY); }
+		dc->Draw3dRect(x-1,y-1,width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 	}
 
 	void CFrameMixerMachine::CheckedButton::Draw(CDC* dc, CFont* b_font_bold,int x, int y,const char* text,bool checked)
@@ -484,6 +487,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		_pMixer->GetParamValue(13,value);
 		Knob::Draw(&bufferDC,xoffset,yoffset,_pMixer->GetParamValue(13)/256.0f);
 		InfoLabel::DrawValue(&bufferDC,xoffset+Knob::width,yoffset,value);
+		bufferDC.Draw3dRect(xoffset-1,yoffset-1,Knob::width+InfoLabel::width+1,Knob::height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 		yoffset+=InfoLabel::height;
 		_pMixer->GetParamValue(14,value);
 		Knob::Draw(&bufferDC,xoffset,yoffset,_pMixer->GetParamValue(14)/1024.0f);
@@ -623,6 +627,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 				_pMixer->GetParamValue(param,value);
 				Knob::Draw(&bufferDC,xoffset,yoffset,_pMixer->GetParamValue(param)/256.0f);
 				InfoLabel::DrawValue(&bufferDC,xoffset+Knob::width,yoffset,value);
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,Knob::width+InfoLabel::width+1,Knob::height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 
 				param = 0xE1+i;
 				_pMixer->GetParamValue(param,value);
@@ -703,6 +708,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			else if (row == 2) return pan;
 			else if (x < GraphSlider::width)
 			{
+				yoffset = y - (InfoLabel::height*(_pMixer->numsends()+4 ));
 				return slider;
 			}
 			else if ( row == 3 )
@@ -872,9 +878,37 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			SetCapture();
 			sourcepoint=point.y;
 			tweakpar=GetParamFromPos(col,row); 
-			tweakbase = _pMachine->GetParamValue(tweakpar);
-			prevval = tweakbase;
 			_pMachine->GetParamRange(tweakpar,minval,maxval);
+			tweakbase = _pMachine->GetParamValue(tweakpar);
+			if ( row == slider)
+			{
+				float foffset = yoffset/ float(GraphSlider::height-GraphSlider::knobheight);
+				float fbase = tweakbase/ float(maxval-minval);
+				float knobheight = (GraphSlider::knobheight/float(GraphSlider::height-GraphSlider::knobheight));
+				float ypos(0);
+				if ( fbase < 0.375) ypos = 1.0f;
+				else if ( fbase < 0.999) ypos = (((tweakbase/float(maxval-minval)-0.375f)*1.6f)-1.0f)*-1.0f;
+
+				if ( foffset <= ypos || foffset > ypos+knobheight) // if mouse not over the knob, move the knob first
+				{
+					foffset = foffset - (knobheight/2.0);
+					double freak = (maxval-minval)*0.625; // *0.625 adjust the full range to the visual range
+					double nv = (1.0f-foffset)*freak + 0.375*(maxval-minval); // 0.375 to compensate for the visual range.
+
+					tweakbase = nv+0.5f;
+					_pMachine->SetParameter(tweakpar,tweakbase);
+					///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+					//				wndView->AddMacViewUndo();
+					if(Global::configuration()._RecordTweaks)
+					{
+						if(Global::configuration()._RecordMouseTweaksSmooth)
+							wndView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, tweakbase);
+						else
+							wndView->MousePatternTweak(_pMachine->_macIndex, tweakpar, tweakbase);
+					}
+				}
+			}
+			prevval = tweakbase;
 			wndView->AddMacViewUndo();
 		}
 		CFrameWnd::OnLButtonDown(nFlags, point);
@@ -898,16 +932,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 				finetweak=!finetweak;
 			}
 
-			double freak = (maxval-minval)/(GraphSlider::height-GraphSlider::knobheight);
+			double freak = (maxval-minval)*0.625/(GraphSlider::height-GraphSlider::knobheight); // *0.625 adjust the full range to the visual range
 			if ( ultrafinetweak ) freak /= 10;
 			if (finetweak) freak/=4;
 
-			double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
+			double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase; // +0.375 to compensate for the visual range.
 
 			if (nv < minval) nv = minval;
 			if (nv > maxval) nv = maxval;
 			_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
-			prevval=(int)nv;
+			prevval=(int)(nv+0.5f);
+			///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+			//				wndView->AddMacViewUndo();
+			if(Global::configuration()._RecordTweaks)
+			{
+				if(Global::configuration()._RecordMouseTweaksSmooth)
+					wndView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, prevval);
+				else
+					wndView->MousePatternTweak(_pMachine->_macIndex, tweakpar, prevval);
+			}
+
 
 			Invalidate(false);
 			CFrameWnd::OnMouseMove(nFlags,point);
