@@ -83,6 +83,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetValText(kf[0].value);
 			if (kftwk != -1)
 			{
+				m_checktwk.SetCheck(1);
 				m_combotwk.EnableWindow(true);
 				m_combotwk.SetCurSel(kftwk);
 			}
