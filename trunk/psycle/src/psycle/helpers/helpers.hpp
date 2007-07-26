@@ -2,14 +2,16 @@
 ///\brief interface file for psycle::host::CValueMapper.
 #pragma once
 //#include <psycle/host/detail/project.hpp>
-#include <cmath>
+#include <string> // to declare hexstring_to_integer
+#include <cmath> // for M_PI
 #include <cstdint>
-#include <universalis/compiler/numeric.hpp>
 #include <boost/static_assert.hpp>
+#include <universalis/compiler/numeric.hpp>
 namespace psycle
 {
 	namespace host
 	{
+		/// the pi constant as a 32-bit floating point number
 		float const F_PI =
 			#if defined M_PI
 				static_cast<float>(M_PI)
@@ -18,6 +20,7 @@ namespace psycle
 			#endif
 			;
 
+		/// parses an hexadecimal string to convert it to an integer
 		template<typename X>
 		void hexstring_to_integer(std::string const &, X &);
 
@@ -50,8 +53,10 @@ namespace psycle
 				static float fMap_255_100[257];
 		};
 
+		///\todo doc
 		inline float fast_log2(float const f)
 		{ 
+			BOOST_STATIC_ASSERT((sizeof f == sizeof(int)));
 			BOOST_STATIC_ASSERT((sizeof f == 4));
 			//assert(f > 0); 
 			std::uint32_t const i(*reinterpret_cast<std::uint32_t const*>(&f));
@@ -61,18 +66,30 @@ namespace psycle
 		/// converts a floating point number to an integer.
 		inline std::int32_t f2i(float f) 
 		{ 
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // or intel?
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+				///\todo not always the fastest when using sse(2)
+				///\todo we can also use C1999's lrint if available
 				///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
-				///\todo this is probably slowing down things on compilers using sse(2)
-				std::int32_t i;
-				double const half(0.5);
-				_asm
-				{ 
-					fld f;
-					fsub half;
-					fistp i;
-				} 
-				return i;
+				#if 1
+					std::int32_t i;
+					double const half(0.5);
+					_asm
+					{ 
+						fld f;
+						fsub half;
+						fistp i;
+					} 
+					return i;
+				#else
+					const double magic = 6755399441055744.0; // 2^51 + 2^52
+					union tmp_union
+					{
+						double d;
+						int i;
+					} tmp;
+					tmp.d = (d - 0.5) + magic;
+					return tmp.i;
+				#endif
 			#else
 				///\todo specify the rounding mode
 				return static_cast<std::int32_t>(f);

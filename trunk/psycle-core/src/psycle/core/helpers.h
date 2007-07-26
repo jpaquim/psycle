@@ -17,16 +17,29 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
-#ifndef HELPERS_H
-#define HELPERS_H
+#pragma once
+#ifndef PSYCLE_CORE_HELPERS_INCLUDED
+#define PSYCLE_CORE_HELPERS_INCLUDED
+#include <string> // to declare hexstring_to_integer
+#include <cmath> // for M_PI
+//namespace psycle { namespace core {
 
-#include <string>
+		/// the pi constant as a 32-bit floating point number
+		float const F_PI =
+			#if defined M_PI
+				static_cast<float>(M_PI)
+			#else
+				3.14159265358979323846f
+			#endif
+			;
 
-		#define F_PI 3.14159265358979323846f
-
-		template<typename x> void hexstring_to_integer(const std::string &, x &);
+		/// parses an hexadecimal string to convert it to an integral number
+		template<typename X>
+		void hexstring_to_integer(const std::string &, X &);
 
 		/// linearly maps a byte (0 to 255) to a float (0 to 1).
+		///\todo check if the table lookup is actually faster than calculating.
+		///\todo needs some explanation about why the tables have a length of 257.
 		class CValueMapper
 		{
 		public:
@@ -55,33 +68,74 @@
 			static float fMap_255_100[257];
 		};
 
-
+		///\todo doc
 		inline float fast_log2(float f) 
 		{ 
+			//BOOST_STATIC_ASSERT((sizeof f == sizeof(int)));
+			//BOOST_STATIC_ASSERT((sizeof f == 4));
 			//assert( f > 0. ); 
-			//assert( sizeof(f) == sizeof(int) ); 
-			//assert( sizeof(f) == 4 ); 
-			int i = (*(int *)&f); 
-			return (((i&0x7f800000)>>23)-0x7f)+(i&0x007fffff)/(float)0x800000; 
+			#if 0 // v1.9
+				std::uint32_t const i(*reinterpret_cast<std::uint32_t const*>(&f));
+				return ((i & 0x7f800000) >> 23) - 0x7f + (i & 0x007fffff) / (float)0x800000; 
+			#else
+				int i = (*(int *)&f); 
+				return (((i&0x7f800000)>>23)-0x7f)+(i&0x007fffff)/(float)0x800000; 
+			#endif
 		} 
 
-		/// converts a floating point number to an integer.
-		///\todo this is not portable
-		inline int f2i(float flt) 
-		{ 
-			//int i; 
-//			static const double half = 0.5f; 
-//			asm 
-//			{ 
-//				fld flt 
-//				fsub half 
-//				fistp i 
-//			} 
-			return (int) flt;
-		}
-		
+		#if 0 // v1.9
+			inline std::int32_t f2i(float f) 
+			{ 
+				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+					///\todo not always the fastest when using sse(2)
+					///\todo we can also use C1999's lrint if available
+					///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
+					#if 1
+						std::int32_t i;
+						double const half(0.5);
+						_asm
+						{ 
+							fld f;
+							fsub half;
+							fistp i;
+						} 
+						return i;
+					#else
+						const double magic = 6755399441055744.0; // 2^51 + 2^52
+						union tmp_union
+						{
+							double d;
+							int i;
+						} tmp;
+						tmp.d = (d - 0.5) + magic;
+						return tmp.i;
+					#endif
+				#else
+					///\todo specify the rounding mode
+					return static_cast<std::int32_t>(f);
+				#endif
+			}
+		#else		
+			/// converts a floating point number to an integer.
+			inline int f2i(float f) 
+			{
+				return static_cast<int>(f); ///\todo this is wrong since it's not the same rounding mode as f2i ; use C1999's lrint
+			}
+
+		#if 0 // uses universalis		
+			/// clipping.
+			template<unsigned int const bits>
+			typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f)
+			{
+				typedef typename universalis::compiler::numeric<bits>::signed_int result_type;
+				typedef std::numeric_limits<result_type> type_traits;
+				if(f < type_traits::min) return type_traits::min;
+				if(f > type_traits::max) return type_traits::max;
+				return static_cast<result_type>(f);
+			}
+		#endif
+
 		/// clipping.
-		///\todo use a single template function that accept any type.
 		inline int f2iclip16(float flt) 
 		{ 
 			if (flt <-32767.0f)
@@ -150,6 +204,5 @@
 			}
 			return f2i(flt);
 		}
-
-
+//}}
 #endif
