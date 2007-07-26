@@ -10,9 +10,8 @@
 	#if defined DIVERSALIS__PROCESSOR__X86 // #if DIVERSALIS__PROCESSOR__X86__SSE >= 2
 		///\todo use _*87_2 functions
 	#endif
-#else
-	///\todo
-	//#include <fenv.h> // C1999
+#elif __STDC_VERSION__ >= 199901
+	#include <fenv.h>
 #endif
 namespace universalis
 {
