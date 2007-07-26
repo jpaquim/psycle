@@ -13,7 +13,8 @@
 		#include <stdint.h>
 	#endif
 	// some unix systems had the equivalent inttypes.h for a long time
-	#if defined __unix__ || defined __APPLE__
+	#include <diversalis/operating_system.hpp>
+	#if defined DIVERSALIS__OPERATING_SYSTEM__UNIX
 		#include <inttypes.h>
 	#endif
 #else
