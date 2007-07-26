@@ -227,7 +227,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
-				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
+				hInt[2] = m_browser.InsertItem("Sampulse (Incomplete)",0, 0, hNodes[0], TVI_SORT);
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
 				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
@@ -333,7 +333,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_nameLabel.SetWindowText("Sampulse Sampler V2");
 				m_descLabel.SetWindowText("Sampler with the essence of FastTracker II and Impulse Tracker 2");
 				m_dllnameLabel.SetWindowText("Internal Machine");
-				m_versionLabel.SetWindowText("V0.8b");
+				m_versionLabel.SetWindowText("V0.9b");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_XMSAMPLER;
 				OutBus = true;
@@ -1188,7 +1188,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					SaveCacheFile();
 				}
-				if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
 				CDialog::OnOK();
 			}
 		}

@@ -19,6 +19,8 @@ namespace psycle
 
 		TCHAR* XMSampler::_psName = _T("Sampulse");
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
+		XMInstrument XMSampler::m_Instruments[MAX_INSTRUMENT+1];
+		XMInstrument::WaveData XMSampler::m_rWaveLayer[MAX_INSTRUMENT+1];
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
 			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
@@ -2024,15 +2026,17 @@ namespace psycle
 			_type = MACH_XMSAMPLER;
 			_mode = MACHMODE_GENERATOR;
 
+			_numVoices=0;
 			_resampler.SetQuality(dsp::R_LINEAR);
 
-			m_GlobalVolume = 128;
-			_sampleCounter = 0;
-			m_NextSampleTick = 0;
-			m_TickCount = 0;
 			m_bAmigaSlides = false;
 			m_UseFilters = true;
+			m_GlobalVolume = 128;
 			m_PanningMode = PanningMode::Linear;
+			m_TickCount = 0;
+			m_DeltaTick = 0;
+			m_NextSampleTick = 0;
+			_sampleCounter = 0;
 
 			int i;
 			for (i = 0; i < XMSampler::MAX_POLYPHONY; i++)
@@ -2070,6 +2074,7 @@ namespace psycle
 			for(i = 0; i < MAX_TRACKS;i++)
 			{
 				m_Channel[i].Init();
+				m_Channel[i].Restore();
 			}
 		}
 		void XMSampler::SetSampleRate(int sr)
@@ -2588,7 +2593,7 @@ namespace psycle
 		void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 		{
 			int temp;
-			// we cannot calculate the size previous to save, so we write done a placeholder
+			// we cannot calculate the size previous to save, so we write a placeholder
 			// and seek back to write the correct value.
 			UINT size = 0;
 			UINT filepos = riffFile->GetPos();
@@ -2614,7 +2619,7 @@ namespace psycle
 				m_Channel[i].Save(*riffFile);
 			}
 
-			// Instrument Data Save
+/*			// Instrument Data Save
 			int numInstruments = 0;	
 			for(int i = 0;i < MAX_INSTRUMENT;i++){
 				if(m_Instruments[i].IsEnabled()){
@@ -2631,7 +2636,7 @@ namespace psycle
 				}
 			}
 
-			// Instrument Data Save
+			// Sample Data Save
 			int numSamples = 0;	
 			for(int i = 0;i < MAX_INSTRUMENT;i++){
 				if(m_rWaveLayer[i].WaveLength() != 0){
@@ -2647,7 +2652,7 @@ namespace psycle
 					m_rWaveLayer[i].Save(*riffFile);
 				}
 			}
-
+*/
 			int endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
 			size = endpos - filepos -sizeof(size);
@@ -2693,7 +2698,7 @@ namespace psycle
 					m_Channel[i].Load(*riffFile);
 				}
 
-				// Instrument Data Load
+/*				// Instrument Data Load
 				int numInstruments;
 				riffFile->Read(numInstruments);
 				int idx;
@@ -2714,6 +2719,7 @@ namespace psycle
 						if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
 					}
 				}
+*/
 			}
 			else wrongState=true;
 

@@ -95,7 +95,7 @@ namespace psycle
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
 			{
 				XMInstrument::NotePair npair = sampler.rInstrument(idx).NoteToSample(i);
-				npair.second=sRemap[npair.second];
+				npair.second=sRemap[(npair.second<inshead.noS)?npair.second:0];
 				sampler.rInstrument(idx).NoteToSample(i,npair);
 			}
 			delete[] sRemap;

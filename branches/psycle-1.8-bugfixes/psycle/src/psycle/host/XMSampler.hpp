@@ -1039,8 +1039,8 @@ XMSampler::Channel::PerformFX().
 	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];};///< Channel 
 	Voice& rVoice(const int index) { return m_Voices[index];};///< 
 
-	XMInstrument & rInstrument(const int index){return m_Instruments[index];};
-	XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];};
+	static XMInstrument & rInstrument(const int index){return m_Instruments[index];};
+	static XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];};
 	
 	const bool IsAmigaSlides(){ return m_bAmigaSlides;};
 	void IsAmigaSlides(const bool value){ m_bAmigaSlides = value;};
@@ -1096,12 +1096,12 @@ protected:
 	Voice m_Voices[MAX_POLYPHONY];
 	XMSampler::Channel m_Channel[MAX_TRACKS];
 	dsp::Cubic _resampler;
+	ZxxMacro zxxMap[128];
 
 	
 	void DeltaTick(const int value){m_DeltaTick = value;};
 	const int DeltaTick(){return m_DeltaTick;};
 	void WorkVoices(int numsamples);
-	ZxxMacro zxxMap[128];
 
 private:
 
@@ -1119,8 +1119,8 @@ private:
 
 
 	//\todo : This should not be independant for each xmsampler, but shared.
-	XMInstrument m_Instruments[MAX_INSTRUMENT+1];
-	XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENT+1];
+	static XMInstrument m_Instruments[MAX_INSTRUMENT+1];
+	static XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENT+1];
 	boost::recursive_mutex m_Mutex;
 };
 }

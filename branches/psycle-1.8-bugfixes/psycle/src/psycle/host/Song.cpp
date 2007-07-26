@@ -1385,6 +1385,47 @@ namespace psycle
 							}
 						}
 					}
+					else if(std::strcmp(Header,"EINS") == 0)
+					{
+						pFile->Read(&version, sizeof version);
+						pFile->Read(&size, sizeof size);
+						long filepos;
+						bool wrongState=false;
+						filepos=pFile->GetPos();
+						--chunkcount;
+						// Check higher bits of version (AAAABBBB). 
+						// different A, incompatible, different B, compatible
+						if ( (version&0x11110000) == (XMSampler::VERSION&0x11110000) )
+						{
+							// Instrument Data Load
+							int numInstruments;
+							pFile->Read(numInstruments);
+							int idx;
+							for(int i = 0;i < numInstruments;i++)
+							{
+								pFile->Read(idx);
+								if (!XMSampler::rInstrument(idx).Load(*pFile)) { wrongState=true; break; }
+								//m_Instruments[idx].IsEnabled(true); // done in the loader.
+							}
+							if (!wrongState)
+							{
+								int numSamples;
+								pFile->Read(numSamples);
+								int idx;
+								for(int i = 0;i < numSamples;i++)
+								{
+									pFile->Read(idx);
+									if (!XMSampler::SampleData(idx).Load(*pFile)) { wrongState=true; break; }
+								}
+							}
+						}
+						else wrongState=true;
+
+						if (wrongState)
+						{
+							pFile->Seek(filepos+size);
+						}
+					}
 					else 
 					{
 						// we are not at a valid header for some weird reason.  
@@ -2333,6 +2374,17 @@ namespace psycle
 					chunkcount++;
 				}
 			}
+			// Instrument Data Save
+			int numInstruments = 0;	
+			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+				if(XMSampler::rInstrument(i).IsEnabled()){
+					numInstruments++;
+				}
+			}
+			if (numInstruments >0)
+			{
+				chunkcount++;
+			}
 
 			if ( !autosave ) 
 			{
@@ -2601,6 +2653,56 @@ namespace psycle
 					}
 				}
 			}
+
+			/*
+			===================================
+			Extended Instrument DATA (Sampulse)
+			===================================
+			id = "EINS"; 
+			*/
+
+			// Instrument Data Save
+			if (numInstruments >0)
+			{
+				pFile->Write("EINS",4);
+				version = XMSampler::VERSION;
+				pFile->Write(&version,sizeof(version));
+				long pos = pFile->GetPos();
+				size = 0;
+				pFile->Write(&size,sizeof(size));
+
+				pFile->Write(numInstruments);
+
+				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+					if(XMSampler::rInstrument(i).IsEnabled()){
+						pFile->Write(i);
+						XMSampler::rInstrument(i).Save(*pFile);
+					}
+				}
+
+				// Sample Data Save
+				int numSamples = 0;	
+				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+					if(XMSampler::SampleData(i).WaveLength() != 0){
+						numSamples++;
+					}
+				}
+
+				pFile->Write(numSamples);
+
+				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+					if(XMSampler::SampleData(i).WaveLength() != 0){
+						pFile->Write(i);
+						XMSampler::SampleData(i).Save(*pFile);
+					}
+				}
+				long pos2 = pFile->GetPos(); 
+				size = pos2-pos-sizeof(size);
+				pFile->Seek(pos);
+				pFile->Write(&size,sizeof(size));
+				pFile->Seek(pos2);
+			}
+
 
 			if ( !autosave ) 
 			{

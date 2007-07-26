@@ -22,6 +22,7 @@
 #include "KeyConfigDlg.hpp"
 #include "Plugin.hpp"
 #include "vsthost24.hpp"
+#include "XMSampler.hpp"
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
@@ -1063,7 +1064,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if ( cc2->GetCurSel() == AUX_PARAMS)	// Params
 			{
-
 				int nmac = _pSong->seqBus;
 				Machine *tmac = _pSong->_pMachine[nmac];
 				if (tmac) 
@@ -1110,11 +1110,27 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char buffer[64];
 				if (updatelist) 
 				{
-					for (int i=0;i<PREV_WAV_INS;i++)
+					int nmac = _pSong->seqBus;
+					Machine *tmac = _pSong->_pMachine[nmac];
+					if (tmac) 
 					{
-						sprintf(buffer, "%.2X: %s", i, _pSong->_pInstrument[i]->_sName);
-						cc->AddString(buffer);
-						listlen++;
+						if ( tmac->_type == MACH_XMSAMPLER)
+						{
+							for (int i(0); i<XMSampler::MAX_INSTRUMENT; i++)
+							{
+								sprintf(buffer, "%.2X: %s", i, XMSampler::rInstrument(i).Name().c_str());
+								cc->AddString(buffer);
+								listlen++;
+		
+							}
+						}
+
+						else for (int i=0;i<PREV_WAV_INS;i++)
+						{
+							sprintf(buffer, "%.2X: %s", i, _pSong->_pInstrument[i]->_sName);
+							cc->AddString(buffer);
+							listlen++;
+						}
 					}
 				}
 				else
@@ -1196,6 +1212,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnLoadwave() 
 		{
+			int nmac = _pSong->seqBus;
+			Machine *tmac = _pSong->_pMachine[nmac];
+			if (tmac) 
+			{
+				if ( tmac->_type == MACH_XMSAMPLER)
+				{
+					CPoint point(-1,-1);
+					ShowMachineGui(nmac,point);
+					return;
+				}
+			}
+
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
 			
 			CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
@@ -1309,6 +1337,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnEditwave() 
 		{
+			int nmac = _pSong->seqBus;
+			Machine *tmac = _pSong->_pMachine[nmac];
+			if (tmac) 
+			{
+				if ( tmac->_type == MACH_XMSAMPLER)
+				{
+					CPoint point(-1,-1);
+					ShowMachineGui(nmac,point);
+					return;
+				}
+			}
 			ShowInstrumentEditor();
 		}
 
@@ -1554,6 +1593,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			WINDOWPLACEMENT w1;
 			pWnd->GetWindowRect(&r);
 			m_wndView.GetWindowPlacement(&w1);
+
+			if ( point.x == -1 || point.y == -1)
+			{
+				point.x = r.right/2;
+				point.y = r.bottom/2;
+			}
 			/*
 			WINDOWPLACEMENT w2;
 			GetWindowPlacement(&w2);
@@ -2624,13 +2669,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							oss << " - " << _pSong->_pMachine[machine]->_editName;
 							if (_pSong->_pMachine[machine]->_type == MACH_SAMPLER)
 							{
-								
 								if (_pSong->_pInstrument[toffset[1]]->_sName[0])
 									oss <<  " - " << _pSong->_pInstrument[toffset[1]]->_sName;
 							}
 							else if (_pSong->_pMachine[machine]->_type == MACH_XMSAMPLER)
 							{
-								int i=0; ///\todo unused var
+								if (XMSampler::rInstrument(toffset[1]).IsEnabled())
+									oss <<  " - " << XMSampler::rInstrument(toffset[1]).Name();
 							}
 							else
 							{
