@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (predeterminado) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
@@ -2295,16 +2295,20 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,350,253,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,404,253,50,14
-    EDITTEXT        IDC_VAL,215,232,59,12,ES_AUTOHSCROLL | ES_WANTRETURN | 
+    EDITTEXT        IDC_VAL,251,232,59,12,ES_AUTOHSCROLL | ES_WANTRETURN | 
                     ES_NUMBER,WS_EX_RIGHT
-    COMBOBOX        IDC_CURVE_TYPE,341,232,75,51,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_CURVE_TYPE,369,232,75,51,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_POS,93,232,45,12,ES_AUTOHSCROLL | ES_WANTRETURN | 
+    EDITTEXT        IDC_POS,147,232,45,12,ES_AUTOHSCROLL | ES_WANTRETURN | 
                     ES_NUMBER,WS_EX_RIGHT
-    LTEXT           "Selected Row:",IDC_STATIC,40,234,50,12
-    LTEXT           "Current Value:",IDC_STATIC,164,234,47,12
-    LTEXT           "Type of curve:",IDC_STATIC,288,234,50,12
+    LTEXT           "Selected Row:",IDC_STATIC,98,234,46,12
+    LTEXT           "Current Value:",IDC_STATIC,201,234,47,12
+    LTEXT           "Type of curve:",IDC_STATIC,319,234,47,12
     GROUPBOX        "",IDC_STATIC,5,1,451,250
+    CONTROL         "Add:",IDC_CHECKTWK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,233,28,10
+    COMBOBOX        IDC_COMBOTWK,49,232,42,62,CBS_DROPDOWNLIST | WS_DISABLED | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_WAVED_ZOOMBAR DIALOGEX 0, 0, 343, 12
@@ -3021,6 +3025,17 @@ BEGIN
     0
 END
 
+IDD_INTERPOLATE_CURVE DLGINIT
+BEGIN
+    IDC_COMBOTWK, 0x403, 4, 0
+0x7774, 0x006b, 
+    IDC_COMBOTWK, 0x403, 4, 0
+0x7774, 0x0073, 
+    IDC_COMBOTWK, 0x403, 4, 0
+0x636d, 0x006d, 
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3375,7 +3390,7 @@ BEGIN
     ID_ABOUT_ABOUTVST       "Shows an about box about this plugin."
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (predeterminado) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

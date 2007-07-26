@@ -2042,7 +2042,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CChildView::BlockParamInterpolate(int *points)
+		void CChildView::BlockParamInterpolate(int *points, int twktype)
 		{
 			if (blockSelected)
 			{
@@ -2062,11 +2062,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 				int displace = firstrow;
 				
-				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide ||toffset[firstrow] == notecommands::midicc)
+				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide || toffset[firstrow] == notecommands::midicc || twktype != notecommands::empty)
 				{
-					unsigned char note = toffset[firstrow];
-					unsigned char aux = toffset[firstrow+1];
-					unsigned char mac = toffset[firstrow+2];
+					unsigned char note = (twktype != notecommands::empty)?twktype:toffset[firstrow];
+					unsigned char aux = (twktype != notecommands::empty)?Global::_pSong->auxcolSelected:toffset[firstrow+1];
+					unsigned char mac = (twktype != notecommands::empty)?Global::_pSong->seqBus:toffset[firstrow+2];
 					for (int l=blockSel.start.line;l<=blockSel.end.line;l++)
 					{
 						toffset[displace]=note;

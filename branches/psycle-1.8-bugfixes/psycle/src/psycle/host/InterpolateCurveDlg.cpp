@@ -4,6 +4,7 @@
 #include "InterpolateCurveDlg.hpp"
 #include "psycle.hpp"
 #include "Helpers.hpp"
+#include ".\interpolatecurvedlg.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -21,6 +22,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//set default keyframe values
 			kf[0].value = 32768;
 			kf[0].curvetype = 1;
+			kftwk = -1;
 			for (int i = 1;i < numLines-1;i++)
 			{
 				kf[i].value = -1;
@@ -43,6 +45,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_POS, m_Pos);
 			DDX_Control(pDX, IDC_VAL, m_Value);
 			DDX_Control(pDX, IDC_CURVE_TYPE, m_CurveType);
+			DDX_Control(pDX, IDC_COMBOTWK, m_combotwk);
+			DDX_Control(pDX, IDC_CHECKTWK, m_checktwk);
 		}
 
 		BEGIN_MESSAGE_MAP(CInterpolateCurve, CDialog)
@@ -55,6 +59,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_CBN_SELENDOK(IDC_CURVE_TYPE, OnSelendokCurveType)
 			ON_EN_KILLFOCUS(IDC_POS, OnEnKillfocusPos)
 			ON_EN_KILLFOCUS(IDC_VAL, OnEnKillfocusVal)
+			ON_BN_CLICKED(IDC_CHECKTWK, OnBnClickedChecktwk)
 		END_MESSAGE_MAP()
 		
 		BOOL CInterpolateCurve::OnInitDialog()
@@ -76,13 +81,42 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			SetPosText(0);
 			SetValText(kf[0].value);
+			if (kftwk != -1)
+			{
+				m_combotwk.EnableWindow(true);
+				m_combotwk.SetCurSel(kftwk);
+			}
 			
 			return true;			
 		}
-		
+		void CInterpolateCurve::OnBnClickedChecktwk()
+		{
+			if ( m_checktwk.GetCheck() == 0)
+			{
+				m_combotwk.EnableWindow(false);
+			}
+			else m_combotwk.EnableWindow(true);
+		}
+
+		// Assign array of values to the curve dialog.
+		void CInterpolateCurve::AssignInitialValues(int* values,int commandtype)
+		{
+			for (int i(0); i< numLines; ++i)
+			{
+				if (values[i] != -1)
+				{
+					kf[i].value=values[i];
+				}
+			}
+			kftwk = commandtype;
+		}
+
 		void CInterpolateCurve::OnOk()
 		{
 			FillReturnValues();
+			if ( m_checktwk.GetCheck() > 0) kftwk = m_combotwk.GetCurSel();
+			else kftwk = -1;
+
 			for (int i=0;i< numLines;i++) kfresult[i]=kf[i].value;
 			OnOK();		
 		}
@@ -168,6 +202,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			tmprect.top -= 10; tmprect.bottom += 10;
 			dc.FillSolidRect (&tmprect, 0x00FFFFFF);
 			dc.Rectangle (&tmprect);
+			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+			HGDIOBJ oldFont = dc.SelectObject(hFont);
 
 			//draw gridlines
 			//horizontal
@@ -179,7 +215,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			for (int h = 0; h < numLines;h++)
 			{
 				if ( (startIndex+h) % linesperbeat == 0)
+				{
+					CString bla; bla.Format("%d",startIndex+h);
+					dc.TextOut (int(h * xscale) + grapharea.left,grapharea.bottom-12, bla);
 					dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DD0000);
+				}
 				else
 					dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DDDDDD);
 			}
@@ -259,6 +299,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				RECT highlightrect = GetGPointRect(selectedGPoint);
 				dc.FillSolidRect (&highlightrect, 0x000000FF);
 			}
+			dc.SelectObject(oldFont);
 		}
 
 		void CInterpolateCurve::OnLButtonDown(UINT nFlags, CPoint point)
@@ -305,10 +346,38 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInterpolateCurve::OnMouseMove(UINT nFlags, CPoint point)
 		{
-//			AdjustPointToView(point); //adjust is already done inside  OnLButtonDown
 			if (bDragging)
 			{
-				OnLButtonDown(nFlags,point);
+				AdjustPointToView(point);
+				if ((point.x >= -3) && (point.x <= 3+(grapharea.right-grapharea.left)) && (point.y >= 0 ) && (point.y <= (grapharea.bottom-grapharea.top) ))
+				{			
+					int pos = GetPointFromX(point.x);
+					if (pos >= 0)
+					{	
+						if ( pos != selectedGPoint && selectedGPoint != 0 && selectedGPoint != numLines-1)
+						{
+							kf[pos].curvetype = kf[selectedGPoint].curvetype;
+							kf[selectedGPoint].value = -1;
+						}
+						kf[pos].value = 65535 - int((point.y)/yscale);
+						selectedGPoint = pos;
+
+						SetPosText(pos);
+						SetValText(kf[pos].value);
+
+						switch (kf[pos].curvetype)
+						{
+						case 0: 
+							m_CurveType.SetCurSel (0); break;
+						case 1:
+							m_CurveType.SetCurSel (1); break;
+						}
+
+						RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
+						temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
+						InvalidateRect(&temp, 0);
+					}
+				}
 			}
 			CDialog::OnMouseMove(nFlags, point);
 		}
@@ -482,4 +551,3 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
-

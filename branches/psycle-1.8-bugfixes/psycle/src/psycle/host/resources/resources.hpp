@@ -787,6 +787,7 @@
 #define IDC_LISTSTYLE                   1551
 #define IDC_COMBO_NOISESHAPING          1551
 #define IDC_MULTIPLEINSTANCES           1551
+#define IDC_COMBOTWK                    1551
 #define IDC_COMBO3                      1552
 #define IDC_INS_NNACOMBO                1552
 #define IDC_COMBO4                      1553
@@ -1029,6 +1030,7 @@
 #define IDC_LINESTART                   1792
 #define IDC_OUTPUTCLIPBOARD2            1793
 #define IDC_OUTPUTSAMPLE                1793
+#define IDC_CHECKTWK                    1794
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1193,9 +1195,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        276
+#define _APS_NEXT_RESOURCE_VALUE        277
 #define _APS_NEXT_COMMAND_VALUE         34207
-#define _APS_NEXT_CONTROL_VALUE         1794
+#define _APS_NEXT_CONTROL_VALUE         1795
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

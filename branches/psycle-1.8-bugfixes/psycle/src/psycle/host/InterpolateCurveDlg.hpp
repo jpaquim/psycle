@@ -4,6 +4,7 @@
 #include "constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+#include "afxwin.h"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -13,8 +14,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CInterpolateCurve(int startsel, int endsel, int _linesperbeat, CWnd* pParent = 0);
 			~CInterpolateCurve();
 			
+			void AssignInitialValues(int* values,int commandtype);
+			
 		// Dialog Data
 			enum { IDD = IDD_INTERPOLATE_CURVE };
+			CButton m_checktwk;
+			CComboBox m_combotwk;
 			CEdit m_Pos;
 			CEdit m_Value;
 			CComboBox m_CurveType;
@@ -33,6 +38,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSelendokCurveType();
 			afx_msg void OnEnKillfocusPos();
 			afx_msg void OnEnKillfocusVal();
+			afx_msg void OnBnClickedChecktwk();
 			DECLARE_MESSAGE_MAP()
 		private:
 			void AdjustPointToView(CPoint&point);
@@ -61,6 +67,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			keyframesstruct *kf;
 		public:
 			int *kfresult;
+			int kftwk;
 	};
 
 	PSYCLE__MFC__NAMESPACE__END

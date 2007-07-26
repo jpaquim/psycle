@@ -1641,10 +1641,34 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnPopInterpolateCurve()
 		{
 			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
+			
+			int *valuearray = new int[blockSel.end.line-blockSel.start.line+1];
+			int ps=_pSong->playOrder[editPosition];
+			for (int i=0; i<=blockSel.end.line-blockSel.start.line; i++)
+			{
+				unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,i+blockSel.start.line);
+				if (*offset_target <= notecommands::release || *offset_target == notecommands::empty)
+				{
+					if ( *(offset_target+3) == 0 && *(offset_target+4) == 0 ) valuearray[i]=-1;
+					else valuearray[i]= *(offset_target+3)*0x100 + *(offset_target+4);
+				}
+				else valuearray[i] = *(offset_target+3)*0x100 + *(offset_target+4);
+			}
+			unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,blockSel.start.line);
+			if ( *offset_target == notecommands::tweak ) dlg.AssignInitialValues(valuearray,0);
+			else if ( *offset_target == notecommands::tweakslide ) dlg.AssignInitialValues(valuearray,1);
+			else if ( *offset_target == notecommands::midicc ) dlg.AssignInitialValues(valuearray,2);
+			else dlg.AssignInitialValues(valuearray,-1);
+			
 			if (dlg.DoModal() == IDOK )
 			{
-				BlockParamInterpolate(dlg.kfresult);
+				int twktype(255);
+				if ( dlg.kftwk == 0 ) twktype = notecommands::tweak;
+				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweakslide;
+				else if ( dlg.kftwk == 2 ) twktype = notecommands::midicc;
+				BlockParamInterpolate(dlg.kfresult,twktype);
 			}
+			delete valuearray;
 		}
 
 
