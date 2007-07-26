@@ -9,9 +9,13 @@
 	// what we would like to include in an ideal world
 	#include <cstdint>
 	// C1999
-	#include <stdint.h>
+	#if __STDC_VERSION__ >= 199901
+		#include <stdint.h>
+	#endif
 	// some unix systems had the equivalent inttypes.h for a long time
-	#include <inttypes.h>
+	#if defined __unix__ || defined __APPLE__
+		#include <inttypes.h>
+	#endif
 #else
 	// boost takes care of all the mess for us
 	#include <boost/cstdint.hpp>
