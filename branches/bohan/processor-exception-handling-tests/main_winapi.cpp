@@ -7,10 +7,11 @@
 #include <iostream>
 #include <iomanip>
 #include <cassert>
-/* #include <cstdint> */ namespace std { typedef unsigned __int64 uint64_t; }
 #include <limits>
-#if __STDC_VERSION__ >= 199901
-	#include <fenv.h>
+#if 0//__STDC_VERSION__ >= 199901
+	#include <cstdint>
+#else
+	namespace std { typedef unsigned __int64 uint64_t; }
 #endif
 #include <cfloat> // for _control*
 
