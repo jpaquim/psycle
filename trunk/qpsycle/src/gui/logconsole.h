@@ -29,6 +29,8 @@
 #include <QString>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QToolBar>
+#include <QAction>
 
 class LogConsole : public QWidget
 {
@@ -38,12 +40,17 @@ public:
 	void AddNormalText(QString text);
 	void AddSuccessText(QString text);
 	void AddErrorText(QString text);
+	void CreateToolbar();
+
+public slots:
 	void Clear();
 	void SaveToFile();
 	
 private:
 	QVBoxLayout *layOut_;
+	QToolBar *toolBar_;
+	QAction *saveAct_;
+	QAction *clearAct_;
 	QTextEdit *logText;
 };
-
 #endif
