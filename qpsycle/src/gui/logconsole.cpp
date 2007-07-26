@@ -21,11 +21,13 @@
 LogConsole::LogConsole()
 {
 	setAttribute(Qt::WA_QuitOnClose, false);
+	CreateToolbar();
 	layOut_ = new QVBoxLayout(this);
 	logText = new QTextEdit(this);
 	logText->setReadOnly(true);
 	logText->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	layOut_->addWidget(logText);
+	layOut_->addWidget(toolBar_);
 	setLayout(layOut_);
 	logText->append("Logging Console is active\n");
 }
@@ -55,4 +57,18 @@ void LogConsole::Clear()
 void LogConsole::SaveToFile()
 {
 
+}
+
+void LogConsole::CreateToolbar()
+{
+	toolBar_ = new QToolBar(this);
+	
+	saveAct_ = new QAction(QIcon(":/images/save.png"), "Save To File", this);
+
+	clearAct_ = new QAction("Clear Buffer", this);
+	
+	connect(clearAct_, SIGNAL(triggered()),this, SLOT(Clear()));
+	
+	toolBar_->addAction(saveAct_);
+	toolBar_->addAction(clearAct_);
 }
