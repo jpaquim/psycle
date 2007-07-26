@@ -69,6 +69,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//set combo box items
 			m_CurveType.AddString ("Linear");
 			m_CurveType.AddString ("Hermite Curve");
+			m_CurveType.AddString ("All to Linear");
+			m_CurveType.AddString ("All to Hermite");
 			m_CurveType.SetCurSel (1);
 
 			//determine scaling factor
@@ -413,6 +415,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					kf[selectedGPoint].curvetype = 0; break;
 				case 1:
 					kf[selectedGPoint].curvetype = 1; break;
+				case 2:
+					for (int i(0); i< numLines; i++)
+					{
+						kf[i].curvetype = 0;
+					}
+					m_CurveType.SetCurSel(0);
+					break;
+				case 3:
+					for (int i(0); i< numLines; i++)
+					{
+						kf[i].curvetype = 1;
+					}
+					m_CurveType.SetCurSel(1);
+					break;
 				}
 				Invalidate();
 			}

@@ -19,6 +19,7 @@ namespace psycle
 			_playing = false;
 			_playBlock = false;
 			_recording = false;
+			_clipboardrecording = false;
 			_isWorking = false;
 			Tweaker = false;
 			_samplesRemaining=0;
@@ -521,7 +522,36 @@ namespace psycle
 							pThis->dither.Process(pR, amount);
 						}
 						int i;
-						switch(Global::pConfig->_pOutputDriver->_channelmode)
+						if ( pThis->_clipboardrecording)
+						{
+							switch(Global::pConfig->_pOutputDriver->_channelmode)
+							{
+							case 0: // mono mix
+								for(i=0; i<amount; i++)
+								{
+									if (!pThis->ClipboardWriteMono(((*pL++)+(*pR++))/2)) pThis->StopRecording(false);
+								}
+								break;
+							case 1: // mono L
+								for(i=0; i<amount; i++)
+								{
+									if (!pThis->ClipboardWriteMono(*pL++)) pThis->StopRecording(false);
+								}
+								break;
+							case 2: // mono R
+								for(i=0; i<amount; i++)
+								{
+									if (!pThis->ClipboardWriteMono(*pR++)) pThis->StopRecording(false);
+								}
+								break;
+							default: // stereo
+								for(i=0; i<amount; i++)
+								{
+									if (!pThis->ClipboardWriteStereo(*pL++,*pR++)) pThis->StopRecording(false);
+								}
+								break;
+							}						}
+						else switch(Global::pConfig->_pOutputDriver->_channelmode)
 						{
 						case 0: // mono mix
 							for(i=0; i<amount; i++)
@@ -558,8 +588,87 @@ namespace psycle
 			} while(numSamples>0);
 			return pThis->_pBuffer;
 		}
+		bool Player::ClipboardWriteMono(float sample)
+		{
+			int *length = reinterpret_cast<int*>((*pClipboardmem)[0]);
+			int pos = *length%1000000;
+			int endpos = pos;
+			
+			switch( Global::pConfig->_pOutputDriver->_bitDepth)
+			{
+			case 8: endpos+=1; break;
+			case 16: endpos+=2; break;
+			case 24: endpos+=3; break;
+			case 32: endpos+=4; break;
+			}
 
-		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape)
+			int d(0);
+			if(sample > 32767.0f) sample = 32767.0f;
+			else if(sample < -32768.0f) sample = -32768.0f;
+			switch( Global::pConfig->_pOutputDriver->_bitDepth)
+			{
+			case 8:
+				d = int(sample/256.0f);
+				d += 128;
+				(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
+				*length+=1;
+				break;
+			case 16:
+				d = static_cast<int>(sample);
+				(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
+				(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
+				*length+=2;
+				break;
+			case 24:
+				d = int(sample * 256.0f);
+				if ( endpos < 1000000 )
+				{
+					(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
+					(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
+					(*pClipboardmem)[clipbufferindex][pos+2]=*(reinterpret_cast<char*>(&d)+2);
+					*length+=3;
+				}
+				break;
+			case 32:
+				d = int(sample * 65536.0f);
+				(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
+				(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
+				(*pClipboardmem)[clipbufferindex][pos+2]=*(reinterpret_cast<char*>(&d)+2);
+				(*pClipboardmem)[clipbufferindex][pos+3]=*(reinterpret_cast<char*>(&d)+3);
+				*length+=4;
+				break;
+			default:
+				break;
+			}
+
+			if ( endpos >= 1000000 )
+			{
+				clipbufferindex++;
+				char *newbuf = new char[1000000];
+				if (!newbuf) return false;
+				pClipboardmem->push_back(newbuf);
+				// bitdepth == 24 is the only "odd" value, since it uses 3 chars each, nondivisible by 1000000
+				if ( Global::pConfig->_pOutputDriver->_bitDepth == 24)
+				{
+					clipbufferindex--;
+					(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
+					if ( ++pos = 1000000) { pos = 0; clipbufferindex++; }
+					(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
+					if ( ++pos = 1000000) { pos = 0; clipbufferindex++; }
+					(*pClipboardmem)[clipbufferindex][pos+2]=*(reinterpret_cast<char*>(&d)+2);
+					if ( ++pos = 1000000) { pos = 0;  clipbufferindex++; }
+					*length+=3;
+				}
+			}
+			return true;
+		}
+		bool Player::ClipboardWriteStereo(float left, float right)
+		{
+			if (!ClipboardWriteMono(left)) return false;
+			return ClipboardWriteMono(right);
+		}
+
+		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape, std::vector<char*> *clipboardmem)
 		{
 			if(!_recording)
 			{
@@ -581,11 +690,27 @@ namespace psycle
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
 				Stop();
-				if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
-					_recording = true;
+				if (!psFilename.empty())
+				{
+					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+						_recording = true;
+					else
+					{
+						StopRecording(false);
+					}
+				}
 				else
 				{
-					StopRecording(false);
+					char *newbuf = new char[1000000];
+					if ( newbuf)
+					{
+						pClipboardmem = clipboardmem;
+						pClipboardmem->push_back(newbuf);
+						_clipboardrecording = true;
+						clipbufferindex = 1;
+						_recording = true;
+					}
+					else StopRecording(false);
 				}
 			}
 		}
@@ -598,8 +723,10 @@ namespace psycle
 				SampleRate(backup_rate);
 				Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
 				Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
-				_outputWaveFile.Close();
+				if (!_clipboardrecording)
+					_outputWaveFile.Close();
 				_recording = false;
+				_clipboardrecording =false;
 				if(!bOk)
 				{
 					MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);

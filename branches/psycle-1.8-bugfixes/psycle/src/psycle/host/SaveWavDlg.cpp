@@ -281,7 +281,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::OnOutputclipboard()
 		{
-			m_savewave.EnableWindow(false);
+//			m_savewave.EnableWindow(false);
 			m_outputtype=1;
 			m_savewires.EnableWindow(false);
 			m_savetracks.EnableWindow(false);
@@ -567,15 +567,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
 				}
 			}
-			else if (m_outputtype == 1)
+			else if (m_outputtype == 1 || m_outputtype == 2)
 			{
-				//record to clipboard				
+				// Clear clipboardmem if needed (should not. it's a safety measure)
+				if ( clipboardmem.size() > 0)
+				{
+					for (unsigned int i=0;i<clipboardmem.size();i++)
+					{
+						delete[] clipboardmem[i];
+					}
+					clipboardmem.clear();
+				}
+				//allocate first vector value to store the size of the clipboard memory.
+				char *size = new char[4];
+				memset(size,0,4);
+				clipboardmem.push_back(size);
+				// No name -> record to clipboard.
+				SaveWav("",real_bits[bits],real_rate[rate],channelmode);
 			}
-			else //m_outputtype == 2
-			{
-				//record to next free sample slot
-			}
-
 		}
 
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode)
@@ -598,7 +607,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 
 			pPlayer->StartRecording(file,bits,rate,channelmode,
-									m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape);
+									m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape,&clipboardmem);
 
 			int tmp;
 			int cont;
@@ -672,7 +681,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				hexstring_to_integer(name.GetBuffer(2), blockELine);
 
 				m_progress.SetRange(blockSLine,blockELine);
-				//<alk> what's this for? (start)
+				//find the position in the sequence where the pstart pattern is located.
 				for (cont=0;cont<pSong->playLength;cont++)
 				{
 					if ( (int)pSong->playOrder[cont] == pstart)
@@ -681,7 +690,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						break;
 					}
 				}
-				//(end)
 				lastpostick=pstart;
 				pSong->playOrderSel[cont]=true;
 				pPlayer->Start(pstart,blockSLine, blockELine);
@@ -694,8 +702,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			unsigned long tmp2;
 			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
-
-
 		}
 
 		DWORD WINAPI __stdcall RecordThread(void *b)
@@ -757,7 +763,33 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Global::pConfig->_pOutputDriver->Enable(true);
 			Global::pConfig->_pMidiInput->Open();
 
-			if (m_savetracks.GetCheck())
+			if (m_outputtype == 1)
+			{
+				SaveToClipboard();
+			}
+
+			else if ( m_outputtype == 2)
+			{
+				// todo : copy clipboardmem to the current selected instrument.
+				int copiedsize=0;
+				int length = *reinterpret_cast<int*>(clipboardmem[0]);
+				int i=1;
+/*				while (copiedsize+1000000<=length)
+				{
+					CopyMemory(pClipboardData +copiedsize,clipboardmem[i], 1000000);
+					i++;
+					copiedsize+=1000000;
+				}
+				CopyMemory(pClipboardData +copiedsize,clipboardmem[i], length-copiedsize);
+*/
+				for (unsigned int i=0;i<clipboardmem.size();i++)
+				{
+					delete[] clipboardmem[i];
+				}
+				clipboardmem.clear();
+
+			}
+			else if (m_savetracks.GetCheck())
 			{
 				Song *pSong = Global::_pSong;
 
@@ -917,6 +949,63 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_progress.SetPos(0);
 			m_savewave.EnableWindow(true);
 			m_cancel.SetWindowText("Close");
+		}
+
+		void CSaveWavDlg::SaveToClipboard()
+		{
+			OpenClipboard();
+			EmptyClipboard();
+
+			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
+			const int real_bits[]={8,16,24,32};
+
+			///\todo: Investigate why i can't paste to audacity (psycle's fault?)
+			clipboardwavheader.head = 'FFIR';
+			clipboardwavheader.head2= 'EVAW';
+			clipboardwavheader.fmthead = ' tmf';
+			clipboardwavheader.fmtsize = sizeof(WAVEFORMATEX) + 2; // !!!!!!!!!!!!!!!!????????? - works...
+			clipboardwavheader.fmtcontent.wFormatTag = WAVE_FORMAT_PCM;
+			clipboardwavheader.fmtcontent.nChannels = (channelmode == 3) ? 2 : 1;
+			clipboardwavheader.fmtcontent.nSamplesPerSec = real_rate[rate];
+			clipboardwavheader.fmtcontent.wBitsPerSample = real_bits[bits];
+			clipboardwavheader.fmtcontent.nBlockAlign = clipboardwavheader.fmtcontent.wBitsPerSample/8*clipboardwavheader.fmtcontent.nChannels;
+			clipboardwavheader.fmtcontent.nAvgBytesPerSec =clipboardwavheader.fmtcontent.nBlockAlign*clipboardwavheader.fmtcontent.nSamplesPerSec;
+			clipboardwavheader.fmtcontent.cbSize = 0;
+			clipboardwavheader.datahead = 'atad';
+
+			int length = *reinterpret_cast<int*>(clipboardmem[0]);
+
+			clipboardwavheader.datasize = length;
+			clipboardwavheader.size = clipboardwavheader.datasize + sizeof(fullheader) - 8;
+
+
+			HGLOBAL hClipboardData = GlobalAlloc(GMEM_MOVEABLE, clipboardwavheader.datasize + sizeof(fullheader));
+			char*	pClipboardData = (char*) GlobalLock(hClipboardData);
+
+			CopyMemory(pClipboardData, &clipboardwavheader, sizeof(fullheader) );
+
+			// In bytes
+			int copiedsize=0;
+			int i=1;
+			pClipboardData += sizeof(fullheader);
+			while (copiedsize+1000000<=length)
+			{
+				CopyMemory(pClipboardData +copiedsize,clipboardmem[i], 1000000);
+				i++;
+				copiedsize+=1000000;
+			}
+			CopyMemory(pClipboardData +copiedsize,clipboardmem[i], length-copiedsize);
+
+			for (unsigned int i=0;i<clipboardmem.size();i++)
+			{
+				delete[] clipboardmem[i];
+			}
+			clipboardmem.clear();
+
+			GlobalUnlock(hClipboardData);
+			SetClipboardData(CF_WAVE, hClipboardData);
+			CloseClipboard();
+
 		}
 
 		void CSaveWavDlg::SaveTick()

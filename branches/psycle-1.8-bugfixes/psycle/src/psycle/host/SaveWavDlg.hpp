@@ -4,6 +4,7 @@
 #include "constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+#include <mmreg.h>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -20,6 +21,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			void SaveTick(void);
 			void SaveEnd(void);
+			void SaveToClipboard();
 			int kill_thread;
 			int threadopen;
 		// Dialog Data
@@ -80,6 +82,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					gaussian
 				};
 			};
+
+			struct fullheader
+			{
+				std::uint32_t	head;
+				std::uint32_t	size;
+				std::uint32_t	head2;
+				std::uint32_t	fmthead;
+				std::uint32_t	fmtsize;
+				WAVEFORMATEX	fmtcontent;
+				std::uint32_t datahead;
+				std::uint32_t datasize;
+			} clipboardwavheader;
+
+			std::vector<char*> clipboardmem;
 
 			int current;
 

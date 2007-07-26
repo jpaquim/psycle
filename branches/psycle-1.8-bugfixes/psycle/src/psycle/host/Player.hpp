@@ -86,11 +86,17 @@ namespace psycle
 			///\name secondary output device, write to a file
 			///\{
 			/// starts the recording output device.
-				void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1, bool dodither=false, int ditherpdf=0, int noiseshape=0);
+			void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1, bool dodither=false, int ditherpdf=0, int noiseshape=0, std::vector<char*> *clipboardmem=0);
 			/// stops the recording output device.
 			void StopRecording(bool bOk = true);
+			bool ClipboardWriteMono(float sample);
+			bool ClipboardWriteStereo(float left, float right);
 			/// wether the recording device has been started.
 			bool _recording;
+			/// wether the recording is done to memory.
+			bool _clipboardrecording;
+			std::vector<char*> *pClipboardmem;
+			int clipbufferindex;
 			/// whether to apply dither to recording
 			bool _dodither;
 			///\}
