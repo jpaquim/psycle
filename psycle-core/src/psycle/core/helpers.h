@@ -121,6 +121,7 @@
 			{
 				return static_cast<int>(f); ///\todo this is wrong since it's not the same rounding mode as f2i ; use C1999's lrint
 			}
+		#endif
 
 		#if 0 // uses universalis		
 			/// clipping.
