@@ -58,9 +58,13 @@ namespace psycle
 		{ 
 			BOOST_STATIC_ASSERT((sizeof f == sizeof(int)));
 			BOOST_STATIC_ASSERT((sizeof f == 4));
-			//assert(f > 0); 
-			std::uint32_t const i(*reinterpret_cast<std::uint32_t const*>(&f));
-			return ((i & 0x7f800000) >> 23) - 0x7f + (i & 0x007fffff) / (float)0x800000; 
+			//assert(f > 0);
+			union tmp_union {
+				float f;
+				std::uint32_t i;
+			} tmp;
+			tmp.f = f;
+			return ((tmp.i & 0x7f800000) >> 23) - 0x7f + (tmp.i & 0x007fffff) / (float)0x800000; 
 		}
 
 		/// converts a floating point number to an integer.
