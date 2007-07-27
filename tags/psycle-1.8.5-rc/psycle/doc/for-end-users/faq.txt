@@ -1,0 +1,148 @@
+List of Frequently Asked Questions about Psycle
+-----------------------------------------------
+
+- General Questions -
+-------------------
+Q)	I need to speak with the developers!
+
+A)	The best way is using IRC - You need to install an IRC client. HydraIRC is a good choice
+	(and there are many others out there as well!). Then you can connect to any server of the
+	EFnet network and join the #psycle channel.
+	An alternative way to connect is through your browser to http://psycle.sourceforge.net/irc.html
+
+Q)	Is it possible to import/load S3M/XM/IT files into Psycle?
+
+A)	Latest 1.7.x alphas and all 1.8 versions include "Sampulse" and its importing routines.
+	Those should allow to import them with ease.
+	Note that the code of Sampulse loading and saving is *unfinished*, so you
+	should not save songs with Sampulse machine.
+
+Q)	What is this 'dummy' machine?
+
+A)	Dummy internal machine? It is mainly used to replace missing plugin machines when loading
+	a .psy file. It can also be used to group machines, connecting them to it.
+
+Q)	I have problems playing a song in Winamp that uses Sublime synth!
+
+A)	The problem with sublime is that you need to copy the file blwtbl.dll file (which you can find
+	where psycle.exe is), to either the windows\system32 directory, or to winamp.exe directory.
+	This file is needed in order to make sublime works (not only using Winamp). That file is basically
+	some extra data that sublime uses to create sounds, and if it doesn't find it, it can't load.
+	
+
+- Samples and the Sampler Machine -
+--------------------------------
+Q)	I've loaded a sample but it doesn't make any sound.
+
+A)	To play a sample (.wav or .iff) you need to add a sampler machine and connect it to the master
+	or to an effect that goes to the master. Be sure your audio settings are 0K, too.
+
+Q)	Can Psycle use OGG?/MP3? files as samples?
+
+A)	Unfortunately not. This is a common question, because it would be good. Support for lossy
+	compression (MP3?, etc) and lossless compression? (FLAC, etc) formats is on the TODO list.
+
+Q)	When I load a sample and enter a note, it's really fast and high-pitched...
+	...when it plays. I've tried everything from halving the bit rate of the sample to re-installing Psycle.
+	What should I do about this?
+
+A)	The way trackers change pitch of a sample is by speeding up or slowing down the rate at which
+	the individual sample points are played back. the result is similar to playing a 33 1/3 RPM record
+	at 45, or vice versa. The pitch changes to the desired tone, but eventually your sample will either
+	end up sounding like either the Chipmunks, or Barry White on valium.
+	That's what multisampled instruments solve, but unfortunately Psycle doesn't support multisampled
+	instruments as yet. You can use another sampler VSTi that support multisample formats like SF2
+	(RGCAudio sfz, Fontaminator, Kontakt, VSampler, ...)
+
+
+- Psycle Usage -
+--------------
+Q)	When Psycle loses focus, the music stops. Why?
+
+A)	The "Exclusive" mode is selected in the Directsound Configuration. Go to the Configuration
+	Menu -> Settings and select the Input/output tab, and press the configure button.
+	There you will see the Exclusive option. Uncheck it.
+
+Q)	I've put my xxx VST plugin in the "plugins" dir and Psycle doesn't show it!
+
+A)	Psycle uses a different paths for Native plugins and VST plugins. By default, Native Plugins go
+	under "Plugins\" and VST's go under "Vst\". If you want to change it, go to Configure-Settings,
+	select the "Directories" tab, and select your VST plugins' dir.
+
+Q)	Why doesn't/Can't/won't Psycle support buzz machines?
+
+A)	Oskari Tammelin, the author of Buzz, declined us the right to develop a Buzz Plugins' Host for Psycle.
+	It's up to someone to develop a plugin that can load buzz plugins.
+	(It won't be allowed by Oskari either, but many users would like it.)
+
+Q)	I Have Pro52 VSTi and it is shown as an Effect Machine. How come?
+
+A)	There are two Pro5 dll's, one called pro-52.dll and the other called pro-52fx.dll. The first one is
+	recognized by Psycle as a generator while the other is recognized as an effect and it allows to use
+	the Pro52 Effect engine separatedly from the synth (The same happen with other synths).
+
+Q)	I can't enter notes into the Pattern Editor. What happens?
+
+A)	The Edit Mode is Deactivated. The default key to switch it on/off is the "Space" key. You can see if
+	you are on Edit mode in the status bar, to the right.
+
+Q)	What is the Red Circle Button in the toolbar for?
+
+A)	It allows you to enter Record Notes in realtime mode. To enter this mode Follow Song and Edit mode
+	have to be activated so when you enable Record Notes in realtime, Follow Song and Edit mode are
+	activated automatically if they were disabled.
+
+Q)	I have only 16 tracks in my psycle song, how do i get 64?
+
+A)	Under the save icon (the diskette), there is a track number selector. Unfold the list of tracks number
+	and select 64.
+
+Q)	What does the Autostop All Machines button exactly do?
+
+A)	When enabled, if Psycle detects an effect that receives no sound input, it stops it, freeing CPU usage.
+	This is beneficial in most cases, but plugins like delays, or those that have LFO's or any other parameter
+	that needs to run constantly, will sound unexpectedly.
+
+Q)	How do I change the pattern length?
+
+A)	Right Click in the Pattern Window and then select "Properties"
+
+Q)	Is it possible to have different patterns with a different length?
+
+A)	See above: "How do I change the pattern length?"
+
+Q)	How does the tweak_smooth command work?
+
+A)	In the docs-Directory you find a .txt-file with in-depth info about tweaking.
+
+Q)	Is it possible to let a tws command affect several rows (not only one)?
+
+A)	Smooth tweaks between two tweak values can be achieved by entering the start and the end value,
+	selecting via mouse the region and then select "Interpolate" from the context-menu.
+
+Q)	how do I stop a synth playing in a track/ how do i create a NoteOff?
+
+A)	put the cursor in a channel's first column, the row you want it to stop and press [ctrl]-1.
+	This will put an "off", silencing the machine at that point. 
+
+
+- Developement -
+----------------
+
+Q)	How can I develop a Psycle Machine?
+A)	There is no SDK yet, and format will change in Psycle 2.
+	The recommended way right now is to get the source directly of one of 
+	the open source plugins ( arguru synth is a good start ), and use it as a template
+	for your own.
+	You can download them from Psycle's SVN repository at Source Forge Site:
+	https://psycle.svn.sourceforge.net/svnroot/psycle/trunk/xpsycle.plugins/
+
+Q)	How can I port a Buzz machine to Psycle?
+A)	An old SDK exists in the download section of Psycle in Sourceforge, but it is
+	obsolete. The only way there is right now is starting with a Psycle plugin.
+
+Q)	When will Psycle 2 be out?/ In which stage is Psycle 2 developement? What do you
+	plan for Psycle 2?
+A)	See the roadmap.txt file
+
+
