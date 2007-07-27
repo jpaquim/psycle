@@ -60,14 +60,21 @@ namespace universalis
 											<< version_info.szCSDVersion;
 										loggers::information()(s.str());
 									}
-									if
-									(
-										version_info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS ||
-										version_info.dwPlatformId == VER_PLATFORM_WIN32s
-									)
-									{
-										throw msdos();
-									}
+									#if \
+										DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR > 5 || \
+										( \
+											DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR == 5 && \
+											DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR > 0 \
+										)
+										if
+										(
+											version_info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS ||
+											version_info.dwPlatformId == VER_PLATFORM_WIN32s
+										)
+										{
+											throw msdos();
+										}
+									#endif
 								}
 							}
 						}
