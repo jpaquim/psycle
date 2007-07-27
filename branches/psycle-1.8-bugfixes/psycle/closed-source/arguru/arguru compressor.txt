@@ -1,4 +1,2 @@
-2004-07:
-<bohan>
-this one should obviously be open source,
-but arguru is not sure wether or not he still have the source on some backup.
+this one should obviously have beeb open source,
+but arguru was not sure wether or not he still had the source on some backup.
