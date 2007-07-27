@@ -93,7 +93,7 @@ int const numVals = 6;
 CMachineInfo const bexphase_info = 
 {
 	MI_VERSION,	
-	0,
+	EFFECT,
 	numVals,
 	pParameters,
 	"DocBexter'S PhaZaR",
