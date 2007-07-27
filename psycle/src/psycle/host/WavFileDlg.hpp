@@ -1,8 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::CWavFileDlg.
 #pragma once
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		class Song;
 
 		/// wave file dialog window.
@@ -13,7 +15,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Song *_pSong;
 			CString _lastFile;
 			CWavFileDlg(
-				BOOL bOpenFileDialog, // true for FileOpen, false for FileSaveAs
+				BOOL bOpenFileDialog, // TRUE for FileOpen, FALSE for FileSaveAs
 				LPCTSTR lpszDefExt = NULL,
 				LPCTSTR lpszFileName = NULL,
 				DWORD dwFlags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
@@ -29,5 +31,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

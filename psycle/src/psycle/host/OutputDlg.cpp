@@ -1,15 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::COutputDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/OutputDlg.hpp>
-#include <psycle/engine/MidiInput.hpp>
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/engine/player.hpp>
-#include <psycle/engine/song.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "OutputDlg.hpp"
+#include "Psycle.hpp"
+#include "MidiInput.hpp"
+#include "Configuration.hpp"
+#include "Player.hpp"
+#include "Song.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
@@ -89,9 +88,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			acc.nInc = 50;
 			m_midiHeadroomSpin.SetAccel(1, &acc);
 
-			m_midiMachineViewSeqMode.SetCheck(Global::configuration()._midiMachineViewSeqMode);
+			m_midiMachineViewSeqMode.SetCheck(Global::pConfig->_midiMachineViewSeqMode);
 
-			return true;
+			return TRUE;
 		}
 
 		void COutputDlg::OnOK() 
@@ -115,7 +114,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = m_midiHeadroom;
 
-			Global::configuration()._midiMachineViewSeqMode = m_midiMachineViewSeqMode.GetCheck();
+			Global::pConfig->_midiMachineViewSeqMode = m_midiMachineViewSeqMode.GetCheck();
 			CDialog::OnOK();
 		}
 
@@ -123,7 +122,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			m_driverIndex = m_oldDriverIndex;
 			m_midiDriverIndex = m_oldMidiDriverIndex;
-			m_midiMachineViewSeqMode.SetCheck(Global::configuration()._midiMachineViewSeqMode);
+			m_midiMachineViewSeqMode.SetCheck(Global::pConfig->_midiMachineViewSeqMode);
 			CDialog::OnCancel();
 		}
 
@@ -132,7 +131,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			int index = m_driverComboBox.GetCurSel();
 			m_ppDrivers[index]->Configure();
-			Global::player().SampleRate(Global::configuration().GetSamplesPerSec());
+			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,8 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::CDirectoryDlg.
 #pragma once
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		/// directory config window.
 		class CDirectoryDlg : public CPropertyPage
 		{
@@ -20,7 +23,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			std::string _skinPathBuf;
 			bool initializingDlg;
 			CDirectoryDlg();
-			~CDirectoryDlg();
+			virtual ~CDirectoryDlg();
 		// Dialog Data
 			//{{AFX_DATA(CDirectoryDlg)
 			enum { IDD = IDD_DIRECTORIES };
@@ -58,5 +61,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

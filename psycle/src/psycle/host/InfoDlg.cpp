@@ -1,25 +1,25 @@
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/InfoDlg.hpp>
-//#include <psycle/host/configuration.hpp>
-#include <psycle/engine/Song.hpp>
-#include <psycle/engine/player.hpp>
-#include <psycle/engine/Machine.hpp>
-#include <sstream>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
-
+#include <psycle/project.private.hpp>
+#include "InfoDlg.hpp"
+#include "Psycle.hpp"
+#include "configuration.hpp"
+#include "Song.hpp"
+#include "Machine.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CInfoDlg::CInfoDlg(CWnd* pParent)
 		: CDialog(CInfoDlg::IDD, pParent)
 		{
+			//{{AFX_DATA_INIT(CInfoDlg)
+			// NOTE: the ClassWizard will add member initialization here
+			//}}AFX_DATA_INIT
 		}
 
 		void CInfoDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
+			//{{AFX_DATA_MAP(CInfoDlg)
 			DDX_Control(pDX, IDC_MEM_RESO4, m_mem_virtual);
 			DDX_Control(pDX, IDC_MEM_RESO3, m_mem_pagefile);
 			DDX_Control(pDX, IDC_MEM_RESO2, m_mem_phy);
@@ -29,10 +29,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_CPUL, m_processor_label);
 			DDX_Control(pDX, IDC_CPUIDLE_LABEL, m_cpuidlelabel);
 			DDX_Control(pDX, IDC_MACHINELIST, m_machlist);
+			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CInfoDlg, CDialog)
-			ON_WM_TIMER()
+		//{{AFX_MSG_MAP(CInfoDlg)
+		ON_WM_TIMER()
+		//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CInfoDlg::OnInitDialog() 
@@ -46,17 +49,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
 			m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
 			
-			{
-				std::ostringstream s;
-				s << static_cast<cpu::cycles_type>(Global::cpu_frequency() * 1e-6) << " MHz";
-				m_processor_label.SetWindowText(s.str().c_str());
-			}
+			char buffer[128];
+			///\todo:  Using the Windows API to get clicks/CPU frequency doesn't give
+			// the real frequency in some cases. This has to be worked out.
+			sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
+			m_processor_label.SetWindowText(buffer);
 			
 			UpdateInfo();
 			
 			InitTimer();
 			
-			return true;
+			return TRUE;
 		}
 
 		void CInfoDlg::InitTimer()
@@ -86,9 +89,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						float machCPU=0;
 		//				float masterCPU=0;
-		//				machCPU = (float)tmac->work_cpu_cost()*0.1f;
-		//				machCPU = ((float)tmac->work_cpu_cost()/Global::cpu_frequency()) * 100;
-						machCPU = ((float)tmac->work_cpu_cost()/Global::cpu_frequency()) * ((float)Global::player().SampleRate()/tempSampCount)*100;
+		//				machCPU = (float)tmac->_cpuCost*0.1f;
+		//				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * 100;
+						machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 		/*				if (!c)
 						{
 							masterCPU = machCPU;
@@ -97,8 +100,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						m_machlist.SetItem(n,5,LVIF_TEXT,buffer,0,0,0,NULL);
 						n++;
 						machsCPU += machCPU;
-		//				wiresCPU += ((float)tmac->wire_cpu_cost()/Global::cpu_frequency())*100;
-						wiresCPU += ((float)tmac->wire_cpu_cost()/Global::cpu_frequency()) * ((float)Global::player().SampleRate()/tempSampCount)*100;
+		//				wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz)*100;
+						wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 					}
 				}
 				if (itemcount != n)
@@ -108,8 +111,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				
 		//		totalCPU = _pSong->cpuIdle*0.1f+masterCPU;
 		//		totalCPU = ((float)_pSong->cpuIdle/Global::_cpuHz)*100+machsCPU;
-		//		totalCPU = machsCPU + wiresCPU + ((float)_pSong->cpu_idle()/Global::cpu_frequency())*100;
-				totalCPU = machsCPU + wiresCPU + ((float)_pSong->cpu_idle()/Global::cpu_frequency()) * ((float)Global::player().SampleRate()/tempSampCount)*100;
+		//		totalCPU = machsCPU + wiresCPU+((float)_pSong->cpuIdle/Global::_cpuHz)*100;
+		//		totalCPU = machsCPU + wiresCPU+ ((float)_pSong->cpuIdle/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+				totalCPU = machsCPU + wiresCPU;
 				
 				sprintf(buffer,"%.1f%%",totalCPU);
 				m_cpuidlelabel.SetWindowText(buffer);
@@ -117,8 +121,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				sprintf(buffer,"%.1f%%",machsCPU);
 				m_machscpu.SetWindowText(buffer);
 				
-		//		sprintf(buffer,"%.1f%%",((float)_pSong->cpu_idle()/Global::cpu_frequency())*100);
-		//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[MASTER_INDEX]->wire_cpu_cost()/Global::cpu_frequency())*100);
+		//		sprintf(buffer,"%.1f%%",((float)_pSong->cpuIdle/Global::_cpuHz)*100);
+		//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[MASTER_INDEX]->_wireCost/Global::_cpuHz)*100);
 				sprintf(buffer,"%.1f%%",wiresCPU);
 				m_cpurout.SetWindowText(buffer);
 				
@@ -151,47 +155,36 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				Machine *tmac = _pSong->_pMachine[c];
 				if(tmac)
 				{
+					char buffer[128];
+					
 					// Name [Machine view editor custom name]
-					{
-						std::ostringstream s;
-						s << n + 1 << ": " << tmac->GetEditName();
-						m_machlist.InsertItem(n,s.str().c_str());
-					}
+					sprintf(buffer,"%.3d: %s",n+1,tmac->_editName);
+					m_machlist.InsertItem(n,buffer);
 					
 					// Gear [Gear type]
-					m_machlist.SetItem(n,1,LVIF_TEXT,tmac->GetBrand().c_str(),0,0,0,0);
+					strcpy(buffer, tmac->GetName());
+					m_machlist.SetItem(n,1,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// Type [Set is generator/effect/master]
+					switch(tmac->_mode)
 					{
-						std::string s;
-						switch(tmac->_mode)
-						{
-							case MACHMODE_GENERATOR: s = "Generator"; break;
-							case MACHMODE_FX: s = "Effect"; break;
-							case MACHMODE_MASTER: s = "Master"; break;
-						}
-						m_machlist.SetItem(n,2,LVIF_TEXT,s.c_str(),0,0,0,0);
+					case MACHMODE_GENERATOR: strcpy(buffer,"Generator");break;
+					case MACHMODE_FX: strcpy(buffer,"Effect");break;
+					case MACHMODE_MASTER: strcpy(buffer,"Master");break;
 					}
-
+					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
+					
 					// Input numbers
-					{
-						std::ostringstream s;
-						s << tmac->_connectedInputs;
-						m_machlist.SetItem(n,3,LVIF_TEXT,s.str().c_str(),0,0,0,0);
-					}
-
+					sprintf(buffer,"%d",tmac->_numInputs);
+					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+					
 					// OutPut numbers
-					{
-						std::ostringstream s;
-						s << tmac->_connectedOutputs;
-						m_machlist.SetItem(n,4,LVIF_TEXT,s.str().c_str(),0,0,0,0);
-					}
-
-					++n;
+					sprintf(buffer,"%d",tmac->_numOutputs);
+					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+					n++;
 				}
 			}
 			itemcount = n;
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
-
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

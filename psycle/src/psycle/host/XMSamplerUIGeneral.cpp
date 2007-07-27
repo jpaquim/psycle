@@ -1,14 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/XMSamplerUIGeneral.hpp>
-#include <psycle/engine/XMInstrument.hpp>
-#include <psycle/engine/XMSampler.hpp>
-#include ".\xmsampleruigeneral.hpp" // Hmm?
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "XMSamplerUIGeneral.hpp"
+#include "Psycle.hpp"
+#include "XMInstrument.hpp"
+#include "XMSampler.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
 
@@ -51,6 +49,7 @@ BOOL XMSamplerUIGeneral::OnInitDialog()
 	m_interpol.AddString(_T("No Interpolation"));
 	m_interpol.AddString(_T("Linear Interpolation"));
 	m_interpol.AddString(_T("Spline Interpolation"));
+	m_interpol.AddString(_T("512p. Sinc Interpolation"));
 
 	m_interpol.SetCurSel(_pMachine->ResamplerQuality());
 
@@ -173,6 +172,6 @@ void XMSamplerUIGeneral::OnCbnSelendokXmpanningmode()
 	_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
 }
 
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END

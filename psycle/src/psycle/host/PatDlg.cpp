@@ -1,18 +1,17 @@
 ///\file
 ///\brief implementation file for psycle::host::CPatDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/engine/constants.hpp>
-#include <psycle/host/PatDlg.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "PatDlg.hpp"
+#include "Psycle.hpp"
+#include "constants.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CPatDlg)
-			m_adaptsize = false;
+			m_adaptsize = FALSE;
 			//}}AFX_DATA_INIT
-			bInit = false;
+			bInit = FALSE;
 		}
 
 		void CPatDlg::DoDataExchange(CDataExchange* pDX)
@@ -51,9 +50,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// Pass the focus to the texbox
 			m_patname.SetFocus();
 			m_patname.SetSel(0,-1);
-			bInit = true;
+			bInit = TRUE;
 			OnUpdateNumLines();
-			return false;
+			return FALSE;
 		}
 
 		void CPatDlg::OnOK() 
@@ -103,5 +102,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_text.SetWindowText(buffer);
 			}
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

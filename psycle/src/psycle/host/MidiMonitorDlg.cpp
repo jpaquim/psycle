@@ -1,14 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiMonitorDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/MidiMonitorDlg.hpp>
-#include <psycle/engine/MidiInput.hpp>
-#include <psycle/engine/song.hpp>
-#include <psycle/engine/machine.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "MidiMonitorDlg.hpp"
+#include "psycle.hpp"
+#include "MidiInput.hpp"
+#include "song.hpp"
+#include "machine.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )
@@ -120,7 +119,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// start the dialog timer
 			InitTimer();
 
-			return true;
+			return TRUE;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -342,6 +341,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return;
 			}
 
+			char txtBuffer[ 128 ];
+
 			// for all MIDI channels
 			for( int ch = 0; ch<MAX_MIDI_CHANNELS; ch++ )
 			{
@@ -351,25 +352,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// machine mapped & active?
 				if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES )
 				{
-					if( Global::song()._pMachine[ genFxIdx ] )
+					if( Global::_pSong->_pMachine[ genFxIdx ] )
 					{
 						// machine
-						Machine * pMachine = Global::song()._pMachine[ genFxIdx ];
-						{
-							std::ostringstream s;
-							s << genFxIdx << ": " << pMachine->GetEditName();
-							m_channelMap.SetItem( ch, 1, LVIF_TEXT, s.str().c_str(), 0, 0, 0, 0);
-						}
+						Machine * pMachine = Global::_pSong->_pMachine[ genFxIdx ];
+						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->_editName );
+						m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
 						
-						// required? (instruments only apply for samplers)
-						if( pMachine->subclass() == MACH_SAMPLER )
+						if( pMachine->_type == MACH_SAMPLER )
 						{
-							std::ostringstream s;
-							s << instrument << ": " << Global::song()._pInstrument[ instrument ]->_sName;
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, s.str().c_str(), 0, 0, 0, 0);
+							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );
+							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+						}
+						else if( pMachine->_type == MACH_XMSAMPLER )
+						{
 						}
 						else
 						{
@@ -421,5 +420,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_channelMap.InsertItem( ch, txtBuffer, NULL );
 			}
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

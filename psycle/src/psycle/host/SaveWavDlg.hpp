@@ -1,24 +1,33 @@
 ///\file
 ///\brief interface file for psycle::host::CSaveWavDlg.
 #pragma once
-#include <psycle/engine/constants.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "constants.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+#include <mmreg.h>
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+		class CChildView;
+		class CSelection;
+
 		/// save wave dialog window.
 		class CSaveWavDlg : public CDialog
 		{
 		// Construction
 		public:
 			/// mfc compliant constructor
-			CSaveWavDlg(CWnd* pParent = 0);
+			CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent = 0);
 
 			void SaveTick(void);
 			void SaveEnd(void);
+			void SaveToClipboard();
 			int kill_thread;
 			int threadopen;
 		// Dialog Data
 			//{{AFX_DATA(CSaveWavDlg)
 			enum { IDD = IDD_SAVEWAVDLG };
+			CButton	m_browse;
 			CButton	m_cancel;
 			CButton	m_savewave;
 			CButton	m_savewires;
@@ -27,11 +36,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CButton m_dither;
 			CEdit	m_rangestart;
 			CEdit	m_rangeend;
+			CEdit	m_linestart;
+			CEdit	m_lineend;
 			CProgressCtrl	m_progress;
 			CEdit	m_patnumber;
+			CEdit	m_patnumber2;
 			CEdit	m_filename;
 			CStatic m_text;
 			int		m_recmode;
+			int		m_outputtype;
 			CComboBox	m_rate;
 			CComboBox	m_bits;
 			CComboBox	m_channelmode;
@@ -48,6 +61,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		protected:
 			HANDLE thread_handle;
 
+			CChildView* pChildView;
+			CSelection* pBlockSel;
 			int lastpostick;
 			int lastlinetick;
 			int tickcont;
@@ -67,6 +82,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					gaussian
 				};
 			};
+
+			struct fullheader
+			{
+				std::uint32_t	head;
+				std::uint32_t	size;
+				std::uint32_t	head2;
+				std::uint32_t	fmthead;
+				std::uint32_t	fmtsize;
+				WAVEFORMATEX	fmtcontent;
+				std::uint32_t datahead;
+				std::uint32_t datasize;
+			} clipboardwavheader;
+
+			std::vector<char*> clipboardmem;
 
 			int current;
 
@@ -105,11 +134,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSavewiresseparated();
 			afx_msg void OnSavegensseparated();
 			afx_msg void OnToggleDither();
+			afx_msg void OnRecblock();
+			afx_msg void OnOutputfile();
+			afx_msg void OnOutputclipboard();
+			afx_msg void OnOutputsample();
 			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
-		};
+			DECLARE_MESSAGE_MAP()						
+};
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

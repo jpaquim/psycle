@@ -1,8 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::CSkinDlg.
 #pragma once
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		/// skin config window.
 		class CSkinDlg : public CPropertyPage
 		{
@@ -79,7 +82,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int _effect_font_point;
 
 			CSkinDlg();
-			~CSkinDlg();
+			virtual ~CSkinDlg();
 
 			std::string _skinPathBuf;
 
@@ -205,9 +208,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnBnClickedMachineguiTopfontc2();
 			afx_msg void OnBnClickedMachineguiBottomc2();
 			afx_msg void OnBnClickedMachineguiBottomfontc2();
-};
+		};
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

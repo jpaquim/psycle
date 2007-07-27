@@ -4,7 +4,7 @@
 	#error this file is not editable by Microsoft Visual C++
 #endif // APSTUDIO_INVOKED
 
-#include "../uiversion.hpp"
+#include "../version.hpp"
 
 // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 VS_VERSION_INFO VERSIONINFO

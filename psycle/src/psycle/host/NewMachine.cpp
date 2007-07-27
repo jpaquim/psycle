@@ -1,32 +1,107 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/NewMachine.hpp>
-#include <psycle/host/ProgressDialog.hpp>
-#include <psycle/host/cacheddllfinder.hpp>
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/engine/internal_machine_package.hpp>
-#undef min //\todo : ???
-#undef max //\todo : ???
-//#include <sstream>
-//#include <fstream>
-#include <cstdint>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "NewMachine.hpp"
+#include "psycle.hpp"
+#include "Plugin.hpp"
+#include "VstHost24.hpp"
+#include "ProgressDialog.hpp"
+#include "loggers.hpp"
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <algorithm> //std::transform
+#include <cctype>	// std::tolower
 
-		int CNewMachine::_numCategorizedPlugins = 0;
-		int CNewMachine::_numCustCategories = 1;
-//		std::map<CString, int> CNewMachine::CustomFolders;
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
+		int CNewMachine::pluginOrder = 1;
+		bool CNewMachine::pluginName = 1;
+		int CNewMachine::_numPlugins = -1;
+		int CNewMachine::selectedClass=internal;
+		int CNewMachine::selectedMode=modegen;
+
+		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
+
+		std::map<std::string,std::string> CNewMachine::NativeNames;
+		std::map<std::string,std::string> CNewMachine::VstNames;
+
+
+		void CNewMachine::learnDllName(const std::string & fullname,MachineType type)
+		{
+			std::string str=fullname;
+			// strip off path
+			std::string::size_type pos=str.rfind('\\');
+			if(pos != std::string::npos)
+				str=str.substr(pos+1);
+
+			// transform string to lower case
+			std::transform(str.begin(),str.end(),str.begin(),std::tolower);
+
+			switch(type)
+			{
+			case MACH_PLUGIN: NativeNames[str]=fullname;
+				break;
+			case MACH_VST:
+			case MACH_VSTFX:VstNames[str]=fullname;
+				break;
+			default:
+				break;
+			}
+		}
+		bool CNewMachine::lookupDllName(const std::string name, std::string & result, MachineType type,int& shellidx)
+		{
+			std::string tmp = name;
+			std::string extension = name.substr(name.length()-4,4);
+			if ( extension != ".dll")
+			{
+				shellidx =  extension[0] + extension[1]*256 + extension[2]*65536 + extension[3]*16777216;
+				tmp = name.substr(0,name.length()-4);
+			}
+			else shellidx = 0;
+
+			// transform string to lower case
+			std::transform(tmp.begin(),tmp.end(),tmp.begin(),std::tolower);
+
+			switch(type)
+			{
+			case MACH_PLUGIN:
+				{
+					std::map<std::string,std::string>::iterator iterator = NativeNames.find(tmp);
+					if(iterator != NativeNames.end())
+					{
+						result=iterator->second;
+						return true;
+					}
+					break;
+				}
+			case MACH_VST:
+			case MACH_VSTFX:
+				{
+					std::map<std::string,std::string>::iterator iterator = VstNames.find(tmp);
+					if(iterator != VstNames.end())
+					{
+						result=iterator->second;
+						return true;
+					}
+					break;
+				}
+			default:
+				break;
+			}
+			return false;
+		}
 
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
-			, Outputmachine(MACH_UNDEFINED)
-			, Outputmode(MACHMODE_UNDEFINED)
-			, bCacheChanged(false)
 		{
+			m_orderby = pluginOrder;
+			m_showdllName = pluginName;
+			OutBus = false;
+			shellIdx = 0;
+			//pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
+				// It is initialized above, where it is declared.
 		}
 
 		CNewMachine::~CNewMachine()
@@ -40,1441 +115,1113 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_NAMELABEL, m_nameLabel);
 			DDX_Control(pDX, IDC_BROWSER, m_browser);
 			DDX_Control(pDX, IDC_VERSIONLABEL, m_versionLabel);
-			DDX_Control(pDX, IDC_DESCLABEL, m_descLabel);
+			DDX_Control(pDX, IDC_DESCRLABEL, m_descLabel);
+			DDX_Radio(pDX, IDC_BYTYPE, m_orderby);
 			DDX_Control(pDX, IDC_DLLNAMELABEL, m_dllnameLabel);
-			DDX_Control(pDX, IDC_LISTSTYLE, comboTypeStyle);
-			DDX_Control(pDX, IDC_NAMESTYLE, comboNameStyle);
+			DDX_Radio(pDX, IDC_SHOWDLLNAME, m_showdllName);
+			DDX_Control(pDX, IDC_APIVERSIONLABEL, m_APIversionLabel);
 		}
 
 		BEGIN_MESSAGE_MAP(CNewMachine, CDialog)
-			ON_WM_DESTROY()
-			ON_BN_CLICKED(IDC_REFRESH, OnRefresh)
-			ON_BN_CLICKED(IDC_CHECK_ALLOW, OnCheckAllow)
-			ON_CBN_SELENDOK(IDC_LISTSTYLE, OnCbnSelendokListstyle)
-			ON_CBN_SELENDOK(IDC_NAMESTYLE, OnCbnSelendokNamestyle)
 			ON_NOTIFY(TVN_SELCHANGED, IDC_BROWSER, OnSelchangedBrowser)
+			ON_BN_CLICKED(IDC_REFRESH, OnRefresh)
+			ON_BN_CLICKED(IDC_BYCLASS, OnByclass)
+			ON_BN_CLICKED(IDC_BYTYPE, OnBytype)
 			ON_NOTIFY(NM_DBLCLK, IDC_BROWSER, OnDblclkBrowser)
-			ON_NOTIFY(TVN_BEGINDRAG, IDC_BROWSER, OnBeginDrag)
-			ON_WM_MOUSEMOVE()
-			ON_WM_CANCELMODE()
-			ON_WM_LBUTTONUP()
-			ON_WM_CONTEXTMENU()
-			ON_COMMAND(ID__ADDSUBFOLDER, NMPOPUP_AddSubFolder)
-			ON_COMMAND(ID__ADDFOLDERONSAMELEVEL, NMPOPUP_AddFolderSameLevel)
-			ON_COMMAND(ID__RENAMEFOLDER, NMPOPUP_RenameFolder)
-			ON_COMMAND(ID_DELETEFOLDER_MOVEPARNT, NMPOPUP_DeleteMoveToParent)
-			ON_COMMAND(ID_DELETEFOLDER_MOVEUNCAT, NMPOPUP_DeleteMoveUncat)
-			ON_COMMAND(ID__MOVETOTOPLEVEL, NMPOPUP_MoveToTopLevel)
-			ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_BROWSER, BeginLabelEdit)
-			ON_NOTIFY(TVN_ENDLABELEDIT, IDC_BROWSER, EndLabelEdit)
-			ON_WM_TIMER()
-			ON_NOTIFY(TVN_KEYDOWN, IDC_BROWSER, OnTvnKeydownBrowser)
+			ON_WM_DESTROY()
+			ON_BN_CLICKED(IDC_SHOWDLLNAME, OnShowdllname)
+			ON_BN_CLICKED(IDC_SHOWEFFNAME, OnShoweffname)
+			ON_BN_CLICKED(IDC_CHECK_ALLOW, OnCheckAllow)
 		END_MESSAGE_MAP()
-		
+
 		BOOL CNewMachine::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 			imgList.Create(IDB_MACHINETYPE,16,2,1);
 			m_browser.SetImageList(&imgList,TVSIL_NORMAL);
-			
-			// fill combo boxes
-			comboTypeStyle.AddString ("Type of Plugin");
-			comboTypeStyle.AddString ("Class of Machine");
-			comboTypeStyle.AddString ("Custom Categories");
-			comboTypeStyle.SetCurSel (Global::configuration()._comboTypeSel);
-
-			comboNameStyle.AddString ("Filename and Path");
-			comboNameStyle.AddString ("Plugin Name");
-			comboNameStyle.SetCurSel (Global::configuration()._comboNameSel);
-
-//			bCategoriesChanged = false;	//\todo: verify that it is used enough/correctly.
-//			bEditing = false;			//\todo: verify that it is used enough/correctly.
-//			_numCustCategories = 1;		//\todo: the way it is used could be improved.
-//			bScrolling = false;
-//			ScrollCount = 0;
-//			bDragging = false;
-			LoadCategoriesFile();
+			bAllowChanged = false;
+			LoadPluginInfo();
 			UpdateList();
-
-			itemheight = m_browser.GetItemHeight ();
-			
-			return true;
-		}
-
-		void CNewMachine::OnOK() 
-		{
-			CEdit* pEdit = m_browser.GetEditControl();
-			if(pEdit)
-			{
-				// save folder name - set focus to make tree contrl send end label edit message
-				m_browser.SetFocus ();
-			}
-			else if (Outputmachine > -1) // This is to ensure that the selection is a machine, and not a folder
-			{			
-				//do normal closing/saving action
-				if (Outputmachine == MACH_XMSAMPLER ) MessageBox("This version of the machine is for demonstration purposes. It is unusable except for Importing Modules","Sampulse Warning");
-				CDialog::OnOK();
-			}
-		}
-
-		void CNewMachine::OnCancel()
-		{
-			CEdit* pEdit = m_browser.GetEditControl();
-			if (pEdit)
-			{
-				// save folder name - set focus to make tree contrl send end label edit message
-				HTREEITEM Sel = m_browser.GetSelectedItem ();
-				CString text = m_browser.GetItemText (Sel);
-				m_browser.SetFocus ();
-				m_browser.SetItemText (Sel, text);
-			}
-			else
-			{
-				CDialog::OnCancel();
-			}
+			return TRUE;
 		}
 
 		void CNewMachine::OnDestroy() 
 		{
-			if (bCacheChanged) Global::dllfinder().ForceSaveOnDestroy();
-			//\todo: 
-			//if (bCategoriesChanged) SetPluginCategories(NULL, NULL);
-			//if (bCategoriesChanged) SaveCategoriesFile();
-
-			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 			CDialog::OnDestroy();
+			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 		}
 
-		void CNewMachine::OnRefresh() 
+		void CNewMachine::UpdateList(bool bInit)
 		{
-			if (MessageBox ("This operation will re-scan your plugins, and reset all plugin warnings.\n\nDo you wish to continue?","Warning!",MB_YESNO | MB_ICONWARNING) == IDYES)
+			int nodeindex;
+			m_browser.DeleteAllItems();
+			HTREEITEM intFxNode;
+			if(!pluginOrder)
 			{
-				//\todo: could there be a better way of doing this? ( concretely about the need to use Global::configuration() )
-				Global::dllfinder().ResetFinder();
-				CProgressCtrl progress;
-				//\todo:
-//				Global::dllfinder().progress.connect(this,&onSignalProgress);
-//				Global::dllfinder().logger.connect(this,&onSignalLogger);
+				hNodes[0] = m_browser.InsertItem("Internal Plugins",0,0 , TVI_ROOT, TVI_LAST);
+				hNodes[1] = m_browser.InsertItem("Native plug-ins",2,2,TVI_ROOT,TVI_LAST);
+				hNodes[2] = m_browser.InsertItem("VST2 plug-ins",4,4,TVI_ROOT,TVI_LAST);
+				hNodes[3] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
+				intFxNode = hNodes[0];
+				nodeindex = 3;
+				//The following is unfinished. It is for nested branches.
+				/*
+				int i=_numPlugins;	// I Search from the end because when creating the array, the deepest dir is saved first.
+				HTREEITEM curnode;
+				int currdir = numDirs;
+				while (i>=0)
+				{
+					if ( strcpy(_pPlugsInfo[i]->_pPlugsInfo[i]->dllname,dirArray[currdir]) != 0 )
+					{
+						currdir--:
+						// check if you need to create a new node or what.
+						// use m_browser.GetNextItem() to check where you are.
+					}
+					// do what it is under here, but with the correct "hNodes";
 
-				Global::dllfinder().AddPath(Global::configuration().GetPluginDir(),MACH_PLUGIN);
-				Global::dllfinder().AddPath(Global::configuration().GetVstDir(),MACH_VST);
-				UpdateList();
+				}
+				*/
+				for(int i(_numPlugins - 1) ; i >= 0 ; --i)
+				{
+					int imgindex;
+					HTREEITEM hitem;
+					if ( _pPlugsInfo[i]->error.empty())
+					{
+						if( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+						{
+							if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
+							{ 
+								imgindex = 2; 
+								hitem= hNodes[1]; 
+							}
+							else 
+							{ 
+								imgindex = 4; 
+								hitem=hNodes[2]; 
+							}
+						}
+						else
+						{
+							if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
+							{ 
+								imgindex = 3; 
+								hitem= hNodes[1];
+							}
+							else 
+							{ 
+								imgindex = 5; 
+								hitem=hNodes[2];
+							}
+						}
+					}
+					else
+					{
+						imgindex = 6;
+						hitem=hNodes[3];
+					}
+					if(pluginName && _pPlugsInfo[i]->error.empty())
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					else
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+				}
+				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
+				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+				hInt[2] = m_browser.InsertItem("Sampulse (Incomplete)",0, 0, hNodes[0], TVI_SORT);
+				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
+				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
+				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
+				m_browser.Select(hNodes[selectedClass],TVGN_CARET);
 			}
-			SetFocus();
-		}
+			else
+			{
+				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
+				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
+				hNodes[2] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
+				intFxNode = hNodes[1];
+				nodeindex=2;
+				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
+				{
+					int imgindex;
+					HTREEITEM hitem;
+					if(_pPlugsInfo[i]->error.empty())
+					{
+						if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+						{
+							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+							{ 
+								imgindex = 2; 
+								hitem= hNodes[0]; 
+							}
+							else 
+							{ 
+								imgindex = 4; 
+								hitem=hNodes[0]; 
+							}
+						}
+						else
+						{
+							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+							{ 
+								imgindex = 3; 
+								hitem= hNodes[1]; 
+							}
+							else 
+							{ 
+								imgindex = 5; 
+								hitem=hNodes[1]; 
+							}
+						}
+					}
+					else
+					{
+						imgindex = 6;
+						hitem=hNodes[2];
+					}
+					if(pluginName && _pPlugsInfo[i]->error.empty())
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					else
+						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 
-		void CNewMachine::OnCbnSelendokListstyle()
-		{
-			//\todo:
-//			if ((bCategoriesChanged) && (pluginOrder == 2))
-//			{
-//				SetPluginCategories(NULL, NULL);
-//			}
-			//set view style from entry in combobox
-			Global::configuration()._comboTypeSel=comboTypeStyle.GetCurSel();
-			UpdateList();
-			m_browser.Invalidate();				  
-		}
-
-		void CNewMachine::OnCbnSelendokNamestyle()
-		{
-			Global::configuration()._comboNameSel=comboNameStyle.GetCurSel();
-			//\todo:
-//			if (bCategoriesChanged)
-//				{
-//					SetPluginCategories(NULL, NULL);
-//				}
-			UpdateList();
-			m_browser.Invalidate();	
+				}
+				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
+				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
+				hInt[2] = m_browser.InsertItem("Sampulse",0, 0, hNodes[0], TVI_SORT);
+				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
+				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
+				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
+				m_browser.Select(hNodes[selectedMode],TVGN_CARET);
+			}
+			Outputmachine = -1;
 		}
 
 		void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			CString name, desc, dll, version;
-
-			HTREEITEM tHand = m_browser.GetSelectedItem();
-			int i = m_browser.GetItemData (tHand);
-			
-			switch(GetType(i))
+			NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
+			tHand = m_browser.GetSelectedItem();
+			Outputmachine = -1;
+			OutBus = false;
+			if (tHand == hInt[0])
 			{
-			case IS_FOLDER:
-				{
-					Outputmachine = MACH_UNDEFINED;
-					Outputmode = MACHMODE_UNDEFINED;
-					name = ""; desc = ""; dll = ""; version = "";
-					m_Allow.SetCheck(false);
-					m_Allow.EnableWindow(false);
-				}
-				break;
-			case IS_INTERNAL_MACHINE:
-				{
-					const InternalMachineInfo* iinfo = Machine::infopackage().GetInfo(Machine::class_type(GetIndex(i)));
-					if ( iinfo )
-					{
-						Outputmachine = iinfo->mclass;
-						Outputmode = iinfo->mode;
-						name = iinfo->brandname;
-						desc = "Internal Machine by "; desc.Append(iinfo->vendor);
-						dll = "None (Internal Machine)";
-						version.Format("%d",iinfo->version);
-						m_Allow.SetCheck(true);
-						m_Allow.EnableWindow(false);
-					}
-				}
-				break;
-			case IS_PLUGIN:
-				{
-					std::map<HTREEITEM,std::string>::iterator iditer = plugidentify.find(tHand);
-					const PluginInfo& minfo = Global::dllfinder().GetPluginInfo(iditer->second);
-					//\todo: temporary hack.
-					if (minfo.subclass == MACH_VST && minfo.mode == MACHMODE_FX) Outputmachine = MACH_VSTFX;
-					else Outputmachine = minfo.subclass;
-					Outputmode = minfo.mode;
-					dll = iditer->second.c_str();
-					name = minfo.name.c_str();
-					desc = minfo.desc.c_str();
-					version = minfo.version.c_str();
-					m_Allow.SetCheck(!minfo.allow);
-					m_Allow.EnableWindow(true);
-					psOutputDll = minfo.dllname;
-				}
-				break;
+				m_nameLabel.SetWindowText("Sampler");
+				m_descLabel.SetWindowText("Stereo Sampler Unit. Inserts new sampler.");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V0.5b");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_SAMPLER;
+				OutBus = true;
+				selectedClass = internal;
+				selectedMode = modegen;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
 			}
-			m_nameLabel.SetWindowText(name);
-			m_descLabel.SetWindowText(desc);
-			m_dllnameLabel.SetWindowText(dll);
-			m_versionLabel.SetWindowText(version);
+			else if (tHand == hInt[1])
+			{
+				m_nameLabel.SetWindowText("Dummy");
+				m_descLabel.SetWindowText("Replaces non-existant plugins");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_DUMMY;
+				selectedClass = internal;
+				selectedMode = modefx;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+			}
+			else if (tHand == hInt[2])
+				{
+				m_nameLabel.SetWindowText("Sampulse Sampler V2");
+				m_descLabel.SetWindowText("Sampler with the essence of FastTracker II and Impulse Tracker 2");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V0.9b");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_XMSAMPLER;
+				OutBus = true;
+				selectedClass = internal;
+				selectedMode = modegen;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+				}
+			else if (tHand == hInt[3])
+			{
+				m_nameLabel.SetWindowText("Note Duplicator");
+				m_descLabel.SetWindowText("Repeats the Events received to the selected machines");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_DUPLICATOR;
+				OutBus = true;
+				selectedClass = internal;
+				selectedMode = modegen;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+			}
+			else if (tHand == hInt[4])
+			{
+				m_nameLabel.SetWindowText("Send-Return Mixer");
+				m_descLabel.SetWindowText("Allows to mix the audio with a typical mixer table, with send/return effects");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_MIXER;
+				selectedClass = internal;
+				selectedMode = modefx;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+			}
+			else if (tHand == hInt[5])
+			{
+				m_nameLabel.SetWindowText("Wave In Recorder");
+				m_descLabel.SetWindowText("Allows Psycle to get audio from an external source");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_RECORDER;
+				selectedClass = internal;
+				selectedMode = modegen;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+			}
+			else for (int i=0; i<_numPlugins; i++)
+			{
+				if (tHand == hPlug[i])
+				{
+					{ //  Strip the directory and put just the dll name.
+						std::string str = _pPlugsInfo[i]->dllname;
+						std::string::size_type pos = str.rfind('\\');
+						if(pos != std::string::npos)
+							str=str.substr(pos+1);
+						m_dllnameLabel.SetWindowText(str.c_str());
+					}
+					m_nameLabel.SetWindowText(_pPlugsInfo[i]->name.c_str());
+					if ( _pPlugsInfo[i]->error.empty())
+						m_descLabel.SetWindowText(_pPlugsInfo[i]->desc.c_str());
+					else
+					{	// Strip the function, and show only the error.
+						std::string str = _pPlugsInfo[i]->error;
+						std::ostringstream s; s << std::endl;
+						std::string::size_type pos = str.find(s.str());
+						if(pos != std::string::npos)
+							str=str.substr(pos+1);
+
+						m_descLabel.SetWindowText(str.c_str());
+					}
+					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
+					{	// convert integer to string.
+						std::ostringstream s; s << _pPlugsInfo[i]->APIversion;
+						m_APIversionLabel.SetWindowText(s.str().c_str());
+					}
+					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
+					{
+						Outputmachine = MACH_PLUGIN;
+						selectedClass = native;
+						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+						{
+							OutBus = true;
+							selectedMode = modegen;
+						}
+						else
+						{
+							selectedMode = modefx;
+						}
+					}
+					else
+					{
+						selectedClass = vstmac;
+						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
+						{
+							Outputmachine = MACH_VST;
+							OutBus = true;
+							selectedMode = modegen;
+						}
+						else
+						{
+							Outputmachine = MACH_VSTFX;
+							selectedMode = modefx;
+						}
+					}
+
+					shellIdx = _pPlugsInfo[i]->identifier;
+					psOutputDll = _pPlugsInfo[i]->dllname;
+
+					m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
+					m_Allow.EnableWindow(TRUE);
+				}
+			}
 			*pResult = 0;
 		}
 
 		void CNewMachine::OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			OnOK();
+			OnOK();	
 			*pResult = 0;
 		}
 
-		void CNewMachine::OnCheckAllow() 
+		void CNewMachine::OnRefresh() 
 		{
-			HTREEITEM tHand = m_browser.GetSelectedItem();
-			int i = m_browser.GetItemData (tHand);
-			switch(GetType(i))
+			DestroyPluginInfo();
 			{
-			case IS_PLUGIN:
-				{
-					std::map<HTREEITEM,std::string>::iterator iditer = plugidentify.find(tHand);
-					PluginInfo& minfo = Global::dllfinder().GetPluginInfo(iditer->second);
-					minfo.allow = !m_Allow.GetCheck();
-					bCacheChanged = true;
-				}
-				break;
+				char cache[1 << 10];
+				GetModuleFileName(0, cache, sizeof cache);
+				char * last(std::strrchr(cache,'\\'));
+				std::strcpy(last, "\\psycle.plugin-scan.cache");
+				DeleteFile(cache);
 			}
+			LoadPluginInfo();
+			UpdateList();
+			m_browser.Invalidate();
+			SetFocus();
 		}
 
-		void CNewMachine::OnBeginDrag(NMHDR *pNMHDR, LRESULT *pResult)
+		void CNewMachine::OnBytype() 
 		{
-			if (comboTypeStyle.GetCurSel() == 2)  //make sure plugins are being displayed by custom category
-			{
-				LPNMTREEVIEW lpnmtv = (LPNMTREEVIEW)pNMHDR;
-				*pResult = 0;	// allow drag
-	
-				CImageList* piml = NULL;    /* handle of image list */
-				POINT ptOffset;
-				RECT rcItem;
-				  
-				if ((piml = m_browser.CreateDragImage(lpnmtv->itemNew.hItem)) == NULL) return;
-				
-				/* get the bounding rectangle of the item being dragged (rel to top-left of control) */
-				if (m_browser.GetItemRect(lpnmtv->itemNew.hItem, &rcItem, true))
-				{
-					CPoint ptDragBegin;
-					int nX, nY;
-					/* get offset into image that the mouse is at */
-					/* item rect doesn't include the image */
-					ptDragBegin = lpnmtv->ptDrag;
-					ImageList_GetIconSize(piml->GetSafeHandle(), &nX, &nY);
-					ptOffset.x = (ptDragBegin.x - rcItem.left) + (nX - (rcItem.right - rcItem.left));
-					ptOffset.y = (ptDragBegin.y - rcItem.top) + (nY - (rcItem.bottom - rcItem.top));
-					/* convert the item rect to screen co-ords, for use later */
-					MapWindowPoints(NULL, &rcItem);
-				}
-				else
-				{
-					GetWindowRect(&rcItem);
-					ptOffset.x = ptOffset.y = 8;
-				}
-				
-				BOOL bDragBegun = piml->BeginDrag(0, ptOffset);
-				if (! bDragBegun)
-				{
-					delete piml;
-					return;
-				}
-				
-				CPoint ptDragEnter = lpnmtv->ptDrag;
-				ClientToScreen(&ptDragEnter);
-				if (!piml->DragEnter(NULL, ptDragEnter))
-				{
-					delete piml;
-					return;
-				}
-				
-				delete piml;
-				
-				// set the focus here, so we get a WM_CANCELMODE if needed
-				SetFocus();
-				
-				// redraw item being dragged, otherwise it remains (looking) selected
-				InvalidateRect(&rcItem, true);
-				UpdateWindow();
-				
-				// Hide the mouse cursor, and direct mouse input to this window
-				SetCapture(); 
-				m_hItemDrag = lpnmtv->itemNew.hItem;
-				bDragging = true;
-			}
-
+			pluginOrder=0;
+			UpdateList();
+			m_browser.Invalidate();
+		}
+		void CNewMachine::OnByclass() 
+		{
+			pluginOrder=1;
+			UpdateList();
+			m_browser.Invalidate();
 		}
 
-
-
-		void CNewMachine::OnMouseMove(UINT nFlags, CPoint point)
+		void CNewMachine::OnShowdllname() 
 		{
-			if (m_hItemDrag)
-			{
-				CPoint pt;
-			
-    				// drag the item to the current position
-    				pt = point;
-    				ClientToScreen(&pt);
-
-    				CImageList::DragMove(pt);
-    				CImageList::DragShowNolock(false);			
-			    
-				if (CWnd::WindowFromPoint(pt) == &m_browser)
-				{
-      				//SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
-      				TVHITTESTINFO tvhti;
-      				tvhti.pt = pt;
-      				m_browser.ScreenToClient(&tvhti.pt);
-      				/*HTREEITEM hItemSel =*/ m_browser.HitTest(&tvhti);
-      				m_browser.SelectDropTarget(tvhti.hItem);
-    				}
-
-    				CImageList::DragShowNolock(true);
-  			}
-
-			CPoint curpoint = point;
-			ClientToScreen (&curpoint);
-			m_browser.GetWindowRect (&UpPos);
-			
-			// sometime, fix this code to do automatic scrolling when user is dragging.
-			MousePt = point;
-			ClientToScreen (&MousePt);
-			if ((UpPos.left < curpoint.x) && (UpPos.right > curpoint.x))
-			{
-				if ((UpPos.top < curpoint.y) && ((UpPos.top + 20) > curpoint.y))
-				{
-					bScrollUp = true;
-					if (!bScrolling)
-					{
-						SetTimer (IDT_NEW_MACHINES_BROWSER_TIMER, TIMER_INTERVAL,NULL);
-						bScrolling = true;
-						ScrollCount = 0;
-					}
-				}
-				else if (((UpPos.bottom - 20) < curpoint.y) && (UpPos.bottom > curpoint.y))
-				{
-					bScrollUp = false;
-					if (!bScrolling)
-					{
-						SetTimer (IDT_NEW_MACHINES_BROWSER_TIMER, TIMER_INTERVAL,NULL);
-						bScrolling = true;
-						ScrollCount = 0;
-					}
-				}
-				else 
-				{
-					//if (bScrolling)
-						KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
-					bScrolling = false;
-					
-				}
-				
-
-			}
-			else
-			{
-				bScrolling = false;
-				KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
-			}
-			CDialog::OnMouseMove(nFlags, point);
+			pluginName=false;	
+			UpdateList();
+			m_browser.Invalidate();
 		}
 
-		void CNewMachine::OnCancelMode()
+		void CNewMachine::OnShoweffname() 
 		{
-			CDialog::OnCancelMode();
-			if (m_hItemDrag) OnEndDrag(nFlags, point);
-			//\todo: necessary?
-			else CDialog::OnLButtonUp(nFlags, point);
+			pluginName = true;
+			UpdateList();
+			m_browser.Invalidate();
 		}
 
-		void CNewMachine::OnLButtonUp(UINT nFlags, CPoint point)
+		void CNewMachine::LoadPluginInfo()
 		{
-			if (m_hItemDrag) OnEndDrag(nFlags, point);
-			else CDialog::OnLButtonUp(nFlags, point);
-		}
-
-		void CNewMachine::OnEndDrag(UINT nFlags, CPoint point)
-		{
-			bDragging = false;
-			bScrolling = false;
-			KillTimer (IDT_NEW_MACHINES_BROWSER_TIMER);
-			if (!m_hItemDrag) return;
-
-			CPoint pt;
-
-			pt = point;
-			ClientToScreen(&pt);
-
-			/*BOOL bCopy =*/ (GetKeyState(VK_CONTROL) & 0x10000000);
-
-  			// do drop
-
-  			HTREEITEM hItemDrop = m_browser.GetDropHilightItem();
-
-  			m_browser.SelectDropTarget(NULL);
-  			
-			if (hItemDrop)
+			if(_numPlugins == -1)
 			{
-				if (!((m_hItemDrag == hNodes[0]) || ((m_browser.GetItemData(m_hItemDrag) == IS_FOLDER) &&((hItemDrop != hNodes[0]) || (m_browser.GetParentItem (hItemDrop) != hNodes[0])))))
+				loggers::info("Scanning plugins ...");
+
+				::AfxGetApp()->DoWaitCursor(1); 
+				int plugsCount(0);
+				int badPlugsCount(0);
+				_numPlugins = 0;
+				bool progressOpen = !LoadCacheFile(plugsCount, badPlugsCount);
+
+				class populate_plugin_list
 				{
-					HTREEITEM hItemDropped = hItemDrop;
-					MoveTreeItem (m_hItemDrag, hItemDrop == NULL ? TVI_ROOT : hItemDrop, TVI_SORT, false);
-				
-					bCategoriesChanged = true;
-					if (m_browser.GetItemData (hItemDropped) == IS_FOLDER) SortChildren(hItemDropped);
-					else SortChildren(m_browser.GetParentItem (hItemDropped));
-				}
-			}
-
-  			FinishDragging(true);
-			
-  			RedrawWindow();
-		}
-
-		void CNewMachine::OnContextMenu(CWnd* pWnd, CPoint point)
-		{
-			if (m_hItemDrag) OnEndDrag(nFlags, point);
-			else
-			{
-				UINT nFlags;
-				CPoint newpoint = point;
-				ScreenToClient (&newpoint);
-				newpoint.y = newpoint.y - 13;   //compensate for shift (not sure why this happens, but it does)
-				//  ^^  this number should be fixed to be something relative to the height of an 
-				//      item/title bar/something like that, so it's accurate on ALL windows themes.
-				
-				HTREEITEM hItem = m_browser.HitTest(newpoint, &nFlags);
-				if (hItem) m_browser.SelectItem(hItem);
-
-				if (hItem && (comboTypeStyle.GetCurSel() == 2)/*&& (TVHT_ONITEM & nFlags)*/)
-				{				
-					//check if selected item is a folder
-					if (m_browser.GetParentItem (hItem) != hNodes[0])
-					{
-
-						CMenu popupmenu;
-						VERIFY(popupmenu.LoadMenu(IDR_NEWMACHINESPOPUP));
-				
-						// TO DO:  Delete/Add menu items depending on selection.
-						if (m_browser.GetItemData(hItem) == IS_FOLDER)
+					public:
+						populate_plugin_list(std::vector<std::string> & result, std::string directory)
 						{
-							//Check if the "Uncategorised" folder has been selected
-							if (hItem == hNodes[0])
+							::CFileFind finder;
+							int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
+							while(loop)
 							{
-								//grey out items that can't be used.
-								popupmenu.EnableMenuItem (ID__RENAMEFOLDER, MF_GRAYED);
-								popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
-								popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
-								popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
-								popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
+								loop = finder.FindNextFile();
+								if(finder.IsDirectory()) {
+									if(!finder.IsDots())
+									{
+										std::string sfilePath = finder.GetFilePath();
+										populate_plugin_list(result,sfilePath);
+									}
+								}
+								else
+								{
+									CString filePath=finder.GetFilePath();
+									filePath.MakeLower();
+									if(filePath.Right(4) == ".dll")
+									{
+										std::string sfilePath = filePath;
+										result.push_back(sfilePath);
+									}
+								}
 							}
+							finder.Close();
+						}
+				};
 
-							//check if selected item is a root folder
-							if (m_browser.GetParentItem (hItem) == NULL)
+				std::vector<std::string> nativePlugs;
+				std::vector<std::string> vstPlugs;
+
+				CProgressDialog Progress;
+				{
+					char c[1 << 10];
+					::GetCurrentDirectory(sizeof c, c);
+					std::string s(c);
+					loggers::info("Scanning plugins ... Current Directory: " + s);
+				}
+				loggers::info("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
+				loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
+				loggers::info("Scanning plugins ... Listing ...");
+				if(progressOpen)
+				{
+					Progress.Create();
+					Progress.SetWindowText("Scanning plugins ... Listing ...");
+					Progress.ShowWindow(SW_SHOW);
+				}
+
+				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
+				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
+
+				int plugin_count = nativePlugs.size() + vstPlugs.size();
+
+				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
+				loggers::info(s.str());
+				if(progressOpen) {
+					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
+					Progress.SetWindowText(s.str().c_str());
+				}
+				std::ofstream out;
+				{
+					std::string module_directory;
+					{
+						char module_file_name[MAX_PATH];
+						::GetModuleFileName(0, module_file_name, sizeof module_file_name);
+						module_directory = module_file_name;
+						module_directory = module_directory.substr(0, module_directory.rfind('\\'));
+					}
+					out.open((module_directory + "/psycle.plugin-scan.log.txt").c_str());
+				}
+				out
+					<< "==========================================" << std::endl
+					<< "=== Psycle Plugin Scan Enumeration Log ===" << std::endl
+					<< std::endl
+					<< "If psycle is crashing on load, chances are it's a bad plugin, "
+					<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
+				
+				if(progressOpen)
+				{
+					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
+					Progress.SetWindowText(s.str().c_str());
+				}
+				loggers::info("Scanning plugins ... Testing Natives ...");
+				out
+					<< std::endl
+					<< "======================" << std::endl
+					<< "=== Native Plugins ===" << std::endl
+					<< std::endl;
+				out.flush();
+
+				///\todo: put this inside a low priority thread and wait until it finishes.
+				FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, progressOpen ? &Progress : 0);
+
+
+				out.flush();
+				if(progressOpen)
+				{
+					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
+					Progress.SetWindowText(s.str().c_str());
+				}
+				loggers::info("Scanning plugins ... Testing VSTs ...");
+				out
+					<< std::endl
+					<< "===================" << std::endl
+					<< "=== VST Plugins ===" << std::endl
+					<< std::endl;
+				out.flush();
+
+				///\todo: put this inside a low priority thread and wait until it finishes.
+				FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, progressOpen ? &Progress : 0);
+
+
+				out.flush();
+				if(progressOpen)
+				{
+					std::ostringstream s; s << "Scanned " << plugin_count << " plugins.";
+					loggers::info(s.str().c_str());
+					Progress.SetWindowText(s.str().c_str());
+				}
+				out.close();
+				_numPlugins = plugsCount;
+				if(progressOpen)
+				{
+					Progress.m_Progress.SetPos(16384);
+					Progress.SetWindowText("Saving scan cache file ...");
+				}
+				loggers::info("Saving scan cache file ...");
+				SaveCacheFile();
+				if(progressOpen)
+					Progress.OnCancel();
+				::AfxGetApp()->DoWaitCursor(-1); 
+				loggers::info("Done.");
+			}
+		}
+
+		void CNewMachine::FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress)
+		{
+			for(unsigned fileIdx=0;fileIdx<list.size();fileIdx++)
+			{
+				if(pProgress)
+				{
+					pProgress->m_Progress.StepIt();
+					::Sleep(1);
+				}
+				std::string fileName = list[fileIdx];
+
+				out << fileName << " ... ";
+				out.flush();
+				FILETIME time;
+				ZeroMemory(&time,sizeof FILETIME);
+				HANDLE hFile=CreateFile(fileName.c_str(),
+					GENERIC_READ,
+					FILE_SHARE_READ,
+					NULL,
+					OPEN_EXISTING,
+					FILE_ATTRIBUTE_NORMAL,
+					NULL);
+				if(hFile!=INVALID_HANDLE_VALUE) {
+					GetFileTime(hFile,0,0,&time);
+					CloseHandle(hFile);
+				}
+				bool exists(false);
+				for(int i(0) ; i < _numPlugins; ++i)
+				{
+					if(_pPlugsInfo[i])
+					{
+						if
+							(
+								_pPlugsInfo[i]->FileTime.dwHighDateTime == time.dwHighDateTime &&
+								_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime
+							)
+						{
+							if(_pPlugsInfo[i]->dllname == fileName)
 							{
-								//prevent plugins from being moved to the root
-								popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
-								popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
+								exists = true;
+								const std::string error(_pPlugsInfo[i]->error);
+								std::stringstream s;
+								if(error.empty())
+									s << "found in cache.";
+								else
+									s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
+								out << s.str();
+								out.flush();
+								loggers::info(fileName + '\n' + s.str());
+								break;
 							}
 						}
-						else
-						{
-							popupmenu.EnableMenuItem (ID__ADDSUBFOLDER, MF_GRAYED);
-							popupmenu.EnableMenuItem (ID__RENAMEFOLDER, MF_GRAYED);
-							popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEPARNT, MF_GRAYED);
-							popupmenu.EnableMenuItem (ID_DELETEFOLDER_MOVEUNCAT, MF_GRAYED);
-							popupmenu.EnableMenuItem (ID__MOVETOTOPLEVEL, MF_GRAYED);
-						}
-						CMenu* pPopup = popupmenu.GetSubMenu(0);
-						assert(pPopup);
-				
-						pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, CNewMachine::GetActiveWindow());
-				
-						popupmenu.DestroyMenu();
 					}
 				}
+				if(!exists)
+				{
+					try
+					{
+						out << "new plugin added to cache ; ";
+						out.flush();
+						loggers::info(fileName + "\nnew plugin added to cache.");
+						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+						_pPlugsInfo[currentPlugsCount]->dllname = fileName;
+						_pPlugsInfo[currentPlugsCount]->FileTime = time;
+						if(type == MACH_PLUGIN)
+						{
+							_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
+							Plugin plug(0);
+							try
+							{
+								 plug.Instance(fileName);
+								 plug.Init(); // [bohan] hmm, we should get rid of two-stepped constructions.
+							}
+							catch(const std::exception & e)
+							{
+								std::ostringstream s; s << typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
+							}
+							catch(...)
+							{
+								std::ostringstream s; s
+									<< "Type of exception is unknown, cannot display any further information." << std::endl;
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
+							}
+							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+							{
+								out << "### ERRONEOUS ###" << std::endl;
+								out.flush();
+								out << _pPlugsInfo[currentPlugsCount]->error;
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << fileName;
+								loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
+								_pPlugsInfo[currentPlugsCount]->allow = false;
+								_pPlugsInfo[currentPlugsCount]->name = "???";
+								_pPlugsInfo[currentPlugsCount]->identifier = 0;
+								_pPlugsInfo[currentPlugsCount]->vendor = "???";
+								_pPlugsInfo[currentPlugsCount]->desc = "???";
+								_pPlugsInfo[currentPlugsCount]->version = "???";
+								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
+								++currentBadPlugsCount;
+							}
+							else
+							{
+								_pPlugsInfo[currentPlugsCount]->allow = true;
+								_pPlugsInfo[currentPlugsCount]->name = plug.GetName();
+								_pPlugsInfo[currentPlugsCount]->identifier = 0;
+								_pPlugsInfo[currentPlugsCount]->vendor = plug.GetAuthor();
+								if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+								{
+									std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
+									_pPlugsInfo[currentPlugsCount]->desc = s.str();
+								}
+								{
+									std::ostringstream s; s << "0";
+									_pPlugsInfo[currentPlugsCount]->version = s.str();
+								}
+								{
+									std::ostringstream s; s << plug.GetInfo()->Version;
+									_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
+								}
+								{
+									std::ostringstream s; s << "0";
+									_pPlugsInfo[currentPlugsCount]->version = s.str();
+								}
+							}
+							learnDllName(fileName,type);
+							out << plug.GetName() << " - successfully instanciated";
+							out.flush();
+							// [bohan] plug is a stack object, so its destructor is called
+							// [bohan] at the end of its scope (this cope actually).
+							// [bohan] The problem with destructors of any object of any class is that
+							// [bohan] they are never allowed to throw any exception.
+							// [bohan] So, we catch exceptions here by calling plug.Free(); explicitly.
+							try
+							{
+								plug.Free();
+							}
+							catch(const std::exception & e)
+							{
+								std::stringstream s; s
+									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+									<< typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+								out
+									<< std::endl
+									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << fileName;
+								loggers::exception(title.str() + '\n' + s.str());
+							}
+							catch(...)
+							{
+								std::stringstream s; s
+									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+									<< "Type of exception is unknown, no further information available.";
+								out
+									<< std::endl
+									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << fileName;
+								loggers::exception(title.str() + '\n' + s.str());
+							}
+						}
+						else if(type == MACH_VST)
+						{
+							_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
+							vst::plugin *vstPlug=0;
+							try
+							{
+								vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(fileName.c_str()));
+							}
+							catch(const std::exception & e)
+							{
+								std::ostringstream s; s << typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
+							}
+							catch(...)
+							{
+								std::ostringstream s; s << "Type of exception is unknown, cannot display any further information." << std::endl;
+								_pPlugsInfo[currentPlugsCount]->error = s.str();
+							}
+							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+							{
+								out << "### ERRONEOUS ###" << std::endl;
+								out.flush();
+								out << _pPlugsInfo[currentPlugsCount]->error;
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << fileName;
+								loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
+								_pPlugsInfo[currentPlugsCount]->allow = false;
+								_pPlugsInfo[currentPlugsCount]->identifier = 0;
+								_pPlugsInfo[currentPlugsCount]->name = "???";
+								_pPlugsInfo[currentPlugsCount]->vendor = "???";
+								_pPlugsInfo[currentPlugsCount]->desc = "???";
+								_pPlugsInfo[currentPlugsCount]->version = "???";
+								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
+								++currentBadPlugsCount;
+							}
+							else
+							{
+								if (vstPlug->IsShellMaster())
+								{
+									char tempName[64] = {0}; 
+									VstInt32 plugUniqueID = 0;
+									bool firstrun = true;
+									while ((plugUniqueID = vstPlug->GetNextShellPlugin(tempName)) != 0)
+									{ 
+										if (tempName[0] != 0)
+										{
+											if ( !firstrun )
+											{
+												++currentPlugsCount;
+												_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+												_pPlugsInfo[currentPlugsCount]->dllname = fileName;
+												_pPlugsInfo[currentPlugsCount]->FileTime = time;
+											}
+
+											_pPlugsInfo[currentPlugsCount]->allow = true;
+											{
+												std::ostringstream s;
+												s << vstPlug->GetVendorName() << " " << tempName;
+												_pPlugsInfo[currentPlugsCount]->name = s.str();
+											}
+											_pPlugsInfo[currentPlugsCount]->identifier = plugUniqueID;
+											_pPlugsInfo[currentPlugsCount]->vendor = vstPlug->GetVendorName();
+											if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+											else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+											{
+												std::ostringstream s;
+												s << (vstPlug->IsSynth() ? "VST Shell instrument" : "VST Shell effect") << " by " << vstPlug->GetVendorName();
+												_pPlugsInfo[currentPlugsCount]->desc = s.str();
+											}
+											{
+												std::ostringstream s;
+												s << vstPlug->GetVersion();
+												_pPlugsInfo[currentPlugsCount]->version = s.str();
+											}
+											{
+												std::ostringstream s;
+												s << vstPlug->GetVstVersion();
+												_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
+											}
+											firstrun=false;
+										}
+									}
+								}
+								else
+								{
+									_pPlugsInfo[currentPlugsCount]->allow = true;
+									_pPlugsInfo[currentPlugsCount]->name = vstPlug->GetName();
+									_pPlugsInfo[currentPlugsCount]->identifier = vstPlug->uniqueId();
+									_pPlugsInfo[currentPlugsCount]->vendor = vstPlug->GetVendorName();
+									if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
+									else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+									{
+										std::ostringstream s;
+										s << (vstPlug->IsSynth() ? "VST instrument" : "VST effect") << " by " << vstPlug->GetVendorName();
+										_pPlugsInfo[currentPlugsCount]->desc = s.str();
+									}
+									{
+										std::ostringstream s;
+										s << vstPlug->GetVersion();
+										_pPlugsInfo[currentPlugsCount]->version = s.str();
+									}
+									{
+										std::ostringstream s;
+										s << vstPlug->GetVstVersion();
+										_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
+									}
+								}
+								learnDllName(fileName,type);
+								out << vstPlug->GetName() << " - successfully instanciated";
+								out.flush();
+							}
+							// [bohan] vstPlug is a stack object, so its destructor is called
+							// [bohan] at the end of its scope (this cope actually).
+							// [bohan] The problem with destructors of any object of any class is that
+							// [bohan] they are never allowed to throw any exception.
+							// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+							try
+							{
+								delete vstPlug;
+								// [bohan] phatmatik crashes here...
+								// <magnus> so does PSP Easyverb, in FreeLibrary
+							}
+							catch(const std::exception & e)
+							{
+								std::stringstream s; s
+									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+									<< typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+								out
+									<< std::endl
+									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << fileName;
+								loggers::exception(title.str() + '\n' + s.str());
+							}
+							catch(...)
+							{
+								std::stringstream s; s
+									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+									<< "Type of exception is unknown, no further information available.";
+								out
+									<< std::endl
+									<< "### ERRONEOUS ###" << std::endl
+									<< s.str().c_str();
+								out.flush();
+								std::stringstream title; title
+									<< "Machine crashed: " << fileName;
+								loggers::exception(title.str() + '\n' + s.str());
+							}
+						}
+						++currentPlugsCount;
+					}
+					catch(const std::exception & e)
+					{
+						std::stringstream s; s
+							<< std::endl
+							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl
+							<< typeid(e).name() << std::endl;
+							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+						out
+							<< s.str().c_str();
+						out.flush();
+						loggers::crash(s.str());
+					}
+					catch(...)
+					{
+						std::stringstream s; s
+							<< std::endl
+							<< "################ SCANNER CRASHED ; PLEASE REPORT THIS BUG! ################" << std::endl
+							<< "Type of exception is unknown, no further information available.";
+						out
+							<< s.str().c_str();
+						out.flush();
+						loggers::crash(s.str());
+					}
+				}
+				out << std::endl;
+				out.flush();
 			}
-
+			out.flush();
 		}
 
-		void CNewMachine::NMPOPUP_AddSubFolder()
+		void CNewMachine::DestroyPluginInfo()
 		{
-			HTREEITEM hSelectedItem;
-			hSelectedItem = m_browser.GetSelectedItem ();
-			//make sure folders aren't added to the "Uncategorised" folder
-			hNodes[_numCustCategories] = m_browser.InsertItem ("A New Category", 6,6,hSelectedItem, TVI_SORT);
-			m_browser.SelectItem (hNodes[_numCustCategories]);
-			m_browser.SetItemData (hNodes[_numCustCategories], IS_FOLDER);
-			m_browser.SetItemState (hNodes[_numCustCategories], TVIS_BOLD, TVIS_BOLD);
-			//let user edit the name of the new category
-			/*CEdit* EditNewFolder =*/ m_browser.EditLabel (m_browser.GetSelectedItem ());
-			_numCustCategories++;
-			bEditing = true;
-		}
-
-
-
-		void CNewMachine::NMPOPUP_AddFolderSameLevel()
-		{
-			HTREEITEM hSelectedItem = m_browser.GetSelectedItem();
-			HTREEITEM hParent = m_browser.GetParentItem (hSelectedItem);
-			hNodes[_numCustCategories] = m_browser.InsertItem ("A New Category", 6,6,hParent, TVI_SORT);
-			m_browser.SelectItem (hNodes[_numCustCategories]);
-			m_browser.SetItemData (hNodes[_numCustCategories], IS_FOLDER);
-			m_browser.SetItemState (hNodes[_numCustCategories], TVIS_BOLD, TVIS_BOLD);
-			/*CEdit* EditNewFolder =*/ m_browser.EditLabel (m_browser.GetSelectedItem ());
-			_numCustCategories++;
-			bEditing = true;
-		}
-
-		void CNewMachine::NMPOPUP_RenameFolder()
-		{	
-			/*CEdit* EditNewFolder =*/ m_browser.EditLabel (m_browser.GetSelectedItem());
-		}
-
-		void CNewMachine::NMPOPUP_DeleteMoveToParent()
-		{
-			HTREEITEM hSelectedItem = m_browser.GetSelectedItem();
-			//add code to move items contained in the subfolder to the parent folder
-			//ALSO must check if sub folders being moved up a level already exist;  if they do,
-			// ask the user when to move plugins or not.
-			HTREEITEM hParent = m_browser.GetParentItem (hSelectedItem);
-			HTREEITEM hChild = m_browser.GetChildItem (hSelectedItem);
-			while (hChild)
+			for (int i=0; i<_numPlugins; i++)
 			{
-				//Add code to check if item already exists.
-				MoveTreeItem (hChild, hParent, TVI_SORT, false);
-				hChild = m_browser.GetChildItem (hSelectedItem);
+				delete _pPlugsInfo[i];
+				_pPlugsInfo[i] = 0;
 			}
-			//delete category
-			m_browser.DeleteItem (hSelectedItem);
-			SortChildren(hParent);
+			NativeNames.clear();
+			VstNames.clear();
+			_numPlugins = -1;
 		}
 
-		void CNewMachine::NMPOPUP_MoveToTopLevel()
+		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount)
 		{
-			HTREEITEM hMovedItem = MoveTreeItem (m_browser.GetSelectedItem(), TVI_ROOT, TVI_SORT);
-			m_browser.SelectItem (hMovedItem);
-			SortChildren (hMovedItem);  //sort items in case two categories are merged
-			SortChildren (m_browser.GetParentItem (hMovedItem));  //sort category that item was moved to
-			bCategoriesChanged = true;
-		}
-
-
-		void CNewMachine::NMPOPUP_DeleteMoveUncat()
-		{
-			HTREEITEM hSelectedItem = m_browser.GetSelectedItem();
-			//add code to move items contained in the subfolder to the "Uncategorised" folder.
-			DeleteMoveUncat (hSelectedItem);
-			//delete category
-			SortChildren(hNodes[0]);
-		}
-
-		void CNewMachine::BeginLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
-		{
-			//LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
-			// edit folder name
-			HTREEITEM hSelectedItem = m_browser.GetSelectedItem ();
-			//make sure item is a folder that is allowed to be edited
-			if ((m_browser.GetItemData (hSelectedItem) >= IS_FOLDER) && (m_browser.GetSelectedItem () != hNodes[0]))
-			{			
-				bEditing = true;
-				*pResult = 0;
-			}
-			else *pResult = true;
-		}
-
-		void CNewMachine::EndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
-		{
-			//LPNMTVDISPINFO pTVDispInfo = reinterpret_cast<LPNMTVDISPINFO>(pNMHDR);
-			CEdit* pEdit = m_browser.GetEditControl();
-			HTREEITEM hSelectedItem = m_browser.GetSelectedItem ();
-			int intNameCount = 0;
-			if(pEdit)
-			{	
-				CString tempstring;
-				CString currenttext = m_browser.GetItemText (hSelectedItem);
-				pEdit->GetWindowText(tempstring);
-				*pResult = false;
-				m_browser.SetItemText (hSelectedItem, tempstring);
-				// make sure user has entered a category name			
-				if (tempstring != "")
-				{
-					// make sure category name doesn't exist
-					HTREEITEM hParent = m_browser.GetParentItem (hSelectedItem);
-					HTREEITEM hChild = m_browser.GetChildItem (hParent);
-					while ((hChild != NULL) && (intNameCount < 3))
-					{
-						if (tempstring == m_browser.GetItemText (hChild))
-							intNameCount++;
-						hChild = m_browser.GetNextSiblingItem (hChild);
-
-					}
-					if (intNameCount >= 2)
-					{
-						// user has entered an invalid name
-						MessageBox ("This folder already exists!", "Error!");
-						intNameCount = 0;
-						// let user continue editing
-						m_browser.EditLabel (hSelectedItem);
-						CEdit* pEdit2 = m_browser.GetEditControl();
-						pEdit2->SetWindowText(tempstring);
-						pEdit2->SetSel (0,-1,0);
-					}
-					else
-					{
-						if ((tempstring.Find("\\") == -1) && (tempstring.Find("/",0) == -1) && (tempstring.Find(":",0) == -1) && (tempstring.Find("*",0) == -1) && (tempstring.Find("\?",0) == -1) && (tempstring.Find("\"",0) == -1) && (tempstring.Find("\'",0) == -1) && (tempstring.Find("<",0) == -1)  && (tempstring.Find(">",0) == -1)  && (tempstring.Find("|",0) == -1))
-						{
-							// set folder name
-							m_browser.SetItemText (hSelectedItem, tempstring);
-							bEditing = false;
-							bCategoriesChanged = true;
-							SortChildren (hParent);
-						}
-						else
-						{
-							MessageBox ("Incorrect Character Entered!  The following characters are not allowed: \n \\ / : * ? \" \' < > | ", "Error!");
-							m_browser.EditLabel (hSelectedItem);
-							CEdit* pEdit2 = m_browser.GetEditControl();
-							pEdit2->SetWindowText(tempstring);
-							pEdit2->SetSel (0,-1,0);
-						}
-					}
-				}
-				else
-				{
-					MessageBox ("You must enter a category name!", "Error!");
-					m_browser.EditLabel (hSelectedItem);
-					CEdit* pEdit2 = m_browser.GetEditControl();
-					pEdit2->SetWindowText(tempstring);
-					pEdit2->SetSel (0,-1,0);
-				}
-			}
-			else 
-				*pResult = false;
-		}
-
-		void CNewMachine::OnTimer(UINT nIDEvent)
-		{
-			ScrollCount++;
-			if (ScrollCount > 0)
-			{
-				//scroll view, if possible
-				int ScrollPos;
-				ScrollPos = m_browser.GetScrollPos (SB_VERT);
-				if (bScrollUp)
-				{
-					if (ScrollPos > 0)
-					{
-						m_browser.ScrollWindow (0, itemheight, 0, 0);
-						HTREEITEM hTemp = m_browser.GetPrevVisibleItem(m_browser.GetFirstVisibleItem ());
-						m_browser.SelectSetFirstVisible (hTemp);
-						m_browser.SelectDropTarget (hTemp);
-						m_browser.Invalidate ();
-					}
-				}
-				else
-				{
-					if (ScrollPos < m_browser.GetScrollLimit (SB_VERT))
-						m_browser.ScrollWindow (0,  - itemheight, 0, 0);
-						HTREEITEM hTemp = m_browser.GetNextVisibleItem(m_browser.GetFirstVisibleItem ());
-						m_browser.SelectSetFirstVisible (hTemp);
-
-						//NEED TO ADD A METHOD FOR FINDING THE LAST VISIBLE ITEM
-						
-						//
-						
-						HTREEITEM hNext = m_browser.GetNextVisibleItem (hTemp);
-						HTREEITEM hCurrent;
-						for (unsigned int inttemp = 1; inttemp < m_browser.GetVisibleCount (); inttemp++)
-						{
-							hCurrent = hNext;
-							hNext = m_browser.GetNextVisibleItem (hCurrent);
-							m_versionLabel.SetWindowText (m_browser.GetItemText(hCurrent));
-						}
-						///\todo warning C4701: potentially uninitialized local variable 'hCurrent' used
-						m_browser.SelectDropTarget (hCurrent);
-						m_browser.Invalidate ();
-				}
-			}
-			CDialog::OnTimer(nIDEvent);
-		}
-		void CNewMachine::OnTvnKeydownBrowser(NMHDR *pNMHDR, LRESULT *pResult)
-		{
-			#if 0 ///\todo THIS DOESN'T WORK - SOMETHING TO FIX ONE DAY
-				LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
-				if (pTVKeyDown->wVKey == VK_APPS)
-				{
-					//deal with "right click " key on those modern fancy windows keyboards!
-					HTREEITEM hSelected = m_browser.GetSelectedItem();
-					if (hSelected != NULL)
-					{
-						RECT selrect;
-						m_browser.GetItemRect (hSelected, &selrect, 0);
-						CPoint point;  
-						point.x = int((selrect.left + selrect.right ) / 2);
-						point.y = int((selrect.bottom + selrect.top) / 2);
-						m_browser.OnContextMenu (0,point);
-					}
-				}
-			#endif
-			*pResult = 0;
-		}
-
-
-		bool CNewMachine::LoadCategoriesFile ()
-		{
-			//load categories cache
-/*			char catfilename[_MAX_PATH];
-			GetModuleFileName(NULL,catfilename,_MAX_PATH);
-			std::string path=catfilename;
+			char modulefilename[_MAX_PATH];
+			GetModuleFileName(NULL,modulefilename,_MAX_PATH);
+			std::string path=modulefilename;
 			std::string::size_type pos=path.rfind('\\');
 			if(pos != std::string::npos)
 				path=path.substr(0,pos);
-			std::string catcache=path + "\\psycle.custom-categories.cache";
+			std::string cache=path + "\\psycle.plugin-scan.cache";
 
 			RiffFile file;
+			CFileFind finder;
 
-			if (!file.Open(catcache.c_str())) 
+			if (!file.Open(cache.c_str())) 
 			{
 				return false;
 			}
 
 			char Temp[MAX_PATH];
-			file.ReadChunk(Temp,13);
-			Temp[13]=0;
-			if (strcmp(Temp,"PSYCATEGORIES")!=0)
+			file.Read(Temp,8);
+			Temp[8]=0;
+			if (strcmp(Temp,"PSYCACHE")!=0)
 			{
 				file.Close();
-				DeleteFile(catcache.c_str());
+				DeleteFile(cache.c_str());
 				return false;
 			}
 
 			UINT version;
-			file.Read(version);
+			file.Read(&version,sizeof(version));
 			if (version != CURRENT_CACHE_MAP_VERSION)
 			{
 				file.Close();
-				DeleteFile(catcache.c_str());
+				DeleteFile(cache.c_str());
 				return false;
 			}
-			//\todo : When the number of internal machines changes, this causes an error with the existing cache.
-			for (int h=0; h < NUM_INTERNAL_MACHINES;h++)
+
+			file.Read(&_numPlugins,sizeof(_numPlugins));
+			for (int i = 0; i < _numPlugins; i++)
 			{
-				file.Read (h);
-				file.ReadString (_pInternalMachines[h]->category);
-			}
-
-			file.Read(_numCategorizedPlugins);
-			PluginInfo p;
-
-			for (int i = 0; i < _numCategorizedPlugins; i++)
-			{
-				//match up dll to _pPlugsInfo entry
-				bool bDllFound = false;
-
-				file.ReadString(p.dllname);
-				file.ReadString(p.category);
-				int j = 0;
-
-				while ((bDllFound == false) && (j < _numPlugins))
+				PluginInfo p;
+				file.ReadString(Temp,sizeof(Temp));
+				file.Read(&p.FileTime,sizeof(_pPlugsInfo[currentPlugsCount]->FileTime));
 				{
-					//compare dll names - if dll is not in plugin cache, ignore its category entry.
-					if (p.dllname == _pPlugsInfo[j]->dllname)
+					UINT size;
+					file.Read(&size, sizeof size);
+					if(size)
 					{
-						_pPlugsInfo[j]->category = p.category;  //match up category to dll name
-						bDllFound = true;
+						char *chars(new char[size + 1]);
+						file.Read(chars, size);
+						chars[size] = '\0';
+						p.error = (const char*)chars;
+						delete [] chars;
 					}
-					j++;
+				}
+				file.Read(&p.allow,sizeof(p.allow));
+				file.Read(&p.mode,sizeof(p.mode));
+				file.Read(&p.type,sizeof(p.type));
+				file.ReadString(p.name);
+				file.Read(&p.identifier,sizeof(p.identifier));
+				file.ReadString(p.vendor);
+				file.ReadString(p.desc);
+				file.ReadString(p.version);
+				file.Read(&p.APIversion,sizeof(p.APIversion));
+				// Temp here contains the full path to the .dll
+				if(finder.FindFile(Temp))
+				{
+					FILETIME time;
+					finder.FindNextFile();
+					if (finder.GetLastWriteTime(&time))
+					{
+						// Only add the information to the cache if the dll hasn't been modified (say, a new version)
+						if
+							(
+								p.FileTime.dwHighDateTime == time.dwHighDateTime &&
+								p.FileTime.dwLowDateTime == time.dwLowDateTime
+							)
+						{
+							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+
+							_pPlugsInfo[currentPlugsCount]->dllname = Temp;
+							_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
+
+							///\todo this could be better handled
+							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+							{
+								_pPlugsInfo[currentPlugsCount]->error = "";
+							}
+							if(!p.error.empty())
+							{
+								_pPlugsInfo[currentPlugsCount]->error = p.error;
+							}
+
+							_pPlugsInfo[currentPlugsCount]->allow = p.allow;
+
+							_pPlugsInfo[currentPlugsCount]->mode = p.mode;
+							_pPlugsInfo[currentPlugsCount]->type = p.type;
+							_pPlugsInfo[currentPlugsCount]->name = p.name;
+							_pPlugsInfo[currentPlugsCount]->identifier = p.identifier;
+							_pPlugsInfo[currentPlugsCount]->vendor = p.vendor;
+							_pPlugsInfo[currentPlugsCount]->desc = p.desc;
+							_pPlugsInfo[currentPlugsCount]->version = p.version;
+							_pPlugsInfo[currentPlugsCount]->APIversion = p.APIversion;
+
+							if(p.error.empty())
+							{
+								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname,_pPlugsInfo[currentPlugsCount]->type);
+							}
+							++currentPlugsCount;
+						}
+					}
 				}
 			}
 			file.Close();
-*/
 			return true;
 		}
 
-		bool CNewMachine::SaveCategoriesFile()
+		bool CNewMachine::SaveCacheFile()
 		{
-/*			char cache[_MAX_PATH];
+			char cache[_MAX_PATH];
 			GetModuleFileName(NULL,cache,_MAX_PATH);
 			char * last = strrchr(cache,'\\');
-			std::strcpy(last,"\\psycle.custom-categories.cache");
+			strcpy(last,"\\psycle.plugin-scan.cache");
 			DeleteFile(cache);
 			RiffFile file;
 			if (!file.Create(cache,true)) 
 			{
 				return false;
 			}
-			file.WriteChunk("PSYCATEGORIES",13);
-			std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
-			file.Write(version);
-
-			//write categories of internal machines
-			for (std::uint32_t h=0; h < NUM_INTERNAL_MACHINES;h++)
-			{
-				file.Write (h);
-				file.WriteChunk(_pInternalMachines[h]->category.c_str (), _pInternalMachines[h]->category.length()+1);
-			}
-
-			file.Write(_numCategorizedPlugins);
-
+			file.Write("PSYCACHE",8);
+			UINT version = CURRENT_CACHE_MAP_VERSION;
+			file.Write(&version,sizeof(version));
+			file.Write(&_numPlugins,sizeof(_numPlugins));
 			for (int i=0; i<_numPlugins; i++ )
 			{
-				if (_pPlugsInfo[i]->category != "")
+				file.Write(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
+				file.Write(&_pPlugsInfo[i]->FileTime,sizeof(_pPlugsInfo[i]->FileTime));
 				{
-					file.WriteChunk(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
-					file.WriteChunk(_pPlugsInfo[i]->category.c_str(),_pPlugsInfo[i]->category.length()+1);
+					const std::string error(_pPlugsInfo[i]->error);
+					UINT size(error.size());
+					file.Write(&size, sizeof size);
+					if(size) file.Write(error.data(), size);
 				}
+				file.Write(&_pPlugsInfo[i]->allow,sizeof(_pPlugsInfo[i]->allow));
+				file.Write(&_pPlugsInfo[i]->mode,sizeof(_pPlugsInfo[i]->mode));
+				file.Write(&_pPlugsInfo[i]->type,sizeof(_pPlugsInfo[i]->type));
+				file.Write(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
+				file.Write(&_pPlugsInfo[i]->identifier,sizeof(_pPlugsInfo[i]->identifier));
+				file.Write(_pPlugsInfo[i]->vendor.c_str(),_pPlugsInfo[i]->vendor.length()+1);
+				file.Write(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
+				file.Write(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
+				file.Write(&_pPlugsInfo[i]->APIversion,sizeof(_pPlugsInfo[i]->APIversion));
 			}
 			file.Close();
-*/
 			return true;
 		}
 
-		void CNewMachine::UpdateList()
+		void CNewMachine::OnOK() 
 		{
-			m_browser.DeleteAllItems();
-			switch(comboTypeStyle.GetCurSel())
+			if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
 			{
-			case 0: // sort by plugin type
-				UpdateWithType(); break;
-				
-			case 1:	//sort by class of machine
-				UpdateWithMode(); break;
-				
-			case 2: //sort into custom folders
-				UpdateWithCategories(); break;
+				if (bAllowChanged)
+				{
+					SaveCacheFile();
+				}
+				CDialog::OnOK();
 			}
 		}
 
-		void CNewMachine::UpdateWithType()
+		void CNewMachine::OnCheckAllow() 
 		{
-			// 1.Creates a branch for Internal machines, and then iterates through the internalmachinepackage, adding the machines to
-			//   this branch, or creating new branches for hosts.
-
-			std::vector<HTREEITEM> itemhosts;
-
-			HTREEITEM newitem = m_browser.InsertItem("Internal Machines",internalgen,internalgen, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (newitem, IS_FOLDER);
-			m_browser.SetItemState (newitem, TVIS_BOLD, TVIS_BOLD);
-			itemhosts.push_back(newitem);
-
-			int modetoicon[]={internalgen,internalfx,internalfx,internalgen};
-			Machine::infopackage().MoveFirst();
-			while (!Machine::infopackage().end())
+			for (int i=0; i<_numPlugins; i++)
 			{
-				const InternalMachineInfo* iminfo = Machine::infopackage().GetInfoAtPos();
-				if ( !iminfo->host )
+				if (tHand == hPlug[i])
 				{
-					if (iminfo->mode != MACHMODE_MASTER && !iminfo->deprecated)
-					{
-						newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], itemhosts[0], TVI_SORT);
-						m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
-					}
+					_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
+					bAllowChanged = TRUE;
 				}
-				else if (!iminfo->deprecated)
-				{
-					newitem = m_browser.InsertItem(iminfo->brandname,internalgen+(itemhosts.size()*2),internalgen+(itemhosts.size()*2), TVI_ROOT, TVI_LAST);
-					m_browser.SetItemData (newitem, IS_FOLDER+iminfo->mclass);
-					m_browser.SetItemState (newitem, TVIS_BOLD, TVIS_BOLD);
-					itemhosts.push_back(newitem);
-				}
-				Machine::infopackage().MoveNext();
-			}
-			HTREEITEM nonfunctional = m_browser.InsertItem("Non Functional",crashedplugin,crashedplugin, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (nonfunctional, IS_FOLDER);
-			m_browser.SetItemState (nonfunctional, TVIS_BOLD, TVIS_BOLD);
-
-			// 2.Iterates through the detected hosts, in order to add the machines of each host to the list.
-
-			int index=2;
-			std::vector<HTREEITEM>::iterator iterhosts = itemhosts.begin();
-			iterhosts++;// skip internal host.
-			while(iterhosts != itemhosts.end())
-			{
-				Machine::class_type hosttype = static_cast<Machine::class_type>(GetIndex(m_browser.GetItemData (*iterhosts)));
-				Global::dllfinder().MoveFirstOf(hosttype);
-				while (!Global::dllfinder().end())
-				{
-					HTREEITEM newitem;
-					const PluginInfo* minfo = Global::dllfinder().GetInfoAtPos();
-					if (minfo->error.empty())
-					{
-						if (comboNameStyle.GetCurSel() == 0)
-							newitem = m_browser.InsertItem(minfo->dllname.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], *iterhosts, TVI_SORT);
-						else
-							newitem = m_browser.InsertItem(minfo->name.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], *iterhosts, TVI_SORT);
-					}
-					else
-						newitem = m_browser.InsertItem(minfo->dllname.c_str(), crashedplugin, crashedplugin, nonfunctional, TVI_SORT);
-					m_browser.SetItemData (newitem, IS_PLUGIN+minfo->subclass);
-					//In order to be able to identify the selection in the plugin cache
-					plugidentify[newitem]=Global::dllfinder().FileFromFullpath(minfo->dllname);
-					Global::dllfinder().MoveNextOf(hosttype);
-				}
-				index+=2;
-				iterhosts++;
-			}
-//			m_browser.Select(hNodes[LastType0],TVGN_CARET);
-		}
-		void CNewMachine::UpdateWithMode()
-		{
-			// 1.Creates branches for generators and effects, and then iterates through the internalmachinepackage, adding the machines to
-			//   each branch
-
-			std::vector<InternalMachineInfo> itemhosts;
-
-			HTREEITEM itemgens = m_browser.InsertItem("Generators",internalgen,internalgen, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (itemgens, IS_FOLDER);
-			m_browser.SetItemState (itemgens, TVIS_BOLD, TVIS_BOLD);
-			HTREEITEM itemfx = m_browser.InsertItem("Effects",internalfx,internalfx, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (itemfx, IS_FOLDER);
-			m_browser.SetItemState (itemfx, TVIS_BOLD, TVIS_BOLD);
-
-			int modetoicon[]={internalgen,internalfx,internalfx,internalgen};
-			HTREEITEM modetoitem[]={itemgens,itemfx,itemfx,itemgens};
-			Machine::infopackage().MoveFirst();
-			while (!Machine::infopackage().end())
-			{
-				HTREEITEM newitem;
-				const InternalMachineInfo* iminfo = Machine::infopackage().GetInfoAtPos();
-				if ( !iminfo->host && !iminfo->deprecated)
-				{
-					newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], modetoitem[iminfo->mode], TVI_SORT);
-					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
-				}
-				else if (!iminfo->deprecated)
-				{
-					itemhosts.push_back(*iminfo);
-				}
-
-				Machine::infopackage().MoveNext();
-			}
-			HTREEITEM nonfunctional = m_browser.InsertItem("Non Functional",crashedplugin,crashedplugin, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (nonfunctional, IS_FOLDER);
-			m_browser.SetItemState (nonfunctional, TVIS_BOLD, TVIS_BOLD);
-
-			// 2.Iterates through the Plugin Cache, in order to add the machines of each host to the list.
-			//   (probably not the best way, but I do it this way to know the icon.
-			int index=2;
-			std::vector<InternalMachineInfo>::iterator iterhosts = itemhosts.begin();
-			while(iterhosts != itemhosts.end())
-			{
-				Machine::class_type hosttype = iterhosts->mclass;
-				Global::dllfinder().MoveFirstOf(hosttype);
-				while (!Global::dllfinder().end())
-				{
-					HTREEITEM newitem;
-					const PluginInfo* minfo = Global::dllfinder().GetInfoAtPos();
-					if (minfo->error.empty())
-					{
-						if (comboNameStyle.GetCurSel() == 0)
-							newitem = m_browser.InsertItem(minfo->dllname.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
-						else
-							newitem = m_browser.InsertItem(minfo->name.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
-					}
-					else 
-						newitem = m_browser.InsertItem(minfo->dllname.c_str(), crashedplugin, crashedplugin, nonfunctional, TVI_SORT);
-					m_browser.SetItemData (newitem, IS_PLUGIN+minfo->subclass);
-					//In order to be able to identify the selection in the plugin cache
-					plugidentify[newitem]=Global::dllfinder().FileFromFullpath(minfo->dllname);
-
-					Global::dllfinder().MoveNextOf(hosttype);
-				}
-				index+=2;
-				iterhosts++;
-			}
-//			m_browser.Select(hNodes[LastType0],TVGN_CARET);
-
-		}
-		void CNewMachine::UpdateWithCategories()
-		{
-			// 1.Creates branches for generators and effects, and then iterates through the internalmachinepackage, adding the machines to
-			//   each branch
-/*
-			std::vector<HTREEITEM> itemcateg;
-
-			HTREEITEM hCategory = m_browser.InsertItem(" Uncategorised",7,7, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (hNodes[0], IS_FOLDER);
-			m_browser.SetItemState (hNodes[0], TVIS_BOLD, TVIS_BOLD);
-			itemcateg.push_back(hCategory);
-
-			int modetoicon[]={internalgen,internalfx,internalfx,internalgen};
-			Machine::infopackage().MoveFirst();
-			while (!Machine::infopackage().end())
-			{
-				HTREEITEM newitem;
-				const InternalMachineInfo* iminfo = Machine::infopackage().GetInfoAtPos();
-				if ( !iminfo->host && !iminfo->deprecated)
-				{
-					newitem = m_browser.InsertItem(iminfo->brandname, modetoicon[iminfo->mode], modetoicon[iminfo->mode], modetoitem[iminfo->mode], TVI_SORT);
-					m_browser.SetItemData (newitem, IS_INTERNAL_MACHINE+iminfo->mclass);
-				}
-				else if (!iminfo->deprecated)
-				{
-					itemhosts.push_back(*iminfo);
-				}
-
-				Machine::infopackage().MoveNext();
-			}
-			HTREEITEM nonfunctional = m_browser.InsertItem("Non Functional",crashedplugin,crashedplugin, TVI_ROOT, TVI_LAST);
-			m_browser.SetItemData (nonfunctional, IS_FOLDER);
-			m_browser.SetItemState (nonfunctional, TVIS_BOLD, TVIS_BOLD);
-
-			// 2.Iterates through the Plugin Cache, in order to add the machines of each host to the list.
-			//   (probably not the best way, but I do it this way to know the icon.
-			int index=2;
-			std::vector<InternalMachineInfo>::iterator iterhosts = itemhosts.begin();
-			while(iterhosts != itemhosts.end())
-			{
-				Machine::class_type hosttype = iterhosts->mclass;
-				Global::dllfinder().MoveFirstOf(hosttype);
-				while (!Global::dllfinder().end())
-				{
-					HTREEITEM newitem;
-					const PluginInfo* minfo = Global::dllfinder().GetInfoAtPos();
-					if (minfo->error.empty())
-					{
-						if (comboNameStyle.GetCurSel() == 0)
-							newitem = m_browser.InsertItem(minfo->dllname.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
-						else
-							newitem = m_browser.InsertItem(minfo->name.c_str(), index+modetoicon[minfo->mode], index+modetoicon[minfo->mode], modetoitem[minfo->mode], TVI_SORT);
-					}
-					else 
-						newitem = m_browser.InsertItem(minfo->dllname.c_str(), crashedplugin, crashedplugin, nonfunctional, TVI_SORT);
-					m_browser.SetItemData (newitem, IS_PLUGIN+minfo->subclass);
-					//In order to be able to identify the selection in the plugin cache
-					plugidentify[newitem]=Global::dllfinder().FileFromFullpath(minfo->dllname);
-
-					Global::dllfinder().MoveNextOf(hosttype);
-				}
-				index+=2;
-				iterhosts++;
-			}
-*/
-			//			m_browser.Select(hNodes[LastType0],TVGN_CARET);
-
-/*
-			for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
-			{
-				if(_pPlugsInfo[i]->error.empty())
-				{
-					//determine plugin icons
-					int imgindex;
-					HTREEITEM hitem;
-					if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
-					{
-						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-						{ 
-							imgindex = 2; 
-						}
-						else 
-						{ 
-							imgindex = 4; 
-						}
-					}
-					else
-					{
-						if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
-						{ 
-							imgindex = 3; 
-						}
-						else 
-						{ 
-							imgindex = 5; 
-						}
-					}
-					//determine plugin folder
-					if (_pPlugsInfo[i]->category == "")
-					{
-						hCategory = hNodes[0];
-					}
-					else
-					{
-						CString restofpath = _pPlugsInfo[i]->category.c_str ();
-						int barpos = restofpath.Find ("|",0);
-						CString curcategory = restofpath.Left (barpos);
-						curcategory = curcategory.TrimRight ("|");
-						hCategory = TVI_ROOT;
-						HTREEITEM hParent;
-						while (restofpath != "")
-						{
-							hParent = hCategory;
-							hCategory = CategoryExists (hParent, curcategory);
-
-							if (hCategory == NULL)
-							{
-								//category doesn't exist
-								hNodes[_numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,6, hParent, TVI_SORT);
-								hCategory = hNodes[_numCustCategories];
-								m_browser.SetItemData (hNodes[_numCustCategories], IS_FOLDER);
-								m_browser.SetItemState (hNodes[_numCustCategories], TVIS_BOLD, TVIS_BOLD);
-								_numCustCategories++;
-							}
-							else
-							{
-								//category exists, just add to tree
-								hitem = hCategory;
-							}
-							restofpath = restofpath.Right (restofpath.GetLength () - barpos - 1);
-							barpos = restofpath.Find ("|",0);
-
-							if (barpos > -1)
-							{
-								curcategory = restofpath.Left (barpos);
-								curcategory = curcategory.TrimRight ("|");
-							}
-						}
-
-
-					}
-					// add plugin to appropriate node on tree
-					HTREEITEM newitem;
-					if(pluginName)
-						newitem = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hCategory, TVI_SORT);
-					else
-						newitem = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hCategory, TVI_SORT);
-
-					m_browser.SetItemData (newitem,IS_PLUGIN+i);
-				}
-
-			}
-
-			//add categories + entries for internal machines	
-			for(int i = 0 ; i < NUM_INTERNAL_MACHINES ; i++)
-			{
-				//determine internal machine folder
-				if (!_pInternalMachines[i]->category.length())
-				{
-					hCategory = hNodes[0];
-				}
-				else
-				{
-					CString restofpath = _pInternalMachines[i]->category.c_str ();
-					int barpos = restofpath.Find ("|",0);
-					CString curcategory = restofpath.Left (barpos);
-					curcategory = curcategory.TrimRight ("|");
-					hCategory = TVI_ROOT;
-					HTREEITEM hParent;
-					while (restofpath != "")
-					{
-						hParent = hCategory;
-						hCategory = CategoryExists (hParent, curcategory);
-
-						if (hCategory == NULL)
-						{
-							//category doesn't exist
-							hNodes[_numCustCategories] = m_browser.InsertItem (" " + curcategory, 6,6, hParent, TVI_SORT);
-							hCategory = hNodes[_numCustCategories];
-							m_browser.SetItemData (hNodes[_numCustCategories], IS_FOLDER);
-							m_browser.SetItemState (hNodes[_numCustCategories], TVIS_BOLD, TVIS_BOLD);
-							_numCustCategories++;
-						}
-						restofpath = restofpath.Right (restofpath.GetLength () - barpos - 1);
-						barpos = restofpath.Find ("|",0);
-
-						if (barpos > -1)
-						{
-							curcategory = restofpath.Left (barpos);
-							curcategory = curcategory.TrimRight ("|");
-						}
-					}
-
-				}
-				// add internal machine to appropriate node on tree
-				HTREEITEM newitem = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hCategory, TVI_SORT);
-				m_browser.SetItemData (newitem,IS_INTERNAL_MACHINE + i);
-				//hInt[i] = m_browser.InsertItem(_pInternalMachines[i]->name.c_str(), _pInternalMachines[i]->machtype, _pInternalMachines[i]->machtype, hCategory, TVI_SORT);
-				//m_browser.SetItemData (hInt[i],IS_INTERNAL_MACHINE + i);
-			}
-
-			// remove leading space from all folders 
-			// (space was added at front of folder name to automatically sort folders to the top)
-			RemoveCatSpaces(NULL);
-			break;
-*/		}
-
-		void CNewMachine::SetPluginCategories (HTREEITEM hItem, CString Category)
-		{
-/*
-			//traverse plugin tree recursively, saving plugin categories to _pPlugsInfo[i]
-			// call this function with hItem = NULL to start right from the highest level
-			if(!hItem)
-			{
-				//deal with "Uncategorised" folder
-				HTREEITEM hChild = m_browser.GetChildItem (hNodes[0]);
-
-				while (hChild != NULL)
-				{
-					int i = m_browser.GetItemData (hChild);
-					if (i < IS_INTERNAL_MACHINE)
-						_pPlugsInfo[i]->category = "";
-					else  //is an internal machine
-						_pInternalMachines[i - IS_INTERNAL_MACHINE]->category = "";
-					hChild = m_browser.GetNextSiblingItem (hChild);
-				}
-				//begin recursive saving
-				Category = "";
-				SetPluginCategories (TVI_ROOT, Category);
-			}
-			else if (hItem != hNodes [0])
-			{
-				HTREEITEM hChild = m_browser.GetChildItem (hItem);
-				CString NewCategory;
-				while (hChild != NULL)
-				{
-					if (m_browser.GetItemData (hChild) == IS_FOLDER)
-					{
-						//continue recursion since it's a folder
-						NewCategory = Category + m_browser.GetItemText (hChild) + "|";
-						//MessageBox (Category, "2");
-						SetPluginCategories (hChild, NewCategory);
-					}
-					else
-					{
-						//save plugin's position in tree to _pPlugsInfo[i]
-						int i = m_browser.GetItemData (hChild);
-						if (i < IS_INTERNAL_MACHINE)
-							_pPlugsInfo[i]->category = Category;
-						else  //is an internal machine
-						{
-							_pInternalMachines[i - IS_INTERNAL_MACHINE]->category = Category;
-						}
-
-						if (m_browser.GetParentItem (hChild) == hNodes[0])
-							Category = "";
-
-						if (Category != "")
-							_numCategorizedPlugins++;
-
-
-					}
-					hChild = m_browser.GetNextSiblingItem (hChild);
-				}
-				// everything else, recursive searching
-			}
-*/
-		}
-
-		HTREEITEM CNewMachine::CategoryExists (HTREEITEM hParent, CString category)
-		{
-			bool bCatFound = false;
-			HTREEITEM hChild = m_browser.GetChildItem (hParent);
-			HTREEITEM hReturn = NULL;
-			while ((hChild != NULL) && (bCatFound == false))
-			{
-				if ((m_browser.GetItemText (hChild) == (" " + category)) && (m_browser.GetItemData (hChild) == IS_FOLDER))
-				{
-					hReturn = hChild;
-					bCatFound = true;
-				}
-				hChild = m_browser.GetNextSiblingItem (hChild);
-			}
-
-			// item not found, so return nothing.
-			if (!bCatFound)
-				return NULL;
-			else
-				return hReturn;
-		}
-
-		void CNewMachine::SortChildren (HTREEITEM hParent)
-		{
-			HTREEITEM hChild = m_browser.GetChildItem (hParent);
-			//add space to front of folders, to sort
-			while (hChild != NULL)
-			{
-				if (m_browser.GetItemData (hChild) == IS_FOLDER)
-				{
-					CString tempstring = m_browser.GetItemText (hChild);
-					m_browser.SetItemText (hChild, " " + tempstring);
-				}
-				hChild = m_browser.GetNextSiblingItem (hChild);
-			}
-			//sort alphabetically - folders will be at top because of the space
-			m_browser.SortChildren (hParent);
-			//remove the space
-			hChild = m_browser.GetChildItem (hParent);
-			while (hChild != NULL)
-			{
-				if (m_browser.GetItemData (hChild) == IS_FOLDER)
-				{
-					CString tempstring = m_browser.GetItemText (hChild);
-					tempstring.Delete (0,1);  //delete first char, which is the space
-					m_browser.SetItemText (hChild, tempstring);
-				}
-				hChild = m_browser.GetNextSiblingItem (hChild);
-			}
-
-
-		}
-
-		HTREEITEM CNewMachine::MoveTreeItem(HTREEITEM hItem, HTREEITEM hItemTo, HTREEITEM hItemPos,  bool bAllowReplace)
-		{		
-			// check if destination is a plugin, if so, make parent folder the destination
-			if (hItemTo != TVI_ROOT)
-			{
-				if (m_browser.GetItemData (hItemTo) != IS_FOLDER)
-					hItemTo = m_browser.GetParentItem (hItemTo);	
-			}
-			if (hItem == NULL || hItemTo == NULL) return NULL;
-			if (!bAllowReplace)
-				if (hItem == hItemTo || hItemTo == m_browser.GetParentItem(hItem)) return hItem;
-
-			// check we're not trying to move to a descendant
-			HTREEITEM hItemParent = hItemTo;
-			if (hItemParent != TVI_ROOT)
-			{
-				while (hItemParent != TVI_ROOT && (hItemParent = m_browser.GetParentItem(hItemParent)) != NULL)
-					if (hItemParent == hItem) return NULL;
-			}
-
-			HTREEITEM hItemNew;
-
-			//check if item already exists
-			bool bExists = false;
-			HTREEITEM hChild = m_browser.GetChildItem (hItemTo);
-			CString ItemText =  m_browser.GetItemText (hItem);
-			while ((hChild != NULL) && (!bExists))
-			{
-				if (m_browser.GetItemText(hChild) == ItemText)
-				{
-					bExists = true;
-					hItemNew = hChild;
-				}
-				hChild = m_browser.GetNextSiblingItem (hChild);
-			}
-			if (!bExists)
-			{
-				// copy items to new location, recursively, then delete old heirarchy
-				// get text, and other info
-				CString sText = m_browser.GetItemText(hItem);
-				int itemdata = m_browser.GetItemData (hItem);
-				TVINSERTSTRUCT tvis;
-				tvis.item.mask = TVIF_HANDLE | TVIF_IMAGE | TVIF_PARAM | 
-					TVIF_SELECTEDIMAGE | TVIF_STATE;
-				tvis.item.hItem = hItem;
-				// we don't want to copy selection/expanded state etc
-				tvis.item.stateMask = (UINT)-1 & ~(TVIS_DROPHILITED | TVIS_EXPANDED | 
-					TVIS_EXPANDEDONCE | TVIS_EXPANDPARTIAL | TVIS_SELECTED);
-				m_browser.GetItem(&tvis.item);
-				tvis.hParent = hItemTo;
-				tvis.hInsertAfter = hItemPos;
-				// if we're only copying, then ask for new data
-				//if (bCopyOnly && pfnCopyData != NULL)
-				//tvis.item.lParam = pfnCopyData(tree, hItem, tvis.item.lParam);
-				hItemNew = m_browser.InsertItem(&tvis);
-				m_browser.SetItemData (hItemNew, itemdata);
-				m_browser.SetItemText(hItemNew, sText);
-			}
-
-			// now move children to under new item
-			HTREEITEM hItemChild = m_browser.GetChildItem(hItem);
-			while (hItemChild != NULL)
-			{
-				HTREEITEM hItemNextChild = m_browser.GetNextSiblingItem(hItemChild);
-				///\todo warning C4701: potentially uninitialized local variable 'hItemNew' used
-				MoveTreeItem(hItemChild, hItemNew, TVI_SORT, false);
-				hItemChild = hItemNextChild;
-			}
-
-			// clear old item data
-			m_browser.SetItemData(hItem, 0);
-			// no (more) children, so we can safely delete top item
-			m_browser.DeleteItem(hItem);
-
-			return hItemNew; 
-		}
-
-		void CNewMachine::FinishDragging(BOOL bDraggingImageList)
-		{
-			if (m_hItemDrag)
-			{
-				if (bDraggingImageList)
-				{
-					CImageList::DragLeave(NULL);
-					CImageList::EndDrag();
-				}
-				ReleaseCapture();
-				ShowCursor(true);
-				m_hItemDrag = NULL;
-				m_browser.SelectDropTarget(NULL);
 			}
 		}
 
-		void CNewMachine::DeleteMoveUncat (HTREEITEM hParent)
+		bool CNewMachine::TestFilename(const std::string & name, const int shellIdx)
 		{
-			HTREEITEM hChild = m_browser.GetChildItem (hParent);
-			while (hChild)
+			for(int i(0) ; i < _numPlugins ; ++i)
 			{
-				if (m_browser.GetItemData (hChild) == IS_FOLDER)
+				if ((name == _pPlugsInfo[i]->dllname) &&
+					(shellIdx == 0 || shellIdx == _pPlugsInfo[i]->identifier))
 				{
-					//recurse into folder
-					DeleteMoveUncat (hChild);
+					// bad plugins always have allow = false
+					if(_pPlugsInfo[i]->allow) return true;
+					std::ostringstream s; s
+						<< "Plugin " << name << " is disabled because:" << std::endl
+						<< _pPlugsInfo[i]->error << std::endl
+						<< "Try to load anyway?";
+					return ::MessageBox(0, s.str().c_str(), "Plugin Warning!", MB_YESNO | MB_ICONWARNING) == IDYES;
 				}
-				else
-				{
-					//hChild is a plugin, move it
-					MoveTreeItem (hChild, hNodes[0], TVI_SORT, false);
-				}
-				hChild = m_browser.GetChildItem (hParent);
 			}
-			m_browser.DeleteItem (hParent);
-		}
-		void CNewMachine::RemoveCatSpaces (HTREEITEM hParent)
-		{
-			HTREEITEM hChild;
-			if (hParent == NULL)
-				hChild = m_browser.GetChildItem (TVI_ROOT);
-			else
-				hChild = m_browser.GetChildItem (hParent);
-			while (hChild != NULL)
-			{
-				if (m_browser.GetItemData (hChild) == IS_FOLDER)
-				{
-					CString tempstring = m_browser.GetItemText (hChild);
-					tempstring.Delete (0,1);
-					m_browser.SetItemText (hChild, tempstring);
-					RemoveCatSpaces (hChild);
-				}
-				hChild = m_browser.GetNextSiblingItem (hChild);
-			}
-
+			return false;
 		}
 
-		UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
-
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

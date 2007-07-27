@@ -1,11 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CSwingFillDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/SwingFillDlg.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "SwingFillDlg.hpp"
+#include "psycle.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CSwingFillDlg::CSwingFillDlg(CWnd* pParent) : CDialog(CSwingFillDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CSwingFillDlg)
@@ -35,7 +34,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		BOOL CSwingFillDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			bGo = false;
+			bGo = FALSE;
 			
 			char buf[32];
 			sprintf(buf,"%d",tempo);
@@ -56,7 +55,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			m_Offset.SetCheck(offset?1:0);
 
-			return false;
+			return FALSE;
 		}
 
 		void CSwingFillDlg::OnOK() 
@@ -79,7 +78,7 @@ This procedure does not mess with BPM nor with LPB so it shouldn't cause any pro
 The beat is always at the same place if not using the LFO with special values
  */
 
-			bGo = true;
+			bGo = TRUE;
 			char buf[32];
 			m_Tempo.GetWindowText(buf,32);
 			tempo=atoi(buf);
@@ -103,5 +102,5 @@ The beat is always at the same place if not using the LFO with special values
 
 			CDialog::OnOK();
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

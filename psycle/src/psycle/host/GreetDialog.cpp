@@ -1,11 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CGreetDialog.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/GreetDialog.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "GreetDialog.hpp"
+#include "Psycle.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CGreetDialog::CGreetDialog(CWnd* pParent /* = 0 */) : CDialog(CGreetDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CGreetDialog)
@@ -66,7 +67,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_greetz.AddString("dazld");
 			m_greetz.AddString("dj_d [Beta testing]");
 			m_greetz.AddString("DJMirage");
-			m_greetz.AddString("Drax_D [for asking to be here ;·D]");
+			m_greetz.AddString("Drax_D [for asking to be here ;D]");
 			m_greetz.AddString("Druttis [Machines]");
 			m_greetz.AddString("Erodix");
 			m_greetz.AddString("Felix Kaplan / Spirit Of India");
@@ -85,11 +86,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_greetz.AddString("pooplog [Machines + Coding]");
 			m_greetz.AddString("sampler");
 			m_greetz.AddString("[SAS] SOLARiS [project-psy WebMaster]");
-			m_greetz.AddString("_sue_ [Extreme testing]");
+			m_greetz.AddString("hugo Vinagre [Extreme testing]");
 			m_greetz.AddString("TAo-AAS");
 			m_greetz.AddString("TimEr [Site Graphics and more]");
 			m_greetz.AddString("Vir|us");
-			return true;
+			return TRUE;
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

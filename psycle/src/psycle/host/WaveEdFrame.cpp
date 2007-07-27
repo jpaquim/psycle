@@ -1,13 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/engine/song.hpp>
-#include <psycle/host/WaveEdFrame.hpp>
-#include <psycle/host/MainFrm.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "WaveEdFrame.hpp"
+#include "Psycle.hpp"
+#include "Song.hpp"
+#include "MainFrm.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
@@ -235,6 +234,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			wavview.SetCursorPos( 0 );
 		}
 
-
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

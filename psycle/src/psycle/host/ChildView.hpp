@@ -1,30 +1,29 @@
 ///\file
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
-#include <psycle/engine/song.hpp>
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/host/InputHandler.hpp>
-#include <sigslot/sigslot.h>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "Song.hpp"
+#include "Configuration.hpp"
+#include "InputHandler.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CMasterDlg;
 		class CWireDlg;
 		class CGearTracker;
 		class XMSamplerUI;
+		class CWaveInMacDlg;
 
-		class CProgressDialog;
+		#define MAX_WIRE_DIALOGS 16
 
-		int const MAX_WIRE_DIALOGS = 16;
-
-		int const MAX_DRAW_MESSAGES = 32;
+		#define MAX_DRAW_MESSAGES 32
 
 		struct draw_modes
 		{
 			enum draw_mode
 			{
 				all, ///< Repaints everything (means, slow). Used when switching views, or when a
-				     ///< whole update is needed (For example, when changing pattern Properties, or TPB)
+				///< whole update is needed (For example, when changing pattern Properties, or TPB)
 
 				all_machines, ///< Used to refresh all the machines, without refreshing the background/wires
 
@@ -33,14 +32,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				pattern, ///< Use this when switching Patterns (changing from one to another)
 
 				data, ///< Data has Changed. Which data to update is indicated with DrawLineStart/End
-				      ///< and DrawTrackStart/End
-				      ///< Use it when editing and copy/pasting
+				///< and DrawTrackStart/End
+				///< Use it when editing and copy/pasting
 
 				horizontal_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
-				                   ///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+				///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
 
 				vertical_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
-				                 ///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+				///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
 
 				//resize, ///< Indicates the Refresh is called from the "OnSize()" event.
 
@@ -49,8 +48,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				playback_change, ///< Indicates that while playing, a pattern switch is needed.
 
 				cursor, ///< Indicates a movement of the cursor. update the values to "editcur" directly
-				        ///< and call this function.
-				        ///< this is arbitrary message as cursor is checked
+				///< and call this function.
+				///< this is arbitrary message as cursor is checked
 
 				selection, ///< The selection has changed. use "blockSel" to indicate the values.
 
@@ -199,7 +198,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		};
 
 		/// child view window
-		class CChildView : public CWnd, public sigslot::has_slots<>
+		class CChildView : public CWnd
 		{
 		public:
 			CChildView();
@@ -248,7 +247,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void HalveLength();
 			void DoubleLength();
 			void BlockTranspose(int trp);
-			void BlockParamInterpolate();
+			void BlockParamInterpolate(int *points=0,int twktype=notecommands::empty);
 			void StartBlock(int track,int line, int col);
 			void ChangeBlock(int track,int line, int col);	// This function allows a handier usage for Shift+Arrows and MouseSelection
 												// Params: current track, line and col
@@ -294,27 +293,24 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void patTrackRecord();
 			void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
-			void NewMachine(int x = -1, int y = -1, Machine::id_type mac = Machine::id_type(-1));
-			void DoMacPropDialog(Machine::id_type propMac);
+			void NewMachine(int x = -1, int y = -1, int mac = -1);
+			void DoMacPropDialog(int propMac);
 			void FileLoadsongNamed(std::string fName);
+			void OnFileLoadsongNamed(std::string fName, int fType);
 			
 		public:
-
-		//	char m_appdir[_MAX_PATH];
-
 			//RECENT!!!//
-			void OnFileLoadsongNamed(std::string fName, int fType);
 			HMENU hRecentMenu;
 
-			CBitmap machinedial; //the machine dial bitmap
+//			CBitmap machinedial; //the machine dial bitmap
 
 			CFrameWnd* pParentFrame;
 			Song* _pSong;
-			bool useDoubleBuffer;
 		//	bool multiPattern;
 			CMasterDlg * MasterMachineDialog;
 			CGearTracker * SamplerMachineDialog;
 			XMSamplerUI* XMSamplerMachineDialog;
+			CWaveInMacDlg* WaveInMachineDialog;
 			CWireDlg * WireDialog[MAX_WIRE_DIALOGS];
 
 			bool blockSelected;
@@ -334,7 +330,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int ChordModeLine;
 			int ChordModeTrack;
 			int updateMode;
-			int updatePar;			// pattern: Display update mode. machine: Machine number to update.
+			int updatePar;			// view_modes::pattern: Display update mode. view_modes::machine: Machine number to update.
 			int viewMode;
 			int XOFFSET;
 			int YOFFSET;
@@ -348,6 +344,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int CH;
 			int CW;
 			int VISTRACKS;
+			int VISLINES;
 			int COLX[10];
 			bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 								// Its function is to prevent audio (and midi) operations while it is not
@@ -361,19 +358,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int textLeftEdge;
 
 		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CChildView)
 			protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-			//}}AFX_VIRTUAL
 
 		//////////////////////////////////////////////////////////////////////
 		// Private operations
 
 		private:
 
-			void onSignalReport(const std::string & message, const std::string &caption);
-			void onSignalProgress(const std::uint32_t & type, const std::uint32_t &position, const std::string& message);
 			//Recent Files!!!!//
 			void AppendToRecent(std::string fName);
 			void CallOpenRecent(int pos);
@@ -398,8 +390,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void DrawMachine(int macnum, CDC *devc);
 			void ClearMachineSpace(int macnum, CDC *devc);
 			void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
-			Machine::id_type GetMachine(CPoint point);
-			Wire::id_type GetWire(CPoint point,Machine::id_type&wiresource);
+			int GetMachine(CPoint point);
+			int GetWire(CPoint point,int&wiresource);
 			inline bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0);
 			void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
@@ -433,14 +425,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			HBITMAP hbmMachineSkin;
 			HBITMAP hbmMachineBkg;
 
-			CProgressDialog* progressdialog;
-
 			
 			HBITMAP hbmMachineDial;
 
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
-			int VISLINES;
 
 			int bkgx;
 			int bkgy;
@@ -460,22 +449,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int numPatternDraw;
 
 			// Enviroment variables
-
-			Machine::id_type smac;
-
-			struct smacmodes
+			int smac;
+			struct smac_modes
 			{
-				enum smacmode
+				enum smac_mode
 				{
 					move, //< moving a machine
 					panning //< panning on a machine
 				};
 			};
-			smacmodes::smacmode smacmode;
-
-			Machine::id_type wiresource;
-			Machine::id_type wiredest;
-			Wire::id_type wiremove;
+			smac_modes::smac_mode smacmode;
+			int wiresource;
+			int wiredest;
+			int wiremove;
 			int wireSX;
 			int wireSY;
 			int wireDX;
@@ -540,8 +526,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
-			// Generated message map functions
-			//{{AFX_MSG(CChildView)
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 			afx_msg void OnRButtonDown( UINT nFlags, CPoint point );
@@ -626,10 +610,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI);
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
 			afx_msg void OnPopBlockswitch();
 			afx_msg void OnUpdatePopBlockswitch(CCmdUI *pCmdUI);
+			afx_msg void OnPopInterpolateCurve();
+			DECLARE_MESSAGE_MAP()
 };
 
 
@@ -965,7 +949,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			return _pSong->_ppattern(_ps());
 		}
 
-
 		inline int CChildView::_xtoCol(int pointpos)
 		{
 			if ( pointpos < COLX[1] ) return 0;
@@ -988,13 +971,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		*/
 
 		}
+
 		inline bool CChildView::InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs)
 		{
-		return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
-			(_y >= _src.y) && (_y < _src.y+_src2.height);
+			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
+				(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

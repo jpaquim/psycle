@@ -1,15 +1,15 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearRackDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/GearRackDlg.hpp>
-#include <psycle/host/WaveEdFrame.hpp>
-#include <psycle/engine/Song.hpp>
-#include <psycle/engine/Machine.hpp>
-#include <psycle/host/MainFrm.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "GearRackDlg.hpp"
+#include "psycle.hpp"
+#include "WaveEdFrame.hpp"
+#include "Song.hpp"
+#include "Machine.hpp"
+#include "MainFrm.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		int CGearRackDlg::DisplayMode = 0;
 
 		CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain)
@@ -60,9 +60,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			// fill our list box and select the currently selected machine
 			RedrawList();
-			return true;
-			// return true unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return false
+			return TRUE;
+			// return TRUE unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
 		void CGearRackDlg::OnCancel()
@@ -83,6 +83,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::RedrawList() 
 		{
+			char buffer[64];
+			
 			m_list.ResetContent();
 
 			int selected=0;
@@ -97,24 +99,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::song().seqBus;
+				selected = Global::_pSong->seqBus;
 				if (selected >= MAX_BUSES)
 				{
 					selected = 0;
 				}
 				for (b=0; b<MAX_BUSES; b++) // Check Generators
 				{
-					if(Global::song()._pMachine[b])
+					if(Global::_pSong->_pMachine[b])
 					{
-						std::ostringstream s;
-						s << std::hex << b << ": " << Global::song()._pMachine[b]->GetEditName();
-						m_list.AddString(s.str().c_str());
+						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
+						m_list.AddString(buffer);
 					}
 					else
 					{
-						std::ostringstream s;
-						s << std::hex << b << ": empty";
-						m_list.AddString(s.str().c_str());
+						sprintf(buffer,"%.2X: empty",b);
+						m_list.AddString(buffer);
 					}
 				}
 				break;
@@ -125,7 +125,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(1);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::song().seqBus;
+				selected = Global::_pSong->seqBus;
 				if (selected < MAX_BUSES)
 				{
 					selected = 0;
@@ -136,17 +136,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 				{
-					if(Global::song()._pMachine[b])
+					if(Global::_pSong->_pMachine[b])
 					{
-						std::ostringstream s;
-						s << std::hex << b << ": " << Global::song()._pMachine[b]->GetEditName();
-						m_list.AddString(s.str().c_str());
+						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
+						m_list.AddString(buffer);
 					}
 					else
 					{
-						std::ostringstream s;
-						s << std::hex << b << ": empty";
-						m_list.AddString(s.str().c_str());
+						sprintf(buffer,"%.2X: empty",b);
+						m_list.AddString(buffer);
 					}
 				}
 				break;
@@ -157,22 +155,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(1);
 
+				char buffer[64];
 				for (int b=0;b<PREV_WAV_INS;b++)
 				{
-					std::ostringstream s;
-					s << std::hex << b << ": " << Global::song()._pInstrument[b]->_sName;
-					m_list.AddString(s.str().c_str());
+					sprintf(buffer, "%.2X: %s", b, Global::_pSong->_pInstrument[b]->_sName);
+					m_list.AddString(buffer);
 				}
 				CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 				if (cc->GetCurSel() == AUX_WAVES)
 				{
-					selected = Global::song().instSelected;
+					selected = Global::_pSong->instSelected;
 				}
 				else
 				{
 					cc->SetCurSel(AUX_WAVES);
 					pParentMain->UpdateComboIns(true);
-					selected = Global::song().instSelected;
+					selected = Global::_pSong->instSelected;
 				}
 				break;
 			}
@@ -188,7 +186,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			case 1:
 				tmac += MAX_BUSES;
 			case 0:
-				Global::song().seqBus = tmac;
+				Global::_pSong->seqBus = tmac;
 				pParentMain->UpdateComboGen();
 				break;
 			case 2:
@@ -196,13 +194,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					if (cc->GetCurSel() == AUX_WAVES)
 					{
-						Global::song().instSelected = Global::song().auxcolSelected=tmac;
+						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(false);
 					}
 					else
 					{
 						cc->SetCurSel(AUX_WAVES);
-						Global::song().instSelected = Global::song().auxcolSelected=tmac;
+						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(true);
 					}
 					pParentMain->m_wndInst.WaveUpdate();
@@ -213,79 +211,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::OnCreate() 
 		{
-			Machine::id_type tmac(m_list.GetCurSel());
+			int tmac = m_list.GetCurSel();
 			switch (DisplayMode)
 			{
 			case 1:
 				tmac += MAX_BUSES;
 			case 0:
 				{
-					Global::song().seqBus = tmac;
-
-					Machine * mac = Global::song()._pMachine[tmac];
-					if (mac)
-					{
-						int x = mac->GetPosX();
-						int y = mac->GetPosY();
-
-						// buffer all the connection info
-
-						int outputMachines[MAX_CONNECTIONS];
-						int inputMachines[MAX_CONNECTIONS];
-						float inputConVol[MAX_CONNECTIONS];
-						float outputConVol[MAX_CONNECTIONS];
-						bool connection[MAX_CONNECTIONS];
-						bool inputCon[MAX_CONNECTIONS];
-
-						int numOutputs = mac->_connectedOutputs;
-						int numInputs = mac->_connectedInputs;
-
-						for (Wire::id_type i(0); i < MAX_CONNECTIONS; i++)
-						{
-							outputMachines[i] = mac->_outputMachines[i];
-							inputMachines[i] = mac->_inputMachines[i];
-							inputConVol[i] = mac->_inputConVol[i]*mac->_wireMultiplier[i];
-							connection[i] = mac->_connection[i];
-							inputCon[i] = mac->_inputCon[i];
-							// store volumes coming back this way, they get destroyed by new machine
-							if (connection[i])
-							{
-								Wire::id_type j(Global::song()._pMachine[outputMachines[i]]->FindInputWire(tmac));
-								if (j >= 0)
-								{
-									Global::song()._pMachine[outputMachines[i]]->GetWireVolume(j, outputConVol[i]);
-								}
-							}
-						}
-
-						m_pParent->NewMachine(x,y,tmac);
-						// replace all the connection info
-
-						Machine * mac = Global::song()._pMachine[tmac];
-						if (mac)
-						{
-							mac->_connectedOutputs = numOutputs;
-							mac->_connectedInputs = numInputs;
-
-							for (Wire::id_type i(0); i < MAX_CONNECTIONS; i++)
-							{
-								// restore input connections
-								if (inputCon[i])
-								{
-									Global::song().InsertConnection(inputMachines[i], tmac, inputConVol[i]);
-								}
-								// restore output connections
-								if (connection[i])
-								{
-									Global::song().InsertConnection(tmac, outputMachines[i], outputConVol[i]);
-								}
-							}
-						}
-					}
-					else
-					{
-						m_pParent->NewMachine(-1,-1,tmac);
-					}
+					m_pParent->NewMachine(-1,-1,tmac);
 
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
@@ -299,7 +232,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::song().instSelected = Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -312,17 +245,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::OnDelete() 
 		{
-			Machine::id_type tmac(m_list.GetCurSel());
+			int tmac = m_list.GetCurSel();
 			m_pParent->AddMacViewUndo();
 			switch (DisplayMode)
 			{
 			case 0:
 				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
-					if (Global::song()._pMachine[tmac])
+					if (Global::_pSong->_pMachine[tmac])
 					{
 						pParentMain->CloseMacGui(tmac);
-						Global::song().DestroyMachine(tmac);
+						Global::_pSong->DestroyMachine(tmac);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
 						if (m_pParent->viewMode==view_modes::machine)
@@ -335,10 +268,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			case 1:
 				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
-					if (Global::song()._pMachine[tmac+MAX_BUSES])
+					if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 					{
 						pParentMain->CloseMacGui(tmac+MAX_BUSES);
-						Global::song().DestroyMachine(tmac+MAX_BUSES);
+						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
 						if (m_pParent->viewMode==view_modes::machine)
@@ -352,11 +285,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::song().instSelected = Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
-				Global::song().DeleteInstrument(Global::song().instSelected);
+				Global::_pSong->DeleteInstrument(Global::_pSong->instSelected);
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -371,11 +304,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CGearRackDlg::OnProperties() 
 		{
-			Machine::id_type tmac(m_list.GetCurSel());
+			int tmac = m_list.GetCurSel();
 			switch (DisplayMode)
 			{
 			case 0:
-				if (Global::song()._pMachine[tmac])
+				if (Global::_pSong->_pMachine[tmac])
 				{
 					m_pParent->DoMacPropDialog(tmac);
 					pParentMain->UpdateEnvInfo();
@@ -387,7 +320,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 1:
-				if (Global::song()._pMachine[tmac+MAX_BUSES])
+				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 				{
 					m_pParent->DoMacPropDialog(tmac+MAX_BUSES);
 					pParentMain->UpdateEnvInfo();
@@ -402,7 +335,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::song().instSelected = Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -418,17 +351,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			POINT point;
 			GetCursorPos(&point);
-			Machine::id_type tmac(m_list.GetCurSel());
+			int tmac = m_list.GetCurSel();
 			switch (DisplayMode)
 			{
 			case 0:
-				if (Global::song()._pMachine[tmac])
+				if (Global::_pSong->_pMachine[tmac])
 				{
 					pParentMain->ShowMachineGui(tmac,point);
 				}
 				break;
 			case 1:
-				if (Global::song()._pMachine[tmac+MAX_BUSES])
+				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 				{
 					pParentMain->ShowMachineGui(tmac+MAX_BUSES,point);
 				}
@@ -437,7 +370,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::song().instSelected = Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -486,7 +419,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			switch (DisplayMode) // should be necessary to rename opened parameter windows.
 			{
 			case 0:
-				ExchangeMacs(sel[0],sel[1]);
+				m_pParent->AddMacViewUndo();
+				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
@@ -494,7 +428,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 1:
-				ExchangeMacs(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
+				m_pParent->AddMacViewUndo();
+				Global::_pSong->ExchangeMachines(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
@@ -502,175 +437,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 2:
-				Global::song().IsInvalided(true);
-				ExchangeIns(sel[0],sel[1]);
+				m_pParent->AddMacViewUndo();
+				Global::_pSong->Invalided=true;
+				Global::_pSong->ExchangeInstruments(sel[0],sel[1]);
 				
-				Global::song().IsInvalided(false);
+				Global::_pSong->Invalided=false;
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
 			
 			pParentMain->RedrawGearRackList();
-		}
-
-		void CGearRackDlg::ExchangeMacs(Machine::id_type one, Machine::id_type two)
-		{
-			Machine * tmp1 = Global::song()._pMachine[one];
-			Machine * tmp2 = Global::song()._pMachine[two];
-			
-			// if they are both valid
-			
-			if (tmp1 && tmp2)
-			{
-				m_pParent->AddMacViewUndo();
-				
-				// exchange positions
-				
-				int temp = tmp1->GetPosX();
-				tmp1->SetPosX(tmp2->GetPosX());
-				tmp2->SetPosX(temp);
-				
-				temp = tmp1->GetPosY();
-				tmp1->SetPosY(tmp2->GetPosY());
-				tmp2->SetPosY(temp);
-				
-				// exchange all connections
-				
-				float tmp1ivol[MAX_CONNECTIONS],tmp2ivol[MAX_CONNECTIONS], tmp1ovol[MAX_CONNECTIONS],tmp2ovol[MAX_CONNECTIONS];
-				
-				for (Wire::id_type i(0); i < MAX_CONNECTIONS; i++)
-				{
-					// Store the volumes of each wire and exchange.
-					if (tmp1->_connection[i]) {	tmp1->GetDestWireVolume(one,i,tmp1ovol[i]);	}
-					if (tmp2->_connection[i]) {	tmp2->GetDestWireVolume(two,i,tmp2ovol[i]); }				
-					tmp1->GetWireVolume(i,tmp1ivol[i]);
-					tmp2->GetWireVolume(i,tmp2ivol[i]);
-
-					temp = tmp1->_outputMachines[i];
-					tmp1->_outputMachines[i] = tmp2->_outputMachines[i];
-					tmp2->_outputMachines[i] = temp;
-					
-					temp = tmp1->_inputMachines[i];
-					tmp1->_inputMachines[i] = tmp2->_inputMachines[i];
-					tmp2->_inputMachines[i] = temp;
-					
-
-					bool btemp = tmp1->_connection[i];
-					tmp1->_connection[i] = tmp2->_connection[i];
-					tmp2->_connection[i] = btemp;
-					
-					btemp = tmp1->_inputCon[i];
-					tmp1->_inputCon[i] = tmp2->_inputCon[i];
-					tmp2->_inputCon[i] = btemp;
-					
-				}
-				
-				temp = tmp1->_connectedOutputs;
-				tmp1->_connectedOutputs = tmp2->_connectedOutputs;
-				tmp2->_connectedOutputs = temp;
-				
-				temp = tmp1->_connectedInputs;
-				tmp1->_connectedInputs = tmp2->_connectedInputs;
-				tmp2->_connectedInputs = temp;
-
-				// Exchange the Machine number.
-				Global::song()._pMachine[one] = tmp2;
-				Global::song()._pMachine[two] = tmp1;
-				
-				tmp1->_macIndex = two;
-				tmp2->_macIndex = one;
-
-				// Finally, Reinitialize the volumes of the wires. Remember that we have exchanged the wires, so the volume indexes are the opposite ones.
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					if (tmp1->_inputCon[i])
-					{
-						tmp1->InitWireVolume(Global::song()._pMachine[tmp1->_inputMachines[i]]->subclass(),i,tmp2ivol[i]);
-					}
-					if (tmp2->_inputCon[i])
-					{
-						tmp2->InitWireVolume(Global::song()._pMachine[tmp2->_inputMachines[i]]->subclass(),i,tmp1ivol[i]);
-					}
-
-					if (tmp1->_connection[i])
-					{
-						Global::song()._pMachine[tmp1->_outputMachines[i]]->InitWireVolume(tmp1->subclass(),Global::song()._pMachine[tmp1->_outputMachines[i]]->FindInputWire(two),tmp2ovol[i]);
-					}
-					if (tmp2->_connection[i])
-					{
-						Global::song()._pMachine[tmp2->_outputMachines[i]]->InitWireVolume(tmp2->subclass(),Global::song()._pMachine[tmp2->_outputMachines[i]]->FindInputWire(one),tmp1ovol[i]);
-					}					
-				}
-
-				return;
-			}
-			if (tmp1)
-			{
-				m_pParent->AddMacViewUndo();
-				// ok we gotta swap this one for a null one
-				Global::song()._pMachine[one] = NULL;
-				Global::song()._pMachine[two] = tmp1;
-
-				tmp1->_macIndex = two;
-
-				// and replace the index in any machine that pointed to this one.
-				for (int i=0; i < MAX_CONNECTIONS; i++)
-				{
-					if ( tmp1->_inputCon[i])
-					{
-						Machine* cmp = Global::song()._pMachine[tmp1->_inputMachines[i]];
-						cmp->_outputMachines[cmp->FindOutputWire(one)]=two;
-					}
-					if ( tmp1->_connection[i])
-					{
-						Machine* cmp = Global::song()._pMachine[tmp1->_outputMachines[i]];
-						cmp->_inputMachines[cmp->FindInputWire(one)]=two;
-					}
-				}
-				return;
-			}
-			if (tmp2)
-			{
-				m_pParent->AddMacViewUndo();
-				// ok we gotta swap this one for a null one
-				Global::song()._pMachine[one] = tmp2;
-				Global::song()._pMachine[two] = NULL;
-
-				tmp2->_macIndex = one;
-
-				// and replace the index in any machine that pointed to this one.
-				for (int i=0; i < MAX_CONNECTIONS; i++)
-				{
-					if ( tmp2->_inputCon[i])
-					{
-						Machine* cmp = Global::song()._pMachine[tmp2->_inputMachines[i]];
-						cmp->_outputMachines[cmp->FindOutputWire(two)]=one;
-					}
-					if ( tmp2->_connection[i])
-					{
-						Machine* cmp = Global::song()._pMachine[tmp2->_outputMachines[i]];
-						cmp->_inputMachines[cmp->FindInputWire(two)]=one;
-					}
-				}
-				return;
-			}
-		}
-
-		void CGearRackDlg::ExchangeIns(Instrument::id_type one, Instrument::id_type two)
-		{
-			Song* pSong = Global::pSong;
-			Instrument * tmpins;
-
-			m_pParent->AddMacViewUndo();
-			
-			tmpins=pSong->_pInstrument[one];
-			pSong->_pInstrument[one]=pSong->_pInstrument[two];
-			pSong->_pInstrument[two]=tmpins;
-			//The above works because we are not creating new objects, just swaping them.
-			//this means that no new data is generated/deleted,and the information is just
-			//copied. If not, we would have had to define the operator=() function and take
-			//care of it.
-
 		}
 
 		void CGearRackDlg::OnClonemachine() 
@@ -702,20 +478,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (tmac2 < 0)
 				{
-					// we need to find an empty slot
-					for (int i = 0; i < MAX_BUSES; i++)
-					{
-						if (!Global::song()._pMachine[i])
-						{
-							tmac2 = i;
-							break;
-						}
-					}
+					tmac2 = Global::_pSong->GetFreeBus();
 				}
 				if (tmac2 >= 0)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
-					if (!Global::song().CloneMac(tmac1,tmac2))
+					if (!Global::_pSong->CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
@@ -735,20 +502,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					// we need to find an empty slot
-					for (int i = MAX_BUSES; i < MAX_BUSES*2; i++)
-					{
-						if (!Global::song()._pMachine[i])
-						{
-							tmac2 = i;
-							break;
-						}
-					}
+					tmac2 = Global::_pSong->GetFreeFxBus();
 				}
 				if (tmac2 >= 0)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
-					if (!Global::song().CloneMac(tmac1,tmac2))
+					if (!Global::_pSong->CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
@@ -761,12 +519,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 2:
-				Global::song().IsInvalided(true);
+				Global::_pSong->Invalided=true;
 				if (tmac2 < 0)
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
 					{
-						if (Global::song()._pInstrument[i]->Empty())
+						if (Global::_pSong->_pInstrument[i]->Empty())
 						{
 							tmac2 = i;
 							break;
@@ -775,21 +533,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				if (tmac2 >=0)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
-					if (!Global::song().CloneIns(tmac1,tmac2))
+					if (!Global::_pSong->CloneIns(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
 					}
 				}
 				
-				Global::song().IsInvalided(false);
+				Global::_pSong->Invalided=false;
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
 			
 			pParentMain->RedrawGearRackList();
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
 
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

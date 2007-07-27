@@ -1,142 +1,135 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/uiversion.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/engine/Player.hpp>
-#include <psycle/host/MainFrm.hpp>
-#include <psycle/host/ChildView.hpp>
-#include <psycle/engine/MidiInput.hpp>
-#include <psycle/host/ConfigDlg.hpp>
-#include <psycle/host/GreetDialog.hpp>
-#include <psycle/host/SaveWavDlg.hpp>
-#include <psycle/host/SongpDlg.hpp>
-#include <psycle/engine/XMSongLoader.hpp>
-#include <psycle/engine/ITModule2.hpp>
-#include <psycle/host/MasterDlg.hpp>
-#include <psycle/engine/internal_machines.hpp>
-#include <psycle/host/XMSamplerUI.hpp>
-#include <psycle/host/VstEditorDlg.hpp>
-#include <psycle/host/WireDlg.hpp>
-#include <psycle/host/MacProp.hpp>
-#include <psycle/host/NewMachine.hpp>
-#include <psycle/host/PatDlg.hpp>
-#include <psycle/host/SwingFillDlg.hpp>
-#include <psycle/host/ProgressDialog.hpp>
+#include <psycle/project.private.hpp>
+#include "ChildView.hpp"
+#include "version.hpp"
+#include "Psycle.hpp"
+#include "Configuration.hpp"
+#include "Player.hpp"
+//#include "Helpers.hpp"
+#include "MainFrm.hpp"
+//#include "Bitmap.hpp"
+#include "Inputhandler.hpp"
+#include "MidiInput.hpp"
+#include "ConfigDlg.hpp"
+#include "GreetDialog.hpp"
+#include "SaveWavDlg.hpp"
+#include "SongpDlg.hpp"
+#include "XMSongLoader.hpp"
+#include "ITModule2.h"
+#include "MasterDlg.hpp"
+#include "NativeGui.hpp"
+#include "XMSamplerUI.hpp"
+//#include "VstEditorDlg.hpp"
+#include "WireDlg.hpp"
+#include "MacProp.hpp"
+#include "NewMachine.hpp"
+#include "PatDlg.hpp"
+#include "vsthost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath> // SwingFill
-#include <cderr.h>
-
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "SwingFillDlg.hpp"
+#include "InterpolateCurveDlg.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		CMainFrame		*pParentMain;
 
-		//\todo: Investigate this variable ( and especially song().cpuIdle ). See if it is doing what it is supposed to.
-		unsigned idletime = 0;
-
 		CChildView::CChildView()
-		:
-			smac(-1),
-			smacmode(smacmodes::move),
-			wiresource(-1),
-			wiredest(-1),
-			wiremove(-1),
-			wireSX(0),
-			wireSY(0),
-			wireDX(0),
-			wireDY(0),
-			maxView(false),
-			textLeftEdge(2),
-			bmpDC(0),
-			viewMode(view_modes::machine),
-			MasterMachineDialog(0),
-			SamplerMachineDialog(0),
-			XMSamplerMachineDialog(0),
-			updateMode(0),
-			updatePar(0),
-			//multiPattern(true), // Long way till it can be finished!
-			patStep(1),
-			editPosition(0),
-			prevEditPosition(0),
-			bEditMode(true),
-
-			blockSelected(false),
-			blockswitch(false),
-			isBlockCopied(false),
-			patBufferCopy(false),
-			blockNTracks(0),
-			blockNLines(0),
-			bScrollDetatch(false),
-
-			blockSelectBarState(1),
-
-			pUndoList(0),
-			pRedoList(0),
-
-			UndoCounter(0),
-			UndoSaved(0),
-
-			UndoMacCounter(0),
-			UndoMacSaved(0),
-
-			//editcur.track(0), // Not needed to initialize, since the class does it already.
-			//editcur.col(0),
-			//editcur.line(0),
-			playpos(-1),
-			newplaypos(-1),
-			numPatternDraw(0),
-
-			//scrollT(0),
-			//scrollL(0),
-			tOff(0),
-			lOff(0),
-			ntOff(0),
-			nlOff(0),
-
-			ChordModeOffs(0),
-
-			_outputActive(false),
-
-			// just give arbitrary values so OnSize doesn't give /0 error
-			// they will be filled in correctly when we switch to pattern view
-			VISLINES(2),
-			VISTRACKS(8)
+			:pParentFrame(0)
+			,MasterMachineDialog(NULL)
+			,SamplerMachineDialog(NULL)
+			,XMSamplerMachineDialog(NULL)
+			,WaveInMachineDialog(NULL)
+			,blockSelected(false)
+			,blockStart(false)
+			,blockswitch(false)
+			,blockSelectBarState(1)
+			,bScrollDetatch(false)
+			,bEditMode(true)
+			,patStep(1)
+			,editPosition(0)
+			,prevEditPosition(0)
+			,ChordModeOffs(0)
+			,updateMode(0)
+			,updatePar(0)
+			,viewMode(view_modes::machine)
+			,_outputActive(false)
+			,CW(300)
+			,CH(200)
+			,maxView(false)
+			,textLeftEdge(2)
+			,hbmPatHeader(0)
+			,hbmMachineSkin(0)
+			,hbmMachineBkg(0)
+			,hbmMachineDial(0)
+			,bmpDC(NULL)
+			,playpos(-1)
+			,newplaypos(-1) 
+			,numPatternDraw(0)
+			,smac(-1)
+			,smacmode(smac_modes::move)
+			,wiresource(-1)
+			,wiredest(-1)
+			,wiremove(-1)
+			,wireSX(0)
+			,wireSY(0)
+			,wireDX(0)
+			,wireDY(0)
+			,maxt(1)
+			,maxl(1)
+			,tOff(0)
+			,lOff(0)
+			,ntOff(0)
+			,nlOff(0)
+			,rntOff(0)
+			,rnlOff(0)
+			,isBlockCopied(false)
+			,blockNTracks(0)
+			,blockNLines(0)
+			,mcd_x(0)
+			,mcd_y(0)
+			,pUndoList(NULL)
+			,pRedoList(NULL)
+			,UndoCounter(0)
+			,UndoSaved(0)
+			,UndoMacCounter(0)
+			,UndoMacSaved(0)
+			,patBufferLines(0)
+			,patBufferCopy(false)
 		{
-			for (int c=0; c<256; c++) FLATSIZES[c]=8;
-			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c) WireDialog[c] = 0;
+			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
+			{
+				WireDialog[c] = NULL;
+			}
+			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
+			selpos.bottom=0;
+			newselpos.bottom=0;
+			szBlankParam[0]='\0';
+			szBlankNote[0]='\0';
+			MBStart.x=0;
+			MBStart.y=0;
 
-			UIGlobal::pInputHandler->SetChildView(this);
-			Global::pResampler->SetQuality(dsp::R_LINEAR);
+			Global::pInputHandler->SetChildView(this);
 
-			//_getcwd(m_appdir,_MAX_PATH);
-			
 			// Creates a new song object. The application Song.
-			//Global::song().Reset(); It's already called in _pSong->New();
-			Global::song().New();
-			
+			Global::_pSong->New();
+
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
-			_pSong = Global::pSong;
-			_pSong->report.connect(this,&CChildView::onSignalReport);
-			_pSong->progress.connect(this,&CChildView::onSignalProgress);
-			progressdialog=0;
-
-			selpos.bottom = 0;
-			newselpos.bottom = 0;
+			_pSong = Global::_pSong;
 		}
 
 		CChildView::~CChildView()
 		{
-			UIGlobal::pInputHandler->SetChildView(NULL);
+			Global::pInputHandler->SetChildView(NULL);
 			KillRedo();
 			KillUndo();
-			if(bmpDC)
+
+			if ( bmpDC != NULL )
 			{
-				std::ostringstream s;
-				s << "CChildView::~CChildView(). Deleted bmpDC (was " << bmpDC << ")";
-				loggers::trace(s.str());
+				char buf[100];
+				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
+				TRACE(buf);
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
@@ -198,6 +191,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
 			ON_COMMAND(ID_POP_DELETE, OnPopDelete)
 			ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
+			ON_COMMAND(ID_POP_INTERPOLATE_CURVE, OnPopInterpolateCurve)
 			ON_COMMAND(ID_POP_CHANGEGENERATOR, OnPopChangegenerator)
 			ON_COMMAND(ID_POP_CHANGEINSTRUMENT, OnPopChangeinstrument)
 			ON_COMMAND(ID_POP_TRANSPOSE1, OnPopTranspose1)
@@ -238,6 +232,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
 			ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdateCutCopy)
+			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE_CURVE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_CHANGEGENERATOR, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_CHANGEINSTRUMENT, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE1, OnUpdateCutCopy)
@@ -257,12 +252,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
 			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
 			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
-		END_MESSAGE_MAP()
+			END_MESSAGE_MAP()
 
 		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
 		{
 			if (!CWnd::PreCreateWindow(cs))
-				return false;
+				return FALSE;
 			
 			cs.dwExStyle |= WS_EX_CLIENTEDGE;
 			cs.style &= ~WS_BORDER;
@@ -274,7 +269,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					0,
 					0
 				);
-			return true;
+			return TRUE;
 		}
 
 		/// This function gives to the pParentMain the pointer to a CMainFrm
@@ -285,48 +280,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::ValidateParent()
 		{
 			pParentMain=(CMainFrame *)pParentFrame;
-			pParentMain->_pSong=Global::pSong;
-		}
-
-		void CChildView::onSignalReport(const std::string & message, const std::string &caption)
-		{
-			MessageBox(message.c_str(),caption.c_str(),MB_OK);
-		}
-		void CChildView::onSignalProgress(const std::uint32_t & type, const std::uint32_t &position, const std::string& message)
-		{
-			switch (type)
-			{
-				case 1:
-					progressdialog = new CProgressDialog();
-					progressdialog->Create();
-					progressdialog->m_Progress.SetPos(0);
-					progressdialog->ShowWindow(SW_SHOW);
-					break;
-				case 2:
-					if (!progressdialog) throw (int)1;
-					progressdialog->SetWindowText(message.c_str());
-					break;
-				case 3:
-					if (!progressdialog) throw (int)1;
-					progressdialog->m_Progress.SetRange(0,position);
-				case 4:
-					if (!progressdialog) throw (int)1;
-					if ( position == -1)
-					{
-						progressdialog->m_Progress.StepIt();
-					} else progressdialog->m_Progress.SetPos(position);
-					break;
-				case 5:
-					if (progressdialog)
-					{
-						progressdialog->OnCancel();
-						delete progressdialog;
-						progressdialog=0;
-					}
-					break;
-				default:
-					break;
-			}
+			pParentMain->_pSong=Global::_pSong;
 		}
 
 		/// Timer initialization
@@ -339,9 +293,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
 
-			if ( Global::configuration().autosaveSong )
+			if ( Global::pConfig->autosaveSong )
 			{
-				if (!SetTimer(159,Global::configuration().autosaveSongTime*60000,NULL)) // Autosave Song
+				if (!SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL)) // Autosave Song
 				{
 					AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 				}
@@ -353,43 +307,34 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (nIDEvent == 31)
 			{
-				#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-					#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-				#else
-					#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-						boost::read_write_mutex::scoped_read_write_lock lock(Global::song().read_write_mutex(),boost::read_write_lock_state::read_locked);
-					#else // original implementation
-						//\todo : IMPORTANT! change this lock to a more flexible one
-						// It is causing skips on sound when there is a pattern change because
-						// it is not allowing the player to work. Do the same in the one inside
-						// Player::Work()
-						CSingleLock lock(&_pSong->door,true);
-					#endif
-				#endif
-				if (Global::song()._pMachine[MASTER_INDEX])
+				///\todo : IMPORTANT! change this lock to a more flexible one
+				// It is causing skips on sound when there is a pattern change because
+				// it is not allowing the player to work. Do the same in the one inside Player::Work()
+				CSingleLock lock(&_pSong->door,TRUE);
+				if (Global::_pSong->_pMachine[MASTER_INDEX])
 				{
 					pParentMain->UpdateVumeters
 						(
-							//((Master*)Global::song()._pMachine[MASTER_INDEX])->_LMAX,
-							//((Master*)Global::song()._pMachine[MASTER_INDEX])->_RMAX,
-							((Master*)Global::song()._pMachine[MASTER_INDEX])->_lMax,
-							((Master*)Global::song()._pMachine[MASTER_INDEX])->_rMax,
-							Global::configuration().vu1,
-							Global::configuration().vu2,
-							Global::configuration().vu3,
-							((Master*)Global::song()._pMachine[MASTER_INDEX])->_clip
+							//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
+							//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
+							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_lMax,
+							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_rMax,
+							Global::pConfig->vu1,
+							Global::pConfig->vu2,
+							Global::pConfig->vu3,
+							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip
 						);
-					pParentMain->UpdateMasterValue(((Master*)Global::song()._pMachine[MASTER_INDEX])->_outDry);
+					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 					if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI();
-					((Master*)Global::song()._pMachine[MASTER_INDEX])->vuupdated = true;
+					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 				}
 				if (viewMode == view_modes::machine)
 				{
-					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::player().Tweaker"
-/*					if (Global::player()._playing && Global::player()._lineChanged)
+					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
+/*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
 					{
 						// This is meant to repaint the whole machine in case the panning/mute/solo/bypass has changed. (not really implemented right now)
-						Repaint(all_machines);
+						Repaint(draw_modes::all_machines);
 					}
 					else
 					{*/
@@ -398,50 +343,51 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 //					}
 				}
 
-				if (Global::player().Tweaker)
+				for(int c=0; c<MAX_MACHINES; c++)
 				{
-					for(int c=0; c<MAX_MACHINES; c++)
+					if (_pSong->_pMachine[c])
 					{
-						if (_pSong->_pMachine[c])
+						if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
 						{
-							if (pParentMain->isguiopen[c])
-							{
-								if ( _pSong->_pMachine[c]->subclass() == MACH_PLUGIN )
-								{
-									pParentMain->m_pWndMac[c]->Invalidate(false);
-								}
-								else if ( _pSong->_pMachine[c]->subclass() == MACH_VST ||
-										_pSong->_pMachine[c]->subclass() == MACH_VSTFX )
-								{
-									((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
-								}
-							}
+							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
+								pParentMain->m_pWndMac[c]->Invalidate(false);
+						}
+						else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
+								_pSong->_pMachine[c]->_type == MACH_VSTFX )
+						{
+							((vst::plugin*)_pSong->_pMachine[c])->Idle();
+//							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
+//								((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
 						}
 					}
-					Global::player().Tweaker = false;
 				}
+				Global::pPlayer->Tweaker = false;
+
 				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
-				if (Global::player()._playing)
+				if (Global::pPlayer->_playing)
 				{
-					if (Global::player()._lineChanged)
+					if (Global::pPlayer->_lineChanged)
 					{
-						Global::player()._lineChanged = false;
+						Global::pPlayer->_lineChanged = false;
 						pParentMain->SetAppSongBpm(0);
 						pParentMain->SetAppSongTpb(0);
 
-						if (Global::configuration()._followSong)
+						if (Global::pConfig->_followSong)
 						{
 							CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
-							editcur.line=Global::player()._lineCounter;
-							if (editPosition != Global::player()._playPosition)
-							//if (pSeqList->GetCurSel() != Global::player()._playPosition)
+							editcur.line=Global::pPlayer->_lineCounter;
+							if (editPosition != Global::pPlayer->_playPosition)
+							//if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 							{
 								pSeqList->SelItemRange(false,0,pSeqList->GetCount());
-								pSeqList->SetSel(Global::player()._playPosition,true);
-								editPosition=Global::player()._playPosition;
+								pSeqList->SetSel(Global::pPlayer->_playPosition,true);
+								int top = Global::pPlayer->_playPosition - 0xC;
+								if (top < 0) top = 0;
+								pSeqList->SetTopIndex(top);
+								editPosition=Global::pPlayer->_playPosition;
 								if ( viewMode == view_modes::pattern ) 
 								{ 
-									Repaint(draw_modes::pattern);//playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
+									Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
 									Repaint(draw_modes::playback);
 								}
 							}
@@ -452,16 +398,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
-			if (nIDEvent == 159 && !Global::player()._recording)
+			if (nIDEvent == 159 && !Global::pPlayer->_recording)
 			{
 				//MessageBox("Saving Disabled");
 				//return;
-				CString filepath = Global::configuration().GetSongDir().c_str();
+				CString filepath = Global::pConfig->GetSongDir().c_str();
 				filepath += "\\autosave.psy";
-				RiffFile file;
+				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
 				_pSong->Save(&file,true);
-				file.Close();
+				/// \todo _pSong->Save() should not close a file which doesn't open. Add the following
+				// line when fixed. There are other places which need this too.
+				//file.Close();
 			}
 		}
 
@@ -469,16 +417,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (_outputActive)
 			{
-				AudioDriver* pOut = Global::configuration()._pOutputDriver;
+				AudioDriver* pOut = Global::pConfig->_pOutputDriver;
+				if (pOut->Enabled()) return;
+
 				_outputActive = false;
 				if (!pOut->Initialized())
 				{
-					pOut->Initialize(m_hWnd, Global::player().Work, Global::pPlayer);
+					pOut->Initialize(m_hWnd, Global::pPlayer->Work, Global::pPlayer);
 				}
 				if (!pOut->Configured())
 				{
 					pOut->Configure();
-					Global::player().SampleRate(pOut->_samplesPerSec);
+					Global::pPlayer->SampleRate(pOut->_samplesPerSec);
 					_outputActive = true;
 				}
 				if (pOut->Enable(true))
@@ -486,20 +436,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					_outputActive = true;
 				}
 				// MIDI IMPLEMENTATION
-				Global::configuration()._pMidiInput->Open();
+				Global::pConfig->_pMidiInput->Open();
 				// set midi input mode to real-time or step
-				if(Global::configuration()._midiMachineViewSeqMode)
+				if(Global::pConfig->_midiMachineViewSeqMode)
 					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
 				else
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
 
 				// Test to use RMS values for Vumeters.
-				#if PSYCLE__CONFIGURATION__RMS_VUS
-					dsp::numRMSSamples=pOut->_samplesPerSec*0.05f;
-					dsp::countRMSSamples=0;
-					dsp::RMSAccumulatedLeft=0;
-					dsp::RMSAccumulatedRight=0;
-				#endif
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+				dsp::numRMSSamples=pOut->_samplesPerSec*0.05f;
+				dsp::countRMSSamples=0;
+				dsp::RMSAccumulatedLeft=0;
+				dsp::RMSAccumulatedRight=0;
+#endif
+				Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			}
 		}
 
@@ -507,9 +459,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
-			if (Global::configuration()._pOutputDriver->Initialized())
+			if (Global::pConfig->_pOutputDriver->Initialized())
 			{
-				Global::configuration()._pOutputDriver->Reset();
+				Global::pConfig->_pOutputDriver->Reset();
 			}
 			KillTimer(31);
 			KillTimer(159);
@@ -524,29 +476,26 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
 			CPaintDC dc(this);
-			if(bmpDC == NULL && Global::configuration().useDoubleBuffer ) // buffer creation
+
+			if ( bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
 			{
 				CRect rc;
 				GetClientRect(&rc);
 				bmpDC = new CBitmap;
 				bmpDC->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
-				{
-					std::ostringstream s;
-					s << "CChildView::OnPaint(). Initialized bmpDC to " << bmpDC;
-					loggers::trace(s.str());
-				}
+				char buf[100];
+				sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%.8X\n",(int)bmpDC);
+				TRACE(buf);
 			}
-			else if ( bmpDC != NULL && !Global::configuration().useDoubleBuffer ) // buffer deletion
+			else if ( bmpDC != NULL && !Global::pConfig->useDoubleBuffer ) // buffer deletion
 			{
-				{
-					std::ostringstream s;
-					s << "CChildView::OnPaint(). Deleted bmpDC (was " << bmpDC << ")";
-					loggers::trace(s.str());
-				}
+				char buf[100];
+				sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
+				TRACE(buf);
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-			if ( Global::configuration().useDoubleBuffer )
+			if ( Global::pConfig->useDoubleBuffer )
 			{
 				CDC bufDC;
 				bufDC.CreateCompatibleDC(&dc);
@@ -560,7 +509,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						DrawMachineEditor(&bufDC);
 						break;
 					case draw_modes::machine:
-						//ClearMachineSpace(Global::song()._pMachines[updatePar], updatePar, &bufDC);
+						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
 						DrawMachine(updatePar, &bufDC);
 						DrawMachineVumeters(updatePar, &bufDC);
 						updateMode=draw_modes::all;
@@ -602,7 +551,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						DrawMachineEditor(&dc);
 						break;
 					case draw_modes::machine:
-						//ClearMachineSpace(Global::song()._pMachines[updatePar], updatePar, &dc);
+						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
 						DrawMachine(updatePar, &dc);
 						DrawMachineVumeters(updatePar, &dc);
 						updateMode=draw_modes::all;
@@ -663,11 +612,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
 			_pSong->viewSize.y=cy;
 			
-			if ( bmpDC != NULL && Global::configuration().useDoubleBuffer ) // remove old buffer to force recreating it with new size
+			if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 			{
 				TRACE("CChildView::OnResize(). Deleted bmpDC");
 				bmpDC->DeleteObject();
-				zapObject(bmpDC);
+				delete bmpDC; bmpDC = 0;
 			}
 			if (viewMode == view_modes::pattern)
 			{
@@ -679,29 +628,27 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		/// "Save Song" Function
 		BOOL CChildView::OnFileSave(UINT id) 
 		{
-			#if defined PSYCLE__CONFIGURATION__SAVE_BROKEN
-				MessageBox("Sorry, saving is not functional in this experimental build.");
-				return false;
-			#endif
-			BOOL bResult = true;
-			if ( Global::song()._saved )
+			//MessageBox("Saving Disabled");
+			//return false;
+			BOOL bResult = TRUE;
+			if ( Global::_pSong->_saved )
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
 				{
-					std::string filepath = Global::configuration().GetCurrentSongDir();
+					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
-					filepath += Global::song().fileName;
+					filepath += Global::_pSong->fileName;
 					
-					RiffFile file;
+					OldPsyFile file;
 					if (!file.Create((char*)filepath.c_str(), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
-						return false;
+						return FALSE;
 					}
 					if (!_pSong->Save(&file))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = false;
+						bResult = FALSE;
 					}
 					else 
 					{
@@ -717,11 +664,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
 					}				
-					file.Close();
+					//file.Close();  <- save handles this 
 				}
 				else 
 				{
-					return false;
+					return FALSE;
 				}
 			}
 			else 
@@ -736,12 +683,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		BOOL CChildView::OnFileSaveAs(UINT id) 
 		{
-			#if defined PSYCLE__CONFIGURATION__SAVE_BROKEN
-				MessageBox("Sorry, saving is not functional in this experimental build.");
-				return false;
-			#endif
+			//MessageBox("Saving Disabled");
+			//return false;
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::song().fileName;
+			std::string ifile = Global::_pSong->fileName;
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
@@ -755,85 +700,55 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter =
-				"Psycle Song (*.psy)"               "\0" "*.psy"        "\0"
-				#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-					#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-				#elif PSYCLE__CONFIGURATION__SERIALIZATION
-					"Psycle Song as XML (*.psycle.xml)" "\0" "*.psycle.xml" "\0"
-				#endif
-				"Psycle Pattern (*.psb)"            "\0" "*.psb"        "\0"
-				"All (*)"                           "\0" "*"            "\0"
-				;
+			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::configuration().GetCurrentSongDir();
+			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = true;
+			BOOL bResult = TRUE;
 			
 			// Display the Open dialog box. 
-			if (GetSaveFileName(&ofn) == true)
+			if (GetSaveFileName(&ofn) == TRUE)
 			{
 				CString str = ofn.lpstrFile;
-
 				if ( ofn.nFilterIndex == 2 ) 
-				#if !defined PSYCLE__CONFIGURATION__SERIALIZATION
-					#error PSYCLE__CONFIGURATION__SERIALIZATION isn't defined! Check the code where this error is triggered.
-				#elif PSYCLE__CONFIGURATION__SERIALIZATION
-				{
-					std::string extension(".psycle.xml");
-					CString str2 = str.Right(extension.length());
-					if ( str2.CompareNoCase(extension.c_str()) != 0 ) str.Insert(str.GetLength(),extension.c_str()); ///\todo remove ".psy" first
-					sprintf(szFile,str);
-					try
-					{
-						_pSong->SaveXML(szFile);
-					}
-					catch(...)
-					{
-						MessageBox("Error creating file!", "Error!", MB_OK);
-						return false;
-					}
-				}
-				else if ( ofn.nFilterIndex == 3 ) 
-				#endif
 				{
 					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb"); ///\todo remove ".psy" first
+					if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb");
 					sprintf(szFile,str);
 					FILE* hFile=fopen(szFile,"wb");
 					SaveBlock(hFile);
 					fflush(hFile);
 					fclose(hFile);
 				}
-				else
+				else 
 				{ 
 					CString str2 = str.Right(4);
 					if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
-					
 					int index = str.ReverseFind('\\');
-					if (index >= 0)
+					OldPsyFile file;
+
+					if (index != -1)
 					{
-						Global::configuration().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-						Global::song().fileName = str.Mid(index+1);
+						Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+						Global::_pSong->fileName = str.Mid(index+1);
 					}
 					else
 					{
-						Global::song().fileName = str;
+						Global::_pSong->fileName = str;
 					}
 					
-					RiffFile file;
 					if (!file.Create(str.GetBuffer(1), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
-						return false;
+						return FALSE;
 					}
 					if (!_pSong->Save(&file))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = false;
+						bResult = FALSE;
 					}
 					else 
 					{
@@ -851,15 +766,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
 					}
-					file.Close();
+					//file.Close(); <- save handles this
 				}
 			}
 			else
 			{
-				return false;
+				return FALSE;
 			}
 			return bResult;
 		}
+
+		#include <cderr.h>
 
 		void CChildView::OnFileLoadsong()
 		{
@@ -873,20 +790,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter =
-				"Psycle Songs (*.psy)"    "\0" "*.psy" "\0"
-				"Psycle Patterns (*.psb)" "\0" "*.psb" "\0"
-				"All (*)"                 "\0"  "*"    "\0"
-				;
+			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::configuration().GetCurrentSongDir();
+			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			
 			// Display the Open dialog box. 
-			if(::GetOpenFileName(&ofn)==true)
+			if(::GetOpenFileName(&ofn)==TRUE)
 			{
 				OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
 			}
@@ -946,28 +859,28 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				KillUndo();
 				KillRedo();
 				pParentMain->CloseAllMacGuis();
-				Global::player().Stop();
+				Global::pPlayer->Stop();
 				Sleep(LOCK_LATENCY);
 				_outputActive = false;
-				Global::configuration()._pOutputDriver->Enable(false);
+				Global::pConfig->_pOutputDriver->Enable(false);
 				// midi implementation
-				Global::configuration()._pMidiInput->Close();
+				Global::pConfig->_pMidiInput->Close();
 				Sleep(LOCK_LATENCY);
 
-				Global::song().New();
+				Global::_pSong->New();
 				_outputActive = true;
-				if (!Global::configuration()._pOutputDriver->Enable(true))
+				if (!Global::pConfig->_pOutputDriver->Enable(true))
 				{
 					_outputActive = false;
 				}
 				else
 				{
 					// midi implementation
-					Global::configuration()._pMidiInput->Open();
+					Global::pConfig->_pMidiInput->Open();
 				}
 				SetTitleBarText();
 				editPosition=0;
-				Global::song().seqBus=0;
+				Global::_pSong->seqBus=0;
 				pParentMain->PsybarsUpdate(); // Updates all values of the bars
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
@@ -988,7 +901,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			KillTimer(31);
 			KillTimer(159);
 			OnTimer(159); // Autosave
-			CSaveWavDlg dlg;
+			CSaveWavDlg dlg(this, &blockSel);
 			dlg.DoModal();
 			InitTimer();
 		}
@@ -997,35 +910,35 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//  <JosepMa> is this still the case? or what does "machine changes" mean?
 		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
 		{
-			BOOL bChecked = true;
+			BOOL bChecked = TRUE;
 			if (pUndoList)
 			{
 				if (UndoSaved != pUndoList->counter)
 				{
-					bChecked = false;
+					bChecked = FALSE;
 				}
 			}
 			else if (UndoMacSaved != UndoMacCounter)
 			{
-				bChecked = false;
+				bChecked = FALSE;
 			}
 			else
 			{
 				if (UndoSaved != 0)
 				{
-					bChecked = false;
+					bChecked = FALSE;
 				}
 			}
 			if (!bChecked)
 			{
-				if (Global::configuration().bFileSaveReminders)
+				if (Global::pConfig->bFileSaveReminders)
 				{
-					std::string filepath = Global::configuration().GetCurrentSongDir();
+					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
-					filepath += Global::song().fileName;
-					RiffFile file;
+					filepath += Global::_pSong->fileName;
+					OldPsyFile file;
 					std::ostringstream szText;
-					szText << "Save changes to \"" << Global::song().fileName
+					szText << "Save changes to \"" << Global::_pSong->fileName
 						<< "\"?";
 					int result = MessageBox(szText.str().c_str(),szTitle.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 					switch (result)
@@ -1036,33 +949,33 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							std::ostringstream szText;
 							szText << "Error writing to \"" << filepath << "\"!!!";
 							MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
-							return false;
+							return FALSE;
 						}
 						_pSong->Save(&file);
-						file.Close();
-						return true;
+						//file.Close(); <- save handles this
+						return TRUE;
 						break;
 					case IDNO:
-						return true;
+						return TRUE;
 						break;
 					case IDCANCEL:
-						return false;
+						return FALSE;
 						break;
 					}
 				}
 			}
-			return true;
+			return TRUE;
 		}
 
 		void CChildView::OnFileRevert()
 		{
 			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 			{
-				if (Global::song()._saved)
+				if (Global::_pSong->_saved)
 				{
 					std::ostringstream fullpath;
-					fullpath << Global::configuration().GetCurrentSongDir().c_str()
-						<< '\\' << Global::song().fileName.c_str();
+					fullpath << Global::pConfig->GetCurrentSongDir().c_str()
+						<< '\\' << Global::_pSong->fileName.c_str();
 					FileLoadsongNamed(fullpath.str());
 				}
 			}
@@ -1075,10 +988,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (viewMode != view_modes::machine)
 			{
 				viewMode = view_modes::machine;
-				ShowScrollBar(SB_BOTH,false);
+				ShowScrollBar(SB_BOTH,FALSE);
 
 				// set midi input mode to real-time or Step
-				if(Global::configuration()._midiMachineViewSeqMode)
+				if(Global::pConfig->_midiMachineViewSeqMode)
 					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
 				else
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
@@ -1104,7 +1017,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				RecalcMetrics();
 
 				viewMode = view_modes::pattern;
-				//ShowScrollBar(SB_BOTH,false);
+				//ShowScrollBar(SB_BOTH,FALSE);
 				
 				// set midi input mode to step insert
 				CMidiInput::Instance()->m_midiMode = MODE_STEP;
@@ -1113,12 +1026,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				if
 					(
-						Global::configuration()._followSong &&
-						editPosition  != Global::player()._playPosition &&
-						Global::player()._playing
+						Global::pConfig->_followSong &&
+						editPosition  != Global::pPlayer->_playPosition &&
+						Global::pPlayer->_playing
 					)
 				{
-					editPosition=Global::player()._playPosition;
+					editPosition=Global::pPlayer->_playPosition;
 				}
 				Repaint();
 				pParentMain->StatusBarIdle();
@@ -1136,12 +1049,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnShowPatternSeq() 
 		{
-			MessageBox("This feature is unimplemented in this release. Use the left side sequence for now.","Psycle Notice");
 			/*
-			if (viewMode != sequence)
+			if (viewMode != view_modes::sequence)
 			{
-				viewMode = sequence;
-				ShowScrollBar(SB_BOTH,false);
+				viewMode = view_modes::sequence;
+				ShowScrollBar(SB_BOTH,FALSE);
 				
 				// set midi input mode to step insert
 				CMidiInput::Instance()->m_midiMode = MODE_STEP;
@@ -1164,29 +1076,29 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnBarplay() 
 		{
-			if (Global::configuration()._followSong)
+			if (Global::pConfig->_followSong)
 			{
 				bScrollDetatch=false;
 			}
 			prevEditPosition=editPosition;
-			Global::player().Start(editPosition,0);
+			Global::pPlayer->Start(editPosition,0);
 			pParentMain->StatusBarIdle();
 		}
 
 		void CChildView::OnBarplayFromStart() 
 		{
-			if (Global::configuration()._followSong)
+			if (Global::pConfig->_followSong)
 			{
 				bScrollDetatch=false;
 			}
 			prevEditPosition=editPosition;
-			Global::player().Start(0,0);
+			Global::pPlayer->Start(0,0);
 			pParentMain->StatusBarIdle();
 		}
 
 		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 		{
-			if (Global::player()._playing)
+			if (Global::pPlayer->_playing)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1199,14 +1111,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnBarrec() 
 		{
-			if (Global::configuration()._followSong && bEditMode)
+			if (Global::pConfig->_followSong && bEditMode)
 			{
-				bEditMode = false;
+				bEditMode = FALSE;
 			}
 			else
 			{
-				Global::configuration()._followSong = true;
-				bEditMode = true;
+				Global::pConfig->_followSong = TRUE;
+				bEditMode = TRUE;
 				CButton*cb=(CButton*)pParentMain->m_wndSeq.GetDlgItem(IDC_FOLLOW);
 				cb->SetCheck(1);
 			}
@@ -1215,7 +1127,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
 		{
-			if (Global::configuration()._followSong && bEditMode)
+			if (Global::pConfig->_followSong && bEditMode)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1223,19 +1135,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnButtonplayseqblock() 
 		{
-			if (Global::configuration()._followSong)
+			if (Global::pConfig->_followSong)
 			{
 				bScrollDetatch=false;
 			}
 
 			prevEditPosition=editPosition;
 			int i=0;
-			while ( Global::song().playOrderSel[i] == false ) i++;
+			while ( Global::_pSong->playOrderSel[i] == false ) i++;
 			
-			if(!Global::player()._playing)
-				Global::player().Start(i,0);
+			if(!Global::pPlayer->_playing)
+				Global::pPlayer->Start(i,0);
 
-			Global::player()._playBlock=!Global::player()._playBlock;
+			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
 
 			pParentMain->StatusBarIdle();
 			if ( viewMode == view_modes::pattern ) Repaint(draw_modes::pattern);
@@ -1243,21 +1155,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 		{
-			if ( Global::player()._playBlock == true ) pCmdUI->SetCheck(true);
-			else pCmdUI->SetCheck(false);
+			if ( Global::pPlayer->_playBlock == true ) pCmdUI->SetCheck(TRUE);
+			else pCmdUI->SetCheck(FALSE);
 		}
 
 		void CChildView::OnBarstop()
 		{
-			bool pl = Global::player()._playing;
-			bool blk = Global::player()._playBlock;
-			Global::player().Stop();
+			bool pl = Global::pPlayer->_playing;
+			bool blk = Global::pPlayer->_playBlock;
+			Global::pPlayer->Stop();
 			pParentMain->SetAppSongBpm(0);
 			pParentMain->SetAppSongTpb(0);
 
 			if (pl)
 			{
-				if ( Global::configuration()._followSong && blk)
+				if ( Global::pConfig->_followSong && blk)
 				{
 					editPosition=prevEditPosition;
 					pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
@@ -1265,8 +1177,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					memset(Global::song().playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-					Global::song().playOrderSel[editPosition] = true;
+					memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+					Global::_pSong->playOrderSel[editPosition] = true;
 					Repaint(draw_modes::cursor); 
 				}
 			}
@@ -1274,29 +1186,29 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnRecordWav() 
 		{
-			if (!Global::player()._recording)
+			if (!Global::pPlayer->_recording)
 			{
 				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 				
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
 				{
-					Global::player().StartRecording(dlg.GetFileName().GetBuffer(4));
+					Global::pPlayer->StartRecording(dlg.GetFileName().GetBuffer(4));
 				}
-				if ( Global::configuration().autoStopMachines ) 
+				if ( Global::pConfig->autoStopMachines ) 
 				{
 					OnAutostop();
 				}
 			}
 			else
 			{
-				Global::player().StopRecording();
+				Global::pPlayer->StopRecording();
 			}
 		}
 
 		void CChildView::OnUpdateRecordWav(CCmdUI* pCmdUI) 
 		{
-			if (Global::player()._recording)
+			if (Global::pPlayer->_recording)
 			{
 				pCmdUI->SetCheck(1);
 			}
@@ -1308,29 +1220,28 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnAutostop() 
 		{
-			if ( Global::configuration().autoStopMachines )
+			if ( Global::pConfig->autoStopMachines )
 			{
-				Global::configuration().autoStopMachines = false;
+				Global::pConfig->autoStopMachines = false;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (Global::song()._pMachine[c])
+					if (Global::_pSong->_pMachine[c])
 					{
-						Global::song()._pMachine[c]->_stopped=false;
+						Global::_pSong->_pMachine[c]->Standby(false);
 					}
 				}
 			}
-			else Global::configuration().autoStopMachines = true;
+			else Global::pConfig->autoStopMachines = true;
 		}
 
 		void CChildView::OnUpdateAutostop(CCmdUI* pCmdUI) 
 		{
-			if (Global::configuration().autoStopMachines == true ) pCmdUI->SetCheck(true);
-			else pCmdUI->SetCheck(false);
+			if (Global::pConfig->autoStopMachines == true ) pCmdUI->SetCheck(TRUE);
+			else pCmdUI->SetCheck(FALSE);
 		}
 
 		void CChildView::OnFileSongproperties() 
-		{	CSongpDlg dlg;
-			dlg._pSong=Global::pSong;
+		{	CSongpDlg dlg(Global::_pSong);
 			dlg.DoModal();
 			pParentMain->StatusBarIdle();
 			//Repaint();
@@ -1364,6 +1275,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			dlg.patLines= nlines;
 			strcpy(dlg.patName,name);
+			pParentMain->UpdateSequencer();
 			
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1382,11 +1294,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{
 					strcpy(_pSong->patternName[patNum],dlg.patName);
+					pParentMain->UpdateSequencer();
 					pParentMain->StatusBarIdle();
-					//Repaint(pattern_header);
+					//Repaint(draw_modes::patternHeader);
 				}
 			}
-
 		}
 
 		void CChildView::OnNewmachine() 
@@ -1395,56 +1307,67 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 
 		/// Show new machine dialog
-		void CChildView::NewMachine(int x, int y, Machine::id_type mac) 
+		void CChildView::NewMachine(int x, int y, int mac) 
 		{
 			CNewMachine dlg;
-			if(dlg.DoModal() == IDOK && dlg.Outputmachine != MACH_UNDEFINED)
+			if(mac >= 0)
 			{
-				Machine::id_type fb;
-				int xs,ys;
+				if (mac < MAX_BUSES)
+				{
+					dlg.selectedMode = modegen;
+				}
+				else
+				{
+					dlg.selectedMode = modefx;
+				}
+			}
+			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
+			{
+				int fb,xs,ys;
 				if (mac < 0)
 				{
-					if (dlg.Outputmode == MACHMODE_FX)
+					AddMacViewUndo();
+					if (dlg.OutBus) 
 					{
-						fb = Global::song().GetFreeFxBus();
-						xs = MachineCoords.sEffect.width;
-						ys = MachineCoords.sEffect.height;
+						fb = Global::_pSong->GetFreeBus();
+						xs = MachineCoords.sGenerator.width;
+						ys = MachineCoords.sGenerator.height;
 					}
 					else 
 					{
-						fb = Global::song().GetFreeBus();
-						xs = MachineCoords.sGenerator.width;
-						ys = MachineCoords.sGenerator.height;
+						fb = Global::_pSong->GetFreeFxBus();
+						xs = MachineCoords.sEffect.width;
+						ys = MachineCoords.sEffect.height;
 					}
 				}
 				else
 				{
-					if (mac >= MAX_BUSES && dlg.Outputmode == MACHMODE_FX)
+					if ((mac >= MAX_BUSES) && !(dlg.OutBus))
 					{
+						AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords.sEffect.width;
 						ys = MachineCoords.sEffect.height;
 						// delete machine if it already exists
-						if (Global::song()._pMachine[fb])
+						if (Global::_pSong->_pMachine[fb])
 						{
-							x = Global::song()._pMachine[fb]->GetPosX();
-							y = Global::song()._pMachine[fb]->GetPosY();
+							x = Global::_pSong->_pMachine[fb]->_x;
+							y = Global::_pSong->_pMachine[fb]->_y;
 							pParentMain->CloseMacGui(fb);
-							Global::song().DestroyMachine(fb);
 						}
 					}
-					else if (mac < MAX_BUSES && dlg.Outputmode != MACHMODE_FX)
+					else if ((mac < MAX_BUSES) && (dlg.OutBus))
 					{
+						AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords.sGenerator.width;
 						ys = MachineCoords.sGenerator.height;
 						// delete machine if it already exists
-						if (Global::song()._pMachine[fb])
+						if (Global::_pSong->_pMachine[fb])
 						{
-							x = Global::song()._pMachine[fb]->GetPosX();
-							y = Global::song()._pMachine[fb]->GetPosY();
+							x = Global::_pSong->_pMachine[fb]->_x;
+							y = Global::_pSong->_pMachine[fb]->_y;
 							pParentMain->CloseMacGui(fb);
-							Global::song().DestroyMachine(fb);
 						}
 					}
 					else
@@ -1453,24 +1376,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						return;
 					}
 				}
-				AddMacViewUndo();
 				// random position
 				if ((x < 0) || (y < 0))
 				{
-					bool bCovered = true;
+					bool bCovered = TRUE;
 					while (bCovered)
 					{
 						x = (rand())%(CW-xs);
 						y = (rand())%(CH-ys);
-						bCovered = false;
+						bCovered = FALSE;
 						for (int i=0; i < MAX_MACHINES; i++)
 						{
-							if (Global::song()._pMachine[i])
+							if (Global::_pSong->_pMachine[i])
 							{
-								if ((abs(Global::song()._pMachine[i]->GetPosX() - x) < 32) &&
-									(abs(Global::song()._pMachine[i]->GetPosY() - y) < 32))
+								if ((abs(Global::_pSong->_pMachine[i]->_x - x) < 32) &&
+									(abs(Global::_pSong->_pMachine[i]->_y - y) < 32))
 								{
-									bCovered = true;
+									bCovered = TRUE;
 									i = MAX_MACHINES;
 								}
 							}
@@ -1482,43 +1404,77 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				// busses are set last, so no messages will be sent until after machine is created anyway
 				/*
 				_outputActive = false;
-				Global::configuration()._pOutputDriver->Enable(false);
+				Global::pConfig->_pOutputDriver->Enable(false);
 				// MIDI IMPLEMENTATION
-				Global::configuration()._pMidiInput->Close();
+				Global::pConfig->_pMidiInput->Close();
 				*/
 
-				if ( fb == -1 || !Global::song().CreateMachine(dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(), fb))
+				if ( fb == -1)
 				{
 					MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
 				else
 				{
-					if(dlg.Outputmode) Global::song().seqBus = fb;
-
-					// make sure that no 2 machines have the same name, because that is irritating
+					bool created=false;
+					if (Global::_pSong->_pMachine[fb] )
 					{
-						std::stringstream ss;
-						ss << _pSong->_pMachine[fb]->GetEditName() << " " << std::hex << fb;
-						_pSong->_pMachine[fb]->SetEditName(ss.str());
+						created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 					}
+					else 
+					{
+						created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+					}
+					if (created)
+					{
+						if ( dlg.OutBus)
+						{
+							Global::_pSong->seqBus = fb;
+						}
 
-					pParentMain->UpdateComboGen();
-					Repaint(draw_modes::all);
-					//Repaint(draw_modes::machine); // Seems that this doesn't always work (multiple calls to Repaint?)
+						// make sure that no 2 machines have the same name, because that is irritating
+
+						int number = 1;
+						char buf[sizeof(_pSong->_pMachine[fb]->_editName)+4];
+						strcpy (buf,_pSong->_pMachine[fb]->_editName);
+
+						for (int i = 0; i < MAX_MACHINES-1; i++)
+						{
+							if (i!=fb)
+							{
+								if (_pSong->_pMachine[i])
+								{
+									if (strcmp(_pSong->_pMachine[i]->_editName,buf)==0)
+									{
+										number++;
+										sprintf(buf,"%s %d",_pSong->_pMachine[fb]->_editName,number);
+										i = -1;
+									}
+								}
+							}
+						}
+
+						buf[sizeof(_pSong->_pMachine[fb]->_editName)-1] = 0;
+						strcpy(_pSong->_pMachine[fb]->_editName,buf);
+
+						pParentMain->UpdateComboGen();
+						Repaint(draw_modes::all);
+						//Repaint(draw_modes::all_machines); // Seems that this doesn't always work (multiple calls to Repaint?)
+					}
+					else MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
 				
 				/*
 				// Restarting the driver...
 				pParentMain->UpdateEnvInfo();
 				_outputActive = true;
-				if (!Global::configuration()._pOutputDriver->Enable(true))
+				if (!Global::pConfig->_pOutputDriver->Enable(true))
 				{
 					_outputActive = false;
 				}
 				else
 				{
 					// MIDI IMPLEMENTATION
-					Global::configuration()._pMidiInput->Open();
+					Global::pConfig->_pMidiInput->Open();
 				}
 				*/
 			}
@@ -1534,9 +1490,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (dlg.DoModal() == IDOK)
 			{
 				KillTimer(159);
-				if ( Global::configuration().autosaveSong )
+				if ( Global::pConfig->autosaveSong )
 				{
-					SetTimer(159,Global::configuration().autosaveSongTime*60000,NULL);
+					SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL);
 				}
 				_outputActive = true;
 				EnableSound();
@@ -1556,7 +1512,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::ShowSwingFillDlg(bool bTrackMode)
 		{
-			int st = Global::song().BeatsPerMin();
+			int st = Global::_pSong->BeatsPerMin();
 			static int sw = 2;
 			static float sv = 13.0f;
 			static float sp = -90.0f;
@@ -1652,8 +1608,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 		{
-			if (blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
-			else pCmdUI->Enable(false);
+			if (blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
+			else pCmdUI->Enable(FALSE);
 		}
 
 		void CChildView::OnPopCopy() { CopyBlock(false); }
@@ -1661,8 +1617,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnPopPaste() { PasteBlock(editcur.track,editcur.line,false); }
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
-			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
-			else  pCmdUI->Enable(false);
+			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
+			else  pCmdUI->Enable(FALSE);
 		}
 
 		void CChildView::OnPopMixpaste() { PasteBlock(editcur.track,editcur.line,true); }
@@ -1677,9 +1633,44 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
 			else  pCmdUI->Enable(false);
 		}
+
 		void CChildView::OnPopDelete() { DeleteBlock(); }
 
 		void CChildView::OnPopInterpolate() { BlockParamInterpolate(); }
+
+		void CChildView::OnPopInterpolateCurve()
+		{
+			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
+			
+			int *valuearray = new int[blockSel.end.line-blockSel.start.line+1];
+			int ps=_pSong->playOrder[editPosition];
+			for (int i=0; i<=blockSel.end.line-blockSel.start.line; i++)
+			{
+				unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,i+blockSel.start.line);
+				if (*offset_target <= notecommands::release || *offset_target == notecommands::empty)
+				{
+					if ( *(offset_target+3) == 0 && *(offset_target+4) == 0 ) valuearray[i]=-1;
+					else valuearray[i]= *(offset_target+3)*0x100 + *(offset_target+4);
+				}
+				else valuearray[i] = *(offset_target+3)*0x100 + *(offset_target+4);
+			}
+			unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,blockSel.start.line);
+			if ( *offset_target == notecommands::tweak ) dlg.AssignInitialValues(valuearray,0);
+			else if ( *offset_target == notecommands::tweakslide ) dlg.AssignInitialValues(valuearray,1);
+			else if ( *offset_target == notecommands::midicc ) dlg.AssignInitialValues(valuearray,2);
+			else dlg.AssignInitialValues(valuearray,-1);
+			
+			if (dlg.DoModal() == IDOK )
+			{
+				int twktype(255);
+				if ( dlg.kftwk == 0 ) twktype = notecommands::tweak;
+				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweakslide;
+				else if ( dlg.kftwk == 2 ) twktype = notecommands::midicc;
+				BlockParamInterpolate(dlg.kfresult,twktype);
+			}
+			delete valuearray;
+		}
+
 
 		void CChildView::OnPopChangegenerator() { BlockGenChange(_pSong->seqBus); }
 
@@ -1701,13 +1692,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		/// fill block
 		void CChildView::OnPopBlockSwingfill()
 		{
-			ShowSwingFillDlg(false);
+			ShowSwingFillDlg(FALSE);
 		}
 
 		/// fill track
 		void CChildView::OnPopTrackSwingfill()
 		{
-			ShowSwingFillDlg(true);
+			ShowSwingFillDlg(TRUE);
 		}
 
 		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
@@ -1717,18 +1708,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				switch (pUndoList->type)
 				{
 				case UNDO_SEQUENCE:
-					pCmdUI->Enable(true);
+					pCmdUI->Enable(TRUE);
 					pCmdUI->SetText("Undo");
 					break;
 				default:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						pCmdUI->Enable(true);
+						pCmdUI->Enable(TRUE);
 						pCmdUI->SetText("Undo");
 					}
 					else
 					{
-						pCmdUI->Enable(false);
+						pCmdUI->Enable(FALSE);
 						pCmdUI->SetText("Undo in Pattern View");
 					}
 					break;
@@ -1737,7 +1728,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else
 			{
 				pCmdUI->SetText("Undo");
-				pCmdUI->Enable(false);
+				pCmdUI->Enable(FALSE);
 			}
 		}
 
@@ -1748,18 +1739,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				switch (pRedoList->type)
 				{
 				case UNDO_SEQUENCE:
-					pCmdUI->Enable(true);
+					pCmdUI->Enable(TRUE);
 					pCmdUI->SetText("Redo");
 					break;
 				default:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						pCmdUI->Enable(true);
+						pCmdUI->Enable(TRUE);
 						pCmdUI->SetText("Redo");
 					}
 					else
 					{
-						pCmdUI->Enable(false);
+						pCmdUI->Enable(FALSE);
 						pCmdUI->SetText("Redo in Pattern View");
 					}
 					break;
@@ -1767,21 +1758,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				pCmdUI->Enable(false);
+				pCmdUI->Enable(FALSE);
 				pCmdUI->SetText("Redo");
 			}
 		}
 
 		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
 		{
-			if(viewMode == view_modes::pattern) pCmdUI->Enable(true);
-			else pCmdUI->Enable(false);
+			if(viewMode == view_modes::pattern) pCmdUI->Enable(TRUE);
+			else pCmdUI->Enable(FALSE);
 		}
 
 		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
 		{
-			if(patBufferCopy&&(viewMode == view_modes::pattern)) pCmdUI->Enable(true);
-			else pCmdUI->Enable(false);
+			if(patBufferCopy&&(viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
+			else pCmdUI->Enable(FALSE);
 		}
 
 		void CChildView::OnFileImportModulefile() 
@@ -1806,21 +1797,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::configuration().GetCurrentSongDir();
+			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==true)
+			if (GetOpenFileName(&ofn)==TRUE)
 			{
 				KillUndo();
 				KillRedo();
 				pParentMain->CloseAllMacGuis();
-				Global::player().Stop();
+				Global::pPlayer->Stop();
 				Sleep(LOCK_LATENCY);
 				_outputActive = false;
-				Global::configuration()._pOutputDriver->Enable(false);
+				Global::pConfig->_pOutputDriver->Enable(false);
 				// MIDI IMPLEMENTATION
-				Global::configuration()._pMidiInput->Close();
+				Global::pConfig->_pMidiInput->Close();
 				Sleep(LOCK_LATENCY);
 
 				CString str = ofn.lpstrFile;
@@ -1832,82 +1823,98 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						XMSongLoader xmfile;
 						xmfile.Open(ofn.lpstrFile);
-						Global::song().New();
+						Global::_pSong->New();
 						editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];		
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::song().Name,
-							Global::song().Author,
-							Global::song().Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "XM file imported", MB_OK);
+*/
 					} else if (ext.CompareNoCase("IT") == 0)
 					{
 						ITModule2 it;
 						it.Open(ofn.lpstrFile);
-						Global::song().New();
+						Global::_pSong->New();
 						editPosition=0;
 						if(!it.LoadITModule(_pSong))
 						{			
 							MessageBox("Load failed");
-							Global::song().New();
+							Global::_pSong->New();
 							it.Close();
 							return;
 						}
 						it.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];		
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::song().Name,
-							Global::song().Author,
-							Global::song().Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "IT file imported", MB_OK);
+*/
 					} else if (ext.CompareNoCase("S3M") == 0)
 					{
 						ITModule2 s3m;
 						s3m.Open(ofn.lpstrFile);
-						Global::song().New();
+						Global::_pSong->New();
 						editPosition=0;
 						if(!s3m.LoadS3MModuleX(_pSong))
 						{			
 							MessageBox("Load failed");
-							Global::song().New();
+							Global::_pSong->New();
 							s3m.Close();
 							return;
 						}
 						s3m.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::song().Name,
-							Global::song().Author,
-							Global::song().Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "S3M file imported", MB_OK);
+*/
 					} else if (ext.CompareNoCase("MOD") == 0)
 					{
 						MODSongLoader modfile;
 						modfile.Open(ofn.lpstrFile);
-						Global::song().New();
+						Global::_pSong->New();
 						editPosition=0;
 						modfile.Load(*_pSong);
 						modfile.Close();
-						char buffer[512];		
+						CSongpDlg dlg(Global::_pSong);
+						dlg.SetReadOnly();
+						dlg.DoModal();
+/*						char buffer[512];		
 						std::sprintf
 							(
 							buffer,"%s\n\n%s\n\n%s",
-							Global::song().Name,
-							Global::song().Author,
-							Global::song().Comment
+							Global::song().name.c_str(),
+							Global::song().author.c_str(),
+							Global::song().comments.c_str()
 							);
 						MessageBox(buffer, "MOD file imported", MB_OK);
+*/
 					}
 				}
 
@@ -1915,22 +1922,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::configuration().SetCurrentSongDir((LPCSTR)str.Left(index));
-					Global::song().fileName = str.Mid(index+1)+".psy";
+					Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
+					Global::_pSong->fileName = str.Mid(index+1)+".psy";
 				}
 				else
 				{
-					Global::song().fileName = str+".psy";
+					Global::_pSong->fileName = str+".psy";
 				}
 				_outputActive = true;
-				if (!Global::configuration()._pOutputDriver->Enable(true))
+				if (!Global::pConfig->_pOutputDriver->Enable(true))
 				{
 					_outputActive = false;
 				}
 				else
 				{
 					// MIDI IMPLEMENTATION
-					Global::configuration()._pMidiInput->Open();
+					Global::pConfig->_pMidiInput->Open();
 				}
 				pParentMain->PsybarsUpdate();
 				pParentMain->WaveEditorBackUpdate();
@@ -1989,9 +1996,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
 			hNewItemInfo.fType		= MFT_STRING;
 			hNewItemInfo.wID		= ids[0];
-			hNewItemInfo.cch		= static_cast<UINT>(fName.length()); ///\todo recheck this on a 64-bit platform
+			hNewItemInfo.cch		= fName.length();
 			hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
-			InsertMenuItem(hRecentMenu, 0, true, &hNewItemInfo);
+			InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
 			// Update identifiers.
 			for(iCount = 1;iCount < GetMenuItemCount(hRecentMenu);iCount++)
 			{
@@ -2042,15 +2049,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::FileLoadsongNamed(std::string fName)
 		{
 			pParentMain->CloseAllMacGuis();
-			Global::player().Stop();
+			Global::pPlayer->Stop();
 			Sleep(LOCK_LATENCY);
 			_outputActive = false;
-			Global::configuration()._pOutputDriver->Enable(false);
+			Global::pConfig->_pOutputDriver->Enable(false);
 			// MIDI IMPLEMENTATION
-			Global::configuration()._pMidiInput->Close();
+			Global::pConfig->_pMidiInput->Close();
 			Sleep(LOCK_LATENCY);
 			
-			RiffFile file;
+			OldPsyFile file;
 			if (!file.Open(fName.c_str()))
 			{
 				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
@@ -2058,29 +2065,29 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			editPosition = 0;
 			_pSong->Load(&file);
-			file.Close();
+			//file.Close(); <- load handles this
 			_pSong->_saved=true;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
 			{
-				Global::configuration().SetCurrentSongDir(fName.substr(0,index));
-				Global::song().fileName = fName.substr(index+1);
+				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
+				Global::_pSong->fileName = fName.substr(index+1);
 			}
 			else
 			{
-				Global::song().fileName = fName;
+				Global::_pSong->fileName = fName;
 			}
-//			Global::song().SetBPM(Global::song().BeatsPerMin(), Global::song()._LinesPerBeat, Global::configuration()._pOutputDriver->_samplesPerSec);
+//			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_LinesPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
 			_outputActive = true;
-			if (!Global::configuration()._pOutputDriver->Enable(true))
+			if (!Global::pConfig->_pOutputDriver->Enable(true))
 			{
 				_outputActive = false;
 			}
 			else
 			{
 				// MIDI IMPLEMENTATION
-				Global::configuration()._pMidiInput->Open();
+				Global::pConfig->_pMidiInput->Open();
 			}
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();
@@ -2094,15 +2101,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			KillUndo();
 			KillRedo();
 			SetTitleBarText();
-			if (Global::configuration().bShowSongInfoOnLoad)
+			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
-				std::ostringstream songLoaded;
-				songLoaded << '\'' << _pSong->Name << '\'' << std::endl
+				CSongpDlg dlg(Global::_pSong);
+				dlg.SetReadOnly();
+				dlg.DoModal();
+/*				std::ostringstream songLoaded;
+				songLoaded << '\'' << _pSong->name << '\'' << std::endl
 					<< std::endl
-					<< _pSong->Author << std::endl
+					<< _pSong->author << std::endl
 					<< std::endl
-					<< _pSong->Comment;
+					<< _pSong->comments;
 				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
+*/
 			}
 		}
 
@@ -2113,15 +2124,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			char* nameBuff = new char[nameSize];
 			GetMenuString(hRecentMenu, pos, nameBuff, nameSize, MF_BYPOSITION);
 			OnFileLoadsongNamed(nameBuff, 1);
-			zapArray(nameBuff);
+			delete [] nameBuff; nameBuff = 0;
 		}
 
 		void CChildView::SetTitleBarText()
 		{
 			std::string titlename = "[";
-			titlename+=Global::song().fileName;
+			titlename+=Global::_pSong->fileName;
 			/*
-			if(!(Global::song()._saved))
+			if(!(Global::_pSong->_saved))
 			{
 				titlename+=" *";
 			}
@@ -2153,28 +2164,28 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\keys.txt",Global::configuration().appPath());
+			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\readme.txt",Global::configuration().appPath());
+			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\tweaking.txt",Global::configuration().appPath());
+			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\whatsnew.txt",Global::configuration().appPath());
+			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
@@ -2182,13 +2193,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			std::string szOld;
 			LoadMachineDial();
-			if (!Global::configuration().machine_skin.empty())
+			if (!Global::pConfig->machine_skin.empty())
 			{
-				szOld = Global::configuration().machine_skin;
+				szOld = Global::pConfig->machine_skin;
 				if (szOld != PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
 				{
-					BOOL result = false;
-					FindMachineSkin(Global::configuration().GetSkinDir().c_str(),Global::configuration().machine_skin.c_str(), &result);
+					BOOL result = FALSE;
+					FindMachineSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
 					if(result)
 					{
 						return;
@@ -2282,7 +2293,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					MachineCoords.dEffectBypass.y = 15;
 					MachineCoords.dEffectName.x = 10;
 					MachineCoords.dEffectName.y = 12;
-					MachineCoords.bHasTransparency = false;
+					MachineCoords.bHasTransparency = FALSE;
 				#else
 					MachineCoords.sMaster.x = 0;
 					MachineCoords.sMaster.y = 0;
@@ -2368,7 +2379,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					MachineCoords.dEffectBypass.y = 5;//15;
 					MachineCoords.dEffectName.x = 49;//10;
 					MachineCoords.dEffectName.y = 7;//12;
-					MachineCoords.bHasTransparency = false;
+					MachineCoords.bHasTransparency = FALSE;
 				#endif
 				machineskin.DeleteObject();
 				DeleteObject(hbmMachineSkin);
@@ -2387,7 +2398,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				if (finder.IsDirectory() && !finder.IsDots())
 				{
 					FindMachineSkin(finder.GetFilePath(),findName,result);
-					if ( *result == true) return;
+					if ( *result == TRUE) return;
 				}
 			}
 			finder.Close();
@@ -2901,7 +2912,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									if (q)
 									{
 										hexstring_to_integer(q+1, MachineCoords.cTransparency);
-										MachineCoords.bHasTransparency = true;
+										MachineCoords.bHasTransparency = TRUE;
 									}
 								}
 							}
@@ -2910,7 +2921,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PrepareMask(&machineskin,&machineskinmask,MachineCoords.cTransparency);
 							}
 							fclose(hfile);
-							*result = true;
+							*result = TRUE;
 							break;
 						}
 					}
@@ -2922,14 +2933,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CChildView::LoadPatternHeaderSkin()
 		{
 			std::string szOld;
-			if (!Global::configuration().pattern_header_skin.empty())
+			if (!Global::pConfig->pattern_header_skin.empty())
 			{
-				szOld = Global::configuration().pattern_header_skin;
+				szOld = Global::pConfig->pattern_header_skin;
 				// ok so...
 				if (szOld != std::string(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN))
 				{
-					BOOL result = false;
-					FindPatternHeaderSkin(Global::configuration().GetSkinDir().c_str(),Global::configuration().pattern_header_skin.c_str(), &result);
+					BOOL result = FALSE;
+					FindPatternHeaderSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->pattern_header_skin.c_str(), &result);
 					if (result)
 					{
 						return;
@@ -2969,7 +2980,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					PatHeaderCoords.dMuteOn.y = 5;
 					PatHeaderCoords.dSoloOn.x = 96;
 					PatHeaderCoords.dSoloOn.y = 5;
-					PatHeaderCoords.bHasTransparency = false;
+					PatHeaderCoords.bHasTransparency = FALSE;
 				#else
 					PatHeaderCoords.sBackground.x=0;
 					PatHeaderCoords.sBackground.y=0;
@@ -3001,7 +3012,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					PatHeaderCoords.dMuteOn.y = 3;//5;
 					PatHeaderCoords.dSoloOn.x = 97;//96;
 					PatHeaderCoords.dSoloOn.y = 3;//5;
-					PatHeaderCoords.bHasTransparency = false;
+					PatHeaderCoords.bHasTransparency = FALSE;
 				#endif
 				patternheader.DeleteObject();
 				DeleteObject(hbmPatHeader);
@@ -3243,7 +3254,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									if (q)
 									{
 										hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
-										PatHeaderCoords.bHasTransparency = true;
+										PatHeaderCoords.bHasTransparency = TRUE;
 									}
 								}
 							}
@@ -3252,7 +3263,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								PrepareMask(&patternheader,&patternheadermask,PatHeaderCoords.cTransparency);
 							}
 							fclose(hfile);
-							*result = true;
+							*result = TRUE;
 							break;
 						}
 					}
@@ -3264,22 +3275,22 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::RecalcMetrics()
 		{
-			if (Global::configuration().pattern_draw_empty_data)
+			if (Global::pConfig->pattern_draw_empty_data)
 			{
-				sprintf(szBlankParam,".");
-				sprintf(szBlankNote,"---");
+				strcpy(szBlankParam,".");
+				strcpy(szBlankNote,"---");
 			}
 			else
 			{
-				sprintf(szBlankParam," ");
-				sprintf(szBlankNote,"   ");
+				strcpy(szBlankParam," ");
+				strcpy(szBlankNote,"   ");
 			}
-			TEXTHEIGHT = Global::configuration().pattern_font_y;
+			TEXTHEIGHT = Global::pConfig->pattern_font_y;
 			ROWHEIGHT = TEXTHEIGHT+1;
-			TEXTWIDTH = Global::configuration().pattern_font_x;
+			TEXTWIDTH = Global::pConfig->pattern_font_x;
 			for (int c=0; c<256; c++)	
 			{ 
-				FLATSIZES[c]=Global::configuration().pattern_font_x; 
+				FLATSIZES[c]=Global::pConfig->pattern_font_x; 
 			}
 			COLX[0] = 0;
 			COLX[1] = (TEXTWIDTH*3)+2;
@@ -3304,7 +3315,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 			}
 			HEADER_INDENT = (ROWWIDTH - HEADER_ROWWIDTH)/2;
-			if (Global::configuration()._linenumbers)
+			if (Global::pConfig->_linenumbers)
 			{
 				XOFFSET = (4*TEXTWIDTH);
 				YOFFSET = TEXTHEIGHT+2;
@@ -3328,7 +3339,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ 
 				VISTRACKS = 1; 
 			}
-			triangle_size_tall = Global::configuration().mv_triangle_size+((23*Global::configuration().mv_wirewidth)/16);
+			triangle_size_tall = Global::pConfig->mv_triangle_size+((23*Global::pConfig->mv_wirewidth)/16);
 
 			triangle_size_center = triangle_size_tall/2;
 			triangle_size_wide = triangle_size_tall/2;
@@ -3432,7 +3443,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = false;
+						_pSong->_trackMuted[i] = FALSE;
 					}
 					_pSong->_trackSoloed = -1;
 				}
@@ -3440,9 +3451,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = true;
+						_pSong->_trackMuted[i] = TRUE;
 					}
-					_pSong->_trackMuted[editcur.track] = false;
+					_pSong->_trackMuted[editcur.track] = FALSE;
 					_pSong->_trackSoloed = editcur.track;
 				}
 				Repaint(draw_modes::track_header);
@@ -3466,18 +3477,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CChildView::DoMacPropDialog(Machine::id_type propMac)
+		void CChildView::DoMacPropDialog(int propMac)
 		{
 			if((propMac < 0 ) || (propMac >= MAX_MACHINES-1)) return;
 			CMacProp dlg;
 			dlg.m_view=this;
-			dlg.pMachine = Global::song()._pMachine[propMac];
-			dlg.pSong = &Global::song();
+			dlg.pMachine = Global::_pSong->_pMachine[propMac];
+			dlg.pSong = Global::_pSong;
 			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
-				dlg.pMachine->SetEditName(dlg.txt);
-				pParentMain->StatusBarText(dlg.txt.c_str());
+				sprintf(dlg.pMachine->_editName, dlg.txt);
+				pParentMain->StatusBarText(dlg.txt);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (pParentMain->pGearRackDialog)
@@ -3488,7 +3499,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if(dlg.deleted)
 			{
 				pParentMain->CloseMacGui(propMac);
-				Global::song().DestroyMachine(propMac);
+				Global::_pSong->DestroyMachine(propMac);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (pParentMain->pGearRackDialog)
@@ -3500,54 +3511,29 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnConfigurationLoopplayback() 
 		{
-			Global::player()._loopSong = !Global::player()._loopSong;
+			Global::pPlayer->_loopSong = !Global::pPlayer->_loopSong;
 		}
 
 		void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI) 
 		{
-			if (Global::player()._loopSong)
+			if (Global::pPlayer->_loopSong)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);	
 		}
-
 		void CChildView::LoadMachineDial()
 		{
-			machinedial.DeleteObject();
-			if ( hbmMachineDial) DeleteObject(hbmMachineDial);
-			if (Global::configuration().bBmpDial)
-			{
-				Global::configuration().bBmpDial=false;
-				hbmMachineDial = (HBITMAP)LoadImage(NULL, Global::configuration().szBmpDialFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-				if (hbmMachineDial)
-				{
-					if (machinedial.Attach(hbmMachineDial))
-					{	
-						BITMAP bm;
-						GetObject(hbmMachineDial,sizeof(BITMAP),&bm);
-
-						if ((bm.bmWidth == 1792) && (bm.bmHeight == 28))
-						{
-							Global::configuration().bBmpDial=true;
-						}
-						else
-							machinedial.LoadBitmap(IDB_KNOB);
-					}
-				}
-			}
-			else 
-				machinedial.LoadBitmap(IDB_KNOB);
+			CNativeGui::uiSetting().LoadMachineDial();
 		}
-
 
 		void CChildView::LoadMachineBackground()
 		{
 			machinebkg.DeleteObject();
 			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
-			if (Global::configuration().bBmpBkg)
+			if (Global::pConfig->bBmpBkg)
 			{
-				Global::configuration().bBmpBkg=false;
-				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::configuration().szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+				Global::pConfig->bBmpBkg=FALSE;
+				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 				if (hbmMachineBkg)
 				{
 					if (machinebkg.Attach(hbmMachineBkg))
@@ -3560,15 +3546,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 						if ((bkgx > 0) && (bkgy > 0))
 						{
-							Global::configuration().bBmpBkg=true;
+							Global::pConfig->bBmpBkg=TRUE;
 						}
 					}
 				}
 			}
 		}
 
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 
 // graphics operations, private headers
 #include "machineview.private.hpp"

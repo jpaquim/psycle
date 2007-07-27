@@ -1,12 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CVolumeDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/VolumeDlg.hpp>
-#include <math.h>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "VolumeDlg.hpp"
+#include "psycle.hpp"
+#include <cmath>
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CVolumeDlg::CVolumeDlg(CWnd* pParent) : CDialog(CVolumeDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CVolumeDlg)
@@ -46,7 +45,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_db.SetSel(0,32);
 			}
 			go = true;
-			return false;
+			return FALSE;
 		}
 
 		void CVolumeDlg::DrawDb() 
@@ -143,5 +142,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				DrawDb();
 			}
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

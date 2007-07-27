@@ -1,8 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::InputHandler.
 #pragma once
-#include <psycle/engine/constants.hpp>
-#include <psycle/engine/SongStructs.hpp>
+#include "constants.hpp"
 namespace psycle
 {
 	namespace host
@@ -40,7 +39,7 @@ namespace psycle
 		/// command it is, and for keys determine the note value
 		///\{
 		/// .
-		const int CS_KEY_START = notecommands::c0;
+		const int CS_KEY_START = 0;
 		/// .
 		const int CS_IMM_START = 256;
 		/// .
@@ -89,11 +88,11 @@ namespace psycle
 			cdefKeyGS2,
 			cdefKeyA_2,	
 
-			cdefKeyStop = notecommands::release,	///< NOTE STOP
-			cdefTweakM = notecommands::tweak,	///< tweak
-			cdefTweakE = notecommands::tweakeffect,	///< tweak effect. Old!
-			cdefMIDICC = notecommands::midicc,	///< Mcm Command (MIDI CC)
-			cdefTweakS = notecommands::tweakslide,	///< tweak slide command
+			cdefKeyStop = 120,	///< NOTE STOP
+			cdefTweakM = 121,	///< tweak
+			cdefTweakE = 122,	///< tweak effect. Old!
+			cdefMIDICC = 123,	///< Mcm Command (MIDI CC)
+			cdefTweakS = 124,	///< tweak slide command
 
 			// immediate commands
 
@@ -147,7 +146,6 @@ namespace psycle
 			cdefRedo,
 			cdefFollowSong,
 			cdefMaxPattern,
-			cdefErrorLog,
 
 			cdefTransposeChannelInc = CS_EDT_START,	
 			cdefTransposeChannelDec,
@@ -175,7 +173,6 @@ namespace psycle
 			cdefBlockCopy,
 			cdefBlockPaste,
 			cdefBlockMix,
-			cdefBlockSwitch,
 			cdefBlockInterpolate,
 			cdefBlockSetMachine,
 			cdefBlockSetInstr,
@@ -196,21 +193,33 @@ namespace psycle
 			cdefPatternTrackRecord,
 			cdefSelectBar,
 
+			
+
 		};
 
 		/// command definitions.
 		class CmdDef
 		{
-		public:
+		protected:
 			/// unique identifier
 			CmdSet ID;			
 			//int data;			// cmd specific data - e.g. note reference		
 			//CString desc;		// string description     
 			//void * callback;	// function callback, not currently used
+		public:
 			
-			CmdDef(CmdSet _ID=cdefNull)
+			CmdDef()
+			{
+				ID=cdefNull;
+			}
+			CmdDef::CmdDef(CmdSet _ID)
 			{
 				ID=_ID;
+				if (!strcmp(GetName(),"Invalid")) { ID=cdefNull; }
+			}
+			CmdDef(const CmdDef &other)
+			{
+				ID=other.ID;
 			}
 
 			CmdType GetType()
@@ -226,8 +235,21 @@ namespace psycle
 
 				return CT_Editor;
 			}
+			void SetNull()
+			{
+				ID=cdefNull;
+			}
+			CmdSet GetID()
+			{
+				return ID;
+			}
+			CmdDef& operator=(const CmdDef &other)
+			{
+				ID=other.ID;
+				return *this;
+			}
 
-			bool operator==(CmdDef other)
+			bool operator==(const CmdDef &other)
 			{
 				return (ID==other.ID);	
 			}
@@ -261,9 +283,9 @@ namespace psycle
 				case cdefKeyFS0: return "Key (Oct.0) F#";
 				case cdefKeyG_0: return "Key (Oct.0) G";
 				case cdefKeyGS0: return "Key (Oct.0) G#";
-				case cdefKeyA_0: return "Key (Oct.0) A";
-				case cdefKeyAS0: return "Key (Oct.0) A#";
-				case cdefKeyB_0: return "Key (Oct.0) B";
+				case cdefKeyA_0: return "Key (Oct.0)-A";
+				case cdefKeyAS0: return "Key (Oct.0)-A#";
+				case cdefKeyB_0: return "Key (Oct.0)-B";
 				case cdefKeyC_1: return "Key (Oct.1) C";
 				case cdefKeyCS1: return "Key (Oct.1) C#";
 				case cdefKeyD_1: return "Key (Oct.1) D";
@@ -273,9 +295,9 @@ namespace psycle
 				case cdefKeyFS1: return "Key (Oct.1) F#";
 				case cdefKeyG_1: return "Key (Oct.1) G";
 				case cdefKeyGS1: return "Key (Oct.1) G#";
-				case cdefKeyA_1: return "Key (Oct.1) A";
-				case cdefKeyAS1: return "Key (Oct.1) A#";
-				case cdefKeyB_1: return "Key (Oct.1) B";
+				case cdefKeyA_1: return "Key (Oct.1)-A";
+				case cdefKeyAS1: return "Key (Oct.1)-A#";
+				case cdefKeyB_1: return "Key (Oct.1)-B";
 				case cdefKeyC_2: return "Key (Oct.2) C";
 				case cdefKeyCS2: return "Key (Oct.2) C#";
 				case cdefKeyD_2: return "Key (Oct.2) D";
@@ -284,8 +306,8 @@ namespace psycle
 				case cdefKeyF_2: return "Key (Oct.2) F";
 				case cdefKeyFS2: return "Key (Oct.2) F#";
 				case cdefKeyG_2: return "Key (Oct.2) G";
-				case cdefKeyGS2: return "Key (Oct.2) G#";
-				case cdefKeyA_2: return "Key (Oct.2) A";
+				case cdefKeyGS2: return "Key (Oct.2)-G#";
+				case cdefKeyA_2: return "Key (Oct.2)-A";
 
 				case cdefKeyStop: return "Key Stop";
 				case cdefKeyStopAny: return "Key Stop Current";
@@ -331,7 +353,6 @@ namespace psycle
 				case cdefBlockDouble:	return "Block Double";
 				case cdefBlockHalve:	return "Block Halve";
 				case cdefBlockMix:		return "Block Mix";
-				case cdefBlockSwitch:	return "Block Switch";
 				case cdefBlockInterpolate:	return "Block Interpolate";
 				case cdefBlockSetMachine:	return "Block Set Machine";
 				case cdefBlockSetInstr:		return "Block Set Instrument";
@@ -389,11 +410,10 @@ namespace psycle
 				case cdefUndo:		return "Edit Undo";
 				case cdefRedo:		return "Edit Redo";
 
-				case cdefErrorLog:	return "Show Error Log";
-
 				case cdefNull:
 				default:
 					// This is a valid point. It is used when doing searches for name.
+					// Also, don't change it, or of you do, do it also in the CmdDef constructor
 					return "Invalid" ;
 				}
 			}
@@ -427,7 +447,12 @@ namespace psycle
 			///\name translation
 			///\{
 			/// .
-			void CmdToKey(CmdDef cse,WORD & key,WORD & mods);	
+			inline void CmdToKey(CmdSet cset,WORD & key,WORD & mods)
+			{
+				CmdDef cse(cset);
+				CmdToKey(cse,key,mods);
+			}
+			void CmdToKey(CmdDef &cse,WORD & key,WORD & mods);	
 			/// .
 			CmdDef KeyToCmd(UINT nChar, UINT nFlags);
 			/// .
@@ -435,7 +460,7 @@ namespace psycle
 			///\}
 		public:
 			/// control 	
-			void PerformCmd(CmdDef cmd,BOOL brepeat);
+			void PerformCmd(CmdDef &cmd,BOOL brepeat);
 			
 			///\name commands
 			///\{
@@ -454,7 +479,12 @@ namespace psycle
 			///\name store/load
 			///\{
 			/// .
-			bool SetCmd(CmdDef cmd, UINT key, UINT modifiers,bool checkforduplicates=true);
+			inline bool SetCmd(CmdSet cset, UINT key, UINT modifiers,bool checkforduplicates=true)
+			{
+				CmdDef cmd(cset);
+				return SetCmd(cmd,key,modifiers,checkforduplicates);
+			}
+			bool SetCmd(CmdDef &cmd, UINT key, UINT modifiers,bool checkforduplicates=true);
 			/// .
 			bool ConfigSave();
 			/// .

@@ -1,29 +1,28 @@
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/XMSamplerUI.hpp>
-#include <psycle/engine/XMSampler.hpp>
-#include <psycle/host/ChildView.hpp>
+#include <psycle/project.private.hpp>
+#include "XMSamplerUI.hpp"
+#include "Psycle.hpp"
+#include "XMSampler.hpp"
+#include "ChildView.hpp"
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 extern CPsycleApp theApp;
 
 IMPLEMENT_DYNAMIC(XMSamplerUI, CPropertySheet)
 
 XMSamplerUI::XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 : CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
+, init(false)
 	{
-		init=false;
 	}
 
 XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 :CPropertySheet(pszCaption, pParentWnd, iSelectPage)
+, init(false)
 	{
-		init=false;
 	}
 
 BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
@@ -59,5 +58,5 @@ void XMSamplerUI::UpdateUI(void)
 	if (GetActivePage() == &m_Mixer ) m_Mixer.UpdateAllChannels();
 }
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,22 +1,21 @@
 ///\file
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/uiglobal.hpp>
-#include <psycle/host/KeyConfigDlg.hpp>
-#include <psycle/host/inputhandler.hpp>
-#include <psycle/host/uiconfiguration.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "KeyConfigDlg.hpp"
+#include "psycle.hpp"
+#include "inputhandler.hpp"
+#include "Configuration.hpp"
+#include "SpecialKeys.hpp"
+#include ".\keyconfigdlg.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
 
 		CKeyConfigDlg::CKeyConfigDlg() : CPropertyPage(CKeyConfigDlg::IDD)
 		{
 			m_prvIdx = 0;
-			//{{AFX_DATA_INIT(CKeyConfigDlg)
-			//}}AFX_DATA_INIT
-			bInit = false;
+			bInit = FALSE;
 		}
 
 		void CKeyConfigDlg::DoDataExchange(CDataExchange* pDX)
@@ -24,7 +23,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			//removed by alk
 			//DDX_Control(pDX, IDC_MOVE_CURSOR_PASTE, m_move_cursor_paste);
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CKeyConfigDlg)
 			DDX_Control(pDX, IDC_AUTOSAVE_MINS_SPIN, m_autosave_spin);
 			DDX_Control(pDX, IDC_AUTOSAVE_MINS, m_autosave_mins);
 			DDX_Control(pDX, IDC_AUTOSAVE_CURRENT_SONG, m_autosave);
@@ -45,26 +43,26 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_EDIT_DEFLINES, m_numlines);
 			DDX_Control(pDX, IDC_SPIN_DEFLINES, m_spinlines);
 			DDX_Control(pDX, IDC_TEXT_DEFLINES, m_textlines);
-			//}}AFX_DATA_MAP
 			DDX_Control(pDX, IDC_COMBO1, m_timesig);
+			DDX_Control(pDX, IDC_PAGEUPSTEPS, m_pageupsteps);
+			DDX_Control(pDX, IDC_MULTIPLEINSTANCES, m_allowinstances);
+			DDX_Control(pDX, IDC_WINDOWSBLOCKS, m_windowsblocks);
 		}
 
 		BEGIN_MESSAGE_MAP(CKeyConfigDlg, CDialog)
-			//{{AFX_MSG_MAP(CKeyConfigDlg)
 			ON_LBN_SELCHANGE(IDC_CMDLIST, OnSelchangeCmdlist)
 			ON_BN_CLICKED(IDC_IMPORTREG, OnImportreg)
 			ON_BN_CLICKED(IDC_EXPORTREG, OnExportreg)
 			ON_BN_CLICKED(IDC_DEFAULTS, OnDefaults)
+			ON_BN_CLICKED(IDC_SPECIALKEYS, OnBnClickedSpecialKeys)
 			ON_BN_CLICKED(IDC_NONE, OnNone)
 			ON_EN_UPDATE(IDC_EDIT_DEFLINES, OnUpdateNumLines)
-			//}}AFX_MSG_MAP
-			//ON_BN_CLICKED(IDC_MOVE_CURSOR_PASTE, OnBnClickedMoveCursorPaste)
 		END_MESSAGE_MAP()
 
 		void CKeyConfigDlg::FillCmdList()
 		{
 			// add command definitions
-			InputHandler* pinp = UIGlobal::pInputHandler;
+			InputHandler* pinp = Global::pInputHandler;
 			bool written[max_cmds];
 			int j,i,pos;
 
@@ -80,7 +78,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					{
 						pos = m_lstCmds.AddString(LPCTSTR(pinp->cmdLUT[j][i].GetName()));
 						m_lstCmds.SetItemData(pos,j*256+i);
-						written[int(pinp->cmdLUT[j][i].ID)]=true;
+						written[int(pinp->cmdLUT[j][i].GetID())]=true;
 					}
 				}
 			}
@@ -88,10 +86,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				if ( !written[i] )
 				{
-					CmdDef cmd;
+					
 					CString cmdDefn;
 					char bla[64];
-					cmd.ID = CmdSet(i);
+					CmdDef cmd = CmdSet(i);
 					cmdDefn = cmd.GetName();
 					if(cmdDefn!="Invalid")
 					{
@@ -107,54 +105,52 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CDialog::OnInitDialog();
 			
-			m_cmdCtrlPlay.SetCheck(UIGlobal::pInputHandler->bCtrlPlay?1:0);
-			m_cmdNewHomeBehaviour.SetCheck(UIGlobal::pInputHandler->bFT2HomeBehaviour?1:0);
-			m_cmdFT2Del.SetCheck(UIGlobal::pInputHandler->bFT2DelBehaviour?1:0);
-			m_cmdShiftArrows.SetCheck(UIGlobal::pInputHandler->bShiftArrowsDoSelect?1:0);
-
-			m_save_reminders.SetCheck(Global::configuration().bFileSaveReminders?1:0);
-			m_tweak_smooth.SetCheck(Global::configuration()._RecordMouseTweaksSmooth?1:0);
-			m_record_unarmed.SetCheck(Global::configuration()._RecordUnarmed?1:0);
-			//m_move_cursor_paste.SetCheck(Global::configuration()._MoveCursorPaste?1:0);
-			m_navigation_ignores_step.SetCheck(Global::configuration()._NavigationIgnoresStep?1:0);
-			m_show_info.SetCheck(Global::configuration().bShowSongInfoOnLoad?1:0);
-			m_autosave.SetCheck(Global::configuration().autosaveSong?1:0);
-			
-			// prevent ALT in hotkey	
-
 			//TRACE("%d %d %d %d %d %d\n",HKCOMB_A,HKCOMB_C,HKCOMB_S,HKCOMB_CA,HKCOMB_SA,HKCOMB_SCA);
-
+			// prevent ALT in hotkey	
 			WORD rules=HKCOMB_A|HKCOMB_CA|HKCOMB_SA|HKCOMB_SCA;
 			WORD subst=0;
-
 			m_hotkey0.SetRules(rules,subst);
 
-			m_wrap.SetCheck(Global::configuration()._wrapAround?1:0);
-			m_centercursor.SetCheck(Global::configuration()._centerCursor?1:0);
-			m_cursordown.SetCheck(Global::configuration()._cursorAlwaysDown?1:0);
+			m_cmdCtrlPlay.SetCheck(Global::pInputHandler->bCtrlPlay?1:0);
+			m_cmdNewHomeBehaviour.SetCheck(Global::pInputHandler->bFT2HomeBehaviour?1:0);
+			m_cmdFT2Del.SetCheck(Global::pInputHandler->bFT2DelBehaviour?1:0);
+			m_cmdShiftArrows.SetCheck(Global::pInputHandler->bShiftArrowsDoSelect?1:0);
+			m_wrap.SetCheck(Global::pConfig->_wrapAround?1:0);
+			m_centercursor.SetCheck(Global::pConfig->_centerCursor?1:0);
+			m_cursordown.SetCheck(Global::pConfig->_cursorAlwaysDown?1:0);
+			m_tweak_smooth.SetCheck(Global::pConfig->_RecordMouseTweaksSmooth?1:0);
+			m_record_unarmed.SetCheck(Global::pConfig->_RecordUnarmed?1:0);
+			m_navigation_ignores_step.SetCheck(Global::pConfig->_NavigationIgnoresStep?1:0);
+			m_windowsblocks.SetCheck(Global::pConfig->_windowsBlocks?1:0);
 
-			m_spinlines.SetRange(1,MAX_LINES);
+			m_autosave.SetCheck(Global::pConfig->autosaveSong?1:0);
 			m_autosave_spin.SetRange(1,60);
+			m_save_reminders.SetCheck(Global::pConfig->bFileSaveReminders?1:0);
+			//m_move_cursor_paste.SetCheck(Global::pConfig->_MoveCursorPaste?1:0);
+			m_show_info.SetCheck(Global::pConfig->bShowSongInfoOnLoad?1:0);
+			m_spinlines.SetRange(1,MAX_LINES);
+			m_allowinstances.SetCheck(Global::pConfig->_allowMultipleInstances?1:0);
 			
 			char buffer[16];
-			itoa(Global::configuration().defaultPatLines,buffer,10);
-			m_numlines.SetWindowText(buffer);
-			itoa(Global::configuration().autosaveSongTime,buffer,10);
+			itoa(Global::pConfig->autosaveSongTime,buffer,10);
 			m_autosave_mins.SetWindowText(buffer);
-			m_timesig.SetCurSel(Global::configuration().pv_timesig-1);
+			itoa(Global::pConfig->defaultPatLines,buffer,10);
+			m_numlines.SetWindowText(buffer);
+			m_timesig.SetCurSel(Global::pConfig->pv_timesig-1);
+			m_pageupsteps.SetCurSel(Global::pConfig->_pageUpSteps);
 			
 			UDACCEL acc;
 			acc.nSec = 4;
 			acc.nInc = 16;
 			m_spinlines.SetAccel(1, &acc);
 			
-			bInit = true;
+			bInit = TRUE;
 			OnUpdateNumLines();
 
 			FillCmdList();
 			
-			return true;  // return true unless you set the focus to a control
-						// EXCEPTION: OCX Property Pages should return false
+			return TRUE;  // return TRUE unless you set the focus to a control
+						// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
 		/// update key on show
@@ -169,7 +165,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			key=0;
 			mods=0;
 			// update display for new key
+			///\todo: find a nicer way to do this (rather than regenerating the whole list)
+			int topidx = m_lstCmds.GetTopIndex();
 			m_prvIdx = m_lstCmds.GetCurSel();
+			FillCmdList();
+			m_lstCmds.SetTopIndex(topidx);
+			m_lstCmds.SetCurSel(m_prvIdx);
 			FindKey(m_prvIdx,key,mods);
 			m_hotkey0.SetHotKey(key,mods);
 		}
@@ -199,11 +200,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// what command is selected?
 			CmdDef cmd = FindCmd(idx);
 
-			m_lstCmds.SetItemData(idx,nMod*256+new_key);
-			
 			// save key definition
 			if(cmd.IsValid())
-				UIGlobal::pInputHandler->SetCmd(cmd,new_key,nMod);
+			{
+				m_lstCmds.SetItemData(idx,nMod*256+new_key);
+				Global::pInputHandler->SetCmd(cmd,new_key,nMod);
+			}
 		}
 
 		void CKeyConfigDlg::FindKey(long idx,WORD&key,WORD&mods)
@@ -212,7 +214,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 //			CmdDef cmd = FindCmd(idx);
 			// locate which key is that command
 //			if(cmd.IsValid())
-//				UIGlobal::pInputHandler->CmdToKey(cmd,key,mods);
+//				Global::pInputHandler->CmdToKey(cmd,key,mods);
 
 			int j = m_lstCmds.GetItemData(idx)/256;
 			key = m_lstCmds.GetItemData(idx)%256;
@@ -233,10 +235,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return cmd;				
 
 			// init
-			InputHandler* pinp = UIGlobal::pInputHandler;
+			InputHandler* pinp = Global::pInputHandler;
 			int j = m_lstCmds.GetItemData(idx)/256;
 			int i = m_lstCmds.GetItemData(idx)%256;
-
+			
 			if ( i != 0 || j != 0)
 				cmd = pinp->cmdLUT[j][i];
 			else
@@ -246,16 +248,41 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_lstCmds.GetText(idx,cmdDesc);
 
 				// convert string to cmd
-				cmd = UIGlobal::pInputHandler->StringToCmd(cmdDesc);
+				cmd = Global::pInputHandler->StringToCmd(cmdDesc);
 			}
 			return cmd;
 		}
+		void CKeyConfigDlg::OnBnClickedSpecialKeys()
+		{
+			CSpecialKeys dlg;
+			if ( dlg.DoModal() == IDOK )
+			{
+				int idx = m_lstCmds.GetCurSel();
+				CmdDef cmd = FindCmd(idx);
 
+				// save key definition
+				if(cmd.IsValid())
+				{
+					m_lstCmds.SetItemData(idx,dlg.mod*256+dlg.key);
+					Global::pInputHandler->SetCmd(cmd,dlg.key,dlg.mod);
+					WORD mods=0;
+					if(dlg.mod&MOD_S)
+						mods|=HOTKEYF_SHIFT;
+					if(dlg.mod&MOD_C)
+						mods|=HOTKEYF_CONTROL;				
+					if(dlg.mod&MOD_E)
+						mods|=HOTKEYF_EXT;
+					m_hotkey0.SetHotKey(dlg.key,mods);
+				}
+				FillCmdList();
+				m_lstCmds.SetCurSel(m_prvIdx);
+			}
+		}
 		void CKeyConfigDlg::OnCancel() 
 		{
 			// user cancelled,
 			// restore from saved settings
-			UIGlobal::pInputHandler->ConfigRestore();
+			Global::pInputHandler->ConfigRestore();
 			CDialog::OnCancel();
 		}
 
@@ -264,27 +291,30 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// update last key
 			OnSelchangeCmdlist();
 
-			UIGlobal::pInputHandler->bCtrlPlay  = m_cmdCtrlPlay.GetCheck()?true:false;
-			UIGlobal::pInputHandler->bFT2HomeBehaviour = m_cmdNewHomeBehaviour.GetCheck()?true:false;
-			UIGlobal::pInputHandler->bFT2DelBehaviour = m_cmdFT2Del.GetCheck()?true:false;
-			UIGlobal::pInputHandler->bShiftArrowsDoSelect = m_cmdShiftArrows.GetCheck()?true:false;
+			Global::pInputHandler->bCtrlPlay  = m_cmdCtrlPlay.GetCheck()?true:false;
+			Global::pInputHandler->bFT2HomeBehaviour = m_cmdNewHomeBehaviour.GetCheck()?true:false;
+			Global::pInputHandler->bFT2DelBehaviour = m_cmdFT2Del.GetCheck()?true:false;
+			Global::pInputHandler->bShiftArrowsDoSelect = m_cmdShiftArrows.GetCheck()?true:false;
 			
 			// save settings
-			UIGlobal::pInputHandler->ConfigSave();
+			Global::pInputHandler->ConfigSave();
 			
-			Global::configuration()._wrapAround = m_wrap.GetCheck()?true:false;
-			Global::configuration()._centerCursor = m_centercursor.GetCheck()?true:false;
-			Global::configuration()._cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
+			Global::pConfig->_windowsBlocks = m_windowsblocks.GetCheck()?true:false;
+			Global::pConfig->_wrapAround = m_wrap.GetCheck()?true:false;
+			Global::pConfig->_centerCursor = m_centercursor.GetCheck()?true:false;
+			Global::pConfig->_cursorAlwaysDown = m_cursordown.GetCheck()?true:false;
 
-			Global::configuration().bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
-			Global::configuration()._RecordMouseTweaksSmooth = m_tweak_smooth.GetCheck()?true:false;
-			Global::configuration()._RecordUnarmed = m_record_unarmed.GetCheck()?true:false;
-			//Global::configuration()._MoveCursorPaste = m_move_cursor_paste.GetCheck()?true:false;
-			Global::configuration()._NavigationIgnoresStep = m_navigation_ignores_step.GetCheck()?true:false;
+			Global::pConfig->bFileSaveReminders = m_save_reminders.GetCheck()?true:false;
+			Global::pConfig->_RecordMouseTweaksSmooth = m_tweak_smooth.GetCheck()?true:false;
+			Global::pConfig->_RecordUnarmed = m_record_unarmed.GetCheck()?true:false;
+			//Global::pConfig->_MoveCursorPaste = m_move_cursor_paste.GetCheck()?true:false;
+			Global::pConfig->_NavigationIgnoresStep = m_navigation_ignores_step.GetCheck()?true:false;
 			
-			Global::configuration().bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
-			Global::configuration().autosaveSong = m_autosave.GetCheck()?true:false;
-			Global::configuration().pv_timesig = m_timesig.GetCurSel()+1;
+			Global::pConfig->bShowSongInfoOnLoad = m_show_info.GetCheck()?true:false;
+			Global::pConfig->autosaveSong = m_autosave.GetCheck()?true:false;
+			Global::pConfig->pv_timesig = m_timesig.GetCurSel()+1;
+			Global::pConfig->_allowMultipleInstances = m_allowinstances.GetCheck()?true:false;
+			Global::pConfig->_pageUpSteps= m_pageupsteps.GetCurSel();
 			
 			char buffer[32];
 			m_numlines.GetWindowText(buffer,16);
@@ -296,7 +326,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			else if (nlines > MAX_LINES)
 				{ nlines = MAX_LINES; }
 
-			Global::configuration().defaultPatLines=nlines;
+			Global::pConfig->defaultPatLines=nlines;
 
 			m_autosave_mins.GetWindowText(buffer,16);
 			nlines = atoi(buffer);
@@ -304,7 +334,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{ nlines = 1; }
 			else if (nlines > 60)
 			{ nlines = 60; }
-			Global::configuration().autosaveSongTime = nlines;
+			Global::pConfig->autosaveSongTime = nlines;
 			
 			CDialog::OnOK();
 		}
@@ -314,8 +344,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//\todo : "return" ?? it's void...
 		void CKeyConfigDlg::OnImportreg() 
 		{
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
+			OPENFILENAME ofn;       // common dialog box structure
+			char szFile[_MAX_PATH];       // buffer for file name
 			
 			szFile[0]='\0';
 			// Initialize OPENFILENAME
@@ -332,7 +362,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 			// Display the Open dialog box. 
 			
-			if (GetOpenFileName(&ofn)==true)
+			if (GetOpenFileName(&ofn)==TRUE)
 			{
 				FILE* hfile;
 				if ((hfile=fopen(szFile,"r")) == NULL )
@@ -362,7 +392,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									q++;
 									int cmddata = atoi(q);
 									CmdSet ID = CmdSet(cmddata);
-									UIGlobal::pInputHandler->SetCmd(ID,i,j);
+									Global::pInputHandler->SetCmd(ID,i,j);
 								}
 							}
 						}
@@ -377,6 +407,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			// update display for new key
 			m_prvIdx = m_lstCmds.GetCurSel();
+			FillCmdList();
+			m_lstCmds.SetCurSel(m_prvIdx);
 			FindKey(m_prvIdx,key,mods);
 			m_hotkey0.SetHotKey(key,mods);
 		}
@@ -402,7 +434,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 			ofn.lpstrInitialDir = _skinPathBuf.c_str();
 
-			if (GetSaveFileName(&ofn)==true)
+			if (GetSaveFileName(&ofn)==TRUE)
 			{
 				FILE* hfile;
 
@@ -422,9 +454,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					for(UINT i=0;i<256;i++)
 					{
-						if(UIGlobal::pInputHandler->cmdLUT[j][i].IsValid())
+						if(Global::pInputHandler->cmdLUT[j][i].IsValid())
 						{
-							fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",j,i,UIGlobal::pInputHandler->cmdLUT[j][i].ID,UIGlobal::pInputHandler->cmdLUT[j][i].GetName());
+							fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",j,i,Global::pInputHandler->cmdLUT[j][i].GetID(),Global::pInputHandler->cmdLUT[j][i].GetName());
 						}
 					}
 				}
@@ -436,7 +468,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			WORD key = 0;
 			WORD mods = 0;
-			UIGlobal::pInputHandler->BuildCmdLUT();
+			Global::pInputHandler->BuildCmdLUT();
 			FillCmdList();
 			m_prvIdx = 0;
 			m_lstCmds.SetCurSel(0);
@@ -458,7 +490,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				nMod|=MOD_C;
 			if(mods&HOTKEYF_EXT)
 				nMod|=MOD_E;
-			UIGlobal::pInputHandler->SetCmd(cdefNull,nKey,nMod);
+			Global::pInputHandler->SetCmd(cdefNull,nKey,nMod);
 			m_hotkey0.SetHotKey(0,0);
 		}
 
@@ -482,5 +514,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				m_textlines.SetWindowText(buffer);
 			}
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

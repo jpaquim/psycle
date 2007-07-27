@@ -1,15 +1,16 @@
 ///\file
 ///\brief interface file for psycle::host::CGearRackDlg.
 #pragma once
-#include <psycle/host/ChildView.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "ChildView.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		/// gear rack window.
 		class CGearRackDlg : public CDialog
 		{
 		public:
-			void ExchangeIns(Instrument::id_type, Instrument::id_type);
-			void ExchangeMacs(Machine::id_type, Machine::id_type);
 			CGearRackDlg(CChildView* pParent, CMainFrame* pMain);
 			CChildView* m_pParent;
 			CMainFrame* pParentMain;
@@ -45,6 +46,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnProperties();
 			afx_msg void OnParameters();
 			afx_msg void OnSelchangeGearlist();
+			afx_msg void OnMachineType();
 			afx_msg void OnRadioEfx();
 			afx_msg void OnRadioGen();
 			afx_msg void OnRadioIns();
@@ -56,5 +58,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

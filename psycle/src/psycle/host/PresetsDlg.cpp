@@ -1,49 +1,41 @@
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/PresetsDlg.hpp>
-#include <psycle/engine/Plugin.hpp>
-#include <psycle/engine/VSTHost.hpp>
-#include <psycle/host/FrameMachine.hpp>
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/engine/FileIO.hpp>
+#include <psycle/project.private.hpp>
+#include "PresetsDlg.hpp"
+#include "psycle.hpp"
+#include "Plugin.hpp"
+#include "VSTHost24.hpp"
+#include "FrameMachine.hpp"
+#include "FileIO.hpp"
+#include <cstring>
 
-#define use_boost 0 // causes an exception with paths that contain spaces
-#if use_boost
-	#include <boost/filesystem/path.hpp>
-	#include <boost/filesystem/convenience.hpp>
-#endif
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-	#error "sorry, only works on little endian machines"
-#endif
-
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+		using namespace seib::vst;
 
 		CPreset::CPreset()
+		:
+			params(),
+			data(),
+			numPars(-1),
+			dataSize()
 		{
-			params=NULL;
-			data=NULL;
-			numPars = -1;
-			sizeData = 0;
-			memset(name,0,32);
+			std::memset(name, 0, sizeof name * sizeof *name);
 		}
 
 		CPreset::~CPreset()
 		{
-			zapArray(params);
-			zapArray(data);
+			delete [] params;
+			delete [] data;
 		}
 
 		void CPreset::Clear()
 		{
-			zapArray(params);
+			delete [] params; params = 0;
 			numPars =-1;
-			zapArray(data);
-			sizeData = 0;
+			delete [] data; data = 0;
+			dataSize = 0;
 			std::memset(name,0,32);
 		}
 
@@ -51,64 +43,64 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if ( num > 0 )
 			{
-				zapArray(params,new int[num]);
+				delete [] params; params = new int[num];
 				numPars=num;
 			}
 			else
 			{
-				zapArray(params);
+				delete params; params = 0;
 				numPars =-1;
 			}
-			zapArray(data);
-			sizeData = 0;
+			delete [] data; data = 0;
+			dataSize = 0;
 
-			memset(name,0,32);
+			std::memset(name,0, sizeof name * sizeof *name);
 		}
 
-		void CPreset::Init(int num, char* newname, int const * parameters, int size, unsigned char * newdata)
+		void CPreset::Init(int num,const char* newname, int const * parameters,int size, void* newdata)
 		{
 			if ( num > 0 )
 			{
-				zapArray(this->params, new int[num]);
+				delete [] params; params = new int[num];
 				numPars=num;
-				std::memcpy(this->params,parameters,numPars*sizeof(int));
+				std::memcpy(params,parameters,numPars * sizeof *params);
 			}
 			else
 			{
-				zapArray(this->params);
+				delete [] params; params = 0;
 				numPars=-1;
 			}
 
 			if ( size > 0 )
 			{
-				zapArray(data, new unsigned char[size]);
+				delete [] data; data = new unsigned char[size];
 				std::memcpy(data,newdata,size);
-				sizeData = size;
+				dataSize = size;
 			}
 			else
 			{
-				zapArray(data);
-				sizeData=0;
+				delete [] data; data = 0;
+				dataSize=0;
 			}
 			std::strcpy(name,newname);
 		}
 
-		void CPreset::Init(int num, char * newname, float const * parameters)
+		void CPreset::Init(int num,const char* newname, float const * parameters)
 		{
 			if ( num > 0 )
 			{
-				zapArray(this->params,new int[num]);
+				delete [] params; params = new int[num];
 				numPars=num;
 				for(int x=0;x<num;x++) params[x]= f2i(parameters[x]*65535.0f);
 			}
 			else
 			{
-				zapArray(params);
+				delete [] params; params = 0;
 				numPars=-1;
 			}
 
-			zapArray(data);
-			sizeData = 0;
+			delete [] data; data = 0;
+			dataSize = 0;
 
 			std::strcpy(name,newname);
 		}
@@ -118,37 +110,37 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			if ( newpreset.numPars > 0 )
 			{
 				numPars=newpreset.numPars;
-				zapArray(params, new int[numPars]);
-				memcpy(params,newpreset.params,numPars*sizeof(int));
+				delete [] params; params = new int[numPars];
+				std::memcpy(params,newpreset.params,numPars * sizeof *params);
 			}
 			else
 			{
-				zapArray(params);
+				delete [] params; params = 0;
 				numPars=-1;
 			}
 
-			if ( newpreset.sizeData > 0 )
+			if ( newpreset.dataSize > 0 )
 			{
-				sizeData = newpreset.sizeData;
-				zapArray(data,new unsigned char[sizeData]);
-				memcpy(data,newpreset.data,sizeData);
+				dataSize = newpreset.dataSize;
+				delete [] data; data = new unsigned char[dataSize];
+				std::memcpy(data,newpreset.data,dataSize);
 			}
 			else
 			{
-				zapArray(data);
-				sizeData = 0;
+				delete [] data; data = 0;
+				dataSize = 0;
 			}
 
 			strcpy(name,newpreset.name);
 		}
 
-		int CPreset::GetParam(int n)
+		int CPreset::GetParam(const int n)
 		{
 			if (( numPars != -1 ) && ( n < numPars )) return params[n];
 			return -1;
 		}
 
-		void CPreset::SetParam(int n,int val)
+		void CPreset::SetParam(const int n,int val)
 		{
 			if (( numPars != -1 ) && ( n < numPars )) params[n] = val;
 		}
@@ -156,24 +148,30 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CPresetsDlg::CPresetsDlg(CWnd* pParent) : CDialog(CPresetsDlg::IDD, pParent)
 		{
 			numParameters = -1;
-			sizeDataStruct = 0;
+			dataSizeStruct = 0;
+			//{{AFX_DATA_INIT(CPresetsDlg)
+			//}}AFX_DATA_INIT
 		}
 
 		void CPresetsDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
+			//{{AFX_DATA_MAP(CPresetsDlg)
 			DDX_Control(pDX, IDC_EXPORT, m_exportButton);
 			DDX_Control(pDX, IDC_PREVIEW, m_preview);
 			DDX_Control(pDX, IDC_PRESETSLIST, m_preslist);
+			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CPresetsDlg, CDialog)
+			//{{AFX_MSG_MAP(CPresetsDlg)
 			ON_BN_CLICKED(IDC_SAVE, OnSave)
 			ON_BN_CLICKED(IDC_DELETE, OnDelete)
 			ON_BN_CLICKED(IDC_IMPORT, OnImport)
 			ON_CBN_SELCHANGE(IDC_PRESETSLIST, OnSelchangePresetslist)
 			ON_CBN_DBLCLK(IDC_PRESETSLIST, OnDblclkPresetslist)
 			ON_BN_CLICKED(IDC_EXPORT, OnExport)
+			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CPresetsDlg::OnInitDialog() 
@@ -181,103 +179,85 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			m_preslist.LimitText(32);
 			presetChanged = false;
-			if( _pMachine->subclass() == MACH_PLUGIN)
+			CString buffer;
+
+			numParameters = _pMachine->GetNumParams();
+
+			if( _pMachine->_type == MACH_PLUGIN)
 			{
-				numParameters = _pMachine->GetNumParams();
 				try
 				{
-					sizeDataStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
+					dataSizeStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
 				}
 				catch(const std::exception &)
 				{
-					sizeDataStruct = 0;
+					dataSizeStruct = 0;
 				}
-				if(sizeDataStruct > 0)
+				if(dataSizeStruct > 0)
 				{
-					unsigned char * pData = new unsigned char[sizeDataStruct];
+					void* pData = new char[dataSizeStruct];
 					try
 					{
-						static_cast<Plugin *>(_pMachine)->proxy().GetData(pData); // Internal Save
-						iniPreset.Init(numParameters , "", static_cast<Plugin*>(_pMachine)->proxy().Vals(), sizeDataStruct, pData);
+						reinterpret_cast<Plugin *>(_pMachine)->proxy().GetData(pData); // Internal Save
+						iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), dataSizeStruct, pData);
 					}
 					catch(const std::exception &)
 					{
 						// o_O`
 					}
-					catch(...) // static_cast sucks
+					catch(...) // reinterpret_cast sucks
 					{
 						// o_O`
 					}
-					zapArray(pData);
+					delete pData;
 				}
 				else
 				{
+					
 					try
 					{
-						iniPreset.Init(numParameters , "", static_cast<Plugin *>(_pMachine)->proxy().Vals(), 0,  0);
+						iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), 0,  0);
 					}
 					catch(const std::exception &)
 					{
 						// o_O`
 					}
-					catch(...) // static_cast sucks
+					catch(...) // reinterpret_cast sucks
 					{
 						// o_O`
 					}
 				}
-				
+				buffer = _pMachine->GetDllName();
 			}
-			else if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
-			{
-				try
-				{
-					numParameters = _pMachine->GetNumParams();
-				}
-				catch(const std::exception &)
-				{
-					numParameters = 0;
-				}
-				catch(...) // static_cast sucks
-				{
-					numParameters = 0;
-				}
+			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			{ 
 				iniPreset.Init(numParameters);
 				int i(0);
 				while(i < numParameters)
 				{
 					try
 					{
-						iniPreset.SetParam(i, f2i(static_cast<vst::plugin *>(_pMachine)->proxy().getParameter(i) * 65535));
+						iniPreset.SetParam(i, f2i(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
 					}
 					catch(const std::exception &)
 					{
 						// o_O`
 					}
-					catch(...) // static_cast sucks
+					catch(...) // reinterpret_cast sucks
 					{
 						// o_O`
 					}
 					++i;
 				}
-			}
+				buffer = _pMachine->GetDllName();
 
-			// change extension of the plugin's library file name to .prs
-			{
-				#if use_boost // causes an exception with paths that contain spaces
-					boost::filesystem::path path(_pMachine->GetDllName(), boost::filesystem::native);
-					path = boost::filesystem::change_extension(path, ".prs");
-					file_name = path.string();
-				#else
-					file_name = _pMachine->GetDllName();
-					std::string::size_type pos = file_name.rfind('.');
-					if(pos != std::string::npos) file_name = file_name.substr(0, pos);
-					file_name += ".prs";
-				#endif
 			}
-
+			buffer = buffer.Left(buffer.GetLength()-4);
+			buffer += ".prs";
+			fileName= buffer;
 			ReadPresets();
 			UpdateList();
-			return true;
+			return TRUE;
 		}
 
 		void CPresetsDlg::OnSave() 
@@ -329,16 +309,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CPresetsDlg::OnImport() 
 		{
-			OPENFILENAME ofn; // common dialog box structure
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
+
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
+
+			///\todo unportable code
+			OPENFILENAME ofn; // common dialog box structure
 			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
+			std::memset(&ofn, 0, sizeof ofn);
+			ofn.lStructSize = sizeof ofn;
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
+			ofn.nMaxFile = sizeof szFile;
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{
 				ofn.lpstrFilter = "Presets\0*.prs\0VST Banks\0*.fxb\0All\0*.*\0";
 			}
@@ -346,19 +330,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			if( _pMachine->subclass() == MACH_PLUGIN)
-			{
-				std::string tmpstr = Global::configuration().GetPluginDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
-			else if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
-			{
-				std::string tmpstr = Global::configuration().GetVstDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
+			std::string tmpstr = Global::pConfig->GetPluginDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
-			if(GetOpenFileName(&ofn) == true)
+			if(GetOpenFileName(&ofn) == TRUE)
 			{
 				if(ofn.nFilterIndex == 1)
 				{
@@ -383,9 +359,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						//int init=m_preslist.GetCount();
 						char cbuf[32];
 						int* ibuf = new int[filenumpars];
-						unsigned char * dbuf = new unsigned char[sizeDataStruct];
+						byte* dbuf = new byte[dataSizeStruct];
 						iniPreset.GetDataArray(dbuf);
-						if (sizeDataStruct)
+						if (dataSizeStruct)
 						{
 							MessageBox("Files do not match! - this file is old format and this machine requires new format.","File Import Error",MB_OK);
 						}
@@ -432,8 +408,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							zapArray(ibuf2);
 							*/
 						}
-						zapArray(ibuf);
-						zapArray(dbuf);
+						delete [] ibuf; ibuf = 0;
+						delete [] dbuf; dbuf = 0;
 					}
 					else
 					{
@@ -447,11 +423,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//				int init=m_preslist.GetCount();
 						char cbuf[32];
 						int* ibuf = new int[filenumpars];
-						unsigned char * dbuf = new unsigned char[sizeDataStruct > filepresetsize ? sizeDataStruct : filepresetsize];
+						byte* dbuf = new byte[dataSizeStruct > filepresetsize ? dataSizeStruct : filepresetsize];
 
 						if ( numParameters == filenumpars )
 						{
-							if (sizeDataStruct != filepresetsize)
+							if (dataSizeStruct != filepresetsize)
 							{
 								// should be warning
 								MessageBox("Files do not match!","File Import Error",MB_OK);
@@ -464,7 +440,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									fread(ibuf,filenumpars*sizeof(int),1,hfile);
 									fread(dbuf,filepresetsize,1,hfile);
 									/*
-									if (sizeDataStruct != filepresetsize)
+									if (dataSizeStruct != filepresetsize)
 									{
 										// there should be a warning for this
 										iniPreset.GetDataArray(dbuf);
@@ -489,7 +465,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 									fread(cbuf,sizeof(cbuf),1,hfile);
 									fread(ibuf,filenumpars*sizeof(int),1,hfile);
 									fread(dbuf,filepresetsize,1,hfile);
-									if (sizeDataStruct != filepresetsize)
+									if (dataSizeStruct != filepresetsize)
 									{
 										// should be warning
 										iniPreset.GetDataArray(dbuf);
@@ -514,85 +490,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 							zapArray(ibuf2);
 							*/
 						}
-						zapArray(ibuf);
-						zapArray(dbuf);
+						delete [] ibuf; ibuf = 0;
+						delete [] dbuf; dbuf = 0;
 					}
 					fclose(hfile);
 				}
-				else
-				{	// Check later for Fileformat explanation
-					RiffFile fxb;
-					if ( !fxb.Open(szFile) )
-					{
-						MessageBox("Couldn't open File! Operation Aborted.",".fxb File Load Error",MB_OK);
-						return;
-					}
-					if ( fxb._header._id != fxb.FourCC("CcnK") ) return;
-					RiffChunkHeader tmp;
-					fxb.Read(tmp);
-					if ( tmp._id == fxb.FourCC("FBCh") ) // Bank Chunk
-					{
-						MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
-						// Possible structure
-						// CcnK, size, fxID, fxversion, numprograms, future[128], chunksize, chunk
-						// Can't be read program by program, so it has to be loaded directly.
-					}
-					else if ( tmp._id == fxb.FourCC("FxBk") )
-					{
-						fxb.Skip(8); // VST ID + VSTVersion
-
-						endian::big::uint32_t numpresets;
-						fxb.ReadChunk(&numpresets,4);
-						int intpresets = (numpresets.lohi*256) + numpresets.lolo;
-
-						endian::big::uint32_t filenumpars;
-						fxb.Skip(128);
-						//\todo: Investigate the following line. I assume it to be wrong, and the next fxb.Skip be 28.
-						fxb.ReadChunk(&filenumpars,0);
-
-						int i=0;
-						//int init=m_preslist.GetCount();
-						char cbuf[29]; cbuf[28]='\0';
-						float* fbuf;
-						fbuf= new float[numParameters];
-						
-						while ( i < intpresets)
-						{
-							fxb.Skip(24);
-							fxb.ReadChunk(&filenumpars,4);
-
-							if ( (filenumpars.lohi*256)+filenumpars.lolo != numParameters)
-							{
-								MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
-								fxb.Close();
-								return;
-							}
-							fxb.ReadChunk(cbuf,28); cbuf[27]=0;
-							fxb.ReadChunk(fbuf,numParameters*sizeof(float));
-							for (int y=0;y<numParameters;y++)
-							{
-								float temp=fbuf[y];
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-								((char*)&fbuf[y])[0]=((char*)&temp)[3];
-								((char*)&fbuf[y])[1]=((char*)&temp)[2];
-								((char*)&fbuf[y])[2]=((char*)&temp)[1];
-								((char*)&fbuf[y])[3]=((char*)&temp)[0];
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-								/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							}
-							AddPreset(cbuf,fbuf);
-							i++;
-						}
-						zapArray(fbuf);
-					}
-					fxb.Close();
-				}
-
 				UpdateList();
 				SavePresets();
 			}
@@ -617,21 +519,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			if ( _pMachine->subclass() == MACH_PLUGIN )
+			if ( _pMachine->_type == MACH_PLUGIN )
 			{
-				std::string tmpstr = Global::configuration().GetPluginDir();
+				std::string tmpstr = Global::pConfig->GetPluginDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
-			else if ( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX )
+			else 
 			{
-				std::string tmpstr = Global::configuration().GetVstDir();
+				std::string tmpstr = Global::pConfig->GetVstDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
 			}
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 
 			// Display the Open dialog box. 
 			
-			if (GetSaveFileName(&ofn)==true)
+			if (GetSaveFileName(&ofn)==TRUE)
 			{
 				int selpreset=m_preslist.GetCurSel();
 				int filepresets;
@@ -652,6 +554,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					fclose(hfile);
 					hfile=fopen(szFile,"r+b"); // read and write mode
 					// we have to create a new file
+
 				}
 				if ( fread(&filepresets,sizeof(int),1,hfile) != 1 ||
 					fread(&fileparams,sizeof(int),1,hfile) != 1 )
@@ -669,7 +572,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					temp1 = 0;
 					fwrite(&temp1,sizeof(int),1,hfile);
 					fwrite(&numParameters,sizeof(int),1,hfile);
-					fwrite(&sizeDataStruct,sizeof(int),1,hfile);
+					fwrite(&dataSizeStruct,sizeof(int),1,hfile);
 					fseek(hfile,2*sizeof(int),SEEK_SET);
 					filepresets=-1;
 					fileparams=fileversion;
@@ -677,7 +580,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				if (filepresets >= 0)
 				{
-					if (( fileparams != numParameters ) || (sizeDataStruct))
+					if (( fileparams != numParameters ) || (dataSizeStruct))
 					{
 						MessageBox("Number of Parameters does not Match with file!","File Save Error",MB_OK);
 						fclose(hfile);
@@ -698,7 +601,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					fwrite(ibuf,numParameters*sizeof(int),1,hfile);
 
 					fclose(hfile);
-					zapArray(ibuf);
+					delete [] ibuf;
 				}
 				else
 				{
@@ -707,7 +610,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					fread(&fileparams,sizeof(int),1,hfile);
 					fread(&filedatasize,sizeof(int),1,hfile);
 
-					if (( fileparams != numParameters ) || (filedatasize != sizeDataStruct))
+					if (( fileparams != numParameters ) || (filedatasize != dataSizeStruct))
 					{
 						MessageBox("Number of Parameters does not Match with file!","File Save Error",MB_OK);
 						fclose(hfile);
@@ -715,8 +618,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					}
 					char cbuf[32];
 					int* ibuf = new int[numParameters];
-					unsigned char * dbuf(0);
-					if ( sizeDataStruct > 0 ) dbuf = new unsigned char[sizeDataStruct];
+					unsigned char * dbuf = 0;
+					if ( dataSizeStruct > 0 ) dbuf = new unsigned char[dataSizeStruct];
 					presets[selpreset].GetName(cbuf);
 					presets[selpreset].GetParsArray(ibuf);
 					presets[selpreset].GetDataArray(dbuf);
@@ -728,11 +631,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					fseek(hfile,0,SEEK_END);
 					fwrite(cbuf,sizeof(cbuf),1,hfile);
 					fwrite(ibuf,numParameters*sizeof(int),1,hfile);
-					if ( sizeDataStruct > 0 ) fwrite(dbuf,sizeDataStruct,1,hfile);
+					if ( dataSizeStruct > 0 ) fwrite(dbuf,dataSizeStruct,1,hfile);
 
 					fclose(hfile);
-					zapArray(ibuf);
-					zapArray(dbuf);
+					delete [] ibuf;
+					delete [] dbuf;
 				}
 			}
 		}
@@ -795,9 +698,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			FILE* hfile;
 			int i=0; // Number of Read Presets
 
-			//  PSYCLE .prs FILE
+		//  PSYCLE .prs FILE
 
-			if(hfile=fopen(file_name.c_str(), "rb"))
+			if(hfile=fopen(fileName,"rb"))
 			{
 				int numpresets;
 				int filenumpars;
@@ -812,7 +715,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				char cbuf[32];
 				if (numpresets >= 0)
 				{
-					if (( filenumpars != numParameters )  || (sizeDataStruct))
+					if (( filenumpars != numParameters )  || (dataSizeStruct))
 					{
 						MessageBox("The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
 						fclose(hfile);
@@ -830,7 +733,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						AddPreset(cbuf,ibuf,0);
 						i++;
 					}
-					zapArray(ibuf);
+					delete [] ibuf;
 				}
 				else
 				{
@@ -844,7 +747,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						fread(&filenumpars,sizeof(int),1,hfile);
 						fread(&filepresetsize,sizeof(int),1,hfile);
 						// now it is time to check our file for compatability
-						if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct))
+						if (( filenumpars != numParameters )  || (filepresetsize != dataSizeStruct))
 						{
 							MessageBox("The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
 							fclose(hfile);
@@ -852,19 +755,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						}
 						// ok that works, so we should now load the names of all of the presets
 						int* ibuf= new int[numParameters];
-						unsigned char * dbuf(0);
-						if ( sizeDataStruct > 0 ) dbuf = new unsigned char[sizeDataStruct];
+						unsigned char * dbuf = 0;
+						if ( dataSizeStruct > 0 ) dbuf = new unsigned char[dataSizeStruct];
 
 						while ( i< numpresets && !feof(hfile) && !ferror(hfile) )
 						{
 							fread(cbuf,sizeof(cbuf),1,hfile);
 							fread(ibuf,numParameters*sizeof(int),1,hfile);
-							if ( sizeDataStruct > 0 )  fread(dbuf,sizeDataStruct,1,hfile);
+							if ( dataSizeStruct > 0 )  fread(dbuf,dataSizeStruct,1,hfile);
 							AddPreset(cbuf,ibuf,dbuf);
 							i++;
 						}
-						zapArray(ibuf);
-						zapArray(dbuf);
+						delete [] ibuf;
+						delete [] dbuf;
 					}
 					else
 					{
@@ -875,128 +778,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				fclose(hfile);
 			}
-
-			//  VST's fxb FILE.
-			// fxb Structure:
-			//
-			// struct FxSet
-			// {
-			//	long ChunkMagic;	// "CcnK"
-			//	long byteSize;		// size of this chunk, excluding ChunkMagic and byteSize
-			//
-			//	long fxMagic;		// "FxBk"
-			//	long version;
-			//	long fxID;			// Fx ID
-			//	long	fxVersion;
-			//
-			//	long numPrograms;
-			//  char	future[128];
-			//	FxProgram *programs;	// Variable no. of programs
-			// }
-			//
-			// struct FxProgram
-			// {
-			//	long ChunkMagic;	// "CcnK"
-			//	long byteSize;		// size of this chunk, excluding ChunkMagic and byteSize
-			//
-			//	long fxMagic;		// "FxCk"
-			//	long version;
-			//	long fxID;			// Fx ID
-			//	long fxVersion;
-			//	long numParams;
-			//	char prgName[28];
-			//	float *params		 //variable no. of params
-			// }
-
-			if( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
-			{
-				RiffFile fxb;
-
-				// change extension of the plugin's library file name to .fxb
-				{
-					#if use_boost // causes an exception with paths that contain spaces
-						boost::filesystem::path path(_pMachine->GetDllName(), boost::filesystem::native);
-						path = boost::filesystem::change_extension(path, ".fxb");
-						if(!fxb.Open(path.string())) return; // here it is read "CcnK" and its "size" (it is 0)
-					#else
-						std::string file_name = _pMachine->GetDllName();
-						std::string::size_type pos = file_name.rfind('.');
-						if(pos != std::string::npos) file_name = file_name.substr(0, pos);
-						file_name += ".fxb";
-						if(!fxb.Open(file_name)) return; // here it is read "CcnK" and its "size" (it is 0)
-					#endif
-				}
-
-				if(fxb._header._id != fxb.FourCC("CcnK")) return;
-				RiffChunkHeader tmp;
-				fxb.Read(tmp);
-				if(tmp._id == fxb.FourCC("FBCh")) // Bank Chunk
-				{
-					MessageBox("Chunk Banks not supported yet","Preset File Error",MB_OK);
-					// Possible structure
-					// CcnK, size, fxID, fxversion, numprograms, future[128], chunksize, chunk
-					// Can't be read program by program, so it has to be loaded directly.
-				}
-				else if( tmp._id == fxb.FourCC("FxBk"))
-				{
-					fxb.Skip(8); // VST ID + VSTVersion
-					endian::big::uint32_t numpresets;
-					fxb.ReadChunk(&numpresets,4);
-					int intpresets = (numpresets.lohi*256) + numpresets.lolo;
-					// well, I don't expect any file with more than 65535 presets.
-					fxb.Skip(128);
-
-					endian::big::uint32_t filenumpars;
-					fxb.ReadChunk(&filenumpars,0); // Just because it seems that one "Skip" after another cause problems.
-
-					char cbuf[29]; cbuf[28]='\0';
-					float* fbuf;
-					fbuf= new float[numParameters];
-					
-					intpresets+=i; // Global "i" to prevent deleting presets previously read from .prs file
-					while( i < intpresets)
-					{
-						fxb.Skip(24); // CcnK header + "size" +  FxCk header + fxbkVersion + VST ID + VSTVersion
-						fxb.ReadChunk(&filenumpars,4);
-						if(filenumpars.lohi * 256 + filenumpars.lolo != numParameters) // same here...
-						{
-							MessageBox("Number of Parameters does not Match with file!",".fxb File Load Error",MB_OK);
-							fxb.Close();
-							return;
-						}
-						fxb.ReadChunk(cbuf,28); cbuf[27]=0;// Read Name
-						fxb.ReadChunk(fbuf,numParameters*sizeof(float)); // Read All params.
-						for (int y=0;y<numParameters;y++)
-						{
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							const float temp=fbuf[y];
-							((char*)&fbuf[y])[0]=((char*)&temp)[3];
-							((char*)&fbuf[y])[1]=((char*)&temp)[2];
-							((char*)&fbuf[y])[2]=((char*)&temp)[1];
-							((char*)&fbuf[y])[3]=((char*)&temp)[0];
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-							/////////// TODO THIS IS HARDCODED FOR LITTLE ENDIAND MACHINES ////////
-						}
-						AddPreset(cbuf, fbuf);
-						++i;
-					}
-					zapArray(fbuf);
-				}
-				fxb.Close();
-			}
 		}
 
 		void CPresetsDlg::SavePresets()
 		{
 			int numpresets=m_preslist.GetCount();
 
-			FILE * hfile;
-			if(!(hfile=fopen(file_name.c_str(), "wb")))
+			FILE* hfile;
+			if(!(hfile=fopen(fileName,"wb")))
 			{
 				MessageBox("The File couldn't be opened for Writing. Operation Aborted","File Save Error",MB_OK);
 				return;
@@ -1025,7 +814,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					i++;
 				}
 				fclose(hfile);
-				zapArray(ibuf);
+				delete [] ibuf;
 			}
 			else if (fileversion == 1)
 			{
@@ -1040,13 +829,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				fwrite(&numpresets,sizeof(int),1,hfile);
 				fwrite(&numParameters,sizeof(int),1,hfile);
-				fwrite(&sizeDataStruct,sizeof(int),1,hfile);
+				fwrite(&dataSizeStruct,sizeof(int),1,hfile);
 				
 				int i=0;
 				char cbuf[32];
 				int* ibuf= new int[numParameters];
-				unsigned char * dbuf(0);
-				if ( sizeDataStruct > 0 ) dbuf = new unsigned char[sizeDataStruct];
+				unsigned char * dbuf = 0;
+				if ( dataSizeStruct > 0 ) dbuf = new byte[dataSizeStruct];
 
 				while ( i< numpresets && !feof(hfile) && !ferror(hfile) )
 				{
@@ -1055,68 +844,46 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					presets[i].GetDataArray(dbuf);
 					fwrite(cbuf,sizeof(cbuf),1,hfile);
 					fwrite(ibuf,numParameters*sizeof(int),1,hfile);
-					if ( sizeDataStruct > 0 ) fwrite(dbuf,sizeDataStruct,1,hfile);
+					if ( dataSizeStruct > 0 ) fwrite(dbuf,dataSizeStruct,1,hfile);
 					i++;
 				}
 				fclose(hfile);
-				zapArray(ibuf);
-				zapArray(dbuf);
+				delete [] ibuf;
+				delete [] dbuf;
 			}
 		}
 
 		void CPresetsDlg::TweakMachine(CPreset &preset)
 		{
 			int num=preset.GetNumPars();
-			if(_pMachine->subclass() == MACH_PLUGIN)
+			for(int i(0) ; i < num ; ++i)
 			{
-				for(int i(0) ; i < num ; ++i)
+				try
 				{
-					try
-					{
-						static_cast<Plugin *>(_pMachine)->proxy().ParameterTweak(i, preset.GetParam(i));
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // static_cast sucks
-					{
-						// o_O`
-					}
+					_pMachine->SetParameter(i, preset.GetParam(i));
 				}
-				if(preset.GetData())
+				catch(const std::exception &)
 				{
-					try
-					{
-						static_cast<Plugin *>(_pMachine)->proxy().PutData(preset.GetData()); // Internal save
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // static_cast sucks
-					{
-						// o_O`
-					}
+					// o_O`
 				}
-				m_wndFrame->Invalidate(false);
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
+				}
 			}
-			else if(_pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX)
+			if(preset.GetData() && _pMachine->_type == MACH_PLUGIN)
 			{
-				for(int i(0) ; i < num ; ++i)
+				try
 				{
-					try
-					{
-						static_cast<vst::plugin *>(_pMachine)->proxy().setParameter(i, preset.GetParam(i) / 65535.0f);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // static_cast sucks
-					{
-						// o_O`
-					}
+					reinterpret_cast<Plugin *>(_pMachine)->proxy().PutData(preset.GetData()); // Internal save
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
 				}
 			}
 			presetChanged = true;
@@ -1124,14 +891,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 
 
-		void CPresetsDlg::AddPreset(char *name, int *parameters, unsigned char * newdata)
+		void CPresetsDlg::AddPreset(const char *name, int *parameters, byte *newdata)
 		{
 			CPreset preset;
-			preset.Init(numParameters,name,parameters,sizeDataStruct,newdata);
+			preset.Init(numParameters,name,parameters,dataSizeStruct,newdata);
 			AddPreset(preset);
 		}
 
-		void CPresetsDlg::AddPreset(char *name, float *parameters)
+		void CPresetsDlg::AddPreset(const char *name, float *parameters)
 		{
 			CPreset preset;
 			preset.Init(numParameters,name,parameters);
@@ -1152,5 +919,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			presets[i2]=preset;;
 		}
 
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,16 +1,17 @@
 ///\file
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-	class CChildView;
-	class Machine;
+		class CChildView;
+		class Machine;
 
-#define K_XSIZE				28
-#define K_YSIZE				28
-#define K_NUMFRAMES			63
-#define W_ROWWIDTH			150
+		#define K_XSIZE     28
+		#define K_YSIZE     28
+		#define K_NUMFRAMES 63
+		#define W_ROWWIDTH  150
 
 
 		/// machine window.
@@ -21,11 +22,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CFrameMachine(); // protected constructor used by dynamic creation
 		// Attributes
 		public:
-			CFrameMachine(int dum){ MachineIndex = dum;};
+			CFrameMachine(int dum){MachineIndex = dum;};
 		protected:
 			Machine* _pMachine;
-			CFont	font;
-			CFont	font_bold;
+			//CBitmap b_knob;
+			CFont	b_font;
+			CFont	b_font_bold;
 
 		// Enviroment
 			int numParameters;
@@ -49,7 +51,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual int ConvertXYtoParam(int x, int y);
 			CChildView *wndView;
 			UINT MachineIndex;
-			bool* _pActive;
+			bool* _pActive;	// It is used to help the program know if this window is open or not.
 		// Overrides
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CFrameMachine)
@@ -82,5 +84,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

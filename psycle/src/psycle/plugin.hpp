@@ -10,12 +10,12 @@
 /// - it provides a bugfree initialization of the plugin.
 /// - it provides the events samples_per_second_changed and sequencer_ticks_per_second_changed, which were not part of the original interface (i don't know if it's been fixed in the host nowadays).
 #pragma once
-#include <psycle/helpers/scale.hpp>
-#include <universalis/compiler.hpp>
+#include <psycle/scale.hpp>
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <stdexcept>
+#include <exception>
+#include "scale.hpp"
 namespace psycle
 {
 	namespace plugin
@@ -37,7 +37,7 @@ namespace psycle
 						/// version of the binary interface of the plugin.
 						int const interface_version;
 						/// type of the plugin, either generator or effect.
-						struct Types { enum Type { effect = 0, generator = 3 }; };
+						struct Types { enum Type { effect = 0, sequencer = 1, generator = 3, customgui=16 }; };
 						/// type of the plugin, either generator or effect.
 						/// declared as int rather than enum for binary compatibility.
 						int /*Types::Type*/ const type;
@@ -110,13 +110,13 @@ namespace psycle
 								/// the upper bound of the parameter's range.
 								/// If using a non-discrete scale (i.e. real), you can't chose this, it's always the maximum value possible.
 								int const maximum_value;
-								/// type of parameter, either null (label), or state.
-								struct Types { enum Type { null = 0, state = 2 }; };
+								/// type of parameter, either null, label, or state.
+								struct Types { enum Type { null = 0, label= 1, state = 2 }; };
 								/// type of parameter, either null (label), or state.
 								/// declared as int rather than enum for binary compatibility.
 								int /*Types::Type*/ const type;
 								int const default_value;
-								common::Scale const & scale;
+								psycle::Scale const & scale;
 							public:
 								/// creates a separator with an optional label.
 								Parameter(char const name[] = "")
@@ -127,7 +127,7 @@ namespace psycle
 									maximum_value(0),
 									type(Types::null),
 									default_value(0),
-									scale(* new common::scale::Discrete(0))
+									scale(* new psycle::scale::Discrete(0))
 								{}
 							public:
 							/// minimum lower bound authorized by the binary interface. (unsigned 16-bit integer)
@@ -136,7 +136,7 @@ namespace psycle
 							int const static input_maximum_value = 0xffff;
 							private:
 								/// creates a scaled parameter ; you don't use this directly, but rather the public static creation functions.
-								Parameter(char const name[], common::Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
+								Parameter(char const name[], psycle::Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
 								:
 									name(name),
 									unused_name(name),
@@ -161,22 +161,22 @@ namespace psycle
 								/// creates a discrete scale, i.e. integers.
 								static const Parameter & discrete(char const name[], int const & default_value, int const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Discrete(static_cast<Real>(maximum_value)), static_cast<Real>(default_value), maximum_value);
+									return * new Parameter(name, * new psycle::scale::Discrete(static_cast<Real>(maximum_value)), static_cast<Real>(default_value), maximum_value);
 								}
 								/// creates a linear real scale.
 								static const Parameter & linear(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Linear(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new psycle::scale::Linear(static_cast<Real>(input_maximum_value+1), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 								/// creates an exponential scale.
 								static const Parameter & exponential(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Exponential(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new psycle::scale::Exponential(static_cast<Real>(input_maximum_value+1), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 								/// creates a logarithmic scale.
 								static const Parameter & logarithmic(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Logarithmic(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new psycle::scale::Logarithmic(static_cast<Real>(input_maximum_value+1), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 						}; // class Parameter
 				}; // class Information
@@ -231,26 +231,26 @@ namespace psycle
 				/// Interface that the host provides to plugins, i.e. what plugins can query the host for.
 				class Host
 				{
-					public:
+				public:
 						/// you can ask the host to display a message.
-						virtual void message(char const message[], char const caption[], unsigned int type = 0) const {}
+					virtual void message(char const message[], char const caption[], unsigned int type = 0) const {}
 					private:
 						/// unused virtual table slot kept for binary compatibility.
-						virtual int const unused__raw(int const, int const, int const, int const) const { return 0; }
+					virtual int const unused__raw(int const, int const, int const, int const) const { return 0; }
 						/// unused virtual table slot kept for binary compatibility.
-						virtual float const * const unused__wave_data_left(int, int) const { return 0; }
+					virtual float const * const unused__wave_data_left(int, int) const { return 0; }
 						/// unused virtual table slot kept for binary compatibility.
-						virtual float const * const unused__wave_data_right(int, int) const { return 0; }
+					virtual float const * const unused__wave_data_right(int, int) const { return 0; }
 					public:
 						/// asks the host to return this value.
-						virtual int const samples_per_tick() const { return 0; }
+					virtual int const samples_per_tick() const { return 0; }
 						/// asks the host to return this value.
-						virtual int const samples_per_second() const { return 0; }
+					virtual int const samples_per_second() const { return 0; }
 						/// asks the host to return this value.
-						virtual int const sequencer_beats_per_minute() const { return 0; }
+					virtual int const sequencer_beats_per_minute() const { return 0; }
 						/// asks the host to return this value.
-						virtual int const sequencer_ticks_per_sequencer_beat() const { return 0; }
-						virtual inline ~Host() throw() {}
+					virtual int const sequencer_ticks_per_sequencer_beat() const { return 0; }
+					virtual inline ~Host() throw() {}
 				} const * host_;
 		}; // class Host_Plugin
 
@@ -420,9 +420,9 @@ namespace psycle
 		#define PSYCLE__PLUGIN__INSTANCIATOR(typename) \
 			extern "C" \
 			{ \
-				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT Host_Plugin::Information const & UNIVERSALIS__COMPILER__CALLING_CONVENTION__C GetInfo() { return typename::information(); } \
-				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT psycle::plugin::Plugin &         UNIVERSALIS__COMPILER__CALLING_CONVENTION__C CreateMachine() { return * new typename; } \
-				UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void                             UNIVERSALIS__COMPILER__CALLING_CONVENTION__C DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
+				__declspec(dllexport) Host_Plugin::Information const & cdecl GetInfo() { return typename::information(); } \
+				__declspec(dllexport) psycle::plugin::Plugin & cdecl CreateMachine() { return * new typename; } \
+				__declspec(dllexport) void cdecl DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 			}
 			
 		int const Host_Plugin::Information::Parameter::input_minimum_value;

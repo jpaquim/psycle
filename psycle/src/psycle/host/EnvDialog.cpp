@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CEnvDialog.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/engine/Song.hpp>
-#include <psycle/host/EnvDialog.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "EnvDialog.hpp"
+#include "Psycle.hpp"
+#include "Song.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CEnvDialog::CEnvDialog(CWnd* pParent)
 			: CDialog(CEnvDialog::IDD, pParent)
 		{
@@ -107,7 +107,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_q_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_RQ);
 			m_envelope_slider.SetPos(_pSong->_pInstrument[si]->ENV_F_EA+128);
 			
-			return true;
+			return TRUE;
 		}
 
 		void CEnvDialog::OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -390,5 +390,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			*pResult = 0;
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

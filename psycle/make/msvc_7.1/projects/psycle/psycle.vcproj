@@ -13,37 +13,122 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
+			Name="release.g6|Win32"
+			OutputDirectory="$(SolutionDir)/output/$(ConfigurationName)/bin"
+			IntermediateDirectory="$(SolutionDir)/output/$(ConfigurationName)/intermediate_output/$(ProjectName)"
+			ConfigurationType="1"
+			UseOfMFC="2"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			DeleteExtensionsOnClean="*.obj;*.ilk;$(TargetDir)/$(TargetName).ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.cmd;$(TargetPath)"
+			WholeProgramOptimization="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/EHa
+/Op-
+/WL"
+				Optimization="4"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../msvc_common/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../src/asio/common&quot;;&quot;$(SolutionDir)/../../src/asio/host&quot;;&quot;$(SolutionDir)/../../src/asio/host/pc&quot;;&quot;$(SolutionDir)/../../include&quot;"
+				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="FALSE"
+				EnableEnhancedInstructionSet="1"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="psycle/project.private.hpp"
+				PrecompiledHeaderFile="$(IntDir)/../pre_compiled_headers.mfc.pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/../pre_compiled_headers.mfc.pdb"
+				WarningLevel="4"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="3"
+				DisableSpecificWarnings="4652"
+				ForcedIncludeFiles="project.private.hpp"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="htmlhelp.lib"
+				OutputFile="$(OutDir)/$(InputName).exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="$(SolutionDir)/output/$(ConfigurationName)/lib"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(OutDir)/$(InputName).pdb"
+				SubSystem="2"
+				LargeAddressAware="1"
+				TerminalServerAware="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				OptimizeForWindows98="1"
+				ImportLibrary="$(SolutionDir)/output/$(ConfigurationName)/lib/$(InputName).lib"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName="$(SolutionDir)/output/$(ConfigurationName)/lib/$(ProjectName).tlb"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_AFXDLL;NDEBUG"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../msvc_common/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../src/psycle/host/resources&quot;;&quot;$(SolutionDir)/../../include&quot;"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
 			Name="debug|Win32"
 			OutputDirectory="$(SolutionDir)/output/$(ConfigurationName)/bin"
 			IntermediateDirectory="$(SolutionDir)/output/$(ConfigurationName)/intermediate_output/$(ProjectName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			DeleteExtensionsOnClean="*.obj;*.ilk;$(TargetDir)/$(TargetName).ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.cmd;$(TargetPath)">
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/EHa
-/
 /Op-
 /WL"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../include&quot;;&quot;$(SolutionDir)/../../src/legacy&quot;;&quot;$(SolutionDir)/../../src/psycle/host&quot;"
-				PreprocessorDefinitions="PACKAGENERIC=&lt;packageneric/module.private.hpp&gt;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../msvc_common/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../src/asio/common&quot;;&quot;$(SolutionDir)/../../src/asio/host&quot;;&quot;$(SolutionDir)/../../src/asio/host/pc&quot;;&quot;$(SolutionDir)/../../include&quot;"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="TRUE"
 				RuntimeLibrary="3"
+				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="packageneric/pre-compiled.private.hpp"
+				PrecompiledHeaderThrough="psycle/project.private.hpp"
 				PrecompiledHeaderFile="$(IntDir)/../pre_compiled_headers.mfc.pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/../pre_compiled_headers.mfc.pdb"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"
 				DisableSpecificWarnings="4652"
 				ForcedIncludeFiles=""/>
@@ -73,7 +158,7 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../include&quot;;&quot;$(SolutionDir)/../../src/legacy&quot;;&quot;$(SolutionDir)/../../src/psycle/host&quot;;&quot;$(SolutionDir)/../../src/psycle/host/resources&quot;"/>
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../msvc_common/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../src/psycle/host/resources&quot;;&quot;$(SolutionDir)/../../include&quot;"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -92,11 +177,11 @@
 			ConfigurationType="1"
 			UseOfMFC="2"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			DeleteExtensionsOnClean="*.obj;*.ilk;$(TargetDir)/$(TargetName).ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.cmd;$(TargetPath)"
 			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/EHa
-/
 /Op-
 /WL"
 				Optimization="4"
@@ -108,24 +193,25 @@
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../include&quot;;&quot;$(SolutionDir)/../../src/legacy&quot;;&quot;$(SolutionDir)/../../src/psycle/host&quot;"
-				PreprocessorDefinitions="PACKAGENERIC=&lt;packageneric/module.private.hpp&gt;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../msvc_common/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../src/asio/common&quot;;&quot;$(SolutionDir)/../../src/asio/host&quot;;&quot;$(SolutionDir)/../../src/asio/host/pc&quot;;&quot;$(SolutionDir)/../../include&quot;"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="FALSE"
+				EnableEnhancedInstructionSet="2"
 				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="packageneric/pre-compiled.private.hpp"
+				PrecompiledHeaderThrough="psycle/project.private.hpp"
 				PrecompiledHeaderFile="$(IntDir)/../pre_compiled_headers.mfc.pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/../pre_compiled_headers.mfc.pdb"
 				WarningLevel="4"
 				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
 				DisableSpecificWarnings="4652"
-				ForcedIncludeFiles=""/>
+				ForcedIncludeFiles="project.private.hpp"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
@@ -155,89 +241,8 @@
 				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../include&quot;;&quot;$(SolutionDir)/../../src/legacy&quot;;&quot;$(SolutionDir)/../../src/psycle/host&quot;;&quot;$(SolutionDir)/../../src/psycle/host/resources&quot;"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="release.g6|Win32"
-			OutputDirectory="$(SolutionDir)/output/$(ConfigurationName)/bin"
-			IntermediateDirectory="$(SolutionDir)/output/$(ConfigurationName)/intermediate_output/$(ProjectName)"
-			ConfigurationType="1"
-			UseOfMFC="2"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			WholeProgramOptimization="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/EHa
-/
-/Op-
-/WL"
-				Optimization="4"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../include&quot;;&quot;$(SolutionDir)/../../src/legacy&quot;;&quot;$(SolutionDir)/../../src/psycle/host&quot;"
-				PreprocessorDefinitions="PACKAGENERIC=&lt;packageneric/module.private.hpp&gt;"
-				StringPooling="TRUE"
-				ExceptionHandling="FALSE"
-				RuntimeLibrary="2"
-				BufferSecurityCheck="FALSE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
-				PrecompiledHeaderThrough="packageneric/pre-compiled.private.hpp"
-				PrecompiledHeaderFile="$(IntDir)/../pre_compiled_headers.mfc.pch"
-				ProgramDataBaseFileName="$(IntDir)/../pre_compiled_headers.mfc.pdb"
-				WarningLevel="4"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4652"
-				ForcedIncludeFiles=""/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="htmlhelp.lib"
-				OutputFile="$(OutDir)/$(InputName).exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="$(SolutionDir)/output/$(ConfigurationName)/lib"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/$(InputName).pdb"
-				SubSystem="2"
-				LargeAddressAware="1"
-				TerminalServerAware="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				OptimizeForWindows98="1"
-				ImportLibrary="$(SolutionDir)/output/$(ConfigurationName)/lib/$(InputName).lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName="$(SolutionDir)/output/$(ConfigurationName)/lib/$(ProjectName).tlb"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../include&quot;;&quot;$(SolutionDir)/../../src/legacy&quot;;&quot;$(SolutionDir)/../../src/psycle/host&quot;;&quot;$(SolutionDir)/../../src/psycle/host/resources&quot;"/>
+				PreprocessorDefinitions="_AFXDLL;NDEBUG"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)/src&quot;;&quot;$(SolutionDir)/src&quot;;&quot;$(SolutionDir)/../msvc_common/src&quot;;&quot;$(SolutionDir)/../../src&quot;;&quot;$(SolutionDir)/../../src/psycle/host/resources&quot;;&quot;$(SolutionDir)/../../include&quot;"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -254,455 +259,544 @@
 	</References>
 	<Files>
 		<Filter
-			Name="legacy/operating_system"
+			Name="psycle"
 			Filter="">
 			<File
-				RelativePath="..\..\..\..\src\legacy\operating_system\logger.cpp">
+				RelativePath="..\..\..\..\src\psycle\host\configuration_options.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\legacy\operating_system\logger.hpp">
-			</File>
-		</Filter>
-		<Filter
-			Name="psycle/host">
-			<File
-				RelativePath="..\..\..\..\src\psycle\host\cacheddllfinder.cpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Constants.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\host\cacheddllfinder.hpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Global.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\host\uiconfiguration.cpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Global.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\host\uiconfiguration.hpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InputHandler.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\host\uiglobal.cpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InputHandler.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\host\uiglobal.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\host\uiversion.hpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\version.hpp">
 			</File>
 			<Filter
-				Name="resources"
+				Name="devices"
 				Filter="">
+				<Filter
+					Name="output"
+					Filter="">
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ASIOInterface.cpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ASIOInterface.hpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\AudioDriver.cpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\AudioDriver.hpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DirectSound.cpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DirectSound.hpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveOut.cpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveOut.hpp">
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="resources"
+				Filter="*.bmp">
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\AsioLogo.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\AsioLogo.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\beta.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\beta.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\bmp00002.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\bmp00001.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\bmp00003.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\bmp00002.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\bmp00004.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\bmp00003.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\bmp00005.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\bmp00004.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\bmp00009.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\bmp00005.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\buttons.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\bmp00009.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\combobox.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\ico00001.ico">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\ico00001.ico">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\icon1.ico">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\icon1.ico">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\idr_vstf.ico">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\idr_vstf.ico">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\imgOff.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\keys_bac.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\imgOn.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\leds.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\keys_bac.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\less.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\less.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\lessless.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\lessless.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\littleleft.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\littleleft.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\littleright.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\littleright.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\machine_skin.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\machine_skin.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\MasterMachine\masterbk.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\MasterMachine\masterbk.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\minus.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\minus.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\minus1.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\minus1.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\more.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\more.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\moremore.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\moremore.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\notekey.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\notekey.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\MasterMachine\numbers.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\MasterMachine\numbers.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\pattern_header_skin.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\pattern_header_skin.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\plus.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\plus.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\plus1.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\plus1.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Psycle.ico">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Psycle.ico">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\resources.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\resources.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\resources.rc">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\resources.rc">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\resources.rc2">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\resources.rc2">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\sampulse.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\sampulse.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\sharpkey.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\sharpkey.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\MasterMachine\slider.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\MasterMachine\slider.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\sliderB-gray.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\sliderB.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\sliderB.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\sliderBh.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\sliderBh.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\sliderP.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\sliderP-gray.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\sliderPh.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\sliderP.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\splash copia.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\sliderPh.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\TbMainKnob.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\splash_copia.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Toolbar.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\TbMainKnob.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\toolbar1.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Toolbar.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\VuOff.bmp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\toolbar1.bmp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\VuOff.bmp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\host\resources\Slider\VuOn.bmp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\resources\Slider\VuOn.bmp">
 				</File>
 			</Filter>
 			<Filter
-				Name="mfc-gui"
+				Name="file"
 				Filter="">
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\bitmap.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DataCompression.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\ChildView.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DataCompression.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\ChildView.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\FileIO.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\GreetDialog.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\FileIO.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\GreetDialog.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ITModule2.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\InputHandler.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ITModule2.h">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\InputHandler.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Riff.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\KeybHandler.private.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Riff.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\MachineView.private.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMFile.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\MainFrm.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSongLoader.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\MainFrm.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSongLoader.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="configuration"
+				Filter="">
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Configuration.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\MouseHandler.private.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Configuration.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\NewMachine.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Registry.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\NewMachine.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Registry.hpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="mfc"
+				Filter="">
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Bitmap.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\PatViewNew.private.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ChildView.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\psycle.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ChildView.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\psycle.hpp">
+					RelativePath="..\..\..\..\src\psycle\host\ExListBox.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\SaveWavDlg.cpp">
+					RelativePath="..\..\..\..\src\psycle\host\ExListBox.h">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\SaveWavDlg.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\GreetDialog.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\ScrollableDlgBar.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\GreetDialog.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\ScrollableDlgBar.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\keybhandler.private.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\SeqView.private.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\machineview.private.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\SongpDlg.cpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MainFrm.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\SongpDlg.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MainFrm.hpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\psycle\host\mfc_namespace.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\mouseHandler.private.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\patviewnew.private.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Psycle.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\psycle.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SaveWavDlg.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SaveWavDlg.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\seqview.private.hpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\psycle\host\sinstance.cpp">
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\psycle\host\sinstance.h">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SongpDlg.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SongpDlg.hpp">
 				</File>
 				<Filter
 					Name="configuration"
 					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\ConfigDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ConfigDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\ConfigDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ConfigDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\DirectoryDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DirectoryDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\DirectoryDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DirectoryDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\KeyConfigDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\KeyConfigDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\KeyConfigDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\KeyConfigDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\SkinDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiInputDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\SkinDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiInputDlg.hpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SkinDlg.cpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SkinDlg.hpp">
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\psycle\host\SpecialKeys.cpp">
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\psycle\host\SpecialKeys.hpp">
 					</File>
 					<Filter
-						Name="midi"
+						Name="devices"
 						Filter="">
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\MidiInputDlg.cpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\MidiInputDlg.hpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\MidiLearn.cpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\MidiLearn.hpp">
-						</File>
-					</Filter>
-					<Filter
-						Name="output"
-						Filter="">
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\audiodrivers\ASIOConfig.cpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\audiodrivers\ASIOConfig.hpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\audiodrivers\DSoundConfig.cpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\audiodrivers\DSoundConfig.hpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\OutputDlg.cpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\audiodrivers\OutputDlg.hpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\audiodrivers\WaveOutDialog.cpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\audiodrivers\WaveOutDialog.hpp">
-						</File>
+						<Filter
+							Name="output"
+							Filter="">
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ASIOConfig.cpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ASIOConfig.hpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DSoundConfig.cpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\DSoundConfig.hpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\OutputDlg.cpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\OutputDlg.hpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveOutDialog.cpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveOutDialog.hpp">
+							</File>
+						</Filter>
+						<Filter
+							Name="midi"
+							Filter="">
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiLearn.cpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiLearn.hpp">
+							</File>
+						</Filter>
 					</Filter>
 				</Filter>
 				<Filter
 					Name="machine"
 					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameAutomator.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\FrameMachine.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameAutomator.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\FrameMachine.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameLFOMachine.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\FrameMixerMachine.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameLFOMachine.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\FrameMixerMachine.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameMachine.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\GearRackDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameMachine.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\GearRackDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameMixerMachine.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MacProp.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\FrameMixerMachine.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MacProp.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\GearRackDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MasterDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\GearRackDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MasterDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\GearTracker.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\NativeGui.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\GearTracker.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\NativeGui.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\MacProp.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\NewMachine.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\MacProp.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\NewMachine.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\MasterDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\NewVal.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\MasterDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\NewVal.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\NewVal.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\PresetsDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\NewVal.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\PresetsDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\PresetsDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveInMacDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\PresetsDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveInMacDlg.hpp">
 					</File>
 					<Filter
 						Name="sampler"
 						Filter="">
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\EnvDialog.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\EnvDialog.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\EnvDialog.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\EnvDialog.hpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\InstrumentEditor.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\GearTracker.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\InstrumentEditor.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\GearTracker.hpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InstrumentEditor.cpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InstrumentEditor.hpp">
 						</File>
 						<Filter
 							Name="waveform"
 							Filter="">
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdAmplifyDialog.cpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ScrollableDlgBar.cpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdAmplifyDialog.hpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ScrollableDlgBar.hpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdChildView.cpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdAmplifyDialog.cpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdChildView.hpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdAmplifyDialog.hpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdCrossfadeDialog.cpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdChildView.cpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdCrossfadeDialog.hpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdChildView.hpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdFrame.cpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdCrossfadeDialog.cpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdFrame.hpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdCrossfadeDialog.hpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdInsertSilenceDialog.cpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdFrame.cpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdInsertSilenceDialog.hpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdFrame.hpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdMixDialog.cpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdInsertSilenceDialog.cpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WaveEdMixDialog.hpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdInsertSilenceDialog.hpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WavFileDlg.cpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdMixDialog.cpp">
 							</File>
 							<File
-								RelativePath="..\..\..\..\src\psycle\host\WavFileDlg.hpp">
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WaveEdMixDialog.hpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\wavfiledlg.cpp">
+							</File>
+							<File
+								RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WavFileDlg.hpp">
 							</File>
 						</Filter>
 					</Filter>
@@ -710,56 +804,50 @@
 						Name="vst"
 						Filter="">
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\DefaultVstGui.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\VstEffectWnd.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\DefaultVstGui.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\VstEffectWnd.hpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\VSTEditorDlg.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\VstParamList.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\VSTEditorDlg.hpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\VSTGUI.cpp">
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\psycle\host\VSTGUI.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\VstParamList.hpp">
 						</File>
 					</Filter>
 					<Filter
 						Name="XMSampler"
 						Filter="">
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerMixerPage.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerMixerPage.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerMixerPage.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerMixerPage.hpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUI.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUI.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUI.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUI.hpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUIGeneral.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUIGeneral.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUIGeneral.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUIGeneral.hpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUIInst.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUIInst.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUIInst.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUIInst.hpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUISample.cpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUISample.cpp">
 						</File>
 						<File
-							RelativePath="..\..\..\..\src\psycle\host\XMSamplerUISample.hpp">
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSamplerUISample.hpp">
 						</File>
 					</Filter>
 				</Filter>
@@ -767,815 +855,222 @@
 					Name="pattern"
 					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\InterpolateCurveDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InterpolateCurveDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\InterpolateCurveDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InterpolateCurveDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\PatDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\PatDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\PatDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\PatDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\SwingFillDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SwingFillDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\SwingFillDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SwingFillDlg.hpp">
 					</File>
 				</Filter>
 				<Filter
 					Name="monitors"
 					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\InfoDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InfoDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\InfoDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InfoDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\MidiMonitorDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiMonitorDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\MidiMonitorDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiMonitorDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\ProgressDialog.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ProgressDialog.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\ProgressDialog.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\ProgressDialog.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\VolumeDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\VolumeDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\VolumeDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\VolumeDlg.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\WireDlg.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WireDlg.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\host\WireDlg.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\WireDlg.hpp">
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
-				Name="detail"
+				Name="host"
 				Filter="">
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\detail\configuration.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\dither.cpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\detail\project.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\dither.hpp">
 				</File>
 				<File
-					RelativePath="..\..\..\..\src\psycle\host\detail\project.private.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Dsp.cpp">
 				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="seib/vsthost">
-			<File
-				RelativePath="..\..\..\..\src\Seib-vsthost\CVSTHost.Seib.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\Seib-vsthost\CVSTHost.Seib.hpp">
-			</File>
-		</Filter>
-		<Filter
-			Name="universalis"
-			Filter="">
-			<File
-				RelativePath="..\..\..\..\src\universalis\exception.cpp">
-				<FileConfiguration
-					Name="debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(ParentName)/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="release.g7|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(ParentName)/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="release.g6|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(ParentName)/"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\universalis\universalis.hpp">
-			</File>
-			<Filter
-				Name="universalis/standard_library"
-				Filter="">
 				<File
-					RelativePath="..\..\..\..\src\universalis\standard_library\standard_library.hpp">
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Dsp.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Helpers.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Helpers.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InstPreview.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\InstPreview.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\mersennetwister.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\mersennetwister.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Player.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Player.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Song.cpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Song.hpp">
+				</File>
+				<File
+					RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\SongStructs.hpp">
 				</File>
 				<Filter
-					Name="universalis/standard_library/exceptions"
+					Name="machine"
 					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\universalis\standard_library\exceptions\code_description.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-					</File>
-				</Filter>
-				<Filter
-					Name="universalis/standard_library/detail"
-					Filter="">
-					<File
-						RelativePath="..\..\..\..\src\universalis\standard_library\detail\allocators.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="universalis/processor"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\universalis\processor\exception.cpp">
-					<FileConfiguration
-						Name="debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g7|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g6|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\universalis\processor\processor.hpp">
-				</File>
-				<Filter
-					Name="universalis/processor/exceptions"
-					Filter="">
-					<File
-						RelativePath="..\..\..\..\src\universalis\processor\exceptions\code_description.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="universalis/operating_system"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\universalis\operating_system\exception.cpp">
-					<FileConfiguration
-						Name="debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g7|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g6|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\universalis\operating_system\loggers.cpp">
-					<FileConfiguration
-						Name="debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g7|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g6|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\universalis\operating_system\operating_system.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\universalis\operating_system\paths.cpp">
-					<FileConfiguration
-						Name="debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g7|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g6|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\universalis\operating_system\terminal.cpp">
-					<FileConfiguration
-						Name="debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g7|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g6|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(ParentName)/"/>
-					</FileConfiguration>
-				</File>
-				<Filter
-					Name="universalis/operating_system/threads"
-					Filter="">
-					<File
-						RelativePath="..\..\..\..\src\universalis\operating_system\threads\id.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
+						RelativePath="..\..\..\..\src\psycle\host\convert_internal_machines.hpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\universalis\operating_system\threads\sleep.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\internal_machines.cpp">
 					</File>
-				</Filter>
-				<Filter
-					Name="universalis/operating_system/exceptions"
-					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\universalis\operating_system\exceptions\code_description.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\internal_machines.hpp">
 					</File>
-				</Filter>
-				<Filter
-					Name="universalis/operating_system/dynamic_link"
-					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\universalis\operating_system\dynamic_link\resolver.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Machine.cpp">
 					</File>
-				</Filter>
-				<Filter
-					Name="universalis/operating_system/detail"
-					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\universalis\operating_system\detail\check_version.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Machine.hpp">
 					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="universalis/compiler"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\universalis\compiler\compiler.hpp">
-				</File>
-				<Filter
-					Name="universalis/compiler/exceptions"
-					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\universalis\compiler\exceptions\ellipsis.cpp">
-						<FileConfiguration
-							Name="debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g7|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="release.g6|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(ParentName)/"/>
-						</FileConfiguration>
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Plugin.cpp">
 					</File>
-				</Filter>
-				<Filter
-					Name="universalis/compiler/detail"
-					Filter="">
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Plugin.hpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\vsthost24.cpp">
+					</File>
+					<File
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\vsthost24.hpp">
+					</File>
 					<Filter
-						Name="universalis/compiler/detail/pragmatic"
+						Name="sampler"
 						Filter="">
 						<File
-							RelativePath="..\..\..\..\src\universalis\compiler\detail\pragmatic\demangle.cpp">
-							<FileConfiguration
-								Name="debug|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ObjectFile="$(IntDir)/$(ParentName)/"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="release.g7|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ObjectFile="$(IntDir)/$(ParentName)/"/>
-							</FileConfiguration>
-							<FileConfiguration
-								Name="release.g6|Win32">
-								<Tool
-									Name="VCCLCompilerTool"
-									ObjectFile="$(IntDir)/$(ParentName)/"/>
-							</FileConfiguration>
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Filter.cpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Filter.hpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Instrument.cpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Instrument.hpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Sampler.cpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\Sampler.hpp">
+						</File>
+					</Filter>
+					<Filter
+						Name="XMSampler"
+						Filter="">
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMInstrument.cpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMInstrument.hpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSampler.cpp">
+						</File>
+						<File
+							RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\XMSampler.hpp">
+						</File>
+					</Filter>
+					<Filter
+						Name="interface"
+						Filter="">
+						<File
+							RelativePath="..\..\..\..\src\psycle\plugin.hpp">
+						</File>
+						<File
+							RelativePath="..\..\..\..\src\psycle\plugin_interface.hpp">
 						</File>
 					</Filter>
 				</Filter>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="packagneric"
-			Filter="">
-			<File
-				RelativePath="..\..\src\packageneric\configuration.private.hpp">
-			</File>
-			<File
-				RelativePath=".\src\packageneric\module.private.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\packageneric\package.private.hpp">
-			</File>
-		</Filter>
-		<Filter
-			Name="engine"
-			Filter="">
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\constants.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\dllfinder.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\dllfinder.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\global.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\global.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\InstPreview.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\InstPreview.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\internal_machine_package.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\internal_machine_package.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\pattern.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\player.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\player.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\song.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\song.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\SongStructs.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\engine\version.hpp">
-			</File>
-			<Filter
-				Name="machine"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\internal_machines.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\internal_machines.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\machine.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\machine.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\plugin.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\plugin.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\plugin.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\plugin_gui.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\plugin_interface.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\VSTHost.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\VSTHost.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\vsthost24.cpp">
-					<FileConfiguration
-						Name="debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="release.g7|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\vsthost24.hpp">
-				</File>
 				<Filter
-					Name="sampler"
+					Name="midi"
 					Filter="">
 					<File
-						RelativePath="..\..\..\..\src\psycle\engine\filter.cpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiInput.cpp">
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\psycle\engine\filter.hpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\instrument.cpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\instrument.hpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\sampler.cpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\sampler.hpp">
+						RelativePath="$(SolutionDir)\..\..\..\src\psycle\host\MidiInput.hpp">
 					</File>
 				</Filter>
-				<Filter
-					Name="XMSampler"
-					Filter="">
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\XMInstrument.cpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\XMInstrument.hpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\XMSampler.cpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\XMSampler.hpp">
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="file"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\FileIO.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\FileIO.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\ITModule2.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\ITModule2.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\psy3filter.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\psy3filter.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\XMFile.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\XMSongLoader.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\XMSongLoader.hpp">
-				</File>
-				<Filter
-					Name="legacy">
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\legacy\convert_internal_machines.hpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\legacy\old_file_format.cpp">
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\psycle\engine\legacy\psy2filter.hpp">
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="configuration"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\configuration.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\configuration.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\registry.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\registry.hpp">
-				</File>
-			</Filter>
-			<Filter
-				Name="detail"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\detail\configuration.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\detail\project.hpp">
-				</File>
 			</Filter>
 		</Filter>
 		<Filter
-			Name="helpers"
+			Name="Seib-Vsthost"
 			Filter="">
 			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\DataCompression.cpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\Seib-vsthost\CVSTHost.Seib.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\DataCompression.hpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\Seib-vsthost\CVSTHost.Seib.hpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\dither.cpp">
+				RelativePath="$(SolutionDir)\..\..\..\src\Seib-vsthost\EffectWnd.cpp">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\dither.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\dsp.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\dsp.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\FFT.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\FFT.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\helpers.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\helpers.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\mersennetwister.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\mersennetwister.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\riff.cpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\src\psycle\helpers\riff.hpp">
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\sigslot\sigslot.h">
+				RelativePath="$(SolutionDir)\..\..\..\src\Seib-vsthost\EffectWnd.hpp">
 			</File>
 		</Filter>
 		<Filter
-			Name="devices"
+			Name="dspguru"
 			Filter="">
-			<Filter
-				Name="output"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\ASIOInterface.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\ASIOInterface.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\AudioDriver.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\AudioDriver.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\DirectSound.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\DirectSound.hpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\WaveOut.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\audiodrivers\WaveOut.hpp">
-				</File>
-			</Filter>
-			<Filter
-				Name="midi"
-				Filter="">
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\MidiInput.cpp">
-				</File>
-				<File
-					RelativePath="..\..\..\..\src\psycle\engine\MidiInput.hpp">
-				</File>
-			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
 		<Global
 			Name="RESOURCE_FILE"
-			Value="..\..\..\..\src\psycle\host\resources\resources.rc"/>
+			Value="\Documents and Settings\All Users\Documentos\Visual C++\psycle-1.8-bugfixes\psycle\src\psycle\host\resources\resources.rc"/>
 	</Globals>
 </VisualStudioProject>

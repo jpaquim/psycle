@@ -1,16 +1,21 @@
 ///\file
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
-#include <psycle/host/InputHandler.hpp>
+#include "InputHandler.hpp"
+#include "resources/resources.hpp"
+#include <afxwin.h>
+#include "mfc_namespace.hpp"
 #include "afxwin.h"
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		/// key config window.
 		class CKeyConfigDlg : public CPropertyPage
 		{
 			DECLARE_DYNCREATE(CKeyConfigDlg)
 		public:
 			void FillCmdList();
+			void UpdateCmdList();
+			int FindCmdonList(const char* cmdname);
 			CKeyConfigDlg();
 			std::string _skinPathBuf;
 			//removed by alk
@@ -50,11 +55,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			BOOL bInit;
 			long m_prvIdx;
 			void UpdateHotKey();	
-			void SaveHotKey(long idx,WORD new_key,WORD new_mods);
-			void FindKey(long idx,WORD & key,WORD & mods);
+			void SaveHotKey(long idx,WORD key,WORD mods);
+			void FindKey(long idx,WORD &key,WORD &mods);
 			CmdDef FindCmd(long idx);
-			// Generated message map functions
-			//{{AFX_MSG(CKeyConfigDlg)
 			virtual BOOL OnInitDialog();
 			afx_msg void OnSelchangeCmdlist();
 			virtual void OnCancel();
@@ -62,17 +65,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnImportreg();
 			afx_msg void OnExportreg();
 			afx_msg void OnDefaults();
+			afx_msg void OnBnClickedSpecialKeys();
 			afx_msg void OnNone();
 			afx_msg void OnUpdateNumLines();
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		public:
-			//afx_msg void OnBnClickedMoveCursorPaste();
 			// number of beats to show a full row in the pattern editor.
 			CComboBox m_timesig;
+			CComboBox m_pageupsteps;
+			CButton m_allowinstances;
+			CButton m_windowsblocks;
 		};
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

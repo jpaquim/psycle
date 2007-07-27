@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/GearTracker.hpp>
-#include <psycle/host/ChildView.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "GearTracker.hpp"
+#include "Psycle.hpp"
+#include "ChildView.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CGearTracker::CGearTracker(CChildView* pParent)
 			: CDialog(CGearTracker::IDD, pParent)
 		{
@@ -38,18 +38,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 
 			m_interpol.AddString("None [Lowest quality]");
-			m_interpol.AddString("Linear [Medium quality]");
-			m_interpol.AddString("Spline [Higher Quality]");
-			m_interpol.AddString("Bandlimited [Higher Quality]");
+			m_interpol.AddString("Linear [Low quality]");
+			m_interpol.AddString("Spline [Medium Quality]");
+			m_interpol.AddString("512p Sinc [Highest Quality]");
 
 			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
 
-			SetWindowText(_pMachine->GetEditName().c_str());
+			SetWindowText(_pMachine->_editName);
 
 			m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 			m_polyslider.SetPos(_pMachine->_numVoices);
 
-			return true;
+			return TRUE;
 		}
 
 		void CGearTracker::OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -93,5 +93,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DestroyWindow();
 			delete this;
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

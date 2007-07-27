@@ -1,11 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::ScrollableDlgBar.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
+#include <psycle/project.private.hpp>
 #include "ScrollableDlgBar.hpp"
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	LRESULT CScrollableDlgBar::WindowProc(UINT nMsg, WPARAM wParam, LPARAM lParam)
 	{
@@ -73,5 +72,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		return lResult;
 	}
 
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

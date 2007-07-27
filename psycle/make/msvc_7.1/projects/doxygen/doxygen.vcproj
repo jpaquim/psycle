@@ -59,10 +59,10 @@
 			Name="pages"
 			Filter="">
 			<File
-				RelativePath="..\..\..\..\src\main_page.doxygen">
+				RelativePath="$(SolutionDir)\..\..\..\src\main_page.doxygen">
 			</File>
 			<File
-				RelativePath="..\..\..\..\src\psycle\namespaces.doxygen">
+				RelativePath="$(SolutionDir)\..\..\..\src\psycle\namespaces.doxygen">
 			</File>
 		</Filter>
 		<File

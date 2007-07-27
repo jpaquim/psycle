@@ -1,11 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CProgressDialog.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/ProgressDialog.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "ProgressDialog.hpp"
+#include "psycle.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CProgressDialog)
@@ -47,5 +46,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DestroyWindow();
 			AfxGetApp()->DoWaitCursor(-1); 
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

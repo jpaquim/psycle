@@ -1,21 +1,21 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiLearn.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/OutputDlg.hpp>
-#include <psycle/engine/MidiInput.hpp>
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/host/MidiLearn.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "MidiLearn.hpp"
+#include "Psycle.hpp"
+#include "OutputDlg.hpp"
+#include "MidiInput.hpp"
+#include "Configuration.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CMidiLearn::CMidiLearn(CWnd* pParent) : CDialog(CMidiLearn::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CMidiLearn)
 				// NOTE: the ClassWizard will add member initialization here
 			//}}AFX_DATA_INIT
 			Message = -1;
-			//Global::configuration()._pMidiInput->fnMidiCallback_Test = (MidiCallback_Test);
+			//Global::pConfig->_pMidiInput->fnMidiCallback_Test = (MidiCallback_Test);
 		}
 
 		void CMidiLearn::DoDataExchange(CDataExchange* pDX)
@@ -37,5 +37,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			Message = -1;
 			CDialog::OnCancel();
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

@@ -1,291 +1,165 @@
 ///\file
 ///\brief implementation file for psycle::host::CInterpolateCurve.
-#include <packageneric/pre-compiled.private.hpp>
-#include "psycle.hpp"
+#include <psycle/project.private.hpp>
 #include "InterpolateCurveDlg.hpp"
+#include "psycle.hpp"
+#include "Helpers.hpp"
+#include ".\interpolatecurvedlg.hpp"
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		CInterpolateCurve::CInterpolateCurve(CWnd* pParent)
+		CInterpolateCurve::CInterpolateCurve(int startsel, int endsel,int _linesperbeat,CWnd* pParent)
 			: CDialog(CInterpolateCurve::IDD, pParent)
+			, startIndex(startsel)
+			, numLines(endsel-startsel+1)
+			, linesperbeat(_linesperbeat)
+			, selectedGPoint(0)
+			, bDragging(false)
 		{
-			/////////////
+			kf = new keyframesstruct[numLines];
+			kfresult = new int[numLines];
+			//set default keyframe values
+			kf[0].value = 32768;
+			kf[0].curvetype = 1;
+			kftwk = -1;
+			for (int i = 1;i < numLines-1;i++)
+			{
+				kf[i].value = -1;
+				kf[i].curvetype = 1;
+			}
+			kf[numLines-1].value = 32768;
+			kf[numLines-1].curvetype = 1;
+
 		}
 
 		CInterpolateCurve::~CInterpolateCurve()
 		{
+			delete kf;
+			delete kfresult;
 		}
 
 		void CInterpolateCurve::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CInterpolateCurve)
-
-			//}}AFX_DATA_MAP
-
+			DDX_Control(pDX, IDC_POS, m_Pos);
 			DDX_Control(pDX, IDC_VAL, m_Value);
 			DDX_Control(pDX, IDC_CURVE_TYPE, m_CurveType);
+			DDX_Control(pDX, IDC_COMBOTWK, m_combotwk);
+			DDX_Control(pDX, IDC_CHECKTWK, m_checktwk);
 		}
 
 		BEGIN_MESSAGE_MAP(CInterpolateCurve, CDialog)
-			//{{AFX_MSG_MAP(CInterpolateCurve)
 			ON_BN_CLICKED(IDOK, OnOk)
-			//}}AFX_MSG_MAP
-			
 			ON_WM_PAINT()
 			ON_WM_LBUTTONDOWN()
 			ON_WM_LBUTTONUP()
 			ON_WM_MOUSEMOVE()
 			ON_WM_RBUTTONDOWN()
 			ON_CBN_SELENDOK(IDC_CURVE_TYPE, OnSelendokCurveType)
+			ON_EN_KILLFOCUS(IDC_POS, OnEnKillfocusPos)
+			ON_EN_KILLFOCUS(IDC_VAL, OnEnKillfocusVal)
+			ON_BN_CLICKED(IDC_CHECKTWK, OnBnClickedChecktwk)
 		END_MESSAGE_MAP()
 		
 		BOOL CInterpolateCurve::OnInitDialog()
 		{
-			
-			//MessageBox ("asdfasdf","asdf");
 			CDialog::OnInitDialog();
-
-			bInterpolate = false;
 
 			//set combo box items
 			m_CurveType.AddString ("Linear");
 			m_CurveType.AddString ("Hermite Curve");
+			m_CurveType.AddString ("All to Linear");
+			m_CurveType.AddString ("All to Hermite");
 			m_CurveType.SetCurSel (1);
 
-			
+			//determine scaling factor
+			GetClientRect(&grapharea);
+			AdjustRectToView(grapharea);
+			xscale = (grapharea.right - grapharea.left) / float(numLines-1);
+			xoffset = (float(grapharea.right - grapharea.left) - (xscale*(numLines-1)))/2.0f;
+			yscale = (grapharea.bottom - grapharea.top) / float(65535); ///total height divided by max param value.
+			grapharea.left+=xoffset;grapharea.right-=xoffset;
 
-			//set default curve type
-			for (int i = 0;i < MAX_LINES;i++)
+			SetPosText(0);
+			SetValText(kf[0].value);
+			if (kftwk != -1)
 			{
-				kfcurvetype[i] = 1;
+				m_checktwk.SetCheck(1);
+				m_combotwk.EnableWindow(true);
+				m_combotwk.SetCurSel(kftwk);
 			}
 			
-			//determine scaling factor
-			GetWindowRect(&grapharea);			
-			ScreenToClient(&grapharea);
-			grapharea.top += 40; grapharea.left += 20; grapharea.right -= 20; grapharea.bottom -= 100;
-			xscale = (grapharea.right - grapharea.left) / (SelEndLine - SelStartLine); 
-			yscale = (grapharea.bottom - grapharea.top) / float(65535); ///total width divided by max param value.
-			
-			SelectedGPoint = 0;
-
 			return true;			
 		}
-		
+		void CInterpolateCurve::OnBnClickedChecktwk()
+		{
+			if ( m_checktwk.GetCheck() == 0)
+			{
+				m_combotwk.EnableWindow(false);
+			}
+			else m_combotwk.EnableWindow(true);
+		}
+
+		// Assign array of values to the curve dialog.
+		void CInterpolateCurve::AssignInitialValues(int* values,int commandtype)
+		{
+			for (int i(0); i< numLines; ++i)
+			{
+				if (values[i] != -1)
+				{
+					kf[i].value=values[i];
+				}
+			}
+			kftwk = commandtype;
+		}
+
 		void CInterpolateCurve::OnOk()
 		{
-			bInterpolate = true;
+			FillReturnValues();
+			if ( m_checktwk.GetCheck() > 0) kftwk = m_combotwk.GetCurSel();
+			else kftwk = -1;
+
+			for (int i=0;i< numLines;i++) kfresult[i]=kf[i].value;
 			OnOK();		
 		}
 
-		void CInterpolateCurve::OnPaint()
+		void CInterpolateCurve::AdjustPointToView(CPoint&point)
 		{
-			CPaintDC dc(this); // device context for painting
-			RECT bgrect;  bgrect.left = grapharea.left - 4; bgrect.top = grapharea.top - 4;
-			bgrect.right = grapharea.right + 4;  bgrect.bottom = grapharea.bottom + 4;
-
-			dc.FillSolidRect (&bgrect, 0x00FFFFFF);
-			dc.Rectangle (&bgrect);
-			//draw gridlines
-			//vertical
-			for (int h = 0; h <= (SelEndLine - SelStartLine);h++)
-			{
-				//dc.SetDCPenColor (0x00CCCCCC) //not sure why this doesn't work, so i've used 
-												// the fillsolidrect method instead
-				dc.FillSolidRect (int(h * xscale + 0.5) + grapharea.left,grapharea.top - 3, 1,grapharea.bottom - grapharea.top + 6, 0x00DDDDDD);
-			}
-			//horizontal
-			for (int j = 0; j < 16; j++)  //line every 0x00001000
-			{
-				dc.FillSolidRect (grapharea.left - 3, grapharea.top - 3 + int(j * yscale * 4096 + 0.5), grapharea.right - grapharea.left + 6, 1, 0x00DDDDDD);
-			}
-
-			 
-			for (int i = 0;i < MAX_LINES; i++)
-			{
-				if (kfvalue[i] >= 0)
-				{
-					RECT pointrect = GetGPointRect(i);
-	
-					//char buff[100]; sprintf(buff, "%d", pointrect.left);MessageBox (buff, buff);
-					
-					dc.FillSolidRect (&pointrect, 0);
-				}
-			}
-			//draw lines between points
-			for (int i = SelStartLine; i < SelEndLine; i++)
-			{
-				int x = grapharea.left + int(xscale * (i - SelStartLine) + 0.5);
-				int y = grapharea.top + int(yscale * (65535 - kfvalue[i]) + 0.5);
-				
-				if (kfvalue[i] >= 0)
-				{
-					for (int h = i + 1; h <= SelEndLine; h++)  //find next occupied pos
-					{
-						if (kfvalue[h] >= 0)
-						{
-							//char b[10]; sprintf (b, "%d", h); MessageBox (b, "kfvalue[h]");
-							int x2 = grapharea.left + int(xscale * (h - SelStartLine) + 0.5);
-							int y2 = grapharea.top + int(yscale * (65535 - kfvalue[h]) + 0.5);
-
-							switch (kfcurvetype[i])
-							{
-							case 0:
-								dc.MoveTo (x, y);
-								dc.LineTo (x2, y2);
-								break;
-							case 1:
-								int max = x2 - x; 
-								int kf0, kf1, kf2, kf3;
-								kf1 = y; kf2 = y2;
-								int curvept;
-								
-								// find kf3;
-								bool bPt3Found = false;
-								int k = h;
-								while (k < MAX_LINES)
-								{
-									if (kfvalue[k] >= 0)
-									{
-										//found next point
-										kf3 = grapharea.top + int(yscale * (65535 - kfvalue[k]) + 0.5);
-										k = MAX_LINES;//force loop to end
-										bPt3Found = true;
-									}
-									k++;
-								}
-								if (bPt3Found = false)
-								{
-									//at second last keyframe, so kf3 = kf2;
-									kf3 = kf2;
-								}
-
-								//find k0
-								bool bPt0Found = false;
-								int l = i;
-								while (l >=0)
-								{
-									if (kfvalue[l] >= 0)
-									{
-										kf0 = grapharea.top + int(yscale * (65535 - kfvalue[l]) + 0.5);
-										l = -1; //force loop to end
-										bPt0Found = true;
-									}
-									l--;
-								}
-								if (bPt0Found = false)
-								{
-									kf0 = kf1;
-								}
-
-
-								//char bu[4]; sprintf (bu, "%d", kf0); MessageBox (bu, bu);
-								for (int g = 0;g < max; g++)
-								{
-									curvept = HermiteCurveInterpolate(kf1,kf1,kf2,kf3,g,max, 0, true);
-									dc.LineTo (g + x, curvept);
-								}
-
-								break;
-							}
-							h = MAX_LINES ; //make loop end prematurely.
-						}
-					}
-				}
-			} 
-			
-
-			//draw selected item
-			if (SelectedGPoint > -1)
-			{
-				RECT highlightrect = GetGPointRect(SelectedGPoint);
-				dc.FillSolidRect (&highlightrect, 0x000000FF);
-			}
+			point.y-=20; point.x-=10+xoffset;
 		}
-
-		void CInterpolateCurve::OnLButtonDown(UINT nFlags, CPoint point)
+		void CInterpolateCurve::AdjustRectToView(RECT&rect)
 		{
-			if ((point.x >= grapharea.left - 3) && (point.x <= grapharea.right + 3 ) && (point.y >= grapharea.top ) && (point.y <= grapharea.bottom ))
-			{			
-				
-				//check if user has clicked on a point
+			rect.top += 20; rect.left += 10; rect.right -= 10; rect.bottom -= 100;
+		}
+		int CInterpolateCurve::GetPointFromX(LONG x)
+		{
+			int pos = -1;
 
-				bool bPointAllowed = false;
-				bool bPointFound = false;
-				int pos = 0;
-
-				CClientDC dc(this);
-
-				//determine x position
-				float remainder = (((point.x - 17) * 1000) % (int(xscale * 1000)))/1000;  //remainder to reasonable accuracy
-
-				//char buff[100]; sprintf(buff, "%e", remainder);MessageBox (buff, buff);
-
-				if (remainder < (3 + int(xscale / 2 + 0.5)))
-				{
-					pos = int((point.x - 17) / xscale) + SelStartLine; //round down to neareset position on left of point
-					bPointAllowed = true;
-				}
-				else if (remainder > ( - int(xscale / 2 + 0.5) - 6))
-				{
-					pos = int((point.x - 17) / xscale) + SelStartLine;// round up to nearest position on right of point
-					bPointAllowed = true;
-				}
-
-				RECT temprect = GetGPointRect (pos);
-
-
-				
-				if (bPointAllowed)
-				{	
-					//char b2[100]; sprintf (b2, "%d", SelectedGPoint); MessageBox (b2, "selectedpoint");
-
-					//temprect.left -=1; temprect.right +=1; temprect.top -=1; temprect.bottom +=1;
-					if (PtInRect (& temprect, point))
-					{
-						SelectedGPoint = pos;
-					}
-					else
-					{
-                        kfvalue[pos] = 65535 - int((point.y - 20)/yscale + 0.5);
-						SelectedGPoint = pos;
-					}
-					
-
-					char val[4]; sprintf (val, "%04X", kfvalue[pos]);
-					m_Value.SetWindowText (val);
-
-					switch (kfcurvetype[pos])
-					{
-					case 0: 
-						m_CurveType.SetCurSel (0); break;
-					case 1:
-						m_CurveType.SetCurSel (1); break;
-					}
-
-					RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
-					temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
-					InvalidateRect(&temp, 0);
-
-				}
+			//determine x position
+			float remainder = ((x * 1000) % (int(xscale * 1000)))/1000;  //remainder to reasonable accuracy
+			if (remainder < (3 + int(xscale / 2 + 0.5)))
+			{
+				pos = int(x / xscale); //round down to neareset position on left of point
 			}
-
-			CDialog::OnLButtonDown(nFlags, point);
+			///\todo: what's the meaning of this "else if"?
+			else if (remainder > ( - int(xscale / 2 + 0.5) - 6))
+			{
+				pos = int(x / xscale)+1;// round up to nearest position on right of point
+			}
+			return pos;
 		}
 
 		RECT CInterpolateCurve::GetGPointRect(int i)
 		{
 			RECT pointrect;
-			int x, y;
-			x = grapharea.left + int(xscale * (i - SelStartLine) + 0.5);
-			y = grapharea.top + int(yscale * (65535 - kfvalue[i]) + 0.5);
+			int x = grapharea.left + int(xscale * i);
+			int y = grapharea.top + int(yscale * (65535 - kf[i].value));
 			pointrect.left = x - 3; pointrect.right = x + 3;
 			pointrect.top = y - 3;  pointrect.bottom = y + 3;
 			return pointrect;
-
 		}
+
 		float CInterpolateCurve::HermiteCurveInterpolate(int kf0, int kf1, int kf2, int kf3, int curposition, int maxposition, float tangmult, bool interpolation)
 		{
 			if ( interpolation == true )
@@ -301,7 +175,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 				float t1 = tangmult * (kf2-kf0);
 				float t2 = tangmult * (kf3-kf1);
-								
+
 				return (h1 * kf1 + h2 * kf2 + h3 * t1 + h4 * t2);
 			}
 			else
@@ -309,39 +183,221 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				return kf1;
 			}
 		}
+		void CInterpolateCurve::SetPosText(int i)
+		{
+			char val[5];
+			sprintf (val, "%d", i+startIndex);
+			m_Pos.SetWindowText (val);
+		}
+		void CInterpolateCurve::SetValText(int i)
+		{
+			char val[5];
+			sprintf (val, "%04X", i);
+			m_Value.SetWindowText (val);
+		}
+		void CInterpolateCurve::OnPaint()
+		{
+			CPaintDC dc(this); // device context for painting
+
+			RECT tmprect = grapharea;
+			//set an extra border.
+			tmprect.left -= xoffset; tmprect.right += xoffset;
+			tmprect.top -= 10; tmprect.bottom += 10;
+			dc.FillSolidRect (&tmprect, 0x00FFFFFF);
+			dc.Rectangle (&tmprect);
+			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+			HGDIOBJ oldFont = dc.SelectObject(hFont);
+
+			//draw gridlines
+			//horizontal
+			for (int j = 0; j < 17; j++)  //line every 0x1000
+			{
+				dc.FillSolidRect (grapharea.left, grapharea.top + int(j * yscale * 4096), grapharea.right - grapharea.left, 1, 0x00DDDDDD);
+			}
+			//vertical
+			for (int h = 0; h < numLines;h++)
+			{
+				if ( (startIndex+h) % linesperbeat == 0)
+				{
+					CString bla; bla.Format("%d",startIndex+h);
+					dc.TextOut (int(h * xscale) + grapharea.left,grapharea.bottom-12, bla);
+					dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DD0000);
+				}
+				else
+					dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DDDDDD);
+			}
+
+			// Draw points and lines between points
+			int pos0=0, pos1=0, pos2=0, pos3=0;
+
+			GetNextkfvalue(pos1);
+			if ( pos1 >= numLines ) return;
+
+			int x = grapharea.left + int(xscale * pos1);
+			int y = grapharea.top + int(yscale * (65535 - kf[pos1].value));
+
+			dc.MoveTo (x, y);
+			RECT pointrect = GetGPointRect(pos1);
+			dc.FillSolidRect (&pointrect, 0);
+
+			pos0=pos1;
+			pos2=pos1;
+			GetNextkfvalue(++pos2);
+			if ( pos2 < numLines )
+			{
+				pos3=pos2;
+				GetNextkfvalue(++pos3);
+				while (pos3 < numLines)
+				{
+					switch (kf[pos1].curvetype)
+					{
+					case 0:
+						x = grapharea.left + int(xscale * pos2);
+						y = grapharea.top + int(yscale * (65535 - kf[pos2].value));
+						dc.LineTo(x,y);
+						break;
+					case 1:
+						int distance = grapharea.left + int(xscale * pos2) - x;
+						for (int i=1; i < distance; i++)
+						{
+							int curveval=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,distance, 0, true);
+							dc.LineTo(x+i,grapharea.top + int(yscale * (65535 - curveval)));
+						}
+						x = grapharea.left + int(xscale * pos2);
+						break;
+					}
+					pointrect = GetGPointRect(pos2);
+					dc.FillSolidRect (&pointrect, 0);
+
+					pos0=pos1;
+					pos1=pos2;
+					pos2=pos3;
+					GetNextkfvalue(++pos3);
+				}
+
+				pos3=pos2;
+				switch (kf[pos1].curvetype)
+				{
+				case 0:
+					x = grapharea.left + int(xscale * pos2);
+					y = grapharea.top + int(yscale * (65535 - kf[pos2].value));
+					dc.LineTo(x,y);
+					break;
+				case 1:
+					int distance = grapharea.left + int(xscale * pos2) - x;
+					for (int i=1; i < distance; i++)
+					{
+						int curveval=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,distance, 0, true);
+						dc.LineTo(x+i,grapharea.top + int(yscale * (65535 - curveval)));
+					}
+					break;
+				}
+				pointrect = GetGPointRect(pos2);
+				dc.FillSolidRect (&pointrect, 0);
+			}
+
+			//draw selected item
+			if (selectedGPoint > -1)
+			{
+				RECT highlightrect = GetGPointRect(selectedGPoint);
+				dc.FillSolidRect (&highlightrect, 0x000000FF);
+			}
+			dc.SelectObject(oldFont);
+		}
+
+		void CInterpolateCurve::OnLButtonDown(UINT nFlags, CPoint point)
+		{
+			AdjustPointToView(point);
+			if ((point.x >= -3) && (point.x <= 3+(grapharea.right-grapharea.left)) && (point.y >= 0 ) && (point.y <= (grapharea.bottom-grapharea.top) ))
+			{			
+				int pos = GetPointFromX(point.x);
+				if (pos >= 0)
+				{	
+                    kf[pos].value = 65535 - int((point.y)/yscale);
+					selectedGPoint = pos;
+					
+					SetPosText(pos);
+					SetValText(kf[pos].value);
+
+					switch (kf[pos].curvetype)
+					{
+					case 0: 
+						m_CurveType.SetCurSel (0); break;
+					case 1:
+						m_CurveType.SetCurSel (1); break;
+					}
+
+					RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
+					temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
+					InvalidateRect(&temp, 0);
+
+				}
+			}
+			bDragging=true;
+			SetCapture();
+			CDialog::OnLButtonDown(nFlags, point);
+		}
 
 		void CInterpolateCurve::OnLButtonUp(UINT nFlags, CPoint point)
 		{
+			AdjustPointToView(point);
 			bDragging = false;
+			ReleaseCapture();
 
 			CDialog::OnLButtonUp(nFlags, point);
 		}
 
 		void CInterpolateCurve::OnMouseMove(UINT nFlags, CPoint point)
 		{
+			if (bDragging)
+			{
+				AdjustPointToView(point);
+				if ((point.x >= -3) && (point.x <= 3+(grapharea.right-grapharea.left)) && (point.y >= 0 ) && (point.y <= (grapharea.bottom-grapharea.top) ))
+				{			
+					int pos = GetPointFromX(point.x);
+					if (pos >= 0)
+					{	
+						if ( pos != selectedGPoint && selectedGPoint != 0 && selectedGPoint != numLines-1)
+						{
+							kf[pos].curvetype = kf[selectedGPoint].curvetype;
+							kf[selectedGPoint].value = -1;
+						}
+						kf[pos].value = 65535 - int((point.y)/yscale);
+						selectedGPoint = pos;
+
+						SetPosText(pos);
+						SetValText(kf[pos].value);
+
+						switch (kf[pos].curvetype)
+						{
+						case 0: 
+							m_CurveType.SetCurSel (0); break;
+						case 1:
+							m_CurveType.SetCurSel (1); break;
+						}
+
+						RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
+						temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
+						InvalidateRect(&temp, 0);
+					}
+				}
+			}
 			CDialog::OnMouseMove(nFlags, point);
 		}
 
 		void CInterpolateCurve::OnRButtonDown(UINT nFlags, CPoint point)
 		{
+			AdjustPointToView(point);
+			int pos = GetPointFromX(point.x);
 
-			int pt = int((point.x - 20) / xscale) + SelStartLine;
-			int allowedpt = -1;
-			//char b2[100]; sprintf (b2, "%d", pt); MessageBox (b2, "kfpos");
-			RECT t1 = GetGPointRect (pt);  RECT t2 = GetGPointRect(pt + 1);
-			if (PtInRect( &t1, point))
-				allowedpt = pt + 0;
-			else if (PtInRect(&t2, point))
-				allowedpt = pt + 1;
+			if (pos > 0 && pos < numLines-1)  // First and last point are not allowed to be removed.
+				kf[pos].value = -1;
+			else return;
 
-			if (allowedpt >= 0)
-				kfvalue[allowedpt] = -1;
-
-			if (allowedpt == SelectedGPoint)
+			if (pos == selectedGPoint)
 			{
-				SelectedGPoint = -1;
+				selectedGPoint = -1;
 			}
-
 
 			RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
 			temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
@@ -351,19 +407,164 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CInterpolateCurve::OnSelendokCurveType()
 		{
-			if (SelectedGPoint >=0)
+			if (selectedGPoint >=0)
 			{
 				switch (m_CurveType.GetCurSel ())
 				{
 				case 0:
-					kfcurvetype[SelectedGPoint] = 0; break;
+					kf[selectedGPoint].curvetype = 0; break;
 				case 1:
-					kfcurvetype[SelectedGPoint] = 1; break;
+					kf[selectedGPoint].curvetype = 1; break;
+				case 2:
+					for (int i(0); i< numLines; i++)
+					{
+						kf[i].curvetype = 0;
+					}
+					m_CurveType.SetCurSel(0);
+					break;
+				case 3:
+					for (int i(0); i< numLines; i++)
+					{
+						kf[i].curvetype = 1;
+					}
+					m_CurveType.SetCurSel(1);
+					break;
 				}
 				Invalidate();
 			}
 		}
 
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+		void CInterpolateCurve::OnEnKillfocusPos()
+		{
+			CString text;
+			m_Pos.GetWindowText(text);
+			int pos=atoi(text)-startIndex;
 
+			if ( pos >=0 && pos <numLines)
+			{
+				if ( kf[pos].value == -1)
+				{
+					CString text2;
+					m_Value.GetWindowText(text2);
+					int value=atoi(text2);
+					if ( value >0 && value < 65536)
+					{
+						kf[pos].value = value;
+					}
+					else 
+					{
+						kf[pos].value= 0;
+						SetValText(0);
+					}
+				}
+				else
+				{
+					SetValText(kf[pos].value);
+				}
+				selectedGPoint = pos;
+				RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
+				temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
+				InvalidateRect(&temp, 0);
+			}
+			else
+			{
+				SetPosText(selectedGPoint);
+				SetValText(kf[selectedGPoint].value);
+			}
+
+		}
+
+		void CInterpolateCurve::OnEnKillfocusVal()
+		{
+			if (selectedGPoint >=0)
+			{
+				CString text;
+				m_Value.GetWindowText(text);
+				std::string text2 = text;
+				int value=0;
+				hexstring_to_integer(text2,value);
+				if ( value >=0 && value < 65536)
+				{
+					kf[selectedGPoint].value = value;
+					RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
+					temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
+					InvalidateRect(&temp, 0);
+				}
+				else
+				{
+					SetValText(kf[selectedGPoint].value);
+				}
+			}
+		}
+
+
+
+		void CInterpolateCurve::GetNextkfvalue(int &startpos)
+		{
+			for (; startpos <= numLines; startpos++)
+			{
+				if (kf[startpos].value >= 0)
+				{
+					return;
+				}
+			}
+		}
+
+		void CInterpolateCurve::FillReturnValues()
+		{
+			int pos0=0, pos1=0, pos2=0, pos3=0;
+
+			GetNextkfvalue(pos1);
+			if ( pos1 >= numLines ) return;
+
+			pos0=pos1;
+			pos2=pos1;
+			GetNextkfvalue(++pos2);
+			if ( pos2 >= numLines ) return;
+
+			pos3=pos2;
+			GetNextkfvalue(++pos3);
+			while (pos3 < numLines)
+			{
+				switch (kf[pos1].curvetype)
+				{
+				case 0:
+					for (int i=1; i < (pos2-pos1); i++)
+					{
+						kf[pos1+i].value=kf[pos1].value + (((kf[pos2].value-kf[pos1].value)*i)/(pos2-pos1));
+					}
+					break;
+				case 1:
+					for (int i=1; i < (pos2-pos1); i++)
+					{
+						kf[pos1+i].value=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,pos2-pos1, 0, true);
+					}
+					break;
+				}
+
+				pos0=pos1;
+				pos1=pos2;
+				pos2=pos3;
+				GetNextkfvalue(++pos3);
+			}
+			
+			pos3=pos2;
+			switch (kf[pos1].curvetype)
+			{
+			case 0:
+				for (int i=1; i < (pos2-pos1); i++)
+				{
+					kf[pos1+i].value=kf[pos1].value + (((kf[pos2].value-kf[pos1].value)*i)/(pos2-pos1));
+				}
+				break;
+			case 1:
+				for (int i=1; i < (pos2-pos1); i++)
+				{
+					kf[pos1+i].value=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,pos2-pos1, 0, true);
+				}
+				break;
+			}
+		}
+
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

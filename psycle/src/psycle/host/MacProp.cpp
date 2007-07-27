@@ -1,19 +1,19 @@
 ///\file
 ///\brief implementation file for psycle::host::CMacProp.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/MacProp.hpp>
-#include <psycle/host/MainFrm.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "MacProp.hpp"
+#include "Psycle.hpp"
+#include "MainFrm.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		extern CPsycleApp theApp;
 
 		CMacProp::CMacProp(CWnd* pParent)
-		:
-			CDialog(CMacProp::IDD, pParent),
-			m_view(0)
-		{}
+			: CDialog(CMacProp::IDD, pParent)
+		{
+			m_view=NULL;
+		}
 
 		void CMacProp::DoDataExchange(CDataExchange* pDX)
 		{
@@ -31,6 +31,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_BYPASS, OnBypass)
 			ON_BN_CLICKED(IDC_SOLO, OnSolo)
 			ON_BN_CLICKED(IDC_CLONE, OnClone)
+			ON_BN_CLICKED(IDC_REPLACEMAC, OnBnClickedReplacemac)
 		END_MESSAGE_MAP()
 
 		BOOL CMacProp::OnInitDialog() 
@@ -39,30 +40,32 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			deleted=false;
 
-			{
-				std::ostringstream s;
-				s	<< std::hex << std::setfill('0') << std::setw(2)
-					<< Global::song().FindBusFromIndex(thisMac) << ": " << pMachine->GetEditName() << "  Properties";
-				SetWindowText(s.str().c_str());
-			}
+			m_macname.SetLimitText(31);
+			char buffer[64];
+			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->_editName);
+			SetWindowText(buffer);
 
-			m_macname.SetWindowText(pMachine->GetEditName().c_str());
+			m_macname.SetWindowText(pMachine->_editName);
 
 			m_muteCheck.SetCheck(pMachine->_mute);
 			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
-			m_bypassCheck.SetCheck(pMachine->_bypass);
+			m_bypassCheck.SetCheck(pMachine->Bypass());
 			if (pMachine->_mode == MACHMODE_GENERATOR ) 
+			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
+			}
 			else 
+			{
 				m_soloCheck.ShowWindow(SW_HIDE);
-			return true;
+			}
+			return TRUE;
+			// return TRUE unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
 		void CMacProp::OnChangeEdit1() 
 		{
-			char value[32];
-			 m_macname.GetWindowText(value,32);
-			 txt = value;
+			m_macname.GetWindowText(txt, 32);
 		}
 
 		void CMacProp::OnButton1() 
@@ -70,7 +73,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			// Delete MACHINE!
 			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 			{
-				if(m_view) m_view->AddMacViewUndo();
+				if ( m_view != NULL )
+				{
+					m_view->AddMacViewUndo();
+				}
+
 				deleted = true;
 				OnCancel();
 			}
@@ -81,7 +88,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			pMachine->_mute = (m_muteCheck.GetCheck() == 1);
 			pMachine->_volumeCounter=0.0f;
 			pMachine->_volumeDisplay = 0;
-			if(m_view)
+			if ( m_view != NULL )
 			{
 				m_view->AddMacViewUndo();
 				m_view->updatePar=thisMac;
@@ -90,8 +97,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 		void CMacProp::OnBypass() 
 		{
-			pMachine->_bypass = (m_bypassCheck.GetCheck() == 1);
-			if(m_view)
+			pMachine->Bypass(m_bypassCheck.GetCheck() == 1);
+			if ( m_view != NULL )
 			{
 				m_view->AddMacViewUndo();
 				m_view->updatePar=thisMac;
@@ -140,40 +147,24 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMacProp::OnClone() 
 		{
-			Machine::id_type src(pMachine->id());
-			Machine::id_type dst(-1);
+			int src = pMachine->_macIndex;
+			int dst = -1;
 
 			if ((src < MAX_BUSES) && (src >=0))
 			{
-				// we need to find an empty slot
-				for (Machine::id_type i(0); i < MAX_BUSES; i++)
-				{
-					if (!Global::song()._pMachine[i])
-					{
-						dst = i;
-						break;
-					}
-				}
+				dst = Global::_pSong->GetFreeBus();
 			}
 			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
 			{
-				for (Machine::id_type i(MAX_BUSES); i < MAX_BUSES*2; i++)
-				{
-					if (!Global::song()._pMachine[i])
-					{
-						dst = i;
-						break;
-					}
-				}
+				dst = Global::_pSong->GetFreeFxBus();
 			}
 			if (dst >= 0)
 			{
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
-				if (!Global::song().CloneMac(src,dst))
+				if (!Global::_pSong->CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}
-				if(m_view)
+				if ( m_view != NULL )
 				{
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
 					if (m_view->viewMode==view_modes::machine)
@@ -184,5 +175,21 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			OnCancel();
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+		void CMacProp::OnBnClickedReplacemac()
+		{
+			int index = pMachine->_macIndex;
+			m_view->NewMachine(pMachine->_x,pMachine->_y,index);
+			strcpy(txt,Global::_pSong->_pMachine[index]->_editName);
+
+			CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
+			pParentMain->UpdateEnvInfo();
+			pParentMain->UpdateComboGen();
+			if (m_view->viewMode==view_modes::machine)
+			{
+				m_view->Repaint();
+			}
+			OnCancel();
+		}
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

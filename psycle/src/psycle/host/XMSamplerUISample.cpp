@@ -1,12 +1,10 @@
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/XMSamplerUISample.hpp>
-#include <psycle/engine/XMSampler.hpp>
-#include <psycle/host/WavFileDlg.hpp>
+#include <psycle/project.private.hpp>
+#include "XMSamplerUISample.hpp"
+#include "Psycle.hpp"
+#include "XMSampler.hpp"
 
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 // CWaveScopeCtrl
 CWaveScopeCtrl::CWaveScopeCtrl()
@@ -339,7 +337,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	else
 	{
 		const int panpos=wave.PanFactor()*128.0f;
-		((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
+	((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
 		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(panpos);
 		char tmp[40];
 		switch(panpos)
@@ -364,7 +362,6 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetPos(wave.VibratoSpeed());
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetPos(wave.VibratoDepth());
 	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->SetCurSel((int)wave.VibratoType());
-
 	((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP))->SetCurSel((int)wave.WaveSusLoopType());
 	sprintf(tmp,"%d",wave.WaveSusLoopStart());
 	((CEdit*)GetDlgItem(IDC_SUSTAINSTART))->SetWindowText(tmp);
@@ -578,7 +575,7 @@ void XMSamplerUISample::OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 	if ( check->GetCheck() != 2 ) // 2 == SurrounD
 	{
-		char tmp[40];
+	char tmp[40];
 		switch(slid->GetPos())
 		{
 		case 0: sprintf(tmp,"||%02d  ",slid->GetPos()); break;
@@ -703,8 +700,8 @@ void XMSamplerUISample::OnEnChangeLoopstart()
 	char tmp[40];
 	if ( m_Init )
 	{
-		CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPSTART);
-		cedit->GetWindowText(tmp,40);
+	CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPSTART);
+	cedit->GetWindowText(tmp,40);
 		rWave().WaveLoopStart(atoi(tmp));
 		DrawScope();
 	}
@@ -715,8 +712,8 @@ void XMSamplerUISample::OnEnChangeLoopend()
 	char tmp[40];
 	if ( m_Init )
 	{
-		CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPEND);
-		cedit->GetWindowText(tmp,40);
+	CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPEND);
+	cedit->GetWindowText(tmp,40);
 		rWave().WaveLoopEnd(atoi(tmp));
 		DrawScope();
 	}
@@ -727,8 +724,8 @@ void XMSamplerUISample::OnEnChangeSustainstart()
 	char tmp[40];
 	if ( m_Init )
 	{
-		CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINSTART);
-		cedit->GetWindowText(tmp,40);
+	CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINSTART);
+	cedit->GetWindowText(tmp,40);
 		rWave().WaveSusLoopStart(atoi(tmp));
 		DrawScope();
 	}
@@ -739,8 +736,8 @@ void XMSamplerUISample::OnEnChangeSustainend()
 	char tmp[40];
 	if ( m_Init )
 	{
-		CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINEND);
-		cedit->GetWindowText(tmp,40);
+	CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINEND);
+	cedit->GetWindowText(tmp,40);
 		rWave().WaveSusLoopEnd(atoi(tmp));
 		DrawScope();
 	}
@@ -751,6 +748,6 @@ void XMSamplerUISample::DrawScope()
 	m_WaveScope.Invalidate();
 }
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
 

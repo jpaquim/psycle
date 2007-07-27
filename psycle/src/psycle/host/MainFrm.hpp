@@ -1,12 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::CMainFrame.
 #pragma once
-#include <psycle/host/ChildView.hpp>
-#include <psycle/host/InstrumentEditor.hpp>
-#include <psycle/host/InfoDlg.hpp>
-#include <psycle/host/MidiMonitorDlg.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "ChildView.hpp"
+#include "InstrumentEditor.hpp"
+#include "InfoDlg.hpp"
+#include "MidiMonitorDlg.hpp"
+#include "ExListBox.h"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		class Song;
 		class CWaveEdFrame;
 		class CGearRackDlg;
@@ -25,19 +27,23 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CMainFrame();
 		protected: 
 			DECLARE_DYNAMIC(CMainFrame)
+		// Attributes
 		public:
 			Song* _pSong;
 			int vuprevL;
 			int vuprevR;
 
+		// Operations
 		public:
-			void SetAppSongBpm(float x);
+			void SetAppSongBpm(int x);
 			void SetAppSongTpb(int x);
 			void UpdatePlayOrder(bool mode);
 			void CenterWindowOnPoint(CWnd* pWnd, POINT point);
+		// Overrides
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 			friend class InputHandler;
+		// Implementation
 		public:
 			void UpdateSequencer(int bottom = -1);
 			bool isguiopen[MAX_MACHINES];
@@ -47,10 +53,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int seqcopybufferlength;
 
 			void ClosePsycle();
+			void CheckForAutosave();
 			void WaveEditorBackUpdate();
-			void CloseMacGui(Machine::id_type mac,bool closewiredialogs=true);
+			void CloseMacGui(int mac,bool closewiredialogs=true);
 			void CloseAllMacGuis();
-			void ShowMachineGui(Machine::id_type tmac, CPoint point);
+			void ShowMachineGui(int tmac, CPoint point);
 			void UpdateEnvInfo();
 			void HidePerformanceDlg();
 			void ShowPerformanceDlg();
@@ -58,7 +65,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			void ShowMidiMonitorDlg();
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
-			void StatusBarText(CString const & txt);
+			void StatusBarText(std::string txt);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);
 			void PsybarsUpdate();
@@ -67,6 +74,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			BOOL StatusBarIdleText();
 			void StatusBarIdle();
 			void RedrawGearRackList();
+
 			virtual ~CMainFrame();
 		private:
 			void SaveRecent();
@@ -92,6 +100,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialogBar	m_wndSeq;
 			CReBar      m_wndReBar;
 			std::string		szStatusIdle;
+			CExListBox	m_seqListbox;
 			
 			CInstrumentEditor	m_wndInst;
 			CInfoDlg	m_wndInfo;
@@ -129,12 +138,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnClipbut();
 			afx_msg void OnSelchangeTrackcombo();
 			afx_msg void OnCloseupTrackcombo();
-
-			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
-				#pragma comment(lib, "HTMLHelp")
-			#endif
 			afx_msg void OnPsyhelp();
-
 			afx_msg void OnSavewave();
 			afx_msg void OnEditwave();
 			afx_msg void OnGearRack();
@@ -171,6 +175,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSelchangeAuxselect();
 			afx_msg void OnDeclong();
 			afx_msg void OnInclong();
+			afx_msg void OnSeqShowpattername();
 			afx_msg void OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateIndicatorPattern(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateIndicatorLine(CCmdUI *pCmdUI);
@@ -200,6 +205,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnMoveCursorPaste();
 			afx_msg void OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult);
 			DECLARE_MESSAGE_MAP()
-		};
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+};
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

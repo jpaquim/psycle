@@ -1,9 +1,10 @@
 #pragma once
-#include <psycle/engine/constants.hpp>
-#include "afxwin.h"
-
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "constants.hpp"
+#include "resources/resources.hpp"
+#include <afxwin.h>
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUIGeneral dialog
@@ -61,5 +62,5 @@ public:
 	afx_msg void OnCbnSelendokXmpanningmode();
 };
 
-UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

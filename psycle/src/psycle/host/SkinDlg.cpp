@@ -1,20 +1,21 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include "psycle.hpp"
-#include <psycle/host/uiglobal.hpp>
+#include <psycle/project.private.hpp>
 #include "SkinDlg.hpp"
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/helpers/helpers.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "psycle.hpp"
+#include "Helpers.hpp"
+#include "Configuration.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		#define MAX_FONTS 256
 
 		IMPLEMENT_DYNCREATE(CSkinDlg, CPropertyPage)
 
 		CSkinDlg::CSkinDlg() : CPropertyPage(CSkinDlg::IDD)
 		{
+			//{{AFX_DATA_INIT(CSkinDlg)
+			//}}AFX_DATA_INIT
 		}
 
 		CSkinDlg::~CSkinDlg()
@@ -24,6 +25,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CSkinDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CPropertyPage::DoDataExchange(pDX);
+			//{{AFX_DATA_MAP(CSkinDlg)
 			DDX_Control(pDX, IDC_MACHINE_BITMAP, m_machine_background_bitmap);
 			DDX_Control(pDX, IDC_MACHINEGUI_BITMAP, m_machine_GUI_bitmap);
 			DDX_Control(pDX, IDC_TRIANGLESIZE, m_triangle_size);
@@ -46,9 +48,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_DRAW_EMPTY_DATA, m_pattern_draw_empty_data);
 			DDX_Control(pDX, IDC_DRAW_MAC_INDEX, m_draw_mac_index);
 			DDX_Control(pDX, IDC_WIREAA, m_wireaa);
+			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CSkinDlg, CPropertyPage)
+			//{{AFX_MSG_MAP(CSkinDlg)
 			ON_BN_CLICKED(IDC_BG_COLOUR, OnColourMachine)
 			ON_BN_CLICKED(IDC_WIRE_COLOUR, OnColourWire)
 			ON_BN_CLICKED(IDC_POLY_COLOUR, OnColourPoly)
@@ -106,6 +110,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_DRAW_MAC_INDEX, OnDrawMacIndex)
 			ON_BN_CLICKED(IDC_MACHINE_BITMAP, OnMachineBitmap)
 			ON_CBN_SELCHANGE(IDC_TRIANGLESIZE, OnSelchangeTrianglesize)
+			//}}AFX_MSG_MAP
 			ON_BN_CLICKED(IDC_MACHINEGUI_TOPFONTC, OnBnClickedMachineguiFontc)
 			ON_BN_CLICKED(IDC_MACHINEGUI_TOPC, OnBnClickedMachineguiTopc)
 			ON_BN_CLICKED(IDC_MACHINEGUI_BOTTOMC, OnBnClickedMachineguiBottomc)
@@ -185,7 +190,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_machine_skin.AddString(PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
 			
 			// ok now browse our folder for skins
-			FindSkinsInDir(Global::configuration().GetSkinDir().c_str());
+			FindSkinsInDir(Global::pConfig->GetSkinDir().c_str());
 
 			int sel = m_pattern_header_skin.FindStringExact(0,_pattern_header_skin.c_str());
 			if (sel==CB_ERR)
@@ -232,9 +237,9 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			m_triangle_size.SetCurSel(_triangle_size-8);
 
-			return true;
-			// return true unless you set the focus to a control
-			// EXCEPTION: OCX Property Pages should return false
+			return TRUE;
+			// return TRUE unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
 		void CSkinDlg::FindSkinsInDir(CString findDir)
@@ -767,7 +772,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						// so, we can't use 'else'
 						#define else
 					#endif
-					// [bohan] this is a horror of repetitive code :-(
+					// this is a horror of repetitive code :-(
 					if (std::strstr(buf,"\"pattern_fontface\"=\""))
 					{
 						char *q = std::strchr(buf,61); // =
@@ -914,7 +919,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								p[0]=0;
 								szBmpBkgFilename = q;
 								// check for no \ in which case search for it?
-								bBmpBkg = true;
+								bBmpBkg = TRUE;
 							}
 						}
 					}
@@ -930,7 +935,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 								p[0]=0;
 								szBmpDialFilename = q;
 								// check for no \ in which case search for it?
-								bBmpDial = true;
+								bBmpDial = TRUE;
 							}
 						}
 					}
@@ -1862,10 +1867,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				ofn.lpstrInitialDir = szPath;
 				ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 				// Display the Open dialog box. 
-				if(GetOpenFileName(&ofn)==true)
+				if(GetOpenFileName(&ofn)==TRUE)
 				{
 					szBmpDialFilename = szFile;
-					bBmpDial = true;
+					bBmpDial = TRUE;
 					CString str1(szBmpDialFilename.c_str());
 					int i = str1.ReverseFind('\\')+1;
 					CString str2 = str1.Mid(i);
@@ -1873,7 +1878,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					bBmpDial = false;
+					bBmpDial = FALSE;
 					m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
 				}
 		}
@@ -1904,10 +1909,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ofn.lpstrInitialDir = szPath;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
-			if(GetOpenFileName(&ofn)==true)
+			if(GetOpenFileName(&ofn)==TRUE)
 			{
 				szBmpBkgFilename = szFile;
-				bBmpBkg = true;
+				bBmpBkg = TRUE;
 				CString str1(szBmpBkgFilename.c_str());
 				int i = str1.ReverseFind('\\')+1;
 				CString str2 = str1.Mid(i);
@@ -1915,7 +1920,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				bBmpBkg = false;
+				bBmpBkg = FALSE;
 				m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 			}
 		}
@@ -1924,5 +1929,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			_triangle_size=m_triangle_size.GetCurSel()+8;
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

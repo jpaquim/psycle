@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/ConfigDlg.hpp>
-#include <psycle/host/MainFrm.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "ConfigDlg.hpp"
+#include "Psycle.hpp"
+#include "MainFrm.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNAMIC(CConfigDlg, CPropertySheet)
@@ -28,7 +28,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		BEGIN_MESSAGE_MAP(CConfigDlg, CPropertySheet)
 		END_MESSAGE_MAP()
 
-		void CConfigDlg::Init(UIConfiguration* pConfig,int dlgnum) 
+		void CConfigDlg::Init(Configuration* pConfig,int dlgnum) 
 		{
 			_pConfig = pConfig;
 			_skinDlg._patternSeparatorColor = pConfig->pvc_separator;
@@ -285,8 +285,10 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
 				}
+				_pConfig->Write();
 			}
 			return retVal;
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

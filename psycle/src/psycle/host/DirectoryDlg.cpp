@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/DirectoryDlg.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "DirectoryDlg.hpp"
+#include "Psycle.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		IMPLEMENT_DYNCREATE(CDirectoryDlg, CPropertyPage)
 
 		CDirectoryDlg::CDirectoryDlg() : CPropertyPage(CDirectoryDlg::IDD)
@@ -100,7 +100,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		bool CDirectoryDlg::BrowseForFolder(std::string& rpath) 
 		{
 			bool val=false;
-
+			
 			LPMALLOC pMalloc;
 			// Gets the Shell's default allocator
 			//
@@ -151,8 +151,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			initializingDlg=false;
 			
-			return true;  // return true unless you set the focus to a control
-						// EXCEPTION: OCX Property Pages should return false
+			return TRUE;  // return TRUE unless you set the focus to a control
+						// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
 		void CDirectoryDlg::OnChangeSongedit() 
@@ -217,5 +217,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				_skinPathBuf=temp;
 			}
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

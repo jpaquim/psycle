@@ -1,8 +1,10 @@
 #pragma once
 ///\file
 ///\brief interface file for psycle::host::CGreetDialog.
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		/// greeting window.
 		class CGreetDialog : public CDialog
 		{
@@ -36,5 +38,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

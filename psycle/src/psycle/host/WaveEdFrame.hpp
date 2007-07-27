@@ -1,20 +1,22 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdFrame.
 #pragma once
-#include <psycle/host/WaveEdChildView.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "WaveEdChildView.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		class CMainFrame;
 
 		/// wave editor frame window.
 		class CWaveEdFrame : public CFrameWnd
 		{
+			DECLARE_DYNAMIC(CWaveEdFrame)
 		public:
-			CWaveEdFrame();
 			CWaveEdFrame(Song* _sng, CMainFrame* pframe);
 			virtual ~CWaveEdFrame() throw();
 		protected: 
-			DECLARE_DYNAMIC(CWaveEdFrame)
+			CWaveEdFrame();
 
 		public:
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
@@ -68,5 +70,5 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

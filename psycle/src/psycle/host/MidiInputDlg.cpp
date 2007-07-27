@@ -1,15 +1,15 @@
 ///\file
 ///\implementation psycle::host::CMidiInputDlg.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include "psycle.hpp"
-#include "OutputDlg.hpp"
+#include <psycle/project.private.hpp>
 #include "MidiInputDlg.hpp"
-#include <psycle/host/uiconfiguration.hpp>
-#include <psycle/helpers/helpers.hpp>
-#include <psycle/engine/MidiInput.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+#include "OutputDlg.hpp"
+#include "MidiInput.hpp"
+#include "Configuration.hpp"
+#include "Helpers.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
 
 		CMidiInputDlg::CMidiInputDlg()
@@ -62,7 +62,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				s << std::hex << model;
 				gui.SetWindowText(s.str().c_str());
 			}
-			void write_to_gui(CMidiInputDlg::group & gui, UIConfiguration::midi_type::group_type const & model)
+			void write_to_gui(CMidiInputDlg::group & gui, Configuration::midi_type::group_type const & model)
 			{
 				gui.record.SetCheck(model.record());
 				gui.type.SetCurSel(model.type());
@@ -76,20 +76,20 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CPropertyPage::OnInitDialog();
 
-			raw.SetCheck(UIGlobal::configuration().midi().raw());
+			raw.SetCheck(Global::pConfig->midi().raw());
 
 			velocity.type.AddString("cmd");
 			velocity.type.AddString("ins");
-			write_to_gui(velocity, UIGlobal::configuration().midi().velocity());
+			write_to_gui(velocity, Global::pConfig->midi().velocity());
 
 			pitch.type.AddString("cmd");
 			pitch.type.AddString("twk");
 			pitch.type.AddString("tws");
 			pitch.type.AddString("ins");
 			pitch.type.AddString("mcm");
-			write_to_gui(pitch, UIGlobal::configuration().midi().pitch());
+			write_to_gui(pitch, Global::pConfig->midi().pitch());
 
-			assert(groups.size() == UIGlobal::configuration().midi().groups().size());
+			assert(groups.size() == Global::pConfig->midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
 				groups[i]->type.AddString("cmd");
@@ -97,11 +97,11 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				groups[i]->type.AddString("tws");
 				groups[i]->type.AddString("ins");
 				groups[i]->type.AddString("mcm");
-				write_to_gui(*groups[i], UIGlobal::configuration().midi().group(i));
-				write_to_gui_text(groups[i]->message, UIGlobal::configuration().midi().group(i).message());
+				write_to_gui(*groups[i], Global::pConfig->midi().group(i));
+				write_to_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
 			}
 
-			return true;
+			return TRUE;
 		}
 
 		namespace
@@ -113,7 +113,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				gui.GetWindowText(mfc);
 				hexstring_to_integer(static_cast<char const * const>(mfc), model);
 			}
-			void read_from_gui(CMidiInputDlg::group const & gui, UIConfiguration::midi_type::group_type & model)
+			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model)
 			{
 				model.record() = gui.record.GetCheck();
 				model.type() = gui.type.GetCurSel();
@@ -126,16 +126,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CMidiInputDlg::OnOK() 
 		{
-			UIGlobal::configuration().midi().raw() = raw.GetCheck();
-			read_from_gui(velocity, UIGlobal::configuration().midi().velocity());
-			read_from_gui(pitch, UIGlobal::configuration().midi().pitch());
-			assert(groups.size() == UIGlobal::configuration().midi().groups().size());
+			Global::pConfig->midi().raw() = raw.GetCheck();
+			read_from_gui(velocity, Global::pConfig->midi().velocity());
+			read_from_gui(pitch, Global::pConfig->midi().pitch());
+			assert(groups.size() == Global::pConfig->midi().groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
-				read_from_gui(*groups[i], UIGlobal::configuration().midi().group(i));
-				read_from_gui_text(groups[i]->message, UIGlobal::configuration().midi().group(i).message());
+				read_from_gui(*groups[i], Global::pConfig->midi().group(i));
+				read_from_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
 			}
 			CPropertyPage::OnOK();
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

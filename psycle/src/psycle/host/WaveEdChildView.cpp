@@ -1,15 +1,15 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/psycle.hpp>
-#include <psycle/host/WaveEdChildView.hpp>
-#include <psycle/host/MainFrm.hpp>
+#include <psycle/project.private.hpp>
+#include "WaveEdChildView.hpp"
+#include "psycle.hpp"
+#include "Helpers.hpp"
+#include "MainFrm.hpp"
+#include "zap.hpp"
 #include <mmreg.h>
 #include <math.h>
-
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	
 		float const CWaveEdChildView::zoomBase = 1.06f;
@@ -368,6 +368,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			cpen_me.DeleteObject();
 			cpen_hi.DeleteObject();
 			cpen_white.DeleteObject();
+			zoombar.DestroyWindow();
 		}
 
 
@@ -949,17 +950,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		{
-			//todo: any ideas what this is for? blSelection gets turned off on the first LButtonDown unless control or
-			//		shift is down..  but if control is down on a dblclk, the display is changed into monochromatic modern art.
-			//		plus, it appears to set the selection to only the visible portion of the wave.  is it meant to be a 
-			//		shortcut to OnEditSelectAll()?
-/*			if(blSelection)
-			{
-				blStart=diStart;
-				blLength=diLength;
-				Invalidate(false);
-			}
-*/
+			OnEditSelectAll();
 		}
 
 		void CWaveEdChildView::OnMouseMove(UINT nFlags, CPoint point) //Fideloop's
@@ -1379,7 +1370,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				{
 					_pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
 					short *pTmp= new signed short[timeInSamps];
-					memset(pTmp, 0, timeInSamps*2 );
+					std::memset(pTmp, 0, timeInSamps*2 );
 					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
 					wdLength=timeInSamps;
 					wdStereo=false;
@@ -1761,12 +1752,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			
 			blStart += blLength;
 			blLength = (wdLength - blStart);
-			OnEditDelete();
+			///\todo : fix the blLengths. There need to be some +1 and -1 throughout the source.
+			if (blLength > 2 ) OnEditDelete();
 			
 			blSelection = true;
 			blStart = 0;
 			blLength = blStartTemp;
-			OnEditDelete();
+			if (blLength > 2 ) OnEditDelete();
 		}
 
 		void CWaveEdChildView::OnEditPaste() 
@@ -2717,6 +2709,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				*(data+i) = static_cast<short>(current);
 			}
 		}
-
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+	
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

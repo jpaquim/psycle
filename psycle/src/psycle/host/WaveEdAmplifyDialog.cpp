@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdAmplifyDialog.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
+#include <psycle/project.private.hpp>
 #include "WaveEdAmplifyDialog.hpp"
-#include "psycle.hpp"
-#include <psycle/helpers/helpers.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+#include "Helpers.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CWaveEdAmplifyDialog::CWaveEdAmplifyDialog(CWnd* pParent)
 			: CDialog(CWaveEdAmplifyDialog::IDD, pParent)
 		{
@@ -34,12 +34,12 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			m_slider.SetRange(0, 14400); 	// Don't use (-,+) range. It fucks up with the "0"
 			m_slider.SetPos(9600);
-			return true;
+			return TRUE;
 		}
 
 		void CWaveEdAmplifyDialog::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			char tmp[6];
+			char tmp[10];
 			float db;
 			db =  (float) (m_slider.GetPos()-9600)*0.01f;
 			_gcvt(db ,4 ,tmp);
@@ -66,5 +66,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			EndDialog( AMP_DIALOG_CANCEL );
 			//CDialog::OnCancel();
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

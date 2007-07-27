@@ -1,14 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::CInstrumentEditor.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/host/Psycle.hpp>
-#include <psycle/host/MainFrm.hpp>
-#include <psycle/host/InstrumentEditor.hpp>
-#include <psycle/host/EnvDialog.hpp>
-#include <psycle/engine/constants.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include <psycle/project.private.hpp>
+#include "InstrumentEditor.hpp"
+#include "Psycle.hpp"
+#include "MainFrm.hpp"
+#include "EnvDialog.hpp"
+#include "constants.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		CInstrumentEditor::CInstrumentEditor(CWnd* pParent)
 			: CDialog(CInstrumentEditor::IDD, pParent)
 		{
@@ -88,7 +88,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 			WaveUpdate();
 			cando=true;
-			return true;
+			return TRUE;
 		}
 
 		//////////////////////////////////////////////////////////////////////
@@ -421,5 +421,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			}
 			m_notelabel.SetWindowText(buffer);
 		}
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

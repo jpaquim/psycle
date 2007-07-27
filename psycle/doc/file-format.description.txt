@@ -1,8 +1,8 @@
 Fileformat Documentation of .psy Files
 
 Psycle Version : 1.7+
-Document Version: 1.3
-Date:01-Jul-2005
+Document Version: 1.4
+Date:12-May-2007
 
 This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle >= 1.7
 It is Riff-like, with independant versioning for each chunk, and a "total" version number for
@@ -23,7 +23,7 @@ Here are the structures of each chunk:
 ===================
 FILE HEADER
 ===================
-id[8] = "PSY3SONG"; // Attention!!! This is the only exception where "ID" is 8bytes instead of 4
+id[8] = "PSY3SONG"; // Attention!!! This is the only exception where "ID" is 8bytes instead of 4. You can think about it as "PSY3" as file indentifier, and "SONG" as the real ID
 version; 	// "total" version of all chunk versions. see CURRENT_FILE_VERSION in constants.h
 size = 4;		// Size of extra information data of the File Header. Note: It is used as version too.
 
@@ -37,13 +37,27 @@ SONG INFO TEXT
 HEADER:
 id = "INFO"; 
 version = 0;
-size = strlen(Name)+strlen(Author)+strlen(Comment)+3;   //( +3 because of the NULL's )
+size = strlen(name)+strlen(author)+strlen(comment)+3;   //( +3 because of the NULL's )
 
 DATA:
 char name[]; // null terminated string, so read until you find NULL.
 char author[]; // null terminated string, so read until you find NULL
 char comment[]; // null terminated string, so read until you find NULL
 
+===================
+SONG INFO TEXT
+===================
+HEADER:
+id = "INFO"; 
+version = 1;
+size = strlen(name)+strlen(author)+strlen(comment)+3 +sizeof(int) + bitmapsize;   //( +3 because of the NULL's )
+
+DATA:
+char name[]; // null terminated string, so read until you find NULL.
+char author[]; // null terminated string, so read until you find NULL
+char comment[]; // null terminated string, so read until you find NULL
+int bitmapsize;
+char *bitmaparray[bitmapsize];
 
 ===================
 SONG PROPERTIES 
@@ -51,7 +65,7 @@ SONG PROPERTIES
 HEADER:
 id = "SNGI"; 
 version = 0;
-size = (11*sizeof(int))+(SONGTRACKS*(sizeof(bool)+sizeof(bool))); // Warning! .psy's previous to 1.8 saved this value as 6*sizeof(int)
+size = (11*sizeof(int))+(numTracks*(sizeof(bool)+sizeof(bool))); // Warning! .psy's previous to 1.8 saved this value as 6*sizeof(int)
 
 DATA:
 int numTracks; // Contains the number of tracks that the song has. In multipattern it would be total tracks	Values: from 4 to 64
@@ -75,11 +89,11 @@ SEQUENCE DATA
 HEADER:
 id = "SEQD"; 
 version = 0;
-size = (sequenceLength*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
+size = (length*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
 
 DATA:
 int index; // column index for multipattern stuff
-int lenght; // lenght of the sequence.
+int length; // length of the sequence. (1-256 ) // Psycle versions previous to 1.8.3 can only load up to 128 sequences.
 char sequenceColumnName[]; // null terminated string, should be less than 32 chars long, It will be trucated on load.
 int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in 
 	// position 3, it plays the pattern 5th. (zero based)
@@ -93,8 +107,8 @@ version = 0;
 size = sizez77+(4*sizeof(int))+strlen(patternName)+1; // where sizez77 is the size of the compressed pattern. Warning! versions prior to 1.8 saved one less sizeof(int)
 
 DATA:
-int index; // which pattern we are loading
-int numlines; // how many lines in this pattern (1-512)
+int index; // which pattern we are loading (1-256)
+int numlines; // how many lines in this pattern (1-1024) //  Psycle versions previous to 1.8.3 can only load up to 256 lines.
 int patterntracks; // how many tracks in this pattern * for multipattern
 char patternName[]; // null terminated string, should be less than 32 chars long, It will be truncated on load.
 unsigned int sizez77;		// size of the compressed data.
@@ -143,13 +157,21 @@ enum MachineType
 		MACH_SCOPE = 11,	// Old
 	MACH_XMSAMPLER = 12,
 	MACH_DUPLICATOR = 13,
+	MACH_MIXER	= 14,
 	MACH_DUMMY	= 255
 };
 
 DATA:
 int index; 			// which machine we are loading
 int type; 			// The MachineType of the machine being loaded
-char dllname[]; 	// NULL terminated .dll name of the plugin (MACH_PLUGIN, MACH_VST, MACH:VSTFX). NULL in any other case. (truncated to 256)
+char dllname[]&shellIdx; 		// NULL terminated .dll name of the plugin (MACH_PLUGIN, MACH_VST, MACH_VSTFX). NULL in any other case. (truncated to 256)
+				// Since version 1.8.3, shellindex is also saved *inside* the dllname array, in order to allow downward fileformat compatibility.
+				// shellidx is a four-letter identifier of the plugin (which is read as a big-endian int) used in some VST's, allowing one single
+				// .dll to include more than one effect.
+				// Examples:
+				// Common plugin   :  "arguru synth 2f.dll\0"
+				// Shellplugin :  "waveshell-5.0.dllSTHS\0"
+				// So, if the last four letters are not ".dll", they are the shellIdx.
 bool bypass; 		// Indicates if the machine has the bypassed status on. (only valid for effects).
 bool mute; 			// Indicates if the machine has the muted status on.
 int pan; 			// Indicates the value of the panning in the machine box. It affects all output wires.
@@ -171,7 +193,7 @@ int numOutputs;	// Number of output wires for this machine.
 
 char editname[]; // null terminated string, truncated to 32
 uint datasize; // size of following data, although it could be easily calculated from chunk size, this will make things easier to maintain
-byte MachineSpecificData[datasize]; // data depends on type member
+byte MachineSpecificData[datasize]; // data depends on type member. See below:
 
 
 
@@ -195,30 +217,53 @@ int antialias;		// Resampling model to use.
 
 ===================
 MACHINE SPECIFIC DATA(MACH_PLUGIN)
-size: numParams*sizeof(int)+2*sizeof(int)+chunksize;
+size: sizeof(int) + numParams*sizeof(int) + chunksize;
 ===================
+
 int numParams; // Indicates the number of parameters that are stored for this plugin.
 int parameter[numParams]; // array with the parameters.
 
 *if this plugin has extradata, then this follows:
 byte ExtraData[chunksize]; // extra data chunk
 
+version 0 doesn't store the size of the ExtraData, so it has to be guessed
+substracting the size of the already written data. Here's an example:
 
-To detect if there is extradata, just check if the loader is at the end of the chunk.
+size -= sizeof(program) + sizeof(numParams) + sizeof(float) * count;
+if(size)
+{
+	char* data=new char[size];
+	readchunkdata(data,size);
+}
+
 
 ===================
 MACHINE SPECIFIC DATA(MACH_VST and MACH_VSTFX)
-size: 3*sizeof(int) + chunksize
+size: 2*sizeof(int) + numParams*sizeof(float) + chunksize
 ===================
+
 int program;
 int numParams;
-int parameter[numParams];
+float parameter[numParams];
 
 *if this plugin has extradata, then this follows:
 byte ExtraData[chunksize]; // extra data chunk
 
+Note 1:  version 0 doesn't store the size of the ExtraData, so it has to be guessed
+substracting the size of the already written data. Here's an example:
 
-To detect if there is extradata, just check if the loader is at the end of the chunk.
+size -= sizeof(program) + sizeof(numParams) + sizeof(float) * count;
+if(size)
+{
+	char* data=new char[size];
+	readchunkdata(data,size);
+}
+
+Note 2: Since psycle 1.8.3beta3, Psycle doesn't store the 
+parameters if there is a chunk. To reflect this, numParams will
+be zero.
+This was done because albino3 didn't like to restore some of
+its parameters via SetParameter().
 
 ===================
 MACHINE SPECIFIC DATA(MACH_XMSAMPLER)
@@ -239,8 +284,8 @@ MACHINE SPECIFIC DATA(MACH_DUMMY)
 size = 0
 ===================
 // none
-
-
+// The default loader for Dummy just does a "Skip(size);", because the loader
+// uses the dummy when it cannot load a plugin from a song.
 
 
 
@@ -282,7 +327,7 @@ unsigned int version;		// Version of this chunk ( yes, this is actually a name-l
 unsigned int size;			// size of this chunk.
 
 unsigned int index;			// sample index. (Non-used samples are not stored, so the index lets us know which one we are storing)
-unsigned int waveLenght;	// sample lenght, in samples.
+unsigned int wavelength;	// sample length, in samples.
 unsigned short waveVolume;	// sample volume. values from 0 onwards. 100 = 0db Psycle supports upto 512
 unsigned int waveLoopStart;// loop start point (in samples), if enabled.
 unsigned int waveLoopEnd;	// loop end point (in samples), if enabled.

@@ -1,9 +1,12 @@
 ///\file
 ///\interface file for psycle::host::COutputDlg.
 #pragma once
-#include <psycle/audiodrivers/audiodriver.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "AudioDriver.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		/// audio device output config window.
 		class COutputDlg : public CPropertyPage
 		{
@@ -40,5 +43,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual void OnCancel();
 			afx_msg void OnConfig();
 		};
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

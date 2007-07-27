@@ -1,20 +1,20 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
+#include <psycle/project.private.hpp>
 #include "FrameMachine.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
+#include "NativeGui.hpp"
 #include "Childview.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
-//#include "InputHandler.hpp"
+#include "Plugin.hpp"
+#include "InputHandler.hpp"
+#include "Helpers.hpp"
 #include "MainFrm.hpp"
-#include <psycle/engine/machine.hpp>
-#include <psycle/engine/plugin.hpp>
-#include <psycle/engine/VSTHost.hpp>
-#include <psycle/helpers/helpers.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "Machine.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)
@@ -69,17 +69,17 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			ncol=0;
 			parspercol=0;
 
-			font.CreatePointFont(80,"Tahoma");
-			//			font_bold.CreatePointFont(80,"Tahoma Bold");
+			b_font.CreatePointFont(80,"Tahoma");
+//			b_font_bold.CreatePointFont(80,"Tahoma Bold");
 			CString sFace("Tahoma");
 			LOGFONT lf = LOGFONT();
 			lf.lfWeight = FW_BOLD;
 			lf.lfHeight = 80;
 			lf.lfQuality = NONANTIALIASED_QUALITY;
 			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
-			if(!font_bold.CreatePointFontIndirect(&lf))
+			if(!b_font_bold.CreatePointFontIndirect(&lf))
 			{
-				font_bold.CreatePointFont(80,"Tahoma Bold");
+				b_font_bold.CreatePointFont(80,"Tahoma Bold");
 			}
 
 			SetTimer(2104+MachineIndex,100,0);
@@ -87,13 +87,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CFrameMachine::OnDestroy() 
-			{
+		{
 			if ( _pActive != NULL ) *_pActive = false;
-			font.DeleteObject();
-			font_bold.DeleteObject();
+			b_font.DeleteObject();
+			b_font_bold.DeleteObject();
 			KillTimer(2104+MachineIndex);
 			CFrameWnd::OnDestroy();
-			}
+		}
 
 		void CFrameMachine::OnTimer(UINT nIDEvent) 
 		{
@@ -111,6 +111,14 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		}
 		void CFrameMachine::Generate()
 		{
+
+			
+/*			if (Global::pConfig->bBmpDial)
+				wndView->LoadMachineDial();
+			else
+				wndView->machinedial.LoadBitmap(IDB_KNOB);
+*/
+
 			UpdateWindow();
 		}
 
@@ -119,38 +127,18 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			_pMachine = pMachine;
 
 			// Get NumParameters
+
 			numParameters = _pMachine->GetNumParams();
 			ncol = _pMachine->GetNumCols();
-			if ( _pMachine->subclass() == MACH_PLUGIN )
+			parspercol = numParameters/ncol;
+
+			if ( _pMachine->_type == MACH_PLUGIN )
 			{
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
-				if( ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
-				{
-					//all this is to set the window size for the plugin in terms of oldstyle parameters
-					int maxX=0, maxY=0;
-					int curX=0, curY=0;
-
-					for(int c(0); c<numParameters; ++c)
-					{
-						curX = ((Plugin*)_pMachine)->GetParam(c)->GetExtent().x;
-						curY = ((Plugin*)_pMachine)->GetParam(c)->GetExtent().y;
-
-						if(curX>maxX) maxX=curX;
-						if(curY>maxY) maxY=curY;
-					}
-
-					while(ncol*W_ROWWIDTH < maxX) ncol++;
-					parspercol=1;
-					while(parspercol*K_YSIZE < maxY) parspercol++;
-				}
 			}
-			else if ( _pMachine->subclass() == MACH_VST || _pMachine->subclass() == MACH_VSTFX )
+			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
 				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
-			}
-
-			if( !(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
-			{
 				parspercol = numParameters/ncol;
 				if (parspercol>24)	// check for "too big" windows
 				{
@@ -161,37 +149,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 						ncol++;
 					}
 				}
-				if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
 			}
-
+			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
+			
 			int const winh = parspercol*K_YSIZE;
 
 			CWnd *dsk = GetDesktopWindow();
 			CRect rClient;
 			dsk->GetClientRect(&rClient);
 
-
-/*			\todo: For some reason, the compiler doesn't see PMENUBARINFO nor GetMenuBarInfo(). They are defined in Winuser.h (PlatformSDK).
-
-			PMENUBARINFO pinfo;
-			GetMenuBarInfo(OBJID_MENU,0,pinfo);
-			CRect rect
-				(
-					CPoint
-					(
-					rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
-					rClient.Height() / 2 - (48 + winh) / 2
-					),
-					CSize
-					(
-						W_ROWWIDTH * ncol + GetSystemMetrics(SM_CXFRAME),
-						winh + GetSystemMetrics(SM_CYCAPTION) +  (pinfo->rcBar.bottom-pinfo->rcBar.top) + GetSystemMetrics(SM_CYEDGE)
-					)
-				);
-
-			CalcWindowRect(&rect, adjustBorder);
-			MoveWindow(&rect, true);
-*/
 			CRect rect,rect2;
 			//Show the window in the usual way, without worrying about the exact sizes.
 			MoveWindow
@@ -226,7 +192,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CPaintDC dc(this); // device context for painting
 
-			CFont* oldfont=dc.SelectObject(&font);
+			CFont* oldfont=dc.SelectObject(&b_font);
 
 			CRect rect;
 			GetClientRect(&rect);
@@ -234,242 +200,176 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			int const K_YSIZE2=K_YSIZE/2;
 		//	int hsp=0;
 
-			if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+			CDC memDC;
+			CBitmap* oldbmp;
+
+			memDC.CreateCompatibleDC(&dc);
+			oldbmp=memDC.SelectObject(&CNativeGui::uiSetting().dial);
+
+			int y_knob = 0;
+			int x_knob = 0;
+			int knob_c = 0;
+			char parName[64];
+			std::memset(parName,0,64);
+
+			for (int c=0; c<numParameters; c++)
 			{
-				CDC memDC;
-				CBitmap* oldbmp;
+				char buffer[128];
 
-				memDC.CreateCompatibleDC(&dc);
-				oldbmp=memDC.SelectObject(&wndView->machinedial);
+				BOOL bDrawKnob = TRUE;
+				int min_v=1;
+				int max_v=1;
+				int val_v=1;
 
-				int y_knob = 0;
-				int x_knob = 0;
-				int knob_c = 0;
-				char parName[64];
-				std::memset(parName,0,64);
+				_pMachine->GetParamName(c,parName);
+				_pMachine->GetParamRange(c,min_v,max_v);
+				val_v = _pMachine->GetParamValue(c);
+				_pMachine->GetParamValue(c,buffer);
+				bDrawKnob = (min_v==max_v)?false:true;
 
-				for (int c=0; c<numParameters; c++)
+				if(bDrawKnob && (max_v - min_v)>0)
 				{
-					char buffer[128];
+					int const amp_v = max_v - min_v;
+					int const rel_v = val_v - min_v;
+
+					int const frame = (K_NUMFRAMES*rel_v)/amp_v;
+					int const xn = frame*K_XSIZE;
+
+					dc.BitBlt(x_knob,y_knob,K_XSIZE,K_YSIZE,&memDC,xn,0,SRCCOPY);
+				
+					//the old code which did the parameter highlight
+					/*int nc;
 					
-					bool bDrawKnob;
-					int min_v,max_v,val_v;
-
-					_pMachine->GetParamName(c,parName);
-					_pMachine->GetParamRange(c,min_v,max_v);
-					val_v = _pMachine->GetParamValue(c);
-					_pMachine->GetParamValue(c,buffer);
-					bDrawKnob = (min_v==max_v)?false:true;
-
-					if(bDrawKnob)
+					if ((tweakpar == c) && (istweak))
 					{
-						int const amp_v = max_v - min_v;
-						int const rel_v = val_v - min_v;
-
-						int const frame = (K_NUMFRAMES*rel_v)/amp_v;
-						int const xn = frame*K_XSIZE;
-
-						dc.BitBlt(x_knob,y_knob,K_XSIZE,K_YSIZE,&memDC,xn,0,SRCCOPY);
-					
-						//the old code which did the parameter highlight
-						/*int nc;
-						
-						if ((tweakpar == c) && (istweak))
-						{
-							nc = 0x00221100;
-						}
-						else
-						{
-							nc = 0;
-						}*/
-						
-						//commented out by Alk when enabling custom colours
-						//and all throughout this function
-						//dc.SetBkColor(0x00788D93 + nc*2);
-						//dc.SetTextColor(0x00CCDDEE + nc);
-						if ((tweakpar == c) && (istweak))
-						{
-							dc.SetBkColor(UIGlobal::configuration().machineGUIHTopColor);
-							dc.SetTextColor(UIGlobal::configuration().machineGUIHFontTopColor);
-						}
-						else
-						{
-							dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
-							dc.SetTextColor(UIGlobal::configuration().machineGUIFontTopColor);
-						}
-						dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
-						
-						//dc.SetBkColor(0x00687D83 + nc*2);
-						//dc.SetTextColor(0x0044EEFF + nc);
-						if ((tweakpar == c) && (istweak))
-						{
-							dc.SetBkColor(UIGlobal::configuration().machineGUIHBottomColor);
-							dc.SetTextColor(UIGlobal::configuration().machineGUIHFontBottomColor);
-						}
-						else
-						{
-							dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
-							dc.SetTextColor(UIGlobal::configuration().machineGUIFontBottomColor);
-						}
-						dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
+						nc = 0x00221100;
 					}
 					else
 					{
-						if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
-						{
-							//dc.SetBkColor(0x00788D93);
-							dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
-							dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
-							
-							//dc.SetBkColor(0x00687D83);
-							dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
-							dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
-						}
-						else
-						{
-							//dc.SetBkColor(0x00788D93);
-							dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
-							dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + K_YSIZE / 4), "", 0);
-						
-							//dc.SetBkColor(0x0088a8b4);
-							//dc.SetTextColor(0x00FFFFFF);
-							dc.SetBkColor(UIGlobal::configuration().machineGUITitleColor);
-							dc.SetTextColor(UIGlobal::configuration().machineGUITitleFontColor);
-
-							dc.SelectObject(&font_bold);
-							dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
-							dc.SelectObject(&font);
-
-							//dc.SetBkColor(0x00687D83);
-							dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
-							dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE), "", 0);
-						}
-					}
-					y_knob += K_YSIZE;
-
-					++knob_c;
-
-					if (knob_c >= parspercol)
+						nc = 0;
+					}*/
+					
+					//commented out by Alk when enabling custom colours
+					//and all throughout this function
+					//dc.SetBkColor(0x00788D93 + nc*2);
+					//dc.SetTextColor(0x00CCDDEE + nc);
+					if ((tweakpar == c) && (istweak))
 					{
-						knob_c = 0;
-						x_knob += W_ROWWIDTH;
-						y_knob = 0;
+						dc.SetBkColor(Global::pConfig->machineGUIHTopColor);
+						dc.SetTextColor(Global::pConfig->machineGUIHFontTopColor);
 					}
+					else
+					{
+						dc.SetBkColor(Global::pConfig->machineGUITopColor);
+						dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
+					}
+					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
+					
+					//dc.SetBkColor(0x00687D83 + nc*2);
+					//dc.SetTextColor(0x0044EEFF + nc);
+					if ((tweakpar == c) && (istweak))
+					{
+						dc.SetBkColor(Global::pConfig->machineGUIHBottomColor);
+						dc.SetTextColor(Global::pConfig->machineGUIHFontBottomColor);
+					}
+					else
+					{
+						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
+						dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+					}
+					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
 				}
-
-				int exess= parspercol*ncol;
-				if ( exess > numParameters )
+				else
 				{
-					for (int c=numParameters; c<exess; c++)
+					if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
 					{
 						//dc.SetBkColor(0x00788D93);
-						//dc.SetTextColor(0x00CCDDEE);
-						dc.SetBkColor(UIGlobal::configuration().machineGUITopColor);
-						dc.SetTextColor(UIGlobal::configuration().machineGUIFontTopColor);
+						dc.SetBkColor(Global::pConfig->machineGUITopColor);
 						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
+						
 
 						//dc.SetBkColor(0x00687D83);
-						//dc.SetTextColor(0x0044EEFF);
-						dc.SetBkColor(UIGlobal::configuration().machineGUIBottomColor);
-						dc.SetTextColor(UIGlobal::configuration().machineGUIFontBottomColor);
+						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
 						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
+					}
+					else
+					{
+						//dc.SetBkColor(0x00788D93);
+						dc.SetBkColor(Global::pConfig->machineGUITopColor);
+						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + K_YSIZE / 4), "", 0);
+					
+						//dc.SetBkColor(0x0088a8b4);
+						//dc.SetTextColor(0x00FFFFFF);
+						dc.SetBkColor(Global::pConfig->machineGUITitleColor);
+						dc.SetTextColor(Global::pConfig->machineGUITitleFontColor);
 
-						y_knob += K_YSIZE;
+						dc.SelectObject(&b_font_bold);
+						dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
+						dc.SelectObject(&b_font);
+
+						//dc.SetBkColor(0x00687D83);
+						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
+						dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE), "", 0);
 					}
 				}
-				memDC.SelectObject(oldbmp);
-				memDC.DeleteDC();
-				dc.SelectObject(oldfont);
-			}
-			else
-			{
-				char paramValue[128];
-				CRect clientRect;
-				GetClientRect(&clientRect);
-				CBitmap* bmpBuffer = new CBitmap;
-				CBitmap* oldbmp;
-				bmpBuffer->CreateCompatibleBitmap(&dc, clientRect.right-clientRect.left, clientRect.bottom-clientRect.top);
+				y_knob += K_YSIZE;
 
-				CDC memdc;
-				memdc.CreateCompatibleDC(&dc);
-				oldbmp = memdc.SelectObject(bmpBuffer);
+				++knob_c;
 
-				for(int c=numParameters-1;c>=0;c--)
+				if (knob_c >= parspercol)
 				{
-					_pMachine->GetParamValue(c,paramValue);
-					((Plugin*)_pMachine)->GetParam(c)->Paint(&memdc,paramValue);
+					knob_c = 0;
+					x_knob += W_ROWWIDTH;
+					y_knob = 0;
 				}
-				dc.BitBlt(0, 0, clientRect.right-clientRect.left, clientRect.bottom-clientRect.top, &memdc, 0, 0, SRCCOPY);
-
-				memdc.SelectObject(oldbmp);
-				memdc.DeleteDC();
-				bmpBuffer->DeleteObject();
 			}
+
+			int exess= parspercol*ncol;
+			if ( exess > numParameters )
+			{
+				for (int c=numParameters; c<exess; c++)
+				{
+					//dc.SetBkColor(0x00788D93);
+					//dc.SetTextColor(0x00CCDDEE);
+					dc.SetBkColor(Global::pConfig->machineGUITopColor);
+					dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
+					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
+
+					//dc.SetBkColor(0x00687D83);
+					//dc.SetTextColor(0x0044EEFF);
+					dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
+					dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
+					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
+
+					y_knob += K_YSIZE;
+				}
+			}
+			memDC.SelectObject(oldbmp);
+			memDC.DeleteDC();
+			dc.SelectObject(oldfont);
 		}
 
 		int CFrameMachine::ConvertXYtoParam(int x, int y)
 		{
 			if ((y/K_YSIZE) >= parspercol ) return -1; //this if for VST's that use the native gui.
-			return (y/K_YSIZE) + ((x/150)*parspercol);
+			return (y/K_YSIZE) + ((x/W_ROWWIDTH)*parspercol);
 		}
 		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
-			if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+			tweakpar = ConvertXYtoParam(point.x,point.y);
+			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
-				tweakpar = ConvertXYtoParam(point.x,point.y);
-				if ((tweakpar > -1) && (tweakpar < numParameters))
-				{
-					sourcepoint = point.y;
-					tweakbase = _pMachine->GetParamValue(tweakpar);
-					prevval = tweakbase;
-					_pMachine->GetParamRange(tweakpar,minval,maxval);
-					istweak = true;
-					wndView->AddMacViewUndo();
-					SetCapture();
-				}
-				else
-				{
-					istweak = false;
-				}
+				sourcepoint = point.y;
+				tweakbase = _pMachine->GetParamValue(tweakpar);
+				prevval = tweakbase;
+				_pMachine->GetParamRange(tweakpar,minval,maxval);
+				istweak = true;
+				wndView->AddMacViewUndo();
+				SetCapture();
 			}
 			else
 			{
-				int c=0, newval;
-				while(c<numParameters && !((Plugin*)_pMachine)->GetParam(c)->PointInParam(point.x,point.y))
-				{
-					++c;
-				}
-				tweakpar=c;
-				if(tweakpar<numParameters && tweakpar>=0)
-				{
-					if(((Plugin*)_pMachine)->GetParam(tweakpar)->bClickable || ((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
-					{
-						if(((Plugin*)_pMachine)->GetParam(tweakpar)->LButtonDown(point.x, point.y, newval))
-						{
-							wndView->AddMacViewUndo();
-							_pMachine->SetParameter(tweakpar,newval);
-							if (UIGlobal::configuration()._RecordTweaks)
-							{
-								if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
-								{
-									wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-								}
-								else
-								{
-									wndView->MousePatternTweak(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-								}
-							}
- 						}
-					}
-					if(((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
-					{
-						istweak = true;
-						SetCapture();
-					}
-				}
-				else
-					istweak = false;	//not sure why this is necessary on mousedown, but everybody else is doing it, so whatever
-
+				istweak = false;
 			}
 			CFrameWnd::OnLButtonDown(nFlags, point);
 		}
@@ -477,57 +377,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
 		{
-			if( _pMachine->subclass() == MACH_PLUGIN)
+			if( _pMachine->_type == MACH_PLUGIN)
 			{
-				if( !(((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI) )
+				int par = ConvertXYtoParam(point.x,point.y);
+				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
 				{
-					int par = ConvertXYtoParam(point.x,point.y);
-					if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
-					{
-						wndView->AddMacViewUndo();
-						_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
-					}
-				}
-				else
-				{
-					int newval;
-					int c=0;
-					while(	c<numParameters && !((Plugin*)_pMachine)->GetParam(c)->PointInParam(point.x,point.y))
-					{
-						++c;
-					}
-					tweakpar=c;
-					if(tweakpar<numParameters && tweakpar>=0)
-					{
-						if(((Plugin*)_pMachine)->GetParam(tweakpar)->bClickable || ((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
-
-						{
-							if(((Plugin*)_pMachine)->GetParam(tweakpar)->LButtonDown(point.x, point.y, newval))
-							{
-								wndView->AddMacViewUndo();
-								_pMachine->SetParameter(tweakpar,newval);
-								if (UIGlobal::configuration()._RecordTweaks)
-								{
-									if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
-									{
-										wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-									}
-									else
-									{
-										wndView->MousePatternTweak(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-									}
-								}
-							}
-						}
-						if(((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
-
-						{
-							istweak = true;
-							SetCapture();
-						}
-					}
-					else
-						istweak = false;	//not sure why this is necessary on mousedown, but everybody else is doing it, so whatever
+					wndView->AddMacViewUndo();
+					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
 				}
 			}
 			Invalidate(false);
@@ -540,21 +396,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			if (istweak)
 			{
-				int curval = _pMachine->GetParamValue(tweakpar);
+				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
+				///       It should be interesting to know what is "somewhere else".
+/*				int curval = _pMachine->GetParamValue(tweakpar);
 				tweakbase -= prevval-curval;					//adjust base for tweaks from somewhere else
 				if(tweakbase<minval) tweakbase=minval;
 				if(tweakbase>maxval) tweakbase=maxval;
-
+*/
 				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{
 					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
-					if(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
-					{
-						((Plugin*)_pMachine)->GetParam(tweakpar)->ResetTweakSrc(point);
-					}
 				}
 				else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
 					( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
@@ -562,10 +416,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 					tweakbase = _pMachine->GetParamValue(tweakpar);
 					sourcepoint=point.y;
 					finetweak=!finetweak;
-					if(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
-					{
-						((Plugin*)_pMachine)->GetParam(tweakpar)->ResetTweakSrc(point);
-					}
 				}
 
 				double freak;
@@ -576,59 +426,25 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				else freak = (maxval-minval)/float(screenh*3/5);
 				if (finetweak) freak/=5;
 
-				if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
+				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
+
+				if (nv < minval) nv = minval;
+				if (nv > maxval) nv = maxval;
+
+				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
+				prevval=(int)(nv+0.5f);
+				wndView->AddMacViewUndo();
+				if (Global::pConfig->_RecordTweaks)
 				{
-					double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
-
-					if (nv < minval) nv = minval;
-					if (nv > maxval) nv = maxval;
-
-					_pMachine->SetParameter(tweakpar,(int) nv);
-					prevval=(int)nv;
-
-					if (UIGlobal::configuration()._RecordTweaks)
+					if (Global::pConfig->_RecordMouseTweaksSmooth)
 					{
-						if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
-						{
-							wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
-						}
-						else
-						{
-							wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-minval);
-						}
+						wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
+					}
+					else
+					{
+						wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-minval);
 					}
 				}
-				else
-				{
-					int setvals[5];			//i can't imagine needing 5, but who am i to judge?
-					int setparams[5];
-					setparams[0]=tweakpar;
-					int setcount = ((Plugin*)_pMachine)->GetParam(tweakpar)->WhatDoITweak(setparams, setvals, point.x, point.y, nFlags);
-					for(int i(0);i<setcount;++i)
-					{
-						if(	   setparams[i] < numParameters		&&		setparams[i] >= 0 
-							&& setvals[i] >= ((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MinValue
-							&& setvals[i] <= ((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MaxValue)
-						{
-							_pMachine->SetParameter(setparams[i],setvals[i]);
-							if (UIGlobal::configuration()._RecordTweaks)	//todo: while i haven't tested it, i can't imagine recording tweaks on something like an
-							{									//xymod grid coming out too well.. to do it properly, we'd need to implement a means
-																//of splitting the recording into separate tracks for each parameter.
-								if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
-								{
-									wndView->MousePatternTweakSlide(MachineIndex, setparams[i], setvals[i]-((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MinValue);
-								}
-								else
-								{
-									wndView->MousePatternTweak(MachineIndex, setparams[i], setvals[i]-((Plugin*)_pMachine)->GetInfo()->Parameters[setparams[i]]->MinValue);
-								}
-							}//end if
-						}//end if
-					}//end for	
-				}//end else
-
-				
-
 				Invalidate(false);
 			}
 			CFrameWnd::OnMouseMove(nFlags, point);
@@ -636,32 +452,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnLButtonUp(UINT nFlags, CPoint point) 
 		{
-			if(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI)
-			{
-				if(tweakpar>=0 && tweakpar<numParameters)
-				{
-					if(((Plugin*)_pMachine)->GetParam(tweakpar)->bClickable || ((Plugin*)_pMachine)->GetParam(tweakpar)->bTweakable)
-					{
-						int newval;
-						if( ((Plugin*)_pMachine)->GetParam(tweakpar)->LButtonUp(point.x, point.y, newval))
-						{
-							_pMachine->SetParameter(tweakpar, newval);
-							if (UIGlobal::configuration()._RecordTweaks)
-							{
-								if (UIGlobal::configuration()._RecordMouseTweaksSmooth)
-								{
-									wndView->MousePatternTweakSlide(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-								}
-								else
-								{
-									wndView->MousePatternTweak(MachineIndex, tweakpar, newval-((Plugin*)_pMachine)->GetInfo()->Parameters[tweakpar]->MinValue);
-								}
-							}
-						}
-					}//endif
-				}
-			}//endif
-
 			istweak = false;
 			Invalidate(false);	
 			ReleaseCapture();
@@ -670,66 +460,41 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point) 
 		{
-			if(!(_pMachine->subclass() == MACH_PLUGIN && ((Plugin*)_pMachine)->GetInfo()->Flags & plugin_interface::CUSTOM_GUI))
-				tweakpar = ConvertXYtoParam(point.x,point.y);
-			else
-			{
-				int c=0;
-				while(c<numParameters && !((Plugin*)_pMachine)->GetParam(c)->PointInParam(point.x, point.y))
-				{
-					++c;
-				}
-				tweakpar=c;
-			}
+			tweakpar = ConvertXYtoParam(point.x,point.y);
 
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				if (nFlags & MK_CONTROL)
 				{
-					Global::song().seqBus = MachineIndex;//Global::song().FindBusFromIndex(MachineIndex);
-					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(false);
+					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
+					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
-					Global::song().auxcolSelected=tweakpar;
+					Global::_pSong->auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 				}
 				else 
-				{	
+				{		
 					int min_v=1;
 					int max_v=1;
-					char name[64];
-					std::memset(name,0,64);
-					CNewVal dlg;
+					char name[64], title[128];
+					memset(name,0,64);
 
 					_pMachine->GetParamName(tweakpar,name);
 					_pMachine->GetParamRange(tweakpar,min_v,max_v);
-					dlg.m_Value = _pMachine->GetParamValue(tweakpar);
-
 					std::sprintf
 						(
-							dlg.title, "Param:'%.2x:%s' (Range from %d to %d)\0",
+							title, "Param:'%.2x:%s' (Range from %d to %d)\0",
 							tweakpar,
 							name,
 							min_v,
 							max_v
 						);
-					dlg.min = min_v;
-					dlg.max = max_v;
-					dlg.macindex = MachineIndex;
-					dlg.paramindex = tweakpar;
+					CNewVal dlg(MachineIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
-					int nv = dlg.m_Value;
-					if (nv < min_v)
-					{
-						nv = min_v;
-					}
-					if (nv > max_v)
-					{
-						nv = max_v;
-					}
-					wndView->AddMacViewUndo();
-						_pMachine->SetParameter(tweakpar,(int)nv);
+						wndView->AddMacViewUndo();
+						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
 					}
 					Invalidate(false);
 				}
@@ -741,26 +506,30 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			// ignore repeats: nFlags&0x4000
 			const BOOL bRepeat = nFlags&0x4000;
-			CmdDef cmd(UIGlobal::pInputHandler->KeyToCmd(nChar,nFlags));
-			if(!bRepeat && cmd.IsValid())
+			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			if(cmd.IsValid())
 			{
 				switch(cmd.GetType())
 				{
 				case CT_Note:
+					if (!bRepeat)
 					{
+						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || UIGlobal::configuration()._notesToEffects)
-							UIGlobal::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
-							UIGlobal::pInputHandler->PlayNote(outnote,127,true, 0);
+							Global::pInputHandler->PlayNote(outnote,127,true, 0);
 					}
 					break;
 
 				case CT_Immediate:
-					UIGlobal::pInputHandler->PerformCmd(cmd,bRepeat);
+				case CT_Editor:
+					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					break;
 				}
 			}
+			this->SetFocus();
 
 			//wndView->KeyDown(nChar,nRepCnt,nFlags);
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
@@ -769,15 +538,15 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
 
-			CmdDef cmd(UIGlobal::pInputHandler->KeyToCmd(nChar,nFlags));
+			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->_mode == MACHMODE_GENERATOR ||UIGlobal::configuration()._notesToEffects)
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
 				{
-					UIGlobal::pInputHandler->StopNote(outnote,true,_pMachine);
+					Global::pInputHandler->StopNote(outnote,true,_pMachine);
 				}
-				else UIGlobal::pInputHandler->StopNote(outnote,true,NULL);
+				else Global::pInputHandler->StopNote(outnote,true,NULL);
 			}
 
 			//wndView->KeyUp(nChar, nRepCnt, nFlags);
@@ -792,11 +561,13 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 				int minran,maxran;
 				_pMachine->GetParamRange(c,minran,maxran);
 
-				int dif = (maxran-minran);
-				float randsem = (float)rand()*0.000030517578125f;
-				float roffset = randsem*(float)dif;
+					int dif = (maxran-minran);
 
-				wndView->AddMacViewUndo();
+					float randsem = (float)rand()*0.000030517578125f;
+
+					float roffset = randsem*(float)dif;
+
+					wndView->AddMacViewUndo();
 				_pMachine->SetParameter(c,minran+int(roffset));
 			}
 			Invalidate(false);
@@ -804,7 +575,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersResetparameters() 
 		{
-			if ( _pMachine->subclass() == MACH_PLUGIN)
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
 				int numpars = _pMachine->GetNumParams();
 				for (int c=0; c<numpars; c++)
@@ -823,7 +594,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersCommand() 
 		{
-			if ( _pMachine->subclass() == MACH_PLUGIN)
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
 				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
 				try
@@ -843,7 +614,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			{
 				istweak = false;
 			}
-			if ( _pMachine->subclass() == MACH_PLUGIN)
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
 				MessageBox
 					(
@@ -858,11 +629,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			CPresetsDlg dlg;
 			dlg._pMachine=_pMachine;
-			dlg.m_wndFrame=this;
 			dlg.DoModal();
 		}
 
-
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
-
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

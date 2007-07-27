@@ -1,10 +1,13 @@
 ///\file
 ///\interface psycle::host::CMidiInputDlg.
 #pragma once
-#include <psycle/audiodrivers/AudioDriver.hpp>
+#include "AudioDriver.hpp"
+#include "resources/resources.hpp"
 #include <vector>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
 		/// midi input config window.
 		class CMidiInputDlg : public CPropertyPage
 		{
@@ -18,7 +21,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			virtual void DoDataExchange(CDataExchange* pDX);
 		public:
 			CMidiInputDlg();
-			~CMidiInputDlg();
+			virtual ~CMidiInputDlg();
 			int const static IDD = IDD_MIDI_INPUT;
 			class group_with_message;
 			class group
@@ -42,5 +45,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			groups_type groups;
 			CButton raw;
 		};
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+
+	PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END

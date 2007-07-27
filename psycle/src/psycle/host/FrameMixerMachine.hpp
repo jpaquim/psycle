@@ -2,11 +2,11 @@
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
 #include "FrameMachine.hpp"
-#include <psycle/engine/constants.hpp>
-UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
-	UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(host)
+#include "Constants.hpp"
+#include "mfc_namespace.hpp"
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-	class Machine;	
 	class Mixer;
 
 	/// mixer window.
@@ -16,20 +16,24 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		{
 			rowlabels=0,
 			send1,
-			send2,
-			send3,
-			send4,
-			send5,
-			send6,
-			send7,
-			send8,
-			send9,
-			send10,
-			send11,
-			send12,
-			dry,
-			//some other buttons.
+			sendmax=send1+MAX_CONNECTIONS,
+			mix = sendmax,
+			gain,
+			pan,
 			slider,
+			solo,
+			mute,
+			dryonly,
+			wetonly
+		};
+		enum
+		{
+			collabels=0,
+			colmaster,
+			chan1,
+			chanmax=chan1+MAX_CONNECTIONS,
+			return1=chanmax,
+			returnmax=return1+MAX_CONNECTIONS
 		};
 		class Knob
 		{
@@ -57,6 +61,7 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			static void Draw(CDC *dc, int x, int y,const char *parName,const char *parValue);
 			static void DrawValue(CDC *dc, int x, int y,const char *parValue);
 			static void DrawHLight(CDC *dc,CFont *font_bold, int x, int y,const char *parName,const char *parValue);
+			static void DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue);
 			static void DrawHLightValue(CDC *dc, int x, int y,const char *parValue);
 //			static void DrawHeader(CDC *dc, int x, int y,const char *parName, const char *parValue);
 
@@ -102,6 +107,33 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 			static CDC backDC;
 			static CDC knobDC;
 		};
+
+		class SwitchButton
+		{
+		public:
+			SwitchButton(){};
+			virtual ~SwitchButton(){};
+			
+			static void Draw(CDC *dc,int x, int y, bool checked);
+
+			static int width;
+			static int height;
+			static CDC imgOff;
+			static CDC imgOn;
+		};
+
+		class CheckedButton
+		{
+		public:
+			CheckedButton(){};
+			virtual ~CheckedButton(){};
+
+			static void Draw(CDC *dc,CFont* b_font_bold,int x, int y,const char*text,bool checked);
+
+			static int width;
+			static int height;
+		};
+
 		class VuMeter
 		{
 		public:
@@ -124,9 +156,6 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CFrameMixerMachine(int dum);
 	private:
 		Mixer* _pMixer;
-		int numChans;
-		int numSends;
-
 
 		// graphics
 		bool updateBuffer;
@@ -135,9 +164,19 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		CBitmap m_vumeteroff;
 		CBitmap m_sliderknob;
 		CBitmap m_vumeteron;
+		CBitmap m_switchon;
+		CBitmap m_switchoff;
 		CBitmap *bmpDC;
 
 		std::string sendNames[MAX_CONNECTIONS];
+		// used to know if they have changed since last paint.
+		int numSends;
+		// used to know if they have changed since last paint.
+		int numChans;
+		int _swapstart;
+		int _swapend;
+		bool isslider;
+		bool refreshheaders;
 
 		// Operations
 	public:
@@ -145,19 +184,16 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		virtual void Generate(){};
 		virtual int ConvertXYtoParam(int x, int y);
 		// Overrides
-		// ClassWizard generated virtual function overrides
-		//{{AFX_VIRTUAL(CFrameMixerMachine)
-		//}}AFX_VIRTUAL
 		// Implementation
 	protected:
+		virtual ~CFrameMixerMachine();
 		void Generate(CDC& dc);
 		bool UpdateSendsandChans();
 		int GetColumn(int x,int &xoffset);
-		int GetRow(int y,int &yoffset);
+		int GetRow(int x,int y,int &yoffset);
 		int GetParamFromPos(int col,int row);
-		virtual ~CFrameMixerMachine();
-		// Generated message map functions
-		//{{AFX_MSG(CFrameMixerMachine)
+		bool GetRouteState(int ret,int send);
+
 		afx_msg void OnPaint();
 		afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 		afx_msg void OnMouseMove(UINT nFlags, CPoint point);
@@ -169,11 +205,8 @@ UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(psycle)
 		afx_msg void OnTimer(UINT nIDEvent);
 		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 		afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-		//}}AFX_MSG
 		DECLARE_MESSAGE_MAP()
 	};
 
-	//{{AFX_INSERT_LOCATION}}
-	// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	UNIVERSALIS__COMPILER__NAMESPACE__END
-UNIVERSALIS__COMPILER__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END
