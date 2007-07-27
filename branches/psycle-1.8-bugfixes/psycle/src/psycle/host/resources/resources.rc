@@ -1813,7 +1813,7 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CONTROL         "Output to file",IDC_OUTPUTFILE,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,15,16,56,10
-    CONTROL         "Output to clipboard (not implemented for now)",
+    CONTROL         "Output to clipboard",
                     IDC_OUTPUTCLIPBOARD,"Button",BS_AUTORADIOBUTTON,15,111,
                     159,10
     CONTROL         "Output to next free sample slot (not implemented for now)",

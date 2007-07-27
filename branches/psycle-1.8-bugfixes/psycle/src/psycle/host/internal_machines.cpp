@@ -1040,8 +1040,8 @@ namespace psycle
 					{
 						float dbs = (value/42.67f)-96.0f;
 						master_.Volume() = dsp::dB2Amp(dbs);
-						RecalcMaster();
 					}
+					RecalcMaster();
 				}
 				else if (param <= 12)
 				{
@@ -1051,8 +1051,8 @@ namespace psycle
 					{
 						float dbs = (value/42.67f)-96.0f;
 						Channel(param-1).Volume() = dsp::dB2Amp(dbs);
-						RecalcChannel(param-1);
 					}
+					RecalcChannel(param-1);
 				}
 				else if (param == 13) { master_.DryWetMix() = (value&0xFF)/256.0f; RecalcMaster(); }
 				else if (param == 14) { master_.Gain() = (value&0xFF)/256.0f; RecalcMaster(); }
@@ -1099,8 +1099,8 @@ namespace psycle
 					{
 						float dbs = (value/42.67f)-96.0f;
 						Return(param-1).Volume() = dsp::dB2Amp(dbs);
-						RecalcReturn(param-1);
 					}
+					RecalcReturn(param-1);
 				}
 				return true;
 			}

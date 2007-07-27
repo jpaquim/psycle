@@ -436,6 +436,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n"
 						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until release 1.0" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
 						"Satoshi Fujiwara\t\t\tInitial code on the XM sampler support\r\n"
+						"Hermann Seib\t\t\tBase code of the new VSTHost in 1.8.5\r\n"
 						"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
 						"Patrick Haworth [TranceMyriad]\tAuthor of the Help File" "\r\n"
 						"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
