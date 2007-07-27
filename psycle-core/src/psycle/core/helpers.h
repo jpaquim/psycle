@@ -78,6 +78,7 @@
 				float f;
 				std::uint32_t i;
 			} tmp;
+			tmp.f = f;
 			return ((tmp.i & 0x7f800000) >> 23) - 0x7f + (tmp.i & 0x007fffff) / (float)0x800000;
 		} 
 
