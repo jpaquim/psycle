@@ -1,10 +1,11 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
-xpsycle | 2006 | alpha                       | prodos
-1.9.x   | 2006 | alpha                       | bohan & magnus & [JAZ] & dw & sartorius & trancemyriad
-1.8.2   | 2005 | bugfix                      | 
-1.8.1   | 2005 | bugfix                      | 
+1.8.5	| 2007 | RC                          | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
+1.8.3	| 2007 | beta                        | [JAZ]
+1.8.2	| 2006 | bugfix                      | [JAZ] & bohan & jme
+1.9		| 2005 | alpha.                      | psycledelics combined effort
+1.8.1   | 2005 | bugfix                      | bohan & plugin developers
 1.8     | 2005 | stable                      | psycledelics combined effort :-)
 1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
 1.7.6.2 | 2004 | bugfix (w98 compatibility)  | alk & bohan
@@ -39,6 +40,47 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.5 RC
+---------
+* Finished the reimplementation of the VSTHost. (Internal and UI).
+* Extended and finished the Mixer machine. 12ins 12sends/returns, with routing abilities.
+* Improved Sampulse partially, can load instruments and be used in a song. (Still incomplete)
+* Improvements in the new Interpolate Curve Dialog.
+* Changes in the Sequencer toolbar. Now it can show names of patterns and change them.
+* Improvements in source code (partially from 1.9 alpha)
++ Several new native plugins (most developed during the 1.9 alpha period). Total number is now 70
++ Wave In machine that allows input from external sources. Only works with directsound and ASIO for now.
++ Sinc interpolation for sampler. Should offer better quality, but it's quite slower.
++ Record to clipboard added to Record to Wave dialog box. (Works only with psycle for now)
++ Blocks in patterns can be moved by dragging them, as well as via popup menu.
++ Volume, panning and portamento commands for VST's ( volume does channel aftertouch for now )
++ Yannis midi native plugin nearly usable now (doesn't sync too well if used in a pattern)
+! Fixes in several native plugins ( arguru synth, ayeternal delay, ...)
+! bugfixes and other smaller additions.
+
+
+v1.8.3 beta2/beta3
+------------------
+! fixed some problems when connecting machines which appeared after moving a wire.
++ Port of Wave Renderer from Psycle 1.9, with support for dithering.
+! Crash prevention when loading damaged files.
++ Added a special keys dialog to use some keys which can't be set using the standard box.
+! Bugfixes and Improvements in the VSTHost ( OpenFileDialog, GetTimeInfo, Shell Plugins)
++ .fxb and .fxp loading and saving routines are done. Pending the UI changes to use them.
++ Improved a bit the Song Properties dialog and the New Machine Dialog.
+! miscellaneous bugfixes.
+
+
+v1.8.3 beta1
+------------
+* Incomplete (but functional) new VST Host based partially on Hermann Seib vsthost. UI part still from old one.
++ Port of Sampulse and module importing code from Psycle 1.9 sources.
++ Port of Mixer machine from Psycle 1.9 sources.
+! Fixed keyboard configuration save code.
++ Ported spectrum analyzer (in the wire dialog) from Psycle 1.9
+! Fixed bug in exchange function of the Gear Rack dialog.
+! some miscellaneous small changes
+
 
 v1.8.2
 ------
@@ -50,6 +92,7 @@ v1.8.2
 + Added customizable 3D arrows in machine view.
 ! Fixed a possible hang bug in note duplicator.
 ! Fixed a quite rare bug where Psycle would crash loading a sample from a song.
++ Updates to several plugins (blitz, gamefx, all of druttis, and some others)
 
 v1.8.0
 ------
@@ -77,8 +120,8 @@ v1.8.0
 	+stk plugins (sartorius)
 	+chorus plugin (sartorius)
 	+whawha plugin (sartorius)
-	+gamefx plugin (voskomo)
-	+blitz plugin (voskomo)
+	+gamefx plugin (jme)
+	+blitz plugin (jme)
 + some native plugins are now opensource (druttis & pooplog):
 	* all druttis' plugins now opensource
 	* all pooplog's plugins now opensource
