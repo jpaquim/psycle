@@ -365,16 +365,16 @@ namespace psycle
 
 		bool Machine::Disconnect(Machine& dst_machine)
 		{
-			int wireIndex = FindOutputWire( dstMac._macIndex );
-			int dstWireIndex = dstMac.FindInputWire( _macIndex );
+			int wireIndex = FindOutputWire( dst_machine._macIndex );
+			int dstWireIndex = dst_machine.FindInputWire( _macIndex );
 
 			_connection[wireIndex] = false;
 			_outputMachines[wireIndex] = -1;
 			_connectedOutputs--;
 
-			dstMac._inputCon[dstWireIndex] = false;
-			dstMac._inputMachines[dstWireIndex]=-1;
-			dstMac._connectedInputs--;
+			dst_machine._inputCon[dstWireIndex] = false;
+			dst_machine._inputMachines[dstWireIndex]=-1;
+			dst_machine._connectedInputs--;
 			return true; 
 		}
 
