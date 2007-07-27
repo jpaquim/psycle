@@ -1,25 +1,28 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
-0.x	| 2000 | alpha, beta                 | arguru
-1.0/01	|      | bugfix                      | arguru
-1.1/11	|      | code reestructure, release  | Mats
-1.5	| 2001 | alpha, beta, stable         | [JAZ] & Mark
-1.6	| 2002 | alpha, beta, stable         | [JAZ] & Dan/Dub & Fideloop
-1.6+/66	|      | maintenance                 | [JAZ]
-1.7	|      | release                     | pooplog & [JAZ]
-1.7.1/2	|      | bugfix                      | [JAZ]
-1.7.3	|      | beta                        | pooplog & [JAZ] & bohan
-1.7.4	| 2003 | stable                      | pooplog & [JAZ]
-1.7.5	|      | beta                        | pooplog & [JAZ]
-1.7.6	|      | stable                      | alk
-1.7.6.1	|      | bug fix                     | alk
-1.7.6.2	| 2004 | bug fix (w98 compatibility) | alk & bohan
-1.7.x	| 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
-1.8	|      | stable                      | psycledelics combined effort :-)
-1.8.1	| 2005 | bugfix			     | bohan & plugin developers
-1.8.2	| 2006 | bugfix			     | [JAZ] & bohan & jme
+1.8.5	| 2007 | RC                          | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
 1.8.3	| 2007 | beta                        | [JAZ]
+1.8.2	| 2006 | bugfix                      | [JAZ] & bohan & jme
+1.9		| 2005 | alpha.                      | psycledelics combined effort
+1.8.1   | 2005 | bugfix                      | bohan & plugin developers
+1.8     | 2005 | stable                      | psycledelics combined effort :-)
+1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
+1.7.6.2 | 2004 | bugfix (w98 compatibility)  | alk & bohan
+1.7.6.1 | 2003 | bugfix                      | alk
+1.7.6   | 2003 | stable                      | alk
+1.7.5   | 2003 | beta                        | pooplog & [JAZ]
+1.7.4   | 2003 | stable                      | pooplog & [JAZ]
+1.7.3   | 2002 | beta                        | pooplog & [JAZ] & bohan
+1.7.2   | 2002 | bugfix                      | [JAZ]
+1.7.1   | 2002 | bugfix                      | [JAZ]
+1.7     | 2002 | release                     | pooplog & [JAZ]
+1.6+/66 | 2002 | maintenance                 | [JAZ]
+1.6     | 2002 | alpha, beta, stable         | [JAZ] & Dan/Dub & Fideloop
+1.5     | 2001 | alpha, beta, stable         | [JAZ] & Mark
+1.1/11  | 2000 | bugfix                      | Mats
+1.0/01  | 2000 | bugfix                      | arguru
+0.x     |      | alpha, beta                 | arguru
 ----------------------------------------------------------------------------------------------------
 
 Versions are composed this way since 1.7.24:
@@ -36,8 +39,27 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.8.3 beta2
------------
+v1.8.5 RC
+---------
+* Finished the reimplementation of the VSTHost. (Internal and UI).
+* Extended and finished the Mixer machine. 12ins 12sends/returns, with routing abilities.
+* Improved Sampulse partially, can load instruments and be used in a song. (Still incomplete)
+* Improvements in the new Interpolate Curve Dialog.
+* Changes in the Sequencer toolbar. Now it can show names of patterns and change them.
+* Improvements in source code (partially from 1.9 alpha)
++ Several new native plugins (most developed during the 1.9 alpha period). Total number is now 70
++ Wave In machine that allows input from external sources. Only works with directsound and ASIO for now.
++ Sinc interpolation for sampler. Should offer better quality, but it's quite slower.
++ Record to clipboard added to Record to Wave dialog box. (Works only with psycle for now)
++ Blocks in patterns can be moved by dragging them, as well as via popup menu.
++ Volume, panning and portamento commands for VST's ( volume does channel aftertouch for now )
++ Yannis midi native plugin nearly usable now (doesn't sync too well if used in a pattern)
+! Fixes in several native plugins ( arguru synth, ayeternal delay, ...)
+! bugfixes and other smaller additions.
+
+
+v1.8.3 beta2/beta3
+------------------
 ! fixed some problems when connecting machines which appeared after moving a wire.
 + Port of Wave Renderer from Psycle 1.9, with support for dithering.
 ! Crash prevention when loading damaged files.
@@ -47,8 +69,9 @@ v1.8.3 beta2
 + Improved a bit the Song Properties dialog and the New Machine Dialog.
 ! miscellaneous bugfixes.
 
+
 v1.8.3 beta1
------------
+------------
 * Incomplete (but functional) new VST Host based partially on Hermann Seib vsthost. UI part still from old one.
 + Port of Sampulse and module importing code from Psycle 1.9 sources.
 + Port of Mixer machine from Psycle 1.9 sources.
@@ -56,6 +79,7 @@ v1.8.3 beta1
 + Ported spectrum analyzer (in the wire dialog) from Psycle 1.9
 ! Fixed bug in exchange function of the Gear Rack dialog.
 ! some miscellaneous small changes
+
 
 v1.8.2
 ------
@@ -69,9 +93,8 @@ v1.8.2
 ! Fixed a quite rare bug where Psycle would crash loading a sample from a song.
 + Updates to several plugins (blitz, gamefx, all of druttis, and some others)
 
-v1.8
-----
-
+v1.8.0
+------
 + added an option to make pattern navigation (cursors by default) doesn't be affected by Pattern Step, jumping always 1 row (sampler)
 + added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
 + added right mouse button to join machines and moving destination machine (when clicking over a triangle) (sampler & JosepMa)
@@ -129,7 +152,7 @@ internal changes in the source code:
 			i still think it would be better to simply disallow having a deep directory tree of libraries and rather put them all, flat, in the same dir.
 			it would be a lot simpler, and even have some technical advantages: what if a plugin depends on other plugins for example?
 	* attempt to use boost::read_write_mutex instead of an exclusive mutex for Song's lock. (bohan, doesn't work, dead locks)
-	+ added optional (masked otherwize) handling of fpu exceptions (bohan)
+	+ added optional (masked otherwise) handling of fpu exceptions (bohan)
 	! rearranged the midi code ; closing sourceforge bug #1087788 (bohan)
 	* interface of the registry class more "c++ oriented" (if that term exist ;p) and independent from the winapi (bohan)
 	* Importing configuration from older psycle's and psycle alpha (jaz)
