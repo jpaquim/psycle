@@ -1,6 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
 #include <psycle/project.private.hpp>
+#include <universalis/operating_system/paths.hpp>
+#include <direct.h>
 #include "NewMachine.hpp"
 #include "psycle.hpp"
 #include "Plugin.hpp"
@@ -12,7 +14,6 @@
 #include <fstream>
 #include <algorithm> //std::transform
 #include <cctype>	// std::tolower
-#include ".\newmachine.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -463,11 +464,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			DestroyPluginInfo();
 			{
-				char cache[1 << 10];
-				GetModuleFileName(0, cache, sizeof cache);
-				char * last(std::strrchr(cache,'\\'));
-				std::strcpy(last, "\\psycle.plugin-scan.cache");
-				DeleteFile(cache);
+				std::string path = universalis::operating_system::paths::package::home().string();
+				path = path + "\\psycle.plugin-scan.cache";
+				DeleteFile(path.c_str());
 			}
 			LoadPluginInfo();
 			UpdateList();
@@ -587,14 +586,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				std::ofstream out;
 				{
-					std::string module_directory;
-					{
-						char module_file_name[MAX_PATH];
-						::GetModuleFileName(0, module_file_name, sizeof module_file_name);
-						module_directory = module_file_name;
-						module_directory = module_directory.substr(0, module_directory.rfind('\\'));
-					}
-					out.open((module_directory + "/psycle.plugin-scan.log.txt").c_str());
+					std::string log = universalis::operating_system::paths::package::home().string();
+					mkdir(log.c_str());
+					log = log + "/psycle.plugin-scan.log.txt";
+					out.open(log.c_str());
 				}
 				out
 					<< "==========================================" << std::endl
@@ -1035,20 +1030,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
-			char modulefilename[_MAX_PATH];
-			GetModuleFileName(NULL,modulefilename,_MAX_PATH);
-			std::string path=modulefilename;
-			std::string::size_type pos=path.rfind('\\');
-			if(pos != std::string::npos)
-				path=path.substr(0,pos);
-			std::string cache=path + "\\psycle.plugin-scan.cache";
+			std::string cache = universalis::operating_system::paths::package::home().string();
+			cache = cache + "\\psycle.plugin-scan.cache";
 
 			RiffFile file;
 			CFileFind finder;
 
 			if (!file.Open(cache.c_str())) 
 			{
-				return false;
+				///\try old location
+				char modulefilename[_MAX_PATH];
+				GetModuleFileName(NULL,modulefilename,_MAX_PATH);
+				std::string path=modulefilename;
+				std::string::size_type pos=path.rfind('\\');
+				if(pos != std::string::npos)
+					path=path.substr(0,pos);
+				std::string cache=path + "\\psycle.plugin-scan.cache";
+
+				if (!file.Open(cache.c_str())) return false;
 			}
 
 			char Temp[MAX_PATH];
@@ -1163,15 +1162,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		bool CNewMachine::SaveCacheFile()
 		{
-			char cache[_MAX_PATH];
-			GetModuleFileName(NULL,cache,_MAX_PATH);
-			char * last = strrchr(cache,'\\');
-			strcpy(last,"\\psycle.plugin-scan.cache");
-			DeleteFile(cache);
+			std::string path = universalis::operating_system::paths::package::home().string();
+			std::string cache = path + "\\psycle.plugin-scan.cache";
+
+			DeleteFile(cache.c_str());
 			RiffFile file;
-			if (!file.Create(cache,true)) 
+			if (!file.Create(cache.c_str(),true)) 
 			{
-				return false;
+				mkdir(path.c_str());
+				if (!file.Create(cache.c_str(),true)) return false;
 			}
 			file.Write("PSYCACHE",8);
 			UINT version = CURRENT_CACHE_MAP_VERSION;
