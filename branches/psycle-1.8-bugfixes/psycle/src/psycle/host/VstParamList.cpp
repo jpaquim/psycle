@@ -134,7 +134,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CVstParamList::UpdateText(int value)
 		{
-			char str[kVstMaxProgNameLen*3],str2[12];
+			char str[kVstMaxProgNameLen*3],str2[14];
 			machine().DescribeValue(m_parlist.GetCurSel(),str);
 			std::sprintf(str2,"\t[Hex: %4X]",value);
 			std::strcat(str,str2);

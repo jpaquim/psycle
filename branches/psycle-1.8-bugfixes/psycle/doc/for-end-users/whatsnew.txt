@@ -50,8 +50,8 @@ v1.8.5 RC
 + Several new native plugins (most developed during the 1.9 alpha period). Total number is now 70
 + Wave In machine that allows input from external sources. Only works with directsound and ASIO for now.
 + Sinc interpolation for sampler. Should offer better quality, but it's quite slower.
-+ Record to clipboard added to Record to Wave dialog box. (Works only with psycle for now)
-+ Blocks in patterns can be moved by dragging them, as well as via popup menu.
++ "Record to clipboard" added to the Record to Wave dialog box.
++ Blocks in patterns can be moved by dragging them, as well as via popup menu (Use Ctrl key for copy).
 + Volume, panning and portamento commands for VST's ( volume does channel aftertouch for now )
 + Yannis midi native plugin nearly usable now (doesn't sync too well if used in a pattern)
 ! Fixes in several native plugins ( arguru synth, ayeternal delay, ...)

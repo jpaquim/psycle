@@ -109,7 +109,8 @@ namespace psycle
 
 			s->name = itFileH.songName;
 			s->author = "";
-			(s->comments = "Imported from Impulse Tracker Module: ") + szName;
+			s->comments = "Imported from Impulse Tracker Module: ";
+			s->comments.append(szName);
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 			s->InsertConnection(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
@@ -1134,7 +1135,8 @@ Special:  Bit 0: On = song message attached.
 			s3mFileH.songName[28]='\0';
 			s->name = s3mFileH.songName;
 			s->author = "";
-			(s->comments = "Imported from Scream Tracker 3 Module: ") + szName;
+			s->comments = "Imported from Scream Tracker 3 Module: ";
+			s->comments.append(szName);
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 			s->InsertConnection(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);

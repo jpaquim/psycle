@@ -655,10 +655,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					CCursor tmpcur;
 					tmpcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
 					tmpcur.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
-					blockSelected=false;//the block to swap is already in copyblock. It is not the currently selected one.
-					blockSel.end.line=0;
-					blockSel.end.track=0;
-					SwitchBlock(blockLastOrigin.start.track+(tmpcur.track-editcur.track),blockLastOrigin.start.line+(tmpcur.line-editcur.line));
+					blockSelected=false; //The current selected block is the destination. We have done CopyBlock in LButtonDown.
+					if ( nFlags & MK_CONTROL ) 
+					{
+						PasteBlock(blockSel.start.track,blockSel.start.line,false);
+					}
+					else SwitchBlock(blockSel.start.track,blockSel.start.line);
+						//SwitchBlock(blockLastOrigin.start.track+(tmpcur.track-editcur.track),blockLastOrigin.start.line+(tmpcur.line-editcur.line));
+					blockSelected=true; // restore selection to the new place.
 					blockswitch=false;
 					Repaint(draw_modes::selection);
 				}

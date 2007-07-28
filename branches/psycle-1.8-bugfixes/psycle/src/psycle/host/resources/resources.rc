@@ -1283,8 +1283,7 @@ BEGIN
                     BS_AUTORADIOBUTTON | WS_GROUP,216,221,85,10
     CONTROL         "By Class of Machine",IDC_BYCLASS,"Button",
                     BS_AUTORADIOBUTTON,216,236,86,10
-    PUSHBUTTON      "Rescan all Plugins and Reset all Warnings",IDC_REFRESH,
-                    7,280,188,16
+    PUSHBUTTON      "Regenerate Plugin Cache",IDC_REFRESH,7,280,97,16
     DEFPUSHBUTTON   "OK",IDOK,202,280,82,16
     PUSHBUTTON      "Cancel",IDCANCEL,297,280,86,16
     CONTROL         "Popup Warning if this plugin tries to load",
@@ -1294,6 +1293,7 @@ BEGIN
     LTEXT           "",IDC_APIVERSIONLABEL,246,115,130,12,SS_SUNKEN
     LTEXT           "",IDC_DESCRLABEL,246,30,130,36,SS_SUNKEN
     LTEXT           "",IDC_DLLNAMELABEL,246,66,130,36,SS_SUNKEN
+    PUSHBUTTON      "Check for New Plugins",IDC_BUTTON1,110,280,85,16
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 323
@@ -1813,9 +1813,8 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     CONTROL         "Output to file",IDC_OUTPUTFILE,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,15,16,56,10
-    CONTROL         "Output to clipboard",
-                    IDC_OUTPUTCLIPBOARD,"Button",BS_AUTORADIOBUTTON,15,111,
-                    159,10
+    CONTROL         "Output to clipboard",IDC_OUTPUTCLIPBOARD,"Button",
+                    BS_AUTORADIOBUTTON,15,111,159,10
     CONTROL         "Output to next free sample slot (not implemented for now)",
                     IDC_OUTPUTSAMPLE,"Button",BS_AUTORADIOBUTTON,15,126,194,
                     10

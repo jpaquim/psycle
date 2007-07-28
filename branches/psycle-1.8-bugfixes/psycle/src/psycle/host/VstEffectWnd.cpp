@@ -858,8 +858,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParamGui= new CVstParamList(&machine());
 				pParamGui->Create();
 			}
-			pParamGui->SetWindowPos(0,rc.right+1,rc.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
-			pParamGui->ShowWindow(SW_SHOWNORMAL); 
+			if (pParamGui->IsWindowVisible())
+			{
+				pParamGui->ShowWindow(SW_HIDE); 
+			}
+			else
+			{
+				pParamGui->SetWindowPos(0,rc.right+1,rc.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
+				pParamGui->ShowWindow(SW_SHOWNORMAL); 
+			}
 		}
 
 		void CVstEffectWnd::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)

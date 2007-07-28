@@ -130,20 +130,32 @@ namespace psycle
 			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) == ERROR_SUCCESS) // general case
 			{
 				result = reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY);
-				if(result != ERROR_SUCCESS) // Config for 1.8 doesn't exist or we can't access, let's try older versions.
+				if(result != ERROR_SUCCESS)
 				{
 					reg.CloseRootKey();
 					if (reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT "--1.7") == ERROR_SUCCESS)  // case for 1.7 alphas
 					{
 						result = reg.OpenKey("configuration");
-						if(result != ERROR_SUCCESS) // Config for 1.7 alpha doesn't exist or we can't access, let's try older versions.
+						if(result != ERROR_SUCCESS)
 						{
 							reg.CloseRootKey();
 							return ReadVersion17();		// Case for 1.7.6 and older. If it doesn't exist, it will return false.
 						}
 					}
+					else return ReadVersion17();		// Case for 1.7.6 and older. If it doesn't exist, it will return false.
 				}
 			}
+			else if (reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT "--1.7") == ERROR_SUCCESS)  // case for 1.7 alphas
+			{
+				result = reg.OpenKey("configuration");
+				if(result != ERROR_SUCCESS)
+				{
+					reg.CloseRootKey();
+					return false;
+				}
+			}
+			else return ReadVersion17();		// Case for 1.7.6 and older. If it doesn't exist, it will return false.
+
 
 			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
 			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);

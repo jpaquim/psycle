@@ -108,7 +108,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			static void learnDllName(const std::string & fullpath, MachineType type);
 			static bool lookupDllName(const std::string, std::string & result, MachineType tye,int& shellIdx);
 			static void DestroyPluginInfo();
-			static void LoadPluginInfo();
+			static void LoadPluginInfo(bool verify=true);
 			static int selectedClass;
 			static int selectedMode;
 			static bool TestFilename(const std::string & name,int shellIdx);
@@ -137,13 +137,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
 			static int _numDirs;
 			static void FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress = 0);
-			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount);
+			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount, bool verify);
 			static bool SaveCacheFile();
 			void UpdateList(bool bInit = false);
 		public:
 			afx_msg void OnEnChangeEdit1();
 			afx_msg void OnStnClickedNamelabel();
 			afx_msg void OnEnChangeRichedit21();
+			afx_msg void OnBnClickedButton1();
 		};
 
 	PSYCLE__MFC__NAMESPACE__END

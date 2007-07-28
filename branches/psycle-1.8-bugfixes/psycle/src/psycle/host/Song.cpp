@@ -582,7 +582,7 @@ namespace psycle
 			// If source is in a mixer chain, dissallow the new connection.
 			if ( srcMac->_isMixerSend ) return -1;
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
-			if ( dstMac->_isMixerSend || dstMac->_type == MACH_MIXER)
+			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && dsttype == 1))
 			{
 				if (!ValidateMixerSendCandidate(srcMac)) return -1;
 			}

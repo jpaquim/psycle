@@ -394,7 +394,7 @@ void mi::SequencerTick()
 
 ////////////////////////////////////////////////////////////////////////
 // The SeqTick function is where your notes and pattern command handlers
-// should be processed. Called each tick.
+// should be processed.
 // It is called by the host sequencer
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
@@ -474,7 +474,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 			gotSomething=true;
 		}
     }
-	if (gotSomething) for (int i=0;i<numsamples;i++) psamplesright[i]=psamplesleft[i];
+	if (gotSomething) memcpy(psamplesright,psamplesleft,numsamples*sizeof(float));
 }
 void mi::Command()
 {

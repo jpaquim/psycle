@@ -166,7 +166,8 @@ namespace host{
 
 		song.name = pSongName;
 		song.author = "";
-		(song.comments = "Imported from FastTracker II Module: ") + szName;
+		song.comments = "Imported from FastTracker II Module: ";
+		song.comments.append(szName);
 		delete [] pSongName; pSongName = 0;
 
 		std::int32_t iInstrStart = LoadPatterns(song);
@@ -1093,7 +1094,8 @@ namespace host{
 
 		song.name = pSongName;
 		song.author = "";
-		(song.comments = "Imported from MOD Module: ") + szName;
+		song.comments = "Imported from MOD Module: ";
+		song.comments.append(szName);
 		delete [] pSongName; pSongName = 0;
 
 		// get data

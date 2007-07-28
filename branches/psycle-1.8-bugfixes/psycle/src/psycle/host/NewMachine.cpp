@@ -12,6 +12,7 @@
 #include <fstream>
 #include <algorithm> //std::transform
 #include <cctype>	// std::tolower
+#include ".\newmachine.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -132,6 +133,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_SHOWDLLNAME, OnShowdllname)
 			ON_BN_CLICKED(IDC_SHOWEFFNAME, OnShoweffname)
 			ON_BN_CLICKED(IDC_CHECK_ALLOW, OnCheckAllow)
+			ON_BN_CLICKED(IDC_BUTTON1, OnBnClickedButton1)
 		END_MESSAGE_MAP()
 
 		BOOL CNewMachine::OnInitDialog() 
@@ -472,6 +474,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_browser.Invalidate();
 			SetFocus();
 		}
+		void CNewMachine::OnBnClickedButton1()
+		{
+			DestroyPluginInfo();
+			LoadPluginInfo();
+			UpdateList();
+			m_browser.Invalidate();
+			SetFocus();
+		}
 
 		void CNewMachine::OnBytype() 
 		{
@@ -500,7 +510,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_browser.Invalidate();
 		}
 
-		void CNewMachine::LoadPluginInfo()
+		void CNewMachine::LoadPluginInfo(bool verify)
 		{
 			if(_numPlugins == -1)
 			{
@@ -510,7 +520,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int plugsCount(0);
 				int badPlugsCount(0);
 				_numPlugins = 0;
-				bool progressOpen = !LoadCacheFile(plugsCount, badPlugsCount);
+				bool progressOpen = !LoadCacheFile(plugsCount, badPlugsCount, verify);
 
 				class populate_plugin_list
 				{
@@ -1023,7 +1033,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			_numPlugins = -1;
 		}
 
-		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount)
+		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
 			char modulefilename[_MAX_PATH];
 			GetModuleFileName(NULL,modulefilename,_MAX_PATH);
@@ -1087,53 +1097,64 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				file.ReadString(p.desc);
 				file.ReadString(p.version);
 				file.Read(&p.APIversion,sizeof(p.APIversion));
-				// Temp here contains the full path to the .dll
-				if(finder.FindFile(Temp))
+				bool addPluginInfo= true;
+
+				if ( verify )
 				{
-					FILETIME time;
-					finder.FindNextFile();
-					if (finder.GetLastWriteTime(&time))
+					// Temp here contains the full path to the .dll
+					if(finder.FindFile(Temp))
 					{
-						// Only add the information to the cache if the dll hasn't been modified (say, a new version)
-						if
-							(
-								p.FileTime.dwHighDateTime == time.dwHighDateTime &&
-								p.FileTime.dwLowDateTime == time.dwLowDateTime
-							)
+						FILETIME time;
+						finder.FindNextFile();
+						if (finder.GetLastWriteTime(&time))
 						{
-							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-
-							_pPlugsInfo[currentPlugsCount]->dllname = Temp;
-							_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
-
-							///\todo this could be better handled
-							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+							// Only add the information to the cache if the dll hasn't been modified (say, a new version)
+							if
+								(
+								p.FileTime.dwHighDateTime != time.dwHighDateTime ||
+								p.FileTime.dwLowDateTime != time.dwLowDateTime
+								)
 							{
-								_pPlugsInfo[currentPlugsCount]->error = "";
+								addPluginInfo = false;
 							}
-							if(!p.error.empty())
-							{
-								_pPlugsInfo[currentPlugsCount]->error = p.error;
-							}
-
-							_pPlugsInfo[currentPlugsCount]->allow = p.allow;
-
-							_pPlugsInfo[currentPlugsCount]->mode = p.mode;
-							_pPlugsInfo[currentPlugsCount]->type = p.type;
-							_pPlugsInfo[currentPlugsCount]->name = p.name;
-							_pPlugsInfo[currentPlugsCount]->identifier = p.identifier;
-							_pPlugsInfo[currentPlugsCount]->vendor = p.vendor;
-							_pPlugsInfo[currentPlugsCount]->desc = p.desc;
-							_pPlugsInfo[currentPlugsCount]->version = p.version;
-							_pPlugsInfo[currentPlugsCount]->APIversion = p.APIversion;
-
-							if(p.error.empty())
-							{
-								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname,_pPlugsInfo[currentPlugsCount]->type);
-							}
-							++currentPlugsCount;
 						}
+						else addPluginInfo = false;
 					}
+					else addPluginInfo = false;
+				}
+				if (addPluginInfo)
+				{
+					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+
+					_pPlugsInfo[currentPlugsCount]->dllname = Temp;
+					_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
+
+					///\todo this could be better handled
+					if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+					{
+						_pPlugsInfo[currentPlugsCount]->error = "";
+					}
+					if(!p.error.empty())
+					{
+						_pPlugsInfo[currentPlugsCount]->error = p.error;
+					}
+
+					_pPlugsInfo[currentPlugsCount]->allow = p.allow;
+
+					_pPlugsInfo[currentPlugsCount]->mode = p.mode;
+					_pPlugsInfo[currentPlugsCount]->type = p.type;
+					_pPlugsInfo[currentPlugsCount]->name = p.name;
+					_pPlugsInfo[currentPlugsCount]->identifier = p.identifier;
+					_pPlugsInfo[currentPlugsCount]->vendor = p.vendor;
+					_pPlugsInfo[currentPlugsCount]->desc = p.desc;
+					_pPlugsInfo[currentPlugsCount]->version = p.version;
+					_pPlugsInfo[currentPlugsCount]->APIversion = p.APIversion;
+
+					if(p.error.empty())
+					{
+						learnDllName(_pPlugsInfo[currentPlugsCount]->dllname,_pPlugsInfo[currentPlugsCount]->type);
+					}
+					++currentPlugsCount;
 				}
 			}
 			file.Close();

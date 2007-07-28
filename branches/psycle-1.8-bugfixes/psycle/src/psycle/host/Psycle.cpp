@@ -54,10 +54,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
-
 			CInstanceChecker instanceChecker;
 
-			SetRegistryKey(_T("AAS")); // Change the registry key under which our settings are stored.
+			SetRegistryKey(_T("psycle")); // Change the registry key under which our settings are stored.
 			
 			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 			
@@ -130,7 +129,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			pFrame->UpdateWindow();
 			
-			CNewMachine::LoadPluginInfo();
+			CNewMachine::LoadPluginInfo(false);
 
 			LoadRecent(pFrame); // Import recent files from registry.
 
@@ -426,15 +425,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_contrib.SetWindowText
 					(
 						"Josep Mª Antolín. [JAZ]\t\tDeveloper since release 1.5" "\r\n"
-						"Jeremy Evers [pooplog]\t\tDeveloper since release 1.7" "\r\n"
-						"James Redfern [alk]\t\tDeveloper since release 1.7.6" "\r\n"
 						"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
-						"Magnus Jonsson [zealmange]\t\tDeveloper since release 1.7.7" "\r\n"
+						"James Redfern [alk]\t\tDeveloper and plugin coder" "\r\n"
+						"Magnus Jonsson [zealmange]\t\tDeveloper during 1.7.x and 1.9alpha" "\r\n"
+						"Jeremy Evers [pooplog]\t\tDeveloper in releases 1.7.x" "\r\n"
 						"Daniel Arena\t\t\tDeveloper in release 1.5 & 1.6" "\r\n"
 						"Marcin Kowalski [FideLoop]\t\tDeveloper in release 1.6" "\r\n"
-						"Mark McCormack\t\t\tMIDI (in) Support" "\r\n"
-						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n"
-						"Juan Antonio Arguelles [Arguru]\tCreator and Main Developer until release 1.0" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
+						"Mark McCormack\t\t\tMIDI (in) Support in release 1.6" "\r\n"
+						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
+						"Juan Antonio Arguelles [Arguru] (RIP)\tOriginal Developer and maintainer until 1.0" "\r\n"
 						"Satoshi Fujiwara\t\t\tInitial code on the XM sampler support\r\n"
 						"Hermann Seib\t\t\tBase code of the new VSTHost in 1.8.5\r\n"
 						"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"

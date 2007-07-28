@@ -97,10 +97,16 @@ namespace psycle { namespace host {
 			//	Object Functions
 
 			void DeleteWaveData(){
-				delete m_pWaveDataL;
-				delete m_pWaveDataR;
-//				delete[] m_pWaveDataL;
-//				delete[] m_pWaveDataR;
+				if ( m_pWaveDataL)
+				{
+					delete[] m_pWaveDataL;
+					m_pWaveDataL=0;
+					if (m_WaveStereo)
+					{
+						delete[] m_pWaveDataR;
+						m_pWaveDataR=0;
+					}
+				}
 				m_WaveLength = 0;
 			}
 
