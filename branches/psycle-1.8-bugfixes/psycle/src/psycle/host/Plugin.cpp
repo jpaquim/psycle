@@ -51,7 +51,7 @@ namespace psycle
 		// tmp hack
 		// we might have DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT wrongly defined
 		// we need to undefine it for w98-compatibility
-		#undef defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+		#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 
 		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 			namespace boost
