@@ -48,7 +48,12 @@ namespace psycle
 			Free();
 		}
 
-		#if defined OPERATING_SYSTEM__MICROSOFT && !defined OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+		// tmp hack
+		// we might have DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT wrongly defined
+		// we need to undefine it for w98-compatibility
+		#undef defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 			namespace boost
 			{
 				namespace filesystem
