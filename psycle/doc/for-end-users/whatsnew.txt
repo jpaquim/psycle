@@ -4,7 +4,7 @@ Version | Date | Type of release             | Authors
 1.8.5	| 2007 | RC                          | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
 1.8.3	| 2007 | beta                        | [JAZ]
 1.8.2	| 2006 | bugfix                      | [JAZ] & bohan & jme
-1.9		| 2005 | alpha.                      | psycledelics combined effort
+1.9     | 2005 | alpha                       | psycledelics combined effort
 1.8.1   | 2005 | bugfix                      | bohan & plugin developers
 1.8     | 2005 | stable                      | psycledelics combined effort :-)
 1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
