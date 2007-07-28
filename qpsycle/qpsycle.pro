@@ -6,7 +6,7 @@ TEMPLATE = app # This project builds an executable program.
 TARGET = 
 CONFIG += thread
 !warn_on:CONFIG += warn_off
-message( "Config is $${CONFIG}." )
+message("Config is $$CONFIG")
 BUILD_DIR = build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
@@ -37,7 +37,7 @@ HEADERS += src/gui/mainwindow.h \
     src/gui/patternbox.h \
     src/gui/audioconfigdlg.h \
     src/gui/samplebrowser.h \
-	src/gui/logconsole.h \
+    src/gui/logconsole.h \
     src/gui/machineview/machinegui.h \
     src/gui/machineview/machinetweakdlg.h \
     src/gui/machineview/machineview.h \
@@ -94,9 +94,11 @@ SOURCES += qpsycle.cpp \
     src/gui/waveview/waveamp.cpp
 RESOURCES += qpsycle.qrc
 win32 { 
-    message("Adding [$${RESOURCES}] for Icon")
+    message("Adding resources $$RESOURCES") # only for icon?
     RC_FILE = qpsycle.rc
 }
 include(../psycle-core/qmake/psycle-core.pri)
 include(../psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
-message( "LIBS are: [$${LIBS}]" )
+message("INCLUDEPATH is $$INCLUDEPATH")
+message("LIBS are $$LIBS")
+message("PKGCONFIG is $$PKGCONFIG")
