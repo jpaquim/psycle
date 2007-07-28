@@ -266,18 +266,18 @@ namespace psycle
 				m_ModulationAmount = m_pEnvelope->GetValue(0);
 				if ( m_pEnvelope->SustainBegin() != XMInstrument::Envelope::INVALID )
 				{
-					m_Stage = EnvelopeStage(m_Stage | EnvelopeStage::HASSUSTAIN);
+					m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::HASSUSTAIN);
 				}
 				if (m_pEnvelope->LoopStart() != XMInstrument::Envelope::INVALID )
 				{
-					m_Stage = EnvelopeStage(m_Stage | EnvelopeStage::HASLOOP);
+					m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::HASLOOP);
 				}
 
 				if(m_pEnvelope->GetTime(1) != XMInstrument::Envelope::INVALID )
 				{ 
 					// Since we do not make a CalcStep, m_NextEventSample=0 and the first "Work()" call enters
 					// the check of what to do, forcing a new decision.
-					m_Stage = EnvelopeStage(m_Stage | EnvelopeStage::DOSTEP);
+					m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::DOSTEP);
 				}
 			} else { m_ModulationAmount = 1.0f; }
 
@@ -292,14 +292,14 @@ namespace psycle
 		{
 			if ( m_Stage != EnvelopeStage::OFF && !(m_Stage&EnvelopeStage::RELEASE))
 			{
-				m_Stage = EnvelopeStage(m_Stage | EnvelopeStage::RELEASE);
+				m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::RELEASE);
 
 				// If we are paused, check why
 				if (!(m_Stage&EnvelopeStage::DOSTEP))
 				{
 					if ( m_Stage&EnvelopeStage::HASSUSTAIN)
 					{
-						m_Stage = EnvelopeStage(m_Stage | EnvelopeStage::DOSTEP);
+						m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::DOSTEP);
 						m_Samples=m_NextEventSample-1;
 						m_PositionIndex--;
 					}
@@ -338,7 +338,7 @@ namespace psycle
 			}
 			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is either zero or INVALID, and samplePos is positive.
 			m_PositionIndex=i-2;
-			m_Stage = EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); 
+			m_Stage = EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); 
 			m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
 			Work();
 			m_Samples=samplePos;//and this sets the real position, once all vars are setup.

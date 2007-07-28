@@ -32,7 +32,7 @@ XMSampler::Channel::PerformFX().
 
 */
 	struct CMD {
-		enum{
+		enum Type {
 		NONE				=	0x00,
 		PORTAMENTO_UP		=	0x01,// Portamento Up , Fine porta (0x01fx, and Extra fine porta 01ex )	(*t)
 		PORTAMENTO_DOWN		=	0x02,// Portamento Down, Fine porta (0x02fx, and Extra fine porta 02ex ) (*t)
@@ -63,7 +63,7 @@ XMSampler::Channel::PerformFX().
 	};
 	struct CMD_E
 	{
-		enum{
+		enum Type {
 		E_GLISSANDO_TYPE	=	0x30, //E3     Set gliss control			(p)
 		E_VIBRATO_WAVE		=	0x40, //E4     Set vibrato control			(p)
 								//0x50
@@ -81,7 +81,7 @@ XMSampler::Channel::PerformFX().
 	};
 	struct CMD_E9
 	{
-		enum{
+		enum Type {
 		E9_SURROUND_OFF		=	0x00,//										(p)
 		E9_SURROUND_ON		=	0x01,//										(p)
 		E9_REVERB_OFF		=	0x08,//										(p)
@@ -96,7 +96,7 @@ XMSampler::Channel::PerformFX().
 	};
 	struct CMD_EE
 	{
-		enum{
+		enum Type {
 		EE_BACKGROUNDNOTECUT	=	0x00,
 		EE_BACKGROUNDNOTEOFF	=	0x01,
 		EE_BACKGROUNDNOTEFADE	=	0x02,
@@ -115,7 +115,7 @@ XMSampler::Channel::PerformFX().
 	
 	struct CMD_VOL
 	{
-		enum{
+		enum Type {
 		VOL_VOLUME0			=	0x00, // 0x00..0x0F (63)  ||
 		VOL_VOLUME1			=	0x10, // 0x10..0x1F (63)  || All are the same command.
 		VOL_VOLUME2			=	0x20, // 0x20..0x2F (63)  ||
@@ -135,11 +135,11 @@ XMSampler::Channel::PerformFX().
 		};
 	};
 
-	typedef struct
+	struct ZxxMacro
 	{
-		int			mode;
-		int			value;
-	} ZxxMacro;
+		int mode;
+		int value;
+	};
 
 	class Channel;
 
@@ -150,8 +150,8 @@ XMSampler::Channel::PerformFX().
 	class WaveDataController
 	{
 	public:
-		struct LoopDirection{ 
-			enum {
+		struct LoopDirection {
+			enum Type {
 				FORWARD = 0,
 				BACKWARD
 			};
@@ -306,19 +306,20 @@ XMSampler::Channel::PerformFX().
 	//\todo: Recall "CalcStep" after a SampleRate change, and also after a Tempo Change.
 	class EnvelopeController {
 	public:
-		enum EnvelopeStage
-		{
-			OFF		= 0,
-			DOSTEP	= 1, // normal operation, follow the steps.
-			HASLOOP	= 2, // Indicates that the envelope *has* a (normal) loop (not that it is playing it)
-			HASSUSTAIN	= 4, // This indicates that the envelope *has* a sustain (not that it is playing it)
-			RELEASE = 8  // Indicates that a Note-Off has been issued.
+		struct EnvelopeStage {
+			enum Type {
+				OFF		= 0,
+				DOSTEP	= 1, // normal operation, follow the steps.
+				HASLOOP	= 2, // Indicates that the envelope *has* a (normal) loop (not that it is playing it)
+				HASSUSTAIN	= 4, // This indicates that the envelope *has* a sustain (not that it is playing it)
+				RELEASE = 8  // Indicates that a Note-Off has been issued.
+			};
 		};
 		// EnvelopeMode defines what the first value of a PointValue means
 		// TICK = one tracker tick ( speed depends on the BPM )
 		// MILIS = a millisecond. (independant of BPM).
 /*		struct EnvelopeMode {
-			enum{
+			enum Type {
 				TICK=0,
 				MILIS
 			};
@@ -348,7 +349,7 @@ XMSampler::Channel::PerformFX().
 							// if the begin==end, pause the envelope.
 							if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
 									{
-										m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
+										m_Stage = EnvelopeStage::Type(m_Stage & ~EnvelopeStage::DOSTEP);
 									}
 							else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
 								}
@@ -359,7 +360,7 @@ XMSampler::Channel::PerformFX().
 						{
 							if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
 							{
-								m_Stage = EnvelopeStage(m_Stage & ~EnvelopeStage::DOSTEP);
+								m_Stage = EnvelopeStage::Type(m_Stage & ~EnvelopeStage::DOSTEP);
 							}
 							else { m_PositionIndex = m_pEnvelope->LoopStart(); }
 						}
@@ -390,11 +391,11 @@ XMSampler::Channel::PerformFX().
 			return m_ModulationAmount;
 		};
 		
-		const EnvelopeStage Stage(){return m_Stage;};
-		void Stage(const EnvelopeStage value){m_Stage = value;};
+		const EnvelopeStage::Type Stage(){return m_Stage;};
+		void Stage(const EnvelopeStage::Type value){m_Stage = value;};
 		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;};
 		inline void CalcStep(const int start,const int  end);
-		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; }; // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
+		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; }; // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
 		int GetPosition(void) { return m_PositionIndex; };
 		void SetPositionInSamples(const int samplePos);
 		int GetPositionInSamples();
@@ -407,7 +408,7 @@ XMSampler::Channel::PerformFX().
 		int m_Mode;
 		int m_PositionIndex;
 		int m_NextEventSample;
-		EnvelopeStage m_Stage;
+		EnvelopeStage::Type m_Stage;
 
 		XMInstrument::Envelope * m_pEnvelope;
 
@@ -961,11 +962,12 @@ XMSampler::Channel::PerformFX().
 	//////////////////////////////////////////////////////////////////////////
 	//  XMSampler Declaration
 
-	enum PanningMode
-	{
-		Linear=0,
-		TwoWay,
-		EqualPower
+	struct PanningMode {
+		enum Type {
+			Linear=0,
+			TwoWay,
+			EqualPower
+		};
 	};
 
 
