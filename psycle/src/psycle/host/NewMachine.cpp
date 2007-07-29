@@ -924,8 +924,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								}
 								out << vstPlug->GetName() << " - successfully instanciated";
 								out.flush();
-								learnDllName(fileName,type);
 							}
+							learnDllName(fileName,type);
 							// [bohan] vstPlug is a stack object, so its destructor is called
 							// [bohan] at the end of its scope (this cope actually).
 							// [bohan] The problem with destructors of any object of any class is that
