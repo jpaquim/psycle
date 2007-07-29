@@ -131,7 +131,7 @@ namespace psycle
 			/// returns index, or -1 if error. 
 			bool ChangeWireSourceMac(Machine* srcMac, Machine* dstMac, int wiresrc, int wiredest);
 			/// Verifies that the new connection doesn't conflict with the mixer machine.
-			bool ValidateMixerSendCandidate(Machine* mac);
+			bool Song::ValidateMixerSendCandidate(Machine* mac,bool rewiring=false);
 			void RestoreMixerSendFlags();
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			int GetFreeBus();

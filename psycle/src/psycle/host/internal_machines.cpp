@@ -586,9 +586,9 @@ namespace psycle
 		{
 			if (wireIndex < MAX_CONNECTIONS)
 			{
+				Machine::SetWireVolume(wireIndex,value);
 				if (ChannelValid(wireIndex))
 				{
-					Machine::SetWireVolume(wireIndex,value);
 					RecalcChannel(wireIndex);
 				}
 			}
@@ -1054,23 +1054,23 @@ namespace psycle
 					}
 					RecalcChannel(param-1);
 				}
-				else if (param == 13) { master_.DryWetMix() = (value&0xFF)/256.0f; RecalcMaster(); }
-				else if (param == 14) { master_.Gain() = (value&0xFF)/256.0f; RecalcMaster(); }
+				else if (param == 13) { master_.DryWetMix() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcMaster(); }
+				else if (param == 14) { master_.Gain() = (value>=1024)?4.0f:((value&0x3FF)/256.0f); RecalcMaster(); }
 				else SetPan(value>>1);
 				return true;
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0) { Channel(channel-1).DryMix() = (value&0xFF)/256.0f; RecalcChannel(channel-1); }
-				else if (param <= 12) { Channel(channel-1).Send(param-1) = (value&0xFF)/256.0f; RecalcSend(channel-1,param-1); } 
+				if (param == 0) { Channel(channel-1).DryMix() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcChannel(channel-1); }
+				else if (param <= 12) { Channel(channel-1).Send(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1); } 
 				else if (param == 13)
 				{
 					Channel(channel-1).Mute() = (value == 3)?true:false;
 					Channel(channel-1).WetOnly() = (value==2)?true:false;
 					Channel(channel-1).DryOnly() = (value==1)?true:false;
 				}
-				else if (param == 14) { float val=(value&0xFF)/256.0f; SetWireVolume(channel-1,val); RecalcChannel(channel-1); }
-				else { Channel(channel-1).Panning() = (value&0xFF)/256.0f; RecalcChannel(channel-1); }
+				else if (param == 14) { float val=(value>=1024)?4.0f:((value&0x3FF)/256.0f); SetWireVolume(channel-1,val); RecalcChannel(channel-1); }
+				else { Channel(channel-1).Panning() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcChannel(channel-1); }
 				return true;
 			}
 			else if ( channel == 13)
@@ -1107,7 +1107,7 @@ namespace psycle
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return false;
-				else { Return(param-1).Panning() = (value&0xFF)/256.0f; RecalcReturn(param-1); }
+				else { Return(param-1).Panning() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcReturn(param-1); }
 				return true;
 			}
 			return false;
