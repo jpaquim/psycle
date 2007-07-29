@@ -532,16 +532,16 @@ namespace psycle
 				if(tmac++ >= MAX_MACHINES) return -1;
 			}
 		}
-		bool Song::ValidateMixerSendCandidate(Machine* mac)
+		bool Song::ValidateMixerSendCandidate(Machine* mac,bool rewiring)
 		{
 			// Basically, we dissallow a send comming from a generator as well as multiple-outs for sends.
 			if ( mac->_mode == MACHMODE_GENERATOR) return false;
-			if ( mac->_numOutputs > 0 ) return false;
+			if ( mac->_numOutputs > 1 || (mac->_numOutputs > 0 && !rewiring) ) return false;
 			for (int i(0); i<MAX_CONNECTIONS; ++i)
 			{
 				if (mac->_inputCon[i])
 				{
-					if (!ValidateMixerSendCandidate(Global::_pSong->_pMachine[mac->_inputMachines[i]]))
+					if (!ValidateMixerSendCandidate(Global::_pSong->_pMachine[mac->_inputMachines[i]],false))
 					{
 						return false;
 					}
@@ -606,6 +606,14 @@ namespace psycle
 			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
 			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
+			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >=MAX_CONNECTIONS) return false;
+			// If source is in a mixer chain, dissallow the new connection.
+			// If destination is in a mixer chain (or the mixer itself), validate the sender first
+			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS))
+			{
+				///\todo: validate for the case whre srcMac->_isMixerSend
+				if (!ValidateMixerSendCandidate(srcMac,true)) return false;
+			}
 
 			if (wiresrc == -1 || wiredest == -1 || srcMac->_outputMachines[wiresrc] == -1)
 				return false;
@@ -636,14 +644,40 @@ namespace psycle
 			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
 			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
+			// disallow mixer as a sender of another mixer
+			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS) return false;
+			// If source is in a mixer chain, dissallow the new connection.
+			if ( srcMac->_isMixerSend ) return false;
+			// If destination is in a mixer chain (or the mixer itself), validate the sender first
+			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS))
+			{
+				if (!ValidateMixerSendCandidate(srcMac,false)) return false;
+			}
 
-			if (wiresrc == -1 || wiredest == -1 || dstMac->_inputMachines[wiredest] == -1)
+			if (wiresrc == -1 || wiredest == -1)
 				return false;
+
+			Machine *oldmac(0);
+			if ( dstMac->_type == MACH_MIXER)
+			{
+				if ( wiredest < MAX_CONNECTIONS)
+				{
+					if (dstMac->_inputMachines[wiredest] == -1)
+						return false;
+					oldmac = _pMachine[dstMac->_inputMachines[wiredest]];
+				}
+				else if (!((Mixer*)dstMac)->ReturnValid(wiredest-MAX_CONNECTIONS))
+					return false;
+				else oldmac = _pMachine[((Mixer*)dstMac)->Return(wiredest-MAX_CONNECTIONS).Wire().machine_];
+			}
+			else if (dstMac->_inputMachines[wiredest] == -1) 
+				return false;
+			else oldmac = _pMachine[dstMac->_inputMachines[wiredest]];
 
 			int w;
 			float volume = 1.0f;
 			///\todo: this assignation will need to change with multi-io.
-			Machine *oldmac = _pMachine[dstMac->_inputMachines[wiredest]];
+			 
 			if (oldmac)
 			{
 				if ((w =oldmac->FindOutputWire(dstMac->_macIndex)) == -1)
@@ -1450,12 +1484,12 @@ namespace psycle
 							{
 								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 								{
-									_pMachine[i]->_connection[c] = FALSE;
+									_pMachine[i]->_connection[c] = false;
 									_pMachine[i]->_outputMachines[c] = -1;
 								}
 								else if(!_pMachine[_pMachine[i]->_outputMachines[c]])
 								{
-									_pMachine[i]->_connection[c] = FALSE;
+									_pMachine[i]->_connection[c] = false;
 									_pMachine[i]->_outputMachines[c] = -1;
 								}
 								else 
@@ -1472,12 +1506,12 @@ namespace psycle
 							{
 								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
 								{
-									_pMachine[i]->_inputCon[c] = FALSE;
+									_pMachine[i]->_inputCon[c] = false;
 									_pMachine[i]->_inputMachines[c] = -1;
 								}
 								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
 								{
-									_pMachine[i]->_inputCon[c] = FALSE;
+									_pMachine[i]->_inputCon[c] = false;
 									_pMachine[i]->_inputMachines[c] = -1;
 								}
 								else
@@ -2268,12 +2302,12 @@ namespace psycle
 							{
 								if (_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
 								{
-									_pMachine[i]->_connection[c]=FALSE;
+									_pMachine[i]->_connection[c]=false;
 									_pMachine[i]->_outputMachines[c]=-1;
 								}
 								else if (!_pMachine[_pMachine[i]->_outputMachines[c]])
 								{
-									_pMachine[i]->_connection[c]=FALSE;
+									_pMachine[i]->_connection[c]=false;
 									_pMachine[i]->_outputMachines[c]=-1;
 								}
 								else 
@@ -2290,12 +2324,12 @@ namespace psycle
 							{
 								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES-1)
 								{
-									_pMachine[i]->_inputCon[c]=FALSE;
+									_pMachine[i]->_inputCon[c]=false;
 									_pMachine[i]->_inputMachines[c]=-1;
 								}
 								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
 								{
-									_pMachine[i]->_inputCon[c]=FALSE;
+									_pMachine[i]->_inputCon[c]=false;
 									_pMachine[i]->_inputMachines[c]=-1;
 								}
 								else
