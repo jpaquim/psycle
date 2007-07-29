@@ -9,6 +9,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <map>
+#include <cstdint>
 #include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -49,7 +50,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			std::string vendor;
 			std::string desc;
 			std::string version;
-			std::string APIversion;
+			std::uint32_t APIversion;
 			FILETIME FileTime;
 			bool allow;
 			/*
