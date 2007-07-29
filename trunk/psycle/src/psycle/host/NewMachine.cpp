@@ -463,11 +463,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CNewMachine::OnRefresh() 
 		{
 			DestroyPluginInfo();
-			{
-				std::string path = universalis::operating_system::paths::package::home().string();
-				path = path + "\\psycle.plugin-scan.cache";
-				DeleteFile(path.c_str());
-			}
+			DeleteFile((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string().c_str());
 			LoadPluginInfo();
 			UpdateList();
 			m_browser.Invalidate();
@@ -586,10 +582,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				std::ofstream out;
 				{
-					std::string log = universalis::operating_system::paths::package::home().string();
-					mkdir(log.c_str());
-					log = log + "/psycle.plugin-scan.log.txt";
-					out.open(log.c_str());
+					boost::filesystem::path log_dir(universalis::operating_system::paths::package::home());
+					// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
+					mkdir(log_dir.native_directory_string().c_str());
+					out.open((log_dir / "psycle.plugin-scan.log.txt").native_file_string().c_str());
 				}
 				out
 					<< "==========================================" << std::endl
@@ -756,7 +752,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								_pPlugsInfo[currentPlugsCount]->vendor = "???";
 								_pPlugsInfo[currentPlugsCount]->desc = "???";
 								_pPlugsInfo[currentPlugsCount]->version = "???";
-								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
+								_pPlugsInfo[currentPlugsCount]->APIversion = 0;
 								++currentBadPlugsCount;
 							}
 							else
@@ -775,18 +771,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									std::ostringstream s; s << "0";
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
-								{
-									std::ostringstream s; s << plug.GetInfo()->Version;
-									_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
-								}
+								_pPlugsInfo[currentPlugsCount]->APIversion = plug.GetInfo()->Version;
 								{
 									std::ostringstream s; s << "0";
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
+								out << plug.GetName() << " - successfully instanciated";
+								out.flush();
 							}
 							learnDllName(fileName,type);
-							out << plug.GetName() << " - successfully instanciated";
-							out.flush();
 							// [bohan] plug is a stack object, so its destructor is called
 							// [bohan] at the end of its scope (this cope actually).
 							// [bohan] The problem with destructors of any object of any class is that
@@ -862,7 +855,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								_pPlugsInfo[currentPlugsCount]->vendor = "???";
 								_pPlugsInfo[currentPlugsCount]->desc = "???";
 								_pPlugsInfo[currentPlugsCount]->version = "???";
-								_pPlugsInfo[currentPlugsCount]->APIversion = "???";
+								_pPlugsInfo[currentPlugsCount]->APIversion = 0;
 								++currentBadPlugsCount;
 							}
 							else
@@ -904,11 +897,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 												s << vstPlug->GetVersion();
 												_pPlugsInfo[currentPlugsCount]->version = s.str();
 											}
-											{
-												std::ostringstream s;
-												s << vstPlug->GetVstVersion();
-												_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
-											}
+											_pPlugsInfo[currentPlugsCount]->APIversion = vstPlug->GetVstVersion();
 											firstrun=false;
 										}
 									}
@@ -931,15 +920,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 										s << vstPlug->GetVersion();
 										_pPlugsInfo[currentPlugsCount]->version = s.str();
 									}
-									{
-										std::ostringstream s;
-										s << vstPlug->GetVstVersion();
-										_pPlugsInfo[currentPlugsCount]->APIversion = s.str();
-									}
+									_pPlugsInfo[currentPlugsCount]->APIversion = vstPlug->GetVstVersion();
 								}
-								learnDllName(fileName,type);
 								out << vstPlug->GetName() << " - successfully instanciated";
 								out.flush();
+								learnDllName(fileName,type);
 							}
 							// [bohan] vstPlug is a stack object, so its destructor is called
 							// [bohan] at the end of its scope (this cope actually).
@@ -1030,15 +1015,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
-			std::string cache = universalis::operating_system::paths::package::home().string();
-			cache = cache + "\\psycle.plugin-scan.cache";
-
+			std::string cache((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string());
 			RiffFile file;
 			CFileFind finder;
 
-			if (!file.Open(cache.c_str())) 
+			if (!file.Open(cache.c_str()))
 			{
-				///\try old location
+				/// try old location
+				/// same as universalis::operating_system::paths::bin() / "psycle.plugin-scan.cache"
 				char modulefilename[_MAX_PATH];
 				GetModuleFileName(NULL,modulefilename,_MAX_PATH);
 				std::string path=modulefilename;
@@ -1162,15 +1146,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		bool CNewMachine::SaveCacheFile()
 		{
-			std::string path = universalis::operating_system::paths::package::home().string();
-			std::string cache = path + "\\psycle.plugin-scan.cache";
+			boost::filesystem::path cache(universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache");
 
-			DeleteFile(cache.c_str());
+			DeleteFile(cache.native_file_string().c_str());
 			RiffFile file;
-			if (!file.Create(cache.c_str(),true)) 
+			if (!file.Create(cache.native_file_string().c_str(),true)) 
 			{
-				mkdir(path.c_str());
-				if (!file.Create(cache.c_str(),true)) return false;
+				// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
+				mkdir(cache.branch_path().native_directory_string().c_str());
+				if (!file.Create(cache.native_file_string().c_str(),true)) return false;
 			}
 			file.Write("PSYCACHE",8);
 			UINT version = CURRENT_CACHE_MAP_VERSION;
