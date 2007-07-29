@@ -346,6 +346,10 @@ namespace psycle
 
 		void Machine::DeleteOutputWireIndex(int wireIndex)
 		{
+			if ( _isMixerSend)
+			{
+				ClearMixerSendFlag();
+			}
 			_connection[wireIndex] = false;
 			_outputMachines[wireIndex] = -1;
 			_numOutputs--;
@@ -432,6 +436,17 @@ namespace psycle
 			//Work down the connection wires until finding the mixer.
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
 				if ( _connection[i]) Global::_pSong->_pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(_macIndex,senderMac);
+		}
+		void Machine::ClearMixerSendFlag()
+		{
+			//Work up the connection wires to clear others' flag.
+			for (int i(0);i< MAX_CONNECTIONS; ++i)
+				if ( _inputCon[i])
+				{
+					Global::_pSong->_pMachine[_inputMachines[i]]->ClearMixerSendFlag();
+				}
+				
+			_isMixerSend=false;
 		}
 
 		void Machine::PreWork(int numSamples,bool clear)

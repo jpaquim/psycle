@@ -2480,7 +2480,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pls->DeleteString(ls);
 
 				if (Global::pConfig->_bShowPatternNames)
-					sprintf(buffer,"%.2X:%s",ls,_pSong->patternName[ls]);
+					sprintf(buffer,"%.2X:%s",ls,_pSong->patternName[le]);
 				else
 					sprintf(buffer,"%.2X: %.2X",ls,le);
 				pls->InsertString(ls,buffer);

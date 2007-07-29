@@ -1647,16 +1647,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{									// operation: select, copy, switch, instead of select, switch.
 				int ps=_pSong->playOrder[editPosition];
 				int nl = _pSong->patternLines[ps];
-				bool bOverlapTrack = false;
-				bool bOverlapLine = false;
+				bool bSwapTracks = false;
+				bool bSwapLines = false;
 				int ls=0;
 				int ts=0;
-				int startRT=0;
-				int startRL=0;
-				int startWT=0;
-				int startWL=0;
-				int stopT=0;
-				int stopL=0;
+				int startRT=tx;
+				int startRL=lx;
+				int startWT=blockLastOrigin.start.track;
+				int startWL=blockLastOrigin.start.line;
+				int stopT=tx+blockNTracks;
+				int stopL=lx+blockNLines;
 				PatternEntry blank;
 
 				// Copy block(1) if not done already.
@@ -1665,73 +1665,79 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// We backup the data of the whole block.
 				AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
-				// Detect Block sizes and see if they overlap, 
+				// Do the blocks overlap? Then take care of moving the appropiate data.
 				if (abs(blockLastOrigin.start.track-tx) < blockNTracks	&& abs(blockLastOrigin.start.line-lx) < blockNLines )
 				{
-					if 	( blockLastOrigin.start.track != tx )  //If they are equal, we don't need to move tracks.
+					if 	( blockLastOrigin.start.track != tx )  //Is the origin and destination track different?
 					{
-						//Tracks overlap
-						bOverlapTrack = true;
+						// ok, then we need to exchange some of the tracks.
+						bSwapTracks = true;
 
+						// If the switch moves to the left, exchange the start of the destination block
 						if ( blockLastOrigin.start.track > tx)
 						{
-							startRT=blockLastOrigin.start.track+blockNTracks;	startRL=lx;
-							startWT=blockLastOrigin.start.track;				startWL=blockLastOrigin.start.line;
-							stopT=tx;											stopL=blockLastOrigin.start.line+blockNLines;
+							startRT=tx;
+							startWT=tx+blockNTracks;
+							stopT=blockLastOrigin.start.track;
 						}
-						else 
+						else // else, exchange the end of the destination block.
 						{
-							startRT=tx;							startRL=lx;
-							startWT=tx+blockNTracks;			startWL=blockLastOrigin.start.line;
-							stopT=blockLastOrigin.start.track;	stopL=lx+blockNLines;
+							startRT=blockLastOrigin.start.track+blockNTracks;
+							startWT=blockLastOrigin.start.track;
+							stopT=tx+blockNTracks;
 						}
 					}
-					if ( blockLastOrigin.start.line != lx )//If they are equal, we don't need to move lines.
+					if ( blockLastOrigin.start.line != lx )  //Is the origin and destination line different?
 					{
-						//lines overlap
-						bOverlapLine = true;
+						// ok, then we need to exchange some of the lines.
+						bSwapLines = true;
 
-						if (bOverlapTrack)
+						// do we have to swap both, tracks and lines?
+						if (bSwapTracks)
 						{
+							// We have a situation like this :  ( - don't care , O origin D destination Q overlap.)
+							// The swap cannot be clean, as in maintaining the structure.
+							//--OOOO   >>>>> --1234  >>>> --BCDE
+							//DDQQOO   >>>>> 56789A  >>>> 123456
+							//DDDD--   >>>>> BCDE--  >>>> 789A--
+
 							int startRT2, startRL2, startWT2, startWL2, stopT2, stopL2;
-							//Most of the work Prepared. Only missing is moving some lines.
-							if ( blockLastOrigin.start.track > tx)
+							if ( blockLastOrigin.start.line > lx)
 							{
-								startRT2=blockLastOrigin.start.track; startWT2=blockLastOrigin.start.track; stopT2=tx+blockNTracks;
-								if ( blockLastOrigin.start.line > lx)
-								{
-									startRL2=lx;
-									startWL2=lx+blockNLines;
-									stopL2=blockLastOrigin.start.line;
-								}
-								else
-								{
-									startRL2=blockLastOrigin.start.line+blockNLines;
-									startWL2=blockLastOrigin.start.line;
-									stopL2=lx+blockNLines;
-								}
+								startRL2=lx;
+								startWL2=lx+blockNLines;
+								stopL2=blockLastOrigin.start.line;
+								startRL=blockLastOrigin.start.line;
+								startWL=blockLastOrigin.start.line;
+								stopL=lx+blockNLines;
 							}
 							else
 							{
-								startRT2=tx;	startWT2=tx; stopT2=blockLastOrigin.start.track+blockNTracks;
-								if ( blockLastOrigin.start.line > lx)
-								{
-									startRL2=lx;
-									startWL2=+blockNLines;
-									stopL2=blockLastOrigin.start.line;
-								}
-								else
-								{
-									startRL2=blockLastOrigin.start.line+blockNLines;
-									startWL2=blockLastOrigin.start.line;
-									stopL2=lx+blockNLines;
-								}
+								startRL2=blockLastOrigin.start.line+blockNLines;
+								startWL2=blockLastOrigin.start.line;
+								stopL2=lx+blockNLines;
+								startRL=lx;
+								startWL=lx;
+								stopL=blockLastOrigin.start.line+blockNLines;
 							}
+							if ( blockLastOrigin.start.track > tx)
+							{
+								startRT2=tx;
+								startWT2=blockLastOrigin.start.track;
+								stopT2=tx+blockNTracks;
+							}
+							else
+							{
+								startRT2=tx;
+								startWT2=blockLastOrigin.start.track;
+								stopT2=tx+blockNTracks;
+							}
+							// We exchange just the lines here. The loop outside will exchange the tracks.
 							ts = startWT2;
-							for (int t=startRT2;t<stopT2 && t<_pSong->SONGTRACKS;t++)
+							for (int t=startRT2;t<stopT2 && t<_pSong->SONGTRACKS && ts<_pSong->SONGTRACKS;t++)
 							{
 								ls=startWL2;
-								for (int l=startRL2;l<stopL2 && l<nl;l++)
+								for (int l=startRL2;l<stopL2 && l<nl && ls <nl;l++)
 								{
 									unsigned char *offset_target=_ptrackline(ps,ts,ls);
 									unsigned char *offset_source=_ptrackline(ps,t,l);
@@ -1745,37 +1751,31 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						}
 						else
 						{
+							// If the switch moves to the top, exchange the start of the destination block
 							if ( blockLastOrigin.start.line > lx)
 							{
-								startRT=tx;								startRL=lx;
-								startWT=tx;								startWL=lx+blockNLines;
-								stopT=tx+blockNTracks;					stopL=blockLastOrigin.start.line;
+								startRL=lx;
+								startWL=lx+blockNLines;
+								stopL=blockLastOrigin.start.line;
 							}
 							else
 							{
-								startRT=tx;					startRL=blockLastOrigin.start.line+blockNLines;
-								startWT=tx;					startWL=blockLastOrigin.start.line;
-								stopT=tx+blockNTracks;		stopL=lx+blockNLines;
+								startRL=blockLastOrigin.start.line+blockNLines;
+								startWL=blockLastOrigin.start.line;
+								stopL=lx+blockNLines;
 							}
 						}
 					}
-					if (!bOverlapLine && !bOverlapTrack) return; // There is nothing to Swap. blocks are the same.
+					// There is nothing to Swap. blocks are the same.
+					if (!bSwapTracks && !bSwapLines) return;
 				}
 			
-				if (!bOverlapLine && !bOverlapTrack)
-				{
-					// No overlapping, 
-					startRT=tx;								startRL=lx;
-					startWT=blockLastOrigin.start.track;	startWL=blockLastOrigin.start.line;
-					stopT=tx+blockNTracks;					stopL=lx+blockNLines;
-				}
-
 				// do Swap "inplace".
 				ts = startWT;
-				for (int t=startRT;t<stopT && t<_pSong->SONGTRACKS;t++)
+				for (int t=startRT;t<stopT && t<_pSong->SONGTRACKS && ts <_pSong->SONGTRACKS;t++)
 				{
 					ls=startWL;
-					for (int l=startRL;l<stopL && l<nl;l++)
+					for (int l=startRL;l<stopL && l<nl && ls<nl;l++)
 					{
 						unsigned char *offset_target=_ptrackline(ps,ts,ls);
 						unsigned char *offset_source=_ptrackline(ps,t,l);

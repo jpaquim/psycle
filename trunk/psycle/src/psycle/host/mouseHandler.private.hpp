@@ -652,17 +652,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (blockswitch)
 				{
-					CCursor tmpcur;
-					tmpcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
-					tmpcur.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
 					blockSelected=false; //The current selected block is the destination. We have done CopyBlock in LButtonDown.
-					if ( nFlags & MK_CONTROL ) 
+					if (blockSel.start.track != blockLastOrigin.start.track ||
+						blockSel.start.line != blockLastOrigin.start.line)
 					{
-						PasteBlock(blockSel.start.track,blockSel.start.line,false);
+						if ( nFlags & MK_CONTROL ) 
+						{
+							PasteBlock(blockSel.start.track,blockSel.start.line,false);
+						}
+						else SwitchBlock(blockSel.start.track,blockSel.start.line);
+						blockSelected=true; // restore selection to the new place.
 					}
-					else SwitchBlock(blockSel.start.track,blockSel.start.line);
-						//SwitchBlock(blockLastOrigin.start.track+(tmpcur.track-editcur.track),blockLastOrigin.start.line+(tmpcur.line-editcur.line));
-					blockSelected=true; // restore selection to the new place.
 					blockswitch=false;
 					Repaint(draw_modes::selection);
 				}
@@ -847,11 +847,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{
 							blockSelectBarState = 1;
 
-							blockSel.start.track=blockLastOrigin.start.track+(ttm-editcur.track);
-							blockSel.start.line=blockLastOrigin.start.line+(llm-editcur.line);
-							iniSelec = blockSel.start;
+							int tstart = (blockLastOrigin.start.track+(ttm-editcur.track) >= 0)?(ttm-editcur.track):-blockLastOrigin.start.track;
+							int lstart = (blockLastOrigin.start.line+(llm-editcur.line) >= 0)?(llm-editcur.line):-blockLastOrigin.start.line;
+							if (blockLastOrigin.end.track+(ttm-editcur.track) >= _pSong->SONGTRACKS) tstart = _pSong->SONGTRACKS-blockLastOrigin.end.track-1;
+							if (blockLastOrigin.end.line+(llm-editcur.line) >= plines) lstart = plines - blockLastOrigin.end.line-1;
 
-							ChangeBlock(blockLastOrigin.end.track+(ttm-editcur.track),blockLastOrigin.end.line+(llm-editcur.line),ccm);
+							blockSel.start.track=blockLastOrigin.start.track+(tstart);
+							blockSel.start.line=blockLastOrigin.start.line+(lstart);
+							iniSelec = blockSel.start;
+							int tend = blockLastOrigin.end.track+(tstart);
+							int lend = blockLastOrigin.end.line+(lstart);
+							ChangeBlock(tend,lend,ccm);
 						}
 						else ChangeBlock(ttm,llm,ccm);
 						oldm.track=ttm;

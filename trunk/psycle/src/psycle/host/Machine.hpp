@@ -260,6 +260,7 @@ namespace psycle
 					virtual void ExchangeInputWires(int first,int second);
 					virtual void ExchangeOutputWires(int first,int second);
 					virtual void NotifyNewSendtoMixer(int callerMac,int senderMac);
+					virtual void ClearMixerSendFlag();
 					virtual void DeleteOutputWireIndex(int wireIndex);
 					virtual void DeleteInputWireIndex(int wireIndex);
 					virtual void DeleteWires();
