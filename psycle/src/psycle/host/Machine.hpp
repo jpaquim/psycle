@@ -91,10 +91,16 @@ namespace psycle
 							template<typename E> void rethrow                  (universalis::compiler::location const & location,              E const * const e, std::exception const * const standard) const throw(function_error)
 							{
 								std::ostringstream s;
-								s
-									<< "Machine had an exception in function '" << location << "'." << std::endl
-									<< universalis::compiler::typenameof(*e) << std::endl
-									<< universalis::exceptions::string(*e);
+								s	<< "Machine had an exception in function '" << location << "'." << std::endl;
+								if (e)
+								{
+									s	<< universalis::compiler::typenameof(*e) << std::endl
+										<< universalis::exceptions::string(*e);
+								}
+								else
+								{
+									s << "Unknown type of exeption";
+								}
 								function_error const function_error(s.str(), standard);
 								machine_.crashed(function_error);
 								throw function_error;

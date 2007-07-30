@@ -1523,7 +1523,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				isBlockCopied=true;
 				blockNTracks=(blockSel.end.track-blockSel.start.track)+1;
 				blockNLines=(blockSel.end.line-blockSel.start.line)+1;
-				blockLastOrigin = blockSel;
 				
 				int ps=_pSong->playOrder[editPosition];
 				

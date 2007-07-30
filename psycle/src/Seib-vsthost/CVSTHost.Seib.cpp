@@ -27,9 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <psycle/project.private.hpp>
 #include "CVSTHost.Seib.hpp"                   /* private prototypes                */
 // Unneeded sources:
-//#include "global.hpp" // for debug loggers.
 #include <psycle/host/machine.hpp> // for throw.
-#include <psycle/host/loggers.hpp>
+
 #include "EffectWnd.hpp"
 
 #if !(defined _WIN64 || defined _WIN32)
@@ -46,7 +45,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace seib {
 	namespace vst {
-		namespace loggers = psycle::loggers;
 
 		/*****************************************************************************/
 		/* Static Data                                                               */
@@ -1188,7 +1186,7 @@ namespace seib {
 				delete loader;
 				std::ostringstream s; s
 					<< "couldn't locate the main entry to VST: " << sName << std::endl;
-					throw psycle::host::exceptions::library_errors::loading_error(s.str());
+					throw psycle::host::exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 
 			loadingEffect = true;
@@ -1216,7 +1214,7 @@ namespace seib {
 			loadingShellId=0;
 			std::ostringstream s; s
 				<< "VST main call returned a null/wrong AEffect: " << sName << std::endl;
-			throw psycle::host::exceptions::library_errors::loading_error(s.str());
+			throw psycle::host::exceptions::function_errors::bad_returned_value(s.str());
 		}
 
 
@@ -1463,7 +1461,7 @@ namespace seib {
 						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
-					loggers::info(title.str() + '\n' + s.str());
+					pHost->Log(title.str() + '\n' + s.str());
 				}
 				
 				// We try to simulate a pEffect plugin for this call, so that calls to
@@ -1488,7 +1486,7 @@ namespace seib {
 						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
-					loggers::info(title.str() + '\n' + s.str());
+					pHost->Log(title.str() + '\n' + s.str());
 					// The VST SDK 2.0 said this:
 					// [QUOTE]
 					//	Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the

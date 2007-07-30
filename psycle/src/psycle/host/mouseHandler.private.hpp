@@ -516,7 +516,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line && Global::pConfig->_windowsBlocks)
 					{
 						blockswitch=true;
-						CopyBlock(false);
+						blockLastOrigin = blockSel;
 						editcur = oldm;
 					}
 					else blockStart = true;
@@ -664,17 +664,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (blockswitch)
 				{
-					blockSelected=false; //The current selected block is the destination. We have done CopyBlock in LButtonDown.
 					if (blockSel.start.track != blockLastOrigin.start.track ||
 						blockSel.start.line != blockLastOrigin.start.line)
 					{
+						CSelection dest = blockSel;
+						blockSel = blockLastOrigin;
 						if ( nFlags & MK_CONTROL ) 
 						{
-							PasteBlock(blockSel.start.track,blockSel.start.line,false);
+							CopyBlock(false);
+							PasteBlock(dest.start.track,dest.start.line,false);
 						}
-						else SwitchBlock(blockSel.start.track,blockSel.start.line);
-						blockSelected=true; // restore selection to the new place.
+						else SwitchBlock(dest.start.track,dest.start.line);
+						blockSel = dest;
 					}
+					else blockSelected=false; 
 					blockswitch=false;
 					Repaint(draw_modes::selection);
 				}

@@ -891,7 +891,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CVstEffectWnd::OnUpdateViewsBankmanager(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(false);
 		}
 
 		void CVstEffectWnd::OnViewsMidichannels()
