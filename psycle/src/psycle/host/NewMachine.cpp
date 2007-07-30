@@ -1081,64 +1081,54 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				file.ReadString(p.desc);
 				file.ReadString(p.version);
 				file.Read(&p.APIversion,sizeof(p.APIversion));
-				bool addPluginInfo= true;
 
-				if ( verify )
+				// Temp here contains the full path to the .dll
+				if(finder.FindFile(Temp))
 				{
-					// Temp here contains the full path to the .dll
-					if(finder.FindFile(Temp))
+					FILETIME time;
+					finder.FindNextFile();
+					if (finder.GetLastWriteTime(&time))
 					{
-						FILETIME time;
-						finder.FindNextFile();
-						if (finder.GetLastWriteTime(&time))
+						// Only add the information to the cache if the dll hasn't been modified (say, a new version)
+						if
+							(
+							p.FileTime.dwHighDateTime == time.dwHighDateTime &&
+							p.FileTime.dwLowDateTime == time.dwLowDateTime
+							)
 						{
-							// Only add the information to the cache if the dll hasn't been modified (say, a new version)
-							if
-								(
-								p.FileTime.dwHighDateTime != time.dwHighDateTime ||
-								p.FileTime.dwLowDateTime != time.dwLowDateTime
-								)
+							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+
+							_pPlugsInfo[currentPlugsCount]->dllname = Temp;
+							_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
+
+							///\todo this could be better handled
+							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
 							{
-								addPluginInfo = false;
+								_pPlugsInfo[currentPlugsCount]->error = "";
 							}
+							if(!p.error.empty())
+							{
+								_pPlugsInfo[currentPlugsCount]->error = p.error;
+							}
+
+							_pPlugsInfo[currentPlugsCount]->allow = p.allow;
+
+							_pPlugsInfo[currentPlugsCount]->mode = p.mode;
+							_pPlugsInfo[currentPlugsCount]->type = p.type;
+							_pPlugsInfo[currentPlugsCount]->name = p.name;
+							_pPlugsInfo[currentPlugsCount]->identifier = p.identifier;
+							_pPlugsInfo[currentPlugsCount]->vendor = p.vendor;
+							_pPlugsInfo[currentPlugsCount]->desc = p.desc;
+							_pPlugsInfo[currentPlugsCount]->version = p.version;
+							_pPlugsInfo[currentPlugsCount]->APIversion = p.APIversion;
+
+							if(p.error.empty())
+							{
+								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname,_pPlugsInfo[currentPlugsCount]->type);
+							}
+							++currentPlugsCount;
 						}
-						else addPluginInfo = false;
 					}
-					else addPluginInfo = false;
-				}
-				if (addPluginInfo)
-				{
-					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-
-					_pPlugsInfo[currentPlugsCount]->dllname = Temp;
-					_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
-
-					///\todo this could be better handled
-					if(!_pPlugsInfo[currentPlugsCount]->error.empty())
-					{
-						_pPlugsInfo[currentPlugsCount]->error = "";
-					}
-					if(!p.error.empty())
-					{
-						_pPlugsInfo[currentPlugsCount]->error = p.error;
-					}
-
-					_pPlugsInfo[currentPlugsCount]->allow = p.allow;
-
-					_pPlugsInfo[currentPlugsCount]->mode = p.mode;
-					_pPlugsInfo[currentPlugsCount]->type = p.type;
-					_pPlugsInfo[currentPlugsCount]->name = p.name;
-					_pPlugsInfo[currentPlugsCount]->identifier = p.identifier;
-					_pPlugsInfo[currentPlugsCount]->vendor = p.vendor;
-					_pPlugsInfo[currentPlugsCount]->desc = p.desc;
-					_pPlugsInfo[currentPlugsCount]->version = p.version;
-					_pPlugsInfo[currentPlugsCount]->APIversion = p.APIversion;
-
-					if(p.error.empty())
-					{
-						learnDllName(_pPlugsInfo[currentPlugsCount]->dllname,_pPlugsInfo[currentPlugsCount]->type);
-					}
-					++currentPlugsCount;
 				}
 			}
 			file.Close();

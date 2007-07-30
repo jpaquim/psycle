@@ -265,7 +265,8 @@ namespace psycle
 							switch(parameter)
 							{
 							case gain:
-								value = scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
 								break;
 							}
 						}
@@ -323,7 +324,8 @@ namespace psycle
 								value *= maximum / 0x100;
 								break;
 							case modulation_radians_per_second:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 3e-9 * Global::pConfig->GetSamplesPerSec());
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 3e-9 * Global::pConfig->GetSamplesPerSec());
 								break;
 							case left_feedback:
 							case right_feedback:
@@ -347,10 +349,12 @@ namespace psycle
 							switch(parameter)
 							{
 							case cutoff_frequency:
-								value = scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Global::pConfig->GetSamplesPerSec());
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Global::pConfig->GetSamplesPerSec());
 								break;
 							case modulation_sequencer_ticks:
-								value = scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::pPlayer->SamplesPerRow());
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::pPlayer->SamplesPerRow());
 								break;
 							case resonance:
 							case modulation_amplitude:
@@ -368,16 +372,20 @@ namespace psycle
 							switch(parameter)
 							{
 							case am_radians_per_second:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Global::pConfig->GetSamplesPerSec());
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Global::pConfig->GetSamplesPerSec());
 								break;
 							case am_glide:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 15 * 22050 * math::pi * 2).apply_inverse(value * 5e-6 * Global::pConfig->GetSamplesPerSec() * Global::pConfig->GetSamplesPerSec());
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 15 * 22050 * math::pi * 2).apply_inverse(value * 5e-6 * Global::pConfig->GetSamplesPerSec() * Global::pConfig->GetSamplesPerSec());
 								break;
 							case fm_radians_per_second:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 2.5e-5 * Global::pConfig->GetSamplesPerSec());
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 2.5e-5 * Global::pConfig->GetSamplesPerSec());
 								break;
 							case fm_bandwidth:
-								value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 5e-4 * Global::pConfig->GetSamplesPerSec());
+								if ( value < 1.0f) value = 0;
+								else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 5e-4 * Global::pConfig->GetSamplesPerSec());
 								break;
 							}
 						}
