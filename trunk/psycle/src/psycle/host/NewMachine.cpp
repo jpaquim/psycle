@@ -516,6 +516,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int badPlugsCount(0);
 				_numPlugins = 0;
 				bool progressOpen = !LoadCacheFile(plugsCount, badPlugsCount, verify);
+				if (!verify) return;
 
 				class populate_plugin_list
 				{

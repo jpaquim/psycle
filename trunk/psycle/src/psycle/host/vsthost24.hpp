@@ -192,6 +192,14 @@ namespace psycle
 				//////////////////////////////////////////////////////////////////////////
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
+				virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index=0, VstIntPtr value=0, void* ptr=0, float opt=0.)
+				{
+					try
+					{
+						return CEffect::Dispatch(opCode,index,value,ptr,opt);
+					}PSYCLE__HOST__CATCH_ALL(*this);
+					return 0;
+				}
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 				/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
 				/// doing an "off/on" when a connection changes.
@@ -221,6 +229,7 @@ namespace psycle
 				//static Machine* CreateFromType(int _id, std::string _dllname);
 				virtual CEffect * CreateEffect(LoadedAEffect &loadstruct) { return new plugin(loadstruct); }
 				virtual CEffect * CreateWrapper(AEffect *effect) { return new plugin(effect); }
+				virtual void Log(std::string message);
 
 				///> Plugin gets Info from the host
 				virtual bool OnGetProductString(char *text) { strcpy(text, "Psycle"); return true; }

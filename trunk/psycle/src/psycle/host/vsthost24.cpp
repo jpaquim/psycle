@@ -6,6 +6,7 @@
 #include "psycle.hpp"
 #include "player.hpp"
 #include "zap.hpp"
+#include <psycle/host/loggers.hpp>
 
 ///\todo: these are required by the GetIn/OutLatency() functions. They should instead ask the player.
 #include "Configuration.hpp"
@@ -22,6 +23,8 @@ namespace psycle
 	namespace host
 	{
 		extern CPsycleApp theApp;
+
+		namespace loggers = psycle::loggers;
 
 		namespace vst
 		{
@@ -98,7 +101,10 @@ namespace psycle
 				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
 				return pdriver->GetInputLatency();
 			}
-
+			void host::Log(std::string message)
+			{
+				loggers::info(message);
+			}
 
 			///\todo: Get information about this function
 			long host::OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }

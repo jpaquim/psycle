@@ -450,7 +450,7 @@ namespace seib {
 			inline VstInt32 version() const			{	if (!aEffect)	throw (int)1;	return aEffect->version;		}
 			inline VstInt32 initialDelay() const	{	if (!aEffect)	throw (int)1;	return aEffect->initialDelay;	}
 
-		private:
+		protected:
 			virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index=0, VstIntPtr value=0, void* ptr=0, float opt=0.);
 		public:
 			//////////////////////////////////////////////////////////////////////////
@@ -651,6 +651,7 @@ namespace seib {
 			// Ensure that samplePos, sampleRate, tempo, and timesigNumerator/Denominator are correct before calling it.
 			virtual void CalcTimeInfo(long lMask = -1);
 		public:
+			virtual void Log(std::string message) {};
 			virtual void SetSampleRate(float fSampleRate=44100.);
 			virtual void SetBlockSize(long lSize=1024);
 			virtual void SetTimeSignature(long numerator, long denominator);
