@@ -125,7 +125,7 @@ CInstanceChecker::~CInstanceChecker()
  */
 BOOL CInstanceChecker::TrackFirstInstanceRunning()
 {
-  VERIFY(PreviousInstanceRunning() == NULL);
+//  VERIFY(PreviousInstanceRunning() == NULL);
 
   //If this is the first instance then copy in our info into the shared memory
   if (m_hPrevInstance == NULL)
