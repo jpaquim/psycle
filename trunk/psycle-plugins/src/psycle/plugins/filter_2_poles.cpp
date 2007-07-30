@@ -117,7 +117,8 @@ void Filter_2_Poles::sequencer_note_event(const int note, const int, const int, 
 	}
 	if ( note < 120 )
 	{
-
+		///\todo: set cutoff_frequency by note.
+		//parameter(cutoff_frequency,pow(2.0, (float)(note-18)/12.0));
 	}
 }
 

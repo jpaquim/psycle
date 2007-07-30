@@ -575,11 +575,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				int plugin_count = nativePlugs.size() + vstPlugs.size();
 
-				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
-				loggers::info(s.str());
-				if(progressOpen) {
-					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
-					Progress.SetWindowText(s.str().c_str());
+				{
+					std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
+					loggers::info(s.str());
+					if(progressOpen) {
+						Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
+						Progress.SetWindowText(s.str().c_str());
+					}
 				}
 				std::ofstream out;
 				{
@@ -629,13 +631,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				///\todo: put this inside a low priority thread and wait until it finishes.
 				FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, progressOpen ? &Progress : 0);
 
-
-				out.flush();
-				if(progressOpen)
 				{
-					std::ostringstream s; s << "Scanned " << plugin_count << " plugins.";
-					loggers::info(s.str().c_str());
-					Progress.SetWindowText(s.str().c_str());
+					std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " plugins found";
+					out << std::endl << s.str() << std::endl;
+					out.flush();
+					if(progressOpen)
+					{
+						loggers::info(s.str().c_str());
+						Progress.SetWindowText(s.str().c_str());
+					}
 				}
 				out.close();
 				_numPlugins = plugsCount;
@@ -680,30 +684,31 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					CloseHandle(hFile);
 				}
 				bool exists(false);
+				// Verify if the plugin is already in the cache.
 				for(int i(0) ; i < _numPlugins; ++i)
 				{
-					if(_pPlugsInfo[i])
+					if
+						(
+							_pPlugsInfo[i]->FileTime.dwHighDateTime == time.dwHighDateTime &&
+							_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime
+						)
 					{
-						if
-							(
-								_pPlugsInfo[i]->FileTime.dwHighDateTime == time.dwHighDateTime &&
-								_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime
-							)
+						if(_pPlugsInfo[i]->dllname == fileName)
 						{
-							if(_pPlugsInfo[i]->dllname == fileName)
+							exists = true;
+							const std::string error(_pPlugsInfo[i]->error);
+							std::stringstream s;
+							if(error.empty())
+								s << "found in cache.";
+							else
 							{
-								exists = true;
-								const std::string error(_pPlugsInfo[i]->error);
-								std::stringstream s;
-								if(error.empty())
-									s << "found in cache.";
-								else
-									s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
-								out << s.str();
-								out.flush();
-								loggers::info(fileName + '\n' + s.str());
-								break;
+								currentBadPlugsCount++;
+								s << "cache says it has previously been disabled because:" << std::endl << error << std::endl;
 							}
+							out << s.str();
+							out.flush();
+							loggers::info(fileName + '\n' + s.str());
+							break;
 						}
 					}
 				}
@@ -1131,6 +1136,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
+
+			_numPlugins = currentPlugsCount;
 			file.Close();
 			return true;
 		}
@@ -1212,7 +1219,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						<< "Plugin " << name << " is disabled because:" << std::endl
 						<< _pPlugsInfo[i]->error << std::endl
 						<< "Try to load anyway?";
-					return ::MessageBox(0, s.str().c_str(), "Plugin Warning!", MB_YESNO | MB_ICONWARNING) == IDYES;
+					return ::MessageBox(0,s.str().c_str(), "Plugin Warning!", MB_YESNO | MB_ICONWARNING) == IDYES;
 				}
 			}
 			return false;

@@ -1,4 +1,6 @@
 #pragma once
+#include <xmmintrin.h>
+
 #include <diversalis/processor.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
@@ -38,9 +40,31 @@ namespace psycle
 				#endif
 			}
 
-			///\todo
+			///\todo This works, but uses too much CPU probably. (at least on 32bit processors)
 			void inline erase_all_nans_infinities_and_denormals(double & sample)
 			{
+				#if !defined DIVERSALIS__PROCESSOR__X86
+					// just do nothing.. not crucial for other archs
+				#else
+					std::uint64_t const bits(reinterpret_cast<std::uint64_t&>(sample));
+					std::uint64_t const exponent_mask
+						(
+				#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+						0x7f80000000000000
+				#else
+				#error sorry, was not much thought
+				#endif
+						);
+					std::uint64_t const exponent(bits & exponent_mask);
+
+					// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
+					std::uint64_t const not_nan_nor_infinity(exponent < exponent_mask);
+
+					// exponent > 0 is 0 if denormalized, otherwise 1
+					std::uint64_t const not_denormal(exponent > 0);
+
+					sample *= not_nan_nor_infinity & not_denormal;
+				#endif
 			}
 
 			void inline erase_all_nans_infinities_and_denormals(float samples[], unsigned int const sample_count)
