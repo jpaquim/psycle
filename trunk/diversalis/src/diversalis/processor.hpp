@@ -142,6 +142,8 @@
 				#if defined __i686__
 					#define DIVERSALIS__PROCESSOR
 					#define DIVERSALIS__PROCESSOR__X86 6
+					///\todo need to detect SSE
+					//#define DIVERSALIS__PROCESSOR__X86__SSE
 				#elif defined __i586__
 					#define DIVERSALIS__PROCESSOR
 					#define DIVERSALIS__PROCESSOR__X86 5
@@ -160,7 +162,10 @@
 				#define DIVERSALIS__PROCESSOR__IA 2
 			#elif defined _M_IX86
 				#define DIVERSALIS__PROCESSOR
-				#define DIVERSALIS__PROCESSOR__X86 _M_IX86 / 100
+				#define DIVERSALIS__PROCESSOR__X86 _M_IX86 / 100  // to check: do the lower digits matter?
+				#if /* DIVERSALIS__PROCESSOR__X86 >= 7 */ defined __SSE__ // to check: value is 1 or 2?
+					#define DIVERSALIS__PROCESSOR__X86__SSE __SSE__
+				#endif
 			#elif defined _M_ALPHA
 				#define DIVERSALIS__PROCESSOR
 				#define DIVERSALIS__PROCESSOR__ALPHA_AXP _M_ALPHA
@@ -170,62 +175,20 @@
 			#endif
 		#endif
 
-		//////////////
-		// inferences
-		//////////////
-
-		// note: about inferences, there are less and less possible since operating systems are mostly processor-independant nowadays.
-
-		#if !defined DIVERSALIS__PROCESSOR
-
-			#if defined DIVERSALIS__OPERATING_SYSTEM__APPLE
-				#define DIVERSALIS__PROCESSOR
-				#define DIVERSALIS__PROCESSOR__POWER_PC 5
-				// Implied because the version of apple's operating system for 68k processors has been discontinued.
-				// Hence now, only power pc processors are supported by this operating system.
-				// [bohan] Actually it seems that darwin also runs on sparc and hppa processors.
-
-			#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-				#if DIVERSALIS__COMPILER__MICROSOFT
-					#if \
-						DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR > 5 || \
-						( \
-							DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR == 5 && \
-							DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR > 0 || \
-							( \
-								DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR == 0 && \
-								DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH > 3 \
-							) \
-						)
-						#error "microsoft, after v5.0.3 (2ksp3), gave up with all processors but x86 and ia... no more hp(compaq(digital-e-c)) alpha axp for this operating system."
-					#else
-						#define DIVERSALIS__PROCESSOR
-						#define DIVERSALIS__PROCESSOR__ALPHA_AXP 7 // ev7 (213?64)
-					#endif
-				#endif
-
-			#endif
-
-		#endif
-
 		///////////////////////
 		// processor endianess
 		///////////////////////
 
-		#if defined DIVERSALIS__WORDS_ENDIAN
-			#if defined DIVERSALIS__WORDS_BIGENDIAN
+		#if !defined DIVERSALIS__PROCESSOR__ENDIAN
+			#elif defined DIVERSALIS__PROCESSOR__POWER_PC
 				#define DIVERSALIS__PROCESSOR__ENDIAN
-				#define DIVERSALIS__PROCESSOR__ENDIAN__BIG
-			#else
+				#define DIVERSALIS__PROCESSOR__ENDIAN__BOTH
+			#elif defined DIVERSALIS__PROCESSOR__X86 || defined DIVERSALIS__PROCESSOR__IA
 				#define DIVERSALIS__PROCESSOR__ENDIAN
 				#define DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+			#else
+				#error please specify the endianness of your processor
 			#endif
-		#elif defined DIVERSALIS__PROCESSOR__POWER_PC
-			#define DIVERSALIS__PROCESSOR__ENDIAN
-			#define DIVERSALIS__PROCESSOR__ENDIAN__BOTH
-		#elif defined DIVERSALIS__PROCESSOR__X86 || defined DIVERSALIS__PROCESSOR__IA
-			#define DIVERSALIS__PROCESSOR__ENDIAN
-			#define DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 		#endif
 
 		#if defined DIVERSALIS__PROCESSOR__POWER_PC && !defined DIVERSALIS__PROCESSOR__ENDIAN__BOTH
