@@ -746,7 +746,7 @@ namespace psycle
 					}
 					if(numInputs() == 1)
 					{
-						///\todo MIX input0 and input1!
+						dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
 					}
 					if(!WillProcessReplace())
 					{
@@ -886,7 +886,7 @@ namespace psycle
 					}
 					try
 					{
-						if(numOutputs() == 1) std::memcpy(outputs[1], outputs[0], numSamples * sizeof(float));
+						if(numOutputs() == 1) dsp::Mov(outputs[0],outputs[1], numSamples);
 					}
 					catch(const std::exception &)
 					{
@@ -913,7 +913,7 @@ namespace psycle
 				{
 					_volumeCounter = dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
 					if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-					int temp((f2i(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
+					int temp((dsp::F2I(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
 					// prevent downward jerkiness
 					if(temp > 97) temp = 97;
 					if(temp > _volumeDisplay) _volumeDisplay = temp;

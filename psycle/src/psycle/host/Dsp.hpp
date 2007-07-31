@@ -26,16 +26,7 @@ namespace psycle
 		/// mixes two signals.
 		static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 		{
-/*			// Previous code.
-			--pSrcSamples;
-			--pDstSamples;
-			do
-			{
-				*++pDstSamples += *++pSrcSamples * vol;
-			}
-			while (--numSamples);
-*/
-///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -58,20 +49,21 @@ namespace psycle
 				jmp LOOPSTART
 			END:
 			}
+		#else
+			--pSrcSamples;
+			--pDstSamples;
+			do
+			{
+				*++pDstSamples += *++pSrcSamples * vol;
+			}
+			while (--numSamples);
+		#endif
 		}
 		/// multiply a signal by a ratio, inplace.
 		///\see MovMul()
 		static inline void Mul(float *pDstSamples, int numSamples, float multi)
 		{
-/*			//Previous code
-			--pDstSamples;
-			do
-			{
-				*++pDstSamples *= mul;
-			}
-			while (--numSamples);
-*/
-			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -90,21 +82,20 @@ namespace psycle
 				jmp LOOPSTART
 			END:
 			}
+		#else
+			--pDstSamples;
+			do
+			{
+				*++pDstSamples *= mul;
+			}
+			while (--numSamples);
+		#endif
 		}
 		/// multiply a signal by a ratio.
 		///\see Mul()
 		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 		{
-/*			//Previous Code:
-			--pSrcSamples;
-			--pDstSamples;
-			do
-			{
-				*++pDstSamples = *++pSrcSamples*mul;
-			}
-			while (--numSamples);
-*/
-			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -125,13 +116,19 @@ namespace psycle
 				jmp LOOPSTART
 			END:
 			}
+		#else
+			--pSrcSamples;
+			--pDstSamples;
+			do
+			{
+				*++pDstSamples = *++pSrcSamples*mul;
+			}
+			while (--numSamples);
+		#endif
 		}
 		static inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 		{
-/*			//Previous code:
-			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
-*/
-			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -149,15 +146,15 @@ namespace psycle
 				jmp LOOPSTART
 			END:
 			}
+		#else
+			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
+		#endif
 
 		}
 		/// zero-out a signal buffer.
 		static inline void Clear(float *pDstSamples, int numSamples)
 		{
-/*			//Previous code:
-			std::memset(pDstSamples, 0, numSamples * sizeof(float));
-*/
-			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -173,7 +170,9 @@ namespace psycle
 				jmp LOOPSTART
 			END:
 			}
-
+		#else
+			std::memset(pDstSamples, 0, numSamples * sizeof(float));
+		#endif
 		}
 		/// converts a double to an int.
 		static inline int F2I(double d)
@@ -271,21 +270,21 @@ namespace psycle
 		END:
 			// to finish, get the max and of each of the four values.
 			// put 02 and 03 to 20 and 21
-			movhlps xmm2, xmm0
+			movhlps xmm3, xmm0
 			// find max of 00 and 20 (02) and of 01 and 21 (03)
-			maxps xmm0, xmm2
+			maxps xmm0, xmm3
 			// put 00 (result of max(00,02)) to 20
-			movss xmm2, xmm0
+			movss xmm3, xmm0
 			// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
-			shufps xmm0, xmm2, 33H
+			shufps xmm0, xmm3, 33H
 			// and find max of 00 (01) and 20 (00)
-			maxps xmm0, xmm2
+			maxps xmm0, xmm3
 
-			movhlps xmm2, xmm1
-			maxps xmm1, xmm2
-			movss xmm2, xmm1
-			shufps xmm1, xmm2, 33H
-			maxps xmm1, xmm2
+			movhlps xmm3, xmm1
+			minps xmm1, xmm3
+			movss xmm3, xmm1
+			shufps xmm1, xmm3, 33H
+			minps xmm1, xmm3
 
 			mov edi, volmaxb
 			movss [edi], xmm0
