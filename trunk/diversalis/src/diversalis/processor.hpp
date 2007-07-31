@@ -142,8 +142,11 @@
 				#if defined __i686__
 					#define DIVERSALIS__PROCESSOR
 					#define DIVERSALIS__PROCESSOR__X86 6
-					///\todo need to detect SSE
-					//#define DIVERSALIS__PROCESSOR__X86__SSE
+					#if defined __SSE2__
+						#define DIVERSALIS__PROCESSOR__X86__SSE 2
+					#elif defined __SSE__
+						#define DIVERSALIS__PROCESSOR__X86__SSE 1
+					#endif
 				#elif defined __i586__
 					#define DIVERSALIS__PROCESSOR
 					#define DIVERSALIS__PROCESSOR__X86 5
@@ -162,9 +165,11 @@
 				#define DIVERSALIS__PROCESSOR__IA 2
 			#elif defined _M_IX86
 				#define DIVERSALIS__PROCESSOR
-				#define DIVERSALIS__PROCESSOR__X86 _M_IX86 / 100  // to check: do the lower digits matter?
-				#if /* DIVERSALIS__PROCESSOR__X86 >= 7 */ defined __SSE__ // to check: value is 1 or 2?
-					#define DIVERSALIS__PROCESSOR__X86__SSE __SSE__
+				#define DIVERSALIS__PROCESSOR__X86 _M_IX86 / 100
+				#if DIVERSALIS__PROCESSOR__X86 >= 7 ///\todo does that exist?
+					#define DIVERSALIS__PROCESSOR__X86__SSE 2
+				#elif DIVERSALIS__PROCESSOR__X86 >= 6
+					#define DIVERSALIS__PROCESSOR__X86__SSE 1
 				#endif
 			#elif defined _M_ALPHA
 				#define DIVERSALIS__PROCESSOR
