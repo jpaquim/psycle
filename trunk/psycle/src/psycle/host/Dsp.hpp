@@ -26,6 +26,7 @@ namespace psycle
 		/// mixes two signals.
 		static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 		{
+/*			// Previous code.
 			--pSrcSamples;
 			--pDstSamples;
 			do
@@ -33,22 +34,68 @@ namespace psycle
 				*++pDstSamples += *++pSrcSamples * vol;
 			}
 			while (--numSamples);
+*/
+///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			_asm
+			{
+				movss xmm2, vol
+				shufps xmm2, xmm2, 0H
+				mov esi, pSrcSamples
+				mov edi, pDstSamples
+				mov eax, [numSamples]
+			LOOPSTART:
+				cmp eax, 0
+				jle END
+				movaps xmm0, [esi]
+				movaps xmm1, [edi]
+				mulps xmm0, xmm2
+				addps xmm0, xmm1
+				movaps [edi], xmm0
+				add esi, 10H
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+			END:
+			}
 		}
 		/// multiply a signal by a ratio, inplace.
 		///\see MovMul()
-		static inline void Mul(float *pDstSamples, int numSamples, float mul)
+		static inline void Mul(float *pDstSamples, int numSamples, float multi)
 		{
+/*			//Previous code
 			--pDstSamples;
 			do
 			{
 				*++pDstSamples *= mul;
 			}
 			while (--numSamples);
+*/
+			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			_asm
+			{
+				movss xmm2, multi
+				shufps xmm2, xmm2, 0H
+				mov edi, pDstSamples
+				mov eax, [numSamples]
+			LOOPSTART:
+				cmp eax, 0
+				jle END
+				movaps xmm0, [edi]
+				mulps xmm0, xmm2
+				movaps [edi], xmm0
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+			END:
+			}
 		}
 		/// multiply a signal by a ratio.
 		///\see Mul()
-		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
+		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 		{
+/*			//Previous Code:
 			--pSrcSamples;
 			--pDstSamples;
 			do
@@ -56,15 +103,77 @@ namespace psycle
 				*++pDstSamples = *++pSrcSamples*mul;
 			}
 			while (--numSamples);
+*/
+			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			_asm
+			{
+				movss xmm2, multi
+				shufps xmm2, xmm2, 0H
+				mov esi, pSrcSamples
+				mov edi, pDstSamples
+				mov eax, [numSamples]
+			LOOPSTART:
+				cmp eax, 0
+				jle END
+				movaps xmm0, [esi]
+				mulps xmm0, xmm2
+				movaps [edi], xmm0
+				add esi, 10H
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+			END:
+			}
 		}
 		static inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 		{
+/*			//Previous code:
 			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
+*/
+			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			_asm
+			{
+				mov esi, pSrcSamples
+				mov edi, pDstSamples
+				mov eax, [numSamples]
+			LOOPSTART:
+				cmp eax, 0
+				jle END
+				movaps xmm0, [esi]
+				movaps [edi], xmm0
+				add esi, 10H
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+			END:
+			}
+
 		}
 		/// zero-out a signal buffer.
 		static inline void Clear(float *pDstSamples, int numSamples)
 		{
+/*			//Previous code:
 			std::memset(pDstSamples, 0, numSamples * sizeof(float));
+*/
+			///\todo: Microsoft x86 compiler specific code. Needs to be ported to GCC and give the older code for other processors/compilers
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			_asm
+			{
+				xorps xmm0, xmm0
+				mov edi, pDstSamples
+				mov eax, [numSamples]
+			LOOPSTART:
+				cmp eax, 0
+				jle END
+				movaps [edi], xmm0
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+			END:
+			}
+
 		}
 		/// converts a double to an int.
 		static inline int F2I(double d)
@@ -113,7 +222,7 @@ namespace psycle
 
 #else
 			// This is the usual code, peak value
-			--pSamplesL;
+/*			--pSamplesL;
 			--pSamplesR;
 
 			float vol = 0.0f;
@@ -134,6 +243,58 @@ namespace psycle
 				}
 			while (--numSamples);
 			return vol;
+*/
+
+		// If anyone knows better assembler than me improve this variable utilization:
+		float volmax = 0.0f, volmin = 0.0f;
+		float *volmaxb = &volmax, *volminb = &volmin;
+		_asm
+		{
+			// we store the max in xmm0 and the min in xmm1
+			xorps xmm0, xmm0
+			xorps xmm1, xmm1
+			mov esi, [pSamplesL]
+			mov edi, [pSamplesR]
+			mov eax, [numSamples]
+			// Loop does: get the 4 max values and 4 min values in xmm0 and xmm1 respct.
+		LOOPSTART:
+			cmp eax, 0
+			jle END
+			maxps xmm0,[esi]
+			maxps xmm0,[edi]
+			minps xmm1,[esi]
+			minps xmm1,[edi]
+			add esi, 10H
+			add edi, 10H
+			sub eax, 4
+			jmp LOOPSTART
+		END:
+			// to finish, get the max and of each of the four values.
+			// put 02 and 03 to 20 and 21
+			movhlps xmm2, xmm0
+			// find max of 00 and 20 (02) and of 01 and 21 (03)
+			maxps xmm0, xmm2
+			// put 00 (result of max(00,02)) to 20
+			movss xmm2, xmm0
+			// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
+			shufps xmm0, xmm2, 33H
+			// and find max of 00 (01) and 20 (00)
+			maxps xmm0, xmm2
+
+			movhlps xmm2, xmm1
+			maxps xmm1, xmm2
+			movss xmm2, xmm1
+			shufps xmm1, xmm2, 33H
+			maxps xmm1, xmm2
+
+			mov edi, volmaxb
+			movss [edi], xmm0
+			mov edi, volminb
+			movss [edi], xmm1
+		}
+		volmin*=-1.0f;
+		return (volmax>volmin)?volmax:volmin;
+
 #endif
 		}
 		/// finds the maximum amplitude in a signal buffer.
