@@ -150,8 +150,12 @@ namespace psycle
 			, _scopePrevNumSamples(0)
 		{
 			_editName[0] = '\0';
-			_pSamplesL = new float[STREAM_SIZE];
-			_pSamplesR = new float[STREAM_SIZE];
+//			_pSamplesL = new float[STREAM_SIZE];
+//			_pSamplesR = new float[STREAM_SIZE];
+			///\todo: for gcc: use int posix_memalign(void **memptr, size_t alignment, size_t size);
+			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+
 			// Clear machine buffer samples
 			for (int c=0; c<STREAM_SIZE; c++)
 			{
@@ -186,8 +190,10 @@ namespace psycle
 
 		Machine::~Machine() throw()
 		{
-			delete [] _pSamplesL;
-			delete [] _pSamplesR;
+//			delete [] _pSamplesL;
+//			delete [] _pSamplesR;
+			_aligned_free(_pSamplesL);
+			_aligned_free(_pSamplesR);
 		}
 
 		void Machine::Init()
@@ -895,105 +901,99 @@ namespace psycle
 			#endif
 			Machine::Work(numSamples);
 			cpu::cycles_type cost = cpu::cycles();
-			//if(!_mute)
-			//{
-				float mv = CValueMapper::Map_255_1(_outDry);
+
+			float mv = CValueMapper::Map_255_1(_outDry);
 				
-				float *pSamples = _pMasterSamples;
-				float *pSamplesL = _pSamplesL;
-				float *pSamplesR = _pSamplesR;
-				
-				//_lMax -= numSamples*8;
-				//_rMax -= numSamples*8;
-				//_lMax *= 0.5;
-				//_rMax *= 0.5;
-				if(vuupdated) 
-				{ 
-					_lMax *= 0.5; 
-					_rMax *= 0.5; 
-				}
-				int i = numSamples;
-				if(decreaseOnClip)
+			float *pSamples = _pMasterSamples;
+			float *pSamplesL = _pSamplesL;
+			float *pSamplesR = _pSamplesR;
+			
+			if(vuupdated)
+			{ 
+					// Auto decrease effect for the Master vu-meters
+				_lMax *= 0.5; 
+				_rMax *= 0.5; 
+			}
+			int i = numSamples;
+			if(decreaseOnClip)
+			{
+				do
 				{
-					do
+					// Left channel
+					if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
 					{
-						// Left channel
-						if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
-						{
-							_lMax = fabsf(*pSamplesL);
-						}
-						if(*pSamples > 32767.0f)
-						{
-							_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-							mv = CValueMapper::Map_255_1(_outDry);
-							*pSamples = *pSamplesL = 32767.0f; 
-						}
-						else if (*pSamples < -32767.0f)
-						{
-							_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-							mv = CValueMapper::Map_255_1(_outDry);
-							*pSamples = *pSamplesL = -32767.0f; 
-						}
-						pSamples++;
-						pSamplesL++;
-						// Right channel
-						if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
-						{
-							_rMax = fabsf(*pSamplesR);
-						}
-						if(*pSamples > 32767.0f)
-						{
-							_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-							mv = CValueMapper::Map_255_1(_outDry);
-							*pSamples = *pSamplesR = 32767.0f; 
-						}
-						else if (*pSamples < -32767.0f)
-						{
-							_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-							mv = CValueMapper::Map_255_1(_outDry);
-							*pSamples = *pSamplesR = -32767.0f; 
-						}
-						pSamples++;
-						pSamplesR++;
+						_lMax = fabsf(*pSamplesL);
 					}
-					while (--i);
-				}
-				else
-				{
-					do
+					if(*pSamples > 32767.0f)
 					{
-						// Left channel
-						if(std::fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
-						{
-							_lMax = fabsf(*pSamplesL);
-						}
-						pSamplesL++;
-						// Right channel
-						if(std::fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
-						{
-							_rMax = fabsf(*pSamplesR);
-						}
-						pSamplesR++;
+						_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+						mv = CValueMapper::Map_255_1(_outDry);
+						*pSamples = *pSamplesL = 32767.0f; 
 					}
-					while (--i);
+					else if (*pSamples < -32767.0f)
+					{
+						_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+						mv = CValueMapper::Map_255_1(_outDry);
+						*pSamples = *pSamplesL = -32767.0f; 
+					}
+					pSamples++;
+					pSamplesL++;
+					// Right channel
+					if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
+					{
+						_rMax = fabsf(*pSamplesR);
+					}
+					if(*pSamples > 32767.0f)
+					{
+						_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+						mv = CValueMapper::Map_255_1(_outDry);
+						*pSamples = *pSamplesR = 32767.0f; 
+					}
+					else if (*pSamples < -32767.0f)
+					{
+						_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+						mv = CValueMapper::Map_255_1(_outDry);
+						*pSamples = *pSamplesR = -32767.0f; 
+					}
+					pSamples++;
+					pSamplesR++;
 				}
-				if(_lMax > 32767.0f)
+				while (--i);
+			}
+			else
+			{
+				do
 				{
-					_clip=true;
-					_lMax = 32767.0f; //_LMAX = 32768;
+					// Left channel
+					if(std::fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
+					{
+						_lMax = fabsf(*pSamplesL);
+					}
+					pSamplesL++;
+					// Right channel
+					if(std::fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
+					{
+						_rMax = fabsf(*pSamplesR);
+					}
+					pSamplesR++;
 				}
-				else if (_lMax < 1.0f) { _lMax = 1.0f; /*_LMAX = 1;*/ }
-				//else _LMAX = Dsp::F2I(_lMax);
-				if(_rMax > 32767.0f)
-				{
-					_clip=true;
-					_rMax = 32767.0f; //_RMAX = 32768;
-				}
-				else if(_rMax < 1.0f) { _rMax = 1.0f; /*_RMAX = 1;*/ }
-				//else _RMAX = Dsp::F2I(_rMax);
-				if( _lMax > currentpeak ) currentpeak = _lMax;
-				if( _rMax > currentpeak ) currentpeak = _rMax;
-			//}
+				while (--i);
+			}
+			if(_lMax > 32767.0f)
+			{
+				_clip=true;
+				_lMax = 32767.0f;
+			}
+			else if (_lMax < 1.0f) { _lMax = 1.0f; }
+			if(_rMax > 32767.0f)
+			{
+				_clip=true;
+				_rMax = 32767.0f;
+			}
+			else if(_rMax < 1.0f) { _rMax = 1.0f; }
+			if( _lMax > currentpeak ) currentpeak = _lMax;
+			if( _rMax > currentpeak ) currentpeak = _rMax;
+
 			sampleCount+=numSamples;
 			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
