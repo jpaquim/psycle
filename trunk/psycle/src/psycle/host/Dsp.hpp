@@ -270,21 +270,21 @@ namespace psycle
 		END:
 			// to finish, get the max and of each of the four values.
 			// put 02 and 03 to 20 and 21
-			movhlps xmm3, xmm0
+			movhlps xmm2, xmm0
 			// find max of 00 and 20 (02) and of 01 and 21 (03)
-			maxps xmm0, xmm3
+			maxps xmm0, xmm2
 			// put 00 (result of max(00,02)) to 20
-			movss xmm3, xmm0
+			movss xmm2, xmm0
 			// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
-			shufps xmm0, xmm3, 33H
+			shufps xmm0, xmm2, 11H
 			// and find max of 00 (01) and 20 (00)
-			maxps xmm0, xmm3
+			maxps xmm0, xmm2
 
-			movhlps xmm3, xmm1
-			minps xmm1, xmm3
-			movss xmm3, xmm1
-			shufps xmm1, xmm3, 33H
-			minps xmm1, xmm3
+			movhlps xmm2, xmm1
+			minps xmm1, xmm2
+			movss xmm2, xmm1
+			shufps xmm1, xmm2, 11H
+			minps xmm1, xmm2
 
 			mov edi, volmaxb
 			movss [edi], xmm0

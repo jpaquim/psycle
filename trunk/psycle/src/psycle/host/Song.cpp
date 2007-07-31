@@ -1193,7 +1193,7 @@ namespace psycle
 				DeleteInstruments();
 				DeleteAllPatterns();
 				Reset(); //added by sampler mainly to reset current pattern showed.
-				while(pFile->Read(&Header, 4))
+				while(pFile->Read(&Header, 4) && chunkcount)
 				{
 					Progress.m_Progress.SetPos(f2i((pFile->GetPos()*16384.0f)/filesize));
 					::Sleep(1); ///< Allow screen refresh.
