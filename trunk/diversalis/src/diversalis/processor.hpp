@@ -180,7 +180,7 @@
 		///////////////////////
 
 		#if !defined DIVERSALIS__PROCESSOR__ENDIAN
-			#elif defined DIVERSALIS__PROCESSOR__POWER_PC
+			#if defined DIVERSALIS__PROCESSOR__POWER_PC
 				#define DIVERSALIS__PROCESSOR__ENDIAN
 				#define DIVERSALIS__PROCESSOR__ENDIAN__BOTH
 			#elif defined DIVERSALIS__PROCESSOR__X86 || defined DIVERSALIS__PROCESSOR__IA
