@@ -254,6 +254,7 @@ namespace psycle
 					virtual void SaveDllNameAndIndex(RiffFile * pFile,int index);
 					virtual void SaveFileChunk(RiffFile * pFile);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
+					virtual void PostLoad(){};
 			///\}
 
 			///\name connections ... wires

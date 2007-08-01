@@ -163,8 +163,14 @@ namespace psycle
 				}
 				else
 				{
+				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+					///\todo: for gcc: use int posix_memalign(void **memptr, size_t alignment, size_t size);
+					_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+					_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+				#else
 					_pOutSamplesL = new float[STREAM_SIZE];
 					_pOutSamplesR = new float[STREAM_SIZE];
+				#endif
 					dsp::Clear(_pOutSamplesL, STREAM_SIZE);
 					dsp::Clear(_pOutSamplesR, STREAM_SIZE);
 					outputs[0] = _pOutSamplesL;
@@ -215,6 +221,21 @@ namespace psycle
 				std::strcpy(_editName,_sProductName.c_str());
 
 			}
+
+			plugin::~plugin()
+			{
+				if (!WillProcessReplace())
+				{
+				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+					_aligned_free(_pOutSamplesL);
+					_aligned_free(_pOutSamplesR);
+				#else
+					delete [] _pOutSamplesL;
+					delete [] _pOutSamplesR;
+				#endif
+				}
+			}
+
 			void plugin::GetParamValue(int numparam, char * parval)
 			{
 				try
@@ -495,6 +516,12 @@ namespace psycle
 			void plugin::PreWork(int numSamples,bool clear)
 			{
 				Machine::PreWork(numSamples,clear);
+				if(!WillProcessReplace())
+				{
+					dsp::Clear(_pOutSamplesL, numSamples);
+					dsp::Clear(_pOutSamplesR, numSamples);
+				}
+
 				for (int midiChannel=0; midiChannel<16; midiChannel++)
 				{
 					if(NSActive[midiChannel])
@@ -748,12 +775,9 @@ namespace psycle
 					{
 						dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
 					}
-					if(!WillProcessReplace())
-					{
-						dsp::Clear(_pOutSamplesL, numSamples);
-						dsp::Clear(_pOutSamplesR, numSamples);
-					}
 
+					///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
+					// Store temporary pointers so that we can increase the address in the retrigger code
 					float * tempinputs[vst::max_io];
 					float * tempoutputs[vst::max_io];
 					for(int i(0) ; i < vst::max_io; ++i)
@@ -761,9 +785,6 @@ namespace psycle
 						tempinputs[i] = inputs[i];
 						tempoutputs[i] = outputs[i];
 					}
-
-
-					///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
 					int ns(numSamples);
 					while(ns)
 					{
@@ -894,9 +915,8 @@ namespace psycle
 					}
 					if (!WillProcessReplace())
 					{
-						// This is an inversion of the pointers
-						// so that _pOutSamples doesn't need to
-						// be copied to _pSamples.
+						// We need the output in _pSamples, so we invert theThis is an inversion of the pointers
+						// pointers to avoid copying _pOutSamples into _pSamples
 						float* const tempSamplesL = inputs[0];
 						float* const tempSamplesR = inputs[1];	
 						_pSamplesL = inputs[0] = outputs[0];
@@ -904,8 +924,8 @@ namespace psycle
 						_pOutSamplesL = outputs[0] = tempSamplesL;
 						_pOutSamplesR = outputs[1] = tempSamplesR;
 						/*
-						memcpy(inputs[0],outputs[0],numSamples);
-						memcpy(inputs[1],outputs[1],numSamples);
+						memcpy(inputs[0],outputs[0],numSamples*sizeof(float));
+						memcpy(inputs[1],outputs[1],numSamples*sizeof(float));
 						*/
 					}
 				}
