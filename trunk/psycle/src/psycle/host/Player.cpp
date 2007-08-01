@@ -156,8 +156,7 @@ namespace psycle
 						if(pEntry->_parameter != 0)
 						{	///\todo: implement the Tempo slide
 							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
-							bpm = pEntry->_parameter;
-							RecalcSPR();
+							SetBPM(pEntry->_parameter);
 						}
 						break;
 					case PatternCmd::EXTENDED:
@@ -165,8 +164,7 @@ namespace psycle
 						{
 							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
 							{
-								tpb=pEntry->_parameter;
-								RecalcSPR();
+								SetBPM(0,pEntry->_parameter);
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_BYPASS )
 							{

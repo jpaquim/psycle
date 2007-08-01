@@ -26,7 +26,7 @@ namespace psycle
 		/// mixes two signals.
 		static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -63,7 +63,7 @@ namespace psycle
 		///\see MovMul()
 		static inline void Mul(float *pDstSamples, int numSamples, float multi)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -95,7 +95,7 @@ namespace psycle
 		///\see Mul()
 		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -128,7 +128,7 @@ namespace psycle
 		}
 		static inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -154,7 +154,7 @@ namespace psycle
 		/// zero-out a signal buffer.
 		static inline void Clear(float *pDstSamples, int numSamples)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -219,7 +219,7 @@ namespace psycle
 			};
 			return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
 
-		#elseif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		#elif defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 
 			// If anyone knows better assembler than me improve this variable utilization:
 			float volmax = 0.0f, volmin = 0.0f;

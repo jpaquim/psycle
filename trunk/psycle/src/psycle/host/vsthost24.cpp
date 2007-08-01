@@ -164,9 +164,11 @@ namespace psycle
 				else
 				{
 				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-					///\todo: for gcc: use int posix_memalign(void **memptr, size_t alignment, size_t size);
 					_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 					_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+				#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+					posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
+					posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
 				#else
 					_pOutSamplesL = new float[STREAM_SIZE];
 					_pOutSamplesR = new float[STREAM_SIZE];
@@ -229,10 +231,14 @@ namespace psycle
 				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 					_aligned_free(_pOutSamplesL);
 					_aligned_free(_pOutSamplesR);
+				#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+					free(_pOutSamplesL);
+					free(_pOutSamplesR);
 				#else
 					delete [] _pOutSamplesL;
 					delete [] _pOutSamplesR;
 				#endif
+					_pOutSamplesL = _pOutSamplesR=0;
 				}
 			}
 
@@ -310,6 +316,7 @@ namespace psycle
 						BeginSetProgram();
 						SetProgram(_program);
 						EndSetProgram();
+						MainsChanged(true);
 						pFile->Skip(sizeof(float) *count);
 						if(ProgramIsChunk())
 						{
@@ -324,6 +331,10 @@ namespace psycle
 							pFile->Skip(size);
 							return false;
 						}
+						/// Do it again for VST's that "forget" the program.
+						BeginSetProgram();
+						SetProgram(_program);
+						EndSetProgram();
 						MainsChanged(true);
 					}
 				}
