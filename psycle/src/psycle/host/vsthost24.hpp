@@ -85,6 +85,9 @@ namespace psycle
 					requiresRepl = 0;
 					requiresProcess = 0;
 					_nCols=0;
+					_pOutSamplesL = 0;
+					_pOutSamplesR = 0;
+					_type=MACH_VST;
 				};
 				virtual ~plugin();
 

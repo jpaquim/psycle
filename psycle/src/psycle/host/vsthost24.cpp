@@ -226,19 +226,22 @@ namespace psycle
 
 			plugin::~plugin()
 			{
-				if (!WillProcessReplace())
+				if (aEffect)
 				{
-				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-					_aligned_free(_pOutSamplesL);
-					_aligned_free(_pOutSamplesR);
-				#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-					free(_pOutSamplesL);
-					free(_pOutSamplesR);
-				#else
-					delete [] _pOutSamplesL;
-					delete [] _pOutSamplesR;
-				#endif
-					_pOutSamplesL = _pOutSamplesR=0;
+					if (!WillProcessReplace())
+					{
+					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+						_aligned_free(_pOutSamplesL);
+						_aligned_free(_pOutSamplesR);
+					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+						free(_pOutSamplesL);
+						free(_pOutSamplesR);
+					#else
+						delete [] _pOutSamplesL;
+						delete [] _pOutSamplesR;
+					#endif
+						_pOutSamplesL = _pOutSamplesR=0;
+					}
 				}
 			}
 
