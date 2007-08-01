@@ -154,6 +154,9 @@ namespace psycle
 			///\todo: for gcc: use int posix_memalign(void **memptr, size_t alignment, size_t size);
 			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
+			posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
 		#else
 			_pSamplesL = new float[STREAM_SIZE];
 			_pSamplesR = new float[STREAM_SIZE];
@@ -196,10 +199,14 @@ namespace psycle
 		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			_aligned_free(_pSamplesL);
 			_aligned_free(_pSamplesR);
+		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+			free(_pSamplesL);
+			free(_pSamplesR);
 		#else
 			delete [] _pSamplesL;
 			delete [] _pSamplesR;
 		#endif
+			_pSamplesL = _pSamplesR=0;
 		}
 
 		void Machine::Init()
