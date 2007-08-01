@@ -1528,6 +1528,7 @@ namespace psycle
 				}
 
 				RestoreMixerSendFlags();
+				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 				// translate any data that is required
 				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
 				machineSoloed = solo;
@@ -2345,6 +2346,7 @@ namespace psycle
 					}
 				}
 				if(fullopen) converter.retweak(*this);
+				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 				_machineLock = false;
 				seqBus=0;
 				

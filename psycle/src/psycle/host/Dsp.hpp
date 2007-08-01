@@ -190,7 +190,7 @@ namespace psycle
 		/// finds the maximum amplitude in a signal buffer.
 		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 		{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+		#if defined PSYCLE__CONFIGURATION__RMS_VUS
 			// This is just a test to get RMS dB values.
 			// Doesn't look that better, and uses more CPU. 
 			float *pL = pSamplesL;
@@ -219,82 +219,82 @@ namespace psycle
 			};
 			return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
 
-#else
-			// This is the usual code, peak value
-/*			--pSamplesL;
+		#elseif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+
+			// If anyone knows better assembler than me improve this variable utilization:
+			float volmax = 0.0f, volmin = 0.0f;
+			float *volmaxb = &volmax, *volminb = &volmin;
+			_asm
+			{
+				// we store the max in xmm0 and the min in xmm1
+				xorps xmm0, xmm0
+				xorps xmm1, xmm1
+				mov esi, [pSamplesL]
+				mov edi, [pSamplesR]
+				mov eax, [numSamples]
+				// Loop does: get the 4 max values and 4 min values in xmm0 and xmm1 respct.
+			LOOPSTART:
+				cmp eax, 0
+				jle END
+				maxps xmm0,[esi]
+				maxps xmm0,[edi]
+				minps xmm1,[esi]
+				minps xmm1,[edi]
+				add esi, 10H
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+			END:
+				// to finish, get the max and of each of the four values.
+				// put 02 and 03 to 20 and 21
+				movhlps xmm2, xmm0
+				// find max of 00 and 20 (02) and of 01 and 21 (03)
+				maxps xmm0, xmm2
+				// put 00 (result of max(00,02)) to 20
+				movss xmm2, xmm0
+				// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
+				shufps xmm0, xmm2, 11H
+				// and find max of 00 (01) and 20 (00)
+				maxps xmm0, xmm2
+
+				movhlps xmm2, xmm1
+				minps xmm1, xmm2
+				movss xmm2, xmm1
+				shufps xmm1, xmm2, 11H
+				minps xmm1, xmm2
+
+				mov edi, volmaxb
+				movss [edi], xmm0
+				mov edi, volminb
+				movss [edi], xmm1
+			}
+			volmin*=-1.0f;
+			return (volmax>volmin)?volmax:volmin;
+
+		#else
+
+			--pSamplesL;
 			--pSamplesR;
 
 			float vol = 0.0f;
 			do
-				{
+			{
 				/// not all waves are symmetrical
 				const float volL = fabsf(*++pSamplesL);
 				const float volR = fabsf(*++pSamplesR);
 
 				if (volL > vol)
-					{
+				{
 					vol = volL;
-					}
-				if (volR > vol)
-					{
-					vol = volR;
-					}
 				}
+				if (volR > vol)
+				{
+					vol = volR;
+				}
+			}
 			while (--numSamples);
 			return vol;
-*/
-
-		// If anyone knows better assembler than me improve this variable utilization:
-		float volmax = 0.0f, volmin = 0.0f;
-		float *volmaxb = &volmax, *volminb = &volmin;
-		_asm
-		{
-			// we store the max in xmm0 and the min in xmm1
-			xorps xmm0, xmm0
-			xorps xmm1, xmm1
-			mov esi, [pSamplesL]
-			mov edi, [pSamplesR]
-			mov eax, [numSamples]
-			// Loop does: get the 4 max values and 4 min values in xmm0 and xmm1 respct.
-		LOOPSTART:
-			cmp eax, 0
-			jle END
-			maxps xmm0,[esi]
-			maxps xmm0,[edi]
-			minps xmm1,[esi]
-			minps xmm1,[edi]
-			add esi, 10H
-			add edi, 10H
-			sub eax, 4
-			jmp LOOPSTART
-		END:
-			// to finish, get the max and of each of the four values.
-			// put 02 and 03 to 20 and 21
-			movhlps xmm2, xmm0
-			// find max of 00 and 20 (02) and of 01 and 21 (03)
-			maxps xmm0, xmm2
-			// put 00 (result of max(00,02)) to 20
-			movss xmm2, xmm0
-			// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
-			shufps xmm0, xmm2, 11H
-			// and find max of 00 (01) and 20 (00)
-			maxps xmm0, xmm2
-
-			movhlps xmm2, xmm1
-			minps xmm1, xmm2
-			movss xmm2, xmm1
-			shufps xmm1, xmm2, 11H
-			minps xmm1, xmm2
-
-			mov edi, volmaxb
-			movss [edi], xmm0
-			mov edi, volminb
-			movss [edi], xmm1
-		}
-		volmin*=-1.0f;
-		return (volmax>volmin)?volmax:volmin;
-
-#endif
+		#endif
 		}
 		/// finds the maximum amplitude in a signal buffer.
 		/// It contains "VST" because initially the return type for native machines 

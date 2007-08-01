@@ -64,6 +64,8 @@ namespace psycle
 				float * outputs[max_io];
 				float * _pOutSamplesL;
 				float * _pOutSamplesR;
+				// Junk is a safe buffer for vst plugins that would want more buffers than
+				// supplied.
 				static float junk[STREAM_SIZE];
 				std::string _sDllName;
 				std::string _sProductName;
@@ -84,7 +86,7 @@ namespace psycle
 					requiresProcess = 0;
 					_nCols=0;
 				};
-				virtual ~plugin() {};
+				virtual ~plugin();
 
 				// Machine overloaded functions
 				//////////////////////////////////////////////////////////////////////////
