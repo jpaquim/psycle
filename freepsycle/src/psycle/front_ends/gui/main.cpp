@@ -32,7 +32,7 @@ namespace psycle
 					try
 					{
 						universalis::operating_system::loggers::multiplex_logger::singleton().add(universalis::operating_system::loggers::stream_logger::default_logger());
-						universalis::processor::exception::new_thread("psycle.gui");
+						universalis::processor::exception::install_handler_in_thread("psycle.gui");
 						{
 							if(universalis::operating_system::loggers::information()())
 							{
