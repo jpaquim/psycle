@@ -146,7 +146,7 @@ namespace universalis
 			{
 				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/seterrormode.asp
-					::SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+					//::SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 							
 					#if defined DIVERSALIS__COMPILER__MICROSOFT
 						// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_crt__set_se_translator.asp
