@@ -92,7 +92,7 @@ namespace universalis
 
 		template<typename E> std::string inline string                (             E const & e) { std::ostringstream s; s << e; return s.str(); }
 		template<          > std::string inline string<std::exception>(std::exception const & e) { return e.what(); }
-		template<          > std::string inline string<void const *>  (  void const * const    ) { return compiler::exceptions::ellipsis(); }
+		template<          > std::string inline string<void const *>  (  void const * const &  ) { return compiler::exceptions::ellipsis(); }
 
 		///\internal
 		namespace detail
