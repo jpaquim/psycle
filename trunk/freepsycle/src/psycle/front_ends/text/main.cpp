@@ -138,7 +138,7 @@ namespace psycle
 					try
 					{
 						universalis::operating_system::loggers::multiplex_logger::singleton().add(universalis::operating_system::loggers::stream_logger::default_logger());
-						universalis::processor::exception::new_thread("psycle.text");
+						universalis::processor::exception::install_handler_in_thread("psycle.text");
 						{
 							if(universalis::operating_system::loggers::information()())
 							{

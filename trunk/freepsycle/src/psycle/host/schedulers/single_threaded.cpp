@@ -208,7 +208,8 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 				void scheduler::operator()()
 				{
 					loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
-					universalis::processor::exception::new_thread(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
+					std::string thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
+					universalis::processor::exception::install_handler_in_thread(thread_name);
 					try
 					{
 						try
