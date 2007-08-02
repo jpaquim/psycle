@@ -94,7 +94,7 @@ namespace universalis
 					#endif
 				}
 				
-				///\todo thread local storage?
+				UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
 				::LPTOP_LEVEL_EXCEPTION_FILTER static unhandled_exception_previous_filter(0);
 
 				::LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS * exception_pointers) throw(exception)
