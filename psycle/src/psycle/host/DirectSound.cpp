@@ -321,7 +321,7 @@ namespace psycle
 
 		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
 		{
-			universalis::processor::exception::new_thread("direct sound");
+			universalis::processor::exception::install_handler_in_thread("direct sound");
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);

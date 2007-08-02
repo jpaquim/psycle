@@ -32,7 +32,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CPsycleApp::CPsycleApp()
 		:m_uUserMessage(0)
 		{
-			universalis::processor::exception::new_thread("mfc gui");
+			universalis::processor::exception::install_handler_in_thread("mfc gui");
 			// support for unicode characters on mswin98
 			{
 				#if 0

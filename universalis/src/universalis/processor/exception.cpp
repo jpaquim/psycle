@@ -95,7 +95,7 @@ namespace universalis
 				}
 				
 				UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
-				::LPTOP_LEVEL_EXCEPTION_FILTER static unhandled_exception_previous_filter(0);
+				::LPTOP_LEVEL_EXCEPTION_FILTER static thread_unhandled_exception_previous_filter(0);
 
 				::LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS * exception_pointers) throw(exception)
 				{
@@ -105,15 +105,16 @@ namespace universalis
 					structured_exception_translator(code, exception_pointers);
 					// note: The following code is never reached because structured_exception_translator throws a c++ exception.
 					//       It is just kept here for documentation and because the function signature requires a return instruction.
-					return unhandled_exception_previous_filter ? unhandled_exception_previous_filter(exception_pointers) : EXCEPTION_CONTINUE_SEARCH;
+					return thread_unhandled_exception_previous_filter ? thread_unhandled_exception_previous_filter(exception_pointers) : EXCEPTION_CONTINUE_SEARCH;
 				}
 			#endif
+
+			/// thread name
+			UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
+			std::string const static * thread_name(0);
 		}
 
-		///\todo thread name
-		//std::string thread_local_storage thread_name;
-		
-		void exception::new_thread(std::string const & name)
+		void exception::install_handler_in_thread(std::string const & name)
 		{
 			// displays the package version
 			{
@@ -134,13 +135,13 @@ namespace universalis
 			if(operating_system::loggers::information()())
 			{
 				std::ostringstream s;
-				s << "new thread: ";
+				s << "installing cpu/os exception handler in thread: ";
 				if(name.size()) s << "name: " << name << ", ";
 				s << "id: " << operating_system::threads::id::current();
 				operating_system::loggers::information()(s.str());
 			}
 
-			//thread_name = name;
+			thread_name = &name;
 
 			// sets the hardware exception handler for the thread
 			{
@@ -167,7 +168,7 @@ namespace universalis
 							///\todo why only once?
 							//once = true;
 							// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/setunhandledexceptionfilter.asp
-							unhandled_exception_previous_filter = ::SetUnhandledExceptionFilter(unhandled_exception_filter);
+							thread_unhandled_exception_previous_filter = ::SetUnhandledExceptionFilter(unhandled_exception_filter);
 
 							#if defined DIVERSALIS__COMPILER__GNU
 								// http://jrfonseca.dyndns.org/projects/gnu-win32/software/drmingw/index.html#exchndl
@@ -204,8 +205,13 @@ namespace universalis
 				if(operating_system::loggers::crash()())
 				{
 					std::ostringstream s;
-					///\todo thread name
-					s << "crash: thread id: " << operating_system::threads::id::current() << ", " << compiler::typenameof(*this) << ": " << what();
+					s
+						<< "cpu/os exception: "
+						<< "thread: ";
+					if(thread_name && thread_name->size()) s << "name: " << *thread_name << ", ";
+					s
+						<< "id: " << operating_system::threads::id::current()
+						<< compiler::typenameof(*this) << ": " << what();
 					operating_system::loggers::crash()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 			}
