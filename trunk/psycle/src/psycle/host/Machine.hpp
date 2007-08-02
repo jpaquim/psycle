@@ -133,7 +133,10 @@ namespace psycle
 				/// Note that the crashable argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
 				#define PSYCLE__HOST__CATCH_ALL(crashable) \
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
-				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &crashable, _1, _2, _3))
+
+				///\see PSYCLE__HOST__CATCH_ALL
+				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
 			}
 		}
 
