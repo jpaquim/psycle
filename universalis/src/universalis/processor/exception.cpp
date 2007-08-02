@@ -94,8 +94,7 @@ namespace universalis
 					#endif
 				}
 				
-				UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
-				::LPTOP_LEVEL_EXCEPTION_FILTER static thread_unhandled_exception_previous_filter(0);
+				::LPTOP_LEVEL_EXCEPTION_FILTER static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE thread_unhandled_exception_previous_filter(0);
 
 				::LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS * exception_pointers) throw(exception)
 				{
@@ -110,8 +109,7 @@ namespace universalis
 			#endif
 
 			/// thread name
-			UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
-			std::string const static * thread_name(0);
+			std::string const static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE * thread_name(0);
 		}
 
 		void exception::install_handler_in_thread(std::string const & name)

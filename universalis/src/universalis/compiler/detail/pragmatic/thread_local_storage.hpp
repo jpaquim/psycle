@@ -9,7 +9,9 @@
 #include "attribute.hpp"
 /// thread local storage.
 /// variable stored in a per thread local storage.
-#if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__COMPILER__MICROSOFT
+#if defined DIVERSALIS__COMPILER__GNU
+	#define UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE __thread
+#elif defined DIVERSALIS__COMPILER__MICROSOFT
 	#define UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE UNIVERSALIS__COMPILER__ATTRIBUTE(thread)
 #else
 	#error "Unsupported compiler ; please add support for thread local storage for your compiler in the file where this error is triggered."
