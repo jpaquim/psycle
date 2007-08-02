@@ -210,7 +210,7 @@ namespace universalis
 						<< "thread: ";
 					if(thread_name && thread_name->size()) s << "name: " << *thread_name << ", ";
 					s
-						<< "id: " << operating_system::threads::id::current()
+						<< "id: " << operating_system::threads::id::current() << "\n"
 						<< compiler::typenameof(*this) << ": " << what();
 					operating_system::loggers::crash()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
