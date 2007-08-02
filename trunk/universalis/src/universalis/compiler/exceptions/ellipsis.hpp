@@ -14,6 +14,9 @@ namespace universalis
 	{
 		namespace exceptions
 		{
+			/// provides information about the exception in an ellipsis catch(...) clause.
+			/// Not all compilers makes it possible to obtain information.
+			/// The GNU compiler and Borland's one do.
 			std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK ellipsis();
 		}
 	}
