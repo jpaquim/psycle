@@ -1896,6 +1896,7 @@ namespace psycle
 
 									Machine* pOldMachine = pTempMac;
 									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+									pMac[i]->_macIndex=i;
 									pOldMachine->_pSamplesL = NULL;
 									pOldMachine->_pSamplesR = NULL;
 									// dummy name goes here
