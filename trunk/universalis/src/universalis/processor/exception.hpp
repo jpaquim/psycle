@@ -17,7 +17,8 @@ namespace universalis
 		{
 			public:
 				/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
-				void static new_thread(std::string const & = "");
+				/// Note: A reference to the name is kept, so don't pass a temporary object.
+				void static install_handler_in_thread(std::string const & name);
 
 			public:
 					#if defined NBEBUG

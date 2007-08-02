@@ -580,7 +580,7 @@ namespace psycle
 			// about thread synchronization. This is omitted here for simplicity.
 			if(_firstrun)
 			{
-				universalis::processor::exception::new_thread("asio");
+				universalis::processor::exception::install_handler_in_thread("asio");
 				SetThreadAffinityMask(GetCurrentThread(), 1);
 				_firstrun = false;
 			}
