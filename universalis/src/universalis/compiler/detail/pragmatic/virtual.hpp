@@ -21,7 +21,7 @@
 //#define UNIVERSALIS__COMPILER__VIRTUAL__IMPLEMENTS_PURE
 #define implements_pure_virtual UNIVERSALIS__COMPILER__VIRTUAL__IMPLEMENTS_PURE
 
-/// overridding of virtual member function
+/// overridding of virtual member function (new keyword in C++0x)
 #define UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES /* overrides */ virtual
 //#define UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES
 #define overrides_virtual UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES
