@@ -121,7 +121,7 @@ namespace psycle
 				/// to catch an exception of any type thrown by a machine.
 				/// It performs the following operations:
 				/// - It catches everything.
-				/// - It marks the machine as crashed.
+				/// - It marks the machine as crashed by calling the machine's member function void crashed(std::exception const &) throw();
 				/// - It converts the exception to a std::exception (if needed).
 				/// - It throws the converted exception.
 				/// The usage is:
@@ -129,6 +129,8 @@ namespace psycle
 				///     try { some_machine.do_something(); } PSYCLE__HOST__CATCH_ALL(some_machine)
 				/// - for the host:
 				///     try { machine_proxy.do_something(); } catch(std::exception) { /* don't rethrow the exception */ }
+				///
+				/// Note that the machine argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
 				#define PSYCLE__HOST__CATCH_ALL(machine) \
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(machine))
 				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
