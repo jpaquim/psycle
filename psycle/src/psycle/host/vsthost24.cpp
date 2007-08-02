@@ -221,7 +221,9 @@ namespace psycle
 				if(GetVendorString(temp) && temp[0]) _sVendorName = temp;
 				else _sVendorName = "Unknown vendor";
 				std::strcpy(_editName,_sProductName.c_str());
-
+				// This is a safe measure against some plugins that have noise at its output for some
+				// unexplained reason ( example : mda piano.dd )
+				Work(STREAM_SIZE);
 			}
 
 			plugin::~plugin()
@@ -319,7 +321,6 @@ namespace psycle
 						BeginSetProgram();
 						SetProgram(_program);
 						EndSetProgram();
-						MainsChanged(true);
 						pFile->Skip(sizeof(float) *count);
 						if(ProgramIsChunk())
 						{
@@ -334,11 +335,6 @@ namespace psycle
 							pFile->Skip(size);
 							return false;
 						}
-						/// Do it again for VST's that "forget" the program.
-						BeginSetProgram();
-						SetProgram(_program);
-						EndSetProgram();
-						MainsChanged(true);
 					}
 				}
 				return true;
