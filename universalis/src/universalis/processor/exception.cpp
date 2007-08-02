@@ -41,7 +41,6 @@ namespace universalis
 						::EXCEPTION_RECORD const & exception_record(*exception_pointers->ExceptionRecord);
 					#endif
 					assert(code == exception_record.ExceptionCode);
-					if(code == STATUS_BREAKPOINT) return; // [bohan] not sure what to do with break points ...
 					switch(code)
 					{
 						////////////////////
@@ -158,7 +157,7 @@ namespace universalis
 						// There is no default translator function.
 						// [bohan] This requires compilation with the asynchronous exception handling model (/EHa)
 						// [bohan] warning C4535: calling ::_set_se_translator() requires /EHa; the command line options /EHc and /GX are insufficient
-						#if DIVERSALIS__COMPILER__VERSION__MAJOR >= 8 || defined NDEBUG // causes problems with the debugger in msvc7.1
+						#if 1 // DIVERSALIS__COMPILER__VERSION__MAJOR >= 8 || defined NDEBUG // causes problems with the debugger in msvc7.1
 							::_set_se_translator(structured_exception_translator);
 						#endif
 					#else
