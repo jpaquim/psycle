@@ -121,8 +121,8 @@ namespace psycle
 				/// to catch an exception of any type thrown by a machine.
 				/// It performs the following operations:
 				/// - It catches everything.
-				/// - It marks the machine as crashed by calling the machine's member function void crashed(std::exception const &) throw();
 				/// - It converts the exception to a std::exception (if needed).
+				/// - It marks the machine as crashed by calling the machine's member function void crashed(std::exception const &) throw();
 				/// - It throws the converted exception.
 				/// The usage is:
 				/// - for the proxy between the host and a machine:
