@@ -701,7 +701,10 @@ namespace psycle
 				iMac->DeleteWires();
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
-				zapObject(_pMachine[mac]);
+				try
+				{
+					zapObject(_pMachine[mac]);
+				}catch(...){};
 			}
 		}
 

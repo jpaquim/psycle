@@ -11,14 +11,14 @@ namespace psycle
 	{
 		namespace dsp
 		{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+		#if defined PSYCLE__CONFIGURATION__RMS_VUS
 			extern int numRMSSamples;
 			extern int countRMSSamples;
 			extern double RMSAccumulatedLeft;
 			extern double RMSAccumulatedRight;
 			extern float previousRMSLeft;
 			extern float previousRMSRight;
-#endif
+		#endif
 		/// Funky denormal check
 		#define IS_DENORMAL(f) (!((*(unsigned int *)&f)&0x7f800000))	
 
@@ -86,7 +86,7 @@ namespace psycle
 			--pDstSamples;
 			do
 			{
-				*++pDstSamples *= mul;
+				*++pDstSamples *= multi;
 			}
 			while (--numSamples);
 		#endif
@@ -121,7 +121,7 @@ namespace psycle
 			--pDstSamples;
 			do
 			{
-				*++pDstSamples = *++pSrcSamples*mul;
+				*++pDstSamples = *++pSrcSamples*multi;
 			}
 			while (--numSamples);
 		#endif

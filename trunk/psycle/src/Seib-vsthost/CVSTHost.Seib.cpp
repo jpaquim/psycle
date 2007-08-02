@@ -26,8 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <psycle/project.private.hpp>
 #include "CVSTHost.Seib.hpp"                   /* private prototypes                */
-// Unneeded sources:
-#include <psycle/host/machine.hpp> // for throw.
 
 #include "EffectWnd.hpp"
 
@@ -662,6 +660,8 @@ namespace seib {
 		/*****************************************************************************/
 		/* CEffect : constructor                                                     */
 		/*****************************************************************************/
+		void Crashingclass::crashed(std::exception const & e) const{ ef->crashed2(e); };
+
 
 		CEffect::CEffect(LoadedAEffect &loadstruct)
 			: aEffect(0)
@@ -677,7 +677,14 @@ namespace seib {
 			, bShellPlugin(false)
 			, editorWnd(0)
 		{
-			Load(loadstruct);
+			crashclass.SetEff(this);
+			try
+			{
+				Load(loadstruct);
+			}
+			catch(...)
+			{
+			}
 		}
 
 		/*****************************************************************************/
@@ -697,6 +704,7 @@ namespace seib {
 			, bShellPlugin(false)
 			, editorWnd(0)
 		{
+			crashclass.SetEff(this);
 		}
 		/*****************************************************************************/
 		/* ~CEffect : destructor                                                     */
@@ -704,7 +712,13 @@ namespace seib {
 
 		CEffect::~CEffect()
 		{
-			if  (ploader)	Unload();
+			try
+			{
+				if  (ploader)	Unload();
+			}
+			catch(...)
+			{
+			}
 		}
 
 		/*****************************************************************************/
@@ -739,28 +753,27 @@ namespace seib {
 			// I am unsure what other hosts use for resvd1 and resvd2
 			aEffect->resvd1 = ToVstPtr(this);
 
-			if ( GetPlugCategory() != kPlugCategShell )
+			try
 			{
-				SetSampleRate(CVSTHost::pHost->GetSampleRate()); // adjust its sample rate            
-				SetBlockSize(CVSTHost::pHost->GetBlockSize());
-				Open();                     // open the effect                   
-				// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
-				if (GetVstVersion() >= 2400 ) WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
-				//6 :        Host to Plug, canDo ( bypass )   returned : 0
-				KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
-				SetProcessPrecision(kVstProcessPrecision32);
-				//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
-				SetPanLaw(kLinearPanLaw,1.0f);
-				MainsChanged(true);                 //   then force resume.                
-//				MainsChanged(false);                //   suspend again...                  
-//				SetBlockSize(CVSTHost::pHost->GetBlockSize()); //   and block size                    
-//				MainsChanged(true);                //    then force resume.                
+				if ( GetPlugCategory() != kPlugCategShell )
+				{
+					SetSampleRate(CVSTHost::pHost->GetSampleRate()); // adjust its sample rate            
+					SetBlockSize(CVSTHost::pHost->GetBlockSize());
+					Open();                     // open the effect                   
+					// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
+					if (GetVstVersion() >= 2400 ) WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
+					//6 :        Host to Plug, canDo ( bypass )   returned : 0
+					KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
+					SetProcessPrecision(kVstProcessPrecision32);
+					//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
+					SetPanLaw(kLinearPanLaw,1.0f);
+					MainsChanged(true);                 //   then force resume.                
+	//				MainsChanged(false);                //   suspend again...                  
+	//				SetBlockSize(CVSTHost::pHost->GetBlockSize()); //   and block size                    
+	//				MainsChanged(true);                //    then force resume.                
 
-			}
-			else
-			{
-				int i= 1; ///\todo unused var
-			}
+				}
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
 		}
 
 		/*****************************************************************************/
@@ -769,8 +782,12 @@ namespace seib {
 
 		void CEffect::Unload()
 		{
-			MainsChanged(false);
-			Close();                             /* make sure it's closed             */
+			try
+			{
+				MainsChanged(false);
+				Close();                             /* make sure it's closed             */
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
+
 			aEffect = NULL;                         /* and reset the pointer             */
 			delete ploader;
 
@@ -968,9 +985,11 @@ namespace seib {
 		VstIntPtr CEffect::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 		{
 			if (!aEffect)
-				throw (int)1;
-
-			return aEffect->dispatcher(aEffect, opCode, index, value, ptr, opt);
+				throw psycle::host::exception("Invalid AEffect!");
+			try
+			{
+				return aEffect->dispatcher(aEffect, opCode, index, value, ptr, opt);
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
 		}
 
 		/*****************************************************************************/
@@ -980,9 +999,12 @@ namespace seib {
 		void CEffect::Process(float **inputs, float **outputs, VstInt32 sampleframes)
 		{
 			if (!aEffect)
-				throw (int)1;
+				throw psycle::host::exception("Invalid AEffect!");
 
-			aEffect->process(aEffect, inputs, outputs, sampleframes);
+			try
+			{
+				aEffect->process(aEffect, inputs, outputs, sampleframes);
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
 		}
 
 		/*****************************************************************************/
@@ -993,17 +1015,23 @@ namespace seib {
 		{
 			if ((!aEffect) ||
 				(!(aEffect->flags & effFlagsCanReplacing)))
-				throw (int)1;
+				throw psycle::host::exception("Invalid AEffect!");
 
-			aEffect->processReplacing(aEffect, inputs, outputs, sampleframes);
+			try
+			{
+				aEffect->processReplacing(aEffect, inputs, outputs, sampleframes);
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
 		}
 
 		void CEffect::ProcessDouble(double **inputs, double **outputs, VstInt32 sampleframes)
 		{
 			if (!aEffect)
-				throw (int)1;
+				throw psycle::host::exception("Invalid AEffect!");
 
-			aEffect->processDoubleReplacing(aEffect, inputs, outputs, sampleframes);
+			try
+			{
+				aEffect->processDoubleReplacing(aEffect, inputs, outputs, sampleframes);
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
 		}
 
 		/*****************************************************************************/
@@ -1013,9 +1041,12 @@ namespace seib {
 		void CEffect::SetParameter(VstInt32 index, float parameter)
 		{
 			if (!aEffect)
-				throw (int)1;
+				throw psycle::host::exception("Invalid AEffect!");
 
-			aEffect->setParameter(aEffect, index, parameter);
+			try
+			{
+				aEffect->setParameter(aEffect, index, parameter);
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
 		}
 
 		/*****************************************************************************/
@@ -1025,9 +1056,12 @@ namespace seib {
 		float CEffect::GetParameter(VstInt32 index)
 		{
 			if (!aEffect)
-				throw (int)1;
+				throw psycle::host::exception("Invalid AEffect!");
 
-			return aEffect->getParameter(aEffect, index);
+			try
+			{
+				return aEffect->getParameter(aEffect, index);
+			}PSYCLE__HOST__CATCH_ALL(crashclass);
 		}
 
 		bool CEffect::OnSizeEditorWindow(long width, long height)
@@ -1192,7 +1226,13 @@ namespace seib {
 			loadingEffect = true;
 			loadingShellId = shellIdx;
 			isShell = false;
-			AEffect* effect = mainEntry (AudioMasterCallback);
+			AEffect* effect(0);
+			CEffect crashtest(0);
+			try
+			{
+				effect = mainEntry (AudioMasterCallback);
+			}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
+
 			if (effect && (effect->magic != kEffectMagic))
 			{
 				delete effect;
@@ -1203,7 +1243,12 @@ namespace seib {
 				LoadedAEffect loadstruct;
 				loadstruct.aEffect = effect;
 				loadstruct.pluginloader = loader;
-				CEffect*neweffect = CreateEffect(loadstruct);
+				CEffect *neweffect(0);
+				CEffect crashtest2(effect);
+				try 
+				{
+					 neweffect = CreateEffect(loadstruct);
+				}PSYCLE__HOST__CATCH_ALL(crashtest2.crashclass);
 				if (isShell) neweffect->IsShellPlugin(true);
 				loadingEffect=false;
 				loadingShellId=0;
@@ -1504,215 +1549,219 @@ namespace seib {
 			}
 
 			VstIntPtr result;
-			switch (opcode)
+			try
 			{
-			case audioMasterAutomate :
-				pHost->OnSetParameterAutomated(*pEffect, index, opt);
-				break;
-			case audioMasterVersion :
-				return pHost->OnGetVSTVersion();
-			case audioMasterCurrentId :
-				if (pHost->loadingEffect) { result = pHost->loadingShellId; pHost->isShell = true; }
-				else result = pHost->OnCurrentId(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterIdle :
-				pHost->OnIdle(*pEffect);
-				break;
-			case audioMasterPinConnected :
-				// for compatibility with VST 1.0, false means connected.
-				result = !((value) ? 
-					pHost->OnOutputConnected(*pEffect, index) :
-					pHost->OnInputConnected(*pEffect, index));
-				if (fakeeffect )delete pEffect;
-				return result;
-		// VST 2.0
-			case audioMasterWantMidi :
-				pHost->OnWantEvents(*pEffect, value);
-				break;
-			case audioMasterGetTime :
-				result = reinterpret_cast<VstIntPtr>(pHost->OnGetTime(*pEffect, value));
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterProcessEvents :
-				result = pHost->OnProcessEvents(*pEffect, (VstEvents *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterSetTime :
-				result = pHost->OnSetTime(*pEffect, value, (VstTimeInfo *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterTempoAt :
-				result = pHost->OnTempoAt(*pEffect, value);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetNumAutomatableParameters :
-				result = pHost->OnGetNumAutomatableParameters(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetParameterQuantization :
-				result = pHost->OnGetParameterQuantization(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterIOChanged :
-				result = pHost->OnIoChanged(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterNeedIdle :
-				result = pHost->OnNeedIdle(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterSizeWindow :
-				result = pHost->OnSizeWindow(*pEffect, index, value);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetSampleRate :
-				result = pHost->OnUpdateSampleRate(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetBlockSize :
-				result = pHost->OnUpdateBlockSize(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetInputLatency :
-				result = pHost->OnGetInputLatency(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetOutputLatency :
-				result = pHost->OnGetOutputLatency(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetPreviousPlug :
-				result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index));
-				if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index)->GetAEffect());
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetNextPlug :
-				result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index));
-				if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index)->GetAEffect());
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterWillReplaceOrAccumulate :
-				result = pHost->OnWillProcessReplacing(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetCurrentProcessLevel :
-				result = pHost->OnGetCurrentProcessLevel(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetAutomationState :
-				result = pHost->OnGetAutomationState(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterOfflineStart :
-				result = pHost->OnOfflineStart(*pEffect,	(VstAudioFile *)ptr,value,index);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterOfflineRead :
-				result = pHost->OnOfflineRead(*pEffect,(VstOfflineTask *)ptr,(VstOfflineOption)value,!!index);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterOfflineWrite :
-				result = pHost->OnOfflineWrite(*pEffect,(VstOfflineTask *)ptr,(VstOfflineOption)value);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterOfflineGetCurrentPass :
-				result = pHost->OnOfflineGetCurrentPass(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterOfflineGetCurrentMetaPass :
-				result = pHost->OnOfflineGetCurrentMetaPass(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterSetOutputSampleRate :
-				pHost->OnSetOutputSampleRate(*pEffect, opt);
-				break;
-			case audioMasterGetOutputSpeakerArrangement :
-				result = reinterpret_cast<VstIntPtr>(pHost->OnGetOutputSpeakerArrangement(*pEffect));
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetVendorString :
-				result = pHost->OnGetVendorString((char *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetProductString :
-				result = pHost->OnGetProductString((char *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetVendorVersion :
-				result = pHost->OnGetHostVendorVersion();
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterVendorSpecific :
-				result = pHost->OnHostVendorSpecific(*pEffect, index, value, ptr, opt);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterSetIcon :
-				// undefined in VST 2.0 specification. Deprecated in v2.4
-				break;
-			case audioMasterCanDo :
-				result = pHost->OnCanDo(*pEffect,(const char *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetLanguage :
-				result = pHost->OnGetHostLanguage();
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterOpenWindow :
-				result = (long)pHost->OnOpenWindow(*pEffect, (VstWindow *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterCloseWindow :
-				result = pHost->OnCloseWindow(*pEffect, (VstWindow *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetDirectory :
-				result = reinterpret_cast<VstIntPtr>(pHost->OnGetDirectory(*pEffect));
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterUpdateDisplay :
-				result = pHost->OnUpdateDisplay(*pEffect);
-				if (fakeeffect )delete pEffect;
-				return result;
-		// VST 2.1
-		#ifdef VST_2_1_EXTENSIONS
-			case audioMasterBeginEdit :
-				result = pHost->OnBeginEdit(*pEffect,index);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterEndEdit :
-				result = pHost->OnEndEdit(*pEffect,index);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterOpenFileSelector :
-				result = pHost->OnOpenFileSelector(*pEffect, (VstFileSelect *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-		#endif
-		// VST 2.2
-		#ifdef VST_2_2_EXTENSIONS
-			case audioMasterCloseFileSelector :
-				result = pHost->OnCloseFileSelector(*pEffect, (VstFileSelect *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterEditFile :
-				result = pHost->OnEditFile(*pEffect, (char *)ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-			case audioMasterGetChunkFile :
-				result = pHost->OnGetChunkFile(*pEffect, ptr);
-				if (fakeeffect )delete pEffect;
-				return result;
-		#endif
-		// VST 2.3
-		#ifdef VST_2_3_EXTENSIONS
-			case audioMasterGetInputSpeakerArrangement :
-				result = reinterpret_cast<VstIntPtr>(pHost->OnGetInputSpeakerArrangement(*pEffect));
-				if (fakeeffect )delete pEffect;
-				return result;
-		#endif
+				switch (opcode)
+				{
+				case audioMasterAutomate :
+					pHost->OnSetParameterAutomated(*pEffect, index, opt);
+					break;
+				case audioMasterVersion :
+					return pHost->OnGetVSTVersion();
+				case audioMasterCurrentId :
+					if (pHost->loadingEffect) { result = pHost->loadingShellId; pHost->isShell = true; }
+					else result = pHost->OnCurrentId(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterIdle :
+					pHost->OnIdle(*pEffect);
+					break;
+				case audioMasterPinConnected :
+					// for compatibility with VST 1.0, false means connected.
+					result = !((value) ? 
+						pHost->OnOutputConnected(*pEffect, index) :
+						pHost->OnInputConnected(*pEffect, index));
+					if (fakeeffect )delete pEffect;
+					return result;
+			// VST 2.0
+				case audioMasterWantMidi :
+					pHost->OnWantEvents(*pEffect, value);
+					break;
+				case audioMasterGetTime :
+					result = reinterpret_cast<VstIntPtr>(pHost->OnGetTime(*pEffect, value));
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterProcessEvents :
+					result = pHost->OnProcessEvents(*pEffect, (VstEvents *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterSetTime :
+					result = pHost->OnSetTime(*pEffect, value, (VstTimeInfo *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterTempoAt :
+					result = pHost->OnTempoAt(*pEffect, value);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetNumAutomatableParameters :
+					result = pHost->OnGetNumAutomatableParameters(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetParameterQuantization :
+					result = pHost->OnGetParameterQuantization(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterIOChanged :
+					result = pHost->OnIoChanged(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterNeedIdle :
+					result = pHost->OnNeedIdle(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterSizeWindow :
+					result = pHost->OnSizeWindow(*pEffect, index, value);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetSampleRate :
+					result = pHost->OnUpdateSampleRate(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetBlockSize :
+					result = pHost->OnUpdateBlockSize(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetInputLatency :
+					result = pHost->OnGetInputLatency(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetOutputLatency :
+					result = pHost->OnGetOutputLatency(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetPreviousPlug :
+					result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index));
+					if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index)->GetAEffect());
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetNextPlug :
+					result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index));
+					if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index)->GetAEffect());
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterWillReplaceOrAccumulate :
+					result = pHost->OnWillProcessReplacing(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetCurrentProcessLevel :
+					result = pHost->OnGetCurrentProcessLevel(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetAutomationState :
+					result = pHost->OnGetAutomationState(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterOfflineStart :
+					result = pHost->OnOfflineStart(*pEffect,	(VstAudioFile *)ptr,value,index);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterOfflineRead :
+					result = pHost->OnOfflineRead(*pEffect,(VstOfflineTask *)ptr,(VstOfflineOption)value,!!index);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterOfflineWrite :
+					result = pHost->OnOfflineWrite(*pEffect,(VstOfflineTask *)ptr,(VstOfflineOption)value);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterOfflineGetCurrentPass :
+					result = pHost->OnOfflineGetCurrentPass(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterOfflineGetCurrentMetaPass :
+					result = pHost->OnOfflineGetCurrentMetaPass(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterSetOutputSampleRate :
+					pHost->OnSetOutputSampleRate(*pEffect, opt);
+					break;
+				case audioMasterGetOutputSpeakerArrangement :
+					result = reinterpret_cast<VstIntPtr>(pHost->OnGetOutputSpeakerArrangement(*pEffect));
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetVendorString :
+					result = pHost->OnGetVendorString((char *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetProductString :
+					result = pHost->OnGetProductString((char *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetVendorVersion :
+					result = pHost->OnGetHostVendorVersion();
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterVendorSpecific :
+					result = pHost->OnHostVendorSpecific(*pEffect, index, value, ptr, opt);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterSetIcon :
+					// undefined in VST 2.0 specification. Deprecated in v2.4
+					break;
+				case audioMasterCanDo :
+					result = pHost->OnCanDo(*pEffect,(const char *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetLanguage :
+					result = pHost->OnGetHostLanguage();
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterOpenWindow :
+					result = (long)pHost->OnOpenWindow(*pEffect, (VstWindow *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterCloseWindow :
+					result = pHost->OnCloseWindow(*pEffect, (VstWindow *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetDirectory :
+					result = reinterpret_cast<VstIntPtr>(pHost->OnGetDirectory(*pEffect));
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterUpdateDisplay :
+					result = pHost->OnUpdateDisplay(*pEffect);
+					if (fakeeffect )delete pEffect;
+					return result;
+			// VST 2.1
+			#ifdef VST_2_1_EXTENSIONS
+				case audioMasterBeginEdit :
+					result = pHost->OnBeginEdit(*pEffect,index);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterEndEdit :
+					result = pHost->OnEndEdit(*pEffect,index);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterOpenFileSelector :
+					result = pHost->OnOpenFileSelector(*pEffect, (VstFileSelect *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+			#endif
+			// VST 2.2
+			#ifdef VST_2_2_EXTENSIONS
+				case audioMasterCloseFileSelector :
+					result = pHost->OnCloseFileSelector(*pEffect, (VstFileSelect *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterEditFile :
+					result = pHost->OnEditFile(*pEffect, (char *)ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+				case audioMasterGetChunkFile :
+					result = pHost->OnGetChunkFile(*pEffect, ptr);
+					if (fakeeffect )delete pEffect;
+					return result;
+			#endif
+			// VST 2.3
+			#ifdef VST_2_3_EXTENSIONS
+				case audioMasterGetInputSpeakerArrangement :
+					result = reinterpret_cast<VstIntPtr>(pHost->OnGetInputSpeakerArrangement(*pEffect));
+					if (fakeeffect )delete pEffect;
+					return result;
+			#endif
 
-			}
+				}
+				// This is PSYCLE__HOST__CATCH_ALL() for static members.
+			}PSYCLE__HOST__CATCH_ALL__NO_CLASS(pEffect->crashclass);
 			if (fakeeffect )delete pEffect;
 			return 0L;
 		}
