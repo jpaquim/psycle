@@ -4,6 +4,21 @@
 #include "machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
 #include <cstring>
+/*
+*<@JosepMa> the so-called seib host (which is mine, but based on his), is composed of two classes:
+*<@JosepMa> CVstHost and CEffect.
+*<@JosepMa> the former maps all the AudioMaster calls, provides a way to create CEffects, and helps
+*           in getting time/position information.
+*<@JosepMa> CEffect is a C++ wrapper for the AEffect class, for a host (AudioEffect is a C++ wrapper
+*           for a plugin)
+*<@JosepMa> in such it maps all the dispatch calls to functions with parameter validation, and helps
+*           in the construction and destruction processes. Tries to help on other simpler tasks, and
+*           in the handling of parameter windows (vstgui)
+*<@JosepMa> vst::host and vst::plugin are subclasses of the aforementioned classes, which both: extend
+*           the functionality of the base classes, and adapts them to its usage inside psycle
+*<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
+*           plugin one wraps the CEffect into a Machine class
+*/
 namespace psycle
 {
 	namespace host
@@ -105,9 +120,9 @@ namespace psycle
 				virtual bool LoadFromMac(vst::plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
-				virtual bool IsShellMaster() { return (GetPlugCategory() == kPlugCategShell); }
-				virtual int GetShellIdx() { return ( IsShellPlugin()) ? uniqueId() : 0;	}
-				virtual int GetPluginCategory() { return GetPlugCategory(); }
+				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(*this); return 0; }
+				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL(*this); return 0; }
+				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(*this); return 0; }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual bool Bypass(void) { return Machine::Bypass(); }
@@ -116,26 +131,29 @@ namespace psycle
 					Machine::Bypass(e);
 					if (aEffect) 
 					{
-						if (!bCanBypass) MainsChanged(!e);
-						SetBypass(e);
+						try
+						{
+							if (!bCanBypass) MainsChanged(!e);
+							SetBypass(e);
+						}catch(...){}
 					}
 				}
 				virtual bool Standby() { return Machine::Standby(); }
 				virtual void Standby(bool e)
 				{
-					Machine::Standby();
-					if (aEffect && _mode != MACHMODE_GENERATOR)
+					Machine::Standby(e);
+					if (aEffect && _mode == MACHMODE_FX)
 					{
 						// some plugins ( psp vintage warmer ) might not like to change the state too
-						// frequently, or might have a delay which mades fast switching unusable.
+						// frequently, or might have a delay which makes fast switching unusable.
 						// This is why this is commented out until another solution is found.
 //						if (!bCanBypass) MainsChanged(!e);
-						SetBypass(e);
+						try
+						{
+							SetBypass(e);
+						}catch(...){}
 					}
 				}
-//				virtual bool ConnectTo(Machine& dstMac,int dstport=0,int outport=0,float volume=1.0f);
-//				virtual bool Disconnect(Machine& dstMac);
-
 				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0, unsigned int sampleoffset=0);
 				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0, unsigned int sampleoffset=0,bool slide=false);
 				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false, unsigned int sampleoffset=0);
@@ -152,7 +170,6 @@ namespace psycle
 				// Properties
 				//////////////////////////////////////////////////////////////////////////
 				virtual void SetSampleRate(int sr) { CEffect::SetSampleRate((float)sr); }
-				//\todo:
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
@@ -165,20 +182,32 @@ namespace psycle
 				virtual void GetParamValue(int numparam, char * parval);
 				virtual int GetParamValue(int numparam)
 				{
-					if(numparam < numParams())
-						return f2i(GetParameter(numparam) * quantization);
+					try
+					{
+						if(numparam < numParams())
+							return f2i(GetParameter(numparam) * quantization);
+					}catch(...){}
 					return 0;
 				}
 				virtual bool SetParameter(int numparam, int value)
 				{
-					if(numparam < numParams())
+					try
 					{
-						CEffect::SetParameter(numparam,float(value)/float(quantization));
-						return true;
-					}
+						if(numparam < numParams())
+						{
+							CEffect::SetParameter(numparam,float(value)/float(quantization));
+							return true;
+						}
+					}catch(...){}
 					return false;
 				}
-				virtual void SetParameter(int numparam, float value) { if(numparam < numParams())CEffect::SetParameter(numparam,value); }
+				virtual void SetParameter(int numparam, float value)
+				{
+					try
+					{
+						if(numparam < numParams())CEffect::SetParameter(numparam,value);
+					}catch(...){}
+				}
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
 				virtual void InsertOutputWireIndex(int wireIndex,int dstmac)
@@ -197,14 +226,7 @@ namespace psycle
 				//////////////////////////////////////////////////////////////////////////
 				virtual void EnterCritical() {;}
 				virtual void LeaveCritical() {;}
-				virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index=0, VstIntPtr value=0, void* ptr=0, float opt=0.)
-				{
-					try
-					{
-						return CEffect::Dispatch(opCode,index,value,ptr,opt);
-					}PSYCLE__HOST__CATCH_ALL(*this);
-					return 0;
-				}
+				virtual void crashed2(std::exception const & e) { Machine::crashed(e); }
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 				/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
 				/// doing an "off/on" when a connection changes.

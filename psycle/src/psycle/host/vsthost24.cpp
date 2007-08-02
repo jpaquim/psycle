@@ -131,14 +131,17 @@ namespace psycle
 				}
 
 				_nCols=0;
-				if ( IsSynth())
+				try
 				{
-					_mode=MACHMODE_GENERATOR; _type=MACH_VST;
-				}
-				else 
-				{
-					_mode=MACHMODE_FX; _type=MACH_VSTFX;
-				}
+					if ( IsSynth())
+					{
+						_mode=MACHMODE_GENERATOR; _type=MACH_VST;
+					}
+					else 
+					{
+						_mode=MACHMODE_FX; _type=MACH_VSTFX;
+					}
+				}catch(...){}
 				// Compatibility hacks
 				{
 					if(uniqueId() == 0x41446c45 ) //"sc-101"
@@ -239,6 +242,7 @@ namespace psycle
 						free(_pOutSamplesL);
 						free(_pOutSamplesR);
 					#else
+
 						delete [] _pOutSamplesL;
 						delete [] _pOutSamplesR;
 					#endif

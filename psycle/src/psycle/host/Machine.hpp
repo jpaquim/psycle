@@ -103,9 +103,9 @@ namespace psycle
 								{
 									s << universalis::compiler::exceptions::ellipsis();
 								}
-								function_error const function_error(s.str(), standard);
-								crashable_.crashed(function_error);
-								throw function_error;
+								function_error const f_error(s.str(), standard);
+								crashable_.crashed(f_error);
+								throw f_error;
 							}
 							Crashable & crashable_;
 					};
