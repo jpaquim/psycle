@@ -81,6 +81,8 @@ namespace psycle
 				///\internal
 				namespace detail
 				{
+					/// Machine type concept requirement: it must have a member function void crashed(std::exception const &) throw();
+					template<typename Machine>
 					class rethrow_functor
 					{
 						public:
@@ -107,6 +109,12 @@ namespace psycle
 							}
 							Machine & machine_;
 					};
+
+					template<typename Machine>
+					rethrow_functor<Machine> make_rethrow_functor(Machine & machine)
+					{
+						return rethrow_functor<Machine>(machine);
+					}
 				}
 
 				/// This macro is to be used in place of a catch statement
@@ -122,7 +130,7 @@ namespace psycle
 				/// - for the host:
 				///     try { machine_proxy.do_something(); } catch(std::exception) { /* don't rethrow the exception */ }
 				#define PSYCLE__HOST__CATCH_ALL(machine) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::rethrow_functor(machine))
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(machine))
 				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
 			}
 		}
