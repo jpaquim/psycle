@@ -81,19 +81,19 @@ namespace psycle
 				///\internal
 				namespace detail
 				{
-					/// Machine type concept requirement: it must have a member function void crashed(std::exception const &) throw();
-					template<typename Machine>
+					/// Crashable type concept requirement: it must have a member function void crashed(std::exception const &) throw();
+					template<typename Crashable>
 					class rethrow_functor
 					{
 						public:
-							rethrow_functor(Machine & machine) : machine_(machine) {}
+							rethrow_functor(Crashable & crashable) : crashable_(crashable) {}
 							template<typename E> void operator_                (universalis::compiler::location const & location,              E const * const e = 0) const throw(function_error) { rethrow(location, e, 0); }
 							template<          > void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e    ) const throw(function_error) { rethrow(location, e, e); }
 						private:
 							template<typename E> void rethrow                  (universalis::compiler::location const & location,              E const * const e, std::exception const * const standard) const throw(function_error)
 							{
 								std::ostringstream s;
-								s	<< "Machine had an exception in function '" << location << "'." << std::endl;
+								s	<< "An exception occured in function '" << location << "'." << std::endl;
 								if (e)
 								{
 									s	<< universalis::compiler::typenameof(*e) << std::endl
@@ -101,19 +101,19 @@ namespace psycle
 								}
 								else
 								{
-									s << "Unknown type of exception";
+									s << universalis::compiler::exceptions::ellipsis();
 								}
 								function_error const function_error(s.str(), standard);
-								machine_.crashed(function_error);
+								crashable_.crashed(function_error);
 								throw function_error;
 							}
-							Machine & machine_;
+							Crashable & crashable_;
 					};
 
-					template<typename Machine>
-					rethrow_functor<Machine> make_rethrow_functor(Machine & machine)
+					template<typename Crashable>
+					rethrow_functor<Crashable> make_rethrow_functor(Crashable & crashable)
 					{
-						return rethrow_functor<Machine>(machine);
+						return rethrow_functor<Crashable>(crashable);
 					}
 				}
 
@@ -130,10 +130,10 @@ namespace psycle
 				/// - for the host:
 				///     try { machine_proxy.do_something(); } catch(std::exception) { /* don't rethrow the exception */ }
 				///
-				/// Note that the machine argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
-				#define PSYCLE__HOST__CATCH_ALL(machine) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(machine))
-				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
+				/// Note that the crashable argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
+				#define PSYCLE__HOST__CATCH_ALL(crashable) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &crashable, _1, _2, _3))
 			}
 		}
 
