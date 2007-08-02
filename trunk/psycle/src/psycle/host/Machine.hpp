@@ -101,7 +101,7 @@ namespace psycle
 								}
 								else
 								{
-									s << "Unknown type of exeption";
+									s << "Unknown type of exception";
 								}
 								function_error const function_error(s.str(), standard);
 								machine_.crashed(function_error);
