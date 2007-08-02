@@ -17,6 +17,9 @@
 	#include <universalis/compiler/typenameof.hpp>
 	#include <boost/current_function.hpp>
 #endif
+#if defined PACKAGENERIC
+	#include <packageneric/module.private.hpp>
+#endif
 namespace universalis
 {
 	namespace compiler
@@ -81,8 +84,7 @@ namespace universalis
 #endif
 		///\internal
 		//#region DETAIL
-			#if defined PACKAGENERIC
-				#include <packageneric/module.private.hpp>
+			#if defined PACKAGENERIC__MODULE__NAME && defined PACKAGENERIC__PACKAGE__VERSION && defined PACKAGENERIC__MODULE__VERSION
 				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE  PACKAGENERIC__MODULE__NAME " " PACKAGENERIC__PACKAGE__VERSION " " PACKAGENERIC__MODULE__VERSION
 			#else
 				#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE  "(unkown)"
