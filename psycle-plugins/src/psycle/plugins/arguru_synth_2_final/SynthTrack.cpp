@@ -43,6 +43,8 @@ CSynthTrack::CSynthTrack()
 	AmpEnvValue=0.0f;
 	VcfEnvStage=0;
 	VcfEnvValue=0.0f;
+	Stage5AmpVal=0.0f;
+	Stage5VcfVal=0.0f;
 	vibrato=false;
 
 	InitArpeggio();
@@ -71,22 +73,25 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 		(float)tspar->osc2detune;
 	OSC2Speed=(float)pow(2.0, (float)note2/12.0);
 
-	if ( AmpEnvStage == 0 || AmpEnvStage == 4 || oscglide == 0.0f)
+	if (oscglide == 0.0f || AmpEnvStage == 0)
 	{
 		ROSC1Speed = OSC1Speed;
 		ROSC2Speed = OSC2Speed;
-		if (syntp->osc2sync) OSC2Position = 0;
-		else {
-			OSC2Position-= OSC1Position;
-			if (OSC2Position<0) OSC2Position+=2048.0f;
+		if (AmpEnvStage == 0)
+		{
+			if (syntp->osc2sync) OSC2Position = 0;
+			else
+			{
+				OSC2Position-= OSC1Position;
+				if (OSC2Position<0) OSC2Position+=2048.0f;
+			}
+			OSC1Position = 0;
 		}
-		OSC1Position = 0;
 		initenvelopes =true;
 	}
 
 	OSC2Vol=(float)syntp->osc_mix*0.0039062f;
 	OSC1Vol=1.0f-OSC2Vol;
-	
 
 
 	float spdcoef;
@@ -110,40 +115,36 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 
 void CSynthTrack::InitEnvelopes(bool force)
 {
-	// Init Amplitude Envelope
 	VcfEnvMod=(float)syntp->vcf_envmod;
 	VcfCutoff=(float)syntp->vcf_cutoff;
-
 	VcfResonance=(float)syntp->vcf_resonance/256.0f;
 
+	// Init Amplitude Envelope
 	AmpEnvSustainLevel=(float)syntp->amp_env_sustain*0.0039062f;
-	VcfEnvSustainLevel=(float)syntp->vcf_env_sustain*0.0039062f;
-	
-	if ( AmpEnvStage != 0 && force)
-	{
-		AmpEnvStage=5;
-		AmpEnvCoef=AmpEnvValue/32.0f;
-
-		if(AmpEnvCoef<=0.0f) AmpEnvCoef=0.03125f;
-	}
-	else if(AmpEnvStage< 4 )
+	if(AmpEnvStage < 2 || force)
 	{
 		AmpEnvStage=1;
 		AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
 	}
-
-	// Init Filter Envelope
-	if ( AmpEnvStage != 0 && force)
+	else if (AmpEnvStage < 5)
 	{
-		VcfEnvStage=5;
-		VcfEnvCoef=VcfEnvValue/32.0f;
-
-		if(VcfEnvCoef<=0.0f) VcfEnvCoef=0.03125f;
+		AmpEnvStage=5;
+		AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
+		Stage5AmpVal=0.0f;
 	}
-	else if(VcfEnvStage < 4)
+	
+	// Init Filter Envelope
+	VcfEnvSustainLevel=(float)syntp->vcf_env_sustain*0.0039062f;
+	if (VcfEnvStage < 2 || force)
 	{
 		VcfEnvStage=1;
 		VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
+	}
+	else if (VcfEnvStage < 5)
+	{
+		VcfEnvStage=5;
+		VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
+		Stage5VcfVal=0.0f;
 	}
 }
 

@@ -110,6 +110,7 @@ private:
 	float AmpEnvValue;
 	float AmpEnvCoef;
 	float AmpEnvSustainLevel;
+	float Stage5AmpVal;
 	bool vibrato;
 	float OSC1Vol;
 	float OSC2Vol;
@@ -119,6 +120,7 @@ private:
 	float VcfEnvCoef;
 	float VcfEnvSustainLevel;
 	int VcfEnvStage;
+	float Stage5VcfVal;
 	float VcfEnvMod;
 	float VcfCutoff;
 	float synthglide;
@@ -366,13 +368,12 @@ inline float CSynthTrack::GetEnvAmp()
 	
 	case 5: // FastRelease
 		AmpEnvValue-=AmpEnvCoef;
+		Stage5AmpVal+=AmpEnvCoef;
 
-		if(AmpEnvValue<0.0f)
+		if(AmpEnvValue<Stage5AmpVal)
 		{
-			AmpEnvValue=0.0f;
+			AmpEnvValue=Stage5AmpVal;
 			AmpEnvStage=1;
-			AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
-			oscglide=256.0f;
 		}
 
 		return AmpEnvValue;
@@ -419,12 +420,12 @@ inline void CSynthTrack::GetEnvVcf()
 
 	case 5: // FastRelease
 		VcfEnvValue-=VcfEnvCoef;
+		Stage5VcfVal+=VcfEnvCoef;
 
-		if(VcfEnvValue<0.0f)
+		if(VcfEnvValue<Stage5VcfVal)
 		{
-			VcfEnvValue=0.0f;
+			VcfEnvValue=Stage5VcfVal;
 			VcfEnvStage=1;
-			VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
 		}
 
 	break;
