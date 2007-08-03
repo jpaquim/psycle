@@ -14,7 +14,7 @@
 
 CMachineParameter const paraCombdelay = 
 { 
-	"Damp",
+	"Absortion",
 	"Damp",											// description
 	1,												// MinValue	
 	640,											// MaxValue
@@ -24,7 +24,7 @@ CMachineParameter const paraCombdelay =
 
 CMachineParameter const paraCombseparator = 
 { 
-	"Width",
+	"Stereo Width",
 	"Width",										// description
 	1,												// MinValue	
 	640,											// MaxValue
@@ -45,7 +45,7 @@ CMachineParameter const paraAPdelay =
 
 CMachineParameter const paraDry = 
 { 
-	"Dry",
+	"Dry Amount",
 	"Dry",											// description
 	0,												// MinValue	
 	640,											// MaxValue
@@ -56,7 +56,7 @@ CMachineParameter const paraDry =
 
 CMachineParameter const paraWet = 
 { 
-	"Wet",
+	"Wet Amount",
 	"Wet",											// description
 	0,												// MinValue	
 	640,											// MaxValue
@@ -84,12 +84,12 @@ CMachineInfo const MacInfo =
 	5,										// numParameters
 	pParameters,							// Pointer to parameters
 #ifdef _DEBUG
-	"Yezar Freeverb (Debug build)",			// name
+	"Jezar Freeverb (Debug build)",			// name
 #else
-	"Yezar Freeverb",						// name
+	"Jezar Freeverb",						// name
 #endif
 	"Freeverb",								// short name
-	"Yezar",								// author
+	"Jezar",								// author
 	"About",									// A command, that could be use for open an editor, etc...
 	5
 };
@@ -160,7 +160,7 @@ void mi::Command()
 // Called when user presses editor button
 // Probably you want to show your custom window here
 // or an about button
-pCB->MessBox("Made 31/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","·-=<([aRgUrU's R3V3RB])>=-·",0);
+pCB->MessBox("Ported in 31/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","·-=<([Freeverb])>=-·",0);
 }
 
 // Work... where all is cooked 
@@ -187,40 +187,29 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
-//	if(param==0)
-//	{
-		// Meter
-//		sprintf(txt,"%.1f ms.",(float)value*0.0226757f);
-//		return true;
-//	}
-
+	if(param==0)
+	{
+		sprintf(txt,"%.f%%",value*0.15625f);
+		return true;
+	}
+	if(param==1)
+	{
+		sprintf(txt,"%.0f degrees",value*0.28125f);
+		return true;
+	}
 	if(param==2)
 	{
-		// Meter
 		sprintf(txt,"%.1f mtrs.",(float)value*0.17f);
 		return true;
-	
 	}
-
-	if(param==3)
+	else if (param==3)
 	{
-		// Meter
-		sprintf(txt,"%.1f%%",(float)value*0.0976562f);
-		return true;
-	
-	}
-
-	if(param==4)
-	{
-		// Frequency of the lowpass
-		sprintf(txt,"%d Hzs.",value);
+		sprintf(txt,"%.1f%%",float(value)*0.31250f);
 		return true;
 	}
-
-	if(param==5 || param==6)
+	else if (param==4)
 	{
-		// Dry and Wet parameters shows value measured in %
-		sprintf(txt,"%.1f%%",float(value)*0.390625f);
+		sprintf(txt,"%.1f%%",float(value)*0.46875f);
 		return true;
 	}
 	return false;
