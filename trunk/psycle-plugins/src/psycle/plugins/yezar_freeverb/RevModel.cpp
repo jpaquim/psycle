@@ -148,13 +148,13 @@ void revmodel::update()
 
 	int i;
 
-	wet1 = wet*(width/2 + 0.5f);
-	wet2 = wet*((1-width)/2);
+	wet1 = wet*(width/2.0f + 0.5f);
+	wet2 = wet*((1.0f-width)/2.0f);
 
 	if (mode >= freezemode)
 	{
-		roomsize1 = 1;
-		damp1 = 0;
+		roomsize1 = 1.0f;
+		damp1 = 0.0f;
 		gain = muted;
 	}
 	else
