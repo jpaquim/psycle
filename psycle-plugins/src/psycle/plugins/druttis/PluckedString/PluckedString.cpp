@@ -144,7 +144,7 @@ public:
 	GLOBALS globals;
 	CVoice	voices[MAX_TRACKS][MAX_VOICES];
 	int		ticks_remaining;
-	bool	enabled;
+	bool	initialized;
 	bool	working;
 };
 
@@ -155,7 +155,7 @@ PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 mi::mi()
 {
 	working = false;
-	enabled = false;
+	initialized = false;
 	Vals = new int[NUM_PARAMS];
 	ticks_remaining = NUM_TICKS;
 }
@@ -164,7 +164,7 @@ mi::mi()
 //============================================================================
 mi::~mi()
 {
-	enabled = false;
+	initialized = false;
 	while (working);
 	delete Vals;
 }
@@ -180,7 +180,7 @@ void mi::Init()
 			voices[ti][vi].Init();
 		}
 	}
-	enabled = true;
+	initialized = true;
 }
 //============================================================================
 //	Stop
@@ -291,7 +291,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int numtracks)
 {
 	working = true;
-	if (enabled) {
+	if (initialized) {
 		//
 		//	Variables
 		int ti;
