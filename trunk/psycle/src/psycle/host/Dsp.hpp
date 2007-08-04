@@ -2,11 +2,15 @@
 ///\brief various signal processing utility functions and classes, psycle::host::Cubic amongst others.
 #pragma once
 #include <cmath>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include "Helpers.hpp"
 //#include <dspguru\resamp.h>
 //#include <dspguru\interp25.inc>
 namespace psycle
 {
+	 ///\todo the paths don't correspond to namespace names
+	namespace helpers = common;
+
 	namespace host
 	{
 		namespace dsp
@@ -339,24 +343,27 @@ namespace psycle
 		///\todo make a template version that accept both float and doubles
 		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
-/*			float id(float(1.0E-18));
-			for(int s(0) ; s < numsamples ; ++s)
-			{
-//			Old denormal code. Now we use a 1bit sinus.
-//				if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
-//				if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
-//				const float is1=pSamplesL[s];
-//				const float is2=pSamplesR[s];
-//				pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
-//				pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
-				pSamplesL[s] += id;
-				pSamplesR[s] += id;
-				id = - id;
-			}
-*/
-			erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
-			erase_All_NaNs_Infinities_And_Denormals(pSamplesR,numsamples);
-
+			#if 1
+				helpers::math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
+				helpers::math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
+			#else // old code
+				float id(float(1.0E-18));
+				for(int s(0) ; s < numsamples ; ++s)
+				{
+					#if 0 // flushes denormals to zero
+						if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
+						if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
+						const float is1=pSamplesL[s];
+						const float is2=pSamplesR[s];
+						pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
+						pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
+					#else // 1-bit "sinus" dither.
+						pSamplesL[s] += id;
+						pSamplesR[s] += id;
+						id = - id;
+					#endif
+				}
+			#endif
 		}
 
 		static inline float dB(float amplitude) // amplitude normalized to 1.0f.
