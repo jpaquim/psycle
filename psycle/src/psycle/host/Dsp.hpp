@@ -26,7 +26,7 @@ namespace psycle
 		/// mixes two signals.
 		static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -63,7 +63,7 @@ namespace psycle
 		///\see MovMul()
 		static inline void Mul(float *pDstSamples, int numSamples, float multi)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -95,7 +95,7 @@ namespace psycle
 		///\see Mul()
 		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -128,7 +128,7 @@ namespace psycle
 		}
 		static inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -154,7 +154,7 @@ namespace psycle
 		/// zero-out a signal buffer.
 		static inline void Clear(float *pDstSamples, int numSamples)
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			_asm
 			{
@@ -219,7 +219,7 @@ namespace psycle
 			};
 			return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
 
-		#elif defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
+		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 
 			// If anyone knows better assembler than me improve this variable utilization:
 			float volmax = 0.0f, volmin = 0.0f;
@@ -334,27 +334,7 @@ namespace psycle
 			return vol;
 		}
 		*/
-		/***********************************************************************
-		Cure for malicious samples
-		Type : Filters Denormals, NaNs, Infinities
-		References : Posted by urs[AT]u-he[DOT]com
-		***********************************************************************/
-		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int const & inNumberOfSamples )
-		{
-			unsigned int* inArrayOfFloats = (unsigned int*) inSamples;
-			unsigned int sample;
-			unsigned int exponent;
-			for ( int i = 0; i < inNumberOfSamples; i++ )
-			{
-				sample = *inArrayOfFloats;
-				exponent = sample & 0x7F800000;
 
-				// exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
-				// exponent > 0 is 0 if denormalized, otherwise 1
-
-				*inArrayOfFloats++ = sample * ((exponent < 0x7F800000) & (exponent > 0));
-			}
-		}
 		/// undenormalize (renormalize) samples in a signal buffer.
 		///\todo make a template version that accept both float and doubles
 		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
