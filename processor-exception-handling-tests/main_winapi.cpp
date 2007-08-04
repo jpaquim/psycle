@@ -24,10 +24,16 @@ int filter(unsigned long int code, EXCEPTION_POINTERS & e, counters & c) {
 	assert(code == e.ExceptionRecord->ExceptionCode);
 	switch(code) {
 		case EXCEPTION_FLT_INVALID_OPERATION /* STATUS_FLOAT_INVALID_OPERATION */:
-			_clear87();
 			++c.invalids;
-			std::cout << "invalid: continue search" << std::endl;
-			return EXCEPTION_CONTINUE_SEARCH;
+			if(false) {
+				std::cout << "invalid: continue search" << std::endl;
+				return EXCEPTION_CONTINUE_SEARCH;
+			} else {
+				std::cout << "invalid: continue execution" << std::endl;
+				_clear87();
+				_control87(~unsigned int(), _MCW_EM);
+				return EXCEPTION_CONTINUE_EXECUTION;
+			}
 		case EXCEPTION_FLT_DENORMAL_OPERAND /* STATUS_FLOAT_DENORMAL_OPERAND */:
 			_clear87();
 			++c.denormals;
