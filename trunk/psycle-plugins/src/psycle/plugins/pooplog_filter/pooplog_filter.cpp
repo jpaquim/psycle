@@ -482,9 +482,15 @@ void mi::Init()
 	thisMin = 0;
 	nextMax = 0;
 	thisMax = 0;
-	nextMinCount = 0;
+	/// Changed from 0 to 1 to avoid a "division by zero" problem.
+	/// in HandleOverdrive w1 = SAMPLE_LENGTH/(thisMinCount+thisMaxCount-w2);
+	/// I don't know what the real solution would be
+	nextMinCount = 1;
 	thisMinCount = 1;
-	nextMaxCount = 0;
+	/// Changed from 0 to 1 to avoid a "division by zero" problem.
+	/// in HandleOverdrive() { w1 = SAMPLE_LENGTH/(thisMinCount+thisMaxCount-w2); }
+	/// I don't know what the real solution would be
+	nextMaxCount = 1;
 	thisMaxCount = 1;
 	w1 = 1;
 	w2 = 1;
