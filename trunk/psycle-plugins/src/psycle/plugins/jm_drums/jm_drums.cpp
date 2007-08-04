@@ -201,12 +201,14 @@ public:
 	virtual void ParameterTweak(int par, int val);
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 	virtual void Stop();
-
+	
+	int GetVoice(int channel,bool getnew=false);
+	void DeallocateVoice(int voice);
 private:
 
 	Drum DTrack[MAX_SIMUL_TRACKS];
 
-	int numT[MAX_TRACKS];
+	int allocatedvoice[MAX_TRACKS];
 	int numtracks;
 
 	DrumPars globalpar;
@@ -221,7 +223,7 @@ mi::mi()
 	Vals=new int[NUMPARAMETERS];
 
 	numtracks=0;
-	for (int i=0;i<MAX_TRACKS;i++) numT[i]=-1;
+	for (int i=0;i<MAX_TRACKS;i++) allocatedvoice[i]=-1;
 
 }
 
@@ -241,6 +243,7 @@ void mi::Stop()
 {
 	for(int c=0;c<numtracks;c++)
 		DTrack[c].NoteOff();
+	for (int i=0;i<MAX_TRACKS;i++) allocatedvoice[i]=-1;
 }
 
 void mi::SequencerTick()
@@ -403,7 +406,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 {
 	float sl=0;
 
-	for(int c=0;c<numtracks;c++)
+	for(int c=0;c<MAX_SIMUL_TRACKS;c++)
 	{
 		if(DTrack[c].AmpEnvStage)
 		{
@@ -426,14 +429,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			
 			if(DTrack[c].AmpEnvStage == ST_NONOTE)
 			{
-				DTrack[c].Started = false;
-				if (numT[DTrack[c].Chan] == c ) // if this voice is the active voice
-				{								// on the channel where it plays, mark current channel as not playing.
-					numT[DTrack[c].Chan] = -1;
-				}
-				DTrack[c]=DTrack[numtracks-1];
-
-				numtracks--; c--;
+				DeallocateVoice(c);
 			}
 			else
 				DTrack[c].Started = true;
@@ -480,26 +476,22 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
+	int vidx = GetVoice(channel);
 	if(note<120) // Note on
 	{
-		if ( numT[channel] != -1) // If a note exists on this channel ...
+		if (vidx != -1 )
 		{
-			if (DTrack[numT[channel]].Started==false )
+			if ( DTrack[vidx].AmpEnvStage && !DTrack[vidx].Started)
+				return;
+
+			if (Vals[9]==0) // If NNA is Noteoff, then, do so.
 			{
-				return; // Exit. probably the machine is muted.
-			}
-			else if (Vals[9]==0) // If NNA is Noteoff, then, do so.
-			{
-				DTrack[numT[channel]].NoteOff();
+				DTrack[vidx].NoteOff();
 			}
 		}
+		vidx = GetVoice(channel,true);
 
-		numT[channel]=numtracks;					// Get an avaiable voice
-		if (numtracks < MAX_SIMUL_TRACKS-1) numtracks++; //and mark it as unavaiable.
-														//(List maintained in ::Work())
-		
-		DTrack[numT[channel]].Chan=channel; // set it up
-		DTrack[numT[channel]].Started=false;
+		DTrack[vidx].Started=false;
 		globalpar.samplerate=pCB->GetSamplingRate();
 
 		float tmp=globalpar.OutVol;
@@ -508,35 +500,63 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 		{
 			if ( cmd == 0x0C ) globalpar.OutVol=(val*Vals[3]/8388352.0);  // (val*(Vals[3]/32767))/256
 
-			DTrack[numT[channel]].NoteOn(48,&globalpar); // C-4 always
+			DTrack[vidx].NoteOn(48,&globalpar); // C-4 always
 		}
 		else
 		{
 			if ( cmd == 0x0C ) globalpar.OutVol=(val*tmp/256.0);
 
-			DTrack[numT[channel]].NoteOn(note,&globalpar);
+			DTrack[vidx].NoteOn(note,&globalpar);
 		}
 
 		globalpar.OutVol=tmp;	//restore outvol
 	}
-
-	else 
+	else if (vidx != -1)
 	{
-		if (numT[channel] != -1)
+		if (note==120)
 		{
-			if (DTrack[numT[channel]].Started==false )
-			{
-				return; // Exit. probably the machine is muted.
-			}
-			else if (note==120)
-			{
-				DTrack[numT[channel]].NoteOff(); // Note off
-			}
-			else if ( cmd == 0x0C )
-			{
-				if ( Vals[8]==0 ) DTrack[numT[channel]].OutVol=(val/256.0); // Comp 1.x
-				else DTrack[numT[channel]].OutVol=(val*globalpar.OutVol/256.0); // Comp 2.x
-			}
+			DTrack[vidx].NoteOff(); // Note off
+		}
+		else if ( cmd == 0x0C )
+		{
+			if ( Vals[8]==0 ) DTrack[vidx].OutVol=(val/256.0); // Comp 1.x
+			else DTrack[vidx].OutVol=(val*globalpar.OutVol/256.0); // Comp 2.x
 		}
 	}
 }
+
+int mi::GetVoice(int channel,bool getnew)
+{
+	// If this channel already has an allocated voice, use it.
+	if ( !getnew ) 
+	{
+		return allocatedvoice[channel];
+	}
+	// If not, search an available voice
+	int j=channel%MAX_SIMUL_TRACKS;
+	while (j<MAX_SIMUL_TRACKS && DTrack[j].Chan != -1) j++;
+	if ( j = MAX_SIMUL_TRACKS)
+	{
+		j=0;
+		while (j<MAX_SIMUL_TRACKS && DTrack[j].Chan != -1) j++;
+		if (j == MAX_SIMUL_TRACKS)
+		{
+			j= MAX_SIMUL_TRACKS * static_cast<unsigned int>(rand())/((RAND_MAX+1)*2);
+		}
+	}
+	allocatedvoice[channel]=j;
+	DTrack[j].Chan = channel;
+	return j;
+}
+void mi::DeallocateVoice(int voice)
+{
+	if ( DTrack[voice].Chan == -1)
+		return;
+
+	if (allocatedvoice[DTrack[voice].Chan] == voice )
+	{
+		allocatedvoice[DTrack[voice].Chan] = -1;
+	}
+	DTrack[voice].Chan = -1;
+}
+
