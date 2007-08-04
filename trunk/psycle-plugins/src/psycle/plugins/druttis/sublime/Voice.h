@@ -486,7 +486,7 @@ public:
 		//////////////////////////////////////////////////////////////
 		//	Noise
 		//////////////////////////////////////////////////////////////
-		if ((m_globals->m_noise_level.GetTarget() == 0.0f) && m_globals->m_noise_level.IsIdle())
+		if ((m_globals->m_noise_level.GetTarget() == 0.0f && m_globals->m_noise_level.IsIdle()) || m_noise_decay.IsIdle())
 		{
 			Fill(m_out2, 0.0f, numsamples);
 		}
