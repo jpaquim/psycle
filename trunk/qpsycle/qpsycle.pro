@@ -18,7 +18,8 @@ DEPENDPATH += . \
     src/gui/machineview \
     src/gui/patternview \
     src/gui/sequencer \
-    src/gui/waveview
+    src/gui/waveview \
+	src/configdlg
 INCLUDEPATH += . \
     src/ \
     src/model \
@@ -29,7 +30,7 @@ INCLUDEPATH += . \
     src/gui/sequencer \
     src/audiodrivers \
     src/mididrivers \
-	src/configdlg
+	src/gui/configdlg
 HEADERS += src/gui/mainwindow.h \
     src/model/instrumentsmodel.h \
     src/gui/global.h \
