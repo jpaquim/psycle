@@ -28,14 +28,15 @@ INCLUDEPATH += . \
     src/gui/waveview \
     src/gui/sequencer \
     src/audiodrivers \
-    src/mididrivers
+    src/mididrivers \
+	src/configdlg
 HEADERS += src/gui/mainwindow.h \
     src/model/instrumentsmodel.h \
     src/gui/global.h \
     src/gui/configuration.h \
     src/gui/inputhandler.h \
     src/gui/patternbox.h \
-    src/gui/audioconfigdlg.h \
+    src/gui/configdlg/audioconfigdlg.h \
     src/gui/samplebrowser.h \
     src/gui/logconsole.h \
     src/gui/machineview/machinegui.h \
@@ -67,7 +68,7 @@ SOURCES += qpsycle.cpp \
     src/gui/configuration.cpp \
     src/gui/inputhandler.cpp \
     src/gui/patternbox.cpp \
-    src/gui/audioconfigdlg.cpp \
+    src/gui/configdlg/audioconfigdlg.cpp \
     src/gui/samplebrowser.cpp \
 	src/gui/logconsole.cpp \
     src/gui/machineview/machinegui.cpp \
