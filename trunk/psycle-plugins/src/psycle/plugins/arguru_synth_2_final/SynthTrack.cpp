@@ -126,7 +126,7 @@ void CSynthTrack::InitEnvelopes(bool force)
 		AmpEnvStage=1;
 		AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
 	}
-	else if (AmpEnvStage < 5)
+	else if (AmpEnvStage < 4)
 	{
 		AmpEnvStage=5;
 		AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
@@ -140,7 +140,7 @@ void CSynthTrack::InitEnvelopes(bool force)
 		VcfEnvStage=1;
 		VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
 	}
-	else if (VcfEnvStage < 5)
+	else if (VcfEnvStage < 4)
 	{
 		VcfEnvStage=5;
 		VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
