@@ -48,5 +48,6 @@
 	 <file>images/pat_addbar.png</file>
 	 <file>images/pat_delbar.png</file>
 	 <file>images/sample-browser.png</file>
+	 <file>images/def-background.png</file>
  </qresource>
  </RCC>

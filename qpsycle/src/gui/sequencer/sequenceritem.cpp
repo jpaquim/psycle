@@ -55,7 +55,7 @@ void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * 
 		painter->setPen( Qt::white ); 
 	}
 	QColor col = QColorFromLongColor( sequenceEntry_->pattern()->category()->color() ); 
-	painter->setBrush( col ); 
+	painter->setBrush(QBrush(col , QPixmap(":/images/def-background.png", 0))); 
 	painter->drawRect( boundingRect() ); // FIXME: need to take border width into account.
 	painter->setPen( Qt::white ); 
 	painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
