@@ -422,13 +422,15 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		//	Left
 		//////////////////////////////////////////////////////////
 
-		*psamplesleft = phaser_left.Tick(chorus_left.Tick(*++psamplesleft + rnd));
+		++psamplesleft;
+		*psamplesleft = phaser_left.Tick(chorus_left.Tick(*psamplesleft + rnd));
 
 		//////////////////////////////////////////////////////////
 		//	Right
 		//////////////////////////////////////////////////////////
 
-		*psamplesright = phaser_right.Tick(chorus_right.Tick(*++psamplesright + rnd));
+		++psamplesright;
+		*psamplesright = phaser_right.Tick(chorus_right.Tick(*psamplesright + rnd));
 	}
 	while (--numsamples);
 }
