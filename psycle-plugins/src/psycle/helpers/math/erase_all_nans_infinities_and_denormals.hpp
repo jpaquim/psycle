@@ -7,7 +7,7 @@
 #endif
 namespace psycle
 {
-	namespace common
+	namespace helpers
 	{
 		namespace math
 		{

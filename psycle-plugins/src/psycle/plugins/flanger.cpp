@@ -14,7 +14,7 @@
 #include <vector>
 namespace psycle { namespace plugin {
 
-namespace math = common::math;
+namespace math = helpers::math;
 
 class Flanger : public Plugin
 {

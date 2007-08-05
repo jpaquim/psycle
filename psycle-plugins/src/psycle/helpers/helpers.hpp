@@ -1,51 +1,55 @@
 ///\interface psycle::helpers
 #pragma once
-//#include <psycle/host/detail/project.hpp>
-#include <string> // to declare hexstring_to_integer
-#include <cmath> // for M_PI ///\todo user <psycle/helpers/math/pi.hpp>
-#include <cstdint>
-#include <boost/static_assert.hpp>
+#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/truncate.hpp>
+#include <psycle/helpers/math/log.hpp>
 #include <universalis/compiler/numeric.hpp>
+#include <boost/static_assert.hpp>
+#include <string> // to declare hexstring_to_integer
+#include <cstdint>
 namespace psycle
 {
-	namespace host
+	namespace helpers
 	{
 		/// the pi constant as a 32-bit floating point number
-		float const F_PI =
-			#if defined M_PI
-				static_cast<float>(M_PI)
-			#else
-				3.14159265358979323846f
-			#endif
-			;
+		float const F_PI = math::pi_f;
 
 		/// parses an hexadecimal string to convert it to an integer
 		template<typename X>
 		void hexstring_to_integer(std::string const &, X &);
 
 		/// linearly maps a byte (0 to 255) to a float (0 to 1).
-		///\todo check if the table lookup is actually faster than calculating.
 		///\todo needs some explanation about why the tables have a length of 257.
+		///\todo make that a namespace
 		class CValueMapper
 		{
 			public:
-				CValueMapper();
-				~CValueMapper();
+				/// contructor.
+				///\todo not needed since everything is static
+				CValueMapper() {}
+
+				/// destructor.
+				///\todo not needed since everything is static
+				~CValueMapper() {}
+
 				/// maps a byte (0 to 255) to a float (0 to 1).
-				static inline float Map_255_1(int iByte)
+				static inline float Map_255_1(int byte)
 				{	
-					if(iByte >=0 && iByte <= 256)
-						return CValueMapper::fMap_255_1[iByte];
+					///\todo the conditional branches probably make it slower than direct calculation
+					if(0 <= byte && byte <= 256)
+						return CValueMapper::fMap_255_1[byte];
 					else	
-						return iByte * 0.00390625f;
+						return byte * 0.00390625f;
 				}
+
 				/// maps a byte (0 to 255) to a float (0 to 100).
-				static inline float Map_255_100(int iByte)
+				static inline float Map_255_100(int byte)
 				{
-					if(iByte >= 0 && iByte <= 256)
-						return CValueMapper::fMap_255_100[iByte];
+					///\todo the conditional branches probably make it slower than direct calculation
+					if(0 <= byte && byte <= 256)
+						return CValueMapper::fMap_255_100[byte];
 					else	
-						return iByte * 0.390625f;
+						return byte * 0.390625f;
 				}
 			private:
 				static float fMap_255_1[257];
@@ -53,49 +57,23 @@ namespace psycle
 		};
 
 		///\todo doc
-		inline float fast_log2(float const f)
-		{ 
-			BOOST_STATIC_ASSERT((sizeof f == 4));
-			//assert(f > 0);
-			union tmp_union {
-				float f;
-				std::uint32_t i;
-			} tmp;
-			tmp.f = f;
-			return ((tmp.i & 0x7f800000) >> 23) - 0x7f + (tmp.i & 0x007fffff) / (float)0x800000; 
+		inline float fast_log2(float f)
+		{
+			return math::log2(f);
 		}
 
 		/// converts a floating point number to an integer.
+		///\todo specify the rounding mode
+		inline std::int32_t f2i(double d) 
+		{ 
+			return math::truncated(d);
+		}
+		
+		/// converts a floating point number to an integer.
+		///\todo specify the rounding mode
 		inline std::int32_t f2i(float f) 
 		{ 
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
-				///\todo not always the fastest when using sse(2)
-				///\todo we can also use C1999's lrint if available
-				///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
-				#if 0 // note: this is not as fast as one might expect.
-					std::int32_t i;
-					double const half(0.5);
-					_asm
-					{ 
-						fld f;
-						fsub half;
-						fistp i;
-					} 
-					return i;
-				#else
-					const double magic = 6755399441055744.0; // 2^51 + 2^52
-					union tmp_union
-					{
-						double d;
-						int i;
-					} tmp;
-					tmp.d = (d - 0.5) + magic;
-					return tmp.i;
-				#endif
-			#else
-				///\todo specify the rounding mode
-				return static_cast<std::int32_t>(f);
-			#endif
+			return math::truncated(f);
 		}
 		
 		/// clipping.
@@ -110,73 +88,48 @@ namespace psycle
 		}
 
 		/// clipping.
-		inline int f2iclip16(float flt) 
+		inline int f2iclip16(float f) 
 		{ 
-			if (flt <-32767.0f)
-			{
-				return -32767;
-			}
-			if (flt > 32767.0f)
-			{
-				return 32767;
-			}
-			return f2i(flt);
+			int const l(32767);
+			if(f < -l) return -l;
+			if(f > +l) return +l;
+			return f2i(f);
 		}
 
 		/// clipping.
-		inline int f2iclip18(float flt) 
+		inline int f2iclip18(float f) 
 		{ 
-			if (flt <-131071.0f)
-			{
-				return -131071;
-			}
-			if (flt > 131071.0f)
-			{
-				return 131071;
-			}
-			return f2i(flt);
+			int const l(131071);
+			if(f < -l) return -l;
+			if(f > +l) return +l;
+			return f2i(f);
 		}
 
 		/// clipping.
-		inline int f2iclip20(float flt) 
+		inline int f2iclip20(float f) 
 		{ 
-			if (flt <-524287.0f)
-			{
-				return -524287;
-			}
-			if (flt > 524287.0f)
-			{
-				return 524287;
-			}
-			return f2i(flt);
+			int const l(524287);
+			if(f < -l) return -l;
+			if(f > +l) return +l;
+			return f2i(f);
 		}
 
 		/// clipping.
-		inline int f2iclip24(float flt) 
+		inline int f2iclip24(float f)
 		{ 
-			if (flt <-8388607.0f)
-			{
-				return -8388607;
-			}
-			if (flt > 8388607.0f)
-			{
-				return 8388607;
-			}
-			return f2i(flt);
+			int const l(8388607);
+			if(f < -l) return -l;
+			if(f > +l) return +l;
+			return f2i(f);
 		}
 
 		/// clipping.
-		inline int f2iclip32(float flt) 
+		inline int f2iclip32(float f)
 		{ 
-			if (flt <-2147483647.0f)
-			{
-				return -2147483647;
-			}
-			if (flt > 2147483647.0f)
-			{
-				return 2147483647;
-			}
-			return f2i(flt);
+			int const l(2147483647);
+			if(f < -l) return -l;
+			if(f > +l) return +l;
+			return f2i(f);
 		}
 	}
 }

@@ -1,25 +1,52 @@
 #pragma once
+#include <diversalis/processor.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 namespace psycle
 {
-	namespace common
+	namespace helpers
 	{
 		namespace math
 		{
-			std::int32_t inline truncated(double x)
+			/// converts a floating point number to an integer.
+			///\todo specify the rounding mode
+			std::int32_t inline truncated(double d)
 			{
-				#if !defined DIVERSALIS__PROCESSOR__X86
-					#error please verify this code
-				#endif
-				BOOST_STATIC_ASSERT((sizeof x == 8));
+				BOOST_STATIC_ASSERT((sizeof d == 8));
 				union result_union
 				{
 					double d;
-					int i;
+					std::int32_t i;
 				} result;
-				result.d = x - 0.5 + 6755399441055744ULL; // 2^51 + 2^52
+				result.d = d - 0.5 + 6755399441055744ULL; // 2^51 + 2^52
 				return result.i;
+			}
+
+			/// converts a floating point number to an integer.
+			///\todo specify the rounding mode
+			std::int32_t inline truncated(float f)
+			{
+				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+					///\todo not always the fastest when using sse(2)
+					///\todo we can also use C1999's lrint if available
+					///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
+					#if 1 // note: this is not as fast as one might expect.
+						std::int32_t i;
+						double const half(0.5);
+						_asm
+						{ 
+							fld f;
+							fsub half;
+							fistp i;
+						} 
+						return i;
+					#else
+						return truncated(double(f));
+					#endif
+				#else
+					///\todo specify the rounding mode
+					return static_cast<std::int32_t>(f);
+				#endif
 			}
 		}
 	}

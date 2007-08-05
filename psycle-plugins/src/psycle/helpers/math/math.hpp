@@ -8,7 +8,7 @@
 #include "erase_all_nans_infinities_and_denormals.hpp"
 namespace psycle
 {
-	namespace common
+	namespace helpers
 	{
 		namespace math
 		{
