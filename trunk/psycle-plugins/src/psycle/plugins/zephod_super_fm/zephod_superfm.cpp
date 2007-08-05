@@ -506,8 +506,10 @@ void CTrack::Generate(float *psamplesleft, float *psamplesright, int numsamples)
 			temp=0;
 
 			// Adding to buffer
-			*++psamplesleft = *psamplesleft+temp;
-			*++psamplesright = *psamplesright+temp;
+			++psamplesleft;
+			*psamplesleft = *psamplesleft+temp;
+			++psamplesright;
+			*psamplesright = *psamplesright+temp;
 
 			// New phases
 			phase+=freq;
