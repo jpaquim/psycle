@@ -29,20 +29,19 @@ extern const float POW2TABLEFACT;
 //
 //////////////////////////////////////////////////////////////////////
 extern float pow2table[POW2TABLESIZE];
-//////////////////////////////////////////////////////////////////////
-//
-//	float2int :
-//
-//////////////////////////////////////////////////////////////////////
-extern unsigned short cwTrunc;
-extern const double fimagic;
-extern const double fihalf;
-extern double fitmp;
 
-inline int f2i(double x)
+///	converts a double to an integer
+inline int f2i(double d)
 {
-	fitmp = x - fihalf + fimagic;
-	return *(int *) &fitmp;
+	const double magic = 6755399441055744.0;
+	const double half = 0.5;
+	union tmp_union
+	{
+		double d;
+		int i,
+	} tmp;
+	tmp.d = d - half + magic;
+	return tmp.i;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -52,7 +51,7 @@ inline int f2i(double x)
 //////////////////////////////////////////////////////////////////////
 inline int floor2i(float x)
 {
-	#if defined _MSC_VER && defined _M_IX86
+	#if defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
 	__asm
 	{
 		FLD		DWORD PTR [x]
@@ -64,8 +63,9 @@ inline int floor2i(float x)
 		POP		EAX
 		POP		EDX
 		ADD		EDX, 7FFFFFFFH
-		SBB		EAX, 0 // [bohan] does the compiler understand that, since there no return statement? ... this code might be what's making druttis plugins behave weirdly when built with msvc 8
+		SBB		EAX, 0
 	}
+	///\todo [bohan] does the compiler understand that, since there no return statement? ... this code might be what's making druttis plugins behave weirdly when built with msvc 8
 	#else
 		return std::floor(x);
 	#endif
@@ -88,7 +88,7 @@ inline float fand(float val, int mask)
 #pragma warning( disable : 4035 )
 inline float fastexp(double x)
 {
-	#if defined _MSC_VER && defined _M_IX86
+	#if defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
 	__asm
 	{
         FLDL2E
@@ -126,6 +126,7 @@ my_overflow:
         ADD     ESP,16
 my_end:
 	}
+	///\todo [bohan] does the compiler understand that, since there no return statement? ... this code might be what's making druttis plugins behave weirdly when built with msvc 8
 	#else
 		return std::exp(x);
 	#endif

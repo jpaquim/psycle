@@ -20,11 +20,7 @@ const float POW2TABLEFACT = 16384.0f;
 //	fm & pm tables
 float *pfmtable;
 float *ppmtable;
-//	Truncation for f2i
-unsigned short cwTrunc = 0x1f72;
-const double fimagic = 6755399441055744.0;
-const double fihalf = 0.5;
-double fitmp;
+
 //////////////////////////////////////////////////////////////////////
 //
 //	InitializeDSP
