@@ -155,6 +155,7 @@ private:
 	CAllPass	all[NALLS];
 	CLowpass	fl;
 	CLowpass	fr;
+	int		prevfilters;
 
 };
 
@@ -163,6 +164,7 @@ PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 mi::mi()
 {
 	Vals=new int[8];
+	prevfilters=0;
 }
 
 mi::~mi()
@@ -188,10 +190,21 @@ void mi::ParameterTweak(int par, int val)
 	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 
-	if(par<4)
+	if(par<2)
 	{
-	comb.Initialize(Vals[0],Vals[1]);
-	SetAll(Vals[2]);
+		comb.Initialize(Vals[0],Vals[1]);
+	}
+	else if ( par == 2)
+	{
+		SetAll(Vals[2]);
+	}
+	else if ( par == 7)
+	{
+		for(int c=prevfilters;c<Vals[par];c++)
+		{
+			all[c].Clear();
+		}
+		prevfilters=Vals[par]-1;
 	}
 }
 
@@ -215,9 +228,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	float const dry_amount	=(float)Vals[5]*0.00390625f;
 	float const wet_amount	=(float)Vals[6]*0.00390625f;
 	
-	float l_revresult=0;
-	float r_revresult=0;
-
 	float g=(float)Vals[3]*0.0009765f;
 	--psamplesleft;
 	--psamplesright;
@@ -229,19 +239,15 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		float const sl = *++psamplesleft;
 		float const sr = *++psamplesright;
 		
-		l_revresult=0;
-		r_revresult=0;
-
 		comb.Work(sl+2,sr+2);
-		l_revresult+=comb.left_output;
-		r_revresult+=comb.right_output;
+		float l_revresult=comb.left_output;
+		float r_revresult=comb.right_output;
 		
-
 		for(int c=0;c<na;c++)
 		{
-		all[c].Work(l_revresult,r_revresult,g);
-		l_revresult=all[c].left_output;
-		r_revresult=all[c].right_output;
+			all[c].Work(l_revresult,r_revresult,g);
+			l_revresult=all[c].left_output;
+			r_revresult=all[c].right_output;
 		}
 
 		*psamplesleft=sl*dry_amount+fl.Process(l_revresult,cf)*wet_amount;
@@ -297,6 +303,6 @@ void mi::SetAll(int delay)
 {
 	for(int c=0;c<NALLS;c++)
 	{
-	all[c].Initialize(delay*(c+1)+(c*c),int(float(c)*1.3f));
+		all[c].Initialize(delay*(c+1)+(c*c),int(float(c)*1.3f));
 	}
 }
