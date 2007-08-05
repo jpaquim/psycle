@@ -1,7 +1,41 @@
 #include <packageneric/pre-compiled.private.hpp>
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+	#include <xmmintrin.h>
+#endif
 #include "CombFilter.hpp"
 
 CCombFilter::CCombFilter()
+{
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+	leftBuffer = static_cast<float*>(_aligned_malloc(MAX_COMB_DELAY*sizeof(float),16));
+	rightBuffer = static_cast<float*>(_aligned_malloc(MAX_COMB_DELAY*sizeof(float),16));
+#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+	posix_memalign(leftBuffer,16,MAX_COMB_DELAY*sizeof(float));
+	posix_memalign(rightBuffer,16,MAX_COMB_DELAY*sizeof(float));
+#else
+	leftBuffer= new float[MAX_COMB_DELAY];
+	rightBuffer = new float[MAX_COMB_DELAY];
+#endif
+
+	Counter=MAX_COMB_DELAY-4;
+}
+
+CCombFilter::~CCombFilter() throw()
+{
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+	_aligned_free(leftBuffer);
+	_aligned_free(rightBuffer);
+#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+	free(leftBuffer);
+	free(rightBuffer);
+#else
+	delete [] leftBuffer;
+	delete [] rightBuffer;
+#endif
+
+}
+
+void CCombFilter::Clear()
 {
 	for(int c=0;c<MAX_COMB_DELAY;c++)
 	{
@@ -11,21 +45,10 @@ CCombFilter::CCombFilter()
 
 	left_output=0;
 	right_output=0;
-
-}
-
-CCombFilter::~CCombFilter() throw()
-{
-
 }
 
 void CCombFilter::Initialize(int time, int stph)
 {
-	//l_Counter=MAX_COMB_DELAY-4;
-	//r_Counter=MAX_COMB_DELAY-4;
-	Counter=MAX_COMB_DELAY-4;
-	//l_delayedCounter=l_Counter-time;
-	//r_delayedCounter=r_Counter-(time+stph);
 	l_delayedCounter=Counter-time;
 	r_delayedCounter=l_delayedCounter-stph;
 	
