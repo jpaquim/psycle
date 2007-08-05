@@ -1,7 +1,13 @@
-///\file
-///\brief the original machine interface api
-///\see plugin.hpp a more object-oriented api
+///\interface psycle's native plugin interface api
+
 #pragma once
+
+// *** Note ***
+// Because this file may be used outside of the psycle project itself,
+// we should not introduce any dependency by including
+// anything that is not part of the c++ standard library.
+
+#include <cstdio> // This is NOT part of the interface. It would be better if plugins that want it included it themselves.
 
 namespace psycle
 {
@@ -15,8 +21,10 @@ namespace psycle
 		/// machine interface version
 		int const MI_VERSION = 11;
 
-		/// max number of pattern tracks
-		int const MAX_TRACKS = 64;
+		#if !defined(MAX_TRACKS) ///\todo remove define from host sources
+			/// max number of pattern tracks
+			int const MAX_TRACKS = 64;
+		#endif
 
 		/// max number of samples (per channel) that the Work function may ask to return
 		int const MAX_BUFFER_LENGTH = 256;
@@ -31,6 +39,8 @@ namespace psycle
 			int const NOTE_OFF = 255;
 		///\}
 
+		/// the pi constant.
+		/// note: this is also defined in <psycle/helpers/math.pi.hpp> but we want no dependency here
 		double const pi = 
 			#if defined M_PI // on some systems, #include <cmath> defines M_PI but this is not standard
 				M_PI
@@ -39,7 +49,7 @@ namespace psycle
 			#endif
 		;
 
-		//////////////////////////////////////////////////////////////////////////
+		/*////////////////////////////////////////////////////////////////////////*/
 
 		/// class to define the modificable parameters of the machine
 		class CMachineParameter
@@ -69,7 +79,7 @@ namespace psycle
 			int const MPF_STATE = 2;
 		///\}
 
-		//////////////////////////////////////////////////////////////////////////
+		/*////////////////////////////////////////////////////////////////////////*/
 
 		/// class defining the machine properties
 		class CMachineInfo
@@ -100,7 +110,7 @@ namespace psycle
 			int const CUSTOM_GUI = 16;
 		///\}
 
-		//////////////////////////////////////////////////////////////////////////
+		/*////////////////////////////////////////////////////////////////////////*/
 
 		/// callback functions to let plugins communicate with the host.
 		class CFxCallback
@@ -121,43 +131,54 @@ namespace psycle
 				virtual inline ~CFxCallback() throw() {}
 		};
 
-		//////////////////////////////////////////////////////////////////////////
+		/*////////////////////////////////////////////////////////////////////////*/
 		
 		/// base machine class
 		class CMachineInterface
 		{
 			public:
 				virtual inline ~CMachineInterface() {}
+				///\todo doc
 				virtual void Init() {}
+				///\todo doc
 				virtual void SequencerTick() {}
+				///\todo doc
 				virtual void ParameterTweak(int par, int val) {}
 
 				/// Work function
 				virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {}
 
+				///\todo doc
 				virtual void Stop() {}
 
 				///\name Export / Import
 				///\{
+					///\todo doc
 					virtual void PutData(void * pData) {}
+					///\todo doc
 					virtual void GetData(void * pData) {}
+					///\todo doc
 					virtual int GetDataSize() { return 0; }
 				///\}
 
+				///\todo doc
 				virtual void Command() {}
-
-				virtual void MuteTrack(int const i) {} /// Not used (yet?)
-				virtual bool IsTrackMuted(int const i) const { return false; } 	// Not used (yet?)
-
-				virtual void MidiNote(int const channel, int const value, int const velocity) {} /// Not used (yet?)
-				virtual void Event(uint32 const data) {} /// Not used (yet?)
-
+				///\todo doc. not used (yet?)
+				virtual void MuteTrack(int const i) {}
+				///\todo doc. not used (yet?)
+				virtual bool IsTrackMuted(int const i) const { return false; }
+				///\todo doc. not used (yet?)
+				virtual void MidiNote(int const channel, int const value, int const velocity) {}
+				///\todo doc. not used (yet?)
+				virtual void Event(uint32 const data) {}
+				///\todo doc
 				virtual bool DescribeValue(char* txt,int const param, int const value) { return false; }
-
-				virtual bool PlayWave(int const wave, int const note, float const volume) { return false; } /// Not used (prolly never)
+				///\todo doc. not used (prolly never)
+				virtual bool PlayWave(int const wave, int const note, float const volume) { return false; }
+				///\todo doc
 				virtual void SeqTick(int channel, int note, int ins, int cmd, int val) {}
-
-				virtual void StopWave() {} 	/// Not used (prolly never)
+				///\todo doc. not used (prolly never)
+				virtual void StopWave() {}
 
 			public:
 				/// initialize these members in the constructor
@@ -169,22 +190,35 @@ namespace psycle
 				CFxCallback * pCB;
 		};
 
-		//////////////////////////////////////////////////////////////////////////
-		
+		/*////////////////////////////////////////////////////////////////////////*/
+
 		// spelling INSTANCIATOR -> INSTANTIATOR
 		#define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) \
 			extern "C" \
 			{ \
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT ::CMachineInfo const * const PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION GetInfo() { return &info; } \
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT ::CMachineInterface *        PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION CreateMachine() { return new typename; } \
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT void                         PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION DeleteMachine(::CMachineInterface & plugin) { delete &plugin; } \
+				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT \
+				psycle::plugin_interface::CMachineInfo const * const \
+				PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION \
+				GetInfo() { return &info; } \
+				\
+				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT \
+				psycle::plugin_interface::CMachineInterface * \
+				PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION \
+				CreateMachine() { return new typename; } \
+				\
+				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT \
+				void \
+				PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION \
+				DeleteMachine(::CMachineInterface & plugin) { delete &plugin; } \
 			}
-		#if !defined _WIN64 && !defined _WIN32 && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN // [bohan] if it was only me, i'd keep these complex tests in a central place (see how the *same* thing is done in plugin.hpp for example).
+
+		/// we don't use universalis/diversalis here because we want no dependency
+		#if !defined _WIN64 && !defined _WIN32 && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
 			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT
 			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION
-		#elif defined _MSC_VER || defined __GNUG__ // [bohan] ditto
-			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport)
-			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
+		#elif defined _MSC_VER || defined __GNUG__
+			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport) // should work on mingw too
+			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl // should work on mingw too
 		#else
 			#error please add definition for your compiler
 		#endif
@@ -193,7 +227,9 @@ namespace psycle
 
 // for plugins that aren't namespace-aware
 using psycle::plugin_interface::MI_VERSION;
+#if !defined(MAX_TRACKS) ///\todo remove define from host sources
 using psycle::plugin_interface::MAX_TRACKS;
+#endif
 using psycle::plugin_interface::NOTE_MAX;
 using psycle::plugin_interface::NOTE_NO;
 using psycle::plugin_interface::NOTE_OFF;
@@ -210,5 +246,3 @@ using psycle::plugin_interface::CFxCallback;
 using psycle::plugin_interface::uint8; // deprecated anyway
 using psycle::plugin_interface::uint16; // deprecated anyway
 using psycle::plugin_interface::uint32; // deprecated anyway
-
-#include <cstdio> // would be better if plugins that want it included it themselves.
