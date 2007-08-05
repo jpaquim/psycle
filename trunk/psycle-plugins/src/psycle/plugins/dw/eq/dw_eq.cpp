@@ -1,6 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugins/plugin.hpp>
-#include <psycle/plugins/dw_filter.hpp>
+#include "../dw_filter.hpp"
 
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846
