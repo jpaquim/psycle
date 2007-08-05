@@ -1,9 +1,8 @@
-///\file
-///\brief interface file for psycle::host::CValueMapper.
+///\interface psycle::helpers
 #pragma once
 //#include <psycle/host/detail/project.hpp>
 #include <string> // to declare hexstring_to_integer
-#include <cmath> // for M_PI
+#include <cmath> // for M_PI ///\todo user <psycle/helpers/math/pi.hpp>
 #include <cstdint>
 #include <boost/static_assert.hpp>
 #include <universalis/compiler/numeric.hpp>
@@ -56,7 +55,6 @@ namespace psycle
 		///\todo doc
 		inline float fast_log2(float const f)
 		{ 
-			BOOST_STATIC_ASSERT((sizeof f == sizeof(int)));
 			BOOST_STATIC_ASSERT((sizeof f == 4));
 			//assert(f > 0);
 			union tmp_union {
@@ -74,7 +72,7 @@ namespace psycle
 				///\todo not always the fastest when using sse(2)
 				///\todo we can also use C1999's lrint if available
 				///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
-				#if 1
+				#if 0 // note: this is not as fast as one might expect.
 					std::int32_t i;
 					double const half(0.5);
 					_asm
