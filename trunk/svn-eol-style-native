@@ -1,0 +1,13 @@
+#! /bin/sh
+
+svn propset svn:eol-style native $(find $(dirname $0) \( \
+	-name \*.cpp -or \
+	-name \*.hpp -or \
+	-name \*.h -or \
+	-name \*.rc -or \
+	-name \*.txt -or \
+	-name \*.text -or \
+	-name \*.html -or \
+	-name README -or \
+	-name AUTHORS \
+\))
