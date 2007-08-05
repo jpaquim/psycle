@@ -1,5 +1,5 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/plugin.hpp>
+#include "plugin.hpp"
 
 #include "../dw_filter.hpp"
 

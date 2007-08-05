@@ -5,7 +5,7 @@
 /// \file
 /// \brief filter in the frequency domain using 2 poles
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/plugin.hpp>
+#include "plugin.hpp"
 #include <psycle/helpers/math/pi.hpp>
 #include <psycle/helpers/math/clip.hpp>
 #include <psycle/helpers/math/remainder.hpp>

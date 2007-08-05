@@ -5,7 +5,7 @@
 /// \file
 /// \brief a crash on purpose plugin
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/plugin.hpp>
+#include "plugin.hpp"
 #include <stdexcept>
 namespace psycle { namespace plugin {
 

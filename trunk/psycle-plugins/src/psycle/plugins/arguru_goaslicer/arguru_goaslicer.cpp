@@ -183,7 +183,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 #if 0
 
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/plugin.hpp>
+#include "plugin.hpp"
 ///\file
 ///\brief arguru simple distortion/saturator plugin
 namespace psycle { namespace plugin {

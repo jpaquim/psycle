@@ -5,7 +5,7 @@
 /// \file
 /// \brief delay modulated by a sine
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/plugin.hpp>
+#include "plugin.hpp"
 #include <psycle/helpers/math/sinus_sequence.hpp>
 #include <psycle/helpers/math/pi.hpp>
 #include <psycle/helpers/math/remainder.hpp>
