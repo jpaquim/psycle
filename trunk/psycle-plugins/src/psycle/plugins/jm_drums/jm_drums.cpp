@@ -1,6 +1,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include "drum.hpp"
+#include <cstdlib>
 
 #define DRUM_VERSION "2.2"
 #define MAX_SIMUL_TRACKS 16
@@ -541,7 +542,7 @@ int mi::GetVoice(int channel,bool getnew)
 		while (j<MAX_SIMUL_TRACKS && DTrack[j].Chan != -1) j++;
 		if (j == MAX_SIMUL_TRACKS)
 		{
-			j= MAX_SIMUL_TRACKS * static_cast<unsigned int>(rand())/((RAND_MAX+1)*2);
+			j= MAX_SIMUL_TRACKS * static_cast<unsigned int>(std::rand())/((RAND_MAX+1)*2);
 		}
 	}
 	allocatedvoice[channel]=j;
