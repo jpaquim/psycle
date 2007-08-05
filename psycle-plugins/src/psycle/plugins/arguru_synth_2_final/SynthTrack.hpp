@@ -157,7 +157,8 @@ inline void CSynthTrack::ArpTick()
 
 	if(++ArpCounter>=syntp->arp_cnt)  ArpCounter=0;
 
-	InitEnvelopes();
+	InitEnvelopes(AmpEnvStage<4);
+	if ( oscglide == 0.0f ) oscglide =256.0f;
 }
 
 inline void CSynthTrack::FilterTick()
