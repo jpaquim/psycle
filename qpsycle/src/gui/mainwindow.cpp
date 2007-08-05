@@ -209,7 +209,7 @@ void MainWindow::onOpenSongRequest()
 	}
 
 	QString songPath = QString::fromStdString( Global::configuration().songPath() );
-	QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psy (*.psy)" );
+	QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psycle Songs (*.psy)" );
 
 	if ( !fileName.isEmpty() ) {
 		psy::core::Player::Instance()->stop();

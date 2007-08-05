@@ -58,7 +58,8 @@ SampleBrowser::SampleBrowser( InstrumentsModel *instrumentsModel,
 }
 
 SampleBrowser::~SampleBrowser() 
-{}
+{
+}
 
 void SampleBrowser::createLoadedSamplesList()
 {
