@@ -1,9 +1,10 @@
 #pragma once
-#include <xmmintrin.h>
-
 #include <diversalis/processor.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
+#if 0 && defined __SSE__
+	//#include <xmmintrin.h>
+#endif
 namespace psycle
 {
 	namespace common
