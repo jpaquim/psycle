@@ -27,12 +27,17 @@ def do_one_file(path, spaces_to_tab):
 					indentation = False
 					if spaces != 0: # sometimes indentation with spaces is inconsistent, using varying lengths
 						print sys.argv[0] + ':', 'inconsistent space indentation found in file:', path, '; line:', line_number
-						#inconsistent = True
+						inconsistent = True
 						chars.append('\t')
+			elif char == '\t':
+					space_found = True
+					print sys.argv[0] + ':', 'tab not used for indentation found in file:', path, ': line:', line_number
+					chars.append(char * spaces_to_tab)
+					continue
 			chars.append(char)
 	if space_found:
-		if not inconsistent:
-			print sys.argv[0] + ':', 'found indentation space in file:', path, '; replacing ...'
+		if True: #not inconsistent:
+			print sys.argv[0] + ':', 'found space or tab missuse in file:', path, '; replacing ...'
 			f = file(path, 'w')
 			for char in chars:
 				f.write(char)
