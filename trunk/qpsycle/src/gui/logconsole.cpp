@@ -29,7 +29,7 @@ LogConsole::LogConsole()
 	layOut_->addWidget(logText);
 	layOut_->addWidget(toolBar_);
 	setLayout(layOut_);
-	logText->append("Logging Console is active\n");
+	logText->append("Logging Console is active");
 }
 void LogConsole::AddNormalText(QString text)
 {
