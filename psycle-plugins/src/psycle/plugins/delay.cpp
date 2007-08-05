@@ -5,7 +5,7 @@
 /// \file
 /// \brief delay
 #include <packageneric/pre-compiled.private.hpp>
-#include <psycle/plugin.hpp>
+#include "plugin.hpp"
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {
