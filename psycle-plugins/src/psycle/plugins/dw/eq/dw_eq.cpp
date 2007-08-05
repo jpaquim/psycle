@@ -1,18 +1,14 @@
 #include <packageneric/pre-compiled.private.hpp>
-#include "plugin.hpp"
-
-#include "../dw_filter.hpp"
+#include <psycle/plugins/plugin.hpp>
+#include <psycle/plugins/dw_filter.hpp>
 
 #ifndef M_PI
- #define M_PI 3.14159265358979323846
+	#define M_PI 3.14159265358979323846
 #endif
 
 namespace psycle { namespace plugin {
 
-///////////////////////////////////
-// dw eq
-
-
+/// dw eq
 class dw_eq : public Plugin
 {
 public:
@@ -22,7 +18,7 @@ public:
 		out << "parametric eq plugin by d.w.aley" << std::endl;
 	}
 
-	enum
+	enum parameters
 	{
 		prm_freq1=0,prm_freq2,	prm_freq3,	prm_freq4,
 		prm_gain1,	prm_gain2,	prm_gain3,	prm_gain4,
@@ -30,7 +26,7 @@ public:
 		num_params
 	};
 
-	enum
+	enum channels
 	{
 		chan_left=0, chan_right
 	};
