@@ -51,7 +51,7 @@ namespace psycle
 					std::uint64_t const exponent_mask
 						(
 				#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-						0x7f80000000000000
+						0x7f80000000000000LL
 				#else
 				#error sorry, was not much thought
 				#endif
