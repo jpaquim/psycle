@@ -7,12 +7,16 @@ def do_one_file(path):
 	lines = f.readlines()
 	f.close()
 	chars = []
+	replaced = False
 	for line in lines:
 		for char in line:
 			if char != '\r': chars.append(char)
-	f = file(path, 'w')
-	for char in chars: f.write(char)
-	f.close()
+			else: replaced = True
+	if replaced:
+		f = file(path, 'w')
+		for char in chars: f.write(char)
+		f.close()
+		print 'removed carriage return characters in', path
 
 if __name__ == '__main__':
 	for path in sys.argv[1:]:
