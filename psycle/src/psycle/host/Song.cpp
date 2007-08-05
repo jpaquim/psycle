@@ -917,7 +917,8 @@ namespace psycle
 			if(instrument != PREV_WAV_INS)
 			{
 				Invalided = true;
-				::Sleep(LOCK_LATENCY); ///< ???
+				///\todo lock/unlock
+				::Sleep(256);
 			}
 			RiffFile file;
 			RiffChunkHeader hd;
@@ -1030,7 +1031,8 @@ namespace psycle
 				return 0; 
 			}
 			Invalided = true;
-			::Sleep(LOCK_LATENCY); ///< ???
+			///\todo lock/unlock
+			::Sleep(256);
 			// sample type	
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());

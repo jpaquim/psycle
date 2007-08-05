@@ -95,7 +95,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
 				}
 				_global.pConfig->_pOutputDriver->Enable(false);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 				_global.pConfig->_pMidiInput->Close();
 
 				return FALSE;
@@ -185,7 +186,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			_global.pConfig->Write();
 			_global.pConfig->_pOutputDriver->Enable(false);
-			Sleep(LOCK_LATENCY);
+			///\todo lock/unlock
+			Sleep(256);
 			_global.pConfig->_pMidiInput->Close();
 			CNewMachine::DestroyPluginInfo();
 			return CWinApp::ExitInstance();

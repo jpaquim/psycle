@@ -860,12 +860,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				KillRedo();
 				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 				_outputActive = false;
 				Global::pConfig->_pOutputDriver->Enable(false);
 				// midi implementation
 				Global::pConfig->_pMidiInput->Close();
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
 				Global::_pSong->New();
 				_outputActive = true;
@@ -1807,12 +1809,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				KillRedo();
 				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 				_outputActive = false;
 				Global::pConfig->_pOutputDriver->Enable(false);
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
 				CString str = ofn.lpstrFile;
 				int index = str.ReverseFind('.');
@@ -2050,12 +2054,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pParentMain->CloseAllMacGuis();
 			Global::pPlayer->Stop();
-			Sleep(LOCK_LATENCY);
+			///\todo lock/unlock
+			Sleep(256);
 			_outputActive = false;
 			Global::pConfig->_pOutputDriver->Enable(false);
 			// MIDI IMPLEMENTATION
 			Global::pConfig->_pMidiInput->Close();
-			Sleep(LOCK_LATENCY);
+			///\todo lock/unlock
+			Sleep(256);
 			
 			OldPsyFile file;
 			if (!file.Open(fName.c_str()))
