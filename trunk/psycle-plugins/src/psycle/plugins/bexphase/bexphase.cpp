@@ -246,10 +246,11 @@ void bexphase::Work(float *psamplesleft, float *psamplesright , int numsamples, 
 			*psamplesleft = (*psamplesleft * dry) + (inbufl[z] * wet);
 		}
 
-		*psamplesright++ = ((inbufr[inpoint] - *psamplesright)*diff)+(*psamplesright*undiff);
-		*psamplesleft++ = ((inbufl[inpoint] - *psamplesleft)*diff)+(*psamplesleft*undiff);
+		*psamplesright = ((inbufr[inpoint] - *psamplesright)*diff)+(*psamplesright*undiff);
+		++psamplesright;
+		*psamplesleft = ((inbufl[inpoint] - *psamplesleft)*diff)+(*psamplesleft*undiff);
+		++psamplesleft;
 		if ( ++inpoint == inbuflen ) inpoint = 0;
-
 	}
 	while(--numsamples);
 }
