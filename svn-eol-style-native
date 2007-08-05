@@ -9,6 +9,13 @@ svn propset svn:eol-style native $(find $(dirname $0) \( \
 	-name \*.txt -or \
 	-name \*.text -or \
 	-name \*.html -or \
+	-name SConstruct -or \
 	-name README -or \
-	-name AUTHORS \
+	-name INSTALL -or \
+	-name LICENSE -or \
+	-name AUTHORS -or \
+	-name NEWS -or \
+	-name TODO -or \
+	-name HACKING -or \
+	-name ChangeLog \
 \))
