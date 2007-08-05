@@ -67,7 +67,7 @@ inline int floor2i(float x)
 	}
 	///\todo [bohan] does the compiler understand that, since there no return statement? ... this code might be what's making druttis plugins behave weirdly when built with msvc 8
 	#else
-		return std::floor(x);
+		return static_cast<int>(std::floor(x));
 	#endif
 }
 //////////////////////////////////////////////////////////////////////
@@ -85,7 +85,9 @@ inline float fand(float val, int mask)
 //	fastexp
 //
 //////////////////////////////////////////////////////////////////////
+#if defined _M_IX86
 #pragma warning( disable : 4035 )
+#endif
 inline float fastexp(double x)
 {
 	#if defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
@@ -131,7 +133,9 @@ my_end:
 		return std::exp(x);
 	#endif
 }
+#if defined _M_IX86
 #pragma warning( default : 4035 )
+#endif
 //////////////////////////////////////////////////////////////////////
 //
 //	fastpow2 : fast, using lookup table, handles negative exponents
@@ -139,12 +143,15 @@ my_end:
 //////////////////////////////////////////////////////////////////////
 inline float fastpow2(float x)
 {
-	long *px = (long*) &x;
-	const long  lx = floor2i(x);
-	const float dx = x - (float) lx;
-	x = pow2table[int(dx * POW2TABLEFACT)];
-	*px += (lx<<23);
-	return x;
+	union tmp_union
+	{
+		float f;
+		long i;
+	} tmp;
+	const long lx = floor2i(x);
+	tmp.f = pow2table[int((x - (float) lx) * POW2TABLEFACT)];
+	tmp.i += lx << 23;
+	return tmp.i;
 }
 //////////////////////////////////////////////////////////////////////
 //
