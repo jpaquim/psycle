@@ -391,7 +391,6 @@ public:
 		default :
 			Fill(m_osc1_fm_out, 0.0f, numsamples);
 			Fill(m_osc2_fm_out, 0.0f, numsamples);
-			break;
 		}
 		//////////////////////////////////////////////////////////////
 		//	LFO 1
@@ -433,8 +432,7 @@ public:
 			m_lfo1_phase = AddLFO(m_osc1_fm_out, m_osc1_fm_out, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
 			break;
 		case DST_OFF :
-		default :
-			break;
+		default: ;
 		}
 		//////////////////////////////////////////////////////////////
 		//	LFO 2
@@ -480,8 +478,7 @@ public:
 			m_lfo2_phase = AddLFO3(m_osc1_fm_out, m_osc1_fm_out, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
 			break;
 		case DST_OFF :
-		default :
-			break;
+		default: ;
 		}
 		//////////////////////////////////////////////////////////////
 		//	Noise
@@ -588,8 +585,7 @@ public:
 			}
 			while (nsamples);
 			break;
-		default :
-			break;
+		default: ;
 		}
 		idx = m_globals->m_osc2_vowelnum;
 		if (idx > -1)
@@ -598,7 +594,8 @@ public:
 			nsamples = numsamples;
 			do
 			{
-				*pout2 = m_osc2_formant.Next(*++pout2, idx);
+				++pout2;
+				*pout2 = m_osc2_formant.Next(*pout2, idx);
 			}
 			while (--nsamples);
 		}
@@ -664,7 +661,7 @@ public:
 			while (nsamples);
 			break;
 		case PMODE_OFF :
-		default :
+		default:
 			do
 			{
 				amt = m_osc1_incr.Clip(nsamples);
@@ -680,7 +677,6 @@ public:
 				while (--amt);
 			}
 			while (nsamples);
-			break;
 		}
 		idx = m_globals->m_osc1_vowelnum;
 		if (idx > -1)
@@ -689,7 +685,8 @@ public:
 			nsamples = numsamples;
 			do
 			{
-				*pout1 = m_osc1_formant.Next(*++pout1, idx);
+				++pout1;
+				*pout1 = m_osc1_formant.Next(*pout1, idx);
 			}
 			while (--nsamples);
 		}
@@ -703,7 +700,8 @@ public:
 		{
 			do
 			{
-				*pout1 = *++pout1 * *++pout2;
+				++pout1;
+				*pout1 = *pout1 * *++pout2;
 			}
 			while (--nsamples);
 		}
@@ -755,7 +753,8 @@ public:
 			do
 			{
 				m_flt1.InitSimple(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.SimpleLP12(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.SimpleLP12(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -763,7 +762,8 @@ public:
 			do
 			{
 				m_flt1.InitSimple(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.SimpleLP24(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.SimpleLP24(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -771,7 +771,8 @@ public:
 			do
 			{
 				m_flt1.InitSimple(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.SimpleLP36(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.SimpleLP36(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -779,7 +780,8 @@ public:
 			do
 			{
 				m_flt1.InitSimple(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.SimpleHP12(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.SimpleHP12(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -787,7 +789,8 @@ public:
 			do
 			{
 				m_flt1.InitSimple(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.SimpleHP24(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.SimpleHP24(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -795,7 +798,8 @@ public:
 			do
 			{
 				m_flt1.InitMoog(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.MoogLP24(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.MoogLP24(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -803,7 +807,8 @@ public:
 			do
 			{
 				m_flt1.InitMoog(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.MoogHP24(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.MoogHP24(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -811,10 +816,12 @@ public:
 			do
 			{
 				m_flt1.InitMoog(*++pflt1_freq + *++pout2, *++pflt1_q);
-				*pout1 = m_flt1.MoogBP24(*++pout1);
+				++pout1;
+				*pout1 = m_flt1.MoogBP24(*pout1);
 			}
 			while (--nsamples);
 			break;
+		default: ;
 		}
 		//////////////////////////////////////////////////////////////
 		//	Filter 2
@@ -828,7 +835,8 @@ public:
 			do
 			{
 				m_flt2.InitSimple(*++pflt2_freq, *++pflt2_q);
-				*pout1 = m_flt2.SimpleLP12(*++pout1);
+				++pout1;
+				*pout1 = m_flt2.SimpleLP12(*pout1);
 			}
 			while (--nsamples);
 			break;
@@ -836,10 +844,12 @@ public:
 			do
 			{
 				m_flt2.InitSimple(*++pflt2_freq + *++pout2, *++pflt2_q);
-				*pout1 = m_flt2.SimpleLP12(*++pout1);
+				++pout1;
+				*pout1 = m_flt2.SimpleLP12(*pout1);
 			}
 			while (--nsamples);
 			break;
+		default: ;
 		}
 		//////////////////////////////////////////////////////////////
 		//	Out
