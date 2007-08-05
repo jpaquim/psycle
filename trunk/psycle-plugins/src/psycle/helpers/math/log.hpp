@@ -1,25 +1,31 @@
 #pragma once
+#include <diversalis/processor.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 namespace psycle
 {
-	namespace common
+	namespace helpers
 	{
 		namespace math
 		{
-			float inline log(float const & x)
+			///\todo doc
+			float inline log2(float f)
 			{ 
 				#if !defined DIVERSALIS__PROCESSOR__X86
 					#error please verify this code
 				#endif
-				BOOST_STATIC_ASSERT((sizeof x == 4));
+				BOOST_STATIC_ASSERT((sizeof f == 4));
 				//assert(f > 0); 
-				std::int32_t const i(*reinterpret_cast<const std::int32_t *>(&x));
+				union result_union {
+					float f;
+					std::uint32_t i;
+				} result;
+				result.f = f;
 				return
-					(  (i & 0x7f800000) >> 23 )
-					+  (i & 0x007fffff)
-					/ float(0x00800000)
-					-       0x0000007f;
+					(  (result.i & 0x7f800000) >> 23 )
+					+  (result.i & 0x007fffff)
+					/     float(0x00800000)
+					-           0x0000007f;
 			}
 		}
 	}

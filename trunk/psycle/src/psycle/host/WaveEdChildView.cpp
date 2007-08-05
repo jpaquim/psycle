@@ -934,7 +934,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{
 							blSelection=false;
 							
-							blStart = f2i((x*wdLength)/nWidth);
+							blStart = f2i(double((x*wdLength)/nWidth));
 							blLength=0;
 							SelStart = blStart;
 
@@ -1049,7 +1049,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						blLength = SelStart-blStart;
 					}
 					//set invalid rects
-					int bodyX = f2i( (x*wdLength - diStart*nWidth)/diLength );
+					int bodyX = f2i(double( (x*wdLength - diStart*nWidth)/diLength ));
 					if(bodyX<0 || bodyX>nWidth)
 						invBody.SetRectEmpty();
 					else

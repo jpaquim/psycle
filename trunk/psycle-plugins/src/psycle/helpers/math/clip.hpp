@@ -1,7 +1,7 @@
 #pragma once
 namespace psycle
 {
-	namespace common
+	namespace helpers
 	{
 		namespace math
 		{

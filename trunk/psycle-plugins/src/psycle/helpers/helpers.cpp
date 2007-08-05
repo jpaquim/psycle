@@ -1,13 +1,11 @@
-///\file
-///\brief implementation file for psycle::host::CValueMapper.
+///\implementation psycle::helpers.
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
-#include <psycle/host/detail/project.private.hpp>
-#include <psycle/helpers/helpers.hpp>
+#include "helpers.hpp"
 #include <cctype>
 namespace psycle
 {
-	namespace host
+	namespace helpers
 	{
 		float CValueMapper::fMap_255_1[257] = 
 			{0, 0.00390625, 0.0078125, 0.01171875, 0.015625, 0.01953125, 0.0234375, 0.02734375, 0.03125, 0.03515625, 0.0390625, 
@@ -58,7 +56,6 @@ namespace psycle
 			89.84375, 90.234375, 90.625, 91.015625, 91.40625, 91.796875, 92.1875, 92.578125, 92.96875, 93.359375, 93.75, 94.140625, 
 			94.53125, 94.921875, 95.3125, 95.703125, 96.09375, 96.484375, 96.875, 97.265625, 97.65625, 98.046875, 98.4375, 98.828125, 
 			99.21875, 99.609375, 100};
-
 
 		namespace
 		{

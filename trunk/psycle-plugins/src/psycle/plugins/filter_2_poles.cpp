@@ -12,7 +12,7 @@
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 namespace psycle { namespace plugin {
 
-namespace math = common::math;
+namespace math = helpers::math;
 
 class Filter_2_Poles : public Plugin
 {

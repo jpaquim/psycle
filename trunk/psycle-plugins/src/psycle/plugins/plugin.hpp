@@ -116,7 +116,7 @@ namespace psycle
 								/// declared as int rather than enum for binary compatibility.
 								int /*Types::Type*/ const type;
 								int const default_value;
-								common::Scale const & scale;
+								helpers::Scale const & scale;
 							public:
 								/// creates a separator with an optional label.
 								Parameter(char const name[] = "")
@@ -127,7 +127,7 @@ namespace psycle
 									maximum_value(0),
 									type(Types::null),
 									default_value(0),
-									scale(* new common::scale::Discrete(0))
+									scale(* new helpers::scale::Discrete(0))
 								{}
 							public:
 							/// minimum lower bound authorized by the binary interface. (unsigned 16-bit integer)
@@ -136,7 +136,7 @@ namespace psycle
 							int const static input_maximum_value = 0xffff;
 							private:
 								/// creates a scaled parameter ; you don't use this directly, but rather the public static creation functions.
-								Parameter(char const name[], common::Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
+								Parameter(char const name[], helpers::Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
 								:
 									name(name),
 									unused_name(name),
@@ -161,22 +161,22 @@ namespace psycle
 								/// creates a discrete scale, i.e. integers.
 								static const Parameter & discrete(char const name[], int const & default_value, int const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Discrete(static_cast<Real>(maximum_value)), static_cast<Real>(default_value), maximum_value);
+									return * new Parameter(name, * new helpers::scale::Discrete(static_cast<Real>(maximum_value)), static_cast<Real>(default_value), maximum_value);
 								}
 								/// creates a linear real scale.
 								static const Parameter & linear(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Linear(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new helpers::scale::Linear(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 								/// creates an exponential scale.
 								static const Parameter & exponential(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Exponential(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new helpers::scale::Exponential(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 								/// creates a logarithmic scale.
 								static const Parameter & logarithmic(char const name[], double const & minimum_value, double const & default_value, double const & maximum_value)
 								{
-									return * new Parameter(name, * new common::scale::Logarithmic(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
+									return * new Parameter(name, * new helpers::scale::Logarithmic(static_cast<Real>(input_maximum_value), static_cast<Real>(minimum_value), static_cast<Real>(maximum_value)), static_cast<Real>(default_value));
 								}
 						}; // class Parameter
 				}; // class Information

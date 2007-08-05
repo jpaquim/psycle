@@ -2,7 +2,7 @@
 #include <string>
 #include <exception>
 #include <map>
-#include "../scale.hpp"
+#include <psycle/helpers/scale.hpp>
 #include "internal_machines.hpp"
 namespace psycle
 {
@@ -253,6 +253,7 @@ namespace psycle
 
 				void retweak(const int & type, int & parameter, int & integral_value) const
 				{
+					typedef double Real;
 					Real value(integral_value);
 					const Real maximum(0xffff);
 					switch(type)

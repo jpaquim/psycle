@@ -2,10 +2,11 @@
 #include <cmath>
 namespace psycle
 {
-	namespace common
+	namespace helpers
 	{
 		namespace math
 		{
+			/// the pi constant as a 64-bit floating point number
 			double const pi
 			(
 				#if defined M_PI
@@ -14,6 +15,9 @@ namespace psycle
 					3.14159265358979323846
 				#endif
 			);
+
+			/// the pi constant as a 32-bit floating point number
+			float const pi_f = float(pi);
 		}
 	}
 }

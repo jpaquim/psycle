@@ -10,7 +10,7 @@
 #include <psycle/helpers/math/remainder.hpp>
 namespace psycle { namespace plugin {
 
-namespace math = common::math;
+namespace math = helpers::math;
 
 class Ring_Modulator : public Plugin
 {
