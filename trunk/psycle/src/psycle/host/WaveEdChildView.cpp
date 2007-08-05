@@ -804,7 +804,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					pParent->m_wndView.AddMacViewUndo();
 					_pSong->IsInvalided(true);
-					Sleep(LOCK_LATENCY);
+					///\todo lock/unlock
+					Sleep(256);
 
 					CRect rect;
 					GetClientRect(&rect);
@@ -849,7 +850,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					pParent->m_wndView.AddMacViewUndo();
 					_pSong->IsInvalided(true);
-					Sleep(LOCK_LATENCY);
+					///\todo lock/unlock
+					Sleep(256);
 
 					CRect rect;
 					GetClientRect(&rect);
@@ -1179,7 +1181,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				_pSong->IsInvalided(true);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
 				for (c = startPoint ; c < startPoint+length ; c++)
 				{
@@ -1240,7 +1243,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				_pSong->IsInvalided(true);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
 				for (c=startPoint; c<startPoint+length; c++)
 				{
@@ -1309,7 +1313,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (pos != AMP_DIALOG_CANCEL)
 				{
 					_pSong->IsInvalided(true);
-					Sleep(LOCK_LATENCY);
+					///\todo lock/unlock
+					Sleep(256);
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 
 					Amplify(wdLeft+startPoint, length, ratio);
@@ -1335,7 +1340,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				_pSong->IsInvalided(true);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
 				//halved = (int) floor(length/2.0);	
 				//<dw> if length is odd (even number of samples), middle two samples aren't flipped:
@@ -1445,9 +1451,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				_pSong->IsInvalided(true);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
-		//		SetUndo(4, wdLeft, wdRight, wdLength); 
+				//SetUndo(4, wdLeft, wdRight, wdLength); 
 				for (unsigned int c = 0; c < wdLength; c++)
 				{
 					*(wdLeft + c) = ( *(wdLeft + c) + *(wdRight + c) ) / 2;
@@ -1608,7 +1615,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParent->m_wndView.AddMacViewUndo();
 
 				_pSong->IsInvalided(true);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 				unsigned long length = blLength+1;
 
 				datalen = (wdLength - length);
@@ -1788,7 +1796,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 			int bytesPerSamp = (int)(pFmt->nBlockAlign/pFmt->nChannels);
 			_pSong->IsInvalided(true);
-			Sleep(LOCK_LATENCY);
+			///\todo lock/unlock
+			Sleep(256);
 
 			if (!wdWave)
 			{
@@ -1906,7 +1915,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 			_pSong->IsInvalided(true);
-			Sleep(LOCK_LATENCY);
+			///\todo lock/unlock
+			Sleep(256);
 
 			if (pFmt->wBitsPerSample == 16 && pFmt->nChannels==1 || pFmt->nChannels==2)
 			{
@@ -2006,7 +2016,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					fadeOutSamps= Global::configuration().GetSamplesPerSec() * MixDlg.fadeOutTime;
 
 				_pSong->IsInvalided(true);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
 				if (pFmt->wBitsPerSample == 16 && ( pFmt->nChannels==1 || pFmt->nChannels==2 ) )
 				{
@@ -2134,7 +2145,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 				_pSong->IsInvalided(true);
-				Sleep(LOCK_LATENCY);
+				///\todo lock/unlock
+				Sleep(256);
 
 				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels == 1 || pFmt->nChannels == 2))
 				{
@@ -2237,7 +2249,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pParent->m_wndView.AddMacViewUndo();
 			_pSong->IsInvalided(true);
-			Sleep(LOCK_LATENCY);
+			///\todo lock/unlock
+			Sleep(256);
 			CRect rect;
 			GetClientRect(&rect);
 			int nWidth = rect.Width();
@@ -2263,7 +2276,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pParent->m_wndView.AddMacViewUndo();
 			_pSong->IsInvalided(true);
-			Sleep(LOCK_LATENCY);
+			///\todo lock/unlock
+			Sleep(256);
 
 			CRect rect;
 			GetClientRect(&rect);

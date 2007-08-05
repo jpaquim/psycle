@@ -21,10 +21,8 @@ namespace psycle
 		/// machine interface version
 		int const MI_VERSION = 11;
 
-		#if !defined(MAX_TRACKS) ///\todo remove define from host sources
-			/// max number of pattern tracks
-			int const MAX_TRACKS = 64;
-		#endif
+		/// max number of pattern tracks
+		int const MAX_TRACKS = 64;
 
 		/// max number of samples (per channel) that the Work function may ask to return
 		int const MAX_BUFFER_LENGTH = 256;
@@ -227,9 +225,7 @@ namespace psycle
 
 // for plugins that aren't namespace-aware
 using psycle::plugin_interface::MI_VERSION;
-#if !defined(MAX_TRACKS) ///\todo remove define from host sources
 using psycle::plugin_interface::MAX_TRACKS;
-#endif
 using psycle::plugin_interface::NOTE_MAX;
 using psycle::plugin_interface::NOTE_NO;
 using psycle::plugin_interface::NOTE_OFF;
