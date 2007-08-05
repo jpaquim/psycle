@@ -38,7 +38,7 @@ inline int f2i(double d)
 	union tmp_union
 	{
 		double d;
-		int i,
+		int i;
 	} tmp;
 	tmp.d = d - half + magic;
 	return tmp.i;
