@@ -34,7 +34,7 @@ from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config
 from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
 
 import os.path
-universalis = os.path.join('..', 'universalis', 'SConstruct')
+universalis = os.path.join(os.pardir, 'universalis', 'SConstruct')
 if os.path.exists(universalis): universalis = project.subscript(universalis).local_package()
 else:
 	universalis = external_package_check(project, name = 'universalis',
