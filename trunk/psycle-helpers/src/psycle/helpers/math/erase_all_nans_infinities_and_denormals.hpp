@@ -49,13 +49,13 @@ namespace psycle
 				#else
 					std::uint64_t const bits(reinterpret_cast<std::uint64_t&>(sample));
 					std::uint64_t const exponent_mask
-						(
-				#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-						0x7f80000000000000LL
-				#else
-				#error sorry, was not much thought
-				#endif
-						);
+					(
+						#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+							0x7f80000000000000ULL
+						#else
+							#error sorry, was not much thought
+						#endif
+					);
 					std::uint64_t const exponent(bits & exponent_mask);
 
 					// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
