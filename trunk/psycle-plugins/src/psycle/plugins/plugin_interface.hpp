@@ -116,9 +116,9 @@ namespace psycle
 			public:
 				virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
 				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
-				/// unused slot kept for binary compatibility.
+				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 				virtual float * unused0(int, int){return 0;}
-				/// unused slot kept for binary compatibility.
+				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 				virtual float * unused1(int, int){return 0;}
 				virtual int GetTickLength(){return 2048;}
 				virtual int GetSamplingRate(){return 44100;}
@@ -214,9 +214,12 @@ namespace psycle
 		#if !defined _WIN64 && !defined _WIN32 && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
 			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT
 			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION
-		#elif defined _MSC_VER || defined __GNUG__
-			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport) // should work on mingw too
-			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl // should work on mingw too
+		#elif defined __GNUG__
+			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __attribute__((dllexport))
+			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __attribute__((cdecl))
+		#elif defined _MSC_VER
+			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport)
+			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
 		#else
 			#error please add definition for your compiler
 		#endif
