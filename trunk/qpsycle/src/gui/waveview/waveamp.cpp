@@ -28,11 +28,20 @@ WaveAmp::WaveAmp()
 	QGridLayout *layout = new QGridLayout(this);
 	gain = new QLabel("Gain", this);
 	gainSli = new QSlider( Qt::Horizontal, this);
+	percent = new QLabel ("0%", this);
 	ok = new QPushButton("Ok", this);
 	cancel = new QPushButton("Cancel", this);
 	
 	layout->addWidget(gain, 0, 0, 1, 1);
 	layout->addWidget(gainSli, 0, 1, 1, 1);
-	layout->addWidget(ok, 1, 0, 1, 1, Qt::AlignRight);
-	layout->addWidget(cancel, 1, 1, 1, 1, Qt::AlignRight);
+	layout->addWidget(percent, 0, 2, 1, 1);
+	layout->addWidget(ok, 1, 1, 1, 1, Qt::AlignRight);
+	layout->addWidget(cancel, 1, 2, 1, 1, Qt::AlignRight);
+	
+//	connect( gainSli, SIGNAL(sliderMoved(int value)), this, SLOT(SliderChanges(int value)));
 }
+
+/*void WaveAmp::SliderChanges(int value)
+{
+	percent->setText( gainSli->value() + "%");
+}*/

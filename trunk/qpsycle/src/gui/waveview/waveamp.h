@@ -31,6 +31,9 @@ class WaveAmp : public QDialog
 
 public:
 	WaveAmp();
+	
+public slots:
+//	void SliderChanges(int value);
 
 private:
 	QLabel *gain;
