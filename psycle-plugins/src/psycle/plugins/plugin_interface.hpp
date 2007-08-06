@@ -216,7 +216,7 @@ namespace psycle
 			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION
 		#elif defined __GNUG__
 			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __attribute__((dllexport))
-			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __attribute__((cdecl))
+			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __attribute__((__cdecl__))
 		#elif defined _MSC_VER
 			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport)
 			#define PSYCLE__PLUGIN__DETAIL__CALLING_CONVENTION __cdecl
