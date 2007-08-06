@@ -49,5 +49,9 @@
 	 <file>images/pat_delbar.png</file>
 	 <file>images/sample-browser.png</file>
 	 <file>images/def-background.png</file>
+	 <file>images/conf-general.png</file>
+	 <file>images/conf-audio.png</file>
+	 <file>images/conf-keyboard.png</file>
+	 <file>images/conf-visual.png</file>
  </qresource>
  </RCC>

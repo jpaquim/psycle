@@ -37,7 +37,7 @@ AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	selectedDriver_ = 0;
 
 	QHBoxLayout *mainLay = new QHBoxLayout();
-
+		
 	QWidget *settingsPanel = new QWidget( this );
 	QWidget *notes = new QWidget( this );
 
