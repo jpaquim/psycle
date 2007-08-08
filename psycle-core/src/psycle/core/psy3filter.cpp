@@ -432,7 +432,7 @@ namespace psy
 				fileread = file->ReadChunk(pSource, size);
 				unsigned char * pDest;
 				DataCompression::BEERZ77Decomp2(pSource, &pDest);
-				delete[] pSource,pDest; pSource,pDest = 0;
+				delete[] pSource; pSource = pDest;
 				// create a SinglePattern
 				std::string indexStr;
 				std::ostringstream o;
@@ -441,7 +441,7 @@ namespace psy
 				else
 					indexStr = o.str();
 				SinglePattern* pat =
-						singleCat->createNewPattern(std::string(patternName)+indexStr);
+					singleCat->createNewPattern(std::string(patternName)+indexStr);
 				pat->setBeatZoom(song.linesPerBeat());
 				TimeSignature & sig =  pat->timeSignatures().back();
 				float beats = numLines / (float) song.linesPerBeat();
