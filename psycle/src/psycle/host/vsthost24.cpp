@@ -12,7 +12,7 @@
 #include "Configuration.hpp"
 #include "AudioDriver.hpp"
 
-//This is so wrong. It's needed because of the loop inside the code for retrigger inside the Work() function.
+//This is so wrong. It's needed because of the loop inside the code for retrigger that it's in the Work() function.
 #include "song.hpp"
 
 ///\todo:  When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
@@ -553,8 +553,6 @@ namespace psycle
 								NSDelta[midiChannel] = 0;
 								NSActive[midiChannel] = false;
 							}
-							//currently just working with midichannel 0
-							//TRACE( "semislide of channel %i = %d\n", midiChannel, NSCurrent[midiChannel]);
 							AddMIDI(0xE0 + midiChannel,LSB(NSCurrent[midiChannel]),MSB(NSCurrent[midiChannel]),NSSamples[midiChannel]);
 							 
 							NSSamples[midiChannel]+=min(TWEAK_SLIDE_SAMPLES,ns);
@@ -946,12 +944,12 @@ namespace psycle
 				// volume "counter"
 				{
 					_volumeCounter = dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
-					if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
+//					if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
 					int temp((dsp::F2I(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
 					// prevent downward jerkiness
 					if(temp > 97) temp = 97;
 					if(temp > _volumeDisplay) _volumeDisplay = temp;
-					--_volumeDisplay;
+					if (_volumeDisplay>0) --_volumeDisplay;
 					///\todo: move autoStopMachines to player
 					if(Global::pConfig->autoStopMachines)
 					{

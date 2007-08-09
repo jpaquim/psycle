@@ -50,14 +50,12 @@
 				42 Indicates Effect Number 2
 				0067 Indicates the value
 
-	--> By setting a start and end value, then selecting them and the space between, you 
-	can have psycle interpolate for you by right clicking.  this is very handy for smooth
+	--> Psycle can fill tweaks for you, using its interpolate option. Put the start value at
+	the start line, the end value in the end line, select all the rows between them plus them both
+	and select Interpolate in the rightclick popup menu. This is very handy for smooth
 	sweeps with tws.
 
-	--> You can also record parameter tweaks via midi or mouse movement in the machine's 
-	GUI.
-
-	To record tweaks with mouse:
+	--> You can also make psycle record your tweaks live, either with mouse or MIDI:
 
 	1) Go to the config/keyboard dialog, and make sure you have either tws checked if that
 	is the mode you would like to record.  If you want to record twk commands instead, 
@@ -65,7 +63,16 @@
 
 	2) Make sure you have "record tweaks" checked in the right under the sequencer.
 
-	3) Open the gui for the machine you want to record tweaks from.
+	3.1) To record tweaks with mouse:
+
+	* Open the gui for the machine you want to record tweaks from.
+
+	3.2) To record tweaks with midi:
+
+	*) Go to the Midi Controllers menu, and set up the controller and range of information
+	that you want to record.  You will need to know the parameter number for the machine
+	you are recording.
+	If the (VST) machine allows it, you might preffer to use "Record RAW MIDI Commands".
 
 	4) Go to the pattern editor and arm the track you want to record in. (Select the record button
 	   on the track header)
@@ -74,15 +81,6 @@
 	    down right in the status bar).
 
 	6) Press play and start tweaking.
-
-	To record tweaks with midi:
-
-	1) Go to the Midi Controllers menu, and set up the controller and range of information
-	that you want to record.  You will need to know the parameter number for the machine
-	you are recording.
-
-	2) Do the same process than with mouse tweaking, except that you tweak with your hardware
-	    rather than with the mouse)
 	    
 	    
 - Knowing the Parameter number of a Machine
@@ -105,9 +103,9 @@
 	  that you'd use to set this parameter to the current value.
 
 	* With VST plugins:
-	  Opening the parameters' window, you can see a list of the parameters on the
-	  right side. These parameters are numbered in HEX.
-	  This is the number you need.
+	  Opening the parameters' window, you have the option to show the parameters list
+	  via the "View" Menu. This will popup a window with a list of the parameters 
+	  numbered in HEX. This is the number you need.
 
 
 - Knowing the Right Value
@@ -147,24 +145,27 @@
 	To do so, you should press Mcm key. Check and/or change its value in the Keyboard
 	Configuration dialog (Configuration-settings).
 
-	On (2) , you define the CC (Control Command number) that you want to send.
+	On (2) , you define the Midi command number that you want to send.
 	You might need to check some MIDI documents and/or the Plugin's help to know what
 	to write in here.
 
 	On (3) , you specify the number of the Machine, just like you do with tweaks.
 		This number is the one shown in the combobox, or in the machine's dialog.
 
-	Finally, on (4), you specify the Value that the parameter will take.
+	Finally, on (4), you specify the Value to send for this midi command.
 	
 	(4) is divided in two groups of two values AABB.
 	You might only need to speficy AA.
 
-	Example: Send NoteOn:
+	Usually, you'll use it to send midi CC's. CC Command is "B0".
+	Example, this sets the machine volume to half of it:
 
-		Mcm 90 01 3C7F  90 Means NoteOn (9) on Midi Channel 1 (0).
-				01 Means Generator number 1
-				3C Means C-5 (3C in Hex = 60 in Dec)
-				7F Means the Velocity (volume) of the note.
+		Mcm B0 01 0740
+				B0 Send a midi CC (Control Change) command
+				01 to the Generator number 1
+				07 In order to change it's (Channel) volume
+				40 to 40 (in a scale of 0 to 7F, HEX)
+				
 
 - Mcm Command with Native plugins. Send a command to a desired channel.
 -------------------------------------------------------------------

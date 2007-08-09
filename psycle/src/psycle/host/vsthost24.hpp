@@ -11,9 +11,9 @@
 *           in getting time/position information.
 *<@JosepMa> CEffect is a C++ wrapper for the AEffect class, for a host (AudioEffect is a C++ wrapper
 *           for a plugin)
-*<@JosepMa> in such it maps all the dispatch calls to functions with parameter validation, and helps
+*<@JosepMa> as such it maps all the dispatch calls to functions with parameter validation, and helps
 *           in the construction and destruction processes. Tries to help on other simpler tasks, and
-*           in the handling of parameter windows (vstgui)
+*           in the handling of parameter windows (VstEffectWnd.cpp/.hpp)
 *<@JosepMa> vst::host and vst::plugin are subclasses of the aforementioned classes, which both: extend
 *           the functionality of the base classes, and adapts them to its usage inside psycle
 *<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
@@ -59,6 +59,12 @@ namespace psycle
 				note trackNote[MAX_TRACKS];
 				VstMidiEvent midievent[MAX_VST_EVENTS];
 				VstEventsDynamic mevents;
+				int	queue_size;
+				/// reserves space for a new midi event in the queue.
+				/// \return midi event to be filled in, or null if queue is full.
+				VstMidiEvent* reserveVstMidiEvent();
+				VstMidiEvent* reserveVstMidiEventAtFront(); // ugly hack
+
 				bool NSActive[16];
 				int	NSSamples[16];
 				int NSDelta[16];
@@ -69,11 +75,6 @@ namespace psycle
 				int rangeInSemis;
 				int currentSemi[16];
 				int oldNote[16];
-				int	queue_size;
-				/// reserves space for a new midi event in the queue.
-				/// \return midi event to be filled in, or null if queue is full.
-				VstMidiEvent* reserveVstMidiEvent();
-				VstMidiEvent* reserveVstMidiEventAtFront(); // ugly hack
 
 				float * inputs[max_io];
 				float * outputs[max_io];

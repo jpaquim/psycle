@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.8.4  ---------
+				------------------------------- 1.8.5  ---------
 --------------------------------------------------------------------------------
 
 contents:
@@ -79,7 +79,7 @@ Effectively, this licensing applies ONLY to those sources.
 
 The current team prefers to enforce that psycle sources remain free to everyone,
 which means everyone can see and modify the source, but in doing so, he/she
-cannot distribute them in a closed way.
+cannot distribute them in a closed way. Much in line with GPL ideas.
 
 You might, on the other hand, distrubute any modification you do as your own,
 keeping a notice in the sources and/or text files that they are
@@ -123,7 +123,7 @@ of an existing one. Arguru synth is an usual template.
 	     new additions which don't imply big changes to the underlying
 	     code.
 
-	1.9/2.0: The existing source code of 1.9 will be discarded and 1.8.4
+	1.9/2.0: The existing source code of 1.9 will be discarded and 1.8.5
 	     will serve as the next 1.9 codebase. It is expected to add
 	     multichannel audio input/output, audio recording (live input),
 	     separation of sources to different libs and multipattern sequence

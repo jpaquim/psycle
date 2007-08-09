@@ -1,30 +1,24 @@
-This pack contains separate directories for each type of CPU.
-Each of them contains the psycle host application, and all the open source native plugins,
-specially targeted to run best on a particular type of CPU.
+There are two separate packs for two types of CPU's
+.
+Each of them contains the psycle host application, and all the open source native plugins, targeted to run best on a particular type of CPU.
 
-There are currently two directories:
+The packages are:
 
-	- the G7 directory, for "recent" AMD and Intel CPUs:
-		- G7:
-			AMD Athlon and early Duron.
-		- G7-SSE:
+	- SSE2, for "recent" AMD and Intel CPUs:
+		- SSE2:
 			AMD: Athlon XP, late Duron, Athlon 64, Athlon FX,
-			Intel: Pentium 4, Celeron Pentium 4, Pentium M Centrino
+			Intel: Pentium 4, Celeron Pentium 4, Pentium M Centrino and newer
 
-	- the G6 directory, for "old" Intel CPUs:
-		- G6:
-			Intel Pentium Pro, Pentium II, and early Celeron.
-		- G6-SSE:
+	- SSE, for "old" Intel CPUs:
+		- SSE:
 			Intel Pentium III and Celeron Pentium III.
 
-You should copy everything contained in the directory that matches your cpu into the psycle directory.
+You should copy everything contained in the package that matches your cpu into the psycle directory.
 Make sure you don't have duplicates of the same plugins:
 	the packs from psycledelics puts the plugins into subdirs of the plugins dir,
 	and this pack does have them all at the top of the plugins dir.
-	(Actually, it could happen in future plugins that subdirectories cause problems.)
+	(This will be the case from now on)
 
-Currently, we don't distribute builds for older CPUs, G5: Intel Pentium I, AMD K6, K6-2, K6-III, 5x86, 6x86, etc.
-If you request us to add it, we'll add it.
+Currently, we don't distribute builds for older CPUs, Intel previous to Pentium III, AMD K5, K6, some earlier Athlon and Duron chips, 5x86, 6x86, etc.
 
-At the time of this writing, AMD Athlon 64/FX and Intel IA-64 are not yet widely used,
-and we don't have tools to make builds for these CPUs.
+At the time of this writing, we do not have 64bit builds. There are parts of the source code that might not be fully adapted to 64bits, and we might generate test builds on a later date.
