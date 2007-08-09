@@ -52,7 +52,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			char buffer[128];
 			///\todo:  Using the Windows API to get clicks/CPU frequency doesn't give
 			// the real frequency in some cases. This has to be worked out.
-			sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
+			if ( Global::_cpuHz/1000000 < 10 ) strcpy(buffer,"Unknown");
+			else sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
 			m_processor_label.SetWindowText(buffer);
 			
 			UpdateInfo();
@@ -87,6 +88,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					Machine *tmac = _pSong->_pMachine[c];
 					if(tmac)
 					{
+						// Input numbers
+						sprintf(buffer,"%d",tmac->_numInputs);
+						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+
+						// OutPut numbers
+						sprintf(buffer,"%d",tmac->_numOutputs);
+						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+
 						float machCPU=0;
 		//				float masterCPU=0;
 		//				machCPU = (float)tmac->_cpuCost*0.1f;
@@ -114,7 +123,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//		totalCPU = machsCPU + wiresCPU+((float)_pSong->cpuIdle/Global::_cpuHz)*100;
 		//		totalCPU = machsCPU + wiresCPU+ ((float)_pSong->cpuIdle/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 				totalCPU = machsCPU + wiresCPU;
-				
+
 				sprintf(buffer,"%.1f%%",totalCPU);
 				m_cpuidlelabel.SetWindowText(buffer);
 				

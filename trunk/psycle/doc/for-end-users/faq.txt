@@ -3,31 +3,42 @@ List of Frequently Asked Questions about Psycle
 
 - General Questions -
 -------------------
-Q)	I need to speak with the developers!
+Q)	I need to talk to the developers!
 
-A)	The best way is using IRC - You need to install an IRC client. HydraIRC is a good choice
-	(and there are many others out there as well!). Then you can connect to any server of the
-	EFnet network and join the #psycle channel.
-	An alternative way to connect is through your browser to http://psycle.sourceforge.net/irc.html
+A)	Via E-mail:
+	* Write to the mailing list: psycle-devel@lists.sourceforge.net
+	* You can also contact with the developers using the e-mails listed here
+	http://sourceforge.net/project/memberlist.php?group_id=10384
+	DO NOT WRITE to those with "No Specific Role". They are Retired.
+	Most probably, you want to talk to JosepMa/jaz, or johan_boule/bohan
+
+	Via IRC:
+	* Use an IRC client to connect to *EFnet* network, and there, to the #psycle channel.
+	* use the web based interfaces at: http://psycle.free.fr/irc
+
 
 Q)	Is it possible to import/load S3M/XM/IT files into Psycle?
 
 A)	Latest 1.7.x alphas and all 1.8 versions include "Sampulse" and its importing routines.
-	Those should allow to import them with ease.
-	Note that the code of Sampulse loading and saving is *unfinished*, so you
-	should not save songs with Sampulse machine.
+	Those should allow you to import them with ease.
+	Warnings:
+	
+	* Sampulse as a machine is unfinished. You might preffer replacing it by other native/VST
+	machines after having imported the patterns/sequence.
+	* Also, note that Psycle has an important limitation : It does not have a volume column, so 
+	all the volume changes are converted to a volume column, making it impossible to have 
+	a volume set and a command at the same line.
 
 Q)	What is this 'dummy' machine?
 
 A)	Dummy internal machine? It is mainly used to replace missing plugin machines when loading
-	a .psy file. It can also be used to group machines, connecting them to it.
+	a .psy file. It can also be used to group machines, connecting them to it, and avoid a
+	limitation that exists of max 12 machines connected to one.
 
-Q)	I have problems playing a song in Winamp that uses Sublime synth!
+Q)	I have problems playing a song in Winamp!
 
-A)	The problem with sublime is that you need to copy the file blwtbl.dll file (which you can find
-	where psycle.exe is), to either the windows\system32 directory, or to winamp.exe directory.
-	This file is needed in order to make sublime works (not only using Winamp). That file is basically
-	some extra data that sublime uses to create sounds, and if it doesn't find it, it can't load.
+A)	The winamp plugin hasn't been updated for long, and it lacks several changes that have
+	been since then. We no longer recommend using it, until we release an up-to-date version.
 	
 
 - Samples and the Sampler Machine -

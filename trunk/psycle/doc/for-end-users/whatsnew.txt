@@ -33,7 +33,7 @@ M.m.p , where:
 		- if odd, then it's an unstable build or release candidate for next stable minor version number.
 	- p = patch number:
 		- if the minor version number is even (stable release), then this patch number is used for bug fixes, so, it's hopefully rarely incremented.
-		- if the minor version number is odd (unstable builds), then this patch number is incremented very often, each cvs commit.
+		- if the minor version number is odd (unstable builds), then this patch number is incremented very often.
 
 
 ----------------------------------------------------------------
