@@ -26,6 +26,7 @@
 	#include "detail/pragmatic/dynamic_link.hpp"
 	#include "detail/pragmatic/hardware_exception.hpp"
 	#include "detail/gnu/typeof.hpp"
+	#include "detail/gnu/diagnostics.hpp"
 	#include "detail/microsoft/assume.hpp"
 	#include "detail/microsoft/super.hpp"
 	#include "detail/microsoft/warnings.hpp"
