@@ -1,4 +1,4 @@
-mspsycle (0) unstable; urgency=low
+﻿mspsycle (0) unstable; urgency=low
 
   * for more details, see http://svn.sourceforge.net/viewcvs.cgi/psycle/trunk/?view=log
 
@@ -1443,7 +1443,7 @@ mspsycle (0) unstable; urgency=low
 	-------------------------
 	- Added flanger machine
 
- -- Johan Boule <bohan@retropaganda.info>  Tue, 21 Mar 2006 02:36:18 +0000
+ -- noone <noone@nowhere.org>  Tue, 21 Mar 2006 02:36:18 +0000
 
 mspsycle (-1) unstable; urgency=low
 
