@@ -17,7 +17,7 @@ A)	Via E-mail:
 	* use the web based interfaces at: http://psycle.free.fr/irc
 
 
-Q)	Is it possible to import/load S3M/XM/IT files into Psycle?
+Q)	Is it possible to import/load MOD/S3M/XM/IT files into Psycle?
 
 A)	Latest 1.7.x alphas and all 1.8 versions include "Sampulse" and its importing routines.
 	Those should allow you to import them with ease.
@@ -26,7 +26,7 @@ A)	Latest 1.7.x alphas and all 1.8 versions include "Sampulse" and its importing
 	* Sampulse as a machine is unfinished. You might preffer replacing it by other native/VST
 	machines after having imported the patterns/sequence.
 	* Also, note that Psycle has an important limitation : It does not have a volume column, so 
-	all the volume changes are converted to a volume column, making it impossible to have 
+	all the volume changes are converted to a volume command, making it impossible to have 
 	a volume set and a command at the same line.
 
 Q)	What is this 'dummy' machine?
@@ -45,9 +45,10 @@ A)	The winamp plugin hasn't been updated for long, and it lacks several changes 
 --------------------------------
 Q)	I've loaded a sample but it doesn't make any sound.
 
-A)	To play a sample (.wav or .iff) you need to add a sampler machine and connect it to the master
-	or to an effect that goes to the master. Be sure your audio settings are 0K, too.
-
+A)	To play a sampled sound (.wav or .iff only!) you need to add a sampler machine and connect
+	it to the master or to an effect that goes to the master. You might want to check if other
+	machines make sound, and check your audio settings.
+ 
 Q)	Can Psycle use OGG?/MP3? files as samples?
 
 A)	Unfortunately not. This is a common question, because it would be good. Support for lossy
@@ -58,12 +59,10 @@ Q)	When I load a sample and enter a note, it's really fast and high-pitched...
 	What should I do about this?
 
 A)	The way trackers change pitch of a sample is by speeding up or slowing down the rate at which
-	the individual sample points are played back. the result is similar to playing a 33 1/3 RPM record
-	at 45, or vice versa. The pitch changes to the desired tone, but eventually your sample will either
-	end up sounding like either the Chipmunks, or Barry White on valium.
-	That's what multisampled instruments solve, but unfortunately Psycle doesn't support multisampled
-	instruments as yet. You can use another sampler VSTi that support multisample formats like SF2
-	(RGCAudio sfz, Fontaminator, Kontakt, VSampler, ...)
+	the individual sample points are played back. The result is similar to playing a 33 1/3 RPM
+	record at 45, or vice versa. This depends on the note you press, and for the Sampler, the
+	"standard" note is C-4, not C-5 like with most other plugins. Also, you can adjust the base
+	note to another value, via the Edit instruments screen (Edit button in the toolbar, or F10 key) 
 
 
 - Psycle Usage -
@@ -83,14 +82,8 @@ A)	Psycle uses a different paths for Native plugins and VST plugins. By default,
 Q)	Why doesn't/Can't/won't Psycle support buzz machines?
 
 A)	Oskari Tammelin, the author of Buzz, declined us the right to develop a Buzz Plugins' Host for Psycle.
-	It's up to someone to develop a plugin that can load buzz plugins.
-	(It won't be allowed by Oskari either, but many users would like it.)
-
-Q)	I Have Pro52 VSTi and it is shown as an Effect Machine. How come?
-
-A)	There are two Pro5 dll's, one called pro-52.dll and the other called pro-52fx.dll. The first one is
-	recognized by Psycle as a generator while the other is recognized as an effect and it allows to use
-	the Pro52 Effect engine separatedly from the synth (The same happen with other synths).
+	Recently, some wrappers are being developed for other projects. Psycle is keeping an eye on those
+	and in the future we could use one of those in Psycle
 
 Q)	I can't enter notes into the Pattern Editor. What happens?
 
@@ -146,14 +139,23 @@ A)	There is no SDK yet, and format will change in Psycle 2.
 	the open source plugins ( arguru synth is a good start ), and use it as a template
 	for your own.
 	You can download them from Psycle's SVN repository at Source Forge Site:
-	https://psycle.svn.sourceforge.net/svnroot/psycle/trunk/xpsycle.plugins/
+	https://psycle.svn.sourceforge.net/svnroot/psycle/trunk/psycle-plugins/
 
 Q)	How can I port a Buzz machine to Psycle?
 A)	An old SDK exists in the download section of Psycle in Sourceforge, but it is
 	obsolete. The only way there is right now is starting with a Psycle plugin.
+	M3 Would be your start point, since it is partially documented.
+
+Q)	I would like to contribute to the project. What can I do?
+A)	Psycle evolves continuously, and sometimes it is thanks small contributions from
+	people not involved directly with it.
+	You can contact the developers (See first Question of this FAQ) and ask what could
+	you do. Or either tell us what you'd like to do, DSP, plugins, help files, graphics,
+	tracker features... There are lots of places that can be improved in one way or another.
+	
 
 Q)	When will Psycle 2 be out?/ In which stage is Psycle 2 developement? What do you
 	plan for Psycle 2?
-A)	See the roadmap.txt file
+A)	See the History and roadmap.txt file
 
 

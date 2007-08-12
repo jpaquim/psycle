@@ -139,7 +139,7 @@
 	If the following is a pattern Row,
            
 	Description:   (1) (2)(3) (4)
-	Pattern Row : ---- .. .. ....
+	Pattern Row : --- .. .. ....
 
 	then, on (1) , you insert the Mcm command.
 	To do so, you should press Mcm key. Check and/or change its value in the Keyboard
@@ -155,13 +155,13 @@
 	Finally, on (4), you specify the Value to send for this midi command.
 	
 	(4) is divided in two groups of two values AABB.
-	You might only need to speficy AA.
+	Some commands might only need AA.
 
 	Usually, you'll use it to send midi CC's. CC Command is "B0".
 	Example, this sets the machine volume to half of it:
 
 		Mcm B0 01 0740
-				B0 Send a midi CC (Control Change) command
+				B0 Send a midi CC (Control Change) command (MIDI channel 1)
 				01 to the Generator number 1
 				07 In order to change it's (Channel) volume
 				40 to 40 (in a scale of 0 to 7F, HEX)
