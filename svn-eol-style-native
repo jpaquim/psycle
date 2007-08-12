@@ -6,6 +6,7 @@ svn propset svn:eol-style native $(find $(dirname $0) \( \
 	-name \*.h -or \
 	-name \*.rc -or \
 	-name \*.py -or \
+	-name \*.cmd -or \
 	-name \*.txt -or \
 	-name \*.text -or \
 	-name \*.html -or \
