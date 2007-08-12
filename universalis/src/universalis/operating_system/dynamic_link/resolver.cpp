@@ -168,19 +168,26 @@ namespace universalis
 			resolver::function_pointer resolver::resolve_symbol_untyped(std::string const & name) const
 			{
 				assert(opened());
+				union result_union
+				{
+					function_pointer typed;
+					#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+						::PROC
+					#else
+						void *
+					#endif
+						untyped;
+				} result;
 				#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-					void * result(0);
-					result = ::dlsym(underlying_, decorated_symbol(name).c_str());
-					if(!result) resolve_symbol_error(name, std::string(::dlerror()));
+					result.untyped = ::dlsym(underlying_, decorated_symbol(name).c_str());
+					if(!result.untyped) resolve_symbol_error(name, std::string(::dlerror()));
 				#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					::PROC result(0);
-					result = ::GetProcAddress(underlying_, decorated_symbol(name).c_str());
-					if(!result) resolve_symbol_error(name, exceptions::code_description());
+					result.untyped = ::GetProcAddress(underlying_, decorated_symbol(name).c_str());
+					if(!result.untyped) resolve_symbol_error(name, exceptions::code_description());
 				#else
-					void * result;
-					if(!underlying_->get_symbol(decorated_symbol(name), result)) resolve_symbol_error(name, Glib::Module::get_last_error());
+					if(!underlying_->get_symbol(decorated_symbol(name), result.untyped)) resolve_symbol_error(name, Glib::Module::get_last_error());
 				#endif
-				return *reinterpret_cast<function_pointer*>(&result);
+				return result.typed;
 			}
 
 			boost::filesystem::path resolver::path() const throw()
