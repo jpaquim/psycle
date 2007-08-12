@@ -5,7 +5,18 @@
 ///\file
 #pragma once
 #include <universalis/detail/project.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+
+#if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__COMPILER__MICROSOFT
+	#define UNIVERSALIS__COMPILER__PACK__PUSH(x) UNIVERSALIS__COMPILER__PRAGMA("pack(push, " #x ")")
+	#define UNIVERSALIS__COMPILER__PACK(x)       UNIVERSALIS__COMPILER__PRAGMA("pack(" #x ")")
+	#define UNIVERSALIS__COMPILER__PACK__POP()   UNIVERSALIS__COMPILER__PRAGMA("pack(pop)")
+#else
+	#define UNIVERSALIS__COMPILER__PACK__PUSH(x)
+	#define UNIVERSALIS__COMPILER__PACK(x)
+	#define UNIVERSALIS__COMPILER__PACK__POP()
+#endif
+
+#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#define UNIVERSALIS__COMPILER__PACK__PUSH(x) <pshpack#x.h>
-	#define UNIVERSALIS__COMPILER__PACK__POP <poppack.h>
+	#define UNIVERSALIS__COMPILER__PACK__POP     <poppack.h>
 #endif
