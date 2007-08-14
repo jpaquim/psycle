@@ -270,7 +270,7 @@ namespace xml
 			x.parse_file(g, argv[1]);
 			return 0;
 		}
-		#if 0    	
+		#if 0
 		std::cout << "The following should fail parsing:\n";
 		x.parse_array(g,
 				"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
