@@ -273,7 +273,7 @@ void Configuration::loadConfig( const std::string & path )
 							psy::core::AudioDriverSettings settings = it->second->settings(); ///\todo why do we do a copy?
 							settings.setDeviceName( deviceName );
 							it->second->setSettings( settings ); ///\todo why do we copy?
-						}		
+						}
 					}
 				}
 			}
