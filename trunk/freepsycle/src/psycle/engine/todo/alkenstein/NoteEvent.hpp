@@ -6,11 +6,11 @@
 namespace psycle
 {
 
-    class NoteEvent : public Event
-    {
-        public:
-            NoteEvent(const int & time) throw(std::exception);
-            virtual ~NoteEvent() throw();
-    };
+	class NoteEvent : public Event
+	{
+		public:
+			NoteEvent(const int & time) throw(std::exception);
+			virtual ~NoteEvent() throw();
+	};
 
 }

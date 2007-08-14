@@ -2,15 +2,15 @@
 
 namespace psycle
 {
-    NoteEvent::NoteEvent(const int & time) throw(std::exception)
+	NoteEvent::NoteEvent(const int & time) throw(std::exception)
 	:
 		Event(time)
-    {
-    }
+	{
+	}
 
-    NoteEvent::~NoteEvent() throw()
-    {
+	NoteEvent::~NoteEvent() throw()
+	{
 
-    }
+	}
 
 }

@@ -3,13 +3,13 @@
 #include "Event.hpp"
 namespace psycle
 {
-    Event::Event(const int & time) throw(std::exception)
-    :
-    	timestamp_(time)
-    {
-    }
+	Event::Event(const int & time) throw(std::exception)
+	:
+		timestamp_(time)
+	{
+	}
 
-    Event::~Event() throw()
-    {
-    }
+	Event::~Event() throw()
+	{
+	}
 }

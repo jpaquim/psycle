@@ -11,7 +11,7 @@ namespace psycle
 			virtual ~TimeStamp() throw();
 
 		private:
-			 /// <alk> temporary, not sure of best unit for time
+				/// <alk> temporary, not sure of best unit for time
 			int time_;
 		public:
 			inline const int & time() const throw() { return time_; }
