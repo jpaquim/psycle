@@ -28,7 +28,7 @@
 	/// shall be encapsulated inside:
 	///\code
 	/// #if !defined NDEBUG
-	/// 	some debugging stuff
+	///  some debugging stuff
 	/// #endif
 	///\endcode
 	#define NDEBUG

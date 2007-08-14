@@ -40,9 +40,9 @@
 			(
 				#if \
 				(\
-					 defined DIVERSALIS__OPERATING_SYSTEM__LINUX || \
+					defined DIVERSALIS__OPERATING_SYSTEM__LINUX || \
 					(defined DIVERSALIS__OPERATING_SYSTEM__BSD && DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR >= 4 && DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR >= 4) || \
-					 defined DIVERSALIS__OPEPATING_SYSTEM__MICROSOFT \
+					defined DIVERSALIS__OPEPATING_SYSTEM__MICROSOFT \
 				)
 					vsnprintf(destination, max_length, format, values)
 				#else

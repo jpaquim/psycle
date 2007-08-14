@@ -196,10 +196,10 @@ namespace processor
 
 			#if 1
 				/*
-					ntohs 	Convert a 16-bit quantity from network byte order to host byte order (Big-Endian to Little-Endian).
-					ntohl 	Convert a 32-bit quantity from network byte order to host byte order (Big-Endian to Little-Endian).
-					htons 	Convert a 16-bit quantity from host byte order to network byte order (Little-Endian to Big-Endian).
-					htonl 	Convert a 32-bit quantity from host byte order to network byte order (Little-Endian to Big-Endian).
+					ntohs Convert a 16-bit quantity from network byte order to host byte order (Big-Endian to Little-Endian).
+					ntohl Convert a 32-bit quantity from network byte order to host byte order (Big-Endian to Little-Endian).
+					htons Convert a 16-bit quantity from host byte order to network byte order (Little-Endian to Big-Endian).
+					htonl Convert a 32-bit quantity from host byte order to network byte order (Little-Endian to Big-Endian).
 				*/
 		
 				/// template specialization for unsigned 32-bit integer.

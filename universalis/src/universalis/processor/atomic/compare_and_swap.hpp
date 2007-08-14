@@ -59,7 +59,7 @@ enum ordering_constraint {raw, acquire, release, ordered};
 // and signal-handler communication, though that's beyond the standard.
 template <class T>
 class native_atomic {
-    public:
+	public:
 	static bool basics_supported();
 		// Are load/store primitives supported?
 	native_atomic(T);
@@ -71,11 +71,11 @@ class native_atomic {
 	// update with an acquire argument.  There are no other
 	// such relationships.
 	template <ordering_constraint c>
-	    void store(const T&);
-	    // Compile-time error if c is acquire.
+		void store(const T&);
+		// Compile-time error if c is acquire.
 	template <ordering_constraint c>
-	    T load();
-	    // Compile-time error if c is neither none nor acquire.
+		T load();
+		// Compile-time error if c is neither none nor acquire.
 	
 	static bool cas_supported();
 		// Is compare_and_swap supported?
@@ -93,13 +93,13 @@ class native_atomic {
 	// Compare-and-swap.  Does not fail spuriously.  Not wait-free
 	// on ll-sc machines.
 	template <ordering_constraint c>
-	    bool cas(const T& old, const T& new_val);
+		bool cas(const T& old, const T& new_val);
 	static bool cas_is_wait_free();
 
 	// Compare-and-swap.  May fail spuriously.  Wait-free
 	// on ll-sc machines.
 	template <ordering_constraint c>
-	    bool weak_cas(const T& old, const T& new_val);
+		bool weak_cas(const T& old, const T& new_val);
 	static bool weak_cas_is_wait_free();
 
 	// I'm inclined to restrict double-width operations to
@@ -131,17 +131,17 @@ class native_atomic {
 
 template <class T>
 class atomic {
-    public:
+	public:
 	static bool basics_supported();
 		// Always yields true.
 	atomic(T);
 		// No ordering semantics, constructor not atomic.
 	template <ordering_constraint c>
-	    void store(const T&);
-	    // Compile-time error if c is neither none nor release.
+		void store(const T&);
+		// Compile-time error if c is neither none nor release.
 	template <ordering_constraint c>
-	    T load();
-	    // Compile-time error if c is neither none nor acquire.
+		T load();
+		// Compile-time error if c is neither none nor acquire.
 	
 	static bool cas_supported();
 		// Always yields true.
@@ -151,13 +151,13 @@ class atomic {
 	// Compare-and-swap.  Does not fail spuriously.  Not wait-free
 	// on ll-sc machines.
 	template <ordering_constraint c>
-	    bool cas(const T& old, const T& new_val);
+		bool cas(const T& old, const T& new_val);
 	static bool cas_is_wait_free();
 
 	// Compare-and-swap.  May fail spuriously.  Wait-free
 	// on ll-sc machines.
 	template <ordering_constraint c>
-	    bool weak_cas(const T& old, const T& new_val);
+		bool weak_cas(const T& old, const T& new_val);
 	static bool weak_cas_is_wait_free();
 
 	T operator T() { return load<acquire>(); }
@@ -168,7 +168,7 @@ class atomic {
 // Meaningful unly if the argument T is an integral type.  
 template <class T=int>
 class native_atomic_int : public native_atomic<T> {
-    public:
+	public:
 	native_atomic_int(T);
 		// No ordering semantics, not atomic.
 	// The fetch_op functions may fail if cas_supported() yields false.
@@ -178,34 +178,34 @@ class native_atomic_int : public native_atomic<T> {
 	// faster implementations.
 	// They return the original value of the atomic.
 	template <ordering_constraint c>
-	    T fetch_add(T);
+		T fetch_add(T);
 	static bool fetch_add_is_wait_free();
 		// Is the operation wait-free?
 	template <ordering_constraint c>
-	    T fetch_and(T);
+		T fetch_and(T);
 	static bool fetch_and_is_wait_free();
 	template <ordering_constraint c>
-	    T fetch_or(T);
+		T fetch_or(T);
 	static bool fetch_or_is_wait_free();
 };
 
 template <class T=int>
 class atomic_int : public atomic<T> {
-    public:
+	public:
 	atomic_int(T);
 		// No ordering semantics, not atomic.
 	// The fetch_op functions always succeed, but are guaranteed
 	// to be lock-free only id native_atomic::cas_supported yields
 	// true.
 	template <ordering_constraint c>
-	    T fetch_add(T);
+		T fetch_add(T);
 	static bool fetch_add_is_wait_free();
 		// Is the operation wait-free?
 	template <ordering_constraint c>
-	    T fetch_and(T);
+		T fetch_and(T);
 	static bool fetch_and_is_wait_free();
 	template <ordering_constraint c>
-	    T fetch_or(T);
+		T fetch_or(T);
 	static bool fetch_or_is_wait_free();
 };
 
@@ -213,7 +213,7 @@ class atomic_int : public atomic<T> {
 // Meaningful unly if T is a pointer type.
 template <class T>
 class native_atomic_ptr : public native_atomic<T> {
-    public:
+	public:
 	native_atomic_ptr(T);
 		// No ordering semantics, not atomic.
 	// The following may fail if native_atomic<T>::cas_supported()
@@ -231,7 +231,7 @@ class native_atomic_ptr : public native_atomic<T> {
 // Meaningful unly if T is a pointer type.
 template <class T>
 class atomic_ptr : public atomic<T> {
-    public:
+	public:
 	atomic_ptr(T);
 		// No ordering semantics, not atomic.
 	// Always succeeds, since it may be emulated with locks.

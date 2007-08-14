@@ -12,7 +12,7 @@
 		/// The indirection in the call to ## lets the macro expansion on the arguments be done first.
 		#define UNIVERSALIS__COMPILER__CONCATENATED(left_token, right_token) UNIVERSALIS__COMPILER__CONCATENATED__DETAIL__NO_EXPANSION(left_token, right_token)
 
-		//#region DETAIL		
+		//#region DETAIL
 			///\internal
 			/// Don't call this macro directly ; call UNIVERSALIS__COMPILER__CONCATENATED, which calls this macro after macro expansion is done on the argument.
 			///\relates UNIVERSALIS__COMPILER__CONCATENATED

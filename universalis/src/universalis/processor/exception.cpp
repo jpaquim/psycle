@@ -90,7 +90,7 @@ namespace universalis
 						if(pExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION && pExceptionRecord->NumberParameters >= 2)
 							rprintf(" %s location %08x", pExceptionRecord->ExceptionInformation[0] ? "Writing to" : "Reading from", pExceptionRecord->ExceptionInformation[1]);
 							
-						/*drmingw::*/StackBackTrace(GetCurrentProcess(), GetCurrentThread(), pContext);		
+						/*drmingw::*/StackBackTrace(GetCurrentProcess(), GetCurrentThread(), pContext);
 					#endif
 				}
 				
