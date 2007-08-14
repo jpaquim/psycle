@@ -240,13 +240,13 @@
 					#endif
 					// patch => minor
 					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH
-						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
 							#error "if you set the patch number, you must also set the minor number."
 						#endif
 					#endif
 					// minor => major
 					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
-						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
 							#error "if you set the minor number, you must also set the major number."
 						#endif
 					#endif
@@ -295,14 +295,14 @@
 			/////////////////////////////////////////////
 				// read the configuration
 					// patch => minor
-					#if	defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
-						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
+					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__PATCH
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
 							#error "if you set the patch number, you must also set the minor number."
 						#endif
 					#endif
 					// minor => major
-					#if	defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
-						#if	!defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR
+					#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MINOR
+						#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__EXTRA_LAYER__INTERNET_EXPLORER__MAJOR
 							#error "if you set the minor number, you must also set the major number."
 						#endif
 					#endif
