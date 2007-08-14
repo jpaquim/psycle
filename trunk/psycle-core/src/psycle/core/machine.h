@@ -321,24 +321,24 @@ namespace psy
 				#endif
 			///\}
 
-			///\name cpu cost measurement ... for the time spent in the machine's processing function
-			///\{
-				#if 0
+			#if 0
+				///\name cpu cost measurement ... for the time spent in the machine's processing function
+				///\{
+						public:
+							void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
+							cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
+						private:
+							cpu::cycles_type        work_cpu_cost_;
+				///\}
+				///\name cpu cost measurement ... for the time spent routing audio
+				///\{
 					public:
-						void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
-						cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
+						void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
+						cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
 					private:
-						cpu::cycles_type        work_cpu_cost_;
-				#endif
-			///\}
-			///\name cpu cost measurement ... for the time spent routing audio
-			///\{
-				public:
-					void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
-					cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
-				private:
-					cpu::cycles_type        wire_cpu_cost_;*/
-			///\}
+						cpu::cycles_type        wire_cpu_cost_;*/
+				///\}
+			#endif
 
 			//////////////////////////////////////////////////////////////////////////
 			//////////////////////////////////////////////////////////////////////////
