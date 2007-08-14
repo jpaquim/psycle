@@ -61,8 +61,8 @@ namespace xml
 						#define L(x) L##x
 					#endif
 					
-			        definition(grammar const & /*self*/)
-			        {
+					definition(grammar const & /*self*/)
+					{
 						using boost::spirit::ch_p;
 						using boost::spirit::anychar_p;
 						using boost::spirit::str_p;
@@ -129,9 +129,9 @@ namespace xml
 						EncName = alpha_p >> *(EncNameCh);
 						
 						i = 0;
-			        }
+					}
 
-			        boost::spirit::rule<Scanner> const & start() const { return document; }
+					boost::spirit::rule<Scanner> const & start() const { return document; }
 
 				private:
 					boost::spirit::rule<Scanner>
@@ -263,13 +263,13 @@ namespace xml
 
 	int main(int argc, char* argv[])
 	{
-   		x x;
+		x x;
 		grammar g;
 
-    	if (argc == 2) {
-        	x.parse_file(g, argv[1]);
-	        return 0;
-    	}
+		if (argc == 2) {
+			x.parse_file(g, argv[1]);
+			return 0;
+		}
 		#if 0    	
 		std::cout << "The following should fail parsing:\n";
 		x.parse_array(g,

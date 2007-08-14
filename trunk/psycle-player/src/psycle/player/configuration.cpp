@@ -74,7 +74,7 @@ Configuration::Configuration()
 	#endif
 	#if defined PSYCLE__ESOUND_AVAILABLE
 		addAudioDriver(new psy::core::ESoundOut);
-	#endif		
+	#endif
 	#if defined PSYCLE__GSTREAMER_AVAILABLE
 		addAudioDriver(new psy::core::GStreamerOut);
 	#endif
@@ -90,7 +90,7 @@ Configuration::Configuration()
 	#if defined PSYCLE__NET_AUDIO_AVAILABLE
 		addAudioDriver(new psy::core::NetAudioOut);
 	#endif
-	loadConfig();			
+	loadConfig();
 }
 
 void Configuration::addAudioDriver(AudioDriver* driver)
