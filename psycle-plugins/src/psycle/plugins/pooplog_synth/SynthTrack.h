@@ -7,8 +7,8 @@
 
 #define OVERDRIVEDIVISOR 512.0f
 
-#define FILTER_CALC_TIME	32
-#define FASTRELEASETICKS	8
+#define FILTER_CALC_TIME				32
+#define FASTRELEASETICKS				8
 #define MAXANTIALIAS 32
 
 #ifdef SYNTH_LIGHT
@@ -29,15 +29,15 @@
 #define MAX_VCF_CUTOFF 301
 #define MAX_VCF_CUTOFF_22050 263
 
-#define TWOPI				6.28318530717958647692528676655901f
+#define TWOPI																6.28318530717958647692528676655901f
 #define MAXARP 37
 #define BASEOVERDRIVE 9
 #define SAMPLE_LENGTH  4096
 
-#define MAX_ENV_TIME	16384
-#define MIN_ENV_TIME	1
-#define MAX_RATE		4096
-#define MAX_TRACKS	64 // for upcoming expansion
+#define MAX_ENV_TIME				16384
+#define MIN_ENV_TIME				1
+#define MAX_RATE								4096
+#define MAX_TRACKS				64 // for upcoming expansion
 #define NUMCOLUMNS 5
 #define MAXVCFMODE 21
 #define MAXLFOWAVE 15
@@ -49,43 +49,43 @@
 #define MAXFILTER 26
 #define MAXVCF 2
 
-#define MAXSYNCMODES	12
+#define MAXSYNCMODES				12
 
-#define TFX_PitchUp			0x01
-#define TFX_PitchDown		0x02
-#define TFX_Portamento		0x03
-#define TFX_Vibrato			0x04
-#define TFX_BypassEnv		0x05
-#define TFX_PanLeft			0x06
-#define TFX_PanRight		0x07
-#define TFX_Pan				0x08
-#define TFX_PanDest			0x09
-#define TFX_VolUp			0x0a
-#define TFX_VolDown			0x0b
-#define TFX_Vol				0x0c
-#define TFX_VolDest			0x0d
-#define TFX_NoteCut			0x0e
-#define TFX_Cancel			0x0f
+#define TFX_PitchUp												0x01
+#define TFX_PitchDown								0x02
+#define TFX_Portamento								0x03
+#define TFX_Vibrato												0x04
+#define TFX_BypassEnv								0x05
+#define TFX_PanLeft												0x06
+#define TFX_PanRight								0x07
+#define TFX_Pan																0x08
+#define TFX_PanDest												0x09
+#define TFX_VolUp												0x0a
+#define TFX_VolDown												0x0b
+#define TFX_Vol																0x0c
+#define TFX_VolDest												0x0d
+#define TFX_NoteCut												0x0e
+#define TFX_Cancel												0x0f
 
-#define TFX_CutoffUp		0x10
-#define TFX_CutoffDown		0x11
-#define TFX_Cutoff			0x12
-#define TFX_CutoffDest		0x13
+#define TFX_CutoffUp								0x10
+#define TFX_CutoffDown								0x11
+#define TFX_Cutoff												0x12
+#define TFX_CutoffDest								0x13
 
-#define TFX_NoteDelay		0x1c
-#define TFX_NoteRetrig		0x1d
+#define TFX_NoteDelay								0x1c
+#define TFX_NoteRetrig								0x1d
 #define TFX_TrackerArpeggioRate 0x1e
 #define TFX_TrackerArpeggio 0x1f
 
 
-#define TFX_OSC_WavePhase			0x20
-#define TFX_OSC_WidthLFOPhase		0x30
-#define TFX_OSC_PhaseLFOPhase		0x40
-#define TFX_OSC_FrqLFOPhase			0x50
-#define TFX_VCF_LFOPhase			0x60
-#define TFX_Gain_LFOPhase			0x70
-#define TFX_Tremolo_LFOPhase		0x71
-#define TFX_Vibrato_LFOPhase		0x72
+#define TFX_OSC_WavePhase												0x20
+#define TFX_OSC_WidthLFOPhase								0x30
+#define TFX_OSC_PhaseLFOPhase								0x40
+#define TFX_OSC_FrqLFOPhase												0x50
+#define TFX_VCF_LFOPhase												0x60
+#define TFX_Gain_LFOPhase												0x70
+#define TFX_Tremolo_LFOPhase								0x71
+#define TFX_Vibrato_LFOPhase								0x72
 
 
 #define SOLVE_A(x)  float(std::pow(2.0f,((7.0f-std::log((float)x)/std::log(2.0f)))))
@@ -320,7 +320,7 @@ const signed char ArpNote[MAXARP][16] = {
 struct VCFPAR
 {
 	float *pvcflfowave;
-	int	vcflfowave;
+	int				vcflfowave;
 	int vcfenvdelay;
 	int vcfenvattack;
 	int vcfenvdecay;
@@ -337,7 +337,7 @@ struct VCFPAR
 
 struct VCFVALS
 {
-	int	VcfEnvStage;
+	int				VcfEnvStage;
 	float VcfCutoff;
 	float vcflfophase;
 	float VcfEnvValue;
@@ -621,24 +621,24 @@ public:
 	inline float antialias(float in0) 
 	{ 
 		in0 = in0* 0.35013f * (1.16f*1.16f)*(1.16f*1.16f); 
-	  b1 = in0 + (0.3f * in1) + ((1.0f - 1.16f) * b1); // Pole 1 
-	  in1  = in0; 
-	  b2 = b1 + (0.3f * in2) + ((1.0f - 1.16f) * b2);  // Pole 2 
-	  in2  = b1; 
-	  b3 = b2 + (0.3f * in3) + ((1.0f - 1.16f) * b3);  // Pole 3 
-	  in3  = b2; 
-	  b4 = b3 + (0.3f * in4) + ((1.0f - 1.16f) * b4);  // Pole 4 
-	  // safety check
-	  /*
-	  if (b4 > 128.0f) 
-		  b4 = 128.0f;
-	  else if (b4 < -128.0f) 
-		  b4 = -128.0f;
-		  */
-	  //
-	  in4  = b3; 
+		b1 = in0 + (0.3f * in1) + ((1.0f - 1.16f) * b1); // Pole 1 
+		in1  = in0; 
+		b2 = b1 + (0.3f * in2) + ((1.0f - 1.16f) * b2);  // Pole 2 
+		in2  = b1; 
+		b3 = b2 + (0.3f * in3) + ((1.0f - 1.16f) * b3);  // Pole 3 
+		in3  = b2; 
+		b4 = b3 + (0.3f * in4) + ((1.0f - 1.16f) * b4);  // Pole 4 
+		// safety check
+		/*
+		if (b4 > 128.0f) 
+			b4 = 128.0f;
+		else if (b4 < -128.0f) 
+			b4 = -128.0f;
+			*/
+		//
+		in4  = b3; 
 	// Lowpass  output:  b4 
-	  return b4; 
+		return b4; 
 	}
 
 	inline void antialias_reset()
@@ -664,7 +664,7 @@ private:
 	float TremoloVol;
 	float TremoloEnvValue;
 	float TremoloEnvCoef;
-	int		TremoloEnvStage;
+	int								TremoloEnvStage;
 	// Arpeggiator
 	float Arp_tickcounter;
 	float Arp_samplespertick;
@@ -744,7 +744,7 @@ inline void CSynthTrack::FilterTick()
 {
 	unsigned int i;
 	timetocompute=FILTER_CALC_TIME-1;
- 	// porta
+		// porta
 	if (PortaCoef < 0.0f)
 	{
 		Arp_basenote += PortaCoef;
@@ -840,7 +840,7 @@ inline void CSynthTrack::FilterTick()
 				switch(lVcfv[i].VcfEnvStage)
 				{
 				case 0: // Delay
-					lVcfv[i].VcfEnvDValue+=lVcfv[i].VcfEnvCoef;			
+					lVcfv[i].VcfEnvDValue+=lVcfv[i].VcfEnvCoef;												
 					if(lVcfv[i].VcfEnvDValue>1.0f)
 					{
 						if (syntp->gVcfp[i].vcfenvattack)
@@ -906,7 +906,7 @@ inline void CSynthTrack::FilterTick()
 						{
 							lVcfv[i].VcfEnvValue=0.0f;
 							lVcfv[i].VcfEnvStage=-1;
-						}				
+						}																
 					}
 					break;
 
@@ -989,7 +989,7 @@ inline void CSynthTrack::FilterTick()
 					switch(lOscv[i].OscpEnvStage)
 					{
 					case 0: // Delay
-						lOscv[i].OscpEnvDValue+=lOscv[i].OscpEnvCoef;			
+						lOscv[i].OscpEnvDValue+=lOscv[i].OscpEnvCoef;												
 						if(lOscv[i].OscpEnvDValue>1.0f)
 						{
 							if (syntp->gOscp[i].oscpattack)
@@ -1013,7 +1013,7 @@ inline void CSynthTrack::FilterTick()
 							{
 								lOscv[i].OscpEnvValue=0.0f;
 								lOscv[i].OscpEnvStage=-1;
-							}	
+							}				
 						}
 						break;
 					case 1: // Attack
@@ -1036,7 +1036,7 @@ inline void CSynthTrack::FilterTick()
 							{
 								lOscv[i].OscpEnvValue=0.0f;
 								lOscv[i].OscpEnvStage=-1;
-							}	
+							}				
 						}
 						break;
 
@@ -1054,7 +1054,7 @@ inline void CSynthTrack::FilterTick()
 							{
 								lOscv[i].OscpEnvValue=0.0f;
 								lOscv[i].OscpEnvStage=-1;
-							}	
+							}				
 						}
 						break;
 
@@ -1104,7 +1104,7 @@ inline void CSynthTrack::FilterTick()
 				switch(lOscv[i].OscwEnvStage)
 				{
 				case 0: // Delay
-					lOscv[i].OscwEnvDValue+=lOscv[i].OscwEnvCoef;			
+					lOscv[i].OscwEnvDValue+=lOscv[i].OscwEnvCoef;												
 					if(lOscv[i].OscwEnvDValue>1.0f)
 					{
 						if (syntp->gOscp[i].oscwattack)
@@ -1128,7 +1128,7 @@ inline void CSynthTrack::FilterTick()
 						{
 							lOscv[i].OscwEnvValue=0.0f;
 							lOscv[i].OscwEnvStage=-1;
-						}	
+						}				
 					}
 					break;
 				case 1: // Attack
@@ -1151,7 +1151,7 @@ inline void CSynthTrack::FilterTick()
 						{
 							lOscv[i].OscwEnvValue=0.0f;
 							lOscv[i].OscwEnvStage=-1;
-						}	
+						}				
 					}
 					break;
 
@@ -1169,7 +1169,7 @@ inline void CSynthTrack::FilterTick()
 						{
 							lOscv[i].OscwEnvValue=0.0f;
 							lOscv[i].OscwEnvStage=-1;
-						}	
+						}				
 					}
 					break;
 
@@ -1235,7 +1235,7 @@ inline void CSynthTrack::FilterTick()
 				switch(lOscv[i].OscfEnvStage)
 				{
 				case 0: // Delay
-					lOscv[i].OscfEnvDValue+=lOscv[i].OscfEnvCoef;			
+					lOscv[i].OscfEnvDValue+=lOscv[i].OscfEnvCoef;												
 					if(lOscv[i].OscfEnvDValue>1.0f)
 					{
 						if (syntp->gOscp[i].oscfattack)
@@ -1259,7 +1259,7 @@ inline void CSynthTrack::FilterTick()
 						{
 							lOscv[i].OscfEnvValue=0.0f;
 							lOscv[i].OscfEnvStage=-1;
-						}	
+						}				
 					}
 					break;
 				case 1: // Attack
@@ -1282,7 +1282,7 @@ inline void CSynthTrack::FilterTick()
 						{
 							lOscv[i].OscfEnvValue=0.0f;
 							lOscv[i].OscfEnvStage=-1;
-						}	
+						}				
 					}
 					break;
 
@@ -1300,7 +1300,7 @@ inline void CSynthTrack::FilterTick()
 						{
 							lOscv[i].OscfEnvValue=0.0f;
 							lOscv[i].OscfEnvStage=-1;
-						}	
+						}				
 					}
 					break;
 
@@ -1373,7 +1373,7 @@ inline void CSynthTrack::FilterTick()
 			switch (GainEnvStage)
 			{
 			case 0: // Delay
-				GainEnvDValue+=GainEnvCoef;			
+				GainEnvDValue+=GainEnvCoef;												
 				if(GainEnvDValue>1.0f)
 				{
 					if (syntp->gain_env_attack)
@@ -1397,7 +1397,7 @@ inline void CSynthTrack::FilterTick()
 					{
 						GainEnvValue=0.0f;
 						GainEnvStage=-1;
-					}	
+					}				
 				}
 				break;
 
@@ -1421,7 +1421,7 @@ inline void CSynthTrack::FilterTick()
 					{
 						GainEnvValue=0.0f;
 						GainEnvStage=-1;
-					}	
+					}				
 				}
 				break;
 
@@ -1563,7 +1563,7 @@ inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, unsigned in
 {
 	while (Pos>=SAMPLE_LENGTH)
 	{
-//		Pos = (Pos-f2i(Pos))+(f2i(Pos)&(SAMPLE_LENGTH-1));
+//								Pos = (Pos-f2i(Pos))+(f2i(Pos)&(SAMPLE_LENGTH-1));
 		Pos -= SAMPLE_LENGTH;
 		dir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -1621,7 +1621,7 @@ inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, unsigned in
 				Pos += add[dir];
 				while (Pos>=SAMPLE_LENGTH)
 				{
-//					Pos = (Pos-f2i(Pos))+(f2i(Pos)&(SAMPLE_LENGTH-1));
+//																				Pos = (Pos-f2i(Pos))+(f2i(Pos)&(SAMPLE_LENGTH-1));
 					Pos -= SAMPLE_LENGTH;
 					dir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -1791,7 +1791,7 @@ inline float CSynthTrack::GetPhaseSampleMix()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed[lOscv[i].oscdir];
 			while (lOscv[i].OSCPosition>=SAMPLE_LENGTH)
 			{
-//					lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
+//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
 				lOscv[i].OSCPosition -= SAMPLE_LENGTH;
 				lOscv[i].oscdir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -1899,7 +1899,7 @@ inline float CSynthTrack::GetPhaseSampleOSCOdd()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed[lOscv[i].oscdir];
 			while (lOscv[i].OSCPosition>=SAMPLE_LENGTH)
 			{
-//					lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
+//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
 				lOscv[i].OSCPosition -= SAMPLE_LENGTH;
 				lOscv[i].oscdir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -2010,7 +2010,7 @@ inline float CSynthTrack::GetPhaseSampleOSCEven()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed[lOscv[i].oscdir];
 			while (lOscv[i].OSCPosition>=SAMPLE_LENGTH)
 			{
-//					lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
+//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
 				lOscv[i].OSCPosition -= SAMPLE_LENGTH;
 				lOscv[i].oscdir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -2138,8 +2138,8 @@ inline float CSynthTrack::HandleOverdrive(float input)
 		case 2+BASEOVERDRIVE:
 			input *= OutGain;
 			input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-			if (input < -1.0f)		return -1.0f;
-			else if (input > 1.0f)	return 1.0f;
+			if (input < -1.0f)								return -1.0f;
+			else if (input > 1.0f)				return 1.0f;
 			return input;
 		case 3: // soft clip 3
 		case 3+BASEOVERDRIVE:
@@ -2151,37 +2151,37 @@ inline float CSynthTrack::HandleOverdrive(float input)
 		case 4: // hard clip 1
 		case 4+BASEOVERDRIVE:
 			input *= OutGain;
-			if (input < -1.0f)		return -1.0f;
-			else if (input > 1.0f)	return 1.0f;
+			if (input < -1.0f)								return -1.0f;
+			else if (input > 1.0f)				return 1.0f;
 			return input;
 			break;
 		case 5: // hard clip 2
 		case 5+BASEOVERDRIVE:
 			// bounce off limits
 			input *= OutGain;
-			if (input < -1.0f)		return input-(f2i(input)+1)*(input+1.0f);
-			else if (input > 1.0f)	return input-(f2i(input)+1)*(input-1.0f);
+			if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+			else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 			return input;
 			break;
 		case 6: // hard clip 3
 		case 6+BASEOVERDRIVE:
 			// invert, this one is harsh
 			input *= OutGain;
-			if (input < -1.0f)		return input + (f2i(input/(2.0f)))*(2.0f);
-			else if (input > 1.0f)	return input - (f2i(input/(2.0f)))*(2.0f);
+			if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+			else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 			return input;
 			break;
 		case 7: // parabolic distortion
 		case 7+BASEOVERDRIVE:
 			input = (((input * input)*(OutGain*OutGain)))-1.0f;
-			if (input > 1.0f)	return 1.0f;
-//			return input*MAXOVERDRIVEAMP*(128.0f/OutGain);
+			if (input > 1.0f)				return 1.0f;
+//												return input*MAXOVERDRIVEAMP*(128.0f/OutGain);
 			return input;
 			break;
 		case 8: // parabolic distortion
 		case 8+BASEOVERDRIVE:
 			input = (((input * input)*(OutGain*OutGain))*32.0f)-1.0f;
-			if (input > 1.0f)	return 1.0f;
+			if (input > 1.0f)				return 1.0f;
 			return input;
 			break;
 		case 9: // sin remapper
@@ -2223,7 +2223,7 @@ inline float CSynthTrack::GetSample()
 			{
 				AmpEnvValue = 0.0f;
 				AmpEnvStage=0;
-			}		
+			}								
 		}
 		break;
 

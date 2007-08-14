@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	FeedMe.cpp
-//	----------
-//	druttis@darkface.pp.se
+//				FeedMe.cpp
+//				----------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
@@ -10,15 +10,15 @@
 #include <psycle/plugin_interface.hpp>
 #include <memory>
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
-#define MAC_NAME		"FeedMe"
-#define MAC_VERSION		"1.1"
-#define MAC_AUTHOR		"Druttis"
-#define	MAX_TRACKS		64
-#define MAX_VOICES		2
+#define MAC_NAME								"FeedMe"
+#define MAC_VERSION								"1.1"
+#define MAC_AUTHOR								"Druttis"
+#define				MAX_TRACKS								64
+#define MAX_VOICES								2
 //============================================================================
-//	Parameters
+//				Parameters
 //============================================================================
 
 #define PARAM_WAVEFORM 0
@@ -261,7 +261,7 @@ CMachineParameter const paramSyncMode = {
 	3
 };
 //============================================================================
-//	Parameter list
+//				Parameter list
 //============================================================================
 CMachineParameter const *pParams[] = {
 	&paramWaveform,
@@ -292,7 +292,7 @@ CMachineParameter const *pParams[] = {
 
 #define NUM_PARAMS 24
 //============================================================================
-//	Machine info
+//				Machine info
 //============================================================================
 CMachineInfo const MacInfo =
 {
@@ -312,7 +312,7 @@ CMachineInfo const MacInfo =
 };
 
 //============================================================================
-//	Machine
+//				Machine
 //============================================================================
 class mi : public CMachineInterface
 {
@@ -332,17 +332,17 @@ public:
 public:
 	TRACKDATA globals;
 	bool setup;
-	CTrack	tracks[MAX_TRACKS][2];
-	int		global_ticks_remaining;
+	CTrack				tracks[MAX_TRACKS][2];
+	int								global_ticks_remaining;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //============================================================================
-//	Constructor
+//				Constructor
 //============================================================================
 int mi::instances = 0;
 //============================================================================
-//	Constructor
+//				Constructor
 //============================================================================
 mi::mi()
 {
@@ -352,7 +352,7 @@ mi::mi()
 	global_ticks_remaining = 0;
 }
 //============================================================================
-//	Destructor
+//				Destructor
 //============================================================================
 mi::~mi()
 {
@@ -362,7 +362,7 @@ mi::~mi()
 		CTrack::Destroy();
 }
 //============================================================================
-//	Init
+//				Init
 //============================================================================
 void mi::Init()
 {
@@ -379,7 +379,7 @@ void mi::Init()
 		CTrack::Init();
 }
 //============================================================================
-//	Stop
+//				Stop
 //============================================================================
 void mi::Stop()
 {
@@ -389,7 +389,7 @@ void mi::Stop()
 	setup = true;
 }
 //============================================================================
-//	Command
+//				Command
 //============================================================================
 void mi::Command()
 {
@@ -407,7 +407,7 @@ void mi::Command()
 	);
 }
 //============================================================================
-//	ParameterTweak
+//				ParameterTweak
 //============================================================================
 void mi::ParameterTweak(int par, int val)
 {
@@ -489,7 +489,7 @@ void mi::ParameterTweak(int par, int val)
 	}
 }
 //============================================================================
-//	DescribeValue
+//				DescribeValue
 //============================================================================
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
@@ -582,14 +582,14 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	return true;
 }
 //============================================================================
-//	SequencerTick
+//				SequencerTick
 //============================================================================
 void mi::SequencerTick()
 {
-	//	Code here if this machine is an effect
+	//				Code here if this machine is an effect
 }
 //============================================================================
-//	SequencerTick
+//				SequencerTick
 //============================================================================
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
@@ -597,14 +597,14 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	//
 	int vol = 254;
 	//
-	//	Volume command
+	//				Volume command
 	if (cmd == 0x0c) {
 		vol = val - 2;
 		if (vol < 0)
 			vol = 0;
 	}
 	//
-	//	Route
+	//				Route
 	if (note == 120) {
 		tracks[channel][0].NoteOff();
 	} else if (note < 120) {
@@ -626,12 +626,12 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 }
 //============================================================================
-//	Work
+//				Work
 //============================================================================
 void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks)
 {
 	//
-	//	Animate inertia
+	//				Animate inertia
 	if (setup) {
 		const float max = 0.0f;
 		AnimateAFloat(&globals.feedback, max);
@@ -643,7 +643,7 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		setup = false;
 	}
 	//
-	//	Loop
+	//				Loop
 	int ti;
 	int vi;
 	//
@@ -651,10 +651,10 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 	--psamplesleft;
 	--psamplesright;
 	//
-	//	Render
+	//				Render
 	do {
 		//
-		//	Handle tick;
+		//				Handle tick;
 		if (global_ticks_remaining <= 0)
 		{
 			global_ticks_remaining = GLOBAL_TICKS;
@@ -667,15 +667,15 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 			AnimateAFloat(&globals.filter_res, inertia);
 		}
 		//
-		//	Compute samples to play
+		//				Compute samples to play
 		int amount = numsamples;
 		if (amount > global_ticks_remaining)
 			amount = global_ticks_remaining;
 		//
-		//	Tick
+		//				Tick
 		global_ticks_remaining -= amount;
 		//
-		//	Render voices
+		//				Render voices
 		for (ti = 0; ti < numtracks; ti++) {
 			for (vi = 0; vi < MAX_VOICES; vi++) {
 				if (!tracks[ti][vi].IsFinished())
@@ -683,11 +683,11 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 			}
 		}
 		//
-		//	Advance
+		//				Advance
 		psamplesleft += amount;
 		psamplesright += amount;
 		numsamples -= amount;
 		//
-		//	Next
+		//				Next
 	} while (numsamples > 0);
 }

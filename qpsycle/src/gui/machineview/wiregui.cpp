@@ -31,98 +31,98 @@
 #include <QMenu>
 #include <QAction>
 
- static const double Pi = 3.14159265358979323846264338327950288419717;
- static double TwoPi = 2.0 * Pi;
+	static const double Pi = 3.14159265358979323846264338327950288419717;
+	static double TwoPi = 2.0 * Pi;
 
- WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView)
-     : arrowSize(20), machineView(macView)
- {
-     source = sourceMacGui;
-     dest = destMacGui;
-     source->addWireGui(this);
-     if ( dest ) dest->addWireGui(this);
-     adjust();
+	WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView)
+		: arrowSize(20), machineView(macView)
+	{
+		source = sourceMacGui;
+		dest = destMacGui;
+		source->addWireGui(this);
+		if ( dest ) dest->addWireGui(this);
+		adjust();
 
-     delConnAct_ = new QAction( "Delete Connection", this );
-     rewireDstAct_ = new QAction( "Rewire Connection Destination", this );
+		delConnAct_ = new QAction( "Delete Connection", this );
+		rewireDstAct_ = new QAction( "Rewire Connection Destination", this );
 
-     connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
-     connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
-     // FIXME: the above lines seem not the best way of doing things.
-     // (i.e. should delete signal go direct to the machineView? )
-     
-     connect( rewireDstAct_, SIGNAL( triggered() ), this, SLOT( onRewireDestActionTriggered() ) );
+		connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
+		connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
+		// FIXME: the above lines seem not the best way of doing things.
+		// (i.e. should delete signal go direct to the machineView? )
+		
+		connect( rewireDstAct_, SIGNAL( triggered() ), this, SLOT( onRewireDestActionTriggered() ) );
 
-     setSourceMacGui( sourceMacGui );
-     setDestMacGui( destMacGui );
- }
+		setSourceMacGui( sourceMacGui );
+		setDestMacGui( destMacGui );
+	}
 
 WireGui::~WireGui()
 {
-//	sourceMacGui()->wireGuiList().removeAll( this );
-//	destMacGui()->wireGuiList().removeAll( this );
-// 	QList<WireGui*>::iterator it = sourceMacGui()->wireGuiList().begin();
-// 	for ( ; it != sourceMacGui()->wireGuiList().end(); it++ ) {
-// 		if ( *it == this ) {
-// 			sourceMacGui()->wireGuiList().erase( it );
-// 		}
-// 	}
-// 	it = destMacGui()->wireGuiList().begin();
-// 	for ( ; it != destMacGui()->wireGuiList().end(); it++ ) {
-// 		if ( *it == this ) {
-// 			destMacGui()->wireGuiList().erase( it );
-// 		}
-// 	}
+//																																																																sourceMacGui()->wireGuiList().removeAll( this );
+//																																																																destMacGui()->wireGuiList().removeAll( this );
+// 																																																																QList<WireGui*>::iterator it = sourceMacGui()->wireGuiList().begin();
+// 																																																																for ( ; it != sourceMacGui()->wireGuiList().end(); it++ ) {
+// 																																																																																																																																if ( *it == this ) {
+// 																																																																																																																																																																																																sourceMacGui()->wireGuiList().erase( it );
+// 																																																																																																																																}
+// 																																																																}
+// 																																																																it = destMacGui()->wireGuiList().begin();
+// 																																																																for ( ; it != destMacGui()->wireGuiList().end(); it++ ) {
+// 																																																																																																																																if ( *it == this ) {
+// 																																																																																																																																																																																																destMacGui()->wireGuiList().erase( it );
+// 																																																																																																																																}
+// 																																																																}
 }
 
- MachineGui *WireGui::sourceMacGui() 
- {
-     return source;
- }
+	MachineGui *WireGui::sourceMacGui() 
+	{
+		return source;
+	}
 
- void WireGui::setSourceMacGui(MachineGui *macGui)
- {
-     source = macGui;
-     adjust();
- }
+	void WireGui::setSourceMacGui(MachineGui *macGui)
+	{
+		source = macGui;
+		adjust();
+	}
 
- MachineGui *WireGui::destMacGui() 
- {
-     return dest;
- }
+	MachineGui *WireGui::destMacGui() 
+	{
+		return dest;
+	}
 
- void WireGui::setDestMacGui(MachineGui *macGui)
- {
-     dest = macGui;
-     adjust();
- }
+	void WireGui::setDestMacGui(MachineGui *macGui)
+	{
+		dest = macGui;
+		adjust();
+	}
 
 void WireGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( event->button() == Qt::LeftButton ) 
-    {
-        if ( event->modifiers() & Qt::ShiftModifier )
-            state_ = 1;
-        else if ( event->modifiers() & Qt::ControlModifier )
-            state_ = 2;
-    }
+	if ( event->button() == Qt::LeftButton ) 
+	{
+		if ( event->modifiers() & Qt::ShiftModifier )
+			state_ = 1;
+		else if ( event->modifiers() & Qt::ControlModifier )
+			state_ = 2;
+	}
 }
 
 void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( event->buttons() == Qt::LeftButton )
-    {
-        if ( ( event->modifiers() & Qt::ShiftModifier ) && state_ == 1 ) {
-            scene()->update( boundingRect() );
-            destPoint = event->lastScenePos();    
-            scene()->update( boundingRect() );
-        }
-        if ( ( event->modifiers() & Qt::ControlModifier ) && state_ == 2 ) {
-            scene()->update( boundingRect() );
-            sourcePoint = event->lastScenePos();    
-            scene()->update( boundingRect() );
-        }
-    }
+	if ( event->buttons() == Qt::LeftButton )
+	{
+		if ( ( event->modifiers() & Qt::ShiftModifier ) && state_ == 1 ) {
+			scene()->update( boundingRect() );
+			destPoint = event->lastScenePos();    
+			scene()->update( boundingRect() );
+		}
+		if ( ( event->modifiers() & Qt::ControlModifier ) && state_ == 2 ) {
+			scene()->update( boundingRect() );
+			sourcePoint = event->lastScenePos();    
+			scene()->update( boundingRect() );
+		}
+	}
 }
 
 void WireGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
@@ -190,94 +190,94 @@ void WireGui::rewireSource( MachineGui *newSrcGui )
 
 void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-    event->accept();
-    QMenu menu;
-    menu.addAction( delConnAct_ );
-    menu.addSeparator();
-    QAction *a = menu.exec( event->screenPos() );
+	event->accept();
+	QMenu menu;
+	menu.addAction( delConnAct_ );
+	menu.addSeparator();
+	QAction *a = menu.exec( event->screenPos() );
 }
 
 void WireGui::adjust()
 {
-    if (!source || !dest)
-        return;
+	if (!source || !dest)
+		return;
 
-    QLineF line(mapFromItem(source, source->boundingRect().width()/2, source->boundingRect().height()/2), 
-                mapFromItem(dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2)); 
-    qreal length = line.length();
-    QPointF wireGuiOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
+	QLineF line(mapFromItem(source, source->boundingRect().width()/2, source->boundingRect().height()/2), 
+				mapFromItem(dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2)); 
+	qreal length = line.length();
+	QPointF wireGuiOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
 
-    removeFromIndex();
-    sourcePoint = line.p1() + wireGuiOffset;
-    destPoint = line.p2() - wireGuiOffset;
-    addToIndex();
+	removeFromIndex();
+	sourcePoint = line.p1() + wireGuiOffset;
+	destPoint = line.p2() - wireGuiOffset;
+	addToIndex();
 }
 
- QRectF WireGui::boundingRect() const
- {
-     if (!source || !dest)
-         return QRectF();
+	QRectF WireGui::boundingRect() const
+	{
+		if (!source || !dest)
+			return QRectF();
 
-     qreal penWidth = 1;
-     qreal extra = (penWidth + arrowSize) / 2.0;
+		qreal penWidth = 1;
+		qreal extra = (penWidth + arrowSize) / 2.0;
 
-     return QRectF(sourcePoint, QSizeF(destPoint.x() - sourcePoint.x(),
-                                       destPoint.y() - sourcePoint.y()))
-         .normalized()
-         .adjusted(-extra, -extra, extra, extra);
- }
+		return QRectF(sourcePoint, QSizeF(destPoint.x() - sourcePoint.x(),
+										destPoint.y() - sourcePoint.y()))
+			.normalized()
+			.adjusted(-extra, -extra, extra, extra);
+	}
 
- void WireGui::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
- {
-     if (!source || !dest)
-         return;
+	void WireGui::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+	{
+		if (!source || !dest)
+			return;
 
-     // Draw the line.
-     QLineF line(sourcePoint, destPoint);
-     painter->setPen(QPen(Qt::white, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-     painter->drawLine(line);
+		// Draw the line.
+		QLineF line(sourcePoint, destPoint);
+		painter->setPen(QPen(Qt::white, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+		painter->drawLine(line);
 
-     // Draw the arrow.
-     // FIXME: arrow isn't quite in centre of line (observe two machines close to each other)
-     double angle = ::acos(line.dx() / line.length());
-     if (line.dy() >= 0)
-         angle = TwoPi - angle;
+		// Draw the arrow.
+		// FIXME: arrow isn't quite in centre of line (observe two machines close to each other)
+		double angle = ::acos(line.dx() / line.length());
+		if (line.dy() >= 0)
+			angle = TwoPi - angle;
 
-     QPointF midPoint = sourcePoint + QPointF((destPoint.x()-sourcePoint.x())/2, 
-                                  (destPoint.y()-sourcePoint.y())/2);
-     QPointF arrowP1 = midPoint + QPointF(sin(angle - Pi / 3) * arrowSize,
-                                               cos(angle - Pi / 3) * arrowSize);
-     QPointF arrowP2 = midPoint + QPointF(sin(angle - Pi + Pi / 3) * arrowSize,
-                                               cos(angle - Pi + Pi / 3) * arrowSize);
+		QPointF midPoint = sourcePoint + QPointF((destPoint.x()-sourcePoint.x())/2, 
+									(destPoint.y()-sourcePoint.y())/2);
+		QPointF arrowP1 = midPoint + QPointF(sin(angle - Pi / 3) * arrowSize,
+												cos(angle - Pi / 3) * arrowSize);
+		QPointF arrowP2 = midPoint + QPointF(sin(angle - Pi + Pi / 3) * arrowSize,
+												cos(angle - Pi + Pi / 3) * arrowSize);
 
-     painter->setBrush(Qt::darkGray);
-     painter->drawPolygon(QPolygonF() << midPoint << arrowP1 << arrowP2);
- }
+		painter->setBrush(Qt::darkGray);
+		painter->drawPolygon(QPolygonF() << midPoint << arrowP1 << arrowP2);
+	}
 
 QPainterPath WireGui::shape () const
 {
-    QPainterPath path;
-    // Making a rectangle with width = arrowSize, height = wire length.
-    qreal halfPolygonWidth = arrowSize/2;
-    qreal sideLength = sqrt((halfPolygonWidth*halfPolygonWidth)/2);
-    QPointF foo( sideLength, sideLength );
-    QPointF p0 = sourcePoint - foo;
-    QPointF p1 = sourcePoint + foo;
-    QPointF p2 = destPoint + foo;
-    QPointF p3 = destPoint - foo;
-    QPolygonF polygon;
-    polygon << p0 << p1 << p2 << p3;
-    path.addPolygon( polygon );
-    path.closeSubpath();
-    return path;
+	QPainterPath path;
+	// Making a rectangle with width = arrowSize, height = wire length.
+	qreal halfPolygonWidth = arrowSize/2;
+	qreal sideLength = sqrt((halfPolygonWidth*halfPolygonWidth)/2);
+	QPointF foo( sideLength, sideLength );
+	QPointF p0 = sourcePoint - foo;
+	QPointF p1 = sourcePoint + foo;
+	QPointF p2 = destPoint + foo;
+	QPointF p3 = destPoint - foo;
+	QPolygonF polygon;
+	polygon << p0 << p1 << p2 << p3;
+	path.addPolygon( polygon );
+	path.closeSubpath();
+	return path;
 }
 
 void WireGui::deleteConnectionRequest()
 {
-   emit deleteConnectionRequest(this);
+	emit deleteConnectionRequest(this);
 }
 
 void WireGui::onRewireDestActionTriggered()
 {
-   //emit startRewiringDest(this);
+	//emit startRewiringDest(this);
 }

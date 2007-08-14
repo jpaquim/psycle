@@ -233,7 +233,7 @@ namespace psy
 						//Skip (wave_format.header.ckSize);// read each block until we find the correct one
 						// we didn't find our header, so move back and try again
 						Skip(1 - sizeof wave_format.header);
-					 	retcode = Read ( &wave_format.header, sizeof(wave_format.header) );
+							retcode = Read ( &wave_format.header, sizeof(wave_format.header) );
 						if(retcode != DDC_SUCCESS) return retcode;
 					}
 					retcode = Read ( &wave_format.data, sizeof(wave_format.data) );

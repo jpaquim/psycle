@@ -11,16 +11,16 @@ class allpass
 {
 public:
 					allpass();
-			void	setbuffer(float *buf, int size);
-	inline  float	process(float inp);
-			void	mute();
-			void	setfeedback(float val);
-			float	getfeedback();
+			void				setbuffer(float *buf, int size);
+	inline  float				process(float inp);
+			void				mute();
+			void				setfeedback(float val);
+			float				getfeedback();
 // private:
-	float	feedback;
-	float	*buffer;
-	int		bufsize;
-	int		bufidx;
+	float				feedback;
+	float				*buffer;
+	int								bufsize;
+	int								bufidx;
 };
 
 // Big to inline - but crucial for speed

@@ -69,7 +69,7 @@ class Configuration
 	///\}
 
 	///\name audio drivers
-	///\{				
+	///\{																																																																																																																																																																																																																																																																
 		public:
 			void setDriverByName( const std::string & driverName );        
 			std::map<std::string, AudioDriver*> & driverMap() { return driverMap_; }

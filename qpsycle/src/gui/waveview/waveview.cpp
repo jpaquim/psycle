@@ -34,7 +34,7 @@
 
 WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent) 
 	: QWidget(parent),
-	  instrumentsModel_( instrumentsModel )
+		instrumentsModel_( instrumentsModel )
 {
 	layout_ = new QVBoxLayout();
 	setLayout(layout_);
@@ -43,20 +43,20 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 		
 	toolBar_ = new QToolBar();
 	toolBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
-	 
+		
 	//sample loading
 	QLabel *playLabel = new QLabel("Play: ");
-	 
+		
 	loadSmp_ = new QAction( QIcon(":images/wave-open.png"), "Load Sample", this );
 	connect( loadSmp_, SIGNAL( triggered() ), this, SLOT( onLoadButtonClicked() ) );
-	 
+		
 	saveSmp_ = new QAction( QIcon(":images/wave-save.png"), "Save Sample", this);
 	connect( saveSmp_, SIGNAL( triggered() ), this, SLOT( onSaveButtonClicked() ) );
-	 
+		
 	playsSmp_ = new QAction(QIcon(":/images/wave_playstart.png"), tr("Play From Start"), this);
 	playSmp_ = new QAction(QIcon(":/images/wave_play.png"), tr("Play"), this);
 	stopSmp_ = new QAction(QIcon(":/images/wave_stop.png"), tr("Stop"), this);
-	 
+		
 	//editing
 	QLabel *editLabel = new QLabel("Edit: ", this);
 	cutAct_ = new QAction( QIcon(":images/wave-cut.png"), "Cut", this);
@@ -84,30 +84,30 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	convEfx_ = new QAction("Convert to Mono", this);
 	remdcEfx_ = new QAction("Remove DC offset", this);
 	invEfx_ = new QAction("Invert Channels", this);
-		 
+			
 	//zoom and various
 	zoomBar_ = new QToolBar();
 	zoomBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	QLabel *zoomLabel = new QLabel("Zoom: ");
 	zoomMore_ = new QAction(QIcon(":/images/plus.png"), tr("Zoom More"), this);
 	connect( zoomMore_, SIGNAL( triggered() ), this, SLOT( onPlusButtonClicked() ));
-	 
+		
 	zoomLess_ = new QAction(QIcon(":/images/minus.png"), tr("Zoom Less"), this);
 	connect( zoomLess_, SIGNAL( triggered() ), this, SLOT( onMinusButtonClicked() ));
-	sampName_ = new QLabel("Sample Name", this);	
+	sampName_ = new QLabel("Sample Name", this);																
 	sampName_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	
 	zoomSlide_ = new QSlider(Qt::Horizontal, this);
 	zoomSlide_->setMinimum(0);
 	zoomSlide_->setMaximum(100);
 	zoomSlide_->setPageStep(10);
-	 
+		
 	zoomBar_->addWidget( zoomLabel );
 	zoomBar_->addAction( zoomLess_ );
 	zoomBar_->addWidget( zoomSlide_ );
 	zoomBar_->addAction( zoomMore_ );
 	zoomBar_->addWidget( sampName_);
-			 
+				
 	toolBar_->addAction( loadSmp_ );
 	toolBar_->addAction( saveSmp_ );
 	toolBar_->addSeparator();
@@ -144,16 +144,16 @@ void WaveView::onLoadButtonClicked()
 {
 	QString samplePath = QString::fromStdString( Global::configuration().samplePath() );
 	QString pathToWavfile = QFileDialog::getOpenFileName( this, tr("Open File"),
-							      samplePath,
-							      tr("Wave files (*.wav)") );
+									samplePath,
+									tr("Wave files (*.wav)") );
 	int curInstrIndex = instrumentsModel_->selectedInstrumentIndex();
 
 	if ( !instrumentsModel_->slotIsEmpty( curInstrIndex ) )
 	{
 		int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
-					       tr("A sample is already loaded here.\n"
-						  "Do you want to overwrite the current sample?"),
-					       QMessageBox::Ok | QMessageBox::Cancel );
+							tr("A sample is already loaded here.\n"
+							"Do you want to overwrite the current sample?"),
+							QMessageBox::Ok | QMessageBox::Cancel );
 		if ( ret == QMessageBox::Cancel ) return;
 	}
 	instrumentsModel_->loadInstrument( curInstrIndex, pathToWavfile );

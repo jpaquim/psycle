@@ -1,13 +1,13 @@
 //============================================================================
 //
-//	CEnvelope.cpp
+//				CEnvelope.cpp
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
 #include "CEnvelope.h"
 //============================================================================
 //
-//	CEnvelope
+//				CEnvelope
 //
 //============================================================================
 CEnvelope::CEnvelope()
@@ -25,18 +25,18 @@ CEnvelope::~CEnvelope()
 {
 }
 //============================================================================
-//	IsActive
+//				IsActive
 //
-//	Returns wether the envelope is active or is stated done.
+//				Returns wether the envelope is active or is stated done.
 //============================================================================
 bool CEnvelope::IsActive()
 {
 	return m_stage != ENVELOPE_DONE;
 }
 //============================================================================
-//	NoteOn
+//				NoteOn
 //
-//	Tells the envelope to
+//				Tells the envelope to
 //============================================================================
 void CEnvelope::NoteOn(float attackModifier)
 {
@@ -48,9 +48,9 @@ void CEnvelope::NoteOn(float attackModifier)
 	m_coeff = 1.0f / attack;
 }
 //============================================================================
-//	NoteOff
+//				NoteOff
 //
-//	Tells the envelope to release it's activity
+//				Tells the envelope to release it's activity
 //============================================================================
 void CEnvelope::NoteOff()
 {
@@ -66,9 +66,9 @@ void CEnvelope::NoteOff()
 	}
 }
 //============================================================================
-//	Stop
+//				Stop
 //
-//	Inactivates the envelope and resets stage as done
+//				Inactivates the envelope and resets stage as done
 //============================================================================
 void CEnvelope::Stop()
 {
@@ -77,7 +77,7 @@ void CEnvelope::Stop()
 	m_coeff = 0.0f;
 }
 //============================================================================
-//	Properties
+//				Properties
 //============================================================================
 float CEnvelope::GetAttack()
 {

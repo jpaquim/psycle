@@ -124,7 +124,7 @@ void SequencerItem::constrainToParent()
 	int newLeftPos = std::max( 0, currentLeftPos );
 
 	setPos( newLeftPos, 0 );                 
-    
+	
 	if ( true /*gridSnap()*/ ) {
 		int beatPos = pos().x() / beatPxLength_;
 		int snappedLeftPos = beatPos * beatPxLength_;
@@ -175,25 +175,25 @@ void SequencerItem::keyPressEvent( QKeyEvent *event )
 {
 	switch ( event->key() )
 	{
-        case Qt::Key_Left:
-        {
+		case Qt::Key_Left:
+		{
 		QPointF diff( -beatPxLength_, 0 );
 		emit moved( this, diff );
-        }
-        break;
-        case Qt::Key_Right :
-        {
+		}
+		break;
+		case Qt::Key_Right :
+		{
 		QPointF diff( beatPxLength_, 0 );
 		emit moved( this, diff );
-        }
-        break;
-        case Qt::Key_Up:
+		}
+		break;
+		case Qt::Key_Up:
 		emit changedLine( this, 0 ); 
 		break;
-        case Qt::Key_Down:
+		case Qt::Key_Down:
 		emit changedLine( this, 1 );
 		break;
-        default: event->ignore();
+		default: event->ignore();
 	}
 }
 

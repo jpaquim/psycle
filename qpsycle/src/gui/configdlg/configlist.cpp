@@ -30,7 +30,7 @@ ConfigList::ConfigList(QWidget *parent)
 
 void ConfigList::CreateItems()
 {
-	QListWidgetItem *general = new QListWidgetItem(QIcon(":/images/conf-general.png"), "General", this);	
+	QListWidgetItem *general = new QListWidgetItem(QIcon(":/images/conf-general.png"), "General", this);																
 	QListWidgetItem *audio = new QListWidgetItem(QIcon(":/images/conf-audio.png"), "Audio", this);
 	QListWidgetItem *keyborad = new QListWidgetItem(QIcon(":/images/conf-keyboard.png"), "Keyboard", this);
 	QListWidgetItem *visual = new QListWidgetItem(QIcon(":/images/conf-visual.png"), "Visual", this);

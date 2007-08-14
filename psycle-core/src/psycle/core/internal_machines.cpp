@@ -16,23 +16,23 @@ namespace psy {
 			Machine(callbacks, MACH_DUMMY, MACHMODE_FX, id, song)
 		{
 			SetEditName("Dummy");
-//			DefineStereoInput(1);
-//			DefineStereoOutput(1);
+			//DefineStereoInput(1);
+			//DefineStereoOutput(1);
 			SetAudioRange(32768.0f);
 		}
 		
 		Dummy::~Dummy() throw()
 		{
-//			DestroyInputs();
-//			DestroyOutputs();
+			//DestroyInputs();
+			//DestroyOutputs();
 		}
 
 		int Dummy::GenerateAudio(int numSamples)
 		{
-//			cpu::cycles_type cost(cpu::cycles());
+			//cpu::cycles_type cost(cpu::cycles());
 			Machine::SetVolumeCounter(numSamples);
-//			cost = cpu::cycles() - cost;
-//			work_cpu_cost(work_cpu_cost() + cost);
+			//cost = cpu::cycles() - cost;
+			//work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 			return numSamples;
 		}
@@ -108,7 +108,8 @@ namespace psy {
 		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
 		{
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-/*			if ( !_mute && !bisTicking)
+			#if 0
+			if ( !_mute && !bisTicking)
 			{
 				bisTicking=true;
 				for (int i=0;i<8;i++)
@@ -123,7 +124,7 @@ namespace psy {
 				}
 			}
 			bisTicking=false;
-*/		
+			#endif
 		}
 
 		void DuplicatorMac::GetParamName(int numparam,char *name) const
@@ -226,7 +227,7 @@ namespace psy {
 			SetEditName("Master");
 			_outDry = 256;
 			SetAudioRange(32768.0f);
-//			DefineStereoInput(1);
+			//DefineStereoInput(1);
 		}
 		
 		Master::~Master() throw()
@@ -263,11 +264,11 @@ namespace psy {
 
 		int Master::GenerateAudio( int numSamples )
 		{
-#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-			universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
+			#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+			#endif
 
-//			cpu::cycles_type cost(cpu::cycles());
+			//cpu::cycles_type cost(cpu::cycles());
 			//if(!_mute)
 			//{
 			float mv = CValueMapper::Map_255_1(_outDry);
@@ -368,8 +369,8 @@ namespace psy {
 			if( _rMax > currentpeak ) currentpeak = _rMax;
 			//}
 			sampleCount+=numSamples;
-//			cost = cpu::cycles() - cost;
-//			work_cpu_cost(work_cpu_cost() + cost);
+			//cost = cpu::cycles() - cost;
+			//work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 			return numSamples;
 		}
@@ -404,8 +405,8 @@ namespace psy {
 			SetEditName("Mixer");
 			_numPars = 255;
 			SetAudioRange(32768.0f);
-//			DefineStereoInput(24);
-//			DefineStereoOutput(1);
+			//DefineStereoInput(24);
+			//DefineStereoOutput(1);
 		}
 		
 		Mixer::~Mixer() throw()
@@ -450,7 +451,7 @@ namespace psy {
 			// Step Two, prepare input signals for the Send Fx, and make them work
 			FxSend( numSamples );
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
-//			cpu::cycles_type cost(cpu::cycles());
+			//cpu::cycles_type cost(cpu::cycles());
 			if(!_mute && !_stopped )
 			{
 				Mix(numSamples);
@@ -465,14 +466,14 @@ namespace psy {
 					}
 					else _stopped = false;
 				}
-//				cost = cpu::cycles() - cost;
-//				work_cpu_cost(work_cpu_cost() + cost);
+				//cost = cpu::cycles() - cost;
+				//work_cpu_cost(work_cpu_cost() + cost);
 			}
 
-//			cost = cpu::cycles();
+			//cost = cpu::cycles();
 			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-//			cost = cpu::cycles() - cost;
-//			wire_cpu_cost(wire_cpu_cost() + cost);
+			//cost = cpu::cycles() - cost;
+			//wire_cpu_cost(wire_cpu_cost() + cost);
 
 			_worked = true;
 			return numSamples;
@@ -493,7 +494,7 @@ namespace psy {
 						{ 
 							// Mix all the inputs and route them to the send fx.
 							{
-//								cpu::cycles_type cost(cpu::cycles());
+								//cpu::cycles_type cost(cpu::cycles());
 								for (int j=0; j<MAX_CONNECTIONS; j++)
 								{
 									if (_inputCon[j])
@@ -509,28 +510,25 @@ namespace psy {
 										}
 									}
 								}
-//								cost = cpu::cycles() - cost;
+								//cost = cpu::cycles() - cost;
 								//work_cpu_cost(work_cpu_cost() + cost);
 							}
 
 							// tell the FX to work, now that the input is ready.
 							{
-#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-#endif
-
+								#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
 								pSendMachine->Work( numSamples );
 							}
-
 							{
-//								cpu::cycles_type cost(cpu::cycles());
+								// cpu::cycles_type cost(cpu::cycles());
 								pSendMachine->_waitingForSound = false;
 								dsp::Clear(_pSamplesL, numSamples);
 								dsp::Clear(_pSamplesR, numSamples);
-//								cost = cpu::cycles() - cost;
-//								work_cpu_cost(work_cpu_cost() + cost);
+								//cost = cpu::cycles() - cost;
+								//work_cpu_cost(work_cpu_cost() + cost);
 							}
-
 						}
 						if(!pSendMachine->_stopped) _stopped = false;
 					}
@@ -574,9 +572,7 @@ namespace psy {
 
 		bool Mixer::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
 		{
-			//
-			// \todo ?
-			//
+			///\todo ?
 			return Machine::ConnectTo(dst_machine,dstport,outport,volume);
 		}
 
@@ -584,7 +580,7 @@ namespace psy {
 		{
 			std::string rettxt;
 			if (port < return1 )
-			{	
+			{
 				rettxt = "Input ";
 				rettxt += ('0'+port-chan1);
 				return rettxt;
@@ -762,24 +758,22 @@ namespace psy {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// LFO
 
-
-		//		todo:
-		//	- as is, control rate is proportional to MAX_BUFFER_LENGTH.. we update in work, which (at the moment) means once every 256
-		//      samples. at 44k, this means a cr of 142hz.  this is probably good enough for most purposes, but i believe it also
-		//		means that the lfo can and likely will be phased by 5.8ms depending on where it is placed in the machine view..
-		//		if we want to take the idea of modulation machines much further, we should probably put together some kind of
-		//		standard place in the processing chain where these machines will work, preferably -before- any audio
-		//		<JosepMa> About the "before any audio", the player can support this right now in two different ways:
-		//		One is in the "Machine::preWork" function, currently only used for buffer cleanup and generation of the wire visual data.
-		//		The second one is in the "Player::NotifyNewLine" function or in "Player::ExecuteGlobalCommands"
-		//		Also, note that currently, work does NOT mean 256 samples. It means *at much* 256, and quite frequently, it is a smaller
-		//		value (each line). This will change with the event based player.
-		//		processing.  this should also eliminate the need for the lfo to be connected to something to work.
+		// todo:
+		// - as is, control rate is proportional to MAX_BUFFER_LENGTH.. we update in work, which (at the moment) means once every 256
+		//   samples. at 44k, this means a cr of 142hz.  this is probably good enough for most purposes, but i believe it also
+		//   means that the lfo can and likely will be phased by 5.8ms depending on where it is placed in the machine view..
+		//   if we want to take the idea of modulation machines much further, we should probably put together some kind of
+		//   standard place in the processing chain where these machines will work, preferably -before- any audio
+		//   <JosepMa> About the "before any audio", the player can support this right now in two different ways:
+		//   One is in the "Machine::preWork" function, currently only used for buffer cleanup and generation of the wire visual data.
+		//   The second one is in the "Player::NotifyNewLine" function or in "Player::ExecuteGlobalCommands"
+		//   Also, note that currently, work does NOT mean 256 samples. It means *at much* 256, and quite frequently, it is a smaller
+		//   value (each line). This will change with the event based player.
+		//   processing.  this should also eliminate the need for the lfo to be connected to something to work.
 		//  - respond to pulse width knob.. consider using it as a 'skew' control for sine/tri waves as in dw-tremolo?
 		//  - now that we have a gui, keeping the 'position' display knob as an un-controllable control is just silly
 		//  - prettify gui
 		//  - vst support??
-
 
 		std::string LFO::_psName = "LFO";
 
@@ -826,13 +820,13 @@ namespace psy {
 
 		void LFO::Tick( int channel, const PatternEvent & pData )
 		{
-			if(!bisTicking)
-			{
-				bisTicking=true;
-				if(pData.command() == 0x01)	// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
-					lfoPos=0.0;			// against any established practices or something, let me know
+			if(!bisTicking) {
+				bisTicking = true;
+				// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
+				// against any established practices or something, let me know
+				if(pData.command() == 0x01) lfoPos = 0;
 			}
-			bisTicking=false;
+			bisTicking = false;
 		}
 
 		void LFO::GetParamName(int numparam,char *name) const
@@ -874,12 +868,12 @@ namespace psy {
 
 		int LFO::GetParamValue(int numparam) const
 		{
-			if(numparam==prms::wave)			return waveform;
-			else if(numparam==prms::speed)	return lSpeed;
-			else if(numparam <prms::prm0)	return macOutput[numparam-prms::mac0];
-			else if(numparam <prms::level0)	return paramOutput[numparam-prms::prm0];
-			else if(numparam <prms::phase0)	return level[numparam-prms::level0];
-			else if(numparam <prms::num_params)	return phase[numparam-prms::phase0];
+			if(numparam==prms::wave) return waveform;
+			else if(numparam==prms::speed) return lSpeed;
+			else if(numparam <prms::prm0) return macOutput[numparam-prms::mac0];
+			else if(numparam <prms::level0) return paramOutput[numparam-prms::prm0];
+			else if(numparam <prms::phase0) return level[numparam-prms::level0];
+			else if(numparam <prms::num_params) return phase[numparam-prms::phase0];
 			else return 0;
 		}
 
@@ -904,7 +898,7 @@ namespace psy {
 				{
 					float speedInMs = 100.0f / (float)(lSpeed/(float)(MAX_SPEED));
 					if(speedInMs<1000.0f)
-						sprintf(  parVal, "%.1f ms", speedInMs);		
+						sprintf(  parVal, "%.1f ms", speedInMs);
 					else
 						sprintf( parVal, "%.3f secs", speedInMs/1000.0f);
 				}
@@ -920,18 +914,18 @@ namespace psy {
 			}
 			else if(numparam<prms::level0)
 			{
-				if(		(macOutput[numparam-prms::prm0] != -1) 
-					&&	(song()->machine(macOutput[numparam-prms::prm0]) != NULL)
-					&&  (paramOutput[numparam-prms::prm0] >= 0)	)
+				if((macOutput[numparam-prms::prm0] != -1) 
+					&& (song()->machine(macOutput[numparam-prms::prm0]) != NULL)
+					&& (paramOutput[numparam-prms::prm0] >= 0))
 				{
-					if		(paramOutput[numparam-prms::prm0] < song()->machine(macOutput[numparam-prms::prm0])->GetNumParams())
+					if(paramOutput[numparam-prms::prm0] < song()->machine(macOutput[numparam-prms::prm0])->GetNumParams())
 					{
 						char name[128];
 						song()->machine(macOutput[numparam-prms::prm0])->GetParamName(paramOutput[numparam-prms::prm0], name);
 						sprintf(parVal,"%X -%s", paramOutput[numparam-prms::prm0], name);
 					}
 					else
-						sprintf(parVal,"%X -none", paramOutput[numparam-prms::prm0]);					
+						sprintf(parVal,"%X -none", paramOutput[numparam-prms::prm0]);
 				} 
 				else 
 					sprintf(parVal,"(disabled)");
@@ -1021,7 +1015,7 @@ namespace psy {
 		void LFO::PreWork(int numSamples)
 		{
 			Machine::PreWork(numSamples);
-//			cpu::cycles_type cost(cpu::cycles());
+			//cpu::cycles_type cost(cpu::cycles());
 
 			int maxVal=0, minVal=0;
 			int curVal=0, newVal=0;
@@ -1031,22 +1025,22 @@ namespace psy {
 
 			for(int j(0);j<NUM_CHANS;++j)
 			{
-				if	( macOutput[j] != -1 && song()->machine(macOutput[j]) != NULL &&
-				    paramOutput[j] != -1 && paramOutput[j] < song()->machine(macOutput[j])->GetNumParams() )
+				if( macOutput[j] != -1 && song()->machine(macOutput[j]) != NULL &&
+					paramOutput[j] != -1 && paramOutput[j] < song()->machine(macOutput[j])->GetNumParams() )
 				{
 					song()->machine(macOutput[j])->GetParamRange(paramOutput[j], minVal, maxVal);
 					curVal = song()->machine(macOutput[j])->GetParamValue(paramOutput[j]);
-					curLFO = waveTable[	int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
+					curLFO = waveTable[int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 					lfoAmt = (level[j]-MAX_DEPTH)/(float)MAX_DEPTH;
 
-					centerVal[j] -= prevVal[j] - curVal;  //compensate for external movement
+					centerVal[j] -= prevVal[j] - curVal; // compensate for external movement
 
 					newVal = (int) (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt + centerVal[j]);
 
 					if(newVal>maxVal) newVal=maxVal;
 					else if(newVal<minVal) newVal=minVal;
 
-					song()->machine(macOutput[j])->SetParameter(paramOutput[j], newVal);	//make it happen!
+					song()->machine(macOutput[j])->SetParameter(paramOutput[j], newVal); // make it happen!
 					bRedraw=true;
 					prevVal[j] = newVal;
 				}
@@ -1056,12 +1050,12 @@ namespace psy {
 				Player::Instance()->Tweaker=true;
 			bRedraw=false;
 
-			float minms = callbacks->timeInfo().sampleRate() /1000.0f * 100.0f;	//100ms in samples
+			float minms = callbacks->timeInfo().sampleRate() /1000.0f * 100.0f; // 100ms in samples
 			lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
 			if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 
-//			cost = cpu::cycles() - cost;
-//			work_cpu_cost(work_cpu_cost() + cost);
+			//cost = cpu::cycles() - cost;
+			//work_cpu_cost(work_cpu_cost() + cost);
 		}
 		
 		int LFO::GenerateAudio( int numSamples )
@@ -1125,7 +1119,7 @@ namespace psy {
 				}
 				break;
 			default:
-				for(int i(0);i<LFO_SIZE;++i)	//????
+				for(int i(0);i<LFO_SIZE;++i) //????
 				{
 					waveTable[i] = 0;
 				}
@@ -1135,18 +1129,18 @@ namespace psy {
 
 		void LFO::ParamStart( int which )
 		{
-			if(which<0 || which>=NUM_CHANS) return;  //jic
+			if(which<0 || which>=NUM_CHANS) return; // jic
 			int destMac = macOutput[which];
 			int destParam = paramOutput[which];
 
-			if	(	destMac		!= -1	&&	song()->machine(destMac) != NULL
-				&&  destParam	!= -1	&&	destParam < song()->machine(destMac)->GetNumParams())
+			if(destMac != -1 && song()->machine(destMac) != NULL
+				&& destParam != -1 && destParam < song()->machine(destMac)->GetNumParams())
 			{
 				int minVal, maxVal;
 				float curLFO, lfoAmt;
 
 				song()->machine(destMac)->GetParamRange(destParam, minVal, maxVal);
-				curLFO = waveTable[	int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
+				curLFO = waveTable[int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 				lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
 
 				//bad! bad!
@@ -1179,8 +1173,8 @@ namespace psy {
 			id_type destMac(macOutput[which]);
 			int destParam = paramOutput[which];
 
-			if	(	destMac		!= -1	&&	song()->machine(destMac) != NULL
-				&&  destParam	!= -1	&&	destParam < song()->machine(destMac)->GetNumParams())
+			if(destMac != -1 && song()->machine(destMac) != NULL
+				&& destParam != -1 && destParam < song()->machine(destMac)->GetNumParams())
 			{
 				int minVal, maxVal;
 				int newVal;

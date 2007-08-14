@@ -1,34 +1,34 @@
 //============================================================================
 //
-//	wtfmlib.h
+//				wtfmlib.h
 //
 //============================================================================
 #pragma once
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
 #ifndef WAVESIZE
 #define WAVESIZE 4096
 #define WAVEMASK 4095
 #endif
 //============================================================================
-//	Always good to have defines
+//				Always good to have defines
 //============================================================================
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
 
 //============================================================================
-//	afloat structure (source, target, current) values
+//				afloat structure (source, target, current) values
 //============================================================================
 typedef struct
 {
-	float	source;
-	float	target;
-	float	current;
+	float				source;
+	float				target;
+	float				current;
 }
 afloat;
 //============================================================================
-//	SetAFloat
+//				SetAFloat
 //============================================================================
 inline void SetAFloat(afloat *afloat, float value)
 {
@@ -36,7 +36,7 @@ inline void SetAFloat(afloat *afloat, float value)
 	afloat->target = value;
 }
 //============================================================================
-//	AnimateAFloat
+//				AnimateAFloat
 //============================================================================
 inline void AnimateAFloat(afloat* p, float fac)
 {
@@ -57,7 +57,7 @@ inline void AnimateAFloat(afloat* p, float fac)
 		p->source = p->current;
 }
 //============================================================================
-//	Function to replace ordinary float to int operation
+//				Function to replace ordinary float to int operation
 //============================================================================
 inline int f2i(double d)
 {
@@ -71,7 +71,7 @@ inline int f2i(double d)
 	return tmp.i;
 }
 //============================================================================
-//	Clips phase for wavetable
+//				Clips phase for wavetable
 //============================================================================
 inline float ClipWTPhase(float phase)
 {
@@ -80,17 +80,17 @@ inline float ClipWTPhase(float phase)
 	while (phase >= (float) WAVESIZE)
 		phase -= (float) WAVESIZE;
 	return phase;
-//	return (float) (f2i(phase) & WAVEMASK) + (phase - (float) f2i(phase));
+//				return (float) (f2i(phase) & WAVEMASK) + (phase - (float) f2i(phase));
 }
 //============================================================================
-//	Get wavetable sample
+//				Get wavetable sample
 //============================================================================
 inline float GetWTSample(float *wavetable, float phase)
 {
 	return wavetable[f2i(phase) & WAVEMASK];
 }
 //============================================================================
-//	Get wavetable sample with linear interpolation
+//				Get wavetable sample with linear interpolation
 //============================================================================
 inline float GetWTSampleLinear(float *wavetable, float phase)
 {

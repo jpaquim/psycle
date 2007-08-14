@@ -33,11 +33,11 @@ namespace psy {
 				/*override*/ ESoundOut* clone()  const;
 				/*override*/ AudioDriverInfo info() const;
 				/*override*/ void Configure();
-				/*override*/ bool Enable(bool e);			
+				/*override*/ bool Enable(bool e);												
 
 			public:
 				/*override*/ void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-				/*override*/ bool Initialized();			
+				/*override*/ bool Initialized();												
 			private:
 				bool initialized_;
 				

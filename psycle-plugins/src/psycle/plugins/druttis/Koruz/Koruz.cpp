@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	Koruz.cpp
-//	----------
-//	druttis@darkface.pp.se
+//				Koruz.cpp
+//				----------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
@@ -14,22 +14,22 @@
 #include "../DspLib/Delay.h"
 #include "../DspLib/Phaser.h"
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
-#define MAC_NAME	"Koruz"
-#define MAC_VERSION	"1.0"
-#define MAC_AUTHOR	"Druttis"
+#define MAC_NAME				"Koruz"
+#define MAC_VERSION				"1.0"
+#define MAC_AUTHOR				"Druttis"
 //============================================================================
-//	Wavetable
+//				Wavetable
 //============================================================================
 #define SINE(x) ((float) sin((float) (x) * PI2))
 #define WAVESIZE 4096
 #define WAVEMASK 4095
-float	wavetable[WAVESIZE];
-//	Truncation for f2i
+float				wavetable[WAVESIZE];
+//				Truncation for f2i
 unsigned short cwTrunc = 0x1f72;
 //============================================================================
-//	Parameters
+//				Parameters
 //============================================================================
 #define PARAM_PHASER_MIN 0
 CMachineParameter const paramPhaserMin = { "Phaser Min.", "Phaser Min.", 0, 256, MPF_STATE, 8 };
@@ -63,7 +63,7 @@ CMachineParameter const paramChorusSwirl = { "Chorus Swirl", "Chorus Swirl", 0, 
 
 #define NUM_PARAMS 14
 //============================================================================
-//	Parameter list
+//				Parameter list
 //============================================================================
 
 CMachineParameter const *pParams[] =
@@ -85,7 +85,7 @@ CMachineParameter const *pParams[] =
 };
 
 //============================================================================
-//	Machine info
+//				Machine info
 //============================================================================
 CMachineInfo const MacInfo =
 {
@@ -105,7 +105,7 @@ CMachineInfo const MacInfo =
 };
 
 //============================================================================
-//	Machine
+//				Machine
 //============================================================================
 class mi : public CMachineInterface
 {
@@ -130,32 +130,32 @@ public:
 	}
 public:
 
-	//	Phaser
-	float	phaser_min;
-	float	phaser_max;
-	float	phaser_increment;
-	Phaser	phaser_left;
-	Phaser	phaser_right;
-	float	phaser_left_phase;
-	float	phaser_right_phase;
-	float	phaser_swirl;
+	//				Phaser
+	float				phaser_min;
+	float				phaser_max;
+	float				phaser_increment;
+	Phaser				phaser_left;
+	Phaser				phaser_right;
+	float				phaser_left_phase;
+	float				phaser_right_phase;
+	float				phaser_swirl;
 
-	//	Chorus
-	float	chorus_delay;
-	float	chorus_depth;
-	float	chorus_increment;
-	Chorus	chorus_left;
-	Chorus	chorus_right;
-	float	chorus_left_phase;
-	float	chorus_right_phase;
-	float	chorus_swirl;
+	//				Chorus
+	float				chorus_delay;
+	float				chorus_depth;
+	float				chorus_increment;
+	Chorus				chorus_left;
+	Chorus				chorus_right;
+	float				chorus_left_phase;
+	float				chorus_right_phase;
+	float				chorus_swirl;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Constructor
+//				Constructor
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -169,14 +169,14 @@ mi::mi()
 	float t;
 	for (i = 0; i < WAVESIZE; i++) {
 		t = (float) i / (float) WAVESIZE;
-		//	Sine
+		//				Sine
 		wavetable[i] = (float) sin(t * PI2);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Destructor
+//				Destructor
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -188,7 +188,7 @@ mi::~mi()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Init
+//				Init
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -210,7 +210,7 @@ void mi::Init()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Stop
+//				Stop
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -220,7 +220,7 @@ void mi::Stop()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Command
+//				Command
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -238,7 +238,7 @@ void mi::Command()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	ParameterTweak
+//				ParameterTweak
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -305,7 +305,7 @@ void mi::ParameterTweak(int par, int val)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	DescribeValue
+//				DescribeValue
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -361,29 +361,29 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 
 //////////////////////////////////////////////////////////////////////
 //
-//	SequencerTick
+//				SequencerTick
 //
 //////////////////////////////////////////////////////////////////////
 
 void mi::SequencerTick()
 {
-	//	Insert code here for effects.
+	//				Insert code here for effects.
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-//	SequencerTick
+//				SequencerTick
 //
 //////////////////////////////////////////////////////////////////////
 
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	//	Insert code here for synths.
+	//				Insert code here for synths.
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Work
+//				Work
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -395,7 +395,7 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 	do
 	{
 		//////////////////////////////////////////////////////////
-		//	Update phaser
+		//				Update phaser
 		//////////////////////////////////////////////////////////
 
 		phaser_left.SetDelay(phaser_min + (phaser_max - phaser_min) * (1.0f + get_sample_l(wavetable, phaser_left_phase, WAVEMASK)) * 0.5f);
@@ -404,7 +404,7 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		phaser_right_phase = fand(phaser_right_phase + phaser_increment * phaser_swirl, WAVEMASK);
 
 		//////////////////////////////////////////////////////////
-		//	Update chorus
+		//				Update chorus
 		//////////////////////////////////////////////////////////
 
 		chorus_left.SetDelay(chorus_delay + chorus_depth * (1.0f + get_sample_l(wavetable, chorus_left_phase, WAVEMASK)) * 0.5f);
@@ -419,14 +419,14 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		rnd = CDsp::GetRandomSignal() * 0.001f;
 
 		//////////////////////////////////////////////////////////
-		//	Left
+		//				Left
 		//////////////////////////////////////////////////////////
 
 		++psamplesleft;
 		*psamplesleft = phaser_left.Tick(chorus_left.Tick(*psamplesleft + rnd));
 
 		//////////////////////////////////////////////////////////
-		//	Right
+		//				Right
 		//////////////////////////////////////////////////////////
 
 		++psamplesright;

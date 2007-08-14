@@ -29,13 +29,13 @@ namespace psy { namespace core {
 #include <QStandardItemModel>
 
 /**
- * InstrumentModel models the instruments array of a CoreSong.
- * It provides a single point of entry for any GUI classes that
- * need access to the song's instruments.
- *
- * Try to use this interface rather than accessing the CoreSong
- * array directly.
- */
+	* InstrumentModel models the instruments array of a CoreSong.
+	* It provides a single point of entry for any GUI classes that
+	* need access to the song's instruments.
+	*
+	* Try to use this interface rather than accessing the CoreSong
+	* array directly.
+	*/
 class InstrumentsModel : public QStandardItemModel {
 Q_OBJECT
 public:
@@ -49,7 +49,7 @@ public:
 	int selectedInstrumentIndex();
 	void setSelectedInstrumentIndex( int newIndex );
 	bool slotIsEmpty( int instrIndex );
-		       
+				
 private:
 	psy::core::Song *song_;
 };

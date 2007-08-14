@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	Globals.h
+//				Globals.h
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -10,16 +10,16 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-//	GLOBALS struct
+//				GLOBALS struct
 //
 //////////////////////////////////////////////////////////////////////
 
 struct GLOBALS
 {
-	int		samplingrate;	// Computed with oversampling factor
-	int		ticklength;		// Computed with oversampling factor
+	int								samplingrate;				// Computed with oversampling factor
+	int								ticklength;								// Computed with oversampling factor
 
 	/* User fields here */
-	float	wtbl[4096];
+	float				wtbl[4096];
 
 };

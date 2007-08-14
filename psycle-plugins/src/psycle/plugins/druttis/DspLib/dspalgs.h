@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	dspalgs.h
+//				dspalgs.h
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -12,7 +12,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Defines
+//				Defines
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-//	generate_wave
+//				generate_wave
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -33,7 +33,7 @@ void generate_wave(float *psamples, int nsamples, float *pcoeffs, int ncoeffs);
 
 //////////////////////////////////////////////////////////////////////
 //
-//	downsample
+//				downsample
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -65,9 +65,9 @@ inline void downsample(float *in, float *out, int nsamples, int levels, float *s
 
 //////////////////////////////////////////////////////////////////////
 //
-//	v2m
+//				v2m
 //
-//	Computes a (2^n)-1 value
+//				Computes a (2^n)-1 value
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,7 @@ inline int v2m(int v)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	get_freq
+//				get_freq
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -92,12 +92,12 @@ inline float get_freq(float note, int size, int samplerate)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	f2i
+//				f2i
 //
-//	Another version of float to int conversion
+//				Another version of float to int conversion
 //
-//	Positive numbers are truncated while negative numbers are
-//	truncated - 1, (f2i(-1.25) = -2 etc...)
+//				Positive numbers are truncated while negative numbers are
+//				truncated - 1, (f2i(-1.25) = -2 etc...)
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -108,11 +108,11 @@ inline int f__2i(float x)
 	#if defined _MSC_VER && defined _M_IX86
 	__asm
 	{
-		FLD		DWORD PTR [x]
-		FLDCW	WORD PTR [cwTrunc]
-		FISTP	DWORD PTR [x]
+		FLD								DWORD PTR [x]
+		FLDCW				WORD PTR [cwTrunc]
+		FISTP				DWORD PTR [x]
 		NOP
-		MOV		EAX, DWORD PTR [x]
+		MOV								EAX, DWORD PTR [x]
 	}
 	#else
 		return static_cast<int>(x - 0.5f);
@@ -121,7 +121,7 @@ inline int f__2i(float x)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	floor2int : fast floor thing
+//				floor2int : fast floor thing
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -130,16 +130,16 @@ inline int f2i(float x)
 	#if defined _MSC_VER && defined _M_IX86
 	__asm
 	{
-		FLD		DWORD PTR [x]
-		FIST	DWORD PTR [ESP-8]
-		SUB		ESP, 8
-		FISUB	DWORD PTR [ESP]
+		FLD								DWORD PTR [x]
+		FIST				DWORD PTR [ESP-8]
+		SUB								ESP, 8
+		FISUB				DWORD PTR [ESP]
 		NOP
-		FSTP	DWORD PTR [ESP+4]
-		POP		EAX
-		POP		EDX
-		ADD		EDX, 7FFFFFFFH
-		SBB		EAX, 0
+		FSTP				DWORD PTR [ESP+4]
+		POP								EAX
+		POP								EDX
+		ADD								EDX, 7FFFFFFFH
+		SBB								EAX, 0
 	}
 	#else
 		return std::floor(x);
@@ -148,11 +148,11 @@ inline int f2i(float x)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	fand
+//				fand
 //
-//	Floating point and operator emulator :)
+//				Floating point and operator emulator :)
 //
-//	This works only because of the call to f2i.
+//				This works only because of the call to f2i.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -165,9 +165,9 @@ inline float fand(float phase, int mask)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	get_sample_n
+//				get_sample_n
 //
-//	Retrieve a sample with no particular algorithm
+//				Retrieve a sample with no particular algorithm
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -178,9 +178,9 @@ inline float get_sample_n(float *samples, float phase, int mask)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	get_sample_l
+//				get_sample_l
 //
-//	Retrieve a sample with linear interpollation algorithm
+//				Retrieve a sample with linear interpollation algorithm
 //
 //////////////////////////////////////////////////////////////////////
 

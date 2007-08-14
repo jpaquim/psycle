@@ -32,11 +32,11 @@ namespace psy
 	{
 
 		class RiffFile;
-	    class PatternCategory;
-	    class SequenceLine;
-	    class Machine;
-	    class PatternEvent;
-	    class MachineCallbacks;
+		class PatternCategory;
+		class SequenceLine;
+		class Machine;
+		class PatternEvent;
+		class MachineCallbacks;
 
 		#if defined __unix__ || defined __APPLE__
 			namespace convert_internal_machines
@@ -61,7 +61,7 @@ namespace psy
 			///\name Singleton Pattern
 			///\{
 				protected:
-				  	Psy2Filter();
+						Psy2Filter();
 				private:
 					Psy2Filter( Psy2Filter const & );
 					Psy2Filter& operator=(Psy2Filter const &);

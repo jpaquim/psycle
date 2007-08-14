@@ -5,21 +5,21 @@
 //#include "ladspa-util.h"
 
 typedef struct {
-  int size;
-  int idx;
-  float *buf;
+	int size;
+	int idx;
+	float *buf;
 } ty_fixeddelay;
 
 typedef struct {
-  int size;
-  float coeff;
-  int idx;
-  float *buf;
+	int size;
+	float coeff;
+	int idx;
+	float *buf;
 } ty_diffuser;
 
 typedef struct {
-  float damping;
-  float delay;
+	float damping;
+	float delay;
 } ty_damper;
 
 ty_diffuser *diffuser_make(int, float);
@@ -46,42 +46,42 @@ int nearest_prime(int, float);
 
 static inline float diffuser_do(ty_diffuser *p, float x)
 {
-  float y,w;
+	float y,w;
 
-  w = x - p->buf[p->idx]*p->coeff;
-  w = flush_to_zero(w);
-  y = p->buf[p->idx] + w*p->coeff;
-  p->buf[p->idx] = w;
-  p->idx = (p->idx + 1) % p->size;
-  return(y);
+	w = x - p->buf[p->idx]*p->coeff;
+	w = flush_to_zero(w);
+	y = p->buf[p->idx] + w*p->coeff;
+	p->buf[p->idx] = w;
+	p->idx = (p->idx + 1) % p->size;
+	return(y);
 }
 
 static inline float fixeddelay_read(ty_fixeddelay *p, int n)
 {
-  int i;
+	int i;
 
-  i = (p->idx - n + p->size) % p->size;
-  return(p->buf[i]);
+	i = (p->idx - n + p->size) % p->size;
+	return(p->buf[i]);
 }
 
 static inline void fixeddelay_write(ty_fixeddelay *p, float x)
 {
-  p->buf[p->idx] = x;
-  p->idx = (p->idx + 1) % p->size;
+	p->buf[p->idx] = x;
+	p->idx = (p->idx + 1) % p->size;
 }
 
 static inline void damper_set(ty_damper *p, float damping)
 { 
-  p->damping = damping;
+	p->damping = damping;
 } 
-  
+	
 static inline float damper_do(ty_damper *p, float x)
 { 
-  float y;
-    
-  y = x*(1.0-p->damping) + p->delay*p->damping;
-  p->delay = y;
-  return(y);
+	float y;
+	
+	y = x*(1.0-p->damping) + p->delay*p->damping;
+	p->delay = y;
+	return(y);
 }
 
 #endif

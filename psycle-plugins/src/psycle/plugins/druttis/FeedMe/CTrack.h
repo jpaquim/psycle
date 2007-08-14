@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	CTrack.h
-//	--------
-//	druttis@darkface.pp.se
+//				CTrack.h
+//				--------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
@@ -17,98 +17,98 @@
 #include "../CEnvelope.h"
 #include "../wtfmlib.h"
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
 #define NUMWAVEFORMS 6
 #define MAX_OVERTONES 6
 #define GLOBAL_TICKS 32
 //============================================================================
-//	CTrack globals
+//				CTrack globals
 //============================================================================
 struct TRACKDATA
 {
-	//	Just some info
-	int		samplingrate;
-	//	The actual track info
-	int		waveform;
-	afloat	feedback;
-	int		overtype;
-	afloat	phase;
-	float	chorus;
-	int		distform;
-	afloat	distortion;
-	float	attack;
-	float	release;
-	float	amplitude;
-	float	vibrato_rate;
-	float	vibrato_amount;
-	float	vibrato_delay;
-	float	vcf_attack;
-	float	vcf_decay;
-	float	vcf_sustain;
-	float	vcf_release;
-	afloat	vcf_amount;
-	int		filter_type;
-	afloat	filter_freq;
-	afloat	filter_res;
-	float	inertia;
-	int		note_cut;
-	int		sync_mode;
+	//				Just some info
+	int								samplingrate;
+	//				The actual track info
+	int								waveform;
+	afloat				feedback;
+	int								overtype;
+	afloat				phase;
+	float				chorus;
+	int								distform;
+	afloat				distortion;
+	float				attack;
+	float				release;
+	float				amplitude;
+	float				vibrato_rate;
+	float				vibrato_amount;
+	float				vibrato_delay;
+	float				vcf_attack;
+	float				vcf_decay;
+	float				vcf_sustain;
+	float				vcf_release;
+	afloat				vcf_amount;
+	int								filter_type;
+	afloat				filter_freq;
+	afloat				filter_res;
+	float				inertia;
+	int								note_cut;
+	int								sync_mode;
 };
 //============================================================================
-//	CTrack class
+//				CTrack class
 //============================================================================
 class CTrack
 {
 	//------------------------------------------------------------------------
-	//	Static variables
+	//				Static variables
 	//------------------------------------------------------------------------
 private:
-	static float	wavetable[NUMWAVEFORMS][WAVESIZE];
-	static float	overtonemults[MAX_OVERTONES];
+	static float				wavetable[NUMWAVEFORMS][WAVESIZE];
+	static float				overtonemults[MAX_OVERTONES];
 	//------------------------------------------------------------------------
-	//	Data
+	//				Data
 	//------------------------------------------------------------------------
-	//	Globals
+	//				Globals
 public:
-	TRACKDATA		*globals;
-	//	Osc 1
-	float			osc1_time;
-	float			osc1_speed;
-	float			osc1_target_speed;
-	float			osc1_out[MAX_OVERTONES + 1];
-	//	Osc 2
-	float			osc2_time;
-	float			osc2_speed;
-	float			osc2_target_speed;
-	float			osc2_out[MAX_OVERTONES + 1];
+	TRACKDATA								*globals;
+	//				Osc 1
+	float												osc1_time;
+	float												osc1_speed;
+	float												osc1_target_speed;
+	float												osc1_out[MAX_OVERTONES + 1];
+	//				Osc 2
+	float												osc2_time;
+	float												osc2_speed;
+	float												osc2_target_speed;
+	float												osc2_out[MAX_OVERTONES + 1];
 	//
-	float			slide_speed;
-	//	Vibrato
-	float			vibrato_time;
-	float			vibrato_osc1_speed;
-	float			vibrato_osc2_speed;
-	float			vibrato_dtime;
-	//	Velocity
-	float			velocity;
-	//	VCA
-	CEnvelope		vca_env;
-	//	VCF & filter
-	CEnvelope		vcf_env;
-	FILTER			vcf_data1;
-	FILTER			vcf_data2;
-	//	Phase
-	float			phase_time;
-	//	Amplitude (scaled for output)
-	float			amplitude;
+	float												slide_speed;
+	//				Vibrato
+	float												vibrato_time;
+	float												vibrato_osc1_speed;
+	float												vibrato_osc2_speed;
+	float												vibrato_dtime;
+	//				Velocity
+	float												velocity;
+	//				VCA
+	CEnvelope								vca_env;
+	//				VCF & filter
+	CEnvelope								vcf_env;
+	FILTER												vcf_data1;
+	FILTER												vcf_data2;
+	//				Phase
+	float												phase_time;
+	//				Amplitude (scaled for output)
+	float												amplitude;
 	//
-	int				note_cut;
-	//	Work variables
-	float			vibrato_out;
-	float			vcf_out;
-	int				ticks_remaining;
+	int																note_cut;
+	//				Work variables
+	float												vibrato_out;
+	float												vcf_out;
+	int																ticks_remaining;
 	//------------------------------------------------------------------------
-	//	Methods
+	//				Methods
 	//------------------------------------------------------------------------
 public:
 	CTrack();
@@ -118,9 +118,9 @@ public:
 	void Stop();
 	void NoteOff();
 	void NoteOn(int note, int volume);
-//	void Work(float *psamplesleft, float *psamplesright, int numsamples);
+//				void Work(float *psamplesleft, float *psamplesright, int numsamples);
 	//------------------------------------------------------------------------
-	//	GetSampleExp with overtones and feedback
+	//				GetSampleExp with overtones and feedback
 	//------------------------------------------------------------------------
 	static inline float GetSample(float* wavetable, int type, float* buf, float fb, float time)
 	{
@@ -174,7 +174,7 @@ public:
 		return out * overtonemults[type];
 	}
 	//------------------------------------------------------------------------
-	//	Setup slide
+	//				Setup slide
 	//------------------------------------------------------------------------
 	void SetFreq(int note)
 	{
@@ -182,14 +182,14 @@ public:
 		osc2_target_speed = CDsp::GetFreq((float) (note + globals->chorus), WAVESIZE, globals->samplingrate);
 	}
 	//------------------------------------------------------------------------
-	//	IsFinished
+	//				IsFinished
 	//------------------------------------------------------------------------
 	inline bool IsFinished()
 	{
 		return vca_env.IsFinished();
 	}
 	//============================================================================
-	//	Work
+	//				Work
 	//============================================================================
 	inline void Work(float *psamplesleft, float *psamplesright, int numsamples)
 	{
@@ -209,24 +209,24 @@ public:
 		static float out1[256]; //GLOBAL_TICKS];
 		static float out2[256]; //GLOBAL_TICKS];
 		//
-		//	Waveform
+		//				Waveform
 		float *pwaveform = wavetable[globals->waveform];
 		if (!pwaveform)
 			return;
 		//
-		//	Distform
+		//				Distform
 		float *pdistform = wavetable[globals->distform];
 		if (!pdistform)
 			return;
 		//
-		//	Loop
+		//				Loop
 		do {
 			//
-			//	Tick handling
+			//				Tick handling
 			if (!ticks_remaining) {
 				ticks_remaining = GLOBAL_TICKS;
 				//
-				//	Handle note cut
+				//				Handle note cut
 				if (note_cut > 0) {
 					note_cut--;
 					if (!note_cut) {
@@ -234,7 +234,7 @@ public:
 					}
 				}
 				//
-				//	Vibrato
+				//				Vibrato
 				if (globals->vibrato_delay == 0.0f) {
 					vibrato_out = 1.0f;
 				} else {
@@ -250,16 +250,16 @@ public:
 				while (vibrato_time >= WAVESIZE)
 					vibrato_time -= WAVESIZE;
 				//
-				//	Vibrato -> Freq
+				//				Vibrato -> Freq
 				vibrato_osc1_speed = vibrato_out * osc1_speed * 0.125f;
 				vibrato_osc2_speed = vibrato_out * osc2_speed * 0.125f;
 				//
-				//	Filter
+				//				Filter
 				vcf_out = vcf_env.Next() * globals->vcf_amount.current;
 				CDsp::InitFilter(&vcf_data1, globals->filter_freq.current + vcf_out, globals->filter_res.current);
 				CDsp::InitFilter(&vcf_data2, globals->filter_freq.current + vcf_out, globals->filter_res.current);
 				//
-				//	Slide
+				//				Slide
 				if (osc1_speed != osc1_target_speed) {
 					float dest = (osc1_target_speed - osc1_speed) * slide_speed;
 					osc1_speed += dest;
@@ -268,17 +268,17 @@ public:
 				}
 			}
 			//
-			//	Compute samples to render this iteration
+			//				Compute samples to render this iteration
 			amount = numsamples;
 			if (amount > ticks_remaining)
 				amount = ticks_remaining;
 			numsamples -= amount;
 			ticks_remaining -= amount;
 			//
-			//	Oscilators
+			//				Oscilators
 			osc1_spd = osc1_speed + vibrato_osc1_speed;
 			osc2_spd = osc2_speed + vibrato_osc2_speed;
-			//	Phase
+			//				Phase
 			osc2_tme = osc2_time + globals->phase.current;
 			//
 			pleft = out1 - 1;
@@ -295,7 +295,7 @@ public:
 			//
 			osc2_time = osc2_tme - globals->phase.current;
 			//
-			//	Distort
+			//				Distort
 			dist = globals->distortion.current;
 			dist2 = dist * WAVESIZE;
 			ndis = 1.0f - dist;
@@ -310,7 +310,7 @@ public:
 				*pright = *pright * ndis + GetWTSample(pdistform, *pright * dist2) * dist;
 			} while (--nsamples);
 			//
-			//	Filter
+			//				Filter
 			switch (globals->filter_type)
 			{
 				case 0:
@@ -335,7 +335,7 @@ public:
 					break;
 			}
 			//
-			//	Amplify & Output
+			//				Amplify & Output
 			pleft = out1 - 1;
 			pright = out2 - 1;
 			nsamples = amount;
@@ -349,7 +349,7 @@ public:
 		}
 		while (numsamples);
 		//
-		//	Limit OSC times
+		//				Limit OSC times
 		while (osc1_time >= WAVESIZE)
 			osc1_time -= WAVESIZE;
 		while (osc2_time >= WAVESIZE)

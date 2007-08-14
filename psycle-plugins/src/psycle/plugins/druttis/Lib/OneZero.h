@@ -1,23 +1,23 @@
 //============================================================================
 //
-//	OneZero
+//				OneZero
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
 //============================================================================
-//	Class
+//				Class
 //============================================================================
 class OneZero
 {
 private:
-	float	gain;
-    float	inputs[1];
-	float	lastOutput;
+	float				gain;
+	float				inputs[1];
+	float				lastOutput;
 	//
-	float	zeroCoeff;
-	float	sgain;
+	float				zeroCoeff;
+	float				sgain;
 public:
 	OneZero();
 	~OneZero();
@@ -26,14 +26,14 @@ public:
 	void SetGain(float newGain);
 	void SetCoeff(float newCoeff);
 	//------------------------------------------------------------------------
-	//	GetLastOutput
+	//				GetLastOutput
 	//------------------------------------------------------------------------
 	inline float GetLastOutput()
 	{
 		return lastOutput;
 	}
 	//------------------------------------------------------------------------
-	//	Tick
+	//				Tick
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{

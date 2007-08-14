@@ -2,21 +2,21 @@
 // Dmitry "Sartorius" Kulikov LegaSynth plugins for PSYCLE
 
 /***************************************************************************
-                          voice.cpp  -  description
-                             -------------------
-    begin                : Fri Jul 5 2002
-    copyright            : (C) 2002 by red
-    email                : red@server
- ***************************************************************************/
+							voice.cpp  -  description
+								-------------------
+	begin                : Fri Jul 5 2002
+	copyright            : (C) 2002 by red
+	email                : red@server
+	***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	***************************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
 #include "voice.h"
 
@@ -26,16 +26,16 @@ void Voice::mix_modifier() {
 
 	if (update_count>sweep_delay*4) {
 		sweep_level+=(sweep_value*sweep_value*0.0025)*((sweep_value<0)?-1.0:1.0); //exponential curve for sweeping
-	    recalculate_pitch_internal();		
+		recalculate_pitch_internal();								
 	}
 
 	if (update_count>LFO_delay*4) {
 
-        int phase=(LFO_speed*update_count*10)&0xFFF;
+		int phase=(LFO_speed*update_count*10)&0xFFF;
 		
 		switch (LFO_type) {
 
-			//phase is 0-1024              	
+			//phase is 0-1024              				
 		
 			case 0: {//sine
 				LFO_level=std::sin((float)phase*(M_PI*2.0)/(float)0x1000);
@@ -54,21 +54,21 @@ void Voice::mix_modifier() {
 		LFO_level*=LFO_depth;
 		LFO_level/=10;
 		
-	    recalculate_pitch_internal();
+		recalculate_pitch_internal();
 	}
 	
-    mix_modifier_call();
+	mix_modifier_call();
 }
 
 float Voice::get_fnote() {
 
-        float fnote = (float)note + (float)(pitch_bend-0x2000)*(float)pitch_bend_depth/(float)0x2000;
+		float fnote = (float)note + (float)(pitch_bend-0x2000)*(float)pitch_bend_depth/(float)0x2000;
 
-        fnote+=sweep_level;
-        fnote+=LFO_level;
+		fnote+=sweep_level;
+		fnote+=LFO_level;
 
-        if (fnote<0) fnote=0;
-        if (fnote>127) fnote=127;
+		if (fnote<0) fnote=0;
+		if (fnote>127) fnote=127;
 
 	return fnote;
 }
@@ -92,10 +92,10 @@ int Voice::get_update_count() {
 
 void Voice::mix(int p_amount,int *p_where_l,int *p_where_r) {
 
-    if (update_count==0) mix_modifier();
+	if (update_count==0) mix_modifier();
 
 			int amount=(update_ofs<p_amount)?update_ofs:p_amount;
-         	update_ofs-=amount;
+				update_ofs-=amount;
 
 
 			poll_for_dead_staus();
@@ -109,16 +109,16 @@ void Voice::mix(int p_amount,int *p_where_l,int *p_where_r) {
 
 
 			if (update_ofs<=0) {
-         		update_ofs=update_interval_samples;
-           		update_count++;
+					update_ofs=update_interval_samples;
+					update_count++;
 				mix_modifier();
-           	}
+				}
 
 }
 
 void Voice::set_sustain(bool p_sustain) {
 
-       	sustain=p_sustain;
+			sustain=p_sustain;
 
 	if (!sustain && sustaining) {
 		set_note_off(sustain_noteoff_velocity);
@@ -143,7 +143,7 @@ void Voice::set_note_off(char p_velocity) {
 		return;
 	}
 
-	set_note_off_internal(p_velocity);		
+	set_note_off_internal(p_velocity);								
 }
 
 
@@ -229,12 +229,12 @@ void Voice::mix_modifier_call() {
 }
 //void Voice::set_channel(char p_channel) {
 //
-//	channel=p_channel;
+//				channel=p_channel;
 //
 //}
 //char Voice::get_channel() {
 //
-//	return channel;
+//				return channel;
 //}
 void Voice::set_default_data(Default_Data *p_data) {
 
@@ -273,29 +273,29 @@ Voice::Voice(){
 	channel=0;
 	mixing_frequency=0;
 
- 	update_interval_samples=0;
-  	update_ofs=0;
-  	update_count=0;
+		update_interval_samples=0;
+		update_ofs=0;
+		update_count=0;
 
-   	sweep_level=0;
+		sweep_level=0;
 	LFO_level=0;
 
-    preamp=1;
-   	//sustain=true;
-   	sustain=false;
-   	sustaining=false;
+	preamp=1;
+		//sustain=true;
+		sustain=false;
+		sustaining=false;
 	//last_val_l = 0;
 	//last_val_r = 0;
 }
 
 //float Voice::get_last_value_L() {
 //
-//	return last_val_l;
+//				return last_val_l;
 //}
 //
 //float Voice::get_last_value_R() {
 //
-//	return last_val_r;
+//				return last_val_r;
 //
 //}
 
@@ -312,7 +312,7 @@ bool Voice::set_controller(char p_ctrl,char p_param) { //true if recognized
 void Voice::process_declicker() {
 
 	int l,r;
-    unsigned int index=0;
+	unsigned int index=0;
 	while(index<declicker_l.size()) {
 
 		l=(int)declicker_l[index];

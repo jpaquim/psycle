@@ -43,11 +43,11 @@ SequencerView::SequencerView( psy::core::Song *asong )
 	toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
 
 	QAction *insTrkAct = toolBar_->addAction( QIcon(":images/seq-add-track.png" ),
-						  "Insert Track" );
+							"Insert Track" );
 	insTrkAct->setStatusTip( "Insert a New Track Above Selction");
 	connect( insTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( insertTrack() ) );
 	QAction *delTrkAct = toolBar_->addAction( QIcon(":images/seq-del-track.png" ),
-						  "Delete Track" );
+							"Delete Track" );
 	delTrkAct->setStatusTip( "Delete Selected Track");
 	toolBar_->addAction( delTrkAct );
 	connect( delTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( deleteTrack() ) );
@@ -55,13 +55,13 @@ SequencerView::SequencerView( psy::core::Song *asong )
 	toolBar_->addSeparator();
 
 	QAction *upTrkAct = toolBar_->addAction( QIcon(":images/seq-up-track.png" ),
-						 "Move Track Up" );
+							"Move Track Up" );
 	upTrkAct->setStatusTip( "Move Selected Track Up" );
 	toolBar_->addAction( upTrkAct );
 	connect( upTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveUpTrack() ) );
 
 	QAction *dnTrkAct = toolBar_->addAction( QIcon(":images/seq-down-track.png" ),
-						 "Move Track Down" );
+							"Move Track Down" );
 	dnTrkAct->setStatusTip( "Move Selected Track Down");
 	toolBar_->addAction( dnTrkAct );
 	connect( dnTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( moveDownTrack() ) );
@@ -70,13 +70,13 @@ SequencerView::SequencerView( psy::core::Song *asong )
 
 
 	QAction *cTrkAct = toolBar_->addAction( QIcon(":images/seq-collapse.png" ),
-						 "Shrink");
+							"Shrink");
 	cTrkAct->setStatusTip( "Shrins a Track");
 	connect( cTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( onCollapseButtonCliked() ) );
 	toolBar_->addAction (cTrkAct);
 	
 	QAction *eTrkAct = toolBar_->addAction( QIcon(":images/seq-expand.png" ),
-						 "Expand");
+							"Expand");
 	eTrkAct->setStatusTip( "Expand a Track");
 	connect( eTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( onExpandButtonCliked() ) );
 	toolBar_->addAction (eTrkAct); 

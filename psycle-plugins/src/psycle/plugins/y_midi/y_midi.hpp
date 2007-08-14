@@ -10,23 +10,23 @@
 
 #define YMIDI_VERSION "1.1"
 #define NUMPARAMETERS 17
-#define MIDI_TRACKS 16					// Maximum tracks allowed.
+#define MIDI_TRACKS 16																				// Maximum tracks allowed.
 
 //===================================================================
 // TWO BYTE PARAMETER MIDI EVENTS
-#define MIDI_NOTEOFF		0x80        // note-off
-#define MIDI_NOTEON			0x90        // note-on
-#define MIDI_AFTERTOUCH		0xa0        // aftertouch
-#define MIDI_CCONTROLLER	0xb0        // continuous controller
-#define MIDI_PITCHWHEEL		0xe0        // pitch wheel
+#define MIDI_NOTEOFF								0x80        // note-off
+#define MIDI_NOTEON												0x90        // note-on
+#define MIDI_AFTERTOUCH								0xa0        // aftertouch
+#define MIDI_CCONTROLLER				0xb0        // continuous controller
+#define MIDI_PITCHWHEEL								0xe0        // pitch wheel
 //===================================================================
 // ONE BYTE PARAMETER MIDI EVENTS
-#define MIDI_PATCHCHANGE	0xc0        // patch change
-#define MIDI_CHANPRESSURE	0xd0		// channel pressure
+#define MIDI_PATCHCHANGE				0xc0        // patch change
+#define MIDI_CHANPRESSURE				0xd0								// channel pressure
 //===================================================================
 
 
-typedef	union
+typedef				union
 {
 	struct split_mtype
 	{
@@ -57,7 +57,7 @@ public:
 private:
 
 	int  Chan;
-	HMIDIOUT handle;	// Midi device/channel handler.
+	HMIDIOUT handle;				// Midi device/channel handler.
 };
 
 typedef struct {
@@ -162,9 +162,9 @@ protected:
 	void UpdatePatch(int channel, int patch);
 
 private:
-	midichannel numChannel[MIDI_TRACKS];	// List of MAX_TRACKS (16 usually) which hold channel note information
-	int numC[MAX_TRACKS];					// Assignation of tracker track to midi channel.
-	int notes[MAX_TRACKS];					// Last note being played in this track.
+	midichannel numChannel[MIDI_TRACKS];				// List of MAX_TRACKS (16 usually) which hold channel note information
+	int numC[MAX_TRACKS];																				// Assignation of tracker track to midi channel.
+	int notes[MAX_TRACKS];																				// Last note being played in this track.
 	MacParams pars;
 
 	static int midiopencount;

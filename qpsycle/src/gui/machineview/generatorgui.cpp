@@ -102,13 +102,13 @@ void GeneratorGui::keyReleaseEvent( QKeyEvent *event )
 {
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 	switch ( command ) { 
-        case commands::mute_machine:
+		case commands::mute_machine:
 		toggleMuteAct_->trigger();
 		return;
-        case commands::solo_machine:
+		case commands::solo_machine:
 		toggleSoloAct_->trigger();
 		return;
-        default:;
+		default:;
 	}
 }
 

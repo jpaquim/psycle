@@ -3,46 +3,46 @@
 #include <cmath>
 
 #ifndef M_PI
- #define M_PI 3.14159265358979323846
+	#define M_PI 3.14159265358979323846
 #endif
 
-#define LFO_SIZE	720
+#define LFO_SIZE				720
 
-#define DEPTH_DIV	1000
+#define DEPTH_DIV				1000
 
-#define MAX_DEPTH	2000
-#define MAX_SPEED	10000
-#define MAX_WAVES	3
-#define MAX_SKEW	LFO_SIZE
-#define MAX_PHASE	LFO_SIZE
-#define MAX_GRAVITY 200			// this can't be changed without other updates, be careful
+#define MAX_DEPTH				2000
+#define MAX_SPEED				10000
+#define MAX_WAVES				3
+#define MAX_SKEW				LFO_SIZE
+#define MAX_PHASE				LFO_SIZE
+#define MAX_GRAVITY 200												// this can't be changed without other updates, be careful
 
-#define MAPSIZE		4096
-#define DISPLAY_REFRESH	882
+#define MAPSIZE								4096
+#define DISPLAY_REFRESH				882
 
 
-CMachineParameter const paramDepth =	{ "Depth",		"Tremolo Depth",	0,		MAX_DEPTH,		MPF_STATE,		MAX_DEPTH/2	};
-CMachineParameter const paramSpeed =	{ "Speed",		"Tremolo Speed",	16,		MAX_SPEED,		MPF_STATE,		MAX_SPEED/6	};
-CMachineParameter const paramWaveform =	{ "Waveform",	"lfo waveform",		0,		MAX_WAVES-1,	MPF_STATE,		0	};
-CMachineParameter const paramSkew =		{ "P.Width/Skew",	"lopsidedness",	10,		MAX_SKEW-10,	MPF_STATE,		MAX_SKEW/2	};
-CMachineParameter const paramGravity =	{ "Gravity",	"Gravity",			0,		MAX_GRAVITY,	MPF_STATE,		100	};
-CMachineParameter const paramGravMode = { "Gravity Mode","Gravity Mode",	0,		1,				MPF_STATE,		0	};
-CMachineParameter const paramStereoPhase={ "Stereo Phase",	"Stereo Phase",	0,		MAX_PHASE,		MPF_STATE,		MAX_PHASE*3/4	};
-CMachineParameter const paramSync	=	{"Restart LFO",	"Restart LFO",		0,		1,				MPF_STATE,		0	};
-//CMachineParameter const paramNull =		{	" ",			" ",			0,		0,				MPF_LABEL,		0};
+CMachineParameter const paramDepth =				{ "Depth",								"Tremolo Depth",				0,								MAX_DEPTH,								MPF_STATE,								MAX_DEPTH/2				};
+CMachineParameter const paramSpeed =				{ "Speed",								"Tremolo Speed",				16,								MAX_SPEED,								MPF_STATE,								MAX_SPEED/6				};
+CMachineParameter const paramWaveform =				{ "Waveform",				"lfo waveform",								0,								MAX_WAVES-1,				MPF_STATE,								0				};
+CMachineParameter const paramSkew =								{ "P.Width/Skew",				"lopsidedness",				10,								MAX_SKEW-10,				MPF_STATE,								MAX_SKEW/2				};
+CMachineParameter const paramGravity =				{ "Gravity",				"Gravity",												0,								MAX_GRAVITY,				MPF_STATE,								100				};
+CMachineParameter const paramGravMode = { "Gravity Mode","Gravity Mode",				0,								1,																MPF_STATE,								0				};
+CMachineParameter const paramStereoPhase={ "Stereo Phase",				"Stereo Phase",				0,								MAX_PHASE,								MPF_STATE,								MAX_PHASE*3/4				};
+CMachineParameter const paramSync				=				{"Restart LFO",				"Restart LFO",								0,								1,																MPF_STATE,								0				};
+//CMachineParameter const paramNull =								{				" ",												" ",												0,								0,																MPF_LABEL,								0};
 
 CMachineParameter const *pParameters[] = 
 { 
 	//column 1:
-	&paramDepth,	&paramWaveform,		&paramGravity,		&paramSkew,
+	&paramDepth,				&paramWaveform,								&paramGravity,								&paramSkew,
 	//column 2:
-	&paramSpeed,	&paramStereoPhase,	&paramGravMode,		&paramSync
+	&paramSpeed,				&paramStereoPhase,				&paramGravMode,								&paramSync
 };
 
 enum
 {
-	prm_depth=0,	prm_waveform,		prm_gravity,		prm_skew,
-	prm_speed,		prm_stereophase,	prm_gravmode,		prm_sync
+	prm_depth=0,				prm_waveform,								prm_gravity,								prm_skew,
+	prm_speed,								prm_stereophase,				prm_gravmode,								prm_sync
 };
 
 enum
@@ -53,25 +53,25 @@ enum
 };
 
 enum
-{	
+{				
 	grav_updown=0,
 	grav_inout
 };
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,								// flags
-	8,								// numParameters
-	pParameters,					// Pointer to parameters
+	MI_VERSION,				
+	0,																																// flags
+	8,																																// numParameters
+	pParameters,																				// Pointer to parameters
 #ifndef NDEBUG
-	"dw Tremolo (Debug build)",		// name
+	"dw Tremolo (Debug build)",								// name
 #else
-	"dw Tremolo",					// name
+	"dw Tremolo",																				// name
 #endif
-	"Tremolo",						// short name
-	"dw",							// author
-	"About",						// A command, that could be use for open an editor, etc...
+	"Tremolo",																								// short name
+	"dw",																												// author
+	"About",																								// A command, that could be use for open an editor, etc...
 	2
 };
 
@@ -99,7 +99,7 @@ protected:
 	float inCurve[MAPSIZE+2];
 	float outCurve[MAPSIZE+2];
 	float lowCurve[MAPSIZE+2];
-	float highCurve[MAPSIZE+2];			// later we scale from 0 (not 1) to MAPSIZE, which is why there's +1.. we make it +2 just 
+	float highCurve[MAPSIZE+2];												// later we scale from 0 (not 1) to MAPSIZE, which is why there's +1.. we make it +2 just 
 										//  in case (we'll init it to 1.0f later)
 
 	int disp_counter;
@@ -123,7 +123,7 @@ mi::~mi()
 void mi::Init()
 {
 	lfopos=0;
-	srMultiplier = 44100/(float)pCB->GetSamplingRate();		// this coefficient changes the increment to lfopos..  timing is defined by samples,
+	srMultiplier = 44100/(float)pCB->GetSamplingRate();								// this coefficient changes the increment to lfopos..  timing is defined by samples,
 															// so without it playing the same song in 22050 will halve the lfo speed.
 	float j;
 	for(int i=0;i<=MAPSIZE;++i)
@@ -136,9 +136,9 @@ void mi::Init()
 	{
 		j = i / (float)(MAPSIZE / 2);
 		inCurve[i] = std::sqrt((-j*j + 2*j)) / 2.0f;
-		inCurve[MAPSIZE + 1 - i]	= 1.0f - inCurve[i];
-		outCurve[MAPSIZE/2-i]	= .5f - inCurve[i]; 
-		outCurve[MAPSIZE/2+i+1]	= .5f + inCurve[i];
+		inCurve[MAPSIZE + 1 - i]				= 1.0f - inCurve[i];
+		outCurve[MAPSIZE/2-i]				= .5f - inCurve[i]; 
+		outCurve[MAPSIZE/2+i+1]				= .5f + inCurve[i];
 	}
 	highCurve[MAPSIZE+1] = lowCurve[MAPSIZE+1] = inCurve[MAPSIZE+1] = outCurve[MAPSIZE+1] = 1.0f;
 
@@ -148,9 +148,9 @@ void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
 
-	float newsr = 44100/(float)pCB->GetSamplingRate();		// in case samprate is changed.. but this should probably go somewhere else.
-	if(newsr!=srMultiplier)									// it doesn't need to happen this frequently-- plus, it won't register until
-		srMultiplier=newsr;									// an actual song is playing
+	float newsr = 44100/(float)pCB->GetSamplingRate();								// in case samprate is changed.. but this should probably go somewhere else.
+	if(newsr!=srMultiplier)																																				// it doesn't need to happen this frequently-- plus, it won't register until
+		srMultiplier=newsr;																																				// an actual song is playing
 
 }
 
@@ -166,10 +166,10 @@ void mi::ParameterTweak(int par, int val)
 {
 
 	Vals[par]=val;
-	if		(par == prm_skew 
-		  || par == prm_waveform
-		  || par == prm_gravity
-		  || par == prm_gravmode)
+	if								(par == prm_skew 
+			|| par == prm_waveform
+			|| par == prm_gravity
+			|| par == prm_gravmode)
 		fillLfo();
 
 	if (par == prm_sync && val==1)
@@ -189,7 +189,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	do
 	{
 		ltpos=(int)floor(lfopos);
-		rtpos=(int)(ltpos+Vals[prm_stereophase]+(MAX_PHASE/2.0f))%LFO_SIZE;	
+		rtpos=(int)(ltpos+Vals[prm_stereophase]+(MAX_PHASE/2.0f))%LFO_SIZE;				
 
 		ltSign = (*psamplesleft  < 0? -1: +1);
 		rtSign = (*psamplesright < 0? -1: +1);
@@ -198,16 +198,16 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 		//when the depth is > 100%, the above multiplication can pass 0.. this next bit makes sure nothing does.
 		//if the original sign multiplied by the new value is negative, it means the sign has changed, and the value is zeroed out.
-		if(*psamplesleft * ltSign < 0) *psamplesleft = 0.0;		// i'm not sure how cpu-intensive it is to multiply by 1 or -1..
-		if(*psamplesright* rtSign < 0) *psamplesright= 0.0;		// but this seems the most terse way to get the result i want.
+		if(*psamplesleft * ltSign < 0) *psamplesleft = 0.0;								// i'm not sure how cpu-intensive it is to multiply by 1 or -1..
+		if(*psamplesright* rtSign < 0) *psamplesright= 0.0;								// but this seems the most terse way to get the result i want.
 
 		
 
 
-		lfopos += (Vals[prm_speed]) / (float) (MAX_SPEED*(LFO_SIZE/360.0f));// * srMultiplier;		//todo: srMultiplier broke my plugin!# it worked great, until
+		lfopos += (Vals[prm_speed]) / (float) (MAX_SPEED*(LFO_SIZE/360.0f));// * srMultiplier;								//todo: srMultiplier broke my plugin!# it worked great, until
 																									// one fateful build when it just stopped. so for now, changing 
 																									// the samprate means changing the tremolo speed..
-		if(lfopos>=LFO_SIZE) 			lfopos-=LFO_SIZE;
+		if(lfopos>=LFO_SIZE) 												lfopos-=LFO_SIZE;
 
 		if(Vals[prm_sync]==1)
 		{
@@ -226,17 +226,17 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch(param)
 	{
-	case prm_depth:			sprintf(txt,"%.1f%%", value/(float)(DEPTH_DIV/100.0f));
+	case prm_depth:												sprintf(txt,"%.1f%%", value/(float)(DEPTH_DIV/100.0f));
 							return true;
 
 	case prm_stereophase:
-	case prm_skew:			sprintf(txt, "%i deg.", (int)((value - MAX_SKEW/2.0f) / (MAX_SKEW/360.0f)));
+	case prm_skew:												sprintf(txt, "%i deg.", (int)((value - MAX_SKEW/2.0f) / (MAX_SKEW/360.0f)));
 							return true;
 
-	case prm_speed:			sprintf(txt, "%.1f ms", LFO_SIZE/(float)(value/(float)MAX_SPEED)/44.1f * LFO_SIZE/360.0f);		// please, don't ask me to explain how i derived
-							return true;																					// this mess :) (i hate these conversions)
+	case prm_speed:												sprintf(txt, "%.1f ms", LFO_SIZE/(float)(value/(float)MAX_SPEED)/44.1f * LFO_SIZE/360.0f);								// please, don't ask me to explain how i derived
+							return true;																																																																																				// this mess :) (i hate these conversions)
 
-	case prm_gravity:		if(Vals[prm_gravmode]==grav_updown)
+	case prm_gravity:								if(Vals[prm_gravmode]==grav_updown)
 							{
 								if(value<100)
 									sprintf(txt, "%i%% (upwards)", value-100);
@@ -244,7 +244,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 									sprintf(txt, "%i%% (downwards)", value-100);
 								else
 									sprintf(txt, "0%%");
-							}	else	{
+							}				else				{
 								if(value<100)
 									sprintf(txt, "%i%% (outwards)", value-100);
 								else if(value>100)
@@ -254,7 +254,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 							}
 							return true;
 
-	case prm_gravmode:		if(value == grav_updown)
+	case prm_gravmode:								if(value == grav_updown)
 							{
 								sprintf(txt, "Up/Down");
 							} else if(value == grav_inout) 
@@ -265,19 +265,19 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 							}
 							return true;
 
-	case prm_sync:			if(value==1)
+	case prm_sync:												if(value==1)
 								sprintf(txt, "lfo restarted!");
 							else
 								sprintf(txt, "");
 							return true;
 
-	case prm_waveform:		switch(value)
+	case prm_waveform:								switch(value)
 							{
-							case lfo_sine:		sprintf(txt, "sine");
+							case lfo_sine:								sprintf(txt, "sine");
 												break;
-							case lfo_tri:		sprintf(txt, "triangle");
+							case lfo_tri:								sprintf(txt, "triangle");
 												break;
-							case lfo_square:	sprintf(txt, "square");
+							case lfo_square:				sprintf(txt, "square");
 												break;
 							}
 							return true;
@@ -302,7 +302,7 @@ void mi::fillLfo()
 {
 
 	int skew = Vals[prm_skew];
-	if(skew>LFO_SIZE||skew<1) skew = LFO_SIZE/2;		// crashes psycle without this! on creation of the class, this function gets called before
+	if(skew>LFO_SIZE||skew<1) skew = LFO_SIZE/2;								// crashes psycle without this! on creation of the class, this function gets called before
 														// Vals[prm_skew] is ever initialized.  i'm sure there are more efficient ways to do this..
 
 	int sqSlope; 
@@ -310,23 +310,23 @@ void mi::fillLfo()
 
 	switch(Vals[prm_waveform])
 	{
-	case lfo_tri:		
+	case lfo_tri:								
 						for(int i=0;i<skew;++i)
 							lfo[i]= 1.0f - (i/(float)skew);
 						for(int i=skew;i<LFO_SIZE;++i)
 							lfo[i]= ((float)(i-skew) / (float)(LFO_SIZE-skew));
 						break;
 
-	case lfo_sine:		for(int i=0;i<skew;++i)
-							lfo[i] =	0.5f * cos(i/(float)skew * M_PI) + 0.5f;
+	case lfo_sine:								for(int i=0;i<skew;++i)
+							lfo[i] =				0.5f * cos(i/(float)skew * M_PI) + 0.5f;
 						for(int i=skew;i<LFO_SIZE;++i)
 							lfo[i] =   -0.5f * cos( (i-skew)/(float)(LFO_SIZE-skew) * M_PI) + 0.5f;
 
 						break;
 
-	case lfo_square:	sqSlope = (int)(LFO_SIZE/80.0f);		// 80.0f is a completely arbitrary constant, feel free to adjust to taste
-						if(sqSlope==0) sqSlope=1;				//better safe than sorry..
-						if(skew<sqSlope)	skew=sqSlope;		// more of a trapezoid wave, i guess.. perfect square makes clicks
+	case lfo_square:				sqSlope = (int)(LFO_SIZE/80.0f);								// 80.0f is a completely arbitrary constant, feel free to adjust to taste
+						if(sqSlope==0) sqSlope=1;																//better safe than sorry..
+						if(skew<sqSlope)				skew=sqSlope;								// more of a trapezoid wave, i guess.. perfect square makes clicks
 
 						for(int i=0;i<sqSlope;++i)
 						{
@@ -344,40 +344,40 @@ void mi::fillLfo()
 
 	if(Vals[prm_gravity]!=100 && Vals[prm_waveform]!=lfo_square)  //we -could- do all this with 0 gravity or a square wave, it just wouldn't change anything..
 	{
-		ylop=std::fabs(Vals[prm_gravity]-100.0f) / 100.0f;		// for weighted average of linear value and curved value
+		ylop=std::fabs(Vals[prm_gravity]-100.0f) / 100.0f;								// for weighted average of linear value and curved value
 
 		for(int i=0;i<LFO_SIZE;++i)
 		{
 			x = lfo[i] * MAPSIZE;
 
-			if(x<0) x=0;								//okay, this really should not be happening, but until i've checked out my equations a bit more,
-			if(x>MAPSIZE) x=MAPSIZE;					// i don't want to risk it
+			if(x<0) x=0;																																//okay, this really should not be happening, but until i've checked out my equations a bit more,
+			if(x>MAPSIZE) x=MAPSIZE;																				// i don't want to risk it
 
-			xlop=x-floor(x);								// for linear interpolation between points in the curve mapping array
+			xlop=x-floor(x);																																// for linear interpolation between points in the curve mapping array
 			
 
 			if(Vals[prm_gravmode]==grav_updown)
 			{
-				if(Vals[prm_gravity]>100)						// positive gravity, use highcurve (remember! this is being subtracted, so our lfos are umop apisdn)
+				if(Vals[prm_gravity]>100)																								// positive gravity, use highcurve (remember! this is being subtracted, so our lfos are umop apisdn)
 				{
-					temp = (highCurve[(int)(floor(x))] * (1.0f-xlop))		//xlop==0 means 100% floor, xlop==.5 means 50% floor and 50% ceil, etc..
-						 + (highCurve[(int)(ceil(x))]  * xlop);
+					temp = (highCurve[(int)(floor(x))] * (1.0f-xlop))								//xlop==0 means 100% floor, xlop==.5 means 50% floor and 50% ceil, etc..
+							+ (highCurve[(int)(ceil(x))]  * xlop);
 				} else {
-					temp = (lowCurve[(int)(floor(x))] * (1.0f-xlop))		//now, x should never be more than 1.0f, which means ceil(x) * MAPSIZE should never
-						 + (lowCurve[(int)(ceil(x))]  * xlop);			// be more than MAPSIZE, but just for safety, the mapping array has one extra element
-				}															// at [MAPSIZE+1], initialized to 1.0f.
+					temp = (lowCurve[(int)(floor(x))] * (1.0f-xlop))								//now, x should never be more than 1.0f, which means ceil(x) * MAPSIZE should never
+							+ (lowCurve[(int)(ceil(x))]  * xlop);												// be more than MAPSIZE, but just for safety, the mapping array has one extra element
+				}																																																												// at [MAPSIZE+1], initialized to 1.0f.
 			} else {
 				if(Vals[prm_gravity]>100)
 				{
 					temp = (inCurve[(int)(floor(x))] * (1.0f-xlop))
-						 + (inCurve[(int)(ceil(x))]  *	xlop);
+							+ (inCurve[(int)(ceil(x))]  *				xlop);
 				} else {
 					temp = (outCurve[(int)(floor(x))] * (1.0f-xlop))
-						 + (outCurve[(int)(ceil(x))]  *  xlop);
+							+ (outCurve[(int)(ceil(x))]  *  xlop);
 				}
 			}
-			lfo[i] = (lfo[i] * (1.0f-ylop))					//ylop==1 means 100% curve map, ylop==.5 means 50% linear and 50% curved, etc.
-				   + (temp   *    ylop);
+			lfo[i] = (lfo[i] * (1.0f-ylop))																				//ylop==1 means 100% curve map, ylop==.5 means 50% linear and 50% curved, etc.
+					+ (temp   *    ylop);
 
 		}
 		

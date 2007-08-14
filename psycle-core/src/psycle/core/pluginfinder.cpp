@@ -130,7 +130,7 @@ namespace psy
 		}
 
 		PluginFinderKey::PluginFinderKey( const std::string & name, const std::string & dllPath, int index ) :
-			name_( name ),			
+			name_( name ),
 			dllPath_( dllPath ),
 			index_( index )
 		{
@@ -148,11 +148,11 @@ namespace psy
 				return dllPath() < key.dllPath();
 			if ( name() != key.name() ) 
 				return name() < key.name();
-			return index() < key.index();	
-		}		
+			return index() < key.index();
+		}
 
 		bool PluginFinderKey::operator ==( const PluginFinderKey & rhs ) const {
-			return dllPath() == rhs.dllPath() && name()	== rhs.name() && index() == rhs.index();
+			return dllPath() == rhs.dllPath() && name() == rhs.name() && index() == rhs.index();
 		}
 
 		const std::string & PluginFinderKey::name() const {
@@ -294,7 +294,7 @@ namespace psy
 					std::string version;
 					if (!(o << plugin.GetInfo().Version )) version = o.str();
 					info.setVersion( version );
-					info.setAuthor( plugin.GetInfo().Author );			
+					info.setAuthor( plugin.GetInfo().Author );
 					///\todo .. path should here stored and not evaluated in plugin
 					PluginFinderKey key( plugin.GetDllName(), fileName );
 					map_[key] = info;               

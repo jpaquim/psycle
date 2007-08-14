@@ -1,13 +1,13 @@
 ///\file
-     ///\brief implementation file for beerz77-2 algorithm.
-     /// beerz77-2 algorithm by jeremy evers, loosely based on lz77
-     /// -2 designates the smaller window, faster compression version
-     /// designed for decompression on gameboy advance
-     /// due to it's efficient decompression, it is usefull for many other things... like pattern data.
-     ///
-     /// SoundSquash and SoundDesquash by jeremy evers
-     /// designed with speed in mind
-     /// simple, non adaptave delta predictor, less effective with high frequency content
+		///\brief implementation file for beerz77-2 algorithm.
+		/// beerz77-2 algorithm by jeremy evers, loosely based on lz77
+		/// -2 designates the smaller window, faster compression version
+		/// designed for decompression on gameboy advance
+		/// due to it's efficient decompression, it is usefull for many other things... like pattern data.
+		///
+		/// SoundSquash and SoundDesquash by jeremy evers
+		/// designed with speed in mind
+		/// simple, non adaptave delta predictor, less effective with high frequency content
 #ifndef DATACOMPRESSION_H
 #define DATACOMPRESSION_H
 

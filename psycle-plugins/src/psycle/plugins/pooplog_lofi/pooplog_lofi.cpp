@@ -19,7 +19,7 @@ v0.01b
 - initial release
 
 /////////////////////////////////////////////////////////////////////
- */
+	*/
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
@@ -49,40 +49,40 @@ inline int f2i(float flt)
 CMachineParameter const paraFrequency = 
 { 
 	"Resample Frequency",
-	"Resample Frequency",						// description
-	0,												// MinValue	
-	4096,											// MaxValue
-	MPF_STATE,										// Flags
+	"Resample Frequency",																								// description
+	0,																																																// MinValue				
+	4096,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
 CMachineParameter const paraBits = 
 { 
 	"Resample Bits",
-	"Resample Bits",											// description
-	0,												// MinValue	
-	32,											// MaxValue
-	MPF_STATE,										// Flags
+	"Resample Bits",																																												// description
+	0,																																																// MinValue				
+	32,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
 CMachineParameter const paraInputGain = 
 { 
 	"Input Gain",
-	"Input Gain",									// description
-	0,											// MinValue	
-	1408,											// MaxValue
-	MPF_STATE,										// Flags
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1408,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256
 };
 
 CMachineParameter const paraUnbalance = 
 { 
-	"Frequency Unbalance",				
-	"Frequency Unbalance",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Frequency Unbalance",																
+	"Frequency Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
@@ -108,14 +108,14 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	num_params,										// numParameters
-	pParameters,							// Pointer to parameters
-	PLUGIN_NAME,					// name
-	"Pooplog Lofi",							// short name
-	"Jeremy Evers",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	MI_VERSION,				
+	0,																																								// flags
+	num_params,																																								// numParameters
+	pParameters,																												// Pointer to parameters
+	PLUGIN_NAME,																				// name
+	"Pooplog Lofi",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	num_params
 };
 

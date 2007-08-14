@@ -31,53 +31,53 @@ class MachineView;
 
 class WireGui : public QObject, public QGraphicsItem
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView);
-    ~WireGui();
+	WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView);
+	~WireGui();
 
-    MachineGui *sourceMacGui();
-    void setSourceMacGui(MachineGui *macGui);
+	MachineGui *sourceMacGui();
+	void setSourceMacGui(MachineGui *macGui);
 
-    MachineGui *destMacGui();
-    void setDestMacGui(MachineGui *macGui);
+	MachineGui *destMacGui();
+	void setDestMacGui(MachineGui *macGui);
 
-    void rewireDest( MachineGui *newDstGui );
-    void rewireSource( MachineGui *newSrcGui );
+	void rewireDest( MachineGui *newDstGui );
+	void rewireSource( MachineGui *newSrcGui );
 
-    void adjust();
+	void adjust();
 
 signals:
-   void deleteConnectionRequest( WireGui *wireGui );
-   void startRewiringDest( WireGui *wireGui, QGraphicsSceneMouseEvent *event );
+	void deleteConnectionRequest( WireGui *wireGui );
+	void startRewiringDest( WireGui *wireGui, QGraphicsSceneMouseEvent *event );
 
 public slots:
-   void deleteConnectionRequest();
-   void onRewireDestActionTriggered();
+	void deleteConnectionRequest();
+	void onRewireDestActionTriggered();
 
 protected:
-    QRectF boundingRect() const;
-    QPainterPath shape () const;
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
-    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
-    void mousePressEvent( QGraphicsSceneMouseEvent *event );
-    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
-    void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+	QRectF boundingRect() const;
+	QPainterPath shape () const;
+	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
+	void mousePressEvent( QGraphicsSceneMouseEvent *event );
+	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
- private:
-     MachineView *machineView;
+	private:
+		MachineView *machineView;
 
-     MachineGui *source, *dest;
+		MachineGui *source, *dest;
 
-     QPointF sourcePoint;
-     QPointF destPoint;
-     qreal arrowSize;
+		QPointF sourcePoint;
+		QPointF destPoint;
+		qreal arrowSize;
 
-     QAction *delConnAct_;
-     QAction *rewireDstAct_;
+		QAction *delConnAct_;
+		QAction *rewireDstAct_;
 
-     int state_;
- };
+		int state_;
+	};
 
- #endif
+	#endif
 

@@ -29,8 +29,8 @@ class QPaintEvent;
 
 class TrackHeader: public QWidget {
 public:
-  TrackHeader( int height, PatternDraw* pPatternDraw );
-  ~TrackHeader();
+	TrackHeader( int height, PatternDraw* pPatternDraw );
+	~TrackHeader();
 
 	void paintEvent( QPaintEvent *event );
 private:

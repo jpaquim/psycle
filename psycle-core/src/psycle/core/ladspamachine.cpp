@@ -24,12 +24,12 @@
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
 #else
-	#include <windows.h>	
+	#include <windows.h>
 #endif
 
 #ifdef _MSC_VER
-	#undef min 
-	#undef max	
+	#undef min
+	#undef max
 #endif
 
 namespace psy {
@@ -45,7 +45,7 @@ namespace psy {
 		,rangeMultiplier_(1)
 		{
 			if (LADSPA_IS_HINT_TOGGLED(hint.HintDescriptor)) {
-				minVal_= 0; maxVal_ = 1;	integer_= true;
+				minVal_= 0; maxVal_ = 1; integer_= true;
 			}
 			else 
 			{
@@ -63,8 +63,8 @@ namespace psy {
 
 				if ( LADSPA_IS_HINT_LOGARITHMIC(hint.HintDescriptor) ){
 					logaritmic_ = true;
-//					rangeMultiplier_ =   9 / (maxVal_ - minVal_);
-					rangeMultiplier_ =   (exp(1.0)-1) / (maxVal_ - minVal_);				
+					// rangeMultiplier_ =   9 / (maxVal_ - minVal_);
+					rangeMultiplier_ =   (exp(1.0)-1) / (maxVal_ - minVal_);
 				}
 				else if ( LADSPA_IS_HINT_INTEGER(hint.HintDescriptor) ){
 					integer_ = true;
@@ -88,13 +88,13 @@ namespace psy {
 			case LADSPA_HINT_DEFAULT_LOW:
 				if (LADSPA_IS_HINT_LOGARITHMIC(hint_.HintDescriptor)) {
 					fDefault 
-					= exp(log(hint_.LowerBound) 	* 0.75
-					+ log(hint_.UpperBound) 			* 0.25) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					= exp(log(hint_.LowerBound) * 0.75
+					+ log(hint_.UpperBound) * 0.25) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				else {
 					fDefault 
-					= (hint_.LowerBound			 * 0.75
-					+ hint_.UpperBound			 * 0.25)* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					= (hint_.LowerBound * 0.75
+					+ hint_.UpperBound * 0.25)* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_MIDDLE:
@@ -113,12 +113,12 @@ namespace psy {
 				if (LADSPA_IS_HINT_LOGARITHMIC(hint_.HintDescriptor)) {
 					fDefault 
 					= exp(log(hint_.LowerBound) * 0.25
-					+ log(hint_.UpperBound) 			* 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					+ log(hint_.UpperBound) * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				else {
 					fDefault 
-					= (hint_.LowerBound			 * 0.25
-					+ hint_.UpperBound			 * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					= (hint_.LowerBound * 0.25
+					+ hint_.UpperBound * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_MAXIMUM:
@@ -144,17 +144,17 @@ namespace psy {
 		
 		int LadspaParam::value() const
 		{ 
-			return (integer_)? value_ : 
-//							(logaritmic_)?  log10(1+((value_-minVal_)*rangeMultiplier_))*65535.0f:
-							(logaritmic_)?  log(1+((value_-minVal_)*rangeMultiplier_))*65535.0f:
-							(value_- minVal_)*rangeMultiplier_; 
+			return (integer_)? value_ :
+				// (logaritmic_) ? log10(1+((value_-minVal_)*rangeMultiplier_))*65535.0f:
+				(logaritmic_) ?  log(1 + ((value_ - minVal_) * rangeMultiplier_)) * 65535.0f:
+				(value_- minVal_)*rangeMultiplier_;
 		}
 		void LadspaParam::setValue(int data)
-		{ 
-			value_ =  (integer_)? 	data :
-//							(logaritmic_)? 	 minVal_ + (pow(10, data/65535.0f)-1)/ rangeMultiplier_ :
-							(logaritmic_)? 	 minVal_ + (exp(data/65535.0f)-1)/ rangeMultiplier_ :		
-							minVal_+ (data/rangeMultiplier_);
+		{
+			value_ = (integer_) ? data :
+				// (logaritmic_) ? minVal_ + (pow(10, data/65535.0f)-1)/ rangeMultiplier_ :
+				(logaritmic_) ? minVal_ + (exp(data / 65535.0f) - 1) / rangeMultiplier_ :
+				minVal_+ (data/rangeMultiplier_);
 		}
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ namespace psy {
 				psDescriptor->cleanup(pluginHandle);
 				pluginHandle=0;
 				psDescriptor=0;
-			 }
+				}
 			if ( libHandle_ ) {
 				#if defined __unix__ || defined __APPLE__
 				dlclose(libHandle_);
@@ -207,7 +207,7 @@ namespace psy {
 			bool endsInSO, needsSlash;
 			size_t iFilenameLength;
 			void * pvResult(NULL);
-//			std::cout << filename_ << std::endl;
+			//std::cout << filename_ << std::endl;
 			#if defined __unix__ || defined __APPLE__
 			if (filename_.compare(filename_.length()-3,3,".so"))
 				filename_.append(".so");
@@ -215,7 +215,7 @@ namespace psy {
 			if (filename_.compare(filename_.length()-3,3,".dll"))
 				filename_.append(".dll");
 			#endif
-//			std::cout << filename_ << std::endl;
+			//std::cout << filename_ << std::endl;
 			
 			#if defined __unix__ || defined __APPLE__
 			if (filename_.c_str()[0] == '/') {
@@ -223,7 +223,7 @@ namespace psy {
 			if (filename_.c_str()[0] == '\\') {
 			#endif
 					/* The filename is absolute. Assume the user knows what he/she is
-						   doing and simply dlopen() it. */
+						doing and simply dlopen() it. */
 				#if defined __unix__ || defined __APPLE__
 				pvResult = dlopen(filename_.c_str(), iFlag);
 				#else
@@ -234,36 +234,36 @@ namespace psy {
 				SetErrorMode( uOldErrorMode );
 				#endif
 				if (pvResult != NULL)
-				  return pvResult;		
+					return pvResult;
 			}
 			else {
 				/* If the filename is not absolute then we wish to check along the
-				   LADSPA_PATH path to see if we can find the file there. We do
-				   NOT call dlopen() directly as this would find plugins on the
-				   LD_LIBRARY_PATH, whereas the LADSPA_PATH is the correct place
-				   to search. */
+					LADSPA_PATH path to see if we can find the file there. We do
+					NOT call dlopen() directly as this would find plugins on the
+					LD_LIBRARY_PATH, whereas the LADSPA_PATH is the correct place
+					to search. */
 		
-			  pcLADSPAPath = std::getenv("LADSPA_PATH");
-			  if ( !pcLADSPAPath) {
+				pcLADSPAPath = std::getenv("LADSPA_PATH");
+				if ( !pcLADSPAPath) {
 				#if defined __unix__ || defined __APPLE__
 				pcLADSPAPath = "/usr/lib/ladspa/";
 				#else
 				pcLADSPAPath = "C:\\Programme\\Audacity\\Plug-Ins\\";
 				#endif
-			  }
-			  std::string directory(pcLADSPAPath);
-			  int dotindex(0),dotpos(0),prevdotpos(0);
+				}
+				std::string directory(pcLADSPAPath);
+				int dotindex(0),dotpos(0),prevdotpos(0);
 		
 			std::cout << directory << std::endl;
-			  dotpos = directory.find(':',dotindex++);
-			  do{
+				dotpos = directory.find(':',dotindex++);
+				do{
 				std::string fullname = directory.substr(prevdotpos,dotpos);
 				#if defined __unix__ || defined __APPLE__
 				if (fullname.c_str()[fullname.length()-1] != '/' )
-				   fullname.append("/");
+					fullname.append("/");
 				#else
 				if (fullname.c_str()[fullname.length()-1] != '\\' )
-				   fullname.append("\\");
+					fullname.append("\\");
 				#endif
 				fullname.append(filename_);
 				std::cout << fullname << std::endl;
@@ -279,15 +279,15 @@ namespace psy {
 				#endif
 
 				if (pvResult != NULL)
-				  return pvResult;
-				prevdotpos = dotpos;            	
-			   dotpos = directory.find(':',dotindex++);
-			  } while (dotpos != directory.npos);
+					return pvResult;
+				prevdotpos = dotpos;
+				dotpos = directory.find(':',dotindex++);
+				} while (dotpos != directory.npos);
 			}
 		
 			/* If nothing has worked, then at least we can make sure we set the
-			   correct error message - and this should correspond to a call to
-			   dlopen() with the actual filename requested. */
+				correct error message - and this should correspond to a call to
+				dlopen() with the actual filename requested. */
 
 			#if defined __unix__ || defined __APPLE__
 			pvResult = dlopen( pcFilename, iFlag);
@@ -303,53 +303,53 @@ namespace psy {
 		
 		
 		bool LADSPAMachine::loadDll( const std::string & fileName, int pluginIndex )
-		{	
+		{
 			// Step one: Open the shared library.
 			#if defined __unix__ || defined __APPLE__
-			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
-			if ( !libHandle_ ) {
-//				std::cerr << "Cannot load library: " << dlerror() << std::endl;
-				return false;
-			}
+				libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
+				if ( !libHandle_ ) {
+					//std::cerr << "Cannot load library: " << dlerror() << std::endl;
+					return false;
+				}
 			#else
-			// Set error mode to disable system error pop-ups (for LoadLibrary)
-			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-			libHandle_ = LoadLibraryA( fileName.c_str() );
-			// Restore previous error mode
-			SetErrorMode( uOldErrorMode );
+				// Set error mode to disable system error pop-ups (for LoadLibrary)
+				UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+				libHandle_ = LoadLibraryA( fileName.c_str() );
+				// Restore previous error mode
+				SetErrorMode( uOldErrorMode );
 			#endif
 
 			// Step two: Get the entry function.
 			#if defined __unix__ || defined __APPLE__
-			LADSPA_Descriptor_Function pfDescriptorFunction =
-				 (LADSPA_Descriptor_Function)dlsym( libHandle_, "ladspa_descriptor");
-			#else			
-			LADSPA_Descriptor_Function pfDescriptorFunction =
-				 (LADSPA_Descriptor_Function)GetProcAddress(  static_cast<HINSTANCE>( libHandle_ ), "ladspa_descriptor" );
+				LADSPA_Descriptor_Function pfDescriptorFunction =
+					(LADSPA_Descriptor_Function)dlsym( libHandle_, "ladspa_descriptor");
+			#else
+				LADSPA_Descriptor_Function pfDescriptorFunction =
+					(LADSPA_Descriptor_Function)GetProcAddress(  static_cast<HINSTANCE>( libHandle_ ), "ladspa_descriptor" );
 			#endif
 		
 			if (!pfDescriptorFunction) {
-//				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
-//				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+				//std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
+				//std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
 				#if defined __unix__ || defined __APPLE__
-//				std::cerr << dlerror() << std::endl;				
-				dlclose( libHandle_ ); 
+					//std::cerr << dlerror() << std::endl;
+					dlclose( libHandle_ ); 
 				#else
-				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
+					::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
 				#endif
 				libHandle_=0;
 				return false;
 			}
 			/*Step three: Get the descriptor of the selected plugin (a shared library can have
-				 several plugins*/
+				several plugins*/
 			std::cout << "step three" << std::endl;
 			psDescriptor = pfDescriptorFunction(pluginIndex);
 			if (psDescriptor == NULL) {
-//				std::cerr <<  "Unable to find the selected plugin  in the library file" << std::endl;
+				//std::cerr <<  "Unable to find the selected plugin  in the library file" << std::endl;
 				#if defined __unix__ || defined __APPLE__
-				dlclose(libHandle_);
+					dlclose(libHandle_);
 				#else
-				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
+					::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
 				#endif
 				libHandle_=0;
 				return false;       
@@ -366,7 +366,7 @@ namespace psy {
 			prepareStructures();
 			
 			// and switch on:
-						std::cout << "step six" << std::endl;
+			std::cout << "step six" << std::endl;
 		
 			if (psDescriptor->activate) psDescriptor->activate(pluginHandle);
 			libName_ = fileName;
@@ -378,40 +378,42 @@ namespace psy {
 		LADSPA_Descriptor_Function LADSPAMachine::loadDescriptorFunction( const std::string & fileName ) {
 			// Step one: Open the shared library.
 			#if defined __unix__ || defined __APPLE__
-			libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
+				libHandle_ = dlopenLADSPA( fileName.c_str() , RTLD_NOW);
 			#else
-			// Set error mode to disable system error pop-ups (for LoadLibrary)
-			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-			libHandle_ = LoadLibraryA( fileName.c_str() );
+				// Set error mode to disable system error pop-ups (for LoadLibrary)
+				UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+				libHandle_ = LoadLibraryA( fileName.c_str() );
 			// Restore previous error mode
-			SetErrorMode( uOldErrorMode );
+				SetErrorMode( uOldErrorMode );
 			#endif
 			if ( !libHandle_ ) {
-/*				std::cerr << "Cannot load library: "
+				#if 0 ///\todo
+					std::cerr << "Cannot load library: "
 					#if defined __unix__ || defined __APPLE__
-					  <<  dlerror() 
+						<<  dlerror() 
 					#endif
-					<< std::endl;*/
+					<< std::endl;
+				#endif
 				return 0;
 			}
 			// Step two: Get the entry function.
 			LADSPA_Descriptor_Function pfDescriptorFunction =
-				 (LADSPA_Descriptor_Function)
-				#if defined __unix__ || defined __APPLE__				 
-				 dlsym(  libHandle_, "ladspa_descriptor");
+					(LADSPA_Descriptor_Function)
+				#if defined __unix__ || defined __APPLE__
+					dlsym(  libHandle_, "ladspa_descriptor");
 				#else
-				 GetProcAddress( static_cast<HINSTANCE>( libHandle_), "ladspa_descriptor");
+					GetProcAddress( static_cast<HINSTANCE>( libHandle_), "ladspa_descriptor");
 				#endif
 				
 		
 			if (!pfDescriptorFunction) {
-//				std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
-//				std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
+				//std::cerr << "Unable to  load : ladspa_descriptor" << std::endl;
+				//std::cerr << "Are you sure '"<< fileName.c_str() << "' is a ladspa file ?" << std::endl;
 				#if defined __unix__ || defined __APPLE__
-//				std::cerr << dlerror() << std::endl;
-				dlclose(libHandle_);
+					//std::cerr << dlerror() << std::endl;
+					dlclose(libHandle_);
 				#else
-				::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
+					::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) ) ;
 				#endif
 				libHandle_=0;
 				return 0;
@@ -438,27 +440,27 @@ namespace psy {
 					if (LADSPA_IS_PORT_INPUT(iPortDescriptor))
 					{
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
-						   values_[_numPars].valueaddress());
+							values_[_numPars].valueaddress());
 					}
 					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor))
 					{
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
-						   controls_[_numPars].valueaddress());
+							controls_[_numPars].valueaddress());
 					}
 					_numPars++;
 				}
 				else if (LADSPA_IS_PORT_AUDIO(iPortDescriptor))
 				{
-					 // Only Stereo for now.
+					// Only Stereo for now.
 					// note, the connections are inverted because we do an inversion in PreWork() (in order to avoid the BROKEN_INPLACE problems)
 					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)  && indexoutput < 2 ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
-						   ppbuffersOut[indexoutput++]);
-    			      }
+							ppbuffersOut[indexoutput++]);
+						}
 					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)  && indexinput < 2 ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
-						   ppbuffersIn[indexinput++]);
-    			      }
+							ppbuffersIn[indexinput++]);
+						}
 				}
 			}
 			_nCols = (GetNumParams()/12)+1;
@@ -479,16 +481,16 @@ namespace psy {
 		
 		void LADSPAMachine::PreWork(int numSamples)
 		{
-    		  std::swap(_pSamplesL,pOutSamplesL);
-    		  std::swap(_pSamplesR,pOutSamplesR);
+				std::swap(_pSamplesL,pOutSamplesL);
+				std::swap(_pSamplesR,pOutSamplesR);
 			Machine::PreWork(numSamples);
 		}
 		
 		int LADSPAMachine::GenerateAudio(int numSamples )
 		{
 			psDescriptor->run(pluginHandle,numSamples);
-		      std::swap(_pSamplesL,pOutSamplesL);
-    		  std::swap(_pSamplesR,pOutSamplesR);
+				std::swap(_pSamplesL,pOutSamplesL);
+				std::swap(_pSamplesR,pOutSamplesR);
 			return numSamples;
 		}
 		void  LADSPAMachine::GetParamName(int numparam, char * name) const
@@ -501,7 +503,8 @@ namespace psy {
 			maxval=values_[numparam].maxval();
 		}
 		
-		int  LADSPAMachine::GetParamValue(int numparam) const { return values_[numparam].value(); } 
+		int LADSPAMachine::GetParamValue(int numparam) const { return values_[numparam].value(); } 
+		
 		void LADSPAMachine::GetParamValue(int numparam,char* parval) const
 		{
 			LADSPA_PortRangeHintDescriptor iHintDescriptor = values_[numparam].hint();
@@ -519,6 +522,7 @@ namespace psy {
 				std::sprintf(parval, "%.4f", value);
 			}
 		}
+		
 		bool  LADSPAMachine::SetParameter(int numparam,int value)
 		{
 			values_[numparam].setValue(value); return true;
@@ -557,7 +561,7 @@ namespace psy {
 					std::ostringstream s; s
 						<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
 						<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-		//					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 					return false;
 				}
 				else
@@ -585,5 +589,3 @@ namespace psy {
 		}
 	}
 }
-
-

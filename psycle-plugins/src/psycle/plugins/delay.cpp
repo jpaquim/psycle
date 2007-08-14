@@ -130,7 +130,7 @@ inline void Delay::resize(const int & channel, const int & parameter)
 inline void Delay::resize(const int & channel, const Real & delay)
 {
 	buffers_[channel].resize(1 + static_cast<int>(delay * samples_per_sequencer_tick()), 0);
-		 // resizes the buffer at least to 1, the smallest length possible for the algorithm to work
+			// resizes the buffer at least to 1, the smallest length possible for the algorithm to work
 	buffer_iterators_[channel] = buffers_[channel].begin();
 }
 

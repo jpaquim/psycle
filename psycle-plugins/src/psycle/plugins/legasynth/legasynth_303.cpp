@@ -16,20 +16,20 @@
 CMachineParameter const paraCoarse = 
 {
 	"Coarse",
-	"Coarse",									// description
-	-24,											// MinValue	
-	24,											// MaxValue
-	MPF_STATE,										// Flags
+	"Coarse",																																				// description
+	-24,																																												// MinValue				
+	24,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFine = 
 {
 	"Fine",
-	"Fine",									// description
-	-65535,											// MinValue	
-	65535,											// MaxValue
-	MPF_STATE,										// Flags
+	"Fine",																																				// description
+	-65535,																																												// MinValue				
+	65535,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -37,50 +37,50 @@ CMachineParameter const paraFine =
 CMachineParameter const paraPB = 
 {
 	"Pitch bend",
-	"Pitch bend",									// description
-	0,											// MinValue	
-	0x2000*2,											// MaxValue
-	MPF_STATE,										// Flags
+	"Pitch bend",																																				// description
+	0,																																												// MinValue				
+	0x2000*2,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0x2000
 };
 
 CMachineParameter const paraPD = 
 {
 	"Pitch depth",
-	"Pitch depth",									// description
-	0,											// MinValue	
-	12,											// MaxValue
-	MPF_STATE,										// Flags
+	"Pitch depth",																																				// description
+	0,																																												// MinValue				
+	12,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	12
 };
 
 CMachineParameter const paraExpression = 
 {
 	"Expression",
-	"Expression",									// description
-	0,											// MinValue	
-	127,											// MaxValue
-	MPF_STATE,										// Flags
+	"Expression",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	127
 };
 
 CMachineParameter const paraDist = 
 {
 	"Distortion",
-	"Distortion",									// description
-	0,											// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Distortion",																																				// description
+	0,																																												// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFilter = 
 {
 	"Envelope&Filter",
-	"Envelope&Filter",									// description
-	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE||MPF_LABEL,						// Flags
+	"Envelope&Filter",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE||MPF_LABEL,																								// Flags
 	0
 };
 
@@ -88,40 +88,40 @@ CMachineParameter const paraFilter =
 CMachineParameter const paraCutOff = 
 {
 	"Cutoff",
-	"Cutoff",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0x7FFF
 };
 
 CMachineParameter const paraCutSweep = 
 {
 	"Cutoff sweep",
-	"Cutoff sweep",									// description
-	-127,											// MinValue	
-	127,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff sweep",																																				// description
+	-127,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraCutLFOSpeed = 
 {
 	"Cutoff LFO speed",
-	"Cutoff",									// description
-	0,											// MinValue	
-	0xFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff",																																				// description
+	0,																																												// MinValue				
+	0xFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraCutLFODepth = 
 {
 	"Cutoff LFO depth",
-	"Cutoff LFO depth",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff LFO depth",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -129,149 +129,149 @@ CMachineParameter const paraCutLFODepth =
 CMachineParameter const paraResonance = 
 {
 	"Resonance",
-	"Resonance",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Resonance",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 CMachineParameter const paraMod = 
 {
 	"Modulation",
-	"Modulation",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Modulation",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDecay = 
 {
 	"Decay",
-	"Modulation",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Modulation",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraLFO = 
 {
 	"LFO&Sweep",
-	"LFO&Sweep",									// description
-	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE||MPF_LABEL,						// Flags
+	"LFO&Sweep",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE||MPF_LABEL,																								// Flags
 	0
 };
 
 CMachineParameter const paraSpeed = 
 {
 	"Speed",
-	"Speed",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Speed",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDepth = 
 {
 	"Depth",
-	"Depth",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Depth",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraType = 
 {
 	"Type",
-	"Type",									// description
-	0,											// MinValue	
-	2,											// MaxValue
-	MPF_STATE,										// Flags
+	"Type",																																				// description
+	0,																																												// MinValue				
+	2,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDelay = 
 {
 	"Delay",
-	"Delay",									// description
-	0,											// MinValue	
-	0xFFFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraSweepDelay = 
 {
 	"Sweep delay",
-	"Sweep delay",									// description
-	0,											// MinValue	
-	1/*xFFFF*/,											// MaxValue
-	MPF_STATE,										// Flags
+	"Sweep delay",																																				// description
+	0,																																												// MinValue				
+	1/*xFFFF*/,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraSweepValue = 
 {
 	"Sweep value",
-	"Sweep value",									// description
-	//-127,											// MinValue	
-	//127,											// MaxValue
-	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Sweep value",																																				// description
+	//-127,																																												// MinValue				
+	//127,																																												// MaxValue
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 CMachineParameter const paraChorus = 
 {
 	"Chorus",
-	"Chorus",									// description
-	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE||MPF_LABEL,										// Flags
+	"Chorus",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE||MPF_LABEL,																																								// Flags
 	0
 };
 
 CMachineParameter const paraChorusOnOff = 
 {
 	"On/Off",
-	"On/Off",									// description
-	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE,										// Flags
+	"On/Off",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 CMachineParameter const paraChorusDelay = 
 {
 	"Delay",
-	"Delay",									// description
-	0,											// MinValue	
-	127,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	3
 };
 
 CMachineParameter const paraChorusLFOSpeed = 
 {
 	"LFO Speed",
-	"LFO Speed",									// description
-	0,											// MinValue	
-	127,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFO Speed",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	2
 };
 
 CMachineParameter const paraChorusLFODepth = 
 {
 	"LFO Depth",
-	"LFO Depth",									// description
-	0,											// MinValue	
-	127,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFO Depth",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1
 };
 
@@ -279,20 +279,20 @@ CMachineParameter const paraChorusLFODepth =
 CMachineParameter const paraChorusFB = 
 {
 	"Feedback",
-	"Feedback",									// description
-	1,											// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback",																																				// description
+	1,																																												// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	64
 };
 
 CMachineParameter const paraChorusWidth = 
 {
 	"Width",
-	"Width",									// description
-	-127,											// MinValue	
-	127,											// MaxValue
-	MPF_STATE,										// Flags
+	"Width",																																				// description
+	-127,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	-10
 };
 
@@ -333,18 +333,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	GENERATOR,								// flags
-	NUMPARAMETERS,							// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	GENERATOR,																																// flags
+	NUMPARAMETERS,																												// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"LegaSynth TB303 (Debug build)",		// name
+	"LegaSynth TB303 (Debug build)",								// name
 #else
-	"LegaSynth TB303",						// name
+	"LegaSynth TB303",																								// name
 #endif
-	"TB303",							// short name
-	"Juan Linietsky, ported by Sartorius",							// author
-	"Help",									// A command, that could be use for open an editor, etc...
+	"TB303",																												// short name
+	"Juan Linietsky, ported by Sartorius",																												// author
+	"Help",																																				// A command, that could be use for open an editor, etc...
 	2
 };
 
@@ -368,7 +368,7 @@ private:
 	TB303_Voice track[MAX_TRACKS];
 	Voice::Default_Data track_def_data;
 	TB303_Voice::Data track_data;
-	Chorus	chorus;
+	Chorus				chorus;
 	int samplerate;
 };
 
@@ -398,7 +398,7 @@ void mi::Init()
 	track_def_data.sweep_delay=0;
 	track_def_data.sweep_value=0;
 	
-        /* Channel Default Stuff */
+		/* Channel Default Stuff */
 	
 	//track_def_data.vibrato_depth=0;
 	//track_def_data.vibrato_speed=30;
@@ -410,7 +410,7 @@ void mi::Init()
 	//track_def_data.do_portamento=false;
 
 	track_data.coarse = 0;
-    track_data.fine=0; //coarse -127 to 127
+	track_data.fine=0; //coarse -127 to 127
 	track_data.envelope_cutoff=0x7FFF; //"Cut", "Filter envelope cutoff 0 - 0xFFFF"
 	track_data.resonance=0; //"Res", "Filter resonance - 0 - 0xFFFF 
 	track_data.envelope_mod=0; //"Env", "Filter envelope modulation"
@@ -606,8 +606,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	// Note Off			== 120
-	// Empty Note Row	== 255
+	// Note Off												== 120
+	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	
 	if( cmd == 0x0C) track[channel].set_preamp(val * .003921568627450980392156862745098f); // 1/255

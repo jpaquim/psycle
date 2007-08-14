@@ -30,10 +30,10 @@
 #include <QDebug>
 
 /**
- * PatternDraw.  This is where the drawing of the pattern
- * is done, including the header, the grid, the line number
- * column, etc.
- */
+	* PatternDraw.  This is where the drawing of the pattern
+	* is done, including the header, the grid, the line number
+	* column, etc.
+	*/
 PatternDraw::PatternDraw( PatternView *patView )
 {
 	patView_ = patView; 
@@ -41,9 +41,9 @@ PatternDraw::PatternDraw( PatternView *patView )
 	scene_ = new QGraphicsScene(this);
 	scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
 	setScene(scene_);
-        
+		
 	setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // FIXME: set to always on as AsNeeded has a bug in 4.2
-//	setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
+//																setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
 	// see: http://www.trolltech.com/developer/task-tracker/index_html?method=entry&id=152477
 	//Mattias: is there a reason why scrollbard were off???
 
@@ -59,7 +59,7 @@ PatternDraw::PatternDraw( PatternView *patView )
 
 	setupTrackGeometrics( patView_->numberOfTracks() );
 	alignTracks();
-    
+	
 	scene_->addItem( patGrid_ );
 	patGrid_->setPos( 0, 0 );
 }
@@ -76,7 +76,7 @@ void PatternDraw::setupTrackGeometrics( int numberOfTracks )
 	it = trackGeometryMap.lower_bound( numberOfTracks );
 	while ( it != trackGeometryMap.end() ) {
 		trackGeometryMap.erase( it++ );
-	}			
+	}																																																
 }
 
 void PatternDraw::alignTracks() 
@@ -86,7 +86,7 @@ void PatternDraw::alignTracks()
 	for ( ; it != trackGeometryMap.end(); it++ ) {
 		TrackGeometry & geometry = it->second;
 		geometry.setLeft( offset );
-		offset+= std::max( 50, geometry.width() );		// 50 is track min width
+		offset+= std::max( 50, geometry.width() );																																// 50 is track min width
 	}
 }
 
@@ -95,8 +95,8 @@ const std::map<int, TrackGeometry> & PatternDraw::trackGeometrics() const {
 }
 
 /** 
- * Get the width of the grid up until and including the given track.
- */
+	* Get the width of the grid up until and including the given track.
+	*/
 int PatternDraw::gridWidthByTrack( int track ) const 
 {
 	std::map<int, TrackGeometry>::const_iterator it;
@@ -117,7 +117,7 @@ int PatternDraw::findTrackByXPos( int x ) const  // FIXME: change to findTrackNu
 	int offset = 0;
 	for ( ; it != trackGeometrics().end(); it++ ) {
 		const TrackGeometry & geometry = it->second;
-		offset+= geometry.width();				
+		offset+= geometry.width();																																																																
 		if ( offset > x ) return it->first;
 	}
 	return -1; // no track found
@@ -172,17 +172,17 @@ void PatternDraw::scrollContentsBy ( int dx, int dy )
 bool PatternDraw::event( QEvent *event )
 {
 	switch (event->type()) {
-        case QEvent::KeyPress: {
+		case QEvent::KeyPress: {
 		QKeyEvent *k = (QKeyEvent *)event;
 		QGraphicsView::keyPressEvent(k);
 		if (k->key() == Qt::Key_Backtab
-		    || (k->key() == Qt::Key_Tab && (k->modifiers() & Qt::ShiftModifier))
-		    || (k->key() == Qt::Key_Tab) ) {
+			|| (k->key() == Qt::Key_Tab && (k->modifiers() & Qt::ShiftModifier))
+			|| (k->key() == Qt::Key_Tab) ) {
 			event->accept();
 		}
 		return true;
-        }
-        default:
+		}
+		default:
 		return QGraphicsView::event( event );
 	}
 }
@@ -196,18 +196,18 @@ bool PatternDraw::event( QEvent *event )
 
 TrackGeometry::TrackGeometry( ) :
 pDraw( 0 ),
-    left_(0),
-    width_(0),
-    visibleColumns_(0),
-    visible_(1)
+	left_(0),
+	width_(0),
+	visibleColumns_(0),
+	visible_(1)
 { }
 
 TrackGeometry::TrackGeometry( PatternDraw & patternDraw ) :
 pDraw( &patternDraw ),
-    left_(0),
-    width_(0),
-    visibleColumns_(0),
-    visible_(1)
+	left_(0),
+	width_(0),
+	visibleColumns_(0),
+	visible_(1)
 { }
 
 TrackGeometry::~TrackGeometry() { }

@@ -34,7 +34,7 @@ v0.01b
 // lfo
 // a wet/dry for signal coming in to buffer - this will work like resonance
 /////////////////////////////////////////////////////////////////////
- */
+	*/
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
@@ -74,71 +74,71 @@ const static float buffindex[NUM_BUFF]={
 	1/192.0f,
 	1/128.0f,
 	1/96.0f,
-	 1/64.0f,
-	 1/48.0f,
-	 1/32.0f,
-	 1/25.0f,
-	 1/24.0f,
-	 1/20.0f,
-	 1/16.0f,
-	 1/12.0f,
-	 1/10.0f,
-	 1/8.0f,
-	 1/6.0f,
-	 1/5.0f,
-	 1/4.0f,
-	 1/3.0f,
-	 1/2.0f,
-	 2/3.0f,
-	 3/4.0f,
-	 1.0f,
-	 1.25f,
-	 1.5f,
-	 1.75f,
-	 2.0f,
-	 2.5f,
-	 3.0f,
-	 4.0f,
-	 5.0f,
-	 6.0f,
-	 7.0f,
-	 8.0f,
-	 10.0f,
-	 12.0f,
-	 14.0f,
-	 16.0f,
-	 18.0f,
-	 20.0f,
-	 22.0f,
-	 24.0f,
-	 26.0f,
-	 28.0f,
-	 30.0f,
-	 32.0f,
-	 34.0f,
-	 36.0f,
-	 38.0f,
-	 40.0f,
-	 42.0f,
-	 44.0f,
-	 46.0f,
-	 48.0f,
-	 50.0f,
-	 52.0f,
-	 54.0f,
-	 56.0f,
-	 58.0f,
-	 60.0f,
-	 62.0f,
-	 64.0f,
-	 68.0f,
-	 72.0f,
-	 76.0f,
-	 80.0f,
-	 84.0f,
-	 88.0f,
-	 92.0f,
-	 96.0f,
+		1/64.0f,
+		1/48.0f,
+		1/32.0f,
+		1/25.0f,
+		1/24.0f,
+		1/20.0f,
+		1/16.0f,
+		1/12.0f,
+		1/10.0f,
+		1/8.0f,
+		1/6.0f,
+		1/5.0f,
+		1/4.0f,
+		1/3.0f,
+		1/2.0f,
+		2/3.0f,
+		3/4.0f,
+		1.0f,
+		1.25f,
+		1.5f,
+		1.75f,
+		2.0f,
+		2.5f,
+		3.0f,
+		4.0f,
+		5.0f,
+		6.0f,
+		7.0f,
+		8.0f,
+		10.0f,
+		12.0f,
+		14.0f,
+		16.0f,
+		18.0f,
+		20.0f,
+		22.0f,
+		24.0f,
+		26.0f,
+		28.0f,
+		30.0f,
+		32.0f,
+		34.0f,
+		36.0f,
+		38.0f,
+		40.0f,
+		42.0f,
+		44.0f,
+		46.0f,
+		48.0f,
+		50.0f,
+		52.0f,
+		54.0f,
+		56.0f,
+		58.0f,
+		60.0f,
+		62.0f,
+		64.0f,
+		68.0f,
+		72.0f,
+		76.0f,
+		80.0f,
+		84.0f,
+		88.0f,
+		92.0f,
+		96.0f,
 	104.0f,
 	112.0f,
 	120.0f,
@@ -162,81 +162,81 @@ const static float buffindex[NUM_BUFF]={
 
 CMachineParameter const paraLength = 
 { 
-	"Buffer Length",				
-	"Buffer Length",								// description
-	0,												// MinValue	
-	NUM_BUFF-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Buffer Length",																
+	"Buffer Length",																																// description
+	0,																																																// MinValue				
+	NUM_BUFF-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	25,
 };
 
 CMachineParameter const paraSpeed = 
 { 
 	"Scratch Speed",
-	"Scratch Speed",								// description
-	int(-SPEED_ONE*2),												// MinValue	
-	SPEED_MAX,											// MaxValue
-	MPF_STATE,										// Flags
+	"Scratch Speed",																																// description
+	int(-SPEED_ONE*2),																																																// MinValue				
+	SPEED_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	int(SPEED_ONE),
 };
 
 CMachineParameter const paraDragL = 
 { 
-	"Left Drag Delay",				
-	"Left Drag Delay",									// description
-	0,												// MinValue	
-	DRAG_MAX,											// MaxValue
-	MPF_STATE,										// Flags
+	"Left Drag Delay",																
+	"Left Drag Delay",																																				// description
+	0,																																																// MinValue				
+	DRAG_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	DRAG_MAX/2,
 };
 
 CMachineParameter const paraDragR = 
 { 
-	"Right Drag Delay",				
-	"Right Drag Delay",									// description
-	0,												// MinValue	
-	DRAG_MAX,											// MaxValue
-	MPF_STATE,										// Flags
+	"Right Drag Delay",																
+	"Right Drag Delay",																																				// description
+	0,																																																// MinValue				
+	DRAG_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	DRAG_MAX/2,
 };
 
 CMachineParameter const paraUnbalance = 
 { 
-	"Speed Unbalance",				
-	"Speed Unbalance",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Speed Unbalance",																
+	"Speed Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraFeedback = 
 { 
-	"Feedback",				
-	"Feedback",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback",																
+	"Feedback",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraMix = 
 { 
-	"Mix",				
-	"Mix",									// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix",																
+	"Mix",																																				// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraInputGain = 
 { 
 	"Input Gain",
-	"Input Gain",									// description
-	0,											// MinValue	
-	1024,											// MaxValue
-	MPF_STATE,										// Flags
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256
 };
 
@@ -270,14 +270,14 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	num_param,										// numParameters
-	pParameters,							// Pointer to parameters
-	PLUGIN_NAME,					// name
-	"Pooplog Scratch",							// short name
-	"Jeremy Evers",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	MI_VERSION,				
+	0,																																								// flags
+	num_param,																																								// numParameters
+	pParameters,																												// Pointer to parameters
+	PLUGIN_NAME,																				// name
+	"Pooplog Scratch",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	4
 };
 
@@ -578,7 +578,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		break;
 	case e_paraDragL:
 		// drag left
- 	case e_paraDragR:
+		case e_paraDragR:
 		// drag right
 		sprintf(txt,"%.2f %%",100*(value)/DRAG_MAX_f);
 		return true;

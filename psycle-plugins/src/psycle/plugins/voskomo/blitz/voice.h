@@ -1,19 +1,19 @@
-/*		Blitz (C)2005 by jme
+/*								Blitz (C)2005 by jme
 		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
-        This plugin is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 2 of the License, or
-        (at your option) any later version.\n"\
+		This plugin is free software; you can redistribute it and/or modify
+		it under the terms of the GNU General Public License as published by
+		the Free Software Foundation; either version 2 of the License, or
+		(at your option) any later version.\n"\
 
-        This plugin is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
+		This plugin is distributed in the hope that it will be useful,
+		but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+		GNU General Public License for more details.
 
-        You should have received a copy of the GNU General Public License
-        along with this program; if not, write to the Free Software
-        Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+		You should have received a copy of the GNU General Public License
+		along with this program; if not, write to the Free Software
+		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #pragma once
@@ -21,40 +21,40 @@
 #include "lfo.h"
 #include "pwm.h"
 
-#define WAVE_SINE		0
-#define	WAVE_ADLIB2		1
-#define	WAVE_ADLIB3		2
-#define	WAVE_ADLIB4		3
-#define WAVE_SINE12		4
-#define WAVE_SINECOSINE	5
-#define	WAVE_HALFSINE	6
-#define	WAVE_TRIANGLE	7
-#define	WAVE_UPDOWN		8
-#define WAVE_UPDOWNX2	9
-#define WAVE_SAWTOOTH	10
-#define WAVE_SAWTOOTHX2	11
-#define	WAVE_EXPSAW		12
-#define WAVE_MIDSINE	13
-#define WAVE_STEPS		14
-#define WAVE_SAWSQUARE	15
-#define WAVE_SQUARE		16
-#define WAVE_SQUAREX2	17
-#define WAVE_TRISTATE	18
-#define WAVE_POLYNEG	19
-#define WAVE_POLYNEG2	20
-#define WAVE_POLYNEG3	21
-#define	WAVE_FORMANT2	22
-#define	WAVE_FORMANT3	23
-#define	WAVE_FORMANT4	24
-#define	WAVE_FORMANT5	25
-#define	WAVE_FORMANT6	26
-#define	WAVE_FORMANT8	27
-#define	WAVE_FORMANT10	28
-#define WAVE_RANDOM		29
-#define WAVE_RANDOM2	30
-#define WAVE_RANDOM3	31
-#define WAVE_RANDOM4	32
-#define WAVE_RANDOM5	33
+#define WAVE_SINE								0
+#define				WAVE_ADLIB2								1
+#define				WAVE_ADLIB3								2
+#define				WAVE_ADLIB4								3
+#define WAVE_SINE12								4
+#define WAVE_SINECOSINE				5
+#define				WAVE_HALFSINE				6
+#define				WAVE_TRIANGLE				7
+#define				WAVE_UPDOWN								8
+#define WAVE_UPDOWNX2				9
+#define WAVE_SAWTOOTH				10
+#define WAVE_SAWTOOTHX2				11
+#define				WAVE_EXPSAW								12
+#define WAVE_MIDSINE				13
+#define WAVE_STEPS								14
+#define WAVE_SAWSQUARE				15
+#define WAVE_SQUARE								16
+#define WAVE_SQUAREX2				17
+#define WAVE_TRISTATE				18
+#define WAVE_POLYNEG				19
+#define WAVE_POLYNEG2				20
+#define WAVE_POLYNEG3				21
+#define				WAVE_FORMANT2				22
+#define				WAVE_FORMANT3				23
+#define				WAVE_FORMANT4				24
+#define				WAVE_FORMANT5				25
+#define				WAVE_FORMANT6				26
+#define				WAVE_FORMANT8				27
+#define				WAVE_FORMANT10				28
+#define WAVE_RANDOM								29
+#define WAVE_RANDOM2				30
+#define WAVE_RANDOM3				31
+#define WAVE_RANDOM4				32
+#define WAVE_RANDOM5				33
 
 struct VOICEPAR
 {
@@ -286,7 +286,7 @@ private:
 	
 	inline int f2i(double d)
 	{
-		 return ((int)d) & 2047;
+			return ((int)d) & 2047;
 	};
 
 	inline float freqChange(float freq)

@@ -18,7 +18,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#define PI	3.1415926535897932384626433832795f
+#define PI				3.1415926535897932384626433832795f
 
 CFilterx::CFilterx()
 {
@@ -89,11 +89,11 @@ CFilterx::ProcessPhaser(float *psamples, int numsamples, int freq, int ratio)
 		*psamples=IIRget(s);
 		++psamples;
 	} while(--numsamples);
-}		
+}								
 
 float CFilterx::IIRget(float input)
 {
-	//output(t) = a0*input(t) + a1*input(t-1) + a2*input(t-2) + b1*output(t-1) + b2*output(t-2)		
+	//output(t) = a0*input(t) + a1*input(t-1) + a2*input(t-2) + b1*output(t-1) + b2*output(t-2)								
 	++input;
 	output=a0*input + a1*input1 + a2*input2 + b1 * output1 + b2 * output2;
 	input2=input1;

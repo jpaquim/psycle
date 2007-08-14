@@ -1,15 +1,15 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	Voice.cpp
+//				Voice.cpp
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 #include <packageneric/pre-compiled.private.hpp>
 #include "Voice.h"
 //////////////////////////////////////////////////////////////////////
 //
-//	Voice constructor
+//				Voice constructor
 //
 //////////////////////////////////////////////////////////////////////
 Voice::Voice()
@@ -17,7 +17,7 @@ Voice::Voice()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	Voice destructor
+//				Voice destructor
 //
 //////////////////////////////////////////////////////////////////////
 Voice::~Voice()
@@ -25,8 +25,8 @@ Voice::~Voice()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	Brutally stops the voice
-//	Must be called before NoteOn if new note!
+//				Brutally stops the voice
+//				Must be called before NoteOn if new note!
 //
 //////////////////////////////////////////////////////////////////////
 void Voice::Reset()
@@ -54,34 +54,34 @@ void Voice::Reset()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	Stops the note
+//				Stops the note
 //
 //////////////////////////////////////////////////////////////////////
 void Voice::Stop(int samples)
 {
-//	m_mod.SetRelease(samples);
-//	m_vcf.SetRelease(samples);
+//				m_mod.SetRelease(samples);
+//				m_vcf.SetRelease(samples);
 	m_vca.SetRelease(samples);
 	NoteOff();
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	Sets note off
+//				Sets note off
 //
 //////////////////////////////////////////////////////////////////////
 void Voice::NoteOff()
 {
-//	m_osc1_incr.Stop();
-//	m_osc2_incr.Stop();
-//	m_noise_decay.Stop();
+//				m_osc1_incr.Stop();
+//				m_osc2_incr.Stop();
+//				m_noise_decay.Stop();
 	m_mod.Stop();
-//	m_lfo2_delay.Stop();
+//				m_lfo2_delay.Stop();
 	m_vcf.Stop();
 	m_vca.Stop();
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	Starts a note
+//				Starts a note
 //
 //////////////////////////////////////////////////////////////////////
 bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
@@ -126,7 +126,7 @@ bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 			old->NoteOff();
 			voice->m_osc1_incr.SetTarget(old->m_osc1_incr.GetValue());
 			voice->m_osc2_incr.SetTarget(old->m_osc2_incr.GetValue());
-//			voice->m_noise_decay.SetTarget(old->m_noise_decay.GetValue());
+//												voice->m_noise_decay.SetTarget(old->m_noise_decay.GetValue());
 			voice->Reset();
 		}
 	}
@@ -137,7 +137,7 @@ bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 	inertia *= m_globals->m_ticklength;
 	inertia >>= 2;
 	int sr = m_globals->m_samplingrate;
-	//	OSC 1
+	//				OSC 1
 	if (m_globals->m_osc1_kbd_track)
 	{
 		voice->m_osc1_incr.SetLength(inertia);
@@ -148,7 +148,7 @@ bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 		voice->m_osc2_incr.SetLength(0);
 		voice->m_osc1_incr.SetTarget(note2incr(WAVESIZE, m_globals->m_osc1_tune, sr));
 	}
-	//	OSC 2
+	//				OSC 2
 	if (m_globals->m_osc2_kbd_track)
 	{
 		voice->m_osc2_incr.SetLength(inertia);
@@ -161,10 +161,10 @@ bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 	}
 	if (voice == this)
 	{
-		//	NOISE
+		//				NOISE
 		voice->m_noise_decay.SetLength(millis2samples(m_globals->m_noise_decay, sr));
 		voice->m_noise_decay.SetTarget(0.0f);
-		//	MOD
+		//				MOD
 		voice->m_mod.SetDelay(millis2samples(m_globals->m_mod_delay, sr));
 		voice->m_mod.SetAttack(millis2samples(m_globals->m_mod_attack, sr));
 		voice->m_mod.SetDecay(millis2samples(m_globals->m_mod_decay, sr));
@@ -172,11 +172,11 @@ bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 		voice->m_mod.SetLength(millis2samples(m_globals->m_mod_length, sr));
 		voice->m_mod.SetRelease(millis2samples(m_globals->m_mod_release, sr));
 		voice->m_mod.Start();
-		//	LFO 2
+		//				LFO 2
 		voice->m_lfo2_delay.SetLength(millis2samples(m_globals->m_lfo2_delay, sr));
 		voice->m_lfo2_delay.SetTarget(1.0f);
 
-		//	VCF
+		//				VCF
 		voice->m_vcf.SetDelay(millis2samples(m_globals->m_vcf_delay, sr));
 		voice->m_vcf.SetAttack(millis2samples(m_globals->m_vcf_attack, sr));
 		voice->m_vcf.SetDecay(millis2samples(m_globals->m_vcf_decay, sr));
@@ -184,7 +184,7 @@ bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 		voice->m_vcf.SetLength(millis2samples(m_globals->m_vcf_length, sr));
 		voice->m_vcf.SetRelease(millis2samples(m_globals->m_vcf_release, sr));
 		voice->m_vcf.Start();
-		//	VCA
+		//				VCA
 		voice->m_vca.SetDelay(0);
 		voice->m_vca.SetAttack(millis2samples(m_globals->m_vca_attack, sr));
 		voice->m_vca.SetDecay(millis2samples(m_globals->m_vca_decay, sr));
@@ -193,8 +193,8 @@ bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 		voice->m_vca.SetRelease(millis2samples(m_globals->m_vca_release, sr));
 		voice->m_vca.Start();
 	}
-//	m_osc1_formant.Reset();
-//	m_osc2_formant.Reset();
-	//	Return
+//				m_osc1_formant.Reset();
+//				m_osc2_formant.Reset();
+	//				Return
 	return voice == this;
 }

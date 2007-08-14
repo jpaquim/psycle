@@ -88,14 +88,14 @@ static zipreader *_zr_step2(int fd, unsigned int a, unsigned int b, unsigned int
 	if (!ldset) return 0;
 
 	/* step 2, we seek to aaaa and we'll find exactly xx
-	 * of the central directory entry file headers:
-	 * 	aaaa is eodl[12] le32
-	 * 	yy is eodl[8] le16
-	 *
-	 * PK\2\1...
-	 *
-	 * that fills out the offset of all the local headers...
-	 */
+		* of the central directory entry file headers:
+		* - aaaa is eodl[12] le32
+		* - yy is eodl[8] le16
+		*
+		* PK\2\1...
+		*
+		* that fills out the offset of all the local headers...
+		*/
 
 	names = 0;
 	for (i = 0; i < y; i++) { /* should be number of entries */
@@ -178,22 +178,22 @@ static zipreader *_zr_step1(int fd, char *buf, size_t len, off_t left)
 	if (len < 22) return 0;
 
 	/* step 1 is locating the central directory record;
-	 * the signature we're looking for (looking backwards)
-	 *
-	 * PK\5\6\0\0\0\0xxyyaaaabbbbkk...
-	 *
-	 * where xx==yy, and kk is the number of
-	 * bytes found in "..." until the end of the file.
-	 *
-	 * since aaaa is the size of the central directory,
-	 * and bbbb is the offset of the central directory,
-	 * bbbb+aaaa will be LESS (or equal) than left+x
-	 *
-	 * the window size is 22 bytes for this stage
-	 */
+		* the signature we're looking for (looking backwards)
+		*
+		* PK\5\6\0\0\0\0xxyyaaaabbbbkk...
+		*
+		* where xx==yy, and kk is the number of
+		* bytes found in "..." until the end of the file.
+		*
+		* since aaaa is the size of the central directory,
+		* and bbbb is the offset of the central directory,
+		* bbbb+aaaa will be LESS (or equal) than left+x
+		*
+		* the window size is 22 bytes for this stage
+		*/
 	for (x = len-22;; x--) {
-		if (memcmp(buf+x, "PK\5\6\0\0\0\0", 8) == 0	/* sig */
-		&& memcmp(buf+x+8, buf+x+10, 2) == 0) {		/* xx=yy */
+		if (memcmp(buf+x, "PK\5\6\0\0\0\0", 8) == 0 /* sig */
+		&& memcmp(buf+x+8, buf+x+10, 2) == 0) { /* xx=yy */
 			a = (((unsigned char *)buf)[x+12])
 			| (((unsigned int )(((unsigned char *)buf)[x+13]))<<8)
 			| (((unsigned int )(((unsigned char *)buf)[x+14]))<<16)
@@ -208,10 +208,10 @@ static zipreader *_zr_step1(int fd, char *buf, size_t len, off_t left)
 			| (((unsigned int )(((unsigned char *)buf)[x+21]))<<8);
 			if (k == (left+len)-(x+22) && ((a+b) <= x)) {
 				/* okay, step1 signature matches;
-				 * this could very well be the end signature
-				 *
-				 * we'll start trying to load the signature
-				 */
+					* this could very well be the end signature
+					*
+					* we'll start trying to load the signature
+					*/
 				y = (((unsigned char *)buf)[x+8])
 				| (((unsigned int )(((unsigned char *)buf)[x+9]))<<8);
 				if (y) return _zr_step2(fd, a, b, y);

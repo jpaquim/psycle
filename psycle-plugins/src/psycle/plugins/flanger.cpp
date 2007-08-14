@@ -81,8 +81,8 @@ public:
 			out << (*this)(modulation_radians_per_second) / math::pi / 2 << " hertz";
 			break;
 		case modulation_amplitude:
-			 out << (*this)(delay) * (*this)(modulation_amplitude) << " seconds";
-			 break;
+				out << (*this)(delay) * (*this)(modulation_amplitude) << " seconds";
+				break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
 			else if((*this)(modulation_stereo_dephase) == Sample(math::pi)) out << "pi";
@@ -209,9 +209,9 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				int integral_part = static_cast<int>(fraction_part);
 				fraction_part = fraction_part-integral_part;
 				if (fraction_part < 0) { fraction_part += 1; integral_part -= 1; }
-//				Real integral_part(0);
-//				Real fraction_part = std::modf(modulation_amplitude_in_samples_ * sin,&integral_part);
-//				if (fraction_part < 0) fraction_part = 1.0+fraction_part;
+//																Real integral_part(0);
+//																Real fraction_part = std::modf(modulation_amplitude_in_samples_ * sin,&integral_part);
+//																if (fraction_part < 0) fraction_part = 1.0+fraction_part;
 				int read = write - delay_in_samples_ + integral_part;
 				int nextvalue = read+1;
 				if(read < 0)
@@ -232,13 +232,13 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				Sample & input_sample = input[sample];
 				Sample buffer_write = input_sample + feedback * buffer_read + 1.0e-9;
 				buffer_write-= static_cast<Sample>(1.0e-9);
-//				Sample buffer_write = input_sample + feedback * buffer_read;
-//				math::erase_all_nans_infinities_and_denormals(buffer_write);
+//																Sample buffer_write = input_sample + feedback * buffer_read;
+//																math::erase_all_nans_infinities_and_denormals(buffer_write);
 				buffer[write] = buffer_write;
 				++write %= size;
 				input_sample *= (*this)(dry);
 				input_sample += (*this)(wet) * buffer_read;
-//				math::erase_all_nans_infinities_and_denormals(input_sample);
+//																math::erase_all_nans_infinities_and_denormals(input_sample);
 			}
 		}
 		break;
@@ -266,7 +266,7 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				int read;
 				//if(sin < 0) read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin);
 				//else read = write - delay_in_samples_ + static_cast<int>(modulation_amplitude_in_samples_ * sin) - 1;
-//				read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
+//																read = write - delay_in_samples_ + std::floor(modulation_amplitude_in_samples_ * sin);
 				int integral_part = static_cast<int>(modulation_amplitude_in_samples_ * sin);
 				read = write - delay_in_samples_ + integral_part;
 
@@ -279,13 +279,13 @@ inline void Flanger::process(math::sinus_sequence & sinus_sequence, std::vector<
 				Sample & input_sample = input[sample];
 				Sample buffer_write = input_sample + feedback * buffer_read + 1.0e-9;
 				buffer_write -= static_cast<Sample>(1.0e-9);
-//				Sample buffer_write = input_sample + feedback * buffer_read;
-//				math::erase_all_nans_infinities_and_denormals(buffer_write);
+//																Sample buffer_write = input_sample + feedback * buffer_read;
+//																math::erase_all_nans_infinities_and_denormals(buffer_write);
 				buffer[write] = buffer_write;
 				++write %= size;
 				input_sample *= (*this)(dry);
 				input_sample += (*this)(wet) * buffer_read;
-//				math::erase_all_nans_infinities_and_denormals(input_sample);
+//																math::erase_all_nans_infinities_and_denormals(input_sample);
 			}
 		}
 		break;

@@ -35,8 +35,8 @@ class TrackGeometry;
 class BehaviourStrategy;
 
 /**
- * Selection.
- */
+	* Selection.
+	*/
 class Selection {
 public:
 	Selection() {}
@@ -60,8 +60,8 @@ private:
 };
 
 /**
- * PatCursor.
- */
+	* PatCursor.
+	*/
 class PatCursor {
 public:
 	PatCursor();
@@ -89,29 +89,29 @@ private:
 };
 
 /**
- * ColumnEvent.
- */
-class ColumnEvent {			
+	* ColumnEvent.
+	*/
+class ColumnEvent {																																																
 public:
-    enum ColType { hex2 = 0, hex4 = 1, note = 2 };
+	enum ColType { hex2 = 0, hex4 = 1, note = 2 };
 
-    ColumnEvent( ColType type );
+	ColumnEvent( ColType type );
 
-    ~ColumnEvent();
+	~ColumnEvent();
 
-    ColType type() const;
-    int cols() const;
+	ColType type() const;
+	int cols() const;
 
 private:
 
-    ColType type_;
+	ColType type_;
 };
 
 
 
 /**
- * PatternGrid.
- */
+	* PatternGrid.
+	*/
 class PatternGrid : public QGraphicsItem {
 
 public:

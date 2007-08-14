@@ -94,21 +94,21 @@ namespace psy {
 			f = zipreader_seek(z, "xml/song.xml");
 
 			if (!zipreader_extract(f, outFd )) {
-				zipreader_close( z );	
+				zipreader_close( z );
 				close( outFd );
 				close( fd );
 				return false;
-			}			
+			}
 			close( outFd );
 
 			f = zipreader_seek(z, "bin/song.bin");
 			outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT, 0644);
 			if (!zipreader_extract(f, outFd )) {
-				zipreader_close( z );	
+				zipreader_close( z );
 				close( outFd );
 				close( fd );
 				return false;
-			}			
+			}
 			close( outFd );
 			
 			zipreader_close( z );
@@ -201,7 +201,7 @@ namespace psy {
 							}
 						}
 					}
-				}		
+				}
 			#elif defined QT_XML_LIB
 				QDomElement root = doc->firstChildElement();
 				QDomElement infoElm = root.firstChildElement( "info" );
@@ -288,7 +288,7 @@ namespace psy {
 								for(xmlpp::Node::NodeList::const_iterator i = pattern_lines.begin(); i != pattern_lines.end(); ++i)
 								{
 									xmlpp::Element const & pattern_line(dynamic_cast<xmlpp::Element const &>(**i));
-									{								
+									{
 										xmlpp::Attribute const * const pos_attribute(pattern_line.get_attribute("pos"));
 										if(!pos_attribute) std::cerr << "expected pos attribute in patline element\n";
 										else lastPatternPos = str<float>(pos_attribute->get_value());
@@ -492,12 +492,12 @@ namespace psy {
 			if (true) {
 				RiffFile file;
 				file.Open("psytemp.bin");
-//				//progress.emit(1,0,"");
-//				//progress.emit(2,0,"Loading... psycle bin data ...");
+				//progress.emit(1,0,"");
+				//progress.emit(2,0,"Loading... psycle bin data ...");
 
 				// skip header
 				file.Skip(8);
-				//\todo:
+				///\todo:
 				size_t filesize = file.FileSize();
 				std::uint32_t version = 0;
 				std::uint32_t size = 0;
@@ -513,11 +513,11 @@ namespace psy {
 					file.Read(size);
 
 					int fileposition = file.GetPos();
-//					//progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
+					//progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
 
 					if(std::strcmp(header,"MACD") == 0)
 					{
-//						//progress.emit(2,0,"Loading... Song machines...");
+						//progress.emit(2,0,"Loading... Song machines...");
 						if ((version&0xFF00) == 0x0000) // chunkformat v0
 						{
 							LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
@@ -526,7 +526,7 @@ namespace psy {
 					}
 					else if(std::strcmp(header,"INSD") == 0)
 					{
-//						//progress.emit(2,0,"Loading... Song instruments...");
+						//progress.emit(2,0,"Loading... Song instruments...");
 						if ((version&0xFF00) == 0x0000) // chunkformat v0
 						{
 							LoadINSDv0(&file,song,version&0x00FF);
@@ -535,11 +535,11 @@ namespace psy {
 					}
 					else
 					{
-//					loggers::warning("foreign chunk found. skipping it.");
+						//loggers::warning("foreign chunk found. skipping it.");
 						//progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
 						std::ostringstream s;
 							s << "foreign chunk: version: " << version << ", size: " << size;
-//					loggers::trace(s.str());
+						//loggers::trace(s.str());
 						if(size && size < filesize-fileposition)
 						{
 							file.Skip(size);
@@ -549,15 +549,15 @@ namespace psy {
 					if  (file.GetPos() != fileposition+size)
 					{
 					///\todo: verify how it works with invalid data.
-//					if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
-//					else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
+					//if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
+					//else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
 						file.Seek(fileposition+size);
 					}
 					--chunkcount;
 				}
 				//progress.emit(4,16384,"");
 
-				//\todo: Move this to something like "song.validate()" 
+				///\todo: Move this to something like "song.validate()" 
 
 				// test all connections for invalid machines. disconnect invalid machines.
 				for(int i(0) ; i < MAX_MACHINES ; ++i)
@@ -628,7 +628,7 @@ namespace psy {
 					s << "some chunks were missing in the file";
 					//report.emit(s.str(), "Song Load Error.");
 				}
-				//\todo:
+				///\todo:
 			}
 
 			return true;
@@ -639,7 +639,7 @@ namespace psy {
 			std::string fileName = File::extractFileNameFromPath(file_Name);
 
 			bool autosave = false;
-			//\todo:
+			///\todo:
 			if ( !autosave )
 			{
 				//progress.emit(1,0,"");
@@ -670,7 +670,7 @@ namespace psy {
 			zipwriter_file *f;
 
 
-				//\todo:
+			///\todo:
 			if ( !autosave )
 			{
 				//progress.emit(1,0,"");
@@ -710,7 +710,7 @@ namespace psy {
 					}
 				}
 			}
-			//\todo:
+			///\todo:
 			file.Close();
 
 			// copy the bin data to the zip
@@ -742,7 +742,7 @@ namespace psy {
 			const int bytesread=4;
 			if ( size > 4)
 			{
-				file->Skip(size - bytesread);// Size of the current header DATA // This ensures that any extra data is skipped.
+				file->Skip(size - bytesread); // Size of the current header DATA // This ensures that any extra data is skipped.
 			}
 			return chunkcount;
 		}
@@ -797,7 +797,7 @@ namespace psy {
 			file->Write(size);
 			file->Seek(pos2);
 
-			//\todo:
+			///\todo:
 			return true;
 		}
 
@@ -828,7 +828,7 @@ namespace psy {
 			file->Write(size);
 			file->Seek(pos2);
 
-			//\todo:
+			///\todo:
 			return true;
 		}
 

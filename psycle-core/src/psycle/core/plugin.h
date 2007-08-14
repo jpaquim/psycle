@@ -33,7 +33,7 @@ class PluginFxCallback : public CFxCallback
 {
 	public:
 		virtual void MessBox(char const* ptxt,char const* caption,unsigned int type);
-	  	virtual int GetTickLength();
+			virtual int GetTickLength();
 		virtual int GetSamplingRate();
 		virtual int GetBPM();
 		virtual int GetTPB();
@@ -119,8 +119,10 @@ class Plugin : public Machine
 		///\name (de)serialization
 		///\{
 			public:
-				/// Loader for psycle fileformat version 2.
-/*				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);*/
+				#if 0
+					/// Loader for psycle fileformat version 2.
+					virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+				#endif
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile) const;
 				virtual void SaveDllName      (RiffFile * pFile) const;

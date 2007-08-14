@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	AllPass2.h
+//				AllPass2.h
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-//	AllPass2 class
+//				AllPass2 class
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -18,27 +18,27 @@ class AllPass2
 {
 
 	//////////////////////////////////////////////////////////////////
-	//	Variables
+	//				Variables
 	//////////////////////////////////////////////////////////////////
 
 private:
 
-	float	_a;
-	float	_x0;
-	float	_x1;
-	float	_x2;
-	float	_y0;
-	float	_y1;
-	float	_y2;
+	float				_a;
+	float				_x0;
+	float				_x1;
+	float				_x2;
+	float				_y0;
+	float				_y1;
+	float				_y2;
 
 	//////////////////////////////////////////////////////////////////
-	//	Methods
+	//				Methods
 	//////////////////////////////////////////////////////////////////
 
 public:
 
 	//////////////////////////////////////////////////////////////////
-	//	Constructor
+	//				Constructor
 	//////////////////////////////////////////////////////////////////
 
 	AllPass2()
@@ -47,7 +47,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Destructor
+	//				Destructor
 	//////////////////////////////////////////////////////////////////
 
 	virtual ~AllPass2()
@@ -55,7 +55,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Init
+	//				Init
 	//////////////////////////////////////////////////////////////////
 
 	inline void Init()
@@ -65,7 +65,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Reset
+	//				Reset
 	//////////////////////////////////////////////////////////////////
 
 	inline void Reset()
@@ -79,7 +79,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	GetDelay
+	//				GetDelay
 	//////////////////////////////////////////////////////////////////
 
 	inline float GetCoeff()
@@ -88,7 +88,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	SetDelay
+	//				SetDelay
 	//////////////////////////////////////////////////////////////////
 
 	inline void SetCoeff(float a)
@@ -97,7 +97,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	GetSample
+	//				GetSample
 	//////////////////////////////////////////////////////////////////
 
 	inline float GetSample(float in)
@@ -116,7 +116,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 //
-//	AllPass2Cascade class
+//				AllPass2Cascade class
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -124,22 +124,22 @@ class AllPass2Cascade
 {
 
 	//////////////////////////////////////////////////////////////////
-	//	Variables
+	//				Variables
 	//////////////////////////////////////////////////////////////////
 
 private:
 
-	AllPass2	alps[6];
-	int			nalps;
+	AllPass2				alps[6];
+	int												nalps;
 
 	//////////////////////////////////////////////////////////////////
-	//	Methods
+	//				Methods
 	//////////////////////////////////////////////////////////////////
 
 public:
 
 	//////////////////////////////////////////////////////////////////
-	//	Constructor
+	//				Constructor
 	//////////////////////////////////////////////////////////////////
 
 	AllPass2Cascade()
@@ -148,7 +148,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Destructor
+	//				Destructor
 	//////////////////////////////////////////////////////////////////
 
 	virtual ~AllPass2Cascade()
@@ -156,7 +156,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Init
+	//				Init
 	//////////////////////////////////////////////////////////////////
 
 	inline void Init()
@@ -166,7 +166,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Reset
+	//				Reset
 	//////////////////////////////////////////////////////////////////
 
 	inline void Reset()
@@ -178,7 +178,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	SetCoeffs
+	//				SetCoeffs
 	//////////////////////////////////////////////////////////////////
 
 	inline void SetCoeffs(float* coeffs, int ncoeffs)
@@ -192,7 +192,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	GetSample
+	//				GetSample
 	//////////////////////////////////////////////////////////////////
 
 	inline float GetSample(float in)
@@ -211,7 +211,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 //
-//	HalfBand2 class
+//				HalfBand2 class
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -219,23 +219,23 @@ class HalfBand2
 {
 
 	//////////////////////////////////////////////////////////////////
-	//	Variables
+	//				Variables
 	//////////////////////////////////////////////////////////////////
 
 private:
 
-	AllPass2Cascade	a;
-	AllPass2Cascade	b;
-	float			old_out;
+	AllPass2Cascade				a;
+	AllPass2Cascade				b;
+	float												old_out;
 
 	//////////////////////////////////////////////////////////////////
-	//	Methods
+	//				Methods
 	//////////////////////////////////////////////////////////////////
 
 public:
 
 	//////////////////////////////////////////////////////////////////
-	//	Constructor
+	//				Constructor
 	//////////////////////////////////////////////////////////////////
 
 	HalfBand2()
@@ -244,7 +244,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Destructor
+	//				Destructor
 	//////////////////////////////////////////////////////////////////
 
 	virtual ~HalfBand2()
@@ -252,7 +252,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Init
+	//				Init
 	//////////////////////////////////////////////////////////////////
 
 	inline void Init()
@@ -264,7 +264,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Reset
+	//				Reset
 	//////////////////////////////////////////////////////////////////
 
 	inline void Reset()
@@ -275,14 +275,14 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	SetCoeffs
+	//				SetCoeffs
 	//////////////////////////////////////////////////////////////////
 
 	inline void SetOrder(int order, bool steep)
 	{
 		if (steep==true)
 		{
-			if (order==12)	//rejection=104dB, transition band=0.01
+			if (order==12)				//rejection=104dB, transition band=0.01
 			{
 				float a_coefficients[6]=
 				{0.036681502163648017f
@@ -305,7 +305,7 @@ public:
 				a.SetCoeffs(a_coefficients, 6);
 				b.SetCoeffs(b_coefficients, 6);
 			}
-			else if (order==10)	//rejection=86dB, transition band=0.01
+			else if (order==10)				//rejection=86dB, transition band=0.01
 			{
 				float a_coefficients[5]=
 				{0.051457617441190984f
@@ -326,7 +326,7 @@ public:
 				a.SetCoeffs(a_coefficients,5);
 				b.SetCoeffs(b_coefficients,5);
 			}
-			else if (order==8)	//rejection=69dB, transition band=0.01
+			else if (order==8)				//rejection=69dB, transition band=0.01
 			{
 				float a_coefficients[4]=
 				{0.07711507983241622f
@@ -345,7 +345,7 @@ public:
 				a.SetCoeffs(a_coefficients,4);
 				b.SetCoeffs(b_coefficients,4);
 			}
-			else if (order==6)	//rejection=51dB, transition band=0.01
+			else if (order==6)				//rejection=51dB, transition band=0.01
 			{
 				float a_coefficients[3]=
 				{0.1271414136264853f
@@ -362,7 +362,7 @@ public:
 				a.SetCoeffs(a_coefficients,3);
 				b.SetCoeffs(b_coefficients,3);
 			}
-			else if (order==4)	//rejection=53dB,transition band=0.05
+			else if (order==4)				//rejection=53dB,transition band=0.05
 			{
 				float a_coefficients[2]=
 				{0.12073211751675449f
@@ -378,7 +378,7 @@ public:
 				b.SetCoeffs(b_coefficients,2);
 			}
 		
-			else	//order=2, rejection=36dB, transition band=0.1
+			else				//order=2, rejection=36dB, transition band=0.1
 			{
 				float a_coefficients=0.23647102099689224f;
 				float b_coefficients=0.7145421497126001f;
@@ -387,9 +387,9 @@ public:
 				b.SetCoeffs(&b_coefficients,1);
 			}
 		}
-		else	//softer slopes, more attenuation and less stopband ripple
+		else				//softer slopes, more attenuation and less stopband ripple
 		{
-			if (order==12)	//rejection=150dB, transition band=0.05
+			if (order==12)				//rejection=150dB, transition band=0.05
 			{
 				float a_coefficients[6]=
 				{0.01677466677723562f
@@ -412,7 +412,7 @@ public:
 				a.SetCoeffs(a_coefficients,6);
 				b.SetCoeffs(b_coefficients,6);
 			}
-			else if (order==10)	//rejection=133dB, transition band=0.05
+			else if (order==10)				//rejection=133dB, transition band=0.05
 			{
 				float a_coefficients[5]=
 				{0.02366831419883467f
@@ -433,7 +433,7 @@ public:
 				a.SetCoeffs(a_coefficients,5);
 				b.SetCoeffs(b_coefficients,5);
 			}
-			else if (order==8)	//rejection=106dB, transition band=0.05
+			else if (order==8)				//rejection=106dB, transition band=0.05
 			{
 				float a_coefficients[4]=
 				{0.03583278843106211f
@@ -452,7 +452,7 @@ public:
 				a.SetCoeffs(a_coefficients,4);
 				b.SetCoeffs(b_coefficients,4);
 			}
-			else if (order==6)	//rejection=80dB, transition band=0.05
+			else if (order==6)				//rejection=80dB, transition band=0.05
 			{
 				float a_coefficients[3]=
 				{0.06029739095712437f
@@ -469,7 +469,7 @@ public:
 				a.SetCoeffs(a_coefficients,3);
 				b.SetCoeffs(b_coefficients,3);
 			}
-			else if (order==4)	//rejection=70dB,transition band=0.1
+			else if (order==4)				//rejection=70dB,transition band=0.1
 			{
 				float a_coefficients[2]=
 				{0.07986642623635751f
@@ -485,7 +485,7 @@ public:
 				b.SetCoeffs(b_coefficients,2);
 			}
 		
-			else	//order=2, rejection=36dB, transition band=0.1
+			else				//order=2, rejection=36dB, transition band=0.1
 			{
 				float a_coefficients=0.23647102099689224f;
 				float b_coefficients=0.7145421497126001f;
@@ -497,7 +497,7 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	GetSample
+	//				GetSample
 	//////////////////////////////////////////////////////////////////
 
 	inline float GetSample(float in)

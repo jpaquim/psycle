@@ -52,7 +52,7 @@ class InstrumentsModel;
 #include <QUndoCommand>
 #include <QUndoGroup>
 #include <QUndoView>
- 
+	
 // Subclassing as we need to override event().
 class TabWidget : public QTabWidget {
 public:
@@ -122,7 +122,7 @@ private:
 
 	void populateMachineCombo();
 	void initSampleCombo();
-    
+	
 	void createActions();
 	void createMenus();
 	void createToolBars();

@@ -100,7 +100,7 @@ private:
 		int set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access);
 		int set_swparams(snd_pcm_sw_params_t *swparams);
 		int xrun_recovery(int err);
-    int write_loop();
+	int write_loop();
 
 		static void* audioOutThread(void * ptr);
 //    void setValues();

@@ -1,26 +1,26 @@
 //============================================================================
 //
-//	DLineA (AllPass Interpolating Delay Line)
+//				DLineA (AllPass Interpolating Delay Line)
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
 //============================================================================
-//	Class
+//				Class
 //============================================================================
 class DLineA
 {
 private:
-    float	*inputs;
-	int		inPoint;
-	int		outPoint;
-	int		length;
-	float	delay;
-	float	lastOutput;
-	float	alpha;
-	float	coeff;
-	float	lastIn;
+	float				*inputs;
+	int								inPoint;
+	int								outPoint;
+	int								length;
+	float				delay;
+	float				lastOutput;
+	float				alpha;
+	float				coeff;
+	float				lastIn;
 public:
 	DLineA();
 	~DLineA();
@@ -30,14 +30,14 @@ public:
 	void SetDelay(float lag);
 	float GetDelay();
 	//------------------------------------------------------------------------
-	//	GetLastOutput
+	//				GetLastOutput
 	//------------------------------------------------------------------------
 	inline float GetLastOutput()
 	{
 		return lastOutput;
 	}
 	//------------------------------------------------------------------------
-	//	Tick
+	//				Tick
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{

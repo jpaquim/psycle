@@ -27,7 +27,7 @@ template<class T> inline std::string toHex(T value , int nums = 8) {
 template<class T> inline T str_hex(const std::string &  value, int pos) {
 		T result;
 
-	 pos = pos*8;
+		pos = pos*8;
 
 		std::stringstream str;
 		str << value.substr(pos,8);
@@ -199,12 +199,12 @@ namespace psy
 							///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 							if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
 							{
-									std::ostringstream s;
-									s << "instrument: " << index << ", name: " << waveName << std::endl;
-									s << "sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
-									s << "You should reload this wave sample and all the samples after this one!";
-//									loggers::warning(s.str());
-//									MessageBox(0, s.str().c_str(), "Loading wave sample data", MB_ICONWARNING | MB_OK);
+								std::ostringstream s;
+								s << "instrument: " << index << ", name: " << waveName << std::endl;
+								s << "sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
+								s << "You should reload this wave sample and all the samples after this one!";
+								//loggers::warning(s.str());
+								//MessageBox(0, s.str().c_str(), "Loading wave sample data", MB_ICONWARNING | MB_OK);
 							}
 							DataCompression::SoundDesquash(pData,&waveDataL);
 							delete[] pData;
@@ -226,12 +226,12 @@ namespace psy
 								///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 								if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
 								{
-										std::ostringstream s;
-										s << "instrument: " << index << ", name: " << waveName << std::endl;
-										s << "stereo wave sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
-										s << "You should reload this wave sample and all the samples after this one!";
-//										loggers::warning(s.str());
-//										MessageBox(0, s.str().c_str(), "Loading stereo wave sample data", MB_ICONWARNING | MB_OK);
+									std::ostringstream s;
+									s << "instrument: " << index << ", name: " << waveName << std::endl;
+									s << "stereo wave sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
+									s << "You should reload this wave sample and all the samples after this one!";
+									//loggers::warning(s.str());
+									//MessageBox(0, s.str().c_str(), "Loading stereo wave sample data", MB_ICONWARNING | MB_OK);
 								}
 								DataCompression::SoundDesquash(pData,&waveDataR);
 								delete[] pData;
@@ -424,7 +424,7 @@ namespace psy
 				xml << "<hex v='";
 				for (int k = 0; k < size1; k++) {
 					xml << toHex(pData1[k],2);
-				}				
+				}
 				xml << "'/>" << std::endl;
 				xml << "</waveleft>" << std::endl;
 				delete[] pData1;
@@ -437,7 +437,7 @@ namespace psy
 					for (int k = 0; k < size2; k++) {
 						xml << toHex(pData2[k], 2);
 					}
-					xml << "'/>" << std::endl;				
+					xml << "'/>" << std::endl;
 					xml << std::endl;
 					xml << "</waveright>" << std::endl;
 				}
@@ -485,7 +485,7 @@ namespace psy
 			int size_count = 0;
 			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
 				_sName[size_count] = *it;
-			}	
+			}
 			_sName[size_count++] = '0';
 		}
 
@@ -494,7 +494,7 @@ namespace psy
 			int size_count = 0;
 			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
 				waveName[size_count] = *it;
-			}	
+			}
 			waveName[size_count++] = '0';
 
 			int pos = 0;
@@ -512,7 +512,7 @@ namespace psy
 		}
 
 		void Instrument::setCompressedData( unsigned char * left, unsigned char * right )
-		{			
+		{
 			bool err = DataCompression::SoundDesquash( left , &waveDataL );
 			if (waveStereo) {
 				bool err = DataCompression::SoundDesquash( right, &waveDataR );
@@ -525,25 +525,11 @@ namespace psy
 			int byte_pos = 0;
 			while ( it != dataStr.end() ) {
 				char hex[3];
-				hex[0] = *it; it++;
-				hex[1] = *it; it++;
-				hex[2] = 0;				
-
+				hex[0] = *it; ++it;
+				hex[1] = *it; ++it;
+				hex[2] = 0;
 				data[byte_pos++] = str_hex<int> ( std::string(hex), 0);
 			}
 		}
-
 	} // end of psycle host namespace
-}
-
-
-
-
-
-
-
-
-
-
-
-	// end of psycle namespace
+} // end of psycle namespace

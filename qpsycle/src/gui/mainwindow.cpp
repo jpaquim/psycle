@@ -90,7 +90,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-  std::cout << "~MainWindow() " << this << "\n";
+	std::cout << "~MainWindow() " << this << "\n";
 }
 
 
@@ -124,7 +124,7 @@ void MainWindow::setupGui()
 	views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
 	views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
 	views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
-	views_->addTab( sampleBrowser_,	QIcon(":images/sample-browser.png"), "Sample Browser" );
+	views_->addTab( sampleBrowser_,																																																																QIcon(":images/sample-browser.png"), "Sample Browser" );
 
 	QGridLayout *layout = new QGridLayout;
 	layout->addWidget( views_ );
@@ -142,30 +142,30 @@ void MainWindow::setupGui()
 void MainWindow::setupSignals()
 {
 	connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
-		 this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
+			this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
 	connect( patternBox_, SIGNAL( patternDeleted() ),
-		 this, SLOT( onPatternDeleted() ) );
+			this, SLOT( onPatternDeleted() ) );
 	connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ),
-		 this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
+			this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
 	connect( patternBox_, SIGNAL( patternNameChanged() ),
-		 this, SLOT( onPatternNameChanged() ) );
+			this, SLOT( onPatternNameChanged() ) );
 	connect( patternBox_, SIGNAL( categoryColorChanged() ),
-		 this, SLOT( onCategoryColorChanged() ) );
+			this, SLOT( onCategoryColorChanged() ) );
 
 	connect( macView_, SIGNAL( newMachineCreated( psy::core::Machine* ) ),
-		 this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
+			this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
 	connect( macView_, SIGNAL( machineChosen( MachineGui* ) ),
-		 this, SLOT( onMachineChosen( MachineGui* ) ) );
+			this, SLOT( onMachineChosen( MachineGui* ) ) );
 	connect( macView_, SIGNAL( machineDeleted( int ) ),
-		 this, SLOT( onMachineDeleted() ) );
+			this, SLOT( onMachineDeleted() ) );
 	connect( macView_, SIGNAL( machineRenamed( ) ),
-		 this, SLOT( onMachineRenamed( ) ) );
+			this, SLOT( onMachineRenamed( ) ) );
 
 	connect( macCombo_, SIGNAL( currentIndexChanged( int ) ),
-		 this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
+			this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
 
 	connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
-		 this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
+			this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 }
 
 void MainWindow::onNewSongRequest()
@@ -173,9 +173,9 @@ void MainWindow::onNewSongRequest()
 	if ( songHasChanged() )
 	{
 		int response = QMessageBox::warning( this, "Save changes?",
-						     "The song has been modified.\n Do you wish to save your changes?",
-						     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-						     QMessageBox::Save ) ;
+								"The song has been modified.\n Do you wish to save your changes?",
+								QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+								QMessageBox::Save ) ;
 
 		if ( response == QMessageBox::Save ) {
 			onSaveSongRequest();
@@ -195,9 +195,9 @@ void MainWindow::onOpenSongRequest()
 	if ( songHasChanged() )
 	{
 		int response = QMessageBox::warning( this, "Save changes?",
-						     "The song has been modified.\n Do you wish to save your changes?",
-						     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-						     QMessageBox::Save ) ;
+								"The song has been modified.\n Do you wish to save your changes?",
+								QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+								QMessageBox::Save ) ;
 
 		if ( response == QMessageBox::Save ) {
 			onSaveSongRequest();
@@ -295,18 +295,18 @@ void MainWindow::loadSong( psy::core::Song *song )
 
 void MainWindow::undo()
 {
- 
+	
 }
 
 void MainWindow::redo()
 {
- 
+	
 }
 
 void MainWindow::aboutQpsycle()
 {
 	QMessageBox::about(this, tr("About qpsycle"),
-			   tr("It makes music and stuff."));
+				tr("It makes music and stuff."));
 }
 
 void MainWindow::createActions()
@@ -351,7 +351,7 @@ void MainWindow::createActions()
 
 	audioConfAct = new QAction( tr("Audio Settings"), this );
 	connect( audioConfAct, SIGNAL( triggered() ),
-		 this, SLOT( showAudioConfigDlg() ) );
+			this, SLOT( showAudioConfigDlg() ) );
 
 
 	aboutAct = new QAction(tr("&About qpsycle"), this);
@@ -437,7 +437,7 @@ void MainWindow::createToolBars()
 		octCombo_->addItem( QString::number( i ) );
 	}
 	connect( octCombo_, SIGNAL( currentIndexChanged( int ) ),
-		 this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
+			this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
 	octCombo_->setCurrentIndex( 4 );
 }
 
@@ -464,7 +464,7 @@ void MainWindow::populateMachineCombo()
 			buffer << std::setfill('0') << std::hex << std::setw(2);
 			buffer << b << ": " << song_->machine(b)->GetEditName();
 			macCombo_->addItem( QString::fromStdString( buffer.str() ),
-					    song_->machine(b)->id() );
+						song_->machine(b)->id() );
 
 			comboIsEmpty = false;
 		}
@@ -479,7 +479,7 @@ void MainWindow::populateMachineCombo()
 			buffer << std::setfill('0') << std::hex << std::setw(2);
 			buffer << b << ": " << song_->machine(b)->GetEditName();
 			macCombo_->addItem( QString::fromStdString( buffer.str() ),
-					    song_->machine(b)->id() );
+						song_->machine(b)->id() );
 			comboIsEmpty = false;
 		}
 	}
@@ -515,7 +515,7 @@ void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 
 void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )
 {
-    patView_->setPattern( selectedPattern );
+	patView_->setPattern( selectedPattern );
 }
 
 
@@ -614,8 +614,8 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
 	switch ( command ) {
-        case commands::show_pattern_box:
-        {
+		case commands::show_pattern_box:
+		{
 		if ( !dock_->isVisible() ) {
 			dock_->setVisible( true );
 			patternBox_->patternTree()->setFocus();
@@ -626,51 +626,51 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 				patternBox_->patternTree()->setFocus();
 			}
 		}
-        }
-        break;
-        case commands::show_machine_view:
+		}
+		break;
+		case commands::show_machine_view:
 		views_->setCurrentWidget( macView_ );
 		break;
-        case commands::show_pattern_view:
+		case commands::show_pattern_view:
 		views_->setCurrentWidget( patView_ );
 		patView_->patDraw()->setFocus();
 		patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
 		break;
-        case commands::show_wave_editor:
+		case commands::show_wave_editor:
 		views_->setCurrentWidget( wavView_ );
 		break;
-        case commands::show_sequencer_view:
+		case commands::show_sequencer_view:
 		views_->setCurrentWidget( seqView_ );
 		break;
 		// Play controls.
-        case commands::play_start:
+		case commands::play_start:
 		playFromStartAct->trigger();
 		break;
-        case commands::play_from_position:
+		case commands::play_from_position:
 		playFromSeqPosAct->trigger();
 		break;
-        case commands::play_stop:
+		case commands::play_stop:
 		playStopAct->trigger();
 		break;
-        case commands::play_loop_entry:
-        {
+		case commands::play_loop_entry:
+		{
 //            psy::core::Player::Instance()->setLoopPatternEntry( ... );
-        }
-        break;
-        case commands::instrument_inc:
+		}
+		break;
+		case commands::instrument_inc:
 		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
 		break;
-        case commands::instrument_dec:
+		case commands::instrument_dec:
 		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
 		break;
-        case commands::octave_up:
+		case commands::octave_up:
 		octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
 		break;
-        case commands::octave_down:
+		case commands::octave_down:
 		octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
 		break;
 
-        default:;
+		default:;
 	}
 }
 
@@ -700,18 +700,18 @@ bool TabWidget::event( QEvent *event )
 {
 
 	switch (event->type()) {
-        case QEvent::KeyPress: {
+		case QEvent::KeyPress: {
 		QKeyEvent *k = (QKeyEvent *)event;
 		if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2
-		    || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
+			|| k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
 		{
 			return true;
 		} else {
 			QTabWidget::keyPressEvent(k);
 			return true;
 		}
-        }
-        default:
+		}
+		default:
 		return QTabWidget::event( event );
 	}
 }

@@ -29,7 +29,7 @@ namespace psy
 			void setSampleRate(float samplerate);
 			static FilterCoeff singleton;
 		private:
-      float samplerate;
+		float samplerate;
 			double _coeff[5];
 			void ComputeCoeffs(int freq, int r, int t);
 
@@ -187,16 +187,18 @@ namespace psy
 					fLastSampleLeft[1] = fy - (sample * fCoeff[3]);
 					sample = fy;
 				}
-				catch(...) //universalis::operating_system::exception const & e) /// todo unsurewhat todo
+				catch(...) //universalis::operating_system::exception const & e)
 				{
-/*					switch(e.code())
-					{
-						case STATUS_FLOAT_DENORMAL_OPERAND:
-						case STATUS_FLOAT_INVALID_OPERATION:
-							fLastSampleLeft[1] = fLastSampleLeft[0] = 0;
-							break;
-						default: throw;
-					}*/
+					#if 0 ///\todo
+						switch(e.code())
+						{
+							case STATUS_FLOAT_DENORMAL_OPERAND:
+							case STATUS_FLOAT_INVALID_OPERATION:
+								fLastSampleLeft[1] = fLastSampleLeft[0] = 0;
+								break;
+							default: throw;
+						}
+					#endif
 				}
 			}
 
@@ -216,15 +218,17 @@ namespace psy
 				}
 				catch(...)//universalis::operating_system::exception const & e)
 				{
-//					switch(e.code())
-//					{ 
-//						case STATUS_FLOAT_DENORMAL_OPERAND:
-//							fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;
-//							left *= fCoeff[0];
-//							right *= fCoeff[0];
-//							break;
-//						default: throw;
-//					}
+					#if 0 ///\todo
+						switch(e.code())
+						{ 
+										case STATUS_FLOAT_DENORMAL_OPERAND:
+														fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;
+														left *= fCoeff[0];
+														right *= fCoeff[0];
+														break;
+										default: throw;
+						}
+					#endif
 				}
 			}
 		protected:

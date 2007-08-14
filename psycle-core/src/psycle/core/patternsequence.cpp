@@ -109,7 +109,7 @@ namespace psy
 
 		SequenceEntry::~ SequenceEntry( )
 		{
-      wasDeleted(this);
+		wasDeleted(this);
 		}
 
 		void SequenceEntry::setPattern( SinglePattern * pattern )
@@ -191,13 +191,13 @@ namespace psy
 			return xml.str();
 		}
 
-        void SequenceEntry::setSequenceLine( SequenceLine *newLine )
-        {
-            printf("line before %p\n", line_);
-            line_->moveEntryToNewLine( this, newLine );
-            line_ = newLine;
-            printf("line after %p\n", line_);
-        }
+		void SequenceEntry::setSequenceLine( SequenceLine *newLine )
+		{
+			printf("line before %p\n", line_);
+			line_->moveEntryToNewLine( this, newLine );
+			line_ = newLine;
+			printf("line after %p\n", line_);
+		}
 
 		// end of SequenceEntry
 
@@ -220,7 +220,7 @@ namespace psy
 		{
 			iterator it = begin();
 			for ( it; it != end(); it++) delete it->second;
-      wasDeleted(this);
+		wasDeleted(this);
 		}
 
 		SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double position )
@@ -231,22 +231,22 @@ namespace psy
 			return entry;
 		}
 
-        void SequenceLine::insertEntry( SequenceEntry *entry )
-        {
+		void SequenceLine::insertEntry( SequenceEntry *entry )
+		{
 			insert(value_type(entry->startPos(), entry));
-        }
+		}
 
-        void SequenceLine::moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine )
-        {
-            newLine->insertEntry( entry );
+		void SequenceLine::moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine )
+		{
+			newLine->insertEntry( entry );
 			iterator it = begin();
 			for( ; it!= end(); ++it )
 			{
 				if ( it->second==entry )
 				break;
 			}
-            erase( it ); // Removes entry from this SequenceLine, but doesn't delete it.
-        }
+			erase( it ); // Removes entry from this SequenceLine, but doesn't delete it.
+		}
 
 		void SequenceLine::removeSinglePatternEntries( SinglePattern* pattern )
 		{
@@ -349,7 +349,7 @@ namespace psy
 		{
 			SequenceLine* line = new SequenceLine(this);
 			push_back(line);
-      newLineCreated(line);
+		newLineCreated(line);
 			return line;
 		}
 
@@ -359,7 +359,7 @@ namespace psy
 			if ( it != end() ) {
 				line = new SequenceLine(this);
 				insert( it,  line);
-        newLineInserted(line,selectedLine);
+		newLineInserted(line,selectedLine);
 			}
 			return line;
 		}
@@ -369,7 +369,7 @@ namespace psy
 			iterator it = find(begin(), end(), line);
 			if ( it != end() ) {
 				erase(it);
-        lineRemoved(line);
+		lineRemoved(line);
 				delete line;
 			}
 		}
@@ -386,14 +386,14 @@ namespace psy
 		////////////////////////////////////////////////////////////////////////////
 		// GetLinesInRange
 		// Objective: return the PatternLines that are active in the range [start, start+length).
-	    // Parameters: 
-		//		start : start time in beats since playback begin.
-		// 	length: length of the range. start+length is the last position (non inclusive)
-		//		(return) events : A multimap of lines (multimap of beatposition and PatternLine )
+		// Parameters: 
+		// - start : start time in beats since playback begin.
+		// - length: length of the range. start+length is the last position (non inclusive)
+		// (return) events : A multimap of lines (multimap of beatposition and PatternLine )
 		void PatternSequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
 		{
 			int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
-		    // Iterate over each timeline of the sequence,
+			// Iterate over each timeline of the sequence,
 			for( iterator seqIt = begin(); seqIt != end(); ++seqIt )
 			{
 				SequenceLine *pSLine = *seqIt;
@@ -434,7 +434,7 @@ namespace psy
 						events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 						}
 				}
-			    seqlineidx++;
+				seqlineidx++;
 			}
 		}
 
@@ -442,7 +442,7 @@ namespace psy
 			entryStart = 0;
 			PatternLine* searchLine = 0;
 
-		    // Iterate over each timeline of the sequence,
+			// Iterate over each timeline of the sequence,
 			for( const_iterator seqIt = begin(); seqIt != end(); ++seqIt )
 			{
 				SequenceLine *pSLine = *seqIt;
@@ -462,7 +462,7 @@ namespace psy
 						return true;
 					}
 				
-				}			    
+				}
 			}
 			return false;
 		}
@@ -470,8 +470,8 @@ namespace psy
 		double PatternSequence::GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive)
 		{
 			GlobalIter firstIt = ( bInclusive ?
-				  	globalEvents_.lower_bound(start) :
-				  	globalEvents_.upper_bound(start) );
+						globalEvents_.lower_bound(start) :
+						globalEvents_.upper_bound(start) );
 			if(firstIt != globalEvents_.end() && firstIt->first < start+length)
 			{
 				double pos = firstIt->first;
@@ -541,7 +541,7 @@ namespace psy
 		void PatternSequence::removeAll( )
 		{
 			for(iterator it = begin(); it != end(); ++it) {
-        lineRemoved(*it);
+		lineRemoved(*it);
 				delete *it;
 			}
 			clear();
@@ -561,21 +561,21 @@ namespace psy
 		void PatternSequence::moveUpLine(SequenceLine* line) {
 		iterator it = find( begin(), end(), line);
 			if ( it != begin() ) {
-        iterator prev = it;
-        --prev;
-        std::swap(*prev,*it);
-        linesSwapped(*it,*prev);
+		iterator prev = it;
+		--prev;
+		std::swap(*prev,*it);
+		linesSwapped(*it,*prev);
 			}
 		}
 
 		void PatternSequence::moveDownLine(SequenceLine* line) {
 			iterator it = find( begin(), end(), line);
-			if ( it != end() ) {			
+			if ( it != end() ) {
 				iterator next=it;
-        ++next;
+		++next;
 				if ( next != end() ) {
-          std::swap(*it,*next);
-          linesSwapped(*next,*it);
+			std::swap(*it,*next);
+			linesSwapped(*next,*it);
 				}
 			}
 		}

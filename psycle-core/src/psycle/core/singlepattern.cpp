@@ -85,22 +85,22 @@ namespace psy
 			idCounter++;
 		}
 
-    // Explicit copy constructor needed because boost::signal is noncopyable
-    SinglePattern::SinglePattern(SinglePattern const& other)
-      : std::map<double,PatternLine>(other)
-      , beatZoom_(other.beatZoom_)
-      , name_(other.name_)
-      , category_(other.category_)
-      , timeSignatures_(other.timeSignatures_)
-      , zeroTime(other.zeroTime)
-      , id_(other.id_)
-      , tweakInfoMap(other.tweakInfoMap)
-    {
-    }
+	// Explicit copy constructor needed because boost::signal is noncopyable
+	SinglePattern::SinglePattern(SinglePattern const& other)
+		: std::map<double,PatternLine>(other)
+		, beatZoom_(other.beatZoom_)
+		, name_(other.name_)
+		, category_(other.category_)
+		, timeSignatures_(other.timeSignatures_)
+		, zeroTime(other.zeroTime)
+		, id_(other.id_)
+		, tweakInfoMap(other.tweakInfoMap)
+	{
+	}
 
 		SinglePattern::~SinglePattern()
 		{
-      wasDeleted(this);
+		wasDeleted(this);
 		}
 
 		void SinglePattern::setBeatZoom( int zoom )
@@ -256,8 +256,8 @@ namespace psy
 					double newpos = top + (rLineIt->first-top) * factor;
 			
 					for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
-					   ; entryIt != line.notes().end() && entryIt->first < right
-					   ; )
+						; entryIt != line.notes().end() && entryIt->first < right
+						; )
 					{
 						if( newpos < beats() )
 						{
@@ -278,8 +278,8 @@ namespace psy
 					double newpos = top + (lineIt->first-top) * factor;
 					
 					for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
-					   ; entryIt != line.notes().end() && entryIt->first < right
-					   ; )
+						; entryIt != line.notes().end() && entryIt->first < right
+						; )
 					{
 						if( newpos < beats() )
 						{
@@ -294,13 +294,13 @@ namespace psy
 		void SinglePattern::transposeBlock(int left, int right, double top, double bottom, int trp)
 		{
 			for( iterator lineIt = lower_bound(top)
-			   ; lineIt != end() && lineIt->first < bottom
-			   ; ++lineIt )
+				; lineIt != end() && lineIt->first < bottom
+				; ++lineIt )
 			{
 				PatternLine & line = lineIt->second;
 				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
-				   ; entryIt != line.notes().end() && entryIt->first < right
-				   ; ++entryIt)
+					; entryIt != line.notes().end() && entryIt->first < right
+					; ++entryIt)
 				{
 					PatternEvent & entry = entryIt->second;
 					int note = entry.note();
@@ -317,13 +317,13 @@ namespace psy
 		void SinglePattern::deleteBlock(int left, int right, double top, double bottom)
 		{
 			for( iterator lineIt = lower_bound(top)
-			   ; lineIt != end() && lineIt->first < bottom
-			   ; ++lineIt )
+				; lineIt != end() && lineIt->first < bottom
+				; ++lineIt )
 			{
 				PatternLine & line = lineIt->second;
 				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
-				   ; entryIt != line.notes().end() && entryIt->first < right
-				   ; )
+					; entryIt != line.notes().end() && entryIt->first < right
+					; )
 				{
 					line.notes().erase(entryIt++);
 				}
@@ -331,7 +331,7 @@ namespace psy
 			clearEmptyLines();
 		}
 
-		bool SinglePattern::lineIsEmpty( int linenr ) const {			
+		bool SinglePattern::lineIsEmpty( int linenr ) const {
 			return ( find_nearest(linenr) == end() );
 		}
 
@@ -498,7 +498,7 @@ namespace psy
 
 
 	
-    std::auto_ptr<SinglePattern> SinglePattern::block( int left, int right, int top, int bottom )
+	std::auto_ptr<SinglePattern> SinglePattern::block( int left, int right, int top, int bottom )
 		{
 			// copies a given block into a new Pattern
 			// the range is:
@@ -506,7 +506,7 @@ namespace psy
 
 			float topBeat = top / (float) beatZoom();
 
-      std::auto_ptr<SinglePattern> newPattern(new SinglePattern());
+		std::auto_ptr<SinglePattern> newPattern(new SinglePattern());
 
 			for( SinglePattern::iterator lineIt = find_lower_nearest( top )
 					; lineIt != end() ; ++lineIt )
@@ -517,17 +517,17 @@ namespace psy
 				if ( y >= bottom ) break;
 		
 				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound( left )
-	          ; entryIt != line.notes().end() && entryIt->first < right
-	          ; ++entryIt)
+				; entryIt != line.notes().end() && entryIt->first < right
+				; ++entryIt)
 				{
-          newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
-		  	}   
+			newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
+				}   
 				newPattern->insert( SinglePattern::value_type( lineIt->first-topBeat, newLine ) );
 			}
 			return newPattern;
 		}
 
-		void SinglePattern::copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats) {			
+		void SinglePattern::copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats) {
 			float pasteStartPos = top / (float) beatZoom();
 			deleteBlock(left,left+tracks, pasteStartPos, pasteStartPos+ maxBeats);
 			for( SinglePattern::const_iterator lineIt = pattern.begin()
@@ -535,8 +535,8 @@ namespace psy
 			{
 				const PatternLine & line = lineIt->second;
 				for( std::map<int, PatternEvent>::const_iterator entryIt = line.notes().begin()
-	          ; entryIt != line.notes().end() && entryIt->first <= tracks
-	          ; entryIt++ )
+				; entryIt != line.notes().end() && entryIt->first <= tracks
+				; entryIt++ )
 				{
 				(*this)[pasteStartPos+lineIt->first].notes()[left+entryIt->first]=entryIt->second;
 				}
@@ -550,8 +550,8 @@ namespace psy
 			{
 				const PatternLine & line = lineIt->second;
 				for( std::map<int, PatternEvent>::const_iterator entryIt = line.notes().begin()
-	          ; entryIt != line.notes().end() && entryIt->first <= tracks
-	          ; entryIt++ )
+				; entryIt != line.notes().end() && entryIt->first <= tracks
+				; entryIt++ )
 				{
 				(*this)[pasteStartPos+lineIt->first].notes()[left+entryIt->first]=entryIt->second;
 				}
@@ -574,10 +574,10 @@ namespace psy
 				if ( y >= bottom ) break;
 		
 				for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound( left )
-	          ; entryIt != line.notes().end() && entryIt->first < right
-	          ; )
+				; entryIt != line.notes().end() && entryIt->first < right
+				; )
 				{
-			                line.notes().erase(entryIt++);
+							line.notes().erase(entryIt++);
 								}   
 				if (line.notes().size() == 0) 
 					erase(lineIt++);
@@ -611,5 +611,5 @@ namespace psy
 		}
 
 
-	}	// end of core namespace
-}// end of psycle namespace
+	} // end of core namespace
+} // end of psycle namespace

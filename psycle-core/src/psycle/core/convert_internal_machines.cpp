@@ -36,7 +36,7 @@ namespace psy {
 					//BOOST_STATIC_ASSERT(sizeof(int) == 4);
 					{
 						char c[16];
-						riff.ReadChunk(c, 16);	c[15] = 0;
+						riff.ReadChunk(c, 16); c[15] = 0;
 						machine.SetEditName(c);
 					}
 					riff.Read(machine._inputMachines);

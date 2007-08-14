@@ -19,50 +19,50 @@ StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
 CMachineParameter const paraVolume = 
 {
 	"Volume",
-	"Volume",									// description
-	0,											// MinValue	
-	32767,											// MaxValue
-	MPF_STATE,										// Flags
+	"Volume",																																				// description
+	0,																																												// MinValue				
+	32767,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	32767
 };
 
 CMachineParameter const paraAttack = 
 {
 	"Attack",
-	"Attack",									// description
-	32,											// MinValue	
-	32767,											// MaxValue
-	MPF_STATE,										// Flags
+	"Attack",																																				// description
+	32,																																												// MinValue				
+	32767,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	32
 };
 
 CMachineParameter const paraDecay = 
 {
 	"Decay",
-	"Decay",									// description
-	32,											// MinValue	
-	32767,											// MaxValue
-	MPF_STATE,										// Flags
+	"Decay",																																				// description
+	32,																																												// MinValue				
+	32767,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	32
 };
 
 CMachineParameter const paraSustain = 
 {
 	"Sustain",
-	"Sustain",									// description
-	0,											// MinValue	
-	32767,											// MaxValue
-	MPF_STATE,										// Flags
+	"Sustain",																																				// description
+	0,																																												// MinValue				
+	32767,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	16768
 };
 
 CMachineParameter const paraRelease = 
 {
 	"Release",
-	"Release",									// description
-	32,											// MinValue	
-	32767,											// MaxValue
-	MPF_STATE,										// Flags
+	"Release",																																				// description
+	32,																																												// MinValue				
+	32767,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	328
 };
 
@@ -80,18 +80,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	GENERATOR,								// flags
-	NUMPARAMETERS,							// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	GENERATOR,																																// flags
+	NUMPARAMETERS,																												// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"stk Plucked (Debug build)",		// name
+	"stk Plucked (Debug build)",								// name
 #else
-	"stk Plucked",						// name
+	"stk Plucked",																								// name
 #endif
-	"stk Plucked",							// short name
-	"Sartorius, Bohan and STK 4.2.0 developers",							// author
-	"Help",									// A command, that could be use for open an editor, etc...
+	"stk Plucked",																												// short name
+	"Sartorius, Bohan and STK 4.2.0 developers",																												// author
+	"Help",																																				// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -113,8 +113,8 @@ public:
 private:
 
 	Plucked track[MAX_TRACKS];
-	ADSR	adsr[MAX_TRACKS];
-	float	vol_ctrl[MAX_TRACKS];
+	ADSR				adsr[MAX_TRACKS];
+	float				vol_ctrl[MAX_TRACKS];
 	StkFloat n2f[NOTE_MAX];
 	std::vector<int> w_tracks;
 	StkFloat samplerate;
@@ -225,7 +225,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 			int xnumsamples=numsamples;
 
 			Plucked *ptrack=&track[*w_tracks_iter];
-			ADSR	*padsr=&adsr[*w_tracks_iter];		
+			ADSR				*padsr=&adsr[*w_tracks_iter];								
 			do
 				{
 					sl=float(padsr->tick()*ptrack->tick())*vol;
@@ -254,8 +254,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	// Note Off			== 120
-	// Empty Note Row	== 255
+	// Note Off												== 120
+	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 
 	bool no_channel(true);

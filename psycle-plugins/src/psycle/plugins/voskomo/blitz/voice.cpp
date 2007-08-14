@@ -1,26 +1,26 @@
-/*		Blitz (C)2005 by jme
+/*								Blitz (C)2005 by jme
 		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
-        This plugin is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 2 of the License, or
-        (at your option) any later version.\n"\
+		This plugin is free software; you can redistribute it and/or modify
+		it under the terms of the GNU General Public License as published by
+		the Free Software Foundation; either version 2 of the License, or
+		(at your option) any later version.\n"\
 
-        This plugin is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
+		This plugin is distributed in the hope that it will be useful,
+		but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+		GNU General Public License for more details.
 
-        You should have received a copy of the GNU General Public License
-        along with this program; if not, write to the Free Software
-        Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+		You should have received a copy of the GNU General Public License
+		along with this program; if not, write to the Free Software
+		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <packageneric/pre-compiled.private.hpp>
 #include "voice.h"
 #include <cmath>
-#define FILTER_CALC_TIME	64
-#define TWOPI				6.28318530717958647692528676655901f
+#define FILTER_CALC_TIME				64
+#define TWOPI																6.28318530717958647692528676655901f
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -333,7 +333,7 @@ void CSynthTrack::updateTuning() {
 		}
 	}
 	switch (vpar->lfoDestination) {
-	case 0:	//all osc
+	case 0:				//all osc
 		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7 ) 
 		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
 		else
@@ -532,7 +532,7 @@ void CSynthTrack::GetSample(float* slr)
 	}
 
 
-	if(ampEnvStage)	{
+	if(ampEnvStage)				{
 		pwmcount--;
 		if (pwmcount < 0){
 			pwmcount = 500;
@@ -612,7 +612,7 @@ void CSynthTrack::GetSample(float* slr)
 									}
 								}
 							}
-						}			
+						}												
 					}
 				}
 			} else {
@@ -763,7 +763,7 @@ void CSynthTrack::GetSample(float* slr)
 				}
 			} else {
 				for (c=0; c<4; c++){
-					output3 += vpar->WaveTable[vpar->oscWaveform[2]][f2i(dco3Position+dco3Last+fmData2)];	
+					output3 += vpar->WaveTable[vpar->oscWaveform[2]][f2i(dco3Position+dco3Last+fmData2)];				
 					dco3Last=(float)(0.00000001f+output3)*(0.00000001f+vpar->oscFeedback[2])*(0.00000001f+fbCtl[2]);
 					dco3Position+=rdco3Pitch;
 					if(dco3Position>=2048.0f){
@@ -877,7 +877,7 @@ void CSynthTrack::GetSample(float* slr)
 		fmData3=(0.00000001f+fmCtl[oldBuf[2]][2])*(0.00000001f+output3)+(0.00000001f+fmCtl2[oldBuf[0]][0])*(0.00000001f+output1);
 		fmData4=(0.00000001f+fmCtl[oldBuf[3]][3])*(0.00000001f+output4)+(0.00000001f+fmCtl2[oldBuf[1]][1])*(0.00000001f+output2);
 
-		output=((0.00000001f+output1)*(0.00000001f+osc1Vol))+((0.00000001f+output2)*(0.00000001f+osc2Vol))+((0.00000001f+output3)*(0.00000001f+osc3Vol))+((0.00000001f+output4)*(0.00000001f+osc4Vol))+((0.00000001f+output1)*(0.00000001f+output2)*(0.00000001f+rm1Vol))+((0.00000001f+output3)*(0.00000001f+output4)*(0.00000001f+rm2Vol));	
+		output=((0.00000001f+output1)*(0.00000001f+osc1Vol))+((0.00000001f+output2)*(0.00000001f+osc2Vol))+((0.00000001f+output3)*(0.00000001f+osc3Vol))+((0.00000001f+output4)*(0.00000001f+osc4Vol))+((0.00000001f+output1)*(0.00000001f+output2)*(0.00000001f+rm1Vol))+((0.00000001f+output3)*(0.00000001f+output4)*(0.00000001f+rm2Vol));				
 
 		//master sat
 		if ((vpar->oscFuncType[0]==47)||(vpar->oscFuncType[1]==47)||(vpar->oscFuncType[2]==47)||(vpar->oscFuncType[3]==47)){
@@ -984,12 +984,12 @@ void CSynthTrack::calcWaves(int mask){
 					float1 = 0;
 					float2 = 0;
 					float4 = (2047-pos)/2.0f;   // 1st halve size in byte
-					float5 = 1024-float4;		// 2nd halve size in byte
+					float5 = 1024-float4;								// 2nd halve size in byte
 					if (float4!=0) float1 = 1024/float4; // 1st halve step
 					else float1 = 1024;
 					if (float5!=0) float2 = 1024/float5; // 2nd halve step
 					else float2 = 0;
-					float3 = 0;					//source phase
+					float3 = 0;																				//source phase
 					for(c=0;c<2100;c++){
 						if (c<1024) {
 							if (float3<1024) {
@@ -1211,7 +1211,7 @@ void CSynthTrack::calcWaves(int mask){
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
 					}
-					break;			
+					break;												
 				case 33: // PM Wave 1
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
@@ -1229,7 +1229,7 @@ void CSynthTrack::calcWaves(int mask){
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
 					}
-					break;			
+					break;												
 				case 36: // Dual Fix PM
 					float2 = 0.125f; //16384:2048=1/8=0.125f
 					for (c=0;c<2048;c++) WaveBuffer[8][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*float2))];
@@ -1264,31 +1264,31 @@ void CSynthTrack::calcWaves(int mask){
 					for (c=0;c<2048;c++) WaveBuffer[buf][c]=float1-((vpar->WaveTable[vpar->oscWaveform[i]][c]-16384)*float2);
 					break;
 				case 43: // Feedback Ctrl
-					for(c=0;c<2048;c++)	WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					fbCtl[i]=(pos-1024)*0.0009765625;
 					break;
 				case 44: // FM next +
-					for(c=0;c<2048;c++)	WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					fmCtl[buf>>2][i]=pos*0.00048828125;
 					break;
 				case 45: // FM next -
-					for(c=0;c<2048;c++)	WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					fmCtl[buf>>2][i]=0-(pos*0.00048828125);
 					break;
 				case 46: // Filter Mod
-					for(c=0;c<2048;c++)	WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					cmCtl[i]=pos*0.0000048828125;
 					break;
 				case 47: // Chan Sat
-					for(c=0;c<2048;c++)	WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					satClip = pos*pos*0.000000015*pos+1.0f;
 					break;
 				case 48: // FM last +
-					for(c=0;c<2048;c++)	WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					fmCtl2[buf>>2][i]=pos*0.00048828125;
 					break;
 				case 49: // FM last -
-					for(c=0;c<2048;c++)	WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					fmCtl2[buf>>2][i]=0-(pos*0.00048828125);
 					break;
 				case 50: // Phase Control
@@ -1609,7 +1609,7 @@ void CSynthTrack::PerformFx()
 					arpList[1]=arpInput[2];
 					arpList[2]=arpInput[1];
 					arpList[3]=arpInput[0];
-				}			
+				}												
 				break;
 			case 4: // 2oct Down
 				if (arpInput[3] == 0) {
@@ -1630,7 +1630,7 @@ void CSynthTrack::PerformFx()
 					arpList[5]=arpInput[2];
 					arpList[6]=arpInput[1];
 					arpList[7]=arpInput[0];
-				}			
+				}												
 				break;
 			case 5: // 3oct Down
 				if (arpInput[3] == 0) {
@@ -1658,7 +1658,7 @@ void CSynthTrack::PerformFx()
 					arpList[9]=arpInput[2];
 					arpList[10]=arpInput[1];
 					arpList[11]=arpInput[0];
-				}			
+				}												
 				break;
 			case 6: // 1oct Up/Down
 				if (arpInput[3] == 0) {
@@ -1675,7 +1675,7 @@ void CSynthTrack::PerformFx()
 					arpList[3]=arpInput[3];
 					arpList[4]=arpInput[2];
 					arpList[5]=arpInput[1];
-				}			
+				}												
 				break;
 			case 7: // 2oct Up/Down
 				if (arpInput[3] == 0) {
@@ -1706,7 +1706,7 @@ void CSynthTrack::PerformFx()
 					arpList[11]=arpInput[3];
 					arpList[12]=arpInput[2];
 					arpList[13]=arpInput[1];
-				}			
+				}												
 				break;
 			case 8: // 3oct Up/Down
 				if (arpInput[3] == 0) {
@@ -1751,7 +1751,7 @@ void CSynthTrack::PerformFx()
 					arpList[19]=arpInput[3];
 					arpList[20]=arpInput[2];
 					arpList[21]=arpInput[1];
-				}			
+				}												
 				break;
 			case 9: //1oct Down/Up
 				if (arpInput[3] == 0) {
@@ -1768,7 +1768,7 @@ void CSynthTrack::PerformFx()
 					arpList[3]=arpInput[0];
 					arpList[4]=arpInput[1];
 					arpList[5]=arpInput[2];
-				}			
+				}												
 				break;
 			case 10: //2oct Down/Up
 				if (arpInput[3] == 0) {
@@ -1799,7 +1799,7 @@ void CSynthTrack::PerformFx()
 					arpList[11]=arpInput[0]+12;
 					arpList[12]=arpInput[1]+12;
 					arpList[13]=arpInput[2]+12;
-				}			
+				}												
 				break;
 			case 11: //3oct Down/Up
 				if (arpInput[3] == 0) {
@@ -1844,7 +1844,7 @@ void CSynthTrack::PerformFx()
 					arpList[19]=arpInput[0]+24;
 					arpList[20]=arpInput[1]+25;
 					arpList[21]=arpInput[2]+24;
-				}			
+				}												
 				break;
 			}
 			updateTuning(); // not very good here but still ok

@@ -32,7 +32,7 @@ namespace psy
 		class PluginInfo
 		{
 			public:
-				PluginInfo();		
+				PluginInfo();
 
 				~PluginInfo();
 
@@ -58,7 +58,7 @@ namespace psy
 				const std::string & libName() const;
 
 				void setFileTime( time_t fileTime );
-				time_t fileTime() const;	
+				time_t fileTime() const;
 
 				void setError( const std::string & error );
 				const std::string error() const;
@@ -92,14 +92,14 @@ namespace psy
 
 				static PluginFinderKey internalSampler();
 
-				const std::string & name() const;				
+				const std::string & name() const;
 				const std::string & dllPath() const;
 				int index() const;
 
 				bool operator<(const PluginFinderKey & key) const;
 				bool operator ==( const PluginFinderKey & rhs ) const;
 			private:
-				std::string name_;				
+				std::string name_;
 				std::string dllPath_;
 				int index_;
 		};

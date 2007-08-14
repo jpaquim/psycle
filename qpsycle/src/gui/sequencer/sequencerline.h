@@ -36,51 +36,51 @@ class SequencerItem;
 
 class SequencerLine : public QObject, public QGraphicsItem, public boost::signalslib::trackable
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    SequencerLine( SequencerDraw *sDraw );
-    ~SequencerLine();
+	SequencerLine( SequencerDraw *sDraw );
+	~SequencerLine();
 
-    QRectF boundingRect() const;
-    void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0 );
+	QRectF boundingRect() const;
+	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0 );
 
-    // don't call setSequenceLine until you have added
-    // this SequencerLine to a scene
-    void setSequenceLine( psy::core::SequenceLine * line );
-    psy::core::SequenceLine *sequenceLine(); 
+	// don't call setSequenceLine until you have added
+	// this SequencerLine to a scene
+	void setSequenceLine( psy::core::SequenceLine * line );
+	psy::core::SequenceLine *sequenceLine(); 
 
-    void addItem( psy::core::SinglePattern* pattern );
-    void insertItem( SequencerItem *item );
-    void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
+	void addItem( psy::core::SinglePattern* pattern );
+	void insertItem( SequencerItem *item );
+	void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
 
-    SequencerDraw *sDraw_;
+	SequencerDraw *sDraw_;
 
-    enum { Type = UserType + 6 };
-    int type() const  // Enable the use of qgraphicsitem_cast with this item.
-    {
+	enum { Type = UserType + 6 };
+	int type() const  // Enable the use of qgraphicsitem_cast with this item.
+	{
 
-        return Type;
-    }
+		return Type;
+	}
 
 protected:
-    void mousePressEvent( QGraphicsSceneMouseEvent *event );
+	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 
 signals:
-    void clicked( SequencerLine* );
+	void clicked( SequencerLine* );
 
 private slots:
-    void onItemClicked(SequencerItem*);
+	void onItemClicked(SequencerItem*);
 
 private:
-    // does not take ownership of entry.
-    void addEntry( psy::core::SequenceEntry* entry );
+	// does not take ownership of entry.
+	void addEntry( psy::core::SequenceEntry* entry );
 
-    // does not delete entry.
-    void removeEntry(psy::core::SequenceEntry* entry);
+	// does not delete entry.
+	void removeEntry(psy::core::SequenceEntry* entry);
 
-    psy::core::SequenceLine *seqLine_;
-    std::list<SequencerItem*> items_;
-    typedef std::list<SequencerItem*>::iterator items_iterator;
+	psy::core::SequenceLine *seqLine_;
+	std::list<SequencerItem*> items_;
+	typedef std::list<SequencerItem*>::iterator items_iterator;
 };
 
 #endif

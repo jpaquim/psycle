@@ -45,13 +45,13 @@
 
 
 /**
- * The graphical representation of a CoreSong machine in the GUI.
- */
+	* The graphical representation of a CoreSong machine in the GUI.
+	*/
 MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: m_macView(macView),
-	  m_mac(mac),
-	  left_(left),
-	  top_(top_)
+		m_mac(mac),
+		left_(left),
+		top_(top_)
 {
 	setHandlesChildEvents( true );
 	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
@@ -105,14 +105,14 @@ void MachineGui::initSignals()
 	connect( cloneMachineAct_, SIGNAL( triggered() ), this, SLOT( onCloneMachineActionTriggered() ) );
 
 	connect( this, SIGNAL(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
-		 m_macView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+			m_macView, SLOT(startNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 	connect( this, SIGNAL(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)), 
-		 m_macView, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
+			m_macView, SLOT(closeNewConnection(MachineGui*, QGraphicsSceneMouseEvent*)) );
 }
 
 /**
- * Note some paint operations are handled in subclasses.
- */
+	* Note some paint operations are handled in subclasses.
+	*/
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
 	if ( this == m_macView->chosenMachine() ) {
@@ -130,8 +130,8 @@ void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opt
 }
 
 /**
- * Updates the name in the song and updates the GUI.
- */
+	* Updates the name in the song and updates the GUI.
+	*/
 void MachineGui::setName(const QString &name)
 {
 	std::ostringstream buffer;
@@ -144,9 +144,9 @@ void MachineGui::setName(const QString &name)
 }
 
 /**
- * This gets called from WireGuis when they are created -- they
- * add themselves to their parent's list.
- */
+	* This gets called from WireGuis when they are created -- they
+	* add themselves to their parent's list.
+	*/
 void MachineGui::addWireGui(WireGui *wireGui)
 {
 	wireGuiList_.push_back( wireGui );
@@ -160,14 +160,14 @@ QPointF MachineGui::centrePointInSceneCoords() {
 
 
 /**
- * Rename machine and send out a signal.
- */
+	* Rename machine and send out a signal.
+	*/
 void MachineGui::onRenameMachineActionTriggered()
 {
 	bool ok;
 	QString text = QInputDialog::getText( m_macView, "Rename machine",
-					      "Name: ", QLineEdit::Normal,
-					      QString::fromStdString( mac()->GetEditName() ), &ok);
+							"Name: ", QLineEdit::Normal,
+							QString::fromStdString( mac()->GetEditName() ), &ok);
 	if ( ok && !text.isEmpty() ) {
 		mac()->SetEditName( text.toStdString() );
 		setName( text );
@@ -181,8 +181,8 @@ void MachineGui::onDeleteMachineActionTriggered()
 }
 
 /**
- * Mute/unmute in the CoreSong and update the GUI.
- */
+	* Mute/unmute in the CoreSong and update the GUI.
+	*/
 void MachineGui::onToggleMuteActionTriggered() 
 {
 	mac()->_mute = !mac()->_mute;
@@ -199,8 +199,8 @@ void MachineGui::onToggleMuteActionTriggered()
 }
 
 /**
- * Solo/unsolo in the CoreSong and update the GUI.
- */
+	* Solo/unsolo in the CoreSong and update the GUI.
+	*/
 void MachineGui::onToggleSoloActionTriggered() 
 {
 	if (mac()->song()->machineSoloed == mac()->id() ) // Unsolo it.
@@ -238,9 +238,9 @@ void MachineGui::onCloneMachineActionTriggered()
 }
 
 /**
- * Called when the item changes in some way (we're interested in when it moves.)
- * See QGraphicsItem::itemChange in the Qt API.
- */
+	* Called when the item changes in some way (we're interested in when it moves.)
+	* See QGraphicsItem::itemChange in the Qt API.
+	*/
 QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value)
 {
 	switch (change) {
@@ -262,8 +262,8 @@ QVariant MachineGui::itemChange(GraphicsItemChange change, const QVariant &value
 
 
 /**
- * Gets subclassed by EffectGui, GeneratorGui etc.
- */
+	* Gets subclassed by EffectGui, GeneratorGui etc.
+	*/
 void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
 {
 	QGraphicsRectItem::mousePressEvent( event ); // Get the default behaviour.
@@ -295,7 +295,7 @@ void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 // Getters.
 std::vector<WireGui *> MachineGui::wireGuiList()
 {
-    return wireGuiList_;
+	return wireGuiList_;
 }
 
 psy::core::Machine* MachineGui::mac()

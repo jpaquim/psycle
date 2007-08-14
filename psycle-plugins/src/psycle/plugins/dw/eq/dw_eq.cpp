@@ -20,9 +20,9 @@ public:
 
 	enum parameters
 	{
-		prm_freq1=0,prm_freq2,	prm_freq3,	prm_freq4,
-		prm_gain1,	prm_gain2,	prm_gain3,	prm_gain4,
-		prm_slope1,	prm_slope2,	prm_slope3,	prm_slope4,
+		prm_freq1=0,prm_freq2,				prm_freq3,				prm_freq4,
+		prm_gain1,				prm_gain2,				prm_gain3,				prm_gain4,
+		prm_slope1,				prm_slope2,				prm_slope3,				prm_slope4,
 		num_params
 	};
 
@@ -36,18 +36,18 @@ public:
 	{
 		static const Information::Parameter parameters [] =
 		{
-			Information::Parameter::exponential("Freq 1", 20, 120,		20000),
-			Information::Parameter::exponential("Freq 2", 20, 800,		20000),
-			Information::Parameter::exponential("Freq 3", 20, 2500,		20000),
-			Information::Parameter::exponential("Freq 4", 20, 6000,		20000),
-			Information::Parameter::exponential("Gain 1", 0.125,	1,		8.0),
-			Information::Parameter::exponential("Gain 2", 0.125,	1,		8.0),
-			Information::Parameter::exponential("Gain 3", 0.125,	1,		8.0),
-			Information::Parameter::exponential("Gain 4", 0.125,	1,		8.0),
-			Information::Parameter::linear("Bandwidth 1", 0,		0,			M_PI/3.0f),
-			Information::Parameter::linear("Bandwidth 2", .01,		M_PI/6.0f,	M_PI/3.0f),
-			Information::Parameter::linear("Bandwidth 3", .01,		M_PI/6.0f,	M_PI/3.0f),
-			Information::Parameter::linear("Bandwidth 4", 0,		0,			M_PI/3.0f)
+			Information::Parameter::exponential("Freq 1", 20, 120,								20000),
+			Information::Parameter::exponential("Freq 2", 20, 800,								20000),
+			Information::Parameter::exponential("Freq 3", 20, 2500,								20000),
+			Information::Parameter::exponential("Freq 4", 20, 6000,								20000),
+			Information::Parameter::exponential("Gain 1", 0.125,				1,								8.0),
+			Information::Parameter::exponential("Gain 2", 0.125,				1,								8.0),
+			Information::Parameter::exponential("Gain 3", 0.125,				1,								8.0),
+			Information::Parameter::exponential("Gain 4", 0.125,				1,								8.0),
+			Information::Parameter::linear("Bandwidth 1", 0,								0,												M_PI/3.0f),
+			Information::Parameter::linear("Bandwidth 2", .01,								M_PI/6.0f,				M_PI/3.0f),
+			Information::Parameter::linear("Bandwidth 3", .01,								M_PI/6.0f,				M_PI/3.0f),
+			Information::Parameter::linear("Bandwidth 4", 0,								0,												M_PI/3.0f)
 		};
 
 		static const Information information(
@@ -67,38 +67,38 @@ public:
 		out<<std::setw(6)<<std::setprecision(3);
 		switch(parameter)
 		{
-		case prm_freq1:		out<<(*this)(prm_freq1)<<" Hz";
+		case prm_freq1:								out<<(*this)(prm_freq1)<<" Hz";
 							break;
-		case prm_freq2:		out<<(*this)(prm_freq2)<<" Hz";
+		case prm_freq2:								out<<(*this)(prm_freq2)<<" Hz";
 							break;
-		case prm_freq3:		out<<(*this)(prm_freq3)<<" Hz";
+		case prm_freq3:								out<<(*this)(prm_freq3)<<" Hz";
 							break;
-		case prm_freq4:		out<<(*this)(prm_freq4)<<" Hz";
+		case prm_freq4:								out<<(*this)(prm_freq4)<<" Hz";
 							break;
-		case prm_slope1:	if((*this)(prm_slope1)==0)
+		case prm_slope1:				if((*this)(prm_slope1)==0)
 								out<<"Low Shelf";
 							else
 								out<<(*this)(prm_slope1)<< " octaves";
 							break;
-		case prm_slope4:	if((*this)(prm_slope4)==0 )
+		case prm_slope4:				if((*this)(prm_slope4)==0 )
 								out<<"Hi Shelf";
 							else
 								out<<(*this)(prm_slope4)<< " octaves";
 							break;
-		case prm_slope2:	out<<(*this)(prm_slope2)<< " octaves";
+		case prm_slope2:				out<<(*this)(prm_slope2)<< " octaves";
 							break;
-		case prm_slope3:	out<<(*this)(prm_slope3)<< " octaves";
+		case prm_slope3:				out<<(*this)(prm_slope3)<< " octaves";
 							break;
 
 		//todo: gain display oddity: "-0.000"
 		//round to 0 when within (-0.001, +0.001) (the channel will be effectively bypassed anyways)
-		case prm_gain1:		out<< 20 * log10( (*this)(prm_gain1) ) << " dB";
+		case prm_gain1:								out<< 20 * log10( (*this)(prm_gain1) ) << " dB";
 							break;
-		case prm_gain2:		out<< 20 * log10( (*this)(prm_gain2) ) << " dB";
+		case prm_gain2:								out<< 20 * log10( (*this)(prm_gain2) ) << " dB";
 							break;
-		case prm_gain3:		out<< 20 * log10( (*this)(prm_gain3) ) << " dB";
+		case prm_gain3:								out<< 20 * log10( (*this)(prm_gain3) ) << " dB";
 							break;
-		case prm_gain4:		out<< 20 * log10( (*this)(prm_gain4) ) << " dB";
+		case prm_gain4:								out<< 20 * log10( (*this)(prm_gain4) ) << " dB";
 							break;
 		default:
 			Plugin::describe(out, parameter);
@@ -126,12 +126,12 @@ protected:
 	virtual void samples_per_second_changed() { band1.SetSampleRate(samples_per_second());
 												band2.SetSampleRate(samples_per_second());
 												band3.SetSampleRate(samples_per_second());
-												band4.SetSampleRate(samples_per_second());	}
+												band4.SetSampleRate(samples_per_second());				}
 	virtual void sequencer_ticks_per_second_changed() {}
 
 	dwfilter band1, band2, band3, band4; //this is silly, i should use an array
 	int samprate;
-	bool active[4];	//used to bypass eq channels with gain==0
+	bool active[4];				//used to bypass eq channels with gain==0
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(dw_eq)
@@ -142,13 +142,13 @@ void dw_eq::parameter(const int & param)
 {
 	switch(param)
 	{
-	case prm_freq1:	band1.SetFreq((*this)(param));
+	case prm_freq1:				band1.SetFreq((*this)(param));
 					break;
-	case prm_freq2:	band2.SetFreq((*this)(param));
+	case prm_freq2:				band2.SetFreq((*this)(param));
 					break;
-	case prm_freq3:	band3.SetFreq((*this)(param));
+	case prm_freq3:				band3.SetFreq((*this)(param));
 					break;
-	case prm_freq4:	band4.SetFreq((*this)(param));
+	case prm_freq4:				band4.SetFreq((*this)(param));
 					break;
 
 	case prm_slope2:band2.SetBW((*this)(param));
@@ -157,25 +157,25 @@ void dw_eq::parameter(const int & param)
 					break;
 
 	case prm_gain1: band1.SetGain((*this)(param));
-					if(abs((*this)(param) - 1.0) >=.001)	//parameter never makes it to exactly 1.0
+					if(abs((*this)(param) - 1.0) >=.001)				//parameter never makes it to exactly 1.0
 						active[0]=true;
 					else
 						active[0]=false;
 					break;
 	case prm_gain2: band2.SetGain((*this)(param));
-					if(abs((*this)(param) - 1.0) >=.001)	//parameter never makes it to exactly 1.0
+					if(abs((*this)(param) - 1.0) >=.001)				//parameter never makes it to exactly 1.0
 						active[1]=true;
 					else
 						active[1]=false;
 					break;
 	case prm_gain3: band3.SetGain((*this)(param));
-					if(abs((*this)(param) - 1.0) >=.001)	//parameter never makes it to exactly 1.0
+					if(abs((*this)(param) - 1.0) >=.001)				//parameter never makes it to exactly 1.0
 						active[2]=true;
 					else
 						active[2]=false;
 					break;
 	case prm_gain4: band4.SetGain((*this)(param));
-					if(abs((*this)(param) - 1.0) >=.001)	//parameter never makes it to exactly 1.0
+					if(abs((*this)(param) - 1.0) >=.001)				//parameter never makes it to exactly 1.0
 						active[3]=true;
 					else
 						active[3]=false;

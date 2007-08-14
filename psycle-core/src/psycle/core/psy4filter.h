@@ -30,15 +30,15 @@
 
 namespace psy {
 	namespace core {
-	    class SinglePattern;
-	    class Machine;
+		class SinglePattern;
+		class Machine;
 
 		class Psy4Filter : public Psy3Filter
 		{
 			///\name Singleton Pattern
 			///\{ 
 				protected:
-			  		Psy4Filter();
+						Psy4Filter();
 				private:
 					Psy4Filter( Psy4Filter const & );
 					Psy4Filter& operator=(Psy4Filter const&);

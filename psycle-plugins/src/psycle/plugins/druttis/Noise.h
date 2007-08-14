@@ -4,8 +4,8 @@
 class Noise
 {
 public:
-	float	last_output;
-	float	scale;
+	float				last_output;
+	float				scale;
 public:
 	Noise()
 	{

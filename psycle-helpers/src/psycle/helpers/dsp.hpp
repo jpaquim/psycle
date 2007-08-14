@@ -286,8 +286,8 @@ namespace psycle
 			// y2 = y[2]  [sample at x+2]
 			
 			// res= distance between two neighboughing sample points [y0 and y1] 
-			//		,so [0...1.0]. You have to multiply this distance * RESOLUTION used
-			//		on the spline conversion table. [2048 by default]
+			//								,so [0...1.0]. You have to multiply this distance * RESOLUTION used
+			//								on the spline conversion table. [2048 by default]
 			// If you are using 2048 is asumed you are using 12 bit decimal
 			// fixed point offsets for resampling.
 			
@@ -297,14 +297,14 @@ namespace psycle
 
 			//either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
 			//make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
-			#define SINC_RESOLUTION 512	//sinc table values per zero crossing -- keep it a power of 2!!
-			#define SINC_ZEROS 11	//sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
+			#define SINC_RESOLUTION 512				//sinc table values per zero crossing -- keep it a power of 2!!
+			#define SINC_ZEROS 11				//sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.
 			static float Bandlimit(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length)
 			{
-				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
+				res = res>>23;								//!!!assumes SINC_RESOLUTION == 512!!!
 				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
 				if(offset<SINC_ZEROS) leftExtent=offset;
 				if(length-offset<SINC_ZEROS) rightExtent=length-offset;
@@ -315,7 +315,7 @@ namespace psycle
 				newval += sincTable[res] * *(pData);
 				float sincIndex(sincInc+res);
 				float weight(sincIndex - floor(sincIndex));
-				for(	int i(1);
+				for(				int i(1);
 						i < leftExtent;
 						++i, sincIndex+=sincInc
 						)
@@ -323,7 +323,7 @@ namespace psycle
 
 				sincIndex = sincInc-res;
 				weight = sincIndex - floor(sincIndex);
-				for(	int i(1);
+				for(				int i(1);
 						i < rightExtent;
 						++i, sincIndex+=sincInc
 						)

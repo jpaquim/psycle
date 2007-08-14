@@ -3,8 +3,8 @@
 ///\file SynthTrack.h
 ///\brief interface for the CSynthTrack class.
 
-#define FILTER_CALC_TIME	64
-#define TWOPI				6.28318530717958647692528676655901f
+#define FILTER_CALC_TIME				64
+#define TWOPI																6.28318530717958647692528676655901f
 
 struct SYNPAR
 {
@@ -207,7 +207,7 @@ inline float CSynthTrack::GetSample()
 		else
 		{
 			output=syntp->pWave[f2i(OSC1Position)]*OSC1Vol+
-				   syntp->pWave2[f2i(OSC2Position)]*OSC2Vol;
+					syntp->pWave2[f2i(OSC2Position)]*OSC2Vol;
 		}
 
 		if(vibrato)
@@ -225,7 +225,7 @@ inline float CSynthTrack::GetSample()
 		{
 			OSC1Position-=2048.0f;
 		
-			if(syntp->osc2sync)	OSC2Position=OSC1Position;
+			if(syntp->osc2sync)				OSC2Position=OSC1Position;
 		}
 
 		if(OSC2Position>=2048.0f) OSC2Position-=2048.0f;
@@ -262,8 +262,8 @@ inline float CSynthTrack::GetSampleOsc1()
 			output=syntp->pWave[f2i(OSC1Position)]*OSC1Vol;
 		}
 
-		if(vibrato)	OSC1Position+=ROSC1Speed+OSCvib;
-		else		OSC1Position+=ROSC1Speed;
+		if(vibrato)				OSC1Position+=ROSC1Speed+OSCvib;
+		else								OSC1Position+=ROSC1Speed;
 		
 		if(OSC1Position>=2048.0f)  OSC1Position-=2048.0f;
 		
@@ -297,8 +297,8 @@ inline float CSynthTrack::GetSampleOsc2()
 			output=syntp->pWave2[f2i(OSC2Position)]*OSC2Vol;
 		}
 
-		if(vibrato)	OSC2Position+=ROSC2Speed+OSCvib;
-		else		OSC2Position+=ROSC2Speed;
+		if(vibrato)				OSC2Position+=ROSC2Speed+OSCvib;
+		else								OSC2Position+=ROSC2Speed;
 		
 		if(OSC2Position>=2048.0f) OSC2Position-=2048.0f;
 		

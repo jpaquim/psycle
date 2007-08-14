@@ -4,16 +4,16 @@
 //   Original
 /**********************************************************************
 
-  Audacity: A Digital Audio Editor
+	Audacity: A Digital Audio Editor
 
-  Wahwah.cpp
+	Wahwah.cpp
 
-  Effect programming:
-  Nasca Octavian Paul
+	Effect programming:
+	Nasca Octavian Paul
 
-  UI programming:
-  Dominic Mazzoni (with the help of wxDesigner)
-  Vaughan Johnson (Preview)
+	UI programming:
+	Dominic Mazzoni (with the help of wxDesigner)
+	Vaughan Johnson (Preview)
 
 **********************************************************************/
 
@@ -35,50 +35,50 @@
 CMachineParameter const paraLFOFreq = 
 { 
 	"LFO Freq",
-	"LFOFreq",						// description
-	1,												// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFOFreq",																								// description
+	1,																																																// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	15,
 };
 
 CMachineParameter const paraLFOStartPhase = 
 { 
 	"LFO start phase",
-	"LFOStartPhase",						// description
-	0,												// MinValue	
-	359,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFOStartPhase",																								// description
+	0,																																																// MinValue				
+	359,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
 CMachineParameter const paraDepth = 
 { 
 	"Depth",
-	"Depth",						// description
-	0,												// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Depth",																								// description
+	0,																																																// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	70,
 };
 
 CMachineParameter const paraResonance = 
 { 
 	"Resonance",
-	"Resonance",											// description
-	1,												// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Resonance",																																												// description
+	1,																																																// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	25,
 };
 
 CMachineParameter const paraWahFreqOff = 
 { 
 	"Wah freq offset",
-	"WahFreqOff",											// description
-	0,												// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"WahFreqOff",																																												// description
+	0,																																																// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	30,
 };
 
@@ -94,18 +94,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	EFFECT,										// flags
-	NUMPARAMETERS,								// numParameters
-	pParameters,								// Pointer to parameters
+	MI_VERSION,				
+	EFFECT,																																								// flags
+	NUMPARAMETERS,																																// numParameters
+	pParameters,																																// Pointer to parameters
 #ifdef _DEBUG
-	"Audacity WahWah (Debug build)",		// name
+	"Audacity WahWah (Debug build)",								// name
 #else
-	"Audacity WahWah",						// name
+	"Audacity WahWah",																								// name
 #endif
-	"WahWah",							// short name
-	"Nasca Octavian Paul/Sartorius",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"WahWah",																												// short name
+	"Nasca Octavian Paul/Sartorius",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -153,37 +153,37 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-   freq = 1.5f;
-   phase = 0;
-   depth = .7f;
-   freqofs = .3f;
-   res = 2.5f;
+	freq = 1.5f;
+	phase = 0;
+	depth = .7f;
+	freqofs = .3f;
+	res = 2.5f;
 
-   lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate();
-   skipcount = 0;
-   xn1_l = 0;
-   xn2_l = 0;
-   yn1_l = 0;
-   yn2_l = 0;
+	lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate();
+	skipcount = 0;
+	xn1_l = 0;
+	xn2_l = 0;
+	yn1_l = 0;
+	yn2_l = 0;
 
-   xn1_r = 0;
-   xn2_r = 0;
-   yn1_r = 0;
-   yn2_r = 0;
+	xn1_r = 0;
+	xn2_r = 0;
+	yn1_r = 0;
+	yn2_r = 0;
 
-   b0_l = 0;
-   b1_l = 0;
-   b2_l = 0;
-   a0_l = 0;
-   a1_l = 0;
-   a2_l = 0;
+	b0_l = 0;
+	b1_l = 0;
+	b2_l = 0;
+	a0_l = 0;
+	a1_l = 0;
+	a2_l = 0;
 
-   b0_r = 0;
-   b1_r = 0;
-   b2_r = 0;
-   a0_r = 0;
-   a1_r = 0;
-   a2_r = 0;
+	b0_r = 0;
+	b1_r = 0;
+	b2_r = 0;
+	a0_r = 0;
+	a1_r = 0;
+	a2_r = 0;
 }
 
 void mi::SequencerTick()
@@ -211,7 +211,7 @@ void mi::ParameterTweak(int par, int val)
 		case 3: res = 1.f / ( float(val) * .2f);  break;
 		case 4: freqofs = float(val) * .01f; break;
 		default:
-			 break;
+				break;
 	}
 }
 

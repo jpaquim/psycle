@@ -34,11 +34,11 @@ namespace psycle
 
 				/// maps a byte (0 to 255) to a float (0 to 1).
 				static inline float Map_255_1(int byte)
-				{	
+				{				
 					///\todo the conditional branches probably make it slower than direct calculation
 					if(0 <= byte && byte <= 256)
 						return CValueMapper::fMap_255_1[byte];
-					else	
+					else				
 						return byte * 0.00390625f;
 				}
 
@@ -48,7 +48,7 @@ namespace psycle
 					///\todo the conditional branches probably make it slower than direct calculation
 					if(0 <= byte && byte <= 256)
 						return CValueMapper::fMap_255_100[byte];
-					else	
+					else				
 						return byte * 0.390625f;
 				}
 			private:

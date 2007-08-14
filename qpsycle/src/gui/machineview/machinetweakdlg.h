@@ -57,54 +57,54 @@ const int LABEL_WIDTH = 150;
 
 class Knob : public QDial {
 public:
-    Knob( int param );
-    QSize sizeHint() const;
-    int param() { return param_; }
+	Knob( int param );
+	QSize sizeHint() const;
+	int param() { return param_; }
 
 protected: 
-    void paintEvent( QPaintEvent *ev );
+	void paintEvent( QPaintEvent *ev );
 
 private:
-    int param_;
+	int param_;
 };
 
 class KnobGroup : public QWidget {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    KnobGroup( int param );
+	KnobGroup( int param );
 
-    void setNameText( const QString & text );
-    void setValueText( const QString & text );
-    void setKnob( Knob *knob );
-    Knob *knob();
-    QSize sizeHint() const;
+	void setNameText( const QString & text );
+	void setValueText( const QString & text );
+	void setKnob( Knob *knob );
+	Knob *knob();
+	QSize sizeHint() const;
 
 public slots:
-    void onKnobChanged();
-    void onKnobPressed();
-    void onKnobReleased();
+	void onKnobChanged();
+	void onKnobPressed();
+	void onKnobReleased();
 
 signals:
-    void changed( KnobGroup *kGroup );
+	void changed( KnobGroup *kGroup );
 
 private:
-    Knob *knob_;
-    QLabel *nameLbl;
-    QLabel *valueLbl;
+	Knob *knob_;
+	QLabel *nameLbl;
+	QLabel *valueLbl;
 };
 
 class FHeader : public QLabel {
 public:
-    FHeader( QWidget *parent = 0 );
+	FHeader( QWidget *parent = 0 );
 protected:
-    void paintEvent( QPaintEvent *ev );
+	void paintEvent( QPaintEvent *ev );
 };
 
 
 
 /**
- * PresetsDlg
- */
+	* PresetsDlg
+	*/
 class PresetsDialog : public QDialog {
 Q_OBJECT
 public:
@@ -146,8 +146,8 @@ private:
 
 
 /**
- * MachineTweakDlg
- */
+	* MachineTweakDlg
+	*/
 class MachineTweakDlg : public QDialog {
 Q_OBJECT
 	public:

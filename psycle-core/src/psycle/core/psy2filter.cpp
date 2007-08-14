@@ -34,9 +34,9 @@ namespace psy
 	namespace core
 	{
 		struct ToLower
-	    {
+		{
 			char operator() (char c) const  { return std::tolower(c); }
-	    };
+		};
 
 		std::string const Psy2Filter::FILE_FOURCC = "PSY2";
 		const int Psy2Filter::PSY2_MAX_TRACKS = 32;
@@ -385,9 +385,9 @@ namespace psy
 			for (i=0; i<128; i++)
 			{
 				Sampler* pSampler=NULL;
-//				XMSampler* pXMSampler=NULL;
+				//XMSampler* pXMSampler=NULL;
 				Plugin* pPlugin=NULL;
-//				vst::plugin * pVstPlugin(0);
+				//vst::plugin * pVstPlugin(0);
 				std::int32_t x,y,type;
 				if (_machineActive[i])
 				{
@@ -427,13 +427,15 @@ namespace psy
 					case MACH_SAMPLER:
 						pMac[i] = pSampler = new Sampler(callbacks,i,&song);
 						goto init_and_load;
-//					case MACH_XMSAMPLER:
-//						pMac[i] = pXMSampler = new XMSampler(i);
-//						goto init_and_load;
+					#if 0
+					case MACH_XMSAMPLER:
+						pMac[i] = pXMSampler = new XMSampler(i);
+						goto init_and_load;
+					#endif
 					case MACH_VST:
 					case MACH_VSTFX:
-//						if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
-//						else if (type == MACH_VSTFX)	pMac[i] = pVstPlugin = new vst::fx(i);
+						//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+						//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 						pMac[i] = new Dummy(callbacks,i,&song);
 						goto init_and_load_VST;
 					case MACH_SCOPE:
@@ -444,9 +446,9 @@ namespace psy
 					{
 						std::ostringstream s;
 						s << "unkown machine type: " << type;
-//						MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+						//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 					}
-          pMac[i] = new Dummy(callbacks,i,&song);
+			pMac[i] = new Dummy(callbacks,i,&song);
 		
 					init_and_load:
 						pMac[i]->Init();
@@ -459,7 +461,7 @@ namespace psy
 						pMac[i]->SetEditName(s.str());
 			
 						file->Skip(sizeof(bool)+5);
-/*
+						#if 0
 						if ((pMac[i]->LoadOldFileFormat(file)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
 						{
 							std::string path = vstL[pVstPlugin->_instance].dllName;
@@ -521,7 +523,7 @@ namespace psy
 							pMac[i]->_subclass = MACH_DUMMY;
 							((Dummy*)pMac[i])->wasVST = true;
 						}
-*/
+						#endif
 					}
 					pMac[i]->SetPosX(x);
 					pMac[i]->SetPosY(y);
@@ -546,7 +548,7 @@ namespace psy
 				{
 					if (_machineActive[i] && pMac[i]->mode() != MACHMODE_GENERATOR )
 					{
-						busEffect[j]=i;	
+						busEffect[j]=i;
 						j++;
 					}
 				}
@@ -568,14 +570,15 @@ namespace psy
 						// Older code moved the dummy to the effects bus, because it couldn't work as
 						// a generator. Now there's no problem for that, and this way we can use the
 						// Create/Replace function of the GearRack dialog.
-/*						pMac[busMachine[i]]->mode(MACHMODE_FX);
+						#if 0
+						pMac[busMachine[i]]->mode(MACHMODE_FX);
 						while (busEffect[j] != 255 && j<MAX_BUSES) 
 						{
 							j++;
 						}
 						busEffect[j]=busMachine[i];
 						busMachine[i]=255;
-*/
+						#endif
 					}
 				}
 			}
@@ -591,7 +594,8 @@ namespace psy
 				}
 			}
 
-/*			bool chunkpresent=false;
+			#if 0
+			bool chunkpresent=false;
 			file->Read(chunkpresent); // Patch 2: VST's Chunk.
 
 			if ( fullopen ) for ( i=0;i<128;i++ ) 
@@ -642,7 +646,7 @@ namespace psy
 					}
 				}
 			}
-*/
+			#endif
 			
 			return true;
 		}
@@ -694,11 +698,11 @@ namespace psy
 			
 			for (i=0; i<128; i++) // Next, we go to fix this for each
 			{
-				if (_machineActive[i])		// valid machine (important, since we have to navigate!)
+				if (_machineActive[i]) // valid machine (important, since we have to navigate!)
 				{
 					for (int c=0; c<MAX_CONNECTIONS; c++) // all of its input connections.
 					{
-						if (pMac[i]->_inputCon[c])	// If there's a valid machine in this inputconnection,
+						if (pMac[i]->_inputCon[c]) // If there's a valid machine in this inputconnection,
 						{
 							Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
 							int d = pOrigMachine->FindOutputWire(i);
@@ -1173,16 +1177,16 @@ namespace psy
 				wasAS2=true;
 			}
 
-//			Gloxxxxxxxxxxxxxxxxbal::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
+			//Gloxxxxxxxxxxxxxxxxbal::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
 			try
 			{
 				result = LoadDll(plugin_path, strname);
 			}
 			catch(...)
 			{
-//				char sError[_MAX_PATH];
-//				sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-//				MessageBox(NULL,sError, "Error", MB_OK);
+				//char sError[_MAX_PATH];
+				//sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
+				//MessageBox(NULL,sError, "Error", MB_OK);
 				result = false;
 			}
 
@@ -1226,12 +1230,12 @@ namespace psy
 				}
 				catch(const std::exception &)
 				{
-//					loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
+					//loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
 				}
 				try
 				{
 					int size = proxy().GetDataSize();
-					//pFile->Read(size);	// This would have been the right thing to do
+					//pFile->Read(size); // This would have been the right thing to do
 					if(size)
 					{
 						char * pData = new char[size];
@@ -1248,7 +1252,7 @@ namespace psy
 				}
 				catch(std::exception const &)
 				{
-//					loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
+					// loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
 				}
 				if(wasAS1) // Patch to replace Synth1 by Arguru Synth 2f
 				{
@@ -1331,7 +1335,7 @@ namespace psy
 
 			return result;
 		}
-/*
+		#if 0
 		namespace vst
 		{
 			bool plugin::LoadChunkPsy2FileFormat(RiffFile * pFile)
@@ -1440,6 +1444,6 @@ namespace psy
 				return true;
 			}
 		}
-		*/
+		#endif
 	}
 }

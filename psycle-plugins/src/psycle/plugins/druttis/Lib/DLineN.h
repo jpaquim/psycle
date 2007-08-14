@@ -1,23 +1,23 @@
 //============================================================================
 //
-//	DLineN (Non-Interpolating Delay Line)
+//				DLineN (Non-Interpolating Delay Line)
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
 //============================================================================
-//	Class
+//				Class
 //============================================================================
 class DLineN
 {
 private:
-    float	*inputs;
-	int		inPoint;
-	int		outPoint;
-	int		length;
-	float	delay;
-	float	lastOutput;
+	float				*inputs;
+	int								inPoint;
+	int								outPoint;
+	int								length;
+	float				delay;
+	float				lastOutput;
 public:
 	DLineN();
 	~DLineN();
@@ -27,14 +27,14 @@ public:
 	void SetDelay(float lag);
 	float GetDelay();
 	//------------------------------------------------------------------------
-	//	GetLastOutput
+	//				GetLastOutput
 	//------------------------------------------------------------------------
 	inline float GetLastOutput()
 	{
 		return lastOutput;
 	}
 	//------------------------------------------------------------------------
-	//	Tick
+	//				Tick
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{

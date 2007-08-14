@@ -45,9 +45,9 @@ AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	restartBtn_ = new QPushButton( "Restart Driver", this );
 
 	connect( driverCbx_, SIGNAL( currentIndexChanged( const QString & ) ),
-		 this, SLOT( onDriverSelected( const QString & ) ) );
+			this, SLOT( onDriverSelected( const QString & ) ) );
 	connect( restartBtn_, SIGNAL( clicked() ),
-		 this, SLOT( onRestartDriver() ) );
+			this, SLOT( onRestartDriver() ) );
 
 	mainLay->addWidget( driverCbx_ );
 	mainLay->addWidget( restartBtn_ );
@@ -82,7 +82,7 @@ void AudioConfigDlg::onDriverSelected( const QString & text )
 }
 
 void AudioConfigDlg::onRestartDriver()
-{		
+{																																
 	if ( selectedDriver_ ) {
 		// disable old driver
 		psy::core::Player::Instance()->driver().Enable( false );

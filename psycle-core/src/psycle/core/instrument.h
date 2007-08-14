@@ -9,7 +9,7 @@ namespace psy
 {
 	namespace core
 	{
-    class RiffFile;
+	class RiffFile;
 
 		/// an instrument is a waveform with some extra features added around it.
 		class Instrument
@@ -44,34 +44,34 @@ namespace psy
 			///\name Amplitude Envelope overview:
 			///\{
 			/// Attack Time [in Samples at 44.1Khz]
-			int ENV_AT;	
+			int ENV_AT;
 			/// Decay Time [in Samples at 44.1Khz]
-			int ENV_DT;	
+			int ENV_DT;
 			/// Sustain Level [in %]
-			int ENV_SL;	
+			int ENV_SL;
 			/// Release Time [in Samples at 44.1Khz]
-			int ENV_RT;	
+			int ENV_RT;
 			///\}
 			
 			///\name Filter 
 			///\{
 			/// Attack Time [in Samples at 44.1Khz]
-			int ENV_F_AT;	
+			int ENV_F_AT;
 			/// Decay Time [in Samples at 44.1Khz]
-			int ENV_F_DT;	
+			int ENV_F_DT;
 			/// Sustain Level [0..128]
-			int ENV_F_SL;	
+			int ENV_F_SL;
 			/// Release Time [in Samples at 44.1Khz]
-			int ENV_F_RT;	
+			int ENV_F_RT;
 
 			/// Cutoff Frequency [0-127]
-			int ENV_F_CO;	
+			int ENV_F_CO;
 			/// Resonance [0-127]
-			int ENV_F_RQ;	
+			int ENV_F_RQ;
 			/// EnvAmount [-128,128]
-			int ENV_F_EA;	
+			int ENV_F_EA;
 			/// Filter Type [0-4]
-			int ENV_F_TP;	
+			int ENV_F_TP;
 			///\}
 
 			int _pan;

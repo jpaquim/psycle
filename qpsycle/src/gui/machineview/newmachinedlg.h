@@ -34,32 +34,32 @@ class QDialog;
 
 class NewMachineDlg : public QDialog
 {
-     Q_OBJECT
+		Q_OBJECT
 
- public:
-     NewMachineDlg(QWidget *parent = 0);
+	public:
+		NewMachineDlg(QWidget *parent = 0);
 
-    const psy::core::PluginFinderKey & pluginKey() const;
+	const psy::core::PluginFinderKey & pluginKey() const;
 
 public slots:
-    void itemSelectionChanged( );
+	void itemSelectionChanged( );
 
- private:
-     QDialogButtonBox *buttonBox;
-    const psy::core::PluginFinder *finder_;
+	private:
+		QDialogButtonBox *buttonBox;
+	const psy::core::PluginFinder *finder_;
 
 
-    QListWidgetItem* selectedItem;
-    psy::core::PluginFinderKey selectedKey_;
+	QListWidgetItem* selectedItem;
+	psy::core::PluginFinderKey selectedKey_;
 	std::map< QListWidgetItem* , psy::core::PluginFinderKey > pluginIdentify_;
 
-    void setPlugin( QListWidgetItem* item );
+	void setPlugin( QListWidgetItem* item );
 
-    QListWidget* genList;
-    QListWidget* efxList;
-    QListWidget* intList;
-    QListWidget* ladList;
-    bool inItemSelectionChanged;
+	QListWidget* genList;
+	QListWidget* efxList;
+	QListWidget* intList;
+	QListWidget* ladList;
+	bool inItemSelectionChanged;
 };
 
- #endif
+	#endif

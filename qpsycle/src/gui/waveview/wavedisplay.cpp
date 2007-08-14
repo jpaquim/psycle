@@ -46,7 +46,7 @@ void WaveDisplay::LoadMono()
 }
 
 void WaveDisplay::Reset()
-{	
+{																
 	//Clear Oprions Not Avable Now
 	nodata = new QGraphicsTextItem("No Wave Data", 0);
 	nodata->setDefaultTextColor(Qt::white);

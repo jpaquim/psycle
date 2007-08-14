@@ -25,12 +25,12 @@ float coefsTab[4*128*128*8];
 float LFOOscTab[0x10000];
 signed short WaveTable[5][2100];
 
-#define MAX_PSYCLE_TRACKS	MAX_TRACKS   // This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
-						 // Leave it like it is. Your Plugin NEEDS TO support it.
-						 // (Or dinamically allocate them. Check JMDrum's Source for an example)
+#define MAX_PSYCLE_TRACKS				MAX_TRACKS   // This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
+							// Leave it like it is. Your Plugin NEEDS TO support it.
+							// (Or dinamically allocate them. Check JMDrum's Source for an example)
 
 #define NUMPARAMETERS 34 // Change this number to the number of parameters of your machine
-						 // Remember that Psycle ONLY have GLOBAL parameters.
+							// Remember that Psycle ONLY have GLOBAL parameters.
 
 CMachineParameter const paraWave1 =
 {
@@ -206,61 +206,61 @@ CMachineParameter const paraLFO2Amount =
 
 CMachineParameter const *pParameters[] =
 {
-        &paraWave1,
-        &paraPulseWidth1,
-        &paraWave2,
-        &paraPulseWidth2,
-        &paraDetuneSemi,
-        &paraDetuneFine,
-        &paraSync,
-        &paraMixType,
-        &paraMix,
-        &paraSubOscWave,
-        &paraSubOscVol,
-        &paraPEGAttackTime,
-        &paraPEGDecayTime,
-        &paraPEnvMod,
-        &paraGlide,
+		&paraWave1,
+		&paraPulseWidth1,
+		&paraWave2,
+		&paraPulseWidth2,
+		&paraDetuneSemi,
+		&paraDetuneFine,
+		&paraSync,
+		&paraMixType,
+		&paraMix,
+		&paraSubOscWave,
+		&paraSubOscVol,
+		&paraPEGAttackTime,
+		&paraPEGDecayTime,
+		&paraPEnvMod,
+		&paraGlide,
 
-        &paraVolume,
-        &paraAEGAttackTime,
-        &paraAEGSustainTime,
-        &paraAEGReleaseTime,
+		&paraVolume,
+		&paraAEGAttackTime,
+		&paraAEGSustainTime,
+		&paraAEGReleaseTime,
 
-        &paraFilterType,
-        &paraCutoff,
-        &paraResonance,
-        &paraFEGAttackTime,
-        &paraFEGSustainTime,
-        &paraFEGReleaseTime,
-        &paraFEnvMod,
+		&paraFilterType,
+		&paraCutoff,
+		&paraResonance,
+		&paraFEGAttackTime,
+		&paraFEGSustainTime,
+		&paraFEGReleaseTime,
+		&paraFEnvMod,
 
-        // LFO 1
-        &paraLFO1Dest,
-        &paraLFO1Wave,
-        &paraLFO1Freq,
-        &paraLFO1Amount,
-        // LFO 2
-        &paraLFO2Dest,
-        &paraLFO2Wave,
-        &paraLFO2Freq,
-        &paraLFO2Amount,
+		// LFO 1
+		&paraLFO1Dest,
+		&paraLFO1Wave,
+		&paraLFO1Freq,
+		&paraLFO1Amount,
+		// LFO 2
+		&paraLFO2Dest,
+		&paraLFO2Wave,
+		&paraLFO2Freq,
+		&paraLFO2Amount,
 };
 
 CMachineInfo const MacInfo =
 {
-        MI_VERSION,
-        GENERATOR,                                                                              // flags
-        NUMPARAMETERS,                                                                              // min tracks
-        pParameters,
+		MI_VERSION,
+		GENERATOR,                                                                              // flags
+		NUMPARAMETERS,                                                                              // min tracks
+		pParameters,
 #ifdef _DEBUG
-        "M3 by Makk (Debug build)",                     // name
+		"M3 by Makk (Debug build)",                     // name
 #else
-        "M3 by Makk",
+		"M3 by Makk",
 #endif
-        "M3",                                                                   // short name
-        "Makk",                                                                 // author
-        "About",
+		"M3",                                                                   // short name
+		"Makk",                                                                 // author
+		"About",
 		5
 };
 
@@ -280,13 +280,13 @@ mi::~mi()
 
 void mi::Init()
 {
-        TabSizeDivSampleFreq = (float)(2048.0/pCB->GetSamplingRate());
+		TabSizeDivSampleFreq = (float)(2048.0/pCB->GetSamplingRate());
 
-        for( int i=0; i<MAX_SIMUL_TRACKS; i++)
-        {
-                Tracks[i].pmi = this;
-                Tracks[i].Init();
-        }
+		for( int i=0; i<MAX_SIMUL_TRACKS; i++)
+		{
+				Tracks[i].pmi = this;
+				Tracks[i].Init();
+		}
 
 		// Generate Oscillator tables
 		for(int c=0;c<2100;c++)
@@ -296,35 +296,35 @@ void mi::Init()
 						WaveTable[0][c]=int(sin(sval)*16384.0f);
 
 			if (c<2048) WaveTable[1][c]=(c*16)-16384;
-			else		WaveTable[1][c]=((c-2048)*16)-16384;
+			else								WaveTable[1][c]=((c-2048)*16)-16384;
 
-			if (c<1024)	WaveTable[2][c]=-16384;
-			else		WaveTable[2][c]=16384;
+			if (c<1024)				WaveTable[2][c]=-16384;
+			else								WaveTable[2][c]=16384;
 
-			if (c<1024)	WaveTable[3][c]=(c*32)-16384;
-			else		WaveTable[3][c]=16384-((c-1024)*32);
+			if (c<1024)				WaveTable[3][c]=(c*32)-16384;
+			else								WaveTable[3][c]=16384-((c-1024)*32);
 						WaveTable[4][c]=rand();
 
 		}
 
-        // generate frequencyTab
-        double freq = 16.35; //c0 bis b9
-        for( int j=0; j<10; j++)
-        {
-                for( int i=0; i<12; i++)
-                {
-                        freqTab[j*12+i] = (float)freq;
-                        freq *= 1.05946309435929526; // *2^(1/12)
-                }
-        }
-        // generate coefsTab
-        for( int t=0; t<4; t++)
-                for( int f=0; f<128; f++)
-                        for( int r=0; r<128; r++)
-                                ComputeCoefs( coefsTab+(t*128*128+f*128+r)*8, f, r, t);
-        // generate LFOOscTab
-        for( int p=0; p<0x10000; p++)
-                LFOOscTab[p] = pow( 1.00004230724139582, p-0x8000);
+		// generate frequencyTab
+		double freq = 16.35; //c0 bis b9
+		for( int j=0; j<10; j++)
+		{
+				for( int i=0; i<12; i++)
+				{
+						freqTab[j*12+i] = (float)freq;
+						freq *= 1.05946309435929526; // *2^(1/12)
+				}
+		}
+		// generate coefsTab
+		for( int t=0; t<4; t++)
+				for( int f=0; f<128; f++)
+						for( int r=0; r<128; r++)
+								ComputeCoefs( coefsTab+(t*128*128+f*128+r)*8, f, r, t);
+		// generate LFOOscTab
+		for( int p=0; p<0x10000; p++)
+				LFOOscTab[p] = pow( 1.00004230724139582, p-0x8000);
 }
 
 void mi::Stop()
@@ -335,7 +335,7 @@ void mi::Stop()
 // Called when a parameter is changed by the host app / user gui
 void mi::ParameterTweak(int par, int val)
 {
-	Vals[par]=val;	// Don't remove this line. Psycle reads this variable when Showing the
+	Vals[par]=val;				// Don't remove this line. Psycle reads this variable when Showing the
 					// Parameters' Dialog box.
 	tvals tmp;
 
@@ -343,44 +343,44 @@ void mi::ParameterTweak(int par, int val)
 
 	switch(par)
 	{
-	case 0:	tmp.Wave1 = val;		break;
-	case 1: tmp.PulseWidth1 = val;	break;
-	case 2:	tmp.Wave2 = val;		break;
-	case 3: tmp.PulseWidth2 = val;	break;
-	case 4: tmp.DetuneSemi = val;	break;
-	case 5: tmp.DetuneFine = val;	break;
-	case 6: tmp.Sync = val;			break;
-	case 7: tmp.MixType = val;		break;
-	case 8: tmp.Mix = val;			break;
-	case 9: tmp.SubOscWave = val;	break;
-	case 10: tmp.SubOscVol = val;	break;
-	case 11: tmp.PEGAttackTime = val;	break;
-	case 12: tmp.PEGDecayTime = val;	break;
-	case 13: tmp.PEnvMod = val;		break;
-	case 14: tmp.Glide = val;		break;
-	case 15: tmp.Volume = val;		break;
-    case 16: tmp.AEGAttackTime = val;	break;
-	case 17: tmp.AEGSustainTime = val;	break;
-	case 18: tmp.AEGReleaseTime = val;	break;
-	case 19: tmp.FilterType = val;	break;
-	case 20: tmp.Cutoff = val;		break;
-	case 21: tmp.Resonance = val;	break;
-	case 22: tmp.FEGAttackTime = val;	break;
-	case 23: tmp.FEGSustainTime = val;	break;
-	case 24: tmp.FEGReleaseTime = val;	break;
-	case 25: tmp.FEnvMod = val;		break;
-	case 26: tmp.LFO1Dest = val;	break;
-	case 27: tmp.LFO1Wave = val;	break;
-	case 28: tmp.LFO1Freq = val;	break;
-	case 29: tmp.LFO1Amount = val;	break;
-	case 30: tmp.LFO2Dest = val;	break;
-	case 31: tmp.LFO2Wave = val;	break;
-	case 32: tmp.LFO2Freq = val;	break;
-	case 33: tmp.LFO2Amount = val;	break;
+	case 0:				tmp.Wave1 = val;								break;
+	case 1: tmp.PulseWidth1 = val;				break;
+	case 2:				tmp.Wave2 = val;								break;
+	case 3: tmp.PulseWidth2 = val;				break;
+	case 4: tmp.DetuneSemi = val;				break;
+	case 5: tmp.DetuneFine = val;				break;
+	case 6: tmp.Sync = val;												break;
+	case 7: tmp.MixType = val;								break;
+	case 8: tmp.Mix = val;												break;
+	case 9: tmp.SubOscWave = val;				break;
+	case 10: tmp.SubOscVol = val;				break;
+	case 11: tmp.PEGAttackTime = val;				break;
+	case 12: tmp.PEGDecayTime = val;				break;
+	case 13: tmp.PEnvMod = val;								break;
+	case 14: tmp.Glide = val;								break;
+	case 15: tmp.Volume = val;								break;
+	case 16: tmp.AEGAttackTime = val;				break;
+	case 17: tmp.AEGSustainTime = val;				break;
+	case 18: tmp.AEGReleaseTime = val;				break;
+	case 19: tmp.FilterType = val;				break;
+	case 20: tmp.Cutoff = val;								break;
+	case 21: tmp.Resonance = val;				break;
+	case 22: tmp.FEGAttackTime = val;				break;
+	case 23: tmp.FEGSustainTime = val;				break;
+	case 24: tmp.FEGReleaseTime = val;				break;
+	case 25: tmp.FEnvMod = val;								break;
+	case 26: tmp.LFO1Dest = val;				break;
+	case 27: tmp.LFO1Wave = val;				break;
+	case 28: tmp.LFO1Freq = val;				break;
+	case 29: tmp.LFO1Amount = val;				break;
+	case 30: tmp.LFO2Dest = val;				break;
+	case 31: tmp.LFO2Wave = val;				break;
+	case 32: tmp.LFO2Freq = val;				break;
+	case 33: tmp.LFO2Amount = val;				break;
 	}
 
-	for (int i=0; i<MAX_SIMUL_TRACKS;i++)	// It is MUCH better to change the parameter to all
-	{										// tracks than _reset_ the selected trach each note.
+	for (int i=0; i<MAX_SIMUL_TRACKS;i++)				// It is MUCH better to change the parameter to all
+	{																																								// tracks than _reset_ the selected trach each note.
 		Tracks[i].Tick(tmp);
 	}
 
@@ -389,7 +389,7 @@ void mi::ParameterTweak(int par, int val)
 // Called each tick (i.e.when playing). Note: it goes after ParameterTweak and before SeqTick
 void mi::SequencerTick()
 {
-	//	If you need this, add a command handler. You cannot use this one like you did in buzz
+	//				If you need this, add a command handler. You cannot use this one like you did in buzz
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -399,8 +399,8 @@ void mi::SequencerTick()
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	// Note Off			== 120
-	// Empty Note Row	== 255
+	// Note Off												== 120
+	// Empty Note Row				== 255
 	// Less than note off == NoteON
 
 	int useVoice=-1;
@@ -410,7 +410,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 	if(note<120) // New Note entering.
 	{
-		for (int voice=0; voice<MAX_SIMUL_TRACKS; voice++)	// Find a voice to apply the new note
+		for (int voice=0; voice<MAX_SIMUL_TRACKS; voice++)				// Find a voice to apply the new note
 		{
 			switch(Tracks[voice].AEGState)
 			{
@@ -428,17 +428,17 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			}
 			if ( Tracks[voice]._channel == channel ) // Does exist a Previous note?
 			{
-				if ( !Tracks[voice].Glide )	// If no Glide , Note Off
-				{	
+				if ( !Tracks[voice].Glide )				// If no Glide , Note Off
+				{				
 					tmp.Note=120;
 					Tracks[voice].Tick(tmp);
 					Tracks[voice]._channel = -1;
 					if ( useVoice == -1 ) { useVoice = voice; }
 				}
-				else useVoice = voice;	// Else, use it.
+				else useVoice = voice;				// Else, use it.
 			}
 		}
-		if ( useVoice == -1 )	// No free voices. Assign one!
+		if ( useVoice == -1 )				// No free voices. Assign one!
 		{
 			useVoice=0;
 		}
@@ -473,7 +473,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 			Tracks[i].Work( psamplesleft, numsamples);
 			gotSomething=true;
 		}
-    }
+	}
 	if (gotSomething) memcpy(psamplesright,psamplesleft,numsamples*sizeof(float));
 }
 void mi::Command()
@@ -486,34 +486,34 @@ void mi::Command()
 // Function that describes the value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0 based!
 {
-    switch(param){
-        case 1: // PW1
-        case 3: // PW2
-                sprintf(txt, "%u : %u", (int)(value*100.0/127),
+	switch(param){
+		case 1: // PW1
+		case 3: // PW2
+				sprintf(txt, "%u : %u", (int)(value*100.0/127),
 									100-(int)(value*100.0/127));
 				return true;
-                break;
-        case 4: // semi detune
-                if( value == 0x40)	 strcpy(txt,"±0 halfnotes");
-                else if( value > 0x40) sprintf( txt, "+%i halfnotes\0", value-0x40);
-                else			     sprintf( txt, "%i halfnotes\0", value-0x40);
+				break;
+		case 4: // semi detune
+				if( value == 0x40)				 strcpy(txt,"±0 halfnotes");
+				else if( value > 0x40) sprintf( txt, "+%i halfnotes\0", value-0x40);
+				else												     sprintf( txt, "%i halfnotes\0", value-0x40);
 				return true;
-                break;
-        case 5: // fine detune
-                if( value == 0x40)	 strcpy(txt,"±0 cents");
-                else if( value > 0x40) sprintf( txt, "+%i cents\0", (int)((value-0x40)*100.0/63));
-                else				 sprintf( txt, "%i cents\0", (int)((value-0x40)*100.0/63));
+				break;
+		case 5: // fine detune
+				if( value == 0x40)				 strcpy(txt,"±0 cents");
+				else if( value > 0x40) sprintf( txt, "+%i cents\0", (int)((value-0x40)*100.0/63));
+				else																 sprintf( txt, "%i cents\0", (int)((value-0x40)*100.0/63));
 				return true;
-                break;
+				break;
 
-        case 6: // Sync
-                if( value == 1) strcpy(txt,"on");
-                else strcpy(txt,"off");
-                return true;
-                break;
+		case 6: // Sync
+				if( value == 1) strcpy(txt,"on");
+				else strcpy(txt,"off");
+				return true;
+				break;
 
-        case 7: // MixType
-                switch( value)
+		case 7: // MixType
+				switch( value)
 				{
 					case 0: strcpy(txt,"add");break;
 					case 1: strcpy(txt,"difference");break;
@@ -525,48 +525,48 @@ bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0
 					case 7: strcpy(txt,"xor");break;
 					case 8: strcpy(txt,"random");break;
 					default: strcpy(txt,"Invalid!");
-                }
+				}
 				return true;
-                break;
-        case 8: // Mix
-                switch( value) {
-	                case 0: strcpy(txt,"Osc1");break;
-		            case 127:strcpy(txt,"Osc2");break;
-			        default: sprintf(txt, "%u%% : %u%%", 100-(int)(value*100.0/127),
-						                                 (int)(value*100.0/127));
-                }
+				break;
+		case 8: // Mix
+				switch( value) {
+					case 0: strcpy(txt,"Osc1");break;
+					case 127:strcpy(txt,"Osc2");break;
+					default: sprintf(txt, "%u%% : %u%%", 100-(int)(value*100.0/127),
+															(int)(value*100.0/127));
+				}
 				return true;
-                break;
+				break;
 
-        case 11: // Pitch Env
-        case 12: // Pitch Env
-        case 16: // Amp Env
-        case 17: // Amp Env
-        case 18: // Amp Env
-        case 22: // Filter Env
-        case 23: // Filter Env
-        case 24: // Filter Env
-                sprintf( txt, "%.4f sec\0", EnvTime( value)/1000);
+		case 11: // Pitch Env
+		case 12: // Pitch Env
+		case 16: // Amp Env
+		case 17: // Amp Env
+		case 18: // Amp Env
+		case 22: // Filter Env
+		case 23: // Filter Env
+		case 24: // Filter Env
+				sprintf( txt, "%.4f sec\0", EnvTime( value)/1000);
 				return true;
-                break;
+				break;
 
-        case 13: // PitchEnvMod
-        case 25: // Filt ENvMod
-                sprintf( txt, "%i\0", value-0x40);
+		case 13: // PitchEnvMod
+		case 25: // Filt ENvMod
+				sprintf( txt, "%i\0", value-0x40);
 				return true;
-                break;
-        case 19:
-                switch( value) {
+				break;
+		case 19:
+				switch( value) {
 					case 0: strcpy(txt,"lowpass");break;
 					case 1: strcpy(txt,"highpass");break;
 					case 2: strcpy(txt,"bandpass");break;
 					case 3: strcpy(txt,"bandreject");break;
 					default: strcpy(txt,"Invalid!");
-                }
+				}
 				return true;
-                break;
-        case 26: // LFO1Dest
-                switch( value) {
+				break;
+		case 26: // LFO1Dest
+				switch( value) {
 				case 0: strcpy(txt,"none");break;
 					case 1: strcpy(txt,"osc1");break;
 					case 2: strcpy(txt,"p.width1");break;
@@ -584,11 +584,11 @@ bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0
 					case 14: strcpy(txt,"pw1+vol+cut");break;// 234
 					case 15: strcpy(txt,"all");break;// 1234
 					default: strcpy(txt,"Invalid!");
-                }
+				}
 				return true;
-                break;
-        case 30: // LFO2Dest
-                switch( value) {
+				break;
+		case 30: // LFO2Dest
+				switch( value) {
 					case 0: strcpy(txt,"none");break;
 					case 1: strcpy(txt,"osc2");break;
 					case 2: strcpy(txt,"p.width2");break;
@@ -608,16 +608,16 @@ bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0
 					case 14: strcpy(txt,"pw2+mix+res");break; // 234
 					case 15: strcpy(txt,"all");break; // 1234
 					default: strcpy(txt,"Invalid!");
-                }
+				}
 				return true;
-                break;
-        case 9: // SubOscWave
+				break;
+		case 9: // SubOscWave
 				if( value == 4) { strcpy(txt,"random"); return true; break; }
-        case 0: // OSC1Wave
-        case 2: // OSC2Wave
-        case 27: // LFO1Wave
-        case 31: // LFO2Wave
-                switch( value) {
+		case 0: // OSC1Wave
+		case 2: // OSC2Wave
+		case 27: // LFO1Wave
+		case 31: // LFO2Wave
+				switch( value) {
 					case 0: strcpy(txt,"sine");break;
 					case 1: strcpy(txt,"saw");break;
 					case 2: strcpy(txt,"square");break;
@@ -625,61 +625,61 @@ bool mi::DescribeValue(char* txt,int const param, int const value) // Param is 0
 					case 4: strcpy(txt,"noise");break;
 					case 5: strcpy(txt,"random");break;
 					case 6: strcpy(txt,"Invalid!");break;
-                }
+				}
 				return true;
-                break;
-        case 28: // LFO1Freq
-        case 32: // LFO2Freq
-                if( value <= 116)
-                        sprintf( txt, "%.4f HZ\0", LFOFreq( value));
-                else
-                        sprintf( txt, "%u ticks\0", 1<<(value-117));
+				break;
+		case 28: // LFO1Freq
+		case 32: // LFO2Freq
+				if( value <= 116)
+						sprintf( txt, "%.4f HZ\0", LFOFreq( value));
+				else
+						sprintf( txt, "%u ticks\0", 1<<(value-117));
 				return true;
-                break;
-    }
+				break;
+	}
 	return false;
 }
 
 void mi::SetNoValue(tvals &tv)
 {
-        tv.Note=0xff;
-        tv.Wave1=0xff;
-        tv.PulseWidth1=0xff;
-        tv.Wave2=0xff;
-        tv.PulseWidth2=0xff;
-        tv.DetuneSemi=0xff;
-        tv.DetuneFine=0xff;
-        tv.Sync=0xff;
-        tv.MixType=0xff;
-        tv.Mix=0xff;
-        tv.SubOscWave=0xff;
-        tv.SubOscVol=0xff;
-        tv.PEGAttackTime=0xff;
-        tv.PEGDecayTime=0xff;
-        tv.PEnvMod=0xff;
-        tv.Glide=0xff;
+		tv.Note=0xff;
+		tv.Wave1=0xff;
+		tv.PulseWidth1=0xff;
+		tv.Wave2=0xff;
+		tv.PulseWidth2=0xff;
+		tv.DetuneSemi=0xff;
+		tv.DetuneFine=0xff;
+		tv.Sync=0xff;
+		tv.MixType=0xff;
+		tv.Mix=0xff;
+		tv.SubOscWave=0xff;
+		tv.SubOscVol=0xff;
+		tv.PEGAttackTime=0xff;
+		tv.PEGDecayTime=0xff;
+		tv.PEnvMod=0xff;
+		tv.Glide=0xff;
 
-        tv.Volume=0xff;
-        tv.AEGAttackTime=0xff;
-        tv.AEGSustainTime=0xff;
-        tv.AEGReleaseTime=0xff;
+		tv.Volume=0xff;
+		tv.AEGAttackTime=0xff;
+		tv.AEGSustainTime=0xff;
+		tv.AEGReleaseTime=0xff;
 
-        tv.FilterType=0xff;
-        tv.Cutoff=0xff;
-        tv.Resonance=0xff;
-        tv.FEGAttackTime=0xff;
-        tv.FEGSustainTime=0xff;
-        tv.FEGReleaseTime=0xff;
-        tv.FEnvMod=0xff;
+		tv.FilterType=0xff;
+		tv.Cutoff=0xff;
+		tv.Resonance=0xff;
+		tv.FEGAttackTime=0xff;
+		tv.FEGSustainTime=0xff;
+		tv.FEGReleaseTime=0xff;
+		tv.FEnvMod=0xff;
 
-        tv.LFO1Dest=0xff;
-        tv.LFO1Wave=0xff;
-        tv.LFO1Freq=0xff;
-        tv.LFO1Amount=0xff;
-        tv.LFO2Dest=0xff;
-        tv.LFO2Wave=0xff;
-        tv.LFO2Freq=0xff;
-        tv.LFO2Amount=0xff;
+		tv.LFO1Dest=0xff;
+		tv.LFO1Wave=0xff;
+		tv.LFO1Freq=0xff;
+		tv.LFO1Amount=0xff;
+		tv.LFO2Dest=0xff;
+		tv.LFO2Wave=0xff;
+		tv.LFO2Freq=0xff;
+		tv.LFO2Amount=0xff;
 
 }
 
@@ -688,57 +688,57 @@ void mi::SetNoValue(tvals &tv)
 void mi::ComputeCoefs( float *coefs, int freq, int r, int t)
 {
 
-    float omega = 2*psycle::plugin_interface::pi*Cutoff(freq)/pCB->GetSamplingRate();
-    float sn = sin( omega);
-    float cs = cos( omega);
-    float alpha;
-        if( t<2)
-                alpha = sn / Resonance( r *(freq+70)/(127.0+70));
-        else
-                alpha = sn * sinh( Bandwidth( r) * omega/sn);
+	float omega = 2*psycle::plugin_interface::pi*Cutoff(freq)/pCB->GetSamplingRate();
+	float sn = sin( omega);
+	float cs = cos( omega);
+	float alpha;
+		if( t<2)
+				alpha = sn / Resonance( r *(freq+70)/(127.0+70));
+		else
+				alpha = sn * sinh( Bandwidth( r) * omega/sn);
 
-        float a0, a1, a2, b0, b1, b2;
+		float a0, a1, a2, b0, b1, b2;
 
-        switch( t) {
-        case 0: // LP
-                b0 =  (1 - cs)/2;
-                b1 =   1 - cs;
-                b2 =  (1 - cs)/2;
-                a0 =   1 + alpha;
-                a1 =  -2*cs;
-                a2 =   1 - alpha;
-                break;
-        case 1: // HP
-                b0 =  (1 + cs)/2;
-                b1 = -(1 + cs);
-                b2 =  (1 + cs)/2;
-                a0 =   1 + alpha;
-                a1 =  -2*cs;
-                a2 =   1 - alpha;
-                break;
-        case 2: // BP
-                b0 =   alpha;
-                b1 =   0;
-                b2 =  -alpha;
-                a0 =   1 + alpha;
-                a1 =  -2*cs;
-                a2 =   1 - alpha;
-                break;
-        case 3: // BR
-                b0 =   1;
-                b1 =  -2*cs;
-                b2 =   1;
-                a0 =   1 + alpha;
-                a1 =  -2*cs;
-                a2 =   1 - alpha;
-                break;
+		switch( t) {
+		case 0: // LP
+				b0 =  (1 - cs)/2;
+				b1 =   1 - cs;
+				b2 =  (1 - cs)/2;
+				a0 =   1 + alpha;
+				a1 =  -2*cs;
+				a2 =   1 - alpha;
+				break;
+		case 1: // HP
+				b0 =  (1 + cs)/2;
+				b1 = -(1 + cs);
+				b2 =  (1 + cs)/2;
+				a0 =   1 + alpha;
+				a1 =  -2*cs;
+				a2 =   1 - alpha;
+				break;
+		case 2: // BP
+				b0 =   alpha;
+				b1 =   0;
+				b2 =  -alpha;
+				a0 =   1 + alpha;
+				a1 =  -2*cs;
+				a2 =   1 - alpha;
+				break;
+		case 3: // BR
+				b0 =   1;
+				b1 =  -2*cs;
+				b2 =   1;
+				a0 =   1 + alpha;
+				a1 =  -2*cs;
+				a2 =   1 - alpha;
+				break;
 		default:
 			throw 0;
-        }
+		}
 
-        coefs[0] = b0/a0;
-        coefs[1] = b1/a0;
-        coefs[2] = b2/a0;
-        coefs[3] = -a1/a0;
-        coefs[4] = -a2/a0;
+		coefs[0] = b0/a0;
+		coefs[1] = b1/a0;
+		coefs[2] = b2/a0;
+		coefs[3] = -a1/a0;
+		coefs[4] = -a2/a0;
 }

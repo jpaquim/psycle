@@ -54,12 +54,12 @@ public:
 	virtual bool SetQ(double _q);
 	virtual bool SetSampleRate(int samprate);
 
-	virtual double GetFreq()	{ return freq;		}
-	virtual double GetGain()	{ return gain;		}
-	virtual double GetBW()		{ return bandwidth;	}
-	virtual double GetSlope()	{ return slope;		}
-	virtual double GetQ()		{ return q;			}
-	virtual int GetMode()	{ return (int)mode;		}
+	virtual double GetFreq()				{ return freq;								}
+	virtual double GetGain()				{ return gain;								}
+	virtual double GetBW()								{ return bandwidth;				}
+	virtual double GetSlope()				{ return slope;								}
+	virtual double GetQ()								{ return q;												}
+	virtual int GetMode()				{ return (int)mode;								}
 
 
 protected:

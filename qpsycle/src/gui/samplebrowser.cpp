@@ -41,9 +41,9 @@
 
 
 SampleBrowser::SampleBrowser( InstrumentsModel *instrumentsModel,
-			      QWidget *parent )
+					QWidget *parent )
 	: QWidget( parent ),
-	  instrumentsModel_( instrumentsModel )
+		instrumentsModel_( instrumentsModel )
 {
 	QHBoxLayout *layout = new QHBoxLayout();
 	setLayout( layout );
@@ -77,10 +77,10 @@ void SampleBrowser::createActionsWidget()
 	button_addToLoadedSamples = new QPushButton( "<<" );
 	button_clearInstrument = new QPushButton( "Clear instrument" );
 
-      	connect( button_addToLoadedSamples, SIGNAL( clicked() ),
-		 this, SLOT( onAddToLoadedSamples() ) );
-      	connect( button_clearInstrument, SIGNAL( clicked() ),
-		 this, SLOT( onClearInstrument() ) );
+			connect( button_addToLoadedSamples, SIGNAL( clicked() ),
+			this, SLOT( onAddToLoadedSamples() ) );
+			connect( button_clearInstrument, SIGNAL( clicked() ),
+			this, SLOT( onClearInstrument() ) );
 
 	actionsLayout->addWidget( button_addToLoadedSamples );
 	actionsLayout->addWidget( button_clearInstrument );
@@ -131,7 +131,7 @@ void SampleBrowser::onAddToLoadedSamples()
 
 void SampleBrowser::onClearInstrument() 
 {
-	int curInstrIndex = instrumentsList_->currentIndex().row();	
+	int curInstrIndex = instrumentsList_->currentIndex().row();																																																																
 	instrumentsModel_->clearInstrument( curInstrIndex );
 	emit sampleAdded();
 }

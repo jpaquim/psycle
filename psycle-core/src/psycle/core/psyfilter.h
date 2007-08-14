@@ -31,8 +31,8 @@ namespace psy
 {
 	namespace core
 	{
-	    class CoreSong;
-	    class MachineCallbacks;
+		class CoreSong;
+		class MachineCallbacks;
 
 		class PsyFilterBase
 		{

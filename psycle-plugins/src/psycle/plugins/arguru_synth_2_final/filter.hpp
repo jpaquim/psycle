@@ -54,8 +54,8 @@ public:
 		m_a1=2*(A0-A2)*q;
 		m_a2=(A0-A1+A2)*q;
 	}
-  // Zoelzer's Parmentric Equalizer Filters - rodem z Csound'a
-  void SetLowShelf(float fc, float q, float v, float esr)
+	// Zoelzer's Parmentric Equalizer Filters - rodem z Csound'a
+	void SetLowShelf(float fc, float q, float v, float esr)
 	{
 		float sq = (float)sqrt(2.0*(double)v);
 		float omega = TWOPI_F*fc/esr;

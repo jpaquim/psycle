@@ -47,9 +47,9 @@ PatternBox::PatternBox( psy::core::Song *song, QWidget *parent )
 	patternTree_->setSelectionMode( QAbstractItemView::SingleSelection );
 	patternTree_->setHeaderLabel( "Patterns" );
 	connect( patternTree_, SIGNAL( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ), 
-		 this, SLOT( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ) );
+			this, SLOT( currentItemChanged( QTreeWidgetItem*, QTreeWidgetItem* ) ) );
 	connect( patternTree_, SIGNAL( itemChanged( QTreeWidgetItem*, int ) ), 
-		 this, SLOT( onItemEdited( QTreeWidgetItem* ) ) );
+			this, SLOT( onItemEdited( QTreeWidgetItem* ) ) );
 
 	layout->addWidget( toolBar_, 0, 0);
 	layout->addWidget( patternTree_, 1, 0, 2, 0 );
@@ -212,7 +212,7 @@ void PatternBox::deletePattern()
 
 			// FIXME: need some stuff here when seq gui is in place.
 			/*        seqGui->removePattern(pattern);
-				  seqGui->repaint();*/
+					seqGui->repaint();*/
 		}
 	}
 
@@ -220,14 +220,14 @@ void PatternBox::deletePattern()
 
 void PatternBox::addPatternToSequencer() 
 { 
-    QTreeWidgetItem* item = patternTree()->currentItem();
-    if ( item ) {
-        std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
-        if ( itr!=patternMap.end() ) {
-            psy::core::SinglePattern *pattern = itr->second;
-            emit addPatternToSequencerRequest( pattern );
-        }
-    }
+	QTreeWidgetItem* item = patternTree()->currentItem();
+	if ( item ) {
+		std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
+		if ( itr!=patternMap.end() ) {
+			psy::core::SinglePattern *pattern = itr->second;
+			emit addPatternToSequencerRequest( pattern );
+		}
+	}
 }
 
 
@@ -274,7 +274,7 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
 	{
 		std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)currItem );
 		if( catItr !=categoryMap.end() ) {
-//			psy::core::PatternCategory *category = catItr->second;
+//																																																																																																																																																																																																psy::core::PatternCategory *category = catItr->second;
 			// FIXME: this needs to do something?
 		}
 	}
@@ -322,7 +322,7 @@ long PatternBox::QColorToLongColor( const QColor & qCol )
 	g = qCol.green();
 	b = qCol.blue();
 	unsigned long longCol = (b << 16) | (g << 8) | (r); // FIXME: BGR??
-    
+	
 
 	return longCol;
 }
@@ -374,11 +374,11 @@ PatternTree::PatternTree( PatternBox *patBox )
 	editCatColorAct_ = new QAction( "Edit color", this );
 
 	connect( editPatNameAct_, SIGNAL( triggered() ),
-		 this, SLOT( onEditPatternNameActionTriggered() ) );
+			this, SLOT( onEditPatternNameActionTriggered() ) );
 	connect( editCatNameAct_, SIGNAL( triggered() ),
-		 this, SLOT( onEditCategoryNameActionTriggered() ) );
+			this, SLOT( onEditCategoryNameActionTriggered() ) );
 	connect( editCatColorAct_, SIGNAL( triggered() ), 
-		 patBox_, SLOT( onEditCategoryColorActionTriggered() ) );
+			patBox_, SLOT( onEditCategoryColorActionTriggered() ) );
 }
 
 void PatternTree::contextMenuEvent( QContextMenuEvent *ev )
@@ -432,18 +432,18 @@ void PatternBox::onEditCategoryColorActionTriggered()
 bool PatternBox::event( QEvent *event )
 {
 	switch (event->type()) {
-        case QEvent::KeyPress: {
+		case QEvent::KeyPress: {
 		QKeyEvent *k = (QKeyEvent *)event;
 		if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2
-		    || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
+			|| k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
 		{
 			return true;
 		} else {
 			QWidget::keyPressEvent(k);
 			return true;
 		}
-        }
-        default:
+		}
+		default:
 		return QWidget::event( event );
 	}
 }

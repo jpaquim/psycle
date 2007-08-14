@@ -14,11 +14,11 @@ class AlsaSeqIn : public EventDriver
 {
 	public:
 		AlsaSeqIn();
-		 ~AlsaSeqIn();
+			~AlsaSeqIn();
 	
 		// AlsaSeqIn interface
 		virtual bool Open();
-	    virtual bool Close();
+		virtual bool Close();
 	
 		virtual void MidiCallback(int numSamples);
 		// TODO: add member function declarations...

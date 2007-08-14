@@ -38,7 +38,7 @@ WaveAmp::WaveAmp()
 	layout->addWidget(ok, 1, 1, 1, 1, Qt::AlignRight);
 	layout->addWidget(cancel, 1, 2, 1, 1, Qt::AlignRight);
 	
-//	connect( gainSli, SIGNAL(sliderMoved(int value)), this, SLOT(SliderChanges(int value)));
+//																connect( gainSli, SIGNAL(sliderMoved(int value)), this, SLOT(SliderChanges(int value)));
 }
 
 /*void WaveAmp::SliderChanges(int value)

@@ -32,17 +32,17 @@ namespace psy
 	namespace core
 	{
 		class RiffFile;
-	    class PatternCategory;
-    	class SequenceLine;
-    	class PatternEvent;
-    	class MachineCallbacks;
+		class PatternCategory;
+		class SequenceLine;
+		class PatternEvent;
+		class MachineCallbacks;
 
 		class Psy3Filter : public PsyFilterBase
 		{
 			///\name Singleton Pattern
 			///\{
 				protected:
-	  				Psy3Filter();          
+						Psy3Filter();          
 				private:
 					Psy3Filter( Psy3Filter const & );
 					Psy3Filter& operator=(Psy3Filter const&);

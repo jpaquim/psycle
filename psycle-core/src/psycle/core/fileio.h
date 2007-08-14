@@ -88,8 +88,8 @@ namespace psy
 				bool               ReadString(std::string &);
 				bool               ReadString(char *, std::size_t const & max_length);
 				///\todo : Implement a WriteString() to complement ReadString, and a ReadSizedString() which would do the same as ReadString
-				//		which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
-				//		setting the last char to null.
+				//         which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
+				//         setting the last char to null.
 
 				/// just a usless reinterpret_cast
 				///\todo disabled because the compiler accepts arguments of different size!
@@ -97,8 +97,8 @@ namespace psy
 
 				/// pad the string with spaces
 				///\todo is it really used with null terminated strings?
-//				PSYCLE__DEPRECATED("use the char const [4] overload instead")
-				static std::uint32_t          FourCC(char const * null_terminated_string);
+				//PSYCLE__DEPRECATED("use the char const [4] overload instead")
+				static std::uint32_t FourCC(char const * null_terminated_string);
 
 			private:
 				bool write_mode;

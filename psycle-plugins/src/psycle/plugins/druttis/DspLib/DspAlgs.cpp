@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	DspAlgs.cpp
+//				DspAlgs.cpp
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 #include <packageneric/pre-compiled.private.hpp>
@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-//	generate_wave
+//				generate_wave
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -47,7 +47,7 @@ void generate_wave(float *psamples, int nsamples, float *pcoeffs, int ncoeffs)
 		ofs = (min - max) / 2.0f;
 
 		for (i = 0; i < nsamples; i++) {
-//			psamples[i] += ofs;
+//												psamples[i] += ofs;
 			psamples[i] *= amp;
 		}
 	}

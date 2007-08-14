@@ -21,80 +21,80 @@
 CMachineParameter const paraDry = 
 { 
 	"Dry",
-	"Dry",						// description
-	-32768,												// MinValue	
-	32768,											// MaxValue
-	MPF_STATE,										// Flags
+	"Dry",																								// description
+	-32768,																																																// MinValue				
+	32768,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	32768,
 };
 
 CMachineParameter const paraWet = 
 { 
 	"Wet",
-	"Wet",						// description
-	-32768,												// MinValue	
-	32768,											// MaxValue
-	MPF_STATE,										// Flags
+	"Wet",																								// description
+	-32768,																																																// MinValue				
+	32768,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
 CMachineParameter const paraFBL = 
 { 
 	"Feedback left",
-	"Feedback left",						// description
-	-32768,												// MinValue	
-	32768,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback left",																								// description
+	-32768,																																																// MinValue				
+	32768,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	16384,
 };
 
 CMachineParameter const paraFBR = 
 { 
 	"Feedback right",
-	"Feedback right",						// description
-	-32768,												// MinValue	
-	32768,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback right",																								// description
+	-32768,																																																// MinValue				
+	32768,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	16384,
 };
 
 CMachineParameter const paraMinD = 
 { 
 	"Min Delay",
-	"Min Delay",											// description
-	1,												// MinValue	
-	6000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Min Delay",																																												// description
+	1,																																																// MinValue				
+	6000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1,
 };
 
 CMachineParameter const paraMaxD = 
 { 
 	"Max Delay",
-	"Max Delay",											// description
-	1,												// MinValue	
-	6000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Max Delay",																																												// description
+	1,																																																// MinValue				
+	6000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	5,
 };
 
 CMachineParameter const paraRate = 
 { 
 	"Rate",
-	"Rate",										// description
-	0,												// MinValue	
-	1000,												// MaxValue
-	MPF_STATE,										// Flags
+	"Rate",																																								// description
+	0,																																																// MinValue				
+	1000,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	1,
 };
 
 CMachineParameter const paraDelay = 
 { 
 	"Delayer",
-	"Delayer",										// description
-	1,												// MinValue	
-	MAXIMUM_DELAY,												// MaxValue
-	MPF_STATE,										// Flags
+	"Delayer",																																								// description
+	1,																																																// MinValue				
+	MAXIMUM_DELAY,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	MAXIMUM_DELAY,
 };
 
@@ -114,18 +114,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	EFFECT,										// flags
-	NUMPARAMETERS,								// numParameters
-	pParameters,								// Pointer to parameters
+	MI_VERSION,				
+	EFFECT,																																								// flags
+	NUMPARAMETERS,																																// numParameters
+	pParameters,																																// Pointer to parameters
 #ifdef _DEBUG
-	"SChorus (Debug build)",		// name
+	"SChorus (Debug build)",								// name
 #else
-	"SChorus",						// name
+	"SChorus",																								// name
 #endif
-	"SChorus",							// short name
-	"Sartorius",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"SChorus",																												// short name
+	"Sartorius",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	4
 };
 
@@ -180,9 +180,9 @@ void mi::Init()
 	samplerate = pCB->GetSamplingRate();
 	buf_count=0;
 	min_sweep = Vals[4] * .001 * samplerate;
-    max_sweep = Vals[5] * .001 * samplerate;
-    step = Vals[6]*.001;
-    sweep = min_sweep;
+	max_sweep = Vals[5] * .001 * samplerate;
+	step = Vals[6]*.001;
+	sweep = min_sweep;
 	outval[0] = outval[1] = 0;
 	for (int i=0;i<MAXIMUM_DELAY;i++)
 	{
@@ -215,8 +215,8 @@ void mi::ParameterTweak(int par, int val)
 	Vals[par]=val;
 
 	min_sweep = Vals[4] * .001 * samplerate;
-    max_sweep = Vals[5] * .001 * samplerate;
-    step = Vals[6]*.001;
+	max_sweep = Vals[5] * .001 * samplerate;
+	step = Vals[6]*.001;
 	if (step == 0)
 	{
 		sweep = 0;
@@ -229,11 +229,11 @@ void mi::ParameterTweak(int par, int val)
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
-	float const dry		=(float)(Vals[0])*0.00006103515625f;
-	float const wet		=(float)(Vals[1])*0.000030517578125f;
-	float const fbl		=(float)(Vals[2])*0.000030517578125f;
-	float const fbr		=(float)(Vals[3])*0.000030517578125f;
-	int const del		=Vals[7];
+	float const dry								=(float)(Vals[0])*0.00006103515625f;
+	float const wet								=(float)(Vals[1])*0.000030517578125f;
+	float const fbl								=(float)(Vals[2])*0.000030517578125f;
+	float const fbr								=(float)(Vals[3])*0.000030517578125f;
+	int const del								=Vals[7];
 
 		do
 		{
@@ -241,20 +241,20 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			float sr = *psamplesright; 
 
 			outval[0] = outval[0]*fbl + DM_l[(buf_count+del -(int)sweep) % del ]*wet;
-		    outval[0] += sl*dry;
+			outval[0] += sl*dry;
 			outval[1] = outval[1]*fbr + DM_r[(buf_count+del -(int)(max_sweep-sweep)) % del ]*wet;
 			outval[1] += sr*dry;
 			
 			//if(outval[0] > 32767.f)
-			//	sl = 32767;
+			//				sl = 32767;
 			//else if(outval[0] < -32768.f)
-			//	sl = -32768;
+			//				sl = -32768;
 			//else
 				sl = outval[0];
 			//if(outval[1] > 32767.f)
-			//	sr = 32767.f;
+			//				sr = 32767.f;
 			//else if(outval[1] < -32768.f)
-			//	sr = -32768.f;
+			//				sr = -32768.f;
 			//else
 				sr = outval[1];
 
@@ -268,9 +268,9 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 
 			sweep += step;
-	        /* check for sweep reversal */
-		    if(sweep > max_sweep)               /* see if we hit top of sweep */
-			    step = -step;                   /* reverse */
+			/* check for sweep reversal */
+			if(sweep > max_sweep)               /* see if we hit top of sweep */
+				step = -step;                   /* reverse */
 			else if(sweep < min_sweep)          /* or if we hit bottom of sweep */
 				step = -step;                   /* reverse */
 

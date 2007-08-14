@@ -30,35 +30,35 @@
 #include <vector>
 
 SequencerArea::SequencerArea( SequencerDraw *seqDrawIn )
-    : seqDraw_( seqDrawIn )
+	: seqDraw_( seqDrawIn )
 {
-    beatPxLength_ = sequencerDraw()->beatPxLength();
+	beatPxLength_ = sequencerDraw()->beatPxLength();
 }
 
 QRectF SequencerArea::boundingRect() const 
 {
-    int width = std::max( seqDraw_->width(), (int)childrenBoundingRect().width() );
-    int height = std::max( seqDraw_->height(), (int)childrenBoundingRect().height() );
-    return QRectF( 0, 0, width, height );
+	int width = std::max( seqDraw_->width(), (int)childrenBoundingRect().width() );
+	int height = std::max( seqDraw_->height(), (int)childrenBoundingRect().height() );
+	return QRectF( 0, 0, width, height );
 }
 
 
 void SequencerArea::paint( QPainter *painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-    drawTimegrid( painter );
+	drawTimegrid( painter );
 }
 
 void SequencerArea::drawTimegrid( QPainter *painter )
 {
-    QRectF br = boundingRect();
-    int start = 0;
-    int end   = (int)br.width();
+	QRectF br = boundingRect();
+	int start = 0;
+	int end   = (int)br.width();
 
-    painter->setPen( QColor( 30, 30, 30 ) );
-    for (int i = start ; i <= end ; i++) {
-        if ( beatPxLength_ > 3 || (beatPxLength_ <= 3 && (!( i %16)))  ) {
-            painter->drawLine( i*beatPxLength_, 0,
-                               i*beatPxLength_, br.height() );
-        }
-    }
+	painter->setPen( QColor( 30, 30, 30 ) );
+	for (int i = start ; i <= end ; i++) {
+		if ( beatPxLength_ > 3 || (beatPxLength_ <= 3 && (!( i %16)))  ) {
+			painter->drawLine( i*beatPxLength_, 0,
+								i*beatPxLength_, br.height() );
+		}
+	}
 }

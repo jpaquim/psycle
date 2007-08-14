@@ -357,7 +357,7 @@ void CSynthTrack::InitEnvelopes()
 
 	if (syntp->amp_env_attack)
 	{
-//			AmpEnvValue = 0;
+//												AmpEnvValue = 0;
 		AmpEnvStage=1;
 		AmpEnvCoef=freq_mul*(1.0f-AmpEnvValue)/(float)(syntp->amp_env_attack*FILTER_CALC_TIME);
 	}
@@ -365,7 +365,7 @@ void CSynthTrack::InitEnvelopes()
 	{
 		AmpEnvValue = 1.0f;
 		AmpEnvStage=2;
-//		AmpEnvCoef=AmpEnvValue/(float)syntp->amp_env_decay;
+//								AmpEnvCoef=AmpEnvValue/(float)syntp->amp_env_decay;
 		AmpEnvCoef=freq_mul/(float)(syntp->amp_env_decay*FILTER_CALC_TIME);
 	}
 	else if (syntp->amp_env_sustain)
@@ -750,7 +750,7 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	}
 
 	// Init vibrato
-	if (cmd==TFX_Vibrato)	
+	if (cmd==TFX_Vibrato)				
 	{
 		VibratoAmplitude = float((val&0xf0)+1)*2;
 		VibratoSpeed = ((val&0x0f)+1) * (MAX_RATE/32.0f);

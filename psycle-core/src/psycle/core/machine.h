@@ -19,7 +19,7 @@ namespace psy
 {
 	namespace core
 	{
-        // FIXME: stole these from analzyer.h just to fix compile error.
+		// FIXME: stole these from analzyer.h just to fix compile error.
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE  = 4096;
 		const int SCOPE_SPEC_SAMPLES = 256;
@@ -88,7 +88,8 @@ namespace psy
 						bad_returned_value(std::string const & what) : function_error(what) {}
 				};
 			}
-/*
+
+			#if 0
 				///\internal
 				namespace detail
 				{
@@ -115,16 +116,16 @@ namespace psy
 				}
 				#define PSYCLE__HOST__CATCH_ALL(machine) \
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psy::core::exceptions::function_errors::detail::rethrow_functor(machine))
-				//	UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
-			}*/
+					//UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
+			#endif
 		}
 
 		/// Class for the Internal Machines' Parameters.
-		class CIntMachParam			
+		class CIntMachParam
 		{
 			public:
 				/// Short name
-				const char * name;		
+				const char * name;
 				/// >= 0
 				int minValue;
 				/// <= 65535
@@ -241,10 +242,10 @@ namespace psy
 			MACH_SCOPE = 11,
 			MACH_XMSAMPLER = 12,
 			MACH_DUPLICATOR = 13,
-			MACH_MIXER = 14,			
+			MACH_MIXER = 14,
 			MACH_LFO = 15,
 			MACH_LADSPA = 16,
-			MACH_DUMMY = 255			
+			MACH_DUMMY = 255
 		};
 
 		enum MachineMode
@@ -293,7 +294,7 @@ namespace psy
 
 				protected:
 					std::deque<WorkEvent> workEvents;
-				    std::map<int,int> playCol;
+					std::map<int,int> playCol;
 					int playColIndex;
 
 
@@ -311,20 +312,24 @@ namespace psy
 			///\}
 			///\name crash handling ... fpu exception mask
 			///\{
-				public:
-/*					universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
-					universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
-				private:
-					universalis::processor::exceptions::fpu::mask::type                fpu_exception_mask_;*/
+				#if 0 ///\todo re-enable this
+					public:
+						universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
+						universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
+					private:
+						universalis::processor::exceptions::fpu::mask::type                fpu_exception_mask_;
+				#endif
 			///\}
 
 			///\name cpu cost measurement ... for the time spent in the machine's processing function
 			///\{
-				public:
-				/*	void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
-					cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
-				private:
-					cpu::cycles_type        work_cpu_cost_;
+				#if 0
+					public:
+						void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
+						cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
+					private:
+						cpu::cycles_type        work_cpu_cost_;
+				#endif
 			///\}
 			///\name cpu cost measurement ... for the time spent routing audio
 			///\{
@@ -342,18 +347,18 @@ namespace psy
 			// A machine is created via pMachine = new Machine;
 			// Creation does not give a ready to use Machine. "The machine is over the table, but the power is off!"
 			// Use LoadDll(std::string) to load a specific plugin to operate this machine. The function does a loadlibrary, and
-			//	the basic information becomes accessible (name, parameters...). Note that this call will only return "true" 
+			// the basic information becomes accessible (name, parameters...). Note that this call will only return "true" 
 			// [ there is another option, which would be a constructor that gets the std::string, and LoadDll() be protected and called from within ]
-			//	for Plugin or vst::plugin, since any other machine do not use an external dll.
+			// for Plugin or vst::plugin, since any other machine do not use an external dll.
 			// Use UnloadDll() to undo the previous action. Else, the destructor will do it for you.
 			// Use SwitchOn() to obtain a ready-to-use machine. This will return false for Plugin and vst::plugin if
-			//	OpenDll() has not been called, or if it has returned false.
+			// OpenDll() has not been called, or if it has returned false.
 			// Use Reset() to reinitialize the machine status and recall all default values for the parameters.
 			// Use SwitchOff() to stop using this machine. Else, the destructor will do it for you.
 			// Use StandBy(bool) to set or unset the machine to a stopped state. ("suspend" in vst terminology).
-			//	"Process()" will still be called in order for the machine to update state, but will return with no data
-			//	Everything else works as usual.
-			//	This function can be used as an "audio-only" reset. (Panic button)
+			// "Process()" will still be called in order for the machine to update state, but will return with no data
+			// Everything else works as usual.
+			// This function can be used as an "audio-only" reset. (Panic button)
 			// Bypass(bool) un/sets the Bypass flag, and calls to StandBy() accordingly.
 			// Process() Call it to start the processing of input buffers and generate the output.
 			// AddEvent(timestampedEvent)
@@ -415,8 +420,8 @@ namespace psy
 					virtual ~Machine();
 			///\}
 			
-		    protected:
-        		MachineCallbacks* callbacks;
+			protected:
+				MachineCallbacks* callbacks;
 
 			///\name song
 			///\{
@@ -424,7 +429,7 @@ namespace psy
 					/// the song this machine belongs to
 					CoreSong const * const song() const { return song_; }
 					CoreSong * const song() { return song_; }
-			    private:
+				private:
 					CoreSong* song_;
 			///\}
 
@@ -448,8 +453,10 @@ namespace psy
 					static Machine * LoadFileChunk(std::string const & plugin_path, CoreSong* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
 					virtual void SaveFileChunk(RiffFile * pFile) const;
 					virtual void SaveSpecificChunk(RiffFile * pFile) const;
-					/// Loader for psycle fileformat version 2.
-/*					virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);*/
+					#if 0
+						/// Loader for psycle fileformat version 2.
+						virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+					#endif
 				protected:
 					// already friend class CoreSong;
 			///\}
@@ -559,8 +566,7 @@ namespace psy
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///\todo below are unencapsulated data members
 
-		public:
-//		PSYCLE__PRIVATE:
+		public:///\todo private:
 
 			InPort *inports;
 			OutPort *outports;
@@ -619,9 +625,9 @@ namespace psy
 			///\name signal measurements, perhaps can be considered misplaced gui stuff
 			///\{
 				/// output peak level for DSP
-				float _volumeCounter;					
+				float _volumeCounter;
 				/// output peak level for display
-				int _volumeDisplay;	
+				int _volumeDisplay;
 				/// output peak level for display
 				int _volumeMaxDisplay;
 				/// output peak level for display
@@ -629,7 +635,7 @@ namespace psy
 				///\todo doc
 				int _scopePrevNumSamples;
 				///\todo doc
-				int	_scopeBufferIndex;
+				int _scopeBufferIndex;
 				///\todo doc
 				float *_pScopeBufferL;
 				///\todo doc

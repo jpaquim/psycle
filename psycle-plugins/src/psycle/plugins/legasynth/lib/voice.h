@@ -2,21 +2,21 @@
 // Dmitry "Sartorius" Kulikov LegaSynth plugins for PSYCLE
 
 /***************************************************************************
-                          voice.h  -  description
-                             -------------------
-    begin                : Fri Jul 5 2002
-    copyright            : (C) 2002 by red
-    email                : red@server
- ***************************************************************************/
+							voice.h  -  description
+								-------------------
+	begin                : Fri Jul 5 2002
+	copyright            : (C) 2002 by red
+	email                : red@server
+	***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	***************************************************************************/
 
 #ifndef VOICE_H
 #define VOICE_H
@@ -36,35 +36,35 @@ class Voice {
 
 	int pan_relative;
 
-    int LFO_speed;
-    int LFO_depth;
-    int LFO_type; // 0 - sine / 1 - saw / 2- pulse
-    int LFO_delay;
+	int LFO_speed;
+	int LFO_depth;
+	int LFO_type; // 0 - sine / 1 - saw / 2- pulse
+	int LFO_delay;
 	
 	int sweep_delay;
 	int sweep_value;
 	
-    int velocity;
+	int velocity;
 	int expression;
 	int main_volume;
 	
 	char channel;
 	int mixing_frequency;
 	
- 	int update_interval_samples; // update interfal for effects (samples)
-  	int update_ofs;
-  	int update_count;
+		int update_interval_samples; // update interfal for effects (samples)
+		int update_ofs;
+		int update_count;
 
-   	float sweep_level;
-   	float LFO_level;
-    float preamp;
+		float sweep_level;
+		float LFO_level;
+	float preamp;
 
-   	bool sustain;
-   	bool sustaining;
-    char sustain_noteoff_velocity;
+		bool sustain;
+		bool sustaining;
+	char sustain_noteoff_velocity;
 
-    //float last_val_l;
-    //float last_val_r;
+	//float last_val_l;
+	//float last_val_r;
 /*
 	std::vector<float> buffer_l;
 	std::vector<float> buffer_r;
@@ -72,17 +72,17 @@ class Voice {
 	std::vector<float> declicker_l;
 	std::vector<float> declicker_r;
 */
-   	void mix_modifier();
+		void mix_modifier();
 
 
-  
+	
 	
 public: /* STATUS */
 
 
 	struct Default_Data {
 
-        	/* Voice Stuff */
+			/* Voice Stuff */
 	
 		int relative_pan;
 
@@ -94,7 +94,7 @@ public: /* STATUS */
 		int sweep_delay;
 		int sweep_value;
 		
-        	/* Channel Default Stuff */
+			/* Channel Default Stuff */
 		
 		//int vibrato_depth;
 		//int vibrato_speed;
@@ -110,14 +110,14 @@ public: /* STATUS */
 		//int portamento_time_fine;
 		//bool do_portamento;
 
-                Default_Data() {
+				Default_Data() {
 
-                	memset(this,0,sizeof(Default_Data));
-                 	channel_pan=0;
-                 	relative_pan=0;
-                  	main_volume=127;
-                   	//vibrato_speed=30;
-                }
+					memset(this,0,sizeof(Default_Data));
+						channel_pan=0;
+						relative_pan=0;
+						main_volume=127;
+						//vibrato_speed=30;
+				}
 
 	};
 
@@ -127,7 +127,7 @@ public: /* STATUS */
 	};
 
 
- 	enum Status {
+		enum Status {
 		DEAD,
 		ATTACKING,
 		RELEASING,
@@ -143,7 +143,7 @@ protected:
 	//virtual void mix_internal(int p_amount,float* p_where_l,float* p_where_r)=0; //set where to mix
 	virtual void mix_internal(int p_amount,int *p_where_l,int *p_where_r)=0; //set where to mix
 	virtual void mix_modifier_call(); //mixer modifier call, if you want to something between mixblocks
-    virtual void set_note_internal(char p_note,char p_velocity)=0; //noteon
+	virtual void set_note_internal(char p_note,char p_velocity)=0; //noteon
 	virtual void set_note_off_internal(char p_velocity)=0;
 	virtual void set_mix_frequency_internal(int p_mixfreq) =0;
 	virtual void recalculate_pitch_internal()=0;
@@ -152,26 +152,26 @@ protected:
 protected: /* API INTERNAL - Voice may need these */
 		/*void add_buffer(float* p_dst, float *p_src, int p_amount);*/
 
-        float get_fnote(); //This gives back the note, format is of a common midi note, but not bound to integers, so pitch bend/vibrato/etc can take place
-        float get_total_volume(); //This gives back the volume in a 0-1 range
-        int get_total_pan(); //This gives back the volume in a 0-1 range
+		float get_fnote(); //This gives back the note, format is of a common midi note, but not bound to integers, so pitch bend/vibrato/etc can take place
+		float get_total_volume(); //This gives back the volume in a 0-1 range
+		int get_total_pan(); //This gives back the volume in a 0-1 range
 		int get_update_count();
 
 
-        void store_last_values(float p_left,float p_right); //this is needed for the declicker, so USE IT
+		void store_last_values(float p_left,float p_right); //this is needed for the declicker, so USE IT
 	
 public: /* COMMANDS */
 
 	/* set */
-    void set_note(char p_note,char p_velocity); //noteon
+	void set_note(char p_note,char p_velocity); //noteon
 	void set_note_off(char p_velocity); //noteoff
 //        virtual void set_data(Data *p_data) =0; //pan
 
- 	void set_sustain(bool p_sustain);
+		void set_sustain(bool p_sustain);
 
- 	void set_pan(char p_pan); //pitch
-   	void set_pitch_bend(int p_bend); //pitch bend
- 	void set_pitch_depth(int p_bend_depth); //pitch depth
+		void set_pan(char p_pan); //pitch
+		void set_pitch_bend(int p_bend); //pitch bend
+		void set_pitch_depth(int p_bend_depth); //pitch depth
 	void set_expression(char p_vol); //expression (CC 11)
 	void set_velocity(char p_vol); //expression (CC 11)
 	void set_main_volume(char p_vol); //mainvol (CC 7)
@@ -182,9 +182,9 @@ public: /* COMMANDS */
 	virtual bool set_controller(char p_ctrl,char p_param);
 	
 	/* get */
- 	int get_pitch_bend();
+		int get_pitch_bend();
 	int get_pitch_depth();
- 	char get_pan();
+		char get_pan();
 	char get_note(); //check purposes only
 	char get_expression();
 	char get_main_volume();
@@ -200,8 +200,8 @@ public: /* MIXING! */
 	void set_mix_frequency(int p_mixfreq);
 	//void mix(int p_amount,float *p_where_l,float *p_where_r); //set where to mix
 	void mix(int p_amount,int *p_where_l,int *p_where_r);
-    float get_last_value_L(); //used for declicker	
-    float get_last_value_R(); //used for declicker
+	float get_last_value_L(); //used for declicker				
+	float get_last_value_R(); //used for declicker
 	//void process_declicker();
 public: /* DELETING */
 

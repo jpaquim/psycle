@@ -9,20 +9,20 @@ int const NUMPARAMETERS = 28;
 CMachineParameter const paraOSC1wave = 
 { 
 	"OSC1 Wave",
-	"OSC1 Wave",									// description
-	0,												// MinValue	
-	4,												// MaxValue
-	MPF_STATE,										// Flags
+	"OSC1 Wave",																																				// description
+	0,																																																// MinValue				
+	4,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	1
 };
 
 CMachineParameter const paraOSC2wave = 
 { 
 	"OSC2 Wave",
-	"OSC2 Wave",									// description
-	0,												// MinValue	
-	4,												// MaxValue
-	MPF_STATE,										// Flags
+	"OSC2 Wave",																																				// description
+	0,																																																// MinValue				
+	4,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	1
 };
 
@@ -30,40 +30,40 @@ CMachineParameter const paraOSC2wave =
 CMachineParameter const paraOSC2detune = 
 { 
 	"OSC2 Detune",
-	"OSC2 Detune",									// description
-	-36,											// MinValue	
-	36,												// MaxValue
-	MPF_STATE,										// Flags
+	"OSC2 Detune",																																				// description
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraOSC2finetune = 
 { 
 	"OSC2 Finetune",
-	"OSC2 Finetune",								// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"OSC2 Finetune",																																// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	27
 };
 
 CMachineParameter const paraOSC2sync = 
 { 
 	"OSC2 Sync",
-	"OSC2 Sync",									// description
-	0,												// MinValue	
-	1,												// MaxValue
-	MPF_STATE,										// Flags
+	"OSC2 Sync",																																				// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraVCAattack = 
 { 
 	"VCA Attack",
-	"VCA Attack",									// description
-	32,												// MinValue	
-	MAX_ENV_TIME,									// MaxValue
-	MPF_STATE,										// Flags
+	"VCA Attack",																																				// description
+	32,																																																// MinValue				
+	MAX_ENV_TIME,																																				// MaxValue
+	MPF_STATE,																																								// Flags
 	32
 };
 
@@ -71,20 +71,20 @@ CMachineParameter const paraVCAattack =
 CMachineParameter const paraVCAdecay = 
 { 
 	"VCA Decay",
-	"VCA Decay",									// description
-	32,												// MinValue	
-	MAX_ENV_TIME,									// MaxValue
-	MPF_STATE,										// Flags
+	"VCA Decay",																																				// description
+	32,																																																// MinValue				
+	MAX_ENV_TIME,																																				// MaxValue
+	MPF_STATE,																																								// Flags
 	6341
 };
 
 CMachineParameter const paraVCAsustain = 
 { 
 	"VCA Sustain",
-	"VCA Sustain level",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"VCA Sustain level",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -92,10 +92,10 @@ CMachineParameter const paraVCAsustain =
 CMachineParameter const paraVCArelease = 
 { 
 	"VCA Release",
-	"VCA Release",									// description
-	32,												// MinValue	
-	MAX_ENV_TIME,									// MaxValue
-	MPF_STATE,										// Flags
+	"VCA Release",																																				// description
+	32,																																																// MinValue				
+	MAX_ENV_TIME,																																				// MaxValue
+	MPF_STATE,																																								// Flags
 	2630
 };
 
@@ -103,10 +103,10 @@ CMachineParameter const paraVCArelease =
 CMachineParameter const paraVCFattack = 
 { 
 	"VCF Attack",
-	"VCF Attack",									// description
-	32,												// MinValue	
-	MAX_ENV_TIME,									// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Attack",																																				// description
+	32,																																																// MinValue				
+	MAX_ENV_TIME,																																				// MaxValue
+	MPF_STATE,																																								// Flags
 	589
 };
 
@@ -114,40 +114,40 @@ CMachineParameter const paraVCFattack =
 CMachineParameter const paraVCFdecay = 
 { 
 	"VCF Decay",
-	"VCF Decay",									// description
-	32,												// MinValue	
-	MAX_ENV_TIME,									// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Decay",																																				// description
+	32,																																																// MinValue				
+	MAX_ENV_TIME,																																				// MaxValue
+	MPF_STATE,																																								// Flags
 	2630
 };
 
 CMachineParameter const paraVCFsustain = 
 { 
 	"VCF Sustain",
-	"VCF Sustain level",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Sustain level",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraVCFrelease = 
 { 
 	"VCF Release",
-	"VCF Release",									// description
-	32,												// MinValue	
-	MAX_ENV_TIME,									// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Release",																																				// description
+	32,																																																// MinValue				
+	MAX_ENV_TIME,																																				// MaxValue
+	MPF_STATE,																																								// Flags
 	2630
 };
 
 CMachineParameter const paraVCFlfospeed = 
 { 
 	"VCF LFO Speed",
-	"VCF LFO Speed",								// description
-	1,												// MinValue	
-	65536,											// MaxValue
-	MPF_STATE,										// Flags
+	"VCF LFO Speed",																																// description
+	1,																																																// MinValue				
+	65536,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	32
 };
 
@@ -155,40 +155,40 @@ CMachineParameter const paraVCFlfospeed =
 CMachineParameter const paraVCFlfoamplitude = 
 { 
 	"VCF LFO Amplitude",
-	"VCF LFO Amplitude",							// description
-	0,												// MinValue	
-	240,											// MaxValue
-	MPF_STATE,										// Flags
+	"VCF LFO Amplitude",																												// description
+	0,																																																// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraVCFcutoff = 
 { 
 	"VCF Cutoff",
-	"VCF Cutoff",									// description
-	0,												// MinValue	
-	240,											// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Cutoff",																																				// description
+	0,																																																// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	120
 };
 
 CMachineParameter const paraVCFresonance = 
 { 
 	"VCF Resonance",
-	"VCF Resonance",								// description
-	1,												// MinValue	
-	240,											// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Resonance",																																// description
+	1,																																																// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	128
 };
 
 CMachineParameter const paraVCFtype = 
 { 
 	"VCF Type",
-	"VCF Type",										// description
-	0,												// MinValue	
-	19,												// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Type",																																								// description
+	0,																																																// MinValue				
+	19,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -196,50 +196,50 @@ CMachineParameter const paraVCFtype =
 CMachineParameter const paraVCFenvmod = 
 { 
 	"VCF Envmod",
-	"VCF Envmod",									// description
-	-240,											// MinValue	
-	240,											// MaxValue
-	MPF_STATE,										// Flags
+	"VCF Envmod",																																				// description
+	-240,																																												// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	80
 };
 
 CMachineParameter const paraOSCmix = 
 { 
 	"OSC Mix",
-	"OSC Mix",									// description
-	0,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"OSC Mix",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	128
 };
 
 CMachineParameter const paraOUTvol = 
 { 
 	"Volume",
-	"Volume",									// description
-	0,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Volume",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	128
 };
 
 CMachineParameter const paraARPmode = 
 {
 	"Arpeggiator",
-	"Arpeggiator",								// description
-	0,											// MinValue	
-	16,											// MaxValue
-	MPF_STATE,										// Flags
+	"Arpeggiator",																																// description
+	0,																																												// MinValue				
+	16,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraARPbpm = 
 {
 	"Arp. BPM",
-	"Arp. BPM",									// description
-	32,											// MinValue	
-	1024,										// MaxValue
-	MPF_STATE,									// Flags
+	"Arp. BPM",																																				// description
+	32,																																												// MinValue				
+	1024,																																								// MaxValue
+	MPF_STATE,																																				// Flags
 	125
 };
 
@@ -247,20 +247,20 @@ CMachineParameter const paraARPbpm =
 CMachineParameter const paraARPcount = 
 {
 	"Arp. Steps",
-	"Arp. Steps",									// description
-	0,											// MinValue	
-	16,											// MaxValue
-	MPF_STATE,										// Flags
+	"Arp. Steps",																																				// description
+	0,																																												// MinValue				
+	16,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	4
 };
 
 CMachineParameter const paraGlobalDetune = 
 {
 	"Glb. Detune",
-	"Global Detune",									// description
-	-36,											// MinValue	
-	36,											// MaxValue
-	MPF_STATE,										// Flags
+	"Global Detune",																																				// description
+	-36,																																												// MinValue				
+	36,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1 
 };
 // Why is the default tuning +1 +60? answer:
@@ -276,30 +276,30 @@ CMachineParameter const paraGlobalDetune =
 CMachineParameter const paraGlobalFinetune = 
 {
 	"Gbl. Finetune",
-	"Global Finetune",									// description
-	-256,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Global Finetune",																																				// description
+	-256,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	60
 };
 
 CMachineParameter const paraGlide = 
 {
 	"Glide Depth",
-	"Glide Depth",									// description
-	0,											// MinValue	
-	255,											// MaxValue
-	MPF_STATE,										// Flags
+	"Glide Depth",																																				// description
+	0,																																												// MinValue				
+	255,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraInterpolation = 
 {
 	"Interpolation",
-	"I",									// description
-	0,											// MinValue	
-	1,											// MaxValue
-	MPF_STATE,										// Flags
+	"I",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -338,18 +338,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	GENERATOR,								// flags
-	NUMPARAMETERS,							// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	GENERATOR,																																// flags
+	NUMPARAMETERS,																												// numParameters
+	pParameters,																												// Pointer to parameters
 #if !defined NDEBUG
-	"Arguru Synth 2 final (debug build)",		// name
+	"Arguru Synth 2 final (debug build)",								// name
 #else
-	"Arguru Synth 2 final",						// name
+	"Arguru Synth 2 final",																								// name
 #endif
-	"Arguru Synth",							// short name
-	"J. Arguelles (arguru)",							// author
-	"help",									// A command, that could be use for open an editor, etc...
+	"Arguru Synth",																												// short name
+	"J. Arguelles (arguru)",																												// author
+	"help",																																				// A command, that could be use for open an editor, etc...
 	4
 };
 
@@ -507,7 +507,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 			ptrack->PerformFx();
 
 			if ( globalpar.osc_mix == 0 )
-			{	do
+			{				do
 				{
 					sl=ptrack->GetSampleOsc1();
 					*++xpsamplesleft+=sl;
@@ -515,7 +515,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 				} while(--xnumsamples);
 			}
 			else if ( globalpar.osc_mix == 256 )
-			{	do
+			{				do
 				{
 					sl=ptrack->GetSampleOsc2();
 					*++xpsamplesleft+=sl;
@@ -523,7 +523,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 				} while(--xnumsamples);
 			}
 			else
-			{	do
+			{				do
 				{
 					sl=ptrack->GetSample();
 					*++xpsamplesleft+=sl;
@@ -660,8 +660,8 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	
 	}
 
-	// Note Off			== 120
-	// Empty Note Row	== 255
+	// Note Off												== 120
+	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	if(note<120)
 	track[channel].NoteOn(note-18,&globalpar,60);
@@ -680,14 +680,14 @@ void mi::InitWaveTable()
 					WaveTable[0][c]=int(sin(sval)*16384.0f);
 
 		if (c<2048) WaveTable[1][c]=(c*16)-16384;
-		else		WaveTable[1][c]=((c-2048)*16)-16384;
+		else								WaveTable[1][c]=((c-2048)*16)-16384;
 
-		if (c<1024 || c>=2048)	WaveTable[2][c]=-16384;
-		else		WaveTable[2][c]=16384;
+		if (c<1024 || c>=2048)				WaveTable[2][c]=-16384;
+		else								WaveTable[2][c]=16384;
 
-		if (c<1024)	WaveTable[3][c]=(c*32)-16384;
+		if (c<1024)				WaveTable[3][c]=(c*32)-16384;
 		else if (c<2048) WaveTable[3][c]=16384-((c-1024)*32);
-		else		WaveTable[3][c]=((c-2048)*32)-16384;
+		else								WaveTable[3][c]=((c-2048)*32)-16384;
 
 					WaveTable[4][c]=rand()-16384;
 	}

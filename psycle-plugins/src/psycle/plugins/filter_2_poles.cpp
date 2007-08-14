@@ -100,8 +100,8 @@ protected:
 	inline void update_coefficients();
 	inline void update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase = 0);
 	enum Channels { left, right, channels };
-    void erase_NaNs_Infinities_And_Denormals( float* inSample );
-    inline const Real process(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
+	void erase_NaNs_Infinities_And_Denormals( float* inSample );
+	inline const Real process(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
 	Real cutoff_sin_, modulation_radians_per_sample_, modulation_phase_, buffers_ [channels][poles], coefficients_ [channels][poles + 1];
 };
 

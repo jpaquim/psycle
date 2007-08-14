@@ -1,12 +1,12 @@
 //============================================================================
 //
-//	CWave.cpp
+//				CWave.cpp
 //
 //============================================================================
 #include <string.h>
 #include "CWave.h"
 //============================================================================
-//	Constructor
+//				Constructor
 //============================================================================
 CWave::CWave()
 {
@@ -16,59 +16,59 @@ CWave::CWave()
 	m_mask = 0;
 }
 //============================================================================
-//	Destructor
+//				Destructor
 //============================================================================
 CWave::~CWave()
 {
-	//	Name
+	//				Name
 	if (m_pname) {
 		delete[] m_pname;
 		m_pname = NULL;
 	}
-	//	Samples
+	//				Samples
 	if (m_psamples) {
 		delete[] m_psamples;
 		m_psamples = NULL;
 	}
-	//	Length
+	//				Length
 	m_nsamples = 0;
 }
 //============================================================================
-//	Initialize
+//				Initialize
 //============================================================================
 bool CWave::Init(char *pname, float *psamples, int nsamples)
 {
-	//	Name
+	//				Name
 	if (!pname)
 		return false;
 	if (m_pname)
 		delete[] m_pname;
 	m_pname = new char[strlen(pname) + 1];
 	strcpy(m_pname, pname);
-	//	Samples
+	//				Samples
 	if (!psamples)
 		return false;
 	if (m_psamples)
 		delete[] m_psamples;
 	m_psamples = new float[nsamples];
 	memcpy(m_psamples, psamples, sizeof(float) * nsamples);
-	//	Length
+	//				Length
 	m_nsamples = nsamples;
 	m_mask = nsamples - 1;
 	if (((nsamples & m_mask) != 0) || (nsamples & 1))
 		return false;
-	//	Ok!
+	//				Ok!
 	return true;
 }
 //============================================================================
-//	GetName
+//				GetName
 //============================================================================
 char *CWave::GetName()
 {
 	return m_pname;
 }
 //============================================================================
-//	GetNumberOfSamples
+//				GetNumberOfSamples
 //============================================================================
 int CWave::GetNumberOfSamples()
 {

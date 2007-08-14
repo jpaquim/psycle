@@ -8,7 +8,7 @@
 typedef float SIG;
 #define TWOPI_F (2.0f*3.141592665f)
 #define PI 3.14159265358979323846
-#define CUTOFFCONV(x)	((96*powf(32,x/192.0f))-86)
+#define CUTOFFCONV(x)				((96*powf(32,x/192.0f))-86)
 //static const double PI=4*atan(1.0);
 #define THREESEL(sel,a,b,c) ((sel)<120)?((a)+((b)-(a))*(sel)/120):((b)+((c)-(b))*((sel)-120)/120)
 
@@ -52,8 +52,8 @@ public:
 		m_a1=2*(A0-A2)*q;
 		m_a2=(A0-A1+A2)*q;
 	}
-  // Zoelzer's Parmentric Equalizer Filters - rodem z Csound'a
-  void SetLowShelf(float fc, float q, float v, float esr)
+	// Zoelzer's Parmentric Equalizer Filters - rodem z Csound'a
+	void SetLowShelf(float fc, float q, float v, float esr)
 	{
 		float sq = (float)sqrt(2.0*(double)v);
 		float omega = TWOPI_F*fc/esr;
@@ -83,7 +83,7 @@ public:
 	}
 	void SetParametricEQ(float fc, float q, float v, float esr, float gain=1.0f)
 	{
-//		float sq = (float)sqrt(2.0*(double)v);
+//								float sq = (float)sqrt(2.0*(double)v);
 		float omega = TWOPI_F*fc/esr;
 		float k = (float) tan((double)omega*0.5);
 		float kk = k*k;
@@ -190,8 +190,8 @@ public:
 	{
 		Biquad.Reset();
 		Biquad2.Reset();
-        for( int i=0; i<16; i++ )
-        	_alps[i].Wipe();
+		for( int i=0; i<16; i++ )
+			_alps[i].Wipe();
 		in1=in2=in3=in4=b0= b1= b2= b3= b4=0;
 	}
 	void SetFilter_4PoleLP(float cf, int Resonance);
@@ -223,8 +223,8 @@ public:
 	float resonance;
 	float depth;
 	float in1,in2,in3,in4;
-	  float f, p, q;             //filter coefficients 
-	  float b0, b1, b2, b3, b4;  //filter buffers (beware denormals!) 
+		float f, p, q;             //filter coefficients 
+		float b0, b1, b2, b3, b4;  //filter buffers (beware denormals!) 
 
 
 	void setmoog1(int t, float c, int r)
@@ -243,37 +243,37 @@ public:
 		input-=(b4 * resonance)+denormal;
 		denormal = -denormal;
 		float in0 = input * 0.35013f * (cutoff*cutoff)*(cutoff*cutoff) +denormal; 
-	  b1 = in0 + (0.3f * in1) + ((1.0f - cutoff) * b1) +denormal; // Pole 1 
-	  in1  = in0; 
-	  b2 = b1 + (0.3f * in2) + ((1.0f - cutoff) * b2)+denormal;  // Pole 2 
-	  in2  = b1; 
-	  b3 = b2 + (0.3f * in3) + ((1.0f - cutoff) * b3)+denormal;  // Pole 3 
-	  in3  = b2; 
-	  b4 = b3 + (0.3f * in4) + ((1.0f - cutoff) * b4)+denormal;  // Pole 4 
-	  // safety check
+		b1 = in0 + (0.3f * in1) + ((1.0f - cutoff) * b1) +denormal; // Pole 1 
+		in1  = in0; 
+		b2 = b1 + (0.3f * in2) + ((1.0f - cutoff) * b2)+denormal;  // Pole 2 
+		in2  = b1; 
+		b3 = b2 + (0.3f * in3) + ((1.0f - cutoff) * b3)+denormal;  // Pole 3 
+		in3  = b2; 
+		b4 = b3 + (0.3f * in4) + ((1.0f - cutoff) * b4)+denormal;  // Pole 4 
+		// safety check
 
-	  if (b4 > 128.0f) 
-		  b4 = 128.0f;
-	  else if (b4 < -128.0f) 
-		  b4 = -128.0f;
-	  
-	  //
-	  in4  = b3; 
-	  switch (type)
-	  {
-	  case 0:
+		if (b4 > 128.0f) 
+			b4 = 128.0f;
+		else if (b4 < -128.0f) 
+			b4 = -128.0f;
+		
+		//
+		in4  = b3; 
+		switch (type)
+		{
+		case 0:
 	// Lowpass  output:  b4 
-		  return b4; 
-		  break;
-	  case 1:
+			return b4; 
+			break;
+		case 1:
 	// Highpass output:  in - b4; 
-		  return (input-b4); 
-		  break;
-	  default:
+			return (input-b4); 
+			break;
+		default:
 	// Bandpass output:  3.0f * (b3 - b4);
-		  return (b3 - b4)*3.0f; 
-		  break;
-	  }
+			return (b3 - b4)*3.0f; 
+			break;
+		}
 	}
 
 
@@ -285,65 +285,65 @@ public:
 
 		cutoff=CUTOFFCONV(c)/(sr/2.0f);
 		resonance = r/256.0f;
-		  q = 1.0f - cutoff; 
-		  p = cutoff + 0.8f * cutoff * q; 
-		  f = p + p - 1.0f; 
-		  q = resonance * (1.0f + 0.5f * q * (1.0f - q + 5.6f * q * q)); 
-//		  b0= b1= b2= b3= b4 = 0;
+			q = 1.0f - cutoff; 
+			p = cutoff + 0.8f * cutoff * q; 
+			f = p + p - 1.0f; 
+			q = resonance * (1.0f + 0.5f * q * (1.0f - q + 5.6f * q * q)); 
+//								  b0= b1= b2= b3= b4 = 0;
 	}
 
 
 
 	float moog2(float in) 
 	{ 
-		  float t1, t2;              //temporary buffers 
+			float t1, t2;              //temporary buffers 
 		// Filter (in [-1.0...+1.0]) 
-		  in -= (q * b4)+denormal;                          //feedback 
-		  t1 = b1;  
-		  t2 = b2;  
-		  t1 = b3;  
-		  b1 = (in + b0) * p - b1 * f +denormal;  
-		  b2 = (b1 + t1) * p - b2 * f +denormal; 
-		  b3 = (b2 + t2) * p - b3 * f +denormal; 
-		  b4 = (b3 + t1) * p - b4 * f +denormal; 
-		  b4 = b4 - b4 * b4 * b4 * 0.166667f +denormal;    //clipping 
-		  b0 = in; 
+			in -= (q * b4)+denormal;                          //feedback 
+			t1 = b1;  
+			t2 = b2;  
+			t1 = b3;  
+			b1 = (in + b0) * p - b1 * f +denormal;  
+			b2 = (b1 + t1) * p - b2 * f +denormal; 
+			b3 = (b2 + t2) * p - b3 * f +denormal; 
+			b4 = (b3 + t1) * p - b4 * f +denormal; 
+			b4 = b4 - b4 * b4 * b4 * 0.166667f +denormal;    //clipping 
+			b0 = in; 
 
 		denormal = -denormal;
-		  // safety check
+			// safety check
 
-		  if (b4 > 1.0f)
-		  {
-			  b4 = 1+((b4-1)/16.0f);
-			  if (b4 > 4.0f) 
-				  b4 = 4.0f;
-		  }
-		  else  if (b4 < -1.0f) 
-		  {
-			  b4 = -1+((b4+1)/16.0f);
-			  if (b4 < -4.0f) 
-				  b4 = -4.0f;
-		  }
+			if (b4 > 1.0f)
+			{
+				b4 = 1+((b4-1)/16.0f);
+				if (b4 > 4.0f) 
+					b4 = 4.0f;
+			}
+			else  if (b4 < -1.0f) 
+			{
+				b4 = -1+((b4+1)/16.0f);
+				if (b4 < -4.0f) 
+					b4 = -4.0f;
+			}
 
 		// Lowpass  output:  b4 
 		// Highpass output:  in - b4; 
 		// Bandpass output:  3.0f * (b3 - b4);
 
-		  switch (type)
-		  {
-		  case 0:
+			switch (type)
+			{
+			case 0:
 		// Lowpass  output:  b4 
-			  return b4; 
-			  break;
-		  case 1:
+				return b4; 
+				break;
+			case 1:
 		// Highpass output:  in - b4; 
-			  return (in-b4); 
-			  break;
-		  default:
+				return (in-b4); 
+				break;
+			default:
 		// Bandpass output:  3.0f * (b3 - b4);
-			  return (b3 - b4)*3.0f; 
-			  break;
-		  }
+				return (b3 - b4)*3.0f; 
+				break;
+			}
 	}
 
 
@@ -361,216 +361,216 @@ public:
 	}
 	float phaser(float inSamp)
 	{
-        for( int i=0; i<type; i++ )
-        	_alps[i].Delay( cutoff );
+		for( int i=0; i<type; i++ )
+			_alps[i].Delay( cutoff );
 		float y = 0.f;
 		switch (type)
 		{
 		case 1:
-			y = 	_alps[0].Update(inSamp + denormal + (_zm1 * resonance));
+			y = 				_alps[0].Update(inSamp + denormal + (_zm1 * resonance));
 			break;
 		case 2:
-		    y = 	_alps[0].Update(
-        			 _alps[1].Update(inSamp + denormal + (_zm1 * resonance)));
+			y = 				_alps[0].Update(
+						_alps[1].Update(inSamp + denormal + (_zm1 * resonance)));
 			break;
 		case 3:
-	        y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(inSamp + denormal + (_zm1 * resonance))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(inSamp + denormal + (_zm1 * resonance))));
 			break;
 		case 4:
-	        y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(inSamp + denormal + (_zm1 * resonance)))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(inSamp + denormal + (_zm1 * resonance)))));
 			break;
 		case 5:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(inSamp + denormal + (_zm1 * resonance))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(inSamp + denormal + (_zm1 * resonance))))));
 			break;
 		case 6:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update(inSamp + denormal + (_zm1 * resonance)))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update(inSamp + denormal + (_zm1 * resonance)))))));
 			break;
 		case 7:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update(inSamp + denormal + (_zm1 * resonance))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update(inSamp + denormal + (_zm1 * resonance))))))));
 			break;
 		case 8:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update(inSamp + denormal + (_zm1 * resonance)))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update(inSamp + denormal + (_zm1 * resonance)))))))));
 			break;
 		case 9:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update(inSamp + denormal + (_zm1 * resonance))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update(inSamp + denormal + (_zm1 * resonance))))))))));
 			break;
 		case 10:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update( 
-                             _alps[9].Update(inSamp + denormal + (_zm1 * resonance)))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update( 
+								_alps[9].Update(inSamp + denormal + (_zm1 * resonance)))))))))));
 			break;
 		case 11:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update( 
-                             _alps[9].Update( 
-                              _alps[10].Update(inSamp + denormal + (_zm1 * resonance))))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update( 
+								_alps[9].Update( 
+								_alps[10].Update(inSamp + denormal + (_zm1 * resonance))))))))))));
 			break;
 		case 12:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update( 
-                             _alps[9].Update( 
-                              _alps[10].Update(
-                               _alps[11].Update(inSamp + denormal + (_zm1 * resonance)))))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update( 
+								_alps[9].Update( 
+								_alps[10].Update(
+								_alps[11].Update(inSamp + denormal + (_zm1 * resonance)))))))))))));
 			break;
 		case 13:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update( 
-                             _alps[9].Update( 
-                              _alps[10].Update(
-                               _alps[11].Update( 
-                                _alps[12].Update(inSamp + denormal + (_zm1 * resonance))))))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update( 
+								_alps[9].Update( 
+								_alps[10].Update(
+								_alps[11].Update( 
+								_alps[12].Update(inSamp + denormal + (_zm1 * resonance))))))))))))));
 			break;
 		case 14:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update( 
-                             _alps[9].Update( 
-                              _alps[10].Update(
-                               _alps[11].Update( 
-                                _alps[12].Update( 
-                                 _alps[13].Update(inSamp + denormal + (_zm1 * resonance)))))))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update( 
+								_alps[9].Update( 
+								_alps[10].Update(
+								_alps[11].Update( 
+								_alps[12].Update( 
+									_alps[13].Update(inSamp + denormal + (_zm1 * resonance)))))))))))))));
 			break;
 		case 15:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update( 
-                             _alps[9].Update( 
-                              _alps[10].Update(
-                               _alps[11].Update( 
-                                _alps[12].Update( 
-                                 _alps[13].Update( 
-                                  _alps[14].Update(inSamp + denormal + (_zm1 * resonance))))))))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update( 
+								_alps[9].Update( 
+								_alps[10].Update(
+								_alps[11].Update( 
+								_alps[12].Update( 
+									_alps[13].Update( 
+									_alps[14].Update(inSamp + denormal + (_zm1 * resonance))))))))))))))));
 			break;
 		case 16:
-			y = 	_alps[0].Update(
-        			 _alps[1].Update(
-                      _alps[2].Update(
-                       _alps[3].Update(
-                        _alps[4].Update(
-                         _alps[5].Update( 
-                          _alps[6].Update( 
-                           _alps[7].Update( 
-                            _alps[8].Update( 
-                             _alps[9].Update( 
-                              _alps[10].Update(
-                               _alps[11].Update( 
-                                _alps[12].Update( 
-                                 _alps[13].Update( 
-                                  _alps[14].Update( 
-                                   _alps[15].Update(inSamp + denormal + (_zm1 * resonance)))))))))))))))));
+			y = 				_alps[0].Update(
+						_alps[1].Update(
+						_alps[2].Update(
+						_alps[3].Update(
+						_alps[4].Update(
+							_alps[5].Update( 
+							_alps[6].Update( 
+							_alps[7].Update( 
+							_alps[8].Update( 
+								_alps[9].Update( 
+								_alps[10].Update(
+								_alps[11].Update( 
+								_alps[12].Update( 
+									_alps[13].Update( 
+									_alps[14].Update( 
+									_alps[15].Update(inSamp + denormal + (_zm1 * resonance)))))))))))))))));
 			break;
 		}
-        _zm1 = y;
+		_zm1 = y;
 		denormal = -denormal;
-        return inSamp + y * depth;
+		return inSamp + y * depth;
 	}
 	class AllpassDelay{
-    public:
-    	AllpassDelay()
-        	: _a1( 0.f )
-            , _zm1( 0.f )
-            {}
+	public:
+		AllpassDelay()
+			: _a1( 0.f )
+			, _zm1( 0.f )
+			{}
 
 		void Wipe()
 		{
 			_a1 = _zm1 = 0;
 		}
-        void Delay( float delay )
+		void Delay( float delay )
 		{ //sample delay time
-			const static float 	denormal = (float)1.0E-18;
+			const static float 				denormal = (float)1.0E-18;
 
-        	_a1 = (1.f - delay) / (1.f + delay)+denormal;
-        }
+			_a1 = (1.f - delay) / (1.f + delay)+denormal;
+		}
 
-        float Update( float inSamp )
+		float Update( float inSamp )
 		{
-			const static float 	denormal = (float)1.0E-18;
-        	float y = inSamp * -_a1 + _zm1+denormal;
-        	_zm1 = y * _a1 + inSamp+denormal;
+			const static float 				denormal = (float)1.0E-18;
+			float y = inSamp * -_a1 + _zm1+denormal;
+			_zm1 = y * _a1 + inSamp+denormal;
 
-            return y;
-        }
-    private:
-    	float _a1, _zm1;
-    };
+			return y;
+		}
+	private:
+		float _a1, _zm1;
+	};
 
-    AllpassDelay _alps[16];
-    float _zm1;
+	AllpassDelay _alps[16];
+	float _zm1;
 	CBiquad Biquad,Biquad2;
 	
 protected:

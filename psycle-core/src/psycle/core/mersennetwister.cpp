@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation for psy::core::dsp::MersenneTwister based on rev.2631
 
-/* 
+/*
 		A C-program for MT19937, with initialization improved 2002/1/26.
 		Coded by Takuji Nishimura and Makoto Matsumoto.
 
@@ -58,8 +58,10 @@ namespace psy
 	{
 		namespace dsp
 		{
-			unsigned long	MersenneTwister::mt[PERIOD_N];		 /* the array for the state vector  */
-			int				MersenneTwister::mti=PERIOD_N+1;	/* mti==PERIOD_N+1 means mt[PERIOD_N] is not initialized */
+			/// the array for the state vector
+			unsigned long MersenneTwister::mt[PERIOD_N];
+			/// mti==PERIOD_N+1 means mt[PERIOD_N] is not initialized
+			int           MersenneTwister::mti = PERIOD_N + 1;
 
 			/* initializes mt[PERIOD_N] with a seed */
 			void MersenneTwister::init_genrand(unsigned long s)
