@@ -1108,7 +1108,7 @@ namespace psy
 		{
 			///\todo rework for multitracking
 			#if 0
-				/*  bool bEditMode = true;
+				bool bEditMode = true;
 
 				// UNDO CODE MIDI PATTERN TWEAK
 				if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
