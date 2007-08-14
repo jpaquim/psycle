@@ -3,14 +3,29 @@
 svn propset svn:eol-style native $(find $(dirname $0) \( \
 	-name \*.cpp -or \
 	-name \*.hpp -or \
+	-name \*.hpp.in -or \
+	-name \*.ipp -or \
+	-name \*.c -or \
 	-name \*.h -or \
+	-name \*.h.in -or \
+	-name \*.i -or \
 	-name \*.rc -or \
+	-name \*.xpm -or \
 	-name \*.py -or \
+	-name \*.sh -or \
 	-name \*.cmd -or \
 	-name \*.txt -or \
 	-name \*.text -or \
 	-name \*.html -or \
+	-name \*.pro -or \
+	-name \*.pri -or \
+	-name \*.m4 -or \
+	-name \*.ac -or \
+	-name \*.am -or \
+	-name \*.pc -or \
+	-name \*.pc.in -or \
 	-name SConstruct -or \
+	-name SConscript -or \
 	-name README -or \
 	-name README-alpha -or \
 	-name INSTALL -or \
