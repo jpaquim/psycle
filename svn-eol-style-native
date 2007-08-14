@@ -17,6 +17,7 @@ svn propset svn:eol-style native $(find $(dirname $0) \( \
 	-name \*.txt -or \
 	-name \*.text -or \
 	-name \*.html -or \
+	-name \*.xml -or \
 	-name \*.pro -or \
 	-name \*.pri -or \
 	-name \*.m4 -or \
