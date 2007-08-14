@@ -21,7 +21,7 @@
 #include <psycle/core/player.h>
 
 #include "audioconfigdlg.h"
-#include "global.h"
+#include <gui/global.h>
 #include "configuration.h"
 
 #include <QHBoxLayout>
@@ -33,7 +33,7 @@ AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	: QDialog( parent )
 {
 	setWindowTitle("Select Audio Driver");
-	config_ = Global::pConfig();
+	config_ = ::Global::pConfig();
 	selectedDriver_ = 0;
 
 	QHBoxLayout *mainLay = new QHBoxLayout();
