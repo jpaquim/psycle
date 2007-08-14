@@ -30,17 +30,17 @@ class SequencerDraw;
 class BeatRuler : public QGraphicsItem {
 
 public :
-    BeatRuler( SequencerDraw* seqGui );
-    ~BeatRuler();
+	BeatRuler( SequencerDraw* seqGui );
+	~BeatRuler();
 
-    QRectF boundingRect() const;
-    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	QRectF boundingRect() const;
+	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 protected:
 
 private:
-    SequencerDraw* sDraw_;
-    int preferredHeight( ) const;
+	SequencerDraw* sDraw_;
+	int preferredHeight( ) const;
 };
 
 #endif

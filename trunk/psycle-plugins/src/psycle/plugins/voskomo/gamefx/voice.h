@@ -108,27 +108,27 @@ private:
 	
 	PERFORMANCE *vpar;
 	int replaycount;
-	int	perf_count;
+	int				perf_count;
 	int perf_index;
 
 	float minFade;
 	float fastRelease;
 	int cur_basenote;
 	int cur_realnote;
-	int	cur_volume;
+	int				cur_volume;
 	float voicevol;
 	float volmulti;
 	float nextvoicevol;
 	bool trigger;
 	bool keyrelease;
 	bool stopsend;
-	int	cur_waveform;
-	int	cur_transpose;
+	int				cur_waveform;
+	int				cur_transpose;
 	float add_to_pitch;
-	int	cur_option;
-	int	cur_command;
-	int	cur_parameter;
-	int	cur_speed;
+	int				cur_option;
+	int				cur_command;
+	int				cur_parameter;
+	int				cur_speed;
 	int cur_pw;
 	float speed;
 	float spdcoef;

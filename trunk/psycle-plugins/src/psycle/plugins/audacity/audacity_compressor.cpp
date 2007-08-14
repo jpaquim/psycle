@@ -4,14 +4,14 @@
 //   Original
 /**********************************************************************
 
-  Audacity: A Digital Audio Editor
+	Audacity: A Digital Audio Editor
 
-  Compressor.cpp
+	Compressor.cpp
 
-  Dominic Mazzoni
+	Dominic Mazzoni
 
-  Steve Jolly made it inherit from EffectSimpleMono.
-  GUI added and implementation improved by Dominic Mazzoni, 5/11/2003.
+	Steve Jolly made it inherit from EffectSimpleMono.
+	GUI added and implementation improved by Dominic Mazzoni, 5/11/2003.
 
 **********************************************************************/
 
@@ -29,40 +29,40 @@
 CMachineParameter const paraThreshold = 
 { 
 	"Threshold",
-	"Threshold",						// description
-	-36,												// MinValue	
-	-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Threshold",																								// description
+	-36,																																																// MinValue				
+	-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	-12,
 };
 
 CMachineParameter const paraRatio = 
 { 
 	"Ratio",
-	"Ratio",						// description
-	100,												// MinValue	
-	10000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Ratio",																								// description
+	100,																																																// MinValue				
+	10000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	200,
 };
 
 CMachineParameter const paraAttackTime = 
 { 
 	"Attack",
-	"Attack",						// description
-	100,												// MinValue	
-	10000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Attack",																								// description
+	100,																																																// MinValue				
+	10000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	200,
 };
 
 CMachineParameter const paraDecayTime = 
 { 
 	"Decay",
-	"Decay",						// description
-	100,												// MinValue	
-	10000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Decay",																								// description
+	100,																																																// MinValue				
+	10000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1000,
 };
 
@@ -70,10 +70,10 @@ CMachineParameter const paraDecayTime =
 CMachineParameter const paraUseGain = 
 { 
 	"Use gain",
-	"Use gain",											// description
-	0,												// MinValue	
-	1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Use gain",																																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
@@ -89,18 +89,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	EFFECT,										// flags
-	NUMPARAMETERS,								// numParameters
-	pParameters,								// Pointer to parameters
+	MI_VERSION,				
+	EFFECT,																																								// flags
+	NUMPARAMETERS,																																// numParameters
+	pParameters,																																// Pointer to parameters
 #ifdef _DEBUG
-	"Audacity Compressor (Debug build)",		// name
+	"Audacity Compressor (Debug build)",								// name
 #else
-	"Audacity Compressor",						// name
+	"Audacity Compressor",																								// name
 #endif
-	"ACompressor",							// short name
-	"Dominic Mazzoni/Sartorius",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"ACompressor",																												// short name
+	"Dominic Mazzoni/Sartorius",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -186,7 +186,7 @@ void mi::ParameterTweak(int par, int val)
 			sr.setGain(val==1);
 			break;
 		default:
-			 break;
+				break;
 
 	}
 }

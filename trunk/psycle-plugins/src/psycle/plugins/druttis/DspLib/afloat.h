@@ -1,26 +1,26 @@
 #pragma once
 
 //============================================================================
-//	Always good to have defines
+//				Always good to have defines
 //============================================================================
 
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
 
 //============================================================================
-//	afloat structure (source, target, current) values
+//				afloat structure (source, target, current) values
 //============================================================================
 
 typedef struct
 {
-	float	source;
-	float	target;
-	float	current;
+	float				source;
+	float				target;
+	float				current;
 }
 afloat;
 
 //============================================================================
-//	SetAFloat
+//				SetAFloat
 //============================================================================
 
 inline void SetAFloat(afloat *afloat, float value)
@@ -30,7 +30,7 @@ inline void SetAFloat(afloat *afloat, float value)
 }
 
 //============================================================================
-//	AnimateAFloat
+//				AnimateAFloat
 //============================================================================
 
 inline void AnimateAFloat(afloat* p, float fac)

@@ -119,35 +119,35 @@ zipwriter_file *zipwriter_addfile(zipwriter *d, const char *name,
 	}
 
 	memcpy(f->head2, "PK\1\2"
-		"\027\00"	/* 4 made by version */
-		"\012\00"	/* 6 version needed to extract */
-		"\0\0"		/* 8 general purpose bit flag */
-		"\1\1"		/* 10 compression method */
-		"\1\1"		/* 12 mtime file time */
-		"\1\1"		/* 14 mtime file date */
-		"\2\2\2\2"	/* 16 crc32 */
-		"\3\3\3\3"	/* 20 compressed size */
-		"\3\3\3\3"	/* 24 uncompressed size */
-		"\4\4"		/* 28 file name length */
-		"\0\0"		/* 30 extra field length */
-		"\0\0"		/* 32 file comment length */
-		"\0\0"		/* 34 disk number */
-		"\0\0"		/* 36 internal file attributes */
-		"\0\0\0\0"	/* 38 external file attributes */
-		"\0\0\0\0"	/* 42 relative offset of local header */
+		"\027\00"  /* 4 made by version */
+		"\012\00"  /* 6 version needed to extract */
+		"\0\0"     /* 8 general purpose bit flag */
+		"\1\1"     /* 10 compression method */
+		"\1\1"     /* 12 mtime file time */
+		"\1\1"     /* 14 mtime file date */
+		"\2\2\2\2" /* 16 crc32 */
+		"\3\3\3\3" /* 20 compressed size */
+		"\3\3\3\3" /* 24 uncompressed size */
+		"\4\4"     /* 28 file name length */
+		"\0\0"     /* 30 extra field length */
+		"\0\0"     /* 32 file comment length */
+		"\0\0"     /* 34 disk number */
+		"\0\0"     /* 36 internal file attributes */
+		"\0\0\0\0" /* 38 external file attributes */
+		"\0\0\0\0" /* 42 relative offset of local header */
 	, 46);
 
 	memcpy(f->head, "PK\3\4"
-		"\012\0"	/* 4 version needed to extract */
-		"\0\0"		/* 6 general purpose bit flag */
-		"\1\1"		/* 8 compression method */
-		"\1\1"		/* 10 mtime file time */
-		"\1\1"		/* 12 mtime file date */
-		"\2\2\2\2"	/* 14 crc32 */
-		"\3\3\3\3"	/* 18 compressed size */
-		"\3\3\3\3"	/* 22 uncompressed size */
-		"\4\4"		/* 26 file name length */
-		"\0\0"		/* 28 extra field length */
+		"\012\0"   /* 4 version needed to extract */
+		"\0\0"     /* 6 general purpose bit flag */
+		"\1\1"     /* 8 compression method */
+		"\1\1"     /* 10 mtime file time */
+		"\1\1"     /* 12 mtime file date */
+		"\2\2\2\2" /* 14 crc32 */
+		"\3\3\3\3" /* 18 compressed size */
+		"\3\3\3\3" /* 22 uncompressed size */
+		"\4\4"     /* 26 file name length */
+		"\0\0"     /* 28 extra field length */
 	, 30);
 	/* compression method */
 
@@ -173,7 +173,7 @@ zipwriter_file *zipwriter_addfile(zipwriter *d, const char *name,
 		f->proc = &zm_deflate;
 	}
 	n = strlen(name);
-	f->head[26] = n & 255;	/* LSB */
+	f->head[26] = n & 255; /* LSB */
 	f->head[27] = (n >> 8) & 255;
 	f->filename = (char*)(f->head+30);
 	memcpy(f->head+30, name, n);
@@ -280,13 +280,13 @@ static void _zw_eodr(zipwriter *d, unsigned char *ptr)
 {
 	off_t o;
 	memcpy(ptr,"PK\5\6"
-			"\0\0"	/* 4 number of this disk */
-			"\0\0"	/* 6 disk with the central directory */
-			"\1\1"	/* 8 number of entries in central directory on this disk */
-			"\1\1"	/* 10 number of entries in central directory */
+			"\0\0"     /* 4 number of this disk */
+			"\0\0"     /* 6 disk with the central directory */
+			"\1\1"     /* 8 number of entries in central directory on this disk */
+			"\1\1"     /* 10 number of entries in central directory */
 			"\2\2\2\2" /* 12 size in bytes of central directory */
 			"\3\3\3\3" /* 16 global offset to start of central directory */
-			"\0\0" /* 20 comment length */
+			"\0\0"     /* 20 comment length */
 		, 22);
 	o = lseek(d->fd, 0, SEEK_CUR);
 	if (o == -1) d->err = errno;
@@ -418,7 +418,8 @@ static void _zm_deflate_chunk(zipwriter_file *f, const void *buf, unsigned int l
 	s->next_in = (unsigned char *)buf;
 	s->avail_in = len;
 
-CONT:	if (s->avail_out == 0) {
+	CONT:
+	if (s->avail_out == 0) {
 		_zw_write(f->top, f->top->buffer, ZW_BUFSIZE);
 		s->avail_out = ZW_BUFSIZE;
 		s->next_out = f->top->buffer;

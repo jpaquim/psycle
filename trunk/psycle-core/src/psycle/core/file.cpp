@@ -1,22 +1,22 @@
 /***************************************************************************
- *   Copyright (C) 2007 Psycledelics Community
- *   psycle.sf.net
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+	*   Copyright (C) 2007 Psycledelics Community
+	*   psycle.sf.net
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 
 #include "file.h"
 #include <fstream>
@@ -106,7 +106,7 @@ namespace psy {
 			// Handle to directory
 			if ((fhandle=FindFirstFileA(directory,&dir)) != INVALID_HANDLE_VALUE) {
 				do {  // readout directory
-					if (			
+					if (
 						( ( fMode & nDirs ) && ( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
 						|| 
 						( ( fMode & nFiles ) && !( dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ) 
@@ -143,7 +143,7 @@ namespace psy {
 
 			HKEY m_hKey = NULL;
 			LONG ReturnValue =  RegOpenKeyExW (hKeyRoot, pszPath, 0L,
-							   KEY_ALL_ACCESS, &m_hKey);
+								KEY_ALL_ACCESS, &m_hKey);
 
 			if(ReturnValue == ERROR_SUCCESS)
 			{
@@ -155,7 +155,7 @@ namespace psy {
 				char  szString[255];
 
 				LONG lReturn = RegQueryValueExW (m_hKey, pszKey, NULL,
-								 &dwType, (BYTE *) szString, &dwSize);
+									&dwType, (BYTE *) szString, &dwSize);
 
 				if(lReturn == ERROR_SUCCESS)
 				{
@@ -257,11 +257,11 @@ namespace psy {
 
 		// replaces entitys`s for xml writing
 		// There are 5 predefined entity references in XML:
-		// &lt; 	< 	less than 
-		// &gt; 	> 	greater than
-		// &amp; 	& 	ampersand 
-		// &apos; 	' 	apostrophe
-		// &quot; 	" 	quotation mark
+		// &lt;                 <               less than 
+		// &gt;                 >               greater than
+		// &amp;                &               ampersand 
+		// &apos;               '               apostrophe
+		// &quot;               "               quotation mark
 		// Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true  replaces all.
 		std::string File::replaceIllegalXmlChr( const std::string & text, bool strict )
 		{

@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	CVoice.h
-//	--------
-//	druttis@darkface.pp.se
+//				CVoice.h
+//				--------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
@@ -14,64 +14,64 @@
 #define EXCITATION_FILTER_LENGTH 3
 
 //============================================================================
-//	Voice globals
+//				Voice globals
 //============================================================================
 struct GLOBALS
 {
 	//
-	//	This should always be here
-	int		srate;
+	//				This should always be here
+	int								srate;
 	//
-	//	Declare your global synth variables here
-	float	pluckPos;
-	float	damping;
-	float	volume;
-	float	vib_amount;
-	float	vib_speed;
-	float	vib_delay;
-	float	schoolness;
+	//				Declare your global synth variables here
+	float				pluckPos;
+	float				damping;
+	float				volume;
+	float				vib_amount;
+	float				vib_speed;
+	float				vib_delay;
+	float				schoolness;
 };
 //============================================================================
-//	CVoice class
+//				CVoice class
 //============================================================================
 class CVoice
 {
 	//------------------------------------------------------------------------
-	//	Data
+	//				Data
 	//------------------------------------------------------------------------
 public:
 	//
-	//	These two should always be here
-	GLOBALS		*globals;
-	int			ticks_remaining;
-	//	
-	//	Declare your runtime variables here
-	DLineN		delayLine;
-	DLineN		combDelay;
-	BiQuad		loopFilt;
-	long		length;
-	float		loopGain;
-	float		lastFreq;
-	float		lastLength;
-	float		pluckAmp;
-	float		pluckPos;
-	float		plucker;
-	float		lastOutput;
+	//				These two should always be here
+	GLOBALS								*globals;
+	int												ticks_remaining;
+	//				
+	//				Declare your runtime variables here
+	DLineN								delayLine;
+	DLineN								combDelay;
+	BiQuad								loopFilt;
+	long								length;
+	float								loopGain;
+	float								lastFreq;
+	float								lastLength;
+	float								pluckAmp;
+	float								pluckPos;
+	float								plucker;
+	float								lastOutput;
 	//
-	CEnvelope	vca;
+	CEnvelope				vca;
 	//
-	//	Runtime variables
-	float		vib_phase;
-	float		vib_dtime;
-	float		vib_out;
+	//				Runtime variables
+	float								vib_phase;
+	float								vib_dtime;
+	float								vib_out;
 	//
 	//
-	float		currentFreq;
-	float		slideSpeed;
-	int			noteDelay;
-	float		lastCurrentFreq;
+	float								currentFreq;
+	float								slideSpeed;
+	int												noteDelay;
+	float								lastCurrentFreq;
 	//------------------------------------------------------------------------
-	//	Methods
+	//				Methods
 	//------------------------------------------------------------------------
 public:
 	CVoice();
@@ -86,29 +86,29 @@ public:
 	void NoteOff();
 	void NoteOn(int note, int volume, int cmd, int val);
 	//------------------------------------------------------------------------
-	//	IsFinished
-	//	returns true if voice is done playing
+	//				IsFinished
+	//				returns true if voice is done playing
 	//------------------------------------------------------------------------
 	inline bool IsActive()
 	{
 		return vca.IsActive();
 	}
 	//------------------------------------------------------------------------
-	//	GlobalTick
-	//	Method to handle parameter inertia and suchs things
+	//				GlobalTick
+	//				Method to handle parameter inertia and suchs things
 	//------------------------------------------------------------------------
 	inline static void GlobalTick()
 	{
 	}
 	//------------------------------------------------------------------------
-	//	VoiceTick
-	//	Method to handle voice specific things as LFO and envelopes
-	//	* tips, dont handle amplitude envelopes or lfo's here
+	//				VoiceTick
+	//				Method to handle voice specific things as LFO and envelopes
+	//				* tips, dont handle amplitude envelopes or lfo's here
 	//------------------------------------------------------------------------
 	inline void VoiceTick()
 	{
 		//
-		//	Slide control
+		//				Slide control
 		if (noteDelay == 0) {
 			if (slideSpeed != 0.0f) {
 				currentFreq += slideSpeed;
@@ -118,7 +118,7 @@ public:
 				}
 			}
 			//
-			//	Vibrato
+			//				Vibrato
 			if (globals->vib_delay == 0.0f) {
 				vib_out = 1.0f;
 			} else {
@@ -131,7 +131,7 @@ public:
 			}
 			vib_out *= globals->vib_amount * (float) sin(vib_phase * PI2);
 			vib_phase += globals->vib_speed;
-			vib_phase -= (float) f2i(vib_phase);		// Mod! :)
+			vib_phase -= (float) f2i(vib_phase);								// Mod! :)
 			float loopFilterDelay = 0.5f;
 			float freq = currentFreq + vib_out * currentFreq;
 			float length = (globals->srate / freq);
@@ -144,8 +144,8 @@ public:
 		}
 	}
 	//------------------------------------------------------------------------
-	//	Work
-	//	all sound generation is done here
+	//				Work
+	//				all sound generation is done here
 	//------------------------------------------------------------------------
 	inline void Work(float *left, float *right, int samps)
 	{

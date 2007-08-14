@@ -11,7 +11,7 @@
 #include <boost/signal.hpp>
 namespace boost
 {
-  namespace signalslib = signals;
+	namespace signalslib = signals;
 }
 
 #endif

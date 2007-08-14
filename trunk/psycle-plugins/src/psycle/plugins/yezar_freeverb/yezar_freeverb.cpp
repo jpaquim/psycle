@@ -9,26 +9,26 @@
 /////////////////////////////////////////////////////////////////////
 // Arguru's psycle port of Yezar freeverb
 
-#define NCOMBS	1
-#define NALLS	12
+#define NCOMBS				1
+#define NALLS				12
 
 CMachineParameter const paraCombdelay = 
 { 
 	"Absortion",
-	"Damp",											// description
-	1,												// MinValue	
-	640,											// MaxValue
-	MPF_STATE,										// Flags
+	"Damp",																																												// description
+	1,																																																// MinValue				
+	640,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	320,
 };
 
 CMachineParameter const paraCombseparator = 
 { 
 	"Stereo Width",
-	"Width",										// description
-	1,												// MinValue	
-	640,											// MaxValue
-	MPF_STATE,										// Flags
+	"Width",																																								// description
+	1,																																																// MinValue				
+	640,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	126,
 };
 
@@ -36,20 +36,20 @@ CMachineParameter const paraCombseparator =
 CMachineParameter const paraAPdelay = 
 { 
 	"Room size",
-	"Room size",									// description
-	1,												// MinValue	
-	640,											// MaxValue
-	MPF_STATE,										// Flags
+	"Room size",																																				// description
+	1,																																																// MinValue				
+	640,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	175,
 };
 
 CMachineParameter const paraDry = 
 { 
 	"Dry Amount",
-	"Dry",											// description
-	0,												// MinValue	
-	640,											// MaxValue
-	MPF_STATE,										// Flags
+	"Dry",																																												// description
+	0,																																																// MinValue				
+	640,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
@@ -57,10 +57,10 @@ CMachineParameter const paraDry =
 CMachineParameter const paraWet = 
 { 
 	"Wet Amount",
-	"Wet",											// description
-	0,												// MinValue	
-	640,											// MaxValue
-	MPF_STATE,										// Flags
+	"Wet",																																												// description
+	0,																																																// MinValue				
+	640,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	128,
 };
 
@@ -73,24 +73,24 @@ CMachineParameter const *pParameters[] =
 	&paraWet,
 };
 
-#pragma pack(1)		
+#pragma pack(1)								
 
 #pragma pack()
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	5,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	0,																																								// flags
+	5,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"Jezar Freeverb (Debug build)",			// name
+	"Jezar Freeverb (Debug build)",												// name
 #else
-	"Jezar Freeverb",						// name
+	"Jezar Freeverb",																								// name
 #endif
-	"Freeverb",								// short name
-	"Jezar",								// author
-	"About",									// A command, that could be use for open an editor, etc...
+	"Freeverb",																																// short name
+	"Jezar",																																// author
+	"About",																																				// A command, that could be use for open an editor, etc...
 	5
 };
 
@@ -172,8 +172,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	// anyway, a few calcs doesnt take too CPU.
 
 	//float const cf=(float)Vals[4]*0.0000453514739229024943310657596371882f;
-	//float const dry_amount	=(float)Vals[5]*0.00390625f;
-	//float const wet_amount	=(float)Vals[6]*0.00390625f;
+	//float const dry_amount				=(float)Vals[5]*0.00390625f;
+	//float const wet_amount				=(float)Vals[6]*0.00390625f;
 	
 	//float l_revresult=0;
 	//float r_revresult=0;

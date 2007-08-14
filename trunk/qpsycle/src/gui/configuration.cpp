@@ -74,7 +74,7 @@ Configuration::Configuration()
 	#endif
 	#if defined PSYCLE__ESOUND_AVAILABLE
 		addAudioDriver(new psy::core::ESoundOut);
-	#endif		
+	#endif																																																																																																																																
 	#if defined PSYCLE__GSTREAMER_AVAILABLE
 		addAudioDriver(new psy::core::GStreamerOut);
 	#endif
@@ -91,7 +91,7 @@ Configuration::Configuration()
 		addAudioDriver(new psy::core::NetAudioOut);
 	#endif
 	configureKeyBindings();
-	loadConfig();			
+	loadConfig();																																																																																																																																																																																																
 }
 
 #if 0
@@ -103,8 +103,8 @@ void Configuration::setXmlDefaults() {
 	xml_mem_ += " <path id='plugindir'";
 	xml_mem_ += " src='c:\\Programme\\Psycle\\PsyclePlugins' />";
 
-	//			xml_mem_ += " <audio enable='1' />";
-	//			xml_mem_ += " <driver name='mswaveout' />"; 
+	//																																																																																																																																																																																																xml_mem_ += " <audio enable='1' />";
+	//																																																																																																																																																																																																xml_mem_ += " <driver name='mswaveout' />"; 
 
 	/*  xml_mem_ += " <!-- help configuration -->";
 	// bohan i don't know where to close that comment, so i close it here: */
@@ -325,7 +325,7 @@ void Configuration::loadConfig( const std::string & path )
 			doEnableSound = true;
 		}
 		QDomElement driverElm = root.firstChildElement( "driver" );
-		if ( doEnableSound ) {		
+		if ( doEnableSound ) {																																																																																																																																
 			setDriverByName( driverElm.attribute("name").toStdString() );
 		} 
 
@@ -339,7 +339,7 @@ void Configuration::loadConfig( const std::string & path )
 				psy::core::AudioDriverSettings settings = it->second->settings();
 				settings.setDeviceName( deviceName );
 				it->second->setSettings( settings );
-			}		
+			}																																																																																																																																
 		}
 
 		// Options.

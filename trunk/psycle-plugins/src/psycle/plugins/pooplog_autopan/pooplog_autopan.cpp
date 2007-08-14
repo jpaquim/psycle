@@ -28,7 +28,7 @@ v0.01b
 - initial beta release
 
 /////////////////////////////////////////////////////////////////////
- */
+	*/
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
@@ -57,13 +57,13 @@ inline int f2i(float flt)
 
 #define FILEVERSION 2
 #define MAXSYNCMODES 16
-#define FILTER_CALC_TIME	1
+#define FILTER_CALC_TIME				1
 #define MAXLFOWAVE 15
-#define TWOPI				6.28318530717958647692528676655901f
+#define TWOPI																6.28318530717958647692528676655901f
 #define SAMPLE_LENGTH  4096
 #define MAXPHASEMIX 9
 #define MAXENVTYPE 2
-#define MAX_RATE		8192
+#define MAX_RATE								8192
 #define MAXWAVE 17
 #define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
@@ -74,10 +74,10 @@ float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 CMachineParameter const paraNULL = 
 { 
 	" ",
-	" ",							// description
-	0,												// MinValue	
-	1,											// MaxValue
-	MPF_LABEL,										// Flags
+	" ",																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_LABEL,																																								// Flags
 	0
 };
 
@@ -85,10 +85,10 @@ CMachineParameter const paraNULL =
 CMachineParameter const paraVCFlfospeed = 
 { 
 	"LFO Rate",
-	"LFO Rate",								// description
-	0,												// MinValue	
-	MAX_RATE,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	6
 };
 
@@ -96,80 +96,80 @@ CMachineParameter const paraVCFlfospeed =
 CMachineParameter const paraPanlfoamplitude = 
 { 
 	"Pan LFO Depth",
-	"Pan LFO Depth",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Pan LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraSmoothing = 
 { 
 	"Delta Smoothing",
-	"Delta Smoothing",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delta Smoothing",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraVCFlfowave = 
 { 
 	"LFO Wave",
-	"LFO Wave",							// description
-	0,												// MinValue	
-	MAXLFOWAVE-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraVCFlfophase = 
 { 
 	"LFO Phase",
-	"LFO Phase",									// description
-	0,												// MinValue	
-	0xffff,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraOUTmix = 
 { 
 	"Mix",
-	"Mix",									// description
-	0,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256
 };
 
 CMachineParameter const paraInputGain = 
 { 
 	"Input Gain",
-	"Input Gain",									// description
-	0,											// MinValue	
-	1024,											// MaxValue
-	MPF_STATE,										// Flags
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256
 };
 
 CMachineParameter const paraInertia = 
 {
 	"Tweak Inertia",
-	"Tweak Inertia",									// description
-	0,												// MinValue	
-	1024,											// MaxValue
-	MPF_STATE,										// Flags
+	"Tweak Inertia",																																				// description
+	0,																																																// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraPan = 
 { 
-	"Panning",				
-	"Panning",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Panning",																
+	"Panning",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
@@ -202,14 +202,14 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	e_numVALS,										// numParameters
-	pParameters,							// Pointer to parameters
-	PLUGIN_NAME,					// name
-	"Pooplog Autopan",							// short name
-	"Jeremy Evers",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	MI_VERSION,				
+	0,																																								// flags
+	e_numVALS,																																								// numParameters
+	pParameters,																												// Pointer to parameters
+	PLUGIN_NAME,																				// name
+	"Pooplog Autopan",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	3
 };
 
@@ -258,7 +258,7 @@ private:
 	int song_sync; 
 	int song_freq;
 	float *pvcflfowave;
-	int	vcflfowave;
+	int				vcflfowave;
 	int vcflfospeed;
 	int panlfoamplitude;
 	float rmix;
@@ -521,20 +521,20 @@ void mi::ParameterTweak(int par, int val)
 		case e_paraInputGain:
 			InGain = val/256.0f;
 			break;
-		case e_paraPanlfoamplitude:		NewInertia(&panlfoamplitude, val); break;
-		case e_paraVCFlfospeed:			NewInertia(&vcflfospeed, val); break;
-		case e_paraVCFlfowave:			pvcflfowave=SourceWaveTable[val%MAXLFOWAVE]; vcflfowave=val%MAXLFOWAVE; break;
+		case e_paraPanlfoamplitude:								NewInertia(&panlfoamplitude, val); break;
+		case e_paraVCFlfospeed:												NewInertia(&vcflfospeed, val); break;
+		case e_paraVCFlfowave:												pvcflfowave=SourceWaveTable[val%MAXLFOWAVE]; vcflfowave=val%MAXLFOWAVE; break;
 		case e_paraOUTmix:
 			// mix
 			wmix = val/256.0f;
 			dmix = 1.0f-wmix;
 			break;
-		case e_paraPan:		NewInertia(&pan, val); break;
+		case e_paraPan:								NewInertia(&pan, val); break;
 		case e_paraVCFlfophase:
 			vcflfophase = val * (SAMPLE_LENGTH*2/65536.0f);
 			break;
-		case e_paraSmoothing:				NewInertia(&smoothing, (257-val)*2); break;
-		case e_paraInertia:	inertia = val; break;
+		case e_paraSmoothing:																NewInertia(&smoothing, (257-val)*2); break;
+		case e_paraInertia:				inertia = val; break;
 	}
 }
 
@@ -624,7 +624,7 @@ void mi::InitWaveTable()
 		SourceWaveTable[0][c]=float(sin(sval));
 
 		// triangle
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			SourceWaveTable[1][c]=(c2*(1.0f/(SAMPLE_LENGTH/2)));
 		}
@@ -666,17 +666,17 @@ void mi::InitWaveTable()
 		}
 
 		// inv sin
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[6][c] = float((1.0-sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[6][c] = float((1.0-sin(sval-PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[6][c] = float((-1.0-sin(sval+PI/2)));
@@ -708,7 +708,7 @@ void mi::InitWaveTable()
 
 
 		// soft square
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			SourceWaveTable[10][c] = ((SourceWaveTable[0][c]*0.5f) + (SourceWaveTable[4][c]*0.5f));// - fabs(sin(sval*32.0f)*0.2f*SourceWaveTable[5][c]));
 		}
@@ -718,17 +718,17 @@ void mi::InitWaveTable()
 		}
 
 		// super mw
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[11][c] = float((sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[11][c] = float((sin(sval-PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[11][c] = float((sin(sval+PI/2)));
@@ -740,17 +740,17 @@ void mi::InitWaveTable()
 		}
 
 		// racer
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[12][c] = float((sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[12][c] = float((sin(sval*2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[12][c] = float((sin(sval+PI/2)));

@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	Slicit.cpp
-//	----------
-//	druttis@darkface.pp.se
+//				Slicit.cpp
+//				----------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
@@ -12,14 +12,14 @@
 #include "../dsp/Inertia.h"
 
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
-#define MAC_NAME	"Slicit"
-#define MAC_VERSION	"1.0"
-#define MAC_AUTHOR	"Druttis"
+#define MAC_NAME				"Slicit"
+#define MAC_VERSION				"1.0"
+#define MAC_AUTHOR				"Druttis"
 
 //============================================================================
-//	Wavetable
+//				Wavetable
 //============================================================================
 #define NUM_PROGRAMS 16
 #define NUM_STEPS 16
@@ -33,7 +33,7 @@ char *FTYPE_STRING[3] = { "off", "1-Pole LP", "1-Pole HP" };
 int SPEED_FACTORS[4] = { 1, 2, 4, 8 };
 
 //============================================================================
-//	Parameters
+//				Parameters
 //============================================================================
 #define PARAM_PROGRAM_NR 0
 CMachineParameter const paramProgramNr = { "Program Nr.", "Program Nr.", 0, 15, MPF_STATE, 0 };
@@ -242,7 +242,7 @@ CMachineParameter const paramFFreq16 = { "F.Freq 16", "F.Freq 16", 0, 256, MPF_S
 #define NUM_PARAMS 68
 
 //============================================================================
-//	Parameter list
+//				Parameter list
 //============================================================================
 
 CMachineParameter const *pParams[] =
@@ -319,22 +319,22 @@ CMachineParameter const *pParams[] =
 
 struct ELEM
 {
-	short	level;
-	short	attack;
-	short	pan;
-	short	ffreq;
+	short				level;
+	short				attack;
+	short				pan;
+	short				ffreq;
 };
 
 struct PROG
 {
-	short	length;	// 0x00ff = length, 0xff00 = last used program nr
-	short	speed;
-	short	ftype;
-	ELEM	elems[NUM_STEPS];
+	short				length;				// 0x00ff = length, 0xff00 = last used program nr
+	short				speed;
+	short				ftype;
+	ELEM				elems[NUM_STEPS];
 };
 
 //============================================================================
-//	Machine info
+//				Machine info
 //============================================================================
 CMachineInfo const MacInfo =
 {
@@ -354,7 +354,7 @@ CMachineInfo const MacInfo =
 };
 
 //============================================================================
-//	Machine
+//				Machine
 //============================================================================
 class mi : public CMachineInterface
 {
@@ -436,29 +436,29 @@ public:
 public:
 
 	// Programs
-	PROG	*m_programs;
+	PROG				*m_programs;
 
 	// Program position
-	int		m_pos;
+	int								m_pos;
 
 	// Inertias
-	Inertia	m_level;
+	Inertia				m_level;
 	Inertia m_pan;
 	Inertia m_ffreq;
 
 	// Remainer
-	int		m_remainer;
+	int								m_remainer;
 
 	// Filter buffers
-	float	m_in[2][2];
-	float	m_out[2][2];
+	float				m_in[2][2];
+	float				m_out[2][2];
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Constructor
+//				Constructor
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -471,7 +471,7 @@ mi::mi()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Destructor
+//				Destructor
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -484,7 +484,7 @@ mi::~mi()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	SetProgramNr
+//				SetProgramNr
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -505,7 +505,7 @@ void mi::SetProgramNr(int nr)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	PutData
+//				PutData
 //
 //////////////////////////////////////////////////////////////////////
 void mi::PutData(void * pData)
@@ -518,7 +518,7 @@ void mi::PutData(void * pData)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	GetData
+//				GetData
 //
 //////////////////////////////////////////////////////////////////////
 void mi::GetData(void * pData)
@@ -530,7 +530,7 @@ void mi::GetData(void * pData)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	GetDataSize
+//				GetDataSize
 //
 //////////////////////////////////////////////////////////////////////
 int mi::GetDataSize()
@@ -540,7 +540,7 @@ int mi::GetDataSize()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Init
+//				Init
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -565,7 +565,7 @@ void mi::Init()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Stop
+//				Stop
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -585,7 +585,7 @@ void mi::Stop()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Command
+//				Command
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -607,7 +607,7 @@ void mi::Command()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	ParameterTweak
+//				ParameterTweak
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -706,7 +706,7 @@ void mi::ParameterTweak(int par, int val)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	DescribeValue
+//				DescribeValue
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -786,7 +786,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case PARAM_ATTACK14:
 		case PARAM_ATTACK15:
 		case PARAM_ATTACK16:
-			sprintf(txt, "%.2f ms", float(value) * 0.125f + 5.0f);	// 5.0 - 37 ms
+			sprintf(txt, "%.2f ms", float(value) * 0.125f + 5.0f);				// 5.0 - 37 ms
 			break;
 		case PARAM_FILTER_TYPE:
 			sprintf(txt, "%s", FTYPE_STRING[value]);
@@ -817,30 +817,30 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 
 //////////////////////////////////////////////////////////////////////
 //
-//	SequencerTick
+//				SequencerTick
 //
 //////////////////////////////////////////////////////////////////////
 
 void mi::SequencerTick()
 {
-	//	Insert code here for effects.
+	//				Insert code here for effects.
 	NextStep();
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-//	SequencerTick
+//				SequencerTick
 //
 //////////////////////////////////////////////////////////////////////
 
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	//	Insert code here for synths.
+	//				Insert code here for synths.
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Work
+//				Work
 //
 //////////////////////////////////////////////////////////////////////
 

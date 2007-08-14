@@ -24,10 +24,10 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsScene>
- 
+	
 class WaveDisplay : public QGraphicsView
 {
-     Q_OBJECT
+		Q_OBJECT
 
 
 public:
@@ -42,14 +42,14 @@ private:
 	QGraphicsScene *wavescene;
 	
 	QGraphicsTextItem *nodata;
-//	QGraphicsTextItem *left;
-//	QGraphicsTextItem *right;
+//																QGraphicsTextItem *left;
+//																QGraphicsTextItem *right;
 	
 	
-/*	QGraphicsLineItem *stereo_centerline;
+/*																QGraphicsLineItem *stereo_centerline;
 	QGraphicsLineItem *stereo_leftline;
 	QGraphicsLineItem *stereo_rightline; */
-    
+	
 };
 
 #endif

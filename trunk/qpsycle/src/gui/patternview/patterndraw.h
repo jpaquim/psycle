@@ -17,8 +17,8 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef PATTERNDRAW_H
- #define PATTERNDRAW_H
+	#ifndef PATTERNDRAW_H
+	#define PATTERNDRAW_H
 
 namespace psy { namespace core {
 class Song;
@@ -43,10 +43,10 @@ class PatternDraw;
 class TrackHeader;
 
 /**
- * TrackGeometry.
- */
+	* TrackGeometry.
+	*/
 class TrackGeometry {
-public:			
+public:																																																
 	TrackGeometry();
 
 	TrackGeometry( PatternDraw & patternDraw );
@@ -57,7 +57,7 @@ public:
 	int left() const;
 
 	void setWidth( int width );
-	int width() const;			
+	int width() const;																																																
 
 	void setVisibleColumns( int cols );
 	int visibleColumns() const;
@@ -78,49 +78,49 @@ private:
 
 class PatternDraw : public QGraphicsView
 {
-   Q_OBJECT
+	Q_OBJECT
 
 public:
-    PatternDraw( PatternView *patView );
+	PatternDraw( PatternView *patView );
 
-    PatternView *patternView() { return patView_; }
-    PatternGrid *patternGrid() { return patGrid_; }
+	PatternView *patternView() { return patView_; }
+	PatternGrid *patternGrid() { return patGrid_; }
 
-    const std::map<int, TrackGeometry> & trackGeometrics() const;
+	const std::map<int, TrackGeometry> & trackGeometrics() const;
 
-    void setupTrackGeometrics( int numberOfTracks );
-    void alignTracks();
+	void setupTrackGeometrics( int numberOfTracks );
+	void alignTracks();
 
-    int gridWidthByTrack( int track ) const;
-    int findTrackByXPos( int x ) const;
-    int xOffByTrack( int track ) const;
-    int xEndByTrack( int track ) const;
-    int trackWidthByTrack( int track ) const; 
-    TrackGeometry findTrackGeomByTrackNum( int trackNum );
-    int trackPaddingLeft() const { return 5; }
-    int trackPaddingRight() const { return 5; }
+	int gridWidthByTrack( int track ) const;
+	int findTrackByXPos( int x ) const;
+	int xOffByTrack( int track ) const;
+	int xEndByTrack( int track ) const;
+	int trackWidthByTrack( int track ) const; 
+	TrackGeometry findTrackGeomByTrackNum( int trackNum );
+	int trackPaddingLeft() const { return 5; }
+	int trackPaddingRight() const { return 5; }
 
-    int lineNumColWidth() const { return lineNumColWidth_; }
-    int trackHeaderHeight() const { return trackHeaderHeight_; }
+	int lineNumColWidth() const { return lineNumColWidth_; }
+	int trackHeaderHeight() const { return trackHeaderHeight_; }
 
 protected:
-    void scrollContentsBy ( int dx, int dy );
-    bool event( QEvent *event );
+	void scrollContentsBy ( int dx, int dy );
+	bool event( QEvent *event );
 
 private:
-   std::map<int, TrackGeometry> trackGeometryMap;
+	std::map<int, TrackGeometry> trackGeometryMap;
 
-   QGraphicsScene *scene_;
-   PatternView *patView_;
+	QGraphicsScene *scene_;
+	PatternView *patView_;
 
-   LineNumberColumn *lineNumCol_;
-   TrackHeader *trackHeader_;
-   PatternGrid *patGrid_;
+	LineNumberColumn *lineNumCol_;
+	TrackHeader *trackHeader_;
+	PatternGrid *patGrid_;
 
-   int lineNumColWidth_;
-   int trackHeaderHeight_;
+	int lineNumColWidth_;
+	int trackHeaderHeight_;
 
-   psy::core::SinglePattern *pattern_;
+	psy::core::SinglePattern *pattern_;
 };
 
 #endif

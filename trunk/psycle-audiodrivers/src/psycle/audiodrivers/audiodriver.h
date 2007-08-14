@@ -85,7 +85,7 @@ namespace psy
 
 			///\name bit depth
 			///\{
-				public:				
+				public:																
 					/// bit depth values 8 16 24 
 					int bitDepth() const { return bitDepth_; }
 					/// bit depth values 8 16 24 
@@ -102,7 +102,7 @@ namespace psy
 					/// channel mode 3 == stereo, 1 == mono left, 2 == mono right, 0 = mono both channels
 					void setChannelMode( int mode );
 				private:
-					int channelMode_;				
+					int channelMode_;																
 			///\}
 
 			///\todo doc

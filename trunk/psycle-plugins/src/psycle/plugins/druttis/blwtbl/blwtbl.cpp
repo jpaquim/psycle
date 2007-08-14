@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	blwtbl.cpp
+//				blwtbl.cpp
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 #include <packageneric/pre-compiled.private.hpp>
@@ -10,18 +10,18 @@
 #include "blwtbl.h"
 //////////////////////////////////////////////////////////////////////
 //
-//	Simple data
+//				Simple data
 //
 //////////////////////////////////////////////////////////////////////
-float		*psinetable;
-int			samplingrate;
-int			totalpartials;
-int			*preverse[2];
-float		*pfmtable;
-float		*ppmtable;
+float								*psinetable;
+int												samplingrate;
+int												totalpartials;
+int												*preverse[2];
+float								*pfmtable;
+float								*ppmtable;
 //////////////////////////////////////////////////////////////////////
 //
-//	BlankFunc
+//				BlankFunc
 //
 //////////////////////////////////////////////////////////////////////
 void BlankFunc(float *pbuf, int len, int partial)
@@ -33,7 +33,7 @@ void BlankFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	SineFunc
+//				SineFunc
 //
 //////////////////////////////////////////////////////////////////////
 void SineFunc(float *pbuf, int len, int partial)
@@ -45,7 +45,7 @@ void SineFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	BLTriangleFunc
+//				BLTriangleFunc
 //
 //////////////////////////////////////////////////////////////////////
 void BLTriangleFunc(float *pbuf, int len, int partial)
@@ -62,7 +62,7 @@ void BLTriangleFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	BLSquareFunc
+//				BLSquareFunc
 //
 //////////////////////////////////////////////////////////////////////
 void BLSquareFunc(float *pbuf, int len, int partial)
@@ -78,7 +78,7 @@ void BLSquareFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	BLSawtoothFunc
+//				BLSawtoothFunc
 //
 //////////////////////////////////////////////////////////////////////
 void BLSawtoothFunc(float *pbuf, int len, int partial)
@@ -91,7 +91,7 @@ void BLSawtoothFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	BLParabolaFunc
+//				BLParabolaFunc
 //
 //////////////////////////////////////////////////////////////////////
 void BLParabolaFunc(float *pbuf, int len, int partial)
@@ -106,7 +106,7 @@ void BLParabolaFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	TriangleFunc
+//				TriangleFunc
 //
 //////////////////////////////////////////////////////////////////////
 void TriangleFunc(float *pbuf, int len, int partial)
@@ -131,7 +131,7 @@ void TriangleFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	SquareFunc
+//				SquareFunc
 //
 //////////////////////////////////////////////////////////////////////
 void SquareFunc(float *pbuf, int len, int partial)
@@ -144,7 +144,7 @@ void SquareFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	SawtoothFunc
+//				SawtoothFunc
 //
 //////////////////////////////////////////////////////////////////////
 void SawtoothFunc(float *pbuf, int len, int partial)
@@ -156,7 +156,7 @@ void SawtoothFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	RevSawtoothFunc
+//				RevSawtoothFunc
 //
 //////////////////////////////////////////////////////////////////////
 void RevSawtoothFunc(float *pbuf, int len, int partial)
@@ -168,47 +168,47 @@ void RevSawtoothFunc(float *pbuf, int len, int partial)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	WAVESPEC type
+//				WAVESPEC type
 //
 //////////////////////////////////////////////////////////////////////
 typedef struct wavespec_t
 {
-	char		*pname;
-	bool		bandlimited;
-	void		(*func) (float *pbuf, int len, int partial);
-	float		*pdata;
-	int			ninstances;
+	char								*pname;
+	bool								bandlimited;
+	void								(*func) (float *pbuf, int len, int partial);
+	float								*pdata;
+	int												ninstances;
 }
 WAVESPEC;
 //////////////////////////////////////////////////////////////////////
 //
-//	WAVESPEC list
+//				WAVESPEC list
 //
 //////////////////////////////////////////////////////////////////////
 WAVESPEC wavespecs[] =
 {
-	{ "Blank",			false,	BlankFunc,			0, 0 },
-	{ "Sine",			false,	SineFunc,			0, 0 },
-	{ "BL-Triangle",	true,	BLTriangleFunc,		0, 0 },
-	{ "BL-Square",		true,	BLSquareFunc,		0, 0 },
-	{ "BL-Sawtooth",	true,	BLSawtoothFunc,		0, 0 },
-	{ "BL-Parabola",	true,	BLParabolaFunc,		0, 0 },
-	{ "Triangle",		false,	TriangleFunc,		0, 0 },
-	{ "Square",			false,	SquareFunc,			0, 0 },
-	{ "Sawtooth",		false,	SawtoothFunc,		0, 0 },
-	{ "Rev. Sawtooth",	false,	RevSawtoothFunc,	0, 0 }
+	{ "Blank",												false,				BlankFunc,												0, 0 },
+	{ "Sine",												false,				SineFunc,												0, 0 },
+	{ "BL-Triangle",				true,				BLTriangleFunc,								0, 0 },
+	{ "BL-Square",								true,				BLSquareFunc,								0, 0 },
+	{ "BL-Sawtooth",				true,				BLSawtoothFunc,								0, 0 },
+	{ "BL-Parabola",				true,				BLParabolaFunc,								0, 0 },
+	{ "Triangle",								false,				TriangleFunc,								0, 0 },
+	{ "Square",												false,				SquareFunc,												0, 0 },
+	{ "Sawtooth",								false,				SawtoothFunc,								0, 0 },
+	{ "Rev. Sawtooth",				false,				RevSawtoothFunc,				0, 0 }
 };
 #define NUMWAVEFORMS 10
 //////////////////////////////////////////////////////////////////////
 //
-//	InitWaveforms
+//				InitWaveforms
 //
 //////////////////////////////////////////////////////////////////////
 void InitWaveforms()
 {
 	int i;
 	//
-	//	Create buffers
+	//				Create buffers
 	//
 	psinetable = new float [WAVESIZE];
 	preverse[0] = new int[65536];
@@ -216,19 +216,19 @@ void InitWaveforms()
 	pfmtable = new float[65536];
 	ppmtable = new float[65536];
 	//
-	//	Initialize environment
+	//				Initialize environment
 	//
 	samplingrate = 0;
 	totalpartials = 0;
 	//
-	//	Create sine table
+	//				Create sine table
 	//
 	for (i = 0; i < WAVESIZE; i++)
 	{
 		psinetable[i] = (float) sin((double) i * PI2 / (double) WAVESIZE);
 	}
 	//
-	//	Initialize reverse lookup table 0
+	//				Initialize reverse lookup table 0
 	//
 	for (i = 0; i < 65536; i++)
 	{
@@ -237,7 +237,7 @@ void InitWaveforms()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	DeleteWaveforms
+//				DeleteWaveforms
 //
 //////////////////////////////////////////////////////////////////////
 void DeleteWaveforms()
@@ -253,24 +253,24 @@ void DeleteWaveforms()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	CleanupWaveforms
+//				CleanupWaveforms
 //
 //////////////////////////////////////////////////////////////////////
 void CleanupWaveforms()
 {
 	//
-	//	Delete wave form data
+	//				Delete wave form data
 	//
 	DeleteWaveforms();
 	//
-	//	Clear instances
+	//				Clear instances
 	//
 	for (int i = 0; i < NUMWAVEFORMS; i++)
 	{
 		wavespecs[i].ninstances = 0;
 	}
 	//
-	//	Delete buffers
+	//				Delete buffers
 	//
 	delete[] preverse[1];
 	delete[] preverse[0];
@@ -280,29 +280,29 @@ void CleanupWaveforms()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	CreateWaveform
+//				CreateWaveform
 //
 //////////////////////////////////////////////////////////////////////
 bool CreateWaveform(WAVESPEC *pspec)
 {
 	//////////////////////////////////////////////////////////////////
 	//
-	//	Variables
+	//				Variables
 	//
 	//////////////////////////////////////////////////////////////////
-	int		a;
-	int		b;
-	int		n;
-	float	freq;
-	int		numpartials;
-	int		lastnumpartials;
-	int		partialindex;
-	float	*pin;
-	float	*pout;
-	float	max;
+	int								a;
+	int								b;
+	int								n;
+	float				freq;
+	int								numpartials;
+	int								lastnumpartials;
+	int								partialindex;
+	float				*pin;
+	float				*pout;
+	float				max;
 	//////////////////////////////////////////////////////////////////
 	//
-	//	Bandlimit?
+	//				Bandlimit?
 	//
 	//////////////////////////////////////////////////////////////////
 	if (pspec->bandlimited == false)
@@ -321,7 +321,7 @@ bool CreateWaveform(WAVESPEC *pspec)
 	}
 	//////////////////////////////////////////////////////////////////
 	//
-	//	Fast bandlimit creation
+	//				Fast bandlimit creation
 	//
 	//////////////////////////////////////////////////////////////////
 	pspec->pdata = new float[totalpartials * WAVESIZE];
@@ -382,7 +382,7 @@ bool CreateWaveform(WAVESPEC *pspec)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	EnableWaveform
+//				EnableWaveform
 //
 //////////////////////////////////////////////////////////////////////
 bool EnableWaveform(int index)
@@ -400,7 +400,7 @@ bool EnableWaveform(int index)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	DisableWaveform
+//				DisableWaveform
 //
 //////////////////////////////////////////////////////////////////////
 bool DisableWaveform(int index)
@@ -425,7 +425,7 @@ bool DisableWaveform(int index)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	GetFMTable
+//				GetFMTable
 //
 //////////////////////////////////////////////////////////////////////
 float* GetFMTable()
@@ -434,7 +434,7 @@ float* GetFMTable()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	GetPMTable
+//				GetPMTable
 //
 //////////////////////////////////////////////////////////////////////
 float* GetPMTable()
@@ -443,7 +443,7 @@ float* GetPMTable()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	GetWaveform
+//				GetWaveform
 //
 //////////////////////////////////////////////////////////////////////
 bool GetWaveform(int index, WAVEFORM *pwave)
@@ -451,7 +451,7 @@ bool GetWaveform(int index, WAVEFORM *pwave)
 	if (!pwave)
 	{
 		//\todo: OUCH! pwave?
-//		DisableWaveform(pwave->index);
+//								DisableWaveform(pwave->index);
 		return false;
 	}
 	if ((index < 0) || (index >= NUMWAVEFORMS))
@@ -471,20 +471,20 @@ bool GetWaveform(int index, WAVEFORM *pwave)
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	UpdateWaveforms
+//				UpdateWaveforms
 //
 //////////////////////////////////////////////////////////////////////
 bool UpdateWaveforms(int sr)
 {
-	int		a;
-	int		b;
-	int		n;
-	float	freq;
-	int		numpartials;
-	int		lastnumpartials;
-	int		reverseindex;
+	int								a;
+	int								b;
+	int								n;
+	float				freq;
+	int								numpartials;
+	int								lastnumpartials;
+	int								reverseindex;
 	//
-	//	Check if new sampling rate
+	//				Check if new sampling rate
 	//
 	if (samplingrate == sr)
 	{
@@ -492,11 +492,11 @@ bool UpdateWaveforms(int sr)
 	}
 	samplingrate = sr;
 	//
-	//	Remove all waveform data
+	//				Remove all waveform data
 	//
 	DeleteWaveforms();
 	//
-	//	Recompute metric data
+	//				Recompute metric data
 	//
 	lastnumpartials = 0;
 	totalpartials = 0;
@@ -520,9 +520,9 @@ bool UpdateWaveforms(int sr)
 	for (b = reverseindex; b < 65536; b++)
 	{
 		preverse[1][b] = totalpartials - 1;
-	}	
+	}				
 	//
-	//	Recreate waveform data
+	//				Recreate waveform data
 	//
 	for (n = 0; n < NUMWAVEFORMS; n++)
 	{
@@ -536,7 +536,7 @@ bool UpdateWaveforms(int sr)
 		}
 	}
 	//
-	//	Setup amp table
+	//				Setup amp table
 	//
 	a = samplingrate >> 1;
 	for (b = 0; b < a; b++)
@@ -550,7 +550,7 @@ bool UpdateWaveforms(int sr)
 		ppmtable[b] = 0.0f;
 	}
 	//
-	//	Done
+	//				Done
 	//
 	return true;
 }

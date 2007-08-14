@@ -16,20 +16,20 @@ int const NUMPARAMETERS = 6;
 CMachineParameter const paraShakeEnergy = 
 { 
 	"Shake Energy",
-	"Shake Energy",									// description
-	0,												// MinValue	
-	128,												// MaxValue
-	MPF_STATE,										// Flags
+	"Shake Energy",																																				// description
+	0,																																																// MinValue				
+	128,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	64
 };
 
 CMachineParameter const paraDecay = 
 { 
 	"Decay",
-	"Decay",									// description
-	0,												// MinValue	
-	128,												// MaxValue
-	MPF_STATE,										// Flags
+	"Decay",																																				// description
+	0,																																																// MinValue				
+	128,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	64
 };
 
@@ -37,40 +37,40 @@ CMachineParameter const paraDecay =
 CMachineParameter const paraObjects = 
 { 
 	"Objects",
-	"Objects",									// description
-	1,											// MinValue	
-	128,												// MaxValue
-	MPF_STATE,										// Flags
+	"Objects",																																				// description
+	1,																																												// MinValue				
+	128,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	10
 };
 
 CMachineParameter const paraResonanceFrequency = 
 { 
 	"Resonance Frequency",
-	"Resonance Frequency",								// description
-	1,												// MinValue	
-	128,											// MaxValue
-	MPF_STATE,										// Flags
+	"Resonance Frequency",																																// description
+	1,																																																// MinValue				
+	128,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	64
 };
 
 CMachineParameter const paraShakeEnergy2 = 
 { 
 	"Shake Energy2",
-	"Shake Energy 2",									// description
-	1,												// MinValue	
-	128,												// MaxValue
-	MPF_STATE,										// Flags
+	"Shake Energy 2",																																				// description
+	1,																																																// MinValue				
+	128,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	64
 };
 
 CMachineParameter const paraVolume = 
 {
 	"Volume",
-	"Volume",									// description
-	0,											// MinValue	
-	32767,											// MaxValue
-	MPF_STATE,										// Flags
+	"Volume",																																				// description
+	0,																																												// MinValue				
+	32767,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	32767
 };
 
@@ -87,18 +87,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	GENERATOR,								// flags
-	NUMPARAMETERS,							// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	GENERATOR,																																// flags
+	NUMPARAMETERS,																												// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"stk Shakers (Debug build)",		// name
+	"stk Shakers (Debug build)",								// name
 #else
-	"stk Shakers",						// name
+	"stk Shakers",																								// name
 #endif
-	"Shakers",							// short name
-	"Sartorius, bohan and STK 4.2.0 developers",							// author
-	"Help",									// A command, that could be use for open an editor, etc...
+	"Shakers",																												// short name
+	"Sartorius, bohan and STK 4.2.0 developers",																												// author
+	"Help",																																				// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -121,7 +121,7 @@ private:
 
 	Shakers track[MAX_TRACKS];
 	bool noteonoff[MAX_TRACKS];
-	float	vol_ctrl[MAX_TRACKS];
+	float				vol_ctrl[MAX_TRACKS];
 	StkFloat samplerate;
 };
 
@@ -221,7 +221,7 @@ pCB->MessBox(buffer,"stk Shakers",0);
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks)
 {
 	float sl=0;
-//	float sr=0;
+//				float sr=0;
 	float const vol=(float)Vals[5];
 	for(int c=0;c<tracks;c++)
 	{
@@ -264,8 +264,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	// Note Off			== 120
-	// Empty Note Row	== 255
+	// Note Off												== 120
+	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	
 	if((note>=48) && (note<=71))

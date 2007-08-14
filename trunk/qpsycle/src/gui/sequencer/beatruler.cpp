@@ -57,7 +57,7 @@ void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option
 		if (! (i % 16)) {
 			painter->setPen( QColor( 180, 180, 180 ) );
 			painter->drawLine( i * sDraw_->beatPxLength(), ch-10, 
-					   i * sDraw_->beatPxLength(), ch-1 );
+						i * sDraw_->beatPxLength(), ch-1 );
 			QString beatLabel = QString::number(i/4);
 			QRectF textRect = QRectF( i * sDraw_->beatPxLength()-10, 0, 20, ch-10 );
 			painter->setPen( QColor( 50, 50, 50 ) );
@@ -76,6 +76,6 @@ void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option
 
 int BeatRuler::preferredHeight( ) const
 {
-    return 30;
+	return 30;
 }
 

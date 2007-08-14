@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	WGFlute.cpp
-//	----------
-//	druttis@darkface.pp.se
+//				WGFlute.cpp
+//				----------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
@@ -10,16 +10,16 @@
 #include <psycle/plugin_interface.hpp>
 #include <memory>
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
-#define MAC_NAME	"Plucked String"
-#define MAC_VERSION	"1.1"
-#define MAC_AUTHOR	"Druttis"
-#define	MAX_TRACKS	64
-#define	MAX_VOICES	2
-#define NUM_TICKS	32
+#define MAC_NAME				"Plucked String"
+#define MAC_VERSION				"1.1"
+#define MAC_AUTHOR				"Druttis"
+#define				MAX_TRACKS				64
+#define				MAX_VOICES				2
+#define NUM_TICKS				32
 //============================================================================
-//	Parameters
+//				Parameters
 //============================================================================
 
 #define PARAM_PLUCK_POS 0
@@ -92,7 +92,7 @@ CMachineParameter const paramSchoolness = {
 	0
 };
 //============================================================================
-//	Parameter list
+//				Parameter list
 //============================================================================
 CMachineParameter const *pParams[] = {
 	&paramPluckPos,
@@ -106,7 +106,7 @@ CMachineParameter const *pParams[] = {
 
 #define NUM_PARAMS 7
 //============================================================================
-//	Machine info
+//				Machine info
 //============================================================================
 CMachineInfo const MacInfo =
 {
@@ -125,7 +125,7 @@ CMachineInfo const MacInfo =
 	1
 };
 //============================================================================
-//	Machine
+//				Machine
 //============================================================================
 class mi : public CMachineInterface
 {
@@ -142,15 +142,15 @@ public:
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks);
 public:
 	GLOBALS globals;
-	CVoice	voices[MAX_TRACKS][MAX_VOICES];
-	int		ticks_remaining;
-	bool	initialized;
-	bool	working;
+	CVoice				voices[MAX_TRACKS][MAX_VOICES];
+	int								ticks_remaining;
+	bool				initialized;
+	bool				working;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //============================================================================
-//	Constructor
+//				Constructor
 //============================================================================
 mi::mi()
 {
@@ -160,7 +160,7 @@ mi::mi()
 	ticks_remaining = NUM_TICKS;
 }
 //============================================================================
-//	Destructor
+//				Destructor
 //============================================================================
 mi::~mi()
 {
@@ -169,7 +169,7 @@ mi::~mi()
 	delete Vals;
 }
 //============================================================================
-//	Init
+//				Init
 //============================================================================
 void mi::Init()
 {
@@ -183,7 +183,7 @@ void mi::Init()
 	initialized = true;
 }
 //============================================================================
-//	Stop
+//				Stop
 //============================================================================
 void mi::Stop()
 {
@@ -193,7 +193,7 @@ void mi::Stop()
 	}
 }
 //============================================================================
-//	Command
+//				Command
 //============================================================================
 void mi::Command()
 {
@@ -208,7 +208,7 @@ void mi::Command()
 	);
 }
 //============================================================================
-//	ParameterTweak
+//				ParameterTweak
 //============================================================================
 void mi::ParameterTweak(int par, int val)
 {
@@ -239,61 +239,61 @@ void mi::ParameterTweak(int par, int val)
 	}
 }
 //============================================================================
-//	DescribeValue
+//				DescribeValue
 //============================================================================
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	return false;
 }
 //============================================================================
-//	SequencerTick
+//				SequencerTick
 //============================================================================
 void mi::SequencerTick()
 {
 	//
-	//	Update some stuf
+	//				Update some stuf
 	globals.srate = pCB->GetSamplingRate();
 }
 //============================================================================
-//	SequencerTick
+//				SequencerTick
 //============================================================================
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	int vol = 254;
 	//
-	//	Handle commands
+	//				Handle commands
 	switch (cmd)
 	{
-		case 0x0c:	//	Volume
+		case 0x0c:				//				Volume
 			vol = val - 2;
 			if (vol < 0)
 				vol = 0;
 			break;
 	}
 	//
-	//	Route
+	//				Route
 	if (note == 120) {
 		voices[channel][0].NoteOff();
 	} else if (note < 120) {
 		if ((cmd != 0x0d) || (voices[channel][0].currentFreq == -1)) {
 			voices[channel][0].NoteOff();
-//			int size = sizeof(CVoice) * (MAX_VOICES - 1);
-//			if (size > 0) {
-//				memcpy(&voices[channel][1], &voices[channel][0], size);
-//			}
+//												int size = sizeof(CVoice) * (MAX_VOICES - 1);
+//												if (size > 0) {
+//																memcpy(&voices[channel][1], &voices[channel][0], size);
+//												}
 		}
 		voices[channel][0].NoteOn(note, vol, cmd, val);
 		voices[channel][0].ticks_remaining = 0;
 	}
 }
 //============================================================================
-//	Work
+//				Work
 //============================================================================
 void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int numtracks)
 {
 	working = true;
 	if (initialized) {
 		//
-		//	Variables
+		//				Variables
 		int ti;
 		int vi;
 		int amount;
@@ -302,49 +302,49 @@ void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int num
 		float *pleft;
 		float *pright;
 		//
-		//	Adjust sample pointers
+		//				Adjust sample pointers
 		--psamplesleft;
 		--psamplesright;
 		//
-		//	Loop
+		//				Loop
 		do {
 			//
-			//	Global tick handling
+			//				Global tick handling
 			if (!ticks_remaining) {
 				ticks_remaining = NUM_TICKS;
 				CVoice::GlobalTick();
 			}
 			//
-			//	Compute amount of samples to render for all voices
+			//				Compute amount of samples to render for all voices
 			amount = numsamples;
 			if (amount > ticks_remaining)
 				amount = ticks_remaining;
 			//
-			//	Render all voices now
+			//				Render all voices now
 			for (ti = 0; ti < numtracks; ti++) {
 				for (vi = 0; vi < MAX_VOICES; vi++) {
-	//			for (vi = MAX_VOICES - 1; vi >= 0; vi--) {
+	//												for (vi = MAX_VOICES - 1; vi >= 0; vi--) {
 					if (voices[ti][vi].IsActive()) {
 						pleft = psamplesleft;
 						pright = psamplesright;
 						nsamples = amount;
 						do {
 							//
-							//	Voice tick handing
+							//				Voice tick handing
 							if (!voices[ti][vi].ticks_remaining) {
 								voices[ti][vi].ticks_remaining = NUM_TICKS;
 								voices[ti][vi].VoiceTick();
 							}
 							//
-							//	Compute amount of samples to render this voice
+							//				Compute amount of samples to render this voice
 							amt = nsamples;
 							if (amt > voices[ti][vi].ticks_remaining)
 								amt = voices[ti][vi].ticks_remaining;
 							//
-							//	Render voice now
+							//				Render voice now
 							voices[ti][vi].Work(pleft, pright, amt);
 							//
-							//	Adjust for next voice iteration
+							//				Adjust for next voice iteration
 							voices[ti][vi].ticks_remaining -= amt;
 							pleft += amt;
 							pright += amt;
@@ -354,14 +354,14 @@ void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int num
 				}
 			}
 			//
-			//	Adjust for next iteration
+			//				Adjust for next iteration
 			ticks_remaining -= amount;
 			psamplesleft += amount;
 			psamplesright += amount;
 			numsamples -= amount;
 		} while (numsamples > 0);
 		//
-		//	Possible effects may be coded here
+		//				Possible effects may be coded here
 	}
 	working = false;
 }

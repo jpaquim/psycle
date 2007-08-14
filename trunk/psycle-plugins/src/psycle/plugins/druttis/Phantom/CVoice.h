@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	CVoice.h
-//	--------
-//	druttis@darkface.pp.se
+//				CVoice.h
+//				--------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 
@@ -16,7 +16,7 @@
 #include <cmath>
 
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
 
 #define NUMWAVEFORMS 8
@@ -27,84 +27,84 @@ extern float wavetable[NUMWAVEFORMS][WAVESIZE];
 extern double coeff[5][11];
 
 //============================================================================
-//	Voice globals
+//				Voice globals
 //============================================================================
 
 struct GLOBALS
 {
 	//
-	//	This should always be here
-	int			samplingrate;
+	//				This should always be here
+	int												samplingrate;
 	//
-	//	Declare your global synth variables here
-	int			osc_wave[6];
-	float		osc_phase[6];
-	float		osc_semi[6];
-	float		osc_fine[6];
-	float		osc_level[6];
+	//				Declare your global synth variables here
+	int												osc_wave[6];
+	float								osc_phase[6];
+	float								osc_semi[6];
+	float								osc_fine[6];
+	float								osc_level[6];
 	//
-	float		vca_attack;
-	float		vca_decay;
-	float		vca_sustain;
-	float		vca_release;
-	float		amp_level;
+	float								vca_attack;
+	float								vca_decay;
+	float								vca_sustain;
+	float								vca_release;
+	float								amp_level;
 	//
-	float		vcf_attack;
-	float		vcf_decay;
-	float		vcf_sustain;
-	float		vcf_release;
-	float		vcf_amount;
+	float								vcf_attack;
+	float								vcf_decay;
+	float								vcf_sustain;
+	float								vcf_release;
+	float								vcf_amount;
 	//
-	int			filter_type;
-	afloat		filter_freq;
-	afloat		filter_res;
-	float		filter_increment;
-	float		filter_amount;
-	float		buf[1024];
+	int												filter_type;
+	afloat								filter_freq;
+	afloat								filter_res;
+	float								filter_increment;
+	float								filter_amount;
+	float								buf[1024];
 
 };
 //============================================================================
-//	CVoice class
+//				CVoice class
 //============================================================================
 class CVoice
 {
 	//////////////////////////////////////////////////////////////////
-	//	Variables
+	//				Variables
 	//////////////////////////////////////////////////////////////////
 
 public:
 
 	//----------------------------------------------------------------
-	//	These two should always be here
+	//				These two should always be here
 	//----------------------------------------------------------------
 
-	GLOBALS		*globals;
-	int			ticks_remaining;
+	GLOBALS								*globals;
+	int												ticks_remaining;
 
 	//----------------------------------------------------------------
-	//	Declare your runtime variables here
+	//				Declare your runtime variables here
 	//----------------------------------------------------------------
 
-	//	Velocity
-	float		velocity;
+	//				Velocity
+	float								velocity;
 
-	//	Oscilator
-	float		osc_phase[6];
-	float		osc_increment[6];
+	//				Oscilator
+	float								osc_phase[6];
+	float								osc_increment[6];
 
-	//	VCA
-	CEnvelope	vca;
+	//				VCA
+	CEnvelope				vca;
 
-	//	VCF
-	CEnvelope	vcf;
+	//				VCF
+	CEnvelope				vcf;
 
-	//	Filter
-	FILTER		filter;
-	float		filter_phase;
+	//				Filter
+	FILTER								filter;
+	float								filter_phase;
 
-	double		memory[6][10];
+	double								memory[6][10];
 	//////////////////////////////////////////////////////////////////
-	//	Methods
+	//				Methods
 	//////////////////////////////////////////////////////////////////
 
 public:
@@ -116,8 +116,8 @@ public:
 	void NoteOn(int note, int volume);
 
 	//////////////////////////////////////////////////////////////////
-	//	IsFinished
-	//	returns true if voice is done playing
+	//				IsFinished
+	//				returns true if voice is done playing
 	//////////////////////////////////////////////////////////////////
 
 	inline bool IsActive()
@@ -126,8 +126,8 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	GlobalTick
-	//	Method to handle parameter inertia and suchs things
+	//				GlobalTick
+	//				Method to handle parameter inertia and suchs things
 	//////////////////////////////////////////////////////////////////
 
 	inline static void GlobalTick()
@@ -135,36 +135,36 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	VoiceTick
-	//	Method to handle voice specific things as LFO and envelopes
-	//	* tips, dont handle amplitude envelopes or lfo's here
+	//				VoiceTick
+	//				Method to handle voice specific things as LFO and envelopes
+	//				* tips, dont handle amplitude envelopes or lfo's here
 	//////////////////////////////////////////////////////////////////
 
 	inline void VoiceTick()
 	{
 		//------------------------------------------------------------
-		//	Setup filter
+		//				Setup filter
 		//------------------------------------------------------------
 
 		float filter_freq = globals->filter_freq.current;
 
-		//	VCF
+		//				VCF
 		filter_freq += (vcf.Next() * globals->vcf_amount);
 
-		//	Filter - LFO (rate/amount)
+		//				Filter - LFO (rate/amount)
 		filter_freq += get_sample_l(wavetable[0], filter_phase, WAVEMASK) * globals->filter_amount;
 		filter_phase = fand(filter_phase + globals->filter_increment, WAVEMASK);
 
-		//	Init filter
+		//				Init filter
 		CDsp::InitFilter(&filter, filter_freq, globals->filter_res.current);
 
 		//------------------------------------------------------------
-		//	Setup phaser
+		//				Setup phaser
 		//------------------------------------------------------------
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Formant filter
+	//				Formant filter
 	//////////////////////////////////////////////////////////////////
 
 	inline float formant_filter(double *memory, float in, int vnum)
@@ -228,8 +228,8 @@ public:
 		osc_phase[i] = fand(osc_phase[i], WAVEMASK);
 	}
 
-	//	Work
-	//	all sound generation is done here
+	//				Work
+	//				all sound generation is done here
 	//////////////////////////////////////////////////////////////////
 
 	inline void Work(float *psamplesleft, float *psamplesright, int numsamples)
@@ -241,7 +241,7 @@ public:
 		register float *pbuf;
 
 		//--------------------------------------------------------
-		//	Clear buf
+		//				Clear buf
 		//--------------------------------------------------------
 /*
 		amount = numsamples;
@@ -254,7 +254,7 @@ public:
 		while (--amount);
 */
 		//--------------------------------------------------------
-		//	Osc add
+		//				Osc add
 		//--------------------------------------------------------
 
 		amount = numsamples;
@@ -294,7 +294,7 @@ public:
 		generate_osc(5, numsamples);
 */
 		//------------------------------------------------------------
-		//	Filter
+		//				Filter
 		//------------------------------------------------------------
 
 		pbuf = globals->buf;
@@ -316,7 +316,7 @@ public:
 		}
 
 		//------------------------------------------------------------
-		//	Output
+		//				Output
 		//------------------------------------------------------------
 
 		--pbuf;
@@ -325,7 +325,7 @@ public:
 
 		do {
 			//--------------------------------------------------------
-			//	Amp
+			//				Amp
 			//--------------------------------------------------------
 			
 			out = *++pbuf;
@@ -335,7 +335,7 @@ public:
 			out *= 16384;
 
 			//--------------------------------------------------------
-			//	Write
+			//				Write
 			//--------------------------------------------------------
 
 			*++psamplesleft += out;

@@ -53,7 +53,7 @@
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
 {
-	 setWindowIcon( QIcon(":/images/plugin.png") );
+		setWindowIcon( QIcon(":/images/plugin.png") );
 	pMachine_ = macGui->mac();
 	m_macGui = macGui;
 
@@ -99,13 +99,13 @@ void MachineTweakDlg::createActions()
 	paramsResetAction_->setShortcut( tr("Ctrl+E") );
 	
 	connect( aboutAction_, SIGNAL( triggered() ),
-		 this, SLOT( showAboutDialog() ) );
+			this, SLOT( showAboutDialog() ) );
 	connect( paramsResetAction_, SIGNAL( triggered() ),
-		 this, SLOT( resetParameters() ) );
+			this, SLOT( resetParameters() ) );
 	connect( paramsRandomAction_, SIGNAL( triggered() ),
-		 this, SLOT( randomiseParameters() ) );
+			this, SLOT( randomiseParameters() ) );
 	connect( paramsOpenPrsAction_, SIGNAL( triggered() ),
-		 this, SLOT( showPresetsDialog() ) );
+			this, SLOT( showPresetsDialog() ) );
 	
 }
 
@@ -120,7 +120,7 @@ void MachineTweakDlg::initParameterGui()
 	int cols = pMachine_->GetNumCols();
 	int rows = numParameters/cols;
 	// Various checks for "non-standard" windows ( lots of parameters, or "odd" parameter numbers)
-	if (rows>24)	// check for "too big" windows
+	if (rows>24)																																																																// check for "too big" windows
 	{
 		rows=24;
 		cols=numParameters/24;
@@ -158,9 +158,9 @@ void MachineTweakDlg::initParameterGui()
 				knobGroup->setNameText(parName);
 				knobGroupMap[ knobIdx ] = knobGroup;
 				connect( knobGroup, SIGNAL( changed( KnobGroup* ) ),
-					 this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
+						this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
 				knobPanelLayout->addWidget( knobGroup, y, x );
-			}					
+			}																																																																																																																																																																																																																																																																																																																																
 		} else {
 			// knob hole
 			knobPanelLayout->addWidget( new QLabel(""), y, x );
@@ -176,9 +176,9 @@ void MachineTweakDlg::initParameterGui()
 }
 
 void MachineTweakDlg::updateValues( )
-{			
+{																																																																																																																																																																																																
 	std::map<int, KnobGroup*>::iterator it = knobGroupMap.begin();
-	for ( ; it != knobGroupMap.end(); it++ ) {	
+	for ( ; it != knobGroupMap.end(); it++ ) {																																																																
 		int knobIdx = it->first;
 		int min_v,max_v;
 		pMachine_->GetParamRange( knobIdx, min_v, max_v);
@@ -223,7 +223,7 @@ void MachineTweakDlg::showEvent( QShowEvent *event )
 void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 {
 	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
-		reject();		// Closes the dialog.
+		reject();																																																																																																																																// Closes the dialog.
 	} else {
 		if ( !event->isAutoRepeat() ) {
 			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
@@ -238,14 +238,14 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 
 void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
 {
-    if ( !event->isAutoRepeat() ) {
-        int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-        int note = NULL;
-        note = noteFromCommand( command );
-        if (note) {
-            emit noteRelease( note );   
-        }
-    }
+	if ( !event->isAutoRepeat() ) {
+		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+		int note = NULL;
+		note = noteFromCommand( command );
+		if (note) {
+			emit noteRelease( note );   
+		}
+	}
 }
 
 void MachineTweakDlg::randomiseParameters() 
@@ -260,7 +260,7 @@ void MachineTweakDlg::randomiseParameters()
 
 		pMachine_->SetParameter(c,random);
 	}
-	updateValues();	
+	updateValues();																																																																
 }
 
 void MachineTweakDlg::resetParameters()
@@ -291,8 +291,8 @@ void MachineTweakDlg::showAboutDialog()
 	if ( pMachine_->type() == psy::core::MACH_PLUGIN )
 	{
 		QMessageBox::information( this,
-					  "About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
-					  "Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
+						"About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
+						"Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
 	
 	}
 }
@@ -329,11 +329,11 @@ KnobGroup::KnobGroup( int param )
 	valueLbl->setAutoFillBackground( true );
 
 	connect( knob_, SIGNAL( valueChanged( int ) ),
-		 this, SLOT( onKnobChanged() ) );
+			this, SLOT( onKnobChanged() ) );
 	connect( knob_, SIGNAL( sliderPressed() ),
-		 this, SLOT( onKnobPressed() ) );
+			this, SLOT( onKnobPressed() ) );
 	connect( knob_, SIGNAL( sliderReleased() ),
-		 this, SLOT( onKnobReleased() ) );
+			this, SLOT( onKnobReleased() ) );
 
 	layout->addWidget( knob_, 0, 0, 2, 2, Qt::AlignLeft );
 	layout->addWidget( nameLbl, 0, 2, 1, 7, Qt::AlignLeft );
@@ -342,116 +342,116 @@ KnobGroup::KnobGroup( int param )
 
 void KnobGroup::setKnob( Knob *inKnob )
 {
-    knob_ = inKnob;
+	knob_ = inKnob;
 }
 
 Knob *KnobGroup::knob()
 {
-    return knob_;
+	return knob_;
 }
 
 void KnobGroup::setNameText( const QString & text )
 {
-    nameLbl->setText( text );
+	nameLbl->setText( text );
 }
 
 void KnobGroup::setValueText( const QString & text )
 {
-    valueLbl->setText( text );
+	valueLbl->setText( text );
 }
 
 void KnobGroup::onKnobChanged()
 {
-    emit changed( this );
+	emit changed( this );
 }
 
 void KnobGroup::onKnobPressed()
 {
-    QPalette plt = nameLbl->palette();
-    plt.setBrush( QPalette::Window, QBrush( QColor( 169, 148, 172 ) ) );
-    plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
-    nameLbl->setPalette( plt );
+	QPalette plt = nameLbl->palette();
+	plt.setBrush( QPalette::Window, QBrush( QColor( 169, 148, 172 ) ) );
+	plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
+	nameLbl->setPalette( plt );
 
-    QPalette plt1 = valueLbl->palette();
-    plt1.setBrush( QPalette::Window, QBrush( QColor( 114, 90, 139 ) ) );
-    plt1.setBrush( QPalette::WindowText, QBrush( QColor( 255, 238, 68 ) ) );
-    valueLbl->setPalette( plt1 );
+	QPalette plt1 = valueLbl->palette();
+	plt1.setBrush( QPalette::Window, QBrush( QColor( 114, 90, 139 ) ) );
+	plt1.setBrush( QPalette::WindowText, QBrush( QColor( 255, 238, 68 ) ) );
+	valueLbl->setPalette( plt1 );
 }
 
 void KnobGroup::onKnobReleased()
 {
-    QPalette plt = nameLbl->palette();
-    plt.setBrush( QPalette::Window, QBrush( QColor( 194, 190, 210 ) ) );
-    plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
-    nameLbl->setPalette( plt );
+	QPalette plt = nameLbl->palette();
+	plt.setBrush( QPalette::Window, QBrush( QColor( 194, 190, 210 ) ) );
+	plt.setBrush( QPalette::WindowText, QBrush( Qt::black ) );
+	nameLbl->setPalette( plt );
 
-    QPalette plt1 = valueLbl->palette();
-    plt1.setBrush( QPalette::Window, QBrush( QColor( 121, 109, 156 ) ) );
-    plt1.setBrush( QPalette::WindowText, QBrush( Qt::white ) );
-    valueLbl->setPalette( plt1 );
+	QPalette plt1 = valueLbl->palette();
+	plt1.setBrush( QPalette::Window, QBrush( QColor( 121, 109, 156 ) ) );
+	plt1.setBrush( QPalette::WindowText, QBrush( Qt::white ) );
+	valueLbl->setPalette( plt1 );
 }
 
 QSize KnobGroup::sizeHint() const
 {
-    return QSize( LABEL_WIDTH, K_YSIZE );
+	return QSize( LABEL_WIDTH, K_YSIZE );
 }
 
 /**
- * Knob class.
- * 
- */
+	* Knob class.
+	* 
+	*/
 Knob::Knob( int param ) 
-    : param_( param )
+	: param_( param )
 {
-    setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
+	setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
 }
 
 void Knob::paintEvent( QPaintEvent *ev )
 {
-    QPainter painter(this);
-    QRectF target( 0, 0, K_XSIZE, K_YSIZE );
-    QPixmap pixmap(":/images/TbMainKnob.png");
+	QPainter painter(this);
+	QRectF target( 0, 0, K_XSIZE, K_YSIZE );
+	QPixmap pixmap(":/images/TbMainKnob.png");
 
-    int amp = maximum() - minimum();
-    int rel = value() - minimum();
+	int amp = maximum() - minimum();
+	int rel = value() - minimum();
 
-    if ( amp > 0 ) {
-        int frame = ( K_NUMFRAMES * rel )/amp;
-        int xn = frame * K_XSIZE;
-        QRectF source( xn, 0, K_XSIZE, K_YSIZE );
+	if ( amp > 0 ) {
+		int frame = ( K_NUMFRAMES * rel )/amp;
+		int xn = frame * K_XSIZE;
+		QRectF source( xn, 0, K_XSIZE, K_YSIZE );
 
-        painter.drawPixmap( target, pixmap, source );
-    }
+		painter.drawPixmap( target, pixmap, source );
+	}
 }
 
 QSize Knob::sizeHint() const
 {
-    return QSize( K_XSIZE, K_YSIZE );
+	return QSize( K_XSIZE, K_YSIZE );
 }
 
 
 
 /**
- * FHeader class.
- * 
- */
+	* FHeader class.
+	* 
+	*/
 FHeader::FHeader( QWidget *parent )
-    : QLabel( parent )
+	: QLabel( parent )
 {
-    setFont( QFont( "Verdana", 8 ) );
-    setIndent( 10 );
+	setFont( QFont( "Verdana", 8 ) );
+	setIndent( 10 );
 }
 
 void FHeader::paintEvent( QPaintEvent *ev )
 {
-    QPainter painter(this);
+	QPainter painter(this);
 
-    painter.fillRect( 0, 0, width(), height()/4, QColor( 194, 190, 210 ) );
-    painter.fillRect( 0, height()/4, width(), height()/2, Qt::black );
-    QRectF textRect( indent(), height()/4, width(), height()/2 );
-    painter.setPen( Qt::white );
-    painter.drawText( textRect, Qt::AlignLeft | Qt::AlignVCenter, text() );
-    painter.fillRect( 0, (height()*3)/4, width(), height()/4, QColor( 121, 109, 156 ) );
+	painter.fillRect( 0, 0, width(), height()/4, QColor( 194, 190, 210 ) );
+	painter.fillRect( 0, height()/4, width(), height()/2, Qt::black );
+	QRectF textRect( indent(), height()/4, width(), height()/2 );
+	painter.setPen( Qt::white );
+	painter.drawText( textRect, Qt::AlignLeft | Qt::AlignVCenter, text() );
+	painter.fillRect( 0, (height()*3)/4, width(), height()/4, QColor( 121, 109, 156 ) );
 }
 
 
@@ -490,15 +490,15 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 
 
 	connect( prsList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
-		 this, SLOT( usePreset() ) );
+			this, SLOT( usePreset() ) );
 	connect( prsList, SIGNAL( itemClicked( QListWidgetItem* ) ),
-		 this, SLOT( onItemClicked( QListWidgetItem* ) ) );
+			this, SLOT( onItemClicked( QListWidgetItem* ) ) );
 
 	connect( useBtn, SIGNAL( pressed() ),
-		 this, SLOT( usePreset() ) );
-		 
+			this, SLOT( usePreset() ) );
+			
 	connect( clsBtn, SIGNAL( pressed() ),
-		 this, SLOT( reject() ) );
+			this, SLOT( reject() ) );
 
 	loadPresets();
 
@@ -507,9 +507,9 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	completer->setCompletionMode( QCompleter::PopupCompletion );
 	lineEdit->setCompleter(completer);
 	connect( completer, SIGNAL( activated( const QString& ) ),
-		 this, SLOT( onCompletionActivated( const QString& ) ) );
-// 	<nmather>says: it might be better to use QCompleter::activated( QModelIndex)
-// 		 but I had some trouble getting it to work.
+			this, SLOT( onCompletionActivated( const QString& ) ) );
+// 																																																																<nmather>says: it might be better to use QCompleter::activated( QModelIndex)
+// 																																																																																																																																 but I had some trouble getting it to work.
 
 }
 
@@ -595,17 +595,17 @@ void PresetsDialog::onItemClicked( QListWidgetItem *item )
 
 void PresetsDialog::onSavePreset() 
 {
-// 	char str[32];
-// 	str = lineEdit->text().toStdString().c_str();
-// 	if ( str[0] == '\0' )
-// 	{
-// 		qDebug("no name");
-// 		//MessageBox("You have not specified any name. Operation Aborted.","Preset Save Error",MB_OK);
-// 		return;
-// 	}
-// // 	iniPreset.SetName(str);
-// // 	AddPreset(iniPreset);
-// 	SavePresets();	
+// 																																																																char str[32];
+// 																																																																str = lineEdit->text().toStdString().c_str();
+// 																																																																if ( str[0] == '\0' )
+// 																																																																{
+// 																																																																																																																																qDebug("no name");
+// 																																																																																																																																//MessageBox("You have not specified any name. Operation Aborted.","Preset Save Error",MB_OK);
+// 																																																																																																																																return;
+// 																																																																}
+// // 																																																																iniPreset.SetName(str);
+// // 																																																																AddPreset(iniPreset);
+// 																																																																SavePresets();																																																																
 }
 
 // FIXME: should be somewhere else, perhaps global.
@@ -613,91 +613,91 @@ int MachineTweakDlg::noteFromCommand( int command )
 {
 	int note = NULL;
 	switch ( command ) {
-        case commands::key_C_0:
+		case commands::key_C_0:
 		note = 1;
 		break;
-        case commands::key_CS0:
+		case commands::key_CS0:
 		note = 2;
 		break;
-        case commands::key_D_0:
+		case commands::key_D_0:
 		note = 3;
 		break;
-        case commands::key_DS0:
+		case commands::key_DS0:
 		note = 4;
 		break;
-        case commands::key_E_0:
+		case commands::key_E_0:
 		note = 5;
 		break;
-        case commands::key_F_0:
+		case commands::key_F_0:
 		note = 6;
 		break;
-        case commands::key_FS0:
+		case commands::key_FS0:
 		note = 7;
 		break;
-        case commands::key_G_0:
+		case commands::key_G_0:
 		note = 8;
 		break;
-        case commands::key_GS0:
+		case commands::key_GS0:
 		note = 9;
 		break;
-        case commands::key_A_0:
+		case commands::key_A_0:
 		note = 10;
 		break;
-        case commands::key_AS0:
+		case commands::key_AS0:
 		note = 11;
 		break;
-        case commands::key_B_0: 
+		case commands::key_B_0: 
 		note = 12;
 		break;
-        case commands::key_C_1:
+		case commands::key_C_1:
 		note = 13;
 		break;
-        case commands::key_CS1:
+		case commands::key_CS1:
 		note = 14;
 		break;
-        case commands::key_D_1:
+		case commands::key_D_1:
 		note = 15;
 		break;
-        case commands::key_DS1:
+		case commands::key_DS1:
 		note = 16;
 		break;
-        case commands::key_E_1:
+		case commands::key_E_1:
 		note = 17;
 		break;
-        case commands::key_F_1:
+		case commands::key_F_1:
 		note = 18;
 		break;
-        case commands::key_FS1:
+		case commands::key_FS1:
 		note = 19;
 		break;
-        case commands::key_G_1:
+		case commands::key_G_1:
 		note = 20;
 		break;
-        case commands::key_GS1:
+		case commands::key_GS1:
 		note = 21;
 		break;
-        case commands::key_A_1:
+		case commands::key_A_1:
 		note = 22;
 		break;
-        case commands::key_AS1:
+		case commands::key_AS1:
 		note = 23;
 		break;
-        case commands::key_B_1: 
+		case commands::key_B_1: 
 		note = 24;
 		break;
-        case commands::key_C_2:
+		case commands::key_C_2:
 		note = 25;
 		break;
-        case commands::key_CS2:
+		case commands::key_CS2:
 		note = 26;
 		break;
-        case commands::key_D_2:
+		case commands::key_D_2:
 		note = 27;
 		break;
-        case commands::key_DS2:
+		case commands::key_DS2:
 		note = 28;
 		break;
-        case commands::key_E_2:
+		case commands::key_E_2:
 		note = 29;
 		break;
 	}

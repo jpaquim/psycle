@@ -40,8 +40,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#define WF_SET		0
-#define WF_ADD		1
+#define WF_SET								0
+#define WF_ADD								1
 
 #define ENV_ATT 1
 #define ENV_DEC 2
@@ -281,12 +281,12 @@ class mi;
 class CTrack
 {
 	public:
-	 	CTrack();
+			CTrack();
 		void Tick(int note, int volume);
-        void Stop();
-        void Init();
-        void clean();
-        void Work(float *psamplesleft, float *psamplesright , int numsamples);
+		void Stop();
+		void Init();
+		void clean();
+		void Work(float *psamplesleft, float *psamplesright , int numsamples);
 
 		void Generate(float *psamplesleft, float *psamplesright,int numsamples);
 		inline float Filter( float x);
@@ -295,10 +295,10 @@ class CTrack
 		inline float Osc(float phi);
 		inline float ModOsc(float phi);
 
-     	mi *pmi; 
+			mi *pmi; 
 
 		float Volume;
-        int Note;
+		int Note;
 		float freq,phase;
 		float oldout;
 
@@ -310,40 +310,40 @@ class CTrack
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	GENERATOR,								// flags
-	20,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	GENERATOR,																																// flags
+	20,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"Zephod SuperFM (Debug build)",			// name
+	"Zephod SuperFM (Debug build)",												// name
 #else
-	"Zephod SuperFM (Arguru Remix)",		// name
+	"Zephod SuperFM (Arguru Remix)",								// name
 #endif
-	"SuperFM",								// short name
-	"Zephod / Arguru",						// author
-	"Help",									// A command, that could be use for open an editor, etc...
+	"SuperFM",																																// short name
+	"Zephod / Arguru",																								// author
+	"Help",																																				// A command, that could be use for open an editor, etc...
 	2
 };
 
 class mi : public CMachineInterface
 {
 	public:
-        mi();
+		mi();
 		virtual ~mi();
-        virtual void Init();
-        virtual void ParameterTweak(int par, int val);
+		virtual void Init();
+		virtual void ParameterTweak(int par, int val);
 		virtual void SequencerTick();
 		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples,int numtracks);
 		virtual void DSPClear(float *psamplesleft,float *psamplesright, int numsamples);
-        virtual void Stop();
+		virtual void Stop();
 
 		uint8 wave,ModWave;
-        CTrack Tracks[MAX_TRACKS];
+		CTrack Tracks[MAX_TRACKS];
 		int medBreakNote[MAX_TRACKS];
 		uint8 route;
 		int mod1_env,mod2_env,mod3_env;
-        int tickCounter;
+		int tickCounter;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
@@ -362,7 +362,7 @@ CTrack::CTrack()
 		current_vol=0.0f;
 		
 		Volume=0.0f;
-        Note=0;
+		Note=0;
 		freq=0.0f;
 		phase=0.0f;
 		oldout=0.0f;
@@ -407,7 +407,7 @@ void CTrack::Tick(int note, int volume)
 {
 		int SamplesPerSec=44100;
 
-        if( note <120)
+		if( note <120)
 		{
 			Note = note - 70;
 			float Detune = (float)pmi->Vals[19]*0.0078125f;
@@ -425,15 +425,15 @@ void CTrack::Tick(int note, int volume)
 		// Volume [note speed handler]
 
 		if(volume!=255)
-        Volume=float(volume)*0.000976562f;
+		Volume=float(volume)*0.000976562f;
 }
 
 float CTrack::Osc(float phi)
 {
 	switch(pmi->wave)
 	{
-		case 0:	return (float) sin(phi*2*psycle::plugin_interface::pi)*32768 ;break;
-		case 1:	if (sin(phi*2*psycle::plugin_interface::pi)>0) return 32768 ; else return -32768 ;break;
+		case 0:				return (float) sin(phi*2*psycle::plugin_interface::pi)*32768 ;break;
+		case 1:				if (sin(phi*2*psycle::plugin_interface::pi)>0) return 32768 ; else return -32768 ;break;
 		case 2: return (float) (phi-0.5)* 32768 ;break;
 		case 3: return (float) (0.5-phi)* 32768 ;break;
 		default:return 0;break;
@@ -445,7 +445,7 @@ float CTrack::ModOsc(float phi)
 	switch(pmi->ModWave)
 	{
 		case 0: return (float) sin(phi*2*psycle::plugin_interface::pi);
-		case 1:	if (sin(phi*2*psycle::plugin_interface::pi)>0) return 1; else return -1;break;
+		case 1:				if (sin(phi*2*psycle::plugin_interface::pi)>0) return 1; else return -1;break;
 		case 2: return (float) (phi-0.5);break;
 		case 3: return (float) (0.5-phi);break;
 		default:return 0;
@@ -515,8 +515,8 @@ void CTrack::Generate(float *psamplesleft, float *psamplesright, int numsamples)
 			phase+=freq;
 			while (phase >= 1.0f) phase -= 1.0f;
 
-        }
-}	
+		}
+}				
 
 void CTrack::Work( float *psamplesleft,float *psamplesright, int numsamples)
 {
@@ -574,25 +574,25 @@ void mi::ParameterTweak(int par, int val)
 		if(par==2) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.sustain(val);
 		if(par==3) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.sustainv((float)val/255);
 		if(par==4) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.release(val);
-        
+		
 		if(par==5) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.attack(val);
 		if(par==6) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.decay(val);
 		if(par==7) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.sustain(val);
 		if(par==8) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.sustainv((float)val/255);
 		if(par==9) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.release(val);
-        
+		
 		if(par==10) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].Mot1dv=(float)val/500;
 		if(par==11) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].Mot2dv=(float)val/500;
 		if(par==12) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].Mot3dv=(float)val/500;
-        
-		if(par==13)	mod1_env=val;
-		if(par==14)	mod2_env=val;
-		if(par==15)	mod3_env=val;
 		
-		if(par==16)	wave=val;
+		if(par==13)				mod1_env=val;
+		if(par==14)				mod2_env=val;
+		if(par==15)				mod3_env=val;
+		
+		if(par==16)				wave=val;
 		if(par==17) ModWave=val;
 
-        if(par==18)
+		if(par==18)
 		route = val;
 
 }
@@ -663,7 +663,7 @@ void mi::Work(float *psamplesleft,float *psamplesright, int numsamples,int numtr
 
 void mi::Stop()
 {
-        for( int i=0; i<MAX_TRACKS; i++) Tracks[i].Stop();
+		for( int i=0; i<MAX_TRACKS; i++) Tracks[i].Stop();
 }
 
 /*
@@ -673,7 +673,7 @@ char const *mi::DescribeValue(int const param, int const value)
 
 	switch(param)
 	{
-	case 9:	
+	case 9:				
 		switch(value)
 		{
 			case 0:sprintf(txt, "Sine");break;
@@ -683,7 +683,7 @@ char const *mi::DescribeValue(int const param, int const value)
 		}
 
 		break;
-	case 10:	
+	case 10:				
 		switch(value)
 		{
 			case 0:sprintf(txt, "Sine");break;
@@ -692,7 +692,7 @@ char const *mi::DescribeValue(int const param, int const value)
 			case 3:sprintf(txt, "-Saw");break;
 		}
 		break;
-	case 13:	
+	case 13:				
 		switch(value)
 		{
 			case 0:sprintf(txt, "Lowpass");break;
@@ -701,7 +701,7 @@ char const *mi::DescribeValue(int const param, int const value)
 			case 3:sprintf(txt, "Bandreject");break;
 		}
 		break;
-	case 14:	
+	case 14:				
 		switch(value)
 		{
 			case 0:sprintf(txt, "O(M(M(M)))");break;

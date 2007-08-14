@@ -24,11 +24,9 @@ namespace psy
 {
 	namespace core
 	{
-		
-		
 		PatternLine::PatternLine()
 		{
-			 sequencerTrack_ = 0;
+				sequencerTrack_ = 0;
 		}
 
 		PatternLine::~PatternLine()
@@ -50,30 +48,30 @@ namespace psy
 
 		void PatternLine::setSequenceTrack( int track )
 		{
-			 sequencerTrack_ = track;
+				sequencerTrack_ = track;
 		}
 
 		int PatternLine::sequenceTrack( ) const
 		{
-			 return sequencerTrack_;
+				return sequencerTrack_;
 		}
 
 		std::map< int, PatternEvent > & PatternLine::notes( )
 		{
 			return noteMap;
-		}						
+		}
 		
 		const std::map< int, PatternEvent > & PatternLine::notes( ) const
 		{
 			return noteMap;
-		}						
+		}
 
-				std::map< int, PatternEvent > & PatternLine::tweaks( )
+		std::map< int, PatternEvent > & PatternLine::tweaks( )
 		{
 			return tweakMap;
 		}
 
-				const std::map< int, PatternEvent > & PatternLine::tweaks( ) const
+		const std::map< int, PatternEvent > & PatternLine::tweaks( ) const
 		{
 			return tweakMap;
 		}
@@ -84,16 +82,3 @@ namespace psy
 
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

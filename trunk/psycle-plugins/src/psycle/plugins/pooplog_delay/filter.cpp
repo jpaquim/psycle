@@ -52,8 +52,8 @@ void filter::SetFilter_4PoleLP(float cf, int Resonance)
 void filter::SetFilter_4PoleEQ1(float cf, int Resonance)
 {
 	cf=CUTOFFCONV(cf);
-//	float ScaleResonance=1.0;
-//	float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
+//				float ScaleResonance=1.0;
+//				float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
 	Biquad.SetParametricEQ(cf,(float)(1.0+Resonance/12.0),float(6+Resonance/30.0),sr,0.4f/(1+(240-Resonance)/120.0f));
 	Biquad2.SetParametricEQ(float(cf/(1+Resonance/240.0)),float(1.0+Resonance/12.0),float(6+Resonance/30.0),sr,0.4f);
 }
@@ -61,8 +61,8 @@ void filter::SetFilter_4PoleEQ1(float cf, int Resonance)
 void filter::SetFilter_4PoleEQ2(float cf, int Resonance)
 {
 	cf=CUTOFFCONV(cf);
-//	float ScaleResonance=1.0;
-//	float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
+//				float ScaleResonance=1.0;
+//				float fQ=(float)(1.01+30*Resonance*ScaleResonance/240.0);
 	Biquad.SetParametricEQ(cf,8.0f,9.0f,sr,0.5f);
 	Biquad2.SetParametricEQ(float(cf/(3.5-2*Resonance/240.0)),8.0f,9.0f,sr,0.4f);
 }

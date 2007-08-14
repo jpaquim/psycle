@@ -2,7 +2,7 @@
 ///\brief interface file for psy::core::Player.
 
 /***************************************************************************
-*   Copyright (C) 2007 Psycledelics  , Josep Maria Antolín Segura, D.W. Aley			
+*   Copyright (C) 2007 Psycledelics, Josep Maria Antolín Segura, D.W. Aley
 *   psycle.sf.net   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -164,7 +164,7 @@ namespace psy
 			
 			///\name loop
 			///\{
-				public:			
+				public:
 					void setLoopSong( bool setit ) { loopSong_ = setit; }
 					bool loopSong() const { return loopSong_; }
 

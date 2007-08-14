@@ -1,13 +1,13 @@
 //============================================================================
-//	CDsp.cpp
-//	------
-//	Digital Signal Processing Library using Floating Point
-//	by Joakim Dahlström a.k.a. Druttis
+//				CDsp.cpp
+//				------
+//				Digital Signal Processing Library using Floating Point
+//				by Joakim Dahlström a.k.a. Druttis
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
 #include "CDsp.h"
 //============================================================================
-//	CreateWavetable
+//				CreateWavetable
 //============================================================================
 void CDsp::CreateWavetable(float *coeffs, int ncoeffs, float *psamples, int nsamples)
 {

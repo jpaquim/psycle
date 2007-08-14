@@ -71,11 +71,11 @@ void PatternView::createToolBar()
 	}
 	patStepCbx_->setCurrentIndex( 1 );
 	connect( patStepCbx_, SIGNAL( currentIndexChanged( int ) ),
-		 this, SLOT( onPatternStepComboBoxIndexChanged( int ) ) );
+			this, SLOT( onPatternStepComboBoxIndexChanged( int ) ) );
 
 	addBarAct_ = new QAction(QIcon(":images/pat_addbar.png"), "Add Bar", this );
-	addBarAct_->setStatusTip( "Add a bar" );	 
-		 
+	addBarAct_->setStatusTip( "Add a bar" );																 
+			
 	delBarAct_ = new QAction(QIcon(":images/pat_delbar.png"), "Delete Bar", this );
 	delBarAct_->setStatusTip( "Delete a bar" );
 	
@@ -90,15 +90,15 @@ void PatternView::createToolBar()
 	}
 	tracksCbx_->setCurrentIndex( numberOfTracks()-1 );
 	connect( tracksCbx_, SIGNAL( currentIndexChanged( int ) ),
-		 this, SLOT( onTracksComboBoxIndexChanged( int ) ) );
+			this, SLOT( onTracksComboBoxIndexChanged( int ) ) );
 
 	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
-	toolBar_->addWidget ( tracksCbx_ );	 
+	toolBar_->addWidget ( tracksCbx_ );																 
 	toolBar_->addSeparator();
 	toolBar_->addWidget( new QLabel( "Step: " ) );
 	toolBar_->addWidget( patStepCbx_ );
 	toolBar_->addSeparator();
-	toolBar_->addAction( addBarAct_ );	
+	toolBar_->addAction( addBarAct_ );																
 	toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
 	toolBar_->addAction( recordCb_ );
@@ -143,7 +143,7 @@ void PatternView::clearNote( const PatCursor & cursor) {
 void PatternView::onTick( double sequenceStart ) {
 	if ( pattern() ) {
 		int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * beatZoom() );
-		if ( liney != playPos_ ) {			
+		if ( liney != playPos_ ) {																																																
 			int oldPlayPos = playPos_;
 			playPos_ = liney;
 			int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
@@ -251,19 +251,19 @@ void PatternView::keyPressEvent( QKeyEvent *event )
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 	switch ( command ) {
 		/*case Qt::Key_A:
-		  {
-		  float position = patternGrid()->cursor().line() / (float) beatZoom();
-		  pattern()->removeBar(position);
-		  patternGrid()->update();
-		  break;
-		  }*/ //why is this commented?
-        case commands::pattern_step_dec:
+			{
+			float position = patternGrid()->cursor().line() / (float) beatZoom();
+			pattern()->removeBar(position);
+			patternGrid()->update();
+			break;
+			}*/ //why is this commented?
+		case commands::pattern_step_dec:
 		patStepCbx_->setCurrentIndex( std::max( 0, patternStep() - 1 ) );
 		break;
-        case commands::pattern_step_inc:
+		case commands::pattern_step_inc:
 		patStepCbx_->setCurrentIndex( std::min( 16, patternStep() + 1 ) );
 		break;
-        default:
+		default:
 		event->ignore();
 	}
 }

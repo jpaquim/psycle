@@ -32,8 +32,8 @@
 
 TrackHeader::TrackHeader( int height, PatternDraw * pPatternDraw ) 
 	: QWidget(pPatternDraw),
-	  pDraw(pPatternDraw),
-	  height_(height)
+		pDraw(pPatternDraw),
+		height_(height)
 {}
 
 TrackHeader::~ TrackHeader( )

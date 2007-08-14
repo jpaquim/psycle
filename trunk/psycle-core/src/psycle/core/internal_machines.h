@@ -66,8 +66,10 @@ namespace psy {
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual int GenerateAudio( int numSamples );
 			virtual std::string GetName() const { return _psName; };
-			/// Loader for psycle fileformat version 2.
-/*			virtual bool LoadPsy2FileFormat(RiffFile* pFile);*/
+			#if 0
+				/// Loader for psycle fileformat version 2.
+				virtual bool LoadPsy2FileFormat(RiffFile* pFile);
+			#endif
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 
@@ -155,10 +157,10 @@ namespace psy {
 			float _sendGrid[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // 12 inputs with 12 sends (+dry) each.  (0 -> dry, 1+ -> sends)
 			/// Incoming send, Machine number
 			///\todo hardcoded limits and wastes
-			id_type _send[MAX_CONNECTIONS];	
+			id_type _send[MAX_CONNECTIONS];
 			/// Incoming send, connection volume
 			///\todo hardcoded limits and wastes
-			float _sendVol[MAX_CONNECTIONS];	
+			float _sendVol[MAX_CONNECTIONS];
 			/// Value to multiply _sendVol[] to have a 0.0..1.0 range
 			///\todo hardcoded limits and wastes
 			float _sendVolMulti[MAX_CONNECTIONS];
@@ -190,7 +192,7 @@ namespace psy {
 		{
 		public:
 			LFO(MachineCallbacks* callbacks);
-      LFO(MachineCallbacks* callbacks, id_type index, CoreSong* song);
+		LFO(MachineCallbacks* callbacks, id_type index, CoreSong* song);
 			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
@@ -219,7 +221,7 @@ namespace psy {
 			{
 				enum lfo_type
 				{
-					sine, tri, saw, /*sawdown,*/ square,	//depth ranges from -100% to 100% -- inverse saw is redundant
+					sine, tri, saw, /*sawdown,*/ square, ///< depth ranges from -100% to 100% -- inverse saw is redundant
 					num_lfos
 				};
 			};
@@ -230,22 +232,25 @@ namespace psy {
 				enum prm
 				{
 					wave, speed,
-					mac0,	mac1,	mac2,	mac3,	mac4,	mac5,
-					prm0,	prm1,	prm2,	prm3,	prm4,	prm5,
-					level0,	level1,	level2,	level3,	level4,	level5,
-					phase0,	phase1,	phase2,	phase3,	phase4,	phase5,
+					mac0,   mac1,   mac2,   mac3,   mac4,   mac5,
+					prm0,   prm1,   prm2,   prm3,   prm4,   prm5,
+					level0, level1, level2, level3, level4, level5,
+					phase0, phase1, phase2, phase3, phase4, phase5,
 					num_params
 				};
 			};
 
 		protected:
-			//protected member funcs
-			virtual void FillTable();				//fills the lfo table based on the value of waveform
-			virtual void ParamStart(int which);		//initializes data to start modulating the param given by 'which'
-			virtual void ParamEnd(int which);		//resets a parameter that's no longer being modulated
+			/// fills the lfo table based on the value of waveform
+			virtual void FillTable();
+			/// initializes data to start modulating the param given by 'which'
+			virtual void ParamStart(int which);
+			/// resets a parameter that's no longer being modulated
+			virtual void ParamEnd(int which);
 
 			//parameter settings
-			short waveform;	
+			
+			short waveform;
 			int lSpeed;
 			short macOutput[NUM_CHANS];
 			short paramOutput[NUM_CHANS];
@@ -253,15 +258,18 @@ namespace psy {
 			int level[NUM_CHANS];
 
 			//internal state vars
-			float lfoPos;				//position in our lfo
-			float waveTable[LFO_SIZE];	//our lfo
-			int prevVal[NUM_CHANS];				//value of knob when last seen-- used to compensate for outside changes
-			int centerVal[NUM_CHANS];			//where knob should be at lfo==0
-
+			
+			/// position in our lfo
+			float lfoPos;
+			/// our lfo
+			float waveTable[LFO_SIZE];
+			/// value of knob when last seen-- used to compensate for outside changes
+			int prevVal[NUM_CHANS];
+			/// where knob should be at lfo==0
+			int centerVal[NUM_CHANS];
 
 			static std::string _psName;
 			bool bisTicking;
-
 		};
 	}
 }

@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------------------------
 // VST Plug-Ins SDK
-// Version 2.4		$Date: 2006/11/13 09:08:27 $
+// Version 2.4								$Date: 2006/11/13 09:08:27 $
 //
 // Category     : VST 2.x SDK Samples
 // Filename     : gmnames.h
@@ -53,7 +53,7 @@ static const char* GmNames [128] =
 	"Harpsichord",
 
 	// Percussion
-	"Clavi",					// 7
+	"Clavi",																				// 7
 	"Celesta",
 	"Glockenspiel",
 	"Music Box",
@@ -64,7 +64,7 @@ static const char* GmNames [128] =
 	"Dulcimer",
 
 	// Organ
-	"Drawbar Organ",			// 16
+	"Drawbar Organ",												// 16
 	"Percussive Organ",
 	"Rock Organ",
 	"Church Organ",
@@ -74,7 +74,7 @@ static const char* GmNames [128] =
 	"Tango Accordion",
 
 	// Gitar
-	"Acoustic Guitar (nylon)",	// 24
+	"Acoustic Guitar (nylon)",				// 24
 	"Acoustic Guitar (steel)",
 	"Electric Guitar (jazz)",
 	"Electric Guitar (clean)",
@@ -84,7 +84,7 @@ static const char* GmNames [128] =
 	"Guitar harmonics",
 
 	// Bass
-	"Acoustic Bass",			// 32
+	"Acoustic Bass",												// 32
 	"Electric Bass (finger)",
 	"Electric Bass (pick)",
 	"Fretless Bass",
@@ -94,7 +94,7 @@ static const char* GmNames [128] =
 	"Synth Bass 2",
 
 	// strings
-	"Violin",					// 40
+	"Violin",																				// 40
 	"Viola",
 	"Cello",
 	"Contrabass",
@@ -104,7 +104,7 @@ static const char* GmNames [128] =
 	"Timpani",
 
 	// Ensemble
-	"String Ensemble 1",		// 48
+	"String Ensemble 1",								// 48
 	"String Ensemble 2",
 	"SynthStrings 1",
 	"SynthStrings 2",
@@ -114,7 +114,7 @@ static const char* GmNames [128] =
 	"Orchestra Hit",
 
 	// Brass
-	"Trumpet",					// 56
+	"Trumpet",																				// 56
 	"Trombone",
 	"Tuba",
 	"Muted Trumpet",
@@ -124,7 +124,7 @@ static const char* GmNames [128] =
 	"SynthBrass 2",
 
 	// Reed
-	"Soprano Sax",				// 64
+	"Soprano Sax",																// 64
 	"Alto Sax",
 	"Tenor Sax",
 	"Baritone Sax",
@@ -134,7 +134,7 @@ static const char* GmNames [128] =
 	"Clarinet",
 
 	// Pipe
-	"Piccolo",					// 72
+	"Piccolo",																				// 72
 	"Flute",
 	"Recorder",
 	"Pan Flute",
@@ -144,7 +144,7 @@ static const char* GmNames [128] =
 	"Ocarina",
 
 	// Synth Lead
-	"Lead 1 (square)",			// 80
+	"Lead 1 (square)",												// 80
 	"Lead 2 (sawtooth)",
 	"Lead 3 (calliope)",
 	"Lead 4 (chiff)",
@@ -154,7 +154,7 @@ static const char* GmNames [128] =
 	"Lead 8 (bass + lead)",
 
 	// Synth Pad
-	"Pad 1 (new age)",			// 88
+	"Pad 1 (new age)",												// 88
 	"Pad 2 (warm)",
 	"Pad 3 (polysynth)",
 	"Pad 4 (choir)",
@@ -164,7 +164,7 @@ static const char* GmNames [128] =
 	"Pad 8 (sweep)",
 
 	// Synth Fx
-	"FX 1 (rain)",				// 96
+	"FX 1 (rain)",																// 96
 	"FX 2 (soundtrack)",
 	"FX 3 (crystal)",
 	"FX 4 (atmosphere)",
@@ -174,7 +174,7 @@ static const char* GmNames [128] =
 	"FX 8 (sci-fi)",
 
 	// Ethnic
-	"Sitar",					// 104
+	"Sitar",																				// 104
 	"Banjo",
 	"Shamisen",
 	"Koto",
@@ -184,7 +184,7 @@ static const char* GmNames [128] =
 	"Shanai",
 
 	// Percussive
-	"Tinkle Bell",				// 112
+	"Tinkle Bell",																// 112
 	"Agogo",
 	"Steel Drums",
 	"Woodblock",
@@ -194,7 +194,7 @@ static const char* GmNames [128] =
 	"Reverse Cymbal",
 
 	// Effects
-	"Guitar Fret Noise",		// 120
+	"Guitar Fret Noise",								// 120
 	"Breath Noise",
 	"Seashore",
 	"Bird Tweet",

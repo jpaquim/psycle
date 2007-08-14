@@ -83,7 +83,7 @@ struct zipwriter_file {
 
 /* outfd must be opened for reading+writing, be seekable, and must be empty.
 	* this means that you probably should have opened it with:
-	* 	open(..., O_CREAT|O_EXCL|O_RDWR)
+	*    open(..., O_CREAT|O_EXCL|O_RDWR)
 	* it should also probably be a temporary file so that you can rename() it
 	* over the target filename thus making your file-save operations crashproof.
 	*
@@ -112,19 +112,19 @@ void zipwriter_comment(zipwriter *z, const void *buf, size_t length);
 	*/
 zipwriter_file *zipwriter_addfile(zipwriter *d, const char *name,
 		unsigned int flags);
-#define ZIPWRITER_STORE		0
-#define ZIPWRITER_DEFLATE1	1
-#define ZIPWRITER_DEFLATE2	2
-#define ZIPWRITER_DEFLATE3	3
-#define ZIPWRITER_DEFLATE4	4
-#define ZIPWRITER_DEFLATE5	5
-#define ZIPWRITER_DEFLATE6	6
-#define ZIPWRITER_DEFLATE7	7
-#define ZIPWRITER_DEFLATE8	8
-#define ZIPWRITER_DEFLATE9	9
-#define ZIPWRITER_DEFLATEx(x)	x
-#define ZIPWRITER_DEFLATE	8
-#define ZIPWRITER_COMPRESS_MASK	0xffff
+#define ZIPWRITER_STORE    0
+#define ZIPWRITER_DEFLATE1 1
+#define ZIPWRITER_DEFLATE2 2
+#define ZIPWRITER_DEFLATE3 3
+#define ZIPWRITER_DEFLATE4 4
+#define ZIPWRITER_DEFLATE5 5
+#define ZIPWRITER_DEFLATE6 6
+#define ZIPWRITER_DEFLATE7 7
+#define ZIPWRITER_DEFLATE8 8
+#define ZIPWRITER_DEFLATE9 9
+#define ZIPWRITER_DEFLATEx(x) x
+#define ZIPWRITER_DEFLATE 8
+#define ZIPWRITER_COMPRESS_MASK 0xffff
 /* this is optional; it doesn't affect the behavior of zipwriter
 	* when writing files to the zipfile, so unless you're actually making
 	* your "text" files have MS-DOS style line-endings (\x0d\x0a), you
@@ -135,8 +135,8 @@ zipwriter_file *zipwriter_addfile(zipwriter *d, const char *name,
 	* so that Info-ZIP on UNIX, MacOS, Amiga, and etc, will translate the
 	* appropriate line-endings...
 	*/
-#define ZIPWRITER_FILE_BINARY	0x00000
-#define ZIPWRITER_FILE_TEXT	0x10000
+#define ZIPWRITER_FILE_BINARY 0x00000
+#define ZIPWRITER_FILE_TEXT   0x10000
 
 /* writes a chunk of data to the current file. returns zero if f isn't
 	* opened, if it isn't the current file, or if write() fails. when

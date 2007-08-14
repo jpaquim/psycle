@@ -195,7 +195,7 @@ CMachineParameter const paraWave1 =
 	"Wave 1",
 	"Wave 1",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	1
 };
@@ -206,7 +206,7 @@ CMachineParameter const paraWave2 =
 	"Wave 2",
 	"Wave 2",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -216,7 +216,7 @@ CMachineParameter const paraWave3 =
 	"Wave 3",
 	"Wave 3",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -226,7 +226,7 @@ CMachineParameter const paraWave4 =
 	"Wave 4",
 	"Wave 4",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -236,7 +236,7 @@ CMachineParameter const paraWave5 =
 	"Wave 5",
 	"Wave 5",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -246,7 +246,7 @@ CMachineParameter const paraWave6 =
 	"Wave 6",
 	"Wave 6",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -256,7 +256,7 @@ CMachineParameter const paraWave7 =
 	"Wave 7",
 	"Wave 7",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -266,7 +266,7 @@ CMachineParameter const paraWave8 =
 	"Wave 8",
 	"Wave 8",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -276,7 +276,7 @@ CMachineParameter const paraWave9 =
 	"Wave 9",
 	"Wave 9",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -286,7 +286,7 @@ CMachineParameter const paraWave10 =
 	"Wave 10",
 	"Wave 10",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -296,7 +296,7 @@ CMachineParameter const paraWave11 =
 	"Wave 11",
 	"Wave 11",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -306,7 +306,7 @@ CMachineParameter const paraWave12 =
 	"Wave 12",
 	"Wave 12",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -316,7 +316,7 @@ CMachineParameter const paraWave13 =
 	"Wave 13",
 	"Wave 13",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -326,7 +326,7 @@ CMachineParameter const paraWave14 =
 	"Wave 14",
 	"Wave 14",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -336,7 +336,7 @@ CMachineParameter const paraWave15 =
 	"Wave 15",
 	"Wave 15",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -346,7 +346,7 @@ CMachineParameter const paraWave16 =
 	"Wave 16",
 	"Wave 16",
 	0,
-	9,	
+	9,				
 	MPF_STATE,
 	0
 };
@@ -356,7 +356,7 @@ CMachineParameter const paraTranspose1 =
 	"Transpose 1",
 	"Transpose 1",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	1
 };
@@ -366,7 +366,7 @@ CMachineParameter const paraTranspose2 =
 	"Transpose 2",
 	"Transpose 2",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -376,7 +376,7 @@ CMachineParameter const paraTranspose3 =
 	"Transpose 3",
 	"Transpose 3",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -386,7 +386,7 @@ CMachineParameter const paraTranspose4 =
 	"Transpose 4",
 	"Transpose 4",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -396,7 +396,7 @@ CMachineParameter const paraTranspose5 =
 	"Transpose 5",
 	"Transpose 5",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -406,7 +406,7 @@ CMachineParameter const paraTranspose6 =
 	"Transpose 6",
 	"Transpose 6",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -416,7 +416,7 @@ CMachineParameter const paraTranspose7 =
 	"Transpose 7",
 	"Transpose 7",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -426,7 +426,7 @@ CMachineParameter const paraTranspose8 =
 	"Transpose 8",
 	"Transpose 8",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -436,7 +436,7 @@ CMachineParameter const paraTranspose9 =
 	"Transpose 9",
 	"Transpose 9",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -446,7 +446,7 @@ CMachineParameter const paraTranspose10 =
 	"Transpose 10",
 	"Transpose 10",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -456,7 +456,7 @@ CMachineParameter const paraTranspose11 =
 	"Transpose 11",
 	"Transpose 11",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -466,7 +466,7 @@ CMachineParameter const paraTranspose12 =
 	"Transpose 12",
 	"Transpose 12",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -476,7 +476,7 @@ CMachineParameter const paraTranspose13 =
 	"Transpose 13",
 	"Transpose 13",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -486,7 +486,7 @@ CMachineParameter const paraTranspose14 =
 	"Transpose 14",
 	"Transpose 14",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -496,7 +496,7 @@ CMachineParameter const paraTranspose15 =
 	"Transpose 15",
 	"Transpose 15",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -506,7 +506,7 @@ CMachineParameter const paraTranspose16 =
 	"Transpose 16",
 	"Transpose 16",
 	0,
-	96,	
+	96,				
 	MPF_STATE,
 	0
 };
@@ -516,7 +516,7 @@ CMachineParameter const paraOption1 =
 	"Option 1",
 	"Option 1",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -526,7 +526,7 @@ CMachineParameter const paraOption2 =
 	"Option 2",
 	"Option 2",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -536,7 +536,7 @@ CMachineParameter const paraOption3 =
 	"Option 3",
 	"Option 3",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -546,7 +546,7 @@ CMachineParameter const paraOption4 =
 	"Option 4",
 	"Option 4",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -556,7 +556,7 @@ CMachineParameter const paraOption5 =
 	"Option 5",
 	"Option 5",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -566,7 +566,7 @@ CMachineParameter const paraOption6 =
 	"Option 6",
 	"Option 6",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -576,7 +576,7 @@ CMachineParameter const paraOption7 =
 	"Option 7",
 	"Option 7",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -586,7 +586,7 @@ CMachineParameter const paraOption8 =
 	"Option 8",
 	"Option 8",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -596,7 +596,7 @@ CMachineParameter const paraOption9 =
 	"Option 9",
 	"Option 9",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -606,7 +606,7 @@ CMachineParameter const paraOption10 =
 	"Option 10",
 	"Option 10",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -616,7 +616,7 @@ CMachineParameter const paraOption11 =
 	"Option 11",
 	"Option 11",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -626,7 +626,7 @@ CMachineParameter const paraOption12 =
 	"Option 12",
 	"Option 12",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -636,7 +636,7 @@ CMachineParameter const paraOption13 =
 	"Option 13",
 	"Option 13",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -646,7 +646,7 @@ CMachineParameter const paraOption14 =
 	"Option 14",
 	"Option 14",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -656,7 +656,7 @@ CMachineParameter const paraOption15 =
 	"Option 15",
 	"Option 15",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -666,7 +666,7 @@ CMachineParameter const paraOption16 =
 	"Option 16",
 	"Option 16",
 	0,
-	3,	
+	3,				
 	MPF_STATE,
 	0
 };
@@ -677,7 +677,7 @@ CMachineParameter const paraCommand1 =
 	"Command 1",
 	"Command 1",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -687,7 +687,7 @@ CMachineParameter const paraCommand2 =
 	"Command 2",
 	"Command 2",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -697,7 +697,7 @@ CMachineParameter const paraCommand3 =
 	"Command 3",
 	"Command 3",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -706,7 +706,7 @@ CMachineParameter const paraCommand4 =
 	"Command 4",
 	"Command 4",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -715,7 +715,7 @@ CMachineParameter const paraCommand5 =
 	"Command 5",
 	"Command 5",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -724,7 +724,7 @@ CMachineParameter const paraCommand6 =
 	"Command 6",
 	"Command 6",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -733,7 +733,7 @@ CMachineParameter const paraCommand7 =
 	"Command 7",
 	"Command 7",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -742,7 +742,7 @@ CMachineParameter const paraCommand8 =
 	"Command 8",
 	"Command 8",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -751,7 +751,7 @@ CMachineParameter const paraCommand9 =
 	"Command 9",
 	"Command 9",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -760,7 +760,7 @@ CMachineParameter const paraCommand10 =
 	"Command 10",
 	"Command 10",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -769,7 +769,7 @@ CMachineParameter const paraCommand11 =
 	"Command 11",
 	"Command 11",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -778,7 +778,7 @@ CMachineParameter const paraCommand12 =
 	"Command 12",
 	"Command 12",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -787,7 +787,7 @@ CMachineParameter const paraCommand13 =
 	"Command 13",
 	"Command 13",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -796,7 +796,7 @@ CMachineParameter const paraCommand14 =
 	"Command 14",
 	"Command 14",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -805,7 +805,7 @@ CMachineParameter const paraCommand15 =
 	"Command 15",
 	"Command 15",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -814,7 +814,7 @@ CMachineParameter const paraCommand16 =
 	"Command 16",
 	"Command 16",
 	0,
-	15,	
+	15,				
 	MPF_STATE,
 	0
 };
@@ -1145,7 +1145,7 @@ CMachineParameter const paraStartPos =
 	"Start Pos",
 	"Start Pos",
 	1,
-	16,	
+	16,				
 	MPF_STATE,
 	1
 };
@@ -1154,9 +1154,9 @@ CMachineParameter const paraLoopStart =
 { 
 	"Loop Start",
 	"Loop Start",
-	1,	
-	16,		
-	MPF_STATE,	
+	1,				
+	16,								
+	MPF_STATE,				
 	1
 };
 
@@ -1164,10 +1164,10 @@ CMachineParameter const paraLoopStart =
 CMachineParameter const paraLoopEnd = 
 { 
 	"Loop End",
-	"Loop End",	
-	1,	
-	16,		
-	MPF_STATE,	
+	"Loop End",				
+	1,				
+	16,								
+	MPF_STATE,				
 	1
 };
 
@@ -1175,9 +1175,9 @@ CMachineParameter const paraReplaySpeed =
 { 
 	"Replay Speed",
 	"Replay Speed",
-	1,	
-	255,	
-	MPF_STATE,	
+	1,				
+	255,				
+	MPF_STATE,				
 	128
 };
 
@@ -1186,9 +1186,9 @@ CMachineParameter const paraVCAattack =
 { 
 	"VCA Attack",
 	"VCA Attack",
-	32,	
+	32,				
 	MAX_ENV_TIME,
-	MPF_STATE,	
+	MPF_STATE,				
 	32
 };
 
@@ -1197,9 +1197,9 @@ CMachineParameter const paraVCAdecay =
 { 
 	"VCA Decay",
 	"VCA Decay",
-	32,	
+	32,				
 	MAX_ENV_TIME,
-	MPF_STATE,	
+	MPF_STATE,				
 	6341
 };
 
@@ -1207,9 +1207,9 @@ CMachineParameter const paraVCAsustain =
 { 
 	"VCA Sustain",
 	"VCA Sustain level",
-	0,	
-	256,	
-	MPF_STATE,	
+	0,				
+	256,				
+	MPF_STATE,				
 	192
 };
 
@@ -1218,9 +1218,9 @@ CMachineParameter const paraVCArelease =
 { 
 	"VCA Release",
 	"VCA Release",
-	32,	
+	32,				
 	MAX_ENV_TIME,
-	MPF_STATE,	
+	MPF_STATE,				
 	2630
 };
 
@@ -1228,9 +1228,9 @@ CMachineParameter const paraVCFcutoff =
 { 
 	"VCF Cutoff",
 	"VCF Cutoff",
-	0,	
-	255,	
-	MPF_STATE,	
+	0,				
+	255,				
+	MPF_STATE,				
 	120
 };
 
@@ -1238,9 +1238,9 @@ CMachineParameter const paraVCFresonance =
 { 
 	"VCF Resonance",
 	"VCF Resonance",
-	1,	
-	240,	
-	MPF_STATE,	
+	1,				
+	240,				
+	MPF_STATE,				
 	1
 };
 
@@ -1250,9 +1250,9 @@ CMachineParameter const paraVCFenvmod =
 { 
 	"VCF Envmod",
 	"VCF Envmod",
-	0,	
-	255,	
-	MPF_STATE,	
+	0,				
+	255,				
+	MPF_STATE,				
 	80
 };
 
@@ -1260,9 +1260,9 @@ CMachineParameter const paraVCFattack =
 { 
 	"VCF Attack",
 	"VCF Attack",
-	32,	
+	32,				
 	MAX_ENV_TIME,
-	MPF_STATE,	
+	MPF_STATE,				
 	589
 };
 
@@ -1271,9 +1271,9 @@ CMachineParameter const paraVCFdecay =
 { 
 	"VCF Decay",
 	"VCF Decay",
-	32,	
+	32,				
 	MAX_ENV_TIME,
-	MPF_STATE,	
+	MPF_STATE,				
 	2630
 };
 
@@ -1281,9 +1281,9 @@ CMachineParameter const paraVCFsustain =
 { 
 	"VCF Sustain",
 	"VCF Sustain level",
-	0,	
-	256,	
-	MPF_STATE,	
+	0,				
+	256,				
+	MPF_STATE,				
 	0
 };
 
@@ -1291,9 +1291,9 @@ CMachineParameter const paraVCFrelease =
 { 
 	"VCF Release",
 	"VCF Release",
-	32,	
+	32,				
 	MAX_ENV_TIME,
-	MPF_STATE,	
+	MPF_STATE,				
 	2630
 };
 
@@ -1301,10 +1301,10 @@ CMachineParameter const paraVCFrelease =
 CMachineParameter const paraFinetune = 
 {
 	"Finetune",
-	"Finetune",	
+	"Finetune",				
 	-256,
-	256,	
-	MPF_STATE,	
+	256,				
+	MPF_STATE,				
 	0
 };
 
@@ -1442,7 +1442,7 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
+	MI_VERSION,				
 	GENERATOR,
 	128,
 	pParameters,
@@ -1664,7 +1664,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			track[c].PerformFx();
 			do
 			{
-				sl=0;		
+				sl=0;								
 				sl+=track[c].GetSample();
 
 				*++xpsamplesleft+=sl;
@@ -1734,7 +1734,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	if(param<16)
-	{	switch(value)
+	{				switch(value)
 		{
 			case 0:sprintf(txt,"---");return true;break;
 			default: sprintf(txt,"%i",value-1);return true;break;
@@ -1897,7 +1897,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	}
 
 	if(param>95 & param<112)
-	{	switch(value)
+	{				switch(value)
 		{
 			case 0:sprintf(txt,"---");return true;break;
 		}

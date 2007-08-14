@@ -4,12 +4,12 @@
 class OnePole
 {
 public:
-	float	poleCoeff;
-	float	sgain;
+	float				poleCoeff;
+	float				sgain;
 	//
-	float	gain;
-	float	output;
-	float	last_output;
+	float				gain;
+	float				output;
+	float				last_output;
 public:
 	OnePole()
 	{

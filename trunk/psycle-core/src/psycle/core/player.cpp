@@ -2,7 +2,7 @@
 ///\brief implementation file for psy::core::Player
 
 /***************************************************************************
-*   Copyright (C) 2007 Psycledelics  , Josep Maria Antolin Segura, D.W. Aley			
+*   Copyright (C) 2007 Psycledelics, Josep Maria Antolin Segura, D.W. Aley
 *   psycle.sf.net   *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
@@ -287,13 +287,19 @@ namespace psy
 				std::vector<GlobalEvent*> globals;
 
 				//processing of each buffer is subdivided into chunks, determined by the placement of any global events.
-				double chunkBeatEnd;	//end beat position of the current chunk-- i.e., the next global event's position.
-				double chunkBeatSize;	//number of beats in the chunk.
-				int chunkSampleSize;	//number of samples needed to process for this chunk.
-				int processedSamples(0);//this is used to counter rounding errors of sample/beat conversions
-				bool bFirst(true);	//whether this is the first time through the loop.  this is passed to GetNextGlobalEvents()
-						//to specify that we're including events at exactly playPos -only- on the first iteration--
-						//otherwise we'll get the first event over and over again.
+				
+				/// end beat position of the current chunk-- i.e., the next global event's position.
+				double chunkBeatEnd;
+				/// number of beats in the chunk.
+				double chunkBeatSize;
+				/// number of samples needed to process for this chunk.
+				int chunkSampleSize;
+				/// this is used to counter rounding errors of sample/beat conversions
+				int processedSamples(0);
+				/// whether this is the first time through the loop.  this is passed to GetNextGlobalEvents()
+				/// to specify that we're including events at exactly playPos -only- on the first iteration--
+				/// otherwise we'll get the first event over and over again.
+				bool bFirst(true);
 				do {
 					//get the next round of global events.  we need to repopulate the list of globals and patternlines
 					//each time through the loop because global events can potentially move the song's beatposition elsewhere.
@@ -336,7 +342,7 @@ namespace psy
 					}
 
 					bFirst=false;
-				} while(!globals.empty());  //if globals is empty, then we've processed through to the end of the buffer.
+				} while(!globals.empty()); // if globals is empty, then we've processed through to the end of the buffer.
 			}
 			else
 			{
@@ -395,7 +401,7 @@ namespace psy
 				case 0: // mono mix
 					for( i = 0; i < amount; i++)
 					{
-						//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither. 	 
+						//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
 						if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) stopRecording();
 					}
 					break;

@@ -4,9 +4,9 @@
 class DCBlock
 {
 public:
-	float	input;
-	float	output;
-	float	last_output;
+	float				input;
+	float				output;
+	float				last_output;
 public:
 	DCBlock()
 	{

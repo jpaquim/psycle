@@ -46,7 +46,7 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 PluginFxCallback Plugin::_callback;
 
 void PluginFxCallback::MessBox(char const* ptxt,char const* caption,unsigned int type) {
-  //MessageBox(hWnd,ptxt,caption,type); 
+	//MessageBox(hWnd,ptxt,caption,type); 
 }
 int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerRow()); }
 int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
@@ -227,7 +227,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 		}
 	}
 	return numSamples;
-/*
+	#if 0
 	if (!_mute) {
 		if ((mode() == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
 			int ns = numSamples;
@@ -441,7 +441,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 						}
 				}
 			}
-*/	  
+			#endif
 			//CPUCOST_CALC(cost, numSamples);
 			//_cpuCost += cost;
 			_worked = true;
@@ -611,7 +611,7 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 						}
 				} else _psDllName = psFileName;
 
-	    		psFileName = path + psFileName; 
+				psFileName = path + psFileName; 
 		}
 	#else
 		_psDllName = psFileName;
@@ -709,7 +709,7 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 					std::ostringstream s; s
 						<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
 						<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-//					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+					//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 					return false;
 				}
 				else

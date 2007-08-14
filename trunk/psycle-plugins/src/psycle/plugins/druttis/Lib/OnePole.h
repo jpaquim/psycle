@@ -1,23 +1,23 @@
 //============================================================================
 //
-//	OnePole
+//				OnePole
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
 //============================================================================
-//	Class
+//				Class
 //============================================================================
 class OnePole
 {
 private:
-	float	gain;
-    float	outputs[1];
-	float	lastOutput;
+	float				gain;
+	float				outputs[1];
+	float				lastOutput;
 	//
-	float	poleCoeff;
-	float	sgain;
+	float				poleCoeff;
+	float				sgain;
 public:
 	OnePole();
 	~OnePole();
@@ -31,14 +31,14 @@ public:
 	void SetPole(float newPole);
 	void SetGain(float newGain);
 	//------------------------------------------------------------------------
-	//	GetLastOutput
+	//				GetLastOutput
 	//------------------------------------------------------------------------
 	inline float GetLastOutput()
 	{
 		return lastOutput;
 	}
 	//------------------------------------------------------------------------
-	//	Tick
+	//				Tick
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{

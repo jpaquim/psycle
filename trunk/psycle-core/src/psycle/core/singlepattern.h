@@ -128,7 +128,7 @@ namespace psy
 
 			std::string toXml() const;
 
-      std::auto_ptr<SinglePattern> block( int left, int right, int top, int bottom );
+		std::auto_ptr<SinglePattern> block( int left, int right, int top, int bottom );
 			void copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
 			void mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
 

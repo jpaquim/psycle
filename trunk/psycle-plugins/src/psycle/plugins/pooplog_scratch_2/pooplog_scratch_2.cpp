@@ -33,7 +33,7 @@ v0.01b
 // some sort of smoothing flag for wrap, or even entire interpolation mode
 // lfo
 /////////////////////////////////////////////////////////////////////
- */
+	*/
 
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
@@ -49,15 +49,15 @@ v0.01b
 #define DRAG_MAX_f 4096.0f
 #define SPEED_MAX 4096
 #define SPEED_ONE 1024.0f
-#define MAX_RATE		8192
+#define MAX_RATE								8192
 #define MAX_BUF 1024*1024*4
 
 #define MAXLFOWAVE 15
-#define TWOPI				6.28318530717958647692528676655901f
+#define TWOPI																6.28318530717958647692528676655901f
 #define SAMPLE_LENGTH  4096
 #define MAXSYNCMODES 16
 
-#define FILTER_CALC_TIME	32
+#define FILTER_CALC_TIME				32
 #define MAXWAVE 17
 #define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
@@ -88,71 +88,71 @@ const static float buffindex[NUM_BUFF]={
 	1/192.0f,
 	1/128.0f,
 	1/96.0f,
-	 1/64.0f,
-	 1/48.0f,
-	 1/32.0f,
-	 1/25.0f,
-	 1/24.0f,
-	 1/20.0f,
-	 1/16.0f,
-	 1/12.0f,
-	 1/10.0f,
-	 1/8.0f,
-	 1/6.0f,
-	 1/5.0f,
-	 1/4.0f,
-	 1/3.0f,
-	 1/2.0f,
-	 2/3.0f,
-	 3/4.0f,
-	 1.0f,
-	 1.25f,
-	 1.5f,
-	 1.75f,
-	 2.0f,
-	 2.5f,
-	 3.0f,
-	 4.0f,
-	 5.0f,
-	 6.0f,
-	 7.0f,
-	 8.0f,
-	 10.0f,
-	 12.0f,
-	 14.0f,
-	 16.0f,
-	 18.0f,
-	 20.0f,
-	 22.0f,
-	 24.0f,
-	 26.0f,
-	 28.0f,
-	 30.0f,
-	 32.0f,
-	 34.0f,
-	 36.0f,
-	 38.0f,
-	 40.0f,
-	 42.0f,
-	 44.0f,
-	 46.0f,
-	 48.0f,
-	 50.0f,
-	 52.0f,
-	 54.0f,
-	 56.0f,
-	 58.0f,
-	 60.0f,
-	 62.0f,
-	 64.0f,
-	 68.0f,
-	 72.0f,
-	 76.0f,
-	 80.0f,
-	 84.0f,
-	 88.0f,
-	 92.0f,
-	 96.0f,
+		1/64.0f,
+		1/48.0f,
+		1/32.0f,
+		1/25.0f,
+		1/24.0f,
+		1/20.0f,
+		1/16.0f,
+		1/12.0f,
+		1/10.0f,
+		1/8.0f,
+		1/6.0f,
+		1/5.0f,
+		1/4.0f,
+		1/3.0f,
+		1/2.0f,
+		2/3.0f,
+		3/4.0f,
+		1.0f,
+		1.25f,
+		1.5f,
+		1.75f,
+		2.0f,
+		2.5f,
+		3.0f,
+		4.0f,
+		5.0f,
+		6.0f,
+		7.0f,
+		8.0f,
+		10.0f,
+		12.0f,
+		14.0f,
+		16.0f,
+		18.0f,
+		20.0f,
+		22.0f,
+		24.0f,
+		26.0f,
+		28.0f,
+		30.0f,
+		32.0f,
+		34.0f,
+		36.0f,
+		38.0f,
+		40.0f,
+		42.0f,
+		44.0f,
+		46.0f,
+		48.0f,
+		50.0f,
+		52.0f,
+		54.0f,
+		56.0f,
+		58.0f,
+		60.0f,
+		62.0f,
+		64.0f,
+		68.0f,
+		72.0f,
+		76.0f,
+		80.0f,
+		84.0f,
+		88.0f,
+		92.0f,
+		96.0f,
 	104.0f,
 	112.0f,
 	120.0f,
@@ -177,191 +177,191 @@ const static float buffindex[NUM_BUFF]={
 
 CMachineParameter const paraLength = 
 { 
-	"Buffer Length",				
-	"Buffer Length",								// description
-	0,												// MinValue	
-	NUM_BUFF-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Buffer Length",																
+	"Buffer Length",																																// description
+	0,																																																// MinValue				
+	NUM_BUFF-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	25,
 };
 
 CMachineParameter const paraSpeed = 
 { 
 	"Scratch Speed",
-	"Scratch Speed",								// description
-	int(-SPEED_ONE*2),												// MinValue	
-	SPEED_MAX,											// MaxValue
-	MPF_STATE,										// Flags
+	"Scratch Speed",																																// description
+	int(-SPEED_ONE*2),																																																// MinValue				
+	SPEED_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	int(SPEED_ONE),
 };
 
 CMachineParameter const paraDragL = 
 { 
-	"Left Drag Delay",				
-	"Left Drag Delay",									// description
-	0,												// MinValue	
-	DRAG_MAX,											// MaxValue
-	MPF_STATE,										// Flags
+	"Left Drag Delay",																
+	"Left Drag Delay",																																				// description
+	0,																																																// MinValue				
+	DRAG_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	DRAG_MAX/2,
 };
 
 CMachineParameter const paraDragR = 
 { 
-	"Right Drag Delay",				
-	"Right Drag Delay",									// description
-	0,												// MinValue	
-	DRAG_MAX,											// MaxValue
-	MPF_STATE,										// Flags
+	"Right Drag Delay",																
+	"Right Drag Delay",																																				// description
+	0,																																																// MinValue				
+	DRAG_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	DRAG_MAX/2,
 };
 
 CMachineParameter const paraUnbalance = 
 { 
-	"Speed Unbalance",				
-	"Speed Unbalance",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Speed Unbalance",																
+	"Speed Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraFeedback = 
 { 
-	"Feedback",				
-	"Feedback",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback",																
+	"Feedback",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraBufThru = 
 { 
-	"Buffer Through",				
-	"Buffer Through",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Buffer Through",																
+	"Buffer Through",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraMix = 
 { 
-	"Mix (Xfade)",				
-	"Mix (Xfade)",									// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix (Xfade)",																
+	"Mix (Xfade)",																																				// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraInputGain = 
 { 
 	"Input Gain",
-	"Input Gain",									// description
-	0,											// MinValue	
-	1024,											// MaxValue
-	MPF_STATE,										// Flags
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256
 };
 
 CMachineParameter const paraSPEEDlfospeed = 
 { 
 	"Speed LFO Rate",
-	"Speed LFO Rate",								// description
-	0,												// MinValue	
-	MAX_RATE,											// MaxValue
-	MPF_STATE,										// Flags
+	"Speed LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	6
 };
 
 CMachineParameter const paraSPEEDlfoamplitude = 
 { 
 	"Speed LFO Depth",
-	"Speed LFO Depth",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Speed LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraSPEEDlfowave = 
 { 
 	"Speed LFO Wave",
-	"Speed LFO Wave",							// description
-	0,												// MinValue	
-	MAXLFOWAVE-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Speed LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraMIXlfospeed = 
 { 
 	"Mix LFO Rate",
-	"Mix LFO Rate",								// description
-	0,												// MinValue	
-	MAX_RATE,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	6
 };
 
 CMachineParameter const paraMIXlfowave = 
 { 
 	"Mix LFO Wave",
-	"Mix LFO Wave",							// description
-	0,												// MinValue	
-	MAXLFOWAVE-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraMIXlfoamplitude = 
 { 
 	"Mix LFO Depth",
-	"Mix LFO Depth",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraSmoothing = 
 { 
 	"Delta Smoothing",
-	"Delta Smoothing",							// description
-	0,												// MinValue	
-	255,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delta Smoothing",																												// description
+	0,																																																// MinValue				
+	255,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraSPEEDlfophase = 
 { 
 	"Speed LFO Phase",
-	"Speed LFO Phase",									// description
-	0,												// MinValue	
-	0xffff,											// MaxValue
-	MPF_STATE,										// Flags
+	"Speed LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraMIXlfophase = 
 { 
 	"Mix LFO Phase",
-	"Mix LFO Phase",									// description
-	0,												// MinValue	
-	0xffff,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraNULL = 
 { 
 	" ",
-	" ",							// description
-	0,												// MinValue	
-	1,											// MaxValue
-	MPF_LABEL,										// Flags
+	" ",																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_LABEL,																																								// Flags
 	0
 };
 
@@ -419,14 +419,14 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	num_param,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	0,																																								// flags
+	num_param,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 	PLUGIN_NAME,
-	"Scratch 2",							// short name
-	"Jeremy Evers",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"Scratch 2",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	4
 };
 
@@ -475,13 +475,13 @@ private:
 	float * WaveTable[MAXWAVE+1];
 
 	float *pspeedlfowave;
-	int	speedlfowave;
+	int				speedlfowave;
 	int speedlfospeed;
 	float speedlfoamplitude;
 	float speedlfophase;
 
 	float *pmixlfowave;
-	int	mixlfowave;
+	int				mixlfowave;
 	int mixlfospeed;
 	float mixlfoamplitude;
 	float mixlfophase;
@@ -700,13 +700,13 @@ void mi::ParameterTweak(int par, int val)
 			InGain = (val/256.0f)*(val/256.0f);
 			break;
 
-		case e_paraSPEEDlfoamplitude:		
+		case e_paraSPEEDlfoamplitude:								
 			speedlfoamplitude = val/256.0f; 
 			break;
-		case e_paraSPEEDlfospeed:			
+		case e_paraSPEEDlfospeed:												
 			speedlfospeed = val; 
 			break;
-		case e_paraSPEEDlfowave:			
+		case e_paraSPEEDlfowave:												
 			pspeedlfowave=SourceWaveTable[val%MAXLFOWAVE]; 
 			speedlfowave=val%MAXLFOWAVE; 
 			break;
@@ -714,13 +714,13 @@ void mi::ParameterTweak(int par, int val)
 			speedlfophase = val * (SAMPLE_LENGTH*2/65536.0f);
 			break;
 
-		case e_paraMIXlfoamplitude:		
+		case e_paraMIXlfoamplitude:								
 			mixlfoamplitude = val/256.0f; 
 			break;
-		case e_paraMIXlfospeed:			
+		case e_paraMIXlfospeed:												
 			mixlfospeed = val; 
 			break;
-		case e_paraMIXlfowave:			
+		case e_paraMIXlfowave:												
 			pmixlfowave=SourceWaveTable[val%MAXLFOWAVE]; 
 			mixlfowave=val%MAXLFOWAVE; 
 			break;
@@ -728,7 +728,7 @@ void mi::ParameterTweak(int par, int val)
 			mixlfophase = val * (SAMPLE_LENGTH*2/65536.0f);
 			break;
 
-		case e_paraSmoothing:				
+		case e_paraSmoothing:																
 			smoothing = float((256-val)*(256-val))/2.0f; 
 			break;
 
@@ -883,7 +883,7 @@ void mi::InitWaveTable()
 		SourceWaveTable[0][c]=float(std::sin(sval));
 
 		// triangle
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			SourceWaveTable[1][c]=(c2*(1.0f/(SAMPLE_LENGTH/2)));
 		}
@@ -925,17 +925,17 @@ void mi::InitWaveTable()
 		}
 
 		// inv sin
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[6][c] = float((1.0-std::sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[6][c] = float((1.0-std::sin(sval-PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[6][c] = float((-1.0-std::sin(sval+PI/2)));
@@ -967,7 +967,7 @@ void mi::InitWaveTable()
 
 
 		// soft square
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			SourceWaveTable[10][c] = ((SourceWaveTable[0][c]*0.5f) + (SourceWaveTable[4][c]*0.5f));// - fabs(sin(sval*32.0f)*0.2f*SourceWaveTable[5][c]));
 		}
@@ -977,17 +977,17 @@ void mi::InitWaveTable()
 		}
 
 		// super mw
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[11][c] = float((std::sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[11][c] = float((std::sin(sval-PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[11][c] = float((std::sin(sval+PI/2)));
@@ -999,17 +999,17 @@ void mi::InitWaveTable()
 		}
 
 		// racer
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[12][c] = float((std::sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[12][c] = float((std::sin(sval*2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[12][c] = float((std::sin(sval+PI/2)));
@@ -1120,7 +1120,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		break;
 	case e_paraDragL:
 		// drag left
- 	case e_paraDragR:
+		case e_paraDragR:
 		// drag right
 		sprintf(txt,"%.2f %%",100*(value)/DRAG_MAX_f);
 		return true;

@@ -88,13 +88,13 @@ void EffectGui::keyPressEvent( QKeyEvent * event )
 {
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 	switch ( command ) { 
-        case commands::mute_machine:
+		case commands::mute_machine:
 		toggleMuteAct_->trigger();
 		return;
-        case commands::bypass_machine:
+		case commands::bypass_machine:
 		toggleBypassAct_->trigger();
 		return;
-        default:;
+		default:;
 	}
 	event->ignore();
 }
@@ -102,7 +102,7 @@ void EffectGui::keyPressEvent( QKeyEvent * event )
 void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
 	if ( event->button() == Qt::LeftButton &&
-	     event->modifiers() == Qt::ControlModifier ) 
+			event->modifiers() == Qt::ControlModifier ) 
 	{
 		emit chosen( this );
 	}
@@ -122,11 +122,11 @@ void EffectGui::showMacTwkDlg()
 
 void EffectGui::onToggleBypassActionTriggered() 
 {
-    mac()->_bypass = !mac()->_bypass;
-    if (mac()->_bypass)
-    {
-        mac()->_volumeCounter=0.0f;	
-        mac()->_volumeDisplay=0;
-    }
-    update( boundingRect() );
+	mac()->_bypass = !mac()->_bypass;
+	if (mac()->_bypass)
+	{
+		mac()->_volumeCounter=0.0f;																																																																
+		mac()->_volumeDisplay=0;
+	}
+	update( boundingRect() );
 }

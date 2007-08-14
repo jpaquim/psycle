@@ -16,8 +16,8 @@ public:
 	CBiquad() { m_x1=0.0; m_y1=0.0; m_x2=0.0; m_y2=0.0; }
 	inline SIG ProcessSample(SIG dSmp) { 
 		SIG dOut=m_b0*dSmp+m_b1*m_x1+m_b2*m_x2-m_a1*m_y1-m_a2*m_y2;
-    if (dOut>=-0.00001 && dOut<=0.00001) dOut=0.0;
-    if (dOut>900000) dOut=900000.0;
+	if (dOut>=-0.00001 && dOut<=0.00001) dOut=0.0;
+	if (dOut>900000) dOut=900000.0;
 		if (dOut<-900000) dOut=-900000.0;
 		m_x2=m_x1;
 		m_x1=dSmp;
@@ -46,50 +46,50 @@ public:
 		m_a1=2*(A0-A2)*q;
 		m_a2=(A0-A1+A2)*q;
 	}
-  // Zoelzer's Parmentric Equalizer Filters - rodem z Csound'a
-  void SetLowShelf(float fc, float q, float v, float esr)
-  {
-    float sq = (float)sqrt(2.0*(double)v);
-    float omega = two_pi*fc/esr;
-    float k = (float) tan((double)omega*0.5);
-    float kk = k*k;
-    float vkk = v*kk;
-    float oda0 =  1.0f/(1.0f + k/q +kk);
-    m_b0 =  oda0*(1.0f + sq*k + vkk);
-    m_b1 =  oda0*(2.0f*(vkk - 1.0f));
-    m_b2 =  oda0*(1.0f - sq*k + vkk);
-    m_a1 =  oda0*(2.0f*(kk - 1.0f));
-    m_a2 =  oda0*(1.0f - k/q + kk);
-  }
-  void SetHighShelf(float fc, float q, float v, float esr)
-  {
-    float sq = (float)sqrt(2.0*(double)v);
-    float omega = two_pi*fc/esr;
-    float k = (float) tan((psycle::plugin_interface::pi - (double)omega)*0.5);
-    float kk = k*k;
-    float vkk = v*kk;
-    float oda0 = 1.0f/( 1.0f + k/q +kk);
-    m_b0 = oda0*( 1.0f + sq*k + vkk);
-    m_b1 = oda0*(-2.0f*(vkk - 1.0f));
-    m_b2 = oda0*( 1.0f - sq*k + vkk);
-    m_a1 = oda0*(-2.0f*(kk - 1.0f));
-    m_a2 = oda0*( 1.0f - k/q + kk);
-  }
-  void SetParametricEQ(float fc, float q, float v, float esr, float gain=1.0f)
-  {
-    //float sq = (float)sqrt(2.0*(double)v);
-    float omega = two_pi*fc/esr;
-    float k = (float) tan((double)omega*0.5);
-    float kk = k*k;
-    float vk = v*k;
-    float vkdq = vk/q;
-    float oda0 =  1.0f/(1.0f + k/q +kk);
-    m_b0 =  gain*oda0*(1.0f + vkdq + kk);
-    m_b1 =  gain*oda0*(2.0f*(kk - 1.0f));
-    m_b2 =  gain*oda0*(1.0f - vkdq + kk);
-    m_a1 =  oda0*(2.0f*(kk - 1.0f));
-    m_a2 =  oda0*(1.0f - k/q + kk);
-  }
+	// Zoelzer's Parmentric Equalizer Filters - rodem z Csound'a
+	void SetLowShelf(float fc, float q, float v, float esr)
+	{
+	float sq = (float)sqrt(2.0*(double)v);
+	float omega = two_pi*fc/esr;
+	float k = (float) tan((double)omega*0.5);
+	float kk = k*k;
+	float vkk = v*kk;
+	float oda0 =  1.0f/(1.0f + k/q +kk);
+	m_b0 =  oda0*(1.0f + sq*k + vkk);
+	m_b1 =  oda0*(2.0f*(vkk - 1.0f));
+	m_b2 =  oda0*(1.0f - sq*k + vkk);
+	m_a1 =  oda0*(2.0f*(kk - 1.0f));
+	m_a2 =  oda0*(1.0f - k/q + kk);
+	}
+	void SetHighShelf(float fc, float q, float v, float esr)
+	{
+	float sq = (float)sqrt(2.0*(double)v);
+	float omega = two_pi*fc/esr;
+	float k = (float) tan((psycle::plugin_interface::pi - (double)omega)*0.5);
+	float kk = k*k;
+	float vkk = v*kk;
+	float oda0 = 1.0f/( 1.0f + k/q +kk);
+	m_b0 = oda0*( 1.0f + sq*k + vkk);
+	m_b1 = oda0*(-2.0f*(vkk - 1.0f));
+	m_b2 = oda0*( 1.0f - sq*k + vkk);
+	m_a1 = oda0*(-2.0f*(kk - 1.0f));
+	m_a2 = oda0*( 1.0f - k/q + kk);
+	}
+	void SetParametricEQ(float fc, float q, float v, float esr, float gain=1.0f)
+	{
+	//float sq = (float)sqrt(2.0*(double)v);
+	float omega = two_pi*fc/esr;
+	float k = (float) tan((double)omega*0.5);
+	float kk = k*k;
+	float vk = v*k;
+	float vkdq = vk/q;
+	float oda0 =  1.0f/(1.0f + k/q +kk);
+	m_b0 =  gain*oda0*(1.0f + vkdq + kk);
+	m_b1 =  gain*oda0*(2.0f*(kk - 1.0f));
+	m_b2 =  gain*oda0*(1.0f - vkdq + kk);
+	m_a1 =  oda0*(2.0f*(kk - 1.0f));
+	m_a2 =  oda0*(1.0f - k/q + kk);
+	}
 	void SetLowpass1(float dCutoff, float dSampleRate)
 	{
 		float a=PreWarp(dCutoff, dSampleRate);
@@ -151,10 +151,10 @@ public:
 		float A=(float)(2*B*(1-B));
 		SetBilinear(0, 0, 1, B*a*a, A*a, 1);
 	}
-  void Reset()
-  {
-    m_x1=m_y1=m_x2=m_y2=0.0f;
-  }
+	void Reset()
+	{
+	m_x1=m_y1=m_x2=m_y2=0.0f;
+	}
 };
 
 
@@ -206,7 +206,7 @@ public:
 
 
 	CBiquad Biquad;
-	  
+		
 private: 
 	int type;
 	bool invert;

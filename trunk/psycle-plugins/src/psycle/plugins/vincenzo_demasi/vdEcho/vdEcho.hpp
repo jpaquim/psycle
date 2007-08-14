@@ -1,20 +1,20 @@
 /*      Copyright (C) 2002 Vincenzo Demasi.
 
-        This plugin is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 2 of the License, or
-        (at your option) any later version.\n"\
+		This plugin is free software; you can redistribute it and/or modify
+		it under the terms of the GNU General Public License as published by
+		the Free Software Foundation; either version 2 of the License, or
+		(at your option) any later version.\n"\
 
-        This plugin is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
+		This plugin is distributed in the hope that it will be useful,
+		but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+		GNU General Public License for more details.
 
-        You should have received a copy of the GNU General Public License
-        along with this program; if not, write to the Free Software
-        Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+		You should have received a copy of the GNU General Public License
+		along with this program; if not, write to the Free Software
+		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-        Vincenzo Demasi. E-Mail: <v.demasi@tiscali.it>
+		Vincenzo Demasi. E-Mail: <v.demasi@tiscali.it>
 */
 
 #pragma once
@@ -117,17 +117,17 @@ CMachineParameter const *pParameters[] =
 CMachineInfo const MacInfo =
 {
 	MI_VERSION,
-	EFFECT,									// flags
-	PARNUM,									// numParameters
-	pParameters,							// Pointer to parameters
+	EFFECT,																																				// flags
+	PARNUM,																																				// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	VDPLUGINNAME " (Debug Build)",			// name
+	VDPLUGINNAME " (Debug Build)",												// name
 #else
-	VDPLUGINNAME,							// name
+	VDPLUGINNAME,																												// name
 #endif
-	VDSHORTNAME,							// short name
-	VDAUTHOR,								// author
-	VDCOMMAND,								// A command, that could be use for open an editor, etc...
+	VDSHORTNAME,																												// short name
+	VDAUTHOR,																																// author
+	VDCOMMAND,																																// A command, that could be use for open an editor, etc...
 	PARCOLS
 };
 

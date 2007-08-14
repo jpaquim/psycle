@@ -9,7 +9,7 @@ namespace psycle
 	{
 		namespace dsp
 		{
-#if PSYCLE__CONFIGURATION__RMS_VUS	
+#if PSYCLE__CONFIGURATION__RMS_VUS				
 			int numRMSSamples=1;
 			int countRMSSamples=0;
 			double RMSAccumulatedLeft=0;
@@ -46,7 +46,7 @@ namespace psycle
 				double pi = 3.14159265358979323846;
 
 				//one-sided-- the function is symmetrical, one wing of the sinc will suffice.
-				sincTable[0] = 1;	//save the trouble of evaluating 0/0
+				sincTable[0] = 1;				//save the trouble of evaluating 0/0
 				for(int i(1); i<sincSize; ++i)
 				{
 					sincTable[i] = sin(i * pi / (float)SINC_RESOLUTION) / float(i * pi / (float)SINC_RESOLUTION); //equivalent to i * pi * SINC_ZEROS / sincSize

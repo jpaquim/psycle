@@ -18,7 +18,7 @@ namespace psy
 		{
 			SetEditName("Sampler");
 			SetAudioRange(32768.0f);
-//			DefineStereoOutput(1);
+			//DefineStereoOutput(1);
 
 			_resampler.SetQuality(dsp::R_LINEAR);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
@@ -61,9 +61,9 @@ namespace psy
 
 		int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 		{
-      assert(numSamples >= 0);
+		assert(numSamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-//			PSYCLE__CPU_COST__INIT(cost);
+			//PSYCLE__CPU_COST__INIT(cost);
 			if (!_mute)
 			{
 				for (int voice=0; voice<_numVoices; voice++)
@@ -173,7 +173,7 @@ namespace psy
 				Machine::SetVolumeCounter(numSamples);
 				if ( callbacks->autoStopMachines() )
 				{
-					if (_volumeCounter < 8.0f)	{
+					if (_volumeCounter < 8.0f) {
 						_volumeCounter = 0.0f;
 						_volumeDisplay = 0;
 						_stopped = true;
@@ -183,8 +183,8 @@ namespace psy
 			}
 			else _stopped = true;
 
-//			PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
-//			work_cpu_cost(work_cpu_cost() + cost);
+			//PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+			//work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
 			return numSamples;
 		}
@@ -195,12 +195,12 @@ namespace psy
 			{
 				NoteOffFast(i);
 			}
-			Machine::Stop();		
+			Machine::Stop();
 		}
 
 		void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 		{
-      assert(numsamples >= 0);
+		assert(numsamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
@@ -357,7 +357,7 @@ namespace psy
 
 		void Sampler::Tick( int channel, const PatternEvent & pData )
 		{
-        std::cout << pData.note() << std::endl;
+		std::cout << pData.note() << std::endl;
 			if ( pData.note() > 120 ) // don't process twk , twf of Mcm Commands
 			{
 				if ( pData.command() == 0 || pData.note() != 255) return; // Return in everything but commands!
@@ -384,11 +384,11 @@ namespace psy
 			}
 
 
-			if ( data.note() < 120 )	// Handle Note On.
+			if ( data.note() < 120 ) // Handle Note On.
 			{
 				if ( song()->_pInstrument[data.instrument()]->waveLength == 0 ) return; // if no wave, return.
 
-				for (voice=0; voice<_numVoices; voice++)	// Find a voice to apply the new note
+				for (voice=0; voice<_numVoices; voice++) // Find a voice to apply the new note
 				{
 					switch(_voices[voice]._envelope._stage)
 					{
@@ -425,8 +425,8 @@ namespace psy
 						if ( useVoice == -1 ) { useVoice = voice; }
 					}
 				}
-				if ( useVoice == -1 )	// No free voices. Assign first one.
-				{						// This algorithm should be replace by a LRU lookup
+				if ( useVoice == -1 ) // No free voices. Assign first one.
+				{ ///\todo This algorithm should be replace by a LRU lookup
 					useVoice=0;
 				}
 				_voices[useVoice]._channel=channel;
@@ -436,25 +436,27 @@ namespace psy
 				{
 					if (( _voices[voice]._channel == channel ) && // ...playing voice on current channel.
 						(_voices[voice]._envelope._stage != ENV_OFF ) &&
-		//				(_voices[voice]._envelope._stage != ENV_RELEASE ) && // Effects can STILL apply in this case.
-																			// Think on a slow fadeout and changing panning
+						//(_voices[voice]._envelope._stage != ENV_RELEASE ) &&
+						// Effects can STILL apply in this case.
+						// Think on a slow fadeout and changing panning
 						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 					{
 						if ( data.note() == 120 ) NoteOff( voice );//  Handle Note Off
 						useVoice=voice;
 					}
 				}
-				if ( useVoice == -1 ) return;   // No playing note on this channel. Just go out.
-												// Change it if you have channel commands.
+				if ( useVoice == -1 )
+					// No playing note on this channel. Just go out.
+					// Change it if you have channel commands.
+					return;
 			}
 			// If you want to make a command that controls more than one voice (the entire channel, for
 			// example) you'll need to change this. Otherwise, add it to VoiceTick().
-
 			VoiceTick( useVoice, data ); 
 		}
 
 		int Sampler::VoiceTick( int voice, const PatternEvent & entry )
-		{		
+		{
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 			PatternEvent pEntry = entry;
 
@@ -556,7 +558,7 @@ namespace psy
 				{
 					double const totalsamples = double(timeInfo.samplesPerRow()*song()->_pInstrument[pVoice->_instrument]->_lines);
 					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
-				}	
+				}
 				else
 				{
 					float const finetune = CValueMapper::Map_255_1(song()->_pInstrument[pVoice->_instrument]->waveFinetune);
@@ -637,21 +639,21 @@ namespace psy
 						switch (volmod) 
 						{
 							case 0:
-							case 8:	pVoice->effretVol = 0; pVoice->effretMode=0; break;
+							case 8: pVoice->effretVol = 0; pVoice->effretMode=0; break;
 							case 1:
 							case 2:
 							case 3:
 							case 4:
 							case 5: pVoice->effretVol = (float)(std::pow(2.,volmod-1)/64); pVoice->effretMode=1; break;
-							case 6: pVoice->effretVol = 0.66666666f;	 pVoice->effretMode=2; break;
-							case 7: pVoice->effretVol = 0.5f;			 pVoice->effretMode=2; break;
+							case 6: pVoice->effretVol = 0.66666666f; pVoice->effretMode=2; break;
+							case 7: pVoice->effretVol = 0.5f; pVoice->effretMode=2; break;
 							case 9:
 							case 10:
 							case 11:
 							case 12:
 							case 13: pVoice->effretVol = (float)(std::pow(2.,volmod-9)*(-1))/64; pVoice->effretMode=1; break;
-							case 14: pVoice->effretVol = 1.5f;					pVoice->effretMode=2; break;
-							case 15: pVoice->effretVol = 2.0f;					pVoice->effretMode=2; break;
+							case 14: pVoice->effretVol = 1.5f; pVoice->effretMode=2; break;
+							case 15: pVoice->effretVol = 2.0f; pVoice->effretMode=2; break;
 						}
 						pVoice->_triggerNoteDelay = pVoice->effVal;
 					}

@@ -35,7 +35,7 @@ class SampleBrowser : public QWidget {
 Q_OBJECT
 public:
 	SampleBrowser( InstrumentsModel *instrumentsModel,
-		       QWidget *parent = 0 );
+				QWidget *parent = 0 );
 	~SampleBrowser();
 
 public slots:

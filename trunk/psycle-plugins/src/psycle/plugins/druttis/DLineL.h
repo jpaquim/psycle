@@ -4,14 +4,14 @@
 class DLineL
 {
 public:
-	int		inPoint;
-	int		outPoint;
-	int		length;
-	float	currentDelay;
-	float	alpha;
-	float	omAlpha;
-	float	last_output;
-    float	*inputs;
+	int								inPoint;
+	int								outPoint;
+	int								length;
+	float				currentDelay;
+	float				alpha;
+	float				omAlpha;
+	float				last_output;
+	float				*inputs;
 public:
 	DLineL() {
 		inputs = 0;
@@ -48,7 +48,7 @@ public:
 
 	void SetDelay(float lag)
 	{
-		float	outPointer;
+		float				outPointer;
 
 		if (lag > length - 1) {
 			outPointer = (float) inPoint + 1.0f;

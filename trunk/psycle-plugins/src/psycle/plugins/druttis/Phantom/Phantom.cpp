@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	WGFlute.cpp
-//	----------
-//	druttis@darkface.pp.se
+//				WGFlute.cpp
+//				----------
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #include <packageneric/pre-compiled.private.hpp>
@@ -10,23 +10,23 @@
 #include <psycle/plugin_interface.hpp>
 #include <memory>
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
-#define MAC_NAME	"Phantom"
-#define MAC_VERSION	"1.1"
-#define MAC_AUTHOR	"Druttis"
-#define	MAX_TRACKS	64
-#define	MAX_VOICES	2
-#define NUM_TICKS	32
+#define MAC_NAME				"Phantom"
+#define MAC_VERSION				"1.1"
+#define MAC_AUTHOR				"Druttis"
+#define				MAX_TRACKS				64
+#define				MAX_VOICES				2
+#define NUM_TICKS				32
 //============================================================================
-//	Wavetable
+//				Wavetable
 //============================================================================
 #define SINE(x) ((float) sin((float) (x) * PI2))
-float	wavetable[NUMWAVEFORMS][WAVESIZE];
-char	wave_str[NUMWAVEFORMS + 5][16];
-char	*filt_str[4] = { "LP-12", "LP-24", "HP-12", "HP-24" };
+float				wavetable[NUMWAVEFORMS][WAVESIZE];
+char				wave_str[NUMWAVEFORMS + 5][16];
+char				*filt_str[4] = { "LP-12", "LP-24", "HP-12", "HP-24" };
 //============================================================================
-//	Parameters
+//				Parameters
 //============================================================================
 #define PARAM_ROWS 11
 
@@ -152,7 +152,7 @@ CMachineParameter const paramChorusMix = { "Chorus Mix", "Chorus Mix", 0, 255, M
 
 #define NUM_PARAMS (PARAM_ROWS * 5)
 //============================================================================
-//	Parameter list
+//				Parameter list
 //============================================================================
 
 CMachineParameter const *pParams[] = {
@@ -214,7 +214,7 @@ CMachineParameter const *pParams[] = {
 };
 
 //============================================================================
-//	Machine info
+//				Machine info
 //============================================================================
 CMachineInfo const MacInfo =
 {
@@ -234,7 +234,7 @@ CMachineInfo const MacInfo =
 };
 
 //============================================================================
-//	Machine
+//				Machine
 //============================================================================
 class mi : public CMachineInterface
 {
@@ -259,36 +259,36 @@ public:
 	}
 public:
 	GLOBALS globals;
-	CVoice	voices[MAX_TRACKS][MAX_VOICES];
-	int		ticks_remaining;
+	CVoice				voices[MAX_TRACKS][MAX_VOICES];
+	int								ticks_remaining;
 
-	//	Phaser
-	float	phaser_min;
-	float	phaser_max;
-	float	phaser_increment;
-	Phaser	phaser_left;
-	Phaser	phaser_right;
-	float	phaser_left_phase;
-	float	phaser_right_phase;
+	//				Phaser
+	float				phaser_min;
+	float				phaser_max;
+	float				phaser_increment;
+	Phaser				phaser_left;
+	Phaser				phaser_right;
+	float				phaser_left_phase;
+	float				phaser_right_phase;
 
-	//	Chorus
-	float	chorus_delay;
-	float	chorus_depth;
-	float	chorus_increment;
-	Chorus	chorus_left;
-	Chorus	chorus_right;
-	float	chorus_left_phase;
-	float	chorus_right_phase;
+	//				Chorus
+	float				chorus_delay;
+	float				chorus_depth;
+	float				chorus_increment;
+	Chorus				chorus_left;
+	Chorus				chorus_right;
+	float				chorus_left_phase;
+	float				chorus_right_phase;
 
 	//
-	float	inertia_factor;
+	float				inertia_factor;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Constructor
+//				Constructor
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -323,12 +323,12 @@ mi::mi()
 	sprintf(wave_str[10], "Vowel I");
 	sprintf(wave_str[11], "Vowel O");
 	sprintf(wave_str[12], "Vowel U");
-	//	Render
+	//				Render
 	for (i = 0; i < WAVESIZE; i++) {
 		t = (float) i / (float) WAVESIZE;
-		//	Sine
+		//				Sine
 		wavetable[0][i] = (float) sin(t * PI2);
-		//	Triangle
+		//				Triangle
 		if (t < 0.25f) {
 			wavetable[1][i] = t * 4.0f;
 		} else if (t < 0.75f) {
@@ -336,22 +336,22 @@ mi::mi()
 		} else {
 			wavetable[1][i] = (t - 1.0f) * 4.0f;
 		}
-		//	Pulse
+		//				Pulse
 		wavetable[2][i] = (t < 0.5f ? 1.0f : -1.0f);
-		//	Ramp up
+		//				Ramp up
 		wavetable[3][i] = (t - 0.5f) * 2.0f;
-		//	Ramp down
+		//				Ramp down
 		wavetable[4][i] = (0.5f - t) * 2.0f;
-		//	Half sine half ramp up
+		//				Half sine half ramp up
 		//float j = 0.0f;
 		//float tmp = 0.0f;
 		if (t < 0.5f)
 			wavetable[5][i] = (float) sin(t * 2.0f * PI2);
 		else
 			wavetable[5][i] = (t - 0.75f) * 4.0f;
-		//	Square - Sine
+		//				Square - Sine
 		wavetable[6][i] = wavetable[2][i] - wavetable[0][i];
-		//	Half Sine half blank
+		//				Half Sine half blank
 		if (t < 0.5f)
 			wavetable[7][i] = 0.0f;
 		else
@@ -362,7 +362,7 @@ mi::mi()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Destructor
+//				Destructor
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -374,7 +374,7 @@ mi::~mi()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Init
+//				Init
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -399,7 +399,7 @@ void mi::Init()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Stop
+//				Stop
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -415,7 +415,7 @@ void mi::Stop()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Command
+//				Command
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -434,7 +434,7 @@ void mi::Command()
 
 //////////////////////////////////////////////////////////////////////
 //
-//	ParameterTweak
+//				ParameterTweak
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -573,7 +573,7 @@ void mi::ParameterTweak(int par, int val)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	DescribeValue
+//				DescribeValue
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -673,42 +673,42 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 
 //////////////////////////////////////////////////////////////////////
 //
-//	SequencerTick
+//				SequencerTick
 //
 //////////////////////////////////////////////////////////////////////
 
 void mi::SequencerTick()
 {
-	//	Code here if this machine is an effect
+	//				Code here if this machine is an effect
 }
 
 //////////////////////////////////////////////////////////////////////
 //
-//	SequencerTick
+//				SequencerTick
 //
 //////////////////////////////////////////////////////////////////////
 
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	//////////////////////////////////////////////////////////////////
-	//	Compute global stuff
+	//				Compute global stuff
 	//////////////////////////////////////////////////////////////////
 
 	inertia_factor = 512.0f / (float) GetTickLength();
 
 	//////////////////////////////////////////////////////////////////
-	//	Volume
+	//				Volume
 	//////////////////////////////////////////////////////////////////
 
 	int vol = 254;
 
 	//////////////////////////////////////////////////////////////////
-	//	Handle commands
+	//				Handle commands
 	//////////////////////////////////////////////////////////////////
 
 	switch (cmd)
 	{
-		case 0x0c:	//	Volume
+		case 0x0c:				//				Volume
 			vol = val - 2;
 			if (vol < 0)
 				vol = 0;
@@ -716,7 +716,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 
 	//////////////////////////////////////////////////////////////////
-	//	Route
+	//				Route
 	//////////////////////////////////////////////////////////////////
 
 	if (note == 120) {
@@ -732,14 +732,14 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 //////////////////////////////////////////////////////////////////////
 //
-//	Work
+//				Work
 //
 //////////////////////////////////////////////////////////////////////
 
 void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks)
 {
 	//////////////////////////////////////////////////////////////////
-	//	Variables
+	//				Variables
 	//////////////////////////////////////////////////////////////////
 	int ti;
 	int vi;
@@ -752,43 +752,43 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 	float *psamplesright2 = psamplesright;
 	float rnd;
 	//////////////////////////////////////////////////////////////////
-	//	Check SR change.
+	//				Check SR change.
 	//////////////////////////////////////////////////////////////////
 	if (globals.samplingrate != GetSamplingRate())
 	{
 		globals.samplingrate = GetSamplingRate();
 	}
 	//////////////////////////////////////////////////////////////////
-	//	Adjust sample pointers
+	//				Adjust sample pointers
 	//////////////////////////////////////////////////////////////////
 	--psamplesleft2;
 	--psamplesright2;
 	//////////////////////////////////////////////////////////////////
-	//	Loop
+	//				Loop
 	//////////////////////////////////////////////////////////////////
 	do
 	{
 		//////////////////////////////////////////////////////////////
-		//	Global tick handling
+		//				Global tick handling
 		//////////////////////////////////////////////////////////////
 		if (ticks_remaining <= 0)
 		{
 			ticks_remaining = NUM_TICKS;
 			CVoice::GlobalTick();
 			//////////////////////////////////////////////////////////
-			//	Intertia parameters
+			//				Intertia parameters
 			//////////////////////////////////////////////////////////
 			AnimateAFloat(&globals.filter_freq, inertia_factor);
 			AnimateAFloat(&globals.filter_res, inertia_factor);
 		}
 		//////////////////////////////////////////////////////////////
-		//	Compute amount of samples to render for all voices
+		//				Compute amount of samples to render for all voices
 		//////////////////////////////////////////////////////////////
 		amount = numsamples;
 		if (amount > ticks_remaining)
 			amount = ticks_remaining;
 		//////////////////////////////////////////////////////////////
-		//	Render all voices now
+		//				Render all voices now
 		//////////////////////////////////////////////////////////////
 		for (ti = 0; ti < numtracks; ti++)
 		{
@@ -802,7 +802,7 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 					do
 					{
 						//////////////////////////////////////////////
-						//	Voice tick handing
+						//				Voice tick handing
 						//////////////////////////////////////////////
 						if (voices[ti][vi].ticks_remaining <= 0)
 						{
@@ -810,17 +810,17 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 							voices[ti][vi].VoiceTick();
 						}
 						//////////////////////////////////////////////
-						//	Compute amount of samples to render this voice
+						//				Compute amount of samples to render this voice
 						//////////////////////////////////////////////
 						amt = nsamples;
 						if (amt > voices[ti][vi].ticks_remaining)
 							amt = voices[ti][vi].ticks_remaining;
 						//////////////////////////////////////////////
-						//	Render voice now
+						//				Render voice now
 						//////////////////////////////////////////////
 						voices[ti][vi].Work(pleft, pright, amt);
 						//////////////////////////////////////////////
-						//	Adjust for next voice iteration
+						//				Adjust for next voice iteration
 						//////////////////////////////////////////////
 						voices[ti][vi].ticks_remaining -= amt;
 						pleft += amt;
@@ -832,7 +832,7 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 			}
 		}
 		//////////////////////////////////////////////////////////////
-		//	Chorus & Phase
+		//				Chorus & Phase
 		//////////////////////////////////////////////////////////////
 		pleft = psamplesleft2;
 		pright = psamplesright2;
@@ -840,14 +840,14 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		do
 		{
 			//////////////////////////////////////////////////////////
-			//	Update phaser
+			//				Update phaser
 			//////////////////////////////////////////////////////////
 			phaser_left.SetDelay(phaser_min + (phaser_max - phaser_min) * (1.0f + get_sample_l(wavetable[0], phaser_left_phase, WAVEMASK)) * 0.5f);
 			phaser_right.SetDelay(phaser_min + (phaser_max - phaser_min) * (1.0f - get_sample_l(wavetable[0], phaser_right_phase, WAVEMASK)) * 0.5f);
 			phaser_left_phase = fand(phaser_left_phase + phaser_increment, WAVEMASK);
 			phaser_right_phase = fand(phaser_right_phase + phaser_increment * 1.1111f, WAVEMASK);
 			//////////////////////////////////////////////////////////
-			//	Update chorus
+			//				Update chorus
 			//////////////////////////////////////////////////////////
 			chorus_left.SetDelay(chorus_delay + chorus_depth * (1.0f + get_sample_l(wavetable[0], chorus_left_phase, WAVEMASK)) * 0.5f);
 			chorus_right.SetDelay(chorus_delay + chorus_depth * (1.0f - get_sample_l(wavetable[0], chorus_right_phase, WAVEMASK)) * 0.5f);
@@ -858,12 +858,12 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 			//////////////////////////////////////////////////////////
 			rnd = CDsp::GetRandomSignal() * 0.001f;
 			//////////////////////////////////////////////////////////
-			//	Left
+			//				Left
 			//////////////////////////////////////////////////////////
 			++pleft;
 			*pleft = phaser_left.Tick(chorus_left.Tick(*pleft + rnd));
 			//////////////////////////////////////////////////////////
-			//	Right
+			//				Right
 			//////////////////////////////////////////////////////////
 			++pright;
 			*pright = phaser_right.Tick(chorus_right.Tick(*pright + rnd));
@@ -871,7 +871,7 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		while (--nsamples);
 
 		//////////////////////////////////////////////////////////////
-		//	Adjust for next iteration
+		//				Adjust for next iteration
 		//////////////////////////////////////////////////////////////
 		ticks_remaining -= amount;
 		psamplesleft2 += amount;

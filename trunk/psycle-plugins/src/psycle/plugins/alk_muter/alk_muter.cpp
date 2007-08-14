@@ -11,10 +11,10 @@
 CMachineParameter const paraType = 
 { 
 	"Mute",
-	"Mute off/on",						// description
-	0,							// MinValue	
-	1,							// MaxValue
-	MPF_STATE,						// Flags
+	"Mute off/on",																								// description
+	0,																												// MinValue				
+	1,																												// MaxValue
+	MPF_STATE,																								// Flags
 	0,
 };
 
@@ -26,18 +26,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,							// flags
-	1,							// numParameters
-	pParameters,						// Pointer to parameters
+	MI_VERSION,				
+	0,																												// flags
+	1,																												// numParameters
+	pParameters,																								// Pointer to parameters
 #ifndef NDEBUG
-	"Alk Muter (Debug build)",				// name
+	"Alk Muter (Debug build)",																// name
 #else
-	"Alk Muter",						// name
+	"Alk Muter",																								// name
 #endif
-	"Muter",						// short name
-	"Alk",							// author
-	"About",						// A command, that could be use for open an editor, etc...
+	"Muter",																								// short name
+	"Alk",																												// author
+	"About",																								// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -92,11 +92,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	if(Vals[0]==1)
 	{
 		do
-		{			
+		{												
 			*psamplesleft = 0.0f;
-			*psamplesright = 0.0f;			
+			*psamplesright = 0.0f;												
 			++psamplesleft;
-			++psamplesright;			
+			++psamplesright;												
 		} while(--numsamples);
 	} 
 }
@@ -105,8 +105,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch(value)
 	{
-		case 0:sprintf(txt,"off");	break;
-		case 1:sprintf(txt,"on");	break;
+		case 0:sprintf(txt,"off");				break;
+		case 1:sprintf(txt,"on");				break;
 	}
 	return false;
 }

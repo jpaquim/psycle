@@ -1,6 +1,6 @@
 //============================================================================
 //
-//	CWave.h
+//				CWave.h
 //
 //============================================================================
 #pragma once
@@ -8,10 +8,10 @@
 class CWave
 {
 private:
-	char	*m_pname;
-	float	*m_psamples;
-	int		m_nsamples;
-	int		m_mask;
+	char				*m_pname;
+	float				*m_psamples;
+	int								m_nsamples;
+	int								m_mask;
 public:
 	CWave();
 	~CWave();
@@ -19,7 +19,7 @@ public:
 	char *GetName();
 	int GetNumberOfSamples();
 	//------------------------------------------------------------------------
-	//	Quick way of float to int
+	//				Quick way of float to int
 	//------------------------------------------------------------------------
 	static inline int f2i(double d)
 	{
@@ -33,14 +33,14 @@ public:
 		return tmp.i;
 	}
 	//------------------------------------------------------------------------
-	//	Get one sample
+	//				Get one sample
 	//------------------------------------------------------------------------
 	inline float GetSample(float phase)
 	{
 		return m_psamples[f2i(phase) & m_mask];
 	}
 	//------------------------------------------------------------------------
-	//	Advance
+	//				Advance
 	//------------------------------------------------------------------------
 	inline float Advance(float phase, float speed)
 	{
@@ -50,7 +50,7 @@ public:
 		return phase;
 	}
 	//------------------------------------------------------------------------
-	//	CopySamplesInto
+	//				CopySamplesInto
 	//------------------------------------------------------------------------
 	inline float CopySamplesInto(float phase, float speed, float *buf, int nsamples)
 	{

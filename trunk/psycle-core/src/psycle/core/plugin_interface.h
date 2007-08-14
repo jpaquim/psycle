@@ -1,3 +1,18 @@
+
+
+
+
+
+///////// TODO This copy of the interface is not up-to-date
+///////// TODO Should use the file from psycle-plugins/src/psycle/plugin_interface.hpp
+
+
+
+
+
+
+
+
 ///\file
 ///\brief the original machine interface api
 ///\see plugin.hpp another, more object-oriented, interface api
@@ -106,28 +121,33 @@ public:
 
 	///\name Export / Import
 	///\{
-	virtual void PutData(void * /*pData*/) {}
-	virtual void GetData(void * /*pData*/) {}
-	virtual int GetDataSize() { return 0; }
+		virtual void PutData(void * /*pData*/) {}
+		virtual void GetData(void * /*pData*/) {}
+		virtual int GetDataSize() { return 0; }
 	///\}
 
 	virtual void Command() {}
 
-	virtual void MuteTrack(int const /*track*/) {} /// Not used (yet?)
-	virtual bool IsTrackMuted(int const /*track*/) const { return false; } 	// Not used (yet?)
+	/// Not used (yet?)
+	virtual void MuteTrack(int const /*track*/) {}
+	/// Not used (yet?)
+	virtual bool IsTrackMuted(int const /*track*/) const { return false; }
 
-	virtual void MidiNote(int const /*channel*/, int const /*value*/, int const /*velocity*/) {} /// Not used (yet?)
+	/// Not used (yet?)
+	virtual void MidiNote(int const /*channel*/, int const /*value*/, int const /*velocity*/) {}
 	virtual void Event(uint32 const /*data*/) {} /// Not used (yet?)
 
 	virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
 
-	virtual bool PlayWave(int const /*wave*/, int const /*note*/, float const /*volume*/) { return false; } /// Not used (prolly never)
+	/// Not used (prolly never)
+	virtual bool PlayWave(int const /*wave*/, int const /*note*/, float const /*volume*/) { return false; }
 	virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
 
-	virtual void StopWave() {} 	/// Not used (prolly never)
+	/// Not used (prolly never)
+	virtual void StopWave() {}
 
 public:
-	// initialize these members in the constructor
+	/// initialize these members in the constructor
 	int *Vals;
 
 	/// Callback.

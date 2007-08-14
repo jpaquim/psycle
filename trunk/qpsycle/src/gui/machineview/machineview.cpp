@@ -1,4 +1,4 @@
- /***************************************************************************
+	/***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
 *                                                                         *
@@ -61,9 +61,9 @@ MachineView::MachineView(psy::core::Song *song)
 }
 
 /**
- * Loops through all the machines in the CoreSong and
- * creates a MachineGui for each one it finds.
- */
+	* Loops through all the machines in the CoreSong and
+	* creates a MachineGui for each one it finds.
+	*/
 void MachineView::createMachineGuis()
 {
 	if ( song() ) {
@@ -78,37 +78,37 @@ void MachineView::createMachineGuis()
 }
 
 /**
- * Given a core Machine, this method makes a MachineGui
- * for it and adds it to the graphics scene. 
- */
+	* Given a core Machine, this method makes a MachineGui
+	* for it and adds it to the graphics scene. 
+	*/
 MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 {
 	MachineGui *macGui;
-	switch ( mac->mode() ) {							
-        case psy::core::MACHMODE_GENERATOR:
+	switch ( mac->mode() ) {																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+		case psy::core::MACHMODE_GENERATOR:
 		macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
 		break;
-        case psy::core::MACHMODE_FX:
+		case psy::core::MACHMODE_FX:
 		macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
 		break;
-        case psy::core::MACHMODE_MASTER: 
+		case psy::core::MACHMODE_MASTER: 
 		macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
 		break;
-        default:
+		default:
 		macGui = 0;
 	}
 
 	if ( macGui ) {
 		if ( mac->mode() == psy::core::MACHMODE_GENERATOR ||
-		     mac->mode() == psy::core::MACHMODE_FX ) {
+				mac->mode() == psy::core::MACHMODE_FX ) {
 			connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
-				 this, SLOT( onMachineChosen( MachineGui* ) ) );
+					this, SLOT( onMachineChosen( MachineGui* ) ) );
 			connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
-				 this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
+					this, SLOT( onDeleteMachineRequest( MachineGui* ) ) );
 			connect( macGui, SIGNAL( renamed() ),
-				 this, SLOT( onMachineRenamed() ) );
+					this, SLOT( onMachineRenamed() ) );
 			connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
-				 this, SLOT( cloneMachine( MachineGui* ) ) );
+					this, SLOT( cloneMachine( MachineGui* ) ) );
 		}
 
 		scene()->addItem(macGui);
@@ -120,10 +120,10 @@ MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 }
 
 /**
- * Loops through all the Machines in the CoreSong and 
- * for each one loops through all its core connections,
- * adding a WireGui to the scene for each one.
- */
+	* Loops through all the Machines in the CoreSong and 
+	* for each one loops through all its core connections,
+	* adding a WireGui to the scene for each one.
+	*/
 void MachineView::createWireGuis() 
 {
 	if ( song() ) 
@@ -153,20 +153,20 @@ void MachineView::createWireGuis()
 }
 
 /**
- * Makes a WireGui.
- * Watch out what happens in the WireGui constructor... can't remember what
- * logic goes on in it.
- */
+	* Makes a WireGui.
+	* Watch out what happens in the WireGui constructor... can't remember what
+	* logic goes on in it.
+	*/
 WireGui *MachineView::createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
-    WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
-    return wireGui;
+	WireGui *wireGui = new WireGui(srcMacGui, dstMacGui, this);
+	return wireGui;
 }
 
 /**
- * Create and add to the scene a temporary line which we show when
- * user is in the process of connecting machines.
- */
+	* Create and add to the scene a temporary line which we show when
+	* user is in the process of connecting machines.
+	*/
 void MachineView::createTempLine()
 {
 	tempLine_ = new QGraphicsLineItem(0, 0, 0, 0);
@@ -178,9 +178,9 @@ void MachineView::createTempLine()
 
 
 /**
- * Some thing for keyjazz.  Can't remember at present what outtrack
- * and notetrack actually do.
- */
+	* Some thing for keyjazz.  Can't remember at present what outtrack
+	* and notetrack actually do.
+	*/
 void MachineView::initKeyjazzSettings()
 {
 	outtrack = 0;
@@ -189,20 +189,20 @@ void MachineView::initKeyjazzSettings()
 
 
 /**
- * Triggered from a signal in a MachineGui, fired when user starts a 
- * connection out of it.
- */
+	* Triggered from a signal in a MachineGui, fired when user starts a 
+	* connection out of it.
+	*/
 void MachineView::startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
 {
-    tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
-    tempLine_->setVisible(true);
-    creatingWire_ = true;
+	tempLine_->setLine( QLineF( srcMacGui->centrePointInSceneCoords(), event->scenePos() ) );
+	tempLine_->setVisible(true);
+	creatingWire_ = true;
 }
 
 /**
- * Triggered from a signal in a MachineGui, fired when a mouse release
- * occurs over and while creatingWire_ is set to true.
- */
+	* Triggered from a signal in a MachineGui, fired when a mouse release
+	* occurs over and while creatingWire_ is set to true.
+	*/
 void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event)
 {
 	Q_UNUSED( event );
@@ -216,9 +216,9 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 
 
 /**
- * Connects machines in the CoreSong and creates and adds a WireGui
- * to the scene.
- */
+	* Connects machines in the CoreSong and creates and adds a WireGui
+	* to the scene.
+	*/
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
 	if ( dstMacGui->mac()->acceptsConnections() ) {
@@ -233,10 +233,10 @@ void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui 
 
 
 /**
- * Deletes the machine from both the GUI and from
- * the CoreSong.
- * Triggered by a signal from somewhere.
- */
+	* Deletes the machine from both the GUI and from
+	* the CoreSong.
+	* Triggered by a signal from somewhere.
+	*/
 void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 {
 	int id = macGui->mac()->id();
@@ -271,10 +271,10 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 }
 
 /**
- * This can be called either when the user deletes a wire
- * directly, or a machine gets deleted and its connections
- * have to go too.
- */
+	* This can be called either when the user deletes a wire
+	* directly, or a machine gets deleted and its connections
+	* have to go too.
+	*/
 void MachineView::deleteConnection( WireGui *wireGui )
 {
 	psy::core::Player::Instance()->lock();
@@ -287,13 +287,13 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	it = std::find( wireGui->sourceMacGui()->wireGuiList_.begin(),
 			wireGui->sourceMacGui()->wireGuiList_.end(), wireGui );
 	if ( it != wireGui->sourceMacGui()->wireGuiList_.end() ) {
-		wireGui->sourceMacGui()->wireGuiList_.erase(it);	
- 	}  
+		wireGui->sourceMacGui()->wireGuiList_.erase(it);																																																																
+		}  
 	it = std::find( wireGui->destMacGui()->wireGuiList_.begin(),
 			wireGui->destMacGui()->wireGuiList_.end(), wireGui );
 	if ( it != wireGui->destMacGui()->wireGuiList_.end() ) {
-		wireGui->destMacGui()->wireGuiList_.erase(it);	
- 	}  
+		wireGui->destMacGui()->wireGuiList_.erase(it);																																																																
+		}  
 	scene()->removeItem( wireGui );
 	delete wireGui;
 
@@ -304,9 +304,9 @@ void MachineView::deleteConnection( WireGui *wireGui )
 }
 
 /**
- * This just gets passed on to the MainWindow.  Maybe it can skip
- * the MachineView altogether.
- */
+	* This just gets passed on to the MainWindow.  Maybe it can skip
+	* the MachineView altogether.
+	*/
 void MachineView::onMachineRenamed()
 {
 	emit machineRenamed();
@@ -314,8 +314,8 @@ void MachineView::onMachineRenamed()
 
 
 /**
- * Doesn't work yet as it isn't ready in psycore.
- */
+	* Doesn't work yet as it isn't ready in psycore.
+	*/
 void MachineView::cloneMachine( MachineGui *macGui )
 {
 	qDebug("in clone machine");
@@ -349,7 +349,7 @@ void MachineView::cloneMachine( MachineGui *macGui )
 	}
 	if (dst >= 0)
 	{
-      
+		
 		if (!song()->CloneMac(src,dst))
 		{
 			qDebug("Cloning failed");
@@ -363,10 +363,10 @@ void MachineView::cloneMachine( MachineGui *macGui )
 
 
 /**
- * This is called when a new machine is added via
- * the NewMachineDialog.
- * 
- */
+	* This is called when a new machine is added via
+	* the NewMachineDialog.
+	* 
+	*/
 void MachineView::addNewMachineGui( psy::core::Machine *mac )
 {
 	MachineGui *macGui = createMachineGui( mac );
@@ -380,9 +380,9 @@ void MachineView::addNewMachineGui( psy::core::Machine *mac )
 }
 
 /**
- * Being 'chosen' refers to the machine being chosen
- * to respond to keyjazz keypresses.
- */
+	* Being 'chosen' refers to the machine being chosen
+	* to respond to keyjazz keypresses.
+	*/
 void MachineView::onMachineChosen( MachineGui *macGui )
 {
 	song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
@@ -415,9 +415,9 @@ MachineGui *MachineView::findMachineGuiByCoreMachineIndex( int index )
 
 
 /**
- * Given a point in the scene we return the MachineGui at
- * that point,  if there's one there.  
- */
+	* Given a point in the scene we return the MachineGui at
+	* that point,  if there's one there.  
+	*/
 MachineGui *MachineView::machineGuiAtPoint( QPointF point )
 {
 	std::vector<MachineGui*>::iterator iter;
@@ -433,8 +433,8 @@ MachineGui *MachineView::machineGuiAtPoint( QPointF point )
 
 
 /**
- * For keyjazz.
- */
+	* For keyjazz.
+	*/
 void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Machine *pMachine )
 {
 
@@ -455,7 +455,7 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 	psy::core::PatternEvent entry;
 	entry.setNote( note );
 	entry.setInstrument( song()->auxcolSelected );
-//    entry.setMachine( song()->seqBus );	// Not really needed.
+//    entry.setMachine( song()->seqBus );																																																																// Not really needed.
 
 	entry.setCommand( 0 );
 	entry.setParameter( 0 );
@@ -471,7 +471,7 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 	}
 
 	if (pMachine) {
-		// pick a track to play it on	
+		// pick a track to play it on																																																																
 		//        if(bMultiKey)
 		{
 			int i;
@@ -504,144 +504,144 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 }
 
 /**
- * For keyjazz again, on key release.
- */
+	* For keyjazz again, on key release.
+	*/
 void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMachine )
 {
-    if (!(note >=0 && note < 128)) return;
+	if (!(note >=0 && note < 128)) return;
 
-    // octave offset
-    if(note<120) {
-        if(bTranspose) note+= octave()*12;
-        if (note > 119) note = 119;
-    }
+	// octave offset
+	if(note<120) {
+		if(bTranspose) note+= octave()*12;
+		if (note > 119) note = 119;
+	}
 
-    if(pMachine==NULL) {
-        int mgn = song()->seqBus;
+	if(pMachine==NULL) {
+		int mgn = song()->seqBus;
 
-        if (mgn < psy::core::MAX_MACHINES) {
-            pMachine = song()->machine(mgn);
-        }
+		if (mgn < psy::core::MAX_MACHINES) {
+			pMachine = song()->machine(mgn);
+		}
 
-        for(int i=0; i<song()->tracks(); i++) {
-            if(notetrack[i]==note) {
-                notetrack[i]=120;
-                // build entry
-                psy::core::PatternEvent entry;
-                entry.setNote( 120+0 );
-                entry.setInstrument( song()->auxcolSelected );
-                entry.setMachine( song()->seqBus );
-                entry.setCommand( 0 );
-                entry.setParameter( 0 );
+		for(int i=0; i<song()->tracks(); i++) {
+			if(notetrack[i]==note) {
+				notetrack[i]=120;
+				// build entry
+				psy::core::PatternEvent entry;
+				entry.setNote( 120+0 );
+				entry.setInstrument( song()->auxcolSelected );
+				entry.setMachine( song()->seqBus );
+				entry.setCommand( 0 );
+				entry.setParameter( 0 );
 
-                // play it
-                if (pMachine) {
-                    pMachine->Tick( i, entry );
-                }
-            }
-        }
+				// play it
+				if (pMachine) {
+					pMachine->Tick( i, entry );
+				}
+			}
+		}
 
-    }
+	}
 }
 
 
 /**
- * Figure out which note to play from the command
- * given.
- *
- * <nmather> I think commands might correspond to the
- * correct notes directly at present, but best not to
- * rely on that always being the case.
- */
+	* Figure out which note to play from the command
+	* given.
+	*
+	* <nmather> I think commands might correspond to the
+	* correct notes directly at present, but best not to
+	* rely on that always being the case.
+	*/
 int MachineView::noteFromCommand( int command )
 {
 	int note = NULL;
 	switch ( command ) {
-        case commands::key_C_0:
+		case commands::key_C_0:
 		note = 1;
 		break;
-        case commands::key_CS0:
+		case commands::key_CS0:
 		note = 2;
 		break;
-        case commands::key_D_0:
+		case commands::key_D_0:
 		note = 3;
 		break;
-        case commands::key_DS0:
+		case commands::key_DS0:
 		note = 4;
 		break;
-        case commands::key_E_0:
+		case commands::key_E_0:
 		note = 5;
 		break;
-        case commands::key_F_0:
+		case commands::key_F_0:
 		note = 6;
 		break;
-        case commands::key_FS0:
+		case commands::key_FS0:
 		note = 7;
 		break;
-        case commands::key_G_0:
+		case commands::key_G_0:
 		note = 8;
 		break;
-        case commands::key_GS0:
+		case commands::key_GS0:
 		note = 9;
 		break;
-        case commands::key_A_0:
+		case commands::key_A_0:
 		note = 10;
 		break;
-        case commands::key_AS0:
+		case commands::key_AS0:
 		note = 11;
 		break;
-        case commands::key_B_0: 
+		case commands::key_B_0: 
 		note = 12;
 		break;
-        case commands::key_C_1:
+		case commands::key_C_1:
 		note = 13;
 		break;
-        case commands::key_CS1:
+		case commands::key_CS1:
 		note = 14;
 		break;
-        case commands::key_D_1:
+		case commands::key_D_1:
 		note = 15;
 		break;
-        case commands::key_DS1:
+		case commands::key_DS1:
 		note = 16;
 		break;
-        case commands::key_E_1:
+		case commands::key_E_1:
 		note = 17;
 		break;
-        case commands::key_F_1:
+		case commands::key_F_1:
 		note = 18;
 		break;
-        case commands::key_FS1:
+		case commands::key_FS1:
 		note = 19;
 		break;
-        case commands::key_G_1:
+		case commands::key_G_1:
 		note = 20;
 		break;
-        case commands::key_GS1:
+		case commands::key_GS1:
 		note = 21;
 		break;
-        case commands::key_A_1:
+		case commands::key_A_1:
 		note = 22;
 		break;
-        case commands::key_AS1:
+		case commands::key_AS1:
 		note = 23;
 		break;
-        case commands::key_B_1: 
+		case commands::key_B_1: 
 		note = 24;
 		break;
-        case commands::key_C_2:
+		case commands::key_C_2:
 		note = 25;
 		break;
-        case commands::key_CS2:
+		case commands::key_CS2:
 		note = 26;
 		break;
-        case commands::key_D_2:
+		case commands::key_D_2:
 		note = 27;
 		break;
-        case commands::key_DS2:
+		case commands::key_DS2:
 		note = 28;
 		break;
-        case commands::key_E_2:
+		case commands::key_E_2:
 		note = 29;
 		break;
 	}
@@ -665,10 +665,10 @@ void MachineView::keyPressEvent(QKeyEvent *event)
 
 
 /**
- * Some cheap code for zooming in and out of the view --
- * probably buggy and more trouble than it's worth in the
- * long run.
- */
+	* Some cheap code for zooming in and out of the view --
+	* probably buggy and more trouble than it's worth in the
+	* long run.
+	*/
 void MachineView::scaleView(qreal scaleFactor) 
 {
 	qreal factor = matrix().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width();
@@ -687,12 +687,12 @@ psy::core::Song *MachineView::song()
 
 int MachineView::octave() const
 {
-    return octave_;
+	return octave_;
 }
 
 void MachineView::setOctave( int newOctave )
 {
-    octave_ = newOctave;
+	octave_ = newOctave;
 }
 
 void MachineView::setChosenMachine( MachineGui *macGui )
@@ -707,8 +707,8 @@ void MachineView::setChosenMachine( MachineGui *macGui )
 
 
 /**
- * MachineScene.
- */
+	* MachineScene.
+	*/
 MachineScene::MachineScene( MachineView *macView )
 	:
 	QGraphicsScene( macView ),
@@ -719,11 +719,11 @@ MachineScene::MachineScene( MachineView *macView )
 }
 
 /**
- * Shows the NewMachineDialog on double-click.
- * This method would perhaps be better in MacView (as we only
- * care about dbl-clicks in the viewport, not in the entirety of
- * the scene) but I couldn't get it to work there iirc.
- */
+	* Shows the NewMachineDialog on double-click.
+	* This method would perhaps be better in MacView (as we only
+	* care about dbl-clicks in the viewport, not in the entirety of
+	* the scene) but I couldn't get it to work there iirc.
+	*/
 void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 { 
 	QGraphicsScene::mouseDoubleClickEvent( event );
@@ -733,7 +733,7 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 		if (accepted) { // Add a new machine to the song.
 			psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
 
-			// Create machine, tell where to place the new machine--get from mouse.	  
+			// Create machine, tell where to place the new machine--get from mouse.																																																																  
 			psy::core::Machine *mac = macView_->song()->createMachine( pluginFinder_, key, event->scenePos().x(), event->scenePos().y() );
 			if ( mac ) {
 				macView_->addNewMachineGui( mac );
@@ -746,9 +746,9 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 
 
 /**
- * Deals with keyjazz keypresses, rather than the individual MachineGuis,
- * for reasons which I forget at present.
- */
+	* Deals with keyjazz keypresses, rather than the individual MachineGuis,
+	* for reasons which I forget at present.
+	*/
 void MachineScene::keyPressEvent( QKeyEvent * event )
 {
 	if ( !event->isAutoRepeat() ) 

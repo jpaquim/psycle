@@ -17,8 +17,8 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
- #ifndef WAVEVIEW_H
- #define WAVEVIEW_H
+	#ifndef WAVEVIEW_H
+	#define WAVEVIEW_H
 
 #include "wavedisplay.h"
 #include <QVBoxLayout>
@@ -37,7 +37,7 @@ class WaveView : public QWidget
 
 public:
 	WaveView( InstrumentsModel *instrumentsModel_,
-		  QWidget *parent = 0);
+			QWidget *parent = 0);
 	QLabel *sampName_;
 
 public slots:
@@ -58,7 +58,7 @@ private:
 	QToolBar *toolBar_;
 	QAction *loadSmp_;
 	QAction *saveSmp_;
-	QAction *playSmp_;	
+	QAction *playSmp_;																
 	QAction *playsSmp_;
 	QAction *stopSmp_;
 	

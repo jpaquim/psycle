@@ -88,7 +88,7 @@ namespace psy
 			boost::signal<void (SequenceEntry*)> wasDeleted;
 
 			double tickPosition() const;
-            double tickEndPosition( ) const;
+			double tickEndPosition( ) const;
 
 			void setPattern(SinglePattern* pattern);
 			SinglePattern* pattern();
@@ -97,7 +97,7 @@ namespace psy
 			float patternBeats() const;
 
 			SequenceLine* track() {return line_;}
-            void setSequenceLine( SequenceLine *newLine );
+			void setSequenceLine( SequenceLine *newLine );
 
 			void setStartPos( float pos );
 			float startPos() const;
@@ -113,11 +113,16 @@ namespace psy
 
 		private:
 
-			SequenceLine* line_; 			// the sequence track , the sequence belongs to
-			SinglePattern* pattern_; 	// the wrapped pattern
-			float startPos_;					// here we can shrink the pattern of the entry
-			float endPos_;						// endpos shrink (from begin of a pattern starting at 0)
-			int transpose_;						// a transpose offset for the entry
+			/// the sequence track , the sequence belongs to
+			SequenceLine* line_;
+			/// the wrapped pattern
+			SinglePattern* pattern_;
+			/// here we can shrink the pattern of the entry
+			float startPos_;
+			/// endpos shrink (from begin of a pattern starting at 0)
+			float endPos_;
+			/// a transpose offset for the entry
+			int transpose_;
 
 			void init();
 
@@ -136,8 +141,8 @@ namespace psy
 			boost::signal<void (SequenceLine*)> wasDeleted;
 
 			SequenceEntry* createEntry(SinglePattern* pattern, double position);
-            void insertEntry( SequenceEntry *entry );
-            void moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine );
+			void insertEntry( SequenceEntry *entry );
+			void moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine );
 			void removeSinglePatternEntries(SinglePattern* pattern);
 
 			double tickLength() const;

@@ -2,21 +2,21 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "dw_filter.hpp"
 
-const double dwfilter::PI				= 3.141592653589793238;
-const double dwfilter::TWO_PI			= 2 * dwfilter::PI;
-const double dwfilter::PI_EIGHTHS		= dwfilter::PI/8.0f;
-const double dwfilter::PI_FOURTHS		= dwfilter::PI/4.0f;
-const double dwfilter::PI_THIRDS		= dwfilter::PI/3.0f;
-const double dwfilter::PI_HALVES		= dwfilter::PI/2.0f;
-const int   dwfilter::FILT_MIN_FREQ		= 15;
-const float dwfilter::FILT_MIN_GAIN		= 0.125f;
-const float dwfilter::FILT_MAX_GAIN		= 8.0f;
-const float dwfilter::FILT_MIN_BW		= 0.01f;
-const float dwfilter::FILT_MAX_BW		= float(dwfilter::PI_THIRDS);
-const float dwfilter::FILT_MIN_SLOPE	= 0.01f;
-const float dwfilter::FILT_MAX_SLOPE	= 1.0f;
-const float dwfilter::FILT_MIN_Q		= 0.7071f;
-const float dwfilter::FILT_MAX_Q		= 0.98f;
+const double dwfilter::PI																= 3.141592653589793238;
+const double dwfilter::TWO_PI												= 2 * dwfilter::PI;
+const double dwfilter::PI_EIGHTHS								= dwfilter::PI/8.0f;
+const double dwfilter::PI_FOURTHS								= dwfilter::PI/4.0f;
+const double dwfilter::PI_THIRDS								= dwfilter::PI/3.0f;
+const double dwfilter::PI_HALVES								= dwfilter::PI/2.0f;
+const int   dwfilter::FILT_MIN_FREQ								= 15;
+const float dwfilter::FILT_MIN_GAIN								= 0.125f;
+const float dwfilter::FILT_MAX_GAIN								= 8.0f;
+const float dwfilter::FILT_MIN_BW								= 0.01f;
+const float dwfilter::FILT_MAX_BW								= float(dwfilter::PI_THIRDS);
+const float dwfilter::FILT_MIN_SLOPE				= 0.01f;
+const float dwfilter::FILT_MAX_SLOPE				= 1.0f;
+const float dwfilter::FILT_MIN_Q								= 0.7071f;
+const float dwfilter::FILT_MAX_Q								= 0.98f;
 
 dwfilter::dwfilter() 
 {
@@ -76,7 +76,7 @@ void dwfilter::zeroize()
 
 	emptybuffers();
 
-	slope=1.0f;				// for now..
+	slope=1.0f;																// for now..
 }
 
 void dwfilter::emptybuffers()
@@ -104,7 +104,7 @@ bool dwfilter::SetFreq(double _freq)
 		{
 			int dif=freq-_freq;
 			freq = _freq;
-			CoefUpdate();	
+			CoefUpdate();				
 
 			if(dif > +800 || dif < -800) // empty buffers every freq change, and twses crackle..
 				emptybuffers();      // don't empty buffers ever, and large jumps pop.
@@ -148,8 +148,8 @@ bool dwfilter::SetSlope(double _slope)
 	{
 		if(slope!=_slope)
 		{
-			slope = _slope;	
-			CoefUpdate();	
+			slope = _slope;				
+			CoefUpdate();				
 			return true; 
 		}
 	}
@@ -172,7 +172,7 @@ bool dwfilter::SetQ(double _q)
 
 bool dwfilter::SetSampleRate(int samprate)
 {
-	if(samprate>=11025 && samprate<=192000)		/* who knows, maybe some day... */
+	if(samprate>=11025 && samprate<=192000)								/* who knows, maybe some day... */
 	{
 		int newNyq=samprate/2.0;
 		if(nyquist!=newNyq)
@@ -190,7 +190,7 @@ void dwfilter::CoefUpdate()
 {
 	switch(mode)
 	{
-	case eq_parametric:	thetac = freq/(float)nyquist * PI;
+	case eq_parametric:				thetac = freq/(float)nyquist * PI;
 						costheta = cosf(thetac);
 						bwtan = tanf(bandwidth/2.0f);
 						coefa0 = (float)(1.0f + gain * bwtan) / (float)(1.0f + bwtan);
@@ -199,7 +199,7 @@ void dwfilter::CoefUpdate()
 						coefb2 = (float)(1.0f - bwtan) / (float)(1.0f + bwtan);
 						break;
 
-	case eq_loshelf:	thetac = freq/(float)nyquist * PI;
+	case eq_loshelf:				thetac = freq/(float)nyquist * PI;
 						rho = sqrt(gain);
 						costheta = cosf(thetac);
 						sintheta = sinf(thetac);
@@ -211,13 +211,13 @@ void dwfilter::CoefUpdate()
 						coefb0 =        ((rho+1) + costhetaRho - costheta + sinthetaBeta); 
 
 						coefa0 = (rho * ((rho+1) - costhetaRho + costheta + sinthetaBeta) / coefb0);
-						coefa1 = (2*rho*((rho-1) - costhetaRho - costheta				) / coefb0);
+						coefa1 = (2*rho*((rho-1) - costhetaRho - costheta																) / coefb0);
 						coefa2 = (rho * ((rho+1) - costhetaRho + costheta - sinthetaBeta) / coefb0);
-						coefb1 = ( -2 * ((rho-1) + costhetaRho + costheta				) / coefb0);
+						coefb1 = ( -2 * ((rho-1) + costhetaRho + costheta																) / coefb0);
 						coefb2 =       (((rho+1) + costhetaRho - costheta - sinthetaBeta) / coefb0);
 						break;
 
-	case eq_hishelf:	thetac = freq/(float)nyquist * PI;
+	case eq_hishelf:				thetac = freq/(float)nyquist * PI;
 						rho = sqrt(gain);
 						costheta = cosf(thetac);
 						sintheta = sinf(thetac);
@@ -229,9 +229,9 @@ void dwfilter::CoefUpdate()
 						coefb0 =       ((rho+1) - costhetaRho + costheta + sinthetaBeta );
 
 						coefa0 = ( rho * ((rho+1) + costhetaRho - costheta + sinthetaBeta) / coefb0);
-						coefa1 = (-2*rho*((rho-1) + costhetaRho + costheta				 ) / coefb0);
+						coefa1 = (-2*rho*((rho-1) + costhetaRho + costheta																 ) / coefb0);
 						coefa2 = ( rho * ((rho+1) + costhetaRho - costheta - sinthetaBeta) / coefb0);
-						coefb1 = (   2 * ((rho-1) - costhetaRho - costheta				 ) / coefb0);
+						coefb1 = (   2 * ((rho-1) - costhetaRho - costheta																 ) / coefb0);
 						coefb2 = (       ((rho+1) - costhetaRho + costheta - sinthetaBeta) / coefb0);
 						break;
 
@@ -247,26 +247,26 @@ float dwfilter::Process(const float xn, const int chan)
 	if (chan<0 || chan>=FILT_MAX_CHANS)
 		return 0.0;
 
-/*	switch(mode)		//unnecessary for now, everything is biquad
+/*				switch(mode)								//unnecessary for now, everything is biquad
 	{
 	case eq_hishelf:
 	case eq_loshelf:
 	case eq_parametric:
-*/	
+*/				
 
-	z0[chan] =	  xn
+	z0[chan] =				  xn
 				- coefb1 * z1[chan]
 				- coefb2 * z2[chan];
 
-	yn =		  coefa0 * z0[chan]
+	yn =								  coefa0 * z0[chan]
 				+ coefa1 * z1[chan]
 				+ coefa2 * z2[chan];
 
 
-/*							break;
+/*																												break;
 
 	}
-*/	
+*/				
 
 	if(isdenormal(z0[chan]))
 		z0[chan]=0.0f;
@@ -276,7 +276,7 @@ float dwfilter::Process(const float xn, const int chan)
 	return yn;
 
 }
-bool dwfilter::isdenormal(float num)		//it might save a bit on cpu to just pre-init a buffer of random values to add to the input
+bool dwfilter::isdenormal(float num)								//it might save a bit on cpu to just pre-init a buffer of random values to add to the input
 {
 	if(  (   ( *(std::uint32_t*) & num) & 0x7f800000) == 0)
 		return true;

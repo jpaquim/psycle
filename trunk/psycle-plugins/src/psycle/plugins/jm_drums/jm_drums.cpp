@@ -72,7 +72,7 @@ CMachineParameter const prDecMode = {
 	0,
 	3,
 	MPF_STATE,
-//	2
+//				2
 	0
 };
 CMachineParameter const prComp = {
@@ -81,7 +81,7 @@ CMachineParameter const prComp = {
 	0,
 	1,
 	MPF_STATE,
-//	1
+//				1
 	0
 };
 CMachineParameter const prNNA = {
@@ -123,7 +123,7 @@ CMachineParameter const prMix = {
 	-100,
 	100,
 	MPF_STATE,
-//	-37
+//				-37
 	-100
 };
 CMachineParameter const prThumpLen = {
@@ -299,9 +299,9 @@ void mi::ParameterTweak(int par, int val)
 				globalpar.SustainDec=(3.2767*Vals[12]*globalpar.sinmix)/(globalpar.SLength-globalpar.DecayPos);
 			}
 			break;
-		case 6:	globalpar.OutVol=val/32767.0;
+		case 6:				globalpar.OutVol=val/32767.0;
 			break;
-		case 7:	globalpar.DecMode=val;
+		case 7:				globalpar.DecMode=val;
 			break;
 		case 8: 
 			if ( val == 0 ) {
@@ -497,7 +497,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 		float tmp=globalpar.OutVol;
 
-		if ( Vals[8] == 0 )	// If Mode 1.x
+		if ( Vals[8] == 0 )				// If Mode 1.x
 		{
 			if ( cmd == 0x0C ) globalpar.OutVol=(val*Vals[3]/8388352.0);  // (val*(Vals[3]/32767))/256
 
@@ -510,7 +510,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			DTrack[vidx].NoteOn(note,&globalpar);
 		}
 
-		globalpar.OutVol=tmp;	//restore outvol
+		globalpar.OutVol=tmp;				//restore outvol
 	}
 	else if (vidx != -1)
 	{

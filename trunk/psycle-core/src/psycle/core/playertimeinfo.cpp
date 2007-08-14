@@ -35,17 +35,17 @@ namespace psy
 				samplesPerBeat_(0),
 				samplesPerRow_(0)
 		{
-      recalcSPB();
-      recalcSPR();
+		recalcSPB();
+		recalcSPR();
 		}
 
-		PlayerTimeInfo::~ PlayerTimeInfo( )		
+		PlayerTimeInfo::~ PlayerTimeInfo( )
 		{
 		}
 
 		void PlayerTimeInfo::setPlayBeatPos( double pos )
 		{
-      assert(pos >= 0);
+		assert(pos >= 0);
 			playBeatPos_ = pos;
 		}
 
@@ -56,7 +56,7 @@ namespace psy
 
 		void PlayerTimeInfo::setSamplePos( int pos )
 		{
-      assert(pos >= 0);
+		assert(pos >= 0);
 			samplePos_ = pos;
 		}
 
@@ -67,7 +67,7 @@ namespace psy
 
 		void PlayerTimeInfo::setLinesPerBeat( int lines )
 		{
-      assert(lines > 0);
+		assert(lines > 0);
 			lpb_ = lines;
 			recalcSPR();
 		}
@@ -79,7 +79,7 @@ namespace psy
 
 		void PlayerTimeInfo::setBpm( double bpm )
 		{
-      assert(bpm > 0);
+		assert(bpm > 0);
 			bpm_ = bpm;
 			recalcSPB();
 			recalcSPR();
@@ -87,12 +87,12 @@ namespace psy
 
 		double PlayerTimeInfo::bpm( ) const
 		{
-			return bpm_;			
+			return bpm_;
 		}
 
 		void PlayerTimeInfo::setSampleRate( int rate )
 		{
-      assert(rate > 0);
+		assert(rate > 0);
 			sampleRate_ = rate;
 			recalcSPB();
 			recalcSPR();
@@ -116,13 +116,13 @@ namespace psy
 		void PlayerTimeInfo::recalcSPB( )
 		{
 			samplesPerBeat_ = (sampleRate_*60) / bpm_;
-      assert(samplesPerBeat_ > 0);
+		assert(samplesPerBeat_ > 0);
 		}
 
 		void PlayerTimeInfo::recalcSPR( )
 		{
 			samplesPerRow_ = (sampleRate_*60)/(bpm_ * lpb_);
-      assert(samplesPerRow_ > 0);
+		assert(samplesPerRow_ > 0);
 		}
 
 	} // end of hostnamespace

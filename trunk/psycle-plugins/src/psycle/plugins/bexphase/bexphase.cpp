@@ -92,7 +92,7 @@ int const numVals = 6;
 
 CMachineInfo const bexphase_info = 
 {
-	MI_VERSION,	
+	MI_VERSION,				
 	EFFECT,
 	numVals,
 	pParameters,
@@ -149,7 +149,7 @@ bexphase::~bexphase()
 {
 	delete Vals;
 }
- 
+	
 void bexphase::Init()
 {
 };
@@ -314,7 +314,7 @@ bool bexphase::DescribeValue(char* txt,int const param, int const value)
 		if ( value < 384 ) sprintf( txt,"%.02f",optimal[0] ); 
 		else
 			{
-			if ( value < 448 ) { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='E'; *txt++='f'; *txt++='f'; *txt++='e'; *txt++='c'; *txt++='t'; *txt='\0';	}
+			if ( value < 448 ) { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='E'; *txt++='f'; *txt++='f'; *txt++='e'; *txt++='c'; *txt++='t'; *txt='\0';				}
 			else { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='W'; *txt++='e'; *txt++='t'; *txt='\0'; };
 			};
 		return true; 

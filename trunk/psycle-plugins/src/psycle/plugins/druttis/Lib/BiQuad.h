@@ -1,8 +1,8 @@
 //============================================================================
 //
-//	BiQuad (2 pole, 2 zero) filter
+//				BiQuad (2 pole, 2 zero) filter
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
@@ -10,11 +10,11 @@
 class BiQuad
 {
 protected:
-	float	*inputs;
-	float	gain;
-	float	lastOutput;
-	float	poleCoeffs[2];
-	float	zeroCoeffs[2];
+	float				*inputs;
+	float				gain;
+	float				lastOutput;
+	float				poleCoeffs[2];
+	float				zeroCoeffs[2];
 public:
 	BiQuad();
 	~BiQuad();
@@ -30,7 +30,7 @@ public:
 	void SetEqualGainZeroes();
 	void SetGain(float newGain);
 	//------------------------------------------------------------------------
-	//	tick
+	//				tick
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{

@@ -29,41 +29,41 @@ namespace psy {
 class JackOut : public AudioDriver {
 public:
 
-    JackOut();
+	JackOut();
 
-    ~JackOut();
+	~JackOut();
 
-    virtual AudioDriverInfo info() const;
+	virtual AudioDriverInfo info() const;
 
-    virtual JackOut* clone()  const;   // Uses the copy constructor
+	virtual JackOut* clone()  const;   // Uses the copy constructor
 
-    virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-            virtual bool Initialized();
-            virtual void configure();
-            virtual bool Enable(bool e);
+	virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+			virtual bool Initialized();
+			virtual void configure();
+			virtual bool Enable(bool e);
 
 private:
 
-    // psycle variables
-    bool _initialized;
-    void* _callbackContext;
-    AUDIODRIVERWORKFN _pCallback;
-    bool running_;
+	// psycle variables
+	bool _initialized;
+	void* _callbackContext;
+	AUDIODRIVERWORKFN _pCallback;
+	bool running_;
 
-    // jack variables
-    jack_port_t *output_port_1;
-    jack_port_t *output_port_2;
+	// jack variables
+	jack_port_t *output_port_1;
+	jack_port_t *output_port_2;
 
-    jack_client_t *client;
-    const char **ports;
+	jack_client_t *client;
+	const char **ports;
 
-    std::string clientName_;
-    std::string serverName_;
+	std::string clientName_;
+	std::string serverName_;
 
-    bool registerToJackServer();
+	bool registerToJackServer();
 
-    static int process (jack_nframes_t nframes, void *arg);
-    int fillBuffer( jack_nframes_t nframes );
+	static int process (jack_nframes_t nframes, void *arg);
+	int fillBuffer( jack_nframes_t nframes );
 
 };
 

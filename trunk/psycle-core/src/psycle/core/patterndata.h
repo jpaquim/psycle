@@ -31,7 +31,7 @@ namespace psy
 {
 	namespace core
 	{
-    class SinglePattern;
+	class SinglePattern;
 
 		class PatternCategory : public std::vector<SinglePattern*> {
 		public:

@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_ALLPASS_DELAY			8192
+#define MAX_ALLPASS_DELAY												8192
 
 class CAllPass
 {

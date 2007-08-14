@@ -34,12 +34,12 @@ extern CMachineParameter const paraFEGSustainTime;
 extern CMachineParameter const paraFEGReleaseTime;
 extern CMachineParameter const paraFEnvMod;
 
-        // LFO 1
+		// LFO 1
 extern CMachineParameter const paraLFO1Dest;
 extern CMachineParameter const paraLFO1Wave;
 extern CMachineParameter const paraLFO1Freq;
 extern CMachineParameter const paraLFO1Amount;
-        // LFO 2
+		// LFO 2
 extern CMachineParameter const paraLFO2Dest;
 extern CMachineParameter const paraLFO2Wave;
 extern CMachineParameter const paraLFO2Freq;
@@ -49,53 +49,53 @@ extern CMachineParameter const paraLFO2Amount;
 
 void CTrack::Stop()
 {
-        AEGState = EGS_NONE;
+		AEGState = EGS_NONE;
 }
 
 void CTrack::Init()
 {
 		_channel = -1;
 
-        noise1 = noise2 = Sync = false;
-        RandomMixType = false;
-        RandomWave1 = false;
-        RandomWave2 = false;
-        RandomWaveSub = false;
-        LFO1Noise = LFO2Noise = false;
-        LFO1Synced = LFO2Synced = false;
-        AEGState = EGS_NONE;
+		noise1 = noise2 = Sync = false;
+		RandomMixType = false;
+		RandomWave1 = false;
+		RandomWave2 = false;
+		RandomWaveSub = false;
+		LFO1Noise = LFO2Noise = false;
+		LFO1Synced = LFO2Synced = false;
+		AEGState = EGS_NONE;
 		FEGState = EGS_NONE;
 		PEGState = EGS_NONE;
-        r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
-        noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
-        x1 = x2 = y1 = y2 = 0;
-        pnoise = WaveTable[4];
-        OldOut = 0;
-        pwavetab1=pwavetab2=pwavetabsub=pwavetabLFO1=pwavetabLFO2= WaveTable[0];
+		r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
+		noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
+		x1 = x2 = y1 = y2 = 0;
+		pnoise = WaveTable[4];
+		OldOut = 0;
+		pwavetab1=pwavetab2=pwavetabsub=pwavetabLFO1=pwavetabLFO2= WaveTable[0];
 		
 		coefsTabOffs = coefsTab; // lp
-        Cutoff = 127; //paraCutoff.DefValue;
-        Resonance = 32; //paraResonance.DefValue;
-        FEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraFEGAttackTime.DefValue*/));
-        FEGSustainTime = MSToSamples( pmi->EnvTime( 0/*paraFEGSustainTime.DefValue*/));
-        FEGReleaseTime = MSToSamples( pmi->EnvTime( 0/*paraFEGReleaseTime.DefValue*/));
-        AEGAttackTime = MSToSamples( pmi->EnvTime( 10/*paraAEGAttackTime.DefValue*/));
-        AEGSustainTime = MSToSamples( pmi->EnvTime( 50/*paraAEGSustainTime.DefValue*/));
-        AEGReleaseTime = MSToSamples( pmi->EnvTime( 30/*paraAEGReleaseTime.DefValue*/));
+		Cutoff = 127; //paraCutoff.DefValue;
+		Resonance = 32; //paraResonance.DefValue;
+		FEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraFEGAttackTime.DefValue*/));
+		FEGSustainTime = MSToSamples( pmi->EnvTime( 0/*paraFEGSustainTime.DefValue*/));
+		FEGReleaseTime = MSToSamples( pmi->EnvTime( 0/*paraFEGReleaseTime.DefValue*/));
+		AEGAttackTime = MSToSamples( pmi->EnvTime( 10/*paraAEGAttackTime.DefValue*/));
+		AEGSustainTime = MSToSamples( pmi->EnvTime( 50/*paraAEGSustainTime.DefValue*/));
+		AEGReleaseTime = MSToSamples( pmi->EnvTime( 30/*paraAEGReleaseTime.DefValue*/));
 		FEnvMod = 0;
-        PEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraPEGAttackTime.DefValue*/));
-        PEGDecayTime = MSToSamples( pmi->EnvTime( 0/*paraPEGDecayTime.DefValue*/));
+		PEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraPEGAttackTime.DefValue*/));
+		PEGDecayTime = MSToSamples( pmi->EnvTime( 0/*paraPEGDecayTime.DefValue*/));
 		PEnvMod = 0;
-        Bal1 = 63;/*127-paraMix.DefValue*/;
-        Bal2 = 64;/*paraMix.DefValue*/;
+		Bal1 = 63;/*127-paraMix.DefValue*/;
+		Bal2 = 64;/*paraMix.DefValue*/;
 		Glide =  GlideActive = false;
 		RandomWave1 = RandomWave2 = RandomWaveSub = false;
 		SubOscVol = 64;/*paraSubOscVol.DefValue*/;
-        Center1 = 64/127;/*paraPulseWidth1.DefValue/127.0;*/
-        Center2 = 64/127;/*paraPulseWidth2.DefValue/127.0;*/
+		Center1 = 64/127;/*paraPulseWidth1.DefValue/127.0;*/
+		Center2 = 64/127;/*paraPulseWidth2.DefValue/127.0;*/
 		DetuneSemi = DetuneFine = 1;
 		Volume = (float)(64/245.0);/*paraVolume.DefValue/245.0);*/
-		LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;	
+		LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;				
 		LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
 		PhaseAddLFO1 = PhaseAddLFO2 = 0;
 		MixType = 0;
@@ -214,7 +214,7 @@ void CTrack::Tick( tvals const &tv)
 	{
 		DetuneFine = (float)pow( 1.00091728179580156, tv.DetuneFine-0x40);
 	}
-    if( tv.Sync != 0xff)
+	if( tv.Sync != 0xff)
 	{
 		Sync = tv.Sync?true:false;
 	}
@@ -223,7 +223,7 @@ void CTrack::Tick( tvals const &tv)
 	{
 		if( tv.MixType == 8) // random
 			RandomMixType = true;
-        else
+		else
 		{
 			MixType = tv.MixType;
 			RandomMixType = false;
@@ -235,36 +235,36 @@ void CTrack::Tick( tvals const &tv)
 		RandomWave1 = noise1 = false;
 
 		if( tv.Wave1 == 4) // noise
-		{	pwavetab1 = NULL;
+		{				pwavetab1 = NULL;
 			noise1 = true;
 		}
 		else if( tv.Wave1 == 5) // random
-		{	RandomWave1 = true;	}
+		{				RandomWave1 = true;				}
 		else 
 		{
 			assert(tv.Wave1 < 4 );
 			pwavetab1 =  WaveTable[tv.Wave1];
 		}
 
-    }
+	}
 
 	if( tv.Wave2 != 0xff) // neuer wert
 	{
 		RandomWave2 = noise2 = false;
 
 		if( tv.Wave2 == 4) // noise
-		{	noise2 = true;
+		{				noise2 = true;
 			pwavetab2 = NULL;
 		}
 		else if( tv.Wave2 == 5) // random
-		{	RandomWave2 = true;	}
+		{				RandomWave2 = true;				}
 		else 
-		{	
+		{				
 			assert(tv.Wave2 < 4 );
 			pwavetab2 =  WaveTable[tv.Wave2];
 		}
 
-    }
+	}
 
 	if( tv.AEGAttackTime != 0xff)
 	{
@@ -319,14 +319,14 @@ void CTrack::Tick( tvals const &tv)
 			{
 				GlideActive = true;
 				if( Frequency > FrequencyFrom)
-				{	GlideMul = std::pow(2., 1. / GlideTime); }
+				{				GlideMul = std::pow(2., 1. / GlideTime); }
 				else
-				{	GlideMul = std::pow(0.5, 1. / GlideTime); }
+				{				GlideMul = std::pow(0.5, 1. / GlideTime); }
 				GlideFactor = 1;
 				GlideCount = (int)(log( Frequency/FrequencyFrom)/log(GlideMul));
 			}
 			else
-			{	GlideActive = false; }
+			{				GlideActive = false; }
 
 			// trigger envelopes neu an...
 			// Amp
@@ -344,7 +344,7 @@ void CTrack::Tick( tvals const &tv)
 				PitchFactor = 1.0;
 			}
 			else
-			{	PitchModActive = false;	}
+			{				PitchModActive = false;				}
 
 			// Filter
 			FEGState = EGS_ATTACK;
@@ -369,33 +369,33 @@ void CTrack::Tick( tvals const &tv)
 		LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;
 		switch( tv.LFO1Dest)
 		{
-//		case 0: ...none
-		case 1: LFO_Osc1 = true;	break;
-		case 2: LFO_PW1 = true;		break;
-		case 3: LFO_Amp = true;		break;
-		case 4: LFO_Cut = true;		break;
+//								case 0: ...none
+		case 1: LFO_Osc1 = true;				break;
+		case 2: LFO_PW1 = true;								break;
+		case 3: LFO_Amp = true;								break;
+		case 4: LFO_Cut = true;								break;
 
 		case 5: // 12
-			LFO_Osc1 = true;	LFO_PW1 = true;	break;
+			LFO_Osc1 = true;				LFO_PW1 = true;				break;
 		case 6: // 13
-			LFO_Osc1 = true;	LFO_Amp = true;	break;
+			LFO_Osc1 = true;				LFO_Amp = true;				break;
 		case 7: // 14
-			LFO_Osc1 = true;	LFO_Cut = true;	break;
+			LFO_Osc1 = true;				LFO_Cut = true;				break;
 		case 8: // 23
-			LFO_PW1 = true;		LFO_Amp = true;	break;
+			LFO_PW1 = true;								LFO_Amp = true;				break;
 		case 9: // 24
-			LFO_PW1 = true;		LFO_Cut = true;	break;
+			LFO_PW1 = true;								LFO_Cut = true;				break;
 		case 10: // 34
-			LFO_Amp = true;		LFO_Cut = true;	break;
+			LFO_Amp = true;								LFO_Cut = true;				break;
 
 		case 11: // 123
-			LFO_Osc1 = true;	LFO_PW1 = true;	LFO_Amp = true;	break;
+			LFO_Osc1 = true;				LFO_PW1 = true;				LFO_Amp = true;				break;
 		case 12: // 124
-			LFO_Osc1 = true;	LFO_PW1 = true; LFO_Cut = true; break;
+			LFO_Osc1 = true;				LFO_PW1 = true; LFO_Cut = true; break;
 		case 13: // 134
-			LFO_Osc1 = true;	LFO_Amp = true; LFO_Cut = true; break;
+			LFO_Osc1 = true;				LFO_Amp = true; LFO_Cut = true; break;
 		case 14: // 234
-			LFO_PW1 = true;		LFO_Amp = true;	LFO_Cut = true;	break;
+			LFO_PW1 = true;								LFO_Amp = true;				LFO_Cut = true;				break;
 		case 15: // 1234
 			LFO_Osc1 = true;
 			LFO_PW1 = true;
@@ -407,10 +407,10 @@ void CTrack::Tick( tvals const &tv)
 	if( tv.LFO1Wave != 0xff)
 	{
 		if( tv.LFO1Wave == 4)
-		{	LFO1Noise = true;
+		{				LFO1Noise = true;
 		}
 		else
-		{	LFO1Noise = false;
+		{				LFO1Noise = false;
 		}
 		assert(tv.LFO1Wave < 5);
 		pwavetabLFO1 = WaveTable[tv.LFO1Wave];
@@ -437,16 +437,16 @@ void CTrack::Tick( tvals const &tv)
 	if( LFO1Synced)
 	{
 		if( LFO1Noise) // sample & hold
-		{	PhaseAddLFO1 = (int)(0x200000/(pmi->pCB->GetTickLength()<<LFO1Freq)); }
+		{				PhaseAddLFO1 = (int)(0x200000/(pmi->pCB->GetTickLength()<<LFO1Freq)); }
 		else
-		{	PhaseAddLFO1 = (int)((double)0x200000*2048/(pmi->pCB->GetTickLength()<<LFO1Freq)); }
+		{				PhaseAddLFO1 = (int)((double)0x200000*2048/(pmi->pCB->GetTickLength()<<LFO1Freq)); }
 	}
 	else
 	{
 		if( LFO1Noise) // sample & hold
-		{	PhaseAddLFO1 = (int)(pmi->LFOFreq( LFO1Freq)/pmi->pCB->GetSamplingRate()*0x200000); }
+		{				PhaseAddLFO1 = (int)(pmi->LFOFreq( LFO1Freq)/pmi->pCB->GetSamplingRate()*0x200000); }
 		else
-		{	PhaseAddLFO1 = (int)(pmi->LFOFreq( LFO1Freq)*pmi->TabSizeDivSampleFreq*0x200000); }
+		{				PhaseAddLFO1 = (int)(pmi->LFOFreq( LFO1Freq)*pmi->TabSizeDivSampleFreq*0x200000); }
 	}
 
 	// LFO2
@@ -455,33 +455,33 @@ void CTrack::Tick( tvals const &tv)
 		LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
 		switch( tv.LFO2Dest)
 		{
-//		case 0: ...none
-		case 1:	LFO_Osc2 = true;	break;
-		case 2: LFO_PW2 = true;		break;
-		case 3:	LFO_Mix = true;		break;
-		case 4:	LFO_Reso = true;	break;
+//								case 0: ...none
+		case 1:				LFO_Osc2 = true;				break;
+		case 2: LFO_PW2 = true;								break;
+		case 3:				LFO_Mix = true;								break;
+		case 4:				LFO_Reso = true;				break;
 
 		case 5: // 12
-			LFO_Osc2 = true;	LFO_PW2 = true;	break;
+			LFO_Osc2 = true;				LFO_PW2 = true;				break;
 		case 6: // 13
-			LFO_Osc2 = true;	LFO_Mix = true;	break;
+			LFO_Osc2 = true;				LFO_Mix = true;				break;
 		case 7: // 14
-			LFO_Osc2 = true;	LFO_Reso = true;break;
+			LFO_Osc2 = true;				LFO_Reso = true;break;
 		case 8: // 23
-			LFO_PW2 = true;	LFO_Mix = true;		break;
+			LFO_PW2 = true;				LFO_Mix = true;								break;
 		case 9: // 24
-			LFO_PW2 = true;	LFO_Reso = true;	break;
+			LFO_PW2 = true;				LFO_Reso = true;				break;
 		case 10: // 34
-			LFO_Mix = true;	LFO_Reso = true;	break;
+			LFO_Mix = true;				LFO_Reso = true;				break;
 
 		case 11: // 123
-			LFO_Osc2 = true;	LFO_PW2 = true;	LFO_Mix = true;	break;
+			LFO_Osc2 = true;				LFO_PW2 = true;				LFO_Mix = true;				break;
 		case 12: // 124
-			LFO_Osc2 = true;	LFO_PW2 = true;	LFO_Reso = true;break;
+			LFO_Osc2 = true;				LFO_PW2 = true;				LFO_Reso = true;break;
 		case 13: // 134
-			LFO_Osc2 = true;	LFO_Mix = true;	LFO_Reso = true;break;
+			LFO_Osc2 = true;				LFO_Mix = true;				LFO_Reso = true;break;
 		case 14: // 234
-			LFO_PW2 = true;	LFO_Mix = true;	LFO_Reso = true;	break;
+			LFO_PW2 = true;				LFO_Mix = true;				LFO_Reso = true;				break;
 
 		case 15: // 1234
 			LFO_Osc2 = true;
@@ -494,10 +494,10 @@ void CTrack::Tick( tvals const &tv)
 	if( tv.LFO2Wave != 0xff)
 	{
 		if( tv.LFO2Wave == 4)
-		{	LFO2Noise = true;
+		{				LFO2Noise = true;
 		}
 		else
-		{	LFO2Noise = false;
+		{				LFO2Noise = false;
 		}
 		assert(tv.LFO2Wave < 5);
 		pwavetabLFO2 = WaveTable[tv.LFO2Wave];
@@ -525,16 +525,16 @@ void CTrack::Tick( tvals const &tv)
 	if( LFO2Synced)
 	{
 		if( LFO2Noise) // sample & hold
-		{	PhaseAddLFO2 = (int)(0x200000/(pmi->pCB->GetTickLength()<<LFO2Freq)); }
+		{				PhaseAddLFO2 = (int)(0x200000/(pmi->pCB->GetTickLength()<<LFO2Freq)); }
 		else
-		{	PhaseAddLFO2 = (int)((double)0x200000*2048/(pmi->pCB->GetTickLength()<<LFO2Freq)); }
+		{				PhaseAddLFO2 = (int)((double)0x200000*2048/(pmi->pCB->GetTickLength()<<LFO2Freq)); }
 	}
 	else
 	{
 		if( LFO2Noise) // sample & hold
-		{	PhaseAddLFO2 = (int)(pmi->LFOFreq( LFO2Freq)/pmi->pCB->GetSamplingRate()*0x200000); }
+		{				PhaseAddLFO2 = (int)(pmi->LFOFreq( LFO2Freq)/pmi->pCB->GetSamplingRate()*0x200000); }
 		else
-		{	PhaseAddLFO2 = (int)(pmi->LFOFreq( LFO2Freq)*pmi->TabSizeDivSampleFreq*0x200000); }
+		{				PhaseAddLFO2 = (int)(pmi->LFOFreq( LFO2Freq)*pmi->TabSizeDivSampleFreq*0x200000); }
 	}
 
 

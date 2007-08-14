@@ -64,10 +64,10 @@
 			virtual ~CValueMapper() throw();
 			/// maps a byte (0 to 255) to a float (0 to 1).
 			static inline float Map_255_1(int iByte)
-			{	
+			{
 				if(iByte>=0&&iByte<=256)
 					return CValueMapper::fMap_255_1[iByte];
-				else	
+				else
 					return iByte * 0.00390625f;
 			}
 			/// maps a byte (0 to 255) to a float (O to 100).
@@ -75,7 +75,7 @@
 			{
 				if(iByte>=0&&iByte<=256)
 					return CValueMapper::fMap_255_100[iByte];
-				else	
+				else
 					return iByte*0.390625f;
 			}
 		private:
@@ -129,7 +129,7 @@
 					return static_cast<std::int32_t>(f);
 				#endif
 			}
-		#else		
+		#else
 			/// converts a floating point number to an integer.
 			inline int f2i(float f) 
 			{
@@ -137,7 +137,7 @@
 			}
 		#endif
 
-		#if 0 // uses universalis		
+		#if 0 // uses universalis
 			/// clipping.
 			template<unsigned int const bits>
 			typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f)

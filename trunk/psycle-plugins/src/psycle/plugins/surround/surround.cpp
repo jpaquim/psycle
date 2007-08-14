@@ -14,19 +14,19 @@
 CMachineParameter const paraLength = 
 { 
 	"Cutoff Frequency",
-	"Cutoff for HighPass Filter",					// description
-	0,												// MinValue	
-	1000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff for HighPass Filter",																				// description
+	0,																																																// MinValue				
+	1000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	400,
 };
 CMachineParameter const paraMode = 
 { 
 	"Work Mode",
-	"Working model for the surround",				// description
-	0,												// MinValue	
-	1,												// MaxValue
-	MPF_STATE,										// Flags
+	"Working model for the surround",																// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
@@ -39,19 +39,19 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	EFFECT,									// flags
-	2,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	EFFECT,																																				// flags
+	2,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"KarLKoX Surround (Debug build)" VERNUM,		// name
+	"KarLKoX Surround (Debug build)" VERNUM,								// name
 #else
-	"KarLKoX Surround" VERNUM,						// name
+	"KarLKoX Surround" VERNUM,																								// name
 #endif
-	"Surround",								// short name
-	"Saïd Bougribate",						// author
-	"About",								// A command, that could be use for open an editor, etc...
-	2										// must be 2 else we can't see the knob (??)
+	"Surround",																																// short name
+	"Saïd Bougribate",																								// author
+	"About",																																// A command, that could be use for open an editor, etc...
+	2																																								// must be 2 else we can't see the knob (??)
 };
 
 class mi : public CMachineInterface
@@ -152,7 +152,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		} while(--numsamples);
 		break;
 	case 1:
-/*		This code was meant to make surround just out of the stereo part of a signal
+/*								This code was meant to make surround just out of the stereo part of a signal
 		concretely it means that it doesn't affect the mono components of the signal.
 		do
 		{

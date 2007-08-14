@@ -116,7 +116,7 @@ namespace psy
 					plugin->SetPosY( y );
 					if( machine_[fb] )  DestroyMachine( fb );
 					machine_[ fb ] = plugin;
-				} else {				 
+				} else {
 					delete plugin;
 				}
 			}
@@ -146,7 +146,7 @@ namespace psy
 				machine = new Sampler(machinecallbacks, index,this);
 				break;
 			case MACH_XMSAMPLER:
-//					machine = new XMSampler(machinecallbacks, index);
+				//machine = new XMSampler(machinecallbacks, index);
 				break;
 			case MACH_DUPLICATOR:
 				machine = new DuplicatorMac(machinecallbacks, index, this);
@@ -157,9 +157,11 @@ namespace psy
 			case MACH_LFO:
 				machine = new LFO(machinecallbacks, index, this);
 				break;
-//				case MACH_AUTOMATOR:
-//					machine = new Automator(machinecallbacks, index);
-//					break;
+			#if 0
+			case MACH_AUTOMATOR:
+							machine = new Automator(machinecallbacks, index);
+							break;
+			#endif
 			case MACH_DUMMY:
 				machine = new Dummy(machinecallbacks, index, this);
 				break;
@@ -170,7 +172,8 @@ namespace psy
 				machine = plugin;
 			}
 			break;
-/*				case MACH_LADSPA:
+			#if 0
+			case MACH_LADSPA:
 				{
 				LADSPAMachine* plugin = new LADSPAMachine(machinecallbacks,index,this);
 				machine = plugin;
@@ -187,50 +190,52 @@ namespace psy
 				if ( pcLADSPAPath ) path = pcLADSPAPath;
 				plugin->loadDll( path + plugin_name, pluginIndex);
 				}
-				break;*/
-/*				case MACH_VST:
-				case MACH_VSTFX:
+				break;
+			#endif
+			#if 0
+			case MACH_VST:
+			case MACH_VSTFX:
 				{
-				vst::plugin * plugin(0);
-				if (type == MACH_VST) machine = plugin = new vst::instrument(machinecallbacks,index);
-				else if (type == MACH_VSTFX)	machine = plugin = new vst::fx(machinecallbacks,index);
-				if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
-				{
-				delete plugin;
-				return false;
+					vst::plugin * plugin(0);
+					if (type == MACH_VST) machine = plugin = new vst::instrument(machinecallbacks,index);
+					else if (type == MACH_VSTFX) machine = plugin = new vst::fx(machinecallbacks,index);
+					if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
+					{
+						delete plugin;
+						return false;
+					}
+					try
+					{
+						plugin->Instance(plugin_name);
+					}
+					catch(std::exception const & e)
+					{
+						loggers::exception(e.what());
+						delete plugin;
+						return false;
+					}
+					catch(...)
+					{
+						delete plugin;
+						return false;
+					}
+					break;
 				}
-				try
-				{
-				plugin->Instance(plugin_name);
-				}
-				catch(std::exception const & e)
-				{
-//							loggers::exception(e.what());
-delete plugin;
-return false;
-}
-catch(...)
-{
-delete plugin;
-return false;
-}
-break;
-}
-*/
+			#endif
 			default:
-//					loggers::warning("failed to create requested machine type");
+				//loggers::warning("failed to create requested machine type");
 				std::cerr << "psycle: failed to create requested machine type\n";
-//					return false;
+				//return false;
 				machine = new Dummy(machinecallbacks, index, this);
 				break;
 			}
 
 			if(index < 0)
 			{
-				index =	GetFreeMachine();
+				index = GetFreeMachine();
 				if(index < 0)
 				{
-//					loggers::warning("no more machine slots");
+					//loggers::warning("no more machine slots");
 					return false;
 				}
 			}
@@ -309,7 +314,7 @@ break;
 				std::ostringstream s;
 				s << "attempted to use a null machine pointer when connecting machines ids: src: " << src << ", dst: " << dst << std::endl;
 				s << "src pointer is " << srcMac << ", dst pointer is: " << dstMac;
-//				loggers::warning(s.str());
+				//loggers::warning(s.str());
 				return false;
 			}
 			return srcMac->ConnectTo(*dstMac, InPort::id_type(0), OutPort::id_type(0), volume);
@@ -348,7 +353,7 @@ break;
 			float volume = 1.0f;
 
 			if (machine_[wiredest])
-			{					
+			{
 				Machine *smac = machine_[machine_[wiredest]->_inputMachines[wireindex]];
 
 				if (smac)
@@ -367,10 +372,10 @@ break;
 						machine_[wiredest]->_connectedInputs--;
 					}
 					/*
-					  else
-					  {
-					  MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
-					  }
+						else
+						{
+						MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+						}
 					*/
 				}
 			}
@@ -379,15 +384,17 @@ break;
 
 		void CoreSong::DestroyMachine(Machine::id_type mac, bool write_locked)
 		{
-/*			#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-				#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
-			#else
-				#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-					boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
-				#else // original implementation
-					CSingleLock lock(&door, true);
+			#if 0
+				#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
+					#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+				#else
+					#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
+						boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
+					#else // original implementation
+						CSingleLock lock(&door, true);
+					#endif
 				#endif
-			#endif*/
+			#endif
 			Machine *iMac = machine_[mac];
 			Machine *iMac2;
 			if(iMac)
@@ -473,27 +480,42 @@ break;
 		** IFF Riff Header
 		** ----------------
 
-		char Id[4]			// "FORM"
-		ULONGINV hlength	// of the data contained in the file (except Id and length)
-		char type[4]		// "16SV" == 16bit . 8SVX == 8bit
+		/// "FORM"
+		char Id[4]
+		/// of the data contained in the file (except Id and length)
+		ULONGINV hlength
+		/// "16SV" == 16bit . 8SVX == 8bit
+		char type[4]
 
-		char name_Id[4]		// "NAME"
-		ULONGINV hlength	// of the data contained in the header "NAME". It is 22 bytes
-		char name[22]		// name of the sample.
+		/// "NAME"
+		char name_Id[4]
+		/// of the data contained in the header "NAME". It is 22 bytes
+		ULONGINV hlength
+		/// name of the sample.
+		char name[22]
 
-		char vhdr_Id[4]		// "VHDR"
-		ULONGINV hlength	// of the data contained in the header "VHDR". it is 20 bytes
-		ULONGINV Samplength	// Lenght of the sample. It is in bytes, not in Samples.
-		ULONGINV loopstart	// Start point for the loop. It is in bytes, not in Samples.
-		ULONGINV loopLength	// Length of the loop (so loopEnd = loopstart+looplenght) In bytes.
-		unsigned char unknown2[5]; //Always $20 $AB $01 $00 //
+		/// "VHDR"
+		char vhdr_Id[4]
+		/// of the data contained in the header "VHDR". it is 20 bytes
+		ULONGINV hlength
+		/// Lenght of the sample. It is in bytes, not in Samples.
+		ULONGINV Samplength
+		/// Start point for the loop. It is in bytes, not in Samples.
+		ULONGINV loopstart
+		/// Length of the loop (so loopEnd = loopstart+looplenght) In bytes.
+		ULONGINV loopLength
+		/// Always $20 $AB $01 $00 //
+		unsigned char unknown2[5];
 		unsigned char volumeHiByte;
 		unsigned char volumeLoByte;
 		unsigned char unknown3;
 
-		char body_Id[4]		// "BODY"
-		ULONGINV hlength	// of the data contained in the file. It is the sample length as well (in bytes)
-		char *data			// the sample.
+		/// "BODY"
+		char body_Id[4]
+		/// of the data contained in the file. It is the sample length as well (in bytes)
+		ULONGINV hlength
+		/// the sample.
+		char *data
 
 		*/
 
@@ -502,7 +524,7 @@ break;
 			if(instrument != PREV_WAV_INS)
 			{
 				Invalided = true;
-//				::Sleep(LOCK_LATENCY); ///< ???
+				//::Sleep(LOCK_LATENCY); ///< ???
 			}
 			RiffFile file;
 			RiffChunkHeader hd;
@@ -585,25 +607,23 @@ break;
 			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 			DeleteLayer(iInstr);
 			_pInstrument[iInstr]->waveDataL = new std::int16_t[iSamplesPerChan];
-			if(bStereo)
-			{	_pInstrument[iInstr]->waveDataR = new std::int16_t[iSamplesPerChan];
+			if(bStereo) {
+				_pInstrument[iInstr]->waveDataR = new std::int16_t[iSamplesPerChan];
 				_pInstrument[iInstr]->waveStereo = true;
 			} else {
 				_pInstrument[iInstr]->waveStereo = false;
 			}
 			_pInstrument[iInstr]->waveLength = iSamplesPerChan;
 
-
 			// Get the filename -- code adapted from: 
 			// http://www.programmersheaven.com/mb/CandCPP/318649/318649/readmessage.aspx
 			///\todo the code below is not nice
 			char fileName[255]; 
-			//char slash = File::slash().c_str()[0];  Note: a single forward slash seems to work
-			//						on both windows and linux.
+			//char slash = File::slash().c_str()[0]; // note: a single forward slash seems to work on both windows and linux.
 			char const *ptr = std::strrchr( pathToWav, '/' ); // locate filename part of path.
-			std::strcpy( fileName,ptr+1 );     // copy remainder of string
-			ptr = std::strchr( fileName,'.');  // strip file extension
-			if ( ptr != 0 ) *const_cast<char*>(ptr) = 0;     // if the extension exists, truncate it
+			std::strcpy( fileName,ptr+1 ); // copy remainder of string
+			ptr = std::strchr( fileName,'.'); // strip file extension
+			if ( ptr != 0 ) *const_cast<char*>(ptr) = 0; // if the extension exists, truncate it
 							
 
 			std::strncpy(_pInstrument[iInstr]->waveName, fileName, 31);
@@ -626,8 +646,8 @@ break;
 				return false; 
 			}
 			Invalided = true;
-//			::Sleep(LOCK_LATENCY); ///< ???
-			// sample type	
+			//::Sleep(LOCK_LATENCY); ///< ???
+			// sample type
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());
 			long int Datalen(file.NumSamples());
@@ -732,7 +752,7 @@ break;
 						{
 							_pInstrument[instrument]->waveLoopType = true;
 						}
-						else { ls = 0; le = 0;	}
+						else { ls = 0; le = 0; }
 					}
 					file.Skip(9);
 				}
@@ -806,150 +826,152 @@ break;
 
 			// save our file
 
-/*			boost::filesystem::path path(Gloxxxxxxxxxxxxxbal::configuration().GetSongDir(), boost::filesystem::native);
-			path /= "psycle.tmp";
+			#if 0
+				boost::filesystem::path path(Gloxxxxxxxxxxxxxbal::configuration().GetSongDir(), boost::filesystem::native);
+				path /= "psycle.tmp";
 
-			boost::filesystem::remove(path);
-
-			RiffFile file;
-			if(!file.Create(path.string(), true)) return false;
-
-			file.WriteChunk("MACD",4);
-			std::uint32_t version = CURRENT_FILE_VERSION_MACD;
-			file.Write(version);
-			std::fpos_t pos = file.GetPos();
-			std::uint32_t size = 0;
-			file.Write(size);
-
-			std::uint32_t index = dst; // index
-			file.Write(index);
-
-			machine_[src]->SaveFileChunk(&file);
-
-			std::fpos_t pos2 = file.GetPos(); 
-			size = pos2 - pos - sizeof size;
-			file.Seek(pos);
-			file.Write(size);
-			file.Close();
-
-			// now load it
-
-			if(!file.Open(path.string()))
-			{
 				boost::filesystem::remove(path);
-				return false;
-			}
 
-			char Header[5];
-			file.ReadChunk(&Header, 4);
-			Header[4] = 0;
-			if (strcmp(Header,"MACD")==0)
-			{
-				file.Read(version);
-				file.Read(size);
-				if (version > CURRENT_FILE_VERSION_MACD)
+				RiffFile file;
+				if(!file.Create(path.string(), true)) return false;
+
+				file.WriteChunk("MACD",4);
+				std::uint32_t version = CURRENT_FILE_VERSION_MACD;
+				file.Write(version);
+				std::fpos_t pos = file.GetPos();
+				std::uint32_t size = 0;
+				file.Write(size);
+
+				std::uint32_t index = dst; // index
+				file.Write(index);
+
+				machine_[src]->SaveFileChunk(&file);
+
+				std::fpos_t pos2 = file.GetPos(); 
+				size = pos2 - pos - sizeof size;
+				file.Seek(pos);
+				file.Write(size);
+				file.Close();
+
+				// now load it
+
+				if(!file.Open(path.string()))
 				{
-					// there is an error, this file is newer than this build of psycle
-					file.Close();
 					boost::filesystem::remove(path);
 					return false;
 				}
-				else
+
+				char Header[5];
+				file.ReadChunk(&Header, 4);
+				Header[4] = 0;
+				if (strcmp(Header,"MACD")==0)
 				{
-					file.Read(index);
-					index = dst;
-					if (index < MAX_MACHINES)
+					file.Read(version);
+					file.Read(size);
+					if (version > CURRENT_FILE_VERSION_MACD)
 					{
-						Machine::id_type id(index);
-						// we had better load it
-						DestroyMachine(id);
-						machine_[index] = Machine::LoadFileChunk(&file,id,version);
-					}
-					else
-					{
+						// there is an error, this file is newer than this build of psycle
 						file.Close();
 						boost::filesystem::remove(path);
 						return false;
 					}
-				}
-			}
-			else
-			{
-				file.Close();
-				boost::filesystem::remove(path);
-				return false;
-			}
-			file.Close();
-			boost::filesystem::remove(path);
-
-			machine_[dst]->SetPosX(machine_[dst]->GetPosX()+32);
-			machine_[dst]->SetPosY(machine_[dst]->GetPosY()+8);
-
-			// delete all connections
-
-			machine_[dst]->_connectedInputs = 0;
-			machine_[dst]->_connectedOutputs = 0;
-
-			for (int i = 0; i < MAX_CONNECTIONS; i++)
-			{
-				if (machine_[dst]->_connection[i])
-				{
-					machine_[dst]->_connection[i] = false;
-					machine_[dst]->_outputMachines[i] = -1;
-				}
-
-				if (machine_[dst]->_inputCon[i])
-				{
-					machine_[dst]->_inputCon[i] = false;
-					machine_[dst]->_inputMachines[i] = -1;
-				}
-			}
-
-			#if 1
-			{
-				std::stringstream s;
-				s << machine_[dst]->_editName << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
-				s >> machine_[dst]->_editName;
-			}
-			#else ///\todo rewrite this for std::string
-				int number = 1;
-				char buf[sizeof(machine_[dst]->_editName)+4];
-				strcpy (buf,machine_[dst]->_editName);
-				char* ps = strrchr(buf,' ');
-				if (ps)
-				{
-					number = atoi(ps);
-					if (number < 1)
-					{
-						number =1;
-					}
 					else
 					{
-						ps[0] = 0;
-						ps = strchr(machine_[dst]->_editName,' ');
-						ps[0] = 0;
-					}
-				}
-
-				for (int i = 0; i < MAX_MACHINES-1; i++)
-				{
-					if (i!=dst)
-					{
-						if (machine_[i])
+						file.Read(index);
+						index = dst;
+						if (index < MAX_MACHINES)
 						{
-							if (strcmp(machine_[i]->_editName,buf)==0)
-							{
-								number++;
-								sprintf(buf,"%s %d",machine_[dst]->_editName.c_str(),number);
-								i = -1;
-							}
+							Machine::id_type id(index);
+							// we had better load it
+							DestroyMachine(id);
+							machine_[index] = Machine::LoadFileChunk(&file,id,version);
+						}
+						else
+						{
+							file.Close();
+							boost::filesystem::remove(path);
+							return false;
 						}
 					}
 				}
+				else
+				{
+					file.Close();
+					boost::filesystem::remove(path);
+					return false;
+				}
+				file.Close();
+				boost::filesystem::remove(path);
 
-				buf[sizeof(machine_[dst]->_editName)-1] = 0;
-				strcpy(machine_[dst]->_editName,buf);
-			#endif*/
+				machine_[dst]->SetPosX(machine_[dst]->GetPosX()+32);
+				machine_[dst]->SetPosY(machine_[dst]->GetPosY()+8);
+
+				// delete all connections
+
+				machine_[dst]->_connectedInputs = 0;
+				machine_[dst]->_connectedOutputs = 0;
+
+				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					if (machine_[dst]->_connection[i])
+					{
+						machine_[dst]->_connection[i] = false;
+						machine_[dst]->_outputMachines[i] = -1;
+					}
+
+					if (machine_[dst]->_inputCon[i])
+					{
+						machine_[dst]->_inputCon[i] = false;
+						machine_[dst]->_inputMachines[i] = -1;
+					}
+				}
+
+				#if 1
+				{
+					std::stringstream s;
+					s << machine_[dst]->_editName << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
+					s >> machine_[dst]->_editName;
+				}
+				#else ///\todo rewrite this for std::string
+					int number = 1;
+					char buf[sizeof(machine_[dst]->_editName)+4];
+					strcpy (buf,machine_[dst]->_editName);
+					char* ps = strrchr(buf,' ');
+					if (ps)
+					{
+						number = atoi(ps);
+						if (number < 1)
+						{
+							number =1;
+						}
+						else
+						{
+							ps[0] = 0;
+							ps = strchr(machine_[dst]->_editName,' ');
+							ps[0] = 0;
+						}
+					}
+
+					for (int i = 0; i < MAX_MACHINES-1; i++)
+					{
+						if (i!=dst)
+						{
+							if (machine_[i])
+							{
+								if (strcmp(machine_[i]->_editName,buf)==0)
+								{
+									number++;
+									sprintf(buf,"%s %d",machine_[dst]->_editName.c_str(),number);
+									i = -1;
+								}
+							}
+						}
+					}
+
+					buf[sizeof(machine_[dst]->_editName)-1] = 0;
+					strcpy(machine_[dst]->_editName,buf);
+				#endif
+			#endif
 
 			return true;
 		}
@@ -958,177 +980,181 @@ break;
 		bool CoreSong::CloneIns(Instrument::id_type src, Instrument::id_type dst)
 		{
 			// src has to be occupied and dst must be empty
-		/*	if (!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
-			{
-				return false;
-			}
-			if (!Gloxxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
-			{
-				int temp = src;
-				src = dst;
-				dst = temp;
-			}
-			if (Gloxxxxxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty())
-			{
-				return false;
-			}
-			// ok now we get down to business
-			// save our file
-
-			CString filepath = Gloxxxxxxxxxxxxxxxxxxxbal::configuration().GetSongDir().c_str();
-			filepath += "\\psycle.tmp";
-			::DeleteFile(filepath);
-			RiffFile file;
-			if (!file.Create(filepath.GetBuffer(1), true))
-			{
-				return false;
-			}
-
-			file.WriteChunk("INSD",4);
-			std::uint32_t version = CURRENT_FILE_VERSION_INSD;
-			file.Write(version);
-			std::fpos_t pos = file.GetPos();
-			std::uint32_t size = 0;
-			file.Write(size);
-
-			std::uint32_t index = dst; // index
-			file.Write(index);
-
-			_pInstrument[src]->SaveFileChunk(&file);
-
-			std::fpos_t pos2 = file.GetPos(); 
-			size = pos2 - pos - sizeof size;
-			file.Seek(pos);
-			file.Write(size);
-
-			file.Close();
-
-			// now load it
-
-			if (!file.Open(filepath.GetBuffer(1)))
-			{
-				DeleteFile(filepath);
-				return false;
-			}
-			char Header[5];
-			file.ReadChunk(&Header, 4);
-			Header[4] = 0;
-
-			if (strcmp(Header,"INSD")==0)
-			{
-				file.Read(version);
-				file.Read(size);
-				if (version > CURRENT_FILE_VERSION_INSD)
+			#if 0
+				if (!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
 				{
-					// there is an error, this file is newer than this build of psycle
-					file.Close();
+					return false;
+				}
+				if (!Gloxxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
+				{
+					int temp = src;
+					src = dst;
+					dst = temp;
+				}
+				if (Gloxxxxxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty())
+				{
+					return false;
+				}
+				// ok now we get down to business
+				// save our file
+
+				CString filepath = Gloxxxxxxxxxxxxxxxxxxxbal::configuration().GetSongDir().c_str();
+				filepath += "\\psycle.tmp";
+				::DeleteFile(filepath);
+				RiffFile file;
+				if (!file.Create(filepath.GetBuffer(1), true))
+				{
+					return false;
+				}
+
+				file.WriteChunk("INSD",4);
+				std::uint32_t version = CURRENT_FILE_VERSION_INSD;
+				file.Write(version);
+				std::fpos_t pos = file.GetPos();
+				std::uint32_t size = 0;
+				file.Write(size);
+
+				std::uint32_t index = dst; // index
+				file.Write(index);
+
+				_pInstrument[src]->SaveFileChunk(&file);
+
+				std::fpos_t pos2 = file.GetPos(); 
+				size = pos2 - pos - sizeof size;
+				file.Seek(pos);
+				file.Write(size);
+
+				file.Close();
+
+				// now load it
+
+				if (!file.Open(filepath.GetBuffer(1)))
+				{
 					DeleteFile(filepath);
 					return false;
 				}
-				else
+				char Header[5];
+				file.ReadChunk(&Header, 4);
+				Header[4] = 0;
+
+				if (strcmp(Header,"INSD")==0)
 				{
-					file.Read(index);
-					index = dst;
-					if (index < MAX_INSTRUMENTS)
+					file.Read(version);
+					file.Read(size);
+					if (version > CURRENT_FILE_VERSION_INSD)
 					{
-						// we had better load it
-						_pInstrument[index]->LoadFileChunk(&file,version);
-					}
-					else
-					{
+						// there is an error, this file is newer than this build of psycle
 						file.Close();
 						DeleteFile(filepath);
 						return false;
 					}
+					else
+					{
+						file.Read(index);
+						index = dst;
+						if (index < MAX_INSTRUMENTS)
+						{
+							// we had better load it
+							_pInstrument[index]->LoadFileChunk(&file,version);
+						}
+						else
+						{
+							file.Close();
+							DeleteFile(filepath);
+							return false;
+						}
+					}
 				}
-			}
-			else
-			{
+				else
+				{
+					file.Close();
+					DeleteFile(filepath);
+					return false;
+				}
 				file.Close();
 				DeleteFile(filepath);
-				return false;
-			}
-			file.Close();
-			DeleteFile(filepath);*/
+			#endif
 			return true;
 		}
 
-		void /*Reset*/CoreSong::DeleteInstrument(Instrument::id_type id)
+		void CoreSong::/*Reset*/DeleteInstrument(Instrument::id_type id)
 		{
 			Invalided=true;
 			_pInstrument[id]->Delete(); Invalided=false;
 		}
-	    
-	    void /*Reset*/CoreSong::DeleteInstruments()
-	    {
+		
+		void CoreSong::/*Reset*/DeleteInstruments()
+		{
 			Invalided=true;
 			for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
 			_pInstrument[id]->Delete();
 			Invalided=false;
 		}
-	    
-	    void /*Delete*/CoreSong::DestroyAllInstruments()
-	    {
+		
+		void CoreSong::/*Delete*/DestroyAllInstruments()
+		{
 			for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 				delete _pInstrument[id];
 				_pInstrument[id] = 0;
 			}
-	    }
-	    
-	    void CoreSong::DeleteLayer(Instrument::id_type id)
-	    {
+		}
+		
+		void CoreSong::DeleteLayer(Instrument::id_type id)
+		{
 			_pInstrument[id]->DeleteLayer();
 		}
 	
 		void CoreSong::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
 		{
-			///\todo reowkr for multitracking
-			/*  bool bEditMode = true;
+			///\todo rework for multitracking
+			#if 0
+				/*  bool bEditMode = true;
 
-			// UNDO CODE MIDI PATTERN TWEAK
-			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
-			//if(viewMode == VMPattern && bEditMode)
-			{ 
-				// write effect
-				const int ps = playOrder[patternPosition];
-				int line = Gloxxxxxxxxxxxxxxxxxbal::pPlayer()->_lineCounter;
-				unsigned char * toffset;
-				if (Gloxxxxxxxxxxxxxxxxxxxxbal::pPlayer()->_playing&&Gloxxxxxxxxxxxxxxxxxxbal::pConfig()->_followSong)
-				{
-					if(_trackArmedCount)
+				// UNDO CODE MIDI PATTERN TWEAK
+				if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+				if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+				//if(viewMode == VMPattern && bEditMode)
+				{ 
+					// write effect
+					const int ps = playOrder[patternPosition];
+					int line = Gloxxxxxxxxxxxxxxxxxbal::pPlayer()->_lineCounter;
+					unsigned char * toffset;
+					if (Gloxxxxxxxxxxxxxxxxxxxxbal::pPlayer()->_playing&&Gloxxxxxxxxxxxxxxxxxxbal::pConfig()->_followSong)
 					{
-						//SelectNextTrack();
+						if(_trackArmedCount)
+						{
+							//SelectNextTrack();
+						}
+						else if (!Gloxxxxxxxxxxxxxxxxxxxxbal::pConfig()->_RecordUnarmed)
+						{
+							return;
+						}
+						toffset = _ptrack(ps,track)+(line*MULTIPLY);
 					}
-					else if (!Gloxxxxxxxxxxxxxxxxxxxxbal::pConfig()->_RecordUnarmed)
-					{	
-						return;
-					}
-					toffset = _ptrack(ps,track)+(line*MULTIPLY);
-				}
-				else
-				{
-					toffset = _ptrackline(ps, track, line);
-				}
-
-				// build entry
-				PatternEntry *entry = (PatternEntry*) toffset;
-				if (entry->_note >= 120)
-				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+					else
 					{
-						//AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						entry->_mach = machine;
-						entry->_cmd = (value>>8)&255;
-						entry->_parameter = value&255;
-						entry->_inst = command;
-						entry->_note = cdefTweakS;
+						toffset = _ptrackline(ps, track, line);
+					}
 
-						//NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						//Repaint(DMData);
+					// build entry
+					PatternEntry *entry = (PatternEntry*) toffset;
+					if (entry->_note >= 120)
+					{
+						if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != cdefTweakM) && (entry->_note != cdefTweakE) && (entry->_note != cdefTweakS)))
+						{
+							//AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+							entry->_mach = machine;
+							entry->_cmd = (value>>8)&255;
+							entry->_parameter = value&255;
+							entry->_inst = command;
+							entry->_note = cdefTweakS;
+
+							//NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+							//Repaint(DMData);
+						}
 					}
 				}
-			}*/
+			#endif
 		}
 
 		void CoreSong::setTracks( unsigned int trackCount )

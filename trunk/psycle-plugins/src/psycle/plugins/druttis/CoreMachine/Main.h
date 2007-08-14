@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	Main.h ( Core Machine Interface Implementation )
+//				Main.h ( Core Machine Interface Implementation )
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -16,20 +16,20 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////
-//	Info definitions
+//				Info definitions
 //////////////////////////////////////////////////////////////////////
 
-#define MAC_NAME	"CoreMachine"
-#define MAC_VERSION	"1.0"
-#define MAC_AUTHOR	"Author"
+#define MAC_NAME				"CoreMachine"
+#define MAC_VERSION				"1.0"
+#define MAC_AUTHOR				"Author"
 
 //////////////////////////////////////////////////////////////////////
-//	Info definitions
+//				Info definitions
 //////////////////////////////////////////////////////////////////////
 
 #ifdef __GENERATOR__
-#define	MAX_TRACKS	32
-#define	MAX_VOICES	2
+#define				MAX_TRACKS				32
+#define				MAX_VOICES				2
 #endif
 
 #define DEFAULT_INTERNAL_TICK_LENGTH 32

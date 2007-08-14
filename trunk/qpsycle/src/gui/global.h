@@ -22,9 +22,9 @@
 class Configuration;
 class Global
 {
-    public:
-        static Configuration* pConfig();
-        static const Configuration & configuration();
+	public:
+		static Configuration* pConfig();
+		static const Configuration & configuration();
 };
 
 template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)

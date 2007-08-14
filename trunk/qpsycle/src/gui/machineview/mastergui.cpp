@@ -18,11 +18,11 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
- #include "mastergui.h"
+	#include "mastergui.h"
 
- MasterGui::MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
-     : MachineGui(left, top, mac, macView)
- {
-	 setBrush( QColor( 90, 90, 40 ) );
- }
+	MasterGui::MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
+		: MachineGui(left, top, mac, macView)
+	{
+		setBrush( QColor( 90, 90, 40 ) );
+	}
 

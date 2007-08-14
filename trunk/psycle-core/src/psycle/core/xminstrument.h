@@ -52,12 +52,12 @@ public:
 		/// When a note starts to play in a channel, and there is still a note playing in it,
 		/// do this on the currently playing note:
 		enum NewNoteAction {
-				STOP = 0x0,     ///  [Note Cut]	(This one actually does a very fast fadeout)
-				CONTINUE = 0x1, ///  [Ignore]
-				NOTEOFF = 0x2,  ///  [Note off]
-				FADEOUT = 0x3   ///  [Note fade]
+				STOP = 0x0,     ///< note cut. This one actually does a very fast fadeout.
+				CONTINUE = 0x1, ///< ignore
+				NOTEOFF = 0x2,  ///< note off
+				FADEOUT = 0x3   ///< note fade
 		};
-		enum DCType	{
+		enum DCType {
 				DCT_NONE=0x0,
 				DCT_NOTE,
 				DCT_SAMPLE,
@@ -71,9 +71,9 @@ public:
 		public:
 			/** Wave Loop Type */
 				enum LoopType {
-					DO_NOT = 0x0,///< Do Nothing
-					NORMAL = 0x1,///< normal Start --> End ,Start --> End ...
-					BIDI = 0x2	 ///< bidirectional Start --> End, End --> Start ...
+					DO_NOT = 0x0, ///< Do Nothing
+					NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
+					BIDI = 0x2    ///< bidirectional Start --> End, End --> Start ...
 				};
 
 				enum WaveForms {
@@ -107,7 +107,7 @@ public:
 					// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
 					m_WaveSampleRate = 8363;
 					m_WaveTune = 0;
-					m_WaveFineTune = 0;	
+					m_WaveFineTune = 0;
 					m_WaveStereo = false;
 					m_PanFactor = 0.5f;
 					m_PanEnabled = false;
@@ -155,7 +155,7 @@ public:
 					m_WaveSusLoopEnd = source.m_WaveSusLoopEnd;
 					m_WaveSusLoopType = source.m_WaveSusLoopType;
 					m_WaveTune = source.m_WaveTune;
-					m_WaveFineTune = source.m_WaveFineTune;	
+					m_WaveFineTune = source.m_WaveFineTune;
 					m_WaveStereo = source.m_WaveStereo;
 					m_VibratoAttack = source.m_VibratoAttack;
 					m_VibratoSpeed = source.m_VibratoSpeed;
@@ -236,7 +236,8 @@ public:
 			private:
 
 				std::string m_WaveName;
-				uint32_t m_WaveLength;		// Wave length in Samples.
+				/// Wave length in Samples.
+				uint32_t m_WaveLength;
 				float m_WaveGlobVolume;
 				uint16_t m_WaveDefVolume;
 				uint32_t m_WaveLoopStart;
@@ -245,14 +246,17 @@ public:
 				uint32_t m_WaveSusLoopStart;
 				uint32_t m_WaveSusLoopEnd;
 				LoopType m_WaveSusLoopType;
-				uint32_t m_WaveSampleRate;    // SampleRate of the sample. \\todo . We will have to rework NotetoPeriod,PeriodtoNote and PeriodtoSpeed.
+				/// SampleRate of the sample. \\todo . We will have to rework NotetoPeriod,PeriodtoNote and PeriodtoSpeed.
+				uint32_t m_WaveSampleRate;
 				int16_t m_WaveTune;
-				int16_t m_WaveFineTune;	// [ -256 .. 256] full range = -/+ 1 seminote
+				/// [ -256 .. 256] full range = -/+ 1 seminote
+				int16_t m_WaveFineTune;
 				bool m_WaveStereo;
 				signed short *m_pWaveDataL;
 				signed short *m_pWaveDataR;
 				bool m_PanEnabled;
-				float m_PanFactor; // Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
+				/// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
+				float m_PanFactor;
 				uint8_t m_VibratoAttack;
 				uint8_t m_VibratoSpeed;
 				uint8_t m_VibratoDepth;

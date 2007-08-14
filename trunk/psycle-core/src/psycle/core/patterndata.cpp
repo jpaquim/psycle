@@ -66,13 +66,13 @@ namespace psy
 			return pattern;
 		}
 								
-        SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
-        {
-            SinglePattern* pattern = new SinglePattern( src);
-            pattern->setCategory(this);
-            pattern->setName(name);
-            push_back(pattern);
-            return pattern;
+		SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
+		{
+			SinglePattern* pattern = new SinglePattern( src);
+			pattern->setCategory(this);
+			pattern->setName(name);
+			push_back(pattern);
+			return pattern;
 		}
 
 		bool PatternCategory::removePattern( SinglePattern * pattern )

@@ -4,16 +4,16 @@
 //   Original
 /**********************************************************************
 
-  Audacity: A Digital Audio Editor
+	Audacity: A Digital Audio Editor
 
-  Phaser.cpp
+	Phaser.cpp
 
-  Effect programming:
-  Nasca Octavian Paul
+	Effect programming:
+	Nasca Octavian Paul
 
-  UI programming:
-  Dominic Mazzoni (with the help of wxDesigner)
-  Vaughan Johnson (Preview)
+	UI programming:
+	Dominic Mazzoni (with the help of wxDesigner)
+	Vaughan Johnson (Preview)
 
 **********************************************************************/
 #include <packageneric/pre-compiled.private.hpp>
@@ -32,60 +32,60 @@
 CMachineParameter const paraLFOFreq = 
 { 
 	"LFO Freq",
-	"LFOFreq",						// description
-	1,												// MinValue	
-	40,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFOFreq",																								// description
+	1,																																																// MinValue				
+	40,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	4,
 };
 
 CMachineParameter const paraLFOStartPhase = 
 { 
 	"LFO start phase",
-	"LFOStartPhase",						// description
-	0,												// MinValue	
-	359,											// MaxValue
-	MPF_STATE,										// Flags
+	"LFOStartPhase",																								// description
+	0,																																																// MinValue				
+	359,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
 CMachineParameter const paraDepth = 
 { 
 	"Depth",
-	"Depth",						// description
-	0,												// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Depth",																								// description
+	0,																																																// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	70,
 };
 
 CMachineParameter const paraStages = 
 { 
 	"Stages",
-	"Stages",											// description
-	2,												// MinValue	
-	24,											// MaxValue
-	MPF_STATE,										// Flags
+	"Stages",																																												// description
+	2,																																																// MinValue				
+	24,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	2,
 };
 
 CMachineParameter const paraDryWet = 
 { 
 	"Dry/Wet",
-	"Dry/Wet",											// description
-	0,												// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Dry/Wet",																																												// description
+	0,																																																// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	50,
 };
 
 CMachineParameter const paraFB = 
 { 
 	"Feedback",
-	"Feedback",											// description
-	-100,												// MinValue	
-	100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback",																																												// description
+	-100,																																																// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
@@ -102,18 +102,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	EFFECT,										// flags
-	NUMPARAMETERS,								// numParameters
-	pParameters,								// Pointer to parameters
+	MI_VERSION,				
+	EFFECT,																																								// flags
+	NUMPARAMETERS,																																// numParameters
+	pParameters,																																// Pointer to parameters
 #ifdef _DEBUG
-	"Audacity Phaser (Debug build)",		// name
+	"Audacity Phaser (Debug build)",								// name
 #else
-	"Audacity Phaser",						// name
+	"Audacity Phaser",																								// name
 #endif
-	"APhaser",							// short name
-	"Nasca Octavian Paul/Sartorius",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"APhaser",																												// short name
+	"Nasca Octavian Paul/Sartorius",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -133,20 +133,20 @@ public:
 	virtual void ParameterTweak(int par, int val);
 
 private:
-   float freq;
-   float startphase;
-   float fb;
-   float depth;
-   int stages;
-   float drywet;
+	float freq;
+	float startphase;
+	float fb;
+	float depth;
+	int stages;
+	float drywet;
 
-   // state variables
-   unsigned long skipcount;
-   float old_l[MAX_STAGES],old_r[MAX_STAGES]; // must be as large as MAX_STAGES
-   float gain_l,gain_r;
-   float fbout_l,fbout_r;
-   float lfoskip;
-   float phase_l,phase_r;
+	// state variables
+	unsigned long skipcount;
+	float old_l[MAX_STAGES],old_r[MAX_STAGES]; // must be as large as MAX_STAGES
+	float gain_l,gain_r;
+	float fbout_l,fbout_r;
+	float lfoskip;
+	float phase_l,phase_r;
 
 };
 
@@ -166,21 +166,21 @@ mi::~mi()
 void mi::Init()
 {
 // Initialize your stuff here
-   freq = 0.4f;
-   startphase = 0;
-   depth = .7f;
+	freq = 0.4f;
+	startphase = 0;
+	depth = .7f;
 
-   lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate();
-   skipcount = 0;
-   gain_l = gain_r = 0;
-   fbout_l = fbout_r = 0;
+	lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate();
+	skipcount = 0;
+	gain_l = gain_r = 0;
+	fbout_l = fbout_r = 0;
 
-   phase_l = startphase; phase_r = phase_l + M_PI;
+	phase_l = startphase; phase_r = phase_l + M_PI;
 
-   for (int j = 0; j < MAX_STAGES; j++){
-      old_l[j] = 0;
-	  old_r[j] = 0;
-   }
+	for (int j = 0; j < MAX_STAGES; j++){
+		old_l[j] = 0;
+		old_r[j] = 0;
+	}
 }
 
 void mi::SequencerTick()
@@ -208,7 +208,7 @@ void mi::ParameterTweak(int par, int val)
 		case 4: drywet = val * .01f; break;
 		case 5: fb = val * .01f; break;
 		default:
-			 break;
+				break;
 	}
 }
 
@@ -278,17 +278,17 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			fbout_l = m_l; fbout_r = m_r;
 			*psamplesleft = m_l * drywet + in_l * (1 - drywet);
 			*psamplesright = m_r * drywet + in_r * (1 - drywet);
-      
+		
 			//if (out_l < -1.0) 
-			//	out_l = float(-1.0);
+			//				out_l = float(-1.0);
 			//else if (out_l > 1.0)
-			//	out_l = float(1.0);                   
+			//				out_l = float(1.0);                   
 			//
 			//
 			//if (out_r < -1.0) 
-			//	out_r = float(-1.0);
+			//				out_r = float(-1.0);
 			//else if (out_r > 1.0)
-			//	out_r = float(1.0); 
+			//				out_r = float(1.0); 
 
 			++psamplesleft;
 			++psamplesright;

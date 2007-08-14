@@ -28,60 +28,60 @@ Comments and suggestions should be mailed to Juhana Sadeharju
 CMachineParameter const paraRoomSize = 
 { 
 	"Room size",
-	"Room size",						// description
-	1,												// MinValue	
-	300,											// MaxValue
-	MPF_STATE,										// Flags
+	"Room size",																								// description
+	1,																																																// MinValue				
+	300,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	144,
 };
 
 CMachineParameter const paraRevTime = 
 { 
 	"Reverb time",
-	"Reverb time",						// description
-	10,												// MinValue	
-	3000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Reverb time",																								// description
+	10,																																																// MinValue				
+	3000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1800,
 };
 
 CMachineParameter const paraDamping = 
 { 
 	"Damping",
-	"Damping",						// description
-	0,												// MinValue	
-	1000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Damping",																								// description
+	0,																																																// MinValue				
+	1000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1000,
 };
 
 CMachineParameter const paraBandwidth = 
 { 
 	"Input bandwidth",
-	"Input bandwidth",											// description
-	0,												// MinValue	
-	1000,											// MaxValue
-	MPF_STATE,										// Flags
+	"Input bandwidth",																																												// description
+	0,																																																// MinValue				
+	1000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
 CMachineParameter const paraDry = 
 { 
 	"Dry signal level",
-	"Dry",						// description
-	-70000,												// MinValue	
-	0,											// MaxValue
-	MPF_STATE,										// Flags
+	"Dry",																								// description
+	-70000,																																																// MinValue				
+	0,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	-70000,
 };
 
 CMachineParameter const paraEarly = 
 { 
 	"Early reflection level",
-	"Early",						// description
-	-70000,												// MinValue	
-	0,											// MaxValue
-	MPF_STATE,										// Flags
+	"Early",																								// description
+	-70000,																																																// MinValue				
+	0,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
@@ -89,20 +89,20 @@ CMachineParameter const paraEarly =
 CMachineParameter const paraTail = 
 { 
 	"Tail level",
-	"Tail level",											// description
-	-70000,												// MinValue	
-	0,											// MaxValue
-	MPF_STATE,										// Flags
+	"Tail level",																																												// description
+	-70000,																																																// MinValue				
+	0,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	-17500,
 };
 
 CMachineParameter const paraMonoStereo = 
 { 
 	"Input",
-	"Input",											// description
-	0,												// MinValue	
-	1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Input",																																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
@@ -122,18 +122,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	EFFECT,										// flags
-	NUMPARAMETERS,								// numParameters
-	pParameters,								// Pointer to parameters
+	MI_VERSION,				
+	EFFECT,																																								// flags
+	NUMPARAMETERS,																																// numParameters
+	pParameters,																																// Pointer to parameters
 #ifdef _DEBUG
-	"LADSPA GVerb (Debug build)",		// name
+	"LADSPA GVerb (Debug build)",								// name
 #else
-	"LADSPA GVerb",						// name
+	"LADSPA GVerb",																								// name
 #endif
-	"GVerb",							// short name
-	"Juhana Sadeharju/Steve Harris/Sartorius",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"GVerb",																												// short name
+	"Juhana Sadeharju/Steve Harris/Sartorius",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -229,7 +229,7 @@ void mi::ParameterTweak(int par, int val)
 		case 6: gverb_set_taillevel(gv_l,DB_CO((float)val*.001f)); gverb_set_taillevel(gv_r,DB_CO((float)val*.001f)); break;
 		case 7: gverb_flush(gv_l); gverb_flush(gv_r); break;
 		default:
-			 break;
+				break;
 	}
 }
 

@@ -35,52 +35,52 @@ class SequencerLine;
 
 class SequencerItem : public QObject, public QGraphicsItem
 {
-   Q_OBJECT
+	Q_OBJECT
 
 public:
-    SequencerItem();
-    ~SequencerItem();
+	SequencerItem();
+	~SequencerItem();
 
-    QRectF boundingRect() const;
-    void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	QRectF boundingRect() const;
+	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-    void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
-    psy::core::SequenceEntry *sequenceEntry(); 
-    void constrainToParent();
+	void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
+	psy::core::SequenceEntry *sequenceEntry(); 
+	void constrainToParent();
 
-    enum { Type = UserType + 5 };
-    int type() const
-    {
-        // Enable the use of qgraphicsitem_cast with this item.
-        return Type;
-    }
+	enum { Type = UserType + 5 };
+	int type() const
+	{
+		// Enable the use of qgraphicsitem_cast with this item.
+		return Type;
+	}
 
 protected: 
-    void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
-    void mousePressEvent( QGraphicsSceneMouseEvent *event );
-    void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
-    void keyPressEvent( QKeyEvent *event );
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+	void mousePressEvent( QGraphicsSceneMouseEvent *event );
+	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
+	void keyPressEvent( QKeyEvent *event );
+	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 private slots:
-    void onLoopEntryActionTriggered();
-    void onDeleteEntryActionTriggered();
+	void onLoopEntryActionTriggered();
+	void onDeleteEntryActionTriggered();
 
 signals:
-    void clicked(SequencerItem*);
-    void deleteRequest( SequencerItem* );
-    void moved( SequencerItem*, QPointF diff );
-    void changedLine( SequencerItem*, int );
+	void clicked(SequencerItem*);
+	void deleteRequest( SequencerItem* );
+	void moved( SequencerItem*, QPointF diff );
+	void changedLine( SequencerItem*, int );
 
 
- private:
-    psy::core::SequenceEntry *sequenceEntry_;
+	private:
+	psy::core::SequenceEntry *sequenceEntry_;
 
-    QAction *deleteEntryAction_;
-    QAction *loopEntryAction_;
-    const QColor & QColorFromLongColor( long longCol );
+	QAction *deleteEntryAction_;
+	QAction *loopEntryAction_;
+	const QColor & QColorFromLongColor( long longCol );
 
-    int beatPxLength_;
- };
+	int beatPxLength_;
+	};
 
 #endif

@@ -236,11 +236,13 @@ namespace psy
 
 			///\name cpu cost measurement
 			///\{
-				public:
-/*					void             inline cpu_idle(cpu::cycles_type const & value)       throw() { cpu_idle_ = value; }
-					cpu::cycles_type inline cpu_idle(                              ) const throw() { return cpu_idle_; }
-				private:
-					cpu::cycles_type        cpu_idle_;*/ // How do make cpu on linux ?
+					#if 0 ///\todo re-enable this
+						public:
+							void             inline cpu_idle(cpu::cycles_type const & value)       throw() { cpu_idle_ = value; }
+							cpu::cycles_type inline cpu_idle(                              ) const throw() { return cpu_idle_; }
+						private:
+							cpu::cycles_type        cpu_idle_;
+					#endif
 
 				public: ///\todo public->private
 					/// ngrs::Number of samples processed since all cpu cost counters were reset.

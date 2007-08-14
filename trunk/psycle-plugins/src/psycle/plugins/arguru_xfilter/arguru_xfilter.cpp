@@ -7,35 +7,35 @@
 
 // Arguru xfilter
 
-#define MAX_DELAY_SAMPLES	80000
+#define MAX_DELAY_SAMPLES				80000
 
 CMachineParameter const paraDelay = 
 { 
 	"Delay time",
-	"Delay time",									// description
-	0,												// MinValue	
-	44100,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay time",																																				// description
+	0,																																																// MinValue				
+	44100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	11025,
 };
 
 CMachineParameter const paraFeedback = 
 { 
 	"Feedback",
-	"Feedback",										// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback",																																								// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	128
 };
 
 CMachineParameter const paraDry = 
 { 
 	"Dry",
-	"Dry",											// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Dry",																																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256
 };
 
@@ -43,30 +43,30 @@ CMachineParameter const paraDry =
 CMachineParameter const paraWet = 
 { 
 	"Wet",
-	"Wet",											// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Wet",																																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	128
 };
 
 CMachineParameter const paraTickmode = 
 { 
 	"Tick mode",
-	"Tick mode",									// description
-	0,												// MinValue	
-	1,												// MaxValue
-	MPF_STATE,										// Flags
+	"Tick mode",																																				// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraTicktweak = 
 { 
 	"Ticks",
-	"Ticks",										// description
-	0,												// MinValue	
-	8,												// MaxValue
-	MPF_STATE,										// Flags
+	"Ticks",																																								// description
+	0,																																																// MinValue				
+	8,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	3
 };
 
@@ -83,18 +83,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	6,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	0,																																								// flags
+	6,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"Arguru CrossDelay (Debug build)",			// name
+	"Arguru CrossDelay (Debug build)",												// name
 #else
-	"Arguru CrossDelay",						// name
+	"Arguru CrossDelay",																								// name
 #endif
-	"CrossDelay",								// short name
-	"J. Arguelles",							// author
-	"About",									// A command, that could be use for open an editor, etc...
+	"CrossDelay",																																// short name
+	"J. Arguelles",																												// author
+	"About",																																				// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -204,8 +204,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		dbl[ccl]=il+dbl[dcl]*fbc;
 		dbr[ccr]=ir+dbr[dcr]*fbc;
 
-		*psamplesleft	=il*cdry+dbl[dcl]*cwet;
-		*psamplesright	=ir*cdry+dbr[dcl]*cwet;
+		*psamplesleft				=il*cdry+dbl[dcl]*cwet;
+		*psamplesright				=ir*cdry+dbr[dcl]*cwet;
 		
 		if(++ccl==MAX_DELAY_SAMPLES)ccl=0;
 		if(++ccr==MAX_DELAY_SAMPLES)ccr=0;
@@ -237,7 +237,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		if(coef>0.0f)
 			sprintf(txt,"%.1f dB",20.0f * log10(coef));
 		else
-			sprintf(txt,"-Inf. dB");	
+			sprintf(txt,"-Inf. dB");				
 		return true;
 	}
 	if(param==4)

@@ -35,33 +35,35 @@ namespace psy
 	{
 		namespace dsp
 		{
+			#if 0
 			// GNU Radio's code
-			//#define IzeroEPSILON 1E-21               /* Max error acceptable in Izero */
-			//static double Izero(double x)
-			//{
-			//	double sum, u, halfx, temp;
-			//	int n;
+			/// Max error acceptable in Izero
+			double const IzeroEPSILON = 1e-21
+			static double Izero(double x)
+			{
+				double sum, u, halfx, temp;
+				int n;
+				sum = u = n = 1;
+				halfx = x/2.0;
+				do {
+					temp = halfx/(double)n;
+					n += 1;
+					temp *= temp;
+					u *= temp;
+					sum += u;
+				} while (u >= IzeroEPSILON*sum);
+				return(sum);
+			}
+			#endif
 
-			//	sum = u = n = 1;
-			//	halfx = x/2.0;
-			//	do {
-			//		temp = halfx/(double)n;
-			//		n += 1;
-			//		temp *= temp;
-			//		u *= temp;
-			//		sum += u;
-			//	} while (u >= IzeroEPSILON*sum);
-			//	return(sum);
-			//}
-
-#if PSYCLE__CONFIGURATION__RMS_VUS	
+		#if PSYCLE__CONFIGURATION__RMS_VUS
 			int numRMSSamples=1;
 			int countRMSSamples=0;
 			double RMSAccumulatedLeft=0;
 			double RMSAccumulatedRight=0;
 			float previousRMSLeft=0;
 			float previousRMSRight=0;
-#endif
+		#endif
 
 			int Cubic::_resolution;
 			float Cubic::_aTable[CUBIC_RESOLUTION];
@@ -98,8 +100,8 @@ namespace psy
 				//double inm1 = 1.0/((double)(sincSize*2)); //+pi;
 				//double temp;
 
-				//one-sided-- the function is symmetrical, one wing of the sinc will suffice.
-				sincTable[0] = 1;	//save the trouble of evaluating 0/0
+				// one-sided-- the function is symmetrical, one wing of the sinc will suffice.
+				sincTable[0] = 1; // save the trouble of evaluating 0/0
 				for(int i(1); i<sincSize; ++i)
 				{
 					sincTable[i] = sin(i * pi / (float)SINC_RESOLUTION) / float(i * pi / (float)SINC_RESOLUTION);
@@ -183,8 +185,8 @@ namespace psy
 			// y2 = y[2]  [sample at x+2]
 			
 			// res= distance between two neighboughing sample points [y0 and y1] 
-			//		,so [0...1.0]. You have to multiply this distance * RESOLUTION used
-			//		on the spline conversion table. [2048 by default]
+			// ,so [0...1.0]. You have to multiply this distance * RESOLUTION used
+			// on the spline conversion table. [2048 by default]
 			// If you are using 2048 is asumed you are using 12 bit decimal
 			// fixed point offsets for resampling.
 			
@@ -194,7 +196,7 @@ namespace psy
 			/// interpolation work function which does band-limited interpolation.
 			float Cubic::Bandlimit(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
 			{
-				res = res>>23;		//!!!assumes SINC_RESOLUTION == 512!!!
+				res = res >> 23; // !!! assumes SINC_RESOLUTION == 512 !!!
 				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
 				if(offset<SINC_ZEROS) leftExtent=(int)(offset);
 				if(length-offset<SINC_ZEROS) rightExtent=(int)(length-offset);
@@ -206,18 +208,22 @@ namespace psy
 				///\todo: Will weight be different than zero using the current code?
 				float sincIndex(sincInc+res);
 				float weight(sincIndex - floor(sincIndex));
-				for(	int i(1);
-						i < leftExtent;
-						++i, sincIndex+=sincInc
-						)
+				for
+				(
+					int i(1);
+					i < leftExtent;
+					++i, sincIndex+=sincInc
+				)
 					newval+= (sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData-i);
 
 				sincIndex = sincInc-res;
 				weight = sincIndex - floor(sincIndex);
-				for(	int i(1);
-						i < rightExtent;
-						++i, sincIndex+=sincInc
-						)
+				for
+				(
+					int i(1);
+					i < rightExtent;
+					++i, sincIndex += sincInc
+				)
 					newval += ( sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData+i);
 
 				return newval;

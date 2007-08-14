@@ -18,7 +18,7 @@ v0.01b
 - initial test beta
 
 /////////////////////////////////////////////////////////////////////
- */
+	*/
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
@@ -57,11 +57,11 @@ inline int f2i(float flt)
 #define FILEVERSION 2
 #define MAXSYNCMODES 16
 #define OVERDRIVEDIVISOR 512.0f
-#define FILTER_CALC_TIME	32
+#define FILTER_CALC_TIME				32
 #define MAXLFOWAVE 15
 #define MAX_VCF_CUTOFF 301
 #define MAX_VCF_CUTOFF_22050 263
-#define TWOPI				6.28318530717958647692528676655901f
+#define TWOPI																6.28318530717958647692528676655901f
 #define SAMPLE_LENGTH  4096
 #define MAXPHASEMIX 9
 #define MAXOVERDRIVEMETHOD SYNTH_REMAP_0+7
@@ -69,7 +69,7 @@ inline int f2i(float flt)
 #define MAXVCFTYPE 42
 #define MAXMOOG 6
 #define MAXFILTER 26
-#define MAX_RATE		4096
+#define MAX_RATE								4096
 #define MAXWAVE 17
 #define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
@@ -83,71 +83,71 @@ const static float buffindex[NUM_BUFF]={
 	1/192.0f,
 	1/128.0f,
 	1/96.0f,
-	 1/64.0f,
-	 1/48.0f,
-	 1/32.0f,
-	 1/25.0f,
-	 1/24.0f,
-	 1/20.0f,
-	 1/16.0f,
-	 1/12.0f,
-	 1/10.0f,
-	 1/8.0f,
-	 1/6.0f,
-	 1/5.0f,
-	 1/4.0f,
-	 1/3.0f,
-	 1/2.0f,
-	 2/3.0f,
-	 3/4.0f,
-	 1.0f,
-	 1.25f,
-	 1.5f,
-	 1.75f,
-	 2.0f,
-	 2.5f,
-	 3.0f,
-	 4.0f,
-	 5.0f,
-	 6.0f,
-	 7.0f,
-	 8.0f,
-	 10.0f,
-	 12.0f,
-	 14.0f,
-	 16.0f,
-	 18.0f,
-	 20.0f,
-	 22.0f,
-	 24.0f,
-	 26.0f,
-	 28.0f,
-	 30.0f,
-	 32.0f,
-	 34.0f,
-	 36.0f,
-	 38.0f,
-	 40.0f,
-	 42.0f,
-	 44.0f,
-	 46.0f,
-	 48.0f,
-	 50.0f,
-	 52.0f,
-	 54.0f,
-	 56.0f,
-	 58.0f,
-	 60.0f,
-	 62.0f,
-	 64.0f,
-	 68.0f,
-	 72.0f,
-	 76.0f,
-	 80.0f,
-	 84.0f,
-	 88.0f,
-	 92.0f,
-	 96.0f,
+		1/64.0f,
+		1/48.0f,
+		1/32.0f,
+		1/25.0f,
+		1/24.0f,
+		1/20.0f,
+		1/16.0f,
+		1/12.0f,
+		1/10.0f,
+		1/8.0f,
+		1/6.0f,
+		1/5.0f,
+		1/4.0f,
+		1/3.0f,
+		1/2.0f,
+		2/3.0f,
+		3/4.0f,
+		1.0f,
+		1.25f,
+		1.5f,
+		1.75f,
+		2.0f,
+		2.5f,
+		3.0f,
+		4.0f,
+		5.0f,
+		6.0f,
+		7.0f,
+		8.0f,
+		10.0f,
+		12.0f,
+		14.0f,
+		16.0f,
+		18.0f,
+		20.0f,
+		22.0f,
+		24.0f,
+		26.0f,
+		28.0f,
+		30.0f,
+		32.0f,
+		34.0f,
+		36.0f,
+		38.0f,
+		40.0f,
+		42.0f,
+		44.0f,
+		46.0f,
+		48.0f,
+		50.0f,
+		52.0f,
+		54.0f,
+		56.0f,
+		58.0f,
+		60.0f,
+		62.0f,
+		64.0f,
+		68.0f,
+		72.0f,
+		76.0f,
+		80.0f,
+		84.0f,
+		88.0f,
+		92.0f,
+		96.0f,
 	104.0f,
 	112.0f,
 	120.0f,
@@ -177,41 +177,41 @@ const static float buffindex[NUM_BUFF]={
 
 CMachineParameter const paraLengthL = 
 { 
-	"Left Delay Length",				
-	"Left Delay Length",								// description
-	0,												// MinValue	
-	NUM_BUFF-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Left Delay Length",																
+	"Left Delay Length",																																// description
+	0,																																																// MinValue				
+	NUM_BUFF-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	21,
 };
 
 CMachineParameter const paraDelayPanL = 
 { 
-	"Left Delay Pan",				
-	"Left Delay Pan",								// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Left Delay Pan",																
+	"Left Delay Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
 CMachineParameter const paraFeedbackL = 
 { 
-	"Left Feedback",				
-	"Left Feedback",								// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Left Feedback",																
+	"Left Feedback",																																// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	64,
 };
 
 CMachineParameter const paraFeedbackPanL = 
 { 
-	"Left Feedback Pan",				
-	"Left Feedback Pan",								// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Left Feedback Pan",																
+	"Left Feedback Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
@@ -219,41 +219,41 @@ CMachineParameter const paraFeedbackPanL =
 
 CMachineParameter const paraLengthR = 
 { 
-	"Right Delay Length",				
-	"Right Delay Length",								// description
-	0,												// MinValue	
-	NUM_BUFF-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Right Delay Length",																
+	"Right Delay Length",																																// description
+	0,																																																// MinValue				
+	NUM_BUFF-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	21,
 };
 
 CMachineParameter const paraDelayPanR = 
 { 
-	"Right Delay Pan",				
-	"Right Delay Pan",								// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Right Delay Pan",																
+	"Right Delay Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	512,
 };
 
 CMachineParameter const paraFeedbackR = 
 { 
-	"Right Feedback",				
-	"Right Feedback",								// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Right Feedback",																
+	"Right Feedback",																																// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	64,
 };
 
 CMachineParameter const paraFeedbackPanR = 
 { 
-	"Right Feedback Pan",				
-	"Right Feedback Pan",								// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Right Feedback Pan",																
+	"Right Feedback Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	512,
 };
 
@@ -267,40 +267,40 @@ CMachineParameter const paraFeedbackPanR =
 CMachineParameter const paraNULL = 
 { 
 	" ",
-	" ",							// description
-	0,												// MinValue	
-	1,											// MaxValue
-	MPF_LABEL,										// Flags
+	" ",																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_LABEL,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLVCFcutoff = 
 { 
 	"Delay Cutoff",
-	"Delay Cutoff",									// description
-	0,												// MinValue	
-	MAX_VCF_CUTOFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay Cutoff",																																				// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	MAX_VCF_CUTOFF/2
 };
 
 CMachineParameter const paraDLVCFresonance = 
 { 
 	"Delay Resonance",
-	"Delay Resonance",								// description
-	1,												// MinValue	
-	240,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay Resonance",																																// description
+	1,																																																// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1
 };
 
 CMachineParameter const paraDLVCFtype = 
 { 
 	"Delay Filter Type",
-	"Delay Filter Type",										// description
-	0,												// MinValue	
-	MAXVCFTYPE,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay Filter Type",																																								// description
+	0,																																																// MinValue				
+	MAXVCFTYPE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -308,10 +308,10 @@ CMachineParameter const paraDLVCFtype =
 CMachineParameter const paraDLVCFlfospeed = 
 { 
 	"Delay LFO Rate",
-	"Delay LFO Rate",								// description
-	0,												// MinValue	
-	MAX_RATE,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -319,90 +319,90 @@ CMachineParameter const paraDLVCFlfospeed =
 CMachineParameter const paraDLVCFlfoamplitude = 
 { 
 	"Cutoff LFO Depth",
-	"Cutoff LFO Depth",							// description
-	0,												// MinValue	
-	MAX_VCF_CUTOFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff LFO Depth",																												// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLUnbalancelfoamplitude = 
 { 
 	"Unbalance LFO Depth",
-	"Unbalance LFO Depth",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Unbalance LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLGainlfoamplitude = 
 { 
 	"Gain LFO Depth",
-	"Gain LFO Depth",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Gain LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLVCFlfowave = 
 { 
 	"Delay LFO Wave",
-	"Delay LFO Wave",							// description
-	0,												// MinValue	
-	MAXLFOWAVE-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLVCFlfophase = 
 { 
 	"Delay LFO Phase",
-	"Delay LFO Phase",									// description
-	0,												// MinValue	
-	0xffff,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLOUToverdrive = 
 { 
 	"Delay Shaper",
-	"Delay Shaper",									// description
-	0,											// MinValue	
-	MAXOVERDRIVEMETHOD,											// MaxValue
-	MPF_STATE,										// Flags
+	"Delay Shaper",																																				// description
+	0,																																												// MinValue				
+	MAXOVERDRIVEMETHOD,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLOUToverdrivegain = 
 { 
 	"Shaper Gain/Param",
-	"Shaper Gain/Param",									// description
-	0,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Shaper Gain/Param",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraDLUnbalance = 
 { 
-	"Cutoff Unbalance",				
-	"Cutoff Unbalance",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff Unbalance",																
+	"Cutoff Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
 CMachineParameter const paraDLRoute = 
 { 
 	"Delay Routing",
-	"Delay Routing",								// description
-	0,												// MinValue	
-	1,												// MaxValue
-	MPF_STATE,										// Flags
+	"Delay Routing",																																// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -414,30 +414,30 @@ CMachineParameter const paraDLRoute =
 CMachineParameter const paraFBVCFcutoff = 
 { 
 	"Feedback Cutoff",
-	"Feedback Cutoff",									// description
-	0,												// MinValue	
-	MAX_VCF_CUTOFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback Cutoff",																																				// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	MAX_VCF_CUTOFF/2
 };
 
 CMachineParameter const paraFBVCFresonance = 
 { 
 	"Feedback Resonance",
-	"Feedback Resonance",								// description
-	1,												// MinValue	
-	240,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback Resonance",																																// description
+	1,																																																// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1
 };
 
 CMachineParameter const paraFBVCFtype = 
 { 
 	"Feedback Filter Type",
-	"Feedback Filter Type",										// description
-	0,												// MinValue	
-	MAXVCFTYPE,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback Filter Type",																																								// description
+	0,																																																// MinValue				
+	MAXVCFTYPE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -445,10 +445,10 @@ CMachineParameter const paraFBVCFtype =
 CMachineParameter const paraFBVCFlfospeed = 
 { 
 	"Feedback LFO Rate",
-	"Feedback LFO Rate",								// description
-	0,												// MinValue	
-	MAX_RATE,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -456,90 +456,90 @@ CMachineParameter const paraFBVCFlfospeed =
 CMachineParameter const paraFBVCFlfoamplitude = 
 { 
 	"Cutoff LFO Depth",
-	"Cutoff LFO Depth",							// description
-	0,												// MinValue	
-	MAX_VCF_CUTOFF,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff LFO Depth",																												// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBUnbalancelfoamplitude = 
 { 
 	"Unbalance LFO Depth",
-	"Unbalance LFO Depth",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Unbalance LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBGainlfoamplitude = 
 { 
 	"Gain LFO Depth",
-	"Gain LFO Depth",							// description
-	0,												// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Gain LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBVCFlfowave = 
 { 
 	"Feedback LFO Wave",
-	"Feedback LFO Wave",							// description
-	0,												// MinValue	
-	MAXLFOWAVE-1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBVCFlfophase = 
 { 
 	"Feedback LFO Phase",
-	"Feedback LFO Phase",									// description
-	0,												// MinValue	
-	0xffff,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBOUToverdrive = 
 { 
 	"Feedback Shaper",
-	"Feedback Shaper",									// description
-	0,											// MinValue	
-	MAXOVERDRIVEMETHOD,											// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback Shaper",																																				// description
+	0,																																												// MinValue				
+	MAXOVERDRIVEMETHOD,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBRoute = 
 { 
 	"Feedback Routing",
-	"Feedback Routing",								// description
-	0,												// MinValue	
-	1,												// MaxValue
-	MPF_STATE,										// Flags
+	"Feedback Routing",																																// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBOUToverdrivegain = 
 { 
 	"Shaper Gain/Param",
-	"Shaper Gain/Param",									// description
-	0,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Shaper Gain/Param",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraFBUnbalance = 
 { 
-	"Cutoff Unbalance",				
-	"Cutoff Unbalance",									// description
-	0,												// MinValue	
-	512,											// MaxValue
-	MPF_STATE,										// Flags
+	"Cutoff Unbalance",																
+	"Cutoff Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256,
 };
 
@@ -547,20 +547,20 @@ CMachineParameter const paraFBUnbalance =
 CMachineParameter const paraOUToverdrivegain = 
 { 
 	"Final Gain/Param",
-	"Final Gain/Param",									// description
-	0,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Final Gain/Param",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraOUToverdrive = 
 { 
 	"Final Shaper",
-	"Final Shaper",									// description
-	0,											// MinValue	
-	MAXOVERDRIVEMETHOD,											// MaxValue
-	MPF_STATE,										// Flags
+	"Final Shaper",																																				// description
+	0,																																												// MinValue				
+	MAXOVERDRIVEMETHOD,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
@@ -570,40 +570,40 @@ CMachineParameter const paraOUToverdrive =
 CMachineParameter const paraInputGain = 
 { 
 	"Input Gain",
-	"Input Gain",									// description
-	0,											// MinValue	
-	1024,											// MaxValue
-	MPF_STATE,										// Flags
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	256
 };
 
 CMachineParameter const paraOUTmix = 
 { 
 	"Mix",
-	"Mix",									// description
-	0,											// MinValue	
-	256,											// MaxValue
-	MPF_STATE,										// Flags
+	"Mix",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	128
 };
 
 CMachineParameter const paraInertia = 
 {
 	"Tweak Inertia",
-	"Tweak Inertia",									// description
-	0,												// MinValue	
-	1024,											// MaxValue
-	MPF_STATE,										// Flags
+	"Tweak Inertia",																																				// description
+	0,																																																// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0
 };
 
 CMachineParameter const paraTRACKTempo = 
 { 
 	"Follow Tempo",
-	"Follow Tempo",							// description
-	0,												// MinValue	
-	1,											// MaxValue
-	MPF_STATE,										// Flags
+	"Follow Tempo",																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1
 };
 
@@ -706,14 +706,14 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	e_numVALS,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	0,																																								// flags
+	e_numVALS,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 	PLUGIN_NAME,
-	"Pooplog Delay",							// short name
-	"Jeremy Evers",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"Pooplog Delay",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	5
 };
 
@@ -786,14 +786,14 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	e_numVALS,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	0,																																								// flags
+	e_numVALS,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 	PLUGIN_NAME,
-	"Pooplog Delay L",							// short name
-	"Jeremy Evers",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"Pooplog Delay L",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	4
 };
 
@@ -853,7 +853,7 @@ private:
 	int FBoverdrivegain;
 	int FBtrackDir;
 	int FBplayDir;
-//	float FBtrackThresh;
+//				float FBtrackThresh;
 	float FBnextMin;
 	int FBnextMinCount;
 	float FBthisMin;
@@ -867,7 +867,7 @@ private:
 	float FBplayPos;
 
 	float *pFBvcflfowave;
-	int	FBvcflfowave;
+	int				FBvcflfowave;
 	int FBvcflfospeed;
 	int FBvcflfoamplitude;
 	int FBvcfcutoff;
@@ -886,7 +886,7 @@ private:
 	int FNoverdrivegain;
 	int FNtrackDir;
 	int FNplayDir;
-//	float FNtrackThresh;
+//				float FNtrackThresh;
 	float FNnextMin;
 	int FNnextMinCount;
 	float FNthisMin;
@@ -917,7 +917,7 @@ private:
 	int DLoverdrivegain;
 	int DLtrackDir;
 	int DLplayDir;
-//	float DLtrackThresh;
+//				float DLtrackThresh;
 	float DLnextMin;
 	int DLnextMinCount;
 	float DLthisMin;
@@ -932,7 +932,7 @@ private:
 
 
 	float *pDLvcflfowave;
-	int	DLvcflfowave;
+	int				DLvcflfowave;
 	int DLvcflfospeed;
 	int DLvcflfoamplitude;
 	int DLvcfcutoff;
@@ -1069,7 +1069,7 @@ void mi::Init()
 	FBw1 = 1;
 	FBw2 = 1;
 	FBplayPos = 0;
-//	FBtrackThresh = 0;
+//				FBtrackThresh = 0;
 
 	FNOutGain = 1;
 	FNtrackDir = 1;
@@ -1085,7 +1085,7 @@ void mi::Init()
 	FNw1 = 1;
 	FNw2 = 1;
 	FNplayPos = 0;
-//	FNtrackThresh = 0;
+//				FNtrackThresh = 0;
 
 #endif
 	DLvcftype = 0;
@@ -1117,7 +1117,7 @@ void mi::Init()
 	DLw1 = 1;
 	DLw2 = 1;
 	DLplayPos = 0;
-//	DLtrackThresh = 0;
+//				DLtrackThresh = 0;
 
 	Lbufsize = int(((buffindex[paraLengthL.DefValue]*song_freq*60.0f)/song_sync)+0.5f);
 	Rbufsize = int(((buffindex[paraLengthR.DefValue]*song_freq*60.0f)/song_sync)+0.5f);
@@ -1745,8 +1745,8 @@ void mi::ParameterTweak(int par, int val)
 			dmix = 1.0f-wmix;
 			break;
 #ifndef LIGHT
-		case e_paraOUToverdrive:		FNoverdrive=val; break;
-		case e_paraOUToverdrivegain:	NewInertia(&FNoverdrivegain, val); break;
+		case e_paraOUToverdrive:								FNoverdrive=val; break;
+		case e_paraOUToverdrivegain:				NewInertia(&FNoverdrivegain, val); break;
 #endif
 
 		case e_paraLengthL:
@@ -1773,20 +1773,20 @@ void mi::ParameterTweak(int par, int val)
 			}
 			Rindex %= Rbufsize;
 			break;
-		case e_paraDelayPanL:	NewInertia(&LDLpan, val); break;
-		case e_paraDelayPanR:	NewInertia(&RDLpan, val); break;
-		case e_paraFeedbackL:		NewInertia(&LFB, val); break;
-		case e_paraFeedbackR:		NewInertia(&RFB, val); break;
-		case e_paraFeedbackPanL:	NewInertia(&LFBpan, val); break;
-		case e_paraFeedbackPanR:	NewInertia(&RFBpan, val); break;
+		case e_paraDelayPanL:				NewInertia(&LDLpan, val); break;
+		case e_paraDelayPanR:				NewInertia(&RDLpan, val); break;
+		case e_paraFeedbackL:								NewInertia(&LFB, val); break;
+		case e_paraFeedbackR:								NewInertia(&RFB, val); break;
+		case e_paraFeedbackPanL:				NewInertia(&LFBpan, val); break;
+		case e_paraFeedbackPanR:				NewInertia(&RFBpan, val); break;
 
-		case e_paraDLVCFcutoff:			NewInertiaDLVC(&DLvcfcutoff, val); break;
-		case e_paraDLVCFresonance:		NewInertia(&DLvcfresonance, val); break;
-		case e_paraDLVCFlfoamplitude:		NewInertia(&DLvcflfoamplitude, val); break;
-		case e_paraDLGainlfoamplitude:		NewInertia(&DLgainlfoamplitude, val); break;
-		case e_paraDLUnbalancelfoamplitude:		NewInertia(&DLunbalancelfoamplitude, val); break;
-		case e_paraDLVCFlfospeed:			NewInertia(&DLvcflfospeed, val); break;
-		case e_paraDLVCFlfowave:			DLvcflfowave=val%MAXLFOWAVE; pDLvcflfowave=SourceWaveTable[DLvcflfowave]; break;
+		case e_paraDLVCFcutoff:												NewInertiaDLVC(&DLvcfcutoff, val); break;
+		case e_paraDLVCFresonance:								NewInertia(&DLvcfresonance, val); break;
+		case e_paraDLVCFlfoamplitude:								NewInertia(&DLvcflfoamplitude, val); break;
+		case e_paraDLGainlfoamplitude:								NewInertia(&DLgainlfoamplitude, val); break;
+		case e_paraDLUnbalancelfoamplitude:								NewInertia(&DLunbalancelfoamplitude, val); break;
+		case e_paraDLVCFlfospeed:												NewInertia(&DLvcflfospeed, val); break;
+		case e_paraDLVCFlfowave:												DLvcflfowave=val%MAXLFOWAVE; pDLvcflfowave=SourceWaveTable[DLvcflfowave]; break;
 		case e_paraDLVCFtype: 
 			if (DLvcftype!=val)
 			{
@@ -1824,8 +1824,8 @@ void mi::ParameterTweak(int par, int val)
 				}
 			}
 			break;
-		case e_paraDLOUToverdrive:		DLoverdrive=val; break;
-		case e_paraDLOUToverdrivegain:	NewInertia(&DLoverdrivegain, val); break;
+		case e_paraDLOUToverdrive:								DLoverdrive=val; break;
+		case e_paraDLOUToverdrivegain:				NewInertia(&DLoverdrivegain, val); break;
 		case e_paraDLUnbalance:
 			// unbalance
 			if (val <= 256)
@@ -1855,13 +1855,13 @@ void mi::ParameterTweak(int par, int val)
 			break;
 
 #ifndef LIGHT
-		case e_paraFBVCFcutoff:			NewInertiaFBVC(&FBvcfcutoff, val); break;
-		case e_paraFBVCFresonance:		NewInertia(&FBvcfresonance, val); break;
-		case e_paraFBVCFlfoamplitude:		NewInertia(&FBvcflfoamplitude, val); break;
-		case e_paraFBGainlfoamplitude:		NewInertia(&FBgainlfoamplitude, val); break;
-		case e_paraFBUnbalancelfoamplitude:		NewInertia(&FBunbalancelfoamplitude, val); break;
-		case e_paraFBVCFlfospeed:			NewInertia(&FBvcflfospeed, val); break;
-		case e_paraFBVCFlfowave:			FBvcflfowave=val%MAXLFOWAVE; pFBvcflfowave=SourceWaveTable[FBvcflfowave]; break;
+		case e_paraFBVCFcutoff:												NewInertiaFBVC(&FBvcfcutoff, val); break;
+		case e_paraFBVCFresonance:								NewInertia(&FBvcfresonance, val); break;
+		case e_paraFBVCFlfoamplitude:								NewInertia(&FBvcflfoamplitude, val); break;
+		case e_paraFBGainlfoamplitude:								NewInertia(&FBgainlfoamplitude, val); break;
+		case e_paraFBUnbalancelfoamplitude:								NewInertia(&FBunbalancelfoamplitude, val); break;
+		case e_paraFBVCFlfospeed:												NewInertia(&FBvcflfospeed, val); break;
+		case e_paraFBVCFlfowave:												FBvcflfowave=val%MAXLFOWAVE; pFBvcflfowave=SourceWaveTable[FBvcflfowave]; break;
 		case e_paraFBVCFtype: 
 			if (FBvcftype!=val)
 			{
@@ -1899,8 +1899,8 @@ void mi::ParameterTweak(int par, int val)
 				}
 			}
 			break;
-		case e_paraFBOUToverdrive:		FBoverdrive=val; break;
-		case e_paraFBOUToverdrivegain:	NewInertia(&FBoverdrivegain, val); break;
+		case e_paraFBOUToverdrive:								FBoverdrive=val; break;
+		case e_paraFBOUToverdrivegain:				NewInertia(&FBoverdrivegain, val); break;
 		case e_paraFBUnbalance:
 			// unbalance
 			if (val <= 256)
@@ -2070,8 +2070,8 @@ inline float mi::HandleFNOverdrive(float input)
 	case 2: // soft clip 2
 		input *= FNOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
-		else if (input > 1.0f)	return 1.0f;
+		if (input < -1.0f)								return -1.0f;
+		else if (input > 1.0f)				return 1.0f;
 		return input;
 	case 3: // soft clip 3
 		input *= FNOutGain;
@@ -2081,32 +2081,32 @@ inline float mi::HandleFNOverdrive(float input)
 		break;
 	case 4: // hard clip 1
 		input *= FNOutGain;
-		if (input < -1.0f)		return -1.0f;
-		else if (input > 1.0f)	return 1.0f;
+		if (input < -1.0f)								return -1.0f;
+		else if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 5: // hard clip 2
 		// bounce off limits
 		input *= FNOutGain;
-		if (input < -1.0f)		return input-(f2i(input)+1)*(input+1.0f);
-		else if (input > 1.0f)	return input-(f2i(input)+1)*(input-1.0f);
+		if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+		else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 		return input;
 		break;
 	case 6: // hard clip 3
 		// invert, this one is harsh
 		input *= FNOutGain;
-		if (input < -1.0f)		return input + (f2i(input/(2.0f)))*(2.0f);
-		else if (input > 1.0f)	return input - (f2i(input/(2.0f)))*(2.0f);
+		if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+		else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 		return input;
 		break;
 	case 7: // parabolic distortion
 		input = (((input * input)*(FNOutGain*FNOutGain)))-1.0f;
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 8: // parabolic distortion
 		input = (((input * input)*(FNOutGain*FNOutGain))*32.0f)-1.0f;
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 9: // sin remapper
@@ -2116,8 +2116,8 @@ inline float mi::HandleFNOverdrive(float input)
 		// good negative partial rectifier
 		input *= FNOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		input= -1.0f;
-		else if (input > 1.0f)	input= 1.0f;
+		if (input < -1.0f)								input= -1.0f;
+		else if (input > 1.0f)				input= 1.0f;
 		if (input < -0.333f)
 		{
 			input = -0.666f - input;
@@ -2128,8 +2128,8 @@ inline float mi::HandleFNOverdrive(float input)
 		// good positive partial rectifier
 		input *= FNOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		input= -1.0f;
-		else if (input > 1.0f)	input= 1.0f;
+		if (input < -1.0f)								input= -1.0f;
+		else if (input > 1.0f)				input= 1.0f;
 		if (input > 0.333f)
 		{
 			input = 0.666f - input;
@@ -2144,7 +2144,7 @@ inline float mi::HandleFNOverdrive(float input)
 		}
 		input = fabsf(input*FNOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input > 1.0f)		return 1.0f;
+		if (input > 1.0f)								return 1.0f;
 		return input;
 		break;
 	case 13:
@@ -2155,14 +2155,14 @@ inline float mi::HandleFNOverdrive(float input)
 		}
 		input = -fabsf(input*FNOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
+		if (input < -1.0f)								return -1.0f;
 		return input;
 		break;
 	case 14:
 		// good negative full rectifier
 		input = -fabsf(input*FNOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
+		if (input < -1.0f)								return -1.0f;
 		return input;
 		break;
 
@@ -2170,7 +2170,7 @@ inline float mi::HandleFNOverdrive(float input)
 		// good positive full rectifier
 		input = fabsf(input*FNOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 16:
@@ -2182,7 +2182,7 @@ inline float mi::HandleFNOverdrive(float input)
 		else 
 		{
 			input *= FNOutGain*4;
-			if (input > 1.0f)	return 1.0f;
+			if (input > 1.0f)				return 1.0f;
 		}
 		return input;
 		break;
@@ -2195,7 +2195,7 @@ inline float mi::HandleFNOverdrive(float input)
 		else 
 		{
 			input *= FNOutGain*8;
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -2208,7 +2208,7 @@ inline float mi::HandleFNOverdrive(float input)
 		}
 		else 
 		{
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -2218,7 +2218,7 @@ inline float mi::HandleFNOverdrive(float input)
 		if (input < -0.5f) return -0.25f + ((input+0.5f)/(1.0f+(powf(2,(input-0.5f)/(1.0f-0.5f)))));
 		else if (input < 0.0f) return input*0.75f;
 		input*=2;
-		if (input > 0.5f)	return 0.5f;
+		if (input > 0.5f)				return 0.5f;
 		break;
 	case 20:
 		// assymetrical fuzz distortion 1 with hard clip
@@ -2233,7 +2233,7 @@ inline float mi::HandleFNOverdrive(float input)
 		else 
 		{
 			input *= FNOutGain*4;
-			if (input > 1.0f)	return 1.0f;
+			if (input > 1.0f)				return 1.0f;
 		}
 		return input;
 		break;
@@ -2246,7 +2246,7 @@ inline float mi::HandleFNOverdrive(float input)
 		else 
 		{
 			input *= FNOutGain*8;
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -2269,7 +2269,7 @@ inline float mi::HandleFNOverdrive(float input)
 		if (input < -0.5f) return -0.25f + ((input+0.5f)/(1.0f+(powf(2,(input-0.5f)/(1.0f-0.5f)))));
 		else if (input < 0.0f) return input*0.75f;
 		input*=2;
-		if (input > 0.5f)	return 1.0f-input;
+		if (input > 0.5f)				return 1.0f-input;
 		break;
 
 	case SYNTH_REMAP_0: 
@@ -2285,7 +2285,7 @@ inline float mi::HandleFNOverdrive(float input)
 		if (FNtrackDir < 0)
 		{
 			// we are tracking negative
-//			if (input < trackThresh)
+//												if (input < trackThresh)
 			if (input < 0)
 			{
 				// track this sample
@@ -2328,13 +2328,13 @@ inline float mi::HandleFNOverdrive(float input)
 				{
 					FNw2 = 0.00001f;
 				}
-//				FNtrackThresh = (FNtrackThresh+FNthisMin+((FNthisMax-FNthisMin)/2))/2;
+//																FNtrackThresh = (FNtrackThresh+FNthisMin+((FNthisMax-FNthisMin)/2))/2;
 			}
 		}
 		else 
 		{
 			// we are tracking positive
-//			if (input > FNtrackThresh)
+//												if (input > FNtrackThresh)
 			if (input > 0)
 			{
 				// track this sample
@@ -2377,7 +2377,7 @@ inline float mi::HandleFNOverdrive(float input)
 				{
 					FNw2 = 0.00001f;
 				}
-//				FNtrackThresh = (FNtrackThresh+FNthisMin+((FNthisMax-FNthisMin)/2))/2;
+//																FNtrackThresh = (FNtrackThresh+FNthisMin+((FNthisMax-FNthisMin)/2))/2;
 			}
 		}
 		// now we just play a waveform
@@ -2501,8 +2501,8 @@ inline float mi::HandleDLOverdrive(float input)
 	case 2: // soft clip 2
 		input *= DLOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
-		else if (input > 1.0f)	return 1.0f;
+		if (input < -1.0f)								return -1.0f;
+		else if (input > 1.0f)				return 1.0f;
 		return input;
 	case 3: // soft clip 3
 		input *= DLOutGain;
@@ -2512,32 +2512,32 @@ inline float mi::HandleDLOverdrive(float input)
 		break;
 	case 4: // hard clip 1
 		input *= DLOutGain;
-		if (input < -1.0f)		return -1.0f;
-		else if (input > 1.0f)	return 1.0f;
+		if (input < -1.0f)								return -1.0f;
+		else if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 5: // hard clip 2
 		// bounce off limits
 		input *= DLOutGain;
-		if (input < -1.0f)		return input-(f2i(input)+1)*(input+1.0f);
-		else if (input > 1.0f)	return input-(f2i(input)+1)*(input-1.0f);
+		if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+		else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 		return input;
 		break;
 	case 6: // hard clip 3
 		// invert, this one is harsh
 		input *= DLOutGain;
-		if (input < -1.0f)		return input + (f2i(input/(2.0f)))*(2.0f);
-		else if (input > 1.0f)	return input - (f2i(input/(2.0f)))*(2.0f);
+		if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+		else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 		return input;
 		break;
 	case 7: // parabolic distortion
 		input = (((input * input)*(DLOutGain*DLOutGain)))-1.0f;
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 8: // parabolic distortion
 		input = (((input * input)*(DLOutGain*DLOutGain))*32.0f)-1.0f;
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 9: // sin remapper
@@ -2547,8 +2547,8 @@ inline float mi::HandleDLOverdrive(float input)
 		// good negative partial rectifier
 		input *= DLOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		input= -1.0f;
-		else if (input > 1.0f)	input= 1.0f;
+		if (input < -1.0f)								input= -1.0f;
+		else if (input > 1.0f)				input= 1.0f;
 		if (input < -0.333f)
 		{
 			input = -0.666f - input;
@@ -2559,8 +2559,8 @@ inline float mi::HandleDLOverdrive(float input)
 		// good positive partial rectifier
 		input *= DLOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		input= -1.0f;
-		else if (input > 1.0f)	input= 1.0f;
+		if (input < -1.0f)								input= -1.0f;
+		else if (input > 1.0f)				input= 1.0f;
 		if (input > 0.333f)
 		{
 			input = 0.666f - input;
@@ -2575,7 +2575,7 @@ inline float mi::HandleDLOverdrive(float input)
 		}
 		input = fabsf(input*DLOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input > 1.0f)		return 1.0f;
+		if (input > 1.0f)								return 1.0f;
 		return input;
 		break;
 	case 13:
@@ -2586,14 +2586,14 @@ inline float mi::HandleDLOverdrive(float input)
 		}
 		input = -fabsf(input*DLOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
+		if (input < -1.0f)								return -1.0f;
 		return input;
 		break;
 	case 14:
 		// good negative full rectifier
 		input = -fabsf(input*DLOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
+		if (input < -1.0f)								return -1.0f;
 		return input;
 		break;
 
@@ -2601,7 +2601,7 @@ inline float mi::HandleDLOverdrive(float input)
 		// good positive full rectifier
 		input = fabsf(input*DLOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 16:
@@ -2613,7 +2613,7 @@ inline float mi::HandleDLOverdrive(float input)
 		else 
 		{
 			input *= DLOutGain*4;
-			if (input > 1.0f)	return 1.0f;
+			if (input > 1.0f)				return 1.0f;
 		}
 		return input;
 		break;
@@ -2626,7 +2626,7 @@ inline float mi::HandleDLOverdrive(float input)
 		else 
 		{
 			input *= DLOutGain*8;
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -2639,7 +2639,7 @@ inline float mi::HandleDLOverdrive(float input)
 		}
 		else 
 		{
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -2649,7 +2649,7 @@ inline float mi::HandleDLOverdrive(float input)
 		if (input < -0.5f) return -0.25f + ((input+0.5f)/(1.0f+(powf(2,(input-0.5f)/(1.0f-0.5f)))));
 		else if (input < 0.0f) return input*0.75f;
 		input*=2;
-		if (input > 0.5f)	return 0.5f;
+		if (input > 0.5f)				return 0.5f;
 		break;
 	case 20:
 		// assymetrical fuzz distortion 1 with hard clip
@@ -2664,7 +2664,7 @@ inline float mi::HandleDLOverdrive(float input)
 		else 
 		{
 			input *= DLOutGain*4;
-			if (input > 1.0f)	return 1.0f;
+			if (input > 1.0f)				return 1.0f;
 		}
 		return input;
 		break;
@@ -2677,7 +2677,7 @@ inline float mi::HandleDLOverdrive(float input)
 		else 
 		{
 			input *= DLOutGain*8;
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -2700,7 +2700,7 @@ inline float mi::HandleDLOverdrive(float input)
 		if (input < -0.5f) return -0.25f + ((input+0.5f)/(1.0f+(powf(2,(input-0.5f)/(1.0f-0.5f)))));
 		else if (input < 0.0f) return input*0.75f;
 		input*=2;
-		if (input > 0.5f)	return 1.0f-input;
+		if (input > 0.5f)				return 1.0f-input;
 		break;
 
 	case SYNTH_REMAP_0: 
@@ -2716,7 +2716,7 @@ inline float mi::HandleDLOverdrive(float input)
 		if (DLtrackDir < 0)
 		{
 			// we are tracking negative
-//			if (input < trackThresh)
+//												if (input < trackThresh)
 			if (input < 0)
 			{
 				// track this sample
@@ -2759,13 +2759,13 @@ inline float mi::HandleDLOverdrive(float input)
 				{
 					DLw2 = 0.00001f;
 				}
-//				DLtrackThresh = (DLtrackThresh+DLthisMin+((DLthisMax-DLthisMin)/2))/2;
+//																DLtrackThresh = (DLtrackThresh+DLthisMin+((DLthisMax-DLthisMin)/2))/2;
 			}
 		}
 		else 
 		{
 			// we are tracking positive
-//			if (input > DLtrackThresh)
+//												if (input > DLtrackThresh)
 			if (input > 0)
 			{
 				// track this sample
@@ -2808,7 +2808,7 @@ inline float mi::HandleDLOverdrive(float input)
 				{
 					DLw2 = 0.00001f;
 				}
-//				DLtrackThresh = (DLtrackThresh+DLthisMin+((DLthisMax-DLthisMin)/2))/2;
+//																DLtrackThresh = (DLtrackThresh+DLthisMin+((DLthisMax-DLthisMin)/2))/2;
 			}
 		}
 		// now we just play a waveform
@@ -2932,8 +2932,8 @@ inline float mi::HandleFBOverdrive(float input)
 	case 2: // soft clip 2
 		input *= FBOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
-		else if (input > 1.0f)	return 1.0f;
+		if (input < -1.0f)								return -1.0f;
+		else if (input > 1.0f)				return 1.0f;
 		return input;
 	case 3: // soft clip 3
 		input *= FBOutGain;
@@ -2943,32 +2943,32 @@ inline float mi::HandleFBOverdrive(float input)
 		break;
 	case 4: // hard clip 1
 		input *= FBOutGain;
-		if (input < -1.0f)		return -1.0f;
-		else if (input > 1.0f)	return 1.0f;
+		if (input < -1.0f)								return -1.0f;
+		else if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 5: // hard clip 2
 		// bounce off limits
 		input *= FBOutGain;
-		if (input < -1.0f)		return input-(f2i(input)+1)*(input+1.0f);
-		else if (input > 1.0f)	return input-(f2i(input)+1)*(input-1.0f);
+		if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+		else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 		return input;
 		break;
 	case 6: // hard clip 3
 		// invert, this one is harsh
 		input *= FBOutGain;
-		if (input < -1.0f)		return input + (f2i(input/(2.0f)))*(2.0f);
-		else if (input > 1.0f)	return input - (f2i(input/(2.0f)))*(2.0f);
+		if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+		else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 		return input;
 		break;
 	case 7: // parabolic distortion
 		input = (((input * input)*(FBOutGain*FBOutGain)))-1.0f;
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 8: // parabolic distortion
 		input = (((input * input)*(FBOutGain*FBOutGain))*32.0f)-1.0f;
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 9: // sin remapper
@@ -2978,8 +2978,8 @@ inline float mi::HandleFBOverdrive(float input)
 		// good negative partial rectifier
 		input *= FBOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		input= -1.0f;
-		else if (input > 1.0f)	input= 1.0f;
+		if (input < -1.0f)								input= -1.0f;
+		else if (input > 1.0f)				input= 1.0f;
 		if (input < -0.333f)
 		{
 			input = -0.666f - input;
@@ -2990,8 +2990,8 @@ inline float mi::HandleFBOverdrive(float input)
 		// good positive partial rectifier
 		input *= FBOutGain;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		input= -1.0f;
-		else if (input > 1.0f)	input= 1.0f;
+		if (input < -1.0f)								input= -1.0f;
+		else if (input > 1.0f)				input= 1.0f;
 		if (input > 0.333f)
 		{
 			input = 0.666f - input;
@@ -3006,7 +3006,7 @@ inline float mi::HandleFBOverdrive(float input)
 		}
 		input = fabsf(input*FBOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input > 1.0f)		return 1.0f;
+		if (input > 1.0f)								return 1.0f;
 		return input;
 		break;
 	case 13:
@@ -3017,14 +3017,14 @@ inline float mi::HandleFBOverdrive(float input)
 		}
 		input = -fabsf(input*FBOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
+		if (input < -1.0f)								return -1.0f;
 		return input;
 		break;
 	case 14:
 		// good negative full rectifier
 		input = -fabsf(input*FBOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input < -1.0f)		return -1.0f;
+		if (input < -1.0f)								return -1.0f;
 		return input;
 		break;
 
@@ -3032,7 +3032,7 @@ inline float mi::HandleFBOverdrive(float input)
 		// good positive full rectifier
 		input = fabsf(input*FBOutGain);//-1.0f;
 		input = 1.5f*input/(1.0f+(0.5f*fabsf(input)));
-		if (input > 1.0f)	return 1.0f;
+		if (input > 1.0f)				return 1.0f;
 		return input;
 		break;
 	case 16:
@@ -3044,7 +3044,7 @@ inline float mi::HandleFBOverdrive(float input)
 		else 
 		{
 			input *= FBOutGain*4;
-			if (input > 1.0f)	return 1.0f;
+			if (input > 1.0f)				return 1.0f;
 		}
 		return input;
 		break;
@@ -3057,7 +3057,7 @@ inline float mi::HandleFBOverdrive(float input)
 		else 
 		{
 			input *= FBOutGain*8;
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -3070,7 +3070,7 @@ inline float mi::HandleFBOverdrive(float input)
 		}
 		else 
 		{
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -3080,7 +3080,7 @@ inline float mi::HandleFBOverdrive(float input)
 		if (input < -0.5f) return -0.25f + ((input+0.5f)/(1.0f+(powf(2,(input-0.5f)/(1.0f-0.5f)))));
 		else if (input < 0.0f) return input*0.75f;
 		input*=2;
-		if (input > 0.5f)	return 0.5f;
+		if (input > 0.5f)				return 0.5f;
 		break;
 	case 20:
 		// assymetrical fuzz distortion 1 with hard clip
@@ -3095,7 +3095,7 @@ inline float mi::HandleFBOverdrive(float input)
 		else 
 		{
 			input *= FBOutGain*4;
-			if (input > 1.0f)	return 1.0f;
+			if (input > 1.0f)				return 1.0f;
 		}
 		return input;
 		break;
@@ -3108,7 +3108,7 @@ inline float mi::HandleFBOverdrive(float input)
 		else 
 		{
 			input *= FBOutGain*8;
-			if (input < -1.0f)	return -1.0f;
+			if (input < -1.0f)				return -1.0f;
 		}
 		return input;
 		break;
@@ -3131,7 +3131,7 @@ inline float mi::HandleFBOverdrive(float input)
 		if (input < -0.5f) return -0.25f + ((input+0.5f)/(1.0f+(powf(2,(input-0.5f)/(1.0f-0.5f)))));
 		else if (input < 0.0f) return input*0.75f;
 		input*=2;
-		if (input > 0.5f)	return 1.0f-input;
+		if (input > 0.5f)				return 1.0f-input;
 		break;
 
 	case SYNTH_REMAP_0: 
@@ -3147,7 +3147,7 @@ inline float mi::HandleFBOverdrive(float input)
 		if (FBtrackDir < 0)
 		{
 			// we are tracking negative
-//			if (input < trackThresh)
+//												if (input < trackThresh)
 			if (input < 0)
 			{
 				// track this sample
@@ -3190,13 +3190,13 @@ inline float mi::HandleFBOverdrive(float input)
 				{
 					FBw2 = 0.00001f;
 				}
-//				FBtrackThresh = (FBtrackThresh+FBthisMin+((FBthisMax-FBthisMin)/2))/2;
+//																FBtrackThresh = (FBtrackThresh+FBthisMin+((FBthisMax-FBthisMin)/2))/2;
 			}
 		}
 		else 
 		{
 			// we are tracking positive
-//			if (input > FBtrackThresh)
+//												if (input > FBtrackThresh)
 			if (input > 0)
 			{
 				// track this sample
@@ -3239,7 +3239,7 @@ inline float mi::HandleFBOverdrive(float input)
 				{
 					FBw2 = 0.00001f;
 				}
-//				FBtrackThresh = (FBtrackThresh+FBthisMin+((FBthisMax-FBthisMin)/2))/2;
+//																FBtrackThresh = (FBtrackThresh+FBthisMin+((FBthisMax-FBthisMin)/2))/2;
 			}
 		}
 		// now we just play a waveform
@@ -3681,7 +3681,7 @@ void mi::InitWaveTable()
 		SourceWaveTable[0][c]=float(sin(sval));
 
 		// triangle
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			SourceWaveTable[1][c]=(c2*(1.0f/(SAMPLE_LENGTH/2)));
 		}
@@ -3723,17 +3723,17 @@ void mi::InitWaveTable()
 		}
 
 		// inv sin
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[6][c] = float((1.0-sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[6][c] = float((1.0-sin(sval-PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[6][c] = float((-1.0-sin(sval+PI/2)));
@@ -3765,7 +3765,7 @@ void mi::InitWaveTable()
 
 
 		// soft square
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			SourceWaveTable[10][c] = ((SourceWaveTable[0][c]*0.5f) + (SourceWaveTable[4][c]*0.5f));// - fabs(sin(sval*32.0f)*0.2f*SourceWaveTable[5][c]));
 		}
@@ -3775,17 +3775,17 @@ void mi::InitWaveTable()
 		}
 
 		// super mw
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[11][c] = float((sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[11][c] = float((sin(sval-PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[11][c] = float((sin(sval+PI/2)));
@@ -3797,17 +3797,17 @@ void mi::InitWaveTable()
 		}
 
 		// racer
-		if (c2<SAMPLE_LENGTH/2)	
+		if (c2<SAMPLE_LENGTH/2)				
 		{
 			// phase 1
 			SourceWaveTable[12][c] = float((sin(sval+PI/2)));
 		}
-		else if (c2<SAMPLE_LENGTH)	
+		else if (c2<SAMPLE_LENGTH)				
 		{
 			// phase 2
 			SourceWaveTable[12][c] = float((sin(sval*2)));
 		}
-		else if (c2<SAMPLE_LENGTH*3/2)	
+		else if (c2<SAMPLE_LENGTH*3/2)				
 		{
 			// phase 3
 			SourceWaveTable[12][c] = float((sin(sval+PI/2)));

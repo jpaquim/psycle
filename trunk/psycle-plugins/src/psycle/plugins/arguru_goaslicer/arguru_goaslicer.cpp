@@ -11,20 +11,20 @@
 CMachineParameter const paraLength = 
 { 
 	"Length",
-	"Length",										// description
-	1,												// MinValue	
-	8192,											// MaxValue
-	MPF_STATE,										// Flags
+	"Length",																																								// description
+	1,																																																// MinValue				
+	8192,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	2048,
 };
 
 CMachineParameter const paraSlope = 
 { 
 	"Slope",
-	"Slope",											// description
-	1,												// MinValue	
-	2048,											// MaxValue
-	MPF_STATE,										// Flags
+	"Slope",																																												// description
+	1,																																																// MinValue				
+	2048,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	512,
 };
 
@@ -37,18 +37,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	2,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	0,																																								// flags
+	2,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"Arguru Goaslicer (Debug build)",		// name
+	"Arguru Goaslicer (Debug build)",								// name
 #else
-	"Arguru Goaslicer",						// name
+	"Arguru Goaslicer",																								// name
 #endif
-	"Goaslicer",							// short name
-	"J. Arguelles",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"Goaslicer",																												// short name
+	"J. Arguelles",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	1
 };
 

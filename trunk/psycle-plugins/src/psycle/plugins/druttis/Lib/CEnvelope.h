@@ -1,30 +1,30 @@
 //============================================================================
 //
-//	CEnvelope.h
+//				CEnvelope.h
 //
 //============================================================================
 #pragma once
 //============================================================================
-//	Defines
+//				Defines
 //============================================================================
-#define ENVELOPE_DONE		0
-#define ENVELOPE_ATTACK		1
-#define ENVELOPE_DECAY		2
-#define ENVELOPE_SUSTAIN	3
-#define ENVELOPE_RELEASE	4
+#define ENVELOPE_DONE								0
+#define ENVELOPE_ATTACK								1
+#define ENVELOPE_DECAY								2
+#define ENVELOPE_SUSTAIN				3
+#define ENVELOPE_RELEASE				4
 //============================================================================
-//	Class
+//				Class
 //============================================================================
 class CEnvelope
 {
 private:
-	float	m_attack;
-	float	m_decay;
-	float	m_sustain;
-	float	m_release;
-	int		m_stage;
-	float	m_value;
-	float	m_coeff;
+	float				m_attack;
+	float				m_decay;
+	float				m_sustain;
+	float				m_release;
+	int								m_stage;
+	float				m_value;
+	float				m_coeff;
 public:
 	CEnvelope();
 	~CEnvelope();

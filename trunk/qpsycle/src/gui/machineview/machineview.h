@@ -101,12 +101,12 @@ private:
 	std::vector<MachineGui*> machineGuis;
 
 	int octave_;
-    
+	
 	QGraphicsScene *scene_;
 	QGraphicsLineItem *tempLine_;
 
 	bool creatingWire_;
-    
+	
 	/// For multi-key playback state.
 	int notetrack[psy::core::MAX_TRACKS];
 	int outtrack;

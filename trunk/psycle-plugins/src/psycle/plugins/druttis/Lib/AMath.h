@@ -1,18 +1,18 @@
 //============================================================================
 //
-//	AMath.h
+//				AMath.h
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
 #include <cmath>
 //=============================================================================
-//	Constants
+//				Constants
 //=============================================================================
 const double PI2 = 6.28318530717958647693;
 //============================================================================
-//	Function to replace ordinary float to int operation
+//				Function to replace ordinary float to int operation
 //============================================================================
 inline int f2i(double d)
 {
@@ -26,14 +26,14 @@ inline int f2i(double d)
 	return tmp.i;
 }
 //=============================================================================
-//	Returns frequency of a note (midi note?)
+//				Returns frequency of a note (midi note?)
 //=============================================================================
 static inline float GetFreq(float note)
 {
 	return (float) 440.0f * (float) pow(2.0, (note - 69.0) / 12.0);
 }
 //=============================================================================
-//	GetRandomLong
+//				GetRandomLong
 //=============================================================================
 static inline unsigned long GetRandomLong()
 { 
@@ -42,7 +42,7 @@ static inline unsigned long GetRandomLong()
 	return randSeed; 
 }
 //=============================================================================
-//	GetRandomSignal
+//				GetRandomSignal
 //=============================================================================
 static inline float GetRandomSignal()
 {

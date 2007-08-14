@@ -9,30 +9,30 @@
 
 #if defined __unix__ || defined __APPLE__
 #else
+	//#define NOMINMAX
 	#include <windows.h>
-//	#undef min
-//	#undef max
+	//#undef min
+	//#undef max
 #endif
 
-namespace psy{
-	namespace core
-	{
-//		class CGearTracker; // forward declaration
+namespace psy {
+	namespace core {
+		// class CGearTracker; // forward declaration
 
-		#define SAMPLER_MAX_POLYPHONY		16
-		#define SAMPLER_DEFAULT_POLYPHONY	8
+		#define SAMPLER_MAX_POLYPHONY     16
+		#define SAMPLER_DEFAULT_POLYPHONY  8
 
-		#define SAMPLER_CMD_NONE			0x00
-		#define SAMPLER_CMD_PORTAUP			0x01
-		#define SAMPLER_CMD_PORTADOWN		0x02
-		#define SAMPLER_CMD_PORTA2NOTE		0x03
-		#define SAMPLER_CMD_PANNING			0x08
-		#define SAMPLER_CMD_OFFSET			0x09
-		#define SAMPLER_CMD_VOLUME			0x0c
-		#define SAMPLER_CMD_RETRIG			0x15
-		#define SAMPLER_CMD_EXTENDED		0x0e
-		#define SAMPLER_CMD_EXT_NOTEOFF		0xc0
-		#define SAMPLER_CMD_EXT_NOTEDELAY	0xd0
+		#define SAMPLER_CMD_NONE          0x00
+		#define SAMPLER_CMD_PORTAUP       0x01
+		#define SAMPLER_CMD_PORTADOWN     0x02
+		#define SAMPLER_CMD_PORTA2NOTE    0x03
+		#define SAMPLER_CMD_PANNING       0x08
+		#define SAMPLER_CMD_OFFSET        0x09
+		#define SAMPLER_CMD_VOLUME        0x0c
+		#define SAMPLER_CMD_RETRIG        0x15
+		#define SAMPLER_CMD_EXTENDED      0x0e
+		#define SAMPLER_CMD_EXT_NOTEOFF   0xc0
+		#define SAMPLER_CMD_EXT_NOTEDELAY 0xd0
 
 		// ms typedefs
 		
@@ -141,13 +141,15 @@ namespace psy{
 			void Tick( );
 			Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song);
 			virtual void Init();
-      // \todo implement SetSampleRate     
+		// \todo implement SetSampleRate     
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual std::string GetName() const { return _psName; }
-			/// Loader for psycle fileformat version 2.
-/*			virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);*/
+			#if 0
+				/// Loader for psycle fileformat version 2.
+				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+			#endif
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
 				std::uint32_t size;
@@ -216,7 +218,7 @@ namespace psy{
 			void Update();
 
 		protected:
-//			friend CGearTracker;
+			//friend CGearTracker;
 
 			static std::string _psName;
 			int _numVoices;

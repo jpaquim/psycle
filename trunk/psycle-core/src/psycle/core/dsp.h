@@ -263,8 +263,12 @@ namespace psy
 
 			//either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
 			//make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
-			#define SINC_RESOLUTION 512	//sinc table values per zero crossing -- keep it a power of 2!!
-			#define SINC_ZEROS 11	//sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
+			
+			/// sinc table values per zero crossing -- keep it a power of 2!!
+			#define SINC_RESOLUTION 512
+			/// sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
+			#define SINC_ZEROS 11 
+			
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.

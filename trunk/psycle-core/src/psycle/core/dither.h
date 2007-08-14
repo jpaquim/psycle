@@ -30,9 +30,9 @@ namespace psy
 					highpass
 				};
 
-				void SetBitDepth(int newdepth)		{bitdepth = newdepth;}
-				void SetPdf(Pdf newpdf)					{pdf = newpdf;}
-				void SetNoiseShaping(NoiseShape newns)	{noiseshape = newns;}
+				void SetBitDepth(int newdepth) { bitdepth = newdepth; }
+				void SetPdf(Pdf newpdf) { pdf = newpdf; }
+				void SetNoiseShaping(NoiseShape newns) { noiseshape = newns; }
 
 			private:
 				int bitdepth;

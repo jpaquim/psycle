@@ -1,48 +1,48 @@
 //////////////////////////////////////////////////////////////////////
 //
-//	Globals.cpp
+//				Globals.cpp
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //////////////////////////////////////////////////////////////////////
 #include <packageneric/pre-compiled.private.hpp>
 #include "Globals.h"
 //////////////////////////////////////////////////////////////////////
 //
-//	Constructor
+//				Constructor
 //
 //////////////////////////////////////////////////////////////////////
 Globals::Globals()
 {
 	//////////////////////////////////////////////////////////////////
-	//	Create buffers
+	//				Create buffers
 	//////////////////////////////////////////////////////////////////
-	m_posc1_pm_amount_out	= new float [MAX_BUFFER_LENGTH];
-	m_posc2_pm_amount_out	= new float [MAX_BUFFER_LENGTH];
-	m_posc_fm_out			= new float [MAX_BUFFER_LENGTH];
-	m_posc_pm_out			= new float [MAX_BUFFER_LENGTH];
-	m_posc_mix_out			= new float [MAX_BUFFER_LENGTH];
-	m_pnoise_color_out		= new float [MAX_BUFFER_LENGTH];
-	m_pnoise_level_out		= new float [MAX_BUFFER_LENGTH];
-	m_pmod_amount_out		= new float [MAX_BUFFER_LENGTH];
-	m_plfo1_amount_out		= new float [MAX_BUFFER_LENGTH];
-	m_plfo1_incr_out		= new float [MAX_BUFFER_LENGTH];
-	m_plfo2_amount_out		= new float [MAX_BUFFER_LENGTH];
-	m_plfo2_incr_out		= new float [MAX_BUFFER_LENGTH];
-	m_pvcf_amount_out		= new float [MAX_BUFFER_LENGTH];
-	m_pflt1_freq_out		= new float [MAX_BUFFER_LENGTH];
-	m_pflt1_q_out			= new float [MAX_BUFFER_LENGTH];
-	m_pflt2_freq_out		= new float [MAX_BUFFER_LENGTH];
-	m_pflt2_q_out			= new float [MAX_BUFFER_LENGTH];
-	m_pamp_level_out		= new float [MAX_BUFFER_LENGTH];
+	m_posc1_pm_amount_out				= new float [MAX_BUFFER_LENGTH];
+	m_posc2_pm_amount_out				= new float [MAX_BUFFER_LENGTH];
+	m_posc_fm_out												= new float [MAX_BUFFER_LENGTH];
+	m_posc_pm_out												= new float [MAX_BUFFER_LENGTH];
+	m_posc_mix_out												= new float [MAX_BUFFER_LENGTH];
+	m_pnoise_color_out								= new float [MAX_BUFFER_LENGTH];
+	m_pnoise_level_out								= new float [MAX_BUFFER_LENGTH];
+	m_pmod_amount_out								= new float [MAX_BUFFER_LENGTH];
+	m_plfo1_amount_out								= new float [MAX_BUFFER_LENGTH];
+	m_plfo1_incr_out								= new float [MAX_BUFFER_LENGTH];
+	m_plfo2_amount_out								= new float [MAX_BUFFER_LENGTH];
+	m_plfo2_incr_out								= new float [MAX_BUFFER_LENGTH];
+	m_pvcf_amount_out								= new float [MAX_BUFFER_LENGTH];
+	m_pflt1_freq_out								= new float [MAX_BUFFER_LENGTH];
+	m_pflt1_q_out												= new float [MAX_BUFFER_LENGTH];
+	m_pflt2_freq_out								= new float [MAX_BUFFER_LENGTH];
+	m_pflt2_q_out												= new float [MAX_BUFFER_LENGTH];
+	m_pamp_level_out								= new float [MAX_BUFFER_LENGTH];
 	//////////////////////////////////////////////////////////////////
-	//	Reset
+	//				Reset
 	//////////////////////////////////////////////////////////////////
 	m_rendered = false;
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	Destructor
+//				Destructor
 //
 //////////////////////////////////////////////////////////////////////
 Globals::~Globals()
@@ -68,109 +68,109 @@ Globals::~Globals()
 }
 //////////////////////////////////////////////////////////////////////
 //
-//	HandleInertia
+//				HandleInertia
 //
 //////////////////////////////////////////////////////////////////////
 void Globals::HandleInertia(int numsamples)
 {
 	//////////////////////////////////////////////////////////////////
-	//	Force rendering?
+	//				Force rendering?
 	//////////////////////////////////////////////////////////////////
 	bool force = !m_rendered;
 	m_rendered = true;
 	//////////////////////////////////////////////////////////////////
-	//	OSC 1 - PM.Amount
+	//				OSC 1 - PM.Amount
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_osc1_pm_amount.IsIdle())
 	{
 		m_osc1_pm_amount.Fill(m_posc1_pm_amount_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	OSC 2 - PM.Amount
+	//				OSC 2 - PM.Amount
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_osc2_pm_amount.IsIdle())
 	{
 		m_osc2_pm_amount.Fill(m_posc2_pm_amount_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	OSC - FM
+	//				OSC - FM
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_osc_fm.IsIdle())
 	{
 		m_osc_fm.Fill(m_posc_fm_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	OSC - PM
+	//				OSC - PM
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_osc_pm.IsIdle())
 	{
 		m_osc_pm.Fill(m_posc_pm_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	OSC - Mix
+	//				OSC - Mix
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_osc_mix.IsIdle())
 	{
 		m_osc_mix.Fill(m_posc_mix_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	NOISE - Color
+	//				NOISE - Color
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_noise_color.IsIdle())
 	{
 		m_noise_color.Fill(m_pnoise_color_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	NOISE - Level
+	//				NOISE - Level
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_noise_level.IsIdle())
 	{
 		m_noise_level.Fill(m_pnoise_level_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	VCF - Amount
+	//				VCF - Amount
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_vcf_amount.IsIdle())
 	{
 		m_vcf_amount.Fill(m_pvcf_amount_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	FLT 1 - Freq
+	//				FLT 1 - Freq
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_flt1_freq.IsIdle())
 	{
 		m_flt1_freq.Fill(m_pflt1_freq_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	FLT 1 - Q
+	//				FLT 1 - Q
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_flt1_q.IsIdle())
 	{
 		m_flt1_q.Fill(m_pflt1_q_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	FLT 2 - Freq
+	//				FLT 2 - Freq
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_flt2_freq.IsIdle())
 	{
 		m_flt2_freq.Fill(m_pflt2_freq_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	FLT 2 - Q
+	//				FLT 2 - Q
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_flt2_q.IsIdle())
 	{
 		m_flt2_q.Fill(m_pflt2_q_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	AMP - Level
+	//				AMP - Level
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_amp_level.IsIdle())
 	{
 		m_amp_level.Fill(m_pamp_level_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	MOD - Amount
+	//				MOD - Amount
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_mod_amount.IsIdle())
 	{
@@ -182,7 +182,7 @@ void Globals::HandleInertia(int numsamples)
 		case DST_OSC12 :
 		case DST_OSC2 :
 		case DST_OSC1 :
-			m_mod_amount.Fill(m_pmod_amount_out, 2.0f, numsamples);		
+			m_mod_amount.Fill(m_pmod_amount_out, 2.0f, numsamples);								
 			break;
 		default:
 			m_mod_amount.Fill(m_pmod_amount_out, numsamples);
@@ -190,7 +190,7 @@ void Globals::HandleInertia(int numsamples)
 		}
 	}
 	//////////////////////////////////////////////////////////////////
-	//	LFO 1 - Amount
+	//				LFO 1 - Amount
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_lfo1_amount.IsIdle())
 	{
@@ -210,14 +210,14 @@ void Globals::HandleInertia(int numsamples)
 		}
 	}
 	//////////////////////////////////////////////////////////////////
-	//	LFO 1 - Rate (incr)
+	//				LFO 1 - Rate (incr)
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_lfo1_incr.IsIdle())
 	{
 		m_lfo1_incr.Fill(m_plfo1_incr_out, numsamples);
 	}
 	//////////////////////////////////////////////////////////////////
-	//	LFO 2 - Amount
+	//				LFO 2 - Amount
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_lfo2_amount.IsIdle())
 	{
@@ -240,7 +240,7 @@ void Globals::HandleInertia(int numsamples)
 		}
 	}
 	//////////////////////////////////////////////////////////////////
-	//	LFO 2 - Rate (incr)
+	//				LFO 2 - Rate (incr)
 	//////////////////////////////////////////////////////////////////
 	if (force || !m_lfo2_incr.IsIdle())
 	{

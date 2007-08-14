@@ -21,11 +21,16 @@ namespace psy
 
 			void Dither::Process(float *inSamps, int length)
 			{
-				bool newgauss(true);				//gaussian rand returns two values, this tells us which we're on
-				double gauss(0.0), randval(0.0);	//our random number, and an extra variable for the gaussian distribution
-				float prevError(0.0f);				//quantization error of the last sample, used for noise shaping
-				float bdMultiplier;				//the amount the sample will eventually be multiplied by for integer quantization
-				float bdQ;						//the inverse.. i.e., the number that will eventually become the quantization interval
+				/// gaussian rand returns two values, this tells us which we're on
+				bool newgauss(true);
+				/// our random number, and an extra variable for the gaussian distribution
+				double gauss(0.0), randval(0.0);
+				/// quantization error of the last sample, used for noise shaping
+				float prevError(0.0f);
+				/// the amount the sample will eventually be multiplied by for integer quantization
+				float bdMultiplier;
+				/// the inverse.. i.e., the number that will eventually become the quantization interval
+				float bdQ;
 
 				switch (bitdepth)
 				{
@@ -60,9 +65,9 @@ namespace psy
 							mt.genrand_gaussian(randval, gauss);
 						else
 							randval=gauss;
-						newgauss = !newgauss;	//mt.genrand_gaussian() has a standard deviation (rms) of 1..
-						randval*=0.5;			//we need it to be one-half the quantizing interval (which is 1), so we just halve it
-						break;	
+						newgauss = !newgauss;// mt.genrand_gaussian() has a standard deviation (rms) of 1..
+						randval*=0.5; //we need it to be one-half the quantizing interval (which is 1), so we just halve it
+						break;
 					case triangular:
 						randval = (mt.genrand_real1()-0.5) + (mt.genrand_real1()-0.5);
 						break;
@@ -70,8 +75,7 @@ namespace psy
 
 					*(inSamps+i) += randval*bdQ;
 
-					//todo: this seems inefficient.. we're essentially quantizing twice, once for practice to get the error, and again
-					//		for real when we write to the wave file.
+					///\todo: this seems inefficient.. we're essentially quantizing twice, once for practice to get the error, and again for real when we write to the wave file.
 					if(noiseshape==highpass)
 					{
 						*(inSamps+i) += prevError;

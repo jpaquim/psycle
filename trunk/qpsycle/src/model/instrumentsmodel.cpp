@@ -28,7 +28,7 @@
 
 InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 	: QStandardItemModel(),
-	  song_( song )
+		song_( song )
 {
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
@@ -38,7 +38,7 @@ InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 		buffer << std::setfill('0') << std::hex << std::setw(2);
 		buffer << row << ": " << song_->_pInstrument[row]->_sName;
 		QString name = QString::fromStdString( buffer.str() );
-		QStandardItem *item = new QStandardItem( name );		
+		QStandardItem *item = new QStandardItem( name );																																
 		appendRow( item );
 	}
 }
@@ -47,16 +47,16 @@ InstrumentsModel::~InstrumentsModel()
 {}
 
 /**
- * Loads a wave file into the CoreSong, and updates the
- * model accordingly.
- */
+	* Loads a wave file into the CoreSong, and updates the
+	* model accordingly.
+	*/
 bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 {
 	if ( song_->WavAlloc( instrIndex, pathToWavfile.toStdString().c_str() ) )
 	{
 		QStandardItem *tempItem = item( instrIndex );
 		std::ostringstream buffer;
-		buffer.setf(std::ios::uppercase);			       
+		buffer.setf(std::ios::uppercase);																																																       
 		buffer.str("");
 		buffer << std::setfill('0') << std::hex << std::setw(2);
 		buffer << instrIndex << ": " << song_->_pInstrument[instrIndex]->_sName;
@@ -70,8 +70,8 @@ bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 
 
 /**
- * Returns an instrument from the CoreSong.
- */
+	* Returns an instrument from the CoreSong.
+	*/
 psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
 {
 	return song_->_pInstrument[instrIndex];
@@ -79,14 +79,14 @@ psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
 
 
 /**
- * Clears the instrument from the CoreSong, and updates
- * the model accordingly.
- */
+	* Clears the instrument from the CoreSong, and updates
+	* the model accordingly.
+	*/
 void InstrumentsModel::clearInstrument( int instrIndex )
 {
 	song_->DeleteInstrument( instrIndex );
 	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);			       
+	buffer.setf(std::ios::uppercase);																																																       
 	buffer.str("");
 	buffer << std::setfill('0') << std::hex << std::setw(2);
 	buffer << instrIndex << ": " << song_->_pInstrument[instrIndex]->_sName;

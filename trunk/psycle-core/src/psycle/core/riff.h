@@ -72,7 +72,7 @@ namespace psy
 		};
 
 		/// riff file format.
-//		UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
+		//UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
 		class ExtRiffFile
 		{
 		private:
@@ -172,7 +172,7 @@ namespace psy
 
 		/// riff wave file format.
 		/// MODIFIED BY [JAZ]. It was "private ExtRiffFile".
-//		UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
+		//UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
 		class WaveFile: public ExtRiffFile
 		{
 			WaveFormat_Chunk   wave_format;

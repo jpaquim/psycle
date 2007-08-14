@@ -11,30 +11,30 @@
 CMachineParameter const paraThreshold = 
 { 
 	"Threshold",
-	"Threshold level",						// description
-	1,												// MinValue	
-	32768,											// MaxValue
-	MPF_STATE,										// Flags
+	"Threshold level",																								// description
+	1,																																																// MinValue				
+	32768,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	0x200,
 };
 
 CMachineParameter const paraGain = 
 { 
 	"Gain",
-	"Gain",											// description
-	1,												// MinValue	
-	2048,											// MaxValue
-	MPF_STATE,										// Flags
+	"Gain",																																												// description
+	1,																																																// MinValue				
+	2048,																																												// MaxValue
+	MPF_STATE,																																								// Flags
 	1024,
 };
 
 CMachineParameter const paraInvert = 
 { 
 	"Phase inversor",
-	"Inversor",										// description
-	0,												// MinValue	
-	1,												// MaxValue
-	MPF_STATE,										// Flags
+	"Inversor",																																								// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
 	0,
 };
 
@@ -48,18 +48,18 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo = 
 {
-	MI_VERSION,	
-	0,										// flags
-	3,										// numParameters
-	pParameters,							// Pointer to parameters
+	MI_VERSION,				
+	0,																																								// flags
+	3,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"Arguru Distortion (Debug build)",		// name
+	"Arguru Distortion (Debug build)",								// name
 #else
-	"Arguru Distortion",					// name
+	"Arguru Distortion",																				// name
 #endif
-	"Distortion",							// short name
-	"J. Arguelles",							// author
-	"About",								// A command, that could be use for open an editor, etc...
+	"Distortion",																												// short name
+	"J. Arguelles",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	3
 };
 
@@ -121,8 +121,8 @@ void mi::ParameterTweak(int par, int val)
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 
-	float const threshold		=(float)(Vals[0]);
-	float const negthreshold	=-(float)(Vals[0]);
+	float const threshold								=(float)(Vals[0]);
+	float const negthreshold				=-(float)(Vals[0]);
 
 	float const wet =(float)Vals[1]*0.00390625f;
 
@@ -182,8 +182,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	{
 		switch(value)
 		{
-			case 0:sprintf(txt,"Off");	break;
-			case 1:sprintf(txt,"On");	break;
+			case 0:sprintf(txt,"Off");				break;
+			case 1:sprintf(txt,"On");				break;
 		}
 		return true;
 	}
@@ -195,7 +195,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	if(coef>0.0f)
 	sprintf(txt,"%.1f dB",20.0f * log10(coef));
 	else
-	sprintf(txt,"-Inf. dB");	
+	sprintf(txt,"-Inf. dB");				
 	return true;
 	}
 

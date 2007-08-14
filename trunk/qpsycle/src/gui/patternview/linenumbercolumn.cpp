@@ -76,10 +76,10 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 
 	for (int i = startLine; i <= endLine; i++) 
 	{
-                QString text = QString::number( i );
-                QRectF textBound( 0, i*rowHeight - dy_, columnWidth, rowHeight );
-                painter.setPen( QPen ( textColor ) );
-                painter.drawText( textBound, text, QTextOption( Qt::AlignRight ) );
+				QString text = QString::number( i );
+				QRectF textBound( 0, i*rowHeight - dy_, columnWidth, rowHeight );
+				painter.setPen( QPen ( textColor ) );
+				painter.drawText( textBound, text, QTextOption( Qt::AlignRight ) );
 	}
 	
 }

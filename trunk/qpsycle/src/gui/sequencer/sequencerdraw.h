@@ -113,7 +113,7 @@ signals:
 
 private:
 	QGraphicsView *m_seqDraw;
-    
+	
 
 };
 

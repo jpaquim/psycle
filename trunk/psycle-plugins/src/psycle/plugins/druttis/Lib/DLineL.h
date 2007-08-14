@@ -1,25 +1,25 @@
 //============================================================================
 //
-//	DLineL (Linear Interpolating Delay Line)
+//				DLineL (Linear Interpolating Delay Line)
 //
-//	druttis@darkface.pp.se
+//				druttis@darkface.pp.se
 //
 //============================================================================
 #pragma once
 //============================================================================
-//	Class
+//				Class
 //============================================================================
 class DLineL
 {
 public:
-    float	*inputs;
-	int		inPoint;
-	int		outPoint;
-	int		length;
-	float	delay;
-	float	lastOutput;
-	float	alpha;
-	float	omAlpha;
+	float				*inputs;
+	int								inPoint;
+	int								outPoint;
+	int								length;
+	float				delay;
+	float				lastOutput;
+	float				alpha;
+	float				omAlpha;
 public:
 	DLineL();
 	~DLineL();
@@ -29,14 +29,14 @@ public:
 	void SetDelay(float lag);
 	float GetDelay();
 	//------------------------------------------------------------------------
-	//	GetLastOutput
+	//				GetLastOutput
 	//------------------------------------------------------------------------
 	inline float GetLastOutput()
 	{
 		return lastOutput;
 	}
 	//------------------------------------------------------------------------
-	//	Tick
+	//				Tick
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{
