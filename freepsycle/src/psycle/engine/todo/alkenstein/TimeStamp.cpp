@@ -3,14 +3,14 @@
 #include "TimeStamp.hpp"
 namespace psycle
 {
-    TimeStamp::TimeStamp(const int& time) throw(std::exception)
+	TimeStamp::TimeStamp(const int& time) throw(std::exception)
 	:
 		time_(time)
-    {
-    }
+	{
+	}
 
-    TimeStamp::~TimeStamp() throw()
-    {
+	TimeStamp::~TimeStamp() throw()
+	{
 
-    }
+	}
 }
