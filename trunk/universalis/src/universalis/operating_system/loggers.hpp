@@ -93,9 +93,9 @@ namespace universalis
 				///\name default stream singleton
 				///\{
 					public:
-						       logger static inline & default_logger() throw() { return default_logger_; }
+						static        logger & default_logger() throw() { return default_logger_; }
 					private:
-						stream_logger static          default_logger_;
+						static stream_logger   default_logger_;
 				///\}
 			};
 

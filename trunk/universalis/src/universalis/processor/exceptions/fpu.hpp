@@ -75,7 +75,7 @@ namespace universalis
 									#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 										value &= ~mask; if(b) value |= mask;
 									#else
-										 ///\todo C1999 #include <fenv.h>
+										///\todo C1999 #include <fenv.h>
 									#endif
 								}
 							public:

@@ -21,21 +21,22 @@ namespace universalis
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK locatable
 		{
 			public:
-				inline locatable(compiler::location const & location) throw() : location_(location) {}
-
+				locatable(compiler::location const & location) throw() : location_(location) {}
+				
 			public:
-				inline operator compiler::location const        &         () const throw() { return  location_; }
-				                compiler::location const inline & location() const throw() { return *this      ; }
+				operator
+				compiler::location const &         () const throw() { return location_; }
+				compiler::location const & location() const throw() { return *this    ; }
 			private:
-				                compiler::location                location_;
+				compiler::location         location_;
 		};
 
 		/// holds information about nested exceptions
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK causality
 		{
 			public:
-				inline causality(void const * cause = 0) throw() : cause_(cause) {}
-
+				causality(void const * cause = 0) throw() : cause_(cause) {}
+				
 			public:
 				void const inline * cause() const throw() { return this->cause_; }
 			private:

@@ -132,16 +132,18 @@ namespace universalis
 			class underlying_wrapper<Underlying>
 			{
 				public:
-					typedef         Underlying                underlying_type;
-					                Underlying const inline & underlying() const throw() { return *this; }
-					                Underlying       inline & underlying()       throw() { return *this; }
-					inline operator Underlying const        &           () const throw() { return this->underlying_; }
-					inline operator Underlying              &           ()       throw() { return this->underlying_; }
+					typedef Underlying underlying_type;
+					
+					Underlying const & underlying() const throw() { return *this; }
+					Underlying       & underlying()       throw() { return *this; }
+					
+					operator Underlying const & () const throw() { return this->underlying_; }
+					operator Underlying       & ()       throw() { return this->underlying_; }
 				private:
-					                Underlying              & underlying_;
+					Underlying & underlying_;
 				protected:
 					typedef underlying_wrapper underlying_wrapper_type;
-					inline  underlying_wrapper(Underlying & underlying) : underlying_(underlying)
+					underlying_wrapper(Underlying & underlying) : underlying_(underlying)
 					{
 						#if 0 && !defined NDEBUG
 							if(operating_system::loggers::trace()())
