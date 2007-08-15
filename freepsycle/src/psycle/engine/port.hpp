@@ -31,7 +31,7 @@ namespace psycle
 				void connect(port &) throw(exception);
 
 			///\name buffer
-			///\{	
+			///\{
 				public:
 					/// assigns a buffer to this port (or unassigns if 0) only if the given buffer is different.
 					void buffer(typenames::buffer * const);

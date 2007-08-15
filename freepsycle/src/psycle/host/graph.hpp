@@ -26,23 +26,29 @@ namespace psycle
 		{
 			public:
 				typedef universalis::compiler::numeric<32>::floating_point real;
-				           inline coordinates(real const & x, real const & y) : x_(x), y_(y) { /* signal_move()(*this); */ }
-				void       inline  operator()(real const & x, real const & y) { this->x_ = x; this->y_ = y; signal_move()(*this); }
-				void       inline   x(real const & x) { this->x_ = x; signal_move()(*this); }
-				real const inline & x() const throw() { return x_; }
-				void       inline   y(real const & y) { this->y_ = y; signal_move()(*this); }
-				real const inline & y() const throw() { return y_; }
+
+				coordinates(real const & x, real const & y) : x_(x), y_(y) { /* signal_move()(*this); */ }
+				
+				void operator()(real const & x, real const & y) { this->x_ = x; this->y_ = y; signal_move()(*this); }
+				
+				void         x(real const & x) { this->x_ = x; signal_move()(*this); }
+				real const & x() const throw() { return x_; }
+				
+				void         y(real const & y) { this->y_ = y; signal_move()(*this); }
+				real const & y() const throw() { return y_; }
+
 			private:
 				real x_, y_;
+
 				/*
 				friend class boost::serialization::access;
 				template<typename Archive> void serialize(Archive & a, unsigned int const & version) { a & x_; a & y_; }
 				*/
 				
 			public:
-				boost::signal<void (coordinates &)> inline & signal_move() throw() { return signal_move_; }
+				boost::signal<void (coordinates &)> & signal_move() throw() { return signal_move_; }
 			private:
-				boost::signal<void (coordinates &)>          signal_move_;
+				boost::signal<void (coordinates &)>   signal_move_;
 		};
 
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::bases::port, public coordinates
@@ -86,6 +92,7 @@ namespace psycle
 			protected: friend class factory;
 				node(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
+				
 			/*
 			private:
 				friend class boost::serialization::access;

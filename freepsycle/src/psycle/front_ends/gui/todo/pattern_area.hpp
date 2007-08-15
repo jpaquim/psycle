@@ -44,7 +44,7 @@ namespace psycle
 		int title_height;
 		Gdk::Color highlight_colour;
 		Gdk::Color border_colour;
-		/// [alk] temporary, until patterns are put int the proper place		
+		/// [alk] temporary, until patterns are put int the proper place
 		Pattern * pat1;
 		/// [alk] temporary, till the engine in made
 		int bpm;

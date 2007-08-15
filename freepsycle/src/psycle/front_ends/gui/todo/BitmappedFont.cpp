@@ -74,12 +74,12 @@ namespace psycle
 				++current_x_pos;
 			char_width[current_char] = (current_x_pos - char_x_offset[current_char]);
 			++current_char;
-		  }
+		}
 	}
 	
 	int BitmappedFont::get_height()
 	{
-	    return char_height;
+		return char_height;
 	}
 	
 	int BitmappedFont::get_width(const std::string& text)

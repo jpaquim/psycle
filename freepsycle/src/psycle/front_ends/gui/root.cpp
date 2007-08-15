@@ -28,10 +28,10 @@ namespace psycle
 				set_title(paths::package::name() + " " + paths::package::version::string());
 				set_border_width(4);
 				button().signal_clicked().connect(sigc::mem_fun(*this, &root::on_button_clicked));
-//				h_box_.pack_start(button(), Gtk::PACK_SHRINK);
-//				h_box_.pack_start(label(), Gtk::PACK_EXPAND_PADDING, 4);
-//				hello_frame_.add(h_box_);
-//				v_box_.pack_start(hello_frame_, Gtk::PACK_SHRINK);
+				//h_box_.pack_start(button(), Gtk::PACK_SHRINK);
+				//h_box_.pack_start(label(), Gtk::PACK_EXPAND_PADDING, 4);
+				//hello_frame_.add(h_box_);
+				//v_box_.pack_start(hello_frame_, Gtk::PACK_SHRINK);
 				graph_frame_.add(graph_instance());
 				v_box_.pack_start(graph_frame_);
 				add(v_box_);

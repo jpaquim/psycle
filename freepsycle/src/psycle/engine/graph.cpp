@@ -50,19 +50,19 @@ namespace psycle
 		
 				//while(!empty())
 				//{
-				//	node & node(*begin());
+				//node & node(*begin());
 			
 				//while(!empty())
 				//{
-				//	node & node(*--end());
+				//node & node(*--end());
 			
 				//for(reverse_iterator i(rbegin()) ; i != rend() ; ++i) /// maybe without ++i, or using a if(i == end()) break; else ++i;
 				//{
 			
 				//for(iterator i(begin()) ; i != end() ; ++i) /// maybe without ++i, or using a if(i == end()) break; else ++i;
 				//{
-				//	node & node(*i);
-				//	erase(i);
+				//node & node(*i);
+				//erase(i);
 		
 				if(loggers::information()())
 				{

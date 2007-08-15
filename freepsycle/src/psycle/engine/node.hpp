@@ -18,7 +18,7 @@
 #include <vector>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE__NODE
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace psycle { namespace engine	{
+namespace psycle { namespace engine {
 	/// node of a graph, placeholder for a dsp, aka "plugin machine".
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::typenames::bases::node, public named
 	{
@@ -47,7 +47,7 @@ namespace psycle { namespace engine	{
 				ports::output * const output_port(name_type const &) const;
 		///\}
 
-		///\name input ports	
+		///\name input ports
 		///\{
 			friend class ports::input;
 	
