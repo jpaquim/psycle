@@ -507,11 +507,6 @@ namespace psycle
 				delete buffer_; buffer_ = 0;
 				resource::do_close();
 			}
-			
-			gstreamer::~gstreamer() throw()
-			{
-				close();
-			}
 		}
 	}
 }

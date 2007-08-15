@@ -15,6 +15,7 @@
 namespace psycle
 {
 	namespace loggers = universalis::operating_system::loggers;
+
 	namespace engine
 	{
 		class exception;
@@ -40,6 +41,7 @@ namespace psycle
 		{
 			using namespace engine;
 			class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple> {};
+			typedef typenames::bases bases;
 		}
 	}
 }

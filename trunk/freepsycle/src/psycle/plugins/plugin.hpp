@@ -1,10 +1,10 @@
-///\file
-///\brief interface file containing the declarations needed by psycle::plugins.
+///\interface declarations needed by psycle::plugins.
 #pragma once
 #include <psycle/engine/engine.hpp>
 #include <boost/ref.hpp>
 #include <cmath>
-
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__PLUGIN
+#include <universalis/compiler/dynamic_link/begin.hpp>
 ///\internal
 /// extensible modular audio frawework.
 namespace psycle
@@ -43,3 +43,4 @@ namespace psycle
 			}
 	}
 }
+#include <universalis/compiler/dynamic_link/end.hpp>

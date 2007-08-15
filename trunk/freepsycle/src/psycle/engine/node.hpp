@@ -20,7 +20,7 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace engine {
 	/// node of a graph, placeholder for a dsp, aka "plugin machine".
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::typenames::bases::node, public named
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, public named
 	{
 		friend class graph;
 		friend class port;
@@ -30,6 +30,11 @@ namespace psycle { namespace engine {
 		
 		protected: friend class factory;
 			node(typenames::plugin_library_reference &, parent_type &, name_type const &);
+			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction()
+			{
+				typenames::typenames::bases::node::before_destruction();
+				close();
+			}
 			virtual ~node();
 
 		///\name reference to plugin library
@@ -60,8 +65,8 @@ namespace psycle { namespace engine {
 		///\{
 			public:
 				/// called by schedulers
-				void inline     open  (          ) throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
-				void inline     opened(bool value) throw(std::exception) { if(value) open(); else close(); }
+				void            open  (          ) throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
+				void            opened(bool value) throw(std::exception) { if(value) open(); else close(); }
 				bool virtual    opened(          ) const;
 			protected:
 				void virtual do_open() throw(std::exception);
@@ -71,8 +76,8 @@ namespace psycle { namespace engine {
 		///\{
 			public:
 				/// called by schedulers
-				void inline     start  (          ) throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
-				void inline     started(bool value) throw(std::exception) { if(value) start(); else stop(); }
+				void            start  (          ) throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
+				void            started(bool value) throw(std::exception) { if(value) start(); else stop(); }
 				bool virtual    started(          ) const;
 			protected:
 				void virtual do_start() throw(std::exception);
@@ -107,7 +112,7 @@ namespace psycle { namespace engine {
 		///\{
 			public:
 				/// called by schedulers
-				void inline     stop() throw(std::exception) { if(started()) do_stop(); }
+				void            stop() throw(std::exception) { if(started()) do_stop(); }
 			protected:
 				void virtual do_stop() throw(std::exception);
 		///\}
@@ -116,7 +121,7 @@ namespace psycle { namespace engine {
 		///\{
 			public:
 				/// called by schedulers
-				void inline     close() throw(std::exception) { stop(); if(opened()) do_close(); }
+				void            close() throw(std::exception) { stop(); if(opened()) do_close(); }
 			protected:
 				void virtual do_close() throw(std::exception);
 		///\}

@@ -9,18 +9,20 @@
 #include <gst/gstelement.h>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__GSTREAMER
+#include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
 	namespace plugins
 	{
 		namespace outputs
 		{
-			/// outputs to a soundcard device via alsa output implementation.
-			class gstreamer : public resource
+			/// outputs to a soundcard device via gstreamer output implementation.
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource
 			{
-				public:
+				protected: friend class factory;
 					gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
-					virtual ~gstreamer() throw();
+				public:
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_name(std::string const &);
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened()  const;
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
@@ -54,3 +56,4 @@ namespace psycle
 		}
 	}
 }
+#include <universalis/compiler/dynamic_link/end.hpp>
