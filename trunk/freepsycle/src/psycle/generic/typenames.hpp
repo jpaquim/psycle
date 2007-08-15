@@ -10,7 +10,7 @@
 	#include <boost/type_traits/is_base_and_derived.hpp>
 #endif
 namespace psycle { namespace generic {
-	namespace basic	{
+	namespace basic {
 		template<typename> class graph;
 		template<typename> class node;
 		template<typename> class port;
@@ -24,7 +24,7 @@ namespace psycle { namespace generic {
 		}
 	}
 
-	namespace wrappers	{
+	namespace wrappers {
 		template<typename> class graph;
 		template<typename> class node;
 		template<typename> class port;

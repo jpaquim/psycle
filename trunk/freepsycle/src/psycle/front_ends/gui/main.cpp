@@ -97,5 +97,5 @@ namespace psycle
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[])
 {
-        psycle::front_ends::gui::main(argument_count, arguments);
+	psycle::front_ends::gui::main(argument_count, arguments);
 }

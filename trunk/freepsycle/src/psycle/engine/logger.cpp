@@ -74,7 +74,7 @@ namespace psycle
 					case universalis::operating_system::loggers::levels::information:
 					default:
 				}
-//				operating_system::terminal::log(level, string);
+				//operating_system::terminal::log(level, string);
 			}
 		}
 		catch(...)

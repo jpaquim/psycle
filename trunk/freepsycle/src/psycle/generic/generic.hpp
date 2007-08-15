@@ -703,8 +703,8 @@ namespace psycle { namespace generic { namespace basic {
 				///\}
 
 				///\name (dis)connection functions
-				///\{					
-					public:	
+				///\{
+					public:
 						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES disconnect_all()
 						{
 							while(!output_ports_.empty()) disconnect(*output_ports_.back());

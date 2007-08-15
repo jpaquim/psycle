@@ -253,7 +253,7 @@ namespace psycle
 								std::ostringstream s; s << ": could not get window attributes";
 								throw std::runtime_error(s.str());
 							}
-			        
+							
 							int const x((window_attributes.width - ::XTextWidth(&font, text.c_str(), text.size())) / 2);
 							int const y((window_attributes.height + font.max_bounds.ascent - font.max_bounds.descent) / 2);
 			

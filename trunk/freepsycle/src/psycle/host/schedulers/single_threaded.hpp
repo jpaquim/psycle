@@ -83,7 +83,7 @@ namespace psycle
 						port(parent_type &, underlying_type &);
 
 					///\name buffer
-					///\{	
+					///\{
 						public:
 							/// assigns a buffer to this port (or unassigns if 0) only if the given buffer is different.
 							void inline buffer(typenames::buffer * const buffer) { underlying().buffer(buffer); }
@@ -101,7 +101,7 @@ namespace psycle
 							output(parent_type &, underlying_type &);
 						
 						///\name schedule
-						///\{	
+						///\{
 							public:  int inline const & input_port_count() const throw() { return input_port_count_; }
 							private: int                input_port_count_;
 			
@@ -149,7 +149,7 @@ namespace psycle
 						void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction(); friend class graph; // init code moved to graph since it deals with connections
 						
 					///\name signal slots
-					///\{					
+					///\{
 						private:
 							void on_new_output_port(typenames::ports::output &);
 							void on_new_single_input_port(typenames::ports::inputs::single &);

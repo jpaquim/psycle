@@ -21,7 +21,7 @@ namespace psycle
 				multiple::multiple(multiple::parent_type & parent, name_type const & name, bool const & single_connection_is_identity_transform, int const & channels)
 				:
 					multiple_type(parent, name, channels),
-					single_connection_is_identity_transform_(single_connection_is_identity_transform)	
+					single_connection_is_identity_transform_(single_connection_is_identity_transform)
 				{
 					if(loggers::trace()())
 					{

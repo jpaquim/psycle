@@ -20,8 +20,8 @@ namespace psycle
 			bipolar_filter(engine::plugin_library_reference &, engine::graph &, const std::string & name, real const & logical_zero);
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES channel_change_notification_from_port(const engine::port &) throw(engine::exception);
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES seconds_per_event_change_notification_from_port(const engine::port &);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process_first() throw(engine::exception);			
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);			
+			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process_first() throw(engine::exception);
+			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
 		private:
 			real logical_zero_;
 		};

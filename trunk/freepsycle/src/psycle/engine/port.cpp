@@ -149,7 +149,7 @@ namespace psycle
 					this->propagate_channels_to_node(port.channels());
 				else
 					{ /* nothing can be done for now */ }
-			}	
+			}
 			// seconds per event negociation
 			{
 				if(this->seconds_per_event())

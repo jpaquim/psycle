@@ -291,8 +291,8 @@ namespace psycle
 					{
 						if(event->key.state & GDK_SHIFT_MASK)
 						{
-						//	dragging_ = true;
-						//	grab(GDK_KEY_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, Gdk::Cursor(Gdk::TCROSS), event->key.time);
+							//dragging_ = true;
+							//grab(GDK_KEY_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, Gdk::Cursor(Gdk::TCROSS), event->key.time);
 						}
 					}
 					break;

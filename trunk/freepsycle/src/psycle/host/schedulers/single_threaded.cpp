@@ -136,7 +136,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 				}
 				
 				namespace
-				{		
+				{
 					class thread
 					{
 					public:
@@ -409,13 +409,13 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 							mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(output_port, *node.multiple_input_port());
 						}
 					}
-					 // check if the content of the node input ports buffers must be preserved for further reading
+					// check if the content of the node input ports buffers must be preserved for further reading
 					for(typenames::node::single_input_ports_type::const_iterator i(node.single_input_ports().begin()) ; i != node.single_input_ports().end() ; ++i)
 					{
 						ports::inputs::single & single_input_port(**i);
 						if(single_input_port.output_port()) mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(*single_input_port.output_port(), single_input_port);
 					}
-					 // check if the content of the node output ports buffers must be preserved for further reading
+					// check if the content of the node output ports buffers must be preserved for further reading
 					for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i)
 					{
 						ports::output & output_port(**i);
@@ -463,7 +463,7 @@ std::cerr << "@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count
 
 				/// decrements the remaining expected read count of the buffer and
 				/// checks if the content of the buffer must be preserved for further reading.
-	 			void inline scheduler::mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(ports::output & output_port, ports::input & input_port)
+				void inline scheduler::mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(ports::output & output_port, ports::input & input_port)
 				{
 					input_port.underlying().buffer(0);
 					--output_port;

@@ -81,7 +81,7 @@ namespace psycle { namespace generic { namespace wrappers {
 				//boost::signals::connection on_delete_node_signal_connection;
 				//void on_delete_node(typename Typenames::underlying::node & underlying_node)
 				//{
-				//	this->delete_node_signal()(underlying_wrapper(underlying_node));
+				//this->delete_node_signal()(underlying_wrapper(underlying_node));
 				//}
 
 				boost::signals::connection    on_new_connection_signal_connection;

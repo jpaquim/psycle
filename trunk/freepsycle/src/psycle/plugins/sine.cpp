@@ -46,7 +46,7 @@ namespace psycle
 						phase
 					};
 				};
-			}		
+			}
 		}
 
 		void sine::seconds_per_event_change_notification_from_port(engine::port const & port)
