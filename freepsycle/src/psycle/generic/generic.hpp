@@ -61,7 +61,7 @@ namespace psycle { namespace generic { namespace basic {
 					void static destroy(graph & instance)
 					{
 						instance.before_destruction();
-						delete & instance;
+						delete &instance;
 					}
 			};
 
@@ -180,7 +180,7 @@ namespace psycle { namespace generic { namespace basic {
 					void static destroy(node & instance)
 					{
 						instance.before_destruction();
-						delete & instance;
+						delete &instance;
 					}
 			};
 
@@ -362,7 +362,7 @@ namespace psycle { namespace generic { namespace basic {
 					void static destroy(port & instance)
 					{
 						instance.before_destruction();
-						delete & instance;
+						delete &instance;
 					}
 			};
 

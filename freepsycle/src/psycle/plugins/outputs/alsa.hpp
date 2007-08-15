@@ -3,12 +3,11 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-	#error "ain't for microsoft"
-#endif
-
 #include "../resource.hpp"
 #include <alsa/asoundlib.h>
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__ALSA
+#include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
 	namespace plugins
@@ -16,11 +15,12 @@ namespace psycle
 		namespace outputs
 		{
 			/// outputs to a soundcard device via alsa output implementation.
-			class alsa : public resource
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource
 			{
-				public:
+				protected: friend class factory;
 					alsa(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 					virtual ~alsa() throw();
+				public:
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened() const;
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
 				protected:
@@ -37,3 +37,4 @@ namespace psycle
 		}
 	}
 }
+#include <universalis/compiler/dynamic_link/end.hpp>

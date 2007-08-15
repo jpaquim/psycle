@@ -21,7 +21,7 @@ namespace psycle
 
 			PSYCLE__PLUGINS__NODE_INSTANCIATOR(direct_sound)
 
-			direct_sound::direct_sound(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name) throw(universalis::operating_system::exception)
+			direct_sound::direct_sound(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(universalis::operating_system::exception)
 			:
 				resource(plugin_library_reference, graph, name),
 				direct_sound_(0),
@@ -33,10 +33,10 @@ namespace psycle
 
 			void direct_sound::do_open() throw(universalis::operating_system::exception)
 			{
+				HRESULT error(0);
 				try
 				{
 					resource::do_open();
-					HRESULT error(0);
 					if(error = ::DirectSoundCreate(0, &direct_sound_, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound create: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 					format format(single_input_ports()[0]->channels(), single_input_ports()[0]->events_per_second(), /*significant_bits_per_channel_sample*/ 16); /// \todo parametrable
 					if(loggers::information()())
@@ -55,7 +55,7 @@ namespace psycle
 							buffer_ = 0;
 							//throw universalis::operating_system::exceptions::runtime_error("direct sound set write primary cooperative level: " + operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 							// actually, we should not report this, since we may simply do not have the focus
-							return false; // \todo that sux.. we're just going to crash latter
+							return; ///\todo that sux.. we're just going to crash latter
 						}
 					}
 					else if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_PRIORITY)) throw universalis::operating_system::exceptions::runtime_error("direct sound set priority cooperative level: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
@@ -181,8 +181,8 @@ namespace psycle
 					}
 				}
 				if(bytes2) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
-				engine::buffer & in = input_ports()[0]->buffer();
-				//real amplification = input_ports()[1]->buffer()[0][0].sample();
+				engine::buffer & in = single_input_ports()[0]->buffer();
+				//real amplification = single_input_ports()[1]->buffer()[0][0].sample();
 				for(int channel(0) ; channel < in.size() ; ++channel)
 				{
 					int spread(0);
@@ -238,7 +238,7 @@ namespace psycle
 					}
 					catch(...)
 					{
-						loggers::crash()("please ignore the crash above, i think it is a bug in your driver", UNIVERSALIS__COMPILER__LOCATION);
+						loggers::crash()("please ignore the crash above, this is possibly a bug in your driver", UNIVERSALIS__COMPILER__LOCATION);
 					}
 					buffer_ = 0;
 				}

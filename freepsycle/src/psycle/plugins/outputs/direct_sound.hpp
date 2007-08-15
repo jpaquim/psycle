@@ -11,7 +11,7 @@
 
 #include <windows.h>
 
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTOLINK
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "user32") // for ::GetDesktopWindow(), see implementation file
 #endif
 
@@ -20,29 +20,36 @@
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 #endif
 
-#include <mmsystem.h>
+#include <mmsystem.h> // winmm lib
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	// unused #pragma comment(lib, "winmm")
+#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(pop)
 #endif
 
 #include <dsound.h> // dsound lib
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTOLINK
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "dsound")
 #endif
 
 #include "../resource.hpp"
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__DIRECT_SOUND
+#include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
 	namespace plugins
 	{
 		namespace outputs
 		{
-			/// outputs to a soundcard device via direct sound output implementation.
-			class direct_sound : public resource
+			/// outputs to a soundcard device via microsoft's direct sound output implementation.
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK direct_sound : public resource
 			{
+				protected: friend class factory;
+					direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::operating_system::exception);
 				public:
-					direct_sound(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(universalis::operating_system::exception);
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened()  const;
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
 				protected:
@@ -71,3 +78,4 @@ namespace psycle
 		}
 	}
 }
+#include <universalis/compiler/dynamic_link/end.hpp>

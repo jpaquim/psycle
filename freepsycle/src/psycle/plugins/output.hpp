@@ -9,6 +9,8 @@
 	#include "outputs/direct_sound.hpp"
 #endif
 
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUT
+#include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
 	namespace plugins
@@ -22,11 +24,13 @@ namespace psycle
 			output_base;
 			
 		/// default output.
-		class output : public output_base
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base
 		{
 			public:
 				typedef output_base base;
-				output(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
+			protected: friend class factory;
+				output(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 		};
 	}
 }
+#include <universalis/compiler/dynamic_link/end.hpp>
