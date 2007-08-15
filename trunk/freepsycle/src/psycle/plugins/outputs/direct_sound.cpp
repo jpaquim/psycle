@@ -130,6 +130,11 @@ namespace psycle
 				}
 			}
 		
+			bool direct_sound::opened() const
+			{
+				return direct_sound_; //&& buffer_;
+			}
+
 			void direct_sound::do_start() throw(universalis::operating_system::exception)
 			{
 				resource::do_start();
