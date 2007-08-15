@@ -27,8 +27,8 @@ namespace psycle
 				adjustment_(1.00, 0.05, 5.00, 0.001, 0.1, 0.1),
 				spin_(adjustment_, 1.0, 2)
 			{
-//				pack_start(start(), Gtk::PACK_SHRINK);
-//				pack_start(spin_, Gtk::PACK_SHRINK);
+				//pack_start(start(), Gtk::PACK_SHRINK);
+				//pack_start(spin_, Gtk::PACK_SHRINK);
 				scroll_.add(canvas_instance());
 				pack_start(scroll_);
 				show_all_children();
@@ -61,7 +61,7 @@ namespace psycle
 			:
 				node_type(parent, underlying),
 				Gnome::Canvas::Group(parent, x, y),
-				contraption_(*this, 0, 0, 0x60606000, underlying.name() + "\n" + underlying.plugin_library_reference_instance().name())
+				contraption_(*this, 0, 0, 0x60606000, underlying.name() + "\n" + underlying.plugin_library_reference().name())
 			{
 			}
 

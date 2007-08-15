@@ -125,7 +125,7 @@ namespace psycle
 			out
 				<< name()
 				<< " (loaded library "
-				<< plugin_library_reference_instance().name()
+				<< plugin_library_reference().name()
 				<< ", " << universalis::compiler::typenameof(*this)
 				<< ')'
 				<< std::endl;
