@@ -9,7 +9,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <list>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PACKAGENERIC__MODULE__SOURCE__PSYCLE__HOST__SCHEDULERS__SINGLE_THREADED
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__SINGLE_THREADED
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host { namespace schedulers {
 	/// a scheduler using only one thread
