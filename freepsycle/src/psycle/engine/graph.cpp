@@ -67,11 +67,11 @@ namespace psycle
 				if(loggers::information()())
 				{
 					std::ostringstream s;
-					s << node.qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node) << " from loaded library " << node.plugin_library_reference_instance().name();
+					s << node.qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node) << " from loaded library " << node.plugin_library_reference().name();
 					loggers::information()(s.str());
 				}
-				reference_counter & reference_counter(node.plugin_library_reference_instance());
-				delete &node;
+				reference_counter & reference_counter(node.plugin_library_reference());
+				node.destroy();
 				--reference_counter;
 			}
 			assert(empty());

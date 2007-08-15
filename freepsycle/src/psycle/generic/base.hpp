@@ -2,13 +2,7 @@
 // copyright 1999-2007 johan boule <bohan@jabber.org>
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
-///\file
 ///\interface psycle::generic::base
 #pragma once
 #include "generic.hpp"
-namespace psycle
-{
-	namespace generic
-	{
-	}
-}
+namespace psycle { namespace generic {} }
