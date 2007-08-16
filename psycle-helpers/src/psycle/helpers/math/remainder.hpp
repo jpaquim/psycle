@@ -7,8 +7,8 @@ namespace psycle
 	{
 		namespace math
 		{
-			template<typename Real>
-			Real inline remainder(Real const & numerator, Real const & denominator) UNIVERSALIS__COMPILER__CONST
+			template<typename Real> UNIVERSALIS__COMPILER__CONST
+			Real inline remainder(Real const & numerator, Real const & denominator)
 			{
 				Real result(numerator);
 				if(result >= denominator) result -= denominator;
