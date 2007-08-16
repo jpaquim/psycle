@@ -163,6 +163,8 @@ namespace universalis
 						static bool once(false);
 						if(!once)
 						{
+							///\todo review and test this
+
 							///\todo why only once?
 							//once = true;
 							// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/setunhandledexceptionfilter.asp

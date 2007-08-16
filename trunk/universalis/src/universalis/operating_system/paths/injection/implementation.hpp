@@ -16,9 +16,9 @@ namespace
 					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 						char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
 						if(!::GetModuleFileName(0, module_file_name, sizeof module_file_name)) throw universalis::operating_system::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-						return boost::filesystem::path(module_file_name, boost::filesystem::native);
+						return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 					#else
-						///\todo use main's argument #0 instead
+						///\todo use main's argument #0 instead <- not! ... use binreloc instead
 						///\todo and distinguish symlinks
 						return boost::filesystem::path(".") / PACKAGENERIC__MODULE__NAME;
 					#endif
@@ -91,7 +91,7 @@ boost::filesystem::path const & share()
 			boost::filesystem::path const static path() throw(std::exception)
 			{
 				#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-					if(stage()) return bin() / boost::filesystem::path(PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE, boost::filesystem::no_check);
+					if(stage()) return bin() / boost::filesystem::path(PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 					else
 				#endif
 					return bin() / PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE;
@@ -134,7 +134,7 @@ boost::filesystem::path const & home()
 					std::ostringstream s; s << "The user has no defined home directory: the environment variable " << env_var << " is not set.";
 					throw universalis::operating_system::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				}
-				return boost::filesystem::path(path, boost::filesystem::native);
+				return boost::filesystem::path(path, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 			}
 	};
 	boost::filesystem::path const static once(once::path());

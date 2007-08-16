@@ -24,7 +24,7 @@ namespace psycle { namespace front_ends { namespace text {
 		#if defined $
 			#error "macro clash"
 		#endif
-		#define $($) loggers::trace()(paths::$().string() + " == " UNIVERSALIS__COMPILER__STRINGIZED($), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
+		#define $($) loggers::trace()(paths::$()./*native_directory_*/string() + " == " UNIVERSALIS__COMPILER__STRINGIZED($), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
 		{
 			$(bin);
 			$(package::lib);

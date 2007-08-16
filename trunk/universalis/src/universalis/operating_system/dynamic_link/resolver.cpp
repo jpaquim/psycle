@@ -88,7 +88,7 @@ namespace universalis
 										//+ "-" + version_string.str()
 									#endif
 							),
-							boost::filesystem::native
+							boost::filesystem::no_check // boost::filesystem::native yells when there are spaces
 						);
 					#endif
 			}
@@ -198,9 +198,9 @@ namespace universalis
 				#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
 					::GetModuleFileName(underlying_, module_file_name, sizeof module_file_name);
-					return boost::filesystem::path(module_file_name, boost::filesystem::native);
+					return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 				#else
-					return boost::filesystem::path(underlying_->get_name(), boost::filesystem::native);
+					return boost::filesystem::path(underlying_->get_name(), boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 				#endif
 			}
 

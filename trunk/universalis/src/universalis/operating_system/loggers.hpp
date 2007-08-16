@@ -34,7 +34,7 @@ namespace universalis
 
 			public:
 				void inline operator()(int const & level, std::string const & message) throw() { log(level, message); }
-				void inline operator()(int const & level, std::string const & message, compiler::location const & location) throw() { log(level, message + "\n" + location); }
+				void inline operator()(int const & level, std::string const & message, compiler::location const & location) throw() { log(level, location + "\n" + message); }
 
 			protected:
 				void            log(int const & level, std::string const &) throw(); friend class loggers::multiplex_logger;
