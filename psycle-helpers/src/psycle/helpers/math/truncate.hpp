@@ -1,5 +1,6 @@
 #pragma once
 #include <diversalis/processor.hpp>
+#include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 namespace psycle
@@ -9,8 +10,8 @@ namespace psycle
 		namespace math
 		{
 			/// converts a floating point number to an integer.
-			///\todo specify the rounding mode
-			std::int32_t inline truncated(double d)
+			///\todo specify the rounding mode.. this is not a truncation!
+			std::int32_t inline truncated(double d) UNIVERSALIS__COMPILER__CONST
 			{
 				BOOST_STATIC_ASSERT((sizeof d == 8));
 				union result_union
@@ -18,13 +19,13 @@ namespace psycle
 					double d;
 					std::int32_t i;
 				} result;
-				result.d = d - 0.5 + 6755399441055744ULL; // 2^51 + 2^52
+				result.d = d - 0.5 + 6755399441055744.0; // 2^51 + 2^52
 				return result.i;
 			}
 
 			/// converts a floating point number to an integer.
-			///\todo specify the rounding mode
-			std::int32_t inline truncated(float f)
+			///\todo specify the rounding mode.. this is not a truncation!
+			std::int32_t inline truncated(float f) UNIVERSALIS__COMPILER__CONST
 			{
 				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 					///\todo not always the fastest when using sse(2)

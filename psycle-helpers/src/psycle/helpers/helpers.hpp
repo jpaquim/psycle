@@ -57,28 +57,28 @@ namespace psycle
 		};
 
 		///\todo doc
-		inline float fast_log2(float f)
+		inline float fast_log2(float f) UNIVERSALIS__COMPILER__CONST
 		{
 			return math::log2(f);
 		}
 
 		/// converts a floating point number to an integer.
-		///\todo specify the rounding mode
-		inline std::int32_t f2i(double d) 
+		///\todo specify the rounding mode!
+		inline std::int32_t f2i(double d) UNIVERSALIS__COMPILER__CONST
 		{ 
 			return math::truncated(d);
 		}
 		
 		/// converts a floating point number to an integer.
-		///\todo specify the rounding mode
-		inline std::int32_t f2i(float f) 
+		///\todo specify the rounding mode!
+		inline std::int32_t f2i(float f) UNIVERSALIS__COMPILER__CONST
 		{ 
 			return math::truncated(f);
 		}
 		
 		/// clipping.
 		template<unsigned int const bits>
-		typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f)
+		typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f) UNIVERSALIS__COMPILER__CONST
 		{
 			typedef typename universalis::compiler::numeric<bits>::signed_int result_type;
 			typedef std::numeric_limits<result_type> type_traits;
@@ -88,7 +88,7 @@ namespace psycle
 		}
 
 		/// clipping.
-		inline int f2iclip16(float f) 
+		inline int f2iclip16(float f) UNIVERSALIS__COMPILER__CONST
 		{ 
 			int const l(32767);
 			if(f < -l) return -l;
@@ -97,7 +97,7 @@ namespace psycle
 		}
 
 		/// clipping.
-		inline int f2iclip18(float f) 
+		inline int f2iclip18(float f) UNIVERSALIS__COMPILER__CONST
 		{ 
 			int const l(131071);
 			if(f < -l) return -l;
@@ -106,7 +106,7 @@ namespace psycle
 		}
 
 		/// clipping.
-		inline int f2iclip20(float f) 
+		inline int f2iclip20(float f) UNIVERSALIS__COMPILER__CONST
 		{ 
 			int const l(524287);
 			if(f < -l) return -l;
@@ -115,7 +115,7 @@ namespace psycle
 		}
 
 		/// clipping.
-		inline int f2iclip24(float f)
+		inline int f2iclip24(float f) UNIVERSALIS__COMPILER__CONST
 		{ 
 			int const l(8388607);
 			if(f < -l) return -l;
@@ -124,7 +124,7 @@ namespace psycle
 		}
 
 		/// clipping.
-		inline int f2iclip32(float f)
+		inline int f2iclip32(float f) UNIVERSALIS__COMPILER__CONST
 		{ 
 			int const l(2147483647);
 			if(f < -l) return -l;
