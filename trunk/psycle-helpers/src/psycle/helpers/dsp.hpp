@@ -1,12 +1,14 @@
 ///\file
 ///\brief various signal processing utility functions and classes, psycle::host::Cubic amongst others.
 #pragma once
+#include "helpers.hpp"
+#include "math/erase_all_nans_infinities_and_denormals.hpp"
+#include "math/truncated.hpp"
+#include <universalis/compiler.hpp>
 #include <cmath>
-#include <psycle/helpers/helpers.hpp>
-#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 namespace psycle
 {
-	namespace host
+	namespace helpers
 	{
 		namespace dsp
 		{
@@ -65,16 +67,10 @@ namespace psycle
 		}
 
 		/// converts a double to a std::uint32_t
-		inline std::int32_t F2I(double d)
+		///\todo specify the rounding mode!
+		inline std::int32_t F2I(double d) UNIVERSALIS__COMPILER__CONST
 		{
-			const double magic(6755399441055744.0); /// 2^51 + 2^52
-			union tmp_union
-			{
-				double d;
-				int i;
-			} tmp;
-			tmp.d = (d-0.5) + magic;
-			return tmp.i;
+			return math::truncated(d);
 		}
 
 		/// finds the maximum amplitude in a signal buffer.
@@ -169,8 +165,8 @@ namespace psycle
 		inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 		{
 			#if 1
-				common::math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
-				common::math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
+				math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
+				math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
 			#else
 				// a 1-bit "sinus" dither
 				float id(float(1.0E-18));
@@ -183,11 +179,15 @@ namespace psycle
 			#endif
 		}
 
-		inline float dB(float amplitude) // amplitude normalized to 1.0f.
+		///\todo doc
+		/// amplitude normalized to 1.0f.
+		inline float dB(float amplitude) UNIVERSALIS__COMPILER__CONST
 		{
 			return 20.0f * std::log10f(amplitude);
 		}
-		inline float dB2Amp(float db)
+
+		///\todo doc
+		inline float dB2Amp(float db) UNIVERSALIS__COMPILER__CONST
 		{
 			return std::pow(10.0f,db/20.0f);
 		}

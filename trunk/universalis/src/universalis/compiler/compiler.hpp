@@ -14,6 +14,7 @@
 	#include "detail/standard/wchar_t.hpp"
 	#include "detail/pragmatic/pragmas.hpp"
 	#include "detail/pragmatic/attribute.hpp"
+	#include "detail/pragmatic/const_function.hpp"
 	#include "detail/pragmatic/align.hpp"
 	#include "detail/pragmatic/pack.hpp"
 	#include "detail/pragmatic/deprecated.hpp"

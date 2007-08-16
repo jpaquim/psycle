@@ -1,5 +1,6 @@
 #pragma once
 #include <diversalis/processor.hpp>
+#include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 namespace psycle
@@ -9,7 +10,7 @@ namespace psycle
 		namespace math
 		{
 			///\todo doc
-			float inline log2(float f)
+			float inline log2(float f) UNIVERSALIS__COMPILER__CONST
 			{ 
 				#if !defined DIVERSALIS__PROCESSOR__X86
 					#error please verify this code
