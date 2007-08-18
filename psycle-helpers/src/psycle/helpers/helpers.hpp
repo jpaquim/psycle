@@ -62,18 +62,20 @@ namespace psycle
 			return math::log2(f);
 		}
 
-		/// converts a floating point number to an integer.
-		///\todo specify the rounding mode!
-		inline std::int32_t f2i(double d) UNIVERSALIS__COMPILER__CONST
+		/// converts a floating point number to an integer by rounding to the nearest integer.
+		/// note: it is unspecified whether rounding x.5 rounds up or down.
+		std::int32_t inline UNIVERSALIS__COMPILER__CONST
+		f2i(double d)
 		{ 
-			return math::truncated(d);
+			return math::rounded(d);
 		}
 		
-		/// converts a floating point number to an integer.
-		///\todo specify the rounding mode!
-		inline std::int32_t f2i(float f) UNIVERSALIS__COMPILER__CONST
+		/// converts a floating point number to an integer by rounding to the nearest integer.
+		/// note: it is unspecified whether rounding x.5 rounds up or down.
+		std::int32_t inline UNIVERSALIS__COMPILER__CONST
+		f2i(float f)
 		{ 
-			return math::truncated(f);
+			return math::rounded(f);
 		}
 		
 		/// clipping.

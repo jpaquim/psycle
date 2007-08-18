@@ -26,21 +26,17 @@ namespace psycle { namespace helpers { namespace math {
 		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 			///\todo not always the fastest when using sse(2)
 			///\todo we can also use C1999's lrint if available
-			///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
-			#if 1 // note: this is not as fast as one might expect.
-				///\todo specify the rounding mode.. this is not a truncation!
-				std::int32_t i;
-				double const half(0.5);
-				_asm
-				{ 
-					fld f;
-					fsub half;
-					fistp i;
-				} 
-				return i;
-			#else
-				return truncated(double(f));
-			#endif
+			///\todo this custom asm is not very fast on some arch, the double "2^51 + 2^52" version might be faster
+			///\todo specify the rounding mode.. is this really a truncation toward -infinity, even with negative numbers?
+			std::int32_t i;
+			double const half(0.5);
+			__asm
+			{ 
+				fld f;
+				fsub half;
+				fistp i;
+			}
+			return i;
 		#else
 			return truncated(double(f));
 		#endif
