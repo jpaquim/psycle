@@ -2,6 +2,7 @@
 #pragma once
 #include <psycle/helpers/math/pi.hpp>
 #include <psycle/helpers/math/truncate.hpp>
+#include <psycle/helpers/math/round.hpp>
 #include <psycle/helpers/math/log.hpp>
 #include <universalis/compiler/numeric.hpp>
 #include <boost/static_assert.hpp>
