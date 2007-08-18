@@ -7,6 +7,8 @@ namespace psycle
 	{
 		namespace math
 		{
+			/// converts a floating point number to an integer by rounding to the nearest integer.
+			/// note: it is unspecified whether rounding x.5 rounds up or down.
 			template<typename Real> UNIVERSALIS__COMPILER__CONST
 			int inline rounded(Real const & x)
 			{

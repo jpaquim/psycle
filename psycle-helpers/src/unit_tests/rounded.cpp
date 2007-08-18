@@ -1,16 +1,28 @@
 #include <psycle/helpers/math/round.hpp>
-#include <iostream>
-int main()
+#include <psycle/helpers/math/truncate.hpp>
+#include <boost/test/included/prg_exec_monitor.hpp>
+#include <stdexcept>
+int cpp_main(int, char*[])
 {
+	#define $(call, result) if(call != result) throw std::runtime_error(#call);
 	using psycle::helpers::math::rounded;
-	std::cout
-		<< rounded(+1.6) << " "
-		<< rounded(+1.4) << " "
-		<< rounded(-1.6) << " "
-		<< rounded(-1.4) << "\n";
-	if(rounded(+1.6) != +2) return 1;
-	if(rounded(+1.4) != +1) return 1;
-	if(rounded(-1.6) != -2) return 1;
-	if(rounded(-1.4) != -1) return 1;
+	$(rounded(+1.6), +2)
+	$(rounded(+1.4), +1)
+	$(rounded(-1.6), -2)
+	$(rounded(-1.4), -1)
+	$(rounded(+1.6f), +2)
+	$(rounded(+1.4f), +1)
+	$(rounded(-1.6f), -2)
+	$(rounded(-1.4f), -1)
+	using psycle::helpers::math::truncated;
+	$(truncated(+1.6), +1)
+	$(truncated(+1.4), +1)
+	$(truncated(-1.6), -2)
+	$(truncated(-1.4), -2)
+	$(truncated(+1.6f), +1)
+	$(truncated(+1.4f), +1)
+	$(truncated(-1.6f), -2)
+	$(truncated(-1.4f), -2)
+	#undef $
 	return 0;
 }

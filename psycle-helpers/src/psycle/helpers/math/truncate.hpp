@@ -9,9 +9,9 @@ namespace psycle
 	{
 		namespace math
 		{
-			/// converts a floating point number to an integer.
-			///\todo specify the rounding mode.. this is not a truncation!
-			std::int32_t inline truncated(double d) UNIVERSALIS__COMPILER__CONST
+			/// converts a floating point number to an integer by truncating toward -infinity
+			std::int32_t inline UNIVERSALIS__COMPILER__CONST
+			truncated(double d)
 			{
 				BOOST_STATIC_ASSERT((sizeof d == 8));
 				union result_union
@@ -23,15 +23,16 @@ namespace psycle
 				return result.i;
 			}
 
-			/// converts a floating point number to an integer.
-			///\todo specify the rounding mode.. this is not a truncation!
-			std::int32_t inline truncated(float f) UNIVERSALIS__COMPILER__CONST
+			/// converts a floating point number to an integer by truncating toward -infinity
+			std::int32_t inline UNIVERSALIS__COMPILER__CONST
+			truncated(float f)
 			{
 				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 					///\todo not always the fastest when using sse(2)
 					///\todo we can also use C1999's lrint if available
 					///\todo do we really need to write this in custom asm? wouldn't it be better to rely on the compiler?
 					#if 1 // note: this is not as fast as one might expect.
+						///\todo specify the rounding mode.. this is not a truncation!
 						std::int32_t i;
 						double const half(0.5);
 						_asm
@@ -45,8 +46,7 @@ namespace psycle
 						return truncated(double(f));
 					#endif
 				#else
-					///\todo specify the rounding mode
-					return static_cast<std::int32_t>(f);
+					return truncated(double(f));
 				#endif
 			}
 		}
