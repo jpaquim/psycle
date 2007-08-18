@@ -49,7 +49,8 @@ else:
 		dependencies = [pkg_config_check(project, name = 'universalis >= 0')]
 	)
 
-# ... there is no external package for now.
+from packageneric.pool.boost import boost
+boost_test = boost(project, 103300, ['test_exec_monitor'])
 
 # modules and pkg-config packages
 
@@ -66,7 +67,7 @@ class unit_test_module(module):
 			name = name,
 			version = source_package.version(),
 			description = description,
-			dependencies = [universalis],
+			dependencies = [universalis, boost_test],
 			target_type = module.target_types.program
 		)
 		self.contexes().source().compilers().cxx().paths().add(['src'])
