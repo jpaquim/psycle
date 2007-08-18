@@ -169,7 +169,11 @@ if __name__ == '__main__':
 				'AUTHORS'
 			],
 			exclude_patterns = [
-				os.path.join(os.curdir, 'external-packages', '*')
+				os.path.join(os.curdir, 'external-packages', '*'),
+				os.path.join('*', '++*'),
+				os.path.join('*', 'build', '*'),
+				os.path.join('*', 'moc_*.cpp'),
+				os.path.join('*', 'qrc_*.cpp')
 			])
 		for f in files: result &= check_tabs_spaces_and_carriage_returns(f.full())
 	if result: sys.exit(0)
