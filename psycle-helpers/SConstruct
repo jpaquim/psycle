@@ -50,7 +50,7 @@ else:
 	)
 
 from packageneric.pool.boost import boost
-boost_test = boost(project, 103300, ['test_exec_monitor'])
+boost_test = boost(project, 103300, ['unit_test_framework'])
 
 # modules and pkg-config packages
 
