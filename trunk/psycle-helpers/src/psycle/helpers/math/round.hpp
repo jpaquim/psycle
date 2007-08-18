@@ -49,7 +49,7 @@ namespace psycle { namespace helpers { namespace math {
 			std::int32_t i;
 			__asm
 			{ 
-				fld f;
+				fld x;
 				fistp i;
 			}
 			return i;
