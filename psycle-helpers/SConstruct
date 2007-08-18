@@ -1,0 +1,84 @@
+#! /usr/bin/env scons
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006-2007 johan boule <bohan@jabber.org>
+# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
+
+# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+
+# project
+
+from packageneric.generic.scons.project import project
+project = project(name = 'psycle-helpers')
+
+# source package
+
+from packageneric.generic.scons.source_package import source_package
+from packageneric.generic.scons.version import version
+source_package = source_package(project,
+	name = project.name(),
+	version = version(1, 9),
+	description = 'helper routines for psycle',
+	long_description = \
+		"these are the some helper routines for psycle."
+		"psycle is a modular music creation studio."
+)
+
+source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
+
+# external packages
+
+from packageneric.generic.scons.check.external_package import external_package as external_package_check
+from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
+
+import os.path
+universalis = os.path.join(os.pardir, 'universalis', 'SConstruct')
+if os.path.exists(universalis): universalis = project.subscript(universalis).local_package()
+else:
+	universalis = external_package_check(project, name = 'universalis',
+		url = 'http://psycle.sourceforge.net',
+		distribution_packages = {
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/universalis-dev.xml',
+			'debian and ubuntu': 'lib-universalis-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
+		dependencies = [pkg_config_check(project, name = 'universalis >= 0')]
+	)
+
+# ... there is no external package for now.
+
+# modules and pkg-config packages
+
+from packageneric.generic.scons.module import module
+from packageneric.generic.scons.find import find
+from packageneric.generic.scons.pkg_config_package import pkg_config_package
+
+modules = []
+unit_test_modules = []
+
+class unit_test_module(module):
+	def __init__(self, name, description, *args, **kw):
+		module.__init__(self, source_package,
+			name = name,
+			version = source_package.version(),
+			description = description,
+			dependencies = [universalis],
+			target_type = module.target_types.program
+		)
+		self.contexes().source().compilers().cxx().paths().add(['src'])
+		unit_test_modules.append(self)
+
+	def add_unit_test_sources(self, include_patterns, exclude_patterns = None):
+		self.add_sources(find(project, 'src', [os.path.join('unit_tests', include_pattern) for include_pattern in include_patterns], exclude_patterns))
+
+unit_test_module('rounded', 'psycle::helpers::math::rounded').add_unit_test_sources(['rounded.cpp'])
+
+modules.extend(unit_test_modules)
+
+project.default_targets(modules)
+
+Return('modules')
