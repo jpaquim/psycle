@@ -274,7 +274,7 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
 	{
 		std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)currItem );
 		if( catItr !=categoryMap.end() ) {
-//																																																																																																																																																																																																psy::core::PatternCategory *category = catItr->second;
+			//psy::core::PatternCategory *category = catItr->second;
 			// FIXME: this needs to do something?
 		}
 	}
