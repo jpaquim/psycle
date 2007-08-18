@@ -42,13 +42,15 @@ private:
 	QGraphicsScene *wavescene;
 	
 	QGraphicsTextItem *nodata;
-//																QGraphicsTextItem *left;
-//																QGraphicsTextItem *right;
+	//QGraphicsTextItem *left;
+	//QGraphicsTextItem *right;
 	
 	
-/*																QGraphicsLineItem *stereo_centerline;
+	#if 0
+	QGraphicsLineItem *stereo_centerline;
 	QGraphicsLineItem *stereo_leftline;
-	QGraphicsLineItem *stereo_rightline; */
+	QGraphicsLineItem *stereo_rightline;
+	#endif
 	
 };
 

@@ -125,7 +125,7 @@ void EffectGui::onToggleBypassActionTriggered()
 	mac()->_bypass = !mac()->_bypass;
 	if (mac()->_bypass)
 	{
-		mac()->_volumeCounter=0.0f;																																																																
+		mac()->_volumeCounter=0.0f;
 		mac()->_volumeDisplay=0;
 	}
 	update( boundingRect() );
