@@ -59,26 +59,17 @@ from packageneric.generic.scons.find import find
 from packageneric.generic.scons.pkg_config_package import pkg_config_package
 
 modules = []
-unit_test_modules = []
 
-class unit_test_module(module):
-	def __init__(self, name, description, *args, **kw):
-		module.__init__(self, source_package,
-			name = name,
+unit_test_module = module(source_package,
+			name = source_package.name() + '_unit_tests',
 			version = source_package.version(),
-			description = description,
 			dependencies = [universalis, boost_test],
 			target_type = module.target_types.program
-		)
-		self.contexes().source().compilers().cxx().paths().add(['src'])
-		unit_test_modules.append(self)
+)
+unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
+unit_test_module.add_sources(find(project, 'src', ['./unit_tests.cpp']))
 
-	def add_unit_test_sources(self, include_patterns, exclude_patterns = None):
-		self.add_sources(find(project, 'src', [os.path.join('unit_tests', include_pattern) for include_pattern in include_patterns], exclude_patterns))
-
-unit_test_module('rounded', 'psycle::helpers::math::rounded').add_unit_test_sources(['rounded.cpp'])
-
-modules.extend(unit_test_modules)
+modules.append(unit_test_module)
 
 project.default_targets(modules)
 
