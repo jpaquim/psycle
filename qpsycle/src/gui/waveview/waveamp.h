@@ -33,7 +33,7 @@ public:
 	WaveAmp();
 	
 public slots:
-//																void SliderChanges(int value);
+	//void SliderChanges(int value);
 
 private:
 	QLabel *gain;

@@ -134,7 +134,7 @@ void SequencerDraw::moveUpTrack() {
 }
 
 void SequencerDraw::onCollapseButtonCliked()
-{																
+{
 	selectedLine()->scale(1.0f, 0.5f);
 }
 
