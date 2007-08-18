@@ -141,7 +141,7 @@ const char * CmdDef::GetName() const
 
 		case commands::transpose_channel_inc: return "Transpose Channel +1";
 		case commands::transpose_channel_dec: return "Transpose Channel -1";
-		case commands::transpose_channel_inc12: return "Transpose Channel +12";																																																																
+		case commands::transpose_channel_inc12: return "Transpose Channel +12";
 		case commands::transpose_channel_dec12: return "Transpose Channel -12";
 
 		case commands::transpose_block_inc: return "Transpose Block +1";
@@ -152,7 +152,7 @@ const char * CmdDef::GetName() const
 		case commands::edit_toggle: return "Toggle Edit Mode";
 
 		case commands::octave_down: return "Current Octave -1";
-		case commands::octave_up: return "Current Octave +1";																																																																
+		case commands::octave_up: return "Current Octave +1";
 
 		case commands::machine_dec: return "Current Machine -1";
 		case commands::machine_inc: return "Current Machine +1";
