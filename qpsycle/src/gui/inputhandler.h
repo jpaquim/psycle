@@ -105,7 +105,7 @@ namespace commands {
 		key_FS2,
 		key_G_2,
 		key_GS2,
-		key_A_2,																																																																
+		key_A_2,
 
 		key_stop = 120, ///< NOTE STOP
 		tweak = 121, ///< tweak
@@ -175,7 +175,7 @@ namespace commands {
 		max_pattern,
 		error_log,
 
-		transpose_channel_inc = CS_EDT_START,																																																																
+		transpose_channel_inc = CS_EDT_START,
 		transpose_channel_dec,
 		transpose_channel_inc12,
 		transpose_channel_dec12,
@@ -238,10 +238,13 @@ class CmdDef
 {
 	public:
 		/// unique identifier
-		commands::command ID;																																																																																																																																																																																																
-		//int data;																																																																																																																																																																																																// cmd specific data - e.g. note reference																																																																																																																																
-		//CString desc;																																																																																																																																// string description     
-		//void * callback;																																																																// function callback, not currently used
+		commands::command ID;
+		/// cmd specific data - e.g. note reference
+		//int data;
+		/// string description
+		//CString desc;
+		/// function callback, not currently used
+		//void * callback;
 		
 		CmdDef(commands::command ID = commands::null) : ID(ID) {}
 
