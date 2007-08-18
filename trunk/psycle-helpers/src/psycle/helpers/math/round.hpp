@@ -55,19 +55,18 @@ namespace psycle { namespace helpers { namespace math {
 			return i;
 		}
 	#endif
-}}}
 
-#if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(rounded)
-	{
-		using psycle::helpers::math::rounded;
-		BOOST_CHECK(rounded(+1.6) == +2);
-		BOOST_CHECK(rounded(+1.4) == +1);
-		BOOST_CHECK(rounded(-1.6) == -2);
-		BOOST_CHECK(rounded(-1.4) == -1);
-		BOOST_CHECK(rounded(+1.6f) == +2);
-		BOOST_CHECK(rounded(+1.4f) == +1);
-		BOOST_CHECK(rounded(-1.6f) == -2);
-		BOOST_CHECK(rounded(-1.4f) == -1);
-	}
-#endif
+	#if defined BOOST_AUTO_TEST_CASE
+		BOOST_AUTO_TEST_CASE(rounded_test)
+		{
+			BOOST_CHECK(rounded(+2.6) == +3);
+			BOOST_CHECK(rounded(+1.4) == +1);
+			BOOST_CHECK(rounded(-2.6) == -3);
+			BOOST_CHECK(rounded(-1.4) == -1);
+			BOOST_CHECK(rounded(+2.6f) == +3);
+			BOOST_CHECK(rounded(+1.4f) == +1);
+			BOOST_CHECK(rounded(-2.6f) == -3);
+			BOOST_CHECK(rounded(-1.4f) == -1);
+		}
+	#endif
+}}}

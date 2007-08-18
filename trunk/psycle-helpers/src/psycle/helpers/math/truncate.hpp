@@ -41,19 +41,18 @@ namespace psycle { namespace helpers { namespace math {
 			return truncated(double(f));
 		#endif
 	}
+	
+	#if defined BOOST_AUTO_TEST_CASE
+		BOOST_AUTO_TEST_CASE(truncated_test)
+		{
+			BOOST_CHECK(truncated(+1.6) == +1);
+			BOOST_CHECK(truncated(+1.4) == +1);
+			BOOST_CHECK(truncated(-1.6) == -2);
+			BOOST_CHECK(truncated(-1.4) == -2);
+			BOOST_CHECK(truncated(+1.6f) == +1);
+			BOOST_CHECK(truncated(+1.4f) == +1);
+			BOOST_CHECK(truncated(-1.6f) == -2);
+			BOOST_CHECK(truncated(-1.4f) == -2);
+		}
+	#endif
 }}}
-
-#if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(truncated)
-	{
-		using psycle::helpers::math::truncated;
-		BOOST_CHECK(truncated(+1.6) == +1);
-		BOOST_CHECK(truncated(+1.4) == +1);
-		BOOST_CHECK(truncated(-1.6) == -2);
-		BOOST_CHECK(truncated(-1.4) == -2);
-		BOOST_CHECK(truncated(+1.6f) == +1);
-		BOOST_CHECK(truncated(+1.4f) == +1);
-		BOOST_CHECK(truncated(-1.6f) == -2);
-		BOOST_CHECK(truncated(-1.4f) == -2);
-	}
-#endif
