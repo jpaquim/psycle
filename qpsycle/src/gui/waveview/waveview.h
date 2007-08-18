@@ -58,7 +58,7 @@ private:
 	QToolBar *toolBar_;
 	QAction *loadSmp_;
 	QAction *saveSmp_;
-	QAction *playSmp_;																
+	QAction *playSmp_;
 	QAction *playsSmp_;
 	QAction *stopSmp_;
 	

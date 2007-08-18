@@ -134,23 +134,25 @@ void NewMachineDlg::itemSelectionChanged()
 
 void NewMachineDlg::setPlugin( QListWidgetItem* item ) 
 {
-	std::map< QListWidgetItem*, psy::core::PluginFinderKey >::iterator it;																																																																																																																																
+	std::map< QListWidgetItem*, psy::core::PluginFinderKey >::iterator it;
 	it = pluginIdentify_.find( item );
 	
 	if ( it != pluginIdentify_.end() ) {
 	const psy::core::PluginInfo & info = finder_->info( it->second );
 		const psy::core::PluginFinderKey & key = it->second;
 
-/*																																																																																																																																name->setText( info.name() );
-			dllName_ = info.libName();
+		#if 0
+		name->setText( info.name() );
+		dllName_ = info.libName();
 		libName->setText( dllName_ );
 		description->setText( "Psycle Instrument by "+ info.author() );
-		apiVersion->setText( info.version() ); */
+		apiVersion->setText( info.version() );
+		#endif
 
 		selectedKey_ = key;
 	}
 	else {
-	fprintf(stderr,"Unable to find plugin for QListWidgetItem\n");
+		std::fprintf(stderr,"Unable to find plugin for QListWidgetItem\n");
 	}
 }
 
