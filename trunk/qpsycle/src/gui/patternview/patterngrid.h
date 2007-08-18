@@ -91,7 +91,7 @@ private:
 /**
 	* ColumnEvent.
 	*/
-class ColumnEvent {																																																
+class ColumnEvent {
 public:
 	enum ColType { hex2 = 0, hex4 = 1, note = 2 };
 

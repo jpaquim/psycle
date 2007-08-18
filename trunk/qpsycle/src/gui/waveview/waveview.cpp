@@ -94,7 +94,7 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 		
 	zoomLess_ = new QAction(QIcon(":/images/minus.png"), tr("Zoom Less"), this);
 	connect( zoomLess_, SIGNAL( triggered() ), this, SLOT( onMinusButtonClicked() ));
-	sampName_ = new QLabel("Sample Name", this);																
+	sampName_ = new QLabel("Sample Name", this);
 	sampName_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	
 	zoomSlide_ = new QSlider(Qt::Horizontal, this);
