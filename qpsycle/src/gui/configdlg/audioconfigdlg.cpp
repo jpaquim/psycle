@@ -82,7 +82,7 @@ void AudioConfigDlg::onDriverSelected( const QString & text )
 }
 
 void AudioConfigDlg::onRestartDriver()
-{																																
+{
 	if ( selectedDriver_ ) {
 		// disable old driver
 		psy::core::Player::Instance()->driver().Enable( false );

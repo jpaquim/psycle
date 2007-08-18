@@ -46,7 +46,7 @@ class TrackHeader;
 	* TrackGeometry.
 	*/
 class TrackGeometry {
-public:																																																
+public:
 	TrackGeometry();
 
 	TrackGeometry( PatternDraw & patternDraw );
@@ -57,7 +57,7 @@ public:
 	int left() const;
 
 	void setWidth( int width );
-	int width() const;																																																
+	int width() const;
 
 	void setVisibleColumns( int cols );
 	int visibleColumns() const;

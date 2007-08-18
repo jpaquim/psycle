@@ -131,7 +131,7 @@ void SampleBrowser::onAddToLoadedSamples()
 
 void SampleBrowser::onClearInstrument() 
 {
-	int curInstrIndex = instrumentsList_->currentIndex().row();																																																																
+	int curInstrIndex = instrumentsList_->currentIndex().row();
 	instrumentsModel_->clearInstrument( curInstrIndex );
 	emit sampleAdded();
 }
