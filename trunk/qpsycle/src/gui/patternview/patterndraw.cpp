@@ -43,7 +43,7 @@ PatternDraw::PatternDraw( PatternView *patView )
 	setScene(scene_);
 		
 	setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // FIXME: set to always on as AsNeeded has a bug in 4.2
-//																setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
+	//setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
 	// see: http://www.trolltech.com/developer/task-tracker/index_html?method=entry&id=152477
 	//Mattias: is there a reason why scrollbard were off???
 
@@ -76,7 +76,7 @@ void PatternDraw::setupTrackGeometrics( int numberOfTracks )
 	it = trackGeometryMap.lower_bound( numberOfTracks );
 	while ( it != trackGeometryMap.end() ) {
 		trackGeometryMap.erase( it++ );
-	}																																																
+	}
 }
 
 void PatternDraw::alignTracks() 
@@ -86,7 +86,7 @@ void PatternDraw::alignTracks()
 	for ( ; it != trackGeometryMap.end(); it++ ) {
 		TrackGeometry & geometry = it->second;
 		geometry.setLeft( offset );
-		offset+= std::max( 50, geometry.width() );																																// 50 is track min width
+		offset+= std::max( 50, geometry.width() ); // 50 is track min width
 	}
 }
 
@@ -117,7 +117,7 @@ int PatternDraw::findTrackByXPos( int x ) const  // FIXME: change to findTrackNu
 	int offset = 0;
 	for ( ; it != trackGeometrics().end(); it++ ) {
 		const TrackGeometry & geometry = it->second;
-		offset+= geometry.width();																																																																
+		offset+= geometry.width();
 		if ( offset > x ) return it->first;
 	}
 	return -1; // no track found

@@ -55,7 +55,7 @@ template<class T> inline T str_hex(const std::string &  value) {
 
 	std::stringstream str;
 	str << value;
-	str >> std::hex >> result;
+	str >> std::hex >> result; ///\todo [bohan] huh!?
 
 	return result;
 }
@@ -129,7 +129,7 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 		int startTrack = 0;
 		int endTrack = endTrackNumber();
 
-		drawGrid( painter, startLine, endLine, startTrack, endTrack );																
+		drawGrid( painter, startLine, endLine, startTrack, endTrack );
 		drawCellBg( painter, cursor() );
 		drawPattern( painter, startLine, endLine, startTrack, endTrack );
 		drawSelBg( painter, selection() );
@@ -192,7 +192,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
 		for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
-			if ( it != pattern()->end() )																{
+			if ( it != pattern()->end() ) {
 				int liney = (int)it->first * beatZoom();
 				if (liney == curLinenum ) {
 					line = &it->second;
@@ -205,7 +205,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 				QColor tColor = textColor();
 
 				bool onBeat = false;
-//																																																																bool onBar  = false;
+				//bool onBar = false;
 				if ( !(curLinenum % beatZoom())) {
 					if (  it != pattern()->end() && pattern()->barStart(it->first, signature) ) {
 						tColor = QColor( barColor() );
@@ -250,7 +250,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 							tColor = QColor( 239,175,140 );
 						else 
 							tColor = QColor( 216,154,120 );
-					}																else tColor = stdColor;
+					} else tColor = stdColor;
 
 					painter->setPen( tColor );
 					drawData( painter, curTracknum, curLinenum, 0, event->note() ,event->isSharp(), tColor );
@@ -259,9 +259,9 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 					if (event->volume() != 255) drawData( painter, curTracknum, curLinenum, 3, event->volume(), 1, tColor );
 					if (event->command() != 0 || event->parameter() != 0) {
 						drawData( painter, curTracknum, curLinenum, 4, (event->command() << 8) | event->parameter(), 1, tColor );
-					}																else {
+					} else {
 						drawString( painter, curTracknum, curLinenum, 4, "....", tColor );
-					}																																																																																																																																																
+					}
 
 					psy::core::PatternEvent::PcmListType & pcList = event->paraCmdList();
 					psy::core::PatternEvent::PcmListType::iterator it = pcList.begin();
@@ -287,35 +287,35 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
 	it = trackGeometrics().lower_bound( track );
 	if ( it == trackGeometrics().end() || eventnr >= it->second.visibleColumns()  ) return;
 
-	int xOff = it->second.left() + patDraw_->trackPaddingLeft() + 5;																																
+	int xOff = it->second.left() + patDraw_->trackPaddingLeft() + 5;
 
 	if ( eventnr < events_.size() ) {
 		const ColumnEvent & event = events_.at( eventnr );
 		switch ( event.type() ) {
-		case ColumnEvent::hex2 :
-			drawBlockData( painter, xOff + eventOffset(eventnr,0), line, toHex(data,2), color );
-			// check if cursor is on event and draw digit in cursortextColor
-			if ( cursor().track() == track && cursor().line() == line && 
-					cursor().eventNr() == eventnr && cursor().col() < 2 ) {
-				drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth() , line, toHex(data,2).substr(cursor().col(),1) ,cursorTextColor() );
-			}
+			case ColumnEvent::hex2 :
+				drawBlockData( painter, xOff + eventOffset(eventnr,0), line, toHex(data,2), color );
+				// check if cursor is on event and draw digit in cursortextColor
+				if ( cursor().track() == track && cursor().line() == line && 
+						cursor().eventNr() == eventnr && cursor().col() < 2 ) {
+					drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth() , line, toHex(data,2).substr(cursor().col(),1) ,cursorTextColor() );
+				}
 			break;
-		case ColumnEvent::hex4 :
-			drawBlockData( painter, xOff + eventOffset(eventnr,0), line, toHex(data,4), color );
-			// check if cursor is on event and draw digit in cursortextColor
-			if ( cursor().track() == track && cursor().line() == line && 
-					cursor().eventNr() == eventnr && cursor().col() < 4 ) {
-				drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth(), line, toHex(data,4).substr(cursor().col(),1) ,cursorTextColor() );
-			}
+			case ColumnEvent::hex4 :
+				drawBlockData( painter, xOff + eventOffset(eventnr,0), line, toHex(data,4), color );
+				// check if cursor is on event and draw digit in cursortextColor
+				if ( cursor().track() == track && cursor().line() == line && 
+						cursor().eventNr() == eventnr && cursor().col() < 4 ) {
+					drawBlockData( painter, xOff + eventOffset(eventnr,0) + cursor().col()*cellWidth(), line, toHex(data,4).substr(cursor().col(),1) ,cursorTextColor() );
+				}
 
 			break;
-		case ColumnEvent::note :																																																																																
-			if ( cursor().track() == track && cursor().line() == line && cursor().eventNr() == eventnr ) {
-				drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor() );
-			} else
-				drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),color );
+			case ColumnEvent::note :
+				if ( cursor().track() == track && cursor().line() == line && cursor().eventNr() == eventnr ) {
+					drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor() );
+				} else
+					drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),color );
 			break;
-		default: ;
+			default: ;
 		}
 	}
 } // drawData
@@ -339,8 +339,8 @@ int PatternGrid::eventOffset( int eventnr, int col ) const
 			return offset + colOff;
 		}
 		switch ( event.type() ) {
-		case ColumnEvent::hex2 : offset+= 2*cellWidth(); 																break;
-		case ColumnEvent::hex4 : offset+= 4*cellWidth(); 																break;
+		case ColumnEvent::hex2 : offset+= 2*cellWidth(); break;
+		case ColumnEvent::hex4 : offset+= 4*cellWidth(); break;
 		case ColumnEvent::note : offset+= noteCellWidth(); break;
 		default: ;
 		}
@@ -355,8 +355,8 @@ int PatternGrid::eventColWidth( int eventnr ) const
 		const ColumnEvent & event = events_.at(eventnr);
 
 		switch ( event.type() ) {
-		case ColumnEvent::hex2 : eventColWidth_= cellWidth(); 																break;
-		case ColumnEvent::hex4 : eventColWidth_= cellWidth(); 																break;
+		case ColumnEvent::hex2 : eventColWidth_= cellWidth(); break;
+		case ColumnEvent::hex4 : eventColWidth_= cellWidth(); break;
 		case ColumnEvent::note : eventColWidth_= noteCellWidth(); break;
 		default: ;
 		}
@@ -371,8 +371,8 @@ int PatternGrid::eventWidth( int eventnr ) const
 		const ColumnEvent & event = events_.at(eventnr);
 
 		switch ( event.type() ) {
-		case ColumnEvent::hex2 : eventWidth= cellWidth()*2; 																break;
-		case ColumnEvent::hex4 : eventWidth= cellWidth()*4; 																break;
+		case ColumnEvent::hex2 : eventWidth= cellWidth()*2; break;
+		case ColumnEvent::hex4 : eventWidth= cellWidth()*4; break;
 		case ColumnEvent::note : eventWidth= noteCellWidth(); break;
 		default: ;
 		}
@@ -380,12 +380,12 @@ int PatternGrid::eventWidth( int eventnr ) const
 	return eventWidth;
 }
 
-int PatternGrid::noteCellWidth( ) const {            																
+int PatternGrid::noteCellWidth( ) const {
 	return cellWidth() * 3;
 }
 
 void PatternGrid::drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color)
-{																																																																																
+{
 	painter->setPen( color );
 	int col = 0;
 	int yOff = (line+1) * lineHeight();
@@ -406,7 +406,7 @@ void PatternGrid::drawStringData( QPainter *painter, int xOff, int line, const s
 
 void PatternGrid::drawString( QPainter *painter, int track, int line, int eventnr, const std::string & data , const QColor & color ) 
 {
-//																int yOff = line * lineHeight();
+	//int yOff = line * lineHeight();
 	painter->setPen( color );
 	std::map<int, TrackGeometry>::const_iterator it;
 	it = trackGeometrics().lower_bound( track );
@@ -666,7 +666,7 @@ void PatternGrid::doInstrumentEvent( int keyChar )
 
 	// Move the cursor.
 	if ( cursor().col() == 0 ) {
-		moveCursor( 1, 0 );																																																
+		moveCursor( 1, 0 );
 	} else {
 		moveCursor( -1, patternStep() );
 		checkDownScroll( cursor() );
@@ -680,7 +680,7 @@ void PatternGrid::doMachineSelectionEvent( int keyChar )
 	patEvent.setMachine( newByte );
 	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
 	if ( cursor().col() == 0 ) {
-		moveCursor(1,0);																																																
+		moveCursor(1,0);
 	} else {
 		moveCursor( -1, patternStep() );
 		checkDownScroll( cursor() );
@@ -694,7 +694,7 @@ void PatternGrid::doVolumeEvent( int keyChar )
 	patEvent.setVolume( newByte );
 	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
 	if (cursor().col() == 0) {
-		moveCursor(1,0);																																																
+		moveCursor(1,0);
 	} else {
 		moveCursor(-1, patternStep() );
 	}
@@ -718,7 +718,7 @@ void PatternGrid::doCommandOrParameterEvent( int keyChar )
 			patEvent.setCommand( newByte );
 		} else {
 			psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
-			pc.first = newByte;																																																																																
+			pc.first = newByte;
 		}
 		pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
 		moveCursor(1,0);
@@ -735,20 +735,20 @@ void PatternGrid::doCommandOrParameterEvent( int keyChar )
 			patEvent.setParameter( newByte );
 		} else {
 			psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
-			pc.second = newByte;																																																																																
+			pc.second = newByte;
 		}
 		pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
 		if (cursor().col() < 3) {
-			moveCursor(1,0);																																																
+			moveCursor(1,0);
 		} else {
 			moveCursor(-3, patternStep() );
 			checkDownScroll( cursor() );
 		}
-	}																																																
+	}
 }
 
 void PatternGrid::drawSelBg( QPainter *painter, Selection selArea )
-{																																																
+{
 	if ( !selArea.isEmpty() ) {
 		int xStart = patDraw_->xOffByTrack( selArea.left() );
 		int yStart = selArea.top()  * lineHeight() ;
@@ -960,7 +960,7 @@ void PatternGrid::moveCursor( int dx, int dy)
 	// dy in lines
 	oldCursor_ = cursor_;
 	int eventnr = cursor().eventNr();
-	if ( dx > 0 ) {																																																
+	if ( dx > 0 ) {
 		if ( eventnr < events_.size() ) 
 		{
 			const ColumnEvent & event = events_.at( eventnr );
@@ -990,7 +990,7 @@ void PatternGrid::moveCursor( int dx, int dy)
 		} else if ( cursor_.eventNr() > 0 ) {
 			cursor_.setEventNr( cursor_.eventNr() - 1 );
 			const ColumnEvent & event = events_.at( cursor_.eventNr() );
-			cursor_.setCol( event.cols() - 1 );																																																																																
+			cursor_.setCol( event.cols() - 1 );
 		} else if ( cursor_.track() > 0 ) {
 			cursor_.setTrack( cursor_.track() -1 );
 			cursor_.setEventNr( visibleEvents( cursor_.track() -1 )-1 );
@@ -1371,14 +1371,14 @@ PatCursor PatternGrid::intersectCell( int x, int y )
 	int offset = 3/*colIdent*/ + patDraw_->trackPaddingLeft();
 	int lastOffset = 3/*colIdent*/ + patDraw_->trackPaddingLeft();
 	for ( ; it < events_.end(); it++, nr++ ) 
-	{																																																																
-		const ColumnEvent & event = *it;																																																																
+	{
+		const ColumnEvent & event = *it;
 		switch ( event.type() ) 
 		{
-		case ColumnEvent::hex2 : offset+= 2*cellWidth(); 																break;
-		case ColumnEvent::hex4 : offset+= 4*cellWidth(); 																break;
-		case ColumnEvent::note : offset+= noteCellWidth(); break;
-		default: ;
+			case ColumnEvent::hex2 : offset+= 2*cellWidth(); break;
+			case ColumnEvent::hex4 : offset+= 4*cellWidth(); break;
+			case ColumnEvent::note : offset+= noteCellWidth(); break;
+			default: ;
 		}
 		if (offset > colOff) {
 			// found our event
@@ -1388,7 +1388,7 @@ PatCursor PatternGrid::intersectCell( int x, int y )
 				int cellStart = colOff - lastOffset;
 				int col = cellStart  / cellWidth();
 				return PatCursor(track,line,nr,col);
-			}																																																
+			}
 		}
 		lastOffset = offset;
 	}
@@ -1464,8 +1464,8 @@ int PatternGrid::visibleColWidth( int maxEvents ) const
 		const ColumnEvent & event = *it;
 
 		switch ( event.type() ) {
-		case ColumnEvent::hex2 : offset+= 2*cellWidth(); 																break;
-		case ColumnEvent::hex4 : offset+= 4*cellWidth(); 																break;
+		case ColumnEvent::hex2 : offset+= 2*cellWidth(); break;
+		case ColumnEvent::hex4 : offset+= 4*cellWidth(); break;
 		case ColumnEvent::note : offset+= noteCellWidth(); break;
 		default: ;
 		}
@@ -1486,7 +1486,7 @@ void PatternGrid::checkLeftScroll( const PatCursor & cursor )
 	int viewX = foo.x();
 	if ( viewX < 0 ) {
 		patDraw_->horizontalScrollBar()->setValue( patDraw_->xOffByTrack( std::max( cursor.track(), 0 ) ) );
-	}																
+	}
 }
 
 void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
@@ -1549,7 +1549,7 @@ void PatternGrid::navBottom()
 	if ( ft2HomeEndBehaviour() ) {
 		cursor_.setLine( endLineNumber() );
 		checkDownScroll( cursor() );
-	} else {																																
+	} else {
 		TrackGeometry trackGeom = patDraw()->findTrackGeomByTrackNum( cursor().track() );
 
 		if ( cursor().eventNr() != trackGeom.visibleColumns() - 1 ) {
@@ -1663,22 +1663,8 @@ void PatternGrid::unmarkBlock()
 	update( boundingRect() );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/*****************************************************************************/
+// ColumnEvent implementation
 
 ColumnEvent::ColumnEvent( ColumnEvent::ColType type ) {
 	type_ = type;
@@ -1706,12 +1692,11 @@ int ColumnEvent::cols() const {
 		default: ;
 	}
 	return cols_;
-}																																
-// end of ColumnEvent
+}
 
-//
-// start of PatCursor class
-//
+/*****************************************************************************/
+// PatCursor implementation
+
 PatCursor::PatCursor() :
 	track_(0), 
 	line_(0), 
@@ -1770,4 +1755,3 @@ void PatCursor::setCol( int col) {
 int PatCursor::col() const {
 	return col_;
 }
-

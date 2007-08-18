@@ -120,7 +120,7 @@ void MachineTweakDlg::initParameterGui()
 	int cols = pMachine_->GetNumCols();
 	int rows = numParameters/cols;
 	// Various checks for "non-standard" windows ( lots of parameters, or "odd" parameter numbers)
-	if (rows>24)																																																																// check for "too big" windows
+	if (rows>24) // check for "too big" windows
 	{
 		rows=24;
 		cols=numParameters/24;
@@ -160,7 +160,7 @@ void MachineTweakDlg::initParameterGui()
 				connect( knobGroup, SIGNAL( changed( KnobGroup* ) ),
 						this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
 				knobPanelLayout->addWidget( knobGroup, y, x );
-			}																																																																																																																																																																																																																																																																																																																																
+			}
 		} else {
 			// knob hole
 			knobPanelLayout->addWidget( new QLabel(""), y, x );
@@ -176,9 +176,9 @@ void MachineTweakDlg::initParameterGui()
 }
 
 void MachineTweakDlg::updateValues( )
-{																																																																																																																																																																																																
+{
 	std::map<int, KnobGroup*>::iterator it = knobGroupMap.begin();
-	for ( ; it != knobGroupMap.end(); it++ ) {																																																																
+	for ( ; it != knobGroupMap.end(); it++ ) {
 		int knobIdx = it->first;
 		int min_v,max_v;
 		pMachine_->GetParamRange( knobIdx, min_v, max_v);
@@ -223,7 +223,7 @@ void MachineTweakDlg::showEvent( QShowEvent *event )
 void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 {
 	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
-		reject();																																																																																																																																// Closes the dialog.
+		reject(); // closes the dialog
 	} else {
 		if ( !event->isAutoRepeat() ) {
 			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
@@ -260,7 +260,7 @@ void MachineTweakDlg::randomiseParameters()
 
 		pMachine_->SetParameter(c,random);
 	}
-	updateValues();																																																																
+	updateValues();
 }
 
 void MachineTweakDlg::resetParameters()
@@ -507,10 +507,10 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	completer->setCompletionMode( QCompleter::PopupCompletion );
 	lineEdit->setCompleter(completer);
 	connect( completer, SIGNAL( activated( const QString& ) ),
-			this, SLOT( onCompletionActivated( const QString& ) ) );
-// 																																																																<nmather>says: it might be better to use QCompleter::activated( QModelIndex)
-// 																																																																																																																																 but I had some trouble getting it to work.
-
+		this, SLOT( onCompletionActivated( const QString& ) )
+	);
+	//<nmather>says: it might be better to use QCompleter::activated( QModelIndex)
+	//but I had some trouble getting it to work.
 }
 
 bool PresetsDialog::loadPresets()
@@ -595,17 +595,19 @@ void PresetsDialog::onItemClicked( QListWidgetItem *item )
 
 void PresetsDialog::onSavePreset() 
 {
-// 																																																																char str[32];
-// 																																																																str = lineEdit->text().toStdString().c_str();
-// 																																																																if ( str[0] == '\0' )
-// 																																																																{
-// 																																																																																																																																qDebug("no name");
-// 																																																																																																																																//MessageBox("You have not specified any name. Operation Aborted.","Preset Save Error",MB_OK);
-// 																																																																																																																																return;
-// 																																																																}
-// // 																																																																iniPreset.SetName(str);
-// // 																																																																AddPreset(iniPreset);
-// 																																																																SavePresets();																																																																
+	#if 0
+	char str[32];
+	str = lineEdit->text().toStdString().c_str();
+	if ( str[0] == '\0' )
+	{
+		qDebug("no name");
+		//MessageBox("You have not specified any name. Operation Aborted.","Preset Save Error",MB_OK);
+		return;
+	}
+	//iniPreset.SetName(str);
+	//AddPreset(iniPreset);
+	SavePresets();
+	#endif
 }
 
 // FIXME: should be somewhere else, perhaps global.

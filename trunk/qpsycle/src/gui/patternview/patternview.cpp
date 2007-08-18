@@ -74,7 +74,7 @@ void PatternView::createToolBar()
 			this, SLOT( onPatternStepComboBoxIndexChanged( int ) ) );
 
 	addBarAct_ = new QAction(QIcon(":images/pat_addbar.png"), "Add Bar", this );
-	addBarAct_->setStatusTip( "Add a bar" );																 
+	addBarAct_->setStatusTip( "Add a bar" );
 			
 	delBarAct_ = new QAction(QIcon(":images/pat_delbar.png"), "Delete Bar", this );
 	delBarAct_->setStatusTip( "Delete a bar" );
@@ -93,12 +93,12 @@ void PatternView::createToolBar()
 			this, SLOT( onTracksComboBoxIndexChanged( int ) ) );
 
 	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
-	toolBar_->addWidget ( tracksCbx_ );																 
+	toolBar_->addWidget ( tracksCbx_ );
 	toolBar_->addSeparator();
 	toolBar_->addWidget( new QLabel( "Step: " ) );
 	toolBar_->addWidget( patStepCbx_ );
 	toolBar_->addSeparator();
-	toolBar_->addAction( addBarAct_ );																
+	toolBar_->addAction( addBarAct_ );
 	toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
 	toolBar_->addAction( recordCb_ );
@@ -143,7 +143,7 @@ void PatternView::clearNote( const PatCursor & cursor) {
 void PatternView::onTick( double sequenceStart ) {
 	if ( pattern() ) {
 		int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * beatZoom() );
-		if ( liney != playPos_ ) {																																																
+		if ( liney != playPos_ ) {
 			int oldPlayPos = playPos_;
 			playPos_ = liney;
 			int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
