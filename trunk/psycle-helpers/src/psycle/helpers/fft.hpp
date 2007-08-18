@@ -29,18 +29,12 @@
 	you need to use doubles.
 
 **********************************************************************/
-namespace psycle
-{
-	namespace host
-	{
-		namespace dsp
-		{
+namespace psycle { namespace host { namespace dsp {
+	#ifndef M_PI
+		#define M_PI 3.14159265358979323846
+	#endif
 
-#ifndef M_PI
-#define				M_PI								3.14159265358979323846  /* pi */
-#endif
-
-/*
+	/**
 	* This is the function you will use the most often.
 	* Given an array of floats, this will compute the power
 	* spectrum by doing a Real FFT and then computing the
@@ -48,30 +42,27 @@ namespace psycle
 	* Note that the output array is half the length of the
 	* input array, and that NumSamples must be a power of two.
 	*/
+	void PowerSpectrum(int NumSamples, float *In, float *Out);
 
-void PowerSpectrum(int NumSamples, float *In, float *Out);
-
-/*
+	/**
 	* Computes an FFT when the input data is real but you still
 	* want complex data as output.  The output arrays are half
 	* the length of the input, and NumSamples must be a power of
 	* two.
 	*/
+	void RealFFT(int NumSamples,
+					float *RealIn, float *RealOut, float *ImagOut);
 
-void RealFFT(int NumSamples,
-				float *RealIn, float *RealOut, float *ImagOut);
-
-/*
+	/**
 	* Computes a FFT of complex input and returns complex output.
 	* Currently this is the only function here that supports the
 	* inverse transform as well.
 	*/
+	void FFT(int NumSamples,
+				bool InverseTransform,
+				float *RealIn, float *ImagIn, float *RealOut, float *ImagOut);
 
-void FFT(int NumSamples,
-			bool InverseTransform,
-			float *RealIn, float *ImagIn, float *RealOut, float *ImagOut);
-
-/*
+	/**
 	* Applies a windowing function to the data in place
 	*
 	* 0: Rectangular (no window)
@@ -79,20 +70,14 @@ void FFT(int NumSamples,
 	* 2: Hamming
 	* 3: Hanning
 	*/
+	void WindowFunc(int whichFunction, int NumSamples, float *data);
 
-void WindowFunc(int whichFunction, int NumSamples, float *data);
+	/// Returns the name of the windowing function (for UI display)
+	const char * WindowFuncName(int whichFunction);
 
-/*
-	* Returns the name of the windowing function (for UI display)
-	*/
-
-const char * WindowFuncName(int whichFunction);
-
-/*
-	* Returns the number of windowing functions supported
-	*/
-
-int NumWindowFuncs();
+	/// Returns the number of windowing functions supported
+	int NumWindowFuncs();
+}}}
 
 // Indentation settings for Vim and Emacs and unique identifier for Arch, a
 // version control system. Please do not modify past this point.
@@ -104,7 +89,3 @@ int NumWindowFuncs();
 //
 // vim: et sts=3 sw=3
 // arch-tag: 91e23340-889b-4c2d-89b0-0173315a0b32
-
-		}
-	}
-}

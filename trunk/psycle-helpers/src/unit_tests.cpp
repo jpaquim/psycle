@@ -4,7 +4,7 @@
 //BOOST_AUTO_TEST_SUITE(psycle)
 //BOOST_AUTO_TEST_SUITE_END
 
-#if 0	
+#if 0
 	BOOST_AUTO_TEST_CASE(fail)
 	{
 		BOOST_CHECK(1 == 1);

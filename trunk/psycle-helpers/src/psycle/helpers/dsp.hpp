@@ -6,77 +6,73 @@
 #include "math/truncated.hpp"
 #include <universalis/compiler.hpp>
 #include <cmath>
-namespace psycle
-{
-	namespace helpers
+namespace psycle { namespace helpers { namespace dsp {
+
+	#if PSYCLE__CONFIGURATION__RMS_VUS
+				extern int numRMSSamples;
+				extern int countRMSSamples;
+				extern double RMSAccumulatedLeft;
+				extern double RMSAccumulatedRight;
+				extern float previousRMSLeft;
+				extern float previousRMSRight;
+	#endif
+
+	/// various signal processing utility functions.
+	/// mixes two signals.
+	inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 	{
-		namespace dsp
+		--pSrcSamples;
+		--pDstSamples;
+		do
 		{
-#if PSYCLE__CONFIGURATION__RMS_VUS
-			extern int numRMSSamples;
-			extern int countRMSSamples;
-			extern double RMSAccumulatedLeft;
-			extern double RMSAccumulatedRight;
-			extern float previousRMSLeft;
-			extern float previousRMSRight;
-#endif
+			*++pDstSamples += *++pSrcSamples * vol;
+		}
+		while (--numSamples);
+	}
+	/// multiply a signal by a ratio, inplace.
+	///\see MovMul()
+	inline void Mul(float *pDstSamples, int numSamples, float mul)
+	{
+		--pDstSamples;
+		do
+		{
+			*++pDstSamples *= mul;
+		}
+		while (--numSamples);
+	}
+	/// multiply a signal by a ratio.
+	///\see Mul()
+	inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
+	{
+		--pSrcSamples;
+		--pDstSamples;
+		do
+		{
+			*++pDstSamples = *++pSrcSamples*mul;
+		}
+		while (--numSamples);
+	}
+	inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
+	{
+		std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
+	}
+	/// zero-out a signal buffer.
+	inline void Clear(float *pDstSamples, int numSamples)
+	{
+		std::memset(pDstSamples, 0, numSamples * sizeof(float));
+	}
 
-		/// various signal processing utility functions.
-		/// mixes two signals.
-		inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
-		{
-			--pSrcSamples;
-			--pDstSamples;
-			do
-			{
-				*++pDstSamples += *++pSrcSamples * vol;
-			}
-			while (--numSamples);
-		}
-		/// multiply a signal by a ratio, inplace.
-		///\see MovMul()
-		inline void Mul(float *pDstSamples, int numSamples, float mul)
-		{
-			--pDstSamples;
-			do
-			{
-				*++pDstSamples *= mul;
-			}
-			while (--numSamples);
-		}
-		/// multiply a signal by a ratio.
-		///\see Mul()
-		inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
-		{
-			--pSrcSamples;
-			--pDstSamples;
-			do
-			{
-				*++pDstSamples = *++pSrcSamples*mul;
-			}
-			while (--numSamples);
-		}
-		inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
-		{
-			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
-		}
-		/// zero-out a signal buffer.
-		inline void Clear(float *pDstSamples, int numSamples)
-		{
-			std::memset(pDstSamples, 0, numSamples * sizeof(float));
-		}
+	/// converts a double to a std::uint32_t
+	///\todo specify the rounding mode!
+	inline std::int32_t F2I(double d) UNIVERSALIS__COMPILER__CONST
+	{
+		return math::truncated(d);
+	}
 
-		/// converts a double to a std::uint32_t
-		///\todo specify the rounding mode!
-		inline std::int32_t F2I(double d) UNIVERSALIS__COMPILER__CONST
-		{
-			return math::truncated(d);
-		}
-
-		/// finds the maximum amplitude in a signal buffer.
-		inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
-		{
-#if PSYCLE__CONFIGURATION__RMS_VUS
+	/// finds the maximum amplitude in a signal buffer.
+	inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+	{
+		#if PSYCLE__CONFIGURATION__RMS_VUS
 			// This is just a test to get RMS dB values.
 			// Doesn't look that better, and uses more CPU. 
 			float *pL = pSamplesL;
@@ -104,8 +100,7 @@ namespace psycle
 				countRMSSamples++;
 			};
 			return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
-
-#else
+		#else
 			// This is the usual code, peak value
 			--pSamplesL;
 			--pSamplesR;
@@ -128,8 +123,8 @@ namespace psycle
 				}
 			while (--numSamples);
 			return vol;
-#endif
-		}
+		#endif
+	}
 
 	#if 0
 		/// finds the maximum amplitude in a signal buffer.
@@ -139,10 +134,14 @@ namespace psycle
 		{
 			return GetMaxVol(pSamplesL,pSamplesR,numSamples);
 		}
+		
+		///\todo doc
 		static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
 		{
 			return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
 		}
+		
+		///\todo doc
 		static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
 		{
 			--pSamplesL;
@@ -160,55 +159,55 @@ namespace psycle
 		}
 	#endif
 
-		/// Cure for malicious samples
-		/// Type : Filters Denormals, NaNs, Infinities
-		inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
-		{
-			#if 1
-				math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
-				math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
-			#else
-				// a 1-bit "sinus" dither
-				float id(float(1.0E-18));
-				for(unsigned int s(0); s < numSamples; ++s)
-				{
-					pSamplesL[s] += id;
-					pSamplesR[s] += id;
-					id = -id;
-				}
-			#endif
-		}
-
-		///\todo doc
-		/// amplitude normalized to 1.0f.
-		inline float dB(float amplitude) UNIVERSALIS__COMPILER__CONST
-		{
-			return 20.0f * std::log10f(amplitude);
-		}
-
-		///\todo doc
-		inline float dB2Amp(float db) UNIVERSALIS__COMPILER__CONST
-		{
-			return std::pow(10.0f,db/20.0f);
-		}
-
-		/// sample interpolator kinds.
-		///\todo typdef should be inside the Resampler or Cubic class itself.
-			enum ResamplerQuality
+	/// Cure for malicious samples
+	/// Type : Filters Denormals, NaNs, Infinities
+	inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
+	{
+		#if 1
+			math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
+			math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
+		#else
+			// a 1-bit "sinus" dither
+			float id(float(1.0E-18));
+			for(unsigned int s(0); s < numSamples; ++s)
 			{
-				R_NONE  = 0,
-				R_LINEAR,
-				R_SPLINE,
-				R_BANDLIM
-			};
+				pSamplesL[s] += id;
+				pSamplesR[s] += id;
+				id = -id;
+			}
+		#endif
+	}
 
-		/// interpolator work function.
-		///\todo typdef should be inside the Resampler class itself.
-		typedef float (*PRESAMPLERFN)(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length);
+	///\todo doc
+	/// amplitude normalized to 1.0f.
+	inline float dB(float amplitude) UNIVERSALIS__COMPILER__CONST
+	{
+		return 20.0f * std::log10f(amplitude);
+	}
 
-		/// sample interpolator.
-		class Resampler
+	///\todo doc
+	inline float dB2Amp(float db) UNIVERSALIS__COMPILER__CONST
+	{
+		return std::pow(10.0f,db/20.0f);
+	}
+
+	/// sample interpolator kinds.
+	///\todo typdef should be inside the Resampler or Cubic class itself.
+		enum ResamplerQuality
 		{
+			R_NONE  = 0,
+			R_LINEAR,
+			R_SPLINE,
+			R_BANDLIM
+		};
+
+	/// interpolator work function.
+	///\todo typdef should be inside the Resampler class itself.
+	typedef float (*PRESAMPLERFN)(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length);
+
+	/// sample interpolator.
+	class Resampler
+	{
 		public:
 			/// constructor
 			Resampler()
@@ -229,11 +228,11 @@ namespace psycle
 			{
 				return *pData;
 			}
-		};
+	};
 
-		/// cubic sample interpolator.
-		class Cubic : public Resampler
-		{
+	/// cubic sample interpolator.
+	class Cubic : public Resampler
+	{
 		public:
 			/// constructor.
 			Cubic();
@@ -285,26 +284,28 @@ namespace psycle
 			// y1 = y[1]  [sample at x+1]
 			// y2 = y[2]  [sample at x+2]
 			
-			// res= distance between two neighboughing sample points [y0 and y1] 
-			//								,so [0...1.0]. You have to multiply this distance * RESOLUTION used
-			//								on the spline conversion table. [2048 by default]
+			// res= distance between two neighboughing sample points [y0 and y1], so [0...1.0].
+			// You have to multiply this distance * RESOLUTION used
+			// on the spline conversion table. [2048 by default]
 			// If you are using 2048 is asumed you are using 12 bit decimal
 			// fixed point offsets for resampling.
 			
 			// offset = sample offset [info to avoid go out of bounds on sample reading ]
 			// length = sample length [info to avoid go out of bounds on sample reading ]
 
-
-			//either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
-			//make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
-			#define SINC_RESOLUTION 512				//sinc table values per zero crossing -- keep it a power of 2!!
-			#define SINC_ZEROS 11				//sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
+			// either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
+			// make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
+			
+			/// sinc table values per zero crossing -- keep it a power of 2!!
+			#define SINC_RESOLUTION 512
+			/// sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
+			#define SINC_ZEROS 11
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.
 			static float Bandlimit(const short *pData,  std::uint64_t offset,  std::uint32_t res,  std::uint64_t length)
 			{
-				res = res>>23;								//!!!assumes SINC_RESOLUTION == 512!!!
+				res = res>>23; //!!!assumes SINC_RESOLUTION == 512!!!
 				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
 				if(offset<SINC_ZEROS) leftExtent=offset;
 				if(length-offset<SINC_ZEROS) rightExtent=length-offset;
@@ -315,26 +316,18 @@ namespace psycle
 				newval += sincTable[res] * *(pData);
 				float sincIndex(sincInc+res);
 				float weight(sincIndex - floor(sincIndex));
-				for(				int i(1);
-						i < leftExtent;
-						++i, sincIndex+=sincInc
-						)
+				for(int i(1); i < leftExtent; ++i, sincIndex+=sincInc)
 					newval+= (sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData-i);
 
 				sincIndex = sincInc-res;
 				weight = sincIndex - floor(sincIndex);
-				for(				int i(1);
-						i < rightExtent;
-						++i, sincIndex+=sincInc
-						)
+				for(int i(1); i < rightExtent; ++i, sincIndex+=sincInc)
 					newval += ( sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData+i);
 
 				return newval;
 			}
-
 			
 		private:
-
 			/// Currently is 2048
 			static int _resolution;
 			/// 
@@ -345,15 +338,13 @@ namespace psycle
 			static float _dTable[CUBIC_RESOLUTION];
 			static float _lTable[CUBIC_RESOLUTION];
 
-			//sinc function table
+			/// sinc function table
 			static float sincTable[SINC_TABLESIZE];
-			//table of deltas between sincTable indices.. sincDelta[i] = sincTable[i+1] - sincTable[i]
-			//used to speed up linear interpolation of sinc table-- this idea stolen from libresampler
+			/// table of deltas between sincTable indices.. sincDelta[i] = sincTable[i+1] - sincTable[i]
+			/// used to speed up linear interpolation of sinc table-- this idea stolen from libresampler
 			static float sincDelta[SINC_TABLESIZE];
-			//note: even with this optimization, interpolating the sinc table roughly doubles the cpu usage on my machine.
+			// note: even with this optimization, interpolating the sinc table roughly doubles the cpu usage on my machine.
 			// since we're working in realtime here, it may be best to just make SINC_RESOLUTION a whole lot bigger, and drop
 			// the table interpolation altogether..
-		};
-		}
-	}
-}
+	};
+}}}
