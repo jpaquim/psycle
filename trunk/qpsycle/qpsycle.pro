@@ -38,7 +38,6 @@ HEADERS += src/gui/mainwindow.h \
     src/gui/inputhandler.h \
     src/gui/patternbox.h \
     src/gui/configdlg/audioconfigdlg.h \
-	src/gui/configdlg/configlist.h \
     src/gui/samplebrowser.h \
     src/gui/logconsole.h \
     src/gui/machineview/machinegui.h \
@@ -71,7 +70,6 @@ SOURCES += qpsycle.cpp \
     src/gui/inputhandler.cpp \
     src/gui/patternbox.cpp \
     src/gui/configdlg/audioconfigdlg.cpp \
-	src/gui/configdlg/configlist.cpp \
     src/gui/samplebrowser.cpp \
 	src/gui/logconsole.cpp \
     src/gui/machineview/machinegui.cpp \
@@ -97,9 +95,9 @@ SOURCES += qpsycle.cpp \
     src/gui/waveview/wavedisplay.cpp \
     src/gui/waveview/waveamp.cpp
 RESOURCES += qpsycle.qrc
-win32 { 
-    message("Adding resources $$RESOURCES") # only for icon?
-    RC_FILE = qpsycle.rc
+win32 {
+    RC_FILE = qpsycle.rc 
+    message("Adding  $$RC_FILE for executable icon")
 }
 include(../psycle-core/qmake/psycle-core.pri)
 include(../psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
