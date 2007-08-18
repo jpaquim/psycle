@@ -11,6 +11,10 @@ namespace psycle { namespace helpers { namespace math {
 	{
 		return x > 0 ? std::floor(x + Real(0.5)) : std::ceil(x - Real(0.5));
 	}
+}}}
+
+// inline implementation
+namespace psycle { namespace helpers { namespace math {
 	
 	#if __STDC__VERSION__ >= 199901 || \
 		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
