@@ -5,6 +5,7 @@
 #include <psycle/helpers/helpers.hpp>
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include "Helpers.hpp"
+#include <xmmintrin.h>
 //#include <dspguru\resamp.h>
 //#include <dspguru\interp25.inc>
 namespace psycle
@@ -32,12 +33,11 @@ namespace psycle
 			#define IS_DENORMAL(f) (!((*(unsigned int *)&f)&0x7f800000))	
 
 			/// various signal processing utility functions.
-			/// mixes two signals.
+			/// mixes two signals. memory should be aligned by 16 in optimized paths.
 			inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 			{
-				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-					// This code assumes aligned memory (to 16) and assigned by powers of 4!
-					_asm
+				#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+/*					_asm
 					{
 						movss xmm2, vol
 						shufps xmm2, xmm2, 0H
@@ -58,6 +58,19 @@ namespace psycle
 						jmp LOOPSTART
 					END:
 					}
+*/
+					__m128 volps = _mm_set_ps1(vol);
+					__m128 *psrc = (__m128*)pSrcSamples;
+					__m128 *pdst = (__m128*)pDstSamples;
+
+					do
+					{
+						__m128 tmpps = _mm_mul_ps(*psrc,volps);
+						*pdst = _mm_add_ps(*pdst,tmpps);
+						psrc++;
+						pdst++;
+						numSamples-=4;
+					}while(numSamples>0);
 				#else
 					--pSrcSamples;
 					--pDstSamples;
@@ -73,8 +86,8 @@ namespace psycle
 			///\see MovMul()
 			inline void Mul(float *pDstSamples, int numSamples, float multi)
 			{
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-				// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+/*				// This code assumes aligned memory (to 16) and assigned by powers of 4!
 				_asm
 				{
 					movss xmm2, multi
@@ -92,6 +105,14 @@ namespace psycle
 					jmp LOOPSTART
 				END:
 				}
+*/				__m128 volps = _mm_set_ps1(multi);
+				__m128 *pdst = (__m128*)pDstSamples;
+				do
+				{
+					*pdst = _mm_mul_ps(*pdst,volps);
+					pdst++;
+					numSamples-=4;
+				}while(numSamples>0);
 			#else
 				--pDstSamples;
 				do
@@ -106,8 +127,8 @@ namespace psycle
 			///\see Mul()
 			inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 			{
-				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-					// This code assumes aligned memory (to 16) and assigned by powers of 4!
+				#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+/*					// This code assumes aligned memory (to 16) and assigned by powers of 4!
 					_asm
 					{
 						movss xmm2, multi
@@ -127,6 +148,17 @@ namespace psycle
 						jmp LOOPSTART
 					END:
 					}
+*/					__m128 volps = _mm_set_ps1(multi);
+					__m128 *psrc = (__m128*)pSrcSamples;
+
+					do
+					{
+						__m128 tmpps = _mm_mul_ps(*psrc,volps);
+						_mm_storeu_ps(pDstSamples,tmpps);
+						psrc++;
+						pDstSamples+=4;
+						numSamples-=4;
+					}while(numSamples>0);
 				#else
 					--pSrcSamples;
 					--pDstSamples;
@@ -140,8 +172,8 @@ namespace psycle
 
 			inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 			{
-				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-					// This code assumes aligned memory (to 16) and assigned by powers of 4!
+				#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+/*					// This code assumes aligned memory (to 16) and assigned by powers of 4!
 					_asm
 					{
 						mov esi, pSrcSamples
@@ -158,6 +190,14 @@ namespace psycle
 						jmp LOOPSTART
 					END:
 					}
+*/					do
+					{
+						__m128 tmpps = _mm_load_ps(pSrcSamples);
+						_mm_storeu_ps(pDstSamples,tmpps);
+						pSrcSamples+=4;
+						pDstSamples+=4;
+						numSamples-=4;
+					}while(numSamples>0);
 				#else
 					std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
 				#endif
@@ -166,8 +206,8 @@ namespace psycle
 			/// zero-out a signal buffer.
 			inline void Clear(float *pDstSamples, int numSamples)
 			{
-				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-					// This code assumes aligned memory (to 16) and assigned by powers of 4!
+				#if defined DIVERSALIS__PROCESSOR__X86 && (defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+/*					// This code assumes aligned memory (to 16) and assigned by powers of 4!
 					_asm
 					{
 						xorps xmm0, xmm0
@@ -182,6 +222,14 @@ namespace psycle
 						jmp LOOPSTART
 					END:
 					}
+*/					__m128 zeroval = _mm_set_ps1(0.0f);
+
+					do
+					{
+						_mm_store_ps(pDstSamples,zeroval);
+						pDstSamples+=4;
+						numSamples-=4;
+					}while(numSamples>0);
 				#else
 					std::memset(pDstSamples, 0, numSamples * sizeof(float));
 				#endif
