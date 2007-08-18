@@ -84,18 +84,18 @@ void MachineView::createMachineGuis()
 MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 {
 	MachineGui *macGui;
-	switch ( mac->mode() ) {																																																																																																																																																																																																																																																																																																																																																																																																																																																																
+	switch ( mac->mode() ) {
 		case psy::core::MACHMODE_GENERATOR:
-		macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+			macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
 		break;
 		case psy::core::MACHMODE_FX:
-		macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+			macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
 		break;
 		case psy::core::MACHMODE_MASTER: 
-		macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+			macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
 		break;
 		default:
-		macGui = 0;
+			macGui = 0;
 	}
 
 	if ( macGui ) {
@@ -287,12 +287,12 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	it = std::find( wireGui->sourceMacGui()->wireGuiList_.begin(),
 			wireGui->sourceMacGui()->wireGuiList_.end(), wireGui );
 	if ( it != wireGui->sourceMacGui()->wireGuiList_.end() ) {
-		wireGui->sourceMacGui()->wireGuiList_.erase(it);																																																																
+		wireGui->sourceMacGui()->wireGuiList_.erase(it);
 		}  
 	it = std::find( wireGui->destMacGui()->wireGuiList_.begin(),
 			wireGui->destMacGui()->wireGuiList_.end(), wireGui );
 	if ( it != wireGui->destMacGui()->wireGuiList_.end() ) {
-		wireGui->destMacGui()->wireGuiList_.erase(it);																																																																
+		wireGui->destMacGui()->wireGuiList_.erase(it);
 		}  
 	scene()->removeItem( wireGui );
 	delete wireGui;
@@ -455,7 +455,7 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 	psy::core::PatternEvent entry;
 	entry.setNote( note );
 	entry.setInstrument( song()->auxcolSelected );
-//    entry.setMachine( song()->seqBus );																																																																// Not really needed.
+	//entry.setMachine( song()->seqBus ); // Not really needed.
 
 	entry.setCommand( 0 );
 	entry.setParameter( 0 );
@@ -471,8 +471,8 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 	}
 
 	if (pMachine) {
-		// pick a track to play it on																																																																
-		//        if(bMultiKey)
+		// pick a track to play it on
+		//if(bMultiKey)
 		{
 			int i;
 			for (i = outtrack+1; i < song()->tracks(); i++)
@@ -490,7 +490,7 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 			}
 			outtrack = i;
 		}// else  {
-		//   outtrack=0;
+			//outtrack=0;
 		//}
 		// this should check to see if a note is playing on that track
 		if (notetrack[outtrack] < 120) {
@@ -733,7 +733,7 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 		if (accepted) { // Add a new machine to the song.
 			psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
 
-			// Create machine, tell where to place the new machine--get from mouse.																																																																  
+			// Create machine, tell where to place the new machine--get from mouse.
 			psy::core::Machine *mac = macView_->song()->createMachine( pluginFinder_, key, event->scenePos().x(), event->scenePos().y() );
 			if ( mac ) {
 				macView_->addNewMachineGui( mac );

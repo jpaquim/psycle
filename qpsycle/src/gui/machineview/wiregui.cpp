@@ -57,23 +57,25 @@
 		setDestMacGui( destMacGui );
 	}
 
-WireGui::~WireGui()
-{
-//																																																																sourceMacGui()->wireGuiList().removeAll( this );
-//																																																																destMacGui()->wireGuiList().removeAll( this );
-// 																																																																QList<WireGui*>::iterator it = sourceMacGui()->wireGuiList().begin();
-// 																																																																for ( ; it != sourceMacGui()->wireGuiList().end(); it++ ) {
-// 																																																																																																																																if ( *it == this ) {
-// 																																																																																																																																																																																																sourceMacGui()->wireGuiList().erase( it );
-// 																																																																																																																																}
-// 																																																																}
-// 																																																																it = destMacGui()->wireGuiList().begin();
-// 																																																																for ( ; it != destMacGui()->wireGuiList().end(); it++ ) {
-// 																																																																																																																																if ( *it == this ) {
-// 																																																																																																																																																																																																destMacGui()->wireGuiList().erase( it );
-// 																																																																																																																																}
-// 																																																																}
-}
+	WireGui::~WireGui()
+	{
+		#if 0
+		sourceMacGui()->wireGuiList().removeAll( this );
+		destMacGui()->wireGuiList().removeAll( this );
+		QList<WireGui*>::iterator it = sourceMacGui()->wireGuiList().begin();
+		for ( ; it != sourceMacGui()->wireGuiList().end(); it++ ) {
+			if ( *it == this ) {
+				sourceMacGui()->wireGuiList().erase( it );
+			}
+		}
+		it = destMacGui()->wireGuiList().begin();
+		for ( ; it != destMacGui()->wireGuiList().end(); it++ ) {
+			if ( *it == this ) {
+				destMacGui()->wireGuiList().erase( it );
+			}
+		}
+		#endif
+	}
 
 	MachineGui *WireGui::sourceMacGui() 
 	{
