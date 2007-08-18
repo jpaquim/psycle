@@ -38,7 +38,7 @@ InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 		buffer << std::setfill('0') << std::hex << std::setw(2);
 		buffer << row << ": " << song_->_pInstrument[row]->_sName;
 		QString name = QString::fromStdString( buffer.str() );
-		QStandardItem *item = new QStandardItem( name );																																
+		QStandardItem *item = new QStandardItem( name );
 		appendRow( item );
 	}
 }
@@ -56,7 +56,7 @@ bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 	{
 		QStandardItem *tempItem = item( instrIndex );
 		std::ostringstream buffer;
-		buffer.setf(std::ios::uppercase);																																																       
+		buffer.setf(std::ios::uppercase);
 		buffer.str("");
 		buffer << std::setfill('0') << std::hex << std::setw(2);
 		buffer << instrIndex << ": " << song_->_pInstrument[instrIndex]->_sName;
@@ -86,7 +86,7 @@ void InstrumentsModel::clearInstrument( int instrIndex )
 {
 	song_->DeleteInstrument( instrIndex );
 	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);																																																       
+	buffer.setf(std::ios::uppercase);
 	buffer.str("");
 	buffer << std::setfill('0') << std::hex << std::setw(2);
 	buffer << instrIndex << ": " << song_->_pInstrument[instrIndex]->_sName;
