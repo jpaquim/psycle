@@ -18,19 +18,38 @@
 	#include <fenv.h>
 	BOOST_AUTO_TEST_CASE(lrint_test)
 	{
-		//int const previous_feround(fesetround(FE_DOWNWARD));
-		int const previous_feround(fesetround(FE_TONEAREST));
-		//int const previous_feround(fesetround(FE_TOWARDZERO));
-		//int const previous_feround(fesetround(FE_UPWARD));
+		int const initial_feround(fegetround());
 		try {
+			fesetround(FE_TONEAREST);
 			BOOST_CHECK(lrint(+1.6) == +2);
 			BOOST_CHECK(lrint(+1.4) == +1);
 			BOOST_CHECK(lrint(-1.6) == -2);
 			BOOST_CHECK(lrint(-1.4) == -1);
 			BOOST_CHECK(lrint(+2.6) == +3);
 			BOOST_CHECK(lrint(-2.6) == -3);
+			fesetround(FE_TOWARDZERO);
+			BOOST_CHECK(lrint(+1.6) == +1);
+			BOOST_CHECK(lrint(+1.4) == +1);
+			BOOST_CHECK(lrint(-1.6) == -1);
+			BOOST_CHECK(lrint(-1.4) == -1);
+			BOOST_CHECK(lrint(+2.6) == +2);
+			BOOST_CHECK(lrint(-2.6) == -2);
+			fesetround(FE_DOWNWARD);
+			BOOST_CHECK(lrint(+1.6) == +1);
+			BOOST_CHECK(lrint(+1.4) == +1);
+			BOOST_CHECK(lrint(-1.6) == -2);
+			BOOST_CHECK(lrint(-1.4) == -2);
+			BOOST_CHECK(lrint(+2.6) == +2);
+			BOOST_CHECK(lrint(-2.6) == -3);
+			fesetround(FE_UPWARD);
+			BOOST_CHECK(lrint(+1.6) == +2);
+			BOOST_CHECK(lrint(+1.4) == +2);
+			BOOST_CHECK(lrint(-1.6) == -1);
+			BOOST_CHECK(lrint(-1.4) == -1);
+			BOOST_CHECK(lrint(+2.6) == +3);
+			BOOST_CHECK(lrint(-2.6) == -2);
 		} catch(...) {
-			fesetround(previous_feround);
+			fesetround(initial_feround);
 			throw;
 		}
 	}
