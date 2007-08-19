@@ -142,7 +142,9 @@
 				#if defined __i686__
 					#define DIVERSALIS__PROCESSOR
 					#define DIVERSALIS__PROCESSOR__X86 6
-					#if defined __SSE3__
+					#if defined __SSE4__
+						#define DIVERSALIS__PROCESSOR__X86__SSE 4
+					#elif defined __SSE3__
 						#define DIVERSALIS__PROCESSOR__X86__SSE 3
 					#elif defined __SSE2__
 						#define DIVERSALIS__PROCESSOR__X86__SSE 2

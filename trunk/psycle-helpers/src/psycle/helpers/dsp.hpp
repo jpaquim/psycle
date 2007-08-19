@@ -6,19 +6,24 @@
 #include "math/truncate.hpp"
 #include "math/round.hpp"
 #include <universalis/compiler.hpp>
-#include <xmmintrin.h>
+#if defined DIVERSALIS__PROCESSOR__X86__SSE
+	#include <xmmintrin.h>
+#endif
 #include <cmath>
+#include <cstdint>
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {
 
 	///\todo doc
 	/// amplitude normalized to 1.0f.
-	inline float dB(float amplitude) UNIVERSALIS__COMPILER__CONST
+	float inline UNIVERSALIS__COMPILER__CONST
+	dB(float amplitude)
 	{
-		return 20.0f * std::log10f(amplitude);
+		return 20.0f * std::log10(amplitude);
 	}
 
 	///\todo doc
-	inline float dB2Amp(float db) UNIVERSALIS__COMPILER__CONST
+	float inline UNIVERSALIS__COMPILER__CONST
+	dB2Amp(float db)
 	{
 		return std::pow(10.0f, db / 20.0f);
 	}
@@ -40,7 +45,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 	{
 		#if 0 /* disabled */ && \
-			defined DIVERSALIS__PROCESSOR__X86 && \
+			defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__INTEL)
 			__asm
 			{
@@ -63,7 +68,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					jmp LOOPSTART
 				END:
 			}
-		#elif defined DIVERSALIS__PROCESSOR__X86 && \
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
 			__m128 volps = _mm_set_ps1(vol);
 			__m128 *psrc = (__m128*)pSrcSamples;
@@ -87,7 +92,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	inline void Mul(float *pDstSamples, int numSamples, float multi)
 	{
 		#if 0 /* disabled */ && \
-			defined DIVERSALIS__PROCESSOR__X86 && \
+			defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__INTEL)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
@@ -107,7 +112,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					jmp LOOPSTART
 				END:
 			}
-		#elif defined DIVERSALIS__PROCESSOR__X86 && \
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *pdst = (__m128*)pDstSamples;
@@ -128,7 +133,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 	{
 		#if 0 /* disabled */ && \
-			defined DIVERSALIS__PROCESSOR__X86 && \
+			defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__INTEL)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
@@ -171,7 +176,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 	{
 		#if 0 /* disabled */ && \
-			defined DIVERSALIS__PROCESSOR__X86 && \
+			defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__INTEL)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
@@ -190,7 +195,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					jmp LOOPSTART
 				END:
 			}
-		#elif defined DIVERSALIS__PROCESSOR__X86 && \
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
 			do
 			{
@@ -209,7 +214,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	inline void Clear(float *pDstSamples, int numSamples)
 	{
 		#if 0 /* disabled */ && \
-			defined DIVERSALIS__PROCESSOR__X86 && \
+			defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__INTEL)
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
@@ -226,7 +231,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					jmp LOOPSTART
 				END:
 			}
-		#elif defined DIVERSALIS__PROCESSOR__X86 && \
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
 			__m128 zeroval = _mm_set_ps1(0.0f);
 			do
@@ -358,7 +363,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 	/// interpolator work function.
 	///\todo typdef should be inside the Resampler class itself.
-	typedef float (*PRESAMPLERFN)(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length);
+	typedef float (*PRESAMPLERFN)(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
 
 	/// sample interpolator.
 	class Resampler
@@ -375,7 +380,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			/// kind of interpolation.
 			ResamplerQuality _quality;
 			/// interpolation work function which does nothing.
-			static float None(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float None(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
 			{
 				return *pData;
 			}
@@ -413,7 +418,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 		protected:
 			/// interpolation work function which does linear interpolation.
-			static float Linear(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float Linear(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
 			{
 				float y0,y1;
 				y0 = *pData;
@@ -421,7 +426,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				return (y0+(y1-y0)*_lTable[res>>21]);
 			}
 			/// interpolation work function which does spline interpolation.
-			static float Spline(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float Spline(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
 			{
 				float yo, y0,y1, y2;
 				res = res >> 21;
@@ -460,7 +465,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.
-			static float Bandlimit(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+			static float Bandlimit(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
 			{
 				res = res>>23; //!!!assumes SINC_RESOLUTION == 512!!!
 				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
@@ -492,7 +497,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 			/****************************************************************************/
 			#if 0
-				static float FIRResampling(const short *pData, unsigned __int64 offset, unsigned __int32 res, unsigned __int64 length)
+				static float FIRResampling(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
 
 				static float FIRResampling(
 					int interp_factor, int decim_factor, int inp_size, const double *p_H,

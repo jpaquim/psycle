@@ -55,7 +55,8 @@ namespace psycle { namespace helpers {
 	};
 
 	///\todo doc
-	inline float fast_log2(float f) UNIVERSALIS__COMPILER__CONST
+	inline float UNIVERSALIS__COMPILER__CONST
+	fast_log2(float f)
 	{
 		return math::fast_log2(f);
 	}
@@ -77,8 +78,8 @@ namespace psycle { namespace helpers {
 	}
 
 	/// clipping.
-	template<unsigned int const bits>
-	typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f) UNIVERSALIS__COMPILER__CONST
+	template<unsigned int const bits> UNIVERSALIS__COMPILER__CONST
+	typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f)
 	{
 		typedef typename universalis::compiler::numeric<bits>::signed_int result_type;
 		typedef std::numeric_limits<result_type> type_traits;
@@ -88,7 +89,8 @@ namespace psycle { namespace helpers {
 	}
 
 	/// clipping.
-	inline int f2iclip16(float f) UNIVERSALIS__COMPILER__CONST
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip16(float f)
 	{ 
 		int const l(32767);
 		if(f < -l) return -l;
@@ -97,7 +99,8 @@ namespace psycle { namespace helpers {
 	}
 
 	/// clipping.
-	inline int f2iclip18(float f) UNIVERSALIS__COMPILER__CONST
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip18(float f)
 	{ 
 		int const l(131071);
 		if(f < -l) return -l;
@@ -106,7 +109,8 @@ namespace psycle { namespace helpers {
 	}
 
 	/// clipping.
-	inline int f2iclip20(float f) UNIVERSALIS__COMPILER__CONST
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip20(float f)
 	{ 
 		int const l(524287);
 		if(f < -l) return -l;
@@ -115,7 +119,8 @@ namespace psycle { namespace helpers {
 	}
 
 	/// clipping.
-	inline int f2iclip24(float f) UNIVERSALIS__COMPILER__CONST
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip24(float f)
 	{ 
 		int const l(8388607);
 		if(f < -l) return -l;
@@ -124,7 +129,8 @@ namespace psycle { namespace helpers {
 	}
 
 	/// clipping.
-	inline int f2iclip32(float f) UNIVERSALIS__COMPILER__CONST
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip32(float f)
 	{ 
 		int const l(2147483647);
 		if(f < -l) return -l;

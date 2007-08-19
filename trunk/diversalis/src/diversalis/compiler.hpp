@@ -164,7 +164,7 @@
 				#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 			#endif
 			#define DIVERSALIS__COMPILER__VERSION__ABI __GXX_ABI_VERSION
-
+			
 		/////////////////////
 		// borland's compiler
 		/////////////////////

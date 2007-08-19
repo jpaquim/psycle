@@ -8,6 +8,8 @@
 
 //BOOST_AUTO_TEST_SUITE(psycle)
 
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/math/round.hpp>
 #include <psycle/helpers/math/truncate.hpp>
 #include <psycle/helpers/math/log.hpp>
