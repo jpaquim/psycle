@@ -478,18 +478,12 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				newval += sincTable[res] * *(pData);
 				float sincIndex(sincInc+res);
 				float weight(sincIndex - floor(sincIndex));
-				for(	int i(1);
-						i < leftExtent;
-						++i, sincIndex+=sincInc
-						)
+				for(int i(1); i < leftExtent; ++i, sincIndex+=sincInc)
 					newval+= (sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData-i);
 
 				sincIndex = sincInc-res;
 				weight = sincIndex - floor(sincIndex);
-				for(	int i(1);
-						i < rightExtent;
-						++i, sincIndex+=sincInc
-						)
+				for(int i(1); i < rightExtent; ++i, sincIndex+=sincInc)
 					newval += ( sincTable[(int)sincIndex] + sincDelta[(int)sincIndex]*weight ) * *(pData+i);
 
 				return newval;
