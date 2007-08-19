@@ -37,6 +37,7 @@
 #include <cstdint>
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/operating_system/threads/sleep.hpp>
+	#include <sstream>
 #endif
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__CLOCKS
 #include <universalis/compiler/dynamic_link/begin.hpp>
@@ -172,6 +173,9 @@ namespace universalis { namespace operating_system { namespace clocks {
 			opaque_time const start(clock::current());
 			universalis::operating_system::threads::sleep(sleep_seconds);
 			double const ratio((clock::current() - start).to_real_time() / sleep_seconds);
+			std::ostringstream s;
+			s << ratio;
+			BOOST_MESSAGE(s.str());
 			BOOST_CHECK(0.75 < ratio && ratio < 1.25);
 		}
 	#endif

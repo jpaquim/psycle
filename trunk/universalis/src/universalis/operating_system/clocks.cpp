@@ -11,109 +11,18 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 	// recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
-	opaque_time wall::current() {
-		opaque_time result;
-		opaque_time::underlying_type & u(result);
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			::LARGE_INTEGER counter, frequency;
-			if(::QueryPerformanceCounter(&counter) && ::QueryPerformanceFrequency(&frequency)) {
-				u = counter.QuadPart * 1e7 / frequency.QuadPart; // to ::FILETIME
-			} else { // The CPU has no tick count register.
-				/// Use the PIT/PIC PC hardware via mswindows' ::timeGetTime() or ::GetTickCount() instead.
-				class set_timer_resolution {
-					private: ::UINT milliseconds;
-					public:
-						set_timer_resolution() {
-							// tries to get the best possible resolution, starting with 1ms
-							milliseconds = 1;
-							retry:
-							if(::timeBeginPeriod(milliseconds) == TIMERR_NOCANDO) {
-								if(++milliseconds < 50) goto retry;
-								else milliseconds = 0; // give up :-(
-							}
-						}
-						~set_timer_resolution() throw() {
-							if(!milliseconds) return; // wasn't set
-							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO) return; // cannot throw in a destructor
-							//throw std::runtime_error(GetLastErrorString());
-						}
-				};
-				static set_timer_resolution once;
-				u = ::timeGetTime() * 1e4; // milliseconds to ::FILETIME
-					// ::timeGetTime() equivalent to ::GetTickCount() but Microsoft very loosely tries to express the idea that it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
-					//
-					// ::GetTickCount()
-					// uptime (i.e., time elapsed since computer was booted), in milliseconds. Microsoft doesn't even specifies wether it's monotonic and as linear as possible, but we can probably assume so.
-					// This function returns a value which is read from a context value which is updated only on context switches, and hence is very inaccurate: it can lag behind the real clock value as much as 15ms.
-			}
-		#else
-			static bool once(false);
-			if(!once) best();
-			::clock_gettime(details::wall_time_clock_id, &u);
-		#endif
-		return result;
-	}
-
-	opaque_time process::current() {
-		opaque_time result;
-		opaque_time::underlying_type & u(result);
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			::FILETIME creation, exit, kernel, user;
-			::GetProcessTimes(::GetCurrentProcess(), &creation, &exit, &kernel, &user);
-			union winapi_is_badly_designed // real unit 1e-7 seconds
-			{
-				::FILETIME file_time;
-				::LARGE_INTEGER large_integer;
-			} u1, u2;
-			u1.file_time = user;
-			u2.file_time = kernel;
-			u = u1.large_integer.QuadPart + u2.large_integer.QuadPart;
-		#else
-			static bool once(false);
-			if(!once) best();
-			::clock_gettime(details::process_time_clock_id, &u);
-		#endif
-		return result;
-	}
-
-	opaque_time thread::current() {
-		opaque_time result;
-		opaque_time::underlying_type & u(result);
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			#if 0 // The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
-				::FILETIME creation, exit, kernel, user;
-				::GetThreadTimes(&creation, &exit, &kernel, &user);
-				union winapi_is_badly_designed // real unit 1e-7 seconds
-				{
-					::FILETIME file_time;
-					::LARGE_INTEGER large_integer;
-				} u1, u2;
-				u1.file_time = user;
-				u2.file_time = kernel;
-				u = u1.large_integer.QuadPart + u2.large_integer.QuadPart;
-			#else // Use the wall clock instead, which majorates all virtual subclocks.
-				u = wall::current().underlying();
-			#endif
-		#else
-			static bool once(false);
-			if(!once) best();
-			return ::clock_gettime(details::thread_time_clock_id, &u);
-		#endif
-		return result;
-	}
-
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 
 		namespace {
+
+			void error(int const & code = errno) {
+				std::cerr << "error: " << code << ": " << ::strerror(code) << std::endl;
+			}
 
 			bool supported(int const & option) {
 				long int result(::sysconf(option));
 				if(result < -1) error();
 				return result > 0;
-			}
-
-			void error(int const & code = errno) {
-				std::cerr << "error: " << code << ": " << ::strerror(code) << std::endl;
 			}
 
 			::clockid_t static wall_clock_id, process_clock_id, thread_clock_id;
@@ -173,11 +82,12 @@ namespace universalis { namespace operating_system { namespace clocks {
 				#else
 					cpu_time_supported = supported(_SC_CPUTIME);
 					if(cpu_time_supported) {
-						if(clock_getcpuclockid(0) == ENOENT) {
+						::clockid_t clock_id;
+						if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
 							// this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
 							cpu_time_supported = false;
 						} else {
-							wall_clock_id = process_clock_id = thread_clock_id = CLOCK_PROCESS_CPUTIME_ID;
+							wall_clock_id = process_clock_id = thread_clock_id = clock_id;//CLOCK_PROCESS_CPUTIME_ID;
 						}
 					}
 				#endif
@@ -233,4 +143,92 @@ namespace universalis { namespace operating_system { namespace clocks {
 			}
 		#endif
 	#endif // defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+
+	opaque_time wall::current() {
+		opaque_time result;
+		opaque_time::underlying_type & u(result);
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			::LARGE_INTEGER counter, frequency;
+			if(::QueryPerformanceCounter(&counter) && ::QueryPerformanceFrequency(&frequency)) {
+				u = counter.QuadPart * 1e7 / frequency.QuadPart; // to ::FILETIME
+			} else { // The CPU has no tick count register.
+				/// Use the PIT/PIC PC hardware via mswindows' ::timeGetTime() or ::GetTickCount() instead.
+				class set_timer_resolution {
+					private: ::UINT milliseconds;
+					public:
+						set_timer_resolution() {
+							// tries to get the best possible resolution, starting with 1ms
+							milliseconds = 1;
+							retry:
+							if(::timeBeginPeriod(milliseconds) == TIMERR_NOCANDO) {
+								if(++milliseconds < 50) goto retry;
+								else milliseconds = 0; // give up :-(
+							}
+						}
+						~set_timer_resolution() throw() {
+							if(!milliseconds) return; // wasn't set
+							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO) return; // cannot throw in a destructor
+							//throw std::runtime_error(GetLastErrorString());
+						}
+				};
+				static set_timer_resolution once;
+				u = ::timeGetTime() * 1e4; // milliseconds to ::FILETIME
+					// ::timeGetTime() equivalent to ::GetTickCount() but Microsoft very loosely tries to express the idea that it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
+					//
+					// ::GetTickCount()
+					// uptime (i.e., time elapsed since computer was booted), in milliseconds. Microsoft doesn't even specifies wether it's monotonic and as linear as possible, but we can probably assume so.
+					// This function returns a value which is read from a context value which is updated only on context switches, and hence is very inaccurate: it can lag behind the real clock value as much as 15ms.
+			}
+		#else
+			static bool once(false); if(!once) best();
+			::clock_gettime(wall_clock_id, &u);
+		#endif
+		return result;
+	}
+
+	opaque_time process::current() {
+		opaque_time result;
+		opaque_time::underlying_type & u(result);
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			::FILETIME creation, exit, kernel, user;
+			::GetProcessTimes(::GetCurrentProcess(), &creation, &exit, &kernel, &user);
+			union winapi_is_badly_designed // real unit 1e-7 seconds
+			{
+				::FILETIME file_time;
+				::LARGE_INTEGER large_integer;
+			} u1, u2;
+			u1.file_time = user;
+			u2.file_time = kernel;
+			u = u1.large_integer.QuadPart + u2.large_integer.QuadPart;
+		#else
+			static bool once(false); if(!once) best();
+			::clock_gettime(process_clock_id, &u);
+		#endif
+		return result;
+	}
+
+	opaque_time thread::current() {
+		opaque_time result;
+		opaque_time::underlying_type & u(result);
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			#if 0 // The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
+				::FILETIME creation, exit, kernel, user;
+				::GetThreadTimes(&creation, &exit, &kernel, &user);
+				union winapi_is_badly_designed // real unit 1e-7 seconds
+				{
+					::FILETIME file_time;
+					::LARGE_INTEGER large_integer;
+				} u1, u2;
+				u1.file_time = user;
+				u2.file_time = kernel;
+				u = u1.large_integer.QuadPart + u2.large_integer.QuadPart;
+			#else // Use the wall clock instead, which majorates all virtual subclocks.
+				u = wall::current().underlying();
+			#endif
+		#else
+			static bool once(false); if(!once) best();
+			::clock_gettime(thread_clock_id, &u);
+		#endif
+		return result;
+	}
 }}}
