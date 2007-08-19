@@ -2615,9 +2615,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			for (int i = 0; i < len; i++)
 			{
-				pDest[i] = (f2i(p0*0x10000)&0xff0000)
-							| (f2i(p1*0x100)&0xff00)
-							| (f2i(p2)&0xff);
+				pDest[i] = (helpers::math::rounded(p0*0x10000)&0xff0000)
+							| (helpers::math::rounded(p1*0x100)&0xff00)
+							| (helpers::math::rounded(p2)&0xff);
 				p0+=a0;
 				p1+=a1;
 				p2+=a2;
