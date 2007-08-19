@@ -1,8 +1,8 @@
 ///\implementation psycle::host::Cubic.
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
-#include <psycle/helpers/dsp.hpp>
-namespace psycle { namespace host { namespace dsp {
+#include "dsp.hpp"
+namespace psycle { namespace helpers { namespace dsp {
 	#if PSYCLE__CONFIGURATION__RMS_VUS
 		int numRMSSamples=1;
 		int countRMSSamples=0;

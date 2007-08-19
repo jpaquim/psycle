@@ -32,7 +32,7 @@ namespace universalis
 					requested.tv_sec = static_cast< ::time_t >(seconds);
 					compiler::numeric<>::floating_point const fractional(seconds - requested.tv_sec);
 					requested.tv_nsec = static_cast</*un*/signed long int>(fractional * 1e9);
-					while(::nanosleep(&requested, &remains))
+					while(::nanosleep(&requested, &remains)) ///\todo use ::clock_nanosleep instead
 					{
 						if(errno != EINTR)
 						{
