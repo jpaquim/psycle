@@ -21,24 +21,27 @@ namespace psycle
 			///\todo doc
 			float inline UNIVERSALIS__COMPILER__CONST log2(float f)
 			{
-				#if !defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
+				#if defined DIVERSALIS__PROCESSOR__X86 /* we should verify the code for other architectures. */ \
+					&& 0 // disabled because this code appears to be slower than std::log
+					BOOST_STATIC_ASSERT((sizeof f == 4));
+					//assert(f > 0); 
+					union result_union {
+						float f;
+						std::uint32_t i;
+					} result;
+					result.f = f;
+					return
+						(  (result.i & 0x7f800000) >> 23 )
+						+  (result.i & 0x007fffff)
+						/     float(0x00800000)
+						-           0x0000007f;
+				#else
+					#define PSYCLE__HELPERS__MATH__LOG2_IS_STD_LOG
 					return std::log(f);
 				#endif
-				BOOST_STATIC_ASSERT((sizeof f == 4));
-				//assert(f > 0); 
-				union result_union {
-					float f;
-					std::uint32_t i;
-				} result;
-				result.f = f;
-				return
-					(  (result.i & 0x7f800000) >> 23 )
-					+  (result.i & 0x007fffff)
-					/     float(0x00800000)
-					-           0x0000007f;
 			}
 
-			#if defined BOOST_AUTO_TEST_CASE
+			#if defined BOOST_AUTO_TEST_CASE && !defined PSYCLE__HELPERS__MATH__LOG2_IS_STD_LOG
 				BOOST_AUTO_TEST_CASE(log2_test)
 				{
 					using namespace universalis::operating_system::clocks;
