@@ -1,25 +1,24 @@
+#include <packageneric/pre-compiled.private.hpp>
+
+#define BOOST_LIB_NAME boost_unit_test_framework
+#include <boost/config/auto_link.hpp>
+
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 
 //BOOST_AUTO_TEST_SUITE(psycle)
-//BOOST_AUTO_TEST_SUITE_END
 
-#if 0
-	BOOST_AUTO_TEST_CASE(fail)
-	{
-		BOOST_CHECK(1 == 1);
-		BOOST_CHECK(1 == 2);
-		BOOST_CHECK(1 == 3);
-	}
-#endif
+#include <psycle/helpers/math/round.hpp>
+#include <psycle/helpers/math/truncate.hpp>
 
-#if 0
+#if 0 // some test of C1999's features
 	#include <cmath>
 	#include <fenv.h>
 	BOOST_AUTO_TEST_CASE(lrint_test)
 	{
 		int const initial_feround(fegetround());
 		try {
+			BOOST_CHECK(1 == 0);
 			fesetround(FE_TONEAREST);
 			BOOST_CHECK(lrint(+2.6) == +3);
 			BOOST_CHECK(lrint(+1.4) == +1);
@@ -47,5 +46,11 @@
 	}
 #endif
 
-#include <psycle/helpers/math/round.hpp>
-#include <psycle/helpers/math/truncate.hpp>
+#if 0 // some dummy test case that always fail (to test failure)
+	BOOST_AUTO_TEST_CASE(dummy_failure)
+	{
+		BOOST_CHECK(false);
+	}
+#endif
+
+//BOOST_AUTO_TEST_SUITE_END
