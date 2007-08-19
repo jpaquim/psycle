@@ -75,9 +75,9 @@ namespace universalis { namespace operating_system { namespace clocks {
 				underlying_type & u(*this);
 				underlying_type const & o(other);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-					u. sec += o. sec;
-					u.nsec += o.nsec;
-					if(u.nsec >= 1e9) { u.nsec -= 1e9; ++u.sec; }
+					u.tv_sec += o.tv_sec;
+					u.tv_nsec += o.tv_nsec;
+					if(u.tv_nsec >= 1e9) { u.tv_nsec -= 1e9; ++u.tv_sec; }
 				#else
 					u += o;
 				#endif
@@ -88,9 +88,9 @@ namespace universalis { namespace operating_system { namespace clocks {
 				underlying_type & u(*this);
 				underlying_type const & o(other);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-					u.sec -= o.sec;
-					if(u.nsec > o.nsec) u.nsec -= o.nsec;
-					else { --u.sec; u.nsec += 1e9 - o.nsec; }
+					u.tv_sec -= o.tv_sec;
+					if(u.tv_nsec > o.tv_nsec) u.tv_nsec -= o.tv_nsec;
+					else { --u.tv_sec; u.tv_nsec += 1e9 - o.tv_nsec; }
 				#else
 					u -= o;
 				#endif
@@ -101,9 +101,9 @@ namespace universalis { namespace operating_system { namespace clocks {
 				underlying_type const & u(*this);
 				underlying_type const & o(other);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-					if(u. sec < o.sec) return true;
-					if(u. sec > o.sec) return false;
-					return u.nsec < o.nsec;
+					if(u.tv_sec < o.tv_sec) return true;
+					if(u.tv_sec > o.tv_sec) return false;
+					return u.tv_nsec < o.tv_nsec;
 				#else
 					return u < o;
 				#endif
@@ -118,8 +118,8 @@ namespace universalis { namespace operating_system { namespace clocks {
 					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 						u = seconds * 1e7; // ::FILETIME resolution
 					#else
-						u. sec =  seconds;
-						u.nsec = (seconds - u.sec) * 1e9;
+						u.tv_sec =  seconds;
+						u.tv_nsec = (seconds - u.tv_sec) * 1e9;
 					#endif
 					return result;
 				}
@@ -132,7 +132,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 						result = u * 1e-7; // ::FILETIME resolution
 					#else
-						result = u.sec + u.nsec * 1e-9;
+						result = u.tv_sec + u.tv_nsec * 1e-9;
 					#endif
 					return result;
 				}
