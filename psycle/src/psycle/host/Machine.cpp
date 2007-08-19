@@ -354,7 +354,7 @@ namespace psycle
 				{
 					//float val;
 					_pDstMachine->GetWireVolume(c,value);
-					//value = f2i(val*256.0f);
+					//value = helpers::math::rounded(val*256.0f);
 					return true;
 				}
 			}

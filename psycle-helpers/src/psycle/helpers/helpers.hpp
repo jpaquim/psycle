@@ -54,29 +54,6 @@ namespace psycle { namespace helpers {
 			static float fMap_255_100[257];
 	};
 
-	///\todo doc
-	inline float UNIVERSALIS__COMPILER__CONST
-	fast_log2(float f)
-	{
-		return math::fast_log2(f);
-	}
-
-	/// converts a floating point number to an integer by rounding to the nearest integer.
-	/// note: it is unspecified whether rounding x.5 rounds up or down.
-	std::int32_t inline UNIVERSALIS__COMPILER__CONST
-	f2i(double d)
-	{ 
-		return math::rounded(d);
-	}
-
-	/// converts a floating point number to an integer by rounding to the nearest integer.
-	/// note: it is unspecified whether rounding x.5 rounds up or down.
-	std::int32_t inline UNIVERSALIS__COMPILER__CONST
-	f2i(float f)
-	{ 
-		return math::rounded(f);
-	}
-
 	/// clipping.
 	template<unsigned int const bits> UNIVERSALIS__COMPILER__CONST
 	typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f)
@@ -95,7 +72,7 @@ namespace psycle { namespace helpers {
 		int const l(32767);
 		if(f < -l) return -l;
 		if(f > +l) return +l;
-		return f2i(f);
+		return math::rounded(f);
 	}
 
 	/// clipping.
@@ -105,7 +82,7 @@ namespace psycle { namespace helpers {
 		int const l(131071);
 		if(f < -l) return -l;
 		if(f > +l) return +l;
-		return f2i(f);
+		return math::rounded(f);
 	}
 
 	/// clipping.
@@ -115,7 +92,7 @@ namespace psycle { namespace helpers {
 		int const l(524287);
 		if(f < -l) return -l;
 		if(f > +l) return +l;
-		return f2i(f);
+		return math::rounded(f);
 	}
 
 	/// clipping.
@@ -125,7 +102,7 @@ namespace psycle { namespace helpers {
 		int const l(8388607);
 		if(f < -l) return -l;
 		if(f > +l) return +l;
-		return f2i(f);
+		return math::rounded(f);
 	}
 
 	/// clipping.
@@ -135,6 +112,6 @@ namespace psycle { namespace helpers {
 		int const l(2147483647);
 		if(f < -l) return -l;
 		if(f > +l) return +l;
-		return f2i(f);
+		return math::rounded(f);
 	}
 }}
