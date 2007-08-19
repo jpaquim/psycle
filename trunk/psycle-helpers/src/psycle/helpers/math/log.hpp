@@ -19,8 +19,8 @@ namespace psycle
 		namespace math
 		{
 			///\todo doc
-			float inline log2(float f) UNIVERSALIS__COMPILER__CONST
-			{ 
+			float inline UNIVERSALIS__COMPILER__CONST log2(float f)
+			{
 				#if !defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
 					return std::log(f);
 				#endif
