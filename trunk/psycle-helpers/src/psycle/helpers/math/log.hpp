@@ -21,8 +21,7 @@ namespace psycle
 			///\todo doc
 			float inline UNIVERSALIS__COMPILER__CONST log2(float f)
 			{
-				#if defined DIVERSALIS__PROCESSOR__X86 /* we should verify the code for other architectures. */ \
-					&& 0 // disabled because this code appears to be slower than std::log
+				#if defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
 					BOOST_STATIC_ASSERT((sizeof f == 4));
 					//assert(f > 0); 
 					union result_union {
@@ -59,9 +58,9 @@ namespace psycle
 					}
 					opaque_time const t3(clock::current());
 					std::ostringstream s;
-					s << (t3 - t2).to_real_time() << " < " << (t2 - t1).to_real_time();
+					s << (t2 - t1).to_real_time() << " < " << (t3 - t2).to_real_time();
 					BOOST_MESSAGE(s.str());
-					BOOST_CHECK(t3 - t2 < t2 - t1);
+					BOOST_CHECK(t2 - t1 < t3 - t2);
 				}
 			#endif
 		}
