@@ -123,14 +123,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::SetSliderValues()
 		{
 			float val;
-			float db = dsp::dB(_pMachine->_outDry/256.0f);
+			float db = helpers::dsp::dB(_pMachine->_outDry/256.0f);
 			m_slidermaster.SetPos(832-(int)((db+40.0f)*16.0f));
 
 
 			if (_pMachine->_inputCon[0])
 			{
 				_pMachine->GetWireVolume(0,val);
-				m_sliderm1.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm1.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm1.SetPos(832);
 			}
@@ -138,7 +138,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[1])
 			{
 				_pMachine->GetWireVolume(1,val);
-				m_sliderm2.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm2.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm2.SetPos(832);
 			}
@@ -146,7 +146,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[2])
 			{
 				_pMachine->GetWireVolume(2,val);
-				m_sliderm3.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm3.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm3.SetPos(832);
 			}
@@ -154,7 +154,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[3])
 			{
 				_pMachine->GetWireVolume(3,val);
-				m_sliderm4.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm4.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm4.SetPos(832);
 			}
@@ -162,7 +162,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[4])
 			{
 				_pMachine->GetWireVolume(4,val);
-				m_sliderm5.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm5.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm5.SetPos(832);
 			}
@@ -170,7 +170,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[5])
 			{
 				_pMachine->GetWireVolume(5,val);
-				m_sliderm6.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm6.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm6.SetPos(832);
 			}
@@ -178,7 +178,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[6])
 			{
 				_pMachine->GetWireVolume(6,val);
-				m_sliderm7.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm7.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm7.SetPos(832);
 			}
@@ -186,7 +186,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[7])
 			{
 				_pMachine->GetWireVolume(7,val);
-				m_sliderm8.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm8.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm8.SetPos(832);
 			}
@@ -194,7 +194,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[8])
 			{
 				_pMachine->GetWireVolume(8,val);
-				m_sliderm9.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm9.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm9.SetPos(832);
 			}
@@ -202,7 +202,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[9])
 			{
 				_pMachine->GetWireVolume(9,val);
-				m_sliderm10.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm10.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm10.SetPos(832);
 			}
@@ -210,7 +210,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[10])
 			{
 				_pMachine->GetWireVolume(10,val);
-				m_sliderm11.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm11.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm11.SetPos(832);
 			}
@@ -218,7 +218,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pMachine->_inputCon[11])
 			{
 				_pMachine->GetWireVolume(11,val);
-				m_sliderm12.SetPos(832-(int)((dsp::dB(val)+40.0f)*16.0f));
+				m_sliderm12.SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 			} else {
 				m_sliderm12.SetPos(832);
 			}
@@ -240,7 +240,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char peak[10];
 				if ( _pMachine->currentpeak > 0)
 				{
-					sprintf(peak,"%.2fdB",dsp::dB(_pMachine->currentpeak*0.00003051f));
+					sprintf(peak,"%.2fdB",helpers::dsp::dB(_pMachine->currentpeak*0.00003051f));
 				}
 				else strcpy(peak,"-99dB");
 				m_masterpeak.SetWindowText(peak);
@@ -271,7 +271,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_slidermaster.GetPos())/16.0f)-40.0f;
-			if (m_slidermaster.editing)_pMachine->_outDry = int(dsp::dB2Amp(db)*256.0f);
+			if (m_slidermaster.editing)_pMachine->_outDry = int(helpers::dsp::dB2Amp(db)*256.0f);
 
 			PaintNumbers(db,40,171);
 
@@ -327,7 +327,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm1.GetPos())/16.0f)-40.0f;
-			if (m_sliderm1.editing)_pMachine->SetWireVolume(0,dsp::dB2Amp(db));
+			if (m_sliderm1.editing)_pMachine->SetWireVolume(0,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,112,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -336,7 +336,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm10.GetPos())/16.0f)-40.0f;
-			if (m_sliderm10.editing)_pMachine->SetWireVolume(9,dsp::dB2Amp(db));
+			if (m_sliderm10.editing)_pMachine->SetWireVolume(9,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,328,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -345,7 +345,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm11.GetPos())/16.0f)-40.0f;
-			if (m_sliderm11.editing)_pMachine->SetWireVolume(10,dsp::dB2Amp(db));
+			if (m_sliderm11.editing)_pMachine->SetWireVolume(10,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,352,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -354,7 +354,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm12.GetPos())/16.0f)-40.0f;
-			if (m_sliderm12.editing)_pMachine->SetWireVolume(11,dsp::dB2Amp(db));
+			if (m_sliderm12.editing)_pMachine->SetWireVolume(11,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,376,171);
 
 		// I know the following is Ugly, but it is the only solution I've found, because first,
@@ -382,7 +382,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm2(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm2.GetPos())/16.0f)-40.0f;
-			if (m_sliderm2.editing)_pMachine->SetWireVolume(1,dsp::dB2Amp(db));
+			if (m_sliderm2.editing)_pMachine->SetWireVolume(1,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,136,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -391,7 +391,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm3(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm3.GetPos())/16.0f)-40.0f;
-			if (m_sliderm3.editing)_pMachine->SetWireVolume(2,dsp::dB2Amp(db));
+			if (m_sliderm3.editing)_pMachine->SetWireVolume(2,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,160,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -400,7 +400,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm4(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm4.GetPos())/16.0f)-40.0f;
-			if (m_sliderm4.editing)_pMachine->SetWireVolume(3,dsp::dB2Amp(db));
+			if (m_sliderm4.editing)_pMachine->SetWireVolume(3,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,184,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -409,7 +409,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm5(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm5.GetPos())/16.0f)-40.0f;
-			if (m_sliderm5.editing)_pMachine->SetWireVolume(4,dsp::dB2Amp(db));
+			if (m_sliderm5.editing)_pMachine->SetWireVolume(4,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,208,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -418,7 +418,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm6.GetPos())/16.0f)-40.0f;
-			if (m_sliderm6.editing)_pMachine->SetWireVolume(5,dsp::dB2Amp(db));
+			if (m_sliderm6.editing)_pMachine->SetWireVolume(5,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,232,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -427,7 +427,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm7.GetPos())/16.0f)-40.0f;
-			if (m_sliderm7.editing)_pMachine->SetWireVolume(6,dsp::dB2Amp(db));
+			if (m_sliderm7.editing)_pMachine->SetWireVolume(6,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,256,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -436,7 +436,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm8.GetPos())/16.0f)-40.0f;
-			if (m_sliderm8.editing)_pMachine->SetWireVolume(7,dsp::dB2Amp(db));
+			if (m_sliderm8.editing)_pMachine->SetWireVolume(7,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,280,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -445,7 +445,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm9.GetPos())/16.0f)-40.0f;
-			if (m_sliderm9.editing)_pMachine->SetWireVolume(8,dsp::dB2Amp(db));
+			if (m_sliderm9.editing)_pMachine->SetWireVolume(8,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,304,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);

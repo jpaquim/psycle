@@ -15,6 +15,8 @@ namespace psycle
 {
 	namespace host
 	{
+		using namespace helpers;
+
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 		#define ALLOW_NON_ASIO
 
@@ -644,7 +646,7 @@ namespace psycle
 					break;
 				case ASIOSTFloat32LSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
 					{
-						dsp::MovMul(static_cast<float*>(ASIObuffers[counter].pleft[index]),_selectedins[counter].pleft,_ASIObufferSize,32768);
+						helpers::dsp::MovMul(static_cast<float*>(ASIObuffers[counter].pleft[index]),_selectedins[counter].pleft,_ASIObufferSize,32768);
 					}
 					break;
 				case ASIOSTFloat64LSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture

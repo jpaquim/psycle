@@ -176,8 +176,8 @@ namespace psycle
 					_pOutSamplesL = new float[STREAM_SIZE];
 					_pOutSamplesR = new float[STREAM_SIZE];
 				#endif
-					dsp::Clear(_pOutSamplesL, STREAM_SIZE);
-					dsp::Clear(_pOutSamplesR, STREAM_SIZE);
+					helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
+					helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
 					outputs[0] = _pOutSamplesL;
 					outputs[1] = _pOutSamplesR;
 				}
@@ -532,8 +532,8 @@ namespace psycle
 				Machine::PreWork(numSamples,clear);
 				if(!WillProcessReplace())
 				{
-					dsp::Clear(_pOutSamplesL, numSamples);
-					dsp::Clear(_pOutSamplesR, numSamples);
+					helpers::dsp::Clear(_pOutSamplesL, numSamples);
+					helpers::dsp::Clear(_pOutSamplesR, numSamples);
 				}
 
 				for (int midiChannel=0; midiChannel<16; midiChannel++)
@@ -785,7 +785,7 @@ namespace psycle
 					}
 					if(numInputs() == 1)
 					{
-						dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
+						helpers::dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
 					}
 
 					///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
@@ -919,7 +919,7 @@ namespace psycle
 					}
 					try
 					{
-						if(numOutputs() == 1) dsp::Mov(outputs[0],outputs[1], numSamples);
+						if(numOutputs() == 1) helpers::dsp::Mov(outputs[0],outputs[1], numSamples);
 					}
 					catch(const std::exception &)
 					{
@@ -943,9 +943,9 @@ namespace psycle
 				}
 				// volume "counter"
 				{
-					_volumeCounter = dsp::GetMaxVSTVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
-//					if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-					int temp((dsp::F2I(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
+					_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
+					//if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
+					int temp((helpers::math::rounded(helpers::math::fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
 					// prevent downward jerkiness
 					if(temp > 97) temp = 97;
 					if(temp > _volumeDisplay) _volumeDisplay = temp;

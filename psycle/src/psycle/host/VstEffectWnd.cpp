@@ -674,9 +674,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, f2i(value * vst::quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, f2i(value * vst::quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
 				}
 				if(pParamGui)
 					pParamGui->UpdateNew(index, value);

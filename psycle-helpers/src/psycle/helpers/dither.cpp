@@ -1,8 +1,8 @@
-///\implementation psycle::host::dsp::Dither
+///\implementation psycle::helpers::dsp::Dither
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
 #include "dither.hpp"
-namespace psycle { namespace host { namespace dsp {
+namespace psycle { namespace helpers { namespace dsp {
 
 	Dither::Dither() : bitdepth(16), pdf(triangular), noiseshape(none)
 	{

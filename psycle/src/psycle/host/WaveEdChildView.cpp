@@ -11,6 +11,7 @@
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
+		using namespace helpers;
 	
 		float const CWaveEdChildView::zoomBase = 1.06f;
 

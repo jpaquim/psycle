@@ -156,7 +156,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			value *= vst::quantization;
 			UpdateText(value);
-			_quantizedvalue = (f2i(value));
+			_quantizedvalue = (helpers::math::rounded(value));
 			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
 		void CVstParamList::OnSelchangeList() 

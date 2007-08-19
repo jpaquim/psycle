@@ -46,7 +46,7 @@ namespace psycle
 			{
 				#if !defined DIVERSALIS__PROCESSOR__X86
 					// just do nothing.. not crucial for other archs
-				#else
+				#elif 1
 					std::uint64_t const bits(reinterpret_cast<std::uint64_t&>(sample));
 					std::uint64_t const exponent_mask
 					(
@@ -65,6 +65,23 @@ namespace psycle
 					std::uint64_t const not_denormal(exponent > 0);
 
 					sample *= not_nan_nor_infinity & not_denormal;
+				#else // old code
+					float id(float(1.0E-18));
+					for(int s(0) ; s < numsamples ; ++s)
+					{
+						#if 0 // flushes denormals to zero
+							if(IS_DENORMAL(pSamplesL[s])) pSamplesL[s] = 0;
+							if(IS_DENORMAL(pSamplesR[s])) pSamplesR[s] = 0;
+							const float is1=pSamplesL[s];
+							const float is2=pSamplesR[s];
+							pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
+							pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
+						#else // 1-bit "sinus" dither
+							pSamplesL[s] += id;
+							pSamplesR[s] += id;
+							id = - id;
+						#endif
+					}
 				#endif
 			}
 

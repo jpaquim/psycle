@@ -1,6 +1,6 @@
-///\interface psycle::host::dsp::Dither
+///\interface psycle::helpers::dsp::Dither
 #include <psycle/helpers/mersennetwister.hpp>
-namespace psycle { namespace host { namespace dsp {
+namespace psycle { namespace helpers { namespace dsp {
 	class Dither
 	{
 		public:

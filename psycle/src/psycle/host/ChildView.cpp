@@ -1587,7 +1587,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						
 						PatternEntry *entry = (PatternEntry*) offset;
 						entry->_cmd = 0xff;
-						int val = f2i(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+						int val = helpers::math::rounded(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 						if (val < 1)
 						{
 							val = 1;
@@ -2917,7 +2917,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									char *q = strchr(buf,61); // =
 									if (q)
 									{
-										hexstring_to_integer(q+1, MachineCoords.cTransparency);
+										helpers::hexstring_to_integer(q+1, MachineCoords.cTransparency);
 										MachineCoords.bHasTransparency = TRUE;
 									}
 								}
@@ -3259,7 +3259,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									char *q = strchr(buf,61); // =
 									if (q)
 									{
-										hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
+										helpers::hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
 										PatHeaderCoords.bHasTransparency = TRUE;
 									}
 								}

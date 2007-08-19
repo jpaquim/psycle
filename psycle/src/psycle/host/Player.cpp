@@ -244,7 +244,7 @@ namespace psycle
 							int mIndex = pEntry->_mach;
 							if(mIndex < MAX_MACHINES)
 							{
-								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst,CValueMapper::Map_255_1(pEntry->_parameter));
+								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst, helpers::CValueMapper::Map_255_1(pEntry->_parameter));
 							}
 						}
 						break;
@@ -682,8 +682,8 @@ namespace psycle
 				{
 					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
 					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->_bitDepth);
-					dither.SetPdf((dsp::Dither::Pdf)ditherpdf);
-					dither.SetNoiseShaping((dsp::Dither::NoiseShape)noiseshape);
+					dither.SetPdf((helpers::dsp::Dither::Pdf)ditherpdf);
+					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape)noiseshape);
 				}
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;

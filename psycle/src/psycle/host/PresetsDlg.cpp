@@ -91,7 +91,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				delete [] params; params = new int[num];
 				numPars=num;
-				for(int x=0;x<num;x++) params[x]= f2i(parameters[x]*65535.0f);
+				for(int x=0;x<num;x++) params[x]= helpers::math::rounded(parameters[x]*65535.0f);
 			}
 			else
 			{
@@ -237,7 +237,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					try
 					{
-						iniPreset.SetParam(i, f2i(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
+						iniPreset.SetParam(i, helpers::math::rounded(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
 					}
 					catch(const std::exception &)
 					{

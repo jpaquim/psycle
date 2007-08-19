@@ -500,8 +500,8 @@ namespace psycle
 			_scopePrevNumSamples=numSamples;
 			if (clear)
 			{
-				dsp::Clear(_pSamplesL, numSamples);
-				dsp::Clear(_pSamplesR, numSamples);
+				helpers::dsp::Clear(_pSamplesL, numSamples);
+				helpers::dsp::Clear(_pSamplesR, numSamples);
 			}
 			_wireCost += cpu::cycles() - wcost;
 		}
@@ -558,8 +558,8 @@ namespace psycle
 						if(!_mute && !Standby())
 						{
 							cpu::cycles_type wcost = cpu::cycles();
-							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+							helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
+							helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
 							_wireCost += cpu::cycles() - wcost;
 						}
 					}
@@ -567,7 +567,7 @@ namespace psycle
 			}
 			_waitingForSound = false;
 			cpu::cycles_type wcost = cpu::cycles();
-			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 			_wireCost += cpu::cycles() - wcost;
 		}
 
@@ -914,7 +914,7 @@ namespace psycle
 			Machine::Work(numSamples);
 			cpu::cycles_type cost = cpu::cycles();
 
-			float mv = CValueMapper::Map_255_1(_outDry);
+			float mv = helpers::CValueMapper::Map_255_1(_outDry);
 				
 			float *pSamples = _pMasterSamples;
 			float *pSamplesL = _pSamplesL;
@@ -938,14 +938,14 @@ namespace psycle
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-						mv = CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
+						mv = helpers::CValueMapper::Map_255_1(_outDry);
 						*pSamples = *pSamplesL = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-						mv = CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
+						mv = helpers::CValueMapper::Map_255_1(_outDry);
 						*pSamples = *pSamplesL = -32767.0f; 
 					}
 					pSamples++;
@@ -957,14 +957,14 @@ namespace psycle
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
-						mv = CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
+						mv = helpers::CValueMapper::Map_255_1(_outDry);
 						*pSamples = *pSamplesR = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
-						mv = CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
+						mv = helpers::CValueMapper::Map_255_1(_outDry);
 						*pSamples = *pSamplesR = -32767.0f; 
 					}
 					pSamples++;
