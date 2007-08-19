@@ -3,7 +3,7 @@
 #pragma once
 #include "helpers.hpp"
 #include "math/erase_all_nans_infinities_and_denormals.hpp"
-#include "math/truncated.hpp"
+#include "math/truncate.hpp"
 #include <universalis/compiler.hpp>
 #include <cmath>
 namespace psycle { namespace helpers { namespace dsp {
@@ -29,6 +29,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		}
 		while (--numSamples);
 	}
+
 	/// multiply a signal by a ratio, inplace.
 	///\see MovMul()
 	inline void Mul(float *pDstSamples, int numSamples, float mul)
@@ -40,6 +41,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		}
 		while (--numSamples);
 	}
+
 	/// multiply a signal by a ratio.
 	///\see Mul()
 	inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
@@ -52,10 +54,13 @@ namespace psycle { namespace helpers { namespace dsp {
 		}
 		while (--numSamples);
 	}
+
+	///\todo doc
 	inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 	{
 		std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
 	}
+
 	/// zero-out a signal buffer.
 	inline void Clear(float *pDstSamples, int numSamples)
 	{

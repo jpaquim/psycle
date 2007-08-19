@@ -60,9 +60,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 			
-			LARGE_INTEGER frequency;
-			QueryPerformanceFrequency(&frequency);
-			Global::_cpuHz = frequency.QuadPart;
+			Global::_cpuHz = cpu::cycles_per_second();
 
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
@@ -193,28 +191,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return CWinApp::ExitInstance();
 		}
 
-		/////////////////////////////////////////////////////////////////////////////
-		// CPsycleApp naive method to get the CPU frequency
-
-
-		void CPsycleApp::GetNaiveCPUFreq()
-		{
-			LARGE_INTEGER cost,next;
-			QueryPerformanceCounter(&cost);
-			Sleep(1000);
-			QueryPerformanceCounter(&next);
-			Global::_cpuHz = next.QuadPart - cost.QuadPart;
-/*			
-			ULONG cpuHz;
-			__asm rdtsc ///< read time stamp to EAX
-			__asm mov cpuHz, eax
-			Sleep(1000);
-			__asm rdtsc
-			__asm sub eax, cpuHz ///< Find the difference
-			__asm mov cpuHz, eax
-			Global::_cpuHz = cpuHz;
-*/
-		}
 		void CPsycleApp::ProcessCmdLine(LPSTR cmdline)
 		{
 			if (*(cmdline) != 0)

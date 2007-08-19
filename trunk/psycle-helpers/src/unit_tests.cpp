@@ -10,6 +10,7 @@
 
 #include <psycle/helpers/math/round.hpp>
 #include <psycle/helpers/math/truncate.hpp>
+#include <psycle/helpers/math/log.hpp>
 
 #if 0 // some test of C1999's features
 	#include <cmath>

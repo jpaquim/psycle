@@ -153,7 +153,7 @@
 			#define DIVERSALIS__COMPILER__VERSION __VERSION__
 			#define DIVERSALIS__COMPILER__VERSION__MAJOR __GNUC__
 			#define DIVERSALIS__COMPILER__VERSION__MINOR __GNUC_MINOR__
-			#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL
+			#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL__
 			// check if version is recent enough__
 			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR < 3)
 				#error "compiler too old... better giving up now."
@@ -183,7 +183,7 @@
 		////////////////////////
 
 		// TODO:
-		// these things are mostly bogus. 1200 means version 12.0 of the compiler. The 
+		// These things are mostly bogus. 1200 means version 12.0 of the compiler. The 
 		// artificial versions assigned to them only refer to the versions of some IDE
 		// these compilers have been shipped with, and even that is not all of it. Some
 		// were shipped with freely downloadable SDKs, others as crosscompilers in eVC.
@@ -191,6 +191,11 @@
 		#elif defined _MSC_VER
 			#define DIVERSALIS__COMPILER
 			#define DIVERSALIS__COMPILER__MICROSOFT
+			#if defined _MSC_FULL_VER
+				#define DIVERSALIS__COMPILER__VERSION _MSC_FULL_VER
+			#else
+				#define DIVERSALIS__COMPILER__VERSION _MSC_VER
+			#endif
 			#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 			#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 			#if _MSC_VER < 1300

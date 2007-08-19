@@ -16,12 +16,13 @@ namespace psycle
 		Player * Global::pPlayer(0);
 		dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
-		cpu::cycles_type Global::_cpuHz(1);
+		cpu::cycles_type Global::_cpuHz(cpu::cycles_per_second());
 		InputHandler * Global::pInputHandler(0);
 		vst::host *Global::pVstHost(0);
 
 		Global::Global()
 		{
+			_cpuHz = cpu::cycles_per_second();
 			_pSong = new Song;
 			pPlayer = new Player;
 			pConfig = new Configuration;
