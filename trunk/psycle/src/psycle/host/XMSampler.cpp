@@ -499,9 +499,9 @@ namespace psycle
 			
 		}// XMSampler::Voice::VoiceInit) 
 
-		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR,dsp::Cubic& _resampler)
+		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, helpers::dsp::Cubic& _resampler)
 		{
-			dsp::PRESAMPLERFN pResamplerWork;
+			helpers::dsp::PRESAMPLERFN pResamplerWork;
 			pResamplerWork = _resampler._pWorkFn;
 
 			float left_output = 0.0f;
@@ -2027,7 +2027,7 @@ namespace psycle
 			_mode = MACHMODE_GENERATOR;
 
 			_numVoices=0;
-			_resampler.SetQuality(dsp::R_LINEAR);
+			_resampler.SetQuality(helpers::dsp::R_LINEAR);
 
 			m_bAmigaSlides = false;
 			m_UseFilters = true;
@@ -2602,10 +2602,10 @@ namespace psycle
 			riffFile->Write(_numVoices); // numSubtracks
 			switch (_resampler.GetQuality())
 			{
-				case dsp::R_NONE:   temp = 0; break;
-				case dsp::R_SPLINE: temp = 2; break;
-				case dsp::R_LINEAR:
-				default:            temp = 1; break;
+				case helpers::dsp::R_NONE: temp = 0; break;
+				case helpers::dsp::R_SPLINE: temp = 2; break;
+				case helpers::dsp::R_LINEAR:
+				default: temp = 1;
 			}
 			riffFile->Write(temp); // quality
 
@@ -2619,40 +2619,42 @@ namespace psycle
 				m_Channel[i].Save(*riffFile);
 			}
 
-/*			// Instrument Data Save
-			int numInstruments = 0;	
-			for(int i = 0;i < MAX_INSTRUMENT;i++){
-				if(m_Instruments[i].IsEnabled()){
-					numInstruments++;
+			#if 0
+				// Instrument Data Save
+				int numInstruments = 0;	
+				for(int i = 0;i < MAX_INSTRUMENT;i++){
+					if(m_Instruments[i].IsEnabled()){
+						numInstruments++;
+					}
 				}
-			}
 
-			riffFile->Write(numInstruments);
+				riffFile->Write(numInstruments);
 
-			for(int i = 0;i < MAX_INSTRUMENT;i++){
-				if(m_Instruments[i].IsEnabled()){
-					riffFile->Write(i);
-					m_Instruments[i].Save(*riffFile);
+				for(int i = 0;i < MAX_INSTRUMENT;i++){
+					if(m_Instruments[i].IsEnabled()){
+						riffFile->Write(i);
+						m_Instruments[i].Save(*riffFile);
+					}
 				}
-			}
 
-			// Sample Data Save
-			int numSamples = 0;	
-			for(int i = 0;i < MAX_INSTRUMENT;i++){
-				if(m_rWaveLayer[i].WaveLength() != 0){
-					numSamples++;
+				// Sample Data Save
+				int numSamples = 0;	
+				for(int i = 0;i < MAX_INSTRUMENT;i++){
+					if(m_rWaveLayer[i].WaveLength() != 0){
+						numSamples++;
+					}
 				}
-			}
 
-			riffFile->Write(numSamples);
+				riffFile->Write(numSamples);
 
-			for(int i = 0;i < MAX_INSTRUMENT;i++){
-				if(m_rWaveLayer[i].WaveLength() != 0){
-					riffFile->Write(i);
-					m_rWaveLayer[i].Save(*riffFile);
+				for(int i = 0;i < MAX_INSTRUMENT;i++){
+					if(m_rWaveLayer[i].WaveLength() != 0){
+						riffFile->Write(i);
+						m_rWaveLayer[i].Save(*riffFile);
+					}
 				}
-			}
-*/
+			#endif
+			
 			int endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
 			size = endpos - filepos -sizeof(size);
@@ -2681,10 +2683,10 @@ namespace psycle
 
 				switch (temp)
 				{
-				case 2:	_resampler.SetQuality(dsp::R_SPLINE); break;
-				case 0:	_resampler.SetQuality(dsp::R_NONE);	  break;
-				default:
-				case 1: _resampler.SetQuality(dsp::R_LINEAR); break;
+					case 2:	_resampler.SetQuality(helpers::dsp::R_SPLINE); break;
+					case 0:	_resampler.SetQuality(helpers::dsp::R_NONE); break;
+					case 1:
+					default: _resampler.SetQuality(helpers::dsp::R_LINEAR);
 				}
 
 				for (int i=0; i < 128; i++) riffFile->Read(&zxxMap[i],sizeof(ZxxMacro));
@@ -2694,9 +2696,7 @@ namespace psycle
 				riffFile->Read(m_GlobalVolume);
 				riffFile->Read(m_PanningMode);
 
-				for(int i = 0;i < MAX_TRACKS;i++){
-					m_Channel[i].Load(*riffFile);
-				}
+				for(int i = 0;i < MAX_TRACKS;i++) m_Channel[i].Load(*riffFile);
 
 /*				// Instrument Data Load
 				int numInstruments;
@@ -2721,10 +2721,9 @@ namespace psycle
 				}
 */
 			}
-			else wrongState=true;
+			else wrongState = true;
 
-			if (!wrongState)
-				return true;
+			if (!wrongState) return true;
 			else
 			{
 				riffFile->Seek(filepos+size);

@@ -11,6 +11,7 @@ namespace psycle
 {
 	namespace host
 	{
+
 class XMSampler : public Machine
 {
 public:
@@ -159,7 +160,7 @@ XMSampler::Channel::PerformFX().
 
 		virtual void Init(XMInstrument::WaveData* wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float *pLeftw,float *pRightw,dsp::PRESAMPLERFN pResamplerWork)
+		virtual void Work(float *pLeftw,float *pRightw, helpers::dsp::PRESAMPLERFN pResamplerWork)
 		{
 			//Process sample
 			*pLeftw = pResamplerWork(
@@ -437,7 +438,7 @@ XMSampler::Channel::PerformFX().
 		void ResetEffects();
 
 		void VoiceInit(int channelNum,int instrumentNum);
-		void Work(int numSamples,float * pSampleL,float *pSamlpesR,dsp::Cubic& _resampler);
+		void Work(int numSamples,float * pSampleL,float *pSamlpesR,helpers::dsp::Cubic& _resampler);
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
@@ -1061,11 +1062,11 @@ XMSampler::Channel::PerformFX().
 	};
 
 	/// set resampler quality 
-	void ResamplerQuality(const dsp::ResamplerQuality value){
+	void ResamplerQuality(const helpers::dsp::ResamplerQuality value){
 		_resampler.SetQuality(value);
 	}
 
-	const dsp::ResamplerQuality ResamplerQuality(){
+	const helpers::dsp::ResamplerQuality ResamplerQuality(){
 		return _resampler.GetQuality();
 	}
 	const bool UseFilters(void) { return m_UseFilters; };
@@ -1097,7 +1098,7 @@ protected:
 
 	Voice m_Voices[MAX_POLYPHONY];
 	XMSampler::Channel m_Channel[MAX_TRACKS];
-	dsp::Cubic _resampler;
+	helpers::dsp::Cubic _resampler;
 	ZxxMacro zxxMap[128];
 
 	

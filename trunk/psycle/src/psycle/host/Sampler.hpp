@@ -124,14 +124,14 @@ namespace psycle
 						switch (temp)
 						{
 						case 2:
-							_resampler.SetQuality(dsp::R_SPLINE);
+							_resampler.SetQuality(helpers::dsp::R_SPLINE);
 							break;
 						case 0:
-							_resampler.SetQuality(dsp::R_NONE);
+							_resampler.SetQuality(helpers::dsp::R_NONE);
 							break;
 						default:
 						case 1:
-							_resampler.SetQuality(dsp::R_LINEAR);
+							_resampler.SetQuality(helpers::dsp::R_LINEAR);
 							break;
 						}
 					}
@@ -148,13 +148,13 @@ namespace psycle
 				pFile->Write(&temp, sizeof(temp)); // numSubtracks
 				switch (_resampler.GetQuality())
 				{
-					case dsp::R_NONE:
+					case helpers::dsp::R_NONE:
 						temp = 0;
 						break;
-					case dsp::R_LINEAR:
+					case helpers::dsp::R_LINEAR:
 						temp = 1;
 						break;
-					case dsp::R_SPLINE:
+					case helpers::dsp::R_SPLINE:
 						temp = 2;
 						break;
 				}
@@ -169,7 +169,7 @@ namespace psycle
 			static char* _psName;
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
-			dsp::Cubic _resampler;
+			helpers::dsp::Cubic _resampler;
 
 			void PerformFx(int voice);
 			void VoiceWork(int numsamples, int voice);

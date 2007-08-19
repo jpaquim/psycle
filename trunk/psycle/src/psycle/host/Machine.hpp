@@ -498,21 +498,14 @@ namespace psycle
 
 		inline void Machine::SetVolumeCounter(int numSamples)
 		{
-			_volumeCounter = dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
-//			if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-			int temp((dsp::F2I(fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3)));// not 100% accurate, but looks as it sounds
+			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
+			//if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
+			int temp((helpers::math::rounded(helpers::math::fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // not 100% accurate, but looks as it sounds
 			// prevent downward jerkiness
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
 			if (_volumeDisplay>0 )--_volumeDisplay;
 		};
-
-		/*
-		inline void Machine::SetVolumeCounterAccurate(int numSamples)
-		{
-			_volumeCounter = Dsp::GetMaxVolAccurate(_pSamplesL, _pSamplesR, numSamples);
-		};
-		*/
 
 		/// master machine.
 		class Master : public Machine
@@ -542,6 +535,5 @@ namespace psycle
 		protected:
 			static char* _psName;
 		};
-
 	}
 }

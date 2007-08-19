@@ -41,8 +41,8 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 		int const my=nHeight/2;
 		if(rWave().IsWaveStereo()) wrHeight=my/2;
 		else wrHeight=my;
-		dsp::Cubic resampler;
-		resampler.SetQuality(dsp::R_SPLINE);
+		helpers::dsp::Cubic resampler;
+		resampler.SetQuality(helpers::dsp::R_SPLINE);
 
 		dc.FillSolidRect(&rect,RGB(255,255,255));
 		dc.SetBkMode(TRANSPARENT);

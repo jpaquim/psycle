@@ -77,10 +77,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-			_pMachine->_resampler.SetQuality((dsp::ResamplerQuality)m_interpol.GetCurSel());
-
+			_pMachine->_resampler.SetQuality((helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
 		}
-
 
 		BOOL CGearTracker::Create()
 		{

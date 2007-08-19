@@ -1096,7 +1096,7 @@ namespace psycle
 			int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
 
 			// adjust the sample position (fix latency)
-			int adjPlayPos = playPos - f2i((midiLatencyMs/1000.f) * samplesPerSecond );
+			int adjPlayPos = playPos - helpers::math::rounded((midiLatencyMs/1000.f) * samplesPerSecond );
 			
 			// never let the adjusted play pos become negative (this really breaks things - usually
 			// when trying to resync just after the audio engine has restared)
@@ -1165,7 +1165,7 @@ namespace psycle
 			// using our own timer, started at the same time (hopefully!) as the MIDI
 			// input timer.
  			int midiLatency = ( timeGetTime() - m_tickBase ) - dwParam2;
-			int midiLatencySamples = f2i( (midiLatency/1000.f) * samplesPerSecond );
+			int midiLatencySamples = helpers::math::rounded( (midiLatency/1000.f) * samplesPerSecond );
 			m_stats.syncEventLatency = midiLatencySamples;
 
 			// work out the real play position
@@ -1341,7 +1341,7 @@ namespace psycle
 							}
 
 							// create actual value
-							int value = min + f2i( (max-min) * (data2/127.f) );
+							int value = min + helpers::math::rounded( (max-min) * (data2/127.f) );
 
 							// assign
 							m_midiBuffer[ m_patOut ].entry._inst = data1;

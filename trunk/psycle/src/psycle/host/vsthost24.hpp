@@ -186,7 +186,7 @@ namespace psycle
 					try
 					{
 						if(numparam < numParams())
-							return f2i(GetParameter(numparam) * quantization);
+							return helpers::math::rounded(GetParameter(numparam) * quantization);
 					}catch(...){}
 					return 0;
 				}

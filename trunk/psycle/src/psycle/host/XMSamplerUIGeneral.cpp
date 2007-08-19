@@ -8,14 +8,14 @@
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
+	IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
 
-XMSamplerUIGeneral::XMSamplerUIGeneral() : CPropertyPage(XMSamplerUIGeneral::IDD)
+	XMSamplerUIGeneral::XMSamplerUIGeneral() : CPropertyPage(XMSamplerUIGeneral::IDD)
 	{
 		m_bInitialize = false;
 	}
 
-void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
+	void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
 	{
 		CPropertyPage::DoDataExchange(pDX);
 		//{{AFX_DATA_MAP(CDirectoryDlg)
@@ -28,36 +28,37 @@ void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
 		DDX_Control(pDX, IDC_CHECK2, m_ckFilter);
 		DDX_Control(pDX, IDC_XMPANNINGMODE, m_cbPanningMode);
 	}
-BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
-	ON_CBN_SELCHANGE(IDC_XMINTERPOL, OnCbnSelchangeXminterpol)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_XMPOLY, OnNMCustomdrawXmpoly)
-	ON_BN_CLICKED(IDC_CHECK1, OnBnClickedCheck1)
-	ON_BN_CLICKED(IDC_CHECK2, OnBnClickedCheck2)
-	ON_CBN_SELENDOK(IDC_XMPANNINGMODE, OnCbnSelendokXmpanningmode)
-END_MESSAGE_MAP()
+	BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
+		ON_CBN_SELCHANGE(IDC_XMINTERPOL, OnCbnSelchangeXminterpol)
+		ON_NOTIFY(NM_CUSTOMDRAW, IDC_XMPOLY, OnNMCustomdrawXmpoly)
+		ON_BN_CLICKED(IDC_CHECK1, OnBnClickedCheck1)
+		ON_BN_CLICKED(IDC_CHECK2, OnBnClickedCheck2)
+		ON_CBN_SELENDOK(IDC_XMPANNINGMODE, OnCbnSelendokXmpanningmode)
+	END_MESSAGE_MAP()
 
-XMSamplerUIGeneral::~XMSamplerUIGeneral()
+	XMSamplerUIGeneral::~XMSamplerUIGeneral()
 	{
 	}
-/////////////////////////////////////////////////////////////////////////////
-// XMSamplerUIGeneral message handlers
 
-BOOL XMSamplerUIGeneral::OnInitDialog() 
+	/////////////////////////////////////////////////////////////////////////////
+	// XMSamplerUIGeneral message handlers
+
+	BOOL XMSamplerUIGeneral::OnInitDialog() 
 	{
-	CPropertyPage::OnInitDialog();
-	m_bInitialize=false;
-	m_interpol.AddString(_T("No Interpolation"));
-	m_interpol.AddString(_T("Linear Interpolation"));
-	m_interpol.AddString(_T("Spline Interpolation"));
-	m_interpol.AddString(_T("512p. Sinc Interpolation"));
+		CPropertyPage::OnInitDialog();
+		m_bInitialize=false;
+		m_interpol.AddString(_T("No Interpolation"));
+		m_interpol.AddString(_T("Linear Interpolation"));
+		m_interpol.AddString(_T("Spline Interpolation"));
+		m_interpol.AddString(_T("512p. Sinc Interpolation"));
 
-	m_interpol.SetCurSel(_pMachine->ResamplerQuality());
+		m_interpol.SetCurSel(_pMachine->ResamplerQuality());
 
 
-	m_polyslider.SetRange(2, XMSampler::MAX_POLYPHONY);
-	m_polyslider.SetPos(_pMachine->NumVoices());
+		m_polyslider.SetRange(2, XMSampler::MAX_POLYPHONY);
+		m_polyslider.SetPos(_pMachine->NumVoices());
 
-	m_ECommandInfo.SetWindowText("Track Commands:\r\n\t\
+		m_ECommandInfo.SetWindowText("Track Commands:\r\n\t\
 01xx: Portamento Up ( Fx: fine, Ex: Extra fine)\r\n\t\
 02xx: Portamento Down (Fx: fine, Ex: Extra fine)\r\n\t\
 03xx: Tone Portamento\r\n\t\
@@ -135,43 +136,41 @@ Ex: Pitch slide down");
 	// EXCEPTION: OCX Property Pages should return false
 	}
 
-void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
+	void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
 	{
-	_pMachine->ResamplerQuality((dsp::ResamplerQuality)m_interpol.GetCurSel());
-
+		_pMachine->ResamplerQuality((helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
 	}
 
-void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
+	void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
 	{
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-
-	for(int c = _pMachine->NumVoices(); c < XMSampler::MAX_POLYPHONY; c++)
+		//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+		for(int c = _pMachine->NumVoices(); c < XMSampler::MAX_POLYPHONY; c++)
 		{
-		_pMachine->rVoice(c).NoteOffFast();
+			_pMachine->rVoice(c).NoteOffFast();
 		}
 
 		_pMachine->NumVoices(m_polyslider.GetPos());
-	// Label on dialog display
-	char buffer[15];
-	sprintf(buffer,"%d",_pMachine->NumVoices());
-	m_polylabel.SetWindowText(buffer);
-	*pResult = 0;
+		// Label on dialog display
+		char buffer[15];
+		sprintf(buffer,"%d",_pMachine->NumVoices());
+		m_polylabel.SetWindowText(buffer);
+		*pResult = 0;
 	}
-void XMSamplerUIGeneral::OnBnClickedCheck1()
-{
-	_pMachine->IsAmigaSlides(( m_bAmigaSlides.GetCheck() == 1 )?true:false);
-}
 
-void XMSamplerUIGeneral::OnBnClickedCheck2()
-{
-	_pMachine->UseFilters(m_ckFilter.GetCheck()?true:false);
-}
+	void XMSamplerUIGeneral::OnBnClickedCheck1()
+	{
+		_pMachine->IsAmigaSlides(( m_bAmigaSlides.GetCheck() == 1 )?true:false);
+	}
 
-void XMSamplerUIGeneral::OnCbnSelendokXmpanningmode()
-{
-	_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
-}
+	void XMSamplerUIGeneral::OnBnClickedCheck2()
+	{
+		_pMachine->UseFilters(m_ckFilter.GetCheck()?true:false);
+	}
+
+	void XMSamplerUIGeneral::OnCbnSelendokXmpanningmode()
+	{
+		_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
+	}
 
 PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
-

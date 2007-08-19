@@ -114,7 +114,7 @@ namespace psycle
 			/// file to which to output signal.
 			WaveFile _outputWaveFile;
 			/// dither handler
-			dsp::Dither dither;
+			helpers::dsp::Dither dither;
 
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()

@@ -8,8 +8,8 @@ namespace psycle
 {
 	namespace host
 	{
-		#define SHORT_MIN	-32768
-		#define SHORT_MAX	32767
+		#define SHORT_MIN -32768
+		#define SHORT_MAX 32767
 
 		AudioDriverInfo AudioDriver::_info = { "Silent" };
 
@@ -33,7 +33,6 @@ namespace psycle
 		void AudioDriver::QuantizeWithDither(float *pin, int *piout, int c)
 		{
 			double const d2i = (1.5 * (1 << 26) * (1 << 26));
-			
 			do
 			{
 				double res = ((double)pin[1] + frand()) + d2i;
@@ -66,13 +65,12 @@ namespace psycle
 
 		void AudioDriver::Quantize(float *pin, int *piout, int c)
 		{
-		//	double const d2i = (1.5 * (1 << 26) * (1 << 26));
-			
+			//double const d2i = (1.5 * (1 << 26) * (1 << 26));
 			do
 			{
-		//		double res = ((double)pin[1]) + d2i;
-		//		int r = *(int *)&res;
-				int r = f2i(pin[1]);
+				//double res = ((double)pin[1]) + d2i;
+				//int r = *(int *)&res;
+				int r = helpers::math::rounded(pin[1]);
 
 				if (r < SHORT_MIN)
 				{
@@ -82,9 +80,9 @@ namespace psycle
 				{
 					r = SHORT_MAX;
 				}
-		//		res = ((double)pin[0]) + d2i;
-		//		int l = *(int *)&res;
-				int l = f2i(pin[0]);
+				//res = ((double)pin[0]) + d2i;
+				//int l = *(int *)&res;
+				int l = helpers::math::rounded(pin[0]);
 
 				if (l < SHORT_MIN)
 				{
@@ -99,19 +97,19 @@ namespace psycle
 			}
 			while(--c);
 		}
+
 		void AudioDriver::DeQuantizeAndDeinterlace(int *pin, float *poutleft,float *poutright,int c)
 		{
-//			const float multiplier = (_bitDepth==24?0.00000011920928955078125f:(_bitDepth==16?0.000030517578125f:0.0078125f));
+			//const float multiplier = (_bitDepth==24?0.00000011920928955078125f:(_bitDepth==16?0.000030517578125f:0.0078125f));
 			do
 			{
 				*poutleft++ = static_cast<short int>(*pin&0xFFFF);
 				*poutright++ = static_cast<short int>((*pin&0xFFFF0000)>>16);
-//				*poutleft++ = *(pin++)*multiplier;
-//				*poutright++ = *(pin++)*multiplier;
+				//*poutleft++ = *(pin++)*multiplier;
+				//*poutright++ = *(pin++)*multiplier;
 				pin++;
 			}
 			while(--c);
 		}
 	}
 }
-

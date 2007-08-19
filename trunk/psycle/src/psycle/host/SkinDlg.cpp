@@ -767,6 +767,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char buf[1 << 10];
 				while(std::fgets(buf, sizeof buf, hfile))
 				{
+					using helpers::hexstring_to_integer;
 					#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR <= 7
 						// msvc 7.1 crashes because of the number of 'else if' statements
 						// so, we can't use 'else'

@@ -111,7 +111,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				CString mfc;
 				gui.GetWindowText(mfc);
-				hexstring_to_integer(static_cast<char const * const>(mfc), model);
+				helpers::hexstring_to_integer(static_cast<char const * const>(mfc), model);
 			}
 			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model)
 			{

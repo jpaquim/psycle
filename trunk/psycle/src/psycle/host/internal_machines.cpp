@@ -319,8 +319,8 @@ namespace psycle
 				mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
 				// prevent crashing if the audio driver is not working.
 				if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
-				dsp::Mul(_pSamplesL,numSamples,_gainvol);
-				dsp::Mul(_pSamplesR,numSamples,_gainvol);
+				helpers::dsp::Mul(_pSamplesL,numSamples,_gainvol);
+				helpers::dsp::Mul(_pSamplesR,numSamples,_gainvol);
 				Machine::SetVolumeCounter(numSamples);
 				if ( Global::configuration().autoStopMachines )
 				{
@@ -332,7 +332,7 @@ namespace psycle
 					}
 					else Standby(false);
 				}
-				dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+				helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 			}
 			_cpuCost = 1;
 			_worked = true;
@@ -424,7 +424,7 @@ namespace psycle
 				}
 				else Standby(false);
 			}
-			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 			_cpuCost += cpu::cycles() - cost;
 
 			_worked = true;
@@ -452,8 +452,8 @@ namespace psycle
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
-										dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
-										dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
+										helpers::dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
+										helpers::dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
 									}
 								}
 							}
@@ -465,8 +465,8 @@ namespace psycle
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
-										dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
-										dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
+										helpers::dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
+										helpers::dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
 									}
 								}
 							}
@@ -478,8 +478,8 @@ namespace psycle
 									assert(pRetMachine);
 									if(!pRetMachine->_mute && !pRetMachine->Standby())
 									{
-										dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[j]);
-										dsp::Add(pRetMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[j]);
+										helpers::dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[j]);
+										helpers::dsp::Add(pRetMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[j]);
 									}
 								}
 							}
@@ -500,8 +500,8 @@ namespace psycle
 						{
 							cpu::cycles_type cost = cpu::cycles();
 							pSendMachine->_waitingForSound = false;
-							dsp::Clear(_pSamplesL, numSamples);
-							dsp::Clear(_pSamplesR, numSamples);
+							helpers::dsp::Clear(_pSamplesL, numSamples);
+							helpers::dsp::Clear(_pSamplesR, numSamples);
 							_cpuCost += cpu::cycles() - cost;
 						}
 
@@ -524,8 +524,8 @@ namespace psycle
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
-							dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[i]);
-							dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[i]);
+							helpers::dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[i]);
+							helpers::dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[i]);
 						}
 					}
 				}
@@ -537,8 +537,8 @@ namespace psycle
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
-							dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[i]);
-							dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[i]);
+							helpers::dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[i]);
+							helpers::dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[i]);
 						}
 					}
 				}
@@ -554,8 +554,8 @@ namespace psycle
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
-							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*mixvolpl[i]);
-							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*mixvolpr[i]);
+							helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*mixvolpl[i]);
+							helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*mixvolpr[i]);
 						}
 					}
 				}
@@ -567,8 +567,8 @@ namespace psycle
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
-							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*mixvolpl[i]);
-							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*mixvolpr[i]);
+							helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*mixvolpl[i]);
+							helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*mixvolpr[i]);
 						}
 					}
 				}
@@ -839,12 +839,12 @@ namespace psycle
 			{
 				if (param == 0)
 				{
-					float dbs = dsp::dB(master_.Volume());
+					float dbs = helpers::dsp::dB(master_.Volume());
 					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
 				}
 				else if (param <= 12)
 				{
-					float dbs = dsp::dB(Channel(param-1).Volume());
+					float dbs = helpers::dsp::dB(Channel(param-1).Volume());
 					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
 				}
 				else if (param == 13) return master_.DryWetMix()*0x100;
@@ -886,7 +886,7 @@ namespace psycle
 				if ( param == 0 || param > 12) return 0;
 				else
 				{
-					float dbs = dsp::dB(Return(param-1).Volume());
+					float dbs = helpers::dsp::dB(Return(param-1).Volume());
 					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
 				}
 			}
@@ -910,7 +910,7 @@ namespace psycle
 					if (master_.Volume() < 0.00002f ) strcpy(parVal,"-inf");
 					else
 					{
-						float dbs = dsp::dB(master_.Volume());
+						float dbs = helpers::dsp::dB(master_.Volume());
 						sprintf(parVal,"%.01fdB",dbs);
 					}
 				}
@@ -919,7 +919,7 @@ namespace psycle
 					if (Channel(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
 					else
 					{
-						float dbs = dsp::dB(Channel(param-1).Volume());
+						float dbs = helpers::dsp::dB(Channel(param-1).Volume());
 						sprintf(parVal,"%.01fdB",dbs);
 					}
 				}
@@ -932,7 +932,7 @@ namespace psycle
 				else if (param == 14)
 				{
 					float val = master_.Gain();
-					float dbs = (((val>0.0f)?dsp::dB(val):-100.0f));
+					float dbs = (((val>0.0f)?helpers::dsp::dB(val):-100.0f));
 					sprintf(parVal,"%.01fdB",dbs);
 				}
 				else 
@@ -966,7 +966,7 @@ namespace psycle
 				{
 					float val;
 					GetWireVolume(channel-1,val);
-					float dbs = (((val>0.0f)?dsp::dB(val):-100.0f));
+					float dbs = (((val>0.0f)?helpers::dsp::dB(val):-100.0f));
 					sprintf(parVal,"%.01fdB",dbs);
 				}
 				else
@@ -1008,7 +1008,7 @@ namespace psycle
 					if (Return(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
 					else
 					{
-						float dbs = dsp::dB(Return(param-1).Volume());
+						float dbs = helpers::dsp::dB(Return(param-1).Volume());
 						sprintf(parVal,"%.01fdB",dbs);
 					}
 				}
@@ -1039,7 +1039,7 @@ namespace psycle
 					else
 					{
 						float dbs = (value/42.67f)-96.0f;
-						master_.Volume() = dsp::dB2Amp(dbs);
+						master_.Volume() = helpers::dsp::dB2Amp(dbs);
 					}
 					RecalcMaster();
 				}
@@ -1050,7 +1050,7 @@ namespace psycle
 					else
 					{
 						float dbs = (value/42.67f)-96.0f;
-						Channel(param-1).Volume() = dsp::dB2Amp(dbs);
+						Channel(param-1).Volume() = helpers::dsp::dB2Amp(dbs);
 					}
 					RecalcChannel(param-1);
 				}
@@ -1098,7 +1098,7 @@ namespace psycle
 					else
 					{
 						float dbs = (value/42.67f)-96.0f;
-						Return(param-1).Volume() = dsp::dB2Amp(dbs);
+						Return(param-1).Volume() = helpers::dsp::dB2Amp(dbs);
 					}
 					RecalcReturn(param-1);
 				}

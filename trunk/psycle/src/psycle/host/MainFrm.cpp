@@ -710,8 +710,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CClientDC canvasl(lv);
 //				CClientDC canvasr(rv);
 
-				int log_l=f2i(100*log10f(l));
-				int log_r=f2i(100*log10f(r));
+				int log_l=helpers::math::rounded(100*log10f(l));
+				int log_r=helpers::math::rounded(100*log10f(r));
 				log_l=log_l-225;
 				if ( log_l < 0 )log_l=0;
 				log_r=log_r-225;
@@ -2468,7 +2468,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 			}
 			
-			sprintf(buffer, "%02d:%02d", f2i(songLength / 60), f2i(songLength) % 60);
+			sprintf(buffer, "%02d:%02d", helpers::math::rounded(songLength / 60), helpers::math::rounded(songLength) % 60);
 			pLength->SetWindowText(buffer);
 			
 			// Update sequencer line
@@ -2557,7 +2557,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (Global::pPlayer->_playing)
 			{
 				CString str;
-				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, f2i(Global::pPlayer->_playTime), f2i(Global::pPlayer->_playTime*100)-(f2i(Global::pPlayer->_playTime)*100)); 
+				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, helpers::math::rounded(Global::pPlayer->_playTime), helpers::math::rounded(Global::pPlayer->_playTime*100)-(helpers::math::rounded(Global::pPlayer->_playTime)*100)); 
 				pCmdUI->SetText(str); 
 			}
 		}
@@ -2625,7 +2625,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CString str;
 			cb->GetWindowText(str);
 			int result;
-			hexstring_to_integer(str.Left(2).GetBuffer(2), result);
+			helpers::hexstring_to_integer(str.Left(2).GetBuffer(2), result);
 			return result;
 		}
 

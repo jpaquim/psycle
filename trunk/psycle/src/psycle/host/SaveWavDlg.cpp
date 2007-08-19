@@ -624,6 +624,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			switch (m_recmode)
 			{
+				using helpers::hexstring_to_integer;
 			case 0:
 				j=0; // Calculate progress bar range.
 				for (i=0;i<pSong->playLength;i++)
@@ -771,17 +772,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else if ( m_outputtype == 2)
 			{
 				// todo : copy clipboardmem to the current selected instrument.
-				int copiedsize=0;
-				int length = *reinterpret_cast<int*>(clipboardmem[0]);
-				int i=1;
-/*				while (copiedsize+1000000<=length)
-				{
-					CopyMemory(pClipboardData +copiedsize,clipboardmem[i], 1000000);
-					i++;
-					copiedsize+=1000000;
-				}
-				CopyMemory(pClipboardData +copiedsize,clipboardmem[i], length-copiedsize);
-*/
+				#if 0
+					int length = *reinterpret_cast<int*>(clipboardmem[0]);
+					int copiedsize=0;
+					int i=1;
+					while (copiedsize+1000000<=length)
+					{
+						CopyMemory(pClipboardData +copiedsize,clipboardmem[i], 1000000);
+						i++;
+						copiedsize+=1000000;
+					}
+					CopyMemory(pClipboardData +copiedsize,clipboardmem[i], length-copiedsize);
+				#endif
 				for (unsigned int i=0;i<clipboardmem.size();i++)
 				{
 					delete[] clipboardmem[i];

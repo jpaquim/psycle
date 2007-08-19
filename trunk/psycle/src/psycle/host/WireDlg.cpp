@@ -200,7 +200,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int constant2 = MAX_SCOPE_BANDS/scope_spec_bands;
 			for (int i=0;i<SCOPE_SPEC_SAMPLES;i++)
 			{ 
-				float constant = (F_PI/(SCOPE_SPEC_SAMPLES/2))*(i-(SCOPE_SPEC_SAMPLES/2)); 
+				float constant = (helpers::math::pi_f/(SCOPE_SPEC_SAMPLES/2))*(i-(SCOPE_SPEC_SAMPLES/2)); 
 				int j=0;
 				for(int h=0;h<scope_spec_bands;h++)
 				{ 
@@ -261,8 +261,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if (awr>curpeakr)	{	curpeakr = awr;	}
 							}
 
-						curpeakl=128-f2i(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
-						curpeakr=128-f2i(sqrtf(curpeakr*vucorrection));
+						curpeakl=128-helpers::math::rounded(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
+						curpeakr=128-helpers::math::rounded(sqrtf(curpeakr*vucorrection));
 
 						if (curpeakl<peak2L) //  it is a cardinal value, so smaller means higher peak.
 							{
@@ -469,7 +469,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						for (int i = 0; i < scope_spec_bands; i++)
 						{
 							int aml = 128 - (log(1+ampl[i])*heightcompensation[i]);
-//							int aml = 128-f2i(sqrtf(ampl[i]));
+//							int aml = 128-helpers::math::rounded(sqrtf(ampl[i]));
 							if (aml < 0)
 							{
 								aml = 0;
@@ -491,7 +491,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							rect.left+=width;
 
 							int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
-//							int amr = 128-f2i(sqrtf(ampr[i]));
+//							int amr = 128-helpers::math::rounded(sqrtf(ampr[i]));
 							if (amr < 0)
 							{
 								amr = 0;
@@ -675,67 +675,67 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 						CPen* oldpen = bufDC.SelectObject(&linepenbL);
 
-						x=f2i(sinf(-(F_PI/4.0f)-(o_mvdpl*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpl*(128.0f/32768.0f))+128;
-						y=f2i(-cosf(-(F_PI/4.0f)-(o_mvdpl*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-f2i(o_mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::rounded(o_mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=f2i(sinf((F_PI/4.0f)+(o_mvdpr*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpr*(128.0f/32768.0f))+128;
-						y=f2i(-cosf((F_PI/4.0f)+(o_mvdpr*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenbR);
 
-						x=f2i(sinf(-(o_mvdl*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvl*(128.0f/32768.0f))+128;
-						y=f2i(-cosf(-(o_mvdl*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-f2i(o_mvc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::rounded(o_mvc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=f2i(sinf((o_mvdr*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvr*(128.0f/32768.0f))+128;
-						y=f2i(-cosf((o_mvdr*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 
 						bufDC.SelectObject(&linepenL);
 
-						x=f2i(sinf(-(F_PI/4.0f)-(mvdpl*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
-						y=f2i(-cosf(-(F_PI/4.0f)-(mvdpl*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-f2i(mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::rounded(mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=f2i(sinf((F_PI/4.0f)+(mvdpr*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpr*(128.0f/32768.0f))+128;
-						y=f2i(-cosf((F_PI/4.0f)+(mvdpr*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenR);
 
-						x=f2i(sinf(-(mvdl*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvl*(128.0f/32768.0f))+128;
-						y=f2i(-cosf(-(mvdl*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-f2i(mvc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::rounded(mvc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=f2i(sinf((mvdr*F_PI/(32768.0f*4.0f)))
+						x=helpers::math::rounded(sinf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvr*(128.0f/32768.0f))+128;
-						y=f2i(-cosf((mvdr*F_PI/(32768.0f*4.0f)))
+						y=helpers::math::rounded(-cosf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 
