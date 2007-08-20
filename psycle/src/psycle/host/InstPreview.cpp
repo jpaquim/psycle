@@ -28,8 +28,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				else
 					rd=ld;
 					
-				*++pSamplesL+=ld;
-				*++pSamplesR+=rd;
+				*(++pSamplesL)+=ld;
+				*(++pSamplesR)+=rd;
 					
 				if(++m_pos>=m_pInstrument->waveLength)
 				{

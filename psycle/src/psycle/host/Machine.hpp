@@ -388,10 +388,18 @@ namespace psycle
 			Machine();
 			Machine(MachineType msubclass, MachineMode mode, int id);
 			virtual ~Machine() throw();
-			virtual void SetSampleRate(int sr) {}
+			virtual void SetSampleRate(int sr)
+			{
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+				rms.count=0;
+				rms.AccumLeft=0.;
+				rms.AccumRight=0.;
+				rms.previousLeft=0.;
+				rms.previousRight=0.;
+#endif
+			}
 		protected:
-			void SetVolumeCounter(int numSamples);
-			//void SetVolumeCounterAccurate(int numSamples);
+			void UpdateVuAndStanbyFlag(int numSamples);
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -412,6 +420,9 @@ namespace psycle
 				/// output peak level for DSP
 				float _volumeCounter;					
 				/// output peak level for display
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+				helpers::dsp::RMSData rms;
+#endif
 				int _volumeDisplay;	
 				/// output peak level for display
 				int _volumeMaxDisplay;
@@ -494,17 +505,6 @@ namespace psycle
 				/// Outgoing connections activated
 				bool _connection[MAX_CONNECTIONS];      
 			///\}
-		};
-
-		inline void Machine::SetVolumeCounter(int numSamples)
-		{
-			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples);
-			//if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-			int temp((helpers::math::rounded(helpers::math::fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // not 100% accurate, but looks as it sounds
-			// prevent downward jerkiness
-			if(temp > 97) temp = 97;
-			if(temp > _volumeDisplay) _volumeDisplay = temp;
-			if (_volumeDisplay>0 )--_volumeDisplay;
 		};
 
 		/// master machine.

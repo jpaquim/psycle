@@ -2079,6 +2079,7 @@ namespace psycle
 		}
 		void XMSampler::SetSampleRate(int sr)
 		{
+			Machine::SetSampleRate(sr);
 			//\todo
 			//update deltatick
 			//update envelopes
@@ -2469,17 +2470,7 @@ namespace psycle
 					}
 				}
 
-				Machine::SetVolumeCounter(numSamples);
-
-				if ( Global::pConfig->autoStopMachines )
-				{
-					if (_volumeCounter < 8.0f)	{
-						_volumeCounter = 0.0f;
-						_volumeDisplay = 0;
-						Standby(true);
-					}
-					else Standby(false);
-				}
+				UpdateVuAndStanbyFlag(numSamples);
 			}
 
 			else Standby(true);

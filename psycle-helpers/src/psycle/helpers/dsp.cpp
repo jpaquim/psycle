@@ -3,14 +3,8 @@
 #include <packageneric/module.private.hpp>
 #include "dsp.hpp"
 namespace psycle { namespace helpers { namespace dsp {
-	#if defined PSYCLE__CONFIGURATION__RMS_VUS
-		int numRMSSamples=1;
-		int countRMSSamples=0;
-		double RMSAccumulatedLeft=0;
-		double RMSAccumulatedRight=0;
-		float previousRMSLeft=0;
-		float previousRMSRight=0;
-	#endif
+
+	int numRMSSamples=1;
 
 	int Cubic::_resolution;
 	float Cubic::_aTable[CUBIC_RESOLUTION];

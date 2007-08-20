@@ -231,6 +231,11 @@ namespace psycle
 			}
 			_numInputs = 0;
 			_numOutputs = 0;
+			rms.AccumLeft=0.;
+			rms.AccumRight=0.;
+			rms.count=0;
+			rms.previousLeft=0.;
+			rms.previousRight=0.;
 		}
 
 		void Machine::SetPan(int newPan)
@@ -599,6 +604,52 @@ namespace psycle
 			}
 			_waitingForSound = false;
 		}
+
+		void Machine::UpdateVuAndStanbyFlag(int numSamples)
+		{
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+			_volumeCounter = helpers::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
+			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			// clip values
+			if(temp > 97) temp = 97;
+			if(temp > 0)
+			{
+				_volumeDisplay = temp;
+			}
+			else if (_volumeDisplay>1 ) _volumeDisplay -=2;
+
+			if ( Global::pConfig->autoStopMachines )
+			{
+				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples)	{
+					rms.count=0;
+					rms.AccumLeft=0.;
+					rms.AccumRight=0.;
+					rms.previousLeft=0.;
+					rms.previousRight=0.;
+					_volumeCounter = 0.0f;
+					_volumeDisplay = 0;
+					Standby(true);
+				}
+			}
+#else
+			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
+			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			// clip values
+			if(temp > 97) temp = 97;
+			if(temp > _volumeDisplay) _volumeDisplay = temp;
+			if (_volumeDisplay>0 )--_volumeDisplay;
+			if ( Global::pConfig->autoStopMachines )
+			{
+				if (_volumeCounter < 8.0f)	{
+					_volumeCounter = 0.0f;
+					_volumeDisplay = 0;
+					Standby(true);
+				}
+			}
+#endif
+		};
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
