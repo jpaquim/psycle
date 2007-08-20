@@ -10,5 +10,5 @@
 	#define DIVERSALIS__COMPILER__FEATURE__TYPEOF
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
 	/// it looks like a reserved keyword, but it's not implemented yet as of version 7.1 (only in c#).
-	#define typeof __typeof
+	#define typeof __typeof__
 #endif
