@@ -30,17 +30,7 @@ namespace psycle
 		{
 			Machine::Work(numSamples);
 			cpu::cycles_type cost = cpu::cycles();
-			Machine::SetVolumeCounter(numSamples);
-			if ( Global::pConfig->autoStopMachines )
-			{
-				//Machine::SetVolumeCounterAccurate(numSamples);
-				if (_volumeCounter < 8.0f)	{
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
-			}
-			//else Machine::SetVolumeCounter(numSamples);
+			UpdateVuAndStanbyFlag(numSamples);
 			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 		}
@@ -321,18 +311,8 @@ namespace psycle
 				if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
 				helpers::dsp::Mul(_pSamplesL,numSamples,_gainvol);
 				helpers::dsp::Mul(_pSamplesR,numSamples,_gainvol);
-				Machine::SetVolumeCounter(numSamples);
-				if ( Global::configuration().autoStopMachines )
-				{
-					if (_volumeCounter < 8.0f)
-					{
-						_volumeCounter = 0.0f;
-						_volumeDisplay = 0;
-						Standby(true);
-					}
-					else Standby(false);
-				}
 				helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+				UpdateVuAndStanbyFlag(numSamples);
 			}
 			_cpuCost = 1;
 			_worked = true;
@@ -413,18 +393,8 @@ namespace psycle
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
 			cpu::cycles_type cost = cpu::cycles();
 			Mix(numSamples);
-			Machine::SetVolumeCounter(numSamples);
-			if ( Global::configuration().autoStopMachines )
-			{
-				if (_volumeCounter < 8.0f)
-				{
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
-				else Standby(false);
-			}
 			helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+			UpdateVuAndStanbyFlag(numSamples);
 			_cpuCost += cpu::cycles() - cost;
 
 			_worked = true;

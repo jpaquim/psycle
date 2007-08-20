@@ -2413,7 +2413,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						devc->SetTextColor(pvc_font[trackcount]);
 					}
 					OutNote(devc,xOffset+COLX[0],yOffset,*patOffset);
-					if (*++patOffset == 255 )
+					if (*(++patOffset) == 255 )
 					{
 						OutData(devc,xOffset+COLX[1],yOffset,0,true);
 					}
@@ -2422,7 +2422,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						OutData(devc,xOffset+COLX[1],yOffset,*patOffset,false);
 					}
 
-					if (*++patOffset == 255 )
+					if (*(++patOffset) == 255 )
 					{
 						OutData(devc,xOffset+COLX[3],yOffset,0,true);
 					}
@@ -2431,7 +2431,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						OutData(devc,xOffset+COLX[3],yOffset,*patOffset,false);
 					}
 
-					if (*++patOffset == 0 && *(patOffset+1) == 0 && 
+					if (*(++patOffset) == 0 && *(patOffset+1) == 0 && 
 						(*(patOffset-3) <= notecommands::release || *(patOffset-3) == 255 ))
 					{
 						OutData(devc,xOffset+COLX[5],yOffset,0,true);

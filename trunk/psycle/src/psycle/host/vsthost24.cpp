@@ -941,27 +941,7 @@ namespace psycle
 						*/
 					}
 				}
-				// volume "counter"
-				{
-					_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR,numSamples) * 32768.0f;
-					//if(_volumeCounter > 32768.0f) _volumeCounter = 32768.0f;
-					int temp((helpers::math::rounded(helpers::math::fast_log2(_volumeCounter) * 78.0f * 4 / 14.0f) - (78 * 3))); // * 2; // not 100% accurate, but looks as it sounds
-					// prevent downward jerkiness
-					if(temp > 97) temp = 97;
-					if(temp > _volumeDisplay) _volumeDisplay = temp;
-					if (_volumeDisplay>0) --_volumeDisplay;
-					///\todo: move autoStopMachines to player
-					if(Global::pConfig->autoStopMachines)
-					{
-						if(_volumeCounter < 8.0f)
-						{
-							_volumeCounter = 0.0f;
-							_volumeDisplay = 0;
-							Standby(true);
-						}
-					}
-				}
-				
+				UpdateVuAndStanbyFlag(numSamples);
 				_cpuCost += cpu::cycles() - cost;
 				_worked = true;
 			}

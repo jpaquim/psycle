@@ -245,47 +245,60 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		#endif
 	}
 
-	#if defined PSYCLE__CONFIGURATION__RMS_VUS
-		extern int numRMSSamples;
-		extern int countRMSSamples;
-		extern double RMSAccumulatedLeft;
-		extern double RMSAccumulatedRight;
-		extern float previousRMSLeft;
-		extern float previousRMSRight;
-	#endif
+	extern int numRMSSamples;
+	typedef struct {
+		int count;
+		double AccumLeft;
+		double AccumRight;
+		float previousLeft;
+		float previousRight;
+	} RMSData;
+
+	/// finds the RMS volume value in a signal buffer.
+	/// Note: Values are buffered since the standard calculation requires 50ms or data.
+	inline float GetRMSVol(RMSData &rms,float *pSamplesL, float *pSamplesR, int numSamples)
+	{
+		float *pL = pSamplesL;
+		float *pR = pSamplesR;
+		int ns = numSamples;
+		int count =(numRMSSamples- rms.count);
+		--pL;
+		--pR;
+		if ( ns >= count)
+		{
+			ns -= count;
+			{
+				double acleft(rms.AccumLeft),acright(rms.AccumRight);
+				while (count--) {
+					acleft +=  *(++pL)**(pL);
+					acright +=  *(++pR)**(pR);
+				};
+				rms.AccumLeft = acleft;
+				rms.AccumRight = acright;
+			}
+			rms.previousLeft =  sqrt(rms.AccumLeft/dsp::numRMSSamples);
+			rms.previousRight =  sqrt(rms.AccumRight/dsp::numRMSSamples);
+			rms.AccumLeft = 0;
+			rms.AccumRight = 0;
+			rms.count = 0;
+		}
+		{
+			double acleft(rms.AccumLeft),acright(rms.AccumRight);
+			while(ns--) {
+				acleft +=  *(++pL)**(pL);
+				acright +=  *(++pR)**(pR);
+				rms.count++;
+			};
+			rms.AccumLeft = acleft;
+			rms.AccumRight = acright;
+		}
+		return rms.previousLeft>rms.previousRight?rms.previousLeft:rms.previousRight;
+	}
 
 	/// finds the maximum amplitude in a signal buffer.
 	inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
-		#if defined PSYCLE__CONFIGURATION__RMS_VUS
-			// This is just a test to get RMS dB values.
-			// Doesn't look that better, and uses more CPU. 
-			float *pL = pSamplesL;
-			float *pR = pSamplesR;
-			int ns = numSamples;
-			int count =(numRMSSamples- countRMSSamples);
-			--pL;
-			--pR;
-			if ( ns >= count)
-			{
-				ns -= count;
-				while (count--) {
-					RMSAccumulatedLeft +=  *(++pL)**(pL);
-					RMSAccumulatedRight +=  *(++pR)**(pR);
-				};
-				previousRMSLeft =  sqrt(dsp::RMSAccumulatedLeft/dsp::numRMSSamples);
-				previousRMSRight =  sqrt(dsp::RMSAccumulatedRight/dsp::numRMSSamples);
-				RMSAccumulatedLeft = 0;
-				RMSAccumulatedRight = 0;
-				countRMSSamples = 0;
-			}
-			while(ns--) {
-				RMSAccumulatedLeft +=  *(++pL)**(pL);
-				RMSAccumulatedRight +=  *(++pR)**(pR);
-				countRMSSamples++;
-			};
-			return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
-		#elif defined DIVERSALIS__PROCESSOR__X86 && \
+		#if defined DIVERSALIS__PROCESSOR__X86 && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__INTEL)
 			// If anyone knows better assembler than me improve this variable utilization:
 			float volmax = 0.0f, volmin = 0.0f;

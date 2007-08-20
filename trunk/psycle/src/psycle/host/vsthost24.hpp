@@ -170,7 +170,7 @@ namespace psycle
 				}
 				// Properties
 				//////////////////////////////////////////////////////////////////////////
-				virtual void SetSampleRate(int sr) { CEffect::SetSampleRate((float)sr); }
+				virtual void SetSampleRate(int sr) { Machine::SetSampleRate(sr); CEffect::SetSampleRate((float)sr); }
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
