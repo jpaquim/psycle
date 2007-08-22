@@ -50,11 +50,12 @@
 				<br/>
 				<b>Note:</b> This might be compiled with SSE2 instructions of the x86 CPUs ; only recent CPUs have SSE2 support.
 			</part-->
-			<!--part caption='Candidate Release' anchor='mfc-release-candidate'>
+			<part caption='Candidate Release' anchor='mfc-release-candidate'>
+				<a href='./psycle-mfc-release-candidate'/>
 				<br/>
-				This is built from the <code>tags/psycle-1.10.0-release-candidate</code> directory of the subversion repository.
+				This is built from the <code>tags/psycle-1.8.5-rc</code> directory of the subversion repository.
 				It is an official candidate release, which means it's nearly stable.
-			</part-->
+			</part>
 			<part caption='Stable Release 1.8 with bugfixes' anchor='mfc-stable'>
 				<a href='./packages/microsoft/psycle.mfc.bin.release_1_8_bugfixes.tar.gz'/>
 				<br/>
@@ -63,7 +64,7 @@
 			<part caption='Old Stable Release 1.7.6.2' anchor='mfc-stable-old-1.7.6.2'>
 				<a href='http://download.sourceforge.net/sourceforge/psycle/psycle.bin.release-1.7.6.2.simpler-g7-only-package.rar'/>
 				<br/>
-				This is built from the directory <code>tags/psycle-1.7.6.2</code> directry of the subversion repository.
+				This is built from the <code>tags/psycle-1.7.6.2</code> directory of the subversion repository.
 			</part>
 		</part>
 	</part>
