@@ -246,53 +246,50 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	}
 
 	extern int numRMSSamples;
-	typedef struct {
+	struct RMSData {
 		int count;
-		double AccumLeft;
-		double AccumRight;
-		float previousLeft;
-		float previousRight;
-	} RMSData;
+		double AccumLeft, AccumRight;
+		float previousLeft, previousRight;
+	};
 
 	/// finds the RMS volume value in a signal buffer.
 	/// Note: Values are buffered since the standard calculation requires 50ms or data.
 	inline float GetRMSVol(RMSData &rms,float *pSamplesL, float *pSamplesR, int numSamples)
 	{
-		float *pL = pSamplesL;
-		float *pR = pSamplesR;
+		float * pL = pSamplesL;
+		float * pR = pSamplesR;
 		int ns = numSamples;
-		int count =(numRMSSamples- rms.count);
-		--pL;
-		--pR;
+		int count(numRMSSamples - rms.count);
+		--pL; --pR;
 		if ( ns >= count)
 		{
 			ns -= count;
 			{
 				double acleft(rms.AccumLeft),acright(rms.AccumRight);
 				while (count--) {
-					acleft +=  *(++pL)**(pL);
-					acright +=  *(++pR)**(pR);
+					++pL; acleft  += *pL * *pL;
+					++pR; acright += *pR * *pR;
 				};
 				rms.AccumLeft = acleft;
 				rms.AccumRight = acright;
 			}
-			rms.previousLeft =  sqrt(rms.AccumLeft/dsp::numRMSSamples);
-			rms.previousRight =  sqrt(rms.AccumRight/dsp::numRMSSamples);
+			rms.previousLeft  = std::sqrt(rms.AccumLeft  / dsp::numRMSSamples);
+			rms.previousRight = std::sqrt(rms.AccumRight / dsp::numRMSSamples);
 			rms.AccumLeft = 0;
 			rms.AccumRight = 0;
 			rms.count = 0;
 		}
 		{
-			double acleft(rms.AccumLeft),acright(rms.AccumRight);
+			double acleft(rms.AccumLeft), acright(rms.AccumRight);
 			while(ns--) {
-				acleft +=  *(++pL)**(pL);
-				acright +=  *(++pR)**(pR);
-				rms.count++;
+				++pL; acleft  += *pL * *pL;
+				++pR; acright += *pR * *pR;
+				++rms.count;
 			};
-			rms.AccumLeft = acleft;
+			rms.AccumLeft  = acleft;
 			rms.AccumRight = acright;
 		}
-		return rms.previousLeft>rms.previousRight?rms.previousLeft:rms.previousRight;
+		return rms.previousLeft > rms.previousRight ? rms.previousLeft : rms.previousRight;
 	}
 
 	/// finds the maximum amplitude in a signal buffer.
