@@ -69,7 +69,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
-			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			__m128 volps = _mm_set_ps1(vol);
 			__m128 *psrc = (__m128*)pSrcSamples;
 			__m128 *pdst = (__m128*)pDstSamples;
@@ -113,7 +113,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
-			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *pdst = (__m128*)pDstSamples;
 			do
@@ -156,7 +156,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#elif defined DIVERSALIS__PROCESSOR__X86 && \
-			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *psrc = (__m128*)pSrcSamples;
 			do
@@ -196,7 +196,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
-			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			do
 			{
 				__m128 tmpps = _mm_load_ps(pSrcSamples);
@@ -232,7 +232,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
-			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GCC)
+			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			__m128 zeroval = _mm_set_ps1(0.0f);
 			do
 			{
