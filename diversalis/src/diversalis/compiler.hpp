@@ -154,16 +154,17 @@
 			#define DIVERSALIS__COMPILER__VERSION__MAJOR __GNUC__
 			#define DIVERSALIS__COMPILER__VERSION__MINOR __GNUC_MINOR__
 			#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL__
+			#define DIVERSALIS__COMPILER__VERSION__ABI __GXX_ABI_VERSION
 			// check if version is recent enough__
 			#if DIVERSALIS__COMPILER__VERSION__MAJOR < 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR < 3)
 				#error "compiler too old... better giving up now."
 			#endif
-			// check if version supports pre-compilation.
-			// gcc < 3.4 does not support pre-compilation.
+			// check if version supports pre-compilation. gcc < 3.4 does not support pre-compilation.
 			#if DIVERSALIS__COMPILER__VERSION__MAJOR > 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR >= 4)
 				#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 			#endif
-			#define DIVERSALIS__COMPILER__VERSION__ABI __GXX_ABI_VERSION
+			#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			#define DIVERSALIS__COMPILER__ASSEMBLER__ATT
 			
 		/////////////////////
 		// borland's compiler
@@ -218,6 +219,8 @@
 				//#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZED(__LINE__) ") : warning: compiler is too old ... some problems are to be expected.")
 			#endif
 			#pragma conform(forScope, on) // ISO conformance of the scope of variables declared inside the parenthesis of a loop instruction.
+			#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 		#endif
 
 
