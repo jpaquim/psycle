@@ -155,7 +155,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					jmp LOOPSTART
 				END:
 			}
-		#elif defined DIVERSALIS__PROCESSOR__X86 && \
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && \
 			(defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__GNU)
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *psrc = (__m128*)pSrcSamples;
