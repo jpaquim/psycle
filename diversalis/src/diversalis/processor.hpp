@@ -138,36 +138,44 @@
 
 		#if defined DIVERSALIS__COMPILER__GNU
 			// There are so many processors supported ...
-			//#if defined _X86_
-				#if defined __i686__
-					#define DIVERSALIS__PROCESSOR
-					#define DIVERSALIS__PROCESSOR__X86 6
-					#if defined __SSE4__
-						#define DIVERSALIS__PROCESSOR__X86__SSE 4
-					#elif defined __SSE3__
-						#define DIVERSALIS__PROCESSOR__X86__SSE 3
-					#elif defined __SSE2__
-						#define DIVERSALIS__PROCESSOR__X86__SSE 2
-					#elif defined __SSE__
-						#define DIVERSALIS__PROCESSOR__X86__SSE 1
-					#endif
-					#if defined __3DNOW__
-						#define DIVERSALIS__PROCESSOR__X86__3DNOW
-					#endif
-					#if defined __MMX__
-						#define DIVERSALIS__PROCESSOR__X86__MMX
-					#endif
-				#elif defined __i586__
-					#define DIVERSALIS__PROCESSOR
-					#define DIVERSALIS__PROCESSOR__X86 5
-				#elif defined __i486__
-					#define DIVERSALIS__PROCESSOR
-					#define DIVERSALIS__PROCESSOR__X86 4
-				#elif defined __i386__
-					#define DIVERSALIS__PROCESSOR
-					#define DIVERSALIS__PROCESSOR__X86 3
-				#endif
-			//#endif
+			// gcc -E -dM -x c++ -std=c++98 -march=k8 -ffast-math -msse2 /dev/null
+			#if defined __k8__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__X86 8
+			#elif defined __nocona__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__X86 8
+			#elif defined __pentium4__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__X86 7
+			#elif defined __i686__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__X86 6
+			#elif defined __i586__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__X86 5
+			#elif defined __i486__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__X86 4
+			#elif defined __i386__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__X86 3
+			#endif
+			#if defined __SSE4__
+				#define DIVERSALIS__PROCESSOR__X86__SSE 4
+			#elif defined __SSE3__
+				#define DIVERSALIS__PROCESSOR__X86__SSE 3
+			#elif defined __SSE2__
+				#define DIVERSALIS__PROCESSOR__X86__SSE 2
+			#elif defined __SSE__
+				#define DIVERSALIS__PROCESSOR__X86__SSE 1
+			#endif
+			#if defined __3dNOW__
+				#define DIVERSALIS__PROCESSOR__X86__3DNOW
+			#endif
+			#if defined __MMX__
+				#define DIVERSALIS__PROCESSOR__X86__MMX
+			#endif
 
 		#elif defined DIVERSALIS__COMPILER__MICROSOFT
 			#if defined _M_IA64
