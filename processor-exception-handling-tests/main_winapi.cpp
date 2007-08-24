@@ -51,6 +51,22 @@ int filter(unsigned long int code, EXCEPTION_POINTERS & e, counters & c) {
 	}
 }
 
+#if 0
+	// You cannot turn float_control precise off when except is on. Similarly, precise cannot be turned off when fenv_access is on. To go from strict model to a fast model with the float_control pragma, use the following code:
+	#pragma float_control(except, off)
+	#pragma fenv_access(off)
+	#pragma float_control(precise, off)
+	// The following line is needed on Itanium processors
+	#pragma fp_contract(on)
+#else
+	//To go from fast model to a strict model with the float_control pragma, use the following code:
+	#pragma float_control(precise, on)
+	#pragma float_control(except, on)
+	#pragma fenv_access(on)
+	// The following line is needed on Itanium processors.
+	#pragma fp_contract(off)
+#endif
+
 int main() {
 	std::cout << "===================================" << std::endl;
 	__try {
@@ -80,6 +96,7 @@ int main() {
 			{
 				(unsigned int) _clear87();
 				std::cout << "fp control: " << std::hex << _control87(0, 0) << std::endl;
+				//int err = _controlfp_s(&currentControl, ~_EM_OVERFLOW, _MCW_EM);
 				unsigned int control(
 					//_control87(~unsigned int(_EM_DENORMAL), _EM_DENORMAL)
 					_control87(~unsigned int(_EM_DENORMAL), _MCW_EM)
