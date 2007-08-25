@@ -231,11 +231,13 @@ namespace psycle
 			}
 			_numInputs = 0;
 			_numOutputs = 0;
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
 			rms.AccumLeft=0.;
 			rms.AccumRight=0.;
 			rms.count=0;
 			rms.previousLeft=0.;
 			rms.previousRight=0.;
+#endif
 		}
 
 		void Machine::SetPan(int newPan)
