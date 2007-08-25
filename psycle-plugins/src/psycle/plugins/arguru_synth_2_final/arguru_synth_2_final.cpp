@@ -657,18 +657,17 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	case 9: // Change reso
 		globalpar.vcf_resonance=val/2;
 	break;
-	
 	}
 
 	// Note Off												== 120
 	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	if(note<120)
-	track[channel].NoteOn(note-18,&globalpar,60);
+		track[channel].NoteOn(note-18,&globalpar,(cmd == 0x0C)?(val>>2)&0x3F:64);
 
 	// Note off
 	else if(note==120)
-	track[channel].NoteOff();
+		track[channel].NoteOff();
 }
 
 void mi::InitWaveTable()

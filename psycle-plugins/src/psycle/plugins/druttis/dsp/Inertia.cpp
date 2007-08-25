@@ -47,11 +47,11 @@ int Inertia::GetLength()
 //////////////////////////////////////////////////////////////////////
 void Inertia::SetLength(int length)
 {
-	if (length != m_length)
-	{
+//	if (length != m_length)
+//	{
 		m_length = length;
 		Update();
-	}
+//	}
 }
 //////////////////////////////////////////////////////////////////////
 //
@@ -69,11 +69,11 @@ float Inertia::GetTarget()
 //////////////////////////////////////////////////////////////////////
 void Inertia::SetTarget(float target)
 {
-	if (target != m_target)
-	{
+//	if (target != m_target)
+//	{
 		m_target = target;
 		Update();
-	}
+//	}
 }
 //////////////////////////////////////////////////////////////////////
 //
@@ -119,21 +119,20 @@ void Inertia::Fill(float *pout, int nsamples)
 	{
 		amt = Clip(nsamples);
 		nsamples -= amt;
-		if (amt > 2)
+		if (amt > 0)
 		{
-			do
+			while (amt > 1)
 			{
 				*++pout = Next();
 				*++pout = Next();
 				amt -= 2;
 			}
-			while (amt > 2);
+			if (amt)
+			{
+				*++pout = Next();
+			}
 		}
-		do
-		{
-			*++pout = Next();
-		}
-		while (--amt);
+		else Fill(pout,0.0f,nsamples);
 	}
 	while (nsamples);
 }

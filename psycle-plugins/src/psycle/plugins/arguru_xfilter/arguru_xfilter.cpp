@@ -14,7 +14,7 @@ CMachineParameter const paraDelay =
 	"Delay time",
 	"Delay time",																																				// description
 	0,																																																// MinValue				
-	44100,																																												// MaxValue
+	88200,																																												// MaxValue
 	MPF_STATE,																																								// Flags
 	11025,
 };
