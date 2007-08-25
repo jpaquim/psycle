@@ -497,7 +497,11 @@ public:
 			{
 				amt = m_noise_decay.Clip(nsamples);
 				nsamples -= amt;
-				do
+				if ( m_noise_decay.IsIdle())
+				{
+					Fill(m_out2,0.0f, numsamples);
+				}
+				else do
 				{
 					tmp = rnd_signal() * *++pnoiselevel * m_noise_decay.Next();
 					b0 = 0.99765f * b0 + tmp * 0.0990460f;
@@ -509,7 +513,9 @@ public:
 				while (--amt);
 			}
 			while (nsamples);
+
 		}
+
 		//////////////////////////////////////////////////////////////
 		//				OSC 2
 		//////////////////////////////////////////////////////////////

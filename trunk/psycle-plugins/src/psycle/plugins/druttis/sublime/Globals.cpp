@@ -77,6 +77,10 @@ void Globals::HandleInertia(int numsamples)
 	//				Force rendering?
 	//////////////////////////////////////////////////////////////////
 	bool force = !m_rendered;
+	if ( force ) 
+	{
+		numsamples = MAX_BUFFER_LENGTH;
+	}
 	m_rendered = true;
 	//////////////////////////////////////////////////////////////////
 	//				OSC 1 - PM.Amount

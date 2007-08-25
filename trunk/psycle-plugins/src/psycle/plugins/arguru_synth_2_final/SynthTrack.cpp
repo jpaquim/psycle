@@ -89,6 +89,7 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 		}
 		initenvelopes =true;
 	}
+	else if ( oscglide > 0.0f && AmpEnvStage > 3) initenvelopes = true;
 
 	OSC2Vol=(float)syntp->osc_mix*0.0039062f;
 	OSC1Vol=1.0f-OSC2Vol;
