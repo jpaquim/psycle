@@ -58,6 +58,7 @@ void CWaveInMacDlg::FillCombobox()
 	{
 		m_listbox.AddString(ports[i].c_str());
 	}
+	if (ports.size()==0) m_listbox.AddString("No Inputs Available");
 	m_listbox.SetCurSel(pRecorder->_captureidx);
 }
 

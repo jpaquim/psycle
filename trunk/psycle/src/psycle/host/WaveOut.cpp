@@ -173,8 +173,16 @@ namespace psycle
 				}
 				///\todo: wait until WHDR_DONE like with waveout?
 				waveInClose(_capPorts[i]._handle);
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_aligned_free(_capPorts[i].pleft);
+				_aligned_free(_capPorts[i].pright);
+			#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+				free(_capPorts[i].pleft);
+				free(_capPorts[i].pright);
+			#else
 				delete[] _capPorts[i].pleft;
 				delete[] _capPorts[i].pright;
+			#endif
 			}
 			_capPorts.resize(0);
 
@@ -256,8 +264,16 @@ namespace psycle
 */
 			waveInStart(port._handle);
 
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			port.pleft = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
+			port.pright = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
+		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(port.pleft,16,_blockSize*sizeof(float));
+			posix_memalign(port.pright,16,_blockSize*sizeof(float));
+		#else
 			port.pleft = new float[_blockSize];
 			port.pright = new float[_blockSize];
+		#endif
 			return true;
 		}
 

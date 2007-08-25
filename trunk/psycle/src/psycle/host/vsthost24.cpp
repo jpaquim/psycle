@@ -927,7 +927,7 @@ namespace psycle
 					}
 					if (!WillProcessReplace())
 					{
-						// We need the output in _pSamples, so we invert theThis is an inversion of the pointers
+						// We need the output in _pSamples, so we invert the
 						// pointers to avoid copying _pOutSamples into _pSamples
 						float* const tempSamplesL = inputs[0];
 						float* const tempSamplesR = inputs[1];	

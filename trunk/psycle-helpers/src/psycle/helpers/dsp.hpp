@@ -8,7 +8,6 @@
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
-	#error
 #endif
 #include <cmath>
 #include <cstdint>

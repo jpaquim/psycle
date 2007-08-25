@@ -757,20 +757,36 @@ namespace seib {
 			{
 				if ( GetPlugCategory() != kPlugCategShell )
 				{
-					SetSampleRate(CVSTHost::pHost->GetSampleRate()); // adjust its sample rate            
+					// 2: Host to Plug, setSampleRate ( 44100.000000 )
+					SetSampleRate(CVSTHost::pHost->GetSampleRate());
+					// 3: Host to Plug, setBlockSize ( 512 ) 
 					SetBlockSize(CVSTHost::pHost->GetBlockSize());
-					Open();                     // open the effect                   
+
+					SetProcessPrecision(kVstProcessPrecision32);
+					// 4: Host to Plug, open
+					Open();
+					// 5: Host to Plug, setSpeakerArrangement returned: false 
+					// The correct behaviour is try to check the return value of
+					// SetSpeakerArrangement, and if false, GetSpeakerArrangement
+					// And SetSpeakerArrangement with those values.
+					{
+						VstSpeakerArrangement VSTsa;
+						VSTsa.type = kSpeakerArrStereo;
+						VSTsa.numChannels = 2;
+						VSTsa.speakers[0].type = kSpeakerL;
+						VSTsa.speakers[1].type = kSpeakerR;
+						SetSpeakerArrangement(&VSTsa,&VSTsa);
+					}
+					// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
+					SetSampleRate(CVSTHost::pHost->GetSampleRate());
+					// 7: Host to Plug, setBlockSize ( 512 ) 
+					SetBlockSize(CVSTHost::pHost->GetBlockSize());
+
 					// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
 					if (GetVstVersion() >= 2400 ) WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
-					//6 :        Host to Plug, canDo ( bypass )   returned : 0
 					KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
-					SetProcessPrecision(kVstProcessPrecision32);
-					//7 :        Host to Plug, setPanLaw ( 0 , 0.707107 )   returned : false 
 					SetPanLaw(kLinearPanLaw,1.0f);
 					MainsChanged(true);                 //   then force resume.                
-	//				MainsChanged(false);                //   suspend again...                  
-	//				SetBlockSize(CVSTHost::pHost->GetBlockSize()); //   and block size                    
-	//				MainsChanged(true);                //    then force resume.                
 
 				}
 			}PSYCLE__HOST__CATCH_ALL(crashclass);

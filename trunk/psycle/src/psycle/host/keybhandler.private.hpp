@@ -1640,7 +1640,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CChildView::SwitchBlock(int tx, int lx)
+		void CChildView::SwitchBlock(int destt, int destl)
 		{
 			if(blockSelected || isBlockCopied)// With shift+arrows, moving the cursor unselects the block, so in this case it is a three step
 			{									// operation: select, copy, switch, instead of select, switch.
@@ -1650,43 +1650,44 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bool bSwapLines = false;
 				int ls=0;
 				int ts=0;
-				int startRT=tx;
-				int startRL=lx;
+				//Where to start reading and writing to free the destination area.
+				int startRT=destt;
+				int startRL=destl;
 				int startWT=blockLastOrigin.start.track;
 				int startWL=blockLastOrigin.start.line;
-				int stopT=tx+blockNTracks;
-				int stopL=lx+blockNLines;
 				PatternEntry blank;
 
 				// Copy block(1) if not done already.
 				if (blockSelected) CopyBlock(false);
+				int stopT=destt+blockNTracks;
+				int stopL=destl+blockNLines;
 
 				// We backup the data of the whole block.
 				AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				// Do the blocks overlap? Then take care of moving the appropiate data.
-				if (abs(blockLastOrigin.start.track-tx) < blockNTracks	&& abs(blockLastOrigin.start.line-lx) < blockNLines )
+				if (abs(blockLastOrigin.start.track-destt) < blockNTracks	&& abs(blockLastOrigin.start.line-destl) < blockNLines )
 				{
-					if 	( blockLastOrigin.start.track != tx )  //Is the origin and destination track different?
+					if 	( blockLastOrigin.start.track != destt )  //Is the origin and destination track different?
 					{
 						// ok, then we need to exchange some of the tracks.
 						bSwapTracks = true;
 
 						// If the switch moves to the left, exchange the start of the destination block
-						if ( blockLastOrigin.start.track > tx)
+						if ( blockLastOrigin.start.track > destt)
 						{
-							startRT=tx;
-							startWT=tx+blockNTracks;
+							startRT=destt;
+							startWT=destt+blockNTracks;
 							stopT=blockLastOrigin.start.track;
 						}
 						else // else, exchange the end of the destination block.
 						{
 							startRT=blockLastOrigin.start.track+blockNTracks;
 							startWT=blockLastOrigin.start.track;
-							stopT=tx+blockNTracks;
+							stopT=destt+blockNTracks;
 						}
 					}
-					if ( blockLastOrigin.start.line != lx )  //Is the origin and destination line different?
+					if ( blockLastOrigin.start.line != destl )  //Is the origin and destination line different?
 					{
 						// ok, then we need to exchange some of the lines.
 						bSwapLines = true;
@@ -1701,35 +1702,35 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							//DDDD--   >>>>> BCDE--  >>>> 789A--
 
 							int startRT2, startRL2, startWT2, startWL2, stopT2, stopL2;
-							if ( blockLastOrigin.start.line > lx)
+							if ( blockLastOrigin.start.line > destl)
 							{
-								startRL2=lx;
-								startWL2=lx+blockNLines;
+								startRL2=destl;
+								startWL2=destl+blockNLines;
 								stopL2=blockLastOrigin.start.line;
 								startRL=blockLastOrigin.start.line;
 								startWL=blockLastOrigin.start.line;
-								stopL=lx+blockNLines;
+								stopL=destl+blockNLines;
 							}
 							else
 							{
 								startRL2=blockLastOrigin.start.line+blockNLines;
 								startWL2=blockLastOrigin.start.line;
-								stopL2=lx+blockNLines;
-								startRL=lx;
-								startWL=lx;
+								stopL2=destl+blockNLines;
+								startRL=destl;
+								startWL=destl;
 								stopL=blockLastOrigin.start.line+blockNLines;
 							}
-							if ( blockLastOrigin.start.track > tx)
+							if ( blockLastOrigin.start.track > destt)
 							{
-								startRT2=tx;
+								startRT2=destt;
 								startWT2=blockLastOrigin.start.track;
-								stopT2=tx+blockNTracks;
+								stopT2=destt+blockNTracks;
 							}
 							else
 							{
-								startRT2=tx;
+								startRT2=destt;
 								startWT2=blockLastOrigin.start.track;
-								stopT2=tx+blockNTracks;
+								stopT2=destt+blockNTracks;
 							}
 							// We exchange just the lines here. The loop outside will exchange the tracks.
 							ts = startWT2;
@@ -1751,17 +1752,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						else
 						{
 							// If the switch moves to the top, exchange the start of the destination block
-							if ( blockLastOrigin.start.line > lx)
+							if ( blockLastOrigin.start.line > destl)
 							{
-								startRL=lx;
-								startWL=lx+blockNLines;
+								startRL=destl;
+								startWL=destl+blockNLines;
 								stopL=blockLastOrigin.start.line;
 							}
 							else
 							{
 								startRL=blockLastOrigin.start.line+blockNLines;
 								startWL=blockLastOrigin.start.line;
-								stopL=lx+blockNLines;
+								stopL=destl+blockNLines;
 							}
 						}
 					}
@@ -1787,7 +1788,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 
 				// Finally, paste the Original selected block on the freed space.
-				PasteBlock(tx, lx, false,false);
+				PasteBlock(destt, destl, false,false);
 				
 				NewPatternDraw(0,_pSong->SONGTRACKS-1,0,nl-1);
 				Repaint(draw_modes::data);
