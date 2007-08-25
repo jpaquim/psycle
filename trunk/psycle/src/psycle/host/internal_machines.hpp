@@ -310,6 +310,7 @@ public:
 	void InsertSend(int idx,MixerWire swire);
 	void DiscardChannel(int idx);
 	void DiscardReturn(int idx);
+	void DiscardSend(int idx);
 
 	void ExchangeChans(int chann1,int chann2);
 	void ExchangeReturns(int chann1,int chann2);

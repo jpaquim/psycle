@@ -643,6 +643,7 @@ namespace psycle
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
+				DiscardSend(wireIndex);
 			}
 		}
 		void Mixer::NotifyNewSendtoMixer(int callerMac,int senderMac)
@@ -1190,6 +1191,19 @@ namespace psycle
 			}
 			returns_.resize(i+1);
 		}
+		void Mixer::DiscardSend(int idx)
+		{
+			assert(idx<MAX_CONNECTIONS);
+			if (idx!=numsends()-1) return;
+			int i;
+			for (i = idx; i >= 0; i--)
+			{
+				if (sends_[i].machine_ != -1)
+					break;
+			}
+			sends_.resize(i+1);
+		}
+
 
 		void Mixer::ExchangeChans(int chann1,int chann2)
 		{
