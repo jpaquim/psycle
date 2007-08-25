@@ -281,8 +281,7 @@ namespace psycle
 			if (!_initialized)
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-				mydriver.AddCapturePort(_captureidx);
-				_initialized=true;
+				_initialized = mydriver.AddCapturePort(_captureidx);
 			}
 		}
 		void AudioRecorder::ChangePort(int newport)
@@ -296,9 +295,8 @@ namespace psycle
 				_pSamplesL=pleftorig;
 				_pSamplesR=prightorig;
 			}
-			mydriver.AddCapturePort(newport);
+			_initialized = mydriver.AddCapturePort(newport);
 			_captureidx = newport;
-			_initialized=true;
 			mydriver.Enable(true);
 		}
 		void AudioRecorder::Work(int numSamples)

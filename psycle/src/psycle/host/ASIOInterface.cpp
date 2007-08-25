@@ -211,7 +211,7 @@ namespace psycle
 			asioCallbacks.asioMessage = &asioMessages;
 			asioCallbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfo;
 			//////////////////////////////////////////////////////////////////////////
-			// Create the buffers to play.
+			// Create the buffers to play and record.
 			int numbuffers = (1+_selectedins.size())*2;
 			ASIOBufferInfo *info = new ASIOBufferInfo[numbuffers];
 			int counter=0;
@@ -242,8 +242,16 @@ namespace psycle
 			{
 				AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedins[i].port->_info.type);
 				ASIObuffers[i] = buffer;
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_selectedins[i].pleft = static_cast<float*>(_aligned_malloc(_ASIObufferSize*sizeof(float),16));
+				_selectedins[i].pright = static_cast<float*>(_aligned_malloc(_ASIObufferSize*sizeof(float),16));
+			#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+				posix_memalign(_selectedins[i].pleft,16,_ASIObufferSize*sizeof(float));
+				posix_memalign(_selectedins[i].pright,16,_ASIObufferSize*sizeof(float));
+			#else
 				_selectedins[i].pleft = new float[_ASIObufferSize];
 				_selectedins[i].pright = new float[_ASIObufferSize];
+			#endif
 				counter+=2;
 			}
 			AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedout.port->_info.type);
@@ -274,8 +282,16 @@ namespace psycle
 			ASIODisposeBuffers();
 			for (unsigned int i(0); i < _selectedins.size() ; ++i)
 			{
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_aligned_free(_selectedins[i].pleft);
+				_aligned_free(_selectedins[i].pright);
+			#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+				free(_selectedins[i].pleft);
+				free(_selectedins[i].pright);
+			#else
 				delete[] _selectedins[i].pleft;
 				delete[] _selectedins[i].pright;
+			#endif
 			}
 			delete[] ASIObuffers;
 			//ASIOExit();

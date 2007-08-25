@@ -196,8 +196,16 @@ namespace psycle
 				_capPorts[i]._pBuffer->Release();
 				_capPorts[i]._pDs->Release();
 				_capPorts[i]._pDs=0;
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_aligned_free(_capPorts[i].pleft);
+				_aligned_free(_capPorts[i].pright);
+			#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+				free(_capPorts[i].pleft);
+				free(_capPorts[i].pright);
+			#else
 				delete[] _capPorts[i].pleft;
 				delete[] _capPorts[i].pright;
+			#endif
 			}
 			_capPorts.resize(0);
 			_running = false;
@@ -221,7 +229,7 @@ namespace psycle
 		bool DirectSound::AddCapturePort(int idx)
 		{
 			bool isplaying = _running;
-			if ( idx >= _capPorts.size() ) return false;
+			if ( idx >= _capEnums.size() ) return false;
 			for (unsigned int i=0;i<_capPorts.size();++i)
 			{
 				if (_capPorts[i]._pGuid == _capEnums[idx].guid ) return false;
@@ -233,6 +241,7 @@ namespace psycle
 				Stop();
 			}
 			_capPorts.push_back(port);
+			if ( _portMapping.size() <= idx) _portMapping.resize(idx+1);
 			_portMapping[idx]=_capPorts.size()-1;
 			if (isplaying)
 			{
@@ -244,7 +253,7 @@ namespace psycle
 		{
 			bool restartplayback = false;
 			std::vector<PortCapt> newports;
-			if ( idx >= _capPorts.size() ) return false;
+			if ( idx >= _capEnums.size() ) return false;
 			for (unsigned int i=0;i<_capPorts.size();++i)
 			{
 				if (_capPorts[i]._pGuid == _capEnums[idx].guid )
@@ -257,6 +266,7 @@ namespace psycle
 				}
 				else 
 				{
+					///\todo: this assignation is probably wrong. should be checked.
 					_portMapping[newports.size()]=_portMapping[i];
 					newports.push_back(_capPorts[i]);
 				}
@@ -303,8 +313,16 @@ namespace psycle
 				return false;
 			}
 			hr = port._pBuffer->Start(DSCBSTART_LOOPING);
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			port.pleft = static_cast<float*>(_aligned_malloc(_dsBufferSize*sizeof(float),16));
+			port.pright = static_cast<float*>(_aligned_malloc(_dsBufferSize*sizeof(float),16));
+		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(port.pleft,16,_dsBufferSize*sizeof(float));
+			posix_memalign(port.pright,16,_dsBufferSize*sizeof(float));
+		#else
 			port.pleft = new float[_dsBufferSize];
 			port.pright = new float[_dsBufferSize];
+		#endif
 			return true;
 		}
 
