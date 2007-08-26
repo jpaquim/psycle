@@ -368,8 +368,7 @@ namespace psycle
 			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
 			else
 			{
-				if (!_mute) Standby(false);
-				else Standby(true);
+				Standby(false);
 			}
 			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute) 
@@ -588,6 +587,7 @@ namespace psycle
 					UpdateVuAndStanbyFlag(numSamples);
 				}
 			}
+			else Standby(true);
 			_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 		}

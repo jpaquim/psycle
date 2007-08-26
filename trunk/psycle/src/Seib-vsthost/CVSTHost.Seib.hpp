@@ -272,7 +272,7 @@ namespace seib {
 			{
 				if(module)
 				{
-				#if _WIN32
+				#if defined _WIN64 || defined _WIN32
 					FreeLibrary ((HMODULE)module);
 				#elif TARGET_API_MAC_CARBON
 					CFBundleUnloadExecutable ((CFBundleRef)module);
@@ -281,8 +281,8 @@ namespace seib {
 				}
 				if (sFileName)
 				{
-				#if _WIN32
-					delete sFileName;
+				#if defined _WIN64 || defined _WIN32
+					delete[] sFileName;
 				#elif TARGET_API_MAC_CARBON
 					///\todo:
 				#endif
@@ -291,7 +291,7 @@ namespace seib {
 
 			bool loadLibrary (const char* fileName)
 			{
-			#if _WIN32
+			#if defined _WIN64 || defined _WIN32
 				module = LoadLibrary (fileName);
 				sFileName = new char[strlen(fileName) + 1];
 				if (sFileName)
@@ -315,7 +315,7 @@ namespace seib {
 			PluginEntryProc getMainEntry ()
 			{
 				PluginEntryProc mainProc = 0;
-			#if _WIN32
+			#if defined _WIN64 || defined _WIN32
 				mainProc = reinterpret_cast<PluginEntryProc>(GetProcAddress ((HMODULE)module, "VSTPluginMain"));
 				if(!mainProc)
 					mainProc = reinterpret_cast<PluginEntryProc>(GetProcAddress ((HMODULE)module, "main"));

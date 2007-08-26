@@ -1573,6 +1573,7 @@ namespace seib {
 					pHost->OnSetParameterAutomated(*pEffect, index, opt);
 					break;
 				case audioMasterVersion :
+					if (fakeeffect )delete pEffect;
 					return pHost->OnGetVSTVersion();
 				case audioMasterCurrentId :
 					if (pHost->loadingEffect) { result = pHost->loadingShellId; pHost->isShell = true; }

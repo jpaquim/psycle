@@ -100,7 +100,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			m_orderby = pluginOrder;
 			m_showdllName = pluginName;
-			OutBus = false;
 			shellIdx = 0;
 			//pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
 				// It is initialized above, where it is declared.
@@ -303,7 +302,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
 			Outputmachine = -1;
-			OutBus = false;
 			if (tHand == hInt[0])
 			{
 				m_nameLabel.SetWindowText("Sampler");
@@ -312,7 +310,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V0.5b");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_SAMPLER;
-				OutBus = true;
 				selectedClass = internal;
 				selectedMode = modegen;
 				m_Allow.SetCheck(FALSE);
@@ -339,7 +336,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V0.9b");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_XMSAMPLER;
-				OutBus = true;
 				selectedClass = internal;
 				selectedMode = modegen;
 				m_Allow.SetCheck(FALSE);
@@ -353,7 +349,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_DUPLICATOR;
-				OutBus = true;
 				selectedClass = internal;
 				selectedMode = modegen;
 				m_Allow.SetCheck(FALSE);
@@ -420,7 +415,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						selectedClass = native;
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
 						{
-							OutBus = true;
 							selectedMode = modegen;
 						}
 						else
@@ -434,7 +428,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 						{
 							Outputmachine = MACH_VST;
-							OutBus = true;
 							selectedMode = modegen;
 						}
 						else
@@ -515,9 +508,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int plugsCount(0);
 				int badPlugsCount(0);
 				_numPlugins = 0;
-				bool progressOpen = !LoadCacheFile(plugsCount, badPlugsCount, verify);
-				// If cache opened and no verify, we're ready, else, scan.
-				if (progressOpen && !verify) return;
+				bool cacheValid = LoadCacheFile(plugsCount, badPlugsCount, verify);
+				// If cache found&loaded and no verify, we're ready, else start scan.
+				if (cacheValid && !verify) return;
 
 				class populate_plugin_list
 				{
@@ -564,12 +557,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				loggers::info("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
 				loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
 				loggers::info("Scanning plugins ... Listing ...");
-				if(progressOpen)
-				{
-					Progress.Create();
-					Progress.SetWindowText("Scanning plugins ... Listing ...");
-					Progress.ShowWindow(SW_SHOW);
-				}
+
+				Progress.Create();
+				Progress.SetWindowText("Scanning plugins ... Listing ...");
+				Progress.ShowWindow(SW_SHOW);
 
 				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
 				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
@@ -579,10 +570,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
 					loggers::info(s.str());
-					if(progressOpen) {
-						Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
-						Progress.SetWindowText(s.str().c_str());
-					}
+					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
+					Progress.SetWindowText(s.str().c_str());
 				}
 				std::ofstream out;
 				{
@@ -598,11 +587,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					<< "If psycle is crashing on load, chances are it's a bad plugin, "
 					<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
 				
-				if(progressOpen)
-				{
-					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
-					Progress.SetWindowText(s.str().c_str());
-				}
+				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
+				Progress.SetWindowText(s.str().c_str());
+
 				loggers::info("Scanning plugins ... Testing Natives ...");
 				out
 					<< std::endl
@@ -612,15 +599,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				out.flush();
 
 				///\todo: put this inside a low priority thread and wait until it finishes.
-				FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, progressOpen ? &Progress : 0);
+				FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, cacheValid ? &Progress : 0);
 
 
 				out.flush();
-				if(progressOpen)
 				{
 					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
 					Progress.SetWindowText(s.str().c_str());
 				}
+
 				loggers::info("Scanning plugins ... Testing VSTs ...");
 				out
 					<< std::endl
@@ -630,29 +617,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				out.flush();
 
 				///\todo: put this inside a low priority thread and wait until it finishes.
-				FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, progressOpen ? &Progress : 0);
+				FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, cacheValid ? &Progress : 0);
 
 				{
 					std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " plugins found";
 					out << std::endl << s.str() << std::endl;
 					out.flush();
-					if(progressOpen)
-					{
-						loggers::info(s.str().c_str());
-						Progress.SetWindowText(s.str().c_str());
-					}
+					loggers::info(s.str().c_str());
+					Progress.SetWindowText(s.str().c_str());
 				}
 				out.close();
 				_numPlugins = plugsCount;
-				if(progressOpen)
-				{
-					Progress.m_Progress.SetPos(16384);
-					Progress.SetWindowText("Saving scan cache file ...");
-				}
+
+				Progress.m_Progress.SetPos(16384);
+				Progress.SetWindowText("Saving scan cache file ...");
+
 				loggers::info("Saving scan cache file ...");
 				SaveCacheFile();
-				if(progressOpen)
-					Progress.OnCancel();
+
+				Progress.OnCancel();
 				::AfxGetApp()->DoWaitCursor(-1); 
 				loggers::info("Done.");
 			}
@@ -864,6 +847,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								_pPlugsInfo[currentPlugsCount]->version = "???";
 								_pPlugsInfo[currentPlugsCount]->APIversion = 0;
 								++currentBadPlugsCount;
+								if (vstPlug) delete vstPlug;
 							}
 							else
 							{
@@ -931,50 +915,51 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								}
 								out << vstPlug->GetName() << " - successfully instanciated";
 								out.flush();
+
+								// [bohan] vstPlug is a stack object, so its destructor is called
+								// [bohan] at the end of its scope (this cope actually).
+								// [bohan] The problem with destructors of any object of any class is that
+								// [bohan] they are never allowed to throw any exception.
+								// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+								try
+								{
+									delete vstPlug;
+									// [bohan] phatmatik crashes here...
+									// <magnus> so does PSP Easyverb, in FreeLibrary
+								}
+								catch(const std::exception & e)
+								{
+									std::stringstream s; s
+										<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+										<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+										<< typeid(e).name() << std::endl;
+									if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+									out
+										<< std::endl
+										<< "### ERRONEOUS ###" << std::endl
+										<< s.str().c_str();
+									out.flush();
+									std::stringstream title; title
+										<< "Machine crashed: " << fileName;
+									loggers::exception(title.str() + '\n' + s.str());
+								}
+								catch(...)
+								{
+									std::stringstream s; s
+										<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+										<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+										<< "Type of exception is unknown, no further information available.";
+									out
+										<< std::endl
+										<< "### ERRONEOUS ###" << std::endl
+										<< s.str().c_str();
+									out.flush();
+									std::stringstream title; title
+										<< "Machine crashed: " << fileName;
+									loggers::exception(title.str() + '\n' + s.str());
+								}
 							}
 							learnDllName(fileName,type);
-							// [bohan] vstPlug is a stack object, so its destructor is called
-							// [bohan] at the end of its scope (this cope actually).
-							// [bohan] The problem with destructors of any object of any class is that
-							// [bohan] they are never allowed to throw any exception.
-							// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
-							try
-							{
-								delete vstPlug;
-								// [bohan] phatmatik crashes here...
-								// <magnus> so does PSP Easyverb, in FreeLibrary
-							}
-							catch(const std::exception & e)
-							{
-								std::stringstream s; s
-									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
-									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
-									<< typeid(e).name() << std::endl;
-								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
-								out
-									<< std::endl
-									<< "### ERRONEOUS ###" << std::endl
-									<< s.str().c_str();
-								out.flush();
-								std::stringstream title; title
-									<< "Machine crashed: " << fileName;
-								loggers::exception(title.str() + '\n' + s.str());
-							}
-							catch(...)
-							{
-								std::stringstream s; s
-									<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
-									<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
-									<< "Type of exception is unknown, no further information available.";
-								out
-									<< std::endl
-									<< "### ERRONEOUS ###" << std::endl
-									<< s.str().c_str();
-								out.flush();
-								std::stringstream title; title
-									<< "Machine crashed: " << fileName;
-								loggers::exception(title.str() + '\n' + s.str());
-							}
 						}
 						++currentPlugsCount;
 					}
