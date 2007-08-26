@@ -542,7 +542,7 @@ int mi::GetVoice(int channel,bool getnew)
 		while (j<MAX_SIMUL_TRACKS && DTrack[j].Chan != -1) j++;
 		if (j == MAX_SIMUL_TRACKS)
 		{
-			j = (unsigned int) (  (double)rand() * MAX_SIMUL_TRACKS /((double)RAND_MAX) + 1.0 ) );
+			j = (unsigned int) (  (double)rand() * MAX_SIMUL_TRACKS /(((double)RAND_MAX) + 1.0 ) );
 		}
 	}
 	allocatedvoice[channel]=j;
