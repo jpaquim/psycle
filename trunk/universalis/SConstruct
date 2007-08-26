@@ -29,6 +29,7 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 
 from packageneric.generic.scons.check.external_package import external_package as external_package_check
 from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
 
 diversalis = os.path.join(os.pardir, 'diversalis', 'SConstruct')
 if os.path.exists(diversalis): diversalis = project.subscript(diversalis).local_package()
@@ -46,6 +47,25 @@ else:
 
 from packageneric.pool.boost import boost
 boost = boost(project, 103300, ['signals', 'thread', 'filesystem'])
+
+microsoft_mm_system = external_package_check(project, name = 'microsoft mm system', url = 'http://msdn.microsoft.com',
+	distribution_packages = {'microsoft (maybe windows updates?)': 'mm system'},
+	dependencies = [
+		cxx_build_check(project, name = 'microsoft mm system', libraries = ['winmm'], source_text = \
+			"""\
+				#include <windows.h>
+				#include <mmsystem.h>
+				void microsoft_mm_system()
+				{
+					::UINT milliseconds(10);
+					::timeBeginPeriod(milliseconds);
+					::timeGetTime();
+					::timeEndPeriod(milliseconds);
+				}
+			"""
+		)
+	]
+)
 
 # modules
 
@@ -79,6 +99,8 @@ class module(base_module):
 		if dlfcn.result(): self.add_dependency(dlfcn)
 		else: quaquaversalis = False
 		
+		if microsoft_mm_system.result(): self.add_dependency(microsoft_mm_system)
+
 		if not quaquaversalis: self.contexes().build().compilers().cxx().defines().add({'UNIVERSALIS__QUAQUAVERSALIS': None})
 		
 		from packageneric.generic.scons.find import find
