@@ -19,7 +19,7 @@ from packageneric.generic.scons.version import version
 
 source_package = source_package(project,
 	name = project.name(),
-	version = version(0, 0),
+	version = version(2, 0),
 	description_file = 'README'
 )
 
