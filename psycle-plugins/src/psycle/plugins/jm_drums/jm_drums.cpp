@@ -536,7 +536,7 @@ int mi::GetVoice(int channel,bool getnew)
 	// If not, search an available voice
 	int j=channel%MAX_SIMUL_TRACKS;
 	while (j<MAX_SIMUL_TRACKS && DTrack[j].Chan != -1) j++;
-	if ( j = MAX_SIMUL_TRACKS)
+	if ( j == MAX_SIMUL_TRACKS)
 	{
 		j=0;
 		while (j<MAX_SIMUL_TRACKS && DTrack[j].Chan != -1) j++;
