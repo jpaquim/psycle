@@ -164,7 +164,7 @@ namespace psycle
 				while (j<MAX_TRACKS && !availablechans[macOutput[machine]][j]) j++;
 				if (j == MAX_TRACKS)
 				{
-					j= MAX_TRACKS * static_cast<unsigned int>(rand())/((RAND_MAX+1)*2);
+					j = (unsigned int) (  (double)rand() * MAX_TRACKS /(((double)RAND_MAX) + 1.0 ));
 				}
 			}
 			allocatedchans[channel][machine]=j;
@@ -312,6 +312,7 @@ namespace psycle
 				helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
 				UpdateVuAndStanbyFlag(numSamples);
 			}
+			else Standby(true);
 			_cpuCost = 1;
 			_worked = true;
 		}
@@ -378,7 +379,7 @@ namespace psycle
 
 		void Mixer::Work(int numSamples)
 		{
-			if ( _mute || Standby() || Bypass())
+			if ( _mute || Bypass())
 			{
 				Machine::Work(numSamples);
 				return;
@@ -463,17 +464,18 @@ namespace psycle
 							#endif
 							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 							pRetMachine->Work(numSamples);
+							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
+							if(!pRetMachine->Standby())Standby(false);
 						}
-
-						{
+						///todo: why was this here? It is already done in PreWork()
+/*						{
 							cpu::cycles_type cost = cpu::cycles();
 							pSendMachine->_waitingForSound = false;
 							helpers::dsp::Clear(_pSamplesL, numSamples);
 							helpers::dsp::Clear(_pSamplesR, numSamples);
 							_cpuCost += cpu::cycles() - cost;
 						}
-
-						if(!pSendMachine->Standby())Standby(false);
+*/
 					}
 				}
 			}

@@ -102,7 +102,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int Outputmachine;
 			std::string psOutputDll;
 			int shellIdx;
-			int OutBus;
 			static int pluginOrder;
 			static bool pluginName;
 

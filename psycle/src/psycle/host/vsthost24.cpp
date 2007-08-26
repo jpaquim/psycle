@@ -759,189 +759,192 @@ namespace psycle
 					else Standby(true);
 				}
 				cpu::cycles_type cost = cpu::cycles();
-				if(!_mute && ((!Standby() && !Bypass()) || bCanBypass))
+				if(!_mute)
 				{
-/*					The following is now being done in the OnTimer() thread of the UI.
-					if(bNeedIdle) 
+					if (_mode == MACHMODE_GENERATOR || (!Standby() && !Bypass()) || bCanBypass)
 					{
-						try
+/*						The following is now being done in the OnTimer() thread of the UI.
+						if(bNeedIdle) 
 						{
-							Idle();
-						}
-						catch (...)
-						{
-							// o_O`
-						}
-
-					}
-*/
-					try
-					{
-						if (WantsMidi()) SendMidi();
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					if(numInputs() == 1)
-					{
-						helpers::dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
-					}
-
-					///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
-					// Store temporary pointers so that we can increase the address in the retrigger code
-					float * tempinputs[vst::max_io];
-					float * tempoutputs[vst::max_io];
-					for(int i(0) ; i < vst::max_io; ++i)
-					{
-						tempinputs[i] = inputs[i];
-						tempoutputs[i] = outputs[i];
-					}
-					int ns(numSamples);
-					while(ns)
-					{
-						int nextevent;
-						if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-						for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
-						{
-							if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
-						}
-						if(nextevent > ns)
-						{
-							if(TWSActive) TWSSamples -= ns;
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
-							{
-								// come back to this
-								if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
-							}
 							try
 							{
-								if(WillProcessReplace())
-									ProcessReplacing(tempinputs, tempoutputs, ns);
-								else
-									Process(tempinputs, tempoutputs, ns);
+								Idle();
 							}
-							catch(const std::exception &)
+							catch (...)
 							{
 								// o_O`
 							}
-							ns = 0;
+
 						}
-						else
+*/
+						try
 						{
-							if(nextevent)
+							if (WantsMidi()) SendMidi();
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
+						if(numInputs() == 1)
+						{
+							helpers::dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
+						}
+
+						///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
+						// Store temporary pointers so that we can increase the address in the retrigger code
+						float * tempinputs[vst::max_io];
+						float * tempoutputs[vst::max_io];
+						for(int i(0) ; i < vst::max_io; ++i)
+						{
+							tempinputs[i] = inputs[i];
+							tempoutputs[i] = outputs[i];
+						}
+						int ns(numSamples);
+						while(ns)
+						{
+							int nextevent;
+							if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
+							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
 							{
-								ns -= nextevent;
+								if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
+							}
+							if(nextevent > ns)
+							{
+								if(TWSActive) TWSSamples -= ns;
+								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
+								{
+									// come back to this
+									if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
+								}
 								try
 								{
 									if(WillProcessReplace())
-										ProcessReplacing(tempinputs, tempoutputs, nextevent);
+										ProcessReplacing(tempinputs, tempoutputs, ns);
 									else
-										Process(tempinputs, tempoutputs, nextevent);
+										Process(tempinputs, tempoutputs, ns);
 								}
 								catch(const std::exception &)
 								{
 									// o_O`
 								}
-								for(int i(0) ; i < vst::max_io ; ++i)
-								{
-									tempinputs[i]+=nextevent;
-									tempoutputs[i]+=nextevent;
-								}
+								ns = 0;
 							}
-							if(TWSActive)
+							else
 							{
-								if(TWSSamples == nextevent)
+								if(nextevent)
 								{
-									int activecount = 0;
-									TWSSamples = TWEAK_SLIDE_SAMPLES;
-									for(int i(0) ; i < MAX_TWS; ++i)
+									ns -= nextevent;
+									try
 									{
-										if(TWSDelta[i])
-										{
-											TWSCurrent[i] += TWSDelta[i];
-											if(
-												(TWSDelta[i] > 0 && TWSCurrent[i] >= TWSDestination[i]) ||
-												(TWSDelta[i] < 0 && TWSCurrent[i] <= TWSDestination[i]))
-											{
-												TWSCurrent[i] = TWSDestination[i];
-												TWSDelta[i] = 0;
-											}
-											else ++activecount;
-											SetParameter(TWSInst[i],TWSCurrent[i]);
-										}
-									}
-									if(activecount == 0) TWSActive = false;
-								}
-							}
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
-							{
-								// come back to this
-								if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
-								{
-									if(TriggerDelayCounter[i] == nextevent)
-									{
-										// do event
-										Tick(i, &TriggerDelay[i]);
-										TriggerDelay[i]._cmd = 0;
-									}
-									else TriggerDelayCounter[i] -= nextevent;
-								}
-								else if(TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
-								{
-									if(TriggerDelayCounter[i] == nextevent)
-									{
-										// do event
-										Tick(i, &TriggerDelay[i]);
-										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
-									}
-									else TriggerDelayCounter[i] -= nextevent;
-								}
-								else if(TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
-								{
-									if(TriggerDelayCounter[i] == nextevent)
-									{
-										// do event
-										Tick(i, &TriggerDelay[i]);
-										TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
-										int parameter(TriggerDelay[i]._parameter & 0x0f);
-										if(parameter < 9) RetriggerRate[i] += 4 * parameter;
+										if(WillProcessReplace())
+											ProcessReplacing(tempinputs, tempoutputs, nextevent);
 										else
-										{
-											RetriggerRate[i] -= 2 * (16 - parameter);
-											if(RetriggerRate[i] < 16) RetriggerRate[i] = 16;
-										}
+											Process(tempinputs, tempoutputs, nextevent);
 									}
-									else TriggerDelayCounter[i] -= nextevent;
+									catch(const std::exception &)
+									{
+										// o_O`
+									}
+									for(int i(0) ; i < vst::max_io ; ++i)
+									{
+										tempinputs[i]+=nextevent;
+										tempoutputs[i]+=nextevent;
+									}
+								}
+								if(TWSActive)
+								{
+									if(TWSSamples == nextevent)
+									{
+										int activecount = 0;
+										TWSSamples = TWEAK_SLIDE_SAMPLES;
+										for(int i(0) ; i < MAX_TWS; ++i)
+										{
+											if(TWSDelta[i])
+											{
+												TWSCurrent[i] += TWSDelta[i];
+												if(
+													(TWSDelta[i] > 0 && TWSCurrent[i] >= TWSDestination[i]) ||
+													(TWSDelta[i] < 0 && TWSCurrent[i] <= TWSDestination[i]))
+												{
+													TWSCurrent[i] = TWSDestination[i];
+													TWSDelta[i] = 0;
+												}
+												else ++activecount;
+												SetParameter(TWSInst[i],TWSCurrent[i]);
+											}
+										}
+										if(activecount == 0) TWSActive = false;
+									}
+								}
+								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
+								{
+									// come back to this
+									if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+									{
+										if(TriggerDelayCounter[i] == nextevent)
+										{
+											// do event
+											Tick(i, &TriggerDelay[i]);
+											TriggerDelay[i]._cmd = 0;
+										}
+										else TriggerDelayCounter[i] -= nextevent;
+									}
+									else if(TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
+									{
+										if(TriggerDelayCounter[i] == nextevent)
+										{
+											// do event
+											Tick(i, &TriggerDelay[i]);
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+										}
+										else TriggerDelayCounter[i] -= nextevent;
+									}
+									else if(TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
+									{
+										if(TriggerDelayCounter[i] == nextevent)
+										{
+											// do event
+											Tick(i, &TriggerDelay[i]);
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+											int parameter(TriggerDelay[i]._parameter & 0x0f);
+											if(parameter < 9) RetriggerRate[i] += 4 * parameter;
+											else
+											{
+												RetriggerRate[i] -= 2 * (16 - parameter);
+												if(RetriggerRate[i] < 16) RetriggerRate[i] = 16;
+											}
+										}
+										else TriggerDelayCounter[i] -= nextevent;
+									}
 								}
 							}
 						}
-					}
-					try
-					{
-						if(numOutputs() == 1) helpers::dsp::Mov(outputs[0],outputs[1], numSamples);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					if (!WillProcessReplace())
-					{
-						// We need the output in _pSamples, so we invert the
-						// pointers to avoid copying _pOutSamples into _pSamples
-						float* const tempSamplesL = inputs[0];
-						float* const tempSamplesR = inputs[1];	
-						_pSamplesL = inputs[0] = outputs[0];
-						_pSamplesR = inputs[1] = outputs[1];
-						_pOutSamplesL = outputs[0] = tempSamplesL;
-						_pOutSamplesR = outputs[1] = tempSamplesR;
-						/*
-						memcpy(inputs[0],outputs[0],numSamples*sizeof(float));
-						memcpy(inputs[1],outputs[1],numSamples*sizeof(float));
-						*/
+						try
+						{
+							if(numOutputs() == 1) helpers::dsp::Mov(outputs[0],outputs[1], numSamples);
+						}
+						catch(const std::exception &)
+						{
+							// o_O`
+						}
+						if (!WillProcessReplace())
+						{
+							// We need the output in _pSamples, so we invert the
+							// pointers to avoid copying _pOutSamples into _pSamples
+							float* const tempSamplesL = inputs[0];
+							float* const tempSamplesR = inputs[1];	
+							_pSamplesL = inputs[0] = outputs[0];
+							_pSamplesR = inputs[1] = outputs[1];
+							_pOutSamplesL = outputs[0] = tempSamplesL;
+							_pOutSamplesR = outputs[1] = tempSamplesR;
+							/*
+							memcpy(inputs[0],outputs[0],numSamples*sizeof(float));
+							memcpy(inputs[1],outputs[1],numSamples*sizeof(float));
+							*/
+						}
+						UpdateVuAndStanbyFlag(numSamples);
 					}
 				}
-				UpdateVuAndStanbyFlag(numSamples);
 				_cpuCost += cpu::cycles() - cost;
 				_worked = true;
 			}

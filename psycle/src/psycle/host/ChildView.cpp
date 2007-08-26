@@ -1322,7 +1322,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (mac < 0)
 				{
 					AddMacViewUndo();
-					if (dlg.OutBus) 
+					if (dlg.selectedMode == modegen) 
 					{
 						fb = Global::_pSong->GetFreeBus();
 						xs = MachineCoords.sGenerator.width;
@@ -1337,7 +1337,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					if ((mac >= MAX_BUSES) && !(dlg.OutBus))
+					if (mac >= MAX_BUSES && dlg.selectedMode != modegen)
 					{
 						AddMacViewUndo();
 						fb = mac;
@@ -1351,7 +1351,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							pParentMain->CloseMacGui(fb);
 						}
 					}
-					else if ((mac < MAX_BUSES) && (dlg.OutBus))
+					else if (mac < MAX_BUSES && dlg.selectedMode == modegen)
 					{
 						AddMacViewUndo();
 						fb = mac;
@@ -1421,7 +1421,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					if (created)
 					{
-						if ( dlg.OutBus)
+						if ( dlg.selectedMode == modegen)
 						{
 							Global::_pSong->seqBus = fb;
 						}

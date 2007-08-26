@@ -2341,6 +2341,7 @@ namespace psycle
 
 			if (!_mute)
 			{
+				Standby(false);
 				int _songtracks = Global::_pSong->SongTracks();
 				int ns = numSamples;
 				int nextevent;

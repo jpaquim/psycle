@@ -526,9 +526,9 @@ namespace psycle
 					if (pInMachine)
 					{
 						/*
-						* Change the sound routing to understand what a feedback loop is,
+						* todo: Change the sound routing to understand what a feedback loop is,
 						* creating a special type of wire that will have a buffer which will give as output,
-						* and which will be (internally) connected to master, 
+						* and which will be triggered from the master, 
 						* to fill again the buffer once all the other machines have done its job.
 						*/
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -562,7 +562,7 @@ namespace psycle
 							*/
 						}
 						if(!pInMachine->Standby()) Standby(false);
-						if(!_mute && !Standby())
+						if(!pInMachine->_mute && !_mute && !pInMachine->Standby())
 						{
 							cpu::cycles_type wcost = cpu::cycles();
 							helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);

@@ -69,6 +69,7 @@ namespace psycle
 			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute)
 			{
+				Standby(false);
 				for (int voice=0; voice<_numVoices; voice++)
 				{
 					// A correct implementation needs to take numsamples into account.

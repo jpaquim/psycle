@@ -52,6 +52,11 @@ namespace psycle
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
 			vst::plugin *vstPlug(0);
+			if(songIdx < 0)
+			{
+				songIdx =	GetFreeMachine();
+				if(songIdx < 0) return false;
+			}
 			switch (type)
 			{
 			case MACH_MASTER:
@@ -76,14 +81,13 @@ namespace psycle
 				break;
 			case MACH_PLUGIN:
 				{
-					pMachine = pPlugin = new Plugin(songIdx);
 					if(!CNewMachine::TestFilename(psPluginDll,shellIdx))
 					{
-						zapObject(pMachine);
 						return false;
 					}
 					try
 					{
+						pMachine = pPlugin = new Plugin(songIdx);
 						pPlugin->Instance(psPluginDll);
 					}
 					catch(std::exception const & e)
@@ -104,13 +108,11 @@ namespace psycle
 				{
 					if(!CNewMachine::TestFilename(psPluginDll,shellIdx)) 
 					{
-						zapObject(pMachine);
 						return false;
 					}
 					try
 					{
 						pMachine = vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(psPluginDll,shellIdx));
-
 						if(vstPlug)
 						{
 							vstPlug->_macIndex=songIdx;
@@ -135,18 +137,8 @@ namespace psycle
 			default:
 				return false; ///< hmm?
 			}
-			if(songIdx < 0)
-			{
-				songIdx =	GetFreeMachine();
-				if(songIdx < 0) return false;
-			}
 			if(_pMachine[songIdx]) DestroyMachine(songIdx);
-			if(pMachine->_type == MACH_VSTFX || pMachine->_type == MACH_VST )
-			{
-				// Do not call VST Init() function after Instance.
-				pMachine->Machine::Init();
-			}
-			else pMachine->Init();
+			pMachine->Init();
 			pMachine->_x = x;
 			pMachine->_y = y;
 			// Finally, activate the machine
