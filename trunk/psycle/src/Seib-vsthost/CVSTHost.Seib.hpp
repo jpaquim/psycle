@@ -7,7 +7,7 @@
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /* vsthost has the following lincense:										 *
 
-Copyright (C) 2006  Hermann Seib
+Copyright (C) 2006-2007  Hermann Seib
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

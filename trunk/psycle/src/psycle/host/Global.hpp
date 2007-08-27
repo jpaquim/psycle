@@ -33,7 +33,7 @@ namespace psycle
 		//\todo: move this source to a better place.
 		namespace cpu
 		{
-			typedef std::int64_t cycles_type;
+			typedef std::uint64_t cycles_type;
 
 			cycles_type inline cycles()
 			{

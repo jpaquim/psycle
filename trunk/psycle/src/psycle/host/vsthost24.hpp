@@ -212,13 +212,33 @@ namespace psycle
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
 				virtual void InsertOutputWireIndex(int wireIndex,int dstmac)
-				{ MainsChanged(false); ConnectOutput(0,true); ConnectOutput(1,true); Machine::InsertOutputWireIndex(wireIndex,dstmac);  MainsChanged(true); }
+				{
+					try
+					{
+						MainsChanged(false); ConnectOutput(0,true); ConnectOutput(1,true); Machine::InsertOutputWireIndex(wireIndex,dstmac);  MainsChanged(true);
+					}catch(...){}
+				}
 				virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f)
-				{ MainsChanged(false); ConnectInput(0,true); ConnectInput(1,true); Machine::InsertInputWireIndex(wireIndex,srcmac,wiremultiplier,initialvol);  MainsChanged(true); }
+				{
+					try
+					{
+						MainsChanged(false); ConnectInput(0,true); ConnectInput(1,true); Machine::InsertInputWireIndex(wireIndex,srcmac,wiremultiplier,initialvol);  MainsChanged(true);
+					}catch(...){}
+				}
 				virtual void DeleteOutputWireIndex(int wireIndex)
-				{ MainsChanged(false); ConnectOutput(0,false); ConnectOutput(1,false); Machine::DeleteOutputWireIndex(wireIndex);  MainsChanged(true); }
+				{
+					try
+					{
+						MainsChanged(false); ConnectOutput(0,false); ConnectOutput(1,false); Machine::DeleteOutputWireIndex(wireIndex);  MainsChanged(true);
+					}catch(...){}
+				}
 				virtual void DeleteInputWireIndex(int wireIndex)
-				{ MainsChanged(false); ConnectInput(0,false); ConnectInput(1,false); Machine::DeleteInputWireIndex(wireIndex);  MainsChanged(true); }
+				{ 
+					try
+					{
+						MainsChanged(false); ConnectInput(0,false); ConnectInput(1,false); Machine::DeleteInputWireIndex(wireIndex);  MainsChanged(true);
+					}catch(...){}
+				}
 				virtual float GetAudioRange(){ return 1.0f; }
 
 
