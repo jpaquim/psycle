@@ -7,7 +7,7 @@
 /* (http://www.hermannseib.com/english/vsthost.htm)"						 */
 /* vsthost has the following lincense:										 *
 
-Copyright (C) 2006  Hermann Seib
+Copyright (C) 2006-2007  Hermann Seib
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -1443,7 +1443,7 @@ namespace seib {
 				||	(!strcmp(ptr, canDoOpenFileSelector ))		// "openFileSelector"
 				//||	(!strcmp(ptr, canDoEditFile ))			// "editFile",
 				||	(!strcmp(ptr, canDoCloseFileSelector ))		// "closeFileSelector"
-				||	(!strcmp(ptr, canDoStartStopProcess ))	// "startStopProcess"
+				||	(!strcmp(ptr, canDoStartStopProcess ))		// "startStopProcess"
 				||	(!strcmp(ptr, canDoShellCategory ))
 				//||	(!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))
 
@@ -1456,8 +1456,8 @@ namespace seib {
 		/*****************************************************************************/
 		/* OnWantEvents : called when the effect calls wantEvents()                  */
 		/*****************************************************************************/
-		// This is called by pre-2.4 VST plugins in when resume() to indicate that
-		// it is going to accept events.
+		// This is called by pre-2.4 VST plugins when resume() is called to indicate
+		// that it is going to accept events.
 		void CVSTHost::OnWantEvents(CEffect & pEffect, long filter)
 		{
 			if ( filter == kVstMidiType )

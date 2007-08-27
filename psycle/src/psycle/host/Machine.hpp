@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Machine
 #pragma once
+#include "Global.hpp"
 #include "SongStructs.hpp"
 #include "Dsp.hpp"
 #include "Helpers.hpp"
@@ -202,8 +203,8 @@ namespace psycle
 			///\}
 #else
 			public:///\todo private
-				std::uint64_t _cpuCost;
-				std::uint64_t _wireCost;
+				cpu::cycles_type _cpuCost;
+				cpu::cycles_type _wireCost;
 #endif
 
 #if 0 // v1.9

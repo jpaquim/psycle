@@ -141,7 +141,7 @@ namespace psycle
 					{
 						_mode=MACHMODE_FX; _type=MACH_VSTFX;
 					}
-				}catch(...){}
+				}PSYCLE__HOST__CATCH_ALL(crashclass);
 				// Compatibility hacks
 				{
 					if(uniqueId() == 0x41446c45 ) //"sc-101"
@@ -158,29 +158,33 @@ namespace psycle
 				}
 				inputs[0] = _pSamplesL;
 				inputs[1] = _pSamplesR;
-				if (WillProcessReplace())
+				try
 				{
-					_pOutSamplesL = _pOutSamplesR = junk;
-					outputs[0] = inputs[0];
-					outputs[1] = inputs[1];
-				}
-				else
-				{
-				#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-					_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-					_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-				#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-					posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
-					posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
-				#else
-					_pOutSamplesL = new float[STREAM_SIZE];
-					_pOutSamplesR = new float[STREAM_SIZE];
-				#endif
-					helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
-					helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
-					outputs[0] = _pOutSamplesL;
-					outputs[1] = _pOutSamplesR;
-				}
+					if (WillProcessReplace())
+					{
+						_pOutSamplesL = _pOutSamplesR = junk;
+						outputs[0] = inputs[0];
+						outputs[1] = inputs[1];
+					}
+					else
+					{
+					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+						_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+						_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+						posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
+						posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
+					#else
+						_pOutSamplesL = new float[STREAM_SIZE];
+						_pOutSamplesR = new float[STREAM_SIZE];
+					#endif
+						helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
+						helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
+						outputs[0] = _pOutSamplesL;
+						outputs[1] = _pOutSamplesR;
+					}
+				}PSYCLE__HOST__CATCH_ALL(crashclass);
+
 				for(int i(0) ; i < MAX_TRACKS; ++i)
 				{
 					trackNote[i].key = 255; // No Note.
@@ -189,15 +193,32 @@ namespace psycle
 				_sDllName= (char*)(loadstruct.pluginloader->sFileName);
 				char temp[kVstMaxVendorStrLen];
 				memset(temp,0,sizeof(temp));
-				if ( GetPlugCategory() != kPlugCategShell )
+				try
 				{
-					// GetEffectName is the better option to GetProductString.
-					// To the few that they show different values in these,
-					// synthedit plugins show only "SyntheditVST" in GetProductString()
-					// and others like battery 1 or psp-nitro, don't have GetProductString(),
-					// so it's almost a no-go.
-					if (GetEffectName(temp) && temp[0])_sProductName=temp;
-					else if(GetProductString(temp) && temp[0]) _sProductName=temp;
+					if ( GetPlugCategory() != kPlugCategShell )
+					{
+						// GetEffectName is the better option to GetProductString.
+						// To the few that they show different values in these,
+						// synthedit plugins show only "SyntheditVST" in GetProductString()
+						// and others like battery 1 or psp-nitro, don't have GetProductString(),
+						// so it's almost a no-go.
+						if (GetEffectName(temp) && temp[0])_sProductName=temp;
+						else if(GetProductString(temp) && temp[0]) _sProductName=temp;
+						else
+						{
+							std::string temp;
+							std::string::size_type pos;
+							pos = _sDllName.rfind('\\');
+							if(pos==std::string::npos)
+								temp=_sDllName;
+							else
+								temp=_sDllName.substr(pos+1);
+							_sProductName=temp.substr(0,temp.rfind('.'));
+						}
+						// This is a safe measure against some plugins that have noise at its output for some
+						// unexplained reason ( example : mda piano.dd )
+						//Work(STREAM_SIZE);
+					}
 					else
 					{
 						std::string temp;
@@ -209,24 +230,10 @@ namespace psycle
 							temp=_sDllName.substr(pos+1);
 						_sProductName=temp.substr(0,temp.rfind('.'));
 					}
-				}
-				else
-				{
-					std::string temp;
-					std::string::size_type pos;
-					pos = _sDllName.rfind('\\');
-					if(pos==std::string::npos)
-						temp=_sDllName;
-					else
-						temp=_sDllName.substr(pos+1);
-					_sProductName=temp.substr(0,temp.rfind('.'));
-				}
-				if(GetVendorString(temp) && temp[0]) _sVendorName = temp;
-				else _sVendorName = "Unknown vendor";
-				std::strcpy(_editName,_sProductName.c_str());
-				// This is a safe measure against some plugins that have noise at its output for some
-				// unexplained reason ( example : mda piano.dd )
-				Work(STREAM_SIZE);
+					if(GetVendorString(temp) && temp[0]) _sVendorName = temp;
+					else _sVendorName = "Unknown vendor";
+					std::strcpy(_editName,_sProductName.c_str());
+				}PSYCLE__HOST__CATCH_ALL(crashclass);
 			}
 
 			plugin::~plugin()

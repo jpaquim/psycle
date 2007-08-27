@@ -8,7 +8,7 @@
 #define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
 
 /// Test for RMS Vu's
-//#define PSYCLE__CONFIGURATION__RMS_VUS 1
+#define PSYCLE__CONFIGURATION__RMS_VUS 1
 
 /// unmasks fpu exceptions
 #define PSYCLE__CONFIGURATION__FPU_EXCEPTIONS 0
