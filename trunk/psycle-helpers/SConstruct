@@ -67,7 +67,7 @@ unit_test_module = module(source_package,
 			target_type = module.target_types.program
 )
 unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
-unit_test_module.add_sources(find(project, 'src', ['./unit_tests.cpp']))
+unit_test_module.add_sources(find(project, 'src', [os.path.join(os.curdir, 'unit_tests.cpp')]))
 
 modules.append(unit_test_module)
 
