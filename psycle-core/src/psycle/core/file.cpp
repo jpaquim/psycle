@@ -208,7 +208,7 @@ namespace psy {
 
 		void File::ensurePathTerminated(std::string &path)
 		{
-			std::string	_slash( File::slash() );
+			std::string _slash( File::slash() );
 
 			if( path[ path.length() - 1 ] != _slash[ 0 ] )
 				path += _slash;
