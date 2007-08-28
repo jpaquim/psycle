@@ -4,6 +4,7 @@
 
 #include "helpers.h"
 #include "cstdint.h"
+#include <cmath>
 
 namespace psy
 {

@@ -23,6 +23,7 @@
 #ifndef PSYCLE_CORE_HELPERS_INCLUDED
 #define PSYCLE_CORE_HELPERS_INCLUDED
 #include <psycle/core/cstdint.h>
+#include <string> // to declare hexstring_to_integer in this file
 
 //namespace psycle { namespace core {
 
