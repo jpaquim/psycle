@@ -27,6 +27,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include "signalsLib.h"
+#include "signalslib.h"
 
 #endif
