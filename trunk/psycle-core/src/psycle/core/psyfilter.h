@@ -20,9 +20,6 @@
 #ifndef PSYFILTER_H
 #define PSYFILTER_H
 
-#include <string>
-#include <vector>
-
 /**
 @author  Psycledelics  
 */

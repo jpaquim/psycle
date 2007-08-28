@@ -17,13 +17,9 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
+#include "psycleCorePch.hpp"
 
 #include "file.h"
-#include <fstream>
-#include <sstream>
-#include <cstdlib>
-#include <iostream>
-#include <algorithm>
 
 #if defined __unix__ || defined __APPLE__
 	#include <sys/types.h>
@@ -208,6 +204,14 @@ namespace psy {
 			if(!path.length() || path[0] != '~') return nvr;
 			nvr.replace( 0, 1, home().c_str() );
 			return nvr;
+		}
+
+		void File::ensurePathTerminated(std::string &path)
+		{
+			std::string	_slash( File::slash() );
+
+			if( path[ path.length() - 1 ] != _slash[ 0 ] )
+				path += _slash;
 		}
 
 		bool File::fileIsReadable( const std::string & file )

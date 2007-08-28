@@ -1,5 +1,6 @@
 // Constants used by psycle
 #pragma once
+
 namespace psy
 {
 	namespace core

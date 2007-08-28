@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
 
 #include <psycle/core/song.h>
 
@@ -36,6 +37,8 @@
 	*/
 PatternDraw::PatternDraw( PatternView *patView )
 {
+	qWarning( "Created PatternDraw: 0x%x.\n", this);
+
 	patView_ = patView; 
 	setAlignment( Qt::AlignLeft | Qt::AlignTop );
 	scene_ = new QGraphicsScene(this);
@@ -63,6 +66,13 @@ PatternDraw::PatternDraw( PatternView *patView )
 	scene_->addItem( patGrid_ );
 	patGrid_->setPos( 0, 0 );
 }
+
+PatternDraw::~PatternDraw()
+{
+	patGrid_->patDraw(0);
+	qWarning( "Delete PatternDraw: 0x%x.\n", this);
+}
+
 
 void PatternDraw::setupTrackGeometrics( int numberOfTracks ) 
 {

@@ -20,6 +20,7 @@
 	*   WRONG ADDRESS
 	*   xxxxxxxxxxxxxxxxxxxxxxx
 	***************************************************************************/
+#include "psycleCorePch.hpp"
 
 #if 0 // doesn't build
 

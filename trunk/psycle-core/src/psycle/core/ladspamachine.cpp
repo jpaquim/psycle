@@ -17,19 +17,17 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "ladspamachine.h"
-#include "player.h"
+
 #include "dsp.h"
+#include "player.h"
 
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
 #else
 	#include <windows.h>
-#endif
-
-#ifdef _MSC_VER
-	#undef min
-	#undef max
 #endif
 
 namespace psy {

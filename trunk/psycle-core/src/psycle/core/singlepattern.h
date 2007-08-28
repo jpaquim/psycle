@@ -20,13 +20,9 @@
 #ifndef SINGLEPATTERN_H
 #define SINGLEPATTERN_H
 
-#include "signalslib.h"
 #include "patternline.h"
+#include "signalslib.h"
 #include "timesignature.h"
-
-#include <map>
-#include <vector>
-#include <string>
 
 /**
 @author  Psycledelics  

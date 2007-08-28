@@ -21,11 +21,13 @@
 #define PATTERNEVENT_H
 
 #include "cstdint.h"
+
 #include <vector>
 
 /**
 @author  Psycledelics  
 */
+
 namespace psy
 {
 	namespace core

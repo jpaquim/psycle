@@ -30,12 +30,10 @@
 		==========================================================================
 	\endverbatim
 */
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
+#include "psycleCorePch.hpp"
+
 #include "riff.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+
 namespace psy
 {
 	namespace core

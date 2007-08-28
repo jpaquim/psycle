@@ -1,5 +1,7 @@
 #pragma once
+
 #include "pattern.h"
+
 namespace psy
 {
 	namespace core

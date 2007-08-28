@@ -20,8 +20,8 @@
 #ifndef PSY3FILTER_H
 #define PSY3FILTER_H
 
-#include "psyfilter.h"
 #include "cstdint.h"
+#include "psyfilter.h"
 
 /**
 @author  Psycledelics  

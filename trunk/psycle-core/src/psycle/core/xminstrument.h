@@ -21,7 +21,6 @@
 #define XMINSTRUMENT_H
 
 #include <utility>
-#include <string>
 #include <inttypes.h>
 #include <cassert>
 

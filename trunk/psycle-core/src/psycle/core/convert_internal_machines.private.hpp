@@ -1,9 +1,7 @@
 #pragma once
+
 #include "internal_machines.h"
 #include "plugin.h"
-#include <string>
-#include <exception>
-#include <map>
 
 namespace psy
 {
@@ -27,7 +25,7 @@ namespace psy
 					Converter(std::string const & plugin_path);
 					virtual ~Converter() throw();
 
-					Machine & redirect(const int & index, const int & type, RiffFile & riff,CoreSong &song) throw(std::exception);
+					Machine & redirect(const int & index, const int & type, RiffFile & riff,CoreSong &song);
 
 					void retweak(CoreSong & song) const;
 
@@ -38,7 +36,7 @@ namespace psy
 							Plugin_Names();
 							~Plugin_Names();
 							const bool exists(const int & type) const throw();
-							const std::string & operator()(const int & type) const throw(std::exception);
+							const std::string & operator()(const int & type) const;
 					};
 
 				public:

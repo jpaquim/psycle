@@ -1,19 +1,12 @@
 ///\file
 ///\brief interface file for psy::core::Sampler. based on Revision 2624
 #pragma once
-#include "machine.h"
-#include "instrument.h"
-#include "filter.h"
-#include "dsp.h"
-#include "cstdint.h"
 
-#if defined __unix__ || defined __APPLE__
-#else
-	//#define NOMINMAX
-	#include <windows.h>
-	//#undef min
-	//#undef max
-#endif
+#include "cstdint.h"
+#include "dsp.h"
+#include "filter.h"
+#include "instrument.h"
+#include "machine.h"
 
 namespace psy {
 	namespace core {

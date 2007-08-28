@@ -19,9 +19,10 @@
 ***************************************************************************/
 #ifndef PSYCLE__CORE__PLUGIN_FINDER
 #define PSYCLE__CORE__PLUGIN_FINDER
-#include <string>
-#include <ctime>
+
 #include "machine.h"
+#include "pluginFinderKey.hpp"
+
 namespace psy
 {
 	namespace core
@@ -81,27 +82,6 @@ namespace psy
 				std::string error_;
 				bool allow_;
 				std::string category_;
-		};
-
-		class PluginFinderKey
-		{
-			public:
-				PluginFinderKey( );
-				PluginFinderKey( const std::string & name, const std::string & dllPath, int index = 0 );
-				~PluginFinderKey();
-
-				static PluginFinderKey internalSampler();
-
-				const std::string & name() const;
-				const std::string & dllPath() const;
-				int index() const;
-
-				bool operator<(const PluginFinderKey & key) const;
-				bool operator ==( const PluginFinderKey & rhs ) const;
-			private:
-				std::string name_;
-				std::string dllPath_;
-				int index_;
 		};
 
 		class PluginFinder

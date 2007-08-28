@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
 
 #include <psycle/core/song.h>
 #include <psycle/core/singlepattern.h>
@@ -39,6 +40,8 @@ int d2i(double d)
 
 PatternView::PatternView( psy::core::Song *song )
 {
+	qWarning( "Created PatternView: 0x%x.\n", this);
+
 	song_ = song;
 	pattern_ = NULL;
 	patternStep_ = 1;
@@ -48,12 +51,12 @@ PatternView::PatternView( psy::core::Song *song )
 	playPos_ = 0;
 
 	setSelectedMachineIndex( 255 ); // FIXME: why 255?
-	layout = new QVBoxLayout();
-	setLayout( layout );
+	layout_ = new QVBoxLayout();
+	setLayout( layout_ );
 	// Create the toolbar.
 	createToolBar();
-	layout->addWidget( toolBar_ );
-	layout->addWidget( patDraw_ );
+	layout_->addWidget( toolBar_ );
+	layout_->addWidget( patDraw_ );
 
 	patDraw_->patternGrid()->setFt2HomeEndBehaviour( Global::configuration().ft2HomeEndBehaviour() );
 	patDraw_->patternGrid()->setShiftArrowForSelect( Global::configuration().shiftArrowForSelect() );
@@ -61,14 +64,19 @@ PatternView::PatternView( psy::core::Song *song )
 	patDraw_->patternGrid()->setCenterCursor( Global::configuration().centerCursor() );
 }
 
+PatternView::~PatternView()
+{
+	qWarning( "Delete PatternView: 0x%x.\n", this);
+}
+
 void PatternView::createToolBar()
 {
 	toolBar_ = new QToolBar();
 
 	patStepCbx_ = new QComboBox();
-	for ( int i = 0; i < 17; i++ ) {
+	for ( int i = 0; i < 17; i++ )
 		patStepCbx_->addItem( QString::number( i ) );
-	}
+
 	patStepCbx_->setCurrentIndex( 1 );
 	connect( patStepCbx_, SIGNAL( currentIndexChanged( int ) ),
 			this, SLOT( onPatternStepComboBoxIndexChanged( int ) ) );
@@ -85,9 +93,9 @@ void PatternView::createToolBar()
 	recordCb_->setChecked(true);
 	
 	tracksCbx_ = new QComboBox();
-	for ( int e = 1; e < 65; e++ ) {
+	for ( int e = 1; e < 65; e++ )
 		tracksCbx_->addItem( QString::number( e ) );
-	}
+
 	tracksCbx_->setCurrentIndex( numberOfTracks()-1 );
 	connect( tracksCbx_, SIGNAL( currentIndexChanged( int ) ),
 			this, SLOT( onTracksComboBoxIndexChanged( int ) ) );
@@ -102,10 +110,7 @@ void PatternView::createToolBar()
 	toolBar_->addAction( delBarAct_ );
 	toolBar_->addSeparator();
 	toolBar_->addAction( recordCb_ );
-
-
 	toolBar_->setSizePolicy ( QSizePolicy::Preferred, QSizePolicy::Fixed );
-
 }
 
 // Returns true if a note was successfully added.
@@ -127,7 +132,6 @@ bool PatternView::enterNote( const PatCursor & cursor, int note )
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -204,9 +208,6 @@ int PatternView::octave( ) const
 	return octave_;
 }
 
-
-
-
 // Setters.
 void PatternView::setNumberOfTracks( int numTracks )
 {
@@ -258,10 +259,10 @@ void PatternView::keyPressEvent( QKeyEvent *event )
 			break;
 			}*/ //why is this commented?
 		case commands::pattern_step_dec:
-		patStepCbx_->setCurrentIndex( std::max( 0, patternStep() - 1 ) );
+			patStepCbx_->setCurrentIndex( std::max( 0, patternStep() - 1 ) );
 		break;
 		case commands::pattern_step_inc:
-		patStepCbx_->setCurrentIndex( std::min( 16, patternStep() + 1 ) );
+			patStepCbx_->setCurrentIndex( std::min( 16, patternStep() + 1 ) );
 		break;
 		default:
 		event->ignore();

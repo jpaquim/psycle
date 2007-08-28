@@ -1,8 +1,7 @@
 //\file
 ///\brief implementation file for psy::core::dsp::Dither
+#include "psycleCorePch.hpp"
 
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
 #include "dither.h"
 
 namespace psy

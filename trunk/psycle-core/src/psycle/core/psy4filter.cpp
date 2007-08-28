@@ -17,23 +17,15 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-
-#include "psy4filter.h"
-#include "fileio.h"
-#include "zipwriter.h"
-#include "zipwriterstream.h"
-#include "zipreader.h"
-#include "internal_machines.h"
-#include "song.h"
-#include "helpers/xml.h"
+#include "psycleCorePch.hpp"
 
 #if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
 	#include <libxml++/parsers/domparser.h>
 #elif defined QT_XML_LIB
-	#include <QFile>
-	#include <QDomDocument>
-	#include <QDomElement>
-	#include <QXmlInputSource>
+	#include <QtCore/QFile>
+	#include <QtXml/QDomDocument>
+	#include <QtXml/QDomElement>
+	#include <QtXml/QXmlInputSource>
 #else
 	#error none of the supported xml parser libs appear to be available
 #endif
@@ -46,12 +38,20 @@
 #endif
 
 #include <fcntl.h>
-#include <cstdlib>
 #include <cerrno>
-#include "file.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sstream>
+
+#include "psy4filter.h"
+
+#include "file.h"
+#include "fileio.h"
+#include "internal_machines.h"
+#include "song.h"
+#include "zipwriter.h"
+#include "zipwriterstream.h"
+#include "zipreader.h"
+#include "helpers/xml.h"
 
 namespace psy {
 	namespace core {

@@ -17,8 +17,9 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "helpers.h"
-#include <vector>
 
 float CValueMapper::fMap_255_1[257] = 
 			{0, 0.00390625, 0.0078125, 0.01171875, 0.015625, 0.01953125, 0.0234375, 0.02734375, 0.03125, 0.03515625, 0.0390625, 

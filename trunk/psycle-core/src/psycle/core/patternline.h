@@ -21,7 +21,6 @@
 #define PATTERNLINE_H
 
 #include "patternevent.h"
-#include <map>
 
 /**
 @author  Psycledelics  

@@ -17,12 +17,13 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
 
 #include <psycle/core/player.h>
 
 #include "audioconfigdlg.h"
-#include <gui/global.h>
-#include "configuration.h"
+#include "../global.h"
+#include "../configuration.h"
 
 #include <QHBoxLayout>
 #include <QComboBox>

@@ -61,7 +61,6 @@ protected:
 	bool event( QEvent *event );
 };
 
-
 class MainWindow : public QMainWindow
 {
 Q_OBJECT
@@ -130,7 +129,6 @@ private:
 
 	void createUndoView();
 
-	
 	QMenu *fileMenu;
 	QMenu *editMenu;
 	QMenu *viewMenu;
@@ -158,17 +156,15 @@ private:
 	QAction *playFromSeqPosAct;
 	QAction *playPatAct;
 	QAction *playStopAct;
-
 	QAction *togglePatBox_;
-
 	QAction *audioConfAct;
 
 	QComboBox *macCombo_;
 	QComboBox *sampCombo_;
 	QComboBox *octCombo_;
-	
+
 	QUndoView *undoView;
-	
+
 	PatternBox *patternBox_;
 	LogConsole *logConsole_;
 	SampleBrowser *sampleBrowser_;

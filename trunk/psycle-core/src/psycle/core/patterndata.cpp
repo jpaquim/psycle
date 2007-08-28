@@ -17,16 +17,12 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "patterndata.h"
+
 #include "helpers/xml.h"
 #include "singlepattern.h"
-#include <algorithm>
-#include <sstream>
-
-#ifdef _MSC_VER
-#undef min 
-#undef max
-#endif
 
 namespace psy
 {

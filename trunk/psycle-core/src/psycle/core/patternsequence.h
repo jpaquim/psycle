@@ -20,13 +20,8 @@
 #ifndef PATTERNSEQUENCE_H
 #define PATTERNSEQUENCE_H
 
-#include "signalslib.h"
-#include "singlepattern.h"
 #include "patterndata.h"
-#include <vector>
-#include <list>
-#include <string>
-
+#include "singlepattern.h"
 
 /**
 @author  Psycledelics  

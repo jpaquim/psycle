@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
 
 #include <psycle/core/signalslib.h>
 #include <psycle/core/machine.h>
@@ -25,7 +26,7 @@
 
 #include "../global.h"
 #include "../configuration.h"
-#include "inputhandler.h"
+#include "../inputhandler.h"
 #include "machinegui.h"
 #include "machineview.h"
 #include "wiregui.h"

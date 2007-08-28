@@ -44,6 +44,7 @@ Q_OBJECT
 
 public:
 	PatternView( psy::core::Song *song );
+	~PatternView();
 
 	bool enterNote( const PatCursor & cursor, int note );
 	void clearNote( const PatCursor & cursor);
@@ -92,10 +93,11 @@ private:
 	int numberOfTracks_; 
 	int selectedMacIdx_;
 	int playPos_;
-
+	int octave_;
 	// GUI items.
 	PatternDraw *patDraw_;
-	QVBoxLayout *layout;
+
+	QVBoxLayout *layout_;
 	QToolBar *toolBar_;
 	QComboBox *patStepCbx_;
 	QComboBox *patternCbx_;
@@ -103,9 +105,6 @@ private:
 	QAction *delBarAct_;
 	QAction *recordCb_;
 	QComboBox *tracksCbx_;
-
-	int octave_;
-
 };
 
 #endif

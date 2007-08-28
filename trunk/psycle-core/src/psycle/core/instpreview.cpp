@@ -1,6 +1,9 @@
+#include "psycleCorePch.hpp"
+
 #include "instpreview.h"
-#include "instrument.h"
+
 #include "cstdint.h"
+#include "instrument.h"
 
 namespace psy
 {

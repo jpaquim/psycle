@@ -20,9 +20,6 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include <string>
-#include <vector>
-
 namespace psy {
 	namespace core {
 
@@ -40,6 +37,7 @@ namespace psy {
 			static void cdHome();
 			static std::string home();
 			static std::string replaceTilde(const std::string & path);
+			static void ensurePathTerminated(std::string &path);
 			static std::string env(const std::string & envName);
 #if defined __unix__ || defined __APPLE__
 			static std::string extractFileNameFromPath( const std::string& fileName, bool slash = true );

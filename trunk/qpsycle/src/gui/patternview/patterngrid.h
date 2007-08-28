@@ -116,12 +116,13 @@ class PatternGrid : public QGraphicsItem {
 
 public:
 	PatternGrid( PatternDraw *pDraw );
+	~PatternGrid();
 
 	void addEvent( const ColumnEvent & event );
 	psy::core::SinglePattern *pattern();
 	enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
 	PatternDraw *patDraw() { return patDraw_; }
-
+	void patDraw( PatternDraw *pd ) { patDraw_ = pd; }
 
 	// Painting.
 	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
@@ -285,7 +286,6 @@ private:
 	float xmlBeats;
 
 	int cellWidth_;
-
 
 	PatternDraw *patDraw_;
 

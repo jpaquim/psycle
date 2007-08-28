@@ -1,14 +1,8 @@
 ///\file
 ///\brief implementation file for psy::core::Filter. based on Revision 2623
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
-#include "filter.h"
+#include "psycleCorePch.hpp"
 
-#ifdef _MSC_VER
-#undef min 
-#undef max
-#endif
-#include <algorithm>
+#include "filter.h"
 
 namespace psy
 {

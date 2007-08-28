@@ -1,30 +1,24 @@
 ///\file
 ///\brief implementation file for psy::core::Machine
+#include "psycleCorePch.hpp"
+
 #include "machine.h"
+
+//#include "analyzer.h"
 #include "song.h"
 #include "dsp.h"
-#include <algorithm>
-//#include "analyzer.h"
 
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
 #include "internal_machines.h"
+#include "plugin.h"
 #include "sampler.h"
-//#include <psycle/host/engine/XMSampler.hpp>
-#include "plugin.h" //<psycle/host/engine/plugin.hpp>
-//#include <psycle/host/engine/VSTHost.hpp>
-
-#ifdef _MSC_VER
-#undef min 
-#undef max
-#endif
 
 namespace psy { namespace core {
 	///\todo: This is the official panning formula for MIDI. Implement it in psycle?
 	// Left Channel Gain [dB] = 20*log (cos (Pi/2* max(0,CC#10 – 1)/126)
 	// Right Channel Gain [dB] = 20*log (sin (Pi /2* max(0,CC#10 – 1)/126)
-
 
 	void Machine::crashed(std::exception const & e) throw()
 	{

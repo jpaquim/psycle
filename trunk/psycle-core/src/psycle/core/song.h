@@ -2,18 +2,17 @@
 ///\brief interface file for psy::core::Song
 /// based on psycle mfc revision 2730
 #pragma once
-#include "patternsequence.h"
+
 #include "commands.h"
+#include "constants.h" 
+#include "cstdint.h"
+#include "fileio.h"
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
-#include "constants.h" 
-#include "fileio.h"
-#include "cstdint.h"
 #include "patterndata.h"
-#if defined PSYCLE__CORE__SIGNALS
-	#include <boost/signals.hpp>
-#endif
+#include "patternsequence.h"
+
 namespace psy
 {
 	namespace core
@@ -127,7 +126,7 @@ namespace psy
 					Machine* createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
 
 					/// creates a new machine in this song. .. deprecated
-					Machine & CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy" ) throw(std::exception);
+					Machine & CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy" );
 
 					/// creates a new machine in this song.
 					bool CreateMachine(std::string const & plugin_path, Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type);

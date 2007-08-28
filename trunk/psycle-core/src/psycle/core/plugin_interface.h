@@ -1,23 +1,11 @@
-
-
-
-
-
 ///////// TODO This copy of the interface is not up-to-date
 ///////// TODO Should use the file from psycle-plugins/src/psycle/plugin_interface.hpp
-
-
-
-
-
-
-
 
 ///\file
 ///\brief the original machine interface api
 ///\see plugin.hpp another, more object-oriented, interface api
+
 #pragma once
-#include <cstdio> // would be better if plugins that wants it included it themselves.
 
 //namespace psy
 //{

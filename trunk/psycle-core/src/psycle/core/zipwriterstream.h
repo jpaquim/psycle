@@ -20,19 +20,14 @@
 #ifndef ZIPWRITERSTREAM_H
 #define ZIPWRITERSTREAM_H
 
-#include <iostream>
-#include <ostream>
-#include <fstream>
-#include <sstream>
-
 #pragma comment(lib, "zlib") // auto-link
 
 #ifndef ZW_BUFSIZE
 #define ZW_BUFSIZE 65536
 #endif
 
-class zipwriter_file;
-class zipwriter;
+struct zipwriter_file;
+struct zipwriter;
 
 /**
 @author  Psycledelics  
