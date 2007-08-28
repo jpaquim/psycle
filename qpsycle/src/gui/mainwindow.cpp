@@ -119,19 +119,19 @@ MainWindow::MainWindow()
 	initSampleCombo();
 	patternBox_->patternTree()->setFocus();
 
-//	startTimer( 10 );
+	//startTimer( 10 );
 
 	macView_->setOctave( 4 );
 	patView_->setOctave( 4 );
 
 	audioCnfDlg = new AudioConfigDlg( this );
-//	setAttribute( Qt::WA_DeleteOnClose );
+	//setAttribute( Qt::WA_DeleteOnClose );
 	createUndoView();
 }
 
 MainWindow::~MainWindow()
 {
-//	std::cout << "~MainWindow() " << this << "\n";
+	//std::cout << "~MainWindow() " << this << "\n";
 }
 
 void MainWindow::keyPressEvent( QKeyEvent * event )
@@ -483,7 +483,7 @@ void MainWindow::createActions()
 	playFromSeqPosAct->setCheckable(true);
 	playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
 	connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
-    playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
+	playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
 }
 
 void MainWindow::createMenus()
@@ -529,7 +529,7 @@ void MainWindow::createToolBars()
 	playToolBar = addToolBar(tr("Play"));
 	playToolBar->addAction(playFromStartAct);
 	playToolBar->addAction(playFromSeqPosAct);
-    playToolBar->addAction(playPatAct);
+	playToolBar->addAction(playPatAct);
 	playToolBar->addAction(playStopAct);
 
 	machToolBar = addToolBar(tr("Machines"));
