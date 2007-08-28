@@ -21,7 +21,7 @@
 
 #include "newmachinedlg.h"
 
-#include "psycle/core/pluginFinder.h"
+#include <psycle/core/pluginfinder.h>
 #include "../global.h"
 #include "../configuration.h"
 
