@@ -19,7 +19,7 @@
 #include "qpsyclePch.hpp"
 
 #include <QApplication>
-#include <QtGui\qicon.h>
+#include <QtGui/qicon.h>
 
 #include "gui/mainwindow.h"
 
