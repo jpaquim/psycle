@@ -1,10 +1,5 @@
-///\file
-///\brief interface file for psy::core::Machine
+///\interface psy::core::Machine
 #pragma once
-
-#include <cassert>
-#include <deque>
-#include <map>
 
 #include "constants.h"
 #include "commands.h"
@@ -14,6 +9,11 @@
 #include "helpers.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
+
+#include <cassert>
+#include <deque>
+#include <map>
+#include <stdexcept>
 
 namespace psy
 {
