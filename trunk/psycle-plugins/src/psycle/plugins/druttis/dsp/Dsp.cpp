@@ -18,6 +18,10 @@
 float pow2table[POW2TABLESIZE];
 const float POW2TABLEFACT = 16384.0f;
 
+// fm & pm tables
+float *pfmtable;
+float *ppmtable;
+
 //////////////////////////////////////////////////////////////////////
 //
 //				InitializeDSP
