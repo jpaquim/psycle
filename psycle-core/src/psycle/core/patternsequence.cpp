@@ -17,15 +17,9 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
-#include "patternsequence.h"
-#include <iostream>
-#include <sstream>
-#include <algorithm>
+#include "psycleCorePch.hpp"
 
-#ifdef _MSC_VER
-#undef min 
-#undef max
-#endif
+#include "patternsequence.h"
 
 namespace psy
 {

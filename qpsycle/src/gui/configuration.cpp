@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
 
 #include "configuration.h"
 #include <psycle/core/file.h>
@@ -49,7 +50,7 @@
 #include <iostream>
 
 #include <QtCore> // For getting key binding stuff.
-#include <QDomDocument> // for reading XML file
+#include <QtXml/QDomDocument> // for reading XML file
 
 Configuration::Configuration()
 :
@@ -303,6 +304,9 @@ void Configuration::loadConfig( const std::string & path )
 			QDomElement path = paths.item( i ).toElement();
 			std::string id = path.attribute("id").toStdString();
 			std::string src = path.attribute("src").toStdString();
+
+			psy::core::File::ensurePathTerminated( src );
+
 			if ( id == "icondir" )   iconPath_   = src;
 			else if ( id == "plugindir" ) pluginPath_ = src;
 			else if ( id == "prsdir" ) prsPath_ = src;

@@ -1,19 +1,21 @@
 ///\file
 ///\brief implementation file for psy::core::Song
+#include "psycleCorePch.hpp"
+
 #include "song.h"
-#include "machine.h"
+
+#include "datacompression.h"
+#include "file.h"
 #include "internal_machines.h"
+#include "ladspamachine.h"
+#include "machine.h"
+#include "plugin.h"
+#include "pluginfinder.h"
+#include "psyfilter.h"
+#include "riff.h"
 #include "sampler.h"
 #include "xmsampler.h"
-#include "plugin.h"
-#include "psyfilter.h"
-#include "datacompression.h"
-#include "riff.h"
-#include "ladspamachine.h"
-#include "pluginfinder.h"
-#include "file.h"
-#include <cassert>
-#include <sstream>
+
 namespace psy
 {
 	namespace core
@@ -123,7 +125,7 @@ namespace psy
 			return machine_[fb];
 		}
 
-		Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name ) throw(std::exception)
+		Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name )
 		{
 			Machine::id_type const array_index(GetFreeMachine());
 			if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
@@ -650,7 +652,8 @@ namespace psy
 			// sample type
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());
-			long int Datalen(file.NumSamples());
+			std::uint32_t Datalen(file.NumSamples());
+
 			// Initializes the layer.
 			WavAlloc(instrument, st_type == 2, Datalen, pathToWav);
 			// Reading of Wave data.

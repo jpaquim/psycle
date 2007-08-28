@@ -20,13 +20,13 @@
 #ifndef PRESETSDLG_H
 #define PRESETSDLG_H
 
+#include <vector>
+
 /**
 	@author  Psycledelics  
 */
 
 #include "binread.h"
-#include <string>
-#include <vector>
 
 namespace psy {
 	namespace core {

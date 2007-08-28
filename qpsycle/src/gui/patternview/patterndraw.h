@@ -82,6 +82,7 @@ class PatternDraw : public QGraphicsView
 
 public:
 	PatternDraw( PatternView *patView );
+	~PatternDraw();
 
 	PatternView *patternView() { return patView_; }
 	PatternGrid *patternGrid() { return patGrid_; }
@@ -109,13 +110,12 @@ protected:
 
 private:
 	std::map<int, TrackGeometry> trackGeometryMap;
-
-	QGraphicsScene *scene_;
 	PatternView *patView_;
 
+	QGraphicsScene *scene_;
+	PatternGrid *patGrid_;
 	LineNumberColumn *lineNumCol_;
 	TrackHeader *trackHeader_;
-	PatternGrid *patGrid_;
 
 	int lineNumColWidth_;
 	int trackHeaderHeight_;

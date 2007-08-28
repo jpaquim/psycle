@@ -22,11 +22,13 @@
 ***************************************************************************/
 
 #pragma once
+
+#include <psycle/audiodrivers/audiodriver.h> ///\todo doesn't belong in psycore
+
 #include "song.h"
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
-#include <psycle/audiodrivers/audiodriver.h> ///\todo doesn't belong in psycore
 
 namespace psy
 {

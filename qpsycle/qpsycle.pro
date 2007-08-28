@@ -30,8 +30,12 @@ INCLUDEPATH += . \
     src/gui/sequencer \
     src/audiodrivers \
     src/mididrivers \
-	src/gui/configdlg
-HEADERS += src/gui/mainwindow.h \
+	src/gui/configdlg \
+	../universalis/src \
+	../diversalis/src \
+	../external-packages/zlib-1.2.3/include
+HEADERS += src/qpsyclePch.hpp \
+	src/gui/mainwindow.h \
     src/model/instrumentsmodel.h \
     src/gui/global.h \
     src/gui/configuration.h \
@@ -63,6 +67,7 @@ HEADERS += src/gui/mainwindow.h \
     src/gui/waveview/wavedisplay.h \
     src/gui/waveview/waveamp.h
 SOURCES += qpsycle.cpp \
+	src/qpsyclePch.cpp \
     src/model/instrumentsmodel.cpp \
     src/gui/mainwindow.cpp \
     src/gui/global.cpp \

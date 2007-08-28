@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
 
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
@@ -28,27 +29,68 @@
 #include "configuration.h"
 #include "mainwindow.h"
 #include "patternbox.h"
-#include "machineview.h"
-#include "patternview.h"
-#include "patterndraw.h"
-#include "patterngrid.h"
-#include "waveview.h"
-#include "sequencerview.h"
-#include "sequencerdraw.h"
+#include "machineview/machineview.h"
+#include "patternview/patternview.h"
+#include "patternview/patterndraw.h"
+#include "patternview/patterngrid.h"
+#include "waveview/waveview.h"
+#include "sequencer/sequencerview.h"
+#include "sequencer/sequencerdraw.h"
 #include "patternbox.h"
-#include "machinegui.h"
-#include "audioconfigdlg.h"
+#include "machineview/machinegui.h"
+#include "configdlg/audioconfigdlg.h"
 #include "samplebrowser.h"
 #include "logconsole.h"
-#include "instrumentsmodel.h"
+#include "../model/instrumentsmodel.h"
 
 #include <QtGui>
 
 #include <iostream>
 #include <iomanip>
 
+TabWidget::TabWidget( QWidget *parent )
+	: QTabWidget( parent )
+{}
+
+bool TabWidget::event( QEvent *event )
+{
+
+	switch (event->type()) {
+		case QEvent::KeyPress: {
+		QKeyEvent *k = (QKeyEvent *)event;
+		if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2
+			|| k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
+		{
+			return true;
+		} else {
+			QTabWidget::keyPressEvent(k);
+			return true;
+		}
+		}
+		default:
+		return QTabWidget::event( event );
+	}
+}
+
 MainWindow::MainWindow()
 {
+	fileMenu = editMenu = viewMenu = configMenu = performMenu = communityMenu = helpMenu = 0;
+	fileToolBar = editToolBar = playToolBar = machToolBar = octToolBar_ = 0;
+	newAct = openAct = saveAct = undoAct = redoAct = aboutAct = quitAct = showUnReAct = showLogConsAct = playFromStartAct = playFromSeqPosAct = playPatAct = playStopAct = togglePatBox_ = audioConfAct = 0;
+	macCombo_ = sampCombo_ = octCombo_ = 0;
+	undoView = 0;
+	patternBox_ = 0;
+	logConsole_ = 0;
+	sampleBrowser_ = 0;
+	views_ = 0;
+	macView_ = 0;
+	patView_ = 0;
+	wavView_ = 0;
+	seqView_ = 0;
+	dock_ = dockL_ = 0;
+	audioCnfDlg = 0;
+	instrumentsModel_ = 0;
+
 	song_ = createBlankSong();
 	setupSound();
 	psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
@@ -59,12 +101,12 @@ MainWindow::MainWindow()
 	patView_ = new PatternView( song_ );
 	wavView_ = new WaveView( instrumentsModel_ );
 	seqView_ = new SequencerView( song_ );
+	sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );
 	patternBox_ = new PatternBox( song_ );
 	logConsole_ = new LogConsole();
 
 	setupGui();
 	setupSignals();
-
 	
 	undoStack = new QUndoStack();
 	connect(undoStack, SIGNAL(canRedoChanged(bool)),
@@ -77,22 +119,105 @@ MainWindow::MainWindow()
 	initSampleCombo();
 	patternBox_->patternTree()->setFocus();
 
-	startTimer( 10 );
+//	startTimer( 10 );
 
 	macView_->setOctave( 4 );
 	patView_->setOctave( 4 );
 
 	audioCnfDlg = new AudioConfigDlg( this );
-	setAttribute( Qt::WA_DeleteOnClose );
+//	setAttribute( Qt::WA_DeleteOnClose );
 	createUndoView();
-
 }
 
 MainWindow::~MainWindow()
 {
-	std::cout << "~MainWindow() " << this << "\n";
+//	std::cout << "~MainWindow() " << this << "\n";
 }
 
+void MainWindow::keyPressEvent( QKeyEvent * event )
+{
+	if ( event->key() == Qt::Key_Tab )
+		return;
+	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+
+	switch ( command ) {
+		case commands::show_pattern_box:
+		{
+		if ( !dock_->isVisible() ) {
+			dock_->setVisible( true );
+			patternBox_->patternTree()->setFocus();
+		} else {
+			if ( patternBox_->patternTree()->hasFocus() ) {
+				dock_->setVisible( false );
+			} else {
+				patternBox_->patternTree()->setFocus();
+			}
+		}
+		}
+		break;
+		case commands::show_machine_view:
+			views_->setCurrentWidget( macView_ );
+		break;
+		case commands::show_pattern_view:
+			views_->setCurrentWidget( patView_ );
+			patView_->patDraw()->setFocus();
+			patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
+		break;
+		case commands::show_wave_editor:
+			views_->setCurrentWidget( wavView_ );
+		break;
+		case commands::show_sequencer_view:
+			views_->setCurrentWidget( seqView_ );
+		break;
+		// Play controls.
+		case commands::play_start:
+		playFromStartAct->trigger();
+		break;
+		case commands::play_from_position:
+		playFromSeqPosAct->trigger();
+		break;
+		case commands::play_stop:
+		playStopAct->trigger();
+		break;
+		case commands::play_loop_entry:
+		{
+//            psy::core::Player::Instance()->setLoopPatternEntry( ... );
+		}
+		break;
+		case commands::instrument_inc:
+			sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
+		break;
+		case commands::instrument_dec:
+			sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
+		break;
+		case commands::octave_up:
+			octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
+		break;
+		case commands::octave_down:
+			octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
+		break;
+
+		default:;
+	}
+}
+
+void MainWindow::timerEvent( QTimerEvent *ev )
+{
+	Q_UNUSED( ev );
+	if ( psy::core::Player::Instance()->playing() ) {
+		seqView_->updatePlayPos();
+
+		psy::core::SinglePattern* visiblePattern = 0;
+		visiblePattern = patView_->pattern();
+		if ( visiblePattern ) {
+			double entryStart = 0;
+			bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
+
+			if ( isPlayPattern )
+				patView_->onTick( entryStart );
+		}
+	}
+}
 
 void MainWindow::setupSound()
 {
@@ -116,9 +241,6 @@ void MainWindow::setupGui()
 	dockL_->setAttribute(Qt::WA_QuitOnClose, false);
 	addDockWidget(Qt::BottomDockWidgetArea, dockL_);
 	
-
-	sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );
-
 	views_ = new TabWidget();
 	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
 	views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
@@ -177,13 +299,11 @@ void MainWindow::onNewSongRequest()
 								QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
 								QMessageBox::Save ) ;
 
-		if ( response == QMessageBox::Save ) {
+		if ( response == QMessageBox::Save )
 			onSaveSongRequest();
-		}
 
-		if ( response == QMessageBox::Cancel ) {
+		if ( response == QMessageBox::Cancel )
 			return;
-		}
 	}
 
 	psy::core::Song *blankSong = createBlankSong();
@@ -199,13 +319,11 @@ void MainWindow::onOpenSongRequest()
 								QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
 								QMessageBox::Save ) ;
 
-		if ( response == QMessageBox::Save ) {
+		if ( response == QMessageBox::Save )
 			onSaveSongRequest();
-		}
 
-		if ( response == QMessageBox::Cancel ) {
+		if ( response == QMessageBox::Cancel )
 			return;
-		}
 	}
 
 	QString songPath = QString::fromStdString( Global::configuration().songPath() );
@@ -278,6 +396,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 	views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
 	views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
 	views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
+	views_->addTab( sampleBrowser_, QIcon(":images/sample-browser.png"), "Sample Browser" );
 	patternBox_ = new PatternBox( song_ );
 	dock_->setWidget( patternBox_ );
 	patternBox_->populatePatternTree();
@@ -288,7 +407,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 	createActions();
 	setupSignals();
 	// enable audio driver
-	//Global::configuration()._pOutputDriver->Enable(true);
+	Global::configuration()._pOutputDriver->Enable(true);
 	logConsole_->AddSuccessText("Song Loaded Successfuly");
 }
 
@@ -305,8 +424,7 @@ void MainWindow::redo()
 
 void MainWindow::aboutQpsycle()
 {
-	QMessageBox::about(this, tr("About qpsycle"),
-				tr("It makes music and stuff."));
+	QMessageBox::about(this, tr("About qpsycle"), tr("It makes music and stuff."));
 }
 
 void MainWindow::createActions()
@@ -365,8 +483,7 @@ void MainWindow::createActions()
 	playFromSeqPosAct->setCheckable(true);
 	playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
 	connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
-//     playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
-
+    playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
 }
 
 void MainWindow::createMenus()
@@ -412,7 +529,7 @@ void MainWindow::createToolBars()
 	playToolBar = addToolBar(tr("Play"));
 	playToolBar->addAction(playFromStartAct);
 	playToolBar->addAction(playFromSeqPosAct);
-//     playToolBar->addAction(playPatAct);
+    playToolBar->addAction(playPatAct);
 	playToolBar->addAction(playStopAct);
 
 	machToolBar = addToolBar(tr("Machines"));
@@ -518,14 +635,12 @@ void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* select
 	patView_->setPattern( selectedPattern );
 }
 
-
-
 void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 {
 	populateMachineCombo();
 	if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
 		macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
-		logConsole_->AddSuccessText("Machine Created Successfuly");
+	logConsole_->AddSuccessText("Machine Created Successfuly");
 }
 
 void MainWindow::onMachineChosen( MachineGui *macGui )
@@ -544,9 +659,6 @@ void MainWindow::onMachineRenamed()
 	populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
 }
 
-
-
-
 void MainWindow::onPatternDeleted()
 {
 	patView_->setPattern( 0 );
@@ -556,8 +668,6 @@ void MainWindow::onPatternNameChanged()
 {
 	seqView_->onPatternNameChanged();
 }
-
-
 
 void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern )
 {
@@ -569,14 +679,11 @@ void MainWindow::onCategoryColorChanged()
 	seqView_->onCategoryColorChanged();
 }
 
-
 void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
 {
 	patView_->setOctave( newIndex );
 	macView_->setOctave( newIndex );
 }
-
-
 
 void MainWindow::playFromStart()
 {
@@ -597,123 +704,9 @@ void MainWindow::playStop()
 	psy::core::Player::Instance()->stop();
 }
 
-
-
-
 void MainWindow::showAudioConfigDlg()
 {
 	audioCnfDlg->exec();
-}
-
-
-
-void MainWindow::keyPressEvent( QKeyEvent * event )
-{
-	if ( event->key() == Qt::Key_Tab )
-		return;
-	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-
-	switch ( command ) {
-		case commands::show_pattern_box:
-		{
-		if ( !dock_->isVisible() ) {
-			dock_->setVisible( true );
-			patternBox_->patternTree()->setFocus();
-		} else {
-			if ( patternBox_->patternTree()->hasFocus() ) {
-				dock_->setVisible( false );
-			} else {
-				patternBox_->patternTree()->setFocus();
-			}
-		}
-		}
-		break;
-		case commands::show_machine_view:
-		views_->setCurrentWidget( macView_ );
-		break;
-		case commands::show_pattern_view:
-		views_->setCurrentWidget( patView_ );
-		patView_->patDraw()->setFocus();
-		patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
-		break;
-		case commands::show_wave_editor:
-		views_->setCurrentWidget( wavView_ );
-		break;
-		case commands::show_sequencer_view:
-		views_->setCurrentWidget( seqView_ );
-		break;
-		// Play controls.
-		case commands::play_start:
-		playFromStartAct->trigger();
-		break;
-		case commands::play_from_position:
-		playFromSeqPosAct->trigger();
-		break;
-		case commands::play_stop:
-		playStopAct->trigger();
-		break;
-		case commands::play_loop_entry:
-		{
-//            psy::core::Player::Instance()->setLoopPatternEntry( ... );
-		}
-		break;
-		case commands::instrument_inc:
-		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
-		break;
-		case commands::instrument_dec:
-		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
-		break;
-		case commands::octave_up:
-		octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
-		break;
-		case commands::octave_down:
-		octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
-		break;
-
-		default:;
-	}
-}
-
-void MainWindow::timerEvent( QTimerEvent *ev )
-{
-	Q_UNUSED( ev );
-	if ( psy::core::Player::Instance()->playing() ) {
-		seqView_->updatePlayPos();
-
-		psy::core::SinglePattern* visiblePattern = 0;
-		visiblePattern = patView_->pattern();
-		if ( visiblePattern ) {
-			double entryStart = 0;
-			bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
-			if ( isPlayPattern ) {
-				patView_->onTick( entryStart );
-			}
-		}
-	}
-}
-
-TabWidget::TabWidget( QWidget *parent )
-	: QTabWidget( parent )
-{}
-
-bool TabWidget::event( QEvent *event )
-{
-
-	switch (event->type()) {
-		case QEvent::KeyPress: {
-		QKeyEvent *k = (QKeyEvent *)event;
-		if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2
-			|| k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
-		{
-			return true;
-		} else {
-			QTabWidget::keyPressEvent(k);
-			return true;
-		}
-		}
-		default:
-		return QTabWidget::event( event );
-	}
 }
 
 void MainWindow::createUndoView()
@@ -727,25 +720,11 @@ void MainWindow::createUndoView()
 
 void MainWindow::showUndoView() 
 {
-	if (undoView->isVisible())
-	{
-		undoView->setVisible(false);
-	}
-	else
-	{
-		undoView->setVisible(true);
-	}
+	undoView->setVisible(!undoView->isVisible());
 }
 
 void MainWindow::showLogCons()
 {
-	if (dockL_->isVisible())
-	{
-		dockL_->setVisible(false);
-	}
-	else
-	{
-		dockL_->setVisible(true);
-	}
+	dockL_->setVisible(!dockL_->isVisible());
 }
 

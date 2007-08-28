@@ -17,12 +17,16 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "psy3filter.h"
-#include "fileio.h"
+
+#include "commands.h"
 #include "datacompression.h"
+#include "fileio.h"
 #include "internal_machines.h"
 #include "song.h"
-#include "commands.h"
+
 namespace psy
 {
 	namespace core

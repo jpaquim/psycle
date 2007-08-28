@@ -1,9 +1,6 @@
 ///\file
 ///\brief interface file for psy::core::Filter. based on Revision 2078
 #pragma once
-//#include "constants.h"
-//#include "fileio.h"
-#include <string>
 
 namespace psy
 {

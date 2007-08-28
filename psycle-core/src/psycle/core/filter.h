@@ -1,10 +1,7 @@
 ///\file
 ///\brief interface file for psy::core::Filter. Revision 2078
 #pragma once
-//#include <psycle/host/detail/project.hpp>
-//#include <universalis/operating_system/exception.hpp>
-#include <cmath>
-#include <cfloat>
+
 namespace psy
 {
 	namespace core
@@ -140,7 +137,7 @@ namespace psy
 				dBand[0] = fCoeff[freq]*high + dBand[0];
 				//out += 0.5*(same out as above);
 				out += 0.5*dLow[0];
-				sample = out;
+				sample = static_cast< float >(out);
 
 			}
 
@@ -160,7 +157,7 @@ namespace psy
 				dBand[0] = fCoeff[freq]*high + dBand[0];
 				//out  += 0.5*(same out as above);
 				out += 0.5*dLow[0];
-				left = out;
+				left = static_cast< float >(out);
 
 				notch = right - fCoeff[damp]*dBand[1];
 				dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
@@ -174,8 +171,7 @@ namespace psy
 				dBand[1] = fCoeff[freq]*high + dBand[1];
 				//out  += 0.5*(same out as above);
 				out += 0.5*dLow[1];
-				right = out;
-
+				right = static_cast< float >(out);
 			}
 
 			inline void WorkOld(float & sample)

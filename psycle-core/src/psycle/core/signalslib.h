@@ -8,6 +8,11 @@
 #error "signalslib.hpp must be included before any qt header"
 #endif
 
+#ifdef _MSC_VER
+#pragma warning (disable:4251) // class 'X' needs to have dll-interface to be used by clients of class 'Y'
+#pragma warning (disable:4275) // non dll-interface class 'X' used as base for dll-interface class 'Y'
+#endif
+
 #include <boost/signal.hpp>
 namespace boost
 {

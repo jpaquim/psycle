@@ -20,19 +20,16 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "psycleCorePch.hpp"
 
 #include "player.h"
-#include "song.h"
-#include "machine.h"
+
 #include "internal_machines.h"
+#include "machine.h"
+#include "song.h"
 
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h> // for OpenBSD usleep()
-#endif
-
-#ifdef _MSC_VER
-	#undef min 
-	#undef max
 #endif
 
 namespace psy

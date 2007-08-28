@@ -17,13 +17,14 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "timesignature.h"
 
 namespace psy
 {
 	namespace core
 	{
-
 
 TimeSignature::TimeSignature() :
 	numerator_(4),
@@ -98,7 +99,7 @@ float TimeSignature::beats( ) const
 	if (ownerDefined_)
 			return ownerDefinedBeats_;
 	else
-			return numerator_ * count_;
+			return static_cast< float >(numerator_ * count_);
 }
 
 bool TimeSignature::ownerDefined( ) const
@@ -106,7 +107,5 @@ bool TimeSignature::ownerDefined( ) const
 	return ownerDefined_;
 }
 
-}}
-
-
-
+	}
+}

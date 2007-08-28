@@ -18,14 +18,12 @@
 	* along with this program; if not, write to the Free Software
 	* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 	*/
-#include "zipwriter.h"
+#include "psycleCorePch.hpp"
 
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
 #include <errno.h>
-
+#include <fcntl.h>
 #include <zlib.h>
+#include <sys/stat.h>
 
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
@@ -35,7 +33,7 @@
 	#include <io.h>
 #endif
 
-#include <sys/stat.h>
+#include "zipwriter.h"
 
 static void _zw_tail(zipwriter *d);
 static void _zw_eodr(zipwriter *d, unsigned char *ptr);
@@ -290,10 +288,10 @@ static void _zw_eodr(zipwriter *d, unsigned char *ptr)
 		, 22);
 	o = lseek(d->fd, 0, SEEK_CUR);
 	if (o == -1) d->err = errno;
-	ptr[16] = o & 255;
-	ptr[17] = (o >> 8) & 255;
-	ptr[18] = (o >> 16) & 255;
-	ptr[19] = (o >> 24) & 255;
+	ptr[16] = static_cast< unsigned char >(o & 255);
+	ptr[17] = static_cast< unsigned char >((o >> 8) & 255);
+	ptr[18] = static_cast< unsigned char >((o >> 16) & 255);
+	ptr[19] = static_cast< unsigned char >((o >> 24) & 255);
 }
 static void _zw_tail(zipwriter *d)
 {
@@ -369,7 +367,7 @@ static void _zw_tail(zipwriter *d)
 }
 static void _zw_write(zipwriter *d, const void *buf, size_t len)
 {
-	int r, x;
+	int r;
 	const char *bp;
 
 	if (d->err) return;
@@ -473,7 +471,7 @@ static void _zm_deflate_finish(zipwriter_file *f)
 void zipwriter_copy(int in, zipwriter_file *out) 
 {
 	char buffer[65536];
-	int r, j;
+	int r;
 
 	(void)lseek(in,0,SEEK_SET);
 	for (;;) {

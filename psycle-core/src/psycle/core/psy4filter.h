@@ -21,8 +21,6 @@
 #define PSY4FILTER_H
 
 #include "psy3filter.h"
-#include <fstream>
-#include <map>
 
 /**
 @author  Stefan Nattkemper

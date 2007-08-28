@@ -17,11 +17,13 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
+
 #include <psycle/core/player.h>
 
 #include "../global.h"
 #include "../configuration.h"
-#include "inputhandler.h"
+#include "../inputhandler.h"
 #include "patternview.h"
 #include "patterngrid.h"
 #include "patterndraw.h"
@@ -34,7 +36,7 @@
 #include <QFontMetrics>
 #include <QApplication>
 #include <QClipboard>
-#include <QDomDocument>
+#include <QtXml/QDomDocument>
 #include <QGraphicsSceneMouseEvent>
 #include <QScrollBar>
 #include <QDebug>
@@ -63,6 +65,8 @@ template<class T> inline T str_hex(const std::string &  value) {
 PatternGrid::PatternGrid( PatternDraw *pDraw )
 	: patDraw_( pDraw )
 {
+	qWarning( "Create PatternGrid: 0x%x.\n", this);
+
 	setFlag(ItemIsFocusable);
 
 	addEvent( ColumnEvent::note );
@@ -100,7 +104,10 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
 	smallTrackSeparatorColor_ = QColor( 105, 107, 107 );
 	lineSepColor_ = QColor( 145, 147, 147 );
 	restAreaColor_ = QColor( 24, 22, 25 );
+}
 
+PatternGrid::~PatternGrid() {
+	qWarning( "Delete PatternGrid: 0x%x.\n", this);
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -110,6 +117,10 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 
 QRectF PatternGrid::boundingRect() const
 {
+//#error this is called by destructor, but our parent patDraw is already dead!
+	if( !patDraw_ )
+		return QRectF();
+
 	if ( patDraw_->patternView()->pattern() ) {
 		int gridWidth = patDraw_->gridWidthByTrack( endTrackNumber() );
 		int gridHeight = numberOfLines()*lineHeight();
@@ -121,6 +132,7 @@ QRectF PatternGrid::boundingRect() const
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+	return;
 	Q_UNUSED( option ); Q_UNUSED( widget );
 	painter->setFont( font_ ); 
 	if ( pattern() ) {
@@ -1234,7 +1246,6 @@ Selection PatternGrid::selection() const
 {
 	return selection_;
 }
-
 
 bool PatternGrid::lineAlreadySelected( int lineNumber ) 
 {

@@ -20,15 +20,13 @@
 #ifndef NEWMACHINEDLG_H
 #define NEWMACHINEDLG_H
 
-#include <psycle/core/pluginfinder.h>
-
-#include <map>
+#include "psycle/core/fwd.hpp"
+#include "psycle/core/pluginFinderKey.hpp"
 
 #include <QWidget>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QListWidgetItem>
-
 
 class QDialog;
 
@@ -62,4 +60,4 @@ public slots:
 	bool inItemSelectionChanged;
 };
 
-	#endif
+#endif

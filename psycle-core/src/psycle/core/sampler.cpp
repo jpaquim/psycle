@@ -1,10 +1,11 @@
 ///\file
 ///\brief implementation file for psy::core::Sampler. based on rev. 2708
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
+#include "psycleCorePch.hpp"
+
 #include "sampler.h"
-#include "song.h"
+
 #include "fileio.h"
+#include "song.h"
 
 namespace psy
 {

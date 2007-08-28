@@ -17,23 +17,14 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "plugin.h"
+
 #include "player.h"
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
-#else
-	#include <windows.h>
-	#ifdef _MSC_VER
-	#undef min 
-	#undef max
-	#endif
 #endif
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <algorithm>
-#include <cctype>
-#include <cassert>
 
 // win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 

@@ -17,17 +17,12 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "singlepattern.h"
+
 #include "patterndata.h"
 #include "helpers/xml.h"
-#include <sstream>
-#include <iostream>
-#include <cmath>
-
-#ifdef _MSC_VER
-#undef min 
-#undef max
-#endif
 
 namespace psy
 {
@@ -391,9 +386,9 @@ namespace psy
 			}
 
 			for ( const_iterator it = begin() ; it != end() ; it++ ) {
-				float beatPos = it->first;
+				double beatPos = it->first;
 				const PatternLine & line = it->second;
-				xml << line.toXml( beatPos );
+				xml << line.toXml( static_cast<float>(beatPos) );
 			}
 			xml << "</pattern>" << std::endl;
 			return xml.str();

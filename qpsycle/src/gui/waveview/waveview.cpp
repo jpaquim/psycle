@@ -17,13 +17,15 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "qpsyclePch.hpp"
+
+#include "waveview.h"
 
 #include "../global.h"
 #include "../configuration.h"
-#include "waveview.h"
+#include "../../model/instrumentsmodel.h"
 #include "wavedisplay.h"
 #include "waveamp.h"
-#include "instrumentsmodel.h"
 
 #include <QtGui>
 #include <iostream>

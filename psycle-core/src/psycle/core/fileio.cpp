@@ -1,8 +1,7 @@
 ///\implementation psy::core::RiffFile
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
+#include "psycleCorePch.hpp"
+
 #include "fileio.h"
-#include <stdexcept>
 
 namespace psy
 {

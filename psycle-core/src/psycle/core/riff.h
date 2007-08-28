@@ -18,8 +18,9 @@
 	\endverbatim
 */
 #pragma once
-//#include <psycle/host/detail/project.hpp>
+
 #include <stdio.h>
+
 namespace psy
 {
 	namespace core
@@ -34,9 +35,6 @@ namespace psy
 			DDC_USER_ABORT,        // Operation was aborted by the user
 			DDC_INVALID_FILE       // File format does not match
 		};
-
-		#define  true     1
-		#define  false    0
 
 		typedef int dBOOLEAN;
 

@@ -1,9 +1,12 @@
+#include "psycleCorePch.hpp"
+
 #include "convert_internal_machines.private.hpp"
-#include "song.h"
-#include "machine.h"
 #include "helpers/scale.hpp"
 #include "helpers/math/pi.hpp"
+#include "machine.h"
 #include "player.h"
+#include "song.h"
+
 namespace psy {
 	namespace core {
 		namespace convert_internal_machines {
@@ -20,7 +23,7 @@ namespace psy {
 				for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
 			}
 			
-			Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff, CoreSong & song) throw(std::exception)
+			Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff, CoreSong & song)
 			{
 				Plugin & plugin = * new Plugin(Player::Instance(), index, &song);
 				Machine * pointer_to_machine = &plugin;
@@ -212,7 +215,8 @@ namespace psy {
 			{
 				return find(type) != end();
 			}
-			const std::string & Converter::Plugin_Names::operator()(const int & type) const throw(std::exception)
+
+			const std::string & Converter::Plugin_Names::operator()(const int & type) const
 			{
 				const_iterator i = find(type);
 				if(i == end()) throw std::exception("internal machine replacement plugin not declared");

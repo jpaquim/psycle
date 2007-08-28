@@ -17,7 +17,10 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
+#include "psycleCorePch.hpp"
+
 #include "zipwriterstream.h"
+
 #include "zipwriter.h"
 
 // the streambuffer descent
@@ -123,9 +126,6 @@ zipfilestreambase::~ zipfilestreambase( )
 	buf.close();
 }
 
-
-
-
 /*zipwriterfilestream zipwriterfilestream( zipwriter * z )
 {
 }*/
@@ -137,39 +137,3 @@ zipwriterfilestream::~ zipwriterfilestream( )
 zipwriterfilestream::zipwriterfilestream( zipwriter * z, const char * name , int compression)
 	: zipfilestreambase( z, name, compression), std::ostream( &buf)
 {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

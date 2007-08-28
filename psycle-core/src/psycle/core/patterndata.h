@@ -20,9 +20,6 @@
 #ifndef PATTERNDATA_H
 #define PATTERNDATA_H
 
-#include <vector>
-#include <string>
-
 /**
 @author  Psycledelics  
 */

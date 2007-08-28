@@ -47,10 +47,9 @@
 //(c++-ified for psycle by dw aley)
 ///todo: inlining and such
 
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
+#include "psycleCorePch.hpp"
+
 #include "mersennetwister.h"
-#include <cmath>
 
 namespace psy
 {

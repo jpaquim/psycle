@@ -1,19 +1,19 @@
 ///\file
 ///\brief interface file for psy::core::Machine
 #pragma once
-#include "patternevent.h"
-#include "commands.h"
-#include "dsp.h"
-#include "helpers.h"
-#include "constants.h"
-#include "fileio.h"
-#include "cstdint.h"
-#include "playertimeinfo.h"
-#include <stdexcept>
-#include <vector>
-#include <deque>
+
 #include <cassert>
+#include <deque>
 #include <map>
+
+#include "constants.h"
+#include "commands.h"
+#include "cstdint.h"
+#include "dsp.h"
+#include "fileio.h"
+#include "helpers.h"
+#include "patternevent.h"
+#include "playertimeinfo.h"
 
 namespace psy
 {
@@ -296,7 +296,6 @@ namespace psy
 					std::deque<WorkEvent> workEvents;
 					std::map<int,int> playCol;
 					int playColIndex;
-
 
 				public:
 					/// This function should be called when an exception was thrown from the machine.

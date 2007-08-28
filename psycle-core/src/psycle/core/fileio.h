@@ -1,14 +1,11 @@
 ///\interface psy::core::RiffFile
 #pragma once
-//#include <psycle/host/detail/project.hpp>
-#include "cstdint.h"
+
 #include <cstdio>
 #include <cstddef>
-#include <string>
-#include <iostream>
 #include <fstream>
-#include <sstream>
 
+#include "cstdint.h"
 
 namespace psy
 {

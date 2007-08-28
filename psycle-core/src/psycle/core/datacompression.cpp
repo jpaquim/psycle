@@ -8,7 +8,10 @@
 		/// SoundSquash and SoundDesquash by jeremy evers
 		/// designed with speed in mind
 		/// simple, non adaptave delta predictor, less effective with high frequency content
+#include "psycleCorePch.hpp"
+
 #include "datacompression.h"
+
 #include <cstring>
 
 #define MIN_REDUNDANT_BYTES_2 3
@@ -20,8 +23,6 @@ typedef unsigned short WORD;
 /// \todo add real detection of type size
 typedef unsigned long DWORD;
 
-
-
 DataCompression::DataCompression( )
 {
 }
@@ -29,8 +30,6 @@ DataCompression::DataCompression( )
 DataCompression::~DataCompression( )
 {
 }
-
-
 
 int DataCompression::BEERZ77Comp2(byte * pSource, byte ** pDestination, int size)
 		{
@@ -566,4 +565,3 @@ bool DataCompression::SoundDesquash(byte * pSourcePos, signed short ** pDestinat
 			}
 			return false;
 		}
-

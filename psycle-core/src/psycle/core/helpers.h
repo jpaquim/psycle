@@ -1,16 +1,4 @@
-
-
-
-
 ///\todo This is not up-to-date and should be replaced with the common psycle/helpers/helpers.hpp
-
-
-
-
-
-
-
-
 
 /***************************************************************************
 	*   Copyright (C) 2007 Psycledelics   *
@@ -35,8 +23,7 @@
 #ifndef PSYCLE_CORE_HELPERS_INCLUDED
 #define PSYCLE_CORE_HELPERS_INCLUDED
 #include <psycle/core/cstdint.h>
-#include <string> // to declare hexstring_to_integer
-#include <cmath> // for M_PI
+
 //namespace psycle { namespace core {
 
 		/// the pi constant as a 32-bit floating point number

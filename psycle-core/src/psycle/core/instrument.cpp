@@ -1,16 +1,14 @@
 ///\file
 ///\brief interface file for psy::core::Filter. based on revision 2686
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
+#include "psycleCorePch.hpp"
+
 #include "instrument.h"
-#include "datacompression.h"
-#include "filter.h"
-#include "cstdint.h"
-#include "fileio.h"
+
 #include "constants.h"
-#include <sstream>
-#include <iostream>
-#include <iomanip>
+#include "cstdint.h"
+#include "datacompression.h"
+#include "fileio.h"
+#include "filter.h"
 
 template<class T> inline std::string toHex(T value , int nums = 8) {
 

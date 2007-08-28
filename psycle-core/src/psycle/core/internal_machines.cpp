@@ -1,8 +1,12 @@
+#include "psycleCorePch.hpp"
+
 #include "internal_machines.h"
+
 ///\todo: These two includes need to be replaced by a "host" callback which gives such information.
-#include "song.h"
-#include "player.h"
 #include "commands.h"
+#include "player.h"
+#include "song.h"
+
 namespace psy {
 	namespace core {
 
