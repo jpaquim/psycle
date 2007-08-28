@@ -75,27 +75,17 @@ namespace psycle { namespace helpers {
 		}
 	}
 
-	template<typename x>
-	void hexstring_to_integer(std::string const & string, x & result)
+	unsigned long long int hexstring_to_integer(std::string const & string)
 	{
+		unsigned long long int result(0);
 		std::vector<unsigned char> v;
 		hexstring_to_vector(string, v);
-		result = x();
-		int r(1);
+		unsigned int r(1);
 		for(std::vector<unsigned char>::reverse_iterator i(v.rbegin()) ; i != v.rend() ; ++i)
 		{
 			result += *i * r;
 			r *= 0x10;
 		}
+		return result;
 	}
-	template void hexstring_to_integer<  signed          char>(std::string const &,   signed          char &);
-	template void hexstring_to_integer<unsigned          char>(std::string const &, unsigned          char &);
-	template void hexstring_to_integer<  signed short     int>(std::string const &,   signed short     int &);
-	template void hexstring_to_integer<unsigned short     int>(std::string const &, unsigned short     int &);
-	template void hexstring_to_integer<  signed           int>(std::string const &,   signed           int &);
-	template void hexstring_to_integer<unsigned           int>(std::string const &, unsigned           int &);
-	template void hexstring_to_integer<  signed long      int>(std::string const &,   signed long      int &);
-	template void hexstring_to_integer<unsigned long      int>(std::string const &, unsigned long      int &);
-	template void hexstring_to_integer<  signed long long int>(std::string const &,   signed long long int &);
-	template void hexstring_to_integer<unsigned long long int>(std::string const &, unsigned long long int &);
 }}
