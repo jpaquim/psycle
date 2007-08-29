@@ -93,9 +93,9 @@ private:
 	QLabel *valueLbl;
 };
 
-class FHeader : public QLabel {
+class SectionHeader : public QLabel {
 public:
-	FHeader( QWidget *parent = 0 );
+	SectionHeader( QWidget *parent = 0 );
 protected:
 	void paintEvent( QPaintEvent *ev );
 };
@@ -201,7 +201,7 @@ private:
 	PresetsDialog *prsDlg;
 
 	std::map<int, KnobGroup*> knobGroupMap;
-	std::map<int, FHeader*> headerMap;
+	std::map<int, SectionHeader*> headerMap;
 };
 
 #endif

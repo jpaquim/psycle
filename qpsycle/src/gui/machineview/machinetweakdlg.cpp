@@ -155,7 +155,7 @@ void MachineTweakDlg::initParameterGui()
 				if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1) {
 					knobPanelLayout->addWidget( new KnobHole(), y, x );
 				} else {
-					FHeader* cell = new FHeader();
+					SectionHeader* cell = new SectionHeader();
 					headerMap[ knobIdx ] = cell;
 					cell->setText(parName);
 					knobPanelLayout->addWidget( cell, y, x );
@@ -443,17 +443,19 @@ QSize Knob::sizeHint() const
 
 
 /**
- * FHeader class.
+ * SectionHeader class.
+ * 
+ * Used for machines' "parameter groupings" section headers (e.g. LFOs, or whathaveyou.)
  * 
  */
-FHeader::FHeader( QWidget *parent )
+SectionHeader::SectionHeader( QWidget *parent )
 	: QLabel( parent )
 {
 	setFont( QFont( "Verdana", 8 ) );
 	setIndent( 10 );
 }
 
-void FHeader::paintEvent( QPaintEvent *ev )
+void SectionHeader::paintEvent( QPaintEvent *ev )
 {
 	QPainter painter(this);
 
