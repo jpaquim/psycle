@@ -54,7 +54,7 @@
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
 {
-		setWindowIcon( QIcon(":/images/plugin.png") );
+	setWindowIcon( QIcon(":/images/plugin.png") );
 	pMachine_ = macGui->mac();
 	m_macGui = macGui;
 
@@ -110,6 +110,9 @@ void MachineTweakDlg::createActions()
 	
 }
 
+/**
+ *
+ */
 void MachineTweakDlg::initParameterGui()
 {
 
@@ -141,15 +144,22 @@ void MachineTweakDlg::initParameterGui()
 
 		if ( knobIdx < numParameters ) {
 			pMachine_->GetParamRange( knobIdx,min_v,max_v);
+
+			// FIXME: bit of a crude check to see if we have
+			// a knob or a header/gap.
 			bool bDrawKnob = (min_v==max_v)?false:true;
 
 			if ( !bDrawKnob ) {
-				FHeader* cell = new FHeader();
-				headerMap[ knobIdx ] = cell;
 				char parName[64];
 				pMachine_->GetParamName(knobIdx,parName);
-				cell->setText(parName);
-				knobPanelLayout->addWidget( cell, y, x );
+				if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1) {
+					knobPanelLayout->addWidget( new KnobHole(), y, x );
+				} else {
+					FHeader* cell = new FHeader();
+					headerMap[ knobIdx ] = cell;
+					cell->setText(parName);
+					knobPanelLayout->addWidget( cell, y, x );
+				}
 			} else if ( knobIdx < numParameters ) {
 				KnobGroup *knobGroup = new KnobGroup( knobIdx );
 				char parName[64];
@@ -164,7 +174,7 @@ void MachineTweakDlg::initParameterGui()
 			}
 		} else {
 			// knob hole
-			knobPanelLayout->addWidget( new QLabel(""), y, x );
+			knobPanelLayout->addWidget( new KnobHole(), y, x );
 		}
 		y++;
 		if ( !(y % rows) ) {
@@ -433,9 +443,9 @@ QSize Knob::sizeHint() const
 
 
 /**
-	* FHeader class.
-	* 
-	*/
+ * FHeader class.
+ * 
+ */
 FHeader::FHeader( QWidget *parent )
 	: QLabel( parent )
 {
@@ -453,6 +463,22 @@ void FHeader::paintEvent( QPaintEvent *ev )
 	painter.setPen( Qt::white );
 	painter.drawText( textRect, Qt::AlignLeft | Qt::AlignVCenter, text() );
 	painter.fillRect( 0, (height()*3)/4, width(), height()/4, QColor( 121, 109, 156 ) );
+}
+
+/**
+ * KnobHole class.
+ * 
+ */
+KnobHole::KnobHole( QWidget *parent )
+	: QLabel( parent )
+{}
+
+void KnobHole::paintEvent( QPaintEvent *ev )
+{
+	QPainter painter(this);
+
+	painter.fillRect( 0, 0, width(), height()/2, QColor( 194, 190, 210 ) );
+	painter.fillRect( 0, height()/2, width(), height()/2, QColor( 121, 109, 156 ) );
 }
 
 

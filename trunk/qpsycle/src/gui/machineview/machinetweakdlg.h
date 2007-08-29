@@ -100,6 +100,13 @@ protected:
 	void paintEvent( QPaintEvent *ev );
 };
 
+class KnobHole : public QLabel {
+public:
+	KnobHole( QWidget *parent = 0 );
+protected:
+	void paintEvent( QPaintEvent *ev );
+};
+
 
 
 /**
@@ -146,8 +153,8 @@ private:
 
 
 /**
-	* MachineTweakDlg
-	*/
+ * MachineTweakDlg
+ */
 class MachineTweakDlg : public QDialog {
 Q_OBJECT
 	public:
