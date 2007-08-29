@@ -1350,10 +1350,6 @@ void mi::Stop(){
 	for(int c=0;c<MAX_TRACKS;c++) track[c].NoteStop();
 }
 
-void mi::SequencerTick(){
-// Called on each tick while sequencer is playing
-}
-
 void mi::updateOsc(int osc){
 	for(int c=0;c<MAX_TRACKS;c++){
 		if(track[c].ampEnvStage) track[c].calcOneWave(osc);
@@ -1819,19 +1815,30 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 
 	if (channel < MAX_TRACKS){
 		float nextVol = 1.0f;
-		if ((note<120) & ((cmd == 0xCC)||cmd == 0x0C )) nextVol=(float)val/255.0f;
+		if ((note<120) & ((cmd == 0xCC)||cmd == 0x0C )){
+			nextVol=(float)val/255.0f;
+			track[channel].InitEffect(cmd,val);
+		}
 		else track[channel].InitEffect(cmd,val);
 		// Note Off												== 120
 		// Empty Note Row				== 255
 		// Less than note off value??? == NoteON!
 		if(note<120){ 
 			if (cmd != 0xC3) track[channel].NoteOn(note-24,&globals,60,nextVol);
-			else track[channel].NoteTie(note-24);
+			else {
+				if (track[channel].ampEnvStage) track[channel].NoteTie(note-24);
+				else track[channel].NoteOn(note-24,&globals,60,nextVol); // retrigger because volume envelope finished
+			}
 		}
 		// Note off
 		if(note==120) track[channel].NoteOff();
 	}
 }
+
+void mi::SequencerTick(){
+// Called on each tick while sequencer is playing
+}
+
 
 void mi::InitWaveTable(){
 	int co = 0;
