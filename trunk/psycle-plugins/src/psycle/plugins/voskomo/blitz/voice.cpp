@@ -124,6 +124,7 @@ CSynthTrack::CSynthTrack() :
 
 	arpInput[0]=0;
 	m_filter.init(44100);
+	firstGlide = true;
 }
 
 CSynthTrack::~CSynthTrack(){
@@ -1503,15 +1504,20 @@ void CSynthTrack::NoteStop()
 void CSynthTrack::DoGlide() {
 
 	// Glide Handler
-	if(rbasenote<basenote){
-		rbasenote+=DCOglide;
-		if(rbasenote>basenote) rbasenote=basenote;
-		tuningChange=true;
-	}else{
-		if (rbasenote>basenote){
-			rbasenote-=DCOglide;
-			if(rbasenote<basenote) rbasenote=basenote;
+	if (firstGlide){
+		rbasenote=basenote;
+		firstGlide = false;
+	} else {
+		if(rbasenote<basenote){
+			rbasenote+=DCOglide;
+			if(rbasenote>basenote) rbasenote=basenote;
 			tuningChange=true;
+		}else{
+			if (rbasenote>basenote){
+				rbasenote-=DCOglide;
+				if(rbasenote<basenote) rbasenote=basenote;
+				tuningChange=true;
+			}
 		}
 	}
 	// Semi Glide Handler

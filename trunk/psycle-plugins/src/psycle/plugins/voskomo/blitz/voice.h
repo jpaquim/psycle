@@ -215,6 +215,7 @@ private:
 	int synbase[4];
 	int synposLast[4];
 	int currentStereoPos;
+	bool firstGlide;
 
 	int lfocount;
 	lfo lfoViber;
