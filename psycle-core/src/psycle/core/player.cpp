@@ -384,7 +384,7 @@ namespace psy
 
 		void Player::writeSamplesToFile( int amount ) {
 
-			if (!song_ && !driver_) return;
+			if (!song_ || !driver_) return;
 
 			float* pL(song().machine(MASTER_INDEX)->_pSamplesL);
 			float* pR(song().machine(MASTER_INDEX)->_pSamplesR);
