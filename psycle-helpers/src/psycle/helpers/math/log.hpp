@@ -46,24 +46,26 @@ namespace psycle
 					using namespace universalis::operating_system::clocks;
 					typedef thread clock;
 					int const iterations(1000000);
+					float f1(1);
 					opaque_time const t1(clock::current());
-					{
-						float f(1);
-						for(int i(0); i < iterations; ++i) f *= fast_log2(f);
-						std::ostringstream s; s << "fast: " << f;
-						BOOST_MESSAGE(s.str());
-					}
+					for(int i(0); i < iterations; ++i) f1 *= fast_log2(f1);
 					opaque_time const t2(clock::current());
+					float f2(1);
+					for(int i(0); i < iterations; ++i) f2 *= std::log(f2);
+					opaque_time const t3(clock::current());
 					{
-						float f(1);
-						for(int i(0); i < iterations; ++i) f *= std::log(f);
-						std::ostringstream s; s << "std: " << f;
+						std::ostringstream s; s << "fast: " << f1;
 						BOOST_MESSAGE(s.str());
 					}
-					opaque_time const t3(clock::current());
-					std::ostringstream s;
-					s << (t2 - t1).to_real_time() << "s < " << (t3 - t2).to_real_time() << "s";
-					BOOST_MESSAGE(s.str());
+					{
+						std::ostringstream s; s << "std: " << f2;
+						BOOST_MESSAGE(s.str());
+					}
+					{
+						std::ostringstream s;
+						s << (t2 - t1).to_real_time() << "s < " << (t3 - t2).to_real_time() << "s";
+						BOOST_MESSAGE(s.str());
+					}
 					BOOST_CHECK(t2 - t1 < t3 - t2);
 				}
 			#endif
