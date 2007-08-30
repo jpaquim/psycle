@@ -96,8 +96,11 @@ private:
 class SectionHeader : public QLabel {
 public:
 	SectionHeader( QWidget *parent = 0 );
+
+	QSize sizeHint() const;
 protected:
 	void paintEvent( QPaintEvent *ev );
+
 };
 
 class KnobHole : public QLabel {
