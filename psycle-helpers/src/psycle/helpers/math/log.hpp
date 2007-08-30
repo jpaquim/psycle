@@ -50,11 +50,15 @@ namespace psycle
 					{
 						float f(1);
 						for(int i(0); i < iterations; ++i) f *= fast_log2(f);
+						std::ostringstream s; s << f;
+						BOOST_MESSAGE(s.str());
 					}
 					opaque_time const t2(clock::current());
 					{
 						float f(1);
 						for(int i(0); i < iterations; ++i) f *= std::log(f);
+						std::ostringstream s; s << f;
+						BOOST_MESSAGE(s.str());
 					}
 					opaque_time const t3(clock::current());
 					std::ostringstream s;
