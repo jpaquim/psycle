@@ -939,6 +939,7 @@ void CSynthTrack::calcWaves(int mask){
 	float size1, size2, step1(0), step2, phase;
 	int work1, work2 = 0;
 	long long1 = 0;
+	long long2 = 0;
 	int buf = 0;
 	for (int i=0; i<4; i++) {
 		if (1<<i & mask){
@@ -1245,7 +1246,7 @@ void CSynthTrack::calcWaves(int mask){
 				case 39: // EOR
 					for (c=0;c<2048;c++) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]^vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047];
 					break;
-				case 40: // Clipper
+				case 40: // Boost (Hard Clip)
 					float1 = pos*pos*0.000000015*pos+1.0f;
 					for (c=0;c<2048;c++){
 						long1=vpar->WaveTable[vpar->oscWaveform[i]][c]*float1;
@@ -1292,11 +1293,31 @@ void CSynthTrack::calcWaves(int mask){
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
 					fmCtl2[buf>>2][i]=0-(pos*0.00048828125);
 					break;
-				case 50: // Phase Control
+				case 50: // X Rotator
 					for (c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047];
 					}
 					break;
+				case 51: // Y Rotator
+					long2 = pos/2046.0f*32768.0f;
+					for (c=0;c<2048;c++){
+						long1=vpar->WaveTable[vpar->oscWaveform[i]][c]+long2;
+						if (long1 > 16384) long1-=32768;
+						if (long1 < -16384) long1+=32768;
+						WaveBuffer[buf][c]=long1;
+					}
+					break;
+				case 52: // Boost II (Wrap)
+					float1 = pos/2047.0f;
+					float1 += float1+1.0f;
+					for (c=0;c<2048;c++){
+						long1=vpar->WaveTable[vpar->oscWaveform[i]][c]*float1;
+						while (long1 > 16384) long1-=32768;
+						while (long1 < -16384) long1+=32768;
+						WaveBuffer[buf][c]=long1;
+					}
+					break;
+
 				}
 				nextBuf[i]=1; // a new buffer is now present
 			}
