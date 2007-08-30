@@ -226,7 +226,7 @@ void MachineTweakDlg::showEvent( QShowEvent *event )
 {
 	// FIXME: can adjustSize() be called somewhere else?
 	adjustSize(); // Updates the window size after
-		      // adding all the knob groups.
+	// adding all the knob groups.
 
 	// Now the window is the right size, make it unresizable.
 	setFixedSize( QSize( width(), height() ) );
