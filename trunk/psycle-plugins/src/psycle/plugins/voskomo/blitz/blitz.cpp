@@ -264,7 +264,7 @@ CMachineParameter const paraOsc1FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	50,																																												// MaxValue
+	52,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -424,7 +424,7 @@ CMachineParameter const paraOsc2FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	50,																																												// MaxValue
+	52,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -585,7 +585,7 @@ CMachineParameter const paraOsc3FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	50,																																												// MaxValue
+	52,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -746,7 +746,7 @@ CMachineParameter const paraOsc4FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	50,																																												// MaxValue
+	52,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -1300,7 +1300,7 @@ CMachineInfo const MacInfo =
 #ifdef _DEBUG
 	"Blitz (Debug build)",																				// name
 #else
-	"Blitz 1.1",																												// name
+	"Blitz 1.2",																												// name
 #endif
 	"Blitz",																																// short name
 	"jme",																																				// author
@@ -1730,7 +1730,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 37:sprintf(txt,"Multiply");return true;break;
 			case 38:sprintf(txt,"AND Gate");return true;break;
 			case 39:sprintf(txt,"XOR Gate");return true;break;
-			case 40:sprintf(txt,"Clipper");return true;break;
+			case 40:sprintf(txt,"Boost (Hard Clip)");return true;break;
 			case 41:sprintf(txt,"RM to AM (Upright)");return true;break;
 			case 42:sprintf(txt,"RM to AM (Flipped)");return true;break;
 			case 43:sprintf(txt,"Feedback Control");return true;break;
@@ -1740,7 +1740,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 47:sprintf(txt,"Master Saturation");return true;break;
 			case 48:sprintf(txt,"FM last Oscillator (+)");return true;break;
 			case 49:sprintf(txt,"FM last Oscillator (-)");return true;break;
-			case 50:sprintf(txt,"Phase Control");return true;break;
+			case 50:sprintf(txt,"X Rotator");return true;break;
+			case 51:sprintf(txt,"Y Rotator");return true;break;
+			case 52:sprintf(txt,"Boost II (Wrap)");return true;break;
+
 		}
 	}
 
