@@ -78,6 +78,7 @@ MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent )
 void MachineTweakDlg::createMenus()
 {
 	menuBar = new QMenuBar( this );
+	menuBar->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	aboutMenu = menuBar->addMenu( "About" );
 	aboutMenu->addAction( aboutAction_ );
 	
@@ -139,17 +140,18 @@ void MachineTweakDlg::initParameterGui()
 	int x = 0;
 	int y = 0;
 
-	for ( int knobIdx =0; knobIdx < cols*rows; knobIdx++ ) {
-		int min_v,max_v;
+	for ( int knobIdx =0; knobIdx < cols*rows; knobIdx++ ) 
+	{
+		int min_v, max_v;
 
 		if ( knobIdx < numParameters ) {
-			pMachine_->GetParamRange( knobIdx,min_v,max_v);
+			pMachine_->GetParamRange( knobIdx,min_v,max_v );
 
 			// FIXME: bit of a crude check to see if we have
 			// a knob or a header/gap.
 			bool bDrawKnob = (min_v==max_v)?false:true;
 
-			if ( !bDrawKnob ) {
+			if ( !bDrawKnob ) { // a header or a gap.
 				char parName[64];
 				pMachine_->GetParamName(knobIdx,parName);
 				if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1) {
@@ -160,7 +162,7 @@ void MachineTweakDlg::initParameterGui()
 					cell->setText(parName);
 					knobPanelLayout->addWidget( cell, y, x );
 				}
-			} else if ( knobIdx < numParameters ) {
+			} else if ( knobIdx < numParameters ) { // an actual knob+parameterinfo.
 				KnobGroup *knobGroup = new KnobGroup( knobIdx );
 				char parName[64];
 				pMachine_->GetParamName( knobIdx, parName );
@@ -172,8 +174,7 @@ void MachineTweakDlg::initParameterGui()
 						this, SLOT( onKnobGroupChanged( KnobGroup* ) ) );
 				knobPanelLayout->addWidget( knobGroup, y, x );
 			}
-		} else {
-			// knob hole
+		} else { // no parameters left, but some space left.
 			knobPanelLayout->addWidget( new KnobHole(), y, x );
 		}
 		y++;
@@ -183,6 +184,7 @@ void MachineTweakDlg::initParameterGui()
 		}
 	}
 	knobPanel->repaint();
+
 	updateValues();
 }
 
@@ -216,10 +218,20 @@ void MachineTweakDlg::onKnobGroupChanged( KnobGroup *kGroup )
 	kGroup->setValueText( QString::fromStdString( buffer ) );
 }
 
+/**
+ * QWidget method that gets called when the dialog
+ * is is made visible.
+ */
 void MachineTweakDlg::showEvent( QShowEvent *event )
 {
 	// FIXME: can adjustSize() be called somewhere else?
-	adjustSize();
+	adjustSize(); // Updates the window size after
+		      // adding all the knob groups.
+
+	// Now the window is the right size, make it unresizable.
+	setFixedSize( QSize( width(), height() ) );
+
+
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
 	buffer.str("");
@@ -258,6 +270,7 @@ void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
 		}
 	}
 }
+
 
 void MachineTweakDlg::randomiseParameters() 
 {
@@ -309,6 +322,10 @@ void MachineTweakDlg::showAboutDialog()
 }
 
 
+/**
+ * A KnobGroup groups together a visual representation of a knob, the name of 
+ * the parameter it represents, and the current value of that parameter.
+ */
 KnobGroup::KnobGroup( int param )
 {
 	QGridLayout *layout = new QGridLayout();
@@ -407,10 +424,13 @@ QSize KnobGroup::sizeHint() const
 	return QSize( LABEL_WIDTH, K_YSIZE );
 }
 
+
+
 /**
-	* Knob class.
-	* 
-	*/
+ * Knob class.
+ * 
+ * Visual representation of the knob itself.
+ */
 Knob::Knob( int param ) 
 	: param_( param )
 {
@@ -458,7 +478,7 @@ SectionHeader::SectionHeader( QWidget *parent )
 void SectionHeader::paintEvent( QPaintEvent *ev )
 {
 	QPainter painter(this);
-
+	
 	painter.fillRect( 0, 0, width(), height()/4, QColor( 194, 190, 210 ) );
 	painter.fillRect( 0, height()/4, width(), height()/2, Qt::black );
 	QRectF textRect( indent(), height()/4, width(), height()/2 );
@@ -467,8 +487,16 @@ void SectionHeader::paintEvent( QPaintEvent *ev )
 	painter.fillRect( 0, (height()*3)/4, width(), height()/4, QColor( 121, 109, 156 ) );
 }
 
+QSize SectionHeader::sizeHint() const
+{
+	return QSize( LABEL_WIDTH, K_YSIZE );
+}
+
+
 /**
  * KnobHole class.
+ *
+ * When there's a spacer element, but no section header... then we have a Knob Hole.
  * 
  */
 KnobHole::KnobHole( QWidget *parent )
@@ -485,6 +513,9 @@ void KnobHole::paintEvent( QPaintEvent *ev )
 
 
 
+/**
+ * PresetsDialog.
+ */
 PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	: QDialog( parent )
 {
