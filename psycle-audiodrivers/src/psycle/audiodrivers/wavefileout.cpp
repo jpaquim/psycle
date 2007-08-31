@@ -116,6 +116,7 @@ namespace psy
 				Sleep(1);
 #endif
 				float const * input(_pCallback(_callbackContext, count));
+				///\todo well, the real job, i.e. output to a file
 			}
 
 			threadOpen = 0;
