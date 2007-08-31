@@ -18,6 +18,13 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+/**
+ * QSynth style knob behaviour based on sf.net/projects/qsynth
+ * original (c) Rui Nuno Capela
+ * Any dodgy modifications not his fault!
+ */
+
+
 #ifndef MACHINETWEAKDLG_H
 #define MACHINETWEAKDLG_H
 
