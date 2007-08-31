@@ -34,7 +34,7 @@ namespace psycle
 						std::uint32_t i;
 					} result;
 					result.f = f;
-					#if 1
+					#if 0
 						return
 							(  (result.i & 0x7f800000) >> 23 )
 							+  (result.i & 0x007fffff)
