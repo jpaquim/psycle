@@ -8,8 +8,8 @@ TEMPLATE = app # This project builds an executable program.
 TARGET = 
 
 CONFIG += thread
-!warn_on: CONFIG += warn_off
-message( "Config is $${CONFIG}." )
+!warn_on: CONFIG *= warn_off
+message("Config is $$CONFIG")
 
 BUILD_DIR = ++build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
