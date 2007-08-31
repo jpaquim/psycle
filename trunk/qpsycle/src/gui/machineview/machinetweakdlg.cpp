@@ -443,7 +443,7 @@ QSize KnobGroup::sizeHint() const
 Knob::Knob( int param ) 
 	: param_( param )
 	, m_bMousePressed(false)
-	, m_knobMode(QSynthLinearMode)
+	, m_knobMode(PsycleLinearMode)
 {
 	setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
 }
@@ -486,20 +486,11 @@ void Knob::mousePressEvent( QMouseEvent *pMouseEvent )
 		m_lastDragValue = value();
 		emit sliderPressed();
 	}
-/*
-	} else if (pMouseEvent->button() == Qt::MidButton) {
-		// Reset to default value...
-		if (m_iDefaultValue < minimum() || m_iDefaultValue > maximum())
-			m_iDefaultValue = (maximum() + minimum()) / 2;
-		setValue(m_iDefaultValue);
-	}
-*/
 }
 
 
 void Knob::mouseMoveEvent( QMouseEvent *pMouseEvent )
 {
-	//int screenHeight = Global::Instance().screenHeight();
 	if (m_knobMode==QDialMode)
 	{
 		QDial::mouseMoveEvent(pMouseEvent);
@@ -515,10 +506,34 @@ void Knob::mouseMoveEvent( QMouseEvent *pMouseEvent )
 
 	switch (m_knobMode) {
 	case PsycleLinearMode:
-		// todo.  Probably remove QSynthLinearMode when done,
-		// because it isn't very good.
-		break;
-	case QSynthLinearMode:
+// Attempt to recreate psycle mfc behaviour...
+// Not quite right yet it seems...? but works well enough.
+// My guess is something to do with m_posMouse.y() or pMouseEvent->y()
+// in double nv = ... line.
+	{
+		double freak; // wtf does freak stand for.
+		int minval = minimum();
+		int maxval = maximum();
+		int screenHeight = Global::Instance().screenHeight();
+
+		if ( /*ultrafinetweak*/false ) 
+			freak = 0.5f;
+		else if ( maxval-minval < screenHeight/4 ) 
+			freak = (maxval-minval)/float(screenHeight/4);
+		else if ( maxval-minval < screenHeight*2/3 ) 
+			freak = (maxval-minval)/float(screenHeight/3);
+		else 
+			freak = (maxval-minval)/float(screenHeight*3/5);
+		//if (finetweak) freak/=5;
+		
+		double nv = (double)(m_posMouse.y() - pMouseEvent->y() )*freak + (double)m_lastDragValue;
+		if (nv < minval) nv = minval;
+		if (nv > maxval) nv = maxval;
+		
+		newValue = nv+0.5f; // +0.5f to round correctly, not like "floor".
+		setCursor( Qt::BlankCursor );
+	} break;
+	case QSynthLinearMode: // <nmather> probably remove this, it isn't very good.
 	{
 		newValue = m_lastDragValue + xdelta - ydelta;
 	} break;
@@ -547,6 +562,10 @@ void Knob::mouseReleaseEvent( QMouseEvent *pMouseEvent )
 		QDial::mouseReleaseEvent(pMouseEvent);
 	} else if (m_bMousePressed) {
 		m_bMousePressed = false;
+		if ( m_knobMode == PsycleLinearMode ) {
+			cursor().setPos( mapToGlobal( m_posMouse ) );
+			setCursor( Qt::ArrowCursor );
+		}
 	}
 }
 
