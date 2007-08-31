@@ -122,6 +122,7 @@ namespace psy { namespace core {
 				std::string home(home_drive);
 				home += home_path;
 				return home;
+			}
 
 			// next, try registry db
 			HKEY hKeyRoot = HKEY_CURRENT_USER;
