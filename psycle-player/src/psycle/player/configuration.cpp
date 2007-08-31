@@ -51,6 +51,7 @@
 #if defined PSYCLE__LIBXMLPP_AVAILABLE
 	#include <libxml++/parsers/domparser.h>
 #elif defined QT_XML_LIB
+	#include <Qt/qfile.h>
 	#include <QDomDocument>
 #else
 	#error none of the supported xml parser libs appear to be available
