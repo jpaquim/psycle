@@ -44,7 +44,7 @@ namespace psycle
 						int const log_2 = ((result.i >> 23) & 255) - 128;
 						result.i &= ~(255 << 23);
 						result.i += 127 << 23;
-   						return result.f + log_2;
+						return result.f + log_2;
 					#endif
 				#else
 					#define PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
