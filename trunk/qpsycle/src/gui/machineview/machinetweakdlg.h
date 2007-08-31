@@ -81,15 +81,15 @@ private:
 	int param_;
 	QPoint cursorTriggerPoint_;
 
-	// Knob dial mode behavior.
-   	KnobMode m_knobMode;
-   
-   	// Alternate mouse behavior tracking.
-   	bool   m_bMousePressed;
-   	QPoint m_posMouse;
-   
- 	// Just for more precission on the movement
- 	double m_lastDragValue;
+// Knob dial mode behavior.
+	KnobMode m_knobMode;
+
+// Alternate mouse behavior tracking.
+	bool   m_bMousePressed;
+	QPoint m_posMouse;
+
+// Just for more precission on the movement
+	double m_lastDragValue;
 };
 
 class KnobGroup : public QWidget {
