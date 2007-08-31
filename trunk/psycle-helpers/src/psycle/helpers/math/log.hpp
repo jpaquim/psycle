@@ -34,13 +34,25 @@ namespace psycle
 						std::uint32_t i;
 					} result;
 					result.f = f;
-					#if 0
+					#if 0 // slower
+						/*
+							speed tests:
+							anechoid amd64 mingw x87  0.0265056s < 0.0724436s
+							anechoid amd64 msvc  sse2 0.0664263s < 0.1051030s
+							factoid  uml   gcc   x87  0.0644470s < 0.0999490s
+						*/
 						return
 							(  (result.i & 0x7f800000) >> 23 )
 							+  (result.i & 0x007fffff)
 							* 1.19209289550781e-07f // * 1 / float(0x00800000)
 							-              0x0000007f;
-					#else
+					#else // faster
+						/*
+							speed tests:
+							anechoid amd64 mingw x87  0.0156093s < 0.0710476s
+							anechoid amd64 msvc  sse2 0.0529316s < 0.1039730s
+							factoid  uml   gcc   x87  0.0199000s < 0.0966760s
+						*/
 						int const log_2 = ((result.i >> 23) & 255) - 128;
 						result.i &= ~(255 << 23);
 						result.i += 127 << 23;
