@@ -11,6 +11,7 @@
 	#include <universalis/operating_system/clocks.hpp>
 	#include <cmath>
 	#include <sstream>
+	#include <iomanip>
 #endif
 namespace psycle
 {
@@ -34,17 +35,16 @@ namespace psycle
 					} result;
 					result.f = f;
 					#if 0
-					return
-						(  (result.i & 0x7f800000) >> 23 )
-						+  (result.i & 0x007fffff)
-						/        float(0x00800000)
-						-              0x0000007f;
+						return
+							(  (result.i & 0x7f800000) >> 23 )
+							+  (result.i & 0x007fffff)
+							* 1.19209289550781e-07f // * 1 / float(0x00800000)
+							-              0x0000007f;
 					#else
-					return
-						(  (result.i & 0x7f800000) >> 23 )
-						+  (result.i & 0x007fffff)
-						/        float(0x00800000)
-						-              0x0000007f;
+						int const log_2 = ((result.i >> 23) & 255) - 128;
+						result.i &= ~(255 << 23);
+						result.i += 127 << 23;
+   						return result.f + log_2;
 					#endif
 				#else
 					#define PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
@@ -110,7 +110,14 @@ namespace psycle
 						double tolerance;
 						if(0.6 < f && f < 1.7) tolerance = 0.60;
 						else tolerance = 0.1;
-						double ratio = fast_log2(f) / ::log2(f);
+						double ratio = fast_log2(f) /
+						(
+							#if defined DIVERSALIS__COMPILER__MICROSOFT // lacks log2
+								std::log(f) * 1.442695f // * 1 / log(2)
+							#else
+								::log2(f)
+							#endif
+						);
 						//std::ostringstream s; s << "ratio(" << f << "): " << ratio;
 						//BOOST_MESSAGE(s.str());
 						BOOST_CHECK(1 - tolerance < ratio && ratio < 1 + tolerance);
@@ -123,7 +130,13 @@ namespace psycle
 					for(int i(0); i < iterations; ++i) f1 += fast_log2(f1);
 					opaque_time const t2(clock::current());
 					float f2(2);
-					for(int i(0); i < iterations; ++i) f2 += std::log(f2);
+					for(int i(0); i < iterations; ++i) f2 += 
+						#if defined DIVERSALIS__COMPILER__MICROSOFT // lacks log2
+							std::log(f2) * 1.442695f // * 1 / log(2)
+						#else
+							::log2(f2)
+						#endif
+						;
 					opaque_time const t3(clock::current());
 					{
 						std::ostringstream s; s << "fast_log2: " << f1;
@@ -139,11 +152,6 @@ namespace psycle
 						BOOST_MESSAGE(s.str());
 					}
 					BOOST_CHECK(t2 - t1 < t3 - t2);
-					{
-						std::ostringstream s; s << "xxxxxxx " << ::log(2.0) << " " << 1.0 / ::log(2.0);
-						BOOST_MESSAGE(s.str());
-						//1.442695
-					}
 				}
 			#endif
 		}
