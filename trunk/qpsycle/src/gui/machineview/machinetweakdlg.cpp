@@ -434,6 +434,8 @@ QSize KnobGroup::sizeHint() const
  */
 Knob::Knob( int param ) 
 	: param_( param )
+	, m_bMousePressed(false)
+	, m_knobMode(QSynthLinearMode)
 {
 	setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
 }
@@ -456,27 +458,86 @@ void Knob::paintEvent( QPaintEvent *ev )
 	}
 }
 
-// For use later.
-void Knob::mousePressEvent( QMouseEvent *ev )
+// Mouse angle determination.
+double Knob::mouseAngle ( const QPoint& pos )
 {
-	cursorTriggerPoint_ = cursor().pos();
-	setCursor( Qt::BlankCursor );
-	QDial::mousePressEvent( ev );
+	float dx = pos.x() - width()/2;
+	float dy = height()/2 - pos.y();
+	return 360*atan2(dx,dy)/M_PI/2;
+}
+
+void Knob::mousePressEvent( QMouseEvent *pMouseEvent )
+{
+	if (m_knobMode==QDialMode) {
+		QDial::mousePressEvent(pMouseEvent);
+		return;
+	}
+	if (pMouseEvent->button() == Qt::LeftButton) {
+		m_bMousePressed = true;
+		m_posMouse = pMouseEvent->pos();
+		m_lastDragValue = value();
+		emit sliderPressed();
+	}
+/*	} else if (pMouseEvent->button() == Qt::MidButton) {
+		// Reset to default value...
+		if (m_iDefaultValue < minimum() || m_iDefaultValue > maximum())
+			m_iDefaultValue = (maximum() + minimum()) / 2;
+		setValue(m_iDefaultValue);
+		}*/
 }
 
 
-void Knob::mouseMoveEvent( QMouseEvent *ev )
+void Knob::mouseMoveEvent( QMouseEvent *pMouseEvent )
 {
-// For use later.
 	//int screenHeight = Global::Instance().screenHeight();
-	QDial::mouseMoveEvent( ev );
+	if (m_knobMode==QDialMode)
+	{
+		QDial::mouseMoveEvent(pMouseEvent);
+		return;
+	}
+
+	if (! m_bMousePressed) return;
+	const QPoint& posMouse = pMouseEvent->pos();
+	int xdelta = posMouse.x() - m_posMouse.x();
+	int ydelta = posMouse.y() - m_posMouse.y();
+	double angleDelta =  mouseAngle(posMouse) - mouseAngle(m_posMouse);
+	int newValue = value();
+
+	switch (m_knobMode) {
+	case PsycleLinearMode:
+		// todo.  Probably remove QSynthLinearMode when done,
+		// because it isn't very good.
+		break;
+	case QSynthLinearMode:
+	{
+		newValue = m_lastDragValue + xdelta - ydelta;
+	} break;
+	case QSynthAngularMode:
+	{
+		// Forget about the drag origin to be robust on full rotations
+		if (angleDelta>180) angleDelta=angleDelta-360;
+		if (angleDelta<-180) angleDelta=angleDelta+360;
+		m_lastDragValue +=  (maximum()-minimum())*angleDelta/270;
+		if (m_lastDragValue>maximum())
+			m_lastDragValue=maximum();
+		if (m_lastDragValue<minimum())
+			m_lastDragValue=minimum();
+		m_posMouse = posMouse;
+		newValue = m_lastDragValue+.5;
+	} break;
+	}
+	setValue(newValue);
+	update();
+	emit sliderMoved(value());
 }
 
-void Knob::mouseReleaseEvent( QMouseEvent *ev )
+void Knob::mouseReleaseEvent( QMouseEvent *pMouseEvent )
 {
-	QDial::mouseReleaseEvent( ev );
-	setCursor( Qt::ArrowCursor );
-	cursor().setPos( cursorTriggerPoint_ );
+	if (m_knobMode==QDialMode) {
+		QDial::mouseReleaseEvent(pMouseEvent);
+	} else if (m_bMousePressed) {
+		m_bMousePressed = false;
+	}
 }
 
 QSize Knob::sizeHint() const
