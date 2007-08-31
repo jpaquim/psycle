@@ -478,12 +478,14 @@ void Knob::mousePressEvent( QMouseEvent *pMouseEvent )
 		m_lastDragValue = value();
 		emit sliderPressed();
 	}
-/*	} else if (pMouseEvent->button() == Qt::MidButton) {
+/*
+	} else if (pMouseEvent->button() == Qt::MidButton) {
 		// Reset to default value...
 		if (m_iDefaultValue < minimum() || m_iDefaultValue > maximum())
 			m_iDefaultValue = (maximum() + minimum()) / 2;
 		setValue(m_iDefaultValue);
-		}*/
+	}
+*/
 }
 
 
