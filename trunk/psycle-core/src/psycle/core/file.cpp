@@ -178,7 +178,7 @@ namespace psy { namespace core {
 	}
 
 	std::string const & File::slash() {
-		std::string static once(
+		std::string const static once(
 			#if defined __unix__ || defined __APPLE__
 				"/"
 			#else
