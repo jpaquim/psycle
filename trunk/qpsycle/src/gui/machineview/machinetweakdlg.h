@@ -63,11 +63,13 @@ public:
 
 protected: 
 	void paintEvent( QPaintEvent *ev );
-	//void mousePressEvent( QMouseEvent *ev );
-	//void mouseMoveEvent( QMouseEvent *ev );
+	void mousePressEvent( QMouseEvent *ev );
+	void mouseMoveEvent( QMouseEvent *ev );
+	void mouseReleaseEvent( QMouseEvent *ev );
 
 private:
 	int param_;
+	QPoint cursorTriggerPoint_;
 };
 
 class KnobGroup : public QWidget {

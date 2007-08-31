@@ -457,16 +457,27 @@ void Knob::paintEvent( QPaintEvent *ev )
 }
 
 // For use later.
-/*void Knob::mousePressEvent( QMouseEvent *ev )
+void Knob::mousePressEvent( QMouseEvent *ev )
 {
-	ev->accept();
-	}*/
+	cursorTriggerPoint_ = cursor().pos();
+	setCursor( Qt::BlankCursor );
+	QDial::mousePressEvent( ev );
+}
 
-// For use later.
-/*void Knob::mouseMoveEvent( QMouseEvent *ev )
+
+void Knob::mouseMoveEvent( QMouseEvent *ev )
 {
-	int screenHeight = Global::Instance().screenHeight();
-}*/
+// For use later.
+	//int screenHeight = Global::Instance().screenHeight();
+	QDial::mouseMoveEvent( ev );
+}
+
+void Knob::mouseReleaseEvent( QMouseEvent *ev )
+{
+	QDial::mouseReleaseEvent( ev );
+	setCursor( Qt::ArrowCursor );
+	cursor().setPos( cursorTriggerPoint_ );
+}
 
 QSize Knob::sizeHint() const
 {
