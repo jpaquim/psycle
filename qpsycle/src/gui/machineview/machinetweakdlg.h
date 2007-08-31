@@ -61,15 +61,35 @@ public:
 	QSize sizeHint() const;
 	int param() { return param_; }
 
+	enum KnobMode
+	{
+		QDialMode, ///< Old QDial behaviour
+		QSynthAngularMode, ///< Knob moves angularly as the mouse around the widget center
+		QSynthLinearMode, ///< Knob moves proportonally to drag distance in one ortogonal axis
+		PsycleLinearMode
+	};
+
 protected: 
 	void paintEvent( QPaintEvent *ev );
 	void mousePressEvent( QMouseEvent *ev );
 	void mouseMoveEvent( QMouseEvent *ev );
 	void mouseReleaseEvent( QMouseEvent *ev );
 
+	double mouseAngle(const QPoint& pos);
+
 private:
 	int param_;
 	QPoint cursorTriggerPoint_;
+
+	// Knob dial mode behavior.
+   	KnobMode m_knobMode;
+   
+   	// Alternate mouse behavior tracking.
+   	bool   m_bMousePressed;
+   	QPoint m_posMouse;
+   
+ 	// Just for more precission on the movement
+ 	double m_lastDragValue;
 };
 
 class KnobGroup : public QWidget {
