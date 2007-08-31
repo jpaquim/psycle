@@ -19,6 +19,8 @@
 	***************************************************************************/
 #ifndef FILE_H
 #define FILE_H
+#include <vector>
+#include <string>
 
 namespace psy {
 	namespace core {
