@@ -20,6 +20,12 @@
 
 #include "global.h"
 #include "configuration.h"
+
+#include <QApplication>
+#include <QDesktopWidget>
+
+Global::Global(){};
+
 Configuration* Global::pConfig() {
 	static Configuration* c = new Configuration();
 	return c;
@@ -27,4 +33,17 @@ Configuration* Global::pConfig() {
 
 Configuration const & Global::configuration() {
 	return *pConfig();
+}
+
+void Global::setApplication( QApplication *app )
+{
+	app_ = app;
+}
+
+int Global::screenHeight()
+{
+	QDesktopWidget *desktopWidget = app_->desktop();
+	// We're assuming for now psycle doesn't run dual-head...
+	// so access default, primary screen.
+	return desktopWidget->screenGeometry().height();
 }

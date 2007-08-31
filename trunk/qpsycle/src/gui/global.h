@@ -19,12 +19,26 @@
 ***************************************************************************/
 #ifndef PSYCLE__GUI__GLOBAL
 #define PSYCLE__GUI__GLOBAL
+
+class QApplication;
 class Configuration;
-class Global
-{
-	public:
-		static Configuration* pConfig();
-		static const Configuration & configuration();
+
+class Global {
+public:
+	static Global& Instance() {
+		static Global theGlobal;
+		return theGlobal;
+	}
+	
+	static Configuration* pConfig();
+	static const Configuration & configuration();
+	
+	void setApplication( QApplication *app );
+	int screenHeight();
+
+private:
+	Global();
+	QApplication *app_;
 };
 
 template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)

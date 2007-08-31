@@ -22,13 +22,17 @@
 #include <QtGui/qicon.h>
 
 #include "gui/mainwindow.h"
+#include "gui/global.h"
 
 int main(int argc, char *argv[])
 {
-	QApplication app(argc, argv);
+	QApplication *app = new QApplication(argc, argv);
 	Q_INIT_RESOURCE(qpsycle);
-	app.setWindowIcon ( QIcon(":images/psycle.png") );
+	app->setWindowIcon ( QIcon(":images/psycle.png") );
 	MainWindow mainWin;
 	mainWin.show();
-	return app.exec();
+
+	Global::Instance().setApplication( app );
+
+	return app->exec();
 }

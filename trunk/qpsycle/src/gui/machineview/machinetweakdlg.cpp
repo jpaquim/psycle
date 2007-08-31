@@ -124,6 +124,7 @@ void MachineTweakDlg::initParameterGui()
 	int numParameters = pMachine_->GetNumParams();
 	int cols = pMachine_->GetNumCols();
 	int rows = numParameters/cols;
+
 	// Various checks for "non-standard" windows ( lots of parameters, or "odd" parameter numbers)
 	if (rows>24) // check for "too big" windows
 	{
@@ -305,8 +306,9 @@ void MachineTweakDlg::resetParameters()
 void MachineTweakDlg::showPresetsDialog()
 {
 	prsDlg = new PresetsDialog( m_macGui, this );
-	if ( prsDlg->exec() == QDialog::Accepted )
+	if ( prsDlg->exec() == QDialog::Accepted ) {
 		updateValues();
+	}
 }
 
 
@@ -315,9 +317,8 @@ void MachineTweakDlg::showAboutDialog()
 	if ( pMachine_->type() == psy::core::MACH_PLUGIN )
 	{
 		QMessageBox::information( this,
-						"About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
-						"Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
-	
+					  "About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
+					  "Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
 	}
 }
 
@@ -454,6 +455,18 @@ void Knob::paintEvent( QPaintEvent *ev )
 		painter.drawPixmap( target, pixmap, source );
 	}
 }
+
+// For use later.
+/*void Knob::mousePressEvent( QMouseEvent *ev )
+{
+	ev->accept();
+	}*/
+
+// For use later.
+/*void Knob::mouseMoveEvent( QMouseEvent *ev )
+{
+	int screenHeight = Global::Instance().screenHeight();
+}*/
 
 QSize Knob::sizeHint() const
 {
