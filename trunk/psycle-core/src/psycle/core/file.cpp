@@ -112,7 +112,7 @@ namespace psy { namespace core {
 			return nrv;
 		#else
 			// first check UserProfile
-			char const * const user_profile(std::getenv("HOME");
+			char const * const user_profile(std::getenv("UserProfile"));
 			if(user_profile) return user_profile;
 
 			// next, check HomeDrive and HomePath
