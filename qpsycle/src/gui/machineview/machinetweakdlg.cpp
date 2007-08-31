@@ -17,6 +17,14 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+
+/**
+ * QSynth style knob behaviour based on sf.net/projects/qsynth
+ * original (c) Rui Nuno Capela
+ * Any dodgy modifications not his fault!
+ */
+
+
 #include <qpsyclePch.hpp>
 
 #include <psycle/core/machine.h>
