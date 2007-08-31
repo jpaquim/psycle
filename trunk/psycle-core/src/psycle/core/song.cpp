@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psy::core::Song
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "song.h"
 

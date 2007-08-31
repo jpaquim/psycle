@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psy::core::Machine
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "machine.h"
 

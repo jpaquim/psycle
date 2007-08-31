@@ -1,6 +1,6 @@
 //\file
 ///\brief implementation file for psy::core::dsp::Dither
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "dither.h"
 

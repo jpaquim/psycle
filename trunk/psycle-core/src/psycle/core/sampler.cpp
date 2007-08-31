@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psy::core::Sampler. based on rev. 2708
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "sampler.h"
 

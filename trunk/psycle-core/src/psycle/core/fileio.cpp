@@ -1,5 +1,5 @@
 ///\implementation psy::core::RiffFile
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "fileio.h"
 

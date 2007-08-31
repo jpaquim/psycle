@@ -8,9 +8,9 @@ TEMPLATE = lib # This project builds a library.
 CONFIG *= plugin # This built library is a loadable module.
 TARGET = 
 
-CONFIG += thread
-!warn_on: CONFIG += warn_off
-message( "Config is $$CONFIG" )
+CONFIG *= thread
+!warn_on: CONFIG *= warn_off
+message("Config is $$CONFIG")
 
 BUILD_DIR = ++build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
