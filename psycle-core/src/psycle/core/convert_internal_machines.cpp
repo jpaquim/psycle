@@ -1,4 +1,4 @@
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "convert_internal_machines.private.hpp"
 #include "helpers/scale.hpp"

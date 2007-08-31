@@ -17,7 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "binread.h"
 
@@ -32,18 +32,6 @@ namespace psy {
 
 		BinRead::~BinRead() {
 		}
-
-
-		// disable << shift to big warning
-		#if defined __GNUC__
-		#pragma GCC system_header
-		#elif defined __SUNPRO_CC
-		#pragma disable_warn
-		#elif defined _MSC_VER
-		#pragma warning(push, 1)
-		#pragma warning(disable:4293)
-		#endif 
-
 
 		unsigned int BinRead::readUInt4LE() {
 			unsigned char buf[4];
@@ -60,11 +48,6 @@ namespace psy {
 			}
 			return 0; // cannot handle platform
 		}
-		#if defined __SUNPRO_CC
-		#pragma enable_warn
-		#elif defined _MSC_VER
-		#pragma warning(pop)
-		#endif 
 
 		int BinRead::readInt4LE() {
 			return static_cast<int>( readUInt4LE() );

@@ -1,6 +1,6 @@
 ///\file
 ///\brief interface file for psy::core::Filter. based on revision 2686
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "instrument.h"
 

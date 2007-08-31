@@ -26,7 +26,7 @@
 * the Free Software Foundation, Inc., 51 Franklin Street,
 * Boston, MA 02110-1301, USA.
 */
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "dsp.h"
 

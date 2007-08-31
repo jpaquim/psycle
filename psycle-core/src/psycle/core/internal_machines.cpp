@@ -1,4 +1,4 @@
-#include "psycleCorePch.hpp"
+#include <psycle/core/psycleCorePch.hpp>
 
 #include "internal_machines.h"
 
