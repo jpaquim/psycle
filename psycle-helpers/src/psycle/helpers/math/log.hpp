@@ -33,18 +33,30 @@ namespace psycle
 						std::uint32_t i;
 					} result;
 					result.f = f;
+					#if 0
 					return
 						(  (result.i & 0x7f800000) >> 23 )
 						+  (result.i & 0x007fffff)
-						/     float(0x00800000)
-						-           0x0000007f;
+						/        float(0x00800000)
+						-              0x0000007f;
+					#else
+					return
+						(  (result.i & 0x7f800000) >> 23 )
+						+  (result.i & 0x007fffff)
+						/        float(0x00800000)
+						-              0x0000007f;
+					#endif
 				#else
-					#define PSYCLE__HELPERS__MATH__FAST_LOG2_IS_STD_LOG2
-					return ::log2(f);
+					#define PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
+					#if defined DIVERSALIS__COMPILER__MICROSOFT // lacks log2
+						return std::log(f) * 1.442695f; // * 1 / log(2)
+					#else
+						return ::log2(f);
+					#endif
 				#endif
 			}
 
-			#if defined BOOST_AUTO_TEST_CASE && !defined PSYCLE__HELPERS__MATH__FAST_LOG2_IS_STD_LOG2
+			#if defined BOOST_AUTO_TEST_CASE && !defined PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
 				BOOST_AUTO_TEST_CASE(fast_log2_test)
 				{
 					float const input_values[] = {
@@ -127,6 +139,11 @@ namespace psycle
 						BOOST_MESSAGE(s.str());
 					}
 					BOOST_CHECK(t2 - t1 < t3 - t2);
+					{
+						std::ostringstream s; s << "xxxxxxx " << ::log(2.0) << " " << 1.0 / ::log(2.0);
+						BOOST_MESSAGE(s.str());
+						//1.442695
+					}
 				}
 			#endif
 		}
