@@ -187,10 +187,10 @@ namespace psy
 			unsigned long lPluginIndex;
 
 			std::vector<std::string> fileList;
-			fileList = File::fileList( ladspa_path );
+			fileList = File::fileList(ladspa_path, File::list_modes::files);
 
 			std::vector<std::string>::iterator it = fileList.begin();
-			for ( ; it < fileList.end(); it++ ) {
+			for ( ; it < fileList.end(); ++it ) {
 				std::string fileName = *it;
 				#if defined __unix__ || defined __APPLE__
 					// problem of so.0.0.x .. .so all three times todo
@@ -228,7 +228,7 @@ namespace psy
 
 		void PluginFinder::scanNatives() {
 			std::vector<std::string> fileList;
-			fileList = File::fileList( psycle_path_ );
+			fileList = File::fileList(psycle_path_, File::list_modes::files);
 
 			std::vector<std::string>::iterator it = fileList.begin();
 
