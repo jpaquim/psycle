@@ -63,8 +63,8 @@ public:
 
 protected: 
 	void paintEvent( QPaintEvent *ev );
-//	void mousePressEvent( QMouseEvent *ev );
-//	void mouseMoveEvent( QMouseEvent *ev );
+	//void mousePressEvent( QMouseEvent *ev );
+	//void mouseMoveEvent( QMouseEvent *ev );
 
 private:
 	int param_;
