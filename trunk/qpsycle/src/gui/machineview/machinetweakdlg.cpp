@@ -317,8 +317,8 @@ void MachineTweakDlg::showAboutDialog()
 	if ( pMachine_->type() == psy::core::MACH_PLUGIN )
 	{
 		QMessageBox::information( this,
-					  "About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
-					  "Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
+			"About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
+			"Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
 	}
 }
 
