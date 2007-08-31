@@ -37,9 +37,13 @@ namespace psycle
 					#if 0 // slower
 						/*
 							speed tests:
-							anechoid amd64 mingw x87  0.0265056s < 0.0724436s
-							anechoid amd64 msvc  sse2 0.0664263s < 0.1051030s
-							factoid  uml   gcc   x87  0.0644470s < 0.0999490s
+							 ______________________________________________________________________________________________
+							| host name | cpu   | compiler        | compiler target          | fast_log2 time | std time   |
+							|-----------|-------|-----------------|--------------------------|----------------|------------|
+							| anechoid  | amd64 | mingw 3.4.4     | x87 without amd64 tuning | 0.0265056s     | 0.0724436s |
+							| anechoid  | amd64 | msvc 1400 (8.0) | sse2                     | 0.0664263s     | 0.1051030s |
+							| factoid   | uml   | gcc 4.1.2       | x87                      | 0.0644470s     | 0.0999490s |
+							`----------------------------------------------------------------------------------------------'
 						*/
 						return
 							(  (result.i & 0x7f800000) >> 23 )
@@ -49,9 +53,13 @@ namespace psycle
 					#else // faster
 						/*
 							speed tests:
-							anechoid amd64 mingw x87  0.0156093s < 0.0710476s
-							anechoid amd64 msvc  sse2 0.0529316s < 0.1039730s
-							factoid  uml   gcc   x87  0.0199000s < 0.0966760s
+							 ______________________________________________________________________________________________
+							| host name | cpu   | compiler        | compiler target          | fast_log2 time | std time   |
+							|-----------|-------|-----------------|--------------------------|----------------|------------|
+							| anechoid  | amd64 | mingw 3.4.4     | x87 without amd64 tuning | 0.0156093s     | 0.0710476s |
+							| anechoid  | amd64 | msvc 1400 (8.0) | sse2                     | 0.0529316s     | 0.1039730s |
+							| factoid   | uml   | gcc 4.1.2       | x87                      | 0.0199000s     | 0.0966760s |
+							`----------------------------------------------------------------------------------------------'
 						*/
 						int const log_2 = ((result.i >> 23) & 255) - 128;
 						result.i &= ~(255 << 23);
