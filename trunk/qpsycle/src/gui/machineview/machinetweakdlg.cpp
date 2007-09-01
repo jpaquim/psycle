@@ -443,7 +443,7 @@ QSize KnobGroup::sizeHint() const
 Knob::Knob( int param ) 
 	: m_paramIndex( param )
 	, m_bMousePressed(false)
-	, m_knobMode(PsycleLinearMode)
+	, m_knobMode(FixedLinearMode)
 {
 	setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
 }
@@ -484,6 +484,7 @@ void Knob::mousePressEvent( QMouseEvent *ev )
 		m_bMousePressed = true;
 		m_posMousePressed = ev->pos();
 		m_lastDragValue = value();
+		setCursor( Qt::BlankCursor );
 		emit sliderPressed();
 	}
 }
@@ -532,6 +533,11 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 		
 		newValue = nv+0.5f; // +0.5f to round correctly, not like "floor".
 	} break;
+	case FixedLinearMode:
+	{
+		newValue = value() - ydelta;
+		cursor().setPos( mapToGlobal( m_posMousePressed ) );
+	} break;
 	case QSynthLinearMode: // <nmather> probably remove this, it isn't very good.
 	{
 		newValue = m_lastDragValue + xdelta - ydelta;
@@ -561,6 +567,7 @@ void Knob::mouseReleaseEvent( QMouseEvent *ev )
 		QDial::mouseReleaseEvent(ev);
 	} else if (m_bMousePressed) {
 		m_bMousePressed = false;
+		setCursor( Qt::ArrowCursor );
 	}
 }
 
