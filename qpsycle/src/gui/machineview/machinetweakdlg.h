@@ -66,7 +66,7 @@ class Knob : public QDial {
 public:
 	Knob( int param );
 	QSize sizeHint() const;
-	int param() { return param_; }
+	int param() { return m_paramIndex; }
 
 	enum KnobMode
 	{
@@ -85,7 +85,7 @@ protected:
 	double mouseAngle(const QPoint& pos);
 
 private:
-	int param_;
+	int m_paramIndex;
 	QPoint cursorTriggerPoint_;
 
 // Knob dial mode behavior.
@@ -93,7 +93,7 @@ private:
 
 // Alternate mouse behavior tracking.
 	bool   m_bMousePressed;
-	QPoint m_posMouse;
+	QPoint m_posMousePressed;
 
 // Just for more precission on the movement
 	double m_lastDragValue;
