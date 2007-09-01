@@ -36,6 +36,17 @@ namespace universalis
 		{
 			#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 				// we do nothing when the operating system is not microsoft's
+			#elif \
+				DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR < 5 || \
+				( \
+					DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR == 5 && \
+					DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR == 0 && \
+					DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH == 0 \
+				)
+				// Dizzy reported that on msdos/pre-nt systems the following code fails (no GetConsoleWindow in kernel32.dll)
+				// Problem is it's currently unkown whether it fails
+				// when dynamically linking at startup or only when we execute the code below.
+				// so, to be sure, we don't even compile it.
 			#else
 				// ok, the following code looks completly weird,
 				// but that's actually the "simplest" way one can allocate a "console" in a gui application the microsoft way.
