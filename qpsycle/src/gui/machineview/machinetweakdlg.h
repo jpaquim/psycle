@@ -73,7 +73,8 @@ public:
 		QDialMode, ///< Old QDial behaviour
 		QSynthAngularMode, ///< Knob moves angularly as the mouse around the widget center
 		QSynthLinearMode, ///< Knob moves proportonally to drag distance in one ortogonal axis
-		PsycleLinearMode
+		PsycleLinearMode,
+		FixedLinearMode
 	};
 
 protected: 
