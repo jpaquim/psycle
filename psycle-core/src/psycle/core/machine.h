@@ -488,7 +488,16 @@ namespace psy
 			// Properties
 
 			public:
-				virtual void SetSampleRate(int /*hertz*/) { /* \todo should this be a pure virtual function? */ };
+				virtual void SetSampleRate(int /*hertz*/)
+				{
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+					rms.count=0;
+					rms.AccumLeft=0.;
+					rms.AccumRight=0.;
+					rms.previousLeft=0.;
+					rms.previousRight=0.;
+#endif
+				};
 
 				///\todo 3 dimensional?
 				virtual void SetPan(int newpan);
@@ -576,17 +585,6 @@ namespace psy
 				public:///\todo private:
 					bool _mute;
 			///\}
-		protected:
-			virtual void SetSampleRate(int sr)
-			{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
-				rms.count=0;
-				rms.AccumLeft=0.;
-				rms.AccumRight=0.;
-				rms.previousLeft=0.;
-				rms.previousRight=0.;
-#endif
-			}
 		protected:
 			void UpdateVuAndStanbyFlag(int numSamples);
 
