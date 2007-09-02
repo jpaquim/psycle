@@ -1,4 +1,4 @@
-///\file \brief A COPY of the revision 5704 of the psycle plugin interface.
+///\file \brief A COPY of the revision 5706 of the psycle plugin interface.
 ///\see http://psycle.svn.sourceforge.net/viewvc/psycle/trunk/psycle-plugins/src/psycle/plugins/plugin_interface.hpp
 ///\todo To keep this file up-to-date, use a svn:externals property to https://psycle.svn.sourceforge.net/svnroot/psycle/trunk/psycle-plugins/src/psycle/plugins
 
@@ -203,17 +203,17 @@ namespace psycle
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					psycle::plugin_interface::CMachineInfo const * const \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO##() { return &info; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO() { return &info; } \
 					\
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					psycle::plugin_interface::CMachineInterface * \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE##() { return new typename; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE() { return new typename; } \
 					\
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					void \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE##(::CMachineInterface & plugin) { delete &plugin; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE(::CMachineInterface & plugin) { delete &plugin; } \
 				}
 
 			#define PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO GetInfo
