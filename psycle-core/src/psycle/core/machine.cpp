@@ -251,7 +251,7 @@ namespace psy { namespace core {
 		//work_cpu_cost(0);
 		//wire_cpu_cost(0);
 		_mute = false;
-		_stopped = false;
+		Standby(false);
 		_bypass = false;
 		_waitingForSound = false;
 		// Centering volume and panning
@@ -538,8 +538,8 @@ namespace psy { namespace core {
 						}
 						*/
 					}
-					if(!pInMachine->_stopped) _stopped = false;
-					if(!_mute && !_stopped)
+					if(!pInMachine->Standby()) Standby(false);
+					if(!_mute && !Standby())
 					{
 						//PSYCLE__CPU_COST__INIT(wcost);
 						dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
@@ -580,7 +580,7 @@ namespace psy { namespace core {
 							pInMachine->Work( numSamples );
 						}
 					}
-					if(!pInMachine->_stopped) _stopped = false;
+					if(!pInMachine->Standby()) Standby(false);
 				}
 			}
 		}
