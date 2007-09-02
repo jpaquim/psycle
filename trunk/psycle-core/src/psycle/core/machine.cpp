@@ -604,7 +604,7 @@ namespace psy { namespace core {
 #if defined PSYCLE__CONFIGURATION__RMS_VUS
 			_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > 0)
@@ -629,7 +629,7 @@ namespace psy { namespace core {
 #else
 			_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
