@@ -182,7 +182,7 @@ void CSynthTrack::NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity){
 	vpar=voicePar;
 	nextNote=note;
 	nextSpd=spd;
-	nextVol=velocity;
+	nextVol=velocity+0.00000001f;
 	ampEnvSustainLevel=(float)vpar->ampS*0.0039062f;
 	if(ampEnvStage==0){
 		RealNoteOn(); // THIS LINE DIFFERS FROM RETRIG()
@@ -1915,10 +1915,6 @@ void CSynthTrack::PerformFx()
 					updateTuning();
 				}
 			break;
-			/* 0xCC Volume */
-			case 0xCC:
-				masterVolume=(float)sp_val*volMulti;
-			break;
 		}
 	}
 }
@@ -1953,5 +1949,5 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	if (cmd == 0xC6) { arpLen=1; arpCount=-1; }
 	// Touchtaping with Retrig
 	if (cmd == 0xC7) { Retrig(); arpLen=1; arpCount=-1; }
-	if (cmd == 0xCC ||cmd == 0x0C) voiceVol=(float)val/255.0f;
+	if (cmd == 0xCC ||cmd == 0x0C) voiceVol=(float)val/255.0f+0.00000001f;
 }
