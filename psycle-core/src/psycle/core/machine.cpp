@@ -7,6 +7,7 @@
 //#include "analyzer.h"
 #include "song.h"
 #include "dsp.h"
+#include "helpers/math/rounded.hpp"
 
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
@@ -601,7 +602,7 @@ namespace psy { namespace core {
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
 #if defined PSYCLE__CONFIGURATION__RMS_VUS
-			_volumeCounter = core::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
+			_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
@@ -612,7 +613,7 @@ namespace psy { namespace core {
 			}
 			else if (_volumeDisplay>1 ) _volumeDisplay -=2;
 
-			if ( Global::pConfig->autoStopMachines )
+			if ( callbacks->autoStopMachines() )
 			{
 				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples)	{
 					rms.count=0;
@@ -633,7 +634,7 @@ namespace psy { namespace core {
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
 			if (_volumeDisplay>0 )--_volumeDisplay;
-			if ( Global::pConfig->autoStopMachines )
+			if ( callbacks->autoStopMachines() )
 			{
 				if (_volumeCounter < 8.0f)	{
 					_volumeCounter = 0.0f;
