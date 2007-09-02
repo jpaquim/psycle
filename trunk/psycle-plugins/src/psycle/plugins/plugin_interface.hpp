@@ -38,7 +38,7 @@ namespace psycle
 		///\}
 
 		/// the pi constant.
-		/// note: this is also defined in <psycle/helpers/math.pi.hpp> but we want no dependency here
+		/// note: this is also defined in <psycle/helpers/math/pi.hpp> but we want no dependency here
 		double const pi = 
 			#if defined M_PI // on some systems, #include <cmath> defines M_PI but this is not standard
 				M_PI
