@@ -7,7 +7,7 @@
 //#include "analyzer.h"
 #include "song.h"
 #include "dsp.h"
-#include "helpers/math/rounded.hpp"
+#include "helpers/math/round.hpp"
 
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
