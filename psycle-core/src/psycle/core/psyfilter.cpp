@@ -20,7 +20,7 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "psyfilter.h"
-
+#include "psy2filter.h"
 #include "psy3filter.h"
 #include "song.h"
 
@@ -39,7 +39,7 @@ namespace psy
 
 		PsyFilters::PsyFilters()
 		{
-			// borken: filters.push_back( Psy2Filter::Instance() );
+			filters.push_back( Psy2Filter::Instance() );
 			filters.push_back( Psy3Filter::Instance() );
 			//filters.push_back( Psy4Filter::Instance() );
 		}

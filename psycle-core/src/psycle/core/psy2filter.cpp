@@ -17,15 +17,16 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include <psycle/core/psycleCorePch.hpp>
+
 #include "psy2filter.h"
+
+#include "commands.h"
 #include "fileio.h"
-#include "machine.h"
 #include "internal_machines.h"
 #include "sampler.h"
 #include "plugin.h"
 #include "song.h"
-#include <algorithm>
-#include <cctype>
 
 #include "convert_internal_machines.private.hpp"
 
@@ -99,7 +100,9 @@ namespace psy
 			PreLoadVSTs(&file,song);
 			convert_internal_machines::Converter converter(plugin_path);
 			LoadMACD(plugin_path, &file,song,&converter,callbacks);
+			std::cout << "tyding up" <<std::endl;
 			TidyUp(&file,song,&converter);
+			std::cout << "returning" << std::endl;
 			return true;
 		}
 
@@ -565,7 +568,7 @@ namespace psy
 			if ( file->Read(busEffect) == false )
 			{
 				int j=0;
-				for ( i=0;i<128;i++ ) 
+				for ( i=1;i<128;i++ ) // Machine 0 is the master machine.
 				{
 					if (_machineActive[i] && pMac[i]->mode() != MACHMODE_GENERATOR )
 					{
@@ -573,7 +576,7 @@ namespace psy
 						j++;
 					}
 				}
-				for (j; j < 64; j++)
+				for (; j < 64; j++)
 				{
 					busEffect[j] = 255;
 				}
@@ -595,7 +598,6 @@ namespace psy
 			// Patch 1.2: Fixes inconsistence when deleting a machine which couldn't be loaded
 			// (.dll not found, or Load failed), which is replaced then by a DUMMY machine.
 			// At the same time, we validate the indexes of the busMachine and busEffects arrays.
-			int j=0;
 			for ( i=0;i<64;i++ ) 
 			{
 				if (busEffect[i] != 255)
@@ -604,7 +606,7 @@ namespace psy
 						busEffect[i] = 255;
 					// Else if the machine is a generator, move it to gens bus.
 					// This can't happen, but it is here for completeness
-					else if (pMac[busMachine[i]]->mode() == MACHMODE_GENERATOR)
+					else if (pMac[busEffect[i]]->mode() == MACHMODE_GENERATOR)
 					{
 						int k=0;
 						while (busEffect[k] != 255 && k<MAX_BUSES) 
@@ -620,13 +622,13 @@ namespace psy
 					if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
 						busMachine[i] = 255;
 					 // If there's a dummy, force it to be a Generator
-					else if (pMac[busMachine[i]]->subclass() == MACH_DUMMY ) 
+					else if (pMac[busMachine[i]]->type() == MACH_DUMMY ) 
 					{
 						pMac[busMachine[i]]->mode(MACHMODE_GENERATOR);
 					}
 					// Else if the machine is an fx, move it to FXs bus.
 					// This can't happen, but it is here for completeness
-					else if ( pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)
+					else if ( pMac[busMachine[i]]->mode() != MACHMODE_GENERATOR)
 					{
 						int j=0;
 						while (busEffect[j] != 255 && j<MAX_BUSES) 
@@ -761,7 +763,7 @@ namespace psy
 				}
 			}
 
-			// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
+			// Psycle no longer uses busMachine and busEffect, since the song.machine_ Array directly maps
 			// to the real machine.
 			// Due to this, we have to move machines to where they really are, 
 			// and remap the inputs and outputs indexes again... ouch
@@ -779,12 +781,11 @@ namespace psy
 			{
 				if (invmach[i] != 255)
 				{
-					;
-					Machine *cMac = _pMachine[invmach[i]] = pMac[i];
-					cMac->_macIndex = invmach[i];
+					song.machine(invmach[i], pMac[i]);
+					Machine *cMac = song.machine(invmach[i]);
 					_machineActive[i] = false; // mark as "converted"
-					cMac->_numInputs = 0;
-					cMac->_numOutputs = 0;
+					cMac->_connectedInputs = 0;
+					cMac->_connectedOutputs = 0;
 					for (int c=0; c<MAX_CONNECTIONS; c++)
 					{
 						if (cMac->_inputCon[c])
@@ -802,7 +803,7 @@ namespace psy
 							else
 							{
 								cMac->_inputMachines[c] = invmach[cMac->_inputMachines[c]];
-								cMac->_numInputs++;
+								cMac->_connectedInputs++;
 							}
 						}
 						if (cMac->_connection[c])
@@ -820,13 +821,13 @@ namespace psy
 							else 
 							{
 								cMac->_outputMachines[c] = invmach[cMac->_outputMachines[c]];
-								cMac->_numOutputs++;
+								cMac->_connectedOutputs++;
 							}
 						}
 					}
 				}
 			}
-			// verify that there isn't any machine that hasn't been copied into _pMachine
+			// verify that there isn't any machine that hasn't been copied into song.machine_
 			// Shouldn't happen. It would mean a damaged file.
 			int j=0;
 			int k=64;
@@ -834,21 +835,21 @@ namespace psy
 			{
 				if (_machineActive[i])
 				{
-					if ( pMac[i]->_mode == MACHMODE_GENERATOR)
+					if ( pMac[i]->mode() == MACHMODE_GENERATOR)
 					{
-						while (_pMachine[j] && j<64) j++;
-						_pMachine[j]=pMac[i];
+						while (song.machine(j) && j<64) j++;
+						song.machine(j,pMac[i]);
 					}
 					else
 					{
-						while (_pMachine[k] && k<128) k++;
-						_pMachine[k]=pMac[i];
+						while (song.machine(k) && k<128) k++;
+						song.machine(k,pMac[i]);
 					}
 				}
 			}
 		
 			// Reparse any pattern for converted machines.
-			if(fullopen) converter->retweak(song);
+			converter->retweak(song);
 			//for (i =0; i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 			song.seqBus=0;
 			return true;

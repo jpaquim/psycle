@@ -452,10 +452,8 @@ namespace psy
 					static Machine * LoadFileChunk(std::string const & plugin_path, CoreSong* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
 					virtual void SaveFileChunk(RiffFile * pFile) const;
 					virtual void SaveSpecificChunk(RiffFile * pFile) const;
-					#if 0
-						/// Loader for psycle fileformat version 2.
-						virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
-					#endif
+					/// Loader for psycle fileformat version 2.
+					virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
 				protected:
 					// already friend class CoreSong;
 			///\}
