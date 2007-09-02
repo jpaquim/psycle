@@ -67,6 +67,7 @@ namespace psy
 			//PSYCLE__CPU_COST__INIT(cost);
 			if (!_mute)
 			{
+				Standby(false);
 				for (int voice=0; voice<_numVoices; voice++)
 				{
 					// A correct implementation needs to take numsamples into account.
@@ -171,18 +172,9 @@ namespace psy
 						}
 					}
 				}
-				Machine::SetVolumeCounter(numSamples);
-				if ( callbacks->autoStopMachines() )
-				{
-					if (_volumeCounter < 8.0f) {
-						_volumeCounter = 0.0f;
-						_volumeDisplay = 0;
-						_stopped = true;
-					}
-					else _stopped=false;
-				}
+				UpdateVuAndStanbyFlag(numSamples);
 			}
-			else _stopped = true;
+			else Standby(true);
 
 			//PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 			//work_cpu_cost(work_cpu_cost() + cost);
@@ -330,7 +322,7 @@ namespace psy
 					//
 					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
 					{
-						pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart;
+						pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart + (pVoice->_wave._pos.HighPart - pVoice->_wave._loopEnd);
 					}
 					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
 					{
@@ -359,7 +351,7 @@ namespace psy
 		void Sampler::Tick( int channel, const PatternEvent & pData )
 		{
 		std::cout << pData.note() << std::endl;
-			if ( pData.note() > 120 ) // don't process twk , twf of Mcm Commands
+			if ( pData.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
 			{
 				if ( pData.command() == 0 || pData.note() != 255) return; // Return in everything but commands!
 			}
@@ -385,7 +377,7 @@ namespace psy
 			}
 
 
-			if ( data.note() < 120 ) // Handle Note On.
+			if ( data.note() < psy::core::commands::release ) // Handle Note On.
 			{
 				if ( song()->_pInstrument[data.instrument()]->waveLength == 0 ) return; // if no wave, return.
 
@@ -442,7 +434,7 @@ namespace psy
 						// Think on a slow fadeout and changing panning
 						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 					{
-						if ( data.note() == 120 ) NoteOff( voice );//  Handle Note Off
+						if ( data.note() == psy::core::commands::release ) NoteOff( voice );//  Handle Note Off
 						useVoice=voice;
 					}
 				}
@@ -496,7 +488,7 @@ namespace psy
 
 			int twlength = song()->_pInstrument[pEntry.instrument()]->waveLength;
 			
-			if (pEntry.note() < 120 && twlength > 0)
+			if (pEntry.note() < psy::core::commands::release && twlength > 0)
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry.instrument();

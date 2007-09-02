@@ -4,6 +4,13 @@
 
 #include "helpers.h"
 #include "cstdint.h"
+#include "math/erase_all_nans_infinities_and_denormals.hpp"
+#include "math/truncate.hpp"
+#include "math/round.hpp"
+#include <universalis/compiler.hpp>
+#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
+	#include <xmmintrin.h>
+#endif
 #include <cmath>
 
 namespace psy
@@ -12,58 +19,219 @@ namespace psy
 	{
 		namespace dsp
 		{
-#if PSYCLE__CONFIGURATION__RMS_VUS
-			extern int numRMSSamples;
-			extern int countRMSSamples;
-			extern double RMSAccumulatedLeft;
-			extern double RMSAccumulatedRight;
-			extern float previousRMSLeft;
-			extern float previousRMSRight;
-#endif
+	///\todo doc
+	/// amplitude normalized to 1.0f.
+	float inline UNIVERSALIS__COMPILER__CONST
+	dB(float amplitude)
+	{
+		return 20.0f * std::log10(amplitude);
+	}
 
-		/// various signal processing utility functions.
-		/// mixes two signals.
+	///\todo doc
+	float inline UNIVERSALIS__COMPILER__CONST
+	dB2Amp(float db)
+	{
+		return std::pow(10.0f, db / 20.0f);
+	}
+
+	/// undenormalize (renormalize) samples in a signal buffer.
+	///\todo make a template version that accept both float and doubles
+	inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
+	{
+		math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
+		math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
+	}
+
+	/// Funky denormal check \todo make it a function
+	#define IS_DENORMAL(f) (!((*(unsigned int *)&f)&0x7f800000))
+			
+	/****************************************************************************/
+
+	/// mixes two signals. memory should be aligned by 16 in optimized paths.
 		static inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 		{
-			--pSrcSamples;
-			--pDstSamples;
+		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			__m128 volps = _mm_set_ps1(vol);
+			__m128 *psrc = (__m128*)pSrcSamples;
+			__m128 *pdst = (__m128*)pDstSamples;
 			do
 			{
-				*++pDstSamples += *++pSrcSamples * vol;
+				__m128 tmpps = _mm_mul_ps(*psrc,volps);
+				*pdst = _mm_add_ps(*pdst,tmpps);
+				psrc++;
+				pdst++;
+				numSamples-=4;
+			} while(numSamples>0);
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+			__asm
+			{
+					movss xmm2, vol
+					shufps xmm2, xmm2, 0H
+					mov esi, pSrcSamples
+					mov edi, pDstSamples
+					mov eax, [numSamples]
+				LOOPSTART:
+					cmp eax, 0
+					jle END
+					movaps xmm0, [esi]
+					movaps xmm1, [edi]
+					mulps xmm0, xmm2
+					addps xmm0, xmm1
+					movaps [edi], xmm0
+					add esi, 10H
+					add edi, 10H
+					sub eax, 4
+					jmp LOOPSTART
+				END:
 			}
-			while (--numSamples);
+		#else
+			--pSrcSamples; --pDstSamples;
+			do { *++pDstSamples += *++pSrcSamples * vol; } while(--numSamples);
+		#endif
 		}
+
 		/// multiply a signal by a ratio, inplace.
 		///\see MovMul()
-		static inline void Mul(float *pDstSamples, int numSamples, float mul)
+		static inline void Mul(float *pDstSamples, int numSamples, float multi)
 		{
-			--pDstSamples;
+		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			__m128 volps = _mm_set_ps1(multi);
+			__m128 *pdst = (__m128*)pDstSamples;
 			do
 			{
-				*++pDstSamples *= mul;
+				*pdst = _mm_mul_ps(*pdst,volps);
+				pdst++;
+				numSamples-=4;
+			} while(numSamples>0);
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			__asm
+			{
+					movss xmm2, multi
+					shufps xmm2, xmm2, 0H
+					mov edi, pDstSamples
+					mov eax, [numSamples]
+				LOOPSTART:
+					cmp eax, 0
+					jle END
+					movaps xmm0, [edi]
+					mulps xmm0, xmm2
+					movaps [edi], xmm0
+					add edi, 10H
+					sub eax, 4
+					jmp LOOPSTART
+				END:
 			}
-			while (--numSamples);
+		#else
+			--pDstSamples;
+			do { *++pDstSamples *= multi; } while (--numSamples);
+		#endif
 		}
 		/// multiply a signal by a ratio.
 		///\see Mul()
-		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float mul)
+		static inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 		{
-			--pSrcSamples;
-			--pDstSamples;
+		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			__m128 volps = _mm_set_ps1(multi);
+			__m128 *psrc = (__m128*)pSrcSamples;
 			do
 			{
-				*++pDstSamples = *++pSrcSamples*mul;
+				__m128 tmpps = _mm_mul_ps(*psrc,volps);
+				_mm_storeu_ps(pDstSamples,tmpps);
+				psrc++;
+				pDstSamples+=4;
+				numSamples-=4;
+			} while(numSamples>0);
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			__asm
+			{
+					movss xmm2, multi
+					shufps xmm2, xmm2, 0H
+					mov esi, pSrcSamples
+					mov edi, pDstSamples
+					mov eax, [numSamples]
+				LOOPSTART:
+					cmp eax, 0
+					jle END
+					movaps xmm0, [esi]
+					mulps xmm0, xmm2
+					movaps [edi], xmm0
+					add esi, 10H
+					add edi, 10H
+					sub eax, 4
+					jmp LOOPSTART
+				END:
 			}
-			while (--numSamples);
+		#else
+			--pSrcSamples; --pDstSamples;
+			do { *++pDstSamples = *++pSrcSamples*multi; } while (--numSamples);
+		#endif
 		}
 		static inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 		{
+		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			do
+			{
+				__m128 tmpps = _mm_load_ps(pSrcSamples);
+				_mm_storeu_ps(pDstSamples,tmpps);
+				pSrcSamples+=4;
+				pDstSamples+=4;
+				numSamples-=4;
+			} while(numSamples>0);
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			__asm
+			{
+					mov esi, pSrcSamples
+					mov edi, pDstSamples
+					mov eax, [numSamples]
+				LOOPSTART:
+					cmp eax, 0
+					jle END
+					movaps xmm0, [esi]
+					movaps [edi], xmm0
+					add esi, 10H
+					add edi, 10H
+					sub eax, 4
+					jmp LOOPSTART
+				END:
+			}
+		#else
 			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
+		#endif
 		}
+
 		/// zero-out a signal buffer.
 		static inline void Clear(float *pDstSamples, int numSamples)
 		{
+		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			__m128 zeroval = _mm_set_ps1(0.0f);
+			do
+			{
+				_mm_store_ps(pDstSamples,zeroval);
+				pDstSamples+=4;
+				numSamples-=4;
+			}while(numSamples>0);
+		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+			// This code assumes aligned memory (to 16) and assigned by powers of 4!
+			__asm
+			{
+					xorps xmm0, xmm0
+					mov edi, pDstSamples
+					mov eax, [numSamples]
+				LOOPSTART:
+					cmp eax, 0
+					jle END
+					movaps [edi], xmm0
+					add edi, 10H
+					sub eax, 4
+					jmp LOOPSTART
+				END:
+			}
+		#else
 			std::memset(pDstSamples, 0, numSamples * sizeof(float));
+		#endif
 		}
 		/// converts a double to an int.
 		static inline int F2I(double d)
@@ -78,40 +246,107 @@ namespace psy
 			return tmp.i;
 		}
 
-		/// finds the maximum amplitude in a signal buffer.
-		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+		extern int numRMSSamples;
+		struct RMSData {
+			int count;
+			double AccumLeft, AccumRight;
+			float previousLeft, previousRight;
+		};
+
+	/// finds the RMS volume value in a signal buffer.
+	/// Note: Values are buffered since the standard calculation requires 50ms or data.
+	inline float GetRMSVol(RMSData &rms,float *pSamplesL, float *pSamplesR, int numSamples)
 		{
-#if PSYCLE__CONFIGURATION__RMS_VUS
-			// This is just a test to get RMS dB values.
-			// Doesn't look that better, and uses more CPU. 
 			float *pL = pSamplesL;
 			float *pR = pSamplesR;
 			int ns = numSamples;
-			int count =(numRMSSamples- countRMSSamples);
-			--pL;
-			--pR;
+		int count(numRMSSamples - rms.count);
+		--pL; --pR;
 			if ( ns >= count)
 			{
 				ns -= count;
+			{
+				double acleft(rms.AccumLeft),acright(rms.AccumRight);
 				while (count--) {
-					RMSAccumulatedLeft +=  *(++pL)**(pL);
-					RMSAccumulatedRight +=  *(++pR)**(pR);
+					++pL; acleft  += *pL * *pL;
+					++pR; acright += *pR * *pR;
 				};
-				previousRMSLeft =  sqrt(dsp::RMSAccumulatedLeft/dsp::numRMSSamples);
-				previousRMSRight =  sqrt(dsp::RMSAccumulatedRight/dsp::numRMSSamples);
-				RMSAccumulatedLeft = 0;
-				RMSAccumulatedRight = 0;
-				countRMSSamples = 0;
+				rms.AccumLeft = acleft;
+				rms.AccumRight = acright;
 			}
+			rms.previousLeft  = std::sqrt(rms.AccumLeft  / dsp::numRMSSamples);
+			rms.previousRight = std::sqrt(rms.AccumRight / dsp::numRMSSamples);
+			rms.AccumLeft = 0;
+			rms.AccumRight = 0;
+			rms.count = 0;
+			}
+		{
+			double acleft(rms.AccumLeft), acright(rms.AccumRight);
 			while(ns--) {
-				RMSAccumulatedLeft +=  *(++pL)**(pL);
-				RMSAccumulatedRight +=  *(++pR)**(pR);
-				countRMSSamples++;
+				++pL; acleft  += *pL * *pL;
+				++pR; acright += *pR * *pR;
+				++rms.count;
 			};
-			return previousRMSLeft>previousRMSRight?previousRMSLeft:previousRMSRight;
+			rms.AccumLeft  = acleft;
+			rms.AccumRight = acright;
+		}
+		return rms.previousLeft > rms.previousRight ? rms.previousLeft : rms.previousRight;
+	}
 
-#else
-			// This is the usual code, peak value
+/// finds the maximum amplitude in a signal buffer.
+		static inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+{
+		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+			// If anyone knows better assembler than me improve this variable utilization:
+			float volmax = 0.0f, volmin = 0.0f;
+			float *volmaxb = &volmax, *volminb = &volmin;
+			__asm
+			{
+					// we store the max in xmm0 and the min in xmm1
+					xorps xmm0, xmm0
+					xorps xmm1, xmm1
+					mov esi, [pSamplesL]
+					mov edi, [pSamplesR]
+					mov eax, [numSamples]
+					// Loop does: get the 4 max values and 4 min values in xmm0 and xmm1 respct.
+				LOOPSTART:
+					cmp eax, 0
+					jle END
+					maxps xmm0,[esi]
+					maxps xmm0,[edi]
+					minps xmm1,[esi]
+					minps xmm1,[edi]
+					add esi, 10H
+					add edi, 10H
+					sub eax, 4
+					jmp LOOPSTART
+				END:
+					// to finish, get the max and of each of the four values.
+					// put 02 and 03 to 20 and 21
+					movhlps xmm2, xmm0
+					// find max of 00 and 20 (02) and of 01 and 21 (03)
+					maxps xmm0, xmm2
+					// put 00 (result of max(00,02)) to 20
+					movss xmm2, xmm0
+					// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
+					shufps xmm0, xmm2, 11H
+					// and find max of 00 (01) and 20 (00)
+					maxps xmm0, xmm2
+
+					movhlps xmm2, xmm1
+					minps xmm1, xmm2
+					movss xmm2, xmm1
+					shufps xmm1, xmm2, 11H
+					minps xmm1, xmm2
+
+					mov edi, volmaxb
+					movss [edi], xmm0
+					mov edi, volminb
+					movss [edi], xmm1
+			}
+			volmin*=-1.0f;
+			return (volmax>volmin)?volmax:volmin;
+		#else
 			--pSamplesL;
 			--pSamplesR;
 
@@ -135,79 +370,8 @@ namespace psy
 			return vol;
 #endif
 		}
-		#if 0
-		/// finds the maximum amplitude in a signal buffer.
-		/// It contains "VST" because initially the return type for native machines 
-		/// was int. Now, GetMaxVSTVol, and both *Acurate() functions are deprecated.
-		static inline float GetMaxVSTVol(float *pSamplesL, float *pSamplesR, int numSamples)
-		{
-			return GetMaxVol(pSamplesL,pSamplesR,numSamples);
-		}
-			static inline int GetMaxVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
-			{
-				return f2i(GetMaxVSTVolAccurate(pSamplesL,pSamplesR,numSamples));
-			}
-			static inline float GetMaxVSTVolAccurate(float *pSamplesL, float *pSamplesR, int numSamples)
-			{
-				--pSamplesL;
-				--pSamplesR;
-				float vol = 0.0f;
-				do
-				{
-					const float volL = std::fabsf(*++pSamplesL); // not all waves are symmetrical
-					const float volR = std::fabsf(*++pSamplesR);
-					if (volL > vol) vol = volL;
-					if (volR > vol) vol = volR;
-				}
-				while(--numSamples);
-				return vol;
-			}
-		#endif
 
-		/// Cure for malicious samples
-		/// Type : Filters Denormals, NaNs, Infinities
-		/// References : Posted by urs[AT]u-he[DOT]com
-		static void erase_All_NaNs_Infinities_And_Denormals( float* inSamples, int inNumberOfSamples )
-		{
-			unsigned int* inArrayOfFloats = (unsigned int*) inSamples;
-			unsigned int sample;
-			unsigned int exponent;
-			for ( int i = 0; i < inNumberOfSamples; i++ )
-			{
-				sample = *inArrayOfFloats;
-				exponent = sample & 0x7F800000;
-
-				// exponent < 0x7F800000 is 0 if NaN or Infinity, otherwise 1
-				// exponent > 0 is 0 if denormalized, otherwise 1
-
-				*inArrayOfFloats++ = sample * ((exponent < 0x7F800000) & (exponent > 0));
-			}
-		}
-
-		/// Cure for malicious samples
-		/// Type : Filters Denormals, NaNs, Infinities
-		static inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
-		{
-			#if 1
-				erase_All_NaNs_Infinities_And_Denormals(pSamplesL,numsamples);
-				erase_All_NaNs_Infinities_And_Denormals(pSamplesR,numsamples);
-			#else
-				// a 1-bit "sinus" dither
-				float id(float(1.0E-18));
-				pSamplesL[s] += id;
-				pSamplesR[s] += id;
-				id = -id;  // <magnus> This statement has no effect.
-			#endif
-		}
-
-		static inline float dB(float amplitude) // amplitude normalized to 1.0f.
-		{
-			return 20.0f * log10f(amplitude);
-		}
-		static inline float dB2Amp(float db)
-		{
-			return pow(10.0f,db/20.0f);
-		}
+	/****************************************************************************/
 
 		/// sample interpolator kinds.
 		///\todo typdef should be inside the Resampler or Cubic class itself.

@@ -72,7 +72,9 @@ static LPASIODRVSTRUCT newDrvStruct (HKEY hkey,char *keyname,int drvID,LPASIODRV
 			if (cr == ERROR_SUCCESS) {
 				rc = findDrvPath (databuf,dllpath,MAXPATHLEN);
 				if (rc == 0) {
-					lpdrv = new ASIODRVSTRUCT[1];
+					// Changed by JosepMa: Why on earth use the new[] operator instead of new?
+					// lpdrv = new ASIODRVSTRUCT[1];
+					lpdrv = new ASIODRVSTRUCT;
 					if (lpdrv) {
 						memset(lpdrv,0,sizeof(ASIODRVSTRUCT));
 						lpdrv->drvID = drvID;

@@ -34,7 +34,7 @@ namespace psy {
 		int Dummy::GenerateAudio(int numSamples)
 		{
 			//cpu::cycles_type cost(cpu::cycles());
-			Machine::SetVolumeCounter(numSamples);
+			UpdateVuAndStanbyFlag(numSamples);
 			//cost = cpu::cycles() - cost;
 			//work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
@@ -60,13 +60,23 @@ namespace psy {
 			Machine(callbacks, MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
 		{
 			SetEditName("Dupe it!");
-			_numPars = 16;
+			_numPars = NUMMACHINES*2;
 			_nCols = 2;
 			bisTicking = false;
-			for (int i=0;i<8;i++)
+			for (int i=0;i<NUMMACHINES;i++)
 			{
 				macOutput[i]=-1;
 				noteOffset[i]=0;
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					allocatedchans[j][i] = -1;
+			}
+			for (int i=0;i<MAX_MACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					availablechans[i][j] = true;
+				}
 			}
 		}
 		
@@ -77,13 +87,46 @@ namespace psy {
 		void DuplicatorMac::Init()
 		{
 			Machine::Init();
-			for (int i=0;i<8;i++)
+			for (int i=0;i<NUMMACHINES;i++)
 			{
 				macOutput[i]=-1;
 				noteOffset[i]=0;
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					allocatedchans[j][i] = -1;
+				}
+			}
+			for (int i=0;i<MAX_MACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					availablechans[i][j] = true;
+				}
+			}	
+		}
+		
+		void DuplicatorMac::Stop()
+		{
+			for (int i=0;i<NUMMACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					allocatedchans[j][i] = -1;
+				}
+			}
+			for (int i=0;i<MAX_MACHINES;i++)
+			{
+				for (int j=0;j<MAX_TRACKS;j++)
+				{
+					availablechans[i][j] = true;
+				}
 			}
 		}
 		
+		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
+		{
+			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
+		}
 		void DuplicatorMac::PreWork(int numSamples)
 		{
 			Machine::PreWork(numSamples);
@@ -93,75 +136,91 @@ namespace psy {
 				if ( !_mute && !bisTicking)
 				{
 					bisTicking=true;
-					for (int i=0;i<8;i++)
+					for (int i=0;i<NUMMACHINES;i++)
 					{
-						
-						PatternEvent temp = workEvent.event();
-						if ( temp.note() < 120 )
+						if (macOutput[i] != -1 && song()->machine(macOutput[i]) != NULL )
 						{
-							temp.setNote(temp.note() +noteOffset[i]);
+							AllocateVoice(channel,i);
+							PatternEvent temp = workEvent.event();
+							if ( temp.note() < psy::core::commands::release )
+							{
+								int note = temp.note()+noteOffset[i];
+								if ( note>=psy::core::commands::release) note=119;
+								else if (note<0 ) note=0;
+								temp.setNote(static_cast<std::uint8_t>(note));
+							}
+							if (song()->machine(macOutput[i]) != this)
+							{
+								song()->machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
+								if (temp.note() >= psy::core::commands::release )
+								{
+									DeallocateVoice(channel,i);
+								}
+							}
 						}
-						if (macOutput[i] != -1 && song()->machine(macOutput[i]) != NULL 
-							&& song()->machine(macOutput[i]) != this) song()->machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
 					}
 				}
 				bisTicking=false;
 			}
 		}
-		
-		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
+		void DuplicatorMac::AllocateVoice(int channel,int machine)
 		{
-			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-			#if 0
-			if ( !_mute && !bisTicking)
+			// If this channel already has allocated channels, use them.
+			if ( allocatedchans[channel][machine] != -1 )
+				return;
+			// If not, search an available channel
+			int j=channel;
+			while (j<MAX_TRACKS && !availablechans[macOutput[machine]][j]) j++;
+			if ( j == MAX_TRACKS)
 			{
-				bisTicking=true;
-				for (int i=0;i<8;i++)
+				j=0;
+				while (j<MAX_TRACKS && !availablechans[macOutput[machine]][j]) j++;
+				if (j == MAX_TRACKS)
 				{
-					PatternEntry pTemp = *pData;
-					if ( pTemp._note < 120 )
-					{
-						pTemp._note+=noteOffset[i];
-					}
-					if (macOutput[i] != -1 && song()->machine(macOutput[i]) != NULL 
-						&& song()->machine(macOutput[i]) != this) song()->machine(macOutput[i])->Tick(channel,&pTemp);
+					j = (unsigned int) (  (double)rand() * MAX_TRACKS /(((double)RAND_MAX) + 1.0 ));
 				}
 			}
-			bisTicking=false;
-			#endif
+			allocatedchans[channel][machine]=j;
+			availablechans[macOutput[machine]][j]=false;
 		}
-
+		void DuplicatorMac::DeallocateVoice(int channel, int machine)
+		{
+			if ( allocatedchans[channel][machine] == -1 )
+				return;
+			availablechans[macOutput[machine]][allocatedchans[channel][machine]]= true;
+			allocatedchans[channel][machine]=-1;
+		}
 		void DuplicatorMac::GetParamName(int numparam,char *name) const
 		{
-			if (numparam >=0 && numparam<8)
+			if (numparam >=0 && numparam<NUMMACHINES)
 			{
 				sprintf(name,"Output Machine %d",numparam);
-			} else if (numparam >=8 && numparam<16) {
-				sprintf(name,"Note Offset %d",numparam-8);
+			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
+				sprintf(name,"Note Offset %d",numparam-NUMMACHINES);
 			}
 			else name[0] = '\0';
 		}
 
 		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval) const
 		{
-			if ( numparam < 8) { minval = -1; maxval = (MAX_BUSES*2)-1;}
-			else if ( numparam < 16) { minval = -48; maxval = 48; }
+			if ( numparam < NUMMACHINES) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if ( numparam < NUMMACHINES*2) { minval = -48; maxval = 48; }
 		}
 
 		int DuplicatorMac::GetParamValue(int numparam) const
 		{
-			if (numparam >=0 && numparam<8)
+			if (numparam >=0 && numparam<NUMMACHINES)
 			{
 				return macOutput[numparam];
-			} else if (numparam >=8 && numparam <16) {
-				return noteOffset[numparam-8];
+			} else if (numparam >=NUMMACHINES && numparam <NUMMACHINES*2) {
+				return noteOffset[numparam-NUMMACHINES];
 			}
 			else return 0;
 		}
 
 		void DuplicatorMac::GetParamValue(int numparam, char *parVal) const
 		{
-			if (numparam >=0 && numparam <8)
+			if (numparam >=0 && numparam <NUMMACHINES)
 			{
 				if ((macOutput[numparam] != -1 ) &&( song()->machine(macOutput[numparam]) != NULL))
 				{
@@ -170,21 +229,21 @@ namespace psy {
 				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
-			} else if (numparam >=8 && numparam <16) {
+			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*2) {
 				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-8]+60)%12],(noteOffset[numparam-8]+60)/12);
+				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-NUMMACHINES]+60)%12],(noteOffset[numparam-NUMMACHINES]+60)/12);
 			}
 			else parVal[0] = '\0';
 		}
 
 		bool DuplicatorMac::SetParameter(int numparam, int value)
 		{
-			if (numparam >=0 && numparam<8)
+			if (numparam >=0 && numparam<NUMMACHINES)
 			{
 				macOutput[numparam]=value;
 				return true;
-			} else if (numparam >=8 && numparam<16) {
-				noteOffset[numparam-8]=value;
+			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
+				noteOffset[numparam-NUMMACHINES]=value;
 				return true;
 			}
 			else return false;
@@ -193,7 +252,7 @@ namespace psy {
 		int DuplicatorMac::GenerateAudio( int numSamples )
 		{
 			_worked = true;
-			_stopped = false;
+			Standby(true);
 			return numSamples;
 		}
 
@@ -213,6 +272,8 @@ namespace psy {
 			pFile->Write(macOutput);
 			pFile->Write(noteOffset);
 		}
+		//////////////////////////////////////////////////////////////////////////
+		// AudioRecorder
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -76,11 +76,7 @@ namespace psycle
 
 		bool Instrument::Empty()
 		{
-			if (waveLength > 0)
-			{
-				return FALSE;
-			}
-			return TRUE;
+			return !waveLength;
 		}
 
 		void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)

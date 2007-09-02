@@ -63,15 +63,15 @@ namespace psy
 					: Scale(input_maximum, output_minimum, output_maximum)
 					{
 						ratio_ = (output_maximum - output_minimum) / input_maximum;
-						offset_ = output_minimum / ratio_;
+						offset_ = output_minimum;
 					}
 					inline virtual const Real apply(const Real & sample) const
 					{
-						return (sample + offset_) * ratio_;
+						return sample * ratio_ + offset_;
 					}
 					inline virtual const Real apply_inverse(const Real & sample) const
 					{
-						return sample / ratio_ - offset_;
+						return (sample - offset_) / ratio_;
 					}
 				private:
 					Real offset_, ratio_;
@@ -88,7 +88,7 @@ namespace psy
 					};
 					inline virtual const Real apply(const Real & sample) const
 					{
-						return static_cast<Real>(::exp((sample + offset_) * ratio_));
+						return static_cast<Real>(std::exp((sample + offset_) * ratio_));
 					}
 					inline virtual const Real apply_inverse(const Real & sample) const
 					{
