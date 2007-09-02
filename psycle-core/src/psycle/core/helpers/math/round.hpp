@@ -14,7 +14,7 @@ namespace psy { namespace common { namespace math {
 }}}
 
 // inline implementation
-namespace psycle { namespace helpers { namespace math {
+namespace psy { namespace common { namespace math {
 	
 	#if __STDC__VERSION__ >= 199901 || \
 		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
