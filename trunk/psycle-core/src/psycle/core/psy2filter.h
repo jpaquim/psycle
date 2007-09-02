@@ -110,6 +110,8 @@ namespace psy
 				unsigned char busMachine[64];
 				unsigned char busEffect[64];
 				VSTLoader vstL[256];
+				float volMatrix[128][12];
+
 
 				void preparePatternSequence(CoreSong & song);
 				PatternEvent convertEntry( unsigned char * data ) const;

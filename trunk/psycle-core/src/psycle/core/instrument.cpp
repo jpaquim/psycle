@@ -42,9 +42,9 @@ namespace psy
 	{
 		Instrument::Instrument()
 		:
-			waveDataL(),
-			waveDataR(),
-			waveLength()
+			waveDataL(0),
+			waveDataR(0),
+			waveLength(0)
 		{
 			// clear everythingout
 			Delete();
@@ -52,8 +52,9 @@ namespace psy
 
 		Instrument::~Instrument()
 		{
-			delete[] waveDataL;
-			delete[] waveDataR;
+			delete[] waveDataL; waveDataL = 0;
+			delete[] waveDataR; waveDataR = 0;
+			waveLength = 0;
 		}
 
 		void Instrument::Delete()

@@ -530,8 +530,7 @@ namespace psy
 				}
 			}
 			
-			// Extra data, Information about instruments, and machines.
-		
+			// Patch 0: Some extra data added around the 1.0 release.
 			for (i=0; i<PSY2_MAX_INSTRUMENTS; i++)
 			{
 				file->Read(song._pInstrument[i]->_loop);
@@ -541,7 +540,29 @@ namespace psy
 				file->Read(song._pInstrument[i]->_lines);
 			}
 
-			if ( file->Read(busEffect) == false ) // Patch 1: BusEffects (twf)
+			// Validate the machine arrays. At the same time we fill volMatrix that
+			// we will use later on to correctly initialize the wire volumes.
+			for (i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
+			{
+				if (!_machineActive[i])
+				{
+					delete pMac[i]; pMac[i]=0;
+				}
+				else if (!pMac[i])
+				{
+					_machineActive[i] = false;
+				}
+				else 
+				{
+					for (int c=0; c<MAX_CONNECTIONS; c++)
+					{
+						volMatrix[i][c] = pMac[i]->_inputConVol[c];
+					}
+				}
+			}
+
+			// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
+			if ( file->Read(busEffect) == false )
 			{
 				int j=0;
 				for ( i=0;i<128;i++ ) 
@@ -557,48 +578,72 @@ namespace psy
 					busEffect[j] = 255;
 				}
 			}
+			// Validate that there isn't any duplicated machine.
+			for ( int i=0;i<64;i++ ) 
+			{
+				for ( int j=i+1;j<64;j++ ) 
+				{
+					if  (busMachine[i] == busMachine[j]) busMachine[j]=255;
+					if  (busEffect[i] == busEffect[j]) busEffect[j]=255;
+				}
+				for (int j=0;j<64;j++)
+				{
+					if  (busMachine[i] == busEffect[j]) busEffect[j]=255;
+				}
+			}
+
 			// Patch 1.2: Fixes inconsistence when deleting a machine which couldn't be loaded
-			// (.dll not found, or Load failed), which is, then, replaced by a DUMMY machine.
+			// (.dll not found, or Load failed), which is replaced then by a DUMMY machine.
+			// At the same time, we validate the indexes of the busMachine and busEffects arrays.
 			int j=0;
 			for ( i=0;i<64;i++ ) 
 			{
-				if (busMachine[i] != 255 && _machineActive[busMachine[i]]) 
-				{ // If there's a machine in the generators' bus that it is not a generator:
-					if (pMac[busMachine[i]]->mode() != MACHMODE_GENERATOR ) 
+				if (busEffect[i] != 255)
+				{
+					if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
+						busEffect[i] = 255;
+					// Else if the machine is a generator, move it to gens bus.
+					// This can't happen, but it is here for completeness
+					else if (pMac[busMachine[i]]->mode() == MACHMODE_GENERATOR)
+					{
+						int k=0;
+						while (busEffect[k] != 255 && k<MAX_BUSES) 
+						{
+							k++;
+						}
+						busMachine[k]=busEffect[i];
+						busEffect[i]=255;
+					}
+				}
+				if (busMachine[i] != 255)
+				{
+					if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
+						busMachine[i] = 255;
+					 // If there's a dummy, force it to be a Generator
+					else if (pMac[busMachine[i]]->subclass() == MACH_DUMMY ) 
 					{
 						pMac[busMachine[i]]->mode(MACHMODE_GENERATOR);
-						// Older code moved the dummy to the effects bus, because it couldn't work as
-						// a generator. Now there's no problem for that, and this way we can use the
-						// Create/Replace function of the GearRack dialog.
-						#if 0
-						pMac[busMachine[i]]->mode(MACHMODE_FX);
+					}
+					// Else if the machine is an fx, move it to FXs bus.
+					// This can't happen, but it is here for completeness
+					else if ( pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)
+					{
+						int j=0;
 						while (busEffect[j] != 255 && j<MAX_BUSES) 
 						{
 							j++;
 						}
 						busEffect[j]=busMachine[i];
 						busMachine[i]=255;
-						#endif
 					}
 				}
 			}
-			for ( i=0;i<64;i++ ) 
-			{
-				if ((busMachine[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busMachine[i]]->mode() != MACHMODE_GENERATOR)) 
-				{
-					busMachine[i] = 255;
-				}
-				if ((busEffect[i] != 255) && (_machineActive[busEffect[i]]) && (pMac[busEffect[i]]->mode() != MACHMODE_FX)) 
-				{
-					busEffect[i] = 255;
-				}
-			}
-
 			#if 0
+			// Patch 2: VST's Chunk.
 			bool chunkpresent=false;
-			file->Read(chunkpresent); // Patch 2: VST's Chunk.
+			file->Read(chunkpresent);
 
-			if ( fullopen ) for ( i=0;i<128;i++ ) 
+			if ( fullopen  && chunkpresent) for ( i=0;i<128;i++ )
 			{
 				if (_machineActive[i])
 				{
@@ -650,8 +695,13 @@ namespace psy
 			
 			return true;
 		}
+
+		//Finished all the file loading. Now Process the data to the current structures
 		bool Psy2Filter::TidyUp(RiffFile*file,CoreSong&song,convert_internal_machines::Converter* converter)
 		{
+			// The old fileformat stored the volumes on each output, 
+			// so what we have in inputConVol is really the output
+			// and we have to convert it.
 			std::int32_t i;
 			// Clean "pars" array.
 			for (i=0; i<PSY2_MAX_PLUGINS; i++) 
@@ -673,281 +723,138 @@ namespace psy
 			}
 		
 		
-			// Since the old file format stored volumes on each output
-			// rather than on each input, we must convert
-			//
-			float volMatrix[128][MAX_CONNECTIONS];
-			for (i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
-			{
-				if (!_machineActive[i])
-				{
-					delete pMac[i]; pMac[i] = 0;
-				}
-				else if (!pMac[i])
-				{
-					_machineActive[i] = false;
-				}
-				else 
-				{
-					for (int c=0; c<MAX_CONNECTIONS; c++)
-					{
-						volMatrix[i][c] = pMac[i]->_inputConVol[c];
-					}
-				}
-			}
-			
-			for (i=0; i<128; i++) // Next, we go to fix this for each
+			// The old fileformat stored the volumes on each output, 
+			// so what we have in inputConVol is really the output
+			// and we have to convert it.
+			for (i=0; i<128; i++) //  we go to fix this for each
 			{
 				if (_machineActive[i]) // valid machine (important, since we have to navigate!)
 				{
 					for (int c=0; c<MAX_CONNECTIONS; c++) // all of its input connections.
 					{
-						if (pMac[i]->_inputCon[c]) // If there's a valid machine in this inputconnection,
+						if (pMac[i]->_inputCon[c] && pMac[i]->_inputMachines[c] > -1 && pMac[pMac[i]->_inputMachines[c]]) // If there's a valid machine in this inputconnection,
 						{
 							Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
-							int d = pOrigMachine->FindOutputWire(i);
-
-							float val = volMatrix[pMac[i]->_inputMachines[c]][d];
-							if( val >= 4.000001f ) 
+							int d = pOrigMachine->FindOutputWire(i);		//and wire
+							if ( d == -1 )
 							{
-								val*=0.000030517578125f; // BugFix
-							}
-							else if ( val < 0.00004f) 
-							{
-								val*=32768.0f; // BugFix
-							}
-
-							pMac[i]->InitWireVolume(pOrigMachine->type(),c,val);
-						}
-					}
-				}
-			}
-
-			// move machines around to where they really should go
-			// now we have to remap all the inputs and outputs again... ouch
-			
-
-			for (i = 0; i < 64; i++)
-			{
-				if ((busMachine[i] < MAX_MACHINES-1) && (busMachine[i] > 0))
-				{
-					if (_machineActive[busMachine[i]])
-					{
-						if (pMac[busMachine[i]]->mode() == MACHMODE_GENERATOR)
-						{
-							song.machine(i, pMac[busMachine[i]]);
-							_machineActive[busMachine[i]] = false; // don't update this twice;
-
-							for (int c=0; c<MAX_CONNECTIONS; c++)
-							{
-								if (song.machine(i)->_inputCon[c])
-								{
-									for (int x=0; x<64; x++)
-									{
-										if (song.machine(i)->_inputMachines[c] == busMachine[x])
-										{
-											song.machine(i)->_inputMachines[c] = x;
-											break;
-										}
-										else if (song.machine(i)->_inputMachines[c] == busEffect[x])
-										{
-											song.machine(i)->_inputMachines[c] = x+MAX_BUSES;
-											break;
-										}
-									}
-								}
-
-								if (song.machine(i)->_connection[c])
-								{
-									if (song.machine(i)->_outputMachines[c] == 0)
-									{
-										song.machine(i)->_outputMachines[c] = MASTER_INDEX;
-									}
-									else
-									{
-										for (int x=0; x<64; x++)
-										{
-											if (song.machine(i)->_outputMachines[c] == busMachine[x])
-											{
-												song.machine(i)->_outputMachines[c] = x;
-												break;
-											}
-											else if (song.machine(i)->_outputMachines[c] == busEffect[x])
-											{
-												song.machine(i)->_outputMachines[c] = x+MAX_BUSES;
-												break;
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				if ((busEffect[i] < MAX_MACHINES-1) && (busEffect[i] > 0))
-				{
-					if (_machineActive[busEffect[i]])
-					{
-						if (pMac[busEffect[i]]->mode() == MACHMODE_FX)
-						{
-							song.machine(i+MAX_BUSES, pMac[busEffect[i]]);
-							_machineActive[busEffect[i]] = false; // don't do this again
-
-							for (int c=0; c<MAX_CONNECTIONS; c++)
-							{
-								if (song.machine(i+MAX_BUSES)->_inputCon[c])
-								{
-									for (int x=0; x<64; x++)
-									{
-										if (song.machine(i+MAX_BUSES)->_inputMachines[c] == busMachine[x])
-										{
-											song.machine(i+MAX_BUSES)->_inputMachines[c] = x;
-											break;
-										}
-										else if (song.machine(i+MAX_BUSES)->_inputMachines[c] == busEffect[x])
-										{
-											song.machine(i+MAX_BUSES)->_inputMachines[c] = x+MAX_BUSES;
-											break;
-										}
-									}
-								}
-								if (song.machine(i+MAX_BUSES)->_connection[c])
-								{
-									if (song.machine(i+MAX_BUSES)->_outputMachines[c] == 0)
-									{
-										song.machine(i+MAX_BUSES)->_outputMachines[c] = MASTER_INDEX;
-									}
-									else
-									{
-										for (int x=0; x<64; x++)
-										{
-											if (song.machine(i+MAX_BUSES)->_outputMachines[c] == busMachine[x])
-											{
-												song.machine(i+MAX_BUSES)->_outputMachines[c] = x;
-												break;
-											}
-											else if (song.machine(i+MAX_BUSES)->_outputMachines[c] == busEffect[x])
-											{
-												song.machine(i+MAX_BUSES)->_outputMachines[c] = x+MAX_BUSES;
-												break;
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if (song.machine(MASTER_INDEX)->_inputCon[c])
-				{
-					for (int x=0; x<64; x++)
-					{
-						if (song.machine(MASTER_INDEX)->_inputMachines[c] == busMachine[x])
-						{
-							song.machine(MASTER_INDEX)->_inputMachines[c] = x;
-							break;
-						}
-						else if (song.machine(MASTER_INDEX)->_inputMachines[c] == busEffect[x])
-						{
-							song.machine(MASTER_INDEX)->_inputMachines[c] = x+MAX_BUSES;
-							break;
-						}
-					}
-				}
-			}
-		
-
-		
-			// fix machine #s
-
-			for (i = 0; i < MAX_MACHINES-1; i++)
-			{
-				if (song.machine(i))
-				{
-					song.machine(i)->id(i);
-					for (int j = i+1; j < MAX_MACHINES-1; j++)
-					{
-						if (song.machine(i) == song.machine(j))
-						{
-							assert(false);
-							// we have duplicate machines...
-							// this should NEVER happen
-							// delete the second one :(
-							song.machine(j, NULL);
-							// and we should remap anything that had wires to it to the first one
-						}
-					}
-				}
-			}
-			
-		
-			// test all connections for invalid machines. disconnect invalid machines.
-			for (i = 0; i < MAX_MACHINES; i++)
-			{
-				if (song.machine(i))
-				{
-					song.machine(i)->_connectedInputs = 0;
-					song.machine(i)->_connectedOutputs = 0;
-
-					for (int c = 0; c < MAX_CONNECTIONS; c++)
-					{
-						if (song.machine(i)->_connection[c])
-						{
-							if (song.machine(i)->_outputMachines[c] < 0 || song.machine(i)->_outputMachines[c] >= MAX_MACHINES)
-							{
-								song.machine(i)->_connection[c]=false;
-								song.machine(i)->_outputMachines[c]=-1;
-							}
-							else if (!song.machine(song.machine(i)->_outputMachines[c]))
-							{
-								song.machine(i)->_connection[c]=false;
-								song.machine(i)->_outputMachines[c]=-1;
-							}
-							else 
-							{
-								song.machine(i)->_connectedOutputs++;
-							}
-						}
-						else
-						{
-							song.machine(i)->_outputMachines[c]=255;
-						}
-
-						if (song.machine(i)->_inputCon[c])
-						{
-							if (song.machine(i)->_inputMachines[c] < 0 || song.machine(i)->_inputMachines[c] >= MAX_MACHINES-1)
-							{
-								song.machine(i)->_inputCon[c]=false;
-								song.machine(i)->_inputMachines[c]=-1;
-							}
-							else if (!song.machine(song.machine(i)->_inputMachines[c]))
-							{
-								song.machine(i)->_inputCon[c]=false;
-								song.machine(i)->_inputMachines[c]=-1;
+								 pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; 
 							}
 							else
 							{
-								song.machine(i)->_connectedInputs++;
+
+								float val = volMatrix[pMac[i]->_inputMachines[c]][d];
+								if( val > 4.1f ) 
+								{
+									val*=0.000030517578125f; // BugFix
+								}
+								else if ( val < 0.00004f) 
+								{
+									val*=32768.0f; // BugFix
+								}
+
+								pMac[i]->InitWireVolume(pOrigMachine->type(),c,val);
 							}
 						}
-						else
+						else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
+					}
+				}
+			}
+
+			// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
+			// to the real machine.
+			// Due to this, we have to move machines to where they really are, 
+			// and remap the inputs and outputs indexes again... ouch
+			// At the same time, we validate each wire, and the number count.
+			unsigned char invmach[128];
+			memset(invmach,255,sizeof(invmach));
+			for (i = 0; i < 64; i++)
+			{
+				if (busMachine[i] != 255) invmach[busMachine[i]]=i;
+				if (busEffect[i] != 255) invmach[busEffect[i]]=i+64;
+			}
+			invmach[0]=MASTER_INDEX;
+
+			for (i = 0; i < 128; i++)
+			{
+				if (invmach[i] != 255)
+				{
+					;
+					Machine *cMac = _pMachine[invmach[i]] = pMac[i];
+					cMac->_macIndex = invmach[i];
+					_machineActive[i] = false; // mark as "converted"
+					cMac->_numInputs = 0;
+					cMac->_numOutputs = 0;
+					for (int c=0; c<MAX_CONNECTIONS; c++)
+					{
+						if (cMac->_inputCon[c])
 						{
-							song.machine(i)->_inputMachines[c]=255;
+							if (cMac->_inputMachines[c] < 0 || cMac->_inputMachines[c] >= MAX_MACHINES-1)
+							{
+								cMac->_inputCon[c]=false;
+								cMac->_inputMachines[c]=-1;
+							}
+							else if (!pMac[cMac->_inputMachines[c]])
+							{
+								cMac->_inputCon[c]=false;
+								cMac->_inputMachines[c]=-1;
+							}
+							else
+							{
+								cMac->_inputMachines[c] = invmach[cMac->_inputMachines[c]];
+								cMac->_numInputs++;
+							}
+						}
+						if (cMac->_connection[c])
+						{
+							if (cMac->_outputMachines[c] < 0 || cMac->_outputMachines[c] >= MAX_MACHINES)
+							{
+								cMac->_connection[c]=false;
+								cMac->_outputMachines[c]=-1;
+							}
+							else if (!pMac[cMac->_outputMachines[c]])
+							{
+								cMac->_connection[c]=false;
+								cMac->_outputMachines[c]=-1;
+							}
+							else 
+							{
+								cMac->_outputMachines[c] = invmach[cMac->_outputMachines[c]];
+								cMac->_numOutputs++;
+							}
 						}
 					}
 				}
 			}
+			// verify that there isn't any machine that hasn't been copied into _pMachine
+			// Shouldn't happen. It would mean a damaged file.
+			int j=0;
+			int k=64;
+			for (i=0;i < 128; i++)
+			{
+				if (_machineActive[i])
+				{
+					if ( pMac[i]->_mode == MACHMODE_GENERATOR)
+					{
+						while (_pMachine[j] && j<64) j++;
+						_pMachine[j]=pMac[i];
+					}
+					else
+					{
+						while (_pMachine[k] && k<128) k++;
+						_pMachine[k]=pMac[i];
+					}
+				}
+			}
 		
-		// Reparse any pattern for converted machines.
-			converter->retweak(song);
+			// Reparse any pattern for converted machines.
+			if(fullopen) converter->retweak(song);
+			//for (i =0; i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 			song.seqBus=0;
 			return true;
 		}
 
-				#endif
+		#endif
 
 		bool Machine::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
 		{
@@ -960,11 +867,7 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			{
-				std::int32_t dummy;
-				pFile->Read(dummy); // connection point x
-				pFile->Read(dummy); // connection point y
-			}
+			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 
@@ -1015,11 +918,7 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			{
-				std::int32_t dummy;
-				pFile->Read(dummy); // connection point x
-				pFile->Read(dummy); // connection point y
-			}
+			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 			
@@ -1075,11 +974,7 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			{
-				std::int32_t dummy;
-				pFile->Read(dummy); // connection point x
-				pFile->Read(dummy); // connection point y
-			}
+			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 
@@ -1292,11 +1187,7 @@ namespace psy
 			pFile->Read(_inputConVol);
 			pFile->Read(_connection);
 			pFile->Read(_inputCon);
-			{
-				std::int32_t dummy;
-				pFile->Read(dummy); // connection point x
-				pFile->Read(dummy); // connection point y
-			}
+			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
 
@@ -1387,11 +1278,7 @@ namespace psy
 				pFile->Read(_inputConVol);
 				pFile->Read(_connection);
 				pFile->Read(_inputCon);
-				{
-					std::int32_t dummy;
-					pFile->Read(dummy); // connection point x
-					pFile->Read(dummy); // connection point y
-				}
+				pFile->Skip(96); // ConnectionPoints, 12*8bytes
 				pFile->Read(_connectedInputs);
 				pFile->Read(_connectedOutputs);
 

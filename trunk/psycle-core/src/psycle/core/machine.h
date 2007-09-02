@@ -120,7 +120,7 @@ namespace psy
 			#endif
 		}
 
-		/// Class for the Internal Machines' Parameters.
+		/// Class storing the parameter description of Internal Machines.
 		class CIntMachParam
 		{
 			public:
@@ -556,6 +556,26 @@ namespace psy
 					virtual void SetPosY(int y) {_y = y;};
 
 			///\}
+			///\name states
+			///\{
+				public:
+					virtual bool Bypass() { return _bypass; }
+					virtual void Bypass(bool e) { _bypass = e; }
+				public:///\todo private:
+					bool _bypass;
+
+				public:
+					virtual bool Standby() { return _standby; }
+					virtual void Standby(bool e) { _standby = e; }
+				public:///\todo private:
+					bool _standby;
+
+				public:
+					bool Mute() { return _mute; }
+					void Mute(bool e) { _mute = e; }
+				public:///\todo private:
+					bool _mute;
+			///\}
 		protected:
 			void SetVolumeCounter(int numSamples);
 			//void SetVolumeCounterAccurate(int numSamples);
@@ -571,10 +591,7 @@ namespace psy
 			OutPort *outports;
 			int numInPorts;
 			int numOutPorts;
-			bool _bypass;
-			bool _mute;
 			bool _waitingForSound;
-			bool _stopped;
 			bool _worked;
 			/// left data
 			float *_pSamplesL;

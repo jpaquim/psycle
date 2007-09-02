@@ -35,11 +35,12 @@ namespace psy {
 			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
+			virtual void Stop();
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
 			virtual std::string GetName() const { return _psName; };
 			virtual void GetParamName(int numparam,char *name) const;
-			virtual void GetParamRange(int NUMPARSE,int &minval,int &maxval) const;
+			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
 			virtual void GetParamValue(int numparam,char *parVal) const;
 			virtual int GetParamValue(int numparam) const;
 			virtual bool SetParameter(int numparam,int value);
@@ -47,10 +48,17 @@ namespace psy {
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 
 		protected:
-			short macOutput[8];
-			short noteOffset[8];
+			static const int NUMMACHINES=8;
+			void AllocateVoice(int channel, int machine);
+			void DeallocateVoice(int channel, int machine);
+			short macOutput[NUMMACHINES];
+			short noteOffset[NUMMACHINES];
 			static std::string _psName;
 			bool bisTicking;
+			// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
+			int allocatedchans[MAX_TRACKS][NUMMACHINES];
+			// indicates if the channel of the specified machine is in use or not
+			bool availablechans[MAX_MACHINES][MAX_TRACKS];
 		};
 
 		//////////////////////////////////////////////////////////////////////////

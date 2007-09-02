@@ -57,14 +57,7 @@ namespace psy
 			}
 			#endif
 
-		#if PSYCLE__CONFIGURATION__RMS_VUS
 			int numRMSSamples=1;
-			int countRMSSamples=0;
-			double RMSAccumulatedLeft=0;
-			double RMSAccumulatedRight=0;
-			float previousRMSLeft=0;
-			float previousRMSRight=0;
-		#endif
 
 			int Cubic::_resolution;
 			float Cubic::_aTable[CUBIC_RESOLUTION];
@@ -105,23 +98,23 @@ namespace psy
 				sincTable[0] = 1; // save the trouble of evaluating 0/0
 				for(int i(1); i<sincSize; ++i)
 				{
-					sincTable[i] = sin(i * pi / (float)SINC_RESOLUTION) / float(i * pi / (float)SINC_RESOLUTION);
-
-					//todo: decide which window we like best.
-					//also todo: kaiser windows might be our best option, but i have no clue how to calculate one :)
+					sincTable[i] = sin(i * pi / (float)SINC_RESOLUTION) / float(i * pi / (float)SINC_RESOLUTION); //equivalent to i * pi * SINC_ZEROS / sincSize
 					
-					//kaiser window
-					//temp = i * inm1;
-					//sincTable[i] *= float(Izero(beta*sqrt(1.0-temp*temp)) * IBeta);
 
+			#if 1
 					//blackman window
 					sincTable[i] *= 0.42f - 0.5f * cos(2*pi*i/(float)sincSize*2 + pi) + 0.08f * cos(4*pi*i/(float)sincSize*2 + 2*pi);
-
+			#elif 0
 					//hann(ing) window
-					//sincTable[i] *= .5f * (1 - cos(2*pi*i/(float)sincSize*2 + pi));
-
+					sincTable[i] *= .5f * (1 - cos(2*pi*i/(float)sincSize*2 + pi));
+			#elif 0
+					//kaiser window
+					temp = i * inm1;
+					sincTable[i] *= float(Izero(beta*sqrt(1.0-temp*temp)) * IBeta);
+			#else
 					//hamming window
-					//sincTable[i] *= 0.53836f - 0.46164f * cos(2*pi*i/(float)sincSize*2 + pi);
+					sincTable[i] *= 0.53836f - 0.46164f * cos(2*pi*i/(float)sincSize*2 + pi);
+			#endif
 				}
 				
 				for(int i(0); i<sincSize-1; ++i)
