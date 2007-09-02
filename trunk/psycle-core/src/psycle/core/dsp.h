@@ -4,9 +4,9 @@
 
 #include "helpers.h"
 #include "cstdint.h"
-#include "math/erase_all_nans_infinities_and_denormals.hpp"
-#include "math/truncate.hpp"
-#include "math/round.hpp"
+#include "helpers/math/erase_all_nans_infinities_and_denormals.hpp"
+#include "helpers/math/truncate.hpp"
+#include "helpers/math/round.hpp"
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
