@@ -81,7 +81,7 @@ namespace psy {
 			}
 		}
 		
-		DuplicatorMac::~DuplicatorMac() throw
+		DuplicatorMac::~DuplicatorMac() throw()
 		{
 		}
 		
@@ -141,7 +141,7 @@ namespace psy {
 					{
 						if (macOutput[i] != -1 && song()->machine(macOutput[i]) != NULL )
 						{
-							AllocateVoice(channel,i);
+							AllocateVoice(workEvent.track(),i);
 							PatternEvent temp = workEvent.event();
 							if ( temp.note() < psy::core::commands::release )
 							{
@@ -155,7 +155,7 @@ namespace psy {
 								song()->machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
 								if (temp.note() >= psy::core::commands::release )
 								{
-									DeallocateVoice(channel,i);
+									DeallocateVoice(workEvent.track(),i);
 								}
 							}
 						}
@@ -518,7 +518,7 @@ namespace psy {
 			FxSend( numSamples );
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
 			//cpu::cycles_type cost(cpu::cycles());
-			if(!_mute && !_stopped )
+			if(!_mute && !Standby() )
 			{
 				Mix(numSamples);
 				Machine::UpdateVuAndStanbyFlag(numSamples);
@@ -558,7 +558,7 @@ namespace psy {
 										Machine* pInMachine = song()->machine(_inputMachines[j]);
 										if (pInMachine)
 										{
-											if(!_mute && !_stopped && _sendGrid[j][send0+i]!= 0.0f)
+											if(!_mute && !Standby() && _sendGrid[j][send0+i]!= 0.0f)
 											{
 												dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[j]*_sendGrid[j][send0+i]);
 												dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[j]*_sendGrid[j][send0+i]);
@@ -586,7 +586,7 @@ namespace psy {
 								//work_cpu_cost(work_cpu_cost() + cost);
 							}
 						}
-						if(!pSendMachine->_stopped) _stopped = false;
+						if(!pSendMachine->Standby()) Standby(false);
 					}
 				}
 			}
@@ -601,7 +601,7 @@ namespace psy {
 					Machine* pSendMachine = song()->machine(_send[i]);
 					if (pSendMachine)
 					{
-						if(!_mute && !_stopped)
+						if(!_mute && !Standby())
 						{
 							dsp::Add(pSendMachine->_pSamplesL, _pSamplesL, numSamples, pSendMachine->_lVol*_sendVol[i]);
 							dsp::Add(pSendMachine->_pSamplesR, _pSamplesR, numSamples, pSendMachine->_rVol*_sendVol[i]);
@@ -616,7 +616,7 @@ namespace psy {
 					Machine* pInMachine = song()->machine(_inputMachines[i]);
 					if (pInMachine)
 					{
-						if(!_mute && !_stopped && _sendGrid[i][mix] != 0.0f)
+						if(!_mute && !Standby() && _sendGrid[i][mix] != 0.0f)
 						{
 							dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]*_sendGrid[i][mix]);
 							dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]*_sendGrid[i][mix]);

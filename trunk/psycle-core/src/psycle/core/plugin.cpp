@@ -208,19 +208,19 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 	int us = startSample;
 	if(mode() == MACHMODE_GENERATOR)
 	{
-		if (!_mute) _stopped = false;
-		else _stopped = true;
+		if (!_mute) Standby(false);
+		else Standby(true);
 	}
 
 	if (!_mute) {
-		if((mode() == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
+		if((mode() == MACHMODE_GENERATOR) || (!_bypass && !Standby())) {
 			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
 		}
 	}
 	return numSamples;
 	#if 0
 	if (!_mute) {
-		if ((mode() == MACHMODE_GENERATOR) || (!_bypass && !_stopped)) {
+		if ((mode() == MACHMODE_GENERATOR) || (!_bypass && !Standby())) {
 			int ns = numSamples;
 			int us = startSample;
 					while (ns)
