@@ -484,6 +484,7 @@ void Knob::mousePressEvent( QMouseEvent *ev )
 		m_bMousePressed = true;
 		m_posMousePressed = ev->pos();
 		m_lastDragValue = value();
+		m_accumulator = 0;
 		setCursor( Qt::BlankCursor );
 		emit sliderPressed();
 	}
@@ -535,7 +536,19 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 	} break;
 	case FixedLinearMode:
 	{
-		newValue = value() - ydelta;
+		int range = maximum() - minimum();
+		double scaleFactor = ((double)range/360)*5;
+
+		// <nmather> FIXME: 360 and 5 are totally arbitrary numbers...
+		// fix it to something sensible.
+
+		m_accumulator += (double)ydelta*scaleFactor;
+
+		if ( m_accumulator < -1 || m_accumulator > 1 ) {
+			newValue = (int)( value() - (m_accumulator) );
+			m_accumulator = 0;
+		}
+
 		cursor().setPos( mapToGlobal( m_posMousePressed ) );
 	} break;
 	case QSynthLinearMode: // <nmather> probably remove this, it isn't very good.

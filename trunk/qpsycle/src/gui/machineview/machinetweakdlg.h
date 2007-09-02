@@ -89,6 +89,8 @@ private:
 	int m_paramIndex;
 	QPoint cursorTriggerPoint_;
 
+	double m_accumulator;
+
 // Knob dial mode behavior.
 	KnobMode m_knobMode;
 
