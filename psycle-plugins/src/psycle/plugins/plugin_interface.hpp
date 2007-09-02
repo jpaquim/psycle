@@ -192,7 +192,7 @@ namespace psycle
 		namespace symbols
 		{
 			// spelling INSTANCIATOR -> INSTANTIATOR
-			#define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) PSYCLE__PLUGIN__INSTANCIATOR(typename, info)
+			#define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) PSYCLE__PLUGIN__INSTANTIATOR(typename, info)
 			#define PSYCLE__PLUGIN__INSTANTIATOR(typename, info) \
 				extern "C" \
 				{ \
