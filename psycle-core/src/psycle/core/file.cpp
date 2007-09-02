@@ -56,6 +56,7 @@ namespace psy { namespace core {
 		std::vector<std::string> destination;
 		std::string saveCurrentDir(workingDir());
 		#if defined __unix__ || defined __APPLE__
+			///\todo using scandir would be simpler (not in posix yet as of 2007)
 			DIR * dhandle(opendir(path.c_str()));
 			if(!dhandle) {
 				std::ostringstream s;
