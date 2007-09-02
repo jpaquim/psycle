@@ -199,17 +199,17 @@ namespace psycle
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					psycle::plugin_interface::CMachineInfo const * const \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO##() { return &info; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO() { return &info; } \
 					\
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					psycle::plugin_interface::CMachineInterface * \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE##() { return new typename; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE() { return new typename; } \
 					\
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					void \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE##(::CMachineInterface & plugin) { delete &plugin; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE(::CMachineInterface & plugin) { delete &plugin; } \
 				}
 
 			#define PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO GetInfo
