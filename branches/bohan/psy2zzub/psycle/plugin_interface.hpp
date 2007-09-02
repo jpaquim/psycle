@@ -1,4 +1,4 @@
-///\file \brief A COPY of the revision 5699 of the psycle plugin interface.
+///\file \brief A COPY of the revision 5704 of the psycle plugin interface.
 ///\see http://psycle.svn.sourceforge.net/viewvc/psycle/trunk/psycle-plugins/src/psycle/plugins/plugin_interface.hpp
 ///\todo To keep this file up-to-date, use a svn:externals property to https://psycle.svn.sourceforge.net/svnroot/psycle/trunk/psycle-plugins/src/psycle/plugins
 
@@ -196,7 +196,7 @@ namespace psycle
 		namespace symbols
 		{
 			// spelling INSTANCIATOR -> INSTANTIATOR
-			#define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) PSYCLE__PLUGIN__INSTANCIATOR(typename, info)
+			#define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) PSYCLE__PLUGIN__INSTANTIATOR(typename, info)
 			#define PSYCLE__PLUGIN__INSTANTIATOR(typename, info) \
 				extern "C" \
 				{ \
