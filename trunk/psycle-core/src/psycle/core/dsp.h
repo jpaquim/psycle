@@ -38,8 +38,8 @@ namespace psy
 	///\todo make a template version that accept both float and doubles
 	inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
 	{
-		math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
-		math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
+		helpers::math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
+		helpers::math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
 	}
 
 	/// Funky denormal check \todo make it a function
