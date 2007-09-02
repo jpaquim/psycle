@@ -12,16 +12,16 @@ namespace psy
 		{
 			FilterCoeff FilterCoeff::singleton;
 
-		FilterCoeff::FilterCoeff() {
-		samplerate = -1;
-		setSampleRate(44100); // initializes table
-		};
+			FilterCoeff::FilterCoeff() {
+				samplerate = -1;
+				setSampleRate(44100); // initializes table
+			};
 
 			void FilterCoeff::setSampleRate(float samplerate)
 			{
 				if (samplerate != this->samplerate)
 				{
-			this->samplerate = samplerate;
+					this->samplerate = samplerate;
 					for (int r=0; r<5; r++)
 					{
 						for (int f=0; f<128; f++)
@@ -115,7 +115,7 @@ namespace psy
 
 			Filter::Filter()
 			{
-				FilterCoeff::singleton._coeffs.Init();
+				FilterCoeff::singleton.Init();
 				Init();
 				_x1 = _x2 = _y1 = _y2 = 0;
 				_a1 = _a2 = _b1 = _b2 = 0;
