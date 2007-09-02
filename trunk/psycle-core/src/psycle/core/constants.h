@@ -1,6 +1,6 @@
 // Constants used by psycle
 #pragma once
-#include <psycle/plugin_interface.hpp>
+//#include <psycle/plugin_interface.hpp>
 namespace psy
 {
 	namespace core
@@ -25,7 +25,7 @@ const int MAX_SEQUENCES = 1;
 /// maximum number of different patterns. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
 const int MAX_PATTERNS = 256;
 /// Max number of pattern tracks
-		/*unsigned*/ int const MAX_TRACKS = plugin_interface::MAX_TRACKS;
+/*unsigned*/ int const MAX_TRACKS = 64; //plugin_interface::MAX_TRACKS;
 /// harcoded maximal number of lines per pattern
 const int MAX_LINES = 1024;
 /// maximum number of positions in the sequence. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
@@ -56,7 +56,8 @@ const int MAX_DELAY_BUFFER = 65536;
 /// Sampler
 const int OVERLAPTIME = 128;
 /// Maximum size of the audio block to be passed to the Work() function.
-const int STREAM_SIZE = plugin_interface::MAX_BUFFER_LENGTH;
+//const int STREAM_SIZE = plugin_interface::MAX_BUFFER_LENGTH;
+const int STREAM_SIZE = 256;
 
 /// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.
 const int CURRENT_FILE_VERSION_INFO = 0x0000;
