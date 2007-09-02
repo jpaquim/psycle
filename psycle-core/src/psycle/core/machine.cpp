@@ -601,7 +601,7 @@ namespace psy { namespace core {
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
 #if defined PSYCLE__CONFIGURATION__RMS_VUS
-			_volumeCounter = helpers::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
+			_volumeCounter = core::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
@@ -626,7 +626,7 @@ namespace psy { namespace core {
 				}
 			}
 #else
-			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
+			_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
