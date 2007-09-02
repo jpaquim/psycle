@@ -43,8 +43,8 @@ namespace psy {
 					return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24; 
 				case byte4BE:
 				case byte8BE:
+				default:
 					return buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0 ; 
-				default: ;
 			}
 		}
 
