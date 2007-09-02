@@ -34,7 +34,7 @@ namespace psy {
 		int Dummy::GenerateAudio(int numSamples)
 		{
 			//cpu::cycles_type cost(cpu::cycles());
-			UpdateVuAndStanbyFlag(numSamples);
+			Machine::UpdateVuAndStanbyFlag(numSamples);
 			//cost = cpu::cycles() - cost;
 			//work_cpu_cost(work_cpu_cost() + cost);
 			_worked = true;
@@ -70,6 +70,7 @@ namespace psy {
 				for (int j=0;j<MAX_TRACKS;j++)
 				{
 					allocatedchans[j][i] = -1;
+				}
 			}
 			for (int i=0;i<MAX_MACHINES;i++)
 			{
@@ -80,7 +81,7 @@ namespace psy {
 			}
 		}
 		
-		DuplicatorMac::~DuplicatorMac() throw()
+		DuplicatorMac::~DuplicatorMac() throw
 		{
 		}
 		
