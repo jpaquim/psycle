@@ -183,7 +183,7 @@ namespace psy { namespace core {
 		_bypass(false),
 		_mute(false),
 		_waitingForSound(false),
-		_stopped(false),
+		_standby(false),
 		_worked(false),
 		_pSamplesL(new float[MAX_BUFFER_LENGTH]),
 		_pSamplesR(new float[MAX_BUFFER_LENGTH]),
