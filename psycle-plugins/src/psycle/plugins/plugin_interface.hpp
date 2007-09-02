@@ -194,17 +194,17 @@ namespace psycle
 		#define PSYCLE__PLUGIN__INSTANCIATOR(typename, info) \
 			extern "C" \
 			{ \
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT \
+				PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 				psycle::plugin_interface::CMachineInfo const * const \
 				PSYCLE__PLUGIN__CALLING_CONVENTION \
 				GetInfo() { return &info; } \
 				\
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT \
+				PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 				psycle::plugin_interface::CMachineInterface * \
 				PSYCLE__PLUGIN__CALLING_CONVENTION \
 				CreateMachine() { return new typename; } \
 				\
-				PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT \
+				PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 				void \
 				PSYCLE__PLUGIN__CALLING_CONVENTION \
 				DeleteMachine(::CMachineInterface & plugin) { delete &plugin; } \
@@ -212,13 +212,13 @@ namespace psycle
 
 		/// we don't use universalis/diversalis here because we want no dependency
 		#if !defined _WIN64 && !defined _WIN32 && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
-			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT
+			#define PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT
 			#define PSYCLE__PLUGIN__CALLING_CONVENTION
 		#elif defined __GNUG__
-			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __attribute__((dllexport))
+			#define PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT __attribute__((dllexport))
 			#define PSYCLE__PLUGIN__CALLING_CONVENTION __attribute__((__cdecl__))
 		#elif defined _MSC_VER
-			#define PSYCLE__PLUGIN__DETAIL__DYNAMIC_LINK__EXPORT __declspec(dllexport)
+			#define PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT __declspec(dllexport)
 			#define PSYCLE__PLUGIN__CALLING_CONVENTION __cdecl
 		#else
 			#error please add definition for your compiler
