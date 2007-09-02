@@ -1981,7 +1981,7 @@ namespace psycle
 				if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false )
 				{
 					int j=0;
-					for ( int i=0;i<128;i++ ) 
+					for ( int i=1;i<128;i++ ) // machine 0 is the Master machine.
 					{
 						if (_machineActive[i] && pMac[i]->_mode != MACHMODE_GENERATOR )
 						{
