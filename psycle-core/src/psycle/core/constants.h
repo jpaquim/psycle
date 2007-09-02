@@ -1,6 +1,5 @@
 // Constants used by psycle
 #pragma once
-#include "version.hpp"
 #include <psycle/plugin_interface.hpp>
 namespace psy
 {
