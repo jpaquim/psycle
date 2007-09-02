@@ -16,7 +16,7 @@ namespace psycle
 		///\todo use #include <cstdint> for that!
 		typedef /* std::uint8_t  */ unsigned char      uint8;
 		typedef /* std::uint16_t */ unsigned short int uint16;
-		typedef /* std::uint32_t */ unsigned long int  uint32;
+		typedef /* std::uint32_t */ unsigned       int uint32;
 
 		/// machine interface version
 		int const MI_VERSION = 11;
