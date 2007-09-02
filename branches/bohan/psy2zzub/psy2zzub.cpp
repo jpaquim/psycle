@@ -579,14 +579,14 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 		for(int i(0); i < n; ++i) {
 			const zzub::parameter &param = *info->global_parameters[i];
 			switch(param.type) {
-				case /*zzub::*/zzub_parameter_type_note:
-				case /*zzub::*/zzub_parameter_type_switch:
-				case /*zzub::*/zzub_parameter_type_byte:
+				case zzub::parameter_type_note:
+				case zzub::parameter_type_switch:
+				case zzub::parameter_type_byte:
 					index[i] = size;
 					this->size[i] = 1;
 					++size;
 					break;
-				case /*zzub::*/zzub_parameter_type_word:
+				case zzub::parameter_type_word:
 					index[i] = size;
 					this->size[i] = 2;
 					size += 2;
