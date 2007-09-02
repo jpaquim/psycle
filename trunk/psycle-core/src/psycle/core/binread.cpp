@@ -34,19 +34,18 @@ namespace psy {
 		}
 
 		unsigned int BinRead::readUInt4LE() {
+			///\todo needs some clean up and optimisation
 			unsigned char buf[4];
-			in_.read( reinterpret_cast<char*>(&buf), 4 );      
+			in_.read( reinterpret_cast<char*>(&buf), 4 );
 			switch ( platform_ ) {
-				case byte4LE : return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24; 
-				break;
-				case byte4BE : return buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0 ; 
-				break;
-				case byte8LE : return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24 | buf[4] << 32 | buf[5] << 40 | buf[6] << 48 | buf[7] << 56;
-				break;
-				case byte8BE : return buf[0] << 56 | buf[1] << 48 | buf[2] << 40 | buf[3] << 32 | buf[4] << 24 | buf[5] << 16 | buf[6] << 8 | buf[7];
-				break;
+				case byte4LE:
+				case byte8LE:
+					return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24; 
+				case byte4BE:
+				case byte8BE:
+					return buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0 ; 
+				default: ;
 			}
-			return 0; // cannot handle platform
 		}
 
 		int BinRead::readInt4LE() {
@@ -91,10 +90,11 @@ namespace psy {
 
 		unsigned int BinRead::swap4( unsigned int value )
 		{
-			return  ((value  & 0xFF000000) >> 24) |
-				(((value & 0x00FF0000) >> 16) << 8) |
-				(((value & 0x0000FF00) >> 8)  << 16) |
-				((value  & 0x000000FF) << 24);
+			return \
+				((value >> 24) & 0x000000ff) |
+				((value >>  8) & 0x0000ff00) |
+				((value <<  8) & 0x00ff0000) |
+				((value << 24) & 0xff000000);
 		}
 
 		bool BinRead::eof() const {
