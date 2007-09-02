@@ -103,7 +103,7 @@ namespace psy {
 				{
 					availablechans[i][j] = true;
 				}
-			}	
+			}
 		}
 		
 		void DuplicatorMac::Stop()

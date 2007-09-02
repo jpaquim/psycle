@@ -615,7 +615,7 @@ namespace psy { namespace core {
 
 			if ( callbacks->autoStopMachines() )
 			{
-				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples)	{
+				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples) {
 					rms.count=0;
 					rms.AccumLeft=0.;
 					rms.AccumRight=0.;
@@ -636,7 +636,7 @@ namespace psy { namespace core {
 			if (_volumeDisplay>0 )--_volumeDisplay;
 			if ( callbacks->autoStopMachines() )
 			{
-				if (_volumeCounter < 8.0f)	{
+				if (_volumeCounter < 8.0f) {
 					_volumeCounter = 0.0f;
 					_volumeDisplay = 0;
 					Standby(true);

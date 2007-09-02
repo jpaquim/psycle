@@ -621,7 +621,7 @@ namespace psy
 				{
 					if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
 						busMachine[i] = 255;
-					 // If there's a dummy, force it to be a Generator
+					// If there's a dummy, force it to be a Generator
 					else if (pMac[busMachine[i]]->type() == MACH_DUMMY ) 
 					{
 						pMac[busMachine[i]]->mode(MACHMODE_GENERATOR);
@@ -737,10 +737,10 @@ namespace psy
 						if (pMac[i]->_inputCon[c] && pMac[i]->_inputMachines[c] > -1 && pMac[pMac[i]->_inputMachines[c]]) // If there's a valid machine in this inputconnection,
 						{
 							Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
-							int d = pOrigMachine->FindOutputWire(i);		//and wire
+							int d = pOrigMachine->FindOutputWire(i); // and wire
 							if ( d == -1 )
 							{
-								 pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; 
+								pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1;
 							}
 							else
 							{
