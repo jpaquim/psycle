@@ -96,7 +96,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 	/*********************************************************************************************************************/
 	///\name misc
 	///\{
-		float normalize(const int val, const int min, const int max) {		
+		float normalize(const int val, const int min, const int max) {
 			return float(val - min) / (max - min);
 		}
 
@@ -127,14 +127,14 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 	/*********************************************************************************************************************/
 	// plugin_collection
 	
-	void plugin_collection::initialize(zzub::pluginfactory * factory) {	
+	void plugin_collection::initialize(zzub::pluginfactory * factory) {
 		this->factory = factory;
 		if(!this->factory) return;
 		#if defined _WIN64 || defined _WIN32
 			module::handle_type module_handle(::GetModuleHandle(0));
 			if(!module_handle) return;
 			char path[MAX_PATH + 32] = {0};
-			::GetModuleFileName(module_handle, path, MAX_PATH);		
+			::GetModuleFileName(module_handle, path, MAX_PATH);
 			std::size_t n(std::strlen(path));
 			if(!n) return;
 			while(n--) {
@@ -191,11 +191,11 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 			struct stat statinfo;
 			/// beware, scandir is not in posix yet as of 2007
 			int n(scandir(search_path.c_str(), &namelist, 0, alphasort));
-		    if(n < 0) {
-		    	perror("scandir");
-		    	return;
-		    }
-	        while(n--) {
+			if(n < 0) {
+				perror("scandir");
+				return;
+			}
+			while(n--) {
 				std::string name(namelist[n]->d_name);
 				std::free(namelist[n]);
 				if(name == "." || name == "..") continue;
@@ -239,7 +239,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 					}
 
 					zzub_info->version = zzub::version;
-					zzub_info->flags = zzub::plugin_flag_mono_to_stereo;					
+					zzub_info->flags = zzub::plugin_flag_mono_to_stereo;
 
 					zzub_info->psy_name = psycle_info->Name;
 					zzub_info->name = zzub_info->psy_name.c_str();
@@ -286,7 +286,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 							} else if(psycle_param.MaxValue - psycle_param.MinValue <= max_value ) {
 								zzub_param.set_value_min(0);
 								zzub_param.set_value_max(psycle_param.MaxValue - psycle_param.MinValue);
-								zzub_param.set_value_default(psycle_param.DefValue - psycle_param.MinValue);								
+								zzub_param.set_value_default(psycle_param.DefValue - psycle_param.MinValue);
 							} else {
 								zzub_param.set_value_min(min_value);
 								zzub_param.set_value_max(max_value);
@@ -355,7 +355,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 		psycle_plugin(),
 		psycle_plugin_param_info(),
 		track_count()
-	{	
+	{
 		global_values = global_params.data;
 		track_values = track_params;
 		attributes = 0;
@@ -371,14 +371,14 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 			std::cerr << "not a psycle plugin: " << info->name << std::endl;
 			module::close(module_handle);
 			module_handle = 0;
-			return false;	
+			return false;
 		}
 		const psycle::plugin_interface::CMachineInfo * const psycle_info = get_info();
 		if(!psycle_info) {
 			std::cerr << "call to " << get_info_function_name << " failed" << std::endl;
 			module::close(module_handle);
 			module_handle = 0;
-			return false;		
+			return false;
 		}
 		psycle_plugin_param_info = psycle_info->Parameters;
 		create_machine_function create_machine = (create_machine_function) module::sym(module_handle, create_machine_function_name);
@@ -387,7 +387,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 			std::cerr << "not a psycle plugin: " << info->name << std::endl;
 			module::close(module_handle);
 			module_handle = 0;
-			return false;		
+			return false;
 		}
 		psycle_plugin = create_machine();
 		if(!psycle_plugin) {
@@ -444,7 +444,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 	/*********************************************************************************************************************/
 	// plugin ... implementation for zzub::plugin
 
-	void plugin::init(zzub::archive * arc) {	
+	void plugin::init(zzub::archive * arc) {
 		if(!open()) return;
 		if(!arc) return;
 		zzub::instream * is = arc->get_instream("");
@@ -490,17 +490,17 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 		}
 		for(int i(0); i < track_count; ++i) {
 			const track_param & param = track_params[i];
-			if(param.note!=zzub::note_value_none) {			
-				if(param.note!=zzub::note_value_off) {				
+			if(param.note!=zzub::note_value_none) {
+				if(param.note!=zzub::note_value_off) {
 					const int note = ((param.note >> 4) * 12) + (param.note & 15);
 					psycle_plugin->SeqTick(i, note, 0, param.command >> 8, param.command & 0xff);
 				}
-				else psycle_plugin->SeqTick(i,psycle::plugin_interface::NOTE_NO, 0, 0, 0);				
+				else psycle_plugin->SeqTick(i,psycle::plugin_interface::NOTE_NO, 0, 0, 0);
 			}
 		}
 	}
 
-	bool plugin::process_stereo(float ** pin, float ** pout, int numsamples, int mode) {	
+	bool plugin::process_stereo(float ** pin, float ** pout, int numsamples, int mode) {
 		if(!psycle_plugin) return false;
 		if(mode & zzub::process_mode_write) {
 			float * ldst = pout[0]; float * rdst = pout[1];
@@ -508,7 +508,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 			const float amp(32768);
 			int n = numsamples;
 			while(--n >= 0) {
-				*ldst++ = *lsrc++ * amp; *rdst++ = *rsrc++ * amp;		
+				*ldst++ = *lsrc++ * amp; *rdst++ = *rsrc++ * amp;
 			}
 			psycle_plugin->Work(pout[0], pout[1], numsamples, track_count);
 			ldst = pout[0]; rdst = pout[1];
@@ -516,7 +516,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 			n = numsamples;
 			while(--n >= 0) {
 				*ldst++ *= deamp; *rdst++ *= deamp;
-			}		
+			}
 			lsrc = pout[0]; rsrc = pout[1];
 			while(--numsamples >= 0) {
 				if(!is_denormal(*lsrc) || !is_denormal(*rsrc)) return true;
@@ -553,7 +553,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 		one_param_description[0] = 0;
 		if(!psycle_plugin) return one_param_description;
 		if(param < int(info->global_parameters.size())) {
-			const zzub::parameter & zzub_param = *info->global_parameters[param];		
+			const zzub::parameter & zzub_param = *info->global_parameters[param];
 			const psycle::plugin_interface::CMachineParameter & psycle_param(*psycle_plugin_param_info[param]);
 			value = scale(
 				zzub_param.normalize(value),
