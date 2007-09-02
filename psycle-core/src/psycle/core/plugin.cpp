@@ -419,17 +419,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 												}
 
 						}
-						Machine::SetVolumeCounter(numSamples);
-						if ( Gloxxxxxxxxxxxxxxxxxxxxxxxxxxxbal::pConfig()->autoStopMachines )
-						{
-							if (_volumeCounter < 8.0f)
-							{
-								_volumeCounter = 0.0f;
-								_volumeDisplay = 0;
-								_stopped = true;
-							}
-							else _stopped = false;
-						}
+						Machine::UpdateVuAndStanbyFlag(numSamples);
 				}
 			}
 			#endif

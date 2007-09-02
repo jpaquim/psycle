@@ -577,8 +577,19 @@ namespace psy
 					bool _mute;
 			///\}
 		protected:
-			void SetVolumeCounter(int numSamples);
-			//void SetVolumeCounterAccurate(int numSamples);
+			virtual void SetSampleRate(int sr)
+			{
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+				rms.count=0;
+				rms.AccumLeft=0.;
+				rms.AccumRight=0.;
+				rms.previousLeft=0.;
+				rms.previousRight=0.;
+#endif
+			}
+		protected:
+			void UpdateVuAndStanbyFlag(int numSamples);
+
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////

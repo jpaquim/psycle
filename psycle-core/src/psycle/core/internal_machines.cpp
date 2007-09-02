@@ -520,17 +520,7 @@ namespace psy {
 			if(!_mute && !_stopped )
 			{
 				Mix(numSamples);
-				Machine::SetVolumeCounter(numSamples);
-				if ( callbacks->autoStopMachines() )
-				{
-					if (_volumeCounter < 8.0f)
-					{
-						_volumeCounter = 0.0f;
-						_volumeDisplay = 0;
-						_stopped = true;
-					}
-					else _stopped = false;
-				}
+				Machine::UpdateVuAndStanbyFlag(numSamples);
 				//cost = cpu::cycles() - cost;
 				//work_cpu_cost(work_cpu_cost() + cost);
 			}
