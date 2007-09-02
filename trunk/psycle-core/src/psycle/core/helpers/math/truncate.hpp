@@ -3,7 +3,7 @@
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
-namespace psycle { namespace helpers { namespace math {
+namespace psy { namespace common { namespace math {
 
 	/// converts a floating point number to an integer by truncating toward -infinity
 	std::int32_t inline UNIVERSALIS__COMPILER__CONST

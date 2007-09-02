@@ -5,9 +5,9 @@
 #if 0 && defined __SSE__
 	//#include <xmmintrin.h>
 #endif
-namespace psycle
+namespace psy
 {
-	namespace helpers
+	namespace common
 	{
 		namespace math
 		{

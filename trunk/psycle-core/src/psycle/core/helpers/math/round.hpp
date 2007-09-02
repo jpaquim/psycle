@@ -2,7 +2,7 @@
 #include <universalis/compiler.hpp>
 #include <cmath>
 #include <cstdint>
-namespace psycle { namespace helpers { namespace math {
+namespace psy { namespace common { namespace math {
 
 	/// converts a floating point number to an integer by rounding to the nearest integer.
 	/// note: it is unspecified whether rounding x.5 rounds up or down.
