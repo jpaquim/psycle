@@ -115,7 +115,8 @@ namespace psy
 
 			Filter::Filter()
 			{
-				FilterCoeff::singleton.Init();
+				//Filtercoef is automatially initialized.
+				//FilterCoeff::singleton.Init();
 				Init();
 				_x1 = _x2 = _y1 = _y2 = 0;
 				_a1 = _a2 = _b1 = _b2 = 0;
