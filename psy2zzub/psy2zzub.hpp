@@ -54,7 +54,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 			///\{
 				void init(zzub::archive *arc);
 				void save(zzub::archive *arc);
-				void destroy();	
+				void destroy();
 				void process_events();
 				bool process_stereo(float **pin,float **pout,int numsamples,int mode);
 				void stop() { if(psycle_plugin) psycle_plugin->Stop(); }
@@ -109,7 +109,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 			} global_params;
 
 			#pragma pack(push, 1)
-			struct track_param {		
+			struct track_param {
 				unsigned char note;
 				unsigned short command;
 			} * track_params;
@@ -134,7 +134,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 				bool store_info(zzub::archive*) const { return false; }
 			///\}
 
-		private:		
+		private:
 			std::string psy_name, psy_label, psy_path, psy_author, psy_uri, psy_command;
 			struct param_info {
 				param_info() { name[0] = 0; desc[0] = 0; }
@@ -142,7 +142,7 @@ namespace zzub { namespace plugins { namespace psycle_to_zzub {
 				char desc[32];
 			};
 			std::vector<param_info> psy_param;
-			friend class plugin_collection;		
+			friend class plugin_collection;
 			friend class plugin;
 	};
 			
