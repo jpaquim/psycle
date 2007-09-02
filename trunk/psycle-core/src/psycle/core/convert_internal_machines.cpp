@@ -217,7 +217,7 @@ namespace psy {
 			const std::string & Converter::Plugin_Names::operator()(const int & type) const
 			{
 				const_iterator i = find(type);
-				if(i == end()) throw std::exception("internal machine replacement plugin not declared");
+				//if(i == end()) throw std::exception("internal machine replacement plugin not declared");
 				if(i == end()) throw;
 				return *i->second;
 			}
@@ -255,7 +255,7 @@ namespace psy {
 							{
 								case gain:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
+								else value = common::scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
 									break;
 							}
 						}
@@ -314,7 +314,7 @@ namespace psy {
 									break;
 								case modulation_radians_per_second:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, 0.0001 * helpers::math::pi * 2, 100 * helpers::math::pi * 2).apply_inverse(value * 3e-9 * Global::pConfig->GetSamplesPerSec());
+								else value = common::scale::Exponential(maximum, 0.0001 * common::math::pi * 2, 100 * common::math::pi * 2).apply_inverse(value * 3e-9 * Player::Instance()->timeInfo().sampleRate());
 									break;
 								case left_feedback:
 								case right_feedback:
@@ -339,11 +339,11 @@ namespace psy {
 							{
 								case cutoff_frequency:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, 15 * helpers::math::pi, 22050 * helpers::math::pi).apply_inverse(std::asin(value / 0x100) * Global::pConfig->GetSamplesPerSec());
+								else value = common::scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Player::Instance()->timeInfo().sampleRate());
 									break;
 								case modulation_sequencer_ticks:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, helpers::math::pi * 2 / 10000, helpers::math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::pPlayer->SamplesPerRow());
+								else value = common::scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Player::Instance()->timeInfo().samplesPerRow());
 									break;
 								case resonance:
 								case modulation_amplitude:
@@ -362,19 +362,19 @@ namespace psy {
 							{
 								case am_radians_per_second:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, 0.0001 * helpers::math::pi * 2, 22050 * helpers::math::pi * 2).apply_inverse(value * 2.5e-3 * Global::pConfig->GetSamplesPerSec());
+								else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Player::Instance()->timeInfo().sampleRate());
 									break;
 								case am_glide:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, 0.0001 * helpers::math::pi * 2, 15 * 22050 * helpers::math::pi * 2).apply_inverse(value * 5e-6 * Global::pConfig->GetSamplesPerSec() * Global::pConfig->GetSamplesPerSec());
+								else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 15 * 22050 * math::pi * 2).apply_inverse(value * 5e-6 * Player::Instance()->timeInfo().sampleRate()) * Player::Instance()->timeInfo().sampleRate();
 									break;
 								case fm_radians_per_second:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, 0.0001 * helpers::math::pi * 2, 100 * helpers::math::pi * 2).apply_inverse(value * 2.5e-5 * Global::pConfig->GetSamplesPerSec());
+								else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 2.5e-5 * Player::Instance()->timeInfo().sampleRate());
 									break;
 								case fm_bandwidth:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, 0.0001 * helpers::math::pi * 2, 22050 * helpers::math::pi * 2).apply_inverse(value * 5e-4 * Global::pConfig->GetSamplesPerSec());
+								else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 5e-4 * Player::Instance()->timeInfo().sampleRate());
 									break;
 							}
 						}

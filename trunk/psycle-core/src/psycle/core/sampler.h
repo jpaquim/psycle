@@ -139,10 +139,8 @@ namespace psy {
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual std::string GetName() const { return _psName; }
-			#if 0
-				/// Loader for psycle fileformat version 2.
-				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
-			#endif
+			/// Loader for psycle fileformat version 2.
+			virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
 				std::uint32_t size;
