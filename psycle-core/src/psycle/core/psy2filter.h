@@ -38,12 +38,10 @@ namespace psy
 		class PatternEvent;
 		class MachineCallbacks;
 
-		#if defined __unix__ || defined __APPLE__
-			namespace convert_internal_machines
-			{
-				class Converter;
-			}
-		#endif
+		namespace convert_internal_machines
+		{
+			class Converter;
+		}
 
 		class Psy2Filter : public PsyFilterBase
 		{
@@ -88,10 +86,8 @@ namespace psy
 				virtual bool LoadINSD(RiffFile* file,CoreSong& song);
 				virtual bool LoadWAVD(RiffFile* file,CoreSong& song);
 				virtual bool PreLoadVSTs(RiffFile* file,CoreSong& song);
-				#if defined __unix__ || defined __APPLE__
-					virtual bool LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
-					virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
-				#endif
+				virtual bool LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
+				virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
 
 			protected:
 				static std::string const FILE_FOURCC;

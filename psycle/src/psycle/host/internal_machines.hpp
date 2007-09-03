@@ -293,9 +293,9 @@ public:
 	inline MixerWire & Send(int i) { return sends_[i]; }
 	inline const MixerWire & Send(int i) const { return sends_[i]; }
 	inline MasterChannel & Master() { return master_; }
-	inline int numinputs() const { return inputs_.size(); }
-	inline int numreturns() const { return returns_.size(); }
-	inline int numsends() const { return sends_.size(); }
+	inline int numinputs() const { return static_cast<int>(inputs_.size()); }
+	inline int numreturns() const { return static_cast<int>(returns_.size()); }
+	inline int numsends() const { return static_cast<int>(sends_.size()); }
 	inline bool ChannelValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numinputs() && _inputCon[i]); }
 	inline bool ReturnValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numreturns() && Return(i).IsValid()); }
 	inline bool SendValid(int i) { assert (i<MAX_CONNECTIONS); return (i<numsends() && sends_[i].IsValid()); }
