@@ -378,7 +378,6 @@ namespace psy
 			return true;
 		}
 		
-		#if defined __unix__ || defined __APPLE__
 		bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
 		{
 			std::int32_t i;
@@ -451,7 +450,7 @@ namespace psy
 						s << "unkown machine type: " << type;
 						//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 					}
-			pMac[i] = new Dummy(callbacks,i,&song);
+					pMac[i] = new Dummy(callbacks,i,&song);
 		
 					init_and_load:
 						pMac[i]->Init();
@@ -854,8 +853,6 @@ namespace psy
 			song.seqBus=0;
 			return true;
 		}
-
-		#endif
 
 		bool Machine::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
 		{

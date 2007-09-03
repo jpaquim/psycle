@@ -13,12 +13,12 @@
 //				Simple data
 //
 //////////////////////////////////////////////////////////////////////
-float								*psinetable;
-int												samplingrate;
-int												totalpartials;
-int												*preverse[2];
-float								*pfmtable;
-float								*ppmtable;
+float *psinetable;
+int samplingrate;
+int totalpartials;
+int *preverse[2];
+float *pfmtable;
+float *ppmtable;
 //////////////////////////////////////////////////////////////////////
 //
 //				BlankFunc
