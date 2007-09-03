@@ -1,4 +1,4 @@
-///\file \brief A COPY of the revision 5706 of the psycle plugin interface.
+///\file \brief A COPY of the revision 5713 of the psycle plugin interface.
 ///\see http://psycle.svn.sourceforge.net/viewvc/psycle/trunk/psycle-plugins/src/psycle/plugins/plugin_interface.hpp
 ///\todo To keep this file up-to-date, use a svn:externals property to https://psycle.svn.sourceforge.net/svnroot/psycle/trunk/psycle-plugins/src/psycle/plugins
 
@@ -241,22 +241,22 @@ namespace psycle
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO);
 			typedef
 				psycle::plugin_interface::CMachineInfo const * const
-				PSYCLE__PLUGIN__CALLING_CONVENTION
-				(*get_info_function)();
+				(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
+				();
 			
 			const char create_machine_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE);
 			typedef
 				psycle::plugin_interface::CMachineInterface *
-				PSYCLE__PLUGIN__CALLING_CONVENTION
-				(*create_machine_function)();
+				(PSYCLE__PLUGIN__CALLING_CONVENTION * create_machine_function)
+				();
 
 			const char delete_machine_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE);
 			typedef
 				void
-				PSYCLE__PLUGIN__CALLING_CONVENTION
-				(*delete_machine_function)(psycle::plugin_interface::CMachineInterface &);
+				(PSYCLE__PLUGIN__CALLING_CONVENTION * delete_machine_function)
+				(psycle::plugin_interface::CMachineInterface &);
 		}
 	}
 }
