@@ -6,7 +6,7 @@
 #include "fast_unspecified_round_to_integer.hpp"
 namespace psycle { namespace helpers { namespace math {
 
-	/// converts a floating point number to an integer by truncating toward -infinity
+	/// converts a floating point number to an integer by truncating positive numbers toward zero and negative ones toward an unspecified direction
 	template<typename Real> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated(Real x)
 	{
