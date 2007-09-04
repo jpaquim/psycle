@@ -54,7 +54,7 @@ namespace psy { namespace common { namespace math {
 		}
 		
 		template<> UNIVERSALIS__COMPILER__CONST
-		std::int32_t inline rounded<>(float x)
+		std::int32_t inline rounded<>(float f)
 		{
 			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 				///\todo not always the fastest when using sse(2)
@@ -63,7 +63,7 @@ namespace psy { namespace common { namespace math {
 				std::int32_t i;
 				__asm
 				{ 
-					fld x;
+					fld f;
 					fistp i;
 				}
 				return i;
