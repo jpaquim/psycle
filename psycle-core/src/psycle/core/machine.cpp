@@ -32,7 +32,7 @@ namespace psy { namespace core {
 				x = static_cast<X*>(address);
 				// note: free with std::free
 		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
-				x = static_cast<X*>(_mingw_aligned_malloc(size, alignment));
+				x = static_cast<X*>(__mingw_aligned_malloc(size, alignment));
 				// note: free with _mingw_aligned_free
 		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				x = static_cast<X*>(_aligned_malloc(size, alignment));
