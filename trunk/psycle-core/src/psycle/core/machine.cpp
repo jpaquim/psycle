@@ -248,8 +248,8 @@ namespace psy { namespace core {
 	}
 	Machine::Machine(Machine* mac,MachineType type,MachineMode mode)
 	:crashed_()
-	,type_(type_)
-	,mode_(mode_)
+	,type_(type)
+	,mode_(mode)
 	,id_(mac->id_)
 	,callbacks(mac->callbacks)
 	,song_(mac->song_)
@@ -293,10 +293,12 @@ namespace psy { namespace core {
 		_pSamplesL = new float[MAX_BUFFER_LENGTH];
 		_pSamplesR = new float[MAX_BUFFER_LENGTH];
 #endif
+		std::cout << "one, two three.. testing.." << std::endl;
 		// Clear machine buffer samples
 		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
 		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
 
+		std::cout << "ok, we got to enter the correct function" << std::endl;
 		for (int c = 0; c<MAX_TRACKS; c++)
 		{
 			TriggerDelay[c].setCommand( 0 );
