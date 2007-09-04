@@ -89,7 +89,7 @@ namespace psy { namespace common { namespace math {
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		std::int32_t inline rounded<>(float f)
+		std::int32_t inline fast_unspecified_round_to_integer<>(float f)
 		{
 			return fast_unspecified_round_to_integer<std::int32_t>(double(f));
 		}
