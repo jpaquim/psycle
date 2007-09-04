@@ -1,6 +1,6 @@
 // Constants used by psycle
 #pragma once
-#include "plugin_interface.hpp"
+#define PSYCLE__CONSTANTS
 namespace psy
 {
 	namespace core
@@ -25,7 +25,7 @@ const int MAX_SEQUENCES = 1;
 /// maximum number of different patterns. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
 const int MAX_PATTERNS = 256;
 /// Max number of pattern tracks
-/*unsigned*/ int const MAX_TRACKS = plugin_interface::MAX_TRACKS;
+/*unsigned*/ int const MAX_TRACKS = 64;
 /// harcoded maximal number of lines per pattern
 const int MAX_LINES = 1024;
 /// maximum number of positions in the sequence. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
@@ -56,9 +56,20 @@ const int MAX_DELAY_BUFFER = 65536;
 /// Sampler
 const int OVERLAPTIME = 128;
 /// Maximum size of the audio block to be passed to the Work() function.
-const int STREAM_SIZE = plugin_interface::MAX_BUFFER_LENGTH;
+const int MAX_BUFFER_LENGTH = 256;
+const int STREAM_SIZE = MAX_BUFFER_LENGTH;
 
-/// \todo add real detection of type size
+/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.
+const int CURRENT_FILE_VERSION_INFO = 0x0000;
+const int CURRENT_FILE_VERSION_SNGI = 0x0000;
+const int CURRENT_FILE_VERSION_SEQD = 0x0000;
+const int CURRENT_FILE_VERSION_PATD = 0x0000;
+const int CURRENT_FILE_VERSION_MACD = 0x0000;
+const int CURRENT_FILE_VERSION_INSD = 0x0000;
+const int CURRENT_FILE_VERSION_WAVE = 0x0000;
+const int CURRENT_FILE_VERSION = CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_WAVE;
+
+///// \todo add real detection of type size
 typedef unsigned char byte;
 /// \todo add real detection of type size
 typedef unsigned short word;
