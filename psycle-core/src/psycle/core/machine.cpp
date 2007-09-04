@@ -283,10 +283,10 @@ namespace psy { namespace core {
 	,TWSSamples(0)
 	,_outDry(256)
 	{
-#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		_pSamplesL = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
 		_pSamplesR = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
-#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		posix_memalign(reinterpret_cast<void**>(&_pSamplesL),16,MAX_BUFFER_LENGTH*sizeof(float));
 		posix_memalign(reinterpret_cast<void**>(&_pSamplesR),16,MAX_BUFFER_LENGTH*sizeof(float));
 #else
