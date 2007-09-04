@@ -3,7 +3,7 @@
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
-namespace psy { namespace common { namespace math {
+namespace psycle { namespace helpers { namespace math {
 
 	/// converts a floating point number to an integer by rounding in an unspecified way
 	template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
@@ -14,7 +14,7 @@ namespace psy { namespace common { namespace math {
 }}}
 
 // inline implementation
-namespace psy { namespace common { namespace math {
+namespace psycle { namespace helpers { namespace math {
 	
 	#if __STDC__VERSION__ >= 199901 || \
 		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
