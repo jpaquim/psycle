@@ -2,8 +2,7 @@
 #include <universalis/compiler.hpp>
 #include <cmath>
 #include <cstdint>
-#include "truncate.hpp"
-
+#include "fast_unspecified_round_to_integer.hpp"
 namespace psy { namespace common { namespace math {
 
 	/// converts a floating point number to an integer by rounding to the nearest integer.
@@ -22,21 +21,21 @@ namespace psy { namespace common { namespace math {
 		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
 		
 		template<> UNIVERSALIS__COMPILER__CONST
-		std::int32_t inline rounded<>(long double x)
+		std::int32_t inline rounded<>(long double ld)
 		{
-			return /*truncated has no overload for long double yet*/ lrint(::roundl(x));
+			return fast_unspecified_round_to_integer<std::int32_t>(::roundl(ld));
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		std::int32_t inline rounded<>(double x)
+		std::int32_t inline rounded<>(double d)
 		{
-			return truncated(::round(x));
+			return fast_unspecified_round_to_integer<std::int32_t>(::round(d));
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		std::int32_t inline rounded<>(float x)
+		std::int32_t inline rounded<>(float f)
 		{
-			return truncated(::roundf(x));
+			return fast_unspecified_round_to_integer<std::int32_t>(::roundf(f));
 		}
 
 	#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
@@ -45,9 +44,8 @@ namespace psy { namespace common { namespace math {
 		std::int32_t inline rounded<>(float x)
 		{
 			///\todo not always the fastest when using sse(2)
-			///\todo we can also use C1999's lrint if available
-			///\todo this custom asm is not very fast on some arch, the double "2^51 + 2^52" version might be faster
-			///\todo verify the rounding mode..
+			///\todo the double "2^51 + 2^52" version might be faster.
+			///\todo the rounding mode is UNSPECIFIED! (potential bug some code changes the FPU's rounding mode)...
 			std::int32_t i;
 			__asm
 			{ 
@@ -56,6 +54,7 @@ namespace psy { namespace common { namespace math {
 			}
 			return i;
 		}
+
 	#endif
 
 	#if defined BOOST_AUTO_TEST_CASE
