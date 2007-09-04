@@ -1,6 +1,9 @@
 /***************************************************************************
-*   Copyright (C) 2007 Psycledelics    *
-*   psycle.sf.net   *
+*   Copyright (C) 2007 Psycledelics					  *
+*   psycle.sf.net							  *
+*
+*   based on binread from sondar					  *
+*   Copyright (C) 2007 Stefan Nattkemper				  *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -33,7 +36,15 @@ namespace psy {
 			BinRead( std::istream & in );
 			~BinRead();
 
+			short readInt2LE();
+			unsigned short readUInt2LE();
+	
+			short readInt2BE();
+			unsigned short readUInt2BE();
+		
 			unsigned int readUInt4LE();
+			unsigned int readUInt4BE();
+			
 			int readInt4LE();
 			void readUIntArray4LE( unsigned int data[], int count );
 			void readIntArray4LE( int data[], int size );
