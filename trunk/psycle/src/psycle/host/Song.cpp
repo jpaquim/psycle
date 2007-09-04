@@ -1816,13 +1816,11 @@ namespace psycle
 							if (!pMac[i]->Load(pFile))
 							{
 								Machine* pOldMachine = pMac[i];
-								pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-								// dummy name goes here
-								sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-								pMac[i]->_type = MACH_DUMMY;
-								pOldMachine->_pSamplesL = NULL;
-								pOldMachine->_pSamplesR = NULL;
+								pMac[i] = new Dummy(pOldMachine);
+								pMac[i]->_macIndex=i;
 								zapObject(pOldMachine);
+								// Warning: It cannot be known if the missing plugin is a generator
+								// or an effect. This will be guessed from the busMachine array.
 							}
 							break;
 							}
@@ -1891,16 +1889,11 @@ namespace psycle
 								{
 									MessageBox(NULL,sError, "Loading Error", MB_OK);
 
-									Machine* pOldMachine = pTempMac;
-									pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+									pMac[i] = new Dummy(pTempMac);
 									pMac[i]->_macIndex=i;
-									pOldMachine->_pSamplesL = NULL;
-									pOldMachine->_pSamplesR = NULL;
-									// dummy name goes here
-									sprintf(pMac[i]->_editName,"X %s",pOldMachine->_editName);
-									zapObject(pOldMachine);
-									pMac[i]->_type = MACH_DUMMY;
-									((Dummy*)pMac[i])->wasVST = true;
+									zapObject(pTempMac);
+									if (type == MACH_VST ) pMac[i]->_mode = MACHMODE_FX;
+									else pMac[i]->_mode = MACHMODE_GENERATOR;
 								}
 							break;
 							}
@@ -1981,12 +1974,23 @@ namespace psycle
 				if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false )
 				{
 					int j=0;
+					unsigned char invmach[128];
+					memset(invmach,255,sizeof(invmach));
+					// The guessing procedure does not rely on the machmode because if a plugin
+					// is missing, then it is always tagged as a generator.
+					for (int i = 0; i < 64; i++)
+					{
+						if (busMachine[i] != 255) invmach[busMachine[i]]=i;
+					}
 					for ( int i=1;i<128;i++ ) // machine 0 is the Master machine.
 					{
-						if (_machineActive[i] && pMac[i]->_mode != MACHMODE_GENERATOR )
+						if (_machineActive[i])
 						{
-							busEffect[j]=i;	
-							j++;
+							if (invmach[i] == 255)
+							{
+								busEffect[j]=i;	
+								j++;
+							}
 						}
 					}
 					while(j < 64)
@@ -2009,8 +2013,8 @@ namespace psycle
 					}
 				}
 
-				// Patch 1.2: Fixes inconsistence when deleting a machine which couldn't be loaded
-				// (.dll not found, or Load failed), which is replaced then by a DUMMY machine.
+				// Patch 1.2: Fixes erroneous machine mode when a dummy replaces a bad plugin
+				// (missing dll, or when the load process failed).
 				// At the same time, we validate the indexes of the busMachine and busEffects arrays.
 				for ( int i=0;i<64;i++ ) 
 				{
@@ -2018,6 +2022,11 @@ namespace psycle
 					{
 						if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
 							busEffect[i] = 255;
+						// If there's a dummy, force it to be an effect
+						else if (pMac[busEffect[i]]->_type == MACH_DUMMY ) 
+						{
+							pMac[busEffect[i]]->_mode = MACHMODE_FX;
+						}
 						// Else if the machine is a generator, move it to gens bus.
 						// This can't happen, but it is here for completeness
 						else if (pMac[busEffect[i]]->_mode == MACHMODE_GENERATOR)
