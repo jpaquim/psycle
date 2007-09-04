@@ -91,7 +91,20 @@ namespace psycle { namespace helpers { namespace math {
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline fast_unspecified_round_to_integer<>(float f)
 		{
-			return fast_unspecified_round_to_integer<std::int32_t>(double(f));
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+				///\todo not always the fastest when using sse(2)
+				///\todo the double "2^51 + 2^52" version might be faster.
+				///\todo the rounding mode is UNSPECIFIED! (potential bug some code changes the FPU's rounding mode)...
+				std::int32_t i;
+				__asm
+				{ 
+					fld f;
+					fistp i;
+				}
+				return i;
+			#else
+				return fast_unspecified_round_to_integer<std::int32_t>(double(f));
+			#endif
 		}
 
 	#endif
