@@ -6,7 +6,7 @@
 #include "fast_unspecified_round_to_integer.hpp"
 namespace psy { namespace common { namespace math {
 
-	/// converts a floating point number to an integer by truncating toward -infinity
+	/// converts a floating point number to an integer by truncating positive numbers toward zero and negative ones toward an unspecified direction
 	template<typename Real> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated(Real x)
 	{
@@ -58,9 +58,8 @@ namespace psy { namespace common { namespace math {
 		{
 			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 				///\todo not always the fastest when using sse(2)
-				///\todo we can also use C1999's lrint if available
-				///\todo this custom asm is not very fast on some arch, the double "2^51 + 2^52" version might be faster
-				///\todo specify the rounding mode.. is this really a truncation toward -infinity, even with negative numbers?
+				///\todo this is not very fast on some arch, the double "2^51 + 2^52" version might be faster
+				///\todo the rounding mode is UNSPECIFIED! (potential bug some code changes the FPU's rounding mode)...
 				std::int32_t i;
 				double const half(0.5);
 				__asm

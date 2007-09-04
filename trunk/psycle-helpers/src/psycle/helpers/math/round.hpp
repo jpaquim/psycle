@@ -38,21 +38,38 @@ namespace psycle { namespace helpers { namespace math {
 			return fast_unspecified_round_to_integer<std::int32_t>(::roundf(f));
 		}
 
-	#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+	#else
 	
+		template<> UNIVERSALIS__COMPILER__CONST
+		std::int32_t inline rounded<>(double d)
+		{
+			BOOST_STATIC_ASSERT((sizeof d == 8));
+			union result_union
+			{
+				double d;
+				std::int32_t i;
+			} result;
+			result.d = d + 6755399441055744.0; // 2^51 + 2^52
+			return result.i;
+		}
+		
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline rounded<>(float x)
 		{
-			///\todo not always the fastest when using sse(2)
-			///\todo the double "2^51 + 2^52" version might be faster.
-			///\todo the rounding mode is UNSPECIFIED! (potential bug some code changes the FPU's rounding mode)...
-			std::int32_t i;
-			__asm
-			{ 
-				fld x;
-				fistp i;
-			}
-			return i;
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+				///\todo not always the fastest when using sse(2)
+				///\todo the double "2^51 + 2^52" version might be faster.
+				///\todo the rounding mode is UNSPECIFIED! (potential bug some code changes the FPU's rounding mode)...
+				std::int32_t i;
+				__asm
+				{ 
+					fld x;
+					fistp i;
+				}
+				return i;
+			#else
+				return rounded(double(f));
+			#endif
 		}
 
 	#endif
