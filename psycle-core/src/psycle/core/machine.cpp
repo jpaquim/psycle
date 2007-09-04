@@ -31,7 +31,7 @@ namespace psy { namespace core {
 				posix_memalign(&address, alignment, size);
 				x = static_cast<X*>(address);
 				// note: free with std::free
-		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+		#elif 0///\todo defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
 				x = static_cast<X*>(__mingw_aligned_malloc(size, alignment));
 				// note: free with _mingw_aligned_free
 		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
