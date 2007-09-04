@@ -1818,6 +1818,9 @@ namespace psycle
 								Machine* pOldMachine = pMac[i];
 								pMac[i] = new Dummy(pOldMachine);
 								pMac[i]->_macIndex=i;
+								std::stringstream s;
+								s << "X!" << pOldMachine->GetEditName();
+								pMac[i]->SetEditName(s.str());
 								zapObject(pOldMachine);
 								// Warning: It cannot be known if the missing plugin is a generator
 								// or an effect. This will be guessed from the busMachine array.
