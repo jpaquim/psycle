@@ -11,6 +11,7 @@ class Dummy : public Machine
 {
 public:
 	Dummy(int index);
+	Dummy(Machine *mac);
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; };

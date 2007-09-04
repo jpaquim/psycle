@@ -387,6 +387,7 @@ namespace psycle
 
 		public:
 			Machine();
+			Machine(Machine* mac);
 			Machine(MachineType msubclass, MachineMode mode, int id);
 			virtual ~Machine() throw();
 			virtual void SetSampleRate(int sr)

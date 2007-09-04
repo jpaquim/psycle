@@ -26,6 +26,15 @@ namespace psycle
 			sprintf(_editName, _psName);
 			wasVST = false;
 		}
+		Dummy::Dummy(Machine *mac)
+			:Machine(mac)
+		{
+			_type = MACH_DUMMY;
+			if (mac->_type == MACH_VST || mac->_type == MACH_VSTFX)
+				wasVST = true;
+			else
+				wasVST = false;
+		}
 		void Dummy::Work(int numSamples)
 		{
 			Machine::Work(numSamples);

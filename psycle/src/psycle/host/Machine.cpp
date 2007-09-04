@@ -129,6 +129,8 @@ namespace psycle
 			, _isMixerSend(false)
 			, _pSamplesL(0)
 			, _pSamplesR(0)
+			, _cpuCost(0)
+			, _wireCost(0)
 			, _lVol(0)
 			, _rVol(0)
 			, _panning(0)
@@ -162,11 +164,9 @@ namespace psycle
 		#endif
 
 			// Clear machine buffer samples
-			for (int c=0; c<STREAM_SIZE; c++)
-			{
-				_pSamplesL[c] = 0;
-				_pSamplesR[c] = 0;
-			}
+			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
+			helpers::dsp::Clear(_pSamplesR,STREAM_SIZE);
+
 			for (int c = 0; c<MAX_TRACKS; c++)
 			{
 				TriggerDelay[c]._cmd = 0;
@@ -185,14 +185,113 @@ namespace psycle
 			for (int i = 0; i<MAX_CONNECTIONS; i++)
 			{
 				_inputMachines[i]=-1;
-				_outputMachines[i]=-1;
+				_inputCon[i]=false;
 				_inputConVol[i]=0.0f;
 				_wireMultiplier[i]=0.0f;
+				_outputMachines[i]=-1;
 				_connection[i]=false;
-				_inputCon[i]=false;
+				_connectionPoint[i].x=0;
+				_connectionPoint[i].y=0;
 			}
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+			rms.count=0;
+			rms.AccumLeft=0.;
+			rms.AccumRight=0.;
+			rms.previousLeft=0.;
+			rms.previousRight=0.;
+#endif
 		}
+		Machine::Machine(Machine* mac)
+			: crashed_()
+#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+#elif	PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+			, fpu_exception_mask_()
+#endif
+			, _macIndex(mac->_macIndex)
+			, _type(mac->_type)
+			, _mode(mac->_mode)
+			, _bypass(mac->_bypass)
+			, _mute(mac->_mute)
+			, _waitingForSound(false)
+			, _standby(false)
+			, _worked(false)
+			, _isMixerSend(false)
+			, _pSamplesL(0)
+			, _pSamplesR(0)
+			, _cpuCost(0)
+			, _wireCost(0)
+			, _lVol(mac->_lVol)
+			, _rVol(mac->_rVol)
+			, _panning(mac->_panning)
+			, _x(mac->_x)
+			, _y(mac->_y)
+			, _numPars(0)
+			, _nCols(1)
+			, _numInputs(mac->_numInputs)
+			, _numOutputs(mac->_numOutputs)
+			, TWSSamples(0)
+			, TWSActive(false)
+			, _volumeCounter(0.0f)
+			, _volumeDisplay(0)
+			, _volumeMaxDisplay(0)
+			, _volumeMaxCounterLife(0)
+			, _pScopeBufferL(0)
+			, _pScopeBufferR(0)
+			, _scopeBufferIndex(0)
+			, _scopePrevNumSamples(0)
+		{
+			sprintf(_editName,mac->_editName);
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
+			posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
+#else
+			_pSamplesL = new float[STREAM_SIZE];
+			_pSamplesR = new float[STREAM_SIZE];
+#endif
 
+			// Clear machine buffer samples
+			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
+			helpers::dsp::Clear(_pSamplesR,STREAM_SIZE);
+
+			for (int c = 0; c<MAX_TRACKS; c++)
+			{
+				TriggerDelay[c]._cmd = 0;
+				TriggerDelayCounter[c]=0;
+				RetriggerRate[c]=256;
+				ArpeggioCount[c]=0;
+			}
+			for (int c = 0; c<MAX_TWS; c++)
+			{
+				TWSInst[c] = 0;
+				TWSDelta[c] = 0;
+				TWSCurrent[c] = 0;
+				TWSDestination[c] = 0;
+			}
+
+			for (int i(0);i<MAX_CONNECTIONS;i++)
+			{
+				_inputMachines[i] = mac->_inputMachines[i];
+				_inputCon[i] = mac->_inputCon[i];
+				_inputConVol[i] = mac->_inputConVol[i];
+				
+				_wireMultiplier[i] = (mac->_wireMultiplier[i]*mac->GetAudioRange()/GetAudioRange());
+				_outputMachines[i] = mac->_outputMachines[i];
+				_connection[i] = mac->_connection[i];
+				_connectionPoint[i].x=mac->_connectionPoint[i].x;
+				_connectionPoint[i].y=mac->_connectionPoint[i].y;
+			}
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+			rms.count=0;
+			rms.AccumLeft=0.;
+			rms.AccumRight=0.;
+			rms.previousLeft=0.;
+			rms.previousRight=0.;
+#endif
+		}
 		Machine::~Machine() throw()
 		{
 		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
