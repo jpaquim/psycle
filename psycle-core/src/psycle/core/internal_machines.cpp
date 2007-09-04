@@ -23,6 +23,25 @@ namespace psy {
 			//DefineStereoInput(1);
 			//DefineStereoOutput(1);
 			SetAudioRange(32768.0f);
+			wasVST=false;
+		}
+		Dummy::Dummy(Machine* oldmac)
+		:
+			Machine(oldmac,MACH_DUMMY,oldmac->mode())
+		{
+			SetAudioRange(32768.0f);
+
+			if (oldmac->type() == MACH_VST || oldmac->type() == MACH_VSTFX)
+			{
+				// we need to redo this, because SetAudioRange cannot be called before the Machine constructor.
+				for (int i=0; i<MAX_CONNECTIONS; i++)
+				{
+					_wireMultiplier[i]=oldmac->_wireMultiplier[i]*(oldmac->GetAudioRange()/GetAudioRange());
+				}
+				wasVST = true;
+			}
+			else
+				wasVST = false;
 		}
 		
 		Dummy::~Dummy() throw()

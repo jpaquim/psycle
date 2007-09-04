@@ -186,8 +186,6 @@ namespace psy { namespace core {
 		_waitingForSound(false),
 		_standby(false),
 		_worked(false),
-		_pSamplesL(new float[MAX_BUFFER_LENGTH]),
-		_pSamplesR(new float[MAX_BUFFER_LENGTH]),
 		_lVol(0),
 		_rVol(0),
 		_panning(0),
@@ -209,12 +207,21 @@ namespace psy { namespace core {
 		TWSSamples(0),
 		_outDry(256)
 	{
+	
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		_pSamplesL = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
+		_pSamplesR = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
+#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+		posix_memalign(reinterpret_cast<void**>(&_pSamplesL),16,MAX_BUFFER_LENGTH*sizeof(float));
+		posix_memalign(reinterpret_cast<void**>(&_pSamplesR),16,MAX_BUFFER_LENGTH*sizeof(float));
+#else
+		_pSamplesL = new float[MAX_BUFFER_LENGTH];
+		_pSamplesR = new float[MAX_BUFFER_LENGTH];
+#endif
 		// Clear machine buffer samples
-		for (int c=0; c<MAX_BUFFER_LENGTH; c++)
-		{
-			_pSamplesL[c] = 0;
-			_pSamplesR[c] = 0;
-		}
+		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
+		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
+		
 		for (int c = 0; c<MAX_TRACKS; c++)
 		{
 			TriggerDelay[c].setCommand( 0 );
@@ -237,6 +244,81 @@ namespace psy { namespace core {
 			_wireMultiplier[i]=0.0f;
 			_connection[i]=false;
 			_inputCon[i]=false;
+		}
+	}
+	Machine::Machine(Machine* mac,MachineType type,MachineMode mode)
+	:crashed_()
+	,type_(type_)
+	,mode_(mode_)
+	,id_(mac->id_)
+	,callbacks(mac->callbacks)
+	,song_(mac->song_)
+	,audio_range_(1.0f)
+	,editName_(mac->GetEditName())
+	,numInPorts(0)
+	,numOutPorts(0)
+	,_bypass(mac->_bypass)
+	,_mute(mac->_mute)
+	,_waitingForSound(false)
+	,_standby(false)
+	,_worked(false)
+	,_lVol(mac->_lVol)
+	,_rVol(mac->_rVol)
+	,_panning(mac->_panning)
+	,_x(mac->_x)
+	,_y(mac->_y)
+	,_numPars(0)
+	,_nCols(1)
+	,_connectedInputs(mac->_connectedInputs)
+	,_connectedOutputs(mac->_connectedOutputs)
+	,_volumeCounter(0.0f)
+	,_volumeDisplay(0)
+	,_volumeMaxDisplay(0)
+	,_volumeMaxCounterLife(0)
+	,_scopePrevNumSamples(0)
+	,_scopeBufferIndex(0)
+	,_pScopeBufferL(0)
+	,_pScopeBufferR(0)
+	,TWSActive(false)
+	,TWSSamples(0)
+	,_outDry(256)
+	{
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+		_pSamplesL = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
+		_pSamplesR = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
+#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+		posix_memalign(reinterpret_cast<void**>(&_pSamplesL),16,MAX_BUFFER_LENGTH*sizeof(float));
+		posix_memalign(reinterpret_cast<void**>(&_pSamplesR),16,MAX_BUFFER_LENGTH*sizeof(float));
+#else
+		_pSamplesL = new float[MAX_BUFFER_LENGTH];
+		_pSamplesR = new float[MAX_BUFFER_LENGTH];
+#endif
+		// Clear machine buffer samples
+		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
+		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
+
+		for (int c = 0; c<MAX_TRACKS; c++)
+		{
+			TriggerDelay[c].setCommand( 0 );
+			TriggerDelayCounter[c]=0;
+			RetriggerRate[c]=256;
+			ArpeggioCount[c]=0;
+		}
+		for (int c = 0; c<MAX_TWS; c++)
+		{
+			TWSInst[c] = 0;
+			TWSDelta[c] = 0;
+			TWSCurrent[c] = 0;
+			TWSDestination[c] = 0;
+		}
+		for (int i = 0; i<MAX_CONNECTIONS; i++)
+		{
+			_inputMachines[i]=mac->_inputMachines[i];
+			_outputMachines[i]=mac->_outputMachines[i];
+			_inputConVol[i]=mac->_inputConVol[i];
+			_wireMultiplier[i]=(mac->_wireMultiplier[i]*mac->GetAudioRange()/GetAudioRange());
+			_connection[i]=mac->_connection[i];
+			_inputCon[i]=mac->_inputCon[i];
 		}
 	}
 

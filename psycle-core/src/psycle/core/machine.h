@@ -416,6 +416,7 @@ namespace psy
 			///\{
 				public:
 					Machine(MachineCallbacks* callbacks, type_type type, mode_type mode, id_type id, CoreSong * song);
+					Machine(Machine *mac,type_type type, mode_type mode);
 					virtual ~Machine();
 			///\}
 			

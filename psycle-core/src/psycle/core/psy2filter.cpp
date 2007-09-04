@@ -161,9 +161,21 @@ namespace psy
 		PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
 		{
 			PatternEvent event;
-			event.setNote(*data++);
-			event.setInstrument(*data++);
-			event.setMachine(*data++);
+			//Convert old tweak effect command to common tweak.
+			if (data[0] == psy::core::commands::tweak_effect)
+			{
+				event.setNote(psy::core::commands::tweak);
+				data++;
+				event.setInstrument((*data)++);
+				event.setMachine((*data)+0x40);
+				data++;
+			}
+			else
+			{
+				event.setNote(*data++);
+				event.setInstrument(*data++);
+				event.setMachine(*data++);
+			}
 			event.setCommand(*data++);
 			event.setParameter(*data++);
 			return event;
@@ -208,7 +220,7 @@ namespace psy
 					file->Skip((PSY2_MAX_TRACKS-song.tracks())*EVENT_SIZE);
 				}
 			}
-			///\todo: ?
+			///\todo: verify that the sequence doesn't use this pattern, and if it does, make it use an empty pattern
 			/*
 			else
 			{
@@ -411,14 +423,11 @@ namespace psy
 						if (!pMac[i]->LoadPsy2FileFormat(plugin_path, file))
 						{
 							Machine* pOldMachine = pMac[i];
-							pMac[i] = new Dummy(*((Dummy*)pOldMachine));
+							pMac[i] = new Dummy(pOldMachine);
 							// dummy name goes here
 							std::stringstream s;
 							s << "X!" << pOldMachine->GetEditName();
-							pOldMachine->SetEditName(s.str());
-							pMac[i]->type(MACH_DUMMY);
-							pOldMachine->_pSamplesL = 0;
-							pOldMachine->_pSamplesR = 0;
+							pMac[i]->SetEditName(s.str());
 							delete pOldMachine; pOldMachine = 0;
 						}
 						break;
@@ -439,18 +448,21 @@ namespace psy
 						//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
 						//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 						pMac[i] = new Dummy(callbacks,i,&song);
+						if (type == MACH_VST ) pMac[i]->mode(MACHMODE_FX);
+						else pMac[i]->mode(MACHMODE_GENERATOR);
+						static_cast<Dummy*>(pMac[i])->wasVST=true;
 						goto init_and_load_VST;
 					case MACH_SCOPE:
 					case MACH_DUMMY:
 						pMac[i] = new Dummy(callbacks,i,&song);
 						goto init_and_load;
 					default:
-					{
-						std::ostringstream s;
-						s << "unkown machine type: " << type;
-						//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
-					}
-					pMac[i] = new Dummy(callbacks,i,&song);
+						{
+							std::ostringstream s;
+							s << "unkown machine type: " << type;
+							//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+						}
+						pMac[i] = new Dummy(callbacks,i,&song);
 		
 					init_and_load:
 						pMac[i]->Init();
@@ -526,6 +538,7 @@ namespace psy
 							((Dummy*)pMac[i])->wasVST = true;
 						}
 						#endif
+						break;
 					}
 					pMac[i]->SetPosX(x);
 					pMac[i]->SetPosY(y);
@@ -567,12 +580,23 @@ namespace psy
 			if ( file->Read(busEffect) == false )
 			{
 				int j=0;
+				unsigned char invmach[128];
+				memset(invmach,255,sizeof(invmach));
+				// The guessing procedure does not rely on the machmode because if a plugin
+				// is missing, then it is always tagged as a generator.
+				for (int i = 0; i < 64; i++)
+				{
+					if (busMachine[i] != 255) invmach[busMachine[i]]=i;
+				}
 				for ( i=1;i<128;i++ ) // Machine 0 is the master machine.
 				{
-					if (_machineActive[i] && pMac[i]->mode() != MACHMODE_GENERATOR )
+					if (_machineActive[i])
 					{
-						busEffect[j]=i;
-						j++;
+						if (invmach[i] == 255)
+						{
+							busEffect[j]=i;
+							j++;
+						}
 					}
 				}
 				for (; j < 64; j++)
@@ -594,8 +618,8 @@ namespace psy
 				}
 			}
 
-			// Patch 1.2: Fixes inconsistence when deleting a machine which couldn't be loaded
-			// (.dll not found, or Load failed), which is replaced then by a DUMMY machine.
+			// Patch 1.2: Fixes erroneous machine mode when a dummy replaces a bad plugin
+			// (missing dll, or when the load process failed).
 			// At the same time, we validate the indexes of the busMachine and busEffects arrays.
 			for ( i=0;i<64;i++ ) 
 			{
@@ -603,6 +627,11 @@ namespace psy
 				{
 					if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
 						busEffect[i] = 255;
+					// If there's a dummy, force it to be an effect
+					else if (pMac[busEffect[i]]->type() == MACH_DUMMY ) 
+					{
+						pMac[busEffect[i]]->mode(MACHMODE_FX);
+					}
 					// Else if the machine is a generator, move it to gens bus.
 					// This can't happen, but it is here for completeness
 					else if (pMac[busEffect[i]]->mode() == MACHMODE_GENERATOR)
