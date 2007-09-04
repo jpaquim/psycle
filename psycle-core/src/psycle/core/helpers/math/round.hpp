@@ -2,6 +2,8 @@
 #include <universalis/compiler.hpp>
 #include <cmath>
 #include <cstdint>
+#include "truncate.hpp"
+
 namespace psy { namespace common { namespace math {
 
 	/// converts a floating point number to an integer by rounding to the nearest integer.
@@ -22,19 +24,19 @@ namespace psy { namespace common { namespace math {
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline rounded<>(long double x)
 		{
-			return ::roundl(x);
+			return /*truncated has no overload for long double yet*/ lrint(::roundl(x));
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline rounded<>(double x)
 		{
-			return ::round(x);
+			return truncated(::round(x));
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline rounded<>(float x)
 		{
-			return ::roundf(x);
+			return truncated(::roundf(x));
 		}
 
 	#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
