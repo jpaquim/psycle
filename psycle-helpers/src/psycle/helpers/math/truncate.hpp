@@ -86,8 +86,8 @@ namespace psycle { namespace helpers { namespace math {
 			BOOST_CHECK(truncated(-1.4) == -2 || truncated(-1.4) == -1);
 			BOOST_CHECK(truncated(+1.6f) == +1);
 			BOOST_CHECK(truncated(+1.4f) == +1);
-			BOOST_CHECK(truncated(-1.6f) == -2 || truncated(-1.6f) == -2);
-			BOOST_CHECK(truncated(-1.4f) == -2 || truncated(-1.4f) == -2);
+			BOOST_CHECK(truncated(-1.6f) == -2 || truncated(-1.6f) == -1);
+			BOOST_CHECK(truncated(-1.4f) == -2 || truncated(-1.4f) == -1);
 		}
 	#endif
 }}}
