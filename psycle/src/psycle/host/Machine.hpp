@@ -308,7 +308,8 @@ namespace psycle
 			///\name general information
 			///\{
 				public:
-					///\todo in v1.9 there was virtual void SetEditName(std::string const & newname) { _editName = newname; }
+					///\todo: update this to std::string.
+					virtual void SetEditName(std::string const & newname) { std::strncpy(_editName,newname.c_str(),32); }
 					const char * GetEditName() { return _editName; }
 				public:///\todo private:
 					///\todo this was a std::string in v1.9
