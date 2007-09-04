@@ -291,7 +291,7 @@ namespace psycle
 					virtual int GetFreeOutputWire(int slottype=0);
 					virtual int GetInputSlotTypes() { return 1; }
 					virtual int GetOutputSlotTypes() { return 1; }
-					virtual float GetAudioRange()=0;
+					virtual float GetAudioRange() { return 1.0f; }
 
 			///\}
 

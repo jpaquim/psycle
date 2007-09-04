@@ -156,8 +156,8 @@ namespace psycle
 			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
-			posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
+			posix_memalign(&static_cast<void*>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(&static_cast<void*>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
 		#else
 			_pSamplesL = new float[STREAM_SIZE];
 			_pSamplesR = new float[STREAM_SIZE];
@@ -246,8 +246,8 @@ namespace psycle
 			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 #elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
-			posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
+			posix_memalign(&static_cast<void*>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(&static_cast<void*>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
 #else
 			_pSamplesL = new float[STREAM_SIZE];
 			_pSamplesR = new float[STREAM_SIZE];
@@ -277,7 +277,7 @@ namespace psycle
 				_inputMachines[i] = mac->_inputMachines[i];
 				_inputCon[i] = mac->_inputCon[i];
 				_inputConVol[i] = mac->_inputConVol[i];
-				
+				//I am unsure that this conversion will always work. Would need some testing.
 				_wireMultiplier[i] = (mac->_wireMultiplier[i]*mac->GetAudioRange()/GetAudioRange());
 				_outputMachines[i] = mac->_outputMachines[i];
 				_connection[i] = mac->_connection[i];
