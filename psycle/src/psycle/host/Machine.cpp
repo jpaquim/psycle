@@ -156,8 +156,8 @@ namespace psycle
 			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(&static_cast<void*>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-			posix_memalign(&static_cast<void*>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
 		#else
 			_pSamplesL = new float[STREAM_SIZE];
 			_pSamplesR = new float[STREAM_SIZE];
@@ -246,8 +246,8 @@ namespace psycle
 			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 #elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(&static_cast<void*>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-			posix_memalign(&static_cast<void*>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
 #else
 			_pSamplesL = new float[STREAM_SIZE];
 			_pSamplesR = new float[STREAM_SIZE];

@@ -246,8 +246,8 @@ namespace psycle
 				_selectedins[i].pleft = static_cast<float*>(_aligned_malloc(_ASIObufferSize*sizeof(float),16));
 				_selectedins[i].pright = static_cast<float*>(_aligned_malloc(_ASIObufferSize*sizeof(float),16));
 			#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-				posix_memalign(_selectedins[i].pleft,16,_ASIObufferSize*sizeof(float));
-				posix_memalign(_selectedins[i].pright,16,_ASIObufferSize*sizeof(float));
+				posix_memalign(reinterpret_cast<void**>(_selectedins[i].pleft),16,_ASIObufferSize*sizeof(float));
+				posix_memalign(reinterpret_cast<void**>(_selectedins[i].pright),16,_ASIObufferSize*sizeof(float));
 			#else
 				_selectedins[i].pleft = new float[_ASIObufferSize];
 				_selectedins[i].pright = new float[_ASIObufferSize];

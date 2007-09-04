@@ -268,8 +268,8 @@ namespace psycle
 			port.pleft = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
 			port.pright = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
 		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(port.pleft,16,_blockSize*sizeof(float));
-			posix_memalign(port.pright,16,_blockSize*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(port.pleft),16,_blockSize*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(port.pright),16,_blockSize*sizeof(float));
 		#else
 			port.pleft = new float[_blockSize];
 			port.pright = new float[_blockSize];

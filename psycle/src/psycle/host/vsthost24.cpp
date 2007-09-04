@@ -172,8 +172,8 @@ namespace psycle
 						_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 						_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
 					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-						posix_memalign(_pSamplesL,16,STREAM_SIZE*sizeof(float));
-						posix_memalign(_pSamplesR,16,STREAM_SIZE*sizeof(float));
+						posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+						posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
 					#else
 						_pOutSamplesL = new float[STREAM_SIZE];
 						_pOutSamplesR = new float[STREAM_SIZE];
