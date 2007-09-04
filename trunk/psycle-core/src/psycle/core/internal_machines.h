@@ -15,6 +15,7 @@ namespace psy {
 		{
 		public:
 			Dummy(MachineCallbacks* callbacks, id_type index, CoreSong* song);
+			Dummy(Machine *mac);
 			virtual ~Dummy() throw();
 			virtual int GenerateAudio(int numSamples);
 			virtual std::string GetName() const { return _psName; };
