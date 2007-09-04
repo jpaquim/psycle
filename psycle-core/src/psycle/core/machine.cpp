@@ -23,7 +23,6 @@ namespace psy { namespace core {
 
 	///\todo general purpose => move this to universalis/operating_system/aligned_malloc.hpp or something
 	///\todo provide function to free the allocated memory?
-	///\todo make this a template to allocate an array of 'count' elements
 	template<typename X>
 	void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
 		std::size_t const size(count * sizeof(X));
