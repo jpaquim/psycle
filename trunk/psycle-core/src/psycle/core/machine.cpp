@@ -16,7 +16,39 @@
 #include "plugin.h"
 #include "sampler.h"
 
+#include <cstddef>
+#include <cstdlib> // for posix_memalign
+
 namespace psy { namespace core {
+
+	///\todo general purpose => move this to universalis/operating_system/aligned_malloc.hpp or something
+	///\todo provide function to free the allocated memory?
+	///\todo make this a template to allocate an array of 'count' elements
+	template<typename X>
+	void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
+		std::size_t const size(count * sizeof(X));
+		#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+				void * address;
+				posix_memalign(&address, alignment, size);
+				x = static_cast<X*>(address);
+				// note: free with std::free
+		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+				x = static_cast<X*>(_mingw_aligned_malloc(size, alignment);
+				// note: free with _mingw_aligned_free
+		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+				x = static_cast<X*>(_aligned_malloc(size, alignment);
+				///\todo note: free with what?
+		#else
+			// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
+			// memalign on SunOS but not BSD (#include both <cstdlib> and <cmalloc>)
+			// note that memalign is declared obsolete and does not specify how to free the allocated memory.
+			
+			size; // unused
+			x = new X[count];
+			// note: free with delete[]
+		#endif
+	}
+
 	///\todo: This is the official panning formula for MIDI. Implement it in psycle?
 	// Left Channel Gain [dB] = 20*log (cos (Pi/2* max(0,CC#10 – 1)/126)
 	// Right Channel Gain [dB] = 20*log (sin (Pi /2* max(0,CC#10 – 1)/126)
@@ -63,7 +95,7 @@ namespace psy { namespace core {
 		{
 			s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
 			//host::loggers::warning(s.str());
-															std::cerr << s.str() << std::endl;
+			std::cerr << s.str() << std::endl;
 		}
 		else
 		{
@@ -83,7 +115,7 @@ namespace psy { namespace core {
 			}
 		}
 		//MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
-											//std::cerr << (crash) ? "Exception (Crash)" : "Exception (Software)" << std::endl;
+		//std::cerr << (crash) ? "Exception (Crash)" : "Exception (Software)" << std::endl;
 		///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 	}
 
@@ -207,17 +239,9 @@ namespace psy { namespace core {
 		TWSSamples(0),
 		_outDry(256)
 	{
-	
-#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-		_pSamplesL = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
-		_pSamplesR = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
-#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-		posix_memalign(reinterpret_cast<void**>(&_pSamplesL),16,MAX_BUFFER_LENGTH*sizeof(float));
-		posix_memalign(reinterpret_cast<void**>(&_pSamplesR),16,MAX_BUFFER_LENGTH*sizeof(float));
-#else
-		_pSamplesL = new float[MAX_BUFFER_LENGTH];
-		_pSamplesR = new float[MAX_BUFFER_LENGTH];
-#endif
+		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
+		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
+
 		// Clear machine buffer samples
 		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
 		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
@@ -283,17 +307,11 @@ namespace psy { namespace core {
 	,TWSSamples(0)
 	,_outDry(256)
 	{
-#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		_pSamplesL = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
-		_pSamplesR = static_cast<float*>(_aligned_malloc(MAX_BUFFER_LENGTH*sizeof(float),16));
-#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		posix_memalign(reinterpret_cast<void**>(&_pSamplesL),16,MAX_BUFFER_LENGTH*sizeof(float));
-		posix_memalign(reinterpret_cast<void**>(&_pSamplesR),16,MAX_BUFFER_LENGTH*sizeof(float));
-#else
-		_pSamplesL = new float[MAX_BUFFER_LENGTH];
-		_pSamplesR = new float[MAX_BUFFER_LENGTH];
-#endif
+		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
+		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
+		
 		std::cout << "one, two three.. testing.." << std::endl;
+
 		// Clear machine buffer samples
 		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
 		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
