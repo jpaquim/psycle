@@ -248,12 +248,13 @@ namespace psy {
 		#if 0 ///\todo
 			Quantize16AndDeinterlace(input,samples[0],samples[1]);
 		#else
-		while (count-- > 0) {
-			*samples[0] = static_cast<short int>( *input++ );
-			samples[0] += steps[0];
-			*samples[1] = static_cast<short int>( *input++ );
-			samples[1] += steps[1];
-		}
+			while (count-- > 0) {
+				*samples[0] = static_cast<short int>( *input++ );
+				samples[0] += steps[0];
+				*samples[1] = static_cast<short int>( *input++ );
+				samples[1] += steps[1];
+			}
+		#endif
 	}
 	
 	int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params,
