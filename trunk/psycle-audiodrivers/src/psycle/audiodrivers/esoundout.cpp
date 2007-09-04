@@ -201,10 +201,11 @@ namespace psy {
 				int newCount = bufSize / channels_;
 				while(!killThread_)
 				{
-						float const * input(callback_(callbackContext_, newCount));
-					for (int i = 0; i < bufSize; i++) {
-						buf[i] = *input++;
-					}
+					float const * input(callback_(callbackContext_, newCount));
+					//for (int i = 0; i < bufSize; i++) {
+					//	buf[i] = *input++;
+					//}
+					Quantize16(input,buf,newCount);
 					if(write(fd_, buf, sizeof buf) < 0) std::cerr << "psycle: esound: write failed.\n";
 				}
 			} else {

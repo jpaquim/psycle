@@ -245,12 +245,13 @@ namespace psy {
 		
 		float const * input(_pCallback(_callbackContext, count));
 		
-		while (count-- > 0) {
-		*samples[0] = static_cast<short int>( *input++ );
-		samples[0] += steps[0];
-		*samples[1] = static_cast<short int>( *input++ );
-		samples[1] += steps[1];
-		}
+		Quantize16AndDeinterlace(input,samples[0],samples[1]);
+		//while (count-- > 0) {
+		//*samples[0] = static_cast<short int>( *input++ );
+		//samples[0] += steps[0];
+		//*samples[1] = static_cast<short int>( *input++ );
+		//samples[1] += steps[1];
+		//}
 	}
 	
 	int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params,
