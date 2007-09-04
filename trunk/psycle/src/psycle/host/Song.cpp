@@ -1894,6 +1894,9 @@ namespace psycle
 
 									pMac[i] = new Dummy(pTempMac);
 									pMac[i]->_macIndex=i;
+									std::stringstream s;
+									s << "X!" << pTempMac->GetEditName();
+									pMac[i]->SetEditName(s.str());
 									zapObject(pTempMac);
 									if (type == MACH_VST ) pMac[i]->_mode = MACHMODE_FX;
 									else pMac[i]->_mode = MACHMODE_GENERATOR;
