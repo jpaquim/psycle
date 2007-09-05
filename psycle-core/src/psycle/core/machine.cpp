@@ -22,7 +22,6 @@
 namespace psy { namespace core {
 
 	///\todo general purpose => move this to universalis/operating_system/aligned_malloc.hpp or something
-	///\todo provide function to free the allocated memory?
 	template<typename X>
 	void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
 		std::size_t const size(count * sizeof(X));
@@ -45,6 +44,21 @@ namespace psy { namespace core {
 			size; // unused
 			x = new X[count];
 			// note: free with delete[]
+		#endif
+	}
+
+	///\todo general purpose => move this to universalis/operating_system/aligned_dealloc.hpp or something
+	template<typename X>
+	void aligned_dealloc(X *& address)
+	{
+		#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			free(address); address=0;
+		#elif 0///\todo: defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+			_aligned_free(address); address=0;
+		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			_aligned_free(address); address=0;
+		#else
+			delete[] address; address=0;
 		#endif
 	}
 
@@ -343,8 +357,8 @@ namespace psy { namespace core {
 
 	Machine::~Machine()
 	{
-		delete[] _pSamplesL; _pSamplesL = 0;
-		delete[] _pSamplesR; _pSamplesR = 0;
+		aligned_dealloc(_pSamplesL);
+		aligned_dealloc(_pSamplesR);
 	}
 
 	void Machine::Init()
