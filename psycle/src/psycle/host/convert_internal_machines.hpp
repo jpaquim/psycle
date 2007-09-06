@@ -50,11 +50,7 @@ namespace psycle
 						riff.Read(machine._inputConVol, sizeof machine._inputConVol);
 						riff.Read(machine._connection, sizeof machine._connection);
 						riff.Read(machine._inputCon, sizeof machine._inputCon);
-						#if defined (_WINAMP_PLUGIN_)
-							riff.Skip(96) ; // sizeof(CPoint) == 8
-						#else
-							riff.Read(machine._connectionPoint, sizeof machine._connectionPoint);
-						#endif
+						riff.Read(machine._connectionPoint, sizeof machine._connectionPoint);
 						riff.Read(&machine._numInputs, sizeof machine._numInputs);
 						riff.Read(&machine._numOutputs, sizeof machine._numOutputs);
 						riff.Read(&machine._panning, sizeof machine._panning);

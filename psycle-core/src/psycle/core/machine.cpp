@@ -249,8 +249,7 @@ namespace psy { namespace core {
 		_pScopeBufferL(0),
 		_pScopeBufferR(0),
 		TWSActive(false),
-		TWSSamples(0),
-		_outDry(256)
+		TWSSamples(0)
 	{
 		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
 		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
@@ -318,18 +317,14 @@ namespace psy { namespace core {
 	,_pScopeBufferR(0)
 	,TWSActive(false)
 	,TWSSamples(0)
-	,_outDry(256)
 	{
 		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
 		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
 		
-		std::cout << "one, two three.. testing.." << std::endl;
-
 		// Clear machine buffer samples
 		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
 		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
 
-		std::cout << "ok, we got to enter the correct function" << std::endl;
 		for (int c = 0; c<MAX_TRACKS; c++)
 		{
 			TriggerDelay[c].setCommand( 0 );

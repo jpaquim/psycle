@@ -87,6 +87,9 @@ namespace psy {
 			static float* _pMasterSamples;
 			int peaktime;
 			float currentpeak;
+			float _lMax;
+			float _rMax;
+			int _outDry;
 			bool vuupdated;
 		protected:
 			static std::string _psName;

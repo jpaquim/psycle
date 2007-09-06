@@ -689,13 +689,6 @@ namespace psy
 				///\todo hardcoded limits and wastes
 				float TWSDestination[MAX_TWS];
 			///\}
-			
-			///\name please someone document these
-			///\{ 
-				float _lMax;
-				float _rMax;
-				int _outDry;
-			///\}
 		};
 	}
 }
