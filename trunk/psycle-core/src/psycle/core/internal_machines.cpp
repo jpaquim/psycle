@@ -307,6 +307,9 @@ namespace psy {
 		:
 			Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
+			_lMax(0),
+			_rMax(0),
+			_outDry(256),
 			decreaseOnClip(false)
 		{
 			SetEditName("Master");

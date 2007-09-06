@@ -91,11 +91,11 @@ int main(int argument_count, char * arguments[]) {
 		std::cout << "psycle: player: (enter anything to stop)\n";
 		std::string s; std::cin >> s;
 		
-		///\todo segfaults! ... this is time to implement proper thread synchronization
-		//player.stop();
+		player.stop();
+		configuration.setDriverByName("silent");
+		player.setDriver(*configuration._pOutputDriver);
 	}
 
-		///\todo segfaults! ... this is time to implement proper thread synchronization
 	if(output_file_name.length()) player.stopRecording();
 	
 	return 0;
