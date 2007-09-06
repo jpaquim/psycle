@@ -3,6 +3,7 @@
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
+#include <cmath>
 namespace psy { namespace common { namespace math {
 
 	/// converts a floating point number to an integer by rounding in an unspecified way
