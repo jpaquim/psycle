@@ -214,7 +214,9 @@ namespace psy
 						PatternEvent event = convertEntry(entry);
 						if (!event.empty()) {
 							float position = y / (float) song.linesPerBeat();
-							(*pat)[position].notes()[x] = event;
+							if (event.note() == commands::tweak) {
+								(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
+							} else (*pat)[position].notes()[x] = event;
 						}
 					}
 					file->Skip((PSY2_MAX_TRACKS-song.tracks())*EVENT_SIZE);
