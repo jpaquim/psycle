@@ -4,3 +4,5 @@ set -x
 /opt/llvm/bin/llvm-g++ main.cpp    -o out-llvm-direct -O3
 /opt/llvm/bin/llvm-g++ main.cpp    -o out-main.bc     -O4 -emit-llvm -c
 /opt/llvm/bin/llvm-ld  out-main.bc -o out-llvm-ld     -O4 -native -lstdc++
+/opt/llvm/bin/llvm-g++ main.cpp    -o out-main.ll     -O4 -S
+diff *.ll
