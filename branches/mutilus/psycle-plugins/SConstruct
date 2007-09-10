@@ -1,0 +1,315 @@
+#! /usr/bin/env scons
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006-2007 johan boule <bohan@jabber.org>
+# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
+
+# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+
+# project
+
+from packageneric.generic.scons.project import project
+project = project(name = 'psycle-plugins')
+
+# source package
+
+from packageneric.generic.scons.source_package import source_package
+from packageneric.generic.scons.version import version
+source_package = source_package(project,
+	name = project.name(),
+	version = version(1, 9),
+	description = 'plugins for psycle',
+	long_description = \
+		"these are the plugins for psycle."
+		"psycle is a modular music creation studio."
+)
+
+source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
+
+# external packages
+
+from packageneric.generic.scons.check.external_package import external_package as external_package_check
+from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
+
+import os.path
+universalis = os.path.join(os.pardir, 'universalis', 'SConstruct')
+if os.path.exists(universalis): universalis = project.subscript(universalis).local_package()
+else:
+	universalis = external_package_check(project, name = 'universalis',
+		url = 'http://psycle.sourceforge.net',
+		distribution_packages = {
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/universalis-dev.xml',
+			'debian and ubuntu': 'lib-universalis-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
+		dependencies = [pkg_config_check(project, name = 'universalis >= 0')]
+	)
+
+# ... there is no external package for now. stk should be added later.
+
+# modules and pkg-config packages
+
+from packageneric.generic.scons.module import module
+from packageneric.generic.scons.find import find
+from packageneric.generic.scons.pkg_config_package import pkg_config_package
+
+modules = []
+plugin_modules = []
+
+# todo we fucking need to agree on a naming convention here!
+if project.platform() in ('win64', 'win32'):
+	def plugin_file_name(name): return 'lib-xpsycle.plugin.' + name
+else:
+	def plugin_file_name(name): return '-xpsycle.plugin.' + name
+
+class plugin_module(module):
+	def __init__(self, name, description, *args, **kw):
+		module.__init__(self, source_package,
+			name = plugin_file_name(name),
+			version = source_package.version(),
+			description = description,
+			dependencies = [universalis],
+			target_type = module.target_types.loadable
+		)
+		self.contexes().source().compilers().cxx().paths().add(['src'])
+		plugin_modules.append(self)
+
+	def add_plugin_sources(self, include_patterns, exclude_patterns = None):
+		self.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', include_pattern) for include_pattern in include_patterns], exclude_patterns))
+
+project.trace('plugins time 0') ; import time ; t = time.time ; t0 = t()
+
+plugin_module('gainer', 'ayeternal gainer').add_plugin_sources(['gainer.cpp'])
+plugin_module('delay', 'ayeternal delay').add_plugin_sources(['delay.cpp'])
+plugin_module('flanger', 'ayeternal flanger').add_plugin_sources(['flanger.cpp'])
+plugin_module('filter_2_poles', 'ayeternal 2-pole filter').add_plugin_sources(['filter_2_poles.cpp'])
+plugin_module('distortion', 'ayeternal distortion').add_plugin_sources(['distortion.cpp'])
+plugin_module('ring_modulator', 'ayeternal psyosc').add_plugin_sources(['ring_modulator.cpp'])
+plugin_module('schorus', 'sartorius chorus').add_plugin_sources(['SChorus.cpp'])
+plugin_module('audacity_compressor', 'audacity compressor').add_plugin_sources([os.path.join('audacity', '*ompressor.cpp')])
+plugin_module('audacity_phaser', 'audacity phaser').add_plugin_sources([os.path.join('audacity', '*_phaser.cpp')])
+plugin_module('wahwah', 'audacity wahwah').add_plugin_sources([os.path.join('audacity', 'wahwah.cpp')])
+
+dw_filter_module = module(source_package,
+	name = 'dw_filter',
+	version = source_package.version(),
+	description = 'dw filter',
+	dependencies = [universalis],
+	target_type = module.target_types.shared_but_pe
+)
+dw_filter_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'dw', 'dw_filter.cpp')]))
+dw_filter_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'dw', 'dw_filter.hpp')]))
+dw_filter_package = pkg_config_package(project,
+	name = 'dw-filter-' + str(dw_filter_module.version().major()),
+	version = dw_filter_module.version(),
+	description = dw_filter_module.description(),
+	modules = [dw_filter_module]
+)
+dw_filter = dw_filter_package.local_package()
+
+dw_eq = plugin_module('dw_eq', 'dw equalizer')
+dw_eq.add_dependencies([dw_filter])
+dw_eq.add_plugin_sources([os.path.join('dw', 'eq', '*.cpp')])
+
+plugin_module('dw_granulizer', 'dw granulizer').add_plugin_sources([os.path.join('dw', 'granulizer', '*.cpp')])
+plugin_module('dw_iopan', 'dw iopan').add_plugin_sources([os.path.join('dw', 'iopan', '*.cpp')])
+plugin_module('dw_tremolo', 'dw tremolo').add_plugin_sources([os.path.join('dw', 'tremolo', '*.cpp')])
+plugin_module('thunderpalace_softsat', 'thunderpalace softsat').add_plugin_sources([os.path.join('graue', 'softsat', '*.cpp')])
+plugin_module('maeq', 'moreamp equalizer').add_plugin_sources([os.path.join('moreamp_eq', '*.cpp')])
+plugin_module('legasynth_303', 'legasynth 303').add_plugin_sources([os.path.join('legasynth', '*.cpp')])
+plugin_module('ladspa_gverb', 'gverb').add_plugin_sources([os.path.join('gverb', '*.cpp')])
+plugin_module('blitz', 'voskomo blitz').add_plugin_sources([os.path.join('voskomo', 'blitz', '*.cpp')])
+plugin_module('gamefx', 'voskomo gamefx').add_plugin_sources([os.path.join('voskomo', 'gamefx', '*.cpp')])
+plugin_module('jmdrum', 'josep ma drum').add_plugin_sources([os.path.join('jm_drums', '*.cpp')])
+plugin_module('haas', 'haas').add_plugin_sources(['haas.cpp'])
+plugin_module('alk_muter', 'alk muter').add_plugin_sources([os.path.join('alk_muter', '*.cpp')])
+plugin_module('negative', 'bdzld negative').add_plugin_sources(['negative.cpp'])
+plugin_module('karlkox_surround', 'karlkox surround').add_plugin_sources([os.path.join('surround', '*.cpp')])
+plugin_module('pooplog_autopan', 'pooplog autopan').add_plugin_sources([os.path.join('pooplog_autopan', '*.cpp')])
+plugin_module('pooplog_filter', 'pooplog filter').add_plugin_sources([os.path.join('pooplog_filter', '*.cpp')])
+plugin_module('pooplog_lofi_processor', 'pooplog lo-fi processor').add_plugin_sources([os.path.join('pooplog_lofi', '*.cpp')])
+plugin_module('pooplog_scratch_master', 'pooplog scratch master').add_plugin_sources([os.path.join('pooplog_scratch', '*.cpp')])
+plugin_module('pooplog_scratch_master_2', 'pooplog scratch master 2').add_plugin_sources([os.path.join('pooplog_scratch_2', '*.cpp')])
+plugin_module('pooplog_delay', 'pooplog delay').add_plugin_sources([os.path.join('pooplog_delay', '*.cpp')])
+plugin_module('pooplog_delay_light', 'pooplog delay light').add_plugin_sources([os.path.join('pooplog_delay_light', '*.cpp')])
+plugin_module('pooplog_fm_laboratory', 'pooplog fm laboratory').add_plugin_sources([os.path.join('pooplog_synth', '*.cpp')])
+plugin_module('pooplog_fm_light', 'pooplog fm laboratory light').add_plugin_sources([os.path.join('pooplog_synth_light', '*.cpp')])
+plugin_module('pooplog_fm_ultralight', 'pooplog fm laboratory ultralight').add_plugin_sources([os.path.join('pooplog_synth_ultralight', '*.cpp')])
+
+druttis_band_limited_wave_tables_module = module(source_package,
+	name = 'druttis_band_limited_wave_tables',
+	version = source_package.version(),
+	description = 'druttis band-limited wave tables',
+	dependencies = [universalis]
+)
+druttis_band_limited_wave_tables_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'blwtbl', '*.cpp')]))
+druttis_band_limited_wave_tables_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'blwtbl', '*.' + extension) for extension in ('hpp', 'h')]))
+druttis_band_limited_wave_tables_package = pkg_config_package(project,
+	name = 'druttis-band-limited-wave-tables-' + str(druttis_band_limited_wave_tables_module.version().major()),
+	version = druttis_band_limited_wave_tables_module.version(),
+	description = druttis_band_limited_wave_tables_module.description(),
+	modules = [druttis_band_limited_wave_tables_module]
+)
+druttis_band_limited_wave_tables = druttis_band_limited_wave_tables_package.local_package()
+
+druttis_dsp_module = module(source_package,
+	name = 'druttis_dsp',
+	version = source_package.version(),
+	description = 'druttis dsp',
+	dependencies = [druttis_band_limited_wave_tables]
+)
+druttis_dsp_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'dsp', '*.cpp')]))
+druttis_dsp_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'dsp', '*.' + extension) for extension in ('hpp', 'h')]))
+druttis_dsp_package = pkg_config_package(project,
+	name = 'druttis-dsp-' + str(druttis_dsp_module.version().major()),
+	version = druttis_dsp_module.version(),
+	description = druttis_dsp_module.description(),
+	modules = [druttis_dsp_module]
+)
+druttis_dsp = druttis_dsp_package.local_package()
+
+druttis_lib_module = module(source_package,
+	name = 'druttis_lib',
+	version = source_package.version(),
+	description = 'druttis lib',
+	dependencies = []
+)
+druttis_lib_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'Lib', file) for file in ('BiQuad.cpp', 'CEnvelope.cpp', 'DLineN.cpp')]))
+druttis_lib_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'Lib', file) for file in ('BiQuad.h', 'CEnvelope.h', 'DLineN.h')]))
+druttis_lib_package = pkg_config_package(project,
+	name = 'druttis-lib-' + str(druttis_lib_module.version().major()),
+	version = druttis_lib_module.version(),
+	description = druttis_lib_module.description(),
+	modules = [druttis_lib_module]
+)
+druttis_lib = druttis_lib_package.local_package()
+
+druttis_dsp_lib_module = module(source_package,
+	name = 'druttis_dsp_lib',
+	version = source_package.version(),
+	description = 'druttis dsp lib',
+	dependencies = []
+)
+druttis_dsp_lib_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'DspLib', 'AllPass.cpp')]))
+druttis_dsp_lib_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'DspLib', 'AllPass.h')]))
+druttis_dsp_lib_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'Lib', 'DspAlgs.cpp')])) # todo header is lowercase while source is not
+druttis_dsp_lib_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'Lib', 'dspalgs.h')]))
+druttis_dsp_lib_package = pkg_config_package(project,
+	name = 'druttis-dsp-lib-' + str(druttis_dsp_lib_module.version().major()),
+	version = druttis_dsp_lib_module.version(),
+	description = druttis_dsp_lib_module.description(),
+	modules = [druttis_dsp_lib_module]
+)
+druttis_dsp_lib = druttis_dsp_lib_package.local_package()
+
+druttis_dsp_class_module = module(source_package,
+	name = 'druttis_dsp_class',
+	version = source_package.version(),
+	description = 'druttis dsp class',
+	dependencies = [druttis_band_limited_wave_tables]
+)
+druttis_dsp_class_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'CDsp.cpp')]))
+druttis_dsp_class_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'CDsp.h')]))
+druttis_dsp_class_package = pkg_config_package(project,
+	name = 'druttis-dsp-class-' + str(druttis_dsp_class_module.version().major()),
+	version = druttis_dsp_class_module.version(),
+	description = druttis_dsp_class_module.description(),
+	modules = [druttis_dsp_class_module]
+)
+druttis_dsp_class = druttis_dsp_class_package.local_package()
+
+druttis_envelope_class_module = module(source_package,
+	name = 'druttis_envelope_class',
+	version = source_package.version(),
+	description = 'druttis envelope class',
+	dependencies = []
+)
+druttis_envelope_class_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'CEnvelope.cpp')]))
+druttis_envelope_class_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'CEnvelope.h')]))
+druttis_envelope_class_package = pkg_config_package(project,
+	name = 'druttis-envelope-class-' + str(druttis_envelope_class_module.version().major()),
+	version = druttis_envelope_class_module.version(),
+	description = druttis_envelope_class_module.description(),
+	modules = [druttis_envelope_class_module]
+)
+druttis_envelope_class = druttis_envelope_class_package.local_package()
+
+druttis_sublime = plugin_module('sublime', 'druttis sublime')
+druttis_sublime.add_plugin_sources([os.path.join('druttis', 'sublime', '*.cpp')])
+druttis_sublime.add_dependencies([druttis_dsp])
+
+druttis_slicit = plugin_module('slicit', 'druttis slicit')
+druttis_slicit.add_plugin_sources([os.path.join('druttis', 'slicit', '*.cpp')])
+druttis_slicit.add_dependencies([druttis_dsp])
+
+druttis_eq3 = plugin_module('eq3', 'druttis eq 3')
+druttis_eq3.add_plugin_sources([os.path.join('druttis', 'eq3', '*.cpp')])
+druttis_eq3.add_dependencies([druttis_dsp])
+
+druttis_plucked_string = plugin_module('pluckedstring', 'druttis plucked string')
+druttis_plucked_string.add_plugin_sources([os.path.join('druttis', 'PluckedString', '*.cpp')])
+druttis_plucked_string.add_dependencies([druttis_lib])
+
+druttis_feed_me = plugin_module('feedme', 'druttis feed me')
+druttis_feed_me.add_plugin_sources([os.path.join('druttis', 'FeedMe', '*.cpp')])
+druttis_feed_me.add_dependencies([druttis_dsp_class, druttis_envelope_class])
+
+druttis_phantom = plugin_module('phantom', 'druttis phantom')
+druttis_phantom.add_plugin_sources([os.path.join('druttis', 'Phantom', '*.cpp')])
+druttis_phantom.add_dependencies([druttis_dsp_class, druttis_envelope_class, druttis_dsp_lib])
+
+druttis_koruz = plugin_module('koruz', 'druttis koruz')
+druttis_koruz.add_plugin_sources([os.path.join('druttis', 'Koruz', '*.cpp')])
+druttis_koruz.add_dependencies([druttis_dsp_class, druttis_dsp_lib])
+
+if False: # it uses the msapi!
+	plugin_module('ymidi', 'yannis brown midi').add_plugin_sources([os.path.join('y_midi', '*.cpp')])
+
+if False: # [bohan] i haven't found this one listed in the closed-source dir, but i can't find its sources either!
+	plugin_module('guido_volume', 'guido volume').add_plugin_sources(['?????!!!!!!!!'])
+	
+plugin_module('bexphase', 'docbexter phaser').add_plugin_sources([os.path.join('bexphase', '*.cpp')])
+plugin_module('vdallpass', 'vincenzo demasi all pass').add_plugin_sources([os.path.join('vincenzo_demasi', 'vdAllPass', '*.cpp')])
+plugin_module('vdecho', 'vincenzo demasi echo').add_plugin_sources([os.path.join('vincenzo_demasi', 'vdEcho', '*.cpp')])
+plugin_module('vdnoisegate', 'vincenzo demasi noise gate').add_plugin_sources([os.path.join('vincenzo_demasi', 'vdNoiseGate', '*.cpp')])
+plugin_module('vsfastverb', 'vincenzo demasi fastverb').add_plugin_sources([os.path.join('vincenzo_demasi', 'vsFastVerb', '*.cpp')])
+plugin_module('arguru_distortion', 'arguru distortion').add_plugin_sources([os.path.join('arguru_distortion', '*.cpp')])
+plugin_module('arguru_freeverb', 'yezar/arguru freeverb').add_plugin_sources([os.path.join('yezar_freeverb', '*.cpp')])
+plugin_module('arguru_goaslicer', 'arguru goaslicer').add_plugin_sources([os.path.join('arguru_goaslicer', '*.cpp')])
+plugin_module('arguru_reverb', 'arguru reverb').add_plugin_sources([os.path.join('arguru_reverb', '*.cpp')])
+plugin_module('arguru_synth_2f', 'arguru synth 2 final').add_plugin_sources([os.path.join('arguru_synth_2_final', '*.cpp')])
+plugin_module('arguru_xfilter', 'arguru cross delay').add_plugin_sources([os.path.join('arguru_xfilter', '*.cpp')])
+plugin_module('zephod_superfm', 'zephod_super fm').add_plugin_sources([os.path.join('zephod_super_fm', '*.cpp')])
+plugin_module('m3', 'm3').add_plugin_sources([os.path.join('m3', '*.cpp')])
+
+project.trace('plugins time ' + str(t() - t0)) # a bit long?
+
+modules.extend(plugin_modules)
+
+from packageneric.pool.dlfcn import dlfcn
+dlfcn = dlfcn(project)
+if dlfcn.result():
+	# whoops, it uses the posix api!
+	# I have to rewrite it using glibmm.
+	# -- bohan
+	class plugin_check_module(module):
+		def __init__(self):
+			module.__init__(self, source_package,
+				name = 'xpsycle.plugin-check',
+				version = source_package.version(),
+				description = 'xpsycle plugin sanity check',
+				dependencies = [universalis, dlfcn],
+				target_type = module.target_types.program
+			)
+			modules.append(self)
+		def dynamic_dependencies(self):
+			self.add_sources(find(project, 'src', [os.path.join('psycle', 'plugin_check.cpp')]))
+	plugin_check_module = plugin_check_module()
+
+project.default_targets(modules)
+
+Return('modules')

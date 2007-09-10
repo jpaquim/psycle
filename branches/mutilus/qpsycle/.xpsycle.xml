@@ -1,0 +1,138 @@
+<!-- xpsycle configuration file -->
+<xpsycle>
+
+<!-- help configuration -->
+<path id='hlpdir' src='~/xpsycle/doc/' />
+
+<!-- audio configuration -->
+
+<!-- for help, read the page at http://psycle.sourceforge.net/wiki/Qpsycle/setup/alpha/Configuring_sound -->
+<audio enable='1' />
+<driver name='alsa' /> <!-- name='alsa' or name='jack' or name='esd' or name='dsound' or name='mmewaveout' -->
+<alsa device = 'plughw:0' />
+
+<!-- gui configuration -->
+<theme id='windowsxp' /> <!-- windows, windowsxp, cleanlooks, macintosh, cde, motif, platique -->
+<path id='plugindir' src='/path/to/psycle-plugins/' />
+<path id='ladspadir' src='/usr/lib/ladspa' />
+<path id='prsdir' src='/path/to/presets/' />
+<path id='sampledir' src='/path/to/samples/' />
+
+<!-- pattern view options -->
+
+<option id="ft2-home-end-behaviour" value="0" />
+<option id="shift-arrow-for-select" value="1" />
+<option id="wrap-around" value="0" />
+<option id="center-cursor" value="0" />
+
+<!-- keyHandler configuration -->
+
+<!-- general keys -->
+
+<key id='current_machine-1' mod='ctrl' keychar='NK_Left' />
+<key id='current_machine+1' mod='ctrl' keychar='NK_Right' />
+<key id='current_instrument-1' mod='ctrl' keychar='NK_Up' />
+<key id='current_instrument+1' mod='ctrl' keychar='NK_Down' />
+
+<key id='screen_machines' keychar='F2' />
+<key id='screen_patterns' keychar='F3' />
+<key id='edit_instrument' keychar='F4' />
+<key id='screen_sequencer' keychar='F5' />
+<key id='play_song_start' keychar='F6' />
+<key id='play_song_normal' keychar='F7' />
+<key id='stop_playback' keychar='F8' />
+<key id='add_new_machine' keychar='F9' />
+
+<!-- patternview octave 0  -->
+
+<key id='oct_C_0' keychar='Y'/>
+<key id='oct_CS0' keychar='S'/>
+<key id='oct_D_0' keychar='X'/>
+<key id='oct_DS0' keychar='D'/>
+<key id='oct_E_0' keychar='C'/>
+<key id='oct_F_0' keychar='V'/>
+<key id='oct_FS0' keychar='G'/>
+<key id='oct_G_0' keychar='B'/>
+<key id='oct_GS0' keychar='H'/>
+<key id='oct_A_0' keychar='N'/>
+<key id='oct_AS0' keychar='J'/>
+<key id='oct_B_0' keychar='M'/>
+
+<!-- patternview octave 1  -->
+
+<key id='oct_C_1' keychar='Q'/>
+<key id='oct_CS1' keychar='2'/>
+<key id='oct_D_1' keychar='W'/>
+<key id='oct_DS1' keychar='3'/>
+<key id='oct_E_1' keychar='E'/>
+<key id='oct_F_1' keychar='R'/>
+<key id='oct_FS1' keychar='5'/>
+<key id='oct_G_1' keychar='T'/>
+<key id='oct_GS1' keychar='6'/>
+<key id='oct_A_1' keychar='Z'/>
+<key id='oct_AS1' keychar='7'/>
+<key id='oct_B_1' keychar='U'/>
+
+<!-- patternview octave 2  -->
+
+<key id='oct_C_2' keychar='I' />
+<key id='oct_CS2' keychar='9' />
+<key id='oct_D_2' keychar='O' />
+<key id='oct_DS2' keychar='0' />
+
+<!-- patternview misc key options -->
+
+<key id='edit_toggle' mod='ctrl' keychar=' ' />
+<key id='key_stop' keychar='1' />
+<key id='current_octave-1' mod="ctrl" keychar='+' />
+<key id='current_octave+1' mod="ctrl" keychar='#' />
+<key id='patternstep_dec' keychar='[' />
+<key id='patternstep_inc' keychar=']' />
+
+<!-- patternview navigation key options -->
+<key id='nav_left' keychar='NK_Left' />
+<key id='nav_right' keychar='NK_Right' />
+<key id='nav_up' keychar='NK_Up' />
+<key id='nav_down' keychar='NK_Down' />
+<key id='nav_up_16' keychar='NK_Page_Up' />
+<key id='nav_down_16' keychar='NK_Page_Down' />
+<key id='nav_top' keychar='NK_Home' />
+<key id='nav_bottom' keychar='NK_End' />
+<key id='next_column' keychar='NK_Tab' />
+<key id='prev_column' keychar='XK_ISO_Left_Tab' />
+<key id='delete_row' keychar='NK_Delete' />
+<key id='insert_row' keychar='NK_Insert' />
+<key id='clear_row' keychar='NK_BackSpace' />
+
+<!-- patternview block key options -->
+
+<key id='block_copy' mod='ctrl' keychar='C' />
+<key id='block_cut' mod='ctrl' keychar='X' />
+<key id='block_delete' mod='ctrl' keychar='Y' />
+<key id='block_double' mod='ctrl' keychar='D' />
+<key id='block_halve' mod='ctrl' keychar='H' />
+<key id='block_interpolate' mod='ctrl' keychar='I' />
+<key id='block_mix' mod='ctrl' keychar='M' />
+<key id='block_paste' mod='ctrl' keychar='V' />
+<key id='block_select_all' mod='ctrl' keychar='A' />
+<key id='block_select_bar' mod='ctrl' keychar='E' />
+<key id='block_select_column' mod='ctrl' keychar='R' />
+<key id='block_select_up' mod='shift' keychar='NK_Up' />
+<key id='block_select_down' mod='shift' keychar='NK_Down' />
+<key id='block_select_left' mod='shift' keychar='NK_Left' />
+<key id='block_select_right' mod='shift' keychar='NK_Right' />
+<key id='block_select_top' mod='shift' keychar='NK_Home' />
+<key id='block_select_bottom' mod='shift' keychar='NK_End' />
+<key id='block_set_instrument' mod='ctrl' keychar='T' />
+<key id='block_set_machine' mod='ctrl' keychar='G' />
+<key id='block_start' mod='ctrl' keychar='B' />
+<key id='block_start' mod='ctrl' keychar='K' />
+<key id='block_unmark' mod='ctrl' keychar='U' />
+
+<!-- machine view key options -->
+
+<key id='mute_machine' mod='shift' keychar='M' />
+<key id='solo_machine' mod='shift' keychar='S' />
+
+
+</xpsycle>

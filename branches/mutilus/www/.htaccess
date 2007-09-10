@@ -1,0 +1,14 @@
+DirectoryIndex index.php index.xml index.html
+
+IndexOptions NameWidth=*
+
+# close the php security hole... 
+#  not actually needed but probably a good idea anyway
+php_flag register_globals off
+
+# first, enable the processing - Unless your ISP has it enabled
+# already.  That might cause weird errors.
+RewriteEngine on
+
+# rewrite rule for mediawiki
+RewriteRule ^wiki/?(.*)$ /mediawiki/index.php/$1 [L,QSA]

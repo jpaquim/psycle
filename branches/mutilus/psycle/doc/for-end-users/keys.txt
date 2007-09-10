@@ -1,0 +1,126 @@
+NOTE:	Most of these keys can be changed from the "Keyboard Settings" DialogBox.
+-----	If you want to set them to default ones again, use the "Default" button inside
+	Psycle's "keyboard and misc" configuration tab.
+	Alternatively, go to your Windows folder (usually C:\Windows) ,
+	delete the file "Psyclekeys.ini" , and reopen Psycle.
+
+
+
+- Pattern RowFormat
+===================
+
+	not aux gen cmdval
+	C-4  01  02  0484
+
+	aux :	Depends on the plugin:
+		For Sampler machine, it indicates the instrument(wave) number.
+		For VSTi's it indicates the MIDI channel ( 0 = 1, 0F = 16)
+
+- PlayBack
+===========
+	Key					Action
+	---					------
+
+	4					Play current track's Row
+	8					Play Entire pattern's Row
+
+	F5					Start Playback
+	Shift+F5				Start Playback from the Song start.
+	F6					Start Block Playback
+	F7					Start Playback From Cursor
+	F8					Stop Playback
+
+
+- Navigation
+=============
+	Key					Action
+	---					------
+
+	SHIFT + UP/DOWN			Inc/Dec Pattern assigned to current SongPosition
+	SHIFT + LEFT/RIGHT			Decrement/Increment Song Position.
+						(Changes current editing pattern also)
+
+	Cursors					Navigate in the pattern Editor.
+	TAB/SHIFT + TAB			Goes to next/Previous Column (Track)
+	PREV/NEXT PAGE			Move the Cursor 16 Lines Upwards/Downwards.
+	HOME/END				- In IT (Impulse Tracker) Mode:
+					  	Go to First/Last Row, if there go to First/Last
+					  	track and if there, go to First/Last Line in pattern
+						- In FT2 Mode: 
+					  	Go to First Line/Last Line
+	CTRL + TAB				Maximize View (hide all toolbars)
+	CTRL + RETURN			Show Pattern Properties.
+	SHIFT + RETURN			Show Current Machine Properties.
+
+
+	F2					Go to Machine View
+	F3					Go to Pattern Editor
+	F4					Reserved.
+	F9					Open "New Machine" Dialog
+	F10					Open "Instruments" Dialog
+						THIS ONE CANNOT BE CHANGED, SORRY.
+
+
+- Editing
+==========
+	Key					Action
+	---					------
+
+	Alphanumeric keys			Most of them are mapped to musical notes.
+	1 in alphanumeric keys			add "off" note.
+	Numbers (numpad)			Enter numbers, as usual.
+	'					Insert tweak command [ twk param mach value]
+						You might need to modify this key.
+	CTRL + '				Insert tweak slide [ tws param mach value]
+						You might need to modify this key.
+	@					Insert mcm command [ mcm command mach value ]
+						You might need to modify this key.
+	* and / (numpad)			Move Up/Down one octave.
+	SpaceBar				Toggle Edit Mode ON/OFF
+	CTRL + F				Toggle Follow on/off
+	CTRL + F1/F2				Note Transpose -1/1 in entire channel.
+	CTRL + SHIFT + F1/F2			Note Transpose -12/12 in entire channel.
+						** Pattern Transposing takes in account the LINE where
+						** the cursor is. so you can half the pattern with just
+						** putting the cursor on the half.
+	CTRL + F11/F12			Notre Transpose -1/+1 in selected Block
+	CTRL + SHIFT + F11/F12		Notre Transpose -12/+12 in selected Block
+	CTRL + F3/F4 or F5			Cut, Copy or Paste pattern.
+	CTRL + SHIFT + F3			Pattern Delete.
+	CTRL + SHIFT + F5			Pattern mix paste.
+	
+	CTRL + F7				(un)Set current track to Record
+	CTRL + F8				(un)Set current track to Solo
+	CTRL + F9				(un)Set current track to mute
+	Ins					Insert one Pattern Row.
+	BACKSPACE				Delete one Pattern Row (Different behaviour depending on FT2 or IT style).
+	DELETE					Clears Row content (in current track)
+	CTRL + B/E				Begin/End Mark block. Note: ONLY WORKS IF "Shift+Arrows Do selection" is
+						deactivated in the Keyboard configuration Dialog.
+	CTRL + U				Unmark Block
+	CTRL + D/H				Double/Halve the length of the block.
+						If no block is selected, then it affects the whole pattern.
+	CTRL + A				Select All Pattern
+	CTRL + R				Select Column
+	CTRL + K		`		Select Bar/Multiple Bars
+	CTRL + X/C/V/M			Cut/Copy/Paste/Mix Paste selected Block.
+	CTRL +SHIFT + X			Delete selected Block.
+	CTRL + I				Interpolate block data (command/parameter column)
+	CTRL + G				Change block Generator to current selected
+	CTRL + T				Change block insTrument to current selected
+	CTRL + LEFT/RIGHT			Dec/Inc current selected Generator/Effect
+	CTRL + UP/DOWN			Dec/Inc current selected Instrument
+	CTRL + Z				Undo Pattern/Sequencer edit
+	CTRL + SHIFT + Z			Redo Pattern/Sequencer edit
+	RETURN				Select the machine and instrument specified in the current Cursor position.	
+
+	[					Set Row Skip -1 when entering a note
+	]					Set Row Skip +1 when entering a note
+
+	SHIFT+Note				"Chord" mode. Enters note and moves to the next track.
+
+	(numpad) : Numpad requires numlock lead ON or it will not work.
+
+
+
+
