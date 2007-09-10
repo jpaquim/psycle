@@ -35,6 +35,7 @@ class SequencerView;
 class PatternBox;
 class SampleBrowser;
 class AudioConfigDlg;
+class SettingsDlg;
 
 class QAction;
 class QListWidget;
@@ -104,6 +105,7 @@ private slots:
 	void playStop();
 
 	void showAudioConfigDlg();
+	void showSettingsDlg();
 	void showUndoView();
 	void showLogCons();
 
@@ -158,6 +160,7 @@ private:
 	QAction *playStopAct;
 	QAction *togglePatBox_;
 	QAction *audioConfAct;
+	QAction *settingsConfAct;
 
 	QComboBox *macCombo_;
 	QComboBox *sampCombo_;
@@ -179,6 +182,7 @@ private:
 	QDockWidget *dockL_;
 
 	AudioConfigDlg *audioCnfDlg;
+	SettingsDlg *settingsDlg;
 
 	InstrumentsModel *instrumentsModel_;
 };
