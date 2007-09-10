@@ -38,6 +38,7 @@ HEADERS += \
 	src/gui/inputhandler.h \
 	src/gui/patternbox.h \
 	src/gui/configdlg/audioconfigdlg.h \
+	src/gui/configdlg/settingsdlg.h \
 	src/gui/samplebrowser.h \
 	src/gui/logconsole.h \
 	src/gui/machineview/machinegui.h \
@@ -72,6 +73,7 @@ SOURCES += \
 	src/gui/inputhandler.cpp \
 	src/gui/patternbox.cpp \
 	src/gui/configdlg/audioconfigdlg.cpp \
+	src/gui/configdlg/settingsdlg.cpp \
 	src/gui/samplebrowser.cpp \
 	src/gui/logconsole.cpp \
 	src/gui/machineview/machinegui.cpp \

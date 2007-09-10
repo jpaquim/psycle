@@ -39,6 +39,7 @@
 #include "patternbox.h"
 #include "machineview/machinegui.h"
 #include "configdlg/audioconfigdlg.h"
+#include "configdlg/settingsdlg.h"
 #include "samplebrowser.h"
 #include "logconsole.h"
 #include "../model/instrumentsmodel.h"
@@ -89,6 +90,7 @@ MainWindow::MainWindow()
 	seqView_ = 0;
 	dock_ = dockL_ = 0;
 	audioCnfDlg = 0;
+	settingsDlg = 0;
 	instrumentsModel_ = 0;
 
 	song_ = createBlankSong();
@@ -125,6 +127,7 @@ MainWindow::MainWindow()
 	patView_->setOctave( 4 );
 
 	audioCnfDlg = new AudioConfigDlg( this );
+	settingsDlg = new SettingsDlg( this );
 	//setAttribute( Qt::WA_DeleteOnClose );
 	createUndoView();
 }
@@ -470,6 +473,12 @@ void MainWindow::createActions()
 	audioConfAct = new QAction( tr("Audio Settings"), this );
 	connect( audioConfAct, SIGNAL( triggered() ),
 			this, SLOT( showAudioConfigDlg() ) );
+	// <nmather> just a hold-all for now.  We can organise settings
+	// dialogs better later on.
+	settingsConfAct = new QAction( tr("General Settings"), this );
+	connect( settingsConfAct, SIGNAL( triggered() ),
+			this, SLOT( showSettingsDlg() ) );
+
 
 
 	aboutAct = new QAction(tr("&About qpsycle"), this);
@@ -505,6 +514,8 @@ void MainWindow::createMenus()
 	
 	configMenu = menuBar()->addMenu(tr("&Configuration"));
 	configMenu->addAction( audioConfAct );
+	configMenu->addAction( settingsConfAct );
+
 
 	performMenu = menuBar()->addMenu(tr("&Performance"));
 	communityMenu = menuBar()->addMenu(tr("&Community"));
@@ -708,6 +719,12 @@ void MainWindow::showAudioConfigDlg()
 {
 	audioCnfDlg->exec();
 }
+
+void MainWindow::showSettingsDlg()
+{
+	settingsDlg->exec();
+}
+
 
 void MainWindow::createUndoView()
 {

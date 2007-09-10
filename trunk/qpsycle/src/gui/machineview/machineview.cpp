@@ -752,13 +752,16 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 	*/
 void MachineScene::keyPressEvent( QKeyEvent * event )
 {
-	if ( !event->isAutoRepeat() ) 
+	if ( macView_->chosenMachine() ) 
 	{
-		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-		int note = NULL;
-		note = macView_->noteFromCommand( command );
-		if (note) {
-			onNotePress( note, macView_->chosenMachine()->mac() );
+		if ( !event->isAutoRepeat() ) 
+		{
+			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
+			int note = NULL;
+			note = macView_->noteFromCommand( command );
+			if (note) {
+				onNotePress( note, macView_->chosenMachine()->mac() );
+			}
 		}
 	}
 	event->ignore();
