@@ -37,6 +37,8 @@ namespace psy { namespace core {
 class MachineGui;
 class MachineView;
 
+#include "configuration.h"
+
 #include <map>
 
 #include <QDialog>
@@ -68,14 +70,14 @@ public:
 	QSize sizeHint() const;
 	int param() { return m_paramIndex; }
 
-	enum KnobMode
-	{
-		QDialMode, ///< Old QDial behaviour
-		QSynthAngularMode, ///< Knob moves angularly as the mouse around the widget center
-		QSynthLinearMode, ///< Knob moves proportonally to drag distance in one ortogonal axis
-		PsycleLinearMode,
-		FixedLinearMode
-	};
+/* 	enum KnobMode */
+/* 	{ */
+/* 		QDialMode, ///< Old QDial behaviour */
+/* 		QSynthAngularMode, ///< Knob moves angularly as the mouse around the widget center */
+/* 		QSynthLinearMode, ///< Knob moves proportonally to drag distance in one ortogonal axis */
+/* 		PsycleLinearMode, */
+/* 		FixedLinearMode */
+/* 	}; */
 
 protected: 
 	void paintEvent( QPaintEvent *ev );

@@ -26,8 +26,11 @@
 #include "../configuration.h"
 
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QComboBox>
 #include <QPushButton>
+#include <QLabel>
+#include <QGroupBox>
 #include <iostream>
 
 SettingsDlg::SettingsDlg( QWidget *parent )
@@ -36,18 +39,58 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	setWindowTitle("General Settings");
 	config_ = Global::pConfig();
 
-	QComboBox *knobBehaviourCombo = new QComboBox( this );
-	knobBehaviourCombo->addItem("Fixed Linear");
-	knobBehaviourCombo->addItem("Psycle Linear");
-	knobBehaviourCombo->addItem("QDial Rotary");
-	knobBehaviourCombo->addItem("QSynth Angular");
+	QLabel *knobComboLabel = new QLabel("Knob behaviour: ");
 
-	QHBoxLayout *mainLay = new QHBoxLayout();
+	knobBehaviourCombo_ = new QComboBox( this );
+	knobBehaviourCombo_->addItem("QDialMode");
+	knobBehaviourCombo_->addItem("QSynthAngularMode");
+	knobBehaviourCombo_->addItem("QSynthLinearMode");
+	knobBehaviourCombo_->addItem("PsycleLinearMode");
+	knobBehaviourCombo_->addItem("FixedLinearMode");
+
+	QVBoxLayout *mainLay = new QVBoxLayout();
+	QHBoxLayout *buttonsLay = new QHBoxLayout();
+	QHBoxLayout *knobLay = new QHBoxLayout();
 		
-	QWidget *settingsPanel = new QWidget( this );
+	QGroupBox *settingsGroup = new QGroupBox( "Machine View", this );
+	QWidget *buttonsGroup = new QWidget( this );
 
-	mainLay->addWidget( knobBehaviourCombo );
+	okBtn_ = new QPushButton( "OK" );
+	applyBtn_ = new QPushButton( "Apply" );
+	cancelBtn_ = new QPushButton( "Cancel" );
+
+	knobLay->addWidget( knobComboLabel );
+	knobLay->addWidget( knobBehaviourCombo_ );
+
+	connect( okBtn_, SIGNAL( clicked() ),
+		 this, SLOT( onOkButtonClicked() ) );
+	connect( applyBtn_, SIGNAL( clicked() ),
+		 this, SLOT( onApplyButtonClicked() ) );
+	connect( cancelBtn_, SIGNAL( clicked() ),
+		 this, SLOT( reject() ) );
+
+	settingsGroup->setLayout( knobLay );
+
+	buttonsLay->addWidget( okBtn_ );
+	buttonsLay->addWidget( applyBtn_ );
+	buttonsLay->addWidget( cancelBtn_ );
+	buttonsGroup->setLayout( buttonsLay );
+
+
+	mainLay->addWidget( settingsGroup );
+	mainLay->addWidget( buttonsGroup );
 
 	setLayout( mainLay );
+}
+
+void SettingsDlg::onOkButtonClicked()
+{
+	Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
+	accept();
+}
+
+void SettingsDlg::onApplyButtonClicked()
+{
+	Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
 }
 

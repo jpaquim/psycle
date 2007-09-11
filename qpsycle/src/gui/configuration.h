@@ -9,6 +9,19 @@ namespace psy {
 	}
 }
 using psy::core::AudioDriver;
+
+
+enum KnobMode
+{
+	QDialMode, ///< Old QDial behaviour
+	QSynthAngularMode, ///< Knob moves angularly as the mouse around the widget center
+	QSynthLinearMode, ///< Knob moves proportonally to drag distance in one ortogonal axis
+	PsycleLinearMode,
+	FixedLinearMode
+};
+
+
+
 /// configuration for the user interface
 class Configuration
 {
@@ -61,11 +74,15 @@ class Configuration
 			bool shiftArrowForSelect() const { return shiftArrowForSelect_; }
 			bool wrapAround() const { return wrapAround_; }
 			bool centerCursor() const { return centerCursor_; }
+
+			KnobMode knobBehaviour() const { return knobBehaviour_; }
+			void setKnobBehaviour( KnobMode behaviourType );
 		private:
 			bool ft2HomeEndBehaviour_;
 			bool shiftArrowForSelect_;
 			bool wrapAround_;
 			bool centerCursor_;
+			KnobMode knobBehaviour_;
 	///\}
 
 	///\name audio drivers

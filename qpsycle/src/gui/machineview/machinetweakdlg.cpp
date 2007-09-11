@@ -443,9 +443,10 @@ QSize KnobGroup::sizeHint() const
 Knob::Knob( int param ) 
 	: m_paramIndex( param )
 	, m_bMousePressed(false)
-	, m_knobMode(FixedLinearMode)
 {
 	setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
+
+	m_knobMode = Global::configuration().knobBehaviour();
 }
 
 void Knob::paintEvent( QPaintEvent *ev )
@@ -476,16 +477,20 @@ double Knob::mouseAngle ( const QPoint& pos )
 
 void Knob::mousePressEvent( QMouseEvent *ev )
 {
-	if (m_knobMode==QDialMode) {
+	m_knobMode = Global::configuration().knobBehaviour();
+
+	if ( m_knobMode == QDialMode ) {
 		QDial::mousePressEvent(ev);
 		return;
 	}
-	if (ev->button() == Qt::LeftButton) {
+	if ( ev->button() == Qt::LeftButton ) {
 		m_bMousePressed = true;
 		m_posMousePressed = ev->pos();
 		m_lastDragValue = value();
 		m_accumulator = 0;
-		setCursor( Qt::BlankCursor );
+		if ( m_knobMode == FixedLinearMode ) {
+			setCursor( Qt::BlankCursor );
+		}
 		emit sliderPressed();
 	}
 }
@@ -506,7 +511,7 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 	double angleDelta =  mouseAngle(posMouseCurrent) - mouseAngle(m_posMousePressed);
 	int newValue = value();
 
-	switch (m_knobMode) {
+	switch ( m_knobMode ) {
 	case PsycleLinearMode:
 // Attempt to recreate psycle mfc behaviour...
 // Not quite right yet it seems...? but works well enough.
