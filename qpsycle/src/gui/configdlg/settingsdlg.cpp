@@ -62,12 +62,9 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	knobLay->addWidget( knobComboLabel );
 	knobLay->addWidget( knobBehaviourCombo_ );
 
-	connect( okBtn_, SIGNAL( clicked() ),
-		 this, SLOT( onOkButtonClicked() ) );
-	connect( applyBtn_, SIGNAL( clicked() ),
-		 this, SLOT( onApplyButtonClicked() ) );
-	connect( cancelBtn_, SIGNAL( clicked() ),
-		 this, SLOT( reject() ) );
+	connect( okBtn_, SIGNAL( clicked() ), this, SLOT( onOkButtonClicked() ) );
+	connect( applyBtn_, SIGNAL( clicked() ), this, SLOT( onApplyButtonClicked() ) );
+	connect( cancelBtn_, SIGNAL( clicked() ), this, SLOT( reject() ) );
 
 	settingsGroup->setLayout( knobLay );
 
