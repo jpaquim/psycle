@@ -13,6 +13,8 @@ svn propset svn:eol-style native $(find . \( \
 	-name \*.i -or \
 	-name \*.rc -or \
 	-name \*.xpm -or \
+	-name \*.dot -or \
+	-name \*.svg -or \
 	-name \*.py -or \
 	-name \*.sh -or \
 	-name \*.cmd -or \
