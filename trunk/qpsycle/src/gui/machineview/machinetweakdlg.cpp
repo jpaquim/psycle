@@ -586,6 +586,7 @@ void Knob::mouseReleaseEvent( QMouseEvent *ev )
 	} else if (m_bMousePressed) {
 		m_bMousePressed = false;
 		setCursor( Qt::ArrowCursor );
+		emit sliderReleased();
 	}
 }
 
