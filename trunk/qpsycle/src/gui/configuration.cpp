@@ -66,6 +66,7 @@ Configuration::Configuration()
 
 	setDriverByName("silent");
 	enableSound_ = false;
+	knobBehaviour_ = FixedLinearMode;
 
 	#if defined PSYCLE__ALSA_AVAILABLE
 		addAudioDriver(new psy::core::AlsaOut);
@@ -361,6 +362,8 @@ void Configuration::loadConfig( const std::string & path )
 				wrapAround_ = value.toInt();     
 			if ( id == "center-cursor" )
 				centerCursor_ = value.toInt();     
+			if ( id == "knob-behaviour" )
+				knobBehaviour_ = (KnobMode)value.toInt();
 		}
 	}
 
@@ -459,4 +462,9 @@ void Configuration::configureKeyBindings() // FIXME: Key bindings are host speci
 	inputHandler_.changeKeyCode( commands::block_delete, Key( Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_X ) );
 
 	inputHandler_.changeKeyCode( commands::row_clear, Key(Qt::NoModifier, Qt::Key_Delete) );
+}
+
+void Configuration::setKnobBehaviour( KnobMode behaviourType )
+{
+	knobBehaviour_ = behaviourType;
 }

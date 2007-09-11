@@ -18,6 +18,11 @@
 <path id='prsdir' src='/path/to/presets/' />
 <path id='sampledir' src='/path/to/samples/' />
 
+<!-- machine view options -->
+
+<option id="knob-behaviour" value="4" />
+
+
 <!-- pattern view options -->
 
 <option id="ft2-home-end-behaviour" value="0" />
