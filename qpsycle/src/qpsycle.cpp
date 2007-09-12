@@ -27,8 +27,14 @@
 int main(int argc, char *argv[])
 {
 	QApplication *app = new QApplication(argc, argv);
+	QCoreApplication::setOrganizationName( "Psycle Ltd" );
+	QCoreApplication::setOrganizationDomain( "psycle.pastnotecut.org" );
+	QCoreApplication::setApplicationName( "qpsycle" );
+
 	Q_INIT_RESOURCE(qpsycle);
+
 	app->setWindowIcon ( QIcon(":images/psycle.png") );
+
 	MainWindow mainWin;
 	mainWin.show();
 
