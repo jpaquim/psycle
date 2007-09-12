@@ -542,10 +542,9 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 	case FixedLinearMode:
 	{
 		int range = maximum() - minimum();
-		double scaleFactor = ((double)range/360)*5;
-
-		// <nmather> FIXME: 360 and 5 are totally arbitrary numbers...
-		// fix it to something sensible.
+		double scaleFactor = ((double)range/900);
+		// <nmather> FIXME: range/900 is just arbitrary, based on trial and error.
+		// Come up with a better algorithm...
 
 		m_accumulator += (double)ydelta*scaleFactor;
 
