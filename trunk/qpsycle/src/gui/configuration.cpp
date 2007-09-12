@@ -51,6 +51,7 @@
 
 #include <QtCore> // For getting key binding stuff.
 #include <QtXml/QDomDocument> // for reading XML file
+#include <QTextStream>
 
 Configuration::Configuration()
 :
@@ -470,23 +471,30 @@ void Configuration::setKnobBehaviour( KnobMode behaviourType )
 {
 	knobBehaviour_ = behaviourType;
 	
-// 	QFile *file = new QFile( QString::fromStdString( configFilePath_ ) );
-// 	if ( file->open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-// 		QDomDocument *doc = new QDomDocument();
-// 		doc->setContent( file );
-// 		QDomElement root = doc->firstChildElement();
+	QFile *file = new QFile( QString::fromStdString( configFilePath_ ) );
+	if ( file->open( QIODevice::ReadWrite | QIODevice::Text ) ) {
+		QDomDocument *doc = new QDomDocument();
+		doc->setContent( file );
+		QDomElement root = doc->firstChildElement();
 
-// 		// Options.
-// 		QDomNodeList options = root.elementsByTagName( "option" );
-// 		for ( int i = 0; i < options.count(); i++ )
-// 		{
-// 			QDomElement option = options.item( i ).toElement();
-// 			QString id = option.attribute("id");
-// 			if ( id == "knob-behaviour" ) {
-// 				option.setAttribute( "value", (int)behaviourType );
-// 			}
+		// Options.
+		QDomNodeList options = root.elementsByTagName( "option" );
+		for ( int i = 0; i < options.count(); i++ )
+		{
+			QDomElement option = options.item( i ).toElement();
+			QString id = option.attribute("id");
+			if ( id == "knob-behaviour" ) {
+
+				QDomElement newOption = option.cloneNode().toElement();
+				newOption.setAttribute( "value", (int)behaviourType );
+				root.replaceChild( newOption, option );
+			}
 			
-// 		}
-// 	}		 
+		}
+		file->resize(0); // Empty the file.
+		QTextStream out(file);
+		out << doc->toString(); // Write the new XmlDoc to the file.
+		file->close();
+	}
 
 }
