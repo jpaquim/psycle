@@ -48,6 +48,8 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	knobBehaviourCombo_->addItem("PsycleLinearMode");
 	knobBehaviourCombo_->addItem("FixedLinearMode");
 
+	knobBehaviourCombo_->setCurrentIndex( (int)Global::configuration().knobBehaviour() );
+
 	QVBoxLayout *mainLay = new QVBoxLayout();
 	QHBoxLayout *buttonsLay = new QHBoxLayout();
 	QHBoxLayout *knobLay = new QHBoxLayout();

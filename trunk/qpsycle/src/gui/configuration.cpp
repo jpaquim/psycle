@@ -292,6 +292,8 @@ void Configuration::loadConfig()
 
 void Configuration::loadConfig( const std::string & path )
 {
+	configFilePath_ = path;
+
 	QFile *file = new QFile( QString::fromStdString( path ) );
 	if (file->open(QIODevice::ReadOnly | QIODevice::Text)) {
 		QDomDocument *doc = new QDomDocument();
@@ -467,4 +469,24 @@ void Configuration::configureKeyBindings() // FIXME: Key bindings are host speci
 void Configuration::setKnobBehaviour( KnobMode behaviourType )
 {
 	knobBehaviour_ = behaviourType;
+	
+// 	QFile *file = new QFile( QString::fromStdString( configFilePath_ ) );
+// 	if ( file->open( QIODevice::ReadOnly | QIODevice::Text ) ) {
+// 		QDomDocument *doc = new QDomDocument();
+// 		doc->setContent( file );
+// 		QDomElement root = doc->firstChildElement();
+
+// 		// Options.
+// 		QDomNodeList options = root.elementsByTagName( "option" );
+// 		for ( int i = 0; i < options.count(); i++ )
+// 		{
+// 			QDomElement option = options.item( i ).toElement();
+// 			QString id = option.attribute("id");
+// 			if ( id == "knob-behaviour" ) {
+// 				option.setAttribute( "value", (int)behaviourType );
+// 			}
+			
+// 		}
+// 	}		 
+
 }
