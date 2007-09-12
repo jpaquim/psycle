@@ -58,6 +58,7 @@ class Configuration
 			const std::string & songPath() const { return songPath_; }
 			const std::string & samplePath() const { return samplePath_; }
 		private:
+			std::string configFilePath_;
 			std::string iconPath_;
 			std::string pluginPath_;
 			std::string prsPath_;
