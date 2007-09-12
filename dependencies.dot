@@ -110,10 +110,13 @@ digraph dependencies {
 		"psycle-core" [ label = "{ psycle-core | core engine }" ];
 		"psycle-core" -> "psycle-plugin-interface";
 		"psycle-core" -> "psycle-helpers";
+		"psycle-core" -> "universalis";
 		"psycle-core" -> "zlib";
 		"psycle-core" -> "libxml++";
 		
 		"psycle-audiodrivers" [ label = "{ psycle-audiodrivers | output device drivers }"];
+		"psycle-audiodrivers" -> "universalis";
+		"psycle-audiodrivers" -> "boost";
 		
 		"psycle-player" [ label = "{ psycle-player | simple command line player }"];
 		"psycle-player" -> "psycle-core";
