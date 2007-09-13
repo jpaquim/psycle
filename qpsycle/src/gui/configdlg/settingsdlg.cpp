@@ -49,6 +49,7 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	knobBehaviourCombo_->addItem("FixedLinearMode");
 
 	knobBehaviourCombo_->setCurrentIndex( (int)Global::configuration().knobBehaviour() );
+	connect( knobBehaviourCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSettingsChanged() ) );
 
 	QVBoxLayout *mainLay = new QVBoxLayout();
 	QHBoxLayout *buttonsLay = new QHBoxLayout();
@@ -57,22 +58,20 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	QGroupBox *settingsGroup = new QGroupBox( "Machine View", this );
 	QWidget *buttonsGroup = new QWidget( this );
 
-	okBtn_ = new QPushButton( "OK" );
-	applyBtn_ = new QPushButton( "Apply" );
-	cancelBtn_ = new QPushButton( "Cancel" );
+	saveBtn_ = new QPushButton( "Save" );
+	saveBtn_->setEnabled( false );
+	closeBtn_ = new QPushButton( "Close" );
 
 	knobLay->addWidget( knobComboLabel );
 	knobLay->addWidget( knobBehaviourCombo_ );
 
-	connect( okBtn_, SIGNAL( clicked() ), this, SLOT( onOkButtonClicked() ) );
-	connect( applyBtn_, SIGNAL( clicked() ), this, SLOT( onApplyButtonClicked() ) );
-	connect( cancelBtn_, SIGNAL( clicked() ), this, SLOT( reject() ) );
+	connect( saveBtn_, SIGNAL( clicked() ), this, SLOT( onSaveButtonClicked() ) );
+	connect( closeBtn_, SIGNAL( clicked() ), this, SLOT( reject() ) );
 
 	settingsGroup->setLayout( knobLay );
 
-	buttonsLay->addWidget( okBtn_ );
-	buttonsLay->addWidget( applyBtn_ );
-	buttonsLay->addWidget( cancelBtn_ );
+	buttonsLay->addWidget( saveBtn_ );
+	buttonsLay->addWidget( closeBtn_ );
 	buttonsGroup->setLayout( buttonsLay );
 
 
@@ -82,14 +81,14 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	setLayout( mainLay );
 }
 
-void SettingsDlg::onOkButtonClicked()
+void SettingsDlg::onSettingsChanged()
 {
-	Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
-	accept();
+	saveBtn_->setEnabled( true );
 }
 
-void SettingsDlg::onApplyButtonClicked()
+void SettingsDlg::onSaveButtonClicked()
 {
 	Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
+	saveBtn_->setEnabled( false );
 }
 
