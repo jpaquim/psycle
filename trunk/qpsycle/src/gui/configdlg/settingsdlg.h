@@ -33,15 +33,14 @@ public:
 	SettingsDlg( QWidget *parent = 0 );
 
 public slots:
-	void onOkButtonClicked();
-	void onApplyButtonClicked();
+	void onSaveButtonClicked();
+	void onSettingsChanged();
 
 private:
 	Configuration *config_;
 	QComboBox *knobBehaviourCombo_;
-	QPushButton *okBtn_;
-	QPushButton *applyBtn_;
-	QPushButton *cancelBtn_;
+	QPushButton *saveBtn_;
+	QPushButton *closeBtn_;
 };
 
 #endif
