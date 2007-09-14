@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cmath>
 
 class node {
 	public:
@@ -9,21 +8,19 @@ class node {
 		friend class factory;
 		
 		node(float f) : f_(f) {
-			for(int i(0); i < 1000000; ++i) f_ += std::log(f_);
-			std::cout << "ctor " << f_ << "\n";
+			std::cout << "ctor\n";
 		}
 
 		void virtual after_construction() {
-			std::cout << "actor\n";
+			std::cout << "after ctor\n";
 		}
 
 		void virtual before_destruction() {
-			std::cout << "bdtor\n";
+			std::cout << "before dtor\n";
 		}
 		
 		virtual ~node() {
-			for(int i(0); i < 1000000; ++i) f_ -= std::log(f_);
-			std::cout << "dtor " << f_ << "\n";
+			std::cout << "dtor\n";
 		}
 
 	public:
@@ -35,13 +32,16 @@ class node {
 					nvr.after_construction();
 					return nvr;
 				}
-				
+
 				template<typename T>
-				T static create_on_stack(float f) {
-					T nvr(f);
-					nvr.after_construction();
-					return nvr;
-				}
+				class create_on_stack {
+					private:
+						T t_;
+					public:
+						create_on_stack(float f) : t_(f) { t_.after_construction(); }
+						operator T & () { return t_; }
+						~create_on_stack() { t_.before_destruction(); }
+				};
 		};
 		
 		void virtual destroy() {
@@ -64,7 +64,8 @@ int main(int, char**) {
 	}
 	std::cout << "--------------\n";
 	{
-		sine s(sine::factory::create_on_stack<sine>(2));
+		sine::factory::create_on_stack<sine> ss(2);
+		sine & s(ss);
 		std::cout << s.f_ << "\n";
 	}
 	std::cout << "--------------\n";
