@@ -1,7 +1,7 @@
 #! /bin/sh
 set -x
 g++                              main.cpp        -o out-native      -O3
-$(llvm-config --bindir)/llvm-g++ main.cpp        -o out-llvm-direct -O3
+$(llvm-config --bindir)/llvm-g++ main.cpp        -o out-llvm-direct -O3 -msse2 # work around for x87 bug
 $(llvm-config --bindir)/llvm-g++ main.cpp        -o out-main.bc     -O4 -emit-llvm -c
 $(llvm-config --bindir)/llvm-ld  out-main.bc     -o out-llvm-ld     -O4 -native -lstdc++
 $(llvm-config --bindir)/llvm-g++ main.cpp        -o out-main.ll     -O4 -S
