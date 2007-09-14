@@ -58,15 +58,15 @@ class sine : public node {
 int main(int, char**) {
 	std::cout << "--------------\n";
 	{
-		node & n(sine::factory::create_on_heap<sine>(2));
+		node & n(node::factory::create_on_heap<sine>(2));
 		std::cout << n.f_ << "\n";
 		n.destroy();
 	}
 	std::cout << "--------------\n";
 	{
-		sine::factory::create_on_stack<sine> ss(2);
-		sine & s(ss);
-		std::cout << s.f_ << "\n";
+		node::factory::create_on_stack<sine> ss(2);
+		node & n(ss);
+		std::cout << n.f_ << "\n";
 	}
 	std::cout << "--------------\n";
 }
