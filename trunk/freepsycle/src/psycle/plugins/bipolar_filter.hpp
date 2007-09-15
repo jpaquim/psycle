@@ -18,7 +18,7 @@ namespace psycle
 		/// hence, the code here is not duplicated amongst all library, but rather shared accross them.
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK bipolar_filter : public engine::node
 		{
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				bipolar_filter(engine::plugin_library_reference &, engine::graph &, std::string const & name, real const & logical_zero);
 			protected:
 				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES channel_change_notification_from_port(engine::port const &) throw(engine::exception);

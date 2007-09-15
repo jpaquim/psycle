@@ -11,7 +11,7 @@ namespace psycle { namespace plugins {
 	/// oscillator with a sinusoidal wave form
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node
 	{
-		protected: friend class factory;
+		protected: friend class virtual_factory_access;
 			sine(engine::plugin_library_reference &, engine::graph &, std::string const & name);
 		public:
 			void inline frequency(real const & frequency) { this->step_ = frequency * frequency_to_step_; }

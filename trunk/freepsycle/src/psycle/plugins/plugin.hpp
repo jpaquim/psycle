@@ -7,38 +7,30 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 ///\internal
 /// extensible modular audio frawework.
-namespace psycle
-{
+namespace psycle {
 	///\internal
 	/// functionalities used by the plugin side only, not by the host.
 	/// Place your plugins in this namespace.
-	namespace plugins
-	{
+	namespace plugins {
 		typedef engine::real real;
 		
 		///\internal
 		/// plugins driving an underlying output device.
-		namespace outputs
-		{
-		}
+		namespace outputs {}
 
 		#define PSYCLE__PLUGINS__NODE_INSTANCIATOR(typename) \
-			extern "C" \
-			{ \
-				psycle::engine::node & PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(new) \
-				( \
+			extern "C" { \
+				psycle::engine::node & PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(new) ( \
 					psycle::engine::plugin_library_reference & plugin_library_reference, \
 					psycle::engine::graph & graph, \
 					std::string const & name \
 				) \
-				throw(psycle::engine::exception) \
-				{ \
-					return psycle::engine::node::create<typename>(plugin_library_reference, graph, name); \
+				throw(psycle::engine::exception) { \
+					return psycle::engine::node::virtual_factory_access::create_on_heap<typename>(plugin_library_reference, graph, name); \
 				} \
 				\
-				void PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(delete)(psycle::engine::node & node) \
-				{ \
-					node.destroy(); \
+				void PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(delete)(psycle::engine::node & node) { \
+					node.free_heap(); \
 				} \
 			}
 	}

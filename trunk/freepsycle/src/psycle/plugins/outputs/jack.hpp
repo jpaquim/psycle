@@ -18,7 +18,7 @@ namespace psycle
 			// outputs to a soundcard device via jackd
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource
 			{
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					jack(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 				public:
 					bool override opened() const;

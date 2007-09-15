@@ -12,7 +12,7 @@ namespace psycle
 		/// resource plugin
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK resource : public engine::node
 		{
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				resource(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(std::exception);
 			protected:
 				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open()  throw(std::exception);

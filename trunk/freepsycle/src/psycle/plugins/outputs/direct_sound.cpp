@@ -27,8 +27,8 @@ namespace psycle
 				direct_sound_(0),
 				buffer_(0)
 			{
-				engine::ports::inputs::single::create(*this, "in");
-				engine::ports::inputs::single::create(*this, "amplification", boost::cref(1));
+				engine::ports::inputs::single::create_on_heap(*this, "in");
+				engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
 			}
 
 			void direct_sound::do_open() throw(universalis::operating_system::exception)

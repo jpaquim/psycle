@@ -71,7 +71,7 @@ namespace psycle
 					loggers::information()(s.str());
 				}
 				reference_counter & reference_counter(node.plugin_library_reference());
-				node.destroy();
+				node.free_heap();
 				--reference_counter;
 			}
 			assert(empty());

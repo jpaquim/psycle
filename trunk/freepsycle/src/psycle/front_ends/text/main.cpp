@@ -44,10 +44,13 @@ namespace psycle { namespace front_ends { namespace text {
 		using engine::graph;
 		using engine::node;
 		host::plugin_resolver & resolver(*new host::plugin_resolver);
-		graph & graph(engine::graph::create("graph"));
+		#if 0
+			graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
+		#else
+			graph & graph(graph::create_on_heap("graph"));
+		#endif
 		node & sine1(resolver("sine", graph, "sine1"));
 		loggers::information()("############################################# clean up ######################################################");
-		graph.destroy();
 		delete &resolver;
 	}
 	
@@ -62,10 +65,10 @@ namespace psycle { namespace front_ends { namespace text {
 			#if !defined PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
 				host::plugin_resolver resolver;
 				//graph graph("graph");
-				graph & graph(engine::graph::create("graph"));
+				graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
 			#else
 				host::plugin_resolver & resolver(*new host::plugin_resolver);
-				graph & graph(engine::graph::create("graph"));
+				graph & graph(engine::graph::create_on_heap("graph"));
 			#endif
 			node & sine1(resolver("sine", graph, "sine1"));
 			node & sine2(resolver("sine", graph, "sine2"));
@@ -123,7 +126,7 @@ namespace psycle { namespace front_ends { namespace text {
 			loggers::information()("############################################# clean up ######################################################");
 			#if defined PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
 				loggers::information()("############################################# manual clean up ######################################################");
-				graph.destroy();
+				graph.free_heap();
 				delete &resolver;
 				loggers::information()("############################################# manual clean up done ######################################################");
 			#endif

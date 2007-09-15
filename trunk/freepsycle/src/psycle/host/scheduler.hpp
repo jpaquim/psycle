@@ -21,7 +21,7 @@ namespace psycle
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler
 		{
 			protected:
-				scheduler(underlying::graph & graph) throw(std::exception) : graph_(Graph::create(graph)) {}
+				scheduler(underlying::graph & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
 			public:
 				virtual ~scheduler() throw() {}
 				void inline started(bool const & started) { if(started) start(); else stop(); }
