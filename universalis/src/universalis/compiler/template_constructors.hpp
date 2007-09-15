@@ -26,7 +26,7 @@
 		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(type, base_type, arity) \
 			BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__DETAIL, (type)(base_type))
 
-		///\internal			
+		///\internal
 		//#region DETAIL
 			#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__DETAIL(_, count, types) \
 				protected: \
