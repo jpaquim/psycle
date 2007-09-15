@@ -65,7 +65,9 @@ namespace psycle { namespace generic { namespace wrappers {
 		///\{
 			private:
 				boost::signals::connection on_new_node_signal_connection;
-				void on_new_node(typename Typenames::underlying::node & underlying_node);
+				void on_new_node(typename Typenames::underlying::node & underlying_node) {
+					Typenames::node::template create_on_heap(static_cast<typename Typenames::graph &>(*this), underlying_node);
+				}
 
 				//boost::signals::connection on_delete_node_signal_connection;
 				//void on_delete_node(typename Typenames::underlying::node & underlying_node) {
@@ -154,13 +156,19 @@ namespace psycle { namespace generic { namespace wrappers {
 				}
 
 				boost::signals::connection on_new_output_port_signal_connection;
-				void on_new_output_port(typename Typenames::underlying::ports::output & underlying_output_port);
+				void on_new_output_port(typename Typenames::underlying::ports::output & underlying_output_port) {
+					//Typenames::ports::output::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_output_port);
+				}
 
 				boost::signals::connection on_new_single_input_port_signal_connection;
-				void on_new_single_input_port(typename Typenames::underlying::ports::inputs::single & underlying_single_input_port);
+				void on_new_single_input_port(typename Typenames::underlying::ports::inputs::single & underlying_single_input_port) {
+					//Typenames::ports::inputs::single::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_single_input_port);
+				}
 
 				boost::signals::connection on_new_multiple_input_port_signal_connection;
-				void on_new_multiple_input_port(typename Typenames::underlying::ports::inputs::multiple & underlying_multiple_input_port);
+				void on_new_multiple_input_port(typename Typenames::underlying::ports::inputs::multiple & underlying_multiple_input_port) {
+					//Typenames::ports::inputs::multiple::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_multiple_input_port);
+				}
 		///\}
 
 		public: //private:
@@ -262,25 +270,5 @@ namespace psycle { namespace generic { namespace wrappers {
 					UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(multiple, multiple::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 			};
 		}
-	}
-
-	template<typename Typenames>	
-	void node<Typenames>::on_new_output_port(typename Typenames::underlying::ports::output & underlying_output_port) {
-		//Typenames::ports::output::template create_on_heap(*this, underlying_output_port);
-	}
-
-	template<typename Typenames>	
-	void node<Typenames>::on_new_single_input_port(typename Typenames::underlying::ports::inputs::single & underlying_single_input_port) {
-		//Typenames::ports::inputs::single::template create_on_heap(*this, underlying_single_input_port);
-	}
-
-	template<typename Typenames>	
-	void node<Typenames>::on_new_multiple_input_port(typename Typenames::underlying::ports::inputs::multiple & underlying_multiple_input_port) {
-		//Typenames::ports::inputs::multiple::template create_on_heap(*this, underlying_multiple_input_port);
-	}
-	
-	template<typename Typenames>	
-	void graph<Typenames>::on_new_node(typename Typenames::underlying::node & underlying_node) {
-		//Typenames::node::template create_on_heap(static_cast<typename Typenames::graph &>(*this), underlying_node);
 	}
 }}}

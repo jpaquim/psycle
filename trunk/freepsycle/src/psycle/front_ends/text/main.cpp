@@ -64,7 +64,6 @@ namespace psycle { namespace front_ends { namespace text {
 			#define PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
 			#if !defined PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
 				host::plugin_resolver resolver;
-				//graph graph("graph");
 				graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
 			#else
 				host::plugin_resolver & resolver(*new host::plugin_resolver);
