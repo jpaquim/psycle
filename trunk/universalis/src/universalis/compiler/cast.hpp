@@ -109,12 +109,7 @@ namespace universalis { namespace compiler { namespace cast {
 		>
 	{
 		public:
-			#define constructor(_, count, __) \
-				BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-				underlying_wrapper(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
-				: Base_Wrapper(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
-				BOOST_PP_REPEAT(UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
-			#undef constructor
+			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(underlying_wrapper, Base_Wrapper, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY)
 		protected:
 			typedef underlying_wrapper underlying_wrapper_type;
 		public:

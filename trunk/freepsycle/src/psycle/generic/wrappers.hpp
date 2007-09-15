@@ -232,8 +232,7 @@ namespace psycle { namespace generic { namespace wrappers {
 			{}
 	};
 	
-	namespace ports
-	{
+	namespace ports {
 		/***********************************************************************/
 		
 		template<typename Typenames>
@@ -241,13 +240,7 @@ namespace psycle { namespace generic { namespace wrappers {
 		{
 			protected:
 				typedef output output_type;
-
-				#define constructor(_, count, __) \
-					BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-					output(typename output::parent_type & parent, typename output::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
-					: output::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-					BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
-				#undef constructor
+				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(output, output::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 		};
 
 		/***********************************************************************/
@@ -257,17 +250,10 @@ namespace psycle { namespace generic { namespace wrappers {
 		{
 			protected:
 				typedef input input_type;
-
-				#define constructor(_, count, __) \
-					BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-					input(typename input::parent_type & parent, typename input::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
-					: input::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-					BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
-				#undef constructor
+				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(input, input::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 		};
 		
-		namespace inputs
-		{
+		namespace inputs {
 			/***********************************************************************/
 			
 			template<typename Typenames>
@@ -275,13 +261,7 @@ namespace psycle { namespace generic { namespace wrappers {
 			{
 				protected:
 					typedef single single_type;
-
-					#define constructor(_, count, __) \
-						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-						single(typename single::parent_type & parent, typename single::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
-						: single::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
-					#undef constructor
+					UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(single, single::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 			};
 
 			/***********************************************************************/
@@ -291,13 +271,7 @@ namespace psycle { namespace generic { namespace wrappers {
 			{
 				protected:
 					typedef multiple multiple_type;
-
-					#define constructor(_, count, __) \
-						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-						multiple(typename multiple::parent_type & parent, typename multiple::underlying_type & underlying BOOST_PP_ENUM_TRAILING_BINARY_PARAMS(count, Xtra, & xtra)) \
-						: multiple::underlying_wrapper_type(parent, underlying BOOST_PP_ENUM_TRAILING_PARAMS(count, xtra)) {}
-						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
-					#undef constructor
+					UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(multiple, multiple::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 			};
 		}
 	}

@@ -7,7 +7,7 @@
 #include "typenames.hpp"
 #include <psycle/engine/exception.hpp>
 #include <universalis/compiler/cast.hpp>
-#include <universalis/compiler/template_constructors.hpp>
+#include <universalis/compiler/virtual_factory.hpp>
 #include <universalis/operating_system/loggers.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
@@ -34,6 +34,7 @@ namespace psycle { namespace generic { namespace basic {
 	class graph
 	:
 		public universalis::compiler::cast::derived<typename Typenames::graph>,
+		public universalis::compiler::virtual_factory,
 		public std::set<typename Typenames::node*>
 	{
 		public:
@@ -144,6 +145,7 @@ namespace psycle { namespace generic { namespace basic {
 	class node
 	:
 		public universalis::compiler::cast::derived<typename Typenames::node>,
+		public universalis::compiler::virtual_factory,
 		public child_of<typename Typenames::graph>
 	{
 		private:
@@ -336,6 +338,7 @@ namespace psycle { namespace generic { namespace basic {
 	class port
 	:
 		public universalis::compiler::cast::derived<typename Typenames::port>,
+		public universalis::compiler::virtual_factory,
 		public child_of<typename Typenames::node>
 	{
 		public:
