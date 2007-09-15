@@ -24,177 +24,168 @@
 #include <libgnomecanvasmm/text.h>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK PACKAGENERIC__MODULE__SOURCE__PSYCLE__FRONT_ENDS__GUI__GRAPH
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace psycle
-{
-	namespace front_ends
+namespace psycle { namespace front_ends { namespace gui {
+	typedef
+		Gnome::Canvas::
+			//Canvas
+			CanvasAA
+				canvas_base;
+	
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base
 	{
-		namespace gui
+		public:
+			typedef canvas_base base;
+			canvas(graph &);
+
+		protected:
+			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+
+		private:
+			Gnome::Canvas::Group group_;
+			
+		public:
+			graph inline & graph_instance() { return graph_; }
+			inline operator graph & () { return graph_instance(); }
+		private:
+			graph & graph_;
+			
+		public:
+			void inline selected_port(port & port) { selected_port_ = &port; }
+			port inline * const selected_port() { return selected_port_; }
+		private:
+			port * selected_port_;
+
+		protected:
+			Gnome::Canvas::Line inline & line() { return line_; }
+		private:
+			Gnome::Canvas::Line line_;
+	};
+
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
+	:
+		public typenames::typenames::bases::graph,
+		public Gtk::VBox
+	{
+		public:
+			typedef Gtk::VBox base;
+
+		protected: friend class factory;
+			graph(underlying_type &, host::plugin_resolver & resolver);
+			virtual ~graph();
+
+		public:
+			host::plugin_resolver inline & resolver() { return resolver_; }
+		private:
+			host::plugin_resolver & resolver_;
+
+		protected:
+			host::schedulers::single_threaded::scheduler inline & scheduler() throw() { return scheduler_; }
+		private:
+			host::schedulers::single_threaded::scheduler scheduler_;
+
+		protected:
+			void on_start();
+			Gtk::ToggleButton inline & start() throw() { return start_; }
+		private:
+			Gtk::ToggleButton start_;
+
+		public:
+			canvas inline & canvas_instance() throw() { return canvas_; }
+			//typenames::canvas inline & canvas() throw() { return canvas_; }
+			inline operator canvas & () throw() { return canvas_instance(); }
+			inline operator Gnome::Canvas::Group & () throw() { return *canvas_instance().root(); }
+			inline operator Gnome::Canvas::Group * () throw() { return canvas_instance().root(); }
+		protected:
+			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_size_allocate(Gtk::Allocation & allocation);
+			void on_zoom();
+		private:
+			canvas canvas_;
+			//typenames::canvas canvas_;
+			Gtk::ScrolledWindow scroll_;
+			Gtk::Adjustment adjustment_;
+			Gtk::SpinButton spin_;
+
+		private:
+			Gtk::VBox box_;
+	};
+	
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
+	:
+		public typenames::typenames::bases::port,
+		public Gnome::Canvas::Group
+	{
+		protected: friend class factory;
+			port(parent_type &, underlying_type &, real const & x, real const & y, color const &);
+			virtual inline ~port() {}
+
+		protected: friend class node;
+			contraption inline & contraption_instance() throw() { return contraption_; }
+			//typenames::contraption inline & contraption() throw() { return contraption_; }
+		private:
+			contraption contraption_;
+			//typenames::contraption contraption_;
+		
+		protected:
+			Gnome::Canvas::Line inline & line() throw() { return line_; }
+		private:
+			Gnome::Canvas::Line line_;
+
+		protected:
+			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+			void on_select(contraption &);
+			void on_move(contraption &);
+	};
+
+	namespace ports {
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output
 		{
-			typedef
-				Gnome::Canvas::
-					//Canvas
-					CanvasAA
-						canvas_base;
-			
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base
-			{
-				public:
-					typedef canvas_base base;
-					canvas(graph &);
+			protected: friend class factory;
+				output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
+		};
 
-				protected:
-					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
-
-				private:
-					Gnome::Canvas::Group group_;
-					
-				public:
-					graph inline & graph_instance() { return graph_; }
-					inline operator graph & () { return graph_instance(); }
-				private:
-					graph & graph_;
-					
-				public:
-					void inline selected_port(port & port) { selected_port_ = &port; }
-					port inline * const selected_port() { return selected_port_; }
-				private:
-					port * selected_port_;
-
-				protected:
-					Gnome::Canvas::Line inline & line() { return line_; }
-				private:
-					Gnome::Canvas::Line line_;
-			};
-
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
-			:
-				public typenames::typenames::bases::graph,
-				public Gtk::VBox
-			{
-				public:
-					typedef Gtk::VBox base;
-
-				protected: friend class factory;
-					graph(underlying_type &, host::plugin_resolver & resolver);
-					virtual ~graph();
-
-				public:
-					host::plugin_resolver inline & resolver() { return resolver_; }
-				private:
-					host::plugin_resolver & resolver_;
-
-				protected:
-					host::schedulers::single_threaded::scheduler inline & scheduler() throw() { return scheduler_; }
-				private:
-					host::schedulers::single_threaded::scheduler scheduler_;
-
-				protected:
-					void on_start();
-					Gtk::ToggleButton inline & start() throw() { return start_; }
-				private:
-					Gtk::ToggleButton start_;
-
-				public:
-					canvas inline & canvas_instance() throw() { return canvas_; }
-					//typenames::canvas inline & canvas() throw() { return canvas_; }
-					inline operator canvas & () throw() { return canvas_instance(); }
-					inline operator Gnome::Canvas::Group & () throw() { return *canvas_instance().root(); }
-					inline operator Gnome::Canvas::Group * () throw() { return canvas_instance().root(); }
-				protected:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_size_allocate(Gtk::Allocation & allocation);
-					void on_zoom();
-				private:
-					canvas canvas_;
-					//typenames::canvas canvas_;
-					Gtk::ScrolledWindow scroll_;
-					Gtk::Adjustment adjustment_;
-					Gtk::SpinButton spin_;
-
-				private:
-					Gtk::VBox box_;
-			};
-			
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
-			:
-				public typenames::typenames::bases::port,
-				public Gnome::Canvas::Group
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input
+		{
+			protected: friend class factory;
+				input(parent_type &, underlying_type &, real const & x, real const & y, color const &);
+		};
+		
+		namespace inputs {
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single
 			{
 				protected: friend class factory;
-					port(parent_type &, underlying_type &, real const & x, real const & y, color const &);
-					virtual inline ~port() {}
-
-				protected: friend class node;
-					contraption inline & contraption_instance() throw() { return contraption_; }
-					//typenames::contraption inline & contraption() throw() { return contraption_; }
-				private:
-					contraption contraption_;
-					//typenames::contraption contraption_;
-				
-				protected:
-					Gnome::Canvas::Line inline & line() throw() { return line_; }
-				private:
-					Gnome::Canvas::Line line_;
-
-				protected:
-					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
-					void on_select(contraption &);
-					void on_move(contraption &);
+					single(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 			};
 
-			namespace ports
-			{
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output
-				{
-					protected: friend class factory;
-						output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
-				};
-
-				class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input
-				{
-					protected: friend class factory;
-						input(parent_type &, underlying_type &, real const & x, real const & y, color const &);
-				};
-				
-				namespace inputs
-				{
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single
-					{
-						protected: friend class factory;
-							single(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
-					};
-
-					class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
-					{
-						protected: friend class factory;
-							multiple(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
-					};
-				}
-			}
-
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
-			:
-				public typenames::typenames::bases::node,
-				public Gnome::Canvas::Group
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
 			{
 				protected: friend class factory;
-					node(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
-					
-				public:
-					~node() throw() {}
-
-				protected:
-					contraption inline & contraption_instance() throw() { return contraption_; }
-					//typenames::contraption inline & contraption() throw() { return contraption_; }
-				private:
-					contraption contraption_;
-					//typenames::contraption contraption_;
-				
-				protected:
-					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+					multiple(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 			};
-
 		}
 	}
-}
+
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
+	:
+		public typenames::typenames::bases::node,
+		public Gnome::Canvas::Group
+	{
+		protected: friend class factory;
+			node(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
+			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
+			
+		public:
+			~node() throw() {}
+
+		protected:
+			contraption inline & contraption_instance() throw() { return contraption_; }
+			//typenames::contraption inline & contraption() throw() { return contraption_; }
+		private:
+			contraption contraption_;
+			//typenames::contraption contraption_;
+		
+		protected:
+			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+	};
+
+}}}
 #include <universalis/compiler/dynamic_link/end.hpp>
