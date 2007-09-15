@@ -28,13 +28,14 @@ namespace psycle { namespace engine {
 		friend class ports::inputs::single;
 		friend class ports::inputs::multiple;
 		
-		protected: friend class factory;
+		protected: friend class virtual_factory_access;
 			node(typenames::plugin_library_reference &, parent_type &, name_type const &);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction()
-			{
+
+			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction() {
 				typenames::typenames::bases::node::before_destruction();
 				close();
 			}
+
 			virtual ~node();
 
 		///\name reference to plugin library
@@ -150,8 +151,7 @@ namespace psycle { namespace engine {
 namespace psycle { namespace engine {
 	void node::process_first() throw(std::exception)
 	{
-		if(false && loggers::trace()())
-		{
+		if(false && loggers::trace()()) {
 			std::ostringstream s;
 			s << qualified_name() << " processing node first input";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -161,8 +161,7 @@ namespace psycle { namespace engine {
 
 	void node::process() throw(std::exception)
 	{
-		if(false && loggers::trace()())
-		{
+		if(false && loggers::trace()()) {
 			std::ostringstream s;
 			s << qualified_name() << " processing node";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -172,8 +171,7 @@ namespace psycle { namespace engine {
 
 	void node::reset()
 	{
-		if(false && loggers::trace()())
-		{
+		if(false && loggers::trace()()) {
 			std::ostringstream s;
 			s << qualified_name() << " resetting node";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);

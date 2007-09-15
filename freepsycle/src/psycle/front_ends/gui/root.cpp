@@ -20,7 +20,7 @@ namespace psycle
 				hello_(hello),
 				button_("get a hello message from psycle's engine"),
 				label_(/*"message from psycle's engine"*/),
-				graph_(graph::create(graph, resolver())),
+				graph_(gui::graph::create_on_heap(graph, resolver())),
 				hello_frame_("hello"),
 				graph_frame_(graph.name())
 			{
@@ -41,7 +41,7 @@ namespace psycle
 		
 			root::~root()
 			{
-				graph_.destroy();
+				graph_.free_heap();
 			}
 		
 			void root::on_button_clicked()

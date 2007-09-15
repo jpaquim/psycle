@@ -34,9 +34,9 @@ namespace psycle
 				s << "delete node: " << qualified_name();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			if(multiple_input_port()) multiple_input_port()->destroy();
-			for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) (**i).destroy();
-			for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) (**i).destroy();
+			if(multiple_input_port()) multiple_input_port()->free_heap();
+			for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) (**i).free_heap();
+			for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) (**i).free_heap();
 		}
 	
 		node::name_type node::qualified_name() const

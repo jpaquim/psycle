@@ -16,8 +16,8 @@ namespace psycle
 			node(plugin_library_reference, graph, name),
 			logical_zero_(logical_zero)
 		{
-			engine::ports::inputs::multiple::create(*this, "in", boost::cref(true));
-			engine::ports::output::create(*this, "out");
+			engine::ports::inputs::multiple::create_on_heap(*this, "in", boost::cref(true));
+			engine::ports::output::create_on_heap(*this, "out");
 		}
 	
 		void bipolar_filter::channel_change_notification_from_port(const engine::port & port) throw(engine::exception)

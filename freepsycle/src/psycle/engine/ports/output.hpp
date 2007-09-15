@@ -24,7 +24,7 @@ namespace psycle
 				friend class inputs::single;
 				friend class inputs::multiple;
 					
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					output(parent_type &, name_type const &, int const & channels = 0);
 					virtual ~output();
 	

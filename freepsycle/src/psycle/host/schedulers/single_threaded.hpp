@@ -55,7 +55,7 @@ namespace psycle { namespace host { namespace schedulers {
 		
 		typedef generic::wrappers::graph<typenames::typenames> graph_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				graph(underlying_type &);
 				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
 
@@ -68,7 +68,7 @@ namespace psycle { namespace host { namespace schedulers {
 
 		typedef generic::wrappers::port<typenames::typenames> port_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				port(parent_type &, underlying_type &);
 
 			///\name buffer
@@ -84,7 +84,7 @@ namespace psycle { namespace host { namespace schedulers {
 		namespace ports {
 			typedef generic::wrappers::ports::output<typenames::typenames> output_base;
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					output(parent_type &, underlying_type &);
 				
 				///\name schedule
@@ -105,20 +105,20 @@ namespace psycle { namespace host { namespace schedulers {
 
 			typedef generic::wrappers::ports::input<typenames::typenames> input_base;
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base {
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					input(parent_type &, underlying_type &);
 			};
 
 			namespace inputs {
 				typedef generic::wrappers::ports::inputs::single<typenames::typenames> single_base;
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base {
-					protected: friend class factory;
+					protected: friend class virtual_factory_access;
 						single(parent_type &, underlying_type &);
 				};
 
 				typedef generic::wrappers::ports::inputs::multiple<typenames::typenames> multiple_base;
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base {
-					protected: friend class factory;
+					protected: friend class virtual_factory_access;
 						multiple(parent_type &, underlying_type &);
 				};
 			}
@@ -126,7 +126,7 @@ namespace psycle { namespace host { namespace schedulers {
 
 		typedef generic::wrappers::node<typenames::typenames> node_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				node(parent_type &, underlying_type &);
 				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction(); friend class graph; // init code moved to graph since it deals with connections
 				

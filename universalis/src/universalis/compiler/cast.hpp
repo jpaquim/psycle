@@ -40,21 +40,20 @@ namespace universalis { namespace compiler { namespace cast {
 	}
 	
 	template<typename Derived>
-	class derived
-	{
+	class derived {
+		protected:
+			typedef derived derived_type;
 		public:
 			inline operator Derived const & () const throw() { return /*derive<Derived const>*/ static_cast<Derived const &>(*this); }
 			inline operator Derived       & ()       throw() { return /*derive<Derived      >*/ static_cast<Derived       &>(*this); }
 	};
 
 	template<typename Derived_Underlying, typename Derived, typename Underlying>
-	class derived_underlying //: public derived< Derived_Underlying, derived< Underlying, derived<Derived> > >
-	{
+	class derived_underlying { //: public derived< Derived_Underlying, derived< Underlying, derived<Derived> > >
 		private:
 			BOOST_STATIC_ASSERT((boost::is_base_and_derived<Underlying, Derived_Underlying>::value));
 		public:
-			inline operator Derived_Underlying const & () const throw()
-			{
+			inline operator Derived_Underlying const & () const throw() {
 				#if 0 && !defined NDEBUG
 					if(operating_system::loggers::trace()())
 					{
@@ -74,8 +73,7 @@ namespace universalis { namespace compiler { namespace cast {
 				//return derive<Derived_Underlying const>(static_cast<Underlying const &>(derive<Derived const>(*this)));
 				return static_cast<Derived_Underlying const &>(static_cast<Underlying const &>(static_cast<Derived const &>(*this)));
 			}
-			inline operator Derived_Underlying       & ()       throw()
-			{
+			inline operator Derived_Underlying       & ()       throw() {
 				#if 0 && !defined NDEBUG
 					if(operating_system::loggers::trace()())
 					{
@@ -119,8 +117,7 @@ namespace universalis { namespace compiler { namespace cast {
 	};
 
 	template<typename Underlying>
-	class underlying_wrapper<Underlying>
-	{
+	class underlying_wrapper<Underlying> {
 		public:
 			typedef Underlying underlying_type;
 			
@@ -133,8 +130,7 @@ namespace universalis { namespace compiler { namespace cast {
 			Underlying & underlying_;
 		protected:
 			typedef underlying_wrapper underlying_wrapper_type;
-			underlying_wrapper(Underlying & underlying) : underlying_(underlying)
-			{
+			underlying_wrapper(Underlying & underlying) : underlying_(underlying) {
 				#if 0 && !defined NDEBUG
 					if(operating_system::loggers::trace()())
 					{
@@ -147,8 +143,7 @@ namespace universalis { namespace compiler { namespace cast {
 	};
 
 	template<typename Underlying>
-	class underlying_value_wrapper
-	{
+	class underlying_value_wrapper {
 		public:
 			typedef Underlying underlying_type;
 			
@@ -162,8 +157,7 @@ namespace universalis { namespace compiler { namespace cast {
 		protected:
 			typedef underlying_value_wrapper underlying_wrapper_type;
 			underlying_value_wrapper() {}
-			underlying_value_wrapper(Underlying const & underlying) : underlying_(underlying)
-			{
+			underlying_value_wrapper(Underlying const & underlying) : underlying_(underlying) {
 				#if 0 && !defined NDEBUG
 					if(operating_system::loggers::trace()())
 					{

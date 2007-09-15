@@ -22,7 +22,7 @@ namespace psycle
 			friend class ports::inputs::single;
 			friend class ports::inputs::multiple;
 			
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				port(parent_type &, name_type const &, int const & channels = 0);
 				virtual ~port();
 	

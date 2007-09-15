@@ -187,7 +187,7 @@ namespace psycle { namespace host {
 			loggers::information()(s.str());
 		}
 		engine::reference_counter & reference_counter(node().plugin_library_reference());
-		node().destroy();
+		node().free_heap();
 		--reference_counter;
 	}
 }}

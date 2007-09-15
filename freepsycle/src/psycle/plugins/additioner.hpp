@@ -11,7 +11,7 @@ namespace psycle
 		/// + operation
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK additioner : public bipolar_filter
 		{
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				inline additioner(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
 					: bipolar_filter(plugin_library_reference, graph, name, 0) {}
 			protected:

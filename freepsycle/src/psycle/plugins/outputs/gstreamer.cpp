@@ -40,8 +40,8 @@ namespace psycle
 				buffer_(),
 				current_read_position_(), current_write_position_()
 			{
-				engine::ports::inputs::single::create(*this, "in");
-				engine::ports::inputs::single::create(*this, "amplification", boost::cref(1));
+				engine::ports::inputs::single::create_on_heap(*this, "in");
+				engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
 			}
 
 			void gstreamer::do_name(std::string const & name)
@@ -262,7 +262,7 @@ namespace psycle
 					(void*)0
 				);
 
-				buffer_ = new std::int8_t[buffer_size_ * buffers_];
+				buffer_ = new char[buffer_size_ * buffers_];
 
 				// register our callback to the handoff signal of the fakesrc element
 				if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw engine::exceptions::runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);

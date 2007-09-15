@@ -20,7 +20,7 @@ namespace psycle
 			// outputs to a soundcard device via steinberg's asio output implementation.
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK asio : public resource
 			{
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					asio(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 				public:
 					bool override opened() const;

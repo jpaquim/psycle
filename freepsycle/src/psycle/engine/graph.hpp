@@ -18,7 +18,7 @@ namespace psycle
 		/// a set of nodes
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::bases::graph, public named
 		{
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				graph(name_type const &);
 				virtual ~graph();
 	

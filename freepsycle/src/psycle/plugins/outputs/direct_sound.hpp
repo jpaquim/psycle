@@ -47,7 +47,7 @@ namespace psycle
 			/// outputs to a soundcard device via microsoft's direct sound output implementation.
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK direct_sound : public resource
 			{
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::operating_system::exception);
 				public:
 					bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened()  const;

@@ -45,13 +45,13 @@ namespace psycle
 						Gnome::Canvas::init();
 						Gtk::Main main(argument_count, arguments);
 						engine::hello hello;
-						engine::graph & graph(engine::graph::create("graph"));
+						engine::graph & graph(engine::graph::create_on_heap("graph"));
 						root window(graph, hello);
 						{
 							lock lock;
 							main.run(window);
 						}
-						graph.destroy();
+						graph.free_heap();
 					}
 					catch(Glib::Exception const & e)
 					{

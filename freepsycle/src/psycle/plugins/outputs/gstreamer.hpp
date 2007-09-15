@@ -20,7 +20,7 @@ namespace psycle
 			/// outputs to a soundcard device via gstreamer output implementation.
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource
 			{
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 				public:
 					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_name(std::string const &);
@@ -49,7 +49,7 @@ namespace psycle
 					boost::mutex mutex_;
 					bool waiting_for_state_to_become_playing_;
 
-					void * buffer_;
+					char * buffer_;
 					unsigned int buffers_, buffer_size_, total_buffer_size_, current_read_position_, current_write_position_;
 					unsigned int samples_per_buffer_;
 			};

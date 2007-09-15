@@ -17,7 +17,7 @@ namespace psycle
 			/// outputs to a soundcard device via alsa output implementation.
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource
 			{
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					alsa(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 					virtual ~alsa() throw();
 				public:

@@ -57,6 +57,16 @@ namespace psycle
 				canvas_instance().set_pixels_per_unit(adjustment_.get_value());
 			}
 
+			#if 0
+			node::node(node::parent_type & parent, node::underlying_type & underlying)
+			:
+				node_type(parent, underlying),
+				Gnome::Canvas::Group(parent, 0, 0),
+				contraption_(*this, 0, 0, 0x60606000, underlying.name() + "\n" + underlying.plugin_library_reference().name())
+			{
+			}
+			#endif
+
 			node::node(node::parent_type & parent, node::underlying_type & underlying, real const & x, real const & y)
 			:
 				node_type(parent, underlying),

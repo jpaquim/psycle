@@ -18,7 +18,7 @@ namespace psycle
 	{
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::bases::graph
 		{
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				graph(underlying_type &);
 		};
 
@@ -53,7 +53,7 @@ namespace psycle
 
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::bases::port, public coordinates
 		{
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				port(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 		};
 
@@ -61,13 +61,13 @@ namespace psycle
 		{
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output
 			{
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					output(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 			};
 
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input
 			{
-				protected: friend class factory;
+				protected: friend class virtual_factory_access;
 					input(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 			};
 			
@@ -75,13 +75,13 @@ namespace psycle
 			{
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single
 				{
-					protected: friend class factory;
+					protected: friend class virtual_factory_access;
 						single(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 				};
 
 				class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
 				{
-					protected: friend class factory;
+					protected: friend class virtual_factory_access;
 						multiple(parent_type &, underlying_type &, real const /*const*/ x = 0, real /*const*/ y = 0);
 				};
 			}
@@ -89,7 +89,7 @@ namespace psycle
 
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::typenames::bases::node, public coordinates
 		{
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				node(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
 				

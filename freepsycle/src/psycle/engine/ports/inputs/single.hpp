@@ -20,7 +20,7 @@ namespace psycle
 				{
 					friend class node;
 	
-					protected: friend class factory;
+					protected: friend class virtual_factory_access;
 						single(parent_type &, name_type const &, int const & channels = 0);
 						virtual ~single();
 		

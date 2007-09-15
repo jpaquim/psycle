@@ -67,7 +67,7 @@ namespace psycle { namespace front_ends { namespace gui {
 		public:
 			typedef Gtk::VBox base;
 
-		protected: friend class factory;
+		protected: friend class virtual_factory_access;
 			graph(underlying_type &, host::plugin_resolver & resolver);
 			virtual ~graph();
 
@@ -112,7 +112,7 @@ namespace psycle { namespace front_ends { namespace gui {
 		public typenames::typenames::bases::port,
 		public Gnome::Canvas::Group
 	{
-		protected: friend class factory;
+		protected: friend class virtual_factory_access;
 			port(parent_type &, underlying_type &, real const & x, real const & y, color const &);
 			virtual inline ~port() {}
 
@@ -133,30 +133,22 @@ namespace psycle { namespace front_ends { namespace gui {
 			void on_select(contraption &);
 			void on_move(contraption &);
 	};
-
 	namespace ports {
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output
-		{
-			protected: friend class factory;
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output {
+			protected: friend class virtual_factory_access;
 				output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 		};
-
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input
-		{
-			protected: friend class factory;
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input {
+			protected: friend class virtual_factory_access;
 				input(parent_type &, underlying_type &, real const & x, real const & y, color const &);
 		};
-		
 		namespace inputs {
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single
-			{
-				protected: friend class factory;
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single {
+				protected: friend class virtual_factory_access;
 					single(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 			};
-
-			class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
-			{
-				protected: friend class factory;
+			class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple {
+				protected: friend class virtual_factory_access;
 					multiple(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 			};
 		}
@@ -167,11 +159,12 @@ namespace psycle { namespace front_ends { namespace gui {
 		public typenames::typenames::bases::node,
 		public Gnome::Canvas::Group
 	{
-		protected: friend class factory;
+		protected: friend class virtual_factory_access;
+			//node(parent_type & parent, underlying_type & underlying);
 			node(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
 			
-		public:
+		public: // protected:
 			~node() throw() {}
 
 		protected:

@@ -28,7 +28,7 @@ namespace psycle
 		{
 			public:
 				typedef output_base base;
-			protected: friend class factory;
+			protected: friend class virtual_factory_access;
 				output(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 		};
 	}

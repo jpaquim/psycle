@@ -17,25 +17,20 @@ namespace psycle { namespace plugins {
 		step_(0),
 		frequency_to_step_(0)
 	{
-		engine::ports::output::create(*this, "out", boost::cref(1));
-		engine::ports::inputs::single::create(*this, "frequency", boost::cref(1));
-		engine::ports::inputs::single::create(*this, "phase", boost::cref(1));
+		engine::ports::output::create_on_heap(*this, "out", boost::cref(1));
+		engine::ports::inputs::single::create_on_heap(*this, "frequency", boost::cref(1));
+		engine::ports::inputs::single::create_on_heap(*this, "phase", boost::cref(1));
 	}
 
 	namespace {
 		namespace ports {
-			struct outputs {
-				enum output {
-					out
-				};
-			};
-			
-			struct inputs {
-				enum input {
-					frequency,
-					phase
-				};
-			};
+			struct outputs { enum output {
+				out
+			}; };
+			struct inputs { enum input {
+				frequency,
+				phase
+			}; };
 		}
 	}
 
