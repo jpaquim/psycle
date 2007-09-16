@@ -14,6 +14,15 @@ namespace universalis { namespace compiler {
 		public:
 			class virtual_factory_access {
 				public://private: friend class basic_virtual_factory;
+				
+					#if defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
+						// A gross hack is needed for gcc < 4 because making virtual_factory_access a friend class
+						// does not make the nested create_on_stack class a friend too on this version of the compiler.
+						// Perhaps this is also needed for msvc 14 ("8.0"), but that compiler is already unsupported because
+						// it's having a lot more troubles anyway.
+						#define protected public
+					#endif
+					
 					template<typename Type>
 					class create_on_stack {
 						private:
