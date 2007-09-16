@@ -362,7 +362,8 @@ namespace psycle { namespace generic { namespace basic {
 				protected: friend class single::virtual_factory_access;
 					typedef single single_type;
 
-					//UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(single, single::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+					//UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__WITH_BODY(single, single::virtual_factory_type, (BOOST_PP_COMMA output_port_() {}), PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+					
 					#define constructor(_, count, __) \
 						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 						single(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \

@@ -24,15 +24,18 @@
 			BOOST_PP_REPEAT(UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 
 		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(type, base_type, arity) \
-			BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__DETAIL, (type)(base_type))
+			BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__DETAIL, (type)(base_type)({}))
+
+		#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__WITH_BODY(type, base_type, body, arity) \
+			BOOST_PP_REPEAT(arity, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__DETAIL, (type)(base_type)(body))
 
 		///\internal
 		//#region DETAIL
-			#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__DETAIL(_, count, types) \
+			#define UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__DETAIL(_, count, types_and_body) \
 				protected: \
 					BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-					BOOST_PP_SEQ_ELEM(0, types)(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
-					: BOOST_PP_SEQ_ELEM(1, types)(BOOST_PP_ENUM_PARAMS(count, xtra)) {}
+					BOOST_PP_SEQ_ELEM(0, types_and_body)(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+					: BOOST_PP_SEQ_ELEM(1, types_and_body)(BOOST_PP_ENUM_PARAMS(count, xtra)) BOOST_PP_SEQ_ELEM(2, types_and_body)
 		//#endregion
 	//#endregion
 //#endregion
