@@ -38,22 +38,6 @@ namespace psycle { namespace front_ends { namespace text {
 		#undef $
 	}
 
-	void stuff0()
-	{
-		loggers::information()("########################################### instanciations ##################################################");
-		using engine::graph;
-		using engine::node;
-		host::plugin_resolver & resolver(*new host::plugin_resolver);
-		#if 0
-			graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
-		#else
-			graph & graph(graph::create_on_heap("graph"));
-		#endif
-		node & sine1(resolver("sine", graph, "sine1"));
-		loggers::information()("############################################# clean up ######################################################");
-		delete &resolver;
-	}
-	
 	void stuff()
 	{
 		try
@@ -61,11 +45,13 @@ namespace psycle { namespace front_ends { namespace text {
 			loggers::information()("########################################### instanciations ##################################################");
 			using engine::graph;
 			using engine::node;
-			#define PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
+			//#define PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
 			#if !defined PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
+				// on stack
 				host::plugin_resolver resolver;
 				graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
 			#else
+				// on heap
 				host::plugin_resolver & resolver(*new host::plugin_resolver);
 				graph & graph(engine::graph::create_on_heap("graph"));
 			#endif
