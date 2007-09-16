@@ -1,12 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2007 psycledelics http://psycle.pastnotecut.org : johan boule
 
-///\file
-///\brief \interface psycle::front_ends:gui:color
+///\\interface psycle::front_ends:gui:color
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <universalis/compiler/numeric.hpp> // \todo <cstdint> or <boost/stdint.hpp>
-//#include <glib/gtypes.h> // for ::guint32
+#include <cstdint>
 #include <cassert>
 namespace psycle
 {
@@ -17,9 +15,8 @@ namespace psycle
 			class color
 			{
 				public:
-					//typedef ::guint32 rgba;
-					typedef universalis::compiler::numeric<32>::unsigned_int    rgba;
-					typedef universalis::compiler::numeric< 8>::unsigned_int channel;
+					typedef std::uint32_t rgba; // meant to match glib/gdk's ::guint32
+					typedef std::uint8_t channel;
 					
 					inline color(rgba const & rgba) : rgba_(rgba) {}
 					inline operator rgba const & () const throw() { return rgba_; }

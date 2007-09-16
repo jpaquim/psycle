@@ -157,17 +157,17 @@ namespace psycle { namespace generic { namespace wrappers {
 
 				boost::signals::connection on_new_output_port_signal_connection;
 				void on_new_output_port(typename Typenames::underlying::ports::output & underlying_output_port) {
-					//Typenames::ports::output::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_output_port);
+					Typenames::ports::output::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_output_port);
 				}
 
 				boost::signals::connection on_new_single_input_port_signal_connection;
 				void on_new_single_input_port(typename Typenames::underlying::ports::inputs::single & underlying_single_input_port) {
-					//Typenames::ports::inputs::single::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_single_input_port);
+					Typenames::ports::inputs::single::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_single_input_port);
 				}
 
 				boost::signals::connection on_new_multiple_input_port_signal_connection;
 				void on_new_multiple_input_port(typename Typenames::underlying::ports::inputs::multiple & underlying_multiple_input_port) {
-					//Typenames::ports::inputs::multiple::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_multiple_input_port);
+					Typenames::ports::inputs::multiple::template create_on_heap(static_cast<typename Typenames::node &>(*this), underlying_multiple_input_port);
 				}
 		///\}
 
@@ -216,7 +216,10 @@ namespace psycle { namespace generic { namespace wrappers {
 		:
 			public universalis::compiler::cast::underlying_wrapper<
 				typename Typenames::underlying::ports::output,
-				universalis::compiler::virtual_factory<output<Typenames>, basic::ports::output<Typenames> >
+				universalis::compiler::virtual_factory<
+					typename Typenames::ports::output,
+					basic::ports::output<Typenames>
+				>
 			>
 		{
 			protected:
@@ -231,7 +234,10 @@ namespace psycle { namespace generic { namespace wrappers {
 		:
 			public universalis::compiler::cast::underlying_wrapper<
 				typename Typenames::underlying::ports::input,
-				universalis::compiler::virtual_factory<input<Typenames>, basic::ports::input<Typenames> >
+				universalis::compiler::virtual_factory<
+					typename Typenames::ports::input,
+					basic::ports::input<Typenames>
+				>
 			>
 		{
 			protected:
@@ -247,7 +253,10 @@ namespace psycle { namespace generic { namespace wrappers {
 			:
 				public universalis::compiler::cast::underlying_wrapper<
 					typename Typenames::underlying::ports::inputs::single,
-					universalis::compiler::virtual_factory<single<Typenames>, basic::ports::inputs::single<Typenames> >
+					universalis::compiler::virtual_factory<
+						typename Typenames::ports::inputs::single,
+						basic::ports::inputs::single<Typenames>
+					>
 				>
 			{
 				protected:
@@ -262,7 +271,10 @@ namespace psycle { namespace generic { namespace wrappers {
 			:
 				public universalis::compiler::cast::underlying_wrapper<
 					typename Typenames::underlying::ports::inputs::multiple,
-					universalis::compiler::virtual_factory<multiple<Typenames>, basic::ports::inputs::multiple<Typenames> >
+					universalis::compiler::virtual_factory<
+						typename Typenames::ports::inputs::multiple,
+						basic::ports::inputs::multiple<Typenames>
+					>
 				>
 			{
 				protected:
