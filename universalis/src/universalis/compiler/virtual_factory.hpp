@@ -8,8 +8,6 @@
 #include <boost/preprocessor/repetition/enum_trailing_params.hpp>
 namespace universalis { namespace compiler {
 
-	//template<>
-	//class virtual_factory<> {
 	class basic_virtual_factory {
 		public:
 			class virtual_factory_access {
