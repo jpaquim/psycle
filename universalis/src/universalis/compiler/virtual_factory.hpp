@@ -80,7 +80,7 @@ namespace universalis { namespace compiler {
 				
 				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
 			#undef constructor
-	};	
+	};
 
 	#if 1
 	template<typename Derived>
