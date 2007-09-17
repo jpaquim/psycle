@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_command.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_Record.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+<p class=head2>Global Commands</P>
+
+Psycle has a set of Global commands, which fill up the parameter section of a note position:
+<P>
+<center><code>... .. .. FXXX<br></code></center>
+<P>
+<table border="0" cellpadding="5px">
+<col width="50">
+<tr valign="top"><td><b>FFxx </b></td><td> Change BPM</td>
+<tr valign="top"><td><b>FExx</b> </td><td>Extended Command:<br><br>
+
+<table border="0" cellbappd="3px">
+<col width="80">
+<tr valign="top"><td><i>FE00-FE1F</i></td><td>Set Tick Per Beat</td>
+<tr valign="top"><td><i>FE2x </i></td><td>Set Bypass mode on/off for the specified machine (e.g. <code> --- .. 02 FE20</code>).  Make x non-zero to bypass the machine, and make it zero to turn the machine back on. </td>
+<tr valign="top"><td><i>FE3x </i></td><td>Set Mute mode on/off for the specificed machine (e.g. <code>--- .. 02 FE30</code>).  Make x non-zero to mute the machine, and make it zero to turn the machine back on. </td>
+<tr valign="top"><td><i>FEBx </i></td><td>Loops the current pattern x times. FEB0 sets the loop start point.</td>
+<tr valign="top"><td><i>FEDx </i></td><td>Causes a "pause" of x rows (the current row becomes x rows longer)</td>
+<tr valign="top"><td><i>FEFx </i></td><td>Causes a "pause" of x ticks (the current row becomes x ticks longer)</td>
+</table>
+</td>
+<tr valign="top"><td><b>FDxx</b> </td><td>Delay Trigger - xx/256 ticks, which works both with note-ons and noteoffs.</td>
+<tr valign="top"><td><b>FCxx</b> </td><td>Change Global/Wire Volume - the second column shows the wire number, the third shows the machine number, and the fourth shows the volume (between 0 and FF) e.g.<P>
+<code>--- .. .. FC80</code>	&nbsp;&nbsp; Sets Global Volume to halfway position.<br>
+<code>--- 01 05 FC40</code>	&nbsp;&nbsp; Sets wire 1 of machine 5 to volume 40 (in hex).<P>You can find the wire number in the title bar of the <a href="Machine_Wires.htm">wire dialogue</a><br> &nbsp;</td>
+
+<tr valign="top"><td> <b>FBxx</b> </td><td>Retrigger - xx/lines duration per trigger.</td>
+<tr valign="top"><td> <b>FAxy</b> </td><td>Retrigger Continue.<br>
+<b>x:</b> x/16 lines duration per trigger (0 to use current value)<br>
+<b>y:</b> acceleration. Values range from 1-F <P>
+<code> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  9-A-B-C-D-E-F | 1-2-3-4-5-6-7-8<BR>
+slowest<- deceleration | acceleration -> fastest
+</code><P>
+This does not trigger on new line &ndash; it continues from the previous retrigger position<br> &nbsp;</td>
+<tr valign="top"><td><b>F8xx</b> </td><td>Sets the indicated machine's panning e.g.<P>
+			<code>--- .. 05 F880</code> &nbsp;&nbsp; Sets the panning of Generator 5 to 80 (Middle)<br> &nbsp;
+</td>
+<tr valign="top"><td> <b>F3xx</b> </td><td>Jump to pattern position xx.</td>
+<tr valign="top"><td> <b>F2xx</b> </td><td>Break to line - jumps to next pattern, to the line specified by xx.</td>
+</table>
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_command.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_Record.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+</body>
+</html>

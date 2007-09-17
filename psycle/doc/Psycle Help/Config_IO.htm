@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Config_Dirs.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Config_MIDI.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+<p class=head2>Input/Output</p>
+<p class=under>(Configuration > Settings... >>Input/Output)</p>
+
+<p class=head3>Audio I/O</P>
+
+Depending on your system and soundcard, you will get several different options for sound output.  By clicking the "Configure..." button, you can then set the sample rate and turn dithering (essentially waveform "smoothing") on or off.  You can set the number of buffers and their size, which will determine the latency (the delay in playback).  If you find your audio skips and breaks unnecessarily, you may need to increase the latency.<P>   
+Note:  When using DirectSound, there is an "exclusive" checkbox that, when ticked, will only allow sound to be played when Psycle is in focus.<P>
+
+<p class=head3>MIDI I/O</P>
+Two MIDI input options are available to you in Psycle:  MIDI command and note input using a MIDI keyboard (or other device), or MIDI sequencing using another sequencer (the latter is covered in the <a href="MIDI.htm">MIDI Tutorial</a>).<P>
+
+To use a MIDI Keyboard to input notes, select your keyboard in "Input Device" and make sure that the "Enabled:  Sequenced with MIDI Commands" checkbox is cleared.
+<P>
+NOTE: Currently, MIDI Input is not available with Directsound, due to sincronization issues.
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Config_Dirs.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Config_MIDI.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+</body>
+</html>

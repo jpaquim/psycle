@@ -1,0 +1,11 @@
+
+
+body { font: 10pt arial; background: #ffffff url(psyclewatermark2.bmp) no-repeat center fixed }
+table { font: 10pt arial }
+P.head1 { font: bold 16pt arial; text-align: center; text-decoration: underline }
+P.head2 { font: bold 14pt arial; text-align: center }
+P.head3 { font: bold italic 10pt arial; text-align: left; text-decoration: underline }
+P.under {font: 11pt arial; text-align: center; color:#666666 }
+
+A:link, A:visited, A:active { text-decoration: none; color: #062498; font: bold}
+li { padding-bottom: 10 }

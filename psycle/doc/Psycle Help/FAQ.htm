@@ -1,0 +1,332 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+  <link rel="StyleSheet" href="psycle.css" type="text/css" media="screen">
+
+</head>
+
+
+
+<body>
+
+<p class="head1">List of Frequently Asked Questions about
+Psycle</p>
+
+<a href="#general">General Questions</a><br>
+
+<a href="#sampler">Samples and the Sampler Machine</a><br>
+
+<a href="#usability">Usability</a><br>
+
+<a href="#development">Development</a>
+<p><a name="general"></a></p>
+
+<p class="head3">General Questions</p>
+
+<p><b>Q)</b> I need to talk to the developers!<br>
+
+<b>A)</b> Via E-mail:<br>
+
+</p>
+
+<ul>
+
+  <li> Write to the mailing list:
+psycle-devel@lists.sourceforge.net<br>
+
+  </li>
+
+  <li> You can also contact with the developers using the e-mails
+listed here :<br>
+
+    <a href="http://sourceforge.net/project/memberlist.php?group_id=10384">http://sourceforge.net/project/memberlist.php?group_id=10384</a><br>
+
+DO NOT WRITE to those with "No Specific Role". They are Retired.<br>
+
+Most probably, you want to talk to JosepMa/jaz, or johan_boule/bohan
+  </li>
+
+</ul>
+
+Via IRC:<br>
+
+<ul>
+
+  <li> Use an IRC client to connect to *EFnet* network, and
+there, to the
+#psycle channel.<br>
+
+  </li>
+
+  <li> use the web based interfaces at: http://psycle.free.fr/irc<br>
+
+  </li>
+
+</ul>
+
+<p><b>Q)</b>Is it possible to import/load
+MOD/S3M/XM/IT files into Psycle?<br>
+
+<b>A)</b> Latest 1.7.x alphas and all 1.8 versions include
+"Sampulse" and its importing routines.
+Those should allow you to import them with ease.<br>
+
+Warnings:<br>
+
+</p>
+
+<ul>
+
+  <li> Sampulse as a machine is unfinished. You
+might preffer replacing it
+by other native/VST
+machines after having imported the patterns/sequence.</li>
+
+  <li> Also, note that Psycle has an important
+limitation : It does not have
+a volume column, so all the volume changes are converted to a volume
+command, making it impossible to have a volume set and a command at the
+same line.</li>
+
+</ul>
+
+<p><b>Q)</b> What is this 'dummy'
+machine?<br>
+
+<b>A)</b> Dummy internal machine? It is mainly used to
+replace missing plugin
+machines when loading
+a .psy file. It can also be used to group machines, connecting them to
+it, and avoid a
+limitation that exists of max 12 machines connected to one.
+</p>
+
+<p><b>Q)</b> I have problems
+playing a song in Winamp!<br>
+
+<b>A)</b> The winamp plugin hasn't been updated for long,
+and it lacks several
+changes that have
+been since then. We no longer recommend using it, until we release an
+up-to-date version.
+</p>
+
+<p><a name="sampler"></a></p>
+
+<p class="head3"><b>Samples and the Sampler
+Machine</b></p>
+
+<p><b>Q)</b> I've loaded a sample
+but it doesn't make any sound.<br>
+
+<span style="font-weight: bold;">A)</span> To play a
+sampled sound (.wav or .iff only!) you need to add a
+sampler machine and connect
+it to the master or to an effect that goes to the master. You might
+want to check if other
+machines make sound, and check your audio settings.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+Can Psycle use OGG?/MP3? files as samples?<br>
+
+<span style="font-weight: bold;">A)</span>
+Unfortunately not. This is a common question, because it would be
+good. Support for lossy
+compression (MP3?, etc) and lossless compression? (FLAC, etc) formats
+is on the TODO list.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+When I load a sample and enter a note, it's really fast and
+high-pitched...<br>
+
+...when it plays. I've tried everything from halving the bit rate of
+the sample to re-installing Psycle.
+What should I do about this?<br>
+
+<span style="font-weight: bold;">A)</span> The way
+trackers change pitch of a sample is by speeding up or
+slowing down the rate at which
+the individual sample points are played back. The result is similar to
+playing a 33 1/3 RPM
+record at 45, or vice versa.<br>
+
+This depends on the note you press, and
+for the Sampler, the
+"standard" note is C-4, not C-5 like with most other plugins. Also, you
+can adjust the base
+note to another value, via the Edit instruments screen (Edit button in
+the toolbar, or F10 key)</p>
+
+<p><a name="sampler"></a></p>
+
+<p class="head3"><b>Psycle Usage</b></p>
+
+<p><b>Q)</b> When Psycle loses focus, the music
+stops. Why?<br>
+
+<span style="font-weight: bold;">A)</span> The
+"Exclusive" mode is selected in the Directsound Configuration.<br>
+
+Go to the Configuration
+Menu -&gt; Settings and select the Input/output tab, and press the
+configure button.
+There you will see the Exclusive option. Uncheck it.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+I've put my xxx VST plugin in the "plugins" dir and Psycle doesn't
+show it!<br>
+
+<span style="font-weight: bold;">A)</span> Psycle
+uses a different paths for Native plugins and VST plugins. By
+default, Native Plugins go
+under "Plugins\" and VST's go under "Vst\".<br>
+
+If you want to change it,
+go to Configure-Settings,
+select the "Directories" tab, and select your VST plugins' dir.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+Why doesn't/Can't/won't Psycle support buzz machines?<br>
+
+<span style="font-weight: bold;">A)</span> Oskari
+Tammelin, the author of Buzz, declined us the right to
+develop a Buzz Plugins' Host for Psycle.<br>
+
+Recently, some wrappers are being developed for other projects. Psycle
+is keeping an eye on those
+and in the future we could use one of those in it</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+I can't enter notes into the Pattern Editor. What happens?<br>
+
+<span style="font-weight: bold;">A)</span> The Edit
+Mode is Deactivated. The default key to switch it on/off is
+the "Space" key. You can see if
+you are on Edit mode in the status bar, to the right.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+What is the Red Circle Button in the toolbar for?<br>
+
+<span style="font-weight: bold;">A)</span> It allows
+you to enter Record Notes in realtime mode.<br>
+
+To enter this
+mode Follow Song and Edit mode
+have to be activated so when you enable Record Notes in realtime,
+Follow Song and Edit mode are
+activated automatically if they were disabled.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+I have only 16 tracks in my psycle song, how do i get 64?<br>
+
+<span style="font-weight: bold;">A)</span> Under the
+save icon (the diskette), there is a track number
+selector. Unfold the list of tracks number
+and select 64.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+What does the&nbsp;<span style="font-style: italic;">Autostop
+All Machines</span> button exactly do?<br>
+
+<span style="font-weight: bold;">A)</span> When
+enabled, if Psycle detects an effect that receives no sound
+input, it stops it, freeing CPU usage.
+This is beneficial in most cases, but plugins like delays, or those
+that have LFO's or any other parameter
+that needs to run constantly, will sound unexpectedly.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+How do I change the pattern length?<br>
+
+<span style="font-weight: bold;">A)</span> Right
+Click in the Pattern Window and then select&nbsp;<span style="font-style: italic;">Properties.</span></p>
+
+<p><span style="font-weight: bold;">Q)</span>
+Is it possible to have&nbsp;patterns with different lengths?<br>
+
+<span style="font-weight: bold;">A)</span> See
+above: "How do I change the pattern length?"</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+How does the tweak_smooth command work?<br>
+
+<span style="font-weight: bold;">A)</span> In the
+docs-Directory you find a .txt-file with in-depth info about
+tweaking.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+Is it possible to let a tws command affect several rows (not only
+one)?<br>
+
+<span style="font-weight: bold;">A)</span> Smooth
+tweaks between two tweak values can be achieved by entering
+the start and the end value,
+selecting via mouse the region and then select "Interpolate" from the
+context-menu.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+how do I stop a synth playing in a track/ how do i create a NoteOff?<br>
+
+<span style="font-weight: bold;">A)</span> put the
+cursor in a channel's first column, the row you want it to
+stop and press&nbsp;1.
+This will put an "off", silencing the machine at that point. You can
+also press Ctrl+1 to insert an off without machine number, so that the
+last machine used in this track would be stopped.<br>
+
+</p>
+
+<p><a name="development"></a></p>
+
+<p class="head3"><b>Development</b></p>
+
+<p><span style="font-weight: bold;">Q)</span>
+How can I develop a Psycle Machine?<br>
+
+<span style="font-weight: bold;">A)</span> There is
+no SDK yet, and format will change in Psycle 2.<br>
+
+The recommended way right now is to get the source directly of one of
+the open source plugins ( arguru synth is a good start ), and use it as
+a template
+for your own.
+You can download them from Psycle's SVN repository at Source Forge
+Site:
+https://psycle.svn.sourceforge.net/svnroot/psycle/trunk/psycle-plugins/</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+How can I port a Buzz machine to Psycle?<br>
+
+<span style="font-weight: bold;">A)</span> An old
+SDK exists in the download section of Psycle in Sourceforge,
+but it is
+obsolete. The only way there is right now is starting with a Psycle
+plugin.<br>
+
+M3 Would be your start point, since it is partially documented.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+I would like to contribute to the project. What can I do?<br>
+
+<span style="font-weight: bold;">A)</span> Psycle
+evolves continuously, and sometimes it is thanks small
+contributions from
+people not involved directly with it.
+You can contact the developers (See first Question of this FAQ) and ask
+what could
+you do, or tell us what you'd like to work on instead: DSP, plugins, help
+files, graphics, tracker features... There are lots of places that can be improved in
+one way or another.</p>
+
+<p><span style="font-weight: bold;">Q)</span>
+When will Psycle 2 be out?/ In which stage is Psycle 2 developement?
+What do you
+plan for Psycle 2?<br>
+
+<span style="font-weight: bold;">A)</span> See the
+<a href="About_History.htm">History and future plans</a> section.
+</p>
+
+</body>
+</html>

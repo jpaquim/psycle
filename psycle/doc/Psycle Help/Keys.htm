@@ -1,0 +1,521 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <link rel="StyleSheet" href="psycle.css" type="text/css" media="screen">
+</head>
+<body>
+.
+
+
+
+
+<!-- Rollover Image Script - Place within <head> tag -->
+<script language="JavaScript" type="text/javascript">
+<!-- Hide from older browsers
+function SwitchImg()
+{ //start
+  var rem, keep=0, store, obj, switcher=new Array, history=document.Data;
+    for (rem=0; rem < (SwitchImg.arguments.length-2); rem+=3) {
+    	store = SwitchImg.arguments[(navigator.appName == 'Netscape')?rem:rem+1];
+    if ((store.indexOf('document.layers[')==0 && document.layers==null) ||
+        (store.indexOf('document.all[')==0 && document.all==null))
+         store = 'document'+store.substring(store.lastIndexOf('.'),store.length);
+         obj = eval(store);
+    if (obj != null) {
+   	   switcher[keep++] = obj;
+      switcher[keep++] = (history==null || history[keep-1]!=obj)?obj.src:history[keep];
+      obj.src = SwitchImg.arguments[rem+2];
+  } }
+  document.Data = switcher;
+} //end
+
+function RestoreImg()
+{ //start
+  if (document.Data != null)
+    for (var rem=0; rem<(document.Data.length-1); rem+=2)
+      document.Data[rem].src=document.Data[rem+1];
+} //end
+
+// end hiding contents -->
+</script>
+
+
+
+
+<p class="head1">Default Keyboard Settings</p>
+
+Almost all&nbsp;of these keys can be changed from the <a href="Config_Keyboard.htm">Keyboard and Misc.</a> configuration tab.  To reset the keyboard settings, click the "Default" button in this window, or delete this file:
+<p>
+<code>&lt;Your Windows Directory&gt;\PsycleKeys.ini</code></p>
+<p>
+<a href="#PlayBack">PlayBack</a><br>
+
+<a href="#Navigation">Navigation</a><br>
+
+<a href="#Editing">Editing</a><br>
+
+<a href="#Notes">Default Note Layout on the PC Keyboard</a>
+<br>
+
+<br>
+
+<br>
+
+<a name="PlayBack"></a>
+</p>
+<p class="head3">PlayBack</p>
+
+<table>
+
+  <col width="200">
+  <tbody>
+    <tr valign="top">
+      <td>Play Block</td>
+      <td>F6</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Play From Cursor Position</td>
+      <td>F7</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Play Current Row (single shot)</td>
+      <td>8</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Play Current Note (single shot)</td>
+      <td>4</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Play Song</td>
+      <td>F5</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Play From Start</td>
+      <td>Shift + F5</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Stop</td>
+      <td>F8</td>
+
+    </tr>
+  </tbody>
+</table>
+
+
+<a name="Navigation"></a>
+<p class="head3">Navigation</p>
+
+<table>
+
+  <col width="200">
+  <tbody>
+    <tr valign="top">
+      <td>Edit Instruments</td>
+      <td>F10</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Machine View</td>
+      <td>F2</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Editor</td>
+      <td>F3</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Down 16</td>
+      <td>Page Down</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Up 16</td>
+      <td>Page Up</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Bottom</td>
+      <td>End</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Down</td>
+      <td>Down</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Left</td>
+      <td>Left</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Right</td>
+      <td>Right</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Top</td>
+      <td>Home</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Nav Up</td>
+      <td>Up</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Next Pattern (in same sequencer position)</td>
+      <td>Shift + Up</td>
+    </tr>
+    <tr valign="top">
+      <td>Next Song Position</td>
+      <td>Shift + Right</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Next Track</td>
+      <td>Tab</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Previous Pattern (in same sequencer position)</td>
+      <td>Shift + Down</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Previous Song Position</td>
+      <td>Shift + Left</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Previous Track</td>
+      <td>Shift + Tab</td>
+
+    </tr>
+  </tbody>
+</table>
+
+
+<a name="Editing"></a>
+<p class="head3">Editing</p>
+
+
+<table>
+
+  <tbody>
+    <tr valign="top">
+      <td>Add Machine</td>
+      <td>F9</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Copy</td>
+      <td>Ctrl + C</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Cut</td>
+      <td>Ctrl + X</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Delete</td>
+      <td>Ctrl + Shift + X</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Double</td>
+      <td>Ctrl + D</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block End</td>
+      <td>Ctrl + E</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Halve</td>
+      <td>Ctrl + H</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Interpolate</td>
+      <td>Ctrl + I</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Mix</td>
+      <td>Ctrl + M</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Paste</td>
+      <td>Ctrl + V</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Set to Current Instrument</td>
+      <td>Ctrl + T</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Set to Current Machine</td>
+      <td>Ctrl + G</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block, Go to Start of</td>
+      <td>Ctrl + B</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Block Deselect</td>
+      <td>Ctrl + U</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Current Instrument +1</td>
+      <td>Ctrl + Up</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Current Instrument -1</td>
+      <td>Ctrl + Down</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Current Machine +1</td>
+      <td>Ctrl + Right</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Current Machine -1</td>
+      <td>Ctrl + Left</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Current Octave +1</td>
+      <td>Num *</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Current Octave -1</td>
+      <td>Num /</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Edit, Toggle On/Off</td>
+      <td>Space</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Error Log</td>
+      <td>F11</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Follow Song</td>
+      <td>Ctrl + F</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Insert mcm command</td>
+      <td>Shift + `</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Machine Properties</td>
+      <td>Shift + Return</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Maximise Pattern</td>
+      <td>Ctrl + Tab</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Note off command (current machine)</td>
+      <td>1</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Note off command (no machine)</td>
+      <td>Ctrl + 1</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Copy</td>
+      <td>Ctrl + F4</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Cut</td>
+      <td>Ctrl + F3</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Delete</td>
+      <td>Ctrl + F3</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Mix Paste</td>
+      <td>Ctrl + F5</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Paste</td>
+      <td>Ctrl + F5</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Properties</td>
+      <td>Ctrl + Return</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Step +1</td>
+      <td>]</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Step -1</td>
+      <td>[</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Track Mute</td>
+      <td>Ctrl + F9</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Track Record</td>
+      <td>Ctrl + F7</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Pattern Track Solo</td>
+      <td>Ctrl + F8</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Redo</td>
+      <td>Ctrl + Z</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Row Clear</td>
+      <td>Delete</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Row Delete</td>
+      <td>BackSpace</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Row Insert (current track only)</td>
+      <td>Insert</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Select All</td>
+      <td>Ctrl + A</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Select Bar</td>
+      <td>Ctrl + D</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Select Track</td>
+      <td>Ctrl + R</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Select Machine</td>
+      <td>Return</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose BlockDec</td>
+      <td>Ctrl + F11</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose BlockDec12</td>
+      <td>Ctrl + Shift + F11</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose BlockInc</td>
+      <td>Ctrl + F12</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose BlockInc12</td>
+      <td>Ctrl + Shift + F12</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose Channel </td>
+      <td>Ctrl + F1</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose ChannelDec12</td>
+      <td>Ctrl + Shift + F1</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose ChannelInc</td>
+      <td>Ctrl + F2</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Transpose ChannelInc12</td>
+      <td>Ctrl + Shift + F2</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Tweak (twk)</td>
+      <td>`</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Tweak Smooth (tws)</td>
+      <td>Ctrl + `</td>
+
+    </tr>
+    <tr valign="top">
+      <td>Undo</td>
+      <td>Ctrl + Z</td>
+
+    </tr>
+  </tbody>
+</table>
+
+
+<a name="Notes"></a>
+<p class="head3">Note Layout on the PC Keyboard</p>
+This image shows the default layout of the notes. Hover the mouse over
+the image below to see how the notes correspond to letters on the
+keyboard (English QWERTY layout). The octave coloured in blue is the
+one set as the <a href="PatternEd_Settings.htm">current octave</a>.<br>
+You may need to modify this for other keyboard layouts ( French AZERTY,
+for example ), or for your own needs (having 3 octaves instead of just
+2 and a half)
+<p>
+<a href="" onmouseout="RestoreImg()" onmouseover="SwitchImg('document.keymap','document.keymap','keymap_ord.gif')"><img src="keymap.gif" name="keymap" alt="" border="0" height="127" width="379"></a>
+<!-- this next zero-size image reference ensures that the image is included in the chm file by HTML Help--><img src="keymap_ord.gif" alt="" border="0" height="0" width="0">
+</p>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_Notes.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_command.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+<p class=head2>Tweaking Machines</P>
+
+The <code>twk</code> (tweak) and <code>tws</code> (smooth tweak) commands allow the parameters of machines to be automated.  The <code>twk</code> commmand causes the parameter change to happen instantaneously, while <code>tws</code> interpolates the change from the current value to the new value, over the time of one line.<P>
+
+To insert a twk command, make sure the cursor is in the left-hand side of the track, and press " ` " (the key to the left of the "1" key).<BR>  To insert a tws command, do the same but hold the Shift key.<br>
+(Please. Note that you can change these keys from the <a href="Config_Keyboard.htm">keyboard configuration dialog</a>)<P>
+
+<center><code>twk 01 00 A9B3<br></code>
+1 &nbsp;&nbsp;&nbsp; 2 &nbsp;&nbsp; 3 &nbsp;&nbsp;&nbsp; 4</center>
+
+<P>
+
+<table border="0">
+<col width="25">
+<tr valign="top"><td><b>1.</b></td><td>Can be <code>twk</code> or <code>tws</code>.</td>
+<tr valign="top"><td><b>2.</b></td><td>Parameter number.</td>
+<tr valign="top"><td><b>3.</b></td><td>Machine number.</td>
+<tr valign="top"><td><b>4.</b></td><td>Parameter value.</td>
+</table>
+<P>
+The above example tweaks generator 0 (00), altering parameter 1 (01) to a value of A9B3 (43443 in decimal).
+<P><a name="param">
+To find the Parameter number and value for machine you can select "Params" in the third list box from the left in the Machine Bar, and then a list of parameters will display in the fourth listbox.<P>
+<center><img src="machinebar_params.png"border="0" align="absmiddle"></center>
+<P>
+Alternatively, for a native machine, right click the knob in the parameter window.  For a VST, use the listbox that appears via the "View-Parameter List" option.
+
+For recording tweaks in real-time, see the <a href="PatternEd_Record.htm">Recording</a> section.
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_Notes.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_command.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+</body>
+</html>
