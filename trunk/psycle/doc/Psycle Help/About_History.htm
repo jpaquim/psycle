@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td></td><td align="right"><a href="About_Changes.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+<P class=head2>Psycle History</P>
+<i>(based on an article by ksn, the Psycledelics FAQ and some first-person knowledge)</i>
+<P>
+Psycle's development began in May 2000. It was designed by Arguru as a "Buzz clone", taking its machine view model and with a sequence that had one line per machine (horizontal, as opposed to buzz's vertical one).<br>
+The first difference was the disconnection of machines from patterns. In effect, the same pattern could be arranged in the sequencer for several (different) machines (up to the user if that made sense to its song)
+<P>
+After the first few alpha versions, Arguru changed Psycle into a more classical-style tracker, only keeping the Buzz-influenced Machine View. Each song position defined in the sequencer was linked to one pattern used to enter notes and data for all the machines at the same time. This is how it has remained until today.
+<P>
+When version 1.0 was close, some important features were added (such as the "twk" command and .wav rendering) but Psycle was still unfinished. It was usable but lacked ergonomy and power &ndash; there was no mouse support, few parameters commands, many plugins were unfinished, and the VST support was weak.
+<P>
+Soon after that, Arguru stopped developing Psycle to start working on another project (what later became TraxVox), and made Psycle open source. This happened  at the beginning of September 2000, leaving a young program with an innovative mix of the classic tracking interface with VST (and native) plugins and modular machine connections.
+<P>
+For several weeks Psycle stayed without a coder, period after which Mats Höjlund took on its development .  At the time, Mats' main objective was to clear things up and clean Psycle's code. His work on versions 1.0.x and 1.1.x was most notable on internal recoding and design consolidation, even though some new features were added (the Lines per beat feature as one).<br>
+Along with this, Mats began the development of a new version of Psycle, Psycle 2, in December 2000. The new program's main feature was a sequencer which had the ability to play several patterns at the same time (a multipattern sequencer), but maintaining the patterns like they were (i.e. no link to machines).
+<p>
+When Mats left, Psycle 2 stopped, and a guy called by the nickname of [JAZ] took on the task of continuing the Psycle history.<br>
+[JAZ]'s initial goals were to fix several of the astounding bugs, and add some notably missing features. This took form in versions 1.5 and 1.6.
+After that, the idea of a version 2 appeared again, but instead of focusing on Mats code, [JAZ] started a new (internal) design codenamed Psyclean, which was never completed.
+<P>
+There existed also a version of Psycle that was temporarily called 1.9. This was started by Dan who had to leave it due to work commitments.  This version had some Data structure changes which aimed to give more tracks, a volume column (panning too?), more lines per pattern, a new song file format. The work was partly dismissed due to the incompatibilities it was generating.
+<P>
+Around Spring/Summer 2002, Dilvie contacted with the Psycle team, interested in developing a tracker with similar aims to what Psycle had, and expand on his own ideas. To make this a reality, Psycle was branched in Psycle 1 and Psycle ii
+<P>
+Psycle 1 (at v 1.7) continued to be maintained by JAZ and pooplog. The aim was to continue offering a version which was simple enough, stable but still powerful, and to fill the gap until PsycleII came out.
+<P>
+Psycleii was to be a fully fledged audio studio (audio and video mixing, mastering...)
+It was initially coded by Majick_ / MJK. He had part of the core ready, but had to leave due to work commitments. Dilvie, on the other hand, started working on the GUI,
+trying Mozilla XUL language as a start. Unfortunately, he was busy with work too as well, and left.  The latest news is that this branch is vapourware.
+<P>
+In 2004, a new project called "freePsycle" began its development. Bohan started it, with his own ideas, and with these two aims: portability (multiplatform), and
+more importantly (and hence the name), developed entirely with free tools (from compilers to libraries as well as OSes). <br>
+Up to today, it has been a testbed for several parts that have ended into the Psycle 1 branch.
+<P>
+Between autumn 2004 and summer 2005 two new versions of Psycle appeared. 1.7.6.2, with many contributions from bohan, zealmange and others,( which improved the aging source code, made it more C++ standard, and added project files for Visual studio 2002/2003), and 1.8.0 that continued on the same direction. Between other facts, psycle stability improved, as well as source code readability.
+On the user side, there were several new native plugins, improvements in the VSThost, and some new handy features.
+<P>
+During the period between that release, and December 2006, a version named 1.9alpha kept being developped, adding Visual Studio 2005 support, new external packages (newer version of boost), many new features, and more native plugins.<br>
+Work on it was halted several times, due to the developers not having time due to different real-life issues.
+<p>
+Also, on March 2006, a new Psycle branch saw the light: xpsycle, or Psycle on linux.
+The original sources were based on Psycle 1.8, but later on moved onto Psycle 1.9 to take advantage of the work dedicated already to the 1.9 alpha.
+This new branch also had another new feature: multisequence. In fact, it was designed from the ground up with multisequence in mind.
+<P>
+At January 2007, xpsycle's developer moved on to his own program, and xpsycle stayed dormant for some months, after which the UI toolkit was changed to QT and continued its steps. These changes were brought mostly by Neil mather/mutilus and Mattias/gravity0, with the help of some other contributors.
+
+<P>
+Also, [JAZ]/JosepMa, took again the task of leading the main Psycle, released Psycle 1.8.5 in August 2007.
+This new release is based on the 1.8 branch (not on the 1.9), but several of the features have been added back and extended/finished ( a new wave editor, the new VSThost, a new Mixer machine, improvements of Sampulse), as well as the all time going task of fixing the errors (bugfixs)
+<p>
+
+<P class=head2>Future:</P>
+There are several works in progress around the Psycle project. This is a brief of what can be expected:
+
+<ul>
+<li>QPsycle: This project is in alpha state, but it will become in the future as the linux reference for Psycle (aside of psycle in wine, that has worked quite well so far). It will not be like Psycle, but will try to maintain the spirit of it. Also, the source code of QPsycle and Psycle will share many common parts so that the developers can work cooperatively.
+<li> Psycle 1.8: One more Psycle 1.8 could be expected (1.8.6) that would contain bugfixes and finish some incomplete features (most notably, Sampulse).
+<li> Psycle 1.9/2.0: Psycle 1.8.5 has become the new 1.9 branch, from which the development will continue. The first work will be to incorporate QPsycle's psycle-core engine, and improve upon it. It should allow to come some new features multi-io audio, new plugin formats ( LADSPA, others?), new Fileformat (PSY4) based on .xml and binary compressed data, and the ability to have a separated library to make again a psycle player.
+</ul>
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td></td><td align="right"><a href="About_Changes.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+</body>
+</html>

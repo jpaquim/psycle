@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_Limitations.htm">Previous</a></td><td align="right"></td>
+</table>
+<p class=head2>MIDI Implementation Chart</P>
+
+<table border="0" bordercolor="0" cellspacing="0" cellpadding="5">
+<Col width=120>
+<tr valign="top"><td><b>Function</b></td><td><b>Recognised</b></td><td><b>Remarks</b></td>
+<tr valign="top"><td><i>Channel</i></td><td>1 - 16</td><td>Channel n is mapped to track n</td>
+<tr valign="top"><td><i>Note On</i></td><td>Yes</td><td></td>
+<tr valign="top"><td><i>Note Off</i></td><td>Yes</td><td>Only if turned on by CC 125</td>
+<tr valign="top"><td><i>Program Change</i></td><td>0 - 63</td><td>Selects generator</td>
+<tr valign="top"><td><i>Program Change</i></td><td>64 - 217</td><td>Selects effect</td>
+<tr valign="top"><td><i>MIDI Sync: Start</i></td><td>Yes</td><td>Syncronizes the audio engine with the MIDI input</td>
+<tr valign="top"><td><i>MIDI Sync: Clock</i></td><td>Yes</td><td>Keeps the MIDI sync</td>
+<tr valign="top"><td><i>MIDI Sync: Stop</i></td><td>Yes</td><td>Stops audio</td>
+<tr valign="top"><td><i>CC 0</i></td><td>Yes</td><td> Selects sampler instrument</td>
+<tr valign="top"><td><i>CC 1 - 120</i></td><td>No</td><td>(Available for mapping to generator parameters)</td><td>
+<tr valign="top"><td><i>CC 121</i></td><td>Yes</td><td> Simulate MIDI Sync Start</td>
+<tr valign="top"><td><i>CC 122</i></td><td>Yes</td><td> Simulate MIDI Sync Clock</td>
+<tr valign="top"><td><i>CC 123</i></td><td>1 - 127</td><td> Tracker Tick Emulation</td>
+<tr valign="top"><td><i>CC 123</i></td><td>0</td><td> All Notes Off</td>
+<tr valign="top"><td><i>CC 124</i></td><td>Yes</td><td> Simulate MIDI Sync Stop</td>
+<tr valign="top"><td><i>CC 125</i></td><td>1 - 127</td><td> Enable Note Off</td>
+<tr valign="top"><td><i>CC 125</i></td><td>0</td><td> Disable Note Off (Default)</td>
+<tr valign="top"><td><i>CC 126</i></td><td>0 - 127</td><td> Set Controller</td>
+<tr valign="top"><td><i>CC 127</i></td><td>0 - 127</td><td> Set Generator Parameter</td>
+</table>
+
+<P>
+
+Controllers 126 & 127 are used as a compound controller. They are used together to set up a link between any free controller (CC 1-120) and a generator parameter on the channel. For example, to map CC 32 to the channels generator parameter 15 use:
+<P>
+CC 126, DATA 32 (followed by) <BR>
+CC 127, DATA 15
+<P>
+The parameters of Psycle Plug-ins & VST machines (both Generators AND effects) can be mapped. It is usually not wise to map recognised MIDI controllers (e.g. Volume is CC 7) to generator parameters, although mapping CC 7 to a generator's Master Volume parameter does make perfect sense!
+<P>
+Note that the values of Psycle generators are displayed in Hexidecimal (e.g. 0f in hex is 15 is decimal/sequencer).
+<P>
+'Note Off' messages are by default ignored, enable them using Controller 125, DATA 127.
+<P>
+To use effects such as the GoaSlicer you will need to have a track sending tick-sync controllers to give the sync usually provided by the tracker. This is very easy, simply send (any channel, any patch, ...) a Controller 123, DATA 127 on every 1/16th note to simulate the typical required sync. In sequencers such as CakeWalk, you can simply create one bar of this sync pattern and then set the Loop parameter to some high value to ensure this pattern is sent every bar.
+<P>
+
+Make sure the internal tempo of Psycle matches that of your MIDI sequencer.
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_Limitations.htm">Previous</a></td><td align="right"></td>
+</table>
+</body>
+</html>
