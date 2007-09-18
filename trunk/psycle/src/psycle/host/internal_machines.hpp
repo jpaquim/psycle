@@ -343,23 +343,24 @@ protected:
 
 };
 	/// tweaks:
-	/// [0]:
+	/// [0x]:
 	///  0 -> Master volume
-	///  1..12 -> Input volumes
-	///  13 -> master drywetmix.
-	///  14 -> master gain.
-	///  15 -> master pan.
-	/// [1..12]:
+	///  1..C -> Input volumes
+	///  D -> master drywetmix.
+	///  E -> master gain.
+	///  F -> master pan.
+	/// [1x..Cx]:
 	///  0 -> input wet mix.
-	///  13 -> input drywetmix. ( 0 normal, 1 dryonly, 2 wetonly  3 mute)
-	///  14 -> input gain.
-	///  15 -> input panning.
-	/// [13]:
+	///  1..C -> input send amout to the send x.
+	///  D -> input drywetmix. ( 0 normal, 1 dryonly, 2 wetonly  3 mute)
+	///  E -> input gain.
+	///  F -> input panning.
+	/// [Dx]:
 	///  0 -> Solo channel.
-	///  1..12 -> return grid. // the return grid array grid represents: bit0 -> mute, bit 1..12 routing to send. bit 13 -> route to master
-	/// [14]: 
-	///  1..12 -> return volumes
-	/// [15]:
-	///  1..12 -> return panning
+	///  1..C -> return grid. // the return grid array grid represents: bit0 -> mute, bit 1..12 routing to send. bit 13 -> route to master
+	/// [Ex]: 
+	///  1..C -> return volumes
+	/// [Fx]:
+	///  1..C -> return panning
 	}
 }

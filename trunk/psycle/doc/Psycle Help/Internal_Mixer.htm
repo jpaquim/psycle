@@ -17,7 +17,7 @@
 
 <p class="head2">Mixer Machine</p>
 <p>The send-return mixer is a very adaptable machine that allows to work with Psycle in a completely different way than what you're used up to now.<br>
-It adapts to the number of wires connected, so it doesn't use any more screen space than the neededf</p>
+It adapts to the number of wires connected, so it doesn't use any more screen space than the needed</p>
 <p>In its most simple way you can use it to control the volume of up to 12 signals (like if it was another master machine). But even then, it is more functional, giving panning per channel, vu-meters and separated gain from volume slider.
 </p>
 <p>
@@ -29,6 +29,62 @@ Finally, in its most complex way of working, you can use several effects in chai
 <center><img src="mixer_machine.png" border="0" ></center>
 
 <p>
+Its layout is very simple. If you don't have effects, there is only one column for Master volume (leftmost), and each of the input channels.<br>
+Each channel has a knob for "Mix" (What is sometimes called "dry signal"), for Gain (this value is mapped to the volume of the wire), and for panning, followed by the volume slider and four small buttons as follow:<br>
+<ul>
+<li>S: Solo this channel. Only mix the audio of this *input* channel. It does not mute the returns of the effects.
+<li>M: Mute this channel. Don't mix the input of this channel. It also prevents its audio to be sent to the effects.
+<li>D: Mix Dry component only. Doesn't send the audio of this channel to the effects. (Sets the "send" knobs of this channel to 0% internally)
+<li>W: Mix Wet component only. The audio is sent to the effects as normal, but the dry component (Mix Knob value) is muted.
+</ul>
+Master Column has a knob named "D/W" in the place of the Mix knob. This allows you to control how much of the dry (coming from input channels) and wet (comming from the effects) is mixed to the output.
+</p>
+<p>
+When adding effects, they are added as a column at the right side of the window, keeping input channels on the left. For each one you add, a new line is added to all input channels that allows to specify which percentage of the signal is sent to the send effect.<br>
+Each one has a slider and some buttons in the place of the knobs that allow to route the audio output like this:<br>
+<ul>
+<li> Master: There's one button that says Master. If it is lit, the output of this effect is mixed directly to the output of the Mixer machine.
+<li> Route : As more effects are being connected, buttons with the word Route appear. If one of them is lit, the output of this effect is used as the input of the send that corresponds to the line of the button.
+</ul>
+<br>
+The buttons next to the slider do the following:
+<ul>
+<li> S: Solo this return. Allows to listen to this return alone. It does mute all the other returns *and* the dry signals of all the input channels.
+<li> M: Mutes this return. Mutes the audio that returns from this effect, not mixing it. Note: If you mute the only effect that outputs to master, you won't hear anything. You can't use this as a "bypass".
+</ul>
+</p>
+<p>
+Almost every part of the interface can be tweaked from the patterns. The following table explains which values you can use for this task:
+<pre>
+[0x]:
+	0 -> Master volume
+	1..C -> Input volumes
+	D -> master drywetmix.
+	E -> master gain.
+	F -> master pan.
+[1x..Cx]:
+	0 -> input wet mix.
+	1..C -> input send amout to the send x.
+	D -> input drywetmix. ( 0 normal, 1 dryonly, 2 wetonly  3 mute)
+	E -> input gain.
+	F -> input panning.
+[Dx]:
+	0 -> Solo channel.
+	1..C -> return grid. // the return grid array grid represents: bit0 -> mute, bit 1..12 routing to send. bit 13 -> route to master
+[Ex]: 
+	1..C -> return volumes
+[Fx]:
+	1..C -> return panning
+</pre>
+</p>
+<p>
+Some things to know:
+<ul>
+<li>If you delete a wire to a mixer, the number of columns will only decrease if it was the last input, or last effect.<br>
+In plain words: If you have three inputs and delete the wire that corresponds to the first input, there will still be three columns, but the first one will be inactive.<br>
+This behaviour is done to avoid any tweaks done in the pattern to become automatically erroneous when changing the machines connected.<br>
+<li>You can move the columns around. Drag the title of any column left or right to put it where you need it. Note that you are not allowed to interlace inputs and effects.
+</ul>
 </p>
 <p>
 <table width="100%">
