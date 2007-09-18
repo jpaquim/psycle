@@ -820,7 +820,7 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* LoadBank : loads a Bank from a CFxBank file								 */
+		/* LoadBank : loads a Bank from a CFxBank class								 */
 		/*****************************************************************************/
 
 		bool CEffect::LoadBank(CFxBank& fxstore)
@@ -930,7 +930,7 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* SaveBank : saves current sound bank to CFxBank file					     */
+		/* SaveBank : saves current sound bank to CFxBank class					     */
 		/*****************************************************************************/
 
 		CFxBank CEffect::SaveBank(bool preferchunk)
