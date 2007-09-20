@@ -1062,7 +1062,16 @@ namespace psycle
 								}
 								else
 								{
-									PatternEntry pentry(notecommands::midicc,status,pMachine->_macIndex,data1,data2);
+									PatternEntry pentry
+									(
+										notecommands::midicc,status,
+										#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+											#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+										#elif PSYCLE__CONFIGURATION__VOLUME_COLUMN
+											255, // volume
+										#endif
+										pMachine->_macIndex,data1,data2
+									);
 									pMachine->Tick(0,&pentry);
 								}
 							}
