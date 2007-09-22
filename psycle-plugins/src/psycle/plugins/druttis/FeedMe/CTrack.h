@@ -6,12 +6,6 @@
 //
 //============================================================================
 #pragma once
-//
-//
-#define WAVESIZE 4096
-#define WAVEMASK 4095
-//
-//
 #include "../CDsp.h"
 #include "../DspMath.h"
 #include "../CEnvelope.h"
