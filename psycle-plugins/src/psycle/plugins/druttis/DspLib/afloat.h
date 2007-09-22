@@ -24,11 +24,9 @@ inline void AnimateAFloat(afloat* p, float fac) {
 			p->current += std::min(maxdist, dist);
 			if (p->current > p->target) p->current = p->target;
 		}
-	} else {
-		if (p->current > p->target) {
+	} else if (p->current > p->target) {
 			p->current += std::max(maxdist, dist);
 			if (p->current < p->target) p->current = p->target;
-		}
 	}
 	if (p->current == p->target) p->source = p->current;
 }
