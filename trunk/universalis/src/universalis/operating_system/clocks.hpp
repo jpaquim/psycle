@@ -78,7 +78,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					u.tv_sec += o.tv_sec;
 					u.tv_nsec += o.tv_nsec;
-					if(u.tv_nsec >= 1e9) { u.tv_nsec -= 1e9; ++u.tv_sec; }
+					if(u.tv_nsec >= 1000000000) { u.tv_nsec -= 1000000000; ++u.tv_sec; }
 				#else
 					u += o;
 				#endif
@@ -91,7 +91,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					u.tv_sec -= o.tv_sec;
 					if(u.tv_nsec > o.tv_nsec) u.tv_nsec -= o.tv_nsec;
-					else { --u.tv_sec; u.tv_nsec += 1e9 - o.tv_nsec; }
+					else { --u.tv_sec; u.tv_nsec += 1000000000 - o.tv_nsec; }
 				#else
 					u -= o;
 				#endif
@@ -117,10 +117,10 @@ namespace universalis { namespace operating_system { namespace clocks {
 					opaque_time result;
 					underlying_type & u(result);
 					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-						u = seconds * 1e7; // ::FILETIME resolution
+						u = static_cast<underlying_type>(seconds * 1e7); // ::FILETIME resolution
 					#else
-						u.tv_sec =  seconds;
-						u.tv_nsec = (seconds - u.tv_sec) * 1e9;
+						u.tv_sec =  static_cast<time_t>(seconds);
+						u.tv_nsec = static_cast<long int>((seconds - u.tv_sec) * 1e9);
 					#endif
 					return result;
 				}
@@ -181,3 +181,4 @@ namespace universalis { namespace operating_system { namespace clocks {
 	#endif
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
+
