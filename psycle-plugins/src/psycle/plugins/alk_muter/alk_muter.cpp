@@ -1,112 +1,99 @@
+///\file
+///\brief Alk muter plugin for PSYCLE
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
-#include <cstring>
-#include <cstdlib>
-#include <cassert>
-#include <cmath>
+#include <cstdio> // for std::sprintf
+#include <stdexcept>
+namespace psycle { namespace plugins { namespace alk_muter {
 
-//////////////////////////////////////////////////////////////////////
-// Alk muter plugin for PSYCLE
+using namespace plugin_interface;
 
-CMachineParameter const paraType = 
-{ 
+CMachineParameter const static mute_parameter = { 
 	"Mute",
-	"Mute off/on",																								// description
-	0,																												// MinValue				
-	1,																												// MaxValue
-	MPF_STATE,																								// Flags
-	0,
+	"Mute off/on", // description
+	0, // min value				
+	1, // max value
+	MPF_STATE, // flags
+	0
 };
 
-CMachineParameter const *pParameters[] = 
-{ 
-	// global
-	&paraType
+CMachineParameter const static * const parameters[] = { 
+	&mute_parameter
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const static machine_info = {
 	MI_VERSION,				
-	0,																												// flags
-	1,																												// numParameters
-	pParameters,																								// Pointer to parameters
-#ifndef NDEBUG
-	"Alk Muter (Debug build)",																// name
-#else
-	"Alk Muter",																								// name
-#endif
-	"Muter",																								// short name
-	"Alk",																												// author
-	"About",																								// A command, that could be use for open an editor, etc...
-	1
+	0, // flags
+	sizeof parameters / sizeof *parameters, // number of parameters
+	parameters, // pointer to parameters
+
+	"Alk Muter" // name
+	#ifndef NDEBUG
+		" (debug build)"
+	#endif
+	,
+	
+	"Muter", // short name
+	"Alk", // author
+	"About", // a command, that could be use to open an editor, etc...
+	1 // number of columns
 };
 
-
-class mi : public CMachineInterface
-{
-public:
-	mi();
-	virtual ~mi();
-	virtual void Init();
-	virtual void SequencerTick();
-	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-	virtual bool DescribeValue(char* txt,int const param, int const value);
-	virtual void Command();
-	virtual void ParameterTweak(int par, int val);
+class machine : public CMachineInterface {
+	public:
+		machine();
+		~machine();
+		void Init();
+		void SequencerTick();
+		void Work(float * left_samples, float * right_samples, int sample_count, int tracks);
+		bool DescribeValue(char* text, int const parameter, int const value);
+		void Command();
+		void ParameterTweak(int parameter, int value);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(machine, machine_info)
 
-mi::mi()
-{
-	Vals = new int[sizeof pParameters];
+machine::machine() {
+	Vals = new int[sizeof parameters];
 }
 
-mi::~mi()
-{
+machine::~machine() {
 	delete Vals;
 }
 
-void mi::Init()
-{
+void machine::Init() {
 }
 
-void mi::SequencerTick()
-{
-// Called on each tick while sequencer is playing
+void machine::SequencerTick() {
+	// called on each tick while sequencer is playing
 }
 
-void mi::Command()
-{
-// Called when user presses editor button
-pCB->MessBox("Made by Alkz0r","Alk's Muter",0);
+void machine::Command() {
+	// called when user presses editor button
+	char text[] = "Made by Alkz0r\0";
+	char caption[] = "Alk's Muter\0";
+	pCB->MessBox(text, caption, 0);
 }
 
-void mi::ParameterTweak(int par, int val)
-{
-	Vals[par]=val;
+void machine::ParameterTweak(int parameter, int value) {
+	Vals[parameter] = value;
 }
 
-void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
-{
-	if(Vals[0]==1)
-	{
-		do
-		{												
-			*psamplesleft = 0.0f;
-			*psamplesright = 0.0f;												
-			++psamplesleft;
-			++psamplesright;												
-		} while(--numsamples);
-	} 
+void machine::Work(float * left_samples, float * right_samples, int sample_count, int /*tracks*/) {
+	if(!Vals[0]) return;
+	while(sample_count--) *left_samples++ = *right_samples++ = 0;
 }
 
-bool mi::DescribeValue(char* txt,int const param, int const value)
-{
-	switch(value)
-	{
-		case 0:sprintf(txt,"off");				break;
-		case 1:sprintf(txt,"on");				break;
+bool machine::DescribeValue(char * text, int const parameter, int const value) {
+	switch(parameter) {
+		case 0:
+			switch(value) {
+				case 0: std::sprintf(text, "off"); return true;
+				case 1: std::sprintf(text, "on"); return true;
+				default: throw std::runtime_error("illegal value for parameter");
+			}
+		default: return false; // returning false will simply show the value as a raw integral number
 	}
-	return false;
 }
+}}}
+

@@ -83,18 +83,22 @@ namespace psycle
 		class CMachineInfo
 		{
 		public:
-			int Version;
-			int Flags;
-			int numParameters;
-			CMachineParameter const **Parameters;
+			/// ...
+			int const Version;
+			/// ...
+			int const Flags;
+			/// number of parameters
+			int const numParameters;
+			/// a pointer to an array of pointers to parameter infos
+			CMachineParameter const * const * const Parameters;
 			/// "Rambo Delay"
-			char const *Name;
+			char const * const Name;
 			/// "Delay"
-			char const *ShortName;
+			char const * const ShortName;
 			/// "John Rambo"
-			char const *Author;
+			char const * const Author;
 			/// "About"
-			char const *Command;
+			char const * const Command;
 			/// number of columns
 			int numCols;
 		};
