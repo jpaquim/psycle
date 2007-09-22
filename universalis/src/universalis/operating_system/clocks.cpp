@@ -112,8 +112,8 @@ namespace universalis { namespace operating_system { namespace clocks {
 					#endif
 				#else
 				{
-					bool const result(supported(_SC_MONOTONIC_CLOCK));
-					if(result) {
+					monotonic_clock_supported = supported(_SC_MONOTONIC_CLOCK);
+					if(monotonic_clock_supported) {
 						if(!cpu_time_supported) wall_clock_id = process_clock_id = thread_clock_id = CLOCK_MONOTONIC;
 					}
 				}
@@ -127,19 +127,20 @@ namespace universalis { namespace operating_system { namespace clocks {
 				::clockid_t clock(universalis::operating_system::clocks::best());
 				timespec result;
 				#if UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-					std::cout << "using ::clock_getres ...\n ";
+					BOOST_MESSAGE("using ::clock_getres");
 					if(::clock_getres(clock, &result))
 					{
 						universalis::operating_system::error();
 						return 1;
 					}
 				#else
-					std::cout << "using CLOCKS_PER_SEC ...\n";
+					BOOST_MESSAGE("using CLOCKS_PER_SEC");
 					result.tv_sec = 1 / CLOCKS_PER_SEC;
 					result.tv_nsec = static_cast<long int>(1e9 / CLOCKS_PER_SEC);
 				#endif
-				std:: cout << "clock resolution: " << result.tv_sec << "s + " << result.tv_nsec * 1e-9 << "s" << std::endl;
-				return 0;
+				std::ostringstream s;
+				ss << "clock resolution: " << result.tv_sec << "s + " << result.tv_nsec * 1e-9 << "s";
+				BOOST_MESSAGE(s.str());
 			}
 		#endif
 	#endif // defined DIVERSALIS__OPERATING_SYSTEM__POSIX
