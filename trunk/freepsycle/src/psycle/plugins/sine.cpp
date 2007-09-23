@@ -8,7 +8,8 @@
 #include <psycle/detail/project.private.hpp>
 #include "sine.hpp"
 namespace psycle { namespace plugins {
-	PSYCLE__PLUGINS__NODE_INSTANCIATOR(sine)
+
+	PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)
 
 	sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
 	:

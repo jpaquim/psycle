@@ -9,7 +9,7 @@ namespace psycle
 	{
 		namespace outputs
 		{
-			PSYCLE__PLUGINS__NODE_INSTANCIATOR(jack)
+			PSYCLE__PLUGINS__NODE_INSTANTIATOR(jack)
 
 			jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name) throw(engine::exception)
 			:

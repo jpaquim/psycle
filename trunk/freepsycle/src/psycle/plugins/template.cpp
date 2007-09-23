@@ -8,7 +8,7 @@ namespace psycle
 {
 	namespace plugins
 	{
-		PSYCLE__PLUGINS__NODE_INSTANCIATOR(template_plugin)
+		PSYCLE__PLUGINS__NODE_INSTANTIATOR(template_plugin)
 
 		template_plugin::template_plugin(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name)
 		:

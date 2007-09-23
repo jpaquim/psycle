@@ -27,7 +27,7 @@ namespace psycle
 				typedef std::int16_t output_sample_type;
 			}
 
-			PSYCLE__PLUGINS__NODE_INSTANCIATOR(gstreamer)
+			PSYCLE__PLUGINS__NODE_INSTANTIATOR(gstreamer)
 
 			gstreamer::gstreamer(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(engine::exception)
 			:

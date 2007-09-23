@@ -11,7 +11,7 @@ namespace psycle
 {
 	namespace plugins
 	{
-		PSYCLE__PLUGINS__NODE_INSTANCIATOR(additioner)
+		PSYCLE__PLUGINS__NODE_INSTANTIATOR(additioner)
 
 		void additioner::do_process() throw(engine::exception)
 		{

@@ -22,7 +22,7 @@ namespace psycle
 		class named;
 		class graph;
 		class node;
-		#define PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(x) psycle__engine__node_instance__##x
+		#define PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(x) psycle__engine__node_instance__##x
 		class port;
 		namespace ports
 		{

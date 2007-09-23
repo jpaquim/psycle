@@ -8,7 +8,7 @@ namespace psycle
 	{
 		namespace outputs
 		{
-			PSYCLE__PLUGINS__NODE_INSTANCIATOR(alsa)
+			PSYCLE__PLUGINS__NODE_INSTANTIATOR(alsa)
 
 			alsa::alsa(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name) throw(engine::exception)
 			:

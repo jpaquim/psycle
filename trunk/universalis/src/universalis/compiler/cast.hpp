@@ -169,3 +169,4 @@ namespace universalis { namespace compiler { namespace cast {
 			}
 	};
 }}}
+
