@@ -8,7 +8,7 @@ namespace psycle
 	{
 		namespace outputs
 		{
-			PSYCLE__PLUGINS__NODE_INSTANCIATOR(asio)
+			PSYCLE__PLUGINS__NODE_INSTANTIATOR(asio)
 
 			asio::asio(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name) throw(engine::exception)
 			:

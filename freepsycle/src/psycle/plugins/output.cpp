@@ -11,7 +11,7 @@ namespace psycle
 {
 	namespace plugins
 	{
-		PSYCLE__PLUGINS__NODE_INSTANCIATOR(output)
+		PSYCLE__PLUGINS__NODE_INSTANTIATOR(output)
 
 		output::output(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(engine::exception)
 		:

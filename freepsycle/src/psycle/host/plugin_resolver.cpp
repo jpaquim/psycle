@@ -86,7 +86,7 @@ namespace psycle { namespace host {
 					"lib"
 				#endif
 				"freepsycle-plugin-" + name, 0)),
-			node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__ENGINE__NODE_INSTANCIATOR__SYMBOL(new))))
+			node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new))))
 	{
 		if(loggers::information()())
 		{

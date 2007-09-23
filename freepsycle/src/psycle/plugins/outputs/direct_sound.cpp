@@ -19,7 +19,7 @@ namespace psycle
 		{
 			using stream::formats::riff_wave::format;
 
-			PSYCLE__PLUGINS__NODE_INSTANCIATOR(direct_sound)
+			PSYCLE__PLUGINS__NODE_INSTANTIATOR(direct_sound)
 
 			direct_sound::direct_sound(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(universalis::operating_system::exception)
 			:

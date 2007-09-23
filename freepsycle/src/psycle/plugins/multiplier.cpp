@@ -11,7 +11,7 @@ namespace psycle
 {
 	namespace plugins
 	{
-		PSYCLE__PLUGINS__NODE_INSTANCIATOR(multiplier)
+		PSYCLE__PLUGINS__NODE_INSTANTIATOR(multiplier)
 
 		void multiplier::do_process() throw(engine::exception)
 		{
