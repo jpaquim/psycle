@@ -873,6 +873,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					// midi implementation
 					Global::pConfig->_pMidiInput->Open();
 				}
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 				SetTitleBarText();
 				editPosition=0;
 				Global::_pSong->seqBus=0;

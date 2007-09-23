@@ -1,7 +1,7 @@
 [OPTIONS]
 Binary Index=No
 Compatibility=1.1 or later
-Compiled file=..\for-end-users\Psycle Help.chm
+Compiled file=..\for-end-users\Psycle.chm
 Contents file=Table of Contents.hhc
 Default Font=Tahoma,8,0
 Default Window=Main

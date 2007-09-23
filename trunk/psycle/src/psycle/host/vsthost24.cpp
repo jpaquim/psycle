@@ -786,7 +786,7 @@ namespace psycle
 */
 						try
 						{
-							if (WantsMidi()) SendMidi();
+							/*if (WantsMidi())*/ SendMidi();
 						}
 						catch(const std::exception &)
 						{

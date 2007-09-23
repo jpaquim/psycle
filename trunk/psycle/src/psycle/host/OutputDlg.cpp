@@ -59,7 +59,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_driverComboBox.SetCurSel(m_driverIndex);
 			m_oldDriverIndex = m_driverIndex;
 
-			_numMidiDrivers = CMidiInput::Instance()->PopulateListbox( &m_midiDriverComboBox );
+			_numMidiDrivers = CMidiInput::Instance()->PopulateListbox( &m_midiDriverComboBox, false );
 			if (m_midiDriverIndex > _numMidiDrivers)
 			{
 				m_midiDriverIndex = 0;
@@ -68,7 +68,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_midiDriverComboBox.SetCurSel(m_midiDriverIndex);
 			m_oldMidiDriverIndex = m_midiDriverIndex;
 
-			_numMidiDrivers = CMidiInput::Instance()->PopulateListbox( &m_midiSyncComboBox );
+			_numMidiDrivers = CMidiInput::Instance()->PopulateListbox( &m_midiSyncComboBox , true );
 			if (m_syncDriverIndex > _numMidiDrivers)
 			{
 				m_syncDriverIndex = 0;

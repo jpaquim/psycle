@@ -1255,7 +1255,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,46,172,10
 END
 
-IDD_NEWMACHINE DIALOGEX 0, 0, 390, 390
+IDD_NEWMACHINE DIALOGEX 0, 0, 462, 391
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
@@ -1265,35 +1265,35 @@ BEGIN
     LTEXT           "Gear Browser",IDC_STATIC,7,2,88,9
     CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
-                    TVS_TRACKSELECT | WS_BORDER | WS_TABSTOP,7,13,187,351
-    GROUPBOX        "Machine Properties",IDC_STATIC,201,7,182,145
-    LTEXT           "Name",IDC_STATIC,223,19,20,8
-    LTEXT           "",IDC_NAMELABEL,246,18,130,12,SS_SUNKEN
-    LTEXT           "Description",IDC_STATIC,208,31,35,8
-    LTEXT           "DllName",IDC_STATIC,217,67,26,8
-    LTEXT           "Version",IDC_STATIC,219,103,24,8
-    LTEXT           "",IDC_VERSIONLABEL,246,102,130,12,SS_SUNKEN
-    GROUPBOX        "List Machines by",IDC_STATIC,201,155,182,47
+                    TVS_TRACKSELECT | WS_BORDER | WS_TABSTOP,7,13,262,351
+    GROUPBOX        "Machine Properties",IDC_STATIC,273,7,182,145
+    LTEXT           "Name",IDC_STATIC,296,19,20,8
+    LTEXT           "",IDC_NAMELABEL,319,18,130,12,SS_SUNKEN
+    LTEXT           "Description",IDC_STATIC,281,31,35,8
+    LTEXT           "DllName",IDC_STATIC,290,67,26,8
+    LTEXT           "Version",IDC_STATIC,292,103,24,8
+    LTEXT           "",IDC_VERSIONLABEL,319,102,130,12,SS_SUNKEN
+    GROUPBOX        "List Machines by",IDC_STATIC,273,155,182,47
     CONTROL         "Library Name (Dll)",IDC_SHOWDLLNAME,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,216,169,88,12
+                    BS_AUTORADIOBUTTON | WS_GROUP,289,169,88,12
     CONTROL         "Plugin's Name",IDC_SHOWEFFNAME,"Button",
-                    BS_AUTORADIOBUTTON,216,185,88,10
-    GROUPBOX        "Sort Machines",IDC_STATIC,201,207,182,49
+                    BS_AUTORADIOBUTTON,289,185,88,10
+    GROUPBOX        "Sort Machines",IDC_STATIC,273,207,182,49
     CONTROL         "By Type of Plugin",IDC_BYTYPE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,216,221,85,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,289,221,85,10
     CONTROL         "By Class of Machine",IDC_BYCLASS,"Button",
-                    BS_AUTORADIOBUTTON,216,236,86,10
-    PUSHBUTTON      "Regenerate Plugin Cache",IDC_REFRESH,7,367,97,16
-    DEFPUSHBUTTON   "OK",IDOK,202,367,82,16
-    PUSHBUTTON      "Cancel",IDCANCEL,297,367,86,16
+                    BS_AUTORADIOBUTTON,289,236,86,10
+    PUSHBUTTON      "Regenerate Plugin Cache",IDC_REFRESH,7,368,97,16
+    DEFPUSHBUTTON   "OK",IDOK,285,368,82,16
+    PUSHBUTTON      "Cancel",IDCANCEL,369,368,86,16
     CONTROL         "Popup Warning if this plugin tries to load",
                     IDC_CHECK_ALLOW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    216,130,154,17
-    LTEXT           "API Version",IDC_STATIC,205,116,38,8
-    LTEXT           "",IDC_APIVERSIONLABEL,246,115,130,12,SS_SUNKEN
-    LTEXT           "",IDC_DESCRLABEL,246,30,130,36,SS_SUNKEN
-    LTEXT           "",IDC_DLLNAMELABEL,246,66,130,36,SS_SUNKEN
-    PUSHBUTTON      "Check for New Plugins",IDC_BUTTON1,110,367,85,16
+                    289,130,154,17
+    LTEXT           "API Version",IDC_STATIC,278,116,38,8
+    LTEXT           "",IDC_APIVERSIONLABEL,319,115,130,12,SS_SUNKEN
+    LTEXT           "",IDC_DESCRLABEL,319,30,130,36,SS_SUNKEN
+    LTEXT           "",IDC_DLLNAMELABEL,319,66,130,36,SS_SUNKEN
+    PUSHBUTTON      "Check for New Plugins",IDC_BUTTON1,110,368,85,16
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 335, 323
@@ -2598,9 +2598,9 @@ BEGIN
     IDD_NEWMACHINE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 383
+        RIGHTMARGIN, 455
         TOPMARGIN, 7
-        BOTTOMMARGIN, 383
+        BOTTOMMARGIN, 384
     END
 
     IDD_ABOUTBOX, DIALOG

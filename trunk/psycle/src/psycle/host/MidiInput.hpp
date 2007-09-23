@@ -167,7 +167,7 @@ namespace psycle
 			/// convert a name identifier into a index identifier (or -1 if fail)
 			int FindDevByName( CString nameString );	
 			/// fill a listbox with a list of the available input devices
-			std::uint32_t PopulateListbox( CComboBox * listbox );	
+			std::uint32_t PopulateListbox( CComboBox * listbox , bool issync );	
 
 			/// return the current device handle
 			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
