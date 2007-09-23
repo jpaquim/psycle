@@ -13,22 +13,14 @@
 #include "reference_counter.hpp"
 #include "named.hpp"
 #include "graph.hpp"
-#include "node.hpp"
-#include "port.hpp"
-#include "ports/input.hpp"
-#include "ports/inputs/single.hpp"
-#include "ports/inputs/multiple.hpp"
-#include "ports/output.hpp"
 #include "buffer.hpp"
 #include "event.hpp"
 #include "sample.hpp"
 ///\internal
 /// extensible modular audio frawework.
-namespace psycle
-{
+namespace psycle {
 	///\internal
 	/// functionalities shared by both the plugins and the host.
-	namespace engine
-	{
-	}
+	namespace engine {}
 }
+

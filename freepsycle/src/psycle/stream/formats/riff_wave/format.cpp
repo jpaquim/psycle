@@ -16,26 +16,25 @@
 #endif
 namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 
-	format::format(unsigned char channels, real samples_per_second, unsigned char significant_bits_per_channel_sample, unsigned char bits_per_channel_sample)
-	{
+	format::format(unsigned char channels, real samples_per_second, unsigned char significant_bits_per_channel_sample, unsigned char bits_per_channel_sample) {
 		allocate_chunk(0);
 		chunk().tag(tags::pcm);
 		chunk().set(channels, static_cast<std::uint32_t>(samples_per_second), bits_per_channel_sample);
 	};
 
 	format::format(format const & format)
+	:
+		stream::format()
 	{
 		allocate_chunk(format.chunk_->extra_information_size());
 		std::memcpy(&this->chunk(), &format.chunk(), chunk().size());
 	};
 
-	format::~format() throw()
-	{
+	format::~format() throw() {
 		std::free(&chunk());
 	}
 
-	std::string format::description() const
-	{
+	std::string format::description() const {
 		#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			if(bits_per_channel_sample() <= 16) // acm does not support more
 			{
@@ -61,8 +60,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 		}
 	}
 
-	std::string format::tag_description() const
-	{
+	std::string format::tag_description() const {
 		#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			::ACMFORMATTAGDETAILS tag_details;
 			std::memset(&tag_details, 0, sizeof tag_details);
@@ -72,25 +70,21 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 				throw exception("acm format tag details: " + universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 			return std::string(tag_details.szFormatTag);
 		#else
-			switch(tag())
-			{
+			switch(tag()) {
 				case tags::pcm: return "pcm";
 				default: return "non pcm";
 			}
 		#endif
 	}
 
-	void format::allocate_chunk(std::size_t extra_information_size) throw(std::bad_alloc)
-	{
+	void format::allocate_chunk(std::size_t extra_information_size) throw(std::bad_alloc) {
 		if(!(chunk_ = static_cast<chunk_type*>(std::malloc(sizeof(chunk_type) + extra_information_size)))) throw std::bad_alloc();
 		chunk().extra_information_size_ = static_cast<std::uint16_t>(extra_information_size);
 	}
 
-	namespace
-	{
+	namespace {
 		///\todo this is general purpose, should be moved to universalis
-		unsigned int inline bits_to_bytes(unsigned int bits)
-		{
+		unsigned int inline bits_to_bytes(unsigned int bits) {
 			#if !defined CHAR_BIT
 				#error missing #include <climits>
 			#elif CHAR_BIT == 8
@@ -102,67 +96,56 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 		}
 	}
 
-	void format::chunk_type::recompute_if_pcm(bool full)
-	{
-		if(tag() == tags::pcm)
-		{
+	void format::chunk_type::recompute_if_pcm(bool full) {
+		if(tag() == tags::pcm) {
 			if(full) bytes_per_sample_ = static_cast<std::uint16_t>(channels() * bits_to_bytes(bits_per_channel_sample()));
 			average_bytes_per_second_ = samples_per_second() * bytes_per_sample_;
 		}
 	}
 
-	void format::chunk_type::set(std::uint16_t channels, std::uint32_t samples_per_second, std::uint16_t bits_per_channel_sample)
-	{
+	void format::chunk_type::set(std::uint16_t channels, std::uint32_t samples_per_second, std::uint16_t bits_per_channel_sample) {
 		this->channels_                = static_cast<std::uint16_t>(channels);
 		this->samples_per_second_      = static_cast<std::uint32_t>(samples_per_second);
 		this->bits_per_channel_sample_ = static_cast<std::uint16_t>(bits_per_channel_sample);
 		recompute_if_pcm();
 	};
 
-	void format::chunk_type::channels(std::uint16_t channels)
-	{
+	void format::chunk_type::channels(std::uint16_t channels) {
 		this->channels_ = static_cast<std::uint16_t>(channels);
 		recompute_if_pcm();
 	}
 
-	void format::chunk_type::samples_per_second(std::uint32_t samples_per_second)
-	{
+	void format::chunk_type::samples_per_second(std::uint32_t samples_per_second) {
 		this->samples_per_second_ = static_cast<std::uint32_t>(samples_per_second);
 		recompute_if_pcm(false);
 	}
 
-	void format::chunk_type::bits_per_channel_sample(std::uint16_t bits_per_channel_sample)
-	{
+	void format::chunk_type::bits_per_channel_sample(std::uint16_t bits_per_channel_sample) {
 		this->bits_per_channel_sample_ = static_cast<std::uint16_t>(bits_per_channel_sample);
 		recompute_if_pcm();
 	}
 
-	format::real format::chunk_type::bytes_per_sample() const
-	{
+	format::real format::chunk_type::bytes_per_sample() const {
 		if(tag() == tags::pcm) return bytes_per_sample_;
 		else return average_bytes_per_second_ / static_cast<real>(samples_per_second());
 	}
 
-	unsigned int format::chunk_type::bytes_to_samples(unsigned int bytes) const
-	{
+	unsigned int format::chunk_type::bytes_to_samples(unsigned int bytes) const {
 		if(tag() == tags::pcm) return bytes / bytes_per_sample_;
 		else return static_cast<unsigned int>(bytes / bytes_per_sample());
 	}
 
-	void format::chunk_type::tag(std::uint16_t tag)
-	{
+	void format::chunk_type::tag(std::uint16_t tag) {
 		this->tag_ = tag;
 	}
 
 	#if 0
-		format::format(riff & riff) throw(exception)
-		{
+		format::format(riff & riff) throw(exception) {
 			std::uint16_t size;
 			allocate_chunk(extra_information_size_which_fits_all_tags());
 			if(!riff.read_chunk('fmt ', chunk(), sizeof chunk() - 2) throw exception("bad fmt chunk", UNIVERSALIS__COMPILER__LOCATION);
 			if(riff.current_chunk_data_size() < sizeof chunk() - 2) throw exception("file " + file_name() + " corrupted", UNIVERSALIS__COMPILER__LOCATION);
-			if(tag() != pcm)
-			{
+			if(tag() != pcm) {
 				std::uint16_t extra_information_size;
 				riff >> extra_information_size;
 				if(riff.current_chunk_data_size() < sizeof chunk() + extra_information_size) throw exception("file: '" + riff.file_name() + "' corrupted: fmt chunk too small to contain the declared extra data", UNIVERSALIS__COMPILER__LOCATION);
@@ -171,17 +154,14 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 			}
 		}
 
-		format::chunk::write(riff & riff)
-		{
+		format::chunk::write(riff & riff) {
 			if(extra_information_size()) riff.update_or_create_chunk("fmt ", *this, riff.size());
 			else riff.update_or_create_chunk("fmt ", *this, riff.size() - sizeof extra_information_size());
 		}
 	
-		format::chunk::write(riff & riff, std::size_t bytes);
-		{
+		format::chunk::write(riff & riff, std::size_t bytes) {
 			write(riff);
-			if(tag() != pcm)
-			{
+			if(tag() != pcm) {
 				std::uint32_t samples = bytes_to_samples(data_size);
 				riff.update_or_create_chunk('fact', samples, sizeof samples);
 			}
@@ -189,13 +169,10 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 	#endif
 
 	#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		namespace
-		{
-			std::uint16_t extra_information_size_which_fits_all_tags() throw(exception)
-			{
+		namespace {
+			std::uint16_t extra_information_size_which_fits_all_tags() throw(exception) {
 				std::uint16_t static extra_information_size_which_fits_all_tags(0);
-				if(!extra_information_size_which_fits_all_tags)
-				{
+				if(!extra_information_size_which_fits_all_tags) {
 					if(!::acmMetrics(0, ACM_METRIC_MAX_SIZE_FORMAT, &extra_information_size_which_fits_all_tags)) throw exception("acm metrics: " + universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 					chunk_extra_information_size_which_fits_all_tags -= sizeof(chunk_type);
 				}
@@ -203,36 +180,29 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 			}
 		}
 	
-		bool format::user_choose_dialog(const HWnd & window_handle, const format * const source_format, const format * const proposed_format, const string & title)
-		{
+		bool format::user_choose_dialog(const HWnd & window_handle, const format * const source_format, const format * const proposed_format, const string & title) {
 			::ACMFORMATCHOOSE choose;
 			std::memset(&choose, 0, sizeof choose);
 			choose.cbStruct = sizeof choose;
 			choose.hwndOwner = window_handle;
 			choose.fdwStyle := ACMFORMATCHOOSE_STYLEF_INITTOWFXSTRUCT;
-			if(proposed_format && (proposed_format.tag() != unknown)
-			{
+			if(proposed_format && (proposed_format.tag() != unknown) {
 				choose.pwfx := proposed_format.chunk();
 				choose.cbwfx := proposed_format.chunk().extra_information_size();
-			}
-			else
-			{
+			} else {
 				if(tag() != unknown) Format();
 				choose.pwfx := this->chunk();
 				choose.cbwfx := this->chunk().extra_information_size();
 			}
-			if(source_format)
-			{
+			if(source_format) {
 				if(!title.empty()) choose.pszTitle = title.c_str();
 				else choose.pszTitle = "ACM Chooser: supported destination formats";
 				choose.fdwEnum := ACM_FORMATENUMF_CONVERT;
 				choose.pwfxEnum := source_format.chunk();
-			}
-			else if(!title.empty()) choose.pszTitle = title.c_str();
+			} else if(!title.empty()) choose.pszTitle = title.c_str();
 			else choose.pszTitle = "ACM Choose: all formats";
 			MMResult result = ::acmFilterChoose(choose);
-			switch(result)
-			{
+			switch(result) {
 				case: MMSysErr_NoError: return true;
 				case: ACMErr_Canceled: return false;
 				default: throw exception("acm format choose: " + universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
@@ -240,3 +210,4 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 		}
 	#endif
 }}}}
+
