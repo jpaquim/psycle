@@ -2596,6 +2596,7 @@ namespace psycle
 			{
 				case helpers::dsp::R_NONE: temp = 0; break;
 				case helpers::dsp::R_SPLINE: temp = 2; break;
+				case helpers::dsp::R_BANDLIM: temp = 3; break;
 				case helpers::dsp::R_LINEAR:
 				default: temp = 1;
 			}
@@ -2676,6 +2677,7 @@ namespace psycle
 				switch (temp)
 				{
 					case 2:	_resampler.SetQuality(helpers::dsp::R_SPLINE); break;
+					case 3:	_resampler.SetQuality(helpers::dsp::R_BANDLIM); break;
 					case 0:	_resampler.SetQuality(helpers::dsp::R_NONE); break;
 					case 1:
 					default: _resampler.SetQuality(helpers::dsp::R_LINEAR);

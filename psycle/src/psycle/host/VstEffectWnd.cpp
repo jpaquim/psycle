@@ -428,10 +428,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CVstEffectWnd::ResizeWindow(ERect *pRect)
 		{
-			CRect rcEffFrame,rcEffClient;
+			CRect rcEffFrame,rcEffClient,rcTemp,tbRect;
 			GetWindowSize(rcEffFrame, rcEffClient, pRect);
 			SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
 			pView->SetWindowPos(NULL,0,rcEffClient.top,rcEffClient.right+1,rcEffClient.bottom+1,SWP_SHOWWINDOW);
+			GetClientRect(&rcTemp);
+			toolBar.GetWindowRect(&tbRect);
+			rcTemp.bottom-=tbRect.bottom - tbRect.top;
+			//Using the previous values, resize the window to the desired sizes.
+			MoveWindow
+				(
+				rcEffFrame.left,
+				rcEffFrame.top,
+				(rcEffFrame.right-rcEffFrame.left)+(rcEffClient.right-rcTemp.right),
+				(rcEffFrame.bottom-rcEffFrame.top)+(rcEffClient.bottom-rcTemp.bottom),
+				true
+				);
 			pView->WindowIdle();
 		}
 		void CVstEffectWnd::OnSizing(UINT fwSide, LPRECT pRect)
