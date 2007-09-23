@@ -9,31 +9,27 @@
 #include <list>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK PACKAGENERIC__MODULE__SOURCE__PSYCLE__HOST__SCHEDULER
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace psycle
-{
-	namespace host
-	{
-		namespace underlying = engine;
-		typedef underlying::exception exception;
-		
-		/// simply, a "player".
-		template<typename Graph>
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler
-		{
-			protected:
-				scheduler(underlying::graph & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
-			public:
-				virtual ~scheduler() throw() {}
-				void inline started(bool const & started) { if(started) start(); else stop(); }
-				void virtual start() throw(exception) = 0;
-				void virtual stop() = 0;
-			protected:
-				typedef Graph graph_type;
-				Graph const inline & graph() const throw() { return graph_; }
-				Graph       inline & graph()       throw() { return graph_; }
-			private:
-				Graph & graph_; ///\todo remove reference
-		};
-	}
-}
+namespace psycle { namespace host {
+	namespace underlying = engine;
+	typedef underlying::exception exception;
+	
+	/// simply, a "player".
+	template<typename Graph>
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler {
+		protected:
+			scheduler(underlying::graph & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
+		public:
+			virtual ~scheduler() throw() {}
+			void inline started(bool started) { if(started) start(); else stop(); }
+			void virtual start() throw(exception) = 0;
+			void virtual stop() = 0;
+		protected:
+			typedef Graph graph_type;
+			Graph const inline & graph() const throw() { return graph_; }
+			Graph       inline & graph()       throw() { return graph_; }
+		private:
+			Graph & graph_; ///\todo remove reference with Graph::create_on_stack graph_;
+	};
+}}
 #include <universalis/compiler/dynamic_link/end.hpp>
+

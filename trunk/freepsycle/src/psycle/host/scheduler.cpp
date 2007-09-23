@@ -6,9 +6,7 @@
 #include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "scheduler.hpp"
-namespace psycle
-{
-	namespace host
-	{
-	}
-}
+namespace psycle { namespace host {
+	// everything is inlined
+}}
+

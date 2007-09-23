@@ -14,6 +14,9 @@
 #include <limits>
 namespace psycle { namespace host { namespace schedulers { namespace single_threaded {
 
+	/**********************************************************************************************************************/
+	// graph
+	
 	graph::graph(graph::underlying_type & underlying) : graph_base(underlying) {
 		new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1));
 	}
@@ -21,7 +24,7 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 	void graph::after_construction() {
 		graph_base::after_construction();
 		for(const_iterator i(begin()) ; i != end() ; ++i) {
-			loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ sched graph::init node");
+			//loggers::trace()("@@@@@@@@@@@@@@@@@@@@@@ sched graph::init node");
 			typenames::node & node(**i);
 			if(node.multiple_input_port()) {
 				/// note: the best algorithm would be to order the inputs with a recursive evaluation on the graph.
@@ -43,7 +46,7 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 			// count the number of output ports that are connected.
 			for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
 				if((**i).input_ports().size()) ++node.output_port_count_;
-				if(loggers::trace()) {
+				if(false && loggers::trace()) {
 					std::ostringstream s;
 					s << "@@@@@@@@@@@@@@@@@@@@@@ sched node::init connected output port count " << node.output_port_count_;
 					loggers::trace()(s.str());
@@ -54,6 +57,9 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 
 	void graph::on_new_node(typenames::node & underlying_node)
 	{}
+	
+	/**********************************************************************************************************************/
+	// node
 	
 	node::node(node::parent_type & parent, underlying_type & underlying)
 	:
@@ -80,6 +86,9 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 	void node::on_new_multiple_input_port(typenames::ports::inputs::multiple & multiple_input_port)
 	{}
 	
+	/**********************************************************************************************************************/
+	// port
+	
 	port::port(port::parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
 	
 	namespace ports {
@@ -101,6 +110,9 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 			{}
 		}
 	}
+	
+	/**********************************************************************************************************************/
+	// scheduler
 	
 	scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 	:
@@ -403,6 +415,9 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 		}
 	}
 
+	/**********************************************************************************************************************/
+	// buffer
+	
 	buffer::buffer(std::size_t channels, std::size_t events) throw(std::exception)
 	:
 		underlying::buffer(channels, events),
@@ -423,3 +438,4 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 		for(iterator i(begin()) ; i != end() ; ++i) delete *i;
 	}
 }}}}
+
