@@ -55,8 +55,7 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 		}
 	}
 
-	void graph::on_new_node(typenames::node & underlying_node)
-	{}
+	void graph::on_new_node(typenames::node & underlying_node) {}
 	
 	/**********************************************************************************************************************/
 	// node
@@ -77,14 +76,9 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 		node_base::after_construction();
 	}
 
-	void node::on_new_output_port(typenames::ports::output & output_port)
-	{}
-
-	void node::on_new_single_input_port(typenames::ports::inputs::single & single_input_port)
-	{}
-
-	void node::on_new_multiple_input_port(typenames::ports::inputs::multiple & multiple_input_port)
-	{}
+	void node::on_new_output_port(typenames::ports::output & output_port) {}
+	void node::on_new_single_input_port(typenames::ports::inputs::single & single_input_port) {}
+	void node::on_new_multiple_input_port(typenames::ports::inputs::multiple & multiple_input_port) {}
 	
 	/**********************************************************************************************************************/
 	// port
@@ -103,11 +97,8 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 		input::input(input::parent_type & parent, input::underlying_type & underlying) : input_base(parent, underlying) {}
 		
 		namespace inputs {
-			single::single(single::parent_type & parent, single::underlying_type & underlying) : single_base(parent, underlying)
-			{}
-			
-			multiple::multiple(multiple::parent_type & parent, multiple::underlying_type & underlying) : multiple_base(parent, underlying)
-			{}
+			single::single(single::parent_type & parent, single::underlying_type & underlying) : single_base(parent, underlying) {}
+			multiple::multiple(multiple::parent_type & parent, multiple::underlying_type & underlying) : multiple_base(parent, underlying) {}
 		}
 	}
 	
@@ -416,6 +407,19 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 	}
 
 	/**********************************************************************************************************************/
+	// buffer pool
+	
+	scheduler::buffer_pool::buffer_pool(std::size_t channels, std::size_t events) throw(std::exception)
+	:
+		channels_(channels),
+		events_(events)
+	{}
+	
+	scheduler::buffer_pool::~buffer_pool() throw() {
+		for(iterator i(begin()) ; i != end() ; ++i) delete *i;
+	}
+
+	/**********************************************************************************************************************/
 	// buffer
 	
 	buffer::buffer(std::size_t channels, std::size_t events) throw(std::exception)
@@ -426,16 +430,6 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 
 	buffer::~buffer() throw() {
 		assert(!*this);
-	}
-
-	scheduler::buffer_pool::buffer_pool(std::size_t channels, std::size_t events) throw(std::exception)
-	:
-		channels_(channels),
-		events_(events)
-	{}
-	
-	scheduler::buffer_pool::~buffer_pool() throw() {
-		for(iterator i(begin()) ; i != end() ; ++i) delete *i;
 	}
 }}}}
 
