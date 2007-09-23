@@ -25,8 +25,8 @@
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__STREAM__FORMATS__RIFF_WAVE__FORMAT
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace stream { namespace formats { namespace riff_wave {
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK format : public stream::format
-	{
+
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK format : public stream::format {
 		///\name riff wave fmt chunk
 		///\{
 			public:
@@ -44,8 +44,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 				#endif
 
 			private:
-				class UNIVERSALIS__COMPILER__ALIGNED(1) chunk_type
-				{
+				class UNIVERSALIS__COMPILER__ALIGNED(1) chunk_type {
 					friend class format;
 
 					public:
@@ -108,18 +107,14 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 				void allocate_chunk(std::size_t extra_information_size) throw(std::bad_alloc);
 
 			public:
-				struct tags
-				{
-					enum type // not meant to be exhaustive
-					{
-						unknown          = 0x0000,
-						pcm              = 0x0001,
-						ieee_float       = 0x0003,
-						iso_gsm_610      = 0x0031,
-						iso_mpeg_layer_3 = 0x0055,
-						vorbis           = unknown // i do not know what would be the identifier ... actually, i only saw vorbis in a ogg container, never in a riff one
-					};
-				};
+				struct tags { enum type { // not meant to be exhaustive
+					unknown          = 0x0000,
+					pcm              = 0x0001,
+					ieee_float       = 0x0003,
+					iso_gsm_610      = 0x0031,
+					iso_mpeg_layer_3 = 0x0055,
+					vorbis           = unknown // i do not know what would be the identifier ... actually, i only saw vorbis in a ogg container, never in a riff one
+				}; };
 
 				void       tag(tags::type tag)       throw() { chunk().tag(tag); }
 				tags::type tag(              ) const throw() { return static_cast<tags::type>(chunk().tag()); }
@@ -167,3 +162,4 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 	};
 }}}}
 #include <universalis/compiler/dynamic_link/end.hpp>
+

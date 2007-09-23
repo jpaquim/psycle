@@ -7,10 +7,7 @@
 #include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "event.hpp"
-namespace psycle
-{
-	namespace engine
-	{
-		// everything is inlined
-	}
-}
+namespace psycle { namespace engine {
+	// everything is inlined
+}}
+

@@ -213,7 +213,7 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 	
 	void scheduler::allocate() throw(std::exception) {
 		loggers::trace()("allocating ...", UNIVERSALIS__COMPILER__LOCATION);
-		int channels(0);
+		std::size_t channels(0);
 		for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 			typenames::node & node(**i);
 			node.underlying().start();
@@ -392,7 +392,7 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 			std::ostringstream s;
 			s
 				<< "output port " << output_port.underlying().qualified_name()
-				<< ": " << static_cast<int>(output_port) << " to go, "
+				<< ": " << static_cast<std::size_t>(output_port) << " to go, "
 				<< "buffer: " << &output_port.underlying().buffer()
 				<< ": " << output_port.buffer() << " to go";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -403,7 +403,7 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 		}
 	}
 
-	buffer::buffer(int const & channels, int const & events) throw(std::exception)
+	buffer::buffer(std::size_t channels, std::size_t events) throw(std::exception)
 	:
 		underlying::buffer(channels, events),
 		reference_count_()
@@ -413,7 +413,7 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 		assert(!*this);
 	}
 
-	scheduler::buffer_pool::buffer_pool(int const & channels, int const & events) throw(std::exception)
+	scheduler::buffer_pool::buffer_pool(std::size_t channels, std::size_t events) throw(std::exception)
 	:
 		channels_(channels),
 		events_(events)

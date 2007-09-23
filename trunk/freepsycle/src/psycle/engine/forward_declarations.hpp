@@ -12,24 +12,20 @@
 #include <psycle/generic/typenames.hpp>
 #include <universalis/operating_system/loggers.hpp>
 #include "sample.hpp"
-namespace psycle
-{
+namespace psycle {
 	namespace loggers = universalis::operating_system::loggers;
 
-	namespace engine
-	{
+	namespace engine {
 		class exception;
 		class named;
 		class graph;
 		class node;
 		#define PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(x) psycle__engine__node_instance__##x
 		class port;
-		namespace ports
-		{
+		namespace ports {
 			class output;
 			class input;
-			namespace inputs
-			{
+			namespace inputs {
 				class single;
 				class multiple;
 			}
@@ -37,11 +33,11 @@ namespace psycle
 		class buffer;
 		class event;
 		
-		namespace typenames
-		{
+		namespace typenames {
 			using namespace engine;
 			class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple> {};
 			typedef typenames::bases bases;
 		}
 	}
 }
+

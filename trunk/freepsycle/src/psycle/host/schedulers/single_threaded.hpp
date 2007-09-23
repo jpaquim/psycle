@@ -38,19 +38,19 @@ namespace psycle { namespace host { namespace schedulers {
 		class buffer : public underlying::buffer {
 			public:
 				/// creates a buffer with an initial reference count set to 0.
-				buffer(int const & channels, int const & events) throw(std::exception);
+				buffer(std::size_t channels, std::size_t events) throw(std::exception);
 				/// deletes the buffer
 				///\pre the reference count must be 0.
 				virtual ~buffer() throw();
-				/// convertible to int
+				/// convertible to std::size_t
 				///\returns the reference count.
-				inline operator int const & () const throw() { return reference_count_; }
+				inline operator std::size_t () const throw() { return reference_count_; }
 				/// increments the reference count.
-				inline buffer & operator+=(int const & more) throw() { reference_count_ += more; return *this; }
+				inline buffer & operator+=(std::size_t more) throw() { reference_count_ += more; return *this; }
 				/// decrements the reference count by 1.
-				inline buffer & operator--() throw() { --reference_count_; assert(*this >= 0); return *this; }
+				inline buffer & operator--() throw() { assert(*this > 0); --reference_count_; return *this; }
 			private:
-				int reference_count_;
+				std::size_t reference_count_;
 		};
 		
 		typedef generic::wrappers::graph<typenames::typenames> graph_base;
@@ -89,17 +89,17 @@ namespace psycle { namespace host { namespace schedulers {
 				
 				///\name schedule
 				///\{
-					public:  int inline const & input_port_count() const throw() { return input_port_count_; }
-					private: int                input_port_count_;
+					public:  std::size_t inline input_port_count() const throw() { return input_port_count_; }
+					private: std::size_t        input_port_count_;
 	
 					public:
-						/// convertible to int
+						/// convertible to std::size_t
 						///\returns the reference count.
-						inline operator int const & () const throw() { return input_ports_remaining_; }
-						output inline & operator--() throw() { --input_ports_remaining_; assert(*this >= 0); return *this; }
+						inline operator std::size_t () const throw() { return input_ports_remaining_; }
+						output inline & operator--() throw() { assert(*this > 0); --input_ports_remaining_; return *this; }
 						void inline reset() throw() { input_ports_remaining_ = input_port_count(); }
 					private:
-						int input_ports_remaining_;
+						std::size_t input_ports_remaining_;
 				///\}
 			};
 
@@ -143,8 +143,8 @@ namespace psycle { namespace host { namespace schedulers {
 				public:  ports::output inline & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
 				private: ports::output        * multiple_input_port_first_output_port_to_process_;
 
-				public:  int inline const & output_port_count() const throw() { return output_port_count_; }
-				private: int                output_port_count_;
+				public:  std::size_t inline output_port_count() const throw() { return output_port_count_; }
+				private: std::size_t        output_port_count_;
 				
 				public:  void inline UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES reset() throw() { assert(processed()); processed(false); underlying().reset(); }
 				public:  void inline mark_as_processed() throw() { processed(true); }
@@ -167,7 +167,7 @@ namespace psycle { namespace host { namespace schedulers {
 				/// a pool of buffers that can be used for input and output ports of the nodes of the graph.
 				class buffer_pool : protected std::list<buffer*> {
 					public:
-						buffer_pool(int const & channels, int const & events) throw(std::exception);
+						buffer_pool(std::size_t channels, std::size_t events) throw(std::exception);
 						virtual ~buffer_pool() throw();
 						/// gets a buffer from the pool.
 						buffer inline & operator()() {
@@ -199,7 +199,7 @@ namespace psycle { namespace host { namespace schedulers {
 							push_back(&buffer);
 						}
 					private:
-						int channels_, events_;
+						std::size_t channels_, events_;
 				} * buffer_pool_instance_;
 				buffer_pool inline & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 				boost::thread * thread_;
@@ -221,3 +221,4 @@ namespace psycle { namespace host { namespace schedulers {
 	}
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
+

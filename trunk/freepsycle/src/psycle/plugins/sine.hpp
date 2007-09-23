@@ -19,9 +19,11 @@ namespace psycle { namespace plugins {
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES seconds_per_event_change_notification_from_port(engine::port const &);
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
 		private:
+			void do_process_const() throw(engine::exception);
 			real phase_;
 			real step_;
 			real frequency_to_step_;
 	};
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
+
