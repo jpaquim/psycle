@@ -79,7 +79,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			return *static_cast< ::GstElement* >(0); // dummy return to avoid warning
 		}
 
-		bool wait_for_state(::GstElement & element, ::GstState state_wanted, ::GstClockTime timeout_nanoseconds = static_cast<GstClockTime>(60e9)) throw(universalis::exception) {
+		bool wait_for_state(::GstElement & element, ::GstState state_wanted, ::GstClockTime timeout_nanoseconds = static_cast<GstClockTime>(5e9)) throw(universalis::exception) {
 			::GstState current_state, pending_state;
 			::GstClockTime intermediate_timeout_nanoseconds(static_cast<GstClockTime>(0.1e9));
 			GstStateChangeReturn result(::gst_element_get_state(&element, &current_state, &pending_state, intermediate_timeout_nanoseconds));
@@ -95,7 +95,13 @@ namespace psycle { namespace plugins { namespace outputs {
 						intermediate_timeout_nanoseconds += static_cast<GstClockTime>(0.5e9);
 						for(;;) {
 							{
-								std::ostringstream s; s << "waiting for element " << ::gst_element_get_name(&element) << " state to asynchronously change from " << ::gst_element_state_get_name(current_state) << " to " << ::gst_element_state_get_name(state_wanted) << " (waited a total of " << timeout_total_nanoseconds * 1e-9 << " seconds ; will timeout after " << timeout_nanoseconds * 1e-9 << " seconds)";
+								std::ostringstream s;
+								s
+									<< "waiting for element " << ::gst_element_get_name(&element)
+									<< " to asynchronously change its state from " << ::gst_element_state_get_name(current_state)
+									<< " to " << ::gst_element_state_get_name(state_wanted)
+									<< " (waited a total of " << timeout_total_nanoseconds * 1e-9
+									<< " seconds ; will timeout after " << timeout_nanoseconds * 1e-9 << " seconds)";
 								universalis::operating_system::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 							} {
 								result = ::gst_element_get_state(&element, &current_state, &pending_state, intermediate_timeout_nanoseconds);
@@ -110,10 +116,10 @@ namespace psycle { namespace plugins { namespace outputs {
 									case ::GST_STATE_CHANGE_FAILURE: {
 											std::ostringstream s;
 												s
-													<< "could not get element " << ::gst_element_get_name(&element) << " state: "
-													<< "state change: " << result << ", "
-													<< "current state: " << ::gst_element_state_get_name(current_state) << ", "
-													<< "pending state: " << ::gst_element_state_get_name(pending_state);
+													<< "could not get state of element: " << ::gst_element_get_name(&element)
+													<< "; state change: " << result
+													<< ", current state: " << ::gst_element_state_get_name(current_state)
+													<< ", pending state: " << ::gst_element_state_get_name(pending_state);
 											throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 										}
 									default: goto unkown;
@@ -131,9 +137,9 @@ namespace psycle { namespace plugins { namespace outputs {
 						std::ostringstream s;
 							s
 								<< "element " << ::gst_element_get_name(&element) << " "
-								<< "did an unknown state change: " << result << ", "
-								<< "current state: " << current_state << ", "
-								<< "pending state: " << pending_state;
+								<< "did an unknown state change: " << result
+								<< ", current state: " << current_state
+								<< ", pending state: " << pending_state;
 						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					}
 			}
@@ -245,35 +251,38 @@ namespace psycle { namespace plugins { namespace outputs {
 			::gst_pad_use_fixed_caps(source_pad);
 
 			// create an audio sink
-			try { sink_ = &instanciate("gconfaudiosink", name() + "-sink"); }
-			catch(std::exception const & e) {
-				// maybe the user didn't configure his default audio-sink, falling back to several possibilities
-				#if 0 // jacksink needs to be put in a jackbin, because it's pulling audio data.
-				loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-				try { sink_ = &instanciate("jacksink", name() + "-sink"); }
-				catch(...)
-				#endif
-				{
-					loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-					try { sink_ = &instanciate("alsasink", name() + "-sink"); }
-					catch(...) {
-						loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-						try { sink_ = &instanciate("esdsink", name() + "-sink"); }
+			#define psycle_log loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
+				try { sink_ = &instanciate("gconfaudiosink", name() + "-sink"); }
+				catch(std::exception const & e) {
+					// maybe the user didn't configure his default audio-sink, falling back to several possibilities
+					#if 0 // jacksink needs to be put in a jackbin, because it's pulling audio data.
+					psycle_log
+					try { sink_ = &instanciate("jacksink", name() + "-sink"); }
+					catch(...)
+					#endif
+					{
+						psycle_log
+						try { sink_ = &instanciate("alsasink", name() + "-sink"); }
 						catch(...) {
-							loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-							try { sink_ = &instanciate("osssink", name() + "-sink"); }
+							psycle_log
+							try { sink_ = &instanciate("esdsink", name() + "-sink"); }
 							catch(...) {
-								loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-								try { sink_ = &instanciate("artssink", name() + "-sink"); }
+								psycle_log
+								try { sink_ = &instanciate("osssink", name() + "-sink"); }
 								catch(...) {
-									loggers::information()("exception: caught while trying to instanciate audio sink ; no more type to try ; bailing out.", UNIVERSALIS__COMPILER__LOCATION);
-									throw;
+									psycle_log
+									try { sink_ = &instanciate("artssink", name() + "-sink"); }
+									catch(...) {
+										psycle_log
+										throw;
+									}
 								}
 							}
 						}
 					}
 				}
-			}
+			#undef psycle_log
+			
 			if(!::gst_bin_add(GST_BIN(pipeline_), sink_)) throw engine::exceptions::runtime_error("could not add sink element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
 
 			// get the sink element's sink pad
@@ -382,7 +391,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			engine::buffer::channel & in(single_input_ports()[0]->buffer()[0]);
 			assert(samples_per_buffer_ == in.size());
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer_);
-			for(unsigned int event(0) ; event < in.size(); ++event) {
+			for(std::size_t event(0) ; event < in.size(); ++event) {
 				real sample(in[event].sample());
 				sample *= std::numeric_limits<output_sample_type>::max();
 				if     (sample < std::numeric_limits<output_sample_type>::min()) sample = std::numeric_limits<output_sample_type>::min();
