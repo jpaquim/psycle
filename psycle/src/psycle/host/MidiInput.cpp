@@ -362,7 +362,7 @@ namespace psycle
 		// PARAMETERS     : CComboBox * listbox - pointer to the listbox to fill
 		// RETURNS		  : std::uint32_t - amount of devices found
 
-		std::uint32_t CMidiInput::PopulateListbox( CComboBox * listbox )
+		std::uint32_t CMidiInput::PopulateListbox( CComboBox * listbox, bool issync )
 		{
 			MIDIINCAPS mic;
 			std::uint32_t numDevs;
@@ -371,7 +371,7 @@ namespace psycle
 			listbox->ResetContent();
 
 			// always add the null dev
-			listbox->AddString( "None" );
+			listbox->AddString( issync?"Same than Input Device":"None" );
 
 			// get the number of MIDI input devices
 			numDevs = midiInGetNumDevs();
@@ -1062,16 +1062,15 @@ namespace psycle
 								}
 								else
 								{
-									PatternEntry pentry
-									(
-										notecommands::midicc,status,
-										#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-											#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-										#elif PSYCLE__CONFIGURATION__VOLUME_COLUMN
-											255, // volume
-										#endif
-										pMachine->_macIndex,data1,data2
-									);
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+									PatternEntry pentry(notecommands::midicc,status,255,data1,data2,pMachine->_macIndex);
+#else
+									PatternEntry pentry(notecommands::midicc,status,pMachine->_macIndex,data1,data2);
+#endif
+#endif
 									pMachine->Tick(0,&pentry);
 								}
 							}

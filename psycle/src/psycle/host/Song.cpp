@@ -444,6 +444,13 @@ namespace psycle
 			{
 					zapObject(_pMachine[i]);
 			}
+			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+				XMSampler::rInstrument(i).Init();
+			}
+			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+				XMSampler::SampleData(i).Init();
+			}
+
 			for(int i(0) ; i < MAX_PATTERNS; ++i)
 			{
 				// All pattern reset

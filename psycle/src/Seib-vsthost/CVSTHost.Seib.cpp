@@ -213,6 +213,9 @@ namespace seib {
 			version=org.version;
 			fxID=org.fxID;
 			fxVersion=org.fxVersion;
+			pathName = org.pathName;
+			initialized = org.initialized;
+			pf = org.pf;
 			return *this;
 		}
 		void CFxBase::SwapBytes(VstInt32 &l)
@@ -348,7 +351,7 @@ namespace seib {
 
 		CFxProgram & CFxProgram::DoCopy(const CFxProgram &org)
 		{
-			FreeMemory();
+			//FreeMemory();
 			CFxBase::DoCopy(org);
 			memcpy(prgName,org.prgName,sizeof(prgName));
 			if (org.pChunk)
@@ -367,6 +370,7 @@ namespace seib {
 			if (!SetNumParams(params,false))
 				return false;
 			memcpy(pParams,pnewparams,params*sizeof(float));
+			initialized=true;
 			return true;
 		}
 		bool CFxProgram::SetNumParams(VstInt32 nPars, bool initializeData)
@@ -374,6 +378,7 @@ namespace seib {
 			if (nPars <=0 )
 				return false;
 
+			ParamMode();
 			pParams = new float[nPars];
 			numParams = nPars;
 			if (pParams && initializeData)
@@ -397,6 +402,7 @@ namespace seib {
 				return false;
 
 			memcpy(pChunk,chunk,size);
+			initialized=true;
 			return true;
 		}
 
@@ -405,6 +411,7 @@ namespace seib {
 			if (size <=0 )
 				return false;
 
+			ChunkMode();
 			pChunk = new unsigned char[size];
 			chunkSize = size;
 			if ( pChunk && initializeData )
@@ -436,6 +443,7 @@ namespace seib {
 				for(int i = 0 ; i < numParams ; i++)
 					Read(pParams[i]);
 			}
+			initialized=true;
 			return true;
 		}
 		bool CFxProgram::SaveData()
@@ -464,12 +472,10 @@ namespace seib {
 
 		CFxBank::CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk, int _size, void*_data)
 			: CFxBase(2,_fxID, _fxVersion)
-			, numPrograms(_numPrograms)
 		{
-			currentProgram=0;
+			Init();
 			if (isChunk)
 			{
-				ChunkMode();
 				SetChunk(_data,_size);
 			}
 			else
@@ -482,6 +488,7 @@ namespace seib {
 						CFxProgram& prog = static_cast<CFxProgram*>(_data)[i];
 						programs.push_back(prog);
 					}
+					initialized=true;
 				}
 				else
 				{
@@ -492,6 +499,7 @@ namespace seib {
 					}
 				}
 			}
+			numPrograms = _numPrograms;
 		}
 
 		CFxBank::CFxBank(FILE *pFileHandle)
@@ -549,9 +557,9 @@ namespace seib {
 
 		CFxBank & CFxBank::DoCopy(const CFxBank &org)
 		{
-			FreeMemory();
+//			FreeMemory();
 			CFxBase::DoCopy(org);
-			if (org.pChunk)
+			if (org.IsChunk())
 			{
 				SetChunk(org.pChunk,org.chunkSize);
 			}
@@ -562,6 +570,7 @@ namespace seib {
 					CFxProgram newprog(org.programs[i]);
 					programs.push_back(newprog);
 				}
+				initialized=true;
 			}
 			numPrograms=org.numPrograms;
 			currentProgram=org.currentProgram;
@@ -577,6 +586,7 @@ namespace seib {
 				return false;
 
 			memcpy(pChunk,chunk,size);
+			initialized=true;
 			return true;
 		}
 
@@ -585,6 +595,7 @@ namespace seib {
 			if (size <=0 )
 				return false;
 
+			ChunkMode();
 			pChunk = new unsigned char[size];
 			chunkSize = size;
 			if ( pChunk && initializeData )
@@ -622,6 +633,7 @@ namespace seib {
 					programs.push_back(loadprog);
 				}
 			}
+			initialized=true;
 			return true;
 		}
 
@@ -846,6 +858,7 @@ namespace seib {
 //					MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
+				SetProgram(fxstore.GetProgramIndex());
 				SetChunk(fxstore.GetChunk(), fxstore.GetChunkSize());
 			}
 			else
@@ -856,7 +869,6 @@ namespace seib {
 //					MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
-				int cProg = GetProgram();
 				for (int i = 0; i < fxstore.GetNumPrograms(); i++)
 				{
 					const CFxProgram &storep = fxstore.GetProgram(i);
@@ -878,7 +890,7 @@ namespace seib {
 						EndSetProgram();
 					}
 				}
-				SetProgram(cProg);
+				SetProgram(fxstore.GetProgramIndex());
 			}
 			loadingChunkName = fxstore.GetPathName();
 			if (mainsstate) MainsChanged(true);
@@ -942,6 +954,7 @@ namespace seib {
 				void *chunk=0;
 				int size=GetChunk(&chunk);
 				CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
+				b.SetProgramIndex(GetProgram());
 				if (mainsstate) MainsChanged(true);
 				return b;
 			}
@@ -950,18 +963,21 @@ namespace seib {
 				bool mainsstate = bMainsState;
 				MainsChanged(false);
 				CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
-				int cProg = GetProgram();
+				b.SetProgramIndex(GetProgram());
 				for (int i = 0; i < numPrograms(); i++)
 				{
 					CFxProgram &storep = b.GetProgram(i);
+					SetProgram(i);
 					char name[kVstMaxProgNameLen+1];
 					GetProgramName(name);
 					storep.SetProgramName(name);
 					int nParms = numParams();
 					for (int j = 0; j < nParms; j++)
 						storep.SetParameter(j,GetParameter(j));
+					storep.ManuallyInitialized();
 				}
-				SetProgram(cProg);
+				SetProgram(b.GetProgramIndex());
+				b.ManuallyInitialized();
 				
 				if (mainsstate) MainsChanged(true);
 				return b;
@@ -976,6 +992,10 @@ namespace seib {
 				void *chunk=0;
 				int size=GetChunk(&chunk);
 				CFxProgram p(uniqueId(),version(),size,true,chunk);
+				char name[kVstMaxProgNameLen+1];
+				GetProgramName(name);
+				p.SetProgramName(name);
+				///\todo: numparams is not being saved. Important with a chunk?
 				if (mainsstate) MainsChanged(true);
 				return p;
 			}
@@ -990,6 +1010,7 @@ namespace seib {
 				int nParms = numParams();
 				for (int j = 0; j < nParms; j++)
 					storep.SetParameter(j,GetParameter(j));
+				storep.ManuallyInitialized();
 				if (mainsstate) MainsChanged(true);
 				return storep;
 			}
@@ -1006,6 +1027,7 @@ namespace seib {
 			{
 				return aEffect->dispatcher(aEffect, opCode, index, value, ptr, opt);
 			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			return 0;
 		}
 
 		/*****************************************************************************/
@@ -1078,6 +1100,7 @@ namespace seib {
 			{
 				return aEffect->getParameter(aEffect, index);
 			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			return 0;
 		}
 
 		bool CEffect::OnSizeEditorWindow(long width, long height)

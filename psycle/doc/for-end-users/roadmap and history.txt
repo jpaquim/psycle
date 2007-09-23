@@ -43,7 +43,7 @@ This new branch also had another new feature: multisequence. In fact, it was des
 
 At January 2007, xpsycle's developer moved onto his own program, and xpsycle stayed dormant for some months, after which the UI toolkit was changed to QT and continued its steps. These changes were brought mostly by Neil mather/mutilus and Mattias/gravity0, with the help of some other contributors.
 
-Also, [JAZ]/JosepMa, took again the task of leading the main Psycle and released Psycle 1.8.5 in August 2007.
+Also, [JAZ]/JosepMa, took again the task of leading the main Psycle and released Psycle 1.8.5 in September 2007.
 This new version is based on the 1.8 branch (not on the 1.9), but several of the features have been added back and extended/finished ( a new wave editor, the new VSThost, a new Mixer machine, improvements on Sampulse), as well as the all time going task of fixing the errors (bugfixs)
 
 

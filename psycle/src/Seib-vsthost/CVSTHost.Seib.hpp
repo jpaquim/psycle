@@ -159,6 +159,7 @@ namespace seib {
 			const void *GetChunk() const { return pChunk; }
 			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
 			bool IsChunk() const{ return fxMagic == chunkPresetMagic; }
+			void ManuallyInitialized() { initialized = true; }
 
 			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pFileHandle); }
 
@@ -222,6 +223,7 @@ namespace seib {
 			}
 			void SetProgramIndex(VstInt32 nProgNum) { if (nProgNum < numPrograms ) currentProgram = nProgNum; }
 			VstInt32 GetProgramIndex() const { return currentProgram;	}
+			void ManuallyInitialized() { initialized = true; }
 			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pf); }
 
 		protected:

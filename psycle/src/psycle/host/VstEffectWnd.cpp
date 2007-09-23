@@ -769,7 +769,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (!machine().OnGetChunkFile(tmp))
 			{
 				std::strncpy(tmp,reinterpret_cast<char*>(machine().OnGetDirectory()),1024);
-				std::strcat(tmp,"\\fxb");
+				std::strcat(tmp,"\\filename");
 			}
 			CFileDialog dlg(FALSE,
 				"fxb",
