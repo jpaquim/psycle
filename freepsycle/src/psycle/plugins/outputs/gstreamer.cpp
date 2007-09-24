@@ -322,9 +322,13 @@ namespace psycle { namespace plugins { namespace outputs {
 	void gstreamer::do_start() throw(engine::exception) {
 		resource::do_start();
 		current_read_position_ = current_write_position_;
-		::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING);
 		waiting_for_state_to_become_playing_ = true;
+		::gst_element_set_state(pipeline_, ::GST_STATE_PLAYING);
 		wait_for_state(*pipeline_, ::GST_STATE_PLAYING);
+		{
+			boost::mutex::scoped_lock lock(mutex_);
+			waiting_for_state_to_become_playing_ = false;
+		}
 	}
 
 	bool gstreamer::started() const {
@@ -337,8 +341,12 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 		if(!caps_set_) {
-			loggers::trace()("caps not set on buffer ; setting them", UNIVERSALIS__COMPILER__LOCATION);
-			::gst_buffer_set_caps(&buffer, caps_);
+			::GstCaps * const caps(::gst_buffer_get_caps(&buffer));
+			if(caps) ::gst_caps_unref(caps);
+			else {
+				loggers::trace()("caps not set on buffer ; setting them", UNIVERSALIS__COMPILER__LOCATION);
+				::gst_buffer_set_caps(&buffer, caps_);
+			}
 			caps_set_ = true;
 		}
 		if(false && loggers::trace()) {
@@ -348,7 +356,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		{
 			boost::mutex::scoped_lock lock(mutex_);
 			if(current_read_position_ == current_write_position_) {
-				if(waiting_for_state_to_become_playing_) return;
+				if(waiting_for_state_to_become_playing_) return; // is handoff called before state is changed to playing?
 				loggers::warning()("underrun");
 				//loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
 				condition_.wait(lock);
@@ -382,10 +390,6 @@ namespace psycle { namespace plugins { namespace outputs {
 		if(false && loggers::trace()) {
 			std::ostringstream s; s << "process " << current_write_position_;
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		if(waiting_for_state_to_become_playing_) {
-			boost::mutex::scoped_lock lock(mutex_);
-			waiting_for_state_to_become_playing_ = false;
 		}
 		{
 			engine::buffer::channel & in(single_input_ports()[0]->buffer()[0]);
