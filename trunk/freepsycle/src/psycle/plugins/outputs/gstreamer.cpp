@@ -46,7 +46,7 @@ namespace psycle { namespace plugins { namespace outputs {
 	}
 
 	namespace {
-		::GstElement & instanciate(std::string const & type, std::string const & name) throw(universalis::exception) {
+		::GstElement & instantiate(std::string const & type, std::string const & name) throw(universalis::exception) {
 			try {
 				if(loggers::information()()) {
 					std::ostringstream s; s << "instanciating " << type << " " << name;
@@ -222,7 +222,8 @@ namespace psycle { namespace plugins { namespace outputs {
 		if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw engine::exceptions::runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
 
 		// create a fakesrc
-		source_ = &instanciate("fakesrc", name() + "-src");
+		source_ = &instantiate("fakesrc", name() + "-src");
+
 		if(!::gst_bin_add(GST_BIN(pipeline_), source_)) throw engine::exceptions::runtime_error("could not add source element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
 
 		// set properties of the fakesrc element
@@ -251,30 +252,34 @@ namespace psycle { namespace plugins { namespace outputs {
 			::gst_pad_use_fixed_caps(source_pad);
 
 			// create an audio sink
-			#define psycle_log loggers::information()("exception: caught while trying to instanciate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-				try { sink_ = &instanciate("gconfaudiosink", name() + "-sink"); }
+			#define psycle_log loggers::information()("exception: caught while trying to instantiate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
+				try { sink_ = &instantiate("gconfaudiosink", name() + "-sink"); }
 				catch(std::exception const & e) {
 					// maybe the user didn't configure his default audio-sink, falling back to several possibilities
 					#if 0 // jacksink needs to be put in a jackbin, because it's pulling audio data.
 					psycle_log
-					try { sink_ = &instanciate("jacksink", name() + "-sink"); }
+					try { sink_ = &instantiate("jacksink", name() + "-sink"); }
 					catch(...)
 					#endif
 					{
 						psycle_log
-						try { sink_ = &instanciate("alsasink", name() + "-sink"); }
+						try { sink_ = &instantiate("autoaudiosink", name() + "-sink"); }
 						catch(...) {
 							psycle_log
-							try { sink_ = &instanciate("esdsink", name() + "-sink"); }
+							try { sink_ = &instantiate("alsasink", name() + "-sink"); }
 							catch(...) {
 								psycle_log
-								try { sink_ = &instanciate("osssink", name() + "-sink"); }
+								try { sink_ = &instantiate("esdsink", name() + "-sink"); }
 								catch(...) {
 									psycle_log
-									try { sink_ = &instanciate("artssink", name() + "-sink"); }
+									try { sink_ = &instantiate("osssink", name() + "-sink"); }
 									catch(...) {
 										psycle_log
-										throw;
+										try { sink_ = &instantiate("artssink", name() + "-sink"); }
+										catch(...) {
+											psycle_log
+											throw;
+										}
 									}
 								}
 							}
