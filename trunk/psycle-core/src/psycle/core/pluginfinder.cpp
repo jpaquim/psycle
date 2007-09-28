@@ -228,7 +228,13 @@ namespace psy
 
 		void PluginFinder::scanNatives() {
 			std::vector<std::string> fileList;
-			fileList = File::fileList(psycle_path_, File::list_modes::files);
+
+			try {
+				fileList = File::fileList(psycle_path_, File::list_modes::files);
+			} catch ( std::exception& e ) {
+				std::cout << "Warning: Unable to scan your native plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
+				return;
+			}
 
 			std::vector<std::string>::iterator it = fileList.begin();
 
