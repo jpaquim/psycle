@@ -28,14 +28,13 @@ namespace psycle { namespace plugins { namespace outputs {
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop()    throw(engine::exception);
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close()   throw(engine::exception);
 		private:
-			::GstElement * pipeline_, * source_, * sink_;
+			::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
 
 			unsigned int  samples_per_second_;
 			unsigned char channels_;
 			unsigned char significant_bits_per_channel_sample_;
 
 			::GstCaps * caps_;
-			bool caps_set_;
 
 			void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 			void        handoff(::GstBuffer &, ::GstPad &);
@@ -45,7 +44,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			bool waiting_for_state_to_become_playing_;
 
 			char * buffer_;
-			unsigned int buffers_, buffer_size_, total_buffer_size_, current_read_position_, current_write_position_;
+			unsigned int buffers_, buffer_size_, current_read_position_, current_write_position_;
 			unsigned int samples_per_buffer_;
 	};
 }}}

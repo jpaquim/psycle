@@ -26,7 +26,7 @@ namespace psycle { namespace engine {
 			s << "new graph: " << qualified_name();
 			loggers::information()(s.str());
 		}
-		events_per_buffer_ = 8192;
+		events_per_buffer_ = 1024;
 	}
 	
 	graph::name_type graph::qualified_name() const {
