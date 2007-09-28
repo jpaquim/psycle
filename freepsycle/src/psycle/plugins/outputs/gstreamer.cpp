@@ -252,7 +252,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		//if(!::gst_element_link_pads(source_,      "sink", caps_filter_, "src")) throw engine::exceptions::runtime_error("could not link source element sink pad to caps filter element src pad", UNIVERSALIS__COMPILER__LOCATION);
 		//if(!::gst_element_link_pads(caps_filter_, "sink", sink_,        "src")) throw engine::exceptions::runtime_error("could not link caps filter element sink pad to sink element src pad",   UNIVERSALIS__COMPILER__LOCATION);
 
-		// buffer settings		
+		// buffer settings
 		samples_per_buffer_ = 1024; /// \todo parametrable
 		buffer_size_ = static_cast<unsigned int>(samples_per_buffer_ * format.bytes_per_sample());
 		if(loggers::information()()) {
