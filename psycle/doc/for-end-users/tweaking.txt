@@ -41,7 +41,7 @@
 
 
 	Finally, on (4), you specify the Value that the parameter will take. There are
-	little differences between tweaking an Native Plugin and a VST plugin. Look further on
+	little differences between tweaking a Native Plugin and a VST plugin. Look further on
 	this document to know them.
 
 	Example:
@@ -163,7 +163,7 @@
 		Mcm B0 01 0740
 				B0 Send a midi CC (Control Change) command (MIDI channel 1)
 				01 to the Generator number 1
-				07 In order to change it's (Channel) volume
+				07 in order to change CC7 (channel volume on most synths)
 				40 to 40 (in a scale of 0 to 7F, HEX)
 				
 

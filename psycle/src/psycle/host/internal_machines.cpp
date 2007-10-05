@@ -418,6 +418,7 @@ namespace psycle
 					assert(pSendMachine);
 					if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
 					{ 
+						bool soundready=false;
 						// Mix all the inputs and route them to the send fx.
 						{
 							cpu::cycles_type cost = cpu::cycles();
@@ -432,6 +433,7 @@ namespace psycle
 									{
 										helpers::dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
 										helpers::dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
+										soundready=true;
 									}
 								}
 							}
@@ -445,6 +447,7 @@ namespace psycle
 									{
 										helpers::dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
 										helpers::dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
+										soundready=true;
 									}
 								}
 							}
@@ -458,9 +461,11 @@ namespace psycle
 									{
 										helpers::dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[j]);
 										helpers::dsp::Add(pRetMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[j]);
+										soundready=true;
 									}
 								}
 							}
+							if (soundready) pSendMachine->Standby(false);
 							_cpuCost += cpu::cycles() - cost ;
 						}
 
@@ -1100,6 +1105,7 @@ namespace psycle
 				float vol;
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
+				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
 				return (Global::song()._pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
 			}
 			return 0.0f;
@@ -1112,6 +1118,7 @@ namespace psycle
 				float vol;
 				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
+				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
 				return (Global::song()._pMachine[Return(idx).Wire().machine_]->_volumeDisplay/97.0f)*vol;
 			}
 			return 0.0f;
