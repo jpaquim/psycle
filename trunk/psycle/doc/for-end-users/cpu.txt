@@ -6,12 +6,13 @@ The packages are:
 
 	- SSE2, for "recent" AMD and Intel CPUs:
 		- SSE2:
-			AMD: Athlon XP, late Duron, Athlon 64, Athlon FX,
-			Intel: Pentium 4, Celeron Pentium 4, Pentium M Centrino and newer
+			AMD: Athlon 64, Athlon FX.
+			Intel: Pentium 4, Celeron Pentium 4, Pentium M, Centrino and newer
 
 	- SSE, for "old" Intel CPUs:
 		- SSE:
-			Intel Pentium III and Celeron Pentium III.
+			AMD: Athlon XP, late Duron.
+			Intel: Pentium III and Celeron Pentium III.
 
 You should copy everything contained in the package that matches your cpu into the psycle directory.
 Make sure you don't have duplicates of the same plugins:

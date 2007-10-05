@@ -958,7 +958,8 @@ namespace psycle
 					int channel = statusLN;
 
 					CMainFrame & frame(*static_cast<CMainFrame*>(theApp.m_pMainWnd));
-					frame.ChangeIns(channel);
+					///\todo: Disabled because it makes the aux column be setup without user control. Needs improvement.
+					//frame.ChangeIns(channel);
 
 					// branch on status code
 					switch( statusHN )
