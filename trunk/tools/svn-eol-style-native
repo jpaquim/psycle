@@ -18,6 +18,7 @@ svn propset svn:eol-style native $(find "$@" \( \
 	-name \*.py -or \
 	-name \*.sh -or \
 	-name \*.cmd -or \
+	-name \*.iss -or \
 	-name \*.txt -or \
 	-name \*.text -or \
 	-name \*.html -or \
