@@ -4,7 +4,7 @@
 
 *	try to use liboil for optimizations.
 
-*	PulseAudio, RTAudio
+*	PulseAudio, RTAudio, libao.
 
 *	Remember to update the TODO file.
 	-- bohan
