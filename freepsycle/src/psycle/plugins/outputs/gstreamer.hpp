@@ -28,7 +28,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop()    throw(engine::exception);
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close()   throw(engine::exception);
 		private:
-			::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
+			::GstElement * pipeline_, * source_, * queue_, * caps_filter_, * sink_;
 
 			unsigned int  samples_per_second_;
 			unsigned char channels_;
