@@ -85,7 +85,6 @@ namespace psycle { namespace plugins { namespace outputs {
 		::GstClockTime const default_timeout_nanoseconds(static_cast<GstClockTime>(5e9));
 
 		void wait_for_state(::GstElement & element, ::GstState state_wanted, ::GstClockTime timeout_nanoseconds = default_timeout_nanoseconds) throw(universalis::exception) {
-/*xxxxx*/return;
 			::GstClockTime intermediate_timeout_nanoseconds(std::min(timeout_nanoseconds, static_cast<GstClockTime>(0.1e9)));
 			::GstClockTime total_nanoseconds_waited(0);
 			for(;;) {
@@ -238,17 +237,21 @@ namespace psycle { namespace plugins { namespace outputs {
 		// create a fakesrc
 		source_ = &instantiate("fakesrc", name() + "-src");
 
+		// create a queue (note that this used to work without a queue in the past)
+		queue_ = &instantiate("queue", name() + "-queue");
+		
 		// create a pipeline
 		if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw engine::exceptions::runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
 		
 		// add the elements to the pipeline
 		//::gst_bin_add_many(GST_BIN(pipeline), source_, caps_filter_, sink_, (void*)0);
 		if(!::gst_bin_add(GST_BIN(pipeline_), source_     )) throw engine::exceptions::runtime_error("could not add source element to pipeline",      UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_bin_add(GST_BIN(pipeline_), queue_      )) throw engine::exceptions::runtime_error("could not add queue element to pipeline",       UNIVERSALIS__COMPILER__LOCATION);
 		if(!::gst_bin_add(GST_BIN(pipeline_), caps_filter_)) throw engine::exceptions::runtime_error("could not add caps filter element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
 		if(!::gst_bin_add(GST_BIN(pipeline_), sink_       )) throw engine::exceptions::runtime_error("could not add sink element to pipeline",        UNIVERSALIS__COMPILER__LOCATION);
 		
 		// link the element pads together
-		if(!::gst_element_link_many(source_, caps_filter_, sink_, (void*)0)) throw engine::exceptions::runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_element_link_many(source_, queue_, caps_filter_, sink_, (void*)0)) throw engine::exceptions::runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
 		//if(!::gst_element_link_pads(source_,      "sink", caps_filter_, "src")) throw engine::exceptions::runtime_error("could not link source element sink pad to caps filter element src pad", UNIVERSALIS__COMPILER__LOCATION);
 		//if(!::gst_element_link_pads(caps_filter_, "sink", sink_,        "src")) throw engine::exceptions::runtime_error("could not link caps filter element sink pad to sink element src pad",   UNIVERSALIS__COMPILER__LOCATION);
 
@@ -294,7 +297,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw engine::exceptions::runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
 
 		// set the pipeline state to ready
-		set_state_synchronously(*pipeline_, ::GST_STATE_READY);
+		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 	}
 
 	bool gstreamer::opened() const {
@@ -309,7 +312,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		resource::do_start();
 		current_read_position_ = current_write_position_;
 		// set the pipeline state to playing
-		set_state_synchronously(*pipeline_, ::GST_STATE_PLAYING);
+		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
 		{
 			boost::mutex::scoped_lock lock(mutex_);
 			waiting_for_state_to_become_playing_ = false;
@@ -397,17 +400,18 @@ namespace psycle { namespace plugins { namespace outputs {
 	}
 	
 	void gstreamer::do_stop() throw(engine::exception) {
-		if(pipeline_) set_state_synchronously(*pipeline_, ::GST_STATE_READY);
+		if(pipeline_) set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 		resource::do_stop();
 	}
 
 	void gstreamer::do_close() throw(engine::exception) {
 		if(pipeline_) {
-			set_state_synchronously(*pipeline_, ::GST_STATE_NULL);
+			set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_NULL);
 			::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
 		}
 		if(sink_) ::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
 		if(caps_filter_) ::gst_object_unref(GST_OBJECT(caps_filter_)); caps_filter_ = 0;
+		if(queue_) ::gst_object_unref(GST_OBJECT(queue_)); queue_ = 0;
 		if(source_) ::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
 		if(caps_) ::gst_caps_unref(caps_); caps_ = 0;
 		// deinitialize gstreamer
