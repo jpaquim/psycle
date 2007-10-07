@@ -46,7 +46,7 @@ EndAmp : Volume when ending playback. (Mode 1.x)
 Length : Time that drum plays.
 Volume : Volume of the drum.
 DecMode : Mode of decrementing. (Linear, Mode 1.1,...)
-Compatible: Selection of Compatibility Mode.
+Compatible: Selection of Compatibility Mode (Older version or newer version).
 NNA : Select NoteOff or NoteContinue when New Note on same Channel.
 
 Attack : Percentage at which Drum volume will have gone up to MAX.
