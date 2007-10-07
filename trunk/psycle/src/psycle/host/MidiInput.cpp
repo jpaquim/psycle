@@ -371,7 +371,7 @@ namespace psycle
 			listbox->ResetContent();
 
 			// always add the null dev
-			listbox->AddString( issync?"Same than Input Device":"None" );
+			listbox->AddString( issync?"Same as MIDI Input Device":"None" );
 
 			// get the number of MIDI input devices
 			numDevs = midiInGetNumDevs();

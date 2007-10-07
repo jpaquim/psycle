@@ -420,7 +420,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						"David Buist\t\t\tAdditional Graphics" "\r\n"
 						"frown\t\t\t\tAdditional Graphics" "\r\n"
 						"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
-						"Haralabos Michael\t\t\tInstaller and Debugging help"
+						"Haralabos Michael\t\t\tInstaller and Debugging help" "\r\n\r\n"
+						"This release of Psycle also contains VST plugins from:" "\r\n"
+						"Digital Fish Phones\t( http://www.digitalfishphones.com/ )" "\r\n"
+						"DiscoDSP\t\t( http://www.discodsp.com/ )" "\r\n"
+						"SimulAnalog\t( http://www.simulanalog.com/ )" "\r\n"
+						"Jeroen Breebaart\t( http://www.jeroenbreebaart.com/ )" "\r\n"
+						"George Yohng\t( http://www.yohng.com/ )" "\r\n"
+						"Christian Budde\t( http://www.savioursofsoul.de/Christian/ )" "\r\n"
+						"DDMF\t\t( http://www.ddmf.eu/ )" "\r\n"
+						"Loser\t\t( http://loser.asseca.com/ )" "\r\n"
+						"E-phonic\t\t( http://www.e-phonic.com/ )" "\r\n"
+						"Argu\t\t( http://www.aodix.com/ )"
+
 					);
 			m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
 
