@@ -643,11 +643,13 @@ namespace psycle
 							{
 								//Disable bad-behaving machines
 								///\todo: add a better approach later on, 
+								/*
 								if (pInMachine->_cpuCost >= Global::_cpuHz && !Global::pPlayer->_recording)
 								{
 									if ( pInMachine->_mode == MACHMODE_GENERATOR) pInMachine->_mute=true;
 									else pInMachine->Bypass(true);
 								}
+								*/
 							}
 							/*
 							This could be a different Undenormalize funtion, using the already calculated

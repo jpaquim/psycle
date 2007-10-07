@@ -29,7 +29,7 @@
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH 5
-#define PSYCLE__VERSION__QUALITY "RC2"
+#define PSYCLE__VERSION__QUALITY "release"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \

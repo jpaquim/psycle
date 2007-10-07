@@ -108,7 +108,9 @@ sourceforge member list:
 	(ignore the "No Specific Role" ones. They are retired.)
 	
 
-You are allowed to develop psycle Machines without any restriction
+You are allowed to develop psycle Machines without any restriction, although if you
+decide to make it closed source, you will have to update whenever we make changes
+to the API.
 There is no SDK ready, so the best way to start a new one is getting the sources
 of an existing one. Arguru synth is an usual template.
 
