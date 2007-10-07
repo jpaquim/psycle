@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+  <link media="screen" type="text/css" href="psycle.css" rel="StyleSheet">
+
+</head>
+
+
+
+<body>
+
+<table width="100%">
+
+  <col width="50%">
+  <tbody>
+
+    <tr>
+
+      <td><a href="Tutorial_Concept2.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
+
+      <td align="right"></td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+<p class="head2">Tweaking</p>
+
+By now you should know how to make a simple song. But what about
+automating parameter changes? (just think of those filter sweeps you've
+heard in commercial tracks). This is where the "Tweak" and "Tweak
+Smooth" commands come in. These can be inserted in patterns exactly
+like notes, but instead of the note-name, you will see "twk" and "tws".
+Here's how they work:
+<p></p>
+
+<center><code>
+twk 01 00 0D7F<br>
+
+tws 01 00 0D7F </code>
+<p></p>
+
+</center>
+
+The 2nd column is the parameter number, the 3rd column is the machine
+number, and the 4th is the parameter value (i.e. your change).
+<p>But how do you actually use this? Continuing on with our file
+from earlier, go to the pattern view (if you're not already in it) and
+enter a bunch of notes in the first track, going right down to the end.
+Now, above the pattern window you'll see a toolbar with several
+drop-down boxes. Make sure the second one says "00: Arguru Synth", the
+third "Params" and then make the fourth "0F: VCF Cutoff". These
+correspond to the third and second columns in the twk or tws command
+(yes, they're back-to-front). The difference between "Tweak" and "Tweak
+Smooth" is self explanatory. </p>
+
+<p>Now, let's use this to create a filter sweep with our
+generator we added earlier. Go to the second track of your pattern,
+click on the note-name part of the first note entry position. While
+holding Control (for Smooth twk), press the "`" or "~" key and release (if you're using
+a non-english keyboard, it might be the key to the left of the "1". Use the keyboard configuration settings if you can't find it). You should see a tws entry like this:
+</p>
+
+<p></p>
+
+<center><code>
+tws 0F 00 0000 </code>
+<p></p>
+
+</center>
+
+<p>Change the "0000" to "00FF" and then go to the last note in
+the same track, and create another tws entry, this time making the
+value "0053" (tws 0F 00 0053).<br>
+Now, here's the shortcut - instead of typing each
+in-between value for the filter sweep, we can interpolate. Select the
+whole track by clicking and dragging from the top to the bottom or vice
+versa, right click, and from the menu select "Interpolate (Linear)".
+Now, press Play (F5). Congratulations, you've done your first filter
+sweep in Psycle!
+</p>
+<br>
+<p>
+<table width="100%">
+
+  <col width="50%">
+  <tbody>
+
+    <tr>
+
+      <td><a href="Tutorial_Concept2.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
+
+      <td align="right"></td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+</p>
+
+
+</body>
+</html>

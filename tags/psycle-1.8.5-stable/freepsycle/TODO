@@ -1,0 +1,10 @@
+# This is a sorted list, top priority at the top!
+
+*	generic::wrappers::node find port by name functions
+
+*	try to use liboil for optimizations.
+
+*	PulseAudio, RTAudio, libao.
+
+*	Remember to update the TODO file.
+	-- bohan

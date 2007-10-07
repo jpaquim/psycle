@@ -1,0 +1,21 @@
+[OPTIONS]
+Binary Index=No
+Compatibility=1.1 or later
+Compiled file=..\for-end-users\Psycle.chm
+Contents file=Table of Contents.hhc
+Default Font=Tahoma,8,0
+Default Window=Main
+Default topic=index.htm
+Display compile progress=Yes
+Full-text search=Yes
+Index file=Index.hhk
+Language=0xc09 Inglés (Australia)
+Title=Psycle Help
+
+[WINDOWS]
+Main="Psycle Help (v. 1.1)","Table of Contents.hhc","Index.hhk",,,,,,,0x2520,227,0x3006,[0,0,800,700],,,,,,,0
+Psycle=,"Table of Contents.hhc","Index.hhk","index.htm",,,,,,0x20,,0x0,[271,372,593,566],,,,,,,0
+
+
+[INFOTYPES]
+

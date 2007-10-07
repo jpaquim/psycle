@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_Record.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_Settings.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+<p class=head2>Pattern Functions</P>
+<b>Block Copy </b> (<i>Edit > Block Copy</i>) &ndash; Copies the selection to the internal clipboard<P>
+<b>Block Cut</b> (<i>Edit > Block Cut</i>) &ndash; Cuts the selection to the internal clipboard.<P>
+<b>Block Delete </b>(<i>Edit > Block Delete</i>) &ndash; Deletes the selection.<P>
+<b>Block Mix Paste </b> (<i>Edit > Block Mix Paste</i>) &ndash; Pastes the copied selection only in the parts of the destination that have no notes or commands (excluding global commands).  If the data takes up more space than is available in the pattern, you will be prompted to auto-enlarge the pattern.<P>
+<b>Block Paste </b> (<i>Edit >Block Paste</i>) &ndash; Pastes the copied selection over the top of anything underneath.  If the data takes up more space than is available in the pattern, you will be prompted to auto-enlarge the pattern.<P>
+<b>Block/Track Swing Fill</b> (<i>Right Click > Block/Track Swing Fill</i>)  &ndash; <P> 
+<img src="swing_fill.png" border="0"><P>
+The swing fill function modulates the speed of the song (using the global <a href="PatternEd_Global.htm"><code>FFxx</code></a> function) in the form of a sine wave. The "Variance" setting determines the maximum speed change as a percentage of the original.  The cycle length determines over how many lines the a single cycle of the sine wave is spread, and the phase setting determines the starting point of the sine wave.  Graphs of how the different options change the speed are shown below.<BR>
+<center>
+<table cellpadding=3>
+<col align="center"><col align="center"><col align="center">
+<tr valign="middle"><td><img src="swing_plain_sml.png" width="103" height="70" border="0"></td><td><img src="swing_center_sml.png" width="103" height="70" border="0"></td><td><img src="swing_actual_sml.png" width="103" height="70" border="0"></td>
+<tr valign="middle"><td>Ordinary Speed</td><td>Center BPM option</td>
+<td>Actual BPM option</td>
+</table><P>
+(The red line is the original speed).
+</center>
+
+<P>
+<b>Change Generator</b> (<i>Right Click > Change Generator</i>) &ndash; Changes the Machine number of the selection to that of the current machine.<P>
+<b>Change Instrument</b> (<i>Right Click > Change Instrument</i>) &ndash; Changes the instrument number of the selection to that of the current instrument.<P>
+<b>Clear</b> (Backspace) &ndash; Clears the note on the selected row.  If the "FT2 Style Delete" option is selected in the <a href="Config_Keyboard.htm">configuration</a> window, the notes below will be moved up by one row, to fill in the gap.<P>
+<b>Delete</b> (Del) &ndash; Clears the note on the selected row<P>
+<b>Interpolate (Linear)</b> (<i>Right Click > Interpolate Effect</i>) &ndash; Interpolates the values in the parameters column at the beginning and end of a selection.  This only works in the leftmost track of a selection.<P>
+<b>Interpolate (Curve)</b> (<i>Right Click > Interpolate Effect, with non-linear change</i>) &ndash; This works like Interpolate (Linear), but shows a dialog were you can specify how the values will cange from line to line.<P>
+<a name="pattern">
+<b>Pattern Copy </b> (<i>Edit > Pattern Copy</i>) &ndash; Copies the data in the pattern to the internal clipboard<P>
+<b>Pattern Cut</b> (<i>Edit > Pattern Cut</i>) &ndash; Cuts the data in the pattern to the internal clipboard.<P>
+<b>Pattern Delete </b>(<i>Edit > Pattern Delete</i>) &ndash; Clears all data from the pattern.<P>
+<b>Pattern Mix Paste </b> (<i>Edit > Pattern Mix Paste</i>) &ndash; Pastes the copied pattern data only in the parts of the destination pattern that have no notes or commands (excluding global commands).  If the data takes up more space than is available in the pattern, you will be prompted to auto-enlarge the pattern.<P>
+<b>Pattern Paste </b> (<i>Edit >Block Paste</i>) &ndash; Pastes the copied selection over the top of anything underneath.  If the data takes up more space than is available in the pattern, you will be prompted to auto-enlarge the pattern.<P>
+<a name="redo">
+<b><a href="PatternEd_Properties.htm">Pattern Properties</a> </b><P>
+<b>Redo </b> (<i>Edit > Redo</i>) &ndash; Redoes the last action that was undone.<P>
+<b>Transpose +1/-1</b> (<i>Right Click > Transpose +1/-1</i>) &ndash; Increases/decreases the notes in the selection by a semitone.<P>
+<b>Transpose +12/-12</b> (<i>Right Click > Transpose +12/-12</i>) &ndash; Increases/decreases the notes in the selection by an octave.<P>
+<a name="undo">
+<b>Undo </b> (<i>Edit > Undo</i>) &ndash; Undoes the previous action.<P>
+
+
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_Record.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_Settings.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td></td><td align="right"><a href="MIDI_Sync.htm">Next</a></td>
+</table>
+
+<p class=head2>Basic Setup</p>
+
+To use Psycle with a MIDI sequencer, you will need to set up a Virtual MIDI port (a software emulated MIDI input/output port).  You will need software such as <i>Hubi's Loopback</i> or <i>MIDI Yoke</i><br>If you're using Windows 2000/NT/XP you will need MIDI Yoke, since Hubi's Loopback only works on previous versions of windows.<P>
+
+After installing your Virtual MIDI Port, select it as the Output from your MIDI sequencer, and as the Input in Psycle. <P>  
+
+In the Psycle <a href="Config_IO.htm">Configuration Window</a>, select the input device from the list.  Make sure that it will match up with the output device selected in your MIDI sequencer i.e. with MIDI Yoke, if you select MIDI Yoke 1 as <i>Output </i>in the MIDI sequencer, you should select MIDI Yoke 1 as <i>Input</i> in Psycle. 
+
+<P>
+
+If you are using a separate device for MIDI Sync (see later for details) then you can select this from the Sync Device listbox, although if you plan to send a MIDI Sync clock through the same device as the main input device then you can leave this unselected (None).
+
+This allows the MIDI to flow as follows:<P>
+<code><center>Sequencer MIDI Out > Virtual MIDI Port > Psycle MIDI In</code><p></center>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_Monitor.htm">Previous</a></td><td align="right"><a href="MIDI_Limitations.htm">Next</a></td>
+</table>
+
+<p class=head2>Tips & Tricks</P>
+
+Set the midi headroom and number of audio buffers/size to the lowest bearable value when working on a particular song (to make things easier to work with). If you experience the occasional glitch then this is not a problem - you are only working on the tune - sync should still be regained within a few milliseconds. Once you are ready to mix down your song then set the midi headroom and audio settings to larger values (adjust midi sequencer time offsets to take account of this with regards to the other non-Psycle tracks) for this final mix - in order to reduce the probability of rogue system MIDI latency or Psycle audio "drop-outs" during this mix down.
+<P>
+
+If you mute a Psycle-controlling track in your sequencer and the current generator does not accept note-off messages, then you can (sometimes) press the main Psycle STOP button in to stop all notes and then let the MIDI restart all the others (appart from the track you wanted to mute of course).<P>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Sampler_Instruments.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Sampler_WaveEditor.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+<p class=head2>Instrument Editor</P>
+<Center><img src="instrument_editor.png" border="0"></center><P>
+
+Use the arrow buttons to switch between samples, the textbox to rename them, and the "Kill" button to delete them.
+<a name="properties">
+<p class=head3>Instrument Properties</P>
+
+<b>New Note Action</b> &ndash; Whether to cut, release or do nothing when another note from the same machine is triggered while the previous note is still playing.<P>
+<b>Panning</b> &ndash; The left or right channel bias of the sample.  128 is the middle. <P>
+<b>Random Panning</b> &ndash; Randomises the panning each time the sample is played.<P>
+<b>Random VCF Cutoff</b> &ndash; Randomises the <a href="#filter">filter</a> cutoff each time the sample is played.<P>
+<b>Random Reso/Bw.</b> &ndash; Randomises the resonance of the filter each time the sample is played.
+
+<p class=head3>Tempo Looping Tool</P>
+
+<b>Play sample to fit X rows</b> &ndash; Stretches or squashes the sample to fit a given number of rows.
+<a name="wavelayer">
+<p class=head3>Instrument Wave Layer</P>
+
+<b>Volume</b> &ndash; Volume of the sample.<P>
+<b>FineTune</b> &ndash; Finetuning of the pitch of the sample by a maximum of +/- one semitone.<P>
+<b>Tune</b> &ndash; Sets the base tuning of the note.  The original pitch of the sample is set to C-4, so if the tuning of a given sample were set to C-5, the pitch of the sample is shifted up by one octave.<P>
+<b>Loop</b> &ndash; To turn on the loop set in the <a href="Sampler_WaveEditor.htm">wave editor</a>, click "Forward".  Click the "Off" button to turn ignore the loop settings.<P>
+<b>Loop At</b> &ndash; Displays the loop points that have been set in the <a href="Sampler_WaveEditor.htm">wave editor</a>.
+
+<p class=head3>Amplitude/Filter Envelopes</P>
+
+(click on the Amplitude/Filter Envelopes button)<P>
+<b>Amplitude</b> &ndash; This modifies the ADSR (Attack-Decay-Sustain-Release) envelope for the volume, which is shown on a graph.  To ignore the volume settings, set the Attack, Decay and Release to the lowest value possible, and set the Sustain to 100%.
+<P>
+<a name="filter">
+<b>Filter</b> &ndash; This modifies the ADSR envelope for the filter.<P>
+<b>Filter Parameters</b> &ndash; This allows you to set the filter cut-off frequency, the Q (resonance) and the percentage effect of the filter envelope on the sample.<P>
+<b>Filter Mode</b> &ndash; This allows you to set the filter type.  You have a choice of Low Pass (retains only the freqencies below the cufoff), High Pass (retains only the freqencies above the cutoff), Band Pass (retains only a band of frequencies above and below the cutoff) and Notch (rejects only a band of frequencies above and below the cutoff).  To ignore any filter settings, set this to "None".<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Sampler_Instruments.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Sampler_WaveEditor.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+</body>
+</html>
