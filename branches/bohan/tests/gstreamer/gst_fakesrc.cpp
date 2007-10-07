@@ -147,6 +147,7 @@ int main(int argc, char * argv[]) {
 
 	gst_bin_add_many(GST_BIN(pipeline), fakesrc, queue, capsfilter, audiosink, (void*)0);
 	gst_element_link_many(fakesrc, queue, capsfilter, audiosink, (void*)0);
+	//gst_element_link_many(fakesrc, capsfilter, queue, audiosink, (void*)0);
 
 	// setup fake source
 	int const s(4096);
