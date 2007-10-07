@@ -77,7 +77,7 @@ void AudioConfigDlg::onDriverSelected( const QString & text )
 		if ( text == "alsa" ) { ///\todo FIXME: bugs if device not set, temp fix.
 			psy::core::AudioDriverSettings settings = it->second->settings();
 			settings.setDeviceName( ///\todo allow to specify the device
-			#if defined PSYCLE__ALSA_DEFAULT_DEVICE
+			#if defined PSYCLE__ALSA__DEFAULT_DEVICE
 				PSYCLE__ALSA__DEFAULT_DEVICE
 			#else
 				"plughw:0"
