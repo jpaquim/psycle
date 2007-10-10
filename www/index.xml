@@ -49,22 +49,22 @@
 				This is built from the <code>trunk</code> directory of the subversion repository.
 				<br/>
 				<b>Note:</b> This might be compiled with SSE2 instructions of the x86 CPUs ; only recent CPUs have SSE2 support.
-			</part-->
+			</part>
 			<part caption='Candidate Release' anchor='mfc-release-candidate'>
 				<a href='./psycle-mfc-release-candidate'/>
 				<br/>
 				This is built from the <code>tags/psycle-1.8.5-rc</code> directory of the subversion repository.
 				It is an official candidate release, which means it's nearly stable.
-			</part>
-			<part caption='Stable Release 1.8 with bugfixes' anchor='mfc-stable'>
-				<a href='./packages/microsoft/psycle.mfc.bin.release_1_8_bugfixes.tar.gz'/>
+			</part-->
+			<part caption='Stable Release 1.8.5' anchor='mfc-stable'>
+				<a href='./psycle-mfc-stable'/>
 				<br/>
-				This is built from the <code>tags/psycle-1.8.2-stable</code> directory in the subversion repository, tagged from the branch directory <code>branches/psycle-1.8-bugfixes</code>.
+				This is built from the <code>tags/psycle-1.8.5-stable</code> directory in the subversion repository. It is the current official release.
 			</part>
-			<part caption='Old Stable Release 1.7.6.2' anchor='mfc-stable-old-1.7.6.2'>
-				<a href='http://download.sourceforge.net/sourceforge/psycle/psycle.bin.release-1.7.6.2.simpler-g7-only-package.rar'/>
+			<part caption='Older Stable Release 1.8.2' anchor='mfc-stable-old-1.8.2'>
+				<a href='http://sourceforge.net/project/showfiles.php?group_id=10834'/>
 				<br/>
-				This is built from the <code>tags/psycle-1.7.6.2</code> directory of the subversion repository.
+				This is built from the <code>tags/psycle-1.8.2-stable</code> directory of the subversion repository.
 			</part>
 		</part>
 	</part>
