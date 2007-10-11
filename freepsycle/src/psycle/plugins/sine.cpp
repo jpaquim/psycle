@@ -43,6 +43,8 @@ namespace psycle { namespace plugins {
 		this->frequency(100);//frequency); \todo remove
 	}
 
+	const real todo(1.00005); // \todo remove
+	
 	void sine::do_process() throw(engine::exception) {
 		if(!single_input_ports()[0]->output_port()) { do_process_const_frequency(); return; }
 		engine::buffer::channel & frequency(single_input_ports()[0]->buffer()[0]);
@@ -61,7 +63,7 @@ namespace psycle { namespace plugins {
 			out[out_event].index(out_event);
 			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= 1.00001; // \todo remove
+			step_ *= todo; // \todo remove
 		}
 		phase_ = std::fmod(phase_, 2 * engine::math::pi);
 	}
@@ -78,7 +80,7 @@ namespace psycle { namespace plugins {
 			out[out_event].index(out_event);
 			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= 1.00001; // \todo remove
+			step_ *= todo; // \todo remove
 		}
 		phase_ = std::fmod(phase_, 2 * engine::math::pi);
 	}
@@ -92,7 +94,7 @@ namespace psycle { namespace plugins {
 			out[out_event].index(out_event);
 			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= 1.00001; // \todo remove
+			step_ *= todo; // \todo remove
 		}
 		phase_ = std::fmod(phase_, 2 * engine::math::pi);
 	}
@@ -103,7 +105,7 @@ namespace psycle { namespace plugins {
 			out[out_event].index(out_event);
 			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= 1.00001; // \todo remove
+			step_ *= todo; // \todo remove
 		}
 		phase_ = std::fmod(phase_, 2 * engine::math::pi);
 	}
