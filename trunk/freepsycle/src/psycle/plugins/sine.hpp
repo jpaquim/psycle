@@ -9,12 +9,12 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins {
 	/// oscillator with a sinusoidal wave form
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node
-	{
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		protected: friend class virtual_factory_access;
 			sine(engine::plugin_library_reference &, engine::graph &, std::string const & name);
 		public:
-			void inline frequency(real const & frequency) { this->step_ = frequency * frequency_to_step_; }
+			void frequency(real const & frequency) { this->step_ = frequency * frequency_to_step_; }
+			real frequency() const { return frequency_to_step_ / step_; }
 		protected:
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES seconds_per_event_change_notification_from_port(engine::port const &);
 			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
