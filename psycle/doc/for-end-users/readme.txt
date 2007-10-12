@@ -119,7 +119,7 @@ Psycle 1.8.5 includes a freeware VST pack containing software from the following
 
 Digital Fish Phones	( http://www.digitalfishphones.com/ )
 DiscoDSP		( http://www.discodsp.com/ )
-SimulAnalog		( http://www.simulanalog.com/ )
+SimulAnalog		( http://www.simulanalog.org/ )
 Jeroen Breebaart	( http://www.jeroenbreebaart.com/ )
 George Yohng		( http://www.yohng.com/ )
 Christian Budde		( http://www.savioursofsoul.de/Christian/ )
@@ -127,6 +127,7 @@ DDMF			( http://www.ddmf.eu/ )
 Loser			( http://loser.asseca.com/ )
 E-phonic		( http://www.e-phonic.com/ )
 Argu			( http://www.aodix.com/ )
+Oatmeal by Fuzzpilz  	( http://bicycle-for-slugs.org/ )
 
 --------------------------------------------------------------------------------
 

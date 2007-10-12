@@ -424,14 +424,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						"This release of Psycle also contains VST plugins from:" "\r\n"
 						"Digital Fish Phones\t( http://www.digitalfishphones.com/ )" "\r\n"
 						"DiscoDSP\t\t( http://www.discodsp.com/ )" "\r\n"
-						"SimulAnalog\t( http://www.simulanalog.com/ )" "\r\n"
+						"SimulAnalog\t( http://www.simulanalog.org/ )" "\r\n"
 						"Jeroen Breebaart\t( http://www.jeroenbreebaart.com/ )" "\r\n"
 						"George Yohng\t( http://www.yohng.com/ )" "\r\n"
 						"Christian Budde\t( http://www.savioursofsoul.de/Christian/ )" "\r\n"
 						"DDMF\t\t( http://www.ddmf.eu/ )" "\r\n"
 						"Loser\t\t( http://loser.asseca.com/ )" "\r\n"
 						"E-phonic\t\t( http://www.e-phonic.com/ )" "\r\n"
-						"Argu\t\t( http://www.aodix.com/ )"
+						"Argu\t\t( http://www.aodix.com/ )" "\r\n"
+						"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )
 
 					);
 			m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);

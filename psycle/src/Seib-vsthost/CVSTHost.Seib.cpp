@@ -874,21 +874,23 @@ namespace seib {
 					const CFxProgram &storep = fxstore.GetProgram(i);
 					CPatchChunkInfo pinfo(storep);
 					BeginLoadProgram(&pinfo);
+					BeginSetProgram();
+					SetProgram(i);
+					SetProgramName(storep.GetProgramName());
 					if (storep.IsChunk())
 					{
 						if (!ProgramIsChunk())
+							return false;
+						else
 							SetChunk(storep.GetChunk(), storep.GetChunkSize(),true);
 					}
 					else 
 					{
 						int nParms = storep.GetNumParams();
-						BeginSetProgram();
-						SetProgram(i);
-						SetProgramName(storep.GetProgramName());
 						for (int j = 0; j < nParms; j++)
 							SetParameter(j, storep.GetParameter(j));
-						EndSetProgram();
 					}
+					EndSetProgram();
 				}
 				SetProgram(fxstore.GetProgramIndex());
 			}
@@ -947,16 +949,43 @@ namespace seib {
 
 		CFxBank CEffect::SaveBank(bool preferchunk)
 		{
-			if (ProgramIsChunk() && preferchunk)
+			if (ProgramIsChunk())
 			{
-				bool mainsstate = bMainsState;
-				MainsChanged(false);
-				void *chunk=0;
-				int size=GetChunk(&chunk);
-				CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
-				b.SetProgramIndex(GetProgram());
-				if (mainsstate) MainsChanged(true);
-				return b;
+				if (preferchunk)
+				{
+					bool mainsstate = bMainsState;
+					MainsChanged(false);
+					void *chunk=0;
+					int size=GetChunk(&chunk);
+					CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
+					b.SetProgramIndex(GetProgram());
+					if (mainsstate) MainsChanged(true);
+					return b;
+				}
+				else
+				{
+					bool mainsstate = bMainsState;
+					MainsChanged(false);
+					CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
+					b.SetProgramIndex(GetProgram());
+					for (int i = 0; i < numPrograms(); i++)
+					{
+						CFxProgram &storep = b.GetProgram(i);
+						SetProgram(i);
+						char name[kVstMaxProgNameLen+1];
+						GetProgramName(name);
+						storep.SetProgramName(name);
+						void *chunk=0;
+						int size=GetChunk(&chunk,true);
+						storep.CopyChunk(chunk,size);
+						storep.ManuallyInitialized();
+					}
+					SetProgram(b.GetProgramIndex());
+					b.ManuallyInitialized();
+
+					if (mainsstate) MainsChanged(true);
+					return b;
+				}
 			}
 			else
 			{
@@ -990,7 +1019,7 @@ namespace seib {
 				bool mainsstate = bMainsState;
 				if (mainsstate) MainsChanged(false);
 				void *chunk=0;
-				int size=GetChunk(&chunk);
+				int size=GetChunk(&chunk,true);
 				CFxProgram p(uniqueId(),version(),size,true,chunk);
 				char name[kVstMaxProgNameLen+1];
 				GetProgramName(name);
