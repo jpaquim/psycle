@@ -27,21 +27,20 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger {
 	public:
 		virtual ~logger() throw() {}
 
-	public:
 		void operator()(int const level, std::string const & message) throw() { log(level, message); }
-		void operator()(int const level, std::string const & message, compiler::location const & location) throw() { log(level, location + ("\n" + message)); }
+		void operator()(int const level, std::string const & message, compiler::location const & location) throw() { log(level, message, location); }
 
 	protected:
+		void            log(int const level, std::string const &, compiler::location const & location) throw();
 		void            log(int const level, std::string const &) throw(); friend class loggers::multiplex_logger;
 		void virtual do_log(int const level, std::string const &) throw() = 0;
 
-	protected:
-		boost::mutex & mutex() throw() { return mutex_; }
-	private:
-		boost::mutex   mutex_;
+	protected: boost::mutex & mutex() throw() { return mutex_; }
+	private:   boost::mutex   mutex_;
 };
 
 namespace loggers {
+
 	/// logger which forwards to multiple loggers.
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiplex_logger : public logger, protected std::vector<logger*> {
 		public:
@@ -59,10 +58,8 @@ namespace loggers {
 
 		///\name singleton
 		///\{
-		public:
-			multiplex_logger static & singleton() throw() { return singleton_; }
-		private:
-			multiplex_logger static   singleton_;
+			public:  multiplex_logger static & singleton() throw() { return singleton_; }
+			private: multiplex_logger static   singleton_;
 		///\}
 	};
 
@@ -76,18 +73,14 @@ namespace loggers {
 
 		///\name underlying stream
 		///\{
-			protected:
-				std::ostream & ostream() const throw() { return ostream_; }
-			private:
-				std::ostream & ostream_;
+			protected: std::ostream & ostream() const throw() { return ostream_; }
+			private:   std::ostream & ostream_;
 		///\}
 
 		///\name default stream singleton
 		///\{
-			public:
-				static        logger & default_logger() throw() { return default_logger_; }
-			private:
-				static stream_logger   default_logger_;
+			public:         logger static & default_logger() throw() { return default_logger_; }
+			private: stream_logger static   default_logger_;
 		///\}
 	};
 
@@ -103,8 +96,7 @@ namespace loggers {
 		};
 		
 		/// the compile-time threshold level for the loggers
-		int const compiled_threshold =
-		(
+		int const compiled_threshold(
 			#if defined UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__LEVELS__COMPILED_THRESHOLD
 				UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__LEVELS__COMPILED_THRESHOLD
 			#elif defined NDEBUG

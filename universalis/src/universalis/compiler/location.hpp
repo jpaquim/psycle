@@ -46,11 +46,6 @@
 
 namespace universalis { namespace compiler {
 
-///\internal
-#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__START "\033[34m# "
-///\internal
-#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MARK__END   "\033[0m"
-
 class location {
 	public:
 		location(
@@ -95,7 +90,7 @@ class location {
 
 ///\internal
 #define UNIVERSALIS__COMPILER__LOCATION__DETAIL(function) \
-	location( \
+	universalis::compiler::location( \
 		UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE, \
 		function, \
 		__FILE__, \
@@ -108,15 +103,15 @@ class location {
 	// so we use the same definition in both cases
 	
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
-		+ std::string(__PRETTY_FUNCTION__) + //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
+		__PRETTY_FUNCTION__ //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
 
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS \
-		+ std::string(__PRETTY_FUNCTION__) + //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
+		__PRETTY_FUNCTION__ //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
 
 #else
 	// include the name of the current class explicitly using rtti on the "this" pointer
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
-		+ universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
+		universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
 
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  \
 		BOOST_CURRENT_FUNCTION
