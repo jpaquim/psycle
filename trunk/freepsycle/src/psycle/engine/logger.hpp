@@ -8,14 +8,15 @@
 #include <fstream>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE__LOGGER
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace psycle
-{
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger : public universalis::operating_system::loggers::stream_logger
-	{
-		public:
-			logger(std::ostream & ostream) : universalis::operating_system::loggers::stream_logger(ostream) {}
-		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDE do_log(int const & level, std::string const & string) throw();
-	};
+namespace psycle {
+
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger : public universalis::operating_system::loggers::stream_logger {
+	public:
+		logger(std::ostream & ostream) : universalis::operating_system::loggers::stream_logger(ostream) {}
+	protected:
+		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDE do_log(int const level, std::string const & string) throw();
+};
+
 }
 #include <universalis/compiler/dynamic_link/end.hpp>
+
