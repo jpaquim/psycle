@@ -6,7 +6,31 @@
 #include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "loggers.hpp"
+#include <cstdlib>
 namespace universalis { namespace operating_system {
+
+namespace {
+	// Here we assume we have an ansi terminal if the TERM env var is defined.
+	bool const ansi_terminal(std::getenv("TERM"));
+	
+	void dump_location(compiler::location const & location, std::ostream & out) {
+		if(ansi_terminal) out << "\033[34m";
+		out
+			<< "# "
+			<< location.module() << " # "
+			<< location.function() << " # "
+			<< location.file() << ":"
+			<< location.line();
+		if(ansi_terminal) out << "\033[0m";
+	}
+}
+
+void logger::log(int const level, std::string const & message, compiler::location const & location) throw() {
+	std::ostringstream s;
+	dump_location(location, s);
+	s << '\n' << message;
+	log(level, s.str());
+}
 
 void logger::log(int const level, std::string const & string) throw() {
 	#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7
@@ -44,15 +68,8 @@ namespace loggers {
 
 	stream_logger::stream_logger(std::ostream & ostream) : ostream_(ostream) {}
 
-	///\internal
-	#define UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__DETAIL__LOCATION_MARK__START "\033[34m# "
-	///\internal
-	#define UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__DETAIL__LOCATION_MARK__END   "\033[0m"
-
 	// [bohan] msvc-7.1 crashes if we put this function in the implementation file instead of inlined in the header.
 	void stream_logger::do_log(int const level, std::string const & string) throw() {
-		// Here we assume we have an ansi terminal if the TERM env var is defined.
-		bool const ansi_terminal(std::getenv("TERM"));
 		int const static color [] = {0, 2, 6, 1, 5, 3, 4, 7};
 		try {
 			if(ansi_terminal) ostream() << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m" << string << '\n';
@@ -60,11 +77,16 @@ namespace loggers {
 		} catch(...) {
 			// oh dear!
 			// report the error to std::cerr ...
-			if(ansi_terminal) std::cerr << UNIVERSALIS__COMPILER__LOCATION << "\033[1;31mlogger crashed!\033[0m" << std::endl;
-			else std::cerr << UNIVERSALIS__COMPILER__LOCATION << "logger crashed!" << std::endl;
+			dump_location(UNIVERSALIS__COMPILER__LOCATION, std::cerr);
+			if(ansi_terminal) std::cerr << "\033[1;31m";
+			std::cerr << "logger crashed!";
+			if(ansi_terminal) std::cerr << "\033[0m";
+			std::cerr << std::endl;
+			
 			// ... and fallback to std::clog
-			if(ansi_terminal) std::clog << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m" << string << '\n';
-			else std::clog << "logger: " << level << ": " << string << '\n';
+			if(ansi_terminal) std::clog << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m";
+			else std::clog << "logger: " << level << ": ";
+			std::clog << string << '\n';
 		}
 	}
 }}}
