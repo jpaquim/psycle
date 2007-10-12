@@ -217,7 +217,7 @@ namespace psycle
 						}
 						// This is a safe measure against some plugins that have noise at its output for some
 						// unexplained reason ( example : mda piano.dd )
-						//Work(STREAM_SIZE);
+						Work(STREAM_SIZE);
 					}
 					else
 					{
