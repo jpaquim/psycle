@@ -316,7 +316,7 @@ namespace universalis
 				{
 					// oh dear!
 					// fallback to std::cerr and std::clog
-					std::cerr << UNIVERSALIS__COMPILER__LOCATION << ": no standard output." << std::endl;
+					std::cerr << /* UNIVERSALIS__COMPILER__LOCATION << ": " */ "no standard output." << std::endl;
 					std::clog << "logger: " << logger_level << ": " << string;
 				}
 				::WORD const base_attributes(BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY);
