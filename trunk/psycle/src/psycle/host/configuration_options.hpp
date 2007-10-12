@@ -21,6 +21,7 @@
 	"compiler build tool chain = " PSYCLE__COMPILER__BUILD EOL \
 	"fpu exceptions = " UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__FPU_EXCEPTIONS) EOL \
 	"volume column = " UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__VOLUME_COLUMN) EOL \
+	"rms vu = " UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__RMS_VUS) EOL \
 	"debugging = " PSYCLE__CONFIGURATION__DEBUG
 
 /// value to show in the string describing the configuration of the build.

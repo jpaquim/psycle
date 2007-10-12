@@ -432,8 +432,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						"Loser\t\t( http://loser.asseca.com/ )" "\r\n"
 						"E-phonic\t\t( http://www.e-phonic.com/ )" "\r\n"
 						"Argu\t\t( http://www.aodix.com/ )" "\r\n"
-						"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )
-
+						"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 					);
 			m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
 

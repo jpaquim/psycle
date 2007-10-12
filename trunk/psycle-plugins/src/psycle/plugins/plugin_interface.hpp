@@ -213,7 +213,7 @@ namespace psycle
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					void \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE(::CMachineInterface & plugin) { delete &plugin; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE(psycle::plugin_interface::CMachineInterface & plugin) { delete &plugin; } \
 				}
 
 			#define PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO GetInfo
