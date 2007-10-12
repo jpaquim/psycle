@@ -94,14 +94,17 @@ namespace psycle
 							template<typename E> void rethrow                  (universalis::compiler::location const & location,              E const * const e, std::exception const * const standard) const throw(function_error)
 							{
 								std::ostringstream s;
-								s	<< "An exception occured in function '" << location << "'." << std::endl;
-								if (e)
-								{
-									s	<< universalis::compiler::typenameof(*e) << std::endl
+								s
+									<< "An exception occured in"
+									<< " module: " << location.module()
+									<< ", function: " << location.function()
+									<< ", file: " << location.file() << ':' << location.line()
+									<< '\n';
+								if(e) {
+									s
+										<< "exception type: " << universalis::compiler::typenameof(*e) << '\n'
 										<< universalis::exceptions::string(*e);
-								}
-								else
-								{
+								} else {
 									s << universalis::compiler::exceptions::ellipsis();
 								}
 								function_error const f_error(s.str(), standard);
