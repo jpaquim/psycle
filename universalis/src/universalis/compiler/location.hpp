@@ -1,9 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-///\file
-///\interface universalis::operating_system::loggers
+///\interface universalis::operating_system::location
 #pragma once
 #include <universalis/compiler/stringized.hpp>
 #include <iostream>
@@ -12,8 +10,8 @@
 #include <vector>
 #include <algorithm>
 #if !defined DIVERSALIS__COMPILER__GNU
-	// only gcc is able to include the name of the current class implicitly
-	// see UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION and UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
+	// Only gcc is able to include the name of the current class implicitly with __PRETTY_FUNCTION__.
+	// We can use rtti support on other compilers.
 	#include <universalis/compiler/typenameof.hpp>
 	#include <boost/current_function.hpp>
 #endif
@@ -21,31 +19,21 @@
 	#include <packageneric/module.private.hpp>
 #endif
 
-//#region UNIVERSALIS
-	//#region COMPILER
-
-		/// location of current line of the source, within a class.
-		#define UNIVERSALIS__COMPILER__LOCATION \
-			universalis::compiler::location( \
-				UNIVERSALIS__COMPILER__LOCATION__DETAIL(UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION) \
-			)
-
-		/// location of current line of the source, outside of any class.
-		#define UNIVERSALIS__COMPILER__LOCATION__NO_CLASS \
-			universalis::compiler::location( \
-				UNIVERSALIS__COMPILER__LOCATION__DETAIL(UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS) \
-			)
-
-	//#endregion
-//#endregion
-
-
-
-/*********************************************************************************************************/
-// implementation
-
 namespace universalis { namespace compiler {
 
+/// location of current line of the source, within a class.
+#define UNIVERSALIS__COMPILER__LOCATION \
+	universalis::compiler::location( \
+		UNIVERSALIS__COMPILER__LOCATION__DETAIL(UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION) \
+	)
+
+/// location of current line of the source, outside of any class.
+#define UNIVERSALIS__COMPILER__LOCATION__NO_CLASS \
+	universalis::compiler::location( \
+		UNIVERSALIS__COMPILER__LOCATION__DETAIL(UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS) \
+	)
+
+/// location of the source.
 class location {
 	public:
 		location(
@@ -70,9 +58,15 @@ class location {
 	public:  std::string const & file() const throw() { return file_; }
 	private: std::string const   file_;
 
-	public:  unsigned int const & line() const throw() { return line_; }
-	private: unsigned int const   line_;
+	public:  unsigned int       line() const throw() { return line_; }
+	private: unsigned int const line_;
 };
+}}
+
+
+
+/*********************************************************************************************************/
+// implementation details
 
 #if \
 	defined PACKAGENERIC__MODULE__NAME && \
@@ -103,10 +97,10 @@ class location {
 	// so we use the same definition in both cases
 	
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
-		__PRETTY_FUNCTION__ //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
+		__PRETTY_FUNCTION__
 
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS \
-		__PRETTY_FUNCTION__ //\todo use direct stringizaton ; report this to boost authors (__PRETTY_FUNCTION__ is a char[] var)
+		__PRETTY_FUNCTION__
 
 #else
 	// include the name of the current class explicitly using rtti on the "this" pointer
@@ -116,5 +110,4 @@ class location {
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  \
 		BOOST_CURRENT_FUNCTION
 #endif
-}}
 
