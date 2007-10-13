@@ -6,32 +6,25 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <psycle/engine/forward_declarations.hpp>
-namespace psycle
-{
-	namespace front_ends
-	{
-		namespace gui
-		{
-			class graph;
-			class node;
-			class port;
-			namespace ports
-			{
-				class output;
-				class input;
-				namespace inputs
-				{
-					class single;
-					class multiple;
-				}
-			}
-			namespace underlying = engine;
+namespace psycle { namespace front_ends { namespace gui {
 
-			namespace typenames
-			{
-				using namespace gui;
-				class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
-			}
+	class graph;
+	class node;
+	class port;
+	namespace ports {
+		class output;
+		class input;
+		namespace inputs {
+			class single;
+			class multiple;
 		}
 	}
-}
+
+	namespace underlying = engine;
+
+	namespace typenames {
+		using namespace gui;
+		class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
+	}
+}}}
+

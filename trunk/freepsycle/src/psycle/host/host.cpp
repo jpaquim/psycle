@@ -6,16 +6,8 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
-#include <psycle/engine/hello.hpp>
 #include "host.hpp"
-namespace psycle
-{
-	namespace host
-	{
-		void hello()
-		{
-			engine::hello hello;
-			hello.say_hello();
-		}
-	}
-}
+namespace psycle { namespace host {
+
+}}
+
