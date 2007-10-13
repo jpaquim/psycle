@@ -7,7 +7,6 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <universalis/operating_system/loggers.hpp>
-#include "hello.hpp"
 #include "forward_declarations.hpp"
 #include "exception.hpp"
 #include "reference_counter.hpp"

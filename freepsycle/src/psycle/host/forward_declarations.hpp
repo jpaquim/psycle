@@ -9,30 +9,29 @@
 ///\see file host.hpp to #include the real declarations
 #pragma once
 #include <psycle/engine/forward_declarations.hpp>
-namespace psycle
-{
-	namespace host
-	{
-		namespace underlying = engine;
+namespace psycle {
 
-		class graph;
-		class node;
-		class port;
-		namespace ports
-		{
-			class output;
-			class input;
-			namespace inputs
-			{
-				class single;
-				class multiple;
-			}
-		}
+/// functionalities used by the host side only, not by the plugins.
+namespace host {
+	namespace underlying = engine;
 
-		namespace typenames
-		{
-			using namespace host;
-			class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
+	class graph;
+	class node;
+	class port;
+	namespace ports {
+		class output;
+		class input;
+		namespace inputs {
+			class single;
+			class multiple;
 		}
 	}
+
+	namespace typenames {
+		using namespace host;
+		class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
+	}
 }
+
+}
+

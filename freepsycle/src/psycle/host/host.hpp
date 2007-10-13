@@ -9,12 +9,8 @@
 #include "schedulers/single_threaded.hpp"
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST__HOST
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace psycle
-{
-	/// functionalities used by the host side only, not by the plugins.
-	namespace host
-	{
-		namespace underlying = engine;
-	}
-}
+namespace psycle { namespace host {
+
+}}
 #include <universalis/compiler/dynamic_link/end.hpp>
+
