@@ -1,10 +1,16 @@
 # This is a sorted list, top priority at the top!
 
 *	generic::wrappers::node find port by name functions
+	-- bohan
 
-*	try to use liboil for optimizations.
+*	merge engine::sample::math with psycle-helpers
+	-- bohan
 
 *	PulseAudio, RTAudio, libao.
+	Implement direct support for pulseaudio (currently works only via gstreamer).
+	-- bohan
+
+*	try to use liboil for optimizations.
 
 *	Remember to update the TODO file.
 	-- bohan
