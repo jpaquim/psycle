@@ -32,7 +32,7 @@ namespace universalis
 							#endif
 
 			public:
-				char const UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES * what() const throw();
+				char const * what() const throw() /*override*/;
 		};
 	}
 }

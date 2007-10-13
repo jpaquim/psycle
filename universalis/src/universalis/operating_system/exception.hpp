@@ -24,7 +24,7 @@ namespace universalis
 				int const          code_;
 
 			public:
-				char const UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES * what() const throw();
+				char const * what() const throw() /*override*/;
 			protected:
 				std::string const mutable                            * what_;
 		};
