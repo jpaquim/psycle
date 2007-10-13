@@ -16,8 +16,8 @@ namespace psycle { namespace plugins {
 			void frequency(real const & frequency) { this->step_ = frequency * frequency_to_step_; }
 			real frequency() const { return frequency_to_step_ / step_; }
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES seconds_per_event_change_notification_from_port(engine::port const &);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
+			void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
+			void do_process() throw(engine::exception) /*override*/;
 		private:
 			void do_process_const_frequency() throw(engine::exception);
 			void do_process_const_phase() throw(engine::exception);

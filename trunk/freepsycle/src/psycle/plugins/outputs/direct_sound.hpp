@@ -47,14 +47,14 @@ namespace psycle { namespace plugins { namespace outputs {
 		protected: friend class virtual_factory_access;
 			direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::operating_system::exception);
 		public:
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened()  const;
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
+			bool opened()  const /*override*/;
+			bool started() const /*override*/;
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open()    throw(universalis::operating_system::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start()   throw(universalis::operating_system::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(universalis::operating_system::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop()    throw(universalis::operating_system::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close()   throw(universalis::operating_system::exception);
+			void do_open()    throw(universalis::operating_system::exception) /*override*/;
+			void do_start()   throw(universalis::operating_system::exception) /*override*/;
+			void do_process() throw(universalis::operating_system::exception) /*override*/;
+			void do_stop()    throw(universalis::operating_system::exception) /*override*/;
+			void do_close()   throw(universalis::operating_system::exception) /*override*/;
 		private:
 			::IDirectSound        * direct_sound_;
 			::IDirectSound inline & direct_sound_implementation() throw() { assert(direct_sound_); return *direct_sound_; }

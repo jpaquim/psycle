@@ -110,14 +110,14 @@ class node
 			new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
 		}
 
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction() {
+		void after_construction() /*override*/ {
 			if(loggers::trace()()) {
 				loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
 			}
 			this->parent().new_node_signal()(*this);
 		}
 
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction() {
+		void before_destruction() /*override*/ {
 			delete_signal()(*this);
 		}
 
@@ -237,11 +237,11 @@ namespace ports {
 
 			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction() {
+			void after_construction() /*override*/ {
 				this->parent().new_output_port_signal()(*this);
 			}
 
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction() {
+			void before_destruction() /*override*/ {
 				disconnect_all();
 			}
 
@@ -317,7 +317,7 @@ namespace ports {
 
 			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(input, input::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction() {
+			void before_destruction() /*override*/ {
 				disconnect_all();
 			}
 
@@ -372,7 +372,7 @@ namespace ports {
 					BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 				#undef constructor
 
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction() {
+				void after_construction() /*override*/ {
 					this->parent().new_single_input_port_signal()(*this);
 				}
 
@@ -387,12 +387,12 @@ namespace ports {
 			///\name (dis)connection functions
 			///\{
 				public:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES disconnect_all() {
+					void disconnect_all() /*override*/ {
 						if(output_port_) disconnect(*output_port_);
 					}
 				
 				protected:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES connect_internal_side(typename Typenames::ports::output & output_port) {
+					void connect_internal_side(typename Typenames::ports::output & output_port) /*override*/ {
 						if(&output_port == this->output_port_) {
 							if(loggers::warning()()) {
 								std::ostringstream s;
@@ -403,7 +403,7 @@ namespace ports {
 						}
 						this->output_port_ = &output_port;
 					}
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES disconnect_internal_side(typename Typenames::ports::output & output_port) {
+					void disconnect_internal_side(typename Typenames::ports::output & output_port) /*override*/ {
 						if(&output_port != this->output_port_) {
 							if(loggers::warning()()) {
 								std::ostringstream s;
@@ -431,7 +431,7 @@ namespace ports {
 
 				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(multiple, multiple::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction() {
+				void after_construction() /*override*/ {
 					this->parent().new_multiple_input_port_signal()(*this);
 				}
 				
@@ -452,11 +452,11 @@ namespace ports {
 			///\name (dis)connection functions
 			///\{
 				public:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES disconnect_all() {
+					void disconnect_all() /*override*/ {
 						while(!output_ports_.empty()) disconnect(*output_ports_.back());
 					}
 				protected:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES connect_internal_side(typename Typenames::ports::output & output_port) {
+					void connect_internal_side(typename Typenames::ports::output & output_port) /*override*/ {
 						typename output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
 						if(i != output_ports_.end()) {
 							if(loggers::warning()()) {
@@ -468,7 +468,7 @@ namespace ports {
 						}
 						output_ports_.push_back(&output_port);
 					}
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES disconnect_internal_side(typename Typenames::ports::output & output_port) {
+					void disconnect_internal_side(typename Typenames::ports::output & output_port) /*override*/ {
 						typename output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
 						if(i == output_ports_.end()) {
 							if(loggers::warning()()) {

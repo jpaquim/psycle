@@ -91,7 +91,7 @@ namespace psycle
 		{
 			protected: friend class virtual_factory_access;
 				node(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
+				void after_construction() /*override*/;
 				
 			/*
 			private:

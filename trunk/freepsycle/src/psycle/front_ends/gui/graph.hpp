@@ -36,7 +36,7 @@ namespace psycle { namespace front_ends { namespace gui {
 			canvas(graph &);
 
 		protected:
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+			bool on_event(GdkEvent *) /*override*/;
 
 		private:
 			Gnome::Canvas::Group group_;
@@ -94,7 +94,7 @@ namespace psycle { namespace front_ends { namespace gui {
 			inline operator Gnome::Canvas::Group & () throw() { return *canvas_instance().root(); }
 			inline operator Gnome::Canvas::Group * () throw() { return canvas_instance().root(); }
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_size_allocate(Gtk::Allocation & allocation);
+			void on_size_allocate(Gtk::Allocation & allocation) /*override*/;
 			void on_zoom();
 		private:
 			canvas canvas_;
@@ -129,7 +129,7 @@ namespace psycle { namespace front_ends { namespace gui {
 			Gnome::Canvas::Line line_;
 
 		protected:
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+			bool on_event(GdkEvent *) /*override*/;
 			void on_select(contraption &);
 			void on_move(contraption &);
 	};
@@ -162,7 +162,7 @@ namespace psycle { namespace front_ends { namespace gui {
 		protected: friend class virtual_factory_access;
 			//node(parent_type & parent, underlying_type & underlying);
 			node(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
+			void after_construction() /*override*/;
 			
 		public: // protected:
 			~node() throw() {}
@@ -175,7 +175,7 @@ namespace psycle { namespace front_ends { namespace gui {
 			//typenames::contraption contraption_;
 		
 		protected:
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+			bool on_event(GdkEvent *) /*override*/;
 	};
 
 }}}

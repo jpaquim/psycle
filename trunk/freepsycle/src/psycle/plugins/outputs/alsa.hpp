@@ -18,14 +18,14 @@ namespace psycle { namespace plugins { namespace outputs {
 			alsa(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 			virtual ~alsa() throw();
 		public:
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened() const;
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
+			bool opened() const /*override*/;
+			bool started() const /*override*/;
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open() throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start() throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop() throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close() throw(engine::exception);
+			void do_open() throw(engine::exception) /*override*/;
+			void do_start() throw(engine::exception) /*override*/;
+			void do_process() throw(engine::exception) /*override*/;
+			void do_stop() throw(engine::exception) /*override*/;
+			void do_close() throw(engine::exception) /*override*/;
 		private:
 			std::string pcm_name_;
 			::snd_pcm_hw_params_t * pcm_hw_params_;

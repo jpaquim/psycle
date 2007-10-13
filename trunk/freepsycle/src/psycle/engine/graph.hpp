@@ -159,12 +159,12 @@ namespace psycle { namespace engine {
 				virtual ~output();
 
 			protected:
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_buffer(engine::buffer * const);
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_channels() throw(exception);
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_seconds_per_event();
+				void do_buffer(engine::buffer * const) /*override*/;
+				void do_propagate_channels() throw(exception) /*override*/;
+				void do_propagate_seconds_per_event() /*override*/;
 
 			public:
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES dump(std::ostream &, std::size_t tabulations = 0) const;
+				void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 		};
 		
 		/**********************************************************************************************************************/
@@ -181,7 +181,7 @@ namespace psycle { namespace engine {
 				void disconnect(typenames::ports::output &);
 
 			public:
-				void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES dump(std::ostream &, std::size_t tabulations = 0) const = 0;
+				void dump(std::ostream &, std::size_t tabulations = 0) const = 0 /*override*/;
 		};
 		
 		namespace inputs {
@@ -196,11 +196,11 @@ namespace psycle { namespace engine {
 					virtual ~single();
 
 				protected:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_channels() throw(exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_seconds_per_event();
+					void do_propagate_channels() throw(exception) /*override*/;
+					void do_propagate_seconds_per_event() /*override*/;
 
 				public:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES dump(std::ostream &, std::size_t tabulations = 0) const;
+					void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 			};
 
 			/**********************************************************************************************************************/
@@ -214,8 +214,8 @@ namespace psycle { namespace engine {
 					virtual ~multiple();
 
 				protected:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_channels() throw(exception);
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_propagate_seconds_per_event();
+					void do_propagate_channels() throw(exception) /*override*/;
+					void do_propagate_seconds_per_event() /*override*/;
 
 				public:
 					bool inline const & single_connection_is_identity_transform() const throw() { return single_connection_is_identity_transform_; }
@@ -223,7 +223,7 @@ namespace psycle { namespace engine {
 					bool                single_connection_is_identity_transform_;
 
 				public:
-					void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES dump(std::ostream &, std::size_t tabulations = 0) const;
+					void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 			};
 		}
 	}
@@ -241,7 +241,7 @@ namespace psycle { namespace engine {
 		protected: friend class virtual_factory_access;
 			node(typenames::plugin_library_reference &, parent_type &, name_type const &);
 
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES before_destruction() {
+			void before_destruction() /*override*/ {
 				typenames::typenames::bases::node::before_destruction();
 				close();
 			}

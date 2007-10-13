@@ -39,7 +39,7 @@ namespace psycle { namespace host {
 					std::string          full_name() const throw();
 					std::string const & short_name() const throw() { return plugin_library_reference::name(); }
 				protected:
-					UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES unsigned int operator--() throw();
+					unsigned int operator--() throw() /*override*/;
 				private:
 					plugin_resolver & plugin_resolver_;
 					/// note: if aggregated directly without reference, on object destruction, we get "Inconsistency detected by ld.so: dl-close.c: 627: _dl_close: Assertion `map->l_init_called' failed!"

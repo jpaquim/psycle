@@ -14,7 +14,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger : public universalis::operating
 	public:
 		logger(std::ostream & ostream) : universalis::operating_system::loggers::stream_logger(ostream) {}
 	protected:
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDE do_log(int const level, std::string const & string) throw();
+		void do_log(int const level, std::string const & string) throw() /*override*/;
 };
 
 }
