@@ -45,21 +45,22 @@ class buffer : public underlying::buffer {
 		virtual ~buffer() throw();
 		/// convertible to std::size_t
 		///\returns the reference count.
-		inline operator std::size_t () const throw() { return reference_count_; }
+		operator std::size_t () const throw() { return reference_count_; }
 		/// increments the reference count.
-		inline buffer & operator+=(std::size_t more) throw() { reference_count_ += more; return *this; }
+		buffer & operator+=(std::size_t more) throw() { reference_count_ += more; return *this; }
 		/// decrements the reference count by 1.
-		inline buffer & operator--() throw() { assert(*this > 0); --reference_count_; return *this; }
+		buffer & operator--() throw() { assert(*this > 0); --reference_count_; return *this; }
 	private:
 		std::size_t reference_count_;
 };
 
 /**********************************************************************************************************************/
+// graph
 typedef generic::wrappers::graph<typenames::typenames> graph_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 	protected: friend class virtual_factory_access;
 		graph(underlying_type &);
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction();
+		void after_construction() /*override*/;
 
 	///\name signal slots
 	///\{
@@ -69,6 +70,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 };
 
 /**********************************************************************************************************************/
+// port
 typedef generic::wrappers::port<typenames::typenames> port_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
 	protected: friend class virtual_factory_access;
@@ -78,15 +80,16 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
 	///\{
 		public:
 			/// assigns a buffer to this port (or unassigns if 0) only if the given buffer is different.
-			void inline buffer(typenames::buffer * const buffer) { underlying().buffer(buffer); }
+			void buffer(typenames::buffer * const buffer) { underlying().buffer(buffer); }
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
-			typenames::buffer inline & buffer() const throw() { return static_cast<typenames::buffer &>(underlying().buffer()); }
+			typenames::buffer & buffer() const throw() { return static_cast<typenames::buffer &>(underlying().buffer()); }
 	///\}
 };
 
 namespace ports {
 
 	/**********************************************************************************************************************/
+	// output
 	typedef generic::wrappers::ports::output<typenames::typenames> output_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 		protected: friend class virtual_factory_access;
@@ -94,21 +97,22 @@ namespace ports {
 		
 		///\name schedule
 		///\{
-			public:  std::size_t inline input_port_count() const throw() { return input_port_count_; }
-			private: std::size_t        input_port_count_;
+			public:  std::size_t input_port_count() const throw() { return input_port_count_; }
+			private: std::size_t input_port_count_;
 
 			public:
 				/// convertible to std::size_t
 				///\returns the reference count.
-				inline operator std::size_t () const throw() { return input_ports_remaining_; }
-				output inline & operator--() throw() { assert(*this > 0); --input_ports_remaining_; return *this; }
-				void inline reset() throw() { input_ports_remaining_ = input_port_count(); }
+				operator std::size_t () const throw() { return input_ports_remaining_; }
+				output & operator--() throw() { assert(*this > 0); --input_ports_remaining_; return *this; }
+				void reset() throw() { input_ports_remaining_ = input_port_count(); }
 			private:
 				std::size_t input_ports_remaining_;
 		///\}
 	};
 
 	/**********************************************************************************************************************/
+	// input
 	typedef generic::wrappers::ports::input<typenames::typenames> input_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base {
 		protected: friend class virtual_factory_access;
@@ -118,6 +122,7 @@ namespace ports {
 	namespace inputs {
 
 		/**********************************************************************************************************************/
+		// single
 		typedef generic::wrappers::ports::inputs::single<typenames::typenames> single_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base {
 			protected: friend class virtual_factory_access;
@@ -125,6 +130,7 @@ namespace ports {
 		};
 
 		/**********************************************************************************************************************/
+		// multiple
 		typedef generic::wrappers::ports::inputs::multiple<typenames::typenames> multiple_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base {
 			protected: friend class virtual_factory_access;
@@ -134,11 +140,12 @@ namespace ports {
 }
 
 /**********************************************************************************************************************/
+// node
 typedef generic::wrappers::node<typenames::typenames> node_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	protected: friend class virtual_factory_access;
 		node(parent_type &, underlying_type &);
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction(); friend class graph; // init code moved to graph since it deals with connections
+		void after_construction() /*override*/; friend class graph; // init code moved to graph since it deals with connections
 		
 	///\name signal slots
 	///\{
@@ -150,17 +157,17 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	
 	///\name schedule
 	///\{
-		public:  ports::output inline & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
-		private: ports::output        * multiple_input_port_first_output_port_to_process_;
+		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
+		private: ports::output * multiple_input_port_first_output_port_to_process_;
 
-		public:  std::size_t inline output_port_count() const throw() { return output_port_count_; }
-		private: std::size_t        output_port_count_;
+		public:  std::size_t output_port_count() const throw() { return output_port_count_; }
+		private: std::size_t output_port_count_;
 		
-		public:  void inline UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES reset() throw() { assert(processed()); processed(false); underlying().reset(); }
-		public:  void inline mark_as_processed() throw() { processed(true); }
-		public:  void inline         processed(bool processed) throw() { assert(this->processed() != processed); this->processed_ = processed; assert(this->processed() == processed); }
-		public:  bool inline const & processed() const throw() { return processed_; }
-		private: bool                processed_;
+		public:  void reset() throw() /*override*/ { assert(processed()); processed(false); underlying().reset(); }
+		public:  void mark_as_processed() throw() { processed(true); }
+		public:  void         processed(bool processed) throw() { assert(this->processed() != processed); this->processed_ = processed; assert(this->processed() == processed); }
+		public:  bool const & processed() const throw() { return processed_; }
+		private: bool         processed_;
 	///\}
 };
 
@@ -170,8 +177,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 	public:
 		scheduler(graph::underlying_type &) throw(std::exception);
 		virtual ~scheduler() throw();
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES start() throw(underlying::exception);
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES stop();
+		void start() throw(underlying::exception) /*override*/;
+		void stop() /*override*/;
 		void operator()();
 	private:
 		/// Flyweight pattern [Gamma95].
@@ -181,7 +188,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 				buffer_pool(std::size_t channels, std::size_t events) throw(std::exception);
 				virtual ~buffer_pool() throw();
 				/// gets a buffer from the pool.
-				buffer inline & operator()() {
+				buffer & operator()() {
 					if(false && loggers::trace()()) {
 						std::ostringstream s;
 						s << "buffer requested, pool size before: " << size();
@@ -194,7 +201,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 					return result;
 				}
 				/// recycles a buffer in the pool.
-				void inline operator()(buffer & buffer) {
+				void operator()(buffer & buffer) {
 					assert(&buffer);
 					assert("reference count is zero: " && !buffer);
 					assert(buffer.size() >= this->channels_);
@@ -209,7 +216,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 			private:
 				std::size_t channels_, events_;
 		} * buffer_pool_instance_;
-		buffer_pool inline & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
+		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		boost::thread * thread_;
 		boost::mutex mutable mutex_;
 		bool stop_requested_;
@@ -218,7 +225,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void process(node &);
 		void process_node_of_output_port_and_set_buffer_for_input_port(ports::output &, ports::input &);
 		void set_buffer_for_output_port(ports::output &, buffer &);
-		void set_buffers_for_all_output_ports_of_node_from_the_buffer_pool(node &);
+		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
 		void mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(ports::output &, ports::input &);
 		void check_whether_to_recycle_buffer_in_the_pool(ports::output &);
 		typedef std::list<node*> terminal_nodes_type;

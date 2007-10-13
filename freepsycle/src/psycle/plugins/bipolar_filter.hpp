@@ -20,10 +20,10 @@ namespace psycle { namespace plugins {
 		protected: friend class virtual_factory_access;
 			bipolar_filter(engine::plugin_library_reference &, engine::graph &, std::string const & name, real const & logical_zero);
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES channel_change_notification_from_port(engine::port const &) throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES seconds_per_event_change_notification_from_port(engine::port const &);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process_first() throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
+			void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
+			void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
+			void do_process_first() throw(engine::exception) /*override*/;
+			void do_process() throw(engine::exception) /*override*/;
 		private:
 			real logical_zero_;
 	};

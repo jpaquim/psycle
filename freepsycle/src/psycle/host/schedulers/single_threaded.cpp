@@ -30,8 +30,10 @@ void graph::after_construction() {
 			// find the output port which has the minimum number of connections.
 			{
 				std::size_t minimum_size(std::numeric_limits<std::size_t>::max());
-				ports::inputs::multiple::output_ports_type::const_iterator i(node.multiple_input_port()->output_ports().begin());
-				for( ; i != node.multiple_input_port()->output_ports().end() ; ++i) {
+				for(
+					ports::inputs::multiple::output_ports_type::const_iterator i(node.multiple_input_port()->output_ports().begin());
+					i != node.multiple_input_port()->output_ports().end() ; ++i
+				) {
 					ports::output & output_port(**i);
 					if(output_port.input_ports().size() < minimum_size) {
 						minimum_size = output_port.input_ports().size();
@@ -39,16 +41,15 @@ void graph::after_construction() {
 						if(minimum_size == 1) break; // it's already an ideal case, we can't find a better one.
 					}
 				}
-				assert(!node.multiple_input_port()->output_ports().size() || node.multiple_input_port_first_output_port_to_process_);
 			}
+			assert(!node.multiple_input_port()->output_ports().size() || node.multiple_input_port_first_output_port_to_process_);
 		}
 		// count the number of output ports that are connected.
-		for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
+		for(
+			typenames::node::output_ports_type::const_iterator i(node.output_ports().begin());
+			i != node.output_ports().end() ; ++i
+		) {
 			if((**i).input_ports().size()) ++node.output_port_count_;
-			if(false && loggers::trace()) {
-				std::ostringstream s;
-				loggers::trace()(s.str());
-			}
 		}
 	}
 }
@@ -119,8 +120,8 @@ scheduler::~scheduler() throw() {
 namespace {
 	class thread {
 		public:
-			inline thread(scheduler & scheduler) : scheduler_(scheduler) {}
-			void inline operator()() { scheduler_(); }
+			thread(scheduler & scheduler) : scheduler_(scheduler) {}
+			void operator()() { scheduler_(); }
 		private:
 			scheduler & scheduler_;
 	};
@@ -132,7 +133,7 @@ void scheduler::start() throw(engine::exception) {
 	}
 	if(thread_) {
 		if(loggers::information()()) {
-			loggers::information()("thread is already running", UNIVERSALIS__COMPILER__LOCATION);
+			loggers::information()("scheduler thread is already running", UNIVERSALIS__COMPILER__LOCATION);
 		}
 		return;
 	}
@@ -249,7 +250,6 @@ void scheduler::process_loop() {
 	try {
 		allocate();
 		while(!stop_requested()) {
-			//loggers::trace()("process loop", UNIVERSALIS__COMPILER__LOCATION);
 			boost::mutex::scoped_lock lock(graph().underlying().mutex());
 			for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 				node & node(**i);
@@ -284,7 +284,7 @@ void scheduler::process(node & node) {
 		}
 	}
 	if(!node.multiple_input_port()) { // the node has no multiple input port: simple case
-		set_buffers_for_all_output_ports_of_node_from_the_buffer_pool(node);
+		set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
 		node.underlying().process();
 	}
 	else if(node.multiple_input_port()->output_ports().size()) { // the node has a multiple input port: complex case
@@ -318,7 +318,7 @@ void scheduler::process(node & node) {
 					output_port.buffer().copy(node.multiple_input_port()->buffer(), node.multiple_input_port()->underlying().channels());
 				}
 			} else { // this is never the identity transform
-				set_buffers_for_all_output_ports_of_node_from_the_buffer_pool(node);
+				set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
 				node.underlying().process_first();
 			}
 			mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(first_output_port_to_process, *node.multiple_input_port());
@@ -362,7 +362,7 @@ void inline scheduler::process_node_of_output_port_and_set_buffer_for_input_port
 }
 
 /// set buffers for all output ports of the node from the buffer pool.
-void inline scheduler::set_buffers_for_all_output_ports_of_node_from_the_buffer_pool(node & node) {
+void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool(node & node) {
 	for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
 		ports::output & output_port(**i);
 		set_buffer_for_output_port(output_port, buffer_pool_instance()());
@@ -373,7 +373,7 @@ void inline scheduler::set_buffers_for_all_output_ports_of_node_from_the_buffer_
 void inline scheduler::set_buffer_for_output_port(ports::output & output_port, buffer & buffer) {
 	output_port.buffer(&buffer);
 	output_port.reset();
-	buffer += output_port;
+	buffer += output_port; // set the expected pending read count
 }
 
 /// decrements the remaining expected read count of the buffer and

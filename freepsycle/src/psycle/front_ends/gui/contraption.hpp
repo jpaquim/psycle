@@ -65,7 +65,7 @@ namespace psycle
 					private:
 						boost::signal<void (contraption &)> signal_enter_, signal_move_, signal_select_, signal_leave_;
 					protected:
-						bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES on_event(GdkEvent *);
+						bool on_event(GdkEvent *) /*override*/;
 				///\}
 
 				///\name dragging

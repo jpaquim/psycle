@@ -18,15 +18,15 @@ namespace psycle { namespace plugins { namespace outputs {
 		protected: friend class virtual_factory_access;
 			gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 		public:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_name(std::string const &);
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES opened()  const;
-			bool UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES started() const;
+			void do_name(std::string const &) /*override*/;
+			bool opened() const /*override*/;
+			bool started() const /*override*/;
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open()    throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start()   throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_process() throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop()    throw(engine::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close()   throw(engine::exception);
+			void do_open()    throw(engine::exception) /*override*/;
+			void do_start()   throw(engine::exception) /*override*/;
+			void do_process() throw(engine::exception) /*override*/;
+			void do_stop()    throw(engine::exception) /*override*/;
+			void do_close()   throw(engine::exception) /*override*/;
 		private:
 			::GstElement * pipeline_, * source_, * queue_, * caps_filter_, * sink_;
 

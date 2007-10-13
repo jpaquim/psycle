@@ -36,7 +36,7 @@ class graph
 			on_delete_connection_signal_connection = underlying.delete_connection_signal().connect(boost::bind(&graph::on_delete_connection, this, _1, _2));
 		}
 
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction() {
+		void after_construction() /*override*/ {
 			basic::graph<Typenames>::after_construction();
 			for(typename graph::underlying_type::const_iterator i(this->underlying().begin()) ; i != this->underlying().end() ; ++i) on_new_node(**i);
 			for(typename graph::const_iterator i(this->begin()) ; i != this->end() ; ++i) {
@@ -124,7 +124,7 @@ class node
 			on_delete_signal_connection                  = underlying.                 delete_signal().connect(boost::bind(&node::on_delete                 , this, _1));
 		}
 
-		void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES after_construction() {
+		void after_construction() /*override*/ {
 			basic::node<Typenames>::after_construction();
 			for(typename node::underlying_type::      output_ports_type::const_iterator i(this->underlying().      output_ports().begin()) ; i != this->underlying().      output_ports().end() ; ++i) on_new_output_port      (**i);
 			for(typename node::underlying_type::single_input_ports_type::const_iterator i(this->underlying().single_input_ports().begin()) ; i != this->underlying().single_input_ports().end() ; ++i) on_new_single_input_port(**i);

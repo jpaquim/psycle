@@ -14,10 +14,10 @@ namespace psycle { namespace plugins {
 		protected: friend class virtual_factory_access;
 			resource(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(std::exception);
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_open()  throw(std::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_start() throw(std::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_stop()  throw(std::exception);
-			void UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES do_close() throw(std::exception);
+			void do_open()  throw(std::exception) /*override*/;
+			void do_start() throw(std::exception) /*override*/;
+			void do_stop()  throw(std::exception) /*override*/;
+			void do_close() throw(std::exception) /*override*/;
 	};
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
