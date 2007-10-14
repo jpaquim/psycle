@@ -142,14 +142,18 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 				pSong=new Song;
 				pSong->New();
 				file.Seek(0);
-
+				int bpm = _global.player().bpm;
+				int lpb = _global.player().tpb;
 				pSong->Load(&file,false);
+				_global.player().SetBPM(bpm, lpb);
+
 				if (title) { sprintf(title,"%s - %s\0",pSong->author.c_str(),pSong->name.c_str()); }
 				if (length_in_ms)
 				{
 					*length_in_ms = CalcSongLength(pSong);
 				}
 //				file.Close(); <- load handles this
+				delete pSong;
 				return;
 			}
 			else if (strcmp(Header,"PSY2SONG")==0)
@@ -273,7 +277,6 @@ int play(char *fn)
 	_global._pSong->Load(&file);
 	file.Close(); //<- load handles this (but maybe nto always)
 	_global._pSong->fileName = fn;
-	_global.pPlayer->SetBPM(_global._pSong->BeatsPerMin(), _global._pSong->LinesPerBeat());
 	int val=64;
 	_global.pPlayer->Work(_global.pPlayer,val); // Some plugins don't like to receive data without making first a
 								// work call. (for example, Phantom)

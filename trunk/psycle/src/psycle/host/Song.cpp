@@ -1298,7 +1298,10 @@ namespace psycle
 								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
-							Global::pPlayer->SetBPM(m_BeatsPerMin,m_LinesPerBeat);
+							///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
+							/// It should be coded in some way to get this information from the loading song, since doing it here
+							/// is bad for the Winamp plugin (or any other multi-document situation).
+							Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
 						}
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
@@ -1605,7 +1608,11 @@ namespace psycle
 				}
 				// The old format assumes we output at 44100 samples/sec, so...
 				else m_LinesPerBeat = 44100 * 60 / (sampR * m_BeatsPerMin);
-				Global::pPlayer->SetBPM(m_BeatsPerMin,m_LinesPerBeat);
+
+				///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
+				/// It should be coded in some way to get this information from the loading song, since doing it here
+				/// is bad for the Winamp plugin (or any other multi-document situation).
+				Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
 //				Global::pPlayer->bpm = m_BeatsPerMin;
 //				Global::pPlayer->tpb = m_LinesPerBeat;
 //				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
