@@ -9,105 +9,93 @@
 #include "sine.hpp"
 namespace psycle { namespace plugins {
 
-	PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)
+PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)
 
-	sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
-	:
-		node(plugin_library_reference, graph, name),
-		phase_(0),
-		step_(0),
-		frequency_to_step_(0)
-	{
-		engine::ports::output::create_on_heap(*this, "out", boost::cref(1));
-		engine::ports::inputs::single::create_on_heap(*this, "frequency", boost::cref(1));
-		engine::ports::inputs::single::create_on_heap(*this, "phase", boost::cref(1));
+sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
+:
+	node(plugin_library_reference, graph, name),
+	phase_(0),
+	step_(0),
+	frequency_to_step_(0)
+{
+	engine::ports::output::create_on_heap(*this, "out", boost::cref(1));
+	engine::ports::inputs::single::create_on_heap(*this, "frequency", boost::cref(1));
+	engine::ports::inputs::single::create_on_heap(*this, "phase", boost::cref(1));
+}
+
+namespace {
+	namespace ports {
+		struct outputs { enum output {
+			out
+		}; };
+		struct inputs { enum input {
+			frequency,
+			phase
+		}; };
 	}
+}
 
-	namespace {
-		namespace ports {
-			struct outputs { enum output {
-				out
-			}; };
-			struct inputs { enum input {
-				frequency,
-				phase
-			}; };
-		}
-	}
+void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
+	if(&port == single_input_ports()[0]) output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+	else if(&port == output_ports()[0]) single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+	//real frequency(frequency_to_step_ ? step_ / frequency_to_step_ : 0);
+	frequency_to_step_ = 2 * engine::math::pi * port.seconds_per_event();
+	this->frequency(100);//frequency); \todo remove
+}
 
-	void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
-		if(&port == single_input_ports()[0]) output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-		else if(&port == output_ports()[0]) single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-		//sample frequency(frequency_to_step_ ? step_ / frequency_to_step_ : 0);
-		frequency_to_step_ = 2 * engine::math::pi * port.seconds_per_event();
-		this->frequency(100);//frequency); \todo remove
-	}
+const real todo(1.000001); // \todo remove
 
-	const real todo(1.00005); // \todo remove
+void sine::do_process() throw(engine::exception) {
+	if(!have_out()) return;
+	if(!have_frequency()) goto const_frequency;
+	if(!have_phase()) goto const_phase;
 	
-	void sine::do_process() throw(engine::exception) {
-		if(!single_input_ports()[0]->output_port()) { do_process_const_frequency(); return; }
-		engine::buffer::channel & frequency(single_input_ports()[0]->buffer()[0]);
-		if(!frequency.size()) { do_process_const_frequency(); return; }
-
-		if(!single_input_ports()[1]->output_port()) { do_process_const_phase(); return; }
-		engine::buffer::channel & phase(single_input_ports()[1]->buffer()[0]);
-		if(!phase.size()) { do_process_const_phase(); return; }
-
-		engine::buffer::channel & out(output_ports()[0]->buffer()[0]);
-		for(std::size_t frequency_event(0), phase_event(0), out_event(0) ; out_event < out.size() ; ++out_event) {
-			if(frequency_event < frequency.size() && frequency[frequency_event].index() == out_event)
-				this->frequency(frequency[frequency_event++].sample());
-			if(phase_event < phase.size() && phase[phase_event].index() == out_event)
-				this->phase_ = phase[phase_event++].sample();
-			out[out_event].index(out_event);
-			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
+	//none_const:
+		for(std::size_t frequency_event(0), phase_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
+			if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
+				this->frequency(frequency_channel()[frequency_event++].sample());
+			if(phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
+				this->phase_ = phase_channel()[phase_event++].sample();
+			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
 			step_ *= todo; // \todo remove
 		}
-		phase_ = std::fmod(phase_, 2 * engine::math::pi);
-	}
+	goto modulo;
 	
-	void sine::do_process_const_frequency() throw(engine::exception) {
-		if(!single_input_ports()[1]->output_port()) { do_process_const(); return; }
-		engine::buffer::channel & phase(single_input_ports()[1]->buffer()[0]);
-		if(!phase.size()) { do_process_const(); return; }
+	const_frequency:
+		if(!have_phase()) goto all_const;
 
-		engine::buffer::channel & out(output_ports()[0]->buffer()[0]);
-		for(std::size_t phase_event(0), out_event(0) ; out_event < out.size() ; ++out_event) {
-			if(phase_event < phase.size() && phase[phase_event].index() == out_event)
-				this->phase_ = phase[phase_event++].sample();
-			out[out_event].index(out_event);
-			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
+		for(std::size_t phase_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
+			if(phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
+				this->phase_ = phase_channel()[phase_event++].sample();
+			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
 			step_ *= todo; // \todo remove
 		}
-		phase_ = std::fmod(phase_, 2 * engine::math::pi);
-	}
-
-	void sine::do_process_const_phase() throw(engine::exception) {
-		engine::buffer::channel & frequency(single_input_ports()[0]->buffer()[0]);
-		engine::buffer::channel & out(output_ports()[0]->buffer()[0]);
-		for(std::size_t frequency_event(0), out_event(0) ; out_event < out.size() ; ++out_event) {
-			if(frequency_event < frequency.size() && frequency[frequency_event].index() == out_event)
-				this->frequency(frequency[frequency_event++].sample());
-			out[out_event].index(out_event);
-			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
+	goto modulo;
+	
+	const_phase: {
+		bool b = true;
+		for(std::size_t frequency_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
+			if(b && frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
+				this->frequency(frequency_channel()[frequency_event++].sample());
+			else b = false; ///\todo goto const loop
+			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
 			step_ *= todo; // \todo remove
 		}
-		phase_ = std::fmod(phase_, 2 * engine::math::pi);
 	}
-
-	void sine::do_process_const() throw(engine::exception) {
-		engine::buffer::channel & out(output_ports()[0]->buffer()[0]);
-		for(std::size_t out_event(0) ; out_event < out.size() ; ++out_event) {
-			out[out_event].index(out_event);
-			out[out_event].sample(0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
+	goto modulo;
+		
+	all_const:
+		for(std::size_t out_event(0) ; out_event < out_channel().size() ; ++out_event) {
+			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
 			step_ *= todo; // \todo remove
 		}
-		phase_ = std::fmod(phase_, 2 * engine::math::pi);
-	}
+	
+	modulo: phase_ = std::fmod(phase_, 2 * engine::math::pi);
+}
+
 }}
 

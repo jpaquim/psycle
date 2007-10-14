@@ -195,6 +195,11 @@ class plugin_uniform_module(uniform_module):
 			*args, **kw
 		)
 	
+pulse_plugin_module = plugin_uniform_module(
+	name = 'pulse',
+	description = 'pulse plugin',
+)
+
 sine_plugin_module = plugin_uniform_module(
 	name = 'sine',
 	description = 'sine plugin'

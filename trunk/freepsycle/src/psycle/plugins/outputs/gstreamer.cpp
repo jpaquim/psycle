@@ -374,10 +374,11 @@ namespace psycle { namespace plugins { namespace outputs {
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		{
+			if(!single_input_ports()[0]->output_port()) return;
 			engine::buffer::channel & in(single_input_ports()[0]->buffer()[0]);
 			assert(samples_per_buffer_ == in.size());
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer_);
-			for(std::size_t event(0) ; event < in.size(); ++event) {
+			for(std::size_t event(0); event < in.size(); ++event) {
 				real sample(in[event].sample());
 				sample *= std::numeric_limits<output_sample_type>::max();
 				if     (sample < std::numeric_limits<output_sample_type>::min()) sample = std::numeric_limits<output_sample_type>::min();
