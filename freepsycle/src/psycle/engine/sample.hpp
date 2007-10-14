@@ -57,6 +57,19 @@ namespace math {
 		output += max / 2;
 		assert(min <= output and output <= max);
 	}
+
+	/// compile-time factorial.
+	template<int i>
+	struct compile_time_factorial {
+		unsigned int const static value = i * compile_time_factorial<i - 1>::value;
+		BOOST_STATIC_ASSERT(value > 0); // makes constant overflows errors, not just warnings
+	};
+	///\internal template specialisation for compile-time factorial of 0.
+	template<> struct compile_time_factorial<0> { unsigned int const static value = 1; };
+
+	/// compares two floating point numbers for rough equality (difference less than epsilon).
+	template<typename Real>
+	bool roughly_equals(Real const & a, Real const & b) { return std::abs(a - b) < std::numeric_limits<Real>::epsilon(); }
 }
 
 /// double (64-bit ieee-754 format) by default.
@@ -79,17 +92,6 @@ namespace math {
 	real const degree = radian * pi / 180;
 	template real inline deci_bell_to_linear<real>(real const &);
 	template real inline linear_to_deci_bell<real>(real const &);
-
-	template<int i>
-	struct compile_time_factorial {
-		int const static value = i * compile_time_factorial<i - 1>::value;
-		BOOST_STATIC_ASSERT(value > 0); // makes constant overflows errors, not just warnings
-	};
-
-	template<>
-	struct compile_time_factorial<0> {
-		int const static value = 1;
-	};
 }
 
 namespace vst {

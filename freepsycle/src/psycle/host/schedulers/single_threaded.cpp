@@ -81,10 +81,12 @@ void node::on_new_multiple_input_port(typenames::ports::inputs::multiple & multi
 
 /**********************************************************************************************************************/
 // port
-
 port::port(port::parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
 
 namespace ports {
+
+	/**********************************************************************************************************************/
+	// output
 	output::output(output::parent_type & parent, output::underlying_type & underlying)
 	:
 		output_base(parent, underlying),
@@ -93,10 +95,18 @@ namespace ports {
 		reset();
 	}
 	
+	/**********************************************************************************************************************/
+	// input
 	input::input(input::parent_type & parent, input::underlying_type & underlying) : input_base(parent, underlying) {}
 	
 	namespace inputs {
+
+		/**********************************************************************************************************************/
+		// single
 		single::single(single::parent_type & parent, single::underlying_type & underlying) : single_base(parent, underlying) {}
+
+		/**********************************************************************************************************************/
+		// multiple
 		multiple::multiple(multiple::parent_type & parent, multiple::underlying_type & underlying) : multiple_base(parent, underlying) {}
 	}
 }
@@ -306,7 +316,7 @@ void scheduler::process(node & node) {
 					}
 					// copy pointer of input buffer to pointer of output buffer
 					set_buffer_for_output_port(output_port, node.multiple_input_port()->buffer());
-				} else { // we have several inputs, so, this cannot by the identity transform, i.e., the buffer would be modified. but its content must be preserved for further reading
+				} else { // we have several inputs, so, this cannot be the identity transform, i.e., the buffer would be modified. but its content must be preserved for further reading
 					// get buffer for output port
 					set_buffer_for_output_port(output_port, buffer_pool_instance()());
 					// copy content of input buffer to output buffer
@@ -365,14 +375,15 @@ void inline scheduler::process_node_of_output_port_and_set_buffer_for_input_port
 void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool(node & node) {
 	for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
 		ports::output & output_port(**i);
-		set_buffer_for_output_port(output_port, buffer_pool_instance()());
+		// we don't need to check since we don't get here in this case: if(output_port.input_ports().size())
+			set_buffer_for_output_port(output_port, buffer_pool_instance()());
 	}
 }
 
 /// sets a buffer for the output port
 void inline scheduler::set_buffer_for_output_port(ports::output & output_port, buffer & buffer) {
 	output_port.buffer(&buffer);
-	output_port.reset();
+	output_port.reset(); // reset the remaining input port count
 	buffer += output_port; // set the expected pending read count
 }
 

@@ -9,6 +9,7 @@
 #include "main.hpp"
 #include <psycle/paths.hpp>
 #include <psycle/engine/engine.hpp>
+#include <psycle/plugins/pulse.hpp>
 #include <psycle/host/host.hpp>
 #include <universalis/processor/exception.hpp>
 #include <universalis/operating_system/loggers.hpp>
@@ -53,15 +54,27 @@ void stuff() {
 			host::plugin_resolver & resolver(*new host::plugin_resolver);
 			graph & graph(engine::graph::create_on_heap("graph"));
 		#endif
+
+		node & out(resolver("output", graph, "out"));
+		//node & additioner(resolver("additioner", graph, "+"));
+		//node & multiplier(resolver("multiplier", graph, "*"));
+
 		node & sine1(resolver("sine", graph, "sine1"));
 		node & sine2(resolver("sine", graph, "sine2"));
 		node & sine3(resolver("sine", graph, "sine3"));
-		node & multiplier(resolver("multiplier", graph, "*"));
-		node & additioner(resolver("additioner", graph, "+"));
-		node & out(resolver("output", graph, "out"));
+
+		plugins::pulse & pulse1(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse1"))));
+		plugins::pulse & pulse2(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse2"))));
+		plugins::pulse & pulse3(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse3"))));
+
+		float freq(400);
+
 		loggers::information()("############################################### settings ####################################################");
 		{
 			out.input_port("in")->events_per_second(44100);
+			pulse1(freq);
+			pulse2(freq * 1.1);
+			pulse3(freq * 1.17);
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -73,14 +86,34 @@ void stuff() {
 		}
 		loggers::information()("############################################## connections ##################################################");
 		{
-			//connect(additioner, "out", "in", out)
-			//graph.connect("additioner", "out", "in", "out")
-			additioner.output_port("out")->connect(*out.input_port("in"));
-			multiplier.output_port("out")->connect(*additioner.input_port("in"));
-			sine2.output_port("out")->connect(*multiplier.input_port("in"));
-			sine3.output_port("out")->connect(*multiplier.input_port("in"));
-			sine1.output_port("out")->connect(*multiplier.input_port("in"));
-			sine1.output_port("out")->connect(*additioner.input_port("in"));
+			/*
+			| (out)---(+)-------\
+			|   |               |
+			|   \------(*)----(sine1)---(pulse1)
+			|          | \
+			|          |  \---(sine2)---(pulse2)
+			|          |
+			|          \------(sine3)---(pulse3)
+			|
+			| pulse1 > sine1 > + > out
+			| pulse1 > sine1 > * > out
+			| pulse2 > sine2 > * > out
+			| pulse2 > sine2 > * > out
+			*/
+			//additioner.output_port("out")->connect(*out.input_port("in"));
+			//multiplier.output_port("out")->connect(*additioner.input_port("in"));
+
+			sine1.output_port("out")->connect(*out.input_port("in"));
+			sine2.output_port("out")->connect(*out.input_port("in"));
+			sine3.output_port("out")->connect(*out.input_port("in"));
+			//sine1.output_port("out")->connect(*additioner.input_port("in"));
+			//sine1.output_port("out")->connect(*multiplier.input_port("in"));
+			//sine2.output_port("out")->connect(*multiplier.input_port("in"));
+			//sine3.output_port("out")->connect(*multiplier.input_port("in"));
+
+			sine1.input_port("frequency")->connect(*pulse1.output_port("out"));
+			sine2.input_port("frequency")->connect(*pulse2.output_port("out"));
+			sine3.input_port("frequency")->connect(*pulse3.output_port("out"));
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -93,7 +126,7 @@ void stuff() {
 		loggers::information()("############################################## schedule ########################################################");
 		{
 			host::schedulers::single_threaded::scheduler scheduler(graph);
-			universalis::compiler::numeric<64>::floating_point const seconds(15);
+			universalis::compiler::numeric<64>::floating_point const seconds(60);
 			if(loggers::information()())
 			{
 				std::ostringstream s;
@@ -101,7 +134,15 @@ void stuff() {
 				loggers::information()(s.str());
 			}
 			scheduler.start();
-			universalis::operating_system::threads::sleep(seconds);
+			int const notes(200);
+			for(int note(0); note < notes; ++note) {
+				universalis::operating_system::threads::sleep(seconds / notes);
+				pulse1(freq);
+				pulse2(freq * 1.1);
+				pulse3(freq * 1.17);
+				freq *= 1.5;
+				if(freq > 5000) freq = 440;
+			}
 			scheduler.stop();
 		}
 		loggers::information()("############################################# clean up ######################################################");
