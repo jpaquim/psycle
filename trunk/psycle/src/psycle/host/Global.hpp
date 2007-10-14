@@ -83,7 +83,9 @@ namespace psycle
 				static helpers::dsp::Resampler * pResampler;
 				///\todo shouldn't we update this value regularly?
 				static cpu::cycles_type _cpuHz;
+#if !defined WINAMP_PLUGIN
 				static InputHandler* pInputHandler;
+#endif //!defined WINAMP_PLUGIN
 				static vst::host* pVstHost;
 
 				static inline Song           & song() { return *_pSong; }

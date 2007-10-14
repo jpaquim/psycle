@@ -1,50 +1,51 @@
 /*
 
-  "Winamp .psy Player input plugin"
+  Winamp .psy Player input plugin
+  -------------------------------
 
-  This plugin plays Psycle Song files with Winamp 2.
+  This plugin plays Psycle Song files with Winamp 2.x/5.x
+  and compatible players.
 
 */
 
-#include <project.private.hpp>
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/song.hpp>
-#include <psycle/host/player.hpp>
-#include <psycle/host/machine.hpp>
-#include <psycle/host/helpers.hpp>
+#include <psycle/project.private.hpp>
+//#include "mfc_wrapped_classes.hpp"
+#include "../../version.hpp"
+#include "../../global.hpp"
+#include "../../configuration.hpp"
+#include "../../Song.hpp"
+#include "../../player.hpp"
+#include "../../machine.hpp"
+#include "../../internal_machines.hpp"
+#include "../../helpers.hpp"
+#include "shrunk_newmachine.hpp"
+#include "resources.hpp"
+#include "winampdriver.hpp"
+#include <psycle/helpers/math.hpp>
 
-#include <math.h> // should be <cmath>
+#include <winamp-2/in2.h>	// Winamp Input plugin header file
 
-#include <winamp-2/in.h>	// Winamp Input plugin header file
 
-#define WA_PLUGIN_VERSION "1.1a"
+#define WA_PLUGIN_VERSION "1.2"
 
-// post this to the main window at end of file (after playback has stopped)
-#define WM_WA_PSY_EOF WM_USER+2
+using namespace psycle::host;
 
 //
 // Global Variables.
 //
-#define WA_STREAM_SIZE 576
-DWORD WINAPI __stdcall PlayThread(void *b);
-BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
-BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
-
 Global _global;
-short stream_buffer[WA_STREAM_SIZE*4];
-extern In_Module mod;
+WinampDriver wadriver;
 
-int killDecodeThread=0;
-HANDLE thread_handle=INVALID_HANDLE_VALUE;
-
-int paused;
-int worked;
 bool loading=false;
 char infofileName[_MAX_PATH];
+
+extern In_Module mod;
 
 //
 // InModule Functions:
 //
+BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
+BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
 
 void config(HWND w)
 {
@@ -52,11 +53,12 @@ void config(HWND w)
 }
 void about(HWND hwndParent)
 {
-	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp 2\nBased on Psycle Engine " VERSION_NUMBER "\n\nCoded by Psycledelics on " __DATE__ "\n\nSome of the code has been gathered from out_wave and in_mpc plugins.\nThanks to their authors.","Psycle Winamp 2 Plugin",MB_OK);
+	MessageBox(hwndParent,"This Plugin plays .psy files using Winamp 2.x/5.x\nBased on Psycle Engine " PSYCLE__VERSION "\n\nCoded by Psycledelics on " __DATE__ "\n\nSome of the code has been gathered from out_wave and in_mpc plugins.\nThanks to their authors.","Psycle Winamp Plugin",MB_OK);
 }
 
 void init()
 {
+	_global.pConfig->_pOutputDriver = &wadriver;
 	if (!_global.pConfig->Initialized())
 	{
 		if (!_global.pConfig->Read())
@@ -64,6 +66,8 @@ void init()
 			config(mod.hMainWindow);
 		}
 	}
+	wadriver.Initialize(mod.hMainWindow,_global.pPlayer->Work,_global.pPlayer);
+	CNewMachine::LoadPluginInfo(false);
 	_global._pSong->fileName[0] = '\0';
 	_global._pSong->New();
 }
@@ -75,14 +79,14 @@ int CalcSongLength(Song *pSong)
 	// take ff and fe commands into account
 	
 	float songLength = 0;
-	int bpm = pSong->BeatsPerMin;
-	int tpb = pSong->_ticksPerBeat;
+	int bpm = pSong->BeatsPerMin();
+	int tpb = pSong->LinesPerBeat();
 	for (int i=0; i <pSong->playLength; i++)
 	{
 		int pattern = pSong->playOrder[i];
 		// this should parse each line for ffxx commands if you want it to be truly accurate
 		unsigned char* const plineOffset = pSong->_ppattern(pattern);
-		for (int l = 0; l < pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
+		for (int l = 0; l < pSong->patternLines[pattern]*psycle::host::MULTIPLY; l+=psycle::host::MULTIPLY)
 		{
 			for (int t = 0; t < pSong->SONGTRACKS*5; t+=5)
 			{
@@ -107,7 +111,7 @@ int CalcSongLength(Song *pSong)
 		}
 	}
 	
-	return f2i(songLength*1000.0f);
+	return psycle::helpers::math::rounded(songLength*1000.0f);
 }
 
 void getfileinfo(char *filename, char *title, int *length_in_ms)
@@ -116,7 +120,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 	{
 		if (_global.pPlayer->_playing)
 		{
-			if (title) { sprintf(title,"%s - %s\0",_global._pSong->Author,_global._pSong->Name); }
+			if (title) { sprintf(title,"%s - %s\0",_global._pSong->author.c_str(),_global._pSong->name.c_str()); }
 			
 			if (length_in_ms) { *length_in_ms = CalcSongLength(_global._pSong); }
 		}
@@ -140,7 +144,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 				file.Seek(0);
 
 				pSong->Load(&file,false);
-				if (title) { sprintf(title,"%s - %s\0",pSong->Author,pSong->Name); }
+				if (title) { sprintf(title,"%s - %s\0",pSong->author.c_str(),pSong->name.c_str()); }
 				if (length_in_ms)
 				{
 					*length_in_ms = CalcSongLength(pSong);
@@ -185,7 +189,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 					}
 					
 					*length_in_ms = 0;
-					for (i=0; i <playLength; i++)
+					for (int i=0; i <playLength; i++)
 					{
 						*length_in_ms += (patternLines[playOrder[i]] * 60000/(bpm * tpb));
 					}
@@ -208,7 +212,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 
 int infoDlg(char *fn, HWND hwnd)
 {
-	if ( strcmp(fn,_global._pSong->fileName) ) // if not the current one
+	if ( strcmp(fn,_global._pSong->fileName.c_str()) ) // if not the current one
 	{
 		strcpy(infofileName,fn);
 	}
@@ -247,28 +251,14 @@ int isourfile(char *fn)
 void stop()
 { 
 	while (loading) Sleep(10);
-	if (thread_handle != INVALID_HANDLE_VALUE)
-	{
-		killDecodeThread=1;
-		if (WaitForSingleObject(thread_handle,INFINITE) == WAIT_TIMEOUT)
-		{
-			MessageBox(mod.hMainWindow,"error asking thread to die!\n","error killing decode thread",0);
-			TerminateThread(thread_handle,0);
-		}
-		CloseHandle(thread_handle);
-		thread_handle = INVALID_HANDLE_VALUE;
-	}
+	_global.pConfig->_pOutputDriver->Enable(false);
 	_global._pSong->New();
-	mod.outMod->Close();
 	mod.SAVSADeInit();
 
 }
 
 int play(char *fn)
 {
-	int maxlatency;
-	unsigned long tmp;
-
 	_global.pPlayer->Stop();//	stop();
 
 	OldPsyFile file;
@@ -276,45 +266,32 @@ int play(char *fn)
 	{
 		return -1;
 	}
-/*	while ( mod.outMod->IsPlaying())
-	{
-		Sleep(10);
-	}*/
+
 	_global._pSong->filesize=file.FileSize();
 	loading = true;
 //	_global._pSong->New();
 	_global._pSong->Load(&file);
 	file.Close(); //<- load handles this (but maybe nto always)
-	strcpy(_global._pSong->fileName,fn);
-	_global._pSong->SetBPM(_global._pSong->BeatsPerMin, _global._pSong->_ticksPerBeat, _global.pConfig->_samplesPerSec);
+	_global._pSong->fileName = fn;
+	_global.pPlayer->SetBPM(_global._pSong->BeatsPerMin(), _global._pSong->LinesPerBeat());
 	int val=64;
 	_global.pPlayer->Work(_global.pPlayer,val); // Some plugins don't like to receive data without making first a
 								// work call. (for example, Phantom)
 	_global.pPlayer->Start(0,0);
 	_global.pPlayer->_loopSong=false;
 
-	paused=0; worked=false;
-	memset(stream_buffer,0,sizeof(stream_buffer));
+	_global.pConfig->_pOutputDriver->Enable(true);
+	mod.SetInfo(_global._pSong->BeatsPerMin(),_global.pConfig->GetSamplesPerSec()/1000,2,1);
+	mod.SAVSAInit(wadriver.GetOutputLatency(),_global.pConfig->GetSamplesPerSec());
+	mod.VSASetInfo(_global.pConfig->GetSamplesPerSec(),2);
 
-	maxlatency = mod.outMod->Open(_global.pConfig->_samplesPerSec,2,16, -1,-1);
-	if (maxlatency < 0)
-	{
-		return 1;
-	}
-	mod.SetInfo(_global._pSong->BeatsPerMin,_global.pConfig->_samplesPerSec/1000,2,1);
-	mod.SAVSAInit(maxlatency,_global.pConfig->_samplesPerSec);
-	mod.VSASetInfo(_global.pConfig->_samplesPerSec,2);
-	mod.outMod->SetVolume(-666);
-
-	killDecodeThread=0;
-	thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) PlayThread,(void *) &killDecodeThread,0,&tmp);
 	loading = false;
 	return 0;
 }
 
-void pause() { paused=1; mod.outMod->Pause(1); }
-void unpause() { paused=0; mod.outMod->Pause(0); }
-int ispaused() { return paused; }
+void pause() { wadriver.Pause(true); }
+void unpause() { wadriver.Pause(false); }
+int ispaused() { return wadriver.Paused(); }
 
 
 int getlength() { return CalcSongLength(Global::_pSong); }
@@ -324,13 +301,14 @@ void setoutputtime(int time_in_ms)
 	Song* pSong = _global._pSong;
 	int time_left = time_in_ms;
 	int patline=-1;
-	for ( int i=0;i<pSong->playLength;i++)
+	int i;
+	for (i=0;i<pSong->playLength;i++)
 	{
 		int pattern = pSong->playOrder[i];
 		int tmp;
-		if ((tmp = pSong->patternLines[pattern] * 60000/(pSong->BeatsPerMin * pSong->_ticksPerBeat)) >= time_left )
+		if ((tmp = pSong->patternLines[pattern] * 60000/(pSong->BeatsPerMin() * pSong->LinesPerBeat())) >= time_left )
 		{
-			patline = time_left * (pSong->BeatsPerMin * pSong->_ticksPerBeat)/60000;
+			patline = time_left * (pSong->BeatsPerMin() * pSong->LinesPerBeat())/60000;
 			break;
 		}
 		else time_left-=tmp;
@@ -348,7 +326,7 @@ void eq_set(int on, char data[10], int preamp) { }
 In_Module mod = 
 {
 	IN_VER,
-	"Psycle Winamp 2 Plugin " WA_PLUGIN_VERSION ,
+	"Psycle Winamp Plugin v" WA_PLUGIN_VERSION ,
 	NULL,
 	NULL,
 	"psy\0Psycle Song (*.psy)\0",
@@ -400,69 +378,6 @@ BOOL WINAPI _DllMainCRTStartup(HANDLE hInst, ULONG ul_reason_for_call, LPVOID lp
 	return TRUE;
 }
 
-void Quantize(float *pin, short *piout, int c)
-{
-	float* inb =pin;
-	short* outb =piout;
-	for (int i=0; i<c; i++)
-	{
-		if ( *inb > 32767.0f) *outb = 32767;
-		else if ( *inb < -32767.0f ) *outb = -32768;
-		else *outb = f2i(*inb);
-		*inb++; outb++;
-	}
-}
-
-DWORD WINAPI __stdcall PlayThread(void *b)
-{
-	float *float_buffer;
-	Player* pPlayer = _global.pPlayer;
-	int samprate = _global.pConfig->_samplesPerSec;
-	int smp2 = _global.pConfig->_samplesPerSec/1000;
-//	int plug_stream_size = samprate/200;
-	int plug_stream_size = WA_STREAM_SIZE;
-//	int plug_stream_size = 1024;
-
-	while (! *((int *)b) )  // While !killDecodeThread
-	{
-		if ( !worked)
-		{
-			if (pPlayer->_playing)
-			{	int bmp = _global._pSong->BeatsPerMin;
-				float_buffer = pPlayer->Work(pPlayer,plug_stream_size);
-				Quantize(float_buffer,stream_buffer,plug_stream_size*2);
-				if ( bmp != _global._pSong->BeatsPerMin ) mod.SetInfo(_global.pPlayer->bpm,smp2,2,1);
-				worked=true;
-			}
-			else
-			{
-				mod.outMod->CanWrite();
-				if (!mod.outMod->IsPlaying())
-				{
-					PostMessage(mod.hMainWindow,WM_WA_PSY_EOF,0,0);
-					return 0;
-				}
-				Sleep(10);
-			}
-		}
-		else if (mod.outMod->CanWrite() >= (plug_stream_size<<(mod.dsp_isactive()?3:2)))
-		{
-			int t;
-			if (mod.dsp_isactive()) t=mod.dsp_dosamples(stream_buffer,plug_stream_size,16,2,samprate)*4;
-			else t=plug_stream_size*4;
-
-			int s=mod.outMod->GetWrittenTime();
-			mod.SAAddPCMData((char*)stream_buffer,2,16,s);
-			mod.VSAAddPCMData((char*)stream_buffer,2,16,s);
-
-			mod.outMod->Write((char*)stream_buffer,t);
-			worked=false;
-		}
-		else Sleep(20);
-	}
-	return 0;
-}
-
 
 BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 {
@@ -475,7 +390,7 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 	case WM_INITDIALOG:
 		
 		//	Sample Rate Combobox
-		w=GetDlgItem(wnd,IDC_SAMP_RATE);
+		w=GetDlgItem(wnd,IDC_SRATE);
 		char valstr[10];
 		for (c=0;c<4;c++)
 		{
@@ -484,7 +399,7 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			sprintf(valstr,"%i",(int)(12000*powf(2.0f,(float)c)));
 			SendMessage(w,CB_ADDSTRING,0,(long)valstr);
 		}
-		switch (_global.pConfig->_samplesPerSec)
+		switch (_global.pConfig->GetSamplesPerSec())
 		{
 		case 11025: SendMessage(w,CB_SETCURSEL,0,0);break;
 		case 12000: SendMessage(w,CB_SETCURSEL,1,0);break;
@@ -496,11 +411,18 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 		case 96000: SendMessage(w,CB_SETCURSEL,7,0);break;
 		}
 		
+		// Autostop
+		w=GetDlgItem(wnd,IDC_AUTOSTOP);
+		SendMessage(w,BM_SETCHECK,_global.pConfig->autoStopMachines?1:0,0);
+		
+		
 		// Directories.
+		SetDlgItemText(wnd,IDC_NATIVEPATH,_global.pConfig->GetPluginDir().c_str());
+		SetDlgItemText(wnd,IDC_VSTPATH,_global.pConfig->GetVstDir().c_str());
 		
-		SetDlgItemText(wnd,IDC_EDIT_NATIVE,_global.pConfig->GetPluginDir());
-		SetDlgItemText(wnd,IDC_EDIT_VST,_global.pConfig->GetVstDir());
-		
+		// Cache
+		SetDlgItemText(wnd,IDC_CACHEVALID,CNewMachine::IsLoaded()?"File Exists.":"Not Found. Rengerate.");
+
 		return 1;
 		break;
 
@@ -510,18 +432,31 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 		case IDOK:
 			if (_global.pPlayer->_playing ) stop();
 
-			c = SendDlgItemMessage(wnd,IDC_SAMP_RATE,CB_GETCURSEL,0,0);
-			if ( (c % 2) == 0) _global.pConfig->_samplesPerSec = (int)(11025*powf(2.0f,(float)(c/2)));
-			else _global.pConfig->_samplesPerSec = (int)(12000*powf(2.0f,(float)(c/2)));
-			
-			GetDlgItemText(wnd,IDC_EDIT_NATIVE,tmptext,_MAX_PATH);
+			c = SendDlgItemMessage(wnd,IDC_SRATE,CB_GETCURSEL,0,0);
+			if ( (c % 2) == 0) _global.pConfig->SetSamplesPerSec((int)(11025*powf(2.0f,(float)(c/2))));
+			else _global.pConfig->SetSamplesPerSec((int)(12000*powf(2.0f,(float)(c/2))));
+
+			c = SendDlgItemMessage(wnd,IDC_AUTOSTOP,BM_GETCHECK,0,0);
+			_global.pConfig->autoStopMachines=c>0?true:false;
+
+			GetDlgItemText(wnd,IDC_NATIVEPATH,tmptext,_MAX_PATH);
 			_global.pConfig->SetPluginDir(tmptext);
-			GetDlgItemText(wnd,IDC_EDIT_VST,tmptext,_MAX_PATH);
+			GetDlgItemText(wnd,IDC_VSTPATH,tmptext,_MAX_PATH);
 			_global.pConfig->SetVstDir(tmptext);
 			EndDialog(wnd,1);
 			break;
 		case IDCANCEL:
 			EndDialog(wnd,0);
+			break;
+		case IDC_REGENERATE:
+			CNewMachine::Regenerate();
+			SetDlgItemText(wnd,IDC_CACHEVALID,CNewMachine::IsLoaded()?"File Exists.":"Not Found. Rengerate.");
+			break;
+		case IDC_BWNATIVE:
+			MessageBox(mod.hMainWindow,"Unfinished","Unfinished",MB_OK);
+			break;
+		case IDC_BWVST:
+			MessageBox(mod.hMainWindow,"Unfinished","Unfinished",MB_OK);
 			break;
 		}
 		break;
@@ -547,18 +482,18 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			{
 				pSong->filesize=file.FileSize();
 				pSong->Load(&file,false);
-				strcpy(pSong->fileName,infofileName);
+				pSong->fileName = infofileName;
 //				file.Close(); <- load handles this
 			}
 		}
 		else pSong= _global._pSong;
 		
-		SetWindowText(wnd,"Psycle Winamp Plugin Info Dialog");
+		SetWindowText(wnd,"Psycle Song Information");
 		char tmp2[20];
-		SetDlgItemText(wnd,IDC_SONGFILENAME,pSong->fileName);
-		SetDlgItemText(wnd,IDC_SONGARTIST,pSong->Author);
-		SetDlgItemText(wnd,IDC_SONGTITLE,pSong->Name);
-		SetDlgItemText(wnd,IDC_SONGCOMMENT,pSong->Comment);
+		SetDlgItemText(wnd,IDC_FILENAME,pSong->fileName.c_str());
+		SetDlgItemText(wnd,IDC_ARTIST,pSong->author.c_str());
+		SetDlgItemText(wnd,IDC_TITLE,pSong->name.c_str());
+		SetDlgItemText(wnd,IDC_COMMENTS,pSong->comments.c_str());
 
 		for( i=0;i<MAX_MACHINES;i++)
 		{
@@ -568,21 +503,18 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 				{
 					case MACH_VST: strcpy(tmp2,"V");break;
 					case MACH_VSTFX: strcpy(tmp2,"V");break;
-					case MACH_PLUGIN: strcpy(tmp2,"P");break;
-					default: strcpy(tmp2,"_"); break;
+					case MACH_PLUGIN: strcpy(tmp2,"N");break;
+					case MACH_MASTER: strcpy(tmp2,"M");break;
+					default: strcpy(tmp2,"I"); break;
 				}
 				
-				if ( pSong->_pMachine[i]->_type == MACH_DUMMY )
+				if ( pSong->_pMachine[i]->_type == MACH_DUMMY && ((Dummy*)pSong->_pMachine[i])->wasVST )
 				{
-					if ( ((Dummy*)pSong->_pMachine[i])->wasVST )
-					{
-						sprintf(valstr,"%.02i:[*]  %s",i,pSong->_pMachine[i]->_editName);
-					}
-					else sprintf(valstr,"%.02i:[?]  %s",i,pSong->_pMachine[i]->_editName);
+					sprintf(valstr,"%.02i:[!]  %s",i,pSong->_pMachine[i]->_editName);
 				}
 				else sprintf(valstr,"%.02i:[%s]  %s",i,tmp2,pSong->_pMachine[i]->_editName);
 				
-				SendDlgItemMessage(wnd,IDC_MACHINELIST,LB_ADDSTRING,0,(long)valstr);
+				SendDlgItemMessage(wnd,IDC_MACHINES,LB_ADDSTRING,0,(long)valstr);
 				j++;
 			}
 		}
@@ -592,12 +524,12 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 		sprintf(valstr,"Filesize: %i\nBeatsPerMin: %i\nLinesPerBeat: %i\n\
 Song Length: %02i:%02i\nPatternsUsed: %i\nMachines Used: %i",
 			pSong->filesize,
-			pSong->BeatsPerMin,
-			pSong->_ticksPerBeat,
+			pSong->BeatsPerMin(),
+			pSong->LinesPerBeat(),
 			i / 60, i % 60,
 			pSong->GetNumPatternsUsed(),
 			j);
-		SetDlgItemText(wnd,IDC_EXTINFO,valstr);
+		SetDlgItemText(wnd,IDC_INFO,valstr);
 		
 		
 		if ( infofileName[0]!='\0' ) delete pSong;

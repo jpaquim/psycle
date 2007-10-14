@@ -28,7 +28,7 @@ namespace psycle
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init();
+				_voices[i]._filter.Init(44100);
 				_voices[i]._cutoff = 0;
 				_voices[i]._sampleCounter = 0;
 				_voices[i]._triggerNoteOff = 0;
@@ -57,7 +57,7 @@ namespace psycle
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init();
+				_voices[i]._filter.Init(44100);
 				_voices[i]._triggerNoteOff = 0;
 				_voices[i]._triggerNoteDelay = 0;
 			}
@@ -560,7 +560,7 @@ namespace psycle
 				
 				// Init filter synthesizer
 				//
-				pVoice->_filter.Init();
+				pVoice->_filter.Init(Global::pPlayer->SampleRate());
 
 				if (Global::_pSong->_pInstrument[pVoice->_instrument]->_RCUT)
 				{

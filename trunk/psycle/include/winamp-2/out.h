@@ -1,3 +1,13 @@
+
+// ids:
+// waveout: 32
+// gapless: 64
+// xfade: 63
+// disk: 33
+// dsound: 38
+// NULL: 65
+// mm2: 69
+
 #define OUT_VER 0x10
 
 typedef struct 

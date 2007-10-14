@@ -1,14 +1,23 @@
-#include <project.mfc.private.hpp>
+// Microsoft Visual C++ generated resource script.
+//
 #include "resources.hpp"
 
 #define APSTUDIO_READONLY_SYMBOLS
-#include <afxres.h>
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
+/////////////////////////////////////////////////////////////////////////////
+// Neutral (predeterminado) resources
 
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
 #ifdef _WIN32
-LANGUAGE 0x3, 0x1
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 #pragma code_page(1252)
 #endif //_WIN32
 
@@ -17,46 +26,52 @@ LANGUAGE 0x3, 0x1
 // Dialog
 //
 
-IDD_CONFIGDLG DIALOG DISCARDABLE  0, 0, 202, 121
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Configuration"
-FONT 8, "MS Sans Serif"
+IDD_CONFIGDLG DIALOGEX 0, 0, 204, 143
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "in_psycle Configuration"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,145,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,145,24,50,14
-    LTEXT           "Vst Plugins",IDC_STATIC,16,85,40,8
-    EDITTEXT        IDC_EDIT_VST,16,95,145,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_CHANGE_VST,165,95,16,12,WS_DISABLED
-    LTEXT           "Native Plugins",IDC_STATIC,16,56,50,8
-    EDITTEXT        IDC_EDIT_NATIVE,16,67,145,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_CHANGE_NATIVE,164,67,16,12,WS_DISABLED
-    COMBOBOX        IDC_SAMP_RATE,65,24,60,56,CBS_DROPDOWNLIST | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Sampling Rate",IDC_STATIC,14,26,47,9
-    GROUPBOX        "Directories",IDC_STATIC,7,43,188,70
+    DEFPUSHBUTTON   "Ok",IDOK,147,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,147,24,50,14
+    LTEXT           "Sampling Rate",IDC_STATIC,12,12,46,8
+    COMBOBOX        IDC_SRATE,64,10,73,89,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Autostop Machines",IDC_AUTOSTOP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,29,77,10
+    EDITTEXT        IDC_NATIVEPATH,23,67,137,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BWNATIVE,167,67,18,13
+    EDITTEXT        IDC_VSTPATH,24,95,137,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BWVST,167,95,18,13
+    GROUPBOX        "Plugins",IDC_STATIC,12,44,181,89
+    LTEXT           "Native Directory",IDC_STATIC,24,55,53,8
+    LTEXT           "VST Directory",IDC_STATIC,24,84,44,8
+    PUSHBUTTON      "Regenerate Cache File",IDC_REGENERATE,24,114,80,14
+    LTEXT           "File is valid",IDC_CACHEVALID,111,115,75,11,0,
+                    WS_EX_STATICEDGE
 END
 
-IDD_INFODLG DIALOG DISCARDABLE  0, 0, 265, 226
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Dialog"
-FONT 8, "MS Sans Serif"
+IDD_INFODLG DIALOGEX 0, 0, 373, 260
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Psycle Song Information"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Close",IDCANCEL,213,205,45,14
-    EDITTEXT        IDC_SONGFILENAME,7,7,250,14,ES_AUTOHSCROLL | ES_READONLY
-    LISTBOX         IDC_MACHINELIST,7,117,163,102,LBS_NOINTEGRALHEIGHT | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Machines ( P=Plugin, V= VST, * or ? = Not loaded)",
-                    IDC_STATIC,7,106,160,8
-    LTEXT           "Filesize:blah\nBpm:blah\nTpb:blah\nLength:blah\nPatterns Used:blah\nMachines:blah\n",
-                    IDC_EXTINFO,175,28,82,171,SS_SUNKEN
-    RTEXT           "Artist",IDC_STATIC,20,39,20,9
-    EDITTEXT        IDC_SONGARTIST,45,37,119,13,ES_AUTOHSCROLL
-    RTEXT           "Title",IDC_STATIC,21,54,19,8
-    EDITTEXT        IDC_SONGTITLE,45,51,119,13,ES_AUTOHSCROLL
-    GROUPBOX        "File Info",IDC_STATIC,7,24,164,77
-    LTEXT           "Comment",IDC_STATIC,11,68,30,10
-    EDITTEXT        IDC_SONGCOMMENT,45,66,119,32,ES_MULTILINE | 
-                    ES_WANTRETURN | WS_VSCROLL
+    DEFPUSHBUTTON   "Close",IDCANCEL,315,239,50,14
+    EDITTEXT        IDC_FILENAME,7,7,359,14,ES_AUTOHSCROLL | ES_READONLY
+    GROUPBOX        "File Information",IDC_STATIC,7,22,242,229
+    LTEXT           "Estático",IDC_INFO,257,26,107,82,0,WS_EX_STATICEDGE
+    LISTBOX         IDC_MACHINES,256,121,110,116,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "(N)ative, (V)ST, !=Not loaded",IDC_STATIC,257,111,99,10
+    EDITTEXT        IDC_ARTIST,16,50,175,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_TITLE,15,81,175,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_COMMENTS,13,110,230,134,ES_MULTILINE | 
+                    ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
+                    ES_WANTRETURN
+    LTEXT           "Artist",IDC_STATIC,17,38,18,8
+    LTEXT           "Title",IDC_STATIC,16,69,14,8
+    LTEXT           "Comments",IDC_STATIC,15,99,34,8
 END
 
 
@@ -66,25 +81,54 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_CONFIGDLG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 195
+        RIGHTMARGIN, 197
         TOPMARGIN, 7
-        BOTTOMMARGIN, 114
+        BOTTOMMARGIN, 136
     END
 
     IDD_INFODLG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 258
+        RIGHTMARGIN, 366
         TOPMARGIN, 7
-        BOTTOMMARGIN, 219
+        BOTTOMMARGIN, 253
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_CONFIGDLG DLGINIT
+BEGIN
+    IDC_SRATE, 0x403, 6, 0
+0x3131, 0x3230, 0x0035, 
+    IDC_SRATE, 0x403, 6, 0
+0x3231, 0x3030, 0x0030, 
+    IDC_SRATE, 0x403, 6, 0
+0x3232, 0x3530, 0x0030, 
+    IDC_SRATE, 0x403, 6, 0
+0x3432, 0x3030, 0x0030, 
+    IDC_SRATE, 0x403, 6, 0
+0x3434, 0x3031, 0x0030, 
+    IDC_SRATE, 0x403, 6, 0
+0x3834, 0x3030, 0x0030, 
+    IDC_SRATE, 0x403, 6, 0
+0x3436, 0x3030, 0x0030, 
+    IDC_SRATE, 0x403, 6, 0
+0x3838, 0x3032, 0x0030, 
+    IDC_SRATE, 0x403, 6, 0
+0x3639, 0x3030, 0x0030, 
+    0
+END
 
 
 #ifdef APSTUDIO_INVOKED
@@ -93,18 +137,92 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resources.hpp\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
-    "#include <afxres.h>\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ESN)\r\n"
+    "LANGUAGE 10, 3\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif\r\n"
     "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Unknown language: 0x3, 0x1 resources
+
 /////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,2,0,0
+ PRODUCTVERSION 1,8,5,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040004e4"
+        BEGIN
+            VALUE "CompanyName", "Psycledelics"
+            VALUE "FileDescription", "Psycle Winamp Plugin"
+            VALUE "FileVersion", "1,2,0,0"
+            VALUE "InternalName", "in_psycle.dll"
+            VALUE "LegalCopyright", "(c) Psycledelics 2001-2007"
+            VALUE "OriginalFilename", "in_psycle.dll"
+            VALUE "ProductName", "Psycle Playback Engine"
+            VALUE "ProductVersion", "1,8,5,0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x400, 1252
+    END
+END
+
+#endif    // Neutral (predeterminado) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ESN)
+LANGUAGE 10, 3
+#pragma code_page(1252)
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

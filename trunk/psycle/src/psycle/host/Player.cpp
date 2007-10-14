@@ -5,8 +5,12 @@
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "Configuration.hpp"
-#include "MidiInput.hpp"
-#include "InputHandler.hpp"
+
+#if !defined WINAMP_PLUGIN
+	#include "MidiInput.hpp"
+	#include "InputHandler.hpp"
+#endif //!defined WINAMP_PLUGIN
+
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
 #include "global.hpp"
 namespace psycle
@@ -37,7 +41,9 @@ namespace psycle
 
 		Player::~Player()
 		{
+#if !defined WINAMP_PLUGIN
 			if(_recording) _outputWaveFile.Close();
+#endif //!defined WINAMP_PLUGIN
 		}
 
 		void Player::Start(int pos, int lineStart, int lineStop, bool initialize)
@@ -505,6 +511,8 @@ namespace psycle
 					pSong->DoPreviews( amount );
 
 					CVSTHost::vstTimeInfo.samplePos = ((Master *) (pSong->_pMachine[MASTER_INDEX]))->sampleCount;
+
+#if !defined WINAMP_PLUGIN
 					// Inject Midi input data
 					if(!CMidiInput::Instance()->InjectMIDI( amount ))
 					{
@@ -512,6 +520,7 @@ namespace psycle
 						// Master machine initiates work
 						pSong->_pMachine[MASTER_INDEX]->Work(amount);
 					}
+
 					pSong->_sampCount += amount;
 					if((pThis->_playing) && (pThis->_recording))
 					{
@@ -581,6 +590,11 @@ namespace psycle
 							break;
 						}
 					}
+#else
+					pSong->_pMachine[MASTER_INDEX]->Work(amount);
+					pSong->_sampCount += amount;
+#endif //!defined WINAMP_PLUGIN
+
 					Master::_pMasterSamples += amount * 2;
 					numSamples -= amount;
 				}
@@ -671,6 +685,7 @@ namespace psycle
 
 		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape, std::vector<char*> *clipboardmem)
 		{
+#if !defined WINAMP_PLUGIN
 			if(!_recording)
 			{
 				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
@@ -714,10 +729,12 @@ namespace psycle
 					else StopRecording(false);
 				}
 			}
+#endif //!defined WINAMP_PLUGIN
 		}
 
 		void Player::StopRecording(bool bOk)
 		{
+#if !defined WINAMP_PLUGIN
 			if(_recording)
 			{
 				Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
@@ -733,6 +750,7 @@ namespace psycle
 					MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
 				}
 			}
+#endif //!defined WINAMP_PLUGIN
 		}
 	}
 }

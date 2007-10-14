@@ -1,25 +1,28 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 #include <psycle/project.private.hpp>
+#include "Global.hpp"
 #include "Configuration.hpp"
 #include "Registry.hpp"
-#include "WaveOut.hpp"
-#include "DirectSound.hpp"
-#include "ASIOInterface.hpp"
-#include "MidiInput.hpp"
+#if !defined WINAMP_PLUGIN
+	#include "WaveOut.hpp"
+	#include "DirectSound.hpp"
+	#include "ASIOInterface.hpp"
+	#include "MidiInput.hpp"
+	#include "NewMachine.hpp"
+#endif // !defined WINAMP_PLUGIN
 #include "Song.hpp"
-#include "NewMachine.hpp"
-#include "Global.hpp"
 namespace psycle
 {
 	namespace host
 	{
 		Configuration::Configuration()
 		{
+			_initialized = false;
+#if !defined WINAMP_PLUGIN
 			_allowMultipleInstances = false;
 			_toolbarOnVsts = true;
 			_bShowPatternNames = false;
-			_initialized = false;
 			_windowsBlocks = true;
 			_wrapAround = true;
 			_centerCursor = false;
@@ -76,6 +79,7 @@ namespace psycle
 					midi().velocity().to()      = 0xff;
 				}
 			}
+#endif // !defined WINAMP_PLUGIN
 			// pattern height
 			{
 				defaultPatLines = 64;
@@ -85,6 +89,7 @@ namespace psycle
 					Global::_pSong->patternLines[c] = defaultPatLines;
 				}
 			}
+
 			// paths
 			{
 				{
@@ -108,6 +113,7 @@ namespace psycle
 
 		Configuration::~Configuration() throw()
 		{
+#if !defined WINAMP_PLUGIN
 			seqFont.DeleteObject();
 			generatorFont.DeleteObject();
 			effectFont.DeleteObject();
@@ -120,6 +126,7 @@ namespace psycle
 				delete [] _ppOutputDrivers;
 			}
 			delete _pMidiInput;
+#endif // !defined WINAMP_PLUGIN
 		}
 
 		bool Configuration::Read()
@@ -157,6 +164,7 @@ namespace psycle
 			else return ReadVersion17();		// Case for 1.7.6 and older. If it doesn't exist, it will return false.
 
 
+#if !defined WINAMP_PLUGIN
 			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
 			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.QueryValue("WrapAround", _wrapAround);
@@ -212,12 +220,15 @@ namespace psycle
 				}
 				reg.QueryValue("MidiRawMcm", midi().raw());
 			}
+#endif // !defined WINAMP_PLUGIN
+
 			reg.QueryValue("defaultPatLines", defaultPatLines);
 			for(int c(0) ; c < MAX_PATTERNS; ++c)
 			{
 				// All pattern reset
 				Global::_pSong->patternLines[c] = defaultPatLines;
 			}
+#if !defined WINAMP_PLUGIN
 			reg.QueryValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
 			reg.QueryValue("bFileSaveReminders", bFileSaveReminders);
 			reg.QueryValue("autosaveSong", autosaveSong);
@@ -327,6 +338,8 @@ namespace psycle
 					CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = _midiHeadroom;
 				}
 			}
+#endif // !defined WINAMP_PLUGIN
+
 			// paths
 			{
 				reg.QueryValue("InstrumentDir", instrument_dir_);
@@ -344,6 +357,7 @@ namespace psycle
 
 		void Configuration::Write()
 		{
+#if !defined WINAMP_PLUGIN
 			Registry reg;
 			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
 			{
@@ -487,6 +501,8 @@ namespace psycle
 			reg.SetValue("SkinDir", GetSkinDir());
 			reg.CloseKey();
 			reg.CloseRootKey();
+#endif // !defined WINAMP_PLUGIN
+
 		}
 
 		void Configuration::SetInstrumentDir(std::string const & s)
@@ -528,6 +544,7 @@ namespace psycle
 		{
 			MessageBox(0, what.c_str(), "Psycle", MB_ICONERROR | MB_OK);
 		}
+#if !defined WINAMP_PLUGIN
 
 		bool Configuration::CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic)
 		{
@@ -668,7 +685,7 @@ namespace psycle
 
 		}
 
-
+#endif //!defined WINAMP_PLUGIN
 
 
 		bool Configuration::ReadVersion17()
@@ -684,6 +701,8 @@ namespace psycle
 			}
 			result = reg.OpenKey("CurrentVersion");
 			if ( result != ERROR_SUCCESS) return false;
+
+#if !defined WINAMP_PLUGIN
 			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
 			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.QueryValue("WrapAround", _wrapAround);
@@ -735,12 +754,15 @@ namespace psycle
 				}
 				reg.QueryValue("MidiRawMcm", midi().raw());
 			}
+#endif // !defined WINAMP_PLUGIN
 			reg.QueryValue("defaultPatLines", defaultPatLines);
 			for(int c(0) ; c < MAX_PATTERNS; ++c)
 			{
 				// All pattern reset
 				Global::_pSong->patternLines[c] = defaultPatLines;
 			}
+#if !defined WINAMP_PLUGIN
+
 			char savedbyte;
 			int savedint;
 			reg.QueryValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
@@ -847,6 +869,7 @@ namespace psycle
 					CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = _midiHeadroom;
 				}
 			}
+#endif // !defined WINAMP_PLUGIN
 			// paths
 			{
 				reg.QueryValue("InstrumentDir", instrument_dir_);

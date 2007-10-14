@@ -2,8 +2,11 @@
 ///\brief interface file for psycle::host::Player.
 #pragma once
 #include "constants.hpp"
-#include "Riff.hpp"
-#include "dither.hpp"
+
+#if !defined WINAMP_PLUGIN
+	#include "Riff.hpp"
+	#include "dither.hpp"
+#endif //!defined WINAMP_PLUGIN
 namespace psycle
 {
 	namespace host
@@ -111,10 +114,12 @@ namespace psycle
 			int backup_channelmode;
 			/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 			float _pBuffer[MAX_DELAY_BUFFER];
+#if !defined WINAMP_PLUGIN
 			/// file to which to output signal.
 			WaveFile _outputWaveFile;
 			/// dither handler
 			helpers::dsp::Dither dither;
+#endif //!defined WINAMP_PLUGIN
 
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()

@@ -25,7 +25,7 @@ namespace psycle
 		public:
 			float _coeffs[5][128][128][5];
 			FilterCoeff() { _inited = false; };
-			inline void Init(void)
+			inline void Init(int samplerate)
 			{
 				if (!_inited)
 				{
@@ -36,7 +36,7 @@ namespace psycle
 						{
 							for (int q=0; q<128; q++)
 							{
-								ComputeCoeffs(f, q, r);
+								ComputeCoeffs(f, q, r,samplerate);
 								_coeffs[r][f][q][0] = (float)_coeff[0];
 								_coeffs[r][f][q][1] = (float)_coeff[1];
 								_coeffs[r][f][q][2] = (float)_coeff[2];
@@ -50,7 +50,7 @@ namespace psycle
 		private:
 			bool _inited;
 			double _coeff[5];
-			void ComputeCoeffs(int freq, int r, int t);
+			void ComputeCoeffs(int freq, int r, int t, int samplerate);
 
 			static inline float Cutoff(int v)
 			{
@@ -78,7 +78,7 @@ namespace psycle
 
 			Filter();
 
-			void Init(void);
+			void Init(int samplerate);
 			void Update(void);
 			inline float Work(float x)
 			{

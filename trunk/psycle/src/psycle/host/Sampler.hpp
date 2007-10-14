@@ -98,6 +98,20 @@ namespace psycle
 			virtual void Init(void);
 			virtual void Work(int numSamples);
 			virtual float GetAudioRange(){ return 32768.0f; }
+			virtual void SetSampleRate(int sr)
+			{
+				Machine::SetSampleRate(sr);
+				for (int i=0; i<_numVoices; i++)
+				{
+					_voices[i]._envelope._stage = ENV_OFF;
+					_voices[i]._envelope._sustain = 0;
+					_voices[i]._filterEnv._stage = ENV_OFF;
+					_voices[i]._filterEnv._sustain = 0;
+					_voices[i]._filter.Init(sr);
+					_voices[i]._triggerNoteOff = 0;
+					_voices[i]._triggerNoteDelay = 0;
+				}
+			}
 			virtual void Stop(void);
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual char* GetName(void) { return _psName; };

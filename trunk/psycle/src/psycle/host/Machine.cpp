@@ -5,15 +5,21 @@
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way
 #include "Song.hpp"
-// Included for the machine position on the machine view. This really should be
-// done in a different way.
-#include "MainFrm.hpp"
-// These two are included to update the buffers that wiredlg uses for display. 
-// Find a way to manage these buffers without its inclusion
-#include "psycle.hpp"
-#include "WireDlg.hpp"
-// Included due to the plugin caching, which should be separated from the dialog.
-#include "NewMachine.hpp"
+
+#if !defined WINAMP_PLUGIN
+	// Included for the machine position on the machine view. This really should be
+	// done in a different way.
+	#include "MainFrm.hpp"
+	// These two are included to update the buffers that wiredlg uses for display. 
+	// Find a way to manage these buffers without its inclusion
+	#include "psycle.hpp"
+	#include "WireDlg.hpp"
+	// Included due to the plugin caching, which should be separated from the dialog.
+	#include "NewMachine.hpp"
+#else
+	#include "player_plugins/winamp/shrunk_newmachine.hpp"
+#endif //!defined WINAMP_PLUGIN
+
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
 // moved to the Song loader.
@@ -22,6 +28,7 @@
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VSTHost24.hpp"
+
 #include "loggers.hpp"
 #include "configuration_options.hpp"
 #if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
@@ -33,7 +40,9 @@ namespace psycle
 {
 	namespace host
 	{
+#if !defined WINAMP_PLUGIN
 		extern CPsycleApp theApp;
+#endif //!defined WINAMP_PLUGIN
 
 		char* Master::_psName = "Master";
 
@@ -578,6 +587,7 @@ namespace psycle
 			_worked = false;
 			_waitingForSound= false;
 			cpu::cycles_type wcost = cpu::cycles();
+#if !defined WINAMP_PLUGIN
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
 				float *pSamplesL = _pSamplesL;   
@@ -604,6 +614,7 @@ namespace psycle
 				} 
 			}
 			_scopePrevNumSamples=numSamples;
+#endif //!defined WINAMP_PLUGIN
 			if (clear)
 			{
 				helpers::dsp::Clear(_pSamplesL, numSamples);
@@ -934,26 +945,32 @@ namespace psycle
 			if(index < MAX_BUSES)
 			{
 				pMachine->_mode = MACHMODE_GENERATOR;
+#if !defined WINAMP_PLUGIN
 				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
 					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
 				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
 					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+#endif //!defined WINAMP_PLUGIN
 			}
 			else if (index < MAX_BUSES*2)
 			{
 				pMachine->_mode = MACHMODE_FX;
+#if !defined WINAMP_PLUGIN
 				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
 					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
 				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
 					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+#endif //!defined WINAMP_PLUGIN
 			}
 			else
 			{
 				pMachine->_mode = MACHMODE_MASTER;
+#if !defined WINAMP_PLUGIN
 				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
 					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
 				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
 					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+#endif //!defined WINAMP_PLUGIN
 			}
 			pMachine->SetPan(pMachine->_panning);
 			if (pMachine->_bypass) pMachine->Bypass(true);
