@@ -2078,7 +2078,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				Global::_pSong->fileName = fName;
 			}
-//			Global::_pSong->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_LinesPerBeat, Global::pConfig->_pOutputDriver->_samplesPerSec);
+			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->_LinesPerBeat);
 			_outputActive = true;
 			if (!Global::pConfig->_pOutputDriver->Enable(true))
 			{
