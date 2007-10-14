@@ -2,8 +2,6 @@
 ///\brief implementation file for psycle::host::Filter.
 #include <psycle/project.private.hpp>
 #include "Filter.hpp"
-#include "Player.hpp"
-#include "global.hpp"
 namespace psycle
 {
 	namespace host
@@ -13,9 +11,9 @@ namespace psycle
 			FilterCoeff Filter::_coeffs;
 
 
-			void FilterCoeff::ComputeCoeffs(int freq, int r, int t)
+			void FilterCoeff::ComputeCoeffs(int freq, int r, int t, int samplerate)
 			{
-				float omega = float(TPI*Cutoff(freq)/Global::pPlayer->SampleRate());
+				float omega = float(TPI*Cutoff(freq)/samplerate);
 				float sn = (float)sin(omega);
 				float cs = (float)cos(omega);
 				float alpha;
@@ -73,14 +71,14 @@ namespace psycle
 
 			Filter::Filter()
 			{
-				_coeffs.Init();
-				Init();
+				Init(44100);
 				_x1 = _x2 = _y1 = _y2 = 0;
 				_a1 = _a2 = _b1 = _b2 = 0;
 			}
 			
-			void Filter::Init()
+			void Filter::Init(int samplerate)
 			{
+				_coeffs.Init(samplerate);
 				_cutoff=127;
 				_q=0;
 				_type = F_LOWPASS12;

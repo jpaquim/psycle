@@ -23,11 +23,11 @@ namespace psycle
 			Configuration();
 			virtual ~Configuration() throw();
 
+#if !defined WINAMP_PLUGIN
 			void CreateFonts();
 			bool CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic);
 			
 			bool _allowMultipleInstances;
-			bool autoStopMachines;
 			bool _bShowPatternNames;
 			bool _toolbarOnVsts;
 			COLORREF mv_colour;
@@ -129,7 +129,6 @@ namespace psycle
 			CFont seqFont;
 			CFont generatorFont;
 			CFont effectFont;
-
 
 		public:
 			class midi_type
@@ -233,7 +232,6 @@ namespace psycle
 			bool _followSong;
 
 			AudioDriver** _ppOutputDrivers;
-			AudioDriver* _pOutputDriver;
 			int _numOutputDrivers;
 			int _outputDriverIndex;
 
@@ -243,22 +241,33 @@ namespace psycle
 			int _syncDriverIndex;
 			int _midiHeadroom;
 
-			int defaultPatLines;
 			bool bShowSongInfoOnLoad;
 			bool bFileSaveReminders;
 			bool autosaveSong;
 			int autosaveSongTime;
+
+#endif // !defined WINAMP_PLUGIN
+
+		public:
+			int defaultPatLines;
+			bool autoStopMachines;
+
+			AudioDriver* _pOutputDriver;
 
 			bool Initialized() { return _initialized; }
 			bool Read();
 			void Write();
 			bool ReadVersion17();
 			void SetSkinDefaults();
-
 			inline int GetSamplesPerSec() const throw()
 			{
 				return _pOutputDriver->_samplesPerSec;
 			}
+			inline void SetSamplesPerSec(int samplerate) const throw()
+			{
+				_pOutputDriver->_samplesPerSec = samplerate;
+			}
+
 
 			bool _initialized;
 

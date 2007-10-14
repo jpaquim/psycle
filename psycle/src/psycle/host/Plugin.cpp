@@ -3,10 +3,16 @@
 #include <psycle/project.private.hpp>
 #include "Plugin.hpp"
 #include "FileIO.hpp"
-#include "InputHandler.hpp"
 #include "Song.hpp"
-//#include "psycle.hpp"
-#include "NewMachine.hpp"
+
+#if !defined WINAMP_PLUGIN
+	#include "InputHandler.hpp"
+	//#include "psycle.hpp"
+	#include "NewMachine.hpp"
+#else
+	#include "player_plugins/winamp/shrunk_newmachine.hpp"
+#endif //!defined WINAMP_PLUGIN
+
 #include "loggers.hpp"
 #include "zap.hpp"
 #include <diversalis/operating_system.hpp>

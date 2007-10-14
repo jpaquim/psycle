@@ -5,7 +5,10 @@
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
-#include "InstPreview.hpp"
+
+#if !defined WINAMP_PLUGIN
+	#include "InstPreview.hpp"
+#endif // WINAMP_PLUGIN
 
 class CCriticalSection;
 
@@ -173,9 +176,13 @@ namespace psycle
 		public:
 			//todo these ought to be dynamically allocated
 			/// Wave preview.
+#if !defined WINAMP_PLUGIN
 			InstPreview wavprev;
 			/// Wave editor playback.
 			InstPreview waved;
+#else
+			int filesize;
+#endif // WINAMP_PLUGIN
 			/// runs the wave previewing.
 			void DoPreviews(int amount);
 			///\}

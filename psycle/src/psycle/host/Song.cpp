@@ -2,19 +2,32 @@
 ///\brief implementation file for psycle::host::Song.
 #include <psycle/project.private.hpp>
 #include "psycle.hpp"
-#include "NewMachine.hpp"
-#include "MainFrm.hpp"
-#include "ChildView.hpp"
-#include "ProgressDialog.hpp"
+
+#if !defined WINAMP_PLUGIN
+	#include "NewMachine.hpp"
+	#include "MainFrm.hpp"
+	#include "ChildView.hpp"
+	#include "ProgressDialog.hpp"
+#else
+	#include "player_plugins/winamp/fake_progressdialog.hpp"
+	#include "player_plugins/winamp/shrunk_newmachine.hpp"
+#endif //!defined WINAMP_PLUGIN
+
 #include "Song.hpp"
+
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.hpp"
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VSTHost24.hpp"
+
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
-#include "Riff.hpp" // for Wave file loading.
+
+#if !defined WINAMP_PLUGIN
+	#include "Riff.hpp" // for Wave file loading.
+#endif //!defined WINAMP_PLUGIN
+
 #include "zap.hpp"
 
 namespace psycle
@@ -505,6 +518,7 @@ namespace psycle
 			auxcolSelected = 0;
 			_saved=false;
 			fileName ="Untitled.psy";
+#if !defined WINAMP_PLUGIN
 			if((CMainFrame *)theApp.m_pMainWnd)
 			{
 				CreateMachine
@@ -520,6 +534,9 @@ namespace psycle
 			{
 				CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
 			}
+#else
+			CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
+#endif //!defined WINAMP_PLUGIN
 		}
 
 		int Song::GetFreeMachine()
@@ -1019,6 +1036,7 @@ namespace psycle
 
 		int Song::WavAlloc(int instrument,const char * Wavfile)
 		{ 
+#if !defined WINAMP_PLUGIN
 			assert(Wavfile != 0);
 			WaveFile file;
 			ExtRiffChunkHeader hd;
@@ -1150,6 +1168,7 @@ namespace psycle
 			}
 			file.Close();
 			Invalided = false;
+#endif //!defined WINAMP_PLUGIN
 			return 1;
 		}
 
@@ -1534,7 +1553,9 @@ namespace psycle
 				RestoreMixerSendFlags();
 				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 				// translate any data that is required
+#if !defined WINAMP_PLUGIN
 				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
+#endif //!defined WINAMP_PLUGIN
 				machineSoloed = solo;
 				// allow stuff to work again
 				_machineLock = false;
@@ -1927,6 +1948,7 @@ namespace psycle
 							pMac[i]->Load(pFile);
 						}
 
+#if !defined WINAMP_PLUGIN
 						switch (pMac[i]->_mode)
 						{
 						case MACHMODE_GENERATOR:
@@ -1943,6 +1965,7 @@ namespace psycle
 							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 							break;
 						}
+#endif //!defined WINAMP_PLUGIN
 
 						pMac[i]->_x = x;
 						pMac[i]->_y = y;
@@ -2667,9 +2690,9 @@ namespace psycle
 
 			return true;
 		}
-
 		void Song::DoPreviews(int amount)
 		{
+#if !defined WINAMP_PLUGIN
 			//todo do better.. use a vector<InstPreview*> or something instead
 			if(wavprev.IsEnabled())
 			{
@@ -2679,6 +2702,7 @@ namespace psycle
 			{
 				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
 			}
+#endif // !defined WINAMP_PLUGIN
 		}
 
 		bool Song::CloneMac(int src,int dst)
@@ -2711,7 +2735,9 @@ namespace psycle
 			}
 
 			// save our file
+#if !defined WINAMP_PLUGIN
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
+#endif //!defined WINAMP_PLUGIN
 			///\todo: Wrong song dir causes "machine cloning failed"! 
 			///\todo: the process should be chagned and save the data in memory.
 			CString filepath = Global::pConfig->GetSongDir().c_str();
@@ -2791,6 +2817,7 @@ namespace psycle
 
 			// randomize the dst's position
 
+#if !defined WINAMP_PLUGIN
 			int xs,ys,x,y;
 			if (src >= MAX_BUSES)
 			{
@@ -2829,6 +2856,7 @@ namespace psycle
 			}
 			_pMachine[dst]->_x = x;
 			_pMachine[dst]->_y = y;
+#endif //!defined WINAMP_PLUGIN
 
 			// delete all connections
 
@@ -2894,8 +2922,10 @@ namespace psycle
 				return false;
 			}
 			// ok now we get down to business
+#if !defined WINAMP_PLUGIN
 
 			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
+#endif //!defined WINAMP_PLUGIN
 
 			// save our file
 
