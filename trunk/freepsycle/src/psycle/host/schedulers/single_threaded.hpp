@@ -197,7 +197,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 					if(empty()) return *new buffer(channels_, events_);
 					buffer & result(*back());
 					assert("reference count is zero: " && !result);
-					pop_back(); ///\todo non-realtime realloc
+					pop_back(); // note: on most implementations, this will not realloc memory, so it's realtime-safe.
 					return result;
 				}
 				/// recycles a buffer in the pool.
@@ -211,7 +211,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 						s << "buffer " << &buffer << " given back, pool size before: " << size();
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
-					push_back(&buffer); ///\todo non-realtime realloc
+					push_back(&buffer); // note: does non-realtime realloc
 				}
 			private:
 				std::size_t channels_, events_;
