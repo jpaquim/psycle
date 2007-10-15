@@ -134,7 +134,7 @@ void stuff() {
 				loggers::information()(s.str());
 			}
 			scheduler.start();
-			int const notes(200);
+			int const notes(2000);
 			for(int note(0); note < notes; ++note) {
 				universalis::operating_system::threads::sleep(seconds / notes);
 				pulse1(freq);

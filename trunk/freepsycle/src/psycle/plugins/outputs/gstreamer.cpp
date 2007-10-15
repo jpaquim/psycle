@@ -15,6 +15,7 @@
 #include <cmath>
 #include <cstddef>
 namespace psycle { namespace plugins { namespace outputs {
+	using engine::exceptions::runtime_error;
 	using stream::formats::riff_wave::format;
 
 	namespace {
@@ -35,8 +36,8 @@ namespace psycle { namespace plugins { namespace outputs {
 		buffer_(),
 		current_read_position_(), current_write_position_()
 	{
-		engine::ports::inputs::single::create_on_heap(*this, "in");
-		engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
+		ports::inputs::single::create_on_heap(*this, "in");
+		ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
 	}
 
 	void gstreamer::do_name(std::string const & name) {
@@ -57,7 +58,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				if(!(factory = ::gst_element_factory_find(type.c_str()))) {
 					std::ostringstream s;
 					s << "could not find element type: " << type;
-					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 				if(loggers::information()()) {
 					std::ostringstream s;
@@ -72,7 +73,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				if(!(element = ::gst_element_factory_create(factory, name.c_str()))) {
 					std::ostringstream s;
 					s << "found element type: " << ::gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory)) << ", but could not create element instance: " << name;
-					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 				return *element;
 			}
@@ -80,7 +81,14 @@ namespace psycle { namespace plugins { namespace outputs {
 			return *static_cast< ::GstElement* >(0); // dummy return to avoid warning
 		}
 
-		::GstState inline state(::GstElement & element) { return GST_STATE(&element); }
+		::GstState inline state(::GstElement & element) {
+			// note: GST_STATE(&element) directly accesses the structure data, so this would be wrong for multi-threading.
+			::GstState current_state, pending_state;
+			::GstClockTime const timeout(0); // don't wait
+			//::GstStateChangeReturn const result(
+				::gst_element_get_state(&element, &current_state, &pending_state, timeout);
+			return current_state;
+		}
 		
 		::GstClockTime const default_timeout_nanoseconds(static_cast<GstClockTime>(5e9));
 
@@ -89,7 +97,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			::GstClockTime total_nanoseconds_waited(0);
 			for(;;) {
 				::GstState current_state, pending_state;
-				::GstStateChangeReturn result(::gst_element_get_state(&element, &current_state, &pending_state, intermediate_timeout_nanoseconds));
+				::GstStateChangeReturn const result(::gst_element_get_state(&element, &current_state, &pending_state, intermediate_timeout_nanoseconds));
 				switch(result) {
 					case ::GST_STATE_CHANGE_NO_PREROLL:
 						universalis::operating_system::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
@@ -101,7 +109,7 @@ namespace psycle { namespace plugins { namespace outputs {
 									<< "unexpected current state on element: " << ::gst_element_get_name(&element)
 									<< "; current state: " << ::gst_element_state_get_name(current_state)
 									<< ", expected state: " << ::gst_element_state_get_name(state_wanted);
-							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+							throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 						}
 					case ::GST_STATE_CHANGE_ASYNC:
 						if(pending_state != state_wanted) {
@@ -110,7 +118,7 @@ namespace psycle { namespace plugins { namespace outputs {
 									<< "unexpected pending state on element: " << ::gst_element_get_name(&element)
 									<< "; pending state: " << ::gst_element_state_get_name(pending_state)
 									<< ", expected state: " << ::gst_element_state_get_name(state_wanted);
-							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+							throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 						}
 						total_nanoseconds_waited += intermediate_timeout_nanoseconds;
 						if(total_nanoseconds_waited > timeout_nanoseconds) {
@@ -118,7 +126,7 @@ namespace psycle { namespace plugins { namespace outputs {
 								s
 									<< "timeout while waiting for state change on element: " << ::gst_element_get_name(&element)
 									<< "; pending state: " << ::gst_element_state_get_name(pending_state);
-							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+							throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 						}
 						{
 							std::ostringstream s;
@@ -139,7 +147,7 @@ namespace psycle { namespace plugins { namespace outputs {
 									<< "; state change: " << result
 									<< ", current state: " << ::gst_element_state_get_name(current_state)
 									<< ", pending state: " << ::gst_element_state_get_name(pending_state);
-							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+							throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 						}
 					default: {
 							std::ostringstream s;
@@ -148,7 +156,7 @@ namespace psycle { namespace plugins { namespace outputs {
 									<< "; state change: " << result
 									<< ", current state: " << current_state // don't use ::gst_element_state_get_name in unknown situation
 									<< ", pending state: " << pending_state; // don't use ::gst_element_state_get_name in unknown situation
-							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+							throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					}
 				}
 			}
@@ -171,12 +179,12 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(!once) {
 				once = true;
 				int * argument_count(0);
-				char *** arguments = 0;
+				char *** arguments(0);
 				::GError * error(0);
 				if(!::gst_init_check(argument_count, arguments, &error)) {
 					std::ostringstream s; s << "could not initialize gstreamer: " << error->code << ": " << error->message;
 					::g_clear_error(&error);
-					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}}}
 
 		// create an audio sink
@@ -209,7 +217,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		#undef psycle_log
 
 		// audio format
-		format format(single_input_ports()[0]->channels(), single_input_ports()[0]->events_per_second(), /*significant_bits_per_channel_sample*/ 16); /// \todo parametrable
+		format format(single_input_ports()[0]->channels(), single_input_ports()[0]->events_per_second(), /*significant_bits_per_channel_sample*/ 16); ///\todo parametrable
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << "format: " << format.description();
@@ -241,29 +249,29 @@ namespace psycle { namespace plugins { namespace outputs {
 		queue_ = &instantiate("queue", name() + "-queue");
 		
 		// create a pipeline
-		if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw engine::exceptions::runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
+		if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
 		
 		// add the elements to the pipeline
 		//::gst_bin_add_many(GST_BIN(pipeline), source_, caps_filter_, sink_, (void*)0);
-		if(!::gst_bin_add(GST_BIN(pipeline_), source_     )) throw engine::exceptions::runtime_error("could not add source element to pipeline",      UNIVERSALIS__COMPILER__LOCATION);
-		if(!::gst_bin_add(GST_BIN(pipeline_), queue_      )) throw engine::exceptions::runtime_error("could not add queue element to pipeline",       UNIVERSALIS__COMPILER__LOCATION);
-		if(!::gst_bin_add(GST_BIN(pipeline_), caps_filter_)) throw engine::exceptions::runtime_error("could not add caps filter element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
-		if(!::gst_bin_add(GST_BIN(pipeline_), sink_       )) throw engine::exceptions::runtime_error("could not add sink element to pipeline",        UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_bin_add(GST_BIN(pipeline_), source_     )) throw runtime_error("could not add source element to pipeline",      UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_bin_add(GST_BIN(pipeline_), queue_      )) throw runtime_error("could not add queue element to pipeline",       UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_bin_add(GST_BIN(pipeline_), caps_filter_)) throw runtime_error("could not add caps filter element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_bin_add(GST_BIN(pipeline_), sink_       )) throw runtime_error("could not add sink element to pipeline",        UNIVERSALIS__COMPILER__LOCATION);
 		
 		// link the element pads together
-		if(!::gst_element_link_many(source_, queue_, caps_filter_, sink_, (void*)0)) throw engine::exceptions::runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
-		//if(!::gst_element_link_pads(source_,      "sink", caps_filter_, "src")) throw engine::exceptions::runtime_error("could not link source element sink pad to caps filter element src pad", UNIVERSALIS__COMPILER__LOCATION);
-		//if(!::gst_element_link_pads(caps_filter_, "sink", sink_,        "src")) throw engine::exceptions::runtime_error("could not link caps filter element sink pad to sink element src pad",   UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_element_link_many(source_, queue_, caps_filter_, sink_, (void*)0)) throw runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
+		//if(!::gst_element_link_pads(source_,      "sink", caps_filter_, "src")) throw runtime_error("could not link source element sink pad to caps filter element src pad", UNIVERSALIS__COMPILER__LOCATION);
+		//if(!::gst_element_link_pads(caps_filter_, "sink", sink_,        "src")) throw runtime_error("could not link caps filter element sink pad to sink element src pad",   UNIVERSALIS__COMPILER__LOCATION);
 
 		// buffer settings
-		samples_per_buffer_ = 1024; /// \todo parametrable
+		samples_per_buffer_ = 1024; ///\todo parametrable
 		buffer_size_ = static_cast<unsigned int>(samples_per_buffer_ * format.bytes_per_sample());
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << "buffer size: " << buffer_size_ << " bytes";
 			loggers::information()(s.str());
 		}
-		buffers_ = 4; /// \todo parametrable
+		buffers_ = 4; ///\todo parametrable
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << buffers_ << " buffers; total buffer size: " << buffers_ * buffer_size_ << " bytes";
@@ -292,9 +300,9 @@ namespace psycle { namespace plugins { namespace outputs {
 
 		buffer_ = new char[buffer_size_ * buffers_];
 
-		// register our callback to the handoff signal of the fakesrc element
-		waiting_for_state_to_become_playing_ = true;
-		if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw engine::exceptions::runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
+		current_read_position_ = current_write_position_;
+		wait_for_state_to_become_playing_ = true;
+		stop_requested_ = false;
 
 		// set the pipeline state to ready
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
@@ -310,13 +318,21 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void gstreamer::do_start() throw(engine::exception) {
 		resource::do_start();
-		current_read_position_ = current_write_position_;
+		{
+			boost::mutex::scoped_lock lock(mutex_);
+			current_read_position_ = current_write_position_;
+			wait_for_state_to_become_playing_ = true;
+			stop_requested_ = false;
+		}
+		// register our callback to the handoff signal of the fakesrc element
+		if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
 		// set the pipeline state to playing
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
 		{
 			boost::mutex::scoped_lock lock(mutex_);
-			waiting_for_state_to_become_playing_ = false;
+			wait_for_state_to_become_playing_ = false;
 		}
+		condition_.notify_one();
 	}
 
 	bool gstreamer::started() const {
@@ -335,13 +351,16 @@ namespace psycle { namespace plugins { namespace outputs {
 		{
 			boost::mutex::scoped_lock lock(mutex_);
 			if(current_read_position_ == current_write_position_) {
-				if(waiting_for_state_to_become_playing_) {
-					//loggers::trace()("waiting for state to become playing", UNIVERSALIS__COMPILER__LOCATION);
-					return; // is handoff called before state is changed to playing?
+				if(stop_requested_) return; 
+				// Handoff is called before state is changed to playing.
+				if(wait_for_state_to_become_playing_) {
+					loggers::trace()("waiting for state to become playing", UNIVERSALIS__COMPILER__LOCATION);
+					return;
+				} else {
+					loggers::warning()("underrun", UNIVERSALIS__COMPILER__LOCATION);
 				}
-				loggers::warning()("underrun");
-				//loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
 				condition_.wait(lock);
+				if(stop_requested_) return; 
 			}
 		}
 		if(!loggers::trace()()) {
@@ -364,7 +383,6 @@ namespace psycle { namespace plugins { namespace outputs {
 			boost::mutex::scoped_lock lock(mutex_);
 			++current_read_position_ %= buffers_;
 		}
-		//loggers::trace()("notifying condition", UNIVERSALIS__COMPILER__LOCATION);
 		condition_.notify_one();
 	}
 
@@ -387,30 +405,38 @@ namespace psycle { namespace plugins { namespace outputs {
 				out[event] = static_cast<output_sample_type>(sample);
 			}
 		}
-		//loggers::trace()("notifying condition", UNIVERSALIS__COMPILER__LOCATION);
 		condition_.notify_one();
 		{
 			unsigned int const next_write_buffer((current_write_position_ + 1) % buffers_);
 			boost::mutex::scoped_lock lock(mutex_);
-			if(current_read_position_ == next_write_buffer) {
-				//loggers::trace()("waiting for condition notification", UNIVERSALIS__COMPILER__LOCATION);
-				condition_.wait(lock);
-			}
+			if(current_read_position_ == next_write_buffer) condition_.wait(lock);
 			current_write_position_ = next_write_buffer;
 		}
 	}
 	
 	void gstreamer::do_stop() throw(engine::exception) {
-		if(pipeline_) set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
+		if(pipeline_) {
+			{
+				boost::mutex::scoped_lock lock(mutex_);
+				stop_requested_ = true;
+			}
+			condition_.notify_one();
+			set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
+		}
 		resource::do_stop();
 	}
 
 	void gstreamer::do_close() throw(engine::exception) {
 		if(pipeline_) {
+			{
+				boost::mutex::scoped_lock lock(mutex_);
+				stop_requested_ = true;
+			}
+			condition_.notify_one();
 			set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_NULL);
 			::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
 		}
-		if(false) { // seems the pipeline owns its element. needs to check the doc.
+		if(false) { // seems the pipeline owns its element. need to check the doc.
 			if(sink_) ::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
 			if(caps_filter_) ::gst_object_unref(GST_OBJECT(caps_filter_)); caps_filter_ = 0;
 			if(queue_) ::gst_object_unref(GST_OBJECT(queue_)); queue_ = 0;

@@ -41,7 +41,8 @@ namespace psycle { namespace plugins { namespace outputs {
 
 			boost::condition condition_;
 			boost::mutex mutex_;
-			bool waiting_for_state_to_become_playing_;
+			bool wait_for_state_to_become_playing_;
+			bool stop_requested_;
 
 			char * buffer_;
 			unsigned int buffers_, buffer_size_, current_read_position_, current_write_position_;
