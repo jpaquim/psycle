@@ -78,9 +78,9 @@ void AudioConfigDlg::onDriverSelected( const QString & text )
 			psy::core::AudioDriverSettings settings = it->second->settings();
 			settings.setDeviceName( ///\todo allow to specify the device
 			#if defined PSYCLE__ALSA__DEFAULT_DEVICE
-				PSYCLE__ALSA__DEFAULT_DEVICE
+				PSYCLE__ALSA__DEFAULT_DEVICE ///\todo use ALSA_CARD instead?
 			#else
-				"plughw:0"
+				"plughw:0" ///\todo use "default" instead?
 			#endif
 			); 
 			it->second->setSettings( settings );
