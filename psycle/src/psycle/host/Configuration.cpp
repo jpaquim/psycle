@@ -19,6 +19,7 @@ namespace psycle
 		Configuration::Configuration()
 		{
 			_initialized = false;
+			autoStopMachines = false;
 #if !defined WINAMP_PLUGIN
 			_allowMultipleInstances = false;
 			_toolbarOnVsts = true;
@@ -34,7 +35,6 @@ namespace psycle
 			_RecordUnarmed = true;
 			_NavigationIgnoresStep = false;
 			_midiMachineViewSeqMode = false;
-			autoStopMachines = false;
 			useDoubleBuffer = true;
 			_showAboutAtStart = true;
 			_followSong = false;

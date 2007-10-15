@@ -160,7 +160,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 			{
 				char Name[33], Author[33];
 				int bpm, tpb, spt, num, playLength, patternLines[MAX_PATTERNS];
-				unsigned char playOrder[MAX_SONG_POSITIONS];
+				unsigned char playOrder[128];
 				
 				file.Read(Name, 32); Name[32]='\0';
 				file.Read(Author, 32); Author[32]='\0';
@@ -176,9 +176,9 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 					else tpb = 44100*15*4/(spt*bpm);
 
 					file.Skip(sizeof(unsigned char)); // currentOctave
-					file.Skip(sizeof(unsigned char)*MAX_BUSES); // BusMachine
+					file.Skip(sizeof(unsigned char)*64); // BusMachine
 
-					file.Read(&playOrder, sizeof(playOrder));
+					file.Read(&playOrder, 128);
 					file.Read(&playLength, sizeof(playLength));
 					file.Skip(sizeof(int));	//SONG_TRACKS
 
@@ -277,9 +277,9 @@ int play(char *fn)
 	_global._pSong->Load(&file);
 	file.Close(); //<- load handles this (but maybe nto always)
 	_global._pSong->fileName = fn;
-	int val=64;
+	int val=256;
 	_global.pPlayer->Work(_global.pPlayer,val); // Some plugins don't like to receive data without making first a
-								// work call. (for example, Phantom)
+	// work call. (for example, Phantom)
 	_global.pPlayer->Start(0,0);
 	_global.pPlayer->_loopSong=false;
 
@@ -513,9 +513,9 @@ BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 				
 				if ( pSong->_pMachine[i]->_type == MACH_DUMMY && ((Dummy*)pSong->_pMachine[i])->wasVST )
 				{
-					sprintf(valstr,"%.02i:[!]  %s",i,pSong->_pMachine[i]->_editName);
+					sprintf(valstr,"%.02x:[!]  %s",i,pSong->_pMachine[i]->_editName);
 				}
-				else sprintf(valstr,"%.02i:[%s]  %s",i,tmp2,pSong->_pMachine[i]->_editName);
+				else sprintf(valstr,"%.02x:[%s]  %s",i,tmp2,pSong->_pMachine[i]->_editName);
 				
 				SendDlgItemMessage(wnd,IDC_MACHINES,LB_ADDSTRING,0,(long)valstr);
 				j++;
