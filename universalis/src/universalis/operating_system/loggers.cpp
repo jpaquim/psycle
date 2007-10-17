@@ -7,6 +7,7 @@
 #include <universalis/detail/project.private.hpp>
 #include "loggers.hpp"
 #include <cstdlib>
+#include <algorithm> // for std::min
 namespace universalis { namespace operating_system {
 
 namespace {
@@ -70,10 +71,12 @@ namespace loggers {
 
 	// [bohan] msvc-7.1 crashes if we put this function in the implementation file instead of inlined in the header.
 	void stream_logger::do_log(int const level, std::string const & string) throw() {
-		int const static color [] = {0, 2, 6, 1, 5, 3, 4, 7};
+		int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
+		int const static colors [] = {0, 2, 6, 1, 5, 3, 4, 7};
+		char const level_char(levels[std::min(static_cast<unsigned int>(level), sizeof levels)]);
 		try {
-			if(ansi_terminal) ostream() << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m" << string << '\n';
-			else ostream() << "logger: " << level << ": " << string << '\n';
+			if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << "mlogger: " << level_char << ": \033[0m" << string << '\n';
+			else ostream() << "logger: " << level_char << ": " << string << '\n';
 		} catch(...) {
 			// oh dear!
 			// report the error to std::cerr ...
@@ -84,8 +87,8 @@ namespace loggers {
 			std::cerr << std::endl;
 			
 			// ... and fallback to std::clog
-			if(ansi_terminal) std::clog << "\033[1;3" << color[level % sizeof color] << "mlogger: " << level << ": \033[0m";
-			else std::clog << "logger: " << level << ": ";
+			if(ansi_terminal) std::clog << "\033[1;3" << colors[level % sizeof colors] << "mlogger: " << level_char << ": \033[0m";
+			else std::clog << "logger: " << level_char << ": ";
 			std::clog << string << '\n';
 		}
 	}
