@@ -40,7 +40,7 @@ class location {
 			std::string const & module,
 			std::string const & function,
 			std::string const & file,
-			unsigned int const & line
+			unsigned int const line
 		)
 		:
 			module_(module),
