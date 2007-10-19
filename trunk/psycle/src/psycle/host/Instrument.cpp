@@ -154,33 +154,33 @@ namespace psycle
 						pFile->Read(&size,sizeof(size));
 						byte* pData;
 						
-						if ( !fullopen )
-						{
-							pFile->Skip(size);
-							waveDataL=new signed short[2];
-						}
-						else
+						if ( fullopen )
 						{
 							pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
 							pFile->Read(pData,size);
 							SoundDesquash(pData,&waveDataL);
 							zapArray(pData);
 						}
+						else
+						{
+							pFile->Skip(size);
+							waveDataL=new signed short[2];
+						}
 
 						if (waveStereo)
 						{
 							pFile->Read(&size,sizeof(size));
-							if ( !fullopen )
-							{
-								pFile->Skip(size);
-								zapArray(waveDataR,new signed short[2]);
-							}
-							else
+							if ( fullopen )
 							{
 								pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
 								pFile->Read(pData,size);
 								SoundDesquash(pData,&waveDataR);
 								zapArray(pData);
+							}
+							else
+							{
+								pFile->Skip(size);
+								waveDataR =new signed short[2];
 							}
 						}
 					}

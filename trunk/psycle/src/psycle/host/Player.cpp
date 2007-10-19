@@ -253,7 +253,7 @@ namespace psycle
 							int mIndex = pEntry->_mach;
 							if(mIndex < MAX_MACHINES)
 							{
-								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(mIndex,pEntry->_inst, helpers::CValueMapper::Map_255_1(pEntry->_parameter));
+								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(pSong,mIndex,pEntry->_inst, helpers::CValueMapper::Map_255_1(pEntry->_parameter));
 							}
 						}
 						break;

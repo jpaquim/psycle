@@ -278,16 +278,16 @@ namespace psycle
 			///\{
 				public:
 					// Set or replace output wire
-					virtual void InsertOutputWireIndex(int wireIndex,int dstmac);
+					virtual void InsertOutputWireIndex(Song* pSong,int wireIndex,int dstmac);
 					// Set or replace input wire
-					virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f);
+					virtual void InsertInputWireIndex(Song* pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f);
 					virtual void ExchangeInputWires(int first,int second);
 					virtual void ExchangeOutputWires(int first,int second);
-					virtual void NotifyNewSendtoMixer(int callerMac,int senderMac);
-					virtual void ClearMixerSendFlag();
-					virtual void DeleteOutputWireIndex(int wireIndex);
-					virtual void DeleteInputWireIndex(int wireIndex);
-					virtual void DeleteWires();
+					virtual void NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac);
+					virtual void ClearMixerSendFlag(Song* pSong);
+					virtual void DeleteOutputWireIndex(Song* pSong,int wireIndex);
+					virtual void DeleteInputWireIndex(Song* pSong,int wireIndex);
+					virtual void DeleteWires(Song *pSong);
 					virtual int FindInputWire(int macIndex);
 					virtual int FindOutputWire(int macIndex);
 					virtual int GetFreeInputWire(int slottype=0);
@@ -304,8 +304,8 @@ namespace psycle
 					virtual void GetWireVolume(int wireIndex, float &value) { value = GetWireVolume(wireIndex); }
 					virtual float GetWireVolume(int wireIndex) { return _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; }
 					virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
-					virtual bool GetDestWireVolume(int srcIndex, int WireIndex,float &value);
-					virtual bool SetDestWireVolume(int srcIndex, int WireIndex,float value);
+					virtual bool GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value);
+					virtual bool SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value);
 			///\}
 
 			///\name general information

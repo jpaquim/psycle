@@ -46,6 +46,7 @@ extern In_Module mod;
 //
 BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
 BOOL WINAPI InfoProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp);
+bool BrowseForFolder(HWND m_hWnd,std::string& rpath);
 
 void config(HWND w)
 {
@@ -91,19 +92,22 @@ int CalcSongLength(Song *pSong)
 			for (int t = 0; t < pSong->SONGTRACKS*5; t+=5)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
-				switch (pEntry->_cmd)
+				if(pEntry->_note < notecommands::tweak || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
 				{
-				case 0xFF:
-					if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+					switch(pEntry->_cmd)
 					{
-						bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
-					}
-					break;
-					
-				case 0xFE:
-					if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
-					{
-						tpb=pEntry->_parameter;
+					case PatternCmd::SET_TEMPO:
+						if(pEntry->_parameter != 0)
+						{
+							bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+						}
+						break;
+					case PatternCmd::EXTENDED:
+						if((pEntry->_parameter != 0) && ( (pEntry->_parameter&0xE0) == 0 )) // range from 0 to 1F for LinesPerBeat.
+						{
+							tpb=pEntry->_parameter;
+						}
+						break;
 					}
 				}
 			}
@@ -142,10 +146,7 @@ void getfileinfo(char *filename, char *title, int *length_in_ms)
 				pSong=new Song;
 				pSong->New();
 				file.Seek(0);
-				int bpm = _global.player().bpm;
-				int lpb = _global.player().tpb;
 				pSong->Load(&file,false);
-				_global.player().SetBPM(bpm, lpb);
 
 				if (title) { sprintf(title,"%s - %s\0",pSong->author.c_str(),pSong->name.c_str()); }
 				if (length_in_ms)
@@ -456,10 +457,22 @@ BOOL WINAPI CfgProc(HWND wnd,UINT msg,WPARAM wp,LPARAM lp)
 			SetDlgItemText(wnd,IDC_CACHEVALID,CNewMachine::IsLoaded()?"File Exists.":"Not Found. Rengerate.");
 			break;
 		case IDC_BWNATIVE:
-			MessageBox(mod.hMainWindow,"Unfinished","Unfinished",MB_OK);
+			{
+				std::string plugdir = _global.pConfig->GetPluginDir();
+				if (BrowseForFolder(wnd,plugdir))
+				{
+					_global.pConfig->SetPluginDir(plugdir);
+				};
+			}
 			break;
 		case IDC_BWVST:
-			MessageBox(mod.hMainWindow,"Unfinished","Unfinished",MB_OK);
+			{
+				std::string plugdir = _global.pConfig->GetVstDir();
+				if (BrowseForFolder(wnd,plugdir))
+				{
+					_global.pConfig->SetVstDir(plugdir);
+				};
+			}
 			break;
 		}
 		break;
@@ -549,3 +562,47 @@ Song Length: %02i:%02i\nPatternsUsed: %i\nMachines Used: %i",
 	}
 	return 0;
 }
+
+bool BrowseForFolder(HWND m_hWnd,std::string& rpath)
+{
+	bool val=false;
+
+	LPMALLOC pMalloc;
+	// Gets the Shell's default allocator
+	//
+	if (::SHGetMalloc(&pMalloc) == NOERROR)
+	{
+		BROWSEINFO bi;
+		char pszBuffer[MAX_PATH];
+		LPITEMIDLIST pidl;
+		// Get help on BROWSEINFO struct - it's got all the bit settings.
+		//
+		bi.hwndOwner = m_hWnd;
+		bi.pidlRoot = NULL;
+		bi.pszDisplayName = pszBuffer;
+		bi.lpszTitle = _T("Select Directory");
+		bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
+		bi.lpfn = NULL;
+		bi.lParam = 0;
+		// This next call issues the dialog box.
+		//
+		if ((pidl = ::SHBrowseForFolder(&bi)) != NULL)
+		{
+			if (::SHGetPathFromIDList(pidl, pszBuffer))
+			{
+				// At this point pszBuffer contains the selected path
+				//
+				val = true;
+				rpath =pszBuffer;
+			}
+			// Free the PIDL allocated by SHBrowseForFolder.
+			//
+			pMalloc->Free(pidl);
+		}
+		// Release the shell's allocator.
+		//
+		pMalloc->Release();
+	}
+	return val;
+}
+

@@ -370,13 +370,13 @@ namespace psycle
 			}
 			_panning = newPan;
 		}
-		void Machine::InsertOutputWireIndex(int wireIndex, int dstmac)
+		void Machine::InsertOutputWireIndex(Song* pSong,int wireIndex, int dstmac)
 		{
 			if (!_connection[wireIndex]) _numOutputs++;
 			_outputMachines[wireIndex] = dstmac;
 			_connection[wireIndex] = true;
 		}
-		void Machine::InsertInputWireIndex(int wireIndex, int srcmac, float wiremultiplier,float initialvol)
+		void Machine::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
 		{
 			if (!_inputCon[wireIndex]) _numInputs++;
 			_inputMachines[wireIndex] = srcmac;
@@ -385,7 +385,7 @@ namespace psycle
 			SetWireVolume(wireIndex,initialvol);
 			if ( _isMixerSend )
 			{
-				NotifyNewSendtoMixer(_macIndex,srcmac);
+				NotifyNewSendtoMixer(pSong,_macIndex,srcmac);
 			}
 		}
 		int Machine::GetFreeInputWire(int slottype)
@@ -435,11 +435,11 @@ namespace psycle
 			return -1;
 		}
 
-		bool Machine::SetDestWireVolume(int srcIndex, int WireIndex,float value)
+		bool Machine::SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
 
 			if (_pDstMachine)
 			{
@@ -456,11 +456,11 @@ namespace psycle
 			return false;
 		}
 
-		bool Machine::GetDestWireVolume(int srcIndex, int WireIndex,float &value)
+		bool Machine::GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = Global::_pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
 			
 			if (_pDstMachine)
 			{
@@ -477,23 +477,23 @@ namespace psycle
 			return false;
 		}
 
-		void Machine::DeleteOutputWireIndex(int wireIndex)
+		void Machine::DeleteOutputWireIndex(Song* pSong,int wireIndex)
 		{
 			if ( _isMixerSend)
 			{
-				ClearMixerSendFlag();
+				ClearMixerSendFlag(pSong);
 			}
 			_connection[wireIndex] = false;
 			_outputMachines[wireIndex] = -1;
 			_numOutputs--;
 		}
-		void Machine::DeleteInputWireIndex(int wireIndex)
+		void Machine::DeleteInputWireIndex(Song* pSong,int wireIndex)
 		{
 			_inputCon[wireIndex] = false;
 			_inputMachines[wireIndex] = -1;
 			_numInputs--;
 		}
-		void Machine::DeleteWires()
+		void Machine::DeleteWires(Song* pSong)
 		{
 			Machine *iMac;
 			// Deleting the connections to/from other machines
@@ -504,34 +504,34 @@ namespace psycle
 				{
 					if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
 					{
-						iMac = Global::_pSong->_pMachine[_inputMachines[w]];
+						iMac = pSong->_pMachine[_inputMachines[w]];
 						if (iMac)
 						{
 							int wix = iMac->FindOutputWire(_macIndex);
 							if (wix >=0)
 							{
-								iMac->DeleteOutputWireIndex(wix);
+								iMac->DeleteOutputWireIndex(pSong,wix);
 							}
 						}
 					}
-					DeleteInputWireIndex(w);
+					DeleteInputWireIndex(pSong,w);
 				}
 				// Checking Out-Wires
 				if(_connection[w])
 				{
 					if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
 					{
-						iMac = Global::_pSong->_pMachine[_outputMachines[w]];
+						iMac = pSong->_pMachine[_outputMachines[w]];
 						if (iMac)
 						{
 							int wix = iMac->FindInputWire(_macIndex);
 							if(wix >=0 )
 							{
-								iMac->DeleteInputWireIndex(wix);
+								iMac->DeleteInputWireIndex(pSong,wix);
 							}
 						}
 					}
-					DeleteOutputWireIndex(w);
+					DeleteOutputWireIndex(pSong,w);
 				}
 			}
 		}
@@ -564,19 +564,19 @@ namespace psycle
 			_connection[first]=_connection[second];
 			_connection[second]=tmp3;
 		}
-		void Machine::NotifyNewSendtoMixer(int callerMac,int senderMac)
+		void Machine::NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac)
 		{
 			//Work down the connection wires until finding the mixer.
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
-				if ( _connection[i]) Global::_pSong->_pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(_macIndex,senderMac);
+				if ( _connection[i]) pSong->_pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(pSong,_macIndex,senderMac);
 		}
-		void Machine::ClearMixerSendFlag()
+		void Machine::ClearMixerSendFlag(Song* pSong)
 		{
 			//Work up the connection wires to clear others' flag.
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
 				if ( _inputCon[i])
 				{
-					Global::_pSong->_pMachine[_inputMachines[i]]->ClearMixerSendFlag();
+					pSong->_pMachine[_inputMachines[i]]->ClearMixerSendFlag(pSong);
 				}
 				
 			_isMixerSend=false;
@@ -794,33 +794,32 @@ namespace psycle
 			switch (type)
 			{
 			case MACH_MASTER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Master(index);
+				if ( fullopen ) pMachine = new Master(index);
+				else pMachine = new Dummy(index);
 				break;
 			case MACH_SAMPLER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Sampler(index);
+				if ( fullopen ) pMachine = new Sampler(index);
+				else pMachine = new Dummy(index);
 				break;
 			case MACH_XMSAMPLER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new XMSampler(index);
+				if ( fullopen ) pMachine = new XMSampler(index);
+				else pMachine = new Dummy(index);
 				break;
 			case MACH_DUPLICATOR:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new DuplicatorMac(index);
+				if ( fullopen ) pMachine = new DuplicatorMac(index);
+				else pMachine = new Dummy(index);
 				break;
 			case MACH_MIXER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new Mixer(index);
+				if ( fullopen ) pMachine = new Mixer(index);
+				else pMachine = new Dummy(index);
 				break;
 			case MACH_RECORDER:
-				if ( !fullopen ) pMachine = new Dummy(index);
-				else pMachine = new AudioRecorder(index);
+				if ( fullopen ) pMachine = new AudioRecorder(index);
+				else pMachine = new Dummy(index);
 				break;
 			case MACH_PLUGIN:
 				{
-					if(!fullopen) pMachine = new Dummy(index);
-					else 
+					if(fullopen)
 					{
 						Plugin * p;
 						pMachine = p = new Plugin(index);
@@ -834,13 +833,13 @@ namespace psycle
 							bDeleted = true;
 						}
 					}
+					else pMachine = new Dummy(index);
 				}
 				break;
 			case MACH_VST:
 			case MACH_VSTFX:
 				{
-					if(!fullopen) pMachine = new Dummy(index);
-					else 
+					if(fullopen)
 					{
 						std::string sPath;
 						vst::plugin *vstPlug=0;
@@ -873,6 +872,7 @@ namespace psycle
 							pMachine = vstPlug;
 						}
 					}
+					else pMachine = new Dummy(index);
 				}
 				break;
 			default:
@@ -884,6 +884,7 @@ namespace psycle
 			if(!bDeleted)
 			{
 				///\todo: Is it even necessary???
+				/// for the winamp plugin maybe?
 				pMachine->_type = type;
 			}
 			pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
@@ -911,6 +912,7 @@ namespace psycle
 				strcpy(pMachine->_editName,buf);
 			}
 			if(!fullopen) return pMachine;
+
 			if(!pMachine->LoadSpecificChunk(pFile,version))
 			{
 				char sError[MAX_PATH + 100];
