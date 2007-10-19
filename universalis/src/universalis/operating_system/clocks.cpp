@@ -7,6 +7,9 @@
 #include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "clocks.hpp"
+#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#include <unistd.h>
+#endif
 namespace universalis { namespace operating_system { namespace clocks {
 
 	// recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
@@ -32,17 +35,15 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 				wall_clock_id = process_clock_id = thread_clock_id = CLOCK_REALTIME;
 
-				#if !defined _POSIX_TIMERS && defined DIVERSALIS__COMPILER__GNU
-					#warning !defined _POSIX_TIMERS
+				#if !_POSIX_TIMERS && defined DIVERSALIS__COMPILER__GNU
+					#warning will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS
 				#elif _POSIX_TIMERS == -1 && defined DIVERSALIS__COMPILER__GNU
-					#warning _POSIX_TIMERS == -1
+					#warning this OS does not support posix timers: _POSIX_TIMERS == -1
 					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
-				#elif _POSIX_TIMERS == 0 && defined DIVERSALIS__COMPILER__GNU
-					#warning defined _POSIX_TIMERS && _POSIX_TIMERS == 0
 				#elif _POSIX_TIMERS > 0
 					// beware: cygwin defines this because it has clock_gettime, but it doesn't have clock_getres.
 					#if defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN && defined DIVERSALIS__COMPILER__GNU
-						#warning _POSIX_TIMERS > 0, but this is cygwin. \
+						#warning ignoring posix timers on cygwin: _POSIX_TIMERS > 0, but this is cygwin. \
 							Cygwin only partially implements this posix option: it has ::clock_gettime, but not ::clock_getres. \
 							Moreover, ::sysconf(_SC_TIMERS) would return 0, which condradicts _POSIX_TIMERS > 0. \
 							We will consider that it simply implements nothing.
@@ -51,7 +52,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 					#endif
 				#endif
 				#if !defined _SC_TIMERS && defined DIVERSALIS__COMPILER__GNU
-					#warning !defined _SC_TIMERS
+					#warning cannot use posix sysconf at runtime to determine whether this OS supports timers: !defined _SC_TIMERS
 					#if !defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
 						#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
 						timers_supported = false;
@@ -61,20 +62,18 @@ namespace universalis { namespace operating_system { namespace clocks {
 				#endif
 				
 				// CPUTIME
-				#if !defined _POSIX_CPUTIME && defined DIVERSALIS__COMPILER__GNU
-					#warning !defined _POSIX_CPUTIME
+				#if !_POSIX_CPUTIME && defined DIVERSALIS__COMPILER__GNU
+					#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
 				#elif _POSIX_CPUTIME == -1 && defined DIVERSALIS__COMPILER__GNU
-					#warning _POSIX_CPUTIME == -1
+					#warning this OS does not support posix cpu time: _POSIX_CPUTIME == -1
 					#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
 					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
-				#elif _POSIX_CPUTIME == 0 && defined DIVERSALIS__COMPILER__GNU
-					#warning defined _POSIX_CPUTIME && _POSIX_CPUTIME == 0
 				#elif _POSIX_CPUTIME > 0
 					#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
 					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 1
 				#endif
 				#if !defined _SC_CPUTIME && defined DIVERSALIS__COMPILER__GNU
-					#warning !defined _SC_CPUTIME
+					#warning cannot use posix sysconf at runtime to determine whether this OS supports cpu time: !defined _SC_CPUTIME
 					#if !defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
 						#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
 						cpu_time_supported = false;
@@ -93,20 +92,18 @@ namespace universalis { namespace operating_system { namespace clocks {
 				#endif
 			
 				// MONOTONIC_CLOCK
-				#if !defined _POSIX_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__GNU
-					#warning !defined _POSIX_MONOTONIC_CLOCK
+				#if !_POSIX_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__GNU
+					#warning will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK
 				#elif _POSIX_MONOTONIC_CLOCK == -1 && defined DIVERSALIS__COMPILER__GNU
-					#warning _POSIX_MONOTONIC_CLOCK == -1
+					#warning this OS does not support posix monotonic clock: _POSIX_MONOTONIC_CLOCK == -1
 					#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
 					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
-				#elif _POSIX_MONOTONIC_CLOCK == 0 && defined DIVERSALIS__COMPILER__GNU
-					#warning defined _POSIX_MONOTONIC_CLOCK && _POSIX_MONOTONIC_CLOCK == 0
 				#elif _POSIX_MONOTONIC_CLOCK > 0
 					#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
 					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 1
 				#endif
 				#if !defined _SC_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__GNU
-					#warning !defined _SC_MONOTONIC_CLOCK
+					#warning cannot use posix sysconf at runtime to determine whether this OS supports monotonic clock: !defined _SC_MONOTONIC_CLOCK
 					#if !defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
 						#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
 					#endif
