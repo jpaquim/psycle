@@ -30,9 +30,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger {
 		void operator()(int const level, std::string const & message) throw() { log(level, message); }
 		void operator()(int const level, std::string const & message, compiler::location const & location) throw() { log(level, message, location); }
 
-	protected:
+	protected: friend class loggers::multiplex_logger;
 		void            log(int const level, std::string const &, compiler::location const & location) throw();
-		void            log(int const level, std::string const &) throw(); friend class loggers::multiplex_logger;
+		void            log(int const level, std::string const &) throw();
+		void virtual do_log(int const level, std::string const & message, compiler::location const &) throw() = 0;
 		void virtual do_log(int const level, std::string const &) throw() = 0;
 
 	protected: boost::mutex & mutex() throw() { return mutex_; }
@@ -54,7 +55,8 @@ namespace loggers {
 		///\}
 
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__IMPLEMENTS_PURE do_log(int const level, std::string const &) throw();
+			void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
+			void do_log(int const level, std::string const &) throw() /* override pure */;
 
 		///\name singleton
 		///\{
@@ -69,7 +71,8 @@ namespace loggers {
 			stream_logger(std::ostream &);
 
 		protected:
-			void UNIVERSALIS__COMPILER__VIRTUAL__IMPLEMENTS_PURE do_log(int const level, std::string const & string) throw();
+			void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
+			void do_log(int const level, std::string const &) throw() /* override pure */;
 
 		///\name underlying stream
 		///\{
