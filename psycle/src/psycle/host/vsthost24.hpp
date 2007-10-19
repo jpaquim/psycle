@@ -211,32 +211,32 @@ namespace psycle
 				}
 				virtual bool DescribeValue(int parameter, char * psTxt);
 
-				virtual void InsertOutputWireIndex(int wireIndex,int dstmac)
+				virtual void InsertOutputWireIndex(Song* pSong,int wireIndex,int dstmac)
 				{
 					try
 					{
-						MainsChanged(false); ConnectOutput(0,true); ConnectOutput(1,true); Machine::InsertOutputWireIndex(wireIndex,dstmac);  MainsChanged(true);
+						MainsChanged(false); ConnectOutput(0,true); ConnectOutput(1,true); Machine::InsertOutputWireIndex(pSong,wireIndex,dstmac);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void InsertInputWireIndex(int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f)
+				virtual void InsertInputWireIndex(Song* pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f)
 				{
 					try
 					{
-						MainsChanged(false); ConnectInput(0,true); ConnectInput(1,true); Machine::InsertInputWireIndex(wireIndex,srcmac,wiremultiplier,initialvol);  MainsChanged(true);
+						MainsChanged(false); ConnectInput(0,true); ConnectInput(1,true); Machine::InsertInputWireIndex(pSong,wireIndex,srcmac,wiremultiplier,initialvol);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void DeleteOutputWireIndex(int wireIndex)
+				virtual void DeleteOutputWireIndex(Song* pSong,int wireIndex)
 				{
 					try
 					{
-						MainsChanged(false); ConnectOutput(0,false); ConnectOutput(1,false); Machine::DeleteOutputWireIndex(wireIndex);  MainsChanged(true);
+						MainsChanged(false); ConnectOutput(0,false); ConnectOutput(1,false); Machine::DeleteOutputWireIndex(pSong,wireIndex);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void DeleteInputWireIndex(int wireIndex)
+				virtual void DeleteInputWireIndex(Song* pSong,int wireIndex)
 				{ 
 					try
 					{
-						MainsChanged(false); ConnectInput(0,false); ConnectInput(1,false); Machine::DeleteInputWireIndex(wireIndex);  MainsChanged(true);
+						MainsChanged(false); ConnectInput(0,false); ConnectInput(1,false); Machine::DeleteInputWireIndex(pSong,wireIndex);  MainsChanged(true);
 					}catch(...){}
 				}
 				virtual float GetAudioRange(){ return 1.0f; }

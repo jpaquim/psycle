@@ -211,7 +211,7 @@ namespace psycle
 				// store out volumes aswell
 				if (connection[i])
 				{
-					origmac->GetDestWireVolume(songIdx,i,outputConVol[i]);
+					origmac->GetDestWireVolume(this,songIdx,i,outputConVol[i]);
 				}
 			}
 
@@ -220,7 +220,7 @@ namespace psycle
 				return false;
 
 			// replace all the connection info
-			Machine* newmac = Global::_pSong->_pMachine[songIdx];
+			Machine* newmac = _pMachine[songIdx];
 			if (newmac)
 			{
 				newmac->_numOutputs = numOutputs;
@@ -266,8 +266,8 @@ namespace psycle
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					// Store the volumes of each wire and exchange.
-					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(mac1->_macIndex,i,tmp1ovol[i]);	}
-					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(mac2->_macIndex,i,tmp2ovol[i]); }				
+					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(this,mac1->_macIndex,i,tmp1ovol[i]);	}
+					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(this,mac2->_macIndex,i,tmp2ovol[i]); }				
 					mac1->GetWireVolume(i,tmp1ivol[i]);
 					mac2->GetWireVolume(i,tmp2ivol[i]);
 
@@ -311,23 +311,23 @@ namespace psycle
 					if (mac1->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac1->_inputMachines[i]];
-						mac1->InsertInputWireIndex(i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
+						mac1->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
 					}
 					if (mac2->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac2->_inputMachines[i]];
-						mac2->InsertInputWireIndex(i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
+						mac2->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
 					}
 
 					if (mac1->_connection[i])
 					{
 						Machine* macdst = _pMachine[mac1->_outputMachines[i]];
-						macdst->InsertInputWireIndex(macdst->FindInputWire(two),two,mac1->GetAudioRange()/macdst->GetAudioRange(),tmp2ovol[i]);
+						macdst->InsertInputWireIndex(this,macdst->FindInputWire(two),two,mac1->GetAudioRange()/macdst->GetAudioRange(),tmp2ovol[i]);
 					}
 					if (mac2->_connection[i])
 					{
 						Machine* macdst = _pMachine[mac2->_outputMachines[i]];
-						macdst->InsertInputWireIndex(macdst->FindInputWire(one),one,mac2->GetAudioRange()/macdst->GetAudioRange(),tmp1ovol[i]);
+						macdst->InsertInputWireIndex(this,macdst->FindInputWire(one),one,mac2->GetAudioRange()/macdst->GetAudioRange(),tmp1ovol[i]);
 					}					
 				}
 
@@ -413,12 +413,11 @@ namespace psycle
 		{
 			CSingleLock lock(&door,TRUE);
 
-			Song* pSong = Global::_pSong;
 			Instrument * tmpins;
 
-			tmpins=pSong->_pInstrument[one];
-			pSong->_pInstrument[one]=pSong->_pInstrument[two];
-			pSong->_pInstrument[two]=tmpins;
+			tmpins=_pInstrument[one];
+			_pInstrument[one]=_pInstrument[two];
+			_pInstrument[two]=tmpins;
 			//The above works because we are not creating new objects, just swaping them.
 			//this means that no new data is generated/deleted,and the information is just
 			//copied. If not, we would have had to define the operator=() function and take
@@ -557,7 +556,7 @@ namespace psycle
 			{
 				if (mac->_inputCon[i])
 				{
-					if (!ValidateMixerSendCandidate(Global::_pSong->_pMachine[mac->_inputMachines[i]],false))
+					if (!ValidateMixerSendCandidate(_pMachine[mac->_inputMachines[i]],false))
 					{
 						return false;
 					}
@@ -577,7 +576,7 @@ namespace psycle
 						for (int j(0); j<mac->numreturns(); ++j)
 						{
 							if ( mac->Return(j).IsValid())
-								mac->SetMixerSendFlag(_pMachine[mac->Return(j).Wire().machine_]);
+								mac->SetMixerSendFlag(this,_pMachine[mac->Return(j).Wire().machine_]);
 						}
 					}
 				}
@@ -609,8 +608,8 @@ namespace psycle
 			if(freebus == -1 || dfreebus == -1 ) return -1;
 
 			// If everything went right, connect them.
-			srcMac->InsertOutputWireIndex(freebus,dstMac->_macIndex);
-			dstMac->InsertInputWireIndex(dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
+			srcMac->InsertOutputWireIndex(this,freebus,dstMac->_macIndex);
+			dstMac->InsertInputWireIndex(this,dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
 			return dfreebus;
 		}
 		bool Song::ChangeWireDestMac(Machine* srcMac,Machine* dstMac, int wiresrc,int wiredest)
@@ -644,9 +643,9 @@ namespace psycle
 					return false;
 
 				oldmac->GetWireVolume(w,volume);
-				oldmac->DeleteInputWireIndex(w);
-				srcMac->InsertOutputWireIndex(wiresrc,dstMac->_macIndex);
-				dstMac->InsertInputWireIndex(wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				oldmac->DeleteInputWireIndex(this,w);
+				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
+				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -699,10 +698,10 @@ namespace psycle
 				if ((w =oldmac->FindOutputWire(dstMac->_macIndex)) == -1)
 					return false;
 
-				oldmac->DeleteOutputWireIndex(w);
-				srcMac->InsertOutputWireIndex(wiresrc,dstMac->_macIndex);
+				oldmac->DeleteOutputWireIndex(this,w);
+				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
 				dstMac->GetWireVolume(wiredest,volume);
-				dstMac->InsertInputWireIndex(wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -714,7 +713,7 @@ namespace psycle
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{
-				iMac->DeleteWires();
+				iMac->DeleteWires(this);
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 				try
@@ -1298,10 +1297,13 @@ namespace psycle
 								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
-							///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
-							/// It should be coded in some way to get this information from the loading song, since doing it here
-							/// is bad for the Winamp plugin (or any other multi-document situation).
-							Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
+							if (fullopen)
+							{
+								///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
+								/// It should be coded in some way to get this information from the loading song, since doing it here
+								/// is bad for the Winamp plugin (or any other multi-document situation).
+								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
+							}
 						}
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
@@ -1609,13 +1611,16 @@ namespace psycle
 				// The old format assumes we output at 44100 samples/sec, so...
 				else m_LinesPerBeat = 44100 * 60 / (sampR * m_BeatsPerMin);
 
-				///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
-				/// It should be coded in some way to get this information from the loading song, since doing it here
-				/// is bad for the Winamp plugin (or any other multi-document situation).
-				Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
-//				Global::pPlayer->bpm = m_BeatsPerMin;
-//				Global::pPlayer->tpb = m_LinesPerBeat;
-//				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
+				if (fullopen)
+				{
+					///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
+					/// It should be coded in some way to get this information from the loading song, since doing it here
+					/// is bad for the Winamp plugin (or any other multi-document situation).
+					Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
+	//				Global::pPlayer->bpm = m_BeatsPerMin;
+	//				Global::pPlayer->tpb = m_LinesPerBeat;
+	//				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
+				}
 				pFile->Read(&currentOctave, sizeof(char));
 				pFile->Read(busMachine, 64);
 				pFile->Read(playOrder, 128);
@@ -2180,7 +2185,7 @@ namespace psycle
 										val*=32768.0f; // BugFix
 									}
 									// and set the volume.
-									pMac[i]->InsertInputWireIndex(c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
+									pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
 								}
 							}
 							else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
@@ -2867,7 +2872,7 @@ namespace psycle
 
 			// delete all connections
 
-			_pMachine[dst]->DeleteWires();
+			_pMachine[dst]->DeleteWires(this);
 
 			int number = 1;
 			char buf[sizeof(_pMachine[dst]->_editName)+4];
@@ -2914,17 +2919,17 @@ namespace psycle
 		bool Song::CloneIns(int src,int dst)
 		{
 			// src has to be occupied and dst must be empty
-			if (!Global::_pSong->_pInstrument[src]->Empty() && !Global::_pSong->_pInstrument[dst]->Empty())
+			if (!_pInstrument[src]->Empty() && !_pInstrument[dst]->Empty())
 			{
 				return false;
 			}
-			if (!Global::_pSong->_pInstrument[dst]->Empty())
+			if (!_pInstrument[dst]->Empty())
 			{
 				int temp = src;
 				src = dst;
 				dst = temp;
 			}
-			if (Global::_pSong->_pInstrument[src]->Empty())
+			if (_pInstrument[src]->Empty())
 			{
 				return false;
 			}

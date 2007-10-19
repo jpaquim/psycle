@@ -582,11 +582,11 @@ namespace psycle
 				RecalcReturn(wireIndex-MAX_CONNECTIONS);
 			}
 		}
-		void Mixer::InsertInputWireIndex(int wireIndex, int srcmac, float wiremultiplier,float initialvol)
+		void Mixer::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
 		{
 			if (wireIndex< MAX_CONNECTIONS)
 			{
-				Machine::InsertInputWireIndex(wireIndex,srcmac,wiremultiplier,initialvol);
+				Machine::InsertInputWireIndex(pSong,wireIndex,srcmac,wiremultiplier,initialvol);
 				InsertChannel(wireIndex);
 				RecalcChannel(wireIndex);
 				for (int i(0);i<numsends();++i)
@@ -597,7 +597,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				SetMixerSendFlag(Global::_pSong->_pMachine[srcmac]);
+				SetMixerSendFlag(pSong,pSong->_pMachine[srcmac]);
 				MixerWire wire(srcmac,0);
 				InsertReturn(wireIndex,wire);
 				InsertSend(wireIndex,wire);
@@ -643,27 +643,27 @@ namespace psycle
 			}
 		}
 
-		void Mixer::DeleteInputWireIndex(int wireIndex)
+		void Mixer::DeleteInputWireIndex(Song* pSong,int wireIndex)
 		{
 			if ( wireIndex < MAX_CONNECTIONS)
 			{
-				Machine::DeleteInputWireIndex(wireIndex);
+				Machine::DeleteInputWireIndex(pSong,wireIndex);
 				DiscardChannel(wireIndex);
 			}
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				DeleteMixerSendFlag(Global::_pSong->_pMachine[Return(wireIndex).Wire().machine_]);
+				DeleteMixerSendFlag(pSong,pSong->_pMachine[Return(wireIndex).Wire().machine_]);
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
 				DiscardSend(wireIndex);
 			}
 		}
-		void Mixer::NotifyNewSendtoMixer(int callerMac,int senderMac)
+		void Mixer::NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac)
 		{
 			// Mixer reached, set flags upwards.
-			SetMixerSendFlag(Global::_pSong->_pMachine[callerMac]);
+			SetMixerSendFlag(pSong,pSong->_pMachine[callerMac]);
 			for (int i(0); i < MAX_CONNECTIONS; i++)
 			{
 				if ( ReturnValid(i))
@@ -673,42 +673,42 @@ namespace psycle
 				}
 			}
 		}
-		void Mixer::SetMixerSendFlag(Machine* mac)
+		void Mixer::SetMixerSendFlag(Song* pSong,Machine* mac)
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) SetMixerSendFlag(Global::_pSong->_pMachine[mac->_inputMachines[i]]);
+				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=true;
 		}
-		void Mixer::DeleteMixerSendFlag(Machine* mac)
+		void Mixer::DeleteMixerSendFlag(Song* pSong,Machine* mac)
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) DeleteMixerSendFlag(Global::_pSong->_pMachine[mac->_inputMachines[i]]);
+				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=false;
 		}
 
-		void Mixer::DeleteWires()
+		void Mixer::DeleteWires(Song* pSong)
 		{
-			Machine::DeleteWires();
+			Machine::DeleteWires(pSong);
 			Machine *iMac;
 			for(int w=0; w<numreturns(); w++)
 			{
 				// Checking send/return Wires
 				if(Return(w).IsValid())
 				{
-					iMac = Global::_pSong->_pMachine[Return(w).Wire().machine_];
+					iMac = pSong->_pMachine[Return(w).Wire().machine_];
 					if (iMac)
 					{
 						int wix = iMac->FindOutputWire(_macIndex);
 						if (wix >=0)
 						{
-							iMac->DeleteOutputWireIndex(wix);
+							iMac->DeleteOutputWireIndex(pSong,wix);
 						}
 					}
-					DeleteInputWireIndex(w+MAX_CONNECTIONS);
+					DeleteInputWireIndex(pSong,w+MAX_CONNECTIONS);
 				}
 			}
 		}
