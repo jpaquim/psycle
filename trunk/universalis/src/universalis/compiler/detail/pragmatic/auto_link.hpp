@@ -7,7 +7,6 @@
 #include "pragmas.hpp"
 //#region UNIVERSALIS
 	//#region COMPILER
-		#else
 		#if defined DIVERSALIS__COMPILER__MICROSOFT
 			#if !defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 				#error "boggus preprocessor definitions: DIVERSALIS__COMPILER__FEATURE__AUTO_LINK should be defined. please fix the cause not this symptom."
