@@ -171,8 +171,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pParent->AddMacViewUndo();
 			Inval = true;
 			CSingleLock lock(&Global::_pSong->door,TRUE);
-			_pSrcMachine->DeleteOutputWireIndex(wireIndex);
-			_pDstMachine->DeleteInputWireIndex(_dstWireIndex);
+			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
+			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
 			OnCancel();
 		}
 
