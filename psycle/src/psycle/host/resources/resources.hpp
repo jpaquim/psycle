@@ -1040,6 +1040,7 @@
 #define IDC_FILTERMAC                   1797
 #define IDC_FILTERCMD                   1798
 #define IDC_APPLYTOBLOCK                1799
+#define IDAPPLY                         1800
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1209,7 +1210,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        278
 #define _APS_NEXT_COMMAND_VALUE         34210
-#define _APS_NEXT_CONTROL_VALUE         1800
+#define _APS_NEXT_CONTROL_VALUE         1801
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

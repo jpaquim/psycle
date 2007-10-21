@@ -12,7 +12,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CTransformPatternDlg::CTransformPatternDlg(CWnd* pParent /*=NULL*/)
 			: CDialog(CTransformPatternDlg::IDD, pParent)
 		{
-
+			m_filternote.EnableWindow(false);
+			m_filtercmd.EnableWindow(false);
+			m_replacenote.EnableWindow(false);
+			m_replacecmd.EnableWindow(false);
 		}
 
 		CTransformPatternDlg::~CTransformPatternDlg()
@@ -38,20 +41,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		BEGIN_MESSAGE_MAP(CTransformPatternDlg, CDialog)
 		//{{AFX_MSG_MAP(CTransformPatternDlg)
-			ON_BN_CLICKED(IDOK, &CTransformPatternDlg::OnBnClickedOk)
-			//}}AFX_MSG_MAP
+			ON_BN_CLICKED(IDAPPLY, &CTransformPatternDlg::OnBnClickedApply)
+		//}}AFX_MSG_MAP
+
 		END_MESSAGE_MAP()
 
 
 		// CTransformPatternDlg message handlers
 
-		void CTransformPatternDlg::OnBnClickedOk()
-		{
-			// TODO: Add your control notification handler code here
-			OnOK();
-		}
-
-		void CTransformPatternDlg::OnOK()
+		void CTransformPatternDlg::OnBnClickedApply()
 		{
 			char afilternote[32];
 			char afilterins[32];
@@ -98,10 +96,44 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			// now perform the pattern data replacement
 
-			
+			int currentPattern;
+			int currentColumn;
+			int currentLine;
 
-			//
-			CDialog::OnOK();
+			int patternCount = 0;
+			int columnCount = 0;
+
+			int currentins;
+			int currentmac;
+
+			unsigned char * toffset;
+			PatternEntry *entry;
+
+			for (currentPattern = 0; currentPattern < patternCount; currentPattern++)
+			{
+				lineCount = 0;
+				for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
+				{
+					for (currentLine = 0; currentLine < lineCount; currentLine++)
+					{
+						toffset = _ptrack
+						entry = (PatternEntry*) toffset;
+
+						currentins = ;
+						currentmac = ;
+
+						if (currentins == filterins)
+						{//change entry to replaceins
+
+						}
+
+						if (currentmac == filtermac)
+						{//change entry to replacemac
+
+						}
+					}
+				}
+			}
 		}
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END

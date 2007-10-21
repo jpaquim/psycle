@@ -36,12 +36,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		protected:
 		// Generated message map functions
 		//{{AFX_MSG(CTransformPatternDlg)
-			virtual void OnOK();
 			
 		//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		public:
-			afx_msg void OnBnClickedOk();
+			afx_msg void OnBnClickedApply();
 		};
 
 
