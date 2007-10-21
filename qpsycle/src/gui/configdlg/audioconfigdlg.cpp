@@ -74,15 +74,11 @@ void AudioConfigDlg::onDriverSelected( const QString & text )
 	if ( it != driverMap.end() ) {
 		psy::core::AudioDriver* driver = it->second;
 		selectedDriver_ = driver;
-		if ( text == "alsa" ) { ///\todo FIXME: bugs if device not set, temp fix.
+		if ( text == "alsa" ) {
 			psy::core::AudioDriverSettings settings = it->second->settings();
-			settings.setDeviceName( ///\todo allow to specify the device
-			#if defined PSYCLE__ALSA__DEFAULT_DEVICE
-				PSYCLE__ALSA__DEFAULT_DEVICE ///\todo use ALSA_CARD instead?
-			#else
-				"plughw:0" ///\todo use "default" instead?
-			#endif
-			); 
+			///\todo allow to specify the device in the gui.
+			///\todo use the ALSA_CARD env var if present: char const * const device(std::getenv("ALSA_CARD"));
+			settings.setDeviceName("default"); 
 			it->second->setSettings( settings );
 		}
 	}
