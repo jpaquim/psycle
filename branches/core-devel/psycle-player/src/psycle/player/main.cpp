@@ -14,7 +14,7 @@ void usage() {
 			"                                 examples: silent, alsa, jack, esd, dsound, mmewaveout\n"
 			"\n"
 			" -odev, --output-device <name>   name of the output device the driver should use.\n"
-			"                                 The default driver will be used if this option is not specified.\n"
+			"                                 The default device will be used if this option is not specified.\n"
 			"                                 examples for alsa: default, hw:0, plughw:0, pulse.\n"
 			//"                                 examples for gstreamer: autoaudiosink, gconfaudiosink.\n"
 			//"                                 examples for pulseaudio: hostname:port\n"
