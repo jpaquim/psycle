@@ -120,8 +120,8 @@ namespace psy {
 		rate = 44100; // stream rate
 		format = SND_PCM_FORMAT_S16; // sample format
 		channels = 2; // count of channels
-		buffer_time = 80000; // ring buffer length in us
-		period_time = 20000; // period time in us
+		buffer_time = 100000; // ring buffer length in us (for colinux->windows, 100000 seems to work fine)
+		period_time = 40000; // period time in us (for colinux->windows, 40000 seems to work fine)
 		
 		buffer_size=0;
 		period_size=0;
