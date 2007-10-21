@@ -76,7 +76,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int replaceins = -1;
 			int replacemac = -1;
 
-			if (afilterins[0] != '\0')
+			if (afilterins[0] !=	'\0')
 				filterins = atoi(afilterins);
 			else
 				TRACE("filterins is blank\n");
