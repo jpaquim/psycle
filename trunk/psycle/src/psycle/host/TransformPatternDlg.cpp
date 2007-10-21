@@ -9,13 +9,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		IMPLEMENT_DYNAMIC(CTransformPatternDlg, CDialog)
 
-		CTransformPatternDlg::CTransformPatternDlg(CWnd* pParent /*=NULL*/)
+		CTransformPatternDlg::CTransformPatternDlg(CChildView* pChildView, CWnd* pParent /*=NULL*/)
 			: CDialog(CTransformPatternDlg::IDD, pParent)
 		{
-			m_filternote.EnableWindow(false);
-			m_filtercmd.EnableWindow(false);
-			m_replacenote.EnableWindow(false);
-			m_replacecmd.EnableWindow(false);
+			_pChildView = pChildView;
 		}
 
 		CTransformPatternDlg::~CTransformPatternDlg()
@@ -46,6 +43,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		END_MESSAGE_MAP()
 
+		BOOL CTransformPatternDlg::OnInitDialog() 
+		{
+			CDialog::OnInitDialog();
+
+			m_filternote.EnableWindow(false);
+			m_filtercmd.EnableWindow(false);
+			m_replacenote.EnableWindow(false);
+			m_replacecmd.EnableWindow(false);
+
+			return true;  // return true unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return false
+		}
 
 		// CTransformPatternDlg message handlers
 
@@ -76,60 +85,89 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if (afilterins[0] !=	'\0')
 				filterins = atoi(afilterins);
-			else
-				TRACE("filterins is blank\n");
 
 			if (afiltermac[0] != '\0')
-				filtermac = atoi(afiltermac);
-			else
-				TRACE("filtermac is blank\n");			
+				filtermac = atoi(afiltermac);			
 
 			if (areplaceins[0] != '\0')
 				replaceins = atoi(areplaceins);
-			else
-				TRACE("replaceins is blank\n");
 
 			if (areplacemac[0] != '\0')
 				replacemac = atoi(areplacemac);
-			else
-				TRACE("replacemac is blank\n");
 
-			// now perform the pattern data replacement
-
-			int currentPattern;
-			int currentColumn;
-			int currentLine;
-
-			int patternCount = 0;
-			int columnCount = 0;
-
-			int currentins;
-			int currentmac;
-
-			unsigned char * toffset;
-			PatternEntry *entry;
-
-			for (currentPattern = 0; currentPattern < patternCount; currentPattern++)
+			if ((filterins != -1) | (filtermac != -1))
 			{
-				lineCount = 0;
-				for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
+				// now perform the pattern data replacement
+
+				int matchTarget = 0;
+
+				if (filterins != -1)
+					matchTarget++;
+
+				if (filtermac != -1)
+					matchTarget++;
+
+				int currentPattern;
+				int currentColumn;
+				int currentLine;
+
+				Song* pSong = _pChildView->_pSong;
+
+				int lastPatternUsed = pSong->GetLastPatternUsed();
+				int columnCount = pSong->SONGTRACKS;
+				int lineCount;
+
+				TRACE("lastPatternUsed used is %i\n", lastPatternUsed);
+				TRACE("columnCount used is %i\n", columnCount);
+
+				int currentins;
+				int currentmac;
+
+				unsigned char * toffset;
+
+				int matchCount;
+
+				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
-					for (currentLine = 0; currentLine < lineCount; currentLine++)
+					if (pSong->IsPatternUsed(currentPattern))
 					{
-						toffset = _ptrack
-						entry = (PatternEntry*) toffset;
+						PatternEntry* patternEntry = (PatternEntry*)pSong->_ppattern(currentPattern);
+						lineCount = pSong->patternLines[currentPattern];
 
-						currentins = ;
-						currentmac = ;
+						for (currentLine = 0; currentLine < lineCount; currentLine++)
+						{
+							for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
+							{
+								currentins = patternEntry[(currentLine*columnCount)+currentColumn]._inst;
+								currentmac = patternEntry[(currentLine*columnCount)+currentColumn]._mach;																				
+							
+								TRACE("[%i,%i] ins=%i mac=%i\n", currentLine, currentColumn, currentins, currentmac);
 
-						if (currentins == filterins)
-						{//change entry to replaceins
+								matchCount = 0;
 
-						}
+								if (currentins == filterins)
+								{
+									matchCount++;
+								}
 
-						if (currentmac == filtermac)
-						{//change entry to replacemac
+								if (currentmac == filtermac)
+								{
+									matchCount++;
+								}
 
+								if (matchCount == matchTarget)
+								{
+									TRACE("MATCH currentLine is %i\n", currentLine);
+									if (filterins != -1)
+									{
+										patternEntry[(currentLine*columnCount)+currentColumn]._inst = replaceins;
+									}
+									if (filtermac != -1)
+									{
+										patternEntry[(currentLine*columnCount)+currentColumn]._mach = replacemac;
+									}
+								}
+							}
 						}
 					}
 				}

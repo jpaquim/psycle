@@ -117,6 +117,8 @@ namespace psycle
 			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
 			void DestroyAllMachines(bool write_locked = false);
+			//the index of the last pattern containing data
+			int GetLastPatternUsed();
 			/// the number of pattern used in this song.
 			int GetNumPatternsUsed();
 			/// creates a new connection between two machines. returns index in the dest machine, or -1 if error.

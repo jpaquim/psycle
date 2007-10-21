@@ -815,6 +815,22 @@ namespace psycle
 			return true;
 		}
 
+		int Song::GetLastPatternUsed()
+		{
+			int patternsUsedCount = GetNumPatternsUsed();
+			int patternsFound = 0;
+			int patternIndex = -1;
+
+			while (patternsFound < patternsUsedCount)
+			{
+				patternIndex++;
+				if (IsPatternUsed(patternIndex))
+					patternsFound++;
+			}
+
+			return patternIndex;
+		}
+
 		int Song::GetNumPatternsUsed()
 		{
 			int rval(0);
