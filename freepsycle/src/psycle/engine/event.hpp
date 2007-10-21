@@ -12,24 +12,6 @@ namespace psycle { namespace engine {
 /// a sample with an associated, logical, index.
 /// the index corresponds to a logical (i.e., not physical) position in a buffer.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK event {
-	///\name index
-	///\{
-		public:
-			/// the logical index of the sample.
-			///\returns the logical index of the sample
-			std::size_t index() const throw() { return index_; }
-			/// the mutable logical index of the sample.
-			///\returns mutable value of the logical index of the sample
-			std::size_t & index() throw() { return index_; }
-			/// sets the logical index of the sample.
-			///\param the logical index of the sample
-			void index(std::size_t index) throw() { index_ = index; }
-			/// the const value of the sample.
-			///\returns the const value of the sample
-		private:
-			std::size_t index_;
-	///\}
-	
 	///\name sample
 	///\{
 		public:
@@ -47,6 +29,24 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK event {
 			///\return true if both events have the same logical index
 		private:
 			real sample_;
+	///\}
+
+	///\name index
+	///\{
+		public:
+			/// the logical index of the sample.
+			///\returns the logical index of the sample
+			std::size_t index() const throw() { return index_; }
+			/// the mutable logical index of the sample.
+			///\returns mutable value of the logical index of the sample
+			std::size_t & index() throw() { return index_; }
+			/// sets the logical index of the sample.
+			///\param the logical index of the sample
+			void index(std::size_t index) throw() { index_ = index; }
+			/// the const value of the sample.
+			///\returns the const value of the sample
+		private:
+			std::size_t index_;
 	///\}
 
 	public:
