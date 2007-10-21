@@ -24,6 +24,7 @@
 #include "WireDlg.hpp"
 #include "MacProp.hpp"
 #include "NewMachine.hpp"
+#include "TransformPatternDlg.hpp"
 #include "PatDlg.hpp"
 #include "vsthost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath> // SwingFill
@@ -200,6 +201,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_COMMAND(ID_POP_TRANSPOSE_12, OnPopTranspose_12)
 			ON_COMMAND(ID_AUTOSTOP, OnAutostop)
 			ON_UPDATE_COMMAND_UI(ID_AUTOSTOP, OnUpdateAutostop)
+			ON_COMMAND(ID_POP_TRANSFORMPATTERN, OnPopTransformpattern)
 			ON_COMMAND(ID_POP_PATTENPROPERTIES, OnPopPattenproperties)
 			ON_COMMAND(ID_POP_BLOCK_SWINGFILL, OnPopBlockSwingfill)
 			ON_COMMAND(ID_POP_TRACK_SWINGFILL, OnPopTrackSwingfill)
@@ -1261,6 +1263,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pParentMain->ShowMidiMonitorDlg();
 		}
 
+		void CChildView::ShowTransformPatternDlg(void)
+		{
+			CTransformPatternDlg dlg;
+
+			if (dlg.DoModal() == IDOK)
+			{
+
+			}
+		}
+
 		void CChildView::ShowPatternDlg(void)
 		{
 			CPatDlg dlg;
@@ -1679,6 +1691,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnPopTranspose_1() { BlockTranspose(-1); }
 
 		void CChildView::OnPopTranspose_12() { BlockTranspose(-12); }
+
+		void CChildView::OnPopTransformpattern() 
+		{
+			ShowTransformPatternDlg();			
+		}
 
 		void CChildView::OnPopPattenproperties() 
 		{
