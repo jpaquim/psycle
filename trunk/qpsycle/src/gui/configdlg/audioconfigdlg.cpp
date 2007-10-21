@@ -76,9 +76,7 @@ void AudioConfigDlg::onDriverSelected( const QString & text )
 		selectedDriver_ = driver;
 		if ( text == "alsa" ) {
 			psy::core::AudioDriverSettings settings = it->second->settings();
-			///\todo allow to specify the device in the gui.
-			///\todo use the ALSA_CARD env var if present: char const * const device(std::getenv("ALSA_CARD"));
-			settings.setDeviceName("default"); 
+			///\todo allow to specify the device in the gui and use settings.setDeviceName("xxx"); 
 			it->second->setSettings( settings );
 		}
 	}
