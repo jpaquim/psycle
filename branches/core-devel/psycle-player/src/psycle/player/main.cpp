@@ -7,8 +7,9 @@
 
 void usage() {
 		std::cerr <<
-			"usage: psycle-player [options] [--input-file] <song file name>\n"
-			"options:\n"
+			"Usage: psycle-player [options] [--input-file] <song file name>\n"
+			"Plays a Psycle song file.\n"
+			"\n"
 			" -odrv, --output-driver <name>   name of the output driver to use.\n"
 			"                                 examples: silent, alsa, jack, esd, dsound, mmewaveout\n"
 			"\n"
@@ -26,7 +27,9 @@ void usage() {
 			"                                 name of the song file to play.\n"
 			"\n"
 			"        --help                   display this help and exit.\n"
-			"        --version                output version information and exit."
+			"        --version                output version information and exit.\n"
+			"\n"
+			"Report bugs to the bug tracker at http://sourceforge.net/projects/psycle\n"
 			;
 }
 
@@ -37,8 +40,8 @@ int main(int argument_count, char * arguments[]) {
 	}
 	
 	std::string input_file_name;
-	std::string output_driver_name("auto");
-	std::string output_device_name("auto");
+	std::string output_driver_name;
+	std::string output_device_name;
 	std::string output_file_name;
 	
 	struct tokens { enum type {
@@ -63,6 +66,10 @@ int main(int argument_count, char * arguments[]) {
 				output_driver_name = s;
 				token = tokens::none;
 				break;
+			case tokens::output_device_name:
+				output_device_name = s;
+				token = tokens::none;
+				break;
 			case tokens::output_file_name:
 				output_file_name = s;
 				token = tokens::none;
@@ -74,7 +81,7 @@ int main(int argument_count, char * arguments[]) {
 				else if(s == "-if" || s == "--input-file") token = tokens::input_file_name;
 				else if(s == "--help") {
 					usage();
-					return 1;
+					return 0;
 				} else if(s == "--version") {
 					std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
 					return 0;
@@ -90,10 +97,7 @@ int main(int argument_count, char * arguments[]) {
 		}
 	}
 
-	std::cout << output_driver_name << " " << output_file_name << "\n";
-	
 	psy::core::Player player;
-
 	
 	if(output_file_name.length()) {
 		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
@@ -117,7 +121,16 @@ int main(int argument_count, char * arguments[]) {
 		configuration.setDriverByName(output_driver_name);
 	}
 
-	player.setDriver(*configuration._pOutputDriver); ///\todo needs a getter
+	psy::core::AudioDriver & output_driver(*configuration._pOutputDriver); ///\todo needs a getter
+
+	if(output_device_name.length()) {
+		std::cout << "psycle: player: setting output driver device name to: " << output_device_name << "\n";
+		psy::core::AudioDriverSettings settings(output_driver.settings()); ///\todo why do we do a copy?
+		settings.setDeviceName(output_device_name);
+		output_driver.setSettings(settings); ///\todo why do we copy?
+	}
+
+	player.setDriver(output_driver); 
 	
 	psy::core::Song song(&player);
 	
