@@ -150,8 +150,6 @@ namespace psy {
 			}
 
 			void Converter::retweak(CoreSong & song) const {
-				///\todo this code is really needed to properly load the pattern data
-				#if 0
 				/// \todo must each twk repeat the machine number ?
 				// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
 				for(int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
@@ -186,7 +184,6 @@ namespace psy {
 						}
 					}
 				}
-				#endif
 			}
 
 			Converter::Plugin_Names::Plugin_Names()
