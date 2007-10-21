@@ -1265,7 +1265,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::ShowTransformPatternDlg(void)
 		{
-			CTransformPatternDlg dlg;
+			CTransformPatternDlg dlg(this);
 
 			if (dlg.DoModal() == IDOK)
 			{

@@ -1,6 +1,8 @@
 #pragma once
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+#include "ChildView.hpp"
+#include "Song.hpp"
 
 // CTransformPatternDlg dialog
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -9,8 +11,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			DECLARE_DYNAMIC(CTransformPatternDlg)
 
+		private:
+			CChildView* _pChildView;
+
 		public:
-			CTransformPatternDlg(CWnd* pParent = NULL);   // standard constructor
+			CTransformPatternDlg(CChildView* pChildView, CWnd* pParent = NULL);   // standard constructor
 			virtual ~CTransformPatternDlg();
 
 		// Dialog Data
@@ -36,11 +41,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		protected:
 		// Generated message map functions
 		//{{AFX_MSG(CTransformPatternDlg)
-			
+			virtual BOOL OnInitDialog();
 		//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		public:
 			afx_msg void OnBnClickedApply();
+
 		};
 
 
