@@ -139,6 +139,9 @@
 		#if defined DIVERSALIS__COMPILER__GNU
 			// There are so many processors supported ...
 			// gcc -E -dM -x c++ -std=c++98 -march=k8 -ffast-math -msse2 /dev/null
+			#if defined __powerpc__
+				#define DIVERSALIS__PROCESSOR
+				#define DIVERSALIS__PROCESSOR__POWER_PC
 			#if defined __k8__
 				#define DIVERSALIS__PROCESSOR
 				#define DIVERSALIS__PROCESSOR__X86 8
@@ -176,7 +179,7 @@
 			#if defined __MMX__
 				#define DIVERSALIS__PROCESSOR__X86__MMX
 			#endif
-
+			
 		#elif defined DIVERSALIS__COMPILER__MICROSOFT
 			#if defined _M_IA64
 				#define DIVERSALIS__PROCESSOR
@@ -201,6 +204,16 @@
 		///////////////////////
 		// processor endianess
 		///////////////////////
+
+		#if defined DIVERSALIS__COMPILER__GNU
+			#if defined __BIG_ENDIAN__
+				#define DIVERSALIS__PROCESSOR__ENDIAN
+				#define DIVERSALIS__PROCESSOR__ENDIAN__BIG
+			#elif defined __LITTLE_ENDIAN__
+				#define DIVERSALIS__PROCESSOR__ENDIAN
+				#define DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+			#endif
+		#endif
 
 		#if !defined DIVERSALIS__PROCESSOR__ENDIAN
 			#if defined DIVERSALIS__PROCESSOR__POWER_PC
