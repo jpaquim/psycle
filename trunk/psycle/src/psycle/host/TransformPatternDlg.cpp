@@ -126,18 +126,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				unsigned char * toffset;
 
 				int matchCount;
+				PatternEntry* patternEntry;
+				int elementIndex;
 
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
 					if (pSong->IsPatternUsed(currentPattern))
-					{
-						PatternEntry* patternEntry = (PatternEntry*)pSong->_ppattern(currentPattern);
+					{				
+						//patternEntry = (PatternEntry*) pSong->_ppattern(currentPattern);
 						lineCount = pSong->patternLines[currentPattern];
 
 						for (currentLine = 0; currentLine < lineCount; currentLine++)
 						{
 							for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
 							{
+								unsigned char *base = pSong->_ppattern(currentPattern);
+								int const displace=((currentLine*columnCount)+currentColumn)*EVENT_SIZE;
+								unsigned char *offset=base+displace;
+								patternEntry = (PatternEntry*) offset;
 								currentins = patternEntry[(currentLine*columnCount)+currentColumn]._inst;
 								currentmac = patternEntry[(currentLine*columnCount)+currentColumn]._mach;																				
 							
