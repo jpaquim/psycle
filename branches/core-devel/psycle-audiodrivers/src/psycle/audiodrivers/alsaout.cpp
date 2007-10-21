@@ -127,6 +127,14 @@ namespace psy {
 		period_size=0;
 		output = NULL;
 		//    AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
+		
+		AudioDriverSettings settings(this->settings());
+		{
+			char const * const env(std::getenv("ALSA_CARD"));
+			if(env) settings.setDeviceName(env);
+			else settings.setDeviceName("default");
+		}
+		this->setSettings(settings);
 	}
 	
 	int AlsaOut::audioStop( )
@@ -485,3 +493,4 @@ namespace psy {
 	}
 }
 #endif // defined PSYCLE__ALSA_AVAILABLE
+

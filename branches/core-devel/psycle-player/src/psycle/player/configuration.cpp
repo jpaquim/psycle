@@ -91,6 +91,17 @@ Configuration::Configuration()
 	#if defined PSYCLE__NET_AUDIO_AVAILABLE
 		addAudioDriver(new psy::core::NetAudioOut);
 	#endif
+
+	{
+		char const * const env(std::getenv("PSYCLE_PATH"));
+		if(env) pluginPath_ = env;
+	}
+
+	{
+		char const * const env(std::getenv("LADSPA_PATH"));
+		if(env) ladspaPath_ = env;
+	}
+
 	loadConfig();
 }
 
@@ -206,7 +217,6 @@ void Configuration::loadConfig( const std::string & path )
 					}
 					// alsa driver
 					if(_pOutputDriver->info().name() == "alsa") {
-						///\todo what if alsa settings are missing from xml document?
 						xmlpp::Node::NodeList const alsa_nodes(root_element.get_children("alsa"));
 						if(alsa_nodes.begin() != alsa_nodes.end()) {
 							xmlpp::Element const & alsa(dynamic_cast<xmlpp::Element const &>(**alsa_nodes.begin()));
@@ -272,7 +282,12 @@ void Configuration::loadConfig( const std::string & path )
 						std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 						if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
 							psy::core::AudioDriverSettings settings = it->second->settings(); ///\todo why do we do a copy?
-							settings.setDeviceName( deviceName );
+							if(deviceName.length()) {
+								settings.setDeviceName( deviceName );
+							} else {
+								///\todo use the ALSA_CARD env var if present: char const * const device(std::getenv("ALSA_CARD"));
+								settings.setDeviceName("default");
+							}
 							it->second->setSettings( settings ); ///\todo why do we copy?
 						}
 					}
