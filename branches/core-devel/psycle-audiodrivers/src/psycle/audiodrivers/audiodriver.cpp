@@ -33,7 +33,7 @@ namespace psy
 		///
 		AudioDriverSettings::AudioDriverSettings()
 		:
-			deviceName_("unnamed"),
+			deviceName_("default"),
 			samplesPerSec_(44100),
 			bitDepth_(16),
 			channelMode_(3),
