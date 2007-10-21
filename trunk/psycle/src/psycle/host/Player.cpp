@@ -114,7 +114,7 @@ namespace psycle
 		void Player::SampleRate(const int sampleRate)
 		{
 			///\todo update the source code of the plugins...
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			helpers::dsp::numRMSSamples=sampleRate*0.05f;
 #endif
 			if(m_SampleRate != sampleRate)

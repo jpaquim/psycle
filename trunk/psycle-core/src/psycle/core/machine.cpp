@@ -711,7 +711,7 @@ namespace psy { namespace core {
 	}
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
