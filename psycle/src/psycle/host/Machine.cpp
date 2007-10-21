@@ -202,7 +202,7 @@ namespace psycle
 				_connectionPoint[i].x=0;
 				_connectionPoint[i].y=0;
 			}
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			rms.count=0;
 			rms.AccumLeft=0.;
 			rms.AccumRight=0.;
@@ -293,7 +293,7 @@ namespace psycle
 				_connectionPoint[i].x=mac->_connectionPoint[i].x;
 				_connectionPoint[i].y=mac->_connectionPoint[i].y;
 			}
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			rms.count=0;
 			rms.AccumLeft=0.;
 			rms.AccumRight=0.;
@@ -339,7 +339,7 @@ namespace psycle
 			}
 			_numInputs = 0;
 			_numOutputs = 0;
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			rms.AccumLeft=0.;
 			rms.AccumRight=0.;
 			rms.count=0;
@@ -721,7 +721,7 @@ namespace psycle
 
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 			_volumeCounter = helpers::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));

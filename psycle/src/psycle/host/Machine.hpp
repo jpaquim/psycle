@@ -396,7 +396,7 @@ namespace psycle
 			virtual ~Machine() throw();
 			virtual void SetSampleRate(int sr)
 			{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 				rms.count=0;
 				rms.AccumLeft=0.;
 				rms.AccumRight=0.;
@@ -426,7 +426,7 @@ namespace psycle
 				/// output peak level for DSP
 				float _volumeCounter;					
 				/// output peak level for display
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+#if PSYCLE__CONFIGURATION__RMS_VUS
 				helpers::dsp::RMSData rms;
 #endif
 				int _volumeDisplay;	
