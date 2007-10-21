@@ -3,6 +3,7 @@
 #include "mfc_namespace.hpp"
 #include "ChildView.hpp"
 #include "Song.hpp"
+#include "Helpers.hpp"
 
 // CTransformPatternDlg dialog
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -29,7 +30,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CEdit	m_replaceins;
 			CEdit	m_replacemac;
 			CEdit	m_replacecmd;
-			BOOL	m_applytoblock;
+			int	m_applyto;
+			CButton	m_applytosong;
+			CButton	m_applytopattern;
+			CButton	m_applytoblock;
 			//}}AFX_DATA
 		// Overrides
 			// ClassWizard generated virtual function overrides
