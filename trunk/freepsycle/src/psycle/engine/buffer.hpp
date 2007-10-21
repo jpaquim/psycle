@@ -11,6 +11,9 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace engine {
 
+#if 1
+typedef std::vector<event> channel;
+#else
 /// a vector of events.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 	public:
@@ -32,6 +35,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 	private:
 		std::size_t last_;
 };
+#endif
 
 /// a vector of channels.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer : public std::vector<channel> {
