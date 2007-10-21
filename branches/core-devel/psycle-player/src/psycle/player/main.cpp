@@ -152,7 +152,7 @@ int main(int argument_count, char * arguments[]) {
 		std::cout << "psycle: player: (enter anything to stop)\n";
 		std::string s; std::cin >> s;
 		
-    std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
+		std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
 		configuration.setDriverByName("silent");
 		player.setDriver(*configuration._pOutputDriver);
