@@ -209,6 +209,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void EnableSound();
 			void Repaint(draw_modes::draw_mode drawMode = draw_modes::all);
 
+			void ShowTransformPatternDlg(void);
 			void ShowPatternDlg(void);
 			void BlockInsChange(int x);
 			void BlockGenChange(int x);
@@ -580,6 +581,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnPopTranspose_12();
 			afx_msg void OnAutostop();
 			afx_msg void OnUpdateAutostop(CCmdUI* pCmdUI);
+			afx_msg void OnPopTransformpattern();
 			afx_msg void OnPopPattenproperties();
 			afx_msg void OnPopBlockSwingfill();
 			afx_msg void OnPopTrackSwingfill();

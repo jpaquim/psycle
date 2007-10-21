@@ -116,6 +116,7 @@
 #define IDD_MACWAVEIN                   271
 #define IDB_SWITCHON                    274
 #define IDB_SWITCHOFF                   275
+#define IDD_TRANSFORMPATTERN            277
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -257,12 +258,15 @@
 #define IDC_EDIT3                       1111
 #define IDC_EDIT4                       1112
 #define IDC_CHECK1                      1113
+#define IDC_REPLACEINS                  1113
 #define IDC_BROWSER                     1114
 #define IDC_ENV_SUSEND                  1114
 #define IDC_SPKEYS_SHIFT                1114
+#define IDC_REPLACENOTE                 1114
 #define IDC_NAMELABEL                   1115
 #define IDC_ENV_LOOPSTART               1115
 #define IDC_DESCLABEL                   1116
+#define IDC_REPLACECMD                  1116
 #define IDC_VERSIONLABEL                1117
 #define IDC_DLLNAMELABEL                1118
 #define IDC_SHOWDLLNAME                 1119
@@ -1031,6 +1035,11 @@
 #define IDC_OUTPUTCLIPBOARD2            1793
 #define IDC_OUTPUTSAMPLE                1793
 #define IDC_CHECKTWK                    1794
+#define IDC_FILTERNOTE                  1795
+#define IDC_FILTERINS                   1796
+#define IDC_FILTERMAC                   1797
+#define IDC_FILTERCMD                   1798
+#define IDC_APPLYTOBLOCK                1799
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1187,6 +1196,9 @@
 #define ID_PROGRAMMORE                  34200
 #define ID_PROGRAMLESS                  34201
 #define ID_VIEWS_SHOWTOOLBAR            34206
+#define ID__TRANSFORMPATTERN            34207
+#define ID_TRANSFORMPATTERN             34208
+#define ID_POP_TRANSFORMPATTERN         34209
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1195,9 +1207,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        277
-#define _APS_NEXT_COMMAND_VALUE         34207
-#define _APS_NEXT_CONTROL_VALUE         1795
+#define _APS_NEXT_RESOURCE_VALUE        278
+#define _APS_NEXT_COMMAND_VALUE         34210
+#define _APS_NEXT_CONTROL_VALUE         1800
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
