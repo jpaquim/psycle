@@ -13,6 +13,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			: CDialog(CTransformPatternDlg::IDD, pParent)
 		{
 			_pChildView = pChildView;
+			m_applyto = 0;
 		}
 
 		CTransformPatternDlg::~CTransformPatternDlg()
@@ -31,7 +32,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_REPLACEINS, m_replaceins);
 			DDX_Control(pDX, IDC_REPLACEMAC, m_replacemac);
 			DDX_Control(pDX, IDC_REPLACECMD, m_replacecmd);
-			DDX_Check(pDX, IDC_APPLYTOBLOCK, m_applytoblock);
+			DDX_Radio(pDX, IDC_APPLYTOSONG, m_applyto);
+			DDX_Control(pDX, IDC_APPLYTOSONG, m_applytosong);
+			DDX_Control(pDX, IDC_APPLYTOPATTERN, m_applytopattern);
+			DDX_Control(pDX, IDC_APPLYTOBLOCK, m_applytoblock);
 			//}}AFX_DATA_MAP
 		}
 
@@ -51,7 +55,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_filtercmd.EnableWindow(false);
 			m_replacenote.EnableWindow(false);
 			m_replacecmd.EnableWindow(false);
-
+			m_applytosong.EnableWindow(false);
+			m_applytopattern.EnableWindow(false);
+			m_applytoblock.EnableWindow(false);
 			return true;  // return true unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return false
 		}
@@ -83,17 +89,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int replaceins = -1;
 			int replacemac = -1;
 
+			using helpers::hexstring_to_integer;
+
 			if (afilterins[0] !=	'\0')
-				filterins = atoi(afilterins);
+				filterins = hexstring_to_integer(afilterins);
 
 			if (afiltermac[0] != '\0')
-				filtermac = atoi(afiltermac);			
+				//filtermac = atoi(afiltermac);			
+				filtermac = hexstring_to_integer(afiltermac);			
 
 			if (areplaceins[0] != '\0')
-				replaceins = atoi(areplaceins);
+				//replaceins = atoi(areplaceins);
+				replaceins = hexstring_to_integer(areplaceins);
 
 			if (areplacemac[0] != '\0')
-				replacemac = atoi(areplacemac);
+				replacemac = hexstring_to_integer(areplacemac);
+
+			TRACE("filterins is %i", filterins);
 
 			if ((filterins != -1) | (filtermac != -1))
 			{
@@ -114,11 +126,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Song* pSong = _pChildView->_pSong;
 
 				int lastPatternUsed = pSong->GetLastPatternUsed();
-				int columnCount = pSong->SONGTRACKS;
+				int columnCount = MAX_TRACKS;
 				int lineCount;
-
-				TRACE("lastPatternUsed used is %i\n", lastPatternUsed);
-				TRACE("columnCount used is %i\n", columnCount);
 
 				int currentins;
 				int currentmac;
@@ -143,8 +152,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								currentins = patternEntry[(currentLine*columnCount)+currentColumn]._inst;
 								currentmac = patternEntry[(currentLine*columnCount)+currentColumn]._mach;																																							
 
-								TRACE("[%i,%i] ins=%i mac=%i\n", currentLine, currentColumn, currentins, currentmac);
-
 								matchCount = 0;
 
 								if (currentins == filterins)
@@ -159,7 +166,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 								if (matchCount == matchTarget)
 								{
-									TRACE("MATCH currentLine is %i\n", currentLine);
 									if (filterins != -1)
 									{
 										patternEntry[(currentLine*columnCount)+currentColumn]._inst = replaceins;
