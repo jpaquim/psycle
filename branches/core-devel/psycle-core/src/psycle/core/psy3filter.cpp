@@ -121,6 +121,8 @@ namespace psy
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadINFOv0(&file,song,version&0x00FF);
+						//bug in psycle saver!!!!!
+						size-=3*sizeof(int);
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -318,15 +320,13 @@ namespace psy
 
 		bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
-				char Name[64];
-				char Author[64];
-				char Comment[256];
-
-				file->ReadString(Name, 64);
+				char Name[129]; char Author[65]; char Comment[65536];
+				
+				file->ReadString(Name, 128);
 				song.setName(Name);
 				file->ReadString(Author, 64);
 				song.setAuthor(Author);
-				bool result = file->ReadString(Comment, 256);
+				bool result = file->ReadString(Comment, 65535);
 				song.setComment(Comment);
 				return result;
 		}
