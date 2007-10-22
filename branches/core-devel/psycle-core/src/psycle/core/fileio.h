@@ -103,7 +103,7 @@ namespace psy
         }
 
         bool inline Read(std::uint16_t & x) {
-          char data[2];
+          std::uint8_t data[2];
           if(!ReadChunk(data,2))
             return false;
           x = (data[1])<<8 | data[0];
@@ -113,7 +113,7 @@ namespace psy
           return Read(reinterpret_cast<std::uint16_t&>(x));
         }
         bool inline ReadBE(std::uint16_t & x) {
-          char data[2];
+          std::uint8_t data[2];
           if(!ReadChunk(data,2))
             return false;
           x = (data[0])<<8 | data[1];
@@ -124,14 +124,14 @@ namespace psy
         }
 
         bool inline Read(std::uint32_t & x) {
-          char data[4];
+          std::uint8_t data[4];
           if(!ReadChunk(data,4))
             return false;
           x = (data[3]<<24) | (data[2]<<16) | (data[1]<<8) | data[0];
           return true;
         }
         bool inline ReadBE(std::uint32_t & x) {
-          char data[4];
+          std::uint8_t data[4];
           if(!ReadChunk(data,4))
             return false;
           x = (data[0]<<24) | (data[1]<<16) | (data[2]<<8) | data[3];
@@ -142,7 +142,7 @@ namespace psy
         }
 
         bool inline Write(std::uint32_t x) {
-          char data[4] = { x, x>>8, x>>16, x>>24 };
+          std::uint8_t data[4] = { x, x>>8, x>>16, x>>24 };
           return WriteChunk(data,4);
         }
         bool inline Write(std::int32_t x) {
