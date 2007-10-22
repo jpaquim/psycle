@@ -34,6 +34,10 @@ namespace psycle
 			///\endverbatim
 			unsigned char _NNA;
 			
+			int _lock_instrument_to_machine; //-1 means not locked
+			bool _LOCKINST;
+
+
 			///\name Amplitude Envelope overview:
 			///\{
 			/// Attack Time [in Samples at 44.1Khz]

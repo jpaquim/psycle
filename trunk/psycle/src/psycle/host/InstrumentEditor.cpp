@@ -6,6 +6,7 @@
 #include "MainFrm.hpp"
 #include "EnvDialog.hpp"
 #include "constants.hpp"
+#include "Helpers.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -27,10 +28,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_LOOPEDIT, m_loopedit);
 			DDX_Control(pDX, IDC_CHECK4, m_loopcheck);
 			DDX_Control(pDX, IDC_RRES, m_rres_check);
-			DDX_Control(pDX, IDC_PANSLIDER, m_panslider);
+			DDX_Control(pDX, IDC_PANSLIDER, m_panslider);			
+			DDX_Control(pDX, IDC_LOCKINST, m_lockinst);
 			DDX_Control(pDX, IDC_RPAN, m_rpan_check);
 			DDX_Control(pDX, IDC_RCUT, m_rcut_check);
-			DDX_Control(pDX, IDC_NNA_COMBO, m_nna_combo);
+			DDX_Control(pDX, IDC_NNA_COMBO, m_nna_combo);			
+			DDX_Control(pDX, IDC_LOCKINSTNUMBER, m_lockinstnumber);
 			DDX_Control(pDX, IDC_INSTNAME, m_instname);
 			DDX_Control(pDX, IDC_VOLABEL, m_volabel);
 			DDX_Control(pDX, IDC_SLIDER1, m_volumebar);
@@ -46,13 +49,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//{{AFX_MSG_MAP(CInstrumentEditor)
 			ON_BN_CLICKED(IDC_LOOPOFF, OnLoopoff)
 			ON_BN_CLICKED(IDC_LOOPFORWARD, OnLoopforward)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)			
+			ON_EN_CHANGE(IDC_LOCKINSTNUMBER, OnChangeLockInst)
 			ON_EN_CHANGE(IDC_INSTNAME, OnChangeInstname)
 			ON_CBN_SELCHANGE(IDC_NNA_COMBO, OnSelchangeNnaCombo)
 			ON_BN_CLICKED(IDC_BUTTON12, OnPrevInstrument)
 			ON_BN_CLICKED(IDC_BUTTON13, OnNextInstrument)
 			ON_BN_CLICKED(IDC_BUTTON8, OnEnvButton)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_PANSLIDER, OnCustomdrawPanslider)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_PANSLIDER, OnCustomdrawPanslider)			
+			ON_BN_CLICKED(IDC_LOCKINST, OnLockinst)
 			ON_BN_CLICKED(IDC_RPAN, OnRpan)
 			ON_BN_CLICKED(IDC_RCUT, OnRcut)
 			ON_BN_CLICKED(IDC_RRES, OnRres)
@@ -102,6 +107,29 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Set instrument current selected label
 			sprintf(buffer, "%.2X", si);
 			m_instlabel.SetWindowText(buffer);
+
+			char buffer2[64];
+
+			if (_pSong->_pInstrument[si]->_lock_instrument_to_machine < 0)
+			{
+				m_lockinstnumber.SetWindowText("");
+			}
+			else
+			{
+				sprintf(buffer2, "%.2X", _pSong->_pInstrument[si]->_lock_instrument_to_machine);
+				m_lockinstnumber.SetWindowText(buffer2);
+			}
+
+			if (_pSong->_pInstrument[si]->_LOCKINST)
+			{
+				m_lockinst.SetCheck(BST_CHECKED);
+				m_lockinstnumber.EnableWindow(true);
+			}
+			else
+			{
+				m_lockinst.SetCheck(BST_UNCHECKED);
+				m_lockinstnumber.EnableWindow(false);
+			}
 
 			initializingDialog=true;
 			// Set instrument current selected name
@@ -195,6 +223,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			*pResult = 0;
 		}
 
+		void CInstrumentEditor::OnChangeLockInst()
+		{
+			char buffer[32];
+			sprintf(buffer,"\0");
+			m_lockinstnumber.GetWindowText(buffer, 16);
+
+			int si = _pSong->instSelected;
+			
+			using helpers::hexstring_to_integer;
+
+			if (buffer[0] == '\0')
+			{
+				_pSong->_pInstrument[si]->_lock_instrument_to_machine = -1;
+			}
+			else
+			{
+				_pSong->_pInstrument[si]->_lock_instrument_to_machine = hexstring_to_integer(buffer);		
+			}
+		}
+
 		//////////////////////////////////////////////////////////////////////
 		// Change instrument & layer name
 
@@ -208,7 +256,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->RedrawGearRackList();
 			}
 		}
-
 
 		void CInstrumentEditor::OnSelchangeNnaCombo() 
 		{
@@ -262,6 +309,28 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			sprintf(buffer,"%d%",_pSong->_pInstrument[si]->_pan);
 			m_panlabel.SetWindowText(buffer);
 			*pResult = 0;
+		}
+
+		void CInstrumentEditor::OnLockinst()
+		{
+			int si = _pSong->instSelected;
+			if (m_lockinst.GetCheck())
+			{
+				_pSong->_pInstrument[si]->_LOCKINST = true;				
+			}
+			else
+			{
+				_pSong->_pInstrument[si]->_LOCKINST = false;				
+			}
+
+			if (_pSong->_pInstrument[si]->_LOCKINST)
+			{
+				m_lockinstnumber.EnableWindow(true);
+			}
+			else
+			{
+				m_lockinstnumber.EnableWindow(false);
+			}
 		}
 
 		void CInstrumentEditor::OnRpan() 
