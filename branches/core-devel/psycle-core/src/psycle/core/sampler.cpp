@@ -348,12 +348,12 @@ namespace psy
 			}
 		}
 
-		void Sampler::Tick( int channel, const PatternEvent & pData )
+		void Sampler::Tick( int channel, const PatternEvent & event )
 		{
-		std::cout << pData.note() << std::endl;
-			if ( pData.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
+			std::cout << "sampler: tick: note: " << static_cast<int>(event.note()) << '\n';
+			if ( event.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
 			{
-				if ( pData.command() == 0 || pData.note() != 255) return; // Return in everything but commands!
+				if ( event.command() == 0 || event.note() != 255) return; // Return in everything but commands!
 			}
 			if ( _mute ) return; // Avoid new note entering when muted.
 
@@ -361,7 +361,7 @@ namespace psy
 			int useVoice = -1;
 
 
-			PatternEvent data = pData;
+			PatternEvent data = event;
 
 			if (data.instrument() >= 255)
 			{
@@ -373,7 +373,7 @@ namespace psy
 			}
 			else
 			{
-				data.setInstrument( lastInstrument[channel] = pData.instrument() );
+				data.setInstrument( lastInstrument[channel] = event.instrument() );
 			}
 
 
