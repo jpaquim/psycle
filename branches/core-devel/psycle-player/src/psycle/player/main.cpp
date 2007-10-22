@@ -153,7 +153,9 @@ int main(int argument_count, char * arguments[]) {
 
 		while (1)
 		{
-			printf("Beat: %.02f\r",player.timeInfo().playBeatPos());			sleep(1);
+			printf("Beat: %.02f\r",player.timeInfo().playBeatPos());
+      fflush(stdout);
+      sleep(1);
 		}
 		
 		std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
