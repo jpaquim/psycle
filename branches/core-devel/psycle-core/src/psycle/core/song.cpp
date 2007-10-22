@@ -467,17 +467,9 @@ namespace psy
 
 		// IFF structure ripped by krokpitr
 		// Current Code Extremely modified by [JAZ] ( RIFF based )
-		// Advise: IFF files use Big Endian byte ordering. That's why I use
-		// the following structure.
-		//
-		// typedef struct {
-		//   unsigned char hihi;
-		//   unsigned char hilo;
-		//   unsigned char lohi;
-		//   unsigned char lolo;
-		// } ULONGINV;
-		// 
-		//
+		// Advise: IFF files use Big Endian byte ordering, so use
+    // ReadBE/WriteBE instead of Read/Write.
+
 		/*
 		** IFF Riff Header
 		** ----------------
@@ -530,8 +522,7 @@ namespace psy
 			}
 			RiffFile file;
 			RiffChunkHeader hd;
-			std::uint32_t data;
-			endian::big::uint32_t tmp;
+			char fourCC[4];
 			int bits = 0;
 			// opens the file and reads the "FORM" header.
 			if(!file.Open(const_cast<char*>(str)))
@@ -540,23 +531,23 @@ namespace psy
 				return false;
 			}
 			DeleteLayer(instrument);
-			file.Read(data);
-			if( data == file.FourCC("16SV")) bits = 16;
-			else if(data == file.FourCC("8SVX")) bits = 8;
+			file.ReadArray(fourCC,4);
+			if( file.matchFourCC(fourCC,"16SV")) bits = 16;
+      else if(file.matchFourCC(fourCC,"8SVX")) bits = 8;
 			file.Read(hd);
-			if(hd._id == file.FourCC("NAME"))
+			if( file.matchFourCC(hd._id,"NAME"))
 			{
-				file.ReadChunk(_pInstrument[instrument]->waveName, 22); _pInstrument[instrument]->waveName[21]=0;///\todo should be hd._size instead of "22", but it is incorrectly read.
+				file.ReadArray(_pInstrument[instrument]->waveName, 22); _pInstrument[instrument]->waveName[21]=0;///\todo should be hd._size instead of "22", but it is incorrectly read.
 				std::strncpy(_pInstrument[instrument]->_sName,str, 31);
 				_pInstrument[instrument]->_sName[31]='\0';
 				file.Read(hd);
 			}
-			if ( hd._id == file.FourCC("VHDR"))
+			if ( file.matchFourCC(hd._id,"VHDR"))
 			{
 				std::uint32_t Datalen, ls, le;
-				file.Read(tmp); Datalen = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-				file.Read(tmp); ls = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-				file.Read(tmp); le = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
+				file.ReadBE(Datalen);
+				file.ReadBE(ls);
+				file.ReadBE(le);
 				if(bits == 16)
 				{
 					Datalen >>= 1;
@@ -573,7 +564,7 @@ namespace psy
 				file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
 				file.Read(hd);
 			}
-			if(hd._id == file.FourCC("BODY"))
+			if(file.matchFourCC(hd._id,"BODY"))
 			{
 				std::int16_t * csamples;
 				std::uint32_t const Datalen(_pInstrument[instrument]->waveLength);
@@ -584,8 +575,7 @@ namespace psy
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-						file.ReadChunk(&tmp, 2);
-						*csamples = tmp.hilo * 256 + tmp.hihi;
+            file.ReadBE(*csamples);
 						++csamples;
 					}
 				}
@@ -593,8 +583,9 @@ namespace psy
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-						file.ReadChunk(&tmp, 1);
-						*csamples = tmp.hihi * 256 + tmp.hihi;
+            std::int8_t tmp;
+						file.Read(tmp);
+						*csamples = tmp*0x101;
 						++csamples;
 					}
 				}

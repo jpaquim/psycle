@@ -39,14 +39,14 @@ namespace psy {
 					//BOOST_STATIC_ASSERT(sizeof(int) == 4);
 					{
 						char c[16];
-						riff.ReadChunk(c, 16); c[15] = 0;
+						riff.ReadArray(c, 16); c[15] = 0;
 						machine.SetEditName(c);
 					}
-					riff.Read(machine._inputMachines);
-					riff.Read(machine._outputMachines);
-					riff.Read(machine._inputConVol);
-					riff.Read(machine._connection);
-					riff.Read(machine._inputCon);
+					riff.ReadArray(machine._inputMachines,MAX_CONNECTIONS);
+					riff.ReadArray(machine._outputMachines,MAX_CONNECTIONS);
+					riff.ReadArray(machine._inputConVol,MAX_CONNECTIONS);
+					riff.ReadArray(machine._connection,MAX_CONNECTIONS);
+					riff.ReadArray(machine._inputCon,MAX_CONNECTIONS);
 					riff.Skip(96);  // ConnectionPoints, 12*8bytes
 					riff.Read(machine._connectedInputs);
 					riff.Read(machine._connectedOutputs);
@@ -56,21 +56,24 @@ namespace psy {
 					switch(type) {
 						case delay:
 							{
-								int parameters [2]; riff.ReadChunk(parameters, sizeof parameters);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 5);
+                const int nparams = 2;
+                std::int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
+								retweak(machine, type, parameters, nparams, 5);
 							}
 							break;
 						case flanger:
 							{
-							int parameters [2]; riff.ReadChunk(parameters, sizeof parameters);
-							retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 7);
+                const int nparams = 2;
+                std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+                retweak(machine, type, parameters, nparams, 7);
 							}
 							break;
 						case gainer:
 							riff.Skip(4);
 							{
-								int parameters [1]; riff.ReadChunk(parameters, sizeof parameters);
-								if(type == gainer) retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+                const int nparams = 1;
+                std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+								if(type == gainer) retweak(machine, type, parameters, nparams);
 							}
 							break;
 						default:
@@ -78,42 +81,48 @@ namespace psy {
 					}
 					switch(type) {
 						case distortion:
-							int parameters [4]; riff.ReadChunk(parameters, sizeof parameters);
-							retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
-							break;
+              {
+                const int nparams=4;
+                std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+                retweak(machine, type, parameters, nparams);
+                break;
+              }
 						default:
 							riff.Skip(16);
 					}
 					switch(type) {
 						case ring_modulator:
 							{
-								unsigned char parameters [4];
+                const int nparams=4;
+                std::uint8_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[1]);
 								riff.Skip(1);
 								riff.Read(parameters[2]);
 								riff.Read(parameters[3]);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								retweak(machine, type, parameters, nparams);
 							}
 							riff.Skip(40);
 							break;
 						case delay:
 							riff.Skip(5);
 							{
-								int parameters [4];
+                const int nparams=4;
+                std::int32_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[2]);
 								riff.Read(parameters[1]);
 								riff.Read(parameters[3]);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								retweak(machine, type, parameters, nparams);
 							}
 							riff.Skip(24);
 							break;
 						case flanger:
 							riff.Skip(4);
 							{
-								unsigned char parameters [1]; riff.ReadChunk(parameters, sizeof parameters);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 9);
+                const int nparams=1;
+								unsigned char parameters [nparams]; riff.ReadArray(parameters, nparams);
+								retweak(machine, type, parameters, nparams, 9);
 							}
 							{
 								int parameters [6];
@@ -132,10 +141,11 @@ namespace psy {
 						case filter_2_poles:
 							riff.Skip(21);
 							{
-								int parameters [6];
-								riff.ReadChunk(&parameters[1], sizeof parameters - sizeof *parameters);
+                const int nparams=6;
+                std::int32_t parameters [nparams];
+								riff.ReadArray(&parameters[1], nparams-1);
 								riff.Read(parameters[0]);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								retweak(machine, type, parameters, nparams);
 							}
 							break;
 						default:

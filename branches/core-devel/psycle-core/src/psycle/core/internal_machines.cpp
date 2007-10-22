@@ -79,10 +79,10 @@ namespace psy {
 			Machine(callbacks, MACH_DUPLICATOR, MACHMODE_GENERATOR, id, song)
 		{
 			SetEditName("Dupe it!");
-			_numPars = NUMMACHINES*2;
+			_numPars = NUM_MACHINES*2;
 			_nCols = 2;
 			bisTicking = false;
-			for (int i=0;i<NUMMACHINES;i++)
+			for (int i=0;i<NUM_MACHINES;i++)
 			{
 				macOutput[i]=-1;
 				noteOffset[i]=0;
@@ -107,7 +107,7 @@ namespace psy {
 		void DuplicatorMac::Init()
 		{
 			Machine::Init();
-			for (int i=0;i<NUMMACHINES;i++)
+			for (int i=0;i<NUM_MACHINES;i++)
 			{
 				macOutput[i]=-1;
 				noteOffset[i]=0;
@@ -127,7 +127,7 @@ namespace psy {
 		
 		void DuplicatorMac::Stop()
 		{
-			for (int i=0;i<NUMMACHINES;i++)
+			for (int i=0;i<NUM_MACHINES;i++)
 			{
 				for (int j=0;j<MAX_TRACKS;j++)
 				{
@@ -156,7 +156,7 @@ namespace psy {
 				if ( !_mute && !bisTicking)
 				{
 					bisTicking=true;
-					for (int i=0;i<NUMMACHINES;i++)
+					for (int i=0;i<NUM_MACHINES;i++)
 					{
 						if (macOutput[i] != -1 && song()->machine(macOutput[i]) != NULL )
 						{
@@ -212,35 +212,35 @@ namespace psy {
 		}
 		void DuplicatorMac::GetParamName(int numparam,char *name) const
 		{
-			if (numparam >=0 && numparam<NUMMACHINES)
+			if (numparam >=0 && numparam<NUM_MACHINES)
 			{
 				sprintf(name,"Output Machine %d",numparam);
-			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
-				sprintf(name,"Note Offset %d",numparam-NUMMACHINES);
+			} else if (numparam >=NUM_MACHINES && numparam<NUM_MACHINES*2) {
+				sprintf(name,"Note Offset %d",numparam-NUM_MACHINES);
 			}
 			else name[0] = '\0';
 		}
 
 		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval) const
 		{
-			if ( numparam < NUMMACHINES) { minval = -1; maxval = (MAX_BUSES*2)-1;}
-			else if ( numparam < NUMMACHINES*2) { minval = -48; maxval = 48; }
+			if ( numparam < NUM_MACHINES) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if ( numparam < NUM_MACHINES*2) { minval = -48; maxval = 48; }
 		}
 
 		int DuplicatorMac::GetParamValue(int numparam) const
 		{
-			if (numparam >=0 && numparam<NUMMACHINES)
+			if (numparam >=0 && numparam<NUM_MACHINES)
 			{
 				return macOutput[numparam];
-			} else if (numparam >=NUMMACHINES && numparam <NUMMACHINES*2) {
-				return noteOffset[numparam-NUMMACHINES];
+			} else if (numparam >=NUM_MACHINES && numparam <NUM_MACHINES*2) {
+				return noteOffset[numparam-NUM_MACHINES];
 			}
 			else return 0;
 		}
 
 		void DuplicatorMac::GetParamValue(int numparam, char *parVal) const
 		{
-			if (numparam >=0 && numparam <NUMMACHINES)
+			if (numparam >=0 && numparam <NUM_MACHINES)
 			{
 				if ((macOutput[numparam] != -1 ) &&( song()->machine(macOutput[numparam]) != NULL))
 				{
@@ -249,21 +249,21 @@ namespace psy {
 				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
-			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*2) {
+			} else if (numparam >= NUM_MACHINES && numparam <NUM_MACHINES*2) {
 				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-NUMMACHINES]+60)%12],(noteOffset[numparam-NUMMACHINES]+60)/12);
+				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-NUM_MACHINES]+60)%12],(noteOffset[numparam-NUM_MACHINES]+60)/12);
 			}
 			else parVal[0] = '\0';
 		}
 
 		bool DuplicatorMac::SetParameter(int numparam, int value)
 		{
-			if (numparam >=0 && numparam<NUMMACHINES)
+			if (numparam >=0 && numparam<NUM_MACHINES)
 			{
 				macOutput[numparam]=value;
 				return true;
-			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
-				noteOffset[numparam-NUMMACHINES]=value;
+			} else if (numparam >=NUM_MACHINES && numparam<NUM_MACHINES*2) {
+				noteOffset[numparam-NUM_MACHINES]=value;
 				return true;
 			}
 			else return false;
@@ -280,8 +280,8 @@ namespace psy {
 		{
 			std::uint32_t size;
 			pFile->Read(size);
-			pFile->Read(macOutput);
-			pFile->Read(noteOffset);
+			pFile->ReadArray(macOutput,NUM_MACHINES);
+			pFile->ReadArray(noteOffset,NUM_MACHINES);
 			return true;
 		}
 
@@ -289,8 +289,8 @@ namespace psy {
 		{
 			std::uint32_t const size(sizeof macOutput + sizeof noteOffset);
 			pFile->Write(size);
-			pFile->Write(macOutput);
-			pFile->Write(noteOffset);
+			pFile->WriteArray(macOutput,NUM_MACHINES);
+			pFile->WriteArray(noteOffset,NUM_MACHINES);
 		}
 		//////////////////////////////////////////////////////////////////////////
 		// AudioRecorder
@@ -798,11 +798,11 @@ namespace psy {
 		{
 			std::uint32_t size;
 			pFile->Read(size);
-			pFile->Read(_sendGrid);
-			pFile->Read(_send);
-			pFile->Read(_sendVol);
-			pFile->Read(_sendVolMulti);
-			pFile->Read(_sendValid);
+			pFile->ReadArray(&_sendGrid[0][0],MAX_CONNECTIONS*(MAX_CONNECTIONS+1));
+			pFile->ReadArray(_send,MAX_CONNECTIONS);
+			pFile->ReadArray(_sendVol,MAX_CONNECTIONS);
+			pFile->ReadArray(_sendVolMulti,MAX_CONNECTIONS);
+			pFile->ReadArray(_sendValid,MAX_CONNECTIONS);
 			return true;
 		}
 
@@ -810,11 +810,11 @@ namespace psy {
 		{
 			std::uint32_t const size(sizeof _sendGrid + sizeof _send + sizeof _sendVol + sizeof _sendVolMulti + sizeof _sendValid);
 			pFile->Write(size);
-			pFile->Write(_sendGrid);
-			pFile->Write(_send);
-			pFile->Write(_sendVol);
-			pFile->Write(_sendVolMulti);
-			pFile->Write(_sendValid);
+			pFile->WriteArray(&_sendGrid[0][0],MAX_CONNECTIONS*(MAX_CONNECTIONS+1));
+			pFile->WriteArray(_send,MAX_CONNECTIONS);
+			pFile->WriteArray(_sendVol,MAX_CONNECTIONS);
+			pFile->WriteArray(_sendVolMulti,MAX_CONNECTIONS);
+			pFile->WriteArray(_sendValid,MAX_CONNECTIONS);
 		}
 
 		float Mixer::VuChan(Wire::id_type idx)
@@ -1148,10 +1148,10 @@ namespace psy {
 			pFile->Read(size);
 			pFile->Read(waveform);
 			pFile->Read(lSpeed);
-			pFile->Read(macOutput);
-			pFile->Read(paramOutput);
-			pFile->Read(level);
-			pFile->Read(phase);
+			pFile->ReadArray(macOutput,NUM_CHANS);
+			pFile->ReadArray(paramOutput,NUM_CHANS);
+			pFile->ReadArray(level,NUM_CHANS);
+			pFile->ReadArray(phase,NUM_CHANS);
 			return true;
 		}
 
@@ -1161,10 +1161,10 @@ namespace psy {
 			pFile->Write(size);
 			pFile->Write(waveform);
 			pFile->Write(lSpeed);
-			pFile->Write(macOutput);
-			pFile->Write(paramOutput);
-			pFile->Write(level);
-			pFile->Write(phase);
+			pFile->WriteArray(macOutput,NUM_CHANS);
+			pFile->WriteArray(paramOutput,NUM_CHANS);
+			pFile->WriteArray(level,NUM_CHANS);
+			pFile->WriteArray(phase,NUM_CHANS);
 		}
 
 		void LFO::FillTable()

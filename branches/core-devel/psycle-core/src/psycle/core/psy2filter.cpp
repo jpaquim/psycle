@@ -56,7 +56,7 @@ namespace psy
 			RiffFile file;
 			file.Open(fileName);
 			char Header[9];
-			file.ReadChunk(&Header, 8);
+			file.ReadArray(Header, 8);
 			Header[8]=0;
 			file.Close();
 			return !std::strcmp(Header,"PSY2SONG");
@@ -112,11 +112,11 @@ namespace psy
 			char Author[32];
 			char Comment[128];
 
-			file->ReadChunk(Name, 32); Name[31]=0;
+			file->ReadArray(Name, 32); Name[31]=0;
 			song.setName(Name);
-			file->ReadChunk(Author, 32); Author[31]=0;
+			file->ReadArray(Author, 32); Author[31]=0;
 			song.setAuthor(Author);
-			bool err = file->ReadChunk(Comment, 128); Comment[127]=0;
+			bool err = file->ReadArray(Comment, 128); Comment[127]=0;
 			song.setComment(Comment);
 			return err;
 		}
@@ -139,7 +139,7 @@ namespace psy
 			file->Read(oct);
 			// note: we don't change the current octave of the gui anymore when loading a song
 
-			file->Read(busMachine);
+			file->ReadArray(busMachine,64);
 			return true;
 		}
 
@@ -147,7 +147,7 @@ namespace psy
 		{
 			std::int32_t length,tmp;
 			unsigned char playOrder[128];
-			file->Read(playOrder);
+			file->ReadArray(playOrder,128);
 			file->Read(length);
 			for (int i(0) ; i < length; ++i)
 			{
@@ -186,7 +186,7 @@ namespace psy
 			std::int32_t numLines;
 			char patternName[32];
 			file->Read(numLines);
-			file->ReadChunk(patternName, sizeof(patternName)); patternName[31]=0;
+			file->ReadArray(patternName, sizeof(patternName)); patternName[31]=0;
 
 			if(numLines > 0)
 			{
@@ -210,7 +210,7 @@ namespace psy
 				{
 					for (int x = 0; x < song.tracks(); x++) {
 						unsigned char entry[5];
-						file->Read(entry);
+						file->ReadArray(entry,5);
 						PatternEvent event = convertEntry(entry);
 						if (!event.empty()) {
 							float position = y / (float) song.linesPerBeat();
@@ -240,7 +240,7 @@ namespace psy
 
 			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
 			{
-				file->ReadChunk(song._pInstrument[i]->_sName,32); song._pInstrument[i]->_sName[31]=0;
+				file->ReadArray(song._pInstrument[i]->_sName,32); song._pInstrument[i]->_sName[31]=0;
 			}
 			for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
 			{
@@ -332,7 +332,7 @@ namespace psy
 							Instrument& pIns = *(song._pInstrument[i]);
 							std::int16_t tmpFineTune;
 							pIns.waveLength=wltemp;
-							file->ReadChunk(pIns.waveName, 32); pIns.waveName[31]=0;
+							file->ReadArray(pIns.waveName, 32); pIns.waveName[31]=0;
 							file->Read(pIns.waveVolume);
 							file->Read(tmpFineTune);
 							pIns.waveFinetune=tmpFineTune;
@@ -341,11 +341,11 @@ namespace psy
 							file->Read(pIns.waveLoopType);
 							file->Read(pIns.waveStereo);
 							pIns.waveDataL = new std::int16_t[pIns.waveLength];
-							file->ReadChunk(pIns.waveDataL, pIns.waveLength * sizeof(std::int16_t));
+							file->ReadArray(pIns.waveDataL, pIns.waveLength);
 							if (pIns.waveStereo)
 							{
 								pIns.waveDataR = new std::int16_t[pIns.waveLength];
-								file->ReadChunk(pIns.waveDataR, pIns.waveLength * sizeof(std::int16_t));
+								file->ReadArray(pIns.waveDataR, pIns.waveLength);
 							}
 						}
 						else 
@@ -375,7 +375,7 @@ namespace psy
 				file->Read(vstL[i].valid);
 				if( vstL[i].valid )
 				{
-					file->ReadChunk(vstL[i].dllName,128); vstL[i].dllName[127]=0;
+					file->ReadArray(vstL[i].dllName,128); vstL[i].dllName[127]=0;
 					std::string strname = vstL[i].dllName;
 					std::transform(strname.begin(),strname.end(),strname.begin(),ToLower());
 					std::strcpy(vstL[i].dllName,strname.c_str());
@@ -395,7 +395,7 @@ namespace psy
 		bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
 		{
 			std::int32_t i;
-			file->Read(_machineActive);
+			file->ReadArray(_machineActive,128);
 			std::memset(pMac,0,sizeof pMac);
 
 			for (i=0; i<128; i++)
@@ -579,7 +579,7 @@ namespace psy
 			}
 
 			// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
-			if ( file->Read(busEffect) == false )
+			if ( file->ReadArray(busEffect,64) == false )
 			{
 				int j=0;
 				unsigned char invmach[128];
@@ -888,14 +888,14 @@ namespace psy
 		bool Machine::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
 		{
 			char edName[32];
-			pFile->ReadChunk(edName, 16); edName[15] = 0;
+			pFile->ReadArray(edName, 16); edName[15] = 0;
 			SetEditName(edName);
 
-			pFile->Read(_inputMachines);
-			pFile->Read(_outputMachines);
-			pFile->Read(_inputConVol);
-			pFile->Read(_connection);
-			pFile->Read(_inputCon);
+			pFile->ReadArray(_inputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_outputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputConVol,MAX_CONNECTIONS);
+			pFile->ReadArray(_connection,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputCon,MAX_CONNECTIONS);
 			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
@@ -939,14 +939,14 @@ namespace psy
 		bool Master::LoadPsy2FileFormat(RiffFile* pFile)
 		{
 			char edName[32];
-			pFile->ReadChunk(edName, 16); edName[15] = 0;
+			pFile->ReadArray(edName, 16); edName[15] = 0;
 			SetEditName(edName);
 			
-			pFile->Read(_inputMachines);
-			pFile->Read(_outputMachines);
-			pFile->Read(_inputConVol);
-			pFile->Read(_connection);
-			pFile->Read(_inputCon);
+			pFile->ReadArray(_inputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_outputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputConVol,MAX_CONNECTIONS);
+			pFile->ReadArray(_connection,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputCon,MAX_CONNECTIONS);
 			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
@@ -995,14 +995,14 @@ namespace psy
 			int i;
 
 			char edName[32];
-			pFile->ReadChunk(edName, 16); edName[15] = 0;
+			pFile->ReadArray(edName, 16); edName[15] = 0;
 			SetEditName(edName);
 
-			pFile->Read(_inputMachines);
-			pFile->Read(_outputMachines);
-			pFile->Read(_inputConVol);
-			pFile->Read(_connection);
-			pFile->Read(_inputCon);
+			pFile->ReadArray(_inputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_outputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputConVol,MAX_CONNECTIONS);
+			pFile->ReadArray(_connection,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputCon,MAX_CONNECTIONS);
 			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);
@@ -1071,7 +1071,7 @@ namespace psy
 			char sDllName[256];
 			int numParameters;
 
-			pFile->Read(sDllName); // Plugin dll name
+			pFile->ReadArray(sDllName,256); // Plugin dll name
 			sDllName[255]='\0';
 			std::string strname = sDllName;
 			std::transform(strname.begin(),strname.end(),strname.begin(),ToLower());
@@ -1117,14 +1117,14 @@ namespace psy
 			Init();
 
 			char edName[32];
-			pFile->ReadChunk(edName, 16); edName[15] = 0;
+			pFile->ReadArray(edName, 16); edName[15] = 0;
 			SetEditName(edName);
 
 			pFile->Read(numParameters);
 			if(result)
 			{
 				std::int32_t * Vals = new std::int32_t[numParameters];
-				pFile->ReadChunk(Vals, numParameters * sizeof(std::int32_t));
+				pFile->ReadArray(Vals, numParameters);
 				try
 				{
 					if ( wasAB ) // Patch to replace Arguru Bass by Arguru Synth 2f
@@ -1163,7 +1163,7 @@ namespace psy
 					if(size)
 					{
 						char * pData = new char[size];
-						pFile->ReadChunk(pData, size); // Number of parameters
+						pFile->ReadArray(pData, size); // Number of parameters
 						try
 						{
 							proxy().PutData(pData); // Internal load
@@ -1207,15 +1207,15 @@ namespace psy
 			{
 				for (int i=0; i<numParameters; i++)
 				{
-					pFile->ReadChunk(junk, 4);
+					pFile->ReadArray(junk, 4);
 				}
 			}
 
-			pFile->Read(_inputMachines);
-			pFile->Read(_outputMachines);
-			pFile->Read(_inputConVol);
-			pFile->Read(_connection);
-			pFile->Read(_inputCon);
+			pFile->ReadArray(_inputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_outputMachines,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputConVol,MAX_CONNECTIONS);
+			pFile->ReadArray(_connection,MAX_CONNECTIONS);
+			pFile->ReadArray(_inputCon,MAX_CONNECTIONS);
 			pFile->Skip(96); // ConnectionPoints, 12*8bytes
 			pFile->Read(_connectedInputs);
 			pFile->Read(_connectedOutputs);

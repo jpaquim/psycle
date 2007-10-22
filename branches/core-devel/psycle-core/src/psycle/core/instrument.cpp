@@ -42,9 +42,9 @@ namespace psy
 	{
 		Instrument::Instrument()
 		:
+			waveLength(0),
 			waveDataL(0),
-			waveDataR(0),
-			waveLength(0)
+			waveDataR(0)
 		{
 			// clear everythingout
 			Delete();
@@ -143,13 +143,13 @@ namespace psy
 
 			// now we have to read waves
 
-			int numwaves;
+      std::int32_t numwaves;
 			pFile->Read(numwaves);
 			for (int i = 0; i < numwaves; i++)
 			{
 				char Header[5];
 
-				pFile->ReadChunk(&Header,4);
+				pFile->ReadArray(Header,4);
 				Header[4] = 0;
 				std::uint32_t version;
 				std::uint32_t size;
@@ -194,7 +194,7 @@ namespace psy
 						else
 						{
 							pData = new std::uint8_t[size+4];// +4 to avoid any attempt at buffer overflow by the code <-- ?
-							pFile->ReadChunk(pData,size);
+							pFile->ReadArray(pData,size);
 							///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 							if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
 							{
@@ -221,7 +221,7 @@ namespace psy
 							else
 							{
 								pData = new std::uint8_t[size+4]; // +4 to avoid any attempt at buffer overflow by the code <-- ?
-								pFile->ReadChunk(pData,size);
+								pFile->ReadArray(pData,size);
 								///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 								if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
 								{
@@ -275,7 +275,7 @@ namespace psy
 			pFile->Write(_RCUT);
 			pFile->Write(_RRES);
 
-			pFile->WriteChunk(_sName, std::strlen(_sName) + 1);
+			pFile->WriteArray(_sName, std::strlen(_sName) + 1);
 
 			// now we have to write out the waves, but only if valid
 
@@ -294,7 +294,7 @@ namespace psy
 				}
 
 				std::uint32_t index = 0;
-				pFile->WriteChunk("WAVE",4);
+				pFile->WriteArray("WAVE",4);
 				std::uint32_t version = CURRENT_FILE_VERSION_WAVE;
 				std::uint32_t size =
 					sizeof index +
@@ -323,15 +323,15 @@ namespace psy
 				pFile->Write(waveLoopType);
 				pFile->Write(waveStereo);
 
-				pFile->WriteChunk(waveName, std::strlen(waveName) + 1);
+				pFile->WriteArray(waveName, std::strlen(waveName) + 1);
 
 				pFile->Write(size1);
-				pFile->WriteChunk(pData1,size1);
+				pFile->WriteArray(pData1,size1);
 				delete[] pData1;
 				if (waveStereo)
 				{
 					pFile->Write(size2);
-					pFile->WriteChunk(pData2,size2);
+					pFile->WriteArray(pData2,size2);
 				}
 				delete[] pData2;
 			}

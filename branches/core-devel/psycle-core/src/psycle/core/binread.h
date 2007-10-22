@@ -24,11 +24,12 @@
 #define BINREAD_H
 
 #include <istream>
+#include <cstdint>
 
 namespace psy {
 	namespace core {
 
-		class BinRead {      
+		class BinRead {
 		public:
 
 			enum BinPlatform { byte4LE, byte4BE, byte8LE, byte8BE };
@@ -36,34 +37,37 @@ namespace psy {
 			BinRead( std::istream & in );
 			~BinRead();
 
-			short readInt2LE();
-			unsigned short readUInt2LE();
+      std::int16_t readInt2LE();
+      std::uint16_t readUInt2LE();
 	
-			short readInt2BE();
-			unsigned short readUInt2BE();
+      std::int16_t readInt2BE();
+      std::uint16_t readUInt2BE();
 		
-			unsigned int readUInt4LE();
-			unsigned int readUInt4BE();
+      std::int32_t readInt4LE(); 
+      std::uint32_t readUInt4LE();
+
+      std::int32_t readInt4BE();
+      std::uint32_t readUInt4BE();
 			
-			int readInt4LE();
-			void readUIntArray4LE( unsigned int data[], int count );
-			void readIntArray4LE( int data[], int size );
+			void readUIntArray4LE( uint32_t data[], int count );
+			void readIntArray4LE( int32_t data[], int count );
 
 			void read( char * data, std::streamsize const & bytes );
 
 			bool eof() const;
 			bool bad() const;
 
-			BinPlatform platform() const;
+      //			BinPlatform platform() const;
 
 		private:
 
-			BinPlatform platform_;
 			std::istream & in_;
 
+      /*
+			BinPlatform platform_;
 			BinPlatform testPlatform();
-			unsigned int swap4( unsigned int value );
-
+      std::uint32_t swap4( std::uint32_t value );
+      */
 		};
 
 	}

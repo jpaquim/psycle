@@ -49,15 +49,15 @@ namespace psy {
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 
 		protected:
-			static const int NUMMACHINES=8;
+			static const int NUM_MACHINES=8;
 			void AllocateVoice(int channel, int machine);
 			void DeallocateVoice(int channel, int machine);
-			short macOutput[NUMMACHINES];
-			short noteOffset[NUMMACHINES];
+      std::int16_t macOutput[NUM_MACHINES];
+      std::int16_t noteOffset[NUM_MACHINES];
 			static std::string _psName;
 			bool bisTicking;
 			// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
-			int allocatedchans[MAX_TRACKS][NUMMACHINES];
+			int allocatedchans[MAX_TRACKS][NUM_MACHINES];
 			// indicates if the channel of the specified machine is in use or not
 			bool availablechans[MAX_MACHINES][MAX_TRACKS];
 		};
@@ -260,12 +260,12 @@ namespace psy {
 
 			//parameter settings
 			
-			short waveform;
-			int lSpeed;
-			short macOutput[NUM_CHANS];
-			short paramOutput[NUM_CHANS];
-			int phase[NUM_CHANS];
-			int level[NUM_CHANS];
+      std::int16_t waveform;
+      std::int32_t lSpeed;
+      std::int16_t macOutput[NUM_CHANS];
+      std::int16_t paramOutput[NUM_CHANS];
+      std::int32_t phase[NUM_CHANS];
+      std::int32_t level[NUM_CHANS];
 
 			//internal state vars
 			
@@ -274,9 +274,9 @@ namespace psy {
 			/// our lfo
 			float waveTable[LFO_SIZE];
 			/// value of knob when last seen-- used to compensate for outside changes
-			int prevVal[NUM_CHANS];
+      std::int16_t prevVal[NUM_CHANS];
 			/// where knob should be at lfo==0
-			int centerVal[NUM_CHANS];
+      std::int32_t centerVal[NUM_CHANS];
 
 			static std::string _psName;
 			bool bisTicking;

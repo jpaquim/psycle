@@ -282,7 +282,7 @@ namespace psy { namespace core {
 			_inputCon[i]=false;
 		}
 	}
-	Machine::Machine(Machine* mac,MachineType type,MachineMode mode)
+  Machine::Machine(Machine* mac,type_type type,MachineMode mode)
 	:crashed_()
 	,type_(type)
 	,mode_(mode)
@@ -776,7 +776,7 @@ namespace psy { namespace core {
 		// assume version 0 for now
 		bool bDeleted(false);
 		Machine* pMachine;
-		MachineType type;//,oldtype;
+		type_type type;//,oldtype;
 		char dllName[256];
 		pFile->Read(type);
 		//oldtype=type;
@@ -959,7 +959,7 @@ namespace psy { namespace core {
 			pFile->Write(_connection[i]);
 			pFile->Write(_inputCon[i]);
 		}
-		pFile->WriteChunk(GetEditName().c_str(), GetEditName().length()+1); //a max of 128 chars will be read on song load, but there's no real
+		pFile->WriteArray(GetEditName().c_str(), GetEditName().length()+1); //a max of 128 chars will be read on song load, but there's no real
 		// reason to limit what gets saved here.. (is there?)
 		SaveSpecificChunk(pFile);
 	}

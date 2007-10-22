@@ -507,7 +507,7 @@ namespace psy {
 				std::cout << chunkcount << std::endl;
 
 				/* chunk_loop: */
-				while(file.ReadChunk(&header, 4) && chunkcount)
+				while(file.ReadArray(header, 4) && chunkcount)
 				{
 					file.Read(version);
 					file.Read(size);
@@ -685,7 +685,7 @@ namespace psy {
 			RiffFile file;
 			file.Create(std::string("psycle_tmp.bin").c_str(), true);
 
-			file.WriteChunk("PSY4",4);
+			file.WriteArray("PSY4",4);
 			saveSONGv0(&file,song);
 
 			for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
@@ -753,7 +753,7 @@ namespace psy {
 			std::uint32_t version, size;
 			// chunk header;
 
-			file->WriteChunk("SONG",4);
+			file->WriteArray("SONG",4);
 			version = FILE_VERSION;
 			file->Write(version);
 			size = sizeof chunkcount;
@@ -777,7 +777,7 @@ namespace psy {
 
 			// chunk header
 
-			file->WriteChunk("MACD",4);
+			file->WriteArray("MACD",4);
 			version = CURRENT_FILE_VERSION_MACD;
 			file->Write(version);
 			pos = file->GetPos();
@@ -808,7 +808,7 @@ namespace psy {
 
 			// chunk header
 
-			file->WriteChunk("INSD",4);
+			file->WriteArray("INSD",4);
 			version = CURRENT_FILE_VERSION_INSD;
 			file->Write(version);
 			pos = file->GetPos();

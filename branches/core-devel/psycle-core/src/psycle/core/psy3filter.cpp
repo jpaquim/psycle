@@ -65,7 +65,7 @@ namespace psy
 			RiffFile file;
 			file.Open(fileName);
 			char Header[9];
-			file.ReadChunk(&Header, 8);
+			file.ReadArray(Header, 8);
 			Header[8]=0;
 			file.Close();
 			if (strcmp(Header,"PSY3SONG")==0) return true;
@@ -107,7 +107,7 @@ namespace psy
 			std::uint32_t chunkcount = LoadSONGv0(&file,song);
 			/* chunk_loop: */
 
-			while(file.ReadChunk(&header, 4) && chunkcount)
+			while(file.ReadArray(header, 4) && chunkcount)
 			{
 				file.Read(version);
 				file.Read(size);
@@ -440,7 +440,7 @@ namespace psy
 				file->ReadString(patternName, sizeof patternName);
 				file->Read(size);
 				unsigned char * pSource = new unsigned char[size];
-				fileread = file->ReadChunk(pSource, size);
+				fileread = file->ReadArray(pSource, size);
 				unsigned char * pDest;
 				DataCompression::BEERZ77Decomp2(pSource, &pDest);
 				delete[] pSource; pSource = pDest;

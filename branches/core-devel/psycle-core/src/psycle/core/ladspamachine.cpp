@@ -544,7 +544,7 @@ namespace psy {
 			else if ( (extpos = libName_.find(".dll"))!= std::string::npos) {
 				withoutSuffix = libName_.substr(0,extpos);
 			}
-			pFile->WriteChunk(withoutSuffix.c_str(), withoutSuffix.length() + 1);
+			pFile->WriteArray(withoutSuffix.c_str(), withoutSuffix.length() + 1);
 		}
 		
 		bool LADSPAMachine::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -583,7 +583,10 @@ namespace psy {
 			std::uint32_t size = sizeof count  + sizeof(std::uint32_t) * count;
 			pFile->Write(size);
 			pFile->Write(count);
-			for(unsigned int i(0) ; i < count ; ++i) pFile->Write<float>(values_[i].rawvalue());
+			for(unsigned int i(0) ; i < count ; ++i) {
+        float temp = values_[i].rawvalue();
+        pFile->Write(temp);
+      }
 		}
 	}
 }

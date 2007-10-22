@@ -675,7 +675,7 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 
 		void Plugin::SaveDllName(RiffFile * pFile) const
 		{
-			pFile->WriteChunk(_psDllName.c_str(), _psDllName.length() + 1);
+			pFile->WriteArray(_psDllName.c_str(), _psDllName.length() + 1);
 		}
 
 		bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
@@ -713,7 +713,7 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 					if(size)
 					{
 						char * pData = new char[size];
-						pFile->ReadChunk(pData, size); // Number of parameters
+						pFile->ReadArray(pData, size); // Number of parameters
 						try
 						{
 							proxy().PutData(pData); // Internal load
@@ -746,7 +746,10 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 			std::uint32_t size = size2 + sizeof count  + sizeof(std::uint32_t) * count;
 			pFile->Write(size);
 			pFile->Write(count);
-			for(unsigned int i(0) ; i < count ; ++i) pFile->Write<std::uint32_t>(GetParamValue(i));
+			for(unsigned int i(0) ; i < count ; ++i) {
+        std::uint32_t temp = GetParamValue(i);
+        pFile->Write(temp);
+      }
 			if(size2)
 			{
 				char * pData = new char[size2];
@@ -759,7 +762,7 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
 				}
-				pFile->WriteChunk(pData, size2); // Number of parameters
+				pFile->WriteArray(pData, size2); // Number of parameters
 				delete[] pData;
 			}
 		};
