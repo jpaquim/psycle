@@ -149,8 +149,12 @@ int main(int argument_count, char * arguments[]) {
 		player.start(0);
 		std::cout << "psycle: player: playing...\n";
 
-		std::cout << "psycle: player: (enter anything to stop)\n";
-		std::string s; std::cin >> s;
+		std::cout << "psycle: player: (press Ctrl+C to end)\n";
+
+		while (1)
+		{
+			printf("Beat: %.02f\r",player.timeInfo().playBeatPos());			sleep(1);
+		}
 		
 		std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
