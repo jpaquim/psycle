@@ -27,6 +27,9 @@ namespace psycle
 
 		void Instrument::Delete()
 		{
+			_lock_instrument_to_machine = -1;
+			_LOCKINST = false;
+
 			// Reset envelope
 			ENV_AT = 1; // 16
 			ENV_DT = 1; // 16386

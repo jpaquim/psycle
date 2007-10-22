@@ -94,12 +94,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (afilterins[0] !=	'\0')
 				filterins = hexstring_to_integer(afilterins);
 
-			if (afiltermac[0] != '\0')
-				//filtermac = atoi(afiltermac);			
+			if (afiltermac[0] != '\0')		
 				filtermac = hexstring_to_integer(afiltermac);			
 
 			if (areplaceins[0] != '\0')
-				//replaceins = atoi(areplaceins);
 				replaceins = hexstring_to_integer(areplaceins);
 
 			if (areplacemac[0] != '\0')

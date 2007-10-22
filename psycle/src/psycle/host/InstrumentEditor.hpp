@@ -3,6 +3,7 @@
 #pragma once
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		class Song;
@@ -33,9 +34,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CButton	m_loopcheck;
 			CButton	m_rres_check;
 			CSliderCtrl	m_panslider;
+			CButton m_lockinst;
 			CButton	m_rpan_check;
 			CButton	m_rcut_check;
 			CComboBox	m_nna_combo;
+			CEdit m_lockinstnumber;
 			CEdit	m_instname;
 			CStatic	m_volabel;
 			CSliderCtrl	m_volumebar;
@@ -59,12 +62,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnLoopoff();
 			afx_msg void OnLoopforward();
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnChangeLockInst();
 			afx_msg void OnChangeInstname();
 			afx_msg void OnSelchangeNnaCombo();
 			afx_msg void OnPrevInstrument();
 			afx_msg void OnNextInstrument();
 			afx_msg void OnEnvButton();
 			afx_msg void OnCustomdrawPanslider(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnLockinst();
 			afx_msg void OnRpan();
 			afx_msg void OnRcut();
 			afx_msg void OnRres();

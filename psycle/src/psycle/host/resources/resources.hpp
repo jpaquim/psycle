@@ -300,6 +300,8 @@
 #define IDC_CHECK4                      1144
 #define IDC_LOOPEDIT                    1145
 #define IDC_TAB1                        1146
+#define IDC_LOOPEDIT2                   1146
+#define IDC_LOCKINSTNUMBER              1146
 #define IDC_INST_NUM                    1147
 #define IDC_INST_MORE                   1148
 #define IDC_INST_LESS                   1149
@@ -1042,8 +1044,8 @@
 #define IDC_FILTERCMD                   1798
 #define IDAPPLY                         1800
 #define IDC_APPLYTOSONG                 1801
-#define IDC_RADIO3                      1802
 #define IDC_APPLYTOBLOCK                1802
+#define IDC_LOCKINST                    1802
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1213,7 +1215,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        278
 #define _APS_NEXT_COMMAND_VALUE         34210
-#define _APS_NEXT_CONTROL_VALUE         1802
+#define _APS_NEXT_CONTROL_VALUE         1803
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif
