@@ -68,13 +68,15 @@ void stuff() {
 		plugins::pulse & pulse3(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse3"))));
 
 		float freq(400);
+		float freq2(440);
+		float freq3(480);
 
 		loggers::information()("############################################### settings ####################################################");
 		{
 			out.input_port("in")->events_per_second(44100);
 			pulse1(freq);
-			pulse2(freq * 1.1);
-			pulse3(freq * 1.17);
+			pulse2(freq2 * 1.1);
+			pulse3(freq3 * 1.17);
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -134,14 +136,21 @@ void stuff() {
 				loggers::information()(s.str());
 			}
 			scheduler.start();
-			int const notes(2000);
+			int const notes(500);
+			float ratio(1.5);
 			for(int note(0); note < notes; ++note) {
 				universalis::operating_system::threads::sleep(seconds / notes);
 				pulse1(freq);
-				pulse2(freq * 1.1);
-				pulse3(freq * 1.17);
-				freq *= 1.5;
-				if(freq > 5000) freq = 440;
+				pulse2(freq2 * 1.1);
+				pulse3(freq3 * 1.17);
+				freq *= ratio;
+				if(freq > 5000) { freq /= 15; ratio *= 1.1; }
+				freq2 *= ratio * ratio;
+				if(freq2 > 5000) freq2 /= 15;
+				freq3 *= ratio * ratio * ratio;
+				if(freq3 > 5000) freq3 /= 15;
+				if(ratio > 1.5) ratio -= 0.5;
+				if(ratio < 1.1) ratio += 0.1;
 			}
 			scheduler.stop();
 		}
