@@ -127,8 +127,8 @@ namespace universalis { namespace operating_system { namespace clocks {
 					BOOST_MESSAGE("using ::clock_getres");
 					if(::clock_getres(clock, &result))
 					{
-						universalis::operating_system::error();
-						return 1;
+						std::ostringstream s; s << universalis::operating_system::exceptions::code_description();
+						throw std::runtime_error(s.str().c_str());
 					}
 				#else
 					BOOST_MESSAGE("using CLOCKS_PER_SEC");
@@ -136,7 +136,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 					result.tv_nsec = static_cast<long int>(1e9 / CLOCKS_PER_SEC);
 				#endif
 				std::ostringstream s;
-				ss << "clock resolution: " << result.tv_sec << "s + " << result.tv_nsec * 1e-9 << "s";
+				s << "clock resolution: " << result.tv_sec << "s + " << result.tv_nsec * 1e-9 << "s";
 				BOOST_MESSAGE(s.str());
 			}
 		#endif

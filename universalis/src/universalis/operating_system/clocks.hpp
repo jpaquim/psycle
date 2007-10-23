@@ -15,7 +15,7 @@
 #elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-		#pragma comment(lib,"kernel32") // win64?
+		#pragma comment(lib, "kernel32") // win64?
 	#endif
 
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
