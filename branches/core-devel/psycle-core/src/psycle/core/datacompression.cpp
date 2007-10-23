@@ -23,6 +23,8 @@ typedef unsigned short WORD;
 /// \todo add real detection of type size
 typedef unsigned long DWORD;
 
+#define ReadLittleEndian32(ptr) ((ptr[3]<<24)|(ptr[2]<<16)|(ptr[1]<<8)|(ptr[0]))
+
 DataCompression::DataCompression( )
 {
 }
@@ -168,7 +170,8 @@ bool DataCompression::BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination)
 				if (*pSourcePos++ == 0x04)
 				{
 					// get file size
-					int FileSize = *(DWORD*)pSourcePos;
+          // This is done byte by byte to avoid endianness issues
+					int FileSize = ReadLittleEndian32(pSourcePos);
 
 					pSourcePos+=4;
 
@@ -498,7 +501,8 @@ bool DataCompression::SoundDesquash(byte * pSourcePos, signed short ** pDestinat
 						0x7fff};
 
 					// get file size
-					int FileSize = *(DWORD*)pSourcePos;
+					// this is done byte-by-byte to avoid endianness issues
+					int FileSize = ReadLittleEndian32(pSourcePos);
 
 					pSourcePos+=4;
 					//ok, now we can start decompressing
@@ -515,7 +519,8 @@ bool DataCompression::SoundDesquash(byte * pSourcePos, signed short ** pDestinat
 						// read a full DWORD because that is 32 bits.  in our worst case we will need
 						// 7+5+15 bits, 27, which is easily contained in 32 bits.
 
-						DWORD bits = *(DWORD*)pSourcePos;
+						DWORD bits = (DWORD)ReadLittleEndian32(pSourcePos);
+            // note, we do not increment pSourcePos.
 
 						// now shift for our bit position to get the next bit we require
 
