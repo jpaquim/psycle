@@ -151,17 +151,11 @@ public:
 	{
 		float out = 0.0f;
 		float stringInput = plucker;
-		bool denormal=false;
 		do {
 			if (noteDelay == 0) {
 				stringInput -= combDelay.Tick(plucker * pluckAmp);
 				plucker = 0.0f;
 				lastOutput = delayLine.Tick(loopFilt.Tick(stringInput + delayLine.GetLastOutput() * loopGain));
-				if ( lastOutput > 0.0f && !((*(int*)&lastOutput)&0x7f800000) )
-				{
-					denormal=true;
-					lastOutput=0.0f;
-				}
 			} else {
 				lastOutput = 0.0f;
 			}
@@ -169,9 +163,5 @@ public:
 			*++left += out;
 			*++right += out;
 		} while (--samps);
-		if (denormal)
-		{
-			NoteOff();
-		}
 	}
 };

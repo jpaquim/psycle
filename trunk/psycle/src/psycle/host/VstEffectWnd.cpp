@@ -290,7 +290,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (!popPrg)
 					return;
 
-				for (int i = 0; i < machine().numPrograms(); i += 16)
+				for (int i = 0; i < machine().numPrograms() && i < 980 ; i += 16)
 				{
 					CMenu popup;
 					popup.CreatePopupMenu();
