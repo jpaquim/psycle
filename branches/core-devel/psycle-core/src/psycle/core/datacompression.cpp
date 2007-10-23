@@ -19,9 +19,9 @@
 /// \todo add real detection of type size
 typedef unsigned char byte;
 /// \todo add real detection of type size
-typedef unsigned short WORD;
+typedef unsigned short int WORD;
 /// \todo add real detection of type size
-typedef unsigned long DWORD;
+typedef unsigned int DWORD;
 
 #define ReadLittleEndian32(ptr) ((ptr[3]<<24)|(ptr[2]<<16)|(ptr[1]<<8)|(ptr[0]))
 
