@@ -239,7 +239,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				_pSong->_pInstrument[si]->_lock_instrument_to_machine = hexstring_to_integer(buffer);		
+				int instNum = hexstring_to_integer(buffer);
+				if (instNum > MAX_INSTRUMENTS)
+					instNum = MAX_INSTRUMENTS;
+				else if (instNum < 0)
+					instNum = 0;
+				_pSong->_pInstrument[si]->_lock_instrument_to_machine = instNum;		
 			}
 		}
 
