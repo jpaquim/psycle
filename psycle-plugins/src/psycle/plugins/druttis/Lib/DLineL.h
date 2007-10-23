@@ -9,6 +9,9 @@
 //============================================================================
 //				Class
 //============================================================================
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
+using namespace psycle::helpers::math;
+
 class DLineL
 {
 public:
@@ -40,6 +43,7 @@ public:
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{
+		erase_all_nans_infinities_and_denormals(sample);
 		inputs[inPoint++] = sample;
 		while (inPoint >= length)
 			inPoint -= length;
@@ -47,6 +51,7 @@ public:
 		while (outPoint >= length)
 			outPoint -= length;
 		lastOutput += inputs[outPoint] * omAlpha;
+		erase_all_nans_infinities_and_denormals(lastOutput);
 		return lastOutput;
 	}
 };

@@ -2424,6 +2424,7 @@ namespace psycle
 
 			pFile->Write("INFO",4);
 			version = CURRENT_FILE_VERSION_INFO;
+///\todo: BUG!!!! Fileformat does NOT define this 3*sizeof(int)
 			size = name.length() + author.length() + comments.length() + 3*sizeof(int) + 3; // +3 for \0
 
 			pFile->Write(&version,sizeof(version));
