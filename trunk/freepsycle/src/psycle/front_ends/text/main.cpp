@@ -56,7 +56,7 @@ void stuff() {
 		#endif
 
 		node & out(resolver("output", graph, "out"));
-		//node & additioner(resolver("additioner", graph, "+"));
+		node & additioner(resolver("additioner", graph, "+"));
 		//node & multiplier(resolver("multiplier", graph, "*"));
 
 		node & sine1(resolver("sine", graph, "sine1"));
@@ -67,16 +67,16 @@ void stuff() {
 		plugins::pulse & pulse2(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse2"))));
 		plugins::pulse & pulse3(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse3"))));
 
-		float freq(400);
-		float freq2(440);
-		float freq3(480);
+		float freq(200);
+		float freq2(400);
+		float freq3(800);
 
 		loggers::information()("############################################### settings ####################################################");
 		{
 			out.input_port("in")->events_per_second(44100);
 			pulse1(freq);
-			pulse2(freq2 * 1.1);
-			pulse3(freq3 * 1.17);
+			pulse2(freq2);
+			pulse3(freq3);
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -89,6 +89,7 @@ void stuff() {
 		loggers::information()("############################################## connections ##################################################");
 		{
 			/*
+			|
 			| (out)---(+)-------\
 			|   |               |
 			|   \------(*)----(sine1)---(pulse1)
@@ -101,13 +102,15 @@ void stuff() {
 			| pulse1 > sine1 > * > out
 			| pulse2 > sine2 > * > out
 			| pulse2 > sine2 > * > out
+			|
 			*/
-			//additioner.output_port("out")->connect(*out.input_port("in"));
+			
+			additioner.output_port("out")->connect(*out.input_port("in"));
 			//multiplier.output_port("out")->connect(*additioner.input_port("in"));
 
-			sine1.output_port("out")->connect(*out.input_port("in"));
-			sine2.output_port("out")->connect(*out.input_port("in"));
-			sine3.output_port("out")->connect(*out.input_port("in"));
+			sine1.output_port("out")->connect(*additioner.input_port("in"));
+			sine2.output_port("out")->connect(*additioner.input_port("in"));
+			sine3.output_port("out")->connect(*additioner.input_port("in"));
 			//sine1.output_port("out")->connect(*additioner.input_port("in"));
 			//sine1.output_port("out")->connect(*multiplier.input_port("in"));
 			//sine2.output_port("out")->connect(*multiplier.input_port("in"));
@@ -136,21 +139,24 @@ void stuff() {
 				loggers::information()(s.str());
 			}
 			scheduler.start();
-			int const notes(500);
-			float ratio(1.5);
-			for(int note(0); note < notes; ++note) {
-				universalis::operating_system::threads::sleep(seconds / notes);
-				pulse1(freq);
-				pulse2(freq2 * 1.1);
-				pulse3(freq3 * 1.17);
-				freq *= ratio;
-				if(freq > 5000) { freq /= 15; ratio *= 1.1; }
-				freq2 *= ratio * ratio;
-				if(freq2 > 5000) freq2 /= 15;
-				freq3 *= ratio * ratio * ratio;
-				if(freq3 > 5000) freq3 /= 15;
-				if(ratio > 1.5) ratio -= 0.5;
-				if(ratio < 1.1) ratio += 0.1;
+			if(false) universalis::operating_system::threads::sleep(seconds);
+			else {
+				int const notes(4000);
+				float ratio(1.1);
+				for(int note(0); note < notes; ++note) {
+					universalis::operating_system::threads::sleep(seconds / notes);
+					pulse1(freq);
+					pulse2(freq2 * 1.1);
+					pulse3(freq3 * 1.17);
+					freq *= ratio;
+					if(freq > 5000) { freq /= 15; ratio *= 1.05; }
+					freq2 *= ratio * ratio;
+					if(freq2 > 5000) freq2 /= 15;
+					freq3 *= ratio * ratio * ratio;
+					if(freq3 > 5000) freq3 /= 15;
+					if(ratio > 1.5) ratio -= 0.5;
+					if(ratio < 1.01) ratio += 0.01;
+				}
 			}
 			scheduler.stop();
 		}

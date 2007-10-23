@@ -43,7 +43,8 @@ void sine::seconds_per_event_change_notification_from_port(engine::port const & 
 	this->frequency(100);//frequency); \todo remove
 }
 
-const real todo(1.000001); // \todo remove
+const real sweep(1.000005); // \todo remove
+//const real sweep(1); // \todo remove
 
 void sine::do_process() throw(engine::exception) {
 	if(!have_out()) return;
@@ -58,7 +59,7 @@ void sine::do_process() throw(engine::exception) {
 				this->phase_ = phase_channel()[phase_event++].sample();
 			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= todo; // \todo remove
+			step_ *= sweep; // \todo remove
 		}
 	goto modulo;
 	
@@ -70,7 +71,7 @@ void sine::do_process() throw(engine::exception) {
 				this->phase_ = phase_channel()[phase_event++].sample();
 			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= todo; // \todo remove
+			step_ *= sweep; // \todo remove
 		}
 	goto modulo;
 	
@@ -82,7 +83,7 @@ void sine::do_process() throw(engine::exception) {
 			else b = false; ///\todo goto const loop
 			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= todo; // \todo remove
+			step_ *= sweep; // \todo remove
 		}
 	}
 	goto modulo;
@@ -91,7 +92,7 @@ void sine::do_process() throw(engine::exception) {
 		for(std::size_t out_event(0) ; out_event < out_channel().size() ; ++out_event) {
 			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
-			step_ *= todo; // \todo remove
+			step_ *= sweep; // \todo remove
 		}
 	
 	modulo: phase_ = std::fmod(phase_, 2 * engine::math::pi);
