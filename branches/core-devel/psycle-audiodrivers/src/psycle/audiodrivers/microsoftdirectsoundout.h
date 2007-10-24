@@ -82,7 +82,7 @@ namespace psy
 			AUDIODRIVERWORKFN _pCallback;
 
 			static DWORD WINAPI PollerThread(void* pDirectSound);
-			//				static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
+			//																static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
 			void ReadConfig();
 			void WriteConfig();
 			void Error(const WCHAR msg[]);

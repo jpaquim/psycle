@@ -40,7 +40,7 @@ namespace psy
 		WaveFileOut::~WaveFileOut()
 		{
 			while ( threadOpen ) {
-				kill_thread = 1;																								
+				kill_thread = 1;																																																																																																
 #if defined __unix__ || defined __APPLE__
 				usleep(200);
 #else

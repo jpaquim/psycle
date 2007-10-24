@@ -584,9 +584,9 @@ namespace psy {
 			pFile->Write(size);
 			pFile->Write(count);
 			for(unsigned int i(0) ; i < count ; ++i) {
-        float temp = values_[i].rawvalue();
-        pFile->Write(temp);
-      }
+		float temp = values_[i].rawvalue();
+		pFile->Write(temp);
+		}
 		}
 	}
 }

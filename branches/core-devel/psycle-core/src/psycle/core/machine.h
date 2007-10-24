@@ -140,7 +140,7 @@ namespace psy
 		{
 			public:
 				/// legacy
-      typedef std::int32_t id_type;
+		typedef std::int32_t id_type;
 
 				Wire()
 					:volume(1.0f),pan(0.0f),multiplier(1.0f),rvol(1.0f),lvol(1.0f)
@@ -209,7 +209,7 @@ namespace psy
 		{
 			public:
 				/// legacy
-      typedef std::int32_t id_type;
+		typedef std::int32_t id_type;
 				InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 				virtual ~InPort(){};
 				virtual void CollectData(int numSamples);
@@ -219,7 +219,7 @@ namespace psy
 		{
 			public:
 				/// legacy
-      typedef std::int32_t id_type;
+		typedef std::int32_t id_type;
 				OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 				virtual ~OutPort() {}
 				virtual void CollectData(int numSamples);
@@ -381,7 +381,7 @@ namespace psy
 			///\{
 				public:
 					///\see enum MachineType which defined somewhere outside
-          typedef std::int32_t type_type; // Was: MachineType type_type
+			typedef std::int32_t type_type; // Was: MachineType type_type
 					type_type inline type() const throw() { return type_; }
 				private:
 					void type(type_type type) { type_ = type; } friend class CoreSong;
@@ -610,7 +610,7 @@ namespace psy
 			/// right chan volume
 			float _rVol;
 			/// numerical value of panning.
-      std::int32_t _panning;
+		std::int32_t _panning;
 			int _x;
 			int _y;
 			int _numPars;
@@ -619,7 +619,7 @@ namespace psy
 			///\name input ports
 			///\{
 				/// number of Incoming connections
-      std::int32_t _connectedInputs;
+		std::int32_t _connectedInputs;
 				/// Incoming connections Machine numbers
 				///\todo hardcoded limits and wastes
 				Machine::id_type _inputMachines[MAX_CONNECTIONS];
@@ -637,7 +637,7 @@ namespace psy
 			///\name output ports
 			///\{
 				/// number of Outgoing connections
-        std::int32_t _connectedOutputs;
+		std::int32_t _connectedOutputs;
 				/// Outgoing connections Machine numbers
 				///\todo hardcoded limits and wastes
 				Machine::id_type _outputMachines[MAX_CONNECTIONS];

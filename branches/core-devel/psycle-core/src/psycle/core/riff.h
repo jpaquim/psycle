@@ -103,7 +103,7 @@ namespace psy
 			/// Added by [JAZ]
 			DDCRET Skip  (unsigned NumBytes);
 
-      DDCRET Backpatch(long FileOffset, const void *Data, unsigned NumBytes); // Remember to fix endian if needed when you call this
+		DDCRET Backpatch(long FileOffset, const void *Data, unsigned NumBytes); // Remember to fix endian if needed when you call this
 		};
 
 		class WaveFormat_ChunkData

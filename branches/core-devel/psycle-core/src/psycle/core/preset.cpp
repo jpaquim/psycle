@@ -41,9 +41,9 @@ namespace psy {
 		{
 		}
 
-    bool Preset::read( std::istream & in )
+	bool Preset::read( std::istream & in )
 		{
-      BinRead prsIn(in);
+		BinRead prsIn(in);
 				// read the preset name     
 			char cbuf[32];
 			prsIn.read(cbuf,32);

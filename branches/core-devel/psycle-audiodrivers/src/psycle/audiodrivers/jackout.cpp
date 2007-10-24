@@ -61,7 +61,7 @@ bool JackOut::Initialized( )
 	return _initialized;
 }
 
-bool				JackOut::Enable( bool e )
+bool																JackOut::Enable( bool e )
 {
 	if ( e && !running_ ) {
 		running_ = registerToJackServer();
@@ -76,8 +76,8 @@ bool				JackOut::Enable( bool e )
 // Jack special functions
 
 bool JackOut::registerToJackServer() {
-//								jack_options_t options = JackNullOption;
-//												jack_status_t status;
+//																																jack_options_t options = JackNullOption;
+//																																																jack_status_t status;
 		// try to become a client of the JACK server
 	const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
 
@@ -86,7 +86,7 @@ bool JackOut::registerToJackServer() {
 		return 0;
 		}
 
-/*												if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
+/*																																																if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
 	{
 			std::cerr << "jack server not running?\n" << std::endl;
 		return 0;

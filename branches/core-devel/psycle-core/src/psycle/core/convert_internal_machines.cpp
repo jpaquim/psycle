@@ -56,23 +56,23 @@ namespace psy {
 					switch(type) {
 						case delay:
 							{
-                const int nparams = 2;
-                std::int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
+				const int nparams = 2;
+				std::int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
 								retweak(machine, type, parameters, nparams, 5);
 							}
 							break;
 						case flanger:
 							{
-                const int nparams = 2;
-                std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
-                retweak(machine, type, parameters, nparams, 7);
+				const int nparams = 2;
+				std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+				retweak(machine, type, parameters, nparams, 7);
 							}
 							break;
 						case gainer:
 							riff.Skip(4);
 							{
-                const int nparams = 1;
-                std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+				const int nparams = 1;
+				std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
 								if(type == gainer) retweak(machine, type, parameters, nparams);
 							}
 							break;
@@ -81,20 +81,20 @@ namespace psy {
 					}
 					switch(type) {
 						case distortion:
-              {
-                const int nparams=4;
-                std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
-                retweak(machine, type, parameters, nparams);
-                break;
-              }
+				{
+				const int nparams=4;
+				std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+				retweak(machine, type, parameters, nparams);
+				break;
+				}
 						default:
 							riff.Skip(16);
 					}
 					switch(type) {
 						case ring_modulator:
 							{
-                const int nparams=4;
-                std::uint8_t parameters [nparams];
+				const int nparams=4;
+				std::uint8_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[1]);
 								riff.Skip(1);
@@ -107,8 +107,8 @@ namespace psy {
 						case delay:
 							riff.Skip(5);
 							{
-                const int nparams=4;
-                std::int32_t parameters [nparams];
+				const int nparams=4;
+				std::int32_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[2]);
 								riff.Read(parameters[1]);
@@ -120,7 +120,7 @@ namespace psy {
 						case flanger:
 							riff.Skip(4);
 							{
-                const int nparams=1;
+				const int nparams=1;
 								unsigned char parameters [nparams]; riff.ReadArray(parameters, nparams);
 								retweak(machine, type, parameters, nparams, 9);
 							}
@@ -141,8 +141,8 @@ namespace psy {
 						case filter_2_poles:
 							riff.Skip(21);
 							{
-                const int nparams=6;
-                std::int32_t parameters [nparams];
+				const int nparams=6;
+				std::int32_t parameters [nparams];
 								riff.ReadArray(&parameters[1], nparams-1);
 								riff.Read(parameters[0]);
 								retweak(machine, type, parameters, nparams);

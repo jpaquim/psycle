@@ -282,7 +282,7 @@ namespace psy { namespace core {
 			_inputCon[i]=false;
 		}
 	}
-  Machine::Machine(Machine* mac,type_type type,MachineMode mode)
+	Machine::Machine(Machine* mac,type_type type,MachineMode mode)
 	:crashed_()
 	,type_(type)
 	,mode_(mode)

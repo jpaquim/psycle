@@ -44,10 +44,10 @@ namespace psy
 
 			virtual MsWaveOut* clone()  const;   // Uses the copy constructor
 
-			virtual AudioDriverInfo info() const;												
+			virtual AudioDriverInfo info() const;																																																
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 			bool Initialized( );
-			virtual bool Enable( bool e );				
+			virtual bool Enable( bool e );																
 
 		private:
 

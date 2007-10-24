@@ -43,12 +43,12 @@ namespace psy {
 			short* _pL;
 			short* _pR;
 			bool _stereo;
-      std::int64_t _pos;
+		std::int64_t _pos;
 			std::int64_t _speed;
 			bool _loop;
-      std::uint32_t _loopStart;
-      std::uint32_t _loopEnd;
-      std::uint32_t _length;
+		std::uint32_t _loopStart;
+		std::uint32_t _loopEnd;
+		std::uint32_t _length;
 			float _vol;
 			float _lVolDest;
 			float _rVolDest;

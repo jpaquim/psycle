@@ -468,7 +468,7 @@ namespace psy
 		// IFF structure ripped by krokpitr
 		// Current Code Extremely modified by [JAZ] ( RIFF based )
 		// Advise: IFF files use Big Endian byte ordering, so use
-    // ReadBE/WriteBE instead of Read/Write.
+	// ReadBE/WriteBE instead of Read/Write.
 
 		/*
 		** IFF Riff Header
@@ -533,7 +533,7 @@ namespace psy
 			DeleteLayer(instrument);
 			file.ReadArray(fourCC,4);
 			if( file.matchFourCC(fourCC,"16SV")) bits = 16;
-      else if(file.matchFourCC(fourCC,"8SVX")) bits = 8;
+		else if(file.matchFourCC(fourCC,"8SVX")) bits = 8;
 			file.Read(hd);
 			if( file.matchFourCC(hd._id,"NAME"))
 			{
@@ -575,7 +575,7 @@ namespace psy
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-            file.ReadBE(*csamples);
+			file.ReadBE(*csamples);
 						++csamples;
 					}
 				}
@@ -583,7 +583,7 @@ namespace psy
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
 					{
-            std::int8_t tmp;
+			std::int8_t tmp;
 						file.Read(tmp);
 						*csamples = tmp*0x101;
 						++csamples;

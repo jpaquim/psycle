@@ -747,9 +747,9 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 			pFile->Write(size);
 			pFile->Write(count);
 			for(unsigned int i(0) ; i < count ; ++i) {
-        std::uint32_t temp = GetParamValue(i);
-        pFile->Write(temp);
-      }
+		std::uint32_t temp = GetParamValue(i);
+		pFile->Write(temp);
+		}
 			if(size2)
 			{
 				char * pData = new char[size2];

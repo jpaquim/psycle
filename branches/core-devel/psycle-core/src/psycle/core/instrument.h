@@ -28,7 +28,7 @@ namespace psy
 			///\name Loop stuff
 			///\{
 			bool _loop;
-      std::int32_t _lines;
+		std::int32_t _lines;
 			///\}
 
 			///\verbatim
@@ -43,19 +43,19 @@ namespace psy
 			///\name Amplitude Envelope overview:
 			///\{
 			/// Attack Time [in Samples at 44.1Khz]
-      std::int32_t ENV_AT;
+		std::int32_t ENV_AT;
 			/// Decay Time [in Samples at 44.1Khz]
-      std::int32_t ENV_DT;
+		std::int32_t ENV_DT;
 			/// Sustain Level [in %]
-      std::int32_t ENV_SL;
+		std::int32_t ENV_SL;
 			/// Release Time [in Samples at 44.1Khz]
-      std::int32_t ENV_RT;
+		std::int32_t ENV_RT;
 			///\}
 			
 			///\name Filter 
 			///\{
 			/// Attack Time [in Samples at 44.1Khz]
-      std::int32_t ENV_F_AT;
+		std::int32_t ENV_F_AT;
 			/// Decay Time [in Samples at 44.1Khz]
 			std::int32_t ENV_F_DT;
 			/// Sustain Level [0..128]
@@ -73,7 +73,7 @@ namespace psy
 			std::int32_t ENV_F_TP;
 			///\}
 
-      std::int32_t _pan;
+		std::int32_t _pan;
 			bool _RPAN;
 			bool _RCUT;
 			bool _RRES;
@@ -86,13 +86,13 @@ namespace psy
 			std::uint16_t waveVolume;
 			std::uint32_t waveLoopStart;
 			std::uint32_t waveLoopEnd;
-      std::int32_t waveTune;
-      std::int32_t waveFinetune;
+		std::int32_t waveTune;
+		std::int32_t waveFinetune;
 			bool waveLoopType;
 			bool waveStereo;
 			char waveName[32];
-      std::int16_t *waveDataL;
-      std::int16_t *waveDataR;
+		std::int16_t *waveDataL;
+		std::int16_t *waveDataR;
 
 			// xml copy paste methods
 			std::string toXml() const;

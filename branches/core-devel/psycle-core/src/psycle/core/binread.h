@@ -37,17 +37,17 @@ namespace psy {
 			BinRead( std::istream & in );
 			~BinRead();
 
-      std::int16_t readInt2LE();
-      std::uint16_t readUInt2LE();
+		std::int16_t readInt2LE();
+		std::uint16_t readUInt2LE();
 	
-      std::int16_t readInt2BE();
-      std::uint16_t readUInt2BE();
+		std::int16_t readInt2BE();
+		std::uint16_t readUInt2BE();
 		
-      std::int32_t readInt4LE(); 
-      std::uint32_t readUInt4LE();
+		std::int32_t readInt4LE(); 
+		std::uint32_t readUInt4LE();
 
-      std::int32_t readInt4BE();
-      std::uint32_t readUInt4BE();
+		std::int32_t readInt4BE();
+		std::uint32_t readUInt4BE();
 			
 			void readUIntArray4LE( uint32_t data[], int count );
 			void readIntArray4LE( int32_t data[], int count );
@@ -57,17 +57,17 @@ namespace psy {
 			bool eof() const;
 			bool bad() const;
 
-      //			BinPlatform platform() const;
+		//																																																BinPlatform platform() const;
 
 		private:
 
 			std::istream & in_;
 
-      /*
+		/*
 			BinPlatform platform_;
 			BinPlatform testPlatform();
-      std::uint32_t swap4( std::uint32_t value );
-      */
+		std::uint32_t swap4( std::uint32_t value );
+		*/
 		};
 
 	}

@@ -256,15 +256,15 @@ namespace psy
 				if (pVoice->_envelope._stage != ENV_OFF)
 				{
 					left_output = pResamplerWork(pVoice->_wave._pL + (pVoice->_wave._pos >> 32),
-                                       pVoice->_wave._pos>>32,
-                                       pVoice->_wave._pos & 0xFFFFFFFF,
-                                       pVoice->_wave._length);
+										pVoice->_wave._pos>>32,
+										pVoice->_wave._pos & 0xFFFFFFFF,
+										pVoice->_wave._length);
 					if (pVoice->_wave._stereo)
 					{
 						right_output = pResamplerWork(pVoice->_wave._pR + (pVoice->_wave._pos >> 32),
-                                          pVoice->_wave._pos >> 32,
-                                          pVoice->_wave._pos & 0xFFFFFFFF,
-                                          pVoice->_wave._length);
+											pVoice->_wave._pos >> 32,
+											pVoice->_wave._pos & 0xFFFFFFFF,
+											pVoice->_wave._length);
 					}
 
 					// Filter section
@@ -810,7 +810,7 @@ namespace psy
 
 		void Sampler::PerformFx( int voice )
 		{
-      std::int64_t shift;
+		std::int64_t shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up

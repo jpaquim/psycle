@@ -37,7 +37,7 @@ namespace psy
 			return AudioDriverInfo("mmewaveout","Microsoft MME WaveOut Driver","Microsoft legacy output driver",true);
 		}      
 
-		MsWaveOut::MsWaveOut()								
+		MsWaveOut::MsWaveOut()																																
 		{
 			_pCallback = 0;
 			hWaveOut = 0; // use this audio handle to detect if the driver is working
@@ -60,7 +60,7 @@ namespace psy
 			_callbackContext = context;
 			_pCallback = pCallback;
 			_initialized= true;
-		}				
+		}																
 
 		bool MsWaveOut::Initialized( )
 		{
@@ -111,7 +111,7 @@ namespace psy
 			// and this is why allocateBlocks works the way it does
 			// 
 			HeapFree( GetProcessHeap(), 0, blockArray );
-		}				       
+		}																       
 
 		void MsWaveOut::writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size )
 		{

@@ -170,7 +170,7 @@ bool DataCompression::BEERZ77Decomp2(byte * pSourcePos, byte ** pDestination)
 				if (*pSourcePos++ == 0x04)
 				{
 					// get file size
-          // This is done byte by byte to avoid endianness issues
+			// This is done byte by byte to avoid endianness issues
 					int FileSize = ReadLittleEndian32(pSourcePos);
 
 					pSourcePos+=4;
@@ -520,7 +520,7 @@ bool DataCompression::SoundDesquash(byte * pSourcePos, signed short ** pDestinat
 						// 7+5+15 bits, 27, which is easily contained in 32 bits.
 
 						DWORD bits = (DWORD)ReadLittleEndian32(pSourcePos);
-            // note, we do not increment pSourcePos.
+			// note, we do not increment pSourcePos.
 
 						// now shift for our bit position to get the next bit we require
 
