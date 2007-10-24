@@ -60,6 +60,8 @@ from packageneric.generic.scons.pkg_config_package import pkg_config_package
 modules = []
 plugin_modules = []
 
+project.contexes().source().compilers().cxx().paths().add(['src'])
+
 # todo we fucking need to agree on a naming convention here!
 if project.platform() in ('win64', 'win32'):
 	def plugin_file_name(name): return 'lib-xpsycle.plugin.' + name
@@ -75,7 +77,6 @@ class plugin_module(module):
 			dependencies = [universalis],
 			target_type = module.target_types.loadable
 		)
-		self.contexes().source().compilers().cxx().paths().add(['src'])
 		plugin_modules.append(self)
 
 	def add_plugin_sources(self, include_patterns, exclude_patterns = None):
@@ -176,7 +177,7 @@ druttis_lib_module = module(source_package,
 	name = 'druttis_lib',
 	version = source_package.version(),
 	description = 'druttis lib',
-	dependencies = []
+	dependencies = [universalis] # note this is actually a dependency on psycle-helpers
 )
 druttis_lib_module.add_sources(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'Lib', file) for file in ('BiQuad.cpp', 'CEnvelope.cpp', 'DLineN.cpp')]))
 druttis_lib_module.add_headers(find(project, 'src', [os.path.join('psycle', 'plugins', 'druttis', 'Lib', file) for file in ('BiQuad.h', 'CEnvelope.h', 'DLineN.h')]))
