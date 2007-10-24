@@ -196,13 +196,15 @@ namespace psy
 							pData = new std::uint8_t[size+4];// +4 to avoid any attempt at buffer overflow by the code <-- ?
 							pFile->ReadArray(pData,size);
 							///\todo SoundDesquash should be object-oriented and provide access to this via its interface
-							if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
+              std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
+							if(waveLength != pDataLength)
 							{
 								std::ostringstream s;
 								s << "instrument: " << index << ", name: " << waveName << std::endl;
-								s << "sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
+								s << "sample data: unpacked length mismatch: " << waveLength << " versus " << pDataLength << std::endl;
 								s << "You should reload this wave sample and all the samples after this one!";
 								//loggers::warning(s.str());
+                std::cout << "Warning: " << s << std::endl;
 								//MessageBox(0, s.str().c_str(), "Loading wave sample data", MB_ICONWARNING | MB_OK);
 							}
 							DataCompression::SoundDesquash(pData,&waveDataL);
@@ -222,14 +224,16 @@ namespace psy
 							{
 								pData = new std::uint8_t[size+4]; // +4 to avoid any attempt at buffer overflow by the code <-- ?
 								pFile->ReadArray(pData,size);
+                std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
 								///\todo SoundDesquash should be object-oriented and provide access to this via its interface
-								if(waveLength != *reinterpret_cast<std::uint32_t const *>(pData + 1))
+								if(waveLength != pDataLength)
 								{
 									std::ostringstream s;
 									s << "instrument: " << index << ", name: " << waveName << std::endl;
-									s << "stereo wave sample data: unpacked length mismatch: " << waveLength << " versus " << *reinterpret_cast<std::uint32_t const *>(pData + 1) << std::endl;
+									s << "stereo wave sample data: unpacked length mismatch: " << waveLength << " versus " << pDataLength << std::endl;
 									s << "You should reload this wave sample and all the samples after this one!";
 									//loggers::warning(s.str());
+                  std::cout << "Warning: " << s << std::endl;
 									//MessageBox(0, s.str().c_str(), "Loading stereo wave sample data", MB_ICONWARNING | MB_OK);
 								}
 								DataCompression::SoundDesquash(pData,&waveDataR);

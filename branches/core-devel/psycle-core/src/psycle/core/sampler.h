@@ -10,7 +10,6 @@
 
 namespace psy {
 	namespace core {
-		// class CGearTracker; // forward declaration
 
 		#define SAMPLER_MAX_POLYPHONY     16
 		#define SAMPLER_DEFAULT_POLYPHONY  8
@@ -26,40 +25,6 @@ namespace psy {
 		#define SAMPLER_CMD_EXTENDED      0x0e
 		#define SAMPLER_CMD_EXT_NOTEOFF   0xc0
 		#define SAMPLER_CMD_EXT_NOTEDELAY 0xd0
-
-		// ms typedefs
-		
-		#if defined __unix__ || defined __APPLE__
-
-		typedef unsigned long ULONG;
-		typedef long long LONGLONG;
-		typedef unsigned long long ULONGLONG;
-		typedef unsigned long DWORD;
-		typedef ULONG* PULONG;
-		typedef PULONG ULONG_PTR;
-		typedef long long int __int64;
-		typedef long long unsigned int __uint64;
-
-
-		typedef union _LARGE_INTEGER {
-				LONGLONG QuadPart;
-		} LARGE_INTEGER;
-
-		typedef union _ULARGE_INTEGER {
-			struct {
-				DWORD LowPart;
-				DWORD HighPart;
-			};
-
-		struct {
-			DWORD LowPart;
-			DWORD HighPart;
-		} u;
-		ULONGLONG QuadPart;
-		} ULARGE_INTEGER, 
-		*PULARGE_INTEGER;
-		
-		#endif
 
 		typedef enum
 		{
@@ -78,12 +43,12 @@ namespace psy {
 			short* _pL;
 			short* _pR;
 			bool _stereo;
-			ULARGE_INTEGER _pos;
+      std::int64_t _pos;
 			std::int64_t _speed;
 			bool _loop;
-			ULONG _loopStart;
-			ULONG _loopEnd;
-			ULONG _length;
+      std::uint32_t _loopStart;
+      std::uint32_t _loopEnd;
+      std::uint32_t _length;
 			float _vol;
 			float _lVolDest;
 			float _rVolDest;
@@ -209,7 +174,6 @@ namespace psy {
 			void Update();
 
 		protected:
-			//friend CGearTracker;
 
 			static std::string _psName;
 			int _numVoices;

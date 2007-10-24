@@ -217,7 +217,7 @@ namespace psy
 					pVoice->_envelope._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/timeInfo.sampleRate());
 					pVoice->_filterEnv._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/timeInfo.sampleRate());
 					pVoice->effretTicks--;
-					pVoice->_wave._pos.QuadPart = 0;
+					pVoice->_wave._pos = 0;
 					if ( pVoice->effretMode == 1 )
 					{
 						pVoice->_wave._lVolDest += pVoice->effretVol;
@@ -255,14 +255,16 @@ namespace psy
 
 				if (pVoice->_envelope._stage != ENV_OFF)
 				{
-					left_output = pResamplerWork(
-						pVoice->_wave._pL + pVoice->_wave._pos.HighPart,
-						pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+					left_output = pResamplerWork(pVoice->_wave._pL + (pVoice->_wave._pos >> 32),
+                                       pVoice->_wave._pos>>32,
+                                       pVoice->_wave._pos & 0xFFFFFFFF,
+                                       pVoice->_wave._length);
 					if (pVoice->_wave._stereo)
 					{
-						right_output = pResamplerWork(
-							pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
-							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+						right_output = pResamplerWork(pVoice->_wave._pR + (pVoice->_wave._pos >> 32),
+                                          pVoice->_wave._pos >> 32,
+                                          pVoice->_wave._pos & 0xFFFFFFFF,
+                                          pVoice->_wave._length);
 					}
 
 					// Filter section
@@ -316,15 +318,15 @@ namespace psy
 
 
 
-					pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
+					pVoice->_wave._pos += pVoice->_wave._speed;
 
 					// Loop handler
 					//
-					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
+					if ((pVoice->_wave._loop) && ((pVoice->_wave._pos>>32) >= pVoice->_wave._loopEnd))
 					{
-						pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart + (pVoice->_wave._pos.HighPart - pVoice->_wave._loopEnd);
+						pVoice->_wave._pos -= (std::int64_t)(pVoice->_wave._loopEnd - pVoice->_wave._loopStart) << 32;
 					}
-					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
+					if ((pVoice->_wave._pos>>32) >= pVoice->_wave._length)
 					{
 						pVoice->_envelope._stage = ENV_OFF;
 					}
@@ -350,7 +352,6 @@ namespace psy
 
 		void Sampler::Tick( int channel, const PatternEvent & event )
 		{
-			std::cout << "sampler: tick: note: " << static_cast<int>(event.note()) << '\n';
 			if ( event.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
 			{
 				if ( event.command() == 0 || event.note() != 255) return; // Return in everything but commands!
@@ -550,12 +551,12 @@ namespace psy
 				if ( song()->_pInstrument[pVoice->_instrument]->_loop)
 				{
 					double const totalsamples = double(timeInfo.samplesPerRow()*song()->_pInstrument[pVoice->_instrument]->_lines);
-					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
+					pVoice->_wave._speed = (std::int64_t)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}
 				else
 				{
 					float const finetune = CValueMapper::Map_255_1(song()->_pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry.note()+song()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
+					pVoice->_wave._speed = (std::int64_t)(pow(2.0f, ((pEntry.note()+song()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
 				}
 				
 
@@ -564,11 +565,11 @@ namespace psy
 				if (pEntry.command() == SAMPLER_CMD_OFFSET)
 				{
 					w_offset = pEntry.parameter()*pVoice->_wave._length;
-					pVoice->_wave._pos.QuadPart = (w_offset << 24);
+					pVoice->_wave._pos = w_offset << 24;
 				}
 				else
 				{
-					pVoice->_wave._pos.QuadPart = 0;
+					pVoice->_wave._pos = 0;
 				}
 
 				// Calculating volume coef ---------------------------------------
@@ -809,7 +810,7 @@ namespace psy
 
 		void Sampler::PerformFx( int voice )
 		{
-			__int64 shift;
+      std::int64_t shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up

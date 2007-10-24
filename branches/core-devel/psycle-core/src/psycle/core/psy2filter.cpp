@@ -100,9 +100,7 @@ namespace psy
 			PreLoadVSTs(&file,song);
 			convert_internal_machines::Converter converter(plugin_path);
 			LoadMACD(plugin_path, &file,song,&converter,callbacks);
-			std::cout << "tyding up" <<std::endl;
 			TidyUp(&file,song,&converter);
-			std::cout << "returning" << std::endl;
 			return true;
 		}
 
