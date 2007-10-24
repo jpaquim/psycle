@@ -310,7 +310,7 @@ namespace psy {
 		}
 		// set the stream rate
 		std::cout << "step2.5" << std::endl;
-		rrate = rate;																																																																																																																																
+		rrate = rate;
 		err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
 		if (err < 0) {
 				printf("Rate %iHz not available for playback: %s\n", rate, snd_strerror(err));

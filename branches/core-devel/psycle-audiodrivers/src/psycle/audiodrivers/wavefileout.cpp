@@ -39,13 +39,14 @@ namespace psy
 
 		WaveFileOut::~WaveFileOut()
 		{
+			///\todo use proper synchronisation mecanisms
 			while ( threadOpen ) {
-				kill_thread = 1;																																																																																																
-#if defined __unix__ || defined __APPLE__
-				usleep(200);
-#else
-				Sleep(1);
-#endif
+				kill_thread = 1;
+				#if defined __unix__ || defined __APPLE__
+					usleep(200);
+				#else
+					Sleep(1);
+				#endif
 			}
 		}
 

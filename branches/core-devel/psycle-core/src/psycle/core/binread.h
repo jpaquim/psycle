@@ -57,7 +57,7 @@ namespace psy {
 			bool eof() const;
 			bool bad() const;
 
-		//																																																BinPlatform platform() const;
+		//BinPlatform platform() const;
 
 		private:
 
@@ -66,7 +66,7 @@ namespace psy {
 		/*
 			BinPlatform platform_;
 			BinPlatform testPlatform();
-		std::uint32_t swap4( std::uint32_t value );
+			std::uint32_t swap4( std::uint32_t value );
 		*/
 		};
 

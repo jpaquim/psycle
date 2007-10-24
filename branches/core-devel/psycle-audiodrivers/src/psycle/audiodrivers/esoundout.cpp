@@ -166,7 +166,7 @@ namespace psy {
 		}
 
 		bool ESoundOut::Enable(bool e)
-		{																																
+		{
 			#if !defined NDEBUG
 				std::cout << "psycle: esound: " << (e ? "en" : "dis") << "abling\n";
 			#endif

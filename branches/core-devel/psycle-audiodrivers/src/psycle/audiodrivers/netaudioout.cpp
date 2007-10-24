@@ -58,9 +58,9 @@ namespace psy
 
 		void NetAudioOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)
 		{
-//																																																#if !defined NDEBUG
-				std::cout << "xpsycle: nas: initializing\n";
-//																																																#endif
+			#if !defined NDEBUG
+				std::cout << "psycle: nas: initializing\n";
+			#endif
 			assert(!threadRunning_);
 			callback_ = callback;
 			callbackContext_ = callbackContext;
@@ -86,10 +86,10 @@ namespace psy
 			return new NetAudioOut(*this);
 		}
 		bool NetAudioOut::Enable(bool e)
-		{																																
-//																																#if !defined NDEBUG
-			std::cout << "xpsycle: NetworkAudioServer: " << (e ? "en" : "dis") << "abling\n";
-//																																#endif
+		{
+			#if !defined NDEBUG
+				std::cout << "psycle: nas: " << (e ? "en" : "dis") << "abling\n";
+			#endif
 			if (e && !threadRunning_ ) {
 				if (!aud_) open();
 				AuStatus status= AuBadValue;
@@ -117,17 +117,17 @@ namespace psy
 			// 1) Open a connection with the Server
 			if(!(aud_ = AuOpenServer(hostPort().c_str(),0,NULL,0,NULL,NULL)))
 			{
-				std::cout << "failed to open NetworkAudioServer output '" + hostPort() << std::endl;
+				std::cerr << "psycle: nass: failed to open output '" + hostPort() << std::endl;
 				return false;
 			}
 			// 1.5)create a flow (workspace) for us.
 			if (!(flow_ = AuCreateFlow(aud_, NULL)))
 			{
-				std::cout << "failed to create flow!" << std::endl;
+				std::cout << "psycle: nas: failed to create flow!" << std::endl;
 				AuCloseServer(aud_);
 				return false;
 			}
-//																																																handler_ = AuRegisterEventHandler(aud_, 0, 0, 0, EventHandlerFunc,(AuPointer) &(*this));
+			//handler_ = AuRegisterEventHandler(aud_, 0, 0, 0, EventHandlerFunc,(AuPointer) &(*this));
 
 			// 2)locate an stereo output device
 			AuDeviceID device = AuNone;
@@ -158,12 +158,12 @@ namespace psy
 			AuMakeElementExportDevice(&nas_elements[1], 0, device_, settings().samplesPerSec(),
 				AuUnlimitedSamples, 0, NULL);
 			AuSetElements(aud_, flow_, AuTrue, 2, nas_elements, NULL);
-//																																																if (status != AuSuccess) {
-//																																																																std::cout << "Can't set audio elements" << nas_error(aud_,status) << std::endl;
-//																																																																AuCloseServer(aud_);
-//																																																																return false;
-//																																																}
-
+			#if 0
+			if (status != AuSuccess) {
+				std::cout << "Can't set audio elements" << nas_error(aud_,status) << std::endl;
+				AuCloseServer(aud_);
+				return false;
+			}
 
 			std::cout << " netaudio opened at " << hostPort() << std::endl;
 			return true;
@@ -199,29 +199,29 @@ namespace psy
 
 		AuBool NetAudioOut::EventHandlerFunc(AuServer *aud, AuEvent *ev, AuEventHandlerRec *handler)
 		{
-		//																GlobalDataPtr   g = (GlobalDataPtr) handler->data;
+			//GlobalDataPtr   g = (GlobalDataPtr) handler->data;
 			AuElementNotifyEvent *event = (AuElementNotifyEvent *) ev;
 
 			if (ev->type == AuEventTypeElementNotify) {
 			switch (event->kind)
 			{
 				case AuElementNotifyKindHighWater:
-//																																																																																readData(g, event);
-//																																																																																writeData(g);
+					//readData(g, event);
+					//writeData(g);
 					break;
 				case AuElementNotifyKindLowWater:
-//																																																																																g->outBytes += event->num_bytes;
-//																																																																																writeData(g);
+					//g->outBytes += event->num_bytes;
+					//writeData(g);
 					break;
 				case AuElementNotifyKindState:
 					switch (event->cur_state)
 					{
 					case AuStateStop:
-					//																(*g->local.callback) (g);
+						//(*g->local.callback) (g);
 						break;
 					case AuStatePause:
-//																																																																																																readData(g, event);
-//																																																																																																writeData(g);
+						//readData(g, event);
+						//writeData(g);
 						break;
 					}
 					break;
@@ -271,9 +271,9 @@ namespace psy
 			pthread_exit(0);
 		}
 
-/*																																static void NetAudioOut::writebuffer(GlobalDataPtr   g)
+		/*static void NetAudioOut::writebuffer(GlobalDataPtr   g)
 		{
-			int             n;
+			int n;
 
 			if (g->inBytes > MAX_LATENCY_BYTES)
 			{
@@ -301,7 +301,8 @@ namespace psy
 				g->in = g->out = g->bufSize = 0;
 			}
 		}
-*/
+		*/
+		
 		int NetAudioOut::latencyInBytes()
 		{
 			int bytes(latency_);
