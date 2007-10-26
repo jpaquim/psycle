@@ -1,0 +1,19 @@
+ <!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+     <file>images/new.png</file>
+     <file>images/open.png</file>
+     <file>images/save.png</file>
+     <file>images/undo.png</file>
+     <file>images/redo.png</file>
+     <file>images/play.png</file>
+     <file>images/playstart.png</file>
+     <file>images/playselpattern.png</file>
+     <file>images/stop.png</file>
+     <file>images/pb_newcat.png</file>
+     <file>images/pb_newpat.png</file>
+     <file>images/pb_clnpat.png</file>
+     <file>images/pb_delpat.png</file>
+     <file>images/pb_addpattoseq.png</file>
+     <file>images/TbMainKnob.png</file>
+ </qresource>
+ </RCC>
