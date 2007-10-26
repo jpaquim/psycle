@@ -158,7 +158,9 @@ void MainWindow::onBreedClicked()
 
 psy::core::Machine *MainWindow::breed( psy::core::Machine *dad, psy::core::Machine *mum )
 {
-	std::string plugin_path = "/home/neil/code/psycle.plugins/";
+	QSettings settings;
+	std::string plugin_path = settings.value("plugins/psyclePath").toString().toStdString();
+
 	psy::core::Machine *kid = &song_->CreateMachine( plugin_path, psy::core::MACH_PLUGIN, 0, 0, "phantom.dll" );
 
 	int numpars = kid->GetNumParams();

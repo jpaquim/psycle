@@ -8,6 +8,7 @@
 #include "machinegui.h"
 
 #include <QGridLayout>
+#include <QSettings>
 
 #include <iostream>
 
@@ -18,8 +19,11 @@ MachineView::MachineView( psy::core::Song *song, QWidget *parent )
     QGridLayout *layout = new QGridLayout();
     setLayout( layout );
 
-    psy::core::PluginFinder finder_( "/home/neil/code/psycle.plugins/",
-					 "/usr/lib/ladspa/" );
+    QSettings settings;
+    std::string psyclePluginsPath = settings.value( "plugins/psyclePath" ).toString().toStdString();
+    std::string ladspaPath = settings.value( "plugins/ladspaPath" ).toString().toStdString();
+
+    psy::core::PluginFinder finder_( psyclePluginsPath, ladspaPath );
 
     psy::core::PluginFinderKey key;
     std::map< psy::core::PluginFinderKey, psy::core::PluginInfo >::const_iterator it = finder_.begin();
