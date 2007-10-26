@@ -160,8 +160,9 @@ psy::core::Machine *MainWindow::breed( psy::core::Machine *dad, psy::core::Machi
 {
 	QSettings settings;
 	std::string plugin_path = settings.value("plugins/psyclePath").toString().toStdString();
+	std::string pluginLibName = settings.value( "mainPlugin/libName" ).toString().toStdString();
 
-	psy::core::Machine *kid = &song_->CreateMachine( plugin_path, psy::core::MACH_PLUGIN, 0, 0, "phantom.dll" );
+	psy::core::Machine *kid = &song_->CreateMachine( plugin_path, psy::core::MACH_PLUGIN, 0, 0, pluginLibName );
 
 	int numpars = kid->GetNumParams();
 	for (int c=0; c<numpars; c++)

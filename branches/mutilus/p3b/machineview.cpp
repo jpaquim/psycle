@@ -22,6 +22,7 @@ MachineView::MachineView( psy::core::Song *song, QWidget *parent )
     QSettings settings;
     std::string psyclePluginsPath = settings.value( "plugins/psyclePath" ).toString().toStdString();
     std::string ladspaPath = settings.value( "plugins/ladspaPath" ).toString().toStdString();
+    std::string pluginLibName = settings.value( "mainPlugin/libName" ).toString().toStdString();
 
     psy::core::PluginFinder finder_( psyclePluginsPath, ladspaPath );
 
@@ -33,7 +34,7 @@ MachineView::MachineView( psy::core::Song *song, QWidget *parent )
         if ( info.type() == psy::core::MACH_PLUGIN ) {
            if ( info.mode() == psy::core::MACHMODE_GENERATOR ) {
                 std::cout << info.libName() << std::endl;
-               if ( info.libName() == "phantom.dll" ) {
+               if ( info.libName() == pluginLibName ) {
                    break;
                }
             }
