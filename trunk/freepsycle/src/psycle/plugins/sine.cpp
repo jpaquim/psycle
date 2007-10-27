@@ -99,4 +99,3 @@ void sine::do_process() throw(engine::exception) {
 }
 
 }}
-
