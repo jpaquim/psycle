@@ -69,7 +69,7 @@ namespace psy
 			void setSharp( bool on );
 			bool isSharp() const;
 
-		private:
+		private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
 			std::uint8_t _note;
 			std::uint8_t _inst;
 			std::uint8_t _mach;
