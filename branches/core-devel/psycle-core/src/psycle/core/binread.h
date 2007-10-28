@@ -26,16 +26,15 @@
 #include <istream>
 #include <cstdint>
 
-namespace psy {
-	namespace core {
+namespace psy { namespace core {
 
-		class BinRead {
-		public:
+class BinRead {
+	public:
 
-			enum BinPlatform { byte4LE, byte4BE, byte8LE, byte8BE };
+		enum BinPlatform { byte4LE, byte4BE, byte8LE, byte8BE };
 
-			BinRead( std::istream & in );
-			~BinRead();
+		BinRead( std::istream & in );
+		~BinRead();
 
 		std::int16_t readInt2LE();
 		std::uint16_t readUInt2LE();
@@ -49,28 +48,27 @@ namespace psy {
 		std::int32_t readInt4BE();
 		std::uint32_t readUInt4BE();
 			
-			void readUIntArray4LE( uint32_t data[], int count );
-			void readIntArray4LE( int32_t data[], int count );
+		void readUIntArray4LE( std::uint32_t data[], int count );
+		void readIntArray4LE( std::int32_t data[], int count );
 
-			void read( char * data, std::streamsize const & bytes );
+		void read( char * data, std::streamsize const & bytes );
 
-			bool eof() const;
-			bool bad() const;
+		bool eof() const;
+		bool bad() const;
 
 		//BinPlatform platform() const;
 
-		private:
+	private:
 
-			std::istream & in_;
+		std::istream & in_;
 
-		/*
+		#if 0
 			BinPlatform platform_;
 			BinPlatform testPlatform();
 			std::uint32_t swap4( std::uint32_t value );
-		*/
-		};
+		#endif
+};
 
-	}
-}
+}}
 
 #endif
