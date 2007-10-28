@@ -376,7 +376,7 @@ namespace psy
 				Master::_pMasterSamples += amount * 2;
 				remainingsamples -= amount;
 				//increase playPos
-				timeInfo_.setPlayBeatPos( timeInfo_.playBeatPos()+ (numSamples/ timeInfo_.samplesPerBeat()) );
+				timeInfo_.setPlayBeatPos( timeInfo_.playBeatPos()+ (amount/ timeInfo_.samplesPerBeat()) );
 			}
 		}
 
