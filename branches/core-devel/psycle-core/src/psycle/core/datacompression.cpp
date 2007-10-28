@@ -508,7 +508,7 @@ bool DataCompression::SoundDesquash(std::uint8_t * pSourcePos, signed short ** p
 				// read a full uint32_t because that is 32 bits.  in our worst case we will need
 				// 7+5+15 bits, 27, which is easily contained in 32 bits.
 
-				std::uint32_t bits = (DWORD)ReadLittleEndian32(pSourcePos);
+				std::uint32_t bits = (std::uint32_t)ReadLittleEndian32(pSourcePos);
 				// note, we do not increment pSourcePos.
 
 				// now shift for our bit position to get the next bit we require
