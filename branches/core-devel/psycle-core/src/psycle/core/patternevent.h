@@ -36,8 +36,8 @@ namespace psy
 		class PatternEvent
 		{
 			public:
-			typedef std::vector< std::pair<std::uint8_t,std::uint8_t> > PcmListType;
 			typedef std::pair<std::uint8_t,std::uint8_t> PcmType;
+			typedef std::vector<PcmType> PcmListType;
 
 			PatternEvent();
 			~PatternEvent();
