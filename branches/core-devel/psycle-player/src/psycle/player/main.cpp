@@ -7,7 +7,9 @@
 
 
 #if defined _WIN32
-#include <windows.h>
+#include <windows.h> // for Sleep(ms)
+#else
+#include <unistd.h> // for sleep(s)
 #endif
 
 void usage() {

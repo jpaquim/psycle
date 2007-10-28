@@ -54,7 +54,7 @@
 	#include <Qt/qfile.h>
 	#include <QDomDocument>
 #else
-	#error none of the supported xml parser libs appear to be available
+	//no need to error. #error none of the supported xml parser libs appear to be available
 #endif
 
 Configuration::Configuration()
@@ -294,7 +294,7 @@ void Configuration::loadConfig( const std::string & path )
 				}
 			}
 		#else
-			#error none of the supported xml parser libs appear to be available
+			//no need to error. #error none of the supported xml parser libs appear to be available
 		#endif
 		doEnableSound = true;
 	} catch(std::exception const & e) {

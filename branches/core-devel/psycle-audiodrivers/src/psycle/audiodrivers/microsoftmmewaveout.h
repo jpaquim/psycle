@@ -22,6 +22,7 @@
 #include "audiodriver.h"
 #include <windows.h>
 #include <mmsystem.h>
+#pragma comment(lib, "winmm")
 #undef min
 #undef max
 #include <psycle/core/cstdint.h>
