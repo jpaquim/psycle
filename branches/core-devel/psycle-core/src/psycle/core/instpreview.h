@@ -8,7 +8,7 @@ namespace psy
 		class InstPreview
 		{
 		public:
-			InstPreview() : m_vol(0.35f), m_bPlaying(false) {}
+			InstPreview() : m_vol(0.5f), m_bPlaying(false) {}
 			virtual ~InstPreview() {}
 			/// process data for output
 			void Work(float *pInSamplesL, float *pInSamplesR, int numSamples);

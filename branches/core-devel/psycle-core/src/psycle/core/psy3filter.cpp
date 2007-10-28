@@ -473,6 +473,12 @@ namespace psy
 							float position = y / (float) song.linesPerBeat();
 							if (event.note() == commands::tweak) {
 								(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
+							}
+							else if (event.note() == commands::tweak_slide) {
+								(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
+							}
+							else if (event.note() == commands::midi_cc) {
+								(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 							} else (*pat)[position].notes()[x] = event;
 						}
 						pSource += EVENT_SIZE;

@@ -143,7 +143,7 @@ namespace psy
 
 			// now we have to read waves
 
-		std::int32_t numwaves;
+			std::int32_t numwaves;
 			pFile->Read(numwaves);
 			for (int i = 0; i < numwaves; i++)
 			{
@@ -186,17 +186,12 @@ namespace psy
 						pFile->Read(size);
 						byte* pData;
 						
-						if ( !fullopen )
-						{
-							pFile->Skip(size);
-							waveDataL=new std::int16_t[2];
-						}
-						else
+						if ( fullopen )
 						{
 							pData = new std::uint8_t[size+4];// +4 to avoid any attempt at buffer overflow by the code <-- ?
 							pFile->ReadArray(pData,size);
 							///\todo SoundDesquash should be object-oriented and provide access to this via its interface
-				std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
+							std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
 							if(waveLength != pDataLength)
 							{
 								std::ostringstream s;
@@ -204,27 +199,26 @@ namespace psy
 								s << "sample data: unpacked length mismatch: " << waveLength << " versus " << pDataLength << std::endl;
 								s << "You should reload this wave sample and all the samples after this one!";
 								//loggers::warning(s.str());
-				std::cout << "Warning: " << s << std::endl;
+								std::cout << "Warning: " << s << std::endl;
 								//MessageBox(0, s.str().c_str(), "Loading wave sample data", MB_ICONWARNING | MB_OK);
 							}
 							DataCompression::SoundDesquash(pData,&waveDataL);
 							delete[] pData;
 						}
+						else
+						{
+							pFile->Skip(size);
+							waveDataL=new std::int16_t[2];
+						}
 
 						if (waveStereo)
 						{
 							pFile->Read(size);
-							if ( !fullopen )
-							{
-								pFile->Skip(size);
-								delete[] waveDataR;
-								waveDataR = new std::int16_t[2];
-							}
-							else
+							if ( fullopen )
 							{
 								pData = new std::uint8_t[size+4]; // +4 to avoid any attempt at buffer overflow by the code <-- ?
 								pFile->ReadArray(pData,size);
-				std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
+								std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
 								///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 								if(waveLength != pDataLength)
 								{
@@ -233,11 +227,16 @@ namespace psy
 									s << "stereo wave sample data: unpacked length mismatch: " << waveLength << " versus " << pDataLength << std::endl;
 									s << "You should reload this wave sample and all the samples after this one!";
 									//loggers::warning(s.str());
-					std::cout << "Warning: " << s << std::endl;
+									std::cout << "Warning: " << s << std::endl;
 									//MessageBox(0, s.str().c_str(), "Loading stereo wave sample data", MB_ICONWARNING | MB_OK);
 								}
 								DataCompression::SoundDesquash(pData,&waveDataR);
 								delete[] pData;
+							}
+							else
+							{
+								pFile->Skip(size);
+								waveDataR = new std::int16_t[2];
 							}
 						}
 					}

@@ -31,8 +31,8 @@ namespace psy
 				else
 					rd=ld;
 					
-				*++pSamplesL+=ld;
-				*++pSamplesR+=rd;
+				*(++pSamplesL)+=ld;
+				*(++pSamplesR)+=rd;
 					
 				if(++m_pos>=m_pInstrument->waveLength)
 				{

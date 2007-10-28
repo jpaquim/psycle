@@ -5,6 +5,11 @@
 #include <string>
 #include <sstream>
 
+
+#if defined _WIN32
+#include <windows.h>
+#endif
+
 void usage() {
 		std::cerr <<
 			"Usage: psycle-player [options] [--input-file] <song file name>\n"
@@ -155,7 +160,11 @@ int main(int argument_count, char * arguments[]) {
 		{
 			printf("Beat: %.02f\n",player.timeInfo().playBeatPos());
 			fflush(stdout);
+#if defined _WIN32
+			Sleep(1000);
+#else
 			sleep(1);
+#endif
 		}
 		
 		std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;

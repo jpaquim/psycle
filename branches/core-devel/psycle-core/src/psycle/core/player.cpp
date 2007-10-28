@@ -326,8 +326,6 @@ namespace psy
 						processedSamples+=chunkSampleSize;
 					}
 					
-					//increase playPos prior to executing globals, in case one of the globals needs it or wants to change it.
-					timeInfo_.setPlayBeatPos( chunkBeatEnd );
 					beatLength-=chunkBeatSize;
 
 					//execute this batch of global events
@@ -377,6 +375,8 @@ namespace psy
 				//Move the pointer forward for the next Master::Work() iteration.
 				Master::_pMasterSamples += amount * 2;
 				remainingsamples -= amount;
+				//increase playPos.
+				timeInfo_.setPlayBeatPos( timeInfo_.playBeatPos()+ (numsamples/ timeInfo.samplesPerBeat()) );
 			}
 		}
 
