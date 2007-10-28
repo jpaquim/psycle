@@ -51,7 +51,7 @@ namespace psy {
 			name_ = cbuf;
 			if ( prsIn.eof() || prsIn.bad() ) return false;
 			// load parameter values
-			prsIn.readIntArray4LE( &params_[0], static_cast<std::streamsize>(params_.size()));
+			for(std::size_t i(0); i < params_.size(); ++i) params_[i] = prsIn.readInt4LE();
 			if ( prsIn.eof() || prsIn.bad() ) return false;
 			// load special machine data
 			if ( data_.size() ) {

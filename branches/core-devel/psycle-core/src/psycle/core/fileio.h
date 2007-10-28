@@ -57,6 +57,16 @@ class RiffFile {
 		bool Expect    (void       *, std::size_t const &);
 
 	public:
+		#if defined DIVERSALIS__COMPILER__MICROSOFT
+			/// workaround for msvc8 which fails to determine which overload to call
+			template<typename X>
+			bool Read(X & x) { return ReadChunk(&x, sizeof x); }
+
+			/// workaround for msvc8 which fails to determine which overload to call
+			template<typename X>
+			bool Write(X & x) { return WriteChunk(&x, sizeof x); }
+		#endif
+
 		bool Read(std::uint8_t & x) { return ReadChunk(&x,1); }
 		bool Read(std::int8_t & x) { return ReadChunk(&x,1); }
 		bool Read(char & x) { return ReadChunk(&x,1); } // somehow char doesn't match int8_t nor uint8_t
