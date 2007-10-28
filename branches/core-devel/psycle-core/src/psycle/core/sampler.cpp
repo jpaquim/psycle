@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psy::core::Sampler. based on rev. 2708
+///\brief implementation file for psy::core::Sampler. based on psyclemfc revision 5903
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "sampler.h"
@@ -28,7 +28,7 @@ namespace psy
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init();
+				_voices[i]._filter.Init(44100);
 				_voices[i]._cutoff = 0;
 				_voices[i]._sampleCounter = 0;
 				_voices[i]._triggerNoteOff = 0;
@@ -54,7 +54,7 @@ namespace psy
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init();
+				_voices[i]._filter.Init(44100);
 				_voices[i]._triggerNoteOff = 0;
 				_voices[i]._triggerNoteDelay = 0;
 			}
@@ -62,9 +62,9 @@ namespace psy
 
 		int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 		{
-		assert(numSamples >= 0);
+			assert(numSamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-			//PSYCLE__CPU_COST__INIT(cost);
+			//cpu::cycles_type cost = cpu::cycles();
 			if (!_mute)
 			{
 				Standby(false);
@@ -176,8 +176,7 @@ namespace psy
 			}
 			else Standby(true);
 
-			//PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
-			//work_cpu_cost(work_cpu_cost() + cost);
+			//_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 			return numSamples;
 		}
@@ -193,7 +192,7 @@ namespace psy
 
 		void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 		{
-		assert(numsamples >= 0);
+			assert(numsamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
@@ -272,7 +271,7 @@ namespace psy
 					if (pVoice->_filter._type < dsp::F_NONE)
 					{
 						TickFilterEnvelope( voice );
-						pVoice->_filter._cutoff = pVoice->_cutoff + dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
+						pVoice->_filter._cutoff = pVoice->_cutoff + common::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
 							pVoice->_filter._cutoff = 0;
@@ -496,7 +495,7 @@ namespace psy
 				
 				// Init filter synthesizer
 				//
-				pVoice->_filter.Init();
+				pVoice->_filter.Init(timeInfo.sampleRate());
 
 				if (song()->_pInstrument[pVoice->_instrument]->_RCUT)
 				{

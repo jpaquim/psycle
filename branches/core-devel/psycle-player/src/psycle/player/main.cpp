@@ -104,8 +104,14 @@ int main(int argument_count, char * arguments[]) {
 		}
 	}
 
-	psy::core::Player player;
-	
+	psy::core::Player &player = *psy::core::Player::Instance();
+	///\todo: player is defined as a machine_callback. The correct design would utilize "timeInfo",
+	// or similar instead of passing all player.
+	psy::core::Song song(&player);
+	//Song is passed to player, since in a good scenario, we would have one player, and several songs (MDI interface)
+	player.song(&song);
+
+
 	if(output_file_name.length()) {
 		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
 		player.setFileName(output_file_name);
@@ -139,10 +145,6 @@ int main(int argument_count, char * arguments[]) {
 
 	player.setDriver(output_driver); 
 	
-	psy::core::Song song(&player);
-	
-	if(output_file_name.length()) player.startRecording();
-	
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
 		if(!song.load(configuration.pluginPath(), input_file_name)) {
@@ -150,32 +152,30 @@ int main(int argument_count, char * arguments[]) {
 			return 2;
 		}
 
-		///\todo this is not intuitive... we pass the player when creating the song, and now we have to pass the song to the player?
-		player.song(&song);
-
+		if(output_file_name.length()) player.startRecording();
+		int itmp=256;
+		player.Work(&player,itmp);
 		player.start(0);
 		std::cout << "psycle: player: playing...\n";
-
 		std::cout << "psycle: player: (press Ctrl+C to end)\n";
 
 		while (1)
 		{
 			printf("\rBeat: %.02f",player.timeInfo().playBeatPos());
 			fflush(stdout);
-#if defined _WIN32
+		#if defined _WIN32
 			Sleep(1000);
-#else
+		#else
 			sleep(1);
-#endif
+		#endif
 		}
 		
 		std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
-		configuration.setDriverByName("silent");
-		player.setDriver(*configuration._pOutputDriver);
+		if(output_file_name.length()) player.stopRecording();
 	}
-
-	if(output_file_name.length()) player.stopRecording();
+	configuration.setDriverByName("silent");
+	player.setDriver(*configuration._pOutputDriver);
 	
 	return 0;
 }

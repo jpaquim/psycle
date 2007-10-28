@@ -64,7 +64,7 @@ namespace psy
 			protected:
 				virtual int LoadSONGv0(RiffFile* file,CoreSong& song);
 				virtual bool LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion);
-				virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion);
+				virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
 				virtual bool LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion);
 				virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
 				virtual bool LoadMACDv0(std::string const & plugin_path, RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);

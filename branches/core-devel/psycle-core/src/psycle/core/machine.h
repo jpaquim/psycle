@@ -275,7 +275,7 @@ namespace psy
 
 		class MachineCallbacks {
 			public:
-				virtual const PlayerTimeInfo & timeInfo() const = 0;
+				virtual PlayerTimeInfo & timeInfo()  = 0;
 				virtual bool autoStopMachines() const = 0;
 				virtual ~MachineCallbacks() {}
 		};

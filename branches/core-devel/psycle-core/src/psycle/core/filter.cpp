@@ -14,7 +14,7 @@ namespace psy
 
 			FilterCoeff::FilterCoeff() {
 				samplerate = -1;
-				setSampleRate(44100); // initializes table
+				//table is initialized with Filter::Init()
 			};
 
 			void FilterCoeff::setSampleRate(float samplerate)
@@ -117,16 +117,17 @@ namespace psy
 			{
 				//Filtercoef is automatially initialized.
 				//FilterCoeff::singleton.Init();
-				Init();
+				Init(44100);
 				_x1 = _x2 = _y1 = _y2 = 0;
 				_a1 = _a2 = _b1 = _b2 = 0;
 			}
 			
-			void Filter::Init()
+			void Filter::Init(int sampleRate)
 			{
 				_cutoff=127;
 				_q=0;
 				_type = F_LOWPASS12;
+				FilterCoeff::singleton.setSampleRate(sampleRate);
 				Update();
 			}
 

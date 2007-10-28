@@ -131,7 +131,7 @@ namespace psy
 					//song.progress.emit(2,0,"Loading... Song properties information...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
-						LoadSNGIv0(&file,song,version&0x00FF);
+						LoadSNGIv0(&file,song,version&0x00FF,callbacks);
 						//\ Fix for a bug existing in the Song Saver in the 1.7.x series
 						if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool); 
 					}
@@ -331,7 +331,7 @@ namespace psy
 				return result;
 		}
 
-		bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion)
+		bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks)
 		{
 			std::uint32_t temp(0);
 			std::uint16_t temp16(0);
@@ -380,7 +380,8 @@ namespace psy
 				fileread = file->Read(song._trackArmed[i]);
 				if(song._trackArmed[i]) ++song._trackArmedCount;
 			}
-			//Gloxxxxxxxxxxxxxxxxbal::player().SetBPM(song.m_BeatsPerMin,song.linesPerBeat());
+			callbacks->timeInfo().setBpm(song.bpm());
+			callbacks->timeInfo().setLinesPerBeat(song.linesPerBeat());
 			return fileread;
 		}
 

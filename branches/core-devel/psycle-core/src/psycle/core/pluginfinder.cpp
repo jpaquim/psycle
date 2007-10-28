@@ -202,7 +202,7 @@ namespace psy
 					private:
 						PlayerTimeInfo ti;
 					public:
-						const PlayerTimeInfo& timeInfo() const { return ti; }
+						 PlayerTimeInfo& timeInfo()  { return ti; }
 						bool autoStopMachines() const { return false; }
 				} dummycallbacks;
 
@@ -250,7 +250,7 @@ namespace psy
 					private:
 						PlayerTimeInfo ti;
 					public:
-						const PlayerTimeInfo& timeInfo() const { return ti; }
+						 PlayerTimeInfo& timeInfo()  { return ti; }
 						bool autoStopMachines() const { return false; }
 				} dummycallbacks;
 

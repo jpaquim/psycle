@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psy::core::Sampler. based on Revision 2624
+///\brief interface file for psy::core::Sampler. based on psyclemfc revision 5903
 #pragma once
 
 #include "cstdint.h"
@@ -11,20 +11,20 @@
 namespace psy {
 	namespace core {
 
-		#define SAMPLER_MAX_POLYPHONY     16
-		#define SAMPLER_DEFAULT_POLYPHONY  8
+		#define SAMPLER_MAX_POLYPHONY		16
+		#define SAMPLER_DEFAULT_POLYPHONY	8
 
-		#define SAMPLER_CMD_NONE          0x00
-		#define SAMPLER_CMD_PORTAUP       0x01
-		#define SAMPLER_CMD_PORTADOWN     0x02
-		#define SAMPLER_CMD_PORTA2NOTE    0x03
-		#define SAMPLER_CMD_PANNING       0x08
-		#define SAMPLER_CMD_OFFSET        0x09
-		#define SAMPLER_CMD_VOLUME        0x0c
-		#define SAMPLER_CMD_RETRIG        0x15
-		#define SAMPLER_CMD_EXTENDED      0x0e
-		#define SAMPLER_CMD_EXT_NOTEOFF   0xc0
-		#define SAMPLER_CMD_EXT_NOTEDELAY 0xd0
+		#define SAMPLER_CMD_NONE			0x00
+		#define SAMPLER_CMD_PORTAUP			0x01
+		#define SAMPLER_CMD_PORTADOWN		0x02
+		#define SAMPLER_CMD_PORTA2NOTE		0x03
+		#define SAMPLER_CMD_PANNING			0x08
+		#define SAMPLER_CMD_OFFSET			0x09
+		#define SAMPLER_CMD_VOLUME			0x0c
+		#define SAMPLER_CMD_RETRIG			0x15
+		#define SAMPLER_CMD_EXTENDED		0x0e
+		#define SAMPLER_CMD_EXT_NOTEOFF		0xc0
+		#define SAMPLER_CMD_EXT_NOTEDELAY	0xd0
 
 		typedef enum
 		{
@@ -43,12 +43,12 @@ namespace psy {
 			short* _pL;
 			short* _pR;
 			bool _stereo;
-		std::int64_t _pos;
+			std::int64_t _pos;
 			std::int64_t _speed;
 			bool _loop;
-		std::uint32_t _loopStart;
-		std::uint32_t _loopEnd;
-		std::uint32_t _length;
+			std::uint32_t _loopStart;
+			std::uint32_t _loopEnd;
+			std::uint32_t _length;
 			float _vol;
 			float _lVolDest;
 			float _rVolDest;
@@ -91,7 +91,6 @@ namespace psy {
 			int effOld;
 		};
 
-
 		/// sampler.
 		class Sampler : public Machine
 		{
@@ -99,8 +98,21 @@ namespace psy {
 			void Tick( );
 			Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song);
 			virtual void Init();
-		// \todo implement SetSampleRate     
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
+			virtual void SetSampleRate(int sr)
+			{
+				Machine::SetSampleRate(sr);
+				for (int i=0; i<_numVoices; i++)
+				{
+					_voices[i]._envelope._stage = ENV_OFF;
+					_voices[i]._envelope._sustain = 0;
+					_voices[i]._filterEnv._stage = ENV_OFF;
+					_voices[i]._filterEnv._sustain = 0;
+					_voices[i]._filter.Init(sr);
+					_voices[i]._triggerNoteOff = 0;
+					_voices[i]._triggerNoteDelay = 0;
+				}
+			}
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual std::string GetName() const { return _psName; }
