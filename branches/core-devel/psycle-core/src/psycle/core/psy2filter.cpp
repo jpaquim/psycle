@@ -598,7 +598,7 @@ namespace psy
 				{
 					if (busMachine[i] != 255) invmach[busMachine[i]]=i;
 				}
-				for ( i=1;i<128;i++ ) // Machine 0 is the master machine.
+				for (int i=1;i<128;i++ ) // Machine 0 is the master machine.
 				{
 					if (_machineActive[i])
 					{

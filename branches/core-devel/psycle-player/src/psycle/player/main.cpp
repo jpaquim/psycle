@@ -158,7 +158,7 @@ int main(int argument_count, char * arguments[]) {
 
 		while (1)
 		{
-			printf("Beat: %.02f\n",player.timeInfo().playBeatPos());
+			printf("\rBeat: %.02f",player.timeInfo().playBeatPos());
 			fflush(stdout);
 #if defined _WIN32
 			Sleep(1000);

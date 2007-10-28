@@ -375,8 +375,8 @@ namespace psy
 				//Move the pointer forward for the next Master::Work() iteration.
 				Master::_pMasterSamples += amount * 2;
 				remainingsamples -= amount;
-				//increase playPos.
-				timeInfo_.setPlayBeatPos( timeInfo_.playBeatPos()+ (numsamples/ timeInfo.samplesPerBeat()) );
+				//increase playPos
+				timeInfo_.setPlayBeatPos( timeInfo_.playBeatPos()+ (numSamples/ timeInfo_.samplesPerBeat()) );
 			}
 		}
 
