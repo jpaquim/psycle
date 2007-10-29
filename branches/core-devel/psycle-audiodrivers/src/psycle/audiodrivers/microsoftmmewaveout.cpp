@@ -215,7 +215,6 @@ namespace psy
 		{
 			if ( hWaveOut ) return true;   // do not start again
 			if(!_pCallback) return false;  // no player callback
-
 			// WAVEFORMATEX is defined in mmsystem.h
 			// this structure is used, to define the sampling rate, sampling resolution
 			// and the number of channles
@@ -238,7 +237,6 @@ namespace psy
 
 			// this will protect the monitor buffer counter variable 
 
-
 			if( waveOutOpen( &hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR)waveOutProc, 
 				(DWORD_PTR)&waveFreeBlockCount, 
 				CALLBACK_FUNCTION ) != MMSYSERR_NOERROR)
@@ -248,17 +246,36 @@ namespace psy
 			}
 
 			_running = true;
-
 			DWORD dwThreadId;
 			_hThread = CreateThread( NULL, 0, audioOutThread, this, 0, &dwThreadId );
-
 			return true;
 		}
 
 		bool MsWaveOut::stop()
 		{
 			if(!_running) return true;
-			TerminateThread( _hThread, 0 );
+			_running=false;
+			///\todo: some threadlocking mechanism. For now adding these sleeps
+		#if defined _WIN32
+			Sleep(1000);
+		#else
+			sleep(1);
+		#endif
+			TerminateThread( _hThread, 0 ); // just in case
+			if(::waveOutReset(hWaveOut) != MMSYSERR_NOERROR)
+			{
+				std::cerr << "waveOutReset() failed" << std::endl;
+				hWaveOut=0;
+				return false;
+			}
+
+			if(waveOutClose(hWaveOut) != MMSYSERR_NOERROR)
+			{
+				std::cerr << "waveOutClose() failed" << std::endl;
+				hWaveOut=0;
+				return false;
+			}
+			hWaveOut=0;
 			return true;
 		}
 

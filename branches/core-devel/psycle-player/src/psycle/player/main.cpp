@@ -143,7 +143,9 @@ int main(int argument_count, char * arguments[]) {
 		output_driver.setSettings(settings); ///\todo why do we copy?
 	}
 
-	player.setDriver(output_driver); 
+	player.setDriver(output_driver);
+	// since driver is cloned, we cannot use output_driver!!!!
+	player.driver().Enable(false);
 	
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
@@ -152,28 +154,24 @@ int main(int argument_count, char * arguments[]) {
 			return 2;
 		}
 
-		if(output_file_name.length()) player.startRecording();
 		int itmp=256;
 		player.Work(&player,itmp);
+
+		if(output_file_name.length()) player.startRecording();
+		// since driver is cloned, we cannot use output_driver!!!!
+		player.driver().Enable(true);
 		player.start(0);
 		std::cout << "psycle: player: playing...\n";
-		std::cout << "psycle: player: (press Ctrl+C to end)\n";
+		std::cout << "psycle: player: press any letter and enter to stop\n";
 
-		while (1)
-		{
-			printf("\rBeat: %.02f",player.timeInfo().playBeatPos());
-			fflush(stdout);
-		#if defined _WIN32
-			Sleep(1000);
-		#else
-			sleep(1);
-		#endif
-		}
+		std::string s; std::cin >> s;
 		
 		std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
 		if(output_file_name.length()) player.stopRecording();
 	}
+	// since driver is cloned, we cannot use output_driver!!!!
+	player.driver().Enable(false);
 	configuration.setDriverByName("silent");
 	player.setDriver(*configuration._pOutputDriver);
 	

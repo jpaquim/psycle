@@ -212,6 +212,13 @@ namespace psy
 			_timerActive = false;
 			//CSingleLock event(&_event, true);
 			// Once we get here, the PollerThread should have stopped
+			///\todo: some threadlocking mechanism. For now adding this sleeps
+		#if defined _WIN32
+			Sleep(1000);
+		#else
+			sleep(1);
+		#endif
+
 			if(_playing)
 			{
 				_pBuffer->Stop();

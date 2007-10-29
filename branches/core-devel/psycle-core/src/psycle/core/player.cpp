@@ -346,7 +346,10 @@ namespace psy
 				//playPos+=beatLength;
 				//if (playPos> "signumerator") playPos-=signumerator;
 			}
-
+			
+			printf("\rBeat: %.02f",timeInfo().playBeatPos());
+			fflush(stdout);
+			
 			inWork_ = false;
 			return _pBuffer;
 		}

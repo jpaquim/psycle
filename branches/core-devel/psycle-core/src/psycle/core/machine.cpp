@@ -35,7 +35,7 @@ namespace psy { namespace core {
 				// note: free with _mingw_aligned_free
 		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				x = static_cast<X*>(_aligned_malloc(size, alignment));
-				///\todo note: free with what?
+				// note: free with _aligned_free
 		#else
 			// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
 			// memalign on SunOS but not BSD (#include both <cstdlib> and <cmalloc>)
@@ -806,10 +806,12 @@ namespace psy { namespace core {
 			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
 			else pMachine = new Mixer(callbacks, index, pSong);
 			break;
+#if 0
 		case MACH_LFO:
 			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
 			else pMachine = new LFO(callbacks, index, pSong);
 			break;
+#endif
 		case MACH_PLUGIN:
 			{
 				if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
@@ -869,7 +871,12 @@ namespace psy { namespace core {
 		}
 		pMachine->Init();
 		int temp;
-		pMachine->type_ = type;
+		if(!bDeleted)
+		{
+			///\todo: Is it even necessary???
+			/// for the winamp plugin maybe?
+			pMachine->type(type);
+		}
 		pFile->Read(pMachine->_bypass);
 		pFile->Read(pMachine->_mute);
 		pFile->Read(pMachine->_panning);
@@ -936,6 +943,7 @@ namespace psy { namespace core {
 		else pMachine->mode(MACHMODE_MASTER);
 
 		pMachine->SetPan(pMachine->_panning);
+		if (pMachine->_bypass) pMachine->Bypass(true);
 		return pMachine;
 	}
 

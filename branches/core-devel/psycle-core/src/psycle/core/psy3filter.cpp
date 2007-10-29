@@ -203,16 +203,15 @@ namespace psy
 
 			///\todo: Move this to something like "song.validate()" 
 
-				// now that we have loaded all the patterns, time to prepare them.
-				double pos = 0;
-				std::vector<int>::iterator it = seqList.begin();
-				for ( ; it < seqList.end(); ++it)
-				{
-					SinglePattern* pat = song.patternSequence()->patternData()->findById(*it);
-					singleLine->createEntry(pat,pos);
-					pos+=pat->beats();
-				}
-
+			// now that we have loaded all the patterns, time to prepare them.
+			double pos = 0;
+			std::vector<int>::iterator it = seqList.begin();
+			for ( ; it < seqList.end(); ++it)
+			{
+				SinglePattern* pat = song.patternSequence()->patternData()->findById(*it);
+				singleLine->createEntry(pat,pos);
+				pos+=pat->beats();
+			}
 
 			// test all connections for invalid machines. disconnect invalid machines.
 			for(int i(0) ; i < MAX_MACHINES ; ++i)

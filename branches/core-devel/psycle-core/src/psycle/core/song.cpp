@@ -156,10 +156,10 @@ namespace psy
 			case MACH_MIXER:
 				machine = new Mixer(machinecallbacks, index, this);
 				break;
+			#if 0
 			case MACH_LFO:
 				machine = new LFO(machinecallbacks, index, this);
 				break;
-			#if 0
 			case MACH_AUTOMATOR:
 							machine = new Automator(machinecallbacks, index);
 							break;
