@@ -1656,6 +1656,7 @@ namespace psycle
 							pFile->Read(reinterpret_cast<char*>(pData), OLD_MAX_TRACKS * sizeof(PatternEntry));
 							pData += MAX_TRACKS * sizeof(PatternEntry);
 						}
+						///\todo: tweak_effect should be converted to normal tweaks!
 					}
 					else
 					{

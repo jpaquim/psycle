@@ -255,7 +255,7 @@ namespace psycle
 
 				UINT index = 0;
 				pFile->Write("WAVE",4);
-				UINT version = CURRENT_FILE_VERSION_PATD;
+				UINT version = CURRENT_FILE_VERSION_WAVE;
 				UINT size = sizeof(index)
 							+sizeof(waveLength)
 							+sizeof(waveVolume)

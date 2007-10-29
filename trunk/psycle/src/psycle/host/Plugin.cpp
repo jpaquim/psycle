@@ -323,7 +323,9 @@ namespace psycle
 						catch(const std::exception &)
 						{
 							return false;
+							delete pData;
 						}
+						delete pData;
 						return true;
 					}
 				}
