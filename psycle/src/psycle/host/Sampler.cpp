@@ -341,7 +341,7 @@ namespace psycle
 					if (pVoice->_filter._type < dsp::F_NONE)
 					{
 						TickFilterEnvelope(voice);
-						pVoice->_filter._cutoff = pVoice->_cutoff + helpers::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
+						pVoice->_filter._cutoff = pVoice->_cutoff + math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
 							pVoice->_filter._cutoff = 0;
@@ -393,7 +393,7 @@ namespace psycle
 					//
 					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
 					{
-						pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart + (pVoice->_wave._pos.HighPart - pVoice->_wave._loopEnd);
+						pVoice->_wave._pos.HighPart -= (pVoice->_wave._loopEnd - pVoice->_wave._loopStart);
 					}
 					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
 					{
@@ -499,8 +499,9 @@ namespace psycle
 				{
 					if (( _voices[voice]._channel == channel ) && // ...playing voice on current channel.
 						(_voices[voice]._envelope._stage != ENV_OFF ) &&
-		//				(_voices[voice]._envelope._stage != ENV_RELEASE ) && // Effects can STILL apply in this case.
-																			// Think on a slow fadeout and changing panning
+		//				(_voices[voice]._envelope._stage != ENV_RELEASE ) &&
+						// Effects can STILL apply in this case.
+						// Think on a slow fadeout and changing panning
 						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 					{
 						if ( data._note == notecommands::release ) NoteOff(voice);//  Handle Note Off
