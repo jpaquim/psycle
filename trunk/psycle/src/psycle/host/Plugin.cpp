@@ -322,8 +322,8 @@ namespace psycle
 						}
 						catch(const std::exception &)
 						{
-							return false;
 							delete pData;
+							return false;
 						}
 						delete pData;
 						return true;
