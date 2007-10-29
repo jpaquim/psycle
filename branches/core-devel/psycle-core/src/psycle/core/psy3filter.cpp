@@ -121,8 +121,8 @@ namespace psy
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
 						LoadINFOv0(&file,song,version&0x00FF);
-						//bug in psycle saver!!!!!
-						size-=3*sizeof(int);
+						//bug in psycle 1.8.5, writes size as 12bytes more!
+						if ( version == 0x0000 ) size = song.name().length()+song.author().length()+song.comment().length() + 3;
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
