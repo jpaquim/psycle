@@ -1,6 +1,5 @@
-/***************************************************************************
-*   Copyright (C) 2007 Psycledelics     *
-*   psycle.sf.net   *
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -17,52 +16,56 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYFILTER_H
-#define PSYFILTER_H
+#ifndef PSYCLE__CORE__PSYFILTER__INCLUDED
+#define PSYCLE__CORE__PSYFILTER__INCLUDED
+#pragma once
+
+#include <string>
+#include <vector>
+
+namespace psy { namespace core {
+
+class CoreSong;
+class MachineCallbacks;
 
 /**
 @author  Psycledelics  
 */
-
-namespace psy
+class PsyFilterBase
 {
-	namespace core
-	{
-		class CoreSong;
-		class MachineCallbacks;
+	public:
+		virtual ~PsyFilterBase() {}
 
-		class PsyFilterBase
-		{
-			public:
-				virtual ~PsyFilterBase() {}
+		//signals
+		//sigslot::signal2<const std::string &, const std::string &> report;
+		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
 
-				//signals
-				//sigslot::signal2<const std::string &, const std::string &> report;
-				//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
+	public:
+		virtual int version() const = 0;
+		virtual std::string filePostfix() const = 0;
+		virtual bool testFormat(const std::string & fileName) = 0;
+		virtual bool load(const std::string & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks *callbacks ) = 0;
+		virtual bool save(const std::string & fileName, const CoreSong & song) = 0;
+};
 
-			public:
-				virtual int version() const = 0;
-				virtual std::string filePostfix() const = 0;
-				virtual bool testFormat(const std::string & fileName) = 0;
-				virtual bool load(const std::string & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks *callbacks ) = 0;
-				virtual bool save(const std::string & fileName, const CoreSong & song) = 0;
-		};
+/**
+@author  Psycledelics  
+*/
+class PsyFilters
+{
+	public:
+		PsyFilters();
 
-		class PsyFilters
-		{
-			public:
-				PsyFilters();
+		bool loadSong(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		bool saveSong(const std::string & fileName, const CoreSong & song, int version);
 
-				bool loadSong(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-				bool saveSong(const std::string & fileName, const CoreSong & song, int version);
+		//signals
+		//sigslot::signal2<const std::string &, const std::string &> report;
+		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
 
-				//signals
-				//sigslot::signal2<const std::string &, const std::string &> report;
-				//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
+	private:
+		std::vector<PsyFilterBase*> filters;
+};
 
-			private:
-				std::vector<PsyFilterBase*> filters;
-		};
-	}
-}
+}}
 #endif

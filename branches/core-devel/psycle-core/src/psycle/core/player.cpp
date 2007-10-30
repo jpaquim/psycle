@@ -28,6 +28,8 @@
 #include "machine.h"
 #include "song.h"
 
+#include <iostream> // only for debug output
+
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h> // for OpenBSD usleep()
 #endif

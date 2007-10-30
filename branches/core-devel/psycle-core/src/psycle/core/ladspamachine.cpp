@@ -24,6 +24,9 @@
 #include "dsp.h"
 #include "player.h"
 
+#include <iostream> // only for debug output
+#include <sstream>
+
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
 #else

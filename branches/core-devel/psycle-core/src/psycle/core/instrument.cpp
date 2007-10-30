@@ -3,12 +3,14 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "instrument.h"
-
 #include "constants.h"
-#include "cstdint.h"
 #include "datacompression.h"
 #include "fileio.h"
 #include "filter.h"
+
+#include <iostream> // only for debug output
+#include <sstream>
+#include <iomanip>
 
 template<class T> inline std::string toHex(T value , int nums = 8) {
 

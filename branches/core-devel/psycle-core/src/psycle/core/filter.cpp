@@ -3,6 +3,8 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "filter.h"
+#include <cmath>
+#include <algorithm>
 
 namespace psy
 {

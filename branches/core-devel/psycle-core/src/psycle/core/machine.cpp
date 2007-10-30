@@ -18,6 +18,8 @@
 
 #include <cstddef>
 #include <cstdlib> // for posix_memalign
+#include <iostream> // only for debug output
+#include <sstream>
 
 namespace psy { namespace core {
 

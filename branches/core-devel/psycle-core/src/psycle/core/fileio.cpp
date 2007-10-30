@@ -2,6 +2,7 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "fileio.h"
+#include <stdexcept>
 
 namespace psy
 {
