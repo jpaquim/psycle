@@ -18,19 +18,9 @@
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
 #include "patternline.h"
-#include <iostream> // only for debug output
 #include <sstream>
 
 namespace psy { namespace core {
-
-PatternLine::PatternLine()
-{
-	sequencerTrack_ = 0;
-}
-
-PatternLine::~PatternLine()
-{
-}
 
 std::string PatternLine::toXml( float pos ) const
 {
@@ -43,40 +33,6 @@ std::string PatternLine::toXml( float pos ) const
 	}
 	xml << "</patline>" << std::endl;
 	return xml.str();
-}
-
-void PatternLine::setSequenceTrack( int track )
-{
-		sequencerTrack_ = track;
-}
-
-int PatternLine::sequenceTrack( ) const
-{
-		return sequencerTrack_;
-}
-
-std::map< int, PatternEvent > & PatternLine::notes( )
-{
-	return noteMap;
-}
-
-const std::map< int, PatternEvent > & PatternLine::notes( ) const
-{
-	return noteMap;
-}
-
-std::map< int, PatternEvent > & PatternLine::tweaks( )
-{
-	return tweakMap;
-}
-
-const std::map< int, PatternEvent > & PatternLine::tweaks( ) const
-{
-	return tweakMap;
-}
-
-bool PatternLine::empty() const {
-	return ( noteMap.empty() && tweakMap.empty() );
 }
 
 }}

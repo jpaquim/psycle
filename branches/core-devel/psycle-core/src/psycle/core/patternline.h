@@ -32,21 +32,21 @@ namespace psy { namespace core {
 */
 class PatternLine {
 	public:
-		PatternLine();
-		~PatternLine();
+		PatternLine() : sequencerTrack_(0) {}
 
-		void setSequenceTrack(int track);
-		int sequenceTrack() const;
+		void setSequenceTrack(int track) { sequencerTrack_ = track; }
+		int sequenceTrack() const { return sequencerTrack_; }
 
 		std::string toXml( float pos ) const;
 
-		std::map<int, PatternEvent> & notes();
-		const std::map<int, PatternEvent> & notes() const;
+		std::map<int, PatternEvent> & notes() { return noteMap; }
+		const std::map<int, PatternEvent> & notes() const { return noteMap; }
 
-		std::map<int, PatternEvent> & tweaks();
-		const std::map<int, PatternEvent> & tweaks() const;
+		std::map<int, PatternEvent> & tweaks() { return tweakMap; }
+		const std::map<int, PatternEvent> & tweaks() const { return tweakMap; }
 
-		virtual bool empty() const;
+		///\todo why is this virtual?
+		virtual bool empty() const { return noteMap.empty() && tweakMap.empty(); }
 
 	private:
 

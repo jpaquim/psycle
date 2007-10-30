@@ -35,43 +35,42 @@ class PatternEvent
 		typedef std::vector<PcmType> PcmListType;
 
 		PatternEvent();
-		~PatternEvent();
 
-		void setNote(std::uint8_t value);
-		std::uint8_t note() const;
+		void setNote(std::uint8_t value) { note_ = value; }
+		std::uint8_t note() const { return note_; }
 
-		void setInstrument(std::uint8_t instrument);
-		std::uint8_t instrument() const;
+		void setInstrument(std::uint8_t instrument) { inst_ = instrument; }
+		std::uint8_t instrument() const { return inst_; }
 
-		void setMachine(std::uint8_t machine);
-		std::uint8_t machine() const;
+		void setMachine(std::uint8_t machine) { mach_ = machine; }
+		std::uint8_t machine() const { return mach_; }
 
-		void setCommand(std::uint8_t command);
-		std::uint8_t command() const;
+		void setCommand(std::uint8_t command) { cmd_ = command; }
+		std::uint8_t command() const { return cmd_; }
 
-		void setParameter(std::uint8_t parameter);
-		std::uint8_t parameter() const;
+		void setParameter(std::uint8_t parameter) { param_ = parameter; }
+		std::uint8_t parameter() const { return param_; }
 
-		void setVolume(std::uint8_t parameter);
-		std::uint8_t volume() const;
+		void setVolume(std::uint8_t parameter) { volume_ = vol; }
+		std::uint8_t volume() const { return volume_; }
 
-		bool empty() const;
+		bool empty() const { return note_ == 255 && inst_ == 255 && mach_ == 255 && cmd_ == 0 && param_ == 0; }
 
 		std::string toXml(int track) const;
 
-		PcmListType & paraCmdList();
+		PcmListType & paraCmdList() { return paraCmdList_; }
 
-		void setSharp( bool on );
-		bool isSharp() const;
+		void setSharp( bool b ) { sharp_ = b; }
+		bool isSharp() const { return sharp_; }
 
 	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
-		std::uint8_t _note;
-		std::uint8_t _inst;
-		std::uint8_t _mach;
-		std::uint8_t _cmd;
-		std::uint8_t _parameter;
-		std::uint8_t _volume;
-		bool _sharp;
+		std::uint8_t note_;
+		std::uint8_t inst_;
+		std::uint8_t mach_;
+		std::uint8_t cmd_;
+		std::uint8_t param_;
+		std::uint8_t volume_;
+		bool sharp_;
 		PcmListType paraCmdList_;
 };
 
