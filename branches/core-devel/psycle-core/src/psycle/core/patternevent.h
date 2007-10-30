@@ -51,7 +51,7 @@ class PatternEvent
 		void setParameter(std::uint8_t parameter) { param_ = parameter; }
 		std::uint8_t parameter() const { return param_; }
 
-		void setVolume(std::uint8_t parameter) { volume_ = vol; }
+		void setVolume(std::uint8_t volume) { volume_ = volume; }
 		std::uint8_t volume() const { return volume_; }
 
 		bool empty() const { return note_ == 255 && inst_ == 255 && mach_ == 255 && cmd_ == 0 && param_ == 0; }
