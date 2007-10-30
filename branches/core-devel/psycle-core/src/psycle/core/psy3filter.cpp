@@ -162,7 +162,7 @@ namespace psy
 					//song.progress.emit(2,0,"Loading... Song machines...");
 					if ((version&0xFF00) == 0x0000) // chunkformat v0
 					{
-			LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
+						LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
 					}
 					//else if ( (version&0xFF00) == 0x0100 ) //and so on
 				}
@@ -411,11 +411,11 @@ namespace psy
 		PatternEvent Psy3Filter::convertEntry( unsigned char * data ) const
 		{
 			PatternEvent event;
-			event.setNote(*data++);
-			event.setInstrument(*data++);
-			event.setMachine(*data++);
-			event.setCommand(*data++);
-			event.setParameter(*data++);
+			event.setNote(*data); data++;
+			event.setInstrument(*data); data++;
+			event.setMachine(*data); data++;
+			event.setCommand(*data); data++;
+			event.setParameter(*data); data++;
 			return event;
 		}
 

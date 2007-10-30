@@ -414,6 +414,7 @@ namespace psy
 						{
 						PatternLine *thisline= &(patIt->second);
 						PatternLine tmpline;
+
 						std::map<int, PatternEvent>::iterator lineIt = thisline->notes().begin();
 						// Since the player needs to differentiate between tracks of different SequenceEntrys, 
 						// we generate a temporary PatternLine with a special column value.
@@ -425,6 +426,7 @@ namespace psy
 						
 						// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
 						tmpline.setSequenceTrack(seqlineidx);
+						tmpline.tweaks()=thisline->tweaks();
 						events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 						}
 				}

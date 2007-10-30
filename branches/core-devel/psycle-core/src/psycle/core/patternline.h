@@ -53,7 +53,7 @@ namespace psy
 
 			int sequencerTrack_;
 
-						std::map<int, PatternEvent>  noteMap;
+			std::map<int, PatternEvent> noteMap;
 			std::map<int, PatternEvent> tweakMap;
 
 		};

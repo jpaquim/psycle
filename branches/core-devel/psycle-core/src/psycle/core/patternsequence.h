@@ -108,7 +108,7 @@ namespace psy
 
 		private:
 
-			/// the sequence track , the sequence belongs to
+			/// the sequence timeline that the sequenceEntry belongs to
 			SequenceLine* line_;
 			/// the wrapped pattern
 			SinglePattern* pattern_;

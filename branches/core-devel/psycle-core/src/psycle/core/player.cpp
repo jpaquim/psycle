@@ -187,7 +187,8 @@ namespace psy
 				if(mac < MAX_MACHINES) //looks like a valid machine index?
 				{
 						Machine *pMachine = song().machine(mac);
-						pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
+						if ( pMachine )
+							pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
 				}
 			}
 

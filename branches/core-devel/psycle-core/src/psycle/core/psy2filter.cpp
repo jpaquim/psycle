@@ -162,20 +162,20 @@ namespace psy
 			//Convert old tweak effect command to common tweak.
 			if (data[0] == psy::core::commands::tweak_effect)
 			{
-				event.setNote(psy::core::commands::tweak);
-				data++;
-				event.setInstrument((*data)++);
-				event.setMachine((*data)+0x40);
-				data++;
+				event.setNote(psy::core::commands::tweak);	data++;
+				event.setInstrument(*data);	data++;
+				event.setMachine((*data)+0x40);	data++;
 			}
 			else
 			{
-				event.setNote(*data++);
-				event.setInstrument(*data++);
-				event.setMachine(*data++);
+				event.setNote(*data);	data++;
+				event.setInstrument(*data);	data++;
+				event.setMachine(*data); data++;
 			}
-			event.setCommand(*data++);
-			event.setParameter(*data++);
+			event.setCommand(*data);
+			data++;
+			event.setParameter(*data);
+			data++;
 			return event;
 		}
 
@@ -213,10 +213,6 @@ namespace psy
 						if (!event.empty()) {
 							float position = y / (float) song.linesPerBeat();
 							if (event.note() == commands::tweak) {
-								(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
-							}
-							else if (event.note() == commands::tweak_effect) {
-								event.setNote(commands::tweak);	event.setMachine(event.machine()+0x40);
 								(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 							}
 							else if (event.note() == commands::tweak_slide) {

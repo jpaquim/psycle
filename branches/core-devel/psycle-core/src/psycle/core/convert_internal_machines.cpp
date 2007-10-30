@@ -56,24 +56,24 @@ namespace psy {
 					switch(type) {
 						case delay:
 							{
-				const int nparams = 2;
-				std::int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
+								const int nparams = 2;
+								std::int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
 								retweak(machine, type, parameters, nparams, 5);
 							}
 							break;
 						case flanger:
 							{
-				const int nparams = 2;
-				std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
-				retweak(machine, type, parameters, nparams, 7);
+								const int nparams = 2;
+								std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+								retweak(machine, type, parameters, nparams, 7);
 							}
 							break;
 						case gainer:
 							riff.Skip(4);
 							{
-				const int nparams = 1;
-				std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
-								if(type == gainer) retweak(machine, type, parameters, nparams);
+								const int nparams = 1;
+								std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+								/*if(type == gainer)*/ retweak(machine, type, parameters, nparams);
 							}
 							break;
 						default:
@@ -81,20 +81,20 @@ namespace psy {
 					}
 					switch(type) {
 						case distortion:
-				{
-				const int nparams=4;
-				std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
-				retweak(machine, type, parameters, nparams);
-				break;
-				}
+						{
+							const int nparams=4;
+							std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+							retweak(machine, type, parameters, nparams);
+							break;
+						}
 						default:
 							riff.Skip(16);
 					}
 					switch(type) {
 						case ring_modulator:
 							{
-				const int nparams=4;
-				std::uint8_t parameters [nparams];
+								const int nparams=4;
+								std::uint8_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[1]);
 								riff.Skip(1);
@@ -107,8 +107,8 @@ namespace psy {
 						case delay:
 							riff.Skip(5);
 							{
-				const int nparams=4;
-				std::int32_t parameters [nparams];
+								const int nparams=4;
+								std::int32_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[2]);
 								riff.Read(parameters[1]);
@@ -120,7 +120,7 @@ namespace psy {
 						case flanger:
 							riff.Skip(4);
 							{
-				const int nparams=1;
+								const int nparams=1;
 								unsigned char parameters [nparams]; riff.ReadArray(parameters, nparams);
 								retweak(machine, type, parameters, nparams, 9);
 							}
@@ -141,8 +141,8 @@ namespace psy {
 						case filter_2_poles:
 							riff.Skip(21);
 							{
-				const int nparams=6;
-				std::int32_t parameters [nparams];
+								const int nparams=6;
+								std::int32_t parameters [nparams];
 								riff.ReadArray(&parameters[1], nparams-1);
 								riff.Read(parameters[0]);
 								retweak(machine, type, parameters, nparams);
@@ -160,43 +160,35 @@ namespace psy {
 			}
 
 			void Converter::retweak(CoreSong & song) const {
-				///\todo this code is really needed to properly load the pattern data
-				#if 0
-				/// \todo must each twk repeat the machine number ?
-				// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
-				for(int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
+
+				// Get the first category (there's only one with imported psy's) and...
+				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->patternData()->begin();
+				// ... for all the patterns in this category...
+				for (std::vector<SinglePattern*>::iterator pit  = (*cit)->begin() ; pit != (*cit)->end(); pit++)
 				{
-					if(!song.IsPatternUsed(pattern)) continue;
-					PatternEntry * const lines(reinterpret_cast<PatternEntry*>(song.ppPatternData[pattern]));
-					for(int line = 0 ; line < song.patternLines[pattern] ; ++line)
-					{
-						PatternEntry * const events(lines + line * MAX_TRACKS);
-						for(int track(0); track < song.tracks() ; ++track)
+					// ... check all lines searching...
+					for ( std::map<double, PatternLine>::iterator lit = (*pit)->begin() ; lit != (*pit)->end() ; lit++ ) {
+						PatternLine & line = lit->second;
+						// ...tweaks to modify.
+						for ( std::map<int, PatternEvent>::iterator tit = line.tweaks().begin(); tit != line.tweaks().end() ; tit++  )
 						{
-							PatternEntry & event(events[track]);
-							if(event._note == psy::core::commands::tweak_effect)
-							{
-								event._mach += 0x40;
-								event._note = psy::core::commands::tweak;
-							}
-							if(event._note == psy::core::commands::tweak)
-							{
-								std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
+								// If this tweak is for a replaced machine, modify the values.
+								std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song.machine(tit->second.machine())));
 								if(i != machine_converted_from.end())
 								{
 									//Machine & machine(*i->first);
 									const int & type(*i->second);
-									int parameter(event._inst);
-									int value((event._cmd << 8) + event._parameter);
+									int parameter(tit->second.instrument());
+									int value((tit->second.command() << 8) + tit->second.parameter());
 									retweak(type, parameter, value);
-									event._inst = parameter;
-									event._cmd = value >> 8; event._parameter = 0xff & value;
+									tit->second.setInstrument(parameter);
+									tit->second.setCommand(value>>8);
+									tit->second.setParameter(value&0xff);
 								}
-							}
+
 						}
 					}
 				}
-				#endif
 			}
 
 			Converter::Plugin_Names::Plugin_Names()

@@ -597,7 +597,7 @@ namespace psy
 				return it->second;
 			} else {
 				int maxTrack = 0;
-				for ( it = tweakInfoMap.begin(); it != tweakInfoMap.begin(); it++) {
+				for ( it = tweakInfoMap.begin(); it != tweakInfoMap.end(); it++) {
 					maxTrack = std::max( maxTrack, it->second + 1 );
 				}
 				tweakInfoMap[info] = maxTrack;
