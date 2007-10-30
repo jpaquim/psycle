@@ -181,7 +181,7 @@ namespace psy
 		{
 			std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
 			for ( ; trackItr != line.tweaks().end() ; ++trackItr) {
-				PatternEvent entry = trackItr->second;
+				PatternEvent & entry(trackItr->second);
 				int track = trackItr->first;
 				int mac = entry.machine();
 				if(mac < MAX_MACHINES) //looks like a valid machine index?
