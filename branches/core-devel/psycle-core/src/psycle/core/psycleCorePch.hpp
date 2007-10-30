@@ -3,7 +3,8 @@
 
 #pragma once
 
-#ifndef PSYCLE__CORE__NO_PCH
+///\todo qmake is currently not configured to create/use pre-compiled headers
+#if 0 // #ifndef PSYCLE__CORE__NO_PCH
 
 #ifdef _WIN32
 #define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR 5
