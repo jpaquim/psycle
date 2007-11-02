@@ -64,11 +64,13 @@ Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , CoreSong* song
 
 Plugin::~ Plugin( ) throw()
 {
-	#if defined __unix__ || defined __APPLE__
-		::dlclose(_dll);
-	#else
-		if(_dll) ::FreeLibrary((HINSTANCE)_dll);
-	#endif          
+	if(_dll) {
+		#if defined __unix__ || defined __APPLE__
+			::dlclose(_dll);
+		#else
+			::FreeLibrary((HINSTANCE)_dll);
+		#endif
+	}
 }
 
 bool Plugin::Instance( const std::string & file_name )
