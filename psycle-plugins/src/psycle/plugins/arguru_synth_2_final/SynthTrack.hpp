@@ -131,6 +131,9 @@ private:
 	inline void FilterTick(void);
 	inline int f2i(double d)
 	{
+#ifdef __BIG_ENDIAN__
+    return static_cast<int>(d);
+#else
 		const double magic = 6755399441055744.0; // 2^51 + 2^52
 		union tmp_union
 		{
@@ -139,6 +142,7 @@ private:
 		} tmp;
 		tmp.d = (d-0.5) + magic;
 		return tmp.i;
+#endif
 	}
 
 };

@@ -317,12 +317,25 @@ CMachineParameter const *pParams[] =
 	&paramFFreq16
 };
 
+static inline void byteswap(short& x) {
+#ifdef __BIG_ENDIAN__
+  x = ((x >> 8) & 0x00ff) + ((x << 8) & 0xff00);
+#endif
+}
+
 struct ELEM
 {
 	short				level;
 	short				attack;
 	short				pan;
 	short				ffreq;
+
+  void byteswap() {
+    ::byteswap(level);
+    ::byteswap(attack);
+    ::byteswap(pan);
+    ::byteswap(ffreq);
+  }
 };
 
 struct PROG
@@ -331,6 +344,15 @@ struct PROG
 	short				speed;
 	short				ftype;
 	ELEM				elems[NUM_STEPS];
+
+  void byteswap() {
+    ::byteswap(length);
+    ::byteswap(speed);
+    ::byteswap(ftype);
+    for(int i=0;i<NUM_STEPS;i++) {
+      elems[i].byteswap();
+    }
+  }
 };
 
 //============================================================================
@@ -510,7 +532,11 @@ void mi::SetProgramNr(int nr)
 //////////////////////////////////////////////////////////////////////
 void mi::PutData(void * pData)
 {
+  for(int i=0;i<16;i++)
+    m_programs[i].byteswap();
 	memcpy(m_programs, pData, sizeof(PROG) * 16);
+  for(int i=0;i<16;i++)
+    m_programs[i].byteswap();
 	int nr = (int) (m_programs[0].length & 0xff00) >> 8;
 	m_programs[0].length &= (short) 0xff;
 	SetProgramNr(nr);
@@ -524,7 +550,11 @@ void mi::PutData(void * pData)
 void mi::GetData(void * pData)
 {
 	m_programs[0].length |= (short) (Vals[PARAM_PROGRAM_NR] << 8);
+  for(int i=0;i<16;i++)
+    m_programs[i].byteswap();
 	memcpy(pData, m_programs, sizeof(PROG) * 16);
+  for(int i=0;i<16;i++)
+    m_programs[i].byteswap();
 	m_programs[0].length &= (short) 0xff;
 }
 
