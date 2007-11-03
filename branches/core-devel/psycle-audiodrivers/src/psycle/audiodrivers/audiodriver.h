@@ -166,7 +166,7 @@ namespace psy
 				static double frand();
 				static void Quantize16WithDither(float const *pin, std::int16_t *piout, int c);
 				static void Quantize16(float const *pin, std::int16_t *piout, int c);
-				static void Quantize16AndDeinterlace(float const *pin, std::int16_t *pileft, std::int16_t *piright, int c);
+				static void Quantize16AndDeinterlace(float const *pin, std::int16_t *pileft, int strideleft, std::int16_t *piright, int strideright, int c);
 				static void DeQuantize16AndDeinterlace(int const *pin, float *poutleft,float *poutright,int c);
 
 			///\name settings
