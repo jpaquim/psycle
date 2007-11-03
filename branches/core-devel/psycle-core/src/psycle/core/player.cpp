@@ -26,6 +26,7 @@
 
 #include "internal_machines.h"
 #include "machine.h"
+#include "sampler.h"
 #include "song.h"
 
 #include <iostream> // only for debug output
@@ -369,7 +370,7 @@ namespace psy
 					if(song().machine(c)) song().machine(c)->PreWork(amount);
 				}
 
-				song().DoPreviews( amount );
+				Sampler::DoPreviews( amount ,song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
 				song().machine(MASTER_INDEX)->Work(amount );
 
 				if ( (recording_ && !autoRecord_) || // controlled by record button

@@ -196,10 +196,8 @@ namespace psy
 			std::int16_t buf[1024 / 2];
 			int newCount = bufSize / 2;        
 			while ( _running ) {
-				float const * input(_pCallback(_callbackContext, newCount));              
-				for (int i = 0; i < bufSize; i++) {
-					buf[i] = *input++;
-				}       
+				float const * input(_pCallback(_callbackContext, newCount));
+				Quantize16(input,buf,newCount);
 				writeAudio(hWaveOut, (CHAR*) buf, sizeof(buf) );
 			}
 		}
@@ -277,38 +275,6 @@ namespace psy
 			}
 			hWaveOut=0;
 			return true;
-		}
-
-		void MsWaveOut::quantize(float *pin, int *piout, int c)
-		{
-			do
-			{
-				int r = f2i( (pin[1]) );
-
-				if (r < SHORT_MIN)
-				{
-					r = SHORT_MIN;
-				}
-				else if (r > SHORT_MAX)
-				{
-					r = SHORT_MAX;
-				}
-
-				int l = f2i( (pin[0]) );
-
-				if (l < SHORT_MIN)
-				{
-					l = SHORT_MIN;
-				}
-				else if (l > SHORT_MAX)
-				{
-					l = SHORT_MAX;
-				}
-
-				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
-				pin += 2;
-			}
-			while(--c);
 		}
 	}
 }

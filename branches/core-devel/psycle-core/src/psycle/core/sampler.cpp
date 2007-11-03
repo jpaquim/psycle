@@ -12,6 +12,8 @@ namespace psy
 	namespace core
 	{
 		std::string Sampler::_psName = "Sampler";
+		InstPreview Sampler::wavprev;
+		InstPreview Sampler::waved;
 
 		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 		:
@@ -830,5 +832,18 @@ namespace psy
 			}
 		}
 
+
+		void Sampler::DoPreviews(int amount, float* pLeft, float* pRight)
+		{
+			//todo do better.. use a vector<InstPreview*> or something instead
+			if(wavprev.IsEnabled())
+			{
+				wavprev.Work(pLeft, pRight, amount);
+			}
+			if(waved.IsEnabled())
+			{
+				waved.Work(pLeft, pRight, amount);
+			}
+		}
 }
 }

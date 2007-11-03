@@ -33,7 +33,7 @@ namespace psy
 #ifdef __BIG_ENDIAN__
       return lrintf(d);
 #else
-      double res = ((double)pin[1] + frand()) + magic;
+      double res = d + magic;
       return *((int *)&res);
 #endif
 

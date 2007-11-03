@@ -91,9 +91,6 @@ namespace psy
 			bool start();
 			bool stop();
 
-			void quantizeWithDither(float *pin, int *piout, int c);
-			void quantize(float *pin, int *piout, int c);
-
 		};
 	}
 }

@@ -451,14 +451,6 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 {
 	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 
-	try
-	{
-		proxy().SeqTick(channel, pData.note(), pData.instrument(), pData.command(), pData.parameter());
-	}
-	catch(const std::exception &)
-	{
-		return;
-	}
 	if(pData.note() == psy::core::commands::tweak || pData.note() == psy::core::commands::tweak_effect)
 	{
 		if( pData.instrument() < info_->numParameters)
@@ -554,6 +546,17 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			}
 		}
 		Player::Instance()->Tweaker = true;
+	}
+	else
+	{
+		try
+		{
+			proxy().SeqTick(channel, pData.note(), pData.instrument(), pData.command(), pData.parameter());
+		}
+		catch(const std::exception &)
+		{
+			return;
+		}
 	}
 }
 

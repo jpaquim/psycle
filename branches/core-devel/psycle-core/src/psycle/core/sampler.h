@@ -6,6 +6,7 @@
 #include "dsp.h"
 #include "filter.h"
 #include "instrument.h"
+#include "instpreview.h"
 #include "machine.h"
 
 namespace psy {
@@ -184,6 +185,20 @@ namespace psy {
 			}
 
 			void Update();
+
+			///\name wave file previewing
+			///\todo shouldn't belong to the song class. Move it to Sampler.
+			///\{
+		public:
+			//todo these ought to be dynamically allocated
+			/// Wave preview.
+			static InstPreview wavprev;
+			/// Wave editor playback.
+			///\todo: two previews??? 
+			static InstPreview waved;
+			/// runs the wave previewing.
+			static void DoPreviews(int amount, float* pLeft, float* pRight);
+			///\}
 
 		protected:
 

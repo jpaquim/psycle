@@ -250,6 +250,10 @@ namespace psy {
 				{
 					case gainer:
 						{
+							///\todo: This "if" had to be added to avoid a crash when pattern contains erroneous data
+							/// (which can happen, since the user can write any value in the pattern)
+							/// More checks should be added where having values out of range can cause bad behaviours.
+							if (parameter != 1) break;
 							enum Parameters { gain };
 							static const int parameters [] = { gain };
 							parameter = parameters[--parameter];
