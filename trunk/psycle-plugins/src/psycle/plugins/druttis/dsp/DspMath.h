@@ -33,6 +33,9 @@ extern float pow2table[POW2TABLESIZE];
 ///				converts a double to an integer
 inline int f2i(double d)
 {
+#ifdef __BIG_ENDIAN__
+  return lrintf(d - 0.5);
+#else
 	const double magic = 6755399441055744.0;
 	const double half = 0.5;
 	union tmp_union
@@ -42,6 +45,7 @@ inline int f2i(double d)
 	} tmp;
 	tmp.d = d - half + magic;
 	return tmp.i;
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////

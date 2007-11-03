@@ -16,6 +16,9 @@ const double PI2 = 6.28318530717958647693;
 //============================================================================
 inline int f2i(double d)
 {
+#ifdef __BIG_ENDIAN__
+  return lrintf(d - 0.5);
+#else
 	const double magic = 6755399441055744.0;
 	union tmp_union
 	{
@@ -24,6 +27,7 @@ inline int f2i(double d)
 	} tmp;
 	tmp.d = (d - 0.5) + magic;
 	return tmp.i;
+#endif
 }
 //=============================================================================
 //				Returns frequency of a note (midi note?)

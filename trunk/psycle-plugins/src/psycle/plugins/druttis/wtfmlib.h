@@ -39,6 +39,9 @@ inline void AnimateAFloat(afloat* p, float fac) {
 /// Function to replace ordinary float to int operation
 ///\todo use psycle::helpers::math
 inline int f2i(double d) {
+#ifdef __BIG_ENDIAN__
+  return lrintf(d - 0.5);
+#else
 	const double magic = 6755399441055744.0;
 	union result_union {
 		double d;
@@ -46,6 +49,7 @@ inline int f2i(double d) {
 	} result;
 	result.d = (d - 0.5) + magic;
 	return result.i;
+#endif
 }
 
 /// Clips phase for wavetable

@@ -23,6 +23,9 @@ public:
 	//------------------------------------------------------------------------
 	static inline int f2i(double d)
 	{
+#ifdef __BIG_ENDIAN__
+    return lrintf(d - 0.5);
+#else
 		const double magic = 6755399441055744.0;
 		union tmp_union
 		{
@@ -31,6 +34,7 @@ public:
 		} tmp;
 		tmp.d = (d - 0.5) + magic;
 		return tmp.i;
+#endif
 	}
 	//------------------------------------------------------------------------
 	//				Get one sample
