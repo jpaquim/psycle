@@ -448,7 +448,8 @@ void CoreSong::DestroyMachine(Machine::id_type mac, bool write_locked)
 			}
 		}
 	}
-	if(mac == machineSoloed) machineSoloed = -1;
+	///\todo:
+	//if(mac == machineSoloed) machineSoloed = -1;
 	// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 	delete machine_[mac]; machine_[mac] = 0;
 }

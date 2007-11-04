@@ -469,7 +469,15 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 					else if (event.note() == commands::midi_cc) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
-					} else (*pat)[beatpos].notes()[x] = event;
+					}
+					else {
+						if(event.command() == PatternCmd::NOTE_DELAY)
+						{
+							/// Convert old value (part of line) to new value (part of beat)
+							event.setParameter(event.parameter()/linesPerBeat);
+						}
+						(*pat)[beatpos].notes()[x] = event;
+					}
 
 					if ( (event.note() <= commands::release || event.note() == commands::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
 					{

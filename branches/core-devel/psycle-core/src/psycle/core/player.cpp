@@ -214,11 +214,12 @@ namespace psy
 							{
 								if(entry.command() == PatternCmd::NOTE_DELAY)
 								{
-									// delay
-									pMachine->TriggerDelay[track] = entry;
-									pMachine->TriggerDelayCounter[track] = static_cast<int>( ((entry.parameter()+1)*timeInfo_.samplesPerRow())/256 );
+									double delayoffset = entry.parameter()/256.0;
+									// At least Plucked works erroneously if the command is not ommited.
+									entry.setCommand(0); entry.setParameter(0);
+									pMachine->AddEvent(beatOffset+delayoffset, line.sequenceTrack()*1024+track, entry);
 								}
-								else if(entry.command() == PatternCmd::RETRIGGER)
+/*								else if(entry.command() == PatternCmd::RETRIGGER)
 								{
 									// retrigger
 									pMachine->TriggerDelay[track] = entry;
@@ -243,8 +244,12 @@ namespace psy
 									}
 									pMachine->RetriggerRate[track] = static_cast<int>( timeInfo_.samplesPerRow()* timeInfo_.linesPerBeat() / 24 );
 								}
+*/
 								else
 								{
+									if(entry.command() == PatternCmd::NOTE_DELAY || entry.command() == PatternCmd::RETRIGGER || entry.command() == PatternCmd::RETR_CONT || entry.command() == PatternCmd::ARPEGGIO)
+									{ entry.setCommand(0); entry.setParameter(0); }
+
 									pMachine->TriggerDelay[track].setCommand( 0 );
 									pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
 									pMachine->TriggerDelayCounter[track] = 0;
