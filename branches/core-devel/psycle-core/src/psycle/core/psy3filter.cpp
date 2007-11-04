@@ -332,8 +332,8 @@ bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion)
 
 bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks)
 {
-	std::uint32_t temp(0);
-	std::uint16_t temp16(0);
+	std::int32_t temp(0);
+	std::int16_t temp16(0);
 	bool fileread = false;
 
 	// why all these temps?  to make sure if someone changes the defs of
@@ -357,7 +357,8 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 	linesPerBeat= song.linesPerBeat();
 
 	// current octave
-	file->Read(octave);
+	file->Read(temp);
+	octave = static_cast<unsigned char>(temp);
 	// machineSoloed
 	file->Read(machineSoloed);
 	// trackSoloed
@@ -366,7 +367,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 	file->Read(midiSelected);
 	file->Read(auxcolSelected);
 	file->Read(instSelected);
-
+	
 	// sequence width, for multipattern
 	file->Read(temp);
 	for(int i(0) ; i < song.tracks(); ++i)
