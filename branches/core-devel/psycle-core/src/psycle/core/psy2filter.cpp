@@ -26,6 +26,7 @@
 #include "song.h"
 #include "convert_internal_machines.private.hpp"
 #include <sstream>
+#include <iostream>
 
 namespace psy { namespace core {
 

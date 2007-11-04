@@ -27,6 +27,7 @@
 #include "song.h"
 
 #include <sstream>
+#include <iostream>
 
 namespace psy { namespace core {
 
