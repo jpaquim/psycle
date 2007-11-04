@@ -58,7 +58,6 @@ void CoreSong::clear()
 	Invalided = false;
 
 	setTracks(MAX_TRACKS);
-	seqBus=0;
 
 	setName("Untitled");
 	setAuthor("Unnamed");
@@ -75,8 +74,6 @@ void CoreSong::clear()
 	DeleteInstruments();
 	// Clear patterns
 	patternSequence()->removeAll();
-	// Clear sequence
-	_sampCount=0;
 	// Cleaning pattern allocation info
 	for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
 	for(int i(0) ; i < MAX_MACHINES ; ++i)
@@ -84,9 +81,6 @@ void CoreSong::clear()
 		if (machine_[i]) delete machine_[i];
 		machine_[i] = 0;
 	}
-
-	machineSoloed = -1;
-	_trackSoloed = -1;
 
 	_saved=false;
 	fileName = "Untitled.psy";
@@ -96,15 +90,6 @@ void CoreSong::clear()
 		CreateMachine(plugin_path, MACH_MASTER, 320, 200, "master", MASTER_INDEX);
 	}
 
-	_trackArmedCount = 0;
-	for(int i(0) ; i < MAX_TRACKS; ++i)
-	{
-		_trackMuted[i] = false;
-		_trackArmed[i] = false;
-	}
-	instSelected = 0;
-	midiSelected = 0;
-	auxcolSelected = 0;
 }
 
 UISong::UISong(MachineCallbacks* callbacks)
@@ -790,19 +775,6 @@ bool CoreSong::save(const std::string & fileName)
 	return filters.saveSong(fileName, *this,4);
 }
 
-void CoreSong::DoPreviews(int amount)
-{
-	//todo do better.. use a vector<InstPreview*> or something instead
-	if(wavprev.IsEnabled())
-	{
-		wavprev.Work(machine_[MASTER_INDEX]->_pSamplesL, machine_[MASTER_INDEX]->_pSamplesR, amount);
-	}
-	if(waved.IsEnabled())
-	{
-		waved.Work(machine_[MASTER_INDEX]->_pSamplesL, machine_[MASTER_INDEX]->_pSamplesR, amount);
-	}
-}
-
 ///\todo mfc+winapi->std
 bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst)
 {
@@ -1169,6 +1141,7 @@ void CoreSong::patternTweakSlide(int machine, int command, int value, int patter
 void CoreSong::setTracks( unsigned int trackCount )
 {
 	tracks_ = trackCount;
+	patternSequence()->setNumTracks(tracks_);
 }
 
 void CoreSong::setName( const std::string & name )
@@ -1197,5 +1170,19 @@ void CoreSong::setLinesPerBeat(const unsigned int value)
 	else if ( value > 31 ) linesPerBeat_ = 31;
 	else linesPerBeat_ = value;
 }
+
+
+void Song::clear()
+{
+	CoreSong::clear();
+	seqBus=0;
+	machineSoloed = -1;
+	_trackSoloed = -1;
+	instSelected = 0;
+	midiSelected = 0;
+	auxcolSelected = 0;
+
+}
+
 
 }}

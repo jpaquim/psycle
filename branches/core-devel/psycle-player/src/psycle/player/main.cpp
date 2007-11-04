@@ -107,7 +107,7 @@ int main(int argument_count, char * arguments[]) {
 	psy::core::Player &player = *psy::core::Player::Instance();
 	///\todo: player is defined as a machine_callback. The correct design would utilize "timeInfo",
 	// or similar instead of passing all player.
-	psy::core::Song song(&player);
+	psy::core::CoreSong song(&player);
 	//Song is passed to player, since in a good scenario, we would have one player, and several songs (MDI interface)
 	player.song(&song);
 
@@ -161,19 +161,19 @@ int main(int argument_count, char * arguments[]) {
 		// since driver is cloned, we cannot use output_driver!!!!
 		player.driver().Enable(true);
 		player.start(0);
-		std::cout << "psycle: player: playing...\n";
-		std::cout << "psycle: player: press any letter and enter to stop\n";
+		std::cout << "psycle: player: playing..." << std::endl;
+		std::cout << "psycle: player: press any letter and enter to stop" << std::endl;
 
 		std::string s; std::cin >> s;
 		
-		std::cout << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
+		std::cout << std::endl << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
 		if(output_file_name.length()) player.stopRecording();
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
-	configuration.setDriverByName("silent");
-	player.setDriver(*configuration._pOutputDriver);
+	//configuration.setDriverByName("silent");
+	//player.setDriver(*configuration._pOutputDriver);
 	
 	return 0;
 }

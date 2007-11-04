@@ -74,6 +74,7 @@ bool Psy2Filter::load(std::string const & plugin_path, const std::string & fileN
 	file.Open(fileName);
 	//progress.emit(1,0,"");
 	//progress.emit(2,0,"Loading... psycle song fileformat version 2...");
+	std::cout << "PSY2 format"<< std::endl;
 
 	song.clear();
 	preparePatternSequence(song);
@@ -117,7 +118,6 @@ bool Psy2Filter::LoadINFO(RiffFile* file,CoreSong& song)
 bool Psy2Filter::LoadSNGI(RiffFile* file,CoreSong& song)
 {
 	std::int32_t tmp;
-	unsigned char oct;
 	file->Read(tmp);
 	song.setBpm(tmp);
 
@@ -129,8 +129,11 @@ bool Psy2Filter::LoadSNGI(RiffFile* file,CoreSong& song)
 	}
 	else song.setLinesPerBeat(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) ));
 
-	file->Read(oct);
-	// note: we don't change the current octave of the gui anymore when loading a song
+	//Used when parsing the pattern, to adapt to true beats.
+	linesPerBeat=song.linesPerBeat();
+
+	///\todo: pass this with the loadExtra() function
+	file->Read(octave);
 
 	file->ReadArray(busMachine,64);
 	return true;
@@ -167,10 +170,8 @@ PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
 		event.setInstrument(*data);	data++;
 		event.setMachine(*data); data++;
 	}
-	event.setCommand(*data);
-	data++;
-	event.setParameter(*data);
-	data++;
+	event.setCommand(*data); data++;
+	event.setParameter(*data); data++;
 	return event;
 }
 
@@ -190,36 +191,44 @@ bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 		else indexStr = o.str();
 		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		pat->setBeatZoom(song.linesPerBeat());
-		TimeSignature & sig =  pat->timeSignatures().back();
-		float beats = numLines / (float) song.linesPerBeat();
 		pat->setID(index);
-		sig.setCount((int) (beats / 4) );
-		float uebertrag = beats - ((int) beats);
-		if ( uebertrag != 0) {
-			TimeSignature uebertragSig(uebertrag);
-			pat->addBar(uebertragSig);
-		}
+		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) // lines
 		{
-			for (int x = 0; x < song.tracks(); x++) {
-				unsigned char entry[5];
-				file->ReadArray(entry,5);
+			for (unsigned int x = 0; x < song.tracks(); x++) {
+				unsigned char entry[EVENT_SIZE];
+				file->ReadArray(entry,sizeof(entry));
 				PatternEvent event = convertEntry(entry);
 				if (!event.empty()) {
-					float position = y / (float) song.linesPerBeat();
 					if (event.note() == commands::tweak) {
-						(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 					}
 					else if (event.note() == commands::tweak_slide) {
-						(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
 					}
 					else if (event.note() == commands::midi_cc) {
-						(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
-					} else (*pat)[position].notes()[x] = event;
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
+					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
+					} else (*pat)[beatpos].notes()[x] = event;
+	
+					if ( (event.note() <= commands::release || event.note() == commands::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
+					{
+						linesPerBeat= event.parameter()&0x1F;
+					}
 				}
 			}
+			beatpos += 1 / (float) linesPerBeat;
 			file->Skip((PSY2_MAX_TRACKS-song.tracks())*EVENT_SIZE);
 		}
+		TimeSignature & sig =  pat->timeSignatures().back();
+		sig.setCount((int) (beatpos / 4) );
+		float uebertrag = beatpos - ((int) beatpos);
+		if ( uebertrag != 0) {
+			TimeSignature uebertragSig(uebertrag);
+			if ( sig.count() == 0 ) pat->timeSignatures().pop_back();
+			pat->addBar(uebertragSig);
+		}
+
 	}
 	///\todo: verify that the sequence doesn't use this pattern, and if it does, make it use an empty pattern
 	/*
@@ -235,7 +244,7 @@ bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 bool Psy2Filter::LoadINSD(RiffFile* file,CoreSong& song)
 {
 	std::int32_t i;
-	file->Read(song.instSelected);
+	file->Read(instSelected);
 
 	for(i=0 ; i < PSY2_MAX_INSTRUMENTS ; ++i)
 	{
@@ -880,7 +889,8 @@ bool Psy2Filter::TidyUp(RiffFile*file,CoreSong&song,convert_internal_machines::C
 	// Reparse any pattern for converted machines.
 	converter->retweak(song);
 	//for (i =0; i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
-	song.seqBus=0;
+	///\todo: resend this to song
+	//song.seqBus=0;
 	return true;
 }
 

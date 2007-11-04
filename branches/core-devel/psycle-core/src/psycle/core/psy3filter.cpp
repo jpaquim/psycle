@@ -88,6 +88,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 	file.Open(fileName);
 	//progress.emit(1,0,"");
 	//progress.emit(2,0,"Loading... psycle song fileformat version 3...");
+	std::cout << "PSY3 format"<< std::endl;
 	
 	// skip header
 	file.Skip(8);
@@ -343,40 +344,38 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 	file->Read(temp);
 	song.setTracks(temp);
 	// bpm
-	file->Read(temp16);
-	int BPMCoarse = temp16;
-	file->Read(temp16);
-	song.setBpm( BPMCoarse + temp16/100.0f );
-	// tpb
+	///\todo: This was a hack added in 1.9alpha to allow decimal BPM values
+	//{
+		file->Read(temp16);
+		int BPMCoarse = temp16;
+		file->Read(temp16);
+		song.setBpm( BPMCoarse + temp16/100.0f );
+	//}
+	// linesperbeat
 	file->Read(temp);
 	song.setLinesPerBeat(temp);
+	linesPerBeat= song.linesPerBeat();
+
 	// current octave
-	file->Read(temp);
-	// note: we don't change the current octave of the gui anymore when loading a song
+	file->Read(octave);
 	// machineSoloed
-	///\todo we need fix destroy machine, because it clears machineSoloed
-	file->Read(temp);
-	song.machineSoloed = temp;
+	file->Read(machineSoloed);
 	// trackSoloed
-	file->Read(temp);
-	song._trackSoloed = temp;
-	file->Read(temp);
-	song.seqBus = temp;
-	file->Read(temp);
-	song.midiSelected = temp;
-	file->Read(temp);
-	song.auxcolSelected = temp;
-	file->Read(temp);
-	song.instSelected = temp;
+	file->Read(trackSoloed);
+	file->Read(seqBus);
+	file->Read(midiSelected);
+	file->Read(auxcolSelected);
+	file->Read(instSelected);
+
 	// sequence width, for multipattern
 	file->Read(temp);
-	song._trackArmedCount = 0;
 	for(int i(0) ; i < song.tracks(); ++i)
 	{
-		file->Read(song._trackMuted[i]);
-		// remember to count them
-		fileread = file->Read(song._trackArmed[i]);
-		if(song._trackArmed[i]) ++song._trackArmedCount;
+		bool tmp;
+		file->Read(tmp);
+		song.patternSequence()->setMutedTrack(i,tmp);
+		fileread = file->Read(tmp);
+		song.patternSequence()->setArmedTrack(i,tmp);
 	}
 	callbacks->timeInfo().setBpm(song.bpm());
 	callbacks->timeInfo().setLinesPerBeat(song.linesPerBeat());
@@ -450,18 +449,10 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 			indexStr = "error";
 		else
 			indexStr = o.str();
-		SinglePattern* pat =
-			singleCat->createNewPattern(std::string(patternName)+indexStr);
+		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		pat->setBeatZoom(song.linesPerBeat());
-		TimeSignature & sig =  pat->timeSignatures().back();
-		float beats = numLines / (float) song.linesPerBeat();
 		pat->setID(index);
-		sig.setCount((int) (beats / 4) );
-		float uebertrag = beats - ((int) beats);
-		if ( uebertrag != 0) {
-			TimeSignature uebertragSig(uebertrag);
-			pat->addBar(uebertragSig);
-		}
+		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) // lines
 		{
 			for (int x = 0; x < song.tracks(); x++) {
@@ -469,21 +460,36 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 				std::memcpy( &entry, pSource, 5);
 				PatternEvent event = convertEntry(entry);
 				if (!event.empty()) {
-					float position = y / (float) song.linesPerBeat();
 					if (event.note() == commands::tweak) {
-						(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 					}
 					else if (event.note() == commands::tweak_slide) {
-						(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
 					}
 					else if (event.note() == commands::midi_cc) {
-						(*pat)[position].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
-					} else (*pat)[position].notes()[x] = event;
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
+					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
+					} else (*pat)[beatpos].notes()[x] = event;
+
+					if ( (event.note() <= commands::release || event.note() == commands::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
+					{
+						linesPerBeat= event.parameter()&0x1F;
+					}
 				}
 				pSource += EVENT_SIZE;
 			}
+			beatpos += 1 / (float) linesPerBeat;
 		}
 		delete[] pDest; pDest = 0;
+		TimeSignature & sig =  pat->timeSignatures().back();
+		sig.setCount((int) (beatpos / 4) );
+		float uebertrag = beatpos - ((int) beatpos);
+		if ( uebertrag != 0) {
+			TimeSignature uebertragSig(uebertrag);
+			if ( sig.count() == 0 ) pat->timeSignatures().pop_back();
+			pat->addBar(uebertragSig);
+		}
+
 	}
 	return fileread;
 }

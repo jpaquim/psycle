@@ -31,6 +31,7 @@ class MachineCallbacks;
 /**
 @author  Psycledelics  
 */
+class RiffFile;
 class PsyFilterBase
 {
 	public:
@@ -45,7 +46,15 @@ class PsyFilterBase
 		virtual std::string filePostfix() const = 0;
 		virtual bool testFormat(const std::string & fileName) = 0;
 		virtual bool load(const std::string & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks *callbacks ) = 0;
+		/// virtual function to use for loading UI-Specific data, or other extra-data that is not basic to song.
+		virtual bool loadExtra(RiffFile* file,char* header, int version) =0;
 		virtual bool save(const std::string & fileName, const CoreSong & song) = 0;
+		/// virtual function to use for saving UI-Specific data, or other extra-data that is not basic to song.
+		virtual bool saveExtra(RiffFile* file,char* header, int version) =0;
+
+		///\todo: Have to allow a way to add a new filter to psyfilter, which will allow to create derived classes of basic filters (psy2, 3, 4, whatever..)
+		/// to add specific "saveextra" and "loadextra" codes, which in turn allow extended Songs (for example, save some windows specific options that 
+		/// the linux version doesn't need to know about, etc..)
 };
 
 /**

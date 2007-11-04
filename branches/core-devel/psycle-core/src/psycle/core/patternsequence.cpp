@@ -325,6 +325,7 @@ std::string SequenceLine::toXml( ) const
 
 PatternSequence::PatternSequence()
 {
+	setNumTracks(16);
 }
 
 PatternSequence::~PatternSequence()

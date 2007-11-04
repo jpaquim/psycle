@@ -94,11 +94,11 @@ namespace psy
 			///\name song
 			///\{
 				public:
-					Song const & song() const { return *song_; }
-					Song & song() { return *song_; }
-					void song(Song * song) { song_ = song; }
+					CoreSong const & song() const { return *song_; }
+					CoreSong & song() { return *song_; }
+					void song(CoreSong * song) { song_ = song; }
 				private:
-					Song * song_;
+					CoreSong * song_;
 			///\}
 
 			///\name secondary output device, write to a file
@@ -218,7 +218,7 @@ namespace psy
 				dsp::Dither dither;
 
 				/// Contains the number of samples until a line change comes in.
-				int _samplesRemaining;
+//				int _samplesRemaining;
 		};
 	}
 }

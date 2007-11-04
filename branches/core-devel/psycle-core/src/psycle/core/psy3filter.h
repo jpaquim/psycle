@@ -55,7 +55,10 @@ class Psy3Filter : public PsyFilterBase
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
 		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		/*override*/ bool loadExtra(RiffFile* file,char* header, int version) {return false;}
 		/*override*/ bool save(const std::string & fileName, const CoreSong & song) {  /* so saving for legacy file format */ return false; }
+		/*override*/ bool saveExtra(RiffFile* file,char* header, int version) {return false;}
+
 
 	protected:
 		virtual int LoadSONGv0(RiffFile* file,CoreSong& song);
@@ -82,6 +85,20 @@ class Psy3Filter : public PsyFilterBase
 		std::vector<int> seqList;
 		PatternCategory* singleCat;
 		SequenceLine* singleLine;
+
+		//inter-loading value.
+		int linesPerBeat;
+
+		//todo: psy3filtermfc, restore these two values.
+		unsigned char octave;
+		int seqBus;
+		int instSelected;
+		int midiSelected;
+		int auxcolSelected;
+		int machineSoloed;
+		int trackSoloed;
+
+
 
 		PatternEvent convertEntry( unsigned char* data) const;
 

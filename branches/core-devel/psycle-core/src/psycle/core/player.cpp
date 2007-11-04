@@ -46,7 +46,7 @@ namespace psy
 			driver_(),
 			_playing(),
 			Tweaker(),
-			_samplesRemaining(),
+//			_samplesRemaining(),
 			loopSequenceEntry_(),
 			_doDither(),
 			autoRecord_(),
@@ -199,7 +199,7 @@ namespace psy
 			for ( ; trackItr != line.notes().end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
-				if(( !song()._trackMuted[track]) && (entry.note() < psy::core::commands::tweak || entry.note() == 255)) // Is it not muted and is a note?
+				if(( !song().patternSequence()->trackMuted(track)) && (entry.note() < psy::core::commands::tweak || entry.note() == 255)) // Is it not muted and is a note?
 				{
 					int mac = entry.machine();
 					if(mac != 255) prevMachines[track] = mac;
@@ -255,7 +255,7 @@ namespace psy
 					}
 				}
 			}
-			_samplesRemaining = static_cast<int>( timeInfo_.samplesPerRow() );
+//			_samplesRemaining = static_cast<int>( timeInfo_.samplesPerRow() );
 		}
 
 		float * Player::Work(int numSamples)
