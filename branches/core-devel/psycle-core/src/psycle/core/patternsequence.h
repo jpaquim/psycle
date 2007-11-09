@@ -212,10 +212,10 @@ namespace psy
 				numTracks_ = newtracks; mutedTrack_.resize(numTracks_); armedTrack_.resize(numTracks_);
 			}
 
-			const int &trackMuted(int track) const { assert(track<numTracks_); return mutedTrack_[track]; }
+			const int trackMuted(int track) const { assert(track<numTracks_); return mutedTrack_[track]; }
 			void setMutedTrack(int track,bool value) { assert(track<numTracks_); mutedTrack_[track]=value; }
 
-			const int &trackArmed(int track) const { assert(track<numTracks_); return armedTrack_[track]; }
+			const int trackArmed(int track) const { assert(track<numTracks_); return armedTrack_[track]; }
 			void setArmedTrack(int track,bool value)
 			{
 				assert(track<numTracks_);

@@ -20,8 +20,8 @@ namespace psy
 		class RiffFile;
 
 		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines 
-		/// and their initial parameters and coordinates, wavetables
+		/// this include patterns, pattern sequence, machines, wavetables
+		/// and their initial parameters
 		class CoreSong
 		{
 		public:
@@ -89,6 +89,31 @@ namespace psy
 		private:
 			float bpm_;
 			///\}
+			///\name the initial ticks per beat (TPB) when the song starts to play.
+			/// With multisequence, ticksSpeed helps on syncronization and timing.
+			/// Concretely, it helps to send the legacy "SequencerTick()" events to native plugins,
+			/// helps in knowing for how much a command is going to be tick'ed ( tws, as well as 
+			/// retrigger code need to know how much they last ) as well as helping Sampulse
+			/// to get ticks according to legacy speed command of Modules.
+			/// isTicks is used to identify if the value in ticksPerBeat_ means ticks, or speed.
+			///\{
+		public:
+			unsigned int ticksSpeed() const { return ticks_; }
+			bool isTicks() const { return isTicks_; }
+			void setTicksSpeed(const unsigned int value, const bool isticks=true);
+		private:
+			unsigned int ticks_;
+			bool isTicks_;
+			///\}
+
+			///\name track count
+			/// legacy. maps to the value from pattternSequence.
+			///\{
+		public:
+			unsigned int tracks() const { return patternSequence_.numTracks(); }
+			void setTracks( unsigned int tracks) { patternSequence_.setNumTracks(tracks); }
+			///\}
+
 
 			///\name pattern sequence
 			///\todo: Think about PatternData. Should be owned by PatternSequence, or by CoreSong?
@@ -241,28 +266,6 @@ namespace psy
 
 
 
-			///\name track count
-			///\todo: think about tracks() in the context of multisequence.
-			///\{
-		public:
-			/// number of tracks in each pattern of this song.
-			unsigned int tracks() const { return tracks_; }
-			/// number of tracks in each pattern of this song.
-			void setTracks( unsigned int tracks);
-		private:
-			unsigned int tracks_;
-			///\}
-
-			///\name deprecated by multiseq for appregio we need an workaround
-			///\{
-		public:
-			/// the initial ticks per beat (TPB) when the song is started playing.
-			/// This can be changed in patterns using a command, but this value will not be affected.
-			unsigned int linesPerBeat() const { return linesPerBeat_; }
-			void setLinesPerBeat(const unsigned int value);
-		private:
-			unsigned int linesPerBeat_;
-			///\}
 
 
 			///\name IsInvalid

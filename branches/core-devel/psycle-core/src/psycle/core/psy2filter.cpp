@@ -126,12 +126,12 @@ bool Psy2Filter::LoadSNGI(RiffFile* file,CoreSong& song)
 	if( tmp <= 0)
 	{
 		// Shouldn't happen but has happened.
-		song.setLinesPerBeat(4);
+		song.setTicksSpeed(4);
 	}
-	else song.setLinesPerBeat(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) ));
+	else song.setTicksSpeed(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm()) ));
 
 	//Used when parsing the pattern, to adapt to true beats.
-	linesPerBeat=song.linesPerBeat();
+	linesPerBeat=song.ticksSpeed();
 
 	///\todo: pass this with the loadExtra() function
 	file->Read(octave);
@@ -191,7 +191,7 @@ bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 		if (!(o << index)) indexStr = "error";
 		else indexStr = o.str();
 		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
-		pat->setBeatZoom(song.linesPerBeat());
+		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) // lines

@@ -26,14 +26,13 @@ PlayerTimeInfo::PlayerTimeInfo( )
 :
 	playBeatPos_(0.0),
 	samplePos_(0),
-	lpb_(4),
+	ticks_(4),
+	isTicks_(true),
 	bpm_(125.0),
-	sampleRate_(44100),
-	samplesPerBeat_(0),
-	samplesPerRow_(0)
+	sampleRate_(44100)
 {
 	recalcSPB();
-	recalcSPR();
+	recalcSPT();
 }
 
 PlayerTimeInfo::~ PlayerTimeInfo( )
@@ -46,32 +45,18 @@ void PlayerTimeInfo::setPlayBeatPos( double pos )
 	playBeatPos_ = pos;
 }
 
-double PlayerTimeInfo::playBeatPos( ) const
-{
-	return playBeatPos_;
-}
-
 void PlayerTimeInfo::setSamplePos( int pos )
 {
 	assert(pos >= 0);
 	samplePos_ = pos;
 }
 
-int PlayerTimeInfo::samplePos( ) const
+void PlayerTimeInfo::setTicksSpeed( int ticks, bool isticks )
 {
-	return samplePos_;
-}
-
-void PlayerTimeInfo::setLinesPerBeat( int lines )
-{
-	assert(lines > 0);
-	lpb_ = lines;
-	recalcSPR();
-}
-
-int PlayerTimeInfo::linesPerBeat( ) const
-{
-	return lpb_;
+	assert(ticks > 0);
+	ticks_ = ticks;
+	isTicks_ = isticks;
+	recalcSPT();
 }
 
 void PlayerTimeInfo::setBpm( double bpm )
@@ -79,12 +64,7 @@ void PlayerTimeInfo::setBpm( double bpm )
 	assert(bpm > 0);
 	bpm_ = bpm;
 	recalcSPB();
-	recalcSPR();
-}
-
-double PlayerTimeInfo::bpm( ) const
-{
-	return bpm_;
+	recalcSPT();
 }
 
 void PlayerTimeInfo::setSampleRate( int rate )
@@ -92,22 +72,7 @@ void PlayerTimeInfo::setSampleRate( int rate )
 	assert(rate > 0);
 	sampleRate_ = rate;
 	recalcSPB();
-	recalcSPR();
-}
-
-int PlayerTimeInfo::sampleRate( ) const
-{
-	return sampleRate_;
-}
-
-float PlayerTimeInfo::samplesPerBeat( ) const
-{
-	return samplesPerBeat_;
-}
-
-float PlayerTimeInfo::samplesPerRow( ) const
-{
-	return samplesPerRow_;
+	recalcSPT();
 }
 
 void PlayerTimeInfo::recalcSPB( )
@@ -116,10 +81,17 @@ void PlayerTimeInfo::recalcSPB( )
 	assert(samplesPerBeat_ > 0);
 }
 
-void PlayerTimeInfo::recalcSPR( )
+void PlayerTimeInfo::recalcSPT( )
 {
-	samplesPerRow_ = (sampleRate_*60)/(bpm_ * lpb_);
-	assert(samplesPerRow_ > 0);
+	if ( isTicks_ )
+	{
+		samplesPerTick_ = samplesPerBeat() / ticks_;
+	}
+	else
+	{
+		samplesPerTick_ =  samplesPerBeat() * ticks_ / 24.0f;
+	}
+	assert(samplesPerTick_ > 0);
 }
 
 }}

@@ -46,7 +46,6 @@ namespace psy
 			driver_(),
 			_playing(),
 			Tweaker(),
-//			_samplesRemaining(),
 			loopSequenceEntry_(),
 			_doDither(),
 			autoRecord_(),
@@ -84,7 +83,7 @@ namespace psy
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 			_playing = true;
 			timeInfo_.setPlayBeatPos( pos );
-			timeInfo_.setLinesPerBeat( song().linesPerBeat() );
+			timeInfo_.setTicksSpeed( song().ticksSpeed(), song().isTicks() );
 		}
 
 		void Player::stop( )
@@ -103,7 +102,7 @@ namespace psy
 				}
 			}
 			setBpm( song().bpm() );
-			timeInfo_.setLinesPerBeat( song().linesPerBeat() );
+			timeInfo_.setTicksSpeed( song().ticksSpeed(), song().isTicks() );
 			SampleRate( driver_->settings().samplesPerSec() );
 			if (autoRecord_) stopRecording();
 			//printf("stop\n");
@@ -182,6 +181,9 @@ namespace psy
 		/// Final Loop. Read new line for notes to send to the Machines
 		void Player::ExecuteNotes(  double beatOffset , PatternLine & line )
 		{
+			/// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modificable)
+
+			/// Step 1: Process all tweaks.
 			std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
 			for ( ; trackItr != line.tweaks().end() ; ++trackItr) {
 				PatternEvent & entry(trackItr->second);
@@ -189,12 +191,47 @@ namespace psy
 				int mac = entry.machine();
 				if(mac < MAX_MACHINES) //looks like a valid machine index?
 				{
-						Machine *pMachine = song().machine(mac);
-						if ( pMachine )
-							pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
+					if ( song().machine(mac) )
+					{
+						Machine &machine = *song().machine(mac);
+						if ( entry.note() == commands::tweak_slide )
+						{
+							const int delay(64);
+							int delaysamples(0), origin(machine.GetParamValue(entry.instrument()));
+							float rate(0.0f), increment(origin);
+							int previous(0);
+							
+							rate = (((entry.command()<<16) | entry.parameter()) - origin) / (timeInfo().samplesPerTick()/64.0f);
+
+							entry.setNote(commands::tweak);
+							entry.setCommand(origin>>8);
+							entry.setParameter(origin&0xFF);
+							machine.AddEvent(beatOffset+ ((double)delaysamples)/timeInfo().samplesPerBeat(), line.sequenceTrack()*1024+track, entry);
+							previous= origin;
+							delaysamples+=delay;
+							while (delaysamples < timeInfo().samplesPerTick())
+							{
+								increment+=rate;
+								if (static_cast<int>(increment) != previous)
+								{
+									origin= static_cast<int>(increment);
+									entry.setCommand(origin>>8);
+									entry.setParameter(origin&0xFF);
+									machine.AddEvent(beatOffset+ ((double)delaysamples)/timeInfo().samplesPerBeat(), line.sequenceTrack()*1024+track, entry);
+									previous = origin;
+								}
+								delaysamples+=delay;
+							}
+						}
+						else
+						{
+							machine.AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
+						}
+					}
 				}
 			}
 
+			/// Step 2: Process all notes.
 			trackItr = line.notes().begin();
 			for ( ; trackItr != line.notes().end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
@@ -209,58 +246,80 @@ namespace psy
 					{
 						if(mac < MAX_MACHINES) //looks like a valid machine index?
 						{
-							Machine *pMachine = song().machine(mac);
-							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
+							if(song().machine(mac) && !(song().machine(mac)->_mute)) // Does this machine really exist and is not muted?
 							{
+								Machine &machine = *song().machine(mac);
 								if(entry.command() == PatternCmd::NOTE_DELAY)
 								{
-									double delayoffset = entry.parameter()/256.0;
-									// At least Plucked works erroneously if the command is not ommited.
+									double delayoffset(entry.parameter()/256.0);
+									// At least Plucked String works erroneously if the command is not ommited.
 									entry.setCommand(0); entry.setParameter(0);
-									pMachine->AddEvent(beatOffset+delayoffset, line.sequenceTrack()*1024+track, entry);
+									machine.AddEvent(beatOffset+delayoffset, line.sequenceTrack()*1024+track, entry);
 								}
-/*								else if(entry.command() == PatternCmd::RETRIGGER)
+								else if(entry.command() == PatternCmd::RETRIGGER)
 								{
-									// retrigger
-									pMachine->TriggerDelay[track] = entry;
-									pMachine->RetriggerRate[track] = (entry.parameter()+1);
-									pMachine->TriggerDelayCounter[track] = 0;
+									//\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
+									int delaysamples(0), rate(0), delay(0);
+									rate = entry.parameter()+1;
+									delay = (rate*static_cast<int>(timeInfo().samplesPerTick())) >> 8; // x/256
+									entry.setCommand(0); entry.setParameter(0);
+									machine.AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
+
+									delaysamples+=delay;
+									while (delaysamples < timeInfo().samplesPerTick())
+									{
+										machine.AddEvent(beatOffset+ ((double)delaysamples)/timeInfo().samplesPerBeat(), line.sequenceTrack()*1024+track, entry);
+										delaysamples+=delay;
+									}
 								}
 								else if(entry.command() == PatternCmd::RETR_CONT)
 								{
-									// retrigger continue
-									pMachine->TriggerDelay[track] = entry;
-									if(entry.parameter()&0xf0) pMachine->RetriggerRate[track] = (entry.parameter()&0xf0);
+									///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
+									///\todo: verify that using ints for rate and variation is enough, or has to be float.
+									int delaysamples(0), rate(0), delay(0), variation(0);
+									int parameter = entry.parameter()&0x0f;
+									variation = (parameter < 9) ? (4*parameter) : (-1*(2*(16-parameter)));
+
+									if(entry.parameter()&0xf0) rate = (entry.parameter()&0xf0);
+									delay = (rate*static_cast<int>(timeInfo().samplesPerTick())) >> 8; // x/256
+									entry.setCommand(0); entry.setParameter(0);
+									machine.AddEvent(beatOffset+ ((double)delaysamples)/timeInfo().samplesPerBeat(), line.sequenceTrack()*1024+track, entry);
+									delaysamples+=delay;
+									while (delaysamples < timeInfo().samplesPerTick())
+									{
+										machine.AddEvent(beatOffset+ ((double)delaysamples)/timeInfo().samplesPerBeat(), line.sequenceTrack()*1024+track, entry);
+
+										rate+=variation;
+										if (rate < 16)	rate = 16;
+										delay = (rate*static_cast<int>(timeInfo().samplesPerTick())) >> 8; // x/256
+										delaysamples+=delay;
+									}
 								}
-								else if (entry.command() == PatternCmd::ARPEGGIO)
+/*								else if (entry.command() == PatternCmd::ARPEGGIO)
 								{
 									// arpeggio
 									///\todo : Add Memory.
 									///\todo : This won't work... What about sampler's NNA's?
 									if (entry.parameter())
 									{
-										pMachine->TriggerDelay[track] = entry;
-										pMachine->ArpeggioCount[track] = 1;
+										machine.TriggerDelay[track] = entry;
+										machine.ArpeggioCount[track] = 1;
 									}
-									pMachine->RetriggerRate[track] = static_cast<int>( timeInfo_.samplesPerRow()* timeInfo_.linesPerBeat() / 24 );
+									machine.RetriggerRate[track] = static_cast<int>( timeInfo_.samplesPerTick()* timeInfo_.linesPerBeat() / 24 );
 								}
 */
 								else
 								{
-									if(entry.command() == PatternCmd::NOTE_DELAY || entry.command() == PatternCmd::RETRIGGER || entry.command() == PatternCmd::RETR_CONT || entry.command() == PatternCmd::ARPEGGIO)
-									{ entry.setCommand(0); entry.setParameter(0); }
-
-									pMachine->TriggerDelay[track].setCommand( 0 );
-									pMachine->AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
-									pMachine->TriggerDelayCounter[track] = 0;
-									pMachine->ArpeggioCount[track] = 0;
+									machine.TriggerDelay[track].setCommand( 0 );
+									machine.AddEvent(beatOffset, line.sequenceTrack()*1024+track, entry);
+									machine.TriggerDelayCounter[track] = 0;
+									machine.ArpeggioCount[track] = 0;
 								}
 							}
 						}
 					}
 				}
 			}
-//			_samplesRemaining = static_cast<int>( timeInfo_.samplesPerRow() );
 		}
 
 		float * Player::Work(int numSamples)
@@ -272,7 +331,7 @@ namespace psy
 
 			// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
 			Master::_pMasterSamples = _pBuffer;
-			double beatLength = numSamples/(double) timeInfo_.samplesPerBeat();
+			double beatsToWork = numSamples/(double) timeInfo_.samplesPerBeat();
 			//CSingleLock crit(&song().door, true);
 
 			if (autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) {
@@ -310,7 +369,7 @@ namespace psy
 					//get the next round of global events.  we need to repopulate the list of globals and patternlines
 					//each time through the loop because global events can potentially move the song's beatposition elsewhere.
 					globals.clear();
-					chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(timeInfo_.playBeatPos(), beatLength, globals, bFirst);
+					chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
 
 					//determine chunk length in beats and samples.
 					chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
@@ -335,7 +394,7 @@ namespace psy
 						processedSamples+=chunkSampleSize;
 					}
 					
-					beatLength-=chunkBeatSize;
+					beatsToWork-=chunkBeatSize;
 
 					//execute this batch of global events
 					for( std::vector<GlobalEvent*>::iterator globIt = globals.begin()

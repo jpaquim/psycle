@@ -354,8 +354,8 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 	//}
 	// linesperbeat
 	file->Read(temp);
-	song.setLinesPerBeat(temp);
-	linesPerBeat= song.linesPerBeat();
+	song.setTicksSpeed(temp);
+	linesPerBeat= song.ticksSpeed();
 
 	// current octave
 	file->Read(temp);
@@ -380,7 +380,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 		song.patternSequence()->setArmedTrack(i,tmp);
 	}
 	callbacks->timeInfo().setBpm(song.bpm());
-	callbacks->timeInfo().setLinesPerBeat(song.linesPerBeat());
+	callbacks->timeInfo().setTicksSpeed(song.ticksSpeed(),song.isTicks());
 	return fileread;
 }
 
@@ -452,7 +452,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 		else
 			indexStr = o.str();
 		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
-		pat->setBeatZoom(song.linesPerBeat());
+		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) // lines

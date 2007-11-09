@@ -138,7 +138,7 @@ namespace psy
 								{
 									// do event
 									Tick(i, TriggerDelay[i] );
-									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerRow())/256 );
+									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerTick())/256 );
 								}
 								else
 								{
@@ -151,7 +151,7 @@ namespace psy
 								{
 									// do event
 									Tick(i, TriggerDelay[i] );
-									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerRow())/256 );
+									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerTick())/256 );
 									int parameter = TriggerDelay[i].parameter() & 0x0f;
 									if (parameter < 9)
 									{
@@ -469,7 +469,7 @@ namespace psy
 				case SAMPLER_CMD_EXTENDED:
 					if ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
-						pVoice->_triggerNoteOff = static_cast<int>( (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f) );
+						pVoice->_triggerNoteOff = static_cast<int>( (timeInfo.samplesPerTick()/6)*(pEntry.parameter() & 0x0f) );
 					}
 					else if (((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry.parameter() & 0x0f) == 0 ))
 					{
@@ -551,7 +551,7 @@ namespace psy
 				//
 				if ( song()->_pInstrument[pVoice->_instrument]->_loop)
 				{
-					double const totalsamples = double(timeInfo.samplesPerRow()*song()->_pInstrument[pVoice->_instrument]->_lines);
+					double const totalsamples = double(timeInfo.samplesPerTick()*song()->_pInstrument[pVoice->_instrument]->_lines);
 					pVoice->_wave._speed = (std::int64_t)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}
 				else
@@ -620,7 +620,7 @@ namespace psy
 				pVoice->_envelope._sustain = (float)song()->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
 				if (( pEntry.command() == SAMPLER_CMD_EXTENDED) && ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
-					pVoice->_triggerNoteDelay = static_cast<int>( (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f) );
+					pVoice->_triggerNoteDelay = static_cast<int>( (timeInfo.samplesPerTick()/6)*(pEntry.parameter() & 0x0f) );
 					pVoice->_envelope._stage = ENV_OFF;
 				}
 				else
@@ -628,7 +628,7 @@ namespace psy
 					if (pEntry.command() == SAMPLER_CMD_RETRIG && (pEntry.parameter() & 0x0f) > 0)
 					{
 						pVoice->effretTicks=(pEntry.parameter() & 0x0f); // number of Ticks.
-						pVoice->effVal= static_cast<int>( (timeInfo.samplesPerRow()/(pVoice->effretTicks+1)) );
+						pVoice->effVal= static_cast<int>( (timeInfo.samplesPerTick()/(pVoice->effretTicks+1)) );
 						
 						int volmod = (pEntry.parameter() & 0xf0)>>4; // Volume modifier.
 						switch (volmod) 

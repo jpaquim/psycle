@@ -995,7 +995,19 @@ namespace psy { namespace core {
 
 	void Machine::AddEvent( double offset, int track, const PatternEvent & event )
 	{
-		workEvents.push_back( WorkEvent(offset,track,event));
+		if ( !workEvents.empty() )
+		{
+			if ( workEvents.back().beatOffset() > offset )
+			{
+				// New event needs to be sorted in the queue
+				std::deque<WorkEvent>::reverse_iterator it = workEvents.rbegin();
+				while ( it != workEvents.rend() && it->beatOffset() > offset) ++it;
+				if ( it == workEvents.rend() ) workEvents.push_front( WorkEvent(offset,track,event));
+				else workEvents.insert(it.base(),WorkEvent(offset,track,event));
+			}
+			else workEvents.push_back( WorkEvent(offset,track,event));
+		}
+		else workEvents.push_back( WorkEvent(offset,track,event));
 	}
 
 	WorkEvent::WorkEvent( )
@@ -1039,9 +1051,9 @@ namespace psy { namespace core {
 		//position [0.0-1.0] inside the current beat.
 		const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 		//position [0.0-linesperbeat] converted to "Tick()" lines
-		const double positionInLines = positionInBeat*timeInfo.linesPerBeat();
+		const double positionInLines = positionInBeat*timeInfo.ticksSpeed();
 		//position in samples of the next "Tick()" Line
-		int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow() );
+		int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerTick() );
 		assert(nextLineInSamples >= 0);
 		//Next event, initialized to "out of scope".
 		int nextevent = numsamples+1;
@@ -1065,7 +1077,7 @@ namespace psy { namespace core {
 			{
 				Tick( );
 				previousline = nextLineInSamples;
-				nextLineInSamples += static_cast<int>( timeInfo.samplesPerRow() ); 
+				nextLineInSamples += static_cast<int>( timeInfo.samplesPerTick() ); 
 			}
 
 			
@@ -1083,7 +1095,7 @@ namespace psy { namespace core {
 						WorkEvent & workEvent1 = *workEvents.begin();
 						//nextevent = (workEvent.beatOffset() - beatOffset) * Gloxxxxxxxxxxxxxxxbal::player().SamplesPerBeat();
 						nextevent = static_cast<int>( workEvent1.beatOffset() * timeInfo.samplesPerBeat() );
-				assert(nextevent >= processedsamples);
+						assert(nextevent >= processedsamples);
 					} else nextevent = numsamples+1;
 				} else nextevent = numsamples+1;
 			}

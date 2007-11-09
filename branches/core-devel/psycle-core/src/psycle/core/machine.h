@@ -24,10 +24,8 @@ namespace psy
 		const int SCOPE_BUF_SIZE  = 4096;
 		const int SCOPE_SPEC_SAMPLES = 256;
 
-		/// we don't really need a macro for just one little expression...
-		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
-		/// we don't really need a macro for just one little expression...
-		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
+		//cpu::cycles_type cost(cpu::cycles());
+		//cost = cpu::cycles() - cost;
 
 		class Machine; // forward declaration
 		class CoreSong; // forward declaration
@@ -190,7 +188,7 @@ namespace psy
 				virtual void Connected(Wire * wire);
 				virtual void Disconnected(Wire * wire);
 				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires_.size()); return wires_[index]; }
-				virtual inline int NumberOfWires() { return wires_.size(); }
+				virtual inline int NumberOfWires() { return static_cast<int>(wires_.size()); }
 				virtual inline int Arrangement() throw() { return arrangement_; }
 				virtual inline Machine * GetMachine() throw() { return &parent_; }
 				///\todo : should change arrangement/name be allowed? (Mutating Port?)

@@ -291,7 +291,7 @@ namespace psy {
 							{
 								case left_delay:
 								case right_delay:
-									value *= Real(2 * 3 * 4 * 5 * 7) / Player::Instance()->timeInfo().samplesPerRow();
+									value *= Real(2 * 3 * 4 * 5 * 7) / Player::Instance()->timeInfo().samplesPerTick();
 									break;
 								case left_feedback:
 								case right_feedback:
@@ -349,7 +349,7 @@ namespace psy {
 									break;
 								case modulation_sequencer_ticks:
 								if ( value < 1.0f) value = 0;
-								else value = common::scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Player::Instance()->timeInfo().samplesPerRow());
+								else value = common::scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Player::Instance()->timeInfo().samplesPerTick());
 									break;
 								case resonance:
 								case modulation_amplitude:

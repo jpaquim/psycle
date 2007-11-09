@@ -38,7 +38,6 @@ CoreSong::CoreSong(MachineCallbacks* callbacks)
 :
 	machinecallbacks(callbacks)
 {
-	tracks_= MAX_TRACKS; // FIXME: change to 'numOfTracks_'
 	_machineLock = false;
 	Invalided = false;
 	for(int i(0) ; i < MAX_MACHINES ; ++i) machine_[i] = 0;
@@ -66,7 +65,7 @@ void CoreSong::clear()
 	// General properties
 	{
 		setBpm(125.0f);
-		setLinesPerBeat(4);
+		setTicksSpeed(4);
 	}
 	// Clean up allocated machines.
 	DestroyAllMachines(true);
@@ -1139,11 +1138,6 @@ void CoreSong::patternTweakSlide(int machine, int command, int value, int patter
 	#endif
 }
 
-void CoreSong::setTracks( unsigned int trackCount )
-{
-	tracks_ = trackCount;
-	patternSequence()->setNumTracks(tracks_);
-}
 
 void CoreSong::setName( const std::string & name )
 {
@@ -1165,11 +1159,12 @@ void CoreSong::setBpm( float bpm )
 	if (bpm > 0 && bpm < 1000) bpm_ = bpm;
 }
 
-void CoreSong::setLinesPerBeat(const unsigned int value)
+void CoreSong::setTicksSpeed(const unsigned int value, const bool isticks)
 {
-	if ( value < 1 ) linesPerBeat_ = 1;
-	else if ( value > 31 ) linesPerBeat_ = 31;
-	else linesPerBeat_ = value;
+	if ( value < 1 ) ticks_ = 1;
+	else if ( value > 31 ) ticks_ = 31;
+	else ticks_ = value;
+	isTicks_=isticks;
 }
 
 

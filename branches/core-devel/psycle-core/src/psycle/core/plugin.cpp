@@ -44,10 +44,10 @@ void PluginFxCallback::MessBox(char const* ptxt,char const* caption,unsigned int
 	//MessageBox(hWnd,ptxt,caption,type); 
 }
 
-int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerRow()); }
+int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerTick()); }
 int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
 int PluginFxCallback::GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
-int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().linesPerBeat(); }
+int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().ticksSpeed(); }
 
 /**************************************************************************/
 // Plugin
@@ -524,7 +524,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 				catch(const std::exception &)
 				{
 				}
-				TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/ timeInfo.samplesPerRow();
+				TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/ timeInfo.samplesPerTick();
 				TWSSamples = 0;
 				TWSActive = true;
 			}

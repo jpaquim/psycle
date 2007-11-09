@@ -31,38 +31,40 @@ class PlayerTimeInfo {
 
 			/// the sequence position currently being played in beats
 			void setPlayBeatPos( double pos );
-			double playBeatPos() const;
+			double playBeatPos() const { return playBeatPos_; }
 
 			/// the current master sample position
 			void setSamplePos( int pos );
-			int samplePos() const;
+			int samplePos() const { return samplePos_; }
 
-			/// for old psycle machines 
-			void setLinesPerBeat( int lines );
-			int linesPerBeat() const;
+			/// for legacy sincronization and duration of some commands.
+			void setTicksSpeed( int ticks , bool isticks);
+			int ticksSpeed() const { return ticks_; }
+			bool isTicks() const { return isTicks_; }
 
 			/// the current beats per minute at which to play the song.
 			/// can be changed from the song itself using commands.
 			void setBpm( double bpm );
-			double bpm() const;
+			double bpm() const { return bpm_; }
 
 			void setSampleRate( int rate );
-			int sampleRate( ) const;
+			int sampleRate( ) const { return sampleRate_; }
 
-			float samplesPerBeat() const;
-			float samplesPerRow() const;
+			float samplesPerBeat() const { return samplesPerBeat_; }
+			float samplesPerTick() const { return samplesPerTick_; }
 			
 	private:
 			double playBeatPos_;
 			int samplePos_;
-			int lpb_;
+			int ticks_;
+			bool isTicks_;
 			double bpm_;
 			int sampleRate_;
 			float samplesPerBeat_;
-			float samplesPerRow_;
+			float samplesPerTick_;
 
 			void recalcSPB();
-			void recalcSPR();
+			void recalcSPT();
 };
 
 }}
