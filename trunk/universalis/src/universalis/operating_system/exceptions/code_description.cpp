@@ -18,7 +18,7 @@ std::string code_description(
 		::DWORD /* or ::HRESULT in some cases */ const code,
 		bool from_processor
 	#endif
-) throw() {
+) {
 	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		return standard_library::exceptions::code_description(code);
 	#else
