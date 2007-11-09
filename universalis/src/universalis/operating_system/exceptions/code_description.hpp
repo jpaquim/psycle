@@ -24,7 +24,7 @@ namespace detail {
 			::DWORD /* or ::HRESULT in some cases */ const /*= ::GetLastError()*/,
 			bool from_processor = false
 		#endif
-	) throw();
+	);
 }
 
 std::string inline code_description(
@@ -33,7 +33,7 @@ std::string inline code_description(
 	#else
 		::DWORD /* or ::HRESULT in some cases */ const code = ::GetLastError()
 	#endif
-) throw() { return detail::code_description(code); }
+) { return detail::code_description(code); }
 
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
