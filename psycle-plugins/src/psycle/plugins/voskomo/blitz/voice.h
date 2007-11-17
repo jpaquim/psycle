@@ -161,7 +161,7 @@ public:
 	void NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity);
 	int nextNote;
 	int nextSpd;
-	void RealNoteOn();
+	void RealNoteOn(bool arpClear);
 	void Retrig();
 	void NoteTie(int note);
 	void changeLfoDepth(int val);
