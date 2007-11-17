@@ -1710,7 +1710,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 17:sprintf(txt,"Triangle Mixer");return true;break;
 			case 18:sprintf(txt,"Sawtooth Mixer");return true;break;
 			case 19:sprintf(txt,"Square Mixer");return true;break;
-			case 20:sprintf(txt,"Tremelo");return true;break;
+			case 20:sprintf(txt,"Tremolo");return true;break;
 			case 21:sprintf(txt,"Sine PM 1");return true;break;
 			case 22:sprintf(txt,"Sine PM 2");return true;break;
 			case 23:sprintf(txt,"Sine PM 3");return true;break;

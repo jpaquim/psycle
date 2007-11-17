@@ -185,7 +185,7 @@ void CSynthTrack::NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity){
 	nextVol=velocity+0.00000001f;
 	ampEnvSustainLevel=(float)vpar->ampS*0.0039062f;
 	if(ampEnvStage==0){
-		RealNoteOn(); // THIS LINE DIFFERS FROM RETRIG()
+		RealNoteOn(true); // THIS LINE DIFFERS FROM RETRIG()
 		ampEnvStage=1;
 		ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
 		if (ampEnvCoef>minFade) ampEnvCoef=minFade;
@@ -214,7 +214,7 @@ void CSynthTrack::changeLfoSpeed(int val){
 	lfoViber.setSpeed(vpar->lfoSpeed);
 }
 
-void CSynthTrack::RealNoteOn(){
+void CSynthTrack::RealNoteOn(bool arpClear){
 	voiceVol=nextVol;
 	stopRetrig=false;
 	updateCount=1;
@@ -282,14 +282,16 @@ void CSynthTrack::RealNoteOn(){
 	arpLen=1;
 	arpIndex=-1;
 	curArp=0;
-	arpInput[1]=0;arpInput[2]=0;arpInput[3]=0;
-	arpList[0]=0;arpList[1]=0;arpList[2]=0;
-	arpList[3]=0;arpList[4]=0;arpList[5]=0;arpList[6]=0;arpList[7]=0;arpList[8]=0;arpList[9]=0;arpList[10]=0;arpList[11]=0;arpList[12]=0;
-	arpList[13]=0;arpList[14]=0;arpList[15]=0;arpList[16]=0;arpList[17]=0;arpList[18]=0;arpList[19]=0;arpList[20]=0;arpList[21]=0;
-	oscArpTranspose[0]=0;
-	oscArpTranspose[1]=0;
-	oscArpTranspose[2]=0;
-	oscArpTranspose[3]=0;
+	if (arpClear){
+		arpInput[1]=0;arpInput[2]=0;arpInput[3]=0;
+		arpList[0]=0;arpList[1]=0;arpList[2]=0;
+		arpList[3]=0;arpList[4]=0;arpList[5]=0;arpList[6]=0;arpList[7]=0;arpList[8]=0;arpList[9]=0;arpList[10]=0;arpList[11]=0;arpList[12]=0;
+		arpList[13]=0;arpList[14]=0;arpList[15]=0;arpList[16]=0;arpList[17]=0;arpList[18]=0;arpList[19]=0;arpList[20]=0;arpList[21]=0;
+		oscArpTranspose[0]=0;
+		oscArpTranspose[1]=0;
+		oscArpTranspose[2]=0;
+		oscArpTranspose[3]=0;
+	}
 	float spdcoef;
 
 	if(spd<65) spdcoef=(float)spd*0.015625f;
@@ -1403,7 +1405,7 @@ float CSynthTrack::GetEnvAmp(){
 
 		if(ampEnvValue<0.0f)
 		{
-			RealNoteOn();
+			RealNoteOn(false);
 			ampEnvValue=0.0f;
 			ampEnvStage=1;
 			ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
