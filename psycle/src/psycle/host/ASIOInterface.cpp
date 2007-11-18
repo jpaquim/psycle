@@ -412,7 +412,7 @@ namespace psycle
 			{
 				if ( &_drivEnum[i] == port.driver )
 				{
-					return counter+port.port->_idx;
+					return counter+(port.port->_idx/2);
 
 				}
 				counter+=_drivEnum[i]._portout.size();
@@ -454,6 +454,8 @@ namespace psycle
 			reg.CloseRootKey();
 			_configured = configured;
 			_selectedout = GetOutPortFromidx(driverID);
+			if ( !_selectedout.driver) _selectedout = GetOutPortFromidx(0);
+			if ( !_selectedout.driver) { configured=false; return; }
 			if(_ASIObufferSize < _selectedout.driver->minSamples) _ASIObufferSize = _selectedout.driver->prefSamples;
 			else if(_ASIObufferSize > _selectedout.driver->maxSamples) _ASIObufferSize = _selectedout.driver->prefSamples;
 			if ( saveatend ) WriteConfig();
