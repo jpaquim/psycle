@@ -26,6 +26,7 @@
 class Configuration;
 class QComboBox;
 class QPushButton;
+class QCheckBox;
 
 class SettingsDlg : public QDialog {
 Q_OBJECT
@@ -41,6 +42,11 @@ private:
 	QComboBox *knobBehaviourCombo_;
 	QPushButton *saveBtn_;
 	QPushButton *closeBtn_;
+
+	QCheckBox *homeEndChk;
+	QCheckBox *shiftChk;
+	QCheckBox *wrapChk;
+	QCheckBox *centerCursorChk;
 };
 
 #endif

@@ -78,6 +78,11 @@ class Configuration
 
 			KnobMode knobBehaviour() const { return knobBehaviour_; }
 			void setKnobBehaviour( KnobMode behaviourType );
+
+			void setFT2HomeEndBehaviour( bool state );
+			void setShiftKeyBehaviour( bool state );
+			void setWrapAround( bool state );
+			void setCenterCursor( bool state );
 		private:
 			bool ft2HomeEndBehaviour_;
 			bool shiftArrowForSelect_;
