@@ -31,6 +31,8 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QGroupBox>
+#include <QCheckBox>
+#include <QLabel>
 #include <iostream>
 
 SettingsDlg::SettingsDlg( QWidget *parent )
@@ -41,6 +43,8 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 
 	QLabel *knobComboLabel = new QLabel("Knob behaviour: ");
 
+
+	/*** Machine View ***/
 	knobBehaviourCombo_ = new QComboBox( this );
 	knobBehaviourCombo_->addItem("QDialMode");
 	knobBehaviourCombo_->addItem("QSynthAngularMode");
@@ -75,7 +79,38 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	buttonsGroup->setLayout( buttonsLay );
 
 
+	/*** Pattern View Settings ***/
+	QGroupBox *patternView = new QGroupBox( "Pattern View", this );
+	QGridLayout *patViewLay = new QGridLayout();
+	patternView->setLayout( patViewLay );
+	QLabel *homeEndLabel = new QLabel( "FT2 Home/End Behaviour" );
+	QLabel *shiftLabel = new QLabel( "Shift Keys For Select" );
+	QLabel *wrapLabel = new QLabel( "Wrap Around" );
+	QLabel *centerCursorLabel = new QLabel( "Center Cursor" );
+	
+	homeEndChk = new QCheckBox();
+	shiftChk = new QCheckBox();
+	wrapChk = new QCheckBox();
+	centerCursorChk = new QCheckBox();
+
+	connect( homeEndChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
+
+	connect( shiftChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
+	connect( wrapChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
+	connect( centerCursorChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
+
+	patViewLay->addWidget( homeEndLabel );
+	patViewLay->addWidget( homeEndChk );
+	patViewLay->addWidget( shiftLabel );
+	patViewLay->addWidget( shiftChk );
+	patViewLay->addWidget( wrapLabel );
+	patViewLay->addWidget( wrapChk );
+	patViewLay->addWidget( centerCursorLabel );
+	patViewLay->addWidget( centerCursorChk );
+
+
 	mainLay->addWidget( settingsGroup );
+	mainLay->addWidget( patternView );
 	mainLay->addWidget( buttonsGroup );
 
 	setLayout( mainLay );
@@ -89,6 +124,36 @@ void SettingsDlg::onSettingsChanged()
 void SettingsDlg::onSaveButtonClicked()
 {
 	Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
+
+ 	switch ( homeEndChk->checkState() ) {
+	case Qt::Unchecked:
+		Global::pConfig()->setFT2HomeEndBehaviour( false );
+	case Qt::Checked:
+		Global::pConfig()->setFT2HomeEndBehaviour( true );
+	}
+
+	switch ( shiftChk->checkState() ) {
+	case Qt::Unchecked:
+		Global::pConfig()->setShiftKeyBehaviour( false );
+	case Qt::Checked:
+		Global::pConfig()->setShiftKeyBehaviour( true );
+	}
+
+	switch ( wrapChk->checkState() ) {
+	case Qt::Unchecked:
+		Global::pConfig()->setWrapAround( false );
+	case Qt::Checked:
+		Global::pConfig()->setWrapAround( true );
+	}
+
+	switch ( centerCursorChk->checkState() ) {
+	case Qt::Unchecked:
+		Global::pConfig()->setCenterCursor( false );
+	case Qt::Checked:
+		Global::pConfig()->setCenterCursor( true );
+	}
+	     
 	saveBtn_->setEnabled( false );
 }
+
 

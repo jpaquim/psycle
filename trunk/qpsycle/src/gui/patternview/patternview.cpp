@@ -57,11 +57,6 @@ PatternView::PatternView( psy::core::Song *song )
 	createToolBar();
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( patDraw_ );
-
-	patDraw_->patternGrid()->setFt2HomeEndBehaviour( Global::configuration().ft2HomeEndBehaviour() );
-	patDraw_->patternGrid()->setShiftArrowForSelect( Global::configuration().shiftArrowForSelect() );
-	patDraw_->patternGrid()->setWrapAround( Global::configuration().wrapAround() );
-	patDraw_->patternGrid()->setCenterCursor( Global::configuration().centerCursor() );
 }
 
 PatternView::~PatternView()

@@ -132,7 +132,7 @@ QRectF PatternGrid::boundingRect() const
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-	return;
+//	return;
 	Q_UNUSED( option ); Q_UNUSED( widget );
 	painter->setFont( font_ ); 
 	if ( pattern() ) {
@@ -1580,28 +1580,28 @@ void PatternGrid::navBottom()
 }
 
 bool PatternGrid::ft2HomeEndBehaviour() {
-	return ft2HomeEndBehaviour_;
+	return Global::configuration().ft2HomeEndBehaviour();
 }
 void PatternGrid::setFt2HomeEndBehaviour( bool setit ) {
 	ft2HomeEndBehaviour_ = setit;
 }
 
 bool PatternGrid::shiftArrowForSelect() {
-	return shiftArrowForSelect_;
+	return Global::configuration().shiftArrowForSelect();
 }
 void PatternGrid::setShiftArrowForSelect( bool setit ) {
 	shiftArrowForSelect_ = setit;
 }
 
 bool PatternGrid::wrapAround() {
-	return wrapAround_;
+	return Global::configuration().wrapAround();
 }
 void PatternGrid::setWrapAround( bool setit ) {
 	wrapAround_ = setit;
 }
 
 bool PatternGrid::centerCursor() {
-	return centerCursor_;
+	return Global::configuration().centerCursor();
 }
 void PatternGrid::setCenterCursor( bool setit ) {
 	centerCursor_ = setit;

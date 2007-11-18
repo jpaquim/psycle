@@ -498,3 +498,24 @@ void Configuration::setKnobBehaviour( KnobMode behaviourType )
 	}
 
 }
+
+void Configuration::setFT2HomeEndBehaviour( bool state )
+{
+	ft2HomeEndBehaviour_ = state;
+}
+
+void Configuration::setShiftKeyBehaviour( bool state )
+{
+	shiftArrowForSelect_ = state;
+}
+
+void Configuration::setWrapAround( bool state )
+{
+	wrapAround_ = state;
+}
+
+void Configuration::setCenterCursor( bool state )
+{
+	centerCursor_ = state;
+}
+
