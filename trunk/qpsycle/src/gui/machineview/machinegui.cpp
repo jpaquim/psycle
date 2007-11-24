@@ -272,7 +272,9 @@ void MachineGui::mousePressEvent( QGraphicsSceneMouseEvent * event )
 
 void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-	if ( ( event->buttons() == Qt::LeftButton ) && ( event->modifiers() == Qt::ShiftModifier ) ) {
+	if ( ( event->buttons() == Qt::LeftButton ) && ( event->modifiers() == Qt::ShiftModifier ) 
+	   || (event->buttons() == Qt::RightButton )
+	   || (m_macView->isCreatingWire() ) ) {
 		emit startNewConnection(this, event);
 	} 
 	else { // Default Qt implementation can take care of moving the MacGui.
@@ -283,7 +285,7 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-	if ( ( event->button() == Qt::LeftButton ) && ( m_macView->isCreatingWire() ) ) {
+	if ( m_macView->isCreatingWire() ) {
 		emit closeNewConnection(this, event);
 	} 
 	else { // business as usual

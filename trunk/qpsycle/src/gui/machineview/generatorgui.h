@@ -48,10 +48,10 @@ public slots:
 	void showMacTwkDlg();
 
 protected:
-	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
 	void keyPressEvent( QKeyEvent * event );
 	void keyReleaseEvent( QKeyEvent * event );
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
+	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 
 

@@ -208,7 +208,7 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 {
 	Q_UNUSED( event );
 	MachineGui *dstMacGui = machineGuiAtPoint( tempLine_->line().p2() );
-	if ( dstMacGui ) {
+	if ( dstMacGui && ( dstMacGui != srcMacGui ) ) {
 		connectMachines( srcMacGui, dstMacGui );
 	}
 	tempLine_->setVisible(false);     // We want the tempLine to disappear, whatever happens.

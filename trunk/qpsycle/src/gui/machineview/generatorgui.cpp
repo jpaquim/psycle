@@ -55,26 +55,29 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
 	painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
 }
 
-void GeneratorGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
-	QString muteText;
-	m_mac->_mute ? muteText = "Unmute" : muteText = "Mute";
-	toggleMuteAct_->setText( muteText );
-
-	QString soloText;   
-	m_mac->song()->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
-	toggleSoloAct_->setText( soloText );
-
-	QMenu menu;
-	menu.addAction( renameMachineAct_ );
-	menu.addAction( cloneMachineAct_ );
-	menu.addAction( deleteMachineAct_ );
-	menu.addSeparator();
-	menu.addAction( showMacTwkDlgAct_ );
-	menu.addSeparator();
-	menu.addAction( toggleMuteAct_ );
-	menu.addAction( toggleSoloAct_ );
-	QAction *a = menu.exec( event->screenPos() );
+	if ( event->button() == Qt::RightButton && !m_macView->isCreatingWire() ) {
+		QString muteText;
+		m_mac->_mute ? muteText = "Unmute" : muteText = "Mute";
+		toggleMuteAct_->setText( muteText );
+	
+		QString soloText;   
+		m_mac->song()->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
+		toggleSoloAct_->setText( soloText );
+	
+		QMenu menu;
+		menu.addAction( renameMachineAct_ );
+		menu.addAction( cloneMachineAct_ );
+		menu.addAction( deleteMachineAct_ );
+		menu.addSeparator();
+		menu.addAction( showMacTwkDlgAct_ );
+		menu.addSeparator();
+		menu.addAction( toggleMuteAct_ );
+		menu.addAction( toggleSoloAct_ );
+		QAction *a = menu.exec( event->screenPos() );
+	}
+	MachineGui::mouseReleaseEvent( event );
 }
 
 void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )

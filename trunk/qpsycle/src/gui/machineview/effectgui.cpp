@@ -63,28 +63,6 @@ void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
 }
 
-void EffectGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-{
-	QString muteText;
-	mac()->_mute ? muteText = "Unmute" : muteText = "Mute";
-	toggleMuteAct_->setText( muteText );
-
-	QString bypassText;
-	mac()->_bypass ? bypassText = "Unbypass" : bypassText = "Bypass";
-	toggleBypassAct_->setText( bypassText );
-
-	QMenu menu;
-	menu.addAction( renameMachineAct_ );
-	menu.addAction("Clone");
-	menu.addAction( deleteMachineAct_ );
-	menu.addSeparator();
-	menu.addAction( showMacTwkDlgAct_ );
-	menu.addSeparator();
-	menu.addAction( toggleMuteAct_ );
-	menu.addAction( toggleBypassAct_ );
-	QAction *a = menu.exec( event->screenPos() );
-}
-
 void EffectGui::keyPressEvent( QKeyEvent * event )
 {
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
@@ -109,6 +87,32 @@ void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	}
 	MachineGui::mousePressEvent( event );
 }
+
+void EffectGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
+{
+	if ( event->button() == Qt::RightButton && !m_macView->isCreatingWire() ) {
+		QString muteText;
+		mac()->_mute ? muteText = "Unmute" : muteText = "Mute";
+		toggleMuteAct_->setText( muteText );
+
+		QString bypassText;
+		mac()->_bypass ? bypassText = "Unbypass" : bypassText = "Bypass";
+		toggleBypassAct_->setText( bypassText );
+
+		QMenu menu;
+		menu.addAction( renameMachineAct_ );
+		menu.addAction("Clone");
+		menu.addAction( deleteMachineAct_ );
+		menu.addSeparator();
+		menu.addAction( showMacTwkDlgAct_ );
+		menu.addSeparator();
+		menu.addAction( toggleMuteAct_ );
+		menu.addAction( toggleBypassAct_ );
+		QAction *a = menu.exec( event->screenPos() );
+	}
+	MachineGui::mouseReleaseEvent( event );
+}
+
 
 void EffectGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 {
