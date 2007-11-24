@@ -39,9 +39,9 @@ public slots:
 	void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
 
 protected:
-	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 	void keyPressEvent( QKeyEvent * event );
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
+	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 	MachineTweakDlg *m_macTwkDlg;
 private:
