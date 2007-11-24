@@ -207,7 +207,7 @@ void WireGui::adjust()
 
 	QLineF line(mapFromItem(source, source->boundingRect().width()/2, source->boundingRect().height()/2), 
 				mapFromItem(dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2)); 
-	qreal length = line.length();
+	qreal length = ( line.length() != 0? line.length() : .001 );
 	QPointF wireGuiOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
 
 	removeFromIndex();
@@ -241,13 +241,12 @@ void WireGui::adjust()
 		painter->drawLine(line);
 
 		// Draw the arrow.
-		// FIXME: arrow isn't quite in centre of line (observe two machines close to each other)
-		double angle = ::acos(line.dx() / line.length());
+		double angle = ( line.length() != 0 ? ::acos(line.dx() / line.length()) : 0 );
 		if (line.dy() >= 0)
 			angle = TwoPi - angle;
 
-		QPointF midPoint = sourcePoint + QPointF((destPoint.x()-sourcePoint.x())/2, 
-									(destPoint.y()-sourcePoint.y())/2);
+		QPointF midPoint = sourcePoint + QPointF((destPoint.x()-sourcePoint.x())/2 + cos(angle) * arrowSize/2, 
+									(destPoint.y()-sourcePoint.y())/2 - sin(angle) * arrowSize/2);
 		QPointF arrowP1 = midPoint + QPointF(sin(angle - Pi / 3) * arrowSize,
 												cos(angle - Pi / 3) * arrowSize);
 		QPointF arrowP2 = midPoint + QPointF(sin(angle - Pi + Pi / 3) * arrowSize,
@@ -262,8 +261,11 @@ QPainterPath WireGui::shape () const
 	QPainterPath path;
 	// Making a rectangle with width = arrowSize, height = wire length.
 	qreal halfPolygonWidth = arrowSize/2;
-	qreal sideLength = sqrt((halfPolygonWidth*halfPolygonWidth)/2);
-	QPointF foo( sideLength, sideLength );
+	QLineF line(sourcePoint, destPoint);
+	double angle = ( line.dx() != 0 ? ::atan( line.dy() / line.dx() ) : Pi/2 );
+
+	QPointF foo( halfPolygonWidth * cos( angle + Pi/2 ),
+	             halfPolygonWidth * sin( angle + Pi/2 ) );
 	QPointF p0 = sourcePoint - foo;
 	QPointF p1 = sourcePoint + foo;
 	QPointF p2 = destPoint + foo;
