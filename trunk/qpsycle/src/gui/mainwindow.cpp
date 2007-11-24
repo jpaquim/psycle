@@ -19,6 +19,7 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
+
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
 #include <psycle/core/singlepattern.h>
