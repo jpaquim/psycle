@@ -443,6 +443,8 @@ QSize KnobGroup::sizeHint() const
 Knob::Knob( int param ) 
 	: m_paramIndex( param )
 	, m_bMousePressed(false)
+	, m_fineTweak(false)
+	, m_ultraFineTweak(false)
 {
 	setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
 
@@ -486,11 +488,19 @@ void Knob::mousePressEvent( QMouseEvent *ev )
 	if ( ev->button() == Qt::LeftButton ) {
 		m_bMousePressed = true;
 		m_posMousePressed = ev->pos();
-		m_lastDragValue = value();
+		m_initialValue = m_lastDragValue = value();
 		m_accumulator = 0;
 		if ( m_knobMode == FixedLinearMode ) {
 			setCursor( Qt::BlankCursor );
 		}
+
+		if ( ev->modifiers() & Qt::ControlModifier ) {
+			m_fineTweak = true;
+		}
+		if ( ev->modifiers() & Qt::ShiftModifier ) {
+			m_ultraFineTweak = true;
+		}
+
 		emit sliderPressed();
 	}
 }
@@ -505,6 +515,22 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 	}
 
 	if (! m_bMousePressed) return;
+
+	if (( m_ultraFineTweak && !(ev->modifiers() & Qt::ShiftModifier )) || //shift-key has been left.
+		( !m_ultraFineTweak && (ev->modifiers() & Qt::ShiftModifier))) //shift-key has just been pressed
+	{
+		m_posMousePressed = ev->pos();
+		m_initialValue = value();
+		m_ultraFineTweak=!m_ultraFineTweak;
+	}
+	else if (( m_fineTweak && !(ev->modifiers() & Qt::ControlModifier )) || //control-key has been left.
+		( !m_fineTweak && (ev->modifiers() & Qt::ControlModifier))) //control-key has just been pressed
+	{
+		m_posMousePressed = ev->pos();
+		m_initialValue = value();
+		m_fineTweak=!m_fineTweak;
+	}
+
 	const QPoint& posMouseCurrent = ev->pos();
 	int xdelta = posMouseCurrent.x() - m_posMousePressed.x();
 	int ydelta = posMouseCurrent.y() - m_posMousePressed.y();
@@ -518,22 +544,22 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 // My guess is something to do with m_posMousePressed.y() or posMouseCurrent.y()
 // in double nv = ... line.
 	{
-		double freak; // <nmather> wtf does freak stand for?
+		double sensitivityCoef;
 		int minval = minimum();
 		int maxval = maximum();
 		int screenHeight = Global::Instance().screenHeight();
 
-		if ( /*ultrafinetweak*/false ) 
-			freak = 0.5f;
+		if ( m_ultraFineTweak ) 
+			sensitivityCoef = 0.5f;
 		else if ( maxval-minval < screenHeight/4 ) 
-			freak = (maxval-minval)/float(screenHeight/4);
+			sensitivityCoef = (maxval-minval)/float(screenHeight/4);
 		else if ( maxval-minval < screenHeight*2/3 ) 
-			freak = (maxval-minval)/float(screenHeight/3);
+			sensitivityCoef = (maxval-minval)/float(screenHeight/3);
 		else 
-			freak = (maxval-minval)/float(screenHeight*3/5);
-		//if (finetweak) freak/=5;
+			sensitivityCoef = (maxval-minval)/float(screenHeight*3/5);
+		if ( m_fineTweak ) sensitivityCoef /= 5;
 		
-		double nv = (double)(m_posMousePressed.y() - posMouseCurrent.y() )*freak + (double)m_lastDragValue;
+		double nv = (double)(m_posMousePressed.y() - posMouseCurrent.y() )*sensitivityCoef + (double)m_initialValue;
 		if (nv < minval) nv = minval;
 		if (nv > maxval) nv = maxval;
 		
@@ -545,6 +571,8 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 		double scaleFactor = ((double)range/900);
 		// <nmather> FIXME: range/900 is just arbitrary, based on trial and error.
 		// Come up with a better algorithm...
+		if ( m_fineTweak ) scaleFactor /= 5;
+		if ( m_ultraFineTweak ) scaleFactor /= 2;
 
 		m_accumulator += (double)ydelta*scaleFactor;
 
