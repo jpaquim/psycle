@@ -1,6 +1,6 @@
-/***************************************************************************
-*   Copyright (C) 2007 Psycledelics Community   *
-*   psycle.sourceforge.net   *
+/**************************************************************************
+*   Copyright (C) 2007 by Psycledelics Community                          *
+*   psycle.sourceforge.net                                                *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -25,15 +25,15 @@
 #include "machinegui.h"
 #include "machineview.h"
 
-#include <math.h>
+#include <cmath>
 
 #include <QPainter>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
 #include <QAction>
 
-	static const double Pi = 3.14159265358979323846264338327950288419717;
-	static double TwoPi = 2.0 * Pi;
+	const double Pi = 3.14159265358979323846264338327950288419717;
+	const double TwoPi = 2.0 * Pi;
 
 	WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *macView)
 		: arrowSize(20), machineView(macView)
@@ -49,7 +49,7 @@
 
 		connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
 		connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
-		// FIXME: the above lines seem not the best way of doing things.
+		///\todo FIXME: the above lines seem not the best way of doing things.
 		// (i.e. should delete signal go direct to the machineView? )
 		
 		connect( rewireDstAct_, SIGNAL( triggered() ), this, SLOT( onRewireDestActionTriggered() ) );
@@ -264,8 +264,10 @@ QPainterPath WireGui::shape () const
 	QLineF line(sourcePoint, destPoint);
 	double angle = ( line.dx() != 0 ? ::atan( line.dy() / line.dx() ) : Pi/2 );
 
-	QPointF foo( halfPolygonWidth * cos( angle + Pi/2 ),
-	             halfPolygonWidth * sin( angle + Pi/2 ) );
+	QPointF foo(
+		halfPolygonWidth * std::cos(angle + Pi/2),
+		halfPolygonWidth * std::sin(angle + Pi/2)
+	);
 	QPointF p0 = sourcePoint - foo;
 	QPointF p1 = sourcePoint + foo;
 	QPointF p2 = destPoint + foo;

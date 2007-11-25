@@ -1,6 +1,6 @@
-/***************************************************************************
-*   Copyright (C) 2007 by Psycledelics Community   *
-*   psycle.sourceforge.net   *
+/**************************************************************************
+*   Copyright (C) 2007 by Psycledelics Community                          *
+*   psycle.sourceforge.net                                                *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -117,7 +117,7 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 
 QRectF PatternGrid::boundingRect() const
 {
-//#error this is called by destructor, but our parent patDraw is already dead!
+	///\todo this is called by destructor, but our parent patDraw is already dead!
 	if( !patDraw_ )
 		return QRectF();
 
@@ -132,7 +132,6 @@ QRectF PatternGrid::boundingRect() const
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-//	return;
 	Q_UNUSED( option ); Q_UNUSED( widget );
 	painter->setFont( font_ ); 
 	if ( pattern() ) {
@@ -148,9 +147,7 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 	}
 }
 
-/**
-	* Draw the grid outline.
-	*/
+/// Draw the grid outline.
 void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  ) 
 {
 	psy::core::TimeSignature signature;
