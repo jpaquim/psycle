@@ -91,6 +91,10 @@ private:
 	bool   m_bMousePressed;
 	QPoint m_posMousePressed;
 
+	bool m_fineTweak;
+	bool m_ultraFineTweak;
+	int m_initialValue;
+
 // Just for more precission on the movement
 	double m_lastDragValue;
 };

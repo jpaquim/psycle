@@ -105,7 +105,7 @@ void SequencerLine::addEntry( psy::core::SequenceEntry* entry )
 
 	entry->wasDeleted.connect(boost::bind(&SequencerLine::removeEntry,this,_1));
 	assert(scene());
-	scene()->addItem( item );
+//	scene()->addItem( item );
 	scene()->update();
 }
 
