@@ -239,11 +239,14 @@ void MainWindow::setupGui()
 	dock_->setWidget(patternBox_);
 	addDockWidget(Qt::LeftDockWidgetArea, dock_);
 	
-/*	dockL_ = new QDockWidget("Logging Console", this);
+#if 0
+	///\todo
+	dockL_ = new QDockWidget("Logging Console", this);
 	dockL_->setAllowedAreas(Qt::BottomDockWidgetArea);
 	dockL_->setWidget(logConsole_);
 	dockL_->setAttribute(Qt::WA_QuitOnClose, false);
-	addDockWidget(Qt::BottomDockWidgetArea, dockL_);*/
+	addDockWidget(Qt::BottomDockWidgetArea, dockL_);
+#endif
 	
 	views_ = new TabWidget();
 	views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
@@ -745,4 +748,3 @@ void MainWindow::showLogCons()
 {
 	dockL_->setVisible(!dockL_->isVisible());
 }
-

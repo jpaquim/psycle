@@ -1,6 +1,6 @@
-/***************************************************************************
-*   Copyright (C) 2007 by Psycledelics Community   *
-*   psycle.sourceforge.net   *
+/**************************************************************************
+*   Copyright (C) 2007 by Psycledelics Community                          *
+*   psycle.sourceforge.net                                                *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -125,7 +125,7 @@ void SettingsDlg::onSaveButtonClicked()
 {
 	Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
 
- 	switch ( homeEndChk->checkState() ) {
+	switch ( homeEndChk->checkState() ) {
 	case Qt::Unchecked:
 		Global::pConfig()->setFT2HomeEndBehaviour( false );
 	case Qt::Checked:
@@ -152,8 +152,6 @@ void SettingsDlg::onSaveButtonClicked()
 	case Qt::Checked:
 		Global::pConfig()->setCenterCursor( true );
 	}
-	     
+	
 	saveBtn_->setEnabled( false );
 }
-
-
