@@ -253,14 +253,15 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 		} else break;
 	}
 
+	///\todo can erase+remove be used for this?
 	std::vector<MachineGui*>::iterator it;
 	for ( it = machineGuis.begin(); it != machineGuis.end(); it++ ) {
 		if ( macGui == *it ) {
 			machineGuis.erase( it );
 			break;
 		}
-
 	}
+
 	scene()->removeItem( macGui );
 	delete macGui;
 
@@ -283,6 +284,7 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
 	psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
 
+	///\todo can erase+remove be used for this?
 	// Delete the connection in the GUI.
 	std::vector<WireGui*>::iterator it;
 	it = std::find( wireGui->sourceMacGui()->wireGuiList_.begin(),
@@ -735,7 +737,10 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 			psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
 
 			// Create machine, tell where to place the new machine--get from mouse.
-			psy::core::Machine *mac = macView_->song()->createMachine( pluginFinder_, key, event->scenePos().x(), event->scenePos().y() );
+			psy::core::Machine *mac = macView_->song()->createMachine(
+				pluginFinder_, key, event->scenePos().toPoint().x(), event->scenePos().toPoint().y()
+			);
+
 			if ( mac ) {
 				macView_->addNewMachineGui( mac );
 
