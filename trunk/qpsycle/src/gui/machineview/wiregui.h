@@ -25,9 +25,17 @@
 
 #include <QGraphicsItem>
 #include <QAction>
+#include <QColor>
 
 class MachineGui;
 class MachineView;
+class WireDlg;
+
+enum RewireType {
+	rewire_none,
+	rewire_dest,
+	rewire_src
+};
 
 class WireGui : public QObject, public QGraphicsItem
 {
@@ -54,6 +62,7 @@ signals:
 public slots:
 	void deleteConnectionRequest();
 	void onRewireDestActionTriggered();
+	void onVolumeChanged(float newval);
 
 protected:
 	QRectF boundingRect() const;
@@ -63,21 +72,26 @@ protected:
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
+	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 
-	private:
-		MachineView *machineView;
+private:
+	MachineView *machineView;
 
-		MachineGui *source, *dest;
+	MachineGui *source, *dest;
 
-		QPointF sourcePoint;
-		QPointF destPoint;
-		qreal arrowSize;
+	QPointF sourcePoint;
+	QPointF destPoint;
+	qreal arrowSize;
 
-		QAction *delConnAct_;
-		QAction *rewireDstAct_;
+	QAction *delConnAct_;
+	QAction *rewireDstAct_;
 
-		int state_;
-	};
+	QColor arrowColor;
 
-	#endif
+	WireDlg *wiredlg;
+
+	RewireType state_;
+};
+
+#endif
 

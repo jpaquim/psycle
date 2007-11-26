@@ -46,6 +46,7 @@ HEADERS += \
 	src/gui/machineview/machineview.h \
 	src/gui/machineview/newmachinedlg.h \
 	src/gui/machineview/wiregui.h \
+	src/gui/machineview/wiredlg.h \
 	src/gui/machineview/generatorgui.h \
 	src/gui/machineview/mastergui.h \
 	src/gui/machineview/effectgui.h \
@@ -81,6 +82,7 @@ SOURCES += \
 	src/gui/machineview/machineview.cpp \
 	src/gui/machineview/newmachinedlg.cpp \
 	src/gui/machineview/wiregui.cpp \
+	src/gui/machineview/wiredlg.cpp \
 	src/gui/machineview/generatorgui.cpp \
 	src/gui/machineview/mastergui.cpp \
 	src/gui/machineview/effectgui.cpp \
