@@ -78,9 +78,9 @@ namespace psy
 			ExtRiffChunkHeader   ExtRiff_header;      
 		protected:
 			/// current file I/O mode
-			ExtRiffFileMode      fmode;            
+			ExtRiffFileMode      fmode;
 			/// I/O stream to use
-			FILE             *file;             
+			FILE             *file;
 			DDCRET  Seek ( long offset );
 		public:
 			ExtRiffFile();
@@ -96,14 +96,14 @@ namespace psy
 			template<typename X>
 			DDCRET inline Write(X const & x) { return Write(&x, sizeof x); }
 
-			DDCRET Read ( void       *, unsigned int bytes);
-			DDCRET Write( void const *, unsigned int bytes);
-			DDCRET Expect(void const *, unsigned int bytes);
+			DDCRET Read ( void       *, unsigned int bytes); // Remember to fix endian if needed when you call this
+			DDCRET Write( void const *, unsigned int bytes); // Remember to fix endian if needed when you call this
+			DDCRET Expect(void const *, unsigned int bytes); // Remember to fix endian if needed when you call this
 
 			/// Added by [JAZ]
 			DDCRET Skip  (unsigned NumBytes);
 
-			DDCRET Backpatch(long FileOffset, const void *Data, unsigned NumBytes);
+		DDCRET Backpatch(long FileOffset, const void *Data, unsigned NumBytes); // Remember to fix endian if needed when you call this
 		};
 
 		class WaveFormat_ChunkData

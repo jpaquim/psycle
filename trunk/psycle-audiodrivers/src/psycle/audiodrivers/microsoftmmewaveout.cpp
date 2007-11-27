@@ -37,7 +37,7 @@ namespace psy
 			return AudioDriverInfo("mmewaveout","Microsoft MME WaveOut Driver","Microsoft legacy output driver",true);
 		}      
 
-		MsWaveOut::MsWaveOut()								
+		MsWaveOut::MsWaveOut()
 		{
 			_pCallback = 0;
 			hWaveOut = 0; // use this audio handle to detect if the driver is working
@@ -60,7 +60,7 @@ namespace psy
 			_callbackContext = context;
 			_pCallback = pCallback;
 			_initialized= true;
-		}				
+		}
 
 		bool MsWaveOut::Initialized( )
 		{
@@ -111,7 +111,7 @@ namespace psy
 			// and this is why allocateBlocks works the way it does
 			// 
 			HeapFree( GetProcessHeap(), 0, blockArray );
-		}				       
+		}
 
 		void MsWaveOut::writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size )
 		{
@@ -196,10 +196,8 @@ namespace psy
 			std::int16_t buf[1024 / 2];
 			int newCount = bufSize / 2;        
 			while ( _running ) {
-				float const * input(_pCallback(_callbackContext, newCount));              
-				for (int i = 0; i < bufSize; i++) {
-					buf[i] = *input++;
-				}       
+				float const * input(_pCallback(_callbackContext, newCount));
+				Quantize16(input,buf,newCount);
 				writeAudio(hWaveOut, (CHAR*) buf, sizeof(buf) );
 			}
 		}
@@ -215,7 +213,6 @@ namespace psy
 		{
 			if ( hWaveOut ) return true;   // do not start again
 			if(!_pCallback) return false;  // no player callback
-
 			// WAVEFORMATEX is defined in mmsystem.h
 			// this structure is used, to define the sampling rate, sampling resolution
 			// and the number of channles
@@ -238,7 +235,6 @@ namespace psy
 
 			// this will protect the monitor buffer counter variable 
 
-
 			if( waveOutOpen( &hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR)waveOutProc, 
 				(DWORD_PTR)&waveFreeBlockCount, 
 				CALLBACK_FUNCTION ) != MMSYSERR_NOERROR)
@@ -248,50 +244,37 @@ namespace psy
 			}
 
 			_running = true;
-
 			DWORD dwThreadId;
 			_hThread = CreateThread( NULL, 0, audioOutThread, this, 0, &dwThreadId );
-
 			return true;
 		}
 
 		bool MsWaveOut::stop()
 		{
 			if(!_running) return true;
-			TerminateThread( _hThread, 0 );
-			return true;
-		}
-
-		void MsWaveOut::quantize(float *pin, int *piout, int c)
-		{
-			do
+			_running=false;
+			///\todo: some threadlocking mechanism. For now adding these sleeps
+		#if defined _WIN32
+			Sleep(1000);
+		#else
+			sleep(1);
+		#endif
+			TerminateThread( _hThread, 0 ); // just in case
+			if(::waveOutReset(hWaveOut) != MMSYSERR_NOERROR)
 			{
-				int r = f2i( (pin[1]) );
-
-				if (r < SHORT_MIN)
-				{
-					r = SHORT_MIN;
-				}
-				else if (r > SHORT_MAX)
-				{
-					r = SHORT_MAX;
-				}
-
-				int l = f2i( (pin[0]) );
-
-				if (l < SHORT_MIN)
-				{
-					l = SHORT_MIN;
-				}
-				else if (l > SHORT_MAX)
-				{
-					l = SHORT_MAX;
-				}
-
-				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
-				pin += 2;
+				std::cerr << "waveOutReset() failed" << std::endl;
+				hWaveOut=0;
+				return false;
 			}
-			while(--c);
+
+			if(waveOutClose(hWaveOut) != MMSYSERR_NOERROR)
+			{
+				std::cerr << "waveOutClose() failed" << std::endl;
+				hWaveOut=0;
+				return false;
+			}
+			hWaveOut=0;
+			return true;
 		}
 	}
 }

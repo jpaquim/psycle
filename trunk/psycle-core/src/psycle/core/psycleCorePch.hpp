@@ -1,7 +1,10 @@
-#ifndef PYSCLECOREPCH_HPP
-#define PYSCLECOREPCH_HPP
+#ifndef PYSCLE__CORE__PCH__INCLUDED
+#define PYSCLE__CORE__PCH__INCLUDED
 
 #pragma once
+
+///\todo qmake is currently not configured to create/use pre-compiled headers
+#if 0 // #ifndef PSYCLE__CORE__NO_PCH
 
 #ifdef _WIN32
 #define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR 5
@@ -33,4 +36,5 @@
 
 #include "signalslib.h"
 
+#endif
 #endif

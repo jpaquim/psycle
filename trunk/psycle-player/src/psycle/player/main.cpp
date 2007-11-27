@@ -7,7 +7,11 @@
 
 int main(int argument_count, char * arguments[]) {
 	if(argument_count < 2) {
-		std::cerr << "psycle: player: usage: psycle-player <song file name>\n";
+		std::cerr << "psycle: player: usage: psycle-player [options] <song file name>" << std::endl;
+		std::cerr << "Options:" << std::endl;
+		std::cerr << "\t-od|--output-device drivername\tUse the specified output driver." << std::endl;
+		std::cerr << "\t-of|--output-file filename\tOutputs the audio to a file. .wav format." << std::endl;
+		std::cerr << "\t-if|--input-file\tOptional way to specify the input filename." << std::endl;
 		return 1;
 	}
 	
@@ -88,9 +92,13 @@ int main(int argument_count, char * arguments[]) {
 		player.start(0);
 		std::cout << "psycle: player: playing...\n";
 
-		std::cout << "psycle: player: (enter anything to stop)\n";
-		std::string s; std::cin >> s;
-		
+		std::cout << "psycle: player: (press Ctrl+C to end)\n";
+	
+		while (1)
+		{
+			printf("Beat: %.02f\n",player.timeInfo().playBeatPos());
+			sleep(1);
+		}
 		player.stop();
 		configuration.setDriverByName("silent");
 		player.setDriver(*configuration._pOutputDriver);

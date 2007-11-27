@@ -51,7 +51,7 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
 	painter->setPen( Qt::white );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
 	painter->drawEllipse( (int)boundingRect().width() - 15, 5, 10, 10 );
-	mac()->song()->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
+	dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
 	painter->drawEllipse( (int)boundingRect().width() - 30, 5, 10, 10 );
 }
 
@@ -63,7 +63,7 @@ void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		toggleMuteAct_->setText( muteText );
 	
 		QString soloText;   
-		m_mac->song()->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
+		dynamic_cast<psy::core::Song*>(m_mac->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 		toggleSoloAct_->setText( soloText );
 	
 		QMenu menu;

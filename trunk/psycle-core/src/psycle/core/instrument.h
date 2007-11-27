@@ -2,6 +2,9 @@
 ///\brief interface file for psy::core::Filter. based on Revision 2078
 #pragma once
 
+#include <cstdint>
+#include <string>
+
 namespace psy
 {
 	namespace core
@@ -26,7 +29,7 @@ namespace psy
 			///\name Loop stuff
 			///\{
 			bool _loop;
-			int _lines;
+		std::int32_t _lines;
 			///\}
 
 			///\verbatim
@@ -41,37 +44,37 @@ namespace psy
 			///\name Amplitude Envelope overview:
 			///\{
 			/// Attack Time [in Samples at 44.1Khz]
-			int ENV_AT;
+		std::int32_t ENV_AT;
 			/// Decay Time [in Samples at 44.1Khz]
-			int ENV_DT;
+		std::int32_t ENV_DT;
 			/// Sustain Level [in %]
-			int ENV_SL;
+		std::int32_t ENV_SL;
 			/// Release Time [in Samples at 44.1Khz]
-			int ENV_RT;
+		std::int32_t ENV_RT;
 			///\}
 			
 			///\name Filter 
 			///\{
 			/// Attack Time [in Samples at 44.1Khz]
-			int ENV_F_AT;
+		std::int32_t ENV_F_AT;
 			/// Decay Time [in Samples at 44.1Khz]
-			int ENV_F_DT;
+			std::int32_t ENV_F_DT;
 			/// Sustain Level [0..128]
-			int ENV_F_SL;
+			std::int32_t ENV_F_SL;
 			/// Release Time [in Samples at 44.1Khz]
-			int ENV_F_RT;
+			std::int32_t ENV_F_RT;
 
 			/// Cutoff Frequency [0-127]
-			int ENV_F_CO;
+			std::int32_t ENV_F_CO;
 			/// Resonance [0-127]
-			int ENV_F_RQ;
+			std::int32_t ENV_F_RQ;
 			/// EnvAmount [-128,128]
-			int ENV_F_EA;
+			std::int32_t ENV_F_EA;
 			/// Filter Type [0-4]
-			int ENV_F_TP;
+			std::int32_t ENV_F_TP;
 			///\}
 
-			int _pan;
+		std::int32_t _pan;
 			bool _RPAN;
 			bool _RCUT;
 			bool _RRES;
@@ -80,17 +83,17 @@ namespace psy
 
 			///\name wave stuff
 			///\{
-			unsigned int waveLength;
-			unsigned short waveVolume;
-			unsigned int waveLoopStart;
-			unsigned int waveLoopEnd;
-			int waveTune;
-			int waveFinetune;
+			std::uint32_t waveLength;
+			std::uint16_t waveVolume;
+			std::uint32_t waveLoopStart;
+			std::uint32_t waveLoopEnd;
+		std::int32_t waveTune;
+		std::int32_t waveFinetune;
 			bool waveLoopType;
 			bool waveStereo;
 			char waveName[32];
-			signed short *waveDataL;
-			signed short *waveDataR;
+		std::int16_t *waveDataL;
+		std::int16_t *waveDataR;
 
 			// xml copy paste methods
 			std::string toXml() const;

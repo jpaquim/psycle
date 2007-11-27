@@ -90,7 +90,7 @@ class Plugin : public Machine
 	public:
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
 	public:
-		Plugin(MachineCallbacks* callbacks, int index, CoreSong* song);
+		Plugin(MachineCallbacks* callbacks, Machine::id_type index, CoreSong* song);
 
 		virtual ~Plugin() throw();
 

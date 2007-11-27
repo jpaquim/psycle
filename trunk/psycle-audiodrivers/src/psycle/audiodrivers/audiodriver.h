@@ -85,7 +85,7 @@ namespace psy
 
 			///\name bit depth
 			///\{
-				public:																
+				public:
 					/// bit depth values 8 16 24 
 					int bitDepth() const { return bitDepth_; }
 					/// bit depth values 8 16 24 
@@ -102,7 +102,7 @@ namespace psy
 					/// channel mode 3 == stereo, 1 == mono left, 2 == mono right, 0 = mono both channels
 					void setChannelMode( int mode );
 				private:
-					int channelMode_;																
+					int channelMode_;
 			///\}
 
 			///\todo doc
@@ -166,7 +166,7 @@ namespace psy
 				static double frand();
 				static void Quantize16WithDither(float const *pin, std::int16_t *piout, int c);
 				static void Quantize16(float const *pin, std::int16_t *piout, int c);
-				static void Quantize16AndDeinterlace(float const *pin, std::int16_t *pileft, std::int16_t *piright, int c);
+				static void Quantize16AndDeinterlace(float const *pin, std::int16_t *pileft, int strideleft, std::int16_t *piright, int strideright, int c);
 				static void DeQuantize16AndDeinterlace(int const *pin, float *poutleft,float *poutright,int c);
 
 			///\name settings

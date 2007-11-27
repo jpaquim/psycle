@@ -1,6 +1,5 @@
-/***************************************************************************
-*   Copyright (C) 2007 Psycledelics Community
-*   psycle.sf.net
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -17,64 +16,66 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSY4FILTER_H
-#define PSY4FILTER_H
+#ifndef PSYCLE__CORE__PSY4FILTER__INCLUDED
+#define PSYCLE__CORE__PSY4FILTER__INCLUDED
+#pragma once
 
 #include "psy3filter.h"
+#include <fstream>
+#include <map>
+
+namespace psy { namespace core {
+
+class SinglePattern;
+class Machine;
 
 /**
 @author  Stefan Nattkemper
 */
+class Psy4Filter : public Psy3Filter
+{
+	///\name Singleton Pattern
+	///\{ 
+		protected:
+				Psy4Filter();
+		private:
+			Psy4Filter( Psy4Filter const & );
+			Psy4Filter& operator=(Psy4Filter const&);
+		public:
+				static Psy4Filter* Instance() {
+					// don`t use multithreaded
+					static Psy4Filter s;
+					return &s; 
+				}
+	///\}
 
-namespace psy {
-	namespace core {
-		class SinglePattern;
-		class Machine;
+	public:
+		/*override*/ int version() const { return 4; }
+		/*override*/ std::string filePostfix() const { return "psy"; }
+		/*override*/ bool testFormat(const std::string & fileName);
+		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		/*override*/ bool save( const std::string & fileName, const CoreSong & song );
 
-		class Psy4Filter : public Psy3Filter
-		{
-			///\name Singleton Pattern
-			///\{ 
-				protected:
-						Psy4Filter();
-				private:
-					Psy4Filter( Psy4Filter const & );
-					Psy4Filter& operator=(Psy4Filter const&);
-				public:
-						static Psy4Filter* Instance() {
-							// don`t use multithreaded
-							static Psy4Filter s;
-							return &s; 
-						}
-			///\}
+	protected:
+		/*override*/ int LoadSONGv0(RiffFile* file,CoreSong& song);
+		bool saveSONGv0(RiffFile* file,const CoreSong& song);
+		bool saveMACDv0(RiffFile* file,const CoreSong& song,int index);
+		bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
+		bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
 
-			public:
-				/*override*/ int version() const { return 4; }
-				/*override*/ std::string filePostfix() const { return "psy"; }
-				/*override*/ bool testFormat(const std::string & fileName);
-				/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-				/*override*/ bool save( const std::string & fileName, const CoreSong & song );
+	private:
+		std::fstream _stream;
 
-			protected:
-				/*override*/ int LoadSONGv0(RiffFile* file,CoreSong& song);
-				bool saveSONGv0(RiffFile* file,const CoreSong& song);
-				bool saveMACDv0(RiffFile* file,const CoreSong& song,int index);
-				bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
-				bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
+		PatternCategory* lastCategory;
+		SinglePattern* lastPattern;
+		SequenceLine* lastSeqLine;
+		Machine* lastMachine;
+		float lastPatternPos;
 
-			private:
-				std::fstream _stream;
+		std::map<int, SinglePattern*> patMap;
 
-				PatternCategory* lastCategory;
-				SinglePattern* lastPattern;
-				SequenceLine* lastSeqLine;
-				Machine* lastMachine;
-				float lastPatternPos;
+		CoreSong* song_;
+};
 
-				std::map<int, SinglePattern*> patMap;
-
-				CoreSong* song_;
-		};
-	}
-}
+}}
 #endif

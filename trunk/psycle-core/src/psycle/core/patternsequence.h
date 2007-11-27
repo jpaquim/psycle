@@ -108,7 +108,7 @@ namespace psy
 
 		private:
 
-			/// the sequence track , the sequence belongs to
+			/// the sequence timeline that the sequenceEntry belongs to
 			SequenceLine* line_;
 			/// the wrapped pattern
 			SinglePattern* pattern_;
@@ -204,11 +204,40 @@ namespace psy
 			void moveUpLine(SequenceLine* line);
 			boost::signal<void (SequenceLine*, SequenceLine*)> linesSwapped;
 
+			const int &numTracks() const { return numTracks_; }
+			void setNumTracks(int newtracks)
+			{
+				///\todo: might be necessary to initialize mutedTrack and armedTrack after this.
+				/// Also, trackArmedCount_ might need recalculation.
+				numTracks_ = newtracks; mutedTrack_.resize(numTracks_); armedTrack_.resize(numTracks_);
+			}
+
+			const int trackMuted(int track) const { assert(track<numTracks_); return mutedTrack_[track]; }
+			void setMutedTrack(int track,bool value) { assert(track<numTracks_); mutedTrack_[track]=value; }
+
+			const int trackArmed(int track) const { assert(track<numTracks_); return armedTrack_[track]; }
+			void setArmedTrack(int track,bool value)
+			{
+				assert(track<numTracks_);
+				if ( value != armedTrack_[track])
+				{
+					armedTrack_[track]=value;
+					trackArmedCount_+=(value==false)?-1:1;
+				}
+			}
+
 			std::string toXml() const;
 
 		private:
 
 			PatternData patternData_;
+
+			int numTracks_;
+			std::vector<bool> mutedTrack_;
+			/// The number of tracks Armed (enabled for record)
+			int trackArmedCount_;
+			/// Wether each of the tracks is armed (selected for recording data in)
+			std::vector<bool> armedTrack_;
 
 			GlobalMap globalEvents_;
 

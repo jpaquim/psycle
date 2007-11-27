@@ -39,14 +39,14 @@ namespace psy {
 					//BOOST_STATIC_ASSERT(sizeof(int) == 4);
 					{
 						char c[16];
-						riff.ReadChunk(c, 16); c[15] = 0;
+						riff.ReadArray(c, 16); c[15] = 0;
 						machine.SetEditName(c);
 					}
-					riff.Read(machine._inputMachines);
-					riff.Read(machine._outputMachines);
-					riff.Read(machine._inputConVol);
-					riff.Read(machine._connection);
-					riff.Read(machine._inputCon);
+					riff.ReadArray(machine._inputMachines,MAX_CONNECTIONS);
+					riff.ReadArray(machine._outputMachines,MAX_CONNECTIONS);
+					riff.ReadArray(machine._inputConVol,MAX_CONNECTIONS);
+					riff.ReadArray(machine._connection,MAX_CONNECTIONS);
+					riff.ReadArray(machine._inputCon,MAX_CONNECTIONS);
 					riff.Skip(96);  // ConnectionPoints, 12*8bytes
 					riff.Read(machine._connectedInputs);
 					riff.Read(machine._connectedOutputs);
@@ -56,21 +56,24 @@ namespace psy {
 					switch(type) {
 						case delay:
 							{
-								int parameters [2]; riff.ReadChunk(parameters, sizeof parameters);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 5);
+								const int nparams = 2;
+								std::int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
+								retweak(machine, type, parameters, nparams, 5);
 							}
 							break;
 						case flanger:
 							{
-							int parameters [2]; riff.ReadChunk(parameters, sizeof parameters);
-							retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 7);
+								const int nparams = 2;
+								std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+								retweak(machine, type, parameters, nparams, 7);
 							}
 							break;
 						case gainer:
 							riff.Skip(4);
 							{
-								int parameters [1]; riff.ReadChunk(parameters, sizeof parameters);
-								if(type == gainer) retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								const int nparams = 1;
+								std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+								/*if(type == gainer)*/ retweak(machine, type, parameters, nparams);
 							}
 							break;
 						default:
@@ -78,42 +81,48 @@ namespace psy {
 					}
 					switch(type) {
 						case distortion:
-							int parameters [4]; riff.ReadChunk(parameters, sizeof parameters);
-							retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+						{
+							const int nparams=4;
+							std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+							retweak(machine, type, parameters, nparams);
 							break;
+						}
 						default:
 							riff.Skip(16);
 					}
 					switch(type) {
 						case ring_modulator:
 							{
-								unsigned char parameters [4];
+								const int nparams=4;
+								std::uint8_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[1]);
 								riff.Skip(1);
 								riff.Read(parameters[2]);
 								riff.Read(parameters[3]);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								retweak(machine, type, parameters, nparams);
 							}
 							riff.Skip(40);
 							break;
 						case delay:
 							riff.Skip(5);
 							{
-								int parameters [4];
+								const int nparams=4;
+								std::int32_t parameters [nparams];
 								riff.Read(parameters[0]);
 								riff.Read(parameters[2]);
 								riff.Read(parameters[1]);
 								riff.Read(parameters[3]);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								retweak(machine, type, parameters, nparams);
 							}
 							riff.Skip(24);
 							break;
 						case flanger:
 							riff.Skip(4);
 							{
-								unsigned char parameters [1]; riff.ReadChunk(parameters, sizeof parameters);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters, 9);
+								const int nparams=1;
+								unsigned char parameters [nparams]; riff.ReadArray(parameters, nparams);
+								retweak(machine, type, parameters, nparams, 9);
 							}
 							{
 								int parameters [6];
@@ -132,10 +141,11 @@ namespace psy {
 						case filter_2_poles:
 							riff.Skip(21);
 							{
-								int parameters [6];
-								riff.ReadChunk(&parameters[1], sizeof parameters - sizeof *parameters);
+								const int nparams=6;
+								std::int32_t parameters [nparams];
+								riff.ReadArray(&parameters[1], nparams-1);
 								riff.Read(parameters[0]);
-								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								retweak(machine, type, parameters, nparams);
 							}
 							break;
 						default:
@@ -150,43 +160,35 @@ namespace psy {
 			}
 
 			void Converter::retweak(CoreSong & song) const {
-				///\todo this code is really needed to properly load the pattern data
-				#if 0
-				/// \todo must each twk repeat the machine number ?
-				// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
-				for(int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
+
+				// Get the first category (there's only one with imported psy's) and...
+				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->patternData()->begin();
+				// ... for all the patterns in this category...
+				for (std::vector<SinglePattern*>::iterator pit  = (*cit)->begin() ; pit != (*cit)->end(); pit++)
 				{
-					if(!song.IsPatternUsed(pattern)) continue;
-					PatternEntry * const lines(reinterpret_cast<PatternEntry*>(song.ppPatternData[pattern]));
-					for(int line = 0 ; line < song.patternLines[pattern] ; ++line)
-					{
-						PatternEntry * const events(lines + line * MAX_TRACKS);
-						for(int track(0); track < song.tracks() ; ++track)
+					// ... check all lines searching...
+					for ( std::map<double, PatternLine>::iterator lit = (*pit)->begin() ; lit != (*pit)->end() ; lit++ ) {
+						PatternLine & line = lit->second;
+						// ...tweaks to modify.
+						for ( std::map<int, PatternEvent>::iterator tit = line.tweaks().begin(); tit != line.tweaks().end() ; tit++  )
 						{
-							PatternEntry & event(events[track]);
-							if(event._note == psy::core::commands::tweak_effect)
-							{
-								event._mach += 0x40;
-								event._note = psy::core::commands::tweak;
-							}
-							if(event._note == psy::core::commands::tweak)
-							{
-								std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
+								// If this tweak is for a replaced machine, modify the values.
+								std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song.machine(tit->second.machine())));
 								if(i != machine_converted_from.end())
 								{
 									//Machine & machine(*i->first);
 									const int & type(*i->second);
-									int parameter(event._inst);
-									int value((event._cmd << 8) + event._parameter);
+									int parameter(tit->second.instrument());
+									int value((tit->second.command() << 8) + tit->second.parameter());
 									retweak(type, parameter, value);
-									event._inst = parameter;
-									event._cmd = value >> 8; event._parameter = 0xff & value;
+									tit->second.setInstrument(parameter);
+									tit->second.setCommand(value>>8);
+									tit->second.setParameter(value&0xff);
 								}
-							}
+
 						}
 					}
 				}
-				#endif
 			}
 
 			Converter::Plugin_Names::Plugin_Names()
@@ -248,6 +250,10 @@ namespace psy {
 				{
 					case gainer:
 						{
+							///\todo: This "if" had to be added to avoid a crash when pattern contains erroneous data
+							/// (which can happen, since the user can write any value in the pattern)
+							/// More checks should be added where having values out of range can cause bad behaviours.
+							if (parameter != 1) break;
 							enum Parameters { gain };
 							static const int parameters [] = { gain };
 							parameter = parameters[--parameter];
@@ -285,7 +291,7 @@ namespace psy {
 							{
 								case left_delay:
 								case right_delay:
-									value *= Real(2 * 3 * 4 * 5 * 7) / Player::Instance()->timeInfo().samplesPerRow();
+									value *= Real(2 * 3 * 4 * 5 * 7) / Player::Instance()->timeInfo().samplesPerTick();
 									break;
 								case left_feedback:
 								case right_feedback:
@@ -343,7 +349,7 @@ namespace psy {
 									break;
 								case modulation_sequencer_ticks:
 								if ( value < 1.0f) value = 0;
-								else value = common::scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Player::Instance()->timeInfo().samplesPerRow());
+								else value = common::scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Player::Instance()->timeInfo().samplesPerTick());
 									break;
 								case resonance:
 								case modulation_amplitude:

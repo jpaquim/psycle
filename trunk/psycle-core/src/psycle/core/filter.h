@@ -44,7 +44,7 @@ namespace psy
 			int _q;
 
 			Filter();
-			void Init();
+			void Init(int sampleRate);
 			void Update(void);
 			inline float Work(float x)
 			{
