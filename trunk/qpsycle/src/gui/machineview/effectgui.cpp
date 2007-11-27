@@ -116,8 +116,8 @@ void EffectGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		menu.addAction( toggleMuteAct_ );
 		menu.addAction( toggleBypassAct_ );
 		QAction *a = menu.exec( event->screenPos() );
-	}
-	MachineGui::mouseReleaseEvent( event );
+	} else
+		MachineGui::mouseReleaseEvent( event );
 }
 
 
