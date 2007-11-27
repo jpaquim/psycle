@@ -26,6 +26,8 @@
 
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
+#else if defined _WIN32
+	#include <winbase.h>
 #endif
 
 // win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
