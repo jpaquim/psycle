@@ -290,12 +290,13 @@ namespace psy
 										machine.AddEvent(beatOffset+ ((double)delaysamples)/timeInfo().samplesPerBeat(), line.sequenceTrack()*1024+track, entry);
 
 										rate+=variation;
-										if (rate < 16)	rate = 16;
+										if (rate < 16) rate = 16;
 										delay = (rate*static_cast<int>(timeInfo().samplesPerTick())) >> 8; // x/256
 										delaysamples+=delay;
 									}
 								}
-/*								else if (entry.command() == PatternCmd::ARPEGGIO)
+/*
+								else if (entry.command() == PatternCmd::ARPEGGIO)
 								{
 									// arpeggio
 									///\todo : Add Memory.

@@ -145,7 +145,7 @@ namespace psy {
 		
 		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
 		{
-//			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
+			//const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 		}
 		void DuplicatorMac::PreWork(int numSamples)
 		{
@@ -559,7 +559,7 @@ namespace psy {
 
 		void Mixer::FxSend(int numSamples )
 		{
-//			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
+			//const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 			for (int i=0; i<MAX_CONNECTIONS; i++)
 			{

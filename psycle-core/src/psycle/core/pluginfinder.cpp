@@ -196,7 +196,7 @@ void PluginFinder::scanLadspa() {
 			private:
 				PlayerTimeInfo ti;
 			public:
-				 PlayerTimeInfo& timeInfo()  { return ti; }
+				PlayerTimeInfo& timeInfo()  { return ti; }
 				bool autoStopMachines() const { return false; }
 		} dummycallbacks;
 
@@ -244,7 +244,7 @@ void PluginFinder::scanNatives() {
 			private:
 				PlayerTimeInfo ti;
 			public:
-				 PlayerTimeInfo& timeInfo()  { return ti; }
+				PlayerTimeInfo& timeInfo()  { return ti; }
 				bool autoStopMachines() const { return false; }
 		} dummycallbacks;
 
