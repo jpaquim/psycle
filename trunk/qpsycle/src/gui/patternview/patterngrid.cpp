@@ -65,7 +65,7 @@ template<class T> inline T str_hex(const std::string &  value) {
 PatternGrid::PatternGrid( PatternDraw *pDraw )
 	: patDraw_( pDraw )
 {
-	qWarning( "Create PatternGrid: 0x%x.\n", this);
+	qWarning( "Create PatternGrid: 0x%p.\n", this);
 
 	setFlag(ItemIsFocusable);
 
@@ -107,7 +107,7 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
 }
 
 PatternGrid::~PatternGrid() {
-	qWarning( "Delete PatternGrid: 0x%x.\n", this);
+	qWarning( "Delete PatternGrid: 0x%p.\n", this);
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
