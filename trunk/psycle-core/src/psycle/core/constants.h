@@ -24,7 +24,7 @@ namespace psy
 
 		/// Max number of instruments.
 		const int MAX_INSTRUMENTS = 256;
-		/// Instrument index of the wave preview. ( instrument.h(111):		Instrument::id_type const PREV_WAV_INS(255); )
+		/// Instrument index of the wave preview. ( instrument.h(111): Instrument::id_type const PREV_WAV_INS(255); )
 		//const int PREV_WAV_INS = 255; 
 
 

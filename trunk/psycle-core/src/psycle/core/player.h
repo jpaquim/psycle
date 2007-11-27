@@ -130,7 +130,7 @@ namespace psy
 			///\name time info
 			///\{
 				public:
-					 PlayerTimeInfo & timeInfo() { return timeInfo_; }
+					PlayerTimeInfo & timeInfo() { return timeInfo_; }
 				private:
 					PlayerTimeInfo timeInfo_;
 			///\}
@@ -218,7 +218,7 @@ namespace psy
 				dsp::Dither dither;
 
 				/// Contains the number of samples until a line change comes in.
-//				int _samplesRemaining;
+				//int _samplesRemaining;
 		};
 	}
 }
