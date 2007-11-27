@@ -76,8 +76,8 @@ void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		menu.addAction( toggleMuteAct_ );
 		menu.addAction( toggleSoloAct_ );
 		QAction *a = menu.exec( event->screenPos() );
-	}
-	MachineGui::mouseReleaseEvent( event );
+	} else
+		MachineGui::mouseReleaseEvent( event );
 }
 
 void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
