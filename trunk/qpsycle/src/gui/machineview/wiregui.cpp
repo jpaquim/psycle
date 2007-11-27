@@ -124,12 +124,12 @@ void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
 	if ( event->buttons() == Qt::LeftButton )
 	{
-		if ( ( event->modifiers() & Qt::ShiftModifier ) && state_ == rewire_dest ) {
+		if ( state_ == rewire_dest ) {
 			scene()->update( boundingRect() );
 			destPoint = event->lastScenePos();    
 			scene()->update( boundingRect() );
 		}
-		if ( ( event->modifiers() & Qt::ControlModifier ) && state_ == rewire_src ) {
+		if ( state_ == rewire_src ) {
 			scene()->update( boundingRect() );
 			sourcePoint = event->lastScenePos();    
 			scene()->update( boundingRect() );
@@ -141,18 +141,14 @@ void WireGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
 	if ( MachineGui* hitMacGui = machineView->machineGuiAtPoint( event->scenePos() ) ) 
 	{
-		if ( state_ == rewire_dest ) { // rewire dest
-			if ( hitMacGui->mac()->acceptsConnections() ) {
-				rewireDest( hitMacGui );
-			} else destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 ); 
-		} else if ( state_ == rewire_src ) { // rewire src
-			if ( hitMacGui->mac()->emitsConnections() ) {
-				rewireSource( hitMacGui );
-			} else sourcePoint = mapFromItem( source, source->boundingRect().width()/2, source->boundingRect().height()/2 ); 
-		}
-		state_ = rewire_none;
-	} else adjust();
-	
+		if ( state_ == rewire_dest && !rewireDest( hitMacGui ) )
+			destPoint = mapFromItem( dest, dest->boundingRect().width()/2, dest->boundingRect().height()/2 );
+		else if ( state_ == rewire_src && !rewireSource( hitMacGui ) )
+			sourcePoint = mapFromItem( source, source->boundingRect().width()/2, source->boundingRect().height()/2 ); 
+	}
+	state_ = rewire_none;
+	adjust();
+
 	scene()->update( scene()->itemsBoundingRect() );
 }
 
@@ -170,22 +166,35 @@ void WireGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 	wiredlg->activateWindow();
 }
 
-void WireGui::rewireDest( MachineGui *newDestGui )
+bool WireGui::rewireDest( MachineGui *newDestGui )
 {
-	// Update GUI connection.
+	if ( !newDestGui->mac()->acceptsConnections() )
+		return false;
+
 	MachineGui *oldDestGui = destMacGui();
 
-	///\todo this doesn't seem to work.
-	///\todo can erase+remove be used for this?
-	std::vector<WireGui*>::iterator it = oldDestGui->wireGuiList_.begin();
-	for ( ; it != oldDestGui->wireGuiList_.end(); it++ ) {
-		if ( *it == this ) {
-			oldDestGui->wireGuiList_.erase( it );
+	bool exists(false);
+	std::vector<WireGui*>::iterator it = newDestGui->wireGuiList_.begin();
+	for ( ; it != newDestGui->wireGuiList_.end(); ++it ) {
+		if (
+			(*it)->sourceMacGui() == this->sourceMacGui() || //duplicate
+			(*it)->destMacGui() == this->sourceMacGui() //feedback
+		) {
+			exists=true;
 			break;
 		}
 	}
+	if (exists) return false;
+
+	// Update GUI connection.
+	oldDestGui->wireGuiList_.erase (
+		std::remove( oldDestGui->wireGuiList_.begin(), oldDestGui->wireGuiList_.end(), this ),
+		oldDestGui->wireGuiList_.end()
+	);
+
 	dest = newDestGui; 
 	dest->addWireGui(this);
+
 	// Update song connection.
 	psy::core::Machine *srcMac = sourceMacGui()->mac();
 	psy::core::Machine *newDstMac = newDestGui->mac();
@@ -197,24 +206,38 @@ void WireGui::rewireDest( MachineGui *newDestGui )
 	if(wiredlg) {
 		wiredlg->wireChanged();
 	}
+	return true;
 }
 
-void WireGui::rewireSource( MachineGui *newSrcGui )
+bool WireGui::rewireSource( MachineGui *newSrcGui )
 {
-	// Update GUI connection.
+	if ( !newSrcGui->mac()->emitsConnections() )
+		return false;
+
 	MachineGui *oldSrcGui = sourceMacGui();
-		
-	///\todo this doesn't seem to work.
-	///\todo can erase+remove be used for this?
-	std::vector<WireGui*>::iterator it = oldSrcGui->wireGuiList_.begin();
-	for ( ; it != oldSrcGui->wireGuiList_.end(); it++ ) {
-		if ( *it == this ) {
-			oldSrcGui->wireGuiList_.erase( it );
+
+	bool exists(false);
+	std::vector<WireGui*>::iterator it = newSrcGui->wireGuiList_.begin();
+	for ( ; it != newSrcGui->wireGuiList_.end(); ++it ) {
+		if (
+			(*it)->destMacGui() == this->destMacGui() || //duplicate
+			(*it)->sourceMacGui() == this->destMacGui() //feedback
+		) {
+			exists=true;
 			break;
 		}
 	}
+	if (exists) return false;
+
+	// Update GUI connection.
+	oldSrcGui->wireGuiList_.erase (
+		std::remove( oldSrcGui->wireGuiList_.begin(), oldSrcGui->wireGuiList_.end(), this ),
+		oldSrcGui->wireGuiList_.end()
+	);
+		
 	source = newSrcGui; 
 	source->addWireGui(this);
+
 	// Update song connection.
 	psy::core::Machine *newSrcMac = newSrcGui->mac();
 	psy::core::Machine *dstMac = destMacGui()->mac();
@@ -226,6 +249,7 @@ void WireGui::rewireSource( MachineGui *newSrcGui )
 	if(wiredlg) {
 		wiredlg->wireChanged();
 	}
+	return true;
 }
 
 void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)

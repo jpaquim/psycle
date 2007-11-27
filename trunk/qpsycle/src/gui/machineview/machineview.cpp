@@ -253,21 +253,15 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 		} else break;
 	}
 
-	///\todo can erase+remove be used for this?
-	std::vector<MachineGui*>::iterator it;
-	for ( it = machineGuis.begin(); it != machineGuis.end(); it++ ) {
-		if ( macGui == *it ) {
-			machineGuis.erase( it );
-			break;
-		}
-	}
-
+	machineGuis.erase (
+		std::remove(machineGuis.begin(), machineGuis.end(), macGui),
+		machineGuis.end()
+	);
 	scene()->removeItem( macGui );
 	delete macGui;
 
 	// Remove machine and connections from the Song. 
 	song()->DestroyMachine( id );
-
 
 	emit machineDeleted( id ); 
 }
@@ -284,19 +278,24 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
 	psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
 
-	///\todo can erase+remove be used for this?
 	// Delete the connection in the GUI.
-	std::vector<WireGui*>::iterator it;
-	it = std::find( wireGui->sourceMacGui()->wireGuiList_.begin(),
-			wireGui->sourceMacGui()->wireGuiList_.end(), wireGui );
-	if ( it != wireGui->sourceMacGui()->wireGuiList_.end() ) {
-		wireGui->sourceMacGui()->wireGuiList_.erase(it);
-		}  
-	it = std::find( wireGui->destMacGui()->wireGuiList_.begin(),
-			wireGui->destMacGui()->wireGuiList_.end(), wireGui );
-	if ( it != wireGui->destMacGui()->wireGuiList_.end() ) {
-		wireGui->destMacGui()->wireGuiList_.erase(it);
-		}  
+	wireGui->sourceMacGui()->wireGuiList_.erase (
+		std::remove (
+			wireGui->sourceMacGui()->wireGuiList_.begin(),
+			wireGui->sourceMacGui()->wireGuiList_.end(),
+			wireGui
+		),
+		wireGui->sourceMacGui()->wireGuiList_.end()
+	);
+	wireGui->destMacGui()->wireGuiList_.erase (
+		std::remove (
+			wireGui->destMacGui()->wireGuiList_.begin(),
+			wireGui->destMacGui()->wireGuiList_.end(),
+			wireGui
+		),
+		wireGui->destMacGui()->wireGuiList_.end()
+	);
+
 	scene()->removeItem( wireGui );
 	delete wireGui;
 
