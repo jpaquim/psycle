@@ -18,10 +18,26 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include "audiodriver.h"
+
+#ifdef __BIG_ENDIAN__
+#include <cmath>
+#endif
+
 namespace psy
 {
 	namespace core
 	{
+
+    static double const magic = (1.5 * (1 << 26) * (1 << 26));
+    static inline int d2i(double d) {
+#ifdef __BIG_ENDIAN__
+      return lrintf(d);
+#else
+      double res = d + magic;
+      return *((int *)&res);
+#endif
+
+    }
 
 		AudioDriverInfo::AudioDriverInfo( const std::string& name, const std::string& header, const std::string& description, bool show ) 
 		: name_( name ), header_( header ), description_( description ), show_( show )
@@ -98,11 +114,9 @@ namespace psy
 		}
 		void AudioDriver::Quantize16WithDither(float const *pin, std::int16_t *piout, int c)
 		{
-			double const d2i = (1.5 * (1 << 26) * (1 << 26));
 			do
 			{
-				double res = ((double)pin[1] + frand()) + d2i;
-				int r = *(int *)&res;
+        int r = d2i(pin[1] + frand());
 				if (r < -32768)
 				{
 					r = -32768;
@@ -111,8 +125,7 @@ namespace psy
 				{
 					r = 32767;
 				}
-				res = ((double)pin[0] + frand()) + d2i;
-				int l = *(int *)&res;
+				int l = d2i(pin[0] + frand());
 				if (l < -32768)
 				{
 					l = -32768;
@@ -132,11 +145,9 @@ namespace psy
 		
 		void AudioDriver::Quantize16(float const *pin, std::int16_t *piout, int c)
 		{
-			double const d2i = (1.5 * (1 << 26) * (1 << 26));
 			do
 			{
-				double res = ((double)pin[1]) + d2i;
-				int r = *(int *)&res;
+			  int r = d2i(pin[1]);
 				if (r < -32768)
 				{
 					r = -32768;
@@ -145,8 +156,7 @@ namespace psy
 				{
 					r = 32767;
 				}
-				res = ((double)pin[0]) + d2i;
-				int l = *(int *)&res;
+				int l = d2i((double)pin[0]);
 				if (l < -32768)
 				{
 					l = -32768;
@@ -164,13 +174,11 @@ namespace psy
 			while(--c);
 		}
 
-		void AudioDriver::Quantize16AndDeinterlace(float const *pin, std::int16_t *pileft, std::int16_t *piright, int c)
+		void AudioDriver::Quantize16AndDeinterlace(float const *pin, std::int16_t *pileft, int strideleft, std::int16_t *piright, int strideright, int c)
 		{
-			double const d2i = (1.5 * (1 << 26) * (1 << 26));
 			do
 			{
-				double res = ((double)pin[1]) + d2i;
-				int r = *(int *)&res;
+				int r = d2i(pin[1]);
 				if (r < -32768)
 				{
 					r = -32768;
@@ -180,9 +188,8 @@ namespace psy
 					r = 32767;
 				}
 				*piright = static_cast<std::int16_t>(r);
-				piright++;
-				res = ((double)pin[0]) + d2i;
-				int l = *(int*)&res;
+				piright += strideright;
+				int l = d2i(pin[0]);
 				if (l < -32768)
 				{
 					l = -32768;
@@ -192,7 +199,8 @@ namespace psy
 					l = 32767;
 				}
 				*pileft = static_cast<std::int16_t>(l);
-				pileft++;
+				pileft += strideleft;
+				pin += 2;
 			}
 			while(--c);
 		}

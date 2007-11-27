@@ -90,7 +90,7 @@ void MachineGui::initActions()
 	m_mac->_mute ? muteText = "Unmute" : muteText = "Mute";
 	toggleMuteAct_ = new QAction( muteText, this );
 	QString soloText;   
-	m_mac->song()->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
+	dynamic_cast<psy::core::Song*>(m_mac->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 	toggleSoloAct_ = new QAction( soloText, this );
 }
 
@@ -177,8 +177,8 @@ void MachineGui::onToggleMuteActionTriggered()
 	{
 		mac()->_volumeCounter = 0.0f;
 		mac()->_volumeDisplay = 0;
-		if ( mac()->song()->machineSoloed == mac()->id() ) {
-			mac()->song()->machineSoloed = -1;
+		if ( dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed == mac()->id() ) {
+			dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed = -1;
 		}
 	}
 
@@ -190,9 +190,9 @@ void MachineGui::onToggleMuteActionTriggered()
 	*/
 void MachineGui::onToggleSoloActionTriggered() 
 {
-	if (mac()->song()->machineSoloed == mac()->id() ) // Unsolo it.
+	if (dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed == mac()->id() ) // Unsolo it.
 	{
-		mac()->song()->machineSoloed = -1;
+		dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed = -1;
 		for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
 			if ( mac()->song()->machine(i) ) {
 				if (( mac()->song()->machine(i)->mode() == psy::core::MACHMODE_GENERATOR )) {
@@ -213,7 +213,7 @@ void MachineGui::onToggleSoloActionTriggered()
 			}
 		}
 		mac()->_mute = false;
-		mac()->song()->machineSoloed = mac()->id();
+		dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed = mac()->id();
 	}
 
 	scene()->update(); // FIXME: possibly more efficient to update individual machines in the loop above.

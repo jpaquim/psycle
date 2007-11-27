@@ -120,13 +120,21 @@ namespace psy {
 		rate = 44100; // stream rate
 		format = SND_PCM_FORMAT_S16; // sample format
 		channels = 2; // count of channels
-		buffer_time = 80000; // ring buffer length in us
-		period_time = 20000; // period time in us
+		buffer_time = 100000; // ring buffer length in us (for colinux->windows, 100000 seems to work fine)
+		period_time = 40000; // period time in us (for colinux->windows, 40000 seems to work fine)
 		
 		buffer_size=0;
 		period_size=0;
 		output = NULL;
 		//    AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
+		
+		AudioDriverSettings settings(this->settings());
+		{
+			char const * const env(std::getenv("ALSA_CARD"));
+			if(env) settings.setDeviceName(env);
+			else settings.setDeviceName("default");
+		}
+		this->setSettings(settings);
 	}
 	
 	int AlsaOut::audioStop( )
@@ -245,16 +253,9 @@ namespace psy {
 		
 		float const * input(_pCallback(_callbackContext, count));
 		
-		#if 0 ///\todo
-			Quantize16AndDeinterlace(input,samples[0],samples[1]);
-		#else
-			while (count-- > 0) {
-				*samples[0] = static_cast<short int>( *input++ );
-				samples[0] += steps[0];
-				*samples[1] = static_cast<short int>( *input++ );
-				samples[1] += steps[1];
-			}
-		#endif
+    Quantize16AndDeinterlace(input,samples[0],steps[0],samples[1],steps[1],count);
+    samples[0]+=steps[0]*count;
+    samples[1]+=steps[1]*count;
 	}
 	
 	int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params,
@@ -302,7 +303,7 @@ namespace psy {
 		}
 		// set the stream rate
 		std::cout << "step2.5" << std::endl;
-		rrate = rate;																																
+		rrate = rate;
 		err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
 		if (err < 0) {
 				printf("Rate %iHz not available for playback: %s\n", rate, snd_strerror(err));
@@ -485,3 +486,4 @@ namespace psy {
 	}
 }
 #endif // defined PSYCLE__ALSA_AVAILABLE
+

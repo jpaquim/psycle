@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psy::core::Sampler. based on rev. 2708
+///\brief implementation file for psy::core::Sampler. based on psyclemfc revision 5903
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "sampler.h"
@@ -12,6 +12,8 @@ namespace psy
 	namespace core
 	{
 		std::string Sampler::_psName = "Sampler";
+		InstPreview Sampler::wavprev;
+		InstPreview Sampler::waved;
 
 		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 		:
@@ -28,7 +30,7 @@ namespace psy
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init();
+				_voices[i]._filter.Init(44100);
 				_voices[i]._cutoff = 0;
 				_voices[i]._sampleCounter = 0;
 				_voices[i]._triggerNoteOff = 0;
@@ -54,7 +56,7 @@ namespace psy
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init();
+				_voices[i]._filter.Init(44100);
 				_voices[i]._triggerNoteOff = 0;
 				_voices[i]._triggerNoteDelay = 0;
 			}
@@ -62,9 +64,9 @@ namespace psy
 
 		int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 		{
-		assert(numSamples >= 0);
+			assert(numSamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-			//PSYCLE__CPU_COST__INIT(cost);
+			//cpu::cycles_type cost = cpu::cycles();
 			if (!_mute)
 			{
 				Standby(false);
@@ -136,7 +138,7 @@ namespace psy
 								{
 									// do event
 									Tick(i, TriggerDelay[i] );
-									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerRow())/256 );
+									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerTick())/256 );
 								}
 								else
 								{
@@ -149,7 +151,7 @@ namespace psy
 								{
 									// do event
 									Tick(i, TriggerDelay[i] );
-									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerRow())/256 );
+									TriggerDelayCounter[i] = static_cast<int>( (RetriggerRate[i]*timeInfo.samplesPerTick())/256 );
 									int parameter = TriggerDelay[i].parameter() & 0x0f;
 									if (parameter < 9)
 									{
@@ -176,8 +178,7 @@ namespace psy
 			}
 			else Standby(true);
 
-			//PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
-			//work_cpu_cost(work_cpu_cost() + cost);
+			//_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 			return numSamples;
 		}
@@ -193,7 +194,7 @@ namespace psy
 
 		void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 		{
-		assert(numsamples >= 0);
+			assert(numsamples >= 0);
 			const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 			dsp::PRESAMPLERFN pResamplerWork;
 			Voice* pVoice = &_voices[voice];
@@ -217,7 +218,7 @@ namespace psy
 					pVoice->_envelope._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/timeInfo.sampleRate());
 					pVoice->_filterEnv._step = (1.0f/song()->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/timeInfo.sampleRate());
 					pVoice->effretTicks--;
-					pVoice->_wave._pos.QuadPart = 0;
+					pVoice->_wave._pos = 0;
 					if ( pVoice->effretMode == 1 )
 					{
 						pVoice->_wave._lVolDest += pVoice->effretVol;
@@ -255,14 +256,16 @@ namespace psy
 
 				if (pVoice->_envelope._stage != ENV_OFF)
 				{
-					left_output = pResamplerWork(
-						pVoice->_wave._pL + pVoice->_wave._pos.HighPart,
-						pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+					left_output = pResamplerWork(pVoice->_wave._pL + (pVoice->_wave._pos >> 32),
+										pVoice->_wave._pos>>32,
+										pVoice->_wave._pos & 0xFFFFFFFF,
+										pVoice->_wave._length);
 					if (pVoice->_wave._stereo)
 					{
-						right_output = pResamplerWork(
-							pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
-							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+						right_output = pResamplerWork(pVoice->_wave._pR + (pVoice->_wave._pos >> 32),
+											pVoice->_wave._pos >> 32,
+											pVoice->_wave._pos & 0xFFFFFFFF,
+											pVoice->_wave._length);
 					}
 
 					// Filter section
@@ -270,7 +273,7 @@ namespace psy
 					if (pVoice->_filter._type < dsp::F_NONE)
 					{
 						TickFilterEnvelope( voice );
-						pVoice->_filter._cutoff = pVoice->_cutoff + dsp::F2I(pVoice->_filterEnv._value*pVoice->_coModify);
+						pVoice->_filter._cutoff = pVoice->_cutoff + common::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
 							pVoice->_filter._cutoff = 0;
@@ -316,15 +319,15 @@ namespace psy
 
 
 
-					pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
+					pVoice->_wave._pos += pVoice->_wave._speed;
 
 					// Loop handler
 					//
-					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
+					if ((pVoice->_wave._loop) && ((pVoice->_wave._pos>>32) >= pVoice->_wave._loopEnd))
 					{
-						pVoice->_wave._pos.HighPart = pVoice->_wave._loopStart + (pVoice->_wave._pos.HighPart - pVoice->_wave._loopEnd);
+						pVoice->_wave._pos -= (std::int64_t)(pVoice->_wave._loopEnd - pVoice->_wave._loopStart) << 32;
 					}
-					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
+					if ((pVoice->_wave._pos>>32) >= pVoice->_wave._length)
 					{
 						pVoice->_envelope._stage = ENV_OFF;
 					}
@@ -348,12 +351,11 @@ namespace psy
 			}
 		}
 
-		void Sampler::Tick( int channel, const PatternEvent & pData )
+		void Sampler::Tick( int channel, const PatternEvent & event )
 		{
-		std::cout << pData.note() << std::endl;
-			if ( pData.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
+			if ( event.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
 			{
-				if ( pData.command() == 0 || pData.note() != 255) return; // Return in everything but commands!
+				if ( event.command() == 0 || event.note() != 255) return; // Return in everything but commands!
 			}
 			if ( _mute ) return; // Avoid new note entering when muted.
 
@@ -361,7 +363,7 @@ namespace psy
 			int useVoice = -1;
 
 
-			PatternEvent data = pData;
+			PatternEvent data = event;
 
 			if (data.instrument() >= 255)
 			{
@@ -373,7 +375,7 @@ namespace psy
 			}
 			else
 			{
-				data.setInstrument( lastInstrument[channel] = pData.instrument() );
+				data.setInstrument( lastInstrument[channel] = event.instrument() );
 			}
 
 
@@ -467,7 +469,7 @@ namespace psy
 				case SAMPLER_CMD_EXTENDED:
 					if ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
-						pVoice->_triggerNoteOff = static_cast<int>( (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f) );
+						pVoice->_triggerNoteOff = static_cast<int>( (timeInfo.samplesPerTick()/6)*(pEntry.parameter() & 0x0f) );
 					}
 					else if (((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry.parameter() & 0x0f) == 0 ))
 					{
@@ -495,7 +497,7 @@ namespace psy
 				
 				// Init filter synthesizer
 				//
-				pVoice->_filter.Init();
+				pVoice->_filter.Init(timeInfo.sampleRate());
 
 				if (song()->_pInstrument[pVoice->_instrument]->_RCUT)
 				{
@@ -549,13 +551,13 @@ namespace psy
 				//
 				if ( song()->_pInstrument[pVoice->_instrument]->_loop)
 				{
-					double const totalsamples = double(timeInfo.samplesPerRow()*song()->_pInstrument[pVoice->_instrument]->_lines);
-					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
+					double const totalsamples = double(timeInfo.samplesPerTick()*song()->_pInstrument[pVoice->_instrument]->_lines);
+					pVoice->_wave._speed = (std::int64_t)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}
 				else
 				{
 					float const finetune = CValueMapper::Map_255_1(song()->_pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry.note()+song()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
+					pVoice->_wave._speed = (std::int64_t)(pow(2.0f, ((pEntry.note()+song()->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
 				}
 				
 
@@ -564,11 +566,11 @@ namespace psy
 				if (pEntry.command() == SAMPLER_CMD_OFFSET)
 				{
 					w_offset = pEntry.parameter()*pVoice->_wave._length;
-					pVoice->_wave._pos.QuadPart = (w_offset << 24);
+					pVoice->_wave._pos = w_offset << 24;
 				}
 				else
 				{
-					pVoice->_wave._pos.QuadPart = 0;
+					pVoice->_wave._pos = 0;
 				}
 
 				// Calculating volume coef ---------------------------------------
@@ -618,7 +620,7 @@ namespace psy
 				pVoice->_envelope._sustain = (float)song()->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
 				if (( pEntry.command() == SAMPLER_CMD_EXTENDED) && ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
-					pVoice->_triggerNoteDelay = static_cast<int>( (timeInfo.samplesPerRow()/6)*(pEntry.parameter() & 0x0f) );
+					pVoice->_triggerNoteDelay = static_cast<int>( (timeInfo.samplesPerTick()/6)*(pEntry.parameter() & 0x0f) );
 					pVoice->_envelope._stage = ENV_OFF;
 				}
 				else
@@ -626,7 +628,7 @@ namespace psy
 					if (pEntry.command() == SAMPLER_CMD_RETRIG && (pEntry.parameter() & 0x0f) > 0)
 					{
 						pVoice->effretTicks=(pEntry.parameter() & 0x0f); // number of Ticks.
-						pVoice->effVal= static_cast<int>( (timeInfo.samplesPerRow()/(pVoice->effretTicks+1)) );
+						pVoice->effVal= static_cast<int>( (timeInfo.samplesPerTick()/(pVoice->effretTicks+1)) );
 						
 						int volmod = (pEntry.parameter() & 0xf0)>>4; // Volume modifier.
 						switch (volmod) 
@@ -809,7 +811,7 @@ namespace psy
 
 		void Sampler::PerformFx( int voice )
 		{
-			__int64 shift;
+		std::int64_t shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up
@@ -830,5 +832,18 @@ namespace psy
 			}
 		}
 
+
+		void Sampler::DoPreviews(int amount, float* pLeft, float* pRight)
+		{
+			//todo do better.. use a vector<InstPreview*> or something instead
+			if(wavprev.IsEnabled())
+			{
+				wavprev.Work(pLeft, pRight, amount);
+			}
+			if(waved.IsEnabled())
+			{
+				waved.Work(pLeft, pRight, amount);
+			}
+		}
 }
 }

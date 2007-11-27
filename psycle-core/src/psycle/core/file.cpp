@@ -36,6 +36,8 @@
 #endif
 
 #include <stdexcept>
+#include <fstream>
+#include <sstream>
 
 namespace psy { namespace core {
 	using namespace std;

@@ -79,7 +79,7 @@ namespace psy
 
 		bool MsDirectSound::Start()
 		{
-			//				CSingleLock lock(&_lock, true);
+			//CSingleLock lock(&_lock, true);
 			if(_running) return true;
 			if(!_pCallback) return false;
 			if(FAILED(::DirectSoundCreate(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
@@ -200,18 +200,25 @@ namespace psy
 				::Sleep(1);
 			}
 			//_event.SetEvent();
-			//												::_endthread();
+			//::_endthread();
 			return 0;
 		}
 
 		bool MsDirectSound::Stop()
 		{
-			//												CSingleLock lock(&_lock, true);
+			//CSingleLock lock(&_lock, true);
 			if(!_running) return true;
 			_running = false;
 			_timerActive = false;
-			//												CSingleLock event(&_event, true);
+			//CSingleLock event(&_event, true);
 			// Once we get here, the PollerThread should have stopped
+			///\todo: some threadlocking mechanism. For now adding this sleeps
+		#if defined _WIN32
+			Sleep(1000);
+		#else
+			sleep(1);
+		#endif
+
 			if(_playing)
 			{
 				_pBuffer->Stop();
@@ -342,9 +349,9 @@ namespace psy
 			device_guid = GUID(); // DSDEVID_DefaultPlayback <-- unresolved external symbol
 			_exclusive = false;
 			_dither = false;
-			//												_bitDepth = 16;
-			//												_channelmode = 3;
-			//												_samplesPerSec = 44100;
+			//_bitDepth = 16;
+			//_channelmode = 3;
+			//_samplesPerSec = 44100;
 			_bufferSize = 4096;
 			_numBuffers = 4;
 			_configured = true;

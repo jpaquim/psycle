@@ -24,10 +24,8 @@ namespace psy
 		const int SCOPE_BUF_SIZE  = 4096;
 		const int SCOPE_SPEC_SAMPLES = 256;
 
-		/// we don't really need a macro for just one little expression...
-		#define PSYCLE__CPU_COST__INIT(cost) cpu::cycles_type cost(cpu::cycles());
-		/// we don't really need a macro for just one little expression...
-		#define PSYCLE__CPU_COST__CALCULATE(cost, _) cost = cpu::cycles() - cost;
+		//cpu::cycles_type cost(cpu::cycles());
+		//cost = cpu::cycles() - cost;
 
 		class Machine; // forward declaration
 		class CoreSong; // forward declaration
@@ -140,7 +138,7 @@ namespace psy
 		{
 			public:
 				/// legacy
-				typedef int id_type;
+		typedef std::int32_t id_type;
 
 				Wire()
 					:volume(1.0f),pan(0.0f),multiplier(1.0f),rvol(1.0f),lvol(1.0f)
@@ -190,7 +188,7 @@ namespace psy
 				virtual void Connected(Wire * wire);
 				virtual void Disconnected(Wire * wire);
 				virtual inline Wire* GetWire(unsigned int index) { assert(index<wires_.size()); return wires_[index]; }
-				virtual inline int NumberOfWires() { return wires_.size(); }
+				virtual inline int NumberOfWires() { return static_cast<int>(wires_.size()); }
 				virtual inline int Arrangement() throw() { return arrangement_; }
 				virtual inline Machine * GetMachine() throw() { return &parent_; }
 				///\todo : should change arrangement/name be allowed? (Mutating Port?)
@@ -209,7 +207,7 @@ namespace psy
 		{
 			public:
 				/// legacy
-				typedef int id_type;
+		typedef std::int32_t id_type;
 				InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 				virtual ~InPort(){};
 				virtual void CollectData(int numSamples);
@@ -219,7 +217,7 @@ namespace psy
 		{
 			public:
 				/// legacy
-				typedef int id_type;
+		typedef std::int32_t id_type;
 				OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 				virtual ~OutPort() {}
 				virtual void CollectData(int numSamples);
@@ -275,7 +273,7 @@ namespace psy
 
 		class MachineCallbacks {
 			public:
-				virtual const PlayerTimeInfo & timeInfo() const = 0;
+				virtual PlayerTimeInfo & timeInfo()  = 0;
 				virtual bool autoStopMachines() const = 0;
 				virtual ~MachineCallbacks() {}
 		};
@@ -381,7 +379,7 @@ namespace psy
 			///\{
 				public:
 					///\see enum MachineType which defined somewhere outside
-					typedef MachineType type_type;
+			typedef std::int32_t type_type; // Was: MachineType type_type
 					type_type inline type() const throw() { return type_; }
 				private:
 					void type(type_type type) { type_ = type; } friend class CoreSong;
@@ -404,7 +402,7 @@ namespace psy
 				public:
 					/// legacy
 					///\todo should be unsigned but some functions return negative values to signal errors instead of throwing an exception
-					typedef int id_type;
+					typedef std::int32_t id_type;
 					id_type id() const throw() { return id_; }
 				private:
 					/// it's currently actually used as an array index, but that shouldn't be part of the interface
@@ -489,7 +487,7 @@ namespace psy
 			public:
 				virtual void SetSampleRate(int /*hertz*/)
 				{
-#if PSYCLE__CONFIGURATION__RMS_VUS
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
 					rms.count=0;
 					rms.AccumLeft=0.;
 					rms.AccumRight=0.;
@@ -610,7 +608,7 @@ namespace psy
 			/// right chan volume
 			float _rVol;
 			/// numerical value of panning.
-			int _panning;
+		std::int32_t _panning;
 			int _x;
 			int _y;
 			int _numPars;
@@ -619,7 +617,7 @@ namespace psy
 			///\name input ports
 			///\{
 				/// number of Incoming connections
-				int _connectedInputs;
+		std::int32_t _connectedInputs;
 				/// Incoming connections Machine numbers
 				///\todo hardcoded limits and wastes
 				Machine::id_type _inputMachines[MAX_CONNECTIONS];
@@ -637,7 +635,7 @@ namespace psy
 			///\name output ports
 			///\{
 				/// number of Outgoing connections
-				int _connectedOutputs;
+		std::int32_t _connectedOutputs;
 				/// Outgoing connections Machine numbers
 				///\todo hardcoded limits and wastes
 				Machine::id_type _outputMachines[MAX_CONNECTIONS];

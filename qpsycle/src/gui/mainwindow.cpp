@@ -312,7 +312,7 @@ void MainWindow::onNewSongRequest()
 		if ( response == QMessageBox::Cancel )
 			return;
 	}
-
+	
 	psy::core::Song *blankSong = createBlankSong();
 	loadSong( blankSong );
 }
@@ -377,6 +377,7 @@ psy::core::Song *MainWindow::createBlankSong()
 
 void MainWindow::loadSong( psy::core::Song *song )
 {
+	psy::core::Player::Instance()->driver().Enable(false);
 	song_ = song;
 	// update gui to new song FIXME: very crappy way of doing it for now.
 	delete instrumentsModel_;
@@ -414,7 +415,7 @@ void MainWindow::loadSong( psy::core::Song *song )
 	createActions();
 	setupSignals();
 	// enable audio driver
-	Global::configuration()._pOutputDriver->Enable(true);
+	psy::core::Player::Instance()->driver().Enable(true);
 	logConsole_->AddSuccessText("Song Loaded Successfuly");
 }
 

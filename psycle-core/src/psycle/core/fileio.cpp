@@ -2,6 +2,7 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "fileio.h"
+#include <stdexcept>
 
 namespace psy
 {
@@ -14,14 +15,6 @@ namespace psy
 
 		RiffFile::~ RiffFile( )
 		{
-		}
-
-		std::uint32_t RiffFile::FourCC(char const * null_terminated_string)
-		{
-			std::uint32_t result(0x20202020); // four spaces (padding)
-			char * chars(reinterpret_cast<char *>(&result));
-			for(int i(0) ; i < 4 && null_terminated_string[i] ; ++i) *chars++ = null_terminated_string[i];
-			return result;
 		}
 
 		bool RiffFile::ReadString(std::string & result)
@@ -40,7 +33,7 @@ namespace psy
 		{
 			if(max_length > 0) {
 				memset(data,0,max_length);
-				char c=EOF;
+				int c=EOF;
 				for(long index = 0; index < max_length; index++)
 				{
 					if ( (c=_stream.get())!=EOF)
@@ -53,11 +46,11 @@ namespace psy
 				{
 					char c;
 					do {
-						if(!ReadChunk(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
+						if(!Read(c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
 					} while(c);
 				}
 				#endif
-				if (c==EOF) return true; else false;
+				if (c==EOF) return true; else return false;
 			}
 			return false;
 		}

@@ -18,6 +18,8 @@
 
 #include <cstddef>
 #include <cstdlib> // for posix_memalign
+#include <iostream> // only for debug output
+#include <sstream>
 
 namespace psy { namespace core {
 
@@ -35,7 +37,7 @@ namespace psy { namespace core {
 				// note: free with _mingw_aligned_free
 		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				x = static_cast<X*>(_aligned_malloc(size, alignment));
-				///\todo note: free with what?
+				// note: free with _aligned_free
 		#else
 			// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
 			// memalign on SunOS but not BSD (#include both <cstdlib> and <cmalloc>)
@@ -282,7 +284,7 @@ namespace psy { namespace core {
 			_inputCon[i]=false;
 		}
 	}
-	Machine::Machine(Machine* mac,MachineType type,MachineMode mode)
+	Machine::Machine(Machine* mac,type_type type,MachineMode mode)
 	:crashed_()
 	,type_(type)
 	,mode_(mode)
@@ -711,7 +713,7 @@ namespace psy { namespace core {
 	}
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
-#if PSYCLE__CONFIGURATION__RMS_VUS
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
 			_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
@@ -776,7 +778,7 @@ namespace psy { namespace core {
 		// assume version 0 for now
 		bool bDeleted(false);
 		Machine* pMachine;
-		MachineType type;//,oldtype;
+		type_type type;//,oldtype;
 		char dllName[256];
 		pFile->Read(type);
 		//oldtype=type;
@@ -806,10 +808,12 @@ namespace psy { namespace core {
 			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
 			else pMachine = new Mixer(callbacks, index, pSong);
 			break;
+#if 0
 		case MACH_LFO:
 			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
 			else pMachine = new LFO(callbacks, index, pSong);
 			break;
+#endif
 		case MACH_PLUGIN:
 			{
 				if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
@@ -869,7 +873,12 @@ namespace psy { namespace core {
 		}
 		pMachine->Init();
 		int temp;
-		pMachine->type_ = type;
+		if(!bDeleted)
+		{
+			///\todo: Is it even necessary???
+			/// for the winamp plugin maybe?
+			pMachine->type(type);
+		}
 		pFile->Read(pMachine->_bypass);
 		pFile->Read(pMachine->_mute);
 		pFile->Read(pMachine->_panning);
@@ -936,6 +945,7 @@ namespace psy { namespace core {
 		else pMachine->mode(MACHMODE_MASTER);
 
 		pMachine->SetPan(pMachine->_panning);
+		if (pMachine->_bypass) pMachine->Bypass(true);
 		return pMachine;
 	}
 
@@ -959,7 +969,7 @@ namespace psy { namespace core {
 			pFile->Write(_connection[i]);
 			pFile->Write(_inputCon[i]);
 		}
-		pFile->WriteChunk(GetEditName().c_str(), GetEditName().length()+1); //a max of 128 chars will be read on song load, but there's no real
+		pFile->WriteArray(GetEditName().c_str(), GetEditName().length()+1); //a max of 128 chars will be read on song load, but there's no real
 		// reason to limit what gets saved here.. (is there?)
 		SaveSpecificChunk(pFile);
 	}
@@ -985,7 +995,19 @@ namespace psy { namespace core {
 
 	void Machine::AddEvent( double offset, int track, const PatternEvent & event )
 	{
-		workEvents.push_back( WorkEvent(offset,track,event));
+		if ( !workEvents.empty() )
+		{
+			if ( workEvents.back().beatOffset() > offset )
+			{
+				// New event needs to be sorted in the queue
+				std::deque<WorkEvent>::reverse_iterator it = workEvents.rbegin();
+				while ( it != workEvents.rend() && it->beatOffset() > offset) ++it;
+				if ( it == workEvents.rend() ) workEvents.push_front( WorkEvent(offset,track,event));
+				else workEvents.insert(it.base(),WorkEvent(offset,track,event));
+			}
+			else workEvents.push_back( WorkEvent(offset,track,event));
+		}
+		else workEvents.push_back( WorkEvent(offset,track,event));
 	}
 
 	WorkEvent::WorkEvent( )
@@ -1029,9 +1051,9 @@ namespace psy { namespace core {
 		//position [0.0-1.0] inside the current beat.
 		const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 		//position [0.0-linesperbeat] converted to "Tick()" lines
-		const double positionInLines = positionInBeat*timeInfo.linesPerBeat();
+		const double positionInLines = positionInBeat*timeInfo.ticksSpeed();
 		//position in samples of the next "Tick()" Line
-		int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerRow() );
+		int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerTick() );
 		assert(nextLineInSamples >= 0);
 		//Next event, initialized to "out of scope".
 		int nextevent = numsamples+1;
@@ -1055,7 +1077,7 @@ namespace psy { namespace core {
 			{
 				Tick( );
 				previousline = nextLineInSamples;
-				nextLineInSamples += static_cast<int>( timeInfo.samplesPerRow() ); 
+				nextLineInSamples += static_cast<int>( timeInfo.samplesPerTick() ); 
 			}
 
 			
@@ -1073,7 +1095,7 @@ namespace psy { namespace core {
 						WorkEvent & workEvent1 = *workEvents.begin();
 						//nextevent = (workEvent.beatOffset() - beatOffset) * Gloxxxxxxxxxxxxxxxbal::player().SamplesPerBeat();
 						nextevent = static_cast<int>( workEvent1.beatOffset() * timeInfo.samplesPerBeat() );
-				assert(nextevent >= processedsamples);
+						assert(nextevent >= processedsamples);
 					} else nextevent = numsamples+1;
 				} else nextevent = numsamples+1;
 			}

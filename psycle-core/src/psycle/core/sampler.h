@@ -1,65 +1,31 @@
 ///\file
-///\brief interface file for psy::core::Sampler. based on Revision 2624
+///\brief interface file for psy::core::Sampler. based on psyclemfc revision 5903
 #pragma once
 
 #include "cstdint.h"
 #include "dsp.h"
 #include "filter.h"
 #include "instrument.h"
+#include "instpreview.h"
 #include "machine.h"
 
 namespace psy {
 	namespace core {
-		// class CGearTracker; // forward declaration
 
-		#define SAMPLER_MAX_POLYPHONY     16
-		#define SAMPLER_DEFAULT_POLYPHONY  8
+		#define SAMPLER_MAX_POLYPHONY		16
+		#define SAMPLER_DEFAULT_POLYPHONY	8
 
-		#define SAMPLER_CMD_NONE          0x00
-		#define SAMPLER_CMD_PORTAUP       0x01
-		#define SAMPLER_CMD_PORTADOWN     0x02
-		#define SAMPLER_CMD_PORTA2NOTE    0x03
-		#define SAMPLER_CMD_PANNING       0x08
-		#define SAMPLER_CMD_OFFSET        0x09
-		#define SAMPLER_CMD_VOLUME        0x0c
-		#define SAMPLER_CMD_RETRIG        0x15
-		#define SAMPLER_CMD_EXTENDED      0x0e
-		#define SAMPLER_CMD_EXT_NOTEOFF   0xc0
-		#define SAMPLER_CMD_EXT_NOTEDELAY 0xd0
-
-		// ms typedefs
-		
-		#if defined __unix__ || defined __APPLE__
-
-		typedef unsigned long ULONG;
-		typedef long long LONGLONG;
-		typedef unsigned long long ULONGLONG;
-		typedef unsigned long DWORD;
-		typedef ULONG* PULONG;
-		typedef PULONG ULONG_PTR;
-		typedef long long int __int64;
-		typedef long long unsigned int __uint64;
-
-
-		typedef union _LARGE_INTEGER {
-				LONGLONG QuadPart;
-		} LARGE_INTEGER;
-
-		typedef union _ULARGE_INTEGER {
-			struct {
-				DWORD LowPart;
-				DWORD HighPart;
-			};
-
-		struct {
-			DWORD LowPart;
-			DWORD HighPart;
-		} u;
-		ULONGLONG QuadPart;
-		} ULARGE_INTEGER, 
-		*PULARGE_INTEGER;
-		
-		#endif
+		#define SAMPLER_CMD_NONE			0x00
+		#define SAMPLER_CMD_PORTAUP			0x01
+		#define SAMPLER_CMD_PORTADOWN		0x02
+		#define SAMPLER_CMD_PORTA2NOTE		0x03
+		#define SAMPLER_CMD_PANNING			0x08
+		#define SAMPLER_CMD_OFFSET			0x09
+		#define SAMPLER_CMD_VOLUME			0x0c
+		#define SAMPLER_CMD_RETRIG			0x15
+		#define SAMPLER_CMD_EXTENDED		0x0e
+		#define SAMPLER_CMD_EXT_NOTEOFF		0xc0
+		#define SAMPLER_CMD_EXT_NOTEDELAY	0xd0
 
 		typedef enum
 		{
@@ -78,12 +44,12 @@ namespace psy {
 			short* _pL;
 			short* _pR;
 			bool _stereo;
-			ULARGE_INTEGER _pos;
+			std::int64_t _pos;
 			std::int64_t _speed;
 			bool _loop;
-			ULONG _loopStart;
-			ULONG _loopEnd;
-			ULONG _length;
+			std::uint32_t _loopStart;
+			std::uint32_t _loopEnd;
+			std::uint32_t _length;
 			float _vol;
 			float _lVolDest;
 			float _rVolDest;
@@ -126,7 +92,6 @@ namespace psy {
 			int effOld;
 		};
 
-
 		/// sampler.
 		class Sampler : public Machine
 		{
@@ -134,8 +99,21 @@ namespace psy {
 			void Tick( );
 			Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song);
 			virtual void Init();
-		// \todo implement SetSampleRate     
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
+			virtual void SetSampleRate(int sr)
+			{
+				Machine::SetSampleRate(sr);
+				for (int i=0; i<_numVoices; i++)
+				{
+					_voices[i]._envelope._stage = ENV_OFF;
+					_voices[i]._envelope._sustain = 0;
+					_voices[i]._filterEnv._stage = ENV_OFF;
+					_voices[i]._filterEnv._sustain = 0;
+					_voices[i]._filter.Init(sr);
+					_voices[i]._triggerNoteOff = 0;
+					_voices[i]._triggerNoteDelay = 0;
+				}
+			}
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual std::string GetName() const { return _psName; }
@@ -208,8 +186,21 @@ namespace psy {
 
 			void Update();
 
+			///\name wave file previewing
+			///\todo shouldn't belong to the song class. Move it to Sampler.
+			///\{
+		public:
+			//todo these ought to be dynamically allocated
+			/// Wave preview.
+			static InstPreview wavprev;
+			/// Wave editor playback.
+			///\todo: two previews??? 
+			static InstPreview waved;
+			/// runs the wave previewing.
+			static void DoPreviews(int amount, float* pLeft, float* pRight);
+			///\}
+
 		protected:
-			//friend CGearTracker;
 
 			static std::string _psName;
 			int _numVoices;

@@ -22,6 +22,7 @@
 #include "audiodriver.h"
 #include <windows.h>
 #include <mmsystem.h>
+#pragma comment(lib, "winmm")
 #undef min
 #undef max
 #include <psycle/core/cstdint.h>
@@ -44,10 +45,10 @@ namespace psy
 
 			virtual MsWaveOut* clone()  const;   // Uses the copy constructor
 
-			virtual AudioDriverInfo info() const;												
+			virtual AudioDriverInfo info() const;
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 			bool Initialized( );
-			virtual bool Enable( bool e );				
+			virtual bool Enable( bool e );
 
 		private:
 
@@ -89,9 +90,6 @@ namespace psy
 
 			bool start();
 			bool stop();
-
-			void quantizeWithDither(float *pin, int *piout, int c);
-			void quantize(float *pin, int *piout, int c);
 
 		};
 	}

@@ -166,6 +166,7 @@ namespace psy
 			return rc;
 		}
 
+
 		DDCRET ExtRiffFile::Backpatch(long FileOffset, const void *Data, unsigned NumBytes)
 		{
 			if(!file || fmode != RFM_WRITE) return DDC_INVALID_CALL;

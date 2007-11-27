@@ -53,7 +53,7 @@ namespace psy
 		//ExportMonitor -> generates events from the audio so that application can get information ( monitor/vumeter.. ) ( destination or interconnect element? )
 
 
-/*								
+		/*
 		Working with the low-level functions
 		------------------------------------
 		1) Creating the Server
@@ -129,7 +129,7 @@ namespace psy
 					case AuElementNotifyKindLowWater:
 						// You will need to write to the shared buffer some audio, of course.
 						// Also, note the bufferpos, which is assumed to allow a circular buffer.
-						AuWriteElement(aud, flow, 0, event->num_bytes, shared->buffer + shared->bufferpos,				AuFalse, NULL);
+						AuWriteElement(aud, flow, 0, event->num_bytes, shared->buffer + shared->bufferpos, AuFalse, NULL);
 						shared->bufferpos += event->num_bytes;
 						break;
 					case AuElementNotifyKindState:
@@ -168,7 +168,7 @@ namespace psy
 					}
 					// update buffer here.
 				}
-*/
+		*/
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -184,11 +184,11 @@ namespace psy
 
 			public:
 				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-				virtual bool Initialized();												
+				virtual bool Initialized();
 			private:
 				bool initialized_;
 				
-			public:								
+			public:
 				virtual void Configure();
 				virtual bool Enable(bool e);
 				virtual AudioDriver* clone() const;
@@ -216,7 +216,7 @@ namespace psy
 				bool threadRunning_;
 				bool killThread_;
 
-//																int writeBuffer(char * buffer, long size);
+				//int writeBuffer(char * buffer, long size);
 				AUDIODRIVERWORKFN callback_;
 				void* callbackContext_; // Player callback
 				short buf[48000];
