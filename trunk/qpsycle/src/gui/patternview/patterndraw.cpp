@@ -37,7 +37,7 @@
 	*/
 PatternDraw::PatternDraw( PatternView *patView )
 {
-	qWarning( "Created PatternDraw: 0x%x.\n", this);
+	qWarning( "Created PatternDraw: 0x%p.\n", this);
 
 	patView_ = patView; 
 	setAlignment( Qt::AlignLeft | Qt::AlignTop );
@@ -70,7 +70,7 @@ PatternDraw::PatternDraw( PatternView *patView )
 PatternDraw::~PatternDraw()
 {
 	patGrid_->patDraw(0);
-	qWarning( "Delete PatternDraw: 0x%x.\n", this);
+	qWarning( "Delete PatternDraw: 0x%p.\n", this);
 }
 
 
