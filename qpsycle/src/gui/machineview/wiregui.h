@@ -50,8 +50,8 @@ public:
 	MachineGui *destMacGui();
 	void setDestMacGui(MachineGui *macGui);
 
-	void rewireDest( MachineGui *newDstGui );
-	void rewireSource( MachineGui *newSrcGui );
+	bool rewireDest( MachineGui *newDstGui );
+	bool rewireSource( MachineGui *newSrcGui );
 
 	void adjust();
 
