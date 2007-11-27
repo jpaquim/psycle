@@ -58,9 +58,9 @@ void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	MachineGui::paint( painter, option, widget );
 	painter->setPen( Qt::white );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
-	painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
+	painter->drawEllipse( (int)boundingRect().width() - 15, 5, 10, 10 );
 	mac()->_bypass ? painter->setBrush( Qt::yellow ) : painter->setBrush( QColor( 100, 100, 0 ) );
-	painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
+	painter->drawEllipse( (int)boundingRect().width() - 30, 5, 10, 10 );
 }
 
 void EffectGui::keyPressEvent( QKeyEvent * event )
@@ -80,10 +80,17 @@ void EffectGui::keyPressEvent( QKeyEvent * event )
 
 void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
-	if ( event->button() == Qt::LeftButton &&
-			event->modifiers() == Qt::ControlModifier ) 
-	{
-		emit chosen( this );
+	///\todo adapt for skins
+	QRect muteRect( (int)boundingRect().width() - 15, 5, 10, 10 );
+	QRect bypassRect( (int)boundingRect().width() - 30, 5, 10, 10 );
+
+	if ( event->button() == Qt::LeftButton ) {
+		if ( event->modifiers() == Qt::ControlModifier )
+			emit chosen( this );
+		else if ( muteRect.contains(event->pos().toPoint()) )
+			toggleMuteAct_->trigger();
+		else if ( bypassRect.contains(event->pos().toPoint()) )
+			toggleBypassAct_->trigger();
 	}
 	MachineGui::mousePressEvent( event );
 }
@@ -116,8 +123,19 @@ void EffectGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 
 void EffectGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 {
-	if ( event->button() == Qt::LeftButton )
-		showMacTwkDlgAct_->trigger();
+	///\todo adapt for skins
+	QRect muteRect( (int)boundingRect().width() - 15, 5, 10, 10 );
+	QRect bypassRect( (int)boundingRect().width() - 30, 5, 10, 10 );
+
+	if ( event->button() == Qt::LeftButton ) {
+		if ( !(
+			muteRect.contains( event->pos().toPoint() ) ||
+			bypassRect.contains( event->pos().toPoint() )
+		) )
+			showMacTwkDlgAct_->trigger();
+		else
+			mousePressEvent(event);
+	}
 }
 
 void EffectGui::showMacTwkDlg()

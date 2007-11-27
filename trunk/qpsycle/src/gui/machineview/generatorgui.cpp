@@ -50,9 +50,9 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
 	MachineGui::paint( painter, option, widget );
 	painter->setPen( Qt::white );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
-	painter->drawEllipse( boundingRect().width() - 15, 5, 10, 10 );
+	painter->drawEllipse( (int)boundingRect().width() - 15, 5, 10, 10 );
 	mac()->song()->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
-	painter->drawEllipse( boundingRect().width() - 30, 5, 10, 10 );
+	painter->drawEllipse( (int)boundingRect().width() - 30, 5, 10, 10 );
 }
 
 void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
@@ -82,8 +82,17 @@ void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 
 void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
+	///\todo adapt for skins
+	QRect muteRect( (int)boundingRect().width() - 15, 5, 10, 10 );
+	QRect soloRect( (int)boundingRect().width() - 30, 5, 10, 10 );
+
 	if ( event->button() == Qt::LeftButton ) {
-		emit chosen( this );    
+		if ( muteRect.contains(event->pos().toPoint()) )
+			toggleMuteAct_->trigger();
+		else if ( soloRect.contains(event->pos().toPoint()) )
+			toggleSoloAct_->trigger();
+		else
+			emit chosen( this );    
 	}
 	MachineGui::mousePressEvent( event );
 }
@@ -123,6 +132,17 @@ void GeneratorGui::showMacTwkDlg()
 
 void GeneratorGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 {
-	if ( event->button() == Qt::LeftButton )
-		showMacTwkDlgAct_->trigger();
+	///\todo adapt for skins
+	QRect muteRect( (int)boundingRect().width() - 15, 5, 10, 10 );
+	QRect soloRect( (int)boundingRect().width() - 30, 5, 10, 10 );
+
+	if ( event->button() == Qt::LeftButton ) {
+		if ( !(
+			muteRect.contains( event->pos().toPoint() ) ||
+			soloRect.contains( event->pos().toPoint() )
+		) )
+			showMacTwkDlgAct_->trigger();
+		else
+			mousePressEvent(event);
+	}
 }
