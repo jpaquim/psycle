@@ -202,7 +202,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 		for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
 			if ( it != pattern()->end() ) {
-				int liney = (int)it->first * beatZoom();
+				int liney = (int)(it->first * beatZoom());
 				if (liney == curLinenum ) {
 					line = &it->second;
 					it++;

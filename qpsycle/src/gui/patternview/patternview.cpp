@@ -40,7 +40,7 @@ int d2i(double d)
 
 PatternView::PatternView( psy::core::Song *song )
 {
-	qWarning( "Created PatternView: 0x%x.\n", this);
+	qWarning( "Created PatternView: 0x%p.\n", this);
 
 	song_ = song;
 	pattern_ = NULL;
@@ -61,7 +61,7 @@ PatternView::PatternView( psy::core::Song *song )
 
 PatternView::~PatternView()
 {
-	qWarning( "Delete PatternView: 0x%x.\n", this);
+	qWarning( "Delete PatternView: 0x%p.\n", this);
 }
 
 void PatternView::createToolBar()
