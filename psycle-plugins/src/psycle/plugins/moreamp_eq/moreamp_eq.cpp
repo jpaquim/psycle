@@ -54,407 +54,93 @@
 
 #define NUMPARAMETERS 36
 
+static char buffer[] = 
+		"Extra filtering:"\
+		"\nSet this to enable extra-filtering,"\
+		"\non either 31-band or 10-band equalization."\
+		"\nNote that this doubles the processor time for filtering."\
+		"\n"\
+		"\nLink:"\
+		"\nIf this is on and a knob with a (*) is moved,"\
+		"\nthen the 2 knobs on either side will be linked to it and move as well."\
+		"\nThis means that you can set a fairly smooth"\
+		"\n31-point curve by moving only ten knobs."\
+		"\nNote that 31 knobs are displayed even when the Bands is 31,"\
+		"\nin this case only the ten knobs with a (*) are active."\
+		"\n";
 
+static sIIRCoefficients MSVC_ALIGN iir_cf10[EQBANDS10] GNU_ALIGN;
 
+static sIIRCoefficients MSVC_ALIGN iir_cf31[EQBANDS31] GNU_ALIGN;
 
-CMachineParameter const paraB20 = 
-{ 
-	"20 Hz",
-	"20 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
+static const double band_f010[] = { 31.,62.,125.,250.,500.,1000.,2000.,4000.,8000.,16000. };
+
+static const double band_f031[] = { 20.,25.,31.5,40.,50.,63.,80.,100.,125.,160.,200.,250.,315.,400.,500.,630.,800.,1000.,1250.,1600.,2000.,2500.,3150.,4000.,5000.,6300.,8000.,10000.,12500.,16000.,20000. };
+
+/* History for two filters */
+sXYData MSVC_ALIGN data_history[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
+sXYData MSVC_ALIGN data_history2[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
+
+band bands[] =
+{
+	{ iir_cf10,	band_f010, 1.0, 10 },
+	{ iir_cf31,	band_f031, 1.0/3.0, 31 },
+	{ 0 }
 };
 
-CMachineParameter const paraB25 = 
-{ 
-	"25 Hz",
-	"25 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
+static const float slidertodb[] =
+{
+-16.0, -15.5, -15.0, -14.5, -14.0, -13.5, -13.0, -12.5, -12.0, -11.5, -11.0, -10.5, -10.0,  -9.5, -9.0, -8.5,
+	-8.0,  -7.5,  -7.0,  -6.5,  -6.0,  -5.5,  -5.0,  -4.5,  -4.0,  -3.5,  -3.0,  -2.5,  -2.0,  -1.5, -1.0, -0.5,
+	0.0,   0.5,   1.0,   1.5,   2.0,   2.5,   3.0,   3.5,   4.0,   4.5,   5.0,   5.5,   6.0,   6.5,  7.0,  7.5,
+	8.0,   8.5,   9.0,   9.5,  10.0,  10.5,  11.0,  11.5,  12.0,  12.5,  13.0,  13.5,  14.0,  14.5, 15.0, 15.5,
+	16.0
 };
 
+inline float DBfromScaleGain(int value)
+{
+	if(value >= EQSLIDERMIN && value <= EQSLIDERMAX)
+			return slidertodb[value];
+	return 0.0f;
+}
 
-CMachineParameter const paraB31 = 
-{ 
-	"* 31.5 Hz",
-	"* 31.5 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
+CMachineParameter const paraB20 = { "20 Hz","20 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB25 = { "25 Hz","25 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB31 = { "* 31.5 Hz","* 31.5 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB40 = { "40 Hz","40 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB50 = { "50 Hz","50 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB62 = { "* 62.5 Hz","* 62.5 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB80 = { "80 Hz","80 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB100 = { "100 Hz","100 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB125 = { "* 125 Hz","* 125 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB160 = { "160 Hz","160 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB200 = { "200 Hz","200 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB250 = { "* 250 Hz","* 250 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB315 = { "315 Hz","315 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB400 = { "400 Hz","400 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB500 = { "* 500 Hz","* 500 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB630 = { "630 Hz","630 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB800 = { "800 Hz","800 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB1000 = { "* 1000 Hz","* 1000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB1250 = { "1250 Hz","1250 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32};
+CMachineParameter const paraB1600 = { "1600 Hz","1600 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB2000 = { "* 2000 Hz","* 2000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB2500 = { "2500 Hz","2500 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32, };
+CMachineParameter const paraB3150 = { "3150 Hz","3150 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB4000 = { "* 4000 Hz","* 4000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB5000 = { "5000 Hz","5000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB6300 = { "6300 Hz","6300 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB8000 = { "* 8000 Hz","* 8000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB10000 = { "10000 Hz","10000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB12500 = { "12500 Hz","12500 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB16000 = { "* 16000 Hz","* 16000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB20000 = { "20000 Hz","20000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 
-CMachineParameter const paraB40 = 
-{ 
-	"40 Hz ",
-	"40 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB50 = 
-{ 
-	"50 Hz",
-	"50 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB62 = 
-{ 
-	"* 62.5 Hz",
-	"* 62.5 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB80 = 
-{ 
-	"80 Hz",
-	"80 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB100 = 
-{ 
-	"100 Hz",
-	"100 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB125 = 
-{ 
-	"* 125 Hz",
-	"* 125 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB160 = 
-{ 
-	"160 Hz",
-	"160 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB200 = 
-{ 
-	"200 Hz",
-	"200 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB250 = 
-{ 
-	"* 250 Hz",
-	"* 250 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB315 = 
-{ 
-	"315 Hz",
-	"315 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB400 = 
-{ 
-	"400 Hz",
-	"400 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB500 = 
-{ 
-	"* 500 Hz",
-	"* 500 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB630 = 
-{ 
-	"630 Hz",
-	"630 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB800 = 
-{ 
-	"800 Hz",
-	"800 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB1000 = 
-{ 
-	"* 1000 Hz",
-	"* 1000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB1250 = 
-{ 
-	"1250 Hz",
-	"1250 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB1600 = 
-{ 
-	"1600 Hz",
-	"1600 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB2000 = 
-{ 
-	"* 2000 Hz",
-	"* 2000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB2500 = 
-{ 
-	"2500 Hz",
-	"2500 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB3150 = 
-{ 
-	"3150 Hz",
-	"3150 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB4000 = 
-{ 
-	"* 4000 Hz",
-	"* 4000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB5000 = 
-{ 
-	"5000 Hz",
-	"5000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB6300 = 
-{ 
-	"6300 Hz",
-	"6300 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB8000 = 
-{ 
-	"* 8000 Hz",
-	"* 8000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-CMachineParameter const paraB10000 = 
-{ 
-	"10000 Hz",
-	"10000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB12500 = 
-{ 
-	"12500 Hz",
-	"12500 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-
-CMachineParameter const paraB16000 = 
-{ 
-	"* 16000 Hz",
-	"* 16000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraB20000 = 
-{ 
-	"20000 Hz",
-	"20000 Hz",																								// description
-	0,																																																// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32,
-};
-
-CMachineParameter const paraDiv = 
-{ 
-	"",
-	"",																								// description
-	0,																																																// MinValue				
-	0,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraPreAmp = 
-{ 
-	"Preamp",
-	"Preamp",																								// description
-	-16,																																																// MinValue				
-	16,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraBands = 
-{ 
-	"Bands",
-	"Bands",																								// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraExtra = 
-{ 
-	"Extra filtering",
-	"Extra filtering",																								// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraLink = 
-{ 
-	"Link",
-	"Link",																								// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-#define B20 0
-#define B25 1
-#define B31 2
-#define B40 3
-#define B50 4
-#define B62 5
-#define B80 6
-#define B100 7
-#define B125 8
-#define B160 9
-#define B200 10
-#define B250 11
-#define B315 12
-#define B400 13
-#define B500 14
-#define B630 15
-#define B800 16
-#define B1000 17
-#define B1250 18
-#define B1600 19
-#define B2000 20
-#define B2500 21
-#define B3150 22
-#define B4000 23
-#define B5000 24
-#define B6300 25
-#define B8000 26
-#define B10000 27
-#define B12500 28
-#define B16000 29
-#define B20000 30
-
-#define _DIV 31
-#define PRE_AMP 32
-#define BANDS 33
-#define EXTRA 34
-#define LINK 35
+CMachineParameter const paraDiv = { "","",0,0,0,0 };
+CMachineParameter const paraPreAmp = { "Preamp","Preamp",-16,16,MPF_STATE,0 };
+CMachineParameter const paraBands = { "Bands","Bands",0,1,MPF_STATE,0 };
+CMachineParameter const paraExtra = { "Extra filtering","Extra filtering",0,1,MPF_STATE,0 };
+CMachineParameter const paraLink = { "Link","Link",0,1,MPF_STATE,0 };
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -514,7 +200,6 @@ CMachineInfo const MacInfo =
 	3
 };
 
-
 class mi : public CMachineInterface
 {
 public:
@@ -530,27 +215,28 @@ public:
 	virtual void ParameterTweak(int par, int val);
 
 private:
-	virtual void maEqualizerReset();
-	virtual void maEqualizerSetLevels();
-	
+	void maEqualizerReset();
+	void maEqualizerSetLevels();
+
 	void calc_coeffs();
 	inline void find_f1_and_f2(double f0, double octave_percent, double *f1, double *f2);
 	inline int find_root(double a, double b, double c, double *x0);
 	void clean_history();
 
-	short bnds;
 	sIIRCoefficients *iir_cf;
 	float *gains31;
 	float *gains10;
 
 	float *gains;
 
-	char g_eqi, g_eqj, g_eqk;
-	int di;
 	float dither[MAX_BUFFER_LENGTH];
 
+	char g_eqi, g_eqj, g_eqk;
+	short bnds;
+	int di;
 	int srate;
 };
+
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
@@ -559,35 +245,35 @@ mi::mi()
 	// The constructor zone
 	Vals = new int[NUMPARAMETERS];
 	//iir_cf = new sIIRCoefficients;
-	this->gains31 = new float[EQBANDS31];
-	this->gains10 = new float[EQBANDS10];
-	this->gains = this->gains10;
-	this->iir_cf = NULL;
+	gains31 = new float[EQBANDS31];
+	gains10 = new float[EQBANDS10];
+	gains = this->gains10;
+	iir_cf = NULL;
 }
 
 mi::~mi()
 {
-	delete Vals;
-	//delete iir_cf;
-	delete gains31;
-	delete gains10;
+	delete [] Vals;
+	delete [] gains31;
+	delete [] gains10;
+	gains = NULL;
 }
 
 void mi::Init()
 {
 // Initialize your stuff here
 
-	this->srate = pCB->GetSamplingRate();
+	srate = pCB->GetSamplingRate();
 
-	this->calc_coeffs();
+	calc_coeffs();
 
-	this->clean_history();
+	clean_history();
 
-	this->bnds = EQBANDS10;
+	bnds = EQBANDS10;
 
-	this->maEqualizerSetLevels();
+	maEqualizerSetLevels();
 
-	this->maEqualizerReset();
+	maEqualizerReset();
 
 }
 
@@ -606,26 +292,8 @@ void mi::Command()
 // Called when user presses editor button
 // Probably you want to show your custom window here
 // or an about button
-char buffer[2048];
 
-std::sprintf(
-		buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s",
-		"Extra filtering:",
-		"\nSet this to enable extra-filtering,",
-		"\non either 31-band or 10-band equalization.",
-		"\nNote that this doubles the processor time for filtering.",
-		"\n",
-		"\nLink:",
-		"\nIf this is on and a knob with a (*) is moved,",
-		"\nthen the 2 knobs on either side will be linked to it and move as well.",
-		"\nThis means that you can set a fairly smooth",
-		"\n31-point curve by moving only ten knobs.",
-		"\nNote that 31 knobs are displayed even when the Bands is 31,",
-		"\nin this case only the ten knobs with a (*) are active.",
-		"\n"
-		);
-
-pCB->MessBox(buffer,"MoreAmp EQ",0);
+pCB->MessBox(&buffer[0],"MoreAmp EQ",0);
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -1057,33 +725,6 @@ void mi::maEqualizerSetLevels()
 		gains10[i] = -0.2f + (factor / 5.125903437963185f);
 		}
 }
-
-#define GAIN_F0 1.0
-#define GAIN_F1 GAIN_F0 / M_SQRT2
-
-//#define TETA(f) (2*M_PI*(double)f/bands[n].sfreq)
-#define TETA(f) (2*M_PI*double(f/pCB->GetSamplingRate()))
-#define TWOPOWER(value) (value * value)
-
-#define BETA2(tf0, tf) \
-	(TWOPOWER(GAIN_F1)*TWOPOWER(std::cos(tf0)) \
-	- 2.0 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
-	+ TWOPOWER(GAIN_F1) \
-	- TWOPOWER(GAIN_F0) * TWOPOWER(std::sin(tf)))
-#define BETA1(tf0, tf) \
-	(2.0 * TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf)) \
-	+ TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf0)) \
-	- 2.0 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
-	- TWOPOWER(GAIN_F1) + TWOPOWER(GAIN_F0) * TWOPOWER(sin(tf)))
-#define BETA0(tf0, tf) \
-	(0.25 * TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf0)) \
-	- 0.5 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
-	+ 0.25 * TWOPOWER(GAIN_F1) \
-	- 0.25 * TWOPOWER(GAIN_F0) * TWOPOWER(std::sin(tf)))
-
-#define GAMMA(beta, tf0) ((0.5 + beta) * std::cos(tf0))
-#define ALPHA(beta) ((0.5 - beta)/2.0)
-
 
 /* Get the freqs at both sides of F0. These will be cut at -3dB */
 inline void mi::find_f1_and_f2(double f0, double octave_percent, double *f1, double *f2)
