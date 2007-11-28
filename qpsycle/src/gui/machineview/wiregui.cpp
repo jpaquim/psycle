@@ -55,14 +55,11 @@ WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *
 	onVolumeChanged(newvol);
 
 	delConnAct_ = new QAction( "Delete Connection", this );
-	rewireDstAct_ = new QAction( "Rewire Connection Destination", this );
 
 	connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
 	connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
 	///\todo FIXME: the above lines seem not the best way of doing things.
 	// (i.e. should delete signal go direct to the machineView? )
-	
-	connect( rewireDstAct_, SIGNAL( triggered() ), this, SLOT( onRewireDestActionTriggered() ) );
 }
 
 WireGui::~WireGui()
@@ -356,9 +353,4 @@ QPainterPath WireGui::shape () const
 void WireGui::deleteConnectionRequest()
 {
 	emit deleteConnectionRequest(this);
-}
-
-void WireGui::onRewireDestActionTriggered()
-{
-	//emit startRewiringDest(this);
 }
