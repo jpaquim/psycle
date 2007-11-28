@@ -22,7 +22,7 @@
     by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
 */
 /***************************************************/
-
+#include <packageneric/pre-compiled.private.hpp>
 #include "Skini.h"
 #include "SKINI.tbl"
 

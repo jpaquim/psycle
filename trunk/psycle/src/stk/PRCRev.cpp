@@ -10,7 +10,7 @@
     two series allpass units and two parallel comb
     filters.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2007.
 */
 /***************************************************/
 #include <packageneric/pre-compiled.private.hpp>
@@ -75,22 +75,14 @@ StkFloat PRCRev :: computeSample(StkFloat input)
   temp = allpassDelays_[0].lastOut();
   temp0 = allpassCoefficient_ * temp;
   temp0 += input;
-  temp0 +=anti;
-  anti = -anti;
   allpassDelays_[0].tick(temp0);
   temp0 = -(allpassCoefficient_ * temp0) + temp;
-  temp0 +=anti;
-  anti = -anti;
     
   temp = allpassDelays_[1].lastOut();
   temp1 = allpassCoefficient_ * temp;
   temp1 += temp0;
-  temp1 +=anti;
-  anti = -anti;
   allpassDelays_[1].tick(temp1);
   temp1 = -(allpassCoefficient_ * temp1) + temp;
-  temp1 +=anti;
-  anti = -anti;
     
   temp2 = temp1 + (combCoefficient_[0] * combDelays_[0].lastOut());
   temp3 = temp1 + (combCoefficient_[1] * combDelays_[1].lastOut());
