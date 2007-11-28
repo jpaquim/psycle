@@ -557,94 +557,94 @@ void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMac
 	*/
 int MachineView::noteFromCommand( int command )
 {
-	int note = NULL;
+	int note = -1;
 	switch ( command ) {
 		case commands::key_C_0:
-		note = 1;
+		note = 0;
 		break;
 		case commands::key_CS0:
-		note = 2;
+		note = 1;
 		break;
 		case commands::key_D_0:
-		note = 3;
+		note = 2;
 		break;
 		case commands::key_DS0:
-		note = 4;
+		note = 3;
 		break;
 		case commands::key_E_0:
-		note = 5;
+		note = 4;
 		break;
 		case commands::key_F_0:
-		note = 6;
+		note = 5;
 		break;
 		case commands::key_FS0:
-		note = 7;
+		note = 6;
 		break;
 		case commands::key_G_0:
-		note = 8;
+		note = 7;
 		break;
 		case commands::key_GS0:
-		note = 9;
+		note = 8;
 		break;
 		case commands::key_A_0:
-		note = 10;
+		note = 9;
 		break;
 		case commands::key_AS0:
-		note = 11;
+		note = 10;
 		break;
 		case commands::key_B_0: 
-		note = 12;
+		note = 11;
 		break;
 		case commands::key_C_1:
-		note = 13;
+		note = 12;
 		break;
 		case commands::key_CS1:
-		note = 14;
+		note = 13;
 		break;
 		case commands::key_D_1:
-		note = 15;
+		note = 14;
 		break;
 		case commands::key_DS1:
-		note = 16;
+		note = 15;
 		break;
 		case commands::key_E_1:
-		note = 17;
+		note = 16;
 		break;
 		case commands::key_F_1:
-		note = 18;
+		note = 17;
 		break;
 		case commands::key_FS1:
-		note = 19;
+		note = 18;
 		break;
 		case commands::key_G_1:
-		note = 20;
+		note = 19;
 		break;
 		case commands::key_GS1:
-		note = 21;
+		note = 20;
 		break;
 		case commands::key_A_1:
-		note = 22;
+		note = 21;
 		break;
 		case commands::key_AS1:
-		note = 23;
+		note = 22;
 		break;
 		case commands::key_B_1: 
-		note = 24;
+		note = 23;
 		break;
 		case commands::key_C_2:
-		note = 25;
+		note = 24;
 		break;
 		case commands::key_CS2:
-		note = 26;
+		note = 25;
 		break;
 		case commands::key_D_2:
-		note = 27;
+		note = 26;
 		break;
 		case commands::key_DS2:
-		note = 28;
+		note = 27;
 		break;
 		case commands::key_E_2:
-		note = 29;
+		note = 28;
 		break;
 	}
 	return note;
@@ -756,14 +756,18 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 	*/
 void MachineScene::keyPressEvent( QKeyEvent * event )
 {
+	if ( event->isAutoRepeat() ) {
+		event->ignore();
+		return;
+	}
+
 	if ( macView_->chosenMachine() ) 
 	{
 		if ( !event->isAutoRepeat() ) 
 		{
 			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-			int note = NULL;
-			note = macView_->noteFromCommand( command );
-			if (note) {
+			int note = macView_->noteFromCommand( command );
+			if ( note > -1 ) {
 				onNotePress( note, macView_->chosenMachine()->mac() );
 			}
 		}
@@ -771,14 +775,17 @@ void MachineScene::keyPressEvent( QKeyEvent * event )
 	event->ignore();
 }
 
-// FIXME: this gets triggered even when you're still holding the key down.  
-// Most likely a Qt bug...
 void MachineScene::keyReleaseEvent( QKeyEvent * event )
 {
+	if ( event->isAutoRepeat() ) {
+		event->ignore();
+		return;
+	}
+
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
 	int note = macView_->noteFromCommand( command );
-	if (note) {
+	if ( note > -1 ) {
 		onNoteRelease( note );
 	}
 	event->ignore();

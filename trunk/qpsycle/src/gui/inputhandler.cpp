@@ -208,7 +208,8 @@ void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
 }
 
 bool Key::operator<(const Key & key) const {
-	long key1 = shift() | vkey() << 8;
-	long key2 = key.shift() | key.vkey() <<8;
-	return key1 < key2;
+	if( vkey() != key.vkey() )
+		return vkey() < key.vkey();
+	else
+		return shift() < key.shift();
 }
