@@ -115,6 +115,8 @@ public:
   static const StkFormat STK_FLOAT32; /*!< Normalized between plus/minus 1.0. */
   static const StkFormat STK_FLOAT64; /*!< Normalized between plus/minus 1.0. */
 
+  static StkFloat anti;
+
   //! Static method which returns the current STK sample rate.
   static StkFloat sampleRate( void ) { return srate_; }
 

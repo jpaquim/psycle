@@ -83,6 +83,9 @@ StkFloat JCRev :: computeSample(StkFloat input)
   StkFloat temp, temp0, temp1, temp2, temp3, temp4, temp5, temp6;
   StkFloat filtout;
 
+  input +=anti;
+  anti = -anti;
+
   temp = allpassDelays_[0].lastOut();
   temp0 = allpassCoefficient_ * temp;
   temp0 += input;

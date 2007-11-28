@@ -71,6 +71,8 @@ void PRCRev :: setT60( StkFloat T60 )
 StkFloat PRCRev :: computeSample(StkFloat input)
 {
   StkFloat temp, temp0, temp1, temp2, temp3;
+  input +=anti;
+  anti = -anti;
 
   temp = allpassDelays_[0].lastOut();
   temp0 = allpassCoefficient_ * temp;

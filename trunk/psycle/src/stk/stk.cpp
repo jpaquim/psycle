@@ -38,6 +38,9 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "Stk.h"
 
+
+StkFloat Stk :: anti = 1.e-20;
+
 StkFloat Stk :: srate_ = (StkFloat) SRATE;
 std::string Stk :: rawwavepath_ = RAWWAVE_PATH;
 const Stk::StkFormat Stk :: STK_SINT8   = 0x1;
