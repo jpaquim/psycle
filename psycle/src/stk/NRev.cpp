@@ -73,6 +73,8 @@ StkFloat NRev :: computeSample(StkFloat input)
 {
   StkFloat temp, temp0, temp1, temp2, temp3;
   int i;
+  input +=anti;
+  anti = -anti;
 
   temp0 = 0.0;
   for (i=0; i<6; i++) {
