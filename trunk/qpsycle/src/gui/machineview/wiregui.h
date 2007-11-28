@@ -57,11 +57,9 @@ public:
 
 signals:
 	void deleteConnectionRequest( WireGui *wireGui );
-	void startRewiringDest( WireGui *wireGui, QGraphicsSceneMouseEvent *event );
 
 public slots:
 	void deleteConnectionRequest();
-	void onRewireDestActionTriggered();
 	void onVolumeChanged(float newval);
 
 protected:
@@ -84,7 +82,6 @@ private:
 	qreal arrowSize;
 
 	QAction *delConnAct_;
-	QAction *rewireDstAct_;
 
 	QColor arrowColor;
 
