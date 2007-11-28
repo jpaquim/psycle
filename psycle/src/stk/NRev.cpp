@@ -12,7 +12,7 @@
     filters in parallel with corresponding right
     and left outputs.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2007.
 */
 /***************************************************/
 #include <packageneric/pre-compiled.private.hpp>
@@ -77,8 +77,6 @@ StkFloat NRev :: computeSample(StkFloat input)
   temp0 = 0.0;
   for (i=0; i<6; i++) {
     temp = input + (combCoefficient_[i] * combDelays_[i].lastOut());
-	temp +=anti;
-	anti = -anti;
     temp0 += combDelays_[i].tick(temp);
   }
   for (i=0; i<3; i++)	{

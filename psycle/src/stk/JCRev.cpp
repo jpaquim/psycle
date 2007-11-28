@@ -10,7 +10,7 @@
     filters, and two decorrelation delay lines in
     parallel at the output.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2007.
 */
 /***************************************************/
 #include <packageneric/pre-compiled.private.hpp>
@@ -84,40 +84,22 @@ StkFloat JCRev :: computeSample(StkFloat input)
   StkFloat filtout;
 
   temp = allpassDelays_[0].lastOut();
-  temp +=anti;
-  anti = -anti;
   temp0 = allpassCoefficient_ * temp;
   temp0 += input;
-  temp0 +=anti;
-  anti = -anti;
   allpassDelays_[0].tick(temp0);
   temp0 = -(allpassCoefficient_ * temp0) + temp;
-  temp0 +=anti;
-  anti = -anti;
     
   temp = allpassDelays_[1].lastOut();
-  temp +=anti;
-  anti = -anti;
   temp1 = allpassCoefficient_ * temp;
   temp1 += temp0;
-  temp1 +=anti;
-  anti = -anti;
   allpassDelays_[1].tick(temp1);
   temp1 = -(allpassCoefficient_ * temp1) + temp;
-  temp1 +=anti;
-  anti = -anti;
     
   temp = allpassDelays_[2].lastOut();
-  temp +=anti;
-  anti = -anti;
   temp2 = allpassCoefficient_ * temp;
   temp2 += temp1;
-  temp2 +=anti;
-  anti = -anti;
   allpassDelays_[2].tick(temp2);
   temp2 = -(allpassCoefficient_ * temp2) + temp;
-  temp2 +=anti;
-  anti = -anti;
     
   temp3 = temp2 + (combCoefficient_[0] * combDelays_[0].lastOut());
   temp4 = temp2 + (combCoefficient_[1] * combDelays_[1].lastOut());
@@ -130,8 +112,6 @@ StkFloat JCRev :: computeSample(StkFloat input)
   combDelays_[3].tick(temp6);
 
   filtout = temp3 + temp4 + temp5 + temp6;
-  filtout +=anti;
-  anti = -anti;
 
   lastOutput_[0] = effectMix_ * (outLeftDelay_.tick(filtout));
   lastOutput_[1] = effectMix_ * (outRightDelay_.tick(filtout));

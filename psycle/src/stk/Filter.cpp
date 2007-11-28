@@ -23,7 +23,7 @@
     results in one extra multiply per computed sample,
     but allows easy control of the overall filter gain.
 
-    by Perry R. Cook and Gary P. Scavone, 1995 - 2005.
+    by Perry R. Cook and Gary P. Scavone, 1995 - 2007.
 */
 /***************************************************/
 #include <packageneric/pre-compiled.private.hpp>
@@ -192,16 +192,12 @@ StkFloat Filter :: tick( StkFloat input )
   inputs_[0] = gain_ * input;
   for (i=b_.size()-1; i>0; i--) {
     outputs_[0] += b_[i] * inputs_[i];
-	outputs_[0] +=anti;
-	anti = -anti;
     inputs_[i] = inputs_[i-1];
   }
   outputs_[0] += b_[0] * inputs_[0];
 
   for (i=a_.size()-1; i>0; i--) {
     outputs_[0] += -a_[i] * outputs_[i];
-	outputs_[0] +=anti;
-	anti = -anti;
     outputs_[i] = outputs_[i-1];
   }
 
