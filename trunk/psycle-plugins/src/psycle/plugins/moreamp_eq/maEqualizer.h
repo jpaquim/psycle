@@ -78,6 +78,43 @@
 #define EQ_MAX_BANDS EQBANDS31
 #define EQ_CHANNELS 2
 
+#define B20 0
+#define B25 1
+#define B31 2
+#define B40 3
+#define B50 4
+#define B62 5
+#define B80 6
+#define B100 7
+#define B125 8
+#define B160 9
+#define B200 10
+#define B250 11
+#define B315 12
+#define B400 13
+#define B500 14
+#define B630 15
+#define B800 16
+#define B1000 17
+#define B1250 18
+#define B1600 19
+#define B2000 20
+#define B2500 21
+#define B3150 22
+#define B4000 23
+#define B5000 24
+#define B6300 25
+#define B8000 26
+#define B10000 27
+#define B12500 28
+#define B16000 29
+#define B20000 30
+
+#define _DIV 31
+#define PRE_AMP 32
+#define BANDS 33
+#define EXTRA 34
+#define LINK 35
 
 struct sIIRCoefficients
 {
@@ -95,24 +132,6 @@ struct sXYData
 	float dummy[2];
 };
 
-// [bohan] shouldn't be in a header file
-static sIIRCoefficients MSVC_ALIGN iir_cf10[EQBANDS10] GNU_ALIGN;
-
-// [bohan] shouldn't be in a header file
-static sIIRCoefficients MSVC_ALIGN iir_cf31[EQBANDS31] GNU_ALIGN;
-
-// [bohan] shouldn't be in a header file
-static const double band_f010[] = { 31.,62.,125.,250.,500.,1000.,2000.,4000.,8000.,16000. };
-
-// [bohan] shouldn't be in a header file
-static const double band_f031[] = { 20.,25.,31.5,40.,50.,63.,80.,100.,125.,160.,200.,250.,315.,400.,500.,630.,800.,1000.,1250.,1600.,2000.,2500.,3150.,4000.,5000.,6300.,8000.,10000.,12500.,16000.,20000. };
-
-/* History for two filters */
-// [bohan] shouldn't be in a header file
-sXYData MSVC_ALIGN data_history[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
-// [bohan] shouldn't be in a header file
-sXYData MSVC_ALIGN data_history2[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
-
 struct band
 {
 	sIIRCoefficients *coeffs;
@@ -121,28 +140,30 @@ struct band
 	int band_count;
 };
 
-// [bohan] shouldn't be in a header file
-band bands[] =
-{
-	{ iir_cf10,				band_f010,				1.0,								10 },
-	{ iir_cf31,				band_f031,				1.0/3.0,				31 },
-	{ 0 }
-};
+#define GAIN_F0 1.0
+#define GAIN_F1 GAIN_F0 / M_SQRT2
 
-// [bohan] shouldn't be in a header file
-static float slidertodb[] =
-{
--16.0, -15.5, -15.0, -14.5, -14.0, -13.5, -13.0, -12.5, -12.0, -11.5, -11.0, -10.5, -10.0,  -9.5, -9.0, -8.5,
-	-8.0,  -7.5,  -7.0,  -6.5,  -6.0,  -5.5,  -5.0,  -4.5,  -4.0,  -3.5,  -3.0,  -2.5,  -2.0,  -1.5, -1.0, -0.5,
-	0.0,   0.5,   1.0,   1.5,   2.0,   2.5,   3.0,   3.5,   4.0,   4.5,   5.0,   5.5,   6.0,   6.5,  7.0,  7.5,
-	8.0,   8.5,   9.0,   9.5,  10.0,  10.5,  11.0,  11.5,  12.0,  12.5,  13.0,  13.5,  14.0,  14.5, 15.0, 15.5,
-	16.0
-};
+//#define TETA(f) (2*M_PI*(double)f/bands[n].sfreq)
+#define TETA(f) (2*M_PI*double(f/pCB->GetSamplingRate()))
+#define TWOPOWER(value) (value * value)
 
-inline float DBfromScaleGain(int value)
-{
-	if(value >= EQSLIDERMIN && value <= EQSLIDERMAX)
-			return slidertodb[value];
-	return 0.0f;
-}
+#define BETA2(tf0, tf) \
+	(TWOPOWER(GAIN_F1)*TWOPOWER(std::cos(tf0)) \
+	- 2.0 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
+	+ TWOPOWER(GAIN_F1) \
+	- TWOPOWER(GAIN_F0) * TWOPOWER(std::sin(tf)))
+#define BETA1(tf0, tf) \
+	(2.0 * TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf)) \
+	+ TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf0)) \
+	- 2.0 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
+	- TWOPOWER(GAIN_F1) + TWOPOWER(GAIN_F0) * TWOPOWER(sin(tf)))
+#define BETA0(tf0, tf) \
+	(0.25 * TWOPOWER(GAIN_F1) * TWOPOWER(std::cos(tf0)) \
+	- 0.5 * TWOPOWER(GAIN_F1) * std::cos(tf) * std::cos(tf0) \
+	+ 0.25 * TWOPOWER(GAIN_F1) \
+	- 0.25 * TWOPOWER(GAIN_F0) * TWOPOWER(std::sin(tf)))
+
+#define GAMMA(beta, tf0) ((0.5 + beta) * std::cos(tf0))
+#define ALPHA(beta) ((0.5 - beta)/2.0)
+
 #endif // __MAEQUALIZER_H__
