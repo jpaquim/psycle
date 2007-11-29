@@ -91,6 +91,7 @@ void SampleBrowser::createSampleBrowserTree()
 {
 	QStringList nameFilters("*");
 	dirModel_ = new QDirModel( nameFilters, QDir::AllEntries, QDir::Name );
+	dirModel_->setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
 	dirTree_ = new QTreeView();
 	dirTree_->setModel( dirModel_ );
 	dirTree_->setSelectionMode( QAbstractItemView::ExtendedSelection );
