@@ -62,42 +62,62 @@ SampleBrowser::~SampleBrowser()
 {
 }
 
+// Creates the list widget holding the samples currently
+// loaded in the CoreSong.
 void SampleBrowser::createLoadedSamplesList()
 {
 	instrumentsList_ = new QListView( this );
+	// InstrumentsModel contains info on the samples loaded
+	// in the CoreSong.
 	instrumentsList_->setModel( instrumentsModel_ );
 	instrumentsList_->setCurrentIndex( instrumentsModel_->index( 0, 0 ) );
 	instrumentsList_->setEditTriggers( QAbstractItemView::NoEditTriggers );
 }
 
+// Creates the widget that holds the buttons that
+// do stuff.
 void SampleBrowser::createActionsWidget()
 {
 	actionsWidget_ = new QWidget( this );
 	QVBoxLayout *actionsLayout = new QVBoxLayout();
 	actionsWidget_->setLayout( actionsLayout );
+
 	button_addToLoadedSamples = new QPushButton( "<<" );
 	button_clearInstrument = new QPushButton( "Clear instrument" );
 
-			connect( button_addToLoadedSamples, SIGNAL( clicked() ),
-			this, SLOT( onAddToLoadedSamples() ) );
-			connect( button_clearInstrument, SIGNAL( clicked() ),
-			this, SLOT( onClearInstrument() ) );
+	connect( button_addToLoadedSamples, SIGNAL( clicked() ),
+		 this, SLOT( onAddToLoadedSamples() ) );
+	connect( button_clearInstrument, SIGNAL( clicked() ),
+		 this, SLOT( onClearInstrument() ) );
 
 	actionsLayout->addWidget( button_addToLoadedSamples );
 	actionsLayout->addWidget( button_clearInstrument );
 }
 
+// Creates the tree widget that allows the user
+// to browse through their filesystem for samples.
 void SampleBrowser::createSampleBrowserTree()
 {
-	QStringList nameFilters("*");
-	dirModel_ = new QDirModel( nameFilters, QDir::AllEntries, QDir::Name );
+	dirModel_ = new QDirModel( this );
+
+	///\todo Should filter for wavs, but when I tried it
+	// it also filters out directories...
+	dirModel_->setNameFilters( QStringList() << "*" );
 	dirModel_->setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
+	///\todo NoDotAndDotDot means we can't navigate above the
+	// provided root index.  We could allow dot and dot dot, but
+	// it's a bit weird with a tree view (try it.)  
+	dirModel_->setSorting( QDir::Name );
+
+
 	dirTree_ = new QTreeView();
 	dirTree_->setModel( dirModel_ );
 	dirTree_->setSelectionMode( QAbstractItemView::ExtendedSelection );
-	dirTree_->setColumnHidden( 1, true );
-	dirTree_->setColumnHidden( 2, true );
-	dirTree_->setColumnHidden( 3, true );
+	dirTree_->setColumnHidden( 1, true ); // file size
+	dirTree_->setColumnHidden( 2, true ); // file type
+	dirTree_->setColumnHidden( 3, true ); // data modified
+
+	// Set the top directory of the tree.
 	QString samplesPath = QString::fromStdString( Global::configuration().samplePath() );
 	if ( samplesPath.isEmpty() ) { // if sample path isn't set in config.
 		samplesPath = QDir::homePath();
@@ -105,14 +125,16 @@ void SampleBrowser::createSampleBrowserTree()
 	dirTree_->setRootIndex( dirModel_->index( samplesPath ) );
 }
 
+// Try to load selected samples in the sample tree into
+// the CoreSong.
 void SampleBrowser::onAddToLoadedSamples()
 {
+	// Find out what items are selected in the sample tree.
 	QItemSelectionModel *selModel = dirTree_->selectionModel();
 	QModelIndexList selList = selModel->selectedRows();
 
-	for (int i = 0; i < selList.size(); ++i) 
+	for ( int i = 0; i < selList.size(); ++i ) 
 	{
-		
 		if ( instrumentsList_->currentIndex().isValid() ) 
 		{
 			QFileInfo fileinfo = dirModel_->fileInfo( selList.at(i) );
@@ -131,6 +153,7 @@ void SampleBrowser::onAddToLoadedSamples()
 	emit sampleAdded();
 }
 
+// Clear an instrument out of the CoreSong.
 void SampleBrowser::onClearInstrument() 
 {
 	int curInstrIndex = instrumentsList_->currentIndex().row();
