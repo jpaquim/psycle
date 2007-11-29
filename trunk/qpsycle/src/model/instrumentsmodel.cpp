@@ -27,14 +27,29 @@
 #include <iostream>
 #include <iomanip>
 
+// The InstrumentsModel provides an interface to the
+// Instrument data in the CoreSong.  This model can be
+// loaded by Qt widgets and changes made by one widget will be
+// automatically propagated to the other widgets using the 
+// same model.
+//
+// You can still access the CoreSong instrument data directly in the GUI if
+// you want to, but you'll probably need to manually alert
+// any widgets that are supposed to be watching it.
 InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 	: QStandardItemModel(),
-		song_( song )
+	song_( song )
 {
+	// Buffer stuff is to get hex notation for instrument indexes.
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
 
-	for (int row = 0; row < psy::core::MAX_INSTRUMENTS; ++row) {
+	// Fill the model up with the instrument data from the CoreSong.
+	// Note that we read info about all instrumuent slots in, even
+	// if they're empty.  No particular reason for this I don't think,
+	// so feel free to change it!
+	for (int row = 0; row < psy::core::MAX_INSTRUMENTS; ++row) 
+	{
 		buffer.str("");
 		buffer << std::setfill('0') << std::hex << std::setw(2);
 		buffer << row << ": " << song_->_pInstrument[row]->_sName;
@@ -48,11 +63,12 @@ InstrumentsModel::~InstrumentsModel()
 {}
 
 /**
-	* Loads a wave file into the CoreSong, and updates the
-	* model accordingly.
-	*/
+ * Loads a wave file into the CoreSong, and updates the
+ * model accordingly.
+ */
 bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 {
+	// WavAlloc tries to load the wav into the CoreSong.
 	if ( song_->WavAlloc( instrIndex, pathToWavfile.toStdString().c_str() ) )
 	{
 		QStandardItem *tempItem = item( instrIndex );
@@ -71,8 +87,8 @@ bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 
 
 /**
-	* Returns an instrument from the CoreSong.
-	*/
+ * Returns an instrument from the CoreSong.
+ */
 psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
 {
 	return song_->_pInstrument[instrIndex];
@@ -80,12 +96,17 @@ psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
 
 
 /**
-	* Clears the instrument from the CoreSong, and updates
-	* the model accordingly.
-	*/
+ * Clears the instrument from the CoreSong, and updates
+ * the model accordingly.  Note that updating the model
+ * automatically alerts any widgets using the model, so
+ * we don't need to send signals out.
+ */
 void InstrumentsModel::clearInstrument( int instrIndex )
 {
+	// Clear the instrument from the CoreSong.
 	song_->DeleteInstrument( instrIndex );
+
+	// Refresh the name in this model.
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
 	buffer.str("");
@@ -106,7 +127,7 @@ void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
 	song_->auxcolSelected = newIndex;
 }
 
-
+// Find out if a particular slot is free in the CoreSong.
 bool InstrumentsModel::slotIsEmpty( int instrIndex )
 {
 	return song_->_pInstrument[instrIndex]->Empty();
