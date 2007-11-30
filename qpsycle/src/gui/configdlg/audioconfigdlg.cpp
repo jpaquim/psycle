@@ -64,6 +64,8 @@ void AudioConfigDlg::initDriverList( )
 	for ( ; it != driverMap.end(); it++ ) {
 		QString driverName = QString::fromStdString( it->first );
 		driverCbx_->addItem( driverName );
+		if ( it->second == ::Global::pConfig()->_pOutputDriver )
+			driverCbx_->setCurrentIndex(driverCbx_->count()-1);
 	}
 }
 

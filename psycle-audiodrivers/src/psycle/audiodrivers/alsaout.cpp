@@ -53,9 +53,12 @@ AlsaOut::AlsaOut()
 	}
 	
 	AlsaOut::~AlsaOut() {
-		enablePlayer = -2;
-		while(enablePlayer != -3) usleep(1000); ///\todo sleeping is bad
-		///\todo free memory here
+		if (enablePlayer >0)
+		{
+			enablePlayer = -2;
+			while(enablePlayer != -3) usleep(1000);
+		}
+		/// \todo free memory here
 	}
 	
 	AlsaOut * AlsaOut::clone() const {
@@ -70,7 +73,7 @@ AlsaOut::AlsaOut()
 		_pCallback = pCallback;
 		_callbackContext = context;
 		_initialized = true;
-		audioStart();
+		//audioStart();
 	}
 	
 	bool AlsaOut::Enable(bool e) {
@@ -102,13 +105,14 @@ AlsaOut::AlsaOut()
 		rate = 44100; // stream rate
 		format = SND_PCM_FORMAT_S16; // sample format
 		channels = 2; // count of channels
-		buffer_time = 100000; // ring buffer length in us (for colinux->windows, 100000 seems to work fine)
-		period_time = 40000; // period time in us (for colinux->windows, 40000 seems to work fine)
+		// safe values, and usual ones too on other programs
+		buffer_time = 200000;
+		period_time = 20000;
 		
 		buffer_size=0;
 		period_size=0;
 		output = NULL;
-		//AlsaOut::enablePlayer = 1; // has stopped, 0: stop!, 1: play!, 2: is playing
+		//AlsaOut::enablePlayer = -1; // -3: error, -2: force stop, -1: has stopped, 0: stop!, 1: play!, 2: is playing
 		
 		AudioDriverSettings settings(this->settings());
 		{
@@ -278,6 +282,7 @@ AlsaOut::AlsaOut()
 			return err;
 		}
 		
+		std::cout << "step2.9, buffer size:" << size << std::endl;
 		buffer_size = size;
 
 		// set the period time
@@ -381,7 +386,10 @@ AlsaOut::AlsaOut()
 					cptr -= err;
 				}
 			} else if(enablePlayer == -2) return 0;
-			else enablePlayer = -1;
+			else { 
+				enablePlayer = -1;
+				return 0;
+			}
 			usleep(1000); ///\todo sleeping is bad
 		}
 	}
