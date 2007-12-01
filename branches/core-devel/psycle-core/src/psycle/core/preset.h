@@ -40,7 +40,7 @@ namespace psy {
 
 			Preset( int numpars, int dataSize );
 
-			bool read( std::istream& prsIn );
+			bool read( BinRead& prsIn );
 
 			const std::string& name() const;
 			const std::vector<int>& parameter() const;

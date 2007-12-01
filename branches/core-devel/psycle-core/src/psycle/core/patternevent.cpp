@@ -39,13 +39,13 @@ std::string PatternEvent::toXml( int track ) const
 	std::ostringstream xml;
 	xml
 		<< "<patevent track='" << track
-	 	<< std::hex << "' note='" << (int) note_
-	 	<< std::hex << "' mac='" << (int) mach_
-	 	<< std::hex << "' inst='" << (int) inst_
-	 	<< std::hex << "' cmd='" << (int) cmd_
-	 	<< std::hex << "' param='" << (int) param_
-	 	<< std::hex << "' sharp='" << (int) sharp_
-	 	<<"' />\n";
+		<< std::hex << "' note='" << (int) note_
+		<< std::hex << "' mac='" << (int) mach_
+		<< std::hex << "' inst='" << (int) inst_
+		<< std::hex << "' cmd='" << (int) cmd_
+		<< std::hex << "' param='" << (int) param_
+		<< std::hex << "' sharp='" << (int) sharp_
+		<<"' />\n";
 	return xml.str();
 }
 

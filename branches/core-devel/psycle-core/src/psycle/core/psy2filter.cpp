@@ -161,14 +161,14 @@ PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
 	//Convert old tweak effect command to common tweak.
 	if (data[0] == psy::core::commands::tweak_effect)
 	{
-		event.setNote(psy::core::commands::tweak);	data++;
-		event.setInstrument(*data);	data++;
-		event.setMachine((*data)+0x40);	data++;
+		event.setNote(psy::core::commands::tweak); data++;
+		event.setInstrument(*data); data++;
+		event.setMachine((*data)+0x40); data++;
 	}
 	else
 	{
-		event.setNote(*data);	data++;
-		event.setInstrument(*data);	data++;
+		event.setNote(*data); data++;
+		event.setInstrument(*data); data++;
 		event.setMachine(*data); data++;
 	}
 	event.setCommand(*data); data++;
