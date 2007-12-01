@@ -339,6 +339,7 @@ void MainWindow::onOpenSongRequest()
 	if ( !fileName.isEmpty() ) {
 		psy::core::Player::Instance()->stop();
 		psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		song->load(Global::configuration().pluginPath(), fileName.toStdString() );
 		loadSong( song );
 	}
