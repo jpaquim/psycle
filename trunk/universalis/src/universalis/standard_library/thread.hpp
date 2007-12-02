@@ -10,7 +10,7 @@ namespace std {
 			return universalis::operating_system::threads::id::current();
 		}
 
-		#if 0 ///\todo		
+		#if 0 ///\todo
 			void yield() {
 				universalis::operating_system::threads::yield();
 			}
