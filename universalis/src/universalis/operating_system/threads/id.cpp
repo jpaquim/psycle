@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::operating_system::threads::id
 #include <packageneric/pre-compiled.private.hpp>
@@ -26,35 +25,24 @@
 		#endif
 	#endif
 #endif
-namespace universalis
-{
-	namespace operating_system
-	{
-		namespace threads
-		{
-			namespace id
-			{
-				type current()
-				{
-					#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-						return ::GetCurrentThreadId();
-					#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-						return ::pthread_self();
-					#else
-						class once
-						{
-							public:
-								once()
-								{
-									if(!Glib::thread_supported()) Glib::thread_init();
-								}
-						};
-						once static once;
-						assert(Glib::thread_supported());
-						return Glib::Thread::self();
-					#endif
+namespace universalis { namespace operating_system { namespace threads { namespace id {
+
+type current() {
+	#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		return ::pthread_self();
+	#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return ::GetCurrentThreadId();
+	#else
+		class once {
+			public:
+				once() {
+					if(!Glib::thread_supported()) Glib::thread_init();
 				}
-			}
-		}
-	}
+		};
+		once static once;
+		assert(Glib::thread_supported());
+		return Glib::Thread::self();
+	#endif
 }
+
+}}}}
