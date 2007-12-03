@@ -14,14 +14,13 @@
 #include <psycle/helpers/math/truncate.hpp>
 #include <psycle/helpers/math/log.hpp>
 
-#if 0 // some test of C1999's features
+#if __STDC_VERSION__ >= 199901 // some test of C1999's features
 	#include <cmath>
 	#include <fenv.h>
 	BOOST_AUTO_TEST_CASE(lrint_test)
 	{
 		int const initial_feround(fegetround());
 		try {
-			BOOST_CHECK(1 == 0);
 			fesetround(FE_TONEAREST);
 			BOOST_CHECK(lrint(+2.6) == +3);
 			BOOST_CHECK(lrint(+1.4) == +1);
