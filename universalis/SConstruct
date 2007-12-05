@@ -119,6 +119,21 @@ pkg_config_package = pkg_config_package(project,
 	modules = [module]
 )
 
-project.default_targets([pkg_config_package])
+# unit tests
 
+from packageneric.pool.boost import boost
+boost_test = boost(project, 103300, ['unit_test_framework'])
+
+unit_test_module = base_module(source_package,
+			name = source_package.name() + '_unit_tests',
+			version = source_package.version(),
+			dependencies = [pkg_config_package.local_package(), boost_test],
+			target_type = base_module.target_types.program
+)
+from packageneric.generic.scons.find import find
+unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
+unit_test_module.add_sources(find(project, 'src', [os.path.join(os.curdir, 'unit_tests.cpp')]))
+
+###
+project.default_targets([pkg_config_package, unit_test_module])
 Return('pkg_config_package')
