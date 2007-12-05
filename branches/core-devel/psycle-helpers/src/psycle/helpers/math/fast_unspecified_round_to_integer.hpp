@@ -143,4 +143,3 @@ namespace psycle { namespace helpers { namespace math {
 		}
 	}
 #endif
-

@@ -56,7 +56,7 @@ boost_test = boost(project, 103300, ['unit_test_framework'])
 
 from packageneric.generic.scons.module import module
 from packageneric.generic.scons.find import find
-from packageneric.generic.scons.pkg_config_package import pkg_config_package
+#from packageneric.generic.scons.pkg_config_package import pkg_config_package
 
 modules = []
 
