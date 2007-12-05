@@ -71,6 +71,6 @@ unit_test_module.add_sources(find(project, 'src', [os.path.join(os.curdir, 'unit
 
 modules.append(unit_test_module)
 
+###
 project.default_targets(modules)
-
 Return('modules')

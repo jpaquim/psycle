@@ -8,9 +8,15 @@
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 
-#include <psycle/helpers/helpers.hpp>
-#include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/math/round.hpp>
-#include <psycle/helpers/math/truncate.hpp>
-#include <psycle/helpers/math/log.hpp>
+#if 0 // some dummy test case that always fail (to test failure)
+	BOOST_AUTO_TEST_CASE(dummy_failure)
+	{
+		BOOST_CHECK(false);
+	}
+#else
+	BOOST_AUTO_TEST_CASE(dummy_success)
+	{
+		BOOST_CHECK(true);
+	}
+#endif
 
