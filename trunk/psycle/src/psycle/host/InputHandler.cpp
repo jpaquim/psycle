@@ -1195,19 +1195,6 @@ namespace psycle
 			entry._inst = Global::_pSong->auxcolSelected;
 			entry._mach = Global::_pSong->seqBus;	// Not really needed.
 
-			// implement lock sample to machine here.
-			// if the current machine is a sampler, check 
-			// if current sample is locked to a machine.
-			// if so, switch entry._mach to that machine number
-			if (((Machine*)Global::_pSong->_pMachine[Global::_pSong->seqBus])->_type == MACH_SAMPLER)
-			{
-				if ((Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
-					&& (Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_LOCKINST == true))
-				{
-					entry._mach = Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine;
-				}
-			}
-
 			if(velocity != 127 && Global::pConfig->midi().velocity().record())
 			{
 				int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
@@ -1232,19 +1219,28 @@ namespace psycle
 			// play it
 			if(pMachine==NULL)
 			{
-				//int mgn = Global::_pSong->seqBus;			
-//altered for locking sample to machine by alk
-				int mgn = entry._mach;
-
-
-				if (mgn < MAX_MACHINES)
+				if (entry._mach < MAX_MACHINES)
 				{
-					pMachine = Global::_pSong->_pMachine[mgn];
+					pMachine = Global::_pSong->_pMachine[entry._mach];
 				}
 			}	
 
 			if (pMachine)
 			{
+				// implement lock sample to machine here.
+				// if the current machine is a sampler, check 
+				// if current sample is locked to a machine.
+				// if so, switch entry._mach to that machine number
+				if (pMachine->_type == MACH_SAMPLER)
+				{
+					if ((Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
+						&& (Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_LOCKINST == true))
+					{
+						entry._mach = Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine;
+						pMachine = Global::_pSong->_pMachine[entry._mach];
+						if ( !pMachine) return;
+					}
+				}
 				// pick a track to play it on	
 				if(bMultiKey)
 				{
