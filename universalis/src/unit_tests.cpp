@@ -14,15 +14,5 @@
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 
-#if 0 // some dummy test case that always fail (to test failure)
-	BOOST_AUTO_TEST_CASE(dummy_failure)
-	{
-		BOOST_CHECK(false);
-	}
-#else
-	BOOST_AUTO_TEST_CASE(dummy_success)
-	{
-		BOOST_CHECK(true);
-	}
-#endif
+#include <universalis/operating_system/clocks.hpp>
 
