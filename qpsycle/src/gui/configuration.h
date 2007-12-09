@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PSYCLE__GUI__CONFIGURATION
+#define PSYCLE__GUI__CONFIGURATION
+
 #include "inputhandler.h"
 #include <string>
 #include <map>
@@ -8,8 +10,8 @@ namespace psy {
 		class AudioDriver;
 	}
 }
-using psy::core::AudioDriver;
 
+using psy::core::AudioDriver;
 
 enum KnobMode
 {
@@ -113,3 +115,5 @@ class Configuration
 		///\ todo put this in player ..
 		bool _RecordUnarmed;
 };
+
+#endif

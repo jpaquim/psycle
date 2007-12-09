@@ -19,7 +19,6 @@
 ***************************************************************************/
 #ifndef INPUTHANDLER_H
 #define INPUTHANDLER_H
-#include <cassert>
 #include <map>
 /**
 @author  Psycledelics

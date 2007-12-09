@@ -28,7 +28,7 @@
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QPushButton>
-#include <iostream>
+#include <QKeyEvent> // QKeyEvent
 
 AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	: QDialog( parent )
@@ -67,6 +67,16 @@ void AudioConfigDlg::initDriverList( )
 		if ( it->second == ::Global::pConfig()->_pOutputDriver )
 			driverCbx_->setCurrentIndex(driverCbx_->count()-1);
 	}
+}
+
+void AudioConfigDlg::keyPressEvent( QKeyEvent *event)
+{
+	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
+		reject(); // closes the dialog
+  }
+  else if ( event->key() == Qt::Key_Escape) {
+    reject(); // close the dialog
+  }
 }
 
 void AudioConfigDlg::onDriverSelected( const QString & text )
