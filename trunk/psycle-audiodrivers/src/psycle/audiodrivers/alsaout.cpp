@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /******************************************************************************
 *  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
 *                                                                             *
@@ -24,6 +25,10 @@
 #include <cstring>
 namespace psy { namespace core {
 
+static uint32_t muldiv(uint32_t a, uint32_t b, uint32_t c) {
+	return ((uint64_t)a*b+(c>>1))/c;
+}
+
 AlsaOut::AlsaOut()
 	:
 		AudioDriver(),
@@ -34,8 +39,8 @@ AlsaOut::AlsaOut()
 		_initialized(),
 		rate(),
 		channels(),
-		buffer_time(),
-		period_time(),
+		//		buffer_time(),
+		//		period_time(),
 		buffer_size(),
 		period_size(),
 		output(),
@@ -106,8 +111,8 @@ AlsaOut::AlsaOut()
 		format = SND_PCM_FORMAT_S16; // sample format
 		channels = 2; // count of channels
 		// safe values, and usual ones too on other programs
-		buffer_time = 200000;
-		period_time = 20000;
+		//buffer_time = 200000;
+		//period_time = 20000;
 		
 		buffer_size=0;
 		period_size=0;
@@ -116,6 +121,10 @@ AlsaOut::AlsaOut()
 		
 		AudioDriverSettings settings(this->settings());
 		{
+			settings.setSamplesPerSec(44100);
+			settings.setBufferSize(8192);
+			settings.setBlockSize(1024);
+			settings.setBlockCount(8);
 			char const * const env(std::getenv("ALSA_CARD"));
 			if(env) settings.setDeviceName(env);
 			else settings.setDeviceName("default");
@@ -215,9 +224,9 @@ AlsaOut::AlsaOut()
 		// fill the channel areas
 		float const * input(_pCallback(_callbackContext, count));
 		
-    	Quantize16AndDeinterlace(input,samples[0],steps[0],samples[1],steps[1],count);
-	    samples[0]+=steps[0]*count;
-    	samples[1]+=steps[1]*count;
+		Quantize16AndDeinterlace(input,samples[0],steps[0],samples[1],steps[1],count);
+		samples[0]+=steps[0]*count;
+		samples[1]+=steps[1]*count;
 	}
 	
 	int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) {
@@ -270,6 +279,7 @@ AlsaOut::AlsaOut()
 		}
 		
 		// set the buffer time
+		unsigned int buffer_time = muldiv(settings().bufferSize(),1000000,settings().samplesPerSec());
 		err = snd_pcm_hw_params_set_buffer_time_near(handle, params, &buffer_time, 0);
 		if (err < 0) {
 			std::cerr << "psycle: alsa: unable to set buffer time " << buffer_time << " for playback: " << snd_strerror(err) << '\n';
@@ -286,6 +296,7 @@ AlsaOut::AlsaOut()
 		buffer_size = size;
 
 		// set the period time
+		unsigned int period_time = muldiv(settings().blockSize(),1000000,settings().samplesPerSec());
 		err = snd_pcm_hw_params_set_period_time_near(handle, params, &period_time, 0);
 		if (err < 0) {
 			std::cerr << "psycle: alsa: unable to set period time " << period_time << " for playback: " << snd_strerror(err) << '\n';

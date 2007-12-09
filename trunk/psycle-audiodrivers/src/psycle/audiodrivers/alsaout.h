@@ -65,9 +65,9 @@ class AlsaOut : public AudioDriver
 		/// count of channels
 		unsigned int channels;
 		/// ring buffer length in us
-		unsigned int buffer_time;
+    //		unsigned int buffer_time;
 		/// period time in us
-		unsigned int period_time;
+		//unsigned int period_time;
 
 		snd_pcm_sframes_t buffer_size;
 		snd_pcm_sframes_t period_size;
