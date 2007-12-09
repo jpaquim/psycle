@@ -35,14 +35,11 @@ Configuration const & Global::configuration() {
 	return *pConfig();
 }
 
-void Global::setApplication( QApplication *app )
-{
-	app_ = app;
-}
-
 int Global::screenHeight()
 {
-	QDesktopWidget *desktopWidget = app_->desktop();
+	// qApp is a handy global pointer referring to the
+	// unique application object (i.e. qpsycle's QApplication.) 
+	QDesktopWidget *desktopWidget = qApp->desktop();
 	// We're assuming for now psycle doesn't run dual-head...
 	// so access default, primary screen.
 	return desktopWidget->screenGeometry().height();

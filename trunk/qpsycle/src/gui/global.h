@@ -33,7 +33,6 @@ public:
 	static Configuration* pConfig();
 	static const Configuration & configuration();
 	
-	void setApplication( QApplication *app );
 	int screenHeight();
 
 private:
