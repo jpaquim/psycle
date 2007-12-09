@@ -256,6 +256,8 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 {
 	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
 		reject(); // closes the dialog
+	} else if ( event->key() == Qt::Key_Escape ) {
+		reject(); // closes the dialog
 	} else {
 		if ( !event->isAutoRepeat() ) {
 			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
