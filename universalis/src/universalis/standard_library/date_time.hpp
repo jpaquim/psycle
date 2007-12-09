@@ -24,11 +24,6 @@ namespace std {
 		public:
 			typedef long long int tick_type;
 			nanoseconds(tick_type ns = 0) : ns_(ns) {}
-			inline nanoseconds(microseconds const &);
-			inline nanoseconds(milliseconds const &);
-			inline nanoseconds(seconds const &);
-			inline nanoseconds(minutes const &);
-			inline nanoseconds(hours const & h);
 			tick_type get_count() const { return ns_; }
 		private:
 			tick_type ns_;
@@ -38,10 +33,6 @@ namespace std {
 		public:
 			typedef long long int tick_type;
 			microseconds(tick_type us = 0) : us_(us) {}
-			inline microseconds(milliseconds const &);
-			inline microseconds(seconds const &);
-			inline microseconds(minutes const &);
-			inline microseconds(hours const & h);
 			tick_type get_count() const { return us_; }
 			operator nanoseconds() const { nanoseconds ns(us_ * 1000); return ns; }
 		private:
@@ -52,9 +43,6 @@ namespace std {
 		public:
 			typedef long long int tick_type;
 			milliseconds(tick_type ms = 0) : ms_(ms) {}
-			inline milliseconds(seconds const &);
-			inline milliseconds(minutes const &);
-			inline milliseconds(hours const & h);
 			tick_type get_count() const { return ms_; }
 			operator nanoseconds() const { nanoseconds ns(ms_ * 1000000); return ns; }
 			operator microseconds() const { microseconds us(ms_ * 1000); return us; }
@@ -66,8 +54,6 @@ namespace std {
 		public:
 			typedef long long int tick_type;
 			seconds(tick_type s = 0) : s_(s) {}
-			inline seconds(minutes const &);
-			inline seconds(hours const & h);
 			tick_type get_count() const { return s_; }
 			operator nanoseconds() const { nanoseconds ns(s_ * 1000000000); return ns; }
 			operator microseconds() const { microseconds us(s_ * 1000000); return us; }
@@ -80,7 +66,6 @@ namespace std {
 		public:
 			typedef long long int tick_type;
 			minutes(tick_type m = 0) : m_(m) {}
-			inline minutes(hours const & h);
 			tick_type get_count() const { return m_; }
 			operator nanoseconds() const { nanoseconds ns(m_ * 60000000000LL); return ns; }
 			operator microseconds() const { microseconds us(m_ * 60000000); return us; }
@@ -103,29 +88,6 @@ namespace std {
 		private:
 			tick_type h_;
 	};
-
-	/***********************************************************************/
-	// inline implementation
-	
-	nanoseconds::nanoseconds(microseconds const & us) : ns_(us.get_count() * 1000) {}
-	nanoseconds::nanoseconds(milliseconds const & ms) : ns_(ms.get_count() * 1000000) {}
-	nanoseconds::nanoseconds(seconds const & s) : ns_(s.get_count() * 1000000000) {}
-	nanoseconds::nanoseconds(minutes const & m) : ns_(m.get_count() * 60000000000LL) {}
-	nanoseconds::nanoseconds(hours const & h) : ns_(h.get_count() * 3600000000000LL) {}
-
-	microseconds::microseconds(milliseconds const & ms) : us_(ms.get_count() * 1000) {}
-	microseconds::microseconds(seconds const & s) : us_(s.get_count() * 1000000) {}
-	microseconds::microseconds(minutes const & m) : us_(m.get_count() * 60000000LL) {}
-	microseconds::microseconds(hours const & h) : us_(h.get_count() * 3600000000LL) {}
-	
-	milliseconds::milliseconds(seconds const & s) : ms_(s.get_count() * 1000) {}
-	milliseconds::milliseconds(minutes const & m) : ms_(m.get_count() * 60000LL) {}
-	milliseconds::milliseconds(hours const & h) : ms_(h.get_count() * 3600000LL) {}
-
-	seconds::seconds(minutes const & m) : s_(m.get_count() * 60LL) {}
-	seconds::seconds(hours const & h) : s_(h.get_count() * 3600LL) {}
-
-	minutes::minutes(hours const & h) : m_(h.get_count() * 60LL) {}
 
 	#if defined BOOST_AUTO_TEST_CASE
 		BOOST_AUTO_TEST_CASE(std_date_time_test)
