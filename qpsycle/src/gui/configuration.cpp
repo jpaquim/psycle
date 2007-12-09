@@ -373,9 +373,9 @@ void Configuration::loadConfig( const std::string & path )
 	doEnableSound = true;
 }
 
-void Configuration::configureKeyBindings() // FIXME: Key bindings are host specific, should be moved?
+void Configuration::configureKeyBindings()
 {
-	int modifiers = Qt::NoModifier; // Shouldn't have Qt stuff in psycore in the future.
+	int modifiers = Qt::NoModifier;
 	inputHandler_.changeKeyCode(commands::key_C_0, Key( modifiers, Qt::Key_Z ) );
 	inputHandler_.changeKeyCode(commands::key_CS0, Key( modifiers, Qt::Key_S ) );
 	inputHandler_.changeKeyCode(commands::key_D_0,Key(modifiers,Qt::Key_X));

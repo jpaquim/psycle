@@ -38,7 +38,5 @@ int main(int argc, char *argv[])
 	MainWindow mainWin;
 	mainWin.show();
 
-	Global::Instance().setApplication( app );
-
 	return app->exec();
 }
