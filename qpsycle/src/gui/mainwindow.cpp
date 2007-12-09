@@ -45,7 +45,15 @@
 #include "logconsole.h"
 #include "../model/instrumentsmodel.h"
 
-#include <QtGui>
+#include <QComboBox>
+#include <QDockWidget>
+#include <QStatusBar>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QFileDialog>
+
+#include <QSettings>
+#include <QTextCodec>
 
 #include <iostream>
 #include <iomanip>
