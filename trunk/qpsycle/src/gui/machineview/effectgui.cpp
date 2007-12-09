@@ -38,9 +38,9 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
 	: MachineGui(left, top, mac, macView)
 {
 	qDebug("creating effeect gui");
-	m_macTwkDlg = new MachineTweakDlg( this, macView );
-	showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
-	connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
+	m_macTweakDlg = new MachineTweakDlg( this, macView );
+	showMacTweakDlgAct_ = new QAction( "Tweak Parameters", this );
+	connect( showMacTweakDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTweakDlg() ) );
 
 	setBrush( QColor( 0, 180, 0 ) );
 
@@ -50,7 +50,7 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
 
 EffectGui::~EffectGui()
 {
-	delete m_macTwkDlg;
+	delete m_macTweakDlg;
 }
 
 void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
@@ -111,7 +111,7 @@ void EffectGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		menu.addAction("Clone");
 		menu.addAction( deleteMachineAct_ );
 		menu.addSeparator();
-		menu.addAction( showMacTwkDlgAct_ );
+		menu.addAction( showMacTweakDlgAct_ );
 		menu.addSeparator();
 		menu.addAction( toggleMuteAct_ );
 		menu.addAction( toggleBypassAct_ );
@@ -132,15 +132,15 @@ void EffectGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 			muteRect.contains( event->pos().toPoint() ) ||
 			bypassRect.contains( event->pos().toPoint() )
 		) )
-			showMacTwkDlgAct_->trigger();
+			showMacTweakDlgAct_->trigger();
 		else
 			mousePressEvent(event);
 	}
 }
 
-void EffectGui::showMacTwkDlg()
+void EffectGui::showMacTweakDlg()
 {
-	m_macTwkDlg->show();
+	m_macTweakDlg->show();
 }
 
 void EffectGui::onToggleBypassActionTriggered() 

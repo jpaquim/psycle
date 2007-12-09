@@ -211,7 +211,7 @@ protected:
 
 signals:
 	void notePress( int note, psy::core::Machine *mac );
-	void noteRelease( int note );
+	void noteRelease( int note, psy::core::Machine *mac );
 
 private:
 	void createActions();

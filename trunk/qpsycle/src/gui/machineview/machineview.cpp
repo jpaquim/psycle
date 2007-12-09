@@ -1,4 +1,5 @@
-	/***************************************************************************
+/* -*- mode:c++, indent-tabs-mode:t -*- */
+/***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
 *                                                                         *
@@ -505,6 +506,9 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 	}
 }
 
+static void sendStopNote(psy::core::Machine* pMachine) {
+}
+
 /**
 	* For keyjazz again, on key release.
 	*/
@@ -524,7 +528,9 @@ void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMac
 		if (mgn < psy::core::MAX_MACHINES) {
 			pMachine = song()->machine(mgn);
 		}
+	}
 
+	if(pMachine) {
 		for(int i=0; i<song()->tracks(); i++) {
 			if(notetrack[i]==note) {
 				notetrack[i]=120;
@@ -535,17 +541,23 @@ void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMac
 				entry.setMachine( song()->seqBus );
 				entry.setCommand( 0 );
 				entry.setParameter( 0 );
-
+				
 				// play it
-				if (pMachine) {
-					pMachine->Tick( i, entry );
-				}
+				pMachine->Tick( i, entry );
 			}
 		}
-
 	}
 }
 
+void MachineView::onNotePress( int note, psy::core::Machine* mac )
+{
+	playNote( note, 127, true, mac );
+}
+
+void MachineView::onNoteRelease( int note, psy::core::Machine* mac )
+{
+	stopNote( note, true, mac );
+}
 
 /**
 	* Figure out which note to play from the command
@@ -768,7 +780,7 @@ void MachineScene::keyPressEvent( QKeyEvent * event )
 			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 			int note = macView_->noteFromCommand( command );
 			if ( note > -1 ) {
-				onNotePress( note, macView_->chosenMachine()->mac() );
+				macView_->onNotePress( note, macView_->chosenMachine()->mac() );
 			}
 		}
 	}
@@ -786,18 +798,7 @@ void MachineScene::keyReleaseEvent( QKeyEvent * event )
 
 	int note = macView_->noteFromCommand( command );
 	if ( note > -1 ) {
-		onNoteRelease( note );
+		macView_->onNoteRelease( note, NULL );
 	}
 	event->ignore();
 }
-
-void MachineScene::onNotePress( int note, psy::core::Machine* mac )
-{
-	macView_->playNote( macView_->octave() * 12 + note, 127, false, mac );   
-}
-
-void MachineScene::onNoteRelease( int note )
-{
-	macView_->stopNote( note );   
-}
-

@@ -35,14 +35,18 @@
 GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
 {
-	m_macTwkDlg = new MachineTweakDlg( this, macView );
-	showMacTwkDlgAct_ = new QAction( "Tweak Parameters", this );
-	connect( showMacTwkDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTwkDlg() ) );
+	m_macTweakDlg = new MachineTweakDlg( this, macView );
+  connect(m_macTweakDlg, SIGNAL( notePress( int, psy::core::Machine* )),
+          macView, SLOT( onNotePress( int, psy::core::Machine* ) ) );
+  connect(m_macTweakDlg, SIGNAL( noteRelease( int, psy::core::Machine* )),
+          macView, SLOT( onNoteRelease( int, psy::core::Machine* ) ) );
+	showMacTweakDlgAct_ = new QAction( "Tweak Parameters", this );
+	connect( showMacTweakDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTweakDlg() ) );
 }
 
 GeneratorGui::~GeneratorGui()
 {
-	delete m_macTwkDlg;
+	delete m_macTweakDlg;
 }
 
 void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
@@ -71,7 +75,7 @@ void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		menu.addAction( cloneMachineAct_ );
 		menu.addAction( deleteMachineAct_ );
 		menu.addSeparator();
-		menu.addAction( showMacTwkDlgAct_ );
+		menu.addAction( showMacTweakDlgAct_ );
 		menu.addSeparator();
 		menu.addAction( toggleMuteAct_ );
 		menu.addAction( toggleSoloAct_ );
@@ -125,9 +129,9 @@ void GeneratorGui::keyReleaseEvent( QKeyEvent *event )
 	}
 }
 
-void GeneratorGui::showMacTwkDlg()
+void GeneratorGui::showMacTweakDlg()
 {
-	m_macTwkDlg->show();
+	m_macTweakDlg->show();
 }
 
 void GeneratorGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
@@ -141,7 +145,7 @@ void GeneratorGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 			muteRect.contains( event->pos().toPoint() ) ||
 			soloRect.contains( event->pos().toPoint() )
 		) )
-			showMacTwkDlgAct_->trigger();
+			showMacTweakDlgAct_->trigger();
 		else
 			mousePressEvent(event);
 	}

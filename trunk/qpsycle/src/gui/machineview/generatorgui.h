@@ -45,7 +45,7 @@ public:
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 public slots:
-	void showMacTwkDlg();
+	void showMacTweakDlg();
 
 protected:
 	void keyPressEvent( QKeyEvent * event );
@@ -55,7 +55,7 @@ protected:
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 
 
-	MachineTweakDlg *m_macTwkDlg;
+	MachineTweakDlg *m_macTweakDlg;
 };
 
 #endif

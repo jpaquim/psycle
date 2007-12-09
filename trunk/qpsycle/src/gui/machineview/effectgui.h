@@ -35,7 +35,7 @@ public:
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 public slots:
-	void showMacTwkDlg();
+	void showMacTweakDlg();
 	void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
 
 protected:
@@ -43,7 +43,7 @@ protected:
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
-	MachineTweakDlg *m_macTwkDlg;
+	MachineTweakDlg *m_macTweakDlg;
 private:
 	QAction *toggleBypassAct_;
 

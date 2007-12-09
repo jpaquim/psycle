@@ -75,7 +75,7 @@ protected:
 	MachineView *m_macView;
 	psy::core::Machine *m_mac;
 
-	QAction *showMacTwkDlgAct_;
+	QAction *showMacTweakDlgAct_;
 	QAction *deleteMachineAct_;
 	QAction *renameMachineAct_;
 	QAction *cloneMachineAct_;
