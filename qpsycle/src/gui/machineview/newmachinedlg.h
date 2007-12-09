@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -39,8 +40,12 @@ class NewMachineDlg : public QDialog
 
 	const psy::core::PluginFinderKey & pluginKey() const;
 
+protected:
+	void keyPressEvent( QKeyEvent *event );
+
 public slots:
 	void itemSelectionChanged( );
+	void tryAccept( );
 
 	private:
 		QDialogButtonBox *buttonBox;

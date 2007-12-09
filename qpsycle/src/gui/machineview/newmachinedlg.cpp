@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -81,13 +82,13 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 		connect( lists[i], SIGNAL( itemSelectionChanged( ) ), 
 				this, SLOT( itemSelectionChanged( ) ) );
 
-		connect( lists[i], SIGNAL( itemDoubleClicked( QListWidgetItem* ) ),
-				this, SLOT( accept() ) );
+		connect( lists[i], SIGNAL( itemActivated( QListWidgetItem* ) ),
+				this, SLOT( tryAccept() ) );
 		}
 
 		buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
 										| QDialogButtonBox::Cancel);
-		connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+		connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
 		connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 		
 		machineTabs->addTab(genList, QIcon(":images/gen-native.png"), "Generators");
@@ -100,11 +101,20 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 		setLayout(layout);
 	}
 
+void NewMachineDlg::keyPressEvent( QKeyEvent *event )
+{
+	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
+		reject(); // closes the dialog
+	} else if ( event->key() == Qt::Key_Escape ) {
+		reject(); // closes the dialog
+	}
+}
+
 void NewMachineDlg::itemSelectionChanged()
 {
 	// prevent reentry
 	if(inItemSelectionChanged) {
-	return;
+		return;
 	}
 	inItemSelectionChanged = true;
 
@@ -158,6 +168,13 @@ void NewMachineDlg::setPlugin( QListWidgetItem* item )
 		std::fprintf(stderr,"Unable to find plugin for QListWidgetItem\n");
 	}
 }
+
+void NewMachineDlg::tryAccept() {
+	if (selectedItem) {
+		accept();
+	}
+}
+
 
 const psy::core::PluginFinderKey & NewMachineDlg::pluginKey() const {
 	return selectedKey_;
