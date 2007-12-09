@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 by Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -73,10 +74,10 @@ void AudioConfigDlg::keyPressEvent( QKeyEvent *event)
 {
 	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
 		reject(); // closes the dialog
-  }
-  else if ( event->key() == Qt::Key_Escape) {
-    reject(); // close the dialog
-  }
+	}
+	else if ( event->key() == Qt::Key_Escape) {
+		reject(); // close the dialog
+	}
 }
 
 void AudioConfigDlg::onDriverSelected( const QString & text )
