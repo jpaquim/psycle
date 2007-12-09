@@ -277,7 +277,7 @@ void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
 		int note = NULL;
 		note = noteFromCommand( command );
 		if (note) {
-			emit noteRelease( note );   
+			emit noteRelease( note, pMachine_ );
 		}
 	}
 }

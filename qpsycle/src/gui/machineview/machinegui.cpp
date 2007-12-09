@@ -30,7 +30,6 @@
 #include "machinegui.h"
 #include "machineview.h"
 #include "wiregui.h"
-#include "machinetweakdlg.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>

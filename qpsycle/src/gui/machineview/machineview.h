@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -55,7 +56,11 @@ public:
 
 	void playNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
 	void stopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
+public slots:
+	void onNotePress( int note, psy::core::Machine* mac );
+	void onNoteRelease( int note, psy::core::Machine* mac );
 
+public:
 	psy::core::Song *song();
 	void setSong( psy::core::Song *song ) { song_ = song; }
 	void setChosenMachine( MachineGui* macGui );
@@ -117,15 +122,11 @@ class MachineScene : public QGraphicsScene {
 Q_OBJECT
 public:
 	MachineScene( MachineView *macView );
-	void onNotePress( int note, psy::core::Machine* mac );
-	void onNoteRelease( int note );
-
 protected:
 	void keyPressEvent( QKeyEvent *event );
 	void keyReleaseEvent( QKeyEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 signals:
-
 
 private:
 	MachineView *macView_;
