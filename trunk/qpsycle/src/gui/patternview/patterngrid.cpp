@@ -508,6 +508,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 	event->accept();
 
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers() , event->key() ) );
+  std::cout << "PatternGrid::keyPressEvent: command: " << command << std::endl;
 	
 	if ( cursor().eventNr() == 0 && isNote( command ) ) 
 	{
@@ -612,8 +613,11 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
 void PatternGrid::doNoteEvent( int note )
 {
+  std::cout << "PatternGrid::doNoteEvent( "<< note << " )" << std::endl;
 	if ( note == commands::key_stop ) {
-		//pView->noteOffAny( cursor() );
+    patDraw_->patternView()->enterNoteOff( cursor() );
+    moveCursor( 0, patternStep() );
+    checkDownScroll( cursor() );
 	} else if (note >=0 && note < 120) {
 // FIXME: better to emit a signal rather than calling enterNote direct?
 		bool noteAdded = patDraw_->patternView()->enterNote( cursor(), note ); 
@@ -928,6 +932,7 @@ void PatternGrid::repaintCursor() {
 bool PatternGrid::isNote( int key )
 {
 	if ( 
+    key == commands::key_stop ||
 		key == commands::key_C_0 ||
 		key == commands::key_CS0 ||
 		key == commands::key_D_0 ||

@@ -135,6 +135,26 @@ bool PatternView::enterNote( const PatCursor & cursor, int note )
 	return false;
 }
 
+bool PatternView::enterNoteOff( const PatCursor & cursor ) 
+{
+	if ( recordCb_->isChecked() == true)
+	{
+		if ( pattern() ) {
+			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+			psy::core::Machine* tmac = song_->machine( song_->seqBus );
+			event.setNote( commands::key_stop );
+			if (tmac) event.setMachine( tmac->id() );
+			if (tmac && tmac->type() == psy::core::MACH_SAMPLER ) {
+				event.setInstrument( song_->instSelected );
+			}
+			pattern()->setEvent( cursor.line(), cursor.track(), event );
+			if (tmac) tmac->Tick(cursor.track(),event);
+			return true;
+		}
+	}
+	return false;
+}
+
 void PatternView::clearNote( const PatCursor & cursor) {
 	if ( pattern() ) {
 		psy::core::Machine* tmac = song_->machine( song_->seqBus );

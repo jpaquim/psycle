@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -47,6 +48,7 @@ public:
 	~PatternView();
 
 	bool enterNote( const PatCursor & cursor, int note );
+	bool enterNoteOff( const PatCursor & cursor );
 	void clearNote( const PatCursor & cursor);
 	void onTick( double sequenceStart );
 
