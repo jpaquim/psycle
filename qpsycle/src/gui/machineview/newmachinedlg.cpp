@@ -26,7 +26,8 @@
 #include "../global.h"
 #include "../configuration.h"
 
-#include <QtGui>
+#include <QKeyEvent>
+#include <QGridLayout>
 
 NewMachineDlg::NewMachineDlg(QWidget *parent) 
 	:

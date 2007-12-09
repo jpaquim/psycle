@@ -468,28 +468,23 @@ void MainWindow::createActions()
 
 	showPatternBoxAct_ = new QAction( tr("Pattern &Box"), this );
 	showPatternBoxAct_->setShortcut( tr( showPatternBoxSetting.data() ) );
-	connect( showPatternBoxAct_, SIGNAL( triggered() ),
-		 this, SLOT( showPatternBox() ) );
+	connect( showPatternBoxAct_, SIGNAL( triggered() ), this, SLOT( showPatternBox() ) );
 
 	showMachineViewAct_ = new QAction( tr("&Machine view"), this );
 	showMachineViewAct_->setShortcut( tr( showMachineViewSetting.data() ) );
-	connect( showMachineViewAct_, SIGNAL( triggered() ),
-		 this, SLOT( showMachineView() ) );
+	connect( showMachineViewAct_, SIGNAL( triggered() ), this, SLOT( showMachineView() ) );
 
 	showPatternViewAct_ = new QAction( tr("&Pattern view"), this );
 	showPatternViewAct_->setShortcut( tr( showPatternViewSetting.data() ) );
-	connect( showPatternViewAct_, SIGNAL( triggered() ),
-		 this, SLOT( showPatternView() ) );
+	connect( showPatternViewAct_, SIGNAL( triggered() ), this, SLOT( showPatternView() ) );
 
 	showWaveEditorAct_ = new QAction( tr("&Wave editor"), this );
 	showWaveEditorAct_->setShortcut( tr( showWaveEditorSetting.data() ) );
-	connect( showWaveEditorAct_, SIGNAL( triggered() ),
-		 this, SLOT( showWaveEditor() ) );
+	connect( showWaveEditorAct_, SIGNAL( triggered() ), this, SLOT( showWaveEditor() ) );
 
 	showSequencerViewAct_ = new QAction( tr("&Sequencer view"), this );
 	showSequencerViewAct_->setShortcut( tr( showSequencerViewSetting.data() ) );
-	connect( showSequencerViewAct_, SIGNAL( triggered() ),
-		 this, SLOT( showSequencerView() ) );
+	connect( showSequencerViewAct_, SIGNAL( triggered() ), this, SLOT( showSequencerView() ) );
 
 
 	// Playback actions.

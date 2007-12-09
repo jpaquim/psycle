@@ -32,7 +32,11 @@
 #include "linenumbercolumn.h"
 
 #include <QVBoxLayout>
-#include <QtGui>
+#include <QKeyEvent>
+#include <QComboBox>
+#include <QAction>
+#include <QToolBar>
+#include <QLabel>
 
 int d2i(double d)
 {

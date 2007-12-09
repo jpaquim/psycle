@@ -27,8 +27,9 @@
 #include "trackheader.h"
 #include "linenumbercolumn.h"
 
-#include <QtGui>
 #include <QDebug>
+#include <QEvent>
+#include <QKeyEvent>
 
 /**
 	* PatternDraw.  This is where the drawing of the pattern

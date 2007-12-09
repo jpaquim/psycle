@@ -27,8 +27,9 @@
 #include "wavedisplay.h"
 #include "waveamp.h"
 
-#include <QtGui>
-#include <iostream>
+#include <QAction>
+#include <QMessageBox>
+#include <QFileDialog>
 
 #include <iostream>
 #include <iomanip>
