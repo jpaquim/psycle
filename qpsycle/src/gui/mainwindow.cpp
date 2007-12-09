@@ -54,6 +54,7 @@
 
 #include <QSettings>
 #include <QTextCodec>
+#include <QDebug>
 
 #include <iostream>
 #include <iomanip>
@@ -153,34 +154,6 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
 	switch ( command ) {
-		case commands::show_pattern_box:
-		{
-		if ( !dock_->isVisible() ) {
-			dock_->setVisible( true );
-			patternBox_->patternTree()->setFocus();
-		} else {
-			if ( patternBox_->patternTree()->hasFocus() ) {
-				dock_->setVisible( false );
-			} else {
-				patternBox_->patternTree()->setFocus();
-			}
-		}
-		}
-		break;
-		case commands::show_machine_view:
-			views_->setCurrentWidget( macView_ );
-		break;
-		case commands::show_pattern_view:
-			views_->setCurrentWidget( patView_ );
-			patView_->patDraw()->setFocus();
-			patView_->patDraw()->scene()->setFocusItem( patView_->patDraw()->patternGrid() );
-		break;
-		case commands::show_wave_editor:
-			views_->setCurrentWidget( wavView_ );
-		break;
-		case commands::show_sequencer_view:
-			views_->setCurrentWidget( seqView_ );
-		break;
 		case commands::instrument_inc:
 			sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
 		break;
@@ -484,9 +457,43 @@ void MainWindow::createActions()
 	aboutAct->setStatusTip(tr("About qpsycle"));
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQpsycle()));
 
+	QSettings settings;
+
+	// View actions.
+	QByteArray showPatternBoxSetting = settings.value( "keys/showPatternBox", "F1" ).toByteArray();
+	QByteArray showMachineViewSetting = settings.value( "keys/showMachineView", "F2" ).toByteArray();
+	QByteArray showPatternViewSetting = settings.value( "keys/showPatternView", "F3" ).toByteArray();
+	QByteArray showWaveEditorSetting = settings.value( "keys/showWaveEditor", "F4" ).toByteArray();
+	QByteArray showSequencerViewSetting = settings.value( "keys/showSequencerView", "F5" ).toByteArray();
+
+	showPatternBoxAct_ = new QAction( tr("Pattern &Box"), this );
+	showPatternBoxAct_->setShortcut( tr( showPatternBoxSetting.data() ) );
+	connect( showPatternBoxAct_, SIGNAL( triggered() ),
+		 this, SLOT( showPatternBox() ) );
+
+	showMachineViewAct_ = new QAction( tr("&Machine view"), this );
+	showMachineViewAct_->setShortcut( tr( showMachineViewSetting.data() ) );
+	connect( showMachineViewAct_, SIGNAL( triggered() ),
+		 this, SLOT( showMachineView() ) );
+
+	showPatternViewAct_ = new QAction( tr("&Pattern view"), this );
+	showPatternViewAct_->setShortcut( tr( showPatternViewSetting.data() ) );
+	connect( showPatternViewAct_, SIGNAL( triggered() ),
+		 this, SLOT( showPatternView() ) );
+
+	showWaveEditorAct_ = new QAction( tr("&Wave editor"), this );
+	showWaveEditorAct_->setShortcut( tr( showWaveEditorSetting.data() ) );
+	connect( showWaveEditorAct_, SIGNAL( triggered() ),
+		 this, SLOT( showWaveEditor() ) );
+
+	showSequencerViewAct_ = new QAction( tr("&Sequencer view"), this );
+	showSequencerViewAct_->setShortcut( tr( showSequencerViewSetting.data() ) );
+	connect( showSequencerViewAct_, SIGNAL( triggered() ),
+		 this, SLOT( showSequencerView() ) );
+
 
 	// Playback actions.
-	QSettings settings;
+
 	QByteArray playFromStartSetting = settings.value( "keys/playFromStart", "Shift+F6" ).toByteArray();
 	QByteArray playFromSeqPosSetting = settings.value( "keys/playFromSeqPos", "F6" ).toByteArray();
 	QByteArray playStopSetting = settings.value( "keys/playStop", "F8" ).toByteArray();
@@ -523,6 +530,12 @@ void MainWindow::createMenus()
 	editMenu->addAction(redoAct);
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
+	viewMenu->addAction( showPatternBoxAct_ );
+	viewMenu->addAction( showMachineViewAct_ );
+	viewMenu->addAction( showPatternViewAct_ );
+	viewMenu->addAction( showWaveEditorAct_ );
+	viewMenu->addAction( showSequencerViewAct_ );
+	viewMenu->addSeparator();
 	viewMenu->addAction( showUnReAct );
 	viewMenu->addAction( showLogConsAct );
 	
@@ -729,6 +742,24 @@ void MainWindow::playStop()
 	psy::core::Player::Instance()->stop();
 }
 
+void MainWindow::showMachineView()
+{
+	views_->setCurrentWidget( macView_ );
+}
+
+void MainWindow::showPatternView()
+{
+	views_->setCurrentWidget( patView_ );
+}
+void MainWindow::showWaveEditor()
+{
+	views_->setCurrentWidget( wavView_ );
+}
+void MainWindow::showSequencerView()
+{
+	views_->setCurrentWidget( seqView_ );
+}
+
 void MainWindow::showAudioConfigDlg()
 {
 	audioCnfDlg->exec();
@@ -757,4 +788,18 @@ void MainWindow::showUndoView()
 void MainWindow::showLogCons()
 {
 	dockL_->setVisible(!dockL_->isVisible());
+}
+
+void MainWindow::showPatternBox()
+{
+	if ( !dock_->isVisible() ) {
+		dock_->setVisible( true );
+		patternBox_->patternTree()->setFocus();
+	} else {
+		if ( patternBox_->patternTree()->hasFocus() ) {
+			dock_->setVisible( false );
+		} else {
+			patternBox_->patternTree()->setFocus();
+		}
+	}
 }
