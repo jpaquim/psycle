@@ -104,6 +104,11 @@ private slots:
 	void playFromSeqPos();
 	void playStop();
 
+	void showPatternBox();
+	void showMachineView();
+	void showPatternView();
+	void showWaveEditor();
+	void showSequencerView();
 	void showAudioConfigDlg();
 	void showSettingsDlg();
 	void showUndoView();
@@ -152,8 +157,16 @@ private:
 	QAction *redoAct;
 	QAction *aboutAct;
 	QAction *quitAct;
+
+	QAction *showPatternBoxAct_;
+	QAction *showMachineViewAct_;
+	QAction *showPatternViewAct_;
+	QAction *showWaveEditorAct_;
+	QAction *showSequencerViewAct_;
+
 	QAction *showUnReAct;
 	QAction *showLogConsAct;
+
 	QAction *playFromStartAct;
 	QAction *playFromSeqPosAct;
 	QAction *playPatAct;
