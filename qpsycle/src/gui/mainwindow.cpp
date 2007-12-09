@@ -173,21 +173,6 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 		case commands::show_sequencer_view:
 			views_->setCurrentWidget( seqView_ );
 		break;
-		// Play controls.
-		case commands::play_start:
-		playFromStartAct->trigger();
-		break;
-		case commands::play_from_position:
-		playFromSeqPosAct->trigger();
-		break;
-		case commands::play_stop:
-		playStopAct->trigger();
-		break;
-		case commands::play_loop_entry:
-		{
-//            psy::core::Player::Instance()->setLoopPatternEntry( ... );
-		}
-		break;
 		case commands::instrument_inc:
 			sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
 		break;
@@ -491,13 +476,28 @@ void MainWindow::createActions()
 	aboutAct->setStatusTip(tr("About qpsycle"));
 	connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQpsycle()));
 
+
+	// Playback actions.
+	QSettings settings;
+	QByteArray playFromStartSetting = settings.value( "keys/playFromStart", "Shift+F6" ).toByteArray();
+	QByteArray playFromSeqPosSetting = settings.value( "keys/playFromSeqPos", "F6" ).toByteArray();
+	QByteArray playStopSetting = settings.value( "keys/playStop", "F8" ).toByteArray();
+	QByteArray playPatSetting = settings.value( "keys/playPattern", "Shift+F6" ).toByteArray();
+
 	playFromStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
+	playFromStartAct->setShortcut( tr( playFromStartSetting.data() ) );
 	connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
+
 	playFromSeqPosAct = new QAction(QIcon(":/images/play.png"), tr("Play from &sequencer position"), this);
+	playFromSeqPosAct->setShortcut( tr( playFromSeqPosSetting.data() ) );
 	connect( playFromSeqPosAct, SIGNAL( triggered() ), this, SLOT( playFromSeqPos() ) );
 	playFromSeqPosAct->setCheckable(true);
+
 	playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
+	playStopAct->setShortcut( tr( playStopSetting.data() ) );
 	connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
+
+	///\todo Doesn't do anything yet.
 	playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
 }
 
