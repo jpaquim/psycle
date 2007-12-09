@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -36,10 +37,10 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 	: MachineGui(left, top, mac, macView)
 {
 	m_macTweakDlg = new MachineTweakDlg( this, macView );
-  connect(m_macTweakDlg, SIGNAL( notePress( int, psy::core::Machine* )),
-          macView, SLOT( onNotePress( int, psy::core::Machine* ) ) );
-  connect(m_macTweakDlg, SIGNAL( noteRelease( int, psy::core::Machine* )),
-          macView, SLOT( onNoteRelease( int, psy::core::Machine* ) ) );
+	connect(m_macTweakDlg, SIGNAL( notePress( int, psy::core::Machine* )),
+					macView, SLOT( onNotePress( int, psy::core::Machine* ) ) );
+	connect(m_macTweakDlg, SIGNAL( noteRelease( int, psy::core::Machine* )),
+					macView, SLOT( onNoteRelease( int, psy::core::Machine* ) ) );
 	showMacTweakDlgAct_ = new QAction( "Tweak Parameters", this );
 	connect( showMacTweakDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTweakDlg() ) );
 }

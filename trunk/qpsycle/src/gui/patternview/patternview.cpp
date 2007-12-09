@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -123,7 +124,7 @@ bool PatternView::enterNote( const PatCursor & cursor, int note )
 				event.setInstrument( song_->instSelected );
 			}
 			pattern()->setEvent( cursor.line(), cursor.track(), event );
-//        if (tmac) PlayNote( octave() * 12 + note, 127, false, tmac);   
+			if (tmac) tmac->Tick(cursor.track(),event);
 			return true;
 		}
 	}
@@ -132,10 +133,12 @@ bool PatternView::enterNote( const PatCursor & cursor, int note )
 
 void PatternView::clearNote( const PatCursor & cursor) {
 	if ( pattern() ) {
+		psy::core::Machine* tmac = song_->machine( song_->seqBus );
 		psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
 		event.setNote(255);
 		event.setSharp( false/*drawArea->sharpMode()*/ );
 		pattern()->setEvent( cursor.line(), cursor.track(), event );
+		if (tmac) tmac->Tick(cursor.track(),event);
 	}
 }
 
