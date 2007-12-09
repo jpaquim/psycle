@@ -19,7 +19,7 @@
 #include <qpsyclePch.hpp>
 
 #include <QApplication>
-#include <QtGui/qicon.h>
+#include <QIcon>
 
 #include "gui/mainwindow.h"
 #include "gui/global.h"
@@ -27,7 +27,7 @@
 int main(int argc, char *argv[])
 {
 	QApplication *app = new QApplication(argc, argv);
-	QCoreApplication::setOrganizationName( "Psycle Ltd" );
+	QCoreApplication::setOrganizationName( "PsycleSoft" );
 	QCoreApplication::setOrganizationDomain( "psycle.pastnotecut.org" );
 	QCoreApplication::setApplicationName( "qpsycle" );
 
