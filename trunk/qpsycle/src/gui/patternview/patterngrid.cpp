@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /**************************************************************************
 *   Copyright (C) 2007 by Psycledelics Community                          *
 *   psycle.sourceforge.net                                                *
@@ -603,6 +604,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 		case commands::block_delete: 
 		deleteBlock();
 		break;
+	case commands::row_insert:
+		insertRow();
+		break;
+	case commands::row_delete:		
+		deleteRow();
+		break;
 		default:
 		// If we got here, we didn't do anything with it, so officially ignore it.
 		event->ignore();
@@ -613,7 +620,6 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
 void PatternGrid::doNoteEvent( int note )
 {
-  std::cout << "PatternGrid::doNoteEvent( "<< note << " )" << std::endl;
 	if ( note == commands::key_stop ) {
     patDraw_->patternView()->enterNoteOff( cursor() );
     moveCursor( 0, patternStep() );
@@ -1348,6 +1354,16 @@ void PatternGrid::deleteBlock( )
 
 	pattern()->deleteBlock(left, right, top, bottom);
 	update( boundingRect() ); // FIXME: be more specific.
+}
+
+void PatternGrid::insertRow() {
+	// \todo: implement
+	std::cout << "PatternGrid::insertRow() not yet implemented" << std::endl;
+}
+
+void PatternGrid::deleteRow() {
+	// \todo: implement
+	std::cout << "PatternGrid::deleteRow() not yet implemented" << std::endl;
 }
 
 QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {

@@ -194,8 +194,6 @@ Q_OBJECT
 	public:
 	MachineTweakDlg( MachineGui *macGui, QWidget *parent );
 
-	int noteFromCommand( int command );
-
 protected:
 	void showEvent( QShowEvent *event );
 	void keyPressEvent( QKeyEvent *event );

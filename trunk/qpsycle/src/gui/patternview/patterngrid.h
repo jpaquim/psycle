@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 by Psycledelics Community   *
 *   psycle.sourceforge.net   *
@@ -238,6 +239,9 @@ public:
 	void copyBlock( bool cutit );
 	void pasteBlock( int tx,int lx,bool mix );
 	void deleteBlock( );
+
+	void insertRow();
+	void deleteRow();
 
 	void selectUp();
 	void selectDown();

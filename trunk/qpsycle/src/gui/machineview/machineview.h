@@ -69,8 +69,6 @@ public:
 	void setOctave( int newOctave );
 	bool isCreatingWire() { return creatingWire_; }
 
-	int noteFromCommand( int command );
-
 protected:
 	void keyPressEvent(QKeyEvent *event);
 	void scaleView(qreal scaleFactor);

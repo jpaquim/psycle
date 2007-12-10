@@ -559,110 +559,6 @@ void MachineView::onNoteRelease( int note, psy::core::Machine* mac )
 	stopNote( note, true, mac );
 }
 
-/**
-	* Figure out which note to play from the command
-	* given.
-	*
-	* <nmather> I think commands might correspond to the
-	* correct notes directly at present, but best not to
-	* rely on that always being the case.
-	*/
-int MachineView::noteFromCommand( int command )
-{
-	int note = -1;
-	switch ( command ) {
-		case commands::key_C_0:
-		note = 0;
-		break;
-		case commands::key_CS0:
-		note = 1;
-		break;
-		case commands::key_D_0:
-		note = 2;
-		break;
-		case commands::key_DS0:
-		note = 3;
-		break;
-		case commands::key_E_0:
-		note = 4;
-		break;
-		case commands::key_F_0:
-		note = 5;
-		break;
-		case commands::key_FS0:
-		note = 6;
-		break;
-		case commands::key_G_0:
-		note = 7;
-		break;
-		case commands::key_GS0:
-		note = 8;
-		break;
-		case commands::key_A_0:
-		note = 9;
-		break;
-		case commands::key_AS0:
-		note = 10;
-		break;
-		case commands::key_B_0: 
-		note = 11;
-		break;
-		case commands::key_C_1:
-		note = 12;
-		break;
-		case commands::key_CS1:
-		note = 13;
-		break;
-		case commands::key_D_1:
-		note = 14;
-		break;
-		case commands::key_DS1:
-		note = 15;
-		break;
-		case commands::key_E_1:
-		note = 16;
-		break;
-		case commands::key_F_1:
-		note = 17;
-		break;
-		case commands::key_FS1:
-		note = 18;
-		break;
-		case commands::key_G_1:
-		note = 19;
-		break;
-		case commands::key_GS1:
-		note = 20;
-		break;
-		case commands::key_A_1:
-		note = 21;
-		break;
-		case commands::key_AS1:
-		note = 22;
-		break;
-		case commands::key_B_1: 
-		note = 23;
-		break;
-		case commands::key_C_2:
-		note = 24;
-		break;
-		case commands::key_CS2:
-		note = 25;
-		break;
-		case commands::key_D_2:
-		note = 26;
-		break;
-		case commands::key_DS2:
-		note = 27;
-		break;
-		case commands::key_E_2:
-		note = 28;
-		break;
-	}
-	return note;
-}
-
-
 void MachineView::keyPressEvent(QKeyEvent *event)
 {
 	switch (event->key()) {
@@ -778,7 +674,7 @@ void MachineScene::keyPressEvent( QKeyEvent * event )
 		if ( !event->isAutoRepeat() ) 
 		{
 			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
-			int note = macView_->noteFromCommand( command );
+			int note = commands::noteFromCommand( command );
 			if ( note > -1 ) {
 				macView_->onNotePress( note, macView_->chosenMachine()->mac() );
 			}
@@ -796,7 +692,7 @@ void MachineScene::keyReleaseEvent( QKeyEvent * event )
 
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
-	int note = macView_->noteFromCommand( command );
+	int note = commands::noteFromCommand( command );
 	if ( note > -1 ) {
 		macView_->onNoteRelease( note, NULL );
 	}

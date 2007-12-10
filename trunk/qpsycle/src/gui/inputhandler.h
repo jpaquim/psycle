@@ -230,6 +230,11 @@ namespace commands {
 		solo_machine,
 		bypass_machine
 	};
+
+  bool isNote(int command);
+  // returns -1 if not a note
+  int noteFromCommand( int command );
+
 }
 
 /// command definitions.
