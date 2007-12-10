@@ -202,6 +202,19 @@ const char * CmdDef::GetName() const
 	}
 }
 
+bool commands::isNote(int command) {
+  return command >= key_C_0 && command <= key_A_2;
+}
+
+int commands::noteFromCommand(int command) {
+  if (!isNote(command)) {
+    return -1;
+  }
+  else {
+    return command - key_C_0;
+  }
+}
+
 void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )
 {
 	keyMap[key] = keyEnumCode;
