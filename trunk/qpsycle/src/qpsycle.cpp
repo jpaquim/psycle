@@ -27,7 +27,7 @@
 int main(int argc, char *argv[])
 {
 	QApplication *app = new QApplication(argc, argv);
-	QCoreApplication::setOrganizationName( "PsycleSoft" );
+	QCoreApplication::setOrganizationName( "Psycledelics" );
 	QCoreApplication::setOrganizationDomain( "psycle.pastnotecut.org" );
 	QCoreApplication::setApplicationName( "qpsycle" );
 
