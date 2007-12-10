@@ -604,10 +604,10 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 		case commands::block_delete: 
 		deleteBlock();
 		break;
-	case commands::row_insert:
+		case commands::row_insert:
 		insertRow();
 		break;
-	case commands::row_delete:		
+		case commands::row_delete:
 		deleteRow();
 		break;
 		default:
