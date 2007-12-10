@@ -724,6 +724,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
 
 	if (!zipwriter_finish(z)) {
+    std::cerr << "Zipwriter failed." << std::endl;
 		return false;
 	}
 

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics     *
 *   psycle.sf.net   *
@@ -18,7 +19,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
-
+#include <iostream>
 #include "psyfilter.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
@@ -73,6 +74,7 @@ namespace psy
 					break;
 				}
 			}
+			std::cerr << "PsyFilter::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
 			return false;
 		}
 	}
