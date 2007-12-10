@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics   *
 *   psycle.sf.net   *
@@ -203,16 +204,16 @@ const char * CmdDef::GetName() const
 }
 
 bool commands::isNote(int command) {
-  return command >= key_C_0 && command <= key_A_2;
+	return command >= key_C_0 && command <= key_A_2;
 }
 
 int commands::noteFromCommand(int command) {
-  if (!isNote(command)) {
-    return -1;
-  }
-  else {
-    return command - key_C_0;
-  }
+	if (!isNote(command)) {
+		return -1;
+	}
+	else {
+		return command - key_C_0;
+	}
 }
 
 void InputHandler::changeKeyCode( int keyEnumCode, const Key & key )

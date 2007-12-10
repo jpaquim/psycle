@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics   *
 *   psycle.sf.net   *
@@ -25,7 +26,7 @@
 */
 ///\name key modifiers
 ///\{
-	/// shift
+  /// shift
 	const int MOD_S = 1<<0;
 	// control
 	const int MOD_C = 1<<1;
