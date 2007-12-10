@@ -433,7 +433,7 @@ std::string PatternGrid::noteToString( int value, bool sharp )
 		case commands::tweak_effect : return "twf"; break;
 		case commands::midi_cc : return "mcm"; break;
 		case commands::tweak_slide : return "tws"; break;
-		case 120        : return "off"; break; ///\todo hardcoded value
+		case commands::key_stop : return "off"; break; ///\todo hardcoded value
 		case 255        : return "---"; break; ///\todo hardcoded value
 		// defaultNoteStr_; break;
 	}
@@ -509,7 +509,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 	event->accept();
 
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers() , event->key() ) );
-  std::cout << "PatternGrid::keyPressEvent: command: " << command << std::endl;
+	std::cout << "PatternGrid::keyPressEvent: command: " << command << std::endl;
 	
 	if ( cursor().eventNr() == 0 && isNote( command ) ) 
 	{
@@ -621,9 +621,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 void PatternGrid::doNoteEvent( int note )
 {
 	if ( note == commands::key_stop ) {
-    patDraw_->patternView()->enterNoteOff( cursor() );
-    moveCursor( 0, patternStep() );
-    checkDownScroll( cursor() );
+		patDraw_->patternView()->enterNoteOff( cursor() );
+		moveCursor( 0, patternStep() );
+		checkDownScroll( cursor() );
 	} else if (note >=0 && note < 120) {
 // FIXME: better to emit a signal rather than calling enterNote direct?
 		bool noteAdded = patDraw_->patternView()->enterNote( cursor(), note ); 
@@ -938,7 +938,7 @@ void PatternGrid::repaintCursor() {
 bool PatternGrid::isNote( int key )
 {
 	if ( 
-    key == commands::key_stop ||
+		key == commands::key_stop ||
 		key == commands::key_C_0 ||
 		key == commands::key_CS0 ||
 		key == commands::key_D_0 ||
