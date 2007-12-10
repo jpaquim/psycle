@@ -134,7 +134,7 @@ void Configuration::setXmlDefaults() {
 	xml_mem_ += " <key id='screen_patterns' keychar='F3' />";
 	xml_mem_ += " <key id='edit_instrument' keychar='F4' />";
 	xml_mem_ += " <key id='screen_sequencer' keychar='F5' />";
-	xml_mem_ += " <key id='play_song_start' keychar='F6' />";
+	xml_mem_ += " <key id='play_song_start' keychar='F10' />";
 	xml_mem_ += " <key id='play_song_normal' keychar='F7' />";
 	xml_mem_ += " <key id='stop_playback' keychar='F8' />";
 	xml_mem_ += " <key id='add_new_machine' keychar='F9' />";

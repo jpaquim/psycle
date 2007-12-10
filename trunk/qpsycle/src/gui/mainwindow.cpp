@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /**************************************************************************
 *   Copyright (C) 2007 by Psycledelics Community                          *
 *   psycle.sourceforge.net                                                *
@@ -317,11 +318,17 @@ void MainWindow::onSaveSongRequest()
 	QString fileName = QFileDialog::getSaveFileName(this,
 							tr("Choose a file name"), songPath,
 							tr("Psycle Songs (*.psy)"));
-	if (fileName.isEmpty())
+	if (fileName.isEmpty()) {
 		return;
+	}
 
-	song_->save( fileName.toStdString() );
-	logConsole_->AddSuccessText("Song Saved");
+	bool success = song_->save( fileName.toStdString() );
+	if (!success) {
+		QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
+	}
+	else {
+		logConsole_->AddSuccessText("Song Saved");
+	}
 }
 
 bool MainWindow::songHasChanged()
