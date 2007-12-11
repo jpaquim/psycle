@@ -150,17 +150,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::keyPressEvent( QKeyEvent * event )
 {
+	// <nmather> IIRC, this is here to stop the default Qt behaviour for a tab press
+	// (namely, cycling through focus on the widgets.)  We want to use tab for other
+	// things (e.g. moving around in the pattern view.)
 	if ( event->key() == Qt::Key_Tab )
 		return;
+
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
 	switch ( command ) {
-		case commands::instrument_inc:
-			sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
-		break;
-		case commands::instrument_dec:
-			sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
-		break;
 		case commands::octave_up:
 			octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
 		break;
@@ -452,6 +450,7 @@ void MainWindow::createActions()
 	audioConfAct = new QAction( tr("Audio Settings"), this );
 	connect( audioConfAct, SIGNAL( triggered() ),
 			this, SLOT( showAudioConfigDlg() ) );
+
 	// <nmather> just a hold-all for now.  We can organise settings
 	// dialogs better later on.
 	settingsConfAct = new QAction( tr("General Settings"), this );
@@ -493,6 +492,27 @@ void MainWindow::createActions()
 	showSequencerViewAct_->setShortcut( tr( showSequencerViewSetting.data() ) );
 	connect( showSequencerViewAct_, SIGNAL( triggered() ), this, SLOT( showSequencerView() ) );
 
+	QByteArray instrumentIncSetting = settings.value( "keys/instrumentIncrement", "Ctrl+Up" ).toByteArray();
+	QByteArray instrumentDecSetting = settings.value( "keys/instrumentDecrement", "Ctrl+Down" ).toByteArray();
+	QByteArray octaveIncSetting = settings.value( "keys/octaveIncrement", "Keypad+Asterisk" ).toByteArray();
+	QByteArray octaveDecSetting = settings.value( "keys/octaveDecrement", "Keypad+Slash" ).toByteArray();
+
+	instrumentIncAct_ = new QAction( this );
+	instrumentIncAct_->setShortcut( tr( instrumentIncSetting.data() ) );
+	connect( instrumentIncAct_, SIGNAL( triggered() ), this, SLOT( instrumentIncrement() ) );
+
+	instrumentDecAct_ = new QAction( this );
+	instrumentDecAct_->setShortcut( tr( instrumentDecSetting.data() ) );
+	connect( instrumentDecAct_, SIGNAL( triggered() ), this, SLOT( instrumentDecrement() ) );
+
+	octaveIncAct_ = new QAction( this );
+ 	octaveIncAct_->setShortcut( tr( octaveIncSetting.data() ) );
+	connect( octaveIncAct_, SIGNAL( triggered() ), this, SLOT( octaveIncrement() ) );
+
+	octaveDecAct_ = new QAction( this );
+ 	octaveDecAct_->setShortcut( tr( octaveDecSetting.data() ) );
+	connect( octaveDecAct_, SIGNAL( triggered() ), this, SLOT( octaveDecrement() ) );
+	
 
 	// Playback actions.
 
@@ -530,6 +550,8 @@ void MainWindow::createMenus()
 	editMenu = menuBar()->addMenu(tr("&Edit"));
 	editMenu->addAction(undoAct);
 	editMenu->addAction(redoAct);
+	editMenu->addAction( instrumentIncAct_ );
+	editMenu->addAction( instrumentDecAct_ );
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction( showPatternBoxAct_ );
@@ -804,4 +826,24 @@ void MainWindow::showPatternBox()
 			patternBox_->patternTree()->setFocus();
 		}
 	}
+}
+
+void MainWindow::instrumentDecrement()
+{
+	sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
+}
+
+void MainWindow::instrumentIncrement()
+{
+	sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
+}
+
+void MainWindow::octaveIncrement()
+{
+	octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
+}
+
+void MainWindow::octaveDecrement()
+{
+	octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
 }
