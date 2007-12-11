@@ -118,6 +118,8 @@ private slots:
 	void instrumentDecrement();
 	void octaveIncrement();
 	void octaveDecrement();
+	void machineIncrement();
+	void machineDecrement();
 
 private:
 	psy::core::Song *song_;
@@ -176,6 +178,9 @@ private:
 	QAction *instrumentDecAct_;
 	QAction *octaveIncAct_;
 	QAction *octaveDecAct_;
+	QAction *machineIncAct_;
+	QAction *machineDecAct_;
+
 
 	QAction *playFromStartAct;
 	QAction *playFromSeqPosAct;
