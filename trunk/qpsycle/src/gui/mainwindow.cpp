@@ -404,7 +404,6 @@ void MainWindow::aboutQpsycle()
 
 	QVBoxLayout layout;
 	layout.setAlignment( Qt::AlignCenter );
-	layout.setContentsMargins( 0, 5, 0, 5 );
 	aboutDialog.setLayout( &layout );
 
 	QLabel aboutImageHolder;
