@@ -1,5 +1,5 @@
- <!DOCTYPE RCC><RCC version="1.0">
- <qresource>
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
      <file>images/new.png</file>
      <file>images/open.png</file>
      <file>images/save.png</file>
@@ -53,5 +53,6 @@
 	 <file>images/conf-audio.png</file>
 	 <file>images/conf-keyboard.png</file>
 	 <file>images/conf-visual.png</file>
+	 <file>images/qp.jpg</file>
  </qresource>
  </RCC>
