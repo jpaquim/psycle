@@ -492,6 +492,9 @@ void MainWindow::createActions()
 	///\todo How to use * and / from the keypad only?  (not working at present.)
 	QByteArray octaveIncSetting = settings.value( "keys/octaveIncrement", "Keypad+*" ).toByteArray();
 	QByteArray octaveDecSetting = settings.value( "keys/octaveDecrement", "Keypad+/" ).toByteArray();
+	QByteArray machineIncSetting = settings.value( "keys/machineIncrement", "Ctrl+Right" ).toByteArray();
+	QByteArray machineDecSetting = settings.value( "keys/machineDecrement", "Ctrl+Left" ).toByteArray();
+
 
 	instrumentIncAct_ = new QAction( tr( "Instrument up" ), this );
 	instrumentIncAct_->setShortcut( tr( instrumentIncSetting.data() ) );
@@ -502,12 +505,20 @@ void MainWindow::createActions()
 	connect( instrumentDecAct_, SIGNAL( triggered() ), this, SLOT( instrumentDecrement() ) );
 
 	octaveIncAct_ = new QAction( tr("Octave up"), this );
- 	octaveIncAct_->setShortcut( tr( octaveIncSetting.data() ) );
+	octaveIncAct_->setShortcut( tr( octaveIncSetting.data() ) );
 	connect( octaveIncAct_, SIGNAL( triggered() ), this, SLOT( octaveIncrement() ) );
 
 	octaveDecAct_ = new QAction( tr("Octave down"), this );
- 	octaveDecAct_->setShortcut( tr( octaveDecSetting.data() ) );
+	octaveDecAct_->setShortcut( tr( octaveDecSetting.data() ) );
 	connect( octaveDecAct_, SIGNAL( triggered() ), this, SLOT( octaveDecrement() ) );
+
+	machineDecAct_ = new QAction( tr("Machine down"), this );
+	machineDecAct_->setShortcut( tr( machineDecSetting.data() ) );
+	connect( machineDecAct_, SIGNAL( triggered() ), this, SLOT( machineDecrement() ) );
+
+	machineIncAct_ = new QAction( tr("Machine down"), this );
+	machineIncAct_->setShortcut( tr( machineIncSetting.data() ) );
+	connect( machineIncAct_, SIGNAL( triggered() ), this, SLOT( machineIncrement() ) );
 	
 
 	// Playback actions.
@@ -551,7 +562,8 @@ void MainWindow::createMenus()
 	editMenu->addAction( instrumentDecAct_ );
 	editMenu->addAction( octaveIncAct_ );
 	editMenu->addAction( octaveDecAct_ );
-
+	editMenu->addAction( machineIncAct_ );
+	editMenu->addAction( machineDecAct_ );
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction( showPatternBoxAct_ );
@@ -828,22 +840,38 @@ void MainWindow::showPatternBox()
 	}
 }
 
+///\todo bounds checking
 void MainWindow::instrumentDecrement()
 {
 	sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
 }
 
+///\todo bounds checking
 void MainWindow::instrumentIncrement()
 {
 	sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
 }
 
+///\todo bounds checking
 void MainWindow::octaveIncrement()
 {
 	octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
 }
 
+///\todo bounds checking
 void MainWindow::octaveDecrement()
 {
 	octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
+}
+
+///\todo bounds checking
+void MainWindow::machineIncrement()
+{
+	macCombo_->setCurrentIndex( macCombo_->currentIndex() + 1 );
+}
+
+///\todo bounds checking
+void MainWindow::machineDecrement()
+{
+	macCombo_->setCurrentIndex( macCombo_->currentIndex() - 1 );
 }
