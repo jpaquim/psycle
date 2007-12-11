@@ -399,7 +399,26 @@ void MainWindow::redo()
 
 void MainWindow::aboutQpsycle()
 {
-	QMessageBox::about(this, tr("About qpsycle"), tr("It makes music and stuff."));
+	QDialog aboutDialog( this );
+	aboutDialog.setWindowTitle( "About qpsycle" );
+
+	QVBoxLayout layout;
+	layout.setAlignment( Qt::AlignCenter );
+	layout.setContentsMargins( 0, 5, 0, 5 );
+	aboutDialog.setLayout( &layout );
+
+	QLabel aboutImageHolder;
+	QImage aboutImage( ":images/qp.jpg" );
+	aboutImageHolder.setPixmap( QPixmap::fromImage( aboutImage ) );
+
+	QLabel aboutText;
+	aboutText.setText( "It makes music and stuff." );
+	aboutText.setAlignment( Qt::AlignHCenter );
+
+	layout.addWidget( &aboutImageHolder );
+	layout.addWidget( &aboutText );
+	aboutDialog.exec();
+	///\todo Is everything definitely removed from memory here?
 }
 
 void MainWindow::createActions()
