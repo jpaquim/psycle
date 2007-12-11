@@ -114,6 +114,11 @@ private slots:
 	void showUndoView();
 	void showLogCons();
 
+	void instrumentIncrement();
+	void instrumentDecrement();
+	void octaveIncrement();
+	void octaveDecrement();
+
 private:
 	psy::core::Song *song_;
 
@@ -166,6 +171,11 @@ private:
 
 	QAction *showUnReAct;
 	QAction *showLogConsAct;
+
+	QAction *instrumentIncAct_;
+	QAction *instrumentDecAct_;
+	QAction *octaveIncAct_;
+	QAction *octaveDecAct_;
 
 	QAction *playFromStartAct;
 	QAction *playFromSeqPosAct;
