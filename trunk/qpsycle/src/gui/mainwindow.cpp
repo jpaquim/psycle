@@ -159,13 +159,8 @@ void MainWindow::keyPressEvent( QKeyEvent * event )
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
 	switch ( command ) {
-		case commands::octave_up:
-			octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
-		break;
-		case commands::octave_down:
-			octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
-		break;
-
+		// All actions are handled with QActions at present, but you
+		// can put something here if you need to.
 		default:;
 	}
 }
@@ -494,22 +489,23 @@ void MainWindow::createActions()
 
 	QByteArray instrumentIncSetting = settings.value( "keys/instrumentIncrement", "Ctrl+Up" ).toByteArray();
 	QByteArray instrumentDecSetting = settings.value( "keys/instrumentDecrement", "Ctrl+Down" ).toByteArray();
-	QByteArray octaveIncSetting = settings.value( "keys/octaveIncrement", "Keypad+Asterisk" ).toByteArray();
-	QByteArray octaveDecSetting = settings.value( "keys/octaveDecrement", "Keypad+Slash" ).toByteArray();
+	///\todo How to use * and / from the keypad only?  (not working at present.)
+	QByteArray octaveIncSetting = settings.value( "keys/octaveIncrement", "Keypad+*" ).toByteArray();
+	QByteArray octaveDecSetting = settings.value( "keys/octaveDecrement", "Keypad+/" ).toByteArray();
 
-	instrumentIncAct_ = new QAction( this );
+	instrumentIncAct_ = new QAction( tr( "Instrument up" ), this );
 	instrumentIncAct_->setShortcut( tr( instrumentIncSetting.data() ) );
 	connect( instrumentIncAct_, SIGNAL( triggered() ), this, SLOT( instrumentIncrement() ) );
 
-	instrumentDecAct_ = new QAction( this );
+	instrumentDecAct_ = new QAction( tr( "Instrument down" ), this );
 	instrumentDecAct_->setShortcut( tr( instrumentDecSetting.data() ) );
 	connect( instrumentDecAct_, SIGNAL( triggered() ), this, SLOT( instrumentDecrement() ) );
 
-	octaveIncAct_ = new QAction( this );
+	octaveIncAct_ = new QAction( tr("Octave up"), this );
  	octaveIncAct_->setShortcut( tr( octaveIncSetting.data() ) );
 	connect( octaveIncAct_, SIGNAL( triggered() ), this, SLOT( octaveIncrement() ) );
 
-	octaveDecAct_ = new QAction( this );
+	octaveDecAct_ = new QAction( tr("Octave down"), this );
  	octaveDecAct_->setShortcut( tr( octaveDecSetting.data() ) );
 	connect( octaveDecAct_, SIGNAL( triggered() ), this, SLOT( octaveDecrement() ) );
 	
@@ -550,8 +546,12 @@ void MainWindow::createMenus()
 	editMenu = menuBar()->addMenu(tr("&Edit"));
 	editMenu->addAction(undoAct);
 	editMenu->addAction(redoAct);
+	editMenu->addSeparator();
 	editMenu->addAction( instrumentIncAct_ );
 	editMenu->addAction( instrumentDecAct_ );
+	editMenu->addAction( octaveIncAct_ );
+	editMenu->addAction( octaveDecAct_ );
+
 
 	viewMenu = menuBar()->addMenu(tr("&View"));
 	viewMenu->addAction( showPatternBoxAct_ );
