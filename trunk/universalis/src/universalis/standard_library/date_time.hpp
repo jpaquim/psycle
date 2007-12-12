@@ -1,15 +1,29 @@
 #pragma once
+#include <ctime> // for std::time_t in std::utc_time constructor
+
 namespace std {
 	/*
 		The following types are also provided by the boost date-time library.
 		There is also a prototype implementation at http://www.crystalclearsoftware.com/libraries/date_time/n2328_impl.tar.gz
-		For now, we just define a minimal implementation for the sleep function to work.
+		For now, we just define a minimal implementation for the timed_wait and sleep functions to work.
 		For example:
-			std::this_thread::sleep(std::nanoseconds(123456789));
-			std::this_thread::sleep(std::microseconds(123456));
-			std::this_thread::sleep(std::milliseconds(123));
+			std::unique_lock<std::mutex> lk(mut);
+			// Wait for 2 seconds on a condition variable
+			std::utc_time time_out = std::hiresolution_clock::universal_time() + std::seconds(2);
+			{
+			     bool timed_out = !cv.timed_wait(lk, time_out);
+			     if (timed_out)
+			         // deal with time out
+			}
+			
+			std::this_thread::sleep(std::hiresolution_clock::universal_time() + std::nanoseconds(123456789));
+			std::this_thread::sleep(std::hiresolution_clock::universal_time() + std::microseconds(123456));
+			std::this_thread::sleep(std::hiresolution_clock::universal_time() + std::milliseconds(123));
 	*/
-	
+
+	/*******************************************************************/
+	// duration types
+		
 	class nanoseconds;
 	class microseconds;
 	class milliseconds;
@@ -88,6 +102,31 @@ namespace std {
 		private:
 			tick_type h_;
 	};
+	
+	/*******************************************************************/
+	// timepoint
+	
+	class utc_time {
+		private:
+			nanoseconds ns_;
+		public:
+			/// epoch
+			utc_time() : ns_() {} ///\ŧodo
+			utc_time(time_t t, nanoseconds ns) : ns_(ns) {} ///\ŧodo
+			
+			static bool is_subsecond() { return true; }
+	};
+	
+	template<typename time_type>
+	class hiresolution_clock {
+		public:
+			static time_type universal_time() {
+				time_type t;
+				///\ŧodo
+				return t;
+			}
+	};
+
 
 	#if defined BOOST_AUTO_TEST_CASE
 		BOOST_AUTO_TEST_CASE(std_date_time_test)
