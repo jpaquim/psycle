@@ -11,9 +11,9 @@ namespace std {
 			// Wait for 2 seconds on a condition variable
 			std::utc_time time_out = std::hiresolution_clock::universal_time() + std::seconds(2);
 			{
-			     bool timed_out = !cv.timed_wait(lk, time_out);
-			     if (timed_out)
-			         // deal with time out
+				bool timed_out = !cv.timed_wait(lk, time_out);
+				if (timed_out)
+					// deal with time out
 			}
 			
 			std::this_thread::sleep(std::hiresolution_clock::universal_time() + std::nanoseconds(123456789));
