@@ -46,7 +46,7 @@ namespace loggers {
 	/// note: puting UNIVERSALIS__COMPILER__DYNAMIC_LINK at class level does not work for this class on msvc because of the static data member
 	class multiplex_logger : public logger, protected std::vector<logger*> {
 		public:
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK virtual ~multiplex_logger() throw() {}
+			virtual ~multiplex_logger() throw() {}
 
 		///\name container operations
 		///\{
