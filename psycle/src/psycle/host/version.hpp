@@ -28,8 +28,8 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 5
-#define PSYCLE__VERSION__QUALITY "release"
+#define PSYCLE__VERSION__PATCH 6
+#define PSYCLE__VERSION__QUALITY "unofficial post release"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -37,6 +37,7 @@
 	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
 	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR) "." \
 	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__PATCH) " " \
+	"$Revision$" \
 	PSYCLE__VERSION__QUALITY 
 
 /// identifies both what sources the build comes from, and what build options were used.
