@@ -43,36 +43,38 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger {
 namespace loggers {
 
 	/// logger which forwards to multiple loggers.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiplex_logger : public logger, protected std::vector<logger*> {
+	/// note: puting UNIVERSALIS__COMPILER__DYNAMIC_LINK at class level does not work for this class on msvc because of the static data member
+	class multiplex_logger : public logger, protected std::vector<logger*> {
 		public:
-			virtual ~multiplex_logger() throw() {}
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK virtual ~multiplex_logger() throw() {}
 
 		///\name container operations
 		///\{
 			public:
-				bool add   (logger       & logger);
-				bool remove(logger const & logger);
+				UNIVERSALIS__COMPILER__DYNAMIC_LINK bool add   (logger       & logger);
+				UNIVERSALIS__COMPILER__DYNAMIC_LINK bool remove(logger const & logger);
 		///\}
 
 		protected:
-			void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
-			void do_log(int const level, std::string const &) throw() /* override pure */;
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const &) throw() /* override pure */;
 
 		///\name singleton
 		///\{
-			public:  multiplex_logger static & singleton() throw() { return singleton_; }
-			private: multiplex_logger static   singleton_;
+			public:                                      multiplex_logger static & singleton() throw() { return singleton_; }
+			private: UNIVERSALIS__COMPILER__DYNAMIC_LINK multiplex_logger static   singleton_;
 		///\}
 	};
 
 	/// logger which outputs to a stream.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK stream_logger : public logger {
+	/// note: puting UNIVERSALIS__COMPILER__DYNAMIC_LINK at class level does not work for this class on msvc because of the static data member
+	class stream_logger : public logger {
 		public:
-			stream_logger(std::ostream &);
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK stream_logger(std::ostream &);
 
 		protected:
-			void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
-			void do_log(int const level, std::string const &) throw() /* override pure */;
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const &) throw() /* override pure */;
 
 		///\name underlying stream
 		///\{
@@ -82,8 +84,8 @@ namespace loggers {
 
 		///\name default stream singleton
 		///\{
-			public:         logger static & default_logger() throw() { return default_logger_; }
-			private: stream_logger static   default_logger_;
+			public:                                             logger static & default_logger() throw() { return default_logger_; }
+			private: UNIVERSALIS__COMPILER__DYNAMIC_LINK stream_logger static   default_logger_;
 		///\}
 	};
 

@@ -23,14 +23,14 @@
 
 #define PSYCLE__TAR_NAME "psycle"
 #define PSYCLE__NAME "Psycle Modular Music Creation Studio"
-#define PSYCLE__BRANCH "psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright (C) 2000-2007 Psycledelics (http://psycle.pastnotecut.org and http://psycle.sourceforge.net)"
+#define PSYCLE__BRANCH "Psycledelics"
+#define PSYCLE__COPYRIGHT "Copyright 2000-2007 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 6
+#define PSYCLE__VERSION__PATCH 5
 #define PSYCLE__VERSION__QUALITY "unofficial post release"
-#define PSYCLE__VERSION__SOURCE_REVISION "subversion $Revision$"
+#define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -43,9 +43,9 @@
 
 /// identifies both what sources the build comes from, and what build options were used.
 #define PSYCLE__BUILD__IDENTIFIER(EOL) \
-	"version: " PSYCLE__VERSION EOL \
-	"build configuration options:" EOL PSYCLE__CONFIGURATION(EOL) EOL \
-	"built on: " PSYCLE__BUILD__DATE
+	"Version: " PSYCLE__VERSION EOL \
+	"Build configuration options:" EOL PSYCLE__CONFIGURATION(EOL) EOL \
+	"Built on: " PSYCLE__BUILD__DATE
 
 #if defined __DATE__ && defined __TIME__
 	#define PSYCLE__BUILD__DATE __DATE__ ", " __TIME__
@@ -57,15 +57,15 @@
 #if defined DIVERSALIS__COMPILER__RESOURCE // if this is a resource compiler
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 
-	#define RC__CompanyName PSYCLE__BRANCH "\r\n" "subversion $URL$"
+	#define RC__CompanyName PSYCLE__BRANCH "\r\n" "Subversion $URL$"
 	#define RC__LegalCopyright PSYCLE__COPYRIGHT
 	#define RC__License PSYCLE__LICENSE
 
 	#define RC__InternalName PSYCLE__TAR_NAME
 	#define RC__ProductName PSYCLE__NAME
 	#define RC__ProductVersion PSYCLE__VERSION \
-		"\r\n" "subversion $Revision$" \
-		"\r\n" "subversion $Date$"
+		"\r\n" "Subversion $Revision$" \
+		"\r\n" "Subversion $Date$"
 
 	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
 	#define RC__FileDescription RC__ProductName " - Host"
