@@ -30,6 +30,7 @@
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH 6
 #define PSYCLE__VERSION__QUALITY "unofficial post release"
+#define PSYCLE__VERSION__SOURCE_REVISION "subversion $Revision$"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -37,8 +38,8 @@
 	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
 	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR) "." \
 	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__PATCH) " " \
-	"$Revision$" \
-	PSYCLE__VERSION__QUALITY 
+	"(" PSYCLE__VERSION__SOURCE_REVISION ") " \
+	PSYCLE__VERSION__QUALITY
 
 /// identifies both what sources the build comes from, and what build options were used.
 #define PSYCLE__BUILD__IDENTIFIER(EOL) \
@@ -56,13 +57,15 @@
 #if defined DIVERSALIS__COMPILER__RESOURCE // if this is a resource compiler
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 
-	#define RC__CompanyName PSYCLE__BRANCH
+	#define RC__CompanyName PSYCLE__BRANCH "\r\n" "subversion $URL$"
 	#define RC__LegalCopyright PSYCLE__COPYRIGHT
 	#define RC__License PSYCLE__LICENSE
 
 	#define RC__InternalName PSYCLE__TAR_NAME
 	#define RC__ProductName PSYCLE__NAME
-	#define RC__ProductVersion PSYCLE__VERSION "\r\n$Revision$\r\n$Date$"
+	#define RC__ProductVersion PSYCLE__VERSION \
+		"\r\n" "subversion $Revision$" \
+		"\r\n" "subversion $Date$"
 
 	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
 	#define RC__FileDescription RC__ProductName " - Host"
