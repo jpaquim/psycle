@@ -166,9 +166,9 @@ namespace universalis { namespace operating_system { namespace clocks {
 	};
 
 	#if defined BOOST_AUTO_TEST_CASE
-		BOOST_AUTO_TEST_CASE(clock_test)
+		BOOST_AUTO_TEST_CASE(wall_clock_test)
 		{
-			typedef thread clock;
+			typedef wall clock;
 			real_time const sleep_seconds(0.25);
 			opaque_time const start(clock::current());
 			universalis::operating_system::threads::sleep(sleep_seconds);
