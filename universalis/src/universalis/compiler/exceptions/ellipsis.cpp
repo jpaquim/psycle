@@ -13,27 +13,22 @@
 	#include <typeinfo>
 	#include "../typenameof.hpp"
 #endif
-namespace universalis
+namespace universalis { namespace compiler { namespace exceptions {
+
+	std::string ellipsis()
 {
-	namespace compiler
-	{
-		namespace exceptions
-		{
-			std::string ellipsis()
-			{
-				#if defined DIVERSALIS__COMPILER__GNU
-					std::type_info * type_info(abi::__cxa_current_exception_type());
-					std::ostringstream s;
-					s << "ellipsis: " << (type_info ? typenameof(*type_info) : "unknown type");
-					return s.str();
-				#elif defined DIVERSALIS__COMPILER__BORLAND
-					std::ostringstream s;
-					s << "ellipsis: " << __ThrowExceptionName() << " was thrown by source file " << __ThrowFileName() << "#" << __ThrowLineNumber();
-					return s.str();
-				#else
-					return "ellipsis: unknown type";
-				#endif
-			}
-		}
-	}
+	#if defined DIVERSALIS__COMPILER__GNU
+		std::type_info * type_info(abi::__cxa_current_exception_type());
+		std::ostringstream s;
+		s << "ellipsis: " << (type_info ? typenameof(*type_info) : "unknown type");
+		return s.str();
+	#elif defined DIVERSALIS__COMPILER__BORLAND
+		std::ostringstream s;
+		s << "ellipsis: " << __ThrowExceptionName() << " was thrown by source file " << __ThrowFileName() << "#" << __ThrowLineNumber();
+		return s.str();
+	#else
+		return "ellipsis: unknown type";
+	#endif
 }
+
+}}}
