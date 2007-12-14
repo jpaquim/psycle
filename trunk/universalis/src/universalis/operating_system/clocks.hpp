@@ -140,7 +140,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 			///\}
 	};
 
-	/// counts the time elapsed since some unspecified origin.
+	/// a real time clock that counts the time elapsed since some unspecified origin.
 	///
 	/// The implementation reads, if available, the tick count register of some unspecified CPU.
 	/// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles, but often the count value and the tick events are unrelated,
@@ -148,18 +148,26 @@ namespace universalis { namespace operating_system { namespace clocks {
 	/// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long, it is possible to count an uptime period in the order of a century without wrapping.
 	/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time. This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845.
 	/// The implementation for mswindows is unpsecified on SMP systems.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK wall {
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK monotonic_wall {
 		public:
 			opaque_time static current();
 	};
 
-	/// counts the time spent by the CPU(s) in the current process, kernel included.
+	/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
+	///
+	/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK utc_since_epoch {
+		public:
+			opaque_time static current();
+	};
+
+	/// a virtual clock that counts the time spent by the CPU(s) in the current process (kernel included?).
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
 		public:
 			opaque_time static current();
 	};
 
-	/// counts the time spent by the CPU(s) in the current thread, kernel included.
+	/// a virtual clock that counts the time spent by the CPU(s) in the current thread (kernel included?).
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 		public:
 			opaque_time static current();
@@ -168,7 +176,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 	#if defined BOOST_AUTO_TEST_CASE
 		BOOST_AUTO_TEST_CASE(wall_clock_test)
 		{
-			typedef wall clock;
+			typedef monotonic_wall clock;
 			real_time const sleep_seconds(0.25);
 			opaque_time const start(clock::current());
 			universalis::operating_system::threads::sleep(sleep_seconds);
@@ -180,5 +188,44 @@ namespace universalis { namespace operating_system { namespace clocks {
 		}
 	#endif
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
 
+#ifdef universalis__operating_system__clocks__version__2
+#include <date_time>
+namespace universalis { namespace operating_system { namespace clocks2 {
+
+	/// a real time clock that counts the time elapsed since some unspecified origin.
+	///
+	/// The implementation reads, if available, the tick count register of some unspecified CPU.
+	/// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles, but often the count value and the tick events are unrelated,
+	/// i.e. the value might not be incremented one by one. So the period corresponding to 1 count unit may be even smaller than the period of a CPU cycle, but should probably stay in the same order of magnitude.
+	/// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long, it is possible to count an uptime period in the order of a century without wrapping.
+	/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time. This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845.
+	/// The implementation for mswindows is unpsecified on SMP systems.
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK monotonic_wall {
+		public:
+			std::nanoseconds static current();
+	};
+
+	/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
+	///
+	/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK utc_since_epoch {
+		public:
+			std::nanoseconds static current();
+	};
+
+	/// a virtual clock that counts the time spent by the CPU(s) in the current process (kernel included?).
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
+		public:
+			std::nanoseconds static current();
+	};
+
+	/// a virtual clock that counts the time spent by the CPU(s) in the current thread (kernel included?).
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
+		public:
+			std::nanoseconds static current();
+	};
+
+}}}
+#endif
+#include <universalis/compiler/dynamic_link/end.hpp>
