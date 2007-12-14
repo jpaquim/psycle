@@ -63,7 +63,6 @@ namespace std {
 			static bool is_subsecond() { return true; }
 			operator nanoseconds() const { nanoseconds ns(ms_ * 1000000); return ns; }
 			operator microseconds() const { microseconds us(ms_ * 1000); return us; }
-			static bool is_subsecond() { return true; }
 		private:
 			tick_type ms_;
 	};
