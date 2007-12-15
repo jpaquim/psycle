@@ -4,7 +4,6 @@
 
 ///\file
 ///\brief project-wide compiler-specific tweaks.
-///\meta generic
 #ifndef DIVERSALIS__COMPILER__INCLUDED
 #define DIVERSALIS__COMPILER__INCLUDED
 #pragma once

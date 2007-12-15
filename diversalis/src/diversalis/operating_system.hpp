@@ -4,7 +4,6 @@
 
 ///\file
 ///\brief project-wide operating system specific tweaks.
-///\meta generic
 #ifndef DIVERSALIS__OPERATING_SYSTEM__INCLUDED
 #define DIVERSALIS__OPERATING_SYSTEM__INCLUDED
 #pragma once
