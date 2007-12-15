@@ -407,7 +407,7 @@ void MainWindow::aboutQpsycle()
 	aboutDialog.setLayout( &layout );
 
 	QLabel aboutImageHolder;
-	QImage aboutImage( ":images/qp.jpg" );
+	QImage aboutImage( ":images/qpsycle.png" );
 	aboutImageHolder.setPixmap( QPixmap::fromImage( aboutImage ) );
 
 	QLabel aboutText;

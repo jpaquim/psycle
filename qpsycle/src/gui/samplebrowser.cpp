@@ -98,11 +98,9 @@ void SampleBrowser::createSampleBrowserTree()
 {
 	dirModel_ = new QDirModel( this );
 
-	///\todo Should filter for wavs, but when I tried it
-	// it also filters out directories...
-	dirModel_->setNameFilters( QStringList() << "*" );
-	dirModel_->setFilter( QDir::AllEntries | QDir::NoDotAndDotDot );
-	///\todo NoDotAndDotDot means we can't navigate above the
+	dirModel_->setNameFilters( QStringList() << "*.wav" );
+	dirModel_->setFilter( QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot );
+	// Note: NoDotAndDotDot means we can't navigate above the
 	// provided root index.  We could allow dot and dot dot, but
 	// it's a bit weird with a tree view (try it.)  
 	dirModel_->setSorting( QDir::Name );
@@ -111,9 +109,9 @@ void SampleBrowser::createSampleBrowserTree()
 	dirTree_ = new QTreeView();
 	dirTree_->setModel( dirModel_ );
 	dirTree_->setSelectionMode( QAbstractItemView::ExtendedSelection );
-	dirTree_->setColumnHidden( 1, true ); // file size
-	dirTree_->setColumnHidden( 2, true ); // file type
-	dirTree_->setColumnHidden( 3, true ); // data modified
+	dirTree_->setColumnHidden( 1, true ); // hide file size column
+	dirTree_->setColumnHidden( 2, true ); // hide file type column 
+	dirTree_->setColumnHidden( 3, true ); // hide data modified column
 
 	// Set the top directory of the tree.
 	QString samplesPath = QString::fromStdString( Global::configuration().samplePath() );
