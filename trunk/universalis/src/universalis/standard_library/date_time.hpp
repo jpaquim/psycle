@@ -44,10 +44,10 @@ namespace std {
 			Final operator-(Final const & that) const { Final f(this->tick_ - that.tick_); return f; }
 			Final operator/(int d) const { Final f(tick_ / d); return f; }
 			Final operator*(int m) const { Final f(tick_ * m); return f; }
-			Final & operator+=(Final const & that) { this->tick_ += that.tick_; return static_cast<Final>(*this); }
-			Final & operator-=(Final const & that) { this->tick_ -= that.tick_; return static_cast<Final>(*this); }
-			Final & operator/=(int d) { tick_ /= d; return static_cast<Final>(*this); }
-			Final & operator*=(int m) { tick_ *= m; return static_cast<Final>(*this); }
+			Final & operator+=(Final const & that) { this->tick_ += that.tick_; return static_cast<Final&>(*this); }
+			Final & operator-=(Final const & that) { this->tick_ -= that.tick_; return static_cast<Final&>(*this); }
+			Final & operator/=(int d) { tick_ /= d; return static_cast<Final&>(*this); }
+			Final & operator*=(int m) { tick_ *= m; return static_cast<Final&>(*this); }
 		protected:
 			typedef basic_time_duration<Final, Tick, Ticks_Per_Seconds, Seconds_Per_Tick> basic_time_duration_type;
 		private:
@@ -113,15 +113,68 @@ namespace std {
 	//class months; // difficult to implement and not useful for specifying pause durations
 	//class years; // difficult to implement and not useful for specifying pause durations
 
+	#if defined BOOST_AUTO_TEST_CASE
+		BOOST_AUTO_TEST_CASE(std_date_time_duration_test)
+		{
+			{
+				days const d(1);
+				BOOST_CHECK(d.get_count() == 1);
+
+				hours const h(d);
+				BOOST_CHECK(h == d);
+				BOOST_CHECK(h.get_count() == 24);
+
+				minutes const m(h);
+				BOOST_CHECK(m == h);
+				BOOST_CHECK(m == d);
+				BOOST_CHECK(m.get_count() == 24 * 60);
+
+				seconds const s(m);
+				BOOST_CHECK(s == m);
+				BOOST_CHECK(s == h);
+				BOOST_CHECK(s == d);
+				BOOST_CHECK(s.get_count() == 24 * 60 * 60);
+			}
+			{
+				seconds const s(1);
+				BOOST_CHECK(s.get_count() == 1);
+				
+				milliseconds const ms(s);
+				BOOST_CHECK(ms == s);
+				BOOST_CHECK(ms.get_count() == 1000);
+				
+				microseconds const us(ms);
+				BOOST_CHECK(us == ms);
+				BOOST_CHECK(us == s);
+				BOOST_CHECK(us.get_count() == 1000000);
+				
+				nanoseconds const ns(ms);
+				BOOST_CHECK(ns == ms);
+				BOOST_CHECK(ns == us);
+				BOOST_CHECK(ns == s);
+				BOOST_CHECK(ns.get_count() == 1000000000LL);
+			}
+			{
+				hours const h(1);
+				minutes m(1);
+				m += h;
+				BOOST_CHECK(m == minutes(1) + hours(1));
+				BOOST_CHECK((m - h).get_count() == 1);
+				BOOST_CHECK(m.get_count() == 61);
+			}
+
+		}
+	#endif
+
 	/*******************************************************************/
 	// time clock
 	
-	template<typename time_type>
+	template<typename Time_Point>
 	class hiresolution_clock {
 		public:
-			static time_type universal_time() {
-				time_type t;
-				///\ŧodo
+			Time_Point static universal_time() {
+				Time_Point t(Time_Point::ticks_per_seconds()
+					* universalis::operating_system::clocks::utc_since_epoch::current().to_real_time());
 				return t;
 			}
 	};
@@ -198,21 +251,4 @@ namespace std {
 			tick_type ns_;
 			utc_time(tick_type t) : ns_(t) {} friend class hiresolution_clock<tick_type>;
 	};
-	
-	#if defined BOOST_AUTO_TEST_CASE
-		BOOST_AUTO_TEST_CASE(std_date_time_test)
-		{
-			seconds const s(1);
-			BOOST_CHECK(s.get_count() == 1);
-			
-			milliseconds const ms(s);
-			BOOST_CHECK(ms.get_count() == 1000);
-			
-			microseconds const us(ms);
-			BOOST_CHECK(us.get_count() == 1000000);
-			
-			nanoseconds const ns(ms);
-			BOOST_CHECK(ns.get_count() == 1000000000LL);
-		}
-	#endif
 }
