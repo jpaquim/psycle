@@ -4,7 +4,6 @@
 
 ///\file
 ///\brief project-wide standard library tweaks.
-///\meta generic
 #ifndef DIVERSALIS__STANDARD_LIBRARY__INCLUDED
 #define DIVERSALIS__STANDARD_LIBRARY__INCLUDED
 #pragma once

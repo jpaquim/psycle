@@ -4,7 +4,6 @@
 
 ///\file
 ///\brief project-wide processor-specific tweaks.
-///\meta generic
 #ifndef DIVERSALIS__PROCESSOR__INCLUDED
 #define DIVERSALIS__PROCESSOR__INCLUDED
 #pragma once
