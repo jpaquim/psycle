@@ -8,245 +8,154 @@
 #include "clocks.hpp"
 #include <universalis/operating_system/exceptions/code_description.hpp>
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-	#include <unistd.h>
+	#include <unistd.h> // for sysconf
 	#include <sys/time.h>
 #endif
 #include <ctime>
+#include <iostream>
+#include <sstream>
 namespace universalis { namespace operating_system { namespace clocks {
 
 // recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	namespace detail { namespace posix_clocks {
+		bool clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, cputime_supported;
+		::clockid_t monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
 
-	namespace {
+		namespace {
+			void error(int const & code = errno) {
+				std::cerr << "error: " << code << ": " << ::strerror(code) << std::endl;
+			}
 
-		void error(int const & code = errno) {
-			std::cerr << "error: " << code << ": " << ::strerror(code) << std::endl;
+			bool supported(int const & option) {
+				long int result(::sysconf(option));
+				if(result < -1) error();
+				return result > 0;
+			}
 		}
 
-		bool supported(int const & option) {
-			long int result(::sysconf(option));
-			if(result < -1) error();
-			return result > 0;
-		}
+		void config() {
+			monotonic_clock_id = process_cputime_clock_id = thread_cputime_clock_id = CLOCK_REALTIME;
 
-		::clockid_t static wall_clock_id, process_clock_id, thread_clock_id;
-
-		void best() {
-			bool timers_supported, cpu_time_supported, monotonic_clock_supported;
-
-			wall_clock_id = process_clock_id = thread_clock_id = CLOCK_REALTIME;
-
-			#if !_POSIX_TIMERS && defined DIVERSALIS__COMPILER__GNU
+			/// TIMERS
+			#if !_POSIX_TIMERS && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 				#warning will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS
-			#elif _POSIX_TIMERS == -1 && defined DIVERSALIS__COMPILER__GNU
+			#elif _POSIX_TIMERS == -1 && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 				#warning this OS does not support posix timers: _POSIX_TIMERS == -1
-				#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
+				clock_gettime_supported = clock_getres_supported = false;
 			#elif _POSIX_TIMERS > 0
-				// beware: cygwin defines this because it has clock_gettime, but it doesn't have clock_getres.
-				#if defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN && defined DIVERSALIS__COMPILER__GNU
-					#warning ignoring posix timers on cygwin: _POSIX_TIMERS > 0, but this is cygwin. \
-						Cygwin only partially implements this posix option: it has ::clock_gettime, but not ::clock_getres. \
-						Moreover, ::sysconf(_SC_TIMERS) would return 0, which condradicts _POSIX_TIMERS > 0. \
-						We will consider that it simply implements nothing.
-				#else
-					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 1
-				#endif
+				clock_gettime_supported = clock_getres_supported = true;
 			#endif
-			#if !defined _SC_TIMERS && defined DIVERSALIS__COMPILER__GNU
+			#if !defined _SC_TIMERS && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 				#warning cannot use posix sysconf at runtime to determine whether this OS supports timers: !defined _SC_TIMERS
-				#if !defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
-					timers_supported = false;
-				#endif
+				clock_gettime_supported = clock_getres_supported = false;
 			#else
-				timers_supported = supported(_SC_TIMERS);
+				clock_gettime_supported = clock_getres_supported = supported(_SC_TIMERS);
+				// beware: cygwin has clock_gettime, but it doesn't have clock_getres.
+				#if defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+					#warning \
+						Operating system is Cygwin. Cygwin has _POSIX_TIMERS > 0, \
+						but only partially implements this posix option: it supports ::clock_gettime, but not ::clock_getres. \
+						This might be the reason ::sysconf(_SC_TIMERS) returns 0, but this condradicts _POSIX_TIMERS > 0. \
+						We assume that ::clock_gettime is supported.
+						if(!clock_gettime_supported) clock_gettime_supported = true;
+				#endif
 			#endif
 			
-			// CPUTIME
-			#if !_POSIX_CPUTIME && defined DIVERSALIS__COMPILER__GNU
-				#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
-			#elif _POSIX_CPUTIME == -1 && defined DIVERSALIS__COMPILER__GNU
-				#warning this OS does not support posix cpu time: _POSIX_CPUTIME == -1
-				#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-				#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
-			#elif _POSIX_CPUTIME > 0
-				#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-				#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 1
-			#endif
-			#if !defined _SC_CPUTIME && defined DIVERSALIS__COMPILER__GNU
-				#warning cannot use posix sysconf at runtime to determine whether this OS supports cpu time: !defined _SC_CPUTIME
-				#if !defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
-					cpu_time_supported = false;
-				#endif
-			#else
-				cpu_time_supported = supported(_SC_CPUTIME);
-				if(cpu_time_supported) {
-					::clockid_t clock_id;
-					if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
-						// this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
-						cpu_time_supported = false;
-					} else {
-						process_clock_id = thread_clock_id = clock_id;
-						//process_clock_id = CLOCK_PROCESS_CPUTIME_ID;
-						//thread_clock_id = CLOCK_THREAD_CPUTIME_ID;
-					}
-				}
-			#endif
-		
 			// MONOTONIC_CLOCK
-			#if !_POSIX_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__GNU
+			#if !_POSIX_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 				#warning will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK
 			#elif _POSIX_MONOTONIC_CLOCK == -1 && defined DIVERSALIS__COMPILER__GNU
 				#warning this OS does not support posix monotonic clock: _POSIX_MONOTONIC_CLOCK == -1
-				#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-				#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
+				monotonic_clock_supported = false;
 			#elif _POSIX_MONOTONIC_CLOCK > 0
-				#undef  UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-				#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 1
+				monotonic_clock_supported  = true;
 			#endif
-			#if !defined _SC_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__GNU
+			#if !defined _SC_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 				#warning cannot use posix sysconf at runtime to determine whether this OS supports monotonic clock: !defined _SC_MONOTONIC_CLOCK
-				#if !defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-					#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL 0
-				#endif
+				monotonic_clock_supported = false;
 			#else
-			{
 				monotonic_clock_supported = supported(_SC_MONOTONIC_CLOCK);
-				if(monotonic_clock_supported) wall_clock_id = CLOCK_MONOTONIC;
-			}
+				if(monotonic_clock_supported) monotonic_clock_id = CLOCK_MONOTONIC;
 			#endif
-		}
-	}
 
-	#if defined BOOST_AUTO_TEST_CASE
-		BOOST_AUTO_TEST_CASE(clock_best_test)
-		{
-			::clockid_t clock(universalis::operating_system::clocks::best());
-			timespec result;
-			#if UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DETAIL
-				BOOST_MESSAGE("using ::clock_getres");
-				if(::clock_getres(clock, &result))
-				{
-					std::ostringstream s; s << exceptions::code_description();
-					throw std::runtime_error(s.str().c_str());
-				}
-			#else
-				BOOST_MESSAGE("using CLOCKS_PER_SEC");
-				result.tv_sec = 1 / CLOCKS_PER_SEC;
-				result.tv_nsec = static_cast<long int>(1e9 / CLOCKS_PER_SEC);
+			// CPUTIME
+			#if !_POSIX_CPUTIME && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+				#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
+			#elif _POSIX_CPUTIME == -1 && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+				#warning this OS does not support posix cpu time: _POSIX_CPUTIME == -1
+				cputime_supported = false;
+			#elif _POSIX_CPUTIME > 0
+				cputime_supported = true;
 			#endif
-			std::ostringstream s;
-			s << "clock resolution: " << result.tv_sec << "s + " << result.tv_nsec * 1e-9 << "s";
-			BOOST_MESSAGE(s.str());
+			#if !defined _SC_CPUTIME && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+				#warning cannot use posix sysconf at runtime to determine whether this OS supports cpu time: !defined _SC_CPUTIME
+				cputime_supported = false;
+			#else
+				cputime_supported = supported(_SC_CPUTIME);
+				if(cputime_supported) {
+					::clockid_t clock_id;
+					if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
+						// this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
+						cputime_supported = false;
+					} else {
+						///\todo do we do something with the clock_id?
+						//process_cputime_clock_id = thread_cputime_clock_id = clock_id;
+						process_cputime_clock_id = CLOCK_PROCESS_CPUTIME_ID;
+						thread_cputime_clock_id = CLOCK_THREAD_CPUTIME_ID;
+					}
+				}
+			#endif
 		}
-	#endif
+	}}
 #endif // defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 
-opaque_time monotonic_wall::current() {
-	opaque_time result;
-	opaque_time::underlying_type & u(result);
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		::LARGE_INTEGER counter, frequency;
-		if(::QueryPerformanceCounter(&counter) && ::QueryPerformanceFrequency(&frequency)) {
-			u = counter.QuadPart * 1e7 / frequency.QuadPart; // to ::FILETIME
-		} else { // The CPU has no tick count register.
-			#if 1
-				/// Use the PIT/PIC PC hardware via mswindows' ::timeGetTime() or ::GetTickCount() instead.
-				class set_timer_resolution {
-					private: ::UINT milliseconds;
-					public:
-						set_timer_resolution() {
-							// tries to get the best possible resolution, starting with 1ms
-							milliseconds = 1;
-							retry:
-							if(::timeBeginPeriod(milliseconds) == TIMERR_NOCANDO) {
-								if(++milliseconds < 50) goto retry;
-								else milliseconds = 0; // give up :-(
-							}
-						}
-						~set_timer_resolution() throw() {
-							if(!milliseconds) return; // wasn't set
-							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO) return; // cannot throw in a destructor
-							//throw std::runtime_error(GetLastErrorString());
-						}
-				};
-				static set_timer_resolution once;
-				result = ::timeGetTime() * 1000000; // milliseconds to nanoseconds
-					// ::timeGetTime() equivalent to ::GetTickCount() but Microsoft very loosely tries to express the idea that it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
-					//
-					// ::GetTickCount()
-					// uptime (i.e., time elapsed since computer was booted), in milliseconds. Microsoft doesn't even specifies wether it's monotonic and as linear as possible, but we can probably assume so.
-					// This function returns a value which is read from a context value which is updated only on context switches, and hence is very inaccurate: it can lag behind the real clock value as much as 15ms.
-			#else
-				::FILETIME ft;
-				::GetSystemTimeAsFileTime(&ft);
-
-				::LARGE_INTEGER li;
-				li.LowPart  = ft.dwLowDateTime;
-				li.HighPart = ft.dwHighDateTime;
-
-				std::int64_t i = li.QuadPart; // in 100-nanosecond intervals
-				
-				// microsoft disregards the unix/posix epoch time, so we need to apply an offset
-				std::int64_t const microsoft_file_time_to_unix_epoch_offset(116444736000000000LL);
-				i -= microsoft_file_time_to_unix_epoch_offset;
-
-				result = i * 100; // conversion from 100-nanosecond intervals to nanoseconds
-			#endif
-		}
-	#else
-		static bool once(false); if(!once) best();
-		::clock_gettime(wall_clock_id, &u);
-	#endif
-	return result;
-}
-
-opaque_time process::current() {
-	opaque_time result;
-	opaque_time::underlying_type & u(result);
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		::FILETIME creation, exit, kernel, user;
-		::GetProcessTimes(::GetCurrentProcess(), &creation, &exit, &kernel, &user);
-		union winapi_is_badly_designed // real unit 1e-7 seconds
-		{
-			::FILETIME file_time;
-			::LARGE_INTEGER large_integer;
-		} u1, u2;
-		u1.file_time = user;
-		u2.file_time = kernel;
-		u = u1.large_integer.QuadPart + u2.large_integer.QuadPart;
-	#else
-		static bool once(false); if(!once) best();
-		::clock_gettime(process_clock_id, &u);
-	#endif
-	return result;
-}
-
-opaque_time thread::current() {
-	opaque_time result;
-	opaque_time::underlying_type & u(result);
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		#if 0 // The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
-			::FILETIME creation, exit, kernel, user;
-			::GetThreadTimes(::GetCurrentThread(), &creation, &exit, &kernel, &user);
-			union winapi_is_badly_designed // real unit 1e-7 seconds
-			{
-				::FILETIME file_time;
-				::LARGE_INTEGER large_integer;
-			} u1, u2;
-			u1.file_time = user;
-			u2.file_time = kernel;
-			u = u1.large_integer.QuadPart + u2.large_integer.QuadPart;
-		#else // Use the wall clock instead, which majorates all virtual subclocks.
-			u = monotonic_wall::current().underlying();
+std::nanoseconds utc_since_epoch::current() {
+	return detail::
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			microsoft_clocks::system_time_as_file_time_since_epoch();
+		#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			posix_clocks::realtime();
+		#else
+			iso_std_time();
 		#endif
+}
+
+std::nanoseconds monotonic::current() {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft_clocks::performance_counter();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		bool static once = false; if(!once) detail::posix_clocks::config();
+		if(detail::posix_clocks::monotonic_clock_supported) return detail::posix_clocks::monotonic();
+		else return detail::posix_clocks::realtime();
 	#else
-		static bool once(false); if(!once) best();
-		::clock_gettime(thread_clock_id, &u);
+		return detail::iso_std_time();
 	#endif
-	return result;
+}
+
+std::nanoseconds process::current() {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft_clocks::process_time();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		bool static once = false; if(!once) detail::posix_clocks::config();
+		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::process_cpu_time();
+		else return detail::iso_std_clock();
+	#else
+		return detail::iso_std_clock();
+	#endif
+}
+
+std::nanoseconds thread::current() {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft_clocks::thread_time();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		bool static once = false; if(!once) detail::posix_clocks::config();
+		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::thread_cpu_time();
+		else return detail::iso_std_clock();
+	#else
+		return detail::iso_std_clock();
+	#endif
 }
 
 /******************************************************************************************/
@@ -262,6 +171,19 @@ namespace detail {
 			throw std::runtime_error(s.str().c_str());
 		}
 		std::nanoseconds ns = std::seconds(t);
+		return ns;
+	}
+
+	/// iso std clock.
+	/// returns an approximation of processor time used by the program
+	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
+	std::nanoseconds iso_std_clock() throw(std::runtime_error) {
+		std::clock_t const t(std::clock());
+		if(t < 0) {
+			std::ostringstream s; s << exceptions::code_description();
+			throw std::runtime_error(s.str().c_str());
+		}
+		std::nanoseconds ns = std::nanoseconds(1000 * 1000 * 1000LL * t / CLOCKS_PER_SEC);
 		return ns;
 	}
 
@@ -281,12 +203,12 @@ namespace detail {
 
 			/// posix CLOCK_REALTIME.
 			/// System-wide realtime clock.
-			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.4e-05s, avg: 1.5875e-05s, max: 0.000385s
+			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.3e-05s, avg: 1.6006e-05s, max: 0.001359s
 			std::nanoseconds realtime() throw(std::runtime_error) { return get(CLOCK_REALTIME); }
 
 			/// posix CLOCK_MONOTONIC.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
-			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.4e-05s, avg: 1.5347e-05s, max: 0.000213s
+			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.3e-05s, avg: 1.606e-05s, max: 0.001745s
 			std::nanoseconds monotonic() throw(std::runtime_error) { return get(CLOCK_MONOTONIC); }
 
 			/// posix CLOCK_PROCESS_CPUTIME_ID.
@@ -302,7 +224,7 @@ namespace detail {
 			std::nanoseconds thread_cpu_time() throw(std::runtime_error) { return get(CLOCK_THREAD_CPUTIME_ID); }
 
 			/// posix gettimeofday.
-			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.6722e-05s, max: 0.001051s
+			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.5878e-05s, max: 0.001719s
 			std::nanoseconds time_of_day() throw(std::runtime_error) {
 				::timeval t;
 				if(::gettimeofday(&t, 0)) { // second argument passed is 0 for no timezone
@@ -319,13 +241,15 @@ namespace detail {
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on AMD64: clock res: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
-			std::nanoseconds performance_counter_nanoseconds() throw(std::runtime_error) {
+			std::nanoseconds performance_counter() throw(std::runtime_error) {
 				::LARGE_INTEGER counter, frequency;
 				if(!::QueryPerformanceCounter(&counter) || !::QueryPerformanceFrequency(&frequency)) {
 					std::ostringstream s; s << exceptions::code_description();
 					throw std::runtime_error(s.str().c_str());
 				}
 				std::nanoseconds ns(counter.QuadPart * 1000 * 1000 * 1000 / frequency.QuadPart);
+				///\todo check possibility of overflow
+				//std::nanoseconds ns(counter.QuadPart * (1000 * 1000 * 1000 / frequency.QuadPart));
 				return ns;
 			}
 
@@ -334,7 +258,7 @@ namespace detail {
 			/// it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: mmsystem timeGetTime, min: 0.001s, avg: 0.0010413s, max: 0.084s.
-			std::nanoseconds mme_system_time_nanoseconds() {
+			std::nanoseconds mme_system_time() {
 				class set_timer_resolution {
 					private: ::UINT milliseconds;
 					public:
@@ -365,14 +289,14 @@ namespace detail {
 			/// and hence is very inaccurate: it can lag behind the real clock value as much as 15ms, and sometimes more.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
-			std::nanoseconds tick_count_nanoseconds() {
+			std::nanoseconds tick_count() {
 				std::nanoseconds ns(1000LL * 1000 * ::GetTickCount());
 				return ns;
 			}
 
 			/// wall clock.
 			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
-			std::nanoseconds system_time_as_file_time_nanoseconds_since_epoch() {
+			std::nanoseconds system_time_as_file_time_since_epoch() {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;
@@ -385,7 +309,7 @@ namespace detail {
 
 			/// virtual clock. kernel time not included.
 			/// test result: clock: GetProcessTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			std::nanoseconds process_times_nanoseconds() {
+			std::nanoseconds process_time() {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;
@@ -398,7 +322,7 @@ namespace detail {
 			/// virtual clock. kernel time not included.
 			/// The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
 			/// test result: clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			std::nanoseconds thread_times_nanoseconds() {
+			std::nanoseconds thread_time() {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;

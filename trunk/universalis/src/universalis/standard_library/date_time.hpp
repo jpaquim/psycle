@@ -1,6 +1,5 @@
 #pragma once
 #include <ctime> // for std::time_t in std::utc_time
-
 namespace std {
 	/*
 		This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2328.html
@@ -24,7 +23,7 @@ namespace std {
 	// time duration types
 		
 	template<typename Final, typename Tick, Tick Ticks_Per_Seconds, Tick Seconds_Per_Tick>
-	class basic_time_duration {
+	class basic_time_duration { ///\todo define only operators +=, -=, < and the rest with #include <boost/operators.hpp> : private boost::additive< basic_time_duration, boost::less_than_comparable<basic_time_duration> >
 		public:
 			typedef Tick tick_type;
 			basic_time_duration(tick_type tick = 0) : tick_(tick) {}

@@ -3,9 +3,7 @@
 
 ///\interface universalis::operating_system::clocks
 #pragma once
-#include <universalis/compiler/cast.hpp>
-#include <universalis/compiler/numeric.hpp>
-#include <boost/operators.hpp>
+#include <diversalis/operating_system.hpp>
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	#include <ctime>
 	#include <cerrno>
@@ -35,7 +33,9 @@
 #endif
 #include <cstdint>
 #include <date_time>
+#include <stdexcept>
 #if defined BOOST_AUTO_TEST_CASE
+	#include <universalis/operating_system/exceptions/code_description.hpp>
 	#include <universalis/operating_system/threads/sleep.hpp>
 	#include <sstream>
 #endif
@@ -45,43 +45,38 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 // recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
-/******************************************************************************************/
-#if defined universalis__operating_system__clocks__version__2
-namespace clocks2 {
-	/// a real time clock that counts the time elapsed since some unspecified origin.
-	///
-	/// The implementation reads, if available, the tick count register of some unspecified CPU.
-	/// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles, but often the count value and the tick events are unrelated,
-	/// i.e. the value might not be incremented one by one. So the period corresponding to 1 count unit may be even smaller than the period of a CPU cycle, but should probably stay in the same order of magnitude.
-	/// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long, it is possible to count an uptime period in the order of a century without wrapping.
-	/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time. This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845.
-	/// The implementation for mswindows is unpsecified on SMP systems.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK monotonic_wall {
-		public:
-			std::nanoseconds static current();
-	};
+/// a real time clock that counts the time elapsed since some unspecified origin.
+///
+/// The implementation reads, if available, the tick count register of some unspecified CPU.
+/// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles, but often the count value and the tick events are unrelated,
+/// i.e. the value might not be incremented one by one. So the period corresponding to 1 count unit may be even smaller than the period of a CPU cycle, but should probably stay in the same order of magnitude.
+/// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long, it is possible to count an uptime period in the order of a century without wrapping.
+/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time. This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845.
+/// The implementation for mswindows is unpsecified on SMP systems.
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK monotonic {
+	public:
+		std::nanoseconds static current();
+};
 
-	/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
-	///
-	/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK utc_since_epoch {
-		public:
-			std::nanoseconds static current();
-	};
+/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
+///
+/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK utc_since_epoch {
+	public:
+		std::nanoseconds static current();
+};
 
-	/// a virtual clock that counts the time spent by the CPU(s) in the current process.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
-		public:
-			std::nanoseconds static current();
-	};
+/// a virtual clock that counts the time spent by the CPU(s) in the current process.
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
+	public:
+		std::nanoseconds static current();
+};
 
-	/// a virtual clock that counts the time spent by the CPU(s) in the current thread.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
-		public:
-			std::nanoseconds static current();
-	};
-}
-#endif // defined universalis__operating_system__clocks__version__2
+/// a virtual clock that counts the time spent by the CPU(s) in the current thread.
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
+	public:
+		std::nanoseconds static current();
+};
 
 /******************************************************************************************/
 typedef std::nanoseconds (*clock_function) ();
@@ -91,16 +86,37 @@ namespace detail {
 	/// test result: clock: std::time, min: 1s, avg: 1s, max: 1s
 	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds iso_std_time() throw(std::runtime_error);
 
+	/// iso std clock.
+	/// returns an approximation of processor time used by the program
+	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
+	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds iso_std_clock() throw(std::runtime_error);
+
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		namespace posix_clocks {
+			bool extern clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, cputime_supported;
+			::clockid_t extern monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
+			void config();
+
+			///\todo CLOCK_REALTIME_HR
+			/// posix CLOCK_REALTIME_HR.
+			/// System-wide realtime clock.
+			/// High resolution version of CLOCK_REALTIME.
+			//UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds realtime_hr() throw(std::runtime_error);
+			
+			///\todo CLOCK_MONOTONIC_HR
+			/// posix CLOCK_MONOTONIC_HR.
+			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
+			/// High resolution version of CLOCK_MONOTONIC.
+			//UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds monotonic_hr() throw(std::runtime_error);
+
 			/// posix CLOCK_REALTIME.
 			/// System-wide realtime clock.
-			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.4e-05s, avg: 1.5875e-05s, max: 0.000385s
+			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.3e-05s, avg: 1.6006e-05s, max: 0.001359s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds realtime() throw(std::runtime_error);
 
 			/// posix CLOCK_MONOTONIC.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
-			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.4e-05s, avg: 1.5347e-05s, max: 0.000213s
+			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.3e-05s, avg: 1.606e-05s, max: 0.001745s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds monotonic() throw(std::runtime_error);
 
 			/// posix CLOCK_PROCESS_CPUTIME_ID.
@@ -116,7 +132,7 @@ namespace detail {
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds thread_cpu_time() throw(std::runtime_error);
 
 			/// posix gettimeofday.
-			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.6722e-05s, max: 0.001051s
+			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.5878e-05s, max: 0.001719s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds time_of_day() throw(std::runtime_error);
 		}
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
@@ -125,14 +141,14 @@ namespace detail {
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on AMD64: clock res: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds performance_counter_nanoseconds() throw(std::runtime_error);
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds performance_counter() throw(std::runtime_error);
 
 			/// wall clock.
 			/// ::timeGetTime() is equivalent to ::GetTickCount() but Microsoft very loosely tries to express the idea that
 			/// it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: mmsystem timeGetTime, min: 0.001s, avg: 0.0010413s, max: 0.084s.
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds mme_system_time_nanoseconds();
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds mme_system_time();
 
 			/// wall clock.
 			/// ::GetTickCount() returns the uptime (i.e., time elapsed since computer was booted), in milliseconds.
@@ -141,20 +157,20 @@ namespace detail {
 			/// and hence is very inaccurate: it can lag behind the real clock value as much as 15ms, and sometimes more.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds tick_count_nanoseconds();
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds tick_count();
 
 			/// wall clock.
 			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds system_time_as_file_time_nanoseconds_since_epoch();
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds system_time_as_file_time_since_epoch();
 
 			/// virtual clock. kernel time not included.
 			/// test result: clock: GetProcessTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds process_times_nanoseconds();
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds process_time();
 
 			/// virtual clock. kernel time not included.
 			/// The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
 			/// test result: clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds thread_times_nanoseconds();
+			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds thread_time();
 		}
 	#endif // defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 
@@ -187,17 +203,52 @@ namespace detail {
 				BOOST_MESSAGE(s.str());
 			}
 
+			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+				void display_clock_resolution(std::string const & clock_name, ::clockid_t clock) throw(std::runtime_error) {
+					::timespec t;
+					if(::clock_getres(CLOCK_REALTIME, &t))
+					{
+						std::ostringstream s; s << exceptions::code_description();
+						throw std::runtime_error(s.str().c_str());
+					}
+					std::nanoseconds const ns(std::nanoseconds(t.tv_nsec) + std::nanoseconds(t.tv_sec));
+					std::ostringstream s;
+					s
+						<< "clock: " << clock_name
+						<< ", resolution: " << ns.get_count() * 1e-9 << 's';
+					BOOST_MESSAGE(s.str());
+				}
+			#endif
+			
 			BOOST_AUTO_TEST_CASE(clocks_test)
 			{
 				measure_clock_resolution("std::time", iso_std_time, 1);
+				measure_clock_resolution("std::clock", iso_std_clock);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					BOOST_MESSAGE("posix clocks");
 					using namespace posix_clocks;
+					bool static once = false; if(!once) config();
 					measure_clock_resolution("CLOCK_REALTIME", realtime);
-					measure_clock_resolution("CLOCK_MONOTONIC", monotonic);
-					measure_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", process_cpu_time);
-					measure_clock_resolution("CLOCK_THREAD_CPUTIME_ID", thread_cpu_time);
+					if(monotonic_clock_supported) measure_clock_resolution("CLOCK_MONOTONIC", monotonic);
+					if(cputime_supported) {
+						measure_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", process_cpu_time);
+						measure_clock_resolution("CLOCK_THREAD_CPUTIME_ID", thread_cpu_time);
+					}
 					measure_clock_resolution("gettimeofday", time_of_day);
+
+					if(clock_getres_supported) {
+						BOOST_MESSAGE("posix clock_getres");
+						display_clock_resolution("CLOCK_REALTIME", CLOCK_REALTIME);
+						if(monotonic_clock_supported) display_clock_resolution("CLOCK_MONOTONIC", CLOCK_MONOTONIC);
+						if(cputime_supported) {
+							display_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", CLOCK_PROCESS_CPUTIME_ID);
+							display_clock_resolution("CLOCK_THREAD_CPUTIME_ID", CLOCK_THREAD_CPUTIME_ID);
+						}
+					} else {
+							std::ostringstream s;
+							s << "CLOCKS_PER_SEC: " << CLOCKS_PER_SEC;
+							BOOST_MESSAGE(s.str());
+					}
 				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					BOOST_MESSAGE("microsoft clocks");
 					using namespace microsoft_clocks;
@@ -207,12 +258,16 @@ namespace detail {
 						std::ostringstream s; s << "clock res: QueryPerformancefrequency: " << frequency.QuadPart << "Hz";
 						BOOST_MESSAGE(s.str());
 					}
-					measure_clock_resolution("QueryPerformanceCounter", performance_counter_nanoseconds, 10000);
-					measure_clock_resolution("mmsystem timeGetTime", mme_system_time_nanoseconds);
-					measure_clock_resolution("GetTickCount", tick_count_nanoseconds);
-					measure_clock_resolution("GetSystemTimeAsFileTime", system_time_as_file_time_nanoseconds_since_epoch);
-					measure_clock_resolution("GetProcessTimes", process_times_nanoseconds);
-					measure_clock_resolution("GetThreadTimes", thread_times_nanoseconds);
+					try {
+						measure_clock_resolution("QueryPerformanceCounter", performance_counter, 10000);
+					} catch(std::runtime_error const & e) {
+						BOOST_MESSAGE(e.what());
+					}
+					measure_clock_resolution("mmsystem timeGetTime", mme_system_time);
+					measure_clock_resolution("GetTickCount", tick_count);
+					measure_clock_resolution("GetSystemTimeAsFileTime", system_time_as_file_time_since_epoch);
+					measure_clock_resolution("GetProcessTimes", process_time);
+					measure_clock_resolution("GetThreadTimes", thread_time);
 				#endif
 			}
 		}
@@ -220,147 +275,19 @@ namespace detail {
 } // namespace detail
 
 /******************************************************************************************/
-/// a time value in SI units (i.e. seconds)
-typedef universalis::compiler::numeric<>::floating_point real_time;
-
-/// a time value with an implementation-defined internal representation.
-/// convertible to/from real_time
-class opaque_time
-:
-	public universalis::compiler::cast::underlying_value_wrapper
-	<
-			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-				::timespec
-			#else
-				std::/*u*/int64_t
-			#endif
-	>,
-	private
-		boost::additive< opaque_time, boost::less_than_comparable<opaque_time> >
-{
-	public:
-		opaque_time() {}
-		opaque_time(underlying_type const & underlying) : underlying_wrapper_type(underlying) {}
-
-		opaque_time & operator=(opaque_time const & other) {
-			static_cast<underlying_type&>(*this) = static_cast<underlying_type const &>(other);
-			return *this;
-		}
-		
-		opaque_time & operator+=(opaque_time const & other) {
-			underlying_type & u(*this);
-			underlying_type const & o(other);
-			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-				u.tv_sec += o.tv_sec;
-				u.tv_nsec += o.tv_nsec;
-				if(u.tv_nsec >= 1000000000) { u.tv_nsec -= 1000000000; ++u.tv_sec; }
-			#else
-				u += o;
-			#endif
-			return *this;
-		}
-
-		opaque_time & operator-=(opaque_time const & other) {
-			underlying_type & u(*this);
-			underlying_type const & o(other);
-			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-				u.tv_sec -= o.tv_sec;
-				if(u.tv_nsec > o.tv_nsec) u.tv_nsec -= o.tv_nsec;
-				else { --u.tv_sec; u.tv_nsec += 1000000000 - o.tv_nsec; }
-			#else
-				u -= o;
-			#endif
-			return *this;
-		}
-
-		bool operator<(opaque_time const & other) const {
-			underlying_type const & u(*this);
-			underlying_type const & o(other);
-			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-				if(u.tv_sec < o.tv_sec) return true;
-				if(u.tv_sec > o.tv_sec) return false;
-				return u.tv_nsec < o.tv_nsec;
-			#else
-				return u < o;
-			#endif
-		}
-
-		///\name conversion from/to real_time
-		///\{
-			/// conversion from real_time.
-			opaque_time static from_real_time(real_time seconds) {
-				opaque_time result;
-				underlying_type & u(result);
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					u = static_cast<underlying_type>(seconds * 1e7); // ::FILETIME resolution
-				#else
-					u.tv_sec =  static_cast<time_t>(seconds);
-					u.tv_nsec = static_cast<long int>((seconds - u.tv_sec) * 1e9);
-				#endif
-				return result;
-			}
-			
-			/// conversion to real_time.
-			///\return the time value in SI units (i.e. seconds).
-			real_time to_real_time() const {
-				real_time result;
-				underlying_type const & u(*this);
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					result = u * 1e-7; // ::FILETIME resolution
-				#else
-					result = u.tv_sec + u.tv_nsec * 1e-9;
-				#endif
-				return result;
-			}
-		///\}
-};
-
-/// a real time clock that counts the time elapsed since some unspecified origin.
-///
-/// The implementation reads, if available, the tick count register of some unspecified CPU.
-/// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles, but often the count value and the tick events are unrelated,
-/// i.e. the value might not be incremented one by one. So the period corresponding to 1 count unit may be even smaller than the period of a CPU cycle, but should probably stay in the same order of magnitude.
-/// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long, it is possible to count an uptime period in the order of a century without wrapping.
-/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time. This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845.
-/// The implementation for mswindows is unpsecified on SMP systems.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK monotonic_wall {
-	public:
-		opaque_time static current();
-};
-
-/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
-///
-/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK utc_since_epoch {
-	public:
-		opaque_time static current();
-};
-
-/// a virtual clock that counts the time spent by the CPU(s) in the current process (kernel included?).
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
-	public:
-		opaque_time static current();
-};
-
-/// a virtual clock that counts the time spent by the CPU(s) in the current thread (kernel included?).
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
-	public:
-		opaque_time static current();
-};
-
 #if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(wall_clock_test)
+	BOOST_AUTO_TEST_CASE(wall_clock_and_sleep_test)
 	{
-		typedef monotonic_wall clock;
-		real_time const sleep_seconds(0.25);
-		opaque_time const start(clock::current());
-		universalis::operating_system::threads::sleep(sleep_seconds);
-		double const ratio((clock::current() - start).to_real_time() / sleep_seconds);
+		typedef monotonic clock;
+		std::nanoseconds const sleep_nanoseconds(std::milliseconds(250));
+		std::nanoseconds const t0(clock::current());
+		universalis::operating_system::threads::sleep(sleep_nanoseconds);
+		double const ratio(double((clock::current() - t0).get_count()) / sleep_nanoseconds.get_count());
 		{
 			std::ostringstream s; s << ratio;
 			BOOST_MESSAGE(s.str());
 		}
-		BOOST_CHECK(0.75 < ratio && ratio < 1.25);
+		BOOST_CHECK(0.66 < ratio && ratio < 1.33);
 	}
 #endif
 
