@@ -143,12 +143,13 @@ namespace psycle
 						BOOST_CHECK(1 - tolerance < ratio && ratio < 1 + tolerance);
 					}
 					using namespace universalis::operating_system::clocks;
-					typedef thread clock;
+					//typedef thread clock;
+					typedef monotonic clock;
 					int const iterations(1000000);
-					opaque_time const t1(clock::current());
+					std::nanoseconds const t1(clock::current());
 					float f1(2);
 					for(int i(0); i < iterations; ++i) f1 += fast_log2(f1);
-					opaque_time const t2(clock::current());
+					std::nanoseconds const t2(clock::current());
 					float f2(2);
 					for(int i(0); i < iterations; ++i) f2 += 
 						#if defined DIVERSALIS__COMPILER__MICROSOFT // lacks log2
@@ -157,7 +158,7 @@ namespace psycle
 							::log2(f2)
 						#endif
 						;
-					opaque_time const t3(clock::current());
+					std::nanoseconds const t3(clock::current());
 					{
 						std::ostringstream s; s << "fast_log2: " << f1;
 						BOOST_MESSAGE(s.str());
@@ -168,7 +169,7 @@ namespace psycle
 					}
 					{
 						std::ostringstream s;
-						s << (t2 - t1).to_real_time() << "s < " << (t3 - t2).to_real_time() << "s";
+						s << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
 						BOOST_MESSAGE(s.str());
 					}
 					BOOST_CHECK(t2 - t1 < t3 - t2);
