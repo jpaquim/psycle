@@ -88,65 +88,72 @@ typedef std::nanoseconds (*clock_function) ();
 namespace detail {
 	/// iso std time.
 	/// returns the time since the Epoch (00:00:00 UTC, January 1, 1970), measured in seconds.
+	/// test result: clock: std::time, min: 1s, avg: 1s, max: 1s
 	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds iso_std_time() throw(std::runtime_error);
 
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		namespace posix_clocks {
 			/// posix CLOCK_REALTIME.
 			/// System-wide realtime clock.
+			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.4e-05s, avg: 1.5875e-05s, max: 0.000385s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds realtime() throw(std::runtime_error);
 
 			/// posix CLOCK_MONOTONIC.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
+			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.4e-05s, avg: 1.5347e-05s, max: 0.000213s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds monotonic() throw(std::runtime_error);
 
 			/// posix CLOCK_PROCESS_CPUTIME_ID.
 			/// High-resolution per-process timer from the CPU.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
+			/// test result on colinux AMD64: clock: CLOCK_PROCESS_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds process_cpu_time() throw(std::runtime_error);
 
 			/// posix CLOCK_THREAD_CPUTIME_ID.
 			/// Thread-specific CPU-time clock.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
+			/// test result on colinux AMD64: clock: CLOCK_THREAD_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds thread_cpu_time() throw(std::runtime_error);
 
 			/// posix gettimeofday.
+			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.6722e-05s, max: 0.001051s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds time_of_day() throw(std::runtime_error);
 		}
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		namespace microsoft_clocks {
-			/// clock: QueryPerformanceCounter.
 			/// wall clock.
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
+			/// test result on AMD64: clock res: QueryPerformancefrequency: 3579545Hz (3.6MHz)
+			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds performance_counter_nanoseconds() throw(std::runtime_error);
 
-			/// clock: mmsystem timeGetTime, min: 0.001s, avg: 0.0010413s, max: 0.084s.
 			/// wall clock.
 			/// ::timeGetTime() is equivalent to ::GetTickCount() but Microsoft very loosely tries to express the idea that
 			/// it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
 			/// Possibly realised using the PIT/PIC PC hardware.
+			/// test result: clock: mmsystem timeGetTime, min: 0.001s, avg: 0.0010413s, max: 0.084s.
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds mme_system_time_nanoseconds();
 
-			/// clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
 			/// wall clock.
 			/// ::GetTickCount() returns the uptime (i.e., time elapsed since computer was booted), in milliseconds.
 			/// Microsoft doesn't even specifies wether it's monotonic and as linear as possible, but we can probably assume so.
 			/// This function returns a value which is read from a context value which is updated only on context switches,
 			/// and hence is very inaccurate: it can lag behind the real clock value as much as 15ms, and sometimes more.
 			/// Possibly realised using the PIT/PIC PC hardware.
+			/// test result: clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds tick_count_nanoseconds();
 
-			/// clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
 			/// wall clock.
+			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds system_time_as_file_time_nanoseconds_since_epoch();
 
-			/// clock: GetProcessTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
 			/// virtual clock. kernel time not included.
+			/// test result: clock: GetProcessTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds process_times_nanoseconds();
 
-			/// clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
 			/// virtual clock. kernel time not included.
 			/// The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
+			/// test result: clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds thread_times_nanoseconds();
 		}
 	#endif // defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
