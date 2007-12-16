@@ -85,7 +85,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 		typedef monotonic clock;
 		std::nanoseconds const sleep_nanoseconds(std::milliseconds(250));
 		std::nanoseconds const t0(clock::current());
-		universalis::operating_system::threads::sleep(sleep_nanoseconds);
+		threads::sleep(sleep_nanoseconds);
 		double const ratio(double((clock::current() - t0).get_count()) / sleep_nanoseconds.get_count());
 		{
 			std::ostringstream s; s << ratio;
@@ -108,7 +108,7 @@ namespace detail {
 	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds iso_std_clock() throw(std::runtime_error);
 
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		namespace posix_clocks {
+		namespace posix {
 			bool extern clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, cputime_supported;
 			::clockid_t extern monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
 			void config();
@@ -152,7 +152,7 @@ namespace detail {
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds time_of_day() throw(std::runtime_error);
 		}
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		namespace microsoft_clocks {
+		namespace microsoft {
 			/// wall clock.
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on AMD64: clock res: QueryPerformancefrequency: 3579545Hz (3.6MHz)
@@ -244,7 +244,7 @@ namespace detail {
 				measure_clock_resolution("std::clock", iso_std_clock);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					BOOST_MESSAGE("posix clocks");
-					using namespace posix_clocks;
+					using namespace posix;
 					bool static once = false; if(!once) config();
 					measure_clock_resolution("CLOCK_REALTIME", realtime);
 					if(monotonic_clock_supported) measure_clock_resolution("CLOCK_MONOTONIC", monotonic);
@@ -269,7 +269,7 @@ namespace detail {
 					}
 				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					BOOST_MESSAGE("microsoft clocks");
-					using namespace microsoft_clocks;
+					using namespace microsoft;
 					{
 						::LARGE_INTEGER frequency;
 						::QueryPerformanceFrequency(&frequency);
