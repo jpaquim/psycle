@@ -18,6 +18,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 // recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
+/******************************************************************************************/
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	namespace detail { namespace posix_clocks {
 		bool clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, cputime_supported;
@@ -110,53 +111,6 @@ namespace universalis { namespace operating_system { namespace clocks {
 		}
 	}}
 #endif // defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-
-std::nanoseconds utc_since_epoch::current() {
-	return detail::
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			microsoft_clocks::system_time_as_file_time_since_epoch();
-		#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-			posix_clocks::realtime();
-		#else
-			iso_std_time();
-		#endif
-}
-
-std::nanoseconds monotonic::current() {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft_clocks::performance_counter();
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix_clocks::config();
-		if(detail::posix_clocks::monotonic_clock_supported) return detail::posix_clocks::monotonic();
-		else return detail::posix_clocks::realtime();
-	#else
-		return detail::iso_std_time();
-	#endif
-}
-
-std::nanoseconds process::current() {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft_clocks::process_time();
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix_clocks::config();
-		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::process_cpu_time();
-		else return detail::iso_std_clock();
-	#else
-		return detail::iso_std_clock();
-	#endif
-}
-
-std::nanoseconds thread::current() {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft_clocks::thread_time();
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix_clocks::config();
-		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::thread_cpu_time();
-		else return detail::iso_std_clock();
-	#else
-		return detail::iso_std_clock();
-	#endif
-}
 
 /******************************************************************************************/
 typedef std::nanoseconds (*clock_function) ();
@@ -333,5 +287,54 @@ namespace detail {
 			}
 		}
 	#endif // defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+} // namespace detail
+
+/******************************************************************************************/
+std::nanoseconds utc_since_epoch::current() {
+	return detail::
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			microsoft_clocks::system_time_as_file_time_since_epoch();
+		#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			posix_clocks::realtime();
+		#else
+			iso_std_time();
+		#endif
 }
+
+std::nanoseconds monotonic::current() {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft_clocks::performance_counter();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		bool static once = false; if(!once) detail::posix_clocks::config();
+		if(detail::posix_clocks::monotonic_clock_supported) return detail::posix_clocks::monotonic();
+		else return detail::posix_clocks::realtime();
+	#else
+		return detail::iso_std_time();
+	#endif
+}
+
+std::nanoseconds process::current() {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft_clocks::process_time();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		bool static once = false; if(!once) detail::posix_clocks::config();
+		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::process_cpu_time();
+		else return detail::iso_std_clock();
+	#else
+		return detail::iso_std_clock();
+	#endif
+}
+
+std::nanoseconds thread::current() {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft_clocks::thread_time();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		bool static once = false; if(!once) detail::posix_clocks::config();
+		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::thread_cpu_time();
+		else return detail::iso_std_clock();
+	#else
+		return detail::iso_std_clock();
+	#endif
+}
+
 }}}
