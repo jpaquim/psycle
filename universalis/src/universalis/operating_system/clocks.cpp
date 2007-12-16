@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::operating_system::clocks
 #include <packageneric/pre-compiled.private.hpp>
@@ -304,7 +303,7 @@ namespace detail {
 					std::ostringstream s; s << exceptions::code_description();
 					throw std::runtime_error(s.str().c_str());
 				}
-				std::nanoseconds ns(std::seconds(t.tv_sec) + std::microseconds(t.tv_usec));
+				std::nanoseconds ns(std::microseconds(t.tv_usec) + std::seconds(t.tv_sec));
 				return ns;
 			}
 		}
