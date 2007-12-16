@@ -184,12 +184,15 @@ namespace detail {
 			{
 				measure_clock_resolution("std::time", iso_std_time, 1);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+					BOOST_MESSAGE("posix clocks");
 					using namespace posix_clocks;
 					measure_clock_resolution("CLOCK_REALTIME", realtime);
 					measure_clock_resolution("CLOCK_MONOTONIC", monotonic);
 					measure_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", process_cpu_time);
 					measure_clock_resolution("CLOCK_THREAD_CPUTIME_ID", thread_cpu_time);
+					measure_clock_resolution("gettimeofday", time_of_day);
 				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					BOOST_MESSAGE("microsoft clocks");
 					using namespace microsoft_clocks;
 					{
 						::LARGE_INTEGER frequency;
@@ -236,7 +239,7 @@ class opaque_time
 			static_cast<underlying_type&>(*this) = static_cast<underlying_type const &>(other);
 			return *this;
 		}
-
+		
 		opaque_time & operator+=(opaque_time const & other) {
 			underlying_type & u(*this);
 			underlying_type const & o(other);
@@ -346,9 +349,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 		opaque_time const start(clock::current());
 		universalis::operating_system::threads::sleep(sleep_seconds);
 		double const ratio((clock::current() - start).to_real_time() / sleep_seconds);
-		std::ostringstream s;
-		s << ratio;
-		BOOST_MESSAGE(s.str());
+		{
+			std::ostringstream s; s << ratio;
+			BOOST_MESSAGE(s.str());
+		}
 		BOOST_CHECK(0.75 < ratio && ratio < 1.25);
 	}
 #endif

@@ -88,7 +88,9 @@ namespace universalis { namespace operating_system { namespace clocks {
 						// this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
 						cpu_time_supported = false;
 					} else {
-						wall_clock_id = process_clock_id = thread_clock_id = clock_id;//CLOCK_PROCESS_CPUTIME_ID;
+						process_clock_id = thread_clock_id = clock_id;
+						//process_clock_id = CLOCK_PROCESS_CPUTIME_ID;
+						//thread_clock_id = CLOCK_THREAD_CPUTIME_ID;
 					}
 				}
 			#endif
@@ -112,9 +114,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 			#else
 			{
 				monotonic_clock_supported = supported(_SC_MONOTONIC_CLOCK);
-				if(monotonic_clock_supported) {
-					if(!cpu_time_supported) wall_clock_id = process_clock_id = thread_clock_id = CLOCK_MONOTONIC;
-				}
+				if(monotonic_clock_supported) wall_clock_id = CLOCK_MONOTONIC;
 			}
 			#endif
 		}
