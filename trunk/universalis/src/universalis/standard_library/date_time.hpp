@@ -3,9 +3,8 @@
 
 namespace std {
 	/*
-		The following types are also provided by the boost date-time library.
-		There is also a prototype implementation at http://www.crystalclearsoftware.com/libraries/date_time/n2328_impl.tar.gz
-		For now, we just define a minimal implementation for the timed_wait and sleep functions to work.
+		This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2328.html
+		This intent is to use these types with the standard thread api timed_wait and sleep functions.
 		For example:
 			std::unique_lock<std::mutex> lk(mut);
 			// Wait for 2 seconds on a condition variable
@@ -54,60 +53,60 @@ namespace std {
 			tick_type tick_;
 	};
 
-	class nanoseconds : public basic_time_duration<nanoseconds, long long int, 1000000000, 0> {
+	class nanoseconds : public basic_time_duration<nanoseconds, long long int, 1000 * 1000 * 1000, 0> {
 		public:
 			nanoseconds(tick_type ns = 0) : basic_time_duration_type(ns) {}
 	};
 
-	class microseconds : public basic_time_duration<microseconds, long long int, 1000000, 0> {
+	class microseconds : public basic_time_duration<microseconds, long long int, 1000 * 1000, 0> {
 		public:
 			microseconds(tick_type us = 0) : basic_time_duration_type(us) {}
-			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() / ticks_per_second()); return ns; }
+			operator nanoseconds() const { nanoseconds ns(get_count() * (nanoseconds::ticks_per_second() / ticks_per_second())); return ns; }
 	};
 
 	class milliseconds : public basic_time_duration<milliseconds, long long int, 1000, 0> {
 		public:
 			milliseconds(tick_type ms = 0) : basic_time_duration_type(ms) {}
-			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() / ticks_per_second()); return ns; }
-			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() / ticks_per_second()); return us; }
+			operator nanoseconds() const { nanoseconds ns(get_count() * (nanoseconds::ticks_per_second() / ticks_per_second())); return ns; }
+			operator microseconds() const { microseconds us(get_count() * (microseconds::ticks_per_second() / ticks_per_second())); return us; }
 	};
 
 	class seconds : public basic_time_duration<seconds, long long int, 1, 1> {
 		public:
 			seconds(tick_type s = 0) : basic_time_duration_type(s) {}
-			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() / ticks_per_second()); return ns; }
-			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() / ticks_per_second()); return us; }
-			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second() / ticks_per_second()); return ms; }
+			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second()); return ns; }
+			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second()); return us; }
+			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second()); return ms; }
 	};
 
 	class minutes : public basic_time_duration<minutes, long long int, 0, 60> {
 		public:
 			minutes(tick_type m = 0) : basic_time_duration_type(m) {}
-			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() / ticks_per_second()); return ns; }
-			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() / ticks_per_second()); return us; }
-			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second() / ticks_per_second()); return ms; }
+			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() * seconds_per_tick()); return ns; }
+			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() * seconds_per_tick()); return us; }
+			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second() * seconds_per_tick()); return ms; }
 			operator seconds() const { seconds s(get_count() * seconds_per_tick()); return s; }
 	};
 
 	class hours : public basic_time_duration<hours, long long int, 0, 60 * 60> {
 		public:
 			hours(tick_type h = 0) : basic_time_duration_type(h) {}
-			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() / ticks_per_second()); return ns; }
-			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() / ticks_per_second()); return us; }
-			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second() / ticks_per_second()); return ms; }
+			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() * seconds_per_tick()); return ns; }
+			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() * seconds_per_tick()); return us; }
+			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second() * seconds_per_tick()); return ms; }
 			operator seconds() const { seconds s(get_count() * seconds_per_tick()); return s; }
-			operator minutes() const { minutes m(get_count() * seconds_per_tick() / minutes::seconds_per_tick()); return m; }
+			operator minutes() const { minutes m(get_count() * (seconds_per_tick() / minutes::seconds_per_tick())); return m; }
 	};
 	
 	class days : public basic_time_duration<days, long long int, 0, 60 * 60 * 24> {
 		public:
 			days(tick_type d = 0) : basic_time_duration_type(d) {}
-			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() / ticks_per_second()); return ns; }
-			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() / ticks_per_second()); return us; }
-			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second() / ticks_per_second()); return ms; }
+			operator nanoseconds() const { nanoseconds ns(get_count() * nanoseconds::ticks_per_second() * seconds_per_tick()); return ns; }
+			operator microseconds() const { microseconds us(get_count() * microseconds::ticks_per_second() * seconds_per_tick()); return us; }
+			operator milliseconds() const { milliseconds ms(get_count() * milliseconds::ticks_per_second() * seconds_per_tick()); return ms; }
 			operator seconds() const { seconds s(get_count() * seconds_per_tick()); return s; }
-			operator minutes() const { minutes m(get_count() * seconds_per_tick() / minutes::seconds_per_tick()); return m; }
-			operator hours() const { hours h(get_count() * 24); return h; }
+			operator minutes() const { minutes m(get_count() * (seconds_per_tick() / minutes::seconds_per_tick())); return m; }
+			operator hours() const { hours h(get_count() * (seconds_per_tick() / hours::seconds_per_tick())); return h; }
 	};
 
 	//class months; // difficult to implement and not useful for specifying pause durations
@@ -125,34 +124,39 @@ namespace std {
 				BOOST_CHECK(h.get_count() == 24);
 
 				minutes const m(h);
-				BOOST_CHECK(m == h);
 				BOOST_CHECK(m == d);
+				BOOST_CHECK(m == h);
 				BOOST_CHECK(m.get_count() == 24 * 60);
 
 				seconds const s(m);
-				BOOST_CHECK(s == m);
-				BOOST_CHECK(s == h);
 				BOOST_CHECK(s == d);
+				BOOST_CHECK(s == h);
+				BOOST_CHECK(s == m);
 				BOOST_CHECK(s.get_count() == 24 * 60 * 60);
-			}
-			{
-				seconds const s(1);
-				BOOST_CHECK(s.get_count() == 1);
-				
+
 				milliseconds const ms(s);
+				BOOST_CHECK(ms == d);
+				BOOST_CHECK(ms == h);
+				BOOST_CHECK(ms == m);
 				BOOST_CHECK(ms == s);
-				BOOST_CHECK(ms.get_count() == 1000);
-				
+				BOOST_CHECK(ms.get_count() == 24 * 60 * 60 * 1000);
+
 				microseconds const us(ms);
-				BOOST_CHECK(us == ms);
+				BOOST_CHECK(us == d);
+				BOOST_CHECK(us == h);
+				BOOST_CHECK(us == m);
 				BOOST_CHECK(us == s);
-				BOOST_CHECK(us.get_count() == 1000000);
-				
-				nanoseconds const ns(ms);
+				BOOST_CHECK(us == ms);
+				BOOST_CHECK(us.get_count() == 24 * 60 * 60 * 1000 * 1000LL);
+
+				nanoseconds const ns(us);
+				BOOST_CHECK(ns == d);
+				BOOST_CHECK(ns == h);
+				BOOST_CHECK(ns == m);
+				BOOST_CHECK(ns == s);
 				BOOST_CHECK(ns == ms);
 				BOOST_CHECK(ns == us);
-				BOOST_CHECK(ns == s);
-				BOOST_CHECK(ns.get_count() == 1000000000LL);
+				BOOST_CHECK(ns.get_count() == 24 * 60 * 60 * 1000 * 1000LL * 1000);
 			}
 			{
 				hours const h(1);
@@ -161,6 +165,19 @@ namespace std {
 				BOOST_CHECK(m == minutes(1) + hours(1));
 				BOOST_CHECK((m - h).get_count() == 1);
 				BOOST_CHECK(m.get_count() == 61);
+			}
+			{
+				seconds const s1(1), s2(2);
+				BOOST_CHECK(s1 <  s2);
+				BOOST_CHECK(s1 <= s2);
+				BOOST_CHECK(s1 <= s1);
+				BOOST_CHECK(s1 == s1);
+				BOOST_CHECK(s1 != s2);
+				BOOST_CHECK(s1 >= s1);
+				BOOST_CHECK(s2 >= s1);
+				BOOST_CHECK(s2 >  s1);
+				BOOST_CHECK(s1 + s1 == s2);
+				BOOST_CHECK(s1 * 2 == s2);
 			}
 
 		}
