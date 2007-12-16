@@ -56,6 +56,10 @@
 			#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 			#undef DIVERSALIS__COMPILER__FEATURE__AUTO_LINK // was just defined to insert documentation.
 
+			/// a compiler feature description, set for compilers which support the warning preprocessor directive.
+			#define DIVERSALIS__COMPILER__FEATURE__WARNING
+			#undef DIVERSALIS__COMPILER__FEATURE__WARNING // was just defined to insert documentation.
+
 			/// gnu g++/gcc, g++, autodetected via __GNUG__ (equivalent to __GNUC__ && __cplusplus).
 			// http://gcc.gnu.org/onlinedocs/gcc
 			/// to see the predefined macros, run:
@@ -162,6 +166,7 @@
 			#if DIVERSALIS__COMPILER__VERSION__MAJOR > 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR >= 4)
 				#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 			#endif
+			#define DIVERSALIS__COMPILER__FEATURE__WARNING
 			#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			#define DIVERSALIS__COMPILER__ASSEMBLER__ATT
 			
