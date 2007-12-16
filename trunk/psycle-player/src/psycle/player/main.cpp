@@ -5,13 +5,6 @@
 #include <string>
 #include <sstream>
 
-
-#if defined _WIN32
-#include <windows.h> // for Sleep(ms)
-#else
-#include <unistd.h> // for sleep(s)
-#endif
-
 void usage() {
 		std::cerr <<
 			"Usage: psycle-player [options] [--input-file] <song file name>\n"
