@@ -20,7 +20,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 /******************************************************************************************/
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-	namespace detail { namespace posix_clocks {
+	namespace detail { namespace posix {
 		bool clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, cputime_supported;
 		::clockid_t monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
 
@@ -142,7 +142,7 @@ namespace detail {
 	}
 
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		namespace posix_clocks {
+		namespace posix {
 			namespace {
 				std::nanoseconds get(::clockid_t clock) throw(std::runtime_error) {
 					::timespec t;
@@ -190,7 +190,7 @@ namespace detail {
 			}
 		}
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		namespace microsoft_clocks {
+		namespace microsoft {
 			/// wall clock.
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on AMD64: clock res: QueryPerformancefrequency: 3579545Hz (3.6MHz)
@@ -293,9 +293,9 @@ namespace detail {
 std::nanoseconds utc_since_epoch::current() {
 	return detail::
 		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			microsoft_clocks::system_time_as_file_time_since_epoch();
+			microsoft::system_time_as_file_time_since_epoch();
 		#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-			posix_clocks::realtime();
+			posix::realtime();
 		#else
 			iso_std_time();
 		#endif
@@ -303,11 +303,11 @@ std::nanoseconds utc_since_epoch::current() {
 
 std::nanoseconds monotonic::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft_clocks::performance_counter();
+		return detail::microsoft::performance_counter();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix_clocks::config();
-		if(detail::posix_clocks::monotonic_clock_supported) return detail::posix_clocks::monotonic();
-		else return detail::posix_clocks::realtime();
+		bool static once = false; if(!once) detail::posix::config();
+		if(detail::posix::monotonic_clock_supported) return detail::posix::monotonic();
+		else return detail::posix::realtime();
 	#else
 		return detail::iso_std_time();
 	#endif
@@ -315,10 +315,10 @@ std::nanoseconds monotonic::current() {
 
 std::nanoseconds process::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft_clocks::process_time();
+		return detail::microsoft::process_time();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix_clocks::config();
-		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::process_cpu_time();
+		bool static once = false; if(!once) detail::posix::config();
+		if(detail::posix::cputime_supported) return detail::posix::process_cpu_time();
 		else return detail::iso_std_clock();
 	#else
 		return detail::iso_std_clock();
@@ -327,10 +327,10 @@ std::nanoseconds process::current() {
 
 std::nanoseconds thread::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft_clocks::thread_time();
+		return detail::microsoft::thread_time();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix_clocks::config();
-		if(detail::posix_clocks::cputime_supported) return detail::posix_clocks::thread_cpu_time();
+		bool static once = false; if(!once) detail::posix::config();
+		if(detail::posix::cputime_supported) return detail::posix::thread_cpu_time();
 		else return detail::iso_std_clock();
 	#else
 		return detail::iso_std_clock();
