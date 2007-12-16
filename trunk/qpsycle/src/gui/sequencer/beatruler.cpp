@@ -19,8 +19,8 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "beatruler.h"
-#include "sequencerdraw.h"
+#include "beatruler.hpp"
+#include "sequencerdraw.hpp"
 
 #include <QGraphicsScene>
 

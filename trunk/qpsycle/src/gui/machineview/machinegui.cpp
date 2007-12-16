@@ -24,12 +24,12 @@
 #include <psycle/core/song.h>
 #include <psycle/core/constants.h>
 
-#include "../global.h"
-#include "../configuration.h"
-#include "../inputhandler.h"
-#include "machinegui.h"
-#include "machineview.h"
-#include "wiregui.h"
+#include "../global.hpp"
+#include "../configuration.hpp"
+#include "../inputhandler.hpp"
+#include "machinegui.hpp"
+#include "machineview.hpp"
+#include "wiregui.hpp"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>

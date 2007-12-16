@@ -22,7 +22,7 @@
 #include <psycle/core/song.h>
 #include <psycle/core/instrument.h>
 
-#include "instrumentsmodel.h"
+#include "instrumentsmodel.hpp"
 
 #include <iostream>
 #include <iomanip>

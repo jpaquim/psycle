@@ -20,9 +20,9 @@
 
 #include <psycle/core/player.h>
 
-#include "settingsdlg.h"
-#include "../global.h"
-#include "../configuration.h"
+#include "settingsdlg.hpp"
+#include "../global.hpp"
+#include "../configuration.hpp"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>

@@ -22,12 +22,12 @@
 
 #include <psycle/core/player.h>
 
-#include "../global.h"
-#include "../configuration.h"
-#include "../inputhandler.h"
-#include "patternview.h"
-#include "patterngrid.h"
-#include "patterndraw.h"
+#include "../global.hpp"
+#include "../configuration.hpp"
+#include "../inputhandler.hpp"
+#include "patternview.hpp"
+#include "patterngrid.hpp"
+#include "patterndraw.hpp"
 
 #include <iostream>
 #include <iomanip>

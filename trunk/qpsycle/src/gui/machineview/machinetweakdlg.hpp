@@ -37,7 +37,7 @@ namespace psy { namespace core {
 class MachineGui;
 class MachineView;
 
-#include "configuration.h"
+#include "configuration.hpp"
 
 #include <map>
 

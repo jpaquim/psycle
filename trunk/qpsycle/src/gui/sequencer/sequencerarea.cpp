@@ -21,11 +21,11 @@
 
 #include <psycle/core/patternsequence.h>
 
-#include "sequencerarea.h"
-#include "sequencerview.h"
-#include "sequencerdraw.h"
-#include "sequencerline.h"
-#include "sequenceritem.h"
+#include "sequencerarea.hpp"
+#include "sequencerview.hpp"
+#include "sequencerdraw.hpp"
+#include "sequencerline.hpp"
+#include "sequenceritem.hpp"
 
 
 #include <vector>

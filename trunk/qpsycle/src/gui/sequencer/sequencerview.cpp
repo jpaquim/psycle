@@ -22,9 +22,9 @@
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 
-#include "sequencerview.h"
-#include "sequencerdraw.h"
-#include "sequencerline.h"
+#include "sequencerview.hpp"
+#include "sequencerdraw.hpp"
+#include "sequencerline.hpp"
 
 #include <iostream>
 #include <vector>

@@ -20,11 +20,11 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "newmachinedlg.h"
+#include "newmachinedlg.hpp"
 
 #include <psycle/core/pluginfinder.h>
-#include "../global.h"
-#include "../configuration.h"
+#include "../global.hpp"
+#include "../configuration.hpp"
 
 #include <QKeyEvent>
 #include <QGridLayout>

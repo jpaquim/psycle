@@ -21,10 +21,10 @@
 
 #include <psycle/core/player.h>
 
-#include "wiregui.h"
-#include "wiredlg.h"
-#include "machinegui.h"
-#include "machineview.h"
+#include "wiregui.hpp"
+#include "wiredlg.hpp"
+#include "machinegui.hpp"
+#include "machineview.hpp"
 
 #include <cmath>
 

@@ -20,7 +20,7 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "configuration.h"
+#include "configuration.hpp"
 #include <psycle/core/file.h>
 
 #include <psycle/audiodrivers/audiodriver.h>

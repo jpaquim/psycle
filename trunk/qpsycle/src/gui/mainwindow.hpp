@@ -46,7 +46,7 @@ class QStandardItemModel;
 
 class InstrumentsModel;
 
-#include "logconsole.h"
+#include "logconsole.hpp"
 
 #include <QTabWidget>
 #include <QMainWindow>

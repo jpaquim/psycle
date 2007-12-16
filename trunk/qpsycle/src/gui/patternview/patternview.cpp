@@ -24,12 +24,12 @@
 #include <psycle/core/singlepattern.h>
 #include <psycle/core/player.h>
 
-#include "../global.h"
-#include "../configuration.h"
-#include "patternview.h"
-#include "patterndraw.h"
-#include "patterngrid.h"
-#include "linenumbercolumn.h"
+#include "../global.hpp"
+#include "../configuration.hpp"
+#include "patternview.hpp"
+#include "patterndraw.hpp"
+#include "patterngrid.hpp"
+#include "linenumbercolumn.hpp"
 
 #include <QVBoxLayout>
 #include <QKeyEvent>

@@ -18,44 +18,23 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef GENERATORGUI_H
-#define GENERATORGUI_H
+#ifndef MASTERGUI_H
+#define MASTERGUI_H
 
-#include "machinegui.h"
+#include "machinegui.hpp"
 
-namespace psy { namespace core {
-		class Machine;
-	}}
-
-
-//class MachineView;
-//class MachineTweakDlg;
-
-class QGraphicsSceneContextMenuEvent;
-class QKeyEvent;
-class QGraphicsSceneMouseEvent;
-class QPainter;
-class QWidget;
-
-class GeneratorGui : public MachineGui {
-Q_OBJECT
+class MasterGui : public MachineGui
+{
 public:
-	GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
-	~GeneratorGui();
-	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-
-public slots:
-	void showMacTweakDlg();
+	MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
 
 protected:
-	void keyPressEvent( QKeyEvent * event );
-	void keyReleaseEvent( QKeyEvent * event );
-	void mousePressEvent( QGraphicsSceneMouseEvent *event );
-	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
-	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+	// Override these, as MasterGui doesn't do much (for now.)
+	void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event ) {}
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {}
+	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseMoveEvent( event ); }
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseReleaseEvent( event ); }
 
-
-	MachineTweakDlg *m_macTweakDlg;
 };
 
 #endif

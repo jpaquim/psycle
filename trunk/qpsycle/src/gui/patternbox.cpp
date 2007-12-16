@@ -22,8 +22,8 @@
 #include <psycle/core/song.h>
 #include <psycle/core/singlepattern.h>
 
-#include "patternbox.h"
-#include "mainwindow.h"
+#include "patternbox.hpp"
+#include "mainwindow.hpp"
 #include <QTreeWidget>
 #include <QAction>
 #include <QGridLayout>

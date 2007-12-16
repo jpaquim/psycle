@@ -28,15 +28,15 @@
 #include <psycle/core/pluginfinder.h>
 #include <psycle/core/patternevent.h>
 
-#include "machineview.h"
-#include "../global.h"
-#include "../configuration.h"
-#include "machinegui.h"
-#include "mastergui.h"
-#include "effectgui.h"
-#include "generatorgui.h"
-#include "wiregui.h"
-#include "newmachinedlg.h"
+#include "machineview.hpp"
+#include "../global.hpp"
+#include "../configuration.hpp"
+#include "machinegui.hpp"
+#include "mastergui.hpp"
+#include "effectgui.hpp"
+#include "generatorgui.hpp"
+#include "wiregui.hpp"
+#include "newmachinedlg.hpp"
 
 #include <QtGui/QGraphicsScene>
 #include <QPainter>
