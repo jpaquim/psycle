@@ -21,10 +21,10 @@
 
 #include <psycle/core/patternsequence.h>
 
-#include "sequencerview.h"
-#include "sequencerdraw.h"
-#include "sequencerline.h"
-#include "sequenceritem.h"
+#include "sequencerview.hpp"
+#include "sequencerdraw.hpp"
+#include "sequencerline.hpp"
+#include "sequenceritem.hpp"
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>

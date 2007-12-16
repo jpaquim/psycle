@@ -1,7 +1,7 @@
 #ifndef PSYCLE__GUI__CONFIGURATION
 #define PSYCLE__GUI__CONFIGURATION
 
-#include "inputhandler.h"
+#include "inputhandler.hpp"
 #include <string>
 #include <map>
 /// configuration for the user interface

@@ -31,39 +31,39 @@ INCLUDEPATH += \
 	src/gui/sequencer \
 	src/gui/configdlg
 HEADERS += \
-	src/gui/mainwindow.h \
-	src/model/instrumentsmodel.h \
-	src/gui/global.h \
-	src/gui/configuration.h \
-	src/gui/inputhandler.h \
-	src/gui/patternbox.h \
-	src/gui/configdlg/audioconfigdlg.h \
-	src/gui/configdlg/settingsdlg.h \
-	src/gui/samplebrowser.h \
-	src/gui/logconsole.h \
-	src/gui/machineview/machinegui.h \
-	src/gui/machineview/machinetweakdlg.h \
-	src/gui/machineview/machineview.h \
-	src/gui/machineview/newmachinedlg.h \
-	src/gui/machineview/wiregui.h \
-	src/gui/machineview/wiredlg.h \
-	src/gui/machineview/generatorgui.h \
-	src/gui/machineview/mastergui.h \
-	src/gui/machineview/effectgui.h \
-	src/gui/patternview/patternview.h \
-	src/gui/patternview/linenumbercolumn.h \
-	src/gui/patternview/trackheader.h \
-	src/gui/patternview/patterngrid.h \
-	src/gui/patternview/patterndraw.h \
-	src/gui/sequencer/sequencerarea.h \
-	src/gui/sequencer/sequencerdraw.h \
-	src/gui/sequencer/sequenceritem.h \
-	src/gui/sequencer/sequencerline.h \
-	src/gui/sequencer/sequencerview.h \
-	src/gui/sequencer/beatruler.h \
-	src/gui/waveview/waveview.h \
-	src/gui/waveview/wavedisplay.h \
-	src/gui/waveview/waveamp.h
+	src/gui/mainwindow.hpp \
+	src/model/instrumentsmodel.hpp \
+	src/gui/global.hpp \
+	src/gui/configuration.hpp \
+	src/gui/inputhandler.hpp \
+	src/gui/patternbox.hpp \
+	src/gui/configdlg/audioconfigdlg.hpp \
+	src/gui/configdlg/settingsdlg.hpp \
+	src/gui/samplebrowser.hpp \
+	src/gui/logconsole.hpp \
+	src/gui/machineview/machinegui.hpp \
+	src/gui/machineview/machinetweakdlg.hpp \
+	src/gui/machineview/machineview.hpp \
+	src/gui/machineview/newmachinedlg.hpp \
+	src/gui/machineview/wiregui.hpp \
+	src/gui/machineview/wiredlg.hpp \
+	src/gui/machineview/generatorgui.hpp \
+	src/gui/machineview/mastergui.hpp \
+	src/gui/machineview/effectgui.hpp \
+	src/gui/patternview/patternview.hpp \
+	src/gui/patternview/linenumbercolumn.hpp \
+	src/gui/patternview/trackheader.hpp \
+	src/gui/patternview/patterngrid.hpp \
+	src/gui/patternview/patterndraw.hpp \
+	src/gui/sequencer/sequencerarea.hpp \
+	src/gui/sequencer/sequencerdraw.hpp \
+	src/gui/sequencer/sequenceritem.hpp \
+	src/gui/sequencer/sequencerline.hpp \
+	src/gui/sequencer/sequencerview.hpp \
+	src/gui/sequencer/beatruler.hpp \
+	src/gui/waveview/waveview.hpp \
+	src/gui/waveview/wavedisplay.hpp \
+	src/gui/waveview/waveamp.hpp
 SOURCES += \
 	src/qpsycle.cpp \
 	src/qpsyclePch.cpp \

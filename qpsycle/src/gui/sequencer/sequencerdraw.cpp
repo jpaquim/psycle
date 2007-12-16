@@ -22,12 +22,12 @@
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 
-#include "sequencerview.h"
-#include "sequencerdraw.h"
-#include "sequencerline.h"
-#include "sequenceritem.h"
-#include "sequencerarea.h"
-#include "beatruler.h"
+#include "sequencerview.hpp"
+#include "sequencerdraw.hpp"
+#include "sequencerline.hpp"
+#include "sequenceritem.hpp"
+#include "sequencerarea.hpp"
+#include "beatruler.hpp"
 
 #include <iostream>
 #include <vector>

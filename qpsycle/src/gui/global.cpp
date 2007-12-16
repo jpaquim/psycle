@@ -18,8 +18,8 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "global.h"
-#include "configuration.h"
+#include "global.hpp"
+#include "configuration.hpp"
 
 #include <QApplication>
 #include <QDesktopWidget>

@@ -24,11 +24,11 @@
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
 
-#include "generatorgui.h"
-#include "../global.h"
-#include "../configuration.h"
-#include "machineview.h"
-#include "machinetweakdlg.h"
+#include "generatorgui.hpp"
+#include "../global.hpp"
+#include "../configuration.hpp"
+#include "machineview.hpp"
+#include "machinetweakdlg.hpp"
 
 #include <QPainter>
 #include <QMenu>

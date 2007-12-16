@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "waveamp.h"
+#include "waveamp.hpp"
 
 #include <QGridLayout>
 

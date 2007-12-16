@@ -21,10 +21,10 @@
 
 #include <psycle/core/constants.h>
 
-#include "global.h"
-#include "configuration.h"
-#include "samplebrowser.h"
-#include "../model/instrumentsmodel.h"
+#include "global.hpp"
+#include "configuration.hpp"
+#include "samplebrowser.hpp"
+#include "../model/instrumentsmodel.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>

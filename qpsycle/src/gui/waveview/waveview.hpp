@@ -17,24 +17,72 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+	#ifndef WAVEVIEW_H
+	#define WAVEVIEW_H
 
-#ifndef MASTERGUI_H
-#define MASTERGUI_H
+#include "wavedisplay.hpp"
+#include <QVBoxLayout>
+#include <QToolBar>
+#include <QWidget>
+#include <QSlider>
+#include <QLabel>
 
-#include "machinegui.h"
 
-class MasterGui : public MachineGui
+class QStandardItemModel;
+class InstrumentsModel;
+
+class WaveView : public QWidget
 {
+	Q_OBJECT
+
 public:
-	MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+	WaveView( InstrumentsModel *instrumentsModel_,
+			QWidget *parent = 0);
+	QLabel *sampName_;
 
-protected:
-	// Override these, as MasterGui doesn't do much (for now.)
-	void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event ) {}
-	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {}
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseMoveEvent( event ); }
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseReleaseEvent( event ); }
+public slots:
+	void onLoadButtonClicked();
+	void onSaveButtonClicked();
+	void onPlusButtonClicked();
+	void onMinusButtonClicked();
+	void onAmpButtonClicked();
+	void onSelectorButtonClicked();
+	void onZoomButtonClicked();
 
+signals:
+	void sampleAdded();
+
+private:
+	QVBoxLayout *layout_;
+	
+	QToolBar *toolBar_;
+	QAction *loadSmp_;
+	QAction *saveSmp_;
+	QAction *playSmp_;
+	QAction *playsSmp_;
+	QAction *stopSmp_;
+	
+	QAction *cutAct_;
+	QAction *copyAct_;
+	QAction *pasteAct_;
+	QAction *selAct_;
+	
+	QAction *tselAct_;
+	QAction *tzoomAct_;
+	
+	QToolBar *processBar_;
+	QAction *ampEfx_;
+	QAction *convEfx_;
+	QAction *remdcEfx_;
+	QAction *invEfx_;
+	
+	QToolBar *zoomBar_;
+	QAction *zoomMore_;
+	QSlider *zoomSlide_;
+	QAction *zoomLess_;
+
+
+	InstrumentsModel *instrumentsModel_;
 };
 
 #endif

@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "logconsole.h"
+#include "logconsole.hpp"
 
 LogConsole::LogConsole()
 {

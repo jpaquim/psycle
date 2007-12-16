@@ -21,13 +21,13 @@
 
 #include <psycle/core/machine.h>
 
-#include "effectgui.h"
+#include "effectgui.hpp"
 
-#include "../configuration.h"
-#include "../global.h"
-#include "../inputhandler.h"
-#include "machinetweakdlg.h"
-#include "machineview.h"
+#include "../configuration.hpp"
+#include "../global.hpp"
+#include "../inputhandler.hpp"
+#include "machinetweakdlg.hpp"
+#include "machineview.hpp"
 
 #include <QMenu>
 #include <QPainter>

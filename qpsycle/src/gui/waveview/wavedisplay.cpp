@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "wavedisplay.h"
+#include "wavedisplay.hpp"
 
 #include <QGraphicsView>
 #include <QGraphicsLineItem>

@@ -17,9 +17,9 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "wiregui.h"
-#include "wiredlg.h"
-#include "machinegui.h"
+#include "wiregui.hpp"
+#include "wiredlg.hpp"
+#include "machinegui.hpp"
 
 #include <psycle/core/machine.h>
 

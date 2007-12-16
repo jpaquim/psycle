@@ -5,7 +5,7 @@
 //
 #include <qpsyclePch.hpp>
 
-#include "alsaseqin.h"
+#include "alsaseqin.hpp"
 
 #if defined PSYCLE__ALSA_AVAILABLE
 

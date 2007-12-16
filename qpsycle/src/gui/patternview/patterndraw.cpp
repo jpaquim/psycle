@@ -21,11 +21,11 @@
 
 #include <psycle/core/song.h>
 
-#include "patternview.h"
-#include "patterndraw.h"
-#include "patterngrid.h"
-#include "trackheader.h"
-#include "linenumbercolumn.h"
+#include "patternview.hpp"
+#include "patterndraw.hpp"
+#include "patterngrid.hpp"
+#include "trackheader.hpp"
+#include "linenumbercolumn.hpp"
 
 #include <QDebug>
 #include <QEvent>

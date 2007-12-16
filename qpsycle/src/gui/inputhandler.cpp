@@ -20,7 +20,7 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "inputhandler.h"
+#include "inputhandler.hpp"
 
 int InputHandler::getEnumCodeByKey( const Key & key ) const
 {

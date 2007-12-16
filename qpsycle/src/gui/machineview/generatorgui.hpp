@@ -18,36 +18,44 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef EFFECTGUI_H
-#define EFFECTGUI_H
+#ifndef GENERATORGUI_H
+#define GENERATORGUI_H
 
-#include "machinegui.h"
+#include "machinegui.hpp"
 
-class QPainter;
-class QKeyEvent;
+namespace psy { namespace core {
+		class Machine;
+	}}
+
+
+//class MachineView;
+//class MachineTweakDlg;
+
 class QGraphicsSceneContextMenuEvent;
+class QKeyEvent;
+class QGraphicsSceneMouseEvent;
+class QPainter;
+class QWidget;
 
-class EffectGui : public MachineGui {
+class GeneratorGui : public MachineGui {
 Q_OBJECT
 public:
-	EffectGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
-	~EffectGui();
+	GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
+	~GeneratorGui();
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 public slots:
 	void showMacTweakDlg();
-	void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
 
 protected:
 	void keyPressEvent( QKeyEvent * event );
+	void keyReleaseEvent( QKeyEvent * event );
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+
+
 	MachineTweakDlg *m_macTweakDlg;
-private:
-	QAction *toggleBypassAct_;
-
-
 };
 
 #endif

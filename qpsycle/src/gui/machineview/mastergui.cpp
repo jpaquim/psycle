@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "mastergui.h"
+#include "mastergui.hpp"
 
 MasterGui::MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)

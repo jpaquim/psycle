@@ -32,12 +32,12 @@
 #include <psycle/core/binread.h>
 #include <psycle/core/constants.h>
 
-#include "machinetweakdlg.h"
-#include "../global.h"
-#include "../configuration.h"
-#include "../inputhandler.h"
-#include "machinegui.h"
-#include "effectgui.h"
+#include "machinetweakdlg.hpp"
+#include "../global.hpp"
+#include "../configuration.hpp"
+#include "../inputhandler.hpp"
+#include "machinegui.hpp"
+#include "effectgui.hpp"
 
 
 #include <QVBoxLayout>

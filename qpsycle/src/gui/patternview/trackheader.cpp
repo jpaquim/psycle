@@ -21,10 +21,10 @@
 
 #include <psycle/core/signalslib.h>
 
-#include "trackheader.h"
-#include "patterndraw.h"
-#include "patterngrid.h"
-#include "patternview.h"
+#include "trackheader.hpp"
+#include "patterndraw.hpp"
+#include "patterngrid.hpp"
+#include "patternview.hpp"
 
 #include <QScrollBar>
 #include <QDebug>

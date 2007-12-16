@@ -22,9 +22,9 @@
 
 #include <psycle/core/player.h>
 
-#include "audioconfigdlg.h"
-#include "../global.h"
-#include "../configuration.h"
+#include "audioconfigdlg.hpp"
+#include "../global.hpp"
+#include "../configuration.hpp"
 
 #include <QHBoxLayout>
 #include <QComboBox>

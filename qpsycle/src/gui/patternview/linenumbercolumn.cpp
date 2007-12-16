@@ -19,10 +19,10 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "linenumbercolumn.h"
-#include "patterndraw.h"
-#include "patternview.h"
-#include "patterngrid.h"
+#include "linenumbercolumn.hpp"
+#include "patterndraw.hpp"
+#include "patternview.hpp"
+#include "patterngrid.hpp"
 
 #include <QPen>
 #include <QRectF>

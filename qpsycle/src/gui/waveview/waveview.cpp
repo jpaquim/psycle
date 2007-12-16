@@ -19,13 +19,13 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include "waveview.h"
+#include "waveview.hpp"
 
-#include "../global.h"
-#include "../configuration.h"
-#include "../../model/instrumentsmodel.h"
-#include "wavedisplay.h"
-#include "waveamp.h"
+#include "../global.hpp"
+#include "../configuration.hpp"
+#include "../../model/instrumentsmodel.hpp"
+#include "wavedisplay.hpp"
+#include "waveamp.hpp"
 
 #include <QAction>
 #include <QMessageBox>

@@ -21,8 +21,8 @@
 #include <QApplication>
 #include <QIcon>
 
-#include "gui/mainwindow.h"
-#include "gui/global.h"
+#include "gui/mainwindow.hpp"
+#include "gui/global.hpp"
 
 int main(int argc, char *argv[])
 {
