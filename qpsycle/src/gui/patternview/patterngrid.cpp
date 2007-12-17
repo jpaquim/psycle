@@ -43,6 +43,8 @@
 #include <QDebug>
 #include <QStyleOptionGraphicsItem>
 
+namespace qpsycle {
+
 template<class T> inline std::string toHex(T value , int nums = 2) {
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
@@ -1784,3 +1786,5 @@ void PatCursor::setCol( int col) {
 int PatCursor::col() const {
 	return col_;
 }
+
+} // namespace qpsycle

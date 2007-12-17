@@ -13,6 +13,8 @@ namespace psy {
 
 using psy::core::AudioDriver;
 
+namespace qpsycle {
+
 enum KnobMode
 {
 	QDialMode, ///< Old QDial behaviour
@@ -115,5 +117,7 @@ class Configuration
 		///\ todo put this in player ..
 		bool _RecordUnarmed;
 };
+
+}
 
 #endif

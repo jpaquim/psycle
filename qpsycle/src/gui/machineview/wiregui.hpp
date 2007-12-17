@@ -27,6 +27,8 @@
 #include <QAction>
 #include <QColor>
 
+namespace qpsycle {
+
 class MachineGui;
 class MachineView;
 class WireDlg;
@@ -89,6 +91,8 @@ private:
 
 	RewireType state_;
 };
+
+} // namespace qpsycle
 
 #endif
 

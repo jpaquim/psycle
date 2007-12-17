@@ -37,6 +37,8 @@ class QGraphicsSceneMouseEvent;
 class QPainter;
 class QWidget;
 
+namespace qpsycle {
+
 class GeneratorGui : public MachineGui {
 Q_OBJECT
 public:
@@ -57,5 +59,7 @@ protected:
 
 	MachineTweakDlg *m_macTweakDlg;
 };
+
+} // namespace qpsycle
 
 #endif

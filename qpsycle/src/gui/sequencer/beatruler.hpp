@@ -25,6 +25,8 @@
 
 #include <QtGui/QGraphicsItem>
 
+namespace qpsycle {
+
 class SequencerDraw;
 
 class BeatRuler : public QGraphicsItem {
@@ -42,5 +44,7 @@ private:
 	SequencerDraw* sDraw_;
 	int preferredHeight( ) const;
 };
+
+} // namespace qpsycle
 
 #endif

@@ -40,6 +40,7 @@
 #include <iostream>
 #include <iomanip>
 
+namespace qpsycle {
 
 SampleBrowser::SampleBrowser( InstrumentsModel *instrumentsModel,
 					QWidget *parent )
@@ -156,4 +157,6 @@ void SampleBrowser::onClearInstrument()
 	int curInstrIndex = instrumentsList_->currentIndex().row();
 	instrumentsModel_->clearInstrument( curInstrIndex );
 	emit sampleAdded();
+}
+
 }

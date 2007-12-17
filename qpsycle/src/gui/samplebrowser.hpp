@@ -29,6 +29,10 @@ class QListView;
 class QDirModel;
 class QTreeView;
 
+
+
+namespace qpsycle {
+
 class InstrumentsModel;
 
 class SampleBrowser : public QWidget {
@@ -62,5 +66,7 @@ private:
 	QPushButton *button_clearInstrument;
 
 };
+
+} // namespace qpsycle
 
 #endif

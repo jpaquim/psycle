@@ -60,6 +60,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace qpsycle {
+
 TabWidget::TabWidget( QWidget *parent )
 	: QTabWidget( parent )
 {}
@@ -892,4 +894,6 @@ void MainWindow::machineIncrement()
 void MainWindow::machineDecrement()
 {
 	macCombo_->setCurrentIndex( macCombo_->currentIndex() - 1 );
+}
+
 }

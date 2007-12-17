@@ -24,6 +24,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
+namespace qpsycle {
+
 Global::Global(){};
 
 Configuration* Global::pConfig() {
@@ -43,4 +45,6 @@ int Global::screenHeight()
 	// We're assuming for now psycle doesn't run dual-head...
 	// so access default, primary screen.
 	return desktopWidget->screenGeometry().height();
+}
+
 }

@@ -33,6 +33,8 @@
 #include <QMenu>
 #include <QAction>
 
+namespace qpsycle {
+
 const double Pi = 3.14159265358979323846264338327950288419717;
 const double TwoPi = 2.0 * Pi;
 
@@ -354,3 +356,5 @@ void WireGui::deleteConnectionRequest()
 {
 	emit deleteConnectionRequest(this);
 }
+
+} // namespace qpsycle

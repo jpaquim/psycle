@@ -25,6 +25,8 @@
 #include <QSlider>
 #include <QPushButton>
 
+namespace qpsycle {
+
 class WaveAmp : public QDialog
 {
 	Q_OBJECT
@@ -42,5 +44,7 @@ private:
 	QPushButton *ok;
 	QPushButton *cancel;
 };
+
+} // namespace qpsycle
 
 #endif

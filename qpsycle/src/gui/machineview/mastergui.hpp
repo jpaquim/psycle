@@ -23,6 +23,8 @@
 
 #include "machinegui.hpp"
 
+namespace qpsycle {
+
 class MasterGui : public MachineGui
 {
 public:
@@ -36,5 +38,7 @@ protected:
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) { QGraphicsItem::mouseReleaseEvent( event ); }
 
 };
+
+} // namespace qpsycle
 
 #endif

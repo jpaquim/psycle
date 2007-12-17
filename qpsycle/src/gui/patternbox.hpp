@@ -26,7 +26,6 @@ class SinglePattern;
 class PatternCategory;
 }}
 
-class PatternBox;
 
 class QToolBar;
 #include <QAction>
@@ -36,6 +35,10 @@ class QToolBar;
 #include <QLabel>
 #include <QContextMenuEvent>
 #include <QMenu>
+
+namespace qpsycle {
+
+class PatternBox;
 
 class PatternTree : public QTreeWidget {
 Q_OBJECT
@@ -129,5 +132,6 @@ private:
 
 };
 
+} // namespace qpsycle
 
 #endif

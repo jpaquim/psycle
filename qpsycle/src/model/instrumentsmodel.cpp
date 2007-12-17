@@ -27,6 +27,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace qpsycle {
+
 // The InstrumentsModel provides an interface to the
 // Instrument data in the CoreSong.  This model can be
 // loaded by Qt widgets and changes made by one widget will be
@@ -131,4 +133,6 @@ void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
 bool InstrumentsModel::slotIsEmpty( int instrIndex )
 {
 	return song_->_pInstrument[instrIndex]->Empty();
+}
+
 }

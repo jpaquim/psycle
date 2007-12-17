@@ -29,6 +29,8 @@
 #include <QPaintEvent>
 #include <QScrollBar>
 
+namespace qpsycle {
+
 LineNumberColumn::LineNumberColumn( PatternDraw *patDraw ) 
 	: QWidget( patDraw )
 {
@@ -84,3 +86,5 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 	}
 	
 }
+
+} // namespace qpsycle

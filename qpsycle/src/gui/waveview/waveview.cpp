@@ -34,6 +34,7 @@
 #include <iostream>
 #include <iomanip>
 
+namespace qpsycle {
 
 WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent) 
 	: QWidget(parent),
@@ -203,3 +204,5 @@ void WaveView::onZoomButtonClicked()
 	tzoomAct_->setChecked(true);
 	tselAct_->setChecked(false);
 }
+
+} // namespace qpsycle

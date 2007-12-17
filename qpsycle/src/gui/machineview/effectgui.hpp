@@ -27,6 +27,8 @@ class QPainter;
 class QKeyEvent;
 class QGraphicsSceneContextMenuEvent;
 
+namespace qpsycle {
+
 class EffectGui : public MachineGui {
 Q_OBJECT
 public:
@@ -49,5 +51,7 @@ private:
 
 
 };
+
+} // namespace qpsycle
 
 #endif

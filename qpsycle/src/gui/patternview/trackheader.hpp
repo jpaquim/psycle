@@ -20,12 +20,14 @@
 #ifndef TRACKHEADER_H
 #define TRACKHEADER_H
 
-class PatternDraw;
-
 class QGraphicsRectItem;
 class QPaintEvent;
 
 #include <QWidget>
+
+namespace qpsycle {
+
+class PatternDraw;
 
 class TrackHeader: public QWidget {
 public:
@@ -37,5 +39,7 @@ private:
 	PatternDraw* pDraw;
 	int height_;
 };
+
+} // namespace qpsycle
 
 #endif

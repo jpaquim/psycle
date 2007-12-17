@@ -34,6 +34,8 @@
 #include <QLabel>
 #include <iostream>
 
+namespace qpsycle {
+
 SettingsDlg::SettingsDlg( QWidget *parent )
 	: QDialog( parent )
 {
@@ -154,3 +156,5 @@ void SettingsDlg::onSaveButtonClicked()
 	
 	saveBtn_->setEnabled( false );
 }
+
+} // namespace qpsycle

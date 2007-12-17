@@ -31,6 +31,7 @@
 #include <QPainter>
 #include <QGraphicsRectItem>
 
+namespace qpsycle {
 
 TrackHeader::TrackHeader( int height, PatternDraw * pPatternDraw ) 
 	: QWidget(pPatternDraw),
@@ -73,3 +74,5 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 		}
 	}
 }
+
+} // namespace qpsycle

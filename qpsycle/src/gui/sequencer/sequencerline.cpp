@@ -33,6 +33,8 @@
 
 #include <iostream>
 
+namespace qpsycle {
+
 SequencerLine::SequencerLine( SequencerDraw *sDraw)
 {
 	sDraw_ = sDraw;
@@ -160,3 +162,4 @@ void SequencerLine::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	emit clicked( this );
 }
 
+} // namespace qpsycle

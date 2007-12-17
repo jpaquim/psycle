@@ -32,6 +32,8 @@
 #include <QAction>
 #include <QGraphicsScene>
 
+namespace qpsycle {
+
 SequencerView::SequencerView( psy::core::Song *asong )
 {
 	song_ = asong;
@@ -125,3 +127,5 @@ SequencerLine* SequencerView::selectedLine()
 {
 	return selectedLine_;
 }
+
+} // namespace qpsycle

@@ -29,6 +29,8 @@
 class QKeyEvent;
 #include <QFont>
 
+namespace qpsycle {
+
 class PatternView;
 class PatternDraw;
 class PatternGrid;
@@ -314,5 +316,7 @@ private:
 	QColor restAreaColor_ ;
 
 };
+
+} // namespace qpsycle
 
 #endif

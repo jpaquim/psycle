@@ -30,6 +30,8 @@
 
 #include <vector>
 
+namespace qpsycle {
+
 SequencerArea::SequencerArea( SequencerDraw *seqDrawIn )
 	: seqDraw_( seqDrawIn )
 {
@@ -63,3 +65,5 @@ void SequencerArea::drawTimegrid( QPainter *painter )
 		}
 	}
 }
+
+} // namespace qpsycle

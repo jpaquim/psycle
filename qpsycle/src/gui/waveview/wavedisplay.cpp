@@ -26,6 +26,8 @@
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsScene> 
 
+namespace qpsycle {
+
 WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for WaveDisplay.
 {
 	setParent( parent);
@@ -60,3 +62,5 @@ void WaveDisplay::Update()
 {
 	
 }
+
+} // namespace qpsycle
