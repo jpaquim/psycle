@@ -32,7 +32,7 @@
 	#error unsupported operating system
 #endif
 #include <cstdint>
-#include <date_time>
+#include <universalis/standard_library/duration.hpp>
 #include <stdexcept>
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/operating_system/exceptions/code_description.hpp>
