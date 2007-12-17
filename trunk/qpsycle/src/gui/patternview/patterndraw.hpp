@@ -35,6 +35,8 @@ class QComboBox;
 class QGridLayout;
 class QAction;
 
+namespace qpsycle {
+
 class LineNumberColumn;
 class PatternGrid;
 class PatCursor;
@@ -122,5 +124,7 @@ private:
 
 	psy::core::SinglePattern *pattern_;
 };
+
+} // namespace qpsycle
 
 #endif

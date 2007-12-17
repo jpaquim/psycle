@@ -35,6 +35,8 @@ class QToolBar;
 class QComboBox;
 class QAction;
 
+namespace qpsycle {
+
 class LineNumberColumn;
 class PatternDraw;
 class PatternGrid;
@@ -108,5 +110,7 @@ private:
 	QAction *recordCb_;
 	QComboBox *tracksCbx_;
 };
+
+} // namespace qpsycle
 
 #endif

@@ -38,6 +38,8 @@
 #include <QToolBar>
 #include <QLabel>
 
+namespace qpsycle {
+
 int d2i(double d)
 {
 	return (int) ( d<0?d-.5:d+.5);
@@ -297,3 +299,5 @@ void PatternView::showEvent( QShowEvent * event )
 	patDraw()->setFocus();
 	patDraw()->scene()->setFocusItem( patDraw()->patternGrid() );
 }
+
+} // namespace qpsycle

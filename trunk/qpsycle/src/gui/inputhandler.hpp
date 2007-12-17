@@ -43,6 +43,8 @@ class Machine;
 class CChildView;
 class CMainFrame;
 
+namespace qpsycle {
+
 /// command types
 enum CmdType
 {
@@ -288,4 +290,7 @@ class InputHandler
 	private:
 		std::map<Key,int> keyMap;
 };
+
+}
+
 #endif

@@ -33,6 +33,8 @@
 #include <QPainter>
 #include <QMenu>
 
+namespace qpsycle {
+
 GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
 {
@@ -151,3 +153,5 @@ void GeneratorGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 			mousePressEvent(event);
 	}
 }
+
+} // namespace qpsycle

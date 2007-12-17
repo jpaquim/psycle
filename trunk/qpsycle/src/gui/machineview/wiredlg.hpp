@@ -32,6 +32,8 @@ class QSlider;
 class WireGui;
 class QLabel;
 
+namespace qpsycle {
+
 class WireDlg : public QDialog
 {
 	Q_OBJECT
@@ -62,5 +64,7 @@ private:
 	QSlider* m_volSlider;
 	QLabel* m_volLabel;
 };
+
+} // namespace qpsycle
 
 #endif

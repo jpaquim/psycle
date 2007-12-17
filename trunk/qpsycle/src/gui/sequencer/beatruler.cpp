@@ -24,6 +24,8 @@
 
 #include <QGraphicsScene>
 
+namespace qpsycle {
+
 BeatRuler::BeatRuler( SequencerDraw* seqDraw )
 {
 	sDraw_ = seqDraw;
@@ -80,3 +82,4 @@ int BeatRuler::preferredHeight( ) const
 	return 30;
 }
 
+} // namespace qpsycle

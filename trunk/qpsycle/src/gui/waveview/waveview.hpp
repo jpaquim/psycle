@@ -29,6 +29,9 @@
 
 
 class QStandardItemModel;
+
+namespace qpsycle {
+
 class InstrumentsModel;
 
 class WaveView : public QWidget
@@ -84,5 +87,7 @@ private:
 
 	InstrumentsModel *instrumentsModel_;
 };
+
+} // namespace qpsycle
 
 #endif

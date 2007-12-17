@@ -30,9 +30,13 @@
 #include <QSlider>
 #include <QLabel>
 
+namespace qpsycle {
+
 const int SliderSize = 1024;
 const int MaxVolume = 4; //multiplier, not dB
 const float Scaler = (SliderSize*SliderSize)/(float)MaxVolume;  //262144.0f
+
+
 
 WireDlg::WireDlg(WireGui *wire, QWidget *parent, QPoint where) 
 	: QDialog(parent)
@@ -112,3 +116,5 @@ void WireDlg::wireChanged()
 	m_wireId = (int)m_destMac->FindInputWire( m_sourceMac->id() );
 	m_destMac->GetWireVolume( m_wireId, m_volume );
 }
+
+} // namespace qpsycle

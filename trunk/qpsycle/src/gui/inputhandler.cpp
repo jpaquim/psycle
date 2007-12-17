@@ -22,6 +22,8 @@
 
 #include "inputhandler.hpp"
 
+namespace qpsycle {
+
 int InputHandler::getEnumCodeByKey( const Key & key ) const
 {
 	std::map<Key,int>::const_iterator itr;
@@ -226,4 +228,6 @@ bool Key::operator<(const Key & key) const {
 		return vkey() < key.vkey();
 	else
 		return shift() < key.shift();
+}
+
 }

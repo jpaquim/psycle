@@ -23,10 +23,13 @@
 
 #include <QDialog>
 
-class Configuration;
 class QComboBox;
 class QPushButton;
 class QCheckBox;
+
+namespace qpsycle {
+
+class Configuration;
 
 class SettingsDlg : public QDialog {
 Q_OBJECT
@@ -48,5 +51,7 @@ private:
 	QCheckBox *wrapChk;
 	QCheckBox *centerCursorChk;
 };
+
+} // namespace qpsycle
 
 #endif

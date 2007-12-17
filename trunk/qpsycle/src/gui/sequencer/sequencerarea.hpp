@@ -17,10 +17,12 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-	#ifndef SEQUENCERAREA_H
-	#define SEQUENCERAREA_H
+#ifndef SEQUENCERAREA_H
+#define SEQUENCERAREA_H
 
-	#include <QtGui/QGraphicsItem>
+#include <QGraphicsItem>
+
+namespace qpsycle {
 
 	class SequencerView;
 	class SequencerDraw;
@@ -28,21 +30,23 @@
 	class SequencerArea : public QGraphicsItem
 	{
 
-public:
-	SequencerArea( SequencerDraw *seqDrawIn );
+	public:
+		SequencerArea( SequencerDraw *seqDrawIn );
 
-	SequencerDraw* sequencerDraw() { return seqDraw_;} 
+		SequencerDraw* sequencerDraw() { return seqDraw_;} 
 
-	QRectF boundingRect() const;
-	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-	void drawTimegrid( QPainter *painter );
+		QRectF boundingRect() const;
+		void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+		void drawTimegrid( QPainter *painter );
 
-protected:
+	protected:
 
-private:
-	SequencerDraw *seqDraw_;
-	int beatPxLength_;
+	private:
+		SequencerDraw *seqDraw_;
+		int beatPxLength_;
 
-};
+	};
+
+} // namespace qpsycle
 
 #endif

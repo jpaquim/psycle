@@ -29,6 +29,8 @@
 #include <QKeyEvent>
 #include <QGridLayout>
 
+namespace qpsycle {
+
 NewMachineDlg::NewMachineDlg(QWidget *parent) 
 	:
 		QDialog(parent),
@@ -180,3 +182,5 @@ void NewMachineDlg::tryAccept() {
 const psy::core::PluginFinderKey & NewMachineDlg::pluginKey() const {
 	return selectedKey_;
 }
+
+} // namespace qpsycle

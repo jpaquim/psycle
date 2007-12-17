@@ -46,6 +46,8 @@
 
 #include <algorithm>
 
+namespace qpsycle {
+
 MachineView::MachineView(psy::core::Song *song)
 {
 	song_ = song;
@@ -698,3 +700,5 @@ void MachineScene::keyReleaseEvent( QKeyEvent * event )
 	}
 	event->ignore();
 }
+
+} // namespace qpsycle

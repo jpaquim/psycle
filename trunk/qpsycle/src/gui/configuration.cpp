@@ -54,6 +54,8 @@
 #include <QtXml/QDomDocument> // for reading XML file
 #include <QTextStream>
 
+namespace qpsycle {
+
 Configuration::Configuration()
 :
 	_RecordTweaks(),
@@ -521,3 +523,4 @@ void Configuration::setCenterCursor( bool state )
 	centerCursor_ = state;
 }
 
+}

@@ -31,6 +31,8 @@ namespace psy { namespace core {
 #include <QGraphicsItem>
 #include <QObject>
 
+namespace qpsycle {
+
 class SequencerDraw;
 class SequencerItem;
 
@@ -82,5 +84,7 @@ private:
 	std::list<SequencerItem*> items_;
 	typedef std::list<SequencerItem*>::iterator items_iterator;
 };
+
+} // namespace qpsycle
 
 #endif

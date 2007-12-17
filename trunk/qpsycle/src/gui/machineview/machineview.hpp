@@ -38,6 +38,8 @@ namespace psy { namespace core {
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
 
+namespace qpsycle {
+
 class NewMachineDlg;
 class MachineGui;
 class WireGui;
@@ -131,5 +133,7 @@ private:
 	NewMachineDlg *newMachineDlg;
 	psy::core::PluginFinder pluginFinder_;
 };
+
+} // namespace qpsycle
 
 #endif

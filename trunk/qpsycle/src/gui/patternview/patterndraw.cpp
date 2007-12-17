@@ -31,6 +31,8 @@
 #include <QEvent>
 #include <QKeyEvent>
 
+namespace qpsycle {
+
 /**
 	* PatternDraw.  This is where the drawing of the pattern
 	* is done, including the header, the grid, the line number
@@ -250,3 +252,5 @@ void TrackGeometry::setVisible( bool on) {
 bool TrackGeometry::visible() const {
 	return visible_;
 }
+
+} // namespace qpsycle

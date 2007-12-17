@@ -34,6 +34,8 @@
 #include <QKeyEvent>
 #include <QGraphicsSceneContextMenuEvent>
 
+namespace qpsycle {
+
 EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
 {
@@ -153,3 +155,5 @@ void EffectGui::onToggleBypassActionTriggered()
 	}
 	update( boundingRect() );
 }
+
+} // namespace qpsycle

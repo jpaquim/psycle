@@ -43,6 +43,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace qpsycle {
+
 /// The graphical representation of a CoreSong machine in the GUI.
 MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: m_macView(macView),
@@ -285,3 +287,5 @@ psy::core::Machine* MachineGui::mac()
 {
 	return m_mac;
 }
+
+} // namespace qpsycle

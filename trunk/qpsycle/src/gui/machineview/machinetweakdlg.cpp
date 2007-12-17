@@ -59,6 +59,8 @@
 #include <iostream>
 #include <iomanip>
 
+namespace qpsycle {
+
 MachineTweakDlg::MachineTweakDlg( MachineGui *macGui, QWidget *parent ) 
 	: QDialog( parent )
 {
@@ -831,3 +833,5 @@ void PresetsDialog::onSavePreset()
 	SavePresets();
 	#endif
 }
+
+} // namespace qpsycle

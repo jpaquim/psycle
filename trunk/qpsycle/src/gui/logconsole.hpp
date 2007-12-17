@@ -32,6 +32,8 @@
 #include <QToolBar>
 #include <QAction>
 
+namespace qpsycle {
+
 class LogConsole : public QWidget
 {
 	Q_OBJECT
@@ -53,4 +55,7 @@ private:
 	QAction *clearAct_;
 	QTextEdit *logText;
 };
+
+}
+
 #endif

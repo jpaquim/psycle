@@ -33,6 +33,8 @@
 #include <QComboBox>
 #include <QColorDialog>
 
+namespace qpsycle {
+
 PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
 	: QWidget(parent)
 	, currentPattern_(NULL)
@@ -447,4 +449,6 @@ bool PatternBox::event( QEvent *event )
 		default:
 		return QWidget::event( event );
 	}
+}
+
 }

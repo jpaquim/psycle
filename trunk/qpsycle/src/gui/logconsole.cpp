@@ -21,6 +21,8 @@
 
 #include "logconsole.hpp"
 
+namespace qpsycle {
+
 LogConsole::LogConsole()
 {
 	setAttribute(Qt::WA_QuitOnClose, false);
@@ -74,4 +76,6 @@ void LogConsole::CreateToolbar()
 	
 	toolBar_->addAction(saveAct_);
 	toolBar_->addAction(clearAct_);
+}
+
 }

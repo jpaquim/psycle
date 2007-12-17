@@ -32,6 +32,8 @@ class Machine;
 #include <QPointF>
 #include <QList>
 
+namespace qpsycle {
+
 class MachineView;
 class WireGui;
 class MachineTweakDlg;
@@ -104,5 +106,6 @@ private:
 
 };
 
+} // namespace qpsycle
 
 #endif

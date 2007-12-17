@@ -24,6 +24,9 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsScene>
+
+
+namespace qpsycle {
 	
 class WaveDisplay : public QGraphicsView
 {
@@ -53,5 +56,7 @@ private:
 	#endif
 	
 };
+
+} // namespace qpsycle
 
 #endif

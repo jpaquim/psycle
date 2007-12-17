@@ -24,6 +24,8 @@
 
 #include <QWidget>
 
+namespace qpsycle {
+
 class PatternDraw;
 class PatternView;
 
@@ -41,5 +43,7 @@ private:
 
 	PatternDraw *patternDraw_;
 };
+
+} // namespace qpsycle
 
 #endif

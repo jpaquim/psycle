@@ -34,9 +34,6 @@ namespace psy { namespace core {
 
 #include <psycle/core/preset.h>
 
-class MachineGui;
-class MachineView;
-
 #include "configuration.hpp"
 
 #include <map>
@@ -57,6 +54,11 @@ class QCheckBox;
 class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
+
+namespace qpsycle {
+
+class MachineGui;
+class MachineView;
 
 const int K_XSIZE = 28;
 const int K_YSIZE = 28;
@@ -235,5 +237,7 @@ private:
 	std::map<int, KnobGroup*> knobGroupMap;
 	std::map<int, SectionHeader*> headerMap;
 };
+
+} // namespace qpsycle
 
 #endif

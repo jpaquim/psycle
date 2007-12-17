@@ -34,6 +34,8 @@
 #include <QKeyEvent>
 #include <QGraphicsItemGroup>
 
+namespace qpsycle {
+
 SequencerItem::SequencerItem() 
 {
 	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
@@ -204,3 +206,5 @@ QVariant SequencerItem::itemChange(GraphicsItemChange change, const QVariant &va
 		return QPointF(value.toPointF().x(), pos().y()); // Constrains an item to present y pos.
 	return QGraphicsItem::itemChange(change, value);
 }
+
+} // namespace qpsycle

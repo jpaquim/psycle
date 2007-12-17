@@ -31,13 +31,17 @@ namespace psy { namespace core {
 #include <QtGui/QGraphicsView>
 #include <QtGui/QGraphicsRectItem>
 
+class QGraphicsSceneMouseEvent;
+
+namespace qpsycle {
+
 class SequencerView;
 class SequencerArea;
 class SequencerLine;
 class SequencerItem;
 class PlayLine;
 
-class QGraphicsSceneMouseEvent;
+
 
 class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
 {
@@ -116,5 +120,7 @@ private:
 	
 
 };
+
+} // namespace qpsycle
 
 #endif

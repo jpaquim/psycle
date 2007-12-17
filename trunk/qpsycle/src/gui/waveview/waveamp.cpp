@@ -23,6 +23,8 @@
 
 #include <QGridLayout>
 
+namespace qpsycle {
+
 WaveAmp::WaveAmp()
 {
 	setWindowTitle("Amplify");
@@ -48,3 +50,5 @@ void WaveAmp::SliderChanges(int value)
 	percent->setText( gainSli->value() + "%");
 }
 #endif
+
+} // namespace qpsycle

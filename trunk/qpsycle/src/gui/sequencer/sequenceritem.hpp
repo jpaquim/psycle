@@ -30,6 +30,10 @@ class SequenceEntry;
 
 class QKeyEvent;
 class QGraphicsSceneMouseEvent;
+
+
+namespace qpsycle {
+
 class SequencerView;
 class SequencerLine;
 
@@ -82,5 +86,7 @@ signals:
 
 	int beatPxLength_;
 	};
+
+} // namespace qpsycle
 
 #endif

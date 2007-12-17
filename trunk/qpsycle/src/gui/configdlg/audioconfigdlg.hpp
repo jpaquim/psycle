@@ -26,9 +26,12 @@ class AudioDriver;}}
 
 #include <QDialog>
 
-class Configuration;
 class QComboBox;
 class QPushButton;
+
+namespace qpsycle {
+
+class Configuration;
 
 class AudioConfigDlg : public QDialog {
 Q_OBJECT
@@ -50,5 +53,7 @@ private:
 	QComboBox *driverCbx_;
 	QPushButton *restartBtn_;
 };
+
+} // namespace qpsycle
 
 #endif

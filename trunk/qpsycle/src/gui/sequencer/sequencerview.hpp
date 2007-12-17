@@ -28,6 +28,8 @@ class SinglePattern;
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QToolBar>
 
+namespace qpsycle {
+
 class SequencerDraw;
 class SequencerLine;
 
@@ -60,5 +62,7 @@ private:
 
 	double oldPlayPos_;
 };
+
+} // namespace qpsycle
 
 #endif

@@ -27,6 +27,26 @@ class SinglePattern;
 class Machine;
 }}
 
+class QAction;
+class QListWidget;
+class QMenu;
+class QTextEdit;
+class QComboBox;
+class QStandardItemModel;
+
+
+#include "logconsole.hpp"
+
+#include <QTabWidget>
+#include <QMainWindow>
+#include <QUndoCommand>
+#include <QUndoGroup>
+#include <QUndoView>
+
+namespace qpsycle {
+
+class InstrumentsModel;
+
 class MachineView;
 class MachineGui;
 class PatternView;
@@ -37,22 +57,7 @@ class SampleBrowser;
 class AudioConfigDlg;
 class SettingsDlg;
 
-class QAction;
-class QListWidget;
-class QMenu;
-class QTextEdit;
-class QComboBox;
-class QStandardItemModel;
 
-class InstrumentsModel;
-
-#include "logconsole.hpp"
-
-#include <QTabWidget>
-#include <QMainWindow>
-#include <QUndoCommand>
-#include <QUndoGroup>
-#include <QUndoView>
 	
 // Subclassing as we need to override event().
 class TabWidget : public QTabWidget {
@@ -214,5 +219,7 @@ private:
 
 	InstrumentsModel *instrumentsModel_;
 };
+
+}
 
 #endif

@@ -20,8 +20,10 @@
 #ifndef PSYCLE__GUI__GLOBAL
 #define PSYCLE__GUI__GLOBAL
 
-class QApplication;
+namespace qpsycle {
+
 class Configuration;
+
 
 class Global {
 public:
@@ -37,7 +39,6 @@ public:
 
 private:
 	Global();
-	QApplication *app_;
 };
 
 template<typename single_object> inline single_object * zapObject(single_object *& pointer, single_object * const new_value = 0)
@@ -51,4 +52,7 @@ template<typename object_array> inline object_array * zapArray(object_array *& p
 	if(pointer) delete [] pointer;
 	return pointer = new_value;
 }
+
+}
+
 #endif

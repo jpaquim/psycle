@@ -28,6 +28,8 @@ namespace psy { namespace core {
 
 #include <QStandardItemModel>
 
+namespace qpsycle {
+
 /**
 	* InstrumentModel models the instruments array of a CoreSong.
 	* It provides a single point of entry for any GUI classes that
@@ -53,5 +55,7 @@ public:
 private:
 	psy::core::Song *song_;
 };
+
+}
 
 #endif

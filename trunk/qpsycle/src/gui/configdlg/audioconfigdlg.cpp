@@ -31,11 +31,13 @@
 #include <QPushButton>
 #include <QKeyEvent> // QKeyEvent
 
+namespace qpsycle {
+
 AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	: QDialog( parent )
 {
 	setWindowTitle("Select Audio Driver");
-	config_ = ::Global::pConfig();
+	config_ = Global::pConfig();
 	selectedDriver_ = 0;
 
 	QHBoxLayout *mainLay = new QHBoxLayout();
@@ -65,7 +67,7 @@ void AudioConfigDlg::initDriverList( )
 	for ( ; it != driverMap.end(); it++ ) {
 		QString driverName = QString::fromStdString( it->first );
 		driverCbx_->addItem( driverName );
-		if ( it->second == ::Global::pConfig()->_pOutputDriver )
+		if ( it->second == Global::pConfig()->_pOutputDriver )
 			driverCbx_->setCurrentIndex(driverCbx_->count()-1);
 	}
 }
@@ -104,3 +106,5 @@ void AudioConfigDlg::onRestartDriver()
 		psy::core::Player::Instance()->setDriver( *selectedDriver_ );
 	}
 }
+
+} // namespace qpsycle

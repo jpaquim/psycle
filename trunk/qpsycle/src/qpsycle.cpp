@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
 	app->setWindowIcon ( QIcon(":images/psycle.png") );
 
-	MainWindow mainWin;
+	qpsycle::MainWindow mainWin;
 	mainWin.show();
 
 	return app->exec();

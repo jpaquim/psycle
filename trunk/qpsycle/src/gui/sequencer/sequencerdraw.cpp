@@ -39,6 +39,8 @@
 #include <QScrollBar>
 #include <QGraphicsItem>
 
+namespace qpsycle {
+
 SequencerDraw::SequencerDraw( SequencerView *seqView )
 	: seqView_(seqView),
 		beatPxLength_(5),
@@ -405,3 +407,5 @@ void PlayLine::paint ( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	painter->setPen( Qt::red );
 	painter->drawRect( boundingRect() );
 }
+
+} // namespace qpsycle

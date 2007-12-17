@@ -31,6 +31,8 @@
 
 class QDialog;
 
+namespace qpsycle {
+
 class NewMachineDlg : public QDialog
 {
 		Q_OBJECT
@@ -64,5 +66,7 @@ public slots:
 	QListWidget* ladList;
 	bool inItemSelectionChanged;
 };
+
+} // namespace qpsycle
 
 #endif
