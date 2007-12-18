@@ -11,8 +11,7 @@ template<typename Elapsed_Time> std::this_thread::sleep(Elapsed_Time &);
 
 #pragma once
 #include <universalis/operating_system/exception.hpp>
-#include <universalis/compiler/numeric.hpp>
-#include <date_time>
+#include <universalis/standard_library/duration.hpp>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__OPERATING_SYSTEM__THREADS__SLEEP
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace universalis { namespace operating_system { namespace threads {
