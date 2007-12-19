@@ -2,7 +2,7 @@
 // copyright 1999-2007 johan boule <bohan@jabber.org>
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
-///\file
+///\file \brief cstdint standard header
 #pragma once
 #include <universalis/detail/project.hpp>
 #if 0

@@ -2,8 +2,7 @@
 // copyright 1999-2007 johan boule <bohan@jabber.org>
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
-///\file
-///\brief meta header
+///\file \brief meta header
 #pragma once
 #include "stdc_secure_lib.hpp"
 #include "detail/iso646.hpp"
