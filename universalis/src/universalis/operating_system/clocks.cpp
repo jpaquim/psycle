@@ -291,67 +291,59 @@ namespace detail {
 
 /******************************************************************************************/
 std::nanoseconds utc_since_epoch::current() {
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			// On microsoft's platform, only the performance_counter has a high resolution ;
-			// the system_time_as_file_time_since_epoch lags 15ms at the minimum, and randomly has even much longer lags.
-			// So, we need to compute an offset once between the system_time_as_file_time_since_epoch clock
-			// and the performance_counter one, that we can apply to what the performance_counter clock
-			// returns in every call to this function.
-			std::nanoseconds const static performance_counter_to_utc_since_epoch_offset(
-				detail::microsoft::system_time_as_file_time_since_epoch() -
-				detail::microsoft::performance_counter()
-			);
-			std::nanoseconds const ns(
-				detail::microsoft::performance_counter() +
-				performance_counter_to_utc_since_epoch_offset
-			);
-		#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-			return detail::posix::realtime();
-		#else
-			return detail::iso_std_time();
-		#endif
-
-	return detail::
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			microsoft::system_time_as_file_time_since_epoch();
-		#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-			posix::realtime();
-		#else
-			iso_std_time();
-		#endif
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		return detail::posix::realtime();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		// On microsoft's platform, only the performance_counter has a high resolution ;
+		// the system_time_as_file_time_since_epoch lags 15ms at the minimum, and randomly has even much longer lags.
+		// So, we need to compute an offset once between the system_time_as_file_time_since_epoch clock
+		// and the performance_counter one, that we can apply to what the performance_counter clock
+		// returns in every call to this function.
+		std::nanoseconds const static performance_counter_to_utc_since_epoch_offset(
+			detail::microsoft::system_time_as_file_time_since_epoch() -
+			detail::microsoft::performance_counter()
+		);
+		std::nanoseconds ns(
+			detail::microsoft::performance_counter() +
+			performance_counter_to_utc_since_epoch_offset
+		);
+		return ns;
+	#else
+		return detail::iso_std_time();
+	#endif
 }
 
 std::nanoseconds monotonic::current() {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft::performance_counter();
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		bool static once = false; if(!once) detail::posix::config();
 		if(detail::posix::monotonic_clock_supported) return detail::posix::monotonic();
 		else return detail::posix::realtime();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft::performance_counter();
 	#else
 		return detail::iso_std_time();
 	#endif
 }
 
 std::nanoseconds process::current() {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft::process_time();
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		bool static once = false; if(!once) detail::posix::config();
 		if(detail::posix::cputime_supported) return detail::posix::process_cpu_time();
 		else return detail::iso_std_clock();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft::process_time();
 	#else
 		return detail::iso_std_clock();
 	#endif
 }
 
 std::nanoseconds thread::current() {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-		return detail::microsoft::thread_time();
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		bool static once = false; if(!once) detail::posix::config();
 		if(detail::posix::cputime_supported) return detail::posix::thread_cpu_time();
 		else return detail::iso_std_clock();
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		return detail::microsoft::thread_time();
 	#else
 		return detail::iso_std_clock();
 	#endif

@@ -73,6 +73,6 @@ namespace std {
 
 		private:
 			tick_type ns_;
-			utc_time(tick_type t) : ns_(t) {} friend class hiresolution_clock<tick_type>;
+			utc_time(tick_type t) : ns_(t) {} friend class hiresolution_clock<utc_time>;
 	};
 }
