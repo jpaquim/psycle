@@ -291,6 +291,26 @@ namespace detail {
 
 /******************************************************************************************/
 std::nanoseconds utc_since_epoch::current() {
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			// On microsoft's platform, only the performance_counter has a high resolution ;
+			// the system_time_as_file_time_since_epoch lags 15ms at the minimum, and randomly has even much longer lags.
+			// So, we need to compute an offset once between the system_time_as_file_time_since_epoch clock
+			// and the performance_counter one, that we can apply to what the performance_counter clock
+			// returns in every call to this function.
+			std::nanoseconds const static performance_counter_to_utc_since_epoch_offset(
+				detail::microsoft::system_time_as_file_time_since_epoch() -
+				detail::microsoft::performance_counter()
+			);
+			std::nanoseconds const ns(
+				detail::microsoft::performance_counter() +
+				performance_counter_to_utc_since_epoch_offset
+			);
+		#elif defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			return detail::posix::realtime();
+		#else
+			return detail::iso_std_time();
+		#endif
+
 	return detail::
 		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			microsoft::system_time_as_file_time_since_epoch();
