@@ -1,11 +1,18 @@
 #pragma once
+#include <boost/operators.hpp>
 namespace std {
 
 	/*******************************************************************/
 	// time duration types
-		
+	
 	template<typename Final, typename Tick, Tick Ticks_Per_Seconds, Tick Seconds_Per_Tick>
-	class basic_time_duration { ///\todo define only operators +=, -=, < and the rest with #include <boost/operators.hpp> : private boost::additive< basic_time_duration, boost::less_than_comparable<basic_time_duration> >
+	class basic_time_duration
+	: private
+		boost::equality_comparable<Final,
+		boost::less_than_comparable<Final,
+		boost::additive<Final,
+		boost::multiplicative<Final, int> > > >
+	{
 		public:
 			typedef Tick tick_type;
 			basic_time_duration(tick_type tick = 0) : tick_(tick) {}
@@ -14,18 +21,10 @@ namespace std {
 			tick_type static seconds_per_tick() { return Seconds_Per_Tick; }
 			bool static is_subsecond() { return ticks_per_second() > seconds_per_tick(); }
 			bool operator==(Final const & that) const { return this->tick_ == that.tick_; }
-			bool operator!=(Final const & that) const { return this->tick_ != that.tick_; }
-			bool operator<=(Final const & that) const { return this->tick_ <= that.tick_; }
-			bool operator>=(Final const & that) const { return this->tick_ >= that.tick_; }
 			bool operator< (Final const & that) const { return this->tick_ < that.tick_; }
-			bool operator> (Final const & that) const { return this->tick_ > that.tick_; }
-			Final operator-() const { Final f(-this->tick_); return f; }
-			Final operator+(Final const & that) const { Final f(this->tick_ + that.tick_); return f; }
-			Final operator-(Final const & that) const { Final f(this->tick_ - that.tick_); return f; }
-			Final operator/(int d) const { Final f(tick_ / d); return f; }
-			Final operator*(int m) const { Final f(tick_ * m); return f; }
 			Final & operator+=(Final const & that) { this->tick_ += that.tick_; return static_cast<Final&>(*this); }
 			Final & operator-=(Final const & that) { this->tick_ -= that.tick_; return static_cast<Final&>(*this); }
+			Final operator-() const { Final f(-this->tick_); return f; }
 			Final & operator/=(int d) { tick_ /= d; return static_cast<Final&>(*this); }
 			Final & operator*=(int m) { tick_ *= m; return static_cast<Final&>(*this); }
 		protected:
