@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+
 #pragma once
 #include <boost/operators.hpp>
 namespace std {
@@ -13,7 +14,8 @@ namespace std {
 		boost::equality_comparable<Final,
 		boost::less_than_comparable<Final,
 		boost::additive<Final,
-		boost::multiplicative<Final, int> > > >
+		boost::multiplicative<Final, int
+		> > > >
 	{
 		public:
 			typedef Tick tick_type;
@@ -23,7 +25,7 @@ namespace std {
 			tick_type static seconds_per_tick() { return Seconds_Per_Tick; }
 			bool static is_subsecond() { return ticks_per_second() > seconds_per_tick(); }
 			bool operator==(Final const & that) const { return this->tick_ == that.tick_; }
-			bool operator< (Final const & that) const { return this->tick_ < that.tick_; }
+			bool operator< (Final const & that) const { return this->tick_ <  that.tick_; }
 			Final & operator+=(Final const & that) { this->tick_ += that.tick_; return static_cast<Final&>(*this); }
 			Final & operator-=(Final const & that) { this->tick_ -= that.tick_; return static_cast<Final&>(*this); }
 			Final operator-() const { Final f(-this->tick_); return f; }
