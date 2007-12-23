@@ -7,10 +7,7 @@
 #include <diversalis/operating_system.hpp>
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>
-#include <functional>
 namespace std {
-
-	namespace this_thread {}
 
 	class thread {
 		public:
@@ -20,47 +17,58 @@ namespace std {
 	
 		public:
 			template<typename Functor>
-			explicit thread(Functor functor) : native_handle_(functor) {}
+			explicit thread(Functor functor) : native_handle_(functor) { /** \todo set the id from within the functor */ }
 
-			bool joinable() const { return native_handle_.joinable(); }
+			//\todo bool joinable() const { return native_handle_.joinable(); }
+
 			void join() { native_handle_.join(); }
 
-		public:
-			class id
-			: private
-				boost::equality_comparable< id,
-				boost::less_than_comparable< id
-				> >
-			{
-				public:
-					id() : implementation_() {}
-					bool operator==(id const & that) const { return this->implementation_ == that.implementation_; }
-					bool operator< (id const & that) const { return this->implementation_ <  that.implementation_; }
-				private:
-					typedef
-						// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread
-						// so we need to know the OS type
-						#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-							::pthread_t *
-						#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-							::DWORD
-						#else
-							#error unsupported operating system
-						#endif
-						implementation_type;
-					implementation_type implementation_;
-					id(implementation_ implementation) : implementation_(implementation) {} friend id this_thread::get_id();
-			};
-			id get_id() const { return id_; }
-		private:
-			id id_;
+		///\name id
+		///\todo
+		///\{
+		#if 0
+			public:
+				class id
+				: private
+					boost::equality_comparable< id,
+					boost::less_than_comparable< id
+					> >
+				{
+					public:
+						id() : implementation_() {}
+						bool operator==(id const & that) const { return this->implementation_ == that.implementation_; }
+						bool operator< (id const & that) const { return this->implementation_ <  that.implementation_; }
+					private:
+						typedef
+							// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
+							// so we need to know the OS type
+							#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+								::pthread_t *
+							#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+								::DWORD
+							#else
+								#error unsupported operating system
+							#endif
+							implementation_type;
+
+						implementation_type implementation_;
+
+						friend id this_thread::id();
+						id(implementation_type implementation) : implementation_(implementation) {}
+				};
+				id get_id() const { return id_; }
+			private:
+				id id_;
+		#endif
+		///\}
 	};
 
 	namespace this_thread {
 
-		thread::id get_id() {
+		#if 0 ///\todo
+		thread::id id() {
 			thread::id id(
-				// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread
+				// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
 				// so we need to know the OS type
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					::pthread_self()
@@ -72,34 +80,14 @@ namespace std {
 			);
 			return id;
 		}
+		#endif
 
 		void yield() { boost::thread::yield(); }
 
 		/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 		template<typename Elapsed_Time>
 		void sleep(Elapsed_Time const & elapsed_time) {
-			std::nanoseconds const ns(elapsed_time);
-
-			// boost::thread::sleep sleeps until the given absolute event date.
-			// So, we compute the event date by getting the current date and adding the delta to it.
-			boost::xtime xtime;
-			// get the current date.
-			boost::xtime_clock_types const clock(boost::TIME_UTC);
-			if(!boost::xtime_get(&xtime, clock)) throw exceptions::runtime_error("failed to get current time", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-			// convert our std::nanoseconds to boost::xtime
-			boost::xtime xtime2;
-			xtime2.sec = static_cast<boost::xtime::xtime_sec_t>(ns.get_count() / (1000 * 1000 * 1000));
-			xtime2.nsec  = static_cast<boost::xtime::xtime_nsec_t>(ns.get_count() - xtime2.sec);
-			// add the delta
-			xtime.sec += xtime2.sec;
-			xtime.nsec += xtime2.nsec;
-			if(xtime.nsec > 1000 * 1000 * 1000) {
-				xtime.nsec -= 1000 * 1000 * 1000;
-				++xtime.sec;
-			}
-
-			// sleep until absolute date
-			boost::thread::sleep(xtime); //\todo returns on interruptions
+			boost::thread::sleep(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
 		}
 	}
 }

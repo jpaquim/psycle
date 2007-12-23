@@ -20,8 +20,7 @@
 #else
 	// boost takes care of all the mess for us
 	#include <boost/cstdint.hpp>
-	namespace std
-	{
+	namespace std {
 		using boost::int8_t;
 		using boost::int_least8_t;
 		using boost::int_fast8_t;

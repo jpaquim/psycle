@@ -19,22 +19,22 @@ namespace std {
 	{
 		public:
 			typedef Tick tick_type;
-			basic_time_duration(tick_type tick = 0) : tick_(tick) {}
-			tick_type get_count() const { return tick_; }
+			basic_time_duration(tick_type ticks = 0) : ticks_(ticks) {}
+			tick_type get_count() const { return ticks_; }
 			tick_type static ticks_per_second() { return Ticks_Per_Seconds; }
 			tick_type static seconds_per_tick() { return Seconds_Per_Tick; }
 			bool static is_subsecond() { return ticks_per_second() > seconds_per_tick(); }
-			bool operator==(Final const & that) const { return this->tick_ == that.tick_; }
-			bool operator< (Final const & that) const { return this->tick_ <  that.tick_; }
-			Final & operator+=(Final const & that) { this->tick_ += that.tick_; return static_cast<Final&>(*this); }
-			Final & operator-=(Final const & that) { this->tick_ -= that.tick_; return static_cast<Final&>(*this); }
-			Final operator-() const { Final f(-this->tick_); return f; }
-			Final & operator/=(int d) { tick_ /= d; return static_cast<Final&>(*this); }
-			Final & operator*=(int m) { tick_ *= m; return static_cast<Final&>(*this); }
+			bool operator==(Final const & that) const { return this->ticks_ == that.ticks_; }
+			bool operator< (Final const & that) const { return this->ticks_ <  that.ticks_; }
+			Final & operator+=(Final const & that) { this->ticks_ += that.ticks_; return static_cast<Final&>(*this); }
+			Final & operator-=(Final const & that) { this->ticks_ -= that.ticks_; return static_cast<Final&>(*this); }
+			Final operator-() const { Final f(-this->ticks_); return f; }
+			Final & operator/=(int d) { ticks_ /= d; return static_cast<Final&>(*this); }
+			Final & operator*=(int m) { ticks_ *= m; return static_cast<Final&>(*this); }
 		protected:
 			typedef basic_time_duration<Final, Tick, Ticks_Per_Seconds, Seconds_Per_Tick> basic_time_duration_type;
 		private:
-			tick_type tick_;
+			tick_type ticks_;
 	};
 
 	class nanoseconds : public basic_time_duration<nanoseconds, long long int, 1000 * 1000 * 1000, 0> {
@@ -95,10 +95,12 @@ namespace std {
 
 	//class months; // difficult to implement and not useful for specifying pause durations
 	//class years; // difficult to implement and not useful for specifying pause durations
+}
 
-	#if defined BOOST_AUTO_TEST_CASE
-		BOOST_AUTO_TEST_CASE(std_date_time_duration_test)
-		{
+#if defined BOOST_AUTO_TEST_CASE
+	namespace universalis { namespace standard_library { namespace detail { namespace test {
+		BOOST_AUTO_TEST_CASE(std_date_time_duration_test) {
+			using namespace std;
 			{
 				days const d(1);
 				BOOST_CHECK(d.get_count() == 1);
@@ -165,5 +167,19 @@ namespace std {
 			}
 
 		}
-	#endif
-}
+	}}}}
+#endif
+
+/******************************************************************************************/
+#include <boost/thread/xtime.hpp>
+namespace universalis { namespace standard_library { namespace detail {
+	/// see the standard header date_time for duration types implementing the Elapsed_Time concept
+	template<typename Elapsed_Time>
+	boost::xtime make_boost_xtime(Elapsed_Time const & elapsed_time) {
+		std::nanoseconds const ns(elapsed_time);
+		boost::xtime xtime;
+		xtime.sec = static_cast<boost::xtime::xtime_sec_t>(ns.get_count() / (1000 * 1000 * 1000));
+		xtime.nsec  = static_cast<boost::xtime::xtime_nsec_t>(ns.get_count() - xtime.sec);
+		return xtime;
+	}
+}}}
