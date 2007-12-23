@@ -8,6 +8,7 @@
 #include "song.h"
 #include "dsp.h"
 #include "helpers/math/round.hpp"
+#include "fileio.h"
 
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 

@@ -6,6 +6,8 @@
 #include "commands.h"
 #include "player.h"
 #include "song.h"
+#include "dsp.h"
+#include "fileio.h"
 
 namespace psy {
 	namespace core {

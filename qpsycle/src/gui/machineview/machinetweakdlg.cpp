@@ -38,6 +38,7 @@
 #include "../inputhandler.hpp"
 #include "machinegui.hpp"
 #include "effectgui.hpp"
+#include <cmath>
 
 
 #include <QVBoxLayout>

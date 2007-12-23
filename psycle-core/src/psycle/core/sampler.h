@@ -100,90 +100,14 @@ namespace psy {
 			Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song);
 			virtual void Init();
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
-			virtual void SetSampleRate(int sr)
-			{
-				Machine::SetSampleRate(sr);
-				for (int i=0; i<_numVoices; i++)
-				{
-					_voices[i]._envelope._stage = ENV_OFF;
-					_voices[i]._envelope._sustain = 0;
-					_voices[i]._filterEnv._stage = ENV_OFF;
-					_voices[i]._filterEnv._sustain = 0;
-					_voices[i]._filter.Init(sr);
-					_voices[i]._triggerNoteOff = 0;
-					_voices[i]._triggerNoteDelay = 0;
-				}
-			}
+			virtual void SetSampleRate(int sr);
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
-			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
-			{
-				std::uint32_t size;
-				pFile->Read(size);
-				if (size)
-				{
-					if (version > CURRENT_FILE_VERSION_MACD)
-					{
-						// data is from a newer format of psycle, it might be unsafe to load.
-						pFile->Skip(size);
-						return false;
-					}
-					else
-					{
-						std::int32_t temp;
-						pFile->Read(temp); // numSubtracks
-						_numVoices=temp;
-						pFile->Read(temp); // quality
-
-						switch (temp)
-						{
-						case 2:
-							_resampler.SetQuality(dsp::R_SPLINE);
-							break;
-						case 3:
-							_resampler.SetQuality(dsp::R_BANDLIM);
-							break;
-						case 0:
-							_resampler.SetQuality(dsp::R_NONE);
-							break;
-						default:
-						case 1:
-							_resampler.SetQuality(dsp::R_LINEAR);
-							break;
-						}
-					}
-				}
-				return true;
-			}
-
-			inline virtual void SaveSpecificChunk(RiffFile* pFile) const
-			{
-				std::int32_t temp;
-				std::uint32_t size = 2 * sizeof temp;
-				pFile->Write(size);
-				temp = _numVoices;
-				pFile->Write(temp); // numSubtracks
-				switch (_resampler.GetQuality())
-				{
-					case dsp::R_NONE:
-						temp = 0;
-						break;
-					case dsp::R_LINEAR:
-						temp = 1;
-						break;
-					case dsp::R_SPLINE:
-						temp = 2;
-						break;
-					case dsp::R_BANDLIM:
-						temp = 3;
-						break;
-				}
-				pFile->Write(temp); // quality
-			}
-
+			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+      virtual void SaveSpecificChunk(RiffFile* pFile) const;
 			void Update();
 
 			///\name wave file previewing
@@ -215,10 +139,6 @@ namespace psy {
 			inline void TickEnvelope( int voice );
 			inline void TickFilterEnvelope( int voice );
 			Instrument::id_type lastInstrument[MAX_TRACKS];
-			static inline int alteRand(int x)
-			{
-				return (x*rand())/32768;
-			}
 		};
 	}
 }

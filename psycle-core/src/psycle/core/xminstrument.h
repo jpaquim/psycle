@@ -17,22 +17,15 @@
 	*   Free Software Foundation, Inc.,                                       *
 	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 	***************************************************************************/
-#if !defined XMINSTRUMENT_H && 0
+#ifndef XMINSTRUMENT_H
 #define XMINSTRUMENT_H
 
 #include <utility>
-#include <inttypes.h>
-#include <cassert>
+#include <cstdint>
+#include <cstdio>
+#include <string>
 
 namespace psy { namespace core {
-
-template<typename object_array> inline object_array * zapArray(object_array *& pointer, object_array * const new_value = 0)
-{
-	if(pointer) delete [] pointer;
-	return pointer = new_value;
-}
-
-
 
 /**
 @author Psycledelics  
@@ -83,154 +76,84 @@ public:
 					RANDOM = 0x4
 				};
 
-				/// Constructor
-				WaveData()
-				{
-					m_pWaveDataL = m_pWaveDataR = NULL;
-					Init();
-				};
+				WaveData();
 
 				/// Initialize
-				void Init(){
-					DeleteWaveData();
-					m_WaveLength = 0;
-					m_WaveGlobVolume = 1.0f; // Global volume ( global multiplier )
-					m_WaveDefVolume = 128; // Default volume ( volume at which it starts to play. corresponds to 0Cxx/volume command )
-					m_WaveLoopStart = 0;
-					m_WaveLoopEnd = 0;
-					m_WaveLoopType = DO_NOT;
-					m_WaveSusLoopStart = 0;
-					m_WaveSusLoopEnd = 0;
-					m_WaveSusLoopType = DO_NOT;
-					//todo: Add SampleRate functionality, and change WaveTune's one.
-					// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
-					m_WaveSampleRate = 8363;
-					m_WaveTune = 0;
-					m_WaveFineTune = 0;
-					m_WaveStereo = false;
-					m_PanFactor = 0.5f;
-					m_PanEnabled = false;
-					m_VibratoAttack = 0;
-					m_VibratoSpeed = 0;
-					m_VibratoDepth = 0;
-					m_VibratoType = 0;
-				}
+        void Init();
 
 				/// Destructor
-				~WaveData(){
-						DeleteWaveData();
-				};
+				~WaveData();
 
 				//  Object Functions
-				void DeleteWaveData(){
-					zapArray(m_pWaveDataL);
-					zapArray(m_pWaveDataR);
-				}
-
-				void AllocWaveData(const int iLen,const bool bStereo)
-				{
-					DeleteWaveData();
-					m_pWaveDataL = new signed short[iLen];
-					m_pWaveDataR = bStereo?new signed short[iLen]:NULL;
-					m_WaveStereo = bStereo;
-					m_WaveLength  = iLen;
-				}
-
+				void DeleteWaveData();
+				void AllocWaveData(const int iLen,const bool bStereo);
 //        void Load(DeSerializer* file);  // here is a change to main psycle
 //        void Save(Serializer* file);
 
 				/// Wave Data Copy Operator
-				void operator= (const WaveData& source)
-				{
-					Init();
-					m_WaveName = source.m_WaveName;
-					m_WaveLength = source.m_WaveLength;
-					m_WaveGlobVolume = source.m_WaveGlobVolume;
-					m_WaveDefVolume = source.m_WaveDefVolume;
-					m_WaveLoopStart = source.m_WaveLoopStart;
-					m_WaveLoopEnd = source.m_WaveLoopEnd;
-					m_WaveLoopType = source.m_WaveLoopType;
-					m_WaveSusLoopStart = source.m_WaveSusLoopStart;
-					m_WaveSusLoopEnd = source.m_WaveSusLoopEnd;
-					m_WaveSusLoopType = source.m_WaveSusLoopType;
-					m_WaveTune = source.m_WaveTune;
-					m_WaveFineTune = source.m_WaveFineTune;
-					m_WaveStereo = source.m_WaveStereo;
-					m_VibratoAttack = source.m_VibratoAttack;
-					m_VibratoSpeed = source.m_VibratoSpeed;
-					m_VibratoDepth = source.m_VibratoDepth;
-					m_VibratoType = source.m_VibratoType;
-
-					AllocWaveData(source.m_WaveLength,source.m_WaveStereo);
-
-					memcpy(m_pWaveDataL,source.m_pWaveDataL,source.m_WaveLength * sizeof(short));
-					if(source.m_WaveStereo){
-							memcpy(m_pWaveDataR,source.m_pWaveDataR,source.m_WaveLength * sizeof(short));
-					}
-				}
-
+				void operator= (const WaveData& source);
 
 			// Properties
-			const std::string WaveName(){ return m_WaveName;};
-			void WaveName(std::string newname){ m_WaveName = newname;};
+        const std::string WaveName();
+        void WaveName(std::string newname);
 
-			uint32_t  WaveLength(){ return m_WaveLength;};
-			void WaveLength (const uint32_t value){m_WaveLength = value;};
+        uint32_t  WaveLength();
+        void WaveLength (const uint32_t value);
 
-			const float WaveGlobVolume()const{ return m_WaveGlobVolume;};
-			void WaveGlobVolume(const float value){m_WaveGlobVolume = value;};
-			const uint16_t WaveVolume(){ return m_WaveDefVolume;};
-			void WaveVolume(const uint16_t value){m_WaveDefVolume = value;};
+        const float WaveGlobVolume()const;
+        void WaveGlobVolume(const float value);
+        const uint16_t WaveVolume();
+        void WaveVolume(const uint16_t value);
 
-			const float PanFactor(){ return m_PanFactor;};// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
-			void PanFactor(const float value){m_PanFactor = value;};
-			bool PanEnabled(){ return m_PanEnabled;};
-			void PanEnabled(bool pan){ m_PanEnabled=pan;};
+        const float PanFactor();
+        void PanFactor(const float value);
+        bool PanEnabled();
+        void PanEnabled(bool pan);
 
-			const uint32_t WaveLoopStart(){ return m_WaveLoopStart;};
-			void WaveLoopStart(const uint32_t value){m_WaveLoopStart = value;};
-			const uint32_t WaveLoopEnd(){ return m_WaveLoopEnd;};
-			void WaveLoopEnd(const uint32_t value){m_WaveLoopEnd = value;};
-			const LoopType WaveLoopType(){ return m_WaveLoopType;};
-			void WaveLoopType(const LoopType value){ m_WaveLoopType = value;};
+        const uint32_t WaveLoopStart();
+        void WaveLoopStart(const uint32_t value);
+        const uint32_t WaveLoopEnd();
+        void WaveLoopEnd(const uint32_t value);
+        const LoopType WaveLoopType();
+        void WaveLoopType(const LoopType value);
 
-			const uint32_t WaveSusLoopStart(){ return m_WaveSusLoopStart;};
-			void WaveSusLoopStart(const uint32_t value){m_WaveSusLoopStart = value;};
-			const uint32_t WaveSusLoopEnd(){ return m_WaveSusLoopEnd;};
-			void WaveSusLoopEnd(const uint32_t value){m_WaveSusLoopEnd = value;};
-			const LoopType WaveSusLoopType(){ return m_WaveSusLoopType;};
-			void WaveSusLoopType(const LoopType value){ m_WaveSusLoopType = value;};
+        const uint32_t WaveSusLoopStart();
+        void WaveSusLoopStart(const uint32_t value);
+        const uint32_t WaveSusLoopEnd();
+        void WaveSusLoopEnd(const uint32_t value);
+        const LoopType WaveSusLoopType();
+        void WaveSusLoopType(const LoopType value);
 
-			const int16_t WaveTune(){return m_WaveTune;};
-			void WaveTune(const int16_t value){m_WaveTune = value;};
-			const int16_t WaveFineTune(){return m_WaveFineTune;};
-			void WaveFineTune(const int16_t value){m_WaveFineTune = value;};
-			const uint32_t WaveSampleRate(){return m_WaveSampleRate;};
-			void WaveSampleRate(const uint32_t value){m_WaveSampleRate = value;};
+        const int16_t WaveTune();
+        void WaveTune(const int16_t value);
+        const int16_t WaveFineTune();
+        void WaveFineTune(const int16_t value);
+        const uint32_t WaveSampleRate();
+        void WaveSampleRate(const uint32_t value);
 
-			const bool IsWaveStereo(){ return m_WaveStereo;};
-			void IsWaveStereo(const bool value){ m_WaveStereo = value;};
+        const bool IsWaveStereo();
+        void IsWaveStereo(const bool value);
 
-			const uint8_t VibratoType(){return m_VibratoType;};
-			const uint8_t VibratoSpeed(){return m_VibratoSpeed;};
-			const uint8_t VibratoDepth(){return m_VibratoDepth;};
-			const uint8_t VibratoAttack(){return m_VibratoAttack;};
+        const uint8_t VibratoType();
+        const uint8_t VibratoSpeed();
+        const uint8_t VibratoDepth();
+        const uint8_t VibratoAttack();
 
-			void VibratoType(const uint8_t value){m_VibratoType = value ;};
-			void VibratoSpeed(const uint8_t value){m_VibratoSpeed = value ;};
-			void VibratoDepth(const uint8_t value){m_VibratoDepth = value ;};
-			void VibratoAttack(const uint8_t value){m_VibratoAttack = value ;};
+        void VibratoType(const uint8_t value);
+        void VibratoSpeed(const uint8_t value);
+        void VibratoDepth(const uint8_t value);
+        void VibratoAttack(const uint8_t value);
 
-			const bool IsAutoVibrato(){return m_VibratoDepth && m_VibratoSpeed;};
+        const bool IsAutoVibrato();
 
-			const signed short * pWaveDataL(){ return m_pWaveDataL;};
-			const signed short * pWaveDataR(){ return m_pWaveDataR;};
+        const signed short * pWaveDataL();
+        const signed short * pWaveDataR();
 
-			signed short WaveDataL(const uint32_t index) const { assert(index<m_WaveLength); return (*(m_pWaveDataL + index));};
-			signed short WaveDataR(const uint32_t index) const { assert(index<m_WaveLength); return (*(m_pWaveDataR + index));};
+        signed short WaveDataL(const uint32_t index) const ;
+        signed short WaveDataR(const uint32_t index) const ;
 
-			void WaveDataL(const uint32_t index,const signed short value){ assert(index<m_WaveLength); *(m_pWaveDataL + index) = value;};
-			void WaveDataR(const uint32_t index,const signed short value){ assert(index<m_WaveLength); *(m_pWaveDataR + index) = value;};
+        void WaveDataL(const uint32_t index,const signed short value);
+        void WaveDataR(const uint32_t index,const signed short value);
 
 			private:
 

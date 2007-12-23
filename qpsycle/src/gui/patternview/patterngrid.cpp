@@ -265,12 +265,12 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 					} else tColor = stdColor;
 
 					painter->setPen( tColor );
-					drawData( painter, curTracknum, curLinenum, 0, event->note() ,event->isSharp(), tColor );
-					if (event->instrument() != 255) drawData( painter, curTracknum, curLinenum, 1, event->instrument(), 1, tColor );
-					if (event->machine() != 255) drawData( painter, curTracknum, curLinenum, 2, event->machine(), 1, tColor );
-					if (event->volume() != 255) drawData( painter, curTracknum, curLinenum, 3, event->volume(), 1, tColor );
+					drawData( painter, curTracknum, curLinenum, 0, event->note() , tColor );
+					if (event->instrument() != 255) drawData( painter, curTracknum, curLinenum, 1, event->instrument(), tColor );
+					if (event->machine() != 255) drawData( painter, curTracknum, curLinenum, 2, event->machine(), tColor );
+					if (event->volume() != 255) drawData( painter, curTracknum, curLinenum, 3, event->volume(), tColor );
 					if (event->command() != 0 || event->parameter() != 0) {
-						drawData( painter, curTracknum, curLinenum, 4, (event->command() << 8) | event->parameter(), 1, tColor );
+						drawData( painter, curTracknum, curLinenum, 4, (event->command() << 8) | event->parameter(), tColor );
 					} else {
 						drawString( painter, curTracknum, curLinenum, 4, "....", tColor );
 					}
@@ -283,7 +283,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 						int command = pc.first;
 						int parameter = pc.second;
 						if ( command != 0 || parameter != 0) {
-							drawData( painter, curTracknum, curLinenum, 5+count, ( command << 8) | parameter , 1, tColor );
+							drawData( painter, curTracknum, curLinenum, 5+count, ( command << 8) | parameter , tColor );
 						}
 					}
 				}
@@ -293,7 +293,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 	}
 } // drawPattern
 
-void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr, int data, bool sharp, const QColor & color ) {
+void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr, int data, const QColor & color ) {
 
 	std::map<int, TrackGeometry>::const_iterator it;
 	it = trackGeometrics().lower_bound( track );
@@ -323,9 +323,9 @@ void PatternGrid::drawData( QPainter *painter, int track, int line, int eventnr,
 			break;
 			case ColumnEvent::note :
 				if ( cursor().track() == track && cursor().line() == line && cursor().eventNr() == eventnr ) {
-					drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),cursorTextColor() );
+					drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data),cursorTextColor() );
 				} else
-					drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data, sharp),color );
+					drawStringData( painter, xOff + eventOffset(eventnr,0), line, noteToString(data),color );
 			break;
 			default: ;
 		}
@@ -428,7 +428,7 @@ void PatternGrid::drawString( QPainter *painter, int track, int line, int eventn
 	drawStringData( painter, xOff + eventOffset(eventnr,0), line, data, color );
 }
 
-std::string PatternGrid::noteToString( int value, bool sharp )
+std::string PatternGrid::noteToString( int value)
 {
 	switch (value) {
 		case commands::tweak : return "twk"; break;
@@ -443,34 +443,21 @@ std::string PatternGrid::noteToString( int value, bool sharp )
 	int octave = value / 12;
 	std::string octStr = QString::number( octave ).toStdString();
 
-	if (sharp) switch (value % 12) {
-		case 0:   return "C-" + octStr; break;
-		case 1:   return "C#" + octStr; break;
-		case 2:   return "D-" + octStr; break;
-		case 3:   return "D#" + octStr; break;
-		case 4:   return "E-" + octStr; break;
-		case 5:   return "F-" + octStr; break;
-		case 6:   return "F#" + octStr; break;
-		case 7:   return "G-" + octStr; break;
-		case 8:   return "G#" + octStr; break;
-		case 9:   return "A-" + octStr; break;
-		case 10:  return "A#" + octStr; break;
-		case 11:  return "B-" + octStr; break;
-		} else
-		switch (value % 12) {
-		case 0:   return "C-" + octStr; break;
-		case 1:   return "Db" + octStr; break;
-		case 2:   return "D-" + octStr; break;
-		case 3:   return "Eb" + octStr; break;
-		case 4:   return "E-" + octStr; break;
-		case 5:   return "F-" + octStr; break;
-		case 6:   return "Gb" + octStr; break;
-		case 7:   return "G-" + octStr; break;
-		case 8:   return "Ab" + octStr; break;
-		case 9:   return "A-" + octStr; break;
-		case 10:  return "Bb" + octStr; break;
-		case 11:  return "B-" + octStr; break;
-		}
+	// historically common chain of fifths from Eb to G#
+	switch (value % 12) {
+	case 0:   return "C-" + octStr; break;
+	case 1:   return "C#" + octStr; break;
+	case 2:   return "D-" + octStr; break;
+	case 3:   return "Eb" + octStr; break;
+	case 4:   return "E-" + octStr; break;
+	case 5:   return "F-" + octStr; break;
+	case 6:   return "F#" + octStr; break;
+	case 7:   return "G-" + octStr; break;
+	case 8:   return "G#" + octStr; break;
+	case 9:   return "A-" + octStr; break;
+	case 10:  return "Bb" + octStr; break;
+	case 11:  return "B-" + octStr; break;
+	}
 	return "err";
 }
 

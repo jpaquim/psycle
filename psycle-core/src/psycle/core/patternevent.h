@@ -60,9 +60,6 @@ class PatternEvent
 
 		PcmListType & paraCmdList() { return paraCmdList_; }
 
-		void setSharp( bool b ) { sharp_ = b; }
-		bool isSharp() const { return sharp_; }
-
 	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
 		std::uint8_t note_;
 		std::uint8_t inst_;
@@ -70,7 +67,6 @@ class PatternEvent
 		std::uint8_t cmd_;
 		std::uint8_t param_;
 		std::uint8_t volume_;
-		bool sharp_;
 		PcmListType paraCmdList_;
 };
 

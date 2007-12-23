@@ -28,8 +28,7 @@ PatternEvent::PatternEvent() :
 	mach_(255),
 	cmd_(0),
 	param_(0),
-	volume_(255),
-	sharp_(1)
+	volume_(255)
 {
 	for(int i = 0; i < 10; i++) paraCmdList_.push_back(PcmType());
 }
@@ -44,7 +43,6 @@ std::string PatternEvent::toXml( int track ) const
 		<< std::hex << "' inst='" << (int) inst_
 		<< std::hex << "' cmd='" << (int) cmd_
 		<< std::hex << "' param='" << (int) param_
-		<< std::hex << "' sharp='" << (int) sharp_
 		<<"' />\n";
 	return xml.str();
 }

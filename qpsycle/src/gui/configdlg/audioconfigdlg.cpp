@@ -21,6 +21,7 @@
 #include <qpsyclePch.hpp>
 
 #include <psycle/core/player.h>
+#include <psycle/audiodrivers/audiodriver.h>
 
 #include "audioconfigdlg.hpp"
 #include "../global.hpp"

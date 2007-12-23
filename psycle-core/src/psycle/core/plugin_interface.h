@@ -7,8 +7,6 @@
 // we should not introduce any dependency by including
 // anything that is not part of the c++ standard library.
 
-#include <cstdio> // This is NOT part of the interface. It would be better if plugins that want it included it themselves.
-
 namespace psycle
 {
 	namespace plugin_interface
@@ -113,20 +111,20 @@ namespace psycle
 		/// callback functions to let plugins communicate with the host.
 		class CFxCallback
 		{
-			public:
-				virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
-				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
-				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-				virtual float * unused0(int, int){return 0;}
-				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-				virtual float * unused1(int, int){return 0;}
-				virtual int GetTickLength(){return 2048;}
-				virtual int GetSamplingRate(){return 44100;}
-				virtual int GetBPM(){return 125;}
-				virtual int GetTPB(){return 4;}
-				// Don't get fooled by the above return values.
-				// You get a pointer to a subclass of this one that returns the correct ones.
-				virtual inline ~CFxCallback() throw() {}
+    public:
+      virtual ~CFxCallback() throw();
+      virtual void MessBox(char* ptxt,char*caption,unsigned int type);
+      virtual int CallbackFunc(int cbkID,int par1,int par2,int par3);
+      /// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+      virtual float * unused0(int, int);
+      /// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+      virtual float * unused1(int, int);
+      virtual int GetTickLength();
+      virtual int GetSamplingRate();
+      virtual int GetBPM();
+      virtual int GetTPB();
+      // Don't get fooled by the above return values.
+      // You get a pointer to a subclass of this one that returns the correct ones.
 		};
 
 		/*////////////////////////////////////////////////////////////////////////*/
@@ -135,48 +133,48 @@ namespace psycle
 		class CMachineInterface
 		{
 			public:
-				virtual inline ~CMachineInterface() {}
+        virtual ~CMachineInterface();
 				///\todo doc
-				virtual void Init() {}
+				virtual void Init();
 				///\todo doc
-				virtual void SequencerTick() {}
+				virtual void SequencerTick();
 				///\todo doc
-				virtual void ParameterTweak(int par, int val) {}
+				virtual void ParameterTweak(int par, int val);
 
 				/// Work function
-				virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {}
+				virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
 
 				///\todo doc
-				virtual void Stop() {}
+				virtual void Stop();
 
 				///\name Export / Import
 				///\{
-					///\todo doc
-					virtual void PutData(void * pData) {}
-					///\todo doc
-					virtual void GetData(void * pData) {}
-					///\todo doc
-					virtual int GetDataSize() { return 0; }
+          ///\todo doc
+          virtual void PutData(void * pData);
+          ///\todo doc
+          virtual void GetData(void * pData);
+          ///\todo doc
+          virtual int GetDataSize();
 				///\}
 
 				///\todo doc
-				virtual void Command() {}
+        virtual void Command();
 				///\todo doc. not used (yet?)
-				virtual void MuteTrack(int const i) {}
+				virtual void MuteTrack(int const i);
 				///\todo doc. not used (yet?)
-				virtual bool IsTrackMuted(int const i) const { return false; }
+				virtual bool IsTrackMuted(int const i) const;
 				///\todo doc. not used (yet?)
-				virtual void MidiNote(int const channel, int const value, int const velocity) {}
+				virtual void MidiNote(int const channel, int const value, int const velocity);
 				///\todo doc. not used (yet?)
-				virtual void Event(uint32 const data) {}
+				virtual void Event(uint32 const data);
 				///\todo doc
-				virtual bool DescribeValue(char* txt,int const param, int const value) { return false; }
+				virtual bool DescribeValue(char* txt,int const param, int const value);
 				///\todo doc. not used (prolly never)
-				virtual bool PlayWave(int const wave, int const note, float const volume) { return false; }
+				virtual bool PlayWave(int const wave, int const note, float const volume);
 				///\todo doc
-				virtual void SeqTick(int channel, int note, int ins, int cmd, int val) {}
+				virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 				///\todo doc. not used (prolly never)
-				virtual void StopWave() {}
+				virtual void StopWave();
 
 			public:
 				/// initialize these members in the constructor

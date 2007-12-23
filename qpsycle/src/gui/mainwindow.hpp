@@ -33,15 +33,14 @@ class QMenu;
 class QTextEdit;
 class QComboBox;
 class QStandardItemModel;
-
-
-#include "logconsole.hpp"
+//#include <QUndoCommand>
+//#include <QUndoGroup>
+//#include <QUndoView>
+class QUndoStack;
+class QUndoView;
 
 #include <QTabWidget>
 #include <QMainWindow>
-#include <QUndoCommand>
-#include <QUndoGroup>
-#include <QUndoView>
 
 namespace qpsycle {
 
@@ -56,7 +55,7 @@ class PatternBox;
 class SampleBrowser;
 class AudioConfigDlg;
 class SettingsDlg;
-
+class LogConsole;
 
 	
 // Subclassing as we need to override event().

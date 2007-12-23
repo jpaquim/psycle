@@ -4,8 +4,8 @@
 #include "constants.h"
 #include "commands.h"
 #include "cstdint.h"
-#include "dsp.h"
-#include "fileio.h"
+//#include "dsp.h"
+//#include "fileio.h"
 #include "helpers.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
@@ -19,6 +19,8 @@ namespace psy
 {
 	namespace core
 	{
+    class RiffFile;
+
 		// FIXME: stole these from analzyer.h just to fix compile error.
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE  = 4096;

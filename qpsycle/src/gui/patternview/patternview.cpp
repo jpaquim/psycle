@@ -124,7 +124,6 @@ bool PatternView::enterNote( const PatCursor & cursor, int note )
 			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
 			psy::core::Machine* tmac = song_->machine( song_->seqBus );
 			event.setNote( octave() * 12 + note );
-			event.setSharp( false/*drawArea->sharpMode()*/ );
 			if (tmac) event.setMachine( tmac->id() );
 			if (tmac && tmac->type() == psy::core::MACH_SAMPLER ) {
 				event.setInstrument( song_->instSelected );
@@ -162,7 +161,6 @@ void PatternView::clearNote( const PatCursor & cursor) {
 		psy::core::Machine* tmac = song_->machine( song_->seqBus );
 		psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
 		event.setNote(255);
-		event.setSharp( false/*drawArea->sharpMode()*/ );
 		pattern()->setEvent( cursor.line(), cursor.track(), event );
 		if (tmac) tmac->Tick(cursor.track(),event);
 	}

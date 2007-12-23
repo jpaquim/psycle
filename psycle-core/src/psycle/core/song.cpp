@@ -29,6 +29,7 @@
 #include "riff.h"
 #include "sampler.h"
 #include "xmsampler.h"
+#include "fileio.h"
 #include <sstream>
 #include <iostream> // only for debug output
 

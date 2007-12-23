@@ -28,6 +28,7 @@
 #include "machine.h"
 #include "sampler.h"
 #include "song.h"
+#include <psycle/audiodrivers/audiodriver.h>
 
 #include <iostream> // only for debug output
 

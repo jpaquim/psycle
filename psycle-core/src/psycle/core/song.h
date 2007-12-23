@@ -3,12 +3,11 @@
 /// based on psycle mfc revision 2730
 #pragma once
 
-#include "constants.h"
 #include "cstdint.h"
 #include "patternsequence.h"
 #include "machine.h"
 #include "instrument.h"
-#include "xminstrument.h"
+//#include "xminstrument.h"
 
 namespace psy
 {
