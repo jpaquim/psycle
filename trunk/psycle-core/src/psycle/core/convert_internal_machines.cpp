@@ -1,11 +1,14 @@
-#include <psycle/core/psycleCorePch.hpp>
+//#include <psycle/core/psycleCorePch.hpp>
 
 #include "convert_internal_machines.private.hpp"
+#include "internal_machines.h"
+#include "plugin.h"
 #include "helpers/scale.hpp"
 #include "helpers/math/pi.hpp"
 #include "machine.h"
 #include "player.h"
 #include "song.h"
+#include "fileio.h"
 
 namespace psy {
 	namespace core {

@@ -132,11 +132,11 @@ public:
 
 	void drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
 	void drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
-	void drawData( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack, bool sharp, const QColor & color );
+	void drawData( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack, const QColor & color );
 	void drawSelBg( QPainter *painter, Selection selArea );
 	void drawBlockData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color);
 	void drawStringData( QPainter *painter, int xOff, int line, const std::string & text, const QColor & color );
-	std::string noteToString( int value, bool sharp );
+	std::string noteToString( int value );
 	void drawString( QPainter *painter, int track, int line, int eventnr, const std::string & data , const QColor & color );
 	void drawCellBg( QPainter *painter, const PatCursor& cursor );
 	QRectF repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const;

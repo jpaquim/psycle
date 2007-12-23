@@ -20,6 +20,7 @@
 
 #include "plugin.h"
 #include "player.h"
+#include "fileio.h"
 
 #include <iostream> // only for debug output
 #include <sstream>

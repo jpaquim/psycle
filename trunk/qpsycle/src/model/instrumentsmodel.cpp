@@ -17,7 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <qpsyclePch.hpp>
+//#include <qpsyclePch.hpp>
 
 #include <psycle/core/song.h>
 #include <psycle/core/instrument.h>
@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 namespace qpsycle {
 

@@ -25,6 +25,7 @@
 
 #include <iomanip>
 #include <sstream>
+#include <cmath>
 
 #include <QVBoxLayout>
 #include <QSlider>

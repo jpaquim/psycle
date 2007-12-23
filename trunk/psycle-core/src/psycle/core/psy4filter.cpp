@@ -331,11 +331,6 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 									else data.setParameter(str_hex<int>(cmd_attribute->get_value()));
 								}
 								{
-									xmlpp::Attribute const * const sharp_attribute(pattern_line.get_attribute("sharp"));
-									if(!sharp_attribute) std::cerr << "expected sharp attribute in patevent element\n";
-									else data.setSharp(str_hex<bool>(sharp_attribute->get_value()));
-								}
-								{
 									xmlpp::Attribute const * const track_attribute(pattern_line.get_attribute("track"));
 									if(!track_attribute) std::cerr << "expected track attribute in patevent element\n";
 									else (*lastPattern)[lastPatternPos].notes()[str_hex<int>(track_attribute->get_value())]= data;
@@ -403,7 +398,6 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 						data.setNote( str_hex<int> (patevent.attribute("note").toStdString()) );
 						data.setParameter( str_hex<int> (patevent.attribute("param").toStdString()) );
 						data.setParameter( str_hex<int> (patevent.attribute("cmd").toStdString()) );
-						data.setSharp( str_hex<bool> (patevent.attribute("sharp").toStdString()) );
 
 						(*lastPattern)[lastPatternPos].notes()[trackNumber]=data;
 					} // patevents

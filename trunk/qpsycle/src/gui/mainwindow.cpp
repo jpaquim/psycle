@@ -26,6 +26,7 @@
 #include <psycle/core/singlepattern.h>
 #include <psycle/core/patterndata.h>
 #include <psycle/core/patternsequence.h>
+#include <psycle/audiodrivers/audiodriver.h>
 
 #include "global.hpp"
 #include "configuration.hpp"
@@ -56,6 +57,9 @@
 #include <QSettings>
 #include <QTextCodec>
 #include <QDebug>
+
+#include <QUndoView>
+#include <QUndoStack>
 
 #include <iostream>
 #include <iomanip>
