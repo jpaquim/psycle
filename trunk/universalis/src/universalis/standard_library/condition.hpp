@@ -65,7 +65,7 @@ namespace std {
 #if defined BOOST_AUTO_TEST_CASE
 	#include <boost/bind.hpp>
 	namespace universalis { namespace standard_library { namespace detail { namespace test {
-		#if 0
+		#if 1
 				class shared_data {
 					public:
 						std::mutex m;
