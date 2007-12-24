@@ -419,8 +419,8 @@ namespace qpsycle {
 		saveAct->setStatusTip(tr("Save the current song"));
 		connect(saveAct, SIGNAL(triggered()), this, SLOT(onSaveSongRequest()));
 
-		songPropsAct_ = new QAction( tr("&Song properties..."), this );
-		songPropsAct_->setStatusTip(tr("View song properties"));
+		songPropsAct_ = new QAction( tr("Song &Properties"), this );
+		songPropsAct_->setStatusTip(tr("View/edit song properties"));
 		connect( songPropsAct_, SIGNAL(triggered()), this, SLOT(showSongPropertiesDialog()) );
 
 		undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
@@ -915,9 +915,9 @@ namespace qpsycle {
 		layout.setAlignment( Qt::AlignCenter );
 		songPropsDlg.setLayout( &layout );
 
-		QLabel songNameLabel( "Song name:" );
-		QLabel artistNameLabel( "Artist:" );
-		QLabel songNotesLabel( "Notes:" );
+		QLabel songNameLabel( "Title" );
+		QLabel artistNameLabel( "Composer / Credits" );
+		QLabel songNotesLabel( "Extended Comments" );
 		
 		QLineEdit songNameEdit( &songPropsDlg );
 		songNameEdit.setText( QString::fromStdString( song_->name() ) );
@@ -926,10 +926,17 @@ namespace qpsycle {
 		QTextEdit songNotesEdit( &songPropsDlg );
 		songNotesEdit.setText( QString::fromStdString( song_->comment() ) );
 
+		QWidget buttonsContainer;
+		QHBoxLayout buttonsLayout;
+		buttonsContainer.setLayout( &buttonsLayout );
+
 		QPushButton cancelButton( "Cancel" );
 		connect( &cancelButton, SIGNAL( clicked() ), &songPropsDlg, SLOT( reject() ) );
 		QPushButton okButton( "OK" );
-		connect( &okButton, SIGNAL( clicked() ), &songPropsDlg, SLOT( accept() ) );	 
+		connect( &okButton, SIGNAL( clicked() ), &songPropsDlg, SLOT( accept() ) );
+
+		buttonsLayout.addWidget( &cancelButton );
+		buttonsLayout.addWidget( &okButton );
 
 		layout.addWidget( &songNameLabel );
 		layout.addWidget( &songNameEdit );
@@ -937,8 +944,7 @@ namespace qpsycle {
 		layout.addWidget( &artistNameEdit );
 		layout.addWidget( &songNotesLabel );
 		layout.addWidget( &songNotesEdit );
-		layout.addWidget( &cancelButton );
-		layout.addWidget( &okButton );
+		layout.addWidget( &buttonsContainer );
 
 		int returnStatus = songPropsDlg.exec();
 
