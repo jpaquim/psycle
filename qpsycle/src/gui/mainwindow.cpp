@@ -74,8 +74,7 @@ namespace qpsycle {
 		switch (event->type()) {
 		case QEvent::KeyPress: {
 			QKeyEvent *k = (QKeyEvent *)event;
-			if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2
-			    || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
+			if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2 || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
 			{
 				return true;
 			} else {
@@ -234,41 +233,27 @@ namespace qpsycle {
 
 	void MainWindow::setupSignals()
 	{
-		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ),
-			 this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
-		connect( patternBox_, SIGNAL( patternDeleted() ),
-			 this, SLOT( onPatternDeleted() ) );
-		connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ),
-			 this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
-		connect( patternBox_, SIGNAL( patternNameChanged() ),
-			 this, SLOT( onPatternNameChanged() ) );
-		connect( patternBox_, SIGNAL( categoryColorChanged() ),
-			 this, SLOT( onCategoryColorChanged() ) );
+		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ), this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
+		connect( patternBox_, SIGNAL( patternDeleted() ), this, SLOT( onPatternDeleted() ) );
+		connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ), this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
+		connect( patternBox_, SIGNAL( patternNameChanged() ), this, SLOT( onPatternNameChanged() ) );
+		connect( patternBox_, SIGNAL( categoryColorChanged() ), this, SLOT( onCategoryColorChanged() ) );
 
-		connect( macView_, SIGNAL( newMachineCreated( psy::core::Machine* ) ),
-			 this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
-		connect( macView_, SIGNAL( machineChosen( MachineGui* ) ),
-			 this, SLOT( onMachineChosen( MachineGui* ) ) );
-		connect( macView_, SIGNAL( machineDeleted( int ) ),
-			 this, SLOT( onMachineDeleted() ) );
-		connect( macView_, SIGNAL( machineRenamed( ) ),
-			 this, SLOT( onMachineRenamed( ) ) );
+		connect( macView_, SIGNAL( newMachineCreated( psy::core::Machine* ) ), this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
+		connect( macView_, SIGNAL( machineChosen( MachineGui* ) ), this, SLOT( onMachineChosen( MachineGui* ) ) );
+		connect( macView_, SIGNAL( machineDeleted( int ) ), this, SLOT( onMachineDeleted() ) );
+		connect( macView_, SIGNAL( machineRenamed( ) ), this, SLOT( onMachineRenamed( ) ) );
 
-		connect( macCombo_, SIGNAL( currentIndexChanged( int ) ),
-			 this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
+		connect( macCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
 
-		connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ),
-			 this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
+		connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 	}
 
 	void MainWindow::onNewSongRequest()
 	{
 		if ( songHasChanged() )
 		{
-			int response = QMessageBox::warning( this, "Save changes?",
-							     "The song has been modified.\n Do you wish to save your changes?",
-							     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-							     QMessageBox::Save ) ;
+			int response = QMessageBox::warning( this, "Save changes?", "The song has been modified.\n Do you wish to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save ) ;
 
 			if ( response == QMessageBox::Save )
 				onSaveSongRequest();
@@ -285,10 +270,7 @@ namespace qpsycle {
 	{
 		if ( songHasChanged() )
 		{
-			int response = QMessageBox::warning( this, "Save changes?",
-							     "The song has been modified.\n Do you wish to save your changes?",
-							     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
-							     QMessageBox::Save ) ;
+			int response = QMessageBox::warning( this, "Save changes?", "The song has been modified.\n Do you wish to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save ) ;
 
 			if ( response == QMessageBox::Save )
 				onSaveSongRequest();
@@ -447,14 +429,12 @@ namespace qpsycle {
 		connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 		audioConfAct = new QAction( tr("Audio Settings"), this );
-		connect( audioConfAct, SIGNAL( triggered() ),
-			 this, SLOT( showAudioConfigDlg() ) );
+		connect( audioConfAct, SIGNAL( triggered() ), this, SLOT( showAudioConfigDlg() ) );
 
 		// <nmather> just a hold-all for now.  We can organise settings
 		// dialogs better later on.
 		settingsConfAct = new QAction( tr("General Settings"), this );
-		connect( settingsConfAct, SIGNAL( triggered() ),
-			 this, SLOT( showSettingsDlg() ) );
+		connect( settingsConfAct, SIGNAL( triggered() ), this, SLOT( showSettingsDlg() ) );
 
 
 
@@ -633,8 +613,7 @@ namespace qpsycle {
 		for ( int i = 0; i < 9; i++ ) {
 			octCombo_->addItem( QString::number( i ) );
 		}
-		connect( octCombo_, SIGNAL( currentIndexChanged( int ) ),
-			 this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
+		connect( octCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
 		octCombo_->setCurrentIndex( 4 );
 	}
 
@@ -660,8 +639,7 @@ namespace qpsycle {
 				buffer.str("");
 				buffer << std::setfill('0') << std::hex << std::setw(2);
 				buffer << b << ": " << song_->machine(b)->GetEditName();
-				macCombo_->addItem( QString::fromStdString( buffer.str() ),
-						    song_->machine(b)->id() );
+				macCombo_->addItem( QString::fromStdString( buffer.str() ), song_->machine(b)->id() );
 
 				comboIsEmpty = false;
 			}
@@ -675,8 +653,7 @@ namespace qpsycle {
 				buffer.str("");
 				buffer << std::setfill('0') << std::hex << std::setw(2);
 				buffer << b << ": " << song_->machine(b)->GetEditName();
-				macCombo_->addItem( QString::fromStdString( buffer.str() ),
-						    song_->machine(b)->id() );
+				macCombo_->addItem( QString::fromStdString( buffer.str() ), song_->machine(b)->id() );
 				comboIsEmpty = false;
 			}
 		}
