@@ -116,6 +116,7 @@ void WireGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 			state_ = rewire_dest;
 		else if ( event->modifiers() & Qt::ControlModifier )
 			state_ = rewire_src;
+	}
 }
 
 void WireGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
