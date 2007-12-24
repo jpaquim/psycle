@@ -20,31 +20,31 @@
 ***************************************************************************/
 #include <qpsyclePch.hpp>
 
-#include <psycle/core/song.h>
-#include <psycle/core/player.h>
-#include <psycle/core/sampler.h>
 #include <psycle/core/constants.h>
 #include <psycle/core/machine.h>
-#include <psycle/core/pluginfinder.h>
 #include <psycle/core/patternevent.h>
+#include <psycle/core/player.h>
+#include <psycle/core/pluginfinder.h>
+#include <psycle/core/sampler.h>
+#include <psycle/core/song.h>
 
-#include "machineview.hpp"
-#include "../global.hpp"
 #include "../configuration.hpp"
-#include "machinegui.hpp"
-#include "mastergui.hpp"
+#include "../global.hpp"
 #include "effectgui.hpp"
 #include "generatorgui.hpp"
-#include "wiregui.hpp"
+#include "machinegui.hpp"
+#include "machineview.hpp"
+#include "mastergui.hpp"
 #include "newmachinedlg.hpp"
+#include "wiregui.hpp"
 
-#include <QtGui/QGraphicsScene>
-#include <QPainter>
-#include <iostream>
-#include <QGraphicsLineItem>
 #include <QDebug>
+#include <QGraphicsLineItem>
+#include <QGraphicsScene>
+#include <QPainter>
 
 #include <algorithm>
+#include <iostream>
 
 namespace qpsycle {
 

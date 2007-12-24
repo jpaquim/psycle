@@ -86,6 +86,7 @@ private slots:
 	void undo();
 	void redo();
 
+	void showSongPropertiesDialog();
 	void aboutQpsycle();
 
 	void onMachineComboBoxIndexChanged( int newIndex );
@@ -164,6 +165,7 @@ private:
 	QAction *newAct;
 	QAction *openAct;
 	QAction *saveAct;
+	QAction *songPropsAct_;
 	QAction *undoAct;
 	QAction *redoAct;
 	QAction *aboutAct;
