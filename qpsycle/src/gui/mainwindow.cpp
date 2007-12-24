@@ -565,9 +565,7 @@ namespace qpsycle {
 		configMenu->addAction( audioConfAct );
 		configMenu->addAction( settingsConfAct );
 
-
 		performMenu = menuBar()->addMenu(tr("&Performance"));
-		communityMenu = menuBar()->addMenu(tr("&Community"));
 
 		menuBar()->addSeparator();
 
