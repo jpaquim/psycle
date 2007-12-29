@@ -64,7 +64,7 @@ namespace std {
 		template<typename Boost_Try_Mutex, typename Boost_Try_Lock>
 		class boost_try_mutex_wrapper : public boost_mutex_wrapper<Boost_Try_Mutex, Boost_Try_Lock> {
 			public:
-				bool try_lock() throw(lock_error) { return implementation_lock_.try_lock(); }
+				bool try_lock() throw(lock_error) { return this->implementation_lock().try_lock(); }
 		};
 
 		template<typename Boost_Timed_Mutex, typename Boost_Timed_Lock>
@@ -73,7 +73,7 @@ namespace std {
 				/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 				template<typename Elapsed_Time>
 				bool timed_lock(Elapsed_Time const & elapsed_time) {
-					implementation_lock_.timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
+					this->implementation_lock().timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
 				}
 		};
 	}
