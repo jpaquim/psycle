@@ -83,9 +83,9 @@ namespace std {
 			// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
 			// so we need to know the OS type
 			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-				::pthread_t inline * id() { return ::pthread_self(); }
+				::pthread_t inline id() { return ::pthread_self(); }
 			#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-				::DWORD     inline   id() { return ::GetCurrentThreadId(); }
+				::DWORD     inline id() { return ::GetCurrentThreadId(); }
 			#else
 				#error unsupported operating system
 			#endif
