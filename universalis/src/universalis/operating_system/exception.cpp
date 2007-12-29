@@ -8,26 +8,19 @@
 #include <universalis/detail/project.private.hpp>
 #include "exception.hpp"
 #include "exceptions/code_description.hpp"
-#include "loggers.hpp"
-#include "threads/id.hpp"
-#include <universalis/compiler/typenameof.hpp>
-namespace universalis
-{
-	namespace operating_system
-	{
-		char const * exception::what() const throw()
-		{
-			if(!what_) what_ = new std::string(exceptions::code_description(code()));
-			return what_->c_str();
-		}
+#include "loggers.hpp" //
+#include <universalis/compiler/typenameof.hpp> //
+namespace universalis { namespace operating_system {
 
-		namespace exceptions
-		{
-			runtime_error::runtime_error(std::string const & what, compiler::location const & location, void const * cause) throw()
-			:
-				universalis::exceptions::runtime_error(what, location, cause)
-			{
-			}
-		}
-	}
+char const * exception::what() const throw() {
+	if(!what_) what_ = new std::string(exceptions::code_description(code()));
+	return what_->c_str();
 }
+
+namespace exceptions {
+	runtime_error::runtime_error(std::string const & what, compiler::location const & location, void const * cause) throw()
+	: universalis::exceptions::runtime_error(what, location, cause)
+	{}
+
+}
+}}
