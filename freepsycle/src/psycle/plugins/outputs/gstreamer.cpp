@@ -9,7 +9,6 @@
 #include <gst/gst.h>
 #include <universalis/compiler/numeric.hpp>
 #include <universalis/exception.hpp>
-#include <universalis/operating_system/threads/sleep.hpp>
 #include <limits>
 #include <algorithm>
 #include <cmath>

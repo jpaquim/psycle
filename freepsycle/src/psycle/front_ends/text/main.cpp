@@ -13,12 +13,12 @@
 #include <psycle/host/host.hpp>
 #include <universalis/processor/exception.hpp>
 #include <universalis/operating_system/loggers.hpp>
-#include <universalis/operating_system/threads/sleep.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <thread>
 namespace psycle { namespace front_ends { namespace text {
 
 void paths() {
@@ -131,20 +131,22 @@ void stuff() {
 		loggers::information()("############################################## schedule ########################################################");
 		{
 			host::schedulers::single_threaded::scheduler scheduler(graph);
-			universalis::compiler::numeric<64>::floating_point const seconds(60);
+			std::seconds const seconds(60);
 			if(loggers::information()())
 			{
 				std::ostringstream s;
-				s << "will end thread in " << seconds << " seconds ...";
+				s << "will end thread in " << seconds.get_count() << " seconds ...";
 				loggers::information()(s.str());
 			}
 			scheduler.start();
-			if(false) universalis::operating_system::threads::sleep(seconds);
+			if(false) std::this_thread::sleep(seconds);
 			else {
 				int const notes(4000);
 				float ratio(1.1);
 				for(int note(0); note < notes; ++note) {
-					universalis::operating_system::threads::sleep(seconds / notes);
+					std::nanoseconds ns(seconds);
+					ns /= notes;
+					std::this_thread::sleep(ns);
 					pulse1(freq);
 					pulse2(freq2 * 1.1);
 					pulse3(freq3 * 1.17);
