@@ -36,4 +36,3 @@ namespace exceptions {
 
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
-
