@@ -1,10 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief thread standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 #pragma once
 #include <diversalis/operating_system.hpp>
+#include "detail/boost_xtime.hpp"
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>
 namespace std {
@@ -17,11 +18,9 @@ namespace std {
 	
 		public:
 			template<typename Functor>
-			explicit thread(Functor functor) : native_handle_(functor) { /** \todo set the id from within the functor */ }
-
-			//\todo bool joinable() const { return native_handle_.joinable(); }
-
+			explicit thread(Functor functor) : native_handle_(functor) {}
 			void join() { native_handle_.join(); }
+			bool joinable() const { return true; /**\todo return native_handle_.joinable(); */ }
 
 		///\name id
 		///\todo
@@ -58,7 +57,7 @@ namespace std {
 				};
 				id get_id() const { return id_; }
 			private:
-				id id_;
+				id id_; ///\todo set it
 		#endif
 		///\}
 	};
@@ -66,7 +65,7 @@ namespace std {
 	namespace this_thread {
 
 		#if 0 ///\todo
-		thread::id id() {
+		thread::id inline id() {
 			thread::id id(
 				// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
 				// so we need to know the OS type
@@ -80,13 +79,26 @@ namespace std {
 			);
 			return id;
 		}
+		#else
+			// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
+			// so we need to know the OS type
+			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+				::pthread_t * inline id() { return ::pthread_self(); }
+			#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				::DWORD       inline id() { return ::GetCurrentThreadId(); }
+			#else
+				#error unsupported operating system
+			#endif
 		#endif
 
-		void yield() { boost::thread::yield(); }
+		void inline yield() { boost::thread::yield(); }
 
 		/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 		template<typename Elapsed_Time>
 		void sleep(Elapsed_Time const & elapsed_time) {
+			// boost::thread::sleep sleeps until the given absolute event date.
+			// So, we compute the event date by getting the current date and adding the delta to it.
+			// Note: boost::thread::sleep returns on interruptions (at least on posix)
 			boost::thread::sleep(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
 		}
 	}

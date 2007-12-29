@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2007-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #pragma once
 #include "duration.hpp"
@@ -71,12 +71,3 @@ namespace std {
 			utc_time(tick_type ticks) : ticks_(ticks) {} friend class hiresolution_clock<utc_time>;
 	};
 }
-
-/******************************************************************************************/
-#include <boost/thread/xtime.hpp>
-namespace universalis { namespace standard_library { namespace detail {
-	boost::xtime make_boost_xtime(std::utc_time const & t) {
-		boost::xtime xtime(make_boost_xtime(t.nanoseconds_since_epoch()));
-		return xtime;
-	}
-}}}

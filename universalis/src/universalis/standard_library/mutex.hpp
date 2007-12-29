@@ -6,12 +6,11 @@
 #pragma once
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
-#include "hiresolution_clock.hpp"
 namespace std {
 
 	class mutex;
-	class timed_mutex;
 	class recursive_mutex;
+	class timed_mutex;
 	class recursive_timed_mutex;
 
 	template<typename Mutex>
@@ -27,13 +26,13 @@ namespace std {
 
 	namespace detail {
 
-		template<typename Boost_Timed_Mutex>
+		template<typename Boost_Timed_Mutex, typename Boost_Timed_Lock>
 		class boost_timed_mutex_wrapper;
 
-		template<typename Boost_Try_Mutex>
+		template<typename Boost_Try_Mutex, typename Boost_Try_Lock>
 		class boost_try_mutex_wrapper;
 
-		template<typename Boost_Mutex>
+		template<typename Boost_Mutex, typename Boost_Lock>
 		class boost_mutex_wrapper : private boost::noncopyable {
 			public:
 				boost_mutex_wrapper() : implementation_lock_(implementation_, false) {}
@@ -42,64 +41,72 @@ namespace std {
 			private:
 				Boost_Mutex   implementation_;
 				Boost_Mutex & implementation() { return implementation_; }
-					friend class boost_try_mutex_wrapper<Boost_Mutex>;
-					friend class boost_timed_mutex_wrapper<Boost_Mutex>;
 
-				typedef typename Boost_Mutex::scoped_lock implementation_lock_type;
+				typedef Boost_Lock implementation_lock_type;
 				implementation_lock_type   implementation_lock_;
 				implementation_lock_type & implementation_lock() { return implementation_lock_; }
+					friend class boost_try_mutex_wrapper<Boost_Mutex, Boost_Lock>;
+					friend class boost_timed_mutex_wrapper<Boost_Mutex, Boost_Lock>;
 					friend class condition<mutex>;
 					friend class condition<recursive_mutex>;
-					friend class scoped_lock<mutex>;
-					friend class scoped_lock<recursive_mutex>;
-					friend class unique_lock<mutex>;
-					friend class unique_lock<recursive_mutex>;
-		};
-
-		template<typename Boost_Try_Mutex>
-		class boost_try_mutex_wrapper : public boost_mutex_wrapper<Boost_Try_Mutex> {
-			public:
-				boost_try_mutex_wrapper() : implementation_try_lock_(this->implementation(), false) {}
-				bool try_lock() throw(lock_error) { return implementation_try_lock_.try_lock(); }
-			private:
-				typename Boost_Try_Mutex::scoped_try_lock implementation_try_lock_;
-		};
-
-		template<typename Boost_Timed_Mutex>
-		class boost_timed_mutex_wrapper : public boost_try_mutex_wrapper<Boost_Timed_Mutex> {
-			public:
-				boost_timed_mutex_wrapper() : implementation_timed_lock_(this->implementation(), false) {}
-
-				/// see the standard header date_time for duration types implementing the Elapsed_Time concept
-				template<typename Elapsed_Time>
-				bool timed_lock(Elapsed_Time const & elapsed_time) {
-					implementation_timed_lock_.timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
-				}
-			private:
-				typedef typename Boost_Timed_Mutex::scoped_timed_lock implementation_timed_lock_type;
-				implementation_timed_lock_type   implementation_timed_lock_;
-				implementation_timed_lock_type & implementation_timed_lock() { return implementation_timed_lock_; }
 					friend class condition<timed_mutex>;
 					friend class condition<recursive_timed_mutex>;
+					friend class scoped_lock<mutex>;
+					friend class scoped_lock<recursive_mutex>;
 					friend class scoped_lock<timed_mutex>;
 					friend class scoped_lock<recursive_timed_mutex>;
+					friend class unique_lock<mutex>;
+					friend class unique_lock<recursive_mutex>;
 					friend class unique_lock<timed_mutex>;
 					friend class unique_lock<recursive_timed_mutex>;
 		};
+
+		template<typename Boost_Try_Mutex, typename Boost_Try_Lock>
+		class boost_try_mutex_wrapper : public boost_mutex_wrapper<Boost_Try_Mutex, Boost_Try_Lock> {
+			public:
+				bool try_lock() throw(lock_error) { return implementation_lock_.try_lock(); }
+		};
+
+		template<typename Boost_Timed_Mutex, typename Boost_Timed_Lock>
+		class boost_timed_mutex_wrapper : public boost_try_mutex_wrapper<Boost_Timed_Mutex, Boost_Timed_Lock> {
+			public:
+				/// see the standard header date_time for duration types implementing the Elapsed_Time concept
+				template<typename Elapsed_Time>
+				bool timed_lock(Elapsed_Time const & elapsed_time) {
+					implementation_lock_.timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
+				}
+		};
 	}
 
-	class mutex : public detail::boost_mutex_wrapper<boost::mutex> {};
-	class timed_mutex : public detail::boost_timed_mutex_wrapper<boost::timed_mutex> {};
-	class recursive_mutex : public detail::boost_mutex_wrapper<boost::recursive_mutex> {};
-	class recursive_timed_mutex : public detail::boost_timed_mutex_wrapper<boost::recursive_timed_mutex> {};
-	
-	class defer_lock_type {};
-	class try_lock_type {};
-	class accept_ownership_type {};
+	class mutex
+		: public detail::boost_try_mutex_wrapper<
+			boost::try_mutex,
+			boost::try_mutex::scoped_try_lock> {};
 
-	extern defer_lock_type       defer_lock;
-	extern try_lock_type         try_to_lock;
-	extern accept_ownership_type accept_ownership;
+	class recursive_mutex
+		: public detail::boost_try_mutex_wrapper<
+			boost::recursive_try_mutex,
+			boost::recursive_try_mutex::scoped_try_lock> {};
+
+	class timed_mutex
+		: public detail::boost_timed_mutex_wrapper<
+			boost::timed_mutex,
+			boost::timed_mutex::scoped_timed_lock> {};
+
+	class recursive_timed_mutex
+		: public detail::boost_timed_mutex_wrapper<
+			boost::recursive_timed_mutex,
+			boost::recursive_timed_mutex::scoped_timed_lock> {};
+	
+	namespace detail {
+		class defer_lock_type {};
+		class try_lock_type {};
+		class accept_ownership_type {};
+	}
+
+	extern detail::defer_lock_type       const defer_lock; // or = {}; without extern
+	extern detail::try_lock_type         const try_to_lock; // or = {}; without extern
+	extern detail::accept_ownership_type const accept_ownership; // or = {}; without extern
 
 	template<typename Mutex>
 	class scoped_lock : private boost::noncopyable {
@@ -107,22 +114,17 @@ namespace std {
 			typedef Mutex mutex_type;
 
 			explicit scoped_lock(mutex_type & mutex) : mutex_(mutex), implementation_lock_(mutex.implementation()) {}
-			scoped_lock(mutex_type & mutex, accept_ownership_type) : mutex_(mutex), implementation_lock_(mutex.implementation(), false) {}
-			~scoped_lock() { implementation_lock_.unlock(); /** \todo other locks too */ }
+			scoped_lock(mutex_type & mutex, detail::accept_ownership_type) : mutex_(mutex), implementation_lock_(mutex.implementation(), false) {}
+			~scoped_lock() { implementation_lock_.unlock(); }
 			/*constexpr*/ bool owns() const { return true; }
 		private:
 			mutex_type & mutex_;
 			typename mutex_type::implementation_lock_type   implementation_lock_;
 			typename mutex_type::implementation_lock_type & implementation_lock() { return implementation_lock_; }
-				friend class condition<scoped_lock<std::mutex> >;
+				friend class condition<scoped_lock<mutex> >;
 				friend class condition<scoped_lock<recursive_mutex> >;
-
-			#if 0 ///\todo
-			typename mutex_type::implementation_timed_lock_type implementation_timed_lock_;
-			typename mutex_type::implementation_lock_type & implementation_lock() { return implementation_timed_lock_; }
 				friend class condition<scoped_lock<timed_mutex> >;
 				friend class condition<scoped_lock<recursive_timed_mutex> >;
-			#endif
 	};
 
 	template<typename Mutex>
@@ -132,10 +134,10 @@ namespace std {
 
 			unique_lock() : mutex_(), owns_() {}
 			explicit unique_lock(mutex_type & mutex) : mutex_(&mutex), owns_(true), implementation_lock_(mutex.implementation()) {}
-			unique_lock(mutex_type & mutex, defer_lock_type) : mutex_(&mutex), owns_(), implementation_lock_(mutex.implementation(), false) {}
-			unique_lock(mutex_type & mutex, try_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation(), false) { owns_ = /** \todo use implementation_try_lock_.try_lock() **/ mutex.try_lock(); }
-			unique_lock(mutex_type & mutex, accept_ownership_type) : mutex_(&mutex), owns_(true), implementation_lock_(mutex.implementation()) {}
-			~unique_lock() { if(owns_) implementation_lock_.unlock(); /** \todo other locks too */ }
+			unique_lock(mutex_type & mutex, detail::defer_lock_type) : mutex_(&mutex), owns_(), implementation_lock_(mutex.implementation(), false) {}
+			unique_lock(mutex_type & mutex, detail::try_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation(), false) { owns_ = implementation_lock_.try_lock(); }
+			unique_lock(mutex_type & mutex, detail::accept_ownership_type) : mutex_(&mutex), owns_(true), implementation_lock_(mutex.implementation()) {}
+			~unique_lock() { if(owns_) implementation_lock_.unlock(); }
 
 			//unique_lock(unique_lock && u);
 			//unique_lock & operator=(unique_lock && u);
@@ -148,42 +150,38 @@ namespace std {
 
 			void lock() throw(lock_error) {
 				if(owns_) throw lock_error();
-				mutex_->lock();
+				implementation_lock_.lock();
 				owns_ = true;
 			}
 
 			void unlock() throw(lock_error) {
 				if(!owns_) throw lock_error();
-				mutex_->unlock();
+				implementation_lock_.unlock();
 				owns_ = false;
 			}
 
 			bool try_lock() throw(lock_error) {
 				if(owns_) throw lock_error();
-				owns_ = mutex_->try_lock();
+				owns_ = implementation_lock_.try_lock();
 				return owns_; 
 			}
 
+			/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 			template<typename Elapsed_Time>
 			bool timed_lock(Elapsed_Time const & elapsed_time) {
 				if(owns_) throw lock_error();
-				owns_ = mutex_->timed_lock(elapsed_time);
+				owns_ = implementation_lock_.timed_lock(elapsed_time);
 				return owns_;
 			}
+
 		private:
 			mutex_type * mutex_;
 			bool owns_;
-
 			typename mutex_type::implementation_lock_type   implementation_lock_;
 			typename mutex_type::implementation_lock_type & implementation_lock() { return implementation_lock_; }
 				friend class condition<unique_lock<std::mutex> >;
 				friend class condition<unique_lock<recursive_mutex> >;
-
-			#if 0 ///\todo
-			typename mutex_type::implementation_timed_lock_type implementation_timed_lock_;
-			typename mutex_type::implementation_lock_type & implementation_lock() { return implementation_timed_lock_; }
 				friend class condition<unique_lock<timed_mutex> >;
 				friend class condition<unique_lock<recursive_timed_mutex> >;
-			#endif
 	};
 }

@@ -169,17 +169,3 @@ namespace std {
 		}
 	}}}}
 #endif
-
-/******************************************************************************************/
-#include <boost/thread/xtime.hpp>
-namespace universalis { namespace standard_library { namespace detail {
-	/// see the standard header date_time for duration types implementing the Elapsed_Time concept
-	template<typename Elapsed_Time>
-	boost::xtime make_boost_xtime(Elapsed_Time const & elapsed_time) {
-		std::nanoseconds const ns(elapsed_time);
-		boost::xtime xtime;
-		xtime.sec = static_cast<boost::xtime::xtime_sec_t>(ns.get_count() / (1000 * 1000 * 1000));
-		xtime.nsec  = static_cast<boost::xtime::xtime_nsec_t>(ns.get_count() - xtime.sec);
-		return xtime;
-	}
-}}}
