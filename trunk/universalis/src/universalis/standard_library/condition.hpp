@@ -1,11 +1,12 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2007-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief condition standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 #pragma once
-#include "utc_time.hpp"
+#include "detail/boost_xtime.hpp"
 #include <boost/thread/condition.hpp>
+#include <date_time>
 namespace std {
 
 	typedef boost::lock_error lock_error;
@@ -36,14 +37,14 @@ namespace std {
 
 				#if 0 ///\todo
 				bool timed_wait(lock_type & lock, utc_time const & timeout) throw(lock_error) {
-					return implementation_.timed_wait(lock.implementation_timed_lock(),
+					return implementation_.timed_wait(lock.implementation_lock(),
 						universalis::standard_library::detail::make_boost_xtime(timeout)
 					);
 				}
 
 				template<typename Predicate>
 				bool timed_wait(lock_type & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
-					return implementation_.timed_wait(lock.implementation_timed_lock(), predicate,
+					return implementation_.timed_wait(lock.implementation_lock(), predicate,
 						universalis::standard_library::detail::make_boost_xtime(timeout)
 					);
 				}

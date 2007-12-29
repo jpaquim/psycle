@@ -8,8 +8,8 @@
 #include <universalis/detail/project.private.hpp>
 #include "exception.hpp"
 #include "operating_system/loggers.hpp"
-#include "operating_system/threads/id.hpp"
 #include "compiler/typenameof.hpp"
+#include <thread>
 namespace universalis
 {
 	namespace exceptions
@@ -24,7 +24,7 @@ namespace universalis
 			{
 				std::ostringstream s;
 				s 
-					<< "exception: thread id: " << operating_system::threads::id::current() << ", "
+					<< "exception: thread id: " << std::this_thread::id() << ", "
 					<< compiler::typenameof(*this) << ": " << this->what();
 				operating_system::loggers::exception()(s.str(), location);
 			}

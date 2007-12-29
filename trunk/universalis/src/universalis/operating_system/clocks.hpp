@@ -32,11 +32,11 @@
 	#error unsupported operating system
 #endif
 #include <cstdint>
-#include <universalis/standard_library/duration.hpp>
+#include <universalis/standard_library/detail/duration.hpp> // cannot #include <date_time> due to mutual dependency
 #include <stdexcept>
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/operating_system/exceptions/code_description.hpp>
-	#include <universalis/operating_system/threads/sleep.hpp>
+	#include <thread>
 	#include <sstream>
 #endif
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__CLOCKS
@@ -80,12 +80,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(wall_clock_and_sleep_test)
-	{
+	BOOST_AUTO_TEST_CASE(wall_clock_and_sleep_test) {
 		typedef monotonic clock;
 		std::nanoseconds const sleep_nanoseconds(std::milliseconds(250));
 		std::nanoseconds const t0(clock::current());
-		threads::sleep(sleep_nanoseconds);
+		std::this_thread::sleep(sleep_nanoseconds);
 		double const ratio(double((clock::current() - t0).get_count()) / sleep_nanoseconds.get_count());
 		{
 			std::ostringstream s; s << ratio;

@@ -13,8 +13,8 @@
 
 #include "exceptions/fpu.hpp"
 #include <universalis/operating_system/loggers.hpp>
-#include <universalis/operating_system/threads/id.hpp>
 #include <universalis/compiler/typenameof.hpp>
+#include <thread>
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 #endif
@@ -135,7 +135,7 @@ namespace universalis
 				std::ostringstream s;
 				s << "installing cpu/os exception handler in thread: ";
 				if(name.size()) s << "name: " << name << ", ";
-				s << "id: " << operating_system::threads::id::current();
+				s << "id: " << std::this_thread::id();
 				operating_system::loggers::information()(s.str());
 			}
 
@@ -210,7 +210,7 @@ namespace universalis
 						<< "thread: ";
 					if(thread_name && thread_name->size()) s << "name: " << *thread_name << ", ";
 					s
-						<< "id: " << operating_system::threads::id::current() << "\n"
+						<< "id: " << std::this_thread::id() << '\n'
 						<< compiler::typenameof(*this) << ": " << what();
 					operating_system::loggers::crash()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
