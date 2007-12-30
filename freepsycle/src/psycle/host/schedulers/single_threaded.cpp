@@ -225,6 +225,7 @@ void scheduler::operator()() {
 void scheduler::allocate() throw(std::exception) {
 	loggers::trace()("allocating ...", UNIVERSALIS__COMPILER__LOCATION);
 	std::size_t channels(0);
+	// find the terminal nodes in the graph (nodes with no connected output ports)
 	for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 		typenames::node & node(**i);
 		node.underlying().start();
@@ -236,6 +237,7 @@ void scheduler::allocate() throw(std::exception) {
 			}
 			terminal_nodes_.push_back(&node);
 		}
+		// find the maximum number of channels needed for buffers
 		for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
 			ports::output & output_port(**i);
 			channels = std::max(channels, output_port.underlying().channels());
