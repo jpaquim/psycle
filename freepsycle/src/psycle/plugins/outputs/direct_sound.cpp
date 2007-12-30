@@ -8,7 +8,7 @@
 #include "direct_sound.hpp"
 #include <psycle/stream/formats/riff_wave/format.hpp>
 #include <universalis/operating_system/exceptions/code_description.hpp>
-#include <universalis/operating_system/threads/sleep.hpp>
+#include <thread>
 #include <sstream>
 namespace psycle { namespace plugins { namespace outputs {
 	using stream::formats::riff_wave::format;
@@ -138,7 +138,9 @@ namespace psycle { namespace plugins { namespace outputs {
 			}
 			if(position < current_position_ * buffer_size_) break;
 			if(position > current_position_ * buffer_size_ + buffer_size_) break;
-			universalis::operating_system::threads::sleep(0.0011); // beware: using a sleep time of 0 will freeze the system if process has real time priority class and thread has time critical priority!
+			// beware: using a sleep time of 0 will freeze the system if process has real time priority class and thread has time critical priority!
+			//std::this_thread::sleep(std::milliseconds(1));
+			std::this_thread::yield();
 		}
 		if(!loggers::trace()()) {
 			static const char c [] = { '-', '\\', '|', '/' };
@@ -148,7 +150,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		unsigned long int bytes(0), bytes2(0);
 		if(HRESULT error = buffer().Lock(current_position_ * buffer_size_, buffer_size_, reinterpret_cast<void**>(&samples), &bytes, reinterpret_cast<void**>(&samples2), &bytes2, 0)) {
 			if(error != DSERR_BUFFERLOST) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
-			buffer().Restore(); // \todo may fail again and again!
+			buffer().Restore(); /// \todo may fail again and again!
 			if(loggers::information()()) {
 				std::ostringstream s;
 				s << "buffer restored";
