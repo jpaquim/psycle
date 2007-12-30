@@ -73,7 +73,7 @@ namespace std {
 				/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 				template<typename Elapsed_Time>
 				bool timed_lock(Elapsed_Time const & elapsed_time) {
-					this->implementation_lock().timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
+					return this->implementation_lock().timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
 				}
 		};
 	}

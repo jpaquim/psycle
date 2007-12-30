@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycle development team http://psycle.sourceforge.net
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::gstreamer
 #include <psycle/detail/project.private.hpp>
@@ -173,8 +172,8 @@ namespace psycle { namespace plugins { namespace outputs {
 		// initialize gstreamer
 		{
 			static bool once = false;
-			static boost::mutex mutex;
-			boost::mutex::scoped_lock lock(mutex);
+			static std::mutex mutex;
+			std::scoped_lock<std::mutex> lock(mutex);
 			if(!once) {
 				once = true;
 				int * argument_count(0);
@@ -318,7 +317,7 @@ namespace psycle { namespace plugins { namespace outputs {
 	void gstreamer::do_start() throw(engine::exception) {
 		resource::do_start();
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+			std::scoped_lock<std::mutex> lock(mutex_);
 			current_read_position_ = current_write_position_;
 			wait_for_state_to_become_playing_ = true;
 			stop_requested_ = false;
@@ -328,7 +327,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		// set the pipeline state to playing
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+			std::scoped_lock<std::mutex> lock(mutex_);
 			wait_for_state_to_become_playing_ = false;
 		}
 		condition_.notify_one();
@@ -348,7 +347,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+			std::scoped_lock<std::mutex> lock(mutex_);
 			if(current_read_position_ == current_write_position_) {
 				if(stop_requested_) return; 
 				// Handoff is called before state is changed to playing.
@@ -379,7 +378,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			}
 		}
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+			std::scoped_lock<std::mutex> lock(mutex_);
 			++current_read_position_ %= buffers_;
 		}
 		condition_.notify_one();
@@ -407,7 +406,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		condition_.notify_one();
 		{
 			unsigned int const next_write_buffer((current_write_position_ + 1) % buffers_);
-			boost::mutex::scoped_lock lock(mutex_);
+			std::scoped_lock<std::mutex> lock(mutex_);
 			if(current_read_position_ == next_write_buffer) condition_.wait(lock);
 			current_write_position_ = next_write_buffer;
 		}
@@ -416,7 +415,7 @@ namespace psycle { namespace plugins { namespace outputs {
 	void gstreamer::do_stop() throw(engine::exception) {
 		if(pipeline_) {
 			{
-				boost::mutex::scoped_lock lock(mutex_);
+				std::scoped_lock<std::mutex> lock(mutex_);
 				stop_requested_ = true;
 			}
 			condition_.notify_one();
@@ -428,7 +427,7 @@ namespace psycle { namespace plugins { namespace outputs {
 	void gstreamer::do_close() throw(engine::exception) {
 		if(pipeline_) {
 			{
-				boost::mutex::scoped_lock lock(mutex_);
+				std::scoped_lock<std::mutex> lock(mutex_);
 				stop_requested_ = true;
 			}
 			condition_.notify_one();
@@ -445,8 +444,8 @@ namespace psycle { namespace plugins { namespace outputs {
 		// deinitialize gstreamer
 		{
 			static bool once = false;
-			static boost::mutex mutex;
-			boost::mutex::scoped_lock lock(mutex);
+			static std::mutex mutex;
+			std::scoped_lock<std::mutex> lock(mutex);
 			if(!once) {
 				once = true;
 				::gst_deinit();
