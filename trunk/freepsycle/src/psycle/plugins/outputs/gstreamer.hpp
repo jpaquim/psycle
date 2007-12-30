@@ -18,7 +18,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 		public:
 			void do_name(std::string const &) /*override*/;
-			bool opened() const /*override*/;
+			bool opened()  const /*override*/;
 			bool started() const /*override*/;
 		protected:
 			void do_open()    throw(engine::exception) /*override*/;

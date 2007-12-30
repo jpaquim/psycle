@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::outputs::asio
 #pragma once
@@ -20,14 +20,14 @@ namespace psycle { namespace plugins { namespace outputs {
 		protected: friend class virtual_factory_access;
 			asio(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 		public:
-			bool override opened() const;
-			bool override started() const;
+			bool opened()  const /*override*/;
+			bool started() const /*override*/;
 		protected:
-			void override do_open() throw(engine::exception);
-			void override do_start() throw(engine::exception);
-			void override do_process() throw(engine::exception);
-			void override do_stop() throw(engine::exception);
-			void override do_close() throw(engine::exception);
+			void do_open()    throw(engine::exception) /*override*/;
+			void do_start()   throw(engine::exception) /*override*/;
+			void do_process() throw(engine::exception) /*override*/;
+			void do_stop()    throw(engine::exception) /*override*/;
+			void do_close()   throw(engine::exception) /*override*/;
 		private:
 	};
 }}}

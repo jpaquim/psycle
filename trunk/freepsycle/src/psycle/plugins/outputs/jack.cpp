@@ -1,8 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 psycledelics http://psycle.pastnotecut.org : erodix
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; erodix ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::jack
-///\author erodix
 #include <psycle/detail/project.private.hpp>
 #include "jack.hpp"
 namespace psycle { namespace plugins { namespace outputs {
