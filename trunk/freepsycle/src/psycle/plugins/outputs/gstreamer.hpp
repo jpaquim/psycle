@@ -1,14 +1,13 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycle development team http://psycle.sourceforge.net
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::outputs::gstreamer
 #pragma once
 #include <psycle/detail/project.hpp>
 #include "../resource.hpp"
 #include <gst/gstelement.h>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/mutex.hpp>
+#include <condition>
+#include <mutex>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__GSTREAMER
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins { namespace outputs {
@@ -39,8 +38,8 @@ namespace psycle { namespace plugins { namespace outputs {
 			void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 			void        handoff(::GstBuffer &, ::GstPad &);
 
-			boost::condition condition_;
-			boost::mutex mutex_;
+			std::condition<std::scoped_lock<std::mutex> > condition_;
+			std::mutex mutex_;
 			bool wait_for_state_to_become_playing_;
 			bool stop_requested_;
 
