@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::outputs::alsa
 #pragma once
@@ -18,14 +18,14 @@ namespace psycle { namespace plugins { namespace outputs {
 			alsa(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 			virtual ~alsa() throw();
 		public:
-			bool opened() const /*override*/;
+			bool opened()  const /*override*/;
 			bool started() const /*override*/;
 		protected:
-			void do_open() throw(engine::exception) /*override*/;
-			void do_start() throw(engine::exception) /*override*/;
+			void do_open()    throw(engine::exception) /*override*/;
+			void do_start()   throw(engine::exception) /*override*/;
 			void do_process() throw(engine::exception) /*override*/;
-			void do_stop() throw(engine::exception) /*override*/;
-			void do_close() throw(engine::exception) /*override*/;
+			void do_stop()    throw(engine::exception) /*override*/;
+			void do_close()   throw(engine::exception) /*override*/;
 		private:
 			std::string pcm_name_;
 			::snd_pcm_hw_params_t * pcm_hw_params_;
