@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycle development team http://psycle.sourceforge.net
+// copyright 1999-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::graph
 #pragma once
@@ -8,7 +7,7 @@
 #include "named.hpp"
 #include <psycle/generic/generic.hpp>
 #include <set>
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE__GRAPH
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace engine {
@@ -24,9 +23,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::b
 		virtual ~graph();
 
 	public:
-		boost::mutex       & mutex() const { return mutex_; }
+		std::mutex       & mutex() const { return mutex_; }
 	private:
-		boost::mutex mutable mutex_;
+		std::mutex mutable mutex_;
 
 	public:
 		/// the length of each channel of the buffers

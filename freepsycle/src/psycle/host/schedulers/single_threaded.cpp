@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::host::schedulers::single_threaded
 #include <packageneric/pre-compiled.private.hpp>
@@ -148,8 +147,8 @@ void scheduler::start() throw(engine::exception) {
 		return;
 	}
 	try {
-		thread_ = new boost::thread(thread(*this));
-	} catch(boost::thread_resource_error const & e) {
+		thread_ = new std::thread(thread(*this));
+	} catch(std::exception /*boost::thread_resource_error*/ const & e) {
 		loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);
 		std::ostringstream s; s << universalis::compiler::typenameof(e) << ": " << e.what();
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -167,7 +166,7 @@ void scheduler::stop() {
 		return;
 	}
 	{
-		boost::mutex::scoped_lock lock(mutex_);
+		std::scoped_lock<std::mutex> lock(mutex_);
 		stop_requested_ = true;
 	}
 	thread_->join();
@@ -178,7 +177,7 @@ void scheduler::stop() {
 }
 
 bool scheduler::stop_requested() {
-	boost::mutex::scoped_lock lock(mutex_);
+	std::scoped_lock<std::mutex> lock(mutex_);
 	return stop_requested_;
 }
 
@@ -211,14 +210,14 @@ void scheduler::operator()() {
 		}
 	} catch(...) {
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+			std::scoped_lock<std::mutex> lock(mutex_);
 			stop_requested_ = false;
 		}
 		throw;
 	}
 	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 	{
-		boost::mutex::scoped_lock lock(mutex_);
+		std::scoped_lock<std::mutex> lock(mutex_);
 		stop_requested_ = false;
 	}
 }
@@ -260,7 +259,7 @@ void scheduler::process_loop() {
 	try {
 		allocate();
 		while(!stop_requested()) {
-			boost::mutex::scoped_lock lock(graph().underlying().mutex());
+			std::scoped_lock<std::mutex> lock(graph().underlying().mutex());
 			for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 				node & node(**i);
 				if(node.processed()) node.reset();

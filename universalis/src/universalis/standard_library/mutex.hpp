@@ -4,6 +4,7 @@
 ///\file \brief mutex standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 #pragma once
+#include "detail/boost_xtime.hpp"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 namespace std {
