@@ -97,6 +97,7 @@ namespace std {
 	//class years; // difficult to implement and not useful for specifying pause durations
 }
 
+/******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	namespace universalis { namespace standard_library { namespace detail { namespace test {
 		BOOST_AUTO_TEST_CASE(std_date_time_duration_test) {
