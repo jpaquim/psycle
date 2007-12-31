@@ -52,22 +52,38 @@ namespace std {
 
 			/// returns this time point shifted by the given duration
 			template<typename Duration>
-			utc_time operator+(Duration const & d) const { nanoseconds ns(d); utc_time t(ticks_ + d); return t; }
+			utc_time operator+(Duration const & d) const { nanoseconds ns(d); utc_time t(ticks_ + ns.get_count()); return t; }
 
 			/// returns this time point shifted by the given duration
 			template<typename Duration>
-			utc_time operator-(Duration const & d) const { nanoseconds ns(d); utc_time t(ticks_ - d); return t; }
+			utc_time operator-(Duration const & d) const { nanoseconds ns(d); utc_time t(ticks_ - ns.get_count()); return t; }
 
 			/// returns shifts this time point by the given duration
 			template<typename Duration>
-			utc_time operator+=(Duration const & d) const { nanoseconds ns(d); this->ticks_ += ns.get_count(); return *this; }
+			utc_time operator+=(Duration const & d) { nanoseconds ns(d); this->ticks_ += ns.get_count(); return *this; }
 
 			/// returns shifts this time point by the given duration
 			template<typename Duration>
-			utc_time operator-=(Duration const & d) const { nanoseconds ns(d); this->ticks_ -= ns.get_count(); return *this; }
+			utc_time operator-=(Duration const & d) { nanoseconds ns(d); this->ticks_ -= ns.get_count(); return *this; }
 
 		private:
 			tick_type ticks_;
 			utc_time(tick_type ticks) : ticks_(ticks) {} friend class hiresolution_clock<utc_time>;
 	};
 }
+
+/******************************************************************************************/
+#if defined BOOST_AUTO_TEST_CASE
+	namespace universalis { namespace standard_library { namespace detail { namespace test {
+		BOOST_AUTO_TEST_CASE(std_utc_time_test) {
+			using namespace std;
+			std::days const d(1);
+			utc_time const t0;
+			utc_time t1(t0 + d);
+			BOOST_CHECK(t1 == t0 + d);
+			BOOST_CHECK(t1 - t0 == d);
+			t1 -= d;
+			BOOST_CHECK(t1 == t0);
+		}
+	}}}}
+#endif

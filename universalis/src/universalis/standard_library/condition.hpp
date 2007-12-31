@@ -35,7 +35,6 @@ namespace std {
 					implementation_.wait(lock.implementation_lock(), predicate);
 				}
 
-				#if 0 ///\todo
 				bool timed_wait(lock_type & lock, utc_time const & timeout) throw(lock_error) {
 					return implementation_.timed_wait(lock.implementation_lock(),
 						universalis::standard_library::detail::make_boost_xtime(timeout)
@@ -48,7 +47,6 @@ namespace std {
 						universalis::standard_library::detail::make_boost_xtime(timeout)
 					);
 				}
-				#endif
 			///\}
 
 		private:
@@ -66,58 +64,46 @@ namespace std {
 #if defined BOOST_AUTO_TEST_CASE
 	#include <boost/bind.hpp>
 	namespace universalis { namespace standard_library { namespace detail { namespace test {
-		#if 1
-				class shared_data {
-					public:
-						std::mutex m;
-						std::condition<std::scoped_lock<std::mutex> > c;
-						int i;
-						shared_data() : i() {}
-				};
+		using namespace std;
+		class shared_data {
+			public:
+				mutex m;
+				condition<scoped_lock<mutex> > c;
+				int i;
+				shared_data() : i() {}
+		};
 
-				void thread_function(shared_data * data_pointer) {
-					shared_data & data(*data_pointer);
-					std::scoped_lock<std::mutex> l(data.m);
-					data.i = 1; data.c.notify_one();
-					do data.c.wait(l); while(data.i != 2);
-				}
+		void thread_function(shared_data * data_pointer) {
+			shared_data & data(*data_pointer);
+			scoped_lock<mutex> l(data.m);
+			data.i = 1; data.c.notify_one();
+			do data.c.wait(l); while(data.i != 2);
+			data.i = 3; data.c.notify_one();
+			{
+				bool const timed_out(!data.c.timed_wait(l, hiresolution_clock<utc_time>::universal_time() - days(1)));
+				BOOST_MESSAGE(timed_out);
+				BOOST_MESSAGE(data.i);
+				// spurious wakeups? BOOST_CHECK(timed_out || data.i == 4);
+			}
+			{
+				bool const timed_out(!data.c.timed_wait(l, hiresolution_clock<utc_time>::universal_time() + seconds(1)));
+				BOOST_MESSAGE(timed_out);
+				BOOST_MESSAGE(data.i);
+				// spurious wakeups? BOOST_CHECK(timed_out || data.i == 4);
+			}
+		}
 
-				BOOST_AUTO_TEST_CASE(std_condition_mutex_test) {
-					shared_data data;
-					std::thread t(boost::bind(thread_function, &data));
-					{
-						std::scoped_lock<std::mutex> l(data.m);
-						while(data.i != 1) data.c.wait(l);
-						data.i = 2; data.c.notify_one();
-					}
-					t.join();
-				}
-		#else // test using boost directly
-				class shared_data {
-					public:
-						boost::mutex m;
-						boost::condition c;
-						int i;
-						shared_data() : i() {}
-				};
-
-				void thread_function(shared_data * data_pointer) {
-					shared_data & data(*data_pointer);
-					boost::mutex::scoped_lock l(data.m);
-					data.i = 1; data.c.notify_one();
-					do data.c.wait(l); while(data.i != 2);
-				}
-
-				BOOST_AUTO_TEST_CASE(boost_condition_test) {
-					shared_data data;
-					boost::thread t(boost::bind(thread_function, &data));
-					{
-						boost::mutex::scoped_lock l(data.m);
-						while(data.i != 1) data.c.wait(l);
-						data.i = 2; data.c.notify_one();
-					}
-					t.join();
-				}
-		#endif
+		BOOST_AUTO_TEST_CASE(std_condition_mutex_test) {
+			shared_data data;
+			thread t(boost::bind(thread_function, &data));
+			{
+				scoped_lock<mutex> l(data.m);
+				while(data.i != 1) data.c.wait(l);
+				data.i = 2; data.c.notify_one();
+				while(data.i != 3) data.c.wait(l);
+				data.i = 4; data.c.notify_one();
+			}
+			t.join();
+		}
 	}}}}
 #endif
