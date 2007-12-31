@@ -45,11 +45,19 @@ protected:
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
 	MachineTweakDlg *m_macTweakDlg;
 private:
 	QAction *toggleBypassAct_;
 
+	QRect *muteRect;
+	QRect *bypassRect;
+	QRect *panRect;
 
+	int panRange;
+	bool isPanning;
+	int startPanPos;
+	int startPan;
 };
 
 } // namespace qpsycle

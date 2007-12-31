@@ -38,8 +38,9 @@ namespace qpsycle {
 
 EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
+	, isPanning(false)
 {
-	qDebug("creating effeect gui");
+	qDebug("creating effect gui");
 	m_macTweakDlg = new MachineTweakDlg( this, macView );
 	showMacTweakDlgAct_ = new QAction( "Tweak Parameters", this );
 	connect( showMacTweakDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTweakDlg() ) );
@@ -48,11 +49,22 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
 
 	toggleBypassAct_ = new QAction( "Bypass", this );
 	connect( toggleBypassAct_, SIGNAL( triggered() ), this, SLOT( onToggleBypassActionTriggered() ) );
+
+	///\todo adapt for skins
+	muteRect = new QRect( (int)boundingRect().width() - 15, 5, 10, 10 );
+	bypassRect = new QRect( (int)boundingRect().width() - 30, 5, 10, 10 );
+	panRect = new QRect(5, (int)boundingRect().height()-15, (int)boundingRect().width()-11, 10 );
+	panRange = panRect->width()-panRect->height(); //assumes square thumb
+
 }
 
 EffectGui::~EffectGui()
 {
 	delete m_macTweakDlg;
+	delete muteRect;
+	delete bypassRect;
+	delete panRect;
+
 }
 
 void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
@@ -60,9 +72,22 @@ void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	MachineGui::paint( painter, option, widget );
 	painter->setPen( Qt::white );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
-	painter->drawEllipse( (int)boundingRect().width() - 15, 5, 10, 10 );
+	painter->drawEllipse( *muteRect );
 	mac()->_bypass ? painter->setBrush( Qt::yellow ) : painter->setBrush( QColor( 100, 100, 0 ) );
-	painter->drawEllipse( (int)boundingRect().width() - 30, 5, 10, 10 );
+	painter->drawEllipse( *bypassRect );
+
+	// panning
+	painter->setBrush( QColor( 16, 16, 16 ) );
+	painter->setPen( Qt::NoPen );
+	painter->drawRect( *panRect );
+
+	int thumbpos = panRect->x() + (int)(panRange * mac()->_panning / 128);
+	QRect panThumb( thumbpos, panRect->y(), panRect->height(), panRect->height() );
+	if ( mac()->_panning == 64 || mac()->_panning == 0 || mac()->_panning == 128 )
+		painter->setBrush( QColor( 224, 224, 224) );
+	else
+		painter->setBrush( QColor( 192, 192, 192 ) );
+	painter->drawRect( panThumb );
 }
 
 void EffectGui::keyPressEvent( QKeyEvent * event )
@@ -82,17 +107,25 @@ void EffectGui::keyPressEvent( QKeyEvent * event )
 
 void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
-	///\todo adapt for skins
-	QRect muteRect( (int)boundingRect().width() - 15, 5, 10, 10 );
-	QRect bypassRect( (int)boundingRect().width() - 30, 5, 10, 10 );
+	QRect panArea(
+		(int)boundingRect().x(),
+		(int)boundingRect().y() + (int)boundingRect().height()*2/3,
+		(int)boundingRect().width(),
+		(int)boundingRect().height()/3
+	);
 
 	if ( event->button() == Qt::LeftButton ) {
 		if ( event->modifiers() == Qt::ControlModifier )
 			emit chosen( this );
-		else if ( muteRect.contains(event->pos().toPoint()) )
+		else if ( muteRect->contains(event->pos().toPoint()) )
 			toggleMuteAct_->trigger();
-		else if ( bypassRect.contains(event->pos().toPoint()) )
+		else if ( bypassRect->contains(event->pos().toPoint()) )
 			toggleBypassAct_->trigger();
+		else if ( panArea.contains(event->pos().toPoint()) ) {
+			isPanning = true;
+			startPanPos = event->pos().toPoint().x();
+			startPan = mac()->_panning;
+		}
 	}
 	MachineGui::mousePressEvent( event );
 }
@@ -117,27 +150,38 @@ void EffectGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		menu.addSeparator();
 		menu.addAction( toggleMuteAct_ );
 		menu.addAction( toggleBypassAct_ );
-		QAction *a = menu.exec( event->screenPos() );
-	} else
+		menu.exec( event->screenPos() );
+	} else if ( isPanning )
+		isPanning = false;	
+	else
 		MachineGui::mouseReleaseEvent( event );
 }
 
 
 void EffectGui::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 {
-	///\todo adapt for skins
-	QRect muteRect( (int)boundingRect().width() - 15, 5, 10, 10 );
-	QRect bypassRect( (int)boundingRect().width() - 30, 5, 10, 10 );
-
 	if ( event->button() == Qt::LeftButton ) {
 		if ( !(
-			muteRect.contains( event->pos().toPoint() ) ||
-			bypassRect.contains( event->pos().toPoint() )
+			muteRect->contains( event->pos().toPoint() ) ||
+			bypassRect->contains( event->pos().toPoint() )
 		) )
 			showMacTweakDlgAct_->trigger();
 		else
 			mousePressEvent(event);
 	}
+}
+
+void EffectGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
+{
+	if ( isPanning ) {
+		int moved = (int)event->pos().x() - startPanPos;
+		int newpan = startPan + (int)(128 * moved / panRange);
+		if ( newpan < 0 ) newpan = 0;
+		else if (newpan > 128) newpan = 128;
+		mac()->SetPan( newpan );
+		update(*panRect);
+	} else
+		MachineGui::mouseMoveEvent( event );
 }
 
 void EffectGui::showMacTweakDlg()

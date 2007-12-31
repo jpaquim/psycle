@@ -52,12 +52,22 @@ public slots:
 protected:
 	void keyPressEvent( QKeyEvent * event );
 	void keyReleaseEvent( QKeyEvent * event );
+	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
 	void mousePressEvent( QGraphicsSceneMouseEvent *event );
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 
-
 	MachineTweakDlg *m_macTweakDlg;
+
+private:
+	QRect *muteRect;
+	QRect *soloRect;
+	QRect *panRect;
+
+	int panRange;
+	bool isPanning;
+	int startPanPos;
+	int startPan;
 };
 
 } // namespace qpsycle
