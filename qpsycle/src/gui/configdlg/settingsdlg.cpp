@@ -94,6 +94,11 @@ SettingsDlg::SettingsDlg( QWidget *parent )
 	wrapChk = new QCheckBox();
 	centerCursorChk = new QCheckBox();
 
+	homeEndChk->setChecked( Global::pConfig()->ft2HomeEndBehaviour() );
+	shiftChk->setChecked( Global::pConfig()->shiftArrowForSelect() );
+	wrapChk->setChecked( Global::pConfig()->wrapAround() );
+	centerCursorChk->setChecked( Global::pConfig()->centerCursor() );
+
 	connect( homeEndChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
 
 	connect( shiftChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
@@ -125,35 +130,11 @@ void SettingsDlg::onSettingsChanged()
 void SettingsDlg::onSaveButtonClicked()
 {
 	Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
+	Global::pConfig()->setFT2HomeEndBehaviour( homeEndChk->checkState() == Qt::Checked? true: false );
+	Global::pConfig()->setShiftKeyBehaviour( shiftChk->checkState() == Qt::Checked? true: false );
+	Global::pConfig()->setWrapAround( wrapChk->checkState() == Qt::Checked? true: false );
+	Global::pConfig()->setCenterCursor( centerCursorChk->checkState() == Qt::Checked? true: false );
 
-	switch ( homeEndChk->checkState() ) {
-	case Qt::Unchecked:
-		Global::pConfig()->setFT2HomeEndBehaviour( false );
-	case Qt::Checked:
-		Global::pConfig()->setFT2HomeEndBehaviour( true );
-	}
-
-	switch ( shiftChk->checkState() ) {
-	case Qt::Unchecked:
-		Global::pConfig()->setShiftKeyBehaviour( false );
-	case Qt::Checked:
-		Global::pConfig()->setShiftKeyBehaviour( true );
-	}
-
-	switch ( wrapChk->checkState() ) {
-	case Qt::Unchecked:
-		Global::pConfig()->setWrapAround( false );
-	case Qt::Checked:
-		Global::pConfig()->setWrapAround( true );
-	}
-
-	switch ( centerCursorChk->checkState() ) {
-	case Qt::Unchecked:
-		Global::pConfig()->setCenterCursor( false );
-	case Qt::Checked:
-		Global::pConfig()->setCenterCursor( true );
-	}
-	
 	saveBtn_->setEnabled( false );
 }
 
