@@ -45,7 +45,7 @@ public:
 	~MachineGui();
 
 	void addWireGui(WireGui *wireGui);
-	void setName(const QString &name);
+	void updateName();
 	QPointF centrePointInSceneCoords();
 	std::vector<WireGui *> wireGuiList();
 	enum { Type = UserType + 1 };

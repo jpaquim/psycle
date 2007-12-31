@@ -50,7 +50,7 @@ MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *
 	: m_macView(macView),
 		m_mac(mac),
 		left_(left),
-		top_(top_)
+		top_(top)
 {
 	setHandlesChildEvents( true );
 	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
@@ -74,8 +74,7 @@ void MachineGui::initGraphics()
 	nameItem->setPos( 5, 20 );
 	nameItem->setAcceptedMouseButtons(0);
 
-	QString string = QString::fromStdString( m_mac->GetEditName() );
-	setName( QString(string) );
+	updateName();
 
 	setRect(QRectF(0, 0, 100, 60));
 	setPen(QPen(Qt::white,1));
@@ -112,6 +111,8 @@ void MachineGui::initSignals()
 /// Note some paint operations are handled in subclasses.
 void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
+	Q_UNUSED( option );
+	Q_UNUSED( widget );
 	if ( this == m_macView->chosenMachine() ) {
 		painter->setPen( QPen( Qt::red ) );
 	} else {
@@ -127,7 +128,7 @@ void MachineGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opt
 }
 
 /// Updates the name in the song and updates the GUI.
-void MachineGui::setName(const QString &name)
+void MachineGui::updateName()
 {
 	std::ostringstream buffer;
 	buffer.setf(std::ios::uppercase);
@@ -160,7 +161,7 @@ void MachineGui::onRenameMachineActionTriggered()
 							QString::fromStdString( mac()->GetEditName() ), &ok);
 	if ( ok && !text.isEmpty() ) {
 		mac()->SetEditName( text.toStdString() );
-		setName( text );
+		updateName();
 	}
 	emit renamed();
 }
