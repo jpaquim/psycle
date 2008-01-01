@@ -29,8 +29,6 @@ namespace psy { namespace core {
 	///\todo move that to psycle-helpers (maybe it's even already there)
 	inline int d2i(double d) {
 		#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-			return ::lrintf(d); // C1999 function
-		#else
 			union u {
 				double d;
 				int i;
@@ -38,6 +36,8 @@ namespace psy { namespace core {
 			double static /* or not static? */ const magic(1.5 * (1 << 26) * (1 << 26));
 			result.d = d + magic;
 			return result.i;
+		#else
+			return ::lrintf(d); // C1999 function
 		#endif
 	}
 
