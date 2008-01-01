@@ -18,25 +18,28 @@
 ******************************************************************************/
 #include "audiodriver.h"
 
-#ifdef __BIG_ENDIAN__
-#include <cmath>
+#include <diversalis/processor.hpp>
+
+#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+	#include <cmath>
 #endif
 
-namespace psy
-{
-	namespace core
-	{
+namespace psy { namespace core {
 
-    static double const magic = (1.5 * (1 << 26) * (1 << 26));
-    static inline int d2i(double d) {
-#ifdef __BIG_ENDIAN__
-      return lrintf(d);
-#else
-      double res = d + magic;
-      return *((int *)&res);
-#endif
-
-    }
+	///\todo move that to psycle-helpers (maybe it's even already there)
+	inline int d2i(double d) {
+		#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+			return ::lrintf(d); // C1999 function
+		#else
+			union u {
+				double d;
+				int i;
+			} result;
+			double static /* or not static? */ const magic(1.5 * (1 << 26) * (1 << 26));
+			result.d = d + magic;
+			return result.i;
+		#endif
+	}
 
 		AudioDriverInfo::AudioDriverInfo( const std::string& name, const std::string& header, const std::string& description, bool show ) 
 		: name_( name ), header_( header ), description_( description ), show_( show )
