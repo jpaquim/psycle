@@ -21,7 +21,8 @@
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "audiodriver.h"
 #include <alsa/asoundlib.h>
-#include <pthread.h>
+#include <mutex>
+#include <condition>
 
 /**
 @author Psycledelics
@@ -38,18 +39,13 @@ class AlsaOut : public AudioDriver
 		virtual AudioDriverInfo info() const;
 
 		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-		virtual bool Initialized();
+		virtual bool Initialized() { return _initialized; }
 		virtual void configure();
 		virtual bool Enable(bool e);
 
-		//bool _timerActive; ///\todo remove?
-
 	private:
-		//int iret1; ///\todo remove?
-		//static void* pollerThread(void* ptr); ///\todo remove?
 		void* _callbackContext;
 		AUDIODRIVERWORKFN _pCallback;
-		pthread_t threadid;
 
 		bool _initialized;
 		
@@ -75,10 +71,6 @@ class AlsaOut : public AudioDriver
 
 		snd_pcm_t *handle;
 
-		/// -3: thread not running, -2: stop thread!, -1: has stopped, 0: stop!, 1: play!, 2: is playing
-		///\todo volatile is not meant to handle thread-shared data
-		volatile int enablePlayer;
-		
 		/// 0:WRITE 1:WRITE&POLL 2:ASYNC 3:async_direct 4:direct_interleaved
 		/// 5:direct_noninterleaved 6:DIRECT_WRITE
 		int method;
@@ -89,13 +81,16 @@ class AlsaOut : public AudioDriver
 		void FillBuffer(snd_pcm_uframes_t offset, int count);
 
 		int id;
+
 		/// left out (getSample should change this non-stop if audio was started
 		signed short left;
+
 		/// right out (getSample should change this non-stop if audio was started)
 		signed short right;
+
 		void (*getSample) (void*);
 
-		int audioStart( );
+		int audioStart();
 		int audioStop();
 
 		int set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access);
@@ -104,8 +99,21 @@ class AlsaOut : public AudioDriver
 
 		int write_loop();
 
-		static void* audioOutThread(void * ptr);
-    	//void setValues(); ///\todo remove?
+		///\name thread
+		///\{
+			void static thread_function_static(void * instance) { reinterpret_cast<AlsaOut*>(instance)->thread_function(); }
+			void thread_function();
+
+			/// -3: thread not running,
+			/// -2: stop thread!,
+			/// -1: has stopped,
+			///  0: stop!,
+			///  1: play!,
+			///  2: is playing
+			int enablePlayer;
+			std::mutex mutex_;
+			std::condition<std::scoped_lock<std::mutex> > condition_;
+		///\}
 };
 
 }}

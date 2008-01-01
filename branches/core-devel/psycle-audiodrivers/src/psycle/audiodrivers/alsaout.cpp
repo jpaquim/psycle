@@ -22,12 +22,12 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
+#include <thread>
 namespace psy { namespace core {
 
 AlsaOut::AlsaOut()
 	:
 		AudioDriver(),
-		//_timerActive(), ///\todo remove?
 		_callbackContext(),
 		_pCallback(),
 		threadid(),
@@ -53,10 +53,12 @@ AlsaOut::AlsaOut()
 	}
 	
 	AlsaOut::~AlsaOut() {
-		if (enablePlayer >0)
 		{
-			enablePlayer = -2;
-			while(enablePlayer != -3) usleep(1000);
+			std::scoped_lock<std::mutex> lock(mutex_);
+			if(enablePlayer > 0) {
+				enablePlayer = -2; condition_.notify_one();
+				while(enablePlayer != -3) condition_.wait(lock);
+			}
 		}
 		/// \todo free memory here
 	}
@@ -82,17 +84,19 @@ AlsaOut::AlsaOut()
 	
 	bool AlsaOut::Start() {
 		// start thread (might already be running, but that is ok.)
-		///\todo needs to use proper thread synchronisation to read a thread-shared datum
 		if(!audioStart()) return false;
 
 		// make thread start using the callback
-		enablePlayer = 1;
-		while(enablePlayer != 2) usleep(1000); ///\todo sleeping is bad
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			enablePlayer = 1; condition.notify_one();
+			while(enablePlayer != 2) condition_.wait(lock);
+		}
+
 		return true;
 	}
 	
 	bool AlsaOut::Stop() {
-		//_timerActive = false; ///\todo remove?
 		audioStop();
 		return true;
 	}
@@ -112,7 +116,6 @@ AlsaOut::AlsaOut()
 		buffer_size=0;
 		period_size=0;
 		output = NULL;
-		//AlsaOut::enablePlayer = -1; // -3: error, -2: force stop, -1: has stopped, 0: stop!, 1: play!, 2: is playing
 		
 		AudioDriverSettings settings(this->settings());
 		{
@@ -124,16 +127,23 @@ AlsaOut::AlsaOut()
 	}
 	
 	int AlsaOut::audioStop() {
-		if(enablePlayer < 0) return 1;
-		enablePlayer = 0;
-		while (enablePlayer >= 0) usleep(1000); ///\todo sleeping is bad
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			if(enablePlayer < 0) return 1;
+			enablePlayer = 0; condition_.notify_one();
+			while(enablePlayer >= 0) condition_.wait();
+		}
 		return 1;
 	}
 	
 	/// starts the alsa thread
 	int AlsaOut::audioStart() {
-		if (enablePlayer >= -1) return 1;
-		enablePlayer = -3;
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			if(enablePlayer >= -1) return 1;
+			enablePlayer = -3; condition_.notify_one();
+		}
+
 		int err;
 		snd_pcm_hw_params_t *hwparams;
 		snd_pcm_sw_params_t *swparams;
@@ -184,12 +194,12 @@ AlsaOut::AlsaOut()
 			areas[chn].step = channels * 16;
 		}
 		
-		enablePlayer = 0;
-		if(pthread_create(&threadid, 0 ,&AlsaOut::audioOutThread, (void*) this)) {
-			enablePlayer = -3;
-			std::cerr << "psycle: alsa: failed to create posix thread.\n";
-			return 0;
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			enablePlayer = 1; condition_.notify_one();
 		}
+
+		std::thread t(AlsaOut::thread_function_static);
 		return 1;
 	}
 	
@@ -221,7 +231,6 @@ AlsaOut::AlsaOut()
 	}
 	
 	int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) {
-		unsigned int rrate;
 		snd_pcm_uframes_t size;
 		int err;
 		
@@ -257,16 +266,19 @@ AlsaOut::AlsaOut()
 			std::cerr << "psycle: alsa: channels count (" << channels << ") not available for playback: " << snd_strerror(err) << '\n';
 			return err;
 		}
+
 		// set the stream rate
-		rrate = rate;
-		err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
-		if (err < 0) {
-			std::cerr << "psycle: alsa: rate "<< rate << "Hz not available for playback: " << snd_strerror(err) << '\n';
-			return err;
-		}
-		if(rrate != rate) {
-			std::cerr << "psycle: alsa: rate does not match (requested " << rate << "Hz, got " << err << "Hz)\n";
-			return -EINVAL;
+		{
+			unsigned int rrate(rate);
+			err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
+			if (err < 0) {
+				std::cerr << "psycle: alsa: rate "<< rate << "Hz not available for playback: " << snd_strerror(err) << '\n';
+				return err;
+			}
+			if(rrate != rate) {
+				std::cerr << "psycle: alsa: rate does not match (requested " << rate << "Hz, got " << err << "Hz)\n";
+				return -EINVAL;
+			}
 		}
 		
 		// set the buffer time
@@ -367,14 +379,22 @@ AlsaOut::AlsaOut()
 		signed short *ptr;
 		int err, cptr;
 		while(true) {
-			if(enablePlayer > 0) {
-				enablePlayer = 2;
+			int enablePlayerCopy;
+			{
+				std::scoped_lock<std::mutex> lock(mutex_);
+				enablePlayerCopy = enablePlayer;
+			}
+			if(enablePlayerCopy > 0) {
+				{
+					std::scoped_lock<std::mutex> lock(mutex_);
+					enablePlayer = 2; condition_.notify_one();
+				}
 				FillBuffer(0, period_size);
 				ptr = samples;
 				cptr = period_size;
 				while(cptr > 0) {
 					err = snd_pcm_writei(handle, ptr, cptr);
-					if(err == -EAGAIN) continue; ///\todo what about using synchronisation?
+					if(err == -EAGAIN) continue;
 					if(err < 0) {
 						if (xrun_recovery(err) < 0) {
 							std::cerr << "psycle: alsa: write error: " << snd_strerror(err) << '\n';
@@ -385,12 +405,15 @@ AlsaOut::AlsaOut()
 					ptr += err * channels;
 					cptr -= err;
 				}
-			} else if(enablePlayer == -2) return 0;
-			else { 
-				enablePlayer = -1;
+			} else if(enablePlayerCopy == -2) return 0;
+			else {
+				{
+					std::scoped_lock<std::mutex> lock(mutex_);
+					enablePlayer = -1; condition_.notify_one();
+				}
 				return 0;
 			}
-			usleep(1000); ///\todo sleeping is bad
+			std::this_thread::yield(); ///\todo sleeping is bad
 		}
 	}
 
@@ -401,19 +424,14 @@ AlsaOut::AlsaOut()
 			int (*transfer_loop)(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
 		};
 	#endif
-	
-	void* AlsaOut::audioOutThread( void * ptr ) {
-		AlsaOut* pDriver = (AlsaOut*) ptr;
-		//\todo: what was this line supposed to do?
-		//if (pDriver->areas) pDriver->areas[0] = pDriver->areas[0];
-		int err = pDriver->write_loop();
-		if (err < 0) printf("Transfer failed: %s\n", snd_strerror(err));
-		pDriver->enablePlayer = -3;
-		return NULL;
-	}
-	
-	bool AlsaOut::Initialized( ) {
-		return _initialized;
+
+	void AlsaOut::thread_function() {
+		int err = write_loop();
+		if(err < 0) std::cerr << "psycle: alsa: transfer failed: " << snd_strerror(err) << '\n';
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			enablePlayer = -3; condition_.notify_one();
+		}
 	}
 	
 }}
