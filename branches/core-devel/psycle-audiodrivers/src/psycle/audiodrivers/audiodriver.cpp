@@ -118,7 +118,7 @@ namespace psy { namespace core {
 		{
 			do
 			{
-        int r = d2i(pin[1] + frand());
+				int r = d2i(pin[1] + frand());
 				if (r < -32768)
 				{
 					r = -32768;
