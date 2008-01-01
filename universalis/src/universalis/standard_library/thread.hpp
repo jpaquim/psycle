@@ -17,10 +17,29 @@ namespace std {
 			native_handle_type native_handle_;
 	
 		public:
-			template<typename Functor>
-			explicit thread(Functor functor) : native_handle_(functor) {}
+			template<typename Callable>
+			explicit thread(Callable callable) : native_handle_(callable) {}
+			
 			void join() { native_handle_.join(); }
-			bool joinable() const { return true; /**\todo return native_handle_.joinable(); */ }
+			
+			template<typename Elapsed_Time>
+			bool timed_join(Elapsed_Time const & /*elapsed_time*/) {
+				///\todo unimplemented in boost version 1.34
+				//return native_handle_.timed_join(elapsed_time);
+				native_handle_.join();
+				return true;
+			}
+
+			bool joinable() const {
+				///\todo unimplemented in boost version 1.34
+				//return native_handle_.joinable();
+				return true;
+			}
+			
+			void detach() {
+				///\todo unimplemented in boost version 1.34
+				//native_handle_.detach();
+			}
 
 		///\name id
 		///\todo
@@ -61,6 +80,27 @@ namespace std {
 		#endif
 		///\}
 	};
+	
+	typedef boost::once_flag once_flag;
+	
+	/// The standard uses the new "constexpr" keyword to mark once_flag's constructor
+	/// so that once_flag objects are initialised as compiled-time constants.
+	/// Since we cannot yet use "constexpr",
+	/// we have to require explicit initialisation with a constant:
+	///\code
+	/// std::once_flag flag = BOOST_ONCE_INIT;
+	///\endcode
+	/// instead of just:
+	///\code
+	/// std::once_flag flag;
+	///\endcode
+	#define STD_ONCE_INIT BOOST_ONCE_INIT
+	
+	template<typename Callable /*, typename Arguments...*/>
+	void inline call_once(once_flag & flag, Callable callable /*, Arguments... arguments*/) {
+		/// note: boost wants a function pointer
+		boost::call_once(&callable, flag);
+	}
 
 	namespace this_thread {
 
