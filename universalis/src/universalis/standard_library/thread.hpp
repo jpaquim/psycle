@@ -99,7 +99,7 @@ namespace std {
 	template<typename Callable /*, typename Arguments...*/>
 	void inline call_once(once_flag & flag, Callable callable /*, Arguments... arguments*/) {
 		/// note: boost wants a function pointer
-		boost::call_once(&callable, flag);
+		boost::call_once(callable, flag);
 	}
 
 	namespace this_thread {
