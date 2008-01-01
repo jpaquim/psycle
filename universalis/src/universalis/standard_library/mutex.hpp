@@ -114,9 +114,10 @@ namespace std {
 		public:
 			typedef Mutex mutex_type;
 
-			explicit scoped_lock(mutex_type & mutex) : mutex_(mutex), implementation_lock_(mutex.implementation()) {}
+			explicit scoped_lock(mutex_type & mutex) : mutex_(mutex), implementation_lock_(mutex.implementation(), true) {}
 			scoped_lock(mutex_type & mutex, detail::accept_ownership_type) : mutex_(mutex), implementation_lock_(mutex.implementation(), false) {}
 			~scoped_lock() { implementation_lock_.unlock(); }
+
 			/*constexpr*/ bool owns() const { return true; }
 		private:
 			mutex_type & mutex_;
@@ -134,19 +135,20 @@ namespace std {
 			typedef Mutex mutex_type;
 
 			unique_lock() : mutex_(), owns_() {}
-			explicit unique_lock(mutex_type & mutex) : mutex_(&mutex), owns_(true), implementation_lock_(mutex.implementation()) {}
-			unique_lock(mutex_type & mutex, detail::defer_lock_type) : mutex_(&mutex), owns_(), implementation_lock_(mutex.implementation(), false) {}
-			unique_lock(mutex_type & mutex, detail::try_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation(), false) { owns_ = implementation_lock_.try_lock(); }
-			unique_lock(mutex_type & mutex, detail::accept_ownership_type) : mutex_(&mutex), owns_(true), implementation_lock_(mutex.implementation()) {}
+			explicit unique_lock(mutex_type & mutex) : mutex_(&mutex), implementation_lock_(mutex.implementation(), true), owns_(true) {}
+			unique_lock(mutex_type & mutex, detail::defer_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation(), false), owns_(false) {}
+			unique_lock(mutex_type & mutex, detail::try_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation()), owns_(implementation_lock_.locked()) {}
+			unique_lock(mutex_type & mutex, detail::accept_ownership_type) : mutex_(&mutex), implementation_lock_(mutex.implementation(), true), owns_(true) {}
 			~unique_lock() { if(owns_) implementation_lock_.unlock(); }
 
 			//unique_lock(unique_lock && u);
 			//unique_lock & operator=(unique_lock && u);
+			//void swap(unique_lock && u);
 
 			bool owns() const { return owns_; }
 			operator void const * () const { return owns_ ? this : 0; }
+
 			mutex_type * mutex() const { return mutex_; }
-			//void swap(unique_lock && u);
 			mutex_type * release() { owns_ = false; return mutex_; }
 
 			void lock() throw(lock_error) {
@@ -177,12 +179,12 @@ namespace std {
 
 		private:
 			mutex_type * mutex_;
-			bool owns_;
 			typename mutex_type::implementation_lock_type   implementation_lock_;
 			typename mutex_type::implementation_lock_type & implementation_lock() { return implementation_lock_; }
 				friend class condition<unique_lock<std::mutex> >;
 				friend class condition<unique_lock<recursive_mutex> >;
 				friend class condition<unique_lock<timed_mutex> >;
 				friend class condition<unique_lock<recursive_timed_mutex> >;
+			bool owns_;
 	};
 }
