@@ -20,7 +20,7 @@
 
 #include <diversalis/processor.hpp>
 
-#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
+#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 	#include <cmath>
 #endif
 
