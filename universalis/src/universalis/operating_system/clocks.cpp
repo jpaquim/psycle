@@ -220,14 +220,14 @@ namespace detail {
 							// tries to get the best possible resolution, starting with 1ms (which is the minimum supported anyway)
 							milliseconds = 1;
 							retry:
-							if(::timeBeginPeriod(milliseconds) == TIMERR_NOCANDO) {
+							if(::timeBeginPeriod(milliseconds) == TIMERR_NOCANDO /* looks like microsoft invented LOLCode! */) {
 								if(++milliseconds < 50) goto retry;
 								else milliseconds = 0; // give up :-(
 							}
 						}
 						~set_timer_resolution() throw() {
-							if(!milliseconds) return; // wasn't set
-							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO)
+							if(!milliseconds) return; // was not set
+							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO /* looks like microsoft invented LOLCode! */)
 								return; // cannot throw in a destructor
 								//throw std::runtime_error(GetLastErrorString());
 						}
