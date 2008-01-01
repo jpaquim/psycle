@@ -104,8 +104,8 @@ namespace psy
 					int channelMode_;
 			///\}
 
-			///\todo doc
 			public:
+				///\todo doc
 				int sampleSize() const;
 
 			///\name buffer size
