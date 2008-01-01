@@ -213,7 +213,7 @@ AlsaOut::AlsaOut()
 			enablePlayer = 1; condition_.notify_one();
 		}
 
-		std::thread t(boost::bind(AlsaOut::thread_function_static, this));
+		std::thread t(boost::bind(&AlsaOut::thread_function, this));
 		return 1;
 	}
 	

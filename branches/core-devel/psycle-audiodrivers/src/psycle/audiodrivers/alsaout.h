@@ -100,7 +100,6 @@ class AlsaOut : public AudioDriver
 
 		///\name thread
 		///\{
-			void static thread_function_static(AlsaOut * instance) { instance->thread_function(); }
 			void thread_function();
 
 			/// -3: thread not running,
