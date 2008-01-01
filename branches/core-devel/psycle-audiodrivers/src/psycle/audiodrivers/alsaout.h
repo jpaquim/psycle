@@ -57,7 +57,7 @@ class AlsaOut : public AudioDriver
 		bool Start();
 		bool Stop();
 
-	public:
+	private:
 		/// stream rate
 		unsigned int rate;
 		/// sample format
