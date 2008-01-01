@@ -92,6 +92,7 @@ namespace std {
 	#include <boost/bind.hpp>
 	namespace universalis { namespace standard_library { namespace detail { namespace test {
 		using namespace std;
+		
 		class shared_data {
 			public:
 				mutex m;
