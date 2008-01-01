@@ -188,7 +188,14 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 				}
 			}
 			paths();
-			stuff();
+			#if 1
+				stuff();
+			#else // some weird multithreaded test
+				std::thread t1(stuff);
+				std::thread t2(stuff);
+				t1.join();
+				t2.join();
+			#endif
 		} catch(std::exception const & e) {
 			if(loggers::exception()()) {
 				std::ostringstream s;
