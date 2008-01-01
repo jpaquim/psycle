@@ -8,7 +8,7 @@ namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(pulse)
 
-pulse::pulse(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name)
+pulse::pulse(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
 :
 	node(plugin_library_reference, graph, name),
 	sample_set_()
@@ -24,13 +24,13 @@ void pulse::do_process() throw(engine::exception) {
 	if(!sample_set_) {
 		for(std::size_t channel(0); channel < out.size(); ++channel)
 			out[channel][0].index(out.events());
-		return;
+	} else {
+		for(std::size_t channel(0); channel < out.size(); ++channel) {
+			out[channel][0](index_, sample_);
+			if(out.events() > 1) out[channel][1].index(out.events());
+		}
+		sample_set_ = false;
 	}
-	for(std::size_t channel(0); channel < out.size(); ++channel) {
-		out[channel][0](index_, sample_);
-		if(out.events() > 1) out[channel][1].index(out.events());
-	}
-	sample_set_ = false;
 }
 
 }}

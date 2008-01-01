@@ -8,6 +8,7 @@
 #include <gst/gst.h>
 #include <universalis/compiler/numeric.hpp>
 #include <universalis/exception.hpp>
+#include <thread>
 #include <limits>
 #include <algorithm>
 #include <cmath>
@@ -165,17 +166,31 @@ namespace psycle { namespace plugins { namespace outputs {
 			wait_for_state(element, state, timeout_nanoseconds);
 		}
 	}
+	
+	namespace {
+		unsigned int   global_client_count;
+		std::mutex     global_client_count_mutex;
+		std::once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
+		void           global_client_count_init() {
+			std::clog << "init\n";
+			// note: we do not need to lock here, but this is a way to ensure it is initialised.
+			std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+			global_client_count = 0;
+			std::clog << "inited\n";
+		}
+	}
 
 	void gstreamer::do_open() throw(engine::exception) {
 		resource::do_open();
 
-		// initialize gstreamer
-		{
-			static bool once = false;
-			static std::mutex mutex;
-			std::scoped_lock<std::mutex> lock(mutex);
-			if(!once) {
-				once = true;
+		std::clog << "open " << std::this_thread::id() << '\n';
+		{ // initialize gstreamer
+			std::call_once(global_client_count_init_once_flag, global_client_count_init);
+			std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+			std::clog << "locked, count " << global_client_count << '\n';
+			if(!global_client_count) {
+				std::clog << "++count\n";
+				++global_client_count;
 				int * argument_count(0);
 				char *** arguments(0);
 				::GError * error(0);
@@ -184,6 +199,7 @@ namespace psycle { namespace plugins { namespace outputs {
 					::g_clear_error(&error);
 					throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}}}
+		std::clog << "opened " << std::this_thread::id() << '\n';
 
 		// create an audio sink
 		#define psycle_log loggers::information()("exception: caught while trying to instantiate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
@@ -441,16 +457,13 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(source_) ::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
 			if(caps_) ::gst_caps_unref(caps_); caps_ = 0;
 		} else sink_ = caps_filter_ = queue_ = source_ = 0; caps_ = 0;
-		// deinitialize gstreamer
-		{
-			static bool once = false;
-			static std::mutex mutex;
-			std::scoped_lock<std::mutex> lock(mutex);
-			if(!once) {
-				once = true;
-				::gst_deinit();
-			}
+
+		{ // deinitialize gstreamer
+			std::call_once(global_client_count_init_once_flag, global_client_count_init);
+			std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+			if(!--global_client_count) ::gst_deinit();
 		}
+
 		delete buffer_; buffer_ = 0;
 		resource::do_close();
 	}
