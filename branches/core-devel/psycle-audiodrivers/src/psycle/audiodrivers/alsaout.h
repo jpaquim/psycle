@@ -40,8 +40,8 @@ class AlsaOut : public AudioDriver
 
 		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 		virtual bool Initialized() { return _initialized; }
-		virtual void configure();
-		virtual bool Enable(bool e);
+		virtual void configure() {}
+		virtual bool Enable(bool e) { return e ? Start() : Stop(); }
 
 	private:
 		void* _callbackContext;
@@ -53,7 +53,6 @@ class AlsaOut : public AudioDriver
 		bool Start();
 		bool Stop();
 
-	private:
 		/// stream rate
 		unsigned int rate;
 		/// sample format
@@ -101,7 +100,7 @@ class AlsaOut : public AudioDriver
 
 		///\name thread
 		///\{
-			void static thread_function_static(void * instance) { reinterpret_cast<AlsaOut*>(instance)->thread_function(); }
+			void static thread_function_static(AlsaOut * instance) { instance->thread_function(); }
 			void thread_function();
 
 			/// -3: thread not running,

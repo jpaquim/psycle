@@ -23,6 +23,7 @@
 #include <iostream>
 #include <cstring>
 #include <thread>
+#include <boost/bind.hpp>
 namespace psy { namespace core {
 
 AlsaOut::AlsaOut()
@@ -30,7 +31,6 @@ AlsaOut::AlsaOut()
 		AudioDriver(),
 		_callbackContext(),
 		_pCallback(),
-		threadid(),
 		_initialized(),
 		rate(),
 		channels(),
@@ -40,13 +40,13 @@ AlsaOut::AlsaOut()
 		period_size(),
 		output(),
 		handle(),
-		enablePlayer(-3),
 		method(),
 		samples(),
 		areas(),
 		id(),
 		left(),
-		right()
+		right(),
+		enablePlayer(-3)
 	{
 		std::memset(&format, 0, sizeof format);
 		setDefault();
@@ -64,7 +64,29 @@ AlsaOut::AlsaOut()
 	}
 	
 	AlsaOut * AlsaOut::clone() const {
-		return new AlsaOut(*this);
+		// we need a hand-written version because not everything can/must be cloned:
+		// e.g., we don't clone the mutex, the condition, nor the thread state.
+		AlsaOut & r(*new AlsaOut);
+		r._callbackContext = _callbackContext;
+		r._pCallback = _pCallback;
+		r._initialized = _initialized;
+		r.rate = rate;
+		r.format = format;
+		r.channels = channels;
+		r.buffer_time = buffer_time;
+		r.period_time = period_time;
+		r.buffer_size = buffer_size;
+		r.period_size = period_size;
+		r.output = output;
+		r.handle = handle;
+		r.method = method;
+		r.samples = samples;
+		r.areas = areas;
+		r.id = id;
+		r.left = left;
+		r.right = right;
+		r.enablePlayer = -3; // doesn't make sense to copy the thread state since we don't clone the thread!
+		return &r;
 	}
 	
 	AudioDriverInfo AlsaOut::info() const {
@@ -78,10 +100,6 @@ AlsaOut::AlsaOut()
 		//audioStart();
 	}
 	
-	bool AlsaOut::Enable(bool e) {
-		return e ? Start() : Stop();
-	}
-	
 	bool AlsaOut::Start() {
 		// start thread (might already be running, but that is ok.)
 		if(!audioStart()) return false;
@@ -89,7 +107,7 @@ AlsaOut::AlsaOut()
 		// make thread start using the callback
 		{
 			std::scoped_lock<std::mutex> lock(mutex_);
-			enablePlayer = 1; condition.notify_one();
+			enablePlayer = 1; condition_.notify_one();
 			while(enablePlayer != 2) condition_.wait(lock);
 		}
 
@@ -99,10 +117,6 @@ AlsaOut::AlsaOut()
 	bool AlsaOut::Stop() {
 		audioStop();
 		return true;
-	}
-	
-	void AlsaOut::configure() {
-		///\todo put empty definition in header file
 	}
 	
 	void AlsaOut::setDefault() {
@@ -131,7 +145,7 @@ AlsaOut::AlsaOut()
 			std::scoped_lock<std::mutex> lock(mutex_);
 			if(enablePlayer < 0) return 1;
 			enablePlayer = 0; condition_.notify_one();
-			while(enablePlayer >= 0) condition_.wait();
+			while(enablePlayer >= 0) condition_.wait(lock);
 		}
 		return 1;
 	}
@@ -199,7 +213,7 @@ AlsaOut::AlsaOut()
 			enablePlayer = 1; condition_.notify_one();
 		}
 
-		std::thread t(AlsaOut::thread_function_static);
+		std::thread t(boost::bind(AlsaOut::thread_function_static, this));
 		return 1;
 	}
 	
