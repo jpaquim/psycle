@@ -32,7 +32,7 @@ namespace psy
 {
 	namespace core
 	{
-    class AudioDriver; ///\todo doesn't belong in psycore
+		class AudioDriver; ///\todo doesn't belong in psycore
 
 		/// schedules the processing of machines, sends signal buffers and sequence events to them, ...
 		class Player : public MachineCallbacks

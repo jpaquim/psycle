@@ -111,20 +111,20 @@ namespace psycle
 		/// callback functions to let plugins communicate with the host.
 		class CFxCallback
 		{
-    public:
-      virtual ~CFxCallback() throw();
-      virtual void MessBox(char* ptxt,char*caption,unsigned int type);
-      virtual int CallbackFunc(int cbkID,int par1,int par2,int par3);
-      /// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-      virtual float * unused0(int, int);
-      /// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-      virtual float * unused1(int, int);
-      virtual int GetTickLength();
-      virtual int GetSamplingRate();
-      virtual int GetBPM();
-      virtual int GetTPB();
-      // Don't get fooled by the above return values.
-      // You get a pointer to a subclass of this one that returns the correct ones.
+		public:
+			virtual ~CFxCallback() throw();
+			virtual void MessBox(char* ptxt,char*caption,unsigned int type);
+			virtual int CallbackFunc(int cbkID,int par1,int par2,int par3);
+			/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+			virtual float * unused0(int, int);
+			/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+			virtual float * unused1(int, int);
+			virtual int GetTickLength();
+			virtual int GetSamplingRate();
+			virtual int GetBPM();
+			virtual int GetTPB();
+			// Don't get fooled by the above return values.
+			// You get a pointer to a subclass of this one that returns the correct ones.
 		};
 
 		/*////////////////////////////////////////////////////////////////////////*/
@@ -133,7 +133,7 @@ namespace psycle
 		class CMachineInterface
 		{
 			public:
-        virtual ~CMachineInterface();
+				virtual ~CMachineInterface();
 				///\todo doc
 				virtual void Init();
 				///\todo doc
@@ -149,16 +149,16 @@ namespace psycle
 
 				///\name Export / Import
 				///\{
-          ///\todo doc
-          virtual void PutData(void * pData);
-          ///\todo doc
-          virtual void GetData(void * pData);
-          ///\todo doc
-          virtual int GetDataSize();
+					///\todo doc
+					virtual void PutData(void * pData);
+					///\todo doc
+					virtual void GetData(void * pData);
+					///\todo doc
+					virtual int GetDataSize();
 				///\}
 
 				///\todo doc
-        virtual void Command();
+				virtual void Command();
 				///\todo doc. not used (yet?)
 				virtual void MuteTrack(int const i);
 				///\todo doc. not used (yet?)
