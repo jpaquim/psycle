@@ -152,7 +152,7 @@ void EffectGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		menu.addAction( toggleBypassAct_ );
 		menu.exec( event->screenPos() );
 	} else if ( isPanning )
-		isPanning = false;	
+		isPanning = false;
 	else
 		MachineGui::mouseReleaseEvent( event );
 }
