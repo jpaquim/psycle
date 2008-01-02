@@ -15,9 +15,9 @@ namespace psy
 		InstPreview Sampler::wavprev;
 		InstPreview Sampler::waved;
 
-    static inline int alteRand(int x) {
-      return (x*rand())/32768;
-    }
+		static inline int alteRand(int x) {
+		return (x*rand())/32768;
+		}
 
 
 		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
@@ -188,19 +188,19 @@ namespace psy
 			return numSamples;
 		}
 
-    void Sampler::SetSampleRate(int sr)
-    {
-      Machine::SetSampleRate(sr);
-      for (int i=0; i<_numVoices; i++) {
-        _voices[i]._envelope._stage = ENV_OFF;
-        _voices[i]._envelope._sustain = 0;
-        _voices[i]._filterEnv._stage = ENV_OFF;
-        _voices[i]._filterEnv._sustain = 0;
-        _voices[i]._filter.Init(sr);
-        _voices[i]._triggerNoteOff = 0;
-        _voices[i]._triggerNoteDelay = 0;
-      }
-    }
+		void Sampler::SetSampleRate(int sr)
+		{
+			Machine::SetSampleRate(sr);
+			for (int i=0; i<_numVoices; i++) {
+				_voices[i]._envelope._stage = ENV_OFF;
+				_voices[i]._envelope._sustain = 0;
+				_voices[i]._filterEnv._stage = ENV_OFF;
+				_voices[i]._filterEnv._sustain = 0;
+				_voices[i]._filter.Init(sr);
+				_voices[i]._triggerNoteOff = 0;
+				_voices[i]._triggerNoteDelay = 0;
+			}
+		}
 
 		void Sampler::Stop(void)
 		{
@@ -470,65 +470,65 @@ namespace psy
 		}
 
 
-    bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
-    {
-      std::uint32_t size;
-      pFile->Read(size);
-      if (size) {
-        if (version > CURRENT_FILE_VERSION_MACD) {
-          // data is from a newer format of psycle, it might be unsafe to load.
-          pFile->Skip(size);
-          return false;
-        }
-        else {
-          std::int32_t temp;
-          pFile->Read(temp); // numSubtracks
-          _numVoices=temp;
-          pFile->Read(temp); // quality
-          
-          switch (temp) {
-          case 2:
-            _resampler.SetQuality(dsp::R_SPLINE);
-            break;
-          case 3:
-            _resampler.SetQuality(dsp::R_BANDLIM);
-            break;
-          case 0:
-            _resampler.SetQuality(dsp::R_NONE);
-            break;
-          default:
-          case 1:
-            _resampler.SetQuality(dsp::R_LINEAR);
-            break;
-          }
-        }
-      }
-      return true;
-    }
+		bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			std::uint32_t size;
+			pFile->Read(size);
+			if (size) {
+				if (version > CURRENT_FILE_VERSION_MACD) {
+					// data is from a newer format of psycle, it might be unsafe to load.
+					pFile->Skip(size);
+					return false;
+				}
+				else {
+					std::int32_t temp;
+					pFile->Read(temp); // numSubtracks
+					_numVoices=temp;
+					pFile->Read(temp); // quality
+					
+					switch (temp) {
+					case 2:
+						_resampler.SetQuality(dsp::R_SPLINE);
+						break;
+					case 3:
+						_resampler.SetQuality(dsp::R_BANDLIM);
+						break;
+					case 0:
+						_resampler.SetQuality(dsp::R_NONE);
+						break;
+					default:
+					case 1:
+						_resampler.SetQuality(dsp::R_LINEAR);
+						break;
+					}
+				}
+			}
+			return true;
+		}
 
-    void Sampler::SaveSpecificChunk(RiffFile* pFile) const
-    {
-      std::int32_t temp;
-      std::uint32_t size = 2 * sizeof temp;
-      pFile->Write(size);
-      temp = _numVoices;
-      pFile->Write(temp); // numSubtracks
-      switch (_resampler.GetQuality()) {
-      case dsp::R_NONE:
-        temp = 0;
-        break;
-      case dsp::R_LINEAR:
-        temp = 1;
-        break;
-      case dsp::R_SPLINE:
-        temp = 2;
-        break;
-      case dsp::R_BANDLIM:
-        temp = 3;
-        break;
-      }
-      pFile->Write(temp); // quality
-    }
+		void Sampler::SaveSpecificChunk(RiffFile* pFile) const
+		{
+			std::int32_t temp;
+			std::uint32_t size = 2 * sizeof temp;
+			pFile->Write(size);
+			temp = _numVoices;
+			pFile->Write(temp); // numSubtracks
+			switch (_resampler.GetQuality()) {
+			case dsp::R_NONE:
+				temp = 0;
+				break;
+			case dsp::R_LINEAR:
+				temp = 1;
+				break;
+			case dsp::R_SPLINE:
+				temp = 2;
+				break;
+			case dsp::R_BANDLIM:
+				temp = 3;
+				break;
+			}
+			pFile->Write(temp); // quality
+		}
 
 		int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		{

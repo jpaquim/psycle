@@ -19,7 +19,7 @@ namespace psy
 {
 	namespace core
 	{
-    class RiffFile;
+		class RiffFile;
 
 		// FIXME: stole these from analzyer.h just to fix compile error.
 		const int MAX_SCOPE_BANDS = 128;

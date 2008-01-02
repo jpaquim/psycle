@@ -8,9 +8,9 @@ namespace psy
 	namespace core
 	{
 
-    class Machine;
-    class RiffFile;
-    class CoreSong;
+		class Machine;
+		class RiffFile;
+		class CoreSong;
 
 		namespace convert_internal_machines
 		{
