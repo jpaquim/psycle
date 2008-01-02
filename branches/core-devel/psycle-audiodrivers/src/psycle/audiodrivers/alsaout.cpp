@@ -46,20 +46,15 @@ AlsaOut::AlsaOut()
 		id(),
 		left(),
 		right(),
-		enablePlayer(-3)
+		running_(),
+		stop_requested_()
 	{
 		std::memset(&format, 0, sizeof format);
 		setDefault();
 	}
 	
 	AlsaOut::~AlsaOut() {
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			if(enablePlayer > 0) {
-				enablePlayer = -2; condition_.notify_one();
-				while(enablePlayer != -3) condition_.wait(lock);
-			}
-		}
+		Stop();
 		/// \todo free memory here
 	}
 	
@@ -85,7 +80,9 @@ AlsaOut::AlsaOut()
 		r.id = id;
 		r.left = left;
 		r.right = right;
-		r.enablePlayer = -3; // doesn't make sense to copy the thread state since we don't clone the thread!
+		// doesn't make sense to copy the thread state since we don't clone the thread!
+		r.running_ = false;
+		r.stop_requested_ = false;
 		return &r;
 	}
 	
@@ -101,22 +98,147 @@ AlsaOut::AlsaOut()
 	}
 	
 	bool AlsaOut::Start() {
-		// start thread (might already be running, but that is ok.)
-		if(!audioStart()) return false;
-
-		// make thread start using the callback
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			enablePlayer = 1; condition_.notify_one();
-			while(enablePlayer != 2) condition_.wait(lock);
+		// return immediatly if the thread is already running
+		if(running_) return true;
+		
+		int err;
+		snd_pcm_hw_params_t *hwparams;
+		snd_pcm_sw_params_t *swparams;
+		
+		snd_pcm_hw_params_alloca(&hwparams);
+		snd_pcm_sw_params_alloca(&swparams);
+		
+		err = snd_output_stdio_attach(&output, stdout, 0);
+		if (err < 0) {
+			std::cerr << "psycle: alsa: attaching output failed: " << snd_strerror(err) << '\n';
+			return false;
 		}
-
+		
+		std::cout << "psycle: alsa: playback device is: " << settings().deviceName() << '\n';
+		std::cout << "psycle: alsa: stream parameters are; " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
+		std::cout << "psycle: alsa: using transfer method: " << "write" << '\n'; ///\todo parametrable?
+		
+		if((err = snd_pcm_open(&handle, settings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+			std::cerr << "psycle: alsa: playback open error: " << snd_strerror(err) << '\n';
+			return false;
+		}
+		
+		if((err = set_hwparams(hwparams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
+			std::cerr << "psycle: alsa: setting of hwparams failed: " << snd_strerror(err) << '\n';
+			return false;
+		}
+		
+		if((err = set_swparams(swparams)) < 0) {
+			std::cerr << "psycle: alsa: setting of swparams failed: " << snd_strerror(err) << '\n';
+			return false;
+		}
+		
+		samples = (std::int16_t*) malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
+		if(!samples) {
+			std::cerr << "out of memory\n";
+			return false;
+		}
+		
+		areas = (snd_pcm_channel_area_t*) calloc(channels, sizeof(snd_pcm_channel_area_t));
+		if(!areas) {
+			std::cerr << "out of memory\n";
+			return false;
+		}
+		
+		for(unsigned int chn(0); chn < channels; ++chn) {
+			areas[chn].addr = samples;
+			areas[chn].first = chn * 16;
+			areas[chn].step = channels * 16;
+		}
+		
+		std::thread t(boost::bind(&AlsaOut::thread_function, this));
+		{ // wait for the thread to be running
+			std::scoped_lock<std::mutex> lock(mutex_);
+			while(!running_) condition_.wait(lock);
+		}
+		
 		return true;
 	}
 	
+	void AlsaOut::thread_function() {
+	 	// notify that the thread is now running
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			running_ = true;
+		}
+		condition_.notify_one();
+
+		while(true) {
+			{ // check whether the thread has been asked to terminate
+				std::scoped_lock<std::mutex> lock(mutex_);
+				if(stop_requested_) goto notify_termination;
+			}
+			FillBuffer(0, period_size);
+			std::int16_t * ptr = samples;
+			int cptr = period_size;
+			while(cptr > 0) {
+				int err = snd_pcm_writei(handle, ptr, cptr);
+				if(err == -EAGAIN) continue;
+				if(err < 0) {
+					if(xrun_recovery(err) < 0) {
+						std::cerr << "psycle: alsa: write error: " << snd_strerror(err) << '\n';
+						goto notify_termination;
+					}
+					break; // skip one period
+				}
+				ptr += err * channels;
+				cptr -= err;
+			}
+			std::this_thread::yield(); ///\todo is this useful?
+		}
+
+		// notify that the thread is not running anymore
+		notify_termination:
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			running_ = false;
+		}
+		condition_.notify_one();
+	}
+
+	///   Underrun and suspend recovery
+	int AlsaOut::xrun_recovery(int err) {
+		if (err == -EPIPE) { // under-run
+			err = snd_pcm_prepare(handle);
+			if(err < 0) std::cerr << "psycle: alsa: cannot recover from under-run, prepare failed: " << snd_strerror(err) << '\n';
+			return 0;
+		} else if(err == -ESTRPIPE) {
+			while((err = snd_pcm_resume(handle)) == -EAGAIN)
+			 	/// wait until the suspend flag is released
+				std::this_thread::yield(); ///\todo any other way?
+			if(err < 0) {
+				err = snd_pcm_prepare(handle);
+				if(err < 0) std::cerr << "psycle: alsa: cannot recover from suspend, prepare failed: " << snd_strerror(err) << '\n';
+			}
+			return 0;
+		}
+		return err;
+	}
+
 	bool AlsaOut::Stop() {
-		audioStop();
-		return true;
+		// return immediatly if the thread is not running
+		if(!running_) return true;
+
+		// ask the thread to terminate
+		{
+				std::scoped_lock<std::mutex> lock(mutex_);
+				stop_requested_ = true;
+		}
+		condition_.notify_one();
+		
+		/// join the thread
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			while(running_) condition_.wait(lock);
+			stop_requested_ = false;
+		}
+
+		return true; ///\todo we actually always return true, so the result is useless!
 	}
 	
 	void AlsaOut::setDefault() {
@@ -140,85 +262,8 @@ AlsaOut::AlsaOut()
 		this->setSettings(settings);
 	}
 	
-	int AlsaOut::audioStop() {
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			if(enablePlayer < 0) return 1;
-			enablePlayer = 0; condition_.notify_one();
-			while(enablePlayer >= 0) condition_.wait(lock);
-		}
-		return 1;
-	}
-	
-	/// starts the alsa thread
-	int AlsaOut::audioStart() {
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			if(enablePlayer >= -1) return 1;
-			enablePlayer = -3; condition_.notify_one();
-		}
-
-		int err;
-		snd_pcm_hw_params_t *hwparams;
-		snd_pcm_sw_params_t *swparams;
-		
-		snd_pcm_hw_params_alloca(&hwparams);
-		snd_pcm_sw_params_alloca(&swparams);
-		
-		err = snd_output_stdio_attach(&output, stdout, 0);
-		if (err < 0) {
-			std::cerr << "psycle: alsa: attaching output failed: " << snd_strerror(err) << '\n';
-			return 0;
-		}
-		
-		std::cout << "psycle: alsa: playback device is: " << settings().deviceName() << '\n';
-		std::cout << "psycle: alsa: stream parameters are; " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
-		std::cout << "psycle: alsa: using transfer method: " << "write" << '\n'; ///\todo parametrable?
-		
-		if((err = snd_pcm_open(&handle, settings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
-			std::cerr << "psycle: alsa: playback open error: " << snd_strerror(err) << '\n';
-			return 0;
-		}
-		
-		if((err = set_hwparams(hwparams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
-			std::cerr << "psycle: alsa: setting of hwparams failed: " << snd_strerror(err) << '\n';
-			return 0;
-		}
-		
-		if((err = set_swparams(swparams)) < 0) {
-			std::cerr << "psycle: alsa: setting of swparams failed: " << snd_strerror(err) << '\n';
-			return 0;
-		}
-		
-		samples = (short int*) malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
-		if(!samples) {
-			std::cerr << "out of memory\n";
-			return 0;
-		}
-		
-		areas = (snd_pcm_channel_area_t*) calloc(channels, sizeof(snd_pcm_channel_area_t));
-		if(!areas) {
-			std::cerr << "out of memory\n";
-			return 0;
-		}
-		
-		for(unsigned int chn(0); chn < channels; ++chn) {
-			areas[chn].addr = samples;
-			areas[chn].first = chn * 16;
-			areas[chn].step = channels * 16;
-		}
-		
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			enablePlayer = 1; condition_.notify_one();
-		}
-
-		std::thread t(boost::bind(&AlsaOut::thread_function, this));
-		return 1;
-	}
-	
 	void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
-		signed short *samples[channels];
+		std::int16_t *samples[channels];
 		int steps[channels];
 		// verify and prepare the contents of areas
 		for (unsigned int chn(0); chn < channels; ++chn) {
@@ -227,7 +272,7 @@ AlsaOut::AlsaOut()
 				s << "psycle: alsa: areas[" << chn << "].first == " << areas[chn].first << ", aborting.";
 				throw std::runtime_error(s.str().c_str());
 			}
-			samples[chn] = (signed short *)(((unsigned char *)areas[chn].addr) + (areas[chn].first / 8));
+			samples[chn] = (std::int16_t *)(((unsigned char *)areas[chn].addr) + (areas[chn].first / 8));
 			if ((areas[chn].step % 16) != 0) {
 				std::ostringstream s;
 				s <<  "psycle: alsa: areas[" << chn << "].step == " << areas[chn].step << ", aborting.";
@@ -371,83 +416,14 @@ AlsaOut::AlsaOut()
 		return 0;
 	}
 	
-	///   Underrun and suspend recovery
-	int AlsaOut::xrun_recovery(int err) {
-		if (err == -EPIPE) { // under-run
-			err = snd_pcm_prepare(handle);
-			if(err < 0) std::cerr << "psycle: alsa: cannot recover from under-run, prepare failed: " << snd_strerror(err) << '\n';
-			return 0;
-		} else if(err == -ESTRPIPE) {
-			while((err = snd_pcm_resume(handle)) == -EAGAIN)
-				sleep(1); /// wait until the suspend flag is released
-			if(err < 0) {
-				err = snd_pcm_prepare(handle);
-				if(err < 0) std::cerr << "psycle: alsa: cannot recover from suspend, prepare failed: " << snd_strerror(err) << '\n';
-			}
-			return 0;
-		}
-		return err;
-	}
-	
-	int AlsaOut::write_loop() {
-		signed short *ptr;
-		int err, cptr;
-		while(true) {
-			int enablePlayerCopy;
-			{
-				std::scoped_lock<std::mutex> lock(mutex_);
-				enablePlayerCopy = enablePlayer;
-			}
-			if(enablePlayerCopy > 0) {
-				{
-					std::scoped_lock<std::mutex> lock(mutex_);
-					enablePlayer = 2; condition_.notify_one();
-				}
-				FillBuffer(0, period_size);
-				ptr = samples;
-				cptr = period_size;
-				while(cptr > 0) {
-					err = snd_pcm_writei(handle, ptr, cptr);
-					if(err == -EAGAIN) continue;
-					if(err < 0) {
-						if (xrun_recovery(err) < 0) {
-							std::cerr << "psycle: alsa: write error: " << snd_strerror(err) << '\n';
-							return -1;
-						}
-						break; // skip one period
-					}
-					ptr += err * channels;
-					cptr -= err;
-				}
-			} else if(enablePlayerCopy == -2) return 0;
-			else {
-				{
-					std::scoped_lock<std::mutex> lock(mutex_);
-					enablePlayer = -1; condition_.notify_one();
-				}
-				return 0;
-			}
-			std::this_thread::yield(); ///\todo sleeping is bad
-		}
-	}
-
 	#if 0 ///\todo remove? This appears to not be used  
 		struct transfer_method {
 			const char *name;
 			snd_pcm_access_t access;
-			int (*transfer_loop)(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
+			int (*transfer_loop)(snd_pcm_t *handle, std::int16_t *samples, snd_pcm_channel_area_t *areas);
 		};
 	#endif
 
-	void AlsaOut::thread_function() {
-		int err = write_loop();
-		if(err < 0) std::cerr << "psycle: alsa: transfer failed: " << snd_strerror(err) << '\n';
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			enablePlayer = -3; condition_.notify_one();
-		}
-	}
-	
 }}
 #endif // defined PSYCLE__ALSA_AVAILABLE
 

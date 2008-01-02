@@ -23,6 +23,7 @@
 #include <alsa/asoundlib.h>
 #include <mutex>
 #include <condition>
+#include <cstdint>
 
 /**
 @author Psycledelics
@@ -74,7 +75,7 @@ class AlsaOut : public AudioDriver
 		/// 5:direct_noninterleaved 6:DIRECT_WRITE
 		int method;
 		
-		signed short *samples;
+		std::int16_t * samples;
 		snd_pcm_channel_area_t *areas;
 
 		void FillBuffer(snd_pcm_uframes_t offset, int count);
@@ -82,34 +83,28 @@ class AlsaOut : public AudioDriver
 		int id;
 
 		/// left out (getSample should change this non-stop if audio was started
-		signed short left;
+		std::int16_t left;
 
 		/// right out (getSample should change this non-stop if audio was started)
-		signed short right;
+		std::int16_t right;
 
 		void (*getSample) (void*);
-
-		int audioStart();
-		int audioStop();
 
 		int set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access);
 		int set_swparams(snd_pcm_sw_params_t *swparams);
 		int xrun_recovery(int err);
 
-		int write_loop();
-
 		///\name thread
 		///\{
+			/// the function executed by the alsa thread
 			void thread_function();
-
-			/// -3: thread not running,
-			/// -2: stop thread!,
-			/// -1: has stopped,
-			///  0: stop!,
-			///  1: play!,
-			///  2: is playing
-			int enablePlayer;
+			/// whether the thread is running
+			bool running_;
+			/// whether the thread is asked to terminate
+			bool stop_requested_;
+			/// a mutex to synchronise accesses to running_ and stop_requested_
 			std::mutex mutex_;
+			/// a condition variable to wait until notified that the value of running_ has changed
 			std::condition<std::scoped_lock<std::mutex> > condition_;
 		///\}
 };
