@@ -54,7 +54,7 @@ namespace psy {
 				LADSPA_Data maxVal_;
 				float rangeMultiplier_;
 				bool integer_;
-				bool logaritmic_;
+				bool logarithmic_;
 		};
 	
 		class LADSPAMachine: public Machine
