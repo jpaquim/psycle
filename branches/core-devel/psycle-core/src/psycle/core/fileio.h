@@ -164,6 +164,7 @@ class RiffFile {
 			} else {
 				assert(!"Error: Couldn't determine 32 bit float endianness");
 			}
+			return false;
 		}
 
 		template<typename T>
@@ -200,6 +201,17 @@ class RiffFile {
 	private:
 		bool write_mode;
 		std::fstream _stream;
+};
+
+
+class MemoryFile : public RiffFile
+{
+public:
+	MemoryFile();
+	~MemoryFile();
+
+	bool Open(std::ptrdiff_t memsize);
+	bool Close();
 };
 
 }}

@@ -56,7 +56,6 @@ namespace psy
 		{
 			delete[] waveDataL; waveDataL = 0;
 			delete[] waveDataR; waveDataR = 0;
-			waveLength = 0;
 		}
 
 		void Instrument::Delete()

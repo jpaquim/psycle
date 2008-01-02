@@ -13,6 +13,7 @@ class Configuration
 {
 	public:
 		Configuration();
+		~Configuration();
 	
 	///\name configuration file
 	///\{
