@@ -172,24 +172,19 @@ namespace psycle { namespace plugins { namespace outputs {
 		std::mutex     global_client_count_mutex;
 		std::once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
 		void           global_client_count_init() {
-			std::clog << "init\n";
 			// note: we do not need to lock here, but this is a way to ensure it is initialised.
 			std::scoped_lock<std::mutex> lock(global_client_count_mutex);
 			global_client_count = 0;
-			std::clog << "inited\n";
 		}
 	}
 
 	void gstreamer::do_open() throw(engine::exception) {
 		resource::do_open();
 
-		std::clog << "open " << std::this_thread::id() << '\n';
 		{ // initialize gstreamer
 			std::call_once(global_client_count_init_once_flag, global_client_count_init);
 			std::scoped_lock<std::mutex> lock(global_client_count_mutex);
-			std::clog << "locked, count " << global_client_count << '\n';
 			if(!global_client_count) {
-				std::clog << "++count\n";
 				++global_client_count;
 				int * argument_count(0);
 				char *** arguments(0);
@@ -199,7 +194,6 @@ namespace psycle { namespace plugins { namespace outputs {
 					::g_clear_error(&error);
 					throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}}}
-		std::clog << "opened " << std::this_thread::id() << '\n';
 
 		// create an audio sink
 		#define psycle_log loggers::information()("exception: caught while trying to instantiate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
