@@ -28,6 +28,8 @@ class AudioDriver;}}
 
 class QComboBox;
 class QPushButton;
+class QLineEdit;
+class QLabel;
 
 namespace qpsycle {
 
@@ -50,7 +52,10 @@ private:
 	Configuration* config_;
 	psy::core::AudioDriver *selectedDriver_;
 
+	QLabel *driverLbl_;
+	QLabel *deviceLbl_;
 	QComboBox *driverCbx_;
+	QLineEdit *deviceBox_;
 	QPushButton *restartBtn_;
 };
 
