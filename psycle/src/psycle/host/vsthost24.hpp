@@ -104,7 +104,7 @@ namespace psycle
 					_pOutSamplesL = 0;
 					_pOutSamplesR = 0;
 					_type=MACH_VST;
-				};
+				}
 				virtual ~plugin();
 
 				// Machine overloaded functions
@@ -113,7 +113,7 @@ namespace psycle
 				virtual void Init(){ Machine::Init();}
 				virtual void PreWork(int numSamples,bool clear=true);
 				virtual void Work(int numSamples);
-				virtual void Tick() { Machine::Tick(); };
+				virtual void Tick() { Machine::Tick(); }
 				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
 				// old fileformat {
@@ -270,7 +270,7 @@ namespace psycle
 			class host : public CVSTHost
 			{
 			public:
-				host(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; };
+				host(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
 				virtual ~host(){;}
 
 				///< Helper class for Machine Creation.

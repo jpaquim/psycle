@@ -58,7 +58,7 @@ public:
 		default:
 			Plugin::describe(out, parameter);
 		}
-	};
+	}
 
 	Ring_Modulator() : Plugin(information()), glided_am_radians_per_samples_(0)
 	{

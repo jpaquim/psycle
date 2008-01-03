@@ -58,7 +58,7 @@ namespace psycle
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
 			virtual void Reset();
 			virtual bool Enable(bool e);
-			virtual bool Enabled() { return _running; };
+			virtual bool Enabled() { return _running; }
 			virtual void GetCapturePorts(std::vector<std::string>&ports);
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
@@ -66,14 +66,14 @@ namespace psycle
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 			virtual void EnumerateCapturePorts();
 
-			virtual int GetInputLatency() { return _numBlocks * _blockSize; };
-			virtual int GetOutputLatency() { return _numBlocks * _blockSize; };
+			virtual int GetInputLatency() { return _numBlocks * _blockSize; }
+			virtual int GetOutputLatency() { return _numBlocks * _blockSize; }
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
 			virtual void Configure();
-			virtual bool Initialized() { return _initialized; };
-			virtual bool Configured() { return _configured; };
-			virtual AudioDriverInfo* GetInfo() { return &_info; };
+			virtual bool Initialized() { return _initialized; }
+			virtual bool Configured() { return _configured; }
+			virtual AudioDriverInfo* GetInfo() { return &_info; }
 			MMRESULT IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID);
 			static void PollerThread(void *pWaveOut);
 		protected:

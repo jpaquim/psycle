@@ -108,7 +108,7 @@ namespace psy
 						offset_ = this->output_minimum() / ratio_;
 						offset_plus_input_maximum_ = offset_ + input_maximum;
 						output_minimum_maximum_sum_ = output_minimum + output_maximum;
-					};
+					}
 					inline virtual const Real apply(const Real & sample) const
 					{
 						return static_cast<Real>(output_minimum_maximum_sum_ - std::exp((offset_plus_input_maximum_ - sample) * ratio_));

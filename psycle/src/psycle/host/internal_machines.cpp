@@ -53,7 +53,7 @@ namespace psycle
 			pFile->Read(&size, sizeof size); // size of this part params to load
 			pFile->Skip(size);
 			return true;
-		};
+		}
 
 
 		//////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-///\interface psycle's native plugin interface api
+///\interface psycle native plugin interface api
 
 #pragma once
 

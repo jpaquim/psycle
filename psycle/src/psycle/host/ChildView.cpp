@@ -439,6 +439,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Open();
+
 				// set midi input mode to real-time or step
 				if(Global::pConfig->_midiMachineViewSeqMode)
 					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
@@ -2104,8 +2105,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else
 			{
 				// MIDI IMPLEMENTATION
+				
 				Global::pConfig->_pMidiInput->Open();
 			}
+
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();
 			pParentMain->m_wndInst.WaveUpdate();

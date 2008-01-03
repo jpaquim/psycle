@@ -541,7 +541,7 @@ namespace psycle
 		int ASIOInterface::GetBufferSize()
 		{ 
 			return _ASIObufferSize; 
-		};
+		}
 
 		void ASIOInterface::ControlPanel(int driverID)
 		{

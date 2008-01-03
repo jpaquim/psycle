@@ -72,12 +72,12 @@ mi::mi()
 	for(i=0;i<MIDI_TRACKS; i++)
 	{
 		numChannel[i].Init(handle,i);
-	};
+	}
 	for(i=0;i<MAX_TRACKS; i++)
 	{
 		numC[i]=0;
 		notes[i]=-1;
-	};
+	}
 }
 
 mi::~mi()

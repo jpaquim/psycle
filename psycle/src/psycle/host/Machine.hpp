@@ -303,7 +303,7 @@ namespace psycle
 				public:
 					virtual void GetWireVolume(int wireIndex, float &value) { value = GetWireVolume(wireIndex); }
 					virtual float GetWireVolume(int wireIndex) { return _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; }
-					virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; };
+					virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; }
 					virtual bool GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value);
 					virtual bool SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value);
 			///\}
@@ -344,10 +344,10 @@ namespace psycle
 			///\name gui stuff
 			///\{
 				public:
-					virtual int  GetPosX() { return _x; };
-					virtual void SetPosX(int x) {_x = x;};
-					virtual int  GetPosY() { return _y; };
-					virtual void SetPosY(int y) {_y = y;};
+					virtual int  GetPosX() { return _x; }
+					virtual void SetPosX(int x) {_x = x;}
+					virtual int  GetPosY() { return _y; }
+					virtual void SetPosY(int y) {_y = y;}
 				public:///\todo private:
 					int _x;
 					int _y;
@@ -522,7 +522,7 @@ namespace psycle
 			virtual void Init(void);
 			virtual void Work(int numSamples);
 			virtual float GetAudioRange(){ return 32768.0f; }
-			virtual char* GetName(void) { return _psName; };
+			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);

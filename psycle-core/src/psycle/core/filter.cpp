@@ -17,7 +17,7 @@ namespace psy
 			FilterCoeff::FilterCoeff() {
 				samplerate = -1;
 				//table is initialized with Filter::Init()
-			};
+			}
 
 			void FilterCoeff::setSampleRate(float samplerate)
 			{
@@ -40,22 +40,22 @@ namespace psy
 						}
 					}
 				}
-			};
+			}
 
 			float FilterCoeff::Cutoff(int v)
 			{
 				return float(pow( (v+5)/(127.0+5), 1.7)*13000+30);
-			};
+			}
 			
 			float FilterCoeff::Resonance(float v)
 			{
 				return float(pow( v/127.0, 4)*150+0.1);
-			};
+			}
 			
 			float FilterCoeff::Bandwidth(int v)
 			{
 				return float(pow( v/127.0, 4)*4+0.1);
-			};
+			}
 
 			void FilterCoeff::ComputeCoeffs(int freq, int r, int t)
 			{

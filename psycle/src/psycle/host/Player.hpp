@@ -78,9 +78,9 @@ namespace psycle
 			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
 
 			/// Returns the number of samples that it takes for each row of the pattern to be played
-			const int SamplesPerRow(){ return m_SamplesPerRow;};
+			const int SamplesPerRow(){ return m_SamplesPerRow;}
 			/// Sets the number of samples that it takes for each row of the pattern to be played
-			void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;};
+			void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;}
 			const int SampleRate() { return m_SampleRate; }
 			void SampleRate(const int sampleRate);
 

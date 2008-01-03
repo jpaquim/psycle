@@ -13,8 +13,8 @@ public:
 	CWaveScopeCtrl();
 	virtual ~CWaveScopeCtrl();
 
-	void SetWave(XMInstrument::WaveData *pWave) { m_pWave = pWave; };
-	XMInstrument::WaveData& rWave() { return *m_pWave; };
+	void SetWave(XMInstrument::WaveData *pWave) { m_pWave = pWave; }
+	XMInstrument::WaveData& rWave() { return *m_pWave; }
 
 	virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
 

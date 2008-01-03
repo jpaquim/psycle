@@ -110,14 +110,14 @@ public: /* STATUS */
 		//int portamento_time_fine;
 		//bool do_portamento;
 
-				Default_Data() {
+		Default_Data() {
 
-					memset(this,0,sizeof(Default_Data));
-						channel_pan=0;
-						relative_pan=0;
-						main_volume=127;
-						//vibrato_speed=30;
-				}
+			memset(this,0,sizeof(Default_Data));
+				channel_pan=0;
+				relative_pan=0;
+				main_volume=127;
+				//vibrato_speed=30;
+		}
 
 	};
 
@@ -127,7 +127,7 @@ public: /* STATUS */
 	};
 
 
-		enum Status {
+	enum Status {
 		DEAD,
 		ATTACKING,
 		RELEASING,

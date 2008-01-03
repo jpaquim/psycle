@@ -594,6 +594,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Song *pSong = Global::_pSong;
 			pPlayer->StopRecording();
 			Global::pConfig->_pOutputDriver->Enable(false);
+			///\todo: for zealan, this call is not closing the midi driver, and when doing the Open again, it crashes.
 			Global::pConfig->_pMidiInput->Close();
 
 			std::string::size_type pos = file.rfind('\\');

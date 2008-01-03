@@ -68,7 +68,7 @@ namespace psy {
 				virtual void Tick(int channel, const PatternEvent & pEntry );
 				virtual void Stop(){}
 				inline virtual std::string GetDllName() const throw() { return libName_.c_str(); }
-				virtual std::string GetName() const { return (char *) psDescriptor ? psDescriptor->Name : ""; };
+				virtual std::string GetName() const { return (char *) psDescriptor ? psDescriptor->Name : ""; }
 				virtual void GetParamName(int numparam, char * name) const;
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) const;
 				virtual int GetParamValue(int numparam) const;

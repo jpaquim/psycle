@@ -88,7 +88,7 @@ class Plugin : public Machine
 	private:
 		static PluginFxCallback _callback;
 	public:
-		inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
+		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
 	public:
 		Plugin(MachineCallbacks* callbacks, Machine::id_type index, CoreSong* song);
 
@@ -100,18 +100,18 @@ class Plugin : public Machine
 		virtual void Tick(int channel, const PatternEvent & pEntry );
 		virtual void Stop();
 		inline virtual std::string GetDllName() const throw() { return _psDllName; }
-		virtual std::string GetName() const { return _psName; };
+		virtual std::string GetName() const { return _psName; }
 
-		virtual int GetNumParams() const { return GetInfo().numParameters; };
-		virtual int GetNumCols() const { return GetInfo().numCols; };
+		virtual int GetNumParams() const { return GetInfo().numParameters; }
+		virtual int GetNumCols() const { return GetInfo().numCols; }
 		virtual void GetParamName(int numparam, char * name) const;
 		virtual void GetParamRange(int numparam,int &minval, int &maxval) const;
 		virtual int GetParamValue(int numparam) const;
 		virtual void GetParamValue(int numparam,char* parval) const;
 		virtual bool SetParameter(int numparam,int value);
 
-		inline Proxy const & proxy() const throw() { return proxy_; };
-		inline Proxy & proxy() throw() { return proxy_; };
+		inline Proxy const & proxy() const throw() { return proxy_; }
+		inline Proxy & proxy() throw() { return proxy_; }
 
 		bool Instance(const std::string & file_name);
 		bool LoadDll (std::string const & path, std::string const & file_name);
@@ -126,7 +126,7 @@ class Plugin : public Machine
 				virtual void SaveDllName      (RiffFile * pFile) const;
 		///\}
 
-		CMachineInfo const & GetInfo() const throw() { return *info_; };
+		CMachineInfo const & GetInfo() const throw() { return *info_; }
 		
 	private:
 		void* _dll;

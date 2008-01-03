@@ -38,13 +38,13 @@ namespace psycle
 		/// IMPORTANT: the enum indexes determine what kind of
 		/// command it is, and for keys determine the note value
 		///\{
-		/// .
+		/// Start index for note input (corresponds to note C-0)
 		const int CS_KEY_START = 0;
-		/// .
+		/// Start index of inmediate commands (play, stop, change view,...)
 		const int CS_IMM_START = 256;
-		/// .
+		/// Start index for edit-related commands (select, cut..)
 		const int CS_EDT_START = 512;
-		/// .
+		/// End marker
 		const int CS_LAST = max_cmds;
 		///\}
 

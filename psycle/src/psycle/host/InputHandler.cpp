@@ -1193,7 +1193,7 @@ namespace psycle
 			PatternEntry entry;
 			entry._note = note;
 			entry._inst = Global::_pSong->auxcolSelected;
-			entry._mach = Global::_pSong->seqBus;	// Not really needed.
+			entry._mach = Global::_pSong->seqBus;
 
 			if(velocity != 127 && Global::pConfig->midi().velocity().record())
 			{

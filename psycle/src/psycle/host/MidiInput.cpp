@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiInput.
-/// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b <virtually complete>
+/// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 #include <psycle/project.private.hpp>
 #include "MidiInput.hpp"
 #include "Psycle.hpp"
@@ -111,7 +111,7 @@ namespace psycle
 			// open the main input driver
 			if( !m_midiInHandle[ DRIVER_MIDI ] && m_devId[ DRIVER_MIDI ] != -1 )
 			{
-				// open
+
 				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
 				if( result != MMSYSERR_NOERROR )
 				{
@@ -181,6 +181,7 @@ namespace psycle
 				return problem != 0;
 			else
 				return Sync();
+
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////

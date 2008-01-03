@@ -672,7 +672,7 @@ namespace seib {
 		/*****************************************************************************/
 		/* CEffect : constructor                                                     */
 		/*****************************************************************************/
-		void Crashingclass::crashed(std::exception const & e) const{ ef->crashed2(e); };
+		void Crashingclass::crashed(std::exception const & e) const{ ef->crashed2(e); }
 
 
 		CEffect::CEffect(LoadedAEffect &loadstruct)

@@ -858,9 +858,9 @@ fluid_rampreset_noteon(fluid_rampreset_t* preset, fluid_synth_t* synth, int chan
 	      /* The generator has not been defined in this instrument.
 	       * Do nothing, leave it at the default.
 	       */
-	    };
+	    }
 
-	  }; /* for all generators */
+	  } /* for all generators */
 	  
 	  /* global instrument zone, modulators: Put them all into a
 	   * list. */
@@ -872,8 +872,8 @@ fluid_rampreset_noteon(fluid_rampreset_t* preset, fluid_synth_t* synth, int chan
 	    while (mod){
 	      mod_list[mod_list_count++] = mod;
 	      mod = mod->next;
-	    };
-	  };
+	    }
+	  }
 	  
 	  /* local instrument zone, modulators.
 	   * Replace modulators with the same definition in the list:
@@ -891,13 +891,13 @@ fluid_rampreset_noteon(fluid_rampreset_t* preset, fluid_synth_t* synth, int chan
 	    for (i = 0; i < mod_list_count; i++){
 	      if (fluid_mod_test_identity(mod,mod_list[i])){
 		mod_list[i] = NULL;
-	      };
-	    };
+	      }
+	    }
 	      
 	    /* Finally add the new modulator to to the list. */
 	    mod_list[mod_list_count++] = mod;
 	    mod = mod->next;
-	  };
+	  }
 
 	  /* Add instrument modulators (global / local) to the voice. */
 	  for (i = 0; i < mod_list_count; i++){
@@ -909,8 +909,8 @@ fluid_rampreset_noteon(fluid_rampreset_t* preset, fluid_synth_t* synth, int chan
 	      /* Instrument modulators -supersede- existing (default)
 	       * modulators.  SF 2.01 page 69, 'bullet' 6 */
 	      fluid_voice_add_mod(voice, mod, FLUID_VOICE_OVERWRITE);
-	    };
-	  };
+	    }
+	  }
 
 	  /* Preset level, generators */
 
@@ -943,9 +943,9 @@ fluid_rampreset_noteon(fluid_rampreset_t* preset, fluid_synth_t* synth, int chan
 		/* The generator has not been defined in this preset
 		 * Do nothing, leave it unchanged.
 		 */
-	      };
-	    }; /* if available at preset level */
-	  }; /* for all generators */
+	      }
+	    } /* if available at preset level */
+	  } /* for all generators */
 	  
 	  
 	  /* Global preset zone, modulators: put them all into a
@@ -961,13 +961,13 @@ fluid_rampreset_noteon(fluid_rampreset_t* preset, fluid_synth_t* synth, int chan
 	    for (i = 0; i < mod_list_count; i++){
 	      if (fluid_mod_test_identity(mod,mod_list[i])){
 		mod_list[i] = NULL;
-	      };
-	    };
+	      }
+	    }
 	      
 	    /* Finally add the new modulator to the list. */
 	    mod_list[mod_list_count++] = mod;
 	    mod = mod->next;
-	  };
+	  }
 	  
 	  /* Add preset modulators (global / local) to the voice. */
 	  for (i = 0; i < mod_list_count; i++){
@@ -978,8 +978,8 @@ fluid_rampreset_noteon(fluid_rampreset_t* preset, fluid_synth_t* synth, int chan
 	       * default modulators.  SF2.01 page 70 first bullet on
 	       * page */
 	      fluid_voice_add_mod(voice, mod, FLUID_VOICE_ADD);
-	    };
-	  };	  
+	    }
+	  }	  
 
 	  /* add the synthesis process to the synthesis loop. */
 	  fluid_synth_start_voice(synth, voice);

@@ -664,7 +664,7 @@ fluid_handle_reverbpreset(fluid_synth_t* synth, int ac, char** av, fluid_ostream
   if (fluid_synth_set_reverb_preset(synth, reverb_preset_number)!=FLUID_OK){
     fluid_ostream_printf(out, "rev_preset: Failed. Parameter out of range?\n");
     return -1;
-  };
+  }
   return 0;
 }
 
@@ -905,7 +905,7 @@ fluid_handle_gain(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
   if ((gain < 0.0f) || (gain > 5.0f)) {
     fluid_ostream_printf(out, "gain: value should be between '0' and '5'.\n");
     return -1;
-  };
+  }
 
   fluid_synth_set_gain(synth, gain);
 
@@ -930,7 +930,7 @@ fluid_handle_interp(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out
   if ((interp < 0) || (interp > FLUID_INTERP_HIGHEST)) {
     fluid_ostream_printf(out, "interp: Bad value\n");
     return -1;
-  };
+  }
 
   fluid_synth_set_interp_method(synth, chan, interp);
 
@@ -956,11 +956,11 @@ fluid_handle_interpc(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t ou
   if ((chan < 0) || (chan >= fluid_synth_count_midi_channels(synth))){
     fluid_ostream_printf(out, "interp: Bad value for channel number.\n");
     return -1;  
-  };
+  }
   if ((interp < 0) || (interp > FLUID_INTERP_HIGHEST)) {
     fluid_ostream_printf(out, "interp: Bad value for interpolation method.\n");
     return -1;
-  };
+  }
   
   fluid_synth_set_interp_method(synth, chan, interp);
 
@@ -988,7 +988,7 @@ fluid_handle_tuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out
   if ((bank < 0) || (bank >= 128)){
     fluid_ostream_printf(out, "tuning: invalid bank number.\n");
     return -1;  
-  };
+  }
 
   if (!fluid_is_number(av[2])) {
     fluid_ostream_printf(out, "tuning: 3rd argument should be a number.\n");
@@ -998,7 +998,7 @@ fluid_handle_tuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out
   if ((prog < 0) || (prog >= 128)){
     fluid_ostream_printf(out, "tuning: invalid program number.\n");
     return -1;  
-  };
+  }
 
   fluid_synth_create_key_tuning(synth, bank, prog, name, NULL);
 
@@ -1024,7 +1024,7 @@ fluid_handle_tune(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
   if ((bank < 0) || (bank >= 128)){
     fluid_ostream_printf(out, "tune: invalid bank number.\n");
     return -1;  
-  };
+  }
 
   if (!fluid_is_number(av[1])) {
     fluid_ostream_printf(out, "tune: 2nd argument should be a number.\n");
@@ -1034,7 +1034,7 @@ fluid_handle_tune(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
   if ((prog < 0) || (prog >= 128)){
     fluid_ostream_printf(out, "tune: invalid program number.\n");
     return -1;  
-  };
+  }
 
   if (!fluid_is_number(av[2])) {
     fluid_ostream_printf(out, "tune: 3rd argument should be a number.\n");
@@ -1044,13 +1044,13 @@ fluid_handle_tune(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
   if ((key < 0) || (key >= 128)){
     fluid_ostream_printf(out, "tune: invalid key number.\n");
     return -1;  
-  };
+  }
 
   pitch = atof(av[3]);
   if (pitch < 0.0f) {
     fluid_ostream_printf(out, "tune: invalid pitch.\n");
     return -1;  
-  };
+  }
 
   fluid_synth_tune_notes(synth, bank, prog, 1, &key, &pitch, 0);
 
@@ -1075,7 +1075,7 @@ fluid_handle_settuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t 
   if ((chan < 0) || (chan >= fluid_synth_count_midi_channels(synth))){
     fluid_ostream_printf(out, "tune: invalid channel number.\n");
     return -1;  
-  };
+  }
 
   if (!fluid_is_number(av[1])) {
     fluid_ostream_printf(out, "tuning: 2nd argument should be a number.\n");
@@ -1085,7 +1085,7 @@ fluid_handle_settuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t 
   if ((bank < 0) || (bank >= 128)){
     fluid_ostream_printf(out, "tuning: invalid bank number.\n");
     return -1;  
-  };
+  }
 
   if (!fluid_is_number(av[2])) {
     fluid_ostream_printf(out, "tuning: 3rd argument should be a number.\n");
@@ -1095,7 +1095,7 @@ fluid_handle_settuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t 
   if ((prog < 0) || (prog >= 128)){
     fluid_ostream_printf(out, "tuning: invalid program number.\n");
     return -1;  
-  };
+  }
 
   fluid_synth_select_tuning(synth, chan, bank, prog);
 
@@ -1120,7 +1120,7 @@ fluid_handle_resettuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_
   if ((chan < 0) || (chan >= fluid_synth_count_midi_channels(synth))){
     fluid_ostream_printf(out, "tune: invalid channel number.\n");
     return -1;  
-  };
+  }
 
   fluid_synth_reset_tuning(synth, chan);
 
@@ -1169,7 +1169,7 @@ fluid_handle_dumptuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t
   if ((bank < 0) || (bank >= 128)){
     fluid_ostream_printf(out, "dumptuning: invalid bank number.\n");
     return -1;  
-  };
+  }
 
   if (!fluid_is_number(av[1])) {
     fluid_ostream_printf(out, "dumptuning: 2nd argument should be a number.\n");
@@ -1179,7 +1179,7 @@ fluid_handle_dumptuning(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t
   if ((prog < 0) || (prog >= 128)){
     fluid_ostream_printf(out, "dumptuning: invalid program number.\n");
     return -1;  
-  };
+  }
 
   fluid_synth_tuning_dump(synth, bank, prog, name, 256, pitch);
 
@@ -1459,29 +1459,29 @@ fluid_handle_help(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
       int listed_first_time = 1;
       int ii;
       for (ii = 0; ii < i; ii++){
-	if (strcmp(fluid_commands[i].topic, fluid_commands[ii].topic) == 0){
-	  listed_first_time = 0;
-	}; /* if topic has already been listed */
-      }; /* for all topics (inner loop) */
+		if (strcmp(fluid_commands[i].topic, fluid_commands[ii].topic) == 0){
+		  listed_first_time = 0;
+		} /* if topic has already been listed */
+      } /* for all topics (inner loop) */
       if (listed_first_time){
-	fluid_ostream_printf(out, "help %s\n",fluid_commands[i].topic);
-      };
-    }; /* for all topics (outer loop) */
+		fluid_ostream_printf(out, "help %s\n",fluid_commands[i].topic);
+      }
+    } /* for all topics (outer loop) */
   } else {
     /* help (arbitrary topic or "all") */
     for (i = 0; fluid_commands[i].name != NULL; i++) {
       fluid_cmd_t cmd = fluid_commands[i];
       if (cmd.help != NULL) {
-	if (strcmp(topic,"all") == 0 || strcmp(topic,cmd.topic) == 0){
-	  fluid_ostream_printf(out, "%s\n", fluid_commands[i].help);
-	  count++;
-	}; /* if it matches the topic */
-      }; /* if help text exists */
-    }; /* foreach command */
+		if (strcmp(topic,"all") == 0 || strcmp(topic,cmd.topic) == 0){
+		  fluid_ostream_printf(out, "%s\n", fluid_commands[i].help);
+		  count++;
+		} /* if it matches the topic */
+      } /* if help text exists */
+    } /* foreach command */
     if (count == 0){
       fluid_ostream_printf(out, "Unknown help topic. Try 'help help'.\n");
-    };
-  };
+    }
+  }
   return 0;
 }
 

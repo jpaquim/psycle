@@ -40,7 +40,7 @@ class Gainer : public Plugin
 				default:
 					Plugin::describe(out, parameter);
 			}
-		};
+		}
 
 		Gainer() : Plugin(information()) {}
 

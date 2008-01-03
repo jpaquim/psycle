@@ -60,7 +60,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			virtual void* OpenSecondaryWnd(VstWindow& window);
 			virtual bool CloseSecondaryWnd(VstWindow& window);
 		protected:
-			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); };
+			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); }
 			virtual CBaseGui* CreateView();
 			void FillProgramCombobox();
 			void FillPopup(CMenu* pPopupMenu);

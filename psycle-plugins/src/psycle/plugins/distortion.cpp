@@ -79,7 +79,7 @@ public:
 		default:
 			Plugin::describe(out, parameter);
 		}
-	};
+	}
 
 	Distortion() : Plugin(information()) {}
 	virtual void process(Sample l[], Sample r[], int samples, int);

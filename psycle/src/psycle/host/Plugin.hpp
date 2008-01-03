@@ -129,7 +129,7 @@ namespace psycle
 				private: std::string                _psDllName;
 
 				///\todo this was called GetBrand in in v1.9
-				public:  virtual char * GetName() { return (char *)_psName.c_str(); };
+				public:  virtual char * GetName() { return (char *)_psName.c_str(); }
 				private: std::string    _psName;
 
 				///\todo there was no ShortName in v1.9
@@ -149,7 +149,7 @@ namespace psycle
 			///\name parameter info
 			///\{
 				public:///\todo private: move this to the proxy class
-					inline CMachineInfo * GetInfo() throw() { return _pInfo; };
+					inline CMachineInfo * GetInfo() throw() { return _pInfo; }
 				private:
 					///\todo move this to the proxy class
 					CMachineInfo * _pInfo;
@@ -158,7 +158,7 @@ namespace psycle
 			///\name calls to the plugin side go thru the proxy
 			///\{
 				/// calls to the plugin side go thru the proxy
-				public:  host::proxy & proxy() throw() { return proxy_; };
+				public:  host::proxy & proxy() throw() { return proxy_; }
 				private: host::proxy   proxy_;
 			///\}
 
@@ -167,7 +167,7 @@ namespace psycle
 				private:
 					static PluginFxCallback _callback;
 				public:
-					inline static PluginFxCallback * GetCallback() throw() { return &_callback; };
+					inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
 			///\}
 
 			///\name signal/event processing
@@ -183,7 +183,7 @@ namespace psycle
 			///\name parameter tweaking
 			///\{
 				public:
-					virtual int  GetNumCols   () { return GetInfo()->numCols; };
+					virtual int  GetNumCols   () { return GetInfo()->numCols; }
 					virtual int  GetNumParams () { return GetInfo()->numParameters; }
 					virtual void GetParamName (int numparam, char * name);
 					virtual void GetParamRange(int numparam, int & minval,int & maxval);

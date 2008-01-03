@@ -465,7 +465,7 @@ namespace psycle { namespace host {
 			{
 				m_AssignNoteToSample[i]=other.m_AssignNoteToSample[i];
 			}
-		};
+		}
 
 		// Properties
 		
@@ -476,7 +476,7 @@ namespace psycle { namespace host {
 		std::string& Name(){return m_Name;}
 		void Name(const std::string& name) { m_Name= name; }
 
-		const std::uint16_t Lines(){ return m_Lines;};
+		const std::uint16_t Lines(){ return m_Lines;}
 		void Lines(const std::uint16_t value){ m_Lines = value;}
 
 		Envelope* const AmpEnvelope(){ return &m_AmpEnvelope;}
@@ -596,7 +596,7 @@ namespace psycle { namespace host {
 	///\todo : implement the following for inter-XMSampler sharing of instruments.
 	class SampleList{
 	public:
-		SampleList(){top=0;};
+		SampleList(){top=0;}
 		~SampleList(){};
 		int AddSample(XMInstrument::WaveData &wave)
 		{

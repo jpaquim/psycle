@@ -1369,9 +1369,9 @@ fluid_midi_event_t* fluid_midi_parser_parse(fluid_midi_parser_t* parser, unsigne
 			parser->event.type = c;
 			parser->status = 0; /* clear the status */
 			return &parser->event;
-		};
+		}
 		return NULL;
-	};
+	}
   
 	/*********************************************************************/
 	/* 'Process' system common messages (again, just skip them)          */
@@ -1387,7 +1387,7 @@ fluid_midi_event_t* fluid_midi_parser_parse(fluid_midi_parser_t* parser, unsigne
 		 * Note: system common cancels running status. */
 		parser->status = 0;
 		return NULL;
-	};
+	}
   
 	/*********************************************************************/
 	/* Process voice category messages:                                  */
@@ -1408,7 +1408,7 @@ fluid_midi_event_t* fluid_midi_parser_parse(fluid_midi_parser_t* parser, unsigne
 		/* of which we have read 0 at this time. */
 		parser->nr_bytes = 0;
 		return NULL;
-	};
+	}
 
 	/*********************************************************************/
 	/* Process data                                                      */
@@ -1419,18 +1419,18 @@ fluid_midi_event_t* fluid_midi_parser_parse(fluid_midi_parser_t* parser, unsigne
 		/* We are not interested in the event currently received.
 		 * Discard the data. */
 		return NULL;
-	};
+	}
 
 	/* Store the first couple of bytes */
 	if (parser->nr_bytes < FLUID_MIDI_PARSER_MAX_PAR){
 		parser->p[parser->nr_bytes]=c;
-	};
+	}
 	parser->nr_bytes++;
 
 	/* Do we still need more data to get this event complete? */
 	if (parser->nr_bytes < parser->nr_bytes_total){
 		return NULL;
-	};
+	}
   
 	/*********************************************************************/
 	/* Send the event                                                    */

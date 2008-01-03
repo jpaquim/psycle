@@ -71,7 +71,7 @@ public:
 		default:
 			Plugin::describe(out, parameter);
 		}
-	};
+	}
 
 	Delay() : Plugin(information()) {}
 	virtual inline ~Delay() throw() {}
