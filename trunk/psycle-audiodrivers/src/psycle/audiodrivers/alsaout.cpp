@@ -1,4 +1,3 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
 /******************************************************************************
 *  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
 *                                                                             *
@@ -23,51 +22,68 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
+#include <thread>
+#include <boost/bind.hpp>
 namespace psy { namespace core {
-
-static uint32_t muldiv(uint32_t a, uint32_t b, uint32_t c) {
-	return ((uint64_t)a*b+(c>>1))/c;
-}
 
 AlsaOut::AlsaOut()
 	:
 		AudioDriver(),
-		//_timerActive(), ///\todo remove?
 		_callbackContext(),
 		_pCallback(),
-		threadid(),
 		_initialized(),
 		rate(),
 		channels(),
-		//		buffer_time(),
-		//		period_time(),
+		buffer_time(),
+		period_time(),
 		buffer_size(),
 		period_size(),
 		output(),
 		handle(),
-		enablePlayer(-3),
 		method(),
 		samples(),
 		areas(),
 		id(),
 		left(),
-		right()
+		right(),
+		running_(),
+		stop_requested_()
 	{
 		std::memset(&format, 0, sizeof format);
 		setDefault();
 	}
 	
 	AlsaOut::~AlsaOut() {
-		if (enablePlayer >0)
-		{
-			enablePlayer = -2;
-			while(enablePlayer != -3) usleep(1000);
-		}
+		Stop();
 		/// \todo free memory here
 	}
 	
 	AlsaOut * AlsaOut::clone() const {
-		return new AlsaOut(*this);
+		// we need a hand-written version because not everything can/must be cloned:
+		// e.g., we don't clone the mutex, the condition, nor the thread state.
+		AlsaOut & r(*new AlsaOut);
+		r._callbackContext = _callbackContext;
+		r._pCallback = _pCallback;
+		r._initialized = _initialized;
+		r.rate = rate;
+		r.format = format;
+		r.channels = channels;
+		r.buffer_time = buffer_time;
+		r.period_time = period_time;
+		r.buffer_size = buffer_size;
+		r.period_size = period_size;
+		r.output = output;
+		r.handle = handle;
+		r.method = method;
+		r.samples = samples;
+		r.areas = areas;
+		r.id = id;
+		r.left = left;
+		r.right = right;
+		// doesn't make sense to copy the thread state since we don't clone the thread!
+		r.running_ = false;
+		r.stop_requested_ = false;
+		return &r;
 	}
 	
 	AudioDriverInfo AlsaOut::info() const {
@@ -81,68 +97,10 @@ AlsaOut::AlsaOut()
 		//audioStart();
 	}
 	
-	bool AlsaOut::Enable(bool e) {
-		return e ? Start() : Stop();
-	}
-	
 	bool AlsaOut::Start() {
-		// start thread (might already be running, but that is ok.)
-		///\todo needs to use proper thread synchronisation to read a thread-shared datum
-		if(!audioStart()) return false;
-
-		// make thread start using the callback
-		enablePlayer = 1;
-		while(enablePlayer != 2) usleep(1000); ///\todo sleeping is bad
-		return true;
-	}
-	
-	bool AlsaOut::Stop() {
-		//_timerActive = false; ///\todo remove?
-		audioStop();
-		return true;
-	}
-	
-	void AlsaOut::configure() {
-		///\todo put empty definition in header file
-	}
-	
-	void AlsaOut::setDefault() {
-		rate = 44100; // stream rate
-		format = SND_PCM_FORMAT_S16; // sample format
-		channels = 2; // count of channels
-		// safe values, and usual ones too on other programs
-		//buffer_time = 200000;
-		//period_time = 20000;
+		// return immediatly if the thread is already running
+		if(running_) return true;
 		
-		buffer_size=0;
-		period_size=0;
-		output = NULL;
-		//AlsaOut::enablePlayer = -1; // -3: error, -2: force stop, -1: has stopped, 0: stop!, 1: play!, 2: is playing
-		
-		AudioDriverSettings settings(this->settings());
-		{
-			settings.setSamplesPerSec(44100);
-			settings.setBufferSize(8192);
-			settings.setBlockSize(1024);
-			settings.setBlockCount(8);
-			char const * const env(std::getenv("ALSA_CARD"));
-			if(env) settings.setDeviceName(env);
-			else settings.setDeviceName("default");
-		}
-		this->setSettings(settings);
-	}
-	
-	int AlsaOut::audioStop() {
-		if(enablePlayer < 0) return 1;
-		enablePlayer = 0;
-		while (enablePlayer >= 0) usleep(1000); ///\todo sleeping is bad
-		return 1;
-	}
-	
-	/// starts the alsa thread
-	int AlsaOut::audioStart() {
-		if (enablePlayer >= -1) return 1;
-		enablePlayer = -3;
 		int err;
 		snd_pcm_hw_params_t *hwparams;
 		snd_pcm_sw_params_t *swparams;
@@ -153,38 +111,38 @@ AlsaOut::AlsaOut()
 		err = snd_output_stdio_attach(&output, stdout, 0);
 		if (err < 0) {
 			std::cerr << "psycle: alsa: attaching output failed: " << snd_strerror(err) << '\n';
-			return 0;
+			return false;
 		}
 		
 		std::cout << "psycle: alsa: playback device is: " << settings().deviceName() << '\n';
-		std::cout << "psycle: alsa: stream parameters are: " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
+		std::cout << "psycle: alsa: stream parameters are; " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
 		std::cout << "psycle: alsa: using transfer method: " << "write" << '\n'; ///\todo parametrable?
 		
 		if((err = snd_pcm_open(&handle, settings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
 			std::cerr << "psycle: alsa: playback open error: " << snd_strerror(err) << '\n';
-			return 0;
+			return false;
 		}
 		
 		if((err = set_hwparams(hwparams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
 			std::cerr << "psycle: alsa: setting of hwparams failed: " << snd_strerror(err) << '\n';
-			return 0;
+			return false;
 		}
 		
 		if((err = set_swparams(swparams)) < 0) {
 			std::cerr << "psycle: alsa: setting of swparams failed: " << snd_strerror(err) << '\n';
-			return 0;
+			return false;
 		}
 		
-		samples = (short int*) malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
+		samples = (std::int16_t*) malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
 		if(!samples) {
 			std::cerr << "out of memory\n";
-			return 0;
+			return false;
 		}
 		
 		areas = (snd_pcm_channel_area_t*) calloc(channels, sizeof(snd_pcm_channel_area_t));
 		if(!areas) {
 			std::cerr << "out of memory\n";
-			return 0;
+			return false;
 		}
 		
 		for(unsigned int chn(0); chn < channels; ++chn) {
@@ -193,17 +151,119 @@ AlsaOut::AlsaOut()
 			areas[chn].step = channels * 16;
 		}
 		
-		enablePlayer = 0;
-		if(pthread_create(&threadid, 0 ,&AlsaOut::audioOutThread, (void*) this)) {
-			enablePlayer = -3;
-			std::cerr << "psycle: alsa: failed to create posix thread.\n";
+		std::thread t(boost::bind(&AlsaOut::thread_function, this));
+		{ // wait for the thread to be running
+			std::scoped_lock<std::mutex> lock(mutex_);
+			while(!running_) condition_.wait(lock);
+		}
+		
+		return true;
+	}
+	
+	void AlsaOut::thread_function() {
+	 	// notify that the thread is now running
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			running_ = true;
+		}
+		condition_.notify_one();
+
+		while(true) {
+			{ // check whether the thread has been asked to terminate
+				std::scoped_lock<std::mutex> lock(mutex_);
+				if(stop_requested_) goto notify_termination;
+			}
+			FillBuffer(0, period_size);
+			std::int16_t * ptr = samples;
+			int cptr = period_size;
+			while(cptr > 0) {
+				int err = snd_pcm_writei(handle, ptr, cptr);
+				if(err == -EAGAIN) continue;
+				if(err < 0) {
+					if(xrun_recovery(err) < 0) {
+						std::cerr << "psycle: alsa: write error: " << snd_strerror(err) << '\n';
+						goto notify_termination;
+					}
+					break; // skip one period
+				}
+				ptr += err * channels;
+				cptr -= err;
+			}
+			std::this_thread::yield(); ///\todo is this useful?
+		}
+
+		// notify that the thread is not running anymore
+		notify_termination:
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			running_ = false;
+		}
+		condition_.notify_one();
+	}
+
+	///   Underrun and suspend recovery
+	int AlsaOut::xrun_recovery(int err) {
+		if (err == -EPIPE) { // under-run
+			err = snd_pcm_prepare(handle);
+			if(err < 0) std::cerr << "psycle: alsa: cannot recover from under-run, prepare failed: " << snd_strerror(err) << '\n';
+			return 0;
+		} else if(err == -ESTRPIPE) {
+			while((err = snd_pcm_resume(handle)) == -EAGAIN)
+			 	/// wait until the suspend flag is released
+				std::this_thread::yield(); ///\todo any other way?
+			if(err < 0) {
+				err = snd_pcm_prepare(handle);
+				if(err < 0) std::cerr << "psycle: alsa: cannot recover from suspend, prepare failed: " << snd_strerror(err) << '\n';
+			}
 			return 0;
 		}
-		return 1;
+		return err;
+	}
+
+	bool AlsaOut::Stop() {
+		// return immediatly if the thread is not running
+		if(!running_) return true;
+
+		// ask the thread to terminate
+		{
+				std::scoped_lock<std::mutex> lock(mutex_);
+				stop_requested_ = true;
+		}
+		condition_.notify_one();
+		
+		/// join the thread
+		{
+			std::scoped_lock<std::mutex> lock(mutex_);
+			while(running_) condition_.wait(lock);
+			stop_requested_ = false;
+		}
+
+		return true; ///\todo we actually always return true, so the result is useless!
+	}
+	
+	void AlsaOut::setDefault() {
+		rate = 44100; // stream rate
+		format = SND_PCM_FORMAT_S16; // sample format
+		channels = 2; // count of channels
+		// safe values, and usual ones too on other programs
+		buffer_time = 200000;
+		period_time = 20000;
+		
+		buffer_size=0;
+		period_size=0;
+		output = NULL;
+		
+		AudioDriverSettings settings(this->settings());
+		{
+			char const * const env(std::getenv("ALSA_CARD"));
+			if(env) settings.setDeviceName(env);
+			else settings.setDeviceName("default");
+		}
+		this->setSettings(settings);
 	}
 	
 	void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
-		signed short *samples[channels];
+		std::int16_t *samples[channels];
 		int steps[channels];
 		// verify and prepare the contents of areas
 		for (unsigned int chn(0); chn < channels; ++chn) {
@@ -212,7 +272,7 @@ AlsaOut::AlsaOut()
 				s << "psycle: alsa: areas[" << chn << "].first == " << areas[chn].first << ", aborting.";
 				throw std::runtime_error(s.str().c_str());
 			}
-			samples[chn] = (signed short *)(((unsigned char *)areas[chn].addr) + (areas[chn].first / 8));
+			samples[chn] = (std::int16_t *)(((unsigned char *)areas[chn].addr) + (areas[chn].first / 8));
 			if ((areas[chn].step % 16) != 0) {
 				std::ostringstream s;
 				s <<  "psycle: alsa: areas[" << chn << "].step == " << areas[chn].step << ", aborting.";
@@ -230,7 +290,6 @@ AlsaOut::AlsaOut()
 	}
 	
 	int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) {
-		unsigned int rrate;
 		snd_pcm_uframes_t size;
 		int err;
 		
@@ -266,20 +325,22 @@ AlsaOut::AlsaOut()
 			std::cerr << "psycle: alsa: channels count (" << channels << ") not available for playback: " << snd_strerror(err) << '\n';
 			return err;
 		}
+
 		// set the stream rate
-		rrate = rate;
-		err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
-		if (err < 0) {
-			std::cerr << "psycle: alsa: rate "<< rate << "Hz not available for playback: " << snd_strerror(err) << '\n';
-			return err;
-		}
-		if(rrate != rate) {
-			std::cerr << "psycle: alsa: rate does not match (requested " << rate << "Hz, got " << err << "Hz)\n";
-			return -EINVAL;
+		{
+			unsigned int rrate(rate);
+			err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
+			if (err < 0) {
+				std::cerr << "psycle: alsa: rate "<< rate << "Hz not available for playback: " << snd_strerror(err) << '\n';
+				return err;
+			}
+			if(rrate != rate) {
+				std::cerr << "psycle: alsa: rate does not match (requested " << rate << "Hz, got " << err << "Hz)\n";
+				return -EINVAL;
+			}
 		}
 		
 		// set the buffer time
-		unsigned int buffer_time = muldiv(settings().bufferSize(),1000000,settings().samplesPerSec());
 		err = snd_pcm_hw_params_set_buffer_time_near(handle, params, &buffer_time, 0);
 		if (err < 0) {
 			std::cerr << "psycle: alsa: unable to set buffer time " << buffer_time << " for playback: " << snd_strerror(err) << '\n';
@@ -296,7 +357,6 @@ AlsaOut::AlsaOut()
 		buffer_size = size;
 
 		// set the period time
-		unsigned int period_time = muldiv(settings().blockSize(),1000000,settings().samplesPerSec());
 		err = snd_pcm_hw_params_set_period_time_near(handle, params, &period_time, 0);
 		if (err < 0) {
 			std::cerr << "psycle: alsa: unable to set period time " << period_time << " for playback: " << snd_strerror(err) << '\n';
@@ -356,76 +416,14 @@ AlsaOut::AlsaOut()
 		return 0;
 	}
 	
-	///   Underrun and suspend recovery
-	int AlsaOut::xrun_recovery(int err) {
-		if (err == -EPIPE) { // under-run
-			err = snd_pcm_prepare(handle);
-			if(err < 0) std::cerr << "psycle: alsa: cannot recover from under-run, prepare failed: " << snd_strerror(err) << '\n';
-			return 0;
-		} else if(err == -ESTRPIPE) {
-			while((err = snd_pcm_resume(handle)) == -EAGAIN)
-				sleep(1); /// wait until the suspend flag is released
-			if(err < 0) {
-				err = snd_pcm_prepare(handle);
-				if(err < 0) std::cerr << "psycle: alsa: cannot recover from suspend, prepare failed: " << snd_strerror(err) << '\n';
-			}
-			return 0;
-		}
-		return err;
-	}
-	
-	int AlsaOut::write_loop() {
-		signed short *ptr;
-		int err, cptr;
-		while(true) {
-			if(enablePlayer > 0) {
-				enablePlayer = 2;
-				FillBuffer(0, period_size);
-				ptr = samples;
-				cptr = period_size;
-				while(cptr > 0) {
-					err = snd_pcm_writei(handle, ptr, cptr);
-					if(err == -EAGAIN) continue; ///\todo what about using synchronisation?
-					if(err < 0) {
-						if (xrun_recovery(err) < 0) {
-							std::cerr << "psycle: alsa: write error: " << snd_strerror(err) << '\n';
-							return -1;
-						}
-						break; // skip one period
-					}
-					ptr += err * channels;
-					cptr -= err;
-				}
-			} else if(enablePlayer == -2) return 0;
-			else { 
-				enablePlayer = -1;
-				return 0;
-			}
-			usleep(1000); ///\todo sleeping is bad
-		}
-	}
-
 	#if 0 ///\todo remove? This appears to not be used  
 		struct transfer_method {
 			const char *name;
 			snd_pcm_access_t access;
-			int (*transfer_loop)(snd_pcm_t *handle, signed short *samples, snd_pcm_channel_area_t *areas);
+			int (*transfer_loop)(snd_pcm_t *handle, std::int16_t *samples, snd_pcm_channel_area_t *areas);
 		};
 	#endif
-	
-	void* AlsaOut::audioOutThread( void * ptr ) {
-		AlsaOut* pDriver = (AlsaOut*) ptr;
-		if (pDriver->areas) pDriver->areas[0] = pDriver->areas[0];
-		int err = pDriver->write_loop();
-		if (err < 0) printf("Transfer failed: %s\n", snd_strerror(err));
-		pDriver->enablePlayer = -3;
-		return NULL;
-	}
-	
-	bool AlsaOut::Initialized( ) {
-		return _initialized;
-	}
-	
+
 }}
 #endif // defined PSYCLE__ALSA_AVAILABLE
 

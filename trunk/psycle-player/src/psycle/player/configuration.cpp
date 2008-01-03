@@ -104,6 +104,15 @@ Configuration::Configuration()
 
 	loadConfig();
 }
+Configuration::~Configuration()
+{
+	std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
+	while ( it != driverMap_.end())
+	{
+		delete(it->second);
+		++it;
+	}
+}
 
 void Configuration::addAudioDriver(AudioDriver* driver)
 {

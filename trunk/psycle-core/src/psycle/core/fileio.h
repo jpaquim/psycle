@@ -164,6 +164,7 @@ class RiffFile {
 			} else {
 				assert(!"Error: Couldn't determine 32 bit float endianness");
 			}
+			return false;
 		}
 
 		template<typename T>
