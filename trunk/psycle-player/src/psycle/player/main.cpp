@@ -1,4 +1,5 @@
 #include "configuration.hpp"
+#include "psycle/audiodrivers/audiodriver.h"
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
 #include <iostream>
