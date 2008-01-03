@@ -199,7 +199,7 @@ fluid_tc2sec_delay(fluid_real_t tc)
    * from -12000 to 5000 */
   if (tc <= -32768.0f) {
 	  return (fluid_real_t) 0.0f;
-  };
+  }
   if (tc < -12000.) {
 	  tc = (fluid_real_t) -12000.0f;
   }

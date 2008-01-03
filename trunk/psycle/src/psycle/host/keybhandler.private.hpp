@@ -697,20 +697,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					entry._note = note;
 					entry._mach = _pSong->seqBus;
 
-					// implement lock sample to machine here.
-					// if the current machine is a sampler, check 
-					// if current sample is locked to a machine.
-					// if so, switch entry._mach to that machine number
-					if (((Machine*)_pSong->_pMachine[_pSong->seqBus])->_type == MACH_SAMPLER)
-					{
-						if ((_pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
-							&& (_pSong->_pInstrument[_pSong->auxcolSelected]->_LOCKINST == true))
-						{
-							entry._mach = _pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine;
-						}
-					}
-					//
-
 					if ( note < notecommands::release)
 					{
 						if (Global::pConfig->_RecordTweaks)
@@ -743,12 +729,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						entry._inst = _pSong->auxcolSelected;
 					}
 
-//					Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
-//altered for locking sample to machine by alk
 					Machine *tmac = _pSong->_pMachine[entry._mach];
+					// implement lock sample to machine here.
+					// if the current machine is a sampler, check 
+					// if current sample is locked to a machine.
+					// if so, switch entry._mach to that machine number
 
 					if (tmac)
 					{
+						if (((Machine*)_pSong->_pMachine[_pSong->seqBus])->_type == MACH_SAMPLER)
+						{
+							if ((_pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
+								&& (_pSong->_pInstrument[_pSong->auxcolSelected]->_LOCKINST == true))
+							{
+								entry._mach = _pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine;
+								tmac = _pSong->_pMachine[entry._mach];
+								if (!tmac) return;
+							}
+						}
 						if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 						{
 							entry._inst = _pSong->auxcolSelected;

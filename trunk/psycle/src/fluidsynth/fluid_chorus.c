@@ -172,9 +172,9 @@ new_fluid_chorus(fluid_real_t sample_rate)
 	chorus->sinc_table[i][ii] = (fluid_real_t)sin(i_shifted * M_PI) / (M_PI * i_shifted);
 	/* Hamming window */
 	chorus->sinc_table[i][ii] *= (fluid_real_t)0.5 * (1.0 + cos(2.0 * M_PI * i_shifted / (fluid_real_t)INTERPOLATION_SAMPLES));
-      };
-    };
-  };
+      }
+    }
+  }
 
   /* allocate lookup tables */
   chorus->lookup_tab = FLUID_ARRAY(int, (int) (chorus->sample_rate / MIN_SPEED_HZ));
@@ -193,7 +193,7 @@ new_fluid_chorus(fluid_real_t sample_rate)
 
   if (fluid_chorus_init(chorus) != FLUID_OK){
     goto error_recovery;
-  };
+  }
   
   return chorus;
 
@@ -341,7 +341,7 @@ fluid_chorus_update(fluid_chorus_t* chorus)
     fluid_log(FLUID_WARN, "chorus: number blocks larger than max. allowed! Setting value to %d.",
 	     MAX_CHORUS);
     chorus->new_number_blocks = MAX_CHORUS;
-  };
+  }
   
   if (chorus->new_speed_Hz < MIN_SPEED_HZ) {
     fluid_log(FLUID_WARN, "chorus: speed is too low (min %f)! Setting value to min.", 
@@ -392,7 +392,7 @@ fluid_chorus_update(fluid_chorus_t* chorus)
     chorus->type = FLUID_CHORUS_MOD_SINE;
     fluid_chorus_sine(chorus->lookup_tab, chorus->modulation_period_samples, 
 		     modulation_depth_samples);
-  };
+  }
   
   for (i = 0; i < chorus->number_blocks; i++) {
     /* Set the phase of the chorus blocks equally spaced */
@@ -461,17 +461,17 @@ void fluid_chorus_processmix(fluid_chorus_t* chorus, fluid_real_t *in,
       pos_subsamples &= INTERPOLATION_SUBSAMPLES_ANDMASK;
       
       for (ii = 0; ii < INTERPOLATION_SAMPLES; ii++){
-	/* Add the delayed signal to the chorus sum d_out Note: The
-	 * delay in the delay line moves backwards for increasing
-	 * delay!*/
+		/* Add the delayed signal to the chorus sum d_out Note: The
+		 * delay in the delay line moves backwards for increasing
+		 * delay!*/
 
-	/* The & in chorusbuf[...] is equivalent to a division modulo
-	   MAX_SAMPLES, only faster. */
-	d_out += (chorus->chorusbuf[pos_samples & MAX_SAMPLES_ANDMASK] 
-		  * chorus->sinc_table[ii][pos_subsamples]);
+		/* The & in chorusbuf[...] is equivalent to a division modulo
+		   MAX_SAMPLES, only faster. */
+		d_out += (chorus->chorusbuf[pos_samples & MAX_SAMPLES_ANDMASK] 
+			  * chorus->sinc_table[ii][pos_subsamples]);
 
-	pos_samples--;
-      };
+		pos_samples--;
+      }
       /* Cycle the phase of the modulating LFO */
       chorus->phase[i]++;
       chorus->phase[i] %= (chorus->modulation_period_samples);
@@ -529,16 +529,16 @@ void fluid_chorus_processreplace(fluid_chorus_t* chorus, fluid_real_t *in,
       pos_subsamples &= INTERPOLATION_SUBSAMPLES_ANDMASK;
       
       for (ii = 0; ii < INTERPOLATION_SAMPLES; ii++){
-	/* Add the delayed signal to the chorus sum d_out Note: The
-	 * delay in the delay line moves backwards for increasing
-	 * delay!*/
+		/* Add the delayed signal to the chorus sum d_out Note: The
+		 * delay in the delay line moves backwards for increasing
+		 * delay!*/
 
-	/* The & in chorusbuf[...] is equivalent to a division modulo
-	   MAX_SAMPLES, only faster. */
-	d_out += chorus->chorusbuf[pos_samples & MAX_SAMPLES_ANDMASK] * chorus->sinc_table[ii][pos_subsamples];
+		/* The & in chorusbuf[...] is equivalent to a division modulo
+		   MAX_SAMPLES, only faster. */
+		d_out += chorus->chorusbuf[pos_samples & MAX_SAMPLES_ANDMASK] * chorus->sinc_table[ii][pos_subsamples];
 
-	pos_samples--;
-      };
+		pos_samples--;
+      }
       /* Cycle the phase of the modulating LFO */
       chorus->phase[i]++;
       chorus->phase[i] %= (chorus->modulation_period_samples);

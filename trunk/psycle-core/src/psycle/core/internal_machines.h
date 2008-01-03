@@ -18,7 +18,7 @@ namespace psy {
 			Dummy(Machine *mac);
 			virtual ~Dummy() throw();
 			virtual int GenerateAudio(int numSamples);
-			virtual std::string GetName() const { return _psName; };
+			virtual std::string GetName() const { return _psName; }
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
 			bool wasVST;
@@ -39,7 +39,7 @@ namespace psy {
 			virtual void Stop();
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
-			virtual std::string GetName() const { return _psName; };
+			virtual std::string GetName() const { return _psName; }
 			virtual void GetParamName(int numparam,char *name) const;
 			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
 			virtual void GetParamValue(int numparam,char *parVal) const;
@@ -74,7 +74,7 @@ namespace psy {
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual int GenerateAudio( int numSamples );
-			virtual std::string GetName() const { return _psName; };
+			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
@@ -142,17 +142,17 @@ namespace psy {
 			virtual int GenerateAudio(int numSamples );
 			void FxSend(int numSamples );
 			void Mix(int numSamples);
-			virtual std::string GetName() const { return _psName; };
+			virtual std::string GetName() const { return _psName; }
 			virtual int GetNumCols() const;
 			virtual void GetParamName(int numparam,char *name) const;
-			virtual void GetParamRange(int numparam, int &minval, int &maxval) const { minval=0; maxval=100; };
+			virtual void GetParamRange(int numparam, int &minval, int &maxval) const { minval=0; maxval=100; }
 			virtual void GetParamValue(int numparam,char *parVal) const;
 			virtual int GetParamValue(int numparam) const;
 			virtual bool SetParameter(int numparam,int value);
-			virtual int GetAudioInputs() { return 24; };
-			virtual int GetAudioOutputs() { return 1; };
+			virtual int GetAudioInputs() { return 24; }
+			virtual int GetAudioOutputs() { return 1; }
 			virtual std::string GetAudioInputName(InPort::id_type port);
-			virtual std::string GetAutioOutputName(OutPort::id_type port) { std::string rettxt = "Stereo Output"; return rettxt; };
+			virtual std::string GetAutioOutputName(OutPort::id_type port) { std::string rettxt = "Stereo Output"; return rettxt; }
 			virtual bool ConnectTo(Machine & dst, InPort::id_type dstport = InPort::id_type(0), OutPort::id_type outport = OutPort::id_type(0), float volume = 1.0f);
 			virtual int GetSend(int i){ assert(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool SendValid(int i) { assert(i<MAX_CONNECTIONS); return _sendValid[i]; }
@@ -208,7 +208,7 @@ namespace psy {
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
-			virtual std::string GetName() const { return _psName; };
+			virtual std::string GetName() const { return _psName; }
 			virtual void GetParamName(int numparam,char *name) const;
 			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
 			virtual void GetParamValue(int numparam,char *parVal) const;

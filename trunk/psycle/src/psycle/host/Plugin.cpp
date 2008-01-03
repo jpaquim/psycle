@@ -259,7 +259,7 @@ namespace psycle
 				return false;
 			}
 			return true;
-		};
+		}
 
 		void Plugin::Free() throw(...)
 		{
@@ -331,7 +331,7 @@ namespace psycle
 				}
 			}
 			return true;
-		};
+		}
 
 		void Plugin::SaveSpecificChunk(RiffFile* pFile)
 		{
@@ -369,7 +369,7 @@ namespace psycle
 				pFile->Write(pData, size2); // Number of parameters
 				zapArray(pData);
 			}
-		};
+		}
 
 		void Plugin::Work(int numSamples)
 		{

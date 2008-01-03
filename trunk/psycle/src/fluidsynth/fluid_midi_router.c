@@ -38,7 +38,7 @@ new_fluid_midi_router(fluid_settings_t* settings, handle_midi_event_func_t handl
   router = FLUID_NEW(fluid_midi_router_t); if (router == NULL){
     FLUID_LOG(FLUID_ERR, "Out of memory");
     return NULL;
-  };
+  }
   
   /* Clear the router, so that error_recovery can safely free all the rules. 
    * Dump functions are also NULLed.
@@ -105,8 +105,8 @@ void fluid_midi_router_destroy_all_rules(fluid_midi_router_t* router){
       next_rule=current_rule->next;
       FLUID_FREE(current_rule);
       current_rule=next_rule;
-    };
-  };
+    }
+  }
 }
 
 /*
@@ -153,13 +153,13 @@ int fluid_midi_router_create_default_rules(fluid_midi_router_t* router)
      */
     if (fluid_midi_router_begin(router, rules[i]) != FLUID_OK) goto error_recovery;
     if (fluid_midi_router_end(router) != FLUID_OK) goto error_recovery;
-  };
+  }
 
   return FLUID_OK;
  error_recovery:
   FLUID_LOG(FLUID_ERR, "fluid_midi_router_create_default_rules failed");
   return FLUID_FAILED;
-};
+}
 
 /* Purpose:
  * Resets the new-rule registers in 'router' to their default values.
@@ -190,7 +190,7 @@ int fluid_midi_router_begin(fluid_midi_router_t* router, fluid_midi_router_rule_
  error_recovery:
   FLUID_LOG(FLUID_ERR, "fluid_midi_router_begin failed");
   return FLUID_FAILED;
-};
+}
 
 /* Purpose:
  * Concludes a sequence of commands:
@@ -280,7 +280,7 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
      */
     event->type = NOTE_OFF;
     event->param2=127;
-  };
+  }
   
   /* Lock the rules table, so that for example the shell thread doesn't
    * clear the rules we are just working with */
@@ -347,7 +347,7 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
      * which calls us here, has raised priority.*/
     if (rule->state == MIDIRULE_DONE){
       goto do_next_rule;
-    };
+    }
 
     /* Channel window */
     if (rule->chan_min > rule->chan_max){
@@ -360,7 +360,7 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
       if (event->channel > rule->chan_max || event->channel < rule->chan_min){
 	goto do_next_rule;
       }
-    };
+    }
 
     /* Par 1 window */
     if (rule->par1_min > rule->par1_max){
@@ -373,7 +373,7 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
       if (event_par1 > rule->par1_max || event_par1 < rule->par1_min){
 	goto do_next_rule;
       }
-    };
+    }
     
     /* Par 2 window (only applies to event types, which have 2 pars)
      * For noteoff events, velocity switching doesn't make any sense.
@@ -386,12 +386,12 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
 	  goto do_next_rule;
 	}
       } else {
-	/* Normal rule: Exclude everything < max or > min (but not min/max)*/
-	if (event_par2 > rule->par2_max || event_par2 < rule->par2_min){
-	  goto do_next_rule;
-	};
-      };
-    };
+		/* Normal rule: Exclude everything < max or > min (but not min/max)*/
+		if (event_par2 > rule->par2_max || event_par2 < rule->par2_min){
+		  goto do_next_rule;
+		}
+      }
+    }
     
     /* Channel scaling / offset
      * Note: rule->chan_mul will probably be 0 or 1. If it's 0, input from all 
@@ -405,20 +405,20 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
     /* Par 2 scaling / offset, if applicable */
     if (event_has_par2){
       par2=(int)((fluid_real_t)event_par2 * (fluid_real_t)rule->par2_mul + (fluid_real_t)rule->par2_add + 0.5);
-    };
+    }
     
     /* Channel range limiting */
     if (chan < 0){
       chan=0;
       /* Upper limit is hard to implement, because the number of MIDI channels can be changed via settings any time. */
-    };
+    }
 
     /* Par1 range limiting */
     if (par1 < 0){
       par1=0;
     } else if (par1 > par1_max){
       par1=par1_max;
-    };
+    }
 
     /* Par2 range limiting */
     if (event_has_par2){
@@ -426,8 +426,8 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
 	par2=0;
       } else if (par2 > par2_max){
 	par2=par2_max;
-      };
-    };
+      }
+    }
 
     /* At this point we have to create an event of event->type on 'chan' with par1 (maybe par2).
      * We keep track on the state of noteon and sustain pedal events. If the application tries
@@ -442,31 +442,31 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
       ){
       /* Noteon or sustain pedal down event generated */
       if (rule->keys_cc[par1] == 0){
-	rule->keys_cc[par1]=1;
-	rule->pending_events++;
-      };
+		rule->keys_cc[par1]=1;
+		rule->pending_events++;
+      }
     } else if (
       event->type == NOTE_OFF 
       || (event->type == CONTROL_CHANGE && par1 == SUSTAIN_SWITCH && par2 < 64)
       ){
       /* Noteoff or sustain pedal up event generated */
       if (rule->keys_cc[par1] > 0){
-	rule->keys_cc[par1]=0;
-	rule->pending_events--;
-	negative_event=1;
-      };
-    };
+		rule->keys_cc[par1]=0;
+		rule->pending_events--;
+		negative_event=1;
+      }
+    }
 
     if (rule->state == MIDIRULE_WAITING){
       if (negative_event){
-	if (rule->pending_events == 0){
-	  /* There are no more pending events in the rule - all keys are up.
-	   * Change its state to 'unused', it will be cleared up at the next
-	   * opportunity to run 'free' safely.
-	   * Note: After this, the rule may disappear at any time  
-	   */
-	    rule->state=MIDIRULE_DONE;
-	};
+		if (rule->pending_events == 0){
+		  /* There are no more pending events in the rule - all keys are up.
+		   * Change its state to 'unused', it will be cleared up at the next
+		   * opportunity to run 'free' safely.
+		   * Note: After this, the rule may disappear at any time  
+		   */
+			rule->state=MIDIRULE_DONE;
+		}
       } else {
 
 	/* This rule only exists because of some unfinished business:
@@ -475,8 +475,8 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
 	 * So we just ignore the event and go on with the next rule.
 	 */
 	goto do_next_rule;
-      };
-    };
+      }
+    }
  
     /* At this point it is decided, what is sent to the synth.
      * Create a new event and make the appropriate call 
@@ -499,9 +499,9 @@ fluid_midi_router_handle_midi_event(void* data, fluid_midi_event_t* event)
       ret_val=FLUID_FAILED;
     }
 
-  do_next_rule:
+    do_next_rule:
     rule=next_rule;
-  };
+  }
 
   /* We are finished with the rule tables. Allow the other threads to do their job. */
   fluid_mutex_unlock(router->ruletables_mutex);
@@ -527,7 +527,7 @@ int fluid_midi_router_handle_clear(fluid_synth_t* synth, int ac, char** av, flui
   return 0;
  error_recovery:
   return -1;
-};
+}
 
 int fluid_midi_router_handle_default(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
 {
@@ -545,7 +545,7 @@ int fluid_midi_router_handle_default(fluid_synth_t* synth, int ac, char** av, fl
   if (fluid_midi_router_create_default_rules(router) != FLUID_OK){
     FLUID_LOG(FLUID_ERR, "create_default_rules failed");
     goto error_recovery;
-  };
+  }
 
   /* Free unused rules */
   fluid_midi_router_free_unused_rules(router);
@@ -553,7 +553,7 @@ int fluid_midi_router_handle_default(fluid_synth_t* synth, int ac, char** av, fl
   return 0;
  error_recovery:
   return -1;
-};
+}
 
 int fluid_midi_router_handle_begin(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
 {
@@ -577,16 +577,16 @@ int fluid_midi_router_handle_begin(fluid_synth_t* synth, int ac, char** av, flui
     dest=& router->channel_pressure_rules;
   } else if (FLUID_STRCMP(av[0],"kpress") == 0){
     dest=& router->key_pressure_rules;
-  };
+  }
   
   if (dest == NULL){
       fluid_ostream_printf(out, "router_begin args: note, cc, prog, pbend, cpress, kpress\n");
       goto error_recovery;
-  };
+  }
  
   if (fluid_midi_router_begin(router, dest) != FLUID_OK){
     goto error_recovery;
-  };
+  }
 
   /* Free unused rules (give it a try) */
   fluid_midi_router_free_unused_rules(router);
@@ -595,7 +595,7 @@ int fluid_midi_router_handle_begin(fluid_synth_t* synth, int ac, char** av, flui
 
  error_recovery:
   return -1;
-};
+}
 
 int fluid_midi_router_handle_end(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
 {
@@ -609,7 +609,7 @@ int fluid_midi_router_handle_end(fluid_synth_t* synth, int ac, char** av, fluid_
   if (fluid_midi_router_end(router) != FLUID_OK){
     FLUID_LOG(FLUID_ERR, "midi_router_end failed");
     goto error_recovery;
-  }; 
+  } 
   
   /* Free unused rules (give it a try) */
   fluid_midi_router_free_unused_rules(router);
@@ -618,7 +618,7 @@ int fluid_midi_router_handle_end(fluid_synth_t* synth, int ac, char** av, fluid_
 
  error_recovery:
   return -1;
-};
+}
 
 int fluid_midi_router_handle_chan(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
 {
@@ -641,7 +641,7 @@ int fluid_midi_router_handle_chan(fluid_synth_t* synth, int ac, char** av, fluid
 
  error_recovery:
   return -1;
-};
+}
 
 int fluid_midi_router_handle_par1(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
 {
@@ -664,7 +664,7 @@ int fluid_midi_router_handle_par1(fluid_synth_t* synth, int ac, char** av, fluid
 
  error_recovery:
   return -1;
-};
+}
 
 int fluid_midi_router_handle_par2(fluid_synth_t* synth, int ac, char** av, fluid_ostream_t out)
 {
@@ -686,7 +686,7 @@ int fluid_midi_router_handle_par2(fluid_synth_t* synth, int ac, char** av, fluid
 
  error_recovery:
   return -1;
-};
+}
 
 void fluid_midi_router_disable_all_rules(fluid_midi_router_t* router)
 {
@@ -720,12 +720,12 @@ void fluid_midi_router_disable_all_rules(fluid_midi_router_t* router)
       } else {
 	/* Wait mode */
 	current_rule->state=MIDIRULE_WAITING;
-      };
+      }
       current_rule=current_rule->next;
-    };
+    }
     fluid_mutex_unlock(router->ruletables_mutex);
-  };
-};
+  }
+}
 
 void fluid_midi_router_free_unused_rules(fluid_midi_router_t* router)
 {
@@ -780,11 +780,11 @@ void fluid_midi_router_free_unused_rules(fluid_midi_router_t* router)
       } else {
 	/* We have to keep the rule, there is still unfinished business. */
 	p = &current_rule->next;
-      };
-    };
+      }
+    }
     fluid_mutex_unlock(router->ruletables_mutex);
-  };
-};
+  }
+}
   
 /* Purpose:
  * This function demonstrates, how to access incoming MIDI messages.
@@ -832,7 +832,7 @@ int fluid_midi_dump_prerouter(void* data, fluid_midi_event_t* event)
 	break;
   };
   return fluid_midi_router_handle_midi_event((fluid_midi_router_t*) data, event);
-};
+}
 
 /* Purpose:
  * This function demonstrates, how to access MIDI messages going from the MIDI
@@ -876,4 +876,4 @@ int fluid_midi_dump_postrouter(void* data, fluid_midi_event_t* event)
 	break;
   };
   return fluid_synth_handle_midi_event((fluid_synth_t*) data, event);
-};
+}

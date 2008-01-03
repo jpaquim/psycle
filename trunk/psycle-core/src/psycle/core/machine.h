@@ -496,7 +496,7 @@ namespace psy
 					rms.previousLeft=0.;
 					rms.previousRight=0.;
 #endif
-				};
+				}
 
 				///\todo 3 dimensional?
 				virtual void SetPan(int newpan);
@@ -504,10 +504,10 @@ namespace psy
 			///\name ports
 			///\{
 				public:
-					virtual unsigned int GetInPorts() { return numInPorts; };
-					virtual unsigned int GetOutPorts() { return numOutPorts; };
-					virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; };
-					virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; };
+					virtual unsigned int GetInPorts() { return numInPorts; }
+					virtual unsigned int GetOutPorts() { return numOutPorts; }
+					virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; }
+					virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; }
 			///\}
 
 			///\name audio range
@@ -524,8 +524,8 @@ namespace psy
 			///\name amplification of the signal in connections/wires
 			///\{
 				public:
-					virtual void GetWireVolume(Wire::id_type wire, float & result) { result = _inputConVol[wire] * _wireMultiplier[wire]; };
-					virtual void SetWireVolume(Wire::id_type wire, float value) { _inputConVol[wire] = value / _wireMultiplier[wire]; };
+					virtual void GetWireVolume(Wire::id_type wire, float & result) { result = _inputConVol[wire] * _wireMultiplier[wire]; }
+					virtual void SetWireVolume(Wire::id_type wire, float value) { _inputConVol[wire] = value / _wireMultiplier[wire]; }
 					virtual bool GetDestWireVolume(id_type src, Wire::id_type, float & result);
 					virtual bool SetDestWireVolume(id_type src, Wire::id_type, float value);
 			///\}
@@ -533,7 +533,7 @@ namespace psy
 			///\name name
 			///\{
 				public:
-					virtual std::string GetDllName() const { return "built-in"; };
+					virtual std::string GetDllName() const { return "built-in"; }
 					virtual std::string GetName() const = 0;
 
 				public:
@@ -558,10 +558,10 @@ namespace psy
 			///\name more misplaced gui stuff
 			///\{
 				public:
-					virtual int  GetPosX() { return _x; };
-					virtual void SetPosX(int x) {_x = x;};
-					virtual int  GetPosY() { return _y; };
-					virtual void SetPosY(int y) {_y = y;};
+					virtual int  GetPosX() { return _x; }
+					virtual void SetPosX(int x) {_x = x;}
+					virtual int  GetPosY() { return _y; }
+					virtual void SetPosY(int y) {_y = y;}
 
 			///\}
 			///\name states

@@ -712,51 +712,51 @@ namespace psy { namespace core {
 		numOutPorts=numoutputs;
 		outports = new OutPort(*this,0,"Stereo Out");
 	}
-		void Machine::UpdateVuAndStanbyFlag(int numSamples)
-		{
+	void Machine::UpdateVuAndStanbyFlag(int numSamples)
+	{
 #if defined PSYCLE__CONFIGURATION__RMS_VUS
-			_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
-			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
-			// clip values
-			if(temp > 97) temp = 97;
-			if(temp > 0)
-			{
-				_volumeDisplay = temp;
-			}
-			else if (_volumeDisplay>1 ) _volumeDisplay -=2;
+		_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
+		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+		// clip values
+		if(temp > 97) temp = 97;
+		if(temp > 0)
+		{
+			_volumeDisplay = temp;
+		}
+		else if (_volumeDisplay>1 ) _volumeDisplay -=2;
 
-			if ( callbacks->autoStopMachines() )
-			{
-				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples) {
-					rms.count=0;
-					rms.AccumLeft=0.;
-					rms.AccumRight=0.;
-					rms.previousLeft=0.;
-					rms.previousRight=0.;
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
+		if ( callbacks->autoStopMachines() )
+		{
+			if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples) {
+				rms.count=0;
+				rms.AccumLeft=0.;
+				rms.AccumRight=0.;
+				rms.previousLeft=0.;
+				rms.previousRight=0.;
+				_volumeCounter = 0.0f;
+				_volumeDisplay = 0;
+				Standby(true);
 			}
+		}
 #else
-			_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
-			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
-			// clip values
-			if(temp > 97) temp = 97;
-			if(temp > _volumeDisplay) _volumeDisplay = temp;
-			if (_volumeDisplay>0 )--_volumeDisplay;
-			if ( callbacks->autoStopMachines() )
-			{
-				if (_volumeCounter < 8.0f) {
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
+		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
+		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+		// clip values
+		if(temp > 97) temp = 97;
+		if(temp > _volumeDisplay) _volumeDisplay = temp;
+		if (_volumeDisplay>0 )--_volumeDisplay;
+		if ( callbacks->autoStopMachines() )
+		{
+			if (_volumeCounter < 8.0f) {
+				_volumeCounter = 0.0f;
+				_volumeDisplay = 0;
+				Standby(true);
 			}
+		}
 #endif
-		};
+	}
 
 	bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 	{
@@ -772,7 +772,7 @@ namespace psy { namespace core {
 		}
 		pFile->Skip(size - sizeof count - count * sizeof(std::uint32_t));
 		return true;
-	};
+	}
 
 	Machine* Machine::LoadFileChunk(std::string const & plugin_path, CoreSong* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
 	{

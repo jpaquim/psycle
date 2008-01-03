@@ -911,7 +911,7 @@ namespace psycle
 			m_TremoloPos = (m_TremoloPos + m_TremoloSpeed) & 0xFF;
 
 
-		};// Tremolo() -------------------------------------------
+		}// Tremolo() -------------------------------------------
 
 		void XMSampler::Voice::Panbrello()
 		{
@@ -1045,7 +1045,7 @@ namespace psycle
 				return 9216 - ((double)(note + _wave.WaveTune()) * 64.0)
 					- ((double)(_wave.WaveFineTune()) * 0.25); // 0.25 since the range is +-256 for XMSampler as opposed to +-128 for FT.
 			}
-		};
+		}
 
 		const int XMSampler::Voice::PeriodToNote(const double period)
 		{
@@ -1652,7 +1652,7 @@ namespace psycle
 				m_GlobalVolSlideSpeed = -(speed & 0x0F);
 				m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
-		};
+		}
 		void XMSampler::Channel::PanningSlide(int speed)
 		{
 			if(speed == 0){
@@ -1681,7 +1681,7 @@ namespace psycle
 				m_PanSlideSpeed = (speed & 0x0F)/64.0f;
 				PanningSlide();
 			}
-		};
+		}
 		void XMSampler::Channel::ChannelVolumeSlide(int speed)
 		{
 			if(speed == 0){
@@ -1710,7 +1710,7 @@ namespace psycle
 				m_ChanVolSlideSpeed = -(speed & 0x0F)/64.0f;
 				ChannelVolumeSlide();
 			}
-		};
+		}
 		void XMSampler::Channel::PitchSlide(bool bUp,int speed,int note)
 		{
 			if ( speed == 0 ) {
@@ -1786,7 +1786,7 @@ namespace psycle
 					ForegroundVoice()->VolumeSlide();
 				}
 			}
-		};
+		}
 
 		void XMSampler::Channel::Tremor(int parameter)
 		{
@@ -1802,7 +1802,7 @@ namespace psycle
 				ForegroundVoice()->m_TremorTickChange = ForegroundVoice()->m_TremorOnTicks;
 			}
 			m_EffectFlags |= EffectFlag::TREMOR;
-		};
+		}
 		void XMSampler::Channel::Vibrato(int speed,int depth)
 		{
 			if(depth == 0){
@@ -1844,7 +1844,7 @@ namespace psycle
 				ForegroundVoice()->m_TremoloDepth=depth;
 			}
 			m_EffectFlags |= EffectFlag::TREMOLO;
-		};
+		}
 		void XMSampler::Channel::Panbrello(int speed,int depth)
 		{
 			if(depth == 0){
@@ -1865,7 +1865,7 @@ namespace psycle
 				ForegroundVoice()->m_PanbrelloDepth=depth;
 			}
 			m_EffectFlags |= EffectFlag::PANBRELLO;
-		};
+		}
 
 		void XMSampler::Channel::Arpeggio(int param)
 		{
@@ -1880,7 +1880,7 @@ namespace psycle
 				m_ArpeggioPeriod[1] = ForegroundVoice()->NoteToPeriod(Note() + (param & 0xf));
 			}
 			m_EffectFlags |= EffectFlag::ARPEGGIO;
-		};
+		}
 		void XMSampler::Channel::Retrigger(const int parameter)
 		{
 			int ticks,volumeModifier;

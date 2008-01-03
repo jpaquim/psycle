@@ -763,7 +763,7 @@ namespace psycle
 				}
 			}
 #endif
-		};
+		}
 
 		bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -779,7 +779,7 @@ namespace psycle
 			}
 			pFile->Skip(size-sizeof(count)-(count*sizeof(int)));
 			return true;
-		};
+		}
 
 		Machine* Machine::LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen)
 		{
@@ -1015,7 +1015,7 @@ namespace psycle
 				int temp = GetParamValue(i);
 				pFile->Write(&temp,sizeof(temp));
 			}
-		};
+		}
 
 		void Machine::SaveDllNameAndIndex(RiffFile* pFile,int index)
 		{
@@ -1038,7 +1038,8 @@ namespace psycle
 				}
 				strcat(str2,idxtext);
 			}
-			pFile->Write(&str2,strlen(str2)+1);		};
+			pFile->Write(&str2,strlen(str2)+1);
+		}
 
 
 

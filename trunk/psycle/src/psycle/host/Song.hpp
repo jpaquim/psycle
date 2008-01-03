@@ -194,45 +194,45 @@ namespace psycle
 			inline unsigned char * _ppattern(int ps){
 				if(!ppPatternData[ps]) return CreateNewPattern(ps);
 				return ppPatternData[ps];
-			};
+			}
 			/// Returns the start offset of the requested track of pattern ps in the
 			/// pPatternData Array and creates one if none exists.
 			inline unsigned char * _ptrack(int ps, int track){
 				if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE);
 				return ppPatternData[ps] + (track*EVENT_SIZE);
-			};
+			}
 			/// Returns the start offset of the requested line of the track of pattern ps in
 			/// the pPatternData Array and creates one if none exists.
 			inline unsigned char * _ptrackline(int ps, int track, int line){
 				if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
 				return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
-			};
+			}
 			/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
 			unsigned char * CreateNewPattern(int ps);
 			/// removes a pattern from this song.
 			void RemovePattern(int ps);
 			
-			const int SongTracks(){return SONGTRACKS;};
-			void SongTracks(const int value){ SONGTRACKS = value;};
+			const int SongTracks(){return SONGTRACKS;}
+			void SongTracks(const int value){ SONGTRACKS = value;}
 
-			const int BeatsPerMin(){return m_BeatsPerMin;};
+			const int BeatsPerMin(){return m_BeatsPerMin;}
 			void BeatsPerMin(const int value)
 			{ 
 				if ( value < 32 ) m_BeatsPerMin = 32;
 				else if ( value > 999 ) m_BeatsPerMin = 999;
 				else m_BeatsPerMin = value;
-			};
+			}
 
-			const int LinesPerBeat(){return m_LinesPerBeat;};
+			const int LinesPerBeat(){return m_LinesPerBeat;}
 			void LinesPerBeat(const int value)
 			{
 				if ( value < 1 )m_LinesPerBeat = 1;
 				else if ( value > 31 ) m_LinesPerBeat = 31;
 				else m_LinesPerBeat = value;
-			};
+			}
 
-			const bool IsInvalided(){return Invalided;};
-			void IsInvalided(const bool value){Invalided = value;};
+			const bool IsInvalided(){return Invalided;}
+			void IsInvalided(const bool value){Invalided = value;}
 			/// The file name this song was loaded from.
 			std::string fileName;
 			/// The index of the machine which plays in solo.

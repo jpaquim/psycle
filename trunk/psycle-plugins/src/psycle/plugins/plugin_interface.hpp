@@ -1,4 +1,4 @@
-///\interface psycle's native plugin interface api
+///\interface psycle native plugin interface api
 
 #pragma once
 
@@ -242,14 +242,14 @@ namespace psycle
 			typedef
 				psycle::plugin_interface::CMachineInfo const * const
 				(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
-				();
+				(void);
 			
 			const char create_machine_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE);
 			typedef
 				psycle::plugin_interface::CMachineInterface *
 				(PSYCLE__PLUGIN__CALLING_CONVENTION * create_machine_function)
-				();
+				(void);
 
 			const char delete_machine_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE);

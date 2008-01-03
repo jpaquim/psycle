@@ -58,22 +58,22 @@ namespace psycle
 			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
 			virtual void Reset();
 			virtual bool Enable(bool e);
-			virtual bool Enabled() { return _running; };
+			virtual bool Enabled() { return _running; }
 			virtual void GetCapturePorts(std::vector<std::string>&ports);
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual bool CreateCapturePort(PortCapt &port);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 			static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
-			virtual int GetInputLatency() { return _dsBufferSize; };
-			virtual int GetOutputLatency() { return _dsBufferSize; };
+			virtual int GetInputLatency() { return _dsBufferSize; }
+			virtual int GetOutputLatency() { return _dsBufferSize; }
 			virtual int GetWritePos();
 			virtual int GetPlayPos();
 //			int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
 			virtual void Configure();
-			virtual bool Initialized() { return _initialized; };
-			virtual bool Configured() { return _configured; };
-			virtual AudioDriverInfo* GetInfo() { return &_info; };
+			virtual bool Initialized() { return _initialized; }
+			virtual bool Configured() { return _configured; }
+			virtual AudioDriverInfo* GetInfo() { return &_info; }
 		protected:
 			void ReadConfig();
 			void WriteConfig();

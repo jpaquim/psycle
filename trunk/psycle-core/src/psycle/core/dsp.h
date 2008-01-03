@@ -396,7 +396,7 @@ namespace psy
 			{ 
 				_quality = R_NONE;
 				_pWorkFn = T_None;
-			};
+			}
 			virtual ~Resampler() {}
 
 			/// work function corresponding to the selected kind.

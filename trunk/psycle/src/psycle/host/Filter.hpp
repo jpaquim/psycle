@@ -24,7 +24,7 @@ namespace psycle
 		{
 		public:
 			float _coeffs[5][128][128][5];
-			FilterCoeff() { _inited = false; };
+			FilterCoeff() { _inited = false; }
 			inline void Init(int samplerate)
 			{
 				if (!_inited)
@@ -46,7 +46,7 @@ namespace psycle
 						}
 					}
 				}
-			};
+			}
 		private:
 			bool _inited;
 			double _coeff[5];
@@ -55,17 +55,17 @@ namespace psycle
 			static inline float Cutoff(int v)
 			{
 				return float(pow( (v+5)/(127.0+5), 1.7)*13000+30);
-			};
+			}
 			
 			static inline float Resonance(float v)
 			{
 				return float(pow( v/127.0, 4)*150+0.1);
-			};
+			}
 			
 			static inline float Bandwidth(int v)
 			{
 				return float(pow( v/127.0, 4)*4+0.1);
-			};
+			}
 		};
 
 		/// filter.
@@ -142,12 +142,12 @@ namespace psycle
 				fLastSampleRight[1]=0.0f;
 				Update();
 			};
-			void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }};
-			void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }};
-			void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }};
-			void SampleSpeed(int _iSampleSpeed) { if ( iSampleCurrentSpeed != _iSampleSpeed) {iSampleCurrentSpeed = _iSampleSpeed; Update(); }};
-			void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }};
-			FilterType Type (void) { return ftFilter; };
+			void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }}
+			void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }}
+			void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }}
+			void SampleSpeed(int _iSampleSpeed) { if ( iSampleCurrentSpeed != _iSampleSpeed) {iSampleCurrentSpeed = _iSampleSpeed; Update(); }}
+			void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }}
+			FilterType Type (void) { return ftFilter; }
 			
 			inline void Work(float & sample)
 			{

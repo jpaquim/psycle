@@ -137,8 +137,8 @@ bexphase::bexphase()
 	inpoint = 0;
 	counter = 0;
 	shift = 0; shiftcount = 0;
-	for ( y = 0; y < inbuflen; y++ ) { inbufr[y] = 0; inbufl[y] = 0; };
-	for ( x = 0; x < fftlen; x++ ) { buffer[x] = 0; altbuffer[x] = 0; };
+	for ( y = 0; y < inbuflen; y++ ) { inbufr[y] = 0; inbufl[y] = 0; }
+	for ( x = 0; x < fftlen; x++ ) { buffer[x] = 0; altbuffer[x] = 0; }
 	dry = optimal[0]; wet = 1 - dry;
 	freq = 1; amntfreq = 0.75f; amntlfo = 0.25f;
 	buflen = 0; last_dir = 0; dlay_r = 0; dlay_l = 0;
@@ -160,7 +160,7 @@ void bexphase::SequencerTick()
 	if ( ++counter >= Vals[pRefresh] )
 	{
 		if ( (inpoint - fftlen) < 0 ) y = inbuflen - ( fftlen - inpoint ); else y = inpoint - fftlen;
-		for ( x = 0; x < fftlen; x++ ) { if ( (y+x) == inbuflen ) y = x * (-1); buffer[x] = inbufr[x+y]; };
+		for ( x = 0; x < fftlen; x++ ) { if ( (y+x) == inbuflen ) y = x * (-1); buffer[x] = inbufr[x+y]; }
 		rfftw_one( forward, buffer, altbuffer );
 		y = 1;
 		for ( x = fftlen/64; x < fftlen/2; x++ )
@@ -173,7 +173,7 @@ void bexphase::SequencerTick()
 		shift_r -= dlay_r; shift_r /= buflen;
 		
 		if ( (inpoint - fftlen) < 0 ) y = inbuflen - ( fftlen - inpoint ); else y = inpoint - fftlen;
-		for ( x = 0; x < fftlen; x++ ) { if ( (y+x) == inbuflen ) y = x * (-1); buffer[x] = inbufl[x+y]; };
+		for ( x = 0; x < fftlen; x++ ) { if ( (y+x) == inbuflen ) y = x * (-1); buffer[x] = inbufl[x+y]; }
 		rfftw_one( forward, buffer, altbuffer );
 		y = 1;
 		for ( x = fftlen/64; x < fftlen/2; x++ )
@@ -198,8 +198,8 @@ void bexphase::Command()
 
 void bexphase::ParameterTweak(int par, int val)
 {
-	if ( par == pRefresh ) { buflen = val * pCB->GetTickLength(); counter = val; last_dir = 1; };
-	if ( par == pFreq ) { shift = (float)(val/443.396f); shift *= shift; shift = ((shift/(float)Vals[3]) - freq)/256.0f; shiftcount = 256; };
+	if ( par == pRefresh ) { buflen = val * pCB->GetTickLength(); counter = val; last_dir = 1; }
+	if ( par == pFreq ) { shift = (float)(val/443.396f); shift *= shift; shift = ((shift/(float)Vals[3]) - freq)/256.0f; shiftcount = 256; }
 	if ( par == pDry ) 
 	{ 
 		if ( val < 384 )
@@ -214,9 +214,9 @@ void bexphase::ParameterTweak(int par, int val)
 		}
 		dry = 1 - wet;
 	}
-	if ( par == pMode ) { freq *= Vals[pMode] / (float)val; if ( wet == optimal[1] ) { wet = optimal[val]; dry = 1 - wet; }; };
-	if ( par == pAmount ) { amntfreq = val / 512.0f; amntlfo = 1 - amntfreq; };
-	if ( par == pDiff ) { diff = val / 512.0f; undiff = 1 - diff; };
+	if ( par == pMode ) { freq *= Vals[pMode] / (float)val; if ( wet == optimal[1] ) { wet = optimal[val]; dry = 1 - wet; }; }
+	if ( par == pAmount ) { amntfreq = val / 512.0f; amntlfo = 1 - amntfreq; }
+	if ( par == pDiff ) { diff = val / 512.0f; undiff = 1 - diff; }
 	Vals[par] = val;
 }
 
@@ -234,7 +234,7 @@ void bexphase::Work(float *psamplesleft, float *psamplesright , int numsamples, 
 		inbufr[inpoint] = *psamplesright; 
 		inbufl[inpoint] = *psamplesleft;
 
-		if ( shiftcount != 0 ) { freq += shift; --shiftcount; };
+		if ( shiftcount != 0 ) { freq += shift; --shiftcount; }
 		help_r = (dlay_r+=shift_r) * freq; 
 		help_l = (dlay_l+=shift_l) * freq;
 
@@ -315,8 +315,8 @@ bool bexphase::DescribeValue(char* txt,int const param, int const value)
 		else
 			{
 			if ( value < 448 ) { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='E'; *txt++='f'; *txt++='f'; *txt++='e'; *txt++='c'; *txt++='t'; *txt='\0';				}
-			else { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='W'; *txt++='e'; *txt++='t'; *txt='\0'; };
-			};
+			else { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='W'; *txt++='e'; *txt++='t'; *txt='\0'; }
+			}
 		return true; 
 	}
 	if ( param == pAmount ) 

@@ -159,7 +159,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int const latency_bytes(buffer_size * buffer_count);
 				int const latency_samples(latency_bytes / 4); ///\todo hardcoded to stereo 16-bit
 				latency_time_seconds = float(latency_samples) / sample_rate;
-			};
+			}
 			// displays the latency in the gui
 			{
 				std::ostringstream s;

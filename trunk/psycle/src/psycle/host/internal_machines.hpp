@@ -14,7 +14,7 @@ public:
 	Dummy(Machine *mac);
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
-	virtual char* GetName(void) { return _psName; };
+	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 
 	/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
@@ -35,7 +35,7 @@ public:
 	virtual void Stop();
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
-	virtual char* GetName(void) { return _psName; };
+	virtual char* GetName(void) { return _psName; }
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
 	virtual void GetParamValue(int numparam,char *parVal);
@@ -66,11 +66,11 @@ public:
 	AudioRecorder();
 	AudioRecorder(int index);
 	virtual ~AudioRecorder();
-	virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); };
+	virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
 	virtual void Init(void);
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
-	virtual char* GetName(void) { return _psName; };
+	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
 
@@ -94,7 +94,7 @@ public:
 	class InputChannel
 	{
 	public:
-		InputChannel(){ Init(); };
+		InputChannel(){ Init(); }
 		InputChannel(int sends){ Init(); sends_.resize(sends); }
 		InputChannel(const InputChannel &in) { Copy(in); }
 		inline void Init()
@@ -265,9 +265,9 @@ public:
 	virtual void DeleteWires(Song* pSong);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	std::string GetAudioInputName(int port);
-	virtual int GetAudioInputs() { return 24; };
-	virtual int GetAudioOutputs() { return 1; };
-	virtual char* GetName(void) { return _psName; };
+	virtual int GetAudioInputs() { return 24; }
+	virtual int GetAudioOutputs() { return 1; }
+	virtual char* GetName(void) { return _psName; }
 	virtual int GetNumCols();
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);

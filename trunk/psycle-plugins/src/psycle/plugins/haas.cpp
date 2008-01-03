@@ -154,7 +154,7 @@ public:
 			default:
 				Plugin::describe(out, parameter);
 		}
-	};
+	}
 
 	Haas()
 	:

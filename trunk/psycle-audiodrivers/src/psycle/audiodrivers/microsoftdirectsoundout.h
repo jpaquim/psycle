@@ -48,8 +48,8 @@ namespace psy
 			virtual int GetPlayPos();
 			int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
 			virtual void Configure();
-			virtual bool Initialized() { return _initialized; };
-			virtual bool Configured() { return _configured; };
+			virtual bool Initialized() { return _initialized; }
+			virtual bool Configured() { return _configured; }
 
 
 		private:

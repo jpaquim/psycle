@@ -374,7 +374,7 @@ int fluid_mod_test_identity(fluid_mod_t * mod1, fluid_mod_t * mod2){
   if (mod1->flags1 != mod2->flags1){return 0;}
   if (mod1->flags2 != mod2->flags2){return 0;}
   return 1;
-};
+}
 
 /* debug function: Prints the contents of a modulator */
 void fluid_dump_modulator(fluid_mod_t * mod){
@@ -407,7 +407,7 @@ void fluid_dump_modulator(fluid_mod_t * mod){
 	default:
 	  printf("(unknown: %i)", src1);
     }; /* switch src1 */
-  }; /* if not CC */
+  } /* if not CC */
   if (flags1 & FLUID_MOD_NEGATIVE){printf("- ");} else {printf("+ ");}; 
   if (flags1 & FLUID_MOD_BIPOLAR){printf("bip ");} else {printf("unip ");}; 
   printf("-> ");
@@ -424,6 +424,6 @@ void fluid_dump_modulator(fluid_mod_t * mod){
       default: printf("dest %i",dest);
   }; /* switch dest */
   printf(", amount %f flags %i src2 %i flags2 %i\n",amount, flags1, src2, flags2);
-};
+}
 
 

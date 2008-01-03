@@ -146,7 +146,7 @@ public:
     updates in response to global sample rate changes on a class by
     class basis.
   */
-  void ignoreSampleRateChange( bool ignore = true ) { ignoreSampleRateChange_ = ignore; };
+  void ignoreSampleRateChange( bool ignore = true ) { ignoreSampleRateChange_ = ignore; }
 
   //! Static method which returns the current rawwave path.
   static std::string rawwavePath(void) { return rawwavepath_; }
@@ -284,7 +284,7 @@ public:
   StkFloat interpolate( StkFloat frame, unsigned int channel = 0 ) const;
 
   //! Returns the total number of audio samples represented by the object.
-  size_t size() const { return size_; }; 
+  size_t size() const { return size_; }
 
   //! Returns \e true if the object size is zero and \e false otherwise.
   bool empty() const;
@@ -310,27 +310,27 @@ public:
   void resize( size_t nFrames, unsigned int nChannels, StkFloat value );
 
   //! Return the number of channels represented by the data.
-  unsigned int channels( void ) const { return nChannels_; };
+  unsigned int channels( void ) const { return nChannels_; }
 
   //! Return the number of sample frames represented by the data.
-  unsigned int frames( void ) const { return nFrames_; };
+  unsigned int frames( void ) const { return nFrames_; }
 
   //! Set the sample rate associated with the StkFrames data.
   /*!
     By default, this value is set equal to the current STK sample
     rate at the time of instantiation.
    */
-  void setDataRate( StkFloat rate ) { dataRate_ = rate; };
+  void setDataRate( StkFloat rate ) { dataRate_ = rate; }
 
   //! Return the sample rate associated with the StkFrames data.
   /*!
     By default, this value is set equal to the current STK sample
     rate at the time of instantiation.
    */
-  StkFloat dataRate( void ) const { return dataRate_; };
+  StkFloat dataRate( void ) const { return dataRate_; }
 
   //! Returns \c true if the data is in interleaved format, \c false if the data is non-interleaved.
-  bool interleaved( void ) const { return interleaved_; };
+  bool interleaved( void ) const { return interleaved_; }
 
   //! Set the flag to indicate whether the internal data is in interleaved (\c true) or non-interleaved (\c false) format.
   /*!
@@ -338,7 +338,7 @@ public:
     with respect to the argument value.  It simply changes the
     indicator flag value.
    */
-  void setInterleaved( bool isInterleaved ) { interleaved_ = isInterleaved; };
+  void setInterleaved( bool isInterleaved ) { interleaved_ = isInterleaved; }
 
 private:
 

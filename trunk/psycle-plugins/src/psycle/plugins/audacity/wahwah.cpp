@@ -256,7 +256,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				a0_r = 1.f + alpha;
 				a1_r = -2.f * cs;
 				a2_r = 1.f - alpha;
-			};
+			}
 
 			float recip = 1 / (a0_l * a0_r);
 

@@ -1051,7 +1051,7 @@ namespace host{
 		}
 		//inst.
 
-	};		
+	}	
 
 
 

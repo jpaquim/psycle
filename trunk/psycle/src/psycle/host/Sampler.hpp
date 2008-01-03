@@ -114,7 +114,7 @@ namespace psycle
 			}
 			virtual void Stop(void);
 			virtual void Tick(int channel, PatternEntry* pData);
-			virtual char* GetName(void) { return _psName; };
+			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
@@ -154,7 +154,7 @@ namespace psycle
 					}
 				}
 				return TRUE;
-			};
+			}
 
 			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
 			{
@@ -180,7 +180,7 @@ namespace psycle
 
 				}
 				pFile->Write(&temp, sizeof(temp)); // quality
-			};
+			}
 
 			void Update(void);
 
@@ -203,7 +203,7 @@ namespace psycle
 			static inline int alteRand(int x)
 			{
 				return (x*rand())/32768;
-			};
+			}
 		};
 	}
 }

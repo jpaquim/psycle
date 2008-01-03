@@ -68,7 +68,7 @@ namespace psy {
 			pFile->Read(size);
 			pFile->Skip(size);
 			return true;
-		};
+		}
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -472,7 +472,7 @@ namespace psy {
 			pFile->Read(_outDry);
 			pFile->Read(decreaseOnClip);
 			return true;
-		};
+		}
 
 		void Master::SaveSpecificChunk(RiffFile* pFile) const
 		{
@@ -480,7 +480,7 @@ namespace psy {
 			pFile->Write(size);
 			pFile->Write(_outDry);
 			pFile->Write(decreaseOnClip);
-		};
+		}
 
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

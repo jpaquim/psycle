@@ -91,7 +91,7 @@ class Flanger : public Plugin {
 				default:
 					Plugin::describe(out, parameter);
 			}
-		};
+		}
 
 		Flanger() : Plugin(information()), modulation_phase_(0) {
 			for(int channel(0) ; channel < channels ; ++channel)

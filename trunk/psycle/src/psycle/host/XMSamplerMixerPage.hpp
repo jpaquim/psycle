@@ -103,7 +103,7 @@ public:
 	// Refreshes the values of the controls of the master channel.
 	void UpdateMaster(void);
 
-	void pMachine(XMSampler* mac) { sampler = mac; };
+	void pMachine(XMSampler* mac) { sampler = mac; }
 private:
 };
 

@@ -1,6 +1,6 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "filter.hpp"
-///\file filter.cpp
+///\file arguru_synth_2_final/filter.cpp
 ///\brief implementation of the filter class.
 
 #define INTERPOLATE(pos,start,end) ((start)+(pos)*((end)-(start)))
