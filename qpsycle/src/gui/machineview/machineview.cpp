@@ -627,7 +627,7 @@ MachineScene::MachineScene( MachineView *macView )
 	pluginFinder_(Global::configuration().pluginPath(), Global::configuration().ladspaPath())
 {
 	macView_ = macView;
-	newMachineDlg = new NewMachineDlg();
+	newMachineDlg = new NewMachineDlg(macView_);
 }
 
 /**
