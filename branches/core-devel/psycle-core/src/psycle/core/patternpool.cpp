@@ -17,9 +17,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
-#include "patterndata.h"
+#include "PatternPool.h"
 #include "helpers/xml.h"
-#include "singlepattern.h"
+#include "Pattern.h"
 #include <sstream>
 
 namespace psy { namespace core {
@@ -43,34 +43,34 @@ PatternCategory::PatternCategory( const std::string & name )
 
 PatternCategory::~ PatternCategory( )
 {
-	for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
+	for (std::vector<Pattern*>::iterator it = begin(); it < end(); it++) {
 		delete *it;
 	}
 }
 
-SinglePattern* PatternCategory::createNewPattern( const std::string & name )
+Pattern* PatternCategory::createNewPattern( const std::string & name )
 {
-	SinglePattern* pattern = new SinglePattern();
+	Pattern* pattern = new Pattern();
 	pattern->setCategory(this);
 	pattern->setName(name);
 	push_back(pattern);
 	return pattern;
 }
 						
-SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
+Pattern* PatternCategory::clonePattern( const Pattern & src, const std::string & name)
 {
-	SinglePattern* pattern = new SinglePattern( src);
+	Pattern* pattern = new Pattern( src);
 	pattern->setCategory(this);
 	pattern->setName(name);
 	push_back(pattern);
 	return pattern;
 }
 
-bool PatternCategory::removePattern( SinglePattern * pattern )
+bool PatternCategory::removePattern( Pattern * pattern )
 {
 	iterator it = find(begin(), end(), pattern);
 	if ( it != end() ) {
-		SinglePattern* pattern = *it;
+		Pattern* pattern = *it;
 		erase(it);
 		delete(pattern);
 		return true;
@@ -98,10 +98,10 @@ long PatternCategory::color( ) const
 	return color_;
 }
 
-SinglePattern * psy::core::PatternCategory::findById( int id )
+Pattern * psy::core::PatternCategory::findById( int id )
 {
-	for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
-		SinglePattern* pat = *it;
+	for (std::vector<Pattern*>::iterator it = begin(); it < end(); it++) {
+		Pattern* pat = *it;
 		if (pat->id() == id) return pat;
 	}
 	return 0;
@@ -123,7 +123,7 @@ std::string PatternCategory::toXml( ) const
 	std::ostringstream xml;
 	xml << "<category name='" << replaceIllegalXmlChr( name() ) << "' color='" << color_ << "' >" << std::endl;
 	for ( const_iterator it = begin(); it < end(); it++) {
-		SinglePattern* pattern = *it;
+		Pattern* pattern = *it;
 		xml << pattern->toXml();
 	}
 	xml << "</category>" << std::endl;
@@ -134,11 +134,11 @@ std::string PatternCategory::toXml( ) const
 
 
 // the pattern data class
-PatternData::PatternData()
+PatternPool::PatternPool()
 {
 }
 
-PatternData::~PatternData()
+PatternPool::~PatternPool()
 {
 	for (std::vector<PatternCategory*>::iterator it = begin(); it < end(); it++) {
 		delete *it;
@@ -146,7 +146,7 @@ PatternData::~PatternData()
 }
 
 
-PatternCategory * PatternData::createNewCategory( const std::string & name )
+PatternCategory * PatternPool::createNewCategory( const std::string & name )
 {
 	PatternCategory* category = new PatternCategory();
 	category->setName(name);
@@ -154,7 +154,7 @@ PatternCategory * PatternData::createNewCategory( const std::string & name )
 	return category;
 }
 
-void PatternData::removeSinglePattern( SinglePattern * pattern )
+void PatternPool::removeSinglePattern( Pattern * pattern )
 {
 	iterator it = begin();
 	for ( ; it < end(); it++) {
@@ -163,7 +163,7 @@ void PatternData::removeSinglePattern( SinglePattern * pattern )
 	}
 }
 
-void PatternData::removeAll( )
+void PatternPool::removeAll( )
 {
 	for (std::vector<PatternCategory*>::iterator it = begin(); it < end(); it++) {
 		delete *it;
@@ -171,7 +171,7 @@ void PatternData::removeAll( )
 	clear();
 }
 
-void PatternData::resetToDefault()
+void PatternPool::resetToDefault()
 {
 	removeAll();
 	PatternCategory* cat = createNewCategory( "default" );
@@ -179,26 +179,26 @@ void PatternData::resetToDefault()
 
 }
 
-SinglePattern * PatternData::findById( int id )
+Pattern * PatternPool::findById( int id )
 {
 	iterator it = begin();
 	for ( ; it < end(); it++) {
 		PatternCategory* cat = *it;
-		SinglePattern* pat = cat->findById(id);
+		Pattern* pat = cat->findById(id);
 		if (pat) return pat;
 	}
 	return 0;
 }
 
-std::string PatternData::toXml( ) const
+std::string PatternPool::toXml( ) const
 {
 	std::ostringstream xml;
-	xml << "<patterndata>" << std::endl;
+	xml << "<PatternPool>" << std::endl;
 	for ( const_iterator it = begin(); it < end(); it++) {
 		PatternCategory* category = *it;
 		xml << category->toXml();
 	}
-	xml << "</patterndata>" << std::endl;
+	xml << "</PatternPool>" << std::endl;
 	return xml.str();
 }
 

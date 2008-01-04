@@ -58,16 +58,39 @@ namespace psy
 			TweakType type_;
 
 		};
-
-
-		class SinglePattern : public std::map<double, PatternLine> {
+		class TrackInfo {
 		public:
-			SinglePattern();
-			SinglePattern(SinglePattern const& other);
 
-			virtual ~SinglePattern();
+			enum TweakType { twk, tws, mdi, aut };
 
-			boost::signal<void (SinglePattern*)> wasDeleted;
+			TweakTrackInfo();
+			TweakTrackInfo( int mac, int param, TweakType type );
+
+			~TweakTrackInfo();
+
+			int machineIdx()    const;
+			int parameterIdx()  const;
+			TweakType type()          const;
+
+			bool operator<(const TweakTrackInfo & key) const;
+
+		private:
+
+			int macIdx_;
+			int paramIdx_;
+			TweakType type_;
+
+		};
+
+
+		class Pattern : public std::map<double, PatternLine> {
+		public:
+			Pattern();
+			Pattern(Pattern const& other);
+
+			virtual ~Pattern();
+
+			boost::signal<void (Pattern*)> wasDeleted;
 
 			void setID(int id);
 			int id() const;
@@ -105,11 +128,11 @@ namespace psy
 			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
 
-			SinglePattern::iterator find_nearest( int linenr );
-			SinglePattern::const_iterator find_nearest( int linenr ) const;
+			Pattern::iterator find_nearest( int linenr );
+			Pattern::const_iterator find_nearest( int linenr ) const;
 
-			SinglePattern::iterator find_lower_nearest( int linenr );
-			SinglePattern::const_iterator find_lower_nearest( int linenr ) const;
+			Pattern::iterator find_lower_nearest( int linenr );
+			Pattern::const_iterator find_lower_nearest( int linenr ) const;
 			
 
 			void clearEmptyLines();
@@ -124,9 +147,9 @@ namespace psy
 
 			std::string toXml() const;
 
-		std::auto_ptr<SinglePattern> block( int left, int right, int top, int bottom );
-			void copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
-			void mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
+		std::auto_ptr<Pattern> block( int left, int right, int top, int bottom );
+			void copyBlock(int left, int top, const Pattern & pattern, int tracks, float maxBeats);
+			void mixBlock(int left, int top, const Pattern & pattern, int tracks, float maxBeats);
 
 			void deleteBlock( int left, int right, int top, int bottom );
 

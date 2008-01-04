@@ -28,12 +28,12 @@ namespace psy { namespace core {
 /**
 @author  Psycledelics  
 */
-class SinglePattern;
+class Pattern;
 
 /**
 @author  Psycledelics  
 */
-class PatternCategory : public std::vector<SinglePattern*> {
+class PatternCategory : public std::vector<Pattern*> {
 	public:
 		PatternCategory();
 		PatternCategory(const std::string & name);
@@ -42,14 +42,14 @@ class PatternCategory : public std::vector<SinglePattern*> {
 		void setName(const std::string & name);
 		const std::string & name() const;
 
-		SinglePattern* createNewPattern(const std::string & name);
-											SinglePattern* clonePattern( const SinglePattern & src, const std::string & name);
-		bool removePattern(SinglePattern* pattern);
+		Pattern* createNewPattern(const std::string & name);
+											Pattern* clonePattern( const Pattern & src, const std::string & name);
+		bool removePattern(Pattern* pattern);
 
 		void setColor(long color);
 		long color() const;
 
-		SinglePattern* findById(int id);
+		Pattern* findById(int id);
 
 		void setID(int id);
 		int id() const;
@@ -70,17 +70,17 @@ class PatternCategory : public std::vector<SinglePattern*> {
 /**
 @author  Psycledelics  
 */
-class PatternData : public std::vector<PatternCategory*> {
+class PatternPool : public std::vector<PatternCategory*> {
 	public:
-		PatternData();
-		~PatternData();
+		PatternPool();
+		~PatternPool();
 
 		PatternCategory* createNewCategory(const std::string & name);
-		void removeSinglePattern(SinglePattern* pattern);
+		void removeSinglePattern(Pattern* pattern);
 		void removeAll();
 		void resetToDefault();
 
-		SinglePattern* findById(int id);
+		Pattern* findById(int id);
 
 		std::string toXml() const;
 
