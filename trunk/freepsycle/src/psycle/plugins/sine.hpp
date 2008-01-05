@@ -16,7 +16,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 	public:
 		void frequency(real const & frequency) { this->step_ = frequency * frequency_to_step_; }
 		real frequency() const { return frequency_to_step_ / step_; }
-		
+	protected:
+		void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
+		void do_process() throw(engine::exception) /*override*/;
+	private:
+		real phase_;
+		real step_;
+		real frequency_to_step_;
+
 		bool have_frequency() {
 			return
 				single_input_ports()[0]->output_port() &&
@@ -41,14 +48,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		buffer::channel & frequency_channel() { return single_input_ports()[0]->buffer()[0]; }
 		buffer::channel & phase_channel() { return single_input_ports()[1]->buffer()[0]; }
 		buffer::channel & out_channel() { return output_ports()[0]->buffer()[0]; }
-		
-	protected:
-		void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
-		void do_process() throw(engine::exception) /*override*/;
-	private:
-		real phase_;
-		real step_;
-		real frequency_to_step_;
 };
 
 }}
