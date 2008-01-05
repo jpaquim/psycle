@@ -14,6 +14,7 @@ namespace psycle { namespace engine {
 #if 1
 typedef std::vector<event> channel;
 #else
+///\todo unsure whether we need a specific class for channels
 /// a vector of events.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 	public:
@@ -27,7 +28,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 		///\{
 			/// sets the index of the last event.
 			///\param last the index of the last event.
-			void last(std::size_t last) throw() { last_ = last;
+			void last(std::size_t last) throw() { last_ = last };
 			/// the index of the last event.
 			///\return the index of the last event.
 			std::size_t last() const throw() { return last_; }

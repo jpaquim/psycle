@@ -5,6 +5,7 @@
 #pragma once
 #include "forward_declarations.hpp"
 #include "named.hpp"
+#include "buffer.hpp"
 #include <psycle/generic/generic.hpp>
 #include <set>
 #include <mutex>
@@ -171,6 +172,7 @@ namespace ports {
 			void do_propagate_seconds_per_event() /*override*/;
 
 		public:
+			operator bool() const { return input_ports().size(); }
 			void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 	};
 	
@@ -209,6 +211,15 @@ namespace ports {
 				void do_propagate_seconds_per_event() /*override*/;
 
 			public:
+				operator bool() const {
+					if(!this->output_port()) return false;
+					engine::buffer const & b(output_port()->buffer());
+					for(std::size_t i(0), e(output_port()->channels()); i < e; ++i) {
+						channel const & c(b[i]);
+						if(c.size() && c.size() > c[0].index()) return true;
+					}
+					return false;
+				}
 				void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 		};
 
@@ -233,6 +244,16 @@ namespace ports {
 				bool single_connection_is_identity_transform_;
 
 			public:
+				operator bool() const {
+					for(output_ports_type::const_iterator ii(this->output_ports().begin()), e(this->output_ports().end()); ii != e; ++ii) {
+						engine::buffer const & b = (**ii).buffer();
+						for(std::size_t i(0), e((**ii).channels()); i < e; ++i) {
+							channel const & c(b[i]);
+							if(c.size() && c.size() > c[0].index()) return true;
+						}
+					}
+					return false;
+				}
 				void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 		};
 	}
