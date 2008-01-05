@@ -21,45 +21,122 @@
 
 #include "wavedisplay.hpp"
 
-#include <QGraphicsView>
-#include <QGraphicsLineItem>
-#include <QGraphicsSimpleTextItem>
-#include <QGraphicsScene> 
+#include <psycle/core/instrument.h>
+#include "../../model/instrumentsmodel.hpp"
+
+#include <QGraphicsScene>
+#include <QGraphicsTextItem>
+#include <QStyleOptionGraphicsItem>
+#include <QResizeEvent>
 
 namespace qpsycle {
 
-WaveDisplay::WaveDisplay(bool mini, QWidget *parent) //inizialization file for WaveDisplay.
+WaveDisplay::WaveDisplay( QWidget *parent, InstrumentsModel *instModel )
+	: QGraphicsView( parent )
 {
-	setParent( parent);
-	wavescene = new QGraphicsScene();
-	wavescene->setBackgroundBrush(Qt::black);
-	setScene(wavescene);
+	scene_ = new QGraphicsScene(this);
+	scene_->setBackgroundBrush(Qt::black);
+	wave_ = new WaveItem(this, instModel, scene_);
+	setScene(scene_);
 	setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
-	Reset();
 }
 
-void WaveDisplay::LoadStereo()
+void WaveDisplay::resizeEvent(QResizeEvent *ev)
 {
-	//we need to add a line at the first quarter and one at the last quarter of GraphicsView To Make that loads a Stereo file...
+	///\todo widening the view probably shouldn't change the horizontal scale
+	int oldheight = ev->oldSize().height();
+	int oldwidth = ev->oldSize().width();
+	if ( oldheight > 0 && oldwidth > 0 ) {
+		scale(
+			ev->size().width() / (float) oldwidth,
+			ev->size().height() / (float) oldheight
+		);
+	}
+
+	wave_->resize();
+
+	QGraphicsView::resizeEvent(ev);
 }
 
-void WaveDisplay::LoadMono()
+
+WaveItem::WaveItem( WaveDisplay *disp, InstrumentsModel *instModel, QGraphicsScene *scene )
+	: QGraphicsRectItem( 0, scene )
+	, instrumentsModel_( instModel )
+	, disp_( disp )
 {
-	//we need to add al line at the middle GraphicsView To Make that loads a Mono file...
-	QGraphicsLineItem *line = new QGraphicsLineItem(0,height()/2,width(),height()/2, 0, wavescene);
-	wavescene->addItem(line);
+	connect (
+		instModel, SIGNAL(selectedInstrumentChanged()),
+		this, SLOT( resetInstrument() )
+	);
+
+	nodata_ = new QGraphicsTextItem( tr("No wave data."), this, this->scene() );
+	nodata_->setDefaultTextColor( Qt::white );
+	nodata_->setFont( QFont("verdana", 10) );
+
+	resetInstrument();
 }
 
-void WaveDisplay::Reset()
+void WaveItem::resetInstrument()
 {
-	//Clear Oprions Not Avable Now
-	nodata = new QGraphicsTextItem("No Wave Data", 0);
-	nodata->setDefaultTextColor(Qt::white);
-	wavescene->addItem(nodata);
+	int curInst = instrumentsModel_->selectedInstrumentIndex();
+	if ( instrumentsModel_->slotIsEmpty(curInst) ) {
+		inst_=0;
+		nodata_->show();
+		setRect( QRectF(0, 0, 100, 20) );
+		disp_->resetMatrix();
+		disp_->centerOn(nodata_);
+	} else {
+		inst_ = instrumentsModel_->getInstrument( curInst );
+		nodata_->hide();
+		setRect( QRectF(0, 0, inst_->waveLength, 1024) );
+		disp_->fitInView( rect() );
+	}
+
+	scene()->setSceneRect( rect() );
 }
 
-void WaveDisplay::Update()
+void WaveItem::resize()
 {
+	if ( !inst_ ) {
+		setRect( QRectF(0, 0, 100, 20) );
+		disp_->resetMatrix();
+		disp_->centerOn(nodata_);
+		scene()->setSceneRect( rect() );
+	}
+}
+
+void WaveItem::paint (
+	QPainter * painter,
+	const QStyleOptionGraphicsItem * option,
+	QWidget * widget )
+{
+	if (inst_) {
+		painter->setBrush( Qt::white );
+		
+		int halfWaveHeight = (int)( rect().height() / (inst_->waveStereo? 4: 2) );
+		int midPoint = halfWaveHeight;
+
+		double startx = option->exposedRect.left();
+		double endx = option->exposedRect.right();
+
+		//inverse of the view's horizontal scaling factor
+		double samplesPerPixel = 1.0 / option->matrix.m11();
+
+		///\todo draw data differently when samplesPerPixel<1
+
+		for ( double i(startx); i < inst_->waveLength && i <= endx; i+=samplesPerPixel ) {
+			int sample = halfWaveHeight * *(inst_->waveDataL + (int)i) / (1<<15);
+			painter->drawLine( QLineF( i, midPoint, i, midPoint-sample ) );
+		}
+
+		if ( inst_->waveStereo ) {
+			midPoint *= 3;
+			for ( double i(startx); i < inst_->waveLength && i <= endx; i+=samplesPerPixel ) {
+				int sample = halfWaveHeight * *(inst_->waveDataR + (int)i) / (1<<15);
+				painter->drawLine( QLineF( i, midPoint, i, midPoint-sample ) );
+			}
+		}
+	}
 	
 }
 

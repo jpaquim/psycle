@@ -319,6 +319,7 @@ namespace qpsycle {
 	psy::core::Song *MainWindow::createBlankSong()
 	{
 		psy::core::Song *blankSong = new psy::core::Song( psy::core::Player::Instance() );
+		blankSong->clear();
 		psy::core::PatternCategory* category0 = blankSong->patternSequence()->patternData()->createNewCategory("New Category");
 		psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
 

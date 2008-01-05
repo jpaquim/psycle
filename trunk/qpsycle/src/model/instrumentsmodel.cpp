@@ -83,6 +83,7 @@ bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 		QString name = QString::fromStdString( buffer.str() );
 		tempItem->setText( name );
 
+		emit selectedInstrumentChanged();
 		return true;
 	}
 	return false;
@@ -128,6 +129,8 @@ void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
 {
 	song_->instSelected   = newIndex;
 	song_->auxcolSelected = newIndex;
+
+	emit selectedInstrumentChanged();
 }
 
 // Find out if a particular slot is free in the CoreSong.

@@ -51,6 +51,9 @@ public:
 	int selectedInstrumentIndex();
 	void setSelectedInstrumentIndex( int newIndex );
 	bool slotIsEmpty( int instrIndex );
+
+signals:
+	void selectedInstrumentChanged();
 				
 private:
 	psy::core::Song *song_;
