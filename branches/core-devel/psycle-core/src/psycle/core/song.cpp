@@ -42,7 +42,7 @@ CoreSong::CoreSong(MachineCallbacks* callbacks)
 	Invalided = false;
 	for(int i(0) ; i < MAX_MACHINES ; ++i) machine_[i] = 0;
 	for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
-	clear();
+	clear(); ///\todo FIXME virtual function call in a ctor = bad
 }
 
 CoreSong::~CoreSong()
