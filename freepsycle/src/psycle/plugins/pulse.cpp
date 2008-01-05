@@ -17,8 +17,7 @@ pulse::pulse(engine::plugin_library_reference & plugin_library_reference, engine
 }
 
 void pulse::do_process() throw(engine::exception) {
-	if(!output_ports()[0]->input_ports().size()) return;
-	assert(&output_ports()[0]->buffer());
+	if(!*output_ports()[0]) return;
 	engine::buffer & out(output_ports()[0]->buffer());
 	if(!out.events()) return;
 	if(!sample_set_) {
