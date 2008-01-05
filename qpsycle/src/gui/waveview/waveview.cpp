@@ -43,7 +43,7 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 	layout_ = new QVBoxLayout();
 	setLayout(layout_);
 	
-	WaveDisplay *wavedisp = new WaveDisplay(false, this);
+	waveDisplay_ = new WaveDisplay(this, instrumentsModel);
 		
 	toolBar_ = new QToolBar();
 	toolBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
@@ -138,7 +138,7 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( processBar_ );
-	layout_->addWidget( wavedisp );
+	layout_->addWidget( waveDisplay_ );
 	layout_->addWidget( zoomBar_ );
 	
 	
@@ -176,6 +176,7 @@ void WaveView::onPlusButtonClicked()
 	if(zoomSlide_->value() < 100)
 	{
 		zoomSlide_->setValue(zoomSlide_->value() + 1);
+		waveDisplay_->scale( 1.5, 1 );
 	}
 }
 
@@ -184,6 +185,7 @@ void WaveView::onMinusButtonClicked()
 	if (zoomSlide_->value() > 0)
 	{
 		zoomSlide_->setValue(zoomSlide_->value() - 1);
+		waveDisplay_->scale( 2.0/3.0, 1 );
 	}
 }
 

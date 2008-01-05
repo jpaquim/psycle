@@ -20,7 +20,6 @@
 	#ifndef WAVEVIEW_H
 	#define WAVEVIEW_H
 
-#include "wavedisplay.hpp"
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QWidget>
@@ -33,6 +32,7 @@ class QStandardItemModel;
 namespace qpsycle {
 
 class InstrumentsModel;
+class WaveDisplay;
 
 class WaveView : public QWidget
 {
@@ -86,6 +86,7 @@ private:
 
 
 	InstrumentsModel *instrumentsModel_;
+	WaveDisplay *waveDisplay_;
 };
 
 } // namespace qpsycle

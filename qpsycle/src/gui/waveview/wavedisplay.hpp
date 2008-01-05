@@ -21,40 +21,60 @@
 #define WAVEDISPLAY_H
 
 #include <QGraphicsView>
-#include <QGraphicsLineItem>
-#include <QGraphicsSimpleTextItem>
-#include <QGraphicsScene>
+#include <QGraphicsRectItem>
 
+namespace psy {
+	namespace core {
+		class Instrument;
+	}
+}
+
+class QGraphicsScene;
+class QGraphicsTextItem;
 
 namespace qpsycle {
+
+class InstrumentsModel;
+class WaveItem;
 	
 class WaveDisplay : public QGraphicsView
 {
-		Q_OBJECT
-
+Q_OBJECT
+public:
+	WaveDisplay(QWidget *parent, InstrumentsModel* instModel);
 
 public:
-	WaveDisplay(bool mini, QWidget *parent);
+	void resizeEvent(QResizeEvent *ev);
+
+private:
+	WaveItem *wave_;
+	QGraphicsScene *scene_;
+
+};
+
+class WaveItem : public QObject, public QGraphicsRectItem
+{
+Q_OBJECT
+public:
+	WaveItem(WaveDisplay *disp, InstrumentsModel *instModel, QGraphicsScene *scene);
+
+	void paint(
+		QPainter * painter,
+		const QStyleOptionGraphicsItem * option,
+		QWidget * widget = 0
+	);
+
+	void resize();
 
 public slots:
-	void LoadStereo();
-	void LoadMono();
-	void Reset();
-	void Update();
+	void resetInstrument();
+
 private:
-	QGraphicsScene *wavescene;
-	
-	QGraphicsTextItem *nodata;
-	//QGraphicsTextItem *left;
-	//QGraphicsTextItem *right;
-	
-	
-	#if 0
-	QGraphicsLineItem *stereo_centerline;
-	QGraphicsLineItem *stereo_leftline;
-	QGraphicsLineItem *stereo_rightline;
-	#endif
-	
+	InstrumentsModel *instrumentsModel_;
+	psy::core::Instrument *inst_;
+	WaveDisplay *disp_;
+
+	QGraphicsTextItem *nodata_;
 };
 
 } // namespace qpsycle
