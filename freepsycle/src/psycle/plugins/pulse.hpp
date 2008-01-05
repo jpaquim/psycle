@@ -15,7 +15,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 		void do_process() throw(engine::exception) /*override*/;
 
 	public:
-		void operator()(real const & sample, std::size_t index = 0) throw() { sample_ = sample; index_ = index; sample_set_ = true; }
+		void operator()(real const & sample, std::size_t index = 0) throw() {
+			sample_ = sample;
+			index_ = index;
+			sample_set_ = true;
+		}
 	private:
 		bool sample_set_;
 		real sample_;

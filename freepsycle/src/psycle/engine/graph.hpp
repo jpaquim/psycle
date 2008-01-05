@@ -22,10 +22,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::b
 		graph(name_type const &);
 		virtual ~graph();
 
-	public:
-		std::mutex       & mutex() const { return mutex_; }
-	private:
-		std::mutex mutable mutex_;
+	///\name thread synchronisation
+		public:
+			typedef std::scoped_lock<std::mutex> scoped_lock;
+			std::mutex       & mutex() const { return mutex_; }
+		private:
+			std::mutex mutable mutex_;
+	///\}
 
 	public:
 		/// the length of each channel of the buffers
