@@ -241,7 +241,6 @@ namespace ports {
 		///\name connected input ports
 		///\{
 			public:
-				operator bool() const { return input_ports_.size(); }
 				typedef std::vector<typename Typenames::ports::input*> input_ports_type;
 				input_ports_type const & input_ports() const throw() { return input_ports_; }
 			private:
@@ -366,17 +365,6 @@ namespace ports {
 			///\name connected output port
 			///\{
 				public:
-					operator bool() const {
-						if(!output_port_) return false;
-						for(unsigned int channel(0); channel < output_port_->buffer().size(); ++channel) {
-							if(
-								output_port_->buffer()[channel].size() &&
-								output_port_->buffer()[channel].size() >
-								output_port_->buffer()[channel][0].index()
-							) return true;
-						}
-						return false;
-					}
 					typename Typenames::ports::output * const & output_port() const throw() { return output_port_; }
 				private:
 					typename Typenames::ports::output *         output_port_;
@@ -436,19 +424,6 @@ namespace ports {
 			///\{
 				public:
 					typedef std::vector<typename Typenames::ports::output*> output_ports_type;
-					operator bool() const {
-						for(typename output_ports_type::const_iterator i(output_ports_.begin()), e(output_ports_.end()); i != e; ++i) {
-							for(unsigned int channel(0); channel < i->buffer().size(); ++channel) {
-								if(
-									i->buffer()[channel].size() &&
-									i->buffer()[channel][0].size() >
-									i->buffer()[channel][0][0].index()
-								) return true;
-							}
-						}
-						return false;
-					}
-				public:
 					output_ports_type inline const & output_ports() const throw() { return output_ports_; }
 				private:
 					output_ports_type                output_ports_;
