@@ -41,9 +41,9 @@ namespace psy {
 		:descriptor_(descriptor)
 		,hint_(hint)
 		,portName_(newname)
-		,integer_(false)
-		,logaritmic_(false)
 		,rangeMultiplier_(1)
+		,integer_(false)
+		,logarithmic_(false)
 		{
 			if (LADSPA_IS_HINT_TOGGLED(hint.HintDescriptor)) {
 				minVal_= 0; maxVal_ = 1; integer_= true;
@@ -63,7 +63,7 @@ namespace psy {
 				}
 
 				if ( LADSPA_IS_HINT_LOGARITHMIC(hint.HintDescriptor) ){
-					logaritmic_ = true;
+					logarithmic_ = true;
 					// rangeMultiplier_ =   9 / (maxVal_ - minVal_);
 					rangeMultiplier_ =   (exp(1.0)-1) / (maxVal_ - minVal_);
 				}
@@ -146,15 +146,15 @@ namespace psy {
 		int LadspaParam::value() const
 		{ 
 			return (integer_)? value_ :
-				// (logaritmic_) ? log10(1+((value_-minVal_)*rangeMultiplier_))*65535.0f:
-				(logaritmic_) ?  log(1 + ((value_ - minVal_) * rangeMultiplier_)) * 65535.0f:
+				// (logarithmic_) ? log10(1+((value_-minVal_)*rangeMultiplier_))*65535.0f:
+				(logarithmic_) ?  log(1 + ((value_ - minVal_) * rangeMultiplier_)) * 65535.0f:
 				(value_- minVal_)*rangeMultiplier_;
 		}
 		void LadspaParam::setValue(int data)
 		{
 			value_ = (integer_) ? data :
-				// (logaritmic_) ? minVal_ + (pow(10, data/65535.0f)-1)/ rangeMultiplier_ :
-				(logaritmic_) ? minVal_ + (exp(data / 65535.0f) - 1) / rangeMultiplier_ :
+				// (logarithmic_) ? minVal_ + (pow(10, data/65535.0f)-1)/ rangeMultiplier_ :
+				(logarithmic_) ? minVal_ + (exp(data / 65535.0f) - 1) / rangeMultiplier_ :
 				minVal_+ (data/rangeMultiplier_);
 		}
 		
@@ -162,16 +162,15 @@ namespace psy {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song )
-		:
-			Machine(callbacks,MACH_LADSPA, MACHMODE_FX, id, song)
+		: Machine(callbacks,MACH_LADSPA, MACHMODE_FX, id, song)
+		, libHandle_(0)
+		, psDescriptor(0)
+		, pluginHandle(0)
 		{
 			SetEditName("ladspa plug");
 			SetAudioRange(1.0f);
-			psDescriptor = 0;
-			pluginHandle = 0;
-			libHandle_=0;
-			pOutSamplesL= new LADSPA_Data[STREAM_SIZE];
-			pOutSamplesR= new LADSPA_Data[STREAM_SIZE];
+			//pOutSamplesL= new LADSPA_Data[STREAM_SIZE];
+			//pOutSamplesR= new LADSPA_Data[STREAM_SIZE];
 		}
 		
 		LADSPAMachine::~LADSPAMachine() throw()
@@ -191,8 +190,8 @@ namespace psy {
 				#endif
 
 			}
-			delete[] pOutSamplesL;
-			delete[] pOutSamplesR;
+			//delete[] pOutSamplesL;
+			//delete[] pOutSamplesR;
 		}
 		
 		/*****************************************************************************
@@ -353,15 +352,26 @@ namespace psy {
 					::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
 				#endif
 				libHandle_=0;
-				return false;       
+				return false;
 			}
+			if( LADSPA_IS_INPLACE_BROKEN(psDescriptor->Properties) ) {
+				std::cerr << "Plugin does not support in-place processing" << std::endl;
+				#if defined __unix__ || defined __APPLE__
+					dlclose(libHandle_);
+				#else
+					::FreeLibrary( static_cast<HINSTANCE>( libHandle_ ) );
+				#endif
+				libHandle_=0;
+				return false;
+			}
+
 			// Step four: Create (instantiate) the plugin, so that we can use it.
 			std::cout << "step four" << std::endl;
 		
 			pluginHandle = psDescriptor->instantiate(psDescriptor,Player::Instance()->timeInfo().sampleRate());
 			if ( !pluginHandle) 
 				return false;
-		
+
 			// Step five: Prepare the structures to use the plugin with the program.
 			std::cout << "step five" << std::endl;
 			prepareStructures();
@@ -428,39 +438,32 @@ namespace psy {
 		{
 			// Controls
 			LADSPA_Data *ppbuffersIn[]={_pSamplesL,_pSamplesR};
-			LADSPA_Data *ppbuffersOut[]={pOutSamplesL,pOutSamplesR};
-		
+			LADSPA_Data *ppbuffersOut[]={_pSamplesL,_pSamplesR};
+			
+			//we're passing addresses within the vector to the plugin.. let's be sure they don't move around
+			values_.reserve(psDescriptor->PortCount);
 			_numPars=0;
 			int indexinput(0),indexoutput(0);
 			for (int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
 				LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
 				if (LADSPA_IS_PORT_CONTROL(iPortDescriptor)) {
 					LadspaParam parameter(iPortDescriptor,psDescriptor->PortRangeHints[lPortIndex],psDescriptor->PortNames[lPortIndex]);
-					
-					values_.push_back(parameter);
-					if (LADSPA_IS_PORT_INPUT(iPortDescriptor))
-					{
-						psDescriptor->connect_port(pluginHandle,lPortIndex,
-							values_[_numPars].valueaddress());
-					}
-					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor))
-					{
-						psDescriptor->connect_port(pluginHandle,lPortIndex,
-							controls_[_numPars].valueaddress());
-					}
+
+					values_[_numPars]=parameter;
+					psDescriptor->connect_port(pluginHandle,lPortIndex,
+						values_[_numPars].valueaddress());
 					_numPars++;
 				}
 				else if (LADSPA_IS_PORT_AUDIO(iPortDescriptor))
 				{
 					// Only Stereo for now.
-					// note, the connections are inverted because we do an inversion in PreWork() (in order to avoid the BROKEN_INPLACE problems)
-					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)  && indexoutput < 2 ) {
-						psDescriptor->connect_port(pluginHandle,lPortIndex,
-							ppbuffersOut[indexoutput++]);
-						}
-					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)  && indexinput < 2 ) {
+					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)  && indexinput < 2 ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
 							ppbuffersIn[indexinput++]);
+						}
+					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor)  && indexoutput < 2 ) {
+						psDescriptor->connect_port(pluginHandle,lPortIndex,
+							ppbuffersOut[indexoutput++]);
 						}
 				}
 			}
@@ -469,6 +472,7 @@ namespace psy {
 		
 		void LADSPAMachine::Init()
 		{
+			Machine::Init();
 			// Not sure what should we do here.
 			SetDefaultsForControls();
 		}
@@ -482,16 +486,17 @@ namespace psy {
 		
 		void LADSPAMachine::PreWork(int numSamples)
 		{
-				std::swap(_pSamplesL,pOutSamplesL);
-				std::swap(_pSamplesR,pOutSamplesR);
+			//std::swap(_pSamplesL,pOutSamplesL);
+			//std::swap(_pSamplesR,pOutSamplesR);
 			Machine::PreWork(numSamples);
 		}
 		
 		int LADSPAMachine::GenerateAudio(int numSamples )
 		{
-			psDescriptor->run(pluginHandle,numSamples);
-				std::swap(_pSamplesL,pOutSamplesL);
-				std::swap(_pSamplesR,pOutSamplesR);
+			if(!_mute && !_bypass && !_standby)
+				psDescriptor->run(pluginHandle,numSamples);
+			//std::swap(_pSamplesL,pOutSamplesL);
+			//std::swap(_pSamplesR,pOutSamplesR);
 			return numSamples;
 		}
 		void  LADSPAMachine::GetParamName(int numparam, char * name) const
@@ -531,7 +536,6 @@ namespace psy {
 		
 		void LADSPAMachine::SetDefaultsForControls()
 		{
-			int lBufferIndex = 0;
 			for (int lPortIndex = 0; lPortIndex < _numPars; lPortIndex++) {
 				values_[lPortIndex].setDefault();
 			}
@@ -587,9 +591,9 @@ namespace psy {
 			pFile->Write(size);
 			pFile->Write(count);
 			for(unsigned int i(0) ; i < count ; ++i) {
-		float temp = values_[i].rawvalue();
-		pFile->Write(temp);
-		}
+				float temp = values_[i].rawvalue();
+				pFile->Write(temp);
+			}
 		}
 	}
 }

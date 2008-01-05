@@ -115,6 +115,7 @@ Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinde
 		if  ( plugin->loadDll( key.dllPath(), key.index() ) ) {
 			plugin->SetPosX( x );
 			plugin->SetPosY( y );
+			plugin->Init();
 			if( machine_[fb] )  DestroyMachine( fb );
 			machine_[ fb ] = plugin;
 		} else {
