@@ -307,7 +307,7 @@ void scheduler::process(node & node) {
 			if(node.multiple_input_port()->underlying().single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
 				ports::output & output_port(*node.output_ports().front());
 				if(
-					node.multiple_input_port()->buffer() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
+					node.multiple_input_port()->buffer().reference_count() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
 					node.multiple_input_port()->output_ports().size() == 1 // We have a single input, so, this is the identity transform, i.e., the buffer will not be modified.
 				) {
 					if(false && loggers::trace()()) {
@@ -363,7 +363,7 @@ void scheduler::process(node & node) {
 /// processes the node of the output port connected to the input port and sets the buffer for the input port
 void inline scheduler::process_node_of_output_port_and_set_buffer_for_input_port(ports::output & output_port, ports::input & input_port) {
 	process(output_port.parent());
-	assert(&output_port.buffer());
+	assert(&output_port.buffer().reference_count());
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
 		s << "back to scheduling of input port " << input_port.underlying().qualified_name();
@@ -385,7 +385,7 @@ void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool
 void inline scheduler::set_buffer_for_output_port(ports::output & output_port, buffer & buffer) {
 	output_port.buffer(&buffer);
 	output_port.reset(); // reset the remaining input port count
-	buffer += output_port; // set the expected pending read count
+	buffer += output_port.input_ports_remaining(); // set the expected pending read count
 }
 
 /// decrements the remaining expected read count of the buffer and
@@ -404,13 +404,13 @@ void inline scheduler::check_whether_to_recycle_buffer_in_the_pool(ports::output
 		std::ostringstream s;
 		s
 			<< "output port " << output_port.underlying().qualified_name()
-			<< ": " << static_cast<std::size_t>(output_port) << " to go, "
+			<< ": " << output_port.input_ports_remaining() << " to go, "
 			<< "buffer: " << &output_port.underlying().buffer()
-			<< ": " << output_port.buffer() << " to go";
+			<< ": " << output_port.buffer().reference_count() << " to go";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	if(!output_port) {
-		if(!output_port.buffer()) (*buffer_pool_instance_)(output_port.buffer()); // recycle the buffer in the pool
+	if(!output_port.input_ports_remaining()) {
+		if(!output_port.buffer().reference_count()) (*buffer_pool_instance_)(output_port.buffer()); // recycle the buffer in the pool
 		output_port.buffer(0);
 	}
 }

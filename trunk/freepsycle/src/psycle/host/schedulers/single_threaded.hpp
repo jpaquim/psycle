@@ -44,7 +44,7 @@ class buffer : public underlying::buffer {
 		virtual ~buffer() throw();
 		/// convertible to std::size_t
 		///\returns the reference count.
-		operator std::size_t () const throw() { return reference_count_; }
+		std::size_t reference_count() const throw() { return reference_count_; }
 		/// increments the reference count.
 		buffer & operator+=(std::size_t more) throw() { reference_count_ += more; return *this; }
 		/// decrements the reference count by 1.
@@ -102,7 +102,7 @@ namespace ports {
 			public:
 				/// convertible to std::size_t
 				///\returns the reference count.
-				operator std::size_t () const throw() { return input_ports_remaining_; }
+				std::size_t input_ports_remaining() const throw() { return input_ports_remaining_; }
 				output & operator--() throw() { assert(*this > 0); --input_ports_remaining_; return *this; }
 				void reset() throw() { input_ports_remaining_ = input_port_count(); }
 			private:

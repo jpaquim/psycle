@@ -243,7 +243,6 @@ namespace ports {
 			public:
 				operator bool() const { return input_ports_.size(); }
 				typedef std::vector<typename Typenames::ports::input*> input_ports_type;
-			public:
 				input_ports_type const & input_ports() const throw() { return input_ports_; }
 			private:
 				input_ports_type         input_ports_;
@@ -449,6 +448,7 @@ namespace ports {
 						}
 						return false;
 					}
+				public:
 					output_ports_type inline const & output_ports() const throw() { return output_ports_; }
 				private:
 					output_ports_type                output_ports_;
