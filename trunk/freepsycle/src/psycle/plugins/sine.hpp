@@ -24,26 +24,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		real step_;
 		real frequency_to_step_;
 
-		bool have_frequency() {
-			return
-				single_input_ports()[0]->output_port() &&
-				single_input_ports()[0]->buffer()[0].size() &&
-				single_input_ports()[0]->buffer()[0].size() >
-				single_input_ports()[0]->buffer()[0][0].index();
-		}
-
-		bool have_phase() {
-			return
-				single_input_ports()[1]->output_port() &&
-				single_input_ports()[1]->buffer()[0].size() &&
-				single_input_ports()[1]->buffer()[0].size() >
-				single_input_ports()[1]->buffer()[0][0].index();
-		}
-		
-		bool have_out() {
-			return
-				output_ports()[0]->input_ports().size();
-		}
+		bool have_frequency() { return *single_input_ports()[0]; }
+		bool have_phase() { return *single_input_ports()[1]; }
+		bool have_out() { return *output_ports()[0]; }
 
 		buffer::channel & frequency_channel() { return single_input_ports()[0]->buffer()[0]; }
 		buffer::channel & phase_channel() { return single_input_ports()[1]->buffer()[0]; }
