@@ -28,7 +28,6 @@ using engine::exception;
 namespace loggers = universalis::operating_system::loggers;
 
 /***********************************************************************/
-	
 template<typename Typenames>
 class graph
 :
@@ -63,7 +62,6 @@ class graph
 };
 
 /***********************************************************************/
-
 template<typename Parent>
 class child_of {
 	protected:
@@ -76,7 +74,6 @@ class child_of {
 };
 
 /***********************************************************************/
-
 template<typename Typenames>
 class node
 :
@@ -206,7 +203,6 @@ class node
 };
 
 /***********************************************************************/
-
 template<typename Typenames>
 class port
 :
@@ -217,15 +213,12 @@ class port
 	protected: friend class port::virtual_factory_access;
 		typedef port port_type;
 		port(typename Typenames::node & node) : child_of<typename Typenames::node>(node) {}
-
-	protected:
-		void connect(typename Typenames::port & port) throw(exception) {}
+		void connect(typename Typenames::port &) {} ///\todo any useful? redefined in derived classes?
 };
 
 namespace ports {
 	
 	/***********************************************************************/
-
 	template<typename Typenames>
 	class output
 	:
@@ -248,13 +241,10 @@ namespace ports {
 		///\name connected input ports
 		///\{
 			public:
+				operator bool() const { return input_ports_.size(); }
 				typedef std::vector<typename Typenames::ports::input*> input_ports_type;
 			public:
 				input_ports_type const & input_ports() const throw() { return input_ports_; }
-			#if 0
-			protected:
-				input_ports_type       & input_ports()       throw() { return input_ports_; }
-			#endif
 			private:
 				input_ports_type         input_ports_;
 		///\}
@@ -305,7 +295,6 @@ namespace ports {
 	};
 
 	/***********************************************************************/
-	
 	template<typename Typenames>
 	class input
 	:
@@ -350,7 +339,6 @@ namespace ports {
 	namespace inputs {
 
 		/***********************************************************************/
-		
 		template<typename Typenames>
 		class single
 		:
@@ -379,6 +367,17 @@ namespace ports {
 			///\name connected output port
 			///\{
 				public:
+					operator bool() const {
+						if(!output_port_) return false;
+						for(unsigned int channel(0); channel < output_port_->buffer().size(); ++channel) {
+							if(
+								output_port_->buffer()[channel].size() &&
+								output_port_->buffer()[channel].size() >
+								output_port_->buffer()[channel][0].index()
+							) return true;
+						}
+						return false;
+					}
 					typename Typenames::ports::output * const & output_port() const throw() { return output_port_; }
 				private:
 					typename Typenames::ports::output *         output_port_;
@@ -418,7 +417,6 @@ namespace ports {
 		};
 
 		/***********************************************************************/
-		
 		template<typename Typenames>
 		class multiple
 		:
@@ -439,12 +437,19 @@ namespace ports {
 			///\{
 				public:
 					typedef std::vector<typename Typenames::ports::output*> output_ports_type;
-				public:
+					operator bool() const {
+						for(typename output_ports_type::const_iterator i(output_ports_.begin()), e(output_ports_.end()); i != e; ++i) {
+							for(unsigned int channel(0); channel < i->buffer().size(); ++channel) {
+								if(
+									i->buffer()[channel].size() &&
+									i->buffer()[channel][0].size() >
+									i->buffer()[channel][0][0].index()
+								) return true;
+							}
+						}
+						return false;
+					}
 					output_ports_type inline const & output_ports() const throw() { return output_ports_; }
-				#if 0
-				protected:
-					output_ports_type inline       & output_ports()       throw() { return output_ports_; }
-				#endif
 				private:
 					output_ports_type                output_ports_;
 			///\}

@@ -20,7 +20,6 @@ namespace detail {
 }
 
 /***********************************************************************/
-
 template<typename Typenames>
 class graph
 :
@@ -103,7 +102,6 @@ class graph
 };
 
 /***********************************************************************/
-
 template<typename Typenames>
 class node
 :
@@ -187,7 +185,6 @@ class node
 };
 
 /***********************************************************************/
-
 template<typename Typenames>
 class port
 :
@@ -207,7 +204,6 @@ class port
 namespace ports {
 
 	/***********************************************************************/
-	
 	template<typename Typenames>
 	class output
 	:
@@ -225,7 +221,6 @@ namespace ports {
 	};
 
 	/***********************************************************************/
-
 	template<typename Typenames>
 	class input
 	:
@@ -245,7 +240,6 @@ namespace ports {
 	namespace inputs {
 
 		/***********************************************************************/
-		
 		template<typename Typenames>
 		class single
 		:
@@ -263,7 +257,6 @@ namespace ports {
 		};
 
 		/***********************************************************************/
-
 		template<typename Typenames>
 		class multiple
 		:
