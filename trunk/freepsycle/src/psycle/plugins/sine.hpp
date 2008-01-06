@@ -15,7 +15,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		sine(engine::plugin_library_reference &, engine::graph &, std::string const & name);
 	public:
 		void frequency(real const & frequency) { this->step_ = frequency * frequency_to_step_; }
-		real frequency() const { return frequency_to_step_ / step_; }
+		real frequency() const { return frequency_to_step_ ? step_ / frequency_to_step_ : 0; }
 	protected:
 		void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
 		void do_process() throw(engine::exception) /*override*/;

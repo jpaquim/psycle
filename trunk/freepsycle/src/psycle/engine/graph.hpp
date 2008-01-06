@@ -295,8 +295,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 					};
 			};
 			typedef typenames::buffer buffer;
-			//this is currently a typedef: class channel;
-			//only a forward declaration at this point: typedef typenames::buffer::channel channel;
+			typedef typenames::buffer::channel channel;
 			typedef typenames::event event;
 	///\}
 		

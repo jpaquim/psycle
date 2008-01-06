@@ -14,16 +14,60 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 	protected:
 		void do_process() throw(engine::exception) /*override*/;
 
-	public:
-		void operator()(real const & sample, std::size_t index = 0) throw() {
-			sample_ = sample;
-			index_ = index;
-			sample_set_ = true;
-		}
-	private:
-		bool sample_set_;
-		real sample_;
-		std::size_t index_;
+	///\name beats per second
+	///\{
+		public:
+			real beats_per_second() const { return beats_per_second_; }
+			void beats_per_second(real beats_per_second) { this->beats_per_second_ = beats_per_second; }
+		private:
+			real beats_per_second_;
+	///\}
+	
+	///\name beat
+	///\{
+		public:
+			real const beat() { return beat_; }
+			void beat(real beat) { this->beat_ = beat; }
+		private:
+			real beat_;
+			std::size_t i;
+	///\}
+		
+	///\name events
+	///\{
+		public:
+			class event {
+				public:
+					event(real beat, real sample) : beat_(beat), sample_(sample) {}
+					
+				///\name beat
+				///\{
+					public:
+						real beat() const { return beat_;}
+					private:
+						real beat_;
+				///\}
+					
+				///\name sample
+				///\{
+					public:
+						real sample() const { return sample_; }
+						void sample(real sample) { this->sample_ = sample; }
+					private:
+						real sample_;
+				///\}
+			};
+
+			void add_event(real beat, real sample) { events_.push_back(event(beat, sample)); }
+
+			typedef std::vector<event> events_type;
+			events_type       & events()       { return events_; }
+			events_type const & events() const { return events_; }
+		private:
+			events_type         events_;
+			/// index in events_ container corresponding to current beat_
+			std::size_t index_;
+	///\}
 };
 
 }}
