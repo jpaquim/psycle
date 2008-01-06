@@ -38,6 +38,7 @@ class QStandardItemModel;
 //#include <QUndoView>
 class QUndoStack;
 class QUndoView;
+class QTimer;
 
 #include <QTabWidget>
 #include <QMainWindow>
@@ -76,9 +77,10 @@ public:
 
 protected:
 	void keyPressEvent( QKeyEvent *event );
-	void timerEvent( QTimerEvent *ev );
 
 private slots:
+	void updatePlaybackGraphics();
+
 	void onNewSongRequest();
 	void onOpenSongRequest();
 	void onSaveSongRequest();
@@ -147,6 +149,8 @@ private:
 	void createStatusBar();
 
 	void createUndoView();
+
+	QTimer *playbackTimer_;
 
 	QMenu *fileMenu;
 	QMenu *editMenu;
