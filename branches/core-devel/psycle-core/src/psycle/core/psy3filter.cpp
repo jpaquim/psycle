@@ -78,7 +78,7 @@ void Psy3Filter::preparePatternSequence( CoreSong & song )
 	seqList.clear();
 	song.patternSequence()->removeAll();
 	// creatse a single Pattern Category
-	singleCat = song.patternSequence()-> patternData()->createNewCategory("SinglePattern");
+	singleCat = song.patternSequence()-> PatternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence()->createNewLine();
 }
@@ -209,7 +209,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 	std::vector<int>::iterator it = seqList.begin();
 	for ( ; it < seqList.end(); ++it)
 	{
-		SinglePattern* pat = song.patternSequence()->patternData()->findById(*it);
+		Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();
 	}
@@ -444,14 +444,14 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 		unsigned char * pDest;
 		DataCompression::BEERZ77Decomp2(pSource, &pDest);
 		delete[] pSource; pSource = pDest;
-		// create a SinglePattern
+		// create a Pattern
 		std::string indexStr;
 		std::ostringstream o;
 		if (!(o << index))
 			indexStr = "error";
 		else
 			indexStr = o.str();
-		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;

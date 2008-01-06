@@ -80,7 +80,7 @@ GlobalEvent::GlobalType GlobalEvent::type( ) const
 
 /**************************************************************************/
 // SequenceEntry
-// pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
+// pattern Entry contains one ptr to a Pattern and the tickPosition for the absolute Sequencer pos
 
 SequenceEntry::SequenceEntry( )
 {
@@ -107,19 +107,19 @@ SequenceEntry::~ SequenceEntry( )
 wasDeleted(this);
 }
 
-void SequenceEntry::setPattern( SinglePattern * pattern )
+void SequenceEntry::setPattern( Pattern * pattern )
 {
 	pattern_ = pattern;
 	startPos_ = 0;
 	endPos_   = pattern->beats();
 }
 
-SinglePattern * SequenceEntry::pattern( )
+Pattern * SequenceEntry::pattern( )
 {
 	return pattern_;
 }
 
-SinglePattern * SequenceEntry::pattern( ) const
+Pattern * SequenceEntry::pattern( ) const
 {
 	return pattern_;
 }
@@ -216,7 +216,7 @@ SequenceLine::~ SequenceLine( )
 wasDeleted(this);
 }
 
-SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double position )
+SequenceEntry* SequenceLine::createEntry( Pattern * pattern, double position )
 {
 	SequenceEntry* entry = new SequenceEntry(this);
 	entry->setPattern(pattern);
@@ -241,7 +241,7 @@ void SequenceLine::moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLi
 	erase( it ); // Removes entry from this SequenceLine, but doesn't delete it.
 }
 
-void SequenceLine::removeSinglePatternEntries( SinglePattern* pattern )
+void SequenceLine::removeSinglePatternEntries( Pattern* pattern )
 {
 	iterator it = begin();
 	while ( it != end() ) {
@@ -364,11 +364,11 @@ void PatternSequence::removeLine( SequenceLine * line )
 	}
 }
 
-PatternData* PatternSequence::patternData() {
+PatternPool* PatternSequence::PatternPool() {
 	return &patternData_;
 }
 
-const PatternData & PatternSequence::patternData( ) const
+const PatternPool & PatternSequence::PatternPool( ) const
 {
 	return patternData_;
 }
@@ -392,14 +392,14 @@ void PatternSequence::GetLinesInRange( double start, double length, std::multima
 		for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt )
 		{
 			// take the pattern,
-			SinglePattern* pPat = sLineIt->second->pattern();
+			Pattern* pPat = sLineIt->second->pattern();
 			double entryStart = sLineIt->first;
 			float entryStartOffset  = sLineIt->second->startPos();
 			float entryEndOffset  = sLineIt->second->endPos();
 			float entryLength = entryEndOffset - entryStartOffset;
 			double relativeStart = start - entryStart + entryStartOffset;
 			
-			SinglePattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
+			Pattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
 			patEnd = pPat->lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
 
 			// and iterate through the lines that are inside the range
@@ -420,14 +420,14 @@ void PatternSequence::GetLinesInRange( double start, double length, std::multima
 				// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
 				tmpline.setSequenceTrack(seqlineidx);
 				tmpline.tweaks()=thisline->tweaks();
-				events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
+				events.insert( Pattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 				}
 		}
 		seqlineidx++;
 	}
 }
 
-bool PatternSequence::getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const {
+bool PatternSequence::getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const {
 	entryStart = 0;
 	PatternLine* searchLine = 0;
 
@@ -444,7 +444,7 @@ bool PatternSequence::getPlayInfo( SinglePattern* pattern, double start, double 
 		{
 			// take the pattern,
 
-			SinglePattern* pPat = sLineIt->second->pattern();
+			Pattern* pPat = sLineIt->second->pattern();
 
 			if ( pPat == pattern ) {
 				entryStart = sLineIt->first;
@@ -519,7 +519,7 @@ const PatternSequence::GlobalMap & PatternSequence::globalEvents( )
 	return globalEvents_;
 }
 
-void PatternSequence::removeSinglePattern( SinglePattern * pattern )
+void PatternSequence::removeSinglePattern( Pattern * pattern )
 {
 	for(iterator it = begin(); it != end(); ++it) {
 		(*it)->removeSinglePatternEntries(pattern);

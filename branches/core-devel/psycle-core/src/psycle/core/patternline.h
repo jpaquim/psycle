@@ -32,28 +32,46 @@ namespace psy { namespace core {
 */
 class PatternLine {
 	public:
-		PatternLine() : sequencerTrack_(0) {}
+		
+		typedef std::map<std::uint8_t, NoteEvent>::iterator noteiterator;
+		typedef std::map<std::uint8_t, NoteEvent>::const_iterator notec_iterator;
+		typedef std::map<std::uint8_t, TweakEvent>::iterator tweakiterator;
+		typedef std::map<std::uint8_t, TweakEvent>::const_iterator tweakc_iterator;
 
-		void setSequenceTrack(int track) { sequencerTrack_ = track; }
-		int sequenceTrack() const { return sequencerTrack_; }
+		PatternLine() {;}
+
+		void setNoteEvent(std::uint8_t,NoteEvent& pevent);
+		void replaceNoteEvent(std::uint8_t,NoteEvent& pevent);
+		void remNoteEvent(std::uint8_t);
+		NoteEvent & noteEvent(std::uint8_t index);
+		const NoteEvent & noteEvent(std::uint8_t index) const;
+//		std::uint8_t noteEvents() { return noteMap.count(); }
+
+		void setTweak(std::uint8_t, TweakEvent& pevent);
+		void replacetweak(std::uint8_t,TweakEvent& pevent);
+		void remTweak(std::uint8_t);
+		TweakEvent & tweak(std::uint8_t index);
+		const TweakEvent & tweak(std::uint8_t index) const;
+//		std::size_t tweaks() { return tweakMap.count(); } const;
+
+		///\todo why is this virtual?
+		/// answer: because we once wanted to make subclasses of patternlines. specifically for tweaks and globals.
+		/// Not sure if this is needed now.
+		virtual bool empty() const { return noteMap.empty() && tweakMap.empty(); }
 
 		std::string toXml( float pos ) const;
 
-		std::map<int, PatternEvent> & notes() { return noteMap; }
-		const std::map<int, PatternEvent> & notes() const { return noteMap; }
-
-		std::map<int, PatternEvent> & tweaks() { return tweakMap; }
-		const std::map<int, PatternEvent> & tweaks() const { return tweakMap; }
-
-		///\todo why is this virtual?
-		virtual bool empty() const { return noteMap.empty() && tweakMap.empty(); }
-
 	private:
+		static NoteEvent emptyevent;
+		static TweakEvent emptytweak;
 
-		int sequencerTrack_;
-
-		std::map<int, PatternEvent> noteMap;
-		std::map<int, PatternEvent> tweakMap;
+		/// A line can contain two types of information, notes/commands, and tweaks. (tweaks will be also wire volumes)
+		/// pattern holds a tweakInfoMap and trackInfoMap maps that contain information about the track, and the tweaks
+		/// of the pattern.
+		/// noteMap and tweakMap store the actual data (noteMap holds events, and tweakMap holds the value of the tweak).
+		/// the key is used to indicate the track at which is located (for tweakMap, it does not correspond to the physical track)
+		std::map<std::uint8_t, NoteEvent> noteMap;
+		std::map<std::uint8_t, TweakEvent> tweakMap;
 };
 
 }}

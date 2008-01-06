@@ -73,6 +73,7 @@ namespace psy
 					break;
 				}
 			}
+			std::cerr << "PsyFilter::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
 			return false;
 		}
 	}

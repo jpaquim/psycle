@@ -111,6 +111,7 @@ namespace psycle
 		/*////////////////////////////////////////////////////////////////////////*/
 
 		/// callback functions to let plugins communicate with the host.
+	    /// DO NOT CHANGE the order of the functions. This is an exported class!
 		class CFxCallback
 		{
 			public:

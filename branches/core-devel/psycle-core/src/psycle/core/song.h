@@ -116,7 +116,7 @@ namespace psy
 
 
 			///\name pattern sequence
-			///\todo: Think about PatternData. Should be owned by PatternSequence, or by CoreSong?
+			///\todo: Think about PatternPool. Should be owned by PatternSequence, or by CoreSong?
 			///\{
 		public:
 			/// pattern sequence

@@ -20,8 +20,8 @@
 #ifndef PATTERNSEQUENCE_H
 #define PATTERNSEQUENCE_H
 
-#include "patterndata.h"
-#include "singlepattern.h"
+#include "PatternPool.h"
+#include "Pattern.h"
 
 /**
 @author  Psycledelics  
@@ -85,9 +85,9 @@ namespace psy
 			double tickPosition() const;
 			double tickEndPosition( ) const;
 
-			void setPattern(SinglePattern* pattern);
-			SinglePattern* pattern();
-			SinglePattern* pattern() const;
+			void setPattern(Pattern* pattern);
+			Pattern* pattern();
+			Pattern* pattern() const;
 
 			float patternBeats() const;
 
@@ -111,7 +111,7 @@ namespace psy
 			/// the sequence timeline that the sequenceEntry belongs to
 			SequenceLine* line_;
 			/// the wrapped pattern
-			SinglePattern* pattern_;
+			Pattern* pattern_;
 			/// here we can shrink the pattern of the entry
 			float startPos_;
 			/// endpos shrink (from begin of a pattern starting at 0)
@@ -135,10 +135,10 @@ namespace psy
 
 			boost::signal<void (SequenceLine*)> wasDeleted;
 
-			SequenceEntry* createEntry(SinglePattern* pattern, double position);
+			SequenceEntry* createEntry(Pattern* pattern, double position);
 			void insertEntry( SequenceEntry *entry );
 			void moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine );
-			void removeSinglePatternEntries(SinglePattern* pattern);
+			void removeSinglePatternEntries(Pattern* pattern);
 
 			double tickLength() const;
 
@@ -181,12 +181,12 @@ namespace psy
 
 			// playpos info
 
-			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
+			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
 
-			PatternData* patternData();
-			const PatternData & patternData() const;
+			PatternPool* PatternPool();
+			const PatternPool & PatternPool() const;
 
-			void removeSinglePattern(SinglePattern* pattern);
+			void removeSinglePattern(Pattern* pattern);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
@@ -230,7 +230,7 @@ namespace psy
 
 		private:
 
-			PatternData patternData_;
+			PatternPool patternData_;
 
 			int numTracks_;
 			std::vector<bool> mutedTrack_;

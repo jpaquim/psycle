@@ -143,7 +143,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 
 	patMap.clear();
 
-	song.patternSequence()->patternData()->removeAll();
+	song.patternSequence()->PatternPool()->removeAll();
 	song.patternSequence()->removeAll();
 	song.clear();
 	song_ = &song;
@@ -228,7 +228,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 	// Pattern data.
 	#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
 		{
-			xmlpp::Node::NodeList const & pattern_data_nodes(root_element.get_children("patterndata"));
+			xmlpp::Node::NodeList const & pattern_data_nodes(root_element.get_children("PatternPool"));
 			if(pattern_data_node.begin() != pattern_data_nodes.end())
 			{
 				xmlpp::Element const & pattern_data(dynamic_cast<xmlpp::Element const &>(pattern_data_nodes.begin()));
@@ -239,7 +239,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 					xmlpp::Attribute const * const name_attribute(category.get_attribute("name"));
 					if(!name_attribute) std::cerr << "expected name attribute in category element\n";
 					else {
-						lastCategory = song_->patternSequence()->patternData()->createNewCategory(name_attribute->get_value());
+						lastCategory = song_->patternSequence()->PatternPool()->createNewCategory(name_attribute->get_value());
 						xmlpp::Attribute const * const color_attribute(category.get_attribute("color"));
 						if(color_attribute) lastCategory->setColor(str<long int>(color_attribute->get_value();));
 					}
@@ -346,14 +346,14 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 			}
 		}
 	#elif defined QT_XML_LIB
-		QDomElement patData = root.firstChildElement( "patterndata" );
+		QDomElement patData = root.firstChildElement( "PatternPool" );
 		QDomNodeList categories = patData.elementsByTagName( "category" );
 		for ( int i = 0; i < categories.count(); i++ )
 		{
 			QDomElement category = categories.item( i ).toElement();
 			std::string catName = category.attribute("name").toStdString();
 			std::string attrib = category.attribute("color").toStdString();
-			lastCategory = song_->patternSequence()->patternData()->createNewCategory(catName);
+			lastCategory = song_->patternSequence()->PatternPool()->createNewCategory(catName);
 			lastCategory->setColor( str<long>( attrib ) );
 
 			QDomNodeList patterns = category.elementsByTagName( "pattern" );
@@ -434,7 +434,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 						else {
 							it = patMap.find(str<int>(id_attribure->get_value()));
 							if(it != patMap.end()) {
-								SinglePattern * pattern = it->second;
+								Pattern * pattern = it->second;
 								if(pattern) {
 									xmlpp::Attribute const * const pos_attribute(sequencer_entry.get_attribute("pos"));
 									if(!pos_attribute) std::cerr << "expected pos attribute in seqentry element\n";
@@ -478,10 +478,10 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 				float startPos = str<float> (seqentry.attribute("start").toStdString());
 				float endPos = str<float> (seqentry.attribute("end").toStdString());
 				int transpose  = str_hex<int> (seqentry.attribute("transpose").toStdString());
-				std::map<int, SinglePattern*>::iterator it = patMap.begin();
+				std::map<int, Pattern*>::iterator it = patMap.begin();
 				it = patMap.find( pat_id );
 				if ( it != patMap.end() ) {
-					SinglePattern* pattern = it->second; 
+					Pattern* pattern = it->second; 
 					if (pattern) {
 						SequenceEntry* entry = lastSeqLine->createEntry(pattern, pos);
 						entry->setStartPos(startPos);
@@ -665,7 +665,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
-	xml << song.patternSequence().patternData().toXml();
+	xml << song.patternSequence().PatternPool().toXml();
 	xml << song.patternSequence().toXml();
 	xml << "</psy4>" << std::endl;
 
@@ -724,6 +724,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
 
 	if (!zipwriter_finish(z)) {
+		std::cerr << "Zipwriter failed." << std::endl;
 		return false;
 	}
 

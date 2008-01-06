@@ -32,144 +32,156 @@ namespace psy
 {
 	namespace core
 	{
-
 		class PatternCategory;
 
 		class TweakTrackInfo {
 		public:
 
-			enum TweakType { twk, tws, mdi, aut };
+			enum TweakType { twk, tws, mdi, mdis, wire, wires, aut };
+			static char **TweakTypeText;
 
 			TweakTrackInfo();
-			TweakTrackInfo( int mac, int param, TweakType type );
+			TweakTrackInfo( TweakType type , std::uint16_t param);
 
-			~TweakTrackInfo();
+			~TweakTrackInfo(){;}
 
-			int machineIdx()    const;
-			int parameterIdx()  const;
-			TweakType type()          const;
+			std::uint16_t parameterIdx()  const { return paramIdx_; }
+			TweakType type()     const { return type_; }
 
 			bool operator<(const TweakTrackInfo & key) const;
 
+			std::string toXml() const;
+
 		private:
 
-			int macIdx_;
-			int paramIdx_;
 			TweakType type_;
+			std::uint16_t paramIdx_;
 
 		};
 		class TrackInfo {
 		public:
 
-			enum TweakType { twk, tws, mdi, aut };
+			TrackInfo();
+			TrackInfo( std::uint16_t mac, bool muted);
 
-			TweakTrackInfo();
-			TweakTrackInfo( int mac, int param, TweakType type );
+			~TrackInfo() {;}
 
-			~TweakTrackInfo();
+			inline void setMachineIdx(std::uint16_t macindex) { macIdx_=macindex; }
+			inline std::uint16_t machineIdx()    const { return macIdx_; }
 
-			int machineIdx()    const;
-			int parameterIdx()  const;
-			TweakType type()          const;
+			///\todo: Add Pattern:: member which changes this value, while adding/removing the columns in
+			/// the patternlines aswell
+			inline void increasecommands()    { commands_++; }
+			inline void decreasecommands()    { commands_--; }
+			inline std::uint8_t commands()    const { return commands_; }
 
-			bool operator<(const TweakTrackInfo & key) const;
+			///\todo: Add Pattern:: member which changes this value, while adding/removing the columns in
+			/// the patternlines aswell
+			void addtweakinfo(TweakTrackInfo* tinfo);
+			void changetweakinfo(std::uint8_t index,TweakTrackInfo* tinfo);
+			void removetweakinfo(TweakTrackInfo* tinfo);
+			//inline std::uint8_t tweaks()    const { return tweakinfos.size(); }
+
+			inline void mute(bool value) { ismuted_=value; }
+			inline bool muted() const { return ismuted_; }
+
+			std::string toXml( int track ) const;
 
 		private:
 
-			int macIdx_;
-			int paramIdx_;
-			TweakType type_;
+			std::uint16_t macIdx_;
+			std::uint8_t commands_;
+			bool ismuted_;
+			std::list<TweakTrackInfo*> tweakinfos;
 
 		};
 
 
-		class Pattern : public std::map<double, PatternLine> {
+		class Pattern {
 		public:
+			typedef  std::map<double, PatternLine>::iterator linesiterator;
+			typedef  std::map<double, PatternLine>::const_iterator linesc_iterator;
+
 			Pattern();
 			Pattern(Pattern const& other);
 
 			virtual ~Pattern();
 
-			boost::signal<void (Pattern*)> wasDeleted;
+//			TweakTrackInfo tweakInfo( int track ) const;
+//			int tweakTrack( const TweakTrackInfo & info);
 
 			void setID(int id);
-			int id() const;
+			int id() const { return id_; }
 
-			void setBeatZoom(int zoom);
-			int beatZoom() const;
+			void setBeatZoom(int zoom) { beatZoom_ = zoom; }
+			int beatZoom() const { return beatZoom_; }
 
+			void setName(const std::string & name) { name_ = name; }
+			const std::string & name() const { return name_; }
 
-			void setEvent( int line, int track, const PatternEvent & event );
-			PatternEvent event( int line, int track );
+			void setCategory(PatternCategory* category) { category_ = category; }
+			PatternCategory* category() { return category_; }
 
-			void setTweakEvent( int line, int track, const PatternEvent & event );
-			PatternEvent tweakEvent( int line, int track );
-
-
+			///\todo: we have to work out better the "time signature" feature. I don't find useful to have one signature each
+			/// signature end. I'd better have an initial signature, and the user add the variations he finds appropiate. 
+			/// Concretely, signature affects mostly the visuals, and concretely, where the notes are placed relative to a beat.
 			void addBar( const TimeSignature & signature );
 			void removeBar( float pos);
-
-			float beats() const;
 
 			bool barStart(double pos, TimeSignature & signature) const;
 			void clearBars();
 
-			const TimeSignature & playPosTimeSignature(double pos) const;
+			std::vector<TimeSignature> &  timeSignatures() { return timeSignatures_; }
+			const std::vector<TimeSignature> &  timeSignatures() const { return timeSignatures_; }
+			const TimeSignature & timeSignatureAt(double pos) const;
 
-			void setName(const std::string & name);
-			const std::string & name() const;
+			///\todo: work out beats().
+			float beats() const;
+			float beatsPerLine() const { return 1 / (float) beatZoom(); }
 
-			void setCategory(PatternCategory* category);
-			PatternCategory* category();
+			linesiterator find_nearest( int linenr );
+			linesc_iterator find_nearest( int linenr ) const;
 
-			float beatsPerLine() const;
+			linesiterator find_lower_nearest( int linenr );
+			linesc_iterator find_lower_nearest( int linenr ) const;
+
+			void setEvent( int line, int track, const NoteEvent & event );
+			NoteEvent event( int line, int track );
+
+			void setTweakEvent( int line, int track, const TweakEvent & event );
+			TweakEvent tweakEvent( int line, int track );
 
 			void clearTrack( int linenr , int tracknr );
 			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
+		
+//			void clearEmptyLines();
 
-			Pattern::iterator find_nearest( int linenr );
-			Pattern::const_iterator find_nearest( int linenr ) const;
-
-			Pattern::iterator find_lower_nearest( int linenr );
-			Pattern::const_iterator find_lower_nearest( int linenr ) const;
-			
-
-			void clearEmptyLines();
-
+			std::auto_ptr<Pattern> block( int left, int right, int top, int bottom );
 			void scaleBlock(int left, int right, double top, double bottom, float factor);
 			void transposeBlock(int left, int right, double top, double bottom, int trp);
+			void copyBlock(int left, int top, const Pattern & pattern, int tracks, float maxBeats);
+			void mixBlock(int left, int top, const Pattern & pattern, int tracks, float maxBeats);
 			void deleteBlock(int left, int right, double top, double bottom);
-
-
-			std::vector<TimeSignature> &  timeSignatures();
-			const std::vector<TimeSignature> &  timeSignatures() const;
+			void deleteBlock( int left, int right, int top, int bottom );
 
 			std::string toXml() const;
 
-		std::auto_ptr<Pattern> block( int left, int right, int top, int bottom );
-			void copyBlock(int left, int top, const Pattern & pattern, int tracks, float maxBeats);
-			void mixBlock(int left, int top, const Pattern & pattern, int tracks, float maxBeats);
-
-			void deleteBlock( int left, int right, int top, int bottom );
-
-			TweakTrackInfo tweakInfo( int track ) const;
-			int tweakTrack( const TweakTrackInfo & info);
+			boost::signal<void (Pattern*)> wasDeleted;
 
 		private:
 
 			int beatZoom_;
-			std::string name_;
-
-			PatternCategory* category_;
-			std::vector<TimeSignature> timeSignatures_;
-
-			TimeSignature zeroTime;
-
 			int id_;
-			static int idCounter;
+			std::string name_;
+			PatternCategory* category_;
 
-			std::map<TweakTrackInfo, int> tweakInfoMap;
+			std::vector<TimeSignature> timeSignatures_;
+			static TimeSignature defaultSignature;
+
+			std::map<int,TrackInfo> trackInfoMap;
+			std::map<TweakTrackInfo,int> tweakInfoMap;
+			std::map<double, PatternLine> lineMap;
 
 		};
 

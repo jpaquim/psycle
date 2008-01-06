@@ -43,6 +43,25 @@ class Psy3Filter : public PsyFilterBase
 			Psy3Filter( Psy3Filter const & );
 			Psy3Filter& operator=(Psy3Filter const&);
 		public:
+			class PatternEntry
+			{
+			public:
+				inline PatternEntry()
+					:
+				_note(255),
+					_inst(255),
+					_mach(255),
+					_cmd(0),
+					_parameter(0)
+				{}
+
+				std::uint8_t _note;
+				std::uint8_t _inst;
+				std::uint8_t _mach;
+				std::uint8_t _cmd;
+				std::uint8_t _parameter;
+			};
+
 			static Psy3Filter* Instance() {
 				// don`t use multithreaded
 				static Psy3Filter s;

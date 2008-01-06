@@ -26,7 +26,7 @@
 
 namespace psy { namespace core {
 
-class SinglePattern;
+class Pattern;
 class Machine;
 
 /**
@@ -67,12 +67,12 @@ class Psy4Filter : public Psy3Filter
 		std::fstream _stream;
 
 		PatternCategory* lastCategory;
-		SinglePattern* lastPattern;
+		Pattern* lastPattern;
 		SequenceLine* lastSeqLine;
 		Machine* lastMachine;
 		float lastPatternPos;
 
-		std::map<int, SinglePattern*> patMap;
+		std::map<int, Pattern*> patMap;
 
 		CoreSong* song_;
 };

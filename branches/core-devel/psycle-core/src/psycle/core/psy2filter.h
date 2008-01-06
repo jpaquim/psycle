@@ -50,7 +50,24 @@ class Psy2Filter : public PsyFilterBase
 				int numpars;
 				float * pars;
 		};
+		class PatternEntry
+		{
+		public:
+			inline PatternEntry()
+				:
+				_note(255),
+				_inst(255),
+				_mach(255),
+				_cmd(0),
+				_parameter(0)
+			{}
 
+			std::uint8_t _note;
+			std::uint8_t _inst;
+			std::uint8_t _mach;
+			std::uint8_t _cmd;
+			std::uint8_t _parameter;
+		};
 
 	///\name Singleton Pattern
 	///\{

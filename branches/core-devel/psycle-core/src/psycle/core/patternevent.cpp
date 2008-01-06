@@ -21,32 +21,66 @@
 #include <sstream>
 
 namespace psy { namespace core {
-		
-PatternEvent::PatternEvent() :
-	note_(255),
-	inst_(255),
-	mach_(255),
-	cmd_(0),
-	param_(0),
-	volume_(255),
-	sharp_(1)
+	
+NoteEvent::PcmType NoteEvent::emptyCmd_;
+
+NoteEvent::NoteEvent()
+	:note_(255)
+	,volume_(255)
+{}
+
+void NoteEvent::setParamCmd(std::uint8_t index,PcmType value)
 {
-	for(int i = 0; i < 10; i++) paraCmdList_.push_back(PcmType());
+	PcmListType::iterator it = paraCmdList_.find(index);
+	if ( it == paraCmdList_.end() ) 
+	{
+		paraCmdList_[index]=value;
+	}
+	else
+	{
+		it->second = value;
+	}
+}
+void NoteEvent::remParamCmd(std::uint8_t index)
+{
+	PcmListType::iterator it = paraCmdList_.find(index);
+	if ( it != paraCmdList_.end() ) 
+	{
+		paraCmdList_.erase(it);
+	}
+}
+const NoteEvent::PcmType & NoteEvent::paramCmd(std::uint8_t index) const
+{
+	PcmListType::const_iterator it = paraCmdList_.find(index);
+	if ( it == paraCmdList_.end() ) return emptyCmd_;
+	else return it->second;
 }
 
-std::string PatternEvent::toXml( int track ) const
+std::string NoteEvent::toXml( int track ) const
 {
 	std::ostringstream xml;
-	xml
-		<< "<patevent track='" << track
+	xml << "<NoteEvent track='" << track
 		<< std::hex << "' note='" << (int) note_
-		<< std::hex << "' mac='" << (int) mach_
-		<< std::hex << "' inst='" << (int) inst_
-		<< std::hex << "' cmd='" << (int) cmd_
-		<< std::hex << "' param='" << (int) param_
-		<< std::hex << "' sharp='" << (int) sharp_
+		<< std::hex << "' volume='" << (int) volume_;
+		for ( PcmListType::const_iterator it = paraCmdList_.begin(); it != paraCmdList_.end(); ++it)
+		{
+			xml << std::hex << "' param" << (int) it->first << "='" << (int) it->second.first << (int) (it->second.second) ;
+		}
+	xml <<"' />\n";
+	return xml.str();
+}
+
+
+/************************************************************************/
+// TweakEvent
+std::string TweakEvent::toXml( int track ) const
+{
+	std::ostringstream xml;
+	xml << "<TrackEvent track='" << track;
+		<< std::hex << "' value='" << (int) value_
 		<<"' />\n";
 	return xml.str();
 }
+
 
 }}

@@ -1,3 +1,8 @@
+/*!
+ * <File comment goes here!!>
+ * 
+ * Copyright (c) 2005 by <your name/ organization here>
+ */
 /******************************************************************************
 *  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
 *                                                                             *
@@ -28,50 +33,63 @@ namespace psy { namespace core {
 /**
 @author  Psycledelics  
 */
-class PatternEvent
+/*!
+ * \brief
+ * Note Event information class.
+ * 
+ * A NoteEvent contains the event information for notes sent to the machines.
+ * 
+ * \remarks
+ * Note that the machine index is not set in the patternEvent. It is common for the same track and is stored by the pattern in a TrackInfo struct
+ * 
+ * \see
+ * patternline.h|Pattern.h
+ */
+class NoteEvent
 {
 	public:
 		typedef std::pair<std::uint8_t,std::uint8_t> PcmType;
-		typedef std::vector<PcmType> PcmListType;
+		typedef std::map<std::uint8_t,PcmType> PcmListType;
 
-		PatternEvent();
+		NoteEvent();
 
-		void setNote(std::uint8_t value) { note_ = value; }
-		std::uint8_t note() const { return note_; }
+		///\todo: use notes from 128 to 254 for a "custom scale", and store the custom scale as song information.
+		/// these notes will have to be sent in a special way (VST allow finetuning. For native it needs to be implemented)
+		inline void setNote(std::uint8_t value) { note_ = value; }
+		inline std::uint8_t note() const { return note_; }
 
-		void setInstrument(std::uint8_t instrument) { inst_ = instrument; }
-		std::uint8_t instrument() const { return inst_; }
+		inline void setVolume(std::uint8_t volume) { volume_ = volume; }
+		inline std::uint8_t volume() const { return volume_; }
 
-		void setMachine(std::uint8_t machine) { mach_ = machine; }
-		std::uint8_t machine() const { return mach_; }
+		void setParamCmd(std::uint8_t index,PcmType parm);
+		void remParamCmd(std::uint8_t index);
+		const inline PcmType & paramCmd(std::uint8_t index) const;
 
-		void setCommand(std::uint8_t command) { cmd_ = command; }
-		std::uint8_t command() const { return cmd_; }
-
-		void setParameter(std::uint8_t parameter) { param_ = parameter; }
-		std::uint8_t parameter() const { return param_; }
-
-		void setVolume(std::uint8_t volume) { volume_ = volume; }
-		std::uint8_t volume() const { return volume_; }
-
-		bool empty() const { return note_ == 255 && inst_ == 255 && mach_ == 255 && cmd_ == 0 && param_ == 0; }
+		inline bool empty() const { return note_ == 255 && volume_ == 255 && paraCmdList_.empty(); }
 
 		std::string toXml(int track) const;
 
-		PcmListType & paraCmdList() { return paraCmdList_; }
-
-		void setSharp( bool b ) { sharp_ = b; }
-		bool isSharp() const { return sharp_; }
-
-	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
+	private:
 		std::uint8_t note_;
-		std::uint8_t inst_;
-		std::uint8_t mach_;
-		std::uint8_t cmd_;
-		std::uint8_t param_;
 		std::uint8_t volume_;
-		bool sharp_;
 		PcmListType paraCmdList_;
+		static PcmType emptyCmd_;
+};
+
+class TweakEvent
+{
+public:
+	TweakEvent();
+
+	inline void setValue(std::uint16_t value) { value_ = value; }
+	inline std::uint8_t value() const { return value_; }
+
+	inline bool empty() const { return value_ == 0; }
+
+	std::string toXml(int track) const;
+
+private:
+	std::uint16_t value_;
 };
 
 }}

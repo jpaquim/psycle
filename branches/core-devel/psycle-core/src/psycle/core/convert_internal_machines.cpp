@@ -162,9 +162,9 @@ namespace psy {
 			void Converter::retweak(CoreSong & song) const {
 
 				// Get the first category (there's only one with imported psy's) and...
-				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->patternData()->begin();
+				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->PatternPool()->begin();
 				// ... for all the patterns in this category...
-				for (std::vector<SinglePattern*>::iterator pit  = (*cit)->begin() ; pit != (*cit)->end(); pit++)
+				for (std::vector<Pattern*>::iterator pit  = (*cit)->begin() ; pit != (*cit)->end(); pit++)
 				{
 					// ... check all lines searching...
 					for ( std::map<double, PatternLine>::iterator lit = (*pit)->begin() ; lit != (*pit)->end() ; lit++ ) {
