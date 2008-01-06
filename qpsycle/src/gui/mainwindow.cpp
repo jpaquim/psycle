@@ -69,6 +69,10 @@ namespace qpsycle {
 		: QTabWidget( parent )
 	{}
 
+	// <nmather> I overrode this as by default a QTabWidget uses 1,2,3,4, etc.
+	// to switch to the 1st,2nd,3rd,4th etc. tab.  We don't want this behaviour,
+	// as we use the numeric keys (for example, in the pattern view.) There might
+	// be a better way to get around this if anyone can think of one.
 	bool TabWidget::event( QEvent *event )
 	{
 
@@ -111,7 +115,7 @@ namespace qpsycle {
 
 		song_ = createBlankSong();
 		setupSound();
-		psy::core::Player::Instance()->setLoopSong( true ); // FIXME: should come from config.
+		psy::core::Player::Instance()->setLoopSong( true ); ///\todo: should this option should perhaps be a GUI setting, not something the player cares about?
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 
@@ -131,22 +135,29 @@ namespace qpsycle {
 		setupGui();
 		setupSignals();
 	
+		///\todo: the undo framework is not implemented at all at present.
 		undoStack = new QUndoStack();
 		connect(undoStack, SIGNAL(canRedoChanged(bool)),
 			redoAct, SLOT(setEnabled(bool)));
 		connect(undoStack, SIGNAL(canUndoChanged(bool)),
 			undoAct, SLOT(setEnabled(bool)));
 
-		patternBox_->populatePatternTree(); // FIXME: here because of bad design?
 		populateMachineCombo();
 		initSampleCombo();
+
+		///\todo: <nmather> iirc the pattern box needs to populated
+		// here (rather than upon creation) but I can't remember why.
+		patternBox_->populatePatternTree();
 		patternBox_->patternTree()->setFocus();
 
 		macView_->setOctave( 4 );
 		patView_->setOctave( 4 );
 
+		///\todo: these might be better being constructed as and when they're
+		// need, not permanently held in memory.
 		audioCnfDlg = new AudioConfigDlg( this );
 		settingsDlg = new SettingsDlg( this );
+
 		//setAttribute( Qt::WA_DeleteOnClose );
 		createUndoView();
 	}
@@ -163,6 +174,7 @@ namespace qpsycle {
 		// things (e.g. moving around in the pattern view.)
 		if ( event->key() == Qt::Key_Tab )
 			return;
+
 
 		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 
@@ -182,6 +194,9 @@ namespace qpsycle {
 
 	void MainWindow::setupGui()
 	{
+		setAnimated( false ); // Turns off animation when moving dock widgets or toolbars.
+		// (these animations were quite slow on Windows.)
+
 		QWidget *workArea = new QWidget();
 
 		dock_ = new QDockWidget( "Pattern Box", this );
@@ -203,6 +218,8 @@ namespace qpsycle {
 		views_->addTab( patView_, QIcon(":images/pattern-editor.png"), "Pattern View" );
 		views_->addTab( wavView_, QIcon(":images/waveed.png"), "Wave Editor" );
 		views_->addTab( seqView_, QIcon(":images/sequencer.png"),"Sequencer View" );
+		///\todo not sure sample browser needs to be a permanent member of the tab bar.
+		// It is accessed much less frequently than other tabs.
 		views_->addTab( sampleBrowser_, QIcon(":images/sample-browser.png"), "Sample Browser" );
 
 		QGridLayout *layout = new QGridLayout;
@@ -803,6 +820,7 @@ namespace qpsycle {
 		dockL_->setVisible(!dockL_->isVisible());
 	}
 
+	// Toggles through states : focus pattern box, hide pattern box, show pattern box.
 	void MainWindow::showPatternBox()
 	{
 		if ( !dock_->isVisible() ) {
