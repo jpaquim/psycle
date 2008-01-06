@@ -38,7 +38,7 @@ namespace {
 void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
 	if(&port == single_input_ports()[0]) output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
 	else if(&port == output_ports()[0]) single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	real frequency(frequency_to_step_ ? step_ / frequency_to_step_ : 0);
+	real frequency(this->frequency());
 	frequency_to_step_ = 2 * engine::math::pi * port.seconds_per_event();
 	this->frequency(frequency);
 }
@@ -71,11 +71,13 @@ void sine::do_process() throw(engine::exception) {
 	goto modulo;
 	
 	const_phase: {
-		bool b = true;
+std::clog << "const_phase\n";
 		for(std::size_t frequency_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
-			if(b && frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
+			if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event) {
+std::clog << frequency_event << ' ' << frequency_channel()[frequency_event].sample() << '\n';
 				this->frequency(frequency_channel()[frequency_event++].sample());
-			else b = false; ///\todo goto const loop
+std::clog << this->frequency() << '\n';
+			}
 			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
 		}

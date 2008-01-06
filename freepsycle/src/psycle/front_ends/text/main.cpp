@@ -63,9 +63,9 @@ void stuff() {
 		node & sine2(resolver("sine", graph, "sine2"));
 		node & sine3(resolver("sine", graph, "sine3"));
 
-		plugins::pulse & pulse1(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse1"))));
-		plugins::pulse & pulse2(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse2"))));
-		plugins::pulse & pulse3(static_cast<plugins::pulse&>(static_cast<node&>(resolver("pulse", graph, "pulse3"))));
+		plugins::pulse & pulse1(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse1").node()));
+		plugins::pulse & pulse2(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse2").node()));
+		plugins::pulse & pulse3(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse3").node()));
 
 		float freq(200);
 		float freq2(400);
@@ -73,10 +73,11 @@ void stuff() {
 
 		loggers::information()("############################################### settings ####################################################");
 		{
-			out.input_port("in")->events_per_second(44100);
-			pulse1(freq);
-			pulse2(freq2);
-			pulse3(freq3);
+			engine::real const events_per_second(44100), beats_per_second(1);
+			out.input_port("in")->events_per_second(events_per_second);
+			pulse1.beats_per_second(beats_per_second);
+			pulse2.beats_per_second(beats_per_second);
+			pulse3.beats_per_second(beats_per_second);
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -132,24 +133,16 @@ void stuff() {
 		{
 			host::schedulers::single_threaded::scheduler scheduler(graph);
 			std::seconds const seconds(60);
-			if(loggers::information()())
 			{
-				std::ostringstream s;
-				s << "will end thread in " << seconds.get_count() << " seconds ...";
-				loggers::information()(s.str());
-			}
-			scheduler.start();
-			if(false) std::this_thread::sleep(seconds);
-			else {
-				int const notes(4000);
+				unsigned int const notes(4000);
+				engine::real const duration(engine::real(seconds.get_count()) / notes);
+				engine::real beat(0);
 				float ratio(1.1);
-				for(int note(0); note < notes; ++note) {
-					std::nanoseconds ns(seconds);
-					ns /= notes;
-					std::this_thread::sleep(ns);
-					pulse1(freq);
-					pulse2(freq2 * 1.1);
-					pulse3(freq3 * 1.17);
+				for(unsigned int note(0); note < notes; ++note) {
+					//std::clog << beat << ' ' << freq << ' ' << freq2 << ' ' << freq3 << '\n';
+					pulse1.add_event(beat, freq);
+					pulse2.add_event(beat, freq2 * 1.1);
+					pulse3.add_event(beat, freq3 * 1.17);
 					freq *= ratio;
 					if(freq > 5000) { freq /= 15; ratio *= 1.05; }
 					freq2 *= ratio * ratio;
@@ -158,8 +151,16 @@ void stuff() {
 					if(freq3 > 5000) freq3 /= 15;
 					if(ratio > 1.5) ratio -= 0.5;
 					if(ratio < 1.01) ratio += 0.01;
+					beat += duration;
 				}
 			}
+			if(loggers::information()()) {
+				std::ostringstream s;
+				s << "will end scheduler thread in " << seconds.get_count() << " seconds ...";
+				loggers::information()(s.str());
+			}
+			scheduler.start();
+			std::this_thread::sleep(seconds);
 			scheduler.stop();
 		}
 		loggers::information()("############################################# clean up ######################################################");
