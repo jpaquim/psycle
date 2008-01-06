@@ -56,6 +56,7 @@
 #include <QSettings>
 #include <QStatusBar>
 #include <QTextCodec>
+#include <QTimer>
 #include <QUndoStack>
 #include <QUndoView>
 
@@ -106,6 +107,7 @@ namespace qpsycle {
 		audioCnfDlg = 0;
 		settingsDlg = 0;
 		instrumentsModel_ = 0;
+		playbackTimer_ = 0;
 
 		song_ = createBlankSong();
 		setupSound();
@@ -121,6 +123,11 @@ namespace qpsycle {
 		patternBox_ = new PatternBox( song_ );
 		logConsole_ = new LogConsole();
 
+		// Playback timer to periodically update certain GUI elements
+		// (e.g. sequencer bar position) to match playback position.
+		playbackTimer_ = new QTimer( this );
+		connect( playbackTimer_, SIGNAL( timeout() ), this, SLOT( updatePlaybackGraphics() ) );
+
 		setupGui();
 		setupSignals();
 	
@@ -134,8 +141,6 @@ namespace qpsycle {
 		populateMachineCombo();
 		initSampleCombo();
 		patternBox_->patternTree()->setFocus();
-
-		//startTimer( 10 );
 
 		macView_->setOctave( 4 );
 		patView_->setOctave( 4 );
@@ -165,24 +170,6 @@ namespace qpsycle {
 			// All actions are handled with QActions at present, but you
 			// can put something here if you need to.
 		default:;
-		}
-	}
-
-	void MainWindow::timerEvent( QTimerEvent *ev )
-	{
-		Q_UNUSED( ev );
-		if ( psy::core::Player::Instance()->playing() ) {
-			seqView_->updatePlayPos();
-
-			psy::core::SinglePattern* visiblePattern = 0;
-			visiblePattern = patView_->pattern();
-			if ( visiblePattern ) {
-				double entryStart = 0;
-				bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
-
-				if ( isPlayPattern )
-					patView_->onTick( entryStart );
-			}
 		}
 	}
 
@@ -623,6 +610,8 @@ namespace qpsycle {
 
 	void MainWindow::populateMachineCombo()
 	{
+		// <nmather> I think it would be preferable to populate
+		// this from a machines model, rather than directly accessing the CoreSong.
 		if (!song_) return;
 		int currentIndex = macCombo_->currentIndex();
 
@@ -707,12 +696,12 @@ namespace qpsycle {
 
 	void MainWindow::onMachineDeleted()
 	{
-		populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
+		populateMachineCombo(); ///\todo: perhaps a bit unnecessary to repopulate the whole thing.
 	}
 
 	void MainWindow::onMachineRenamed()
 	{
-		populateMachineCombo(); // FIXME: a bit inefficient to repopulate the whole thing.
+		populateMachineCombo(); ///\todo: perhaps a bit unnecessary to repopulate the whole thing.
 	}
 
 	void MainWindow::onPatternDeleted()
@@ -743,6 +732,8 @@ namespace qpsycle {
 
 	void MainWindow::playFromStart()
 	{
+		playbackTimer_->start( 10 );
+
 		playFromSeqPosAct->setChecked(true);
 		psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
 		psy::core::Player::Instance()->start( 0.0 );
@@ -750,12 +741,16 @@ namespace qpsycle {
 
 	void MainWindow::playFromSeqPos()
 	{
+		playbackTimer_->start( 10 );
+
 		playFromSeqPosAct->setChecked(true);
 		psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
 	}
 
 	void MainWindow::playStop()
 	{
+		playbackTimer_->stop();
+
 		playFromSeqPosAct->setChecked(false);
 		psy::core::Player::Instance()->stop();
 	}
@@ -879,7 +874,8 @@ namespace qpsycle {
 		layout.addWidget( &aboutText );
 		aboutDialog.exec();
 
-		///\todo Check if everything is definitely removed from memory here.
+		///\todo Check if everything related to the about dialog gui
+		// is definitely removed from memory here.
 	}
 
 	void MainWindow::showSongPropertiesDialog()
@@ -924,7 +920,8 @@ namespace qpsycle {
 
 		int returnStatus = songPropsDlg.exec();
 
-		if ( returnStatus == QDialog::Accepted ) {
+		if ( returnStatus == QDialog::Accepted ) 
+		{
 			song_->setName( songNameEdit.text().toStdString() );
 			song_->setAuthor( artistNameEdit.text().toStdString() );
 			song_->setComment( songNotesEdit.toPlainText().toStdString() );
@@ -932,9 +929,28 @@ namespace qpsycle {
 			statusBar()->showMessage( "Song properties updated." );
 		} 
 
-		///\todo Check everything related to the song dialog
+		///\todo Check everything related to the song dialog gui
 		// is definitely removed from memory here.
 	}
 
-}
+	void MainWindow::updatePlaybackGraphics()
+	{
+		if ( psy::core::Player::Instance()->playing() )
+		{
+			seqView_->updatePlayPos();
+
+			psy::core::SinglePattern* visiblePattern = 0;
+			visiblePattern = patView_->pattern();
+			if ( visiblePattern ) 
+			{
+				double entryStart = 0;
+				bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
+
+				if ( isPlayPattern )
+					patView_->onTick( entryStart );
+			}
+		}
+	}
+
+} // namespace qpsycle
 
