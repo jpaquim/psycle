@@ -134,7 +134,7 @@ void stuff() {
 			host::schedulers::single_threaded::scheduler scheduler(graph);
 			std::seconds const seconds(60);
 			{
-				unsigned int const notes(4000);
+				unsigned int const notes(10000);
 				engine::real const duration(engine::real(seconds.get_count()) / notes);
 				engine::real beat(0);
 				float ratio(1.1);
