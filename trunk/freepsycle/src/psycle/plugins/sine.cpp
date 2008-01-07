@@ -50,7 +50,6 @@ void sine::do_process() throw(engine::exception) {
 	if(!have_phase()) goto const_phase;
 	
 	//none_const:
-//std::clog << "none_const\n";
 		for(std::size_t frequency_event(0), phase_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
 			if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
 				this->frequency(frequency_channel()[frequency_event++].sample());
@@ -63,7 +62,6 @@ void sine::do_process() throw(engine::exception) {
 	
 	const_frequency:
 		if(!have_phase()) goto all_const;
-//std::clog << "const_frequency\n";
 
 		for(std::size_t phase_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
 			if(phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
@@ -74,10 +72,8 @@ void sine::do_process() throw(engine::exception) {
 	goto modulo;
 	
 	const_phase: {
-//std::clog << "const_phase\n";
 		for(std::size_t frequency_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
 			if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event) {
-//std::clog << frequency_event << ' ' << frequency_channel()[frequency_event].sample() << '\n';
 				this->frequency(frequency_channel()[frequency_event++].sample());
 			}
 			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
@@ -87,7 +83,6 @@ void sine::do_process() throw(engine::exception) {
 	goto modulo;
 		
 	all_const:
-//std::clog << "all_const\n";
 		for(std::size_t out_event(0) ; out_event < out_channel().size() ; ++out_event) {
 			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
 			phase_ += step_;
