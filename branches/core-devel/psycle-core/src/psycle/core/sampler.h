@@ -217,7 +217,7 @@ namespace psy {
 			Instrument::id_type lastInstrument[MAX_TRACKS];
 			static inline int alteRand(int x)
 			{
-				return (x*rand())/32768;
+				return (x*rand())/RAND_MAX;
 			}
 		};
 	}

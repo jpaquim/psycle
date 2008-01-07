@@ -588,7 +588,7 @@ namespace psy
 				
 				if (song()->_pInstrument[pVoice->_instrument]->_RPAN)
 				{
-					panFactor = (float)rand()*0.000030517578125f;
+					panFactor = (float)rand()/RAND_MAX;
 				}
 				else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 				{
@@ -676,7 +676,7 @@ namespace psy
 				
 				if (song()->_pInstrument[pVoice->_instrument]->_RPAN)
 				{
-					panFactor = (float)rand()*0.000030517578125f;
+					panFactor = (float)rand()/RAND_MAX;
 				}
 				else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 				{
