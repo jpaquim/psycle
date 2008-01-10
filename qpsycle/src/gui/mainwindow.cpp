@@ -674,6 +674,7 @@ namespace qpsycle {
 	void MainWindow::initSampleCombo()
 	{
 		sampCombo_->setModel( instrumentsModel_ );
+		connect ( instrumentsModel_, SIGNAL(selectedInstrumentChanged(int)), sampCombo_, SLOT(setCurrentIndex(int)) );
 	}
 
 	void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
@@ -689,7 +690,6 @@ namespace qpsycle {
 	void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
 	{
 		instrumentsModel_->setSelectedInstrumentIndex( newIndex );
-		wavView_->sampName_->setText(sampCombo_->currentText());
 	}
 
 	void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )

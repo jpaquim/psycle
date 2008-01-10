@@ -50,11 +50,13 @@ public:
 
 	int selectedInstrumentIndex();
 	void setSelectedInstrumentIndex( int newIndex );
+	void setName( int index, const QString & newname );
+
 	bool slotIsEmpty( int instrIndex );
 
 signals:
-	void selectedInstrumentChanged();
-				
+	void selectedInstrumentChanged(int);
+
 private:
 	psy::core::Song *song_;
 };
