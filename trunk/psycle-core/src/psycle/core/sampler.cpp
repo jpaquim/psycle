@@ -16,7 +16,7 @@ namespace psy
 		InstPreview Sampler::waved;
 
 		static inline int alteRand(int x) {
-		return (x*rand())/32768;
+			return (x*rand())/RAND_MAX;
 		}
 
 
@@ -668,7 +668,7 @@ namespace psy
 				
 				if (song()->_pInstrument[pVoice->_instrument]->_RPAN)
 				{
-					panFactor = (float)rand()*0.000030517578125f;
+					panFactor = (float)rand()/RAND_MAX;
 				}
 				else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 				{
@@ -756,7 +756,7 @@ namespace psy
 				
 				if (song()->_pInstrument[pVoice->_instrument]->_RPAN)
 				{
-					panFactor = (float)rand()*0.000030517578125f;
+					panFactor = (float)rand()/RAND_MAX;
 				}
 				else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 				{
