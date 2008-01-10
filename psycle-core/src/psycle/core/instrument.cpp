@@ -490,7 +490,7 @@ namespace psy
 			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
 				_sName[size_count] = *it;
 			}
-			_sName[size_count++] = '0';
+			_sName[size_count++] = '\0';
 		}
 
 		void Instrument::createWavHeader( const std::string & name, const std::string & header )
@@ -499,7 +499,7 @@ namespace psy
 			for (std::string::const_iterator it = name.begin(); size_count < 31 && it != name.end(); it++, size_count++) {
 				waveName[size_count] = *it;
 			}
-			waveName[size_count++] = '0';
+			waveName[size_count++] = '\0';
 
 			int pos = 0;
 
