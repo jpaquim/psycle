@@ -20,19 +20,23 @@
 	#ifndef WAVEVIEW_H
 	#define WAVEVIEW_H
 
-#include <QVBoxLayout>
-#include <QToolBar>
 #include <QWidget>
-#include <QSlider>
-#include <QLabel>
+#include <QSpinBox>
 
 
 class QStandardItemModel;
+class QComboBox;
+class QLineEdit;
+class QPushButton;
+class QSlider;
+class QLabel;
+class QCheckBox;
 
 namespace qpsycle {
 
 class InstrumentsModel;
 class WaveDisplay;
+class HexSpinBox;
 
 class WaveView : public QWidget
 {
@@ -41,52 +45,67 @@ class WaveView : public QWidget
 public:
 	WaveView( InstrumentsModel *instrumentsModel_,
 			QWidget *parent = 0);
-	QLabel *sampName_;
 
 public slots:
-	void onLoadButtonClicked();
-	void onSaveButtonClicked();
-	void onPlusButtonClicked();
-	void onMinusButtonClicked();
-	void onAmpButtonClicked();
-	void onSelectorButtonClicked();
-	void onZoomButtonClicked();
+	void indexSpinChanged(int newidx);
+	void reset();
 
-signals:
-	void sampleAdded();
+	void onLoadButtonClicked();
+	void onKillButtonClicked();
+	void onZoomInButtonClicked();
+	void onZoomOutButtonClicked();
+
+	void nameChanged();
+	void onListenPressed();
+	void onListenReleased();
+	void onVolSliderMoved(int newval);
+	void onPanSliderMoved(int newval);
+	void onCoarseTuneChanged();
+	void onFineTuneChanged();
+
+	void onRandPanChanged(int newstate);
+	void onRandResChanged(int newstate);
+	void onRandCutoffChanged(int newstate);
+
+	void onNNAChanged(int newstate);
+	void onLoopChanged(int newstate);
 
 private:
-	QVBoxLayout *layout_;
-	
-	QToolBar *toolBar_;
-	QAction *loadSmp_;
-	QAction *saveSmp_;
-	QAction *playSmp_;
-	QAction *playsSmp_;
-	QAction *stopSmp_;
-	
-	QAction *cutAct_;
-	QAction *copyAct_;
-	QAction *pasteAct_;
-	QAction *selAct_;
-	
-	QAction *tselAct_;
-	QAction *tzoomAct_;
-	
-	QToolBar *processBar_;
-	QAction *ampEfx_;
-	QAction *convEfx_;
-	QAction *remdcEfx_;
-	QAction *invEfx_;
-	
-	QToolBar *zoomBar_;
-	QAction *zoomMore_;
-	QSlider *zoomSlide_;
-	QAction *zoomLess_;
+	HexSpinBox *instIndexSpin_;
+	QLineEdit *instName_;
+	QComboBox *outputCbx_;
 
+	QPushButton *zoomInBtn_, *zoomOutBtn_;
+	QSlider *volSlider_, *panSlider_;
+	QLabel *volLabel_, *panLabel_;
+
+	/// instrument tuning widgets
+	QSpinBox *octaveSpin_, *semiSpin_, *centSpin_;
+
+	/// randomization widgets
+	QCheckBox *randPanChk_, *randResChk_, *randCutChk_;
+
+	QComboBox *nnaCbx_;
+	QComboBox *loopCbx_;
 
 	InstrumentsModel *instrumentsModel_;
 	WaveDisplay *waveDisplay_;
+
+	//used to ensure the instrument isn't modified while initializing the controls
+	bool resettingwidgets_;
+};
+
+
+
+class HexSpinBox : public QSpinBox
+{
+Q_OBJECT
+public:
+	HexSpinBox(QWidget *parent = 0) : QSpinBox(parent) {}
+
+	QString textFromValue ( int value ) const;
+	int valueFromText ( const QString & text ) const;
+	QValidator::State validate ( QString &input, int &pos ) const;
 };
 
 } // namespace qpsycle

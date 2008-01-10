@@ -65,6 +65,27 @@ InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 InstrumentsModel::~InstrumentsModel()
 {}
 
+void InstrumentsModel::setName( int index, const QString & newname )
+{
+	if (
+		index < 0 || index >= psy::core::MAX_INSTRUMENTS ||
+		slotIsEmpty( index )
+	)
+		return;
+
+	psy::core::Instrument *inst = song_->_pInstrument[index];
+	inst->setName( newname.toStdString() );
+
+	std::ostringstream buffer;
+	buffer.setf(std::ios::uppercase);
+	buffer.str("");
+	buffer << std::setfill('0') << std::hex << std::setw(2);
+	buffer << index << ": " << song_->_pInstrument[index]->_sName;
+	QString name = QString::fromStdString( buffer.str() );
+	QStandardItem *item = new QStandardItem( name );
+	setItem(index, item);
+}
+
 /**
  * Loads a wave file into the CoreSong, and updates the
  * model accordingly.
@@ -83,7 +104,7 @@ bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 		QString name = QString::fromStdString( buffer.str() );
 		tempItem->setText( name );
 
-		emit selectedInstrumentChanged();
+		emit selectedInstrumentChanged(instrIndex);
 		return true;
 	}
 	return false;
@@ -130,7 +151,7 @@ void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
 	song_->instSelected   = newIndex;
 	song_->auxcolSelected = newIndex;
 
-	emit selectedInstrumentChanged();
+	emit selectedInstrumentChanged(newIndex);
 }
 
 // Find out if a particular slot is free in the CoreSong.

@@ -65,7 +65,7 @@ WaveItem::WaveItem( WaveDisplay *disp, InstrumentsModel *instModel, QGraphicsSce
 	, disp_( disp )
 {
 	connect (
-		instModel, SIGNAL(selectedInstrumentChanged()),
+		instModel, SIGNAL(selectedInstrumentChanged(int)),
 		this, SLOT( resetInstrument() )
 	);
 
@@ -111,13 +111,15 @@ void WaveItem::paint (
 	QWidget * widget )
 {
 	if (inst_) {
-		painter->setBrush( Qt::white );
-		
 		int halfWaveHeight = (int)( rect().height() / (inst_->waveStereo? 4: 2) );
 		int midPoint = halfWaveHeight;
 
 		double startx = option->exposedRect.left();
 		double endx = option->exposedRect.right();
+
+		painter->setPen( Qt::darkGray );
+		painter->drawLine( QLineF( startx, midPoint, endx, midPoint ) );
+		painter->setPen( Qt::lightGray );
 
 		//inverse of the view's horizontal scaling factor
 		double samplesPerPixel = 1.0 / option->matrix.m11();
@@ -131,11 +133,24 @@ void WaveItem::paint (
 
 		if ( inst_->waveStereo ) {
 			midPoint *= 3;
+
+			painter->setPen( Qt::darkGray );
+			painter->drawLine( QLineF( startx, midPoint, endx, midPoint ) );
+			painter->setPen( Qt::lightGray );
 			for ( double i(startx); i < inst_->waveLength && i <= endx; i+=samplesPerPixel ) {
 				int sample = halfWaveHeight * *(inst_->waveDataR + (int)i) / (1<<15);
 				painter->drawLine( QLineF( i, midPoint, i, midPoint-sample ) );
 			}
 		}
+
+		if ( inst_->waveLoopType ) {
+			painter->setPen( QColor(0, 128, 200) );
+			if ( inst_->waveLoopStart >= startx )
+				painter->drawLine( QLineF( inst_->waveLoopStart, 0, inst_->waveLoopStart, rect().height() ) );
+			if ( inst_->waveLoopEnd <= endx )
+				painter->drawLine( QLineF( inst_->waveLoopEnd, 0, inst_->waveLoopEnd, rect().height() ) );
+		}
+
 	}
 	
 }
