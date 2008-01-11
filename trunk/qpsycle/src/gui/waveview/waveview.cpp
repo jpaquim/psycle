@@ -449,7 +449,7 @@ void WaveView::onLoopChanged(int newstate)
 	if (inst->waveLoopEnd==0 && newstate > 0 ) {
 		inst->waveLoopEnd = inst->waveLength;
 	}
-	waveDisplay_->scene()->update( waveDisplay_->sceneRect() );
+	//waveDisplay_->scene()->update( waveDisplay_->sceneRect() );
 }
 
 
