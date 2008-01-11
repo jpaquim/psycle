@@ -16,12 +16,12 @@ namespace universalis { namespace standard_library { namespace detail {
 		xtime.nsec  = static_cast<boost::xtime::xtime_nsec_t>(ns.get_count() - xtime.sec);
 		return xtime;
 	}
-
+	
 	boost::xtime inline make_boost_xtime(std::utc_time const & t) {
 		boost::xtime xtime(make_boost_xtime(t.nanoseconds_since_epoch()));
 		return xtime;
 	}
-
+	
 	/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 	template<typename Elapsed_Time>
 	boost::xtime inline boost_xtime_get_and_add(Elapsed_Time const & elapsed_time) {
