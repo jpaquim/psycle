@@ -112,18 +112,18 @@ namespace psycle
 		/// DO NOT CHANGE the order of the functions. This is an exported class!
 		class CFxCallback
 		{
-		public:
-			virtual void MessBox(char* ptxt,char*caption,unsigned int type);
-			virtual int CallbackFunc(int cbkID,int par1,int par2,int par3);
-			/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-			virtual float * unused0(int, int);
-			/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-			virtual float * unused1(int, int);
-			virtual int GetTickLength();
-			virtual int GetSamplingRate();
-			virtual int GetBPM();
-			virtual int GetTPB();
-			virtual ~CFxCallback() throw();
+			public:
+				virtual void MessBox(char* ptxt,char*caption,unsigned int type);
+				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3);
+				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+				virtual float * unused0(int, int);
+				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+				virtual float * unused1(int, int);
+				virtual int GetTickLength();
+				virtual int GetSamplingRate();
+				virtual int GetBPM();
+				virtual int GetTPB();
+				virtual ~CFxCallback() throw();
 		};
 
 		/*////////////////////////////////////////////////////////////////////////*/
