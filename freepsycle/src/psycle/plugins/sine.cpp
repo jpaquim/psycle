@@ -16,11 +16,13 @@ sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::
 	node(plugin_library_reference, graph, name),
 	phase_(0),
 	step_(0),
-	frequency_to_step_(0)
+	frequency_to_step_(0),
+	amplitude_(0.2)
 {
 	engine::ports::output::create_on_heap(*this, "out", boost::cref(1));
 	engine::ports::inputs::single::create_on_heap(*this, "frequency", boost::cref(1));
 	engine::ports::inputs::single::create_on_heap(*this, "phase", boost::cref(1));
+	engine::ports::inputs::single::create_on_heap(*this, "amplitude", boost::cref(1));
 }
 
 namespace {
@@ -44,51 +46,38 @@ void sine::seconds_per_event_change_notification_from_port(engine::port const & 
 }
 
 void sine::do_process() throw(engine::exception) {
-//std::clog << "sine " << name() << '\n';
 	if(!have_out()) return;
-	if(!have_frequency()) goto const_frequency;
-	if(!have_phase()) goto const_phase;
-	
-	//none_const:
-		for(std::size_t frequency_event(0), phase_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
-			if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
-				this->frequency(frequency_channel()[frequency_event++].sample());
-			if(phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
-				this->phase_ = phase_channel()[phase_event++].sample();
-			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
-			phase_ += step_;
-		}
-	goto modulo;
-	
-	const_frequency:
-		if(!have_phase()) goto all_const;
+	if(!have_phase()) {
+		if(!have_frequency()) {
+			if(!have_amplitude()) do_process_template<false, false, false>();
+			else do_process_template<false, false, true>();
+		} else if(!have_amplitude()) do_process_template<false, true, false>();
+		else do_process_template<false, true, true>();
+	} else if(!have_frequency()) {
+		if(!have_amplitude()) do_process_template<true, false, false>();
+		else do_process_template<true, false, true>();
+	} else if(!have_amplitude()) do_process_template<true, true, false>();
+	else do_process_template<true, true, true>();
+}
 
-		for(std::size_t phase_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
-			if(phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
-				this->phase_ = phase_channel()[phase_event++].sample();
-			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
-			phase_ += step_;
-		}
-	goto modulo;
-	
-	const_phase: {
-		for(std::size_t frequency_event(0), out_event(0); out_event < out_channel().size(); ++out_event) {
-			if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event) {
-				this->frequency(frequency_channel()[frequency_event++].sample());
-			}
-			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
-			phase_ += step_;
-		}
+template<bool use_phase, bool use_frequency, bool use_amplitude>
+void sine::do_process_template() throw(engine::exception) {
+	for(std::size_t
+		phase_event(0),
+		frequency_event(0),
+		amplitude_event(0),
+		out_event(0); out_event < out_channel().size(); ++out_event
+	) {
+		if(use_phase && phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
+			this->phase_ = phase_channel()[phase_event++].sample();
+		if(use_frequency && frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
+			this->frequency(frequency_channel()[frequency_event++].sample());
+		if(use_amplitude && amplitude_event < amplitude_channel().size() && amplitude_channel()[amplitude_event].index() == out_event)
+			this->amplitude_ = amplitude_channel()[amplitude_event++].sample();
+		out_channel()[out_event](out_event, amplitude_ * std::sin(phase_)); // \todo optimize with a cordic algorithm
+		phase_ += step_;
 	}
-	goto modulo;
-		
-	all_const:
-		for(std::size_t out_event(0) ; out_event < out_channel().size() ; ++out_event) {
-			out_channel()[out_event](out_event, 0.3 * std::sin(phase_)); // \todo optimize with a cordic algorithm
-			phase_ += step_;
-		}
-	
-	modulo: phase_ = std::fmod(phase_, 2 * engine::math::pi);
+	phase_ = std::fmod(phase_, 2 * engine::math::pi);
 }
 
 }}
