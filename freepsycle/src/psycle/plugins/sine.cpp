@@ -25,18 +25,6 @@ sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::
 	engine::ports::inputs::single::create_on_heap(*this, "amplitude", boost::cref(1));
 }
 
-namespace {
-	namespace ports {
-		struct outputs { enum output {
-			out
-		}; };
-		struct inputs { enum input {
-			frequency,
-			phase
-		}; };
-	}
-}
-
 void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
 	if(&port == single_input_ports()[0]) output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
 	else if(&port == output_ports()[0]) single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
