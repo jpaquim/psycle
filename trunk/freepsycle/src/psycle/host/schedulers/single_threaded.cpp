@@ -363,7 +363,7 @@ void scheduler::process(node & node) {
 /// processes the node of the output port connected to the input port and sets the buffer for the input port
 void inline scheduler::process_node_of_output_port_and_set_buffer_for_input_port(ports::output & output_port, ports::input & input_port) {
 	process(output_port.parent());
-	assert(&output_port.buffer().reference_count());
+	assert(&output_port.buffer());
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
 		s << "back to scheduling of input port " << input_port.underlying().qualified_name();
@@ -438,7 +438,7 @@ buffer::buffer(std::size_t channels, std::size_t events) throw(std::exception)
 {}
 
 buffer::~buffer() throw() {
-	assert(!*this);
+	assert(!this->reference_count());
 }
 
 }}}}
