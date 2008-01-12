@@ -262,7 +262,11 @@ class text_front_end_module(module):
 			name = source_package.name() + '-text',
 			version = source_package.version(),
 			description = 'text front-end',
-			dependencies = [paths_module.as_dependency(), host_module.as_dependency()],
+			dependencies = [
+				paths_module.as_dependency(),
+				host_module.as_dependency(),
+				pulse_plugin_module.as_dependency()
+			],
 			target_type = module.target_types.program
 		)
 		modules.append(self)

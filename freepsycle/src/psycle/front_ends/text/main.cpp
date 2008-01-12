@@ -140,9 +140,9 @@ void stuff() {
 				float ratio(1.1);
 				for(unsigned int note(0); note < notes; ++note) {
 					//std::clog << beat << ' ' << freq << ' ' << freq2 << ' ' << freq3 << '\n';
-					pulse1.add_event(beat, freq);
-					pulse2.add_event(beat, freq2 * 1.1);
-					pulse3.add_event(beat, freq3 * 1.17);
+					pulse1.insert_event(beat, freq);
+					pulse2.insert_event(beat, freq2 * 1.1);
+					pulse3.insert_event(beat, freq3 * 1.17);
 					freq *= ratio;
 					if(freq > 5000) { freq /= 15; ratio *= 1.05; }
 					freq2 *= ratio * ratio;
