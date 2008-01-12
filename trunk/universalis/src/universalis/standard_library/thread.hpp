@@ -8,7 +8,7 @@
 #include "detail/boost_xtime.hpp"
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>
-#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 #endif
 namespace std {
