@@ -38,7 +38,7 @@ namespace psy
 		public:
 
 			enum TweakType { twk, tws, mdi, mdis, wire, wires, aut };
-			static char **TweakTypeText;
+			static char *tweakTypeText[];
 
 			TweakTrackInfo();
 			TweakTrackInfo( TweakType type , std::uint16_t param);
@@ -99,14 +99,29 @@ namespace psy
 
 		class Pattern {
 		public:
-			typedef  std::map<double, PatternLine>::iterator linesiterator;
-			typedef  std::map<double, PatternLine>::const_iterator linesc_iterator;
+			typedef  std::map<double, PatternLine>::iterator iterator;
+			typedef  std::map<double, PatternLine>::const_iterator const_iterator;
+			typedef  std::map<double, PatternLine>::reverse_iterator reverse_iterator;
+			typedef  std::map<double, PatternLine>::const_reverse_iterator const_reverse_iterator;
 
 			Pattern();
 			Pattern(Pattern const& other);
 
 			virtual ~Pattern();
 
+			inline iterator upper_bound(const double& _Keyval) { return lineMap.upper_bound(_Keyval); }
+			inline const_iterator upper_bound(const double& _Keyval) const { return lineMap.upper_bound(_Keyval); }
+			inline iterator lower_bound(const double& _Keyval) { return lineMap.lower_bound(_Keyval); }
+			inline const_iterator lower_bound(const double& _Keyval) const{ return lineMap.lower_bound(_Keyval); }
+			inline iterator begin() { lineMap.begin(); }
+			inline const_iterator begin() const { lineMap.begin(); }
+			inline iterator end() { lineMap.end(); }
+			inline const_iterator end() const { lineMap.end(); }
+			inline reverse_iterator rbegin() { lineMap.rbegin(); }
+			inline const_reverse_iterator rbegin() const { lineMap.rbegin(); }
+			inline reverse_iterator rend() { lineMap.rend(); }
+			inline const_reverse_iterator rend() const { lineMap.rend(); }
+			
 //			TweakTrackInfo tweakInfo( int track ) const;
 //			int tweakTrack( const TweakTrackInfo & info);
 
@@ -139,11 +154,11 @@ namespace psy
 			float beats() const;
 			float beatsPerLine() const { return 1 / (float) beatZoom(); }
 
-			linesiterator find_nearest( int linenr );
-			linesc_iterator find_nearest( int linenr ) const;
+			iterator find_nearest( int linenr );
+			const_iterator find_nearest( int linenr ) const;
 
-			linesiterator find_lower_nearest( int linenr );
-			linesc_iterator find_lower_nearest( int linenr ) const;
+			iterator find_lower_nearest( int linenr );
+			const_iterator find_lower_nearest( int linenr ) const;
 
 			void setEvent( int line, int track, const NoteEvent & event );
 			NoteEvent event( int line, int track );
@@ -155,7 +170,7 @@ namespace psy
 			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
 		
-//			void clearEmptyLines();
+/*			void clearEmptyLines();
 
 			std::auto_ptr<Pattern> block( int left, int right, int top, int bottom );
 			void scaleBlock(int left, int right, double top, double bottom, float factor);
@@ -164,7 +179,7 @@ namespace psy
 			void mixBlock(int left, int top, const Pattern & pattern, int tracks, float maxBeats);
 			void deleteBlock(int left, int right, double top, double bottom);
 			void deleteBlock( int left, int right, int top, int bottom );
-
+*/
 			std::string toXml() const;
 
 			boost::signal<void (Pattern*)> wasDeleted;
