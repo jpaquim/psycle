@@ -71,9 +71,10 @@ void stuff() {
 		float freq2(400);
 		float freq3(800);
 
+		engine::real const events_per_second(44100), beats_per_second(1);
+
 		loggers::information()("############################################### settings ####################################################");
 		{
-			engine::real const events_per_second(44100), beats_per_second(1);
 			out.input_port("in")->events_per_second(events_per_second);
 			pulse1.beats_per_second(beats_per_second);
 			pulse2.beats_per_second(beats_per_second);
@@ -135,14 +136,15 @@ void stuff() {
 			std::seconds const seconds(60);
 			{
 				unsigned int const notes(10000);
-				engine::real const duration(engine::real(seconds.get_count()) / notes);
 				engine::real beat(0);
+				engine::real duration(0.1 / beats_per_second);
+				float slowdown(0.01);
 				float ratio(1.1);
 				for(unsigned int note(0); note < notes; ++note) {
 					//std::clog << beat << ' ' << freq << ' ' << freq2 << ' ' << freq3 << '\n';
 					pulse1.insert_event(beat, freq);
-					pulse2.insert_event(beat, freq2 * 1.1);
-					pulse3.insert_event(beat, freq3 * 1.17);
+					pulse2.insert_event(beat * 1.1, freq2 * 1.1);
+					pulse3.insert_event(beat * 1.2, freq3 * 1.17);
 					freq *= ratio;
 					if(freq > 5000) { freq /= 15; ratio *= 1.05; }
 					freq2 *= ratio * ratio;
@@ -152,6 +154,11 @@ void stuff() {
 					if(ratio > 1.5) ratio -= 0.5;
 					if(ratio < 1.01) ratio += 0.01;
 					beat += duration;
+					duration += duration * slowdown;
+					if(
+						duration > 0.25  / beats_per_second ||
+						duration < 0.001 / beats_per_second
+					) slowdown = -slowdown;
 				}
 			}
 			if(loggers::information()()) {
