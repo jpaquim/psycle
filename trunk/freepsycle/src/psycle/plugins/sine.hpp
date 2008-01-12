@@ -20,16 +20,22 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
 		void do_process() throw(engine::exception) /*override*/;
 	private:
+		template<bool have_phase, bool have_frequency, bool have_amplitude>
+		void do_process_template() throw(engine::exception);
+		
 		real phase_;
 		real step_;
 		real frequency_to_step_;
+		real amplitude_;
 
 		bool have_frequency() { return *single_input_ports()[0]; }
 		bool have_phase() { return *single_input_ports()[1]; }
+		bool have_amplitude() { return *single_input_ports()[2]; }
 		bool have_out() { return *output_ports()[0]; }
 
 		buffer::channel & frequency_channel() { return single_input_ports()[0]->buffer()[0]; }
 		buffer::channel & phase_channel() { return single_input_ports()[1]->buffer()[0]; }
+		buffer::channel & amplitude_channel() { return single_input_ports()[2]->buffer()[0]; }
 		buffer::channel & out_channel() { return output_ports()[0]->buffer()[0]; }
 };
 
