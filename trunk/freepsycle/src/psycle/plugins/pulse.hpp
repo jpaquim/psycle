@@ -8,31 +8,13 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins {
 
+/// an event scheduler
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 	protected: friend class virtual_factory_access;
 		pulse(engine::plugin_library_reference &, engine::graph &, std::string const & name);
 	protected:
 		void do_process() throw(engine::exception) /*override*/;
 
-	///\name beats per second
-	///\{
-		public:
-			real beats_per_second() const { return beats_per_second_; }
-			void beats_per_second(real beats_per_second) { this->beats_per_second_ = beats_per_second; }
-		private:
-			real beats_per_second_;
-	///\}
-	
-	///\name beat
-	///\{
-		public:
-			real const beat() { return beat_; }
-			void beat(real beat) { this->beat_ = beat; }
-		private:
-			real beat_;
-			std::size_t i;
-	///\}
-		
 	///\name events
 	///\{
 		public:
@@ -58,15 +40,56 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 				///\}
 			};
 
-			void add_event(real beat, real sample) { events_.push_back(event(beat, sample)); }
+			/// inserts an event
+			void insert_event(real beat, real sample);
+			/// erases the range [begin_beat, end_beat[
+			void erase_events(real begin_beat, real end_beat);
 
-			typedef std::vector<event> events_type;
-			events_type       & events()       { return events_; }
-			events_type const & events() const { return events_; }
 		private:
-			events_type         events_;
-			/// index in events_ container corresponding to current beat_
-			std::size_t index_;
+			typedef std::vector<event> events_type;
+			events_type events_;
+			/// iterator in events_ container corresponding to current beat_
+			events_type::const_iterator i_;
+	///\}
+
+	///\name beats per second
+	///\{
+		public:
+			real beats_per_second() const { return beats_per_second_; }
+			void beats_per_second(real beats_per_second) {
+				this->beats_per_second_ =     beats_per_second;
+				this->seconds_per_beat_ = 1 / beats_per_second;
+			}
+		private:
+			real beats_per_second_;
+	///\}
+	
+	///\name seconds per beat
+	///\{
+		public:
+			real seconds_per_beat() const { return seconds_per_beat_; }
+			void seconds_per_beat(real seconds_per_beat) {
+				this->seconds_per_beat_ =     seconds_per_beat;
+				this->beats_per_second_ = 1 / seconds_per_beat;
+			}
+		private:
+			real seconds_per_beat_;
+	///\}
+
+	///\name beat
+	///\{
+		public:
+			real const beat() { return beat_; }
+			void beat(real beat);
+		private:
+			real beat_;
+	///\}
+
+	///\name seconds
+	///\{
+		public:
+			real const seconds() { return beat_ * seconds_per_beat(); }
+			void seconds(real seconds) { beat_ = seconds * beats_per_second(); }
 	///\}
 };
 
