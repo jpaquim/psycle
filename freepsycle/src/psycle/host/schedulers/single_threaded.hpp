@@ -48,7 +48,7 @@ class buffer : public underlying::buffer {
 		/// increments the reference count.
 		buffer & operator+=(std::size_t more) throw() { reference_count_ += more; return *this; }
 		/// decrements the reference count by 1.
-		buffer & operator--() throw() { assert(*this > 0); --reference_count_; return *this; }
+		buffer & operator--() throw() { assert(this->reference_count() > 0); --reference_count_; return *this; }
 	private:
 		std::size_t reference_count_;
 };
