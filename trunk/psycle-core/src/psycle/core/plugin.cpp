@@ -43,7 +43,9 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 
 PluginFxCallback Plugin::_callback;
 
-void PluginFxCallback::MessBox(char const* ptxt,char const* caption,unsigned int type) {
+PluginFxCallback::~PluginFxCallback() throw() {}
+
+void PluginFxCallback::MessBox(char const * ptxt, char const * caption, unsigned int type) {
 	//MessageBox(hWnd,ptxt,caption,type); 
 }
 
@@ -51,6 +53,13 @@ int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::Instance
 int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
 int PluginFxCallback::GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
 int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().ticksSpeed(); }
+
+// dummy body
+int PluginFxCallback::CallbackFunc(int, int, int, int) { return 0; }
+// dummy body
+float * PluginFxCallback::unused0(int, int) { return 0; }
+// dummy body
+float * PluginFxCallback::unused1(int, int) { return 0; }
 
 /**************************************************************************/
 // Plugin

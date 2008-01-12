@@ -113,71 +113,73 @@ namespace psycle
 		class CFxCallback
 		{
 			public:
-				virtual void MessBox(char* ptxt,char*caption,unsigned int type);
-				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3);
+				virtual void MessBox(char const * ptxt, char const * caption, unsigned int type) = 0;
+				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3) = 0;
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-				virtual float * unused0(int, int);
+				virtual float * unused0(int, int) = 0;
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-				virtual float * unused1(int, int);
-				virtual int GetTickLength();
-				virtual int GetSamplingRate();
-				virtual int GetBPM();
-				virtual int GetTPB();
-				virtual ~CFxCallback() throw();
+				virtual float * unused1(int, int) = 0;
+				virtual int GetTickLength() = 0;
+				virtual int GetSamplingRate() = 0;
+				virtual int GetBPM() = 0;
+				virtual int GetTPB() = 0;
+				virtual ~CFxCallback() throw() {} // a dtor cannot be made pure virtual
 		};
 
 		/*////////////////////////////////////////////////////////////////////////*/
 		
-		/// base machine class
+		/// base machine class from which plugins derived.
+		/// Note: We keep empty definitions of the functions in the header so that
+		/// plugins don't need to implement everything nor link with a default implementation.
 		class CMachineInterface
 		{
 			public:
-				virtual ~CMachineInterface();
+				virtual ~CMachineInterface() {}
 				///\todo doc
-				virtual void Init();
+				virtual void Init() {}
 				///\todo doc
-				virtual void SequencerTick();
+				virtual void SequencerTick() {}
 				///\todo doc
-				virtual void ParameterTweak(int par, int val);
+				virtual void ParameterTweak(int par, int val) {}
 
 				/// Work function
-				virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+				virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {}
 
 				///\todo doc
-				virtual void Stop();
+				virtual void Stop() {}
 
 				///\name Export / Import
 				///\{
 					///\todo doc
-					virtual void PutData(void * pData);
+					virtual void PutData(void * pData) {}
 					///\todo doc
-					virtual void GetData(void * pData);
+					virtual void GetData(void * pData) {}
 					///\todo doc
-					virtual int GetDataSize();
+					virtual int GetDataSize() { return 0; }
 				///\}
 
 				///\todo doc
-				virtual void Command();
+				virtual void Command() {}
 				///\todo doc. not used (yet?)
-				virtual void MuteTrack(int const i);
+				virtual void MuteTrack(int /*track*/) {}
 				///\todo doc. not used (yet?)
-				virtual bool IsTrackMuted(int const i) const;
+				virtual bool IsTrackMuted(int /*track*/) const { return false; }
 				///\todo doc. not used (yet?)
-				virtual void MidiNote(int const channel, int const value, int const velocity);
+				virtual void MidiNote(int const /*channel*/, int /*value*/, int /*velocity*/) {}
 				///\todo doc. not used (yet?)
-				virtual void Event(uint32 const data);
+				virtual void Event(uint32 const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char* txt,int const param, int const value);
+				virtual bool DescribeValue(char* /*txt*/, int /*param*/, int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
-				virtual bool PlayWave(int const wave, int const note, float const volume);
+				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 				///\todo doc
-				virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
+				virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
 				///\todo doc. not used (prolly never)
-				virtual void StopWave();
+				virtual void StopWave() {}
 
 			public:
 				/// initialize these members in the constructor
-				int *Vals;
+				int * Vals;
 
 				/// callback.
 				/// This member is initialized by the engine right after it calls CreateMachine().

@@ -32,11 +32,15 @@ namespace psy { namespace core {
 class PluginFxCallback : public CFxCallback
 {
 	public:
-		virtual void MessBox(char const* ptxt,char const* caption,unsigned int type);
-			virtual int GetTickLength();
-		virtual int GetSamplingRate();
-		virtual int GetBPM();
-		virtual int GetTPB();
+		/* implement */ ~PluginFxCallback() throw();
+		/* implement */ void MessBox(char const * ptxt, char const * caption, unsigned int type);
+		/* implement */ int GetTickLength();
+		/* implement */ int GetSamplingRate();
+		/* implement */ int GetBPM();
+		/* implement */ int GetTPB();
+		/* implement */ int CallbackFunc(int, int, int, int);
+		/* implement */ float * unused0(int, int);
+		/* implement */ float * unused1(int, int);
 };
 
 class Plugin; // forward declaration
