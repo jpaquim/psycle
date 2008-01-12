@@ -103,7 +103,7 @@ namespace ports {
 				/// convertible to std::size_t
 				///\returns the reference count.
 				std::size_t input_ports_remaining() const throw() { return input_ports_remaining_; }
-				output & operator--() throw() { assert(*this > 0); --input_ports_remaining_; return *this; }
+				output & operator--() throw() { assert(this->input_ports_remaining() > 0); --input_ports_remaining_; return *this; }
 				void reset() throw() { input_ports_remaining_ = input_port_count(); }
 			private:
 				std::size_t input_ports_remaining_;
