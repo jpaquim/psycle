@@ -195,14 +195,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 					}
 					if(empty()) return *new buffer(channels_, events_);
 					buffer & result(*back());
-					assert("reference count is zero: " && !result);
+					assert("reference count is zero: " && !result.reference_count());
 					pop_back(); // note: on most implementations, this will not realloc memory, so it's realtime-safe.
 					return result;
 				}
 				/// recycles a buffer in the pool.
 				void operator()(buffer & buffer) {
 					assert(&buffer);
-					assert("reference count is zero: " && !buffer);
+					assert("reference count is zero: " && !buffer.reference_count());
 					assert(buffer.size() >= this->channels_);
 					assert(buffer.events() >= this->events_);
 					if(false && loggers::trace()()) {
