@@ -58,7 +58,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 			real beats_per_second() const { return beats_per_second_; }
 			void beats_per_second(real beats_per_second) {
 				this->beats_per_second_ =     beats_per_second;
-				this->seconds_per_beat_ = 1 / beats_per_second;
+				this->seconds_per_beat_ = beats_per_second ? 1 / beats_per_second : 0;
 			}
 		private:
 			real beats_per_second_;

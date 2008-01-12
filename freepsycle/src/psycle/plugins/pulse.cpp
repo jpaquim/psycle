@@ -42,7 +42,7 @@ void pulse::erase_events(real begin_beat, real end_beat) {
 	if(first == events_.end()) return;
 	events_type::iterator last(first);
 	while(last != events_.end() && last->beat() > end_beat) ++last;
-	if(last != events_.end() && last->beat() == end_beat) --last; // exclude end_beat from range
+	if(last != events_.end() && first != last && last->beat() == end_beat) --last; // exclude end_beat from range
 	events_.erase(first, last);
 	beat(beat()); // recompute the iterator
 }
