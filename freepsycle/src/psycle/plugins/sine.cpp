@@ -14,21 +14,39 @@ PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)
 sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
 :
 	node(plugin_library_reference, graph, name),
-	phase_(0),
-	step_(0),
-	frequency_to_step_(0),
-	amplitude_(0.2)
+	phase_(),
+	step_(), frequency_to_step_(),
+	amplitude_()
 {
 	engine::ports::output::create_on_heap(*this, "out", boost::cref(1));
-	engine::ports::inputs::single::create_on_heap(*this, "frequency", boost::cref(1));
 	engine::ports::inputs::single::create_on_heap(*this, "phase", boost::cref(1));
+	engine::ports::inputs::single::create_on_heap(*this, "frequency", boost::cref(1));
 	engine::ports::inputs::single::create_on_heap(*this, "amplitude", boost::cref(1));
 }
 
 void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
-	if(&port == single_input_ports()[0]) output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	else if(&port == output_ports()[0]) single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	real frequency(this->frequency());
+	if(&port == single_input_ports()[0]) {
+		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
+		single_input_ports()[2]->propagate_seconds_per_event(port.seconds_per_event());
+		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+	} else if(&port == single_input_ports()[1]) {
+		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+		single_input_ports()[2]->propagate_seconds_per_event(port.seconds_per_event());
+		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+	} else if(&port == single_input_ports()[2]) {
+		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
+		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+	} else if(&port == output_ports()[0]) {
+		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
+		single_input_ports()[2]->propagate_seconds_per_event(port.seconds_per_event());
+	}
+	
+	// no easy way to get the value for old_events_per_second
+	//this->step_ *= old_events_per_second * port.seconds_per_event();
+	
+	real const frequency(this->frequency());
 	frequency_to_step_ = 2 * engine::math::pi * port.seconds_per_event();
 	this->frequency(frequency);
 }

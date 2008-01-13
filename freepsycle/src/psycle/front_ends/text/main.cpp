@@ -57,28 +57,33 @@ void stuff() {
 
 		node & out(resolver("output", graph, "out"));
 		node & additioner(resolver("additioner", graph, "+"));
-		//node & multiplier(resolver("multiplier", graph, "*"));
 
 		node & sine1(resolver("sine", graph, "sine1"));
 		node & sine2(resolver("sine", graph, "sine2"));
 		node & sine3(resolver("sine", graph, "sine3"));
 
+		//plugins::pulse & freq1(plugins::pulse::create_on_heap<plugins::pulse>(graph, "freq1"));
+		plugins::pulse & freq1(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq1").node()));
+		plugins::pulse & freq2(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq2").node()));
+		plugins::pulse & freq3(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq3").node()));
+
+		node & decay1(resolver("decay", graph, "decay1"));
+		node & decay2(resolver("decay", graph, "decay2"));
+		node & decay3(resolver("decay", graph, "decay3"));
+
 		plugins::pulse & pulse1(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse1").node()));
 		plugins::pulse & pulse2(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse2").node()));
 		plugins::pulse & pulse3(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse3").node()));
 
-		float freq(200);
-		float freq2(400);
-		float freq3(800);
+		plugins::pulse & pulse_decay1(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse_decay1").node()));
+		plugins::pulse & pulse_decay2(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse_decay2").node()));
+		plugins::pulse & pulse_decay3(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse_decay3").node()));
 
 		engine::real const events_per_second(44100), beats_per_second(1);
 
 		loggers::information()("############################################### settings ####################################################");
 		{
 			out.input_port("in")->events_per_second(events_per_second);
-			pulse1.beats_per_second(beats_per_second);
-			pulse2.beats_per_second(beats_per_second);
-			pulse3.beats_per_second(beats_per_second);
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -90,37 +95,27 @@ void stuff() {
 		}
 		loggers::information()("############################################## connections ##################################################");
 		{
-			/*
-			|
-			| (out)---(+)-------\
-			|   |               |
-			|   \------(*)----(sine1)---(pulse1)
-			|          | \
-			|          |  \---(sine2)---(pulse2)
-			|          |
-			|          \------(sine3)---(pulse3)
-			|
-			| pulse1 > sine1 > + > out
-			| pulse1 > sine1 > * > out
-			| pulse2 > sine2 > * > out
-			| pulse2 > sine2 > * > out
-			|
-			*/
-			
 			additioner.output_port("out")->connect(*out.input_port("in"));
-			//multiplier.output_port("out")->connect(*additioner.input_port("in"));
 
 			sine1.output_port("out")->connect(*additioner.input_port("in"));
 			sine2.output_port("out")->connect(*additioner.input_port("in"));
 			sine3.output_port("out")->connect(*additioner.input_port("in"));
-			//sine1.output_port("out")->connect(*additioner.input_port("in"));
-			//sine1.output_port("out")->connect(*multiplier.input_port("in"));
-			//sine2.output_port("out")->connect(*multiplier.input_port("in"));
-			//sine3.output_port("out")->connect(*multiplier.input_port("in"));
 
-			sine1.input_port("frequency")->connect(*pulse1.output_port("out"));
-			sine2.input_port("frequency")->connect(*pulse2.output_port("out"));
-			sine3.input_port("frequency")->connect(*pulse3.output_port("out"));
+			sine1.input_port("frequency")->connect(*freq1.output_port("out"));
+			sine2.input_port("frequency")->connect(*freq2.output_port("out"));
+			sine3.input_port("frequency")->connect(*freq3.output_port("out"));
+
+			sine1.input_port("amplitude")->connect(*decay1.output_port("out"));
+			sine2.input_port("amplitude")->connect(*decay2.output_port("out"));
+			sine3.input_port("amplitude")->connect(*decay3.output_port("out"));
+
+			decay1.input_port("pulse")->connect(*pulse1.output_port("out"));
+			decay2.input_port("pulse")->connect(*pulse2.output_port("out"));
+			decay3.input_port("pulse")->connect(*pulse3.output_port("out"));
+
+			decay1.input_port("decay")->connect(*pulse_decay1.output_port("out"));
+			decay2.input_port("decay")->connect(*pulse_decay2.output_port("out"));
+			decay3.input_port("decay")->connect(*pulse_decay3.output_port("out"));
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -139,18 +134,31 @@ void stuff() {
 				engine::real beat(0);
 				engine::real duration(0.1 / beats_per_second);
 				float slowdown(0.01);
+				float f1(200), f2(400), f3(800);
 				float ratio(1.1);
 				for(unsigned int note(0); note < notes; ++note) {
-					//std::clog << beat << ' ' << freq << ' ' << freq2 << ' ' << freq3 << '\n';
-					pulse1.insert_event(beat, freq);
-					pulse2.insert_event(beat * 1.1, freq2 * 1.1);
-					pulse3.insert_event(beat * 1.2, freq3 * 1.17);
-					freq *= ratio;
-					if(freq > 5000) { freq /= 15; ratio *= 1.05; }
-					freq2 *= ratio * ratio;
-					if(freq2 > 5000) freq2 /= 15;
-					freq3 *= ratio * ratio * ratio;
-					if(freq3 > 5000) freq3 /= 15;
+					//std::clog << beat << ' ' << f1 << ' ' << f2 << ' ' << f3 << '\n';
+					
+					engine::real const b1(beat), b2(beat * 1.1), b3(beat * 1.2);
+					
+					freq1.insert_event(b1, f1);
+					freq2.insert_event(b2 * 1.1, f2 * 1.1);
+					freq3.insert_event(b3 * 1.2, f3 * 1.17);
+					
+					pulse1.insert_event(b1, 0.3);
+					pulse2.insert_event(b2, 0.3);
+					pulse3.insert_event(b3, 0.3);
+
+					pulse_decay1.insert_event(b1, 0.0001);
+					pulse_decay2.insert_event(b2, 0.0001);
+					pulse_decay3.insert_event(b3, 0.0001);
+
+					f1 *= ratio;
+					if(f1 > 5000) { f1 /= 15; ratio *= 1.05; }
+					f2 *= ratio * ratio;
+					if(f2 > 5000) f2 /= 15;
+					f3 *= ratio * ratio * ratio;
+					if(f3 > 5000) f3 /= 15;
 					if(ratio > 1.5) ratio -= 0.5;
 					if(ratio < 1.01) ratio += 0.01;
 					beat += duration;
