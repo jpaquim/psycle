@@ -188,13 +188,18 @@ class plugin_uniform_module(uniform_module):
 	def __init__(self, name, *args, **kw):
 		if 'dependencies' in kw: dependencies = kw['dependencies']
 		else: dependencies = kw['dependencies'] = []
-		dependencies.append(resource_module.as_dependency())
+		dependencies.append(resource_module.as_dependency()) # todo why resource?
 		uniform_module.__init__(self,
 			path = os.path.join('plugins', name),
 			name = 'plugin-' + name,
 			*args, **kw
 		)
 	
+decay_plugin_module = plugin_uniform_module(
+	name = 'decay',
+	description = 'decaying pulse plugin',
+)
+
 pulse_plugin_module = plugin_uniform_module(
 	name = 'pulse',
 	description = 'pulse plugin',

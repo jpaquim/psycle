@@ -13,8 +13,8 @@ pulse::pulse(engine::plugin_library_reference & plugin_library_reference, engine
 :
 	node(plugin_library_reference, graph, name),
 	i_(events_.end()),
-	beats_per_second_(),
-	seconds_per_beat_(),
+	beats_per_second_(1),
+	seconds_per_beat_(1),
 	beat_()
 {
 	engine::ports::output::create_on_heap(*this, "out");
