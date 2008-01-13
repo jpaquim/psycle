@@ -39,11 +39,7 @@ void decay::seconds_per_event_change_notification_from_port(engine::port const &
 
 void decay::do_process() throw(engine::exception) {
 	if(!have_out()) return;
-	if(!have_pulse()) {
-		if(!have_decay()) do_process_template<false, false>();
-		else do_process_template<false, true>();
-	} else if(!have_decay()) do_process_template<true, false>();
-	else do_process_template<true, true>();
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(do_process_template, have_pulse(), have_decay());
 }
 
 template<bool use_pulse, bool use_decay>

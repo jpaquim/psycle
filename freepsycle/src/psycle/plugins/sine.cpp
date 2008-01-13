@@ -53,17 +53,7 @@ void sine::seconds_per_event_change_notification_from_port(engine::port const & 
 
 void sine::do_process() throw(engine::exception) {
 	if(!have_out()) return;
-	if(!have_phase()) {
-		if(!have_frequency()) {
-			if(!have_amplitude()) do_process_template<false, false, false>();
-			else do_process_template<false, false, true>();
-		} else if(!have_amplitude()) do_process_template<false, true, false>();
-		else do_process_template<false, true, true>();
-	} else if(!have_frequency()) {
-		if(!have_amplitude()) do_process_template<true, false, false>();
-		else do_process_template<true, false, true>();
-	} else if(!have_amplitude()) do_process_template<true, true, false>();
-	else do_process_template<true, true, true>();
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(do_process_template, have_phase(), have_frequency(), have_amplitude());
 }
 
 template<bool use_phase, bool use_frequency, bool use_amplitude>
