@@ -201,7 +201,7 @@ void node::quaquaversal_propagation_of_seconds_per_event_change_notification_fro
 		BOOST_FOREACH(ports::output * const output_port, multiple_input_port()->output_ports())
 			if(&port != output_port) output_port->propagate_seconds_per_event(port.seconds_per_event());
 	}
-#else	
+#else
 	for(
 		single_input_ports_type::const_iterator i(single_input_ports().begin()),
 		e(single_input_ports().end()); i != e; ++i
