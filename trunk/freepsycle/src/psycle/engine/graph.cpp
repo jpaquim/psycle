@@ -9,7 +9,7 @@
 #include "buffer.hpp"
 #include "reference_counter.hpp"
 #include <universalis/compiler/typenameof.hpp>
-#include <boost/foreach.hpp>
+//#include <boost/foreach.hpp> // boost foreach is in v 1.34
 #include <map>
 #include <iomanip>
 namespace psycle { namespace engine {
@@ -171,6 +171,7 @@ void node::do_close() throw(std::exception) {
 }
 
 void node::quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const & port) {
+#if 0 // boost foreach is in v 1.34
 	if(std::find(single_input_ports().begin(), single_input_ports().end(), &port) != single_input_ports().end()) {
 		BOOST_FOREACH(ports::inputs::single * const input_port, single_input_ports())
 			if(&port != input_port) input_port->propagate_seconds_per_event(port.seconds_per_event());
@@ -200,6 +201,61 @@ void node::quaquaversal_propagation_of_seconds_per_event_change_notification_fro
 		BOOST_FOREACH(ports::output * const output_port, multiple_input_port()->output_ports())
 			if(&port != output_port) output_port->propagate_seconds_per_event(port.seconds_per_event());
 	}
+#else	
+	for(
+		single_input_ports_type::const_iterator i(single_input_ports().begin()),
+		e(single_input_ports().end()); i != e; ++i
+	) if(&port == *i) {
+		for(
+			single_input_ports_type::const_iterator j(single_input_ports().begin()),
+			e(single_input_ports().end()); j != e; ++j
+		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			output_ports_type::const_iterator j(output_ports().begin()),
+			e(output_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		if(multiple_input_port()) for(
+			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
+			j != multiple_input_port()->output_ports().end() ; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		return;
+	}
+	for(
+		output_ports_type::const_iterator i(output_ports().begin()),
+		e(output_ports().end()); i != e; ++i
+	) if(&port == *i) {
+		for(
+			single_input_ports_type::const_iterator j(single_input_ports().begin()),
+			e(single_input_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			output_ports_type::const_iterator j(output_ports().begin()),
+			e(output_ports().end()); j != e; ++j
+		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		if(multiple_input_port()) for(
+			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
+			j != multiple_input_port()->output_ports().end() ; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		return;
+	}
+	if(multiple_input_port()) for(
+		ports::inputs::multiple::output_ports_type::const_iterator i(multiple_input_port()->output_ports().begin());
+		i != multiple_input_port()->output_ports().end() ; ++i
+	) if(&port == *i) {
+		for(
+			single_input_ports_type::const_iterator j(single_input_ports().begin()),
+			e(single_input_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			output_ports_type::const_iterator j(output_ports().begin()),
+			e(output_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
+			j != multiple_input_port()->output_ports().end() ; ++j
+		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
+	}
+#endif
 }
 
 void node::dump(std::ostream & out, std::size_t tabulations) const {
