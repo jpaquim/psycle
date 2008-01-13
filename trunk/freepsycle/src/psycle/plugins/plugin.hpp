@@ -47,23 +47,23 @@ namespace outputs {}
 	}
 
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(t, a, b) \
-	if(!a) { \
-		if(!b) t<false, false>(); \
+	if(!(a)) { \
+		if(!(b)) t<false, false>(); \
 		else t<false, true>(); \
-	} else if(!b) t<true, false>(); \
+	} else if(!(b)) t<true, false>(); \
 	else t<true, true>();
 
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(t, a, b, c) \
-	if(!a) { \
-		if(!b) { \
-			if(!c) t<false, false, false>(); \
+	if(!(a)) { \
+		if(!(b)) { \
+			if(!(c)) t<false, false, false>(); \
 			else t<false, false, true>(); \
-		} else if(!c) t<false, true, false>(); \
+		} else if(!(c)) t<false, true, false>(); \
 		else t<false, true, true>(); \
-	} else if(!b) { \
-		if(!c) t<true, false, false>(); \
+	} else if(!(b)) { \
+		if(!(c)) t<true, false, false>(); \
 		else t<true, false, true>(); \
-	} else if(!c) t<true, true, false>(); \
+	} else if(!(c)) t<true, true, false>(); \
 	else t<true, true, true>();
 
 }}
