@@ -22,16 +22,7 @@ decay::decay(engine::plugin_library_reference & plugin_library_reference, engine
 }
 
 void decay::seconds_per_event_change_notification_from_port(engine::port const & port) {
-	if(&port == single_input_ports()[0]) {
-		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
-		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	} else if(&port == single_input_ports()[1]) {
-		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	} else if(&port == output_ports()[0]) {
-		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
-	}
+	quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port);
 	decay_ = std::pow(decay_, events_per_second_ * port.seconds_per_event());
 	seconds_per_event_ = port.seconds_per_event();
 	events_per_second_ = port.events_per_second();

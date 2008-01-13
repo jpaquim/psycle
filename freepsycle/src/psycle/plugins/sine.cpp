@@ -25,24 +25,8 @@ sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::
 }
 
 void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
-	if(&port == single_input_ports()[0]) {
-		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
-		single_input_ports()[2]->propagate_seconds_per_event(port.seconds_per_event());
-		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	} else if(&port == single_input_ports()[1]) {
-		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-		single_input_ports()[2]->propagate_seconds_per_event(port.seconds_per_event());
-		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	} else if(&port == single_input_ports()[2]) {
-		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
-		output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-	} else if(&port == output_ports()[0]) {
-		single_input_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
-		single_input_ports()[1]->propagate_seconds_per_event(port.seconds_per_event());
-		single_input_ports()[2]->propagate_seconds_per_event(port.seconds_per_event());
-	}
-	
+	quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port);
+		
 	// no easy way to get the value for old_events_per_second
 	//this->step_ *= old_events_per_second * port.seconds_per_event();
 	
@@ -52,8 +36,8 @@ void sine::seconds_per_event_change_notification_from_port(engine::port const & 
 }
 
 void sine::do_process() throw(engine::exception) {
-	if(!have_out()) return;
-	PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(do_process_template, have_phase(), have_frequency(), have_amplitude());
+	if(!out_port()) return;
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(do_process_template, phase_port(), frequency_port(), amplitude_port());
 }
 
 template<bool use_phase, bool use_frequency, bool use_amplitude>

@@ -389,6 +389,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 	protected:
 		void virtual channel_change_notification_from_port(port const &) throw(std::exception) {}
 		void virtual seconds_per_event_change_notification_from_port(port const &) {}
+		void quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const &);
 
 	///\name name
 	///\{
