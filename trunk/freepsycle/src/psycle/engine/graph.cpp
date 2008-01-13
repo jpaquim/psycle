@@ -169,6 +169,63 @@ void node::do_close() throw(std::exception) {
 	}
 }
 
+void node::quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const & port) {
+	///\todo use std::find
+	for(
+		single_input_ports_type::const_iterator i(single_input_ports().begin()),
+		e(single_input_ports().end()); i != e; ++i
+	) if(&port == *i) {
+		for(
+			single_input_ports_type::const_iterator j(single_input_ports().begin()),
+			e(single_input_ports().end()); j != e; ++j
+		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			output_ports_type::const_iterator j(output_ports().begin()),
+			e(output_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		if(multiple_input_port()) for(
+			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
+			j != multiple_input_port()->output_ports().end() ; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		return;
+	}
+	for(
+		output_ports_type::const_iterator i(output_ports().begin()),
+		e(output_ports().end()); i != e; ++i
+	) if(&port == *i) {
+		for(
+			single_input_ports_type::const_iterator j(single_input_ports().begin()),
+			e(single_input_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			output_ports_type::const_iterator j(output_ports().begin()),
+			e(output_ports().end()); j != e; ++j
+		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		if(multiple_input_port()) for(
+			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
+			j != multiple_input_port()->output_ports().end() ; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		return;
+	}
+	if(multiple_input_port()) for(
+		ports::inputs::multiple::output_ports_type::const_iterator i(multiple_input_port()->output_ports().begin());
+		i != multiple_input_port()->output_ports().end() ; ++i
+	) if(&port == *i) {
+		for(
+			single_input_ports_type::const_iterator j(single_input_ports().begin()),
+			e(single_input_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			output_ports_type::const_iterator j(output_ports().begin()),
+			e(output_ports().end()); j != e; ++j
+		) (**j).propagate_seconds_per_event(port.seconds_per_event());
+		for(
+			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
+			j != multiple_input_port()->output_ports().end() ; ++j
+		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
+	}
+}
+
 void node::dump(std::ostream & out, std::size_t tabulations) const {
 	for(std::size_t t(0) ; t < tabulations ; ++t) out << '\t';
 	out

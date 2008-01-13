@@ -30,15 +30,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		real step_, frequency_to_step_;
 		real amplitude_;
 
-		bool have_phase()     { return *single_input_ports()[0]; }
-		bool have_frequency() { return *single_input_ports()[1]; }
-		bool have_amplitude() { return *single_input_ports()[2]; }
-		bool have_out()       { return *output_ports()[0]; }
+		engine::ports::inputs::single & phase_port()     { return *single_input_ports()[0]; }
+		engine::ports::inputs::single & frequency_port() { return *single_input_ports()[1]; }
+		engine::ports::inputs::single & amplitude_port() { return *single_input_ports()[2]; }
+		engine::ports::output         & out_port()       { return *output_ports()[0]; }
 
-		buffer::channel & phase_channel()     { return single_input_ports()[0]->buffer()[0]; }
-		buffer::channel & frequency_channel() { return single_input_ports()[1]->buffer()[0]; }
-		buffer::channel & amplitude_channel() { return single_input_ports()[2]->buffer()[0]; }
-		buffer::channel & out_channel()       { return output_ports()[0]->buffer()[0]; }
+		buffer::channel & phase_channel()     { return phase_port().buffer()[0]; }
+		buffer::channel & frequency_channel() { return frequency_port().buffer()[0]; }
+		buffer::channel & amplitude_channel() { return amplitude_port().buffer()[0]; }
+		buffer::channel & out_channel()       { return out_port().buffer()[0]; }
 };
 
 }}
