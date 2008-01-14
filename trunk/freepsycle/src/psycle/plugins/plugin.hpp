@@ -47,25 +47,49 @@ namespace outputs {}
 	}
 
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(t, a, b) \
-	if(!(a)) { \
-		if(!(b)) t<false, false>(); \
-		else t<false, true>(); \
-	} else if(!(b)) t<true, false>(); \
-	else t<true, true>();
+	if(a) { \
+		if(b) t<true, true>(); \
+		else t<true, false>(); \
+	} else if(b) t<false, true>(); \
+	else t<false, false>();
 
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(t, a, b, c) \
-	if(!(a)) { \
-		if(!(b)) { \
-			if(!(c)) t<false, false, false>(); \
-			else t<false, false, true>(); \
-		} else if(!(c)) t<false, true, false>(); \
-		else t<false, true, true>(); \
-	} else if(!(b)) { \
-		if(!(c)) t<true, false, false>(); \
-		else t<true, false, true>(); \
-	} else if(!(c)) t<true, true, false>(); \
-	else t<true, true, true>();
+	if(a) { \
+		if(b) { \
+			if(c) t<true, true, true>(); \
+			else t<true, true, false>(); \
+		} else if(c) t<true, false, true>(); \
+		else t<true, false, false>(); \
+	} else if(b) { \
+		if(c) t<false, true, true>(); \
+		else t<false, true, false>(); \
+	} else if(c) t<false, false, true>(); \
+	else t<false, false, false>();
+
+#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__4(t, a, b, c, d) \
+	if(a) { \
+		if(b) { \
+			if(c) { \
+				if(d) t<true, true, true, true>(); \
+				else t<true, true, true, false>(); \
+			} else if(d) t<true, true, false, true>(); \
+			else t<true, true, false, false>(); \
+		} else if(c) { \
+			if(d) t<true, false, true, true>(); \
+			else t<true, false, true, false>(); \
+		} else if(d) t<true, false, false, true>(); \
+		else t<true, false, false, false>(); \
+	} else if(b) { \
+		if(c) { \
+			if(d) t<false, true, true, true>(); \
+			else t<false, true, true, false>(); \
+		} else if(d) t<false, true, false, true>(); \
+		else t<false, true, false, false>(); \
+	} else if(c) { \
+		if(d) t<false, false, true, true>(); \
+		else t<false, false, true, false>(); \
+	} else if(d) t<false, false, false, true>(); \
+	else t<false, false, false, false>();
 
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
-
