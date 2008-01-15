@@ -19,8 +19,8 @@ void additioner::do_process() throw(engine::exception) {
 	assert(&output_ports()[0]->buffer());
 	engine::buffer & in(multiple_input_port()->buffer());
 	engine::buffer & out(output_ports()[0]->buffer());
-	assert(out.size() == in.size());
-	for(std::size_t channel(0) ; channel < in.size() ; ++channel)
+	assert(out.channels() == in.channels());
+	for(std::size_t channel(0) ; channel < in.channels() ; ++channel)
 		for(std::size_t event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event) {
 			// not needed because in and out have the same buffer: out[channel][event].index(event);
 			out[channel][event].sample() += in[channel][event].sample();
