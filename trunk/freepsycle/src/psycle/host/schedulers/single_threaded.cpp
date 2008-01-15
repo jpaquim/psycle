@@ -287,8 +287,7 @@ void scheduler::process(node & node) {
 		s << "scheduling " << node.underlying().qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	{
-		// get node input buffers by processing the dependencies of the node
+	{ // get node input buffers by processing the dependencies of the node
 		for(node::single_input_ports_type::const_iterator i(node.single_input_ports().begin()) ; i != node.single_input_ports().end() ; ++i) {
 			ports::inputs::single & single_input_port(**i);
 			if(single_input_port.output_port()) process_node_of_output_port_and_set_buffer_for_input_port(*single_input_port.output_port(), single_input_port);
@@ -301,8 +300,7 @@ void scheduler::process(node & node) {
 	else if(node.multiple_input_port()->output_ports().size()) { // the node has a multiple input port: complex case
 		// get first output to process 
 		ports::output & first_output_port_to_process(node.multiple_input_port_first_output_port_to_process());
-		{
-			// process with first input buffer
+		{ // process with first input buffer
 			process_node_of_output_port_and_set_buffer_for_input_port(first_output_port_to_process, *node.multiple_input_port());
 			if(node.multiple_input_port()->underlying().single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
 				ports::output & output_port(*node.output_ports().front());

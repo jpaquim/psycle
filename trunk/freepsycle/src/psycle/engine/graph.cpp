@@ -430,7 +430,7 @@ void port::do_channels(std::size_t channels) throw(exception) {
 	}
 	if(channels_immutable()) throw exceptions::runtime_error("channel count of port " + qualified_name() + " is immutable", UNIVERSALIS__COMPILER__LOCATION);
 	this->channels_ = channels;
-	if(buffer_ && buffer().size() < channels) buffer().resize(channels);
+	if(buffer_ && buffer().channels() < channels) buffer().channels(channels);
 }
 
 void port::dump(std::ostream & out, /*const std::string & kind,*/ std::size_t tabulations) const {
