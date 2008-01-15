@@ -57,6 +57,7 @@ void sine::do_process_template() throw(engine::exception) {
 		out_channel()[out_event](out_event, amplitude_ * std::sin(phase_)); // \todo optimize with a cordic algorithm
 		phase_ += step_;
 	}
+	out_channel().flag(channel::flags::continuous);
 	phase_ = std::fmod(phase_, 2 * engine::math::pi);
 }
 

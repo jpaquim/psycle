@@ -48,10 +48,11 @@ void decay::do_process_template() throw(engine::exception) {
 		out_channel()[out_event](out_event, current_);
 		current_ *= decay_;
 	}
-	out_channel().flag(channel::flags::continuous);
+	if(current_) out_channel().flag(channel::flags::continuous);
+	else out_channel().flag(channel::flags::empty);
 }
 #else
-template<engine::buffer::flags::type pulse_flag, flags::type decay_flag>
+template<engine::channel::flags::type pulse_flag, engine::channel::flags::type decay_flag>
 void decay::do_process_template() throw(engine::exception) {
 	for(std::size_t
 		pulse_event(0),
@@ -59,19 +60,19 @@ void decay::do_process_template() throw(engine::exception) {
 		out_event(0); out_event < out_channel().size(); ++out_event
 	) {
 		switch(pulse_flag) {
-			flags::continuous:
+			channel::flags::continuous:
 				this->current_ = pulse_channel()[out_event].sample();
 			break;
-			flags::discrete:
+			channel::flags::discrete:
 				if(pulse_event < pulse_channel().size() && pulse_channel()[pulse_event].index() == out_event)
 					this->current_ = pulse_channel()[pulse_event++].sample();
 			default: /* nothing */ ;
 		}
 		switch(decay_flag) {
-			flags::continuous:
+			channel::flags::continuous:
 				this->decay_per_second(decay_channel()[decay_event++].sample());
 			break;
-			flags::discrete:
+			channel::flags::discrete:
 				if(decay_event < decay_channel().size() && decay_channel()[decay_event].index() == out_event)
 					this->decay_per_second(decay_channel()[decay_event++].sample());
 			default: /* nothing */ ;
@@ -79,7 +80,8 @@ void decay::do_process_template() throw(engine::exception) {
 		out_channel()[out_event](out_event, current_);
 		current_ *= decay_;
 	}
-	out_channel().flag(flags::continuous);
+	if(current_) out_channel().flag(channel::flags::continuous);
+	else out_channel().flag(channel::flags::empty);
 }
 #endif
 

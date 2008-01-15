@@ -72,6 +72,8 @@ void pulse::do_process() throw(engine::exception) {
 			}
 		}
 	}
+	if(last_index) for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::discrete);
+	else for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::empty);
 	if(last_index < out.events()) for(std::size_t c(0); c < channels; ++c) out[c][last_index].index(out.events());
 	beat_ = last_beat;
 }
