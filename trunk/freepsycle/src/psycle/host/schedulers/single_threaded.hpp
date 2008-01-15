@@ -203,7 +203,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 				void operator()(buffer & buffer) {
 					assert(&buffer);
 					assert("reference count is zero: " && !buffer.reference_count());
-					assert(buffer.size() >= this->channels_);
+					assert(buffer.channels() >= this->channels_);
 					assert(buffer.events() >= this->events_);
 					if(false && loggers::trace()()) {
 						std::ostringstream s;
