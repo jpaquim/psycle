@@ -78,7 +78,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer : public std::vector<channel> {
 		void events(std::size_t events) { resize(channels(), events); }
 
 		/// clears all events.
-		/// A complexity of o(channels) is achieved by simply setting 
+		/// A complexity of o(channels) is achieved by simply setting the index of the first event.
 		void inline clear(std::size_t channels);
 
 		/// copies the first given number of channels from another buffer into this buffer.
