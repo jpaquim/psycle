@@ -47,8 +47,8 @@ void template_plugin::seconds_per_event_change_notification_from_port(const engi
 }
 
 void template_plugin::do_process() throw(engine::exception) {
-	if(!output_ports()) return;
-	if(!multiple_input_port()) return;
+	if(!*output_ports()[0]) return;
+	if(!*multiple_input_port()) return;
 	assert(&multiple_input_port()->buffer());
 	assert(&input_ports()[0]->buffer());
 	assert(&output_ports()[0]->buffer());
