@@ -160,7 +160,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		if(bytes2) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
 		engine::buffer & in = single_input_ports()[0]->buffer();
 		//real amplification = single_input_ports()[1]->buffer()[0][0].sample();
-		for(int channel(0) ; channel < in.size() ; ++channel) {
+		for(int channel(0) ; channel < in.channels() ; ++channel) {
 			int spread(0);
 			for(int event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event) {
 				if(ultra_trace && loggers::trace()()) {
