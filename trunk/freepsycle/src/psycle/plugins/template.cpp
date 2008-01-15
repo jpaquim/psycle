@@ -42,24 +42,23 @@ void template_plugin::channel_change_notification_from_port(const engine::port &
 }
 
 void template_plugin::seconds_per_event_change_notification_from_port(const engine::port & port) {
-	if(&port == output_ports()[0]) multiple_input_port()->propagate_seconds_per_event(port.seconds_per_event());
-	else if(&port == multiple_input_port()) output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
+	quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port);
 	assert(multiple_input_port()->seconds_per_event() == output_ports()[0]->seconds_per_event())
 }
 
 void template_plugin::do_process() throw(engine::exception) {
-	if(!multiple_input_port()->output_ports().size()) return;
-	if(!output_ports()[0]->input_ports().size()) return;
+	if(!output_ports()) return;
+	if(!multiple_input_port()) return;
 	assert(&multiple_input_port()->buffer());
 	assert(&input_ports()[0]->buffer());
 	assert(&output_ports()[0]->buffer());
 	engine::buffer & in(multiple_input_port()->buffer());
 	engine::buffer & out(output_ports()[0]->buffer());
 	assert(out.size() == in.size())
-	if(single_input_ports()[0]->output_port()) {
+	if(single_input_ports()) {
 		engine::buffer & side(input_ports()[0]->buffer());
-		assert(out.size() == side.size())
-		for(std::size_t channel(0) ; channel < in.size() ; ++channel)
+		assert(out.channels() == side.channels())
+		for(std::size_t channel(0) ; channel < in.channels() ; ++channel)
 			for(std::size_t event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event)
 				out[channel][event].index(event);
 				if(side[channel][event].index() == event)
@@ -67,12 +66,13 @@ void template_plugin::do_process() throw(engine::exception) {
 				else
 					out[channel][event].sample() *= in[channel][event].sample();
 	} else {
-		for(std::size_t channel(0) ; channel < in.size() ; ++channel)
+		for(std::size_t channel(0) ; channel < in.channels() ; ++channel)
 			for(std::size_t event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event) {
 				out[channel][event].index(event);
 				out[channel][event].sample() *= in[channel][event].sample();
 			}
 	}
+	for(std::size_t channel(0) ; channel < in.channels() ; ++channel) out[channel].flag(channel::flags::continuous);
 
 	// c++ exception:
 	//throw exception("template!", UNIVERSALIS__COMPILER__LOCATION);
