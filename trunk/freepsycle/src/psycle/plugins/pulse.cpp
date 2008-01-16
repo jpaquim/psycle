@@ -50,7 +50,6 @@ void pulse::erase_events(real begin_beat, real end_beat) {
 void pulse::do_process() throw(engine::exception) {
 	if(!*output_ports()[0]) return;
 	engine::buffer & out(output_ports()[0]->buffer());
-	if(!out.events()) return; // ?
 	real const samples_per_beat = output_ports()[0]->events_per_second() / beats_per_second_;
 	std::uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
 	real last_beat(beat_ + (out.events() - 1) / samples_per_beat);
@@ -62,13 +61,11 @@ void pulse::do_process() throw(engine::exception) {
 		if(i < out.events()) {
 			for(std::size_t c(0); c < channels; ++c) out[c][last_index](i, e.sample());
 			++last_index;
-		}
-		else {
-			// event lost! should never happen.
+		} else { // event lost! should never happen.
 			if(loggers::warning()) {
 				std::ostringstream s;
 				s << "event lost: " << e.beat() << ' ' << e.sample();
-				loggers::warning()(s.str());
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
 	}

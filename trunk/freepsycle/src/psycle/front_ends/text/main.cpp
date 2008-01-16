@@ -62,7 +62,7 @@ void stuff() {
 		node & sine2(resolver("sine", graph, "sine2"));
 		node & sine3(resolver("sine", graph, "sine3"));
 
-		//plugins::pulse & freq1(plugins::pulse::create_on_heap<plugins::pulse>(graph, "freq1"));
+		//plugins::pulse & freq1(node::virtual_factory_access::create_on_heap<plugins::pulse>(graph, "freq1"));
 		plugins::pulse & freq1(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq1").node()));
 		plugins::pulse & freq2(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq2").node()));
 		plugins::pulse & freq3(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq3").node()));
