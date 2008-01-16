@@ -201,7 +201,7 @@ namespace ports {
 			}
 			
 		public:
-			void dump(std::ostream &, std::size_t tabulations = 0) const = 0 /*override*/;
+			void dump(std::ostream &, std::size_t tabulations = 0) const = 0;
 	};
 	
 	namespace inputs {
