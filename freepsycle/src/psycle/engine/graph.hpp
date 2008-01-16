@@ -191,6 +191,16 @@ namespace ports {
 			void disconnect(typenames::ports::output &);
 
 		public:
+			operator bool() const {
+				engine::buffer const & b(this->buffer());
+				for(std::size_t i(0), e(channels()); i < e; ++i) {
+					channel const & c(b[i]);
+					if(c.size() && c.size() > c[0].index()) return true;
+				}
+				return false;
+			}
+			
+		public:
 			void dump(std::ostream &, std::size_t tabulations = 0) const = 0 /*override*/;
 	};
 	
@@ -212,13 +222,8 @@ namespace ports {
 
 			public:
 				operator bool() const {
-					if(!this->output_port()) return false;
-					engine::buffer const & b(output_port()->buffer());
-					for(std::size_t i(0), e(output_port()->channels()); i < e; ++i) {
-						channel const & c(b[i]);
-						if(c.size() && c.size() > c[0].index()) return true;
-					}
-					return false;
+					return this->output_port() &&
+					static_cast<bool>(static_cast<input const &>(*this));
 				}
 				void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 		};
@@ -245,14 +250,8 @@ namespace ports {
 
 			public:
 				operator bool() const {
-					for(output_ports_type::const_iterator ii(this->output_ports().begin()), e(this->output_ports().end()); ii != e; ++ii) {
-						engine::buffer const & b = (**ii).buffer();
-						for(std::size_t i(0), e((**ii).channels()); i < e; ++i) {
-							channel const & c(b[i]);
-							if(c.size() && c.size() > c[0].index()) return true;
-						}
-					}
-					return false;
+					return this->output_ports().size() &&
+					static_cast<bool>(static_cast<input const &>(*this));
 				}
 				void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 		};

@@ -25,7 +25,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 			};
 			
 			flags::type flag() const { return flag_; }
-			void flag(flags::type flag) { this->flag_ = flag_; }
+			void flag(flags::type flag) { this->flag_ = flag; }
 		private:
 			flags::type flag_;
 	///\}
