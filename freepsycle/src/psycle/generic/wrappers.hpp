@@ -1,9 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2002-2007 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2002-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::generic::wrappers
 #pragma once
-#include "generic.hpp"
+#include "base.hpp"
 #include <algorithm>
 namespace psycle { namespace generic { namespace wrappers {
 

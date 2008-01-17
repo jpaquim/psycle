@@ -6,7 +6,7 @@
 #include "forward_declarations.hpp"
 #include "named.hpp"
 #include "buffer.hpp"
-#include <psycle/generic/generic.hpp>
+#include <psycle/generic/base.hpp>
 #include <set>
 #include <mutex>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE__GRAPH
