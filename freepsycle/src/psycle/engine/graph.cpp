@@ -39,27 +39,22 @@ graph::~graph() {
 		s << "delete graph: " << qualified_name();
 		loggers::information()(s.str());
 	}
+
+	//for(reverse_iterator i(rbegin()) ; i != rend() ; ++i) /// maybe without ++i, or using a if(i == end()) break; else ++i; {
+
+	//while(!empty()) {
+	//node & node(*--end());
+
 	while(!empty()) {
 		node & node(**begin());
-		erase(*begin()); ///< work around to bypass msvc7.1's "assume no aliasing (accross functions)" optimization
-
-		//while(!empty()) {
-		//node & node(*begin());
-	
-		//while(!empty()) {
-		//node & node(*--end());
-	
-		//for(reverse_iterator i(rbegin()) ; i != rend() ; ++i) /// maybe without ++i, or using a if(i == end()) break; else ++i; {
-	
-		//for(iterator i(begin()) ; i != end() ; ++i) /// maybe without ++i, or using a if(i == end()) break; else ++i; {
-		//node & node(*i);
-		//erase(i);
+		erase(*begin()); // work around to bypass the compiler's no-aliasing optimisation
 
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << node.qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node) << " from loaded library " << node.plugin_library_reference().name();
 			loggers::information()(s.str());
 		}
+
 		reference_counter & reference_counter(node.plugin_library_reference());
 		node.free_heap();
 		--reference_counter;
