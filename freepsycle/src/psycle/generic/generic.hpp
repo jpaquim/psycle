@@ -18,10 +18,19 @@
 #include <algorithm>
 namespace psycle { namespace generic { namespace basic {
 
-#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM  UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
-#if PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY < PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
-	#undef  PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
-	#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY  PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
+// use the same miminum arity as in universalis
+#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM \
+	UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
+	
+// ensure a minimum arity
+#if \
+	PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY < \
+	PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
+	#undef \
+		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+	#define \
+		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY \
+		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
 #endif
 
 using engine::exception;
@@ -38,6 +47,7 @@ class graph
 	protected: friend class graph::virtual_factory_access;
 		typedef graph graph_type;
 		graph() {
+			// register to our own signal
 			new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1));
 		}
 
@@ -102,6 +112,8 @@ class node
 			if(loggers::trace()()) {
 				loggers::trace()("new generic node", UNIVERSALIS__COMPILER__LOCATION);
 			}
+			
+			// register to our own signals
 			new_output_port_signal()        .connect(boost::bind(&node::        on_new_output_port, this, _1));
 			new_single_input_port_signal()  .connect(boost::bind(&node::  on_new_single_input_port, this, _1));
 			new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
@@ -111,13 +123,16 @@ class node
 			if(loggers::trace()()) {
 				loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
 			}
+			// emit the new_node signal of our parent graph
 			this->parent().new_node_signal()(*this);
 		}
 
 		void before_destruction() /*override*/ {
+			// emit our deletion signal
 			delete_signal()(*this);
 		}
 
+		/// virtual destructor
 		virtual inline ~node() {}
 
 	///\name destruction
@@ -146,6 +161,7 @@ class node
 	///\{
 		private:
 			void on_new_output_port(typename Typenames::ports::output & port) {
+				// add the new output port to our container
 				output_ports_.push_back(&port);
 			}
 	///\}
@@ -170,6 +186,7 @@ class node
 	///\{
 		private:
 			void on_new_single_input_port(typename Typenames::ports::inputs::single & port) {
+				// add the new single input port to our container
 				single_input_ports_.push_back(&port); 
 			}
 	///\}
@@ -197,6 +214,7 @@ class node
 	///\{
 		private:
 			void on_new_multiple_input_port(typename Typenames::ports::inputs::multiple & port) {
+				// store a pointer to the new multiple input port
 				multiple_input_port(port); 
 			}
 	///\}
@@ -231,10 +249,12 @@ namespace ports {
 			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
 			void after_construction() /*override*/ {
+				// emit the new_output_port signal of our parent node
 				this->parent().new_output_port_signal()(*this);
 			}
 
 			void before_destruction() /*override*/ {
+				// polymorphic virtual call to disconnect all connected input ports
 				disconnect_all();
 			}
 
@@ -252,12 +272,15 @@ namespace ports {
 		///\{
 			public:
 				void connect(typename Typenames::ports::input & input_port) throw(exception) {
+					// connect the input port to this output port
 					input_port.connect(*this);
-					this->parent().parent().new_connection_signal()(input_port, *this);
 				}
 			public: // private:
 				void connect_internal_side(typename Typenames::ports::input & input_port) {
-					typename input_ports_type::iterator i(std::find(input_ports_.begin(), input_ports_.end(), &input_port));
+					// find the input port in our container
+					typename input_ports_type::iterator i(std::find(
+						input_ports_.begin(), input_ports_.end(), &input_port
+					));
 					if(i != input_ports_.end()) {
 						if(loggers::warning()()) {
 							std::ostringstream s;
@@ -266,19 +289,24 @@ namespace ports {
 						}
 						return;
 					}
+					// add the newly connected input port to our container
 					input_ports_.push_back(&input_port);
 				}
 			public:
 				void disconnect_all() {
+					// iterate over all our input ports to disconnect them
 					while(!input_ports_.empty()) disconnect(*input_ports_.back());
 				}
 				void disconnect(typename Typenames::ports::input & input_port) {
+					// disconnect the input port from this output port
 					input_port.disconnect(*this);
-					this->parent().parent().delete_connection_signal()(input_port, *this);
 				}
 			public: // private:
 				void disconnect_internal_side(typename Typenames::ports::input & input_port) {
-					typename input_ports_type::iterator i(std::find(input_ports_.begin(), input_ports_.end(), &input_port));
+					// find the input port in our container
+					typename input_ports_type::iterator i(std::find(
+						input_ports_.begin(), input_ports_.end(), &input_port)
+					);
 					if(i == input_ports_.end()) {
 						if(loggers::warning()()) {
 							std::ostringstream s;
@@ -287,6 +315,7 @@ namespace ports {
 						}
 						return;
 					}
+					// remove the disconnected input port from our container
 					input_ports_.erase(i);
 				}
 		///\}
@@ -312,11 +341,19 @@ namespace ports {
 		///\{
 			public:
 				void connect(typename Typenames::ports::output & output_port) throw(exception) {
-					assert("ports must belong to different nodes:" && &output_port.parent() != &this->parent());
-					assert("nodes of both ports must belong to the same graph:" && &output_port.parent().parent() == &this->parent().parent());
+					assert("ports must belong to different nodes:" &&
+						&output_port.parent() != &this->parent()
+					);
+					assert("nodes of both ports must belong to the same graph:" &&
+						&output_port.parent().parent() == &this->parent().parent()
+					);
+					// connect the output port internal side to this input port
 					output_port.connect_internal_side(*this);
+					// call our base port class connection function
 					Typenames::port::connect(output_port);
+					// connect this input port internal side to the output port
 					this->connect_internal_side(output_port);
+					// signal our grand parent graph of the new connection
 					this->parent().parent().new_connection_signal()(*this, output_port);
 				}
 			protected:
@@ -325,8 +362,11 @@ namespace ports {
 			public:
 				void virtual disconnect_all() = 0;
 				void disconnect(typename Typenames::ports::output & output_port) {
+					// disconnect this input port internal side from the output port
 					this->disconnect_internal_side(output_port);
+					// disconnect the output port internal side from this input port
 					output_port.disconnect_internal_side(*this);
+					// signal our grand parent graph of the disconnection
 					this->parent().parent().delete_connection_signal()(*this, output_port);
 				}
 			protected:
@@ -346,8 +386,14 @@ namespace ports {
 			protected: friend class single::virtual_factory_access;
 				typedef single single_type;
 
-				//UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__WITH_BODY(single, single::virtual_factory_type, (BOOST_PP_COMMA output_port_() {}), PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
-				
+				#if 0
+				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__WITH_BODY(
+					single, single::virtual_factory_type,
+					(BOOST_PP_COMMA output_port_() {}),
+					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+				)
+				#endif
+
 				#define constructor(_, count, __) \
 					BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 					single(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
@@ -359,6 +405,7 @@ namespace ports {
 				#undef constructor
 
 				void after_construction() /*override*/ {
+					// signal our parent node it has a new single input port
 					this->parent().new_single_input_port_signal()(*this);
 				}
 
@@ -374,6 +421,7 @@ namespace ports {
 			///\{
 				public:
 					void disconnect_all() /*override*/ {
+						// disconnect the connected output port
 						if(output_port_) disconnect(*output_port_);
 					}
 				
@@ -387,6 +435,7 @@ namespace ports {
 							}
 							return;
 						}
+						// store a pointer to the newly connected output port
 						this->output_port_ = &output_port;
 					}
 					void disconnect_internal_side(typename Typenames::ports::output & output_port) /*override*/ {
@@ -398,6 +447,7 @@ namespace ports {
 							}
 							return;
 						}
+						// clear the pointer to the disconnected output port
 						this->output_port_ = 0;
 					}
 			///\}
@@ -414,9 +464,12 @@ namespace ports {
 
 				typedef multiple multiple_type;
 
-				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(multiple, multiple::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
+					multiple, multiple::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+				)
 
 				void after_construction() /*override*/ {
+					// signal our parent node it now has a multiple input port
 					this->parent().new_multiple_input_port_signal()(*this);
 				}
 				
@@ -433,11 +486,15 @@ namespace ports {
 			///\{
 				public:
 					void disconnect_all() /*override*/ {
+						// iterate over all our connected output ports to disconnect them
 						while(!output_ports_.empty()) disconnect(*output_ports_.back());
 					}
 				protected:
 					void connect_internal_side(typename Typenames::ports::output & output_port) /*override*/ {
-						typename output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
+						// find the output port in our container
+						typename output_ports_type::iterator i(std::find(
+							output_ports_.begin(), output_ports_.end(), &output_port)
+						);
 						if(i != output_ports_.end()) {
 							if(loggers::warning()()) {
 								std::ostringstream s;
@@ -446,10 +503,14 @@ namespace ports {
 							}
 							return;
 						}
+						// add the newly connected output port to our container
 						output_ports_.push_back(&output_port);
 					}
 					void disconnect_internal_side(typename Typenames::ports::output & output_port) /*override*/ {
-						typename output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
+						// find the output port in our container
+						typename output_ports_type::iterator i(std::find(
+							output_ports_.begin(), output_ports_.end(), &output_port
+						));
 						if(i == output_ports_.end()) {
 							if(loggers::warning()()) {
 								std::ostringstream s;
@@ -458,6 +519,7 @@ namespace ports {
 							}
 							return;
 						}
+						// remove the disconnected output port from our container
 						output_ports_.erase(i);
 					}
 			///\}
