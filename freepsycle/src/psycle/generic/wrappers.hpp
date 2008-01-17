@@ -365,7 +365,9 @@ namespace ports {
 		{
 			protected:
 				typedef multiple multiple_type;
-				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(multiple, multiple::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
+					multiple, multiple::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+				)
 		};
 	}
 }
