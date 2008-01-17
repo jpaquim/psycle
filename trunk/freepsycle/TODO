@@ -13,5 +13,9 @@
 
 *	try to use liboil for optimizations.
 
+*	ring buffer
+	http://www.audiomulch.com/~rossb/code/lockfree/placement_copying_message_queue.cpp
+	-- bohan
+
 *	Remember to update the TODO file.
 	-- bohan
