@@ -11,7 +11,7 @@
 namespace psycle { namespace engine {
 
 	/// reference counter for shared objects.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK reference_counter
+	class reference_counter
 	{
 		public:
 			/// creates a reference counter with an initial reference count set to 0.
@@ -31,7 +31,7 @@ namespace psycle { namespace engine {
 	};
 
 	/// reference counter for plugin libraries.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK plugin_library_reference : public reference_counter
+	class plugin_library_reference : public reference_counter
 	{
 		public:
 			/// creates a reference counter for the library named \param name.
