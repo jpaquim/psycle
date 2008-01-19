@@ -32,7 +32,7 @@ void pulse::insert_event(real beat, real sample) {
 
 void pulse::erase_events(real begin_beat, real end_beat) {
 	events_type::iterator last(events_.lower_bound(end_beat));
-	if(last != events_.end()) --last;
+	if(last != events_.end()) --last; // exclude end_beat from range
 	events_.erase(events_.lower_bound(begin_beat), last);
 	beat(beat()); // recompute the iterator
 }
