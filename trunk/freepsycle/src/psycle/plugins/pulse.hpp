@@ -1,9 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2007-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::pulse
 #pragma once
 #include "plugin.hpp"
+#include <map>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__PULSE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins {
@@ -18,35 +19,12 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 	///\name events
 	///\{
 		public:
-			class event {
-				public:
-					event(real beat, real sample) : beat_(beat), sample_(sample) {}
-					
-				///\name beat
-				///\{
-					public:
-						real beat() const { return beat_;}
-					private:
-						real beat_;
-				///\}
-					
-				///\name sample
-				///\{
-					public:
-						real sample() const { return sample_; }
-						void sample(real sample) { this->sample_ = sample; }
-					private:
-						real sample_;
-				///\}
-			};
-
 			/// inserts an event
 			void insert_event(real beat, real sample);
 			/// erases the range [begin_beat, end_beat[
 			void erase_events(real begin_beat, real end_beat);
-
 		private:
-			typedef std::vector<event> events_type;
+			typedef std::map<real, real> events_type;
 			events_type events_;
 			/// iterator in events_ container corresponding to current beat_
 			events_type::const_iterator i_;
@@ -76,7 +54,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 			real seconds_per_beat_;
 	///\}
 
-	///\name beat
+	///\name position in beat unit
 	///\{
 		public:
 			real const beat() { return beat_; }
@@ -85,7 +63,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
 			real beat_;
 	///\}
 
-	///\name seconds
+	///\name position in second unit
 	///\{
 		public:
 			real const seconds() { return beat_ * seconds_per_beat(); }
