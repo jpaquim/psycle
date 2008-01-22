@@ -37,8 +37,19 @@ TrackInfo::TrackInfo( std::uint16_t mac, bool muted)
 	,ismuted_(muted)
 {}
 
+void TrackInfo::setMachineIdx(std::uint16_t macindex)
+{
+	macIdx_=macindex;
+	std::list<TweakTrackInfo*>::iterator endit = tweakinfos.end();
+	for (std::list<TweakTrackInfo*>::iterator it = tweakinfos.begin(); it != endit; it++)
+	{
+		*it.setMachineIdx(macindex);
+	}
+}
+
 void TrackInfo::addtweakinfo(TweakTrackInfo* tinfo)
 {
+	tinfo->setMachineIdx(macIdx_);
 	tweakinfos.push_back(tinfo);
 }
 void TrackInfo::changetweakinfo(std::uint8_t index,TweakTrackInfo* tinfo)

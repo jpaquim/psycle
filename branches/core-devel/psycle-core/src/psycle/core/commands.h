@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pattern.h"
-
 ///\todo: any real reason why this isn't inside pattern.h?
 
 namespace psy

@@ -34,6 +34,15 @@ namespace psy
 	{
 		class PatternCategory;
 
+		/*!
+		 * \brief
+		 * Data Holder for the type of tweak.
+		 * 
+		 * TweakTrackInfo holds the parameter and type of tweak for a specific column.
+		 * 
+		 * \see
+		 * TrackInfo|TweakEvent
+		 */
 		class TweakTrackInfo {
 		public:
 
@@ -45,8 +54,8 @@ namespace psy
 
 			~TweakTrackInfo(){;}
 
-			std::uint16_t parameterIdx()  const { return paramIdx_; }
 			TweakType type()     const { return type_; }
+			std::uint16_t parameterIdx()  const { return paramIdx_; }
 
 			bool operator<(const TweakTrackInfo & key) const;
 
@@ -56,31 +65,25 @@ namespace psy
 
 			TweakType type_;
 			std::uint16_t paramIdx_;
-
 		};
 		class TrackInfo {
 		public:
 
 			TrackInfo();
-			TrackInfo( std::uint16_t mac, bool muted);
+			TrackInfo( std::uint8_t trackidx, std::uint16_t mac, bool muted);
 
-			~TrackInfo() {;}
-
-			inline void setMachineIdx(std::uint16_t macindex) { macIdx_=macindex; }
+			inline void setMachineIdx(std::uint16_t macindex, std::uint8_t trackidx);
 			inline std::uint16_t machineIdx()    const { return macIdx_; }
 
-			///\todo: Add Pattern:: member which changes this value, while adding/removing the columns in
-			/// the patternlines aswell
-			inline void increasecommands()    { commands_++; }
-			inline void decreasecommands()    { commands_--; }
-			inline std::uint8_t commands()    const { return commands_; }
 
 			///\todo: Add Pattern:: member which changes this value, while adding/removing the columns in
 			/// the patternlines aswell
-			void addtweakinfo(TweakTrackInfo* tinfo);
-			void changetweakinfo(std::uint8_t index,TweakTrackInfo* tinfo);
-			void removetweakinfo(TweakTrackInfo* tinfo);
-			//inline std::uint8_t tweaks()    const { return tweakinfos.size(); }
+			void addtweakinfo(TweakTrackInfo& tinfo);
+			void changetweakinfo(std::uint8_t index,TweakTrackInfo& tinfo);
+			void removetweakinfo(TweakTrackInfo& tinfo);
+			void removetweakinfo(std::uint8_t tinfo);
+			inline TweakTrackInfo& tweak(std::uint8_t idx) const { assert(idx<tweakinfos.size()); return tweakinfos[idx]; }
+			inline const std::uint8_t tweaks() const { return tweakinfos.size(); }
 
 			inline void mute(bool value) { ismuted_=value; }
 			inline bool muted() const { return ismuted_; }
@@ -89,10 +92,13 @@ namespace psy
 
 		private:
 
+			std::uint8_t index_;
 			std::uint16_t macIdx_;
-			std::uint8_t commands_;
+			std::uint8_t numnotes_;
+			std::uint8_t numtweaks_;
+
 			bool ismuted_;
-			std::list<TweakTrackInfo*> tweakinfos;
+			std::vector<TweakTrackInfo> tweakinfos;
 
 		};
 
@@ -195,8 +201,7 @@ namespace psy
 			static TimeSignature defaultSignature;
 
 			std::map<int,TrackInfo> trackInfoMap;
-			std::map<TweakTrackInfo,int> tweakInfoMap;
-			std::map<double, PatternLine> lineMap;
+			std::multimap<double, TrackEvent> events;
 
 		};
 

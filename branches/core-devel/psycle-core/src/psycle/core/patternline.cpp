@@ -22,10 +22,7 @@
 
 namespace psy { namespace core {
 
-NoteEvent PatternLine::emptyevent;
-TweakEvent PatternLine::emptytweak;
-
-void PatternLine::setNoteEvent(std::uint8_t index,NoteEvent& pevent)
+void PatternLine::setNoteEvent(track_t index,NoteEvent& pevent)
 {
 	noteiterator it = noteMap.find(index);
 	if ( it == noteMap.end() ) 
@@ -37,7 +34,7 @@ void PatternLine::setNoteEvent(std::uint8_t index,NoteEvent& pevent)
 		it->second = pevent;
 	}
 }
-void PatternLine::remNoteEvent(std::uint8_t index)
+void PatternLine::remNoteEvent(track_t index)
 {
 	noteiterator it = noteMap.find(index);
 	if ( it != noteMap.end() ) 
@@ -45,20 +42,20 @@ void PatternLine::remNoteEvent(std::uint8_t index)
 		noteMap.erase(it);
 	}
 }
-NoteEvent & PatternLine::noteEvent(std::uint8_t index)
+NoteEvent & PatternLine::noteEvent(track_t index)
 {
 	noteiterator it = noteMap.find(index);
 	if ( it == noteMap.end() ) return emptyevent;
 	else return it->second;
 }
-const NoteEvent & PatternLine::noteEvent(std::uint8_t index) const
+const NoteEvent & PatternLine::noteEvent(track_t index) const
 {
 	notec_iterator it = noteMap.find(index);
 	if ( it == noteMap.end() ) return emptyevent;
 	else return it->second;
 }
 
-void PatternLine::setTweak(std::uint8_t index,TweakEvent& pevent)
+void PatternLine::setTweak(track_t index,TweakEvent& pevent)
 {
 	tweakiterator it = tweakMap.find(index);
 	if ( it == tweakMap.end() ) 
@@ -71,7 +68,7 @@ void PatternLine::setTweak(std::uint8_t index,TweakEvent& pevent)
 	}
 
 }
-void PatternLine::remTweak(std::uint8_t index)
+void PatternLine::remTweak(track_t index)
 {
 	tweakiterator it = tweakMap.find(index);
 	if ( it != tweakMap.end() ) 
@@ -79,13 +76,13 @@ void PatternLine::remTweak(std::uint8_t index)
 		tweakMap.erase(it);
 	}
 }
-TweakEvent & PatternLine::tweak(std::uint8_t index)
+TweakEvent & PatternLine::tweak(track_t index)
 {
 	tweakiterator it = tweakMap.find(index);
 	if ( it == tweakMap.end() ) return emptytweak;
 	else return it->second;
 }
-const TweakEvent & PatternLine::tweak(std::uint8_t index) const
+const TweakEvent & PatternLine::tweak(track_t index) const
 {
 	tweakc_iterator it = tweakMap.find(index);
 	if ( it == tweakMap.end() ) return emptytweak;

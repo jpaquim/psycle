@@ -22,65 +22,106 @@
 
 namespace psy { namespace core {
 	
-NoteEvent::PcmType NoteEvent::emptyCmd_;
+NoteEvent TrackEvent::emptyevent;
+CommandEvent TrackEvent::emptycommand;
+TweakEvent TrackEvent::emptytweak;
 
-NoteEvent::NoteEvent()
-	:note_(255)
-	,volume_(255)
-{}
-
-void NoteEvent::setParamCmd(std::uint8_t index,PcmType value)
-{
-	PcmListType::iterator it = paraCmdList_.find(index);
-	if ( it == paraCmdList_.end() ) 
-	{
-		paraCmdList_[index]=value;
-	}
-	else
-	{
-		it->second = value;
-	}
-}
-void NoteEvent::remParamCmd(std::uint8_t index)
-{
-	PcmListType::iterator it = paraCmdList_.find(index);
-	if ( it != paraCmdList_.end() ) 
-	{
-		paraCmdList_.erase(it);
-	}
-}
-const NoteEvent::PcmType & NoteEvent::paramCmd(std::uint8_t index) const
-{
-	PcmListType::const_iterator it = paraCmdList_.find(index);
-	if ( it == paraCmdList_.end() ) return emptyCmd_;
-	else return it->second;
-}
-
-std::string NoteEvent::toXml( int track ) const
+std::string CommandEvent::toXml( int index ) const
 {
 	std::ostringstream xml;
-	xml << "<NoteEvent track='" << track
-		<< std::hex << "' note='" << (int) note_
-		<< std::hex << "' volume='" << (int) volume_;
-		for ( PcmListType::const_iterator it = paraCmdList_.begin(); it != paraCmdList_.end(); ++it)
-		{
-			xml << std::hex << "' param" << (int) it->first << "='" << (int) it->second.first << (int) (it->second.second) ;
-		}
+	xml << "<CommandEvent index='" << index;
+	xml << std::hex << "' command='" << (int) command_
+		<< std::hex << "' param='" << (int) param_;
 	xml <<"' />\n";
+
+}
+
+std::string NoteEvent::toXml( int index ) const
+{
+	std::ostringstream xml;
+	xml << "<NoteEvent index='" << index;
+		if (note_ != notetypes::empty) xml << std::hex << "' note='" << (int) note_;
+		if (volume_ != 255) xml << std::hex << "' volume='" << (int) volume_;
 	return xml.str();
 }
 
 
 /************************************************************************/
 // TweakEvent
-std::string TweakEvent::toXml( int track ) const
+std::string TweakEvent::toXml( int index ) const
 {
 	std::ostringstream xml;
-	xml << "<TrackEvent track='" << track;
+	xml << "<TweakEvent index='" << index
 		<< std::hex << "' value='" << (int) value_
 		<<"' />\n";
 	return xml.str();
 }
 
+/************************************************************************/
+// TrackEvent
+void TrackEvent::RemoveNote(std::uint8_t index)
+{
+	if (index >= notes.size()) return;
+	
+	int size = notes.size()-1;
+	for (int i=index; i<size; i++)
+	{
+		notes[index]=notes[index+1];
+	}
+	notes.pop_back();
+}
+void TrackEvent::RemoveCommand(std::uint8_t index)
+{
+	if (index >= commands.size()) return;
+
+	int size = commands.size()-1;
+	for (int i=index; i<size; i++)
+	{
+		commands[index]=commands[index+1];
+	}
+	commands.pop_back();
+}
+void TrackEvent::RemoveTweak(std::uint8_t index)
+{
+	if (index >= tweaks.size()) return;
+
+	int size = tweaks.size()-1;
+	for (int i=index; i<size; i++)
+	{
+		tweaks[index]=tweaks[index+1];
+	}
+	tweaks.pop_back();
+}
+
+
+void TrackEvent::AddNote(std::uint8_t index,NoteEvent &note)
+{
+	int size = notes.size()+1;
+	while (size < index) { notes.push_back(NoteEvent()); }
+	notes[index]=note;
+}
+void TrackEvent::AddCommand(std::uint8_t index,CommandEvent &cmd)
+{
+	int size = commands.size()+1;
+	while (size < index) { commands.push_back(CommandEvent()); }
+	commands[index]=cmd;
+}
+void TrackEvent::AddTweak(std::uint8_t index,TweakEvent &tweak)
+{
+	int size = tweaks.size()+1;
+	while (size < index) { tweaks.push_back(TweakEvent()); }
+	tweaks[index]=tweak;
+}
+
+std::string TrackEvent::toXml( double position, int track ) const
+{
+	std::ostringstream xml;
+	xml << "<TrackEvent position='" << position << "' track='" << track << "'>\n"
+	for(int i=0;i<notes.size();i++) if (!notes[i].empty() ) xml << notes[i].toXml(i);
+	for(int i=0;i<commands.size();i++) if (!commands[i].empty() )x ml << commands[i].toXml(i);
+	for(int i=0;i<tweaks.size();i++) if (!tweaks[i].empty() ) xml << tweaks[i].toXml(i);
+	xml <<"</>\n";
+	return xml.str();
+}
 
 }}

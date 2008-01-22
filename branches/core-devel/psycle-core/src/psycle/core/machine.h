@@ -439,7 +439,7 @@ namespace psy
 					virtual void Work(int numSamples );
 					virtual void WorkNoMix(int numSamples );
 					virtual void Tick( ) {};
-					virtual void Tick(int /*channel*/, const PatternEvent &) {}
+					virtual void Tick(int /*channel*/, const TrackEvent &) {}
 					virtual void Stop() { playCol.clear(); playColIndex =0; }
 			///\}
 
@@ -667,7 +667,7 @@ namespace psy
 			///\ various player-related states
 			///\{
 				///\todo hardcoded limits and wastes
-				PatternEvent TriggerDelay[MAX_TRACKS];
+				TrackEvent TriggerDelay[MAX_TRACKS];
 				///\todo hardcoded limits and wastes
 				int TriggerDelayCounter[MAX_TRACKS];
 				///\todo hardcoded limits and wastes

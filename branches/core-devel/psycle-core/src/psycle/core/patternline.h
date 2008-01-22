@@ -46,15 +46,17 @@ namespace psy { namespace core {
 class PatternLine {
 	public:
 		
-		typedef std::map<std::uint8_t, NoteEvent>::iterator noteiterator;
-		typedef std::map<std::uint8_t, NoteEvent>::const_iterator notec_iterator;
-		typedef std::map<std::uint8_t, TweakEvent>::iterator tweakiterator;
-		typedef std::map<std::uint8_t, TweakEvent>::const_iterator tweakc_iterator;
+		typedef std::uint8_t track_t;
+
+		typedef std::map<track_t, NoteEvent>::iterator noteiterator;
+		typedef std::map<track_t, NoteEvent>::const_iterator notec_iterator;
+		typedef std::map<track_t, TweakEvent>::iterator tweakiterator;
+		typedef std::map<track_t, TweakEvent>::const_iterator tweakc_iterator;
 
 		PatternLine() {;}
 
 		///\todo: These functions are not fully usable as they are. This is an area of study right now
-		///{
+/*		///{
 		inline iterator upper_bound(const double& _Keyval) { return noteMap.upper_bound(_Keyval); }
 		inline const_iterator upper_bound(const double& _Keyval) const { return noteMap.upper_bound(_Keyval); }
 		inline iterator lower_bound(const double& _Keyval) { return noteMap.lower_bound(_Keyval); }
@@ -68,21 +70,21 @@ class PatternLine {
 		inline reverse_iterator rend() { noteMap.rend(); }
 		inline const_reverse_iterator rend() const { noteMap.rend(); }
 		///}
-
-		void setNoteEvent(std::uint8_t,NoteEvent& pevent);
-		void replaceNoteEvent(std::uint8_t,NoteEvent& pevent);
-		void remNoteEvent(std::uint8_t);
-		inline NoteEvent & noteEvent(std::uint8_t index);
-		inline const NoteEvent & noteEvent(std::uint8_t index) const;
+*/
+		void setNoteEvent(track_t,NoteEvent& pevent);
+		void replaceNoteEvent(track_t,NoteEvent& pevent);
+		void remNoteEvent(track_t);
+		inline NoteEvent & noteEvent(track_t index);
+		inline const NoteEvent & noteEvent(track_t index) const;
 		///\todo: verify the necessity of this function as a public one
 		inline bool isnotesempty() { return noteMap.empty(); }
 //		inline std::uint8_t noteEvents() { return noteMap.count(); }
 
-		void setTweak(std::uint8_t, TweakEvent& pevent);
-		void replacetweak(std::uint8_t,TweakEvent& pevent);
-		void remTweak(std::uint8_t);
-		inline TweakEvent & tweak(std::uint8_t index);
-		inline const TweakEvent & tweak(std::uint8_t index) const;
+		void setTweak(track_t, TweakEvent& pevent);
+		void replacetweak(track_t,TweakEvent& pevent);
+		void remTweak(track_t);
+		inline TweakEvent & tweak(track_t index);
+		inline const TweakEvent & tweak(track_t index) const;
 		///\todo: verify the necessity of this function as a public one
 		inline bool istweaksempty() { return tweakMap.empty(); }
 //		inline std::size_t tweaks() { return tweakMap.count(); } const;
@@ -100,11 +102,9 @@ class PatternLine {
 		std::string toXml( float pos ) const;
 
 	private:
-		static NoteEvent emptyevent; ///< Empty event.
-		static TweakEvent emptytweak;///< Empty tweak.
 
-		std::map<std::uint8_t, NoteEvent> noteMap;///< Map with the notes in this line. The index corresponds to the track.
-		std::map<std::uint8_t, TweakEvent> tweakMap;///< Map with the tweaks in this line. The index corresponds to the Pattern::tweakInfoMap index.
+		std::map<track_t, NoteEvent> noteMap;///< Map with the notes in this line. The index corresponds to the track.
+		std::map<track_t, TweakEvent> tweakMap;///< Map with the tweaks in this line. The index corresponds to the Pattern::tweakInfoMap index.
 };
 
 }}
