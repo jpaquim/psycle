@@ -353,7 +353,6 @@ AlsaOut::AlsaOut()
 			return err;
 		}
 		
-		std::cout << "step2.9, buffer size:" << size << std::endl;
 		buffer_size = size;
 
 		// set the period time
