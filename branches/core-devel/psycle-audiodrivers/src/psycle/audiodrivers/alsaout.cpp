@@ -307,7 +307,7 @@ AlsaOut::AlsaOut()
 				return err;
 			}
 		#endif
-		// set the interleaved read/write format
+		// set the interleaved read/write access
 		err = snd_pcm_hw_params_set_access(handle, params, access);
 		if (err < 0) {
 			std::cerr << "psycle: alsa: access type not available for playback: " << snd_strerror(err) << '\n';
