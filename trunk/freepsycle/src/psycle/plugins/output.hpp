@@ -6,11 +6,11 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 
-#if defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__GSTREAMER
+#if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
 	#include "outputs/gstreamer.hpp"
-#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__ALSA
+#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__ALSA
 	#include "outputs/alsa.hpp"
-#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__DIRECT_SOUND
+#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
 	#include "outputs/direct_sound.hpp"
 #else
 	#error "no default output"
@@ -21,11 +21,11 @@
 namespace psycle { namespace plugins {
 
 typedef outputs::
-	#if defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__GSTREAMER
+	#if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
 		gstreamer
-	#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__ALSA
+	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__ALSA
 		alsa
-	#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__DIRECT_SOUND
+	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
 		direct_sound
 	#else
 		#error "no default output"
