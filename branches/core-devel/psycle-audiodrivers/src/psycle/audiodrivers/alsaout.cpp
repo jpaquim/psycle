@@ -255,7 +255,7 @@ AlsaOut::AlsaOut()
 		
 		AudioDriverSettings settings(this->settings());
 		{
-			char const * const env(std::getenv("ALSA_CARD"));
+			char const * const env(std::getenv("ALSA_PCM_DEVICE"));
 			if(env) settings.setDeviceName(env);
 			else settings.setDeviceName("default");
 		}
