@@ -57,6 +57,17 @@ gstreamer = external_package_check(project, name = 'gstreamer', url = 'http://gs
 	dependencies = [pkg_config_check(project, name = 'gstreamer-0.10 >= 0.10 gstreamer-plugins-base-0.10 >= 0.10')]
 )
 
+alsa = external_package_check(project, name = 'alsa', url = 'http://alsa-project.org',
+	distribution_packages = {
+		'zero-install': '...',
+		'debian and ubuntu': 'libasound2-dev (>= 1.0)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
+	dependencies = [pkg_config_check(project, name = 'alsa >= 1.0')]
+)
+
 microsoft_direct_sound = external_package_check(project, name = 'microsoft direct sound', url = 'http://msdn.microsoft.com',
 	distribution_packages = {'microsoft (maybe windows updates?)': 'direct sound'},
 	dependencies = [
@@ -115,13 +126,11 @@ class uniform_module(module):
 		)
 		modules.append(self)
 		self.pkg_config_package() # todo hmm?
-		if path is not None:
-			self._path = path
+		if path is not None: self._path = path
 		else:
 			if dir is None: self._path = name
 			else: self._path = os.path.join(dir, name)
 		
-
 	def dynamic_dependencies(self):
 		self.contexes().source().compilers().cxx().paths().add(['src'])
 		if os.path.exists(os.path.join('src', 'psycle', self._path)):
@@ -236,13 +245,27 @@ class output_plugin_uniform_module(uniform_module):
 
 default_output_plugin_module = None
 
+if alsa.result():
+	alsa_output_plugin_module = output_plugin_uniform_module(
+		name = 'alsa',
+		description = 'alsa output plugin',
+		dependencies = [alsa, stream_module.as_dependency()]
+	)
+	alsa_output_plugin_module.contexes().client().compilers().cxx().defines().add(
+		{'PSYCLE__PLUGINS__OUPUTS__DEFAULT__ALSA': None}
+	)
+	if not default_output_plugin_module: default_output_plugin_module = alsa_output_plugin_module
+
 if microsoft_direct_sound.result():
 	microsoft_direct_sound_output_plugin_module = output_plugin_uniform_module(
 		name = 'direct_sound',
 		description = 'microsoft direct sound output plugin',
 		dependencies = [microsoft_direct_sound, stream_module.as_dependency()]
 	)
-	default_output_plugin_module = microsoft_direct_sound_output_plugin_module
+	microsoft_direct_sound_output_plugin_module.contexes().client().compilers().cxx().defines().add(
+		{'PSYCLE__PLUGINS__OUPUTS__DEFAULT__DIRECT_SOUND': None}
+	)
+	if not default_output_plugin_module: default_output_plugin_module = microsoft_direct_sound_output_plugin_module
 
 if gstreamer.result():
 	gstreamer_output_plugin_module = output_plugin_uniform_module(
@@ -250,7 +273,10 @@ if gstreamer.result():
 		description = 'gstreamer output plugin',
 		dependencies = [gstreamer, stream_module.as_dependency()]
 	)
-	default_output_plugin_module = gstreamer_output_plugin_module
+	gstreamer_output_plugin_module.contexes().client().compilers().cxx().defines().add(
+		{'PSYCLE__PLUGINS__OUPUTS__DEFAULT__GSTREAMER': None}
+	)
+	if not default_output_plugin_module: default_output_plugin_module = gstreamer_output_plugin_module
 
 if default_output_plugin_module:
 	default_output_plugin_module = plugin_uniform_module(
