@@ -6,10 +6,14 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 
-#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__GSTREAMER
 	#include "outputs/gstreamer.hpp"
-#else
+#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__ALSA
+	#include "outputs/alsa.hpp"
+#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__DIRECT_SOUND
 	#include "outputs/direct_sound.hpp"
+#else
+	#error "no default output"
 #endif
 
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUT
@@ -17,10 +21,14 @@
 namespace psycle { namespace plugins {
 
 typedef outputs::
-	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__GSTREAMER
 		gstreamer
-	#else
+	#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__ALSA
+		alsa
+	#elif defined PSYCLE__PLUGINS__OUPUTS__DEFAULT__DIRECT_SOUND
 		direct_sound
+	#else
+		#error "no default output"
 	#endif
 	output_base;
 	
@@ -34,4 +42,3 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
-
