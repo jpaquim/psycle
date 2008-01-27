@@ -241,7 +241,9 @@ class output_plugin_uniform_module(uniform_module):
 			name = 'plugin-output-' + name,
 			*args, **kw
 		)
-		self._dir = name
+		self._short_name = name
+	
+	def short_name(self): return self._short_name
 
 default_output_plugin_module = None
 
@@ -251,9 +253,6 @@ if alsa.result():
 		description = 'alsa output plugin',
 		dependencies = [alsa, stream_module.as_dependency()]
 	)
-	alsa_output_plugin_module.contexes().client().compilers().cxx().defines().add(
-		{'PSYCLE__PLUGINS__OUPUTS__DEFAULT__ALSA': None}
-	)
 	if not default_output_plugin_module: default_output_plugin_module = alsa_output_plugin_module
 
 if microsoft_direct_sound.result():
@@ -261,9 +260,6 @@ if microsoft_direct_sound.result():
 		name = 'direct_sound',
 		description = 'microsoft direct sound output plugin',
 		dependencies = [microsoft_direct_sound, stream_module.as_dependency()]
-	)
-	microsoft_direct_sound_output_plugin_module.contexes().client().compilers().cxx().defines().add(
-		{'PSYCLE__PLUGINS__OUPUTS__DEFAULT__DIRECT_SOUND': None}
 	)
 	if not default_output_plugin_module: default_output_plugin_module = microsoft_direct_sound_output_plugin_module
 
@@ -273,17 +269,16 @@ if gstreamer.result():
 		description = 'gstreamer output plugin',
 		dependencies = [gstreamer, stream_module.as_dependency()]
 	)
-	gstreamer_output_plugin_module.contexes().client().compilers().cxx().defines().add(
-		{'PSYCLE__PLUGINS__OUPUTS__DEFAULT__GSTREAMER': None}
-	)
 	if not default_output_plugin_module: default_output_plugin_module = gstreamer_output_plugin_module
 
 if default_output_plugin_module:
+	defines = {'PSYCLE__PLUGINS__OUTPUTS__DEFAULT__' + default_output_plugin_module.short_name().upper() : None}
 	default_output_plugin_module = plugin_uniform_module(
 		name = 'output',
 		description = 'default output plugin',
 		dependencies = [default_output_plugin_module.as_dependency()]
 	)
+	default_output_plugin_module.contexes().compilers().cxx().defines().add(defines)
 
 front_end_modules = []
 
