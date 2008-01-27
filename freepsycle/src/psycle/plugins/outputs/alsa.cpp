@@ -50,10 +50,17 @@ namespace psycle { namespace plugins { namespace outputs {
 			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 
-		unsigned int rate(static_cast<unsigned int>(single_input_ports()[0]->events_per_second()));
+		unsigned int rate(::lround(single_input_ports()[0]->events_per_second()));
 		bool const allow_resample(true);
+
 		unsigned int const channels(single_input_ports()[0]->channels());
-		std::size_t const bytes_per_sample(sizeof(output_sample_type) * channels); // for total of channels
+
+		::snd_pcm_format_t format(::SND_PCM_FORMAT_S16); ///\todo parametrable
+		{ // get format from env
+			char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__FORMAT"));
+			if(env) format = ::snd_pcm_format_value(env);
+		}
+		std::size_t const bytes_per_sample(::snd_pcm_format_width(format) / 8 * channels); // for total of channels
 
 		std::string pcm_device_name("default"); ///\todo parametrable
 		{ // get device name from env
@@ -74,12 +81,6 @@ namespace psycle { namespace plugins { namespace outputs {
 			else period_frames_ = 4096;
 		}
 
-		::snd_pcm_format_t format(::SND_PCM_FORMAT_S16); ///\todo parametrable
-		{ // get format from env
-			char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__FORMAT"));
-			if(env) format = ::snd_pcm_format_value(env);
-		}
-		
 		::snd_pcm_stream_t const direction(::SND_PCM_STREAM_PLAYBACK);
 		int const open_mode(0); // 0: block, ::SND_PCM_NONBLOCK: non-block, ::SND_PCM_ASYNC: asynchronous
 		bool const work_mode_is_non_blocking(false);
