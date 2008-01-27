@@ -1,21 +1,43 @@
 #pragma once
 
-///\todo: any real reason why this isn't inside pattern.h?
-
+// This is outside pattern, since this way, machines just need to know about events.
 namespace psy
 {
 	namespace core
 	{
+		const int volumeempty = 0xFF;
+		namespace instrumenttypes
+		{
+			enum type_t{
+				machine = 0,
+				sample,
+				sequence,
+				// maintain these two as the last ones
+				invalid,
+				empty = 0xFFFF ///< empty is used to indicate an unassigned instrument in a track or in a classicEvent.
+			};
+		}
 		namespace notetypes
 		{
-			enum notetype {
+			enum type_t {
 				c0 = 0,
 				b9 = 119,
 				release = 120,
 				tweak,
-				tweak_effect, ///< old. for compatibility only.
-				midi_cc,
 				tweak_slide,
+				tweak_slide_to,
+				midi_cc,
+				midi_slide,
+				midi_slide_to,
+				automation,
+				microtonal0=128,
+				microtonallast=247
+				wire,
+				wire_slide,
+				wire_slide_to,
+				pan,
+				pan_slide,
+				pan_slide_to,
 				// maintain these two as the last ones
 				invalid,
 				empty = 255
@@ -23,7 +45,7 @@ namespace psy
 		}
 		namespace commandtypes
 		{
-			enum commandtype
+			enum type_t
 			{
 				EXTENDED      = 0xFE, // see below
 				SET_TEMPO     = 0xFF,
