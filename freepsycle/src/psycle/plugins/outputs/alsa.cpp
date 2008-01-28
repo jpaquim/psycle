@@ -369,25 +369,36 @@ namespace psycle { namespace plugins { namespace outputs {
 	void alsa::do_process() throw(engine::exception) {
 		if(!in_port()) return;
 		unsigned int const channels(in_port().channels());
+		unsigned int const samples_per_buffer(parent().events_per_buffer());
 		// fill the buffer
 		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in = in_port().buffer()[c];
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_));
-			for(std::size_t e(0), s(in.size()); e < s; ++e) {
-				real s(in[e].sample()); ///\todo support for sparse stream
-				///\todo constants
-				//int const bits_per_channel_sample(::snd_pcm_format_width(format));
-				//unsigned int const max((1 << (::snd_pcm_format_width(format) - 1)) - 1);
-				s *= std::numeric_limits<output_sample_type>::max();
-				if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
-				else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
-				out[c] = static_cast<output_sample_type>(s);
-				++out; ///\todo support for non-interleaved channels
+			
+			// retrieve the last sample written on this channel
+			output_sample_type sparse_spread_sample(out[samples_per_buffer * channels - 1 - c]); ///\todo support for non-interleaved channels
+			
+			unsigned int sparse_spread_index(0);
+			for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
+				real s(in[e].sample());
+				{
+					///\todo constants
+					//int const bits_per_channel_sample(::snd_pcm_format_width(format));
+					//unsigned int const max((1 << (::snd_pcm_format_width(format) - 1)) - 1);
+					s *= std::numeric_limits<output_sample_type>::max();
+					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
+					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
+				}
+				sparse_spread_sample = static_cast<output_sample_type>(s);
+				for( ; sparse_spread_index <= in[e].index() ; ++sparse_spread_index)
+					out[sparse_spread_index + c] = sparse_spread_sample; ///\todo support for non-interleaved channels
 			}
+			for( ; sparse_spread_index < samples_per_buffer ; ++sparse_spread_index)
+				out[sparse_spread_index + c] = sparse_spread_sample; ///\todo support for non-interleaved channels
 		}
 		{ // write to the device
 			output_sample_type * samples(reinterpret_cast<output_sample_type*>(buffer_));
-			::snd_pcm_uframes_t frames_to_write(parent().events_per_buffer());
+			::snd_pcm_uframes_t frames_to_write(samples_per_buffer);
 			do {
 				///\todo support for non-blocking mode
 				///\todo support for non-interleaved channels

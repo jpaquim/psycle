@@ -175,18 +175,14 @@ namespace psycle { namespace plugins { namespace outputs {
 					assert(std::numeric_limits<output_sample_type>::min() <= sample && sample <= std::numeric_limits<output_sample_type>::max());
 				}
 				last_sample_ = static_cast<output_sample_type>(sample);
-				for( ; spread <= in[channel][event].index() ; ++spread) {
-					samples[spread + channel] = last_sample_;
-				}
+				for( ; spread <= in[channel][event].index() ; ++spread) samples[spread + channel] = last_sample_;
 				if(ultra_trace && loggers::trace()()) {
 					std::ostringstream s;
 					s << "spread: " << spread << ", sample: " << last_sample_;
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 			}
-			for( ; spread < samples_per_buffer_ ; ++spread) {
-				samples[spread + channel] = last_sample_;
-			}
+			for( ; spread < samples_per_buffer_ ; ++spread) samples[spread + channel] = last_sample_;
 		}
 		if(unsigned long int error = buffer().Unlock(samples, bytes, samples2, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer unlock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 		++current_position_ %= buffers_;

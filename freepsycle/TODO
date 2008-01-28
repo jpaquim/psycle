@@ -12,7 +12,6 @@
 	-- bohan
 	
 *	alsa:
-	* support for sparse stream
 	* support for non-interleaved stream access
 	* support for mmap stream access
 	* support for sample formats other than S16
