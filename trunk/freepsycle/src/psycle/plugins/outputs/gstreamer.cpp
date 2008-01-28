@@ -412,9 +412,11 @@ namespace psycle { namespace plugins { namespace outputs {
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer_);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {
 				real s(in[e].sample()); ///\todo support for sparse stream
-				s *= std::numeric_limits<output_sample_type>::max();
-				if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
-				else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
+				{
+					s *= std::numeric_limits<output_sample_type>::max();
+					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
+					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
+				}
 				out[c] = static_cast<output_sample_type>(s);
 				++out; ///\todo interleaved channels?
 			}
