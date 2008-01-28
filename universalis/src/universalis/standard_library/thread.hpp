@@ -101,7 +101,7 @@ namespace std {
 	
 	template<typename Callable /*, typename Arguments...*/>
 	void inline call_once(once_flag & flag, Callable callable /*, Arguments... arguments*/) {
-		/// note: boost wants a function pointer
+		/// note: boost wants a function pointer and arguments in reversed order
 		boost::call_once(callable, flag);
 	}
 

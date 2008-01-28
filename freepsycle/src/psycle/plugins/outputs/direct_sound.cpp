@@ -30,7 +30,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		try {
 			resource::do_open();
 			if(error = ::DirectSoundCreate(0, &direct_sound_, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound create: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
-			format format(single_input_ports()[0]->channels(), single_input_ports()[0]->events_per_second(), /*significant_bits_per_channel_sample*/ 16); /// \todo parametrable
+			format format(in_port().channels(), in_port().events_per_second(), /*significant_bits_per_channel_sample*/ 16); /// \todo parametrable
 			if(loggers::information()()) {
 				std::ostringstream s;
 				s << "format: " << format.description();
@@ -158,8 +158,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			}
 		}
 		if(bytes2) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
-		engine::buffer & in = single_input_ports()[0]->buffer();
-		//real amplification = single_input_ports()[1]->buffer()[0][0].sample();
+		engine::buffer & in = in_port().buffer();
 		for(int channel(0) ; channel < in.channels() ; ++channel) {
 			int spread(0);
 			for(int event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event) {

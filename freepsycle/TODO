@@ -1,19 +1,32 @@
 # This is a sorted list, top priority at the top!
 
 *	generic::wrappers::node find port by name functions
-	This is currently in engine.
+	This is currently in engine (still?).
 	-- bohan
 
 *	merge engine::sample::math with psycle-helpers
 	-- bohan
 
 *	PulseAudio, RTAudio, libao.
-	Implement direct support for pulseaudio (currently works only via gstreamer).
+	Implement direct support for pulseaudio (currently works only via alsa and gstreamer).
+	-- bohan
+	
+*	alsa:
+	* support for sparse stream
+	* support for non-interleaved stream access
+	* support for mmap stream access
+	* support for sample formats other than S16
 	-- bohan
 
+*	GStreamer:
+	* support for multichannel (interleaved?)
+	* support for sparse stream
+	* simplify by outputing floating point numbers directly
+	--bohan
+	
 *	try to use liboil for optimizations.
 
-*	ring buffer
+*	ring buffer / atomic
 	http://www.audiomulch.com/~rossb/code/lockfree/placement_copying_message_queue.cpp
 	-- bohan
 

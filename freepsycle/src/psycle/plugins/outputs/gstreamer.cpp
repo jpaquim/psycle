@@ -225,7 +225,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		#undef psycle_log
 
 		// audio format
-		format format(single_input_ports()[0]->channels(), single_input_ports()[0]->events_per_second(), /*significant_bits_per_channel_sample*/ 16); ///\todo parametrable
+		format format(in_port().channels(), in_port().events_per_second(), /*significant_bits_per_channel_sample*/ 16); ///\todo parametrable
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << "format: " << format.description();
@@ -306,7 +306,13 @@ namespace psycle { namespace plugins { namespace outputs {
 			(void*)0
 		);
 
-		buffer_ = new char[buffer_size_ * buffers_];
+		{ // allocate a buffer
+			std::size_t const bytes(buffer_size_ * buffers_);
+			if(!(buffer_ = new char[bytes])) {
+				std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
+				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+		}
 
 		current_read_position_ = current_write_position_;
 		wait_for_state_to_become_playing_ = true;
@@ -399,18 +405,18 @@ namespace psycle { namespace plugins { namespace outputs {
 			std::ostringstream s; s << "process " << current_write_position_;
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		{
-			if(!single_input_ports()[0]->output_port()) return;
-			engine::buffer::channel & in(single_input_ports()[0]->buffer()[0]);
+		if(!in_port()) return;
+		for(unsigned int c(0); c < in_port().channels(); ++c) {
+			engine::buffer::channel & in(in_port().buffer()[c]);
 			assert(samples_per_buffer_ == in.size());
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer_);
-			for(std::size_t event(0); event < in.size(); ++event) {
-				real sample(in[event].sample());
-				sample *= std::numeric_limits<output_sample_type>::max();
-				if     (sample < std::numeric_limits<output_sample_type>::min()) sample = std::numeric_limits<output_sample_type>::min();
-				else if(sample > std::numeric_limits<output_sample_type>::max()) sample = std::numeric_limits<output_sample_type>::max();
-				assert(std::numeric_limits<output_sample_type>::min() <= sample && sample <= std::numeric_limits<output_sample_type>::max());
-				out[event] = static_cast<output_sample_type>(sample);
+			for(std::size_t e(0), s(in.size()); e < s; ++e) {
+				real s(in[e].sample()); ///\todo support for sparse stream
+				s *= std::numeric_limits<output_sample_type>::max();
+				if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
+				else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
+				out[c] = static_cast<output_sample_type>(s);
+				++out; ///\todo interleaved channels?
 			}
 		}
 		condition_.notify_one();
@@ -458,7 +464,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(!--global_client_count) ::gst_deinit();
 		}
 
-		delete buffer_; buffer_ = 0;
+		delete[] buffer_; buffer_ = 0;
 		resource::do_close();
 	}
 }}}
