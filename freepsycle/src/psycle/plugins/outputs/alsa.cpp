@@ -376,9 +376,10 @@ namespace psycle { namespace plugins { namespace outputs {
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_));
 			
 			// retrieve the last sample written on this channel
-			output_sample_type sparse_spread_sample(out[samples_per_buffer * channels - 1 - c]); ///\todo support for non-interleaved channels
-			
-			unsigned int sparse_spread_index(0);
+			// sss: sparse spread sample
+			output_sample_type sss(out[samples_per_buffer * channels - 1 - c]); ///\todo support for non-interleaved channels
+			/// ssi: sparse spread index
+			unsigned int ssi(0);
 			for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
 				real s(in[e].sample());
 				{
@@ -389,12 +390,10 @@ namespace psycle { namespace plugins { namespace outputs {
 					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
 					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
 				}
-				sparse_spread_sample = static_cast<output_sample_type>(s);
-				for( ; sparse_spread_index <= in[e].index() ; ++sparse_spread_index)
-					out[sparse_spread_index + c] = sparse_spread_sample; ///\todo support for non-interleaved channels
+				sss = static_cast<output_sample_type>(s);
+				for( ; ssi <= in[e].index(); ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
 			}
-			for( ; sparse_spread_index < samples_per_buffer ; ++sparse_spread_index)
-				out[sparse_spread_index + c] = sparse_spread_sample; ///\todo support for non-interleaved channels
+			for( ; ssi < samples_per_buffer; ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
 		}
 		{ // write to the device
 			output_sample_type * samples(reinterpret_cast<output_sample_type*>(buffer_));
