@@ -18,6 +18,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			alsa(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 			virtual ~alsa() throw();
 		public:
+			engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 			bool opened()  const /*override*/;
 			bool started() const /*override*/;
 		protected:
@@ -27,20 +28,12 @@ namespace psycle { namespace plugins { namespace outputs {
 			void do_stop()    throw(engine::exception) /*override*/;
 			void do_close()   throw(engine::exception) /*override*/;
 		private:
-			/// pcm device name
-			///\todo parametrable
-			std::string pcm_device_name_;
 			/// pcm device handle
 			::snd_pcm_t * pcm_;
-			/// number of frames (samples) per period
-			///\todo parametrable
-			::snd_pcm_uframes_t period_frames_;
-			/// samples
-			std::int16_t * samples_;
-			/// aeras
-			::snd_pcm_channel_area_t * areas_;
 			/// attached to std output
 			::snd_output_t * output_;
+			/// intermediate buffer for format convertion in write access method
+			char * buffer_;
 	};
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
