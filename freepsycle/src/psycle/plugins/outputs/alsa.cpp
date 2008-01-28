@@ -385,7 +385,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				++out; ///\todo support for non-interleaved channels
 			}
 		}
-		{ // write to the device	
+		{ // write to the device
 			output_sample_type * samples(reinterpret_cast<output_sample_type*>(buffer_));
 			::snd_pcm_uframes_t frames_to_write(parent().events_per_buffer());
 			do {
