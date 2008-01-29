@@ -1443,7 +1443,7 @@ namespace psycle
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
 						--chunkcount;
-						if(version > CURRENT_FILE_VERSION_INSD)
+						if(version&0xFF00 > CURRENT_FILE_VERSION_INSD&0xFF00)
 						{
 							// there is an error, this file is newer than this build of psycle
 							//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
