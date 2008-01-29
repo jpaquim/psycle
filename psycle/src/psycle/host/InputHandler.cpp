@@ -363,11 +363,12 @@ namespace psycle
 				// restore key data
 				sect = "Keys2"; // 1.8 onward
 				key.Format("n%03d",0);
-				if ( GetPrivateProfileInt(sect,key,-1,sDefaultCfgName) == -1 ) // trying to get key for command 0 (C-0)
+/*				if ( GetPrivateProfileInt(sect,key,-1,sDefaultCfgName) == -1 ) // trying to get key for command 0 (C-0)
 				{
 					sect = "Keys";  // 1.7 Alpha release.
 					saveconfig=true;
 				}
+*/
 				for(i=0;i<max_cmds;i++)
 				{
 					CmdDef cmd = CmdSet(i);
@@ -377,11 +378,14 @@ namespace psycle
 					{
 						key.Format("n%03d",i);
 						cmddata= GetPrivateProfileInt(sect,key,cdefNull,sDefaultCfgName);
-						if (cmddata != cdefNull)
-						{
+						///\todo: this is commented in order to allow users to have keys mapped to "none".
+						/// It causes new keys (so unexistant in the configuration) to be set as null, instead of
+						/// keeping the default value. Maybe this is a desired feature in fact.
+						//if (cmddata != cdefNull)
+						//{
 							modi=cmddata/256;
 							SetCmd(cmd.GetID(),cmddata%256,modi,true);
-						}
+						//}
 					}
 				}
 				if (saveconfig) ConfigSave();
