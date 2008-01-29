@@ -265,6 +265,9 @@ AlsaOut::AlsaOut()
 	void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
 		std::int16_t *samples[channels];
 		int steps[channels];
+		
+		// note: we don't really need areas with non-mmap method
+		
 		// verify and prepare the contents of areas
 		for (unsigned int chn(0); chn < channels; ++chn) {
 			if ((areas[chn].first % 8) != 0) {
