@@ -372,13 +372,13 @@ namespace psycle { namespace plugins { namespace outputs {
 		unsigned int const samples_per_buffer(parent().events_per_buffer());
 		// fill the buffer
 		for(unsigned int c(0); c < channels; ++c) {
-			engine::buffer::channel & in = in_port().buffer()[c];
+			engine::buffer::channel & in(in_port().buffer()[c]);
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_));
 			
 			// retrieve the last sample written on this channel
 			// sss: sparse spread sample
 			output_sample_type sss(out[samples_per_buffer * channels - 1 - c]); ///\todo support for non-interleaved channels
-			/// ssi: sparse spread index
+			// ssi: sparse spread index
 			unsigned int ssi(0);
 			for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
 				real s(in[e].sample());

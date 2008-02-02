@@ -9,7 +9,7 @@
 #include "main.hpp"
 #include <psycle/paths.hpp>
 #include <psycle/engine/engine.hpp>
-#include <psycle/plugins/pulse.hpp>
+#include <psycle/plugins/sequence.hpp>
 #include <psycle/host/host.hpp>
 #include <universalis/processor/exception.hpp>
 #include <universalis/operating_system/loggers.hpp>
@@ -62,22 +62,22 @@ void stuff() {
 		node & sine2(resolver("sine", graph, "sine2"));
 		node & sine3(resolver("sine", graph, "sine3"));
 
-		//plugins::pulse & freq1(node::virtual_factory_access::create_on_heap<plugins::pulse>(graph, "freq1"));
-		plugins::pulse & freq1(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq1").node()));
-		plugins::pulse & freq2(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq2").node()));
-		plugins::pulse & freq3(static_cast<plugins::pulse&>(resolver("pulse", graph, "freq3").node()));
+		//plugins::sequence & freq1(node::virtual_factory_access::create_on_heap<plugins::sequence>(graph, "freq1"));
+		plugins::sequence & freq1(static_cast<plugins::sequence&>(resolver("sequence", graph, "freq1").node()));
+		plugins::sequence & freq2(static_cast<plugins::sequence&>(resolver("sequence", graph, "freq2").node()));
+		plugins::sequence & freq3(static_cast<plugins::sequence&>(resolver("sequence", graph, "freq3").node()));
 
 		node & decay1(resolver("decay", graph, "decay1"));
 		node & decay2(resolver("decay", graph, "decay2"));
 		node & decay3(resolver("decay", graph, "decay3"));
 
-		plugins::pulse & pulse1(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse1").node()));
-		plugins::pulse & pulse2(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse2").node()));
-		plugins::pulse & pulse3(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse3").node()));
+		plugins::sequence & sequence1(static_cast<plugins::sequence&>(resolver("sequence", graph, "sequence1").node()));
+		plugins::sequence & sequence2(static_cast<plugins::sequence&>(resolver("sequence", graph, "sequence2").node()));
+		plugins::sequence & sequence3(static_cast<plugins::sequence&>(resolver("sequence", graph, "sequence3").node()));
 
-		plugins::pulse & pulse_decay1(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse_decay1").node()));
-		plugins::pulse & pulse_decay2(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse_decay2").node()));
-		plugins::pulse & pulse_decay3(static_cast<plugins::pulse&>(resolver("pulse", graph, "pulse_decay3").node()));
+		plugins::sequence & decay_sequence1(static_cast<plugins::sequence&>(resolver("sequence", graph, "decay_sequence1").node()));
+		plugins::sequence & decay_sequence2(static_cast<plugins::sequence&>(resolver("sequence", graph, "decay_sequence2").node()));
+		plugins::sequence & decay_sequence3(static_cast<plugins::sequence&>(resolver("sequence", graph, "decay_sequence3").node()));
 
 		engine::real const events_per_second(44100), beats_per_second(1);
 
@@ -109,13 +109,13 @@ void stuff() {
 			sine2.input_port("amplitude")->connect(*decay2.output_port("out"));
 			sine3.input_port("amplitude")->connect(*decay3.output_port("out"));
 
-			decay1.input_port("pulse")->connect(*pulse1.output_port("out"));
-			decay2.input_port("pulse")->connect(*pulse2.output_port("out"));
-			decay3.input_port("pulse")->connect(*pulse3.output_port("out"));
+			decay1.input_port("pulse")->connect(*sequence1.output_port("out"));
+			decay2.input_port("pulse")->connect(*sequence2.output_port("out"));
+			decay3.input_port("pulse")->connect(*sequence3.output_port("out"));
 
-			decay1.input_port("decay")->connect(*pulse_decay1.output_port("out"));
-			decay2.input_port("decay")->connect(*pulse_decay2.output_port("out"));
-			decay3.input_port("decay")->connect(*pulse_decay3.output_port("out"));
+			decay1.input_port("decay")->connect(*decay_sequence1.output_port("out"));
+			decay2.input_port("decay")->connect(*decay_sequence2.output_port("out"));
+			decay3.input_port("decay")->connect(*decay_sequence3.output_port("out"));
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -145,13 +145,13 @@ void stuff() {
 					freq2.insert_event(b2 * 1.1, f2 * 1.1);
 					freq3.insert_event(b3 * 1.2, f3 * 1.17);
 					
-					pulse1.insert_event(b1, 0.3);
-					pulse2.insert_event(b2, 0.3);
-					pulse3.insert_event(b3, 0.3);
+					sequence1.insert_event(b1, 0.3);
+					sequence2.insert_event(b2, 0.3);
+					sequence3.insert_event(b3, 0.3);
 
-					pulse_decay1.insert_event(b1, 0.0001);
-					pulse_decay2.insert_event(b2, 0.0001);
-					pulse_decay3.insert_event(b3, 0.0001);
+					decay_sequence1.insert_event(b1, 0.0001);
+					decay_sequence2.insert_event(b2, 0.0001);
+					decay_sequence3.insert_event(b3, 0.0001);
 
 					f1 *= ratio;
 					if(f1 > 5000) { f1 /= 15; ratio *= 1.05; }
