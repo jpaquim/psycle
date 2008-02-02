@@ -1,18 +1,18 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::pulse
+///\interface psycle::plugins::sequence
 #pragma once
 #include "plugin.hpp"
 #include <map>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__PULSE
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__SEQUENCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins {
 
 /// an event scheduler
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK pulse : public engine::node {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public engine::node {
 	protected: friend class virtual_factory_access;
-		pulse(engine::plugin_library_reference &, engine::graph &, std::string const & name);
+		sequence(engine::plugin_library_reference &, engine::graph &, std::string const & name);
 	protected:
 		void do_process() throw(engine::exception) /*override*/;
 

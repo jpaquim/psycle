@@ -209,9 +209,9 @@ decay_plugin_module = plugin_uniform_module(
 	description = 'decaying pulse plugin',
 )
 
-pulse_plugin_module = plugin_uniform_module(
-	name = 'pulse',
-	description = 'pulse plugin',
+sequence_plugin_module = plugin_uniform_module(
+	name = 'sequence',
+	description = 'sequence plugin',
 )
 
 sine_plugin_module = plugin_uniform_module(
@@ -291,7 +291,7 @@ class text_front_end_module(module):
 			dependencies = [
 				paths_module.as_dependency(),
 				host_module.as_dependency(),
-				pulse_plugin_module.as_dependency()
+				sequence_plugin_module.as_dependency()
 			],
 			target_type = module.target_types.program
 		)
