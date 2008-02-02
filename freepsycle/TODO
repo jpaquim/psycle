@@ -15,13 +15,19 @@
 	* support for non-interleaved stream access
 	* support for mmap stream access
 	* support for sample formats other than S16
+	* support for amplification input port
 	-- bohan
 
 *	GStreamer:
 	* support for multichannel (interleaved?)
 	* support for sparse stream
 	* simplify by outputing floating point numbers directly
-	--bohan
+	* support for amplification input port
+	-- bohan
+	
+*	DirectSound:
+	* support for amplification input port
+	-- bohan
 	
 *	try to use liboil for optimizations.
 
