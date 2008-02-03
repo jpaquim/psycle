@@ -32,9 +32,10 @@
 
 #include "signalslib.h"
 
-#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
+#if defined PSYCLE__LIBXMLPP_AVAILABLE
 	#include <libxml++/parsers/domparser.h>
 #elif defined QT_XML_LIB
+  #warning "Wasn't able to use libxml++. Using QT's XML library instead."
 	#include <QtCore/QFile>
 	#include <QtXml/QDomDocument>
 	#include <QtXml/QDomElement>
@@ -121,7 +122,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	zipreader_close( z );
 	close( fd );
 
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
+	#if defined PSYCLE__LIBXMLPP_AVAILABLE
 		xmlpp::DomParser parser;
 		parser.parse_file("psytemp.xml");
 		if(!parser) return false;
@@ -154,11 +155,12 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 	lastMachine  = 0;
 	std::cout << "psy4filter detected for load" << std::endl;
 
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
+	#if defined PSYCLE__LIBXMLPP_AVAILABLE
 		xmlpp::DomParser parser;
 		parser.parse_file("psytemp.xml");
 		if(!parser) return false;
 		xmlpp::Document const & document(*parser.get_document());
+		xmlpp::Element const & root_element(*document.get_root_node());
 	#elif defined QT_XML_LIB
 		QFile *file = new QFile( "psytemp.xml" );
 		if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) return false;
@@ -171,18 +173,18 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 	std::string attrib;
 
 	// Song info.
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
+	#if defined PSYCLE__LIBXMLPP_AVAILABLE
 		{
 			xmlpp::Node::NodeList const & info_nodes(root_element.get_children("info"));
-			if(info_node.begin() != info_nodes.end())
+			if(info_nodes.begin() != info_nodes.end())
 			{
-				xmlpp::Element const & info(dynamic_cast<xmlpp::Element const &>(info_nodes.begin()));
+				xmlpp::Element const & info(dynamic_cast<xmlpp::Element const &>(**info_nodes.begin()));
 				{
 					xmlpp::Node::NodeList const & names(info.get_children("name"));
 					if(names.begin() != names.end())
 					{
-						xmlpp::Element const & name(dynamic_cast<xmlpp::Element const &>(names.begin()));
-						xmlpp::Attribute const * const text_attribute(category.get_attribute("text"));
+						xmlpp::Element const & name(dynamic_cast<xmlpp::Element const &>(**names.begin()));
+						xmlpp::Attribute const * const text_attribute(name.get_attribute("text"));
 						if(!text_attribute) std::cerr << "expected text attribute in info/name element\n";
 						else song_->setName(text_attribute->get_value());
 					}
@@ -191,8 +193,8 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 					xmlpp::Node::NodeList const & authors(info.get_children("author"));
 					if(authors.begin() != authors.end())
 					{
-						xmlpp::Element const & author(dynamic_cast<xmlpp::Element const &>(authors.begin()));
-						xmlpp::Attribute const * const text_attribute(category.get_attribute("text"));
+						xmlpp::Element const & author(dynamic_cast<xmlpp::Element const &>(**authors.begin()));
+						xmlpp::Attribute const * const text_attribute(author.get_attribute("text"));
 						if(!text_attribute) std::cerr << "expected text attribute in info/author element\n";
 						else song_->setAuthor(text_attribute->get_value());
 					}
@@ -201,8 +203,8 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 					xmlpp::Node::NodeList const & comments(info.get_children("comment"));
 					if(comments.begin() != comments.end())
 					{
-						xmlpp::Element const & comment(dynamic_cast<xmlpp::Element const &>(comments.begin()));
-						xmlpp::Attribute const * const text_attribute(category.get_attribute("text"));
+						xmlpp::Element const & comment(dynamic_cast<xmlpp::Element const &>(**comments.begin()));
+						xmlpp::Attribute const * const text_attribute(comment.get_attribute("text"));
 						if(!text_attribute) std::cerr << "expected text attribute in info/comment element\n";
 						else song_->setComment(text_attribute->get_value());
 					}
@@ -227,12 +229,12 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 	#endif
 
 	// Pattern data.
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
+	#if defined PSYCLE__LIBXMLPP_AVAILABLE
 		{
 			xmlpp::Node::NodeList const & pattern_data_nodes(root_element.get_children("patterndata"));
-			if(pattern_data_node.begin() != pattern_data_nodes.end())
+			if(pattern_data_nodes.begin() != pattern_data_nodes.end())
 			{
-				xmlpp::Element const & pattern_data(dynamic_cast<xmlpp::Element const &>(pattern_data_nodes.begin()));
+				xmlpp::Element const & pattern_data(dynamic_cast<xmlpp::Element const &>(**pattern_data_nodes.begin()));
 				xmlpp::Node::NodeList const & categories(pattern_data.get_children("category"));
 				for(xmlpp::Node::NodeList::const_iterator i = categories.begin(); i != categories.end(); ++i)
 				{
@@ -242,7 +244,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 					else {
 						lastCategory = song_->patternSequence()->patternData()->createNewCategory(name_attribute->get_value());
 						xmlpp::Attribute const * const color_attribute(category.get_attribute("color"));
-						if(color_attribute) lastCategory->setColor(str<long int>(color_attribute->get_value();));
+						if(color_attribute) lastCategory->setColor(str<long int>(color_attribute->get_value()));
 					}
 					xmlpp::Node::NodeList const & patterns(category.get_children("pattern"));
 					for(xmlpp::Node::NodeList::const_iterator i = patterns.begin(); i != patterns.end(); ++i)
@@ -266,10 +268,10 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 								xmlpp::Node::NodeList const & signatures(pattern.get_children("sign"));
 								if(signatures.begin() == signatures.end()) std::cerr << "expected sign innert element in enclosing pattern element\n";
 								{
-									xmlpp::Element const & signature(dynamic_cast<xmlpp::Element const &>(signatures.begin()));
+									xmlpp::Element const & signature(dynamic_cast<xmlpp::Element const &>(**signatures.begin()));
 									xmlpp::Attribute const * const free_attribute(pattern.get_attribute("free"));
 									if(free_attribute) {
-										TimeSignature sig(str<float>(free_atribute.get_value()));
+										TimeSignature sig(str<float>(free_attribute->get_value()));
 										lastPattern->addBar(sig);
 									} else {
 										xmlpp::Attribute const * const num_attribute(pattern.get_attribute("num"));
@@ -282,7 +284,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 												if(!count_attribute) std::cerr << "expected count attribute in sign element\n";
 												else {
 													TimeSignature sig(str<int>(num_attribute->get_value()), str<int>(num_attribute->get_value()));
-													sig.setCount(str<int>(num_attribute->get_value());
+													sig.setCount(str<int>(num_attribute->get_value()));
 													lastPattern->addBar(sig);
 												}
 											}
@@ -409,25 +411,25 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 	#endif
 
 	// Sequence data.
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE && 0 // disabled for now
+	#if defined PSYCLE__LIBXMLPP_AVAILABLE
 		{
 			xmlpp::Node::NodeList const & sequences(root_element.get_children("sequence"));
 			if(sequences.begin() != sequences.end())
 			{
-				xmlpp::Element const & sequence(dynamic_cast<xmlpp::Element const &>(sequences.begin()));
+				xmlpp::Element const & sequence(dynamic_cast<xmlpp::Element const &>(**sequences.begin()));
 				xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
 				for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i)
 				{
 					xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
 					lastSeqLine = song_->patternSequence()->createNewLine();
-					xmlpp::Node::NodeList const & sequencer_entries(sequence_line.get_children("seqentry"));
+					xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
 					for(xmlpp::Node::NodeList::const_iterator i = sequencer_entries.begin(); i != sequencer_entries.end(); ++i)
 					{
 						xmlpp::Element const & sequencer_entry(dynamic_cast<xmlpp::Element const &>(**i));
 						xmlpp::Attribute const * const id_attribute(sequencer_entry.get_attribute("patid"));
 						if(!id_attribute) std::cerr << "expected patid attribute in seqentry element\n";
 						else {
-							it = patMap.find(str<int>(id_attribure->get_value()));
+							std::map<int, SinglePattern*>::iterator it = patMap.find(str<int>(id_attribute->get_value()));
 							if(it != patMap.end()) {
 								SinglePattern * pattern = it->second;
 								if(pattern) {
@@ -437,15 +439,15 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 										SequenceEntry * entry = lastSeqLine->createEntry(pattern, str<double>(pos_attribute->get_value()));
 										{
 											xmlpp::Attribute const * const start_attribute(sequencer_entry.get_attribute("start"));
-											if(start_attribute) entry->setStartPos(str<float>(start_attribure->get_value()));
+											if(start_attribute) entry->setStartPos(str<float>(start_attribute->get_value()));
 										}
 										{
 											xmlpp::Attribute const * const end_attribute(sequencer_entry.get_attribute("end"));
-											if(end_attribute) entry->setEndPos(str<float>(end_attribure->get_value()));
+											if(end_attribute) entry->setEndPos(str<float>(end_attribute->get_value()));
 										}
 										{
 											xmlpp::Attribute const * const transpose_attribute(sequencer_entry.get_attribute("transpose"));
-											if(transpose_attribute) entry->setTranspose(str<int>(transpose_attribure->get_value()));
+											if(transpose_attribute) entry->setTranspose(str<int>(transpose_attribute->get_value()));
 										}
 									}
 								}
