@@ -163,8 +163,6 @@ bool InstrumentsModel::slotIsEmpty( int instrIndex )
 {
   assert(instrIndex >= 0);
   assert(instrIndex < psy::core::MAX_INSTRUMENTS);
-  if (song_->_pInstrument[instrIndex] == NULL)
-    return false;
 	return song_->_pInstrument[instrIndex]->Empty();
 }
 
