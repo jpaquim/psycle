@@ -339,13 +339,13 @@ namespace qpsycle {
 		song_ = song;
 		// Update gui to new song 
 		///\todo this is a very crappy way of doing it for now.
-		delete instrumentsModel_;
-		delete patternBox_;
-		delete macView_;
-		delete patView_;
-		delete wavView_;
-		delete seqView_;
-		delete sampleBrowser_;
+		delete instrumentsModel_; instrumentsModel_ = NULL;
+		delete patternBox_; patternBox_ = NULL;
+		delete macView_; macView_ = NULL;
+		delete patView_; patView_ = NULL;
+		delete wavView_; wavView_ = NULL;
+		delete seqView_; seqView_ = NULL;
+		delete sampleBrowser_; sampleBrowser_ = NULL;
 	
 		logConsole_->Clear();
 
