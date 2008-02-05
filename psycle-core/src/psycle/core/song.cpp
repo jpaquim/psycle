@@ -1176,7 +1176,7 @@ void Song::clear()
 	seqBus=0;
 	machineSoloed = -1;
 	_trackSoloed = -1;
-	instSelected = 0;
+	_instSelected = 0;
 	midiSelected = 0;
 	auxcolSelected = 0;
 
