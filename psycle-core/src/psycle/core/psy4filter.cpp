@@ -98,7 +98,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	zipreader_file *f;
 	int fd = open( fileName.c_str(), O_RDONLY );
 	z = zipreader_open( fd );
-	int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT, 0644);
+	int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
 	f = zipreader_seek(z, "xml/song.xml");
 
 	if (!zipreader_extract(f, outFd )) {
@@ -110,7 +110,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	close( outFd );
 
 	f = zipreader_seek(z, "bin/song.bin");
-	outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT, 0644);
+	outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
 	if (!zipreader_extract(f, outFd )) {
 		zipreader_close( z );
 		close( outFd );
