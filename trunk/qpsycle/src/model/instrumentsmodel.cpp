@@ -143,12 +143,16 @@ void InstrumentsModel::clearInstrument( int instrIndex )
 
 int InstrumentsModel::selectedInstrumentIndex()
 {
-	return song_->instSelected;
+	return song_->instSelected();
 }
 
 void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
 {
-	song_->instSelected   = newIndex;
+  assert(newIndex >= 0);
+  assert(newIndex < psy::core::MAX_INSTRUMENTS);
+  assert(song_->_pInstrument[newIndex] != NULL);
+
+	song_->instSelected(newIndex);
 	song_->auxcolSelected = newIndex;
 
 	emit selectedInstrumentChanged(newIndex);
@@ -157,6 +161,10 @@ void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
 // Find out if a particular slot is free in the CoreSong.
 bool InstrumentsModel::slotIsEmpty( int instrIndex )
 {
+  assert(instrIndex >= 0);
+  assert(instrIndex < psy::core::MAX_INSTRUMENTS);
+  if (song_->_pInstrument[instrIndex] == NULL)
+    return false;
 	return song_->_pInstrument[instrIndex]->Empty();
 }
 

@@ -312,7 +312,15 @@ namespace psy
 			Machine::id_type seqBus;
 			
 			/// Current selected instrument number in the GUI
-			Instrument::id_type instSelected;
+    private:
+			Instrument::id_type _instSelected;
+    public:
+      Instrument::id_type instSelected() const { return _instSelected; }
+      void instSelected(Instrument::id_type id) {
+        assert(id >= 0);
+        assert(id < MAX_INSTRUMENTS);
+        _instSelected = id;
+      }
 			/// The index of the selected MIDI program for note entering
 			int midiSelected;
 			/// The index for the auxcolumn selected (would be waveselected, midiselected, or an index to a machine parameter)
