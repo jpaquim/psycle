@@ -269,22 +269,22 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 								if(signatures.begin() == signatures.end()) std::cerr << "expected sign innert element in enclosing pattern element\n";
 								{
 									xmlpp::Element const & signature(dynamic_cast<xmlpp::Element const &>(**signatures.begin()));
-									xmlpp::Attribute const * const free_attribute(pattern.get_attribute("free"));
+									xmlpp::Attribute const * const free_attribute(signature.get_attribute("free"));
 									if(free_attribute) {
 										TimeSignature sig(str<float>(free_attribute->get_value()));
 										lastPattern->addBar(sig);
 									} else {
-										xmlpp::Attribute const * const num_attribute(pattern.get_attribute("num"));
+										xmlpp::Attribute const * const num_attribute(signature.get_attribute("num"));
 										if(!num_attribute) std::cerr << "expected num attribute in sign element\n";
 										else {
-											xmlpp::Attribute const * const denom_attribute(pattern.get_attribute("denom"));
+											xmlpp::Attribute const * const denom_attribute(signature.get_attribute("denom"));
 											if(!denom_attribute) std::cerr << "expected denom attribute in sign element\n";
 											else {
-												xmlpp::Attribute const * const count_attribute(pattern.get_attribute("count"));
+												xmlpp::Attribute const * const count_attribute(signature.get_attribute("count"));
 												if(!count_attribute) std::cerr << "expected count attribute in sign element\n";
 												else {
-													TimeSignature sig(str<int>(num_attribute->get_value()), str<int>(num_attribute->get_value()));
-													sig.setCount(str<int>(num_attribute->get_value()));
+													TimeSignature sig(str<int>(num_attribute->get_value()), str<int>(denom_attribute->get_value()));
+													sig.setCount(str<int>(count_attribute->get_value()));
 													lastPattern->addBar(sig);
 												}
 											}
@@ -302,38 +302,38 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 								if(!pos_attribute) std::cerr << "expected pos attribute in patline element\n";
 								else lastPatternPos = str<float>(pos_attribute->get_value());
 							}
-							xmlpp::Node::NodeList const & pattern_events(pattern.get_children("patevent"));
+							xmlpp::Node::NodeList const & pattern_events(pattern_line.get_children("patevent"));
 							for(xmlpp::Node::NodeList::const_iterator i = pattern_events.begin(); i != pattern_events.end(); ++i)
 							{
 								xmlpp::Element const & pattern_event(dynamic_cast<xmlpp::Element const &>(**i));
 								PatternEvent data;
 								{
-									xmlpp::Attribute const * const mac_attribute(pattern_line.get_attribute("mac"));
+									xmlpp::Attribute const * const mac_attribute(pattern_event.get_attribute("mac"));
 									if(!mac_attribute) std::cerr << "expected mac attribute in patevent element\n";
 									else data.setMachine(str_hex<int>(mac_attribute->get_value()));
 								}
 								{
-									xmlpp::Attribute const * const inst_attribute(pattern_line.get_attribute("inst"));
+									xmlpp::Attribute const * const inst_attribute(pattern_event.get_attribute("inst"));
 									if(!inst_attribute) std::cerr << "expected inst attribute in patevent element\n";
 									else data.setInstrument(str_hex<int>(inst_attribute->get_value()));
 								}
 								{
-									xmlpp::Attribute const * const note_attribute(pattern_line.get_attribute("note"));
+									xmlpp::Attribute const * const note_attribute(pattern_event.get_attribute("note"));
 									if(!note_attribute) std::cerr << "expected note attribute in patevent element\n";
 									else data.setNote(str_hex<int>(note_attribute->get_value()));
 								}
 								{
-									xmlpp::Attribute const * const param_attribute(pattern_line.get_attribute("param"));
+									xmlpp::Attribute const * const param_attribute(pattern_event.get_attribute("param"));
 									if(!param_attribute) std::cerr << "expected param attribute in patevent element\n";
 									else data.setParameter(str_hex<int>(param_attribute->get_value()));
 								}
 								{
-									xmlpp::Attribute const * const cmd_attribute(pattern_line.get_attribute("cmd"));
+									xmlpp::Attribute const * const cmd_attribute(pattern_event.get_attribute("cmd"));
 									if(!cmd_attribute) std::cerr << "expected cmd attribute in patevent element\n";
 									else data.setParameter(str_hex<int>(cmd_attribute->get_value()));
 								}
 								{
-									xmlpp::Attribute const * const track_attribute(pattern_line.get_attribute("track"));
+									xmlpp::Attribute const * const track_attribute(pattern_event.get_attribute("track"));
 									if(!track_attribute) std::cerr << "expected track attribute in patevent element\n";
 									else (*lastPattern)[lastPatternPos].notes()[str_hex<int>(track_attribute->get_value())]= data;
 								}
