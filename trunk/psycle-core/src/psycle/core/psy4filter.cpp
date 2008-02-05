@@ -35,7 +35,7 @@
 #if defined PSYCLE__LIBXMLPP_AVAILABLE
 	#include <libxml++/parsers/domparser.h>
 #elif defined QT_XML_LIB
-  #warning "Wasn't able to use libxml++. Using QT's XML library instead."
+	#warning "Wasn't able to use libxml++. Using QT's XML library instead."
 	#include <QtCore/QFile>
 	#include <QtXml/QDomDocument>
 	#include <QtXml/QDomElement>
