@@ -43,7 +43,11 @@ CoreSong::CoreSong(MachineCallbacks* callbacks)
 	Invalided = false;
 	for(int i(0) ; i < MAX_MACHINES ; ++i) machine_[i] = 0;
 	for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
-	clear();
+	clear(); /* Warning! Due to C++ semantics
+              CoreSong::clear() will be called, even in
+              a derived class that implements clear().
+           */
+              
 }
 
 CoreSong::~CoreSong()
@@ -1170,16 +1174,26 @@ void CoreSong::setTicksSpeed(const unsigned int value, const bool isticks)
 }
 
 
+Song::Song(MachineCallbacks* callbacks)
+  : UISong(callbacks)
+{
+  clearMyData();
+};
+			
+
+
 void Song::clear()
 {
-	CoreSong::clear();
+	UISong::clear();
+  clearMyData();
+}
+void Song::clearMyData() {
 	seqBus=0;
 	machineSoloed = -1;
 	_trackSoloed = -1;
 	_instSelected = 0;
 	midiSelected = 0;
 	auxcolSelected = 0;
-
 }
 
 

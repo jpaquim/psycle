@@ -301,9 +301,10 @@ namespace psy
 		class Song : public UISong
 		{
 		public:
-			Song(MachineCallbacks* callbacks) : UISong(callbacks) {};
-			
+			Song(MachineCallbacks* callbacks);
 			virtual void clear();
+    private:
+      void clearMyData();
 
 		public:
 			///\name various ui-related stuff
