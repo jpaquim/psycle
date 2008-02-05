@@ -336,6 +336,7 @@ namespace qpsycle {
 	void MainWindow::loadSong( psy::core::Song *song )
 	{
 		psy::core::Player::Instance()->driver().Enable(false);
+		if ( song_ ) delete song_;
 		song_ = song;
 		// Update gui to new song 
 		///\todo this is a very crappy way of doing it for now.
@@ -377,7 +378,6 @@ namespace qpsycle {
 		psy::core::Player::Instance()->driver().Enable(true);
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
 	}
-
 
 	void MainWindow::undo()
 	{
