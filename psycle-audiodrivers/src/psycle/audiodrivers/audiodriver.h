@@ -139,10 +139,10 @@ namespace psy
 
 				virtual void Reset(void) {}
 				/// enable will start the driver and the calling for the work player function
-				virtual bool Enable(bool e) { return false; }
+				virtual bool Enable(bool e) {return true;}
 				/// initialize has nothing to do with the driver, it sets only the pointer for a later player work call
-				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context) {}
-				virtual void Configure(void) {}
+				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context) {;}
+				virtual void Configure(void){};
 				virtual bool Initialized(void) { return true; }
 				virtual bool Configured(void) { return true; }
 				static double frand();
