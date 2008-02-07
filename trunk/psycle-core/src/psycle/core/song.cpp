@@ -1,5 +1,5 @@
 /**************************************************************************
-*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*   Copyright 2007-2008 Psycledelics http://psycle.sourceforge.net        *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -44,20 +44,17 @@ CoreSong::CoreSong(MachineCallbacks* callbacks)
 	for(int i(0) ; i < MAX_MACHINES ; ++i) machine_[i] = 0;
 	for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
 	clear(); /* Warning! Due to C++ semantics
-              CoreSong::clear() will be called, even in
-              a derived class that implements clear().
-           */
-              
+		CoreSong::clear() will be called, even in
+		a derived class that implements clear().
+	*/      
 }
 
-CoreSong::~CoreSong()
-{
+CoreSong::~CoreSong() {
 	DestroyAllMachines();
 	DestroyAllInstruments();
 }
 
-void CoreSong::clear()
-{
+void CoreSong::clear() {
 	_machineLock = false;
 	Invalided = false;
 
@@ -98,11 +95,9 @@ void CoreSong::clear()
 
 UISong::UISong(MachineCallbacks* callbacks)
 	: CoreSong(callbacks)
-{
-}
+{}
 
-Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) 
-{
+Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
 	int fb; 
 	if ( key == PluginFinderKey::internalSampler() ) {
 		fb = GetFreeBus();
@@ -130,8 +125,7 @@ Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinde
 	return machine_[fb];
 }
 
-Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name )
-{
+Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name ) {
 	Machine::id_type const array_index(GetFreeMachine());
 	if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
 	if(!CreateMachine(plugin_path, type, x, y, plugin_name, array_index))
@@ -139,8 +133,7 @@ Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type
 	return *machine_[array_index];
 }
 
-bool CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index )
-{
+bool CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index ) {
 	Machine * machine(0);
 	switch (type)
 	{
@@ -267,14 +260,12 @@ bool CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type
 	return true;
 }
 
-Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac)
-{
+Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac) {
 	if(!machine_[smac]) return Machine::id_type(255);
 	return smac;
 }
 
-void CoreSong::DestroyAllMachines(bool write_locked)
-{
+void CoreSong::DestroyAllMachines(bool write_locked) {
 	_machineLock = true;
 	for(Machine::id_type c(0); c < MAX_MACHINES; ++c)
 	{
@@ -288,9 +279,9 @@ void CoreSong::DestroyAllMachines(bool write_locked)
 					{
 						std::ostringstream s;
 						s << c << " and " << j << " have duplicate pointers";
-#if defined PSYCLE__CORE__SIGNALS
-						report.emit(s.str(), "duplicate machine found");
-#endif
+						#if defined PSYCLE__CORE__SIGNALS
+							report.emit(s.str(), "duplicate machine found");
+						#endif
 					}
 					machine_[j] = 0;
 				}
@@ -302,8 +293,7 @@ void CoreSong::DestroyAllMachines(bool write_locked)
 	_machineLock = false;
 }
 
-Machine::id_type CoreSong::GetFreeMachine()
-{
+Machine::id_type CoreSong::GetFreeMachine() {
 	Machine::id_type tmac(0);
 	for(;;)
 	{
@@ -312,8 +302,7 @@ Machine::id_type CoreSong::GetFreeMachine()
 	}
 }
 
-bool CoreSong::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume)
-{
+bool CoreSong::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume) {
 	Machine *srcMac = machine_[src];
 	Machine *dstMac = machine_[dst];
 	if(!srcMac || !dstMac)
@@ -327,8 +316,7 @@ bool CoreSong::InsertConnection(Machine::id_type src, Machine::id_type dst, floa
 	return srcMac->ConnectTo(*dstMac, InPort::id_type(0), OutPort::id_type(0), volume);
 }
 
-int CoreSong::ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
-{
+int CoreSong::ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex) {
 	Wire::id_type w;
 	float volume = 1.0f;
 	if (machine_[wiresource])
@@ -355,10 +343,8 @@ int CoreSong::ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wi
 	return 0;
 }
 
-int CoreSong::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex)
-{
+int CoreSong::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex) {
 	float volume = 1.0f;
-
 	if (machine_[wiredest])
 	{
 		Machine *smac = machine_[machine_[wiredest]->_inputMachines[wireindex]];
@@ -389,8 +375,7 @@ int CoreSong::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type 
 	return 0;
 }
 
-void CoreSong::DestroyMachine(Machine::id_type mac, bool write_locked)
-{
+void CoreSong::DestroyMachine(Machine::id_type mac, bool write_locked) {
 	#if 0
 		#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
 			#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
@@ -459,14 +444,12 @@ void CoreSong::DestroyMachine(Machine::id_type mac, bool write_locked)
 	delete machine_[mac]; machine_[mac] = 0;
 }
 
-int CoreSong::GetFreeBus()
-{
+int CoreSong::GetFreeBus() {
 	for(int c(0) ; c < MAX_BUSES ; ++c) if(!machine_[c]) return c;
 	return -1; 
 }
 
-int CoreSong::GetFreeFxBus()
-{
+int CoreSong::GetFreeFxBus() {
 	for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!machine_[c]) return c;
 	return -1; 
 }
@@ -519,8 +502,7 @@ char *data
 
 */
 
-bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str)
-{
+bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 	if(instrument != PREV_WAV_INS)
 	{
 		Invalided = true;
@@ -539,7 +521,7 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str)
 	DeleteLayer(instrument);
 	file.ReadArray(fourCC,4);
 	if( file.matchFourCC(fourCC,"16SV")) bits = 16;
-else if(file.matchFourCC(fourCC,"8SVX")) bits = 8;
+	else if(file.matchFourCC(fourCC,"8SVX")) bits = 8;
 	file.Read(hd);
 	if( file.matchFourCC(hd._id,"NAME"))
 	{
@@ -601,8 +583,7 @@ else if(file.matchFourCC(fourCC,"8SVX")) bits = 8;
 	return true;
 }
 
-bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * pathToWav)
-{
+bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * pathToWav) {
 	assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
 	DeleteLayer(iInstr);
 	_pInstrument[iInstr]->waveDataL = new std::int16_t[iSamplesPerChan];
@@ -632,8 +613,7 @@ bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesP
 	return true;
 }
 
-bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav)
-{ 
+bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) { 
 	assert(pathToWav != 0);
 	WaveFile file;
 	ExtRiffChunkHeader hd;
@@ -771,19 +751,16 @@ namespace {
 	PsyFilters filters;
 }
 
-bool CoreSong::load(std::string const & plugin_path, const std::string & fileName)
-{
+bool CoreSong::load(std::string const & plugin_path, const std::string & fileName) {
 	return filters.loadSong(plugin_path, fileName, *this, machinecallbacks);
 }
 
-bool CoreSong::save(const std::string & fileName)
-{
+bool CoreSong::save(const std::string & fileName) {
 	return filters.saveSong(fileName, *this,4);
 }
 
 ///\todo mfc+winapi->std
-bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst)
-{
+bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst) {
 	// src has to be occupied and dst must be empty
 	if (machine_[src] && machine_[dst])
 	{
@@ -964,8 +941,7 @@ bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst)
 }
 
 ///\todo mfc+winapi->std
-bool CoreSong::CloneIns(Instrument::id_type src, Instrument::id_type dst)
-{
+bool CoreSong::CloneIns(Instrument::id_type src, Instrument::id_type dst) {
 	// src has to be occupied and dst must be empty
 	#if 0
 		if (!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
@@ -1070,29 +1046,25 @@ void CoreSong::/*Reset*/DeleteInstrument(Instrument::id_type id)
 	_pInstrument[id]->Delete(); Invalided=false;
 }
 
-void CoreSong::/*Reset*/DeleteInstruments()
-{
+void CoreSong::/*Reset*/DeleteInstruments() {
 	Invalided=true;
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
 	_pInstrument[id]->Delete();
 	Invalided=false;
 }
 
-void CoreSong::/*Delete*/DestroyAllInstruments()
-{
+void CoreSong::/*Delete*/DestroyAllInstruments() {
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 		delete _pInstrument[id];
 		_pInstrument[id] = 0;
 	}
 }
 
-void CoreSong::DeleteLayer(Instrument::id_type id)
-{
+void CoreSong::DeleteLayer(Instrument::id_type id) {
 	_pInstrument[id]->DeleteLayer();
 }
 
-void CoreSong::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line)
-{
+void CoreSong::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line) {
 	///\todo rework for multitracking
 	#if 0
 		bool bEditMode = true;
@@ -1145,28 +1117,23 @@ void CoreSong::patternTweakSlide(int machine, int command, int value, int patter
 }
 
 
-void CoreSong::setName( const std::string & name )
-{
+void CoreSong::setName( const std::string & name ) {
 	name_ = name;
 }
 
-void CoreSong::setAuthor( const std::string & author )
-{
+void CoreSong::setAuthor( const std::string & author ) {
 	author_ = author;
 }
 
-void CoreSong::setComment( const std::string & comment )
-{
+void CoreSong::setComment( const std::string & comment ) {
 	comment_ = comment;
 }
 
-void CoreSong::setBpm( float bpm )
-{
+void CoreSong::setBpm( float bpm ) {
 	if (bpm > 0 && bpm < 1000) bpm_ = bpm;
 }
 
-void CoreSong::setTicksSpeed(const unsigned int value, const bool isticks)
-{
+void CoreSong::setTicksSpeed(const unsigned int value, const bool isticks) {
 	if ( value < 1 ) ticks_ = 1;
 	else if ( value > 31 ) ticks_ = 31;
 	else ticks_ = value;
@@ -1175,18 +1142,16 @@ void CoreSong::setTicksSpeed(const unsigned int value, const bool isticks)
 
 
 Song::Song(MachineCallbacks* callbacks)
-  : UISong(callbacks)
+: UISong(callbacks)
 {
-  clearMyData();
+	clearMyData();
 };
-			
 
-
-void Song::clear()
-{
+void Song::clear() {
 	UISong::clear();
-  clearMyData();
+	clearMyData();
 }
+
 void Song::clearMyData() {
 	seqBus=0;
 	machineSoloed = -1;

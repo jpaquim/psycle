@@ -1,6 +1,6 @@
 /* -*- mode:c++, indent-tabs-mode:t -*- */
 /**************************************************************************
-*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*   Copyright 2007-2008 Psycledelics http://psycle.sourceforge.net        *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -244,7 +244,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 						}
 					}
 					xmlpp::Node::NodeList const & pattern_lines(pattern.get_children("patline"));
-					for(xmlpp::Node::NodeList::const_iterator i = pattern_lines.begin(); i != pattern_lines.end(); ++i)	{
+					for(xmlpp::Node::NodeList::const_iterator i = pattern_lines.begin(); i != pattern_lines.end(); ++i) {
 						xmlpp::Element const & pattern_line(dynamic_cast<xmlpp::Element const &>(**i));
 						{
 							xmlpp::Attribute const * const pos_attribute(pattern_line.get_attribute("pos"));
@@ -252,7 +252,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 							else lastPatternPos = str<float>(pos_attribute->get_value());
 						}
 						xmlpp::Node::NodeList const & pattern_events(pattern_line.get_children("patevent"));
-						for(xmlpp::Node::NodeList::const_iterator i = pattern_events.begin(); i != pattern_events.end(); ++i)	{
+						for(xmlpp::Node::NodeList::const_iterator i = pattern_events.begin(); i != pattern_events.end(); ++i) {
 							xmlpp::Element const & pattern_event(dynamic_cast<xmlpp::Element const &>(**i));
 							PatternEvent data;
 							{
@@ -298,7 +298,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 		if(sequences.begin() != sequences.end()) {
 			xmlpp::Element const & sequence(dynamic_cast<xmlpp::Element const &>(**sequences.begin()));
 			xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
-			for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i)	{
+			for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i) {
 				xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
 				lastSeqLine = song_->patternSequence()->createNewLine();
 				xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
