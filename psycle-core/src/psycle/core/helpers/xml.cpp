@@ -4,8 +4,9 @@
 
 #include "../helpers.h"
 
-namespace psy {
-	namespace core {
+#include "xml.h"
+
+namespace psy { namespace core {
 
 	std::string replaceIllegalXmlChr( const std::string & text, bool strict )
 	{
@@ -33,5 +34,22 @@ namespace psy {
 		}
 		return xml;
 	}
-	}
-}
+
+  xmlpp::Element& get_first_element(xmlpp::Node const& node, std::string tag) {
+      
+    xmlpp::Node::NodeList const&
+      nodes(node.get_children(tag));
+    
+    if (nodes.begin() == nodes.end())
+      throw xml_helper_element_not_found();
+    
+    return dynamic_cast<xmlpp::Element&>(**nodes.begin());
+  }
+
+  xmlpp::Attribute& get_attribute(xmlpp::Element const& e, std::string attr) {
+    xmlpp::Attribute* a = e.get_attribute(attr);
+    if (a == NULL)
+      throw xml_helper_attribute_not_found(attr);
+    return static_cast<xmlpp::Attribute&>(*a);
+  }
+}}
