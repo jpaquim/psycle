@@ -303,8 +303,8 @@ namespace psy
 		public:
 			Song(MachineCallbacks* callbacks);
 			virtual void clear();
-    private:
-      void clearMyData();
+		private:
+			void clearMyData();
 
 		public:
 			///\name various ui-related stuff
@@ -313,15 +313,15 @@ namespace psy
 			Machine::id_type seqBus;
 			
 			/// Current selected instrument number in the GUI
-    private:
+		private:
 			Instrument::id_type _instSelected;
-    public:
-      Instrument::id_type instSelected() const { return _instSelected; }
-      void instSelected(Instrument::id_type id) {
-        assert(id >= 0);
-        assert(id < MAX_INSTRUMENTS);
-        _instSelected = id;
-      }
+		public:
+			Instrument::id_type instSelected() const { return _instSelected; }
+			void instSelected(Instrument::id_type id) {
+				assert(id >= 0);
+				assert(id < MAX_INSTRUMENTS);
+				_instSelected = id;
+			}
 			/// The index of the selected MIDI program for note entering
 			int midiSelected;
 			/// The index for the auxcolumn selected (would be waveselected, midiselected, or an index to a machine parameter)
