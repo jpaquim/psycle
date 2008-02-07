@@ -34,12 +34,6 @@
 
 #if defined PSYCLE__LIBXMLPP_AVAILABLE
 	#include <libxml++/parsers/domparser.h>
-#elif defined QT_XML_LIB
-	#warning "Wasn't able to use libxml++. Using QT's XML library instead."
-	#include <QtCore/QFile>
-	#include <QtXml/QDomDocument>
-	#include <QtXml/QDomElement>
-	#include <QtXml/QXmlInputSource>
 #else
 	#error none of the supported xml parser libs appear to be available
 #endif
@@ -122,21 +116,11 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	zipreader_close( z );
 	close( fd );
 
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE
-		xmlpp::DomParser parser;
-		parser.parse_file("psytemp.xml");
-		if(!parser) return false;
-		xmlpp::Element const & root_element(*parser.get_document()->get_root_node());
-		return root_element.get_name() == "psy4";
-	#elif defined QT_XML_LIB
-		QFile *file = new QFile( "psytemp.xml" );
-		QDomDocument *doc = new QDomDocument();
-		doc->setContent( file );
-		QDomElement psy4El = doc->documentElement();
-		return psy4El.tagName() == "psy4";
-	#else
-		#error none of the supported xml parser libs appear to be available
-	#endif
+	xmlpp::DomParser parser;
+	parser.parse_file("psytemp.xml");
+	if(!parser) return false;
+	xmlpp::Element const & root_element(*parser.get_document()->get_root_node());
+	return root_element.get_name() == "psy4";
 }
 
 bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
@@ -155,280 +139,174 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 	lastMachine  = 0;
 	std::cout << "psy4filter detected for load" << std::endl;
 
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE
-		xmlpp::DomParser parser;
-		parser.parse_file("psytemp.xml");
-		if(!parser) return false;
-		xmlpp::Document const & document(*parser.get_document());
-		xmlpp::Element const & root_element(*document.get_root_node());
-	#elif defined QT_XML_LIB
-		QFile *file = new QFile( "psytemp.xml" );
-		if (!file->open(QIODevice::ReadOnly | QIODevice::Text)) return false;
-		QDomDocument *doc = new QDomDocument();
-		doc->setContent( file );
-	#else
-		#error none of the supported xml parser libs appear to be available
-	#endif
+	xmlpp::DomParser parser;
+	parser.parse_file("psytemp.xml");
+	if(!parser) return false;
+	xmlpp::Document const & document(*parser.get_document());
+	xmlpp::Element const & root_element(*document.get_root_node());
 
 	std::string attrib;
 
 	// Song info.
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE
-		{
-			xmlpp::Node::NodeList const & info_nodes(root_element.get_children("info"));
-			if(info_nodes.begin() != info_nodes.end())
+	{
+		xmlpp::Node::NodeList const & info_nodes(root_element.get_children("info"));
+		if(info_nodes.begin() != info_nodes.end()) {
+			xmlpp::Element const & info(dynamic_cast<xmlpp::Element const &>(**info_nodes.begin()));
 			{
-				xmlpp::Element const & info(dynamic_cast<xmlpp::Element const &>(**info_nodes.begin()));
-				{
-					xmlpp::Node::NodeList const & names(info.get_children("name"));
-					if(names.begin() != names.end())
-					{
-						xmlpp::Element const & name(dynamic_cast<xmlpp::Element const &>(**names.begin()));
-						xmlpp::Attribute const * const text_attribute(name.get_attribute("text"));
-						if(!text_attribute) std::cerr << "expected text attribute in info/name element\n";
-						else song_->setName(text_attribute->get_value());
-					}
+				xmlpp::Node::NodeList const & names(info.get_children("name"));
+				if(names.begin() != names.end()) {
+					xmlpp::Element const & name(dynamic_cast<xmlpp::Element const &>(**names.begin()));
+					xmlpp::Attribute const * const text_attribute(name.get_attribute("text"));
+					if(!text_attribute) std::cerr << "expected text attribute in info/name element\n";
+					else song_->setName(text_attribute->get_value());
 				}
-				{
-					xmlpp::Node::NodeList const & authors(info.get_children("author"));
-					if(authors.begin() != authors.end())
-					{
-						xmlpp::Element const & author(dynamic_cast<xmlpp::Element const &>(**authors.begin()));
-						xmlpp::Attribute const * const text_attribute(author.get_attribute("text"));
-						if(!text_attribute) std::cerr << "expected text attribute in info/author element\n";
-						else song_->setAuthor(text_attribute->get_value());
-					}
+			}
+			{
+				xmlpp::Node::NodeList const & authors(info.get_children("author"));
+				if(authors.begin() != authors.end()) {
+					xmlpp::Element const & author(dynamic_cast<xmlpp::Element const &>(**authors.begin()));
+					xmlpp::Attribute const * const text_attribute(author.get_attribute("text"));
+					if(!text_attribute) std::cerr << "expected text attribute in info/author element\n";
+					else song_->setAuthor(text_attribute->get_value());
 				}
-				{
-					xmlpp::Node::NodeList const & comments(info.get_children("comment"));
-					if(comments.begin() != comments.end())
-					{
-						xmlpp::Element const & comment(dynamic_cast<xmlpp::Element const &>(**comments.begin()));
-						xmlpp::Attribute const * const text_attribute(comment.get_attribute("text"));
-						if(!text_attribute) std::cerr << "expected text attribute in info/comment element\n";
-						else song_->setComment(text_attribute->get_value());
-					}
+			}
+			{
+				xmlpp::Node::NodeList const & comments(info.get_children("comment"));
+				if(comments.begin() != comments.end()) {
+					xmlpp::Element const & comment(dynamic_cast<xmlpp::Element const &>(**comments.begin()));
+					xmlpp::Attribute const * const text_attribute(comment.get_attribute("text"));
+					if(!text_attribute) std::cerr << "expected text attribute in info/comment element\n";
+					else song_->setComment(text_attribute->get_value());
 				}
 			}
 		}
-	#elif defined QT_XML_LIB
-		QDomElement root = doc->firstChildElement();
-		QDomElement infoElm = root.firstChildElement( "info" );
-		QDomElement nameElm = infoElm.firstChildElement( "name" );
-			attrib = nameElm.attribute( "text" ).toStdString();
-			std::cout << attrib << std::endl;
-			song_->setName( attrib );
-		QDomElement authorElm = infoElm.firstChildElement( "author" );
-			attrib = authorElm.attribute( "text" ).toStdString();
-			song_->setAuthor( attrib );
-		QDomElement commentElm = infoElm.firstChildElement( "comment" );
-			attrib = commentElm.attribute( "text" ).toStdString();
-			song_->setComment( attrib );
-	#else
-		#error none of the supported xml parser libs appear to be available
-	#endif
+	}
 
 	// Pattern data.
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE
-		{
-			xmlpp::Node::NodeList const & pattern_data_nodes(root_element.get_children("patterndata"));
-			if(pattern_data_nodes.begin() != pattern_data_nodes.end())
-			{
-				xmlpp::Element const & pattern_data(dynamic_cast<xmlpp::Element const &>(**pattern_data_nodes.begin()));
-				xmlpp::Node::NodeList const & categories(pattern_data.get_children("category"));
-				for(xmlpp::Node::NodeList::const_iterator i = categories.begin(); i != categories.end(); ++i)
-				{
-					xmlpp::Element const & category(dynamic_cast<xmlpp::Element const &>(**i));
-					xmlpp::Attribute const * const name_attribute(category.get_attribute("name"));
-					if(!name_attribute) std::cerr << "expected name attribute in category element\n";
+	{
+		xmlpp::Node::NodeList const & pattern_data_nodes(root_element.get_children("patterndata"));
+		if(pattern_data_nodes.begin() != pattern_data_nodes.end()) {
+			xmlpp::Element const & pattern_data(dynamic_cast<xmlpp::Element const &>(**pattern_data_nodes.begin()));
+			xmlpp::Node::NodeList const & categories(pattern_data.get_children("category"));
+			for(xmlpp::Node::NodeList::const_iterator i = categories.begin(); i != categories.end(); ++i) {
+				xmlpp::Element const & category(dynamic_cast<xmlpp::Element const &>(**i));
+				xmlpp::Attribute const * const name_attribute(category.get_attribute("name"));
+				if(!name_attribute) std::cerr << "expected name attribute in category element\n";
+				else {
+					lastCategory = song_->patternSequence()->patternData()->createNewCategory(name_attribute->get_value());
+					xmlpp::Attribute const * const color_attribute(category.get_attribute("color"));
+					if(color_attribute) lastCategory->setColor(str<long int>(color_attribute->get_value()));
+				}
+				xmlpp::Node::NodeList const & patterns(category.get_children("pattern"));
+				for(xmlpp::Node::NodeList::const_iterator i = patterns.begin(); i != patterns.end(); ++i) {
+					xmlpp::Element const & pattern(dynamic_cast<xmlpp::Element const &>(**i));
+					xmlpp::Attribute const * const name_attribute(pattern.get_attribute("name"));
+					if(!name_attribute) std::cerr << "expected name attribute in pattern element\n";
 					else {
-						lastCategory = song_->patternSequence()->patternData()->createNewCategory(name_attribute->get_value());
-						xmlpp::Attribute const * const color_attribute(category.get_attribute("color"));
-						if(color_attribute) lastCategory->setColor(str<long int>(color_attribute->get_value()));
-					}
-					xmlpp::Node::NodeList const & patterns(category.get_children("pattern"));
-					for(xmlpp::Node::NodeList::const_iterator i = patterns.begin(); i != patterns.end(); ++i)
-					{
-						xmlpp::Element const & pattern(dynamic_cast<xmlpp::Element const &>(**i));
-						xmlpp::Attribute const * const name_attribute(pattern.get_attribute("name"));
-						if(!name_attribute) std::cerr << "expected name attribute in pattern element\n";
-						else {
-							lastPattern = lastCategory->createNewPattern(name_attribute->get_value());
-							lastPattern->clearBars(); ///\todo we just created it.. why does it need cleaning?
+						lastPattern = lastCategory->createNewPattern(name_attribute->get_value());
+						lastPattern->clearBars(); ///\todo we just created it.. why does it need cleaning?
+						{
+							xmlpp::Attribute const * const zoom_attribute(pattern.get_attribute("zoom"));
+							if(zoom_attribute) lastPattern->setBeatZoom(str_hex<int>(zoom_attribute->get_value()));
+						}
+						{
+							xmlpp::Attribute const * const id_attribute(pattern.get_attribute("id"));
+							if(!id_attribute) std::cerr << "expected id attribute in pattern element\n";
+							else patMap[str_hex<int>(id_attribute->get_value())] = lastPattern;
+						}
+						{
+							xmlpp::Node::NodeList const & signatures(pattern.get_children("sign"));
+							if(signatures.begin() == signatures.end()) std::cerr << "expected sign innert element in enclosing pattern element\n";
 							{
-								xmlpp::Attribute const * const zoom_attribute(pattern.get_attribute("zoom"));
-								if(zoom_attribute) lastPattern->setBeatZoom(str_hex<int>(zoom_attribute->get_value()));
-							}
-							{
-								xmlpp::Attribute const * const id_attribute(pattern.get_attribute("id"));
-								if(!id_attribute) std::cerr << "expected id attribute in pattern element\n";
-								else patMap[str_hex<int>(id_attribute->get_value())] = lastPattern;
-							}
-							{
-								xmlpp::Node::NodeList const & signatures(pattern.get_children("sign"));
-								if(signatures.begin() == signatures.end()) std::cerr << "expected sign innert element in enclosing pattern element\n";
-								{
-									xmlpp::Element const & signature(dynamic_cast<xmlpp::Element const &>(**signatures.begin()));
-									xmlpp::Attribute const * const free_attribute(signature.get_attribute("free"));
-									if(free_attribute) {
-										TimeSignature sig(str<float>(free_attribute->get_value()));
-										lastPattern->addBar(sig);
-									} else {
-										xmlpp::Attribute const * const num_attribute(signature.get_attribute("num"));
-										if(!num_attribute) std::cerr << "expected num attribute in sign element\n";
+								xmlpp::Element const & signature(dynamic_cast<xmlpp::Element const &>(**signatures.begin()));
+								xmlpp::Attribute const * const free_attribute(signature.get_attribute("free"));
+								if(free_attribute) {
+									TimeSignature sig(str<float>(free_attribute->get_value()));
+									lastPattern->addBar(sig);
+								} else {
+									xmlpp::Attribute const * const num_attribute(signature.get_attribute("num"));
+									if(!num_attribute) std::cerr << "expected num attribute in sign element\n";
+									else {
+										xmlpp::Attribute const * const denom_attribute(signature.get_attribute("denom"));
+										if(!denom_attribute) std::cerr << "expected denom attribute in sign element\n";
 										else {
-											xmlpp::Attribute const * const denom_attribute(signature.get_attribute("denom"));
-											if(!denom_attribute) std::cerr << "expected denom attribute in sign element\n";
+											xmlpp::Attribute const * const count_attribute(signature.get_attribute("count"));
+											if(!count_attribute) std::cerr << "expected count attribute in sign element\n";
 											else {
-												xmlpp::Attribute const * const count_attribute(signature.get_attribute("count"));
-												if(!count_attribute) std::cerr << "expected count attribute in sign element\n";
-												else {
-													TimeSignature sig(str<int>(num_attribute->get_value()), str<int>(denom_attribute->get_value()));
-													sig.setCount(str<int>(count_attribute->get_value()));
-													lastPattern->addBar(sig);
-												}
+												TimeSignature sig(str<int>(num_attribute->get_value()), str<int>(denom_attribute->get_value()));
+												sig.setCount(str<int>(count_attribute->get_value()));
+												lastPattern->addBar(sig);
 											}
 										}
 									}
 								}
 							}
 						}
-						xmlpp::Node::NodeList const & pattern_lines(pattern.get_children("patline"));
-						for(xmlpp::Node::NodeList::const_iterator i = pattern_lines.begin(); i != pattern_lines.end(); ++i)
+					}
+					xmlpp::Node::NodeList const & pattern_lines(pattern.get_children("patline"));
+					for(xmlpp::Node::NodeList::const_iterator i = pattern_lines.begin(); i != pattern_lines.end(); ++i)	{
+						xmlpp::Element const & pattern_line(dynamic_cast<xmlpp::Element const &>(**i));
 						{
-							xmlpp::Element const & pattern_line(dynamic_cast<xmlpp::Element const &>(**i));
+							xmlpp::Attribute const * const pos_attribute(pattern_line.get_attribute("pos"));
+							if(!pos_attribute) std::cerr << "expected pos attribute in patline element\n";
+							else lastPatternPos = str<float>(pos_attribute->get_value());
+						}
+						xmlpp::Node::NodeList const & pattern_events(pattern_line.get_children("patevent"));
+						for(xmlpp::Node::NodeList::const_iterator i = pattern_events.begin(); i != pattern_events.end(); ++i)	{
+							xmlpp::Element const & pattern_event(dynamic_cast<xmlpp::Element const &>(**i));
+							PatternEvent data;
 							{
-								xmlpp::Attribute const * const pos_attribute(pattern_line.get_attribute("pos"));
-								if(!pos_attribute) std::cerr << "expected pos attribute in patline element\n";
-								else lastPatternPos = str<float>(pos_attribute->get_value());
+								xmlpp::Attribute const * const mac_attribute(pattern_event.get_attribute("mac"));
+								if(!mac_attribute) std::cerr << "expected mac attribute in patevent element\n";
+								else data.setMachine(str_hex<int>(mac_attribute->get_value()));
 							}
-							xmlpp::Node::NodeList const & pattern_events(pattern_line.get_children("patevent"));
-							for(xmlpp::Node::NodeList::const_iterator i = pattern_events.begin(); i != pattern_events.end(); ++i)
 							{
-								xmlpp::Element const & pattern_event(dynamic_cast<xmlpp::Element const &>(**i));
-								PatternEvent data;
-								{
-									xmlpp::Attribute const * const mac_attribute(pattern_event.get_attribute("mac"));
-									if(!mac_attribute) std::cerr << "expected mac attribute in patevent element\n";
-									else data.setMachine(str_hex<int>(mac_attribute->get_value()));
-								}
-								{
-									xmlpp::Attribute const * const inst_attribute(pattern_event.get_attribute("inst"));
-									if(!inst_attribute) std::cerr << "expected inst attribute in patevent element\n";
-									else data.setInstrument(str_hex<int>(inst_attribute->get_value()));
-								}
-								{
-									xmlpp::Attribute const * const note_attribute(pattern_event.get_attribute("note"));
-									if(!note_attribute) std::cerr << "expected note attribute in patevent element\n";
-									else data.setNote(str_hex<int>(note_attribute->get_value()));
-								}
-								{
-									xmlpp::Attribute const * const param_attribute(pattern_event.get_attribute("param"));
-									if(!param_attribute) std::cerr << "expected param attribute in patevent element\n";
-									else data.setParameter(str_hex<int>(param_attribute->get_value()));
-								}
-								{
-									xmlpp::Attribute const * const cmd_attribute(pattern_event.get_attribute("cmd"));
-									if(!cmd_attribute) std::cerr << "expected cmd attribute in patevent element\n";
-									else data.setParameter(str_hex<int>(cmd_attribute->get_value()));
-								}
-								{
-									xmlpp::Attribute const * const track_attribute(pattern_event.get_attribute("track"));
-									if(!track_attribute) std::cerr << "expected track attribute in patevent element\n";
-									else (*lastPattern)[lastPatternPos].notes()[str_hex<int>(track_attribute->get_value())]= data;
-								}
+								xmlpp::Attribute const * const inst_attribute(pattern_event.get_attribute("inst"));
+								if(!inst_attribute) std::cerr << "expected inst attribute in patevent element\n";
+								else data.setInstrument(str_hex<int>(inst_attribute->get_value()));
+							}
+							{
+								xmlpp::Attribute const * const note_attribute(pattern_event.get_attribute("note"));
+								if(!note_attribute) std::cerr << "expected note attribute in patevent element\n";
+								else data.setNote(str_hex<int>(note_attribute->get_value()));
+							}
+							{
+								xmlpp::Attribute const * const param_attribute(pattern_event.get_attribute("param"));
+								if(!param_attribute) std::cerr << "expected param attribute in patevent element\n";
+								else data.setParameter(str_hex<int>(param_attribute->get_value()));
+							}
+							{
+								xmlpp::Attribute const * const cmd_attribute(pattern_event.get_attribute("cmd"));
+								if(!cmd_attribute) std::cerr << "expected cmd attribute in patevent element\n";
+								else data.setParameter(str_hex<int>(cmd_attribute->get_value()));
+							}
+							{
+								xmlpp::Attribute const * const track_attribute(pattern_event.get_attribute("track"));
+								if(!track_attribute) std::cerr << "expected track attribute in patevent element\n";
+								else (*lastPattern)[lastPatternPos].notes()[str_hex<int>(track_attribute->get_value())]= data;
 							}
 						}
 					}
 				}
 			}
 		}
-	#elif defined QT_XML_LIB
-		QDomElement patData = root.firstChildElement( "patterndata" );
-		QDomNodeList categories = patData.elementsByTagName( "category" );
-		for ( int i = 0; i < categories.count(); i++ )
-		{
-			QDomElement category = categories.item( i ).toElement();
-			std::string catName = category.attribute("name").toStdString();
-			std::string attrib = category.attribute("color").toStdString();
-			lastCategory = song_->patternSequence()->patternData()->createNewCategory(catName);
-			lastCategory->setColor( str<long>( attrib ) );
-
-			QDomNodeList patterns = category.elementsByTagName( "pattern" );
-			for ( int i = 0; i < patterns.count(); i++ )
-			{
-				QDomElement pattern = patterns.item( i ).toElement();
-			
-				std::string patName = pattern.attribute("name").toStdString();
-				int beatZoom = str_hex<int> (pattern.attribute("zoom").toStdString());
-				lastPattern = lastCategory->createNewPattern(patName);
-				lastPattern->clearBars();
-				lastPattern->setBeatZoom(beatZoom);
-				int pat_id  = str_hex<int> (pattern.attribute("id").toStdString());
-				patMap[pat_id] = lastPattern;
-
-				QDomElement sign = pattern.firstChildElement( "sign" );
-				std::string freeStr = sign.attribute("free").toStdString();
-				if (freeStr != "") {
-					float free = str<float> (freeStr);
-					TimeSignature sig(free);
-					lastPattern->addBar(sig);
-				} else {
-					int num = str<int> (sign.attribute("num").toStdString());
-					int denom = str<int> (sign.attribute("denom").toStdString());
-					int count = str<int> (sign.attribute("count").toStdString());
-					TimeSignature sig(num,denom);
-					sig.setCount(count);
-					lastPattern->addBar(sig);
-				}
-
-				QDomNodeList patlines = pattern.elementsByTagName( "patline" );
-				for ( int i = 0; i < patlines.count(); i++ )
-				{
-					QDomElement patline = patlines.item( i ).toElement();
-					lastPatternPos = str<float> (patline.attribute("pos").toStdString());
-
-					QDomNodeList patevents = patline.elementsByTagName( "patevent" );
-					for ( int i = 0; i < patevents.count(); i++ )
-					{
-						QDomElement patevent = patevents.item( i ).toElement();
-						int trackNumber = str_hex<int> (patevent.attribute("track").toStdString());
-
-						PatternEvent data;
-						data.setMachine( str_hex<int> (patevent.attribute("mac").toStdString()) );
-						data.setInstrument( str_hex<int> (patevent.attribute("inst").toStdString()) );
-						data.setNote( str_hex<int> (patevent.attribute("note").toStdString()) );
-						data.setParameter( str_hex<int> (patevent.attribute("param").toStdString()) );
-						data.setParameter( str_hex<int> (patevent.attribute("cmd").toStdString()) );
-
-						(*lastPattern)[lastPatternPos].notes()[trackNumber]=data;
-					} // patevents
-				} // patlines
-			} // patterns
-		} // categories
-	#else
-		#error none of the supported xml parser libs appear to be available
-	#endif
+	}
 
 	// Sequence data.
-	#if defined PSYCLE__LIBXMLPP_AVAILABLE
-		{
-			xmlpp::Node::NodeList const & sequences(root_element.get_children("sequence"));
-			if(sequences.begin() != sequences.end())
-			{
-				xmlpp::Element const & sequence(dynamic_cast<xmlpp::Element const &>(**sequences.begin()));
-				xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
-				for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i)
-				{
-					xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
-					lastSeqLine = song_->patternSequence()->createNewLine();
-					xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
-					for(xmlpp::Node::NodeList::const_iterator i = sequencer_entries.begin(); i != sequencer_entries.end(); ++i)
-					{
-						xmlpp::Element const & sequencer_entry(dynamic_cast<xmlpp::Element const &>(**i));
-						xmlpp::Attribute const * const id_attribute(sequencer_entry.get_attribute("patid"));
-						if(!id_attribute) std::cerr << "expected patid attribute in seqentry element\n";
-						else {
+	{
+		xmlpp::Node::NodeList const & sequences(root_element.get_children("sequence"));
+		if(sequences.begin() != sequences.end()) {
+			xmlpp::Element const & sequence(dynamic_cast<xmlpp::Element const &>(**sequences.begin()));
+			xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
+			for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i)	{
+				xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
+				lastSeqLine = song_->patternSequence()->createNewLine();
+				xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
+				for(xmlpp::Node::NodeList::const_iterator i = sequencer_entries.begin(); i != sequencer_entries.end(); ++i) {
+					xmlpp::Element const & sequencer_entry(dynamic_cast<xmlpp::Element const &>(**i));
+					xmlpp::Attribute const * const id_attribute(sequencer_entry.get_attribute("patid"));
+					if(!id_attribute) std::cerr << "expected patid attribute in seqentry element\n";
+					else {
 							std::map<int, SinglePattern*>::iterator it = patMap.find(str<int>(id_attribute->get_value()));
 							if(it != patMap.end()) {
 								SinglePattern * pattern = it->second;
@@ -452,45 +330,11 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 									}
 								}
 							}
-						}
 					}
 				}
 			}
 		}
-	#elif defined QT_XML_LIB
-		QDomElement seqData = root.firstChildElement( "sequence" );
-		QDomNodeList seqlines = seqData.elementsByTagName( "seqline" );
-		for ( int i = 0; i < seqlines.count(); i++ )
-		{
-			QDomElement seqline = seqlines.item( i ).toElement();
-			lastSeqLine = song_->patternSequence()->createNewLine();
-			std::cout << "create seqline" << std::endl;
-
-			QDomNodeList seqentries = seqline.elementsByTagName( "seqentry" );
-			for ( int i = 0; i < seqentries.count(); i++ )
-			{
-				QDomElement seqentry = seqentries.item( i ).toElement();
-				double pos =  str<double> (seqentry.attribute("pos").toStdString());
-				int pat_id  = str<int> (seqentry.attribute("patid").toStdString());
-				float startPos = str<float> (seqentry.attribute("start").toStdString());
-				float endPos = str<float> (seqentry.attribute("end").toStdString());
-				int transpose  = str_hex<int> (seqentry.attribute("transpose").toStdString());
-				std::map<int, SinglePattern*>::iterator it = patMap.begin();
-				it = patMap.find( pat_id );
-				if ( it != patMap.end() ) {
-					SinglePattern* pattern = it->second; 
-					if (pattern) {
-						SequenceEntry* entry = lastSeqLine->createEntry(pattern, pos);
-						entry->setStartPos(startPos);
-						entry->setEndPos(endPos);
-						entry->setTranspose(transpose);
-					}
-				}
-			} // seqentries
-		} // seqlines
-	#else
-		#error none of the supported xml parser libs appear to be available
-	#endif
+	}
 
 	if (true) {
 		RiffFile file;
