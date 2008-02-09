@@ -92,6 +92,6 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 
 const int LineNumberColumn::width()
 {
-  return width_;
+	return width_;
 }
 } // namespace qpsycle

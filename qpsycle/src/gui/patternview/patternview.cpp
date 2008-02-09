@@ -182,7 +182,7 @@ void PatternView::onTick( double offsetPos ) {
 			int oldPlayPos = playPos_;
 			playPos_ = liney;
 			int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
-			int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );			
+			int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );	
 			patternGrid()->update( patternGrid()->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ) );
 			patternGrid()->update( patternGrid()->repaintTrackArea( liney, liney, startTrack, endTrack ) );
 		}
