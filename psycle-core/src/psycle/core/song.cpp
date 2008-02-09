@@ -46,7 +46,7 @@ CoreSong::CoreSong(MachineCallbacks* callbacks)
 	clear(); /* Warning! Due to C++ semantics
 		CoreSong::clear() will be called, even in
 		a derived class that implements clear().
-	*/      
+	*/
 }
 
 CoreSong::~CoreSong() {
@@ -101,7 +101,7 @@ Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinde
 	int fb; 
 	if ( key == PluginFinderKey::internalSampler() ) {
 		fb = GetFreeBus();
-		CreateMachine(finder.psycle_path(), MACH_SAMPLER, x, y, "SAMPLER", fb );  
+		CreateMachine(finder.psycle_path(), MACH_SAMPLER, x, y, "SAMPLER", fb );
 	} else if ( finder.info( key ).type() == MACH_PLUGIN ) 
 	{
 		if ( finder.info( key ).mode() == MACHMODE_FX ) {
@@ -112,11 +112,11 @@ Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinde
 	{
 		fb = GetFreeFxBus();
 		LADSPAMachine* plugin = new LADSPAMachine( machinecallbacks, fb, this );
-		if  ( plugin->loadDll( key.dllPath(), key.index() ) ) {
+		if(plugin->loadDll( key.dllPath(), key.index())) {
 			plugin->SetPosX( x );
 			plugin->SetPosY( y );
 			plugin->Init();
-			if( machine_[fb] )  DestroyMachine( fb );
+			if( machine_[fb] ) DestroyMachine( fb );
 			machine_[ fb ] = plugin;
 		} else {
 			delete plugin;

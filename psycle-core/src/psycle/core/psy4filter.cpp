@@ -123,30 +123,30 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 			(get_first_element(root_element,"info"));
 
 		try {
-			song_->setName
-				(get_attribute(get_first_element(info,"name"),
-											 "text"
-											 ).get_value());
+			song_->setName(
+				get_attribute(get_first_element(info,"name"),
+					"text"
+				).get_value());
 		}
 		catch(...) {
 			std::cerr << "couldn't read name of song" << std::endl;
 		}
 
 		try {
-			song_->setAuthor
-				(get_attribute(get_first_element(info,"author"),
-											 "text"
-											 ).get_value());
+			song_->setAuthor(
+				get_attribute(get_first_element(info,"author"),
+					"text"
+				).get_value());
 		}
 		catch(...) {
 			std::cerr << "couldn't read author of song" << std::endl;
 		}
 
-		try	{
-			song_->setComment
-				(get_attribute(get_first_element(info,"comment"),
-											 "text"
-											 ).get_value());
+		try {
+			song_->setComment(
+				get_attribute(get_first_element(info,"comment"),
+					"text"
+				).get_value());
 		}
 		catch(...) {
 			std::cerr << "couldn't read song comment" << std::endl;
@@ -201,9 +201,9 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 					}
 					
 					try {
-						patMap[str_hex<int>
-									 (get_attribute(pattern,"id").get_value())
-									 ] = lastPattern;
+						patMap[str_hex<int>(
+							get_attribute(pattern,"id").get_value())
+						] = lastPattern;
 					}
 					catch(...) {
 						std::cerr << "expected id attribute in pattern element\n";
@@ -214,20 +214,20 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 							(get_first_element(pattern,"sign"));
 						
 						try {
-							lastPattern->addBar
-								(TimeSignature
-								 (get_attr<float>(signature,"free")));
+							lastPattern->addBar(
+								TimeSignature(
+									get_attr<float>(signature,"free")));
 						}
 						catch(...) {
 							// no 'free' attribute found, so
 							// try reading a 'num'/'denom' style time sig
 							try {
-								TimeSignature sig
-									(get_attr<int>(signature,"num"),
-									 get_attr<int>(signature,"denom"));
+								TimeSignature sig(
+									get_attr<int>(signature,"num"),
+									get_attr<int>(signature,"denom"));
 								
-								sig.setCount
-									(get_attr<int>(signature,"count"));
+								sig.setCount(
+									get_attr<int>(signature,"count"));
 								
 								lastPattern->addBar(sig);
 							}
@@ -261,7 +261,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 							xmlpp::Node::NodeList const & pattern_events
 								(pattern_line.get_children("patevent"));
 							
-							for(xmlpp::Node::NodeList::const_iterator i = pattern_events.begin(); i != pattern_events.end(); ++i)	{
+							for(xmlpp::Node::NodeList::const_iterator i = pattern_events.begin(); i != pattern_events.end(); ++i) {
 								
 								try { // each pattern event
 									xmlpp::Element const & pattern_event
@@ -340,7 +340,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 			(get_first_element(root_element,"sequence"));
 
 		xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
-		for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i)	{
+		for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i) {
 			xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
 			lastSeqLine = song_->patternSequence()->createNewLine();
 			xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
@@ -453,7 +453,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 				}
 			}
 			// For invalid version chunks, or chunks that haven't been read correctly/completely.
-			if  (file.GetPos() != fileposition+size)
+			if(file.GetPos() != fileposition+size)
 			{
 			///\todo: verify how it works with invalid data.
 			//if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
@@ -562,7 +562,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	std::ostringstream xml;
 	xml << "<psy4>" << std::endl;
 	xml << "<info>" << std::endl;
-	xml << "<name   text='" << replaceIllegalXmlChr( song.name() ) << "' />" << std::endl;
+	xml << "<name text='" << replaceIllegalXmlChr( song.name() ) << "' />" << std::endl;
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
@@ -668,7 +668,7 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong & song )
 	file->Write(size);
 
 	chunkcount = 3; // 3 chunks plus:
-	for(unsigned int i(0) ; i < MAX_MACHINES    ; ++i)
+	for(unsigned int i(0) ; i < MAX_MACHINES; ++i)
 			if(song.machine(i)) ++chunkcount;
 	for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i)
 			if(!song._pInstrument[i]->Empty()) ++chunkcount;
