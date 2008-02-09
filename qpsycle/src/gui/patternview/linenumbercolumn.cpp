@@ -48,7 +48,7 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 {
 	Q_UNUSED( event );
 	QPainter painter( this );
-	setGeometry( 0 , patternDraw->trackHeight(), width(), patternDraw()->height() );
+	setGeometry( 0 , patternDraw()->trackHeaderHeight(), width(), patternDraw()->height() );
 	
 	int ch = patternDraw()->height();//clientHeight();
 	QColor lineColor( Qt::black );
