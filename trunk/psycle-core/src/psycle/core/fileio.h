@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\interface psy::core::RiffFile
 #pragma once
 

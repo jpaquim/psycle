@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 // Constants used by psycle
 #pragma once
 #define PSYCLE__CONSTANTS

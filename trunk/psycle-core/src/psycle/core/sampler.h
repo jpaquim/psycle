@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief interface file for psy::core::Sampler. based on psyclemfc revision 5903
 #pragma once

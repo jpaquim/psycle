@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /* ladspa.h
 
 		Linux Audio Developer's Simple Plugin API Version 1.1[LGPL].
