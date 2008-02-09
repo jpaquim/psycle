@@ -1,6 +1,6 @@
 /* -*- mode:c++, indent-tabs-mode:t -*- */
 /**************************************************************************
-*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*   Copyright 2007-2008 Psycledelics http://psycle.sourceforge.net        *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -71,7 +71,7 @@ bool TweakTrackInfo::operator<(const TweakTrackInfo & key) const {
 int SinglePattern::idCounter = 0;
 
 int SinglePattern::genId() {
-  return idCounter++;
+	return idCounter++;
 }
 
 SinglePattern::SinglePattern()
