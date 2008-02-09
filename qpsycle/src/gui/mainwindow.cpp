@@ -628,45 +628,47 @@ namespace qpsycle {
 	void MainWindow::populateMachineCombo()
 	{
 		// <nmather> I think it would be preferable to populate
-		// this from a machines model, rather than directly accessing the CoreSong.
+		// this from a machines model that can be shared with other widgets,
+		// rather than directly accessing the CoreSong.
 		if (!song_) return;
 		int currentIndex = macCombo_->currentIndex();
 
 		macCombo_->clear();
 
-		bool comboIsEmpty=true;
+		bool noMachinesLoaded=true;
 		std::ostringstream buffer;
-		buffer.setf(std::ios::uppercase);
+		buffer.setf( std::ios::uppercase );
 
-		for (int b=0; b<psy::core::MAX_BUSES; b++) // Generators.
+		for ( int b=0; b<psy::core::MAX_BUSES; b++ ) // Generators.
 		{
-			if( song_->machine(b)) {
+			if ( song_->machine(b) ) {
 				buffer.str("");
 				buffer << std::setfill('0') << std::hex << std::setw(2);
 				buffer << b << ": " << song_->machine(b)->GetEditName();
 				macCombo_->addItem( QString::fromStdString( buffer.str() ), song_->machine(b)->id() );
 
-				comboIsEmpty = false;
+				noMachinesLoaded = false;
 			}
 		}
 
 		macCombo_->addItem( "--------------------------");
 
-		for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Effects.
+		for ( int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++ ) // Effects.
 		{
-			if(song_->machine(b)) {
+			if ( song_->machine(b) ) {
 				buffer.str("");
 				buffer << std::setfill('0') << std::hex << std::setw(2);
 				buffer << b << ": " << song_->machine(b)->GetEditName();
 				macCombo_->addItem( QString::fromStdString( buffer.str() ), song_->machine(b)->id() );
-				comboIsEmpty = false;
+				noMachinesLoaded = false;
 			}
 		}
 
-		if (comboIsEmpty) {
-			macCombo_->addItem( "No Machines Loaded" );
-			currentIndex = 1;
+		if ( noMachinesLoaded ) {
+			macCombo_->setItemText( 0, "No Machines Loaded" );
+			currentIndex = 0;
 		}
+
 		macCombo_->setCurrentIndex( currentIndex );
 		macCombo_->update();
 	}
@@ -835,6 +837,22 @@ namespace qpsycle {
 		}
 	}
 
+	void MainWindow::machineIncrement()
+	{
+		if ( macCombo_->currentIndex() + 1 > macCombo_->count()-1 )
+			macCombo_->setCurrentIndex( 0 );
+		else
+			macCombo_->setCurrentIndex( macCombo_->currentIndex() + 1 );
+	}
+
+	void MainWindow::machineDecrement()
+	{
+		if ( macCombo_->currentIndex() - 1 < 0  )
+			macCombo_->setCurrentIndex( macCombo_->count()-1 );
+		else
+			macCombo_->setCurrentIndex( macCombo_->currentIndex() - 1 );
+	}
+
 	void MainWindow::instrumentDecrement()
 	{
 		sampCombo_->setCurrentIndex( std::max( 0, sampCombo_->currentIndex() - 1 ) );
@@ -845,28 +863,14 @@ namespace qpsycle {
 		sampCombo_->setCurrentIndex( std::min( sampCombo_->currentIndex() + 1, psy::core::MAX_INSTRUMENTS-1 ) );
 	}
 
-///\todo bounds checking
-	void MainWindow::octaveIncrement()
-	{
-		octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() + 1 ) );
-	}
-
-///\todo bounds checking
 	void MainWindow::octaveDecrement()
 	{
-		octCombo_->setCurrentIndex( std::min( 8, octCombo_->currentIndex() - 1 ) );
+		octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() - 1 ) );
 	}
 
-///\todo bounds checking
-	void MainWindow::machineIncrement()
+	void MainWindow::octaveIncrement()
 	{
-		macCombo_->setCurrentIndex( macCombo_->currentIndex() + 1 );
-	}
-
-///\todo bounds checking
-	void MainWindow::machineDecrement()
-	{
-		macCombo_->setCurrentIndex( macCombo_->currentIndex() - 1 );
+		octCombo_->setCurrentIndex( std::min( octCombo_->currentIndex() + 1 , 8 ) );
 	}
 
 	void MainWindow::aboutQpsycle() 

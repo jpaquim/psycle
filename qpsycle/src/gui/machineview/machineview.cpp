@@ -379,8 +379,9 @@ void MachineView::addNewMachineGui( psy::core::Machine *mac )
 	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
 		setChosenMachine( macGui );
 		song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
-		emit newMachineCreated( mac );
 	}
+	emit newMachineCreated( mac );
+
 	scene()->update( scene()->itemsBoundingRect() );
 }
 
