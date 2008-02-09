@@ -33,10 +33,11 @@
 
 namespace qpsycle {
 
-TrackHeader::TrackHeader( int height, PatternDraw * pPatternDraw ) 
+const int TrackHeader::height_ = 20;
+
+TrackHeader::TrackHeader( PatternDraw * pPatternDraw ) 
 	: QWidget(pPatternDraw),
-		pDraw(pPatternDraw),
-		height_(height)
+		pDraw(pPatternDraw)
 {}
 
 TrackHeader::~ TrackHeader( )
@@ -50,8 +51,8 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 
 	QPainter painter(this);
 	painter.setBrush( QBrush( QColor(30,30,30) ) );
-	setGeometry( pDraw->lineNumColWidth(), 0, viewableWidth, pDraw->trackHeaderHeight() );
-	painter.drawRect( 0, 0, viewableWidth, pDraw->trackHeaderHeight() );
+	setGeometry( pDraw->lineNumColWidth(), 0, viewableWidth, height() );
+	painter.drawRect( 0, 0, viewableWidth, height() );
 
 	int scrollDx = pDraw->horizontalScrollBar()->value();
 	int spacingWidth = 5;
@@ -74,5 +75,8 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 		}
 	}
 }
-
+const int TrackHeader::height()
+{
+	return height_;
+}
 } // namespace qpsycle

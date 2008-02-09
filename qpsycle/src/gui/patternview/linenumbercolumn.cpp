@@ -31,6 +31,8 @@
 
 namespace qpsycle {
 
+const int LineNumberColumn::width_ = 50;
+
 LineNumberColumn::LineNumberColumn( PatternDraw *patDraw ) 
 	: QWidget( patDraw )
 {
@@ -45,15 +47,16 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 {
 	Q_UNUSED( event );
 	QPainter painter( this );
-	int columnWidth = 50;
-	int ch = height();//clientHeight();
+	setGeometry( 0 , patternDraw->trackHeight(), width(), patternDraw()->height() );
+	
+	int ch = patternDraw()->height();//clientHeight();
 	QColor lineColor( Qt::black );
 	QColor textColor( QColor(200,200,200) );
 //    TimeSignature signature;
-	int rowHeight = patternDraw()->patternView()->rowHeight();
+	int rowHeight = patternDraw()->rowHeight();
 	painter.setPen( QPen ( Qt::black ) );
 	painter.setBrush( QBrush ( QColor(30,30,30 ) ) );
-	painter.drawRect(0, 0, columnWidth, ch );
+	painter.drawRect(0, 0, width(), ch );
 
 	int dy_ = patternDraw()->verticalScrollBar()->value();
 	int absTop  = 0;//absoluteTop();
@@ -80,11 +83,15 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 	for (int i = startLine; i <= endLine; i++) 
 	{
 				QString text = QString::number( i );
-				QRectF textBound( 0, i*rowHeight - dy_, columnWidth, rowHeight );
+				QRectF textBound( 0, i*rowHeight - dy_, width(), rowHeight );
 				painter.setPen( QPen ( textColor ) );
 				painter.drawText( textBound, text, QTextOption( Qt::AlignRight ) );
 	}
 	
 }
 
+const int LineNumberColumn::width()
+{
+  return width_;
+}
 } // namespace qpsycle

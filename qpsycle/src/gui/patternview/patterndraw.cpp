@@ -48,36 +48,34 @@ PatternDraw::PatternDraw( PatternView *patView )
 	scene_->setBackgroundBrush( QColor( 30, 30, 30 ) );
 	setScene(scene_);
 		
-	setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn ); // FIXME: set to always on as AsNeeded has a bug in 4.2
-	//setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff ); // Will be fixed in 4.3.
-	// see: http://www.trolltech.com/developer/task-tracker/index_html?method=entry&id=152477
-	//Mattias: is there a reason why scrollbard were off???
-
-	trackHeaderHeight_ = 20;
-	lineNumColWidth_ = 50;
+	const int trackHeaderHeight_ = TrackHeader::height();
+	const int lineNumColWidth_ = LineNumberColumn::width();
 
 	setViewportMargins( lineNumColWidth_, trackHeaderHeight_, 0, 0);
 
 	patGrid_ = new PatternGrid( this );
 	lineNumCol_ = new LineNumberColumn( this );
 	lineNumCol_->setGeometry( 0, trackHeaderHeight_+2, lineNumColWidth_, height() );
-	trackHeader_ = new TrackHeader( trackHeaderHeight_, this );
+	trackHeader_ = new TrackHeader( this );
 
-	//disabled. This is done by patternview, when setting numberOfTracks.
+	//disabled. This is now called from patternview constructor, via a call to numberOfTracks.
 	//setupTrackGeometrics( patView_->numberOfTracks() );
 	//alignTracks();
 	
 	scene_->addItem( patGrid_ );
+	///\todo: Isn't it better to add lineNumCol and trackHeader to the scene too?
 	patGrid_->setPos( 0, 0 );
 }
 
 PatternDraw::~PatternDraw()
 {
+	///\todo: why so?
 	patGrid_->patDraw(0);
 	qWarning( "Delete PatternDraw: 0x%p.\n", this);
 }
 
-
+//FIXME: Several comments here: First, if we are going to modify all values, why not empty the map?
+// next, since alignTracks is executed after setupTrackGemetrics, wouldn't it make sense to be the same function?
 void PatternDraw::setupTrackGeometrics( int numberOfTracks, int visibleColumns ) 
 {
 	for ( int newTrack = 0; newTrack < numberOfTracks; newTrack++ ) {
@@ -107,6 +105,16 @@ void PatternDraw::alignTracks()
 
 const std::map<int, TrackGeometry> & PatternDraw::trackGeometrics() const {
 	return trackGeometryMap;
+}
+
+int PatternDraw::rowHeight( ) const
+{
+        return 13;
+}
+
+int PatternDraw::trackWidth() const
+{
+	return 130;
 }
 
 /** 
@@ -175,6 +183,15 @@ TrackGeometry PatternDraw::findTrackGeomByTrackNum( int trackNum )
 		return it->second;
 	}
 	return TrackGeometry( *this );
+}
+
+int PatternDraw::lineNumColWidth() const
+{
+	return lineNumCol_->width();
+}
+int PatternDraw::trackHeaderHeight() const
+{
+	return trackHeader_->height();
 }
 
 void PatternDraw::scrollContentsBy ( int dx, int dy ) 

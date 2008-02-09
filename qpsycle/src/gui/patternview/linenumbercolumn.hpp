@@ -39,9 +39,11 @@ public:
 	PatternDraw *patternDraw() { return patternDraw_; }
 
 
+	static const int width();
 private:
 
 	PatternDraw *patternDraw_;
+	static const int width_;
 };
 
 } // namespace qpsycle
