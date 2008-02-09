@@ -835,16 +835,14 @@ namespace qpsycle {
 		}
 	}
 
-///\todo bounds checking
 	void MainWindow::instrumentDecrement()
 	{
-		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() - 1 );
+		sampCombo_->setCurrentIndex( std::max( 0, sampCombo_->currentIndex() - 1 ) );
 	}
 
-///\todo bounds checking
 	void MainWindow::instrumentIncrement()
 	{
-		sampCombo_->setCurrentIndex( sampCombo_->currentIndex() + 1 );
+		sampCombo_->setCurrentIndex( std::min( sampCombo_->currentIndex() + 1, psy::core::MAX_INSTRUMENTS-1 ) );
 	}
 
 ///\todo bounds checking
