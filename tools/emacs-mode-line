@@ -14,8 +14,8 @@ for f in $(find "$@" \( \
 \))
 do
 	grep -F ' -*- ' $f > /dev/null || {
-		echo $f
-		tmp=/tmp/$(basename $0).tmp
+		echo $f &&
+		tmp=/tmp/$(basename $0).tmp &&
 		cp $f $tmp &&
 		echo '/* -*- mode:c++, indent-tabs-mode:t -*- */' > $f &&
 		cat $tmp >> $f &&
