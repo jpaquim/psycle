@@ -145,6 +145,7 @@ namespace psy
 
 			int id_;
 			static int idCounter;
+      static int genId();
 
 			std::map<TweakTrackInfo, int> tweakInfoMap;
 
