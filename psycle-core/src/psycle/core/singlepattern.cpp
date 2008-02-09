@@ -69,6 +69,10 @@ bool TweakTrackInfo::operator<(const TweakTrackInfo & key) const {
 
 int SinglePattern::idCounter = 0;
 
+int SinglePattern::genId() {
+  return idCounter++;
+}
+
 SinglePattern::SinglePattern()
 {
 	TimeSignature timeSig;
@@ -76,8 +80,7 @@ SinglePattern::SinglePattern()
 	timeSignatures_.push_back( timeSig  );
 	beatZoom_ = 4;
 	category_ = 0;
-	id_ = idCounter;
-	idCounter++;
+	id_ = genId();
 }
 
 // Explicit copy constructor needed because boost::signal is noncopyable
@@ -88,7 +91,7 @@ SinglePattern::SinglePattern(SinglePattern const& other)
 , category_(other.category_)
 , timeSignatures_(other.timeSignatures_)
 , zeroTime(other.zeroTime)
-, id_(other.id_)
+, id_(genId())
 , tweakInfoMap(other.tweakInfoMap)
 {
 }
