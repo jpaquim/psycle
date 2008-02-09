@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include <packageneric/pre-compiled.private.hpp>
 // Here It goes the "mi" declaration. It has been moved to track.hpp due to some compiling requirements.
 #include "track.hpp"

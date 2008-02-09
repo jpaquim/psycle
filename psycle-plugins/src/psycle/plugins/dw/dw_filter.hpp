@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 //interface definitions for dwfilter class
 
 #pragma once

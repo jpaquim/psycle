@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /////////////////////////////////////////////////////////////////////
 // Dmitry "Sartorius" Kulikov stk Plucked plugin for PSYCLE
 // v0.3

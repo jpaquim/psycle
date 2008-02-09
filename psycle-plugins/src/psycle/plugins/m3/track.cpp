@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include <packageneric/pre-compiled.private.hpp>
 #include "track.hpp"
 #include <cassert>

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #pragma once
 #include <cmath>
 #include <psycle/plugin_interface.hpp>

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 //////////////////////////////////////////////////////////////////////
 // MoreAmp EQ effect plugin for PSYCLE by Sartorius
 //

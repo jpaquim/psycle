@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief Alk muter plugin for PSYCLE
 #include <packageneric/pre-compiled.private.hpp>

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ////implementation for dwfilter class
 #include <packageneric/pre-compiled.private.hpp>
 #include "dw_filter.hpp"
