@@ -1,0 +1,23 @@
+#! /bin/sh
+
+cd $(dirname $0)/.. &&
+
+for f in $(find "$@" \( \
+	-name \*.cpp -or \
+	-name \*.hpp -or \
+	-name \*.hpp.in -or \
+	-name \*.ipp -or \
+	-name \*.c -or \
+	-name \*.h -or \
+	-name \*.h.in -or \
+	-name \*.i \
+\))
+do
+	grep -F ' -*- ' $f || {
+		tmp=/tmp/$(basename $0).tmp
+		cp $f $tmp &&
+		echo '/* -*- mode:c++, indent-tabs-mode:t -*- */' > $f &&
+		cat $tmp >> $f &&
+		rm -f $tmp
+	}
+done
