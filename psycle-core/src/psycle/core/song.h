@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief interface file for psy::core::Song
 /// based on psycle mfc revision 2730

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\todo This is not up-to-date and should be replaced with the common psycle/helpers/helpers.hpp
 
 /***************************************************************************

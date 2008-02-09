@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 		///\brief implementation file for beerz77-2 algorithm.
 		/// beerz77-2 algorithm by jeremy evers, loosely based on lz77

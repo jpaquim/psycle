@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /*
 	* zipreader
 	* a library for reading zipfiles

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #ifndef PLUGINFINDERKEY_HPP
 #define PLUGINFINDERKEY_HPP
 
