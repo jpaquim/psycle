@@ -109,7 +109,7 @@ const std::map<int, TrackGeometry> & PatternDraw::trackGeometrics() const {
 
 int PatternDraw::rowHeight( ) const
 {
-        return 13;
+	return 13;
 }
 
 int PatternDraw::trackWidth() const
