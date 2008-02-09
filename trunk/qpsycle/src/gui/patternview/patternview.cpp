@@ -52,9 +52,9 @@ PatternView::PatternView( psy::core::Song *song )
 	song_ = song;
 	pattern_ = NULL;
 	patternStep_ = 1;
-	setNumberOfTracks( 6 );
+	
 	patDraw_ = new PatternDraw( this );
-
+	setNumberOfTracks( 6 );
 	playPos_ = 0;
 
 	setSelectedMachineIndex( 255 ); // FIXME: why 255?
@@ -68,6 +68,7 @@ PatternView::PatternView( psy::core::Song *song )
 
 PatternView::~PatternView()
 {
+	delete patDraw_;
 	qWarning( "Delete PatternView: 0x%p.\n", this);
 }
 
@@ -234,6 +235,7 @@ int PatternView::octave( ) const
 void PatternView::setNumberOfTracks( int numTracks )
 {
 	numberOfTracks_ = numTracks;
+	patDraw_->setupTrackGeometrics(numTracks);
 }
 
 void PatternView::setPattern( psy::core::SinglePattern *pattern )
