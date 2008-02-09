@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include <packageneric/pre-compiled.private.hpp>
 #include "y_midi.hpp"
 #include "gmnames.h"

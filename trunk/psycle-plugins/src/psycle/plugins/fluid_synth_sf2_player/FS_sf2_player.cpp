@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /////////////////////////////////////////////////////////////////////
 // Dmitry "Sartorius" Kulikov FluidSynth plugin for PSYCLE
 //

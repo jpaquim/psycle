@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #pragma once
 
 #define TWOPI 6.283185307179586476925286766559

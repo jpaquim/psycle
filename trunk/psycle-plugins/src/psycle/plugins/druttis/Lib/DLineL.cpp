@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 //============================================================================
 //
 //				DLineL (Linear Interpolating Delay Line)

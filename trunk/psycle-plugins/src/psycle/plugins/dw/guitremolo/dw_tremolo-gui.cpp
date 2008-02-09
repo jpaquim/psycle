@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 //																dw tremolo, with the new gui
 
 // since this is the first plugin to use the new gui code, i'm commenting it pretty heavily to help other people convert their own

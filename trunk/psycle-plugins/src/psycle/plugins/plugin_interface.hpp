@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\interface psycle native plugin interface api
 
 #pragma once
