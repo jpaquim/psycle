@@ -967,7 +967,7 @@ namespace qpsycle {
 				bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
 
 				if ( isPlayPattern )
-					patView_->onTick( entryStart );
+					patView_->onTick( psy::core::Player::Instance()->playPos() - entryStart ) ;
 			}
 		}
 	}

@@ -41,6 +41,13 @@ class LineNumberColumn;
 class PatternDraw;
 class PatternGrid;
 class PatCursor;
+/*!
+ * \brief
+ * Tab object for the Pattern View.
+ * 
+ * PatternView is the object that holds the whole pattern view (the tab).
+ */
+
 
 class PatternView : public QWidget {
 Q_OBJECT
@@ -49,20 +56,22 @@ public:
 	PatternView( psy::core::Song *song );
 	~PatternView();
 
+	//FIXME: These three functions should be placed inside patternGrid, and have a signal call for view update
 	bool enterNote( const PatCursor & cursor, int note );
 	bool enterNoteOff( const PatCursor & cursor );
 	void clearNote( const PatCursor & cursor);
-	void onTick( double sequenceStart );
+	// Called from mainwindow's periodical update to refresh playback position
+	void onTick( double offsetPos );
+
 
 	// Getters.
 	psy::core::Song *song() { return song_; }
 	psy::core::SinglePattern *pattern() const { return pattern_; }
 	PatternDraw* patDraw() { return patDraw_; }
 	PatternGrid* patternGrid(); 
-	int rowHeight() const;
+
 	int numberOfLines() const;
 	int numberOfTracks() const;
-	int trackWidth() const;
 	int selectedMachineIndex() const;
 	int playPos() { return playPos_; }
 	int beatZoom() const;
@@ -82,7 +91,7 @@ public:
 public slots:
 	void onPatternStepComboBoxIndexChanged( int newIndex );
 	void onTracksComboBoxIndexChanged( int index );
-
+	void onZoomComboBoxIndexChanged( int );
 protected:
 	void showEvent( QShowEvent * event );
 
@@ -104,11 +113,11 @@ private:
 	QVBoxLayout *layout_;
 	QToolBar *toolBar_;
 	QComboBox *patStepCbx_;
-	QComboBox *patternCbx_;
 	QAction *addBarAct_;
 	QAction *delBarAct_;
 	QAction *recordCb_;
 	QComboBox *tracksCbx_;
+	QComboBox *zoomCbx_;
 };
 
 } // namespace qpsycle

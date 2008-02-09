@@ -31,13 +31,15 @@ class PatternDraw;
 
 class TrackHeader: public QWidget {
 public:
-	TrackHeader( int height, PatternDraw* pPatternDraw );
+	TrackHeader( PatternDraw* pPatternDraw );
 	~TrackHeader();
 
 	void paintEvent( QPaintEvent *event );
+
+	static const int height();
 private:
 	PatternDraw* pDraw;
-	int height_;
+	static const int height_;
 };
 
 } // namespace qpsycle

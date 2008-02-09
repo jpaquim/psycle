@@ -94,6 +94,9 @@ public:
 	void setupTrackGeometrics( int numberOfTracks , int visibleColumns = 5);
 	void alignTracks();
 
+	int rowHeight( ) const;
+	int trackWidth() const;
+
 	int gridWidthByTrack( int track ) const;
 	int findTrackByXPos( int x ) const;
 	int xOffByTrack( int track ) const;
@@ -103,8 +106,8 @@ public:
 	int trackPaddingLeft() const { return 5; }
 	int trackPaddingRight() const { return 5; }
 
-	int lineNumColWidth() const { return lineNumColWidth_; }
-	int trackHeaderHeight() const { return trackHeaderHeight_; }
+	int lineNumColWidth() const; 
+	int trackHeaderHeight() const; 
 
 protected:
 	void scrollContentsBy ( int dx, int dy );
@@ -118,9 +121,6 @@ private:
 	PatternGrid *patGrid_;
 	LineNumberColumn *lineNumCol_;
 	TrackHeader *trackHeader_;
-
-	int lineNumColWidth_;
-	int trackHeaderHeight_;
 
 	psy::core::SinglePattern *pattern_;
 };

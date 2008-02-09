@@ -79,9 +79,10 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
 	addEvent( ColumnEvent::hex4 );
 
 	// just for test !
-	addEvent( ColumnEvent::hex4 );
-	addEvent( ColumnEvent::hex4 );
-	addEvent( ColumnEvent::hex4 );
+	// To make them visible, the number of colums of the TrackGeometry has to be changed.
+	//addEvent( ColumnEvent::hex4 );
+	//addEvent( ColumnEvent::hex4 );
+	//addEvent( ColumnEvent::hex4 );
 	// end of multi paraCmd
 	//
 	selection_.set( 0,0,0,0 );
@@ -463,7 +464,7 @@ std::string PatternGrid::noteToString( int value)
 
 int PatternGrid::lineHeight() const
 {
-	return patDraw_->patternView()->rowHeight();
+	return patDraw_->rowHeight();
 }
 
 bool PatternGrid::lineGridEnabled() const

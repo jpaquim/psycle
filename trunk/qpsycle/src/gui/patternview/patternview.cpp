@@ -54,21 +54,21 @@ PatternView::PatternView( psy::core::Song *song )
 	patternStep_ = 1;
 	
 	patDraw_ = new PatternDraw( this );
-	setNumberOfTracks( 6 );
+	setNumberOfTracks( 10 );
 	playPos_ = 0;
 
 	setSelectedMachineIndex( 255 ); // FIXME: why 255?
 	layout_ = new QVBoxLayout();
-	setLayout( layout_ );
 	// Create the toolbar.
 	createToolBar();
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( patDraw_ );
+	setLayout( layout_ );
 }
 
 PatternView::~PatternView()
 {
-	delete patDraw_;
+	//Objects don't need to be deleted, since QWidget deletes the layout, and layout deletes its widgets too
 	qWarning( "Delete PatternView: 0x%p.\n", this);
 }
 
@@ -103,11 +103,19 @@ void PatternView::createToolBar()
 	connect( tracksCbx_, SIGNAL( currentIndexChanged( int ) ),
 			this, SLOT( onTracksComboBoxIndexChanged( int ) ) );
 
+	zoomCbx_ = new QComboBox();
+	for ( int e = 1; e < 33 ; e++ )
+		zoomCbx_->addItem( QString("1/") + QString::number( e ) );
+
+	connect( zoomCbx_ , SIGNAL( currentIndexChanged( int ) ),
+			this, SLOT( onZoomComboBoxIndexChanged( int ) ) );
 	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
 	toolBar_->addWidget ( tracksCbx_ );
 	toolBar_->addSeparator();
 	toolBar_->addWidget( new QLabel( "Step: " ) );
 	toolBar_->addWidget( patStepCbx_ );
+	toolBar_->addWidget( new QLabel( "Zoom: " ) );
+	toolBar_->addWidget( zoomCbx_ );
 	toolBar_->addSeparator();
 	toolBar_->addAction( addBarAct_ );
 	toolBar_->addAction( delBarAct_ );
@@ -167,14 +175,14 @@ void PatternView::clearNote( const PatCursor & cursor) {
 	}
 }
 
-void PatternView::onTick( double sequenceStart ) {
+void PatternView::onTick( double offsetPos ) {
 	if ( pattern() ) {
-		int liney = d2i ( ( psy::core::Player::Instance()->playPos() - sequenceStart ) * beatZoom() );
+		int liney = d2i ( offsetPos * beatZoom() );
 		if ( liney != playPos_ ) {
 			int oldPlayPos = playPos_;
 			playPos_ = liney;
 			int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
-			int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
+			int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );			
 			patternGrid()->update( patternGrid()->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ) );
 			patternGrid()->update( patternGrid()->repaintTrackArea( liney, liney, startTrack, endTrack ) );
 		}
@@ -183,11 +191,6 @@ void PatternView::onTick( double sequenceStart ) {
 
 
 // Getters.
-int PatternView::rowHeight( ) const
-{
-	return 13;
-}
-
 int PatternView::numberOfLines() const
 {
 	return ( pattern() ) ? static_cast<int> ( pattern()->beatZoom() * pattern()->beats() ) : 0;  
@@ -196,11 +199,6 @@ int PatternView::numberOfLines() const
 int PatternView::numberOfTracks() const
 {
 	return numberOfTracks_;
-}
-
-int PatternView::trackWidth() const
-{
-	return 130;
 }
 
 int PatternView::selectedMachineIndex( ) const
@@ -269,6 +267,14 @@ void PatternView::onTracksComboBoxIndexChanged( int index )
 {
 	setNumberOfTracks( index+1 ); // +1 as combo index begins at 0.
 	patDraw_->scene()->update();
+}
+
+void PatternView::onZoomComboBoxIndexChanged( int index )
+{
+	if ( pattern() ) 
+	{
+		pattern()->setBeatZoom(1 / (index+1));
+	}
 }
 
 void PatternView::keyPressEvent( QKeyEvent *event )
