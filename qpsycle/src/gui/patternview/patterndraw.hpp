@@ -91,7 +91,7 @@ public:
 
 	const std::map<int, TrackGeometry> & trackGeometrics() const;
 
-	void setupTrackGeometrics( int numberOfTracks );
+	void setupTrackGeometrics( int numberOfTracks , int visibleColumns = 5);
 	void alignTracks();
 
 	int gridWidthByTrack( int track ) const;

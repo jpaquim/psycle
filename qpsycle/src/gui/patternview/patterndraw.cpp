@@ -63,8 +63,9 @@ PatternDraw::PatternDraw( PatternView *patView )
 	lineNumCol_->setGeometry( 0, trackHeaderHeight_+2, lineNumColWidth_, height() );
 	trackHeader_ = new TrackHeader( trackHeaderHeight_, this );
 
-	setupTrackGeometrics( patView_->numberOfTracks() );
-	alignTracks();
+	//disabled. This is done by patternview, when setting numberOfTracks.
+	//setupTrackGeometrics( patView_->numberOfTracks() );
+	//alignTracks();
 	
 	scene_->addItem( patGrid_ );
 	patGrid_->setPos( 0, 0 );
@@ -77,11 +78,11 @@ PatternDraw::~PatternDraw()
 }
 
 
-void PatternDraw::setupTrackGeometrics( int numberOfTracks ) 
+void PatternDraw::setupTrackGeometrics( int numberOfTracks, int visibleColumns ) 
 {
 	for ( int newTrack = 0; newTrack < numberOfTracks; newTrack++ ) {
 		TrackGeometry trackGeometry( *this );
-		trackGeometry.setVisibleColumns( 6 );
+		trackGeometry.setVisibleColumns( visibleColumns );
 		trackGeometryMap[ newTrack ] = trackGeometry;
 	}
 
@@ -90,6 +91,7 @@ void PatternDraw::setupTrackGeometrics( int numberOfTracks )
 	while ( it != trackGeometryMap.end() ) {
 		trackGeometryMap.erase( it++ );
 	}
+	alignTracks();
 }
 
 void PatternDraw::alignTracks() 
