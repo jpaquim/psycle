@@ -234,6 +234,8 @@ void PatternView::setNumberOfTracks( int numTracks )
 {
 	numberOfTracks_ = numTracks;
 	patDraw_->setupTrackGeometrics(numTracks);
+	if ( patternGrid() )
+		patternGrid()->update();
 }
 
 void PatternView::setPattern( psy::core::SinglePattern *pattern )
