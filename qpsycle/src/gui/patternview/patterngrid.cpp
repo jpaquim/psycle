@@ -615,13 +615,16 @@ void PatternGrid::doNoteEvent( int note )
 		moveCursor( 0, patternStep() );
 		checkDownScroll( cursor() );
 	} else if (note >=0 && note < 120) {
-// FIXME: better to emit a signal rather than calling enterNote direct?
+///\todo: better to emit a signal rather than calling enterNote direct?
 		bool noteAdded = patDraw_->patternView()->enterNote( cursor(), note ); 
 		if ( noteAdded ) { 
 			moveCursor( 0, patternStep() );
 			checkDownScroll( cursor() );
 		}
 	}
+
+	// Repaint the row/track area where the note has just been placed.
+	update( patDraw_->xOffByTrack( cursor().track() ), (cursor().line()-1)*lineHeight(), patDraw_->trackWidthByTrack( cursor().track() ), lineHeight() );	
 }
 
 void PatternGrid::centerOnCursor() {
