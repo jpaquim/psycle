@@ -1,8 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2007 psycledelics http://psycle.pastnotecut.org : johan boule
-
-///\file
-///\brief \implementation psycle::front_ends::gui::graph
+// copyright 2000-2008 psycledelics http://psycle.pastnotecut.org : johan boule
+///\implementation psycle::front_ends::gui::graph
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
@@ -11,6 +9,7 @@
 #include <boost/bind.hpp>
 #include <gdkmm/color.h>
 #include <gdkmm/colormap.h>
+#include <gtkmm/stock.h>
 namespace psycle { namespace front_ends { namespace gui {
 	graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 	:
@@ -214,7 +213,7 @@ namespace psycle { namespace front_ends { namespace gui {
 	:
 		group_(*root()),
 		graph_(graph),
-		selected_port_(0),
+		selected_port_(),
 		line_(*root())
 	{
 		//set_center_scroll_region(false);
@@ -227,6 +226,55 @@ namespace psycle { namespace front_ends { namespace gui {
 		line().property_arrow_shape_a() = 20;
 		line().property_arrow_shape_b() = 25;
 		line().property_arrow_shape_c() = 8;
+		
+		action_group_ = Gtk::ActionGroup::create();
+		action_group_->add(Gtk::Action::create("context-menu", "Context Menu"));
+		add_node_type("sequence");
+		add_node_type("sine");
+		add_node_type("decay");
+		add_node_type("additioner");
+		add_node_type("multiplier");
+		add_node_type("output");
+		ui_manager_ = Gtk::UIManager::create();
+		ui_manager_->insert_action_group(action_group_);
+		//xxx.add_accel_group(ui_manager_->get_accel_group());
+		Glib::ustring ui_info =
+			"<ui>"
+			"	<popup name='popup-menu'>"
+			"		<menuitem action='new-sequence-node'/>"
+			"		<menuitem action='new-sine-node'/>"
+			"		<menuitem action='new-decay-node'/>"
+			"		<menuitem action='new-additioner-node'/>"
+			"		<menuitem action='new-multiplier-node'/>"
+			"		<menuitem action='new-output-node'/>"
+			"	</popup>"
+			"</ui>";
+		ui_manager_->add_ui_from_string(ui_info);
+		popup_menu_ = dynamic_cast<Gtk::Menu*>(ui_manager_->get_widget("/popup-menu"));
+	}
+	
+	void canvas::add_node_type(std::string const & type) {
+		action_group_->add(
+			Gtk::Action::create("new-" + type + "-node", Gtk::Stock::NEW, "New " + type, "Create a new " + type + " node"),
+			sigc::bind(sigc::mem_fun(*this, &canvas::on_new_node), type)
+		);
+	}
+	
+	void canvas::on_new_node(std::string const & type) {
+		static int id(0);
+		std::ostringstream name; name << type << id++;
+		node::underlying_type * underlying(0);
+		try {
+			underlying = &static_cast<node::underlying_type&>(graph_instance().resolver()(type, graph_instance(), name.str()));
+		} catch(std::exception const & e) {
+			loggers::exception()(e.what(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		if(underlying) {
+			node & underlying_wrapper(graph_instance().underlying_wrapper(*underlying));
+			Gtk::manage(&underlying_wrapper);
+			underlying_wrapper.property_x() = x_;
+			underlying_wrapper.property_y() = y_;
+		}
 	}
 	
 	bool canvas::on_event(GdkEvent * event) {
@@ -251,16 +299,6 @@ namespace psycle { namespace front_ends { namespace gui {
 					}
 					break;
 					case 2: {
-						window_to_world(x, y, x, y);
-						node::underlying_type & underlying(graph_instance().resolver()("sine", graph_instance(), "node"));
-						node & underlying_wrapper(graph_instance().underlying_wrapper(underlying));
-						Gtk::manage(&underlying_wrapper);
-						underlying_wrapper.property_x() = x;
-						underlying_wrapper.property_y() = y;
-						//return true;
-					}
-					break;
-					case 3: {
 						real bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max;
 						root()->get_bounds(bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max);
 						real scroll_x_min, scroll_y_min, scroll_x_max, scroll_y_max;
@@ -268,6 +306,12 @@ namespace psycle { namespace front_ends { namespace gui {
 						//set_scroll_region(std::min(bounds_x_min, scroll_x_min), std::min(bounds_y_min, scroll_y_min), std::max(bounds_x_max, scroll_x_max), std::max(bounds_y_max, scroll_y_max));
 						set_scroll_region(bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max);
 						//return true;
+					}
+					break;
+					case 3: {
+						window_to_world(x, y, x_, y_);
+						popup_menu_->popup(event->button.button, event->button.time);
+						return true;
 					}
 					break;
 				}

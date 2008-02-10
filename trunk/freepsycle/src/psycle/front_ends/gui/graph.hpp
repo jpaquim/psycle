@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2007 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2000-2008 psycledelics http://psycle.pastnotecut.org : johan boule
 ///\interface psycle::front_ends::gui::graph
 #pragma once
 #include "forward_declarations.hpp"
@@ -15,12 +15,14 @@
 #include <gtkmm/box.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm/actiongroup.h>
+#include <gtkmm/uimanager.h>
 #include <libgnomecanvasmm/canvas.h>
 #include <libgnomecanvasmm/group.h>
 #include <libgnomecanvasmm/rect.h>
 #include <libgnomecanvasmm/line.h>
 #include <libgnomecanvasmm/text.h>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PACKAGENERIC__MODULE__SOURCE__PSYCLE__FRONT_ENDS__GUI__GRAPH
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__FRONT_ENDS__GUI__GRAPH
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 	typedef
@@ -29,8 +31,7 @@ namespace psycle { namespace front_ends { namespace gui {
 			CanvasAA
 				canvas_base;
 	
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base
-	{
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base {
 		public:
 			typedef canvas_base base;
 			canvas(graph &);
@@ -57,6 +58,14 @@ namespace psycle { namespace front_ends { namespace gui {
 			Gnome::Canvas::Line inline & line() { return line_; }
 		private:
 			Gnome::Canvas::Line line_;
+			
+		private:
+			Glib::RefPtr<Gtk::ActionGroup> action_group_;
+			void add_node_type(std::string const & type);
+			void on_new_node(std::string const & type);
+			Glib::RefPtr<Gtk::UIManager> ui_manager_;
+			Gtk::Menu * popup_menu_;
+			real x_, y_;
 	};
 
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
@@ -133,6 +142,7 @@ namespace psycle { namespace front_ends { namespace gui {
 			void on_select(contraption &);
 			void on_move(contraption &);
 	};
+	
 	namespace ports {
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output {
 			protected: friend class virtual_factory_access;
