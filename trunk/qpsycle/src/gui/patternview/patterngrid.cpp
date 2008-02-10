@@ -1513,13 +1513,10 @@ void PatternGrid::checkLeftScroll( const PatCursor & cursor )
 
 void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
 {
-	///\todo This doesn't work quite correctly -- you really want to scroll right if some
-	// of the current track that you're in is partially obscured, not just if the cursor
-	// goes outside of the viewport.
-	int cursorSceneX = patDraw_->xOffByTrack( std::min( cursor.track() + 1, endTrackNumber() ) );
-	int cursorViewX = patDraw_->mapFromScene( cursorSceneX, 0 ).x();
+	int currentTrackRightSceneX = patDraw_->xEndByTrack( std::min( cursor.track() + 1, endTrackNumber() ) );
+	int currentTrackRightViewX = patDraw_->mapFromScene( currentTrackRightSceneX, 0 ).x();
 
-	if ( cursorViewX > patDraw_->width() ) // the cursor has moved out of the right range of the viewport.
+	if ( currentTrackRightViewX > patDraw_->width() )
 	{
 		patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , endTrackNumber())) - patDraw_->width() );
 	}
