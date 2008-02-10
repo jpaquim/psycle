@@ -624,7 +624,7 @@ void PatternGrid::doNoteEvent( int note )
 	}
 
 	// Repaint the row/track area where the note has just been placed.
-	update( patDraw_->xOffByTrack( cursor().track() ), (cursor().line()-1)*lineHeight(), patDraw_->trackWidthByTrack( cursor().track() ), lineHeight() );	
+	update( patDraw_->xOffByTrack( cursor().track() ), (cursor().line()-1)*lineHeight(), patDraw_->trackWidthByTrack( cursor().track() ), lineHeight() );
 }
 
 void PatternGrid::centerOnCursor() {
