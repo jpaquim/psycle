@@ -240,14 +240,14 @@ namespace psycle { namespace front_ends { namespace gui {
 		//xxx.add_accel_group(ui_manager_->get_accel_group());
 		Glib::ustring ui_info =
 			"<ui>"
-			"	<popup name='popup-menu'>"
-			"		<menuitem action='new-sequence-node'/>"
-			"		<menuitem action='new-sine-node'/>"
-			"		<menuitem action='new-decay-node'/>"
-			"		<menuitem action='new-additioner-node'/>"
-			"		<menuitem action='new-multiplier-node'/>"
-			"		<menuitem action='new-output-node'/>"
-			"	</popup>"
+			" <popup name='popup-menu'>"
+			"  <menuitem action='new-sequence-node'/>"
+			"  <menuitem action='new-sine-node'/>"
+			"  <menuitem action='new-decay-node'/>"
+			"  <menuitem action='new-additioner-node'/>"
+			"  <menuitem action='new-multiplier-node'/>"
+			"  <menuitem action='new-output-node'/>"
+			" </popup>"
 			"</ui>";
 		ui_manager_->add_ui_from_string(ui_info);
 		popup_menu_ = dynamic_cast<Gtk::Menu*>(ui_manager_->get_widget("/popup-menu"));
