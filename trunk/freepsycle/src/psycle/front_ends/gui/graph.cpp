@@ -228,28 +228,35 @@ namespace psycle { namespace front_ends { namespace gui {
 		line().property_arrow_shape_c() = 8;
 		
 		action_group_ = Gtk::ActionGroup::create();
-		action_group_->add(Gtk::Action::create("context-menu", "Context Menu"));
 		add_node_type("sequence");
 		add_node_type("sine");
 		add_node_type("decay");
 		add_node_type("additioner");
 		add_node_type("multiplier");
 		add_node_type("output");
+
 		ui_manager_ = Gtk::UIManager::create();
+		ui_manager_->set_add_tearoffs(true);
 		ui_manager_->insert_action_group(action_group_);
 		//xxx.add_accel_group(ui_manager_->get_accel_group());
-		Glib::ustring ui_info =
-			"<ui>"
-			" <popup name='popup-menu'>"
-			"  <menuitem action='new-sequence-node'/>"
-			"  <menuitem action='new-sine-node'/>"
-			"  <menuitem action='new-decay-node'/>"
-			"  <menuitem action='new-additioner-node'/>"
-			"  <menuitem action='new-multiplier-node'/>"
-			"  <menuitem action='new-output-node'/>"
-			" </popup>"
-			"</ui>";
-		ui_manager_->add_ui_from_string(ui_info);
+		{
+			std::ostringstream s;
+			s << "<ui><popup name='popup-menu'>";
+			{
+				typedef std::list<Glib::RefPtr<Gtk::Action const> > action_list;
+				action_list const & actions(action_group_->get_actions());
+				for(action_list::const_iterator i(actions.begin()), e(actions.end()); i != e; ++i) {
+					if(loggers::information()) {
+						std::ostringstream s; s << "adding ui action: " << (*i)->get_name();
+						loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+					s << "<menuitem action='" << (*i)->get_name() << "'/>";
+				}
+			}
+			s << "</popup></ui>";
+			ui_manager_->add_ui_from_string(s.str());
+		}
+		//ui_manager_->add_ui(ui_manager_->new_merge_id(), "/popup-menu", "new-" + type + "-node", "new-" + type + "-node");
 		popup_menu_ = dynamic_cast<Gtk::Menu*>(ui_manager_->get_widget("/popup-menu"));
 	}
 	
