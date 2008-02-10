@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2008 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2000-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 ///\implementation psycle::front_ends::gui::graph
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
@@ -49,7 +49,14 @@ namespace psycle { namespace front_ends { namespace gui {
 		node_type(parent, underlying),
 		Gnome::Canvas::Group(parent, x, y),
 		contraption_(*this, 0, 0, 0x60606000, underlying.name() + "\n" + underlying.plugin_library_reference().name())
-	{}
+	{
+		menu_ = new Gtk::Menu;
+		Gtk::MenuItem * item;
+		item = new Gtk::MenuItem("Delete");
+		item->signal_activate_item().connect(sigc::mem_fun(*this, &node::on_delete));
+		menu_->append(*item); // menu_->items().push_back(*item);
+		contraption_.signal_event().connect(sigc::mem_fun(*this, &node::on_event_));
+	}
 
 	void node::after_construction() {
 		node_type::after_construction();
@@ -83,10 +90,13 @@ namespace psycle { namespace front_ends { namespace gui {
 		}
 		contraption_instance().raise_to_top();
 	}
+	
+	void node::on_delete() {
+		underlying().free_heap();
+	}
 
-	bool node::on_event(GdkEvent * event) {
-		if(Gnome::Canvas::Group::on_event(event)) return true;
-		#if 0
+	bool node::on_event_(GdkEvent * event) {
+std::clog << "node::on_event\n";
 		switch(event->type) {
 			case GDK_ENTER_NOTIFY: {
 			}
@@ -96,6 +106,18 @@ namespace psycle { namespace front_ends { namespace gui {
 			break;
 			case GDK_BUTTON_PRESS: {
 				switch(event->button.button) {
+					case 1: {
+					}
+					break;
+					case 2: {
+					}
+					break;
+					case 3: {
+						menu_->popup(event->button.button, event->button.time);
+						return true;
+					}
+					break;
+					default: ;
 				}
 			}
 			break;
@@ -115,7 +137,8 @@ namespace psycle { namespace front_ends { namespace gui {
 			break;
 			default: ;
 		}
-		#endif
+		//return Gnome::Canvas::Group::on_event(event);
+std::clog << "node::on_event: false\n";
 		return false;
 	}
 
@@ -151,8 +174,8 @@ namespace psycle { namespace front_ends { namespace gui {
 
 	bool port::on_event(GdkEvent * event) {
 		if(Gnome::Canvas::Group::on_event(event)) return true;
-		real x(event->button.x), y(event->button.y);
 		#if 0
+		real x(event->button.x), y(event->button.y);
 		switch(event->type) {
 			case GDK_ENTER_NOTIFY: {
 			}
@@ -257,7 +280,7 @@ namespace psycle { namespace front_ends { namespace gui {
 			ui_manager_->add_ui_from_string(s.str());
 		}
 		//ui_manager_->add_ui(ui_manager_->new_merge_id(), "/popup-menu", "new-" + type + "-node", "new-" + type + "-node");
-		popup_menu_ = dynamic_cast<Gtk::Menu*>(ui_manager_->get_widget("/popup-menu"));
+		menu_ = dynamic_cast<Gtk::Menu*>(ui_manager_->get_widget("/popup-menu"));
 	}
 	
 	void canvas::add_node_type(std::string const & type) {
@@ -281,7 +304,17 @@ namespace psycle { namespace front_ends { namespace gui {
 			Gtk::manage(&underlying_wrapper);
 			underlying_wrapper.property_x() = x_;
 			underlying_wrapper.property_y() = y_;
+			//set_scroll_region_from_bounds();
 		}
+	}
+	
+	void canvas::set_scroll_region_from_bounds() {
+		real bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max;
+		root()->get_bounds(bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max);
+		real scroll_x_min, scroll_y_min, scroll_x_max, scroll_y_max;
+		//get_scroll_region(scroll_x_min, scroll_y_min, scroll_x_max, scroll_y_max);
+		//set_scroll_region(std::min(bounds_x_min, scroll_x_min), std::min(bounds_y_min, scroll_y_min), std::max(bounds_x_max, scroll_x_max), std::max(bounds_y_max, scroll_y_max));
+		set_scroll_region(bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max);
 	}
 	
 	bool canvas::on_event(GdkEvent * event) {
@@ -306,21 +339,17 @@ namespace psycle { namespace front_ends { namespace gui {
 					}
 					break;
 					case 2: {
-						real bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max;
-						root()->get_bounds(bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max);
-						real scroll_x_min, scroll_y_min, scroll_x_max, scroll_y_max;
-						//get_scroll_region(scroll_x_min, scroll_y_min, scroll_x_max, scroll_y_max);
-						//set_scroll_region(std::min(bounds_x_min, scroll_x_min), std::min(bounds_y_min, scroll_y_min), std::max(bounds_x_max, scroll_x_max), std::max(bounds_y_max, scroll_y_max));
-						set_scroll_region(bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max);
+						set_scroll_region_from_bounds();
 						//return true;
 					}
 					break;
 					case 3: {
 						window_to_world(x, y, x_, y_);
-						popup_menu_->popup(event->button.button, event->button.time);
+						menu_->popup(event->button.button, event->button.time);
 						return true;
 					}
 					break;
+					default: ;
 				}
 			}
 			break;
