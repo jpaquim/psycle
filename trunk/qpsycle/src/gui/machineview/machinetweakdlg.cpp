@@ -823,6 +823,7 @@ void PresetsDialog::onSavePreset()
 {
 	#if 0
 	char str[32];
+	QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 	str = lineEdit->text().toStdString().c_str();
 	if ( str[0] == '\0' )
 	{

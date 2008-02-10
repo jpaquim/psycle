@@ -25,6 +25,7 @@
 
 #include "instrumentsmodel.hpp"
 
+#include <QTextCodec>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -75,6 +76,7 @@ void InstrumentsModel::setName( int index, const QString & newname )
 		return;
 
 	psy::core::Instrument *inst = song_->_pInstrument[index];
+	QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 	inst->setName( newname.toStdString() );
 
 	std::ostringstream buffer;
@@ -94,6 +96,7 @@ void InstrumentsModel::setName( int index, const QString & newname )
 bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 {
 	// WavAlloc tries to load the wav into the CoreSong.
+	QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 	if ( song_->WavAlloc( instrIndex, pathToWavfile.toStdString().c_str() ) )
 	{
 		QStandardItem *tempItem = item( instrIndex );

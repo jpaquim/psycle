@@ -306,6 +306,7 @@ void Configuration::loadConfig( const std::string & path )
 
 		// Paths.
 		QDomNodeList paths = root.elementsByTagName( "path" );
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		for ( int i = 0; i < paths.count(); i++ )
 		{
 			QDomElement path = paths.item( i ).toElement();
