@@ -25,6 +25,7 @@
 
 #include "patternbox.hpp"
 #include "mainwindow.hpp"
+#include <QTextCodec>
 #include <QTreeWidget>
 #include <QAction>
 #include <QGridLayout>
@@ -287,7 +288,7 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
 void PatternBox::onPatternNameEdited( const QString & newText )
 {
 	QTreeWidgetItem *item = patternTree_->currentItem();
-
+	QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 	// If current item is a pattern...
 	std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
 	if( itr!=patternMap.end() ) {

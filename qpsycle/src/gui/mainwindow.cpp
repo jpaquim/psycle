@@ -304,7 +304,7 @@ namespace qpsycle {
 		if (fileName.isEmpty()) {
 			return;
 		}
-
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		bool success = song_->save( fileName.toStdString() );
 		if (!success) {
 			QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
@@ -942,6 +942,7 @@ namespace qpsycle {
 
 		if ( returnStatus == QDialog::Accepted ) 
 		{
+			QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 			song_->setName( songNameEdit.text().toStdString() );
 			song_->setAuthor( artistNameEdit.text().toStdString() );
 			song_->setComment( songNotesEdit.toPlainText().toStdString() );
