@@ -1503,17 +1503,24 @@ const std::map<int, TrackGeometry> & PatternGrid::trackGeometrics() const
 
 void PatternGrid::checkLeftScroll( const PatCursor & cursor ) 
 {
-	int sceneX = patDraw_->xOffByTrack( cursor.track() );
-	QPoint foo = patDraw_->mapFromScene( sceneX, 0 ); 
-	int viewX = foo.x();
-	if ( viewX < 0 ) {
+	int cursorSceneX = patDraw_->xOffByTrack( cursor.track() );
+	int cursorViewX = patDraw_->mapFromScene( cursorSceneX, 0 ).x();
+
+	if ( cursorViewX < 0 ) { // the cursor has moved out of the left range of the viewport.
 		patDraw_->horizontalScrollBar()->setValue( patDraw_->xOffByTrack( std::max( cursor.track(), 0 ) ) );
 	}
 }
 
 void PatternGrid::checkRightScroll( const PatCursor & cursor ) 
 {
-	if ( patDraw_->xOffByTrack( std::min( cursor.track()+1, endTrackNumber() ) ) > patDraw_->width() ) {
+	///\todo This doesn't work quite correctly -- you really want to scroll right if some
+	// of the current track that you're in is partially obscured, not just if the cursor
+	// goes outside of the viewport.
+	int cursorSceneX = patDraw_->xOffByTrack( std::min( cursor.track() + 1, endTrackNumber() ) );
+	int cursorViewX = patDraw_->mapFromScene( cursorSceneX, 0 ).x();
+
+	if ( cursorViewX > patDraw_->width() ) // the cursor has moved out of the right range of the viewport.
+	{
 		patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , endTrackNumber())) - patDraw_->width() );
 	}
 	if ( cursor.track() == endTrackNumber() )
