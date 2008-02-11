@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 
 ////////////////////////////////////////////////////
 // This file is a test of boost spirit to parse xml

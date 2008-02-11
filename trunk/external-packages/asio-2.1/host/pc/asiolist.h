@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #ifndef __asiolist__
 #define __asiolist__
 

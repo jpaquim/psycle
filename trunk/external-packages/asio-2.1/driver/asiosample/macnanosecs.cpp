@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include "asio.h"
 #include <Timer.h>
 

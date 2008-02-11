@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************/
 /*! \class ADSR
     \brief STK ADSR envelope class.

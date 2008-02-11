@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief keyboard handler for psycle::host::CChildView, private header
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

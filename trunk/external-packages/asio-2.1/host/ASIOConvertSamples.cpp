@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include "ginclude.h"
 #include "ASIOConvertSamples.h"
 #include <math.h>

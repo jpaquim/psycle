@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #pragma once
 #include "constants.hpp"
 #include "resources/resources.hpp"

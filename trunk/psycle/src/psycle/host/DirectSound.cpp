@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\implementation psycle::host::DirectSound.
 #include <psycle/project.private.hpp>

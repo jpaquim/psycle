@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include <windows.h>
 #include "asiosmpl.h"
 

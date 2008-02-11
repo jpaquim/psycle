@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #define MACINTOSH
 
 #define HAVE_STRING_H 1

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************/
 /*! \class OnePole
     \brief STK one-pole filter class.

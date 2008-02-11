@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************/
 /*! \class Filter
     \brief STK filter class.

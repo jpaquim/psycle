@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #ifndef __asiosys__
 	#define __asiosys__
 

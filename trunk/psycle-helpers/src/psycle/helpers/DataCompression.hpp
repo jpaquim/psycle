@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\interface beerz77-2 algorithm.
 #pragma once
 #include <psycle/host/detail/project.hpp>

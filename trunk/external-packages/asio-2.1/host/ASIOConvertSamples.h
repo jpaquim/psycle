@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #ifndef __ASIOConvertSamples__
 #define __ASIOConvertSamples__
 

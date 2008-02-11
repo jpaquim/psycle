@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************/
 /*! \class Effect
     \brief STK abstract effects parent class.

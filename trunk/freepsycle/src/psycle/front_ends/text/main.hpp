@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief \interface psycle::front_ends::text::main
 #pragma once

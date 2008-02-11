@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 // XMSamplerUIInst.cpp : XMSamplerUIInst
 /** @file
  *  @brief implementation file
