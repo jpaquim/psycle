@@ -53,9 +53,10 @@ namespace psycle { namespace front_ends { namespace gui {
 		menu_ = new Gtk::Menu;
 		Gtk::MenuItem * item;
 		item = new Gtk::MenuItem("Delete");
-		item->signal_activate_item().connect(sigc::mem_fun(*this, &node::on_delete));
+		item->signal_activate().connect(sigc::mem_fun(*this, &node::on_delete));
 		menu_->append(*item); // menu_->items().push_back(*item);
-		contraption_.signal_event().connect(sigc::mem_fun(*this, &node::on_event_));
+		item->show();
+		/*contraption_.*/signal_event().connect(sigc::mem_fun(*this, &node::on_event_));
 	}
 
 	void node::after_construction() {
@@ -92,6 +93,7 @@ namespace psycle { namespace front_ends { namespace gui {
 	}
 	
 	void node::on_delete() {
+std::clog << "node::on_delete\n";
 		underlying().free_heap();
 	}
 
@@ -110,11 +112,12 @@ std::clog << "node::on_event\n";
 					}
 					break;
 					case 2: {
+std::clog << "node::on_event: bp2\n";
+						menu_->popup(event->button.button, event->button.time);
+						return true;
 					}
 					break;
 					case 3: {
-						menu_->popup(event->button.button, event->button.time);
-						return true;
 					}
 					break;
 					default: ;
@@ -126,6 +129,7 @@ std::clog << "node::on_event\n";
 			break;
 			case GDK_BUTTON_RELEASE: {
 				switch(event->button.button) {
+					default: ;
 				}
 			}
 			break;
