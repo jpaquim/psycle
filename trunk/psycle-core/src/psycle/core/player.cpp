@@ -344,6 +344,7 @@ namespace psy
 			if (_playing)
 			{
 				if ( loopSequenceEntry() ) {
+					// Maintan the cursor inside the loop sequence
 					if ( timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition()
 							|| timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition() ) {
 						setPlayPos( loopSequenceEntry()->tickPosition() );
@@ -373,6 +374,11 @@ namespace psy
 					//each time through the loop because global events can potentially move the song's beatposition elsewhere.
 					globals.clear();
 					chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
+					if ( loopSequenceEntry() ) {
+						//Don't go further than the sequenceEnd.
+						if ( chunkBeatEnd >= loopSequenceEntry()->tickEndPosition())
+							chunkBeatEnd= loopSequenceEntry()->tickEndPosition();
+					}
 
 					//determine chunk length in beats and samples.
 					chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
