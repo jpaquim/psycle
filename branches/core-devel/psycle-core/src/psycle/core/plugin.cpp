@@ -26,7 +26,7 @@
 
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
-#else if defined _WIN32
+#elif defined _WIN32
 	#include <windows.h>
 #endif
 
