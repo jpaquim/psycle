@@ -103,6 +103,13 @@ class RiffFile {
 
 		bool ReadBE(std::int16_t & x) { return ReadBE(reinterpret_cast<std::uint16_t&>(x)); }
 
+		bool Write(std::uint16_t x) {
+			std::uint8_t data[2] = { x, x>>8 };
+			return WriteChunk(data,2);
+		}
+		bool Write(std::int16_t x) { return Write(reinterpret_cast<std::uint16_t&>(x)); }
+
+
 		bool Read(std::uint32_t & x) {
 			std::uint8_t data[4];
 			if(!ReadChunk(data,4)) return false;
