@@ -1,4 +1,4 @@
->/* -*- mode:c++, indent-tabs-mode:t -*- */
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #pragma once
 
 /*
@@ -18,4 +18,4 @@
 	probably faster too:
 */
 #include <psycle/helpers/math/erase_denormals.hpp>
-#define undenormalise(sample) (psy::helpers::math::fast_erase_denormals_inplace(sample))
+#define undenormalise(sample) (psycle::helpers::math::fast_erase_denormals_inplace(sample))
