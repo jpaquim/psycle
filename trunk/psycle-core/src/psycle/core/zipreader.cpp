@@ -205,7 +205,7 @@ static zipreader *_zr_step1(int fd, char *buf, size_t len, off_t left)
 
 			k = (((unsigned char *)buf)[x+20])
 			| (((unsigned int )(((unsigned char *)buf)[x+21]))<<8);
-			if (k == (left+len)-(x+22) && ((a+b) <= x)) {
+			if (k == len-(x+22) && ((a+b) <= left+x)) {
 				/* okay, step1 signature matches;
 					* this could very well be the end signature
 					*
@@ -230,6 +230,7 @@ zipreader *zipreader_open(int fd)
 
 	pos = lseek(fd, 0, SEEK_END);
 	/* search backwards */
+	//FIXME: Is the loop really necessary? The table is always at the end! (AFAIK)
 	while (pos >= sizeof(buf)) {
 		pos -= sizeof(buf);
 		if (lseek(fd, pos, SEEK_SET) != pos) return 0;
