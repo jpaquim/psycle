@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\implementation psycle::host::Configuration.
 #include <psycle/project.private.hpp>

@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 namespace psycle { namespace host {
 	/// Safer version of delete that clears the pointer automatically. Don't use it for arrays!

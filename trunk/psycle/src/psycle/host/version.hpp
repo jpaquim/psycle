@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 #include "configuration_options.hpp"
 #include <diversalis/compiler.hpp> // to test whether this is a resource compiler (DIVERSALIS__COMPILER__RESOURCE)

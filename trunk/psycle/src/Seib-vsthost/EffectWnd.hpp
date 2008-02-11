@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /*****************************************************************************/
 /* EffectWnd.h : Interface for CEffectWnd class. (Base plugin window)		 */
 /*****************************************************************************/

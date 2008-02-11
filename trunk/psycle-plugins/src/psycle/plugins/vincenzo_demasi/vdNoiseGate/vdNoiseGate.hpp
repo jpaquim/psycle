@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /*      Copyright (C) 2002 Vincenzo Demasi.
 
 		This plugin is free software; you can redistribute it and/or modify

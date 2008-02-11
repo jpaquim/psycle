@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 // SynthTrack.h: interface for the CSynthTrack class.
 //
 //////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community
 *   psycle.sf.net

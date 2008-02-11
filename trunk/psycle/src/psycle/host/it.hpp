@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 // Impulse Tracker File Format Loading/Saving/Editing code
 // version 0.11b

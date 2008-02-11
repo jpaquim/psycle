@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/detail/project.private.hpp>
 #include <diversalis/operating_system.hpp>
 #if !defined DIVERSALIS__OPERATING_SYSTEM__X_WINDOW

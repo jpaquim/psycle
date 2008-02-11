@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /*****************************************************************************/
 /* CVSTHost.hpp: interface for CVSTHost/CEffect classes (for VST SDK 2.4r2). */
 /*****************************************************************************/

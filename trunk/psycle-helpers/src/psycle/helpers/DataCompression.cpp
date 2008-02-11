@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\implementation beerz77-2 algorithm.
 /// beerz77-2 algorithm by jeremy evers, loosely based on lz77 
 /// -2 designates the smaller window, faster compression version

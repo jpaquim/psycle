@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #define VERSION FLUIDSYNTH_VERSION
 
 #define MACOS9

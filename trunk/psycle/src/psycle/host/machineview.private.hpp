@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief machine view graphic operations for psycle::host::CChildView, private header
 #include <algorithm>

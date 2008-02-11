@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #include <packageneric/pre-compiled.private.hpp>
 
 #define BOOST_LIB_NAME boost_unit_test_framework

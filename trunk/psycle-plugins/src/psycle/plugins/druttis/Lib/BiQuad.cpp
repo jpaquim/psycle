@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 //============================================================================
 //
 //				BiQuad (2 pole, 2 zero) filter

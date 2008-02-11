@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /*============================================================================
 
 	 ddc.h  -  Don Cross,  October 1992.

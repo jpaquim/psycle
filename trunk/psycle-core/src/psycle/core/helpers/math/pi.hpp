@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 
 
 ///\todo This file is not up-to-date and should be replaced with the common psycle/helpers/math/pi.hpp

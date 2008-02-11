@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief various signal processing utility functions and classes, psycle::helpers::dsp::Cubic amongst others.
 #pragma once

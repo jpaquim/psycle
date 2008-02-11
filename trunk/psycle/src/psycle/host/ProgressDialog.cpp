@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief implementation file for psycle::host::CProgressDialog.
 #include <psycle/project.private.hpp>

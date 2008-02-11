@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /*
  * August 24, 1998
  * Copyright (C) 1998 Juergen Mueller And Sundry Contributors

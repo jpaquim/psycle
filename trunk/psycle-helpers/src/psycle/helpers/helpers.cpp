@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\implementation psycle::helpers.
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
