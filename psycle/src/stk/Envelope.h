@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************/
 /*! \class Envelope
     \brief STK envelope base class.

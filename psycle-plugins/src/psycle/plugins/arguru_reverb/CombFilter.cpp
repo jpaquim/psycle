@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #include <packageneric/pre-compiled.private.hpp>
 #if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <xmmintrin.h>

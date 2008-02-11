@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief configuration of the build.
 #pragma once

@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 //////////////////////////////////////////////////////////////////////
 // AudaCity Phaser effect plugin for PSYCLE by Sartorius
 //

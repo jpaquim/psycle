@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************/
 /*! \class PRCRev
     \brief Perry's simple reverberator class.

@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #ifndef PSYCLE__GUI__CONFIGURATION
 #define PSYCLE__GUI__CONFIGURATION
 

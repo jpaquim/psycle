@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 #include "XMInstrument.hpp"
 #include "resources/resources.hpp"

@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 //////////////////////////////////////////////////////////////////////
 // LADSPA GVerb plugin for PSYCLE by Sartorius
 //

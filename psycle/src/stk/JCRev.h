@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************/
 /*! \class JCRev
     \brief John Chowning's reverberator class.

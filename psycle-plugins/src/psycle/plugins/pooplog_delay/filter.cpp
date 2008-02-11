@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 // filter.cpp: implementation of the filter class.
 //
 //////////////////////////////////////////////////////////////////////

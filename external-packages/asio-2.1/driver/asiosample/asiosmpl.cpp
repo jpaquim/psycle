@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /*
 	Steinberg Audio Stream I/O API
 	(c) 1996, Steinberg Soft- und Hardware GmbH

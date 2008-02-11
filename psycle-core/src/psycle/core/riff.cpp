@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**
 	\file
 	implementation file for psy::core::ExtRiffFile and psy::core::WaveFile.

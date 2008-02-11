@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /////////////////////////////////////////////////////////////////////
 // Dmitry "Sartorius" Kulikov LegaSynth TB303 plugin for PSYCLE
 // v0.2 beta

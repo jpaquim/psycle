@@ -1,4 +1,4 @@
-/* -*- mode:c++, indent-tabs-mode:t -*- */
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************/
 /*! \class Delay
     \brief STK non-interpolating delay line class.
