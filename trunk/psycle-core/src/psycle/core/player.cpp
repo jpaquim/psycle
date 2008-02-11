@@ -377,9 +377,11 @@ namespace psy
 					if ( loopSequenceEntry() ) {
 						//Don't go further than the sequenceEnd.
 						if ( chunkBeatEnd >= loopSequenceEntry()->tickEndPosition())
-							chunkBeatEnd= loopSequenceEntry()->tickEndPosition();
+							chunkBeatEnd = loopSequenceEntry()->tickEndPosition();
+					} else if ( loopSong() ) {
+						if ( chunkBeatEnd >= song.patternSequence()->tickLength())
+							chunkBeatEnd = song.patternSequence()->tickLength();
 					}
-
 					//determine chunk length in beats and samples.
 					chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
 					if(globals.empty())
