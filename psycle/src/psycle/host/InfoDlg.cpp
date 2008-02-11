@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
 #include <psycle/project.private.hpp>

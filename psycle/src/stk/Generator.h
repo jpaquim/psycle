@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /***************************************************/
 /*! \class Generator
     \brief STK abstract unit generator parent class.

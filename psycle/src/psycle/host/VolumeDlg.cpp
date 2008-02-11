@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief implementation file for psycle::host::CVolumeDlg.
 #include <psycle/project.private.hpp>

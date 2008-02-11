@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 // asio code fragment 'linker'
 // mac specific
 // loads the symbols via the fragment manager, and

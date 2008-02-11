@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 // very MAC specific; generic code fragment handler
 #include "ginclude.h"
 #include <macheaders.c>

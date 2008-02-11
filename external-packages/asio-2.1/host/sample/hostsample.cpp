@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 // hostsample.cpp : a simple ASIO host example.
 // - instantiates the driver
 // - get the information from the driver

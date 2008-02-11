@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 /* src/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to enable ALSA driver */

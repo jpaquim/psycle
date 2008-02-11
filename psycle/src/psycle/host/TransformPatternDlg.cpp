@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 // TransformPatternDlg.cpp : implementation file
 //
 #include <psycle/project.private.hpp>

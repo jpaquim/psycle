@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include "component.h"
 #pragma comment(linker,"/opt:nowin98")
 

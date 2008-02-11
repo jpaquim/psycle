@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #pragma once
 #include "SongStructs.hpp"
 #include "FileIO.hpp"

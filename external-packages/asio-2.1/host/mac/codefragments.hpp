@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #ifndef __CodeFragments__
 #define __CodeFragments__
 

@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdMixDialog.
 #include <psycle/project.private.hpp>

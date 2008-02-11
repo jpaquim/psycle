@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #ifndef __AsioDrivers__
 #define __AsioDrivers__
 

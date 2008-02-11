@@ -1,3 +1,4 @@
+/* -*- mode:c++, indent-tabs-mode:t -*- */
 #include "configuration.hpp"
 #include "psycle/audiodrivers/audiodriver.h"
 #include <psycle/core/player.h>
