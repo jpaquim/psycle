@@ -62,7 +62,7 @@ PatternDraw::PatternDraw( PatternView *patView )
 	//disabled. This is now called from patternview constructor, via a call to numberOfTracks.
 	//setupTrackGeometrics( patView_->numberOfTracks() );
 	//alignTracks();
-	
+
 	scene_->addItem( patGrid_ );
 	///\todo: Isn't it better to add lineNumCol and trackHeader to the scene too?
 	patGrid_->setPos( 0, 0 );
