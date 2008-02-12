@@ -1518,7 +1518,8 @@ void PatternGrid::checkRightScroll( const PatCursor & cursor )
 
 	if ( currentTrackRightViewX > patDraw_->width() )
 	{
-		patDraw_->horizontalScrollBar()->setValue( patDraw_->xEndByTrack( std::min( cursor.track()+1 , endTrackNumber())) - patDraw_->width() );
+		int trackEnd = patDraw_->xEndByTrack( std::min( cursor.track()+1, endTrackNumber() ) );
+		patDraw_->horizontalScrollBar()->setValue( trackEnd - patDraw_->width() - patDraw_->verticalScrollBar()->width() );
 	}
 	if ( cursor.track() == endTrackNumber() )
 		patDraw_->horizontalScrollBar()->setValue( patDraw_->horizontalScrollBar()->maximum() );
