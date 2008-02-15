@@ -139,14 +139,18 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 	Q_UNUSED( option ); Q_UNUSED( widget );
 	painter->setFont( font_ ); 
 	if ( pattern() ) {
+
+		int sceneVisibleXStart = patDraw_->mapToScene( 0, 0 ).x();
+		int startTrackNum = patDraw_->findTrackByXPos( sceneVisibleXStart );
+		int sceneVisibleXEnd = patDraw_->mapToScene( patDraw_->viewport()->width()-1, 0 ).x();
+		int endTrackNum = patDraw_->findTrackByXPos( sceneVisibleXEnd );
+
 		int startLine = 0; 
 		int endLine = endLineNumber();
-		int startTrack = 0;
-		int endTrack = endTrackNumber();
 
-		drawGrid( painter, startLine, endLine, startTrack, endTrack );
+		drawGrid( painter, startLine, endLine, startTrackNum, endTrackNum );
 		drawCellBg( painter, cursor() );
-		drawPattern( painter, startLine, endLine, startTrack, endTrack );
+		drawPattern( painter, startLine, endLine, startTrackNum, endTrackNum );
 		drawSelBg( painter, selection() );
 	}
 }
