@@ -20,6 +20,7 @@
 
 #include <packageneric/pre-compiled.private.hpp>
 #include <cmath>
+#include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
 
 #include "voice.h"
 
@@ -196,9 +197,11 @@ float CSynthTrack::GetSample()
 	for (int i = 0; i<16; i++){
 		switch(cur_waveform)
 		{
-			case 5:								output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)+cur_pw]; break;
+			case 5:								output+=vpar->Wavetable[cur_waveform]
+				[psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition+cur_pw-0.5)]; break;
 			case 8:								output+=vpar->shortnoise; break;
-			default:				output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)]; break;
+			default:				output+=vpar->Wavetable[cur_waveform]
+				[psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5)]; break;
 		}
 		OSCPosition+=OOSCSpeed;
 		if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
