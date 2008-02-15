@@ -135,16 +135,4 @@ private:
 	float spdcoef;
 	float rcVol;
 	float rcVolCutoff;
-
-	inline int f2i(double d)
-	{
-		const double magic = 6755399441055744.0; // 2^51 + 2^52
-		union tmp_union
-		{
-			double d;
-			int i;
-		} tmp;
-		tmp.d = (d-0.5) + magic;
-		return tmp.i;
-	}
 };
