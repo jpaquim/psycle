@@ -146,9 +146,9 @@ void stuff() {
 					freq2.insert_event(b2 * 1.1, f2 * 1.1);
 					freq3.insert_event(b3 * 1.2, f3 * 1.17);
 					
-					sequence1.insert_event(b1, 0.3);
-					sequence2.insert_event(b2, 0.3);
-					sequence3.insert_event(b3, 0.3);
+					sequence1.insert_event(b1, 0.1);
+					sequence2.insert_event(b2, 0.1);
+					sequence3.insert_event(b3, 0.1);
 
 					decay_sequence1.insert_event(b1, 0.0001);
 					decay_sequence2.insert_event(b2, 0.0001);
@@ -210,8 +210,24 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 			#else // some weird multithreaded test
 				std::thread t1(stuff);
 				std::thread t2(stuff);
+				std::thread t3(stuff);
+				std::thread t4(stuff);
+				std::thread t5(stuff);
+				std::thread t6(stuff);
+				std::thread t7(stuff);
+				std::thread t8(stuff);
+				std::thread t9(stuff);
+				std::thread t10(stuff);
 				t1.join();
 				t2.join();
+				t3.join();
+				t4.join();
+				t5.join();
+				t6.join();
+				t7.join();
+				t8.join();
+				t9.join();
+				t10.join();
 			#endif
 		} catch(std::exception const & e) {
 			if(loggers::exception()()) {
