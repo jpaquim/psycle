@@ -35,6 +35,8 @@
 #include <QComboBox>
 #include <QColorDialog>
 
+#include <iostream> // std::cerr
+
 namespace qpsycle {
 
 PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
@@ -186,11 +188,13 @@ void PatternBox::clonePattern()
 				PatternItem* newItem = new PatternItem();
 				newItem->setText( 0, QString::fromStdString( clonedPatName ) );
 				CategoryItem *parentCat = (CategoryItem*)patItem->parent();
+				// Record the pattern <-> patitem pairing.
+				patternMap[newItem] = clonedPat; /* must happen before setCurrentItem,
+																						otherwise no signal will be emitted
+																						when the pattern selected changes.
+																				 */
 				parentCat->addChild( newItem );
 				patternTree()->setCurrentItem( newItem );
-
-				// Record the pattern <-> patitem pairing.
-				patternMap[newItem] = clonedPat;
 			}
 		}
 	}
@@ -272,6 +276,9 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
 			// emit a signal for main window to tell pat view.
 			emit patternSelectedInPatternBox( pattern );
 		}
+		else {
+			std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown pattern item was selected." << std::endl;
+		}
 	}
 
 	// If new item is a category...
@@ -281,6 +288,9 @@ void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem 
 		if( catItr !=categoryMap.end() ) {
 			//psy::core::PatternCategory *category = catItr->second;
 			// FIXME: this needs to do something?
+		}
+		else {
+			std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown category item was selected." << std::endl;
 		}
 	}
 }
