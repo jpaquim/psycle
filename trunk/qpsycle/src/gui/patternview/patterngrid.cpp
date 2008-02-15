@@ -1544,10 +1544,10 @@ void PatternGrid::checkUpScroll( const PatCursor & cursor )
 void PatternGrid::checkDownScroll( const PatCursor & cursor ) 
 {
 	int sceneY = cursor.line() * lineHeight(); 
-	QPoint foo = patDraw_->mapFromScene( 0, sceneY ); 
-	int viewY = foo.y();
-	if ( viewY > patDraw_->height() ) {
-		patDraw_->verticalScrollBar()->setValue( ( std::min( cursor.line(),endLineNumber()) +1 ) * lineHeight() );
+	int viewY = patDraw_->mapFromScene( 0, sceneY ).y(); 
+
+	if ( viewY > patDraw_->viewport()->height() - patDraw_->horizontalScrollBar()->height() ) {
+		patDraw_->verticalScrollBar()->setValue( ( std::min( cursor.line(),endLineNumber()) ) * lineHeight() );
 	}
 }
 
