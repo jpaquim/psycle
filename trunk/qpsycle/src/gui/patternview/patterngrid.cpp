@@ -145,12 +145,14 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 		int sceneVisibleXEnd = patDraw_->mapToScene( patDraw_->viewport()->width()-1, 0 ).x();
 		int endTrackNum = patDraw_->findTrackByXPos( sceneVisibleXEnd );
 
-		int startLine = 0; 
-		int endLine = endLineNumber();
+		int sceneVisibleYStart = patDraw_->mapToScene( 0, 0 ).y();
+		int startLineNum = static_cast<int>(sceneVisibleYStart / patDraw_->rowHeight());
+		int sceneVisibleYEnd = patDraw_->mapToScene( 0, patDraw_->viewport()->height()-1 ).y();
+		int endLineNum = static_cast<int>( sceneVisibleYEnd / patDraw_->rowHeight() );
 
-		drawGrid( painter, startLine, endLine, startTrackNum, endTrackNum );
+		drawGrid( painter, startLineNum, endLineNum, startTrackNum, endTrackNum );
 		drawCellBg( painter, cursor() );
-		drawPattern( painter, startLine, endLine, startTrackNum, endTrackNum );
+		drawPattern( painter, startLineNum, endLineNum, startTrackNum, endTrackNum );
 		drawSelBg( painter, selection() );
 	}
 }
