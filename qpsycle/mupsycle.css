@@ -106,3 +106,7 @@ QToolBar::handle {
 QTreeView, QListView {
 	  background-color: #333333;
 }
+
+QLineEdit, QTextEdit {
+	  background-color: #333333;
+}
