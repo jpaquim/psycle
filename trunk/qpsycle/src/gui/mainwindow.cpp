@@ -64,7 +64,7 @@
 #include <iomanip>
 #include <iostream>
 
-#define SUBVERSION_REVISION  "$Revision: 6066 $"
+#define SUBVERSION_REVISION  "$Revision$"
 
 namespace qpsycle {
 
