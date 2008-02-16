@@ -46,6 +46,7 @@
 #include "sequencer/sequencerview.hpp"
 #include "waveview/waveview.hpp"
 
+#include <QApplication>
 #include <QComboBox>
 #include <QDebug>
 #include <QDockWidget>
@@ -94,6 +95,10 @@ namespace qpsycle {
 
 	MainWindow::MainWindow()
 	{
+		QFile styleFile( "mupsycle.css" );
+		if ( styleFile.open( QIODevice::ReadOnly ) )
+			qApp->setStyleSheet( styleFile.readAll().data() );
+
 		fileMenu = editMenu = viewMenu = configMenu = performMenu = communityMenu = helpMenu = 0;
 		fileToolBar = editToolBar = playToolBar = machToolBar = octToolBar_ = 0;
 		newAct = openAct = saveAct = undoAct = redoAct = aboutAct = quitAct = showUnReAct = showLogConsAct = playFromStartAct = playFromSeqPosAct = playPatAct = playStopAct = togglePatBox_ = audioConfAct = 0;
@@ -623,6 +628,7 @@ namespace qpsycle {
 	void MainWindow::createStatusBar()
 	{
 		statusBar()->showMessage(tr("Ready"));
+		statusBar()->addPermanentWidget( new QLabel( "hi" ) );
 	}
 
 	void MainWindow::populateMachineCombo()
