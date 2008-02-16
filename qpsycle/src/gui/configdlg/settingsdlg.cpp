@@ -162,11 +162,10 @@ namespace qpsycle {
 
 	void SettingsDlg::onThemeComboChanged( const QString &sheetName )
 	{
-		     QFile file( ":/themes/" + sheetName.toLower() );
-		     file.open( QFile::ReadOnly );
-		     QString styleSheet = QLatin1String( file.readAll() );
-		     
-		     qApp->setStyleSheet( styleSheet );
+		QFile file( ":/themes/" + sheetName.toLower() );
+		file.open( QFile::ReadOnly );
+		QString styleSheet = QLatin1String( file.readAll() );
+		
+		qApp->setStyleSheet( styleSheet );
 	}
-
 } // namespace qpsycle
