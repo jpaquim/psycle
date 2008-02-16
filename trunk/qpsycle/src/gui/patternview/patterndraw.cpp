@@ -64,7 +64,7 @@ PatternDraw::PatternDraw( PatternView *patView )
 	//alignTracks();
 
 	scene_->addItem( patGrid_ );
-	///\todo: Isn't it better to add lineNumCol and trackHeader to the scene too?
+	///LineNumCol and TrackHeader are not part of the scene, because they have not to be scrolled by both, x and y.
 	patGrid_->setPos( 0, 0 );
 }
 
