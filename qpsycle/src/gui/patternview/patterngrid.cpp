@@ -150,8 +150,8 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 		int startLineNum = static_cast<int>(sceneVisibleYStart / patDraw_->rowHeight());
 		int sceneVisibleYEnd = patDraw_->mapToScene( 0, patDraw_->viewport()->height()-1 ).y();
 		int endLineNum = static_cast<int>( sceneVisibleYEnd / patDraw_->rowHeight() );
-		if ( endLineNum > patDraw_->patternView()->numberOfLines()  )
-			endLineNum = patDraw_->patternView()->numberOfLines();
+		if ( endLineNum > patDraw_->patternView()->numberOfLines()-1 )
+			endLineNum = patDraw_->patternView()->numberOfLines()-1;
 
 		drawGrid( painter, startLineNum, endLineNum, startTrackNum, endTrackNum );
 		drawCellBg( painter, cursor() );
@@ -175,7 +175,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 			painter->drawLine( 0, y * lineHeight(), gridWidth, y* lineHeight() );
 	}
 
-	for (int y = startLine; y < endLine; y++) {
+	for (int y = startLine; y <= endLine; y++) {
 		float position = y / (float) beatZoom();
 		if (!(y == patDraw_->patternView()->playPos() ) || !psy::core::Player::Instance()->playing() ) {
 			if ( !(y % beatZoom())) {
@@ -212,10 +212,17 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 		psy::core::PatternLine* line;
 		psy::core::PatternLine emptyLine;
 
-		for ( int curLinenum = startLine; curLinenum < endLine; curLinenum++ ) {
+		for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
 			if ( it != pattern()->end() ) {
+				//FIXME: This is not perfect. Some data will not be drawn if there's data in another track at a previous
+				// time, within the limits of the current line, because only the first line inside the limits is used.
 				int liney = (int)(it->first * beatZoom());
+				while (liney < curLinenum )
+				{
+					it++;
+					liney = (int)(it->first * beatZoom());
+				}
 				if (liney == curLinenum ) {
 					line = &it->second;
 					it++;

@@ -65,6 +65,7 @@
 #include <iostream>
 
 namespace qpsycle {
+	#define SUBVERSION_REVISION "$Revision: 6666 $"
 
 	TabWidget::TabWidget( QWidget *parent )
 		: QTabWidget( parent )
@@ -237,7 +238,8 @@ namespace qpsycle {
 		createToolBars();
 		createStatusBar();
 
-		setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.00001090 alpha ) "));
+		setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.1.") + tr(SUBVERSION_REVISION) + tr(") "));
+
 	}
 
 	void MainWindow::setupSignals()
