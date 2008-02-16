@@ -22,6 +22,7 @@
 #ifndef SETTINGSDLG_H
 #define SETTINGSDLG_H
 
+#include <QString>
 #include <QDialog>
 
 class QComboBox;
@@ -40,6 +41,7 @@ public:
 public slots:
 	void onSaveButtonClicked();
 	void onSettingsChanged();
+	void onThemeComboChanged( const QString &sheetName );
 
 private:
 	Configuration *config_;
