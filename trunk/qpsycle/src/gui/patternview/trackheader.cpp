@@ -48,11 +48,11 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 {
 	Q_UNUSED( event );
 
-	int viewableWidth = pDraw->width();
+	int viewableWidth = pDraw->viewport()->width();
 
 	QPainter painter(this);
 	painter.setBrush( QBrush( QColor(30,30,30) ) );
-	setGeometry( pDraw->lineNumColWidth(), 0, viewableWidth, height() );
+	setGeometry( pDraw->lineNumColWidth()+2, 0, viewableWidth, height() );
 	painter.drawRect( 0, 0, viewableWidth, height() );
 
 	int scrollDx = pDraw->horizontalScrollBar()->value();

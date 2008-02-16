@@ -48,9 +48,9 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 {
 	Q_UNUSED( event );
 	QPainter painter( this );
-	setGeometry( 0 , patternDraw()->trackHeaderHeight(), width(), patternDraw()->height() );
+	setGeometry(0, patternDraw()->trackHeaderHeight()+2, width(), patternDraw()->viewport()->height() );
 	
-	int ch = patternDraw()->height();//clientHeight();
+	int ch = patternDraw()->viewport()->height();
 	QColor lineColor( Qt::black );
 	QColor textColor( QColor(200,200,200) );
 //    TimeSignature signature;
@@ -78,7 +78,7 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 	int endLine   = end;
 
 	for (int i = startLine; i <= endLine; i++) {
-		painter.drawLine(0,(i+1)*rowHeight - dy_ -1, width(),(i+1)*rowHeight -1 - dy_ );
+		painter.drawLine(0,(i+1)*rowHeight - dy_, width(),(i+1)*rowHeight - dy_ );
 	}
 
 	for (int i = startLine; i <= endLine; i++) 
