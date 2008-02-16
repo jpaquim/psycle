@@ -62,7 +62,6 @@ void LogConsole::Clear()
 
 void LogConsole::SaveToFile()
 {
-
 }
 
 void LogConsole::CreateToolbar()
