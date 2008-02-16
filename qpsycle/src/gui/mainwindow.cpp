@@ -97,10 +97,6 @@ namespace qpsycle {
 
 	MainWindow::MainWindow()
 	{
-		QFile styleFile( "mupsycle.css" );
-		if ( styleFile.open( QIODevice::ReadOnly ) )
-			qApp->setStyleSheet( styleFile.readAll().data() );
-
 		fileMenu = editMenu = viewMenu = configMenu = performMenu = communityMenu = helpMenu = 0;
 		fileToolBar = editToolBar = playToolBar = machToolBar = octToolBar_ = 0;
 		newAct = openAct = saveAct = undoAct = redoAct = aboutAct = quitAct = showUnReAct = showLogConsAct = playFromStartAct = playFromSeqPosAct = playPatAct = playStopAct = togglePatBox_ = audioConfAct = 0;
@@ -309,11 +305,12 @@ namespace qpsycle {
 		QString fileName = QFileDialog::getSaveFileName(this,
 								tr("Choose a file name"), songPath,
 								tr("Psycle Songs (*.psy)"));
-		if (fileName.isEmpty()) {
+		if ( fileName.isEmpty() ) {
 			return;
 		}
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		bool success = song_->save( fileName.toStdString() );
+
 		if (!success) {
 			QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
 		}
