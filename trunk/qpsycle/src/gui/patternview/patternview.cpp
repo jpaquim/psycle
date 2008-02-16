@@ -107,7 +107,7 @@ void PatternView::createToolBar()
 	for ( int e = 1; e < 33 ; e++ )
 		zoomCbx_->addItem( QString("1/") + QString::number( e ) );
 
-	zoomCbx_->setCurrentIndex(3);
+	zoomCbx_->setCurrentIndex(beatZoom()-1);
 	connect( zoomCbx_ , SIGNAL( currentIndexChanged( int ) ),
 			this, SLOT( onZoomComboBoxIndexChanged( int ) ) );
 	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
@@ -243,6 +243,7 @@ void PatternView::setPattern( psy::core::SinglePattern *pattern )
 {
 	printf("PatternView::setPattern(%p)\n",pattern);
 	pattern_ = pattern;
+	zoomCbx_->setCurrentIndex(beatZoom()-1);
 	patternGrid()->update();
 }
 
