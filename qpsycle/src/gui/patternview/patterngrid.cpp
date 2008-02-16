@@ -144,11 +144,14 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 		int startTrackNum = patDraw_->findTrackByXPos( sceneVisibleXStart );
 		int sceneVisibleXEnd = patDraw_->mapToScene( patDraw_->viewport()->width()-1, 0 ).x();
 		int endTrackNum = patDraw_->findTrackByXPos( sceneVisibleXEnd );
+		if ( endTrackNum == -1 )  endTrackNum = patDraw_->patternView()->numberOfTracks();
 
 		int sceneVisibleYStart = patDraw_->mapToScene( 0, 0 ).y();
 		int startLineNum = static_cast<int>(sceneVisibleYStart / patDraw_->rowHeight());
 		int sceneVisibleYEnd = patDraw_->mapToScene( 0, patDraw_->viewport()->height()-1 ).y();
 		int endLineNum = static_cast<int>( sceneVisibleYEnd / patDraw_->rowHeight() );
+		if ( endLineNum > patDraw_->patternView()->numberOfLines()  )
+			endLineNum = patDraw_->patternView()->numberOfLines();
 
 		drawGrid( painter, startLineNum, endLineNum, startTrackNum, endTrackNum );
 		drawCellBg( painter, cursor() );
@@ -172,7 +175,7 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 			painter->drawLine( 0, y * lineHeight(), gridWidth, y* lineHeight() );
 	}
 
-	for (int y = startLine; y <= endLine; y++) {
+	for (int y = startLine; y < endLine; y++) {
 		float position = y / (float) beatZoom();
 		if (!(y == patDraw_->patternView()->playPos() ) || !psy::core::Player::Instance()->playing() ) {
 			if ( !(y % beatZoom())) {
@@ -209,7 +212,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 		psy::core::PatternLine* line;
 		psy::core::PatternLine emptyLine;
 
-		for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
+		for ( int curLinenum = startLine; curLinenum < endLine; curLinenum++ ) {
 
 			if ( it != pattern()->end() ) {
 				int liney = (int)(it->first * beatZoom());

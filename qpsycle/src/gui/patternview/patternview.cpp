@@ -107,6 +107,7 @@ void PatternView::createToolBar()
 	for ( int e = 1; e < 33 ; e++ )
 		zoomCbx_->addItem( QString("1/") + QString::number( e ) );
 
+	zoomCbx_->setCurrentIndex(3);
 	connect( zoomCbx_ , SIGNAL( currentIndexChanged( int ) ),
 			this, SLOT( onZoomComboBoxIndexChanged( int ) ) );
 	toolBar_->addWidget( new QLabel( "# of Tracks: ") );
@@ -275,7 +276,9 @@ void PatternView::onZoomComboBoxIndexChanged( int index )
 {
 	if ( pattern() ) 
 	{
-		pattern()->setBeatZoom(1 / (index+1));
+		pattern()->setBeatZoom(index+1);
+		if ( patternGrid() )
+			patternGrid()->update();
 	}
 }
 
