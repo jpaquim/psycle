@@ -64,8 +64,9 @@
 #include <iomanip>
 #include <iostream>
 
+#define SUBVERSION_REVISION "Subversion $Revision: 6066 $"
+
 namespace qpsycle {
-	#define SUBVERSION_REVISION "Subversion $Revision: 6066 $"
 
 	TabWidget::TabWidget( QWidget *parent )
 		: QTabWidget( parent )
