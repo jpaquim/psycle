@@ -197,6 +197,14 @@ namespace qpsycle {
 
 	void MainWindow::setupGui()
 	{
+		QSettings settings;
+		QByteArray themeName = settings.value( "theme", "default.qss" ).toByteArray();
+		QFile file( ":/themes/" + themeName.toLower() );
+		file.open( QFile::ReadOnly );
+		QString styleSheet = QLatin1String( file.readAll() );
+		qApp->setStyleSheet( styleSheet );
+
+
 		setAnimated( false ); // Turns off animation when moving dock widgets or toolbars.
 		// (these animations were quite slow on Windows.)
 
