@@ -25,6 +25,8 @@
 #include "../global.hpp"
 #include "../configuration.hpp"
 
+#include <iostream>
+
 #include <QDebug>
 #include <QDir>
 #include <QApplication>
@@ -37,7 +39,7 @@
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QLabel>
-#include <iostream>
+#include <QSettings>
 
 namespace qpsycle {
 
@@ -108,7 +110,7 @@ namespace qpsycle {
 		QGroupBox *miscGroup = new QGroupBox( "Misc", this );
 		QLabel *themeLabel = new QLabel( "Theme:" );
 		QComboBox *themeCombo = new QComboBox( this );
-		connect( themeCombo, SIGNAL( currentIndexChanged( QString ) ), this, SLOT( onThemeComboChanged( QString ) ) );
+		connect( themeCombo, SIGNAL( activated( QString ) ), this, SLOT( onThemeComboChanged( QString ) ) );
 		QDir themeDir(":/themes");
 		QStringList themes = themeDir.entryList();
 		themeCombo->addItems( themes );
@@ -162,6 +164,9 @@ namespace qpsycle {
 
 	void SettingsDlg::onThemeComboChanged( const QString &sheetName )
 	{
+		QSettings settings;
+		settings.setValue( "theme", sheetName );
+
 		QFile file( ":/themes/" + sheetName.toLower() );
 		file.open( QFile::ReadOnly );
 		QString styleSheet = QLatin1String( file.readAll() );
