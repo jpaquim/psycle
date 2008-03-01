@@ -48,6 +48,7 @@ PatternBox::PatternBox( psy::core::Song *song, QWidget *parent )
 
 	QGridLayout *layout = new QGridLayout();
 	layout->setAlignment( Qt::AlignTop );
+	setLayout(layout);
 
 	createToolbar();
 	patternTree_ = new PatternTree( this );
@@ -60,15 +61,14 @@ PatternBox::PatternBox( psy::core::Song *song, QWidget *parent )
 
 	layout->addWidget( toolBar_, 0, 0);
 	layout->addWidget( patternTree_, 1, 0, 2, 0 );
-	layout->setRowStretch(1, 10);
-	layout->setRowStretch(3, 5);
-	setLayout(layout);
+	layout->setRowStretch(1,10);
+	layout->setRowStretch(3,5);
 }
 
 void PatternBox::createToolbar()
 {
 	toolBar_ = new QToolBar();
-	toolBar_->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
+	toolBar_->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Fixed );
 	toolBar_->addAction(newCatAct);
 	toolBar_->addSeparator();
 	toolBar_->addAction(newPatAct);
