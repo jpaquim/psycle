@@ -54,11 +54,10 @@ namespace qpsycle {
 
 		/*** Machine View ***/
 		knobBehaviourCombo_ = new QComboBox( this );
-		knobBehaviourCombo_->addItem("QDialMode");
-		knobBehaviourCombo_->addItem("QSynthAngularMode");
-		knobBehaviourCombo_->addItem("QSynthLinearMode");
-		knobBehaviourCombo_->addItem("PsycleLinearMode");
-		knobBehaviourCombo_->addItem("FixedLinearMode");
+		knobBehaviourCombo_->addItem("Rotary (QDial)");
+		knobBehaviourCombo_->addItem("Angular (QSynth)");
+		knobBehaviourCombo_->addItem("Linear");
+		knobBehaviourCombo_->addItem("Fixed Linear");
 
 		knobBehaviourCombo_->setCurrentIndex( (int)Global::configuration().knobBehaviour() );
 		connect( knobBehaviourCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSettingsChanged() ) );
