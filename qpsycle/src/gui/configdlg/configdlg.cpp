@@ -39,8 +39,8 @@ namespace qpsycle {
 		contentsWidget->setSpacing(12);
 
 		pagesWidget = new QStackedWidget;
-		pagesWidget->addWidget( new AudioConfigDlg );
-		pagesWidget->addWidget( new SettingsDlg );
+		pagesWidget->addWidget( new AudioPage );
+		pagesWidget->addWidget( new BehaviourPage );
 		pagesWidget->addWidget( new LooksPage );
 		pagesWidget->addWidget( new DirsPage );
 

@@ -28,8 +28,6 @@
 #include <psycle/core/song.h>
 
 #include "../model/instrumentsmodel.hpp"
-#include "configdlg/audioconfigdlg.hpp"
-#include "configdlg/settingsdlg.hpp"
 #include "configdlg/configdlg.hpp"
 #include "configuration.hpp"
 #include "global.hpp"
@@ -37,7 +35,6 @@
 #include "machineview/machinegui.hpp"
 #include "machineview/machineview.hpp"
 #include "mainwindow.hpp"
-#include "patternbox.hpp"
 #include "patternbox.hpp"
 #include "patternview/patterndraw.hpp"
 #include "patternview/patterngrid.hpp"
