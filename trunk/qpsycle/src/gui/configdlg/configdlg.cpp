@@ -21,9 +21,8 @@
 #include <QtGui>
 
 #include "configdlg.hpp"
-#include "pages.hpp"
-#include "audioconfigdlg.hpp"
-#include "settingsdlg.hpp"
+#include "audiopage.hpp"
+#include "behaviourpage.hpp"
 #include "lookspage.hpp"
 #include "dirspage.hpp"
 
@@ -39,11 +38,11 @@ namespace qpsycle {
 		contentsWidget->setMaximumWidth(128);
 		contentsWidget->setSpacing(12);
 
- 		pagesWidget = new QStackedWidget;
- 		pagesWidget->addWidget( new AudioConfigDlg );
- 		pagesWidget->addWidget( new SettingsDlg );
- 		pagesWidget->addWidget( new LooksPage );
- 		pagesWidget->addWidget( new DirsPage );
+		pagesWidget = new QStackedWidget;
+		pagesWidget->addWidget( new AudioConfigDlg );
+		pagesWidget->addWidget( new SettingsDlg );
+		pagesWidget->addWidget( new LooksPage );
+		pagesWidget->addWidget( new DirsPage );
 
 		QPushButton *closeButton = new QPushButton(tr("Close"));
 

@@ -117,7 +117,6 @@ private slots:
 	void showPatternView();
 	void showWaveEditor();
 	void showSequencerView();
-	void showAudioConfigDlg();
 	void showSettingsDlg();
 	void showUndoView();
 	void showLogCons();
