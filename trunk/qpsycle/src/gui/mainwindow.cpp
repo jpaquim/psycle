@@ -30,6 +30,7 @@
 #include "../model/instrumentsmodel.hpp"
 #include "configdlg/audioconfigdlg.hpp"
 #include "configdlg/settingsdlg.hpp"
+#include "configdlg/configdlg.hpp"
 #include "configuration.hpp"
 #include "global.hpp"
 #include "logconsole.hpp"
@@ -158,8 +159,8 @@ namespace qpsycle {
 
 		///\todo: these might be better being constructed as and when they're
 		// need, not permanently held in memory.
-		audioCnfDlg = new AudioConfigDlg( this );
-		settingsDlg = new SettingsDlg( this );
+//		audioCnfDlg = new AudioConfigDlg( this );
+		//	settingsDlg = new SettingsDlg( this );
 
 		//setAttribute( Qt::WA_DeleteOnClose );
 		createUndoView();
@@ -446,12 +447,7 @@ namespace qpsycle {
 		quitAct->setStatusTip(tr("Quit the application"));
 		connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-		audioConfAct = new QAction( tr("Audio Settings"), this );
-		connect( audioConfAct, SIGNAL( triggered() ), this, SLOT( showAudioConfigDlg() ) );
-
-		// <nmather> just a hold-all for now.  We can organise settings
-		// dialogs better later on.
-		settingsConfAct = new QAction( tr("General Settings"), this );
+		settingsConfAct = new QAction( tr("&Settings..."), this );
 		connect( settingsConfAct, SIGNAL( triggered() ), this, SLOT( showSettingsDlg() ) );
 
 
@@ -580,7 +576,6 @@ namespace qpsycle {
 		viewMenu->addAction( showLogConsAct );
 	
 		configMenu = menuBar()->addMenu(tr("&Configuration"));
-		configMenu->addAction( audioConfAct );
 		configMenu->addAction( settingsConfAct );
 
 		performMenu = menuBar()->addMenu(tr("&Performance"));
@@ -808,12 +803,13 @@ namespace qpsycle {
 
 	void MainWindow::showAudioConfigDlg()
 	{
-		audioCnfDlg->exec();
+//		audioCnfDlg->exec();
 	}
 
 	void MainWindow::showSettingsDlg()
 	{
-		settingsDlg->exec();
+		ConfigDialog configDlg;
+		configDlg.exec();
 	}
 
 

@@ -23,7 +23,7 @@
 #define SETTINGSDLG_H
 
 #include <QString>
-#include <QDialog>
+#include <QWidget>
 
 class QComboBox;
 class QPushButton;
@@ -33,7 +33,7 @@ namespace qpsycle {
 
 class Configuration;
 
-class SettingsDlg : public QDialog {
+class SettingsDlg : public QWidget {
 Q_OBJECT
 public:
 	SettingsDlg( QWidget *parent = 0 );
@@ -41,7 +41,6 @@ public:
 public slots:
 	void onSaveButtonClicked();
 	void onSettingsChanged();
-	void onThemeComboChanged( const QString &sheetName );
 
 private:
 	Configuration *config_;
