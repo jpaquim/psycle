@@ -157,11 +157,6 @@ namespace qpsycle {
 		macView_->setOctave( 4 );
 		patView_->setOctave( 4 );
 
-		///\todo: these might be better being constructed as and when they're
-		// need, not permanently held in memory.
-//		audioCnfDlg = new AudioConfigDlg( this );
-		//	settingsDlg = new SettingsDlg( this );
-
 		//setAttribute( Qt::WA_DeleteOnClose );
 		createUndoView();
 	}
@@ -799,11 +794,6 @@ namespace qpsycle {
 	void MainWindow::showSequencerView()
 	{
 		views_->setCurrentWidget( seqView_ );
-	}
-
-	void MainWindow::showAudioConfigDlg()
-	{
-//		audioCnfDlg->exec();
 	}
 
 	void MainWindow::showSettingsDlg()

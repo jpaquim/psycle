@@ -50,7 +50,8 @@ AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 
 	QGroupBox *driverGroup = new QGroupBox();
 	QGridLayout *driverLay = new QGridLayout();
-	driverLay->setAlignment( Qt::AlignTop );	
+
+	driverLay->setAlignment( Qt::AlignTop );
 	driverGroup->setLayout( driverLay );
 
 	driverCbx_ = new QComboBox( this );
