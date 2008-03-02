@@ -44,7 +44,7 @@
 namespace qpsycle {
 
 	SettingsDlg::SettingsDlg( QWidget *parent )
-		: QDialog( parent )
+		: QWidget( parent )
 	{
 		setWindowTitle("General Settings");
 		config_ = Global::pConfig();
@@ -66,7 +66,6 @@ namespace qpsycle {
 		QVBoxLayout *mainLay = new QVBoxLayout();
 		QHBoxLayout *buttonsLay = new QHBoxLayout();
 		QHBoxLayout *knobLay = new QHBoxLayout();
-		QHBoxLayout *miscLay = new QHBoxLayout();
 		
 		QGroupBox *settingsGroup = new QGroupBox( "Machine View", this );
 		QWidget *buttonsGroup = new QWidget( this );
@@ -76,6 +75,7 @@ namespace qpsycle {
 		closeBtn_ = new QPushButton( "Close" );
 
 		knobLay->addWidget( knobComboLabel );
+		knobLay->setAlignment( Qt::AlignRight );
 		knobLay->addWidget( knobBehaviourCombo_ );
 
 		connect( saveBtn_, SIGNAL( clicked() ), this, SLOT( onSaveButtonClicked() ) );
@@ -84,7 +84,6 @@ namespace qpsycle {
 		settingsGroup->setLayout( knobLay );
 
 		buttonsLay->addWidget( saveBtn_ );
-		buttonsLay->addWidget( closeBtn_ );
 		buttonsGroup->setLayout( buttonsLay );
 
 
@@ -107,20 +106,6 @@ namespace qpsycle {
 		wrapChk->setChecked( Global::pConfig()->wrapAround() );
 		centerCursorChk->setChecked( Global::pConfig()->centerCursor() );
 
-		QGroupBox *miscGroup = new QGroupBox( "Misc", this );
-		QLabel *themeLabel = new QLabel( "Theme:" );
-		QComboBox *themeCombo = new QComboBox( this );
-		connect( themeCombo, SIGNAL( activated( QString ) ), this, SLOT( onThemeComboChanged( QString ) ) );
-		QDir themeDir(":/themes");
-		QStringList themes = themeDir.entryList();
-		themeCombo->addItems( themes );
-
-		miscGroup->setLayout( miscLay );
-
-		miscLay->addWidget( themeLabel );
-		miscLay->addWidget( themeCombo );
-	
-
 		connect( homeEndChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
 
 		connect( shiftChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
@@ -139,7 +124,6 @@ namespace qpsycle {
 
 		mainLay->addWidget( settingsGroup );
 		mainLay->addWidget( patternView );
-		mainLay->addWidget( miscGroup );
 
 		mainLay->addWidget( buttonsGroup );
 
@@ -162,15 +146,4 @@ namespace qpsycle {
 		saveBtn_->setEnabled( false );
 	}
 
-	void SettingsDlg::onThemeComboChanged( const QString &sheetName )
-	{
-		QSettings settings;
-		settings.setValue( "theme", sheetName );
-
-		QFile file( ":/themes/" + sheetName.toLower() );
-		file.open( QFile::ReadOnly );
-		QString styleSheet = QLatin1String( file.readAll() );
-		
-		qApp->setStyleSheet( styleSheet );
-	}
 } // namespace qpsycle

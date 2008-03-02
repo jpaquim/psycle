@@ -19,45 +19,28 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef AUDIOCONFIGDLG_H
-#define AUDIOCONFIGDLG_H
+#ifndef LOOKSPAGE_H
+#define LOOKSPAGE_H
 
-namespace psy { namespace core {
-class AudioDriver;}}
-
+#include <QString>
 #include <QWidget>
 
 class QComboBox;
 class QPushButton;
-class QLineEdit;
-class QLabel;
+class QCheckBox;
 
 namespace qpsycle {
 
 class Configuration;
 
-class AudioConfigDlg : public QWidget {
+class LooksPage : public QWidget {
 Q_OBJECT
 public:
-	AudioConfigDlg( QWidget *parent = 0 );
+	LooksPage( QWidget *parent = 0 );
 
 public slots:
-	void onDriverSelected( const QString & );
-	void onRestartDriver();
+	void onThemeComboChanged( const QString &sheetName );
 
-private:
-	void keyPressEvent( QKeyEvent *event );
-
-	void initDriverList();
-
-	Configuration* config_;
-	psy::core::AudioDriver *selectedDriver_;
-
-	QLabel *driverLbl_;
-	QLabel *deviceLbl_;
-	QComboBox *driverCbx_;
-	QLineEdit *deviceBox_;
-	QPushButton *restartBtn_;
 };
 
 } // namespace qpsycle

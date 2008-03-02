@@ -28,26 +28,30 @@
 #include "../configuration.hpp"
 
 #include <QGridLayout>
+#include <QGroupBox>
+#include <QVBoxLayout>
 #include <QComboBox>
 #include <QPushButton>
 #include <QLineEdit>
-#include <QKeyEvent> // QKeyEvent
+#include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
 
 namespace qpsycle {
 
 AudioConfigDlg::AudioConfigDlg( QWidget *parent )
-	: QDialog( parent )
+	: QWidget( parent )
 {
 	setWindowTitle(tr("Select Audio Driver"));
 	config_ = Global::pConfig();
 	selectedDriver_ = 0;
 
-	QGridLayout *mainLay = new QGridLayout();
-		
-	//QWidget *settingsPanel = new QWidget( this );
-	//QWidget *notes = new QWidget( this );
+	QVBoxLayout *mainLay = new QVBoxLayout();
+
+	QGroupBox *driverGroup = new QGroupBox();
+	QGridLayout *driverLay = new QGridLayout();
+	driverLay->setAlignment( Qt::AlignTop );	
+	driverGroup->setLayout( driverLay );
 
 	driverCbx_ = new QComboBox( this );
 	driverLbl_ = new QLabel( tr("Driver"), this );
@@ -55,28 +59,21 @@ AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	deviceLbl_ = new QLabel( tr("Device"), this );
 
 	restartBtn_ = new QPushButton( tr("Restart Driver"), this );
-	QPushButton *closeBtn = new QPushButton( tr("Close"), this );
 
 
 	connect( driverCbx_, SIGNAL( currentIndexChanged( const QString & ) ),
 			this, SLOT( onDriverSelected( const QString & ) ) );
 	connect( restartBtn_, SIGNAL( clicked() ),
 			this, SLOT( onRestartDriver() ) );
-	connect( closeBtn, SIGNAL( clicked() ),
-			this, SLOT( reject() ) );
 
-	mainLay->addWidget( driverLbl_, 0, 0 );
-	mainLay->addWidget( deviceLbl_, 1, 0 );
-	mainLay->addItem( new QSpacerItem( 5, 0 ), 0, 1);
-	mainLay->addItem( new QSpacerItem( 5, 0 ), 1, 1);
-	mainLay->addWidget( driverCbx_, 0, 2 );
-	mainLay->addWidget( deviceBox_, 1, 2 );
-	mainLay->addItem( new QSpacerItem( 15,0 ), 0, 3);
-	mainLay->addItem( new QSpacerItem( 15,0 ), 1, 3);
-	mainLay->addWidget( restartBtn_, 0, 4 );
-	mainLay->addWidget( closeBtn, 1, 4 );
+	driverLay->addWidget( driverLbl_, 0, 0 );
+	driverLay->addWidget( deviceLbl_, 1, 0 );
+	driverLay->addWidget( driverCbx_, 0, 1 );
+	driverLay->addWidget( deviceBox_, 1, 1 );
+	driverLay->addWidget( restartBtn_, 0, 2 );
 
-	mainLay->setColumnStretch(2, 1);
+
+	mainLay->addWidget( driverGroup );
 
 	setLayout( mainLay );
 
@@ -103,12 +100,6 @@ void AudioConfigDlg::initDriverList( )
 
 void AudioConfigDlg::keyPressEvent( QKeyEvent *event)
 {
-	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
-		reject(); // closes the dialog
-	}
-	else if ( event->key() == Qt::Key_Escape) {
-		reject(); // close the dialog
-	}
 }
 
 void AudioConfigDlg::onDriverSelected( const QString & text )
