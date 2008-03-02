@@ -236,7 +236,7 @@ namespace qpsycle {
 		createToolBars();
 		createStatusBar();
 
-		setWindowTitle(tr("] Psycle Modular Music Creation Studio [ ( Q v0.1.") + tr(SUBVERSION_REVISION) + tr(") "));
+		setWindowTitle( " qpsycle v0.1." + QString(SUBVERSION_REVISION) );
 
 	}
 

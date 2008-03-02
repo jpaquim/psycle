@@ -587,10 +587,6 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 
 		cursor().setPos( mapToGlobal( m_posMousePressed ) );
 	} break;
-	case QSynthLinearMode: // <nmather> probably remove this, it isn't very good.
-	{
-		newValue = m_lastDragValue + xdelta - ydelta;
-	} break;
 	case QSynthAngularMode:
 	{
 		// Forget about the drag origin to be robust on full rotations

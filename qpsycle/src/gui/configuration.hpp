@@ -18,9 +18,8 @@ namespace qpsycle {
 
 enum KnobMode
 {
-	QDialMode, ///< Old QDial behaviour
+	QDialMode, ///< Built-in QDial behaviour
 	QSynthAngularMode, ///< Knob moves angularly as the mouse around the widget center
-	QSynthLinearMode, ///< Knob moves proportonally to drag distance in one ortogonal axis
 	PsycleLinearMode,
 	FixedLinearMode
 };
