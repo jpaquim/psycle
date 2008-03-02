@@ -23,7 +23,7 @@
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
 
-#include "audioconfigdlg.hpp"
+#include "audiopage.hpp"
 #include "../global.hpp"
 #include "../configuration.hpp"
 
@@ -39,7 +39,7 @@
 
 namespace qpsycle {
 
-AudioConfigDlg::AudioConfigDlg( QWidget *parent )
+AudioPage::AudioPage( QWidget *parent )
 	: QWidget( parent )
 {
 	setWindowTitle(tr("Select Audio Driver"));
@@ -81,7 +81,7 @@ AudioConfigDlg::AudioConfigDlg( QWidget *parent )
 	initDriverList();
 }
 
-void AudioConfigDlg::initDriverList( )
+void AudioPage::initDriverList( )
 {
 	std::map<std::string, psy::core::AudioDriver*> & driverMap =  config_->driverMap();
 	std::map<std::string, psy::core::AudioDriver*>::iterator it = driverMap.begin();
@@ -99,11 +99,11 @@ void AudioConfigDlg::initDriverList( )
 	}
 }
 
-void AudioConfigDlg::keyPressEvent( QKeyEvent *event)
+void AudioPage::keyPressEvent( QKeyEvent *event)
 {
 }
 
-void AudioConfigDlg::onDriverSelected( const QString & text )
+void AudioPage::onDriverSelected( const QString & text )
 {
 	std::map<std::string, psy::core::AudioDriver*> & driverMap =  config_->driverMap();
 	std::map<std::string, psy::core::AudioDriver*>::iterator it = driverMap.find( text.toStdString() );
@@ -122,7 +122,7 @@ void AudioConfigDlg::onDriverSelected( const QString & text )
 	}
 }
 
-void AudioConfigDlg::onRestartDriver()
+void AudioPage::onRestartDriver()
 {
 	if ( selectedDriver_ ) {
 		// disable old driver

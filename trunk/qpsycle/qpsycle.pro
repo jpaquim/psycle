@@ -37,8 +37,8 @@ HEADERS += \
 	src/gui/configuration.hpp \
 	src/gui/inputhandler.hpp \
 	src/gui/patternbox.hpp \
-	src/gui/configdlg/audioconfigdlg.hpp \
-	src/gui/configdlg/settingsdlg.hpp \
+	src/gui/configdlg/audiopage.hpp \
+	src/gui/configdlg/behaviourpage.hpp \
         src/gui/configdlg/configdlg.hpp \
         src/gui/configdlg/lookspage.hpp \
         src/gui/configdlg/dirspage.hpp \
@@ -76,8 +76,8 @@ SOURCES += \
 	src/gui/configuration.cpp \
 	src/gui/inputhandler.cpp \
 	src/gui/patternbox.cpp \
-	src/gui/configdlg/audioconfigdlg.cpp \
-	src/gui/configdlg/settingsdlg.cpp \
+	src/gui/configdlg/audiopage.cpp \
+	src/gui/configdlg/behaviourpage.cpp \
         src/gui/configdlg/configdlg.cpp \
         src/gui/configdlg/lookspage.cpp \
         src/gui/configdlg/dirspage.cpp \

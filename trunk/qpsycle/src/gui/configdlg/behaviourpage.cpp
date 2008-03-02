@@ -21,7 +21,7 @@
 
 #include <psycle/core/player.h>
 
-#include "settingsdlg.hpp"
+#include "behaviourpage.hpp"
 #include "../global.hpp"
 #include "../configuration.hpp"
 
@@ -43,7 +43,7 @@
 
 namespace qpsycle {
 
-	SettingsDlg::SettingsDlg( QWidget *parent )
+	BehaviourPage::BehaviourPage( QWidget *parent )
 		: QWidget( parent )
 	{
 		setWindowTitle("General Settings");
@@ -79,7 +79,6 @@ namespace qpsycle {
 		knobLay->addWidget( knobBehaviourCombo_ );
 
 		connect( saveBtn_, SIGNAL( clicked() ), this, SLOT( onSaveButtonClicked() ) );
-		connect( closeBtn_, SIGNAL( clicked() ), this, SLOT( reject() ) );
 
 		settingsGroup->setLayout( knobLay );
 
@@ -130,12 +129,12 @@ namespace qpsycle {
 		setLayout( mainLay );
 	}
 
-	void SettingsDlg::onSettingsChanged()
+	void BehaviourPage::onSettingsChanged()
 	{
 		saveBtn_->setEnabled( true );
 	}
 
-	void SettingsDlg::onSaveButtonClicked()
+	void BehaviourPage::onSaveButtonClicked()
 	{
 		Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
 		Global::pConfig()->setFT2HomeEndBehaviour( homeEndChk->checkState() == Qt::Checked? true: false );
