@@ -186,9 +186,6 @@ void PluginFinder::scanLadspa() {
 		if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
 	#else
 	#endif
-	const LADSPA_Descriptor * psDescriptor;
-	LADSPA_Descriptor_Function pfDescriptorFunction;
-	unsigned long lPluginIndex;
 
 	std::vector<std::string> fileList;
 	fileList = File::fileList(ladspa_path, File::list_modes::files);
@@ -203,6 +200,10 @@ void PluginFinder::scanLadspa() {
 
 void PluginFinder::LoadLadspaInfo(std::string fileName)
 {
+	const LADSPA_Descriptor * psDescriptor;
+	LADSPA_Descriptor_Function pfDescriptorFunction;
+	unsigned long lPluginIndex;
+
 		#if defined __unix__ || defined __APPLE__
 			// problem of so.0.0.x .. .so all three times todo
 		#else

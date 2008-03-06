@@ -111,7 +111,7 @@ namespace psy
 			protected:
 				std::map< PluginFinderKey, PluginInfo > map_;
 
-
+				virtual void clearInfo();
 				virtual void loadInfo();
 				virtual void scanInternal();
 				virtual void scanLadspa();
