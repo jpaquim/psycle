@@ -36,7 +36,7 @@ namespace psy
 			public:
 				PluginInfo();
 
-				~PluginInfo();
+				virtual ~PluginInfo();
 
 				void setType( Machine::type_type type );
 				Machine::type_type type() const;
@@ -112,7 +112,7 @@ namespace psy
 				std::map< PluginFinderKey, PluginInfo > map_;
 
 				virtual void clearInfo();
-				virtual void loadInfo();
+				virtual bool loadInfo();
 				virtual void scanInternal();
 				virtual void scanLadspa();
 				virtual void scanNatives();

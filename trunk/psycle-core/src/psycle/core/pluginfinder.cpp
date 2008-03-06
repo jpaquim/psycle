@@ -156,8 +156,9 @@ PluginInfo PluginFinder::info( const PluginFinderKey & key ) const {
 		return PluginInfo();
 }
 
-void PluginFinder::loadInfo() {
+bool PluginFinder::loadInfo() {
 	refreshInfo();
+	return true;
 }
 
 void PluginFinder::refreshInfo() {
@@ -197,9 +198,10 @@ void PluginFinder::scanLadspa() {
 }
 
 
-
+//FIXME:Probably is needed to pass the path too, when we support more than one path.
 void PluginFinder::LoadLadspaInfo(std::string fileName)
 {
+	std::string ladspa_path = ladspa_path_;
 	const LADSPA_Descriptor * psDescriptor;
 	LADSPA_Descriptor_Function pfDescriptorFunction;
 	unsigned long lPluginIndex;
