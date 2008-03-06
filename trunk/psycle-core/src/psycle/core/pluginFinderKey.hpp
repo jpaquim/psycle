@@ -12,6 +12,9 @@ namespace psy
 		{
 			public:
 				PluginFinderKey( );
+				//FIXME: dllPath as part PluginFinderKey??? One of the reasons to have a plugin finder
+				// is to find out its dll path from the relative path stored in the song. Obviously, this
+				// functionality is not used right now.
 				PluginFinderKey( const std::string & name, const std::string & dllPath, int index = 0 );
 				~PluginFinderKey();
 

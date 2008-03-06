@@ -132,7 +132,8 @@ PluginFinder::PluginFinder(std::string const & psycle_path, std::string const & 
 	psycle_path_(psycle_path),
 	ladspa_path_(ladspa_path)
 {
-	scanAll();
+	if (map_.empty())
+		loadInfo();
 }
 
 PluginFinder::~PluginFinder()
@@ -155,12 +156,19 @@ PluginInfo PluginFinder::info( const PluginFinderKey & key ) const {
 		return PluginInfo();
 }
 
-void PluginFinder::scanAll() {
+void PluginFinder::loadInfo() {
+	refreshInfo();
+}
+
+void PluginFinder::refreshInfo() {
+	clearInfo();
 	scanInternal();
 	scanNatives();
 	scanLadspa();
 }
-
+void PluginFinder::clearInfo() {
+	map_.clear();
+}
 void PluginFinder::scanInternal() {
 	PluginFinderKey key = PluginFinderKey::internalSampler();
 	PluginInfo info;
@@ -171,7 +179,8 @@ void PluginFinder::scanInternal() {
 
 void PluginFinder::scanLadspa() {
 	std::string ladspa_path = ladspa_path_;
-	///\todo this just uses the first path in getenv
+	//FIXME: this just uses the first path in getenv. Do this for each path.
+	// The best way would be pre-process in the constructor, and store a vector of strings.
 	#if defined __unix__ || defined __APPLE__
 		std::string::size_type dotpos = ladspa_path.find(':',0);
 		if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
@@ -186,7 +195,14 @@ void PluginFinder::scanLadspa() {
 
 	std::vector<std::string>::iterator it = fileList.begin();
 	for ( ; it < fileList.end(); ++it ) {
-		std::string fileName = *it;
+		LoadLadspaInfo(*it);
+	}
+}
+
+
+
+void PluginFinder::LoadLadspaInfo(std::string fileName)
+{
 		#if defined __unix__ || defined __APPLE__
 			// problem of so.0.0.x .. .so all three times todo
 		#else
@@ -219,7 +235,6 @@ void PluginFinder::scanLadspa() {
 			}
 		}
 	}
-}
 
 void PluginFinder::scanNatives() {
 	std::vector<std::string> fileList;
@@ -234,7 +249,12 @@ void PluginFinder::scanNatives() {
 	std::vector<std::string>::iterator it = fileList.begin();
 
 	for ( ; it < fileList.end(); ++it ) {
-		std::string fileName = *it;
+		LoadNativeInfo(*it);
+	}
+}
+
+void PluginFinder::LoadNativeInfo(std::string fileName)
+{
 		#if defined __unix__ || defined __APPLE__
 			///\todo problem of so.x.y.z .. .so all three times todo
 		#else
@@ -266,6 +286,5 @@ void PluginFinder::scanNatives() {
 			map_[key] = info;               
 		}
 	}
-}
 
 }}
