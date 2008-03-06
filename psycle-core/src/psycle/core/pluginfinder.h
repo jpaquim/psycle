@@ -91,7 +91,7 @@ namespace psy
 				PluginFinder(std::string const & psycle_path, std::string const & ladspa_path);
 				~PluginFinder();
 
-				void scanAll();
+				virtual void refreshInfo();
 
 				PluginInfo info( const PluginFinderKey & key ) const;
 			
@@ -108,12 +108,16 @@ namespace psy
 			private:
 				std::string const ladspa_path_;
 
-			private:
+			protected:
 				std::map< PluginFinderKey, PluginInfo > map_;
 
-				void scanInternal();
-				void scanLadspa();
-				void scanNatives();
+
+				virtual void loadInfo();
+				virtual void scanInternal();
+				virtual void scanLadspa();
+				virtual void scanNatives();
+				void LoadLadspaInfo(std::string fileName);
+				void LoadNativeInfo(std::string fileName);
 		};
 	}
 }
