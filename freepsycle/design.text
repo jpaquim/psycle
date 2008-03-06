@@ -1,0 +1,66 @@
+Graph:
+A graph is a set of nodes.
+Possibly, a node could be a subgraph itself, allowing for nesting graphs.
+
+Nodes:
+Each node can have several ports (input and output ones).
+
+A node has a "process" function which reads the audio signals coming to its input ports
+and writes the result of the processing to its output ports.
+
+Ports:
+A port can be either an input port or an output port.
+A port has a "buffer" getter/setter function to get/set a pointer to the audio data.
+An audio buffer can carry several channels of audio data.
+
+The port does not own the buffer, it's the the scheduler (explained below) that sets it
+before calling the "process" function of the node.
+
+In its "process" function, the node uses the getter function to retreive a pointer to the audio buffer.
+
+Output ports:
+An output port of a node can be connected to several input ports of other nodes.
+A node can have several output ports.
+
+Input ports:
+Input ports can be of two different kinds:
+
+Single input ports:
+A single input port of a node can only be connected to one output port of another node.
+A node can have several single input ports.
+
+Multiple input ports:
+A mutiple input port can be connected to several output ports of other nodes.
+A node can only have one mulitple input port.
+
+Processing scheduler:
+A scheduler is responsible for setting the buffer pointers of the ports, and then
+calling the nodes' "process" function, in the right order.
+
+After calling a node's "process" function, the scheduler can unset the buffer pointer of node's ports,
+and decides wether the buffer needs to be forwarded to another port, or copied to another buffer, or if
+its content is not needed any longer.
+
+Buffers are recycled in a pool (fifo/stack): when a buffer has been consumed by a node and is not needed
+anymore by following nodes, it is put back in the pool and will be used the next time a port needs a buffer.
+
+If a node has a multiple input port, the sheduler calls the node's "process" function several times:
+For each output port connected to the node's multiple input port, the scheduler sets the buffer pointer of the
+mulitple input port with to the same buffer as the connected output port, and then calls the node's "process" function.
+This allows, for example, to implement nodes that mixes (sums), or modulate (multiplies) any number of signals.
+
+Buffer-forwarding optimisations:
+
+Nodes have the possibility to inform the scheduler about possible optimisations:
+
+If a node is able to do "in-place processing", that is, using the same buffer for both input and output data,
+it can inform the scheduler of this condition.
+
+If a node does not alter the audio signal when its multiple input port has only one connection,
+it can set a flag on its multiple input port to inform the scheduler that the node
+will not alter the signal coming to the multiple input port, and hence can simply forward
+the buffer to the followinf nodes.
+
+A example of this case is a node that mixes (sums) the audio signals sent to its multiple
+input port (the sum of one signal is the signal itself).
+
