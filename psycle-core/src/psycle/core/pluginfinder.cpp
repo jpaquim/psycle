@@ -209,7 +209,7 @@ void PluginFinder::LoadLadspaInfo(std::string fileName)
 		#if defined __unix__ || defined __APPLE__
 			// problem of so.0.0.x .. .so all three times todo
 		#else
-			if ( fileName.find( ".dll" ) == std::string::npos ) continue;
+			if ( fileName.find( ".dll" ) == std::string::npos ) return;
 		#endif
 
 		class DummyCallbacks : public MachineCallbacks {
@@ -261,7 +261,7 @@ void PluginFinder::LoadNativeInfo(std::string fileName)
 		#if defined __unix__ || defined __APPLE__
 			///\todo problem of so.x.y.z .. .so all three times todo
 		#else
-			if ( fileName.find( ".dll" ) == std::string::npos ) continue;
+			if ( fileName.find( ".dll" ) == std::string::npos ) return;
 		#endif
 
 		class DummyCallbacks : public MachineCallbacks {
