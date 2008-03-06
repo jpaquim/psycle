@@ -219,7 +219,7 @@ void PluginFinder::LoadLadspaInfo(std::string fileName)
 		} dummycallbacks;
 
 		LADSPAMachine plugin(&dummycallbacks, 0, 0 );
-		pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + File::slash() + fileName );
+		pfDescriptorFunction = plugin.loadDescriptorFunction( (ladspa_path + File::slash()) + fileName );
 
 		if (pfDescriptorFunction) {
 			for (lPluginIndex = 0;; lPluginIndex++) {
@@ -231,7 +231,7 @@ void PluginFinder::LoadLadspaInfo(std::string fileName)
 				info.setType( MACH_LADSPA );
 				info.setName( psDescriptor->Name );
 				info.setLibName( fileName );
-				PluginFinderKey key(fileName, ladspa_path + File::slash() + fileName, lPluginIndex );
+				PluginFinderKey key(fileName, (ladspa_path + File::slash()) + fileName, lPluginIndex );
 				map_[key] = info;
 			}
 		}
