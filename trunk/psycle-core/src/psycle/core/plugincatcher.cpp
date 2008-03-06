@@ -100,7 +100,7 @@ bool PluginCatcher::loadCache(){
 			std::int32_t identifier;
 			MachineType mtype;
 			MachineMode mmode;
-			//FIXME: types		
+			//FIXME: types
 			file.Read(b_temp); p.setAllow(b_temp);
 			//file.ReadArray(&mmode,sizeof(mmode)); p.setMode(mmode);
 			//file.ReadArray(&mtype,sizeof(mtype)); p.setType(mtype);
@@ -113,7 +113,7 @@ bool PluginCatcher::loadCache(){
 
 //FIXME:Unfinished
 		// Temp here contains the full path to the .dll
-/*		if(finder.FindFile(Temp))
+		/*if(finder.FindFile(Temp))
 		{
 			time_t t_time;
 			finder.FindNextFile();
@@ -131,7 +131,7 @@ bool PluginCatcher::loadCache(){
 				}
 			}
 		}
-*/		
+*/
 	}
 	
 	file.Close();
@@ -156,9 +156,9 @@ void PluginCatcher::rescanAll() {
 
 void PluginCatcher::scanInternal() {
 
-//	So far just calling superclass' function.
-//	A better approach is to verify if the key exists, but probably there's no
-//	penalty with refreshing the value.
+	// So far just calling superclass' function.
+	// A better approach is to verify if the key exists, but probably there's no
+	// penalty with refreshing the value.
 	PluginFinder::scanInternal();
 }
 
@@ -204,3 +204,4 @@ void PluginCatcher::scanNatives() {
 }
 
 }}
+
