@@ -543,8 +543,8 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileN
 
 bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 {
-//FIXME: Verify if this was needed for something. It was preventing to save to the correct directory.
-//	std::string fileName = File::extractFileNameFromPath(file_Name);
+	//FIXME: Verify if this was needed for something. It was preventing to save to the correct directory.
+	// std::string fileName = File::extractFileNameFromPath(file_Name);
 	const std::string &fileName = file_Name;
 
 	bool autosave = false;
