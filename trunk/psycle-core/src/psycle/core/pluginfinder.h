@@ -109,7 +109,7 @@ namespace psy
 				std::string const ladspa_path_;
 
 			protected:
-				std::map< PluginFinderKey, PluginInfo > map_;
+				static std::map< PluginFinderKey, PluginInfo > map_;
 
 				virtual void clearInfo();
 				virtual bool loadInfo();
