@@ -33,26 +33,26 @@ namespace qpsycle {
 
 NewMachineDlg::NewMachineDlg(QWidget *parent) 
 	:
-		QDialog(parent),
-		selectedItem(NULL)
+	QDialog(parent),
+	selectedItem(NULL)
 {
-		setWindowTitle(tr("Choose New Machine"));
-		resize(500, 500);
-		
-		QGridLayout *layout = new QGridLayout();
+	setWindowTitle(tr("Choose New Machine"));
+	resize(500, 500);
+	
+	QGridLayout *layout = new QGridLayout();
 
-		// Should we use a tree layout instead of tabs?
-		QTabWidget *machineTabs = new QTabWidget();
+	// Should we use a tree layout instead of tabs?
+	QTabWidget *machineTabs = new QTabWidget();
 
-		finder_ = new psy::core::PluginFinder(Global::configuration().pluginPath(), Global::configuration().ladspaPath());
+	finder_ = new psy::core::PluginFinder(Global::configuration().pluginPath(), Global::configuration().ladspaPath());
 
-		genList = new QListWidget();
-		efxList = new QListWidget();
-		intList = new QListWidget();
-		ladList = new QListWidget();
+	genList = new QListWidget();
+	efxList = new QListWidget();
+	intList = new QListWidget();
+	ladList = new QListWidget();
 
-		std::map< psy::core::PluginFinderKey, psy::core::PluginInfo >::const_iterator it = finder_->begin();
-		for ( ; it != finder_->end(); it++ ) {
+	std::map< psy::core::PluginFinderKey, psy::core::PluginInfo >::const_iterator it = finder_->begin();
+	for ( ; it != finder_->end(); it++ ) {
 		const psy::core::PluginFinderKey & key = it->first;
 		const psy::core::PluginInfo & info = it->second;
 		QListWidget* list=NULL;
@@ -75,34 +75,34 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 			list->addItem(item);
 			pluginIdentify_[item] = key;
 		}
-		}
+	}
 
-		inItemSelectionChanged = false;
+	inItemSelectionChanged = false;
 
-		QListWidget* lists[4] = { genList, efxList, intList, ladList };
+	QListWidget* lists[4] = { genList, efxList, intList, ladList };
 
-		for(int i=0;i<4;i++) {
+	for(int i=0;i<4;i++) {
 		connect( lists[i], SIGNAL( itemSelectionChanged( ) ), 
-				this, SLOT( itemSelectionChanged( ) ) );
+			this, SLOT( itemSelectionChanged( ) ) );
 
 		connect( lists[i], SIGNAL( itemActivated( QListWidgetItem* ) ),
-				this, SLOT( tryAccept() ) );
-		}
-
-		buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
-										| QDialogButtonBox::Cancel);
-		connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
-		connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-		
-		machineTabs->addTab(genList, QIcon(":images/gen-native.png"), "Generators");
-		machineTabs->addTab(efxList, QIcon(":images/efx-native.png"), "Effects");
-		machineTabs->addTab(intList, QIcon(":images/gen-internal.png"), "Internal");
-		machineTabs->addTab(ladList, "Ladspa");
-		
-		layout->addWidget(machineTabs);
-		layout->addWidget(buttonBox);
-		setLayout(layout);
+			this, SLOT( tryAccept() ) );
 	}
+
+	buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+					| QDialogButtonBox::Cancel);
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
+	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+		
+	machineTabs->addTab(genList, QIcon(":images/gen-native.png"), "Generators");
+	machineTabs->addTab(efxList, QIcon(":images/efx-native.png"), "Effects");
+	machineTabs->addTab(intList, QIcon(":images/gen-internal.png"), "Internal");
+	machineTabs->addTab(ladList, "Ladspa");
+	
+	layout->addWidget(machineTabs);
+	layout->addWidget(buttonBox);
+	setLayout(layout);
+}
 
 void NewMachineDlg::keyPressEvent( QKeyEvent *event )
 {

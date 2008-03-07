@@ -127,6 +127,8 @@ const std::string & PluginInfo::category() const {
 	return category_;
 }
 
+std::map< PluginFinderKey, PluginInfo > PluginFinder::map_;
+
 PluginFinder::PluginFinder(std::string const & psycle_path, std::string const & ladspa_path)
 :
 	psycle_path_(psycle_path),
