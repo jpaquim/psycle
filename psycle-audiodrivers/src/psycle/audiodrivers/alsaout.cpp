@@ -27,6 +27,14 @@
 #include <boost/bind.hpp>
 namespace psy { namespace core {
 
+#define PSYCLE__CHECK_ALSA_VERSION(major, minor, micro) \
+	( \
+		SND_LIB_MAJOR > (major) || \
+		(SND_LIB_MAJOR == (major) && SND_LIB_MINOR > (minor)) || \
+		(SND_LIB_MAJOR == (major) && SND_LIB_MINOR == (minor) && \
+		SND_LIB_SUBMINOR >= (micro)) \
+	)
+
 AlsaOut::AlsaOut()
 	:
 		AudioDriver(),
@@ -403,11 +411,15 @@ AlsaOut::AlsaOut()
 			return err;
 		}
 		// align all transfers to 1 sample
-		err = snd_pcm_sw_params_set_xfer_align(handle, swparams, 1);
-		if (err < 0) {
-			std::cerr << "psycle: alsa: unable to set transfer align for playback: " << snd_strerror(err) << '\n';
-			return err;
-		}
+		#if PSYCLE__CHECK_ALSA_VERSION(1, 0, 16)
+			// snd_pcm_sw_params_set_xfer_align() is deprecated, alignment is always 1
+		#else
+			err = snd_pcm_sw_params_set_xfer_align(handle, swparams, 1);
+			if (err < 0) {
+				std::cerr << "psycle: alsa: unable to set transfer align for playback: " << snd_strerror(err) << '\n';
+				return err;
+			}
+		#endif
 		// write the parameters to the playback device
 		err = snd_pcm_sw_params(handle, swparams);
 		if (err < 0) {
