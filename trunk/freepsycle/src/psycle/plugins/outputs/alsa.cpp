@@ -9,6 +9,14 @@
 #include <cstdio>
 #include <thread>
 namespace psycle { namespace plugins { namespace outputs {
+
+	#define PSYCLE__PLUGINS__OUTPUTS__ALSA__REQUIRE_VERSION(major, minor, micro) \
+		( \
+			SND_LIB_MAJOR >  (major) || \
+			SND_LIB_MAJOR == (major) && SND_LIB_MINOR >  (minor) || \
+			SND_LIB_MAJOR == (major) && SND_LIB_MINOR == (minor) && SND_LIB_SUBMINOR >= (micro) \
+		)
+
 	using engine::exceptions::runtime_error;
 
 	namespace {
