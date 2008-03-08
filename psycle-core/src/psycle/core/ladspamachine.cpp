@@ -204,11 +204,14 @@ namespace psy {
 		void * LADSPAMachine::dlopenLADSPA(const char * pcFilename, int iFlag)
 		{
 			std::string filename_(pcFilename);
-/*			char *pcBuffer;
+			
+			#if 0
+			char *pcBuffer;
 			const char * pcStart, * pcEnd ,* pcLADSPAPath;
 			bool endsInSO, needsSlash;
 			size_t iFilenameLength;
-*/			
+			#endif
+			
 			const char * pcLADSPAPath;
 			void * pvResult(NULL);
 			//std::cout << filename_ << std::endl;

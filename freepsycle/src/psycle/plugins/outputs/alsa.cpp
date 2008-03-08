@@ -10,13 +10,6 @@
 #include <thread>
 namespace psycle { namespace plugins { namespace outputs {
 
-	#define PSYCLE__PLUGINS__OUTPUTS__ALSA__REQUIRE_VERSION(major, minor, micro) \
-		( \
-			SND_LIB_MAJOR >  (major) || \
-			SND_LIB_MAJOR == (major) && SND_LIB_MINOR >  (minor) || \
-			SND_LIB_MAJOR == (major) && SND_LIB_MINOR == (minor) && SND_LIB_SUBMINOR >= (micro) \
-		)
-
 	using engine::exceptions::runtime_error;
 
 	namespace {
@@ -164,7 +157,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				std::ostringstream s; s << "could not initialize hardware parameters: " << ::snd_strerror(error);
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			#if SND_LIB_VERSION >= 0x010009
+			#if SND_LIB_VERSION >= 0x10009 // 1.0.9
 				// If allow_resample is false, we will only allow sample format conversion,
 				// by disabling the resampling feature in the "plug" plugin, hence restricting
 				// a configuration space to contain only real (or virtual, like pulse audio) hardware rates.

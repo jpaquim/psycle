@@ -27,13 +27,6 @@
 #include <boost/bind.hpp>
 namespace psy { namespace core {
 
-#define PSYCLE__CHECK_ALSA_VERSION(major, minor, micro) \
-	( \
-		SND_LIB_MAJOR > (major) || \
-		SND_LIB_MAJOR == (major) && SND_LIB_MINOR > (minor) || \
-		SND_LIB_MAJOR == (major) && SND_LIB_MINOR == (minor) && SND_LIB_SUBMINOR >= (micro) \
-	)
-
 AlsaOut::AlsaOut()
 	:
 		AudioDriver(),
@@ -410,7 +403,7 @@ AlsaOut::AlsaOut()
 			return err;
 		}
 		// align all transfers to 1 sample
-		#if PSYCLE__CHECK_ALSA_VERSION(1, 0, 16)
+		#if SND_LIB_VERSION >= 0x10010 // 1.0.16
 			// snd_pcm_sw_params_set_xfer_align() is deprecated, alignment is always 1
 		#else
 			err = snd_pcm_sw_params_set_xfer_align(handle, swparams, 1);
