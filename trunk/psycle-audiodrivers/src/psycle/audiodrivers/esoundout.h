@@ -23,7 +23,7 @@
 #include "audiodriver.h"
 #include <pthread.h>
 #include <exception>
-#include <unistd.h>
+
 namespace psy {
 	namespace core {
 		class ESoundOut : public AudioDriver

@@ -37,7 +37,7 @@ namespace psy {
 			killThread_(false),
 			callback_(0),
 			callbackContext_(0),
-			host_(),
+			host_(""),
 			port_(0)
 		{
 			setDefaults();
@@ -147,7 +147,7 @@ namespace psy {
 				return 0;
 			}
 			{
-				int resume(esd_resume(output_));
+				esd_resume(output_);
 			}
 			esd_print_all_info(esd_get_all_info(output_));
 			deviceBuffer_ = esd_get_latency(output_);

@@ -230,13 +230,14 @@ namespace psy { namespace core {
 		}
 	}
 
-	void OutPort::CollectData(int numSamples)
+	void OutPort::CollectData(int /*numSamples*/)
 	{
 		//parent_.Work(numSamples);
 	}
 
 	Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
 	:
+		playColIndex(0),
 		crashed_(),
 		type_(type),
 		mode_(mode),
@@ -246,12 +247,14 @@ namespace psy { namespace core {
 		audio_range_(1.0f),
 		editName_(),
 		//fpu_exception_mask_(),
+		_bypass(false),
+		_standby(false),
+		_mute(false),
+		inports(0),
+		outports(0),
 		numInPorts(0),
 		numOutPorts(0),
-		_bypass(false),
-		_mute(false),
 		_waitingForSound(false),
-		_standby(false),
 		_worked(false),
 		_lVol(0),
 		_rVol(0),
@@ -305,7 +308,8 @@ namespace psy { namespace core {
 		}
 	}
 	Machine::Machine(Machine* mac,type_type type,MachineMode mode)
-	:crashed_()
+	:playColIndex(0)
+	,crashed_()
 	,type_(type)
 	,mode_(mode)
 	,id_(mac->id_)
@@ -313,12 +317,14 @@ namespace psy { namespace core {
 	,song_(mac->song_)
 	,audio_range_(1.0f)
 	,editName_(mac->GetEditName())
+	,_bypass(mac->_bypass)
+	,_standby(false)
+	,_mute(mac->_mute)
+	,inports(0)
+	,outports(0)
 	,numInPorts(0)
 	,numOutPorts(0)
-	,_bypass(mac->_bypass)
-	,_mute(mac->_mute)
 	,_waitingForSound(false)
-	,_standby(false)
 	,_worked(false)
 	,_lVol(mac->_lVol)
 	,_rVol(mac->_rVol)
@@ -426,7 +432,7 @@ namespace psy { namespace core {
 		_panning = newPan;
 	}
 
-	bool Machine::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
+	bool Machine::ConnectTo(Machine & dst_machine, InPort::id_type /*dstport*/, OutPort::id_type /*outport*/, float volume)
 	{
 		if(dst_machine.mode() == MACHMODE_GENERATOR)
 		{
@@ -777,7 +783,7 @@ namespace psy { namespace core {
 #endif
 	}
 
-	bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
+	bool Machine::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 	{
 		std::uint32_t size;
 		pFile->Read(size);
@@ -1056,9 +1062,8 @@ namespace psy { namespace core {
 		return track_;
 	}
 
-	int Machine::GenerateAudioInTicks(int startSample, int numsamples )
+	int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples )
 	{
-		startSample;
 		assert(numsamples >= 0);
 		std::cerr << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
 		workEvents.clear();

@@ -86,7 +86,7 @@ namespace psy
 				while (ns)
 				{
 					int nextevent = ns+1;
-					for (int i=0; i < song()->tracks(); i++)
+					for (unsigned int i=0; i < song()->tracks(); i++)
 					{
 						if (TriggerDelay[i].command() )
 						{
@@ -98,7 +98,7 @@ namespace psy
 					}
 					if (nextevent > ns)
 					{
-						for (int i=0; i < song()->tracks(); i++)
+						for (unsigned int i=0; i < song()->tracks(); i++)
 						{
 							// come back to this
 							if (TriggerDelay[i].command() )
@@ -122,7 +122,7 @@ namespace psy
 								VoiceWork(startSample, nextevent, voice );
 							}
 						}
-						for (int i=0; i < song()->tracks(); i++)
+						for (unsigned int i=0; i < song()->tracks(); i++)
 						{
 							// come back to this
 							if (TriggerDelay[i].command() == commandtypes::NOTE_DELAY)
@@ -353,8 +353,10 @@ namespace psy
 					}
 				}
 					
-				*pSamplesL++ = *pSamplesL+left_output;
-				*pSamplesR++ = *pSamplesR+right_output;
+				*pSamplesL = (*pSamplesL)+left_output;
+				*pSamplesR = (*pSamplesR)+right_output;
+				pSamplesL++;
+				pSamplesR++;
 				numsamples--;
 			}
 		}
@@ -822,6 +824,8 @@ namespace psy
 					pVoice->_filterEnv._value = 0;
 					pVoice->_filterEnv._stage = ENV_OFF;
 				}
+				break;
+			default:
 				break;
 			}
 		}
