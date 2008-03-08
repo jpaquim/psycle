@@ -65,6 +65,7 @@ namespace psy {
 
 		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
+			version;
 			std::uint32_t size;
 			pFile->Read(size);
 			pFile->Skip(size);
@@ -165,17 +166,17 @@ namespace psy {
 						{
 							AllocateVoice(workEvent.track(),i);
 							PatternEvent temp = workEvent.event();
-							if ( temp.note() < psy::core::commands::release )
+							if ( temp.note() < notetypes::release )
 							{
 								int note = temp.note()+noteOffset[i];
-								if ( note>=psy::core::commands::release) note=119;
+								if ( note>= notetypes::release) note=119;
 								else if (note<0 ) note=0;
 								temp.setNote(static_cast<std::uint8_t>(note));
 							}
 							if (song()->machine(macOutput[i]) != this)
 							{
 								song()->machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
-								if (temp.note() >= psy::core::commands::release )
+								if (temp.note() >= notetypes::release )
 								{
 									DeallocateVoice(workEvent.track(),i);
 								}
@@ -281,11 +282,15 @@ namespace psy {
 
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size;
-			pFile->Read(size);
-			pFile->ReadArray(macOutput,NUM_MACHINES);
-			pFile->ReadArray(noteOffset,NUM_MACHINES);
-			return true;
+			if ( version == 0 )
+			{
+				std::uint32_t size;
+				pFile->Read(size);
+				pFile->ReadArray(macOutput,NUM_MACHINES);
+				pFile->ReadArray(noteOffset,NUM_MACHINES);
+				return true;
+			}
+			return false;
 		}
 
 		void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile) const
@@ -312,8 +317,8 @@ namespace psy {
 			sampleCount(0),
 			_lMax(0),
 			_rMax(0),
-			_outDry(256),
-			decreaseOnClip(false)
+			decreaseOnClip(false),
+			_outDry(256)
 		{
 			SetEditName("Master");
 			_outDry = 256;
@@ -347,7 +352,8 @@ namespace psy {
 		
 		void Master::Tick(int channel, const PatternEvent & data )
 		{
-			if ( data.note() == PatternCmd::SET_VOLUME )
+			channel;
+			if ( data.note() == commandtypes::SET_VOLUME )
 			{
 				_outDry = data.parameter();
 			}
@@ -468,11 +474,15 @@ namespace psy {
 
 		bool Master::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size;
-			pFile->Read(size);
-			pFile->Read(_outDry);
-			pFile->Read(decreaseOnClip);
-			return true;
+			if ( version == 0 )
+			{
+				std::uint32_t size;
+				pFile->Read(size);
+				pFile->Read(_outDry);
+				pFile->Read(decreaseOnClip);
+				return true;
+			}
+			return false;
 		}
 
 		void Master::SaveSpecificChunk(RiffFile* pFile) const
@@ -523,13 +533,14 @@ namespace psy {
 
 		void Mixer::Tick( int channel, const PatternEvent & pData )
 		{
-			if(pData.note() == commands::tweak)
+			channel;
+			if(pData.note() == notetypes::tweak)
 			{
 				int nv = (pData.command() << 8)+pData.parameter();
 				SetParameter(pData.instrument(), nv);
 				Player::Instance()->Tweaker = true;
 			}
-			else if( pData.note() == commands::tweak_slide)
+			else if( pData.note() == notetypes::tweak_slide)
 			{
 				///\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 			}
@@ -799,14 +810,18 @@ namespace psy {
 
 		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size;
-			pFile->Read(size);
-			pFile->ReadArray(&_sendGrid[0][0],MAX_CONNECTIONS*(MAX_CONNECTIONS+1));
-			pFile->ReadArray(_send,MAX_CONNECTIONS);
-			pFile->ReadArray(_sendVol,MAX_CONNECTIONS);
-			pFile->ReadArray(_sendVolMulti,MAX_CONNECTIONS);
-			pFile->ReadArray(_sendValid,MAX_CONNECTIONS);
-			return true;
+			if (version == 0)
+			{
+				std::uint32_t size;
+				pFile->Read(size);
+				pFile->ReadArray(&_sendGrid[0][0],MAX_CONNECTIONS*(MAX_CONNECTIONS+1));
+				pFile->ReadArray(_send,MAX_CONNECTIONS);
+				pFile->ReadArray(_sendVol,MAX_CONNECTIONS);
+				pFile->ReadArray(_sendVolMulti,MAX_CONNECTIONS);
+				pFile->ReadArray(_sendValid,MAX_CONNECTIONS);
+				return true;
+			}
+			return false;
 		}
 
 		void Mixer::SaveSpecificChunk(RiffFile* pFile) const
@@ -901,6 +916,7 @@ namespace psy {
 
 		void LFO::Tick( int channel, const PatternEvent & pData )
 		{
+			channel;
 			if(!bisTicking) {
 				bisTicking = true;
 				// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
@@ -1147,15 +1163,19 @@ namespace psy {
 
 		bool LFO::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size;
-			pFile->Read(size);
-			pFile->Read(waveform);
-			pFile->Read(lSpeed);
-			pFile->ReadArray(macOutput,NUM_CHANS);
-			pFile->ReadArray(paramOutput,NUM_CHANS);
-			pFile->ReadArray(level,NUM_CHANS);
-			pFile->ReadArray(phase,NUM_CHANS);
-			return true;
+			if ( version == 0) 
+			{
+				std::uint32_t size;
+				pFile->Read(size);
+				pFile->Read(waveform);
+				pFile->Read(lSpeed);
+				pFile->ReadArray(macOutput,NUM_CHANS);
+				pFile->ReadArray(paramOutput,NUM_CHANS);
+				pFile->ReadArray(level,NUM_CHANS);
+				pFile->ReadArray(phase,NUM_CHANS);
+				return true;
+			}
+			return false;
 		}
 
 		void LFO::SaveSpecificChunk(RiffFile* pFile) const

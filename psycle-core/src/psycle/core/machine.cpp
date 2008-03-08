@@ -433,7 +433,7 @@ namespace psy { namespace core {
 			std::ostringstream s;
 			s << "attempted to use a generator as destination for wire" << this->id() << " -> " << dst_machine.id();
 			//loggers::warning(s.str());
-															std::cerr << s.str() << std::endl;
+			std::cerr << s.str() << std::endl;
 			return false;
 		}
 
@@ -1058,8 +1058,9 @@ namespace psy { namespace core {
 
 	int Machine::GenerateAudioInTicks(int startSample, int numsamples )
 	{
+		startSample;
 		assert(numsamples >= 0);
-		//std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
+		std::cerr << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
 		workEvents.clear();
 		return 0;
 	}

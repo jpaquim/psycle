@@ -146,14 +146,14 @@ namespace psy {
 			virtual std::string GetName() const { return _psName; }
 			virtual int GetNumCols() const;
 			virtual void GetParamName(int numparam,char *name) const;
-			virtual void GetParamRange(int numparam, int &minval, int &maxval) const { minval=0; maxval=100; }
+			virtual void GetParamRange(int /*numparam*/, int &minval, int &maxval) const { minval=0; maxval=100; }
 			virtual void GetParamValue(int numparam,char *parVal) const;
 			virtual int GetParamValue(int numparam) const;
 			virtual bool SetParameter(int numparam,int value);
 			virtual int GetAudioInputs() { return 24; }
 			virtual int GetAudioOutputs() { return 1; }
 			virtual std::string GetAudioInputName(InPort::id_type port);
-			virtual std::string GetAutioOutputName(OutPort::id_type port) { std::string rettxt = "Stereo Output"; return rettxt; }
+			virtual std::string GetAutioOutputName(OutPort::id_type /*port*/) { std::string rettxt = "Stereo Output"; return rettxt; }
 			virtual bool ConnectTo(Machine & dst, InPort::id_type dstport = InPort::id_type(0), OutPort::id_type outport = OutPort::id_type(0), float volume = 1.0f);
 			virtual int GetSend(int i){ assert(i<MAX_CONNECTIONS); return _send[i]; }
 			virtual bool SendValid(int i) { assert(i<MAX_CONNECTIONS); return _sendValid[i]; }

@@ -376,10 +376,10 @@ int CoreSong::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type 
 	return 0;
 }
 
-void CoreSong::DestroyMachine(Machine::id_type mac, bool write_locked) {
+void CoreSong::DestroyMachine(Machine::id_type mac, bool /*write_locked*/) {
 	#if 0
 		#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-			#error PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn't defined anymore, please clean the code where this error is triggered.
+			#error "PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn\'t defined anymore, please clean the code where this error is triggered."
 		#else
 			#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
 				boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
@@ -641,7 +641,7 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 
 	///\todo use template code for all this semi-repetitive code.
 
-	std::int32_t io; /// \todo why is this declared here?
+	std::uint32_t io; /// \todo why is this declared here?
 	// mono
 	if(st_type == 1)
 	{
@@ -942,7 +942,7 @@ bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst) {
 }
 
 ///\todo mfc+winapi->std
-bool CoreSong::CloneIns(Instrument::id_type src, Instrument::id_type dst) {
+bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/) {
 	// src has to be occupied and dst must be empty
 	#if 0
 		if (!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
@@ -1065,7 +1065,7 @@ void CoreSong::DeleteLayer(Instrument::id_type id) {
 	_pInstrument[id]->DeleteLayer();
 }
 
-void CoreSong::patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line) {
+void CoreSong::patternTweakSlide(int /*machine*/, int /*command*/, int /*value*/, int /*patternPosition*/, int /*track*/, int /*line*/) {
 	///\todo rework for multitracking
 	#if 0
 		bool bEditMode = true;

@@ -93,7 +93,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	return root_element.get_name() == "psy4";
 }
 
-bool Psy4Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
+bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fileName*/, CoreSong & song, MachineCallbacks* callbacks )
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
@@ -597,7 +597,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	file.WriteArray("PSY4",4);
 	saveSONGv0(&file,song);
 
-	for(std::uint32_t index(0) ; index < MAX_MACHINES; ++index)
+	for(std::int32_t index(0) ; index < MAX_MACHINES; ++index)
 	{
 		if (song.machine(index))
 		{
@@ -637,9 +637,9 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	return true;
 }
 
-int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& song)
+int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 {
-	std::uint32_t fileversion = 0;
+	std::int32_t fileversion = 0;
 	std::uint32_t size = 0;
 	std::uint32_t chunkcount = 0;
 	file->Read(fileversion);
@@ -670,9 +670,9 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong & song )
 	file->Write(size);
 
 	chunkcount = 3; // 3 chunks plus:
-	for(unsigned int i(0) ; i < MAX_MACHINES; ++i)
+	for(int i(0) ; i < MAX_MACHINES; ++i)
 			if(song.machine(i)) ++chunkcount;
-	for(unsigned int i(0) ; i < MAX_INSTRUMENTS ; ++i)
+	for(int i(0) ; i < MAX_INSTRUMENTS ; ++i)
 			if(!song._pInstrument[i]->Empty()) ++chunkcount;
 
 	file->Write(chunkcount);
@@ -742,7 +742,7 @@ bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong & song, int index )
 	return true;
 }
 
-bool Psy4Filter::saveWAVEv0( RiffFile * file, const CoreSong & song, int index )
+bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong & /*song*/, int /*index*/ )
 {
 	return false;
 }

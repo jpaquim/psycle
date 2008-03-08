@@ -44,6 +44,25 @@ class Psy3Filter : public PsyFilterBase
 			Psy3Filter( Psy3Filter const & );
 			Psy3Filter& operator=(Psy3Filter const&);
 		public:
+			class PatternEntry
+			{
+			public:
+				inline PatternEntry()
+					:
+				_note(255),
+					_inst(255),
+					_mach(255),
+					_cmd(0),
+					_parameter(0)
+				{}
+
+				std::uint8_t _note;
+				std::uint8_t _inst;
+				std::uint8_t _mach;
+				std::uint8_t _cmd;
+				std::uint8_t _parameter;
+			};
+
 			static Psy3Filter* Instance() {
 				// don`t use multithreaded
 				static Psy3Filter s;
@@ -56,9 +75,9 @@ class Psy3Filter : public PsyFilterBase
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
 		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-		/*override*/ bool loadExtra(RiffFile* file,char* header, int version) {return false;}
-		/*override*/ bool save(const std::string & fileName, const CoreSong & song) {  /* so saving for legacy file format */ return false; }
-		/*override*/ bool saveExtra(RiffFile* file,char* header, int version) {return false;}
+		/*override*/ bool loadExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
+		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong & /*song*/) {  /* so saving for legacy file format */ return false; }
+		/*override*/ bool saveExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
 
 
 	protected:
