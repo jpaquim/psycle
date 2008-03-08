@@ -410,11 +410,14 @@ namespace qpsycle {
 		inputHandler_.changeKeyCode(commands::key_D_2,Key(modifiers,Qt::Key_O));
 		inputHandler_.changeKeyCode(commands::key_DS2,Key(modifiers,Qt::Key_0));
 		inputHandler_.changeKeyCode(commands::key_E_2,Key(modifiers,Qt::Key_P));
-		/*inputHandler_.changeKeyCode(commands::key_F_2,Key(modifiers,Qt::Key_X)); // no bindings for now.
-		  inputHandler_.changeKeyCode(commands::key_FS2,Key(modifiers,Qt::Key_X));
-		  inputHandler_.changeKeyCode(commands::key_G_2,Key(modifiers,Qt::Key_X));
-		  inputHandler_.changeKeyCode(commands::key_GS2,Key(modifiers,Qt::Key_X));
-		  inputHandler_.changeKeyCode(commands::key_A_2,Key(modifiers,Qt::Key_X));*/
+
+#if 0
+		inputHandler_.changeKeyCode(commands::key_F_2,Key(modifiers,Qt::Key_X)); // no bindings for now.
+		inputHandler_.changeKeyCode(commands::key_FS2,Key(modifiers,Qt::Key_X));
+		inputHandler_.changeKeyCode(commands::key_G_2,Key(modifiers,Qt::Key_X));
+		inputHandler_.changeKeyCode(commands::key_GS2,Key(modifiers,Qt::Key_X));
+		inputHandler_.changeKeyCode(commands::key_A_2,Key(modifiers,Qt::Key_X));
+#endif
 
 		inputHandler_.changeKeyCode( commands::show_pattern_box, Key( modifiers, Qt::Key_F1 ) );
 		inputHandler_.changeKeyCode( commands::show_machine_view, Key( modifiers, Qt::Key_F2 ) );
