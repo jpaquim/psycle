@@ -34,15 +34,19 @@ class QMenu;
 class QTextEdit;
 class QComboBox;
 class QStandardItemModel;
-//#include <QUndoCommand>
-//#include <QUndoGroup>
-//#include <QUndoView>
 class QUndoStack;
 class QUndoView;
 class QTimer;
 
 #include <QTabWidget>
 #include <QMainWindow>
+#if 0
+#include <QUndoCommand>
+#include <QUndoGroup>
+#include <QUndoView>
+#endif
+
+#include <QSettings>
 
 namespace qpsycle {
 
@@ -223,6 +227,8 @@ private:
 	SettingsDlg *settingsDlg;
 
 	InstrumentsModel *instrumentsModel_;
+
+	QSettings settings;
 };
 
 }

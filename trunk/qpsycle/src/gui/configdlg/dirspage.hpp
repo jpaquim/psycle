@@ -24,10 +24,12 @@
 
 #include <QString>
 #include <QWidget>
+#include <QSettings>
 
 class QComboBox;
 class QPushButton;
 class QCheckBox;
+class QLineEdit;
 
 namespace qpsycle {
 
@@ -38,8 +40,19 @@ Q_OBJECT
 public:
 	DirsPage( QWidget *parent = 0 );
 
+private slots:
+	void onSongBrowse();
+	void onPluginsBrowse();
+	void onLadspaBrowse();
+
 private:
 	Configuration *config_;
+
+	QLineEdit *songPathEdit_;
+	QLineEdit *pluginsPathEdit_;
+	QLineEdit *ladspaPathEdit_;
+
+	QSettings settings;
 };
 
 } // namespace qpsycle

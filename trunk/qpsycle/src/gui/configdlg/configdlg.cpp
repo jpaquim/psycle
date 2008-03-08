@@ -18,13 +18,13 @@
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
 
-#include <QtGui>
-
 #include "configdlg.hpp"
 #include "audiopage.hpp"
 #include "behaviourpage.hpp"
 #include "lookspage.hpp"
 #include "dirspage.hpp"
+
+#include <QtGui>
 
 namespace qpsycle {
 
