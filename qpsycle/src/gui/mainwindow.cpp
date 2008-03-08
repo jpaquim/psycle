@@ -190,7 +190,6 @@ namespace qpsycle {
 
 	void MainWindow::setupGui()
 	{
-		QSettings settings;
 		QByteArray themeName = settings.value( "theme", "default.qss" ).toByteArray();
 		QFile file( ":/themes/" + themeName.toLower() );
 		file.open( QFile::ReadOnly );
@@ -288,7 +287,7 @@ namespace qpsycle {
 				return;
 		}
 
-		QString songPath = QString::fromStdString( Global::configuration().songPath() );
+		QString songPath = settings.value( "paths/songPath", "." ).toString();
 		QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psycle Songs (*.psy)" );
 
 		if ( !fileName.isEmpty() ) {
@@ -302,7 +301,7 @@ namespace qpsycle {
 
 	void MainWindow::onSaveSongRequest()
 	{
-		QString songPath = QString::fromStdString( Global::configuration().songPath() );
+		QString songPath = settings.value( "paths/songPath" ).toString();
 		QString fileName = QFileDialog::getSaveFileName(this,
 								tr("Choose a file name"), songPath,
 								tr("Psycle Songs (*.psy)"));
@@ -447,8 +446,6 @@ namespace qpsycle {
 		aboutAct = new QAction(tr("&About qpsycle"), this);
 		aboutAct->setStatusTip(tr("About qpsycle"));
 		connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQpsycle()));
-
-		QSettings settings;
 
 		// View actions.
 		QByteArray showPatternBoxSetting = settings.value( "keys/showPatternBox", "F1" ).toByteArray();

@@ -132,7 +132,7 @@ void MachineView::createWireGuis()
 {
 	if ( song() ) 
 	{
-		for( int m=0; m < psy::core::MAX_MACHINES; m++ )
+		for ( int m=0; m < psy::core::MAX_MACHINES; m++ )
 		{
 			psy::core::Machine* tmac = song()->machine(m);
 			if (tmac) 
@@ -246,13 +246,13 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 	int id = macGui->mac()->id();
 
 	// Remove machine and connections from the gui. 
-	std::vector<WireGui*>::iterator wIt;
+	std::vector<WireGui*>::iterator wireItr;
 	while ( true ) {
 		// Loop this way as deleteConnection removes
 		// wireGuis from the wireGuiList.
-		wIt = macGui->wireGuiList_.begin();
-		if ( wIt != macGui->wireGuiList_.end() ) {
-			deleteConnection( *wIt );
+		wireItr = macGui->wireGuiList_.begin();
+		if ( wireItr != macGui->wireGuiList_.end() ) {
+			deleteConnection( *wireItr );
 		} else break;
 	}
 
