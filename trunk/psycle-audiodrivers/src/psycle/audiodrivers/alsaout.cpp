@@ -30,9 +30,8 @@ namespace psy { namespace core {
 #define PSYCLE__CHECK_ALSA_VERSION(major, minor, micro) \
 	( \
 		SND_LIB_MAJOR > (major) || \
-		(SND_LIB_MAJOR == (major) && SND_LIB_MINOR > (minor)) || \
-		(SND_LIB_MAJOR == (major) && SND_LIB_MINOR == (minor) && \
-		SND_LIB_SUBMINOR >= (micro) \
+		SND_LIB_MAJOR == (major) && SND_LIB_MINOR > (minor) || \
+		SND_LIB_MAJOR == (major) && SND_LIB_MINOR == (minor) && SND_LIB_SUBMINOR >= (micro) \
 	)
 
 AlsaOut::AlsaOut()
