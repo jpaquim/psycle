@@ -125,7 +125,7 @@ namespace psy
 						for (int i=0; i < song()->tracks(); i++)
 						{
 							// come back to this
-							if (TriggerDelay[i].command() == PatternCmd::NOTE_DELAY)
+							if (TriggerDelay[i].command() == commandtypes::NOTE_DELAY)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -138,7 +138,7 @@ namespace psy
 									TriggerDelayCounter[i] -= nextevent;
 								}
 							}
-							else if (TriggerDelay[i].command() == PatternCmd::RETRIGGER)
+							else if (TriggerDelay[i].command() == commandtypes::RETRIGGER)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -151,7 +151,7 @@ namespace psy
 									TriggerDelayCounter[i] -= nextevent;
 								}
 							}
-							else if (TriggerDelay[i].command() == PatternCmd::RETR_CONT)
+							else if (TriggerDelay[i].command() == commandtypes::RETR_CONT)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -373,7 +373,7 @@ namespace psy
 
 		void Sampler::Tick( int channel, const PatternEvent & event )
 		{
-			if ( event.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
+			if ( event.note() > notetypes::release ) // don't process twk , twf of Mcm Commands
 			{
 				if ( event.command() == 0 || event.note() != 255) return; // Return in everything but commands!
 			}
@@ -399,7 +399,7 @@ namespace psy
 			}
 
 
-			if ( data.note() < psy::core::commands::release ) // Handle Note On.
+			if ( data.note() < notetypes::release ) // Handle Note On.
 			{
 				if ( song()->_pInstrument[data.instrument()]->waveLength == 0 ) return; // if no wave, return.
 
@@ -456,7 +456,7 @@ namespace psy
 						// Think on a slow fadeout and changing panning
 						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 					{
-						if ( data.note() == psy::core::commands::release ) NoteOff( voice );//  Handle Note Off
+						if ( data.note() == notetypes::release ) NoteOff( voice );//  Handle Note Off
 						useVoice=voice;
 					}
 				}
@@ -571,7 +571,7 @@ namespace psy
 
 			int twlength = song()->_pInstrument[pEntry.instrument()]->waveLength;
 			
-			if (pEntry.note() < psy::core::commands::release && twlength > 0)
+			if (pEntry.note() < notetypes::release && twlength > 0)
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry.instrument();

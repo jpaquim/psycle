@@ -127,7 +127,7 @@ namespace psycle
 				virtual ~CFxCallback() throw() {} // a dtor cannot be made pure virtual
 		};
 
-		/*////////////////////////////////////////////////////////////////////////*/
+		/* //////////////////////////////////////////////////////////////////////// */
 		
 		/// base machine class from which plugins derived.
 		/// Note: We keep empty definitions of the functions in the header so that
@@ -141,10 +141,10 @@ namespace psycle
 				///\todo doc
 				virtual void SequencerTick() {}
 				///\todo doc
-				virtual void ParameterTweak(int par, int val) {}
+				virtual void ParameterTweak(int /*par*/, int /*val*/) {}
 
 				/// Work function
-				virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {}
+				virtual void Work(float* /*psamplesleft*/, float* /*psamplesright*/ , int /*numsamples*/, int /*tracks*/) {}
 
 				///\todo doc
 				virtual void Stop() {}
@@ -152,9 +152,9 @@ namespace psycle
 				///\name Export / Import
 				///\{
 					///\todo doc
-					virtual void PutData(void * pData) {}
+					virtual void PutData(void * /*pData*/) {}
 					///\todo doc
-					virtual void GetData(void * pData) {}
+					virtual void GetData(void * /*pData*/) {}
 					///\todo doc
 					virtual int GetDataSize() { return 0; }
 				///\}

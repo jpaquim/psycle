@@ -160,9 +160,9 @@ PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
 {
 	PatternEvent event;
 	//Convert old tweak effect command to common tweak.
-	if (data[0] == psy::core::commands::tweak_effect)
+	if (data[0] == 122)
 	{
-		event.setNote(psy::core::commands::tweak); data++;
+		event.setNote(notetypes::tweak); data++;
 		event.setInstrument(*data); data++;
 		event.setMachine((*data)+0x40); data++;
 	}
@@ -202,18 +202,18 @@ bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 				file->ReadArray(entry,sizeof(entry));
 				PatternEvent event = convertEntry(entry);
 				if (!event.empty()) {
-					if (event.note() == commands::tweak) {
+					if (event.note() == notetypes::tweak) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 					}
-					else if (event.note() == commands::tweak_slide) {
+					else if (event.note() == notetypes::tweak_slide) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
 					}
-					else if (event.note() == commands::midi_cc) {
+					else if (event.note() == notetypes::midi_cc) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
 					} else (*pat)[beatpos].notes()[x] = event;
 	
-					if ( (event.note() <= commands::release || event.note() == commands::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
+					if ( (event.note() <= notetypes::release || event.note() == notetypes::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
 					{
 						linesPerBeat= event.parameter()&0x1F;
 					}
@@ -377,7 +377,7 @@ bool Psy2Filter::LoadWAVD(RiffFile* file,CoreSong& song)
 	return true;
 }
 
-bool Psy2Filter::PreLoadVSTs(RiffFile* file,CoreSong& song)
+bool Psy2Filter::PreLoadVSTs(RiffFile* file,CoreSong& /*song*/)
 {
 	std::int32_t i;
 	for (i=0; i<PSY2_MAX_PLUGINS; i++)
@@ -739,7 +739,7 @@ bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSo
 }
 
 //Finished all the file loading. Now Process the data to the current structures
-bool Psy2Filter::TidyUp(RiffFile*file,CoreSong&song,convert_internal_machines::Converter* converter)
+bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machines::Converter* converter)
 {
 	// The old fileformat stored the volumes on each output, 
 	// so what we have in inputConVol is really the output
@@ -896,7 +896,7 @@ bool Psy2Filter::TidyUp(RiffFile*file,CoreSong&song,convert_internal_machines::C
 	return true;
 }
 
-bool Machine::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
+bool Machine::LoadPsy2FileFormat(std::string const & /*plugin_path*/, RiffFile* pFile)
 {
 	char edName[32];
 	pFile->ReadArray(edName, 16); edName[15] = 0;
@@ -1001,7 +1001,7 @@ bool Master::LoadPsy2FileFormat(RiffFile* pFile)
 	return true;
 }
 
-bool Sampler::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
+bool Sampler::LoadPsy2FileFormat(std::string const & /*plugin_path*/, RiffFile* pFile)
 {
 	int i;
 

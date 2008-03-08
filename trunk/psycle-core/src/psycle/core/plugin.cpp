@@ -326,7 +326,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 					for (int i=0; i < song()->tracks(); i++)
 					{
 						// come back to this
-						if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+						if (TriggerDelay[i]._cmd == commandtypes::NOTE_DELAY)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -345,7 +345,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
-						else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
+						else if (TriggerDelay[i]._cmd == commandtypes::RETRIGGER)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -363,7 +363,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
-						else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
+						else if (TriggerDelay[i]._cmd == commandtypes::RETR_CONT)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -393,7 +393,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 							{
 								TriggerDelayCounter[i] -= nextevent;
 							}
-						} else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
+						} else if (TriggerDelay[i]._cmd == commandtypes::ARPEGGIO)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -464,7 +464,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 {
 	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 
-	if(pData.note() == psy::core::commands::tweak || pData.note() == psy::core::commands::tweak_effect)
+	if(pData.note() == notetypes::tweak)
 	{
 		if( pData.instrument() < info_->numParameters)
 		{
@@ -483,7 +483,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			Player::Instance()->Tweaker = true;
 		}
 	}
-	else if(pData.note() == psy::core::commands::tweak_slide)
+	else if(pData.note() == notetypes::tweak_slide)
 	{
 		if(pData.instrument() < info_->numParameters)
 		{
