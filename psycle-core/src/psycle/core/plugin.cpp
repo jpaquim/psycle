@@ -46,7 +46,7 @@ PluginFxCallback Plugin::_callback;
 
 PluginFxCallback::~PluginFxCallback() throw() {}
 
-void PluginFxCallback::MessBox(char const * ptxt, char const * caption, unsigned int type) {
+void PluginFxCallback::MessBox(char const * /*ptxt*/, char const * /*caption*/, unsigned int /*type*/) {
 	//MessageBox(hWnd,ptxt,caption,type); 
 }
 
@@ -601,10 +601,10 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 			std::string soName = withoutSuffix + ".so";
 			psFileName = prefix + soName;
 			psFileName = path + psFileName; 
-			int pos;
+			unsigned int pos;
 			while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
 		} else {
-			int i = psFileName.find(prefix);
+			unsigned int i = psFileName.find(prefix);
 			if (i!=std::string::npos) {
 				int j = psFileName.find(".so");
 				if (j!=0) {

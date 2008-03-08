@@ -63,9 +63,8 @@ namespace psy {
 			return numSamples;
 		}
 
-		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version)
+		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 		{
-			version;
 			std::uint32_t size;
 			pFile->Read(size);
 			pFile->Skip(size);
@@ -147,7 +146,7 @@ namespace psy {
 			}
 		}
 		
-		void DuplicatorMac::Tick( int channel, const PatternEvent & pData )
+		void DuplicatorMac::Tick( int /*channel*/, const PatternEvent & /*pData*/ )
 		{
 			//const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 		}
@@ -315,9 +314,9 @@ namespace psy {
 		:
 			Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
+			decreaseOnClip(false),
 			_lMax(0),
 			_rMax(0),
-			decreaseOnClip(false),
 			_outDry(256)
 		{
 			SetEditName("Master");
@@ -350,9 +349,8 @@ namespace psy {
 			_clip = false;
 		}
 		
-		void Master::Tick(int channel, const PatternEvent & data )
+		void Master::Tick(int /*channel*/, const PatternEvent & data )
 		{
-			channel;
 			if ( data.note() == commandtypes::SET_VOLUME )
 			{
 				_outDry = data.parameter();
@@ -531,9 +529,8 @@ namespace psy {
 			}
 		}
 
-		void Mixer::Tick( int channel, const PatternEvent & pData )
+		void Mixer::Tick( int /*channel*/, const PatternEvent & pData )
 		{
-			channel;
 			if(pData.note() == notetypes::tweak)
 			{
 				int nv = (pData.command() << 8)+pData.parameter();
@@ -914,9 +911,8 @@ namespace psy {
 			FillTable();
 		}
 
-		void LFO::Tick( int channel, const PatternEvent & pData )
+		void LFO::Tick( int /*channel*/, const PatternEvent & pData )
 		{
-			channel;
 			if(!bisTicking) {
 				bisTicking = true;
 				// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
