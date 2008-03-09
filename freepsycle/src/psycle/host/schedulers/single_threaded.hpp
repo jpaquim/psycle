@@ -28,6 +28,7 @@ namespace ports {
 		class multiple;
 	}
 }
+class scheduler;
 
 namespace typenames {
 	using namespace single_threaded;
