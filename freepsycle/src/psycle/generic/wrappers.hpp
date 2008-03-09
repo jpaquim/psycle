@@ -33,6 +33,7 @@ class graph
 		graph(typename graph::underlying_type & underlying) : graph::underlying_wrapper_type(underlying) {
 			// register to the underlying signals
 			on_new_node_signal_connection          = underlying.         new_node_signal().connect(boost::bind(&graph::on_new_node         , this, _1    ));
+			//on_delete_node_signal_connection       = underlying.      delete_node_signal().connect(boost::bind(&graph::on_delete_node      , this, _1    ));
 			on_new_connection_signal_connection    = underlying.   new_connection_signal().connect(boost::bind(&graph::on_new_connection   , this, _1, _2));
 			on_delete_connection_signal_connection = underlying.delete_connection_signal().connect(boost::bind(&graph::on_delete_connection, this, _1, _2));
 		}
@@ -69,6 +70,7 @@ class graph
 		virtual ~graph() {
 			// disconnect from the underlying signals
 			on_new_node_signal_connection.disconnect();
+			//on_delete_node_signal_connection.disconnect();
 			on_new_connection_signal_connection.disconnect();
 			on_delete_connection_signal_connection.disconnect();
 		}
@@ -87,7 +89,8 @@ class graph
 
 			#if 0
 			boost::signals::connection on_delete_node_signal_connection;
-				void on_delete_node(typename Typenames::underlying::node & underlying_node) {
+			void on_delete_node(typename Typenames::underlying::node & underlying_node) {
+				// emit the wrapper signal
 				this->delete_node_signal()(underlying_wrapper(underlying_node));
 			}
 			#endif
@@ -211,12 +214,6 @@ class node
 				delete this;
 			}
 			
-			///\todo remove. unused.
-			void static on_delete_(node & wrapper, typename node::underlying_type & underlying) {
-				assert(&underlying == &wrapper.underlying());
-				delete &wrapper;
-			}
-
 			boost::signals::connection on_new_output_port_signal_connection;
 			void on_new_output_port(typename Typenames::underlying::ports::output & underlying_output_port) {
 				// create a wrapper for the new underlying output port

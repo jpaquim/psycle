@@ -370,7 +370,7 @@ void port::propagate_seconds_per_event(real const & seconds_per_event) {
 void port::connect(port & port) throw(exception) {
 	if(loggers::trace()()) {
 		std::ostringstream s;
-		s << "connecting " << this->qualified_name() << " to " << port.qualified_name();
+		s << this->qualified_name() << " port connecting to port " << port.qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	// channels negociation
@@ -520,7 +520,7 @@ namespace ports {
 	void input::connect(typenames::ports::output & output_port) throw(exception) {
 		if(loggers::information()()) {
 			std::ostringstream s;
-			s << "connecting output port " << output_port.qualified_name() << " to input port " << this->qualified_name();
+			s << output_port.qualified_name() << " output port connecting to input port " << this->qualified_name();
 			loggers::information()(s.str());
 		}
 		input_type::connect(output_port);
@@ -529,7 +529,7 @@ namespace ports {
 	void input::disconnect(typenames::ports::output & output_port) {
 		if(loggers::information()()) {
 			std::ostringstream s;
-			s << "disconnecting output port " << output_port.qualified_name() << " from input port " << this->qualified_name();
+			s << output_port.qualified_name() << " output port disconnecting from input port " << this->qualified_name();
 			loggers::information()(s.str());
 		}
 		input_type::disconnect(output_port);
