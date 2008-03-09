@@ -21,13 +21,13 @@ namespace psycle { namespace host {
 			scheduler(underlying::graph & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
 		public:
 			virtual ~scheduler() throw() {}
-			void inline started(bool started) { if(started) start(); else stop(); }
+			void started(bool started) throw(exception) { if(started) start(); else stop(); }
 			void virtual start() throw(exception) = 0;
 			void virtual stop() = 0;
 		protected:
 			typedef Graph graph_type;
-			Graph const inline & graph() const throw() { return graph_; }
-			Graph       inline & graph()       throw() { return graph_; }
+			Graph const & graph() const throw() { return graph_; }
+			Graph       & graph()       throw() { return graph_; }
 		private:
 			Graph & graph_; ///\todo remove reference with Graph::create_on_stack graph_;
 	};

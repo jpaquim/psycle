@@ -65,8 +65,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 	///\name signal slots
 	///\{
 		private:
-			void on_new_node(typenames::node &);
+			void on_new_node(node &);
+			void on_delete_node(node &);
+			void on_new_connection(ports::input &, ports::output &);
+			void on_delete_connection(ports::input &, ports::output &);
 	///\}
+	
+	private:
+		void compute_plan(); friend class scheduler;
 };
 
 /**********************************************************************************************************************/
@@ -150,9 +156,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	///\name signal slots
 	///\{
 		private:
-			void on_new_output_port(typenames::ports::output &);
-			void on_new_single_input_port(typenames::ports::inputs::single &);
-			void on_new_multiple_input_port(typenames::ports::inputs::multiple &);
+			void on_new_output_port(ports::output &);
+			void on_new_single_input_port(ports::inputs::single &);
+			void on_new_multiple_input_port(ports::inputs::multiple &);
 	///\}
 	
 	///\name schedule
@@ -178,8 +184,20 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		scheduler(graph::underlying_type &) throw(std::exception);
 		virtual ~scheduler() throw();
 		void start() throw(underlying::exception) /*override*/;
+		bool started() { return thread_; }
+		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
 		void stop() /*override*/;
 		void operator()();
+
+	///\name signal slots
+	///\{
+		private:
+			void on_new_node(node &);
+			void on_delete_node(node &);
+			void on_new_connection(ports::input &, ports::output &);
+			void on_delete_connection(ports::input &, ports::output &);
+	///\}
+
 	private:
 		/// Flyweight pattern [Gamma95].
 		/// a pool of buffers that can be used for input and output ports of the nodes of the graph.
@@ -217,10 +235,19 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 				std::size_t channels_, events_;
 		} * buffer_pool_instance_;
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
+		
 		std::thread * thread_;
 		std::mutex mutable mutex_;
 		bool stop_requested_;
 		bool stop_requested();
+		
+		typedef std::list<node*> terminal_nodes_type;
+		terminal_nodes_type terminal_nodes_;
+
+		void compute_plan();
+		void allocate() throw(std::exception);
+		void free() throw();
+
 		void process_loop();
 		void process(node &);
 		void process_node_of_output_port_and_set_buffer_for_input_port(ports::output &, ports::input &);
@@ -228,10 +255,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
 		void mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(ports::output &, ports::input &);
 		void check_whether_to_recycle_buffer_in_the_pool(ports::output &);
-		typedef std::list<node*> terminal_nodes_type;
-		terminal_nodes_type terminal_nodes_;
-		void allocate() throw(std::exception);
-		void free() throw();
 };
 
 }}}}

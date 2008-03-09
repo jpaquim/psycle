@@ -18,16 +18,42 @@ namespace psycle { namespace host { namespace schedulers { namespace single_thre
 // graph
 
 graph::graph(graph::underlying_type & underlying) : graph_base(underlying) {
+	// register to the signals
 	new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1));
+	//delete_node_signal().connect(boost::bind(&graph::on_delete_node, this, _1));
+	new_connection_signal().connect(boost::bind(&graph::on_new_connection, this, _1, _2));
+	delete_connection_signal().connect(boost::bind(&graph::on_delete_connection, this, _1, _2));
 }
 
 void graph::after_construction() {
 	graph_base::after_construction();
+	compute_plan();
+}
+
+void graph::on_new_node(node &) {
+	//compute_plan();
+}
+
+void graph::on_delete_node(node &) {
+	//compute_plan();
+}
+
+void graph::on_new_connection(ports::input &, ports::output &) {
+	//compute_plan();
+}
+
+void graph::on_delete_connection(ports::input &, ports::output &) {
+	//compute_plan();
+}
+
+void graph::compute_plan() {
+	// iterate over all the nodes.
 	for(const_iterator i(begin()) ; i != end() ; ++i) {
 		typenames::node & node(**i);
 		if(node.multiple_input_port()) {
+			// If the node has a multiple input port,
+			// find which output port connected to it has the minimum number of connections.
 			/// note: the best algorithm would be to order the inputs with a recursive evaluation on the graph.
-			// find the output port which has the minimum number of connections.
 			{
 				std::size_t minimum_size(std::numeric_limits<std::size_t>::max());
 				for(
@@ -54,8 +80,6 @@ void graph::after_construction() {
 	}
 }
 
-void graph::on_new_node(typenames::node & underlying_node) {}
-
 /**********************************************************************************************************************/
 // node
 
@@ -66,6 +90,7 @@ node::node(node::parent_type & parent, underlying_type & underlying)
 	output_port_count_(),
 	processed_(true) // set to true because reset() is called first in the processing loop
 {
+	// register to the signals
 	new_output_port_signal()        .connect(boost::bind(&node::on_new_output_port        , this, _1));
 	new_single_input_port_signal()  .connect(boost::bind(&node::on_new_single_input_port  , this, _1));
 	new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
@@ -75,9 +100,14 @@ void node::after_construction() {
 	node_base::after_construction();
 }
 
-void node::on_new_output_port(typenames::ports::output & output_port) {}
-void node::on_new_single_input_port(typenames::ports::inputs::single & single_input_port) {}
-void node::on_new_multiple_input_port(typenames::ports::inputs::multiple & multiple_input_port) {}
+void node::on_new_output_port(ports::output &) {
+}
+
+void node::on_new_single_input_port(ports::inputs::single &) {
+}
+
+void node::on_new_multiple_input_port(ports::inputs::multiple &) {
+}
 
 /**********************************************************************************************************************/
 // port
@@ -120,11 +150,41 @@ scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 	buffer_pool_instance_(),
 	thread_(),
 	stop_requested_()
-{}
+{
+	#if 0
+	// register to the graph signals
+	graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ));
+	//graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ));
+	graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2));
+	graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2));
+	#endif
+}
 
 scheduler::~scheduler() throw() {
 	stop();
 	delete &graph();
+}
+
+void scheduler::on_new_node(node &) {
+	compute_plan();
+}
+
+void scheduler::on_delete_node(node &) {
+	compute_plan();
+}
+
+void scheduler::on_new_connection(ports::input &, ports::output &) {
+	compute_plan();
+}
+
+void scheduler::on_delete_connection(ports::input &, ports::output &) {
+	compute_plan();
+}
+
+void scheduler::compute_plan() {
+	if(!started()) return;
+	stop();
+	start();
 }
 
 namespace {
@@ -225,8 +285,9 @@ void scheduler::operator()() {
 
 void scheduler::allocate() throw(std::exception) {
 	loggers::trace()("allocating ...", UNIVERSALIS__COMPILER__LOCATION);
+	graph().compute_plan();
 	std::size_t channels(0);
-	// find the terminal nodes in the graph (nodes with no connected output ports)
+	// find the terminal nodes in the graph (nodes with no connected output ports, i.e. leaves)
 	for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 		typenames::node & node(**i);
 		node.underlying().start();

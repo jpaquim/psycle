@@ -54,14 +54,23 @@ class graph
 
 	///\name signals
 	///\{
-		public:  boost::signal<void (typename Typenames::node &)> inline & new_node_signal() throw() { return new_node_signal_; }
-		private: boost::signal<void (typename Typenames::node &)>          new_node_signal_;
+		public:
+			/// signal emitted when a new node is added to the graph
+			boost::signal<void (typename Typenames::node &)> & new_node_signal() throw() { return new_node_signal_; }
+		private:
+			boost::signal<void (typename Typenames::node &)> new_node_signal_;
 			
-		public:  boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> inline &    new_connection_signal() throw() { return new_connection_signal_; }
-		private: boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)>             new_connection_signal_;
+		public:
+			/// signal emitted when two ports (of two different nodes) are connected
+			boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> & new_connection_signal() throw() { return new_connection_signal_; }
+		private:
+			boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> new_connection_signal_;
 
-		public:  boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> inline & delete_connection_signal() throw() { return delete_connection_signal_; }
-		private: boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)>          delete_connection_signal_;
+		public:
+			/// signal emitted when two ports (of two different nodes) are disconnected
+			boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> & delete_connection_signal() throw() { return delete_connection_signal_; }
+		private:
+			boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> delete_connection_signal_;
 	///\}
 	
 	///\name signal slots
@@ -154,8 +163,11 @@ class node
 
 	///\name ports: outputs: signals
 	///\{
-		public:  boost::signal<void (typename Typenames::ports::output &)> & new_output_port_signal() throw() { return new_output_port_signal_; }
-		private: boost::signal<void (typename Typenames::ports::output &)>   new_output_port_signal_;
+		public:
+			/// signal emitted when a new output port is created for this node
+			boost::signal<void (typename Typenames::ports::output &)> & new_output_port_signal() throw() { return new_output_port_signal_; }
+		private:
+			boost::signal<void (typename Typenames::ports::output &)>   new_output_port_signal_;
 	///\}
 	
 	///\name ports: outputs: signals: slots
@@ -179,8 +191,11 @@ class node
 	
 	///\name ports: inputs: single: signals
 	///\{
-		public:  boost::signal<void (typename Typenames::ports::inputs::single &)> & new_single_input_port_signal() throw() { return new_single_input_port_signal_; }
-		private: boost::signal<void (typename Typenames::ports::inputs::single &)>   new_single_input_port_signal_;
+		public:
+			/// signal emitted when a new single input port is created for this node
+			boost::signal<void (typename Typenames::ports::inputs::single &)> & new_single_input_port_signal() throw() { return new_single_input_port_signal_; }
+		private:
+			boost::signal<void (typename Typenames::ports::inputs::single &)>   new_single_input_port_signal_;
 	///\}
 	
 	///\name ports: inputs: single: signals: slots
@@ -207,8 +222,11 @@ class node
 	
 	///\name ports: inputs: multiple: signals
 	///\{
-		public:  boost::signal<void (typename Typenames::ports::inputs::multiple &)> & new_multiple_input_port_signal() throw() { return new_multiple_input_port_signal_; }
-		private: boost::signal<void (typename Typenames::ports::inputs::multiple &)>   new_multiple_input_port_signal_;
+		public:
+			/// signal emitted when the multiple input port is created for this node
+			boost::signal<void (typename Typenames::ports::inputs::multiple &)> & new_multiple_input_port_signal() throw() { return new_multiple_input_port_signal_; }
+		private:
+			boost::signal<void (typename Typenames::ports::inputs::multiple &)>   new_multiple_input_port_signal_;
 	///\}
 	
 	///\name ports: inputs: multiple: signals: slots
