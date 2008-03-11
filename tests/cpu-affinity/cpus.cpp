@@ -26,7 +26,7 @@ int main(int, char**) {
 			return error ? error : 1;
 		}
 		std::cout << "cpu set: ";
-		for(int i(CPU_SETSIZE - 1); i >= 0 ; --i) std::cout << (CPU_ISSET(i, &set) ? 1 : 0);
+		for(int i(0); i < CPU_SETSIZE; ++i) std::cout << (CPU_ISSET(i, &set) ? 1 : 0);
 		std::cout << '\n';
 		return 0;
 	#elif defined _WIN64 || defined _WIN32
