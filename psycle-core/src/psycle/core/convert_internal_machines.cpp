@@ -54,8 +54,9 @@ namespace psy {
 					riff.Skip(96);  // ConnectionPoints, 12*8bytes
 					riff.Read(machine._connectedInputs);
 					riff.Read(machine._connectedOutputs);
-					riff.Read(machine._panning);
-					machine.SetPan(machine._panning);
+					std::int32_t panning;
+					riff.Read(panning);
+					machine.SetPan(panning);
 					riff.Skip(40); // skips shiatz
 					switch(type) {
 						case delay:

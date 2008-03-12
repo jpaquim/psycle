@@ -741,9 +741,10 @@ bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSo
 //Finished all the file loading. Now Process the data to the current structures
 bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machines::Converter* converter)
 {
-	// The old fileformat stored the volumes on each output, 
-	// so what we have in inputConVol is really the output
-	// and we have to convert it.
+	// The old fileformat had a pool of VST plugins, of which, the user could create
+	// machines that instanced them. vstL[] contains this pool.
+	// Since we have already created the machines, now we can remove this array
+	// which just maintains the parameters of the machine.
 	std::int32_t i;
 	// Clean "pars" array.
 	for (i=0; i<PSY2_MAX_PLUGINS; i++) 
@@ -794,8 +795,7 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 						{
 							val*=32768.0f; // BugFix
 						}
-
-						pMac[i]->InitWireVolume(pOrigMachine->type(),c,val);
+						pMac[i]->InsertInputWire(*pOrigMachine,c,val);
 					}
 				}
 				else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
