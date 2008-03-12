@@ -622,14 +622,15 @@ namespace psy {
 							if(!pRetMachine->Standby())Standby(false);
 						}
 						///todo: why was this here? It is already done in PreWork()
-/*						{
+						#if 0
+						{
 							//cpu::cycles_type cost = cpu::cycles();
 							pSendMachine->_waitingForSound = false;
 							dsp::Clear(_pSamplesL, numSamples);
 							dsp::Clear(_pSamplesR, numSamples);
-							//_cpuCost += cpu::cycles() - cost;							
+							//_cpuCost += cpu::cycles() - cost;
 						}
-*/
+						#endif
 					}
 				}
 			}
@@ -722,7 +723,7 @@ namespace psy {
 				sends_[dstWire].volume_ = 1.0f;
 				sends_[dstWire].normalize_ = 1.0f/(srcMac.GetAudioRange()/GetAudioRange());
 				RecalcReturn(dstWire);
-                                for(int c(0) ; c < numinputs() ; ++c)
+				for(int c(0) ; c < numinputs() ; ++c)
 				{
 					RecalcSend(c,dstWire);
 				}
@@ -736,8 +737,8 @@ namespace psy {
 			}
 			if (srctype >= srcMac.GetOutPorts() || dsttype >= GetInPorts())
 				return false;
-			if ( !_inputCon[dstwire])
-				return false;	
+			if (!_inputCon[dstwire])
+				return false;
 			if (!ReturnValid(dstwire-MAX_CONNECTIONS))
 				return false;
 			
@@ -883,8 +884,8 @@ namespace psy {
 		std::string Mixer::GetAudioInputName(Wire::id_type wire) const
 		{
 			std::string rettxt;
-			if (wire < chanmax )
-			{	
+			if (wire < chanmax)
+			{
 				int i = wire-chan1;
 				rettxt = "Input ";
 				if ( i < 9 ) rettxt += ('1'+i);
@@ -1507,7 +1508,7 @@ namespace psy {
 				_sendvolpl[chan][send] *= (1.0f-Channel(chan).Panning())*2.0f;
 			}
 			else _sendvolpr[chan][send] *= (Channel(chan).Panning())*2.0f;
-		}		
+		}
 		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 		{
 			std::uint32_t filesize;

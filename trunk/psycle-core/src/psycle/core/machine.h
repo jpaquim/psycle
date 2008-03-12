@@ -588,7 +588,7 @@ namespace psy
 			/// Value to multiply _inputConVol[] to have a 0.0...1.0 range
 			///\todo hardcoded limits and wastes
 			float _wireMultiplier[MAX_CONNECTIONS];
-		///\}		
+		///\}
 		///\name output ports legacy mode.
 		///\{
 			/// number of Outgoing connections
@@ -655,7 +655,7 @@ namespace psy
 			virtual void GetParamValue(int /*numparam*/, char * parval) const { parval[0] = '\0'; }
 			virtual int GetParamValue(int /*numparam*/) const { return 0; }
 			virtual bool SetParameter(int /*numparam*/, int /*value*/) { return false; }
-		protected:	
+		protected:
 			int _numPars;
 			int _nCols;
 		///\}

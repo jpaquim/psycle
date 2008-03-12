@@ -395,7 +395,7 @@ bool CoreSong::ChangeWireSourceMac(Machine& newSrcMac, Machine &dstMac, InPort::
 
 void CoreSong::DestroyMachine(int mac, bool /*write_locked*/)
 {
-//	CSingleLock lock(&door, TRUE);
+	//CSingleLock lock(&door, TRUE);
 	Machine *iMac = machine(mac);
 	if(iMac)
 	{
