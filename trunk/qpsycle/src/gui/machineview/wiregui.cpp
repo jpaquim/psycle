@@ -200,7 +200,7 @@ bool WireGui::rewireDest( MachineGui *newDestGui )
 	psy::core::Machine *newDstMac = newDestGui->mac();
 	psy::core::Player::Instance()->lock();
 	int oldDstWireIndex = srcMac->FindOutputWire( oldDestGui->mac()->id() );
-	machineView->song()->ChangeWireDestMac( *srcMac, *newDstMac, oldDstWireIndex );
+	machineView->song()->ChangeWireDestMac( *srcMac, *newDstMac, 0,oldDstWireIndex,0 );
 	psy::core::Player::Instance()->unlock();
 
 	if(wiredlg) {
@@ -243,7 +243,7 @@ bool WireGui::rewireSource( MachineGui *newSrcGui )
 	psy::core::Machine *dstMac = destMacGui()->mac();
 	psy::core::Player::Instance()->lock();
 	int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->id() );
-	machineView->song()->ChangeWireSourceMac( *newSrcMac, *dstMac, oldSrcWireIndex );
+	machineView->song()->ChangeWireSourceMac( *newSrcMac, *dstMac, 0, oldSrcWireIndex,0 );
 	psy::core::Player::Instance()->unlock();
 
 	if(wiredlg) {
