@@ -457,14 +457,14 @@ namespace psy { namespace core {
 		Machine *oldDst = song()->machine(_connection[srcwire]);
 		if (oldDst)
 		{
-		        Wire::id_type oldwire,dstwire;
+			Wire::id_type oldwire,dstwire;
 			if ((oldwire = oldDst->FindInputWire(id()))== -1)
 				return false;
 
 			if ((dstwire = dstMac.GetFreeInputWire(dsttype)) == -1)
 				return false;
 
-      			float volume = 1.0f;
+			float volume = 1.0f;
 			oldDst->GetWireVolume(oldwire,volume);
 			///\todo: Error dsttype may not be the correct type. FindInputWire should give that info to us.
 			oldDst->DeleteInputWire(oldwire,dsttype);
@@ -604,7 +604,7 @@ namespace psy { namespace core {
 			if (_inputCon[i]) song()->machine(_inputMachines[i])->SetMixerSendFlag();
 		}
 		_isMixerSend=true;
-	}	
+	}
 	void Machine::ClearMixerSendFlag()
 	{
 		//Work up the connection wires to clear others' flag.
@@ -681,7 +681,7 @@ namespace psy { namespace core {
 		}
 		return -1;
 	}
-#if 0	
+#if 0
 	bool Machine::acceptsConnections() const
 	{
 		if (mode() == MACHMODE_FX || mode() == MACHMODE_MASTER) {

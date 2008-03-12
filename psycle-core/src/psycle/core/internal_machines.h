@@ -283,7 +283,7 @@ namespace psy {
 			virtual void SetWireVolume(Wire::id_type wireIndex,float value);
 			virtual Wire::id_type FindInputWire(Machine::id_type macIndex) const;
 			virtual Wire::id_type GetFreeInputWire(InPort::id_type slotType=InPort::id_type(0)) const;
-			virtual void ExchangeInputWires(Wire::id_type first,Wire::id_type second, InPort::id_type firstType= InPort::id_type(0), InPort::id_type secondType = InPort::id_type(0));		
+			virtual void ExchangeInputWires(Wire::id_type first,Wire::id_type second, InPort::id_type firstType= InPort::id_type(0), InPort::id_type secondType = InPort::id_type(0));
 			virtual void NotifyNewSendtoMixer(Machine& caller,Machine& senderMac);
 			virtual void DeleteInputWire(Wire::id_type wireIndex, InPort::id_type dstType);
 			virtual void DeleteWires();
