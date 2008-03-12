@@ -555,8 +555,11 @@ namespace psy
 		#else
 			virtual std::string GetPortInputName(InPort::id_type /*port*/) const { std::string rettxt = "Stereo Input"; return rettxt; }
 			virtual std::string GetPortOutputName(OutPort::id_type /*port*/)  const { std::string rettxt = "Stereo Output"; return rettxt; }
-			virtual int GetInPorts() const { return 1; }
+			virtual int GetInPorts() const { return (mode() != MACHMODE_GENERATOR)?1:0; }
 			virtual int GetOutPorts() const { return 1; }
+			bool acceptsConnections() { return mode() != MACHMODE_GENERATOR; }
+			bool emitsConnections() { return mode() != MACHMODE_MASTER; }
+
 			virtual int GetAudioInputs() const{ return MAX_CONNECTIONS; }
 			virtual int GetAudioOutputs() const { return MAX_CONNECTIONS; }
 		#endif
