@@ -226,7 +226,7 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
 	if ( dstMacGui->mac()->acceptsConnections() ) {
-		if (song()->InsertConnection( srcMacGui->mac()->id(), dstMacGui->mac()->id(), 1.0f))
+		if (song()->InsertConnection( srcMacGui->mac(), dstMacGui->mac(), 0,0, 1.0f))
 		{
 			// Make a new wiregui connection.
 			WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );
