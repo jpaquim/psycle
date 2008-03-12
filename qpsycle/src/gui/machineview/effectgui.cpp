@@ -82,9 +82,9 @@ void EffectGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * opti
 	painter->setPen( Qt::NoPen );
 	painter->drawRect( *panRect );
 
-	int thumbpos = panRect->x() + (int)(panRange * mac()->_panning / 128);
+	int thumbpos = panRect->x() + (int)(panRange * mac()->Pan() / 128);
 	QRect panThumb( thumbpos, panRect->y(), panRect->height(), panRect->height() );
-	if ( mac()->_panning == 64 || mac()->_panning == 0 || mac()->_panning == 128 )
+	if ( mac()->Pan() == 64 || mac()->Pan() == 0 || mac()->Pan() == 128 )
 		painter->setBrush( QColor( 224, 224, 224) );
 	else
 		painter->setBrush( QColor( 192, 192, 192 ) );
@@ -125,7 +125,7 @@ void EffectGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 		else if ( panArea.contains(event->pos().toPoint()) ) {
 			isPanning = true;
 			startPanPos = event->pos().toPoint().x();
-			startPan = mac()->_panning;
+			startPan = mac()->Pan();
 		}
 	}
 	MachineGui::mousePressEvent( event );
