@@ -302,149 +302,112 @@ Machine::id_type CoreSong::GetFreeMachine() {
 		if(tmac++ >= MAX_MACHINES) return Machine::id_type(-1); // that's why ids can't be unsigned :-(
 	}
 }
-
-bool CoreSong::InsertConnection(Machine::id_type src, Machine::id_type dst, float volume) {
-	Machine *srcMac = machine_[src];
-	Machine *dstMac = machine_[dst];
-	if(!srcMac || !dstMac)
+bool CoreSong::ValidateMixerSendCandidate(Machine& mac,bool rewiring)
+{
+	// Basically, we dissallow a send comming from a generator as well as multiple-outs for sends.
+	if ( mac.mode() == MACHMODE_GENERATOR) return false;
+	if ( mac._connectedOutputs > 1 || (mac._connectedOutputs > 0 && !rewiring) ) return false;
+	for (int i(0); i<MAX_CONNECTIONS; ++i)
 	{
-		std::ostringstream s;
-		s << "attempted to use a null machine pointer when connecting machines ids: src: " << src << ", dst: " << dst << std::endl;
-		s << "src pointer is " << srcMac << ", dst pointer is: " << dstMac;
-		//loggers::warning(s.str());
-		return false;
-	}
-	return srcMac->ConnectTo(*dstMac, InPort::id_type(0), OutPort::id_type(0), volume);
-}
-
-int CoreSong::ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex) {
-	Wire::id_type w;
-	float volume = 1.0f;
-	if (machine_[wiresource])
-	{
-		Machine *dmac = machine_[machine_[wiresource]->_outputMachines[wireindex]];
-
-		if (dmac)
+		if (mac._inputCon[i])
 		{
-			w = dmac->FindInputWire(wiresource);
-			dmac->GetWireVolume(w,volume);
-			if (InsertConnection(wiresource, wiredest,volume)) ///\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+			if (!ValidateMixerSendCandidate(*machine(mac._inputMachines[i]),false))
 			{
-				// delete the old wire
-				machine_[wiresource]->_connection[wireindex] = false;
-				machine_[wiresource]->_outputMachines[wireindex] = -1;
-				machine_[wiresource]->_connectedOutputs--;
-
-				dmac->_inputCon[w] = false;
-				dmac->_inputMachines[w] = -1;
-				dmac->_connectedInputs--;
+				return false;
 			}
 		}
 	}
-	return 0;
+	return true;
 }
-
-int CoreSong::ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex) {
-	float volume = 1.0f;
-	if (machine_[wiredest])
+void CoreSong::RestoreMixerSendFlags()
+{
+	for (int i(0);i < MAX_MACHINES; ++i)
 	{
-		Machine *smac = machine_[machine_[wiredest]->_inputMachines[wireindex]];
-
-		if (smac)
+		if (machine(i))
 		{
-			machine_[wiredest]->GetWireVolume(wireindex,volume);
-			if (InsertConnection(wiresource, wiredest,volume)) ///\todo this needs to be checked. It wouldn't allow a machine with MAXCONNECTIONS to move any wire.
+			if (machine(i)->type() == MACH_MIXER)
 			{
-				// delete the old wire
-				int wire = smac->FindOutputWire(wiredest);
-				smac->_connection[wire] = false;
-				smac->_outputMachines[wire] = 255;
-				smac->_connectedOutputs--;
-
-				machine_[wiredest]->_inputCon[wireindex] = false;
-				machine_[wiredest]->_inputMachines[wireindex] = -1;
-				machine_[wiredest]->_connectedInputs--;
-			}
-			/*
-				else
+				Mixer* mac = static_cast<Mixer*>(machine(i));
+				for (int j(0); j<mac->numreturns(); ++j)
 				{
-				MessageBox("Machine connection failed!","Error!", MB_ICONERROR);
+					if ( mac->Return(j).IsValid())
+						machine(mac->Return(j).Wire().machine_)->SetMixerSendFlag();
 				}
-			*/
+			}
 		}
 	}
-	return 0;
+}
+Wire::id_type CoreSong::InsertConnection(Machine &srcMac, Machine &dstMac, InPort::id_type srctype, OutPort::id_type dsttype,float volume) {
+	//CSingleLock lock(&door,TRUE);
+	// Verify that the destination is not a generator
+	if(dstMac.mode() == MACHMODE_GENERATOR) return -1;
+	// Verify that src is not connected to dst already, and that destination is not connected to source.
+	if (srcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(srcMac.id()) > -1) return -1;
+	// disallow mixer as a sender of another mixer
+	if ( srcMac.type() == MACH_MIXER && dstMac.type() == MACH_MIXER && dsttype != 0) return -1;
+	// If source is in a mixer chain, dissallow the new connection.
+	if ( srcMac._isMixerSend ) return -1;
+	// If destination is in a mixer chain (or the mixer itself), validate the sender first
+	if ( dstMac._isMixerSend || (dstMac.type() == MACH_MIXER && dsttype == 1))
+	{
+		if (!ValidateMixerSendCandidate(srcMac)) return -1;
+	}
+	///\todo: srctype not being used right now.
+	return srcMac.ConnectTo(dstMac,dsttype,srctype,volume);
+}
+bool CoreSong::ChangeWireDestMac(Machine& srcMac, Machine &newDstMac, OutPort::id_type srctype, Wire::id_type wiretochange, InPort::id_type dsttype)
+{
+	//CSingleLock lock(&door,TRUE);
+	// Verify that the destination is not a generator
+	if(newDstMac.mode() == MACHMODE_GENERATOR) return false;
+	// Verify that src is not connected to dst already, and that destination is not connected to source.
+	if (srcMac.FindOutputWire(newDstMac.id()) > -1 || newDstMac.FindOutputWire(srcMac.id()) > -1) return false;
+	if ( srcMac.type() == MACH_MIXER && newDstMac.type() == MACH_MIXER && wiretochange >=MAX_CONNECTIONS) return false;
+	// If source is in a mixer chain, dissallow the new connection.
+	// If destination is in a mixer chain (or the mixer itself), validate the sender first
+	if ( newDstMac._isMixerSend || (newDstMac.type() == MACH_MIXER && wiretochange >= MAX_CONNECTIONS))
+	{
+		///\todo: validate for the case whre srcMac->_isMixerSend
+		if (!ValidateMixerSendCandidate(srcMac,true)) return false;
+	}
+
+	return srcMac.MoveWireDestTo(newDstMac,srctype,wiretochange,dsttype);
+}
+bool CoreSong::ChangeWireSourceMac(Machine& newSrcMac, Machine &dstMac, InPort::id_type dsttype, Wire::id_type wiretochange, OutPort::id_type srctype)
+{
+	//CSingleLock lock(&door,TRUE);
+	// Verify that the destination is not a generator
+	if(dstMac.mode() == MACHMODE_GENERATOR) return false;
+	// Verify that src is not connected to dst already, and that destination is not connected to source.
+	if (newSrcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(newSrcMac.id()) > -1) return false;
+	// disallow mixer as a sender of another mixer
+	if ( newSrcMac.type() == MACH_MIXER && dstMac.type() == MACH_MIXER && wiretochange >= MAX_CONNECTIONS) return false;
+	// If source is in a mixer chain, dissallow the new connection.
+	if ( newSrcMac._isMixerSend ) return false;
+	// If destination is in a mixer chain (or the mixer itself), validate the sender first
+	if ( dstMac._isMixerSend || (dstMac.type() == MACH_MIXER && wiretochange >= MAX_CONNECTIONS))
+	{
+		if (!ValidateMixerSendCandidate(newSrcMac,false)) return false;
+	}
+	
+	return dstMac.MoveWireSourceTo(newSrcMac,dsttype,wiretochange,srctype);
 }
 
-void CoreSong::DestroyMachine(Machine::id_type mac, bool /*write_locked*/) {
-	#if 0
-		#if !defined PSYCLE__CONFIGURATION__READ_WRITE_MUTEX
-			#error "PSYCLE__CONFIGURATION__READ_WRITE_MUTEX isn\'t defined anymore, please clean the code where this error is triggered."
-		#else
-			#if PSYCLE__CONFIGURATION__READ_WRITE_MUTEX // new implementation
-				boost::read_write_mutex::scoped_write_lock lock(read_write_mutex(), !write_locked); // only lock if not already locked
-			#else // original implementation
-				CSingleLock lock(&door, true);
-			#endif
-		#endif
-	#endif
-	Machine *iMac = machine_[mac];
-	Machine *iMac2;
+void CoreSong::DestroyMachine(int mac, bool /*write_locked*/)
+{
+//	CSingleLock lock(&door, TRUE);
+	Machine *iMac = machine(mac);
 	if(iMac)
 	{
-		// Deleting the connections to/from other machines
-		for(int w=0; w<MAX_CONNECTIONS; w++)
+		iMac->DeleteWires();
+		// If it's a (Vst)Plugin, the destructor calls to release the underlying library
+		try
 		{
-			// Checking In-Wires
-			if(iMac->_inputCon[w])
-			{
-				if((iMac->_inputMachines[w] >= 0) && (iMac->_inputMachines[w] < MAX_MACHINES))
-				{
-					iMac2 = machine_[iMac->_inputMachines[w]];
-					if(iMac2)
-					{
-						for(int x=0; x<MAX_CONNECTIONS; x++)
-						{
-							if( iMac2->_connection[x] && iMac2->_outputMachines[x] == mac)
-							{
-								iMac2->_connection[x] = false;
-								iMac2->_outputMachines[x]=-1;
-								iMac2->_connectedOutputs--;
-								break;
-							}
-						}
-					}
-				}
-			}
-			// Checking Out-Wires
-			if(iMac->_connection[w])
-			{
-				if((iMac->_outputMachines[w] >= 0) && (iMac->_outputMachines[w] < MAX_MACHINES))
-				{
-					iMac2 = machine_[iMac->_outputMachines[w]];
-					if(iMac2)
-					{
-						for(int x=0; x<MAX_CONNECTIONS; x++)
-						{
-							if(iMac2->_inputCon[x] && iMac2->_inputMachines[x] == mac)
-							{
-								iMac2->_inputCon[x] = false;
-								iMac2->_inputMachines[x]=-1;
-								iMac2->_connectedInputs--;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
+			delete machine(mac);
+			machine_[mac]=0;
+		}catch(...){};
 	}
-	///\todo:
-	//if(mac == machineSoloed) machineSoloed = -1;
-	// If it's a (Vst)Plugin, the destructor calls to release the underlying library
-	delete machine_[mac]; machine_[mac] = 0;
 }
-
 int CoreSong::GetFreeBus() {
 	for(int c(0) ; c < MAX_BUSES ; ++c) if(!machine_[c]) return c;
 	return -1; 
@@ -1162,5 +1125,9 @@ void Song::clearMyData() {
 	auxcolSelected = 0;
 }
 
-
+void Song::DestroyMachine(Machine::id_type mac, bool write_locked ) 
+{
+	CoreSong::DestroyMachine(mac,write_locked);
+	if(mac == machineSoloed) machineSoloed = -1;
+}
 }}

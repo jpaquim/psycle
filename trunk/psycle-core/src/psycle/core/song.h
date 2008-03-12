@@ -131,12 +131,8 @@ namespace psy
 			///\{
 		public:
 			/// access to the machines of the song
-			///\todo hardcoded limits and wastes
-			///\todo more lightweight with a std::vector<Machine*>
 			Machine * const machine(Machine::id_type id) { return machine_[id]; }
 			/// access to the machines of the song
-			///\todo hardcoded limits and wastes
-			///\todo more lightweight with a std::vector<Machine*>
 			Machine const * const machine(Machine::id_type id) const { return machine_[id]; }
 		private:
 			void machine(Machine::id_type id, Machine * machine)
@@ -197,7 +193,7 @@ namespace psy
 			/// destroy a machine of this song.
 			void DestroyMachine(Machine & machine, bool /*write_locked*/ = false) { DestroyMachine(machine.id()); /* stupid circonvolution */ }
 			/// destroy a machine of this song.
-			void DestroyMachine(Machine::id_type mac, bool write_locked = false);
+			virtual void DestroyMachine(Machine::id_type mac, bool write_locked = false);
 			/// destroys all the machines of this song.
 			void DestroyAllMachines(bool write_locked = false);
 
@@ -223,20 +219,23 @@ namespace psy
 			///\{
 		public:
 			/// creates a new connection between two machines.
-			///\todo kinda useless since machines can connect themselves with their ConnectTo function
-			bool InsertConnection(Machine::id_type src, Machine::id_type dst, float volume = 1.0f);
+			/// This funcion is to be used over the Machine's ConnectTo(). This one verifies the validity of the connections, and uses Machine's function
+			Wire::id_type InsertConnection(Machine &srcMac, Machine &dstMac, InPort::id_type srctype=0, OutPort::id_type dsttype=0, float volume = 1.0f);
 
 			/// Changes the destination of a wire connection.
 			///\param wiresource source mac index
 			///\param wiredest new dest mac index
 			///\param wireindex index of the wire in wiresource to change
-			int ChangeWireDestMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex);
-
+			bool ChangeWireDestMac(Machine& srcMac, Machine &newDstMac, OutPort::id_type srctype, Wire::id_type wiretochange, InPort::id_type dsttype);
 			/// Changes the destination of a wire connection.
 			///\param wiredest dest mac index
 			///\param wiresource new source mac index
 			///\param wireindex index of the wire in wiredest to change
-			int ChangeWireSourceMac(Machine::id_type wiresource, Machine::id_type wiredest, Wire::id_type wireindex);
+			bool ChangeWireSourceMac(Machine& newSrcMac, Machine &dstMac, InPort::id_type dsttype, Wire::id_type wiretochange, OutPort::id_type srctype);
+			
+			bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
+
+			void RestoreMixerSendFlags();
 			///\}
 
 			///\name actions with instruments
@@ -304,6 +303,7 @@ namespace psy
 		public:
 			Song(MachineCallbacks* callbacks);
 			virtual void clear();
+			virtual void DestroyMachine(Machine::id_type mac, bool write_locked = false);
 		private:
 			void clearMyData();
 
