@@ -270,7 +270,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 			}
 		}
 	}
-
+	song.RestoreMixerSendFlags();
 	//song.progress.emit(5,0,"");
 	if(chunkcount)
 	{

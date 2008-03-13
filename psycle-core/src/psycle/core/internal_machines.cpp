@@ -560,7 +560,7 @@ namespace psy {
 				{
 					Machine* pSendMachine = song()->machine(sends_[i].machine_);
 					assert(pSendMachine);
-					if (!pSendMachine-_worked && !pSendMachine->_waitingForSound)
+					if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
 					{
 						bool soundready=false;
 						// Mix all the inputs and route them to the send fx.
