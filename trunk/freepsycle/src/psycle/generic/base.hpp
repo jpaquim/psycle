@@ -88,7 +88,8 @@ class child_of {
 		child_of(Parent & parent) : parent_(parent) {}
 	public:
 		typedef Parent parent_type;
-		Parent & parent() const throw() { return parent_; }
+		Parent const & parent() const throw() { return parent_; }
+		Parent       & parent()       throw() { return parent_; }
 	private:
 		Parent & parent_;
 };
