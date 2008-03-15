@@ -50,7 +50,7 @@ class graph
 				i != this->underlying().end(); ++i
 			) on_new_node(**i);
 			
-			// Iterate over all the underlying nodes of the graph to connect the wrapping ports.
+			// Iterate over all the nodes of the graph to connect the wrapping ports.
 			for(typename graph::const_iterator i(this->begin()) ; i != this->end() ; ++i) {
 				typename Typenames::node & node(**i);
 				for(typename Typenames::node::output_ports_type::const_iterator i(node.output_ports().begin());
@@ -60,10 +60,9 @@ class graph
 					for(typename Typenames::ports::output::underlying_type::
 						input_ports_type::const_iterator i(output_port.underlying().input_ports().begin());
 						i != output_port.underlying().input_ports().end() ; ++i
-					) {
-						typename Typenames::ports::input & input_port(underlying_wrapper(**i));
-						output_port.connect(input_port);
-					}
+					)
+						// The underlying layer is already connected, we only have to connect this wrapping layer.
+						static_cast<basic::ports::input<Typenames> &>(underlying_wrapper(**i)).connect(output_port);
 				}
 			}
 		}
@@ -102,9 +101,7 @@ class graph
 				typename Typenames::underlying::ports::output & underlying_output_port
 			) {
 				// The underlying layer is already connected, we only have to connect this wrapping layer.
-				basic::ports:: input<Typenames> & in (underlying_wrapper(underlying_input_port));
-				basic::ports::output<Typenames> & out(underlying_wrapper(underlying_output_port));
-				in.connect(out);
+				static_cast<basic::ports::input<Typenames> &>(underlying_wrapper(underlying_input_port)).connect(underlying_wrapper(underlying_output_port));
 			}
 
 			boost::signals::connection on_delete_connection_signal_connection;
