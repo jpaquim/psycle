@@ -47,10 +47,6 @@ class graph
 {
 	protected: friend class graph::virtual_factory_access;
 		typedef graph graph_type;
-		graph() {
-			// register to our own signal
-			new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1));
-		}
 
 	///\name signals
 	///\{
@@ -60,6 +56,12 @@ class graph
 		private:
 			boost::signal<void (typename Typenames::node &)> new_node_signal_;
 			
+		public:
+			/// signal emitted when a node is deleted from the graph
+			boost::signal<void (typename Typenames::node &)> & delete_node_signal() throw() { return delete_node_signal_; }
+		private:
+			boost::signal<void (typename Typenames::node &)> delete_node_signal_;
+
 		public:
 			/// signal emitted when two ports (of two different nodes) are connected
 			boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> & new_connection_signal() throw() { return new_connection_signal_; }
@@ -71,13 +73,6 @@ class graph
 			boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> & delete_connection_signal() throw() { return delete_connection_signal_; }
 		private:
 			boost::signal<void (typename Typenames::ports::input &, typename Typenames::ports::output &)> delete_connection_signal_;
-	///\}
-	
-	///\name signal slots
-	///\{
-		private:
-			void on_new_node   (typename Typenames::node & node) { insert(&node); node.delete_signal().connect(boost::bind(&graph::on_delete_node, this, _1)); }
-			void on_delete_node(typename Typenames::node & node) { erase (&node); }
 	///\}
 };
 
@@ -123,24 +118,22 @@ class node
 			if(loggers::trace()()) {
 				loggers::trace()("new generic node", UNIVERSALIS__COMPILER__LOCATION);
 			}
-			
-			// register to our own signals
-			new_output_port_signal()        .connect(boost::bind(&node::        on_new_output_port, this, _1));
-			new_single_input_port_signal()  .connect(boost::bind(&node::  on_new_single_input_port, this, _1));
-			new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
 		}
 
 		void after_construction() /*override*/ {
 			if(loggers::trace()()) {
 				loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
 			}
-			// emit the new_node signal of our parent graph
+			this->parent().insert(static_cast<typename Typenames::node*>(this));
+			// emit the new_node signal to the wrappers
 			this->parent().new_node_signal()(*this);
+			
 		}
 
 		void before_destruction() /*override*/ {
-			// emit our deletion signal
-			delete_signal()(*this);
+			this->parent().erase(static_cast<typename Typenames::node*>(this));
+			// emit the delete_node signal to the wrappers
+			this->parent().delete_node_signal()(*this);
 		}
 
 		/// virtual destructor
@@ -158,7 +151,7 @@ class node
 			typedef std::vector<typename Typenames::ports::output*> output_ports_type;
 			/// the output ports owned by this node
 			output_ports_type const &  output_ports() const throw() { return output_ports_; }
-		private:
+		private: friend class ports::output<Typenames>;
 			output_ports_type          output_ports_;
 	///\}
 
@@ -170,23 +163,14 @@ class node
 		private:
 			boost::signal<void (typename Typenames::ports::output &)>   new_output_port_signal_;
 	///\}
-	
-	///\name ports: outputs: signals: slots
-	///\{
-		private:
-			void on_new_output_port(typename Typenames::ports::output & port) {
-				// add the new output port to our container
-				output_ports_.push_back(&port);
-			}
-	///\}
-	
+
 	///\name ports: inputs
 	///\{
 		public:
 			typedef std::vector<typename Typenames::ports::inputs::single*> single_input_ports_type;
 			/// the input ports owned by this node
 			single_input_ports_type const & single_input_ports() const throw() { return single_input_ports_; }
-		private:
+		private: friend class ports::inputs::single<Typenames>;
 			single_input_ports_type         single_input_ports_;
 	///\}
 	
@@ -198,22 +182,13 @@ class node
 		private:
 			boost::signal<void (typename Typenames::ports::inputs::single &)>   new_single_input_port_signal_;
 	///\}
-	
-	///\name ports: inputs: single: signals: slots
-	///\{
-		private:
-			void on_new_single_input_port(typename Typenames::ports::inputs::single & port) {
-				// add the new single input port to our container
-				single_input_ports_.push_back(&port); 
-			}
-	///\}
 
 	///\name ports: inputs: multiple
 	///\{
 		public:
 			/// the multiple input port owned by this node, if any, or else 0
 			typename Typenames::ports::inputs::multiple * const multiple_input_port() const throw() { return multiple_input_port_; }
-		private:
+		private: friend class ports::inputs::multiple<Typenames>;
 			typename Typenames::ports::inputs::multiple *       multiple_input_port_;
 		public: // node_friends protected:
 			/// gives a multiple input port for this node
@@ -228,15 +203,6 @@ class node
 			boost::signal<void (typename Typenames::ports::inputs::multiple &)> & new_multiple_input_port_signal() throw() { return new_multiple_input_port_signal_; }
 		private:
 			boost::signal<void (typename Typenames::ports::inputs::multiple &)>   new_multiple_input_port_signal_;
-	///\}
-	
-	///\name ports: inputs: multiple: signals: slots
-	///\{
-		private:
-			void on_new_multiple_input_port(typename Typenames::ports::inputs::multiple & port) {
-				// store a pointer to the new multiple input port
-				multiple_input_port(port); 
-			}
 	///\}
 };
 
@@ -269,7 +235,8 @@ namespace ports {
 			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
 			void after_construction() /*override*/ {
-				// emit the new_output_port signal of our parent node
+				this->parent().output_ports_.push_back(static_cast<typename Typenames::ports::output*>(this));
+				// emit the new_output_port signal to the wrappers
 				this->parent().new_output_port_signal()(*this);
 			}
 
@@ -286,7 +253,6 @@ namespace ports {
 			private:
 				input_ports_type         input_ports_;
 		///\}
-		
 
 		///\name (dis)connection functions
 		///\{
@@ -373,7 +339,7 @@ namespace ports {
 					Typenames::port::connect(output_port);
 					// connect this input port internal side to the output port
 					this->connect_internal_side(output_port);
-					// signal our grand parent graph of the new connection
+					// signal grand parent graph wrappers of the new connection
 					this->parent().parent().new_connection_signal()(*this, output_port);
 				}
 			protected:
@@ -386,7 +352,7 @@ namespace ports {
 					this->disconnect_internal_side(output_port);
 					// disconnect the output port internal side from this input port
 					output_port.disconnect_internal_side(*this);
-					// signal our grand parent graph of the disconnection
+					// signal grand parent graph wrappers of the disconnection
 					this->parent().parent().delete_connection_signal()(*this, output_port);
 				}
 			protected:
@@ -425,7 +391,8 @@ namespace ports {
 				#undef constructor
 
 				void after_construction() /*override*/ {
-					// signal our parent node it has a new single input port
+					this->parent().single_input_ports_.push_back(static_cast<typename Typenames::ports::inputs::single*>(this));
+					// emit the new_single_input_port signal to the wrappers
 					this->parent().new_single_input_port_signal()(*this);
 				}
 
@@ -489,7 +456,9 @@ namespace ports {
 				)
 
 				void after_construction() /*override*/ {
-					// signal our parent node it now has a multiple input port
+					assert(!this->parent().multiple_input_port_);
+					this->parent().multiple_input_port_ = static_cast<typename Typenames::ports::inputs::multiple*>(this);
+					// emit the new_single_input_port signal to the wrappers
 					this->parent().new_multiple_input_port_signal()(*this);
 				}
 				
