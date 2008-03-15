@@ -37,8 +37,7 @@ std::clog << "new gui graph\n";
 }
 
 void graph::after_construction() {
-	///\todo remove this test
-	resolver()("decay", *this, "decayX");
+	resolver()("output", *this, "output");
 }
 
 graph::~graph() {}
