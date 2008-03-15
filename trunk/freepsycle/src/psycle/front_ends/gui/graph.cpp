@@ -286,6 +286,11 @@ std::clog << "node::on_event: false\n";
 		}
 		//ui_manager_->add_ui(ui_manager_->new_merge_id(), "/popup-menu", "new-" + type + "-node", "new-" + type + "-node");
 		menu_ = dynamic_cast<Gtk::Menu*>(ui_manager_->get_widget("/popup-menu"));
+		
+		///\todo remove this test
+		x_ = y_ = 0;
+		on_new_node("sine");
+		on_new_node("decay");
 	}
 	
 	void canvas::add_node_type(std::string const & type) {

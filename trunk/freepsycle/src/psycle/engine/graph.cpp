@@ -24,7 +24,7 @@ graph::graph(graph::name_type const & name)
 {
 	if(loggers::information()()) {
 		std::ostringstream s;
-		s << "new graph: " << qualified_name();
+		s << qualified_name() << ": new engine graph";
 		loggers::information()(s.str());
 	}
 	events_per_buffer_ = 1024;
@@ -37,7 +37,7 @@ graph::name_type graph::qualified_name() const {
 graph::~graph() {
 	if(loggers::information()()) {
 		std::ostringstream s;
-		s << "delete graph: " << qualified_name();
+		s << qualified_name() << ": deleting engine graph";
 		loggers::information()(s.str());
 	}
 
@@ -52,7 +52,7 @@ graph::~graph() {
 
 		if(loggers::information()()) {
 			std::ostringstream s;
-			s << node.qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node) << " from loaded library " << node.plugin_library_reference().name();
+			s << node.qualified_name() << ": deleting engine node instance of " << universalis::compiler::typenameof(node) << " from loaded library " << node.plugin_library_reference().name();
 			loggers::information()(s.str());
 		}
 
@@ -85,7 +85,7 @@ node::node(engine::plugin_library_reference & plugin_library_reference, node::pa
 {
 	if(loggers::trace()()) {
 		std::ostringstream s;
-		s << "new node: " << qualified_name();
+		s << qualified_name() << ": new engine node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 }
@@ -93,7 +93,7 @@ node::node(engine::plugin_library_reference & plugin_library_reference, node::pa
 node::~node() {
 	if(loggers::trace()()) {
 		std::ostringstream s;
-		s << "delete node: " << qualified_name();
+		s << qualified_name() << ": deleting engine node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(multiple_input_port()) multiple_input_port()->free_heap();
@@ -258,9 +258,8 @@ void node::dump(std::ostream & out, std::size_t tabulations) const {
 	for(std::size_t t(0) ; t < tabulations ; ++t) out << '\t';
 	out
 		<< name()
-		<< " (loaded library "
-		<< plugin_library_reference().name()
-		<< ", " << universalis::compiler::typenameof(*this)
+		<< " (" << universalis::compiler::typenameof(*this)
+		<< ", lib " << plugin_library_reference().name()
 		<< ")\n";
 	if(multiple_input_port()) multiple_input_port()->dump(out, tabulations + 1);
 	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) (**i).dump(out, tabulations + 1);
@@ -284,7 +283,7 @@ port::port(parent_type & parent, name_type const & name, std::size_t channels)
 {
 	if(loggers::trace()()) {
 		std::ostringstream s;
-		s << this->qualified_name() << ": new port";
+		s << this->qualified_name() << ": new engine port";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(!channels) {
@@ -305,7 +304,7 @@ port::port(parent_type & parent, name_type const & name, std::size_t channels)
 port::~port() {
 	if(loggers::trace()()) {
 		std::ostringstream s;
-		s << this->qualified_name() << ": delete port";
+		s << this->qualified_name() << ": deleting engine port";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 }
@@ -348,7 +347,7 @@ void port::channels(std::size_t channels) throw(exception) {
 void port::seconds_per_event(real const & seconds_per_event) {
 	if(loggers::information()()) {
 		std::ostringstream s;
-		s << qualified_name() << " port events per second changing to " << 1 / seconds_per_event;
+		s << qualified_name() << ": port events per second changing to " << 1 / seconds_per_event;
 		loggers::information()(s.str());
 	}
 	propagate_seconds_per_event_to_node(seconds_per_event);
@@ -421,7 +420,7 @@ void port::channels_transaction(std::size_t channels) throw(exception) {
 void port::do_channels(std::size_t channels) throw(exception) {
 	if(loggers::information()()) {
 		std::ostringstream s;
-		s << qualified_name() << " port channels changing to " << channels;
+		s << qualified_name() << ": port channels changing to " << channels;
 		loggers::information()(s.str());
 	}
 	if(channels_immutable()) throw exceptions::runtime_error("channel count of port " + qualified_name() + " is immutable", UNIVERSALIS__COMPILER__LOCATION);
@@ -430,13 +429,16 @@ void port::do_channels(std::size_t channels) throw(exception) {
 }
 
 void port::dump(std::ostream & out, /*const std::string & kind,*/ std::size_t tabulations) const {
-	for(std::size_t t(0) ; t < tabulations - 1 ; ++t) out << '\t';
+	for(std::size_t t(0) ; t < tabulations; ++t) out << '\t';
+	if     (typeid(*this) == typeid(ports::inputs::single  )) out << "in  ";
+	else if(typeid(*this) == typeid(ports::inputs::multiple)) out << "in* ";
+	else if(typeid(*this) == typeid(ports::output          )) out << "out ";
+	else out << universalis::compiler::typenameof(*this) << ' ';
 	out
-		<< std::setw(60) << universalis::compiler::typenameof(*this) << '\t'
 		<< std::setw(16) << name()
-		<< "\tchannels: " << channels()
-		<< "\tevents per second: " << std::setw(6) << events_per_second()
-		<< "\tconnections: ";
+		<< "\tchns: " << channels()
+		<< "\tevts/s: " << std::setw(6) << events_per_second()
+		<< "\tconns: ";
 }
 
 std::ostream & operator<<(std::ostream & out, port const & port) {
@@ -455,7 +457,7 @@ namespace ports {
 	{
 		if(loggers::trace()()) {
 			std::ostringstream s;
-			s << qualified_name() << ": new port output";
+			s << qualified_name() << ": new engine port output";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
@@ -463,7 +465,7 @@ namespace ports {
 	output::~output() {
 		if(loggers::trace()()) {
 			std::ostringstream s;
-			s << qualified_name() << ": delete port output";
+			s << qualified_name() << ": deleting engine port output";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
@@ -503,7 +505,7 @@ namespace ports {
 	{
 		if(loggers::trace()()) {
 			std::ostringstream s;
-			s << qualified_name() << ": new port input";
+			s << qualified_name() << ": new engine port input";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
@@ -511,7 +513,7 @@ namespace ports {
 	input::~input() {
 		if(loggers::trace()()) {
 			std::ostringstream s;
-			s << qualified_name() << ": delete port input";
+			s << qualified_name() << ": deleting engine port input";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		//disconnect_all();
@@ -546,7 +548,7 @@ namespace ports {
 		{
 			if(loggers::trace()()) {
 				std::ostringstream s;
-				s << this->qualified_name() << ": new port input single";
+				s << this->qualified_name() << ": new engine port input single";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
@@ -554,7 +556,7 @@ namespace ports {
 		single::~single() {
 			if(loggers::trace()()) {
 				std::ostringstream s;
-				s << this->qualified_name() << ": delete port input single";
+				s << this->qualified_name() << ": deleting engine port input single";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
@@ -583,7 +585,7 @@ namespace ports {
 		{
 			if(loggers::trace()()) {
 				std::ostringstream s;
-				s << qualified_name() << ": new port input multiple";
+				s << qualified_name() << ": new engine port input multiple";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
@@ -591,7 +593,7 @@ namespace ports {
 		multiple::~multiple() {
 			if(loggers::trace()()) {
 				std::ostringstream s;
-				s << qualified_name() << ": delete port input multiple";
+				s << qualified_name() << ": deleting engine port input multiple";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
