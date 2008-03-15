@@ -89,6 +89,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
 
 	protected: friend class virtual_factory_access;
 		graph(underlying_type &, host::plugin_resolver & resolver);
+		void after_construction() /*override*/;
 		virtual ~graph();
 
 	public:
