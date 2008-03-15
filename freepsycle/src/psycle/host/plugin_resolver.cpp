@@ -30,7 +30,7 @@ namespace psycle { namespace host {
 		if(loggers::trace()())
 		{
 			std::ostringstream s;
-			s << "delete plugin resolver";
+			s << "deleting plugin resolver";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		for(map::const_iterator i(map_.begin()) ; i != map_.end() ; ++i) delete i->second;
@@ -122,7 +122,7 @@ namespace psycle { namespace host {
 		if(loggers::trace()())
 		{
 			std::ostringstream s;
-			s << graph.qualified_name() << '.' << name << " new plugin instance from loaded library " << this->name();
+			s << graph.qualified_name() << '.' << name << ": new plugin instance from loaded library " << this->name();
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		instance & result(*new instance(*this, graph, name));
@@ -157,7 +157,7 @@ namespace psycle { namespace host {
 		if(loggers::information()())
 		{
 			std::ostringstream s;
-			s << "delete plugin instanciator, unloading library " << short_name() << ": " << full_name();
+			s << "deleting plugin instanciator, unloading library " << short_name() << ": " << full_name();
 			loggers::information()(s.str());
 		}
 		delete &library_resolver_;
@@ -173,7 +173,7 @@ namespace psycle { namespace host {
 		if(loggers::information()())
 		{
 			std::ostringstream s;
-			s << node().qualified_name() << " new node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << instanciator.name();
+			s << node().qualified_name() << ": done creating new node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << instanciator.name();
 			loggers::information()(s.str());
 		}
 		++node().plugin_library_reference();
@@ -184,7 +184,7 @@ namespace psycle { namespace host {
 		if(loggers::information()())
 		{
 			std::ostringstream s;
-			s << node().qualified_name() << " delete node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << node().plugin_library_reference().name();
+			s << node().qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << node().plugin_library_reference().name();
 			loggers::information()(s.str());
 		}
 		engine::reference_counter & reference_counter(node().plugin_library_reference());
