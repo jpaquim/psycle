@@ -533,7 +533,7 @@ namespace psy {
 			}
 		}
 
-		int Mixer::GenerateAudio( int numSamples )
+		void Mixer::Work( int numSamples )
 		{
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
 			Machine::WorkNoMix( numSamples );
@@ -547,7 +547,7 @@ namespace psy {
 			//cost = cpu::cycles() - cost;
 			
 			_worked = true;
-			return numSamples;
+			return;
 		}
 
 		void Mixer::FxSend(int numSamples )
@@ -907,7 +907,7 @@ namespace psy {
 		{
 			return (port==0)?"Input Port":"Send/Return Port";
 		}
-
+		
 		int Mixer::GetNumCols() const
 		{
 			return 2+numinputs()+numreturns();
@@ -919,15 +919,22 @@ namespace psy {
 			if ( channel == 0)
 			{
 				if (param == 0){ minval=0; maxval=0x1000; }
-				else if (param <= 12)  { minval=0; maxval=0x1000; }
+				else if (param <= 12)  {
+					if (!ChannelValid(param-1)) { minval=0; maxval=0; }
+					else { minval=0; maxval=0x1000; }
+				}
 				else if (param == 13) { minval=0; maxval=0x100; }
 				else if (param == 14) { minval=0; maxval=0x400; }
 				else  { minval=0; maxval=0x100; }
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0) { minval=0; maxval=0x100; }
-				else if (param <= 12) { minval=0; maxval=0x100; }
+				if (!ChannelValid(channel-1)) { minval=0; maxval=0; }
+				else if (param == 0) { minval=0; maxval=0x100; }
+				else if (param <= 12) {
+					if(!ReturnValid(param-1)) { minval=0; maxval=0; }
+					else { minval=0; maxval=0x100; }
+				}
 				else if (param == 13) { minval=0; maxval=3; }
 				else if (param == 14) { minval=0; maxval=0x400; }
 				else  { minval=0; maxval=0x100; }
@@ -936,16 +943,19 @@ namespace psy {
 			{
 				if ( param > 12) { minval=0; maxval=0; }
 				else if ( param == 0 ) { minval=0; maxval=24; }
+				else if (!ReturnValid(param-1)) { minval=0; maxval=0; }
 				else { minval=0; maxval=(1<<14)-1; }
 			}
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) { minval=0; maxval=0; }
+				else if (!ReturnValid(param-1)) { minval=0; maxval=0; }
 				else { minval=0; maxval=0x1000; }
 			}
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) { minval=0; maxval=0; }
+				else if (!ReturnValid(param-1)) { minval=0; maxval=0; }
 				else { minval=0; maxval=0x100; }
 			}
 			else { minval=0; maxval=0; }
@@ -1002,8 +1012,11 @@ namespace psy {
 				}
 				else if (param <= 12)
 				{
-					float dbs = dsp::dB(Channel(param-1).Volume());
-					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
+					if (!ChannelValid(param-1)) return 0;
+					else {
+						float dbs = dsp::dB(Channel(param-1).Volume());
+						return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
+					}
 				}
 				else if (param == 13) return master_.DryWetMix()*0x100;
 				else if (param == 14) return master_.Gain()*0x100;
@@ -1011,8 +1024,13 @@ namespace psy {
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0) return Channel(channel-1).DryMix()*0x100;
-				else if (param <= 12) return Channel(channel-1).Send(param-1)*0x100;
+				if (!ChannelValid(channel-1)) return 0;
+				else if (param == 0) return Channel(channel-1).DryMix()*0x100;
+				else if (param <= 12) 
+				{
+					if ( !ReturnValid(param-1)) return 0;
+					else return Channel(channel-1).Send(param-1)*0x100;
+				}
 				else if (param == 13)
 				{
 					if (Channel(channel-1).Mute()) return 3;
@@ -1027,7 +1045,8 @@ namespace psy {
 			{
 				if ( param > 12) return 0;
 				else if (param == 0 ) return solocolumn_+1;
-				else 
+				else if ( !ReturnValid(param-1)) return 0;
+				else
 				{
 					int val(0);
 					if (Return(param-1).Mute()) val|=1;
@@ -1042,6 +1061,7 @@ namespace psy {
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return 0;
+				else if ( !ReturnValid(param-1)) return 0;
 				else
 				{
 					float dbs = dsp::dB(Return(param-1).Volume());
@@ -1051,6 +1071,7 @@ namespace psy {
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return 0;
+				else if ( !ReturnValid(param-1)) return 0;
 				else return Return(param-1).Panning()*0x100;
 			}
 			else return 0;
@@ -1073,8 +1094,9 @@ namespace psy {
 					}
 				}
 				else if (param <= 12)
-				{ 
-					if (Channel(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
+				{
+					if (!ChannelValid(param-1)) return;
+					else if (Channel(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
 					else
 					{
 						float dbs = dsp::dB(Channel(param-1).Volume());
@@ -1103,14 +1125,16 @@ namespace psy {
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0)
+				if (!ChannelValid(channel-1)) return;
+				else if (param == 0)
 				{
 					if (Channel(channel-1).DryMix() == 0.0f) strcpy(parVal,"Off");
 					else sprintf(parVal,"%.0f%%",Channel(channel-1).DryMix()*100.0f);
 				}
 				else if (param <= 12)
 				{
-					if (Channel(channel-1).Send(param-1) == 0.0f) strcpy(parVal,"Off");
+					if ( !ReturnValid(param-1)) return;
+					else if (Channel(channel-1).Send(param-1) == 0.0f) strcpy(parVal,"Off");
 					else sprintf(parVal,"%.0f%%",Channel(channel-1).Send(param-1)*100.0f);
 				}
 				else if (param == 13)
@@ -1139,7 +1163,8 @@ namespace psy {
 			{
 				if ( param > 12) return;
 				else if (param == 0 ){ sprintf(parVal,"%d",solocolumn_+1); }
-				else 
+				else if ( !ReturnValid(param-1))  return;
+				else
 				{
 					parVal[0]= (Return(param-1).Mute())?'M':' ';
 					parVal[1]= (Return(param-1).Send(0))?'1':' ';
@@ -1161,19 +1186,18 @@ namespace psy {
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return;
+				else if ( !ReturnValid(param-1)) return;
+				else if (Return(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
 				else
-				{ 
-					if (Return(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
-					else
-					{
-						float dbs = dsp::dB(Return(param-1).Volume());
-						sprintf(parVal,"%.01fdB",dbs);
-					}
+				{
+					float dbs = dsp::dB(Return(param-1).Volume());
+					sprintf(parVal,"%.01fdB",dbs);
 				}
 			}
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return;
+				else if ( !ReturnValid(param-1)) return;
 				else
 				{
 					if (Return(param-1).Panning()== 0.0f) strcpy(parVal,"left");

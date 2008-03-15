@@ -273,7 +273,7 @@ namespace psy {
 			virtual ~Mixer() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
-			virtual int GenerateAudio(int numSamples );
+			virtual void Work(int numSamples );
 			void FxSend(int numSamples );
 			void Mix(int numSamples);
 			virtual void InsertInputWire(Machine& srcMac, Wire::id_type dstWire,InPort::id_type dstType, float initialVol=1.0f);
