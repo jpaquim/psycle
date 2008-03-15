@@ -88,7 +88,7 @@ class graph
 				);
 			}
 
-			#if 0 // this is done by the nodes themselves
+			#if 0 // this is done by the nodes themselves (they call "delete this" directly, so it's faster)
 				boost::signals::connection on_delete_node_signal_connection;
 				void on_delete_node(typename Typenames::underlying::node & underlying_node) {
 						// automatic destruction of the wrapper when the underlying node is destroyed
