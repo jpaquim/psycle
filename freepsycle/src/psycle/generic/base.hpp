@@ -190,10 +190,6 @@ class node
 			typename Typenames::ports::inputs::multiple * const multiple_input_port() const throw() { return multiple_input_port_; }
 		private: friend class ports::inputs::multiple<Typenames>;
 			typename Typenames::ports::inputs::multiple *       multiple_input_port_;
-		public: // node_friends protected:
-			/// gives a multiple input port for this node
-			///\pre the node doesn't already have a multiple input port
-			void                                                multiple_input_port(typename Typenames::ports::inputs::multiple & multiple_input_port) throw() { assert(!this->multiple_input_port()); this->multiple_input_port_ = &multiple_input_port; }
 	///\}
 	
 	///\name ports: inputs: multiple: signals
