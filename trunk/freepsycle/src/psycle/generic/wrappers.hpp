@@ -8,6 +8,9 @@
 #include <algorithm>
 namespace psycle { namespace generic { namespace wrappers {
 
+using engine::exception;
+namespace loggers = universalis::operating_system::loggers;
+
 ///\internal
 namespace detail {
 	template<typename Underlying_Wrapper>
@@ -33,7 +36,7 @@ class graph
 		graph(typename graph::underlying_type & underlying) : graph::underlying_wrapper_type(underlying) {
 			// register to the underlying signals
 			on_new_node_signal_connection          = underlying.         new_node_signal().connect(boost::bind(&graph::on_new_node         , this, _1    ));
-			on_delete_node_signal_connection       = underlying.      delete_node_signal().connect(boost::bind(&graph::on_delete_node      , this, _1    ));
+			//on_delete_node_signal_connection     = underlying.      delete_node_signal().connect(boost::bind(&graph::on_delete_node      , this, _1    ));
 			on_new_connection_signal_connection    = underlying.   new_connection_signal().connect(boost::bind(&graph::on_new_connection   , this, _1, _2));
 			on_delete_connection_signal_connection = underlying.delete_connection_signal().connect(boost::bind(&graph::on_delete_connection, this, _1, _2));
 		}
@@ -42,14 +45,12 @@ class graph
 			// polymorphic virtual construction
 			basic::graph<Typenames>::after_construction();
 			
-			// Iterate over all the nodes of the underlying graph
-			// to emit the new_node signal to the wrapping graph.
+			// Iterate over all the nodes of the underlying graph to create wrapping nodes.
 			for(typename graph::underlying_type::const_iterator i(this->underlying().begin());
 				i != this->underlying().end(); ++i
 			) on_new_node(**i);
 			
-			// Iterate over all the underlying nodes of the graph
-			// to connect the wrapping ports
+			// Iterate over all the underlying nodes of the graph to connect the wrapping ports.
 			for(typename graph::const_iterator i(this->begin()) ; i != this->end() ; ++i) {
 				typename Typenames::node & node(**i);
 				for(typename Typenames::node::output_ports_type::const_iterator i(node.output_ports().begin());
@@ -70,7 +71,7 @@ class graph
 		virtual ~graph() {
 			// disconnect from the underlying signals
 			on_new_node_signal_connection.disconnect();
-			on_delete_node_signal_connection.disconnect();
+			//on_delete_node_signal_connection.disconnect();
 			on_new_connection_signal_connection.disconnect();
 			on_delete_connection_signal_connection.disconnect();
 		}
@@ -87,22 +88,23 @@ class graph
 				);
 			}
 
-			boost::signals::connection on_delete_node_signal_connection;
-			void on_delete_node(typename Typenames::underlying::node & underlying_node) {
-				// emit the wrapper signal
-				this->delete_node_signal()(underlying_wrapper(underlying_node));
-			}
+			#if 0 // this is done by the nodes themselves
+				boost::signals::connection on_delete_node_signal_connection;
+				void on_delete_node(typename Typenames::underlying::node & underlying_node) {
+						// automatic destruction of the wrapper when the underlying node is destroyed
+						delete &underlying_wrapper(underlying_node);
+				}
+			#endif
 
 			boost::signals::connection on_new_connection_signal_connection;
 			void on_new_connection(
 				typename Typenames::underlying::ports::input & underlying_input_port,
 				typename Typenames::underlying::ports::output & underlying_output_port
 			) {
-				// emit the wrapper signal
-				this->new_connection_signal()(
-					underlying_wrapper(underlying_input_port),
-					underlying_wrapper(underlying_output_port)
-				);
+				// The underlying layer is already connected, we only have to connect this wrapping layer.
+				basic::ports:: input<Typenames> & in (underlying_wrapper(underlying_input_port));
+				basic::ports::output<Typenames> & out(underlying_wrapper(underlying_output_port));
+				in.connect(out);
 			}
 
 			boost::signals::connection on_delete_connection_signal_connection;
@@ -110,11 +112,10 @@ class graph
 				typename Typenames::underlying::ports::input & underlying_input_port,
 				typename Typenames::underlying::ports::output & underlying_output_port
 			) {
-				// emit the wrapper signal
-				this->delete_connection_signal()(
-					underlying_wrapper(underlying_input_port),
-					underlying_wrapper(underlying_output_port)
-				);
+				// The underlying layer is already disconnected, we only have to disconnect this wrapping layer.
+				basic::ports:: input<Typenames> & in (underlying_wrapper(underlying_input_port));
+				basic::ports::output<Typenames> & out(underlying_wrapper(underlying_output_port));
+				in.disconnect(out);
 			}
 	///\}
 
@@ -174,22 +175,19 @@ class node
 			// polymorphic virtual construction
 			basic::node<Typenames>::after_construction();
 
-			// Iterate over all the underlying output ports of the underlying node
-			// to emit the new_output_port signal to the wrapping node.
+			// Iterate over all the underlying output ports of the underlying node to create wrapping output ports.
 			for(typename node::underlying_type::output_ports_type::const_iterator
 				i(this->underlying().output_ports().begin());
 				i != this->underlying().output_ports().end(); ++i
 			) on_new_output_port(**i);
 
-			// Iterate over all the underlying single input ports of the underlying node
-			// to emit the new_single_input_port signal to the wrapping node.
+			// Iterate over all the underlying single input ports of the underlying node to create wrapping single input ports.
 			for(typename node::underlying_type::single_input_ports_type::const_iterator
 				i(this->underlying().single_input_ports().begin());
 				i != this->underlying().single_input_ports().end(); ++i
 			) on_new_single_input_port(**i);
 
-			// If underlying node has a multiple input port,
-			// emit the new_multiple_input_port signal to the wrapping node.
+			// If underlying node has a multiple input port, create a wrapping multiple input port.
 			if(this->underlying().multiple_input_port())
 				on_new_multiple_input_port(*this->underlying().multiple_input_port());
 		}
@@ -326,6 +324,20 @@ namespace ports {
 			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
 				input, input::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 			)
+
+		///\name (dis)connection functions
+		///\{
+			public:
+				/// delegate the connection to the underlying layer
+				void connect(typename Typenames::ports::output & output_port) throw(exception) {
+					this->underlying().connect(output_port.underlying());
+				}
+
+				/// delegate the disconnection to the underlying layer
+				void disconnect(typename Typenames::ports::output & output_port) {
+					this->underlying().disconnect(output_port.underlying());
+				}
+		///\}
 	};
 	
 	namespace inputs {
