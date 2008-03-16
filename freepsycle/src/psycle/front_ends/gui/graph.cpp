@@ -14,7 +14,7 @@
 namespace psycle { namespace front_ends { namespace gui {
 
 /**********************************************************************************************************************/
-// graph	
+// graph
 
 graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 :
