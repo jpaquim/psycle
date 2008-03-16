@@ -37,7 +37,7 @@ std::clog << "new gui graph\n";
 }
 
 void graph::after_construction() {
-	graph_base::after_construction();
+	graph_type::after_construction();
 	resolver()("output", *this, "output");
 }
 
