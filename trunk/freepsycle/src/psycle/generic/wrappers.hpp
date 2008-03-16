@@ -24,6 +24,7 @@ namespace detail {
 }
 
 /***********************************************************************/
+/// This template declares a class whose underlying type is Typenames::underlying::graph
 template<typename Typenames>
 class graph
 :
@@ -147,6 +148,7 @@ class graph
 };
 
 /***********************************************************************/
+/// This template declares a class whose underlying type is Typenames::underlying::node
 template<typename Typenames>
 class node
 :
@@ -162,10 +164,26 @@ class node
 			node::underlying_wrapper_type(underlying)
 		{
 			// register to the underlying signals
+			#if 1
 			on_new_output_port_signal_connection         = underlying.        new_output_port_signal().connect(boost::bind(&node::on_new_output_port        , this, _1));
 			on_new_single_input_port_signal_connection   = underlying.  new_single_input_port_signal().connect(boost::bind(&node::on_new_single_input_port  , this, _1));
 			on_new_multiple_input_port_signal_connection = underlying.new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
 			on_delete_signal_connection                  = underlying.                 delete_signal().connect(boost::bind(&node::on_delete                 , this, _1));
+			#else
+			// connect to the derived class (untested)
+			on_new_output_port_signal_connection = underlying.new_output_port_signal().connect(
+				boost::bind(&Typenames::node::on_new_output_port, static_cast<typename Typenames::node *>(this), _1)
+			);
+			on_new_single_input_port_signal_connection = underlying.new_single_input_port_signal().connect(
+				boost::bind(&Typenames::node::on_new_single_input_port, static_cast<typename Typenames::node *>(this), _1)
+			);
+			on_new_multiple_input_port_signal_connection = underlying.new_multiple_input_port_signal().connect(
+				boost::bind(&Typenames::node::on_new_multiple_input_port, static_cast<typename Typenames::node *>(this), _1)
+			);
+			on_delete_signal_connection = underlying.delete_signal().connect(
+				boost::bind(&Typenames::node::on_delete, static_cast<typename Typenames::node *>(this), _1)
+			);
+			#endif
 		}
 
 		void after_construction() /*override*/ {
@@ -269,6 +287,7 @@ class node
 };
 
 /***********************************************************************/
+/// This template declares a class whose underlying type is Typenames::underlying::port
 template<typename Typenames>
 class port
 :
@@ -288,6 +307,9 @@ class port
 namespace ports {
 
 	/***********************************************************************/
+	/// This template declares a class derived from Typenames::port,
+	/// which is derived from wrappers::port<Typenames>,
+	/// and whose underlying type is Typenames::underlying::ports::output
 	template<typename Typenames>
 	class output
 	:
@@ -296,6 +318,8 @@ namespace ports {
 			universalis::compiler::virtual_factory<
 				typename Typenames::ports::output,
 				basic::ports::output<Typenames>
+				// note that the base class of basic::ports::output<Typenames>
+				// is Typenames::port, which is derived from wrappers::port<Typenames>
 			> >
 	{
 		protected:
@@ -306,6 +330,9 @@ namespace ports {
 	};
 
 	/***********************************************************************/
+	/// This template declares a class derived from Typenames::port,
+	/// which is derived from wrappers::port<Typenames>,
+	/// and whose underlying type is Typenames::underlying::ports::input
 	template<typename Typenames>
 	class input
 	:
@@ -314,6 +341,8 @@ namespace ports {
 			universalis::compiler::virtual_factory<
 				typename Typenames::ports::input,
 				basic::ports::input<Typenames>
+				// note that the base class of basic::ports::input<Typenames>
+				// is Typenames::port, which is derived from wrappers::port<Typenames>
 			> >
 	{
 		protected:
@@ -334,12 +363,22 @@ namespace ports {
 				void disconnect(typename Typenames::ports::output & output_port) {
 					this->underlying().disconnect(output_port.underlying());
 				}
+
+				#if 0 ///\todo
+				/// delegate the disconnection to the underlying layer
+				void disconnect_all() /*override*/ {
+					this->underlying().disconnect_all();
+				}
+				#endif
 		///\}
 	};
 	
 	namespace inputs {
 
 		/***********************************************************************/
+		/// This template declares a class derived from Typenames::ports::input,
+		/// which is derived from wrappers::ports::input<Typenames>,
+		/// and whose underlying type is Typenames::underlying::ports::inputs::single
 		template<typename Typenames>
 		class single
 		:
@@ -348,6 +387,8 @@ namespace ports {
 				universalis::compiler::virtual_factory<
 					typename Typenames::ports::inputs::single,
 					basic::ports::inputs::single<Typenames>
+					// note that the base class of basic::ports::inputs::single<Typenames>
+					// is Typenames::ports::input, which is derived from wrappers::ports::input<Typenames>
 				> >
 		{
 			protected:
@@ -358,6 +399,9 @@ namespace ports {
 		};
 
 		/***********************************************************************/
+		/// This template declares a class derived from Typenames::ports::input,
+		/// which is derived from wrappers::ports::input<Typenames>,
+		/// and whose underlying type is Typenames::underlying::ports::inputs::multiple
 		template<typename Typenames>
 		class multiple
 		:
@@ -366,6 +410,8 @@ namespace ports {
 				universalis::compiler::virtual_factory<
 					typename Typenames::ports::inputs::multiple,
 					basic::ports::inputs::multiple<Typenames>
+					// note that the base class of basic::ports::inputs::multiple<Typenames>
+					// is Typenames::ports::input, which is derived from wrappers::ports::input<Typenames>
 				> >
 		{
 			protected:
