@@ -99,11 +99,16 @@ UISong::UISong(MachineCallbacks* callbacks)
 {}
 
 Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
-	int fb; 
+	int fb=-1;
 	if ( key == PluginFinderKey::internalSampler() ) {
 		fb = GetFreeBus();
 		CreateMachine(finder.psycle_path(), MACH_SAMPLER, x, y, "SAMPLER", fb );
-	} else if ( finder.info( key ).type() == MACH_PLUGIN ) 
+	}
+	else if ( key == PluginFinderKey::internalMixer() ) {
+		fb = GetFreeFxBus();
+		CreateMachine(finder.psycle_path(), MACH_MIXER, x, y, "Mixer", fb );
+	}
+	else if ( finder.info( key ).type() == MACH_PLUGIN ) 
 	{
 		if ( finder.info( key ).mode() == MACHMODE_FX ) {
 			fb = GetFreeFxBus();
@@ -123,7 +128,8 @@ Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinde
 			delete plugin;
 		}
 	}
-	return machine_[fb];
+	if ( fb != -1 ) return machine_[fb];
+	else return 0;
 }
 
 Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name ) {

@@ -43,10 +43,7 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
 	, isPanning(false)
 {
 	qDebug("creating effect gui");
-	if ( mac->type() == psy::core::MACH_MIXER) 
-		m_macTweakDlg = new MixerTweakDlg( this, macView );
-	else
-		m_macTweakDlg = new MachineTweakDlg( this, macView );
+	m_macTweakDlg = 0;
 
 	showMacTweakDlgAct_ = new QAction( "Tweak Parameters", this );
 	connect( showMacTweakDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTweakDlg() ) );
@@ -192,6 +189,25 @@ void EffectGui::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 
 void EffectGui::showMacTweakDlg()
 {
+	if ( !m_macTweakDlg )
+	{
+		if ( m_mac->type() == psy::core::MACH_MIXER)
+			m_macTweakDlg = new MixerTweakDlg( this, m_macView);
+		else
+			m_macTweakDlg = new MachineTweakDlg( this, m_macView);
+	}/* else if (mac()->setupChanged()){
+		m_macTweakDlg->regenerateUI();
+	}*/
+	else //doing it the easy way for now.
+	{
+		delete m_macTweakDlg;
+
+		if ( m_mac->type() == psy::core::MACH_MIXER)
+			m_macTweakDlg = new MixerTweakDlg( this, m_macView );
+		else
+			m_macTweakDlg = new MachineTweakDlg( this, m_macView);
+	}
+
 	m_macTweakDlg->show();
 }
 
