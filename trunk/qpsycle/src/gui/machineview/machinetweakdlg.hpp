@@ -203,8 +203,8 @@ protected:
 	void keyReleaseEvent( QKeyEvent *event );
 
 
-	public slots: 
-	void onKnobGroupChanged( KnobGroup *kGroup );
+public slots: 
+	virtual void onKnobGroupChanged( KnobGroup *kGroup );
 	void randomiseParameters();
 	void resetParameters();
 	void showAboutDialog();
@@ -214,11 +214,11 @@ signals:
 	void notePress( int note, psy::core::Machine *mac );
 	void noteRelease( int note, psy::core::Machine *mac );
 
-private:
+protected:
 	void createActions();
 	void createMenus();
-	void initParameterGui();
-	void updateValues();
+	virtual void initParameterGui();
+	virtual void updateValues();
 
 	QAction *aboutAction_;
 	QAction *paramsResetAction_;

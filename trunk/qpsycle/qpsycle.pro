@@ -47,6 +47,7 @@ HEADERS += \
 	src/gui/machineview/machinegui.hpp \
 	src/gui/machineview/machinetweakdlg.hpp \
 	src/gui/machineview/machineview.hpp \
+	src/gui/machineview/mixertweakdlg.hpp \
 	src/gui/machineview/newmachinedlg.hpp \
 	src/gui/machineview/wiregui.hpp \
 	src/gui/machineview/wiredlg.hpp \
@@ -86,6 +87,7 @@ SOURCES += \
 	src/gui/machineview/machinegui.cpp \
 	src/gui/machineview/machinetweakdlg.cpp \
 	src/gui/machineview/machineview.cpp \
+	src/gui/machineview/mixertweakdlg.cpp \ 
 	src/gui/machineview/newmachinedlg.cpp \
 	src/gui/machineview/wiregui.cpp \
 	src/gui/machineview/wiredlg.cpp \

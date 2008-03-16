@@ -27,6 +27,7 @@
 #include "../configuration.hpp"
 #include "../global.hpp"
 #include "../inputhandler.hpp"
+#include "mixertweakdlg.hpp"
 #include "machinetweakdlg.hpp"
 #include "machineview.hpp"
 
@@ -42,7 +43,11 @@ EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *ma
 	, isPanning(false)
 {
 	qDebug("creating effect gui");
-	m_macTweakDlg = new MachineTweakDlg( this, macView );
+	if ( mac->type() == psy::core::MACH_MIXER) 
+		m_macTweakDlg = new MixerTweakDlg( this, macView );
+	else
+		m_macTweakDlg = new MachineTweakDlg( this, macView );
+
 	showMacTweakDlgAct_ = new QAction( "Tweak Parameters", this );
 	connect( showMacTweakDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTweakDlg() ) );
 

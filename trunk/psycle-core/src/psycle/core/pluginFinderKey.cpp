@@ -44,6 +44,9 @@ namespace psy
 		PluginFinderKey PluginFinderKey::internalSampler() {
 			return PluginFinderKey("Psycle Internal Sampler", "none", 0 );
 		}
+		PluginFinderKey PluginFinderKey::internalMixer() {
+			return PluginFinderKey("Psycle Send/Return Mixer", "none", 0 );
+		}
 
 		bool PluginFinderKey::operator<(const PluginFinderKey & key) const {
 			if ( dllPath() != key.dllPath() )

@@ -32,11 +32,13 @@ namespace psy { namespace core {
 
 #include <vector>
 
+#include <QDialog>
 #include <QtGui/QGraphicsView>
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsSceneMouseEvent>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
+#include <QPushButton>
 
 namespace qpsycle {
 
@@ -117,6 +119,38 @@ private:
 	int outtrack;
 };
 
+class QPortButton : public QPushButton {
+Q_OBJECT
+public:
+	QPortButton( const QString & text, QWidget * parent = 0 ):QPushButton(text,parent) {}
+
+	void setIndex(int index) { myindex = index; }
+	int getIndex() { return myindex; }
+
+public slots:
+	void iamclicked() { emit myclicked(myindex); }
+signals:
+	void myclicked(int index);
+protected:
+	int myindex;
+};
+
+class QPortsDialog : public QDialog {
+Q_OBJECT
+public:
+	QPortsDialog(QWidget *parent = 0);
+
+	psy::core::InPort::id_type GetInPort(psy::core::Machine* mac);
+	psy::core::OutPort::id_type GetOutPort(psy::core::Machine* mac);
+
+public slots:
+	void buttonClicked(int portidx);
+private:
+	void addNewButton(std::string message,int portidx);
+
+	int numButtons;
+
+};
 
 class MachineScene : public QGraphicsScene {
 Q_OBJECT
@@ -126,7 +160,6 @@ protected:
 	void keyPressEvent( QKeyEvent *event );
 	void keyReleaseEvent( QKeyEvent *event );
 	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
-signals:
 
 private:
 	MachineView *macView_;

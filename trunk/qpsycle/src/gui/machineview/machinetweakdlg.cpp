@@ -205,10 +205,10 @@ void MachineTweakDlg::updateValues( )
 {
 	std::map<int, KnobGroup*>::iterator it = knobGroupMap.begin();
 	for ( ; it != knobGroupMap.end(); it++ ) {
-		int knobIdx = it->first;
+		KnobGroup* kGroup = it->second;
+		int knobIdx = kGroup->knob()->param();
 		int min_v,max_v;
 		pMachine_->GetParamRange( knobIdx, min_v, max_v);
-		KnobGroup* kGroup = it->second;
 		char buffer[128];
 		pMachine_->GetParamValue( knobIdx, buffer );
 		int val_v = pMachine_->GetParamValue( knobIdx );

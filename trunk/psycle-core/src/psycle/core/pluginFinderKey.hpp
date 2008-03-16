@@ -19,6 +19,7 @@ namespace psy
 				~PluginFinderKey();
 
 				static PluginFinderKey internalSampler();
+				static PluginFinderKey internalMixer();
 
 				const std::string & name() const;
 				const std::string & dllPath() const;

@@ -39,9 +39,6 @@
 /// ???
 const int max_cmds = 1024;
 
-class Machine;
-class CChildView;
-class CMainFrame;
 
 namespace qpsycle {
 

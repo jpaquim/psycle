@@ -59,6 +59,7 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 
 		switch(info.type()) {
 		case psy::core::MACH_SAMPLER:
+		case psy::core::MACH_MIXER:
 			list=intList;
 			break;
 		case psy::core::MACH_PLUGIN:
