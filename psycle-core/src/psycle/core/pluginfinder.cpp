@@ -178,6 +178,11 @@ void PluginFinder::scanInternal() {
 	info.setType( MACH_SAMPLER );
 	info.setName( key.name() );
 	map_[key]=info;
+	PluginFinderKey key2 = PluginFinderKey::internalMixer();
+	PluginInfo info2;
+	info2.setType( MACH_MIXER );
+	info2.setName( key2.name() );
+	map_[key2]=info2;
 }
 
 void PluginFinder::scanLadspa() {

@@ -1227,7 +1227,8 @@ namespace psy {
 				}
 				else if (param <= 12)
 				{
-					if ( value >= 0x1000) Channel(param-1).Volume()=1.0f;
+					if (!ChannelValid(param-1)) return false;
+					else if ( value >= 0x1000) Channel(param-1).Volume()=1.0f;
 					else if ( value == 0) Channel(param-1).Volume()=0.0f;
 					else
 					{
@@ -1243,6 +1244,7 @@ namespace psy {
 			}
 			else if (channel <= 12 )
 			{
+				 if (!ChannelValid(channel-1)) return false;
 				if (param == 0) { Channel(channel-1).DryMix() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcChannel(channel-1); }
 				else if (param <= 12) { Channel(channel-1).Send(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1); } 
 				else if (param == 13)
@@ -1259,6 +1261,7 @@ namespace psy {
 			{
 				if ( param > 12) return false;
 				else if (param == 0) solocolumn_ = (value<24)?value-1:23;
+				else if (!ReturnValid(param-1)) return false;
 				else 
 				{
 					Return(param-1).Mute() = (value&1)?true:false;
@@ -1273,6 +1276,7 @@ namespace psy {
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return false;
+				else if (!ReturnValid(param-1)) return false;
 				else
 				{
 					if ( value >= 0x1000) Return(param-1).Volume()=1.0f;
@@ -1289,6 +1293,7 @@ namespace psy {
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return false;
+				else if (!ReturnValid(param-1)) return false;
 				else { Return(param-1).Panning() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcReturn(param-1); }
 				return true;
 			}

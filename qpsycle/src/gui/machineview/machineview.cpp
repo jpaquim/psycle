@@ -42,6 +42,7 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsScene>
 #include <QPainter>
+#include <QGridLayout>
 
 #include <algorithm>
 #include <iostream>
@@ -226,7 +227,17 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui )
 {
 	if ( dstMacGui->mac()->acceptsConnections() ) {
-		if (song()->InsertConnection( *(srcMacGui->mac()), *(dstMacGui->mac()), 0,0, 1.0f))
+		psy::core::InPort::id_type portin=psy::core::InPort::id_type(0);
+		psy::core::OutPort::id_type portout=psy::core::OutPort::id_type(0);
+		if ( srcMacGui->mac()->GetOutPorts() > 1 ) {
+			QPortsDialog dialog(this);
+			portout =  dialog.GetOutPort(srcMacGui->mac());
+		}
+		if ( dstMacGui->mac()->GetInPorts() > 1 ) {
+			QPortsDialog dialog(this);
+			portin = dialog.GetInPort(dstMacGui->mac());
+		}
+		if (song()->InsertConnection( *(srcMacGui->mac()), *(dstMacGui->mac()), portout, portin, 1.0f))
 		{
 			// Make a new wiregui connection.
 			WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );
@@ -328,33 +339,11 @@ void MachineView::cloneMachine( MachineGui *macGui )
 	psy::core::Machine::id_type src( pMachine->id() );
 	psy::core::Machine::id_type dst(-1);
 
-	if ((src < psy::core::MAX_BUSES) && (src >=0))
-	{
-		// we need to find an empty slot
-		for (psy::core::Machine::id_type i(0); i < psy::core::MAX_BUSES; i++)
-		{
-			if (!song()->machine(i))
-			{
-				dst = i;
-				break;
-			}
-		}
-	}
-	else if ((src < psy::core::MAX_BUSES*2) && (src >= psy::core::MAX_BUSES))
-	{
-		// MAX_BUSES*2 is where FX begin.
-		for (psy::core::Machine::id_type i(psy::core::MAX_BUSES); i < psy::core::MAX_BUSES*2; i++)
-		{
-			if (!song()->machine(i))
-			{
-				dst = i;
-				break;
-			}
-		}
-	}
+	if ( pMachine->mode() == psy::core::MACHMODE_GENERATOR ) dst = song()->GetFreeBus();
+	else if ( pMachine->mode() == psy::core::MACHMODE_FX ) dst = song()->GetFreeFxBus();
+
 	if (dst >= 0)
 	{
-		
 		if (!song()->CloneMac(src,dst))
 		{
 			qDebug("Cloning failed");
@@ -363,7 +352,6 @@ void MachineView::cloneMachine( MachineGui *macGui )
 			qDebug("Cloning doesn't work yet."); // See Song::CloneMac().
 		}
 	} 
-
 }
 
 
@@ -700,6 +688,50 @@ void MachineScene::keyReleaseEvent( QKeyEvent * event )
 		macView_->onNoteRelease( note, NULL );
 	}
 	event->ignore();
+}
+
+QPortsDialog::QPortsDialog(QWidget *parent)
+:QDialog(parent)
+{
+	QGridLayout *layout = new QGridLayout;
+	setLayout(layout);
+	numButtons=0;
+}
+
+psy::core::OutPort::id_type QPortsDialog::GetOutPort(psy::core::Machine* mac)
+{
+	setWindowTitle(tr("Output Port Selection"));
+
+	const int nPorts = mac->GetOutPorts();
+	for(int i=0; i < nPorts; i++) {
+		addNewButton(mac->GetPortOutputName(i),i);
+	}
+	return psy::core::OutPort::id_type(exec());
+}
+psy::core::InPort::id_type QPortsDialog::GetInPort(psy::core::Machine* mac)
+{
+	setWindowTitle(tr("Input Port Selection"));
+	const int nPorts = mac->GetInPorts();
+	for(int i=0; i < nPorts; i++) {
+		addNewButton(mac->GetPortInputName(i),i);
+	}
+	return psy::core::InPort::id_type(exec());
+}
+
+void QPortsDialog::addNewButton(std::string message, int portidx) {
+	QPortButton *newButton = new QPortButton(tr(message.c_str()));
+	newButton->setIndex(portidx);
+	
+	connect(newButton, SIGNAL(clicked()), newButton, SLOT(iamclicked()));
+	connect(newButton, SIGNAL(myclicked(int)), this, SLOT(buttonClicked(int)));
+
+	QGridLayout *thelayout = dynamic_cast<QGridLayout*>(layout());
+	thelayout->addWidget(newButton, numButtons++, 0);
+	setLayout(thelayout);
+}
+
+void QPortsDialog::buttonClicked(int portidx) {
+	done(portidx);
 }
 
 } // namespace qpsycle
