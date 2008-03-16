@@ -2,18 +2,18 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\implementation psycle::host::schedulers::single_threaded
+///\implementation psycle::host::schedulers::multi_threaded
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
-#include "single_threaded.hpp"
+#include "multi_threaded.hpp"
 #include <universalis/processor/exception.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <sstream>
 #include <limits>
-namespace psycle { namespace host { namespace schedulers { namespace single_threaded {
-
+namespace psycle { namespace host { namespace schedulers { namespace multi_threaded {
+#if 0
 /**********************************************************************************************************************/
 // graph
 
@@ -148,7 +148,6 @@ scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 :
 	host::scheduler<graph_type>(graph),
 	buffer_pool_instance_(),
-	thread_(),
 	stop_requested_()
 {
 	#if 0
@@ -500,6 +499,6 @@ buffer::buffer(std::size_t channels, std::size_t events) throw(std::exception)
 buffer::~buffer() throw() {
 	assert(!this->reference_count());
 }
-
+#endif
 }}}}
 

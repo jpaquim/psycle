@@ -2,18 +2,18 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\interface psycle::host::schedulers::single_threaded
+///\interface psycle::host::schedulers::multi_threaded
 #pragma once
 #include "../scheduler.hpp"
 #include <psycle/generic/wrappers.hpp>
 #include <thread>
 #include <mutex>
 #include <list>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__SINGLE_THREADED
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__MULTI_THREADED
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host { namespace schedulers {
-/// a scheduler using only one thread
-namespace single_threaded {
+/// a scheduler using several threads
+namespace multi_threaded {
 
 namespace underlying = host::underlying;
 
@@ -31,7 +31,7 @@ namespace ports {
 class scheduler;
 
 namespace typenames {
-	using namespace single_threaded;
+	using namespace multi_threaded;
 	class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
 }
 
@@ -179,13 +179,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 };
 
 /**********************************************************************************************************************/
-/// a scheduler using only one thread
+/// a scheduler using several threads
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<graph> {
 	public:
 		scheduler(graph::underlying_type &) throw(std::exception);
 		virtual ~scheduler() throw();
 		void start() throw(underlying::exception) /*override*/;
-		bool started() { return thread_; }
+		bool started() { return threads_.size(); }
 		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
 		void stop() /*override*/;
 		void operator()();
@@ -237,7 +237,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		} * buffer_pool_instance_;
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		
-		std::thread * thread_;
+		typedef std::list<std::thread *> threads_type;
+		threads_type threads_;
 		std::mutex mutable mutex_;
 		bool stop_requested_;
 		bool stop_requested();
@@ -245,6 +246,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		typedef std::list<node*> terminal_nodes_type;
 		/// nodes with no dependency, that are processed first
 		terminal_nodes_type terminal_nodes_;
+		
+		typedef std::list<node*> blocked_nodes_type;
+		/// nodes that still have dependencies to be processed before them
+		blocked_nodes_type blocked_nodes_;
+
+		typedef std::list<node*> waiting_nodes_type;
+		/// nodes ready to be processed, just waiting for a free thread
+		waiting_nodes_type waiting_nodes_;
 
 		void compute_plan();
 		void allocate() throw(std::exception);
