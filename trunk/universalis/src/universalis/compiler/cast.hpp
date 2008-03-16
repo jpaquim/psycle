@@ -24,8 +24,7 @@ namespace universalis { namespace compiler { namespace cast {
 	{
 		BOOST_STATIC_ASSERT((boost::is_base_and_derived<Base, Derived>::value));
 		#if 0 && !defined NDEBUG
-			if(operating_system::loggers::trace()())
-			{
+			if(operating_system::loggers::trace()()) {
 				std::ostringstream s;
 				s << "downcasting from " << typenameof(base) << " down to " << typenameof(static_cast<Derived*>(0));
 				operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
@@ -56,43 +55,56 @@ namespace universalis { namespace compiler { namespace cast {
 		public:
 			inline operator Derived_Underlying const & () const throw() {
 				#if 0 && !defined NDEBUG
-					if(operating_system::loggers::trace()())
-					{
+					if(operating_system::loggers::trace()()) {
 						std::ostringstream s;
 						s
 							<< "derived underlying: "
-							<<                                                                                                              this
-							<< " "
-							<<                                                                           static_cast<Derived const * const>(this)
-							<< " "
-							<<                                         &static_cast<Underlying const &>(*static_cast<Derived const * const>(this))
-							<< " "
-							<< &static_cast<Derived_Underlying const &>(static_cast<Underlying const &>(*static_cast<Derived const * const>(this)));
+							<< this << " "
+							<< static_cast<Derived const * const>(this) << " "
+							<< &static_cast<Underlying const &>(
+								*static_cast<Derived const * const>(this)) << " "
+							<< &static_cast<Derived_Underlying const &>(
+								static_cast<Underlying const &>(
+									*static_cast<Derived const * const>(this)));
 						operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 				#endif
-				//return derive<Derived_Underlying const>(static_cast<Underlying const &>(derive<Derived const>(*this)));
-				return static_cast<Derived_Underlying const &>(static_cast<Underlying const &>(static_cast<Derived const &>(*this)));
+				#if 0
+					return derive<Derived_Underlying const>(
+						static_cast<Underlying const &>(
+							derive<Derived const>(*this)));
+				#else
+					return static_cast<Derived_Underlying const &>(
+						static_cast<Underlying const &>(
+							static_cast<Derived const &>(*this)));
+				#endif
 			}
-			inline operator Derived_Underlying       & ()       throw() {
+			
+			inline operator Derived_Underlying & () throw() {
 				#if 0 && !defined NDEBUG
-					if(operating_system::loggers::trace()())
-					{
+					if(operating_system::loggers::trace()()) {
 						std::ostringstream s;
 						s
 							<< "derived underlying: "
-							<<                                                                                                              this
-							<< " "
-							<<                                                                           static_cast<Derived       * const>(this)
-							<< " "
-							<<                                         &static_cast<Underlying       &>(*static_cast<Derived       * const>(this))
-							<< " "
-							<< &static_cast<Derived_Underlying       &>(static_cast<Underlying       &>(*static_cast<Derived       * const>(this)));
+							<< this << " "
+							<< static_cast<Derived * const>(this) << " "
+							<< &static_cast<Underlying &>(
+								*static_cast<Derived * const>(this)) << " "
+							<< &static_cast<Derived_Underlying &>(
+								static_cast<Underlying &>(
+									*static_cast<Derived * const>(this)));
 						operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 				#endif
-				//return derive<Derived_Underlying      >(static_cast<Underlying       &>(derive<Derived       &>(*this));
-				return static_cast<Derived_Underlying       &>(static_cast<Underlying       &>(static_cast<Derived       &>(*this)));
+				#if 0
+					return derive<Derived_Underlying>(
+						static_cast<Underlying &>(
+							derive<Derived &>(*this));
+				#else
+					return static_cast<Derived_Underlying &>(
+						static_cast<Underlying &>(
+							static_cast<Derived &>(*this)));
+				#endif
 			}
 	};
 	
@@ -100,8 +112,7 @@ namespace universalis { namespace compiler { namespace cast {
 	class underlying_wrapper
 	:
 		public Base_Wrapper,
-		public derived_underlying
-		<
+		public derived_underlying<
 			Derived_Underlying,
 			underlying_wrapper<Derived_Underlying, Base_Wrapper>,
 			typename Base_Wrapper::underlying_type
@@ -133,8 +144,7 @@ namespace universalis { namespace compiler { namespace cast {
 			typedef underlying_wrapper underlying_wrapper_type;
 			underlying_wrapper(Underlying & underlying) : underlying_(underlying) {
 				#if 0 && !defined NDEBUG
-					if(operating_system::loggers::trace()())
-					{
+					if(operating_system::loggers::trace()()) {
 						std::ostringstream s;
 						s << "underlying wrapper: " << this << " -> " << &underlying;
 						operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -160,8 +170,7 @@ namespace universalis { namespace compiler { namespace cast {
 			underlying_value_wrapper() {}
 			underlying_value_wrapper(Underlying const & underlying) : underlying_(underlying) {
 				#if 0 && !defined NDEBUG
-					if(operating_system::loggers::trace()())
-					{
+					if(operating_system::loggers::trace()()) {
 						std::ostringstream s;
 						s << "underlying value wrapper: " << this << " -> " << &underlying;
 						operating_system::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
