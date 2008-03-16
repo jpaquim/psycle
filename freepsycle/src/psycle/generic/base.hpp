@@ -38,10 +38,13 @@ using engine::exception;
 namespace loggers = universalis::operating_system::loggers;
 
 /***********************************************************************/
+/// This template declares a class convertible to its derived type Typenames::graph.
 template<typename Typenames>
 class graph
 :
+	// makes the class convertible to its derived type Typenames::graph
 	public universalis::compiler::cast::derived<typename Typenames::graph>,
+	// note: while the virtual factory pattern is useful for nodes and ports, it could possibly be removed for graph.
 	public universalis::compiler::virtual_factory<typename Typenames::graph>,
 	public std::set<typename Typenames::node*>
 {
@@ -49,6 +52,12 @@ class graph
 		typedef graph graph_type;
 
 	///\name signals
+	/// Signals are used to propagate changes from an underlying layer to the layers wrapping it.
+	/// A wrapping layer will register to the signals of the underlying layer,
+	/// to automatically create new wrapping elements (nodes, ports) as peers to new elements in the underlying layer.
+	/// This mecanism needs the virtual factory pattern for nodes and ports, to be able to emit the signals only
+	/// once the underlying elements are fully constructed: signals send Typenames::xxx types, that is the effective
+	/// types, seen as the underlying types by the wrappers, rather than their basic<Typenames>::xxx base types.
 	///\{
 		public:
 			/// signal emitted when a new node is added to the graph
@@ -90,9 +99,13 @@ class child_of {
 };
 
 /***********************************************************************/
+/// This template declares a class convertible to its derived type Typenames::node.
+/// The virtual factory pattern is needed to be able to emit the signals only
+/// once the objects are fully constructed (see note about the signals in the graph class).
 template<typename Typenames>
 class node
 :
+	// makes the class convertible to its derived type Typenames::node
 	public universalis::compiler::cast::derived<typename Typenames::node>,
 	public universalis::compiler::virtual_factory<typename Typenames::node>,
 	public child_of<typename Typenames::graph>
@@ -205,9 +218,13 @@ class node
 };
 
 /***********************************************************************/
+/// This template declares a class convertible to its derived type Typenames::port.
+/// The virtual factory pattern is needed to be able to emit the signals only
+/// once the objects are fully constructed (see note about the signals in the graph class).
 template<typename Typenames>
 class port
 :
+	// makes the class convertible to its derived type Typenames::port
 	public universalis::compiler::cast::derived<typename Typenames::port>,
 	public universalis::compiler::virtual_factory<typename Typenames::port>,
 	public child_of<typename Typenames::node>
@@ -221,15 +238,21 @@ class port
 namespace ports {
 	
 	/***********************************************************************/
+	/// This template declares a class convertible to its derived type Typenames::ports::output.
+	/// The virtual factory pattern is needed to be able to emit the signals only
+	/// once the objects are fully constructed (see note about the signals in the graph class).
 	template<typename Typenames>
 	class output
 	:
+		// makes the class convertible to its derived type Typenames::ports::output
 		public universalis::compiler::cast::derived<typename Typenames::ports::output>,
 		public universalis::compiler::virtual_factory<typename Typenames::ports::output, typename Typenames::port>
 	{
 		protected: friend class output::virtual_factory_access;
 			typedef output output_type;
 
+			/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+			/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
 			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
 			void after_construction() /*override*/ {
@@ -239,8 +262,9 @@ namespace ports {
 			}
 
 			void before_destruction() /*override*/ {
-				// polymorphic virtual call to disconnect all connected input ports
 				disconnect_all();
+				// Note that in the case of a wrapper, the underlying layer is already disconnected,
+				// but since there is no polymorphic virtual call, this will only disconnect the wrapping layer.
 			}
 
 		///\name connected input ports
@@ -306,19 +330,27 @@ namespace ports {
 	};
 
 	/***********************************************************************/
+	/// This template declares a class convertible to its derived type Typenames::ports::input
+	/// The virtual factory pattern is needed to be able to emit the signals only
+	/// once the objects are fully constructed (see note about the signals in the graph class).
 	template<typename Typenames>
 	class input
 	:
+		// makes the class convertible to its derived type Typenames::ports::input
 		public universalis::compiler::cast::derived<typename Typenames::ports::input>,
 		public universalis::compiler::virtual_factory<typename Typenames::ports::input, typename Typenames::port>
 	{
 		protected: friend class input::virtual_factory_access;
 			typedef input input_type;
 
+			/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+			/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
 			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(input, input::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
 			void before_destruction() /*override*/ {
 				disconnect_all();
+				// Note that in the case of a wrapper, the underlying layer is already disconnected,
+				// but since there is no polymorphic virtual call, this will only disconnect the wrapping layer.
 			}
 
 		///\name (dis)connection functions
@@ -361,23 +393,21 @@ namespace ports {
 	namespace inputs {
 
 		/***********************************************************************/
+		/// This template declares a class convertible to its derived type Typenames::ports::inputs::single
+		/// The virtual factory pattern is needed to be able to emit the signals only
+		/// once the objects are fully constructed (see note about the signals in the graph class).
 		template<typename Typenames>
 		class single
 		:
+			// makes the class convertible to its derived type Typenames::ports::inputs::single
 			public universalis::compiler::cast::derived<typename Typenames::ports::inputs::single>,
 			public universalis::compiler::virtual_factory<typename Typenames::ports::inputs::single, typename Typenames::ports::input>
 		{
 			protected: friend class single::virtual_factory_access;
 				typedef single single_type;
 
-				#if 0
-				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__WITH_BODY(
-					single, single::virtual_factory_type,
-					(BOOST_PP_COMMA output_port_() {}),
-					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
-				)
-				#endif
-
+				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+				/// Note that Typenames::ports::input, which is the base class, is in this case derived from wrappers::ports::input<Typenames>.
 				#define constructor(_, count, __) \
 					BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
 					single(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
@@ -387,6 +417,14 @@ namespace ports {
 					{}
 					BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
 				#undef constructor
+
+				#if 0
+				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__WITH_BODY(
+					single, single::virtual_factory_type,
+					(BOOST_PP_COMMA output_port_() {}),
+					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+				)
+				#endif
 
 				void after_construction() /*override*/ {
 					this->parent().single_input_ports_.push_back(static_cast<typename Typenames::ports::inputs::single*>(this));
@@ -439,9 +477,13 @@ namespace ports {
 		};
 
 		/***********************************************************************/
+		/// This template declares a class convertible to its derived type Typenames::ports::inputs::multiple
+		/// The virtual factory pattern is needed to be able to emit the signals only
+		/// once the objects are fully constructed (see note about the signals in the graph class).
 		template<typename Typenames>
 		class multiple
 		:
+			// makes the class convertible to its derived type Typenames::ports::inputs::multiple
 			public universalis::compiler::cast::derived<typename Typenames::ports::inputs::multiple>,
 			public universalis::compiler::virtual_factory<typename Typenames::ports::inputs::multiple, typename Typenames::ports::input>
 		{
@@ -449,6 +491,8 @@ namespace ports {
 
 				typedef multiple multiple_type;
 
+				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+				/// Note that Typenames::ports::input, which is the base class, is in this case derived from wrappers::ports::input<Typenames>.
 				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
 					multiple, multiple::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 				)
