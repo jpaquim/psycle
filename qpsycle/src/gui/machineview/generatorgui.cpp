@@ -39,7 +39,7 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 	: MachineGui(left, top, mac, macView)
 	, isPanning(false)
 {
-	m_macTweakDlg = new MachineTweakDlg( this, macView );
+	m_macTweakDlg = 0;
 	connect(m_macTweakDlg, SIGNAL( notePress( int, psy::core::Machine* )),
 					macView, SLOT( onNotePress( int, psy::core::Machine* ) ) );
 	connect(m_macTweakDlg, SIGNAL( noteRelease( int, psy::core::Machine* )),
@@ -179,6 +179,18 @@ void GeneratorGui::keyReleaseEvent( QKeyEvent *event )
 
 void GeneratorGui::showMacTweakDlg()
 {
+	if ( !m_macTweakDlg )
+	{
+		m_macTweakDlg = new MachineTweakDlg( this,  m_macView); 
+	}/* else if ( mac()->setupChanged())
+	{
+		m_macTweakDlg->regenerateUI();
+	}*/
+	else //doing it the easy way for now
+	{
+		delete m_macTweakDlg;
+		m_macTweakDlg = new MachineTweakDlg( this, m_macView );
+	}
 	m_macTweakDlg->show();
 }
 

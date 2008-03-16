@@ -1244,7 +1244,7 @@ namespace psy {
 			}
 			else if (channel <= 12 )
 			{
-				 if (!ChannelValid(channel-1)) return false;
+				if (!ChannelValid(channel-1)) return false;
 				if (param == 0) { Channel(channel-1).DryMix() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcChannel(channel-1); }
 				else if (param <= 12) { Channel(channel-1).Send(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1); } 
 				else if (param == 13)
