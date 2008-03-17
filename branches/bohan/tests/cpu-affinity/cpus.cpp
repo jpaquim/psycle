@@ -19,7 +19,7 @@ int main(int, char**) {
 			#else
 				sched_getaffinity(0
 			#endif
-			, CPU_SETSIZE, &set)
+			, sizeof set /* warning: do not use CPU_SETSIZE here */, &set)
 		) {
 			int error(errno);
 			std::cerr << "standard error: " << error << '\n';
