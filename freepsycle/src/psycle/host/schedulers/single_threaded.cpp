@@ -10,9 +10,20 @@
 #include <universalis/processor/exception.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
+#include <universalis/operating_system/clocks.hpp>
 #include <sstream>
 #include <limits>
 namespace psycle { namespace host { namespace schedulers { namespace single_threaded {
+
+namespace detail {
+	std::nanoseconds clock() {
+		#if 0
+			return std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch();
+		#else
+			return universalis::operating_system::clocks::monotonic::current();
+		#endif
+	}
+}
 
 /**********************************************************************************************************************/
 // graph
@@ -88,7 +99,9 @@ node::node(node::parent_type & parent, underlying_type & underlying)
 	node_base(parent, underlying),
 	multiple_input_port_first_output_port_to_process_(),
 	output_port_count_(),
-	processed_(true) // set to true because reset() is called first in the processing loop
+	processed_(true), // set to true because reset() is called first in the processing loop
+	accumulated_processing_time_(),
+	processing_count_()
 {
 	// register to the signals
 	new_output_port_signal()        .connect(boost::bind(&node::on_new_output_port        , this, _1));
@@ -107,6 +120,19 @@ void node::on_new_single_input_port(ports::inputs::single &) {
 }
 
 void node::on_new_multiple_input_port(ports::inputs::multiple &) {
+}
+
+void node::reset_time_measurement() {
+	accumulated_processing_time_ = 0;
+	processing_count_ = 0;
+}
+
+void node::process(bool first) {
+	std::nanoseconds const t0(clock());
+	if(first) underlying().process_first(); else underlying().process();
+	std::nanoseconds const t1(clock());
+	accumulated_processing_time_ += t1 - t0;
+	++processing_count_;
 }
 
 /**********************************************************************************************************************/
@@ -304,6 +330,8 @@ void scheduler::allocate() throw(std::exception) {
 			ports::output & output_port(**i);
 			channels = std::max(channels, output_port.underlying().channels());
 		}
+		// initialise time measurement
+		node.reset_time_measurement();
 	}
 	if(loggers::trace()()) {
 		std::ostringstream s;
@@ -333,6 +361,16 @@ void scheduler::process_loop() {
 				process(node);
 			}
 		}
+		// dump time measurements
+		std::cout << "time measurements: \n";
+		for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
+			node & node(**i);
+			std::cout
+				<< node.underlying().qualified_name() << ": "
+				<< node.accumulated_processing_time().get_count() << "ns / "
+				<< node.processing_count() << " = "
+				<< double(node.accumulated_processing_time().get_count()) / node.processing_count() << "ns\n";
+		}
 	} catch(...) {
 		loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);
 		free();
@@ -357,7 +395,7 @@ void scheduler::process(node & node) {
 	}
 	if(!node.multiple_input_port()) { // the node has no multiple input port: simple case
 		set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
-		node.underlying().process();
+		node.process();
 	}
 	else if(node.multiple_input_port()->output_ports().size()) { // the node has a multiple input port: complex case
 		// get first output to process 
@@ -390,7 +428,7 @@ void scheduler::process(node & node) {
 				}
 			} else { // this is never the identity transform
 				set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
-				node.underlying().process_first();
+				node.process_first();
 			}
 			mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(first_output_port_to_process, *node.multiple_input_port());
 		}
@@ -399,7 +437,7 @@ void scheduler::process(node & node) {
 			ports::output & output_port(**i);
 			if(&output_port == &first_output_port_to_process) continue;
 			process_node_of_output_port_and_set_buffer_for_input_port(output_port, *node.multiple_input_port());
-			node.underlying().process();
+			node.process();
 			mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(output_port, *node.multiple_input_port());
 		}
 	}
