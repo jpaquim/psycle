@@ -7,6 +7,7 @@
 #include "../scheduler.hpp"
 #include <psycle/generic/wrappers.hpp>
 #include <thread>
+#include <date_time>
 #include <mutex>
 #include <list>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__SINGLE_THREADED
@@ -171,10 +172,24 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		private: std::size_t output_port_count_;
 		
 		public:  void reset() throw() /*override*/ { assert(processed()); processed(false); underlying().reset(); }
+		public:  void         process_first() { process(true); }
+		public:  void         process() { process(false); }
+		private: void         process(bool first);
 		public:  void mark_as_processed() throw() { processed(true); }
 		public:  void         processed(bool processed) throw() { assert(this->processed() != processed); this->processed_ = processed; assert(this->processed() == processed); }
 		public:  bool const & processed() const throw() { return processed_; }
 		private: bool         processed_;
+	///\}
+		
+	///\name schedule ... time measurement (to be used for heuristics)
+	///\{
+		public:  void reset_time_measurement();
+
+		public:  std::nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
+		private: std::nanoseconds accumulated_processing_time_;
+
+		public:  unsigned int processing_count() throw() { return processing_count_; }
+		private: unsigned int processing_count_;
 	///\}
 };
 
