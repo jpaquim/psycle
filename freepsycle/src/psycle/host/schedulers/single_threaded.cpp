@@ -367,9 +367,9 @@ void scheduler::process_loop() {
 			node & node(**i);
 			std::cout
 				<< node.underlying().qualified_name() << ": "
-				<< node.accumulated_processing_time().get_count() << "ns / "
+				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
 				<< node.processing_count() << " = "
-				<< double(node.accumulated_processing_time().get_count()) / node.processing_count() << "ns\n";
+				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s\n";
 		}
 	} catch(...) {
 		loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);

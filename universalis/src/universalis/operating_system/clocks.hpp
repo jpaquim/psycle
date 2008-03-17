@@ -224,7 +224,7 @@ namespace detail {
 			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 				void display_clock_resolution(std::string const & clock_name, ::clockid_t clock) throw(std::runtime_error) {
 					::timespec t;
-					if(::clock_getres(CLOCK_REALTIME, &t))
+					if(::clock_getres(clock, &t))
 					{
 						std::ostringstream s; s << exceptions::code_description();
 						throw std::runtime_error(s.str().c_str());
