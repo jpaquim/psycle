@@ -273,7 +273,7 @@ namespace detail {
 					{
 						::LARGE_INTEGER frequency;
 						::QueryPerformanceFrequency(&frequency);
-						std::ostringstream s; s << "clock res: QueryPerformancefrequency: " << frequency.QuadPart << "Hz";
+						std::ostringstream s; s << "clock resolution: QueryPerformanceFrequency: " << frequency.QuadPart << "Hz";
 						BOOST_MESSAGE(s.str());
 					}
 					try {

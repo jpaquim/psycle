@@ -26,11 +26,11 @@ namespace universalis { namespace operating_system { namespace clocks {
 		::clockid_t monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
 
 		namespace {
-			void error(int const & code = errno) {
+			void error(int const code = errno) {
 				std::cerr << "error: " << code << ": " << ::strerror(code) << std::endl;
 			}
 
-			bool supported(int const & option) {
+			bool supported(int const option) {
 				long int result(::sysconf(option));
 				if(result < -1) error();
 				return result > 0;
@@ -330,7 +330,7 @@ std::nanoseconds process::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		bool static once = false; if(!once) detail::posix::config();
 		if(detail::posix::cputime_supported) return detail::posix::process_cpu_time();
-		else return detail::iso_std_clock();
+		else return monotonic::current();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		return detail::microsoft::process_time();
 	#else
@@ -342,7 +342,7 @@ std::nanoseconds thread::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		bool static once = false; if(!once) detail::posix::config();
 		if(detail::posix::cputime_supported) return detail::posix::thread_cpu_time();
-		else return detail::iso_std_clock();
+		else return process::current();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		return detail::microsoft::thread_time();
 	#else
