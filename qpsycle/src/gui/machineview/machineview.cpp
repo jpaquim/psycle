@@ -237,7 +237,7 @@ void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui 
 			QPortsDialog dialog(this);
 			portin = dialog.GetInPort(dstMacGui->mac());
 		}
-		if (song()->InsertConnection( *(srcMacGui->mac()), *(dstMacGui->mac()), portout, portin, 1.0f))
+		if (song()->InsertConnection( *(srcMacGui->mac()), *(dstMacGui->mac()), portout, portin, 1.0f) >= 0)
 		{
 			// Make a new wiregui connection.
 			WireGui *newWireGui = createWireGui( srcMacGui, dstMacGui );

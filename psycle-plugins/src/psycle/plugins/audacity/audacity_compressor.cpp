@@ -30,40 +30,40 @@
 CMachineParameter const paraThreshold = 
 { 
 	"Threshold",
-	"Threshold",																								// description
-	-36,																																																// MinValue				
-	-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Threshold",		// description
+	-36,			// MinValue
+	-1,			// MaxValue
+	MPF_STATE,		// Flags
 	-12,
 };
 
 CMachineParameter const paraRatio = 
 { 
 	"Ratio",
-	"Ratio",																								// description
-	100,																																																// MinValue				
-	10000,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Ratio",		// description
+	100,			// MinValue
+	10000,			// MaxValue
+	MPF_STATE,		// Flags
 	200,
 };
 
 CMachineParameter const paraAttackTime = 
 { 
 	"Attack",
-	"Attack",																								// description
-	100,																																																// MinValue				
-	10000,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Attack",		// description
+	100,			// MinValue
+	10000,			// MaxValue
+	MPF_STATE,		// Flags
 	200,
 };
 
 CMachineParameter const paraDecayTime = 
 { 
 	"Decay",
-	"Decay",																								// description
-	100,																																																// MinValue				
-	10000,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Decay",		// description
+	100,			// MinValue
+	10000,			// MaxValue
+	MPF_STATE,		// Flags
 	1000,
 };
 
@@ -71,10 +71,10 @@ CMachineParameter const paraDecayTime =
 CMachineParameter const paraUseGain = 
 { 
 	"Use gain",
-	"Use gain",																																												// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Use gain",		// description
+	0,			// MinValue
+	1,			// MaxValue
+	MPF_STATE,		// Flags
 	0,
 };
 
@@ -91,17 +91,17 @@ CMachineParameter const *pParameters[] =
 CMachineInfo const MacInfo = 
 {
 	MI_VERSION,				
-	EFFECT,																																								// flags
-	NUMPARAMETERS,																																// numParameters
-	pParameters,																																// Pointer to parameters
+	EFFECT,			// flags
+	NUMPARAMETERS,		// numParameters
+	pParameters,		// Pointer to parameters
 #ifdef _DEBUG
-	"Audacity Compressor (Debug build)",								// name
+	"Audacity Compressor (Debug build)",		// name
 #else
-	"Audacity Compressor",																								// name
+	"Audacity Compressor",				// name
 #endif
-	"ACompressor",																												// short name
-	"Dominic Mazzoni/Sartorius",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	"ACompressor",					// short name
+	"Dominic Mazzoni/Sartorius",			// author
+	"About",					// A command, that could be use for open an editor, etc...
 	1
 };
 
@@ -158,7 +158,7 @@ void mi::Command()
 // Called when user presses editor button
 // Probably you want to show your custom window here
 // or an about button
-pCB->MessBox("Audacity Compressor","ACompressor",0);
+	pCB->MessBox("Audacity Compressor","ACompressor",0);
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -166,29 +166,30 @@ void mi::ParameterTweak(int par, int val)
 	Vals[par]=val;
 	switch(par)
 	{
-		case 0:
-			sl.setThreshold(val);
-			sr.setThreshold(val);
-			break;
-		case 1: 
-			sl.setRatio(val*.01);
-			sr.setRatio(val*.01);
-			break;
-		case 2: 
-			sl.setAttack(val*.001);
-			sr.setAttack(val*.001);
-			break;
-		case 3: 
-			sl.setDecay(val*.001);
-			sr.setDecay(val*.001);
-			break;
-		case 4:
-			sl.setGain(val==1);
-			sr.setGain(val==1);
-			break;
-		default:
-				break;
-
+	case 0:
+		sl.setThreshold(val);
+		sl.setGainDB();
+		sr.setThreshold(val);
+		sl.setGainDB();
+		break;
+	case 1: 
+		sl.setRatio(val*.01);
+		sr.setRatio(val*.01);
+		break;
+	case 2: 
+		sl.setAttack(val*.001);
+		sr.setAttack(val*.001);
+		break;
+	case 3: 
+		sl.setDecay(val*.001);
+		sr.setDecay(val*.001);
+		break;
+	case 4:
+		sl.setGain(val==1);
+		sr.setGain(val==1);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -215,7 +216,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		case 1:
 			std::sprintf(txt,"%.1f:1",(float)value*.01f);
 			return true;
-		case 2: case 3:
+		case 2:
+		case 3:
 			std::sprintf(txt,"%.01f s",(float)value*.001f);
 			return true;
 		case 4:
@@ -223,7 +225,6 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			return true;
 
 		default:
-
 			return false;
 	}
 }
