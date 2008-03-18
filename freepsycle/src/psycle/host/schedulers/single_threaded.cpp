@@ -15,10 +15,14 @@
 #include <limits>
 namespace psycle { namespace host { namespace schedulers { namespace single_threaded {
 
-namespace detail {
-	std::nanoseconds clock() {
+namespace {
+	std::nanoseconds cpu_time_clock() {
 		#if 0
 			return std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch();
+		#elif 0
+			return universalis::operating_system::clocks::thread_cpu_time::current();
+		#elif 0c
+			return universalis::operating_system::clocks::process_cpu_time::current();
 		#else
 			return universalis::operating_system::clocks::monotonic::current();
 		#endif
@@ -128,9 +132,9 @@ void node::reset_time_measurement() {
 }
 
 void node::process(bool first) {
-	std::nanoseconds const t0(clock());
+	std::nanoseconds const t0(cpu_time_clock());
 	if(first) underlying().process_first(); else underlying().process();
-	std::nanoseconds const t1(clock());
+	std::nanoseconds const t1(cpu_time_clock());
 	accumulated_processing_time_ += t1 - t0;
 	++processing_count_;
 }
@@ -386,8 +390,7 @@ void scheduler::process(node & node) {
 		std::ostringstream s;
 		s << "scheduling " << node.underlying().qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	{ // get node input buffers by processing the dependencies of the node
+	} { // get node input buffers by processing the dependencies of the node
 		for(node::single_input_ports_type::const_iterator i(node.single_input_ports().begin()) ; i != node.single_input_ports().end() ; ++i) {
 			ports::inputs::single & single_input_port(**i);
 			if(single_input_port.output_port()) process_node_of_output_port_and_set_buffer_for_input_port(*single_input_port.output_port(), single_input_port);
@@ -396,8 +399,7 @@ void scheduler::process(node & node) {
 	if(!node.multiple_input_port()) { // the node has no multiple input port: simple case
 		set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
 		node.process();
-	}
-	else if(node.multiple_input_port()->output_ports().size()) { // the node has a multiple input port: complex case
+	} else if(node.multiple_input_port()->output_ports().size()) { // the node has a multiple input port: complex case
 		// get first output to process 
 		ports::output & first_output_port_to_process(node.multiple_input_port_first_output_port_to_process());
 		{ // process with first input buffer
