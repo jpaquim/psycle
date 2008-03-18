@@ -21,7 +21,7 @@ namespace {
 			return std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch();
 		#elif 0
 			return universalis::operating_system::clocks::thread_cpu_time::current();
-		#elif 0c
+		#elif 0
 			return universalis::operating_system::clocks::process_cpu_time::current();
 		#else
 			return universalis::operating_system::clocks::monotonic::current();
