@@ -190,6 +190,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 
 		public:  std::uint64_t processing_count() throw() { return processing_count_; }
 		private: std::uint64_t processing_count_;
+
+		public:  std::uint64_t processing_count_no_zeroes() throw() { return processing_count_no_zeroes_; }
+		private: std::uint64_t processing_count_no_zeroes_;
 	///\}
 };
 
