@@ -105,7 +105,8 @@ node::node(node::parent_type & parent, underlying_type & underlying)
 	output_port_count_(),
 	processed_(true), // set to true because reset() is called first in the processing loop
 	accumulated_processing_time_(),
-	processing_count_()
+	processing_count_(),
+	processing_count_no_zeroes_()
 {
 	// register to the signals
 	new_output_port_signal()        .connect(boost::bind(&node::on_new_output_port        , this, _1));
@@ -128,14 +129,17 @@ void node::on_new_multiple_input_port(ports::inputs::multiple &) {
 
 void node::reset_time_measurement() {
 	accumulated_processing_time_ = 0;
-	processing_count_ = 0;
+	processing_count_ = processing_count_no_zeroes_ = 0;
 }
 
 void node::process(bool first) {
 	std::nanoseconds const t0(cpu_time_clock());
 	if(first) underlying().process_first(); else underlying().process();
 	std::nanoseconds const t1(cpu_time_clock());
-	accumulated_processing_time_ += t1 - t0;
+	if(t1 != t0) {
+		accumulated_processing_time_ += t1 - t0;
+		++processing_count_no_zeroes_;
+	}
 	++processing_count_;
 }
 
@@ -370,10 +374,17 @@ void scheduler::process_loop() {
 		for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 			node & node(**i);
 			std::cout
-				<< node.underlying().qualified_name() << ": "
+				<< node.underlying().qualified_name()
+				<< " (" << universalis::compiler::typenameof(node.underlying())
+				<< ", lib " << node.underlying().plugin_library_reference().name()
+				<< "): ";
+			if(!node.processing_count()) std::cout << "not processed";
+			else std::cout
 				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
 				<< node.processing_count() << " = "
-				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s\n";
+				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s"
+				" , zeroes: " << node.processing_count() - node.processing_count_no_zeroes() << '\n';
+				
 		}
 	} catch(...) {
 		loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);
