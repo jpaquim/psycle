@@ -188,8 +188,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		public:  std::nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
 		private: std::nanoseconds accumulated_processing_time_;
 
-		public:  unsigned int processing_count() throw() { return processing_count_; }
-		private: unsigned int processing_count_;
+		public:  std::uint64_t processing_count() throw() { return processing_count_; }
+		private: std::uint64_t processing_count_;
 	///\}
 };
 
