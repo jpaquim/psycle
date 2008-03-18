@@ -426,7 +426,7 @@ namespace psy
 			virtual void Tick(int /*channel*/, const PatternEvent &) {}
 			virtual void Stop() { playCol.clear(); playColIndex =0; }
 		protected:
-			virtual void WorkNoMix(int numSamples );
+			virtual void WorkWires(int numSamples, bool mix=true );
 			virtual int GenerateAudioInTicks(int startSample, int numsamples );
 			virtual int GenerateAudio(int numsamples );
 			virtual void reallocateRemainingEvents(double beatOffset);

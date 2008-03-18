@@ -428,16 +428,18 @@ namespace psy {
 				do
 				{
 					// Left channel
-					if(std::fabs( *pSamples++ = *pSamplesL = *pSamplesL * mv) > _lMax)
+					if(std::fabs( *pSamples = (*pSamplesL = *pSamplesL * mv)) > _lMax)
 					{
 						_lMax = fabsf(*pSamplesL);
 					}
+					pSamples++;
 					pSamplesL++;
 					// Right channel
-					if(std::fabs(*pSamples++ = *pSamplesR = *pSamplesR * mv) > _rMax)
+					if(std::fabs(*pSamples = (*pSamplesR = *pSamplesR * mv)) > _rMax)
 					{
 						_rMax = fabsf(*pSamplesR);
 					}
+					pSamples++;
 					pSamplesR++;
 				}
 				while (--i);
@@ -535,8 +537,14 @@ namespace psy {
 
 		void Mixer::Work( int numSamples )
 		{
+			if ( _mute || Bypass())
+			{
+				WorkWires(numSamples);
+				return;
+			}
+
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
-			Machine::WorkNoMix( numSamples );
+			WorkWires( numSamples, false );
 			// Step Two, prepare input signals for the Send Fx, and make them work
 			FxSend( numSamples );
 			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
