@@ -776,10 +776,18 @@ namespace psy { namespace core {
 		//wire_cpu_cost(wire_cpu_cost() + cost);
 	}
 
-	/// Each machine is expected to produce its output in its own
-	/// _pSamplesX buffers.
+
+	// Low level Work function of machines. Takes care of audio generation and routing.
+	// Each machine is expected to produce its output in its own _pSamplesX buffers.
 	void Machine::Work(int numSamples )
 	{
+		WorkWires(numSamples);
+		GenerateAudio( numSamples );
+	}
+
+	void Machine::WorkWires(int numSamples, bool mix )
+	{
+		// Variable to avoid feedback loops. Probably, it is not worth implement feedbacks.
 		_waitingForSound=true;
 		for (int i=0; i<MAX_CONNECTIONS; i++)
 		{
@@ -788,35 +796,17 @@ namespace psy { namespace core {
 				Machine* pInMachine = song()->machine(_inputMachines[i]);
 				if (pInMachine)
 				{
-					/*
-					* Change the sound routing to understand what a feedback loop is,
-					* creating a special type of wire that will have a buffer which will give as output,
-					* and which will be (internally) connected to master, 
-					* to fill again the buffer once all the other machines have done its job.
-					*/
 					if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 					{ 
 						{
 							#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 							#endif
-							//std::cout << pInMachine->id() << "before work" << numSamples << std::endl;
 							pInMachine->Work( numSamples );
-							//std::cout << pInMachine->id() << "after work" << numSamples << std::endl;
 						}
-						/*
-						This could be a different Undenormalize funtion, using the already calculated
-						"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
-						correctly.
-						if(pInMachine->_volumeCounter*_inputConVol[i] < 0.004f) // this gives for 24bit depth.
-						{
-							std::memset(pInMachine->_pSamplesL,0,numSamples*sizeof(float));
-							std::memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
-						}
-						*/
 					}
 					if(!pInMachine->Standby()) Standby(false);
-					if(!_mute && !Standby())
+					if(!_mute && !Standby() && mix)
 					{
 						//PSYCLE__CPU_COST__INIT(wcost);
 						dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
@@ -828,41 +818,13 @@ namespace psy { namespace core {
 			}
 		}
 		_waitingForSound = false;
-		{
-			//PSYCLE__CPU_COST__INIT(wcost);
-			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
-			//wire_cpu_cost(wire_cpu_cost() + wcost);
-		}
-		GenerateAudio( numSamples );
+		
+		//PSYCLE__CPU_COST__INIT(wcost);
+		dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+		//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+		//wire_cpu_cost(wire_cpu_cost() + wcost);
 	}
 
-	//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
-	void Machine::WorkNoMix( int numSamples )
-	{
-		_waitingForSound=true;
-		for (int i=0; i<MAX_CONNECTIONS; i++)
-		{
-			if (_inputCon[i])
-			{
-				Machine* pInMachine = song()->machine(_inputMachines[i]);
-				if (pInMachine)
-				{
-					if (!pInMachine->_worked && !pInMachine->_waitingForSound)
-					{ 
-						{
-							#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-							#endif
-							pInMachine->Work( numSamples );
-						}
-					}
-					if(!pInMachine->Standby()) Standby(false);
-				}
-			}
-		}
-		_waitingForSound = false;
-	}
 #if 0
 
 	void Machine::defineInputAsStereo(int numports)
