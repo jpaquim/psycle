@@ -21,8 +21,8 @@ EffectCompressor::EffectCompressor()
 	mFloor = 0.001;
 	mGainDB = 0.0;
 
-	this->setRatio(2.0);
 	this->setThreshold(-12.0);
+	this->setRatio(2.0);
 	this->setGain(true);
 	this->setSampleRate(44100.0);
 	this->setAttack(0.2);
@@ -102,6 +102,7 @@ void EffectCompressor::setGainDB()
 	mGainDB = ((mThresholdDB*-0.7) * (1 - 1/mRatio));
 	if (mGainDB < 0)
 		mGainDB = 0;
+	setGain(mUseGain);
 }
 
 void EffectCompressor::setGain(bool gain)
