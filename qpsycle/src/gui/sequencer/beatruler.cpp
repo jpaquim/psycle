@@ -24,6 +24,7 @@
 #include "sequencerdraw.hpp"
 
 #include <QGraphicsScene>
+#include <QVarLengthArray>
 
 namespace qpsycle {
 
@@ -44,37 +45,44 @@ QRectF BeatRuler::boundingRect() const
 
 void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+	///\ todo: this paint method uses a lot of processor power when the play line
+	// is being updated over the top of it -- need a way to only draw the part which
+	// has been invalided.  Possibly. do this by moving to SeqDraw::drawBackground.
 	Q_UNUSED( option ); Q_UNUSED( widget );
 
 	int cw = boundingRect().width();
 	int ch = boundingRect().height();
 
-
-	painter->setBrush( QColor( 230,230,230 ) );
-	painter->setPen( QColor( 230,230,230 ) );
 	painter->fillRect( boundingRect(), QColor( 230, 230, 230 ) );
 
 	int start = 0;
 	int end   = sDraw_->width();
+	QVarLengthArray<QLineF, 100> lines1;
+	QVarLengthArray<QLineF, 100> lines2;
+ 	QString beatLabel;
+ 	QRectF textRect;
 
-	for (int i = start ; i < end ; i++) {
-		if (! (i % 16)) {
-			painter->setPen( QColor( 180, 180, 180 ) );
-			painter->drawLine( i * sDraw_->beatPxLength(), ch-10, 
-						i * sDraw_->beatPxLength(), ch-1 );
-			QString beatLabel = QString::number(i/4);
-			QRectF textRect = QRectF( i * sDraw_->beatPxLength()-10, 0, 20, ch-10 );
+	for (int i = start ; i < end ; i++) 
+	{
+		if (! (i % 16)) 
+		{
 			painter->setPen( QColor( 50, 50, 50 ) );
+			lines1.append( QLineF( i * sDraw_->beatPxLength(), ch-10, i * sDraw_->beatPxLength(), ch-1 ) );
+			beatLabel = QString::number(i/4);
+			textRect.setRect( i * sDraw_->beatPxLength()-10, 0, 20, ch-10 );
 			painter->drawText( textRect, Qt::AlignHCenter | Qt::AlignBottom, beatLabel );
 		}
 		else {
 			if ( sDraw_->beatPxLength() > 3 ) {
-				painter->setPen( QColor( 220, 220, 220 ) );
-				painter->drawLine( i * sDraw_->beatPxLength(), ch-10, i*sDraw_->beatPxLength(), ch-5);
+				lines2.append( QLineF( i * sDraw_->beatPxLength(), ch-10, i*sDraw_->beatPxLength(), ch-5) );
 			}
 		}
 	}
-	painter->setPen( QColor( 220, 220, 220 ) );
+	painter->setPen( QColor( 180, 180, 180 ) );
+	painter->drawLines( lines1.data(), lines1.size() );
+
+ 	painter->setPen( QColor( 220, 220, 220 ) );
+ 	painter->drawLines( lines2.data(), lines2.size() );
 	painter->drawLine( 0, ch - 10 , cw, ch - 10 );
 }
 
