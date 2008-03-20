@@ -46,8 +46,8 @@ namespace qpsycle {
 
 	SequencerDraw::SequencerDraw( SequencerView *seqView )
 		: seqView_(seqView),
-		  beatPxLength_(5),
-		  lineHeight_(30)
+		beatPxLength_(5),
+		lineHeight_(30)
 	{
 		setAlignment ( Qt::AlignLeft | Qt::AlignTop );
 
@@ -75,22 +75,21 @@ namespace qpsycle {
 			patternSequence->newLineInserted.connect
 				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
 			/*
-			  Does not work because of a boost bug in boost 1.33
-			  as of Mar 28 2007.
-			  This bug is fixed in boost SVN. I put a workaround in
-			  makeSequencerLine instead.
-			  / Magnus
+			Does not work because of a boost bug in boost 1.33
+			as of Mar 28 2007.
+			This bug is fixed in boost SVN. I put a workaround in
+			makeSequencerLine instead.
+			/ Magnus
 
-			  patternSequence->lineRemoved.connect
-			  (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+			patternSequence->lineRemoved.connect
+			(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 			*/
 			patternSequence->linesSwapped.connect
 				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 		}
 
 		pLine_ = new PlayLine( this );
-		connect( pLine_, SIGNAL( playLineMoved( double ) ),
-			 this, SLOT( onPlayLineMoved( double ) ) );
+		connect( pLine_, SIGNAL( playLineMoved( double ) ), this, SLOT( onPlayLineMoved( double ) ) );
 		scene_->addItem( pLine_ );
 
 		BeatRuler *beatRuler = new BeatRuler( this );
@@ -228,8 +227,7 @@ namespace qpsycle {
 		}
 	}
 
-	void SequencerDraw::onLinesSwapped(psy::core::SequenceLine* a,
-					   psy::core::SequenceLine* b)
+	void SequencerDraw::onLinesSwapped(psy::core::SequenceLine* a, psy::core::SequenceLine* b)
 	{
 		lines_iterator ita = lines_.end();
 		lines_iterator itb = lines_.end();

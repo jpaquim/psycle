@@ -59,8 +59,8 @@ void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option
 	int end   = sDraw_->width();
 	QVarLengthArray<QLineF, 100> lines1;
 	QVarLengthArray<QLineF, 100> lines2;
- 	QString beatLabel;
- 	QRectF textRect;
+	QString beatLabel;
+	QRectF textRect;
 
 	for (int i = start ; i < end ; i++) 
 	{
@@ -81,8 +81,8 @@ void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option
 	painter->setPen( QColor( 180, 180, 180 ) );
 	painter->drawLines( lines1.data(), lines1.size() );
 
- 	painter->setPen( QColor( 220, 220, 220 ) );
- 	painter->drawLines( lines2.data(), lines2.size() );
+	painter->setPen( QColor( 220, 220, 220 ) );
+	painter->drawLines( lines2.data(), lines2.size() );
 	painter->drawLine( 0, ch - 10 , cw, ch - 10 );
 }
 
