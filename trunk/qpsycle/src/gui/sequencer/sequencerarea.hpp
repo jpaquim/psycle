@@ -38,7 +38,6 @@ namespace qpsycle {
 
 		QRectF boundingRect() const;
 		void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-		void drawTimegrid( QPainter *painter );
 
 	protected:
 

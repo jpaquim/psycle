@@ -49,22 +49,6 @@ QRectF SequencerArea::boundingRect() const
 
 void SequencerArea::paint( QPainter *painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
-	drawTimegrid( painter );
-}
-
-void SequencerArea::drawTimegrid( QPainter *painter )
-{
-	QRectF br = boundingRect();
-	int start = 0;
-	int end   = (int)br.width();
-
-	painter->setPen( QColor( 30, 30, 30 ) );
-	for (int i = start ; i <= end ; i++) {
-		if ( beatPxLength_ > 3 || (beatPxLength_ <= 3 && (!( i %16)))  ) {
-			painter->drawLine( i*beatPxLength_, 0,
-								i*beatPxLength_, br.height() );
-		}
-	}
 }
 
 } // namespace qpsycle

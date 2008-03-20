@@ -76,6 +76,7 @@ public slots:
 	void onItemChangedLine( SequencerItem *item, int direction );
 
 protected:
+	void drawBackground( QPainter * painter, const QRectF & rect );
 
 private:
 	SequencerView *seqView_;

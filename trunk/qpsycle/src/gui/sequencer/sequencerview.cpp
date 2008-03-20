@@ -98,14 +98,15 @@ void SequencerView::addPattern( psy::core::SinglePattern *pattern )
 	}
 }
 
-void SequencerView::updatePlayPos() {
-	if ( song()->patternSequence() ) {
+void SequencerView::updatePlayPos() 
+{
+	if ( song()->patternSequence() ) 
+	{
 		int beatPxLength = seqDraw_->beatPxLength();
 		int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
 		int oxPos = std::min(song()->patternSequence()->tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
 		if (oxPos != xPos) {
 			seqDraw_->pLine()->setPos( xPos, 0 );
-			seqDraw_->pLine()->update( seqDraw_->pLine()->boundingRect() );
 		}
 		oldPlayPos_ = psy::core::Player::Instance()->playPos();
 	}
