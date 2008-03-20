@@ -257,6 +257,7 @@ namespace qpsycle {
 
 	void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff ) 
 	{
+		Q_UNUSED( item );
 		if ( gridSnap() ) {
 			int beatDiff = (int)diff.x() / 5;
 			int snappedBeatDiff = beatDiff * 5;
@@ -322,12 +323,12 @@ namespace qpsycle {
 				{
 					SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
 					int parentPos;
-					for ( int i = 0; i < lines_.size(); i++ ) {
+					for ( unsigned int i = 0; i < lines_.size(); i++ ) {
 						if ( lines_[i] == parentLine ) {
 							parentPos = i;
 						}
 					}
-					SequencerLine *newLine;
+					
 					if ( direction == 0 ) {
 						parentLine->moveItemToNewLine( someItem, lines_[parentPos-1] );
 					} else if ( direction == 1 ) {
