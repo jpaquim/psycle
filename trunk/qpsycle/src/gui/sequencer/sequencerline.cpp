@@ -79,12 +79,12 @@ psy::core::SequenceLine *SequencerLine::sequenceLine()
 	return seqLine_;
 }
 
-void SequencerLine::addItem( psy::core::SinglePattern* pattern )
+	void SequencerLine::addItem( psy::core::SinglePattern* pattern )
 {
 	printf("SequencerLine::addItem called\n");
 	double endTick = sequenceLine()->tickLength();
 	
-	SequencerItem *item = new SequencerItem();
+	SequencerItem *item = new SequencerItem( sDraw_ );
 	psy::core::SequenceEntry* entry =
 		sequenceLine()->createEntry(pattern, endTick);
 	addEntry(entry);
@@ -92,7 +92,7 @@ void SequencerLine::addItem( psy::core::SinglePattern* pattern )
 
 void SequencerLine::addEntry( psy::core::SequenceEntry* entry )
 {
-	SequencerItem* item = new SequencerItem();
+	SequencerItem* item = new SequencerItem( sDraw_ );
 	item->setSequenceEntry( entry );
 	item->setParentItem( this );
 	items_.push_back( item );

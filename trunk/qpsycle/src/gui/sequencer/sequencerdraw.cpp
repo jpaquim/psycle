@@ -46,7 +46,7 @@ namespace qpsycle {
 
 	SequencerDraw::SequencerDraw( SequencerView *seqView )
 		: seqView_(seqView),
-		beatPxLength_(5),
+		beatPxLength_(6),
 		lineHeight_(30)
 	{
 		setAlignment ( Qt::AlignLeft | Qt::AlignTop );
@@ -337,7 +337,7 @@ namespace qpsycle {
 
 	bool SequencerDraw::gridSnap() const 
 	{
-		return true; // FIXME: hardcoded.
+		return true; ///\todo this should be a user option (so not hardcoded.)
 	}
 
 	int SequencerDraw::beatPxLength( ) const
@@ -387,7 +387,10 @@ namespace qpsycle {
 		QGraphicsView::scrollContentsBy( dx, dy );
 	}
 
-
+	void SequencerDraw::setBeatPxLength( int beatPxLength )
+	{
+		beatPxLength_ = beatPxLength;
+	}
 
 
 

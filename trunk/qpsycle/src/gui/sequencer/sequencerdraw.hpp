@@ -55,7 +55,10 @@ public:
 
 	SequencerView *sequencerView() { return seqView_; }
 	PlayLine *pLine() { return pLine_; }
+
 	int beatPxLength() const;
+	void setBeatPxLength( int beatPxLength );
+
 	int lineHeight() const { return lineHeight_; }
 	bool gridSnap() const;
 	SequencerLine *selectedLine();
