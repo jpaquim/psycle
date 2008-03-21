@@ -47,8 +47,8 @@ namespace universalis { namespace compiler { namespace cast {
 			inline operator Derived const & () const throw() { return /*derive<Derived const>*/ static_cast<Derived const &>(*this); }
 			inline operator Derived       & ()       throw() { return /*derive<Derived      >*/ static_cast<Derived       &>(*this); }
 			
-			Derived inline const & derived() const throw() { return *this; }
-			Dervied inline       & derived()       throw() { return *this; }
+			Derived inline const & derived_this() const throw() { return *this; }
+			Derived inline       & derived_this()       throw() { return *this; }
 	};
 
 	template<typename Derived_Underlying, typename Derived, typename Underlying>
