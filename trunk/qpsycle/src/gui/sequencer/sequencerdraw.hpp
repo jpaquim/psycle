@@ -41,7 +41,7 @@ class SequencerArea;
 class SequencerLine;
 class SequencerItem;
 class PlayLine;
-
+class BeatRuler;
 
 
 class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
@@ -77,6 +77,7 @@ public slots:
 
 protected:
 	void drawBackground( QPainter * painter, const QRectF & rect );
+	void scrollContentsBy ( int dx, int dy );
 
 private:
 	SequencerView *seqView_;
@@ -87,6 +88,7 @@ private:
 	std::vector<SequencerLine*> lines_;
 	typedef std::vector<SequencerLine*>::iterator lines_iterator;
 
+	BeatRuler *beatRuler_;
 	SequencerLine *selectedLine_;
 
 	int beatPxLength_;
