@@ -41,8 +41,10 @@ SequencerView::SequencerView( psy::core::Song *asong )
 
 	layout_ = new QVBoxLayout();
 	setLayout( layout_ );
-
+	
 	seqDraw_ = new SequencerDraw( this );
+	seqDraw_->setCacheMode( QGraphicsView::CacheBackground );
+
 	toolBar_ = new QToolBar();
 	toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
 
@@ -84,7 +86,17 @@ SequencerView::SequencerView( psy::core::Song *asong )
 	eTrkAct->setStatusTip( "Expand a Track");
 	connect( eTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( onExpandButtonCliked() ) );
 	toolBar_->addAction (eTrkAct); 
+	
+	toolBar_->addSeparator();
+
+	QAction *zoomOutAct_ = toolBar_->addAction( QIcon(":/images/zoom-out.png"), "Zoom Out" );
+	zoomOutAct_->setStatusTip( "Zoom Out" );
+	connect( zoomOutAct_, SIGNAL( triggered() ), this, SLOT( zoomOut() ) );
 		
+	QAction *zoomInAct_ = toolBar_->addAction( QIcon(":/images/zoom-in.png"), "Zoom In" );
+	zoomInAct_->setStatusTip( "Zoom In" );
+	connect( zoomInAct_, SIGNAL( triggered() ), this, SLOT( zoomIn() ) );
+
 	layout_->addWidget( toolBar_ );
 	layout_->addWidget( seqDraw_ );
 
@@ -130,4 +142,20 @@ SequencerLine* SequencerView::selectedLine()
 	return selectedLine_;
 }
 
+void SequencerView::zoomIn()
+{
+	seqDraw_->setBeatPxLength( std::min( seqDraw_->beatPxLength()+2, 20 ) );
+ 	seqDraw_->update();
+	seqDraw_->resetCachedContent();
+}
+
+void SequencerView::zoomOut()
+{
+	seqDraw_->setBeatPxLength( std::max( seqDraw_->beatPxLength()-2, 4 ) );
+	seqDraw_->update();
+	seqDraw_->resetCachedContent();
+}
+
+
 } // namespace qpsycle
+

@@ -35,57 +35,60 @@ class QGraphicsSceneMouseEvent;
 
 namespace qpsycle {
 
-class SequencerView;
-class SequencerLine;
+	class SequencerView;
+	class SequencerLine;
+	class SequencerDraw;
 
-class SequencerItem : public QObject, public QGraphicsItem
-{
-	Q_OBJECT
-
-public:
-	SequencerItem();
-	~SequencerItem();
-
-	QRectF boundingRect() const;
-	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
-
-	void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
-	psy::core::SequenceEntry *sequenceEntry(); 
-	void constrainToParent();
-
-	enum { Type = UserType + 5 };
-	int type() const
+	class SequencerItem : public QObject, public QGraphicsItem
 	{
-		// Enable the use of qgraphicsitem_cast with this item.
-		return Type;
-	}
+		Q_OBJECT
 
-protected: 
-	void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
-	void mousePressEvent( QGraphicsSceneMouseEvent *event );
-	void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
-	void keyPressEvent( QKeyEvent *event );
-	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+		public:
+		SequencerItem( SequencerDraw *seqDraw );
+		~SequencerItem();
 
-private slots:
-	void onLoopEntryActionTriggered();
-	void onDeleteEntryActionTriggered();
+		QRectF boundingRect() const;
+		void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-signals:
-	void clicked(SequencerItem*);
-	void deleteRequest( SequencerItem* );
-	void moved( SequencerItem*, QPointF diff );
-	void changedLine( SequencerItem*, int );
+		void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
+		psy::core::SequenceEntry *sequenceEntry(); 
+		void constrainToParent();
+
+		enum { Type = UserType + 5 };
+		int type() const
+			{
+				// Enable the use of qgraphicsitem_cast with this item.
+				return Type;
+			}
+
+	protected: 
+		void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
+		void mousePressEvent( QGraphicsSceneMouseEvent *event );
+		void contextMenuEvent( QGraphicsSceneContextMenuEvent *event );
+		void keyPressEvent( QKeyEvent *event );
+		QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+	private slots:
+		void onLoopEntryActionTriggered();
+		void onDeleteEntryActionTriggered();
+
+	signals:
+		void clicked(SequencerItem*);
+		void deleteRequest( SequencerItem* );
+		void moved( SequencerItem*, QPointF diff );
+		void changedLine( SequencerItem*, int );
 
 
 	private:
-	psy::core::SequenceEntry *sequenceEntry_;
+		psy::core::SequenceEntry *sequenceEntry_;
 
-	QAction *deleteEntryAction_;
-	QAction *loopEntryAction_;
-	const QColor & QColorFromLongColor( long longCol );
+		QAction *deleteEntryAction_;
+		QAction *loopEntryAction_;
+		const QColor & QColorFromLongColor( long longCol );
 
-	int beatPxLength_;
+		int beatPxLength_;
+
+		SequencerDraw *seqDraw_;
 	};
 
 } // namespace qpsycle

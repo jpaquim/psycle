@@ -37,10 +37,10 @@
 
 namespace qpsycle {
 
-SequencerItem::SequencerItem() 
+SequencerItem::SequencerItem( SequencerDraw *seqDraw ) 
 {
 	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
-	beatPxLength_ = 5;
+	seqDraw_ = seqDraw;
 }
 
 SequencerItem::~SequencerItem() {
@@ -48,7 +48,7 @@ SequencerItem::~SequencerItem() {
 
 QRectF SequencerItem::boundingRect() const
 {
-	return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*beatPxLength_, parentItem()->boundingRect().height() );
+	return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*seqDraw_->beatPxLength(), parentItem()->boundingRect().height() );
 }
 
 void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
@@ -130,8 +130,8 @@ void SequencerItem::constrainToParent()
 	setPos( newLeftPos, 0 );                 
 	
 	if ( true /*gridSnap()*/ ) {
-		int beatPos = pos().x() / beatPxLength_;
-		int snappedLeftPos = beatPos * beatPxLength_;
+		int beatPos = pos().x() / seqDraw_->beatPxLength();
+		int snappedLeftPos = beatPos * seqDraw_->beatPxLength();
 		setPos( snappedLeftPos, 0 );
 	}
 }
@@ -181,13 +181,13 @@ void SequencerItem::keyPressEvent( QKeyEvent *event )
 	{
 		case Qt::Key_Left:
 		{
-		QPointF diff( -beatPxLength_, 0 );
+		QPointF diff( -seqDraw_->beatPxLength(), 0 );
 		emit moved( this, diff );
 		}
 		break;
 		case Qt::Key_Right :
 		{
-		QPointF diff( beatPxLength_, 0 );
+		QPointF diff( seqDraw_->beatPxLength(), 0 );
 		emit moved( this, diff );
 		}
 		break;

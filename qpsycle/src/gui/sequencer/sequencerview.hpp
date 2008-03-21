@@ -48,6 +48,10 @@ public:
 	void updatePlayPos();
 	void onPatternNameChanged();
 	void onCategoryColorChanged();
+
+public slots:
+	void zoomIn();
+	void zoomOut();
 	
 protected:
 
