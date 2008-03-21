@@ -383,7 +383,7 @@ void scheduler::process_loop() {
 				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
 				<< node.processing_count() << " = "
 				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s"
-				" , zeroes: " << node.processing_count() - node.processing_count_no_zeroes() << '\n';
+				", zeroes: " << node.processing_count() - node.processing_count_no_zeroes() << '\n';
 				
 		}
 	} catch(...) {
