@@ -168,8 +168,8 @@ void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int s
 {
 	psy::core::TimeSignature signature;
 
-	int gridWidth = (int)boundingRect().width();
-	int gridHeight = (int)boundingRect().height();
+	int gridWidth = static_cast<int>( boundingRect().width() );
+	int gridHeight = static_cast<int>( boundingRect().height() );
 
 	// Draw horizontal lines to demarcate the pattern lines.
 	if ( lineGridEnabled() ) 

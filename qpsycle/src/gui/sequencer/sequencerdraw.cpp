@@ -46,8 +46,8 @@ namespace qpsycle {
 
 	SequencerDraw::SequencerDraw( SequencerView *seqView )
 		: seqView_(seqView),
-		beatPxLength_(5),
-		lineHeight_(30)
+		  beatPxLength_(5),
+		  lineHeight_(30)
 	{
 		setAlignment ( Qt::AlignLeft | Qt::AlignTop );
 
@@ -57,7 +57,7 @@ namespace qpsycle {
 
 		seqArea_ = new SequencerArea( this );
 		scene_->addItem( seqArea_ );
-		seqArea_->setPos( 0, 30 );
+		seqArea_->setPos( 0, 0 );
 
 		psy::core::PatternSequence* patternSequence = sequencerView()->song()->patternSequence();
 
@@ -75,14 +75,14 @@ namespace qpsycle {
 			patternSequence->newLineInserted.connect
 				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
 			/*
-			Does not work because of a boost bug in boost 1.33
-			as of Mar 28 2007.
-			This bug is fixed in boost SVN. I put a workaround in
-			makeSequencerLine instead.
-			/ Magnus
+			  Does not work because of a boost bug in boost 1.33
+			  as of Mar 28 2007.
+			  This bug is fixed in boost SVN. I put a workaround in
+			  makeSequencerLine instead.
+			  / Magnus
 
-			patternSequence->lineRemoved.connect
-			(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+			  patternSequence->lineRemoved.connect
+			  (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 			*/
 			patternSequence->linesSwapped.connect
 				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
@@ -91,12 +91,9 @@ namespace qpsycle {
 		pLine_ = new PlayLine( this );
 		connect( pLine_, SIGNAL( playLineMoved( double ) ), this, SLOT( onPlayLineMoved( double ) ) );
 		scene_->addItem( pLine_ );
-
-		BeatRuler *beatRuler = new BeatRuler( this );
-
-		scene_->addItem( beatRuler );
-		beatRuler->setPos( 0, 0 );
-		beatRuler->update( beatRuler->boundingRect() );
+		setViewportMargins( 0, 30, 0, 0 );
+		beatRuler_ = new BeatRuler( this );
+		beatRuler_->setGeometry( 2, 2, width()-2, 30 );
 	}
 
 
@@ -382,6 +379,12 @@ namespace qpsycle {
 		painter->setPen( QColor( 30, 30, 30 ) );
 
 		painter->drawLines( lines.data(), lines.size() );
+	}
+
+	void SequencerDraw::scrollContentsBy ( int dx, int dy ) 
+	{
+		beatRuler_->update();
+		QGraphicsView::scrollContentsBy( dx, dy );
 	}
 
 

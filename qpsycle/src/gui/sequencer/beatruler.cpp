@@ -25,10 +25,12 @@
 
 #include <QGraphicsScene>
 #include <QVarLengthArray>
+#include <QScrollBar>
 
 namespace qpsycle {
 
 BeatRuler::BeatRuler( SequencerDraw* seqDraw )
+	: QWidget( seqDraw )
 {
 	sDraw_ = seqDraw;
 }
@@ -37,53 +39,56 @@ BeatRuler::~BeatRuler( )
 {
 }
 
-QRectF BeatRuler::boundingRect() const
+///\ todo Update this so it makes use of event->region(), which gives the geometry
+// of the invalidated region that needs repainting.  At the moment it repaints
+// everything regardless of which bit got invalidated.
+///\ todo Need to draw the playline.
+void BeatRuler::paintEvent( QPaintEvent *event )
 {
-	int width = std::max( sDraw_->width(), (int)scene()->width() );
-	return QRectF( 0, 0, width, preferredHeight() ) ;
-}
+	///\todo Seems incorrect (and wasteful) to call setGeometry in here, but if we don't
+	// the beatruler isn't the right size after a window resize.  Should be able to
+	// put this somewhere else, but not sure where yet.
+	int borderWidth = 2;  ///\todo Not sure how to get this programatically.
+	setGeometry( borderWidth, borderWidth, sDraw_->viewport()->width(), 30 );
 
-void BeatRuler::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
-{
-	///\ todo: this paint method uses a lot of processor power when the play line
-	// is being updated over the top of it -- need a way to only draw the part which
-	// has been invalided.  Possibly. do this by moving to SeqDraw::drawBackground.
-	Q_UNUSED( option ); Q_UNUSED( widget );
+	QPainter painter(this);
 
-	int cw = boundingRect().width();
-	int ch = boundingRect().height();
+	int myWidth = width();
+	int myHeight = height();
 
-	painter->fillRect( boundingRect(), QColor( 230, 230, 230 ) );
+	painter.fillRect( 0, 0, myWidth, 30, QColor( 230, 230, 230 ) );
+	int scrollDx = sDraw_->horizontalScrollBar()->value();
 
 	int start = 0;
-	int end   = sDraw_->width();
+	int end   = myWidth;
 	QVarLengthArray<QLineF, 100> lines1;
 	QVarLengthArray<QLineF, 100> lines2;
 	QString beatLabel;
 	QRectF textRect;
 
-	for (int i = start ; i < end ; i++) 
+	for (int i = start; i < end ; i++) 
 	{
+		int currentX = i *sDraw_->beatPxLength()-scrollDx;
 		if (! (i % 16)) 
 		{
-			painter->setPen( QColor( 50, 50, 50 ) );
-			lines1.append( QLineF( i * sDraw_->beatPxLength(), ch-10, i * sDraw_->beatPxLength(), ch-1 ) );
+			painter.setPen( QColor( 50, 50, 50 ) );
+			lines1.append( QLineF( currentX, myHeight-10, currentX, myHeight-1 ) );
 			beatLabel = QString::number(i/4);
-			textRect.setRect( i * sDraw_->beatPxLength()-10, 0, 20, ch-10 );
-			painter->drawText( textRect, Qt::AlignHCenter | Qt::AlignBottom, beatLabel );
+			textRect.setRect( currentX - 10, 0, 20, myHeight-10 );
+			painter.drawText( textRect, Qt::AlignHCenter | Qt::AlignBottom, beatLabel );
 		}
 		else {
 			if ( sDraw_->beatPxLength() > 3 ) {
-				lines2.append( QLineF( i * sDraw_->beatPxLength(), ch-10, i*sDraw_->beatPxLength(), ch-5) );
+				lines2.append( QLineF( currentX, myHeight-10, currentX, myHeight-5) );
 			}
 		}
 	}
-	painter->setPen( QColor( 180, 180, 180 ) );
-	painter->drawLines( lines1.data(), lines1.size() );
+	painter.setPen( QColor( 180, 180, 180 ) );
+	painter.drawLines( lines1.data(), lines1.size() );
 
-	painter->setPen( QColor( 220, 220, 220 ) );
-	painter->drawLines( lines2.data(), lines2.size() );
-	painter->drawLine( 0, ch - 10 , cw, ch - 10 );
+	painter.setPen( QColor( 220, 220, 220 ) );
+	painter.drawLines( lines2.data(), lines2.size() );
+	painter.drawLine( 0, myHeight - 10 , myWidth, myHeight - 10 );
 }
 
 int BeatRuler::preferredHeight( ) const

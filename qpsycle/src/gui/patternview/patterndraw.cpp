@@ -55,9 +55,12 @@ PatternDraw::PatternDraw( PatternView *patView )
 	setViewportMargins( lineNumColWidth_, trackHeaderHeight_, 0, 0);
 
 	patGrid_ = new PatternGrid( this );
+
 	lineNumCol_ = new LineNumberColumn( this );
 	lineNumCol_->setGeometry( 0, trackHeaderHeight_+2, lineNumColWidth_, height() );
+
 	trackHeader_ = new TrackHeader( this );
+	trackHeader_->setGeometry( lineNumColWidth()+2, 0, width(), trackHeaderHeight_ );
 
 	//disabled. This is now called from patternview constructor, via a call to numberOfTracks.
 	//setupTrackGeometrics( patView_->numberOfTracks() );

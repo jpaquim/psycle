@@ -24,20 +24,20 @@
 
 #include <psycle/core/signalslib.h>
 
-#include <QtGui/QGraphicsItem>
+#include <QWidget>
+class QPaintEvent;
 
 namespace qpsycle {
 
 class SequencerDraw;
 
-class BeatRuler : public QGraphicsItem {
+class BeatRuler : public QWidget {
 
 public :
 	BeatRuler( SequencerDraw* seqGui );
 	~BeatRuler();
 
-	QRectF boundingRect() const;
-	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+	void paintEvent( QPaintEvent *event );
 
 protected:
 
