@@ -137,14 +137,14 @@ class node
 			if(loggers::trace()()) {
 				loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
 			}
-			this->parent().insert(static_cast<typename Typenames::node*>(this));
+			this->parent().insert(&this->derived_this());
 			// emit the new_node signal to the wrappers
 			this->parent().new_node_signal()(*this);
 			
 		}
 
 		void before_destruction() /*override*/ {
-			this->parent().erase(static_cast<typename Typenames::node*>(this));
+			this->parent().erase(&this->derived_this());
 			// emit the delete_node signal to the wrappers
 			this->parent().delete_node_signal()(*this);
 			// emit the delete signal to the wrappers
