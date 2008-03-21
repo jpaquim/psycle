@@ -46,6 +46,9 @@ namespace universalis { namespace compiler { namespace cast {
 		public:
 			inline operator Derived const & () const throw() { return /*derive<Derived const>*/ static_cast<Derived const &>(*this); }
 			inline operator Derived       & ()       throw() { return /*derive<Derived      >*/ static_cast<Derived       &>(*this); }
+			
+			Derived inline const & derived() const throw() { return *this; }
+			Dervied inline       & derived()       throw() { return *this; }
 	};
 
 	template<typename Derived_Underlying, typename Derived, typename Underlying>
@@ -133,11 +136,12 @@ namespace universalis { namespace compiler { namespace cast {
 		public:
 			typedef Underlying underlying_type;
 			
+			operator Underlying const & () const throw() { return this->underlying_; }
+			operator Underlying       & ()       throw() { return this->underlying_; }
+
 			Underlying const & underlying() const throw() { return *this; }
 			Underlying       & underlying()       throw() { return *this; }
 			
-			operator Underlying const & () const throw() { return this->underlying_; }
-			operator Underlying       & ()       throw() { return this->underlying_; }
 		private:
 			Underlying & underlying_;
 		protected:
@@ -158,11 +162,12 @@ namespace universalis { namespace compiler { namespace cast {
 		public:
 			typedef Underlying underlying_type;
 			
+			operator Underlying const & () const throw() { return this->underlying_; }
+			operator Underlying       & ()       throw() { return this->underlying_; }
+
 			Underlying const & underlying() const throw() { return *this; }
 			Underlying       & underlying()       throw() { return *this; }
 			
-			operator Underlying const & () const throw() { return this->underlying_; }
-			operator Underlying       & ()       throw() { return this->underlying_; }
 		private:
 			Underlying underlying_;
 		protected:
@@ -179,4 +184,3 @@ namespace universalis { namespace compiler { namespace cast {
 			}
 	};
 }}}
-
