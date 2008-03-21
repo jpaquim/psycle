@@ -145,7 +145,7 @@ SequencerLine* SequencerView::selectedLine()
 void SequencerView::zoomIn()
 {
 	seqDraw_->setBeatPxLength( std::min( seqDraw_->beatPxLength()+2, 20 ) );
- 	seqDraw_->update();
+	seqDraw_->update();
 	seqDraw_->resetCachedContent();
 }
 
