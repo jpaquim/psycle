@@ -402,7 +402,7 @@ namespace qpsycle {
 				psy::core::SequenceEntry *entry = seqItem->sequenceEntry();
 				seqItem->setPos( entry->tickPosition() * beatPxLength_, 0 );
 			}
-		}		
+		}
 	}
 
 
