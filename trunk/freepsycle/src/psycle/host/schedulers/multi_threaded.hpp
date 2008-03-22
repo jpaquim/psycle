@@ -261,17 +261,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		
 		bool stop_requested_;
 		
-		typedef std::list<node*> terminal_nodes_type;
-		/// nodes with no dependency, that are processed first
-		terminal_nodes_type terminal_nodes_;
-		
-		typedef std::list<node*> blocked_nodes_type;
-		/// nodes that still have dependencies to be processed before them
-		blocked_nodes_type blocked_nodes_;
-
-		typedef std::list<node*> waiting_nodes_type;
+		typedef std::list<node*> nodes_queue_type;
 		/// nodes ready to be processed, just waiting for a free thread
-		waiting_nodes_type waiting_nodes_;
+		nodes_queue_type nodes_queue_;
 
 		void compute_plan();
 		void allocate() throw(std::exception);
