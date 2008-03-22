@@ -251,14 +251,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		} * buffer_pool_instance_;
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		
-		std::thread * thread_;
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
 		std::mutex mutable mutex_;
+		typedef std::scoped_lock<std::mutex> scoped_lock;
+		std::condition<scoped_lock> mutable condition_;
+		
 		bool stop_requested_;
 		bool stop_requested();
-		
-		void x();
 		
 		typedef std::list<node*> terminal_nodes_type;
 		/// nodes with no dependency, that are processed first
@@ -277,12 +277,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void free() throw();
 
 		void process_loop();
-		void process(node &);
-		void process_node_of_output_port_and_set_buffer_for_input_port(ports::output &, ports::input &);
-		void set_buffer_for_output_port(ports::output &, buffer &);
-		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
-		void mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(ports::output &, ports::input &);
-		void check_whether_to_recycle_buffer_in_the_pool(ports::output &);
 };
 
 }}}}
