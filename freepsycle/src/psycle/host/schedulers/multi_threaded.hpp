@@ -7,8 +7,10 @@
 #include "../scheduler.hpp"
 #include <psycle/generic/wrappers.hpp>
 #include <thread>
+#include <date_time>
 #include <mutex>
 #include <list>
+#include <cstdint>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__MULTI_THREADED
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host { namespace schedulers {
@@ -108,8 +110,7 @@ namespace ports {
 			private: std::size_t input_port_count_;
 
 			public:
-				/// convertible to std::size_t
-				///\returns the reference count.
+				/// returns the reference count.
 				std::size_t input_ports_remaining() const throw() { return input_ports_remaining_; }
 				output & operator--() throw() { assert(this->input_ports_remaining() > 0); --input_ports_remaining_; return *this; }
 				void reset() throw() { input_ports_remaining_ = input_port_count(); }
@@ -164,17 +165,31 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	
 	///\name schedule
 	///\{
-		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
-		private: ports::output * multiple_input_port_first_output_port_to_process_;
-
-		public:  std::size_t output_port_count() const throw() { return output_port_count_; }
-		private: std::size_t output_port_count_;
+		public:  bool has_connected_input_ports() const throw() { return has_connected_input_ports_; }
+		private: bool has_connected_input_ports_;
 		
 		public:  void reset() throw() /*override*/ { assert(processed()); processed(false); underlying().reset(); }
+		public:  void         process_first() { process(true); }
+		public:  void         process() { process(false); }
+		private: void         process(bool first);
 		public:  void mark_as_processed() throw() { processed(true); }
 		public:  void         processed(bool processed) throw() { assert(this->processed() != processed); this->processed_ = processed; assert(this->processed() == processed); }
 		public:  bool const & processed() const throw() { return processed_; }
 		private: bool         processed_;
+	///\}
+		
+	///\name schedule ... time measurement (to be used for heuristics)
+	///\{
+		public:  void reset_time_measurement();
+
+		public:  std::nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
+		private: std::nanoseconds accumulated_processing_time_;
+
+		public:  std::uint64_t processing_count() throw() { return processing_count_; }
+		private: std::uint64_t processing_count_;
+
+		public:  std::uint64_t processing_count_no_zeroes() throw() { return processing_count_no_zeroes_; }
+		private: std::uint64_t processing_count_no_zeroes_;
 	///\}
 };
 
@@ -237,11 +252,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		} * buffer_pool_instance_;
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		
+		std::thread * thread_;
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
 		std::mutex mutable mutex_;
 		bool stop_requested_;
 		bool stop_requested();
+		
+		void x();
 		
 		typedef std::list<node*> terminal_nodes_type;
 		/// nodes with no dependency, that are processed first

@@ -10,6 +10,7 @@
 #include <date_time>
 #include <mutex>
 #include <list>
+#include <cstdint>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__SINGLE_THREADED
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host { namespace schedulers {
@@ -109,8 +110,7 @@ namespace ports {
 			private: std::size_t input_port_count_;
 
 			public:
-				/// convertible to std::size_t
-				///\returns the reference count.
+				/// returns the reference count.
 				std::size_t input_ports_remaining() const throw() { return input_ports_remaining_; }
 				output & operator--() throw() { assert(this->input_ports_remaining() > 0); --input_ports_remaining_; return *this; }
 				void reset() throw() { input_ports_remaining_ = input_port_count(); }
@@ -168,8 +168,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
 		private: ports::output * multiple_input_port_first_output_port_to_process_;
 
-		public:  std::size_t output_port_count() const throw() { return output_port_count_; }
-		private: std::size_t output_port_count_;
+		public:  bool has_connected_output_ports() const throw() { return has_connected_output_ports_; }
+		private: bool has_connected_output_ports_;
 		
 		public:  void reset() throw() /*override*/ { assert(processed()); processed(false); underlying().reset(); }
 		public:  void         process_first() { process(true); }
@@ -269,7 +269,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void free() throw();
 
 		void process_loop();
-		void process(node &);
+		void process_recursively(node &);
 		void process_node_of_output_port_and_set_buffer_for_input_port(ports::output &, ports::input &);
 		void set_buffer_for_output_port(ports::output &, buffer &);
 		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
