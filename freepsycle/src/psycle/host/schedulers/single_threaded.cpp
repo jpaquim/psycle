@@ -214,16 +214,6 @@ void scheduler::on_delete_connection(ports::input &, ports::output &) {
 	compute_plan();
 }
 
-namespace {
-	class thread {
-		public:
-			thread(scheduler & scheduler) : scheduler_(scheduler) {}
-			void operator()() { scheduler_(); }
-		private:
-			scheduler & scheduler_;
-	};
-}
-
 void scheduler::start() throw(engine::exception) {
 	if(loggers::information()()) loggers::information()("starting scheduler thread on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(thread_) {
@@ -232,8 +222,8 @@ void scheduler::start() throw(engine::exception) {
 	}
 	try {
 		stop_requested_ = false;
-		// start the scheduling thread. operator()() is the thread start point.
-		thread_ = new std::thread(thread(*this));
+		// start the scheduling thread
+		thread_ = new std::thread(boost::bind(&scheduler::thread_function, this));
 	} catch(std::exception /*boost::thread_resource_error*/ const & e) {
 		loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);
 		std::ostringstream s; s << universalis::compiler::typenameof(e) << ": " << e.what();
@@ -299,7 +289,7 @@ void scheduler::stop() {
 	delete thread_; thread_ = 0;
 }
 
-void scheduler::operator()() {
+void scheduler::thread_function() {
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 	std::string thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
 	universalis::processor::exception::install_handler_in_thread(thread_name);
