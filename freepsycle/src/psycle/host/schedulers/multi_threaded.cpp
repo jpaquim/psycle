@@ -13,8 +13,6 @@
 #include <universalis/operating_system/clocks.hpp>
 #include <sstream>
 #include <limits>
-#if 1
-#else
 namespace psycle { namespace host { namespace schedulers { namespace multi_threaded {
 
 namespace {
@@ -89,8 +87,6 @@ void graph::compute_plan() {
 node::node(node::parent_type & parent, underlying_type & underlying)
 :
 	node_base(parent, underlying),
-	multiple_input_port_first_output_port_to_process_(),
-	output_port_count_(),
 	processed_(true) // set to true because reset() is called first in the processing loop
 {
 	// register to the signals
@@ -164,9 +160,7 @@ namespace ports {
 scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 :
 	host::scheduler<graph_type>(graph),
-	buffer_pool_instance_(),
-	thread_(),
-	stop_requested_()
+	buffer_pool_instance_()
 {
 	#if 0
 	// register to the graph signals
@@ -226,8 +220,16 @@ void scheduler::start() throw(engine::exception) {
 			stop_requested_ = false;
 			// start the threads
 			std::size_t thread_count(2);
-			for(std::size_t i(O); i < thread_count; ++i) threads_.push_back(new std::thread(thread(*this)));
+			for(std::size_t i(0); i < thread_count; ++i) threads_.push_back(new std::thread(thread(*this)));
 		} catch(...) {
+			{ scoped_lock lock(mutex_);
+				stop_requested_ = true;
+			}
+			for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
+				(**i).join();
+				delete *i;
+			}
+			threads_.clear();
 			free();
 			throw;
 		}
@@ -293,8 +295,8 @@ void scheduler::allocate() throw(std::exception) {
 	for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 		typenames::node & node(**i);
 		node.underlying().start();
-		if(node.has_connected_input_ports()) blocked_nodes_.push_back(&node);
-		else waiting_nodes_.push_back(&node);
+		// add terminal nodes to the processing queue
+		if(!node.has_connected_input_ports()) nodes_queue_.push_back(&node);
 		// find the maximum number of channels needed for buffers
 		for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
 			ports::output & output_port(**i);
@@ -314,20 +316,21 @@ void scheduler::allocate() throw(std::exception) {
 void scheduler::free() throw() {
 	loggers::trace()("freeing ...", UNIVERSALIS__COMPILER__LOCATION);
 	delete buffer_pool_instance_; buffer_pool_instance_ = 0;
-	waiting_nodes_.clear();
+	nodes_queue_.clear();
 }
 
 void scheduler::process_loop() {
 	while(true) {
 		typenames::node * node_;
 		{ scoped_lock lock(mutex_);
-			while(!waiting_nodes_.size() && !stop_requested_) condition_.wait(lock);
+			while(!nodes_queue_.size() && !stop_requested_) condition_.wait(lock);
 			if(stop_requested_) return;
 			// There are nodes waiting in the queue. We pop the first one.
-			node = waiting_nodes_.front();
-			waiting_nodes_.pop_front();
+			node_ = nodes_queue_.front();
+			nodes_queue_.pop_front();
 		}
 		typenames::node & node(*node_);
+		if(node.processed()) continue;
 		node.reset();
 		node.process();
 		bool notify(false);
@@ -349,31 +352,27 @@ void scheduler::process_loop() {
 					// iterate over all the input ports of the node
 					for(typenames::node::single_input_ports_type::const_iterator
 						i(node.single_input_ports().begin()),
-						e(node.single_input_ports.end()); i != e; ++i
+						e(node.single_input_ports().end()); i != e; ++i
 					) {
 						// check whether the single input port is connected to an output port
 						ports::output * output_port((**i).output_port());
-						if(output_port) {
-							// get the node of the output port
-							typenames::node & node(output_port->parent())
-							if(!node.processed()) goto input_port_loop;
-						}
+						if(output_port)
+							// check the node of the output port
+							if(!output_port->parent().processed()) goto input_port_loop;
 					}
 					if(node.multiple_input_port()) {
 						// iterate over all the output ports connected to the multiple input port
-						for(
-							ports::inputs::multiple::output_ports_type::const_iterator i(node.multiple_input_port().output_ports().begin()), 
-							e(node.multiple_input_port().output_ports().end()), i != e; ++i
-						) {
-							// get the node of the output port
-							typenames::node & node((**i).parent());
-							if(!node.processed()) goto input_port_loop;
-						}
+						for(ports::inputs::multiple::output_ports_type::const_iterator
+							i(node.multiple_input_port()->output_ports().begin()),
+							e(node.multiple_input_port()->output_ports().end()); i != e; ++i
+						)
+							// check the node of the output port
+							if(!(**i).parent().processed()) goto input_port_loop;
 					}
 					// If we get here, this means all the dependencies of the node have been processed.
 					// We add the node to the processing queue.
 					// (note: for the first node, we could reserve it for ourselves)
-					waiting_nodes.push_back(&node);
+					nodes_queue_.push_back(&node);
 					notify = true;
 				}
 			}
@@ -409,4 +408,3 @@ buffer::~buffer() throw() {
 }
 
 }}}}
-#endif
