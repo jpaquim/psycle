@@ -49,7 +49,7 @@ namespace qpsycle {
 		// don't call setSequenceLine until you have added
 		// this SequencerLine to a scene
 		void setSequenceLine( psy::core::SequenceLine * line );
-		psy::core::SequenceLine *sequenceLine(); 
+		psy::core::SequenceLine *sequenceLine() const; 
 
 		void addItem( psy::core::SinglePattern* pattern );
 		void insertItem( SequencerItem *item );

@@ -51,7 +51,7 @@ namespace qpsycle {
 		void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
 		void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
-		psy::core::SequenceEntry *sequenceEntry(); 
+		psy::core::SequenceEntry *sequenceEntry() const; 
 		void constrainToParent();
 
 		enum { Type = UserType + 5 };

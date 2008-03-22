@@ -53,6 +53,7 @@ QRectF SequencerItem::boundingRect() const
 
 void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
+	Q_UNUSED( option ); Q_UNUSED( widget );
 	if ( isSelected() ) {
 		painter->setPen( Qt::blue ); 
 	} else {
@@ -80,7 +81,7 @@ void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
 	sequenceEntry_ = sequenceEntry;
 }
 
-psy::core::SequenceEntry *SequencerItem::sequenceEntry() {
+psy::core::SequenceEntry *SequencerItem::sequenceEntry() const {
 	return sequenceEntry_;
 }
 

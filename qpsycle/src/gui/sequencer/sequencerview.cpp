@@ -137,7 +137,7 @@ void SequencerView::onCategoryColorChanged()
 }
 
 
-SequencerLine* SequencerView::selectedLine() 
+SequencerLine* SequencerView::selectedLine() const
 {
 	return selectedLine_;
 }
