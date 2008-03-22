@@ -123,6 +123,7 @@ void node::process(bool first) {
 	}
 	++processing_count_;
 }
+
 bool node::is_ready_to_process() {
 	// iterate over all the input ports of the node
 	for(single_input_ports_type::const_iterator
@@ -356,11 +357,10 @@ void scheduler::process_loop() {
 		if(node.processed()) continue;
 		node.reset();
 		node.process();
-		++processed_node_count_;
 		bool notify(false);
 		{ scoped_lock lock(mutex_);
 			// check whether all nodes have been processed
-			if(processed_node_count_ == graph().size()) {
+			if(++processed_node_count_ == graph().size()) {
 				processed_node_count_ = 0;
 				notify = true;
 				// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
@@ -378,16 +378,14 @@ void scheduler::process_loop() {
 				) {
 					ports::output & output_port(**i);
 					// iterate over all the input ports connected to our output port
-					//input_port_loop:
 					for(ports::output::input_ports_type::const_iterator
 						ii(output_port.input_ports().begin()),
 						ie(output_port.input_ports().end()); ii != ie; ++ii
 					) {
 						// get the node of the input port
 						typenames::node & node((**ii).parent());
-						if (node.is_ready_to_process())
-						{
-							// If we get here, this means all the dependencies of the node have been processed.
+						if (node.is_ready_to_process()) {
+							// All the dependencies of the node have been processed.
 							// We add the node to the processing queue.
 							// (note: for the first node, we could reserve it for ourselves)
 							nodes_queue_.push_back(&node);
