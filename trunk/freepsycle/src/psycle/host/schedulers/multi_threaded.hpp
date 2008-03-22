@@ -196,7 +196,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		bool started() { return threads_.size(); }
 		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
 		void stop() /*override*/;
-		void operator()();
 
 	///\name signal slots
 	///\{
@@ -247,6 +246,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
+		void thread_function();
 
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;

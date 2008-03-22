@@ -195,16 +195,6 @@ void scheduler::on_delete_connection(ports::input &, ports::output &) {
 	compute_plan();
 }
 
-namespace {
-	class thread {
-		public:
-			thread(scheduler & scheduler) : scheduler_(scheduler) {}
-			void operator()() { scheduler_(); }
-		private:
-			scheduler & scheduler_;
-	};
-}
-
 void scheduler::start() throw(engine::exception) {
 	if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(threads_.size()) {
@@ -216,9 +206,9 @@ void scheduler::start() throw(engine::exception) {
 		try {
 			stop_requested_ = false;
 			processed_node_count_ = 0;
-			// start the scheduling threads. operator()() is the threads' start point.
+			// start the scheduling threads
 			std::size_t thread_count(2);
-			for(std::size_t i(0); i < thread_count; ++i) threads_.push_back(new std::thread(thread(*this)));
+			for(std::size_t i(0); i < thread_count; ++i) threads_.push_back(new std::thread(boost::bind(&scheduler::thread_function, this)));
 		} catch(...) {
 			{ scoped_lock lock(mutex_);
 				stop_requested_ = true;
@@ -317,7 +307,7 @@ void scheduler::stop() {
 	free();
 }
 
-void scheduler::operator()() {
+void scheduler::thread_function() {
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 	std::string thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name()); ///\todo + number
 	universalis::processor::exception::install_handler_in_thread(thread_name);
@@ -366,7 +356,7 @@ void scheduler::process_loop() {
 			// check whether all nodes have been processed
 			if(++processed_node_count_ == graph().size()) {
 				processed_node_count_ = 0;
-				// resets the queue to the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
+				// reset the queue to the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
 				nodes_queue_ = initial_nodes_queue_;
 				notify = true;
 			} else // check whether successors of the node we processed are now ready.
