@@ -157,14 +157,16 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		public:  bool has_connected_output_ports() const throw() { return has_connected_output_ports_; }
 		private: bool has_connected_output_ports_;
 		
-		public:  void reset() throw() /*override*/ { assert(processed()); processed(false); underlying().reset(); }
-		public:  void         process_first() { process(true); }
-		public:  void         process() { process(false); }
-		private: void         process(bool first);
-		public:  void mark_as_processed() throw() { processed(true); }
-		public:  void         processed(bool processed) throw() { assert(this->processed() != processed); this->processed_ = processed; assert(this->processed() == processed); }
-		public:  bool const & processed() const throw() { return processed_; }
-		private: bool         processed_;
+		public:  void reset() throw() /*override*/ { assert(processed()); processed_ = false; underlying().reset(); }
+
+		public:  void process_first() { process(true); }
+		public:  void process() { process(false); }
+		private: void process(bool first);
+
+		public:  void mark_as_processed() throw() { processed_ = true; }
+
+		public:  bool const processed() const throw() { return processed_; }
+		private: bool       processed_;
 	///\}
 		
 	///\name schedule ... time measurement (to be used for heuristics)

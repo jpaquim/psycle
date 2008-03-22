@@ -67,18 +67,7 @@ void graph::on_delete_connection(ports::input &, ports::output &) {
 
 void graph::compute_plan() {
 	// iterate over all the nodes.
-	for(const_iterator i(begin()) ; i != end() ; ++i) {
-		typenames::node & node(**i);
-		// determine whether the node is a terminal one (i.e. whether some input ports are connected).
-		if(node.multiple_input_port()) node.has_connected_input_ports_ = true;
-		else for(
-			typenames::node::single_input_ports_type::const_iterator i(node.single_input_ports().begin());
-			i != node.single_input_ports().end() ; ++i
-		) if((**i).output_port()) {
-			node.has_connected_input_ports_ = true;
-			break;
-		}
-	}
+	for(const_iterator i(begin()), e(end()); i != e ; ++i) (**i).compute_plan();
 }
 
 /**********************************************************************************************************************/
@@ -113,6 +102,23 @@ void node::reset_time_measurement() {
 	processing_count_ = processing_count_no_zeroes_ = 0;
 }
 
+void node::compute_plan() {
+	// count the number of predecessor nodes
+	if(multiple_input_port()) predecessor_node_count_ = multiple_input_port()->output_ports().size();
+	else predecessor_node_count_ = 0;
+	for(typenames::node::single_input_ports_type::const_iterator
+		i(single_input_ports().begin()),
+		e(single_input_ports().end()); i != e; ++i
+	) if((**i).output_port()) ++predecessor_node_count_;
+}
+
+void node::reset() throw() {
+	assert(processed());
+	processed_ = false;
+	predecessor_node_remaining_count_ = predecessor_node_count_;
+	underlying().reset();
+}
+
 void node::process(bool first) {
 	std::nanoseconds const t0(cpu_time_clock());
 	if(first) underlying().process_first(); else underlying().process();
@@ -122,32 +128,9 @@ void node::process(bool first) {
 		++processing_count_no_zeroes_;
 	}
 	++processing_count_;
+	processed_ = true;
 }
 
-bool node::is_ready_to_process() {
-	// iterate over all the input ports of the node
-	for(single_input_ports_type::const_iterator
-		i(single_input_ports().begin()),
-		e(single_input_ports().end()); i != e; ++i
-	) {
-		// check whether the single input port is connected to an output port
-		ports::output * output_port((**i).output_port());
-		if(output_port)
-		// check the node of the output port
-			if(!output_port->parent().processed()) return false;
-	}
-
-	if(multiple_input_port()) {
-		// iterate over all the output ports connected to the multiple input port
-		for(ports::inputs::multiple::output_ports_type::const_iterator
-			i2(multiple_input_port()->output_ports().begin()),
-			e2(multiple_input_port()->output_ports().end()); i2 != e2; ++i2
-		)
-		// check the node of the output port
-		if(!(**i2).parent().processed()) return false;
-	}
-	return true;
-}
 /**********************************************************************************************************************/
 // port
 port::port(port::parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
@@ -156,11 +139,7 @@ namespace ports {
 
 	/**********************************************************************************************************************/
 	// output
-	output::output(output::parent_type & parent, output::underlying_type & underlying)
-	: output_base(parent, underlying)
-	{
-		reset();
-	}
+	output::output(output::parent_type & parent, output::underlying_type & underlying) : output_base(parent, underlying) {}
 	
 	/**********************************************************************************************************************/
 	// input
@@ -260,33 +239,56 @@ void scheduler::start() throw(engine::exception) {
 }
 
 void scheduler::compute_plan() {
-	if(!started()) return;
-	stop();
-	start();
+	///\todo we need to suspend the threads rather than stop them completely
+	#if 1
+		if(!started()) return;
+		stop();
+		start();
+	#else
+		{ scoped_lock lock(mutex_);
+			suspend_requested_ = true;
+			while(!suspended_) condition_.wait(lock);
+			free();
+			allocate();
+			suspend_requested_ = false;
+		}
+		condition_.notify_all();
+	#endif
 }
 void scheduler::allocate() throw(std::exception) {
 	loggers::trace()("allocating ...", UNIVERSALIS__COMPILER__LOCATION);
+
 	graph().compute_plan();
+
 	std::size_t channels(0);
+
 	// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
 	for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 		typenames::node & node(**i);
 		node.underlying().start();
-		// add terminal nodes to the processing queue
-		if(!node.has_connected_input_ports()) nodes_queue_.push_back(&node);
+
+		// add terminal nodes to the initial processing queue
+		if(node.is_ready_to_process()) initial_nodes_queue_.push_back(&node);
+
 		// find the maximum number of channels needed for buffers
 		for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
 			ports::output & output_port(**i);
 			channels = std::max(channels, output_port.underlying().channels());
 		}
+
 		// initialise time measurement
 		node.reset_time_measurement();
 	}
+
+	// copy the initial processing queue
+	nodes_queue_ = initial_nodes_queue_;
+
 	if(loggers::trace()()) {
 		std::ostringstream s;
 		s << "channels: " << channels;
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
+	
 	buffer_pool_instance_ = new buffer_pool(channels, graph().underlying().events_per_buffer());
 }
 
@@ -294,6 +296,7 @@ void scheduler::free() throw() {
 	loggers::trace()("freeing ...", UNIVERSALIS__COMPILER__LOCATION);
 	delete buffer_pool_instance_; buffer_pool_instance_ = 0;
 	nodes_queue_.clear();
+	initial_nodes_queue_.clear();
 }
 
 void scheduler::stop() {
@@ -356,21 +359,17 @@ void scheduler::process_loop() {
 		typenames::node & node(*node_);
 		if(node.processed()) continue;
 		node.reset();
+		///\todo set the buffer pointers before calling node.process()
 		node.process();
 		bool notify(false);
 		{ scoped_lock lock(mutex_);
 			// check whether all nodes have been processed
 			if(++processed_node_count_ == graph().size()) {
 				processed_node_count_ = 0;
+				// resets the queue to the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
+				nodes_queue_ = initial_nodes_queue_;
 				notify = true;
-				// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
-				for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
-					typenames::node & node(**i);
-					// add terminal nodes to the processing queue
-					if(!node.has_connected_input_ports()) nodes_queue_.push_back(&node);
-				}
-			} else {
-				// check whether successors of the node we processed are now ready.
+			} else // check whether successors of the node we processed are now ready.
 				// iterate over all the output ports of the node we processed
 				for(typenames::node::output_ports_type::const_iterator
 					i(node.output_ports().begin()),
@@ -384,7 +383,8 @@ void scheduler::process_loop() {
 					) {
 						// get the node of the input port
 						typenames::node & node((**ii).parent());
-						if (node.is_ready_to_process()) {
+						node.predecessor_node_processed();
+						if(node.is_ready_to_process()) {
 							// All the dependencies of the node have been processed.
 							// We add the node to the processing queue.
 							// (note: for the first node, we could reserve it for ourselves)
@@ -393,7 +393,6 @@ void scheduler::process_loop() {
 						}
 					}
 				}
-			}
 		}
 		if(notify) condition_.notify_all(); // notify all threads that we added nodes to the queue
 	}

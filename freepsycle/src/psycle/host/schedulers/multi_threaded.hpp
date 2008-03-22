@@ -152,18 +152,23 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	
 	///\name schedule
 	///\{
-		public:  bool has_connected_input_ports() const throw() { return has_connected_input_ports_; }
-		private: bool has_connected_input_ports_;
-		
-		public:  void reset() throw() /*override*/ { assert(processed()); processed(false); underlying().reset(); }
-		public:  bool is_ready_to_process();
-		public:  void         process_first() { process(true); }
-		public:  void         process() { process(false); }
-		private: void         process(bool first);
-		public:  void mark_as_processed() throw() { processed(true); }
-		public:  void         processed(bool processed) throw() { assert(this->processed() != processed); this->processed_ = processed; assert(this->processed() == processed); }
-		public:  bool const & processed() const throw() { return processed_; }
-		private: bool         processed_;
+		public:
+			void compute_plan();
+			void reset() throw() /*override*/;
+			/// called each time a direct predecessor node has been processed
+			void predecessor_node_processed() { assert(predecessor_node_remaining_count_); --predecessor_node_remaining_count_; }
+			/// indicates whether all the predecessors of this node have been processed
+			bool is_ready_to_process() { return !predecessor_node_remaining_count_; }
+		private:
+			std::size_t predecessor_node_count_;
+			std::size_t predecessor_node_remaining_count_;
+
+		public:  void process_first() { process(true); }
+		public:  void process() { process(false); }
+		private: void process(bool first);
+
+		public:  bool const processed() const throw() { return processed_; }
+		private: bool       processed_;
 	///\}
 		
 	///\name schedule ... time measurement (to be used for heuristics)
@@ -252,6 +257,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		typedef std::list<node*> nodes_queue_type;
 		/// nodes ready to be processed, just waiting for a free thread
 		nodes_queue_type nodes_queue_;
+		/// nodes ready to be processed initially (leaves), just waiting for a free thread
+		nodes_queue_type initial_nodes_queue_;
 		
 		std::size_t processed_node_count_;
 
