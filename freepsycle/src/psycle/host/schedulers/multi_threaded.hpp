@@ -106,14 +106,13 @@ namespace ports {
 		
 		///\name schedule
 		///\{
-			public:  std::size_t input_port_count() const throw() { return input_port_count_; }
-			private: std::size_t input_port_count_;
-
 			public:
 				/// returns the reference count.
+				/// note: this reference count is not really needed,
+				//  it just makes it possible to unset the buffer pointer of the output port, which is not strictly needed.
 				std::size_t input_ports_remaining() const throw() { return input_ports_remaining_; }
 				output & operator--() throw() { assert(this->input_ports_remaining() > 0); --input_ports_remaining_; return *this; }
-				void reset() throw() { input_ports_remaining_ = input_port_count(); }
+				void reset() throw() { input_ports_remaining_ = input_ports().size(); }
 			private:
 				std::size_t input_ports_remaining_;
 		///\}
