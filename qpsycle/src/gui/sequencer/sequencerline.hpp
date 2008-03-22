@@ -30,61 +30,63 @@ namespace psy { namespace core {
 #include <psycle/core/signalslib.h>
 
 #include <QGraphicsItem>
-#include <QObject>
+
 
 namespace qpsycle {
 
-class SequencerDraw;
-class SequencerItem;
+	class SequencerDraw;
+	class SequencerItem;
 
-class SequencerLine : public QObject, public QGraphicsItem, public boost::signalslib::trackable
-{
-	Q_OBJECT
-public:
-	SequencerLine( SequencerDraw *sDraw );
-	~SequencerLine();
+	class SequencerLine : public QObject, public QGraphicsItem, public boost::signalslib::trackable {
+		Q_OBJECT
+		public:
+		SequencerLine( SequencerDraw *sDraw );
+		~SequencerLine();
 
-	QRectF boundingRect() const;
-	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0 );
+		QRectF boundingRect() const;
+		void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0 );
 
-	// don't call setSequenceLine until you have added
-	// this SequencerLine to a scene
-	void setSequenceLine( psy::core::SequenceLine * line );
-	psy::core::SequenceLine *sequenceLine(); 
+		// don't call setSequenceLine until you have added
+		// this SequencerLine to a scene
+		void setSequenceLine( psy::core::SequenceLine * line );
+		psy::core::SequenceLine *sequenceLine(); 
 
-	void addItem( psy::core::SinglePattern* pattern );
-	void insertItem( SequencerItem *item );
-	void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
+		void addItem( psy::core::SinglePattern* pattern );
+		void insertItem( SequencerItem *item );
+		void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
 
-	SequencerDraw *sDraw_;
+		// To resolve ambiguity between QObject::children() and QGraphicsItem::children().
+		QList<QGraphicsItem*> children() const { return QGraphicsItem::children(); }
 
-	enum { Type = UserType + 6 };
-	int type() const  // Enable the use of qgraphicsitem_cast with this item.
-	{
+		SequencerDraw *sDraw_;
 
-		return Type;
-	}
+		enum { Type = UserType + 6 };
+		int type() const  // Enable the use of qgraphicsitem_cast with this item.
+			{
 
-protected:
-	void mousePressEvent( QGraphicsSceneMouseEvent *event );
+				return Type;
+			}
 
-signals:
-	void clicked( SequencerLine* );
+	protected:
+		void mousePressEvent( QGraphicsSceneMouseEvent *event );
 
-private slots:
-	void onItemClicked(SequencerItem*);
+	signals:
+		void clicked( SequencerLine* );
 
-private:
-	// does not take ownership of entry.
-	void addEntry( psy::core::SequenceEntry* entry );
+	private slots:
+		void onItemClicked(SequencerItem*);
 
-	// does not delete entry.
-	void removeEntry(psy::core::SequenceEntry* entry);
+	private:
+		// does not take ownership of entry.
+		void addEntry( psy::core::SequenceEntry* entry );
 
-	psy::core::SequenceLine *seqLine_;
-	std::list<SequencerItem*> items_;
-	typedef std::list<SequencerItem*>::iterator items_iterator;
-};
+		// does not delete entry.
+		void removeEntry(psy::core::SequenceEntry* entry);
+
+		psy::core::SequenceLine *seqLine_;
+		std::list<SequencerItem*> items_;
+		typedef std::list<SequencerItem*>::iterator items_iterator;
+	};
 
 } // namespace qpsycle
 

@@ -351,12 +351,12 @@ namespace qpsycle {
 		selectedLine_ = line;
 	}
 
-	SequencerLine* SequencerDraw::selectedLine() 
+	SequencerLine* SequencerDraw::selectedLine() const
 	{
 		return selectedLine_;
 	}
 
-	std::vector<SequencerLine*> SequencerDraw::lines()
+	std::vector<SequencerLine*> SequencerDraw::lines() const
 	{
 		return lines_;
 	}
@@ -390,6 +390,19 @@ namespace qpsycle {
 	void SequencerDraw::setBeatPxLength( int beatPxLength )
 	{
 		beatPxLength_ = beatPxLength;
+
+		// Update the position in the scene of each sequencer item based on
+		// the new beatpxlength.
+		for ( lines_iterator it = lines_.begin(); it != lines_.end(); it++ ) 
+		{
+			QList<QGraphicsItem*> children = (*it)->children();
+			foreach ( QGraphicsItem *child, children )
+			{
+				SequencerItem *seqItem = qgraphicsitem_cast<SequencerItem*>( child );
+				psy::core::SequenceEntry *entry = seqItem->sequenceEntry();
+				seqItem->setPos( entry->tickPosition() * beatPxLength_, 0 );
+			}
+		}		
 	}
 
 

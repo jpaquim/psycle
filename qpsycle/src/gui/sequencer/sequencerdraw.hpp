@@ -46,24 +46,24 @@ class BeatRuler;
 
 class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
 {
-Q_OBJECT
+	Q_OBJECT
 
 public:
 	SequencerDraw( SequencerView *seqView );
 
 	void addPattern( psy::core::SinglePattern *pattern );
 
-	SequencerView *sequencerView() { return seqView_; }
-	PlayLine *pLine() { return pLine_; }
+	SequencerView *sequencerView() const { return seqView_; }
+	PlayLine *pLine() const { return pLine_; }
 
 	int beatPxLength() const;
 	void setBeatPxLength( int beatPxLength );
 
 	int lineHeight() const { return lineHeight_; }
 	bool gridSnap() const;
-	SequencerLine *selectedLine();
+	SequencerLine *selectedLine() const;
 	void setSelectedLine( SequencerLine *line );
-	std::vector<SequencerLine*> lines();
+	std::vector<SequencerLine*> lines() const;
 
 public slots:
 	void insertTrack();
