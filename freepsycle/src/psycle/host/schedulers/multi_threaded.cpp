@@ -125,9 +125,9 @@ void node::process(bool first) {
 }
 bool node::is_ready_to_process() {
 	// iterate over all the input ports of the node
-	for(typenames::node::single_input_ports_type::const_iterator
-		i(node.single_input_ports().begin()),
-		e(node.single_input_ports().end()); i != e; ++i
+	for(single_input_ports_type::const_iterator
+		i(single_input_ports().begin()),
+		e(single_input_ports().end()); i != e; ++i
 	) {
 		// check whether the single input port is connected to an output port
 		ports::output * output_port((**i).output_port());
@@ -136,11 +136,11 @@ bool node::is_ready_to_process() {
 			if(!output_port->parent().processed()) return false;
 	}
 
-	if(node.multiple_input_port()) {
+	if(multiple_input_port()) {
 		// iterate over all the output ports connected to the multiple input port
 		for(ports::inputs::multiple::output_ports_type::const_iterator
-			i2(node.multiple_input_port()->output_ports().begin()),
-			e2(node.multiple_input_port()->output_ports().end()); i2 != e2; ++i2
+			i2(multiple_input_port()->output_ports().begin()),
+			e2(multiple_input_port()->output_ports().end()); i2 != e2; ++i2
 		)
 		// check the node of the output port
 		if(!(**i2).parent().processed()) return false;
