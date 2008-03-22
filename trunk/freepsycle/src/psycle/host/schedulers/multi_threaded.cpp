@@ -319,7 +319,7 @@ void scheduler::free() throw() {
 
 void scheduler::process_loop() {
 	while(true) {
-		typenames::node * node;
+		typenames::node * node_;
 		{ scoped_lock lock(mutex_);
 			while(!waiting_nodes_.size() && !stop_requested_) condition_.wait(lock);
 			if(stop_requested_) return;
@@ -327,31 +327,54 @@ void scheduler::process_loop() {
 			node = waiting_nodes_.front();
 			waiting_nodes_.pop_front();
 		}
-		node->reset();
-		node->process();
+		typenames::node & node(*node_);
+		node.reset();
+		node.process();
 		bool notify(false);
 		{ scoped_lock lock(mutex_);
 			// iterate over all the output ports of the node we processed
-			for(typenames::node::output_ports_type::const_iterator i(n->output_ports().begin()), e(n->output_ports().end()); i != e; ++i) {
+			for(typenames::node::output_ports_type::const_iterator
+				i(node.output_ports().begin()),
+				e(node.output_ports().end()); i != e; ++i
+			) {
 				ports::output & output_port(**i);
 				// iterate over all the input ports connected to our output port
-				for(ports::output::input_ports_type::const_iterator i(output_port
-				// check whether the output port is connected
-				if(output_port.input_port()) {
-					// get the input port connected to our output port
-					ports::input & input_port(*output_port.input_port());
-					--input_port;
-					if(!input_port.remaining_output_port_count) {
-						node & n(input_port.parent());
-						--n;
-						if(!n.remaining_count()) {
-							// All the dependencies of the node have been processed.
-							// We add the node to the processing queue.
-							// (note: for the first node, we could reserve it for ourselves)
-							waiting_nodes.push_back(&n);
-							notify = true;
+				input_port_loop:
+				for(ports::output::input_ports_type::const_iterator
+					i(output_port.input_ports().begin()),
+					e(output_port.input_ports().end()); i != e; ++i
+				) {
+					// get the node of the input port
+					typenames::node & node((**i).parent());
+					// iterate over all the input ports of the node
+					for(typenames::node::single_input_ports_type::const_iterator
+						i(node.single_input_ports().begin()),
+						e(node.single_input_ports.end()); i != e; ++i
+					) {
+						// check whether the single input port is connected to an output port
+						ports::output * output_port((**i).output_port());
+						if(output_port) {
+							// get the node of the output port
+							typenames::node & node(output_port->parent())
+							if(!node.processed()) goto input_port_loop;
 						}
 					}
+					if(node.multiple_input_port()) {
+						// iterate over all the output ports connected to the multiple input port
+						for(
+							ports::inputs::multiple::output_ports_type::const_iterator i(node.multiple_input_port().output_ports().begin()), 
+							e(node.multiple_input_port().output_ports().end()), i != e; ++i
+						) {
+							// get the node of the output port
+							typenames::node & node((**i).parent());
+							if(!node.processed()) goto input_port_loop;
+						}
+					}
+					// If we get here, this means all the dependencies of the node have been processed.
+					// We add the node to the processing queue.
+					// (note: for the first node, we could reserve it for ourselves)
+					waiting_nodes.push_back(&node);
+					notify = true;
 				}
 			}
 		}
