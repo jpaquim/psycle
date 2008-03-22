@@ -123,7 +123,30 @@ void node::process(bool first) {
 	}
 	++processing_count_;
 }
+bool node::is_ready_to_process() {
+	// iterate over all the input ports of the node
+	for(typenames::node::single_input_ports_type::const_iterator
+		i(node.single_input_ports().begin()),
+		e(node.single_input_ports().end()); i != e; ++i
+	) {
+		// check whether the single input port is connected to an output port
+		ports::output * output_port((**i).output_port());
+		if(output_port)
+		// check the node of the output port
+		if(!output_port->parent().processed()) return false;
+	}
 
+	if(node.multiple_input_port()) {
+		// iterate over all the output ports connected to the multiple input port
+		for(ports::inputs::multiple::output_ports_type::const_iterator
+			i2(node.multiple_input_port()->output_ports().begin()),
+			e2(node.multiple_input_port()->output_ports().end()); i2 != e2; ++i2
+		)
+		// check the node of the output port
+		if(!(**i2).parent().processed()) return false;
+	}
+	return true;
+}
 /**********************************************************************************************************************/
 // port
 port::port(port::parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
@@ -349,51 +372,28 @@ void scheduler::process_loop() {
 			} else {
 				// check whether successors of the node we processed are now ready.
 				// iterate over all the output ports of the node we processed
-				//for(typenames::node::output_ports_type::const_iterator
-					//i(node.output_ports().begin()),
-					//e(node.output_ports().end()); i != e; ++i
-				//) {
-				typenames::node::output_ports_type::const_iterator
-				i(node.output_ports().begin()),
-				e(node.output_ports().end());
-				while(i != e ) {
+				for(typenames::node::output_ports_type::const_iterator
+					i(node.output_ports().begin()),
+					e(node.output_ports().end()); i != e; ++i
+				) {
 					ports::output & output_port(**i);
 					// iterate over all the input ports connected to our output port
 					//input_port_loop:
 					for(ports::output::input_ports_type::const_iterator
-						i(output_port.input_ports().begin()),
-						e(output_port.input_ports().end()); i != e; ++i
+						ii(output_port.input_ports().begin()),
+						ie(output_port.input_ports().end()); ii != ie; ++ii
 					) {
 						// get the node of the input port
-						typenames::node & node((**i).parent());
-						// iterate over all the input ports of the node
-						for(typenames::node::single_input_ports_type::const_iterator
-							i(node.single_input_ports().begin()),
-							e(node.single_input_ports().end()); i != e; ++i
-						) {
-							// check whether the single input port is connected to an output port
-							ports::output * output_port((**i).output_port());
-							if(output_port)
-								// check the node of the output port
-								if(!output_port->parent().processed()) goto input_port_loop;
+						typenames::node & node((**ii).parent());
+						if (node.is_ready_to_process())
+						{
+							// If we get here, this means all the dependencies of the node have been processed.
+							// We add the node to the processing queue.
+							// (note: for the first node, we could reserve it for ourselves)
+							nodes_queue_.push_back(&node);
+							notify = true;
 						}
-						if(node.multiple_input_port()) {
-							// iterate over all the output ports connected to the multiple input port
-							for(ports::inputs::multiple::output_ports_type::const_iterator
-								i(node.multiple_input_port()->output_ports().begin()),
-								e(node.multiple_input_port()->output_ports().end()); i != e; ++i
-							)
-								// check the node of the output port
-								if(!(**i).parent().processed()) goto input_port_loop;
-						}
-						// If we get here, this means all the dependencies of the node have been processed.
-						// We add the node to the processing queue.
-						// (note: for the first node, we could reserve it for ourselves)
-						nodes_queue_.push_back(&node);
-						notify = true;
 					}
-					input_port_loop:
-					++i;
 				}
 			}
 		}
