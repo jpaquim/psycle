@@ -346,48 +346,48 @@ void scheduler::process_loop() {
 					// add terminal nodes to the processing queue
 					if(!node.has_connected_input_ports()) nodes_queue_.push_back(&node);
 				}
-			}
-
-			// check whether successors of the node we processed are now ready.
-			// iterate over all the output ports of the node we processed
-			for(typenames::node::output_ports_type::const_iterator
-				i(node.output_ports().begin()),
-				e(node.output_ports().end()); i != e; ++i
-			) {
-				ports::output & output_port(**i);
-				// iterate over all the input ports connected to our output port
-				input_port_loop:
-				for(ports::output::input_ports_type::const_iterator
-					i(output_port.input_ports().begin()),
-					e(output_port.input_ports().end()); i != e; ++i
+			} else {
+				// check whether successors of the node we processed are now ready.
+				// iterate over all the output ports of the node we processed
+				for(typenames::node::output_ports_type::const_iterator
+					i(node.output_ports().begin()),
+					e(node.output_ports().end()); i != e; ++i
 				) {
-					// get the node of the input port
-					typenames::node & node((**i).parent());
-					// iterate over all the input ports of the node
-					for(typenames::node::single_input_ports_type::const_iterator
-						i(node.single_input_ports().begin()),
-						e(node.single_input_ports().end()); i != e; ++i
+					ports::output & output_port(**i);
+					// iterate over all the input ports connected to our output port
+					input_port_loop:
+					for(ports::output::input_ports_type::const_iterator
+						i(output_port.input_ports().begin()),
+						e(output_port.input_ports().end()); i != e; ++i
 					) {
-						// check whether the single input port is connected to an output port
-						ports::output * output_port((**i).output_port());
-						if(output_port)
-							// check the node of the output port
-							if(!output_port->parent().processed()) goto input_port_loop;
+						// get the node of the input port
+						typenames::node & node((**i).parent());
+						// iterate over all the input ports of the node
+						for(typenames::node::single_input_ports_type::const_iterator
+							i(node.single_input_ports().begin()),
+							e(node.single_input_ports().end()); i != e; ++i
+						) {
+							// check whether the single input port is connected to an output port
+							ports::output * output_port((**i).output_port());
+							if(output_port)
+								// check the node of the output port
+								if(!output_port->parent().processed()) goto input_port_loop;
+						}
+						if(node.multiple_input_port()) {
+							// iterate over all the output ports connected to the multiple input port
+							for(ports::inputs::multiple::output_ports_type::const_iterator
+								i(node.multiple_input_port()->output_ports().begin()),
+								e(node.multiple_input_port()->output_ports().end()); i != e; ++i
+							)
+								// check the node of the output port
+								if(!(**i).parent().processed()) goto input_port_loop;
+						}
+						// If we get here, this means all the dependencies of the node have been processed.
+						// We add the node to the processing queue.
+						// (note: for the first node, we could reserve it for ourselves)
+						nodes_queue_.push_back(&node);
+						notify = true;
 					}
-					if(node.multiple_input_port()) {
-						// iterate over all the output ports connected to the multiple input port
-						for(ports::inputs::multiple::output_ports_type::const_iterator
-							i(node.multiple_input_port()->output_ports().begin()),
-							e(node.multiple_input_port()->output_ports().end()); i != e; ++i
-						)
-							// check the node of the output port
-							if(!(**i).parent().processed()) goto input_port_loop;
-					}
-					// If we get here, this means all the dependencies of the node have been processed.
-					// We add the node to the processing queue.
-					// (note: for the first node, we could reserve it for ourselves)
-					nodes_queue_.push_back(&node);
-					notify = true;
 				}
 			}
 		}
