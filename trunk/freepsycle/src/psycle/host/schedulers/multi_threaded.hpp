@@ -246,7 +246,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
-		void thread_function();
+		void thread_function(std::size_t thread_number);
 
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;
