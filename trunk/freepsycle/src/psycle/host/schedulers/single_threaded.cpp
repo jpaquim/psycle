@@ -157,11 +157,7 @@ namespace ports {
 
 	/**********************************************************************************************************************/
 	// output
-	output::output(output::parent_type & parent, output::underlying_type & underlying)
-	: output_base(parent, underlying)
-	{
-		reset();
-	}
+	output::output(output::parent_type & parent, output::underlying_type & underlying) : output_base(parent, underlying) {}
 	
 	/**********************************************************************************************************************/
 	// input
@@ -450,7 +446,7 @@ void scheduler::process_recursively(node & node) {
 				set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
 				node.process_first();
 			}
-			mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(first_output_port_to_process, *node.multiple_input_port());
+			check_whether_to_recycle_buffer_in_the_pool(--first_output_port_to_process.buffer());
 		}
 		// process with remaining input buffers
 		for(ports::inputs::multiple::output_ports_type::const_iterator i(node.multiple_input_port()->output_ports().begin()) ; i != node.multiple_input_port()->output_ports().end() ; ++i) {
@@ -458,18 +454,18 @@ void scheduler::process_recursively(node & node) {
 			if(&output_port == &first_output_port_to_process) continue;
 			process_node_of_output_port_and_set_buffer_for_input_port(output_port, *node.multiple_input_port());
 			node.process();
-			mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(output_port, *node.multiple_input_port());
+			check_whether_to_recycle_buffer_in_the_pool(--output_port.buffer());
 		}
 	}
 	// check if the content of the node input ports buffers must be preserved for further reading
 	for(typenames::node::single_input_ports_type::const_iterator i(node.single_input_ports().begin()) ; i != node.single_input_ports().end() ; ++i) {
 		ports::inputs::single & single_input_port(**i);
-		if(single_input_port.output_port()) mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(*single_input_port.output_port(), single_input_port);
+		if(single_input_port.output_port()) check_whether_to_recycle_buffer_in_the_pool(--single_input_port.output_port()->buffer());
 	}
 	// check if the content of the node output ports buffers must be preserved for further reading
 	for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
 		ports::output & output_port(**i);
-		check_whether_to_recycle_buffer_in_the_pool(output_port);
+		check_whether_to_recycle_buffer_in_the_pool(output_port.buffer());
 	}
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
@@ -502,35 +498,18 @@ void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool
 /// sets a buffer for the output port
 void inline scheduler::set_buffer_for_output_port(ports::output & output_port, buffer & buffer) {
 	output_port.buffer(&buffer);
-	output_port.reset(); // reset the remaining input port count
-	buffer += output_port.input_ports_remaining(); // set the expected pending read count
-}
-
-/// decrements the remaining expected read count of the buffer and
-/// checks if the content of the buffer must be preserved for further reading.
-void inline scheduler::mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(ports::output & output_port, ports::input & input_port) {
-	input_port.buffer(0);
-	--output_port;
-	--output_port.buffer();
-	check_whether_to_recycle_buffer_in_the_pool(output_port);
+	buffer += output_port.input_ports().size(); // set the expected pending read count
 }
 
 /// checks if the content of the buffer must be preserved for further reading and
 /// if not recycles it in the pool.
-void inline scheduler::check_whether_to_recycle_buffer_in_the_pool(ports::output & output_port) {
+void inline scheduler::check_whether_to_recycle_buffer_in_the_pool(buffer & buffer) {
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
-		s
-			<< "output port " << output_port.underlying().qualified_name()
-			<< ": " << output_port.input_ports_remaining() << " to go, "
-			<< "buffer: " << &output_port.underlying().buffer()
-			<< ": " << output_port.buffer().reference_count() << " to go";
+		s << "buffer: " << &buffer << ": " << buffer.reference_count() << " to go";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	if(!output_port.input_ports_remaining()) {
-		if(!output_port.buffer().reference_count()) (*buffer_pool_instance_)(output_port.buffer()); // recycle the buffer in the pool
-		output_port.buffer(0);
-	}
+	if(!buffer.reference_count()) (*buffer_pool_instance_)(buffer); // recycle the buffer in the pool
 }
 
 /**********************************************************************************************************************/

@@ -103,19 +103,6 @@ namespace ports {
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 		protected: friend class virtual_factory_access;
 			output(parent_type &, underlying_type &);
-		
-		///\name schedule
-		///\{
-			public:
-				/// returns the reference count.
-				/// note: this reference count is not really needed,
-				//  it just makes it possible to unset the buffer pointer of the output port, which is not strictly needed.
-				std::size_t input_ports_remaining() const throw() { return input_ports_remaining_; }
-				output & operator--() throw() { assert(this->input_ports_remaining() > 0); --input_ports_remaining_; return *this; }
-				void reset() throw() { input_ports_remaining_ = input_ports().size(); }
-			private:
-				std::size_t input_ports_remaining_;
-		///\}
 	};
 
 	/**********************************************************************************************************************/
@@ -272,8 +259,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void process_node_of_output_port_and_set_buffer_for_input_port(ports::output &, ports::input &);
 		void set_buffer_for_output_port(ports::output &, buffer &);
 		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
-		void mark_buffer_as_read_once_more_and_check_whether_to_recycle_it_in_the_pool(ports::output &, ports::input &);
-		void check_whether_to_recycle_buffer_in_the_pool(ports::output &);
+		void check_whether_to_recycle_buffer_in_the_pool(buffer &);
 };
 
 }}}}
