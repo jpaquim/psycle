@@ -104,19 +104,6 @@ namespace ports {
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 		protected: friend class virtual_factory_access;
 			output(parent_type &, underlying_type &);
-		
-		///\name schedule
-		///\{
-			public:
-				/// returns the reference count.
-				/// note: this reference count is not really needed,
-				///  it just makes it possible to unset the buffer pointer of the output port, which is not strictly needed.
-				std::size_t input_ports_remaining() const throw() { return input_ports_remaining_; }
-				output & operator--() throw() { assert(this->input_ports_remaining() > 0); --input_ports_remaining_; return *this; }
-				void reset() throw() { input_ports_remaining_ = input_ports().size(); }
-			private:
-				std::size_t input_ports_remaining_;
-		///\}
 	};
 
 	/**********************************************************************************************************************/
