@@ -349,13 +349,17 @@ void scheduler::process_loop() {
 			} else {
 				// check whether successors of the node we processed are now ready.
 				// iterate over all the output ports of the node we processed
-				for(typenames::node::output_ports_type::const_iterator
-					i(node.output_ports().begin()),
-					e(node.output_ports().end()); i != e; ++i
-				) {
+				//for(typenames::node::output_ports_type::const_iterator
+					//i(node.output_ports().begin()),
+					//e(node.output_ports().end()); i != e; ++i
+				//) {
+				typenames::node::output_ports_type::const_iterator
+				i(node.output_ports().begin()),
+				e(node.output_ports().end());
+				while(i != e ) {
 					ports::output & output_port(**i);
 					// iterate over all the input ports connected to our output port
-					input_port_loop:
+					//input_port_loop:
 					for(ports::output::input_ports_type::const_iterator
 						i(output_port.input_ports().begin()),
 						e(output_port.input_ports().end()); i != e; ++i
@@ -388,6 +392,8 @@ void scheduler::process_loop() {
 						nodes_queue_.push_back(&node);
 						notify = true;
 					}
+					input_port_loop:
+					++i;
 				}
 			}
 		}
