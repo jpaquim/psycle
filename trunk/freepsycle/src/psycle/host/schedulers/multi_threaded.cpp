@@ -237,6 +237,7 @@ void scheduler::compute_plan() {
 	#else
 		{ scoped_lock lock(mutex_);
 			suspend_requested_ = true;
+			condition_.notify_all();
 			while(!suspended_) condition_.wait(lock);
 			free();
 			allocate();
@@ -298,6 +299,7 @@ void scheduler::stop() {
 	{ scoped_lock lock(mutex_);
 		stop_requested_ = true;
 	}
+	condition_.notify_all();
 	for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
 		(**i).join();
 		delete *i;
