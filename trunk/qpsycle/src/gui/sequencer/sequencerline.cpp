@@ -74,7 +74,7 @@ void SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
 	}
 }
 
-psy::core::SequenceLine *SequencerLine::sequenceLine() 
+psy::core::SequenceLine *SequencerLine::sequenceLine() const
 {
 	return seqLine_;
 }
