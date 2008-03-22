@@ -208,7 +208,8 @@ void scheduler::start() throw(engine::exception) {
 			processed_node_count_ = 0;
 			// start the scheduling threads
 			std::size_t thread_count(2);
-			for(std::size_t i(0); i < thread_count; ++i) threads_.push_back(new std::thread(boost::bind(&scheduler::thread_function, this)));
+			for(std::size_t i(0); i < thread_count; ++i)
+				threads_.push_back(new std::thread(boost::bind(&scheduler::thread_function, this, i)));
 		} catch(...) {
 			{ scoped_lock lock(mutex_);
 				stop_requested_ = true;
@@ -309,10 +310,15 @@ void scheduler::stop() {
 	free();
 }
 
-void scheduler::thread_function() {
+void scheduler::thread_function(std::size_t thread_number) {
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
-	std::string thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name()); ///\todo + number
-	universalis::processor::exception::install_handler_in_thread(thread_name);
+
+	{ // set thread name
+		std::ostringstream s;
+		s << universalis::compiler::typenameof(*this) << "#" << graph().underlying().name() << thread_number;
+		universalis::processor::exception::install_handler_in_thread(s.str());
+	}
+
 	try {
 		try {
 			process_loop();
