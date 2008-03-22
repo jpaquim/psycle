@@ -336,10 +336,6 @@ void scheduler::allocate() throw(std::exception) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	buffer_pool_instance_ = new buffer_pool(channels, graph().underlying().events_per_buffer());
-
-	// start the threads
-	std::size_t thread_count(2);
-	for(std::size_t i(O); i < thread_count; ++i) threads_.push_back(new std::thread(thread(*this)));
 }
 
 void scheduler::free() throw() {

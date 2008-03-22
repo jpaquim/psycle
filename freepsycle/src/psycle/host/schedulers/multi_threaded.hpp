@@ -9,6 +9,7 @@
 #include <thread>
 #include <date_time>
 #include <mutex>
+#include <condition>
 #include <list>
 #include <cstdint>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__MULTI_THREADED
