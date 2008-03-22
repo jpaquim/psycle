@@ -331,11 +331,6 @@ void port::buffer(typenames::buffer * const buffer) {
 		}
 		return;
 	}
-	do_buffer(buffer); // polymorphic virtual call
-}
-
-void port::do_buffer(typenames::buffer * const buffer) {
-	assert("not yet assigned another buffer: " && (not buffer or not this->buffer_));
 	this->buffer_ = buffer;
 }
 
@@ -468,15 +463,6 @@ namespace ports {
 			s << qualified_name() << ": deleting engine port output";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-	}
-
-	void output::do_buffer(engine::buffer * const buffer) {
-		port::do_buffer(buffer);
-		// propagates the new buffer to the connected input ports:
-		/*
-		for(input_ports_type::const_iterator i(input_ports().begin()) ; i != input_ports().end() ; ++i)
-			(**i).do_buffer(buffer);
-		*/
 	}
 
 	void output::do_propagate_channels() throw(exception) {

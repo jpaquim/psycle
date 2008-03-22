@@ -71,14 +71,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::ba
 	///\name buffer
 	///\{
 		public:
-			/// assigns a buffer to this port (or unassigns if 0) only if the given buffer is different.
+			/// assigns a buffer to this port (or unassigns if 0).
 			void buffer(typenames::buffer * const);
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
 			typenames::buffer & buffer() const throw() { return *buffer_; }
-		protected:
-			/// assigns a buffer to this port (or unassigns if 0) without checking if the given buffer is different.
-			///\pre either the given buffer is 0, or else, this port has not yet been assigned a buffer.
-			void virtual do_buffer(typenames::buffer * const);
 		private:
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
 			typenames::buffer * buffer_;
@@ -168,7 +164,6 @@ namespace ports {
 			virtual ~output();
 
 		protected:
-			void do_buffer(engine::buffer * const) /*override*/;
 			void do_propagate_channels() throw(exception) /*override*/;
 			void do_propagate_seconds_per_event() /*override*/;
 
