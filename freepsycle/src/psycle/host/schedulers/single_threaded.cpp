@@ -232,13 +232,9 @@ namespace {
 }
 
 void scheduler::start() throw(engine::exception) {
-	if(loggers::information()()) {
-		loggers::information()("starting scheduler thread on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
-	}
+	if(loggers::information()()) loggers::information()("starting scheduler thread on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(thread_) {
-		if(loggers::information()()) {
-			loggers::information()("scheduler thread is already running", UNIVERSALIS__COMPILER__LOCATION);
-		}
+		if(loggers::information()()) loggers::information()("scheduler thread is already running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
 	try {
@@ -251,33 +247,26 @@ void scheduler::start() throw(engine::exception) {
 }
 
 void scheduler::stop() {
-	if(loggers::information()()) {
-		loggers::information()("terminating and joining scheduler thread ...", UNIVERSALIS__COMPILER__LOCATION);
-	}
+	if(loggers::information()()) loggers::information()("terminating and joining scheduler thread ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!thread_) {
-		if(loggers::information()()) {
-			loggers::information()("scheduler thread was not running", UNIVERSALIS__COMPILER__LOCATION);
-		}
+		if(loggers::information()()) loggers::information()("scheduler thread was not running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
-	{
-		std::scoped_lock<std::mutex> lock(mutex_);
+	{ scoped_lock lock(mutex_);
 		stop_requested_ = true;
 	}
 	thread_->join();
-	if(loggers::information()()) {
-		loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
-	}
+	if(loggers::information()()) loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
 	delete thread_; thread_ = 0;
 }
 
 bool scheduler::stop_requested() {
-	std::scoped_lock<std::mutex> lock(mutex_);
+	scoped_lock lock(mutex_);
 	return stop_requested_;
 }
 
 void scheduler::operator()() {
-	loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 	std::string thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
 	universalis::processor::exception::install_handler_in_thread(thread_name);
 	try {
@@ -304,15 +293,13 @@ void scheduler::operator()() {
 			throw;
 		}
 	} catch(...) {
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
+		{ scoped_lock lock(mutex_);
 			stop_requested_ = false;
 		}
 		throw;
 	}
 	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
-	{
-		std::scoped_lock<std::mutex> lock(mutex_);
+	{ scoped_lock lock(mutex_);
 		stop_requested_ = false;
 	}
 }

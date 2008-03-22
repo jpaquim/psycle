@@ -254,12 +254,12 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
-		std::mutex mutable mutex_;
+
 		typedef std::scoped_lock<std::mutex> scoped_lock;
+		std::mutex mutable mutex_;
 		std::condition<scoped_lock> mutable condition_;
 		
 		bool stop_requested_;
-		bool stop_requested();
 		
 		typedef std::list<node*> terminal_nodes_type;
 		/// nodes with no dependency, that are processed first
