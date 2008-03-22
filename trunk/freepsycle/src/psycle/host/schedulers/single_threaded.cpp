@@ -158,9 +158,7 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// output
 	output::output(output::parent_type & parent, output::underlying_type & underlying)
-	:
-		output_base(parent, underlying),
-		input_port_count_(underlying.input_ports().size())
+	: output_base(parent, underlying)
 	{
 		reset();
 	}
