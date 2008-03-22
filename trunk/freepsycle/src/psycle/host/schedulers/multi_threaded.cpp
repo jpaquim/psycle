@@ -133,7 +133,7 @@ bool node::is_ready_to_process() {
 		ports::output * output_port((**i).output_port());
 		if(output_port)
 		// check the node of the output port
-		if(!output_port->parent().processed()) return false;
+			if(!output_port->parent().processed()) return false;
 	}
 
 	if(node.multiple_input_port()) {

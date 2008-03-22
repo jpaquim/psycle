@@ -169,6 +169,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		private: bool has_connected_input_ports_;
 		
 		public:  void reset() throw() /*override*/ { assert(processed()); processed(false); underlying().reset(); }
+		public:  bool is_ready_to_process();
 		public:  void         process_first() { process(true); }
 		public:  void         process() { process(false); }
 		private: void         process(bool first);
