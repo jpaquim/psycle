@@ -242,7 +242,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		
 		std::thread * thread_;
+		
+		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;
+		
 		bool stop_requested_;
 		bool stop_requested();
 		
