@@ -192,12 +192,6 @@ void scheduler::on_delete_connection(ports::input &, ports::output &) {
 	compute_plan();
 }
 
-void scheduler::compute_plan() {
-	if(!started()) return;
-	stop();
-	start();
-}
-
 namespace {
 	class thread {
 		public:
@@ -218,7 +212,8 @@ void scheduler::start() throw(engine::exception) {
 		allocate();
 		try {
 			stop_requested_ = false;
-			// start the threads
+			processed_node_count_ = 0;
+			// start the scheduling threads. operator()() is the threads' start point.
 			std::size_t thread_count(2);
 			for(std::size_t i(0); i < thread_count; ++i) threads_.push_back(new std::thread(thread(*this)));
 		} catch(...) {
@@ -238,6 +233,43 @@ void scheduler::start() throw(engine::exception) {
 		std::ostringstream s; s << universalis::compiler::typenameof(e) << ": " << e.what();
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
+}
+
+void scheduler::compute_plan() {
+	if(!started()) return;
+	stop();
+	start();
+}
+void scheduler::allocate() throw(std::exception) {
+	loggers::trace()("allocating ...", UNIVERSALIS__COMPILER__LOCATION);
+	graph().compute_plan();
+	std::size_t channels(0);
+	// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
+	for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
+		typenames::node & node(**i);
+		node.underlying().start();
+		// add terminal nodes to the processing queue
+		if(!node.has_connected_input_ports()) nodes_queue_.push_back(&node);
+		// find the maximum number of channels needed for buffers
+		for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
+			ports::output & output_port(**i);
+			channels = std::max(channels, output_port.underlying().channels());
+		}
+		// initialise time measurement
+		node.reset_time_measurement();
+	}
+	if(loggers::trace()()) {
+		std::ostringstream s;
+		s << "channels: " << channels;
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	buffer_pool_instance_ = new buffer_pool(channels, graph().underlying().events_per_buffer());
+}
+
+void scheduler::free() throw() {
+	loggers::trace()("freeing ...", UNIVERSALIS__COMPILER__LOCATION);
+	delete buffer_pool_instance_; buffer_pool_instance_ = 0;
+	nodes_queue_.clear();
 }
 
 void scheduler::stop() {
@@ -287,38 +319,6 @@ void scheduler::operator()() {
 	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
-void scheduler::allocate() throw(std::exception) {
-	loggers::trace()("allocating ...", UNIVERSALIS__COMPILER__LOCATION);
-	graph().compute_plan();
-	std::size_t channels(0);
-	// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
-	for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
-		typenames::node & node(**i);
-		node.underlying().start();
-		// add terminal nodes to the processing queue
-		if(!node.has_connected_input_ports()) nodes_queue_.push_back(&node);
-		// find the maximum number of channels needed for buffers
-		for(typenames::node::output_ports_type::const_iterator i(node.output_ports().begin()) ; i != node.output_ports().end() ; ++i) {
-			ports::output & output_port(**i);
-			channels = std::max(channels, output_port.underlying().channels());
-		}
-		// initialise time measurement
-		node.reset_time_measurement();
-	}
-	if(loggers::trace()()) {
-		std::ostringstream s;
-		s << "channels: " << channels;
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	buffer_pool_instance_ = new buffer_pool(channels, graph().underlying().events_per_buffer());
-}
-
-void scheduler::free() throw() {
-	loggers::trace()("freeing ...", UNIVERSALIS__COMPILER__LOCATION);
-	delete buffer_pool_instance_; buffer_pool_instance_ = 0;
-	nodes_queue_.clear();
-}
-
 void scheduler::process_loop() {
 	while(true) {
 		typenames::node * node_;
@@ -333,8 +333,22 @@ void scheduler::process_loop() {
 		if(node.processed()) continue;
 		node.reset();
 		node.process();
+		++processed_node_count_;
 		bool notify(false);
 		{ scoped_lock lock(mutex_);
+			// check whether all nodes have been processed
+			if(processed_node_count_ == graph().size()) {
+				processed_node_count_ = 0;
+				notify = true;
+				// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
+				for(graph_type::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
+					typenames::node & node(**i);
+					// add terminal nodes to the processing queue
+					if(!node.has_connected_input_ports()) nodes_queue_.push_back(&node);
+				}
+			}
+
+			// check whether successors of the node we processed are now ready.
 			// iterate over all the output ports of the node we processed
 			for(typenames::node::output_ports_type::const_iterator
 				i(node.output_ports().begin()),

@@ -264,6 +264,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		typedef std::list<node*> nodes_queue_type;
 		/// nodes ready to be processed, just waiting for a free thread
 		nodes_queue_type nodes_queue_;
+		
+		std::size_t processed_node_count_;
 
 		void compute_plan();
 		void allocate() throw(std::exception);

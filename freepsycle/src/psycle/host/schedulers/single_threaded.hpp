@@ -247,7 +247,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		std::mutex mutable mutex_;
 		
 		bool stop_requested_;
-		bool stop_requested();
 		
 		typedef std::list<node*> terminal_nodes_type;
 		/// nodes with no dependency, that are processed first

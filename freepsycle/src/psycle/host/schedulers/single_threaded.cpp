@@ -182,8 +182,7 @@ scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 :
 	host::scheduler<graph_type>(graph),
 	buffer_pool_instance_(),
-	thread_(),
-	stop_requested_()
+	thread_()
 {
 	#if 0
 	// register to the graph signals
@@ -215,12 +214,6 @@ void scheduler::on_delete_connection(ports::input &, ports::output &) {
 	compute_plan();
 }
 
-void scheduler::compute_plan() {
-	if(!started()) return;
-	stop();
-	start();
-}
-
 namespace {
 	class thread {
 		public:
@@ -238,6 +231,8 @@ void scheduler::start() throw(engine::exception) {
 		return;
 	}
 	try {
+		stop_requested_ = false;
+		// start the scheduling thread. operator()() is the thread start point.
 		thread_ = new std::thread(thread(*this));
 	} catch(std::exception /*boost::thread_resource_error*/ const & e) {
 		loggers::exception()("caught exception", UNIVERSALIS__COMPILER__LOCATION);
@@ -246,62 +241,10 @@ void scheduler::start() throw(engine::exception) {
 	}
 }
 
-void scheduler::stop() {
-	if(loggers::information()()) loggers::information()("terminating and joining scheduler thread ...", UNIVERSALIS__COMPILER__LOCATION);
-	if(!thread_) {
-		if(loggers::information()()) loggers::information()("scheduler thread was not running", UNIVERSALIS__COMPILER__LOCATION);
-		return;
-	}
-	{ scoped_lock lock(mutex_);
-		stop_requested_ = true;
-	}
-	thread_->join();
-	if(loggers::information()()) loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
-	delete thread_; thread_ = 0;
-}
-
-bool scheduler::stop_requested() {
-	scoped_lock lock(mutex_);
-	return stop_requested_;
-}
-
-void scheduler::operator()() {
-	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
-	std::string thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
-	universalis::processor::exception::install_handler_in_thread(thread_name);
-	try {
-		try {
-			try {
-				process_loop();
-			} catch(...) {
-				loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
-				throw;
-			}
-		} catch(std::exception const & e) {
-			if(loggers::exception()()) {
-				std::ostringstream s;
-				s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
-				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			throw;
-		} catch(...) {
-			if(loggers::exception()()) {
-				std::ostringstream s;
-				s << "exception: " << universalis::compiler::exceptions::ellipsis();
-				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			throw;
-		}
-	} catch(...) {
-		{ scoped_lock lock(mutex_);
-			stop_requested_ = false;
-		}
-		throw;
-	}
-	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
-	{ scoped_lock lock(mutex_);
-		stop_requested_ = false;
-	}
+void scheduler::compute_plan() {
+	if(!started()) return;
+	stop();
+	start();
 }
 
 void scheduler::allocate() throw(std::exception) {
@@ -342,10 +285,56 @@ void scheduler::free() throw() {
 	terminal_nodes_.clear();
 }
 
+void scheduler::stop() {
+	if(loggers::information()()) loggers::information()("terminating and joining scheduler thread ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(!thread_) {
+		if(loggers::information()()) loggers::information()("scheduler thread was not running", UNIVERSALIS__COMPILER__LOCATION);
+		return;
+	}
+	{ scoped_lock lock(mutex_);
+		stop_requested_ = true;
+	}
+	thread_->join();
+	if(loggers::information()()) loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
+	delete thread_; thread_ = 0;
+}
+
+void scheduler::operator()() {
+	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
+	std::string thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
+	universalis::processor::exception::install_handler_in_thread(thread_name);
+	try {
+		try {
+			process_loop();
+		} catch(...) {
+			loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
+			throw;
+		}
+	} catch(std::exception const & e) {
+		if(loggers::exception()()) {
+			std::ostringstream s;
+			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		throw;
+	} catch(...) {
+		if(loggers::exception()()) {
+			std::ostringstream s;
+			s << "exception: " << universalis::compiler::exceptions::ellipsis();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		throw;
+	}
+	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
+}
+
 void scheduler::process_loop() {
 	try {
 		allocate();
-		while(!stop_requested()) {
+		while(true) {
+			{ scoped_lock lock(mutex_);
+				if(stop_requested_) break;
+			}
 			std::scoped_lock<std::mutex> lock(graph().underlying().mutex());
 			for(graph::const_iterator i(graph().begin()) ; i != graph().end() ; ++i) {
 				node & node(**i);
