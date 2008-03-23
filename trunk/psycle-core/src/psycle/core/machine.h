@@ -257,20 +257,23 @@ namespace psy
 		// Wire doesn't need to modify it, the InPort can already process the data that the OutPort has provided
 		// In fact, this is the usual case.
 		//
-		// class Machine {
-		// 	// It is possible, but not necessary to have more than one port, so no need for the vector in that case.
-		// 	std::vector<InPort> inPorts;
-		// 	std::vector<OutPort> outPorts;
-		//
-		// 	void ProcessAudio(int numSamples)
-		// 	{
-		// 		for( int i = 0; i < inPorts.size(); ++i )
-		// 		{
-		// 			inPorts.CollectData(numSamples);
-		// 		}
-		// 		GenerateAudio();
-		// 	} 
-		// }
+		/*
+		class Machine
+		{
+			// It is possible, but not necessary to have more than one port, so no need for the vector in that case.
+			std::vector<InPort> inPorts;
+			std::vector<OutPort> outPorts;
+		
+			void ProcessAudio(int numSamples)
+			{
+				for( int i = 0; i < inPorts.size(); ++i )
+				{
+					inPorts.CollectData(numSamples);
+				}
+				GenerateAudio();
+			} 
+		}
+		*/
 
 
 
