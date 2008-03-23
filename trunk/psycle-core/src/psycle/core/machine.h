@@ -121,16 +121,19 @@ namespace psy
 			#endif
 		}
 
-		/// Class storing the parameter description of Internal Machines.
-		class CIntMachParam
+		class AudioBuffer
 		{
-		public:
-			/// Short name
-			const char * name;
-			/// >= 0
-			int minValue;
-			/// <= 65535
-			int maxValue;
+		public: 
+			AudioBuffer(int numChannels,int numSamples);
+			~AudioBuffer();
+			void Clear();
+			float* getBuffer() { return buffer_; }
+			int getNumChannels() {  return numchannels_; }
+			int getNumSamples() {  return numsamples_; }
+		private:
+			float* buffer_;
+			int numchannels_;
+			int numsamples_;
 		};
 
 		class AudioPort;
@@ -154,10 +157,12 @@ namespace psy
 			virtual void ChangeDestination(AudioPort* newdest);
 			virtual void CollectData(int numSamples);
 			virtual void SetVolume(float newvol);
+			// Range of pan is -1.0f for top left and 1.0f for top right. 0.0f is both channels full scale.
 			virtual void SetPan(float newpan);
 			virtual inline int GetIndex() const { return index; }
 			virtual inline void SetIndex(int idx) { index = idx; }
-
+			virtual inline AudioBuffer* GetBuffer() { return intermediatebuffer; }
+			virtual inline void setBuffer(AudioBuffer* buffer) { intermediatebuffer=buffer; }
 		protected:
 			virtual void Disconnect(AudioPort* port);
 			virtual inline float RVol() { return rvol; }
@@ -170,6 +175,7 @@ namespace psy
 			int index;
 			AudioPort *senderport;
 			AudioPort *receiverport;
+			AudioBuffer *intermediatebuffer;
 		};
 
 		// Class which allows the setup (as in shape) of the machines' connectors.
@@ -191,17 +197,20 @@ namespace psy
 			virtual inline Wire* GetWire(unsigned int index) { assert(index<wires_.size()); return wires_[index]; }
 			virtual inline int NumberOfWires() { return static_cast<int>(wires_.size()); }
 			virtual inline int Arrangement() throw() { return arrangement_; }
-			virtual inline Machine * GetMachine() throw() { return &parent_; }
+			virtual inline Machine & GetMachine() throw() { return parent_; }
 			///\todo : should change arrangement/name be allowed? (Mutating Port?)
 			virtual inline void ChangeArrangement(int arrangement) { this->arrangement_ = arrangement; }
 			virtual inline std::string const & Name() const throw() { return name_; }
 			virtual inline void ChangeName(std::string const & name) { this->name_ = name; }
+			virtual inline AudioBuffer* GetBuffer() { return audiobuffer_; } 
+			virtual inline void setBuffer(AudioBuffer* buffer) { audiobuffer_ = buffer; }
 		protected:
 			Machine & parent_;
 			int arrangement_;
 			std::string name_;
 			typedef std::vector<Wire*> wires_type;
 			wires_type wires_;
+			AudioBuffer *audiobuffer_;
 		};
 
 		class InPort : public AudioPort
@@ -221,6 +230,50 @@ namespace psy
 			virtual ~OutPort() {}
 			virtual void CollectData(int numSamples);
 		};
+		// Usage of the AudioPorts and Wire classes:
+		//
+		// the class Machine has zero ore more InPorts, as well as zero or more OutPorts.
+		// Each AudioPort has an AudioBuffer associated. The scheduler supplies these buffers.
+		// To connect the AudioPorts, there's a Wire, which connects one AudioPort to another AudioPort
+		// There can be several Wires to/from the same AudioPort (either input or output), but not two connecting
+		// the same pair of AudioPorts, nor a wire from and to the same AudioPort.
+		//
+		// The scheduler maintains and cleans the AudioBuffers, as well as calling the appropiate machine.
+		// 
+		// If the machine has InPorts, then it first cycles through them calling CollectData() on them.
+		// This call, then, cycles through each of the wires it has connected, calling CollectData() aswell.
+		// At last, the Wire gets the content of the AudioBuffers of the OutPort, and processes it to change volume
+		// or remap/mixdown the discrete channels of the buffer.
+		// When ready, the InPort proceeds to mix the buffer from the Wire into its own buffer, in order to have it
+		// ready for its machine. 
+		// When all Wires of all InPorts are processed, of if the machine doesn't have InPorts, the Machine generates
+		// its audio over the AudioBuffer of its OutPorts and returns to the scheduler.
+		//
+		// Optimizations:
+		// A Wire needs its own buffer just when both the OutPort and the InPort have more than one Wire,
+		// An InPort needs its own buffer just when it has more than one Wire connected to it. (In order to mix them)
+		// 
+		// This means that the buffer set for the OutPort, for the Wire and for the InPort may be the same, and if the
+		// Wire doesn't need to modify it, the InPort can already process the data that the OutPort has provided
+		// In fact, this is the usual case.
+		//
+		// class Machine {
+		// 	// It is possible, but not necessary to have more than one port, so no need for the vector in that case.
+		// 	std::vector<InPort> inPorts;
+		// 	std::vector<OutPort> outPorts;
+		//
+		// 	void ProcessAudio(int numSamples)
+		// 	{
+		// 		for( int i = 0; i < inPorts.size(); ++i )
+		// 		{
+		// 			inPorts.CollectData(numSamples);
+		// 		}
+		// 		GenerateAudio();
+		// 	} 
+		// }
+
+
+
 
 		enum MachineType
 		{

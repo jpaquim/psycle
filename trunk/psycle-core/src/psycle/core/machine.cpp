@@ -154,22 +154,37 @@ namespace psy { namespace core {
 		///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 	}
 
+	AudioBuffer::AudioBuffer(int numChannels,int numSamples)
+		:numchannels_(numChannels),numsamples_(numSamples)
+	{
+		aligned_malloc(16, buffer_, numChannels*numSamples);
+	}
+
+	AudioBuffer::~AudioBuffer()
+	{
+		aligned_dealloc(buffer_);
+	}
+
+	void AudioBuffer::Clear()
+	{
+		dsp::Clear(buffer_,numsamples_*numchannels_);
+	}
+	
 	void Wire::Connect(AudioPort *senderp,AudioPort *receiverp)
 	{
 		senderport=senderp;
 		receiverport=receiverp;
-		multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+		multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
 		SetVolume(volume);
 		senderport->Connected(this);
 		receiverport->Connected(this);
-		///\todo : need a way get a wire index.
 	}
 
 	void Wire::ChangeSource(AudioPort* newsource)
 	{
 		assert(senderport); Disconnect(senderport);
 		senderport=newsource;
-		multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+		multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
 		SetVolume(volume);
 		senderport->Connected(this);
 	}
@@ -178,7 +193,7 @@ namespace psy { namespace core {
 	{
 		assert(receiverport); Disconnect(receiverport);
 		receiverport=newdest;
-		multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+		multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
 		SetVolume(volume);
 		receiverport->Connected(this);
 	}
@@ -187,13 +202,21 @@ namespace psy { namespace core {
 	{
 		senderport->CollectData(numSamples);
 		///\todo : apply volume, panning and mapping.
+		// Check if the Wire is working "inplace" or not, so that it does not
+		// need to copy the contents of the output buffer into its intermediate buffer.
 	}
 
 	void Wire::SetVolume(float newvol)
 	{
 		volume=newvol;
-		rvol=volume*pan*multiplier;
-		lvol=volume*(1.0f-pan)*multiplier;
+		if ( pan > 0.0f )
+		{
+			rvol=newvol*multiplier;
+			lvol=rvol*(1.0f-pan); // lvol=volume*multiplier*(1.0f-pan);
+		} else {
+			lvol=newvol*multiplier;
+			rvol=lvol*(1.0f+pan); // rvol=volume*multiplier*(1.0f+pan);
+		}
 	}
 
 	void Wire::SetPan(float newpan)
@@ -206,7 +229,6 @@ namespace psy { namespace core {
 	{
 		if ( port == senderport ) senderport=0; else receiverport=0;
 		port->Disconnected(this);
-		///\todo : need a way to indicate to the main Machine that this wire index is now free.
 	}
 
 	void AudioPort::Connected(Wire *wire)
@@ -219,20 +241,24 @@ namespace psy { namespace core {
 		wires_type::iterator i(std::find(wires_.begin(), wires_.end(), wire));
 		assert(i != wires_.end());
 		wires_.erase(i);
+		///\todo : may want to notify to the parent that this wire is now free.
 	}
 
 	void InPort::CollectData(int numSamples)
 	{
-		///\todo : need to clean the buffer first? wire(0)processreplacing() while(wires) wire(1+).processadding() ?
+		///wire(0)processreplacing() while(wires) wire(1+).processadding() ?
 		for(wires_type::const_iterator i(wires_.begin()); i != wires_.end(); ++i)
 		{
 			(**i).CollectData(numSamples);
+			// do something with (**i).getBuffer().getBuffer()
+			// check if the wire is working in "in-place", since maybe the 
+			// buffer is shared with ours.
 		}
 	}
 
 	void OutPort::CollectData(int /*numSamples*/)
 	{
-		//parent_.Work(numSamples);
+		//An outport, by default, does nothing.
 	}
 
 	Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
