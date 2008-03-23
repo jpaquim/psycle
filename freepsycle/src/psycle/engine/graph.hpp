@@ -227,8 +227,7 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// multiple
 		/// handles multiple input streams of signal coming to a node.
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple
-		{
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple {
 			friend class node;
 
 			protected: friend class virtual_factory_access;

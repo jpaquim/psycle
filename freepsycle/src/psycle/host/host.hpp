@@ -8,10 +8,10 @@
 #include "plugin_resolver.hpp"
 #include "scheduler.hpp"
 #include "schedulers/single_threaded.hpp"
+#include "schedulers/multi_threaded.hpp"
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST__HOST
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host {
 
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
-

@@ -201,16 +201,16 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 	///\name signal slots and connections
 	///\{
 		private:
-			boost::signals::scoped_connection new_node_signal_connection;
+			boost::signals::scoped_connection on_new_node_signal_connection;
 			void on_new_node(node::underlying_type &);
 			
-			boost::signals::scoped_connection delete_node_signal_connection;
+			boost::signals::scoped_connection on_delete_node_signal_connection;
 			void on_delete_node(node::underlying_type &);
 
-			boost::signals::scoped_connection new_connection_signal_connection;
+			boost::signals::scoped_connection on_new_connection_signal_connection;
 			void on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &);
 
-			boost::signals::scoped_connection delete_connection_signal_connection;
+			boost::signals::scoped_connection on_delete_connection_signal_connection;
 			void on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &);
 	///\}
 
@@ -277,8 +277,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void clear_plan();
 
 		void process_loop();
+		void process(node &);
+		void set_buffer_for_output_port(ports::output &, buffer &);
+		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
+		void check_whether_to_recycle_buffer_in_the_pool(buffer &);
 };
 
 }}}}
 #include <universalis/compiler/dynamic_link/end.hpp>
-

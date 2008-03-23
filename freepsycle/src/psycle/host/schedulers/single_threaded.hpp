@@ -196,16 +196,16 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 	///\name signal slots and connections
 	///\{
 		private:
-			boost::signals::scoped_connection new_node_signal_connection;
+			boost::signals::scoped_connection on_new_node_signal_connection;
 			void on_new_node(node::underlying_type &);
 			
-			boost::signals::scoped_connection delete_node_signal_connection;
+			boost::signals::scoped_connection on_delete_node_signal_connection;
 			void on_delete_node(node::underlying_type &);
 
-			boost::signals::scoped_connection new_connection_signal_connection;
+			boost::signals::scoped_connection on_new_connection_signal_connection;
 			void on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &);
 
-			boost::signals::scoped_connection delete_connection_signal_connection;
+			boost::signals::scoped_connection on_delete_connection_signal_connection;
 			void on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &);
 	///\}
 

@@ -47,7 +47,14 @@ void graph::compute_plan() {
 		node.compute_plan();
 
 		// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
-		if(node.is_ready_to_process()) terminal_nodes_.push_back(&node);
+		if(node.is_ready_to_process()) {
+			if(loggers::trace()()) {
+				std::ostringstream s;
+				s << "terminal node: " << node.underlying().name();
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			terminal_nodes_.push_back(&node);
+		}
 
 		// find the maximum number of channels needed for buffers
 		// iterate over all output ports of the node
@@ -71,7 +78,6 @@ node::node(node::parent_type & parent, underlying_type & underlying)
 :
 	node_base(parent, underlying),
 	multiple_input_port_first_output_port_to_process_(),
-	processed_(true), // set to true because reset() is called first in the processing loop
 	accumulated_processing_time_(),
 	processing_count_(),
 	processing_count_no_zeroes_()
@@ -85,6 +91,8 @@ void node::reset_time_measurement() {
 void node::compute_plan() {
 	// initialise time measurement
 	reset_time_measurement();
+	
+	processed_ = true; // set to true because reset() is called first in the processing loop
 
 	// count the number of predecessor nodes
 	if(multiple_input_port()) predecessor_node_count_ = multiple_input_port()->output_ports().size();
@@ -93,6 +101,7 @@ void node::compute_plan() {
 		i(single_input_ports().begin()),
 		e(single_input_ports().end()); i != e; ++i
 	) if((**i).output_port()) ++predecessor_node_count_;
+	predecessor_node_remaining_count_ = predecessor_node_count_;
 
 	if(multiple_input_port()) {
 		// If the node has a multiple input port,
@@ -142,16 +151,13 @@ void node::process(bool first) {
 scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 :
 	host::scheduler<graph_type>(graph),
-	buffer_pool_instance_()
-{
-	#if 0
 	// register to the graph signals
-	graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ));
-	graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ));
-	graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2));
-	graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2));
-	#endif
-}
+	on_new_node_signal_connection         (graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ))),
+	on_delete_node_signal_connection      (graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ))),
+	on_new_connection_signal_connection   (graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2))),
+	on_delete_connection_signal_connection(graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2))),
+	buffer_pool_instance_()
+{}
 
 scheduler::~scheduler() throw() {
 	stop();
@@ -271,7 +277,7 @@ void scheduler::stop() {
 			<< " (" << universalis::compiler::typenameof(node.underlying())
 			<< ", lib " << node.underlying().plugin_library_reference().name()
 			<< "): ";
-		if(!node.processing_count()) std::cout << "not processed";
+		if(!node.processing_count()) std::cout << "not processed\n";
 		else std::cout
 			<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
 			<< node.processing_count() << " = "
@@ -332,20 +338,14 @@ void scheduler::process_loop() {
 			nodes_queue_.pop_front();
 		}
 		typenames::node & node(*node_);
-		if(node.processed()) continue;
-		node.reset();
 
-		///\todo set the buffer pointers before calling node.process()
-		node.process();
-
-		#if 0
-		if(!node.multiple_input_port()) { // the node has no multiple input port: simple case
-			set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
-			node.process();
-		} else if(node.multiple_input_port()->output_ports().size()) { // the node has a multiple input port, which is connected: complex case
-			...
+		if(false && loggers::trace()()) {
+			std::ostringstream s;
+			s << "scheduling " << node.underlying().qualified_name();
+			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		#endif
+
+		process(node);
 
 		bool notify(false);
 		{ scoped_lock lock(mutex_);
@@ -382,6 +382,122 @@ void scheduler::process_loop() {
 		}
 		if(notify) condition_.notify_all(); // notify all threads that we added nodes to the queue
 	}
+}
+
+void scheduler::process(typenames::node & node) {
+	node.reset();
+
+	// get buffers for the single input ports from the buffers of their connected output ports
+	for(node::single_input_ports_type::const_iterator
+		i(node.single_input_ports().begin()),
+		e(node.single_input_ports().end()); i !=e ; ++i
+	) {
+		ports::inputs::single & single_input_port(**i);
+		if(single_input_port.output_port())
+			single_input_port.buffer(&single_input_port.output_port()->buffer());
+	}
+	
+	if(!node.multiple_input_port()) { // the node has no multiple input port: simple case
+		set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
+		node.process();
+	} else if(node.multiple_input_port()->output_ports().size()) { // the node has a multiple input port, which is connected: complex case
+		// get first output to process 
+		ports::output & first_output_port_to_process(node.multiple_input_port_first_output_port_to_process());
+		{ // process with first input buffer
+			node.multiple_input_port()->buffer(&first_output_port_to_process.buffer());
+			if(node.multiple_input_port()->underlying().single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
+				ports::output & output_port(*node.output_ports().front());
+				if(
+					node.multiple_input_port()->buffer().reference_count() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
+					node.multiple_input_port()->output_ports().size() == 1 // We have a single input, so, this is the identity transform, i.e., the buffer will not be modified.
+				) {
+					if(false && loggers::trace()()) {
+						std::ostringstream s;
+						s << node.underlying().qualified_name() << ": copying pointer of input buffer to pointer of output buffer";
+						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+					// copy pointer of input buffer to pointer of output buffer
+					set_buffer_for_output_port(output_port, node.multiple_input_port()->buffer());
+				} else { // we have several inputs, so, this cannot be the identity transform, i.e., the buffer would be modified. but its content must be preserved for further reading
+					// get buffer for output port
+					set_buffer_for_output_port(output_port, buffer_pool_instance()());
+					// copy content of input buffer to output buffer
+					if(false && loggers::trace()()) {
+						std::ostringstream s;
+						s << node.underlying().qualified_name() << ": copying content of input buffer to output buffer";
+						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+					output_port.buffer().copy(node.multiple_input_port()->buffer(), node.multiple_input_port()->underlying().channels());
+				}
+			} else { // this is never the identity transform
+				set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
+				node.process_first();
+			}
+			check_whether_to_recycle_buffer_in_the_pool(--first_output_port_to_process.buffer());
+		}
+		// process with remaining input buffers
+		for(ports::inputs::multiple::output_ports_type::const_iterator
+			i(node.multiple_input_port()->output_ports().begin()),
+			e(node.multiple_input_port()->output_ports().end()); i !=e; ++i
+		) {
+			ports::output & output_port(**i);
+			if(&output_port == &first_output_port_to_process) continue;
+			node.multiple_input_port()->buffer(&output_port.buffer());
+			node.process();
+			check_whether_to_recycle_buffer_in_the_pool(--output_port.buffer());
+		}
+	}
+	// check if the content of the node input ports buffers must be preserved for further reading
+	for(typenames::node::single_input_ports_type::const_iterator
+		i(node.single_input_ports().begin()),
+		e(node.single_input_ports().end()); i != e; ++i
+	) {
+		ports::inputs::single & single_input_port(**i);
+		if(single_input_port.output_port()) check_whether_to_recycle_buffer_in_the_pool(--single_input_port.output_port()->buffer());
+	}
+	// check if the content of the node output ports buffers must be preserved for further reading
+	for(typenames::node::output_ports_type::const_iterator
+		i(node.output_ports().begin()),
+		e(node.output_ports().end()); i != e; ++i
+	) {
+		ports::output & output_port(**i);
+		check_whether_to_recycle_buffer_in_the_pool(output_port.buffer());
+	}
+	if(false && loggers::trace()()) {
+		std::ostringstream s;
+		s << "scheduling of " << node.underlying().qualified_name() << " done";
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+}
+
+/// set buffers for all output ports of the node from the buffer pool.
+void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool(node & node) {
+	for(typenames::node::output_ports_type::const_iterator
+		i(node.output_ports().begin()),
+		e(node.output_ports().end()); i != e; ++i
+	) {
+		ports::output & output_port(**i);
+		///\todo check whether this is true for the multithreaded scheduler too
+		// we don't need to check since we don't get here in this case: if(output_port.input_ports().size())
+			set_buffer_for_output_port(output_port, buffer_pool_instance()());
+	}
+}
+
+/// sets a buffer for the output port
+void inline scheduler::set_buffer_for_output_port(ports::output & output_port, buffer & buffer) {
+	output_port.buffer(&buffer);
+	buffer += output_port.input_ports().size(); // set the expected pending read count
+}
+
+/// checks if the content of the buffer must be preserved for further reading and
+/// if not recycles it in the pool.
+void inline scheduler::check_whether_to_recycle_buffer_in_the_pool(buffer & buffer) {
+	if(false && loggers::trace()()) {
+		std::ostringstream s;
+		s << "buffer: " << &buffer << ": " << buffer.reference_count() << " to go";
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	if(!buffer.reference_count()) (*buffer_pool_instance_)(buffer); // recycle the buffer in the pool
 }
 
 /**********************************************************************************************************************/

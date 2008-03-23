@@ -85,7 +85,6 @@ node::node(node::parent_type & parent, underlying_type & underlying)
 :
 	node_base(parent, underlying),
 	multiple_input_port_first_output_port_to_process_(),
-	processed_(true), // set to true because reset() is called first in the processing loop
 	accumulated_processing_time_(),
 	processing_count_(),
 	processing_count_no_zeroes_()
@@ -99,6 +98,8 @@ void node::reset_time_measurement() {
 void node::compute_plan() {
 	// initialise time measurement
 	reset_time_measurement();
+
+	processed_ = true; // set to true because reset() is called first in the processing loop
 
 	if(multiple_input_port()) {
 		// If the node has a multiple input port,
@@ -141,10 +142,10 @@ scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 :
 	host::scheduler<graph_type>(graph),
 	// register to the graph signals
-	new_node_signal_connection         (graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ))),
-	delete_node_signal_connection      (graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ))),
-	new_connection_signal_connection   (graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2))),
-	delete_connection_signal_connection(graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2))),
+	on_new_node_signal_connection         (graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ))),
+	on_delete_node_signal_connection      (graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ))),
+	on_new_connection_signal_connection   (graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2))),
+	on_delete_connection_signal_connection(graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2))),
 	buffer_pool_instance_(),
 	thread_()
 {}
@@ -241,7 +242,7 @@ void scheduler::stop() {
 			<< " (" << universalis::compiler::typenameof(node.underlying())
 			<< ", lib " << node.underlying().plugin_library_reference().name()
 			<< "): ";
-		if(!node.processing_count()) std::cout << "not processed";
+		if(!node.processing_count()) std::cout << "not processed\n";
 		else std::cout
 			<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
 			<< node.processing_count() << " = "
@@ -324,7 +325,7 @@ void scheduler::process_recursively(node & node) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
-	// get node input buffers by processing the dependencies of the node
+	// get buffers for the single input ports by processing the dependencies of the node
 	for(node::single_input_ports_type::const_iterator
 		i(node.single_input_ports().begin()),
 		e(node.single_input_ports().end()); i !=e ; ++i

@@ -128,7 +128,13 @@ void stuff() {
 		}
 		loggers::information()("############################################## schedule ########################################################");
 		{
-			host::schedulers::single_threaded::scheduler scheduler(graph);
+			host::schedulers::
+				#if 1
+					multi_threaded
+				#else
+					single_threaded
+				#endif
+				::scheduler scheduler(graph);
 			std::seconds const seconds(60);
 			{
 				unsigned int const notes(10000);
