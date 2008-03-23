@@ -140,15 +140,14 @@ void node::process(bool first) {
 scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 :
 	host::scheduler<graph_type>(graph),
+	// register to the graph signals
+	new_node_signal_connection         (graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ))),
+	delete_node_signal_connection      (graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ))),
+	new_connection_signal_connection   (graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2))),
+	delete_connection_signal_connection(graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2))),
 	buffer_pool_instance_(),
 	thread_()
-{
-	// register to the graph signals
-	graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ));
-	graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ));
-	graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2));
-	graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2));
-}
+{}
 
 scheduler::~scheduler() throw() {
 	stop();
@@ -232,6 +231,24 @@ void scheduler::stop() {
 	if(loggers::information()()) loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
 	delete thread_; thread_ = 0;
 	//clear_plan(); this is done by the thread
+
+	// dump time measurements
+	std::cout << "time measurements: \n";
+	for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i) {
+		node & node(**i);
+		std::cout
+			<< node.underlying().qualified_name()
+			<< " (" << universalis::compiler::typenameof(node.underlying())
+			<< ", lib " << node.underlying().plugin_library_reference().name()
+			<< "): ";
+		if(!node.processing_count()) std::cout << "not processed";
+		else std::cout
+			<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
+			<< node.processing_count() << " = "
+			<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s"
+			", zeroes: " << node.processing_count() - node.processing_count_no_zeroes() << '\n';
+			
+	}
 }
 
 void scheduler::thread_function() {
@@ -289,23 +306,6 @@ void scheduler::process_loop() {
 				i(graph().terminal_nodes().begin()),
 				e(graph().terminal_nodes().end()); i != e; ++i
 			) process_recursively(**i);
-		}
-		// dump time measurements
-		std::cout << "time measurements: \n";
-		for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i) {
-			node & node(**i);
-			std::cout
-				<< node.underlying().qualified_name()
-				<< " (" << universalis::compiler::typenameof(node.underlying())
-				<< ", lib " << node.underlying().plugin_library_reference().name()
-				<< "): ";
-			if(!node.processing_count()) std::cout << "not processed";
-			else std::cout
-				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
-				<< node.processing_count() << " = "
-				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s"
-				", zeroes: " << node.processing_count() - node.processing_count_no_zeroes() << '\n';
-				
 		}
 	} catch(...) {
 		clear_plan();

@@ -19,7 +19,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 			struct flags {
 				enum type {
 					continuous, ///< indicates there is an event for every sample
-					discrete, ///< indicates there is not a event for every sample
+					discrete, ///< indicates there is not an event for every sample
 					empty ///< indicates there is no event
 				};
 			};

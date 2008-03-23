@@ -91,7 +91,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 typedef generic::wrappers::port<typenames::typenames> port_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
 	protected: friend class virtual_factory_access;
-		//port(parent_type &, underlying_type &);
 		port(parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
 
 	///\name buffer
@@ -194,12 +193,19 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
 		void stop() /*override*/;
 
-	///\name signal slots
+	///\name signal slots and connections
 	///\{
 		private:
+			boost::signals::scoped_connection new_node_signal_connection;
 			void on_new_node(node::underlying_type &);
+			
+			boost::signals::scoped_connection delete_node_signal_connection;
 			void on_delete_node(node::underlying_type &);
+
+			boost::signals::scoped_connection new_connection_signal_connection;
 			void on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &);
+
+			boost::signals::scoped_connection delete_connection_signal_connection;
 			void on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &);
 	///\}
 
