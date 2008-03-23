@@ -32,41 +32,6 @@ namespace {
 /**********************************************************************************************************************/
 // graph
 
-graph::graph(graph::underlying_type & underlying) : graph_base(underlying) {
-	#if 0
-	// register to the signals
-	new_node_signal()         .connect(boost::bind(&graph::on_new_node         , this, _1));
-	delete_node_signal()      .connect(boost::bind(&graph::on_delete_node      , this, _1));
-	new_connection_signal()   .connect(boost::bind(&graph::on_new_connection   , this, _1, _2));
-	delete_connection_signal().connect(boost::bind(&graph::on_delete_connection, this, _1, _2));
-	#endif
-}
-
-void graph::after_construction() {
-	graph_base::after_construction();
-	compute_plan();
-}
-
-void graph::on_new_node(node & node) {
-	//graph_base::on_new_node(node);
-	compute_plan();
-}
-
-void graph::on_delete_node(node & node) {
-	//graph_base::on_delete_node(node);
-	compute_plan();
-}
-
-void graph::on_new_connection(ports::input & in, ports::output & out) {
-	//graph_base::on_new_connection(in, out);
-	compute_plan();
-}
-
-void graph::on_delete_connection(ports::input & in, ports::output & out) {
-	//graph_base::on_delete_connection(in, out);
-	compute_plan();
-}
-
 void graph::clear_plan() {
 	terminal_nodes_.clear();
 }
@@ -124,30 +89,7 @@ node::node(node::parent_type & parent, underlying_type & underlying)
 	accumulated_processing_time_(),
 	processing_count_(),
 	processing_count_no_zeroes_()
-{
-	#if 0
-	// register to the signals
-	new_output_port_signal()        .connect(boost::bind(&node::on_new_output_port        , this, _1));
-	new_single_input_port_signal()  .connect(boost::bind(&node::on_new_single_input_port  , this, _1));
-	new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1));
-	#endif
-}
-
-void node::after_construction() {
-	node_base::after_construction();
-}
-
-void node::on_new_output_port(ports::output &) {
-	compute_plan();
-}
-
-void node::on_new_single_input_port(ports::inputs::single &) {
-	compute_plan();
-}
-
-void node::on_new_multiple_input_port(ports::inputs::multiple &) {
-	compute_plan();
-}
+{}
 
 void node::reset_time_measurement() {
 	accumulated_processing_time_ = 0;
@@ -193,32 +135,6 @@ void node::process(bool first) {
 }
 
 /**********************************************************************************************************************/
-// port
-port::port(port::parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
-
-namespace ports {
-
-	/**********************************************************************************************************************/
-	// output
-	output::output(output::parent_type & parent, output::underlying_type & underlying) : output_base(parent, underlying) {}
-	
-	/**********************************************************************************************************************/
-	// input
-	input::input(input::parent_type & parent, input::underlying_type & underlying) : input_base(parent, underlying) {}
-	
-	namespace inputs {
-
-		/**********************************************************************************************************************/
-		// single
-		single::single(single::parent_type & parent, single::underlying_type & underlying) : single_base(parent, underlying) {}
-
-		/**********************************************************************************************************************/
-		// multiple
-		multiple::multiple(multiple::parent_type & parent, multiple::underlying_type & underlying) : multiple_base(parent, underlying) {}
-	}
-}
-
-/**********************************************************************************************************************/
 // scheduler
 
 scheduler::scheduler(underlying::graph & graph) throw(std::exception)
@@ -227,13 +143,11 @@ scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 	buffer_pool_instance_(),
 	thread_()
 {
-	#if 0
 	// register to the graph signals
 	graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ));
 	graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ));
 	graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2));
 	graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2));
-	#endif
 }
 
 scheduler::~scheduler() throw() {
@@ -241,19 +155,19 @@ scheduler::~scheduler() throw() {
 	delete &graph(); // note that this doesn't delete the underying graph, only the scheduler's wrapping layer
 }
 
-void scheduler::on_new_node(node &) {
+void scheduler::on_new_node(node::underlying_type &) {
 	suspend_and_compute_plan();
 }
 
-void scheduler::on_delete_node(node &) {
+void scheduler::on_delete_node(node::underlying_type &) {
 	suspend_and_compute_plan();
 }
 
-void scheduler::on_new_connection(ports::input &, ports::output &) {
+void scheduler::on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &) {
 	suspend_and_compute_plan();
 }
 
-void scheduler::on_delete_connection(ports::input &, ports::output &) {
+void scheduler::on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &) {
 	suspend_and_compute_plan();
 }
 
@@ -317,7 +231,7 @@ void scheduler::stop() {
 	thread_->join();
 	if(loggers::information()()) loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
 	delete thread_; thread_ = 0;
-	clear_plan();
+	//clear_plan(); this is done by the thread
 }
 
 void scheduler::thread_function() {
