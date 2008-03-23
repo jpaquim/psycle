@@ -130,7 +130,6 @@ public:
 	// Painting.
 	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
-	void drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
 	void drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  );
 	void drawData( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack, const QColor & color );
 	void drawSelBg( QPainter *painter, Selection selArea );
