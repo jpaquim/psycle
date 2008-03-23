@@ -9,6 +9,7 @@
 #include <thread>
 #include <date_time>
 #include <mutex>
+#include <condition>
 #include <list>
 #include <cstdint>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST__SCHEDULERS__SINGLE_THREADED
@@ -74,8 +75,25 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 			void on_delete_connection(ports::input &, ports::output &);
 	///\}
 	
-	private:
-		void compute_plan(); friend class scheduler;
+	///\name schedule
+	///\{
+		public:
+			void compute_plan();
+			void clear_plan();
+			
+		public:
+			/// maximum number of channels needed for buffers
+			std::size_t channels() const throw() { return channels_; }
+		private:
+			std::size_t channels_;
+			
+		public:
+			typedef std::list<node*> terminal_nodes_type;
+			/// nodes with no dependency, that are processed first
+			terminal_nodes_type const & terminal_nodes() const throw() { return terminal_nodes_; }
+		private:
+			terminal_nodes_type terminal_nodes_;
+	///\}
 };
 
 /**********************************************************************************************************************/
@@ -139,7 +157,7 @@ typedef generic::wrappers::node<typenames::typenames> node_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	protected: friend class virtual_factory_access;
 		node(parent_type &, underlying_type &);
-		void after_construction() /*override*/; friend class graph; // init code moved to graph since it deals with connections
+		void after_construction() /*override*/;
 		
 	///\name signal slots
 	///\{
@@ -151,12 +169,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	
 	///\name schedule
 	///\{
+		public: void compute_plan();
+			
 		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
 		private: ports::output * multiple_input_port_first_output_port_to_process_;
 
-		public:  bool has_connected_output_ports() const throw() { return has_connected_output_ports_; }
-		private: bool has_connected_output_ports_;
-		
 		public:  void reset() throw() /*override*/ { assert(processed()); processed_ = false; underlying().reset(); }
 
 		public:  void process_first() { process(true); }
@@ -247,16 +264,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;
+		std::condition<scoped_lock> mutable condition_;
 		
 		bool stop_requested_;
+		bool suspend_requested_;
+		bool suspended_;
 		
-		typedef std::list<node*> terminal_nodes_type;
-		/// nodes with no dependency, that are processed first
-		terminal_nodes_type terminal_nodes_;
-
+		void suspend_and_compute_plan();
 		void compute_plan();
-		void allocate() throw(std::exception);
-		void free() throw();
+		void clear_plan();
 
 		void process_loop();
 		void process_recursively(node &);
