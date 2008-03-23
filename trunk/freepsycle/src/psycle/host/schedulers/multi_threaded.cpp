@@ -200,6 +200,11 @@ void scheduler::start() throw(engine::exception) {
 	try {
 		// start the scheduling threads
 		std::size_t thread_count(2); ///\todo parametrable
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "using " << thread_count << " threads";
+			loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
 		for(std::size_t i(0); i < thread_count; ++i)
 			threads_.push_back(new std::thread(boost::bind(&scheduler::thread_function, this, i)));
 	} catch(...) {
@@ -339,12 +344,6 @@ void scheduler::process_loop() {
 		}
 		typenames::node & node(*node_);
 
-		if(false && loggers::trace()()) {
-			std::ostringstream s;
-			s << "scheduling " << node.underlying().qualified_name();
-			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-
 		process(node);
 
 		bool notify(false);
@@ -385,6 +384,12 @@ void scheduler::process_loop() {
 }
 
 void scheduler::process(typenames::node & node) {
+	if(false && loggers::trace()()) {
+		std::ostringstream s;
+		s << "scheduling " << node.underlying().qualified_name();
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+
 	node.reset();
 
 	// get buffers for the single input ports from the buffers of their connected output ports
@@ -433,7 +438,9 @@ void scheduler::process(typenames::node & node) {
 				set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
 				node.process_first();
 			}
-			check_whether_to_recycle_buffer_in_the_pool(--first_output_port_to_process.buffer());
+			{ scoped_lock lock(mutex_);
+				check_whether_to_recycle_buffer_in_the_pool(--first_output_port_to_process.buffer());
+			}
 		}
 		// process with remaining input buffers
 		for(ports::inputs::multiple::output_ports_type::const_iterator
@@ -444,24 +451,29 @@ void scheduler::process(typenames::node & node) {
 			if(&output_port == &first_output_port_to_process) continue;
 			node.multiple_input_port()->buffer(&output_port.buffer());
 			node.process();
-			check_whether_to_recycle_buffer_in_the_pool(--output_port.buffer());
+			{ scoped_lock lock(mutex_);
+				check_whether_to_recycle_buffer_in_the_pool(--output_port.buffer());
+			}
 		}
 	}
-	// check if the content of the node input ports buffers must be preserved for further reading
-	for(typenames::node::single_input_ports_type::const_iterator
-		i(node.single_input_ports().begin()),
-		e(node.single_input_ports().end()); i != e; ++i
-	) {
-		ports::inputs::single & single_input_port(**i);
-		if(single_input_port.output_port()) check_whether_to_recycle_buffer_in_the_pool(--single_input_port.output_port()->buffer());
-	}
-	// check if the content of the node output ports buffers must be preserved for further reading
-	for(typenames::node::output_ports_type::const_iterator
-		i(node.output_ports().begin()),
-		e(node.output_ports().end()); i != e; ++i
-	) {
-		ports::output & output_port(**i);
-		check_whether_to_recycle_buffer_in_the_pool(output_port.buffer());
+	{ scoped_lock lock(mutex_);
+		// check if the content of the node input ports buffers must be preserved for further reading
+		for(typenames::node::single_input_ports_type::const_iterator
+			i(node.single_input_ports().begin()),
+			e(node.single_input_ports().end()); i != e; ++i
+		) {
+			ports::inputs::single & single_input_port(**i);
+			if(single_input_port.output_port())
+				check_whether_to_recycle_buffer_in_the_pool(--single_input_port.output_port()->buffer());
+		}
+		// check if the content of the node output ports buffers must be preserved for further reading
+		for(typenames::node::output_ports_type::const_iterator
+			i(node.output_ports().begin()),
+			e(node.output_ports().end()); i != e; ++i
+		) {
+			ports::output & output_port(**i);
+			check_whether_to_recycle_buffer_in_the_pool(output_port.buffer());
+		}
 	}
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
@@ -477,8 +489,7 @@ void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool
 		e(node.output_ports().end()); i != e; ++i
 	) {
 		ports::output & output_port(**i);
-		///\todo check whether this is true for the multithreaded scheduler too
-		// we don't need to check since we don't get here in this case: if(output_port.input_ports().size())
+		if(output_port.input_ports().size())
 			set_buffer_for_output_port(output_port, buffer_pool_instance()());
 	}
 }
