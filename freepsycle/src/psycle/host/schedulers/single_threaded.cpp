@@ -427,7 +427,7 @@ void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool
 		e(node.output_ports().end()); i != e; ++i
 	) {
 		ports::output & output_port(**i);
-		// we don't need to check since we don't get here in this case: if(output_port.input_ports().size())
+		if(output_port.input_ports().size())
 			set_buffer_for_output_port(output_port, buffer_pool_instance()());
 	}
 }
