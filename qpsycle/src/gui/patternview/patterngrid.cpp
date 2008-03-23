@@ -154,72 +154,11 @@ void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *opti
 		if ( endLineNum > patDraw_->patternView()->numberOfLines()-1 )
 			endLineNum = patDraw_->patternView()->numberOfLines()-1;
 
-		drawGrid( painter, startLineNum, endLineNum, startTrackNum, endTrackNum );
+		// Note: the grid lines are drawn in PatDraw::drawBackground().
 		drawCellBg( painter, cursor() );
 		drawPattern( painter, startLineNum, endLineNum, startTrackNum, endTrackNum );
 		drawSelBg( painter, selection() );
 	}
-}
-
-/// Draw the grid outline.
-///\ todo: perhaps this should go in PatDraw::drawBackground -- might
-// be faster there.
-void PatternGrid::drawGrid( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack  ) 
-{
-	psy::core::TimeSignature signature;
-
-	int gridWidth = static_cast<int>( boundingRect().width() );
-	int gridHeight = static_cast<int>( boundingRect().height() );
-
-	// Draw horizontal lines to demarcate the pattern lines.
-	if ( lineGridEnabled() ) 
-	{
-		QVarLengthArray<QLineF, 100> horizontalLines;
-		for (int y = startLine; y <= endLine; y++) {
-			horizontalLines.append( QLineF (0, y * lineHeight(), gridWidth, y* lineHeight() ) );
-		}
-		painter->setPen( separatorColor() );
-		painter->drawLines( horizontalLines.data(), horizontalLines.size() );
-	}
-
-	QVector<QRectF> barRects;
-	QVector<QRectF> beatRects;
-	QVector<QRectF> trackSepRects;
-
-	// Construct barRects and beatRects.
-	for (int y = startLine; y <= endLine; y++) 
-	{
-		float position = y / (float) beatZoom();
-		if (!(y == patDraw_->patternView()->playPos() ) || !psy::core::Player::Instance()->playing() ) 
-		{
-			if ( !(y % beatZoom() ) ) 
-			{
-				if ((patDraw_->patternView()->pattern()->barStart(position, signature) )) {
-					barRects.append( QRectF( 0, y*lineHeight(), gridWidth, lineHeight() ) );
-				} else {
-					beatRects.append( QRectF( 0, y* lineHeight(), gridWidth, lineHeight() ) );
-				}
-			}
-		}
-	}
-
-	// Construct the vertical track separator rects.
-	std::map<int, TrackGeometry>::const_iterator it;
-	it = trackGeometrics().lower_bound( startTrack );
-	for ( ; it != trackGeometrics().end() && it->first <= endTrack; it++ ) { 
-		trackSepRects.append( QRectF( it->second.left(), 0, 5, gridHeight ) );
-	}
-
-	// Paint all the rects.
-	painter->setPen( Qt::black );
-	painter->setBrush( beatColor() );
-	painter->drawRects( beatRects );
-	painter->setBrush( barColor() );
-	painter->drawRects( barRects );
-
-	painter->setPen( separatorColor() );
-	painter->setBrush( separatorColor() );
-	painter->drawRects( trackSepRects );
 }
 
 void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, int startTrack, int endTrack )

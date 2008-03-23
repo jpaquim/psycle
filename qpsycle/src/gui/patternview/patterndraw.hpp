@@ -113,6 +113,7 @@ public:
 protected:
 	void scrollContentsBy ( int dx, int dy );
 	bool event( QEvent *event );
+	void drawBackground( QPainter * painter, const QRectF & rect );
 
 private:
 	std::map<int, TrackGeometry> trackGeometryMap;
