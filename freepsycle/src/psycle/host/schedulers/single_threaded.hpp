@@ -63,18 +63,8 @@ class buffer : public underlying::buffer {
 typedef generic::wrappers::graph<typenames::typenames> graph_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 	protected: friend class virtual_factory_access;
-		graph(underlying_type &);
-		void after_construction() /*override*/;
+		graph(underlying_type & underlying) : graph_base(underlying) {}
 
-	///\name signal slots
-	///\{
-		private:
-			void on_new_node(node &);
-			void on_delete_node(node &);
-			void on_new_connection(ports::input &, ports::output &);
-			void on_delete_connection(ports::input &, ports::output &);
-	///\}
-	
 	///\name schedule
 	///\{
 		public:
@@ -101,7 +91,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 typedef generic::wrappers::port<typenames::typenames> port_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
 	protected: friend class virtual_factory_access;
-		port(parent_type &, underlying_type &);
+		//port(parent_type &, underlying_type &);
+		port(parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
 
 	///\name buffer
 	///\{
@@ -120,7 +111,7 @@ namespace ports {
 	typedef generic::wrappers::ports::output<typenames::typenames> output_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 		protected: friend class virtual_factory_access;
-			output(parent_type &, underlying_type &);
+			output(parent_type & parent, underlying_type & underlying) : output_base(parent, underlying) {}
 	};
 
 	/**********************************************************************************************************************/
@@ -128,7 +119,7 @@ namespace ports {
 	typedef generic::wrappers::ports::input<typenames::typenames> input_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base {
 		protected: friend class virtual_factory_access;
-			input(parent_type &, underlying_type &);
+			input(parent_type & parent, underlying_type & underlying) : input_base(parent, underlying) {}
 	};
 
 	namespace inputs {
@@ -138,7 +129,7 @@ namespace ports {
 		typedef generic::wrappers::ports::inputs::single<typenames::typenames> single_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base {
 			protected: friend class virtual_factory_access;
-				single(parent_type &, underlying_type &);
+				single(parent_type & parent, underlying_type & underlying) : single_base(parent, underlying) {}
 		};
 
 		/**********************************************************************************************************************/
@@ -146,7 +137,7 @@ namespace ports {
 		typedef generic::wrappers::ports::inputs::multiple<typenames::typenames> multiple_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base {
 			protected: friend class virtual_factory_access;
-				multiple(parent_type &, underlying_type &);
+				multiple(parent_type & parent, underlying_type & underlying) : multiple_base(parent, underlying) {}
 		};
 	}
 }
@@ -157,16 +148,7 @@ typedef generic::wrappers::node<typenames::typenames> node_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	protected: friend class virtual_factory_access;
 		node(parent_type &, underlying_type &);
-		void after_construction() /*override*/;
 		
-	///\name signal slots
-	///\{
-		private:
-			void on_new_output_port(ports::output &);
-			void on_new_single_input_port(ports::inputs::single &);
-			void on_new_multiple_input_port(ports::inputs::multiple &);
-	///\}
-	
 	///\name schedule
 	///\{
 		public: void compute_plan();
@@ -215,10 +197,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 	///\name signal slots
 	///\{
 		private:
-			void on_new_node(node &);
-			void on_delete_node(node &);
-			void on_new_connection(ports::input &, ports::output &);
-			void on_delete_connection(ports::input &, ports::output &);
+			void on_new_node(node::underlying_type &);
+			void on_delete_node(node::underlying_type &);
+			void on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &);
+			void on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &);
 	///\}
 
 	private:
@@ -284,4 +266,3 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 
 }}}}
 #include <universalis/compiler/dynamic_link/end.hpp>
-
