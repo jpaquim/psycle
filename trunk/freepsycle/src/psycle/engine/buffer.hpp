@@ -18,9 +18,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 		public:
 			struct flags {
 				enum type {
-					continuous,
-					discrete,
-					empty
+					continuous, ///< indicates there is an event for every sample
+					discrete, ///< indicates there is not a event for every sample
+					empty ///< indicates there is no event
 				};
 			};
 			
@@ -89,11 +89,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer : public std::vector<channel> {
 	private:
 		std::size_t events_;
 
-		/// size is ambiguous because we have two dimensions: channel() and events().
+		/// size is ambiguous because we have two dimensions: channels() and events().
 		/// so we hide it by making it private.
 		std::size_t size() const { return std::vector<channel>::size(); }
 
-		/// resize is ambiguous because we have two dimensions: channel() and events().
+		/// resize is ambiguous because we have two dimensions: channels() and events().
 		/// so we hide it by making it private.
 		void resize(std::size_t channels) { resize(channels, events()); }
 };
