@@ -63,20 +63,27 @@ class buffer : public underlying::buffer {
 typedef generic::wrappers::graph<typenames::typenames> graph_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 	protected: friend class virtual_factory_access;
-		graph(underlying_type &);
-		void after_construction() /*override*/;
+		graph(underlying_type & underlying) : graph_base(underlying) {}
 
-	///\name signal slots
+	///\name schedule
 	///\{
+		public:
+			void compute_plan();
+			void clear_plan();
+			
+		public:
+			/// maximum number of channels needed for buffers
+			std::size_t channels() const throw() { return channels_; }
 		private:
-			void on_new_node(node &);
-			void on_delete_node(node &);
-			void on_new_connection(ports::input &, ports::output &);
-			void on_delete_connection(ports::input &, ports::output &);
+			std::size_t channels_;
+			
+		public:
+			typedef std::list<node*> terminal_nodes_type;
+			/// nodes with no dependency, that are processed first
+			terminal_nodes_type const & terminal_nodes() const throw() { return terminal_nodes_; }
+		private:
+			terminal_nodes_type terminal_nodes_;
 	///\}
-	
-	private:
-		void compute_plan(); friend class scheduler;
 };
 
 /**********************************************************************************************************************/
@@ -84,7 +91,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 typedef generic::wrappers::port<typenames::typenames> port_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
 	protected: friend class virtual_factory_access;
-		port(parent_type &, underlying_type &);
+		port(parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
 
 	///\name buffer
 	///\{
@@ -103,7 +110,7 @@ namespace ports {
 	typedef generic::wrappers::ports::output<typenames::typenames> output_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 		protected: friend class virtual_factory_access;
-			output(parent_type &, underlying_type &);
+			output(parent_type & parent, underlying_type & underlying) : output_base(parent, underlying) {}
 	};
 
 	/**********************************************************************************************************************/
@@ -111,7 +118,7 @@ namespace ports {
 	typedef generic::wrappers::ports::input<typenames::typenames> input_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base {
 		protected: friend class virtual_factory_access;
-			input(parent_type &, underlying_type &);
+			input(parent_type & parent, underlying_type & underlying) : input_base(parent, underlying) {}
 	};
 
 	namespace inputs {
@@ -121,7 +128,7 @@ namespace ports {
 		typedef generic::wrappers::ports::inputs::single<typenames::typenames> single_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base {
 			protected: friend class virtual_factory_access;
-				single(parent_type &, underlying_type &);
+				single(parent_type & parent, underlying_type & underlying) : single_base(parent, underlying) {}
 		};
 
 		/**********************************************************************************************************************/
@@ -129,7 +136,7 @@ namespace ports {
 		typedef generic::wrappers::ports::inputs::multiple<typenames::typenames> multiple_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base {
 			protected: friend class virtual_factory_access;
-				multiple(parent_type &, underlying_type &);
+				multiple(parent_type & parent, underlying_type & underlying) : multiple_base(parent, underlying) {}
 		};
 	}
 }
@@ -140,16 +147,7 @@ typedef generic::wrappers::node<typenames::typenames> node_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	protected: friend class virtual_factory_access;
 		node(parent_type &, underlying_type &);
-		void after_construction() /*override*/; friend class graph; // init code moved to graph since it deals with connections
 		
-	///\name signal slots
-	///\{
-		private:
-			void on_new_output_port(ports::output &);
-			void on_new_single_input_port(ports::inputs::single &);
-			void on_new_multiple_input_port(ports::inputs::multiple &);
-	///\}
-	
 	///\name schedule
 	///\{
 		public:
@@ -162,6 +160,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		private:
 			std::size_t predecessor_node_count_;
 			std::size_t predecessor_node_remaining_count_;
+
+		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
+		private: ports::output * multiple_input_port_first_output_port_to_process_;
 
 		public:  void process_first() { process(true); }
 		public:  void process() { process(false); }
@@ -197,13 +198,20 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
 		void stop() /*override*/;
 
-	///\name signal slots
+	///\name signal slots and connections
 	///\{
 		private:
-			void on_new_node(node &);
-			void on_delete_node(node &);
-			void on_new_connection(ports::input &, ports::output &);
-			void on_delete_connection(ports::input &, ports::output &);
+			boost::signals::scoped_connection new_node_signal_connection;
+			void on_new_node(node::underlying_type &);
+			
+			boost::signals::scoped_connection delete_node_signal_connection;
+			void on_delete_node(node::underlying_type &);
+
+			boost::signals::scoped_connection new_connection_signal_connection;
+			void on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &);
+
+			boost::signals::scoped_connection delete_connection_signal_connection;
+			void on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &);
 	///\}
 
 	private:
@@ -253,6 +261,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		std::condition<scoped_lock> mutable condition_;
 		
 		bool stop_requested_;
+		bool suspend_requested_;
+		std::size_t suspended_;
 		
 		typedef std::list<node*> nodes_queue_type;
 		/// nodes ready to be processed, just waiting for a free thread
@@ -262,9 +272,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		
 		std::size_t processed_node_count_;
 
+		void suspend_and_compute_plan();
 		void compute_plan();
-		void allocate() throw(std::exception);
-		void free() throw();
+		void clear_plan();
 
 		void process_loop();
 };
