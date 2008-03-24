@@ -18,10 +18,11 @@ namespace psycle { namespace host {
 	template<typename Graph>
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler {
 		protected:
-			scheduler(underlying::graph & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
+			scheduler(typename Graph::underlying_type & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
 		public:
 			virtual ~scheduler() throw() {}
-			void started(bool started) throw(exception) { if(started) start(); else stop(); }
+			bool virtual started() = 0;
+			void         started(bool started) throw(exception) { if(started) start(); else stop(); }
 			void virtual start() throw(exception) = 0;
 			void virtual stop() = 0;
 		protected:
