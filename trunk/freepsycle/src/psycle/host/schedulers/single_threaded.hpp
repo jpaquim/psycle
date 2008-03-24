@@ -189,7 +189,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		scheduler(graph::underlying_type &) throw(std::exception);
 		virtual ~scheduler() throw();
 		void start() throw(underlying::exception) /*override*/;
-		bool started() { return thread_; }
+		bool started() /*override*/ { return thread_; }
 		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
 		void stop() /*override*/;
 
