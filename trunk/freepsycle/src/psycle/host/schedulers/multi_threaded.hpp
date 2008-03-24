@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2007-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::host::schedulers::multi_threaded
 #pragma once
@@ -191,12 +191,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 /// a scheduler using several threads
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<graph> {
 	public:
-		scheduler(graph::underlying_type &) throw(std::exception);
+		scheduler(graph::underlying_type &, std::size_t threads = 1) throw(std::exception);
 		virtual ~scheduler() throw();
 		void start() throw(underlying::exception) /*override*/;
 		bool started() { return threads_.size(); }
 		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
 		void stop() /*override*/;
+		
+		std::size_t threads() const throw() { return thread_count_; }
+		void        threads(std::size_t threads);
 
 	///\name signal slots and connections
 	///\{
@@ -252,6 +255,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		} * buffer_pool_instance_;
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		
+		std::size_t thread_count_;
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
 		void thread_function(std::size_t thread_number);

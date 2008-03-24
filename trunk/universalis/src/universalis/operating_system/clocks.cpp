@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::operating_system::clocks
 #include <packageneric/pre-compiled.private.hpp>
@@ -122,6 +122,7 @@ namespace detail {
 	std::nanoseconds iso_std_time() throw(std::runtime_error) {
 		std::time_t const t(std::time(0));
 		if(t < 0) {
+			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 			std::ostringstream s; s << exceptions::code_description();
 			throw std::runtime_error(s.str().c_str());
 		}
@@ -135,6 +136,7 @@ namespace detail {
 	std::nanoseconds iso_std_clock() throw(std::runtime_error) {
 		std::clock_t const t(std::clock());
 		if(t < 0) {
+			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 			std::ostringstream s; s << exceptions::code_description();
 			throw std::runtime_error(s.str().c_str());
 		}
@@ -148,6 +150,7 @@ namespace detail {
 				std::nanoseconds get(::clockid_t clock) throw(std::runtime_error) {
 					::timespec t;
 					if(::clock_gettime(clock, &t)) {
+						//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 						std::ostringstream s; s << exceptions::code_description();
 						throw std::runtime_error(s.str().c_str());
 					}
@@ -183,6 +186,7 @@ namespace detail {
 			std::nanoseconds time_of_day() throw(std::runtime_error) {
 				::timeval t;
 				if(::gettimeofday(&t, 0)) { // second argument passed is 0 for no timezone
+					//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 					std::ostringstream s; s << exceptions::code_description();
 					throw std::runtime_error(s.str().c_str());
 				}
@@ -199,6 +203,7 @@ namespace detail {
 			std::nanoseconds performance_counter() throw(std::runtime_error) {
 				::LARGE_INTEGER counter, frequency;
 				if(!::QueryPerformanceCounter(&counter) || !::QueryPerformanceFrequency(&frequency)) {
+					//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 					std::ostringstream s; s << exceptions::code_description();
 					throw std::runtime_error(s.str().c_str());
 				}

@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2007-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::host::schedulers::multi_threaded
 #include <packageneric/pre-compiled.private.hpp>
@@ -148,7 +148,7 @@ void node::process(bool first) {
 /**********************************************************************************************************************/
 // scheduler
 
-scheduler::scheduler(underlying::graph & graph) throw(std::exception)
+scheduler::scheduler(underlying::graph & graph, std::size_t threads) throw(std::exception)
 :
 	host::scheduler<graph_type>(graph),
 	// register to the graph signals
@@ -156,7 +156,8 @@ scheduler::scheduler(underlying::graph & graph) throw(std::exception)
 	on_delete_node_signal_connection      (graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ))),
 	on_new_connection_signal_connection   (graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2))),
 	on_delete_connection_signal_connection(graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2))),
-	buffer_pool_instance_()
+	buffer_pool_instance_(),
+	thread_count_(threads)
 {}
 
 scheduler::~scheduler() throw() {
@@ -180,6 +181,14 @@ void scheduler::on_delete_connection(ports::input::underlying_type &, ports::out
 	suspend_and_compute_plan();
 }
 
+void scheduler::threads(std::size_t threads) {
+	// It could be achieved without recreating all the threads, but to keep it simple, we recreate them all.
+	bool const was_started(started());
+	if(was_started) stop();
+	thread_count_ = threads;
+	if(was_started) start();
+}
+
 void scheduler::start() throw(engine::exception) {
 	if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(threads_.size()) {
@@ -199,13 +208,12 @@ void scheduler::start() throw(engine::exception) {
 
 	try {
 		// start the scheduling threads
-		std::size_t thread_count(2); ///\todo parametrable
 		if(loggers::information()()) {
 			std::ostringstream s;
-			s << "using " << thread_count << " threads";
+			s << "using " << thread_count_ << " threads";
 			loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		for(std::size_t i(0); i < thread_count; ++i)
+		for(std::size_t i(0); i < thread_count_; ++i)
 			threads_.push_back(new std::thread(boost::bind(&scheduler::thread_function, this, i)));
 	} catch(...) {
 		{ scoped_lock lock(mutex_);
@@ -297,7 +305,7 @@ void scheduler::thread_function(std::size_t thread_number) {
 
 	{ // set thread name and install cpu/os exception handler/translator
 		std::ostringstream s;
-		s << universalis::compiler::typenameof(*this) << "#" << graph().underlying().name() << thread_number;
+		s << universalis::compiler::typenameof(*this) << '#' << graph().underlying().name() << '#' << thread_number;
 		universalis::processor::exception::install_handler_in_thread(s.str());
 	}
 

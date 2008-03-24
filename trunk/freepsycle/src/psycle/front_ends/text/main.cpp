@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::front_ends::text::main
 #include <packageneric/pre-compiled.private.hpp>
@@ -14,6 +13,7 @@
 #include <psycle/host/host.hpp>
 #include <universalis/processor/exception.hpp>
 #include <universalis/operating_system/loggers.hpp>
+#include <universalis/operating_system/cpu_affinity.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <string>
@@ -128,13 +128,22 @@ void stuff() {
 		}
 		loggers::information()("############################################## schedule ########################################################");
 		{
-			host::schedulers::
-				#if 1
-					multi_threaded
-				#else
-					single_threaded
-				#endif
-				::scheduler scheduler(graph);
+			#if 1
+				host::schedulers::multi_threaded::scheduler scheduler(graph);
+				std::size_t threads(universalis::operating_system::cpu_affinity::cpu_count());
+				{ // thread count env var
+					char const * const env(std::getenv("PSYCLE__THREADS"));
+					if(env) {
+						std::stringstream s;
+						s << env;
+						s >> threads;
+					}
+				}
+				scheduler.threads(threads);
+			#else
+				host::schedulers::single_threaded::scheduler scheduler(graph);
+			#endif
+				
 			std::seconds const seconds(60);
 			{
 				unsigned int const notes(10000);

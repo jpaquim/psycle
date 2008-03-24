@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::operating_system::clocks
 #pragma once
@@ -238,8 +238,7 @@ namespace detail {
 				}
 			#endif
 			
-			BOOST_AUTO_TEST_CASE(clocks_test)
-			{
+			BOOST_AUTO_TEST_CASE(clocks_test) {
 				measure_clock_resolution("std::time", iso_std_time, 1);
 				measure_clock_resolution("std::clock", iso_std_clock);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
