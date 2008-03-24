@@ -1,6 +1,6 @@
 #! /bin/sh
 
-echo svn propset svn:eol-style native $(find "${@:-$(dirname $0)/..}" \( \
+svn propset svn:eol-style native $(find "${@:-$(dirname $0)/..}" \( \
 	-name \*.cpp -or \
 	-name \*.hpp -or \
 	-name \*.hpp.in -or \
