@@ -19,3 +19,4 @@
 #include <thread>
 #include <mutex>
 #include <condition>
+#include <universalis/operating_system/cpu_affinity.hpp>
