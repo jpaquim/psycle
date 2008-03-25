@@ -219,10 +219,10 @@ namespace std {
 					shared_start = threads;
 					shared = 0;
 
-					tls ** const tls_(new tls*[threads]);
+					tls ** const tls_(new (tls*)[threads]);
 					for(unsigned int i(0); i < threads; ++i) tls_[i] = new tls(i);
 					
-					thread ** const threads_(new thread*[threads]);
+					thread ** const threads_(new (thread*)[threads]);
 					for(unsigned int i(0); i < threads; ++i)
 						threads_[i] = new thread(boost::bind(&condition_speed_test_class::thread_function, this, tls_[i]));
 					
@@ -244,6 +244,6 @@ namespace std {
 			condition_speed_test_class test;
 			test.test(2);
 			test.test(4); // shows a race condition
-		}		
+		}
 	}}}}
 #endif
