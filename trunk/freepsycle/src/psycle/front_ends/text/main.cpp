@@ -212,12 +212,10 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 		try {
 			universalis::operating_system::loggers::multiplex_logger::singleton().add(universalis::operating_system::loggers::stream_logger::default_logger());
 			universalis::processor::exception::install_handler_in_thread("psycle.text");
-			{
-				if(universalis::operating_system::loggers::information()()) {
-					std::ostringstream s;
-					s << paths::package::name() << " " << paths::package::version::string();
-					universalis::operating_system::loggers::information()(s.str());
-				}
+			if(universalis::operating_system::loggers::information()()) {
+				std::ostringstream s;
+				s << paths::package::name() << " " << paths::package::version::string();
+				universalis::operating_system::loggers::information()(s.str());
 			}
 			paths();
 			#if 1
@@ -271,4 +269,3 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	psycle::front_ends::text::main(argument_count, arguments);
 }
-

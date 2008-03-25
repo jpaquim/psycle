@@ -7,8 +7,7 @@
 #pragma once
 #include "forward_declarations.hpp"
 #include <psycle/engine.hpp>
-#include <list>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PACKAGENERIC__MODULE__SOURCE__PSYCLE__HOST__SCHEDULER
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST__SCHEDULER
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host {
 	namespace underlying = engine;

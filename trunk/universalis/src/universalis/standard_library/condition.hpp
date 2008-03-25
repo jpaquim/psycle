@@ -93,53 +93,64 @@ namespace std {
 	#include <boost/bind.hpp>
 	namespace universalis { namespace standard_library { namespace detail { namespace test {
 		using namespace std;
-		
-		class shared_data {
+
+		class condition_test_class {
 			public:
+				void test() {
+					i = 0;
+					thread t(boost::bind(&condition_test_class::thread_function, this));
+					{ scoped_lock_type l(m);
+						while(i != 1) c.wait(l);
+						i = 2;
+					}
+					c.notify_one();
+					t.join();
+				}
+			
+			private:
+				typedef scoped_lock<mutex> scoped_lock_type;
 				mutex m;
-				condition<scoped_lock<mutex> > c;
+				condition<scoped_lock_type> c;
 				int i;
-				shared_data() : i() {}
+
+			void thread_function() {
+				{ scoped_lock_type l(m);
+					i = 1;
+				}
+				c.notify_one();
+				{ scoped_lock<mutex> l(m);
+					while(i != 2) c.wait(l); 
+				}
+				#if 0 ///\todo strange bug...
+				{ // timeout in the future
+					scoped_lock_type l(m);
+					utc_time const timeout(hiresolution_clock<utc_time>::universal_time() + seconds(1));
+					while(c.timed_wait(l, timeout)) {
+						utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
+						//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
+						//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
+						BOOST_CHECK(now < timeout);
+						if(now >= timeout) break;
+					}
+				}
+				{ // timeout in the past
+					scoped_lock_type l(m);
+					utc_time const timeout(hiresolution_clock<utc_time>::universal_time() - days(1));
+					while(c.timed_wait(l, timeout)) {
+						utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
+						//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
+						//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
+						BOOST_CHECK(now < timeout);
+						if(now >= timeout) break;
+					}
+				}
+				#endif
+			}
 		};
 
-		void thread_function(shared_data * data_pointer) {
-			shared_data & data(*data_pointer);
-			scoped_lock<mutex> l(data.m);
-			data.i = 1; data.c.notify_one();
-			do data.c.wait(l); while(data.i != 2);
-			#if 0 ///\todo strange bug...
-			{ // timeout in the future
-				utc_time const timeout(hiresolution_clock<utc_time>::universal_time() + seconds(1));
-				while(data.c.timed_wait(l, timeout)) {
-					utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
-					//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
-					//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
-					BOOST_CHECK(now < timeout);
-					if(now >= timeout) break;
-				}
-			}
-			{ // timeout in the past
-				utc_time const timeout(hiresolution_clock<utc_time>::universal_time() - days(1));
-				while(data.c.timed_wait(l, timeout)) {
-					utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
-					//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
-					//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
-					BOOST_CHECK(now < timeout);
-					if(now >= timeout) break;
-				}
-			}
-			#endif
-		}
-
-		BOOST_AUTO_TEST_CASE(std_condition_mutex_test) {
-			shared_data data;
-			thread t(boost::bind(thread_function, &data));
-			{
-				scoped_lock<mutex> l(data.m);
-				while(data.i != 1) data.c.wait(l);
-				data.i = 2; data.c.notify_one();
-			}
-			t.join();
+		BOOST_AUTO_TEST_CASE(std_condition_test) {
+			condition_test_class test;
+			test.test();
 		}
 	}}}}
 #endif
