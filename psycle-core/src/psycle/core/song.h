@@ -191,7 +191,7 @@ namespace psy
 			bool CreateMachine(std::string const & plugin_path, Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type);
 
 			/// destroy a machine of this song.
-			void DestroyMachine(Machine & machine, bool /*write_locked*/ = false) { DestroyMachine(machine.id()); /* stupid circonvolution */ }
+			void DestroyMachine(Machine & machine, bool write_locked = false) { DestroyMachine(machine.id(),write_locked); /* stupid circonvolution */ }
 			/// destroy a machine of this song.
 			virtual void DestroyMachine(Machine::id_type mac, bool write_locked = false);
 			/// destroys all the machines of this song.

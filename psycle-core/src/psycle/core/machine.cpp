@@ -687,25 +687,25 @@ namespace psy { namespace core {
 		for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
 			if(_connection[c])
 				if(_outputMachines[c] == id)
-					return c;
+				return c;
 		return Wire::id_type(-1);
 	}
 
-	int Machine::GetFreeInputWire(int /*slottype*/) const
+	Wire::id_type Machine::GetFreeInputWire(InPort::id_type /*slottype*/) const
 	{
 		for(int c=0; c<MAX_CONNECTIONS; c++)
 		{
 			if(!_inputCon[c]) return c;
 		}
-		return -1;
+		return Wire::id_type(-1);
 	}
-	int Machine::GetFreeOutputWire(int /*slottype*/) const
+	Wire::id_type Machine::GetFreeOutputWire(OutPort::id_type /*slottype*/) const
 	{
 		for(int c=0; c<MAX_CONNECTIONS; c++)
 		{
 			if(!_connection[c]) return c;
 		}
-		return -1;
+		return Wire::id_type(-1);
 	}
 #if 0
 	bool Machine::acceptsConnections() const
