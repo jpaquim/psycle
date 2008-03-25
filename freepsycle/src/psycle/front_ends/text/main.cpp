@@ -149,7 +149,7 @@ void stuff() {
 				unsigned int const notes(10000);
 				engine::real beat(0);
 				engine::real duration(0.1 / beats_per_second);
-				float slowdown(0.01);
+				float slowdown(0.03);
 				float f1(200), f2(400), f3(800);
 				float ratio(1.1);
 				for(unsigned int note(0); note < notes; ++note) {
@@ -161,20 +161,20 @@ void stuff() {
 					freq2.insert_event(b2 * 1.1, f2 * 1.1);
 					freq3.insert_event(b3 * 1.2, f3 * 1.17);
 					
-					sequence1.insert_event(b1, 0.1);
-					sequence2.insert_event(b2, 0.1);
-					sequence3.insert_event(b3, 0.1);
+					sequence1.insert_event(b1, 0.3);
+					sequence2.insert_event(b2 * 1.1, 0.3);
+					sequence3.insert_event(b3 * 1.2, 0.3);
 
 					decay_sequence1.insert_event(b1, 0.0001);
 					decay_sequence2.insert_event(b2, 0.0001);
 					decay_sequence3.insert_event(b3, 0.0001);
 
 					f1 *= ratio;
-					if(f1 > 5000) { f1 /= 15; ratio *= 1.05; }
+					if(f1 > 8000) { f1 /= 150; ratio *= 1.05; }
 					f2 *= ratio * ratio;
-					if(f2 > 5000) f2 /= 15;
+					if(f2 > 8000) f2 /= 150;
 					f3 *= ratio * ratio * ratio;
-					if(f3 > 5000) f3 /= 15;
+					if(f3 > 8000) f3 /= 150;
 					if(ratio > 1.5) ratio -= 0.5;
 					if(ratio < 1.01) ratio += 0.01;
 					beat += duration;
