@@ -232,7 +232,7 @@ namespace std {
 						delete threads_[i];
 						{
 							std::ostringstream s;
-							s << threads << " threads: " << i << ": " << tls_[i]->t.get_count() * 1e-9 / (tls_[i]->count - start) << 's';
+							s << threads << " threads: " << i << ": " << tls_[i]->t.get_count() * 1e-9 / (tls_[i]->count - start) / inner_loop << 's';
 							BOOST_MESSAGE(s.str());
 						}
 						delete tls_[i];
