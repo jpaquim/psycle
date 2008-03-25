@@ -794,7 +794,7 @@ namespace psy {
 			}
 			return ret;
 		}
-		int Mixer::GetFreeInputWire(InPort::id_type slotType) const
+		Wire::id_type Mixer::GetFreeInputWire(InPort::id_type slotType) const
 		{
 			if ( slotType == 0) return Machine::GetFreeInputWire(0);
 			else 
@@ -804,7 +804,7 @@ namespace psy {
 				{
 					if(!ReturnValid(c)) return c+MAX_CONNECTIONS;
 				}
-				return -1;
+				return Wire::id_type(-1);
 			}
 		}
 

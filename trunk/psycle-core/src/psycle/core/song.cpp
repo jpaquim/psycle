@@ -399,7 +399,7 @@ bool CoreSong::ChangeWireSourceMac(Machine& newSrcMac, Machine &dstMac, InPort::
 	return dstMac.MoveWireSourceTo(newSrcMac,dsttype,wiretochange,srctype);
 }
 
-void CoreSong::DestroyMachine(int mac, bool /*write_locked*/)
+void CoreSong::DestroyMachine(Machine::id_type mac, bool /*write_locked*/)
 {
 	//CSingleLock lock(&door, TRUE);
 	Machine *iMac = machine(mac);
