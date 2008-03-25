@@ -90,7 +90,9 @@ namespace std {
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
+	#include <vector>
 	#include <boost/bind.hpp>
+	#include <sstream>
 	namespace universalis { namespace standard_library { namespace detail { namespace test {
 		using namespace std;
 
@@ -219,10 +221,10 @@ namespace std {
 					shared_start = threads;
 					shared = 0;
 
-					tls ** const tls_(new (tls*)[threads]);
+					vector<tls*> tls_(threads);
 					for(unsigned int i(0); i < threads; ++i) tls_[i] = new tls(i);
 					
-					thread ** const threads_(new (thread*)[threads]);
+					vector<thread*> threads_(threads);
 					for(unsigned int i(0); i < threads; ++i)
 						threads_[i] = new thread(boost::bind(&condition_speed_test_class::thread_function, this, tls_[i]));
 					
