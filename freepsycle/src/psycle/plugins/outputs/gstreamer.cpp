@@ -369,7 +369,12 @@ namespace psycle { namespace plugins { namespace outputs {
 				if(stop_requested_) return; 
 				// Handoff is called before state is changed to playing.
 				if(wait_for_state_to_become_playing_) {
-					loggers::trace()("waiting for state to become playing", UNIVERSALIS__COMPILER__LOCATION);
+					if(loggers::trace()()) loggers::trace()("waiting for state to become playing", UNIVERSALIS__COMPILER__LOCATION);
+					{
+						output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
+						std::size_t const samples(GST_BUFFER_SIZE(&buffer) / sizeof *out);
+						for(std::size_t i(0); i < samples ; ++i) out[i] = 0;
+					}
 					return;
 				} else {
 					loggers::warning()("underrun", UNIVERSALIS__COMPILER__LOCATION);
