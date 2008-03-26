@@ -333,18 +333,20 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void gstreamer::do_start() throw(engine::exception) {
 		resource::do_start();
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			current_read_position_ = current_write_position_;
-			wait_for_state_to_become_playing_ = true;
-			stop_requested_ = false;
-		}
+		current_read_position_ = current_write_position_;
+		stop_requested_ = false;
+		handoff_called_ = false;
+		wait_for_state_to_become_playing_ = true;
 		// register our callback to the handoff signal of the fakesrc element
 		if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
 		// set the pipeline state to playing
-		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
+		#if 0 // Handoff is called before state is changed to playing.
+			set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
+		#else
+			::gst_element_set_state(GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
+		#endif
+		{ std::scoped_lock<std::mutex> lock(mutex_);
+			while(!handoff_called_) condition_.wait(lock);
 			wait_for_state_to_become_playing_ = false;
 		}
 		condition_.notify_one();
@@ -363,24 +365,18 @@ namespace psycle { namespace plugins { namespace outputs {
 			std::ostringstream s; s << "handoff " << current_read_position_;
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
-			if(current_read_position_ == current_write_position_) {
+		{ std::scoped_lock<std::mutex> lock(mutex_);
+			while(current_read_position_ == current_write_position_) {
 				if(stop_requested_) return; 
 				// Handoff is called before state is changed to playing.
 				if(wait_for_state_to_become_playing_) {
-					if(loggers::trace()()) loggers::trace()("waiting for state to become playing", UNIVERSALIS__COMPILER__LOCATION);
-					{
-						output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
-						std::size_t const samples(GST_BUFFER_SIZE(&buffer) / sizeof *out);
-						for(std::size_t i(0); i < samples ; ++i) out[i] = 0;
-					}
-					return;
-				} else {
-					loggers::warning()("underrun", UNIVERSALIS__COMPILER__LOCATION);
-				}
+					if(loggers::trace()()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
+					handoff_called_ = true;
+					condition_.notify_one();
+					while(wait_for_state_to_become_playing_) condition_.wait(lock);
+					break;
+				} else loggers::warning()("underrun", UNIVERSALIS__COMPILER__LOCATION);
 				condition_.wait(lock);
-				if(stop_requested_) return; 
 			}
 		}
 		if(!loggers::trace()()) {
@@ -399,8 +395,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				std::memcpy(out, in, buffer_size_);
 			}
 		}
-		{
-			std::scoped_lock<std::mutex> lock(mutex_);
+		{ std::scoped_lock<std::mutex> lock(mutex_);
 			++current_read_position_ %= buffers_;
 		}
 		condition_.notify_one();
@@ -438,8 +433,7 @@ namespace psycle { namespace plugins { namespace outputs {
 	
 	void gstreamer::do_stop() throw(engine::exception) {
 		if(pipeline_) {
-			{
-				std::scoped_lock<std::mutex> lock(mutex_);
+			{ std::scoped_lock<std::mutex> lock(mutex_);
 				stop_requested_ = true;
 			}
 			condition_.notify_one();
@@ -450,8 +444,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void gstreamer::do_close() throw(engine::exception) {
 		if(pipeline_) {
-			{
-				std::scoped_lock<std::mutex> lock(mutex_);
+			{ std::scoped_lock<std::mutex> lock(mutex_);
 				stop_requested_ = true;
 			}
 			condition_.notify_one();
