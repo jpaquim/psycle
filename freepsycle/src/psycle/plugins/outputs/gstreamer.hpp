@@ -43,6 +43,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			std::condition<std::scoped_lock<std::mutex> > condition_;
 			std::mutex mutex_;
 			bool wait_for_state_to_become_playing_;
+			bool handoff_called_;
 			bool stop_requested_;
 
 			char * buffer_;
