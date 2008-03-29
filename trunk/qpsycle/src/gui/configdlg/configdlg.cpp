@@ -73,7 +73,7 @@ namespace qpsycle {
 	{
 		QListWidgetItem *configButton = new QListWidgetItem(contentsWidget);
 		configButton->setIcon(QIcon(":/images/config.png"));
-		configButton->setText(tr("Audio"));
+		configButton->setText(tr("Audio & MIDI"));
 		configButton->setTextAlignment(Qt::AlignHCenter);
 		configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
@@ -85,7 +85,7 @@ namespace qpsycle {
 
 		QListWidgetItem *queryButton = new QListWidgetItem(contentsWidget);
 		queryButton->setIcon(QIcon(":/images/query.png"));
-		queryButton->setText(tr("Looks"));
+		queryButton->setText(tr("Look & Feel"));
 		queryButton->setTextAlignment(Qt::AlignHCenter);
 		queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 

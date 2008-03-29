@@ -53,11 +53,18 @@ private:
 	Configuration* config_;
 	psy::core::AudioDriver *selectedDriver_;
 
-	QLabel *driverLbl_;
-	QLabel *deviceLbl_;
-	QComboBox *driverCbx_;
-	QLineEdit *deviceBox_;
-	QPushButton *restartBtn_;
+	QLabel *audio_driverLbl_;
+	QLabel *audio_deviceLbl_;
+	QComboBox *audio_driverCbx_;
+	QLineEdit *audio_deviceBox_;
+	QPushButton *audio_restartBtn_;
+
+	QLabel *midi_driverLbl_;
+	QLabel *midi_deviceLbl_;
+	QComboBox *midi_driverCbx_;
+	QLineEdit *midi_deviceBox_;
+	QPushButton *midi_restartBtn_;
+
 };
 
 } // namespace qpsycle
