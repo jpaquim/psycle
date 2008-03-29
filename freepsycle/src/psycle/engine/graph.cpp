@@ -105,6 +105,12 @@ node::name_type node::qualified_name() const {
 	return parent().qualified_name() + '.' + name();
 }
 
+void node::io_ready(bool io_ready) {
+	bool const was_io_ready(io_ready_);
+	io_ready_ = io_ready;
+	if(!was_io_ready && io_ready) io_ready_signal_(*this);
+}
+
 ports::input * const node::input_port(name_type const & name) const {
 	if(multiple_input_port() && multiple_input_port()->name() == name) return multiple_input_port();
 	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) if((**i).name() == name) return *i;
@@ -144,6 +150,7 @@ void node::do_start() throw(std::exception) {
 		s << qualified_name() << ": starting";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
+	io_ready_ = true;
 }
 
 bool node::started() const {

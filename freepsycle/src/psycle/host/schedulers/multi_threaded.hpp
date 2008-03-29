@@ -83,6 +83,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 			terminal_nodes_type const & terminal_nodes() const throw() { return terminal_nodes_; }
 		private:
 			terminal_nodes_type terminal_nodes_;
+
+		public:
+			boost::signal<void (node & node)> & io_ready_signal() throw() { return io_ready_signal_; }
+		private:
+			boost::signal<void (node &)> io_ready_signal_;
 	///\}
 };
 
@@ -164,6 +169,18 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
 		private: ports::output * multiple_input_port_first_output_port_to_process_;
 
+		private:
+			/// connection to the underlying signal
+			boost::signals::scoped_connection on_underlying_io_ready_signal_connection;
+			/// signal slot for the underlying signal
+			void on_underlying_io_ready(node::underlying_type & /*underlying_node*/) { parent().io_ready_signal()(*this); }
+			
+		public:
+			bool waiting_for_io_ready_signal() const throw() { return waiting_for_io_ready_signal_; }
+			void waiting_for_io_ready_signal(bool waiting_for_io_ready_signal) throw() { waiting_for_io_ready_signal_ = waiting_for_io_ready_signal; }
+		private:
+			bool waiting_for_io_ready_signal_;
+
 		public:  void process_first() { process(true); }
 		public:  void process() { process(false); }
 		private: void process(bool first);
@@ -215,6 +232,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 
 			boost::signals::scoped_connection on_delete_connection_signal_connection;
 			void on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &);
+
+			boost::signals::scoped_connection on_io_ready_signal_connection;
+			void on_io_ready(node &);
 	///\}
 
 	private:
