@@ -26,7 +26,7 @@ void CDMDirverHandler::Initialize()
 		CDMusic.Initialize();
 		
 		CInPort.Initialize(CDMusic);
-		CinPort.SetReceiver(Receiver);
+		CInPort.SetReceiver(Receiver);
 	}
 	catch (CDMusicException& DMex)
 	{
@@ -39,7 +39,30 @@ int CDMDirverHandler::GetCurrentPortNumer()
 	return _portNumber;
 }
 
+void CDMDirverHandler::SetPort(int portNumber);
+{
+	_portNumber = portNumber;
+	CInPort.ReleasePort();
+	CinPort.GetPortInfo(_portNumber, &portInfo);
+	CInPort.ActivatePort(&_portInfo, SYSTEM_EXCLUSIVE_MEM);
+}
+
 QString CDMDirverHandler::GetCurrentPortName()
 {
+	INFOPORT infoport; //we need a temporary infoport because we don't want to change our main infoport
+	CInPort.GetActivatedPortInfo(&infoport);
+	return infoport;
+}
 
+QString[] CDMDirverHandler::GetPorts()
+{
+	QString[] ports;
+	int i;
+	INFOPORT infoport; //we need a temporary infoport to enum our ports because we don't want to change our main infoport
+	
+	for {i=0,  i<(int)CInPort.GetNumPorts()-1. i++)
+	{
+		CInPort.GetPortInfo(i+1, &infoport);
+		ports[i] = infoport.szPortDescription();
+	}
 }
