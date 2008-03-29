@@ -17,7 +17,7 @@
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
 
-#include "w_directmidi.h"
+#include "w_directmidi_CDMRecv.h"
 //SysEx
 void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel, DWORD dwBytesRead,BYTE *lpBuffer)
 {
