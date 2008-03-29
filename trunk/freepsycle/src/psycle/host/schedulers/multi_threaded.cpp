@@ -14,6 +14,7 @@
 #include <sstream>
 #include <limits>
 namespace psycle { namespace host { namespace schedulers { namespace multi_threaded {
+using engine::exceptions::runtime_error;
 
 namespace {
 	std::nanoseconds cpu_time_clock() {
@@ -78,6 +79,8 @@ node::node(node::parent_type & parent, underlying_type & underlying)
 :
 	node_base(parent, underlying),
 	multiple_input_port_first_output_port_to_process_(),
+	on_underlying_io_ready_signal_connection(underlying.io_ready_signal().connect(boost::bind(&node::on_underlying_io_ready, this, _1))),
+	waiting_for_io_ready_signal_(),
 	accumulated_processing_time_(),
 	processing_count_(),
 	processing_count_no_zeroes_()
@@ -93,6 +96,7 @@ void node::compute_plan() {
 	reset_time_measurement();
 	
 	processed_ = true; // set to true because reset() is called first in the processing loop
+	waiting_for_io_ready_signal_ = false;
 
 	// count the number of predecessor nodes
 	if(multiple_input_port()) predecessor_node_count_ = multiple_input_port()->output_ports().size();
@@ -205,6 +209,7 @@ void scheduler::start() throw(engine::exception) {
 
 	stop_requested_ = suspend_requested_ = false;
 	processed_node_count_ = suspended_ = 0;
+	on_io_ready_signal_connection = graph().io_ready_signal().connect(boost::bind(&scheduler::on_io_ready, this, _1));
 
 	try {
 		// start the scheduling threads
@@ -218,6 +223,7 @@ void scheduler::start() throw(engine::exception) {
 	} catch(...) {
 		{ scoped_lock lock(mutex_);
 			stop_requested_ = true;
+			on_io_ready_signal_connection.block();
 		}
 		condition_.notify_all();
 		for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
@@ -237,12 +243,14 @@ void scheduler::suspend_and_compute_plan() {
 	}
 	{ scoped_lock lock(mutex_);
 		suspend_requested_ = true;
+		on_io_ready_signal_connection.block();
 	}
 	condition_.notify_all();
 	{ scoped_lock lock(mutex_);
 		while(suspended_ != threads_.size()) condition_.wait(lock);
 		compute_plan();
 		suspend_requested_ = false;
+		on_io_ready_signal_connection.unblock();
 	}
 	condition_.notify_all();
 }
@@ -271,6 +279,7 @@ void scheduler::stop() {
 	}
 	{ scoped_lock lock(mutex_);
 		stop_requested_ = true;
+		on_io_ready_signal_connection.disconnect();
 	}
 	condition_.notify_all();
 	for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
@@ -334,23 +343,53 @@ void scheduler::thread_function(std::size_t thread_number) {
 	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
+void scheduler::on_io_ready(node & node) {
+	if(loggers::trace()()) loggers::trace()("io ready slot, node: "  + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
+	{ scoped_lock lock(mutex_);
+		if(!node.waiting_for_io_ready_signal()) return;
+		node.waiting_for_io_ready_signal(false);
+		nodes_queue_.push_front(&node);
+	}
+	condition_.notify_all(); // notify all threads that we added a node to the queue
+}
+
 void scheduler::process_loop() {
 	while(true) {
 		typenames::node * node_;
 		{ scoped_lock lock(mutex_);
-			while((!nodes_queue_.size() || suspend_requested_) && !stop_requested_) condition_.wait(lock);
+			while(
+				!nodes_queue_.size() &&
+				!suspend_requested_ &&
+				!stop_requested_
+			) condition_.wait(lock);
+
 			if(stop_requested_) break;
+
 			if(suspend_requested_) {
-				++suspended_; ///\todo spurious wakeups will make the counter bogus!
+				++suspended_; ///\todo spurious wakeups will make the counter bogus! need a tls flag to do the inc only once per thread
 				condition_.notify_all();
 				continue;
 			}
 			suspended_ = 0;
+
 			// There are nodes waiting in the queue. We pop the first one.
 			node_ = nodes_queue_.front();
 			nodes_queue_.pop_front();
+
+			typenames::node & node(*node_);
+
+			// If the node drives an underlying device that is not ready,
+			// we just wait for its io_ready_signal to be emitted and handled by the scheduler's on_io_ready slot.
+			// on_io_ready will readd it to the processing queue.
+			if(!node.underlying().io_ready()) {
+				if(!loggers::trace()()) loggers::trace()("node io not ready: "  + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
+				node.waiting_for_io_ready_signal(true);
+				continue;
+			}
 		}
 		typenames::node & node(*node_);
+
+		//if(node.processed()) throw /*logic_error*/runtime_error("bug: node already processed: " + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
 
 		process(node);
 

@@ -271,6 +271,7 @@ if gstreamer.result():
 	)
 	if not default_output_plugin_module: default_output_plugin_module = gstreamer_output_plugin_module
 
+default_output_plugin_module = gstreamer_output_plugin_module
 if default_output_plugin_module:
 	defines = {'PSYCLE__PLUGINS__OUTPUTS__DEFAULT__' + default_output_plugin_module.short_name().upper() : None}
 	default_output_plugin_module = plugin_uniform_module(

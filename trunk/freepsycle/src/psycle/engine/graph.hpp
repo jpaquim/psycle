@@ -340,6 +340,24 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 	///\name process
 	///\{
 		public:
+			/// indicates whether the underlying device (if any) is ready to process.
+			/// called by schedulers
+			bool io_ready() const throw() { return io_ready_; }
+		protected:
+			/// Derived classes that drives an underlying device should call this setter.
+			/// When changed from false to true, the io_ready_signal will be emitted.
+			void io_ready(bool io_ready);
+		private:
+			bool io_ready_;
+
+		public:
+			/// signal to be emitted when the underlying device (if any) becomes ready to process
+			/// This signal is to be registered by schedulers.
+			boost::signal<void (node &)> & io_ready_signal() throw() { return io_ready_signal_; }
+		private:
+			boost::signal<void (node &)> io_ready_signal_;
+			
+		public:
 			/// called by schedulers
 			void inline     process_first() throw(std::exception);
 		protected:

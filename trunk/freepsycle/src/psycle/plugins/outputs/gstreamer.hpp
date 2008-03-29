@@ -40,8 +40,10 @@ namespace psycle { namespace plugins { namespace outputs {
 			void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 			void        handoff(::GstBuffer &, ::GstPad &);
 
-			std::condition<std::scoped_lock<std::mutex> > condition_;
-			std::mutex mutex_;
+			typedef std::scoped_lock<std::mutex> scoped_lock;
+			std::mutex mutable mutex_;
+			std::condition<scoped_lock> mutable condition_;
+
 			bool wait_for_state_to_become_playing_;
 			bool handoff_called_;
 			bool stop_requested_;
