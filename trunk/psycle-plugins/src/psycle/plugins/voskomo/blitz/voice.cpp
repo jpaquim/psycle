@@ -938,6 +938,13 @@ void CSynthTrack::calcWaves(int mask){
 	synfx[2].next();
 	synfx[3].next();
 
+	//Continuous Drift?
+	if (vpar->oscOptions[0]==13) synbase[0]=vpar->initposition[0];
+	if (vpar->oscOptions[1]==13) synbase[1]=vpar->initposition[1];
+	if (vpar->oscOptions[2]==13) synbase[2]=vpar->initposition[2];
+	if (vpar->oscOptions[3]==13) synbase[3]=vpar->initposition[3];
+
+
 	float float1, float2, float3, float4, float5 = 0;
 	float size1, size2, step1(0), step2, phase;
 	int work1, work2 = 0;
