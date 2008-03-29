@@ -16,6 +16,8 @@
 *  Free Software Foundation, Inc.,                                            *
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
+#ifndef CDMRECV_H
+#define CDMRECV_H
 
 #include <conio.h>
 #include <iostream.h>
@@ -24,15 +26,11 @@
 
 #include <CDirectMidi.h>
 
-#include <psycle/helpers/math/pi.hpp>
-
 using namespace std;
 
 using namespace directmidi;
 
 using namespace psycle::helpers::math;
-
-const int SYSTEM_EXCLUSIVE_MEM = 48000;
 
 class CDMReceiver : public CReceiver
 {
@@ -40,3 +38,4 @@ class CDMReceiver : public CReceiver
     void RecvMidiMsg(REFERENCE_TIME rt,DWORD dwChannel,DWORD dwMsg);
 };
 
+#endif
