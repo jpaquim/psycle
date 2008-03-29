@@ -17,7 +17,7 @@ Johan Boul�                    johan-boule       Psycle 1.9, qpsycle (build sy
 Magnus Jonsson                 zealmange         qpsycle, psycle-core.
 Neil Mather                    nmather           xpsycle->qpsycle (ngrs->Qt).  qpsycle misc.
 d.w. aley                      dw_aley           Psycle 1.9, parts of xpsycle, qpsycle.
-Mattias                        gravity0          qpsycle GUI, qpsycle windows.
+Mattias C.                     gravity0          qpsycle GUI, qpsycle windows, qpsycle DirectMidi driver.
   
 Less recently active developers / contributors:
 -----------------------------------------------
