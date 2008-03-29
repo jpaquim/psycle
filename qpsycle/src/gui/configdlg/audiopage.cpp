@@ -48,33 +48,57 @@ AudioPage::AudioPage( QWidget *parent )
 
 	QVBoxLayout *mainLay = new QVBoxLayout();
 
-	QGroupBox *driverGroup = new QGroupBox();
-	QGridLayout *driverLay = new QGridLayout();
+	QGroupBox *audio_driverGroup = new QGroupBox("Audio Driver", this);
+	QGridLayout *audio_driverLay = new QGridLayout();
 
-	driverLay->setAlignment( Qt::AlignTop );
-	driverGroup->setLayout( driverLay );
+	audio_driverLay->setAlignment( Qt::AlignTop );
+	audio_driverGroup->setLayout( audio_driverLay );
 
-	driverCbx_ = new QComboBox( this );
-	driverLbl_ = new QLabel( tr("Driver"), this );
-	deviceBox_ = new QLineEdit( "", this );
-	deviceLbl_ = new QLabel( tr("Device"), this );
+	audio_driverCbx_ = new QComboBox( this );
+	audio_driverLbl_ = new QLabel( tr("Audio Driver"), this );
+	audio_deviceBox_ = new QLineEdit( "", this );
+	audio_deviceLbl_ = new QLabel( tr("Audio Device"), this );
 
-	restartBtn_ = new QPushButton( tr("Restart Driver"), this );
+	audio_restartBtn_ = new QPushButton( tr("Restart Audio Driver"), this );
 
 
-	connect( driverCbx_, SIGNAL( currentIndexChanged( const QString & ) ),
+	connect( audio_driverCbx_, SIGNAL( currentIndexChanged( const QString & ) ),
 			this, SLOT( onDriverSelected( const QString & ) ) );
-	connect( restartBtn_, SIGNAL( clicked() ),
+	connect( audio_restartBtn_, SIGNAL( clicked() ),
 			this, SLOT( onRestartDriver() ) );
 
-	driverLay->addWidget( driverLbl_, 0, 0 );
-	driverLay->addWidget( deviceLbl_, 1, 0 );
-	driverLay->addWidget( driverCbx_, 0, 1 );
-	driverLay->addWidget( deviceBox_, 1, 1 );
-	driverLay->addWidget( restartBtn_, 0, 2 );
+	audio_driverLay->addWidget( audio_driverLbl_, 0, 0 );
+	audio_driverLay->addWidget( audio_deviceLbl_, 1, 0 );
+	audio_driverLay->addWidget( audio_driverCbx_, 0, 1 );
+	audio_driverLay->addWidget( audio_deviceBox_, 1, 1 );
+	audio_driverLay->addWidget( audio_restartBtn_, 0, 2 );
 
+	QGroupBox *midi_driverGroup = new QGroupBox("MIDI Driver", this);
+	QGridLayout *midi_driverLay = new QGridLayout();
 
-	mainLay->addWidget( driverGroup );
+	midi_driverLay->setAlignment( Qt::AlignTop );
+	midi_driverGroup->setLayout( midi_driverLay );
+
+	midi_driverCbx_ = new QComboBox( this );
+	//test purpose
+	midi_driverCbx_->addItem("ALSA Sequencer");
+	midi_driverCbx_->addItem("G0 DirectMIDI Driver");
+
+	//end
+	midi_driverLbl_ = new QLabel( tr("MIDI Driver"), this );
+	midi_deviceBox_ = new QLineEdit( "", this );
+	midi_deviceLbl_ = new QLabel( tr("MIDI Device"), this );
+
+	midi_restartBtn_ = new QPushButton( tr("Restart MIDI Driver"), this );
+
+	midi_driverLay->addWidget( midi_driverLbl_, 0, 0 );
+	midi_driverLay->addWidget( midi_deviceLbl_, 1, 0 );
+	midi_driverLay->addWidget( midi_driverCbx_, 0, 1 );
+	midi_driverLay->addWidget( midi_deviceBox_, 1, 1 );
+	midi_driverLay->addWidget( midi_restartBtn_, 0, 2 );
+
+	mainLay->addWidget( audio_driverGroup );
+	mainLay->addWidget( midi_driverGroup );
 
 	setLayout( mainLay );
 
@@ -90,11 +114,11 @@ void AudioPage::initDriverList( )
 			continue;
 
 		QString driverName = QString::fromStdString( it->first );
-		driverCbx_->addItem( driverName );
+		audio_driverCbx_->addItem( driverName );
 		if ( it->second == Global::pConfig()->_pOutputDriver ) {
-			driverCbx_->setCurrentIndex(driverCbx_->count()-1);
+			audio_driverCbx_->setCurrentIndex(audio_driverCbx_->count()-1);
 			if ( driverName == "alsa" )
-				deviceBox_->setText( it->second->settings().deviceName().c_str() );
+				audio_deviceBox_->setText( it->second->settings().deviceName().c_str() );
 		}
 	}
 }
@@ -111,13 +135,13 @@ void AudioPage::onDriverSelected( const QString & text )
 		psy::core::AudioDriver* driver = it->second;
 		selectedDriver_ = driver;
 		if ( text == "alsa" ) {
-			deviceBox_->setText( it->second->settings().deviceName().c_str() );
-			deviceBox_->setVisible(true);
-			deviceLbl_->setVisible(true);
+			audio_deviceBox_->setText( it->second->settings().deviceName().c_str() );
+			audio_deviceBox_->setVisible(true);
+			audio_deviceLbl_->setVisible(true);
 		} else {
-			deviceBox_->setText( "" );
-			deviceBox_->setVisible(false);
-			deviceLbl_->setVisible(false);
+			audio_deviceBox_->setText( "" );
+			audio_deviceBox_->setVisible(false);
+			audio_deviceLbl_->setVisible(false);
 		}
 	}
 }
@@ -128,9 +152,9 @@ void AudioPage::onRestartDriver()
 		// disable old driver
 		psy::core::Player::Instance()->driver().Enable( false );
 		// set the device
-		if ( ! deviceBox_->text().isEmpty() ) {
+		if ( ! audio_deviceBox_->text().isEmpty() ) {
 			psy::core::AudioDriverSettings settings = selectedDriver_->settings();
-			settings.setDeviceName( deviceBox_->text().toStdString() );
+			settings.setDeviceName( audio_deviceBox_->text().toStdString() );
 			selectedDriver_->setSettings(settings);
 		}
 		// set new Driver to Player
