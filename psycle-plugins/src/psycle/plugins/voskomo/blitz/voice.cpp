@@ -602,13 +602,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[1]^=4;
 								nextBuf[1]=0;
 							}
-							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[1] == 8)){
+							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
 								dco3Position=dco1Position;
 								if (nextBuf[2]){
 									curBuf[2]^=4;
 									nextBuf[2]=0;
 								}
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[1] == 8)){
+								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
 									dco4Position=dco1Position;
 									if (nextBuf[3]){
 										curBuf[3]^=4;
@@ -636,13 +636,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[1]^=4;
 								nextBuf[1]=0;
 							}
-							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[1] == 8)){
+							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
 								dco3Position=dco1Position;
 								if (nextBuf[2]){
 									curBuf[2]^=4;
 									nextBuf[2]=0;
 								}
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[1] == 8)){
+								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
 									dco4Position=dco1Position;
 									if (nextBuf[3]){
 										curBuf[3]^=4;
@@ -675,13 +675,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[2]^=4;
 								nextBuf[2]=0;
 							}
-							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[2] == 8)){
+							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
 								dco4Position=dco2Position;
 								if (nextBuf[3]){
 									curBuf[3]^=4;
 									nextBuf[3]=0;
 								}
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[2] == 8)){
+								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
 									dco1Position=dco2Position;
 									if (nextBuf[0]){
 										curBuf[0]^=4;
@@ -709,13 +709,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[2]^=4;
 								nextBuf[2]=0;
 							}
-							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[2] == 8)){
+							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
 								dco4Position=dco2Position;
 								if (nextBuf[3]){
 									curBuf[3]^=4;
 									nextBuf[3]=0;
 								}
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[2] == 8)){
+								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
 									dco1Position=dco2Position;
 									if (nextBuf[0]){
 										curBuf[0]^=4;
@@ -748,13 +748,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[3]^=4;
 								nextBuf[3]=0;
 							}
-							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[3] == 8)){
+							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
 								dco1Position=dco3Position;
 								if (nextBuf[0]){
 									curBuf[0]^=4;
 									nextBuf[0]=0;
 								}
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[3] == 8)){
+								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
 									dco2Position=dco3Position;
 									if (nextBuf[1]){
 										curBuf[1]^=4;
@@ -782,13 +782,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[3]^=4;
 								nextBuf[3]=0;
 							}
-							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[3] == 8)){
+							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
 								dco1Position=dco3Position;
 								if (nextBuf[0]){
 									curBuf[0]^=4;
 									nextBuf[0]=0;
 								}
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[3] == 8)){
+								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
 									dco2Position=dco3Position;
 									if (nextBuf[1]){
 										curBuf[1]^=4;
@@ -821,13 +821,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[0]^=4;
 								nextBuf[0]=0;
 							}
-							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[0] == 8)){
+							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
 								dco2Position=dco4Position;
 								if (nextBuf[1]){
 									curBuf[1]^=4;
 									nextBuf[1]=0;
 								}
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[0] == 8)){
+								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
 									dco3Position=dco4Position;
 									if (nextBuf[2]){
 										curBuf[2]^=4;
@@ -855,13 +855,13 @@ void CSynthTrack::GetSample(float* slr)
 								curBuf[0]^=4;
 								nextBuf[0]=0;
 							}
-							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[0] == 8)){
+							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
 								dco2Position=dco4Position;
 								if (nextBuf[1]){
 									curBuf[1]^=4;
 									nextBuf[1]=0;
 								}
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[0] == 8)){
+								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
 									dco3Position=dco4Position;
 									if (nextBuf[2]){
 										curBuf[2]^=4;
