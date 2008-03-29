@@ -17,42 +17,29 @@
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
 
-#include "w_directmidi_CDMRecv.h"
-//SysEx
-void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel, DWORD dwBytesRead,BYTE *lpBuffer)
+#include "w_directmidi_Driver.h"
+
+void CDMDirverHandler::Initialize()
 {
-	DWORD dwBytecount;
-	
-	//Print The received buffer
-	
-	for (dwBytecount = 0;dwBytecount < dwBytesRead;dwBytecount++)
-    {    
-        cout.width(2);
-        cout.precision(2);
-        cout.fill('0');        
-        cout << hex << static_cast<int>(lpBuffer[dwBytecount]) << " ";
-        if ((dwBytecount % 20) == 0) cout << endl;
-        if (lpBuffer[dwBytecount] == END_SYS_EX)
-            cout << "\nSystem memory dumped" << endl;
-    }
+	try
+	{
+		CDMusic.Initialize();
+		
+		CInPort.Initialize(CDMusic);
+		CinPort.SetReceiver(Receiver);
+	}
+	catch (CDMusicException& DMex)
+	{
+		//Adding error handling to the class;
+	}
 }
 
-//Structured MIDI
-void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel,
-                               DWORD dwMsg)
+int CDMDirverHandler::GetCurrentPortNumer()
 {
-    unsigned char Command,Channel,Note,Velocity;
-    
-    // Extract MIDI parameters from a MIDI message    
+	return _portNumber;
+}
 
-    CInputPort::DecodeMidiMsg(dwMsg,&Command,&Channel,&Note,&Velocity);
-    
-    if (Command == NOTE_ON) //Channel #0 Note-On
+QString CDMDirverHandler::GetCurrentPortName()
+{
 
-        {                    
-        cout << "Received on channel " << static_cast<int>(Channel) << 
-                " Note " << static_cast<int>(Note) 
-             << " with velocity " << static_cast<int>(Velocity) << endl;
-    }
-} 
-   
+}

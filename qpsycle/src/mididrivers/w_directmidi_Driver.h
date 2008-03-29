@@ -16,43 +16,30 @@
 *  Free Software Foundation, Inc.,                                            *
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
+#ifndef DMIDIDRIVER_H
+#define DMIDIDRIVER_H
 
 #include "w_directmidi_CDMRecv.h"
-//SysEx
-void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel, DWORD dwBytesRead,BYTE *lpBuffer)
+
+#include <CDirectMidi.h>
+#include <QString>
+
+class CDMDirverHandler
 {
-	DWORD dwBytecount;
-	
-	//Print The received buffer
-	
-	for (dwBytecount = 0;dwBytecount < dwBytesRead;dwBytecount++)
-    {    
-        cout.width(2);
-        cout.precision(2);
-        cout.fill('0');        
-        cout << hex << static_cast<int>(lpBuffer[dwBytecount]) << " ";
-        if ((dwBytecount % 20) == 0) cout << endl;
-        if (lpBuffer[dwBytecount] == END_SYS_EX)
-            cout << "\nSystem memory dumped" << endl;
-    }
-}
+private:
+	INFOPORT _portInfo;
+	const int SYSTEM_EXCLUSIVE_MEM = 48000;
+	int _portNumber;
+	CDirectMusic CDMusic;
+    CInputPort   CInPort;
+    CDMReceiver  Receiver;    
 
-//Structured MIDI
-void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel,
-                               DWORD dwMsg)
-{
-    unsigned char Command,Channel,Note,Velocity;
-    
-    // Extract MIDI parameters from a MIDI message    
+public:
+	void Initialize();
+	void SetPort(int portNumber);
+	int GetCurrentPortNumber();
+	QString GetCurrentPortName();
+	QString[] GetPorts();
+};
 
-    CInputPort::DecodeMidiMsg(dwMsg,&Command,&Channel,&Note,&Velocity);
-    
-    if (Command == NOTE_ON) //Channel #0 Note-On
-
-        {                    
-        cout << "Received on channel " << static_cast<int>(Channel) << 
-                " Note " << static_cast<int>(Note) 
-             << " with velocity " << static_cast<int>(Velocity) << endl;
-    }
-} 
-   
+#endif
