@@ -245,7 +245,7 @@ CMachineParameter const paraOsc1Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	12,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -405,7 +405,7 @@ CMachineParameter const paraOsc2Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	12,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -566,7 +566,7 @@ CMachineParameter const paraOsc3Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	12,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -727,7 +727,7 @@ CMachineParameter const paraOsc4Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	12,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -1666,6 +1666,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 10:sprintf(txt,"LFO Oneshot (A/D)");return true;break;
 			case 11:sprintf(txt,"LFO Oneshot (A&D)");return true;break;
 			case 12:sprintf(txt,"Phase Reset All Osc");return true;break;
+			case 13:sprintf(txt,"Continuous Drifting");return true;break;
 		}
 	}
 
