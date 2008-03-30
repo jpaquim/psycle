@@ -22,40 +22,46 @@
 #include "lfo.h"
 #include "pwm.h"
 
-#define WAVE_SINE								0
-#define				WAVE_ADLIB2								1
-#define				WAVE_ADLIB3								2
-#define				WAVE_ADLIB4								3
-#define WAVE_SINE12								4
+#define WAVE_SINE					0
+#define	WAVE_ADLIB2					1
+#define	WAVE_ADLIB3					2
+#define	WAVE_ADLIB4					3
+#define WAVE_SINE12					4
 #define WAVE_SINECOSINE				5
-#define				WAVE_HALFSINE				6
-#define				WAVE_TRIANGLE				7
-#define				WAVE_UPDOWN								8
+#define	WAVE_HALFSINE				6
+#define	WAVE_TRIANGLE				7
+#define	WAVE_UPDOWN					8
 #define WAVE_UPDOWNX2				9
 #define WAVE_SAWTOOTH				10
 #define WAVE_SAWTOOTHX2				11
-#define				WAVE_EXPSAW								12
+#define	WAVE_EXPSAW					12
 #define WAVE_MIDSINE				13
-#define WAVE_STEPS								14
+#define WAVE_STEPS					14
 #define WAVE_SAWSQUARE				15
-#define WAVE_SQUARE								16
+#define WAVE_SQUARE					16
 #define WAVE_SQUAREX2				17
 #define WAVE_TRISTATE				18
 #define WAVE_POLYNEG				19
 #define WAVE_POLYNEG2				20
 #define WAVE_POLYNEG3				21
-#define				WAVE_FORMANT2				22
-#define				WAVE_FORMANT3				23
-#define				WAVE_FORMANT4				24
-#define				WAVE_FORMANT5				25
-#define				WAVE_FORMANT6				26
-#define				WAVE_FORMANT8				27
-#define				WAVE_FORMANT10				28
-#define WAVE_RANDOM								29
+#define	WAVE_FORMANT2				22
+#define	WAVE_FORMANT3				23
+#define	WAVE_FORMANT4				24
+#define	WAVE_FORMANT5				25
+#define	WAVE_FORMANT6				26
+#define	WAVE_FORMANT8				27
+#define	WAVE_FORMANT10				28
+#define WAVE_RANDOM					29
 #define WAVE_RANDOM2				30
 #define WAVE_RANDOM3				31
 #define WAVE_RANDOM4				32
 #define WAVE_RANDOM5				33
+#define WAVE_STORE1					34
+#define WAVE_STORE2					35
+#define WAVE_STORE3					36
+
+#define BufferTemp					8
+
 
 struct VOICEPAR
 {
@@ -120,7 +126,7 @@ struct VOICEPAR
 	float fltVelocity;
 	float fltEnvAmount;
 
-	signed short WaveTable[34][4100];
+	signed short WaveTable[37][4100]; // incl. 3x store
 
 	int initposition[4];
 	float syncvibe;
@@ -141,7 +147,7 @@ public:
 	}
 	int pwmcount;
 	int fxcount;
-	signed short WaveBuffer[9][2100]; // the last is only for temporary data
+	signed short WaveBuffer[9][2100]; // 8x buffer, 1x temp
 	void InitEffect(int cmd,int val);
 	void PerformFx();
 	void DoGlide();
@@ -286,6 +292,10 @@ private:
 	float speedup;
 	float speedup2;
 	
+	int store1Different;
+	int store2Different;
+	int store3Different;
+
 	inline int f2i(double d)
 	{
 			return ((int)d) & 2047;
@@ -296,6 +306,5 @@ private:
 		if (freq > 666.0f) freq = 666.0f;
 		return freq*0.25f; //4x oversampling
 	};
-
 };
 
