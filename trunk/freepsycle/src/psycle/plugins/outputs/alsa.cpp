@@ -366,7 +366,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		bool alsa::started() const {
 			if(!opened()) return false;
 			::snd_pcm_state_t const state(::snd_pcm_state(pcm_));
-			return state >= ::SND_PCM_STATE_SETUP; // this is a bit meaningless without a thread
+			return state >= ::SND_PCM_STATE_PREPARED; // this is a bit meaningless without a thread
 		}
 	#endif
 
@@ -467,10 +467,11 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 	}
 
-	void alsa::do_stop() throw(engine::exception) {
-		// meaningless without a thread
-		resource::do_stop();
-	}
+	#if 0 // meaningless without a thread
+		void alsa::do_stop() throw(engine::exception) {
+			resource::do_stop();
+		}
+	#endif
 
 	void alsa::do_close() throw(engine::exception) {
 		if(pcm_) ::snd_pcm_close(pcm_); pcm_ = 0;  // or ::snd_pcm_free(pcm_); ?

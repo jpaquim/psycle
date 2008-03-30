@@ -409,6 +409,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		if(!in_port()) return;
 		{ scoped_lock lock(mutex_);
+			if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 			while(!io_ready()) condition_.wait(lock);
 		}
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
