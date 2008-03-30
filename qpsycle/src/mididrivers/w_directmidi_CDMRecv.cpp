@@ -24,7 +24,6 @@ void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel, DWORD dwBytes
 	DWORD dwBytecount;
 	
 	//Print The received buffer
-	
 	for (dwBytecount = 0;dwBytecount < dwBytesRead;dwBytecount++)
     {    
         cout.width(2);
@@ -46,7 +45,7 @@ void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel,
     // Extract MIDI parameters from a MIDI message    
 
     CInputPort::DecodeMidiMsg(dwMsg,&Command,&Channel,&Note,&Velocity);
-    
+  
     if (Command == NOTE_ON) //Channel #0 Note-On
 
         {                    
