@@ -56,7 +56,16 @@ void stuff() {
 			graph & graph(engine::graph::create_on_heap("graph"));
 		#endif
 
-		node & out(resolver("output", graph, "out"));
+		std::string output_plugin_name("output");
+		{ // output env var
+			char const * const env(std::getenv("PSYCLE__OUTPUT"));
+			if(env) {
+				std::stringstream s;
+				s << env;
+				s >> output_plugin_name;
+			}
+		}
+		node & out(resolver(output_plugin_name, graph, "out"));
 		node & additioner(resolver("additioner", graph, "+"));
 
 		node & sine1(resolver("sine", graph, "sine1"));
