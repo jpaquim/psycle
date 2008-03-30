@@ -387,7 +387,7 @@ void scheduler::process_loop() {
 				continue;
 			}
 			
-			if(!loggers::trace()()) {
+			if(false && !loggers::trace()()) {
 				static unsigned int i(0);
 				static const char c [] = { '-', '\\', '|', '/' };
 				std::cout << ' ' << c[++i %= sizeof c] << '\r' << std::flush;

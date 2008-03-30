@@ -408,6 +408,9 @@ namespace psycle { namespace plugins { namespace outputs {
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		if(!in_port()) return;
+		{ scoped_lock lock(mutex_);
+			while(!io_ready()) condition_.wait(lock);
+		}		
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
 			assert(samples_per_buffer_ == in.size());
