@@ -26,7 +26,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			void do_open()    throw(engine::exception) /*override*/;
 			void do_start()   throw(engine::exception) /*override*/;
 			void do_process() throw(engine::exception) /*override*/;
-			void do_stop()    throw(engine::exception) /*override*/;
+			//void do_stop()    throw(engine::exception) /*override*/;
 			void do_close()   throw(engine::exception) /*override*/;
 		private:
 			/// pcm device handle
