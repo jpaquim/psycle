@@ -160,6 +160,10 @@ void CSynthTrack::ResetSym(){
 	synbase[3]=vpar->initposition[3];
 	synfx[3].reset();
 	pwmcount=0;
+
+	store1Different = 15; // set all channels to update (%1111)
+	store2Different = 15;
+	store3Different = 15;
 }
 
 void CSynthTrack::NoteTie(int note){
@@ -585,142 +589,70 @@ void CSynthTrack::GetSample(float* slr)
 		if (tuningChange) updateTuning();
 		int c = 0;
 		if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 || (vpar->oscFuncType[0]>=44) & (vpar->oscFuncType[0]!=47) || (vpar->oscFuncType[0]>=46) & (vpar->oscFuncType[0]!=49)){
-			if (vpar->oscFuncType[0]){
-				for (c=0; c<4; c++){
-					output1 += WaveBuffer[curBuf[0]][f2i(dco1Position+dco1Last+fmData4)];
-					dco1Last=(float)(0.00000001f+output1)*(0.00000001f+vpar->oscFeedback[0])*(0.00000001f+fbCtl[0]);
-					dco1Position+=rdco1Pitch;
-					if(dco1Position>=2048.0f){
-						dco1Position-=2048.0f;
-						if (nextBuf[0]){
-							curBuf[0]^=4;
-							nextBuf[0]=0;
-						}
-						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-							dco2Position=dco1Position;
-							if (nextBuf[1]){
-								curBuf[1]^=4;
-								nextBuf[1]=0;
-							}
-							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-								dco3Position=dco1Position;
-								if (nextBuf[2]){
-									curBuf[2]^=4;
-									nextBuf[2]=0;
-								}
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-									dco4Position=dco1Position;
-									if (nextBuf[3]){
-										curBuf[3]^=4;
-										nextBuf[3]=0;
-									}
-								}
-							}
-						}												
+			for (c=0; c<4; c++){
+				output1 += WaveBuffer[curBuf[0]][f2i(dco1Position+dco1Last+fmData4)];
+				dco1Last=(float)(0.00000001f+output1)*(0.00000001f+vpar->oscFeedback[0])*(0.00000001f+fbCtl[0]);
+				dco1Position+=rdco1Pitch;
+				if(dco1Position>=2048.0f){
+					dco1Position-=2048.0f;
+					if (nextBuf[0]){
+						curBuf[0]^=4;
+						nextBuf[0]=0;
 					}
-				}
-			} else {
-				for (c=0; c<4; c++){
-					output1 += vpar->WaveTable[vpar->oscWaveform[0]][f2i(dco1Position+dco1Last+fmData4)];
-					dco1Last=(float)(0.00000001f+output1)*(0.00000001f+vpar->oscFeedback[0])*(0.00000001f+fbCtl[0]);
-					dco1Position+=rdco1Pitch;
-					if(dco1Position>=2048.0f){
-						dco1Position-=2048.0f;
-						if (nextBuf[0]){
-							curBuf[0]^=4;
-							nextBuf[0]=0;
+					if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
+						dco2Position=dco1Position;
+						if (nextBuf[1]){
+							curBuf[1]^=4;
+							nextBuf[1]=0;
 						}
-						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-							dco2Position=dco1Position;
-							if (nextBuf[1]){
-								curBuf[1]^=4;
-								nextBuf[1]=0;
+						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
+							dco3Position=dco1Position;
+							if (nextBuf[2]){
+								curBuf[2]^=4;
+								nextBuf[2]=0;
 							}
-							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-								dco3Position=dco1Position;
-								if (nextBuf[2]){
-									curBuf[2]^=4;
-									nextBuf[2]=0;
-								}
-								if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-									dco4Position=dco1Position;
-									if (nextBuf[3]){
-										curBuf[3]^=4;
-										nextBuf[3]=0;
-									}
+							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
+								dco4Position=dco1Position;
+								if (nextBuf[3]){
+									curBuf[3]^=4;
+									nextBuf[3]=0;
 								}
 							}
 						}
-					}
+					}												
 				}
 			}
 			output1 *= 0.25f;
 		}
 
 		if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8 || (vpar->oscFuncType[1]>=44) & (vpar->oscFuncType[1]!=47) || (vpar->oscFuncType[1]>=46) & (vpar->oscFuncType[1]!=49)){
-			if (vpar->oscFuncType[1]){
-				for (c=0; c<4; c++){
-					output2 += WaveBuffer[1+curBuf[1]][f2i(dco2Position+dco2Last+fmData1)];
-					dco2Last=(float)(0.00000001f+output2)*(0.00000001f+vpar->oscFeedback[1])*(0.00000001f+fbCtl[1]);
-					dco2Position+=rdco2Pitch;
-					if(dco2Position>=2048.0f){
-						dco2Position-=2048.0f;
-						if (nextBuf[1]){
-							curBuf[1]^=4;
-							nextBuf[1]=0;
-						}
-						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-							dco3Position=dco2Position;
-							if (nextBuf[2]){
-								curBuf[2]^=4;
-								nextBuf[2]=0;
-							}
-							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-								dco4Position=dco2Position;
-								if (nextBuf[3]){
-									curBuf[3]^=4;
-									nextBuf[3]=0;
-								}
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-									dco1Position=dco2Position;
-									if (nextBuf[0]){
-										curBuf[0]^=4;
-										nextBuf[0]=0;
-									}
-								}
-							}
-						}
+			for (c=0; c<4; c++){
+				output2 += WaveBuffer[1+curBuf[1]][f2i(dco2Position+dco2Last+fmData1)];
+				dco2Last=(float)(0.00000001f+output2)*(0.00000001f+vpar->oscFeedback[1])*(0.00000001f+fbCtl[1]);
+				dco2Position+=rdco2Pitch;
+				if(dco2Position>=2048.0f){
+					dco2Position-=2048.0f;
+					if (nextBuf[1]){
+						curBuf[1]^=4;
+						nextBuf[1]=0;
 					}
-				}
-			} else {
-				for (c=0; c<4; c++){
-					output2 += vpar->WaveTable[vpar->oscWaveform[1]][f2i(dco2Position+dco2Last+fmData1)];
-					dco2Last=(float)(0.00000001f+output2)*(0.00000001f+vpar->oscFeedback[1])*(0.00000001f+fbCtl[1]);
-					dco2Position+=rdco2Pitch;
-					if(dco2Position>=2048.0f){
-						dco2Position-=2048.0f;
-						if (nextBuf[1]){
-							curBuf[1]^=4;
-							nextBuf[1]=0;
+					if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
+						dco3Position=dco2Position;
+						if (nextBuf[2]){
+							curBuf[2]^=4;
+							nextBuf[2]=0;
 						}
-						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-							dco3Position=dco2Position;
-							if (nextBuf[2]){
-								curBuf[2]^=4;
-								nextBuf[2]=0;
+						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
+							dco4Position=dco2Position;
+							if (nextBuf[3]){
+								curBuf[3]^=4;
+								nextBuf[3]=0;
 							}
-							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-								dco4Position=dco2Position;
-								if (nextBuf[3]){
-									curBuf[3]^=4;
-									nextBuf[3]=0;
-								}
-								if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-									dco1Position=dco2Position;
-									if (nextBuf[0]){
-										curBuf[0]^=4;
-										nextBuf[0]=0;
-									}
+							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
+								dco1Position=dco2Position;
+								if (nextBuf[0]){
+									curBuf[0]^=4;
+									nextBuf[0]=0;
 								}
 							}
 						}
@@ -731,69 +663,33 @@ void CSynthTrack::GetSample(float* slr)
 		}
 
 		if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8 || (vpar->oscFuncType[2]>=44) & (vpar->oscFuncType[2]!=47)|| (vpar->oscFuncType[2]>=46) & (vpar->oscFuncType[2]!=49)){
-			if (vpar->oscFuncType[2]){
-				for (c=0; c<4; c++){
-					output3 += WaveBuffer[2+curBuf[2]][f2i(dco3Position+dco3Last+fmData2)];
-					dco3Last=(float)(0.00000001f+output3)*(0.00000001f+vpar->oscFeedback[2])*(0.00000001f+fbCtl[2]);
-					dco3Position+=rdco3Pitch;
-					if(dco3Position>=2048.0f){
-						dco3Position-=2048.0f;
-						if (nextBuf[2]){
-							curBuf[2]^=4;
-							nextBuf[2]=0;
-						}
-						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-							dco4Position=dco3Position;
-							if (nextBuf[3]){
-								curBuf[3]^=4;
-								nextBuf[3]=0;
-							}
-							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-								dco1Position=dco3Position;
-								if (nextBuf[0]){
-									curBuf[0]^=4;
-									nextBuf[0]=0;
-								}
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-									dco2Position=dco3Position;
-									if (nextBuf[1]){
-										curBuf[1]^=4;
-										nextBuf[1]=0;
-									}
-								}
-							}
-						}
+			for (c=0; c<4; c++){
+				output3 += WaveBuffer[2+curBuf[2]][f2i(dco3Position+dco3Last+fmData2)];
+				dco3Last=(float)(0.00000001f+output3)*(0.00000001f+vpar->oscFeedback[2])*(0.00000001f+fbCtl[2]);
+				dco3Position+=rdco3Pitch;
+				if(dco3Position>=2048.0f){
+					dco3Position-=2048.0f;
+					if (nextBuf[2]){
+						curBuf[2]^=4;
+						nextBuf[2]=0;
 					}
-				}
-			} else {
-				for (c=0; c<4; c++){
-					output3 += vpar->WaveTable[vpar->oscWaveform[2]][f2i(dco3Position+dco3Last+fmData2)];				
-					dco3Last=(float)(0.00000001f+output3)*(0.00000001f+vpar->oscFeedback[2])*(0.00000001f+fbCtl[2]);
-					dco3Position+=rdco3Pitch;
-					if(dco3Position>=2048.0f){
-						dco3Position-=2048.0f;
-						if (nextBuf[2]){
-							curBuf[2]^=4;
-							nextBuf[2]=0;
+					if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
+						dco4Position=dco3Position;
+						if (nextBuf[3]){
+							curBuf[3]^=4;
+							nextBuf[3]=0;
 						}
-						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-							dco4Position=dco3Position;
-							if (nextBuf[3]){
-								curBuf[3]^=4;
-								nextBuf[3]=0;
+						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
+							dco1Position=dco3Position;
+							if (nextBuf[0]){
+								curBuf[0]^=4;
+								nextBuf[0]=0;
 							}
-							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-								dco1Position=dco3Position;
-								if (nextBuf[0]){
-									curBuf[0]^=4;
-									nextBuf[0]=0;
-								}
-								if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-									dco2Position=dco3Position;
-									if (nextBuf[1]){
-										curBuf[1]^=4;
-										nextBuf[1]=0;
-									}
+							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
+								dco2Position=dco3Position;
+								if (nextBuf[1]){
+									curBuf[1]^=4;
+									nextBuf[1]=0;
 								}
 							}
 						}
@@ -804,69 +700,33 @@ void CSynthTrack::GetSample(float* slr)
 		}
 
 		if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 || (vpar->oscFuncType[3]>=44) & (vpar->oscFuncType[3]!=47) || (vpar->oscFuncType[3]>=46) & (vpar->oscFuncType[3]!=49)){
-			if (vpar->oscFuncType[3]){
-				for (c=0; c<4; c++){
-					output4 += WaveBuffer[3+curBuf[3]][f2i(dco4Position+dco4Last+fmData3)];
-					dco4Last=(float)(0.00000001f+output4)*(0.00000001f+vpar->oscFeedback[3])*(0.00000001f+fbCtl[3]);
-					dco4Position+=rdco4Pitch;
-					if(dco4Position>=2048.0f){
-						dco4Position-=2048.0f;
-						if (nextBuf[3]){
-							curBuf[3]^=4;
-							nextBuf[3]=0;
-						}
-						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-							dco1Position=dco4Position;
-							if (nextBuf[0]){
-								curBuf[0]^=4;
-								nextBuf[0]=0;
-							}
-							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-								dco2Position=dco4Position;
-								if (nextBuf[1]){
-									curBuf[1]^=4;
-									nextBuf[1]=0;
-								}
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-									dco3Position=dco4Position;
-									if (nextBuf[2]){
-										curBuf[2]^=4;
-										nextBuf[2]=0;
-									}
-								}
-							}
-						}
+			for (c=0; c<4; c++){
+				output4 += WaveBuffer[3+curBuf[3]][f2i(dco4Position+dco4Last+fmData3)];
+				dco4Last=(float)(0.00000001f+output4)*(0.00000001f+vpar->oscFeedback[3])*(0.00000001f+fbCtl[3]);
+				dco4Position+=rdco4Pitch;
+				if(dco4Position>=2048.0f){
+					dco4Position-=2048.0f;
+					if (nextBuf[3]){
+						curBuf[3]^=4;
+						nextBuf[3]=0;
 					}
-				}
-			} else {
-				for (c=0; c<4; c++){
-					output4 += vpar->WaveTable[vpar->oscWaveform[3]][f2i(dco4Position+dco4Last+fmData3)];
-					dco4Last=(float)(0.00000001f+output4)*(0.00000001f+vpar->oscFeedback[3])*(0.00000001f+fbCtl[3]);
-					dco4Position+=rdco4Pitch;
-					if(dco4Position>=2048.0f){
-						dco4Position-=2048.0f;
-						if (nextBuf[3]){
-							curBuf[3]^=4;
-							nextBuf[3]=0;
+					if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
+						dco1Position=dco4Position;
+						if (nextBuf[0]){
+							curBuf[0]^=4;
+							nextBuf[0]=0;
 						}
-						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-							dco1Position=dco4Position;
-							if (nextBuf[0]){
-								curBuf[0]^=4;
-								nextBuf[0]=0;
+						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
+							dco2Position=dco4Position;
+							if (nextBuf[1]){
+								curBuf[1]^=4;
+								nextBuf[1]=0;
 							}
-							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-								dco2Position=dco4Position;
-								if (nextBuf[1]){
-									curBuf[1]^=4;
-									nextBuf[1]=0;
-								}
-								if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-									dco3Position=dco4Position;
-									if (nextBuf[2]){
-										curBuf[2]^=4;
-										nextBuf[2]=0;
-									}
+							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
+								dco3Position=dco4Position;
+								if (nextBuf[2]){
+									curBuf[2]^=4;
+									nextBuf[2]=0;
 								}
 							}
 						}
@@ -939,11 +799,10 @@ void CSynthTrack::calcWaves(int mask){
 	synfx[3].next();
 
 	//Continuous Drift?
-	if (vpar->oscOptions[0]==13) synbase[0]=vpar->initposition[0];
-	if (vpar->oscOptions[1]==13) synbase[1]=vpar->initposition[1];
-	if (vpar->oscOptions[2]==13) synbase[2]=vpar->initposition[2];
-	if (vpar->oscOptions[3]==13) synbase[3]=vpar->initposition[3];
-
+	if ((vpar->oscOptions[0]>=13) & (vpar->oscOptions[0] <= 16)) synbase[0]=vpar->initposition[0];
+	if ((vpar->oscOptions[1]>=13) & (vpar->oscOptions[0] <= 16)) synbase[1]=vpar->initposition[1];
+	if ((vpar->oscOptions[2]>=13) & (vpar->oscOptions[0] <= 16)) synbase[2]=vpar->initposition[2];
+	if ((vpar->oscOptions[3]>=13) & (vpar->oscOptions[0] <= 16)) synbase[3]=vpar->initposition[3];
 
 	float float1, float2, float3, float4, float5 = 0;
 	float size1, size2, step1(0), step2, phase;
@@ -951,8 +810,10 @@ void CSynthTrack::calcWaves(int mask){
 	long long1 = 0;
 	long long2 = 0;
 	int buf = 0;
+	int bit = 0;
 	for (int i=0; i<4; i++) {
-		if (1<<i & mask){
+		bit = 1<<i;
+		if (bit & mask){
 			int pos = (synbase[i]+synfx[i].getPosition()+vpar->oscFuncSym[i])&2047;
 			if (vpar->oscFuncType[i] != 43) fbCtl[i]=1.0f;
 			if ((vpar->oscFuncType[i] < 44) || (vpar->oscFuncType[i] > 45)){
@@ -963,17 +824,26 @@ void CSynthTrack::calcWaves(int mask){
 				fmCtl2[0][i]=0.0f;
 				fmCtl2[1][i]=0.0f;
 			}
-			if (pos != synposLast[i]) {
+			if ((pos != synposLast[i]) || ((vpar->oscWaveform[i] == WAVE_STORE1) & ((store1Different & bit) != 0)) || ((vpar->oscWaveform[i] == WAVE_STORE2) & ((store2Different & bit) != 0)) ||  ((vpar->oscWaveform[i] == WAVE_STORE3) & ((store3Different & bit) != 0)) ) {
 				synposLast[i]=pos;
 				buf=4-curBuf[i]+i;
+				//mark storage as read
+				store1Different = store1Different & (15 ^ bit);
+				store2Different = store2Different & (15 ^ bit);
+				store3Different = store3Different & (15 ^ bit);
+				signed short* sourceWave = &vpar->WaveTable[vpar->oscWaveform[i]][0];
 				switch (vpar->oscFuncType[i]) {
-				case 0: break; // no function
+				case 0: // no function, just make a copy
+				for (c=0;c<2048;c++){
+					WaveBuffer[buf][c]=sourceWave[(c)];
+				}
+				break;
 				case 1: // stretch&squash
 					size1 = float(pos+1); size2 = float(2048.0f-size1);
 					if (size1!=0.0f) { step1 = 1024.0f/(size1); phase=0.0f;} else { phase=1024.0f; }
 					if (size2!=0.0f) { step2 = 1024.0f/(size2); } else { step2 = 0.0f; }
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][int(phase)];
+						WaveBuffer[buf][c]=sourceWave[int(phase)];
 						if (phase < 1023.0f) phase+=step1; else phase+=step2;
 					}
 					break;
@@ -982,14 +852,14 @@ void CSynthTrack::calcWaves(int mask){
 					if (size1!=0.0f) { step1 = 1024.0f/(size1); phase = 0.0f; } else { phase=1024.0f; }
 					if (size2!=0.0f) { step2 = 1024.0f/(size2); } else { step2 = 0.0f; }
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][int(phase+phase)];
+						WaveBuffer[buf][c]=sourceWave[int(phase+phase)];
 						if (phase < 1023.0f) phase+=step1; else phase+=step2;
 					}
 					break;
 				case 3: // pw am
 					for(c=0;c<2048;c++){
-						if (c < pos) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-						else WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]>>1;
+						if (c < pos) WaveBuffer[buf][c]=sourceWave[c];
+						else WaveBuffer[buf][c]=sourceWave[c]>>1;
 					}
 					break;
 				case 4: // squash&squash
@@ -1006,7 +876,7 @@ void CSynthTrack::calcWaves(int mask){
 						if (c<1024) {
 							if (float3<1024) {
 								if (float4) {
-									WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float3];
+									WaveBuffer[buf][c]=sourceWave[(int)float3];
 									float3+=float1;
 								} else {
 									WaveBuffer[buf][c]=0;
@@ -1021,7 +891,7 @@ void CSynthTrack::calcWaves(int mask){
 						} else {
 							if (float3<2048) {
 								if (float4 != 0) {
-								WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float3];
+								WaveBuffer[buf][c]=sourceWave[(int)float3];
 								float3+=float1;
 								} else WaveBuffer[buf][c]=0;
 							} else {
@@ -1035,7 +905,7 @@ void CSynthTrack::calcWaves(int mask){
 					float2 = float(pos*6)/2047+1;
 					for(c=0;c<2048;c++){
 						if (float1<2047){
-							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float1];
+							WaveBuffer[buf][c]=sourceWave[(int)float1];
 							float1+=float2;
 						if (float1 > 2047) float1=2048;
 						} else WaveBuffer[buf][c]=0;
@@ -1045,7 +915,7 @@ void CSynthTrack::calcWaves(int mask){
 					float1 = 0;
 					float2 = float(pos*6)/2047+1;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(int)float1];
+						WaveBuffer[buf][c]=sourceWave[(int)float1];
 						float1+=float2;
 						if (float1 > 2047) float1-=2048;
 					}
@@ -1054,39 +924,39 @@ void CSynthTrack::calcWaves(int mask){
 					work1 = 0;
 					work2 = 2047-pos;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][work1];
+						WaveBuffer[buf][c]=sourceWave[work1];
 						work1++; if (work1 > work2) work1 = 0;
 					}
 					break;
 				case 8: // Negator
 					for(c=0;c<2048;c++){
-						if (c<pos)WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-						else WaveBuffer[buf][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
+						if (c<pos)WaveBuffer[buf][c]=sourceWave[c];
+						else WaveBuffer[buf][c]=0-sourceWave[c];
 					}
 					break;
 				case 9: // Double Negator
 					if (pos > 1023) pos = 2047-pos;
 					for(c=0;c<1024;c++){
 						if (c<pos){
-							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-							WaveBuffer[buf][2047-c]=vpar->WaveTable[vpar->oscWaveform[i]][2047-c];
+							WaveBuffer[buf][c]=sourceWave[c];
+							WaveBuffer[buf][2047-c]=sourceWave[2047-c];
 						} else {
-							WaveBuffer[buf][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
-							WaveBuffer[buf][2047-c]=0-vpar->WaveTable[vpar->oscWaveform[i]][2047-c];
+							WaveBuffer[buf][c]=0-sourceWave[c];
+							WaveBuffer[buf][2047-c]=0-sourceWave[2047-c];
 						}
 					}
 					break;
 				case 10: // Rect Negator
 					for(c=0;c<2048;c++){
-					if (((pos+c)&2047)<1024)WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
-						else WaveBuffer[buf][c]=0-vpar->WaveTable[vpar->oscWaveform[i]][c];
+					if (((pos+c)&2047)<1024)WaveBuffer[buf][c]=sourceWave[c];
+						else WaveBuffer[buf][c]=0-sourceWave[c];
 					}
 					break;
 				case 11: // Octaving
 					float1 = (2047-float(pos))/2047;
 					float2 = float(pos)/2047;
 					for (c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2));
+						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+(sourceWave[(c+c)&2047]*float2));
 					}
 					break;
 				case 12: // FSK
@@ -1094,40 +964,40 @@ void CSynthTrack::calcWaves(int mask){
 					work2=2047-pos;
 					for (c=0;c<2048;c++){
 						if (c<work2){
-							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+							WaveBuffer[buf][c]=sourceWave[c];
 							work1=c+1;
 						}
 						else {
-							WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][work1];
+							WaveBuffer[buf][c]=sourceWave[work1];
 							work1+=2; if (work1>2047) work1 -= 2048;
 						}
 					}
 					break;
 				case 13: // Mixer
 					for (c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]>>1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
+						WaveBuffer[buf][c]=(sourceWave[c]>>1)+(sourceWave[(c+pos)&2047]>>1);
 					}
 					break;
 				case 14: // Dual Mixer
 					for (c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*0.3333333)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*0.3333333)+(vpar->WaveTable[vpar->oscWaveform[i]][(c-pos)&2047]*0.3333333));
+						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*0.3333333)+(sourceWave[(c+pos)&2047]*0.3333333)+(sourceWave[(c-pos)&2047]*0.3333333));
 					}
 					break;
 				case 15: // Fbk.Mixer
 					for (c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(WaveBuffer[buf][c]>>1)+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
+						WaveBuffer[buf][c]=(WaveBuffer[buf][c]>>1)+(sourceWave[(c+pos)&2047]>>1);
 					}
 					break;
 				case 16: // Inv.Mixer
 					for (c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]>>1)-(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]>>1);
+						WaveBuffer[buf][c]=(sourceWave[c]>>1)-(sourceWave[(c+pos)&2047]>>1);
 					}
 					break;
 				case 17: // TriMix
 					float1 = (2047-float(pos))/2047;
 					float2 = float(pos)/2047;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[WAVE_TRIANGLE][c]*float2));
+						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+(vpar->WaveTable[WAVE_TRIANGLE][c]*float2));
 					}
 					break;
 				case 18: // SawMix
@@ -1135,7 +1005,7 @@ void CSynthTrack::calcWaves(int mask){
 					float2 = float(pos)/2047;
 					work1 = 0;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+((work1-16384)*float2));
+						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+((work1-16384)*float2));
 						work1+=16;
 					}
 					break;
@@ -1143,123 +1013,123 @@ void CSynthTrack::calcWaves(int mask){
 					float1 = (2047-float(pos))/2047;
 					float2 = float(pos)/2047;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(signed short)((vpar->WaveTable[vpar->oscWaveform[i]][c]*float1)+(vpar->WaveTable[WAVE_SQUARE][c]*float2));
+						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+(vpar->WaveTable[WAVE_SQUARE][c]*float2));
 					}
 					break;
 				case 20: // Tremelo
 					float1 = (2047-float(pos))/2047;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(signed short)((float)vpar->WaveTable[vpar->oscWaveform[i]][c]*float1);
+						WaveBuffer[buf][c]=(signed short)((float)sourceWave[c]*float1);
 					}
 					break;
 				case 21: // PM Sine 1
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 22: // PM Sine 2
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 23: // PM Sine 3
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;
 				case 24: // PM Adlib2 1
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 25: // PM Adlib2 2
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 26: // PM Adlib2 3
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;
 				case 27: // PM Adlib3 1
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 28: // PM Adlib3 2
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 29: // PM Adlib3 3
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;
 				case 30: // PM Adlib4 1
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 31: // PM Adlib4 2
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 32: // PM Adlib4 3
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;												
 				case 33: // PM Wave 1
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][c]*float2))];
+						WaveBuffer[buf][c]=sourceWave[2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 34: // PM Wave 2
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=sourceWave[2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 35: // PM Wave 3
 					float2 = float(pos)*0.00025f;
 					for(c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+c+c)&2047]*float2))];
+						WaveBuffer[buf][c]=sourceWave[2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;												
 				case 36: // Dual Fix PM
 					float2 = 0.125f; //16384:2048=1/8=0.125f
-					for (c=0;c<2048;c++) WaveBuffer[8][c]=vpar->WaveTable[vpar->oscWaveform[i]][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*float2))];
-					for (c=0;c<2048;c++) WaveBuffer[buf][c]=WaveBuffer[8][2047&(int)(c+(vpar->WaveTable[vpar->oscWaveform[i]][(c-pos)&2047]*float2))];
+					for (c=0;c<2048;c++) WaveBuffer[BufferTemp][c]=sourceWave[2047&(int)(c+(sourceWave[(c+pos)&2047]*float2))];
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=WaveBuffer[BufferTemp][2047&(int)(c+(sourceWave[(c-pos)&2047]*float2))];
 					break;
 				case 37: // Multiply
-					for (c=0;c<2048;c++) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]*vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047]*0.0001f;;
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=sourceWave[c]*sourceWave[(c+pos)&2047]*0.0001f;;
 					break;
 				case 38: // AND
-					for (c=0;c<2048;c++) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]&vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047];
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=sourceWave[c]&sourceWave[(c+pos)&2047];
 					break;
 				case 39: // EOR
-					for (c=0;c<2048;c++) WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c]^vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047];
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=sourceWave[c]^sourceWave[(c+pos)&2047];
 					break;
 				case 40: // Boost (Hard Clip)
 					float1 = pos*pos*0.000000015*pos+1.0f;
 					for (c=0;c<2048;c++){
-						long1=vpar->WaveTable[vpar->oscWaveform[i]][c]*float1;
+						long1=sourceWave[c]*float1;
 						if (long1 > 16384) long1=16384;
 						if (long1 < -16384) long1=-16384;
 						WaveBuffer[buf][c]=long1;
@@ -1268,50 +1138,50 @@ void CSynthTrack::calcWaves(int mask){
 				case 41: // RM to AM (Upright)
 					float1 = (2047-float(pos))/2047*16384;
 					float2 = float(pos)/2047*0.5f;
-					for (c=0;c<2048;c++) WaveBuffer[buf][c]=(vpar->WaveTable[vpar->oscWaveform[i]][c]+16384)*float2+float1;
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=(sourceWave[c]+16384)*float2+float1;
 					break;
 				case 42: // RM to AM (Down)
 					float1 = (2047-float(pos))/2047*16384;
 					float2 = float(pos)/2047*0.5f;
-					for (c=0;c<2048;c++) WaveBuffer[buf][c]=float1-((vpar->WaveTable[vpar->oscWaveform[i]][c]-16384)*float2);
+					for (c=0;c<2048;c++) WaveBuffer[buf][c]=float1-((sourceWave[c]-16384)*float2);
 					break;
 				case 43: // Feedback Ctrl
-					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
 					fbCtl[i]=(pos-1024)*0.0009765625;
 					break;
 				case 44: // FM next +
-					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
 					fmCtl[buf>>2][i]=pos*0.00048828125;
 					break;
 				case 45: // FM next -
-					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
 					fmCtl[buf>>2][i]=0-(pos*0.00048828125);
 					break;
 				case 46: // Filter Mod
-					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
 					cmCtl[i]=pos*0.0000048828125;
 					break;
 				case 47: // Chan Sat
-					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
 					satClip = pos*pos*0.000000015*pos+1.0f;
 					break;
 				case 48: // FM last +
-					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
 					fmCtl2[buf>>2][i]=pos*0.00048828125;
 					break;
 				case 49: // FM last -
-					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][c];
+					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
 					fmCtl2[buf>>2][i]=0-(pos*0.00048828125);
 					break;
 				case 50: // X Rotator
 					for (c=0;c<2048;c++){
-						WaveBuffer[buf][c]=vpar->WaveTable[vpar->oscWaveform[i]][(c+pos)&2047];
+						WaveBuffer[buf][c]=sourceWave[(c+pos)&2047];
 					}
 					break;
 				case 51: // Y Rotator
 					long2 = pos/2046.0f*32768.0f;
 					for (c=0;c<2048;c++){
-						long1=vpar->WaveTable[vpar->oscWaveform[i]][c]+long2;
+						long1=sourceWave[c]+long2;
 						if (long1 > 16384) long1-=32768;
 						if (long1 < -16384) long1+=32768;
 						WaveBuffer[buf][c]=long1;
@@ -1321,13 +1191,28 @@ void CSynthTrack::calcWaves(int mask){
 					float1 = pos/2047.0f;
 					float1 += float1+1.0f;
 					for (c=0;c<2048;c++){
-						long1=vpar->WaveTable[vpar->oscWaveform[i]][c]*float1;
+						long1=sourceWave[c]*float1;
 						while (long1 > 16384) long1-=32768;
 						while (long1 < -16384) long1+=32768;
 						WaveBuffer[buf][c]=long1;
 					}
 					break;
 
+				}
+				// store to a
+				if ((vpar->oscOptions[i] == 14) || (vpar->oscOptions[i] == 17)){
+					for (c=0;c<2048;c++) vpar->WaveTable[WAVE_STORE1][c] = WaveBuffer[buf][c];
+					store1Different = 15; // set all channels to update (%1111)
+				}
+				// store to b
+				if ((vpar->oscOptions[i] == 15) || (vpar->oscOptions[i] == 18)){
+					for (c=0;c<2048;c++) vpar->WaveTable[WAVE_STORE2][c] = WaveBuffer[buf][c];
+					store2Different = 15; // set all channels to update (%1111)
+				}
+				// store to c
+				if ((vpar->oscOptions[i] == 16) || (vpar->oscOptions[i] == 19)){
+					for (c=0;c<2048;c++) vpar->WaveTable[WAVE_STORE3][c] = WaveBuffer[buf][c];
+					store3Different = 15; // set all channels to update (%1111)
 				}
 				nextBuf[i]=1; // a new buffer is now present
 			}
