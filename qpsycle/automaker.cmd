@@ -15,7 +15,7 @@ echo Running QMake
 qmake
 echo QMake Complete
 echo Compiling Debug Version
-make debug
+mingw32-make debug
 echo Make Complete
 pause
 exit
@@ -25,7 +25,7 @@ echo Running QMake
 qmake
 echo QMake Complete
 echo Compiling Release Version
-make release
+mingw32-make release
 echo Make Complete
 pause
 exit
