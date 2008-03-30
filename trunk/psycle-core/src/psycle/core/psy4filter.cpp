@@ -37,6 +37,9 @@
 	#include <sys/types.h>
 #elif defined _WIN64 || defined _WIN32
 	#include <io.h>
+	#if defined _MSC_VER
+		#pragma comment(lib, "xml++-2.6.lib xml2.lib glibmm-2.4.lib gobject-2.0.lib sigc-2.0.lib glib-2.0.lib intl.lib iconv.lib")
+	#endif
 #endif
 
 #include <fcntl.h>
