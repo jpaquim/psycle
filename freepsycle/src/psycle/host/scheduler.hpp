@@ -21,7 +21,7 @@ namespace psycle { namespace host {
 		public:
 			virtual ~scheduler() throw() {}
 			bool virtual started() = 0;
-			void         started(bool started) throw(exception) { if(started) start(); else stop(); }
+			void         started(bool value) throw(exception) { if(value) start(); else stop(); }
 			void virtual start() throw(exception) = 0;
 			void virtual stop() = 0;
 		protected:

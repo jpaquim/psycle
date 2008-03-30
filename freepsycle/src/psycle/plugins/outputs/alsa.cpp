@@ -362,11 +362,13 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 	}
 
-	bool alsa::started() const {
-		if(!opened()) return false;
-		::snd_pcm_state_t const state(::snd_pcm_state(pcm_));
-		return state >= ::SND_PCM_STATE_SETUP; // this is a bit meaningless without a thread
-	}
+	#if 0 // this is a bit meaningless without a thread
+		bool alsa::started() const {
+			if(!opened()) return false;
+			::snd_pcm_state_t const state(::snd_pcm_state(pcm_));
+			return state >= ::SND_PCM_STATE_SETUP; // this is a bit meaningless without a thread
+		}
+	#endif
 
 	void alsa::do_process() throw(engine::exception) {
 		if(!in_port()) return;

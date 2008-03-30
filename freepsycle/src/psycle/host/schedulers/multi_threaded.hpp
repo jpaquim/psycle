@@ -177,7 +177,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 			
 		public:
 			bool waiting_for_io_ready_signal() const throw() { return waiting_for_io_ready_signal_; }
-			void waiting_for_io_ready_signal(bool waiting_for_io_ready_signal) throw() { waiting_for_io_ready_signal_ = waiting_for_io_ready_signal; }
+			void waiting_for_io_ready_signal(bool value) throw() { waiting_for_io_ready_signal_ = value; }
 		private:
 			bool waiting_for_io_ready_signal_;
 
@@ -212,7 +212,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		virtual ~scheduler() throw();
 		void start() throw(underlying::exception) /*override*/;
 		bool started() /*override*/ { return threads_.size(); }
-		void started(bool started) { host::scheduler<typenames::graph>::started(started); }
+		void started(bool value) { host::scheduler<typenames::graph>::started(value); }
 		void stop() /*override*/;
 		
 		std::size_t threads() const throw() { return thread_count_; }

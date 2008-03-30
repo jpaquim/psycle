@@ -321,9 +321,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 			/// called by schedulers
 			void            open  (          ) throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
 			void            opened(bool value) throw(std::exception) { if(value) open(); else close(); }
-			bool virtual    opened(          ) const;
+			bool virtual    opened(          ) const { return opened_; }
 		protected:
 			void virtual do_open() throw(std::exception);
+		private:
+			bool            opened_;
 	///\}
 
 	///\name start
@@ -332,9 +334,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 			/// called by schedulers
 			void            start  (          ) throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
 			void            started(bool value) throw(std::exception) { if(value) start(); else stop(); }
-			bool virtual    started(          ) const;
+			bool virtual    started(          ) const { return started_; }
 		protected:
 			void virtual do_start() throw(std::exception);
+		private:
+			bool            started_;
 	///\}
 
 	///\name process
