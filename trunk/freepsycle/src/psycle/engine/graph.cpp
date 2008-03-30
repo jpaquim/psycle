@@ -108,8 +108,11 @@ node::name_type node::qualified_name() const {
 }
 
 void node::io_ready(bool io_ready) {
-	bool const was_io_ready(io_ready_);
-	io_ready_ = io_ready;
+	bool was_io_ready;
+	{ scoped_lock lock(mutex_);
+		was_io_ready = io_ready_;
+		io_ready_ = io_ready;
+	}
 	if(!was_io_ready && io_ready) io_ready_signal_(*this);
 }
 
