@@ -33,9 +33,9 @@ namespace qpsycle {
 	{
 		contentsWidget = new QListWidget;
 		contentsWidget->setViewMode(QListView::IconMode);
-		contentsWidget->setIconSize(QSize(96, 84));
+		contentsWidget->setIconSize(QSize(96, 32));
 		contentsWidget->setMovement(QListView::Static);
-		contentsWidget->setMaximumWidth(128);
+		contentsWidget->setMaximumWidth(96);
 		contentsWidget->setSpacing(12);
 
 		pagesWidget = new QStackedWidget;
@@ -72,26 +72,26 @@ namespace qpsycle {
 	void ConfigDialog::createIcons()
 	{
 		QListWidgetItem *configButton = new QListWidgetItem(contentsWidget);
-		configButton->setIcon(QIcon(":/images/config.png"));
+		configButton->setIcon(QIcon(":/images/conf-audio.png"));
 		configButton->setText(tr("Audio & MIDI"));
 		configButton->setTextAlignment(Qt::AlignHCenter);
 		configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
 		QListWidgetItem *updateButton = new QListWidgetItem(contentsWidget);
-		updateButton->setIcon(QIcon(":/images/update.png"));
+		updateButton->setIcon(QIcon(":/images/conf-general.png"));
 		updateButton->setText(tr("Behaviour"));
 		updateButton->setTextAlignment(Qt::AlignHCenter);
 		updateButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
 		QListWidgetItem *queryButton = new QListWidgetItem(contentsWidget);
-		queryButton->setIcon(QIcon(":/images/query.png"));
+		queryButton->setIcon(QIcon(":/images/conf-visual.png"));
 		queryButton->setText(tr("Look & Feel"));
 		queryButton->setTextAlignment(Qt::AlignHCenter);
 		queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
 
 		QListWidgetItem *dirsButton = new QListWidgetItem(contentsWidget);
-		dirsButton->setIcon(QIcon(":/images/query.png"));
+		dirsButton->setIcon(QIcon(":/images/conf-folders.png"));
 		dirsButton->setText(tr("Directories"));
 		dirsButton->setTextAlignment(Qt::AlignHCenter);
 		dirsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
