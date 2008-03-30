@@ -33,8 +33,8 @@ private:
 	const int SYSTEM_EXCLUSIVE_MEM = 48000;
 	int _portNumber;
 	CDirectMusic CDMusic;
-    CInputPort   CInPort;
-    CDMReceiver  Receiver;    
+	CInputPort   CInPort;
+	CDMReceiver  Receiver;    
 
 public:
 	void Initialize();

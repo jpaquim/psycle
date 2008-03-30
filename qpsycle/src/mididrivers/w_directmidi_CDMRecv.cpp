@@ -25,33 +25,28 @@ void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel, DWORD dwBytes
 	
 	//Print The received buffer
 	for (dwBytecount = 0;dwBytecount < dwBytesRead;dwBytecount++)
-    {    
-        cout.width(2);
-        cout.precision(2);
-        cout.fill('0');        
-        cout << hex << static_cast<int>(lpBuffer[dwBytecount]) << " ";
-        if ((dwBytecount % 20) == 0) cout << endl;
-        if (lpBuffer[dwBytecount] == END_SYS_EX)
-            cout << "\nSystem memory dumped" << endl;
-    }
+	{    
+		cout.width(2);
+		cout.precision(2);
+		cout.fill('0');        
+		cout << hex << static_cast<int>(lpBuffer[dwBytecount]) << " ";
+		if ((dwBytecount % 20) == 0) cout << endl;
+		if (lpBuffer[dwBytecount] == END_SYS_EX)
+			cout << "\nSystem memory dumped" << endl;
+	}
 }
 
 //Structured MIDI
-void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel,
-                               DWORD dwMsg)
+void CDMReceiver::RecvMidiMsg(REFERENCE_TIME lprt,DWORD dwChannel, DWORD dwMsg)
 {
-    unsigned char Command,Channel,Note,Velocity;
-    
-    // Extract MIDI parameters from a MIDI message    
+		unsigned char Command,Channel,Note,Velocity;
+		
+	// Extract MIDI parameters from a MIDI message    
 
-    CInputPort::DecodeMidiMsg(dwMsg,&Command,&Channel,&Note,&Velocity);
-  
-    if (Command == NOTE_ON) //Channel #0 Note-On
+	CInputPort::DecodeMidiMsg(dwMsg,&Command,&Channel,&Note,&Velocity);
 
-        {                    
-        cout << "Received on channel " << static_cast<int>(Channel) << 
-                " Note " << static_cast<int>(Note) 
-             << " with velocity " << static_cast<int>(Velocity) << endl;
-    }
-} 
-   
+	if (Command == NOTE_ON) //Channel #0 Note-On
+	{                    
+		cout << "Received on channel " << static_cast<int>(Channel) << " Note " << static_cast<int>(Note) << " with velocity " << static_cast<int>(Velocity) << endl;
+	}
+}

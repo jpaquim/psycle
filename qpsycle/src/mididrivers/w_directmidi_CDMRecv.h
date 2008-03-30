@@ -35,7 +35,7 @@ using namespace psycle::helpers::math;
 class CDMReceiver : public CReceiver
 {
 	void RecvMidiMsg(REFERENCE_TIME rt,DWORD dwChannel,DWORD dwBytesRead, BYTE *lpBuffer);
-    void RecvMidiMsg(REFERENCE_TIME rt,DWORD dwChannel,DWORD dwMsg);
+	void RecvMidiMsg(REFERENCE_TIME rt,DWORD dwChannel,DWORD dwMsg);
 };
 
 #endif
