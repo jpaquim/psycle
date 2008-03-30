@@ -346,13 +346,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 		public:
 			/// indicates whether the underlying device (if any) is ready to process.
 			/// called by schedulers
-			bool io_ready() const throw() { return io_ready_; }
+			bool io_ready() const throw() { scoped_lock lock(mutex_); return io_ready_; }
 		protected:
 			/// Derived classes that drives an underlying device should call this setter.
 			/// When changed from false to true, the io_ready_signal will be emitted.
 			void io_ready(bool io_ready);
 		private:
 			bool io_ready_;
+			typedef std::scoped_lock<std::mutex> scoped_lock;
+			std::mutex mutable mutex_;
 
 		public:
 			/// signal to be emitted when the underlying device (if any) becomes ready to process
