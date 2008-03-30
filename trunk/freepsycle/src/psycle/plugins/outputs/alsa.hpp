@@ -21,7 +21,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		public:
 			engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 			bool opened()  const /*override*/;
-			bool started() const /*override*/;
+			//bool started() const /*override*/;
 		protected:
 			void do_open()    throw(engine::exception) /*override*/;
 			void do_start()   throw(engine::exception) /*override*/;
@@ -33,7 +33,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			::snd_pcm_t * pcm_;
 			/// attached to std output
 			::snd_output_t * output_;
-			/// intermediate buffer for format convertion in write access method
+			/// intermediate buffer for format conversion in write access method
 			char * buffer_;
 	};
 }}}

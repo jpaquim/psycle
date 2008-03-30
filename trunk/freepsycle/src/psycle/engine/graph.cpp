@@ -81,7 +81,9 @@ node::node(engine::plugin_library_reference & plugin_library_reference, node::pa
 :
 	node_type(parent),
 	named(name),
-	plugin_library_reference_(plugin_library_reference)
+	plugin_library_reference_(plugin_library_reference),
+	opened_(),
+	started_()
 {
 	if(loggers::trace()()) {
 		std::ostringstream s;
@@ -140,10 +142,6 @@ void node::do_open() throw(std::exception) {
 	}
 }
 
-bool node::opened() const {
-	return false;
-}
-
 void node::do_start() throw(std::exception) {
 	if(loggers::trace()()) {
 		std::ostringstream s;
@@ -151,10 +149,6 @@ void node::do_start() throw(std::exception) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	io_ready_ = true;
-}
-
-bool node::started() const {
-	return false;
 }
 
 void node::do_stop() throw(std::exception) {

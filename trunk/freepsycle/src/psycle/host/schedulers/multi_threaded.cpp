@@ -386,6 +386,12 @@ void scheduler::process_loop() {
 				node.waiting_for_io_ready_signal(true);
 				continue;
 			}
+			
+			if(!loggers::trace()()) {
+				static unsigned int i(0);
+				static const char c [] = { '-', '\\', '|', '/' };
+				std::cout << ' ' << c[++i %= sizeof c] << '\r' << std::flush;
+			}
 		}
 		typenames::node & node(*node_);
 

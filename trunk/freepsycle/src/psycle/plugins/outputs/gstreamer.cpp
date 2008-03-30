@@ -382,10 +382,6 @@ namespace psycle { namespace plugins { namespace outputs {
 				while(wait_for_state_to_become_playing_) condition_.wait(lock);
 			}
 		}
-		if(!loggers::trace()()) {
-			static const char c [] = { '-', '\\', '|', '/' };
-			std::cout << ' ' << c[current_read_position_ % sizeof c] << '\r' << std::flush;
-		}
 		{
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
 			if(false && loggers::trace()) {
