@@ -38,12 +38,12 @@
 #elif defined _WIN64 || defined _WIN32
 	#include <io.h>
 	#if defined _MSC_VER
-		#pragma comment(lib, "xml++-2.6")
+		#pragma comment(lib, "xml++-2.6.lib")
 		#pragma comment(lib, "xml2")
-		#pragma comment(lib, "glibmm-2.4")
-		#pragma comment(lib, "gobject-2.0")
-		#pragma comment(lib, "sigc-2.0")
-		#pragma comment(lib, "glib-2.0")
+		#pragma comment(lib, "glibmm-2.4.lib")
+		#pragma comment(lib, "gobject-2.0.lib")
+		#pragma comment(lib, "sigc-2.0.lib")
+		#pragma comment(lib, "glib-2.0.lib")
 		#pragma comment(lib, "intl")
 		#pragma comment(lib, "iconv")
 	#endif
