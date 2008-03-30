@@ -24,6 +24,8 @@
 #include <CDirectMidi.h>
 #include <QString>
 
+using namespace directmidi;
+
 class CDMDirverHandler
 {
 private:

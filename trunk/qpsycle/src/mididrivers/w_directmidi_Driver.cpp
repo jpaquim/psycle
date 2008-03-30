@@ -51,7 +51,7 @@ QString CDMDirverHandler::GetCurrentPortName()
 {
 	INFOPORT infoport; //we need a temporary infoport because we don't want to change our main infoport
 	CInPort.GetActivatedPortInfo(&infoport);
-	return infoport;
+	return infoport.szPortDescription();
 }
 
 QString[] CDMDirverHandler::GetPorts()
@@ -65,4 +65,5 @@ QString[] CDMDirverHandler::GetPorts()
 		CInPort.GetPortInfo(i+1, &infoport);
 		ports[i] = infoport.szPortDescription();
 	}
+	return ports;
 }
