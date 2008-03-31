@@ -1,0 +1,19 @@
+#! /usr/bin/make -f
+
+BUILD_DIR = ++build
+INSTALL_DIR = $(BUILD_DIR)/install
+TAR_NAME = qpsycle
+
+all: $(BUILD_DIR)/qpsycle.exe
+	rm -Rf $(INSTALL_DIR)
+	mkdir -p $(INSTALL_DIR)/bin
+	cp -f $< $(INSTALL_DIR)/bin
+	../packageneric/generic/microsoft-dll-collector $(INSTALL_DIR) $(TAR_NAME)
+	echo subversion revision "$$(svnversion)" > $(INSTALL_DIR)/$(TAR_NAME)/version.text
+	tar cvjf $(INSTALL_DIR)/$(TAR_NAME).tar.bz2 --directory=$(INSTALL_DIR) $(TAR_NAME)
+	#cd $(INSTALL_DIR) && 7za a -ms=on -mx=9 -m0=BCJ2 -m1=LZMA -m2=LZMA -m3=LZMA -mb0:1 -mb0s1:2 -mb0s2:3 $(TAR_NAME).7z $(TAR_NAME)
+
+
+$(BUILD_DIR)/qpsycle.exe:
+	qmake
+	mingw32-make
