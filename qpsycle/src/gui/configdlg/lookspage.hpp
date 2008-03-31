@@ -35,11 +35,15 @@ class Configuration;
 
 class LooksPage : public QWidget {
 Q_OBJECT
+
+private:
+	QComboBox *colorSchemeCombo;
 public:
 	LooksPage( QWidget *parent = 0 );
 
 public slots:
-	void onThemeComboChanged( const QString &sheetName );
+	void oncolorSchemeComboChanged( const QString &sheetName );
+	void onthemeComboChanged( const QString &themeName );
 
 };
 
