@@ -300,9 +300,9 @@ if dlfcn.result():
 	class plugin_check_module(module):
 		def __init__(self):
 			module.__init__(self, source_package,
-				name = 'xpsycle.plugin-check',
+				name = 'psycle-plugin-check',
 				version = source_package.version(),
-				description = 'xpsycle plugin sanity check',
+				description = 'psycle plugin sanity check',
 				dependencies = [universalis, dlfcn],
 				target_type = module.target_types.program
 			)
