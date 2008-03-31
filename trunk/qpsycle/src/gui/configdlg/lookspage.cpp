@@ -50,13 +50,13 @@ namespace qpsycle {
 		
 		QGroupBox *miscGroup = new QGroupBox( this );
 		QLabel *themeLabel = new QLabel( "Theme" );
-		QComboBox *themeCombo = new QComboBox( this );
+		themeCombo = new QComboBox( this );
 		connect( themeCombo, SIGNAL( activated( QString ) ), this, SLOT( onthemeComboChanged( QString ) ) );
 		QStringList themes = QStyleFactory::keys();
 		themeCombo->addItems( themes);
 
 		QLabel *colorSchemeLabel = new QLabel( "Color Scheme:" );
-		colorSchemeCombo = new QComboBox( this );
+		QComboBox *colorSchemeCombo = new QComboBox( this );
 		connect( colorSchemeCombo, SIGNAL( activated( QString ) ), this, SLOT( oncolorSchemeComboChanged( QString ) ) );
 		QDir themeDir(":/themes");
 		QStringList colorSchemes = themeDir.entryList();
@@ -88,7 +88,6 @@ namespace qpsycle {
 	}
 	void LooksPage::onthemeComboChanged( const QString &themeName )
 	{
-		// Gravity_0 why isn't this working?
-		QApplication::setStyle(colorSchemeCombo->currentText());
+		QApplication::setStyle(themeCombo->currentText());
 	}
 } // namespace qpsycle

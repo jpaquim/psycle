@@ -37,7 +37,7 @@ class LooksPage : public QWidget {
 Q_OBJECT
 
 private:
-	QComboBox *colorSchemeCombo;
+	QComboBox *themeCombo;
 public:
 	LooksPage( QWidget *parent = 0 );
 
