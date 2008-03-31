@@ -56,9 +56,10 @@
 #define WAVE_RANDOM3				31
 #define WAVE_RANDOM4				32
 #define WAVE_RANDOM5				33
-#define WAVE_STORE1					34
-#define WAVE_STORE2					35
-#define WAVE_STORE3					36
+#define WAVE_OSC1WORKBUFFER			34
+#define WAVE_OSC2WORKBUFFER			35
+#define WAVE_OSC3WORKBUFFER			36
+#define WAVE_OSC4WORKBUFFER			37
 
 #define BufferTemp					8
 
@@ -126,7 +127,7 @@ struct VOICEPAR
 	float fltVelocity;
 	float fltEnvAmount;
 
-	signed short WaveTable[37][4100]; // incl. 3x store
+	signed short WaveTable[38][4100];
 
 	int initposition[4];
 	float syncvibe;
@@ -292,9 +293,7 @@ private:
 	float speedup;
 	float speedup2;
 	
-	int store1Different;
-	int store2Different;
-	int store3Different;
+	int oscWorkBufferDifferent[4];
 
 	inline int f2i(double d)
 	{

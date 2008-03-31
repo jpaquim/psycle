@@ -225,7 +225,7 @@ CMachineParameter const paraOsc1Waveform =
 	"Waveform",
 	"Waveform",																																				// description
 	0,																																												// MinValue				
-	36,																																												// MaxValue
+	37,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -245,7 +245,7 @@ CMachineParameter const paraOsc1Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	19,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -385,7 +385,7 @@ CMachineParameter const paraOsc2Waveform =
 	"Waveform",
 	"Waveform",																																				// description
 	0,																																												// MinValue				
-	36,																																												// MaxValue
+	37,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -405,7 +405,7 @@ CMachineParameter const paraOsc2Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	19,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -546,7 +546,7 @@ CMachineParameter const paraOsc3Waveform =
 	"Waveform",
 	"Waveform",																																				// description
 	0,																																												// MinValue				
-	36,																																												// MaxValue
+	37,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -566,7 +566,7 @@ CMachineParameter const paraOsc3Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	19,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -707,7 +707,7 @@ CMachineParameter const paraOsc4Waveform =
 	"Waveform",
 	"Waveform",																																				// description
 	0,																																												// MinValue				
-	36,																																												// MaxValue
+	37,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -727,7 +727,7 @@ CMachineParameter const paraOsc4Options =
 	"Options",
 	"Options",																																				// description
 	0,																																												// MinValue				
-	19,																																												// MaxValue
+	13,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -1641,9 +1641,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case WAVE_RANDOM3:sprintf(txt,"Random 3");return true;break;
 			case WAVE_RANDOM4:sprintf(txt,"Random 4");return true;break;
 			case WAVE_RANDOM5:sprintf(txt,"Random 5");return true;break;
-			case WAVE_STORE1:sprintf(txt,"User Memory A");return true;break;
-			case WAVE_STORE2:sprintf(txt,"User Memory B");return true;break;
-			case WAVE_STORE3:sprintf(txt,"User Memory C");return true;break;
+			case WAVE_OSC1WORKBUFFER:sprintf(txt,"Osc 1 Work Buffer");return true;break;
+			case WAVE_OSC2WORKBUFFER:sprintf(txt,"Osc 2 Work Buffer");return true;break;
+			case WAVE_OSC3WORKBUFFER:sprintf(txt,"Osc 3 Work Buffer");return true;break;
+			case WAVE_OSC4WORKBUFFER:sprintf(txt,"Osc 4 Work Buffer");return true;break;
 		}
 	}
 
@@ -1670,12 +1671,6 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 11:sprintf(txt,"LFO Oneshot (A&D)");return true;break;
 			case 12:sprintf(txt,"Phase Reset All Osc");return true;break;
 			case 13:sprintf(txt,"Continuous Drifting");return true;break;
-			case 14:sprintf(txt,"Cont.D. & Store to A");return true;break;
-			case 15:sprintf(txt,"Cont.D. & Store to B");return true;break;
-			case 16:sprintf(txt,"Cont.D. & Store to C");return true;break;
-			case 17:sprintf(txt,"Store to User Memory A");return true;break;
-			case 18:sprintf(txt,"Store to User Memory B");return true;break;
-			case 19:sprintf(txt,"Store to User Memory C");return true;break;
 		}
 	}
 

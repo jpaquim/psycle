@@ -161,9 +161,10 @@ void CSynthTrack::ResetSym(){
 	synfx[3].reset();
 	pwmcount=0;
 
-	store1Different = 15; // set all channels to update (%1111)
-	store2Different = 15;
-	store3Different = 15;
+	oscWorkBufferDifferent[0] = 15; // set all channels to update (%1111)
+	oscWorkBufferDifferent[1] = 15; // set all channels to update (%1111)
+	oscWorkBufferDifferent[2] = 15; // set all channels to update (%1111)
+	oscWorkBufferDifferent[3] = 15; // set all channels to update (%1111)
 }
 
 void CSynthTrack::NoteTie(int note){
@@ -824,13 +825,14 @@ void CSynthTrack::calcWaves(int mask){
 				fmCtl2[0][i]=0.0f;
 				fmCtl2[1][i]=0.0f;
 			}
-			if ((pos != synposLast[i]) || ((vpar->oscWaveform[i] == WAVE_STORE1) & ((store1Different & bit) != 0)) || ((vpar->oscWaveform[i] == WAVE_STORE2) & ((store2Different & bit) != 0)) ||  ((vpar->oscWaveform[i] == WAVE_STORE3) & ((store3Different & bit) != 0)) ) {
+			if ((pos != synposLast[i]) || ((vpar->oscWaveform[i] == WAVE_OSC1WORKBUFFER) & ((oscWorkBufferDifferent[i] & bit) != 0)) || ((vpar->oscWaveform[i] == WAVE_OSC2WORKBUFFER) & ((oscWorkBufferDifferent[i] & bit) != 0)) ||  ((vpar->oscWaveform[i] == WAVE_OSC3WORKBUFFER) & ((oscWorkBufferDifferent[i] & bit) != 0)) || ((vpar->oscWaveform[i] == WAVE_OSC4WORKBUFFER) & ((oscWorkBufferDifferent[i] & bit) != 0)) ) {
 				synposLast[i]=pos;
 				buf=4-curBuf[i]+i;
 				//mark storage as read
-				store1Different = store1Different & (15 ^ bit);
-				store2Different = store2Different & (15 ^ bit);
-				store3Different = store3Different & (15 ^ bit);
+				oscWorkBufferDifferent[0] = oscWorkBufferDifferent[0] & (15 ^ bit);
+				oscWorkBufferDifferent[1] = oscWorkBufferDifferent[1] & (15 ^ bit);
+				oscWorkBufferDifferent[2] = oscWorkBufferDifferent[2] & (15 ^ bit);
+				oscWorkBufferDifferent[3] = oscWorkBufferDifferent[3] & (15 ^ bit);
 				signed short* sourceWave = &vpar->WaveTable[vpar->oscWaveform[i]][0];
 				switch (vpar->oscFuncType[i]) {
 				case 0: // no function, just make a copy
@@ -1199,22 +1201,12 @@ void CSynthTrack::calcWaves(int mask){
 					break;
 
 				}
-				// store to a
-				if ((vpar->oscOptions[i] == 14) || (vpar->oscOptions[i] == 17)){
-					for (c=0;c<2048;c++) vpar->WaveTable[WAVE_STORE1][c] = WaveBuffer[buf][c];
-					store1Different = 15; // set all channels to update (%1111)
-				}
-				// store to b
-				if ((vpar->oscOptions[i] == 15) || (vpar->oscOptions[i] == 18)){
-					for (c=0;c<2048;c++) vpar->WaveTable[WAVE_STORE2][c] = WaveBuffer[buf][c];
-					store2Different = 15; // set all channels to update (%1111)
-				}
-				// store to c
-				if ((vpar->oscOptions[i] == 16) || (vpar->oscOptions[i] == 19)){
-					for (c=0;c<2048;c++) vpar->WaveTable[WAVE_STORE3][c] = WaveBuffer[buf][c];
-					store3Different = 15; // set all channels to update (%1111)
-				}
-				nextBuf[i]=1; // a new buffer is now present
+				// a new buffer is now present
+				nextBuf[i]=1;
+
+				// store in selecatable waves ram
+				for (c=0;c<2048;c++) vpar->WaveTable[WAVE_OSC1WORKBUFFER+i][c] = WaveBuffer[buf][c];
+				oscWorkBufferDifferent[i] = 15; // set all channels to update (%1111)
 			}
 		}
 	}
