@@ -36,6 +36,7 @@
 #include <QCheckBox>
 #include <QLabel>
 #include <QSettings>
+#include <QStyleFactory>
 
 namespace qpsycle {
 
@@ -44,28 +45,37 @@ namespace qpsycle {
 	{
 		QVBoxLayout *mainLay = new QVBoxLayout();
 		mainLay->setAlignment( Qt::AlignTop );
-		QHBoxLayout *miscLay = new QHBoxLayout();
+		QHBoxLayout *themeLay = new QHBoxLayout();
 		
 		
 		QGroupBox *miscGroup = new QGroupBox( this );
-		QLabel *themeLabel = new QLabel( "Theme:" );
+		QLabel *themeLabel = new QLabel( "Theme" );
 		QComboBox *themeCombo = new QComboBox( this );
-		connect( themeCombo, SIGNAL( activated( QString ) ), this, SLOT( onThemeComboChanged( QString ) ) );
+		connect( themeCombo, SIGNAL( activated( QString ) ), this, SLOT( onthemeComboChanged( QString ) ) );
+		QStringList themes = QStyleFactory::keys();
+		themeCombo->addItems( themes);
+
+		QLabel *colorSchemeLabel = new QLabel( "Color Scheme:" );
+		colorSchemeCombo = new QComboBox( this );
+		connect( colorSchemeCombo, SIGNAL( activated( QString ) ), this, SLOT( oncolorSchemeComboChanged( QString ) ) );
 		QDir themeDir(":/themes");
-		QStringList themes = themeDir.entryList();
-		themeCombo->addItems( themes );
+		QStringList colorSchemes = themeDir.entryList();
+		colorSchemeCombo->addItems( colorSchemes );
 
-		miscGroup->setLayout( miscLay );
+		miscGroup->setLayout( themeLay );
 
-		miscLay->addWidget( themeLabel );
-		miscLay->addWidget( themeCombo );
+		themeLay->addWidget( themeLabel );
+		themeLay->addWidget( themeCombo );
+
+		themeLay->addWidget( colorSchemeLabel );
+		themeLay->addWidget( colorSchemeCombo );
 	
 		mainLay->addWidget( miscGroup );
 
 		setLayout( mainLay );
 	}
 
-	void LooksPage::onThemeComboChanged( const QString &sheetName )
+	void LooksPage::oncolorSchemeComboChanged( const QString &sheetName )
 	{
 		QSettings settings;
 		settings.setValue( "theme", sheetName );
@@ -75,5 +85,10 @@ namespace qpsycle {
 		QString styleSheet = QLatin1String( file.readAll() );
 		
 		qApp->setStyleSheet( styleSheet );
+	}
+	void LooksPage::onthemeComboChanged( const QString &themeName )
+	{
+		// Gravity_0 why isn't this working?
+		QApplication::setStyle(colorSchemeCombo->currentText());
 	}
 } // namespace qpsycle
