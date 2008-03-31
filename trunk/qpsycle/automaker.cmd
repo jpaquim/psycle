@@ -1,9 +1,8 @@
 @REM Created By Graity_0... Released Under GPL Licence
 @echo off
-title Automaker QPsycle 1.16 Final - Windows
+title Automaker QPsycle 1.17 Final - Windows
 echo Welcome to Gravity_0 Automaker for QPsycle
 pause
-if "%1" == "help" goto HELP
 
 if "%1" == "release" goto RELEASE
 if "%1" == "debug" goto DEBUG
