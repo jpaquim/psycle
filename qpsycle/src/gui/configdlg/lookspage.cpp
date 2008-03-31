@@ -88,6 +88,6 @@ namespace qpsycle {
 	}
 	void LooksPage::onthemeComboChanged( const QString &themeName )
 	{
-		QApplication::setStyle(themeCombo->currentText());
+		QApplication::setStyle(themeName);
 	}
 } // namespace qpsycle
