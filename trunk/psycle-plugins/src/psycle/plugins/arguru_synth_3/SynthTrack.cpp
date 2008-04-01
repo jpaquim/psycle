@@ -438,7 +438,7 @@ void CSynthTrack::DoGlide()
 	{
 		ROSC4Speed-=oscglide;
 
-		if(ROSC4Speed<OSC2Speed) ROSC4Speed=OSC2Speed;
+		if(ROSC4Speed<OSC4Speed) ROSC4Speed=OSC4Speed;
 	}
 }
 
