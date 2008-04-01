@@ -471,6 +471,8 @@ inline float CSynthTrack::GetEnvAmp()
 				AmpEnvStage=0;
 				ROSC1Speed=0.0f;
 				ROSC2Speed=0.0f;
+				ROSC3Speed=0.0f;
+				ROSC4Speed=0.0f;
 			}
 			else
 			{
@@ -495,6 +497,8 @@ inline float CSynthTrack::GetEnvAmp()
 			AmpEnvStage=0;
 			ROSC1Speed=0.0f;
 			ROSC2Speed=0.0f;
+			ROSC3Speed=0.0f;
+			ROSC4Speed=0.0f;
 		}
 
 		return AmpEnvValue;

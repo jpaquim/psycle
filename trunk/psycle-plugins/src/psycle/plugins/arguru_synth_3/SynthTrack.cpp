@@ -85,8 +85,8 @@ void CSynthTrack::NoteOn(int note, SYNPAR *tspar,int spd)
 	float note3=nnote+
 		(float)tspar->osc3finetune*0.0038962f+
 		(float)tspar->osc3detune;
-	OSC3Speed=(float)pow(2.0, (float)note3/12.0)
-		;
+	OSC3Speed=(float)pow(2.0, (float)note3/12.0);
+	
 	float note4=nnote+
 		(float)tspar->osc4finetune*0.0038962f+
 		(float)tspar->osc4detune;
