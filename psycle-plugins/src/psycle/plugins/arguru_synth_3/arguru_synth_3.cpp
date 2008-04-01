@@ -527,41 +527,41 @@ void mi::ParameterTweak(int par, int val)
 	globalpar.osc2detune=Vals[2];
 	globalpar.osc2finetune=Vals[3];
 	globalpar.osc2sync=Vals[4];
-	globalpar.pWave3=&WaveTable[Vals[1]][0];
-	globalpar.osc3detune=Vals[2];
-	globalpar.osc3finetune=Vals[3];
-	globalpar.osc3sync=Vals[4];
-	globalpar.pWave4=&WaveTable[Vals[1]][0];
-	globalpar.osc4detune=Vals[2];
-	globalpar.osc4finetune=Vals[3];
-	globalpar.osc4sync=Vals[4];
+	globalpar.pWave3=&WaveTable[Vals[5]][0];
+	globalpar.osc3detune=Vals[6];
+	globalpar.osc3finetune=Vals[7];
+	globalpar.osc3sync=Vals[8];
+	globalpar.pWave4=&WaveTable[Vals[9]][0];
+	globalpar.osc4detune=Vals[10];
+	globalpar.osc4finetune=Vals[11];
+	globalpar.osc4sync=Vals[12];
 	
-	globalpar.amp_env_attack=Vals[5];
-	globalpar.amp_env_decay=Vals[6];
-	globalpar.amp_env_sustain=Vals[7];
-	globalpar.amp_env_release=Vals[8];
+	globalpar.amp_env_attack=Vals[13];
+	globalpar.amp_env_decay=Vals[14];
+	globalpar.amp_env_sustain=Vals[15];
+	globalpar.amp_env_release=Vals[16];
 
-	globalpar.vcf_env_attack=Vals[9];
-	globalpar.vcf_env_decay=Vals[10];
-	globalpar.vcf_env_sustain=Vals[11];
-	globalpar.vcf_env_release=Vals[12];
-	globalpar.vcf_lfo_speed=Vals[13];
-	globalpar.vcf_lfo_amplitude=Vals[14];
+	globalpar.vcf_env_attack=Vals[17];
+	globalpar.vcf_env_decay=Vals[18];
+	globalpar.vcf_env_sustain=Vals[19];
+	globalpar.vcf_env_release=Vals[20];
+	globalpar.vcf_lfo_speed=Vals[21];
+	globalpar.vcf_lfo_amplitude=Vals[22];
 
-	globalpar.vcf_cutoff=Vals[15];
-	globalpar.vcf_resonance=Vals[16];
-	globalpar.vcf_type=Vals[17];
-	globalpar.vcf_envmod=Vals[18];
-	globalpar.osc12_mix=Vals[19];
-	globalpar.osc34_mix=Vals[19];
-	globalpar.out_vol=Vals[20];
-	globalpar.arp_mod=Vals[21];
-	globalpar.arp_bpm=Vals[22];
-	globalpar.arp_cnt=Vals[23];
-	globalpar.globaldetune=Vals[24];
-	globalpar.globalfinetune=Vals[25];
-	globalpar.synthglide=Vals[26];
-	globalpar.interpolate=Vals[27];
+	globalpar.vcf_cutoff=Vals[23];
+	globalpar.vcf_resonance=Vals[24];
+	globalpar.vcf_type=Vals[25];
+	globalpar.vcf_envmod=Vals[26];
+	globalpar.osc12_mix=Vals[27];
+	globalpar.osc34_mix=Vals[28];
+	globalpar.out_vol=Vals[29];
+	globalpar.arp_mod=Vals[30];
+	globalpar.arp_bpm=Vals[31];
+	globalpar.arp_cnt=Vals[32];
+	globalpar.globaldetune=Vals[33];
+	globalpar.globalfinetune=Vals[34];
+	globalpar.synthglide=Vals[35];
+	globalpar.interpolate=Vals[36];
 }
 
 void mi::Command()
