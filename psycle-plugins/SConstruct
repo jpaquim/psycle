@@ -283,6 +283,7 @@ plugin_module('arguru_freeverb', 'yezar/arguru freeverb').add_plugin_sources([os
 plugin_module('arguru_goaslicer', 'arguru goaslicer').add_plugin_sources([os.path.join('arguru_goaslicer', '*.cpp')])
 plugin_module('arguru_reverb', 'arguru reverb').add_plugin_sources([os.path.join('arguru_reverb', '*.cpp')])
 plugin_module('arguru_synth_2f', 'arguru synth 2 final').add_plugin_sources([os.path.join('arguru_synth_2_final', '*.cpp')])
+plugin_module('arguru_synth_3', 'arguru synth 3').add_plugin_sources([os.path.join('arguru_synth_3', '*.cpp')])
 plugin_module('arguru_xfilter', 'arguru cross delay').add_plugin_sources([os.path.join('arguru_xfilter', '*.cpp')])
 plugin_module('zephod_superfm', 'zephod_super fm').add_plugin_sources([os.path.join('zephod_super_fm', '*.cpp')])
 plugin_module('m3', 'm3').add_plugin_sources([os.path.join('m3', '*.cpp')])
