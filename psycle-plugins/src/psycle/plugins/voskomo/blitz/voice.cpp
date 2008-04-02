@@ -1199,6 +1199,18 @@ void CSynthTrack::calcWaves(int mask){
 						WaveBuffer[buf][c]=long1;
 					}
 					break;
+				case 53: // Sync & Fade
+					float1 = 0;
+					float2 = float(pos*96)/2047+1;
+					float3 = 1.0f;
+					float4 = 1.0f/2048.0f;
+					for(c=0;c<2048;c++){
+						WaveBuffer[buf][c]=sourceWave[(int)float1]*float3;
+						float1+=float2;
+						float3-=float4;
+						if (float1 > 2047) float1-=2048;
+					}
+					break;
 
 				}
 				// a new buffer is now present
