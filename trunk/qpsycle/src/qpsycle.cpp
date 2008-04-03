@@ -20,6 +20,8 @@
 
 #include <QApplication>
 #include <QIcon>
+#include <QSettings>
+
 
 #include "gui/mainwindow.hpp"
 
@@ -29,6 +31,9 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName( "Psycledelics" );
 	QCoreApplication::setOrganizationDomain( "psycle.pastnotecut.org" );
 	QCoreApplication::setApplicationName( "qpsycle" );
+
+	QSettings settings;
+	QApplication::setStyle( settings.value( "looks/theme" ).toString() );
 
 	Q_INIT_RESOURCE(qpsycle);
 
