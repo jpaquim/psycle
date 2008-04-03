@@ -49,11 +49,17 @@ namespace qpsycle {
 		
 		
 		QGroupBox *miscGroup = new QGroupBox( this );
+
 		QLabel *themeLabel = new QLabel( "Theme" );
 		themeCombo = new QComboBox( this );
 		connect( themeCombo, SIGNAL( activated( QString ) ), this, SLOT( onthemeComboChanged( QString ) ) );
 		QStringList themes = QStyleFactory::keys();
-		themeCombo->addItems( themes);
+		themeCombo->addItems( themes );
+		
+		QSettings settings;
+		QString currentTheme = settings.value( "looks/theme" ).toString();
+		int currentIndex = themeCombo->findText( currentTheme );
+		themeCombo->setCurrentIndex( currentIndex );
 
 		QLabel *colorSchemeLabel = new QLabel( "Color Scheme:" );
 		QComboBox *colorSchemeCombo = new QComboBox( this );
@@ -61,6 +67,11 @@ namespace qpsycle {
 		QDir themeDir(":/themes");
 		QStringList colorSchemes = themeDir.entryList();
 		colorSchemeCombo->addItems( colorSchemes );
+
+		QString currentColorScheme = settings.value( "looks/sheet" ).toString();
+		currentIndex = colorSchemeCombo->findText( currentColorScheme );
+		colorSchemeCombo->setCurrentIndex( currentIndex );
+		
 
 		miscGroup->setLayout( themeLay );
 
@@ -78,7 +89,7 @@ namespace qpsycle {
 	void LooksPage::oncolorSchemeComboChanged( const QString &sheetName )
 	{
 		QSettings settings;
-		settings.setValue( "theme", sheetName );
+		settings.setValue( "looks/sheet", sheetName );
 
 		QFile file( ":/themes/" + sheetName.toLower() );
 		file.open( QFile::ReadOnly );
@@ -86,8 +97,13 @@ namespace qpsycle {
 		
 		qApp->setStyleSheet( styleSheet );
 	}
+
 	void LooksPage::onthemeComboChanged( const QString &themeName )
 	{
+		QSettings settings;
+		settings.setValue( "looks/theme", themeName );
+
 		QApplication::setStyle(themeName);
 	}
+
 } // namespace qpsycle

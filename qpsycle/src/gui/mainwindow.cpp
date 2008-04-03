@@ -190,8 +190,8 @@ namespace qpsycle {
 
 	void MainWindow::setupGui()
 	{
-		QByteArray themeName = settings.value( "theme", "default.qss" ).toByteArray();
-		QFile file( ":/themes/" + themeName.toLower() );
+		QByteArray sheetName = settings.value( "looks/sheet", "default.qss" ).toByteArray();
+		QFile file( ":/themes/" + sheetName.toLower() );
 		file.open( QFile::ReadOnly );
 		QString styleSheet = QLatin1String( file.readAll() );
 		qApp->setStyleSheet( styleSheet );
