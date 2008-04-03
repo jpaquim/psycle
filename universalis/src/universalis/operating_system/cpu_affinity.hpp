@@ -51,7 +51,7 @@ namespace universalis { namespace operating_system { namespace cpu_affinity {
 				std::ostringstream s; s << exceptions::code_description();
 				throw std::runtime_error(s.str().c_str());
 			}
-			for(DWORD mask(1); mask <= 1U << 31/*std::numeric_limits<DWORD>::digits - 1*/; mask <<= 1) if(process & mask) ++result;
+			for(DWORD mask(1); mask <= 1U << std::numeric_limits<DWORD>::digits - 2; mask <<= 1) if(process & mask) ++result;
 		#else
 			#error unsupported operating system
 		#endif
