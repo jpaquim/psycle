@@ -15,7 +15,6 @@
 #else
 	#error unsupported operating system
 #endif
-#include <limits>
 #include <stdexcept>
 #include <universalis/operating_system/exceptions/code_description.hpp>
 #if defined BOOST_AUTO_TEST_CASE
@@ -51,7 +50,7 @@ namespace universalis { namespace operating_system { namespace cpu_affinity {
 				std::ostringstream s; s << exceptions::code_description();
 				throw std::runtime_error(s.str().c_str());
 			}
-			for(DWORD mask(1); mask <= 1U << std::numeric_limits<DWORD>::digits - 2; mask <<= 1) if(process & mask) ++result;
+			for(DWORD mask(1); mask != 0; mask <<= 1) if(process & mask) ++result;
 		#else
 			#error unsupported operating system
 		#endif
