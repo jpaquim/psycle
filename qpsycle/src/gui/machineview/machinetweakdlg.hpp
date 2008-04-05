@@ -71,7 +71,7 @@ class Knob : public QDial {
 public:
 	Knob( int param );
 	QSize sizeHint() const;
-	int param() { return m_paramIndex; }
+	int param() const { return m_paramIndex; }
 
 protected: 
 	void paintEvent( QPaintEvent *ev );
@@ -79,7 +79,7 @@ protected:
 	void mouseMoveEvent( QMouseEvent *ev );
 	void mouseReleaseEvent( QMouseEvent *ev );
 
-	double mouseAngle(const QPoint& pos);
+	double mouseAngle(const QPoint& pos) const;
 
 private:
 	int m_paramIndex;
@@ -110,7 +110,7 @@ public:
 	void setNameText( const QString & text );
 	void setValueText( const QString & text );
 	void setKnob( Knob *knob );
-	Knob *knob();
+	Knob *knob() const;
 	QSize sizeHint() const;
 
 public slots:

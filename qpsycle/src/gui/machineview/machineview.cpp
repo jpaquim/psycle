@@ -389,18 +389,18 @@ void MachineView::onMachineChosen( MachineGui *macGui )
 
 
 
-MachineGui *MachineView::findMachineGuiByCoreMachine( psy::core::Machine *mac )
+MachineGui *MachineView::findMachineGuiByCoreMachine( psy::core::Machine *mac ) const
 {
-	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
+	for (std::vector<MachineGui*>::const_iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
 		MachineGui* machineGui = *it;
 		if ( machineGui->mac() == mac ) return machineGui;
 	}
 	return 0;
 }
 /// <nmather> probably don't need both of these methods.
-MachineGui *MachineView::findMachineGuiByCoreMachineIndex( int index )
+MachineGui *MachineView::findMachineGuiByCoreMachineIndex( int index ) const
 {
-	for (std::vector<MachineGui*>::iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
+	for (std::vector<MachineGui*>::const_iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
 		MachineGui* machineGui = *it;
 		if ( machineGui->mac()->id() == index ) return machineGui;
 	}
@@ -412,9 +412,9 @@ MachineGui *MachineView::findMachineGuiByCoreMachineIndex( int index )
 	* Given a point in the scene we return the MachineGui at
 	* that point,  if there's one there.  
 	*/
-MachineGui *MachineView::machineGuiAtPoint( QPointF point )
+MachineGui *MachineView::machineGuiAtPoint( QPointF point ) const
 {
-	std::vector<MachineGui*>::iterator iter;
+	std::vector<MachineGui*>::const_iterator iter;
 	for( iter = machineGuis.begin(); iter != machineGuis.end(); iter++ ) {
 		MachineGui *macGui = *iter;
 		if ( macGui->contains( macGui->mapFromScene( point ) ) )
@@ -581,7 +581,7 @@ void MachineView::scaleView(qreal scaleFactor)
 
 
 // Getters and setters.
-psy::core::Song *MachineView::song()
+psy::core::Song *MachineView::song() const
 {
 	return song_;
 }

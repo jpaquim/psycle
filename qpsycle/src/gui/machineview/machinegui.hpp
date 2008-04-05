@@ -47,20 +47,20 @@ public:
 
 	void addWireGui(WireGui *wireGui);
 	void updateName();
-	QPointF centrePointInSceneCoords();
-	std::vector<WireGui *> wireGuiList();
-	enum { Type = UserType + 1 };
+	QPointF centrePointInSceneCoords() const;
+	std::vector<WireGui *> wireGuiList() const;
 
+	enum { Type = UserType + 1 };
 	int type() const { return Type; }
 
-	psy::core::Machine* mac();
-	int noteFromCommand( int command );
+	psy::core::Machine* mac() const;
+	int noteFromCommand( int command ) const;
 
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-	MachineView *macView() { return m_macView; }
+	MachineView *macView() const { return m_macView; }
 
-	std::vector<WireGui *> wireGuiList_;
+	std::vector<WireGui *> wireGuiList_;  ///\todo Oops!  A public data member?
 
 public slots:
 	void onDeleteMachineActionTriggered();
