@@ -54,9 +54,9 @@ public:
 
 	void addNewMachineGui( psy::core::Machine *mac );
 
-	MachineGui* findMachineGuiByCoreMachineIndex( int index );
-	MachineGui* findMachineGuiByCoreMachine( psy::core::Machine *mac );
-	MachineGui *machineGuiAtPoint( QPointF point );
+	MachineGui* findMachineGuiByCoreMachineIndex( int index ) const;
+	MachineGui* findMachineGuiByCoreMachine( psy::core::Machine *mac ) const;
+	MachineGui *machineGuiAtPoint( QPointF point ) const;
 
 	void playNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
 	void stopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
@@ -65,13 +65,13 @@ public slots:
 	void onNoteRelease( int note, psy::core::Machine* mac );
 
 public:
-	psy::core::Song *song();
+	psy::core::Song *song() const;
 	void setSong( psy::core::Song *song ) { song_ = song; }
 	void setChosenMachine( MachineGui* macGui );
-	MachineGui* chosenMachine() { return chosenMachine_; }
+	MachineGui* chosenMachine() const { return chosenMachine_; }
 	int octave() const;
 	void setOctave( int newOctave );
-	bool isCreatingWire() { return creatingWire_; }
+	bool isCreatingWire() const { return creatingWire_; }
 
 protected:
 	void keyPressEvent(QKeyEvent *event);

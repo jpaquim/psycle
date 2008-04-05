@@ -386,7 +386,7 @@ void KnobGroup::setKnob( Knob *inKnob )
 	knob_ = inKnob;
 }
 
-Knob *KnobGroup::knob()
+Knob *KnobGroup::knob() const
 {
 	return knob_;
 }
@@ -474,7 +474,7 @@ void Knob::paintEvent( QPaintEvent *ev )
 }
 
 // Mouse angle determination.
-double Knob::mouseAngle ( const QPoint& pos )
+double Knob::mouseAngle ( const QPoint& pos ) const
 {
 	float dx = pos.x() - width()/2;
 	float dy = height()/2 - pos.y();

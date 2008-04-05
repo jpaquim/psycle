@@ -87,7 +87,7 @@ WireGui::~WireGui()
 		delete wiredlg;
 }
 
-MachineGui *WireGui::sourceMacGui() 
+MachineGui *WireGui::sourceMacGui() const
 {
 	return source;
 }
@@ -98,7 +98,7 @@ void WireGui::setSourceMacGui(MachineGui *macGui)
 	adjust();
 }
 
-MachineGui *WireGui::destMacGui() 
+MachineGui *WireGui::destMacGui() const
 {
 	return dest;
 }
@@ -258,7 +258,7 @@ void WireGui::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	QMenu menu;
 	menu.addAction( delConnAct_ );
 	menu.addSeparator();
-	QAction *a = menu.exec( event->screenPos() );
+	menu.exec( event->screenPos() );
 }
 
 void WireGui::adjust()

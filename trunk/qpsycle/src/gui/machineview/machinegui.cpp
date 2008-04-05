@@ -150,7 +150,7 @@ void MachineGui::addWireGui(WireGui *wireGui)
 }
 
 
-QPointF MachineGui::centrePointInSceneCoords() {
+QPointF MachineGui::centrePointInSceneCoords() const {
 	return mapToScene( QPointF( boundingRect().width()/2, boundingRect().height()/2 ) );
 }
 
@@ -282,12 +282,12 @@ void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 
 // Getters.
-std::vector<WireGui *> MachineGui::wireGuiList()
+std::vector<WireGui *> MachineGui::wireGuiList() const
 {
 	return wireGuiList_;
 }
 
-psy::core::Machine* MachineGui::mac()
+psy::core::Machine* MachineGui::mac() const
 {
 	return m_mac;
 }
