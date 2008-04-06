@@ -624,9 +624,9 @@ namespace psycle { namespace plugins { namespace outputs {
 	}
 
 	void alsa::do_stop() throw(engine::exception) {
-		if(loggers::information()()) loggers::information()("terminating and joining scheduler thread ...", UNIVERSALIS__COMPILER__LOCATION);
+		if(loggers::information()()) loggers::information()("terminating and joining poller thread ...", UNIVERSALIS__COMPILER__LOCATION);
 		if(!thread_) {
-			if(loggers::information()()) loggers::information()("scheduler thread was not running", UNIVERSALIS__COMPILER__LOCATION);
+			if(loggers::information()()) loggers::information()("poller thread was not running", UNIVERSALIS__COMPILER__LOCATION);
 			return;
 		}
 		{ scoped_lock lock(mutex_);
@@ -634,7 +634,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		condition_.notify_one();
 		thread_->join();
-		if(loggers::information()()) loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
+		if(loggers::information()()) loggers::information()("poller thread joined", UNIVERSALIS__COMPILER__LOCATION);
 		delete thread_; thread_ = 0;
 		resource::do_stop();
 	}
