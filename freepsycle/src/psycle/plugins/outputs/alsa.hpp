@@ -35,6 +35,14 @@ namespace psycle { namespace plugins { namespace outputs {
 			::snd_output_t * output_;
 			/// intermediate buffer for format conversion in write access method
 			char * buffer_;
+			/// pointers to areas within the buffer
+			::snd_pcm_channel_area_t * areas_;
+			/// buffer size in samples
+			::snd_pcm_uframes_t buffer_frames_;
+			/// samples per period
+			::snd_pcm_uframes_t period_frames_;
+			/// bits per channel sample
+			unsigned int bits_per_channel_sample_;
 	};
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
