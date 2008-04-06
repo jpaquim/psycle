@@ -255,11 +255,7 @@ AlsaOut::AlsaOut()
 		output = NULL;
 		
 		AudioDriverSettings settings(this->settings());
-		{
-			char const * const env(std::getenv("ALSA_CARD"));
-			if(env) settings.setDeviceName(env);
-			else settings.setDeviceName("default");
-		}
+		settings.setDeviceName("default");
 		this->setSettings(settings);
 	}
 	
