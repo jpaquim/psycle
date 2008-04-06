@@ -67,7 +67,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 		std::string pcm_device_name("default"); ///\todo parametrable
 		{ // get device name from env
-			char const * const env(std::getenv("ALSA_PCM_DEVICE"));
+			char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__PCM_DEVICE"));
 			if(env) pcm_device_name = env;
 		}
 
