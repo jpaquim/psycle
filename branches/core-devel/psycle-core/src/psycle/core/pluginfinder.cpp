@@ -127,7 +127,7 @@ const std::string & PluginInfo::category() const {
 	return category_;
 }
 
-std::map< PluginFinderKey, PluginInfo > PluginFinder::map_;
+std::map< MachineKey, PluginInfo > PluginFinder::map_;
 
 PluginFinder::PluginFinder(std::string const & psycle_path, std::string const & ladspa_path)
 :
@@ -142,16 +142,16 @@ PluginFinder::~PluginFinder()
 {
 }
 
-std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::begin() const {
+std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::begin() const {
 	return map_.begin();
 }         
 		
-std::map< PluginFinderKey, PluginInfo >::const_iterator PluginFinder::end() const {
+std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::end() const {
 	return map_.end();
 }         
 		
-PluginInfo PluginFinder::info( const PluginFinderKey & key ) const {
-	std::map< PluginFinderKey, PluginInfo >::const_iterator it = map_.find( key );
+PluginInfo PluginFinder::info( const MachineKey & key ) const {
+	std::map< MachineKey, PluginInfo >::const_iterator it = map_.find( key );
 	if ( it != map_.end() ) 
 		return it->second;
 	else
@@ -173,15 +173,15 @@ void PluginFinder::clearInfo() {
 	map_.clear();
 }
 void PluginFinder::scanInternal() {
-	PluginFinderKey key = PluginFinderKey::internalSampler();
+	MachineKey key = MachineKey::sampler();
 	PluginInfo info;
 	info.setType( MACH_SAMPLER );
-	info.setName( key.name() );
+	info.setName( "Sampler Machine");
 	map_[key]=info;
-	PluginFinderKey key2 = PluginFinderKey::internalMixer();
+	MachineKey key2 = MachineKey::mixer();
 	PluginInfo info2;
 	info2.setType( MACH_MIXER );
-	info2.setName( key2.name() );
+	info2.setName( "Send/Return Mixer");
 	map_[key2]=info2;
 }
 
@@ -240,7 +240,7 @@ void PluginFinder::LoadLadspaInfo(std::string fileName)
 				info.setType( MACH_LADSPA );
 				info.setName( psDescriptor->Name );
 				info.setLibName( fileName );
-				PluginFinderKey key(fileName, (ladspa_path + File::slash()) + fileName, lPluginIndex );
+				MachineKey key(Hosts::LADSPA, fileName, lPluginIndex );
 				map_[key] = info;
 			}
 		}
@@ -292,7 +292,7 @@ void PluginFinder::LoadNativeInfo(std::string fileName)
 			info.setVersion( version );
 			info.setAuthor( plugin.GetInfo().Author );
 			///\todo .. path should here stored and not evaluated in plugin
-			PluginFinderKey key( plugin.GetDllName(), fileName );
+			MachineKey key( Hosts::NATIVE, fileName );
 			map_[key] = info;               
 		}
 	}

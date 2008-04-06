@@ -105,6 +105,7 @@ class Plugin : public Machine
 		virtual void Tick(int channel, const PatternEvent & pEntry );
 		virtual void Stop();
 		inline virtual std::string GetDllName() const throw() { return _psDllName; }
+		virtual MachineKey getMachineKey() { return MachineKey(Hosts::NATIVE,_psDllName,0);}
 		virtual std::string GetName() const { return _psName; }
 
 		virtual int GetNumParams() const { return GetInfo().numParameters; }

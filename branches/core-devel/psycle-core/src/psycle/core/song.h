@@ -184,7 +184,7 @@ namespace psy
 			/// requirements : PluginFinder, PluginFinderKey
 			///\return a pointer to a new machine upon success, 0 otherwise
 			// future : iterator of machine (stl)container or at failure end()
-			Machine* createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x = 0, int y = 0 );
+			Machine* createMachine(const PluginFinder & finder, const MachineKey & key, int x = 0, int y = 0 );
 			/// creates a new machine in this song. .. deprecated
 			Machine & CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy" );
 			/// creates a new machine in this song.

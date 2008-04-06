@@ -10,6 +10,7 @@
 #include "helpers.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
+#include "machinekey.hpp"
 
 #include <cassert>
 #include <deque>
@@ -449,7 +450,10 @@ namespace psy
 			id_type id_;
 			void id(id_type id) { id_ = id; } friend class Psy2Filter;
 		///\}
-
+		public:
+		
+			virtual MachineKey getMachineKey() = 0;
+		
 		///\name ctor/dtor
 		///\{
 		public:

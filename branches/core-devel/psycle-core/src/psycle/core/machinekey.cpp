@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics     *
 *   psycle.sf.net   *
@@ -19,57 +20,91 @@
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
 
-#include "pluginFinderKey.hpp"
+#include "machinekey.hpp"
 
 namespace psy
 {
 	namespace core
 	{
-
-		PluginFinderKey::PluginFinderKey( ) : index_(0) {
-
-		}
-
-		PluginFinderKey::PluginFinderKey( const std::string & name, const std::string & dllPath, int index ) :
-			name_( name ),
-			dllPath_( dllPath ),
-			index_( index )
+		namespace Hosts 
 		{
+                       static const char *names[]={"Internal","Psycle","vST","LADSPA"};
+		}
+		namespace InternalMacs
+		{
+			typedef enum 
+			{
+				MASTER = 0,
+				DUMMY,
+				SAMPLER,
+				XMSAMPLER,
+				DUPLICATOR,
+				MIXER,
+				AUDIOINPUT,
+				LFO
+			} type;
 		}
 
-		PluginFinderKey::~PluginFinderKey() {
+		MachineKey::MachineKey( ) : index_(0) {
 		}
 
-		PluginFinderKey PluginFinderKey::internalSampler() {
-			return PluginFinderKey("Psycle Internal Sampler", "none", 0 );
-		}
-		PluginFinderKey PluginFinderKey::internalMixer() { 
-			return PluginFinderKey("Psycle Internal Mixer", "none", 0 );
+		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, int index ) :
+			dllName_( dllName ),
+			host_( host ),
+			index_( index )
+		{}
+
+		MachineKey::~MachineKey() {
 		}
 
-		bool PluginFinderKey::operator<(const PluginFinderKey & key) const {
-			if ( dllPath() != key.dllPath() )
-				return dllPath() < key.dllPath();
-			if ( name() != key.name() ) 
-				return name() < key.name();
+		const MachineKey MachineKey::master() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::MASTER);
+		}
+		const MachineKey MachineKey::dummy() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::DUMMY);
+		}
+		const MachineKey MachineKey::sampler() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::SAMPLER );
+		}
+		const MachineKey MachineKey::sampulse() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::XMSAMPLER );
+		}
+		const MachineKey MachineKey::duplicator() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::DUPLICATOR);
+		}
+		const MachineKey MachineKey::mixer() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::MIXER );
+		}
+		const MachineKey MachineKey::audioInput() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::AUDIOINPUT );
+		}
+		const MachineKey MachineKey::LFO() {
+			return MachineKey(Hosts::INTERNAL,"",InternalMacs::LFO );
+		}
+
+		static const std::string HostName(Hosts::type type) {
+			if ( type < Hosts::NUM_HOSTS ) return Hosts::names[type];
+		}
+
+		bool MachineKey::operator<(const MachineKey & key) const {
+			if ( host() != key.host() ) 
+				return host() < key.host();
+			else if ( dllName() != key.dllName() )
+				return dllName() < key.dllName();
 			return index() < key.index();
 		}
-
-		bool PluginFinderKey::operator ==( const PluginFinderKey & rhs ) const {
-			return dllPath() == rhs.dllPath() && name() == rhs.name() && index() == rhs.index();
+		bool MachineKey::operator ==( const MachineKey & rhs ) const {
+			return host() == rhs.host() && dllName() == rhs.dllName() && index() == rhs.index();
 		}
 
-		const std::string & PluginFinderKey::name() const {
-			return name_;
+		const std::string & MachineKey::dllName() const {
+			return dllName_;
 		}
-		
-		const std::string & PluginFinderKey::dllPath() const {
-			return dllPath_;
+		const Hosts::type MachineKey::host() const { 
+			return host_;
 		}
-
-		int PluginFinderKey::index() const {
+		int MachineKey::index() const {
 			return index_;
 		}
-
 	}
 }

@@ -19,6 +19,7 @@ namespace psy {
 			Dummy(Machine *mac);
 			virtual ~Dummy() throw();
 			virtual int GenerateAudio(int numSamples);
+			virtual MachineKey getMachineKey() { return MachineKey::dummy(); } 
 			virtual std::string GetName() const { return _psName; }
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
@@ -40,6 +41,7 @@ namespace psy {
 			virtual void Stop();
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
+			virtual MachineKey getMachineKey() { return MachineKey::duplicator(); } 
 			virtual std::string GetName() const { return _psName; }
 			virtual void GetParamName(int numparam,char *name) const;
 			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
@@ -53,8 +55,8 @@ namespace psy {
 			static const int NUM_MACHINES=8;
 			void AllocateVoice(int channel, int machine);
 			void DeallocateVoice(int channel, int machine);
-		std::int16_t macOutput[NUM_MACHINES];
-		std::int16_t noteOffset[NUM_MACHINES];
+			std::int16_t macOutput[NUM_MACHINES];
+			std::int16_t noteOffset[NUM_MACHINES];
 			static std::string _psName;
 			bool bisTicking;
 			// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
@@ -75,6 +77,7 @@ namespace psy {
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual int GenerateAudio( int numSamples );
+			virtual MachineKey getMachineKey() { return MachineKey::master(); } 
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -291,6 +294,7 @@ namespace psy {
 			virtual std::string GetPortInputName(InPort::id_type port) const;
 			virtual int GetInPorts() const { return 2; }
 			virtual int GetAudioInputs() const{ return GetInPorts() * MAX_CONNECTIONS; }
+			virtual MachineKey getMachineKey() { return MachineKey::mixer(); } 
 			virtual std::string GetName() const { return _psName; }
 			virtual int GetNumCols() const;
 			virtual void GetParamName(int numparam,char *name) const;
@@ -400,6 +404,7 @@ namespace psy {
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
+			virtual MachineKey getMachineKey() { return MachineKey::LFO(); } 
 			virtual std::string GetName() const { return _psName; }
 			virtual void GetParamName(int numparam,char *name) const;
 			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
@@ -450,6 +455,7 @@ namespace psy {
 			/// resets a parameter that's no longer being modulated
 			virtual void ParamEnd(int which);
 
+			//
 			//parameter settings
 			
 		std::int16_t waveform;

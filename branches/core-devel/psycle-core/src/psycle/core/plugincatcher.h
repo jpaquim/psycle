@@ -18,64 +18,37 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#ifndef PSYCLE__CORE__PLUGIN_CATCHER
+#define PSYCLE__CORE__PLUGIN_CATCHEr
 
-#ifndef MACHINEKEY_HPP
-#define MACHINEKEY_HPP
-
-#include <string>
+#include "machine.h"
+#include "machinekey.hpp"
+#include "pluginfinder.h"
 
 namespace psy
 {
 	namespace core
 	{
-		// type host_t
-		// Allows to differentiate between machines of different hosts.
-		namespace Hosts {
-			typedef enum 
-			{
-				INTERNAL=0,
-				NATIVE,
-				VST,
-				LADSPA,
-				//Keep at last place
-				NUM_HOSTS
-			} type;
-		}
 
-
-		class MachineKey
+		class PluginCatcher: public PluginFinder
 		{
-		protected:
-			MachineKey( );
-		public:
-			MachineKey( const Hosts::type host, const std::string & dllName, int index = 0 );
-			~MachineKey();
+			public:
+				PluginCatcher(std::string const & psycle_path, std::string const & ladspa_path);
+				virtual ~PluginCatcher();
 
-			// These keys are defined here instead of in InternalHost to help the loaders find out
-			// this information, as well as the machines themselves report this to the savers.
-			static const MachineKey master();
-			static const MachineKey dummy();
-			static const MachineKey sampler();
-			static const MachineKey sampulse();
-			static const MachineKey duplicator();
-			static const MachineKey mixer();
-			static const MachineKey audioInput();
-			static const MachineKey LFO();
+				virtual void rescanAll();
+			
+			protected:
+				std::uint32_t _numPlugins;
 
-			static const std::string HostName(Hosts::type);
-
-			const std::string & dllName() const;
-			const Hosts::type host() const;
-			int index() const;
-
-			bool operator<(const MachineKey & key) const;
-			bool operator==( const MachineKey & rhs ) const;
-		private:
-			std::string dllName_;
-			Hosts::type host_;
-			int index_;
+				virtual bool loadInfo();
+				bool loadCache();
+				bool saveCache();
+				void deleteCache();
+				virtual void scanInternal();
+				virtual void scanLadspa();
+				virtual void scanNatives();
 		};
 	}
 }
-
 #endif

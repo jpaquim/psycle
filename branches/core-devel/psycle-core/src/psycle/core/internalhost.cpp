@@ -18,64 +18,46 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include <psycle/core/psycleCorePch.hpp>
 
-#ifndef MACHINEKEY_HPP
-#define MACHINEKEY_HPP
+#include "internalhost.hpp"
+#include "internal_machines.h"
 
-#include <string>
+namespace psy {namespace core {
 
-namespace psy
-{
-	namespace core
-	{
-		// type host_t
-		// Allows to differentiate between machines of different hosts.
-		namespace Hosts {
-			typedef enum 
-			{
-				INTERNAL=0,
-				NATIVE,
-				VST,
-				LADSPA,
-				//Keep at last place
-				NUM_HOSTS
-			} type;
-		}
+static InternalHost* instance_ = 0;
 
-
-		class MachineKey
-		{
-		protected:
-			MachineKey( );
-		public:
-			MachineKey( const Hosts::type host, const std::string & dllName, int index = 0 );
-			~MachineKey();
-
-			// These keys are defined here instead of in InternalHost to help the loaders find out
-			// this information, as well as the machines themselves report this to the savers.
-			static const MachineKey master();
-			static const MachineKey dummy();
-			static const MachineKey sampler();
-			static const MachineKey sampulse();
-			static const MachineKey duplicator();
-			static const MachineKey mixer();
-			static const MachineKey audioInput();
-			static const MachineKey LFO();
-
-			static const std::string HostName(Hosts::type);
-
-			const std::string & dllName() const;
-			const Hosts::type host() const;
-			int index() const;
-
-			bool operator<(const MachineKey & key) const;
-			bool operator==( const MachineKey & rhs ) const;
-		private:
-			std::string dllName_;
-			Hosts::type host_;
-			int index_;
-		};
-	}
+InternalHost::InternalHost(MachineCallbacks*calls)
+:MachineHost(calls){
 }
 
-#endif
+InternalHost& InternalHost::getInstance(MachineCallbacks* callb) {
+	if ( !mcallback_ )
+		mcallback_ = new InternalHost(callb);
+	return mcallback_;
+}
+
+Machine* InternalHost::CreateMachine(MachineKey key)
+{
+	Machine* mac=0;
+
+	if ( key == MachineKey::master(callbacks,id) ) {
+		mac = new Master()
+		return CreateMachine(finder.psycle_path(), MACH_SAMPLER, key.name());
+	}
+	else if ( key == PluginFinderKey::internalSampler() ) {
+		return CreateMachine(finder.psycle_path(), MACH_SAMPLER, key.name());
+	}
+	else if ( key == PluginFinderKey::internalMixer() ) {
+		if (id == -1) id = GetFreeFxBus();
+		return CreateMachine(finder.psycle_path(), MACH_MIXER, "Mixer" );
+	}
+}
+void InternalHost::DeleteMachine(Machine* mac) {
+	delete mac;
+}
+
+
+}}
+
+

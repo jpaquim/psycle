@@ -22,7 +22,7 @@
 #define PSYCLE__CORE__PLUGIN_FINDER
 
 #include "machine.h"
-#include "pluginFinderKey.hpp"
+#include "machinekey.hpp"
 
 namespace psy
 {
@@ -93,10 +93,10 @@ namespace psy
 
 				virtual void refreshInfo();
 
-				PluginInfo info( const PluginFinderKey & key ) const;
+				PluginInfo info( const MachineKey & key ) const;
 			
-				std::map< PluginFinderKey, PluginInfo >::const_iterator begin() const;
-				std::map< PluginFinderKey, PluginInfo >::const_iterator end() const;
+				std::map< MachineKey, PluginInfo >::const_iterator begin() const;
+				std::map< MachineKey, PluginInfo >::const_iterator end() const;
 				
 			public:
 				std::string const & psycle_path() const { return psycle_path_; }
@@ -109,7 +109,7 @@ namespace psy
 				std::string const ladspa_path_;
 
 			protected:
-				static std::map< PluginFinderKey, PluginInfo > map_;
+				static std::map< MachineKey, PluginInfo > map_;
 
 				virtual void clearInfo();
 				virtual bool loadInfo();

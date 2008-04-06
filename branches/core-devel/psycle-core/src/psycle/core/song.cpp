@@ -98,13 +98,13 @@ UISong::UISong(MachineCallbacks* callbacks)
 	: CoreSong(callbacks)
 {}
 
-Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
+Machine * CoreSong::createMachine(const PluginFinder & finder, const MachineKey & key, int x, int y ) {
 	int fb=-1;
-	if ( key == PluginFinderKey::internalSampler() ) {
+	if ( key == MachineKey::sampler() ) {
 		fb = GetFreeBus();
 		CreateMachine(finder.psycle_path(), MACH_SAMPLER, x, y, "SAMPLER", fb );
 	}
-	else if ( key == PluginFinderKey::internalMixer() ) {
+	else if ( key == MachineKey::mixer() ) {
 		fb = GetFreeFxBus();
 		CreateMachine(finder.psycle_path(), MACH_MIXER, x, y, "Mixer", fb );
 	}
@@ -113,12 +113,12 @@ Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinde
 		if ( finder.info( key ).mode() == MACHMODE_FX ) {
 			fb = GetFreeFxBus();
 		} else fb = GetFreeBus();
-		CreateMachine(finder.psycle_path(), MACH_PLUGIN, x, y, key.dllPath(), fb );
+		CreateMachine(finder.psycle_path(), MACH_PLUGIN, x, y, key.dllName(), fb );
 	} else if ( finder.info( key ).type() == MACH_LADSPA )
 	{
 		fb = GetFreeFxBus();
 		LADSPAMachine* plugin = new LADSPAMachine( machinecallbacks, fb, this );
-		if(plugin->loadDll( key.dllPath(), key.index())) {
+		if(plugin->loadDll( key.dllName(), key.index())) {
 			plugin->SetPosX( x );
 			plugin->SetPosY( y );
 			plugin->Init();

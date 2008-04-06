@@ -19,63 +19,30 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef MACHINEKEY_HPP
-#define MACHINEKEY_HPP
+#ifndef MACHINEHOST_HPP
+#define MACHINEHOST_HPP
 
-#include <string>
+#include "machinekey.hpp"
+#include "machine.h"
 
-namespace psy
+namespace psy{namespace core{
+
+class MachineCallbacks;
+class Machine;
+
+class MachineHost
 {
-	namespace core
-	{
-		// type host_t
-		// Allows to differentiate between machines of different hosts.
-		namespace Hosts {
-			typedef enum 
-			{
-				INTERNAL=0,
-				NATIVE,
-				VST,
-				LADSPA,
-				//Keep at last place
-				NUM_HOSTS
-			} type;
-		}
+protected:
+	MachineHost(){}
+	MachineHost(MachineCallbacks*);
+public:
+	virtual Hosts::type hostCode() = 0;
+	
+	virtual Machine* CreateMachine(MachineKey,Machine::id_type) = 0;
+	virtual void DeleteMachine(Machine*) =0;
+protected:
+	MachineCallbacks* mcallback_;
+};
 
-
-		class MachineKey
-		{
-		protected:
-			MachineKey( );
-		public:
-			MachineKey( const Hosts::type host, const std::string & dllName, int index = 0 );
-			~MachineKey();
-
-			// These keys are defined here instead of in InternalHost to help the loaders find out
-			// this information, as well as the machines themselves report this to the savers.
-			static const MachineKey master();
-			static const MachineKey dummy();
-			static const MachineKey sampler();
-			static const MachineKey sampulse();
-			static const MachineKey duplicator();
-			static const MachineKey mixer();
-			static const MachineKey audioInput();
-			static const MachineKey LFO();
-
-			static const std::string HostName(Hosts::type);
-
-			const std::string & dllName() const;
-			const Hosts::type host() const;
-			int index() const;
-
-			bool operator<(const MachineKey & key) const;
-			bool operator==( const MachineKey & rhs ) const;
-		private:
-			std::string dllName_;
-			Hosts::type host_;
-			int index_;
-		};
-	}
-}
-
-#endif
+}}
+#endif // MACHINEHOST_HPP
