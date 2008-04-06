@@ -31,10 +31,6 @@ namespace psycle { namespace plugins { namespace outputs {
 		private:
 			::GstElement * pipeline_, * source_, * queue_, * caps_filter_, * sink_;
 
-			unsigned int  samples_per_second_;
-			unsigned char channels_;
-			unsigned char significant_bits_per_channel_sample_;
-
 			::GstCaps * caps_;
 
 			void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
@@ -50,7 +46,6 @@ namespace psycle { namespace plugins { namespace outputs {
 
 			char * buffer_;
 			unsigned int buffers_, buffer_size_, current_read_position_, current_write_position_;
-			unsigned int samples_per_buffer_;
 	};
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>

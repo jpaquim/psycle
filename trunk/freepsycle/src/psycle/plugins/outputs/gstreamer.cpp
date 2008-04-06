@@ -198,27 +198,28 @@ namespace psycle { namespace plugins { namespace outputs {
 
 		// create an audio sink
 		#define psycle_log loggers::information()("exception: caught while trying to instantiate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-			try { sink_ = &instantiate("gconfaudiosink", name() + "-sink"); }
+			std::string const sink_name(name() + "-sink");
+			try { sink_ = &instantiate("gconfaudiosink", sink_name); }
 			catch(...) {
 				psycle_log
 				// maybe the user didn't configure his default audio-sink, falling back to several possibilities
-				try { sink_ = &instantiate("autoaudiosink", name() + "-sink"); }
+				try { sink_ = &instantiate("autoaudiosink", sink_name); }
 				catch(...) {
 					psycle_log
 					#if 0 // jacksink needs to be put in a jackbin, because it's pulling audio data.
-						try { sink_ = &instantiate("jacksink", name() + "-sink"); }
+						try { sink_ = &instantiate("jacksink", sink_name); }
 						catch(...) {
 					#endif
-					try { sink_ = &instantiate("alsasink", name() + "-sink"); }
+					try { sink_ = &instantiate("alsasink", sink_name); }
 					catch(...) {
 						psycle_log
-						try { sink_ = &instantiate("esdsink", name() + "-sink"); }
+						try { sink_ = &instantiate("esdsink", sink_name); }
 						catch(...) {
 							psycle_log
-							try { sink_ = &instantiate("osssink", name() + "-sink"); }
+							try { sink_ = &instantiate("osssink", sink_name); }
 							catch(...) {
 								psycle_log
-								try { sink_ = &instantiate("artssink", name() + "-sink"); }
+								try { sink_ = &instantiate("artssink", sink_name); }
 								catch(...) {
 									psycle_log
 									throw;
@@ -273,8 +274,9 @@ namespace psycle { namespace plugins { namespace outputs {
 		//if(!::gst_element_link_pads(caps_filter_, "sink", sink_,        "src")) throw runtime_error("could not link caps filter element sink pad to sink element src pad",   UNIVERSALIS__COMPILER__LOCATION);
 
 		// buffer settings
-		samples_per_buffer_ = 1024; ///\todo parametrable
-		buffer_size_ = static_cast<unsigned int>(samples_per_buffer_ * format.bytes_per_sample());
+		unsigned const samples_per_buffer(parent().events_per_buffer());
+
+		buffer_size_ = static_cast<unsigned int>(samples_per_buffer * format.bytes_per_sample());
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << "buffer size: " << buffer_size_ << " bytes";
@@ -287,7 +289,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			loggers::information()(s.str());
 		}
 		{
-			real const latency(static_cast<real>(samples_per_buffer_) / format.samples_per_second());
+			real const latency(static_cast<real>(samples_per_buffer) / format.samples_per_second());
 			if(loggers::information()()) {
 				std::ostringstream s;
 				s << "latency: between " << latency << " and " << latency * buffers_ << " seconds ";
@@ -390,7 +392,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 			{
-				output_sample_type * in(reinterpret_cast<output_sample_type*>(buffer_) + current_read_position_ * samples_per_buffer_);
+				output_sample_type * in(reinterpret_cast<output_sample_type*>(buffer_) + current_read_position_ * parent().events_per_buffer());
 				std::memcpy(out, in, buffer_size_);
 			}
 		}
@@ -412,10 +414,10 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 			while(!io_ready()) condition_.wait(lock);
 		}
+		unsigned const samples_per_buffer(parent().events_per_buffer());
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
-			assert(samples_per_buffer_ == in.size());
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer_);
+			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {
 				real s(in[e].sample()); ///\todo support for sparse stream
 				{
