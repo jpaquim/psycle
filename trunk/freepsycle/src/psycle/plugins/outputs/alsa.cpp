@@ -77,11 +77,15 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(env) { std::stringstream s; s << env; s >> periods; }
 		}
 
-		period_frames_ = 4096; ///\todo parametrable
-		{ // get period frames from env
-			char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__PERIOD_FRAMES"));
-			if(env) { std::stringstream s; s << env; s >> period_frames_; }
-		}
+		#if 1
+			period_frames_ = parent().events_per_buffer();
+		#else
+			period_frames_ = 4096; ///\todo parametrable
+			{ // get period frames from env
+				char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__PERIOD_FRAMES"));
+				if(env) { std::stringstream s; s << env; s >> period_frames_; }
+			}
+		#endif
 
 		::snd_pcm_stream_t const direction(::SND_PCM_STREAM_PLAYBACK);
 		int const open_mode(0); // 0: block, ::SND_PCM_NONBLOCK: non-block, ::SND_PCM_ASYNC: asynchronous
@@ -420,9 +424,18 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void alsa::do_process() throw(engine::exception) {
 		if(!in_port()) return;
+		assert(parent().events_per_buffer() == period_frames_);
+		::snd_pcm_uframes_t frames_to_write(parent().events_per_buffer());
+		do {
+			fill_buffer();
+			write_to_device();
+			frames_to_write -= period_frames_;
+		} while(frames_to_write);
+	}
+		
+	void alsa::fill_buffer() throw(engine::exception) {
 		unsigned int const channels(in_port().channels());
 		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
-		// fill the buffer
 		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_));
@@ -445,72 +458,74 @@ namespace psycle { namespace plugins { namespace outputs {
 			}
 			for( ; ssi < samples_per_buffer; ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
 		}
-		{ // write to the device
-			output_sample_type * samples(reinterpret_cast<output_sample_type*>(buffer_));
-			::snd_pcm_uframes_t frames_to_write(samples_per_buffer);
-			do {
-				///\todo support for non-blocking mode
-				///\todo support for non-interleaved channels
-				::snd_pcm_sframes_t const frames_written(::snd_pcm_writei(pcm_, samples, frames_to_write));
-				int error(frames_written);
-				if(0 > error) switch(error) {
-					case -EAGAIN: // not documented, but seen in example code!
-						if(loggers::warning()()) {
-							std::ostringstream s; s << "weird: " << ::snd_strerror(error);
-							loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						}
-						continue;
-					case -EPIPE: // an underrun occured
-						if(loggers::warning()()) {
-							std::ostringstream s; s << "underrun: " << ::snd_strerror(error);
-							loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						}
-						if(0 > (error = ::snd_pcm_prepare(pcm_))) {
-							if(loggers::warning()()) {
-								std::ostringstream s; s << "could not prepare device for use: " << ::snd_strerror(error);
-								loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-							}
-							goto next; // skip rest of period
-						}
-						break;
-					case -ESTRPIPE: // a suspend event occurred (stream is suspended and waiting for an application recovery)
-						// wait until device is resumed
-						while(-EAGAIN == (error = ::snd_pcm_resume(pcm_))) {
-							// resume cannot be proceeded immediately (the device is still suspended)
-							if(loggers::trace()()) {
-								std::ostringstream s; s << "waiting for device to resume: " << ::snd_strerror(error);
-								loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-							}
-							// sleep a bit before retrying to resume
-							std::this_thread::sleep(std::seconds(1));
-						}
-						if(0 > error) switch(error) {
-							case -ENOSYS: // the device is no longer suspended, but it does not fully support resuming
-								if(0 > (error = ::snd_pcm_prepare(pcm_))) {
-									if(loggers::warning()()) {
-										std::ostringstream s; s << "could not prepare device for resume: " << ::snd_strerror(error);
-										loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-									}
-									goto next; // skip rest of period
-								}
-								break;
-							default: {
-								std::ostringstream s; s << "could not resume device: " << ::snd_strerror(error);
-								throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-							}
-						}
-						break;
-					case -EBADFD: // pcm device is not in the right state (::SND_PCM_STATE_PREPARED or ::SND_PCM_STATE_RUNNING)
-					default: {
-						std::ostringstream s; s << "write error: " << ::snd_strerror(error);
-						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	
+	void alsa::write_to_device() throw(engine::exception) {
+		unsigned int const channels(in_port().channels());
+		output_sample_type * samples(reinterpret_cast<output_sample_type*>(buffer_));
+		::snd_pcm_uframes_t frames_to_write(period_frames_);
+		do {
+			///\todo support for non-blocking mode
+			///\todo support for non-interleaved channels
+			::snd_pcm_sframes_t const frames_written(::snd_pcm_writei(pcm_, samples, frames_to_write));
+			int error(frames_written);
+			if(0 > error) switch(error) {
+				case -EAGAIN: // not documented, but seen in example code!
+					if(loggers::warning()()) {
+						std::ostringstream s; s << "weird: " << ::snd_strerror(error);
+						loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
+					continue;
+				case -EPIPE: // an underrun occured
+					if(loggers::warning()()) {
+						std::ostringstream s; s << "underrun: " << ::snd_strerror(error);
+						loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+					if(0 > (error = ::snd_pcm_prepare(pcm_))) {
+						if(loggers::warning()()) {
+							std::ostringstream s; s << "could not prepare device for use: " << ::snd_strerror(error);
+							loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+						goto next; // skip rest of period
+					}
+					break;
+				case -ESTRPIPE: // a suspend event occurred (stream is suspended and waiting for an application recovery)
+					// wait until device is resumed
+					while(-EAGAIN == (error = ::snd_pcm_resume(pcm_))) {
+						// resume cannot be proceeded immediately (the device is still suspended)
+						if(loggers::trace()()) {
+							std::ostringstream s; s << "waiting for device to resume: " << ::snd_strerror(error);
+							loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+						// sleep a bit before retrying to resume
+						std::this_thread::sleep(std::seconds(1));
+					}
+					if(0 > error) switch(error) {
+						case -ENOSYS: // the device is no longer suspended, but it does not fully support resuming
+							if(0 > (error = ::snd_pcm_prepare(pcm_))) {
+								if(loggers::warning()()) {
+									std::ostringstream s; s << "could not prepare device for resume: " << ::snd_strerror(error);
+									loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+								}
+								goto next; // skip rest of period
+							}
+							break;
+						default: {
+							std::ostringstream s; s << "could not resume device: " << ::snd_strerror(error);
+							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+					}
+					break;
+				case -EBADFD: // pcm device is not in the right state (::SND_PCM_STATE_PREPARED or ::SND_PCM_STATE_RUNNING)
+				default: {
+					std::ostringstream s; s << "write error: " << ::snd_strerror(error);
+					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
-				next:
-				samples += frames_written * channels;
-				frames_to_write -= frames_written;
-			} while(frames_to_write);
-		}
+			}
+			next:
+			samples += frames_written * channels;
+			frames_to_write -= frames_written;
+		} while(frames_to_write);
 	}
 
 	#if 0 // meaningless without a thread

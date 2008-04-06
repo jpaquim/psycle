@@ -27,7 +27,7 @@ graph::graph(graph::name_type const & name)
 		s << qualified_name() << ": new engine graph";
 		loggers::information()(s.str());
 	}
-	events_per_buffer_ = 1024;
+	events_per_buffer_ = 4096;
 }
 
 graph::name_type graph::qualified_name() const {
