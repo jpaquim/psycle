@@ -43,6 +43,9 @@ namespace psycle { namespace plugins { namespace outputs {
 			::snd_pcm_uframes_t period_frames_;
 			/// bits per channel sample
 			unsigned int bits_per_channel_sample_;
+			
+			void fill_buffer() throw(engine::exception);
+			void write_to_device() throw(engine::exception);
 	};
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
