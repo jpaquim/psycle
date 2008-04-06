@@ -353,7 +353,7 @@ void scheduler::on_io_ready(node & node) {
 	condition_.notify_all(); // notify all threads that we added a node to the queue
 }
 
-void scheduler::process_loop() {
+void scheduler::process_loop() throw(std::exception) {
 	while(true) {
 		typenames::node * node_;
 		{ scoped_lock lock(mutex_);
@@ -436,7 +436,7 @@ void scheduler::process_loop() {
 	}
 }
 
-void scheduler::process(typenames::node & node) {
+void scheduler::process(typenames::node & node) throw(std::exception) {
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
 		s << "scheduling " << node.underlying().qualified_name();

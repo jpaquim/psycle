@@ -285,7 +285,7 @@ void scheduler::thread_function() {
 	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
-void scheduler::process_loop() {
+void scheduler::process_loop() throw(std::exception) {
 	try {
 		while(true) {
 			{ scoped_lock lock(mutex_);
@@ -315,7 +315,7 @@ void scheduler::process_loop() {
 	clear_plan();
 }
 
-void scheduler::process_recursively(node & node) {
+void scheduler::process_recursively(node & node) throw(std::exception) {
 	if(node.processed()) return;
 	node.mark_as_processed();
 

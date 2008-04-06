@@ -262,8 +262,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void compute_plan();
 		void clear_plan();
 
-		void process_loop();
-		void process_recursively(node &);
+		void process_loop() throw(std::exception);
+		void process_recursively(node &) throw(std::exception);
 		void process_node_of_output_port_and_set_buffer_for_input_port(ports::output &, ports::input &);
 		void set_buffer_for_output_port(ports::output &, buffer &);
 		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
