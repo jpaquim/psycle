@@ -34,7 +34,8 @@ namespace psycle { namespace plugins { namespace outputs {
 		resource(plugin_library_reference, graph, name),
 		pcm_(),
 		output_(),
-		buffer_()
+		buffer_(),
+		areas_()
 	{
 		engine::ports::inputs::single::create_on_heap(*this, "in");
 		engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
@@ -61,6 +62,8 @@ namespace psycle { namespace plugins { namespace outputs {
 			char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__FORMAT"));
 			if(env) format = ::snd_pcm_format_value(env);
 		}
+		// get the sample width
+		bits_per_channel_sample_ = ::snd_pcm_format_width(format);
 
 		std::string pcm_device_name("default"); ///\todo parametrable
 		{ // get device name from env
@@ -74,10 +77,10 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(env) { std::stringstream s; s << env; s >> periods; }
 		}
 
-		::snd_pcm_uframes_t period_frames(4096); ///\todo parametrable
+		period_frames_ = 4096; ///\todo parametrable
 		{ // get period frames from env
 			char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__PERIOD_FRAMES"));
-			if(env) { std::stringstream s; s << env; s >> period_frames; }
+			if(env) { std::stringstream s; s << env; s >> period_frames_; }
 		}
 
 		::snd_pcm_stream_t const direction(::SND_PCM_STREAM_PLAYBACK);
@@ -208,21 +211,21 @@ namespace psycle { namespace plugins { namespace outputs {
 			}
 			#if 1
 				{ // set the period size in frames
-					::snd_pcm_uframes_t period_frames_accepted(period_frames);
+					::snd_pcm_uframes_t period_frames_accepted(period_frames_);
 					int direction(0);
 					if(0 > (error = ::snd_pcm_hw_params_set_period_size_near(pcm_, pcm_hw_params, &period_frames_accepted, &direction))) {
 						std::ostringstream s;
-						s << "could not set period size to: " << period_frames << " samples: " << ::snd_strerror(error);
+						s << "could not set period size to: " << period_frames_ << " samples: " << ::snd_strerror(error);
 						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
-					if(period_frames_accepted != period_frames) {
+					if(period_frames_accepted != period_frames_) {
 						std::ostringstream s;
 						s <<
 							"period size: "
-							"requested: " << period_frames << " samples, "
+							"requested: " << period_frames_ << " samples, "
 							"accepted: " << period_frames_accepted << " samples";
 						loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						period_frames = period_frames_accepted;
+						period_frames_ = period_frames_accepted;
 					}
 				}
 				{ // set the period count
@@ -266,7 +269,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				}
 				{ // get the period size in frames
 					int direction(0);
-					if(0 > (error = ::snd_pcm_hw_params_get_period_size(params, &period_frames, &direction))) {
+					if(0 > (error = ::snd_pcm_hw_params_get_period_size(params, &period_frames_, &direction))) {
 						std::ostringstream s; s << "could not get period size: " << ::snd_strerror(error);
 						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
@@ -274,21 +277,21 @@ namespace psycle { namespace plugins { namespace outputs {
 			#endif
 			#if 1
 				{ // set the buffer size in frames
-					::snd_pcm_uframes_t buffer_frames(period_frames * periods);
-					::snd_pcm_uframes_t buffer_frames_accepted(buffer_frames);
+					buffer_frames_ = period_frames_ * periods;
+					::snd_pcm_uframes_t buffer_frames_accepted(buffer_frames_);
 					if(0 > (error = ::snd_pcm_hw_params_set_buffer_size_near(pcm_, pcm_hw_params, &buffer_frames_accepted))) {
 						std::ostringstream s;
-						s << "could not set buffer size to: " << buffer_frames << " samples: " << ::snd_strerror(error);
+						s << "could not set buffer size to: " << buffer_frames_ << " samples: " << ::snd_strerror(error);
 						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
-					if(buffer_frames_accepted != buffer_frames) {
+					if(buffer_frames_accepted != buffer_frames_) {
 						std::ostringstream s;
 						s <<
 							"buffer size: "
-							"requested: " << buffer_frames << " samples, "
+							"requested: " << buffer_frames_ << " samples, "
 							"accepted: " << buffer_frames_accepted << " samples";
 						loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						buffer_frames = buffer_frames_accepted;
+						buffer_frames_ = buffer_frames_accepted;
 					}
 				}
 			#else
@@ -311,7 +314,7 @@ namespace psycle { namespace plugins { namespace outputs {
 					}
 				}
 				{ // get the buffer size in frames
-					if(0 > (error = ::snd_pcm_hw_params_get_buffer_size(params, &buffer_frames))) {
+					if(0 > (error = ::snd_pcm_hw_params_get_buffer_size(params, &buffer_frames_))) {
 						std::ostringstream s; s << "could not get buffer size: " << ::snd_strerror(error);
 						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
@@ -321,28 +324,34 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(0 > (error = ::snd_pcm_hw_params(pcm_, pcm_hw_params))) {
 				std::ostringstream s; s << "could not set hardware parameters: " << ::snd_strerror(error);
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else if(loggers::information()()) {
+			}
+			if(loggers::information()()) {
 				std::ostringstream s; s << "alsa pcm device: name: " << pcm_device_name << ": setup successful";
 				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 			// At this point ::snd_pcm_prepare(pcm_) was called automatically,
 			// and hence ::snd_pcm_state(pcm_) was brought to ::SND_PCM_STATE_PREPARED state.
 			
-			{ // get the sample width
-				int const bits_per_channel_sample(::snd_pcm_format_width(format));
-				if(0 > (error = bits_per_channel_sample)) {
-					std::ostringstream s; s << "could not get width of sample format: " << ::snd_strerror(error);
+			{ // allocate a buffer
+				std::size_t const bytes(period_frames_ * channels * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
+				if(!(buffer_ = new char[bytes])) {
+					std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
-				{ // allocate a buffer
-					std::size_t const bytes((period_frames * channels * bits_per_channel_sample) / 8);
-					if(!(buffer_ = new char[bytes])) {
-						std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
-						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-				}
+			}
+			// setup areas within buffer
+			if(!(areas_ = new ::snd_pcm_channel_area_t[channels])) {
+				std::ostringstream s; s << "not enough memory to allocate " << (channels * sizeof *areas_) << " bytes on heap";
+				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			for(unsigned int i(0); i < channels; ++i) {
+				areas_[i].addr = buffer_;
+				areas_[i].first = i * bits_per_channel_sample_;
+				areas_[i].step = channels * bits_per_channel_sample_;
 			}
 		} catch(...) {
+			delete[] buffer_; buffer_ = 0;
+			delete[] areas_; areas_ = 0;
 			::snd_pcm_close(pcm_); pcm_ = 0; // or ::snd_pcm_free(pcm_); ?
 			throw;
 		}
@@ -354,9 +363,48 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void alsa::do_start() throw(engine::exception) {
 		resource::do_start();
+
+		unsigned int const channels(in_port().channels());
+		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
+
+		int error;
+
+		// allocate software parameters on the stack
+		::snd_pcm_sw_params_t * pcm_sw_params; snd_pcm_sw_params_alloca(&pcm_sw_params);
+		// get the current sw_params
+		if(0 > (error = ::snd_pcm_sw_params_current(pcm_, pcm_sw_params))) {
+			std::ostringstream s; s << "could not initialize software parameters: " << ::snd_strerror(error);
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		// start the transfer when the buffer is almost full: buffer_size / avail_min * avail_min
+		if(0 > (error = ::snd_pcm_sw_params_set_start_threshold(pcm_, pcm_sw_params, buffer_frames_ / period_frames_ * period_frames_))) {
+			std::ostringstream s; s << "could not set start threshold mode for playback: " << ::snd_strerror(error);
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		// allow the transfer when at least period_frames samples can be processed
+		if(0 > (error = ::snd_pcm_sw_params_set_avail_min(pcm_, pcm_sw_params, period_frames_))) {
+			std::ostringstream s; s << "could not set avail min for playback: " << ::snd_strerror(error);
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		#if SND_LIB_VERSION >= 0x10010 // 1.0.16
+			// snd_pcm_sw_params_set_xfer_align() is deprecated, alignment is always 1
+		#else
+			// align all transfers to 1 sample
+			if (0 > (error = ::snd_pcm_sw_params_set_xfer_align(pcm_, pcm_sw_params, 1)) {
+				std::ostringstream s; s << "could not set transfer align for playback: " << ::snd_strerror(error);
+				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+		#endif
+		// write the parameters to the playback device
+		if(0 > (error = ::snd_pcm_sw_params(pcm_, pcm_sw_params))) {
+			std::ostringstream s; s << "could not set software parameters: " << ::snd_strerror(error);
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		// dump information
+		::snd_pcm_dump(pcm_, output_);
+
 		// not really useful
-		int const error(::snd_pcm_prepare(pcm_));
-		if(0 > error) {
+		if(0 > (error = ::snd_pcm_prepare(pcm_))) {
 			std::ostringstream s; s << "could not prepare device for use: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
@@ -373,7 +421,7 @@ namespace psycle { namespace plugins { namespace outputs {
 	void alsa::do_process() throw(engine::exception) {
 		if(!in_port()) return;
 		unsigned int const channels(in_port().channels());
-		unsigned int const samples_per_buffer(parent().events_per_buffer());
+		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
 		// fill the buffer
 		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
@@ -387,14 +435,12 @@ namespace psycle { namespace plugins { namespace outputs {
 			for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
 				real s(in[e].sample());
 				{
-					///\todo constants
-					//int const bits_per_channel_sample(::snd_pcm_format_width(format));
-					//unsigned int const max((1 << (::snd_pcm_format_width(format) - 1)) - 1);
+					///\todo use bits_per_channel_sample_;
 					s *= std::numeric_limits<output_sample_type>::max();
 					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
 					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
 				}
-				sss = static_cast<output_sample_type>(s);
+				sss = ::lrint(s);
 				for( ; ssi <= in[e].index(); ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
 			}
 			for( ; ssi < samples_per_buffer; ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
@@ -475,6 +521,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void alsa::do_close() throw(engine::exception) {
 		if(pcm_) ::snd_pcm_close(pcm_); pcm_ = 0;  // or ::snd_pcm_free(pcm_); ?
+		delete[] areas_; areas_ = 0;
 		delete[] buffer_; buffer_ = 0;
 		resource::do_close();
 	}
