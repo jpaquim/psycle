@@ -1,11 +1,15 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::alsa
 #include <psycle/detail/project.private.hpp>
 #include "alsa.hpp"
 #include <diversalis/processor.hpp>
+#include <universalis/processor/exception.hpp>
+#include <universalis/operating_system/exceptions/code_description.hpp>
+#include <poll.h>
+#include <alloca.h> // beware: this is not in posix, but this is available on *bsd and linux.
 #include <cstdio>
 #include <thread>
 namespace psycle { namespace plugins { namespace outputs {
@@ -35,7 +39,8 @@ namespace psycle { namespace plugins { namespace outputs {
 		pcm_(),
 		output_(),
 		buffer_(),
-		areas_()
+		//areas_(),
+		thread_()
 	{
 		engine::ports::inputs::single::create_on_heap(*this, "in");
 		engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
@@ -343,19 +348,27 @@ namespace psycle { namespace plugins { namespace outputs {
 					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 			}
-			// setup areas within buffer
-			if(!(areas_ = new ::snd_pcm_channel_area_t[channels])) {
-				std::ostringstream s; s << "not enough memory to allocate " << (channels * sizeof *areas_) << " bytes on heap";
-				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			for(unsigned int i(0); i < channels; ++i) {
-				areas_[i].addr = buffer_;
-				areas_[i].first = i * bits_per_channel_sample_;
-				areas_[i].step = channels * bits_per_channel_sample_;
-			}
+			#if 1
+				// nothing needed for write method
+			#else
+				// setup areas within buffer
+				if(!(areas_ = new ::snd_pcm_channel_area_t[channels])) {
+					std::ostringstream s; s << "not enough memory to allocate " << (channels * sizeof *areas_) << " bytes on heap";
+					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				}
+				for(unsigned int i(0); i < channels; ++i) {
+					areas_[i].addr = buffer_;
+					areas_[i].first = i * bits_per_channel_sample_;
+					areas_[i].step = channels * bits_per_channel_sample_;
+				}
+			#endif
 		} catch(...) {
 			delete[] buffer_; buffer_ = 0;
-			delete[] areas_; areas_ = 0;
+			#if 1
+				// nothing needed for write method
+			#else
+				delete[] areas_; areas_ = 0;
+			#endif
 			::snd_pcm_close(pcm_); pcm_ = 0; // or ::snd_pcm_free(pcm_); ?
 			throw;
 		}
@@ -368,13 +381,11 @@ namespace psycle { namespace plugins { namespace outputs {
 	void alsa::do_start() throw(engine::exception) {
 		resource::do_start();
 
-		unsigned int const channels(in_port().channels());
-		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
+		// allocate software parameters on the stack
+		::snd_pcm_sw_params_t * pcm_sw_params; snd_pcm_sw_params_alloca(&pcm_sw_params);
 
 		int error;
 
-		// allocate software parameters on the stack
-		::snd_pcm_sw_params_t * pcm_sw_params; snd_pcm_sw_params_alloca(&pcm_sw_params);
 		// get the current sw_params
 		if(0 > (error = ::snd_pcm_sw_params_current(pcm_, pcm_sw_params))) {
 			std::ostringstream s; s << "could not initialize software parameters: " << ::snd_strerror(error);
@@ -382,12 +393,12 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		// start the transfer when the buffer is almost full: buffer_size / avail_min * avail_min
 		if(0 > (error = ::snd_pcm_sw_params_set_start_threshold(pcm_, pcm_sw_params, buffer_frames_ / period_frames_ * period_frames_))) {
-			std::ostringstream s; s << "could not set start threshold mode for playback: " << ::snd_strerror(error);
+			std::ostringstream s; s << "could not set start threshold: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		// allow the transfer when at least period_frames samples can be processed
 		if(0 > (error = ::snd_pcm_sw_params_set_avail_min(pcm_, pcm_sw_params, period_frames_))) {
-			std::ostringstream s; s << "could not set avail min for playback: " << ::snd_strerror(error);
+			std::ostringstream s; s << "could not set available minimum: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		#if SND_LIB_VERSION >= 0x10010 // 1.0.16
@@ -395,7 +406,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		#else
 			// align all transfers to 1 sample
 			if (0 > (error = ::snd_pcm_sw_params_set_xfer_align(pcm_, pcm_sw_params, 1)) {
-				std::ostringstream s; s << "could not set transfer align for playback: " << ::snd_strerror(error);
+				std::ostringstream s; s << "could not set transfer alignment: " << ::snd_strerror(error);
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		#endif
@@ -412,27 +423,110 @@ namespace psycle { namespace plugins { namespace outputs {
 			std::ostringstream s; s << "could not prepare device for use: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+		
+		io_ready(false);
+		stop_requested_ = false;
+		// start the poller thread
+		thread_ = new std::thread(boost::bind(&alsa::thread_function, this));
 	}
 
-	#if 0 // this is a bit meaningless without a thread
-		bool alsa::started() const {
-			if(!opened()) return false;
+	bool alsa::started() const {
+		if(!opened()) return false;
+		#if 1
+			return thread_;
+		#else
 			::snd_pcm_state_t const state(::snd_pcm_state(pcm_));
 			return state >= ::SND_PCM_STATE_PREPARED; // this is a bit meaningless without a thread
+		#endif
+	}
+	
+	void alsa::thread_function() {
+		if(loggers::information()()) loggers::information()("poller thread started", UNIVERSALIS__COMPILER__LOCATION);
+
+		{ // set thread name and install cpu/os exception handler/translator
+			std::string thread_name(universalis::compiler::typenameof(*this) + "#" + qualified_name());
+			universalis::processor::exception::install_handler_in_thread(thread_name);
 		}
-	#endif
+		
+		try {
+			try {
+				poll_loop();
+			} catch(...) {
+				loggers::exception()("caught exception in poller thread", UNIVERSALIS__COMPILER__LOCATION);
+				throw;
+			}
+		} catch(std::exception const & e) {
+			if(loggers::exception()()) {
+				std::ostringstream s;
+				s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
+				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			throw;
+		} catch(...) {
+			if(loggers::exception()()) {
+				std::ostringstream s;
+				s << "exception: " << universalis::compiler::exceptions::ellipsis();
+				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			throw;
+		}
+		loggers::information()("poller thread " + qualified_name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
+	}
+	
+	void alsa::poll_loop() throw(engine::exception) {
+		// get number of file descriptors to poll
+		::nfds_t nfds;
+		if(0 >= (nfds = ::snd_pcm_poll_descriptors_count(pcm_)))
+			throw engine::exceptions::runtime_error("invalid poll descriptor count", UNIVERSALIS__COMPILER__LOCATION);
+		// allocate memory for file descriptors on the stack
+		::pollfd * fds(reinterpret_cast< ::pollfd*>(alloca(nfds * sizeof *fds)));
+		int error;
+		// get file descriptors to poll
+		if(0 > (error = ::snd_pcm_poll_descriptors(pcm_, fds, nfds))) {
+			std::ostringstream s; s << "could not get poll descriptors: " << ::snd_strerror(error);
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		while(true) {
+			bool loop(false);
+			int const timeout_ms(1000);
+			if(0 > (error = ::poll(fds, nfds, timeout_ms)))
+				if(errno == EAGAIN || errno == EINTR) loop = true;
+				else throw engine::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
+			if(!error) {
+				if(loggers::warning()()) loggers::warning()("timed out", UNIVERSALIS__COMPILER__LOCATION);
+				loop = true;
+			}
+			{ scoped_lock lock(mutex_);
+				if(stop_requested_) return;
+			}
+			if(loop) continue;
+			unsigned short revents;
+			if(0 > (error = ::snd_pcm_poll_descriptors_revents(pcm_, fds, nfds, &revents))) {
+				std::ostringstream s; s << "could not poll file descriptors: " << ::snd_strerror(error);
+				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			if(revents & POLLERR) throw engine::exceptions::runtime_error("error condition in poll", UNIVERSALIS__COMPILER__LOCATION);
+			if(loggers::warning()() && revents & POLLNVAL) loggers::warning()("invalid file descriptor in poll (could have been asynchronously closed)", UNIVERSALIS__COMPILER__LOCATION);
+			if(revents & POLLOUT) {
+				if(loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
+				io_ready(true);
+				condition_.notify_one();
+			}
+		}
+	}
 
 	void alsa::do_process() throw(engine::exception) {
 		if(!in_port()) return;
-		assert(parent().events_per_buffer() == period_frames_);
-		::snd_pcm_uframes_t frames_to_write(parent().events_per_buffer());
-		do {
-			fill_buffer();
-			write_to_device();
-			frames_to_write -= period_frames_;
-		} while(frames_to_write);
+		{ scoped_lock lock(mutex_);
+			if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
+			while(!io_ready()) condition_.wait(lock);
+		}
+		fill_buffer();
+		write_to_device();
+		if(loggers::trace()()) loggers::trace()("io ready: false", UNIVERSALIS__COMPILER__LOCATION);
+		io_ready(false);
 	}
-		
+	
 	void alsa::fill_buffer() throw(engine::exception) {
 		unsigned int const channels(in_port().channels());
 		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
@@ -463,16 +557,17 @@ namespace psycle { namespace plugins { namespace outputs {
 	void alsa::write_to_device() throw(engine::exception) {
 		unsigned int const channels(in_port().channels());
 		output_sample_type * samples(reinterpret_cast<output_sample_type*>(buffer_));
-		::snd_pcm_uframes_t frames_to_write(period_frames_);
+		::snd_pcm_uframes_t frames_to_write(parent().events_per_buffer());
 		do {
 			///\todo support for non-blocking mode
 			///\todo support for non-interleaved channels
 			::snd_pcm_sframes_t const frames_written(::snd_pcm_writei(pcm_, samples, frames_to_write));
 			int error(frames_written);
 			if(0 > error) switch(error) {
-				case -EAGAIN: // not documented, but seen in example code!
+				case -EAGAIN: // for non-blocking mode
+					//io_ready(false);
 					if(loggers::warning()()) {
-						std::ostringstream s; s << "weird: " << ::snd_strerror(error);
+						std::ostringstream s; s << "blocked: " << ::snd_strerror(error);
 						loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					continue;
@@ -528,15 +623,29 @@ namespace psycle { namespace plugins { namespace outputs {
 		} while(frames_to_write);
 	}
 
-	#if 0 // meaningless without a thread
-		void alsa::do_stop() throw(engine::exception) {
-			resource::do_stop();
+	void alsa::do_stop() throw(engine::exception) {
+		if(loggers::information()()) loggers::information()("terminating and joining scheduler thread ...", UNIVERSALIS__COMPILER__LOCATION);
+		if(!thread_) {
+			if(loggers::information()()) loggers::information()("scheduler thread was not running", UNIVERSALIS__COMPILER__LOCATION);
+			return;
 		}
-	#endif
+		{ scoped_lock lock(mutex_);
+			stop_requested_ = true;
+		}
+		condition_.notify_one();
+		thread_->join();
+		if(loggers::information()()) loggers::information()("scheduler thread joined", UNIVERSALIS__COMPILER__LOCATION);
+		delete thread_; thread_ = 0;
+		resource::do_stop();
+	}
 
 	void alsa::do_close() throw(engine::exception) {
 		if(pcm_) ::snd_pcm_close(pcm_); pcm_ = 0;  // or ::snd_pcm_free(pcm_); ?
-		delete[] areas_; areas_ = 0;
+		#if 1
+			// nothing needed for write method
+		#else
+			delete[] areas_; areas_ = 0;
+		#endif
 		delete[] buffer_; buffer_ = 0;
 		resource::do_close();
 	}

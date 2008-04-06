@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::gstreamer
 #include <psycle/detail/project.private.hpp>
@@ -384,10 +384,11 @@ namespace psycle { namespace plugins { namespace outputs {
 				while(wait_for_state_to_become_playing_) condition_.wait(lock);
 			}
 		}
-		{
+		{ // write to the buffer
+			// reading from the input ports could be done here instead of in do_process()
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
 			if(false && loggers::trace()) {
-				std::size_t const size(GST_BUFFER_SIZE(&buffer));
+				std::size_t const size(GST_BUFFER_SIZE(&buffer)); // to compare with buffer_size_
 				std::ostringstream s; s << "buffer size: " << size << ", data address: " << out;
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
@@ -414,19 +415,21 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 			while(!io_ready()) condition_.wait(lock);
 		}
-		unsigned const samples_per_buffer(parent().events_per_buffer());
-		for(unsigned int c(0); c < in_port().channels(); ++c) {
-			engine::buffer::channel & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer);
-			for(std::size_t e(0), s(in.size()); e < s; ++e) {
-				real s(in[e].sample()); ///\todo support for sparse stream
-				{
-					s *= std::numeric_limits<output_sample_type>::max();
-					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
-					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
+		{ // fill the buffer (this could be done in the handoff)
+			unsigned const samples_per_buffer(parent().events_per_buffer());
+			for(unsigned int c(0); c < in_port().channels(); ++c) {
+				engine::buffer::channel & in(in_port().buffer()[c]);
+				output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer);
+				for(std::size_t e(0), s(in.size()); e < s; ++e) {
+					real s(in[e].sample()); ///\todo support for sparse stream
+					{
+						s *= std::numeric_limits<output_sample_type>::max();
+						if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
+						else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
+					}
+					out[c] = static_cast<output_sample_type>(s);
+					++out; ///\todo interleaved channels?
 				}
-				out[c] = static_cast<output_sample_type>(s);
-				++out; ///\todo interleaved channels?
 			}
 		}
 		{ scoped_lock lock(mutex_);
