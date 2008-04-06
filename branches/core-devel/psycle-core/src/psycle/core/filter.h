@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief interface file for psy::core::Filter. Revision 2078
 #pragma once
@@ -54,7 +55,7 @@ namespace psy
 				_x2 = _x1;
 				_x1 = x;
 				return y;
-			};
+			}
 			inline void WorkStereo(float& l, float& r)
 			{
 				float y = _coeff0*l + _coeff1*_x1 + _coeff2*_x2 + _coeff3*_y1 + _coeff4*_y2;
@@ -69,7 +70,7 @@ namespace psy
 				_a2 = _a1;
 				_a1 = r;
 				r = b;
-			};
+			}
 		protected:
 			float _coeff0;
 			float _coeff1;
@@ -89,7 +90,7 @@ namespace psy
 			{
 				SampleRate(44100);
 				Reset();
-			};
+			}
 
 			virtual inline ~ITFilter() throw() {}
 
@@ -108,13 +109,13 @@ namespace psy
 				fLastSampleRight[0]=0.0f;
 				fLastSampleRight[1]=0.0f;
 				Update();
-			};
-			void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }};
-			void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }};
-			void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }};
-			void SampleSpeed(int _iSampleSpeed) { if ( iSampleCurrentSpeed != _iSampleSpeed) {iSampleCurrentSpeed = _iSampleSpeed; Update(); }};
-			void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }};
-			FilterType Type (void) { return ftFilter; };
+			}
+			void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }}
+			void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }}
+			void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }}
+			void SampleSpeed(int _iSampleSpeed) { if ( iSampleCurrentSpeed != _iSampleSpeed) {iSampleCurrentSpeed = _iSampleSpeed; Update(); }}
+			void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }}
+			FilterType Type (void) { return ftFilter; }
 			
 			inline void Work(float & sample)
 			{

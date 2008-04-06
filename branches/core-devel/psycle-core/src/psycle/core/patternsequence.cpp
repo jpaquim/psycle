@@ -364,11 +364,11 @@ void PatternSequence::removeLine( SequenceLine * line )
 	}
 }
 
-PatternPool* PatternSequence::PatternPool() {
+PatternPool* PatternSequence::getPatternPool() {
 	return &patternData_;
 }
 
-const PatternPool & PatternSequence::PatternPool( ) const
+const PatternPool & PatternSequence::getPatternPool( ) const
 {
 	return patternData_;
 }
@@ -379,6 +379,8 @@ const PatternPool & PatternSequence::PatternPool( ) const
 ///\return events : A multimap of lines (multimap of beatposition and PatternLine )
 void PatternSequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
 {
+///FIXME: Adapt this to the new pattern Event style.
+#if 0
 	int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
 	// Iterate over each timeline of the sequence,
 	for( iterator seqIt = begin(); seqIt != end(); ++seqIt )
@@ -425,6 +427,7 @@ void PatternSequence::GetLinesInRange( double start, double length, std::multima
 		}
 		seqlineidx++;
 	}
+#endif 	
 }
 
 bool PatternSequence::getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const {

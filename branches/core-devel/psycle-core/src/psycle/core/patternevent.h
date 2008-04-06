@@ -88,9 +88,9 @@ private:
 class NoteEvent
 {
 public:
-	NoteEvent():note_(notetype::empty),volume_(255);
+	NoteEvent():note_(notetypes::empty),volume_(255) {}
 	NoteEvent(std::uint8_t note,std::uint8_t vol)
-	:note_(note),volume_(vol){}
+		:note_(note),volume_(vol){}
 
 	/**
 	* setter for the note value
@@ -149,13 +149,13 @@ class TweakEvent
 {
 public:
 	TweakEvent();
-	TweakEvent(std::uint16_t val):value_(val)set_(true){}
+	TweakEvent(std::uint16_t val):value_(val),set_(true){}
 
 	/**
 	* setter for the value of the tweak
 	* @param value an std::uint16_t containing the tweak value.
 	*/
-	inline void setValue(std::uint16_t value) { value_ = value; set_(true);}
+	inline void setValue(std::uint16_t value) { value_ = value; set_ = true;}
 	/**
 	* getter for the tweak value
 	* @return an std::uint16_t with the tweak value
@@ -166,7 +166,7 @@ public:
 	* checks if the structure is in an empty state
 	* @return a boolean with the empty state value.
 	*/
-	inline bool empty() const { return !set; }
+	inline bool empty() const { return !set_; }
 
 	/**
 	* generates an xml output of the data, in order to save it.
@@ -186,21 +186,21 @@ public:
 	ClassicTweakEvent(NoteEvent &note,CommandEvent &command)
 		:tweaktype_(note.note())
 		,param_(note.volume())
-		,value((command.command()<<8)|command.param()){}
+		,value_((command.command()<<8)|command.param()){}
 	ClassicTweakEvent(std::uint8_t tweaktype, std::uint8_t param,std::uint16_t value)
 		:tweaktype_(tweaktype),param_(param),value_(value){}
 	
 	inline void setType(std::uint8_t type) { tweaktype_ = type; }
-	inline std::uint8_t type() { return tweaktype_; }
+	inline std::uint8_t type() const { return tweaktype_; }
 
-	inline void setParameter(std::uint8_t param) { param_ = param: }
-	inline std::uint8_t parameter(){ return param_; }
+	inline void setParameter(std::uint8_t param) { param_ = param; }
+	inline std::uint8_t parameter() const { return param_; }
 
-	inline void setValue(std::uint16_t value) { value_ value; }
-	inline std::uint16_t value(){ return value_; }
+	inline void setValue(std::uint16_t value) { value_ = value; }
+	inline std::uint16_t value() const { return value_; }
 
-	inline NoteEvent getAsNote() { NoteEvent(tweaktype_,param_) thisevent; return thisevent; }
-	inline CommandEvent getAsCommand() { CommandEvent((value&&0xFF00)>>8,value&&0x00FF) thisevent; return thisevent; }
+	inline NoteEvent getAsNote() const { NoteEvent thisevent(tweaktype_,param_); return thisevent; }
+	inline CommandEvent getAsCommand() const { CommandEvent thisevent((value_&0xFF00)>>8,value_&0x00FF); return thisevent; }
 
 private:
 	std::uint8_t tweaktype_;
@@ -214,15 +214,15 @@ public:
 	ClassicEvent():instr_(instrumenttypes::empty) {};
 	ClassicEvent(NoteEvent &note, std::uint16_t instr=instrumenttypes::empty):instr_(instr) { addNote(0,note); }
 	ClassicEvent(CommandEvent &command, std::uint16_t instr=instrumenttypes::empty):instr_(instr) { addCommand(0,command); }
-	ClassicEvent(NoteEvent &note,CommandEvent &command, std::uint16_t instr=instrumenttypes::empty):instr_(instr) { addNote(0,note); addCommand(command); }
-	ClassicEvent(ClassicTweakEvent &tweak, std::uint16_t instr=instrumenttypes::empty):instr_(instr) { addNote(0,tweak.getAsNote()); addCommand(tweak.getAsCommand()); }
+	ClassicEvent(NoteEvent &note,CommandEvent &command, std::uint16_t instr=instrumenttypes::empty):instr_(instr) { addNote(0,note); addCommand(0,command); }
+	ClassicEvent(ClassicTweakEvent &tweak, std::uint16_t instr=instrumenttypes::empty):instr_(instr) { addNote(0,tweak.getAsNote()); addCommand(0,tweak.getAsCommand()); }
 
 	inline void setInstrument(std::uint16_t instr) { instr_ = instr; }
 	inline std::uint16_t instrument() { return instr_; }
 
 	inline void setNote(std::uint8_t index, NoteEvent &note)
 	{
-		if (index >= notes.size()) AddNote(index,note);
+		if (index >= notes.size()) addNote(index,note);
 		else notes[index]=note;
 	}
 	inline const NoteEvent& note(std::uint8_t index) const
@@ -234,7 +234,7 @@ public:
 
 	inline void setCommand(std::uint8_t index, CommandEvent &command)
 	{
-		if (index >= commands.size()) AddCommand(index,command);
+		if (index >= commands.size()) addCommand(index,command);
 		else commands[index]=command;
 	}
 	inline const CommandEvent& command(std::uint8_t index) const
@@ -258,8 +258,8 @@ public:
 
 
 private:
-	void addNote(std::uint8_t index,NoteEvent &note);
-	void addCommand(std::uint8_t index,CommandEvent& cmd);
+	void addNote(std::uint8_t index,NoteEvent note);
+	void addCommand(std::uint8_t index,CommandEvent cmd);
 
 	std::vector<NoteEvent> notes;
 	std::vector<CommandEvent> commands;
@@ -267,7 +267,7 @@ private:
 
 	static NoteEvent emptyevent; ///< Empty event.
 	static CommandEvent emptycommand;///< Empty command.
-}
+};
 
 
 
@@ -278,18 +278,18 @@ public:
 	PatternEvent(TrackInfo* track){ track_ = track; }
 	PatternEvent(NoteEvent &note, TrackInfo* track=0):track_(track) { AddNote(0,note); }
 	PatternEvent(CommandEvent &command, TrackInfo* track=0):track_(track) { AddCommand(0,command); }
-	PatternEvent(NoteEvent &note,CommandEvent &command, TrackInfo* track=0):track_(track) { AddNote(0,note); AddCommand(command); }
+	PatternEvent(NoteEvent &note,CommandEvent &command, TrackInfo* track=0):track_(track) { AddNote(0,note); AddCommand(0,command); }
 	PatternEvent(TweakEvent &tweak, TrackInfo* track=0):track_(track) { AddTweak(0,tweak); }
 
 	inline void SetTrack(TrackInfo* track) { track_ = track; }
-	inline TrackInfo* track() { return track_; }
+	inline TrackInfo* track() const { return track_; }
 
 	inline void SetNote(std::uint8_t index, NoteEvent &note)
 	{
 		if (index >= notes.size()) AddNote(index,note);
 		else notes[index]=note;
 	}
-	inline NoteEvent& note(std::uint8_t index)
+	inline const NoteEvent& note(std::uint8_t index) const
 	{
 		if (index >= notes.size()) return emptyevent;
 		else return notes[index];
@@ -302,7 +302,7 @@ public:
 		if (index >= commands.size()) AddCommand(index,command);
 		else commands[index]=command;
 	}
-	inline CommandEvent& command(std::uint8_t index)
+	inline const CommandEvent& command(std::uint8_t index) const
 	{
 		if (index >= commands.size()) return emptycommand;
 		else return commands[index];
@@ -315,7 +315,7 @@ public:
 		if (index >= tweaks.size()) AddTweak(index,tweak);
 		else tweaks[index]=tweak;
 	}
-	inline TweakEvent& tweak(std::uint8_t index)
+	inline const TweakEvent& tweak(std::uint8_t index) const
 	{
 		if (index >= tweaks.size()) return emptytweak;
 		else return tweaks[index];

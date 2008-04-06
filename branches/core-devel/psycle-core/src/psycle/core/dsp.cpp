@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 //\file
 ///\brief implementation file for psy::core::Cubic.
 //#include <packageneric/pre-compiled.private.hpp>

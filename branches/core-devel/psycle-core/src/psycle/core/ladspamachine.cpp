@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics     *
 *   psycle.sf.net   *
@@ -23,6 +24,7 @@
 
 #include "dsp.h"
 #include "player.h"
+#include "fileio.h"
 
 #include <iostream> // only for debug output
 #include <sstream>
@@ -202,10 +204,15 @@ namespace psy {
 		void * LADSPAMachine::dlopenLADSPA(const char * pcFilename, int iFlag)
 		{
 			std::string filename_(pcFilename);
+			
+			#if 0
 			char *pcBuffer;
 			const char * pcStart, * pcEnd ,* pcLADSPAPath;
 			bool endsInSO, needsSlash;
 			size_t iFilenameLength;
+			#endif
+			
+			const char * pcLADSPAPath;
 			void * pvResult(NULL);
 			//std::cout << filename_ << std::endl;
 			#if defined __unix__ || defined __APPLE__
@@ -252,7 +259,7 @@ namespace psy {
 				#endif
 				}
 				std::string directory(pcLADSPAPath);
-				int dotindex(0),dotpos(0),prevdotpos(0);
+				unsigned int dotindex(0),dotpos(0),prevdotpos(0);
 		
 			std::cout << directory << std::endl;
 				dotpos = directory.find(':',dotindex++);
@@ -444,7 +451,7 @@ namespace psy {
 			values_.reserve(psDescriptor->PortCount);
 			_numPars=0;
 			int indexinput(0),indexoutput(0);
-			for (int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
+			for (unsigned int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
 				LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
 				if (LADSPA_IS_PORT_CONTROL(iPortDescriptor)) {
 					LadspaParam parameter(iPortDescriptor,psDescriptor->PortRangeHints[lPortIndex],psDescriptor->PortNames[lPortIndex]);
@@ -476,12 +483,15 @@ namespace psy {
 			// Not sure what should we do here.
 			SetDefaultsForControls();
 		}
-		void LADSPAMachine::Tick(int channel, const PatternEvent & pEntry )
+		void LADSPAMachine::Tick(int /*channel*/, const PatternEvent & pEntry )
 		{
-			if ( pEntry.note() == psy::core::commands::tweak || pEntry.note() == psy::core::commands::tweak_slide)
+		///FIXME: Information for the tweak is needed for this
+		#if 0
+			if ( pEntry.note() == notetypes::tweak || pEntry.note() == notetypes::tweak_slide)
 			{
 				SetParameter(pEntry.instrument(),pEntry.command()*0x100+pEntry.parameter());
 			}
+		#endif
 		}
 		
 		void LADSPAMachine::PreWork(int numSamples)

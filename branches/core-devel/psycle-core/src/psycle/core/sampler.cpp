@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief implementation file for psy::core::Sampler. based on psyclemfc revision 5903
 #include <psycle/core/psycleCorePch.hpp>
@@ -14,6 +15,11 @@ namespace psy
 		std::string Sampler::_psName = "Sampler";
 		InstPreview Sampler::wavprev;
 		InstPreview Sampler::waved;
+
+		static inline int alteRand(int x) {
+			return (x*rand())/RAND_MAX;
+		}
+
 
 		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
 		:
@@ -80,7 +86,7 @@ namespace psy
 				while (ns)
 				{
 					int nextevent = ns+1;
-					for (int i=0; i < song()->tracks(); i++)
+					for (unsigned int i=0; i < song()->tracks(); i++)
 					{
 						if (TriggerDelay[i].command() )
 						{
@@ -92,7 +98,7 @@ namespace psy
 					}
 					if (nextevent > ns)
 					{
-						for (int i=0; i < song()->tracks(); i++)
+						for (unsigned int i=0; i < song()->tracks(); i++)
 						{
 							// come back to this
 							if (TriggerDelay[i].command() )
@@ -116,10 +122,10 @@ namespace psy
 								VoiceWork(startSample, nextevent, voice );
 							}
 						}
-						for (int i=0; i < song()->tracks(); i++)
+						for (unsigned int i=0; i < song()->tracks(); i++)
 						{
 							// come back to this
-							if (TriggerDelay[i].command() == PatternCmd::NOTE_DELAY)
+							if (TriggerDelay[i].command() == commandtypes::NOTE_DELAY)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -132,7 +138,7 @@ namespace psy
 									TriggerDelayCounter[i] -= nextevent;
 								}
 							}
-							else if (TriggerDelay[i].command() == PatternCmd::RETRIGGER)
+							else if (TriggerDelay[i].command() == commandtypes::RETRIGGER)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -145,7 +151,7 @@ namespace psy
 									TriggerDelayCounter[i] -= nextevent;
 								}
 							}
-							else if (TriggerDelay[i].command() == PatternCmd::RETR_CONT)
+							else if (TriggerDelay[i].command() == commandtypes::RETR_CONT)
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
@@ -181,6 +187,20 @@ namespace psy
 			//_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 			return numSamples;
+		}
+
+		void Sampler::SetSampleRate(int sr)
+		{
+			Machine::SetSampleRate(sr);
+			for (int i=0; i<_numVoices; i++) {
+				_voices[i]._envelope._stage = ENV_OFF;
+				_voices[i]._envelope._sustain = 0;
+				_voices[i]._filterEnv._stage = ENV_OFF;
+				_voices[i]._filterEnv._sustain = 0;
+				_voices[i]._filter.Init(sr);
+				_voices[i]._triggerNoteOff = 0;
+				_voices[i]._triggerNoteDelay = 0;
+			}
 		}
 
 		void Sampler::Stop(void)
@@ -333,8 +353,10 @@ namespace psy
 					}
 				}
 					
-				*pSamplesL++ = *pSamplesL+left_output;
-				*pSamplesR++ = *pSamplesR+right_output;
+				*pSamplesL = (*pSamplesL)+left_output;
+				*pSamplesR = (*pSamplesR)+right_output;
+				pSamplesL++;
+				pSamplesR++;
 				numsamples--;
 			}
 		}
@@ -353,7 +375,7 @@ namespace psy
 
 		void Sampler::Tick( int channel, const PatternEvent & event )
 		{
-			if ( event.note() > psy::core::commands::release ) // don't process twk , twf of Mcm Commands
+			if ( event.note() > notetypes::release ) // don't process twk , twf of Mcm Commands
 			{
 				if ( event.command() == 0 || event.note() != 255) return; // Return in everything but commands!
 			}
@@ -379,7 +401,7 @@ namespace psy
 			}
 
 
-			if ( data.note() < psy::core::commands::release ) // Handle Note On.
+			if ( data.note() < notetypes::release ) // Handle Note On.
 			{
 				if ( song()->_pInstrument[data.instrument()]->waveLength == 0 ) return; // if no wave, return.
 
@@ -436,7 +458,7 @@ namespace psy
 						// Think on a slow fadeout and changing panning
 						(_voices[voice]._envelope._stage != ENV_FASTRELEASE )) 
 					{
-						if ( data.note() == psy::core::commands::release ) NoteOff( voice );//  Handle Note Off
+						if ( data.note() == notetypes::release ) NoteOff( voice );//  Handle Note Off
 						useVoice=voice;
 					}
 				}
@@ -448,6 +470,67 @@ namespace psy
 			// If you want to make a command that controls more than one voice (the entire channel, for
 			// example) you'll need to change this. Otherwise, add it to VoiceTick().
 			VoiceTick( useVoice, data ); 
+		}
+
+
+		bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			std::uint32_t size;
+			pFile->Read(size);
+			if (size) {
+				if (version > CURRENT_FILE_VERSION_MACD) {
+					// data is from a newer format of psycle, it might be unsafe to load.
+					pFile->Skip(size);
+					return false;
+				}
+				else {
+					std::int32_t temp;
+					pFile->Read(temp); // numSubtracks
+					_numVoices=temp;
+					pFile->Read(temp); // quality
+					
+					switch (temp) {
+					case 2:
+						_resampler.SetQuality(dsp::R_SPLINE);
+						break;
+					case 3:
+						_resampler.SetQuality(dsp::R_BANDLIM);
+						break;
+					case 0:
+						_resampler.SetQuality(dsp::R_NONE);
+						break;
+					default:
+					case 1:
+						_resampler.SetQuality(dsp::R_LINEAR);
+						break;
+					}
+				}
+			}
+			return true;
+		}
+
+		void Sampler::SaveSpecificChunk(RiffFile* pFile) const
+		{
+			std::int32_t temp;
+			std::uint32_t size = 2 * sizeof temp;
+			pFile->Write(size);
+			temp = _numVoices;
+			pFile->Write(temp); // numSubtracks
+			switch (_resampler.GetQuality()) {
+			case dsp::R_NONE:
+				temp = 0;
+				break;
+			case dsp::R_LINEAR:
+				temp = 1;
+				break;
+			case dsp::R_SPLINE:
+				temp = 2;
+				break;
+			case dsp::R_BANDLIM:
+				temp = 3;
+				break;
+			}
+			pFile->Write(temp); // quality
 		}
 
 		int Sampler::VoiceTick( int voice, const PatternEvent & entry )
@@ -490,7 +573,7 @@ namespace psy
 
 			int twlength = song()->_pInstrument[pEntry.instrument()]->waveLength;
 			
-			if (pEntry.note() < psy::core::commands::release && twlength > 0)
+			if (pEntry.note() < notetypes::release && twlength > 0)
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry.instrument();
@@ -741,6 +824,8 @@ namespace psy
 					pVoice->_filterEnv._value = 0;
 					pVoice->_filterEnv._stage = ENV_OFF;
 				}
+				break;
+			default:
 				break;
 			}
 		}

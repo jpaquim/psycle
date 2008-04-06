@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\implementation psy::core::RiffFile
 #include <psycle/core/psycleCorePch.hpp>
 

@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 #include <universalis/compiler.hpp>
 #include <cmath>

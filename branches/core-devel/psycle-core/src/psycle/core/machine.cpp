@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /******************************************************************************
 *  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
 *                                                                             *
@@ -26,6 +27,7 @@
 #include "song.h"
 #include "dsp.h"
 #include "helpers/math/round.hpp"
+#include "fileio.h"
 
 // The inclusion of the following headers is needed because of a bad design.
 // The use of these subclasses in a function of the base class should be 
@@ -152,22 +154,37 @@ namespace psy { namespace core {
 		///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 	}
 
+	AudioBuffer::AudioBuffer(int numChannels,int numSamples)
+		:numchannels_(numChannels),numsamples_(numSamples)
+	{
+		aligned_malloc(16, buffer_, numChannels*numSamples);
+	}
+
+	AudioBuffer::~AudioBuffer()
+	{
+		aligned_dealloc(buffer_);
+	}
+
+	void AudioBuffer::Clear()
+	{
+		dsp::Clear(buffer_,numsamples_*numchannels_);
+	}
+	
 	void Wire::Connect(AudioPort *senderp,AudioPort *receiverp)
 	{
 		senderport=senderp;
 		receiverport=receiverp;
-		multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+		multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
 		SetVolume(volume);
 		senderport->Connected(this);
 		receiverport->Connected(this);
-		///\todo : need a way get a wire index.
 	}
 
 	void Wire::ChangeSource(AudioPort* newsource)
 	{
 		assert(senderport); Disconnect(senderport);
 		senderport=newsource;
-		multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+		multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
 		SetVolume(volume);
 		senderport->Connected(this);
 	}
@@ -176,7 +193,7 @@ namespace psy { namespace core {
 	{
 		assert(receiverport); Disconnect(receiverport);
 		receiverport=newdest;
-		multiplier=receiverport->GetMachine()->GetAudioRange()/senderport->GetMachine()->GetAudioRange();
+		multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
 		SetVolume(volume);
 		receiverport->Connected(this);
 	}
@@ -185,13 +202,21 @@ namespace psy { namespace core {
 	{
 		senderport->CollectData(numSamples);
 		///\todo : apply volume, panning and mapping.
+		// Check if the Wire is working "inplace" or not, so that it does not
+		// need to copy the contents of the output buffer into its intermediate buffer.
 	}
 
 	void Wire::SetVolume(float newvol)
 	{
 		volume=newvol;
-		rvol=volume*pan*multiplier;
-		lvol=volume*(1.0f-pan)*multiplier;
+		if ( pan > 0.0f )
+		{
+			rvol=newvol*multiplier;
+			lvol=rvol*(1.0f-pan); // lvol=volume*multiplier*(1.0f-pan);
+		} else {
+			lvol=newvol*multiplier;
+			rvol=lvol*(1.0f+pan); // rvol=volume*multiplier*(1.0f+pan);
+		}
 	}
 
 	void Wire::SetPan(float newpan)
@@ -204,7 +229,6 @@ namespace psy { namespace core {
 	{
 		if ( port == senderport ) senderport=0; else receiverport=0;
 		port->Disconnected(this);
-		///\todo : need a way to indicate to the main Machine that this wire index is now free.
 	}
 
 	void AudioPort::Connected(Wire *wire)
@@ -217,49 +241,56 @@ namespace psy { namespace core {
 		wires_type::iterator i(std::find(wires_.begin(), wires_.end(), wire));
 		assert(i != wires_.end());
 		wires_.erase(i);
+		///\todo : may want to notify to the parent that this wire is now free.
 	}
 
 	void InPort::CollectData(int numSamples)
 	{
-		///\todo : need to clean the buffer first? wire(0)processreplacing() while(wires) wire(1+).processadding() ?
+		///wire(0)processreplacing() while(wires) wire(1+).processadding() ?
 		for(wires_type::const_iterator i(wires_.begin()); i != wires_.end(); ++i)
 		{
 			(**i).CollectData(numSamples);
+			// do something with (**i).getBuffer().getBuffer()
+			// check if the wire is working in "in-place", since maybe the 
+			// buffer is shared with ours.
 		}
 	}
 
-	void OutPort::CollectData(int numSamples)
+	void OutPort::CollectData(int /*numSamples*/)
 	{
-		//parent_.Work(numSamples);
+		//An outport, by default, does nothing.
 	}
 
 	Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
 	:
 		crashed_(),
+		//fpu_exception_mask_(),
 		type_(type),
 		mode_(mode),
 		id_(id),
 		callbacks(callbacks),
 		song_(song),
-		audio_range_(1.0f),
-		editName_(),
-		//fpu_exception_mask_(),
-		numInPorts(0),
-		numOutPorts(0),
+		playColIndex(0),
 		_bypass(false),
+		_standby(false),
 		_mute(false),
 		_waitingForSound(false),
-		_standby(false),
 		_worked(false),
-		_lVol(0),
-		_rVol(0),
-		_panning(0),
-		_x(0),
-		_y(0),
-		_numPars(0),
-		_nCols(1),
+		audio_range_(1.0f),
+		numInPorts(0),
+		numOutPorts(0),
+		inports(0),
+		outports(0),
+		_isMixerSend(false),
 		_connectedInputs(0),
 		_connectedOutputs(0),
+		_panning(0),
+		_lVol(0),
+		_rVol(0),
+		_numPars(0),
+		_nCols(1),
+		_x(0),
+		_y(0),
 		_volumeCounter(0.0f),
 		_volumeDisplay(0),
 		_volumeMaxDisplay(0),
@@ -280,7 +311,8 @@ namespace psy { namespace core {
 		
 		for (int c = 0; c<MAX_TRACKS; c++)
 		{
-			TriggerDelay[c].setCommand( 0 );
+			CommandEvent event(0,0);
+			TriggerDelay[c].SetCommand(0,event);
 			TriggerDelayCounter[c]=0;
 			RetriggerRate[c]=256;
 			ArpeggioCount[c]=0;
@@ -303,30 +335,35 @@ namespace psy { namespace core {
 		}
 	}
 	Machine::Machine(Machine* mac,type_type type,MachineMode mode)
-	:crashed_()
+	://fpu_exception_mask_(),
+	crashed_()
 	,type_(type)
 	,mode_(mode)
 	,id_(mac->id_)
 	,callbacks(mac->callbacks)
 	,song_(mac->song_)
-	,audio_range_(1.0f)
-	,editName_(mac->GetEditName())
-	,numInPorts(0)
-	,numOutPorts(0)
+	,playColIndex(0)
 	,_bypass(mac->_bypass)
+	,_standby(false)
 	,_mute(mac->_mute)
 	,_waitingForSound(false)
-	,_standby(false)
 	,_worked(false)
-	,_lVol(mac->_lVol)
-	,_rVol(mac->_rVol)
-	,_panning(mac->_panning)
-	,_x(mac->_x)
-	,_y(mac->_y)
-	,_numPars(0)
-	,_nCols(1)
+	,audio_range_(1.0f)
+	,numInPorts(0)
+	,numOutPorts(0)
+	,inports(0)
+	,outports(0)
+	,_isMixerSend(false)
 	,_connectedInputs(mac->_connectedInputs)
 	,_connectedOutputs(mac->_connectedOutputs)
+	,_panning(mac->_panning)
+	,_lVol(mac->_lVol)
+	,_rVol(mac->_rVol)
+	,editName_(mac->GetEditName())
+	,_numPars(0)
+	,_nCols(1)
+	,_x(mac->_x)
+	,_y(mac->_y)
 	,_volumeCounter(0.0f)
 	,_volumeDisplay(0)
 	,_volumeMaxDisplay(0)
@@ -347,7 +384,8 @@ namespace psy { namespace core {
 
 		for (int c = 0; c<MAX_TRACKS; c++)
 		{
-			TriggerDelay[c].setCommand( 0 );
+			CommandEvent event(0,0);
+			TriggerDelay[c].SetCommand(0,event);
 			TriggerDelayCounter[c]=0;
 			RetriggerRate[c]=256;
 			ArpeggioCount[c]=0;
@@ -424,54 +462,70 @@ namespace psy { namespace core {
 		_panning = newPan;
 	}
 
-	bool Machine::ConnectTo(Machine & dst_machine, InPort::id_type dstport, OutPort::id_type outport, float volume)
+	Wire::id_type Machine::ConnectTo(Machine & dstMac, InPort::id_type dsttype, OutPort::id_type srctype, float volume)
 	{
-		if(dst_machine.mode() == MACHMODE_GENERATOR)
-		{
-			std::ostringstream s;
-			s << "attempted to use a generator as destination for wire" << this->id() << " -> " << dst_machine.id();
-			//loggers::warning(s.str());
-															std::cerr << s.str() << std::endl;
+		// Try to get free indexes from each machine
+		Wire::id_type freebus=GetFreeOutputWire(srctype);
+		Wire::id_type dfreebus=dstMac.GetFreeInputWire(dsttype);
+		if(freebus == -1 || dfreebus == -1 )
+			return -1;
+
+		InsertOutputWire(dstMac,freebus,srctype);
+		dstMac.InsertInputWire(*this, dfreebus,dsttype,volume);
+
+		return dfreebus;
+	}
+	bool Machine::MoveWireDestTo(Machine& dstMac, OutPort::id_type srctype, Wire::id_type srcwire, InPort::id_type dsttype) 
+	{
+		if (srctype >= GetOutPorts() || dsttype >= dstMac.GetInPorts())
 			return false;
-		}
+		if ( !_connection[srcwire])
+			return false;
 
-		// Get a free output slot on the source machine
-		Wire::id_type freebus(-1);
+		Machine *oldDst = song()->machine(_connection[srcwire]);
+		if (oldDst)
 		{
-			bool error = false;
-			for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
-			{
-				if(!_connection[c]) freebus = c;
-				// Checking that there's not a slot to the dest. machine already
-				else if(_outputMachines[c] == dst_machine.id()) error = true;
-			}
-			// lamely abandon
-			if(freebus == -1 || error) return false;
-		}
+			Wire::id_type oldwire,dstwire;
+			if ((oldwire = oldDst->FindInputWire(id()))== -1)
+				return false;
 
-		// Get a free input slot on the destination machine
-		Wire::id_type dfreebus(-1);
+			if ((dstwire = dstMac.GetFreeInputWire(dsttype)) == -1)
+				return false;
+
+			float volume = 1.0f;
+			oldDst->GetWireVolume(oldwire,volume);
+			///\todo: Error dsttype may not be the correct type. FindInputWire should give that info to us.
+			oldDst->DeleteInputWire(oldwire,dsttype);
+			InsertOutputWire(dstMac,srcwire,srctype);
+			dstMac.InsertInputWire(*this,dstwire,dsttype,volume);
+			return true;
+		}
+		return false;
+	}
+	bool Machine::MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype)
+	{
+		if (srctype >= srcMac.GetOutPorts() || dsttype >= GetInPorts())
+			return false;
+		if ( !_inputCon[dstwire])
+			return false;
+		if (_inputMachines[dstwire] == -1) 
+			return false;
+
+		Machine *oldDst = song()->machine(_connection[dstwire]);
+		if (oldDst)
 		{
-			bool error = false;
-			for(int c(MAX_CONNECTIONS - 1); c >= 0; --c)
-			{
-				if(!dst_machine._inputCon[c]) dfreebus = c;
-				// Checking if the destination machine is connected with the source machine to avoid a loop.
-				if(dst_machine._connection[c] && dst_machine._outputMachines[c] == this->id()) error = true;
-			}
-			// lamely abandon
-			if(dfreebus == -1 || error) return false;
+			Wire::id_type oldwire;
+			float volume = 1.0f;
+			if ((oldwire =oldDst->FindOutputWire(id())) == -1)
+				return false;
+			///\todo: Error srctype may not be the correct type. FindOutputWire should give that info to us.
+			oldDst->DeleteOutputWire(oldwire,srctype);
+			srcMac.InsertOutputWire(*this,dstwire,dsttype);
+			GetWireVolume(dstwire,volume);
+			InsertInputWire(srcMac,dstwire,dsttype,volume);
+			return true;
 		}
-
-		// Calibrating in/out properties
-		this->_outputMachines[freebus] = dst_machine.id();
-		this->_connection[freebus] = true;
-		this->_connectedOutputs++;
-		dst_machine._inputMachines[dfreebus] = this->id();
-		dst_machine._inputCon[dfreebus] = true;
-		dst_machine._connectedInputs++;
-		dst_machine.InitWireVolume(type(), dfreebus, volume);
-		return true;
+		return false;
 	}
 
 	bool Machine::Disconnect( Machine& dstMac )
@@ -479,49 +533,149 @@ namespace psy { namespace core {
 		int wireIndex = FindOutputWire(dstMac.id());
 		int dstWireIndex = dstMac.FindInputWire(this->id());
 
+		if( wireIndex == -1 || dstWireIndex == -1)
+			return false;
+
+		///\todo: Error the type may not be the correct type. FindIn/OutputWire should give that info to us.
+		DeleteOutputWire(wireIndex,OutPort::id_type(0));
+		dstMac.DeleteInputWire(dstWireIndex,InPort::id_type(0));
+		return true; 
+	}
+	void Machine::DeleteWires()
+	{
+		Machine *iMac;
+		// Deleting the connections to/from other machines
+		for(Wire::id_type w=0; w<MAX_CONNECTIONS; w++)
+		{
+			// Checking In-Wires
+			if(_inputCon[w])
+			{
+				if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
+				{
+					iMac = song()->machine(_inputMachines[w]);
+					if (iMac)
+					{
+						Wire::id_type wix = iMac->FindOutputWire(id());
+						if (wix >=0)
+						{
+							iMac->DeleteOutputWire(wix,0);
+						}
+					}
+				}
+				DeleteInputWire(w,0);
+			}
+			// Checking Out-Wires
+			if(_connection[w])
+			{
+				if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
+				{
+					iMac = song()->machine(_outputMachines[w]);
+					if (iMac)
+					{
+						Wire::id_type wix = iMac->FindInputWire(id());
+						if(wix >=0 )
+						{
+							iMac->DeleteInputWire(wix,0);
+						}
+					}
+				}
+				DeleteOutputWire(w,0);
+			}
+		}
+	}
+
+	void Machine::InsertOutputWire(Machine& mac, Wire::id_type wireIndex, OutPort::id_type /*srctype*/)
+	{
+		if (!_connection[wireIndex]) _connectedOutputs++;
+		_outputMachines[wireIndex] = mac.id();
+		_connection[wireIndex] = true;
+	}
+	void Machine::InsertInputWire(Machine& srcMac, Wire::id_type dstWire,InPort::id_type /*dstType*/, float initialVol)
+	{
+		if (!_inputCon[dstWire]) _connectedInputs++;
+		_inputMachines[dstWire] = srcMac.id();
+		_inputCon[dstWire] = true;
+		_wireMultiplier[dstWire] = srcMac.GetAudioRange()/GetAudioRange();
+		SetWireVolume(dstWire,initialVol);
+		if ( _isMixerSend )
+		{
+			NotifyNewSendtoMixer(*this,srcMac);
+		}
+	}
+
+	void Machine::DeleteOutputWire(Wire::id_type wireIndex, OutPort::id_type /*srctype*/)
+	{
+		if ( _isMixerSend)
+		{
+			ClearMixerSendFlag();
+		}
 		_connection[wireIndex] = false;
 		_outputMachines[wireIndex] = -1;
 		_connectedOutputs--;
-
-		dstMac._inputCon[dstWireIndex] = false;
-		dstMac._inputMachines[dstWireIndex]=-1;
-		dstMac._connectedInputs--;
-		return true; 
 	}
-
-	void Machine::InitWireVolume(Machine::type_type type, Wire::id_type wire, float value)
+	void Machine::DeleteInputWire(Wire::id_type wireIndex, InPort::id_type /*dsttype*/)
 	{
-		if (type == MACH_VST || type == MACH_VSTFX  || type == MACH_LADSPA)
+		_inputCon[wireIndex] = false;
+		_inputMachines[wireIndex] = -1;
+		_connectedInputs--;
+	}
+	void Machine::NotifyNewSendtoMixer(Machine& /*callerMac*/,Machine& senderMac)
+	{
+		//Work down the connection wires until finding the mixer.
+		for (int i(0);i< MAX_CONNECTIONS; ++i)
+			if ( _connection[i]) song()->machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
+	}
+	void Machine::SetMixerSendFlag()
+	{
+		for (int i(0);i<MAX_CONNECTIONS;++i)
 		{
-			if (this->type() == MACH_VST || this->type() == MACH_VSTFX || this->type() == MACH_LADSPA) // VST to VST, no need to convert.
+			if (_inputCon[i]) song()->machine(_inputMachines[i])->SetMixerSendFlag();
+		}
+		_isMixerSend=true;
+	}
+	void Machine::ClearMixerSendFlag()
+	{
+		//Work up the connection wires to clear others' flag.
+		for (int i(0);i< MAX_CONNECTIONS; ++i)
+			if ( _inputCon[i])
 			{
-				_inputConVol[wire] = value;
-				_wireMultiplier[wire] = 1.0f;
+				song()->machine(_inputMachines[i])->ClearMixerSendFlag();
 			}
-			else // VST to native, multiply
-			{
-				_inputConVol[wire] = value * 32768.0f;
-				_wireMultiplier[wire] = 0.000030517578125f; // what is it?
-			}
-		}
-		else if (this->type() == MACH_VST || this->type() == MACH_VSTFX || this->type() == MACH_LADSPA ) // native to VST, divide.
-		{
-			_inputConVol[wire] = value * 0.000030517578125f; // what is it?
-			_wireMultiplier[wire] = 32768.0f;
-		}
-		else // native to native, no need to convert.
-		{
-			_inputConVol[wire] = value;
-			_wireMultiplier[wire] = 1.0f;
-		}
-		// The reason of the conversions in the case of MACH_VST is because VST's output wave data
-		// in the range -1.0 to +1.0, while native and internal output at -32768.0 to +32768.0
-		// Initially (when the format was made), Psycle did convert this in the "Work" function,
-		// but since it already needs to multiply the output by inputConVol, I decided to remove
-		// that extra conversion and use directly the volume to do so.
+			
+		_isMixerSend=false;
 	}
 
-	Wire::id_type Machine::FindInputWire(Machine::id_type id)
+
+	void Machine::ExchangeInputWires(Wire::id_type first,Wire::id_type second, InPort::id_type /*firstType*/, InPort::id_type /*secondType*/)
+	{
+		int tmp = _inputMachines[first];
+		_inputMachines[first]=_inputMachines[second];
+		_inputMachines[second]=tmp;
+
+		float tmp2 = _inputConVol[first];
+		_inputConVol[first]=_inputConVol[second];
+		_inputConVol[second]=tmp2;
+
+		tmp2 = _wireMultiplier[first];
+		_wireMultiplier[first]=_wireMultiplier[second];
+		_wireMultiplier[second]=tmp2;
+
+		bool tmp3 = _inputCon[first];
+		_inputCon[first]=_inputCon[second];
+		_inputCon[second]=tmp3;
+	}
+	void Machine::ExchangeOutputWires(Wire::id_type first,Wire::id_type second, OutPort::id_type /*firstType*/, InPort::id_type /*secondType*/)
+	{
+		int tmp = _outputMachines[first];
+		_outputMachines[first]=_outputMachines[second];
+		_outputMachines[second]=tmp;
+
+		bool tmp3 = _connection[first];
+		_connection[first]=_connection[second];
+		_connection[second]=tmp3;
+	}
+
+	Wire::id_type Machine::FindInputWire(Machine::id_type id) const
 	{
 		for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
 			if(_inputCon[c])
@@ -530,33 +684,31 @@ namespace psy { namespace core {
 		return Wire::id_type(-1);
 	}
 
-	Wire::id_type Machine::FindOutputWire(Machine::id_type id)
+	Wire::id_type Machine::FindOutputWire(Machine::id_type id) const
 	{
 		for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
 			if(_connection[c])
 				if(_outputMachines[c] == id)
-					return c;
+				return c;
 		return Wire::id_type(-1);
 	}
 
-							bool Machine::acceptsConnections()
-							{
-											if (mode() == MACHMODE_FX || mode() == MACHMODE_MASTER) {
-															return true;
-											} else {
-															return false;  
-											}
-							}
-
-							bool Machine::emitsConnections()
-							{
-											if (mode() == MACHMODE_GENERATOR || mode() == MACHMODE_FX) {
-															return true;
-											} else {
-															return false;  
-											}
-							}
-
+	Wire::id_type Machine::GetFreeInputWire(InPort::id_type /*slottype*/) const
+	{
+		for(int c=0; c<MAX_CONNECTIONS; c++)
+		{
+			if(!_inputCon[c]) return c;
+		}
+		return Wire::id_type(-1);
+	}
+	Wire::id_type Machine::GetFreeOutputWire(OutPort::id_type /*slottype*/) const
+	{
+		for(int c=0; c<MAX_CONNECTIONS; c++)
+		{
+			if(!_connection[c]) return c;
+		}
+		return Wire::id_type(-1);
+	}
 	bool Machine::SetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float value)
 	{
 		// Get reference to the destination machine
@@ -574,11 +726,11 @@ namespace psy { namespace core {
 		return false;
 	}
 
-	bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float &value)
+	bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float &value) const
 	{
 		// Get reference to the destination machine
 		if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-		Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
+		const Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
 		if (_pDstMachine)
 		{
 			Wire::id_type c;
@@ -593,7 +745,7 @@ namespace psy { namespace core {
 		return false;
 	}
 
-	void Machine::PreWork(int numSamples)
+	void Machine::PreWork(int numSamples,bool clear)
 	{
 		_worked = false;
 		_waitingForSound= false;
@@ -624,16 +776,27 @@ namespace psy { namespace core {
 			} 
 		}
 		_scopePrevNumSamples=numSamples;
-		dsp::Clear(_pSamplesL, numSamples);
-		dsp::Clear(_pSamplesR, numSamples);
+		if (clear)
+		{
+			dsp::Clear(_pSamplesL, numSamples);
+			dsp::Clear(_pSamplesR, numSamples);
+		}
 		//PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
 		//wire_cpu_cost(wire_cpu_cost() + cost);
 	}
 
-	/// Each machine is expected to produce its output in its own
-	/// _pSamplesX buffers.
+
+	// Low level Work function of machines. Takes care of audio generation and routing.
+	// Each machine is expected to produce its output in its own _pSamplesX buffers.
 	void Machine::Work(int numSamples )
 	{
+		WorkWires(numSamples);
+		GenerateAudio( numSamples );
+	}
+
+	void Machine::WorkWires(int numSamples, bool mix )
+	{
+		// Variable to avoid feedback loops. Probably, it is not worth implement feedbacks.
 		_waitingForSound=true;
 		for (int i=0; i<MAX_CONNECTIONS; i++)
 		{
@@ -642,35 +805,17 @@ namespace psy { namespace core {
 				Machine* pInMachine = song()->machine(_inputMachines[i]);
 				if (pInMachine)
 				{
-					/*
-					* Change the sound routing to understand what a feedback loop is,
-					* creating a special type of wire that will have a buffer which will give as output,
-					* and which will be (internally) connected to master, 
-					* to fill again the buffer once all the other machines have done its job.
-					*/
 					if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 					{ 
 						{
 							#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 							#endif
-							//std::cout << pInMachine->id() << "before work" << numSamples << std::endl;
 							pInMachine->Work( numSamples );
-							//std::cout << pInMachine->id() << "after work" << numSamples << std::endl;
 						}
-						/*
-						This could be a different Undenormalize funtion, using the already calculated
-						"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
-						correctly.
-						if(pInMachine->_volumeCounter*_inputConVol[i] < 0.004f) // this gives for 24bit depth.
-						{
-							std::memset(pInMachine->_pSamplesL,0,numSamples*sizeof(float));
-							std::memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
-						}
-						*/
 					}
 					if(!pInMachine->Standby()) Standby(false);
-					if(!_mute && !Standby())
+					if(!_mute && !Standby() && mix)
 					{
 						//PSYCLE__CPU_COST__INIT(wcost);
 						dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
@@ -682,100 +827,76 @@ namespace psy { namespace core {
 			}
 		}
 		_waitingForSound = false;
-		{
-			//PSYCLE__CPU_COST__INIT(wcost);
-			dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
-			//wire_cpu_cost(wire_cpu_cost() + wcost);
-		}
-		GenerateAudio( numSamples );
+		
+		//PSYCLE__CPU_COST__INIT(wcost);
+		dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+		//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+		//wire_cpu_cost(wire_cpu_cost() + wcost);
 	}
 
-	//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
-	void Machine::WorkNoMix( int numSamples )
-	{
-		_waitingForSound=true;
-		for (int i=0; i<MAX_CONNECTIONS; i++)
-		{
-			if (_inputCon[i])
-			{
-				Machine* pInMachine = song()->machine(_inputMachines[i]);
-				if (pInMachine)
-				{
-					if (!pInMachine->_worked && !pInMachine->_waitingForSound)
-					{ 
-						{
-							#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-							#endif
-							pInMachine->Work( numSamples );
-						}
-					}
-					if(!pInMachine->Standby()) Standby(false);
-				}
-			}
-		}
-		_waitingForSound = false;
-	}
+#if 0
 
-	void Machine::DefineStereoInput(int numinputs)
+	void Machine::defineInputAsStereo(int numports)
 	{
-		numInPorts=numinputs;
+		numInPorts=numports;
+		///\todo: ArraY!!!!
 		inports = new InPort(*this,0,"Stereo In");
 	}
 
-	void Machine::DefineStereoOutput(int numoutputs)
+	void Machine::defineOutputAsStereo(int numports)
 	{
-		numOutPorts=numoutputs;
+		numOutPorts=numports;
+		///\todo: ArraY!!!!
 		outports = new OutPort(*this,0,"Stereo Out");
 	}
-		void Machine::UpdateVuAndStanbyFlag(int numSamples)
-		{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
-			_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
-			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
-			// clip values
-			if(temp > 97) temp = 97;
-			if(temp > 0)
-			{
-				_volumeDisplay = temp;
-			}
-			else if (_volumeDisplay>1 ) _volumeDisplay -=2;
-
-			if ( callbacks->autoStopMachines() )
-			{
-				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples) {
-					rms.count=0;
-					rms.AccumLeft=0.;
-					rms.AccumRight=0.;
-					rms.previousLeft=0.;
-					rms.previousRight=0.;
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
-			}
-#else
-			_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
-			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
-			// clip values
-			if(temp > 97) temp = 97;
-			if(temp > _volumeDisplay) _volumeDisplay = temp;
-			if (_volumeDisplay>0 )--_volumeDisplay;
-			if ( callbacks->autoStopMachines() )
-			{
-				if (_volumeCounter < 8.0f) {
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
-			}
 #endif
-		};
+	void Machine::UpdateVuAndStanbyFlag(int numSamples)
+	{
+#if defined PSYCLE__CONFIGURATION__RMS_VUS
+		_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
+		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+		// clip values
+		if(temp > 97) temp = 97;
+		if(temp > 0)
+		{
+			_volumeDisplay = temp;
+		}
+		else if (_volumeDisplay>1 ) _volumeDisplay -=2;
 
-	bool Machine::LoadSpecificChunk(RiffFile* pFile, int version)
+		if ( callbacks->autoStopMachines() )
+		{
+			if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples) {
+				rms.count=0;
+				rms.AccumLeft=0.;
+				rms.AccumRight=0.;
+				rms.previousLeft=0.;
+				rms.previousRight=0.;
+				_volumeCounter = 0.0f;
+				_volumeDisplay = 0;
+				Standby(true);
+			}
+		}
+#else
+		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
+		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+		// clip values
+		if(temp > 97) temp = 97;
+		if(temp > _volumeDisplay) _volumeDisplay = temp;
+		if (_volumeDisplay>0 )--_volumeDisplay;
+		if ( callbacks->autoStopMachines() )
+		{
+			if (_volumeCounter < 8.0f) {
+				_volumeCounter = 0.0f;
+				_volumeDisplay = 0;
+				Standby(true);
+			}
+		}
+#endif
+	}
+
+	bool Machine::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 	{
 		std::uint32_t size;
 		pFile->Read(size);
@@ -789,7 +910,7 @@ namespace psy { namespace core {
 		}
 		pFile->Skip(size - sizeof count - count * sizeof(std::uint32_t));
 		return true;
-	};
+	}
 
 	Machine* Machine::LoadFileChunk(std::string const & plugin_path, CoreSong* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
 	{
@@ -1054,10 +1175,10 @@ namespace psy { namespace core {
 		return track_;
 	}
 
-	int Machine::GenerateAudioInTicks(int startSample, int numsamples )
+	int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples )
 	{
 		assert(numsamples >= 0);
-		//std::cout << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
+		std::cerr << "ERROR!!!! Machine::GenerateAudioInTicks() called!"<<std::endl;
 		workEvents.clear();
 		return 0;
 	}

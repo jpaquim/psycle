@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 
 // This is outside pattern, since this way, machines just need to know about events.
@@ -31,7 +32,7 @@ namespace psy
 				midi_slide_to,
 				automation,
 				microtonal0=128,
-				microtonallast=247
+				microtonallast=247,
 				wire,
 				wire_slide,
 				wire_slide_to,

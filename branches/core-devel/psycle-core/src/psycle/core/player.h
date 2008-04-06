@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief interface file for psy::core::Player.
 
@@ -23,8 +24,6 @@
 
 #pragma once
 
-#include <psycle/audiodrivers/audiodriver.h> ///\todo doesn't belong in psycore
-
 #include "song.h"
 #include "dither.h"
 #include "machine.h"
@@ -34,6 +33,8 @@ namespace psy
 {
 	namespace core
 	{
+		class AudioDriver; ///\todo doesn't belong in psycore
+
 		/// schedules the processing of machines, sends signal buffers and sequence events to them, ...
 		class Player : public MachineCallbacks
 		{

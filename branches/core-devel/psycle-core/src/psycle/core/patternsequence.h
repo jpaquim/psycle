@@ -20,8 +20,8 @@
 #ifndef PATTERNSEQUENCE_H
 #define PATTERNSEQUENCE_H
 
-#include "PatternPool.h"
-#include "Pattern.h"
+#include "patternpool.h"
+#include "pattern.h"
 
 /**
 @author  Psycledelics  
@@ -183,8 +183,8 @@ namespace psy
 
 			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
 
-			PatternPool* PatternPool();
-			const PatternPool & PatternPool() const;
+			PatternPool* getPatternPool();
+			const PatternPool & getPatternPool() const;
 
 			void removeSinglePattern(Pattern* pattern);
 

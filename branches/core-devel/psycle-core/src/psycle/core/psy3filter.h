@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -35,38 +36,51 @@ class MachineCallbacks;
 */
 class Psy3Filter : public PsyFilterBase
 {
+	protected:
+		typedef enum MachineClass
+		{
+			MASTER = 0,
+			SAMPLER = 3,
+			PLUGIN = 8,
+			VST = 9,
+			XMSAMPLER = 12,
+			DUPLICATOR = 13,
+			MIXER = 14,
+			DUMMY = 255
+		} machineclass_t;
+
+		class PatternEntry
+		{
+		public:
+			inline PatternEntry()
+				:
+				_note(255),
+				_inst(255),
+				_mach(255),
+				_cmd(0),
+				_parameter(0)
+			{}
+			
+			std::uint8_t _note;
+			std::uint8_t _inst;
+			std::uint8_t _mach;
+			std::uint8_t _cmd;
+			std::uint8_t _parameter;
+		};
+
 	///\name Singleton Pattern
 	///\{
-		protected:
-			Psy3Filter();          
-		private:
-			Psy3Filter( Psy3Filter const & );
-			Psy3Filter& operator=(Psy3Filter const&);
-		public:
-			class PatternEntry
-			{
-			public:
-				inline PatternEntry()
-					:
-				_note(255),
-					_inst(255),
-					_mach(255),
-					_cmd(0),
-					_parameter(0)
-				{}
-
-				std::uint8_t _note;
-				std::uint8_t _inst;
-				std::uint8_t _mach;
-				std::uint8_t _cmd;
-				std::uint8_t _parameter;
-			};
-
-			static Psy3Filter* Instance() {
-				// don`t use multithreaded
-				static Psy3Filter s;
-				return &s;
-			}
+	protected:
+		Psy3Filter();          
+	private:
+		Psy3Filter( Psy3Filter const & );
+		Psy3Filter& operator=(Psy3Filter const&);
+	public:
+		static Psy3Filter* Instance() {
+			// don`t use multithreaded
+			static Psy3Filter s;
+			return &s;
+		}
 	///\}
 
 	protected:
@@ -74,9 +88,9 @@ class Psy3Filter : public PsyFilterBase
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
 		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-		/*override*/ bool loadExtra(RiffFile* file,char* header, int version) {return false;}
-		/*override*/ bool save(const std::string & fileName, const CoreSong & song) {  /* so saving for legacy file format */ return false; }
-		/*override*/ bool saveExtra(RiffFile* file,char* header, int version) {return false;}
+		/*override*/ bool loadExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
+		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong & /*song*/) {  /* so saving for legacy file format */ return false; }
+		/*override*/ bool saveExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
 
 
 	protected:

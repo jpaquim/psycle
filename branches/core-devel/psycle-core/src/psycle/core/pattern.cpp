@@ -17,8 +17,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
-#include "Pattern.h"
-#include "PatternPool.h"
+#include "pattern.h"
+#include "patternpool.h"
 #include "helpers/xml.h"
 #include <sstream>
 

@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -126,12 +127,15 @@ const std::string & PluginInfo::category() const {
 	return category_;
 }
 
+std::map< PluginFinderKey, PluginInfo > PluginFinder::map_;
+
 PluginFinder::PluginFinder(std::string const & psycle_path, std::string const & ladspa_path)
 :
 	psycle_path_(psycle_path),
 	ladspa_path_(ladspa_path)
 {
-	scanAll();
+	if (map_.empty())
+		loadInfo();
 }
 
 PluginFinder::~PluginFinder()
@@ -154,42 +158,65 @@ PluginInfo PluginFinder::info( const PluginFinderKey & key ) const {
 		return PluginInfo();
 }
 
-void PluginFinder::scanAll() {
+bool PluginFinder::loadInfo() {
+	refreshInfo();
+	return true;
+}
+
+void PluginFinder::refreshInfo() {
+	clearInfo();
 	scanInternal();
 	scanNatives();
 	scanLadspa();
 }
-
+void PluginFinder::clearInfo() {
+	map_.clear();
+}
 void PluginFinder::scanInternal() {
 	PluginFinderKey key = PluginFinderKey::internalSampler();
 	PluginInfo info;
 	info.setType( MACH_SAMPLER );
 	info.setName( key.name() );
 	map_[key]=info;
+	PluginFinderKey key2 = PluginFinderKey::internalMixer();
+	PluginInfo info2;
+	info2.setType( MACH_MIXER );
+	info2.setName( key2.name() );
+	map_[key2]=info2;
 }
 
 void PluginFinder::scanLadspa() {
 	std::string ladspa_path = ladspa_path_;
-	///\todo this just uses the first path in getenv
+	//FIXME: this just uses the first path in getenv. Do this for each path.
+	// The best way would be pre-process in the constructor, and store a vector of strings.
 	#if defined __unix__ || defined __APPLE__
 		std::string::size_type dotpos = ladspa_path.find(':',0);
 		if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
 	#else
 	#endif
-	const LADSPA_Descriptor * psDescriptor;
-	LADSPA_Descriptor_Function pfDescriptorFunction;
-	unsigned long lPluginIndex;
 
 	std::vector<std::string> fileList;
 	fileList = File::fileList(ladspa_path, File::list_modes::files);
 
 	std::vector<std::string>::iterator it = fileList.begin();
 	for ( ; it < fileList.end(); ++it ) {
-		std::string fileName = *it;
+		LoadLadspaInfo(*it);
+	}
+}
+
+
+//FIXME:Probably is needed to pass the path too, when we support more than one path.
+void PluginFinder::LoadLadspaInfo(std::string fileName)
+{
+	std::string ladspa_path = ladspa_path_;
+	const LADSPA_Descriptor * psDescriptor;
+	LADSPA_Descriptor_Function pfDescriptorFunction;
+	unsigned long lPluginIndex;
+
 		#if defined __unix__ || defined __APPLE__
 			// problem of so.0.0.x .. .so all three times todo
 		#else
-			if ( fileName.find( ".dll" ) == std::string::npos ) continue;
+			if ( fileName.find( ".dll" ) == std::string::npos ) return;
 		#endif
 
 		class DummyCallbacks : public MachineCallbacks {
@@ -201,7 +228,7 @@ void PluginFinder::scanLadspa() {
 		} dummycallbacks;
 
 		LADSPAMachine plugin(&dummycallbacks, 0, 0 );
-		pfDescriptorFunction = plugin.loadDescriptorFunction( ladspa_path + File::slash() + fileName );
+		pfDescriptorFunction = plugin.loadDescriptorFunction( (ladspa_path + File::slash()) + fileName );
 
 		if (pfDescriptorFunction) {
 			for (lPluginIndex = 0;; lPluginIndex++) {
@@ -213,12 +240,11 @@ void PluginFinder::scanLadspa() {
 				info.setType( MACH_LADSPA );
 				info.setName( psDescriptor->Name );
 				info.setLibName( fileName );
-				PluginFinderKey key(fileName, ladspa_path + File::slash() + fileName, lPluginIndex );
+				PluginFinderKey key(fileName, (ladspa_path + File::slash()) + fileName, lPluginIndex );
 				map_[key] = info;
 			}
 		}
 	}
-}
 
 void PluginFinder::scanNatives() {
 	std::vector<std::string> fileList;
@@ -233,11 +259,16 @@ void PluginFinder::scanNatives() {
 	std::vector<std::string>::iterator it = fileList.begin();
 
 	for ( ; it < fileList.end(); ++it ) {
-		std::string fileName = *it;
+		LoadNativeInfo(*it);
+	}
+}
+
+void PluginFinder::LoadNativeInfo(std::string fileName)
+{
 		#if defined __unix__ || defined __APPLE__
 			///\todo problem of so.x.y.z .. .so all three times todo
 		#else
-			if ( fileName.find( ".dll" ) == std::string::npos ) continue;
+			if ( fileName.find( ".dll" ) == std::string::npos ) return;
 		#endif
 
 		class DummyCallbacks : public MachineCallbacks {
@@ -265,6 +296,5 @@ void PluginFinder::scanNatives() {
 			map_[key] = info;               
 		}
 	}
-}
 
 }}

@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics     *
 *   psycle.sf.net   *
@@ -35,7 +36,7 @@ namespace psy
 			public:
 				PluginInfo();
 
-				~PluginInfo();
+				virtual ~PluginInfo();
 
 				void setType( Machine::type_type type );
 				Machine::type_type type() const;
@@ -90,7 +91,7 @@ namespace psy
 				PluginFinder(std::string const & psycle_path, std::string const & ladspa_path);
 				~PluginFinder();
 
-				void scanAll();
+				virtual void refreshInfo();
 
 				PluginInfo info( const PluginFinderKey & key ) const;
 			
@@ -107,12 +108,16 @@ namespace psy
 			private:
 				std::string const ladspa_path_;
 
-			private:
-				std::map< PluginFinderKey, PluginInfo > map_;
+			protected:
+				static std::map< PluginFinderKey, PluginInfo > map_;
 
-				void scanInternal();
-				void scanLadspa();
-				void scanNatives();
+				virtual void clearInfo();
+				virtual bool loadInfo();
+				virtual void scanInternal();
+				virtual void scanLadspa();
+				virtual void scanNatives();
+				void LoadLadspaInfo(std::string fileName);
+				void LoadNativeInfo(std::string fileName);
 		};
 	}
 }

@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief implementation file for psy::core::Player
 
@@ -28,6 +29,7 @@
 #include "machine.h"
 #include "sampler.h"
 #include "song.h"
+#include <psycle/audiodrivers/audiodriver.h>
 
 #include <iostream> // only for debug output
 
@@ -42,14 +44,14 @@ namespace psy
 
 		Player::Player()
 		:
-			song_(),
-			driver_(),
-			_playing(),
 			Tweaker(),
-			loopSequenceEntry_(),
-			_doDither(),
+			driver_(),
 			autoRecord_(),
+			song_(),
 			recording_(),
+			_doDither(),
+			_playing(),
+			loopSequenceEntry_(),
 			autoStopMachines_(),
 			lock_(),
 			inWork_()
@@ -194,7 +196,7 @@ namespace psy
 					if ( song().machine(mac) )
 					{
 						Machine &machine = *song().machine(mac);
-						if ( entry.note() == commands::tweak_slide )
+						if ( entry.note() == notetypes::tweak_slide )
 						{
 							const int delay(64);
 							int delaysamples(0), origin(machine.GetParamValue(entry.instrument()));
@@ -203,7 +205,7 @@ namespace psy
 							
 							rate = (((entry.command()<<16) | entry.parameter()) - origin) / (timeInfo().samplesPerTick()/64.0f);
 
-							entry.setNote(commands::tweak);
+							entry.setNote(notetypes::tweak);
 							entry.setCommand(origin>>8);
 							entry.setParameter(origin&0xFF);
 							machine.AddEvent(beatOffset+ ((double)delaysamples)/timeInfo().samplesPerBeat(), line.sequenceTrack()*1024+track, entry);
@@ -236,7 +238,7 @@ namespace psy
 			for ( ; trackItr != line.notes().end() ; ++trackItr) {
 				PatternEvent entry = trackItr->second;
 				int track = trackItr->first;
-				if(( !song().patternSequence()->trackMuted(track)) && (entry.note() < psy::core::commands::tweak || entry.note() == 255)) // Is it not muted and is a note?
+				if(( !song().patternSequence()->trackMuted(track)) && (entry.note() < notetypes::tweak || entry.note() == 255)) // Is it not muted and is a note?
 				{
 					int mac = entry.machine();
 					if(mac != 255) prevMachines[track] = mac;
@@ -249,14 +251,14 @@ namespace psy
 							if(song().machine(mac) && !(song().machine(mac)->_mute)) // Does this machine really exist and is not muted?
 							{
 								Machine &machine = *song().machine(mac);
-								if(entry.command() == PatternCmd::NOTE_DELAY)
+								if(entry.command() == commandtypes::NOTE_DELAY)
 								{
 									double delayoffset(entry.parameter()/256.0);
 									// At least Plucked String works erroneously if the command is not ommited.
 									entry.setCommand(0); entry.setParameter(0);
 									machine.AddEvent(beatOffset+delayoffset, line.sequenceTrack()*1024+track, entry);
 								}
-								else if(entry.command() == PatternCmd::RETRIGGER)
+								else if(entry.command() == commandtypes::RETRIGGER)
 								{
 									//\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
 									int delaysamples(0), rate(0), delay(0);
@@ -272,7 +274,7 @@ namespace psy
 										delaysamples+=delay;
 									}
 								}
-								else if(entry.command() == PatternCmd::RETR_CONT)
+								else if(entry.command() == commandtypes::RETR_CONT)
 								{
 									///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
 									///\todo: verify that using ints for rate and variation is enough, or has to be float.
@@ -296,7 +298,7 @@ namespace psy
 									}
 								}
 /*
-								else if (entry.command() == PatternCmd::ARPEGGIO)
+								else if (entry.command() == commandtypes::ARPEGGIO)
 								{
 									// arpeggio
 									///\todo : Add Memory.
@@ -342,6 +344,7 @@ namespace psy
 			if (_playing)
 			{
 				if ( loopSequenceEntry() ) {
+					// Maintan the cursor inside the loop sequence
 					if ( timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition()
 							|| timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition() ) {
 						setPlayPos( loopSequenceEntry()->tickPosition() );
@@ -371,7 +374,14 @@ namespace psy
 					//each time through the loop because global events can potentially move the song's beatposition elsewhere.
 					globals.clear();
 					chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
-
+					if ( loopSequenceEntry() ) {
+						//Don't go further than the sequenceEnd.
+						if ( chunkBeatEnd >= loopSequenceEntry()->tickEndPosition())
+							chunkBeatEnd = loopSequenceEntry()->tickEndPosition();
+					} else if ( loopSong() ) {
+						if ( chunkBeatEnd >= song().patternSequence()->tickLength())
+							chunkBeatEnd = song().patternSequence()->tickLength();
+					}
 					//determine chunk length in beats and samples.
 					chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
 					if(globals.empty())
@@ -416,8 +426,8 @@ namespace psy
 				//if (playPos> "signumerator") playPos-=signumerator;
 			}
 			
-			printf("\rBeat: %.02f",timeInfo().playBeatPos());
-			fflush(stdout);
+			//printf("\rBeat: %.02f",timeInfo().playBeatPos());
+			//fflush(stdout);
 			
 			inWork_ = false;
 			return _pBuffer;

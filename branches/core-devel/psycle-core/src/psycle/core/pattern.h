@@ -82,7 +82,7 @@ namespace psy
 			void changetweakinfo(std::uint8_t index,TweakTrackInfo& tinfo);
 			void removetweakinfo(TweakTrackInfo& tinfo);
 			void removetweakinfo(std::uint8_t tinfo);
-			inline TweakTrackInfo& tweak(std::uint8_t idx) const { assert(idx<tweakinfos.size()); return tweakinfos[idx]; }
+			inline TweakTrackInfo tweak(std::uint8_t idx) const { assert(idx<tweakinfos.size()); return tweakinfos[idx]; }
 			inline const std::uint8_t tweaks() const { return tweakinfos.size(); }
 
 			inline void mute(bool value) { ismuted_=value; }
@@ -105,28 +105,28 @@ namespace psy
 
 		class Pattern {
 		public:
-			typedef  std::map<double, PatternLine>::iterator iterator;
-			typedef  std::map<double, PatternLine>::const_iterator const_iterator;
-			typedef  std::map<double, PatternLine>::reverse_iterator reverse_iterator;
-			typedef  std::map<double, PatternLine>::const_reverse_iterator const_reverse_iterator;
+			typedef  std::multimap<double, PatternEvent>::iterator iterator;
+			typedef  std::multimap<double, PatternEvent>::const_iterator const_iterator;
+			typedef  std::multimap<double, PatternEvent>::reverse_iterator reverse_iterator;
+			typedef  std::multimap<double, PatternEvent>::const_reverse_iterator const_reverse_iterator;
 
 			Pattern();
 			Pattern(Pattern const& other);
 
 			virtual ~Pattern();
 
-			inline iterator upper_bound(const double& _Keyval) { return lineMap.upper_bound(_Keyval); }
-			inline const_iterator upper_bound(const double& _Keyval) const { return lineMap.upper_bound(_Keyval); }
-			inline iterator lower_bound(const double& _Keyval) { return lineMap.lower_bound(_Keyval); }
-			inline const_iterator lower_bound(const double& _Keyval) const{ return lineMap.lower_bound(_Keyval); }
-			inline iterator begin() { lineMap.begin(); }
-			inline const_iterator begin() const { lineMap.begin(); }
-			inline iterator end() { lineMap.end(); }
-			inline const_iterator end() const { lineMap.end(); }
-			inline reverse_iterator rbegin() { lineMap.rbegin(); }
-			inline const_reverse_iterator rbegin() const { lineMap.rbegin(); }
-			inline reverse_iterator rend() { lineMap.rend(); }
-			inline const_reverse_iterator rend() const { lineMap.rend(); }
+			inline iterator upper_bound(const double& _Keyval) { return events.upper_bound(_Keyval); }
+			inline const_iterator upper_bound(const double& _Keyval) const { return events.upper_bound(_Keyval); }
+			inline iterator lower_bound(const double& _Keyval) { return events.lower_bound(_Keyval); }
+			inline const_iterator lower_bound(const double& _Keyval) const{ return events.lower_bound(_Keyval); }
+			inline iterator begin() { return events.begin(); }
+			inline const_iterator begin() const { return events.begin(); }
+			inline iterator end() { return events.end(); }
+			inline const_iterator end() const { return events.end(); }
+			inline reverse_iterator rbegin() { return events.rbegin(); }
+			inline const_reverse_iterator rbegin() const { return events.rbegin(); }
+			inline reverse_iterator rend() { return events.rend(); }
+			inline const_reverse_iterator rend() const { return events.rend(); }
 			
 //			TweakTrackInfo tweakInfo( int track ) const;
 //			int tweakTrack( const TweakTrackInfo & info);
@@ -201,7 +201,7 @@ namespace psy
 			static TimeSignature defaultSignature;
 
 			std::map<int,TrackInfo> trackInfoMap;
-			std::multimap<double, TrackEvent> events;
+			std::multimap<double, PatternEvent> events;
 
 		};
 

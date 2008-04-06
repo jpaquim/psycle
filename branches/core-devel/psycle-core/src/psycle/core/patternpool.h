@@ -43,7 +43,7 @@ class PatternCategory : public std::vector<Pattern*> {
 		const std::string & name() const;
 
 		Pattern* createNewPattern(const std::string & name);
-											Pattern* clonePattern( const Pattern & src, const std::string & name);
+		Pattern* clonePattern( const Pattern & src, const std::string & name);
 		bool removePattern(Pattern* pattern);
 
 		void setColor(long color);

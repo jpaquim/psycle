@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -20,6 +21,7 @@
 
 #include "plugin.h"
 #include "player.h"
+#include "fileio.h"
 
 #include <iostream> // only for debug output
 #include <sstream>
@@ -42,7 +44,9 @@ typedef CMachineInterface * (* CREATEMACHINE) ();
 
 PluginFxCallback Plugin::_callback;
 
-void PluginFxCallback::MessBox(char const* ptxt,char const* caption,unsigned int type) {
+PluginFxCallback::~PluginFxCallback() throw() {}
+
+void PluginFxCallback::MessBox(char const * /*ptxt*/, char const * /*caption*/, unsigned int /*type*/) {
 	//MessageBox(hWnd,ptxt,caption,type); 
 }
 
@@ -50,6 +54,13 @@ int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::Instance
 int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
 int PluginFxCallback::GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
 int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().ticksSpeed(); }
+
+// dummy body
+int PluginFxCallback::CallbackFunc(int, int, int, int) { return 0; }
+// dummy body
+float * PluginFxCallback::unused0(int, int) { return 0; }
+// dummy body
+float * PluginFxCallback::unused1(int, int) { return 0; }
 
 /**************************************************************************/
 // Plugin
@@ -315,7 +326,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 					for (int i=0; i < song()->tracks(); i++)
 					{
 						// come back to this
-						if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+						if (TriggerDelay[i]._cmd == commandtypes::NOTE_DELAY)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -334,7 +345,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
-						else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
+						else if (TriggerDelay[i]._cmd == commandtypes::RETRIGGER)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -352,7 +363,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
-						else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
+						else if (TriggerDelay[i]._cmd == commandtypes::RETR_CONT)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -382,7 +393,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 							{
 								TriggerDelayCounter[i] -= nextevent;
 							}
-						} else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
+						} else if (TriggerDelay[i]._cmd == commandtypes::ARPEGGIO)
 						{
 							if (TriggerDelayCounter[i] == nextevent)
 							{
@@ -452,8 +463,9 @@ void Plugin::Tick( )
 void Plugin::Tick( int channel, const PatternEvent & pData )
 {
 	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
-
-	if(pData.note() == psy::core::commands::tweak || pData.note() == psy::core::commands::tweak_effect)
+///FIXME: Add the Information about the tweaks.
+#if 0
+	if(pData.note() == notetypes::tweak)
 	{
 		if( pData.instrument() < info_->numParameters)
 		{
@@ -472,7 +484,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			Player::Instance()->Tweaker = true;
 		}
 	}
-	else if(pData.note() == psy::core::commands::tweak_slide)
+	else if(pData.note() == notetypes::tweak_slide)
 	{
 		if(pData.instrument() < info_->numParameters)
 		{
@@ -549,7 +561,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 		}
 		Player::Instance()->Tweaker = true;
 	}
-	else
+	else	
 	{
 		try
 		{
@@ -560,6 +572,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			return;
 		}
 	}
+#endif
 }
 
 void Plugin::Stop( )
@@ -590,10 +603,10 @@ bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ 
 			std::string soName = withoutSuffix + ".so";
 			psFileName = prefix + soName;
 			psFileName = path + psFileName; 
-			int pos;
+			unsigned int pos;
 			while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
 		} else {
-			int i = psFileName.find(prefix);
+			unsigned int i = psFileName.find(prefix);
 			if (i!=std::string::npos) {
 				int j = psFileName.find(".so");
 				if (j!=0) {

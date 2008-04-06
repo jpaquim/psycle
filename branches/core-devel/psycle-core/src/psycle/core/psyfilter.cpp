@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics     *
 *   psycle.sf.net   *
@@ -17,11 +18,13 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <psycle/core/psycleCorePch.hpp>
-
+//#include <psycle/core/psycleCorePch.hpp>
+#include <iostream>
+#include <fstream>
 #include "psyfilter.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
+#include "psy4filter.h"
 #include "song.h"
 
 namespace psy
@@ -41,7 +44,7 @@ namespace psy
 		{
 			filters.push_back( Psy2Filter::Instance() );
 			filters.push_back( Psy3Filter::Instance() );
-			//filters.push_back( Psy4Filter::Instance() );
+			filters.push_back( Psy4Filter::Instance() );
 		}
 
 		bool PsyFilters::loadSong(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )

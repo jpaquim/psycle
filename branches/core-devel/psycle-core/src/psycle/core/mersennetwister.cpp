@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\implementation for psy::core::dsp::MersenneTwister based on rev.2631
 
 /*

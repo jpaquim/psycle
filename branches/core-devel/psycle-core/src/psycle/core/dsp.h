@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief various signal processing utility functions and classes, psy::core::Cubic amongst others. based on revison  2663
 #pragma once
@@ -396,7 +397,7 @@ namespace psy
 			{ 
 				_quality = R_NONE;
 				_pWorkFn = T_None;
-			};
+			}
 			virtual ~Resampler() {}
 
 			/// work function corresponding to the selected kind.

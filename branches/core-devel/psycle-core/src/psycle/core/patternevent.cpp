@@ -64,13 +64,15 @@ void ClassicEvent::setTweak(std::uint8_t index, ClassicTweakEvent &tweak)
 {
 	if (index >= notes.size()) 
 	{
-		AddNote(index,tweak.getAsNote());
-		setCommand(0,tweak.getAsCommand());
+		CommandEvent event = tweak.getAsCommand();
+		addNote(index,tweak.getAsNote());
+		setCommand(0,event);
 	}
 	else
 	{
+		CommandEvent event = tweak.getAsCommand();
 		notes[index]=tweak.getAsNote();
-		setCommand(0,tweak.getAsCommand());
+		setCommand(0,event);
 	}
 }
 const ClassicTweakEvent ClassicEvent::tweak(std::uint8_t index) const
@@ -82,7 +84,9 @@ const ClassicTweakEvent ClassicEvent::tweak(std::uint8_t index) const
 	}
 	else 
 	{
-		ClassicTweakEvent(notes[index],commands[0]) thisevent;
+		NoteEvent note = notes[index];
+		CommandEvent event = commands[0];
+		ClassicTweakEvent thisevent(note,event);
 		return thisevent;
 	}
 }
@@ -110,13 +114,13 @@ void ClassicEvent::removeCommand(std::uint8_t index)
 	commands.pop_back();
 }
 
-void ClassicEvent::addNote(std::uint8_t index,NoteEvent &note)
+void ClassicEvent::addNote(std::uint8_t index,NoteEvent note)
 {
 	int size = notes.size()+1;
 	while (size < index) { notes.push_back(NoteEvent()); }
 	notes[index]=note;
 }
-void ClassicEvent::addCommand(std::uint8_t index,CommandEvent &cmd)
+void ClassicEvent::addCommand(std::uint8_t index,CommandEvent cmd)
 {
 	int size = commands.size()+1;
 	while (size < index) { commands.push_back(CommandEvent()); }
@@ -129,13 +133,13 @@ std::string ClassicEvent::toXml( double position, int track ) const
 	xml << "<ClassicEvent position='" << position << "' track='" << track << "' instrument='" << instr_;
 	xml << "'>\n";
 	for(int i=0;i<notes.size();i++) if (!notes[i].empty() ) xml << notes[i].toXml(i);
-	for(int i=0;i<commands.size();i++) if (!commands[i].empty() )x ml << commands[i].toXml(i);
+	for(int i=0;i<commands.size();i++) if (!commands[i].empty() )xml << commands[i].toXml(i);
 	xml <<"</ClassicEvent>\n";
 	return xml.str();
 }
 /************************************************************************/
 // PatternEvent
-void PatternEvent::removeNote(std::uint8_t index)
+void PatternEvent::RemoveNote(std::uint8_t index)
 {
 	if (index >= notes.size()) return;
 	
@@ -146,7 +150,7 @@ void PatternEvent::removeNote(std::uint8_t index)
 	}
 	notes.pop_back();
 }
-void PatternEvent::removeCommand(std::uint8_t index)
+void PatternEvent::RemoveCommand(std::uint8_t index)
 {
 	if (index >= commands.size()) return;
 
@@ -157,7 +161,7 @@ void PatternEvent::removeCommand(std::uint8_t index)
 	}
 	commands.pop_back();
 }
-void PatternEvent::removeTweak(std::uint8_t index)
+void PatternEvent::RemoveTweak(std::uint8_t index)
 {
 	if (index >= tweaks.size()) return;
 
@@ -170,19 +174,19 @@ void PatternEvent::removeTweak(std::uint8_t index)
 }
 
 
-void PatternEvent::addNote(std::uint8_t index,NoteEvent &note)
+void PatternEvent::AddNote(std::uint8_t index,NoteEvent &note)
 {
 	int size = notes.size()+1;
 	while (size < index) { notes.push_back(NoteEvent()); }
 	notes[index]=note;
 }
-void PatternEvent::addCommand(std::uint8_t index,CommandEvent &cmd)
+void PatternEvent::AddCommand(std::uint8_t index,CommandEvent &cmd)
 {
 	int size = commands.size()+1;
 	while (size < index) { commands.push_back(CommandEvent()); }
 	commands[index]=cmd;
 }
-void PatternEvent::addTweak(std::uint8_t index,TweakEvent &tweak)
+void PatternEvent::AddTweak(std::uint8_t index,TweakEvent &tweak)
 {
 	int size = tweaks.size()+1;
 	while (size < index) { tweaks.push_back(TweakEvent()); }
@@ -195,7 +199,7 @@ std::string PatternEvent::toXml( double position, int track ) const
 	xml << "<PatternEvent position='" << position << "' track='" << track;
 	xml << "'>\n";
 	for(int i=0;i<notes.size();i++) if (!notes[i].empty() ) xml << notes[i].toXml(i);
-	for(int i=0;i<commands.size();i++) if (!commands[i].empty() )x ml << commands[i].toXml(i);
+	for(int i=0;i<commands.size();i++) if (!commands[i].empty() )xml << commands[i].toXml(i);
 	for(int i=0;i<tweaks.size();i++) if (!tweaks[i].empty() ) xml << tweaks[i].toXml(i);
 	xml <<"</PatternEvent>\n";
 	return xml.str();

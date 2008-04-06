@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -21,6 +22,7 @@
 #pragma once
 
 #include "psyfilter.h"
+#include "cstdint.h"
 
 namespace psy { namespace core {
 
@@ -42,6 +44,22 @@ namespace convert_internal_machines
 class Psy2Filter : public PsyFilterBase
 {
 	protected:
+		typedef enum MachineClass
+		{
+			MASTER = 0,
+			SINE = 1, 
+			DIST = 2,
+			SAMPLER = 3,
+			DELAY = 4,
+			FILTER2P = 5,
+			GAIN = 6, 
+			FLANGER = 7, 
+			PLUGIN = 8,
+			VST = 9,
+			VSTFX = 10,
+			DUMMY = 255
+		} machineclass_t;
+
 		class VSTLoader
 		{
 			public:
@@ -71,17 +89,17 @@ class Psy2Filter : public PsyFilterBase
 
 	///\name Singleton Pattern
 	///\{
-		protected:
-				Psy2Filter();
-		private:
-			Psy2Filter( Psy2Filter const & );
-			Psy2Filter& operator=(Psy2Filter const &);
-		public:
-			static Psy2Filter* Instance() {
-					// don`t use multithreaded
-					static Psy2Filter s;
-					return &s; 
-			}
+	protected:
+		Psy2Filter();
+	private:
+		Psy2Filter( Psy2Filter const & );
+		Psy2Filter& operator=(Psy2Filter const &);
+	public:
+		static Psy2Filter* Instance() {
+			// don`t use multithreaded
+			static Psy2Filter s;
+			return &s; 
+		}
 	///\}
 
 	public:
@@ -89,9 +107,9 @@ class Psy2Filter : public PsyFilterBase
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
 		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-		/*override*/ bool loadExtra(RiffFile* file,char* header, int version) {return false;}
-		/*override*/ bool save(const std::string & fileName, const CoreSong & song) {  /* so saving for legacy file format */ return false; }
-		/*override*/ bool saveExtra(RiffFile* file,char* header, int version) {return false;}
+		/*override*/ bool loadExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
+		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong & /*song*/) {  /* so saving for legacy file format */ return false; }
+		/*override*/ bool saveExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
 
 
 	protected:

@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 #ifndef PYSCLE__CORE__PCH__INCLUDED
 #define PYSCLE__CORE__PCH__INCLUDED
 

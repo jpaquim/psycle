@@ -1,12 +1,18 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 
-#include "internal_machines.h"
-#include "plugin.h"
+#include <string>
+#include <map>
 
 namespace psy
 {
 	namespace core
 	{
+
+		class Machine;
+		class RiffFile;
+		class CoreSong;
+
 		namespace convert_internal_machines
 		{
 			class Converter

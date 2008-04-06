@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -269,7 +270,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 			}
 		}
 	}
-
+	song.RestoreMixerSendFlags();
 	//song.progress.emit(5,0,"");
 	if(chunkcount)
 	{
@@ -287,9 +288,9 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 	return true;
 }
 
-int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& song)
+int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 {
-	std::uint32_t fileversion = 0;
+	std::int32_t fileversion = 0;
 	std::uint32_t size = 0;
 	std::uint32_t chunkcount = 0;
 
@@ -318,7 +319,7 @@ int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& song)
 	return chunkcount;
 }
 
-bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion)
+bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 {
 		char Name[129]; char Author[65]; char Comment[65536];
 		
@@ -331,7 +332,7 @@ bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion)
 		return result;
 }
 
-bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks)
+bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/, MachineCallbacks* callbacks)
 {
 	std::int32_t temp(0);
 	std::int16_t temp16(0);
@@ -371,7 +372,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 	
 	// sequence width, for multipattern
 	file->Read(temp);
-	for(int i(0) ; i < song.tracks(); ++i)
+	for(unsigned int i(0) ; i < song.tracks(); ++i)
 	{
 		bool tmp;
 		file->Read(tmp);
@@ -384,9 +385,9 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 	return fileread;
 }
 
-bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion)
+bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& /*song*/,int /*minorversion*/)
 {
-	std::uint32_t index = 0;
+	std::int32_t index = 0;
 	std::uint32_t temp;
 	bool fileread = false;
 	// index, for multipattern - for now always 0
@@ -419,9 +420,9 @@ PatternEvent Psy3Filter::convertEntry( unsigned char * data ) const
 	return event;
 }
 
-bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
+bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 {
-	std::uint32_t index = 0;
+	std::int32_t index = 0;
 	std::uint32_t temp;
 	std::uint32_t size;
 	bool fileread=false;
@@ -457,23 +458,23 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) // lines
 		{
-			for (int x = 0; x < song.tracks(); x++) {
+			for (unsigned int x = 0; x < song.tracks(); x++) {
 				unsigned char entry[5] ;
 				std::memcpy( &entry, pSource, 5);
 				PatternEvent event = convertEntry(entry);
 				if (!event.empty()) {
-					if (event.note() == commands::tweak) {
+					if (event.note() == notetypes::tweak) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 					}
-					else if (event.note() == commands::tweak_slide) {
+					else if (event.note() == notetypes::tweak_slide) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
 					}
-					else if (event.note() == commands::midi_cc) {
+					else if (event.note() == notetypes::midi_cc) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
 					}
 					else {
-						if(event.command() == PatternCmd::NOTE_DELAY)
+						if(event.command() == commandtypes::NOTE_DELAY)
 						{
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
@@ -481,7 +482,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 						(*pat)[beatpos].notes()[x] = event;
 					}
 
-					if ( (event.note() <= commands::release || event.note() == commands::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
+					if ( (event.note() <= notetypes::release || event.note() == notetypes::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
 					{
 						linesPerBeat= event.parameter()&0x1F;
 					}
@@ -506,7 +507,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion)
 
 bool Psy3Filter::LoadMACDv0(std::string const & plugin_path, RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks)
 {
-	std::uint32_t index = 0;
+	std::int32_t index = 0;
 
 	file->Read(index);
 	if(index < MAX_MACHINES)
@@ -521,7 +522,7 @@ bool Psy3Filter::LoadMACDv0(std::string const & plugin_path, RiffFile* file,Core
 
 bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion)
 {
-	std::uint32_t index = 0;
+	std::int32_t index = 0;
 	file->Read(index);
 	if(index < MAX_INSTRUMENTS)
 	{
@@ -532,3 +533,4 @@ bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion)
 }
 		
 }}
+

@@ -1,11 +1,14 @@
-#include <psycle/core/psycleCorePch.hpp>
-
+// -*- mode:c++; indent-tabs-mode:t -*-
+//#include <psycle/core/psycleCorePch.hpp>
 #include "convert_internal_machines.private.hpp"
+#include "internal_machines.h"
+#include "plugin.h"
 #include "helpers/scale.hpp"
 #include "helpers/math/pi.hpp"
 #include "machine.h"
 #include "player.h"
 #include "song.h"
+#include "fileio.h"
 
 namespace psy {
 	namespace core {
@@ -50,8 +53,9 @@ namespace psy {
 					riff.Skip(96);  // ConnectionPoints, 12*8bytes
 					riff.Read(machine._connectedInputs);
 					riff.Read(machine._connectedOutputs);
-					riff.Read(machine._panning);
-					machine.SetPan(machine._panning);
+					std::int32_t panning;
+					riff.Read(panning);
+					machine.SetPan(panning);
 					riff.Skip(40); // skips shiatz
 					switch(type) {
 						case delay:
@@ -160,15 +164,16 @@ namespace psy {
 			}
 
 			void Converter::retweak(CoreSong & song) const {
-
+///FIXME: This has to be ported to the new pattern class.
+#if 0
 				// Get the first category (there's only one with imported psy's) and...
-				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->PatternPool()->begin();
+				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->getPatternPool()->begin();
 				// ... for all the patterns in this category...
 				for (std::vector<Pattern*>::iterator pit  = (*cit)->begin() ; pit != (*cit)->end(); pit++)
 				{
 					// ... check all lines searching...
-					for ( std::map<double, PatternLine>::iterator lit = (*pit)->begin() ; lit != (*pit)->end() ; lit++ ) {
-						PatternLine & line = lit->second;
+					for ( Pattern::iterator lit = (*pit)->begin() ; lit != (*pit)->end() ; lit++ ) {
+						PatternEvent &  = lit->second;
 						// ...tweaks to modify.
 						for ( std::map<int, PatternEvent>::iterator tit = line.tweaks().begin(); tit != line.tweaks().end() ; tit++  )
 						{
@@ -189,6 +194,7 @@ namespace psy {
 						}
 					}
 				}
+#endif
 			}
 
 			Converter::Plugin_Names::Plugin_Names()
