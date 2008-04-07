@@ -54,12 +54,9 @@ namespace qpsycle {
 		psy::core::SequenceEntry *sequenceEntry() const; 
 		void constrainToParent();
 
+		// Enable the use of qgraphicsitem_cast with this item.
 		enum { Type = UserType + 5 };
-		int type() const
-			{
-				// Enable the use of qgraphicsitem_cast with this item.
-				return Type;
-			}
+		int type() const { return Type;	}
 
 	protected: 
 		void mouseMoveEvent( QGraphicsSceneMouseEvent *event );
@@ -84,7 +81,7 @@ namespace qpsycle {
 
 		QAction *deleteEntryAction_;
 		QAction *loopEntryAction_;
-		const QColor & QColorFromLongColor( long longCol );
+		const QColor QColorFromLongColor( long longCol ) const;
 
 		int beatPxLength_;
 

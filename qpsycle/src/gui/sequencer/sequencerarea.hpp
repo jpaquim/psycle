@@ -34,12 +34,11 @@ namespace qpsycle {
 	public:
 		SequencerArea( SequencerDraw *seqDrawIn );
 
-		SequencerDraw* sequencerDraw() { return seqDraw_;} 
+		SequencerDraw* sequencerDraw() const { return seqDraw_;} 
 
 		QRectF boundingRect() const;
 		void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-	protected:
 
 	private:
 		SequencerDraw *seqDraw_;
