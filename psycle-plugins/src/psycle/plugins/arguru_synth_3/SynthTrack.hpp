@@ -64,10 +64,6 @@ public:
 	void GetEnvVcf();
 	float oscglide;
 	float GetSample();
-	float GetSampleOsc1();
-	float GetSampleOsc2();
-	float GetSampleOsc3();
-	float GetSampleOsc4();
 	void NoteOn(int note, SYNPAR *tspar,int spd);
 	void InitArpeggio();
 	
@@ -228,7 +224,8 @@ inline float CSynthTrack::GetSample()
 			float d2=syntp->pWave[iOsc+1];
 			float d3=syntp->pWave[iOsc+2];
 			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
-			
+
+
 			iOsc=f2i(OSC2Position);
 			fractpart=OSC2Position-iOsc;
 			d0=syntp->pWave2[iOsc-1];
@@ -236,7 +233,8 @@ inline float CSynthTrack::GetSample()
 			d2=syntp->pWave2[iOsc+1];
 			d3=syntp->pWave2[iOsc+2];
 			output+=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
-			
+
+
 			iOsc=f2i(OSC3Position);
 			fractpart=OSC3Position-iOsc;
 			d0=syntp->pWave3[iOsc-1];
@@ -244,6 +242,7 @@ inline float CSynthTrack::GetSample()
 			d2=syntp->pWave3[iOsc+1];
 			d3=syntp->pWave3[iOsc+2];
 			output+=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC3Vol;
+
 			
 			iOsc=f2i(OSC4Position);
 			fractpart=OSC4Position-iOsc;
@@ -252,6 +251,7 @@ inline float CSynthTrack::GetSample()
 			d2=syntp->pWave4[iOsc+1];
 			d3=syntp->pWave4[iOsc+2];
 			output+=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC4Vol;
+
 
 		}
 		else
@@ -299,150 +299,6 @@ inline float CSynthTrack::GetSample()
 		else return m_filter.res(output)*GetEnvAmp();
 	}
 	else return 0;
-}
-
-inline float CSynthTrack::GetSampleOsc1()
-{
-
-	if(AmpEnvStage)
-	{
-		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
-	
-		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
-		{
-			int iOsc=f2i(OSC1Position);
-			float fractpart=OSC1Position-iOsc;
-			float d0=syntp->pWave[iOsc-1];
-			float d1=syntp->pWave[iOsc];
-			float d2=syntp->pWave[iOsc+1];
-			float d3=syntp->pWave[iOsc+2];
-			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
-		}
-		else
-		{
-			output=syntp->pWave[f2i(OSC1Position)]*OSC1Vol;
-		}
-
-		if(vibrato)				OSC1Position+=ROSC1Speed+OSCvib;
-		else								OSC1Position+=ROSC1Speed;
-		
-		if(OSC1Position>=2048.0f)  OSC1Position-=2048.0f;
-		
-		GetEnvVcf();
-
-		if(!timetocompute--) FilterTick();
-
-		if ( syntp->vcf_type > 9 ) return m_filter.res2(output)*GetEnvAmp();
-		else return m_filter.res(output)*GetEnvAmp();
-	}
-	else return 0;
-}
-inline float CSynthTrack::GetSampleOsc2()
-{
-	if(AmpEnvStage)
-	{
-		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
-	
-		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
-		{
-			int iOsc=f2i(OSC2Position);
-			float fractpart=OSC2Position-iOsc;
-			float d0=syntp->pWave2[iOsc-1];
-			float d1=syntp->pWave2[iOsc];
-			float d2=syntp->pWave2[iOsc+1];
-			float d3=syntp->pWave2[iOsc+2];
-			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
-		}
-		else
-		{
-			output=syntp->pWave2[f2i(OSC2Position)]*OSC2Vol;
-		}
-
-		if(vibrato)				OSC2Position+=ROSC2Speed+OSCvib;
-		else								OSC2Position+=ROSC2Speed;
-		
-		if(OSC2Position>=2048.0f) OSC2Position-=2048.0f;
-		
-		GetEnvVcf();
-
-		if(!timetocompute--) FilterTick();
-
-		if ( syntp->vcf_type > 9 ) return m_filter.res2(output)*GetEnvAmp();
-		else return m_filter.res(output)*GetEnvAmp();
-	}
-	else  return 0;
-}
-
-inline float CSynthTrack::GetSampleOsc3()
-{
-	if(AmpEnvStage)
-	{
-		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
-	
-		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
-		{
-			int iOsc=f2i(OSC3Position);
-			float fractpart=OSC3Position-iOsc;
-			float d0=syntp->pWave3[iOsc-1];
-			float d1=syntp->pWave3[iOsc];
-			float d2=syntp->pWave3[iOsc+1];
-			float d3=syntp->pWave3[iOsc+2];
-			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC3Vol;
-		}
-		else
-		{
-			output=syntp->pWave3[f2i(OSC3Position)]*OSC3Vol;
-		}
-
-		if(vibrato)				OSC3Position+=ROSC3Speed+OSCvib;
-		else								OSC3Position+=ROSC3Speed;
-		
-		if(OSC3Position>=2048.0f) OSC3Position-=2048.0f;
-		
-		GetEnvVcf();
-
-		if(!timetocompute--) FilterTick();
-
-		if ( syntp->vcf_type > 9 ) return m_filter.res2(output)*GetEnvAmp();
-		else return m_filter.res(output)*GetEnvAmp();
-	}
-	else  return 0;
-}
-
-inline float CSynthTrack::GetSampleOsc4()
-{
-	if(AmpEnvStage)
-	{
-		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
-	
-		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
-		{
-			int iOsc=f2i(OSC4Position);
-			float fractpart=OSC4Position-iOsc;
-			float d0=syntp->pWave4[iOsc-1];
-			float d1=syntp->pWave4[iOsc];
-			float d2=syntp->pWave4[iOsc+1];
-			float d3=syntp->pWave4[iOsc+2];
-			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC4Vol;
-		}
-		else
-		{
-			output=syntp->pWave4[f2i(OSC3Position)]*OSC4Vol;
-		}
-
-		if(vibrato)				OSC4Position+=ROSC4Speed+OSCvib;
-		else								OSC4Position+=ROSC4Speed;
-		
-		if(OSC4Position>=2048.0f) OSC4Position-=2048.0f;
-		
-		GetEnvVcf();
-
-		if(!timetocompute--) FilterTick();
-
-		if ( syntp->vcf_type > 9 ) return m_filter.res2(output)*GetEnvAmp();
-		else return m_filter.res(output)*GetEnvAmp();
-	}
-	else  return 0;
 }
 
 inline float CSynthTrack::GetEnvAmp()
