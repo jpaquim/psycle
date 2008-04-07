@@ -615,46 +615,12 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 		
 			ptrack->PerformFx();
 
-			if ( globalpar.osc12_mix == 0 )
-			{	do
-				{
-					sl=ptrack->GetSampleOsc1();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
-			else if ( globalpar.osc12_mix == 256 )
-			{	do
-				{
-					sl=ptrack->GetSampleOsc2();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
-			if ( globalpar.osc34_mix == 0 )
-			{	do
-				{
-					sl=ptrack->GetSampleOsc3();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
-			if ( globalpar.osc34_mix == 256 )
-			{	do
-				{
-					sl=ptrack->GetSampleOsc4();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
-			else
-			{	do
+			do
 				{
 					sl=ptrack->GetSample();
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
 				} while(--xnumsamples);
-			}
 		}
 	}
 }
