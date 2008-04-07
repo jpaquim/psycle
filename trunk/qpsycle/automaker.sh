@@ -10,7 +10,11 @@
 #
 #
 
-QMAKE='qmake-qt4'
+if test "$OSTYPE" = "msys" then
+	QMAKE=qmake
+else
+	QMAKE=qmake-qt4
+fi &&
 
 echo "---"
 echo "Welcome to Automaker"
