@@ -334,7 +334,7 @@ namespace psy { namespace core {
 			_inputCon[i]=false;
 		}
 	}
-	Machine::Machine(Machine* mac,type_type type,MachineMode mode)
+	Machine::Machine(Machine* mac)
 	://fpu_exception_mask_(),
 	crashed_()
 	,type_(type)

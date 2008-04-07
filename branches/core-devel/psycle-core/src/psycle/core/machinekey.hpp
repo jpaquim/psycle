@@ -28,7 +28,7 @@ namespace psy
 {
 	namespace core
 	{
-		// type host_t
+		// type Hosts::type
 		// Allows to differentiate between machines of different hosts.
 		namespace Hosts {
 			typedef enum 
@@ -37,11 +37,31 @@ namespace psy
 				NATIVE,
 				VST,
 				LADSPA,
-				//Keep at last place
+				//Keep at last position
 				NUM_HOSTS
 			} type;
 		}
 
+		// These enums are defined here instead of in InternalHost so that they can be used
+		// by both machinekey (to define the keys below) and by InternalHost
+		// type InternalMacs::type
+		// Allows to differentiate between the different internal machines.
+		namespace InternalMacs
+		{
+			typedef enum 
+			{
+				MASTER = 0,
+				DUMMY,
+				SAMPLER,
+				XMSAMPLER,
+				DUPLICATOR,
+				MIXER,
+				AUDIOINPUT,
+				LFO,
+				//Keep at Last position.
+				NUM_MACS
+			} type;
+		}
 
 		class MachineKey
 		{
@@ -61,8 +81,6 @@ namespace psy
 			static const MachineKey mixer();
 			static const MachineKey audioInput();
 			static const MachineKey LFO();
-
-			static const std::string HostName(Hosts::type);
 
 			const std::string & dllName() const;
 			const Hosts::type host() const;

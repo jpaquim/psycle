@@ -31,9 +31,13 @@ class InternalHost : public MachineHost
 protected:
 	InternalHost(MachineCallbacks*);
 public:
+	~InternalHost();
 	static InternalHost& getInstance(MachineCallbacks*);
-	virtual Hosts::type hostCode() { return Hosts::INTERNAL; }
-	
+	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
+	virtual const std::string hostName() const { return "Internal"; }
+
+	virtual void getMachineInformation(std::vector<PluginInfo>&) const;
+
 	virtual void DeleteMachine(Machine*);
 	virtual Machine* CreateMachine(MachineKey,Machine::id_type);
 protected:

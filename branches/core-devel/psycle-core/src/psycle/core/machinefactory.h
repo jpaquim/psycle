@@ -24,22 +24,22 @@
 
 #include "machinekey.hpp"
 #include "machine.h"
-#include "machinehost.hpp"
 
 namespace psy { namespace core { 
-class Song;
+
 class PluginFinder;
+class MachineHost;
 
 class MachineFactory
 {
 public:
-	MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder, Song* song);
+	MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder);
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
 	void DeleteMachine(Machine*);
+	const std::vector<MachineHost*> getHosts() const { return hosts_; }
 
 protected:
 	MachineCallbacks* callbacks_;
-	Song* song_;
 	PluginFinder* finder_;
 	std::vector<MachineHost*> hosts_;
 };

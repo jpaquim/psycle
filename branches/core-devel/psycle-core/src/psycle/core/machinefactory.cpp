@@ -31,11 +31,11 @@ namespace psy{ namespace core {
 
 
 
-MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder, Song* song)
+MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 :callbacks_(callbacks)
-,song_(song)
 ,finder_(finder)
 {
+	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
 	hosts_.push_back( &InternalHost::getInstance(callbacks) );
 //	hosts_.push_back( &NativeHost::getInstance(callbacks) );
 //	hosts_.push_back( &VstHost::getInstance(callbacks) );
@@ -45,14 +45,18 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder,
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 {
-	for (std::vector<MachineHost*>::iterator it = hosts_.begin(); it < hosts_.end(); ++it)
+	assert(key.host() < Hosts::NUM_HOSTS);
+	return hosts_[key.host()].CreateMachine(key,id);
+#if 0
+	for (int i=0; i< hosts_.size(); ++i)
 	{
-		MachineHost* host = *it;
-		if ( host->hostCode() == key.host() ) {
-			return host->CreateMachine(key,id);
+		if ( hosts_[i]->hostCode() == key.host() ) {
+			return hosts_[i]->CreateMachine(key,id);
 			break;
 		}
 	}
+	return 0;
+#endif	
 ///FIXME: Move this code to the appropiate host.
 #if 0
 	if ( finder.info( key ).type() == MACH_PLUGIN )
@@ -77,20 +81,22 @@ Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 		}
 	}
 #endif	
-	return 0;
 }
 
 void MachineFactory::DeleteMachine(Machine* mac)
 {
 	MachineKey key = mac->getMachineKey();
-	for (std::vector<MachineHost*>::iterator it = hosts_.begin(); it < hosts_.end(); ++it)
+	assert(key.host() < Hosts::NUM_HOSTS);
+	hosts_[key.host()].DeleteMachine(mac);
+#if 0	
+	for (int i=0; i < hosts_.size(); ++i )
 	{
-		MachineHost* host = *it;
-		if ( host->hostCode() == key.host() ) {
-			return host->DeleteMachine(mac);
+		if ( hosts_[i]->hostCode() == key.host() ) {
+			return hosts_[i].DeleteMachine(mac);
 			break;
 		}
 	}
+#endif
 }
 
 }}

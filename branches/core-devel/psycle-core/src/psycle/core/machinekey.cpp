@@ -26,25 +26,6 @@ namespace psy
 {
 	namespace core
 	{
-		namespace Hosts 
-		{
-                       static const char *names[]={"Internal","Psycle","vST","LADSPA"};
-		}
-		namespace InternalMacs
-		{
-			typedef enum 
-			{
-				MASTER = 0,
-				DUMMY,
-				SAMPLER,
-				XMSAMPLER,
-				DUPLICATOR,
-				MIXER,
-				AUDIOINPUT,
-				LFO
-			} type;
-		}
-
 		MachineKey::MachineKey( ) : index_(0) {
 		}
 
@@ -80,10 +61,6 @@ namespace psy
 		}
 		const MachineKey MachineKey::LFO() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::LFO );
-		}
-
-		static const std::string HostName(Hosts::type type) {
-			if ( type < Hosts::NUM_HOSTS ) return Hosts::names[type];
 		}
 
 		bool MachineKey::operator<(const MachineKey & key) const {

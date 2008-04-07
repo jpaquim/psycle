@@ -28,6 +28,17 @@ namespace psy
 {
 	namespace core
 	{
+		namespace MachineMode
+		{
+			typedef enum
+			{
+				GENERATOR = 0,
+				EFFECT,
+				MASTER,
+				CONTROLLER
+			} type;
+		}
+
 		/**
 		@author  Psycledelics  
 		*/
@@ -38,11 +49,11 @@ namespace psy
 
 				virtual ~PluginInfo();
 
-				void setType( Machine::type_type type );
-				Machine::type_type type() const;
+				void setKey( PluginKey );
+				PluginKey key() const;
 
-				void setMode( Machine::mode_type mode );
-				Machine::mode_type mode() const;
+				void setMode( MachineMode::type mode );
+				MachineMode::type mode() const;
 
 				void setName( const std::string & name );
 				const std::string & name() const;
