@@ -226,7 +226,7 @@ void MachineTweakDlg::onKnobGroupChanged( KnobGroup *kGroup )
 	int value = kGroup->knob()->value();
 	pMachine_->SetParameter( param, value );
 	char buffer[128];
-	int val_v = pMachine_->GetParamValue( param );
+
 	pMachine_->GetParamValue( param, buffer );
 	kGroup->setValueText( QString::fromStdString( buffer ) );
 }
@@ -457,6 +457,7 @@ Knob::Knob( int param )
 
 void Knob::paintEvent( QPaintEvent *ev )
 {
+	Q_UNUSED( ev );
 	QPainter painter(this);
 	QRectF target( 0, 0, K_XSIZE, K_YSIZE );
 	QPixmap pixmap(":/images/TbMainKnob.png");
@@ -536,6 +537,7 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 	}
 
 	const QPoint& posMouseCurrent = ev->pos();
+	
 	int xdelta = posMouseCurrent.x() - m_posMousePressed.x();
 	int ydelta = posMouseCurrent.y() - m_posMousePressed.y();
 	double angleDelta =  mouseAngle(posMouseCurrent) - mouseAngle(m_posMousePressed);
@@ -600,6 +602,7 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 		m_posMousePressed = posMouseCurrent;
 		newValue = m_lastDragValue+.5;
 	} break;
+	default:;
 	}
 	setValue(newValue);
 	update();
@@ -639,6 +642,7 @@ SectionHeader::SectionHeader( QWidget *parent )
 
 void SectionHeader::paintEvent( QPaintEvent *ev )
 {
+	Q_UNUSED( ev );
 	QPainter painter(this);
 	
 	painter.fillRect( 0, 0, width(), height()/4, QColor( 194, 190, 210 ) );
@@ -667,6 +671,7 @@ KnobHole::KnobHole( QWidget *parent )
 
 void KnobHole::paintEvent( QPaintEvent *ev )
 {
+	Q_UNUSED( ev );
 	QPainter painter(this);
 
 	painter.fillRect( 0, 0, width(), height()/2, QColor( 194, 190, 210 ) );
@@ -767,7 +772,7 @@ bool PresetsDialog::loadPresets()
 			int numParameters = ((psy::core::Plugin*) m_macGui->mac())->GetInfo().numParameters;
 			int sizeDataStruct = ((psy::core::Plugin *) m_macGui->mac())->proxy().GetDataSize();
 
-			int numpresets = binIn.readInt4LE();
+			//int numpresets = binIn.readInt4LE();
 			filenumpars = binIn.readInt4LE();
 			filepresetsize = binIn.readInt4LE();
 

@@ -62,7 +62,7 @@ namespace qpsycle {
 
 		enum { Type = UserType + 6 };
 		// Enable the use of qgraphicsitem_cast with this item.
-		int type() const { return Type;	}
+		int type() const { return Type; } 
 
 	protected:
 		void mousePressEvent( QGraphicsSceneMouseEvent *event );

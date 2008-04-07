@@ -141,7 +141,7 @@ void MixerTweakDlg::onKnobGroupChanged( KnobGroup *kGroup )
 	int value = kGroup->knob()->value();
 	pMachine_->SetParameter( param, value );
 	char buffer[128];
-	int val_v = pMachine_->GetParamValue( param );
+	
 	pMachine_->GetParamValue( param, buffer );
 	kGroup->setValueText( QString::fromStdString( buffer ) );
 }

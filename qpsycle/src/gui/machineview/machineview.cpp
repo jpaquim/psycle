@@ -429,7 +429,7 @@ MachineGui *MachineView::machineGuiAtPoint( QPointF point ) const
 /**
 	* For keyjazz.
 	*/
-void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Machine *pMachine )
+	void MachineView::playNote( int note,int /*velocity*/,bool bTranspose, psy::core::Machine *pMachine )
 {
 
 	// stop any notes with the same value
@@ -468,7 +468,7 @@ void MachineView::playNote( int note,int velocity,bool bTranspose, psy::core::Ma
 		// pick a track to play it on
 		//if(bMultiKey)
 		{
-			int i;
+			unsigned int i;
 			for (i = outtrack+1; i < song()->tracks(); i++)
 			{
 				if (notetrack[i] == 120) {
@@ -522,7 +522,7 @@ void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMac
 	}
 
 	if(pMachine) {
-		for(int i=0; i<song()->tracks(); i++) {
+		for(unsigned int i=0; i<song()->tracks(); i++) {
 			if(notetrack[i]==note) {
 				notetrack[i]=120;
 				// build entry
