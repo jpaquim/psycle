@@ -123,10 +123,6 @@ void AudioPage::initDriverList( )
 	}
 }
 
-void AudioPage::keyPressEvent( QKeyEvent *event)
-{
-}
-
 void AudioPage::onDriverSelected( const QString & text )
 {
 	std::map<std::string, psy::core::AudioDriver*> & driverMap =  config_->driverMap();

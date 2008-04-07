@@ -176,16 +176,20 @@ void PatternView::clearNote( const PatCursor & cursor) {
 	}
 }
 
-void PatternView::onTick( double offsetPos ) {
-	if ( pattern() ) {
+void PatternView::onTick( double offsetPos ) 
+{
+	if ( pattern() ) 
+	{
 		int liney = d2i ( offsetPos * beatZoom() );
-		if ( liney != playPos_ ) {
+		if ( liney != playPos_ ) 
+		{
 			int oldPlayPos = playPos_;
 			playPos_ = liney;
-			int startTrack = 0;//drawArea->findTrackByScreenX( drawArea->dx() );
-			int endTrack = numberOfTracks();//drawArea->findTrackByScreenX( drawArea->dx() + drawArea->clientWidth() );
-			patternGrid()->update( patternGrid()->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ) );
-			patternGrid()->update( patternGrid()->repaintTrackArea( liney, liney, startTrack, endTrack ) );
+
+			int rowHeight = patDraw_->rowHeight();
+			patternGrid()->update( patDraw_->mapToScene( 0, 0 ).x(), oldPlayPos*rowHeight, patDraw_->viewport()->width(), rowHeight*2 );
+			//patternGrid()->update( patternGrid()->repaintTrackArea( oldPlayPos, oldPlayPos, startTrack, endTrack ) );
+			//patternGrid()->update( patternGrid()->repaintTrackArea( liney, liney, startTrack, endTrack ) );
 		}
 	}
 }

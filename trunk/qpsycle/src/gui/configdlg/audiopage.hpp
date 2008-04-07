@@ -46,8 +46,6 @@ public slots:
 	void onRestartDriver();
 
 private:
-	void keyPressEvent( QKeyEvent *event );
-
 	void initDriverList();
 
 	Configuration* config_;

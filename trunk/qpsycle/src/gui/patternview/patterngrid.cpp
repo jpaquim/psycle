@@ -205,6 +205,8 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 				}
 
 				// Check if this line is currently being played.
+				///\todo.  might be more sensible to have the playline
+				// as a graphics item that moves over the background.
 				if ((curLinenum == patDraw_->patternView()->playPos() && psy::core::Player::Instance()->playing() ) ) {
 					int trackWidth = patDraw_->xEndByTrack( endTrack );
 					painter->setPen( playBarColor() );

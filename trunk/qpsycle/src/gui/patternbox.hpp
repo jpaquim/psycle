@@ -84,9 +84,9 @@ public:
 	PatternBox( psy::core::Song *song, QWidget *parent = 0);
 
 	void populatePatternTree();
-	PatternTree* patternTree() { return patternTree_; }
-	psy::core::Song* song() { return song_; }
-	psy::core::SinglePattern* currentPattern() { return currentPattern_; }
+	PatternTree* patternTree() const { return patternTree_; }
+	psy::core::Song* song() const { return song_; }
+	psy::core::SinglePattern* currentPattern() const { return currentPattern_; }
 
 public slots:
 	void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
