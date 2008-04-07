@@ -66,7 +66,7 @@ void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * 
 	painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
 }
 
-const QColor & SequencerItem::QColorFromLongColor( long longCol )
+const QColor SequencerItem::QColorFromLongColor( long longCol ) const
 {
 	unsigned int r, g, b;
 	b = (longCol>>16) & 0xff;
@@ -121,11 +121,7 @@ void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 
 void SequencerItem::constrainToParent() 
 {
-	int widthOfThisItem = boundingRect().width();
-	int widthOfParent = parentItem()->boundingRect().width();
-	//int maximumLeftPos = widthOfParent - widthOfThisItem;
 	int currentLeftPos = pos().x();
-	//int desiredLeftPos = std::min( currentLeftPos, maximumLeftPos );
 	int newLeftPos = std::max( 0, currentLeftPos );
 
 	setPos( newLeftPos, 0 );                 
@@ -148,6 +144,7 @@ void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 
 void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
+	Q_UNUSED( event );
 	QMenu menu;
 	if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
 		loopEntryAction_ = new QAction( "Unloop Entry", this );
@@ -159,7 +156,6 @@ void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
 	menu.addAction( loopEntryAction_ );
 	menu.addAction( deleteEntryAction_ );
-	QAction *a = menu.exec(event->screenPos());
 }
 
 void SequencerItem::onLoopEntryActionTriggered()

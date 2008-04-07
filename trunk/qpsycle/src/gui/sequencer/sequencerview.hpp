@@ -44,7 +44,7 @@ public:
 	SequencerLine *selectedLine() const;
 	void setSelectedLine( SequencerLine *line ) ;
 	void addPattern( psy::core::SinglePattern *pattern );
-	SequencerDraw *sequencerDraw() { return seqDraw_; }
+	SequencerDraw *sequencerDraw() const { return seqDraw_; }
 	void updatePlayPos();
 	void onPatternNameChanged();
 	void onCategoryColorChanged();

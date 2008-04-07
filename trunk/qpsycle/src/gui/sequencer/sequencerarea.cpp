@@ -46,9 +46,12 @@ QRectF SequencerArea::boundingRect() const
 	return QRectF( 0, 0, width, height );
 }
 
-
 void SequencerArea::paint( QPainter *painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
 {
+	Q_UNUSED( painter ); Q_UNUSED( option ); Q_UNUSED( widget );
+	// This stopped having any paint operations when the timeline drawing
+	// moved to drawBackground of SeqDraw.  It's still acting as a container
+	// for other items at the moment.
 }
 
 } // namespace qpsycle

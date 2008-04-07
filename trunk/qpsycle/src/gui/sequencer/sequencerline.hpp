@@ -58,14 +58,11 @@ namespace qpsycle {
 		// To resolve ambiguity between QObject::children() and QGraphicsItem::children().
 		QList<QGraphicsItem*> children() const { return QGraphicsItem::children(); }
 
-		SequencerDraw *sDraw_;
+		SequencerDraw *sDraw_; ///\todo Hrm, why is this public?
 
 		enum { Type = UserType + 6 };
-		int type() const  // Enable the use of qgraphicsitem_cast with this item.
-			{
-
-				return Type;
-			}
+		// Enable the use of qgraphicsitem_cast with this item.
+		int type() const { return Type;	}
 
 	protected:
 		void mousePressEvent( QGraphicsSceneMouseEvent *event );
