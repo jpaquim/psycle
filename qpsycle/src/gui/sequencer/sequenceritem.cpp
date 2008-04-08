@@ -156,6 +156,7 @@ void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 	connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
 	menu.addAction( loopEntryAction_ );
 	menu.addAction( deleteEntryAction_ );
+	menu.exec( event->screenPos() );
 }
 
 void SequencerItem::onLoopEntryActionTriggered()
