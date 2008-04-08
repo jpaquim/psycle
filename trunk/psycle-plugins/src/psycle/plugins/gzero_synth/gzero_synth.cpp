@@ -697,7 +697,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	// Oscillators waveform descriptions
-	if(param==0 || param==1 || param==5 || param==9)
+	if(param==1 || param==2 || param==6 || param==10)
 	{
 		switch(value)
 		{
@@ -709,7 +709,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 	}
 
-	if(param==4 || param==8 || param==12)
+	if(param==5 || param==9 || param==13)
 	{
 		switch(value)
 		{
@@ -718,7 +718,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 	}
 
-	if(param==25)
+	if(param==28)
 	{
 		switch(value)
 		{
@@ -745,7 +745,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 	}
 
-	if(param==27)
+	if(param==31)
 	{
 		float fv=(float)value*0.390625f;
 
@@ -756,7 +756,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		return true;
 	}
 
-	if(param==28)
+	if(param==32)
 	{
 		float fv=(float)value*0.390625f;
 
@@ -767,13 +767,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		return true;
 	}
 
-	if(param==29)
+	if(param==33)
 	{
 		sprintf(txt,"%.1f%%",(float)value*0.390625f);
 		return true;
 	}
 
-	if(param==30)
+	if(param==35)
 	{
 		switch(value)
 		{
@@ -790,12 +790,12 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 
 		}
 	}
-	if ((param==35) && ( value == 0 ))
+	if ((param==41) && ( value == 0 ))
 	{
 		sprintf(txt,"Off");
 		return true;
 	}
-	if (param==36)
+	if (param==42)
 	{
 		sprintf(txt,value?"On":"Off");
 		return true;
