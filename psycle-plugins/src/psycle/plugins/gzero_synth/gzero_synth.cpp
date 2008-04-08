@@ -5,7 +5,17 @@
 #include <cstdlib>
 
 int const MAX_ENV_TIME = 250000;
-int const NUMPARAMETERS = 37;
+int const NUMPARAMETERS = 43;
+
+CMachineParameter const labelOSC = 
+{
+	"Oscillators",
+	"Oscillators",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
+	0
+};
 
 CMachineParameter const paraOSC1wave = 
 { 
@@ -138,6 +148,16 @@ CMachineParameter const paraOSC4sync =
 	0
 };
 
+CMachineParameter const labelAmp = 
+{
+	"Amplifer",
+	"Amplifer",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
+	0
+};
+
 CMachineParameter const paraVCAattack = 
 { 
 	"VCA Attack",
@@ -180,6 +200,15 @@ CMachineParameter const paraVCArelease =
 	2630
 };
 
+CMachineParameter const labelFilter = 
+{
+	"Filter",
+	"Filter",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
+	0
+};
 
 CMachineParameter const paraVCFattack = 
 { 
@@ -284,6 +313,16 @@ CMachineParameter const paraVCFenvmod =
 	80
 };
 
+CMachineParameter const labelMixer = 
+{
+	"Mixer",
+	"Mixer",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
+	0
+};
+
 CMachineParameter const paraOSC12mix = 
 { 
 	"OSC1&2 Mix",
@@ -314,10 +353,20 @@ CMachineParameter const paraOUTvol =
 	128
 };
 
-CMachineParameter const paraARPmode = 
+CMachineParameter const labelArp = 
 {
 	"Arpeggiator",
-	"Arpeggiator",																																// description
+	"Arpeggiator",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
+	0
+};
+
+CMachineParameter const paraARPmode = 
+{
+	"Mode",
+	"Mode",																																// description
 	0,																																												// MinValue				
 	16,																																												// MaxValue
 	MPF_STATE,																																								// Flags
@@ -343,6 +392,16 @@ CMachineParameter const paraARPcount =
 	16,																																												// MaxValue
 	MPF_STATE,																																								// Flags
 	4
+};
+
+CMachineParameter const labelOptions = 
+{
+	"Options",
+	"Options",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
+	0
 };
 
 CMachineParameter const paraGlobalDetune = 
@@ -396,6 +455,7 @@ CMachineParameter const paraInterpolation =
 
 CMachineParameter const *pParameters[] = 
 { 
+	&labelOSC,
 	&paraOSC1wave,
 	&paraOSC2wave,
 	&paraOSC2detune,
@@ -409,10 +469,12 @@ CMachineParameter const *pParameters[] =
 	&paraOSC4detune,
 	&paraOSC4finetune,
 	&paraOSC4sync,
+	&labelAmp,
 	&paraVCAattack,
 	&paraVCAdecay,
 	&paraVCAsustain,
 	&paraVCArelease,
+	&labelFilter,
 	&paraVCFattack,
 	&paraVCFdecay,
 	&paraVCFsustain,
@@ -423,12 +485,15 @@ CMachineParameter const *pParameters[] =
 	&paraVCFresonance,
 	&paraVCFtype,
 	&paraVCFenvmod,
+	&labelMixer,
 	&paraOSC12mix,
 	&paraOSC34mix,
 	&paraOUTvol,
+	&labelArp,
 	&paraARPmode,
 	&paraARPbpm,
 	&paraARPcount,
+	&labelOptions,
 	&paraGlobalDetune,
 	&paraGlobalFinetune,
 	&paraGlide,
@@ -522,46 +587,49 @@ void mi::ParameterTweak(int par, int val)
 	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 
-	globalpar.pWave=&WaveTable[Vals[0]][0];
-	globalpar.pWave2=&WaveTable[Vals[1]][0];
-	globalpar.osc2detune=Vals[2];
-	globalpar.osc2finetune=Vals[3];
-	globalpar.osc2sync=Vals[4];
-	globalpar.pWave3=&WaveTable[Vals[5]][0];
-	globalpar.osc3detune=Vals[6];
-	globalpar.osc3finetune=Vals[7];
-	globalpar.osc3sync=Vals[8];
-	globalpar.pWave4=&WaveTable[Vals[9]][0];
-	globalpar.osc4detune=Vals[10];
-	globalpar.osc4finetune=Vals[11];
-	globalpar.osc4sync=Vals[12];
+	globalpar.pWave=&WaveTable[Vals[1]][0];
+	globalpar.pWave2=&WaveTable[Vals[2]][0];
+	globalpar.osc2detune=Vals[3];
+	globalpar.osc2finetune=Vals[4];
+	globalpar.osc2sync=Vals[5];
+	globalpar.pWave3=&WaveTable[Vals[6]][0];
+	globalpar.osc3detune=Vals[7];
+	globalpar.osc3finetune=Vals[8];
+	globalpar.osc3sync=Vals[9];
+	globalpar.pWave4=&WaveTable[Vals[10]][0];
+	globalpar.osc4detune=Vals[11];
+	globalpar.osc4finetune=Vals[12];
+	globalpar.osc4sync=Vals[13];
 	
-	globalpar.amp_env_attack=Vals[13];
-	globalpar.amp_env_decay=Vals[14];
-	globalpar.amp_env_sustain=Vals[15];
-	globalpar.amp_env_release=Vals[16];
+	globalpar.amp_env_attack=Vals[15];
+	globalpar.amp_env_decay=Vals[16];
+	globalpar.amp_env_sustain=Vals[17];
+	globalpar.amp_env_release=Vals[18];
 
-	globalpar.vcf_env_attack=Vals[17];
-	globalpar.vcf_env_decay=Vals[18];
-	globalpar.vcf_env_sustain=Vals[19];
-	globalpar.vcf_env_release=Vals[20];
-	globalpar.vcf_lfo_speed=Vals[21];
-	globalpar.vcf_lfo_amplitude=Vals[22];
+	globalpar.vcf_env_attack=Vals[20];
+	globalpar.vcf_env_decay=Vals[21];
+	globalpar.vcf_env_sustain=Vals[22];
+	globalpar.vcf_env_release=Vals[23];
+	globalpar.vcf_lfo_speed=Vals[24];
+	globalpar.vcf_lfo_amplitude=Vals[25];
 
-	globalpar.vcf_cutoff=Vals[23];
-	globalpar.vcf_resonance=Vals[24];
-	globalpar.vcf_type=Vals[25];
-	globalpar.vcf_envmod=Vals[26];
-	globalpar.osc12_mix=Vals[27];
-	globalpar.osc34_mix=Vals[28];
-	globalpar.out_vol=Vals[29];
-	globalpar.arp_mod=Vals[30];
-	globalpar.arp_bpm=Vals[31];
-	globalpar.arp_cnt=Vals[32];
-	globalpar.globaldetune=Vals[33];
-	globalpar.globalfinetune=Vals[34];
-	globalpar.synthglide=Vals[35];
-	globalpar.interpolate=Vals[36];
+	globalpar.vcf_cutoff=Vals[26];
+	globalpar.vcf_resonance=Vals[27];
+	globalpar.vcf_type=Vals[28];
+	globalpar.vcf_envmod=Vals[29];
+
+	globalpar.osc12_mix=Vals[31];
+	globalpar.osc34_mix=Vals[32];
+	globalpar.out_vol=Vals[33];
+
+	globalpar.arp_mod=Vals[35];
+	globalpar.arp_bpm=Vals[36];
+	globalpar.arp_cnt=Vals[37];
+
+	globalpar.globaldetune=Vals[39];
+	globalpar.globalfinetune=Vals[40];
+	globalpar.synthglide=Vals[41];
+	globalpar.interpolate=Vals[42];
 }
 
 void mi::Command()
