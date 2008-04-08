@@ -98,7 +98,7 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 	machineTabs->addTab(genList, QIcon(":images/gen-native.png"), "Generators");
 	machineTabs->addTab(efxList, QIcon(":images/efx-native.png"), "Effects");
 	machineTabs->addTab(intList, QIcon(":images/gen-internal.png"), "Internal");
-	machineTabs->addTab(ladList, "Ladspa");
+	machineTabs->addTab(ladList, QIcon(":images/ladspa.png"),"Ladspa");
 	
 	layout->addWidget(machineTabs);
 	layout->addWidget(buttonBox);
