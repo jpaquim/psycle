@@ -384,6 +384,23 @@ void CSynthTrack::InitArpeggio()
 	ArpNote[8][14]				=7;
 	ArpNote[8][15]				=4;
 
+	ArpNote[9][0]				=0;
+	ArpNote[9][1]				=12;
+	ArpNote[9][2]				=0;
+	ArpNote[9][3]				=12;
+	ArpNote[9][4]				=0;
+	ArpNote[9][5]				=12;
+	ArpNote[9][6]				=0;
+	ArpNote[9][7]				=12;
+	ArpNote[9][8]				=0;
+	ArpNote[9][9]				=12;
+	ArpNote[9][10]				=0;
+	ArpNote[9][11]				=12;
+	ArpNote[9][12]				=0;
+	ArpNote[9][13]				=12;
+	ArpNote[9][14]				=0;
+	ArpNote[9][15]				=12;
+
 }
 
 void CSynthTrack::DoGlide()
