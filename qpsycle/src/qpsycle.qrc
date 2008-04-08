@@ -55,6 +55,7 @@
 	 <file>images/conf-visual.png</file>
 	 <file>images/conf-folders.png</file>
 	 <file>images/qpsycle.png</file>
+	 <file>images/ladspa.png</file>
 
 	 <file>../themes/mupsycle.qss</file>
 	 <file>../themes/default.qss</file>
