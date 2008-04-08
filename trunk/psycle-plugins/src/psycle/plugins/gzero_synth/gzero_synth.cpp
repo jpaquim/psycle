@@ -443,12 +443,12 @@ CMachineInfo const MacInfo =
 	NUMPARAMETERS,																												// numParameters
 	pParameters,																												// Pointer to parameters
 #if !defined NDEBUG
-	"Arguru Synth 3 (debug build)",								// name
+	"GZero Synth (debug build)",								// name
 #else
-	"Arguru Synth 3",																								// name
+	"GZero Synth",																								// name
 #endif
-	"Arguru Synth 3",																												// short name
-	"Gravity_0 on original source by J. Arguelles (arguru)",																												// author
+	"GZero Synth",																												// short name
+	"Gravity_0 on 'Arguru Synth 2' source by J. Arguelles (arguru)",																												// author
 	"help",																																				// A command, that could be use for open an editor, etc...
 	4
 };
