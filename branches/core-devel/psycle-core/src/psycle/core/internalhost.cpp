@@ -21,70 +21,24 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "internalhost.hpp"
+#include "pluginfinder.h"
 #include "internal_machines.h"
+#include "sampler.h"
+#include "xmsampler.h"
 
 namespace psy {namespace core {
 
 namespace InternalMacs {
-	static const char names[]={
-		"Master",
-		"Dummy Machine",
-		"Sampler",
 
-		"Sampulse",
-		"Note Duplicator",
-		"Send/Return Mixer",
-
-		"AudioInput",
-		"LFO Machine"
-	};
-	static const char author[]={
-		"Psycledelics",
-		"Psycledelics",
-		"Psycledelics",
-
-		"JosepMa [JAZ]",
-		"JosepMa [JAZ]",
-		"JosepMa [JAZ]",
-
-		"JosepMa [JAZ]",
-		"dw"
-	};
-	static const char description[]={
-		"Outputs Audio to soundcard",
-		"lets audio pass through",
-		"Plays .wav audio samples",
-		
-		"Tracker oriented sampler",
-		"forwards events to other machines",
-		"Mixes audio allowing send/returns",
-		
-		"Receives audio from the soundcard",
-		"Controls another machine's parameter",
-	};
-	static const char version[]={
-		"1.1",
-		"1.1",
-		"1.3",
-
-		"0.9",
-		"1.0",
-		"1.0",
-
-		"0.7",
-		"0.5"
-	};
-	static const MachineMode::type mode[] {
-		MachineMode::MASTER,
-		MachineMode::EFFECT,
-		MachineMode::GENERATOR,
-		
-		MachineMode::GENERATOR,
-		MachineMode::CONTROLLER,
-		MachineMode::EFFECT,
-
-		MachineMode::GENERATOR,
-		MachineMode::CONTROLLER
+	static const PluginInfo infos[]={
+		PluginInfo(MachineKey::master(),MachineMode::MASTER,"Master","Psycledelics","Outputs audio to soundcard","1.1","","Master"),
+		PluginInfo(MachineKey::dummy(),MachineMode::EFFECT,"Dummy Machine","Psycledelics","lets audio pass through","1.1","","Mixer"),
+		PluginInfo(MachineKey::sampler(),MachineMode::GENERATOR,"Sampler","Psycledelics","Plays .wav audio samples","1.3","","Sampler"),
+		PluginInfo(MachikeKey::sampulse(),MachineMode::GENERATOR,"Sampulse","JosepMa [JAZ]","Tracker oriented sampler","0.9","","Sampler"),
+		PluginInfo(MachineKey::duplicator(),MachineMode::CONTROLLER,"Note Duplicator","JosepMa [JAZ]","Forwards events to other machines","1.0","","Controller"),
+		PluginInfo(MachineKey::mixer(),MachineMode::EFFECT,"Send/Return Mixer","JosepMa [JAZ]","Mixes audio with send/returns","1.0","","Mixer"),
+		PluginInfo(MachineKey::audioinput(),MachineMode::GENERATOR,"AudioInput","Receives audio from the soundcard","0.7","","Capture"),
+		PluginInfo(MachineKey::lfo(),MachineMode::CONTROLLEr,"LFO Machine","Controls parameters of other machines","0.5","","Controller")
 	};
 }
 static InternalHost* instance_ = 0;
@@ -104,7 +58,7 @@ InternalHost& InternalHost::getInstance(MachineCallbacks* callb) {
 	return instance_;
 }
 
-Machine* InternalHost::CreateMachine(MachineKey key,Machine::id_type id) const
+Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Machine::id_type id) const
 {
 	Machine* mac=0;
 
@@ -145,21 +99,19 @@ void InternalHost::DeleteMachine(Machine* mac) const {
 	delete mac;
 }
 
-void InternalHost::getMachineInformation(std::vector<PluginInfo>& infoList) const
+void InternalHost::FillFinderData(PluginFinder* finder, bool /*clearfirst*/) const
 {
-	//InternalHost always regenerates his pluginInfo.
-	infoList.clear();
+	if ( !finder.hasHost(Hosts::INTERNAL) ) {
+		//Finder stores one map for each host, so we ensure that it knows us.
+		finder.addHost(Hosts::INTERNAL);
+	}
+	std::map<MachineKey,PluginInfo> infoMap = finder.getMap(Hosts::INTERNAL);
+
+	//InternalHost always regenerates its pluginInfo.
+	infoMap.clear();
 	
 	for(InternalMacs::type i=0; i < InternalMacs::NUM_MACS; ++i) {
-		PluginInfo info;
-		info.setKey(MachineKey(Hosts::INTERNAL,"",i));
-		info.setName(InternalMacs::names[i]);
-		info.setAuthor(InternalMacs::author[i]);
-		info.setDescription(InternalMacs::description[i]);
-		info.setVersion(InternalMacs::version[i]);
-		info.setMode(InternalMacs::mode[i]);
-		info.setLibName("");
-		infoList.push_back(info);
+		infoMap.insert(InternalMacs::infos[i].key(),InternalMacs::infos[i]);
 	}
 }
 

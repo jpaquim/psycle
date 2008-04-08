@@ -29,6 +29,7 @@ namespace psy{namespace core{
 
 class MachineCallbacks;
 class Machine;
+class PluginFinder;
 
 class MachineHost
 {
@@ -39,9 +40,9 @@ public:
 	virtual const Hosts::type hostCode() const = 0;
 	virtual const std::string hostName() const = 0;
 
-	virtual void getMachineInformation(std::vector<PluginInfo>&) const = 0;
+	virtual void FillFinderData(PluginFinder*, bool clearfirst=false) const = 0;
 
-	virtual Machine* CreateMachine(MachineKey,Machine::id_type) const = 0;
+	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) const = 0;
 	virtual void DeleteMachine(Machine*) const = 0;
 protected:
 	MachineCallbacks* mcallback_;

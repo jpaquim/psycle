@@ -36,7 +36,10 @@ public:
 	MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder);
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
 	void DeleteMachine(Machine*);
+
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }
+
+	void RegenerateFinderData();
 
 protected:
 	MachineCallbacks* callbacks_;

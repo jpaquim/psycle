@@ -79,8 +79,8 @@ namespace psy
 			static const MachineKey sampulse();
 			static const MachineKey duplicator();
 			static const MachineKey mixer();
-			static const MachineKey audioInput();
-			static const MachineKey LFO();
+			static const MachineKey audioinput();
+			static const MachineKey lfo();
 
 			const std::string & dllName() const;
 			const Hosts::type host() const;

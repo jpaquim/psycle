@@ -36,10 +36,10 @@ public:
 	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
 	virtual const std::string hostName() const { return "Internal"; }
 
-	virtual void getMachineInformation(std::vector<PluginInfo>&) const;
+	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
 
 	virtual void DeleteMachine(Machine*);
-	virtual Machine* CreateMachine(MachineKey,Machine::id_type);
+	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
 protected:
 	static InternalHost* instance_;
 };

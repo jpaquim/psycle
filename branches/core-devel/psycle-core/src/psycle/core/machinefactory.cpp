@@ -37,16 +37,20 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 {
 	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
 	hosts_.push_back( &InternalHost::getInstance(callbacks) );
+	InternalHost::getInstance(callbacks).FillFinderData(finder_);
 //	hosts_.push_back( &NativeHost::getInstance(callbacks) );
+//	NativeHost::getInstance(callbacks).FillFinderData(finder_);
 //	hosts_.push_back( &VstHost::getInstance(callbacks) );
+//	VstHost::getInstance(callbacks).FillFinderData(finder_);
 //	hosts_.push_back( &LadspaHost::getInstance(callbacks) );
+//	LadspaHost::getInstance(callbacks).FillFinderData(finder_);
 
 }
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 {
 	assert(key.host() < Hosts::NUM_HOSTS);
-	return hosts_[key.host()].CreateMachine(key,id);
+	return hosts_[key.host()].CreateMachine(finder_,key,id);
 #if 0
 	for (int i=0; i< hosts_.size(); ++i)
 	{
@@ -97,6 +101,13 @@ void MachineFactory::DeleteMachine(Machine* mac)
 		}
 	}
 #endif
+}
+void MachineFactory::RegenerateFinderData() 
+{
+	for (int i=0; i < hosts_.size(); ++i )
+	{
+		hosts_[i].FillFinderData(finder_,true);
+	}
 }
 
 }}

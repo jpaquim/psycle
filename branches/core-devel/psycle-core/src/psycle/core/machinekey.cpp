@@ -56,10 +56,10 @@ namespace psy
 		const MachineKey MachineKey::mixer() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::MIXER );
 		}
-		const MachineKey MachineKey::audioInput() {
+		const MachineKey MachineKey::audioinput() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::AUDIOINPUT );
 		}
-		const MachineKey MachineKey::LFO() {
+		const MachineKey MachineKey::lfo() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::LFO );
 		}
 

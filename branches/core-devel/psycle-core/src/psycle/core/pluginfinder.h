@@ -21,93 +21,26 @@
 #ifndef PSYCLE__CORE__PLUGIN_FINDER
 #define PSYCLE__CORE__PLUGIN_FINDER
 
-#include "machine.h"
 #include "machinekey.hpp"
+#include "plugininfo.h"
 
 namespace psy
 {
 	namespace core
 	{
-		namespace MachineMode
-		{
-			typedef enum
-			{
-				GENERATOR = 0,
-				EFFECT,
-				MASTER,
-				CONTROLLER
-			} type;
-		}
-
-		/**
-		@author  Psycledelics  
-		*/
-		class PluginInfo
-		{
-			public:
-				PluginInfo();
-
-				virtual ~PluginInfo();
-
-				void setKey( PluginKey );
-				PluginKey key() const;
-
-				void setMode( MachineMode::type mode );
-				MachineMode::type mode() const;
-
-				void setName( const std::string & name );
-				const std::string & name() const;
-
-				void setAuthor( const std::string & name );
-				const std::string & author() const;
-
-				void setDesc( const std::string & desc );
-				const std::string & desc() const;
-
-				void setVersion( const std::string & version );
-				const std::string & version() const;
-
-				void setLibName( const std::string & libName );
-				const std::string & libName() const;
-
-				void setFileTime( time_t fileTime );
-				time_t fileTime() const;
-
-				void setError( const std::string & error );
-				const std::string error() const;
-
-				void setAllow( bool allow );
-				bool allow() const;
-
-				void setCategory( const std::string & category );
-				const std::string & category() const;
-
-			private:
-				Machine::type_type subclass_;
-				Machine::mode_type mode_;
-				std::string name_;
-				std::string author_;
-				std::string desc_;
-				std::string version_;
-				std::string libName_;
-				time_t fileTime_;
-				std::string error_;
-				bool allow_;
-				std::string category_;
-		};
-
 		class PluginFinder
 		{
 			public:
 				PluginFinder(std::string const & psycle_path, std::string const & ladspa_path);
 				~PluginFinder();
 
-				virtual void refreshInfo();
+				virtual void addHost(Hosts::type);
+				virtual bool hasHost(Hosts::type);
 
 				PluginInfo info( const MachineKey & key ) const;
 			
-				std::map< MachineKey, PluginInfo >::const_iterator begin() const;
-				std::map< MachineKey, PluginInfo >::const_iterator end() const;
+				std::map< MachineKey, PluginInfo >::const_iterator begin(Hosts::type) const;
+				std::map< MachineKey, PluginInfo >::const_iterator end(Hosts::type) const;
 				
 			public:
 				std::string const & psycle_path() const { return psycle_path_; }
@@ -120,11 +53,8 @@ namespace psy
 				std::string const ladspa_path_;
 
 			protected:
-				static std::map< MachineKey, PluginInfo > map_;
+				static std::vector<std::map< MachineKey, PluginInfo >> maps_;
 
-				virtual void clearInfo();
-				virtual bool loadInfo();
-				virtual void scanInternal();
 				virtual void scanLadspa();
 				virtual void scanNatives();
 				void LoadLadspaInfo(std::string fileName);
