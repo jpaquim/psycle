@@ -57,8 +57,8 @@
 	 <file>images/qpsycle.png</file>
 	 <file>images/ladspa.png</file>
 
-	 <file>../themes/mupsycle.qss</file>
-	 <file>../themes/default.qss</file>
-	 <file>../themes/zeropsycle.qss</file>
+	 <file>../colorschemes/mupsycle.qss</file>
+	 <file>../colorschemes/default.qss</file>
+	 <file>../colorschemes/zeropsycle.qss</file>
  </qresource>
  </RCC>
