@@ -22,10 +22,12 @@ struct SYNPAR
 	int osc4detune;
 	int osc4finetune;
 	int osc4sync;
+
 	int amp_env_attack;
 	int amp_env_decay;
 	int amp_env_sustain;
 	int amp_env_release;
+
 	int vcf_env_attack;
 	int vcf_env_decay;
 	int vcf_env_sustain;
@@ -36,12 +38,17 @@ struct SYNPAR
 	int vcf_resonance;
 	int vcf_type;
 	int vcf_envmod;
+
 	int osc12_mix;
 	int osc34_mix;
 	int out_vol;
+
 	int arp_mod;
 	int arp_bpm;
 	int arp_cnt;
+
+	int custom_arp_step[16];
+
 	int globaldetune;
 	int globalfinetune;
 	int synthglide;
@@ -167,7 +174,15 @@ inline void CSynthTrack::ArpTick()
 {
 	Arp_tickcounter=0;
 
-	float note=Arp_basenote+(float)ArpNote[syntp->arp_mod-1][ArpCounter];
+	float note;
+	if(syntp->arp_mod == 16)
+	{	
+		note=Arp_basenote+(float)syntp->custom_arp_step[ArpCounter];
+	}
+	else
+	{
+		note=Arp_basenote+(float)ArpNote[syntp->arp_mod-1][ArpCounter];
+	}
 	OSC1Speed=(float)pow(2.0, note/12.0);
 
 	float note2=note+
