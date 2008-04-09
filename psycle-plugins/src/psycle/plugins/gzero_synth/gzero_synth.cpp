@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 int const MAX_ENV_TIME = 250000;
-int const NUMPARAMETERS = 43;
+int const NUMPARAMETERS = 60;
 
 CMachineParameter const labelOSC = 
 {
@@ -394,6 +394,176 @@ CMachineParameter const paraARPcount =
 	4
 };
 
+CMachineParameter const labelArpConf = 
+{
+	"Custom Arp Pattern",
+	"Custom Arp Pattern",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
+	0
+};
+
+CMachineParameter const paraStep1 =
+{
+	"Step 1",
+	"Step 1",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep2 =
+{
+	"Step 2",
+	"Step 2",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep3 =
+{
+	"Step 3",
+	"Step 3",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep4 =
+{
+	"Step 4",
+	"Step 4",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep5 =
+{
+	"Step 5",
+	"Step 5",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep6 =
+{
+	"Step 6",
+	"Step 6",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep7 =
+{
+	"Step 7",
+	"Step 7",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep8 =
+{
+	"Step 8",
+	"Step 8",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep9 =
+{
+	"Step 9",
+	"Step 9",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep10 =
+{
+	"Step 10",
+	"Step 10",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep11 =
+{
+	"Step 11",
+	"Step 11",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep12 =
+{
+	"Step 12",
+	"Step 12",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep13 =
+{
+	"Step 13",
+	"Step 13",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep14 =
+{
+	"Step 14",
+	"Step 14",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep15 =
+{
+	"Step 15",
+	"Step 15",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraStep16 =
+{
+	"Step 16",
+	"Step 16",
+	-36,																																												// MinValue				
+	36,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
 CMachineParameter const labelOptions = 
 {
 	"Options",
@@ -493,6 +663,23 @@ CMachineParameter const *pParameters[] =
 	&paraARPmode,
 	&paraARPbpm,
 	&paraARPcount,
+	&labelArpConf,
+	&paraStep1,
+	&paraStep2,
+	&paraStep3,
+	&paraStep4,
+	&paraStep5,
+	&paraStep6,
+	&paraStep7,
+	&paraStep8,
+	&paraStep9,
+	&paraStep10,
+	&paraStep11,
+	&paraStep12,
+	&paraStep13,
+	&paraStep14,
+	&paraStep15,
+	&paraStep16,
 	&labelOptions,
 	&paraGlobalDetune,
 	&paraGlobalFinetune,
@@ -626,10 +813,27 @@ void mi::ParameterTweak(int par, int val)
 	globalpar.arp_bpm=Vals[36];
 	globalpar.arp_cnt=Vals[37];
 
-	globalpar.globaldetune=Vals[39];
-	globalpar.globalfinetune=Vals[40];
-	globalpar.synthglide=Vals[41];
-	globalpar.interpolate=Vals[42];
+	globalpar.custom_arp_step[0]=Vals[39];
+	globalpar.custom_arp_step[1]=Vals[40];
+	globalpar.custom_arp_step[2]=Vals[41];
+	globalpar.custom_arp_step[3]=Vals[42];
+	globalpar.custom_arp_step[4]=Vals[43];
+	globalpar.custom_arp_step[5]=Vals[44];
+	globalpar.custom_arp_step[6]=Vals[45];
+	globalpar.custom_arp_step[7]=Vals[46];
+	globalpar.custom_arp_step[8]=Vals[47];
+	globalpar.custom_arp_step[9]=Vals[48];
+	globalpar.custom_arp_step[10]=Vals[49];
+	globalpar.custom_arp_step[11]=Vals[50];
+	globalpar.custom_arp_step[12]=Vals[51];
+	globalpar.custom_arp_step[13]=Vals[52];
+	globalpar.custom_arp_step[14]=Vals[53];
+	globalpar.custom_arp_step[15]=Vals[54];
+
+	globalpar.globaldetune=Vals[56];
+	globalpar.globalfinetune=Vals[57];
+	globalpar.synthglide=Vals[58];
+	globalpar.interpolate=Vals[59];
 }
 
 void mi::Command()
@@ -654,7 +858,7 @@ sprintf(
 		"\n12xx : Vcf cutoff slide-down\0"
 		);
 
-pCB->MessBox(buffer,"·-=<([aRgUrU's SYNTH 3)])>=-·",0);
+pCB->MessBox(buffer,"GZero Synth",0);
 
 }
 
@@ -788,15 +992,17 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		case 8:sprintf(txt,"Minor Bounce");return true;break;
 		case 9:sprintf(txt,"Major Bounce");return true;break;
 		case 10:sprintf(txt,"Up & Down");return true;break;
+			/* other arps not set yet */
+		case 16:sprintf(txt,"Custom");return true;break;
 
 		}
 	}
-	if ((param==41) && ( value == 0 ))
+	if ((param==58) && ( value == 0 ))
 	{
 		sprintf(txt,"Off");
 		return true;
 	}
-	if (param==42)
+	if (param==59)
 	{
 		sprintf(txt,value?"On":"Off");
 		return true;
