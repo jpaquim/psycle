@@ -64,7 +64,7 @@ namespace qpsycle {
 		QLabel *colorSchemeLabel = new QLabel( "Color Scheme:" );
 		QComboBox *colorSchemeCombo = new QComboBox( this );
 		connect( colorSchemeCombo, SIGNAL( activated( QString ) ), this, SLOT( oncolorSchemeComboChanged( QString ) ) );
-		QDir themeDir(":/themes");
+		QDir themeDir(":/colorschemes");
 		QStringList colorSchemes = themeDir.entryList();
 		colorSchemeCombo->addItems( colorSchemes );
 
