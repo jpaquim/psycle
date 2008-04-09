@@ -44,20 +44,21 @@ namespace convert_internal_machines
 class Psy2Filter : public PsyFilterBase
 {
 	protected:
+		//Note: convert_internal_machines uses its own enum.
 		typedef enum MachineClass
 		{
-			MASTER = 0,
-			SINE = 1, 
-			DIST = 2,
-			SAMPLER = 3,
-			DELAY = 4,
-			FILTER2P = 5,
-			GAIN = 6, 
-			FLANGER = 7, 
-			PLUGIN = 8,
-			VST = 9,
-			VSTFX = 10,
-			DUMMY = 255
+			MACH_MASTER = 0,
+			MACH_SINE = 1, 
+			MACH_DIST = 2,
+			MACH_SAMPLER = 3,
+			MACH_DELAY = 4,
+			MACH_2PFILTER = 5,
+			MACH_GAIN = 6, 
+			MACH_FLANGER = 7, 
+			MACH_PLUGIN = 8,
+			MACH_VST = 9,
+			MACH_VSTFX = 10,
+			MACH_DUMMY = 255
 		} machineclass_t;
 
 		class VSTLoader

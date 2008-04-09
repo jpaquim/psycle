@@ -30,11 +30,16 @@ namespace psy { namespace core {
 class PluginFinder;
 class MachineHost;
 
+// MachineFactory
+// Generates Machines and maintains the finder information.
+// Note: An usual factory would have functions for each type of machine.
+// Here it's been choosen to use MachineKeys instead.
 class MachineFactory
 {
 public:
 	MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder);
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
+
 	void DeleteMachine(Machine*);
 
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }

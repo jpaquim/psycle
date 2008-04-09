@@ -65,9 +65,9 @@ float * PluginFxCallback::unused1(int, int) { return 0; }
 /**************************************************************************/
 // Plugin
 
-Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , CoreSong* song)
+Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id )
 :
-	Machine(callbacks, MACH_PLUGIN, MACHMODE_FX, id, song),
+	Machine(callbacks, id),
 	_dll(0),
 	proxy_(*this)
 {
@@ -590,44 +590,6 @@ struct ToLower
 	char operator() (char c) const  { return std::tolower(c); }
 };
 
-bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ ) // const is here not possible cause we modify it -- stefan
-{
-	std::string prefix = "lib-xpsycle.plugin.";
-	std::string psFileName = psFileName_;
-	#if defined __unix__ || defined __APPLE__        
-		std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
-		if (psFileName.find(".so")== std::string::npos) {
-			_psDllName = psFileName;
-			int i = psFileName.find(".dll");
-			std::string withoutSuffix = psFileName.substr(0,i);
-			std::string soName = withoutSuffix + ".so";
-			psFileName = prefix + soName;
-			psFileName = path + psFileName; 
-			unsigned int pos;
-			while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
-		} else {
-			unsigned int i = psFileName.find(prefix);
-			if (i!=std::string::npos) {
-				int j = psFileName.find(".so");
-				if (j!=0) {
-					_psDllName = psFileName.substr(0,j);
-					_psDllName.erase(0, prefix.length());
-					_psDllName = _psDllName + ".dll";
-				} else {
-					_psDllName = psFileName;
-					_psDllName.erase(0, prefix.length());
-					_psDllName = _psDllName + ".dll";
-				}
-			} else _psDllName = psFileName;
-
-			psFileName = path + psFileName; 
-		}
-	#else
-		_psDllName = psFileName;
-		psFileName = path + psFileName;
-	#endif   
-	return Instance(psFileName);
-}
 
 
 void Plugin::GetParamName(int numparam, char * name) const

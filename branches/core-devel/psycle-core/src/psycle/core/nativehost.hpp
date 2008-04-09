@@ -18,51 +18,33 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PLUGIN_FINDER
-#define PSYCLE__CORE__PLUGIN_FINDER
 
-#include "machinekey.hpp"
-#include "plugininfo.h"
+#ifndef NATIVEHOST_HPP
+#define NATIVEHOST_HPP
 
-namespace psy
+#include "machinehost.hpp"
+
+namespace psy{ namespace core{
+
+
+class NativeHost : public MachineHost
 {
-	namespace core
-	{
-		class PluginFinder
-		{
-			public:
-				PluginFinder(std::string const & psycle_path, std::string const & ladspa_path);
-				~PluginFinder();
+protected:
+	NativeHost(MachineCallbacks*);
+public:
+	~NativeHost();
+	static NativeHost& getInstance(MachineCallbacks*);
 
-				virtual void addHost(Hosts::type);
-				virtual bool hasHost(Hosts::type);
+	virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }
+	virtual const std::string hostName() const { return "Native"; }
 
-				PluginInfo info( const MachineKey & key ) const;
-				std::string lookupDllName( const MachineKey & key ) const;
-			
-				std::map< MachineKey, PluginInfo >::const_iterator begin(Hosts::type) const;
-				std::map< MachineKey, PluginInfo >::const_iterator end(Hosts::type) const;
+	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
 
-				std::map< MachineKey, PluginInfo >& getMap(Hosts::type);
-				
-			public:
-				std::string const & psycle_path() const { return psycle_path_; }
-			private:
-				std::string const psycle_path_;
-				
-			public:
-				std::string const & ladspa_path() const { return ladspa_path_; }
-			private:
-				std::string const ladspa_path_;
+	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
+	virtual void DeleteMachine(Machine*);
+protected:
+	static NativeHost* instance_;
+};
 
-			protected:
-				static std::vector<std::map< MachineKey, PluginInfo >> maps_;
-
-				virtual void scanLadspa();
-				virtual void scanNatives();
-				void LoadLadspaInfo(std::string fileName);
-				void LoadNativeInfo(std::string fileName);
-		};
-	}
-}
-#endif
+}}
+#endif // NATIVEHOST_HPP

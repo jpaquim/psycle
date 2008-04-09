@@ -163,8 +163,8 @@ namespace psy {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song )
-		: Machine(callbacks,MACH_LADSPA, MACHMODE_FX, id, song)
+		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id )
+		: Machine(callbacks,id)
 		, libHandle_(0)
 		, psDescriptor(0)
 		, pluginHandle(0)

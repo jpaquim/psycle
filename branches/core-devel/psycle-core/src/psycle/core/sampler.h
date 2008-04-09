@@ -98,7 +98,7 @@ namespace psy {
 		{
 		public:
 			void Tick( );
-			Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song);
+			Sampler(MachineCallbacks* callbacks, Machine::id_type id);
 			virtual void Init();
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
 			virtual void SetSampleRate(int sr);

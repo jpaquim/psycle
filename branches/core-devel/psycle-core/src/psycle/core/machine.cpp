@@ -23,18 +23,10 @@
 
 #include "machine.h"
 
-//#include "analyzer.h"
 #include "song.h"
 #include "dsp.h"
 #include "helpers/math/round.hpp"
 #include "fileio.h"
-
-// The inclusion of the following headers is needed because of a bad design.
-// The use of these subclasses in a function of the base class should be 
-// moved to the Song loader.
-#include "internal_machines.h"
-#include "plugin.h"
-#include "sampler.h"
 
 #include <cstddef>
 #include <cstdlib> // for posix_memalign
@@ -261,15 +253,12 @@ namespace psy { namespace core {
 		//An outport, by default, does nothing.
 	}
 
-	Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
+	Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 	:
 		crashed_(),
 		//fpu_exception_mask_(),
-		type_(type),
-		mode_(mode),
 		id_(id),
 		callbacks(callbacks),
-		song_(song),
 		playColIndex(0),
 		_bypass(false),
 		_standby(false),
@@ -302,6 +291,8 @@ namespace psy { namespace core {
 		TWSActive(false),
 		TWSSamples(0)
 	{
+		SetEditName(GetName());
+
 		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
 		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
 
@@ -337,23 +328,20 @@ namespace psy { namespace core {
 	Machine::Machine(Machine* mac)
 	://fpu_exception_mask_(),
 	crashed_()
-	,type_(type)
-	,mode_(mode)
 	,id_(mac->id_)
 	,callbacks(mac->callbacks)
-	,song_(mac->song_)
 	,playColIndex(0)
 	,_bypass(mac->_bypass)
 	,_standby(false)
 	,_mute(mac->_mute)
 	,_waitingForSound(false)
 	,_worked(false)
-	,audio_range_(1.0f)
+	,audio_range_(mac->audio_range_)
 	,numInPorts(0)
 	,numOutPorts(0)
 	,inports(0)
 	,outports(0)
-	,_isMixerSend(false)
+	,_isMixerSend(mac->_isMixerSend)
 	,_connectedInputs(mac->_connectedInputs)
 	,_connectedOutputs(mac->_connectedOutputs)
 	,_panning(mac->_panning)
@@ -482,7 +470,7 @@ namespace psy { namespace core {
 		if ( !_connection[srcwire])
 			return false;
 
-		Machine *oldDst = song()->machine(_connection[srcwire]);
+		Machine *oldDst = callbacks->callbacks->song()->machine(_connection[srcwire]);
 		if (oldDst)
 		{
 			Wire::id_type oldwire,dstwire;
@@ -511,7 +499,7 @@ namespace psy { namespace core {
 		if (_inputMachines[dstwire] == -1) 
 			return false;
 
-		Machine *oldDst = song()->machine(_connection[dstwire]);
+		Machine *oldDst = callbacks->callbacks->song()->machine(_connection[dstwire]);
 		if (oldDst)
 		{
 			Wire::id_type oldwire;
@@ -552,7 +540,7 @@ namespace psy { namespace core {
 			{
 				if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
 				{
-					iMac = song()->machine(_inputMachines[w]);
+					iMac = callbacks->song()->machine(_inputMachines[w]);
 					if (iMac)
 					{
 						Wire::id_type wix = iMac->FindOutputWire(id());
@@ -569,7 +557,7 @@ namespace psy { namespace core {
 			{
 				if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
 				{
-					iMac = song()->machine(_outputMachines[w]);
+					iMac = callbacks->song()->machine(_outputMachines[w]);
 					if (iMac)
 					{
 						Wire::id_type wix = iMac->FindInputWire(id());
@@ -623,13 +611,13 @@ namespace psy { namespace core {
 	{
 		//Work down the connection wires until finding the mixer.
 		for (int i(0);i< MAX_CONNECTIONS; ++i)
-			if ( _connection[i]) song()->machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
+			if ( _connection[i]) callbacks->song()->machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
 	}
 	void Machine::SetMixerSendFlag()
 	{
 		for (int i(0);i<MAX_CONNECTIONS;++i)
 		{
-			if (_inputCon[i]) song()->machine(_inputMachines[i])->SetMixerSendFlag();
+			if (_inputCon[i]) callbacks->song()->machine(_inputMachines[i])->SetMixerSendFlag();
 		}
 		_isMixerSend=true;
 	}
@@ -639,7 +627,7 @@ namespace psy { namespace core {
 		for (int i(0);i< MAX_CONNECTIONS; ++i)
 			if ( _inputCon[i])
 			{
-				song()->machine(_inputMachines[i])->ClearMixerSendFlag();
+				callbacks->song()->machine(_inputMachines[i])->ClearMixerSendFlag();
 			}
 			
 		_isMixerSend=false;
@@ -713,7 +701,7 @@ namespace psy { namespace core {
 	{
 		// Get reference to the destination machine
 		if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-		Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
+		Machine *_pDstMachine = callbacks->song()->machine(_outputMachines[WireIndex]);
 		if (_pDstMachine)
 		{
 			Wire::id_type c;
@@ -730,7 +718,7 @@ namespace psy { namespace core {
 	{
 		// Get reference to the destination machine
 		if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-		const Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
+		const Machine *_pDstMachine = callbacks->song()->machine(_outputMachines[WireIndex]);
 		if (_pDstMachine)
 		{
 			Wire::id_type c;
@@ -802,7 +790,7 @@ namespace psy { namespace core {
 		{
 			if (_inputCon[i])
 			{
-				Machine* pInMachine = song()->machine(_inputMachines[i]);
+				Machine* pInMachine = callbacks->song()->machine(_inputMachines[i]);
 				if (pInMachine)
 				{
 					if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -922,52 +910,13 @@ namespace psy { namespace core {
 		pFile->Read(type);
 		//oldtype=type;
 		pFile->ReadString(dllName,256);
-		switch (type)
-		{
-		case MACH_MASTER:
-			if (pSong->machine(MASTER_INDEX)) pMachine = pSong->machine(MASTER_INDEX);
-			else if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new Master(callbacks, index, pSong);
-			break;
-		case MACH_SAMPLER:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new Sampler(callbacks, index, pSong );
-			break;
-		case MACH_XMSAMPLER:
-			//if ( !fullopen ) 
-			pMachine = new Dummy(callbacks, index, pSong);
-			type = MACH_DUMMY;
-			//else pMachine = new XMSampler(index);
-			break;
-		case MACH_DUPLICATOR:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new DuplicatorMac(callbacks, index, pSong);
-			break;
-		case MACH_MIXER:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new Mixer(callbacks, index, pSong);
-			break;
-#if 0
-		case MACH_LFO:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new LFO(callbacks, index, pSong);
-			break;
-#endif
-		case MACH_PLUGIN:
-			{
-				if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
+
+
+
+			if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
 				else 
 				{
-					Plugin * p;
-					pMachine = p = new Plugin(callbacks, index, pSong);
-					if(!p->LoadDll(plugin_path, dllName))
-					{
-						pMachine = new Dummy(callbacks, index, pSong);
-						type = MACH_DUMMY;
-						delete p;
-						bDeleted = true;
-					}
-				}
+			}
 			}
 			break;
 		case MACH_VST:

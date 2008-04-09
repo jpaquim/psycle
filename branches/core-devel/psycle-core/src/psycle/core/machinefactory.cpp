@@ -21,15 +21,12 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "machinefactory.h"
-#include "machine.h"
 #include "pluginfinder.h"
 #include "internalhost.hpp"
 //#include "nativehost11.hpp"
 //#include "vsthost24.hpp"
 //#include "ladspahost.hpp"
 namespace psy{ namespace core {
-
-
 
 MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 :callbacks_(callbacks)
@@ -38,12 +35,15 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
 	hosts_.push_back( &InternalHost::getInstance(callbacks) );
 	InternalHost::getInstance(callbacks).FillFinderData(finder_);
-//	hosts_.push_back( &NativeHost::getInstance(callbacks) );
-//	NativeHost::getInstance(callbacks).FillFinderData(finder_);
-//	hosts_.push_back( &VstHost::getInstance(callbacks) );
-//	VstHost::getInstance(callbacks).FillFinderData(finder_);
-//	hosts_.push_back( &LadspaHost::getInstance(callbacks) );
-//	LadspaHost::getInstance(callbacks).FillFinderData(finder_);
+
+	//hosts_.push_back( &NativeHost::getInstance(callbacks) );
+	//NativeHost::getInstance(callbacks).FillFinderData(finder_);
+
+	//hosts_.push_back( &VstHost::getInstance(callbacks) );
+	//VstHost::getInstance(callbacks).FillFinderData(finder_);
+
+	//hosts_.push_back( &LadspaHost::getInstance(callbacks) );
+	//LadspaHost::getInstance(callbacks).FillFinderData(finder_);
 
 }
 
@@ -65,10 +65,7 @@ Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 #if 0
 	if ( finder.info( key ).type() == MACH_PLUGIN )
 	{
-		if ( finder.info( key ).mode() == MACHMODE_FX ) {
-			if (id == -1) id = GetFreeFxBus();
-		} else if (id == -1) id = GetFreeBus();
-		return CreateMachine(finder.psycle_path(), MACH_PLUGIN, x, y, key.dllPath(), id );
+
 	}
 	else if ( finder.info( key ).type() == MACH_LADSPA )
 	{
@@ -102,6 +99,9 @@ void MachineFactory::DeleteMachine(Machine* mac)
 	}
 #endif
 }
+
+
+
 void MachineFactory::RegenerateFinderData() 
 {
 	for (int i=0; i < hosts_.size(); ++i )

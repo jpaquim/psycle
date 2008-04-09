@@ -41,11 +41,10 @@ namespace psy
 				NUM_HOSTS
 			} type;
 		}
-
-		// These enums are defined here instead of in InternalHost so that they can be used
-		// by both machinekey (to define the keys below) and by InternalHost
 		// type InternalMacs::type
-		// Allows to differentiate between the different internal machines.
+		// Allows to differentiate between internal machines.
+		// Note: This should be known only to InternalHost, but it is here
+		// so that MachineKey can return the keys of internal machines.
 		namespace InternalMacs
 		{
 			typedef enum 
@@ -63,6 +62,7 @@ namespace psy
 			} type;
 		}
 
+
 		class MachineKey
 		{
 		protected:
@@ -71,16 +71,14 @@ namespace psy
 			MachineKey( const Hosts::type host, const std::string & dllName, int index = 0 );
 			~MachineKey();
 
-			// These keys are defined here instead of in InternalHost to help the loaders find out
-			// this information, as well as the machines themselves report this to the savers.
-			static const MachineKey master();
-			static const MachineKey dummy();
-			static const MachineKey sampler();
-			static const MachineKey sampulse();
-			static const MachineKey duplicator();
-			static const MachineKey mixer();
-			static const MachineKey audioinput();
-			static const MachineKey lfo();
+			static const MachineKey MachineKey::master() const;
+			static const MachineKey MachineKey::dummy() const;
+			static const MachineKey MachineKey::sampler) const;
+			static const MachineKey MachineKey::sampulse() const;
+			static const MachineKey MachineKey::duplicator() const;
+			static const MachineKey MachineKey::mixer() const;
+			static const MachineKey MachineKey::audioinput() const;
+			static const MachineKey MachineKey::lfo() const;
 
 			const std::string & dllName() const;
 			const Hosts::type host() const;

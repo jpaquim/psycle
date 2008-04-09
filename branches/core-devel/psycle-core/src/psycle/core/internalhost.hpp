@@ -26,6 +26,7 @@
 
 namespace psy{ namespace core{
 
+
 class InternalHost : public MachineHost
 {
 protected:
@@ -33,13 +34,14 @@ protected:
 public:
 	~InternalHost();
 	static InternalHost& getInstance(MachineCallbacks*);
+
 	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
 	virtual const std::string hostName() const { return "Internal"; }
 
 	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
 
-	virtual void DeleteMachine(Machine*);
 	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
+	virtual void DeleteMachine(Machine*);
 protected:
 	static InternalHost* instance_;
 };

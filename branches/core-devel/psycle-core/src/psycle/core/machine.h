@@ -423,7 +423,7 @@ namespace psy
 		
 		///\name ctor/dtor
 		///\{
-		public:
+		protected:
 			Machine(MachineCallbacks* callbacks, id_type id);
 			Machine(Machine *mac);
 			virtual ~Machine();

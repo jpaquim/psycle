@@ -16,7 +16,7 @@
 *   You should have received a copy of the GNU General Public License     *
 *   along with this program; if not, write to the                         *
 *   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
+*   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.            *
 ***************************************************************************/
 #ifndef PLUGIN_H
 #define PLUGIN_H
@@ -94,11 +94,11 @@ class Plugin : public Machine
 		static PluginFxCallback _callback;
 	public:
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
-	public:
-		Plugin(MachineCallbacks* callbacks, Machine::id_type index, CoreSong* song);
+	protected:
+		Plugin(MachineCallbacks* callbacks, Machine::id_type index) ;
 
 		virtual ~Plugin() throw();
-
+	public:
 		virtual void Init();
 		virtual int GenerateAudioInTicks( int startSample, int numSamples );
 		virtual void Tick( );

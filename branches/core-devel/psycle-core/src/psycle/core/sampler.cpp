@@ -21,9 +21,9 @@ namespace psy
 		}
 
 
-		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
+		Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id)
 		:
-			Machine(callbacks, MACH_SAMPLER, MACHMODE_GENERATOR, id, song)
+			Machine(callbacks, id)
 		{
 			SetEditName("Sampler");
 			SetAudioRange(32768.0f);

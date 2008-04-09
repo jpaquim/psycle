@@ -24,7 +24,8 @@
 #include "pluginfinder.h"
 #include "internal_machines.h"
 #include "sampler.h"
-#include "xmsampler.h"
+#include "xmsampler"
+#include "mixer.h"
 
 namespace psy {namespace core {
 
@@ -58,7 +59,7 @@ InternalHost& InternalHost::getInstance(MachineCallbacks* callb) {
 	return instance_;
 }
 
-Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Machine::id_type id) const
+Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Machine::id_type id) const 
 {
 	Machine* mac=0;
 
@@ -95,6 +96,7 @@ Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Ma
 	return mac;
 }
 
+
 void InternalHost::DeleteMachine(Machine* mac) const {
 	delete mac;
 }
@@ -102,7 +104,7 @@ void InternalHost::DeleteMachine(Machine* mac) const {
 void InternalHost::FillFinderData(PluginFinder* finder, bool /*clearfirst*/) const
 {
 	if ( !finder.hasHost(Hosts::INTERNAL) ) {
-		//Finder stores one map for each host, so we ensure that it knows us.
+		//Finder stores one map for each host, so we ensure that it knows this host.
 		finder.addHost(Hosts::INTERNAL);
 	}
 	std::map<MachineKey,PluginInfo> infoMap = finder.getMap(Hosts::INTERNAL);
@@ -110,7 +112,8 @@ void InternalHost::FillFinderData(PluginFinder* finder, bool /*clearfirst*/) con
 	//InternalHost always regenerates its pluginInfo.
 	infoMap.clear();
 	
-	for(InternalMacs::type i=0; i < InternalMacs::NUM_MACS; ++i) {
+	// Master machine is skipped because it is never created by the user.
+	for(InternalMacs::type i=1; i < InternalMacs::NUM_MACS; ++i) {
 		infoMap.insert(InternalMacs::infos[i].key(),InternalMacs::infos[i]);
 	}
 }

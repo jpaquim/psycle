@@ -61,7 +61,7 @@ namespace psy {
 		class LADSPAMachine: public Machine
 		{
 			public:
-				LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song );
+				LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id);
 				virtual ~LADSPAMachine() throw();
 				virtual void Init();
 				virtual void PreWork(int numSamples);
