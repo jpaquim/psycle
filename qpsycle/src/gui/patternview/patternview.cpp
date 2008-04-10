@@ -47,7 +47,7 @@ int d2i(double d)
 
 PatternView::PatternView( psy::core::Song *song )
 {
-	qWarning( "Created PatternView: 0x%p.\n", this);
+	qDebug( "Created PatternView: 0x%p.\n", this);
 
 	song_ = song;
 	pattern_ = NULL;
@@ -69,7 +69,7 @@ PatternView::PatternView( psy::core::Song *song )
 PatternView::~PatternView()
 {
 	//Objects don't need to be deleted, since QWidget deletes the layout, and layout deletes its widgets too
-	qWarning( "Delete PatternView: 0x%p.\n", this);
+	qDebug( "Delete PatternView: 0x%p.\n", this );
 }
 
 void PatternView::createToolBar()
@@ -245,7 +245,7 @@ void PatternView::setNumberOfTracks( int numTracks )
 
 void PatternView::setPattern( psy::core::SinglePattern *pattern )
 {
-	printf("PatternView::setPattern(%p)\n",pattern);
+	qDebug( "PatternView::setPattern(%p)\n", pattern );
 	pattern_ = pattern;
 	zoomCbx_->setCurrentIndex(beatZoom()-1);
 	patternGrid()->update();

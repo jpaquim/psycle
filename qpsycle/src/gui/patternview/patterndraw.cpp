@@ -43,7 +43,7 @@ namespace qpsycle {
  */
 	PatternDraw::PatternDraw( PatternView *patView )
 	{
-		qWarning( "Created PatternDraw: 0x%p.\n", this);
+		qDebug( "Created PatternDraw: 0x%p.\n", this);
 
 		patView_ = patView; 
 		setAlignment( Qt::AlignLeft | Qt::AlignTop );
@@ -77,7 +77,7 @@ namespace qpsycle {
 	{
 		///\todo: why so?
 		patGrid_->patDraw(0);
-		qWarning( "Delete PatternDraw: 0x%p.\n", this);
+		qDebug( "Delete PatternDraw: 0x%p.\n", this);
 	}
 
 //FIXME: Several comments here: First, if we are going to modify all values, why not empty the map?

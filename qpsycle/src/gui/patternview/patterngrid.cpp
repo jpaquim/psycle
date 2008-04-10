@@ -69,7 +69,7 @@ template<class T> inline T str_hex(const std::string &  value) {
 PatternGrid::PatternGrid( PatternDraw *pDraw )
 	: patDraw_( pDraw )
 {
-	qWarning( "Create PatternGrid: 0x%p.\n", this);
+	qDebug( "Create PatternGrid: 0x%p.\n", this);
 
 	setFlag(ItemIsFocusable);
 
@@ -112,7 +112,7 @@ PatternGrid::PatternGrid( PatternDraw *pDraw )
 }
 
 PatternGrid::~PatternGrid() {
-	qWarning( "Delete PatternGrid: 0x%p.\n", this);
+	qDebug( "Delete PatternGrid: 0x%p.\n", this);
 }
 
 void PatternGrid::addEvent( const ColumnEvent & event ) {
@@ -1329,12 +1329,12 @@ void PatternGrid::deleteBlock( )
 
 void PatternGrid::insertRow() {
 	// \todo: implement
-	std::cout << "PatternGrid::insertRow() not yet implemented" << std::endl;
+	qDebug( "PatternGrid::insertRow() not yet implemented" );
 }
 
 void PatternGrid::deleteRow() {
 	// \todo: implement
-	std::cout << "PatternGrid::deleteRow() not yet implemented" << std::endl;
+	qDebug( "PatternGrid::deleteRow() not yet implemented" );
 }
 
 QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {

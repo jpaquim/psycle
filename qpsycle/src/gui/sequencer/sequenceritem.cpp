@@ -136,15 +136,14 @@ void SequencerItem::constrainToParent()
 void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
 	QGraphicsItem::mousePressEvent( event ); // Do normal business...
-	printf( "parentLine %p\n", qgraphicsitem_cast<SequencerLine*>(parentItem()) );
-	printf( "tickPos %f\n", sequenceEntry()->tickPosition() );
+	qDebug( "parentLine %p\n", qgraphicsitem_cast<SequencerLine*>(parentItem()) );
+	qDebug( "tickPos %f\n", sequenceEntry()->tickPosition() );
 
 	emit clicked(this);
 }
 
 void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
-	Q_UNUSED( event );
 	QMenu menu;
 	if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
 		loopEntryAction_ = new QAction( "Unloop Entry", this );
