@@ -25,8 +25,31 @@
 
 #include "gui/mainwindow.hpp"
 
+
+void customMessageHandler( QtMsgType type, const char *msg )
+{
+	switch ( type ) {
+	case QtDebugMsg:
+		fprintf( stderr, "qpsycle: [debug] %s\n", msg );
+		break;
+	case QtWarningMsg:
+		fprintf( stderr, "qpsycle: [warning] %s\n", msg );
+		break;
+	case QtCriticalMsg:
+		fprintf( stderr, "qpsycle: [critical] %s\n", msg );
+		break;
+	case QtFatalMsg:
+		fprintf( stderr, "qpsycle: [fatal] %s\n", msg );
+		abort( );
+	}
+}
+
+
+
 int main(int argc, char *argv[])
 {
+	qInstallMsgHandler( customMessageHandler );
+
 	QApplication *app = new QApplication(argc, argv);
 	QCoreApplication::setOrganizationName( "Psycledelics" );
 	QCoreApplication::setOrganizationDomain( "psycle.pastnotecut.org" );
