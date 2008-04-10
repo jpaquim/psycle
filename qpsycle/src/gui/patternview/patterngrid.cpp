@@ -477,7 +477,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 	event->accept();
 
 	int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers() , event->key() ) );
-	std::cout << "PatternGrid::keyPressEvent: command: " << command << std::endl;
+	qDebug() << "PatternGrid::keyPressEvent: command: " << command;
 	
 	if ( cursor().eventNr() == 0 && isNote( command ) ) 
 	{
