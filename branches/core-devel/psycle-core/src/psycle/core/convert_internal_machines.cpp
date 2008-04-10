@@ -1,11 +1,10 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 //#include <psycle/core/psycleCorePch.hpp>
 #include "convert_internal_machines.private.hpp"
-#include "internal_machines.h"
+#include "MachineFactory.hpp"
 #include "plugin.h"
 #include "helpers/scale.hpp"
 #include "helpers/math/pi.hpp"
-#include "machine.h"
 #include "player.h"
 #include "song.h"
 #include "fileio.h"
@@ -16,9 +15,8 @@ namespace psy {
 			namespace math = common::math;
 			typedef common::Scale::Real Real;
 
-			Converter::Converter(std::string const & plugin_path)
+			Converter::Converter()
 			:
-				plugin_path_(plugin_path)
 			{}
 			
 			Converter::~Converter() throw()
@@ -26,16 +24,13 @@ namespace psy {
 				for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
 			}
 			
-			Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff, CoreSong & song)
+			Machine & Converter::redirect(const MachineFactory factory, const int & index, const int& type, RiffFile & riff)
 			{
-				Plugin & plugin = * new Plugin(Player::Instance(), index, &song);
-				Machine * pointer_to_machine = &plugin;
+				Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::Native,(plugin_names()(type).c_str()),0),index);
+				if (!pointer_to_machine){
+					pointer_to_machine = factory.CreateMachine(MachineKey::dummy(),index);
+				}
 				try {
-					if(!plugin.LoadDll(plugin_path_, const_cast<char *>((plugin_names()(type) + ".dll").c_str()))) {
-						pointer_to_machine = 0; // for delete pointer_to_machine in the catch clause
-						delete & plugin;
-						pointer_to_machine = new Dummy(Player::Instance(), index, &song);
-					}
 					Machine & machine = *pointer_to_machine;
 					machine_converted_from[&machine] = new int(type);
 					machine.Init();
@@ -158,7 +153,7 @@ namespace psy {
 					return machine;
 				}
 				catch(...) {
-					delete pointer_to_machine;
+					factory.DeleteMachine(pointer_to_machine);
 					throw;
 				}
 			}

@@ -57,18 +57,17 @@ int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().ticksSpee
 
 // dummy body
 int PluginFxCallback::CallbackFunc(int, int, int, int) { return 0; }
-// dummy body
 float * PluginFxCallback::unused0(int, int) { return 0; }
-// dummy body
 float * PluginFxCallback::unused1(int, int) { return 0; }
 
 /**************************************************************************/
 // Plugin
 
-Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id )
+Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id )
 :
 	Machine(callbacks, id),
 	_dll(0),
+	key_(key),
 	proxy_(*this)
 {
 	SetEditName("native plugin");
@@ -77,127 +76,52 @@ Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id )
 
 Plugin::~ Plugin( ) throw()
 {
-	if(_dll) {
-		#if defined __unix__ || defined __APPLE__
-			::dlclose(_dll);
-		#else
-			::FreeLibrary((HINSTANCE)_dll);
-		#endif
-	}
 }
 
-bool Plugin::Instance( const std::string & file_name )
+bool Plugin::Instance( void * hInstance )
 {      
+	_dll = hInstance;
 	try {
-		#if 0
-			char const static path_env_var_name[] =
-			{
-				#if defined __unix__ || defined __APPLE__
-					"LD_LIBRARY_PATH"
-				#elif defined _WIN64 || or defined _WIN32
-					"PATH"
-				#else
-					#error unknown dynamic linker
-				#endif
-			};
-
-			// save the original path env var
-			std::string old_path;
-			{
-				char const * const env(std::getenv(path_env_var_name));
-				if(env) old_path = env;
-			}
-
-			// append the plugin dir to the path env var
-			std::string new_path(old_path);
-			if(new_path.length()) {
-				new_path +=
-					#if defined __unix__ || defined __APPLE__
-						":"
-					#elif defined _WIN64 || or defined _WIN32
-						";"
-					#else
-						#error unknown dynamic linker
-					#endif
-			}
-
-			///\todo new_path += dir_name(file_name), using boost::filesystem::path for portability
-
-			// append the plugin dir to the path env var
-			if(::putenv((path_env_var_name + ("=" + new_path)).c_str())) {
-				std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
-			}
-		#endif // 0
-
+	#if defined __unix__ || defined __APPLE__
+		GETINFO GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
+	#else
+		GETINFO GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
+	#endif
+		if (!GetInfo) {
 		#if defined __unix__ || defined __APPLE__
-			_dll = ::dlopen(file_name.c_str(), RTLD_LAZY /*RTLD_NOW*/);
+			std::cerr << "Cannot load symbols: " << dlerror() << '\n';
 		#else
-			if ( file_name.find(".dll") == std::string::npos) return false;
-			// Set error mode to disable system error pop-ups (for LoadLibrary)
-			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-			_dll = LoadLibraryA( file_name.c_str() );
-			// Restore previous error mode
-			SetErrorMode( uOldErrorMode );
+			///\todo readd the original code here!
 		#endif
-
-		#if 0
-			// set the path env var back to its original value
-			if(::putenv((path_env_var_name + ("=" + old_path)).c_str())) {
-				std::cerr << "psycle: plugin: warning: could not set " << path_env_var_name << " env var back to its original value.\n";
-			}
-		#endif // 0
-
-		if (!_dll) {
+			return false;
+		} else {
+			info_ = GetInfo();
+			if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << file_name << "\n";
+			fflush(stdout);
+			_isSynth = info_->Flags == 3;
+			if(_isSynth) mode(MACHMODE_GENERATOR);
+			strncpy(_psShortName,info_->ShortName,15);
+			_psShortName[15]='\0';
+			char buf[32];
+			strncpy(buf, info_->ShortName,31);
+			buf[31]='\0';
+			SetEditName(buf);
+			_psAuthor = info_->Author;
+			_psName = info_->Name;
+		#if defined __unix__ || defined __APPLE__
+			CREATEMACHINE GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
+		#else
+			CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)_dll, "CreateMachine" );
+		#endif
+			if(!GetInterface) {
 			#if defined __unix__ || defined __APPLE__
-				std::cerr << "Cannot load library: " << dlerror() << '\n';
+				std::cerr << "Cannot load symbol: " << dlerror() << "\n";
 			#else
 				///\todo
 			#endif
-			return false;
-		} else {
-			GETINFO GetInfo  = 0;
-			#if defined __unix__ || defined __APPLE__
-				GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
-			#else
-				GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
-			#endif
-			if (!GetInfo) {
-				#if defined __unix__ || defined __APPLE__
-					std::cerr << "Cannot load symbols: " << dlerror() << '\n';
-				#else
-					///\todo readd the original code here!
-				#endif
 				return false;
 			} else {
-				info_ = GetInfo();
-				if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << file_name << "\n";
-				fflush(stdout);
-				_isSynth = info_->Flags == 3;
-				if(_isSynth) mode(MACHMODE_GENERATOR);
-				strncpy(_psShortName,info_->ShortName,15);
-				_psShortName[15]='\0';
-				char buf[32];
-				strncpy(buf, info_->ShortName,31);
-				buf[31]='\0';
-				SetEditName(buf);
-				_psAuthor = info_->Author;
-				_psName = info_->Name;
-				CREATEMACHINE GetInterface = 0;
-				#if defined __unix__ || defined __APPLE__
-					GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
-				#else
-					GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)_dll, "CreateMachine" );
-				#endif
-				if(!GetInterface) {
-					#if defined __unix__ || defined __APPLE__
-						std::cerr << "Cannot load symbol: " << dlerror() << "\n";
-					#else
-						///\todo
-					#endif
-					return false;
-				} else {
-					proxy()(GetInterface());
-				}
+				proxy()(GetInterface());
 			}
 		}
 		return true;

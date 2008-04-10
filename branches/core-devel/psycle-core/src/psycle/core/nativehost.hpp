@@ -43,6 +43,8 @@ public:
 	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
 	virtual void DeleteMachine(Machine*);
 protected:
+	void* LoadDll( std::string const & psFileName );
+	void UnloadDll( void* hInstance );
 	static NativeHost* instance_;
 };
 

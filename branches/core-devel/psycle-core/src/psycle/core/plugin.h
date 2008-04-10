@@ -88,6 +88,8 @@ class Proxy
 		void callback() throw(); //exceptions::function_error);
 };
 
+class NativeHost;
+
 class Plugin : public Machine
 {
 	private:
@@ -95,17 +97,16 @@ class Plugin : public Machine
 	public:
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
 	protected:
-		Plugin(MachineCallbacks* callbacks, Machine::id_type index) ;
-
-		virtual ~Plugin() throw();
+		Plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type index) friend class NativeHost;
+		virtual ~Plugin() throw() friend class NativeHost;
 	public:
 		virtual void Init();
 		virtual int GenerateAudioInTicks( int startSample, int numSamples );
 		virtual void Tick( );
 		virtual void Tick(int channel, const PatternEvent & pEntry );
 		virtual void Stop();
-		inline virtual std::string GetDllName() const throw() { return _psDllName; }
-		virtual MachineKey getMachineKey() { return MachineKey(Hosts::NATIVE,_psDllName,0);}
+		inline virtual std::string GetDllName() const throw() { return key.dllName(); }
+		virtual MachineKey getMachineKey() { return key_;}
 		virtual std::string GetName() const { return _psName; }
 
 		virtual int GetNumParams() const { return GetInfo().numParameters; }
@@ -119,17 +120,17 @@ class Plugin : public Machine
 		inline Proxy const & proxy() const throw() { return proxy_; }
 		inline Proxy & proxy() throw() { return proxy_; }
 
-		bool Instance(const std::string & file_name);
-		bool LoadDll (std::string const & path, std::string const & file_name);
+		bool Instance(void* hInstance);
+		void* GethInstance() { return _dll; } friend class NativeHost;
 
 		///\name (de)serialization
 		///\{
-			public:
-				/// Loader for psycle fileformat version 2.
-				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
-				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-				virtual void SaveSpecificChunk(RiffFile * pFile) const;
-				virtual void SaveDllName      (RiffFile * pFile) const;
+	public:
+		/// Loader for psycle fileformat version 2.
+		virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+		virtual void SaveSpecificChunk(RiffFile * pFile) const;
+		virtual void SaveDllName      (RiffFile * pFile) const;
 		///\}
 
 		CMachineInfo const & GetInfo() const throw() { return *info_; }
@@ -138,8 +139,8 @@ class Plugin : public Machine
 		void* _dll;
 		char _psShortName[16];
 		std::string _psAuthor;
-		std::string _psDllName;
 		std::string _psName;
+		MachineKey key_;
 		bool _isSynth;
 		CMachineInfo * info_;
 		Proxy proxy_;

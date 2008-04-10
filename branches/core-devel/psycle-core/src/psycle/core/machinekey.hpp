@@ -80,6 +80,8 @@ namespace psy
 			static const MachineKey MachineKey::audioinput() const;
 			static const MachineKey MachineKey::lfo() const;
 
+			static const std::string MachineKey::preprocessName(std::string dllName);
+
 			const std::string & dllName() const;
 			const Hosts::type host() const;
 			int index() const;

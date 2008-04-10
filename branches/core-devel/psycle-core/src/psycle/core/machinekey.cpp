@@ -30,10 +30,13 @@ namespace psy
 		}
 
 		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, int index ) :
-			dllName_( dllName ),
 			host_( host ),
 			index_( index )
-		{}
+		{
+			if (!dllName.empty()) {
+				dllName_ = preprocessName(dllName);
+			}
+		}
 
 		MachineKey::~MachineKey() {
 		}
@@ -61,6 +64,27 @@ namespace psy
 		}
 		const MachineKey MachineKey::lfo() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::LFO );
+		}
+
+		static const std::string MachineKey::preprocessName(std::string dllName) {
+		#if defined __unix__ || defined __APPLE__
+			int pos = dllName.find(".so");
+		#else
+			int pos = dllName.find(".dll");
+		#endif
+			if (pos != std::string::npos) {
+				dllName = dllName.substr(0,pos);
+			}
+
+			std::transform(dllName.begin(),dllName.end(),dllName.begin(),ToLower());
+			std::replace(dllName.begin(),dllName.end()," ","_");
+
+			std::string prefix = "lib-xpsycle.plugin.";
+			pos = dllName.find(prefix);
+			if (pos!=std::string::npos) {
+				dllName.erase(pos, prefix.length());
+			}
+			return dllName;
 		}
 
 		bool MachineKey::operator<(const MachineKey & key) const {

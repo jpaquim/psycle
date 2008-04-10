@@ -53,9 +53,17 @@ Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine:
 	if (fullpath.empty()){ 
 		return 0;
 	}
-
-	if(!p->LoadDll(plugin_path, dllName))
+	void* hInstance = LoadDll(plugin_path, dllName);
+	if(!hInstance)
 	{
+		delete p;
+		return 0;
+	}
+	if(!p->Instance(hInstance))
+	{
+		//Since we don't allow to delete machines via "delete" keyword,
+		//we centralize the dll unloading here too unlike in psyclemfc.
+		UnloadDll(hInstance);
 		delete p;
 		return 0;
 	}
@@ -65,6 +73,7 @@ Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine:
 
 
 void NativeHost::DeleteMachine(Machine* mac) const {
+	UnloadDll(mac->GethInstance());
 	delete mac;
 }
 
@@ -82,53 +91,83 @@ void NativeHost::FillFinderData(PluginFinder* finder, bool clearfirst) const
 }
 
 
-
-bool NativeHost::LoadDll( Plugin* mac, std::string const & path, std::string const & psFileName_ )
+void* NativeHost::LoadDll( std::string const & psFileName )
 {
-// do this more generic. Since we lookup the full path from the pluginFinder, this process is not needed
-// *BUT* the dllname in the MachineKey needs some preprocessing previous to be added.
-// Concretely: removal of the extension.
-// Removal of the "lib-xpsycle.plugin." part of the name, for linux.
-// Loaders will need also to remove the extension when creating a key.
-//
-// MachineKey could do the std::transform to ToLower() as an automatic step.
+	void* hInstance;
+///FIXME: The disabled code was introduced in psyclemfc in order to load plugins that depend on external dll's.
+///       In such cases, the dll needs to be placed in the same dir than the .exe, not the one of the .dll, and this
+///       code allowed to place it with the dlls.
+#if 0
+	char const static path_env_var_name[] =
+	{
+		#if defined __unix__ || defined __APPLE__
+			"LD_LIBRARY_PATH"
+		#elif defined _WIN64 || or defined _WIN32
+			"PATH"
+		#else
+			#error unknown dynamic linker
+		#endif
+	};
+	// save the original path env var
+	std::string old_path;
+	{
+		char const * const env(std::getenv(path_env_var_name));
+		if(env) old_path = env;
+	}
+	// append the plugin dir to the path env var
+	std::string new_path(old_path);
+	if(new_path.length()) {
+		new_path +=
+			#if defined __unix__ || defined __APPLE__
+				":"
+			#elif defined _WIN64 || or defined _WIN32
+				";"
+			#else
+				#error unknown dynamic linker
+			#endif
+	}
+	///\todo new_path += dir_name(file_name), using boost::filesystem::path for portability
+	// append the plugin dir to the path env var
+	if(::putenv((path_env_var_name + ("=" + new_path)).c_str())) {
+		std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
+	}
+#endif // 0
 
+#if defined __unix__ || defined __APPLE__
+	hInstance = ::dlopen(file_name.c_str(), RTLD_LAZY /*RTLD_NOW*/);
+#else
+	// Set error mode to disable system error pop-ups (for LoadLibrary)
+	UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+	hInstance = LoadLibraryA( file_name.c_str() );
+	// Restore previous error mode
+	SetErrorMode( uOldErrorMode );
+#endif
 
-	std::string prefix = "lib-xpsycle.plugin.";
-	std::string psFileName = psFileName_;
-	#if defined __unix__ || defined __APPLE__        
-		std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
-		if (psFileName.find(".so")== std::string::npos) {
-			_psDllName = psFileName;
-			int i = psFileName.find(".dll");
-			std::string withoutSuffix = psFileName.substr(0,i);
-			std::string soName = withoutSuffix + ".so";
-			psFileName = prefix + soName;
-			psFileName = path + psFileName; 
-			unsigned int pos;
-			while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
-		} else {
-			unsigned int i = psFileName.find(prefix);
-			if (i!=std::string::npos) {
-				int j = psFileName.find(".so");
-				if (j!=0) {
-					_psDllName = psFileName.substr(0,j);
-					_psDllName.erase(0, prefix.length());
-					_psDllName = _psDllName + ".dll";
-				} else {
-					_psDllName = psFileName;
-					_psDllName.erase(0, prefix.length());
-					_psDllName = _psDllName + ".dll";
-				}
-			} else _psDllName = psFileName;
+#if 0
+	// set the path env var back to its original value
+	if(::putenv((path_env_var_name + ("=" + old_path)).c_str())) {
+		std::cerr << "psycle: plugin: warning: could not set " << path_env_var_name << " env var back to its original value.\n";
+	}
+#endif // 0
 
-			psFileName = path + psFileName; 
-		}
+	if (!hInstance) {
+	#if defined __unix__ || defined __APPLE__
+		std::cerr << "Cannot load library: " << dlerror() << '\n';
 	#else
-		_psDllName = psFileName;
-		psFileName = path + psFileName;
-	#endif   
-	return Instance(psFileName);
+		///\todo
+	#endif
+	}
+	return hInstance;
+}
+
+void NativeHost::UnloadDll( void* hInstance )
+{
+	assert(_hInstance);
+	#if defined __unix__ || defined __APPLE__
+		::dlclose(_dll);
+	#else
+		::FreeLibrary((HINSTANCE)_dll);
+	#endif
 }
 
 }}

@@ -23,7 +23,7 @@
 #include "machinefactory.h"
 #include "pluginfinder.h"
 #include "internalhost.hpp"
-//#include "nativehost11.hpp"
+#include "nativehost.hpp"
 //#include "vsthost24.hpp"
 //#include "ladspahost.hpp"
 namespace psy{ namespace core {
@@ -36,8 +36,8 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 	hosts_.push_back( &InternalHost::getInstance(callbacks) );
 	InternalHost::getInstance(callbacks).FillFinderData(finder_);
 
-	//hosts_.push_back( &NativeHost::getInstance(callbacks) );
-	//NativeHost::getInstance(callbacks).FillFinderData(finder_);
+	hosts_.push_back( &NativeHost::getInstance(callbacks) );
+	NativeHost::getInstance(callbacks).FillFinderData(finder_);
 
 	//hosts_.push_back( &VstHost::getInstance(callbacks) );
 	//VstHost::getInstance(callbacks).FillFinderData(finder_);

@@ -14,7 +14,7 @@ namespace psy {	namespace core {
 		class Dummy : public Machine
 		{
 		protected:
-			Dummy(MachineCallbacks* callbacks, id_type index) friend class InternalHost;
+			Dummy(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
 			Dummy(Machine *mac) friend class InternalHost;
 			virtual ~Dummy() throw() friend class InternalHost;
 		public:
@@ -31,7 +31,7 @@ namespace psy {	namespace core {
 		class DuplicatorMac : public Machine
 		{
 		protected:
-			DuplicatorMac(MachineCallbacks* callbacks, id_type index) friend class InternalHost;
+			DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
 			virtual ~DuplicatorMac() throw() friend class InternalHost;
 		public:
 			virtual void Init(void);
@@ -68,7 +68,7 @@ namespace psy {	namespace core {
 		class Master : public Machine
 		{
 		protected:
-			Master(MachineCallbacks* callbacks, id_type index) friend class InternalHost;
+			Master(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
 			virtual ~Master() throw() friend class InternalHost;
 		public:
 			virtual void Init(void);
@@ -104,7 +104,7 @@ namespace psy {	namespace core {
 		class LFO : public Machine
 		{
 		protected:
-			LFO(MachineCallbacks* callbacks, id_type index) friend class InternalHost;
+			LFO(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
 			virtual ~LFO() throw() friend class InternalHost;
 		public:
 			virtual void Init(void);

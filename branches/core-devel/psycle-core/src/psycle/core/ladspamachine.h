@@ -61,16 +61,15 @@ namespace psy {
 		class LADSPAMachine: public Machine
 		{
 			public:
-				LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id);
+				LADSPAMachine(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id);
 				virtual ~LADSPAMachine() throw();
 				virtual void Init();
 				virtual void PreWork(int numSamples);
 				virtual int GenerateAudio(int numSamples );
 				virtual void Tick(int channel, const PatternEvent & pEntry );
 				virtual void Stop(){}
-				inline virtual std::string GetDllName() const throw() { return libName_.c_str(); }
-				///FIXME: Use the correct index for the machinekey.
-				virtual MachineKey getMachineKey() {  return MachineKey(Hosts::LADSPA,libName_,0); }
+				inline virtual std::string GetDllName() const throw() { return key.dllName(); }
+				virtual MachineKey getMachineKey() {  return key_; }
 				virtual std::string GetName() const { return (char *) psDescriptor ? psDescriptor->Name : ""; }
 				virtual void GetParamName(int numparam, char * name) const;
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) const;
@@ -93,7 +92,7 @@ namespace psy {
 				LADSPA_Data GetMaxValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
 				void SetDefaultsForControls();
 				void* libHandle_;
-				std::string libName_;
+				MachineKey key_;
 
 				const LADSPA_Descriptor * psDescriptor;
 				/*const*/ LADSPA_Handle pluginHandle;

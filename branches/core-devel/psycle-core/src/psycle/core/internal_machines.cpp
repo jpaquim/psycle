@@ -305,7 +305,7 @@ namespace psy {
 
 		float * Master::_pMasterSamples = 0;
 
-		Master::Master(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song)
+		Master::Master(MachineCallbacks* callbacks, Machine:.id_type id)
 		:
 			Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
 			sampleCount(0),
