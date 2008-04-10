@@ -186,12 +186,12 @@ namespace qpsycle {
 
 	void SequencerDraw::onNewLineInserted(psy::core::SequenceLine* seqLine, psy::core::SequenceLine* position)
 	{
-		printf("onNewLineInserted(%p,%p)\n",seqLine,position);
+		qDebug("onNewLineInserted(%p,%p)\n",seqLine,position);
 		SequencerLine* line = makeSequencerLine(seqLine);
 		int numLines = lines_.size();
 		for(int i=0;i<numLines;i++) {
 			if (lines_[i]->sequenceLine() == position) {
-				printf("%ith line\n",i);
+				qDebug("%ith line\n",i);
 				SequencerLine* l=line;
 				for(int j=i;j<numLines;j++) {
 					l->setPos( 0, j*lineHeight_ );
@@ -347,7 +347,7 @@ namespace qpsycle {
 
 	void SequencerDraw::setSelectedLine( SequencerLine *line ) 
 	{
-		printf("setSelectedLine %p\n", line);
+		qDebug("setSelectedLine %p\n", line);
 		selectedLine_ = line;
 	}
 

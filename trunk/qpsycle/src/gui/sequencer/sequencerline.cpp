@@ -42,7 +42,7 @@ SequencerLine::SequencerLine( SequencerDraw *sDraw)
 }
 
 SequencerLine::~SequencerLine() {
-	printf("~SequencerLine %p\n",this);
+	qDebug( "~SequencerLine %p\n",this );
 }
 
 QRectF SequencerLine::boundingRect() const 
@@ -81,7 +81,7 @@ psy::core::SequenceLine *SequencerLine::sequenceLine() const
 
 	void SequencerLine::addItem( psy::core::SinglePattern* pattern )
 {
-	printf("SequencerLine::addItem called\n");
+	qDebug( "SequencerLine::addItem called\n" );
 	double endTick = sequenceLine()->tickLength();
 	
 	SequencerItem *item = new SequencerItem( sDraw_ );
@@ -124,8 +124,8 @@ void SequencerLine::insertItem( SequencerItem *item )
 // FIXME: design-wise, this may be better as SequencerItem::moveToNewLine.
 void SequencerLine::moveItemToNewLine( SequencerItem *item, SequencerLine *newLine ) 
 {
-	printf( "prevline %p\n", this );
-	printf( "newline %p\n", newLine );
+	qDebug( "prevline %p\n", this );
+	qDebug( "newline %p\n", newLine );
 	for( items_iterator i=items_.begin(); i!=items_.end(); ++i ) {
 		assert(*i);
 		if( (*i) == item ) {
@@ -139,9 +139,9 @@ void SequencerLine::moveItemToNewLine( SequencerItem *item, SequencerLine *newLi
 }
 
 void SequencerLine::removeEntry(psy::core::SequenceEntry* entry) {
-	printf("SequencerLine(this=%p)::removeEntry(%p)",this,entry);
+	qDebug( "SequencerLine(this=%p)::removeEntry(%p)",this,entry );
 	for(items_iterator i=items_.begin();i!=items_.end();++i) {
-		printf("item: %p\n",*i); // gives address 0x0000001 which is clearly wrong!
+		qDebug("item: %p\n",*i); // gives address 0x0000001 which is clearly wrong!
 		assert(*i);
 		if((*i)->sequenceEntry() == entry) {
 			scene()->removeItem(*i);
