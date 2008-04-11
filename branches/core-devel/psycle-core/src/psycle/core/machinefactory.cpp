@@ -37,7 +37,8 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 	InternalHost::getInstance(callbacks).FillFinderData(finder_);
 
 	hosts_.push_back( &NativeHost::getInstance(callbacks) );
-	NativeHost::getInstance(callbacks).FillFinderData(finder_);
+	//Skipped until path is set.
+	//NativeHost::getInstance(callbacks).FillFinderData(finder_);
 
 	//hosts_.push_back( &VstHost::getInstance(callbacks) );
 	//VstHost::getInstance(callbacks).FillFinderData(finder_);
@@ -100,6 +101,12 @@ void MachineFactory::DeleteMachine(Machine* mac)
 #endif
 }
 
+std::string const & getPsyclePath() const { return hosts_[Hosts::NATIVE].getPsyclePath(); }
+void setPsyclePath(std::string path)
+{
+	hosts_[Hosts::NATIVE].setPsyclePath(path);
+	hosts_[Hosts::NATIVE].FillFinderData(finder_,true);
+}
 
 
 void MachineFactory::RegenerateFinderData() 

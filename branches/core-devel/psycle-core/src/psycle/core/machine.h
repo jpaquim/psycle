@@ -459,9 +459,8 @@ namespace psy
 		///\name (de)serialization
 		///\{
 		public:
-			virtual void SaveDllName(RiffFile * pFile) const;
-			static Machine * LoadFileChunk(std::string const & plugin_path, CoreSong* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
-			virtual void SaveFileChunk(RiffFile * pFile) const;
+			bool LoadFileChunk(RiffFile* pFile) const;
+			void SaveFileChunk(RiffFile * pFile) const;
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 			/// Loader for psycle fileformat version 2.
@@ -559,28 +558,20 @@ namespace psy
 		///\name ports
 		///\{
 		public:
-			///\todo: to be enabled when enabling AudioPorts and Wires
-		#if 0
-			virtual unsigned int GetInPorts() const { return numInPorts; }
-			virtual unsigned int GetOutPorts() const { return numOutPorts; }
-			virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; }
-			virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; }
-
 			void defineInputAsStereo(int numports=1);
 			void defineOutputAsStereo(int numports=1);
 			bool acceptsConnections() { return numInPorts>0; }
 			bool emitsConnections() { return numOutPorts>0; }
-		#else
+
+			virtual unsigned int GetInPorts() const { return numInPorts; }
+			virtual unsigned int GetOutPorts() const { return numOutPorts; }
+			virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; }
+			virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; }
 			virtual std::string GetPortInputName(InPort::id_type /*port*/) const { std::string rettxt = "Stereo Input"; return rettxt; }
 			virtual std::string GetPortOutputName(OutPort::id_type /*port*/)  const { std::string rettxt = "Stereo Output"; return rettxt; }
-			virtual int GetInPorts() const { return (mode() != MACHMODE_GENERATOR)?1:0; }
-			virtual int GetOutPorts() const { return 1; }
-			bool acceptsConnections() { return mode() != MACHMODE_GENERATOR; }
-			bool emitsConnections() { return mode() != MACHMODE_MASTER; }
 
 			virtual int GetAudioInputs() const{ return MAX_CONNECTIONS; }
 			virtual int GetAudioOutputs() const { return MAX_CONNECTIONS; }
-		#endif
 		protected:
 			int numInPorts;
 			int numOutPorts;
@@ -653,7 +644,7 @@ namespace psy
 		///\name name
 		///\{
 		public:
-			virtual std::string GetDllName() const { return "built-in"; }
+			virtual std::string GetDllName() const { return ""; }
 			virtual std::string GetName() const = 0;
 
 		public:

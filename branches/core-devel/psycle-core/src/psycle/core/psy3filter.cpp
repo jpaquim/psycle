@@ -515,6 +515,18 @@ bool Psy3Filter::LoadMACDv0(std::string const & plugin_path, RiffFile* file,Core
 		Machine::id_type const id(index);
 		///\todo: song.clear() creates an empty song with a Master Machine. This loader doesn't
 		// try to free that allocated machine.
+				// assume version 0 for now
+		bool bDeleted(false);
+		Machine* pMachine;
+		type_type type;//,oldtype;
+		char dllName[256];
+		pFile->Read(type);
+		//oldtype=type;
+		pFile->ReadString(dllName,256);
+
+
+
+
 		song.machine(index, Machine::LoadFileChunk(plugin_path, &song,file, callbacks, id, minorversion, true));
 	}
 	return song.machine(index) != 0;

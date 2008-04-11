@@ -66,7 +66,7 @@ float * PluginFxCallback::unused1(int, int) { return 0; }
 Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id )
 :
 	Machine(callbacks, id),
-	_dll(0),
+	hInstance(0),
 	key_(key),
 	proxy_(*this)
 {
@@ -78,28 +78,33 @@ Plugin::~ Plugin( ) throw()
 {
 }
 
-bool Plugin::Instance( void * hInstance )
+bool Plugin::Instance( void * hInstance, bool load )
 {      
-	_dll = hInstance;
 	try {
 	#if defined __unix__ || defined __APPLE__
-		GETINFO GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
-	#else
-		GETINFO GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
-	#endif
+		GETINFO GetInfo = (GETINFO) dlsym( hInstance, "GetInfo");
 		if (!GetInfo) {
-		#if defined __unix__ || defined __APPLE__
 			std::cerr << "Cannot load symbols: " << dlerror() << '\n';
-		#else
-			///\todo readd the original code here!
-		#endif
 			return false;
-		} else {
+		}
+	#else
+		GETINFO GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( hInstance ), "GetInfo" );
+		if (!GetInfo) {
+			///\todo readd the original code here!
+			return false;
+		}
+	#endif
+		else {
 			info_ = GetInfo();
-			if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << file_name << "\n";
+			if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << GetDllName() << "\n";
 			fflush(stdout);
-			_isSynth = info_->Flags == 3;
-			if(_isSynth) mode(MACHMODE_GENERATOR);
+			
+			_isSynth = (info_->Flags == 3);
+			if(!_isSynth) {
+				SetStereoInputs();	
+			}
+			SetStereoOutputs();
+
 			strncpy(_psShortName,info_->ShortName,15);
 			_psShortName[15]='\0';
 			char buf[32];
@@ -108,20 +113,23 @@ bool Plugin::Instance( void * hInstance )
 			SetEditName(buf);
 			_psAuthor = info_->Author;
 			_psName = info_->Name;
-		#if defined __unix__ || defined __APPLE__
-			CREATEMACHINE GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
-		#else
-			CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)_dll, "CreateMachine" );
-		#endif
-			if(!GetInterface) {
+			if (load)
+			{
 			#if defined __unix__ || defined __APPLE__
-				std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+				CREATEMACHINE GetInterface =  (CREATEMACHINE) dlsym(hInstance, "CreateMachine");
 			#else
-				///\todo
+				CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)hInstance, "CreateMachine" );
 			#endif
-				return false;
-			} else {
-				proxy()(GetInterface());
+				if(!GetInterface) {
+				#if defined __unix__ || defined __APPLE__
+					std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+				#else
+					///\todo
+				#endif
+					return false;
+				} else {
+					proxy()(GetInterface());
+				}
 			}
 		}
 		return true;
@@ -150,14 +158,14 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
 	int ns = numSamples;
 	int us = startSample;
-	if(mode() == MACHMODE_GENERATOR)
+	if(_isSynth)
 	{
 		if (!_mute) Standby(false);
 		else Standby(true);
 	}
 
 	if (!_mute) {
-		if((mode() == MACHMODE_GENERATOR) || (!_bypass && !Standby())) {
+		if((_isSynth) || (!_bypass && !Standby())) {
 			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
 		}
 	}
@@ -509,13 +517,6 @@ void Plugin::Stop( )
 	Machine::Stop();
 }
 
-struct ToLower
-{
-	char operator() (char c) const  { return std::tolower(c); }
-};
-
-
-
 void Plugin::GetParamName(int numparam, char * name) const
 {
 	if( numparam < info_->numParameters ) std::strcpy(name,info_->Parameters[numparam]->Name);
@@ -570,12 +571,6 @@ bool Plugin::SetParameter(int numparam,int value)
 		}
 		return true;
 	} else return false;
-}
-
-
-void Plugin::SaveDllName(RiffFile * pFile) const
-{
-	pFile->WriteArray(_psDllName.c_str(), _psDllName.length() + 1);
 }
 
 bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)

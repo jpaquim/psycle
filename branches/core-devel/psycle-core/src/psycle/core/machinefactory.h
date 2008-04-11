@@ -44,6 +44,11 @@ public:
 
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }
 
+	//Getter necessary?
+	std::string const & getPsyclePath() const;
+	void setPsyclePath(std::string path);
+
+
 	void RegenerateFinderData();
 
 protected:

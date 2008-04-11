@@ -60,7 +60,8 @@ class Proxy
 	public:
 		Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 		~Proxy() throw ()
-		{ 
+		{
+			delete plugin_;
 			// (*this)(0);  ///\todo this segfaults under windows .. investigate 
 		}
 		
@@ -120,8 +121,7 @@ class Plugin : public Machine
 		inline Proxy const & proxy() const throw() { return proxy_; }
 		inline Proxy & proxy() throw() { return proxy_; }
 
-		bool Instance(void* hInstance);
-		void* GethInstance() { return _dll; } friend class NativeHost;
+		bool Instance(void* hInstance,bool load=true);
 
 		///\name (de)serialization
 		///\{
@@ -130,13 +130,11 @@ class Plugin : public Machine
 		virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
 		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 		virtual void SaveSpecificChunk(RiffFile * pFile) const;
-		virtual void SaveDllName      (RiffFile * pFile) const;
 		///\}
 
 		CMachineInfo const & GetInfo() const throw() { return *info_; }
 		
 	private:
-		void* _dll;
 		char _psShortName[16];
 		std::string _psAuthor;
 		std::string _psName;
@@ -161,7 +159,8 @@ inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::f
 	if(plugin)
 	{
 		callback();
-		//Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
+		// Init needs to be called after setting the default values for the parameters (IIRC?)
+		// Init(); 
 	}
 }
 inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw() { assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }

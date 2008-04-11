@@ -42,10 +42,16 @@ public:
 
 	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
 	virtual void DeleteMachine(Machine*);
+
+	std::string const & getPsyclePath() const { return psycle_path_; }
+	void setPsyclePath(std::string path) { psycle_path_ = path; }
+
 protected:
 	void* LoadDll( std::string const & psFileName );
 	void UnloadDll( void* hInstance );
+	void LoadNativeInfo(std::string fileName, std::map<MachineKey,PluginInfo>& infoMap);
 	static NativeHost* instance_;
+	std::string const psycle_path_;
 };
 
 }}

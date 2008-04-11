@@ -26,6 +26,13 @@ namespace psy
 {
 	namespace core
 	{
+	
+		struct ToLower
+		{
+			char operator() (char c) const  { return std::tolower(c); }
+		};
+
+
 		MachineKey::MachineKey( ) : index_(0) {
 		}
 

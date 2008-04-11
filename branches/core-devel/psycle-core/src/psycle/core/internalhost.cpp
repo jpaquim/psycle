@@ -32,14 +32,14 @@ namespace psy {namespace core {
 namespace InternalMacs {
 
 	static const PluginInfo infos[]={
-		PluginInfo(MachineKey::master(),MachineMode::MASTER,"Master","Psycledelics","Outputs audio to soundcard","1.1","","Master"),
-		PluginInfo(MachineKey::dummy(),MachineMode::EFFECT,"Dummy Machine","Psycledelics","lets audio pass through","1.1","","Mixer"),
-		PluginInfo(MachineKey::sampler(),MachineMode::GENERATOR,"Sampler","Psycledelics","Plays .wav audio samples","1.3","","Sampler"),
-		PluginInfo(MachikeKey::sampulse(),MachineMode::GENERATOR,"Sampulse","JosepMa [JAZ]","Tracker oriented sampler","0.9","","Sampler"),
-		PluginInfo(MachineKey::duplicator(),MachineMode::CONTROLLER,"Note Duplicator","JosepMa [JAZ]","Forwards events to other machines","1.0","","Controller"),
-		PluginInfo(MachineKey::mixer(),MachineMode::EFFECT,"Send/Return Mixer","JosepMa [JAZ]","Mixes audio with send/returns","1.0","","Mixer"),
-		PluginInfo(MachineKey::audioinput(),MachineMode::GENERATOR,"AudioInput","Receives audio from the soundcard","0.7","","Capture"),
-		PluginInfo(MachineKey::lfo(),MachineMode::CONTROLLEr,"LFO Machine","Controls parameters of other machines","0.5","","Controller")
+		PluginInfo(MachineKey::master(),MachineRole::MASTER,"Master","Psycledelics","Outputs audio to soundcard","1.1","","Master"),
+		PluginInfo(MachineKey::dummy(),MachineRole::EFFECT,"Dummy Machine","Psycledelics","lets audio pass through","1.1","","Mixer"),
+		PluginInfo(MachineKey::sampler(),MachineRole::GENERATOR,"Sampler","Psycledelics","Plays .wav audio samples","1.3","","Sampler"),
+		PluginInfo(MachikeKey::sampulse(),MachineRole::GENERATOR,"Sampulse","JosepMa [JAZ]","Tracker oriented sampler","0.9","","Sampler"),
+		PluginInfo(MachineKey::duplicator(),MachineRole::CONTROLLER,"Note Duplicator","JosepMa [JAZ]","Forwards events to other machines","1.0","","Controller"),
+		PluginInfo(MachineKey::mixer(),MachineRole::EFFECT,"Send/Return Mixer","JosepMa [JAZ]","Mixes audio with send/returns","1.0","","Mixer"),
+		PluginInfo(MachineKey::audioinput(),MachineRole::GENERATOR,"AudioInput","Receives audio from the soundcard","0.7","","Capture"),
+		PluginInfo(MachineKey::lfo(),MachineRole::CONTROLLEr,"LFO Machine","Controls parameters of other machines","0.5","","Controller")
 	};
 }
 static InternalHost* instance_ = 0;

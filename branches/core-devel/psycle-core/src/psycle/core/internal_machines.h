@@ -21,7 +21,6 @@ namespace psy {	namespace core {
 			virtual int GenerateAudio(int numSamples);
 			virtual MachineKey getMachineKey() { return MachineKey::dummy(); }
 			virtual std::string GetName() const { return _psName; }
-			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 		protected:
 			static std::string _psName;
 		};

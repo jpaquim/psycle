@@ -30,10 +30,11 @@ namespace psy
 	{
 		class PluginFinder
 		{
-			public:
-				PluginFinder(std::string const & psycle_path, std::string const & ladspa_path);
+			protected:
+				PluginFinder();
 				~PluginFinder();
-
+			public:
+				static PluginFinder& getInstance();
 				virtual void addHost(Hosts::type);
 				virtual bool hasHost(Hosts::type);
 
@@ -44,25 +45,9 @@ namespace psy
 				std::map< MachineKey, PluginInfo >::const_iterator end(Hosts::type) const;
 
 				std::map< MachineKey, PluginInfo >& getMap(Hosts::type);
-				
-			public:
-				std::string const & psycle_path() const { return psycle_path_; }
-			private:
-				std::string const psycle_path_;
-				
-			public:
-				std::string const & ladspa_path() const { return ladspa_path_; }
-			private:
-				std::string const ladspa_path_;
 
 			protected:
-				static std::vector<std::map< MachineKey, PluginInfo >> maps_;
-
-				virtual void scanLadspa();
-				virtual void scanNatives();
-				void LoadLadspaInfo(std::string fileName);
-				void LoadNativeInfo(std::string fileName);
-		};
+				std::vector<std::map< MachineKey, PluginInfo >> maps_;
 	}
 }
 #endif

@@ -822,25 +822,28 @@ namespace psy { namespace core {
 		//wire_cpu_cost(wire_cpu_cost() + wcost);
 	}
 
-#if 0
 
 	void Machine::defineInputAsStereo(int numports)
 	{
 		numInPorts=numports;
+		#if 0
 		///\todo: ArraY!!!!
 		inports = new InPort(*this,0,"Stereo In");
+		#endif
 	}
 
 	void Machine::defineOutputAsStereo(int numports)
 	{
 		numOutPorts=numports;
+		#if 0
 		///\todo: ArraY!!!!
 		outports = new OutPort(*this,0,"Stereo Out");
+		#endif
 	}
-#endif
+	
 	void Machine::UpdateVuAndStanbyFlag(int numSamples)
 	{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+	#if defined PSYCLE__CONFIGURATION__RMS_VUS
 		_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
@@ -865,7 +868,7 @@ namespace psy { namespace core {
 				Standby(true);
 			}
 		}
-#else
+	#else
 		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
@@ -881,95 +884,14 @@ namespace psy { namespace core {
 				Standby(true);
 			}
 		}
-#endif
+	#endif
 	}
 
-	bool Machine::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
+	bool Machine::LoadFileChunk(RiffFile* pFile)
 	{
-		std::uint32_t size;
-		pFile->Read(size);
-		std::uint32_t count;
-		pFile->Read(count);
-		for(std::uint32_t i(0); i < count; ++i)
-		{
-			std::uint32_t temp;
-			pFile->Read(temp);
-			SetParameter(i,temp);
-		}
-		pFile->Skip(size - sizeof count - count * sizeof(std::uint32_t));
-		return true;
-	}
-
-	Machine* Machine::LoadFileChunk(std::string const & plugin_path, CoreSong* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
-	{
-		// assume version 0 for now
-		bool bDeleted(false);
-		Machine* pMachine;
-		type_type type;//,oldtype;
-		char dllName[256];
-		pFile->Read(type);
-		//oldtype=type;
-		pFile->ReadString(dllName,256);
-
-
-
-			if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
-				else 
-				{
-			}
-			}
-			break;
-		case MACH_VST:
-			{
-				if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
-				else 
-				{
-					//vst::instrument * p;
-					//pMachine = p = new vst::instrument(index);
-					//if(!p->LoadDll(dllName))
-					//{
-					pMachine = new Dummy(callbacks, index, pSong);
-					type = MACH_DUMMY;
-					//delete p;
-					//bDeleted = true;
-					//}
-				}
-			}
-			break;
-		case MACH_VSTFX:
-			{
-				//if(!fullopen) pMachine = new Dummy(callbacks, index);
-				//else 
-				//{
-				//vst::fx * p;
-				//pMachine = p = new vst::fx(callbacks, index);
-				//if(!p->LoadDll(dllName))
-				//{
-				pMachine = new Dummy(callbacks, index, pSong);
-				type = MACH_DUMMY;
-				//delete p;
-				//bDeleted = true;
-				//}
-				//}
-			}
-			break;
-		default:
-			//if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
-			std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
-			pMachine = new Dummy(callbacks, index, pSong);
-			break;
-		}
-		pMachine->Init();
-		int temp;
-		if(!bDeleted)
-		{
-			///\todo: Is it even necessary???
-			/// for the winamp plugin maybe?
-			pMachine->type(type);
-		}
-		pFile->Read(pMachine->_bypass);
-		pFile->Read(pMachine->_mute);
-		pFile->Read(pMachine->_panning);
+		pFile->Read(_bypass);
+		pFile->Read(_mute);
+		pFile->Read(_panning);
 		pFile->Read(temp);
 		pMachine->SetPosX(temp);
 		pFile->Read(temp);
@@ -992,55 +914,37 @@ namespace psy { namespace core {
 			pFile->ReadString(&nametemp[0], nametemp.size());
 			pMachine->editName_.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
 		}
-		if(bDeleted) pMachine->editName_ += " (replaced)";
-		if(!fullopen) return pMachine;
-		if(!pMachine->LoadSpecificChunk(pFile,version))
-		{
-			{
-				std::ostringstream s;
-				s << "Missing or Corrupted Machine Specific Chunk " << dllName << std::endl << "Replacing with Dummy.";
-				std::cerr << s.str() << std::endl;
-				//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-			}
-			Machine* p = new Dummy(callbacks, index, pSong);
-			p->Init();
-			p->type(MACH_DUMMY);
-			p->mode(pMachine->mode());
-			p->_bypass=pMachine->_bypass;
-			p->_mute=pMachine->_mute;
-			p->_panning=pMachine->_panning;
-			p->SetPosX(pMachine->GetPosX());
-			p->SetPosY(pMachine->GetPosY());
-			p->_connectedInputs=pMachine->_connectedInputs; // number of Incoming connections
-			p->_connectedOutputs=pMachine->_connectedOutputs; // number of Outgoing connections
-			for(int i = 0; i < MAX_CONNECTIONS; i++)
-			{
-				p->_inputMachines[i]=pMachine->_inputMachines[i];
-				p->_outputMachines[i]=pMachine->_outputMachines[i];
-				p->_inputConVol[i]=pMachine->_inputConVol[i];
-				p->_wireMultiplier[i]=pMachine->_wireMultiplier[i];
-				p->_connection[i]=pMachine->_connection[i];
-				p->_inputCon[i]=pMachine->_inputCon[i];
-			}
-			pMachine->editName_ += " (replaced)";
-			p->_numPars = 0;
-			delete pMachine;
-			pMachine = p;
+		bool success = pMachine->LoadSpecificChunk(pFile,version);
+		if (success) {
+			pMachine->SetPan(pMachine->_panning);
+			if (pMachine->_bypass) pMachine->Bypass(true);
 		}
 
-		if(index < MAX_BUSES) pMachine->mode(MACHMODE_GENERATOR);
-		else if (index < MAX_BUSES * 2) pMachine->mode(MACHMODE_FX);
-		else pMachine->mode(MACHMODE_MASTER);
+		return success;
+	}
 
-		pMachine->SetPan(pMachine->_panning);
-		if (pMachine->_bypass) pMachine->Bypass(true);
-		return pMachine;
+	bool Machine::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
+	{
+		std::uint32_t size;
+		pFile->Read(size);
+		std::uint32_t count;
+		pFile->Read(count);
+		for(std::uint32_t i(0); i < count; ++i)
+		{
+			std::uint32_t temp;
+			pFile->Read(temp);
+			SetParameter(i,temp);
+		}
+		pFile->Skip(size - sizeof count - count * sizeof(std::uint32_t));
+		return true;
 	}
 
 	void Machine::SaveFileChunk(RiffFile* pFile) const
 	{
+		/* FIXME: Move this to the psyfilter saver.
 		pFile->Write(type());
 		SaveDllName(pFile);
+		*/
 		pFile->Write(_bypass);
 		pFile->Write(_mute);
 		pFile->Write(_panning);
@@ -1057,8 +961,8 @@ namespace psy { namespace core {
 			pFile->Write(_connection[i]);
 			pFile->Write(_inputCon[i]);
 		}
-		pFile->WriteArray(GetEditName().c_str(), GetEditName().length()+1); //a max of 128 chars will be read on song load, but there's no real
-		// reason to limit what gets saved here.. (is there?)
+		pFile->WriteArray(GetEditName().c_str(), GetEditName().length()+1); //a max of 256 chars will be read on song load, but there's no real
+											// reason to limit what gets saved here.. (is there?)
 		SaveSpecificChunk(pFile);
 	}
 
@@ -1073,12 +977,6 @@ namespace psy { namespace core {
 			std::uint32_t temp = GetParamValue(i);
 			pFile->Write(temp);
 		}
-	}
-
-	void Machine::SaveDllName(RiffFile* pFile) const
-	{
-		char temp=0;
-		pFile->Write(temp);
 	}
 
 	void Machine::AddEvent( double offset, int track, const PatternEvent & event )

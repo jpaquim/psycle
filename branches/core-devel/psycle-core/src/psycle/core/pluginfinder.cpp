@@ -27,36 +27,58 @@
 
 namespace psy { namespace core {
 
-std::map< MachineKey, PluginInfo > PluginFinder::map_;
-
-PluginFinder::PluginFinder(std::string const & psycle_path, std::string const & ladspa_path)
-:
-	psycle_path_(psycle_path),
-	ladspa_path_(ladspa_path)
+PluginFinder::PluginFinder()
 {
-	if (map_.empty())
-		loadInfo();
 }
-
 PluginFinder::~PluginFinder()
 {
 }
-
-std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::begin() const {
-	return map_.begin();
-}         
-		
-std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::end() const {
-	return map_.end();
-}         
-		
-PluginInfo PluginFinder::info( const MachineKey & key ) const {
-	std::map< MachineKey, PluginInfo >::const_iterator it = map_.find( key );
-	if ( it != map_.end() ) 
-		return it->second;
-	else
-		return PluginInfo();
+PluginFinder& PluginFinder::getInstance() 
+{
+	static PluginFinder finder;
+	return finder;
 }
+
+void PluginFinder::addHost(Hosts::type type)
+{
+	if (type >= maps_.size()) {
+		maps_.resize(type+1);
+	}
+}
+bool PluginFinder::hasHost(Hosts::type type)
+{
+	return (type < maps_.size());
+}
+
+std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::begin(Hosts::type) const {
+	return map_.begin();
+}
+std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::end(Hosts::type) const {
+	return map_.end();
+}
+std::map< MachineKey, PluginInfo >& PluginInfo::getMap(Hosts::type type) {
+	assert(type < maps_size());
+	return maps_[type];
+}
+
+PluginInfo PluginFinder::info( const MachineKey & key ) const {
+	if (!hasHost(key.host())) {
+		return PluginInfo();
+	}
+	
+	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
+	if ( it != map_.end() ) {
+		return it->second;
+	} else {
+		return PluginInfo();
+	}
+}
+std::string lookupDllName( const MachineKey & key ) const {
+	return info(key).libName();
+}
+
+
+
 
 void PluginFinder::scanLadspa() {
 	std::string ladspa_path = ladspa_path_;
@@ -119,55 +141,5 @@ void PluginFinder::LoadLadspaInfo(std::string fileName)
 		}
 	}
 
-void PluginFinder::scanNatives() {
-	std::vector<std::string> fileList;
-
-	try {
-		fileList = File::fileList(psycle_path_, File::list_modes::files);
-	} catch ( std::exception& e ) {
-		std::cout << "Warning: Unable to scan your native plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
-		return;
-	}
-
-	std::vector<std::string>::iterator it = fileList.begin();
-
-	for ( ; it < fileList.end(); ++it ) {
-		LoadNativeInfo(*it);
-	}
-}
-
-void PluginFinder::LoadNativeInfo(std::string fileName)
-{
-		#if defined __unix__ || defined __APPLE__
-			///\todo problem of so.x.y.z .. .so all three times todo
-		#else
-			if ( fileName.find( ".dll" ) == std::string::npos ) return;
-		#endif
-
-		class DummyCallbacks : public MachineCallbacks {
-			private:
-				PlayerTimeInfo ti;
-			public:
-				PlayerTimeInfo& timeInfo()  { return ti; }
-				bool autoStopMachines() const { return false; }
-		} dummycallbacks;
-
-		Plugin plugin(&dummycallbacks, 0, 0 );
-		if ( plugin.LoadDll( psycle_path_, fileName ) ) {
-			PluginInfo info;
-			info.setType( MACH_PLUGIN );
-			info.setName( plugin.GetName() );
-			info.setMode( plugin.mode() );
-			info.setLibName( plugin.GetDllName() );
-			std::ostringstream o;
-			std::string version;
-			if (!(o << plugin.GetInfo().Version )) version = o.str();
-			info.setVersion( version );
-			info.setAuthor( plugin.GetInfo().Author );
-			///\todo .. path should here stored and not evaluated in plugin
-			MachineKey key( Hosts::NATIVE, fileName );
-			map_[key] = info;               
-		}
-	}
 
 }}

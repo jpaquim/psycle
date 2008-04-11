@@ -59,15 +59,6 @@ namespace psy {
 			return numSamples;
 		}
 
-		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
-		{
-			std::uint32_t size;
-			pFile->Read(size);
-			pFile->Skip(size);
-			return true;
-		}
-
-
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 

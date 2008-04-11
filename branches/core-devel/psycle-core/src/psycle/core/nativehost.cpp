@@ -45,20 +45,16 @@ NativeHost& NativeHost::getInstance(MachineCallbacks* callb) {
 
 Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine::id_type id) const 
 {
-	Machine* mac=0;
-	Plugin * p;
-	mac = p = new Plugin(callbacks, id);
-
 	std::string fullPath = finder->lookupDllName(key);
 	if (fullpath.empty()){ 
 		return 0;
 	}
 	void* hInstance = LoadDll(plugin_path, dllName);
-	if(!hInstance)
-	{
-		delete p;
+	if(!hInstance) {
 		return 0;
 	}
+
+	Plugin * p = new Plugin(callbacks, id);
 	if(!p->Instance(hInstance))
 	{
 		//Since we don't allow to delete machines via "delete" keyword,
@@ -67,8 +63,8 @@ Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine:
 		delete p;
 		return 0;
 	}
-	mac->Init();
-	return mac;
+	p->Init();
+	return p;
 }
 
 
@@ -88,8 +84,55 @@ void NativeHost::FillFinderData(PluginFinder* finder, bool clearfirst) const
 	if (clearfirst) {
 		infoMap.clear();
 	}
+
+	std::vector<std::string> fileList;
+	try {
+		fileList = File::fileList(psycle_path_, File::list_modes::files);
+	} catch ( std::exception& e ) {
+		std::cout << "Warning: Unable to scan your native plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
+		return;
+	}
+
+	std::vector<std::string>::iterator it = fileList.begin();
+	for ( ; it < fileList.end(); ++it ) {
+		LoadNativeInfo(*it);
+	}
 }
 
+void NativeHost::LoadNativeInfo(std::string fileName, std::map<MachineKey,PluginInfo>& infoMap)
+{
+	#if defined __unix__ || defined __APPLE__
+		///\todo problem of so.x.y.z .. .so all three times todo
+	#else
+		if ( fileName.find( ".dll" ) == std::string::npos ) return;
+	#endif
+
+	void* hInstance = LoadDll(plugin_path, dllName);
+	if(!hInstance) {
+		return;
+	}
+	Plugin p(callbacks, id);
+	if(p->Instance(hInstance,false)) {
+		//we centralize the dll unloading here too unlike in psyclemfc.
+		UnloadDll(hInstance);
+		delete p;
+		return;
+	}
+
+	PluginInfo info;
+	MachineKey key( Hosts::NATIVE, fileName, 0 );
+	info.setKey(key);
+	info.setName( plugin.GetName() );
+//	info.setRole( plugin.mode() );
+	info.setLibName(fileName);
+	std::ostringstream o;
+	std::string version;
+	if (!(o << plugin.GetInfo().Version )) version = o.str();
+	info.setVersion( version );
+	info.setAuthor( plugin.GetInfo().Author );
+	///\todo .. path should here stored and not evaluated in plugin
+	infoMap[key] = info;
+}
 
 void* NativeHost::LoadDll( std::string const & psFileName )
 {
