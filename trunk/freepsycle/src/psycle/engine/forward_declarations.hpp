@@ -32,8 +32,9 @@ namespace psycle {
 			}
 		}
 		class buffer;
-		//this is currently a typedef: class channel;
+		class channel;
 		class event;
+		class sequence;
 		
 		namespace typenames {
 			using namespace engine;

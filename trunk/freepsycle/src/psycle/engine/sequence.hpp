@@ -1,34 +1,57 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2008-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::sequence
+///\interface psycle::engine::sequence
 #pragma once
-#include "plugin.hpp"
+#include "named.hpp"
+#include "buffer.hpp"
+#include "exception.hpp"
 #include <map>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__SEQUENCE
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE__SEQUENCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace psycle { namespace plugins {
+namespace psycle { namespace engine {
 
-/// an event scheduler
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public engine::node {
-	protected: friend class virtual_factory_access;
-		sequence(engine::plugin_library_reference &, engine::graph &, std::string const & name);
-	protected:
-		void do_process() throw(engine::exception) /*override*/;
+/// a sequence of events
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public named {
+	public:
+		/// constructs a sequence.
+		sequence(std::string const & name) : named(name) {}
 
 	///\name events
 	///\{
 		public:
 			/// inserts an event
-			void insert_event(real beat, real sample);
+			void insert_event(real beat, real sample) { events_[beat] = sample; }
+			/// erases an event
+			void erase_event(real beat) { events_.erase(beat); }
 			/// erases the range [begin_beat, end_beat[
 			void erase_events(real begin_beat, real end_beat);
-		private:
+		private: friend class sequence_iterator;
 			typedef std::map<real, real> events_type;
 			events_type events_;
-			/// iterator in events_ container corresponding to current beat_
-			events_type::const_iterator i_;
+	///\}
+};
+
+/// a iterator over a sequence
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence_iterator {
+	public:
+		/// constructs a sequence iterator.
+		sequence_iterator(typenames::sequence const & sequence);
+
+		/// outputs events to the given buffer and advances the beat position.
+		void process(buffer & out, real events_per_second, std::size_t channels) throw(exception);
+
+	private:
+		/// iterator in events_ container corresponding to current beat_
+		typenames::sequence::events_type::const_iterator i_;
+
+	///\name the sequence on which iteration is done
+	///\{
+		public:
+			typenames::sequence const & sequence() const throw() { return sequence_; }
+		private:
+			typenames::sequence const & sequence_;
 	///\}
 
 	///\name beats per second
@@ -74,4 +97,3 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public engine::node {
 
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
-
