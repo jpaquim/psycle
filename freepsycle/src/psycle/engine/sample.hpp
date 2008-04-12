@@ -5,7 +5,7 @@
 ///\interface psycle::engine::sample
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <universalis/compiler/numeric.hpp>
+//#include <universalis/compiler/numeric.hpp>
 #include <limits>
 #include <cmath>
 #include <cassert>
@@ -74,7 +74,8 @@ namespace math {
 }
 
 /// double (64-bit ieee-754 format) by default.
-typedef universalis::compiler::numeric<64>::floating_point real;
+typedef double real;
+//typedef universalis::compiler::numeric<64>::floating_point real;
 	
 namespace math {
 	/// john napier's log(2) aka ln(2) constant 
