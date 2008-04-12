@@ -365,7 +365,14 @@ namespace psy {
 				if ( ReturnValid(i))
 				{
 					if (Return(i).Wire().machine_ == caller.id())
+					{
 						sends_[i].machine_ = sender.id();
+						sends_[i].normalize_ = GetAudioRange()/sender.GetAudioRange();
+						for (int ch(0);ch<numinputs();ch++)
+						{
+							RecalcSend(ch,i);
+						}
+					}
 				}
 			}
 		}
