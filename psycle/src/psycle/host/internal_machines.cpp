@@ -55,23 +55,14 @@ namespace psycle
 			pFile->Skip(size);
 			return true;
 		}
-
-
 		//////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
-		DuplicatorMac::DuplicatorMac(int index)
+		MultiMachine::MultiMachine(int index)
 		{
-			_macIndex = index;
-			_numPars = NUMMACHINES*2;
-			_nCols = 2;
-			_type = MACH_DUPLICATOR;
-			_mode = MACHMODE_GENERATOR;
 			bisTicking = false;
-			sprintf(_editName, _psName);
 			for (int i=0;i<NUMMACHINES;i++)
 			{
 				macOutput[i]=-1;
-				noteOffset[i]=0;
 				for (int j=0;j<MAX_TRACKS;j++)
 				{
 					allocatedchans[j][i] = -1;
@@ -85,13 +76,16 @@ namespace psycle
 				}
 			}
 		}
-		void DuplicatorMac::Init()
+		MultiMachine::~MultiMachine()
+		{
+		}
+
+		void MultiMachine::Init()
 		{
 			Machine::Init();
 			for (int i=0;i<NUMMACHINES;i++)
 			{
 				macOutput[i]=-1;
-				noteOffset[i]=0;
 				for (int j=0;j<MAX_TRACKS;j++)
 				{
 					allocatedchans[j][i] = -1;
@@ -105,7 +99,7 @@ namespace psycle
 				}
 			}
 		}
-		void DuplicatorMac::Stop()
+		void MultiMachine::Stop()
 		{
 			for (int i=0;i<NUMMACHINES;i++)
 			{
@@ -122,14 +116,11 @@ namespace psycle
 				}
 			}
 		}
-		void DuplicatorMac::Tick()
-		{
 
-		}
 
-		void DuplicatorMac::Tick( int channel,PatternEntry* pData)
+		void MultiMachine::Tick( int channel,PatternEntry* pData)
 		{
-			if ( !_mute && !bisTicking) // Prevent possible loops of dupe machines.
+			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
 				bisTicking=true;
 				for (int i=0;i<NUMMACHINES;i++)
@@ -138,15 +129,8 @@ namespace psycle
 					{
 						AllocateVoice(channel,i);
 						PatternEntry pTemp = *pData;
-						if ( pTemp._note < notecommands::release )
-						{
-							int note = pTemp._note+noteOffset[i];
-							if ( note>=notecommands::release) note=119;
-							else if (note<0 ) note=0;
-							pTemp._note = static_cast<std::uint8_t>(note);
-						}
-
-						// the first part can happen if the parameter is the machine itself.
+						CustomTick(channel,i, pTemp);
+						// this can happen if the parameter is the machine itself.
 						if (Global::_pSong->_pMachine[macOutput[i]] != this) 
 						{
 							Global::_pSong->_pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
@@ -155,12 +139,16 @@ namespace psycle
 								DeallocateVoice(channel,i);
 							}
 						}
+						else
+						{
+							DeallocateVoice(channel,i);
+						}
 					}
 				}
 			}
 			bisTicking=false;
 		}
-		void DuplicatorMac::AllocateVoice(int channel,int machine)
+		void MultiMachine::AllocateVoice(int channel,int machine)
 		{
 			// If this channel already has allocated channels, use them.
 			if ( allocatedchans[channel][machine] != -1 )
@@ -180,13 +168,56 @@ namespace psycle
 			allocatedchans[channel][machine]=j;
 			availablechans[macOutput[machine]][j]=false;
 		}
-		void DuplicatorMac::DeallocateVoice(int channel, int machine)
+		void MultiMachine::DeallocateVoice(int channel, int machine)
 		{
 			if ( allocatedchans[channel][machine] == -1 )
 				return;
 			availablechans[macOutput[machine]][allocatedchans[channel][machine]]= true;
 			allocatedchans[channel][machine]=-1;
 		}
+		//////////////////////////////////////////////////////////////////////////
+		// NoteDuplicator
+		DuplicatorMac::DuplicatorMac(int index):
+			MultiMachine(index)
+		{
+			_macIndex = index;
+			_numPars = NUMMACHINES*2;
+			_nCols = 2;
+			_type = MACH_DUPLICATOR;
+			_mode = MACHMODE_GENERATOR;
+			sprintf(_editName, _psName);
+
+			for (int i=0;i<NUMMACHINES;i++)
+			{
+				noteOffset[i]=0;
+			}
+		}
+		void DuplicatorMac::Init()
+		{
+			MultiMachine::Init();
+			for (int i=0;i<NUMMACHINES;i++)
+			{
+
+				noteOffset[i]=0;
+			}
+		}
+
+		void DuplicatorMac::Tick()
+		{
+
+		}
+
+		void DuplicatorMac::CustomTick(int channel,int i, PatternEntry& pData)
+		{
+			if ( pData._note < notecommands::release )
+			{
+				int note = pData._note+noteOffset[i];
+				if ( note>=notecommands::release) note=119;
+				else if (note<0 ) note=0;
+				pData._note = static_cast<std::uint8_t>(note);
+			}
+		}
+
 		void DuplicatorMac::GetParamName(int numparam,char *name)
 		{
 			if (numparam >=0 && numparam<NUMMACHINES)
@@ -670,7 +701,14 @@ namespace psycle
 				if ( ReturnValid(i))
 				{
 					if (Return(i).Wire().machine_ == callerMac)
+					{
 						sends_[i].machine_ = senderMac;
+						sends_[i].normalize_ = GetAudioRange()/pSong->_pMachine[senderMac]->GetAudioRange();
+						for (int ch(0);ch<numinputs();ch++)
+						{
+							RecalcSend(ch,i);
+						}
+					}
 				}
 			}
 		}

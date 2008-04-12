@@ -386,7 +386,19 @@ namespace psycle
 			SetWireVolume(wireIndex,initialvol);
 			if ( _isMixerSend )
 			{
-				NotifyNewSendtoMixer(pSong,_macIndex,srcmac);
+				//Let's find if the new machine has still other machines connected to it.
+				// Right now the UI doesn't allow such configurations, but there isn't a reason
+				// not to allow it in the future.
+				Machine* pMac = pSong->_pMachine[srcmac];
+				for(int c=0; c<MAX_CONNECTIONS; c++)
+				{
+					if(pMac->_inputCon[c])	{
+						pMac = pSong->_pMachine[pMac->_inputCon[c]];
+						c=0;
+						continue;
+					}
+				}
+				NotifyNewSendtoMixer(pSong,_macIndex,pMac->_macIndex);
 			}
 		}
 		int Machine::GetFreeInputWire(int slottype)
@@ -493,6 +505,11 @@ namespace psycle
 			_inputCon[wireIndex] = false;
 			_inputMachines[wireIndex] = -1;
 			_numInputs--;
+			if ( _isMixerSend )
+			{
+				// Chain is broken, notify the mixer so that it replaces the send machine of the send/return.
+				NotifyNewSendtoMixer(pSong,_macIndex,_macIndex);
+			}
 		}
 		void Machine::DeleteWires(Song* pSong)
 		{
