@@ -619,7 +619,7 @@ namespace psy { namespace core {
 		if ( _isMixerSend )
 		{ 
 			// Chain is broken, notify the mixer so that it replaces the send machine of the send/return.
-			NotifyNewSendtoMixer(pSong,_macIndex,_macIndex);
+			NotifyNewSendtoMixer(*this,*this);
 		} 
 	}
 	void Machine::NotifyNewSendtoMixer(Machine& /*callerMac*/,Machine& senderMac)
