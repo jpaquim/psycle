@@ -25,11 +25,61 @@ protected:
 };
 //////////////////////////////////////////////////////////////////////////
 /// Duplicator machine.
-class DuplicatorMac : public Machine
+class MultiMachine: public Machine
+{
+public:
+	MultiMachine();
+	MultiMachine(int index);
+	virtual ~MultiMachine();
+	virtual void Init();
+	virtual void Tick( int channel,PatternEntry* pData);
+	virtual void Stop();
+
+protected:
+	static const int NUMMACHINES=8;
+	void AllocateVoice(int channel, int machine);
+	void DeallocateVoice(int channel, int machine);
+		virtual void CustomTick(int channel,int i, PatternEntry& pData) = 0;
+	short macOutput[NUMMACHINES];
+	short noteOffset[NUMMACHINES];
+	bool bisTicking;
+	// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
+	int allocatedchans[MAX_TRACKS][NUMMACHINES];
+	// indicates if the channel of the specified machine is in use or not
+	bool availablechans[MAX_MACHINES][MAX_TRACKS];
+};
+
+class DuplicatorMac : public MultiMachine
 {
 public:
 	DuplicatorMac();
 	DuplicatorMac(int index);
+	virtual void Init(void);
+	virtual void Tick();
+	virtual void CustomTick(int channel,int i, PatternEntry& pData);
+	virtual void Work(int numSamples);
+	virtual float GetAudioRange(){ return 32768.0f; }
+	virtual char* GetName(void) { return _psName; }
+	virtual void GetParamName(int numparam,char *name);
+	virtual void GetParamRange(int numparam, int &minval, int &maxval);
+	virtual void GetParamValue(int numparam,char *parVal);
+	virtual int GetParamValue(int numparam);
+	virtual bool SetParameter(int numparam,int value);
+	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+	virtual void SaveSpecificChunk(RiffFile * pFile);
+
+protected:
+	short noteOffset[NUMMACHINES];
+	static char* _psName;
+};
+/*
+//////////////////////////////////////////////////////////////////////////
+/// Drum Matrix Machine 
+class DrumsMatrix : public MultiMachine
+{
+public:
+	DrumsMatrix();
+	DrumsMatrix(int index);
 	virtual void Init(void);
 	virtual void Tick();
 	virtual void Tick( int channel,PatternEntry* pData);
@@ -46,19 +96,9 @@ public:
 	virtual void SaveSpecificChunk(RiffFile * pFile);
 
 protected:
-	static const int NUMMACHINES=8;
-	void AllocateVoice(int channel, int machine);
-	void DeallocateVoice(int channel, int machine);
-	short macOutput[NUMMACHINES];
-	short noteOffset[NUMMACHINES];
 	static char* _psName;
-	bool bisTicking;
-	// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
-	int allocatedchans[MAX_TRACKS][NUMMACHINES];
-	// indicates if the channel of the specified machine is in use or not
-	bool availablechans[MAX_MACHINES][MAX_TRACKS];
 };
-
+*/
 //////////////////////////////////////////////////////////////////////////
 /// Audio Recorder
 class AudioRecorder : public Machine
