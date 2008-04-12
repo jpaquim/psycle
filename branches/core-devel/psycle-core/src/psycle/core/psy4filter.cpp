@@ -103,7 +103,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	return root_element.get_name() == "psy4";
 }
 
-bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fileName*/, CoreSong & song, MachineCallbacks* callbacks )
+bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong & song, MachineFactory& factory )
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
@@ -437,7 +437,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 				//progress.emit(2,0,"Loading... Song machines...");
 				if ((version&0xFF00) == 0x0000) // chunkformat v0
 				{
-					LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
+					LoadMACDv0(&file,song,version&0x00FF,factory);
 				}
 				//else if ( (version&0xFF00) == 0x0100 ) //and so on
 			}

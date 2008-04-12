@@ -107,7 +107,7 @@ class Psy2Filter : public PsyFilterBase
 		/*override*/ int version() const { return 2; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		/*override*/ bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory);
 		/*override*/ bool loadExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
 		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong & /*song*/) {  /* so saving for legacy file format */ return false; }
 		/*override*/ bool saveExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
@@ -121,8 +121,8 @@ class Psy2Filter : public PsyFilterBase
 		virtual bool LoadINSD(RiffFile* file,CoreSong& song);
 		virtual bool LoadWAVD(RiffFile* file,CoreSong& song);
 		virtual bool PreLoadVSTs(RiffFile* file,CoreSong& song);
-		virtual bool LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
-		virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
+		virtual bool LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter, MachineFactory& factory);
+		virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter& converter);
 
 	protected:
 		static std::string const FILE_FOURCC;

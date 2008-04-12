@@ -43,12 +43,11 @@ public:
 	void DeleteMachine(Machine*);
 
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }
+	MachineCallbacks* getCallbacks() { return callbacks_; }
 
-	//Getter necessary?
 	std::string const & getPsyclePath() const;
 	void setPsyclePath(std::string path);
 
-	//Getter necessary?
 	std::string const & getLadspaPath() const;
 	void setLadspaPath(std::string path);
 

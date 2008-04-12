@@ -84,7 +84,7 @@ void Psy3Filter::preparePatternSequence( CoreSong & song )
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
+bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFactory& factory)
 {
 	RiffFile file;
 	file.Open(fileName);
@@ -133,7 +133,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 			//song.progress.emit(2,0,"Loading... Song properties information...");
 			if ((version&0xFF00) == 0x0000) // chunkformat v0
 			{
-				LoadSNGIv0(&file,song,version&0x00FF,callbacks);
+				LoadSNGIv0(&file,song,version&0x00FF,factory.getCallbacks());
 				//\ Fix for a bug existing in the Song Saver in the 1.7.x series
 				if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool); 
 			}
@@ -164,7 +164,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 			//song.progress.emit(2,0,"Loading... Song machines...");
 			if ((version&0xFF00) == 0x0000) // chunkformat v0
 			{
-				LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
+				LoadMACDv0(&file,song,version&0x00FF,factory);
 			}
 			//else if ( (version&0xFF00) == 0x0100 ) //and so on
 		}
@@ -513,21 +513,57 @@ bool Psy3Filter::LoadMACDv0(std::string const & plugin_path, RiffFile* file,Core
 	if(index < MAX_MACHINES)
 	{
 		Machine::id_type const id(index);
-		///\todo: song.clear() creates an empty song with a Master Machine. This loader doesn't
-		// try to free that allocated machine.
-				// assume version 0 for now
-		bool bDeleted(false);
-		Machine* pMachine;
-		type_type type;//,oldtype;
+		// assume version 0 for now
+		type_type type;
 		char dllName[256];
 		pFile->Read(type);
-		//oldtype=type;
 		pFile->ReadString(dllName,256);
 
-
-
-
-		song.machine(index, Machine::LoadFileChunk(plugin_path, &song,file, callbacks, id, minorversion, true));
+		switch (type)
+		{
+		case MACH_MASTER:
+			index= MASTER_INDEX;
+			break;
+		case MACH_SAMPLER:
+			song.machine(index,factory.CreateMachine(MachineKey::sampler(),id));
+			break;
+		case MACH_MIXER:
+			song.machine(index,factory.CreateMachine(MachineKey::mixer(),id));
+			break;
+		case MACH_XMSAMPLER:
+			song.machine(index,factory.CreateMachine(MachineKey::sampulse(),id));
+			break;
+		case MACH_DUPLICATOR:
+			song.machine(index,factory.CreateMachine(MachineKey::duplicator(),id));
+			break;
+		case MACH_AUDIOINPUT:
+			song.machine(index,factory.CreateMachine(MachineKey::audioinput(),id));
+			break;
+		case MACH_LFO:
+			song.machine(index,factory.CreateMachine(MachineKey::lfo(),id));
+			break;
+		case MACH_SCOPE:
+		case MACH_DUMMY:
+			song.machine(index,factory.CreateMachine(MachineKey::dummy(),id));
+			break;
+		case MACH_PLUGIN:
+			song.machine(index,factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),id));
+			break;
+		case MACH_VST:
+		case MACH_VSTFX:
+			//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+			//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
+			song.machine(index,factory.CreateMachine(MachineKey::dummy(),id));
+			break;
+		default:
+			{
+				std::ostringstream s;
+				s << "unkown machine type: " << type;
+				//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+			}
+			song.machine(index,factory.CreateMachine(MachineKey::dummy(),id));
+		}
+		song.machine(index).LoadFileChunk(file);
 	}
 	return song.machine(index) != 0;
 }

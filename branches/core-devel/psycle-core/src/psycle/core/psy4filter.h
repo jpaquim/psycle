@@ -54,7 +54,7 @@ class Psy4Filter : public Psy3Filter
 		/*override*/ int version() const { return 4; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		/*override*/ bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory);
 		/*override*/ bool save( const std::string & fileName, const CoreSong & song );
 
 	protected:

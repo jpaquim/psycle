@@ -87,7 +87,7 @@ class Psy3Filter : public PsyFilterBase
 		/*override*/ int version() const { return 3; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		/*override*/ bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory);
 		/*override*/ bool loadExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
 		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong & /*song*/) {  /* so saving for legacy file format */ return false; }
 		/*override*/ bool saveExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
@@ -99,7 +99,7 @@ class Psy3Filter : public PsyFilterBase
 		virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
 		virtual bool LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadMACDv0(std::string const & plugin_path, RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
+		virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, MachineFactory& factory);
 		virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
 
 	protected:

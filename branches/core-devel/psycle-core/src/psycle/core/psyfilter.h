@@ -27,17 +27,17 @@
 namespace psy { namespace core {
 
 class CoreSong;
-class MachineCallbacks;
 
 /**
 @author  Psycledelics  
 */
 class RiffFile;
+class MachineFactory;
+
 class PsyFilterBase
 {
 	public:
 		virtual ~PsyFilterBase() {}
-
 		//signals
 		//sigslot::signal2<const std::string &, const std::string &> report;
 		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
@@ -46,7 +46,7 @@ class PsyFilterBase
 		virtual int version() const = 0;
 		virtual std::string filePostfix() const = 0;
 		virtual bool testFormat(const std::string & fileName) = 0;
-		virtual bool load(const std::string & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks *callbacks ) = 0;
+		virtual bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory)= 0;
 		/// virtual function to use for loading UI-Specific data, or other extra-data that is not basic to song.
 		virtual bool loadExtra(RiffFile* file,char* header, int version) =0;
 		virtual bool save(const std::string & fileName, const CoreSong & song) = 0;
@@ -64,9 +64,9 @@ class PsyFilterBase
 class PsyFilters
 {
 	public:
-		PsyFilters();
+		PsyFilters(MachineFactory& factory1);
 
-		bool loadSong(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		bool loadSong(const std::string & fileName, CoreSong & song);
 		bool saveSong(const std::string & fileName, const CoreSong & song, int version);
 
 		//signals
@@ -75,6 +75,7 @@ class PsyFilters
 
 	private:
 		std::vector<PsyFilterBase*> filters;
+		MachineFactory& factory;
 };
 
 }}

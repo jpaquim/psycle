@@ -21,6 +21,8 @@
 //#include <psycle/core/psycleCorePch.hpp>
 #include <iostream>
 #include <fstream>
+#include "file.h"
+#include "machineFactory.h"
 #include "psyfilter.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
@@ -31,29 +33,21 @@ namespace psy
 {
 	namespace core
 	{
-		namespace {
-			bool fileIsReadable( const std::string & file )
-			{
-				std::ifstream _stream (file.c_str (), std::ios_base::in | std::ios_base::binary);
-				if (!_stream.is_open ()) return false;
-				return true;
-			}
-		}
-
-		PsyFilters::PsyFilters()
+		PsyFilters::PsyFilters(MachineFactory& factory1)
+		:factory(factory1)
 		{
 			filters.push_back( Psy2Filter::Instance() );
 			filters.push_back( Psy3Filter::Instance() );
 			filters.push_back( Psy4Filter::Instance() );
 		}
 
-		bool PsyFilters::loadSong(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
+		bool PsyFilters::loadSong(const std::string & fileName, CoreSong & song)
 		{
-			if ( fileIsReadable( fileName ) ) {
+			if ( File::fileIsReadable( fileName ) ) {
 				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 					PsyFilterBase* filter = *it;
 					if ( filter->testFormat(fileName) ) {
-						return filter->load(plugin_path, fileName,song, callbacks);
+						return filter->load(fileName,song,factory);
 						break;
 					}
 				}
