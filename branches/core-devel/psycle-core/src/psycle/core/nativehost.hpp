@@ -23,9 +23,13 @@
 #define NATIVEHOST_HPP
 
 #include "machinehost.hpp"
+#include "plugininfo.h"
 
+#include <map>
 namespace psy{ namespace core{
 
+class CMachineInfo;
+class CMachineInterface;
 
 class NativeHost : public MachineHost
 {
@@ -35,23 +39,23 @@ public:
 	~NativeHost();
 	static NativeHost& getInstance(MachineCallbacks*);
 
-	virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }
-	virtual const std::string hostName() const { return "Native"; }
-
-	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
-
 	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
 	virtual void DeleteMachine(Machine*);
+	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
 
-	std::string const & getPsyclePath() const { return psycle_path_; }
-	void setPsyclePath(std::string path) { psycle_path_ = path; }
+	virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }
+	virtual const std::string hostName() const { return "Native"; }
+	virtual std::string const & getPluginPath(int ) const { return plugin_path_; }
+	virtual int getNumPluginPaths() { return 1; }
+	virtual void setPluginPath(std::string ) { plugin_path_ = path; }
 
 protected:
-	void* LoadDll( std::string const & psFileName );
-	void UnloadDll( void* hInstance );
-	void LoadNativeInfo(std::string fileName, std::map<MachineKey,PluginInfo>& infoMap);
-	static NativeHost* instance_;
-	std::string const psycle_path_;
+	virtual void FillPluginInfo(const std::string&, const std::string&, std::map<MachineKey,PluginInfo>&);
+	void* LoadDll( const std::string& );
+	CMachineInfo* LoadDescriptor(void* );
+	CMachineInterface* Instantiate(void * );
+	void UnloadDll( void*  );
+	std::string const plugin_path_;
 };
 
 }}

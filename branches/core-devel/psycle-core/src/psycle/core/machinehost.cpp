@@ -28,6 +28,35 @@ MachineHost::MachineHost(MachineCallbacks*calls)
 {
 }
 
+void MachineHost::FillFinderData(PluginFinder* finder, bool clearfirst) const
+{
+	if ( !finder.hasHost(hostCode()) ) {
+		//Finder stores one map for each host, so we ensure that it knows this host.
+		finder.addHost(hostCode());
+	}
+	std::map<MachineKey,PluginInfo> infoMap = finder.getMap(hostCode());
+
+	if (clearfirst) {
+		infoMap.clear();
+	}
+	for (int i=0; i < getNumPluginPaths();i++) 
+	{
+		std::string currentPath = getPluginPath(i);
+		std::vector<std::string> fileList;
+		try {
+			fileList = File::fileList(currentPath, File::list_modes::files);
+		} catch ( std::exception& e ) {
+			std::cout << "Warning: Unable to scan your " hostName() " plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
+			return;
+		}
+		currentPath = currentPath + File::slash();
+		std::vector<std::string>::iterator it = fileList.begin();
+		for ( ; it < fileList.end(); ++it ) {
+			FillPluginInfo(currentPath,*it,infoMap);
+		}
+	}
+}
+
 }}
 
 

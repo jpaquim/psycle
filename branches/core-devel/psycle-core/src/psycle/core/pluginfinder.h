@@ -39,6 +39,7 @@ namespace psy
 				virtual bool hasHost(Hosts::type);
 
 				PluginInfo info( const MachineKey & key ) const;
+				bool hasKey( const MachineKey& key ) const;
 				std::string lookupDllName( const MachineKey & key ) const;
 			
 				std::map< MachineKey, PluginInfo >::const_iterator begin(Hosts::type) const;

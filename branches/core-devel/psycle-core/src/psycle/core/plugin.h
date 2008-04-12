@@ -98,7 +98,8 @@ class Plugin : public Machine
 	public:
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
 	protected:
-		Plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type index) friend class NativeHost;
+		Plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type index,
+			CMachineInfo* info, CMachineInterface* macIface ) friend class NativeHost;
 		virtual ~Plugin() throw() friend class NativeHost;
 	public:
 		virtual void Init();
@@ -120,8 +121,6 @@ class Plugin : public Machine
 
 		inline Proxy const & proxy() const throw() { return proxy_; }
 		inline Proxy & proxy() throw() { return proxy_; }
-
-		bool Instance(void* hInstance,bool load=true);
 
 		///\name (de)serialization
 		///\{

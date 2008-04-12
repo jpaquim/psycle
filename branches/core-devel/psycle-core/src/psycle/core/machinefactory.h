@@ -48,6 +48,9 @@ public:
 	std::string const & getPsyclePath() const;
 	void setPsyclePath(std::string path);
 
+	//Getter necessary?
+	std::string const & getLadspaPath() const;
+	void setLadspaPath(std::string path);
 
 	void RegenerateFinderData();
 

@@ -37,14 +37,19 @@ protected:
 	MachineHost(){}
 	MachineHost(MachineCallbacks*);
 public:
+	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) const = 0;
+	virtual void DeleteMachine(Machine*) const = 0;
+	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
+	
 	virtual const Hosts::type hostCode() const = 0;
 	virtual const std::string hostName() const = 0;
 
-	virtual void FillFinderData(PluginFinder*, bool clearfirst=false) const = 0;
-
-	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) const = 0;
-	virtual void DeleteMachine(Machine*) const = 0;
+	virtual std::string const & getPluginPath(int) { return ""; };
+	virtual int getNumPluginPaths() { return 0; }
+	virtual void setPluginPath(std::string path) {};
 protected:
+	virtual void FillPluginInfo(const std::string&, const std::string& , std::map<MachineKey,PluginInfo>& ) = 0;
+
 	MachineCallbacks* mcallback_;
 };
 

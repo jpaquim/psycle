@@ -36,8 +36,6 @@
 
 namespace psy { namespace core {
 
-typedef CMachineInfo * (* GETINFO) ();
-typedef CMachineInterface * (* CREATEMACHINE) ();
 
 /**************************************************************************/
 // PluginFxCallback
@@ -63,82 +61,37 @@ float * PluginFxCallback::unused1(int, int) { return 0; }
 /**************************************************************************/
 // Plugin
 
-Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id )
+Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, CMachineInfo* info, CMachineInterface* macIface )
 :
 	Machine(callbacks, id),
 	hInstance(0),
 	key_(key),
+	info_(info),
 	proxy_(*this)
 {
-	SetEditName("native plugin");
 	SetAudioRange(32768.0f);
+
+	_isSynth = (info_->Flags == 3);
+	if(!_isSynth) {
+		SetStereoInputs();	
+	}
+	SetStereoOutputs();
+
+	strncpy(_psShortName,info_->ShortName,15);
+	_psShortName[15]='\0';
+	char buf[32];
+	strncpy(buf, info_->ShortName,31);
+	buf[31]='\0';
+	SetEditName(buf);
+	_psAuthor = info_->Author;
+	_psName = info_->Name;
+
+	proxy()(macIface);
 }
 
 Plugin::~ Plugin( ) throw()
 {
 }
-
-bool Plugin::Instance( void * hInstance, bool load )
-{      
-	try {
-	#if defined __unix__ || defined __APPLE__
-		GETINFO GetInfo = (GETINFO) dlsym( hInstance, "GetInfo");
-		if (!GetInfo) {
-			std::cerr << "Cannot load symbols: " << dlerror() << '\n';
-			return false;
-		}
-	#else
-		GETINFO GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( hInstance ), "GetInfo" );
-		if (!GetInfo) {
-			///\todo readd the original code here!
-			return false;
-		}
-	#endif
-		else {
-			info_ = GetInfo();
-			if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << GetDllName() << "\n";
-			fflush(stdout);
-			
-			_isSynth = (info_->Flags == 3);
-			if(!_isSynth) {
-				SetStereoInputs();	
-			}
-			SetStereoOutputs();
-
-			strncpy(_psShortName,info_->ShortName,15);
-			_psShortName[15]='\0';
-			char buf[32];
-			strncpy(buf, info_->ShortName,31);
-			buf[31]='\0';
-			SetEditName(buf);
-			_psAuthor = info_->Author;
-			_psName = info_->Name;
-			if (load)
-			{
-			#if defined __unix__ || defined __APPLE__
-				CREATEMACHINE GetInterface =  (CREATEMACHINE) dlsym(hInstance, "CreateMachine");
-			#else
-				CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)hInstance, "CreateMachine" );
-			#endif
-				if(!GetInterface) {
-				#if defined __unix__ || defined __APPLE__
-					std::cerr << "Cannot load symbol: " << dlerror() << "\n";
-				#else
-					///\todo
-				#endif
-					return false;
-				} else {
-					proxy()(GetInterface());
-				}
-			}
-		}
-		return true;
-	} catch (...) {
-		std::cerr << "exception while loading plugin\n";
-		return false;
-	}
-}
-
 
 void Plugin::Init( )
 {

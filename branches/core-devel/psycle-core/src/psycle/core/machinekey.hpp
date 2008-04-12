@@ -35,8 +35,8 @@ namespace psy
 			{
 				INTERNAL=0,
 				NATIVE,
-				VST,
 				LADSPA,
+				VST,
 				//Keep at last position
 				NUM_HOSTS
 			} type;

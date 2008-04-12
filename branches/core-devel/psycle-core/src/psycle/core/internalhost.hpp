@@ -35,15 +35,14 @@ public:
 	~InternalHost();
 	static InternalHost& getInstance(MachineCallbacks*);
 
-	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
-	virtual const std::string hostName() const { return "Internal"; }
-
-	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
-
 	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
 	virtual void DeleteMachine(Machine*);
+	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
+
+	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
+	virtual const std::string hostName() const { return "Internal"; }
 protected:
-	static InternalHost* instance_;
+	virtual void FillPluginInfo(std::string , std::map<MachineKey,PluginInfo>& ) {}
 };
 
 }}

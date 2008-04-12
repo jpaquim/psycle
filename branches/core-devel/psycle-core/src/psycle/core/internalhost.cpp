@@ -42,21 +42,17 @@ namespace InternalMacs {
 		PluginInfo(MachineKey::lfo(),MachineRole::CONTROLLEr,"LFO Machine","Controls parameters of other machines","0.5","","Controller")
 	};
 }
-static InternalHost* instance_ = 0;
 
 InternalHost::InternalHost(MachineCallbacks*calls)
 :MachineHost(calls){
 }
 InternalHost::~InternalHost()
 {
-	if ( instance_ )
-		delete instance_;
 }
 
 InternalHost& InternalHost::getInstance(MachineCallbacks* callb) {
-	if ( !instance__ )
-		instance__ = new InternalHost(callb);
-	return instance_;
+	static InternalHost instance(callb);
+	return instance;
 }
 
 Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Machine::id_type id) const 

@@ -25,7 +25,7 @@
 #include "internalhost.hpp"
 #include "nativehost.hpp"
 //#include "vsthost24.hpp"
-//#include "ladspahost.hpp"
+#include "ladspahost.hpp"
 namespace psy{ namespace core {
 
 MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
@@ -39,13 +39,13 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 	hosts_.push_back( &NativeHost::getInstance(callbacks) );
 	//Skipped until path is set.
 	//NativeHost::getInstance(callbacks).FillFinderData(finder_);
+	
+	hosts_.push_back( &LadspaHost::getInstance(callbacks) );
+	//SKipped until path is set.
+	//LadspaHost::getInstance(callbacks).FillFinderData(finder_);
 
 	//hosts_.push_back( &VstHost::getInstance(callbacks) );
 	//VstHost::getInstance(callbacks).FillFinderData(finder_);
-
-	//hosts_.push_back( &LadspaHost::getInstance(callbacks) );
-	//LadspaHost::getInstance(callbacks).FillFinderData(finder_);
-
 }
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
@@ -101,12 +101,20 @@ void MachineFactory::DeleteMachine(Machine* mac)
 #endif
 }
 
-std::string const & getPsyclePath() const { return hosts_[Hosts::NATIVE].getPsyclePath(); }
+std::string const & getPsyclePath() const { return hosts_[Hosts::NATIVE].getPluginPath(); }
 void setPsyclePath(std::string path)
 {
-	hosts_[Hosts::NATIVE].setPsyclePath(path);
+	hosts_[Hosts::NATIVE].setPluginPath(path);
 	hosts_[Hosts::NATIVE].FillFinderData(finder_,true);
 }
+
+std::string const & getLadspaPath() const { return hosts_[Hosts::LADSPA].getPluginPath(); }
+void setLadspaPath(std::string path)
+{
+	hosts_[Hosts::LADSPA].setPluginPath(path);
+	hosts_[Hosts::LADSPA].FillFinderData(finder_,true);
+}
+
 
 
 void MachineFactory::RegenerateFinderData() 

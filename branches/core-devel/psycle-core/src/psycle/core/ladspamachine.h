@@ -61,7 +61,7 @@ namespace psy {
 		class LADSPAMachine: public Machine
 		{
 			public:
-				LADSPAMachine(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id);
+				LADSPAMachine(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,LADSPA_Descriptor* ,LADSPA_Handle );
 				virtual ~LADSPAMachine() throw();
 				virtual void Init();
 				virtual void PreWork(int numSamples);
@@ -78,20 +78,13 @@ namespace psy {
 				virtual bool SetParameter(int numparam,int value);
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile) const;
-				virtual void SaveDllName      (RiffFile * pFile) const;
-
-				LADSPA_Descriptor_Function loadDescriptorFunction( const std::string & fileName );
-				bool loadDll( const std::string & fileName ,int pluginIndex=0);
-				const LADSPA_Descriptor* pluginDescriptor() { return psDescriptor; }
 				std::string label() const { return psDescriptor ? psDescriptor->Label : ""; }
 
 			private:
-				void *dlopenLADSPA(const char * pcFilename, int iFlag);
 				void prepareStructures(void);
 				LADSPA_Data GetMinValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
 				LADSPA_Data GetMaxValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
 				void SetDefaultsForControls();
-				void* libHandle_;
 				MachineKey key_;
 
 				const LADSPA_Descriptor * psDescriptor;

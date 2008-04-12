@@ -26,112 +26,85 @@
 
 namespace psy {namespace core {
 
-static NativeHost* instance_ = 0;
+
+typedef CMachineInfo * (* GETINFO) ();
+typedef CMachineInterface * (* CREATEMACHINE) ();
 
 NativeHost::NativeHost(MachineCallbacks*calls)
 :MachineHost(calls){
 }
 NativeHost::~NativeHost()
 {
-	if ( instance_ )
-		delete instance_;
 }
 
-NativeHost& NativeHost::getInstance(MachineCallbacks* callb) {
-	if ( !instance__ )
-		instance__ = new NativeHost(callb);
-	return instance_;
+NativeHost& NativeHost::getInstance(MachineCallbacks* callb)
+{
+	static NativeHost instance(callb);
+	return instance;
 }
 
 Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine::id_type id) const 
 {
+	//FIXME: This is a good place where to use exceptions. (task for a later date)
 	std::string fullPath = finder->lookupDllName(key);
-	if (fullpath.empty()){ 
-		return 0;
-	}
-	void* hInstance = LoadDll(plugin_path, dllName);
-	if(!hInstance) {
-		return 0;
-	}
-
-	Plugin * p = new Plugin(callbacks, id);
-	if(!p->Instance(hInstance))
-	{
-		//Since we don't allow to delete machines via "delete" keyword,
-		//we centralize the dll unloading here too unlike in psyclemfc.
+	if (fullPath.empty()) return 0;
+	void* hInstance = LoadDll(fullPath);
+	if (!hInstance) return 0;
+	CMachineInfo* info = LoadDescriptor(hInstance,key.index());
+	if (!info) {
 		UnloadDll(hInstance);
-		delete p;
 		return 0;
 	}
+	CMachineInterface* maciface = Instantiate(hInstance,key.index());
+	if (!maciface) {
+		UnloadDll(hInstance);
+		return 0;
+	}
+	Plugin * p = new Plugin(callbacks, key, id, info, maciface );
 	p->Init();
 	return p;
 }
 
 
 void NativeHost::DeleteMachine(Machine* mac) const {
-	UnloadDll(mac->GethInstance());
-	delete mac;
-}
-
-void NativeHost::FillFinderData(PluginFinder* finder, bool clearfirst) const
-{
-	if ( !finder.hasHost(Hosts::NATIVE) ) {
-		//Finder stores one map for each host, so we ensure that it knows this host.
-		finder.addHost(Hosts::NATIVE);
-	}
-	std::map<MachineKey,PluginInfo> infoMap = finder.getMap(Hosts::NATIVE);
-
-	if (clearfirst) {
-		infoMap.clear();
-	}
-
-	std::vector<std::string> fileList;
 	try {
-		fileList = File::fileList(psycle_path_, File::list_modes::files);
-	} catch ( std::exception& e ) {
-		std::cout << "Warning: Unable to scan your native plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
-		return;
-	}
-
-	std::vector<std::string>::iterator it = fileList.begin();
-	for ( ; it < fileList.end(); ++it ) {
-		LoadNativeInfo(*it);
+		//Since we don't allow to delete machines via "delete" keyword,
+		//we centralize the dll unloading here too unlike in psyclemfc.
+		UnloadDll(mac->GethInstance());
+		delete mac;
+	}catch(...) {
 	}
 }
 
-void NativeHost::LoadNativeInfo(std::string fileName, std::map<MachineKey,PluginInfo>& infoMap)
+void NativeHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName, std::map<MachineKey,PluginInfo>& infoMap)
 {
 	#if defined __unix__ || defined __APPLE__
 		///\todo problem of so.x.y.z .. .so all three times todo
 	#else
 		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#endif
-
-	void* hInstance = LoadDll(plugin_path, dllName);
-	if(!hInstance) {
-		return;
+	
+	void* hInstance = LoadDll(fileName);
+	if (!hInstance) return 0;
+	
+	CMachineInfo* minfo = LoadDescriptor(hInstance);
+	if (minfo) {
+		PluginInfo pinfo;
+		MachineKey key( hostCode() , fileName, 0 );
+		pinfo.setKey(key);
+		pinfo.setName( minfo->Name );
+		//pinfo.setRole( plugin.mode() );
+		pinfo.setLibName(currentPath + fileName);
+		std::ostringstream o;
+		std::string version;
+		if (!(o << minfo->Version )) version = o.str();
+		pinfo.setVersion( version );
+		pinfo.setAuthor( minfo->Author );
+		infoMap[key] = pinfo;
+	
+		minfo = LoadDescriptor(hInstance,++index);
 	}
-	Plugin p(callbacks, id);
-	if(p->Instance(hInstance,false)) {
-		//we centralize the dll unloading here too unlike in psyclemfc.
-		UnloadDll(hInstance);
-		delete p;
-		return;
-	}
-
-	PluginInfo info;
-	MachineKey key( Hosts::NATIVE, fileName, 0 );
-	info.setKey(key);
-	info.setName( plugin.GetName() );
-//	info.setRole( plugin.mode() );
-	info.setLibName(fileName);
-	std::ostringstream o;
-	std::string version;
-	if (!(o << plugin.GetInfo().Version )) version = o.str();
-	info.setVersion( version );
-	info.setAuthor( plugin.GetInfo().Author );
-	///\todo .. path should here stored and not evaluated in plugin
-	infoMap[key] = info;
+	UnloadDll(hInstance);
 }
 
 void* NativeHost::LoadDll( std::string const & psFileName )
@@ -203,6 +176,60 @@ void* NativeHost::LoadDll( std::string const & psFileName )
 	return hInstance;
 }
 
+CMachineInfo* NativeHost::LoadDescriptor(void* hInstance)
+{
+	try {
+	#if defined __unix__ || defined __APPLE__
+		GETINFO GetInfo = (GETINFO) dlsym( hInstance, "GetInfo");
+		if (!GetInfo) {
+			std::cerr << "Cannot load symbols: " << dlerror() << '\n';
+			return 0;
+		}
+	#else
+		GETINFO GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( hInstance ), "GetInfo" );
+		if (!GetInfo) {
+			///\todo readd the original code here!
+			return 0;
+		}
+	#endif
+		CMachineInfo* info_ = GetInfo();
+		if(info_->Version < MI_VERSION) {
+			std::cerr << "plugin format is too old" << info_->Version << GetDllName() << "\n";
+			info_ = 0;
+		}
+		return info;
+	} catch (...) {
+		std::cerr << "exception while getting plugin info handler\n";
+		return 0;
+	}
+}
+
+CMachineInterface* NativeHost::Instantiate(void * hInstance)
+{      
+	try {
+	#if defined __unix__ || defined __APPLE__
+		CREATEMACHINE GetInterface =  (CREATEMACHINE) dlsym(hInstance, "CreateMachine");
+	#else
+		CREATEMACHINE GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)hInstance, "CreateMachine" );
+	#endif
+		if(!GetInterface) {
+		#if defined __unix__ || defined __APPLE__
+			std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+		#else
+			///\todo
+		#endif
+			return 0;
+		} else {
+			return GetInterface();
+		}
+	} catch (...) {
+		throw InstanceException()
+		std::cerr << "exception while creating interface instance\n";
+		return 0;
+	}
+}
+
+
 void NativeHost::UnloadDll( void* hInstance )
 {
 	assert(_hInstance);
@@ -212,6 +239,7 @@ void NativeHost::UnloadDll( void* hInstance )
 		::FreeLibrary((HINSTANCE)_dll);
 	#endif
 }
+
 
 }}
 
