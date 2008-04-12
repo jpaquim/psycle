@@ -616,6 +616,11 @@ namespace psy { namespace core {
 		_inputCon[wireIndex] = false;
 		_inputMachines[wireIndex] = -1;
 		_connectedInputs--;
+		if ( _isMixerSend )
+		{ 
+			// Chain is broken, notify the mixer so that it replaces the send machine of the send/return.
+			NotifyNewSendtoMixer(pSong,_macIndex,_macIndex);
+		} 
 	}
 	void Machine::NotifyNewSendtoMixer(Machine& /*callerMac*/,Machine& senderMac)
 	{
