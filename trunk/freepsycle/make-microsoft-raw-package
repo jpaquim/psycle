@@ -1,14 +1,14 @@
 #! /usr/bin/make -f
 
-BUILD_DIR = ++build
-BUILD_TARGETS = $(BUILD_DIR)/qpsycle.exe
-INSTALL_DIR = $(BUILD_DIR)/install
-TAR_NAME = qpsycle
+BUILD_DIR = ++packageneric/variants/default/stage-install/usr/local
+BUILD_TARGETS = $(BUILD_DIR)/bin/freepsycle-text.exe $(BUILD_DIR)/bin/freepsycle-gui.exe
+INSTALL_DIR = ++packageneric/variants/default/install
+TAR_NAME = freepsycle
 
 all: $(BUILD_TARGETS)
 	rm -Rf $(INSTALL_DIR)
 	mkdir -p $(INSTALL_DIR)/bin
-	cp -f $^ $(INSTALL_DIR)/bin
+	cp -f $^ $(BUILD_DIR)/bin/*.dll $(INSTALL_DIR)/bin
 	../packageneric/generic/microsoft-dll-collector $(INSTALL_DIR) $(TAR_NAME)
 	echo subversion revision "$$(svnversion)" > $(INSTALL_DIR)/$(TAR_NAME)/version.text
 	tar cvjf $(INSTALL_DIR)/$(TAR_NAME).tar.bz2 --directory=$(INSTALL_DIR) $(TAR_NAME)
@@ -17,5 +17,4 @@ all: $(BUILD_TARGETS)
 	#ls -lh $(INSTALL_DIR)/$(TAR_NAME).7z
 
 $(BUILD_TARGETS):
-	qmake
-	mingw32-make
+	scons
