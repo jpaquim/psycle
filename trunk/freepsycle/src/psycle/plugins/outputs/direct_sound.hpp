@@ -48,7 +48,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		protected: friend class virtual_factory_access;
 			direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::operating_system::exception);
 		public:
-			engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
+			engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 			bool opened()  const /*override*/;
 			bool started() const /*override*/;
 		protected:
@@ -76,4 +76,3 @@ namespace psycle { namespace plugins { namespace outputs {
 	};
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
-
