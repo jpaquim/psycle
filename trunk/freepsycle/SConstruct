@@ -317,14 +317,8 @@ if gtkmm.result() and gnomecanvasmm.result():
 			front_end_modules.append(self)
 		def dynamic_dependencies(self):
 			self.contexes().source().compilers().cxx().paths().add(['src'])
-			self.add_sources(find(self.project(), 'src',
-				exclude_patterns = [os.path.join('*', 'todo', '*'), os.path.join('*', 'x_window', '*')],
-				include_patterns = [os.path.join('psycle', 'front_ends', 'gui', '*.cpp')]
-			))
-			self.add_headers(find(self.project(), 'src',
-				exclude_patterns = [os.path.join('*', 'todo', '*'), os.path.join('*', 'x_window', '*')],
-				include_patterns = [os.path.join('psycle', 'front_ends', 'gui', '*.hpp')]
-			))
+			self.add_sources(find(self.project(), 'src', [os.path.join('psycle', 'front_ends', 'gui', '*.cpp')]))
+			self.add_headers(find(self.project(), 'src', [os.path.join('psycle', 'front_ends', 'gui', '*.hpp')]))
 	gui_front_end_module = gui_front_end_module()
 
 project.default_targets(pkg_config_packages + front_end_modules)
