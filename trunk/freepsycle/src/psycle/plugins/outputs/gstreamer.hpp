@@ -29,7 +29,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			void do_stop()    throw(engine::exception) /*override*/;
 			void do_close()   throw(engine::exception) /*override*/;
 		private:
-			::GstElement * pipeline_, * source_, * queue_, * caps_filter_, * sink_;
+			::GstElement * pipeline_, * source_, /** queue_,*/ * caps_filter_, * sink_;
 
 			::GstCaps * caps_;
 

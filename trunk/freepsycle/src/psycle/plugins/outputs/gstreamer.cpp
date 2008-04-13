@@ -256,7 +256,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		source_ = &instantiate("fakesrc", name() + "-src");
 
 		// create a queue (note that this used to work without a queue in the past)
-		queue_ = &instantiate("queue", name() + "-queue");
+		//queue_ = &instantiate("queue", name() + "-queue");
 		
 		// create a pipeline
 		if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
@@ -264,12 +264,13 @@ namespace psycle { namespace plugins { namespace outputs {
 		// add the elements to the pipeline
 		//::gst_bin_add_many(GST_BIN(pipeline), source_, caps_filter_, sink_, (void*)0);
 		if(!::gst_bin_add(GST_BIN(pipeline_), source_     )) throw runtime_error("could not add source element to pipeline",      UNIVERSALIS__COMPILER__LOCATION);
-		if(!::gst_bin_add(GST_BIN(pipeline_), queue_      )) throw runtime_error("could not add queue element to pipeline",       UNIVERSALIS__COMPILER__LOCATION);
+		//if(!::gst_bin_add(GST_BIN(pipeline_), queue_      )) throw runtime_error("could not add queue element to pipeline",       UNIVERSALIS__COMPILER__LOCATION);
 		if(!::gst_bin_add(GST_BIN(pipeline_), caps_filter_)) throw runtime_error("could not add caps filter element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
 		if(!::gst_bin_add(GST_BIN(pipeline_), sink_       )) throw runtime_error("could not add sink element to pipeline",        UNIVERSALIS__COMPILER__LOCATION);
 		
 		// link the element pads together
-		if(!::gst_element_link_many(source_, queue_, caps_filter_, sink_, (void*)0)) throw runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
+		if(!::gst_element_link_many(source_, caps_filter_, sink_, (void*)0)) throw runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
+		//if(!::gst_element_link_many(source_, queue_, caps_filter_, sink_, (void*)0)) throw runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
 		//if(!::gst_element_link_pads(source_,      "sink", caps_filter_, "src")) throw runtime_error("could not link source element sink pad to caps filter element src pad", UNIVERSALIS__COMPILER__LOCATION);
 		//if(!::gst_element_link_pads(caps_filter_, "sink", sink_,        "src")) throw runtime_error("could not link caps filter element sink pad to sink element src pad",   UNIVERSALIS__COMPILER__LOCATION);
 
@@ -465,10 +466,10 @@ namespace psycle { namespace plugins { namespace outputs {
 		if(false) { // seems the pipeline owns its element. need to check the doc.
 			if(sink_) ::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
 			if(caps_filter_) ::gst_object_unref(GST_OBJECT(caps_filter_)); caps_filter_ = 0;
-			if(queue_) ::gst_object_unref(GST_OBJECT(queue_)); queue_ = 0;
+			//if(queue_) ::gst_object_unref(GST_OBJECT(queue_)); queue_ = 0;
 			if(source_) ::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
 			if(caps_) ::gst_caps_unref(caps_); caps_ = 0;
-		} else sink_ = caps_filter_ = queue_ = source_ = 0; caps_ = 0;
+		} else sink_ = caps_filter_ = /*queue_ =*/ source_ = 0; caps_ = 0;
 
 		{ // deinitialize gstreamer
 			std::call_once(global_client_count_init_once_flag, global_client_count_init);

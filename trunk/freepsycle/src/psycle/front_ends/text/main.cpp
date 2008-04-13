@@ -278,3 +278,46 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	psycle::front_ends::text::main(argument_count, arguments);
 }
+
+#if 1
+#else
+namespace psycle {
+void imaginary() {
+	using engine::graph;
+	using engine::node;
+
+	host::plugin_resolver pr;
+	graph::create_on_stack stack_graph("graph"); graph & g(stack_graph);
+
+	node & sine1(pr("sine", g, "sine1"));
+
+	node & decay1(pr("decay", g, "decay1"));
+	sine1.input_port("amplitude")->connect(*decay1.output_port("out"));
+	
+	sequence_master & seq_master;
+	
+	sequence_node & seq_node1(g, "seq1", seq_master);
+	decay1.input_port("decay")->connect(*seq_node1.output_port("out"));
+	
+	sequence_node & seq_node2(g, "seq1", seq_master);
+	decay1.input_port("pulse")->connect(*seq_node2.output_port("out"));
+
+	sequence_node & seq_node3(g, "seq1", seq_master);
+	sine1.input_port("frequency")->connect(*seq_node3.output_port("out"));
+
+	sequence s0(seq_master, "main");
+	s0.beats_per_second(2);
+	s0.insert_event(0, seq_node3, 50);
+	s0.insert_event(0, seq_node1, 0.0001);
+
+	sequence s1(seq_master, "bd");
+	s0.insert_sequence_loop(0, seq_node2, s1);
+	s0.insert_sequence_stop(128, seq_node2);
+	s1.insert_event(0, 1);
+	s1.insert_event(4, 1);
+	s1.insert_event(8, 1);
+	s1.insert_event(12, 1);
+	s1.insert_event(14, 1);
+}
+}
+#endif
