@@ -26,7 +26,7 @@ static void cb_handoff (
 	//std::cout <<  "x " << tt << "\n";
 	sample * samples(reinterpret_cast<sample*>(GST_BUFFER_DATA(buffer)));
 	for(unsigned int i(0); i < GST_BUFFER_SIZE(buffer) / sizeof *samples; ++i) {
-		samples[i] = std::numeric_limits<sample>::max() * std::sin(s.phase);
+		samples[i] = std::numeric_limits<sample>::max() * std::sin(s.phase) / 4;
 		s.phase += s.freq * 2 * M_PI / sample_rate;
 		s.freq *= 1.00001;
 	}
@@ -146,7 +146,8 @@ int main(int argc, char * argv[]) {
 	g_object_set(G_OBJECT(capsfilter), "caps", caps, (void*)0);
 
 	gst_bin_add_many(GST_BIN(pipeline), fakesrc, queue, capsfilter, audiosink, (void*)0);
-	gst_element_link_many(fakesrc, queue, capsfilter, audiosink, (void*)0);
+	gst_element_link_many(fakesrc, capsfilter, audiosink, (void*)0);
+	//gst_element_link_many(fakesrc, queue, capsfilter, audiosink, (void*)0);
 	//gst_element_link_many(fakesrc, capsfilter, queue, audiosink, (void*)0);
 
 	// setup fake source
