@@ -33,7 +33,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public named {
 	///\}
 };
 
-/// a iterator over a sequence
+/// an iterator over a sequence
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence_iterator {
 	public:
 		/// constructs a sequence iterator.
