@@ -198,7 +198,7 @@ namespace detail {
 		namespace microsoft {
 			/// wall clock.
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
-			/// test result on AMD64: clock res: QueryPerformancefrequency: 3579545Hz (3.6MHz)
+			/// test result on AMD64: clock resolution: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
 			std::nanoseconds performance_counter() throw(std::runtime_error) {
 				::LARGE_INTEGER counter, frequency;
@@ -207,9 +207,18 @@ namespace detail {
 					std::ostringstream s; s << exceptions::code_description();
 					throw std::runtime_error(s.str().c_str());
 				}
-				std::nanoseconds ns(counter.QuadPart * 1000 * 1000 * 1000 / frequency.QuadPart);
-				///\todo check possibility of overflow
-				//std::nanoseconds ns(counter.QuadPart * (1000 * 1000 * 1000 / frequency.QuadPart));
+				#if 1
+					// for systems where the frequency may change over time, we need to remember the last counter and time values
+					///\todo make them per-thread variables (need to upgrade mingw)
+					std::int64_t static last_counter(0);
+					std::nanoseconds static last_time;
+					std::nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
+					ns += last_time;
+					last_time = ns;
+					last_counter = counter.QuadPart;
+				#else
+					std::nanoseconds ns(counter.QuadPart * 1000 * 1000 * 1000 / frequency.QuadPart);
+				#endif
 				return ns;
 			}
 
