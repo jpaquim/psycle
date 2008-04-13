@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-/***************************************************************************
-*   Copyright (C) 2007 Psycledelics     *
-*   psycle.sf.net   *
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -18,38 +17,37 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#ifndef SONGFACTORY_HPP
+#define SONGFACTORY_HPP 
+#pragma once
 
-#ifndef MACHINEHOST_HPP
-#define MACHINEHOST_HPP
+#include <string>
+#include <vector>
 
-#include "machinekey.hpp"
-#include "machine.h"
+namespace psy { namespace core {
 
-namespace psy{namespace core{
+class MachineFactory;
 
-class MachineCallbacks;
-class Machine;
-class PluginFinder;
-
-class MachineHost
+template class<T>
+class SongFactory<T>
 {
-protected:
-	MachineHost(MachineCallbacks*);
-public:
-	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) const = 0;
-	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
-	
-	virtual const Hosts::type hostCode() const = 0;
-	virtual const std::string hostName() const = 0;
+	public:
+		SongFactory(MachineFactory& factory1);
+		~SongFactory();
 
-	virtual std::string const & getPluginPath(int) { return ""; };
-	virtual int getNumPluginPaths() { return 0; }
-	virtual void setPluginPath(std::string path) {};
-protected:
-	virtual void FillPluginInfo(const std::string&, const std::string& , std::map<MachineKey,PluginInfo>& ) = 0;
+		T* createEmptySong();
+		T* loadSong(const std::string & fileName);
+		bool saveSong(const std::string & fileName, const T& song, int version);
+		
 
-	MachineCallbacks* mcallback_;
+		//signals
+		//sigslot::signal2<const std::string &, const std::string &> report;
+		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
+
+	private:
+		std::vector<PsyFilterBase*> filters;
+		MachineFactory& factory;
 };
 
 }}
-#endif // MACHINEHOST_HPP
+#endif // SONGFACTORY_HPP

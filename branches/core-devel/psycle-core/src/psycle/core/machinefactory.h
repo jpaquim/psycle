@@ -39,17 +39,16 @@ class MachineFactory
 public:
 	MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder);
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
-
-	void DeleteMachine(Machine*);
+	Machine* CloneMachine(Machine& mac);
 
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }
 	MachineCallbacks* getCallbacks() { return callbacks_; }
 
 	std::string const & getPsyclePath() const;
-	void setPsyclePath(std::string path);
+	void setPsyclePath(std::string path, bool cleardata=false);
 
 	std::string const & getLadspaPath() const;
-	void setLadspaPath(std::string path);
+	void setLadspaPath(std::string path,bool cleardata=false);
 
 	void RegenerateFinderData();
 

@@ -60,8 +60,10 @@ namespace psy {
 	
 		class LADSPAMachine: public Machine
 		{
+			protected:
+				LADSPAMachine(MachineCallbacks*, MachineKey, Machine::id_type, void*,
+						LADSPA_Descriptor* ,LADSPA_Handle) friend class LadspaHost;
 			public:
-				LADSPAMachine(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,LADSPA_Descriptor* ,LADSPA_Handle );
 				virtual ~LADSPAMachine() throw();
 				virtual void Init();
 				virtual void PreWork(int numSamples);
@@ -86,7 +88,7 @@ namespace psy {
 				LADSPA_Data GetMaxValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
 				void SetDefaultsForControls();
 				MachineKey key_;
-
+				void* libHandle_;
 				const LADSPA_Descriptor * psDescriptor;
 				/*const*/ LADSPA_Handle pluginHandle;
 				std::vector<LadspaParam> values_;

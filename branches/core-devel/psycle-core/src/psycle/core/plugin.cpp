@@ -61,19 +61,19 @@ float * PluginFxCallback::unused1(int, int) { return 0; }
 /**************************************************************************/
 // Plugin
 
-Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, CMachineInfo* info, CMachineInterface* macIface )
+Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, void* libHandle, CMachineInfo* info, CMachineInterface* macIface )
 :
 	Machine(callbacks, id),
-	hInstance(0),
+	libHandle(libHandle),
 	key_(key),
 	info_(info),
-	proxy_(*this)
+	proxy_(*this,macIface)
 {
 	SetAudioRange(32768.0f);
 
 	_isSynth = (info_->Flags == 3);
 	if(!_isSynth) {
-		SetStereoInputs();	
+		SetStereoInputs();
 	}
 	SetStereoOutputs();
 
@@ -86,11 +86,16 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 	_psAuthor = info_->Author;
 	_psName = info_->Name;
 
-	proxy()(macIface);
 }
 
 Plugin::~ Plugin( ) throw()
 {
+	if(libHandle_)
+	#if defined __unix__ || defined __APPLE__
+		::dlclose(libHandle_);
+	#else
+		::FreeLibrary((HINSTANCE)libHandle_);
+	#endif
 }
 
 void Plugin::Init( )
@@ -446,7 +451,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 		}
 		Player::Instance()->Tweaker = true;
 	}
-	else	
+	else
 	{
 		try
 		{

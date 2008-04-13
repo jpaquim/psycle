@@ -22,27 +22,36 @@
 #include <iostream>
 #include <fstream>
 #include "file.h"
-#include "machineFactory.h"
-#include "psyfilter.h"
+#include "songfactory.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
-#include "song.h"
 
 namespace psy
 {
 	namespace core
 	{
-		PsyFilters::PsyFilters(MachineFactory& factory1)
+		SongFactory<T>::SongFactory(MachineFactory& factory1)
 		:factory(factory1)
 		{
-			filters.push_back( Psy2Filter::Instance() );
-			filters.push_back( Psy3Filter::Instance() );
-			filters.push_back( Psy4Filter::Instance() );
+			filters.push_back( new Psy2Filter<T>() );
+			filters.push_back( new Psy3Filter<T>() );
+			filters.push_back( new Psy4Filter<T>() );
 		}
-
-		bool PsyFilters::loadSong(const std::string & fileName, CoreSong & song)
+		SongFactory<T>::~SongFactory() {
+			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+				delete *it;
+			}
+		}
+		
+		T* SongFactory<T>::createEmptySong() {
+			T* song = new T();
+			song.addMachine(factory.CreateMachine(MachineKey::master(),MASTER_INDEX));
+			return song;
+		}
+		T* SongFactory<T>::loadSong(const std::string & fileName)
 		{
+			T* song = new T();
 			if ( File::fileIsReadable( fileName ) ) {
 				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 					PsyFilterBase* filter = *it;
@@ -55,7 +64,7 @@ namespace psy
 			return false;
 		}
 
-		bool PsyFilters::saveSong( const std::string & fileName, const CoreSong & song, int version )
+		bool SongFactory<T>::saveSong( const std::string & fileName, const T& song, int version )
 		{
 			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); it++) {
 				PsyFilterBase* filter = *it;
@@ -70,7 +79,7 @@ namespace psy
 					break;
 				}
 			}
-			std::cerr << "PsyFilter::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
+			std::cerr << "SongFactory<T>::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
 			return false;
 		}
 	}

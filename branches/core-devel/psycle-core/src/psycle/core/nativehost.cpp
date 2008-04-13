@@ -66,16 +66,6 @@ Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine:
 }
 
 
-void NativeHost::DeleteMachine(Machine* mac) const {
-	try {
-		//Since we don't allow to delete machines via "delete" keyword,
-		//we centralize the dll unloading here too unlike in psyclemfc.
-		UnloadDll(mac->GethInstance());
-		delete mac;
-	}catch(...) {
-	}
-}
-
 void NativeHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName, std::map<MachineKey,PluginInfo>& infoMap)
 {
 	#if defined __unix__ || defined __APPLE__
@@ -91,7 +81,6 @@ void NativeHost::FillPluginInfo(const std::string& currentPath, const std::strin
 	if (minfo) {
 		PluginInfo pinfo;
 		MachineKey key( hostCode() , fileName, 0 );
-		pinfo.setKey(key);
 		pinfo.setName( minfo->Name );
 		//pinfo.setRole( plugin.mode() );
 		pinfo.setLibName(currentPath + fileName);

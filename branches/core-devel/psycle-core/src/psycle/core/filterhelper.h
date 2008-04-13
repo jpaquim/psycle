@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-/***************************************************************************
-*   Copyright (C) 2007 Psycledelics     *
-*   psycle.sf.net   *
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -18,38 +17,27 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#ifndef PSYCLE__CORE__PSYFILTER__INCLUDED
+#define PSYCLE__CORE__PSYFILTER__INCLUDED
+#pragma once
 
-#ifndef MACHINEHOST_HPP
-#define MACHINEHOST_HPP
+#include <string>
 
-#include "machinekey.hpp"
-#include "machine.h"
+namespace psy { namespace core {
 
-namespace psy{namespace core{
+///\todo: Have a way to allow to save program-specific data to the song filters.
+/// This will allow extended Songs (for example, save some windows specific options that the linux version doesn't need to know about, etc..)
+//  Idea: LoaderHelpers:
+//  The extended class from CoreSong (passed as class T), could provide a FilterHelper class, which will be called in each load/save state.
+//  psycle-core will provide two FilterHelpers: Psy2FilterHelper and Psy3FilterHelper, in order to ease loading the data that these formats
+//  already store in a non-packed way.
 
-class MachineCallbacks;
-class Machine;
-class PluginFinder;
-
-class MachineHost
-{
-protected:
-	MachineHost(MachineCallbacks*);
-public:
-	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) const = 0;
-	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
-	
-	virtual const Hosts::type hostCode() const = 0;
-	virtual const std::string hostName() const = 0;
-
-	virtual std::string const & getPluginPath(int) { return ""; };
-	virtual int getNumPluginPaths() { return 0; }
-	virtual void setPluginPath(std::string path) {};
-protected:
-	virtual void FillPluginInfo(const std::string&, const std::string& , std::map<MachineKey,PluginInfo>& ) = 0;
-
-	MachineCallbacks* mcallback_;
+class FilterHelper {
+	public:
+		virtual ~FilterHelper(){}
+		///\todo: Add helper classes
 };
 
 }}
-#endif // MACHINEHOST_HPP
+
+#endif

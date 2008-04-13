@@ -33,7 +33,8 @@ class Machine;
 /**
 @author  Stefan Nattkemper
 */
-class Psy4Filter : public Psy3Filter
+template class<T>
+class Psy4Filter<T> : public Psy3Filter<T>
 {
 	///\name Singleton Pattern
 	///\{ 
@@ -54,15 +55,15 @@ class Psy4Filter : public Psy3Filter
 		/*override*/ int version() const { return 4; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory);
-		/*override*/ bool save( const std::string & fileName, const CoreSong & song );
+		/*override*/ bool load(const std::string & fileName, T & song, MachineFactory& factory);
+		/*override*/ bool save( const std::string & fileName, const T & song );
 
 	protected:
-		/*override*/ int LoadSONGv0(RiffFile* file,CoreSong& song);
-		bool saveSONGv0(RiffFile* file,const CoreSong& song);
-		bool saveMACDv0(RiffFile* file,const CoreSong& song,int index);
-		bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
-		bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
+		/*override*/ int LoadSONGv0(RiffFile* file,T& song);
+		bool saveSONGv0(RiffFile* file,const T& song);
+		bool saveMACDv0(RiffFile* file,const T& song,int index);
+		bool saveINSDv0(RiffFile* file,const T& song,int index);
+		bool saveWAVEv0(RiffFile* file,const T& song,int index);
 
 	private:
 		std::fstream _stream;
@@ -75,7 +76,7 @@ class Psy4Filter : public Psy3Filter
 
 		std::map<int, Pattern*> patMap;
 
-		CoreSong* song_;
+		T* song_;
 };
 
 }}

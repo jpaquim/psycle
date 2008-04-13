@@ -157,6 +157,27 @@ namespace psy
 		{
 			return  (write_mode) ? _stream.tellp() : _stream.tellg();
 		}
+
+
+
+
+		//////////////////////////////////////////////////////////////////////////////////
+		//  MemoryFile
+		//
+		MemoryFile::MemoryFile() {}
+		MemoryFile::~MemoryFile(){}
+
+		bool MemoryFile::OpenMem(std::ptrdiff_t blocksize){}
+		bool MemoryFile::CloseMem(){}
+		std::size_t MemoryFile::FileSize(){}
+		std::size_t MemoryFile::GetPos(){}
+		int MemoryFile::Seek(std::ptrdiff_t const & bytes){}
+		int MemoryFile::Skip(std::ptrdiff_t const & bytes){}
+		bool MemoryFile::ReadString(char *, std::size_t const & max_length){}
+		bool MemoryFile::WriteChunk(void const *, std::size_t const &){}
+		bool MemoryFile::ReadChunk (void       *, std::size_t const &){}
+		bool MemoryFile::Expect    (void       *, std::size_t const &){}
+
 		
 	}
 }

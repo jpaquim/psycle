@@ -163,9 +163,11 @@ namespace psy {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id, LADSPA_Descriptor* psDescriptor1,LADSPA_Handle pluginHandle1)
+		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
+			void* libHandle, LADSPA_Descriptor* psDescriptor1,LADSPA_Handle pluginHandle1)
 		: Machine(callbacks,id)
 		, key_(key)
+		, libHandle_(libHandle)
 		, psDescriptor(psDescriptor1)
 		, pluginHandle(pluginHandle1)
 		{
@@ -191,7 +193,7 @@ namespace psy {
 				psDescriptor->cleanup(pluginHandle);
 				pluginHandle=0;
 				psDescriptor=0;
-				}
+			}
 			if ( libHandle_ ) {
 				#if defined __unix__ || defined __APPLE__
 				dlclose(libHandle_);

@@ -30,10 +30,6 @@ MachineHost::MachineHost(MachineCallbacks*calls)
 
 void MachineHost::FillFinderData(PluginFinder* finder, bool clearfirst) const
 {
-	if ( !finder.hasHost(hostCode()) ) {
-		//Finder stores one map for each host, so we ensure that it knows this host.
-		finder.addHost(hostCode());
-	}
 	std::map<MachineKey,PluginInfo> infoMap = finder.getMap(hostCode());
 
 	if (clearfirst) {

@@ -23,7 +23,6 @@
 
 #include "file.h"
 #include "fileio.h"
-#include "internal_machines.h"
 #include "song.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
@@ -59,12 +58,14 @@
 
 namespace psy { namespace core {
 
-Psy4Filter::Psy4Filter()
+template class<T>
+Psy4Filter<T>::Psy4Filter()
 :
 	song_()
 {}
 
-bool Psy4Filter::testFormat( const std::string & fileName )
+template class<T>
+bool Psy4Filter<T>::testFormat( const std::string & fileName )
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
@@ -103,7 +104,8 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	return root_element.get_name() == "psy4";
 }
 
-bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong & song, MachineFactory& factory )
+template class<T>
+bool Psy4Filter<T>::load(const std::string & /*fileName*/, T & song, MachineFactory& factory )
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
@@ -551,7 +553,8 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong & song, Machine
 	return true;
 } // load
 
-bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
+template class<T>
+bool Psy4Filter<T>::save( const std::string & file_Name, const T & song )
 {
 	//FIXME: Verify if this was needed for something. It was preventing to save to the correct directory.
 	// std::string fileName = File::extractFileNameFromPath(file_Name);
@@ -647,7 +650,8 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	return true;
 }
 
-int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
+template class<T>
+int Psy4Filter<T>::LoadSONGv0(RiffFile* file,T& /*song*/)
 {
 	std::int32_t fileversion = 0;
 	std::uint32_t size = 0;
@@ -667,7 +671,8 @@ int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 	return chunkcount;
 }
 
-bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong & song )
+template class<T>
+bool Psy4Filter<T>::saveSONGv0( RiffFile * file, const T & song )
 {
 	std::uint32_t chunkcount;
 	std::uint32_t version, size;
@@ -690,7 +695,8 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong & song )
 	return true;
 }
 
-bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong & song, int index )
+template class<T>
+bool Psy4Filter<T>::saveMACDv0( RiffFile * file, const T & song, int index )
 {
 	std::uint32_t version, size;
 	std::size_t pos;
@@ -721,7 +727,8 @@ bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong & song, int index )
 	return true;
 }
 
-bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong & song, int index )
+template class<T>
+bool Psy4Filter<T>::saveINSDv0( RiffFile * file, const T & song, int index )
 {
 	std::uint32_t version, size;
 	std::size_t pos;
@@ -752,7 +759,8 @@ bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong & song, int index )
 	return true;
 }
 
-bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong & /*song*/, int /*index*/ )
+template class<T>
+bool Psy4Filter<T>::saveWAVEv0( RiffFile * /*file*/, const T & /*song*/, int /*index*/ )
 {
 	return false;
 }

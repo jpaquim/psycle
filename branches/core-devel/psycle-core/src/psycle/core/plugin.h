@@ -98,19 +98,25 @@ class Plugin : public Machine
 	public:
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
 	protected:
-		Plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type index,
-			CMachineInfo* info, CMachineInterface* macIface ) friend class NativeHost;
-		virtual ~Plugin() throw() friend class NativeHost;
+		Plugin(MachineCallbacks*, MachineKey, Machine::id_type, void* hInstance,
+			CMachineInfo*, CMachineInterface*) friend class NativeHost;
 	public:
+		virtual ~Plugin() throw();
 		virtual void Init();
 		virtual int GenerateAudioInTicks( int startSample, int numSamples );
 		virtual void Tick( );
 		virtual void Tick(int channel, const PatternEvent & pEntry );
 		virtual void Stop();
-		inline virtual std::string GetDllName() const throw() { return key.dllName(); }
-		virtual MachineKey getMachineKey() { return key_;}
+		///\name (de)serialization
+		///\{
+		/// Loader for psycle fileformat version 2.
+		virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+		virtual void SaveSpecificChunk(RiffFile * pFile) const;
+		///\}
+		inline virtual std::string GetDllName() const { return key.dllName(); }
+		virtual MachineKey getMachineKey() const { return key_; }
 		virtual std::string GetName() const { return _psName; }
-
 		virtual int GetNumParams() const { return GetInfo().numParameters; }
 		virtual int GetNumCols() const { return GetInfo().numCols; }
 		virtual void GetParamName(int numparam, char * name) const;
@@ -119,25 +125,17 @@ class Plugin : public Machine
 		virtual void GetParamValue(int numparam,char* parval) const;
 		virtual bool SetParameter(int numparam,int value);
 
-		inline Proxy const & proxy() const throw() { return proxy_; }
-		inline Proxy & proxy() throw() { return proxy_; }
-
-		///\name (de)serialization
-		///\{
-	public:
-		/// Loader for psycle fileformat version 2.
-		virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
-		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-		virtual void SaveSpecificChunk(RiffFile * pFile) const;
-		///\}
-
+		inline Proxy const & proxy() const { return proxy_; }
+		inline Proxy & proxy() { return proxy_; }
 		CMachineInfo const & GetInfo() const throw() { return *info_; }
+		void* const GethInstance() const { return hInstance; }
 		
 	private:
 		char _psShortName[16];
 		std::string _psAuthor;
 		std::string _psName;
 		MachineKey key_;
+		void* libHandle_;
 		bool _isSynth;
 		CMachineInfo * info_;
 		Proxy proxy_;

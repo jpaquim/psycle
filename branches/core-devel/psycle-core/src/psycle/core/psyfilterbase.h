@@ -22,7 +22,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 namespace psy { namespace core {
 
@@ -34,7 +33,8 @@ class CoreSong;
 class RiffFile;
 class MachineFactory;
 
-class PsyFilterBase
+template class<T>
+class PsyFilterBase<T>
 {
 	public:
 		virtual ~PsyFilterBase() {}
@@ -46,37 +46,10 @@ class PsyFilterBase
 		virtual int version() const = 0;
 		virtual std::string filePostfix() const = 0;
 		virtual bool testFormat(const std::string & fileName) = 0;
-		virtual bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory)= 0;
-		/// virtual function to use for loading UI-Specific data, or other extra-data that is not basic to song.
-		virtual bool loadExtra(RiffFile* file,char* header, int version) =0;
-		virtual bool save(const std::string & fileName, const CoreSong & song) = 0;
-		/// virtual function to use for saving UI-Specific data, or other extra-data that is not basic to song.
-		virtual bool saveExtra(RiffFile* file,char* header, int version) =0;
-
-		///\todo: Have to allow a way to add a new filter to psyfilter, which will allow to create derived classes of basic filters (psy2, 3, 4, whatever..)
-		/// to add specific "saveextra" and "loadextra" codes, which in turn allow extended Songs (for example, save some windows specific options that 
-		/// the linux version doesn't need to know about, etc..)
-};
-
-/**
-@author  Psycledelics  
-*/
-class PsyFilters
-{
-	public:
-		PsyFilters(MachineFactory& factory1);
-
-		bool loadSong(const std::string & fileName, CoreSong & song);
-		bool saveSong(const std::string & fileName, const CoreSong & song, int version);
-
-		//signals
-		//sigslot::signal2<const std::string &, const std::string &> report;
-		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
-
-	private:
-		std::vector<PsyFilterBase*> filters;
-		MachineFactory& factory;
+		virtual bool load(const std::string & fileName, T& song, MachineFactory& factory)= 0;
+		virtual bool save(const std::string & fileName, const T& song) = 0;
 };
 
 }}
 #endif
+

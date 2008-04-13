@@ -8,18 +8,17 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // internal machines
 
-namespace psy {	namespace core {
+namespace psy { namespace core {
 		//////////////////////////////////////////////////////////////////////////
 		/// dummy machine.
 		class Dummy : public Machine
 		{
 		protected:
 			Dummy(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
-			Dummy(Machine *mac) friend class InternalHost;
-			virtual ~Dummy() throw() friend class InternalHost;
 		public:
+			virtual ~Dummy() throw();
 			virtual int GenerateAudio(int numSamples);
-			virtual MachineKey getMachineKey() { return MachineKey::dummy(); }
+			virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
 			virtual std::string GetName() const { return _psName; }
 		protected:
 			static std::string _psName;
@@ -31,14 +30,14 @@ namespace psy {	namespace core {
 		{
 		protected:
 			DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
-			virtual ~DuplicatorMac() throw() friend class InternalHost;
 		public:
+			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void Stop();
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
-			virtual MachineKey getMachineKey() { return MachineKey::duplicator(); }
+			virtual MachineKey getMachineKey() const { return MachineKey::duplicator(); }
 			virtual std::string GetName() const { return _psName; }
 			virtual void GetParamName(int numparam,char *name) const;
 			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
@@ -68,13 +67,13 @@ namespace psy {	namespace core {
 		{
 		protected:
 			Master(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
-			virtual ~Master() throw() friend class InternalHost;
 		public:
+			virtual ~Master() throw();
 			virtual void Init(void);
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
 			virtual int GenerateAudio( int numSamples );
-			virtual MachineKey getMachineKey() { return MachineKey::master(); }
+			virtual MachineKey getMachineKey() const { return MachineKey::master(); }
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -104,13 +103,13 @@ namespace psy {	namespace core {
 		{
 		protected:
 			LFO(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
-			virtual ~LFO() throw() friend class InternalHost;
 		public:
+			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
-			virtual MachineKey getMachineKey() { return MachineKey::LFO(); }
+			virtual MachineKey getMachineKey() const { return MachineKey::LFO(); }
 			virtual std::string GetName() const { return _psName; }
 			virtual void GetParamName(int numparam,char *name) const;
 			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;

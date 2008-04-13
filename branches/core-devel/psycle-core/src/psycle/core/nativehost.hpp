@@ -40,7 +40,6 @@ public:
 	static NativeHost& getInstance(MachineCallbacks*);
 
 	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
-	virtual void DeleteMachine(Machine*);
 	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
 
 	virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }

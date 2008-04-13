@@ -104,7 +104,7 @@ namespace psy {
 			virtual void SetSampleRate(int sr);
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
-			virtual MachineKey getMachineKey() { return MachineKey::sampler(); }
+			virtual MachineKey getMachineKey() const { return MachineKey::sampler(); }
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);

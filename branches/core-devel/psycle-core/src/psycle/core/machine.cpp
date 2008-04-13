@@ -325,83 +325,75 @@ namespace psy { namespace core {
 			_inputCon[i]=false;
 		}
 	}
-	Machine::Machine(Machine* mac)
-	://fpu_exception_mask_(),
-	crashed_()
-	,id_(mac->id_)
-	,callbacks(mac->callbacks)
-	,playColIndex(0)
-	,_bypass(mac->_bypass)
-	,_standby(false)
-	,_mute(mac->_mute)
-	,_waitingForSound(false)
-	,_worked(false)
-	,audio_range_(mac->audio_range_)
-	,numInPorts(0)
-	,numOutPorts(0)
-	,inports(0)
-	,outports(0)
-	,_isMixerSend(mac->_isMixerSend)
-	,_connectedInputs(mac->_connectedInputs)
-	,_connectedOutputs(mac->_connectedOutputs)
-	,_panning(mac->_panning)
-	,_lVol(mac->_lVol)
-	,_rVol(mac->_rVol)
-	,editName_(mac->GetEditName())
-	,_numPars(0)
-	,_nCols(1)
-	,_x(mac->_x)
-	,_y(mac->_y)
-	,_volumeCounter(0.0f)
-	,_volumeDisplay(0)
-	,_volumeMaxDisplay(0)
-	,_volumeMaxCounterLife(0)
-	,_scopePrevNumSamples(0)
-	,_scopeBufferIndex(0)
-	,_pScopeBufferL(0)
-	,_pScopeBufferR(0)
-	,TWSActive(false)
-	,TWSSamples(0)
-	{
-		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
-		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
-		
-		// Clear machine buffer samples
-		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
-		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
-
-		for (int c = 0; c<MAX_TRACKS; c++)
-		{
-			CommandEvent event(0,0);
-			TriggerDelay[c].SetCommand(0,event);
-			TriggerDelayCounter[c]=0;
-			RetriggerRate[c]=256;
-			ArpeggioCount[c]=0;
-		}
-		for (int c = 0; c<MAX_TWS; c++)
-		{
-			TWSInst[c] = 0;
-			TWSDelta[c] = 0;
-			TWSCurrent[c] = 0;
-			TWSDestination[c] = 0;
-		}
-		for (int i = 0; i<MAX_CONNECTIONS; i++)
-		{
-			_inputMachines[i]=mac->_inputMachines[i];
-			_outputMachines[i]=mac->_outputMachines[i];
-			_inputConVol[i]=mac->_inputConVol[i];
-			_wireMultiplier[i]=(mac->_wireMultiplier[i]*mac->GetAudioRange()/GetAudioRange());
-			_connection[i]=mac->_connection[i];
-			_inputCon[i]=mac->_inputCon[i];
-		}
-	}
 
 	Machine::~Machine()
 	{
 		aligned_dealloc(_pSamplesL);
 		aligned_dealloc(_pSamplesR);
 	}
+	void Machine::CloneFrom(Machine& src) 
+	{
+		// Only allow to copy from a machine of the same type.
+		if ( key() != src.key())
+			return;
+		SetPan(src.Pan());
+		SetPosX(src.GetPosX()+32);
+		SetPosY(src.GetPosY()+16);
+		#if 1
+		{
+			std::stringstream s;
+			s << src.GetEditName() << " " << std::hex << id() << " (cloned from " << std::hex << src.id() << ")";
+			SetEditName(s.str());
+		}
+		#else ///\todo rewrite this for std::string
+			int number = 1;
+			char buf[sizeof(machine_[dst]->_editName)+4];
+			strcpy (buf,machine_[dst]->_editName);
+			char* ps = strrchr(buf,' ');
+			if (ps)
+			{
+				number = atoi(ps);
+				if (number < 1)
+				{
+					number =1;
+				}
+				else
+				{
+					ps[0] = 0;
+					ps = strchr(machine_[dst]->_editName,' ');
+					ps[0] = 0;
+				}
+			}
 
+			for (int i = 0; i < MAX_MACHINES-1; i++)
+			{
+				if (i!=dst)
+				{
+					if (machine_[i])
+					{
+						if (strcmp(machine_[i]->_editName,buf)==0)
+						{
+							number++;
+							sprintf(buf,"%s %d",machine_[dst]->_editName.c_str(),number);
+							i = -1;
+						}
+					}
+				}
+			}
+
+			buf[sizeof(machine_[dst]->_editName)-1] = 0;
+			SetEditName(buf);
+		#endif
+
+		SetEditName(src.GetEditName());
+
+		///\FIXME: Implement MemoryFile.
+		MemoryFile file;
+		file.open(1000);
+		src.SaveSpecificFileChunk(file);
+		LoadSpecificFileChunk(file);
+		file.close();
+	}
 	void Machine::Init()
 	{
 		// Standard gear initalization

@@ -415,18 +415,19 @@ namespace psy
 			id_type id() const throw() { return id_; }
 		private:
 			id_type id_;
-			void id(id_type id) { id_ = id; } friend class Psy2Filter;
+			void id(id_type id) { id_ = id; } friend class CoreSong;
 		///\}
 		public:
 		
-			virtual MachineKey getMachineKey() = 0;
+			virtual MachineKey getMachineKey() const = 0;
 		
 		///\name ctor/dtor
 		///\{
 		protected:
 			Machine(MachineCallbacks* callbacks, Machine::id_type id);
-			Machine(Machine *mac);
+		public:
 			virtual ~Machine();
+			virtual void CloneFrom(Machine& src);
 		///\}
 			
 		protected:
@@ -459,7 +460,7 @@ namespace psy
 		///\name (de)serialization
 		///\{
 		public:
-			bool LoadFileChunk(RiffFile* pFile) const;
+			bool LoadFileChunk(RiffFile* pFile);
 			void SaveFileChunk(RiffFile * pFile) const;
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
@@ -560,17 +561,17 @@ namespace psy
 		public:
 			void defineInputAsStereo(int numports=1);
 			void defineOutputAsStereo(int numports=1);
-			bool acceptsConnections() { return numInPorts>0; }
-			bool emitsConnections() { return numOutPorts>0; }
+			bool acceptsConnections() const { return numInPorts>0; }
+			bool emitsConnections() const { return numOutPorts>0; }
 
 			virtual unsigned int GetInPorts() const { return numInPorts; }
 			virtual unsigned int GetOutPorts() const { return numOutPorts; }
-			virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; }
-			virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; }
+			virtual AudioPort& GetInPort(InPort::id_type i) const { assert(i<numInPorts); return inports[i]; }
+			virtual AudioPort& GetOutPort(OutPort::id_type i) const  { assert(i<numOutPorts); return inports[i]; }
 			virtual std::string GetPortInputName(InPort::id_type /*port*/) const { std::string rettxt = "Stereo Input"; return rettxt; }
 			virtual std::string GetPortOutputName(OutPort::id_type /*port*/)  const { std::string rettxt = "Stereo Output"; return rettxt; }
 
-			virtual int GetAudioInputs() const{ return MAX_CONNECTIONS; }
+			virtual int GetAudioInputs() const { return MAX_CONNECTIONS; }
 			virtual int GetAudioOutputs() const { return MAX_CONNECTIONS; }
 		protected:
 			int numInPorts;

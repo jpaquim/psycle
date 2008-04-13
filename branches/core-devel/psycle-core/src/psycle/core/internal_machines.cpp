@@ -27,22 +27,7 @@ namespace psy {
 			//DefineStereoOutput(1);
 			SetAudioRange(32768.0f);
 		}
-		Dummy::Dummy(Machine* oldmac)
-		:
-			Machine(oldmac)
-		{
-			SetAudioRange(32768.0f);
-
-			if (oldmac->GetAudioRange() != GetAudioRange())
-			{
-				// Update the multipliers to the new AudioRange
-				for (int i=0; i<MAX_CONNECTIONS; i++)
-				{
-					_wireMultiplier[i]=oldmac->_wireMultiplier[i]*(oldmac->GetAudioRange()/GetAudioRange());
-				}
-			}
-		}
-		
+	
 		Dummy::~Dummy() throw()
 		{
 			//DestroyInputs();

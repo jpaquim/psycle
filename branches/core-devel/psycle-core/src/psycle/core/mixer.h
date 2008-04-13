@@ -177,8 +177,8 @@ namespace psy {
 			};
 		protected:
 			Mixer(MachineCallbacks* callbacks, id_type index) friend class InternalHost;
+		public:
 			virtual ~Mixer() throw() friend class InternalHost;
-		protected:
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void Work(int numSamples );
@@ -199,7 +199,7 @@ namespace psy {
 			virtual std::string GetPortInputName(InPort::id_type port) const;
 			virtual int GetInPorts() const { return 2; }
 			virtual int GetAudioInputs() const{ return GetInPorts() * MAX_CONNECTIONS; }
-			virtual MachineKey getMachineKey() { return MachineKey::mixer(); }
+			virtual MachineKey getMachineKey() const { return MachineKey::mixer(); }
 			virtual std::string GetName() const { return _psName; }
 			virtual int GetNumCols() const;
 			virtual void GetParamName(int numparam,char *name) const;

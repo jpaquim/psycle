@@ -34,18 +34,18 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 {
 	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
 	hosts_.push_back( &InternalHost::getInstance(callbacks) );
+	finder_.addHost(Hosts::INTERNAL);
+	// InternalHost doesn't have a path, so we call FillFinderData now.
 	InternalHost::getInstance(callbacks).FillFinderData(finder_);
 
 	hosts_.push_back( &NativeHost::getInstance(callbacks) );
-	//Skipped until path is set.
-	//NativeHost::getInstance(callbacks).FillFinderData(finder_);
+	finder_.addHost(Hosts::NATIVE);
 	
 	hosts_.push_back( &LadspaHost::getInstance(callbacks) );
-	//SKipped until path is set.
-	//LadspaHost::getInstance(callbacks).FillFinderData(finder_);
+	finder_.addHost(Hosts::LADSPA);
 
 	//hosts_.push_back( &VstHost::getInstance(callbacks) );
-	//VstHost::getInstance(callbacks).FillFinderData(finder_);
+	//finder_.addHost(Hosts::VST);
 }
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
@@ -61,61 +61,29 @@ Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 		}
 	}
 	return 0;
-#endif	
-///FIXME: Move this code to the appropiate host.
-#if 0
-	if ( finder.info( key ).type() == MACH_PLUGIN )
-	{
-
-	}
-	else if ( finder.info( key ).type() == MACH_LADSPA )
-	{
-		if (id == -1 ) id = GetFreeFxBus();
-		LADSPAMachine* plugin = new LADSPAMachine( machinecallbacks, id, this );
-		if(plugin->loadDll( key.dllPath(), key.index())) {
-			plugin->SetPosX( x );
-			plugin->SetPosY( y );
-			plugin->Init();
-			if( machine_[fb] ) DestroyMachine( fb );
-				machine_[ fb ] = plugin;
-		} else {
-			delete plugin;
-		}
-	}
-#endif	
-}
-
-void MachineFactory::DeleteMachine(Machine* mac)
-{
-	MachineKey key = mac->getMachineKey();
-	assert(key.host() < Hosts::NUM_HOSTS);
-	hosts_[key.host()].DeleteMachine(mac);
-#if 0	
-	for (int i=0; i < hosts_.size(); ++i )
-	{
-		if ( hosts_[i]->hostCode() == key.host() ) {
-			return hosts_[i].DeleteMachine(mac);
-			break;
-		}
-	}
 #endif
 }
 
-std::string const & getPsyclePath() const { return hosts_[Hosts::NATIVE].getPluginPath(); }
-void setPsyclePath(std::string path)
+Machine* MachineFactory::CloneMachine(Machine& mac)
 {
-	hosts_[Hosts::NATIVE].setPluginPath(path);
-	hosts_[Hosts::NATIVE].FillFinderData(finder_,true);
+	Machine* newmac = CreateMachine(mac.key());
+	newmac->CloneFrom(mac);
+	return newmac;
 }
 
-std::string const & getLadspaPath() const { return hosts_[Hosts::LADSPA].getPluginPath(); }
-void setLadspaPath(std::string path)
+std::string const & MachineFactory::getPsyclePath() const { return NativeHost.getInstance(0).getPluginPath(); }
+void MachineFactory::setPsyclePath(std::string path,bool cleardata)
 {
-	hosts_[Hosts::LADSPA].setPluginPath(path);
-	hosts_[Hosts::LADSPA].FillFinderData(finder_,true);
+	NativeHost.getInstance(0).setPluginPath(path);
+	NativeHost.getInstance(0).FillFinderData(finder_,cleardata);
 }
 
-
+std::string const & MachineFactory::getLadspaPath() const { return LadspaHost.getInstance(0).getPluginPath(); }
+void MachineFactory::setLadspaPath(std::string path,bool cleardata)
+{
+	LadspaHost.getInstance(0).setPluginPath(path);
+	LadspaHost.getInstance(0).FillFinderData(finder_,cleardata);
+}
 
 void MachineFactory::RegenerateFinderData() 
 {

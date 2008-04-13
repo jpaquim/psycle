@@ -37,7 +37,7 @@ class RiffFile {
 	public:
 
 		RiffFile();
-		~RiffFile();
+		virtual ~RiffFile();
 
 		///\todo shouldn't be public
 		RiffChunkHeader _header;
@@ -47,15 +47,15 @@ class RiffFile {
 		bool Close();
 		bool Error();
 		bool Eof();
-		std::size_t FileSize();
-		std::size_t GetPos();
-		int Seek(std::ptrdiff_t const & bytes);
-		int Skip(std::ptrdiff_t const & bytes);
+		virtual std::size_t FileSize();
+		virtual std::size_t GetPos();
+		virtual int Seek(std::ptrdiff_t const & bytes);
+		virtual int Skip(std::ptrdiff_t const & bytes);
 
-	private:
-		bool WriteChunk(void const *, std::size_t const &);
-		bool ReadChunk (void       *, std::size_t const &);
-		bool Expect    (void       *, std::size_t const &);
+	protected:
+		virtual bool WriteChunk(void const *, std::size_t const &);
+		virtual bool ReadChunk (void       *, std::size_t const &);
+		virtual bool Expect    (void       *, std::size_t const &);
 
 	public:
 		#if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -197,7 +197,7 @@ class RiffFile {
 
 
 		bool ReadString(std::string &);
-		bool ReadString(char *, std::size_t const & max_length);
+		virtual bool ReadString(char *, std::size_t const & max_length);
 		///\todo : Implement a WriteString() to complement ReadString, and a ReadSizedString() which would do the same as ReadString
 		//         which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
 		//         setting the last char to null.
@@ -216,10 +216,22 @@ class MemoryFile : public RiffFile
 {
 public:
 	MemoryFile();
-	~MemoryFile();
+	virtual ~MemoryFile();
 
-	bool Open(std::ptrdiff_t memsize);
-	bool Close();
+	bool OpenMem(std::ptrdiff_t blocksize);
+	bool CloseMem();
+	virtual std::size_t FileSize();
+	virtual std::size_t GetPos();
+	virtual int Seek(std::ptrdiff_t const & bytes);
+	virtual int Skip(std::ptrdiff_t const & bytes);
+	virtual bool ReadString(char *, std::size_t const & max_length);
+protected:
+	virtual bool WriteChunk(void const *, std::size_t const &);
+	virtual bool ReadChunk (void       *, std::size_t const &);
+	virtual bool Expect    (void       *, std::size_t const &);
+
+	std::vector<void*> memoryblocks_;
+	int blocksize_;
 };
 
 }}

@@ -19,37 +19,40 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef MACHINEHOST_HPP
-#define MACHINEHOST_HPP
+#ifndef LADSPAHOST_HPP
+#define LADSPAHOST_HPP
 
-#include "machinekey.hpp"
-#include "machine.h"
+#include "machinehost.hpp"
 
-namespace psy{namespace core{
+namespace psy{ namespace core{
 
-class MachineCallbacks;
-class Machine;
-class PluginFinder;
 
-class MachineHost
+class LadspaHost : public MachineHost
 {
 protected:
-	MachineHost(MachineCallbacks*);
+	LadspaHost(MachineCallbacks*);
 public:
-	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) const = 0;
+	~LadspaHost();
+	static LadspaHost& getInstance(MachineCallbacks*);
+
+	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
 	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
-	
-	virtual const Hosts::type hostCode() const = 0;
-	virtual const std::string hostName() const = 0;
 
-	virtual std::string const & getPluginPath(int) { return ""; };
-	virtual int getNumPluginPaths() { return 0; }
-	virtual void setPluginPath(std::string path) {};
+	virtual const Hosts::type hostCode() const { return Hosts::LADSPA; }
+	virtual const std::string hostName() const { return "Ladspa"; }
+	virtual std::string const & getPluginPath(int) const { return plugin_path_; }
+	virtual int getNumPluginPaths() const { return 1; }
+	virtual void setPluginPath(std::string path);
+
 protected:
-	virtual void FillPluginInfo(const std::string&, const std::string& , std::map<MachineKey,PluginInfo>& ) = 0;
-
-	MachineCallbacks* mcallback_;
+	virtual void FillPluginInfo(const std::string& const std::string&, std::map<MachineKey,PluginInfo>&);
+	void* LoadDll( const std::string &  );
+	LADSPA_Descriptor_Function* LoadDescriptorFunction(void*);
+	LADSPA_Handle Instantiate(LADSPA_Descriptor*);
+	void UnloadDll( void* );
+	void *dlopenLADSPA(const char * pcFilename, int iFlag);
+	std::string const plugin_path_;
 };
 
 }}
-#endif // MACHINEHOST_HPP
+#endif // LADSPAHOST_HPP

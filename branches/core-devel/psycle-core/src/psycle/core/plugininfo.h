@@ -44,13 +44,9 @@ namespace psy
 		class PluginInfo
 		{
 			public:
-				///FIXME: Should MachineKey be part of the PluginInfo? It is the key to the map.
-				PluginInfo(MachineKey, MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string)
+				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string)
 
 				virtual ~PluginInfo();
-
-				void setKey( MachineKey );
-				MachineKey key() cons;
 
 				void setRole( MachineRole::type role );
 				MachineRole::type role() const;
@@ -83,7 +79,6 @@ namespace psy
 				const std::string & category() const;
 
 			private:
-				MachineKey key_;
 				MachineRole::type role_;
 				std::string name_;
 				std::string author_;

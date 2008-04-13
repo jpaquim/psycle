@@ -24,21 +24,12 @@ namespace psy
 		/// and their initial parameters
 		class CoreSong
 		{
+		protected:
+			CoreSong() friend class SongFactory;
 		public:
-			CoreSong(MachineCallbacks*);
 			virtual ~CoreSong();
-
 			/// clears all song data
 			virtual void clear();
-
-			///\name (de)serialisation
-			///\{
-		public:
-			/// loads the song
-			bool load(std::string const & plugin_path, const std::string & fileName);
-			/// saves the song
-			bool save(const std::string & fileName);
-			///\}
 
 		public:
 			// signals
@@ -139,7 +130,7 @@ namespace psy
 			{
 				machine_[id] = machine;
 				machine->id(id);
-			} friend class Psy2Filter; friend class Psy3Filter; friend class Psy4Filter;
+			} 
 
 			Machine * machine_[MAX_MACHINES];
 			///\}
@@ -173,44 +164,38 @@ namespace psy
 			bool _saved;
 			///\}
 
-		private:
-			MachineCallbacks *machinecallbacks;
-
 			///\name actions with machines
 			///\{
 		public:
-
-			/// creates a new machine in this song
-			/// requirements : PluginFinder, PluginFinderKey
-			///\return a pointer to a new machine upon success, 0 otherwise
-			// future : iterator of machine (stl)container or at failure end()
-			Machine* createMachine(const PluginFinder & finder, const MachineKey & key, int x = 0, int y = 0 );
-			/// creates a new machine in this song. .. deprecated
-			Machine & CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name = "dummy" );
-			/// creates a new machine in this song.
-			bool CreateMachine(std::string const & plugin_path, Machine::type_type, int x, int y, std::string const & plugin_name, Machine::id_type);
-
+			/// add a new machine. The index comes from pmac. 
+			///\todo: set a value which indicates "get a free one"
+			virtual bool AddMachine(Machine* pmac);
 			/// destroy a machine of this song.
-			void DestroyMachine(Machine & machine, bool write_locked = false) { DestroyMachine(machine.id(),write_locked); /* stupid circonvolution */ }
+			virtual void DeleteMachine(Machine & machine, bool write_locked = false);
 			/// destroy a machine of this song.
-			virtual void DestroyMachine(Machine::id_type mac, bool write_locked = false);
+			virtual void DeleteMachineDeprecated(Machine::id_type mac, bool write_locked = false)
+			{
+				if (machine(mac))
+					DestroyMachine(machine(mac),write_locked);
+			}
 			/// destroys all the machines of this song.
-			void DestroyAllMachines(bool write_locked = false);
+			virtual void DeleteAllMachines(bool write_locked = false);
 
 			/// clones a machine.
-			bool CloneMac(Machine & src, Machine & dst) { return CloneMac(src.id(), dst.id()); /* stupid circonvolution */ }
+			bool CloneMac(const Machine & src, Machine & dst) { return CloneMac(src.id(), dst.id()); /* stupid circonvolution */ }
 			/// clones a machine.
-			bool CloneMac(Machine::id_type src, Machine::id_type dst);
-
-			/// Gets the first free slot in the machine array
-			///\todo it's low-level.. should be private.
-			/// we have higer-level CreateMachine and CloneMachine functions already
-			//PSYCLE__DEPRECATED("low-level")
-			Machine::id_type GetFreeMachine();
+			bool CloneMacDeprecated(Machine::id_type src, Machine::id_type dst)
+			{
+				if(machine(src))
+				{
+					
+				}
+			}
+		protected:
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
-			int GetFreeBus();
+			Machine::id_type GetFreeBus();
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
-			int GetFreeFxBus();
+			Machine::id_type GetFreeFxBus();
 			/// Returns the Bus index out of a machine id.
 			Machine::id_type FindBusFromIndex(Machine::id_type);
 			///\}
@@ -232,7 +217,7 @@ namespace psy
 			///\param wiresource new source mac index
 			///\param wireindex index of the wire in wiredest to change
 			bool ChangeWireSourceMac(Machine& newSrcMac, Machine &dstMac, InPort::id_type dsttype, Wire::id_type wiretochange, OutPort::id_type srctype);
-			
+		protected:
 			bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
 
 			void RestoreMixerSendFlags();
@@ -298,6 +283,12 @@ namespace psy
 
 		/// the actual song class used by qpsycle. it's simply the UISong class
 		/// note that a simple typedef won't work due to the song class being forward-declared, as a class and not a typedef.
+		//
+		///\todo: For derived UI machines, the data is hold by Song in a class VisualMachine.
+		// This means that a Song maintans a separate array of VisualMachines for the Non-visual counterparts and gives access
+		// to these with ui-specific methods.
+		// To help working with them, a VisualMachine can have a reference to the related non-visual machine, so that the UI parts
+		// can access the real machine via the VisualMachine class.
 		class Song : public UISong
 		{
 		public:

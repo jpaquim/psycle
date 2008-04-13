@@ -27,9 +27,8 @@
 
 namespace psy { namespace core {
 
-PluginInfo::(MachineKey key, MachineRole::type role, std::string name, std::string author, std::string desc, std::string version, std::string libname, std::string categ)
+PluginInfo::(MachineRole::type role, std::string name, std::string author, std::string desc, std::string version, std::string libname, std::string categ)
 :
-	key_(key);
 	role_(role),
 	name_(name),
 	author_(author),
@@ -43,14 +42,6 @@ PluginInfo::(MachineKey key, MachineRole::type role, std::string name, std::stri
 }
 
 PluginInfo::~PluginInfo() {
-}
-
-void PluginInfo::setType( Machine::type_type type ) {
-	subclass_ = type;
-}
-
-Machine::type_type PluginInfo::type() const {
-	return subclass_;
 }
 
 void PluginInfo::setRole( MachineRole::type role ) {
