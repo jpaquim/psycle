@@ -8,6 +8,7 @@
 #include <fstream>
 #include <cstdint>
 #include <cassert>
+#include <vector>
 
 namespace psy { namespace core {
 

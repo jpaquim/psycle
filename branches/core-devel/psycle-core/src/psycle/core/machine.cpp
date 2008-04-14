@@ -334,7 +334,7 @@ namespace psy { namespace core {
 	void Machine::CloneFrom(Machine& src) 
 	{
 		// Only allow to copy from a machine of the same type.
-		if ( key() != src.key())
+		if ( getMachineKey() != src.getMachineKey())
 			return;
 		SetPan(src.Pan());
 		SetPosX(src.GetPosX()+32);
@@ -389,10 +389,11 @@ namespace psy { namespace core {
 
 		///\FIXME: Implement MemoryFile.
 		MemoryFile file;
-		file.open(1000);
-		src.SaveSpecificFileChunk(file);
-		LoadSpecificFileChunk(file);
-		file.close();
+		file.OpenMem(1000);
+		///FIXME: Version anyone?! 
+		src.SaveSpecificChunk(&file);
+		LoadSpecificChunk(&file,0);
+		file.CloseMem();
 	}
 	void Machine::Init()
 	{
@@ -462,7 +463,7 @@ namespace psy { namespace core {
 		if ( !_connection[srcwire])
 			return false;
 
-		Machine *oldDst = callbacks->callbacks->song()->machine(_connection[srcwire]);
+		Machine *oldDst = callbacks->song().machine(_connection[srcwire]);
 		if (oldDst)
 		{
 			Wire::id_type oldwire,dstwire;
@@ -491,7 +492,7 @@ namespace psy { namespace core {
 		if (_inputMachines[dstwire] == -1) 
 			return false;
 
-		Machine *oldDst = callbacks->callbacks->song()->machine(_connection[dstwire]);
+		Machine *oldDst = callbacks->song().machine(_connection[dstwire]);
 		if (oldDst)
 		{
 			Wire::id_type oldwire;
@@ -532,7 +533,7 @@ namespace psy { namespace core {
 			{
 				if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
 				{
-					iMac = callbacks->song()->machine(_inputMachines[w]);
+					iMac = callbacks->song().machine(_inputMachines[w]);
 					if (iMac)
 					{
 						Wire::id_type wix = iMac->FindOutputWire(id());
@@ -549,7 +550,7 @@ namespace psy { namespace core {
 			{
 				if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
 				{
-					iMac = callbacks->song()->machine(_outputMachines[w]);
+					iMac = callbacks->song().machine(_outputMachines[w]);
 					if (iMac)
 					{
 						Wire::id_type wix = iMac->FindInputWire(id());
@@ -608,13 +609,13 @@ namespace psy { namespace core {
 	{
 		//Work down the connection wires until finding the mixer.
 		for (int i(0);i< MAX_CONNECTIONS; ++i)
-			if ( _connection[i]) callbacks->song()->machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
+			if ( _connection[i]) callbacks->song().machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
 	}
 	void Machine::SetMixerSendFlag()
 	{
 		for (int i(0);i<MAX_CONNECTIONS;++i)
 		{
-			if (_inputCon[i]) callbacks->song()->machine(_inputMachines[i])->SetMixerSendFlag();
+			if (_inputCon[i]) callbacks->song().machine(_inputMachines[i])->SetMixerSendFlag();
 		}
 		_isMixerSend=true;
 	}
@@ -624,7 +625,7 @@ namespace psy { namespace core {
 		for (int i(0);i< MAX_CONNECTIONS; ++i)
 			if ( _inputCon[i])
 			{
-				callbacks->song()->machine(_inputMachines[i])->ClearMixerSendFlag();
+				callbacks->song().machine(_inputMachines[i])->ClearMixerSendFlag();
 			}
 			
 		_isMixerSend=false;
@@ -698,7 +699,7 @@ namespace psy { namespace core {
 	{
 		// Get reference to the destination machine
 		if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-		Machine *_pDstMachine = callbacks->song()->machine(_outputMachines[WireIndex]);
+		Machine *_pDstMachine = callbacks->song().machine(_outputMachines[WireIndex]);
 		if (_pDstMachine)
 		{
 			Wire::id_type c;
@@ -715,7 +716,7 @@ namespace psy { namespace core {
 	{
 		// Get reference to the destination machine
 		if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-		const Machine *_pDstMachine = callbacks->song()->machine(_outputMachines[WireIndex]);
+		const Machine *_pDstMachine = callbacks->song().machine(_outputMachines[WireIndex]);
 		if (_pDstMachine)
 		{
 			Wire::id_type c;
@@ -787,7 +788,7 @@ namespace psy { namespace core {
 		{
 			if (_inputCon[i])
 			{
-				Machine* pInMachine = callbacks->song()->machine(_inputMachines[i]);
+				Machine* pInMachine = callbacks->song().machine(_inputMachines[i]);
 				if (pInMachine)
 				{
 					if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -886,35 +887,36 @@ namespace psy { namespace core {
 
 	bool Machine::LoadFileChunk(RiffFile* pFile)
 	{
+		std::uint32_t temp, version;
 		pFile->Read(_bypass);
 		pFile->Read(_mute);
 		pFile->Read(_panning);
 		pFile->Read(temp);
-		pMachine->SetPosX(temp);
+		SetPosX(temp);
 		pFile->Read(temp);
-		pMachine->SetPosY(temp);
-		pFile->Read(pMachine->_connectedInputs);
-		pFile->Read(pMachine->_connectedOutputs);
+		SetPosY(temp);
+		pFile->Read(_connectedInputs);
+		pFile->Read(_connectedOutputs);
 		for(int i = 0; i < MAX_CONNECTIONS; i++)
 		{
-			pFile->Read(pMachine->_inputMachines[i]);
-			pFile->Read(pMachine->_outputMachines[i]);
-			pFile->Read(pMachine->_inputConVol[i]);
-			pFile->Read(pMachine->_wireMultiplier[i]);
-			pFile->Read(pMachine->_connection[i]);
-			pFile->Read(pMachine->_inputCon[i]);
+			pFile->Read(_inputMachines[i]);
+			pFile->Read(_outputMachines[i]);
+			pFile->Read(_inputConVol[i]);
+			pFile->Read(_wireMultiplier[i]);
+			pFile->Read(_connection[i]);
+			pFile->Read(_inputCon[i]);
 		}
 		{
 			//see? no char arrays! god bless the stl
 			//it's still necessary to limit editname length, but i'm inclined to think 128 is plenty..
 			std::vector<char> nametemp(128);
 			pFile->ReadString(&nametemp[0], nametemp.size());
-			pMachine->editName_.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
+			editName_.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
 		}
-		bool success = pMachine->LoadSpecificChunk(pFile,version);
+		bool success = LoadSpecificChunk(pFile,version);
 		if (success) {
-			pMachine->SetPan(pMachine->_panning);
-			if (pMachine->_bypass) pMachine->Bypass(true);
+			SetPan(_panning);
+			if (_bypass) Bypass(true);
 		}
 
 		return success;

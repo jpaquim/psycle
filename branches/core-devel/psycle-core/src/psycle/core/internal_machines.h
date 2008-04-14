@@ -14,7 +14,7 @@ namespace psy { namespace core {
 		class Dummy : public Machine
 		{
 		protected:
-			Dummy(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
+			Dummy(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 		public:
 			virtual ~Dummy() throw();
 			virtual int GenerateAudio(int numSamples);
@@ -29,7 +29,7 @@ namespace psy { namespace core {
 		class DuplicatorMac : public Machine
 		{
 		protected:
-			DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
+			DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 		public:
 			virtual ~DuplicatorMac() throw();
 			virtual void Init(void);
@@ -66,7 +66,7 @@ namespace psy { namespace core {
 		class Master : public Machine
 		{
 		protected:
-			Master(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
+			Master(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 		public:
 			virtual ~Master() throw();
 			virtual void Init(void);
@@ -102,14 +102,14 @@ namespace psy { namespace core {
 		class LFO : public Machine
 		{
 		protected:
-			LFO(MachineCallbacks* callbacks, Machine::id_type index) friend class InternalHost;
+			LFO(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 		public:
 			virtual ~LFO() throw();
 			virtual void Init(void);
 			virtual void Tick( int channel, const PatternEvent & pData );
 			virtual void PreWork(int numSamples);
 			virtual int GenerateAudio( int numSamples );
-			virtual MachineKey getMachineKey() const { return MachineKey::LFO(); }
+			virtual MachineKey getMachineKey() const { return MachineKey::lfo(); }
 			virtual std::string GetName() const { return _psName; }
 			virtual void GetParamName(int numparam,char *name) const;
 			virtual void GetParamRange(int numparam,int &minval,int &maxval) const;

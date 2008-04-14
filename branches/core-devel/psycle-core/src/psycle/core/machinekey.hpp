@@ -71,16 +71,16 @@ namespace psy
 			MachineKey( const Hosts::type host, const std::string & dllName, int index = 0 );
 			~MachineKey();
 
-			static const MachineKey MachineKey::master() const;
-			static const MachineKey MachineKey::dummy() const;
-			static const MachineKey MachineKey::sampler) const;
-			static const MachineKey MachineKey::sampulse() const;
-			static const MachineKey MachineKey::duplicator() const;
-			static const MachineKey MachineKey::mixer() const;
-			static const MachineKey MachineKey::audioinput() const;
-			static const MachineKey MachineKey::lfo() const;
+			static const MachineKey master();
+			static const MachineKey dummy();
+			static const MachineKey sampler();
+			static const MachineKey sampulse();
+			static const MachineKey duplicator();
+			static const MachineKey mixer();
+			static const MachineKey audioinput();
+			static const MachineKey lfo();
 
-			static const std::string MachineKey::preprocessName(std::string dllName);
+			static const std::string preprocessName(std::string dllName);
 
 			const std::string & dllName() const;
 			const Hosts::type host() const;
@@ -88,6 +88,7 @@ namespace psy
 
 			bool operator<(const MachineKey & key) const;
 			bool operator==( const MachineKey & rhs ) const;
+			bool operator!=( const MachineKey & rhs ) const;
 		private:
 			std::string dllName_;
 			Hosts::type host_;

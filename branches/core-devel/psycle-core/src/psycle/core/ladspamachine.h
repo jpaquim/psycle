@@ -62,7 +62,7 @@ namespace psy {
 		{
 			protected:
 				LADSPAMachine(MachineCallbacks*, MachineKey, Machine::id_type, void*,
-						LADSPA_Descriptor* ,LADSPA_Handle) friend class LadspaHost;
+						const LADSPA_Descriptor* ,LADSPA_Handle); friend class LadspaHost;
 			public:
 				virtual ~LADSPAMachine() throw();
 				virtual void Init();
@@ -70,8 +70,8 @@ namespace psy {
 				virtual int GenerateAudio(int numSamples );
 				virtual void Tick(int channel, const PatternEvent & pEntry );
 				virtual void Stop(){}
-				inline virtual std::string GetDllName() const throw() { return key.dllName(); }
-				virtual MachineKey getMachineKey() {  return key_; }
+				inline virtual std::string GetDllName() const throw() { return key_.dllName(); }
+				virtual MachineKey getMachineKey() const {  return key_; }
 				virtual std::string GetName() const { return (char *) psDescriptor ? psDescriptor->Name : ""; }
 				virtual void GetParamName(int numparam, char * name) const;
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) const;

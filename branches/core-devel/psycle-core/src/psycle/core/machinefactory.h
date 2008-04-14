@@ -42,7 +42,7 @@ public:
 	Machine* CloneMachine(Machine& mac);
 
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }
-	MachineCallbacks* getCallbacks() { return callbacks_; }
+	MachineCallbacks* getCallbacks() const { return callbacks_; }
 
 	std::string const & getPsyclePath() const;
 	void setPsyclePath(std::string path, bool cleardata=false);

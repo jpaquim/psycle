@@ -24,8 +24,10 @@
 #include "pluginfinder.h"
 #include "internal_machines.h"
 #include "sampler.h"
-#include "xmsampler"
+#include "xmsampler.h"
 #include "mixer.h"
+
+#include <map>
 
 namespace psy {namespace core {
 
@@ -35,7 +37,7 @@ namespace InternalMacs {
 		MachineKey::master(),
 		MachineKey::dummy(),
 		MachineKey::sampler(),
-		MachikeKey::sampulse(),
+		MachineKey::sampulse(),
 		MachineKey::duplicator(),
 		MachineKey::mixer(),
 		MachineKey::audioinput(),
@@ -48,8 +50,8 @@ namespace InternalMacs {
 		PluginInfo(MachineRole::GENERATOR,"Sampulse","JosepMa [JAZ]","Tracker oriented sampler","0.9","","Sampler"),
 		PluginInfo(MachineRole::CONTROLLER,"Note Duplicator","JosepMa [JAZ]","Forwards events to other machines","1.0","","Controller"),
 		PluginInfo(MachineRole::EFFECT,"Send/Return Mixer","JosepMa [JAZ]","Mixes audio with send/returns","1.0","","Mixer"),
-		PluginInfo(MachineRole::GENERATOR,"AudioInput","Receives audio from the soundcard","0.7","","Capture"),
-		PluginInfo(MachineRole::CONTROLLEr,"LFO Machine","Controls parameters of other machines","0.5","","Controller")
+		PluginInfo(MachineRole::GENERATOR,"AudioInput","JosepMa [JAZ]","Receives audio from the soundcard","0.7","","Capture"),
+		PluginInfo(MachineRole::CONTROLLER,"LFO Machine","dw","Controls parameters of other machines","0.5","","Controller")
 	};
 }
 
@@ -65,7 +67,7 @@ InternalHost& InternalHost::getInstance(MachineCallbacks* callb) {
 	return instance;
 }
 
-Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Machine::id_type id) const 
+Machine* InternalHost::CreateMachine(PluginFinder* /*finder */, MachineKey key,Machine::id_type id) 
 {
 	Machine* mac=0;
 
@@ -81,16 +83,18 @@ Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Ma
 		mac = new Sampler(mcallback_, id);
 		break;
 	case InternalMacs::XMSAMPLER:
-		mac = new XMSampler(mcallback_, id);
+		//TODO:
+		//mac = new XMSampler(mcallback_, id);
 		break;
 	case InternalMacs::DUPLICATOR:
-		mac = new DuplicatorMac(mallback_, id);
+		mac = new DuplicatorMac(mcallback_, id);
 		break;
 	case InternalMacs::MIXER:
 		mac = new Mixer(mcallback_, id);
 		break;
 	case InternalMacs::AUDIOINPUT:
-		mac = new AudioInput(mcallback_, id);
+		//TODO:
+		//mac = new AudioInput(mcallback_, id);
 		break;
 	case InternalMacs::LFO:
 		mac = new LFO(mcallback_, id);
@@ -102,16 +106,16 @@ Machine* InternalHost::CreateMachine(PluginFinder /*finder */, MachineKey key,Ma
 	return mac;
 }
 
-void InternalHost::FillFinderData(PluginFinder* finder, bool /*clearfirst*/) const
+void InternalHost::FillFinderData(PluginFinder* finder, bool /*clearfirst*/)
 {
-	std::map<MachineKey,PluginInfo> infoMap = finder.getMap(Hosts::INTERNAL);
+	std::map<MachineKey,PluginInfo> infoMap = finder->getMap(Hosts::INTERNAL);
 
 	//InternalHost always regenerates its pluginInfo.
 	infoMap.clear();
 	
 	// Master machine is skipped because it is never created by the user.
-	for(InternalMacs::type i=1; i < InternalMacs::NUM_MACS; ++i) {
-		infoMap.insert(InternalMacs::keys[i],InternalMacs::infos[i]);
+	for(int  i=InternalMacs::type(1); i < InternalMacs::NUM_MACS; i++) {
+		infoMap[InternalMacs::keys[i]] = InternalMacs::infos[i];
 	}
 }
 

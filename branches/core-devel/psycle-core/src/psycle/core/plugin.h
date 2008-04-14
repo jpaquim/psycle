@@ -99,7 +99,7 @@ class Plugin : public Machine
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
 	protected:
 		Plugin(MachineCallbacks*, MachineKey, Machine::id_type, void* hInstance,
-			CMachineInfo*, CMachineInterface*) friend class NativeHost;
+			CMachineInfo*, CMachineInterface*); friend class NativeHost;
 	public:
 		virtual ~Plugin() throw();
 		virtual void Init();
@@ -114,7 +114,7 @@ class Plugin : public Machine
 		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 		virtual void SaveSpecificChunk(RiffFile * pFile) const;
 		///\}
-		inline virtual std::string GetDllName() const { return key.dllName(); }
+		inline virtual std::string GetDllName() const { return key_.dllName(); }
 		virtual MachineKey getMachineKey() const { return key_; }
 		virtual std::string GetName() const { return _psName; }
 		virtual int GetNumParams() const { return GetInfo().numParameters; }
@@ -128,7 +128,6 @@ class Plugin : public Machine
 		inline Proxy const & proxy() const { return proxy_; }
 		inline Proxy & proxy() { return proxy_; }
 		CMachineInfo const & GetInfo() const throw() { return *info_; }
-		void* const GethInstance() const { return hInstance; }
 		
 	private:
 		char _psShortName[16];

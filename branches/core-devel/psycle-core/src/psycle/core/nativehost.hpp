@@ -44,9 +44,9 @@ public:
 
 	virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }
 	virtual const std::string hostName() const { return "Native"; }
-	virtual std::string const & getPluginPath(int ) const { return plugin_path_; }
+	virtual std::string const & getPluginPath(int) const { return plugin_path_; }
 	virtual int getNumPluginPaths() { return 1; }
-	virtual void setPluginPath(std::string ) { plugin_path_ = path; }
+	virtual void setPluginPath(std::string path) { plugin_path_ = path; }
 
 protected:
 	virtual void FillPluginInfo(const std::string&, const std::string&, std::map<MachineKey,PluginInfo>&);
@@ -54,7 +54,7 @@ protected:
 	CMachineInfo* LoadDescriptor(void* );
 	CMachineInterface* Instantiate(void * );
 	void UnloadDll( void*  );
-	std::string const plugin_path_;
+	std::string plugin_path_;
 };
 
 }}

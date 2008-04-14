@@ -20,9 +20,18 @@
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
 
-#include "nativehost.hpp"
+
+#include "ladspahost.hpp"
 #include "pluginfinder.h"
-#include "ladspamachne.h"
+#include "ladspamachine.h"
+#include "playertimeinfo.h"
+#include <iostream>
+
+#if defined __unix__ || defined __APPLE__
+	#include <dlfcn.h>
+#else
+	#include <windows.h>
+#endif
 
 namespace psy {namespace core {
 
@@ -34,11 +43,11 @@ LadspaHost::~LadspaHost()
 }
 
 LadspaHost& LadspaHost::getInstance(MachineCallbacks* callb) {
-	static LadspaHost instance;
+	static LadspaHost instance(callb);
 	return instance;
 }
 
-Machine* LadspaHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine::id_type id) const 
+Machine* LadspaHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine::id_type id) 
 {
 	//FIXME: This is a good place where to use exceptions. (task for a later date)
 	std::string fullPath = finder->lookupDllName(key);
@@ -46,23 +55,23 @@ Machine* LadspaHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine:
 	void* hInstance = LoadDll(fullPath);
 	if (!hInstance) return 0;
 	
-	LADSPA_Descriptor_Function pfDescriptorFunction = loadDescriptorFunction(fileName);
+	LADSPA_Descriptor_Function pfDescriptorFunction = LoadDescriptorFunction(hInstance);
 	if (pfDescriptorFunction) {
 		/*Step three: Get the descriptor of the selected plugin (a shared library can have
 		several plugins*/
 		std::cout << "step three" << std::endl;
-		LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(key.index());
+		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(key.index());
 		if (psDescriptor) {
 			LADSPA_Handle handle = Instantiate(psDescriptor);
 			if ( handle) 
 			{
-				LADSPAMachine * p = new LADSPAMachine(callbacks, key, id, psDescriptor, handle );
+				LADSPAMachine * p = new LADSPAMachine(mcallback_, key, id, hInstance, psDescriptor, handle );
 				p->Init();
 				return p;
 			}
 		}
 	}
-	unloadDll(hInstance);
+	UnloadDll(hInstance);
 	return 0;
 }
 
@@ -78,20 +87,19 @@ void LadspaHost::FillPluginInfo(const std::string& currentPath, const std::strin
 	if (!hInstance) return;
 	
 	LADSPA_Descriptor_Function pfDescriptorFunction;
-	pfDescriptorFunction = loadDescriptorFunction(hInstance);
+	pfDescriptorFunction = LoadDescriptorFunction(hInstance);
 	if (pfDescriptorFunction) {
 		unsigned int index=0;
-		LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(index);
+		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(index);
 		while (psDescriptor) {
 			PluginInfo info;
-			MachineKey key( hostCode() , fileName, 0 );
-			info.setType( MACH_LADSPA );
 			info.setName( psDescriptor->Label );
 			//info.setRole( plugin.mode() );
 			info.setLibName( currentPath + fileName );
 			//info.setVersion( version );
 			//info.setAuthor( plugin.GetInfo().Author );
-			MachineKey key(Hosts::LADSPA, fileName, lPluginIndex );
+			MachineKey key( hostCode() , fileName, index );
+			infoMap[key] = info;
 			psDescriptor = pfDescriptorFunction(++index);
 		}
 	}
@@ -104,16 +112,16 @@ void LadspaHost::setPluginPath(std::string path)
 	// The best way would be pre-process and store a vector of strings.
 	#if defined __unix__ || defined __APPLE__
 		std::string::size_type dotpos = path.find(':',0);
-		if ( dotpos != path.npos ) plugin_path = path.substr( 0, dotpos );
+		if ( dotpos != path.npos ) plugin_path_ = path.substr( 0, dotpos );
 	#else
 		plugin_path_ = path;
 	#endif
 }
 
 
-void* LadspaHost::loadDll( const std::string & fileName )
+void* LadspaHost::LoadDll( const std::string & fileName ) const
 {
-	void libHandle_ = 0;
+	void* libHandle_ = 0;
 	// Step one: Open the shared library.
 #if defined __unix__ || defined __APPLE__
 	libHandle_ = dlopen( fileName.c_str() , RTLD_NOW);
@@ -127,7 +135,7 @@ void* LadspaHost::loadDll( const std::string & fileName )
 	return libHandle_;
 }
 
-LADSPA_Descriptor_Function* LadspaHost::loadDescriptorFunction( void* hInstance ) {
+LADSPA_Descriptor_Function LadspaHost::LoadDescriptorFunction( void* libHandle_ ) const {
 	// Step two: Get the entry function.
 	LADSPA_Descriptor_Function pfDescriptorFunction =
 		(LADSPA_Descriptor_Function)
@@ -140,7 +148,7 @@ LADSPA_Descriptor_Function* LadspaHost::loadDescriptorFunction( void* hInstance 
 }
 
 
-LADSPA_Handle LadspaHost::Instantiate(LADSPA_Descriptor* psDescriptor)
+LADSPA_Handle LadspaHost::Instantiate(const LADSPA_Descriptor* psDescriptor) const
 {
 	if( LADSPA_IS_INPLACE_BROKEN(psDescriptor->Properties) ) {
 		return 0;
@@ -148,13 +156,13 @@ LADSPA_Handle LadspaHost::Instantiate(LADSPA_Descriptor* psDescriptor)
 	// Step four: Create (instantiate) the plugin, so that we can use it.
 	std::cout << "step four" << std::endl;
 		
-	return psDescriptor->instantiate(psDescriptor,Player::Instance()->timeInfo().sampleRate());
+	return psDescriptor->instantiate(psDescriptor,mcallback_->timeInfo().sampleRate());
 }
 
 
-void LadspaHost::UnloadDll( void* hInstance )
+void LadspaHost::UnloadDll( void* hInstance ) const
 {
-	assert(_hInstance);
+	assert(hInstance);
 	#if defined __unix__ || defined __APPLE__
 		::dlclose(hInstance);
 	#else
@@ -166,7 +174,7 @@ void LadspaHost::UnloadDll( void* hInstance )
 *   not an absolute path (i.e. does not begin with / character), this
 *   routine will search the LADSPA_PATH for the file.
 *****************************************************************************/
-void * LADSPAMachine::dlopenLADSPA(const char * pcFilename, int iFlag)
+void * LadspaHost::dlopenLADSPA(const char * pcFilename, int iFlag) const
 		{
 			std::string filename_(pcFilename);
 			

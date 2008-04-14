@@ -23,6 +23,8 @@
 
 #include "machinekey.hpp"
 #include "plugininfo.h"
+#include <vector>
+#include <map>
 
 namespace psy
 {
@@ -42,13 +44,15 @@ namespace psy
 				bool hasKey( const MachineKey& key ) const;
 				std::string lookupDllName( const MachineKey & key ) const;
 			
-				std::map< MachineKey, PluginInfo >::const_iterator begin(Hosts::type) const;
-				std::map< MachineKey, PluginInfo >::const_iterator end(Hosts::type) const;
+				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
+				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
 
-				std::map< MachineKey, PluginInfo >& getMap(Hosts::type);
+				std::map<MachineKey, PluginInfo> & getMap(Hosts::type);
 
 			protected:
-				std::vector<std::map< MachineKey, PluginInfo >> maps_;
+				typedef std::map<MachineKey, PluginInfo> maptype;
+				std::vector<maptype> maps_;
+		};
 	}
 }
 #endif

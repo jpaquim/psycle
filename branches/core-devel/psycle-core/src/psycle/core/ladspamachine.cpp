@@ -164,7 +164,7 @@ namespace psy {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 		LADSPAMachine::LADSPAMachine(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
-			void* libHandle, LADSPA_Descriptor* psDescriptor1,LADSPA_Handle pluginHandle1)
+			void* libHandle, const LADSPA_Descriptor* psDescriptor1,LADSPA_Handle pluginHandle1)
 		: Machine(callbacks,id)
 		, key_(key)
 		, libHandle_(libHandle)
@@ -315,19 +315,7 @@ namespace psy {
 				values_[lPortIndex].setDefault();
 			}
 		}
-		
-		void LADSPAMachine::SaveDllName(RiffFile * pFile) const
-		{
-			std::string::size_type extpos=0;
-			std::string withoutSuffix;
-			if ( (extpos= libName_.find(".so"))!= std::string::npos) {
-				withoutSuffix = libName_.substr(0,extpos);
-			}
-			else if ( (extpos = libName_.find(".dll"))!= std::string::npos) {
-				withoutSuffix = libName_.substr(0,extpos);
-			}
-			pFile->WriteArray(withoutSuffix.c_str(), withoutSuffix.length() + 1);
-		}
+
 		
 		bool LADSPAMachine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{

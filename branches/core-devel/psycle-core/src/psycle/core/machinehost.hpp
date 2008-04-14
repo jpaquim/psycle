@@ -23,7 +23,9 @@
 #define MACHINEHOST_HPP
 
 #include "machinekey.hpp"
+#include "plugininfo.h"
 #include "machine.h"
+#include <string>
 
 namespace psy{namespace core{
 
@@ -36,15 +38,15 @@ class MachineHost
 protected:
 	MachineHost(MachineCallbacks*);
 public:
-	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) const = 0;
+	virtual Machine* CreateMachine(PluginFinder*,MachineKey,Machine::id_type) = 0;
 	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
 	
 	virtual const Hosts::type hostCode() const = 0;
 	virtual const std::string hostName() const = 0;
 
-	virtual std::string const & getPluginPath(int) { return ""; };
+	virtual std::string const & getPluginPath(int) { static std::string ret = ""; return ret; };
 	virtual int getNumPluginPaths() { return 0; }
-	virtual void setPluginPath(std::string path) {};
+	virtual void setPluginPath(std::string ) {};
 protected:
 	virtual void FillPluginInfo(const std::string&, const std::string& , std::map<MachineKey,PluginInfo>& ) = 0;
 

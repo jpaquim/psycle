@@ -303,9 +303,11 @@ namespace psy
 		class MachineCallbacks {
 		public:
 			virtual ~MachineCallbacks() {}
-			virtual PlayerTimeInfo & timeInfo() const = 0;
+			virtual const PlayerTimeInfo & timeInfo() const = 0;
+			virtual PlayerTimeInfo &timeInfo() = 0;
 			virtual bool autoStopMachines() const = 0;
-			virtual CoreSong const & song() const = 0;
+			virtual const CoreSong & song() const = 0;
+			virtual CoreSong & song() = 0;
 		};
 
 		/// Base class for "Machines", the audio producing elements.

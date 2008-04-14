@@ -34,15 +34,15 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 {
 	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
 	hosts_.push_back( &InternalHost::getInstance(callbacks) );
-	finder_.addHost(Hosts::INTERNAL);
+	finder_->addHost(Hosts::INTERNAL);
 	// InternalHost doesn't have a path, so we call FillFinderData now.
 	InternalHost::getInstance(callbacks).FillFinderData(finder_);
 
 	hosts_.push_back( &NativeHost::getInstance(callbacks) );
-	finder_.addHost(Hosts::NATIVE);
+	finder_->addHost(Hosts::NATIVE);
 	
 	hosts_.push_back( &LadspaHost::getInstance(callbacks) );
-	finder_.addHost(Hosts::LADSPA);
+	finder_->addHost(Hosts::LADSPA);
 
 	//hosts_.push_back( &VstHost::getInstance(callbacks) );
 	//finder_.addHost(Hosts::VST);
@@ -51,7 +51,7 @@ MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 {
 	assert(key.host() < Hosts::NUM_HOSTS);
-	return hosts_[key.host()].CreateMachine(finder_,key,id);
+	return hosts_[key.host()]->CreateMachine(finder_,key,id);
 #if 0
 	for (int i=0; i< hosts_.size(); ++i)
 	{
@@ -66,30 +66,31 @@ Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 
 Machine* MachineFactory::CloneMachine(Machine& mac)
 {
-	Machine* newmac = CreateMachine(mac.key());
+	Machine* newmac = CreateMachine(mac.getMachineKey());
 	newmac->CloneFrom(mac);
 	return newmac;
 }
-
-std::string const & MachineFactory::getPsyclePath() const { return NativeHost.getInstance(0).getPluginPath(); }
+///\FIXME: This only returns the first path, should regenerate the string
+std::string const & MachineFactory::getPsyclePath() const { return NativeHost::getInstance(0).getPluginPath(0); }
 void MachineFactory::setPsyclePath(std::string path,bool cleardata)
 {
-	NativeHost.getInstance(0).setPluginPath(path);
-	NativeHost.getInstance(0).FillFinderData(finder_,cleardata);
+	NativeHost::getInstance(0).setPluginPath(path);
+	NativeHost::getInstance(0).FillFinderData(finder_,cleardata);
 }
 
-std::string const & MachineFactory::getLadspaPath() const { return LadspaHost.getInstance(0).getPluginPath(); }
+///\FIXME: This only returns the first path, should regenerate the string
+std::string const & MachineFactory::getLadspaPath() const { return LadspaHost::getInstance(0).getPluginPath(0); }
 void MachineFactory::setLadspaPath(std::string path,bool cleardata)
 {
-	LadspaHost.getInstance(0).setPluginPath(path);
-	LadspaHost.getInstance(0).FillFinderData(finder_,cleardata);
+	LadspaHost::getInstance(0).setPluginPath(path);
+	LadspaHost::getInstance(0).FillFinderData(finder_,cleardata);
 }
 
 void MachineFactory::RegenerateFinderData() 
 {
 	for (int i=0; i < hosts_.size(); ++i )
 	{
-		hosts_[i].FillFinderData(finder_,true);
+		hosts_[i]->FillFinderData(finder_,true);
 	}
 }
 

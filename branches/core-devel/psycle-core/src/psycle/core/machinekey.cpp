@@ -104,6 +104,9 @@ namespace psy
 		bool MachineKey::operator ==( const MachineKey & rhs ) const {
 			return host() == rhs.host() && dllName() == rhs.dllName() && index() == rhs.index();
 		}
+		bool MachineKey::operator !=( const MachineKey & rhs ) const {
+			return host() != rhs.host() || dllName() != rhs.dllName() || index() != rhs.index();
+		}
 
 		const std::string & MachineKey::dllName() const {
 			return dllName_;

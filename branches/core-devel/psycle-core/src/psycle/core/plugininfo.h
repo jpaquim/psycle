@@ -18,8 +18,8 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PLUGIN_FINDER
-#define PSYCLE__CORE__PLUGIN_FINDER
+#ifndef PSYCLE__CORE__PLUGIN_INFO
+#define PSYCLE__CORE__PLUGIN_INFO
 
 #include "machinekey.hpp"
 
@@ -44,7 +44,8 @@ namespace psy
 		class PluginInfo
 		{
 			public:
-				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string)
+				PluginInfo();
+				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string);
 
 				virtual ~PluginInfo();
 

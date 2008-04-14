@@ -41,7 +41,7 @@ public:
 	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
 	virtual const std::string hostName() const { return "Internal"; }
 protected:
-	virtual void FillPluginInfo(std::string , std::map<MachineKey,PluginInfo>& ) {}
+	virtual void FillPluginInfo(const std::string&, const std::string& , std::map<MachineKey,PluginInfo>& ) {}
 };
 
 }}

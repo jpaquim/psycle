@@ -133,7 +133,7 @@ namespace psy {
 					bisTicking=true;
 					for (int i=0;i<NUM_MACHINES;i++)
 					{
-						if (macOutput[i] != -1 && callbacks->song()->machine(macOutput[i]) != NULL )
+						if (macOutput[i] != -1 && callbacks->song().machine(macOutput[i]) != NULL )
 						{
 							AllocateVoice(workEvent.track(),i);
 							PatternEvent temp = workEvent.event();
@@ -147,9 +147,9 @@ namespace psy {
 								thenote.setNote(note);
 								temp.SetNote(0,thenote);
 							}
-							if (callbacks->song()->machine(macOutput[i]) != this)
+							if (callbacks->song().machine(macOutput[i]) != this)
 							{
-								callbacks->song()->machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
+								callbacks->song().machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
 								if (temp.note(0).note() >= notetypes::release )
 								{
 									DeallocateVoice(workEvent.track(),i);
@@ -220,9 +220,9 @@ namespace psy {
 		{
 			if (numparam >=0 && numparam <NUM_MACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( callbacks->song()->machine(macOutput[numparam]) != NULL))
+				if ((macOutput[numparam] != -1 ) &&( callbacks->song().machine(macOutput[numparam]) != NULL))
 				{
-					sprintf(parVal,"%X -%s", macOutput[numparam], callbacks->song()->machine(macOutput[numparam])->GetEditName().c_str());
+					sprintf(parVal,"%X -%s", macOutput[numparam], callbacks->song().machine(macOutput[numparam])->GetEditName().c_str());
 				}
 				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
@@ -281,9 +281,9 @@ namespace psy {
 
 		float * Master::_pMasterSamples = 0;
 
-		Master::Master(MachineCallbacks* callbacks, Machine:.id_type id)
+		Master::Master(MachineCallbacks* callbacks, Machine::id_type id)
 		:
-			Machine(callbacks, MACH_MASTER, MACHMODE_MASTER, id, song),
+			Machine(callbacks, id),
 			sampleCount(0),
 			decreaseOnClip(false),
 			_lMax(0),
@@ -561,10 +561,10 @@ namespace psy {
 			else if (numparam <prms::level0)
 			{
 				minval = -1;
-				if(macOutput[numparam-prms::prm0]==-1 || callbacks->song()->machine(macOutput[numparam-prms::prm0]) == NULL)
+				if(macOutput[numparam-prms::prm0]==-1 || callbacks->song().machine(macOutput[numparam-prms::prm0]) == NULL)
 					maxval = -1;
 				else
-					maxval =  callbacks->song()->machine(macOutput[numparam-prms::prm0])->GetNumParams()-1;
+					maxval =  callbacks->song().machine(macOutput[numparam-prms::prm0])->GetNumParams()-1;
 			}
 
 			else if (numparam <prms::phase0){minval = 0; maxval = MAX_DEPTH*2;}
@@ -612,8 +612,8 @@ namespace psy {
 			} 
 			else if(numparam<prms::prm0)
 			{
-				if ((macOutput[numparam-prms::mac0] != -1 ) &&( callbacks->song()->machine(macOutput[numparam-prms::mac0]) != NULL))
-					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],callbacks->song()->machine(macOutput[numparam-prms::mac0])->GetEditName().c_str());
+				if ((macOutput[numparam-prms::mac0] != -1 ) &&( callbacks->song().machine(macOutput[numparam-prms::mac0]) != NULL))
+					sprintf(parVal,"%X -%s",macOutput[numparam-prms::mac0],callbacks->song().machine(macOutput[numparam-prms::mac0])->GetEditName().c_str());
 				else if (macOutput[numparam-prms::mac0] != -1)
 					sprintf(parVal,"%X (none)",macOutput[numparam-prms::mac0]);
 				else 
@@ -622,13 +622,13 @@ namespace psy {
 			else if(numparam<prms::level0)
 			{
 				if((macOutput[numparam-prms::prm0] != -1) 
-					&& (callbacks->song()->machine(macOutput[numparam-prms::prm0]) != NULL)
+					&& (callbacks->song().machine(macOutput[numparam-prms::prm0]) != NULL)
 					&& (paramOutput[numparam-prms::prm0] >= 0))
 				{
-					if(paramOutput[numparam-prms::prm0] < callbacks->song()->machine(macOutput[numparam-prms::prm0])->GetNumParams())
+					if(paramOutput[numparam-prms::prm0] < callbacks->song().machine(macOutput[numparam-prms::prm0])->GetNumParams())
 					{
 						char name[128];
-						callbacks->song()->machine(macOutput[numparam-prms::prm0])->GetParamName(paramOutput[numparam-prms::prm0], name);
+						callbacks->song().machine(macOutput[numparam-prms::prm0])->GetParamName(paramOutput[numparam-prms::prm0], name);
 						sprintf(parVal,"%X -%s", paramOutput[numparam-prms::prm0], name);
 					}
 					else
@@ -668,13 +668,13 @@ namespace psy {
 					//if we're increasing, increase until we hit an active machine
 					if(value>macOutput[numparam-prms::mac0])
 					{
-						for(newMac=value; newMac<MAX_MACHINES && callbacks->song()->machine(newMac)==NULL; ++newMac)
+						for(newMac=value; newMac<MAX_MACHINES && callbacks->song().machine(newMac)==NULL; ++newMac)
 							;
 					}
 					//if we're decreasing, or if we're increasing but didn't find anything, decrease until we find an active machine
 					if(value<macOutput[numparam-prms::mac0] || newMac>=MAX_MACHINES)
 					{
-						for(newMac=value;newMac>-1 && callbacks->song()->machine(newMac)==NULL; --newMac)
+						for(newMac=value;newMac>-1 && callbacks->song().machine(newMac)==NULL; --newMac)
 							;
 					}
 
@@ -686,9 +686,9 @@ namespace psy {
 			}
 			else if(numparam <prms::level0)
 			{
-				if( macOutput[numparam-prms::prm0]>-1 && callbacks->song()->machine(macOutput[numparam-prms::prm0]) )
+				if( macOutput[numparam-prms::prm0]>-1 && callbacks->song().machine(macOutput[numparam-prms::prm0]) )
 				{
-					if(value<callbacks->song()->machine(macOutput[numparam-prms::prm0])->GetNumParams())
+					if(value<callbacks->song().machine(macOutput[numparam-prms::prm0])->GetNumParams())
 					{
 						ParamEnd(numparam-prms::prm0);
 						paramOutput[numparam-prms::prm0] = value;
@@ -697,7 +697,7 @@ namespace psy {
 					else
 					{
 						ParamEnd(numparam-prms::prm0);
-						paramOutput[numparam-prms::prm0] = callbacks->song()->machine(macOutput[numparam-prms::prm0])->GetNumParams()-1;
+						paramOutput[numparam-prms::prm0] = callbacks->song().machine(macOutput[numparam-prms::prm0])->GetNumParams()-1;
 						ParamStart(numparam-prms::prm0);
 					}
 				}
@@ -732,11 +732,11 @@ namespace psy {
 
 			for(int j(0);j<NUM_CHANS;++j)
 			{
-				if( macOutput[j] != -1 && callbacks->song()->machine(macOutput[j]) != NULL &&
-					paramOutput[j] != -1 && paramOutput[j] < callbacks->song()->machine(macOutput[j])->GetNumParams() )
+				if( macOutput[j] != -1 && callbacks->song().machine(macOutput[j]) != NULL &&
+					paramOutput[j] != -1 && paramOutput[j] < callbacks->song().machine(macOutput[j])->GetNumParams() )
 				{
-					callbacks->song()->machine(macOutput[j])->GetParamRange(paramOutput[j], minVal, maxVal);
-					curVal = callbacks->song()->machine(macOutput[j])->GetParamValue(paramOutput[j]);
+					callbacks->song().machine(macOutput[j])->GetParamRange(paramOutput[j], minVal, maxVal);
+					curVal = callbacks->song().machine(macOutput[j])->GetParamValue(paramOutput[j]);
 					curLFO = waveTable[int(lfoPos+phase[j]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 					lfoAmt = (level[j]-MAX_DEPTH)/(float)MAX_DEPTH;
 
@@ -747,7 +747,7 @@ namespace psy {
 					if(newVal>maxVal) newVal=maxVal;
 					else if(newVal<minVal) newVal=minVal;
 
-					callbacks->song()->machine(macOutput[j])->SetParameter(paramOutput[j], newVal); // make it happen!
+					callbacks->song().machine(macOutput[j])->SetParameter(paramOutput[j], newVal); // make it happen!
 					bRedraw=true;
 					prevVal[j] = newVal;
 				}
@@ -840,13 +840,13 @@ namespace psy {
 			int destMac = macOutput[which];
 			int destParam = paramOutput[which];
 
-			if(destMac != -1 && callbacks->song()->machine(destMac) != NULL
-				&& destParam != -1 && destParam < callbacks->song()->machine(destMac)->GetNumParams())
+			if(destMac != -1 && callbacks->song().machine(destMac) != NULL
+				&& destParam != -1 && destParam < callbacks->song().machine(destMac)->GetNumParams())
 			{
 				int minVal, maxVal;
 				float curLFO, lfoAmt;
 
-				callbacks->song()->machine(destMac)->GetParamRange(destParam, minVal, maxVal);
+				callbacks->song().machine(destMac)->GetParamRange(destParam, minVal, maxVal);
 				curLFO = waveTable[int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
 				lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
 
@@ -854,7 +854,7 @@ namespace psy {
 				//prevVal[which] = Gloxxxxxxxxxxxxxxxxxbal::callbacks->song().machine(macOutput[which])->GetParamValue(paramOutput[which]);
 				//centerVal[which] = prevVal[which] - (curLFO * ((maxVal-minVal)/2.0f) * lfoAmt);
 
-				centerVal[which] = callbacks->song()->machine(destMac)->GetParamValue(destParam);
+				centerVal[which] = callbacks->song().machine(destMac)->GetParamValue(destParam);
 				prevVal[which] = centerVal[which];
 
 				// the way i've set this up, a control will 'jump' if the lfo is at a peak or dip when a control is first selected.
@@ -880,18 +880,18 @@ namespace psy {
 			id_type destMac(macOutput[which]);
 			int destParam = paramOutput[which];
 
-			if(destMac != -1 && callbacks->song()->machine(destMac) != NULL
-				&& destParam != -1 && destParam < callbacks->song()->machine(destMac)->GetNumParams())
+			if(destMac != -1 && callbacks->song().machine(destMac) != NULL
+				&& destParam != -1 && destParam < callbacks->song().machine(destMac)->GetNumParams())
 			{
 				int minVal, maxVal;
 				int newVal;
-				callbacks->song()->machine(destMac)->GetParamRange(destParam, minVal, maxVal);
+				callbacks->song().machine(destMac)->GetParamRange(destParam, minVal, maxVal);
 				newVal = centerVal[which];
 				if(newVal<minVal) newVal=minVal;
 				else if(newVal>maxVal) newVal=maxVal;
 
 				if(destMac != this->id()) // craziness may ensue without this check.. folks routing the lfo to itself are on their own
-					callbacks->song()->machine(destMac)->SetParameter(destParam, newVal); //set to value at lfo==0
+					callbacks->song().machine(destMac)->SetParameter(destParam, newVal); //set to value at lfo==0
 			}
 		}
 	}

@@ -23,9 +23,11 @@
 #define LADSPAHOST_HPP
 
 #include "machinehost.hpp"
+#include "ladspa.h"
+#include <string>
+#include <map>
 
 namespace psy{ namespace core{
-
 
 class LadspaHost : public MachineHost
 {
@@ -45,13 +47,13 @@ public:
 	virtual void setPluginPath(std::string path);
 
 protected:
-	virtual void FillPluginInfo(const std::string& const std::string&, std::map<MachineKey,PluginInfo>&);
-	void* LoadDll( const std::string &  );
-	LADSPA_Descriptor_Function* LoadDescriptorFunction(void*);
-	LADSPA_Handle Instantiate(LADSPA_Descriptor*);
-	void UnloadDll( void* );
-	void *dlopenLADSPA(const char * pcFilename, int iFlag);
-	std::string const plugin_path_;
+	virtual void FillPluginInfo(const std::string&, const std::string&, std::map<MachineKey,PluginInfo>&);
+	void* LoadDll( const std::string &  ) const;
+	LADSPA_Descriptor_Function LoadDescriptorFunction(void*) const;
+	LADSPA_Handle Instantiate(const LADSPA_Descriptor*) const;
+	void UnloadDll( void* ) const;
+	void *dlopenLADSPA(const char * pcFilename, int iFlag) const;
+	std::string  plugin_path_;
 };
 
 }}

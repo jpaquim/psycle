@@ -25,7 +25,7 @@ namespace psy
 		class CoreSong
 		{
 		protected:
-			CoreSong() friend class SongFactory;
+			CoreSong();friend class SongFactory;
 		public:
 			virtual ~CoreSong();
 			/// clears all song data
@@ -122,7 +122,7 @@ namespace psy
 			///\{
 		public:
 			/// access to the machines of the song
-			Machine * const machine(Machine::id_type id) { return machine_[id]; }
+			Machine * machine(Machine::id_type id) { return machine_[id]; }
 			/// access to the machines of the song
 			Machine const * const machine(Machine::id_type id) const { return machine_[id]; }
 		private:
@@ -176,21 +176,11 @@ namespace psy
 			virtual void DeleteMachineDeprecated(Machine::id_type mac, bool write_locked = false)
 			{
 				if (machine(mac))
-					DestroyMachine(machine(mac),write_locked);
+					DeleteMachine(*machine(mac),write_locked);
 			}
 			/// destroys all the machines of this song.
 			virtual void DeleteAllMachines(bool write_locked = false);
 
-			/// clones a machine.
-			bool CloneMac(const Machine & src, Machine & dst) { return CloneMac(src.id(), dst.id()); /* stupid circonvolution */ }
-			/// clones a machine.
-			bool CloneMacDeprecated(Machine::id_type src, Machine::id_type dst)
-			{
-				if(machine(src))
-				{
-					
-				}
-			}
 		protected:
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			Machine::id_type GetFreeBus();

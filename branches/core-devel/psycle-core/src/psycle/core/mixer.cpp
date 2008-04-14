@@ -1,7 +1,7 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/core/psycleCorePch.hpp>
 
-#include "internal_machines.h"
+#include "mixer.h"
 
 ///\todo: These two includes need to be replaced by a "host" callback which gives such information.
 #include "commands.h"
@@ -96,7 +96,7 @@ namespace psy {
 			{
 				if (sends_[i].IsValid())
 				{
-					Machine* pSendMachine = callbacks->song()->machine(sends_[i].machine_);
+					Machine* pSendMachine = callbacks->song().machine(sends_[i].machine_);
 					assert(pSendMachine);
 					if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
 					{
@@ -109,7 +109,7 @@ namespace psy {
 								int j = solocolumn_;
 								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f))
 								{
-									Machine* pInMachine = callbacks->song()->machine(_inputMachines[j]);
+									Machine* pInMachine = callbacks->song().machine(_inputMachines[j]);
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
@@ -123,7 +123,7 @@ namespace psy {
 							{
 								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
-									Machine* pInMachine = callbacks->song()->machine(_inputMachines[j]);
+									Machine* pInMachine = callbacks->song().machine(_inputMachines[j]);
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
@@ -137,7 +137,7 @@ namespace psy {
 							{
 								if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j] != 0.0f || mixvolretpr[j] != 0.0f ))
 								{
-									Machine* pRetMachine = callbacks->song()->machine(Return(j).Wire().machine_);
+									Machine* pRetMachine = callbacks->song().machine(Return(j).Wire().machine_);
 									assert(pRetMachine);
 									if(!pRetMachine->_mute && !pRetMachine->Standby())
 									{
@@ -154,7 +154,7 @@ namespace psy {
 	
 						// tell the FX to work, now that the input is ready.
 						{
-							Machine* pRetMachine = callbacks->song()->machine(Return(i).Wire().machine_);
+							Machine* pRetMachine = callbacks->song().machine(Return(i).Wire().machine_);
 							pRetMachine->Work(numSamples);
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
 							if(!pRetMachine->Standby())Standby(false);
@@ -183,7 +183,7 @@ namespace psy {
 					int i= solocolumn_-MAX_CONNECTIONS;
 					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i] != 0.0f || mixvolretpr[i] != 0.0f ))
 					{
-						Machine* pRetMachine = callbacks->song()->machine(Return(i).Wire().machine_);
+						Machine* pRetMachine = callbacks->song().machine(Return(i).Wire().machine_);
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
@@ -196,7 +196,7 @@ namespace psy {
 				{
 					if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i] != 0.0f || mixvolretpr[i] != 0.0f ))
 					{
-						Machine* pRetMachine = callbacks->song()->machine(Return(i).Wire().machine_);
+						Machine* pRetMachine = callbacks->song().machine(Return(i).Wire().machine_);
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
@@ -213,7 +213,7 @@ namespace psy {
 					int i = solocolumn_;
 					if (ChannelValid(i) && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = callbacks->song()->machine(_inputMachines[i]);
+						Machine* pInMachine = callbacks->song().machine(_inputMachines[i]);
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
@@ -226,7 +226,7 @@ namespace psy {
 				{
 					if (_inputCon[i] && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = callbacks->song()->machine(_inputMachines[i]);
+						Machine* pInMachine = callbacks->song().machine(_inputMachines[i]);
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
@@ -280,7 +280,7 @@ namespace psy {
 			if (!ReturnValid(dstwire-MAX_CONNECTIONS))
 				return false;
 			
-			Machine* oldSrc = callbacks->song()->machine(Return(dstwire-MAX_CONNECTIONS).Wire().machine_);
+			Machine* oldSrc = callbacks->song().machine(Return(dstwire-MAX_CONNECTIONS).Wire().machine_);
 			if (oldSrc)
 			{
 				Wire::id_type oldwire;
@@ -349,7 +349,7 @@ namespace psy {
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				callbacks->song()->machine(Return(wireIndex).Wire().machine_)->ClearMixerSendFlag();
+				callbacks->song().machine(Return(wireIndex).Wire().machine_)->ClearMixerSendFlag();
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
@@ -387,7 +387,7 @@ namespace psy {
 				// Checking send/return Wires
 				if(Return(w).IsValid())
 				{
-					iMac = callbacks->song()->machine(Return(w).Wire().machine_);
+					iMac = callbacks->song().machine(Return(w).Wire().machine_);
 					if (iMac)
 					{
 						int wix = iMac->FindOutputWire(id());
@@ -855,7 +855,7 @@ namespace psy {
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
 				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (callbacks->song()->machine(_inputMachines[idx])->_volumeDisplay/97.0f)*vol;
+				return (callbacks->song().machine(_inputMachines[idx])->_volumeDisplay/97.0f)*vol;
 			}
 			return 0.0f;
 		}
@@ -868,7 +868,7 @@ namespace psy {
 				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
 				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (callbacks->song()->machine(Return(idx).Wire().machine_)->_volumeDisplay/97.0f)*vol;
+				return (callbacks->song().machine(Return(idx).Wire().machine_)->_volumeDisplay/97.0f)*vol;
 			}
 			return 0.0f;
 		}

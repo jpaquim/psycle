@@ -1,7 +1,7 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 //#include <psycle/core/psycleCorePch.hpp>
 #include "convert_internal_machines.private.hpp"
-#include "MachineFactory.hpp"
+#include "machinefactory.h"
 #include "plugin.h"
 #include "helpers/scale.hpp"
 #include "helpers/math/pi.hpp"
@@ -16,7 +16,6 @@ namespace psy {
 			typedef common::Scale::Real Real;
 
 			Converter::Converter()
-			:
 			{}
 			
 			Converter::~Converter() throw()
@@ -24,9 +23,9 @@ namespace psy {
 				for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
 			}
 			
-			Machine & Converter::redirect(const MachineFactory factory, const int & index, const int& type, RiffFile & riff)
+			Machine & Converter::redirect(const MachineFactory& factory, const int & index, const int& type, RiffFile & riff)
 			{
-				Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::Native,(plugin_names()(type).c_str()),0),index);
+				Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::NATIVE,(plugin_names()(type).c_str()),0),index);
 				if (!pointer_to_machine){
 					pointer_to_machine = factory.CreateMachine(MachineKey::dummy(),index);
 				}
@@ -153,7 +152,7 @@ namespace psy {
 					return machine;
 				}
 				catch(...) {
-					factory.DeleteMachine(pointer_to_machine);
+					delete pointer_to_machine;
 					throw;
 				}
 			}

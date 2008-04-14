@@ -21,6 +21,9 @@
 #include <psycle/core/psycleCorePch.hpp>
 
 #include "machinehost.hpp"
+#include "pluginfinder.h"
+#include "file.h"
+#include <iostream>
 
 namespace psy {namespace core {
 MachineHost::MachineHost(MachineCallbacks*calls)
@@ -28,9 +31,9 @@ MachineHost::MachineHost(MachineCallbacks*calls)
 {
 }
 
-void MachineHost::FillFinderData(PluginFinder* finder, bool clearfirst) const
+void MachineHost::FillFinderData(PluginFinder* finder, bool clearfirst) 
 {
-	std::map<MachineKey,PluginInfo> infoMap = finder.getMap(hostCode());
+	std::map<MachineKey,PluginInfo> infoMap = finder->getMap(hostCode());
 
 	if (clearfirst) {
 		infoMap.clear();
@@ -42,7 +45,7 @@ void MachineHost::FillFinderData(PluginFinder* finder, bool clearfirst) const
 		try {
 			fileList = File::fileList(currentPath, File::list_modes::files);
 		} catch ( std::exception& e ) {
-			std::cout << "Warning: Unable to scan your " hostName() " plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
+			std::cout << "Warning: Unable to scan your " << hostName() << " plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
 			return;
 		}
 		currentPath = currentPath + File::slash();

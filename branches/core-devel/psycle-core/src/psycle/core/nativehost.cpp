@@ -43,7 +43,7 @@ NativeHost& NativeHost::getInstance(MachineCallbacks* callb)
 	return instance;
 }
 
-Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine::id_type id) const 
+Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine::id_type id) 
 {
 	//FIXME: This is a good place where to use exceptions. (task for a later date)
 	std::string fullPath = finder->lookupDllName(key);
