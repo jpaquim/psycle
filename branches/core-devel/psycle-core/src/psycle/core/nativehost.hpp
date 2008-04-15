@@ -26,10 +26,13 @@
 #include "plugininfo.h"
 
 #include <map>
-namespace psy{ namespace core{
 
+namespace psycle { namespace plugin_interface {
 class CMachineInfo;
 class CMachineInterface;
+}}
+
+namespace psy{ namespace core{
 
 class NativeHost : public MachineHost
 {
@@ -51,8 +54,8 @@ public:
 protected:
 	virtual void FillPluginInfo(const std::string&, const std::string&, std::map<MachineKey,PluginInfo>&);
 	void* LoadDll( const std::string& );
-	CMachineInfo* LoadDescriptor(void* );
-	CMachineInterface* Instantiate(void * );
+	psycle::plugin_interface::CMachineInfo* LoadDescriptor(void* );
+	psycle::plugin_interface::CMachineInterface* Instantiate(void * );
 	void UnloadDll( void*  );
 	std::string plugin_path_;
 };

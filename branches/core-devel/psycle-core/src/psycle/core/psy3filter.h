@@ -20,8 +20,9 @@
 #ifndef PSYCLE__CORE__PSY3FILTER__INCLUDED
 #define PSYCLE__CORE__PSY3FILTER__INCLUDED
 
-#include "psyfilter.h"
+#include "psyfilterbase.h"
 #include <cstdint>
+#include <vector>
 
 namespace psy { namespace core {
 
@@ -34,20 +35,21 @@ class MachineCallbacks;
 /**
 @author  Psycledelics  
 */
-template class<T>
-class Psy3Filter<T> : public PsyFilterBase<T>
+template <class T>
+class Psy3Filter : public PsyFilterBase<T>
 {
 	protected:
 		typedef enum MachineClass
 		{
-			MASTER = 0,
-			SAMPLER = 3,
-			PLUGIN = 8,
-			VST = 9,
-			XMSAMPLER = 12,
-			DUPLICATOR = 13,
-			MIXER = 14,
-			DUMMY = 255
+			MACH_MASTER = 0,
+			MACH_SAMPLER = 3,
+			MACH_PLUGIN = 8,
+			MACH_VST = 9,
+			MACH_XMSAMPLER = 12,
+			MACH_DUPLICATOR = 13,
+			MACH_MIXER = 14,
+			MACH_AUDIOINPUT = 15,
+			MACH_DUMMY = 255
 		} machineclass_t;
 
 		class PatternEntry
@@ -72,7 +74,7 @@ class Psy3Filter<T> : public PsyFilterBase<T>
 	///\name Singleton Pattern
 	///\{
 	protected:
-		Psy3Filter() friend class SongFactory;          
+		Psy3Filter(); template <class U> friend class SongFactory;
 	private:
 		Psy3Filter( Psy3Filter const & );
 		Psy3Filter& operator=(Psy3Filter const&);
@@ -126,6 +128,7 @@ class Psy3Filter<T> : public PsyFilterBase<T>
 		int trackSoloed;
 
 
+		void RestoreMixerSendFlags(T& song);
 
 		PatternEvent convertEntry( unsigned char* data) const;
 

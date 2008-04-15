@@ -23,7 +23,7 @@ namespace psy {
 				for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
 			}
 			
-			Machine & Converter::redirect(const MachineFactory& factory, const int & index, const int& type, RiffFile & riff)
+			Machine & Converter::redirect(MachineFactory& factory, const int & index, const int& type, RiffFile & riff)
 			{
 				Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::NATIVE,(plugin_names()(type).c_str()),0),index);
 				if (!pointer_to_machine){

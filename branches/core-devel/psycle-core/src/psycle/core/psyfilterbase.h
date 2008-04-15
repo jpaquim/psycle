@@ -17,8 +17,8 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PSYFILTER__INCLUDED
-#define PSYCLE__CORE__PSYFILTER__INCLUDED
+#ifndef PSYCLE__CORE__PSYFILTERBASE__INCLUDED
+#define PSYCLE__CORE__PSYFILTERBASE__INCLUDED
 #pragma once
 
 #include <string>
@@ -27,14 +27,14 @@ namespace psy { namespace core {
 
 class CoreSong;
 
-/**
-@author  Psycledelics  
-*/
 class RiffFile;
 class MachineFactory;
 
-template class<T>
-class PsyFilterBase<T>
+/**
+@author  Psycledelics  
+*/
+template <class T>
+class PsyFilterBase
 {
 	public:
 		virtual ~PsyFilterBase() {}

@@ -27,28 +27,24 @@
 
 namespace psy { namespace core {
 
-class Pattern;
+class SinglePattern;
 class Machine;
 
 /**
 @author  Stefan Nattkemper
 */
-template class<T>
-class Psy4Filter<T> : public Psy3Filter<T>
+template <class T>
+class Psy4Filter : public Psy3Filter<T>
 {
-	///\name Singleton Pattern
+	///\name Singleton SinglePattern
 	///\{ 
 		protected:
-				Psy4Filter();
+			Psy4Filter(); template <class U> friend class SongFactory;
 		private:
 			Psy4Filter( Psy4Filter const & );
 			Psy4Filter& operator=(Psy4Filter const&);
 		public:
-				static Psy4Filter* Instance() {
-					// don`t use multithreaded
-					static Psy4Filter s;
-					return &s; 
-				}
+
 	///\}
 
 	public:
@@ -69,12 +65,12 @@ class Psy4Filter<T> : public Psy3Filter<T>
 		std::fstream _stream;
 
 		PatternCategory* lastCategory;
-		Pattern* lastPattern;
+		SinglePattern* lastPattern;
 		SequenceLine* lastSeqLine;
 		Machine* lastMachine;
 		float lastPatternPos;
 
-		std::map<int, Pattern*> patMap;
+		std::map<int, SinglePattern*> patMap;
 
 		T* song_;
 };

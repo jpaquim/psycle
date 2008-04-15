@@ -16,13 +16,13 @@ namespace psy {
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Dummy
 
-		std::string Dummy::_psName = "DummyPlug";
+		std::string Dummy::_psName = "Dummy";
 
 		Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id)
 		:
 			Machine(callbacks, id)
 		{
-			SetEditName("Dummy");
+			SetEditName(_psName);
 			//DefineStereoInput(1);
 			//DefineStereoOutput(1);
 			SetAudioRange(32768.0f);
@@ -53,7 +53,7 @@ namespace psy {
 		:
 			Machine(callbacks, id)
 		{
-			SetEditName("Dupe it!");
+			SetEditName(_psName);
 			_numPars = NUM_MACHINES*2;
 			_nCols = 2;
 			bisTicking = false;
@@ -136,24 +136,38 @@ namespace psy {
 						if (macOutput[i] != -1 && callbacks->song().machine(macOutput[i]) != NULL )
 						{
 							AllocateVoice(workEvent.track(),i);
+							#if 0
 							PatternEvent temp = workEvent.event();
-							NoteEvent thenote = temp.note(0);
-							///\todo: Multiple notes.
+							//\todo: Multiple notes.
+							NoteteEvent thenote = temp.note(0);
+							#else
+							PatternEvent thenote = workEvent.event();
+							#endif
 							if ( thenote.note() < notetypes::release )
 							{
 								int note =  thenote.note()+noteOffset[i];
 								if ( note>= notetypes::release) note=119;
 								else if (note<0 ) note=0;
 								thenote.setNote(note);
+								#if 0
 								temp.SetNote(0,thenote);
+								#endif
 							}
 							if (callbacks->song().machine(macOutput[i]) != this)
 							{
+								#if 0
 								callbacks->song().machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),temp);
 								if (temp.note(0).note() >= notetypes::release )
 								{
 									DeallocateVoice(workEvent.track(),i);
 								}
+								#else
+								callbacks->song().machine(macOutput[i])->AddEvent(workEvent.beatOffset(),workEvent.track(),thenote);
+								if (thenote.note() >= notetypes::release )
+								{
+									DeallocateVoice(workEvent.track(),i);
+								}
+								#endif
 							}
 						}
 					}
@@ -290,7 +304,7 @@ namespace psy {
 			_rMax(0),
 			_outDry(256)
 		{
-			SetEditName("Master");
+			SetEditName(_psName);
 			_outDry = 256;
 			SetAudioRange(32768.0f);
 			//DefineStereoInput(1);
@@ -322,11 +336,19 @@ namespace psy {
 		
 		void Master::Tick(int /*channel*/, const PatternEvent & data )
 		{
+			#if 0
 			///\todo: multiple commands
 			if ( data.command(0).command() == commandtypes::SET_VOLUME )
 			{
 				_outDry = data.command(0).param();
 			}
+			#else
+			if ( data.command() == commandtypes::SET_VOLUME )
+			{
+				_outDry = data.parameter();
+			}
+			#endif
+
 		}
 
 		int Master::GenerateAudio( int numSamples )
@@ -497,7 +519,7 @@ namespace psy {
 		:
 			Machine(callbacks, id)
 		{
-			SetEditName("LFO");
+			SetEditName(_psName);
 			_numPars = prms::num_params;
 			_nCols = 3;
 			bisTicking = false;
@@ -531,7 +553,11 @@ namespace psy {
 				bisTicking = true;
 				// 0x01.. seems appropriate for a machine with exactly one command, but if this goes
 				// against any established practices or something, let me know
+				#if 0
 				if(pData.command(0).command() == 0x01) lfoPos = 0;
+				#else
+				if(pData.command() == 0x01) lfoPos = 0;
+				#endif
 			}
 			bisTicking = false;
 		}

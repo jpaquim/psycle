@@ -24,36 +24,38 @@
 #include "commands.h"
 #include "datacompression.h"
 #include "fileio.h"
-#include "internal_machines.h"
 #include "song.h"
+#include "machinefactory.h"
+
+#include "mixer.h"
 
 #include <sstream>
 #include <iostream>
 
 namespace psy { namespace core {
 
-template class<T>
+template <class T>
 std::string const Psy3Filter<T>::FILE_FOURCC = "PSY3";
 /// Current version of the Song file and its chunks.
 /// format: 0xAABB
 /// A = Major version. It can't be loaded, skip the whole chunk. (Right now the loader does it, so simply do nothing)
 /// B = minor version. It can be loaded with the existing loader, but not all information will be available.
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::VERSION_INFO = 0x0000;
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::VERSION_SNGI = 0x0000;
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::VERSION_SEQD = 0x0000;
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::VERSION_PATD = 0x0000;
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::VERSION_MACD = 0x0000;
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::VERSION_INSD = 0x0000;
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::VERSION_WAVE = 0x0000;
 
-template class<T>
+template <class T>
 std::uint32_t const Psy3Filter<T>::FILE_VERSION =
 	Psy3Filter<T>::VERSION_INFO +
 	Psy3Filter<T>::VERSION_SNGI +
@@ -64,14 +66,14 @@ std::uint32_t const Psy3Filter<T>::FILE_VERSION =
 	Psy3Filter<T>::VERSION_INSD +
 	Psy3Filter<T>::VERSION_WAVE;
 
-template class<T>
+template <class T>
 Psy3Filter<T>::Psy3Filter()
 :
 	singleCat(),
 	singleLine()
 {}
 
-template class<T>
+template <class T>
 bool Psy3Filter<T>::testFormat( const std::string & fileName )
 {
 	RiffFile file;
@@ -85,7 +87,7 @@ bool Psy3Filter<T>::testFormat( const std::string & fileName )
 }
 
 
-template class<T>
+template <class T>
 void Psy3Filter<T>::preparePatternSequence( T & song )
 {
 	seqList.clear();
@@ -96,7 +98,7 @@ void Psy3Filter<T>::preparePatternSequence( T & song )
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-template class<T>
+template <class T>
 bool Psy3Filter<T>::load(const std::string & fileName, T & song, MachineFactory& factory)
 {
 	RiffFile file;
@@ -223,7 +225,11 @@ bool Psy3Filter<T>::load(const std::string & fileName, T & song, MachineFactory&
 	std::vector<int>::iterator it = seqList.begin();
 	for ( ; it < seqList.end(); ++it)
 	{
+		#if 0
 		Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		#else
+		SinglePattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		#endif
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();
 	}
@@ -305,7 +311,7 @@ bool Psy3Filter<T>::load(const std::string & fileName, T & song, MachineFactory&
 	return true;
 }
 
-template class<T>
+template <class T>
 int Psy3Filter<T>::LoadSONGv0(RiffFile* file,T& /*song*/)
 {
 	std::int32_t fileversion = 0;
@@ -337,7 +343,7 @@ int Psy3Filter<T>::LoadSONGv0(RiffFile* file,T& /*song*/)
 	return chunkcount;
 }
 
-template class<T>
+template <class T>
 bool Psy3Filter<T>::LoadINFOv0(RiffFile* file,T& song,int /*minorversion*/)
 {
 		char Name[129]; char Author[65]; char Comment[65536];
@@ -351,7 +357,7 @@ bool Psy3Filter<T>::LoadINFOv0(RiffFile* file,T& song,int /*minorversion*/)
 		return result;
 }
 
-template class<T>
+template <class T>
 bool Psy3Filter<T>::LoadSNGIv0(RiffFile* file,T& song,int /*minorversion*/, MachineCallbacks* callbacks)
 {
 	std::int32_t temp(0);
@@ -405,7 +411,7 @@ bool Psy3Filter<T>::LoadSNGIv0(RiffFile* file,T& song,int /*minorversion*/, Mach
 	return fileread;
 }
 
-template class<T>
+template <class T>
 bool Psy3Filter<T>::LoadSEQDv0(RiffFile* file,T& /*song*/,int /*minorversion*/)
 {
 	std::int32_t index = 0;
@@ -430,7 +436,7 @@ bool Psy3Filter<T>::LoadSEQDv0(RiffFile* file,T& /*song*/,int /*minorversion*/)
 	return fileread;
 }
 
-template class<T>
+template <class T>
 PatternEvent Psy3Filter<T>::convertEntry( unsigned char * data ) const
 {
 	PatternEvent event;
@@ -442,7 +448,7 @@ PatternEvent Psy3Filter<T>::convertEntry( unsigned char * data ) const
 	return event;
 }
 
-template class<T>
+template <class T>
 bool Psy3Filter<T>::LoadPATDv0(RiffFile* file,T& song,int /*minorversion*/)
 {
 	std::int32_t index = 0;
@@ -475,7 +481,11 @@ bool Psy3Filter<T>::LoadPATDv0(RiffFile* file,T& song,int /*minorversion*/)
 			indexStr = "error";
 		else
 			indexStr = o.str();
+		#if 0
 		Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#else
+		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;
@@ -528,8 +538,8 @@ bool Psy3Filter<T>::LoadPATDv0(RiffFile* file,T& song,int /*minorversion*/)
 	return fileread;
 }
 
-template class<T>
-bool Psy3Filter<T>::LoadMACDv0(std::string const & plugin_path, RiffFile* file,T& song,int minorversion, MachineCallbacks* callbacks)
+template <class T>
+bool Psy3Filter<T>::LoadMACDv0(RiffFile* file,T& song,int minorversion, MachineFactory& factory)
 {
 	std::int32_t index = 0;
 
@@ -538,11 +548,11 @@ bool Psy3Filter<T>::LoadMACDv0(std::string const & plugin_path, RiffFile* file,T
 	{
 		Machine::id_type const id(index);
 		// assume version 0 for now
-		type_type type;
+		std::int32_t type;
 		Machine* mac;
 		char dllName[256];
-		pFile->Read(type);
-		pFile->ReadString(dllName,256);
+		file->Read(type);
+		file->ReadString(dllName,256);
 
 		switch (type)
 		{
@@ -564,10 +574,10 @@ bool Psy3Filter<T>::LoadMACDv0(std::string const & plugin_path, RiffFile* file,T
 		case MACH_AUDIOINPUT:
 			mac = factory.CreateMachine(MachineKey::audioinput(),id);
 			break;
-		case MACH_LFO:
-			mac = factory.CreateMachine(MachineKey::lfo(),id);
-			break;
-		case MACH_SCOPE:
+		//case MACH_LFO:
+			//mac = factory.CreateMachine(MachineKey::lfo(),id);
+			//break;
+		//case MACH_SCOPE:
 		case MACH_DUMMY:
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 			break;
@@ -575,16 +585,17 @@ bool Psy3Filter<T>::LoadMACDv0(std::string const & plugin_path, RiffFile* file,T
 			mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),id);
 			break;
 		case MACH_VST:
-		case MACH_VSTFX:
+		//case MACH_VSTFX:
 			//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
 			//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 			break;
 		default:
+			break;
 		}
 		if (!mac) 
 		{
 			std::ostringstream s;
-			s << "Problem loading machine!" << std::eol << "type: " << type << ", dllName: " << dllName;
+			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << dllName;
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 		}
@@ -593,7 +604,7 @@ bool Psy3Filter<T>::LoadMACDv0(std::string const & plugin_path, RiffFile* file,T
 	return song.machine(index) != 0;
 }
 
-template class<T>
+template <class T>
 bool Psy3Filter<T>::LoadINSDv0(RiffFile* file,T& song,int minorversion)
 {
 	std::int32_t index = 0;
@@ -605,6 +616,25 @@ bool Psy3Filter<T>::LoadINSDv0(RiffFile* file,T& song,int minorversion)
 	///\todo:
 	return true;
 }
-		
+
+template <class T>
+void Psy3Filter<T>::RestoreMixerSendFlags(T& song)
+{
+	for (int i(0);i < MAX_MACHINES; ++i)
+	{
+		if (song.machine(i))
+		{
+			if (song.machine(i)->getMachineKey() == MachineKey::mixer())
+			{
+				Mixer* mac = static_cast<Mixer*>(song.machine(i));
+				for (int j(0); j<mac->numreturns(); ++j)
+				{
+					if ( mac->Return(j).IsValid())
+						song.machine(mac->Return(j).Wire().machine_)->SetMixerSendFlag();
+				}
+			}
+		}
+	}
+}		
 }}
 

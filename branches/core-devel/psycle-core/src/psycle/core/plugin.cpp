@@ -23,15 +23,12 @@
 #include "player.h"
 #include "fileio.h"
 
-#include <iostream> // only for debug output
 #include <sstream>
-
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
 #elif defined _WIN32
 	#include <windows.h>
 #endif
-
 // win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 
 namespace psy { namespace core {
@@ -64,7 +61,7 @@ float * PluginFxCallback::unused1(int, int) { return 0; }
 Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, void* libHandle, CMachineInfo* info, CMachineInterface* macIface )
 :
 	Machine(callbacks, id),
-	libHandle(libHandle),
+	libHandle_(libHandle),
 	key_(key),
 	info_(info),
 	proxy_(*this,macIface)
@@ -73,9 +70,9 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 
 	_isSynth = (info_->Flags == 3);
 	if(!_isSynth) {
-		SetStereoInputs();
+		defineInputAsStereo();
 	}
-	SetStereoOutputs();
+	defineOutputAsStereo();
 
 	strncpy(_psShortName,info_->ShortName,15);
 	_psShortName[15]='\0';
@@ -124,7 +121,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 
 	if (!_mute) {
 		if((_isSynth) || (!_bypass && !Standby())) {
-			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
+			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, callbacks->song().tracks());
 		}
 	}
 	//CPUCOST_CALC(cost, numSamples);

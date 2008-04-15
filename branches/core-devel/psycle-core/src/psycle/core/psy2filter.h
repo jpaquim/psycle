@@ -21,8 +21,9 @@
 #define PSYCLE__CORE__PSY2FILTER__INCLUDED
 #pragma once
 
-#include "psyfilter.h"
+#include "psyfilterbase.h"
 #include "cstdint.h"
+#include <vector>
 
 namespace psy { namespace core {
 
@@ -41,8 +42,8 @@ namespace convert_internal_machines
 /**
 @author  Psycledelics  
 */
-template class<T>
-class Psy2Filter<t> : public PsyFilterBase<T>
+template <class T>
+class Psy2Filter : public PsyFilterBase<T>
 {
 	protected:
 		//Note: convert_internal_machines uses its own enum.
@@ -59,6 +60,7 @@ class Psy2Filter<t> : public PsyFilterBase<T>
 			MACH_PLUGIN = 8,
 			MACH_VST = 9,
 			MACH_VSTFX = 10,
+			MACH_SCOPE = 11,
 			MACH_DUMMY = 255
 		} machineclass_t;
 
@@ -92,7 +94,7 @@ class Psy2Filter<t> : public PsyFilterBase<T>
 	///\name Singleton Pattern
 	///\{
 	protected:
-		Psy2Filter() friend class SongFactory;
+		Psy2Filter(); template <class U> friend class SongFactory;
 	private:
 		Psy2Filter( Psy2Filter const & );
 		Psy2Filter& operator=(Psy2Filter const &);

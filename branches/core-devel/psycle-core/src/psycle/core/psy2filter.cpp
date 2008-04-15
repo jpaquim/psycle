@@ -21,11 +21,17 @@
 #include "psy2filter.h"
 #include "commands.h"
 #include "fileio.h"
+#include "song.h"
+#include "machinefactory.h"
+#include "convert_internal_machines.private.hpp"
+
+//Needed since the psy2loading source has been moved here
 #include "internal_machines.h"
 #include "sampler.h"
 #include "plugin.h"
-#include "song.h"
-#include "convert_internal_machines.private.hpp"
+
+
+
 #include <sstream>
 #include <iostream>
 
@@ -36,25 +42,25 @@ struct ToLower
 	char operator() (char c) const  { return std::tolower(c); }
 };
 
-template class<T>
+template <class T>
 std::string const Psy2Filter<T>::FILE_FOURCC = "PSY2";
-template class<T>
+template <class T>
 const int Psy2Filter<T>::PSY2_MAX_TRACKS = 32;
-template class<T>
+template <class T>
 const int Psy2Filter<T>::PSY2_MAX_WAVES  = 16;
-template class<T>
+template <class T>
 const int Psy2Filter<T>::PSY2_MAX_INSTRUMENTS = 255;
-template class<T>
+template <class T>
 const int Psy2Filter<T>::PSY2_MAX_PLUGINS = 256;
 
-template class<T>
+template <class T>
 Psy2Filter<T>::Psy2Filter()
 :
 	singleCat(),
 	singleLine()
 {}
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::testFormat(const std::string & fileName)
 {
 	RiffFile file;
@@ -66,7 +72,7 @@ bool Psy2Filter<T>::testFormat(const std::string & fileName)
 	return !std::strcmp(Header,"PSY2SONG");
 }
 
-template class<T>
+template <class T>
 void Psy2Filter<T>::preparePatternSequence( T & song )
 {
 	seqList.clear();
@@ -77,7 +83,7 @@ void Psy2Filter<T>::preparePatternSequence( T & song )
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::load(const std::string & fileName, T & song, MachineFactory& factory)
 {
 	std::int32_t num;
@@ -111,7 +117,7 @@ bool Psy2Filter<T>::load(const std::string & fileName, T & song, MachineFactory&
 	return true;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::LoadINFO(RiffFile* file,T& song)
 {
 	char Name[32];
@@ -127,7 +133,7 @@ bool Psy2Filter<T>::LoadINFO(RiffFile* file,T& song)
 	return err;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::LoadSNGI(RiffFile* file,T& song)
 {
 	std::int32_t tmp;
@@ -152,7 +158,7 @@ bool Psy2Filter<T>::LoadSNGI(RiffFile* file,T& song)
 	return true;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::LoadSEQD(RiffFile* file,T& song)
 {
 	std::int32_t length,tmp;
@@ -168,7 +174,7 @@ bool Psy2Filter<T>::LoadSEQD(RiffFile* file,T& song)
 	return true;
 }
 
-template class<T>
+template <class T>
 PatternEvent Psy2Filter<T>::convertEntry( unsigned char * data ) const
 {
 	PatternEvent event;
@@ -190,7 +196,7 @@ PatternEvent Psy2Filter<T>::convertEntry( unsigned char * data ) const
 	return event;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::LoadPATD(RiffFile* file,T& song,int index)
 {
 	std::int32_t numLines;
@@ -205,7 +211,11 @@ bool Psy2Filter<T>::LoadPATD(RiffFile* file,T& song,int index)
 		std::ostringstream o;
 		if (!(o << index)) indexStr = "error";
 		else indexStr = o.str();
+		#if 0
 		Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#else
+		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;
@@ -257,7 +267,7 @@ bool Psy2Filter<T>::LoadPATD(RiffFile* file,T& song,int index)
 	return true;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::LoadINSD(RiffFile* file,T& song)
 {
 	std::int32_t i;
@@ -338,7 +348,7 @@ bool Psy2Filter<T>::LoadINSD(RiffFile* file,T& song)
 	return true;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::LoadWAVD(RiffFile* file,T& song)
 {
 	std::int32_t i;
@@ -393,7 +403,7 @@ bool Psy2Filter<T>::LoadWAVD(RiffFile* file,T& song)
 	return true;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::PreLoadVSTs(RiffFile* file,T& /*song*/)
 {
 	std::int32_t i;
@@ -419,7 +429,7 @@ bool Psy2Filter<T>::PreLoadVSTs(RiffFile* file,T& /*song*/)
 	return true;
 }
 
-template class<T>
+template <class T>
 bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::Converter& converter, MachineFactory& factory)
 {
 	std::int32_t i;
@@ -437,8 +447,8 @@ bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::C
 			file->Read(y);
 			file->Read(type);
 
-			if(converter->plugin_names().exists(type)) {
-				pMac[i] = &converter->redirect(i, type, *file,song);
+			if(converter.plugin_names().exists(type)) {
+				pMac[i] = &converter.redirect(i, type, *file,song);
 			}
 			else switch (type)
 			{
@@ -455,7 +465,7 @@ bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::C
 			case MACH_PLUGIN:
 			{
 				char sDllName[256];
-				pFile->ReadArray(sDllName,256); // Plugin dll name
+				file->ReadArray(sDllName,256); // Plugin dll name
 				sDllName[255]='\0';
 				pMac[i] = factory.CreateMachine(MachineKey(Hosts::NATIVE,sDllName,0),i);
 				if (!pMac[i]) {
@@ -665,8 +675,8 @@ bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::C
 }
 
 //Finished all the file loading. Now Process the data to the current structures
-template class<T>
-bool Psy2Filter<T>::TidyUp(RiffFile* /*file*/,T& song,convert_internal_machines::Converter* converter)
+template <class T>
+bool Psy2Filter<T>::TidyUp(RiffFile* /*file*/,T& song,convert_internal_machines::Converter& converter)
 {
 	// The old fileformat had a pool of VST plugins, of which, the user could create
 	// machines that instanced them. vstL[] contains this pool.
@@ -687,7 +697,11 @@ bool Psy2Filter<T>::TidyUp(RiffFile* /*file*/,T& song,convert_internal_machines:
 	std::vector<int>::iterator it = seqList.begin();
 	for ( ; it < seqList.end(); ++it)
 	{
+		#if 0
 		Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		#else
+		SinglePattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		#endif
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();
 	}
@@ -816,7 +830,7 @@ bool Psy2Filter<T>::TidyUp(RiffFile* /*file*/,T& song,convert_internal_machines:
 	}
 
 	// Reparse any pattern for converted machines.
-	converter->retweak(song);
+	converter.retweak(song);
 	//for (i =0; i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 	///\todo: resend this to song
 	//song.seqBus=0;

@@ -31,6 +31,7 @@ namespace psy
 {
 	namespace core
 	{
+		template <class T>
 		SongFactory<T>::SongFactory(MachineFactory& factory1)
 		:factory(factory1)
 		{
@@ -38,23 +39,26 @@ namespace psy
 			filters.push_back( new Psy3Filter<T>() );
 			filters.push_back( new Psy4Filter<T>() );
 		}
+		template <class T>
 		SongFactory<T>::~SongFactory() {
-			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+			for (std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 				delete *it;
 			}
 		}
 		
+		template <class T>
 		T* SongFactory<T>::createEmptySong() {
 			T* song = new T();
 			song.addMachine(factory.CreateMachine(MachineKey::master(),MASTER_INDEX));
 			return song;
 		}
+		template <class T>
 		T* SongFactory<T>::loadSong(const std::string & fileName)
 		{
 			T* song = new T();
 			if ( File::fileIsReadable( fileName ) ) {
-				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
-					PsyFilterBase* filter = *it;
+				for (std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+					PsyFilterBase<T>* filter = *it;
 					if ( filter->testFormat(fileName) ) {
 						return filter->load(fileName,song,factory);
 						break;
@@ -66,8 +70,8 @@ namespace psy
 
 		bool SongFactory<T>::saveSong( const std::string & fileName, const T& song, int version )
 		{
-			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); it++) {
-				PsyFilterBase* filter = *it;
+			for (std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); it++) {
+				PsyFilterBase<T>* filter = *it;
 				if ( filter->version() == version ) {
 					// check postfix
 					std::string newFileName = fileName;

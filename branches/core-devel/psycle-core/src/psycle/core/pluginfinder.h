@@ -38,9 +38,10 @@ namespace psy
 			public:
 				static PluginFinder& getInstance();
 				virtual void addHost(Hosts::type);
-				virtual bool hasHost(Hosts::type);
+				virtual bool hasHost(Hosts::type) const;
 
-				PluginInfo info( const MachineKey & key ) const;
+				PluginInfo info(const MachineKey & key );
+				const PluginInfo& info( const MachineKey & key ) const;
 				bool hasKey( const MachineKey& key ) const;
 				std::string lookupDllName( const MachineKey & key ) const;
 			
@@ -50,6 +51,7 @@ namespace psy
 				std::map<MachineKey, PluginInfo> & getMap(Hosts::type);
 
 			protected:
+				static const PluginInfo empty_;
 				typedef std::map<MachineKey, PluginInfo> maptype;
 				std::vector<maptype> maps_;
 		};

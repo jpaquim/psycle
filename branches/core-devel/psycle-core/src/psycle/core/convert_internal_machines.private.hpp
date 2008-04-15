@@ -32,7 +32,7 @@ namespace psy
 					Converter();
 					virtual ~Converter() throw();
 
-					Machine & redirect(const MachineFactory & factory, const int & index, const int & type, RiffFile & riff);
+					Machine & redirect(MachineFactory & factory, const int & index, const int & type, RiffFile & riff);
 
 					void retweak(CoreSong & song) const;
 

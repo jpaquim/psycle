@@ -171,12 +171,12 @@ namespace psy
 			///\todo: set a value which indicates "get a free one"
 			virtual bool AddMachine(Machine* pmac);
 			/// destroy a machine of this song.
-			virtual void DeleteMachine(Machine & machine, bool write_locked = false);
+			virtual void DeleteMachine(Machine* machine, bool write_locked = false);
 			/// destroy a machine of this song.
 			virtual void DeleteMachineDeprecated(Machine::id_type mac, bool write_locked = false)
 			{
 				if (machine(mac))
-					DeleteMachine(*machine(mac),write_locked);
+					DeleteMachine(machine(mac),write_locked);
 			}
 			/// destroys all the machines of this song.
 			virtual void DeleteAllMachines(bool write_locked = false);
@@ -267,8 +267,10 @@ namespace psy
 		/// UI stuff moved here
 		class UISong : public CoreSong
 		{
+		protected:
+			UISong();friend class SongFactory;
 		public:
-			UISong(MachineCallbacks* callbacks);
+			virtual ~UISong(){};
 		};
 
 		/// the actual song class used by qpsycle. it's simply the UISong class
@@ -281,10 +283,12 @@ namespace psy
 		// can access the real machine via the VisualMachine class.
 		class Song : public UISong
 		{
+		protected:
+			Song();friend class SongFactory;
 		public:
-			Song(MachineCallbacks* callbacks);
+			virtual ~Song(){};
 			virtual void clear();
-			virtual void DestroyMachine(Machine::id_type mac, bool write_locked = false);
+			virtual void DeleteMachine(Machine* mac, bool write_locked = false);
 		private:
 			void clearMyData();
 

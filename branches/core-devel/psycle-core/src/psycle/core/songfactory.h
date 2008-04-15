@@ -28,8 +28,11 @@ namespace psy { namespace core {
 
 class MachineFactory;
 
-template class<T>
-class SongFactory<T>
+template <class T>
+class PsyFilterBase;
+
+template <class T>
+class SongFactory
 {
 	public:
 		SongFactory(MachineFactory& factory1);
@@ -45,7 +48,7 @@ class SongFactory<T>
 		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
 
 	private:
-		std::vector<PsyFilterBase*> filters;
+		std::vector<PsyFilterBase<T>*> filters;
 		MachineFactory& factory;
 };
 

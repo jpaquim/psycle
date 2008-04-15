@@ -24,6 +24,13 @@
 #include "pluginfinder.h"
 #include "plugin.h"
 
+#include <iostream>
+#include <sstream>
+#if defined __unix__ || defined __APPLE__
+	#include <dlfcn.h>
+#elif defined _WIN32
+	#include <windows.h>
+#endif
 namespace psy {namespace core {
 
 
@@ -50,17 +57,17 @@ Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine:
 	if (fullPath.empty()) return 0;
 	void* hInstance = LoadDll(fullPath);
 	if (!hInstance) return 0;
-	CMachineInfo* info = LoadDescriptor(hInstance,key.index());
+	CMachineInfo* info = LoadDescriptor(hInstance);
 	if (!info) {
 		UnloadDll(hInstance);
 		return 0;
 	}
-	CMachineInterface* maciface = Instantiate(hInstance,key.index());
+	CMachineInterface* maciface = Instantiate(hInstance);
 	if (!maciface) {
 		UnloadDll(hInstance);
 		return 0;
 	}
-	Plugin * p = new Plugin(callbacks, key, id, info, maciface );
+	Plugin * p = new Plugin(mcallback_, key, id, hInstance, info, maciface );
 	p->Init();
 	return p;
 }
@@ -75,7 +82,7 @@ void NativeHost::FillPluginInfo(const std::string& currentPath, const std::strin
 	#endif
 	
 	void* hInstance = LoadDll(fileName);
-	if (!hInstance) return 0;
+	if (!hInstance) return;
 	
 	CMachineInfo* minfo = LoadDescriptor(hInstance);
 	if (minfo) {
@@ -90,13 +97,11 @@ void NativeHost::FillPluginInfo(const std::string& currentPath, const std::strin
 		pinfo.setVersion( version );
 		pinfo.setAuthor( minfo->Author );
 		infoMap[key] = pinfo;
-	
-		minfo = LoadDescriptor(hInstance,++index);
 	}
 	UnloadDll(hInstance);
 }
 
-void* NativeHost::LoadDll( std::string const & psFileName )
+void* NativeHost::LoadDll( std::string const & file_name )
 {
 	void* hInstance;
 ///FIXME: The disabled code was introduced in psyclemfc in order to load plugins that depend on external dll's.
@@ -183,10 +188,10 @@ CMachineInfo* NativeHost::LoadDescriptor(void* hInstance)
 	#endif
 		CMachineInfo* info_ = GetInfo();
 		if(info_->Version < MI_VERSION) {
-			std::cerr << "plugin format is too old" << info_->Version << GetDllName() << "\n";
+			std::cerr << "plugin format is too old" << info_->Version << "\n";
 			info_ = 0;
 		}
-		return info;
+		return info_;
 	} catch (...) {
 		std::cerr << "exception while getting plugin info handler\n";
 		return 0;
@@ -212,7 +217,6 @@ CMachineInterface* NativeHost::Instantiate(void * hInstance)
 			return GetInterface();
 		}
 	} catch (...) {
-		throw InstanceException()
 		std::cerr << "exception while creating interface instance\n";
 		return 0;
 	}
@@ -221,11 +225,11 @@ CMachineInterface* NativeHost::Instantiate(void * hInstance)
 
 void NativeHost::UnloadDll( void* hInstance )
 {
-	assert(_hInstance);
+	assert(hInstance);
 	#if defined __unix__ || defined __APPLE__
-		::dlclose(_dll);
+		::dlclose(hInstance);
 	#else
-		::FreeLibrary((HINSTANCE)_dll);
+		::FreeLibrary((HINSTANCE)hInstance);
 	#endif
 }
 

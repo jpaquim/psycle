@@ -21,8 +21,6 @@
 #ifndef PSYCLE__CORE__PLUGIN_INFO
 #define PSYCLE__CORE__PLUGIN_INFO
 
-#include "machinekey.hpp"
-
 namespace psy
 {
 	namespace core

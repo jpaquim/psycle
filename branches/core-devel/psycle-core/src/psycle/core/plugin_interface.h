@@ -256,7 +256,6 @@ namespace psycle
 		}
 	}
 }
-
 // for plugins that aren't namespace-aware
 using psycle::plugin_interface::MI_VERSION;
 #if !defined(PSYCLE__CONSTANTS)
@@ -284,3 +283,5 @@ using psycle::plugin_interface::CFxCallback;
 using psycle::plugin_interface::uint8; // deprecated anyway
 using psycle::plugin_interface::uint16; // deprecated anyway
 using psycle::plugin_interface::uint32; // deprecated anyway
+
+

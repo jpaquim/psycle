@@ -27,6 +27,8 @@
 
 namespace psy { namespace core {
 
+const PluginInfo PluginFinder::empty_;
+
 PluginFinder::PluginFinder()
 {
 }
@@ -45,32 +47,44 @@ void PluginFinder::addHost(Hosts::type type)
 		maps_.resize(type+1);
 	}
 }
-bool PluginFinder::hasHost(Hosts::type type)
+bool PluginFinder::hasHost(Hosts::type type) const
 {
 	return (type < maps_.size());
 }
 
-std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::begin(Hosts::type) const {
-	return map_.begin();
+std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::begin(Hosts::type host) const {
+	return maps_[host].begin();
 }
-std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::end(Hosts::type) const {
-	return map_.end();
+std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::end(Hosts::type host) const {
+	return maps_[host].end();
 }
-std::map< MachineKey, PluginInfo >& PluginFinder:getMap(Hosts::type type) {
-	assert(type < maps_size());
-	return maps_[type];
+std::map< MachineKey, PluginInfo >& PluginFinder::getMap(Hosts::type host) {
+	assert(host < maps_.size());
+	return maps_[host];
 }
 
-PluginInfo PluginFinder::info( const MachineKey & key ) const {
+const PluginInfo & PluginFinder::info ( const MachineKey & key ) const {
 	if (!hasHost(key.host())) {
-		return PluginInfo();
+		return empty_;
 	}
 	
 	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
-	if ( it != map_.end() ) {
+	if ( it != maps_[key.host()].end() ) {
 		return it->second;
 	} else {
-		return PluginInfo();
+		return empty_;
+	}
+}
+PluginInfo PluginFinder::info( const MachineKey & key ) {
+	if (!hasHost(key.host())) {
+		return empty_;
+	}
+	
+	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
+	if ( it != maps_[key.host()].end() ) {
+		return it->second;
+	} else {
+		return empty_;
 	}
 }
 std::string PluginFinder::lookupDllName( const MachineKey & key ) const {
@@ -81,10 +95,11 @@ bool PluginFinder::hasKey( const MachineKey& key ) const {
 		return false;
 	}
 	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
-	if ( it != map_.end() ) {
+	if ( it != maps_[key.host()].end() ) {
 		return true;
 	} else {
 		return false;
 	}
+}
 	
 }}

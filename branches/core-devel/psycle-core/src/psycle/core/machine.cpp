@@ -291,7 +291,6 @@ namespace psy { namespace core {
 		TWSActive(false),
 		TWSSamples(0)
 	{
-		SetEditName(GetName());
 
 		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
 		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
@@ -302,8 +301,12 @@ namespace psy { namespace core {
 		
 		for (int c = 0; c<MAX_TRACKS; c++)
 		{
+			#if 0
 			CommandEvent event(0,0);
 			TriggerDelay[c].SetCommand(0,event);
+			#else
+			TriggerDelay[c].setCommand(0);
+			#endif
 			TriggerDelayCounter[c]=0;
 			RetriggerRate[c]=256;
 			ArpeggioCount[c]=0;

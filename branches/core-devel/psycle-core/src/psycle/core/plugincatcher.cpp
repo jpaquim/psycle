@@ -27,25 +27,18 @@
 namespace psy { namespace core {
 
 
-PluginCatcher::PluginCatcher(std::string const & psycle_path, std::string const & ladspa_path)
-:PluginFinder(psycle_path,ladspa_path)
-,_numPlugins(0)
+PluginFinderCache::PluginFinderCache()
+:_numPlugins(0)
 {
-}
-
-PluginCatcher::~PluginCatcher()
-{
-}
-bool PluginCatcher::loadInfo() {
 	loadCache();
-	scanInternal();
-	scanNatives();
-	scanLadspa();
-	saveCache();
-	return true;
 }
 
-bool PluginCatcher::loadCache(){
+PluginFinderCache::~PluginFinderCache()
+{
+}
+
+bool PluginFinderCache::loadCache(){
+#if 0
 	//FIXME:std::string cache((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string());
 	std::string cache(File::home() + "/psycle.plugin-scan.cache");
 
@@ -135,73 +128,15 @@ bool PluginCatcher::loadCache(){
 	}
 	
 	file.Close();
+#endif
 	return true;
 }
-bool PluginCatcher::saveCache(){
+bool PluginFinderCache::saveCache(){
 	return false;
 }
-void PluginCatcher::deleteCache(){
-}
-		
-void PluginCatcher::rescanAll() {
-	clearInfo();
-	_numPlugins = 0;
-	deleteCache();
-
-	scanInternal();
-	scanNatives();
-	scanLadspa();
-	saveCache();
+void PluginFinderCache::deleteCache(){
 }
 
-void PluginCatcher::scanInternal() {
-
-	// So far just calling superclass' function.
-	// A better approach is to verify if the key exists, but probably there's no
-	// penalty with refreshing the value.
-	PluginFinder::scanInternal();
-}
-
-void PluginCatcher::scanLadspa() {
-	// Reused superclass' code. The difference is that we check some values before actually wanting to load it.
-	std::string ladspa_path = this->ladspa_path();
-	#if defined __unix__ || defined __APPLE__
-		std::string::size_type dotpos = ladspa_path.find(':',0);
-		if ( dotpos != ladspa_path.npos ) ladspa_path = ladspa_path.substr( 0, dotpos );
-	#else
-	#endif
-
-	std::vector<std::string> fileList;
-	fileList = File::fileList(ladspa_path, File::list_modes::files);
-
-	std::vector<std::string>::iterator it = fileList.begin();
-	for ( ; it < fileList.end(); ++it ) {
-		std::string fileName = *it;
-		///\todo: do some checks
-		// how to get filetime???
-		LoadLadspaInfo(fileName);
-	}
-}
-
-void PluginCatcher::scanNatives() {
-	std::vector<std::string> fileList;
-
-	try {
-		fileList = File::fileList(psycle_path(), File::list_modes::files);
-	} catch ( std::exception& e ) {
-		std::cout << "Warning: Unable to scan your native plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
-		return;
-	}
-
-	std::vector<std::string>::iterator it = fileList.begin();
-
-	for ( ; it < fileList.end(); ++it ) {
-		std::string fileName = *it;
-		///\todo: do some checks
-		// how to get filetime?
-		LoadNativeInfo(fileName);
-	}
-}
 
 }}
 
