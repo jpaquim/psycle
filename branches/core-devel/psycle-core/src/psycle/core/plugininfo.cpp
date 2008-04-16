@@ -26,7 +26,7 @@
 #include <sstream>
 
 namespace psy { namespace core {
-
+PluginInfo::PluginInfo(){}
 PluginInfo::PluginInfo(MachineRole::type role, std::string name, std::string author, std::string desc, std::string version, std::string libname, std::string categ)
 :
 	role_(role),

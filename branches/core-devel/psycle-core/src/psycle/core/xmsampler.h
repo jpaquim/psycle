@@ -28,8 +28,7 @@
 namespace psy { namespace core {
 class XMSampler : public Machine {
 public:
-	XMSampler(MachineCallbacks* callb,Machine::id_type id)
-		:Machine(callb,id) {};
+	XMSampler(MachineCallbacks* callb,Machine::id_type id);
 	~XMSampler();
 };
 

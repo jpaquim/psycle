@@ -25,7 +25,7 @@ namespace psy
 		class CoreSong
 		{
 		protected:
-			CoreSong();friend class SongFactory;
+			CoreSong(); template <class U> friend class SongFactory;
 		public:
 			virtual ~CoreSong();
 			/// clears all song data
@@ -268,7 +268,7 @@ namespace psy
 		class UISong : public CoreSong
 		{
 		protected:
-			UISong();friend class SongFactory;
+			UISong();template <class U> friend class SongFactory;
 		public:
 			virtual ~UISong(){};
 		};
@@ -284,7 +284,7 @@ namespace psy
 		class Song : public UISong
 		{
 		protected:
-			Song();friend class SongFactory;
+			Song();template <class U> friend class SongFactory;
 		public:
 			virtual ~Song(){};
 			virtual void clear();

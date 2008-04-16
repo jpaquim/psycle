@@ -73,18 +73,18 @@ namespace psy
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::LFO );
 		}
 
-		static const std::string MachineKey::preprocessName(std::string dllName) {
+		const std::string MachineKey::preprocessName(std::string dllName) {
 		#if defined __unix__ || defined __APPLE__
-			int pos = dllName.find(".so");
+			unsigned int pos = dllName.find(".so");
 		#else
-			int pos = dllName.find(".dll");
+			unsigned int pos = dllName.find(".dll");
 		#endif
 			if (pos != std::string::npos) {
 				dllName = dllName.substr(0,pos);
 			}
 
 			std::transform(dllName.begin(),dllName.end(),dllName.begin(),ToLower());
-			std::replace(dllName.begin(),dllName.end()," ","_");
+			std::replace(dllName.begin(),dllName.end(),' ','_');
 
 			std::string prefix = "lib-xpsycle.plugin.";
 			pos = dllName.find(prefix);

@@ -48,7 +48,7 @@ class SongFactory
 		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
 
 	private:
-		std::vector<PsyFilterBase<T>*> filters;
+		std::vector<PsyFilterBase<T>*>  filters;
 		MachineFactory& factory;
 };
 

@@ -22,10 +22,13 @@
 
 #include "xmsampler.h"
 
-XMSampler::XMSampler()
-{
-}
+namespace psy{ namespace core{
+
+XMSampler::XMSampler(MachineCallbacks* callb,Machine::id_type id)
+	:Machine(callb,id) {};
+
 
 XMSampler::~XMSampler()
 {
 }
+}}

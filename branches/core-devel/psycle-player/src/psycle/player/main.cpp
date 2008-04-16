@@ -1,10 +1,15 @@
 #include "configuration.hpp"
-#include <psycle/core/player.h>
+#include <psycle/core/pluginfinder.h>
+#include <psycle/core/songfactory.h>
+#include <psycle/core/machinefactory.h>
 #include <psycle/core/song.h>
+#include <psycle/core/player.h>
+#include <psycle/audiodrivers/audiodriver.h>
 #include <iostream>
 #include <string>
 #include <sstream>
 
+using namespace psy::core;
 void usage() {
 		std::cerr <<
 			"Usage: psycle-player [options] [--input-file] <song file name>\n"
@@ -83,7 +88,7 @@ int main(int argument_count, char * arguments[]) {
 					usage();
 					return 0;
 				} else if(s == "--version") {
-					std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
+				std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
 					return 0;
 				} else if(s.length() && s[0] == '-') { // unrecognised option
 					std::cerr << "error: unknown option: " << s << '\n';
@@ -95,21 +100,11 @@ int main(int argument_count, char * arguments[]) {
 					token = tokens::none;
 				}
 		}
+	
 	}
-
-	psy::core::Player &player = *psy::core::Player::Instance();
-	///\todo: player is defined as a machine_callback. The correct design would utilize "timeInfo",
-	// or similar instead of passing all player.
-	psy::core::CoreSong song(&player);
-	//Song is passed to player, since in a good scenario, we would have one player, and several songs (MDI interface)
-	player.song(&song);
-
-
-	if(output_file_name.length()) {
-		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
-		player.setFileName(output_file_name);
-	}
-
+	Player &player = *Player::Instance();
+	MachineFactory mfactory(&player,&PluginFinder::getInstance());
+	SongFactory<CoreSong> sfactory(mfactory);
 	Configuration configuration;
 
 	if(!configuration.pluginPath().length())
@@ -122,11 +117,13 @@ int main(int argument_count, char * arguments[]) {
 	else
 		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << "\n";
 
+	mfactory.setPsyclePath(configuration.pluginPath());
+	mfactory.setLadspaPath(configuration.ladspaPath());
+	
 	if(output_driver_name.length()) {
 		std::cout << "psycle: player: setting output driver name to: " << output_driver_name << "\n";
 		configuration.setDriverByName(output_driver_name);
 	}
-
 	psy::core::AudioDriver & output_driver(*configuration._pOutputDriver); ///\todo needs a getter
 
 	if(output_device_name.length()) {
@@ -135,17 +132,24 @@ int main(int argument_count, char * arguments[]) {
 		settings.setDeviceName(output_device_name);
 		output_driver.setSettings(settings); ///\todo why do we copy?
 	}
-
 	player.setDriver(output_driver);
+
+
+	if(output_file_name.length()) {
+		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
+		player.setFileName(output_file_name);
+	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
 	
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
-		if(!song.load(configuration.pluginPath(), input_file_name)) {
+		CoreSong* song = sfactory.loadSong(input_file_name);
+		if(!song) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << "\n";
 			return 2;
 		}
+		player.song(song);
 
 		int itmp=256;
 		player.Work(&player,itmp);
@@ -162,6 +166,7 @@ int main(int argument_count, char * arguments[]) {
 		std::cout << std::endl << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
 		if(output_file_name.length()) player.stopRecording();
+		delete song;
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);

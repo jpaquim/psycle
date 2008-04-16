@@ -23,6 +23,7 @@
 #include <fstream>
 #include "file.h"
 #include "songfactory.h"
+#include "machinefactory.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
@@ -41,7 +42,7 @@ namespace psy
 		}
 		template <class T>
 		SongFactory<T>::~SongFactory() {
-			for (std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+			for (typename std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 				delete *it;
 			}
 		}
@@ -57,20 +58,24 @@ namespace psy
 		{
 			T* song = new T();
 			if ( File::fileIsReadable( fileName ) ) {
-				for (std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+				for (typename std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 					PsyFilterBase<T>* filter = *it;
 					if ( filter->testFormat(fileName) ) {
-						return filter->load(fileName,song,factory);
+						if (!filter->load(fileName,song,factory)) {
+							return 0;
+						} else {
+							return song;
+						}
 						break;
 					}
 				}
 			}
 			return false;
 		}
-
+		template <class T>
 		bool SongFactory<T>::saveSong( const std::string & fileName, const T& song, int version )
 		{
-			for (std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); it++) {
+			for (typename std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); it++) {
 				PsyFilterBase<T>* filter = *it;
 				if ( filter->version() == version ) {
 					// check postfix
