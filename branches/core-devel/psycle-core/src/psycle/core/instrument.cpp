@@ -50,17 +50,16 @@ namespace psy
 			waveDataR(0)
 		{
 			// clear everythingout
-			Delete();
+			Reset();
 		}
 
 		Instrument::~Instrument()
 		{
-			delete[] waveDataL; waveDataL = 0;
-			delete[] waveDataR; waveDataR = 0;
-			waveLength = 0;
+			delete[] waveDataL; 
+			delete[] waveDataR;
 		}
 
-		void Instrument::Delete()
+		void Instrument::Reset()
 		{
 			// Reset envelope
 			ENV_AT = 1; // 16
@@ -116,7 +115,7 @@ namespace psy
 
 		void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 		{
-			Delete();
+			Reset();
 			// assume version 0 for now
 			pFile->Read(_loop);
 			pFile->Read(_lines);

@@ -388,7 +388,7 @@ namespace psy
 		//////////////////////////////////////////////////////////////////////////
 
 		///\name each machine has a type attribute so that we can make yummy switch statements
-		///\{
+/*		///\{
 		public:
 			///\see enum MachineType which defined somewhere outside
 			typedef std::int32_t type_type; // Was: MachineType type_type
@@ -408,7 +408,7 @@ namespace psy
 			void mode(mode_type mode) { mode_ = mode; } friend class Plugin;
 			mode_type mode_;
 		///\}
-
+*/
 		///\name machine's numeric identifier. It is required for pattern events<->machine association, gui, and obviusly, in file load/save.
 		///\{
 		public:

@@ -32,7 +32,6 @@ class PatternCategory;
 class SequenceLine;
 class Machine;
 class PatternEvent;
-class MachineCallbacks;
 
 namespace convert_internal_machines
 {
@@ -42,8 +41,7 @@ namespace convert_internal_machines
 /**
 @author  Psycledelics  
 */
-template <class T>
-class Psy2Filter : public PsyFilterBase<T>
+class Psy2Filter : public PsyFilterBase
 {
 	protected:
 		//Note: convert_internal_machines uses its own enum.
@@ -94,30 +92,36 @@ class Psy2Filter : public PsyFilterBase<T>
 	///\name Singleton Pattern
 	///\{
 	protected:
-		Psy2Filter(); template <class U> friend class SongFactory;
+		Psy2Filter();
 	private:
 		Psy2Filter( Psy2Filter const & );
 		Psy2Filter& operator=(Psy2Filter const &);
+	public:
+		static Psy2Filter* Instance() {
+			// don`t use multithreaded
+			static Psy2Filter s;
+			return &s; 
+		}
 	///\}
 
 	public:
 		/*override*/ int version() const { return 2; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(const std::string & fileName, T& song, MachineFactory& factory);
-		/*override*/ bool save(const std::string & /*fileName*/, const T& /*song*/) {  /* so saving for legacy file format */ return false; }
+		/*override*/ bool load(const std::string & fileName, CoreSong& song, MachineFactory& factory);
+		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong& /*song*/) {  /* so saving for legacy file format */ return false; }
 
 
 	protected:
-		virtual bool LoadINFO(RiffFile* file,T& song);
-		virtual bool LoadSNGI(RiffFile* file,T& song);
-		virtual bool LoadSEQD(RiffFile* file,T& song);
-		virtual bool LoadPATD(RiffFile* file,T& song,int index);
-		virtual bool LoadINSD(RiffFile* file,T& song);
-		virtual bool LoadWAVD(RiffFile* file,T& song);
-		virtual bool PreLoadVSTs(RiffFile* file,T& song);
-		virtual bool LoadMACD(RiffFile* file,T& song,convert_internal_machines::Converter& converter, MachineFactory& factory);
-		virtual bool TidyUp(RiffFile* file,T &song,convert_internal_machines::Converter& converter);
+		virtual bool LoadINFO(RiffFile* file,CoreSong& song);
+		virtual bool LoadSNGI(RiffFile* file,CoreSong& song);
+		virtual bool LoadSEQD(RiffFile* file,CoreSong& song);
+		virtual bool LoadPATD(RiffFile* file,CoreSong& song,int index);
+		virtual bool LoadINSD(RiffFile* file,CoreSong& song);
+		virtual bool LoadWAVD(RiffFile* file,CoreSong& song);
+		virtual bool PreLoadVSTs(RiffFile* file,CoreSong& song);
+		virtual bool LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter, MachineFactory& factory);
+		virtual bool TidyUp(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter);
 
 	protected:
 		static std::string const FILE_FOURCC;
@@ -145,7 +149,7 @@ class Psy2Filter : public PsyFilterBase<T>
 		unsigned char octave;
 		int instSelected; //-> map to auxcolselected
 
-		void preparePatternSequence(T & song);
+		void preparePatternSequence(CoreSong& song);
 		PatternEvent convertEntry( unsigned char * data ) const;
 };
 

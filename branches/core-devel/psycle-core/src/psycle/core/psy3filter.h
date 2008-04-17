@@ -27,16 +27,15 @@
 namespace psy { namespace core {
 
 class RiffFile;
+class MachineCallbacks;
 class PatternCategory;
 class SequenceLine;
 class PatternEvent;
-class MachineCallbacks;
 
 /**
 @author  Psycledelics  
 */
-template <class T>
-class Psy3Filter : public PsyFilterBase<T>
+class Psy3Filter : public PsyFilterBase
 {
 	protected:
 		typedef enum MachineClass
@@ -74,29 +73,34 @@ class Psy3Filter : public PsyFilterBase<T>
 	///\name Singleton Pattern
 	///\{
 	protected:
-		Psy3Filter(); template <class U> friend class SongFactory;
+		Psy3Filter(); 
 	private:
 		Psy3Filter( Psy3Filter const & );
 		Psy3Filter& operator=(Psy3Filter const&);
 	public:
-	///\}
+		static Psy3Filter* Instance() {
+			// don`t use multithreaded
+			static Psy4Filter s;
+			return &s; 
+		}
+		///\}
 
 	protected:
 		/*override*/ int version() const { return 3; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(const std::string & fileName, T& song, MachineFactory& factory);
-		/*override*/ bool save(const std::string & /*fileName*/, const T & /*song*/) {  /* so saving for legacy file format */ return false; }
+		/*override*/ bool load(const std::string & fileName, CoreSong& song, MachineFactory& factory);
+		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong& /*song*/) {  /* so saving for legacy file format */ return false; }
 
 
 	protected:
-		virtual int LoadSONGv0(RiffFile* file,T& song);
-		virtual bool LoadINFOv0(RiffFile* file,T& song,int minorversion);
-		virtual bool LoadSNGIv0(RiffFile* file,T& song,int minorversion, MachineCallbacks* callbacks);
-		virtual bool LoadSEQDv0(RiffFile* file,T& song,int minorversion);
-		virtual bool LoadPATDv0(RiffFile* file,T& song,int minorversion);
-		virtual bool LoadMACDv0(RiffFile* file,T& song,int minorversion, MachineFactory& factory);
-		virtual bool LoadINSDv0(RiffFile* file,T& song,int minorversion);
+		virtual int LoadSONGv0(RiffFile* file,CoreSong& song);
+		virtual bool LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion);
+		virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
+		virtual bool LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion);
+		virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
+		virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, MachineFactory& factory);
+		virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
 
 	protected:
 		static std::string const FILE_FOURCC;
@@ -118,7 +122,7 @@ class Psy3Filter : public PsyFilterBase<T>
 		//inter-loading value.
 		int linesPerBeat;
 
-		//todo: psy3filtermfc, restore these two values.
+		//todo: psy3filtermfc, restore these values.
 		unsigned char octave;
 		int seqBus;
 		int instSelected;
@@ -128,11 +132,11 @@ class Psy3Filter : public PsyFilterBase<T>
 		int trackSoloed;
 
 
-		void RestoreMixerSendFlags(T& song);
+		void RestoreMixerSendFlags(CoreSong& song);
 
 		PatternEvent convertEntry( unsigned char* data) const;
 
-		void preparePatternSequence(T & song);
+		void preparePatternSequence(CoreSong& song);
 };
 
 }}

@@ -26,30 +26,21 @@
 
 namespace psy { namespace core {
 
+class PsyFilterBase;
+class CoreSong;
 class MachineFactory;
 
-template <class T>
-class PsyFilterBase;
-
-template <class T>
-class SongFactory
+class SongSerializer
 {
 	public:
-		SongFactory(MachineFactory& factory1);
-		~SongFactory();
+		SongSerializer();
+		~SongSerializer();
 
-		T* createEmptySong();
-		T* loadSong(const std::string & fileName);
-		bool saveSong(const std::string & fileName, const T& song, int version);
-		
-
-		//signals
-		//sigslot::signal2<const std::string &, const std::string &> report;
-		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
+		bool loadSong(const std::string & fileName, CoreSong& song,MachineFactory& factory);
+		bool saveSong(const std::string & fileName, const CoreSong& song, int version);
 
 	private:
-		std::vector<PsyFilterBase<T>*>  filters;
-		MachineFactory& factory;
+		std::vector<PsyFilterBase*>  filters;
 };
 
 }}

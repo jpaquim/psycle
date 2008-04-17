@@ -6,6 +6,7 @@
 
 #include "cstdint.h"
 #include "patternsequence.h"
+#include "songserializer.h"
 #include "machine.h"
 #include "instrument.h"
 //#include "xminstrument.h"
@@ -15,23 +16,29 @@ namespace psy
 	namespace core
 	{
 		/// forward declarations.
-		class PluginFinder;
 		class PluginFinderKey;
-		class RiffFile;
+		class MachineFactory;
 
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines, wavetables
 		/// and their initial parameters
 		class CoreSong
 		{
-		protected:
-			CoreSong(); template <class U> friend class SongFactory;
 		public:
+			CoreSong(MachineFactory&); 
 			virtual ~CoreSong();
 			/// clears all song data
 			virtual void clear();
 
 		public:
+			///\name serialization
+			///\{
+			bool load(std::string filename);
+			bool save(std::string filename, int version=4);
+		private:
+			static SongSerializer serializer;
+			///\}
+
 			// signals
 #if defined PSYCLE__CORE__SIGNALS
 			boost::signal<void (const std::string &, const std::string &)> report;
@@ -230,6 +237,7 @@ namespace psy
 			void /*Reset*/DeleteInstrument(Instrument::id_type id);
 			/// resets the instrument and delete each sample/layer that it uses. (all instruments)
 			void /*Reset*/DeleteInstruments();
+		protected:
 			/// deletes all instruments in this song.
 			void /*Delete*/DestroyAllInstruments();
 			/// removes the sample/layer of the instrument
@@ -268,7 +276,7 @@ namespace psy
 		class UISong : public CoreSong
 		{
 		protected:
-			UISong();template <class U> friend class SongFactory;
+			UISong();
 		public:
 			virtual ~UISong(){};
 		};
@@ -284,7 +292,7 @@ namespace psy
 		class Song : public UISong
 		{
 		protected:
-			Song();template <class U> friend class SongFactory;
+			Song();
 		public:
 			virtual ~Song(){};
 			virtual void clear();

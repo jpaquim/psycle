@@ -34,47 +34,36 @@
 
 namespace psy { namespace core {
 
-template <class T>
-std::string const Psy3Filter<T>::FILE_FOURCC = "PSY3";
+std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 /// Current version of the Song file and its chunks.
 /// format: 0xAABB
 /// A = Major version. It can't be loaded, skip the whole chunk. (Right now the loader does it, so simply do nothing)
 /// B = minor version. It can be loaded with the existing loader, but not all information will be available.
-template <class T>
-std::uint32_t const Psy3Filter<T>::VERSION_INFO = 0x0000;
-template <class T>
-std::uint32_t const Psy3Filter<T>::VERSION_SNGI = 0x0000;
-template <class T>
-std::uint32_t const Psy3Filter<T>::VERSION_SEQD = 0x0000;
-template <class T>
-std::uint32_t const Psy3Filter<T>::VERSION_PATD = 0x0000;
-template <class T>
-std::uint32_t const Psy3Filter<T>::VERSION_MACD = 0x0000;
-template <class T>
-std::uint32_t const Psy3Filter<T>::VERSION_INSD = 0x0000;
-template <class T>
-std::uint32_t const Psy3Filter<T>::VERSION_WAVE = 0x0000;
+std::uint32_t const Psy3Filter::VERSION_INFO = 0x0000;
+std::uint32_t const Psy3Filter::VERSION_SNGI = 0x0000;
+std::uint32_t const Psy3Filter::VERSION_SEQD = 0x0000;
+std::uint32_t const Psy3Filter::VERSION_PATD = 0x0000;
+std::uint32_t const Psy3Filter::VERSION_MACD = 0x0000;
+std::uint32_t const Psy3Filter::VERSION_INSD = 0x0000;
+std::uint32_t const Psy3Filter::VERSION_WAVE = 0x0000;
 
-template <class T>
-std::uint32_t const Psy3Filter<T>::FILE_VERSION =
-	Psy3Filter<T>::VERSION_INFO +
-	Psy3Filter<T>::VERSION_SNGI +
-	Psy3Filter<T>::VERSION_SEQD +
-	Psy3Filter<T>::VERSION_PATD +
-	Psy3Filter<T>::VERSION_PATD + 
-	Psy3Filter<T>::VERSION_MACD +
-	Psy3Filter<T>::VERSION_INSD +
-	Psy3Filter<T>::VERSION_WAVE;
+std::uint32_t const Psy3Filter::FILE_VERSION =
+	Psy3Filter::VERSION_INFO +
+	Psy3Filter::VERSION_SNGI +
+	Psy3Filter::VERSION_SEQD +
+	Psy3Filter::VERSION_PATD +
+	Psy3Filter::VERSION_PATD + 
+	Psy3Filter::VERSION_MACD +
+	Psy3Filter::VERSION_INSD +
+	Psy3Filter::VERSION_WAVE;
 
-template <class T>
-Psy3Filter<T>::Psy3Filter()
+Psy3Filter::Psy3Filter()
 :
 	singleCat(),
 	singleLine()
 {}
 
-template <class T>
-bool Psy3Filter<T>::testFormat( const std::string & fileName )
+bool Psy3Filter::testFormat( const std::string & fileName )
 {
 	RiffFile file;
 	file.Open(fileName);
@@ -87,8 +76,7 @@ bool Psy3Filter<T>::testFormat( const std::string & fileName )
 }
 
 
-template <class T>
-void Psy3Filter<T>::preparePatternSequence( T & song )
+void Psy3Filter::preparePatternSequence( CoreSong & song )
 {
 	seqList.clear();
 	song.patternSequence()->removeAll();
@@ -98,8 +86,7 @@ void Psy3Filter<T>::preparePatternSequence( T & song )
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-template <class T>
-bool Psy3Filter<T>::load(const std::string & fileName, T & song, MachineFactory& factory)
+bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFactory& factory)
 {
 	RiffFile file;
 	file.Open(fileName);
@@ -311,8 +298,7 @@ bool Psy3Filter<T>::load(const std::string & fileName, T & song, MachineFactory&
 	return true;
 }
 
-template <class T>
-int Psy3Filter<T>::LoadSONGv0(RiffFile* file,T& /*song*/)
+int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 {
 	std::int32_t fileversion = 0;
 	std::uint32_t size = 0;
@@ -343,8 +329,7 @@ int Psy3Filter<T>::LoadSONGv0(RiffFile* file,T& /*song*/)
 	return chunkcount;
 }
 
-template <class T>
-bool Psy3Filter<T>::LoadINFOv0(RiffFile* file,T& song,int /*minorversion*/)
+bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 {
 		char Name[129]; char Author[65]; char Comment[65536];
 		
@@ -357,8 +342,7 @@ bool Psy3Filter<T>::LoadINFOv0(RiffFile* file,T& song,int /*minorversion*/)
 		return result;
 }
 
-template <class T>
-bool Psy3Filter<T>::LoadSNGIv0(RiffFile* file,T& song,int /*minorversion*/, MachineCallbacks* callbacks)
+bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/, MachineCallbacks* callbacks)
 {
 	std::int32_t temp(0);
 	std::int16_t temp16(0);
@@ -411,8 +395,7 @@ bool Psy3Filter<T>::LoadSNGIv0(RiffFile* file,T& song,int /*minorversion*/, Mach
 	return fileread;
 }
 
-template <class T>
-bool Psy3Filter<T>::LoadSEQDv0(RiffFile* file,T& /*song*/,int /*minorversion*/)
+bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& /*song*/,int /*minorversion*/)
 {
 	std::int32_t index = 0;
 	std::uint32_t temp;
@@ -436,8 +419,7 @@ bool Psy3Filter<T>::LoadSEQDv0(RiffFile* file,T& /*song*/,int /*minorversion*/)
 	return fileread;
 }
 
-template <class T>
-PatternEvent Psy3Filter<T>::convertEntry( unsigned char * data ) const
+PatternEvent Psy3Filter::convertEntry( unsigned char * data ) const
 {
 	PatternEvent event;
 	event.setNote(*data); data++;
@@ -448,8 +430,7 @@ PatternEvent Psy3Filter<T>::convertEntry( unsigned char * data ) const
 	return event;
 }
 
-template <class T>
-bool Psy3Filter<T>::LoadPATDv0(RiffFile* file,T& song,int /*minorversion*/)
+bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 {
 	std::int32_t index = 0;
 	std::uint32_t temp;
@@ -538,8 +519,7 @@ bool Psy3Filter<T>::LoadPATDv0(RiffFile* file,T& song,int /*minorversion*/)
 	return fileread;
 }
 
-template <class T>
-bool Psy3Filter<T>::LoadMACDv0(RiffFile* file,T& song,int minorversion, MachineFactory& factory)
+bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, MachineFactory& factory)
 {
 	std::int32_t index = 0;
 
@@ -604,8 +584,7 @@ bool Psy3Filter<T>::LoadMACDv0(RiffFile* file,T& song,int minorversion, MachineF
 	return song.machine(index) != 0;
 }
 
-template <class T>
-bool Psy3Filter<T>::LoadINSDv0(RiffFile* file,T& song,int minorversion)
+bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion)
 {
 	std::int32_t index = 0;
 	file->Read(index);
@@ -617,8 +596,7 @@ bool Psy3Filter<T>::LoadINSDv0(RiffFile* file,T& song,int minorversion)
 	return true;
 }
 
-template <class T>
-void Psy3Filter<T>::RestoreMixerSendFlags(T& song)
+void Psy3Filter::RestoreMixerSendFlags(CoreSong& song)
 {
 	for (int i(0);i < MAX_MACHINES; ++i)
 	{

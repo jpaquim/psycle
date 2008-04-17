@@ -42,26 +42,19 @@ struct ToLower
 	char operator() (char c) const  { return std::tolower(c); }
 };
 
-template <class T>
-std::string const Psy2Filter<T>::FILE_FOURCC = "PSY2";
-template <class T>
-const int Psy2Filter<T>::PSY2_MAX_TRACKS = 32;
-template <class T>
-const int Psy2Filter<T>::PSY2_MAX_WAVES  = 16;
-template <class T>
-const int Psy2Filter<T>::PSY2_MAX_INSTRUMENTS = 255;
-template <class T>
-const int Psy2Filter<T>::PSY2_MAX_PLUGINS = 256;
+std::string const Psy2Filter::FILE_FOURCC = "PSY2";
+const int Psy2Filter::PSY2_MAX_TRACKS = 32;
+const int Psy2Filter::PSY2_MAX_WAVES  = 16;
+const int Psy2Filter::PSY2_MAX_INSTRUMENTS = 255;
+const int Psy2Filter::PSY2_MAX_PLUGINS = 256;
 
-template <class T>
-Psy2Filter<T>::Psy2Filter()
+Psy2Filter::Psy2Filter()
 :
 	singleCat(),
 	singleLine()
 {}
 
-template <class T>
-bool Psy2Filter<T>::testFormat(const std::string & fileName)
+bool Psy2Filter::testFormat(const std::string & fileName)
 {
 	RiffFile file;
 	file.Open(fileName);
@@ -72,19 +65,17 @@ bool Psy2Filter<T>::testFormat(const std::string & fileName)
 	return !std::strcmp(Header,"PSY2SONG");
 }
 
-template <class T>
-void Psy2Filter<T>::preparePatternSequence( T & song )
+void Psy2Filter::preparePatternSequence( CoreSong & song )
 {
 	seqList.clear();
 	song.patternSequence()->removeAll();
 	// create a single Pattern Category
-	singleCat = song.patternSequence()-> PatternPool()->createNewCategory("Pattern");
+	singleCat = song.patternSequence()-> patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-template <class T>
-bool Psy2Filter<T>::load(const std::string & fileName, T & song, MachineFactory& factory)
+bool Psy2Filter::load(const std::string & fileName, CoreSong & song, MachineFactory& factory)
 {
 	std::int32_t num;
 	RiffFile file;
@@ -111,14 +102,13 @@ bool Psy2Filter<T>::load(const std::string & fileName, T & song, MachineFactory&
 	LoadINSD(&file,song);
 	LoadWAVD(&file,song);
 	PreLoadVSTs(&file,song);
-	convert_internal_machines::Converter converter(factory);
+	convert_internal_machines::Converter converter;
 	LoadMACD(&file,song,converter,factory);
 	TidyUp(&file,song,converter);
 	return true;
 }
 
-template <class T>
-bool Psy2Filter<T>::LoadINFO(RiffFile* file,T& song)
+bool Psy2Filter::LoadINFO(RiffFile* file,CoreSong& song)
 {
 	char Name[32];
 	char Author[32];
@@ -133,8 +123,7 @@ bool Psy2Filter<T>::LoadINFO(RiffFile* file,T& song)
 	return err;
 }
 
-template <class T>
-bool Psy2Filter<T>::LoadSNGI(RiffFile* file,T& song)
+bool Psy2Filter::LoadSNGI(RiffFile* file,CoreSong& song)
 {
 	std::int32_t tmp;
 	file->Read(tmp);
@@ -158,8 +147,7 @@ bool Psy2Filter<T>::LoadSNGI(RiffFile* file,T& song)
 	return true;
 }
 
-template <class T>
-bool Psy2Filter<T>::LoadSEQD(RiffFile* file,T& song)
+bool Psy2Filter::LoadSEQD(RiffFile* file,CoreSong& song)
 {
 	std::int32_t length,tmp;
 	unsigned char playOrder[128];
@@ -174,8 +162,7 @@ bool Psy2Filter<T>::LoadSEQD(RiffFile* file,T& song)
 	return true;
 }
 
-template <class T>
-PatternEvent Psy2Filter<T>::convertEntry( unsigned char * data ) const
+PatternEvent Psy2Filter::convertEntry( unsigned char * data ) const
 {
 	PatternEvent event;
 	//Convert old tweak effect command to common tweak.
@@ -196,8 +183,7 @@ PatternEvent Psy2Filter<T>::convertEntry( unsigned char * data ) const
 	return event;
 }
 
-template <class T>
-bool Psy2Filter<T>::LoadPATD(RiffFile* file,T& song,int index)
+bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 {
 	std::int32_t numLines;
 	char patternName[32];
@@ -267,8 +253,7 @@ bool Psy2Filter<T>::LoadPATD(RiffFile* file,T& song,int index)
 	return true;
 }
 
-template <class T>
-bool Psy2Filter<T>::LoadINSD(RiffFile* file,T& song)
+bool Psy2Filter::LoadINSD(RiffFile* file,CoreSong& song)
 {
 	std::int32_t i;
 	file->Read(instSelected);
@@ -348,8 +333,7 @@ bool Psy2Filter<T>::LoadINSD(RiffFile* file,T& song)
 	return true;
 }
 
-template <class T>
-bool Psy2Filter<T>::LoadWAVD(RiffFile* file,T& song)
+bool Psy2Filter::LoadWAVD(RiffFile* file,CoreSong& song)
 {
 	std::int32_t i;
 	// Skip wave selected
@@ -403,8 +387,7 @@ bool Psy2Filter<T>::LoadWAVD(RiffFile* file,T& song)
 	return true;
 }
 
-template <class T>
-bool Psy2Filter<T>::PreLoadVSTs(RiffFile* file,T& /*song*/)
+bool Psy2Filter::PreLoadVSTs(RiffFile* file,CoreSong& /*song*/)
 {
 	std::int32_t i;
 	for (i=0; i<PSY2_MAX_PLUGINS; i++)
@@ -429,8 +412,7 @@ bool Psy2Filter<T>::PreLoadVSTs(RiffFile* file,T& /*song*/)
 	return true;
 }
 
-template <class T>
-bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::Converter& converter, MachineFactory& factory)
+bool Psy2Filter::LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter, MachineFactory& factory)
 {
 	std::int32_t i;
 	file->ReadArray(_machineActive,128);
@@ -448,7 +430,7 @@ bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::C
 			file->Read(type);
 
 			if(converter.plugin_names().exists(type)) {
-				pMac[i] = &converter.redirect(i, type, *file,song);
+				pMac[i] = &converter.redirect(factory,i, type, *file);
 			}
 			else switch (type)
 			{
@@ -576,13 +558,13 @@ bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::C
 			if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
 				busEffect[i] = 255;
 			// If there's a dummy, force it to be an effect
-			else if (pMac[busEffect[i]]->type() == MACH_DUMMY ) 
+			/*else if (pMac[busEffect[i]]->type() == MACH_DUMMY ) 
 			{
 				pMac[busEffect[i]]->mode(MACHMODE_FX);
-			}
+			}*/
 			// Else if the machine is a generator, move it to gens bus.
 			// This can't happen, but it is here for completeness
-			else if (pMac[busEffect[i]]->mode() == MACHMODE_GENERATOR)
+			else if (!pMac[busEffect[i]]->acceptsConnections())
 			{
 				int k=0;
 				while (busEffect[k] != 255 && k<MAX_BUSES) 
@@ -598,13 +580,14 @@ bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::C
 			if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
 				busMachine[i] = 255;
 			// If there's a dummy, force it to be a Generator
-			else if (pMac[busMachine[i]]->type() == MACH_DUMMY ) 
+			// TODO: set acceptsConnections to false
+			/*else if (pMac[busMachine[i]]->type() == MACH_DUMMY ) 
 			{
 				pMac[busMachine[i]]->mode(MACHMODE_GENERATOR);
-			}
+			}*/
 			// Else if the machine is an fx, move it to FXs bus.
 			// This can't happen, but it is here for completeness
-			else if ( pMac[busMachine[i]]->mode() != MACHMODE_GENERATOR)
+			else if ( pMac[busMachine[i]]->acceptsConnections())
 			{
 				int j=0;
 				while (busEffect[j] != 255 && j<MAX_BUSES) 
@@ -675,8 +658,7 @@ bool Psy2Filter<T>::LoadMACD(RiffFile* file,T& song,convert_internal_machines::C
 }
 
 //Finished all the file loading. Now Process the data to the current structures
-template <class T>
-bool Psy2Filter<T>::TidyUp(RiffFile* /*file*/,T& song,convert_internal_machines::Converter& converter)
+bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machines::Converter& converter)
 {
 	// The old fileformat had a pool of VST plugins, of which, the user could create
 	// machines that instanced them. vstL[] contains this pool.
@@ -700,7 +682,7 @@ bool Psy2Filter<T>::TidyUp(RiffFile* /*file*/,T& song,convert_internal_machines:
 		#if 0
 		Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
 		#else
-		SinglePattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		SinglePattern* pat = song.patternSequence()->patternPool()->findById(*it);
 		#endif
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();

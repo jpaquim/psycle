@@ -22,57 +22,45 @@
 #pragma once
 
 #include "psy3filter.h"
-#include <fstream>
-#include <map>
 
 namespace psy { namespace core {
 
-class SinglePattern;
-class Machine;
+class CoreSong;
 
 /**
 @author  Stefan Nattkemper
 */
-template <class T>
-class Psy4Filter : public Psy3Filter<T>
+class Psy4Filter : public Psy3Filter
 {
 	///\name Singleton SinglePattern
 	///\{ 
 		protected:
-			Psy4Filter(); template <class U> friend class SongFactory;
+			Psy4Filter();
 		private:
 			Psy4Filter( Psy4Filter const & );
 			Psy4Filter& operator=(Psy4Filter const&);
 		public:
-
+			static Psy4Filter* Instance() {
+				// don`t use multithreaded
+				static Psy4Filter s;
+				return &s; 
+			}
 	///\}
 
 	public:
 		/*override*/ int version() const { return 4; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(const std::string & fileName, T & song, MachineFactory& factory);
-		/*override*/ bool save( const std::string & fileName, const T & song );
+		/*override*/ bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory);
+		/*override*/ bool save( const std::string & fileName, const CoreSong & song );
 
 	protected:
-		/*override*/ int LoadSONGv0(RiffFile* file,T& song);
-		bool saveSONGv0(RiffFile* file,const T& song);
-		bool saveMACDv0(RiffFile* file,const T& song,int index);
-		bool saveINSDv0(RiffFile* file,const T& song,int index);
-		bool saveWAVEv0(RiffFile* file,const T& song,int index);
+		/*override*/ int LoadSONGv0(RiffFile* file,CoreSong& song);
+		bool saveSONGv0(RiffFile* file,const CoreSong& song);
+		bool saveMACDv0(RiffFile* file,const CoreSong& song,int index);
+		bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
+		bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
 
-	private:
-		std::fstream _stream;
-
-		PatternCategory* lastCategory;
-		SinglePattern* lastPattern;
-		SequenceLine* lastSeqLine;
-		Machine* lastMachine;
-		float lastPatternPos;
-
-		std::map<int, SinglePattern*> patMap;
-
-		T* song_;
 };
 
 }}

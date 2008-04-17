@@ -19,64 +19,46 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 //#include <psycle/core/psycleCorePch.hpp>
-#include <iostream>
-#include <fstream>
-#include "file.h"
-#include "songfactory.h"
-#include "machinefactory.h"
+#include "songserializer.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
+#include <iostream>
 
 namespace psy
 {
 	namespace core
 	{
-		template <class T>
-		SongFactory<T>::SongFactory(MachineFactory& factory1)
-		:factory(factory1)
+		SongSerializer::SongSerializer()
 		{
-			filters.push_back( new Psy2Filter<T>() );
-			filters.push_back( new Psy3Filter<T>() );
-			filters.push_back( new Psy4Filter<T>() );
+			filters.push_back( Psy2Filter::getInstance() );
+			filters.push_back( Psy3Filter::getInstance() );
+			filters.push_back( Psy4Filter::getInstance() );
 		}
-		template <class T>
-		SongFactory<T>::~SongFactory() {
-			for (typename std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+		SongSerializer::~SongSerializer() {
+			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 				delete *it;
 			}
 		}
 		
-		template <class T>
-		T* SongFactory<T>::createEmptySong() {
-			T* song = new T();
-			song.addMachine(factory.CreateMachine(MachineKey::master(),MASTER_INDEX));
-			return song;
-		}
-		template <class T>
-		T* SongFactory<T>::loadSong(const std::string & fileName)
+		bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song,MachineFactory& factory)
 		{
-			T* song = new T();
 			if ( File::fileIsReadable( fileName ) ) {
-				for (typename std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); ++it) {
-					PsyFilterBase<T>* filter = *it;
+				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+					PsyFilterBase* filter = *it;
 					if ( filter->testFormat(fileName) ) {
-						if (!filter->load(fileName,song,factory)) {
-							return 0;
-						} else {
-							return song;
-						}
+						return filter->load(fileName,song,factory);
 						break;
 					}
 				}
 			}
+			std::cerr << "SongSerializer::loadSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
 			return false;
 		}
-		template <class T>
-		bool SongFactory<T>::saveSong( const std::string & fileName, const T& song, int version )
+		bool SongSerializer::saveSong( const std::string & fileName, const CoreSong& song, int version )
 		{
-			for (typename std::vector<PsyFilterBase<T>*>::iterator it = filters.begin(); it < filters.end(); it++) {
-				PsyFilterBase<T>* filter = *it;
+			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); it++) {
+				PsyFilterBase* filter = *it;
 				if ( filter->version() == version ) {
 					// check postfix
 					std::string newFileName = fileName;
@@ -88,7 +70,7 @@ namespace psy
 					break;
 				}
 			}
-			std::cerr << "SongFactory<T>::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
+			std::cerr << "SongSerializer::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
 			return false;
 		}
 	}

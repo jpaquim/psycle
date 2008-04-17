@@ -28,23 +28,33 @@
 #include "ladspahost.hpp"
 namespace psy{ namespace core {
 
+MachineFactory::MachineFactory(MachineCallbacks* callbacks)
+:callbacks_(callbacks)
+{
+	finder_= &PluginFinder::getInstance();
+	FillHosts();
+}
 MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
 :callbacks_(callbacks)
 ,finder_(finder)
 {
+	FillHosts();
+}
+void MachineFactory::FillHosts()
+{
 	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
-	hosts_.push_back( &InternalHost::getInstance(callbacks) );
+	hosts_.push_back( &InternalHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::INTERNAL);
 	// InternalHost doesn't have a path, so we call FillFinderData now.
-	InternalHost::getInstance(callbacks).FillFinderData(finder_);
+	InternalHost::getInstance(callbacks_).FillFinderData(finder_);
 
-	hosts_.push_back( &NativeHost::getInstance(callbacks) );
+	hosts_.push_back( &NativeHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::NATIVE);
 	
-	hosts_.push_back( &LadspaHost::getInstance(callbacks) );
+	hosts_.push_back( &LadspaHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::LADSPA);
 
-	//hosts_.push_back( &VstHost::getInstance(callbacks) );
+	//hosts_.push_back( &VstHost::getInstance(callbacks_) );
 	//finder_.addHost(Hosts::VST);
 }
 

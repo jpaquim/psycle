@@ -37,6 +37,7 @@ class MachineHost;
 class MachineFactory
 {
 public:
+	MachineFactory(MachineCallbacks* callbacks);
 	MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder);
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
 	Machine* CloneMachine(Machine& mac);
@@ -53,6 +54,8 @@ public:
 	void RegenerateFinderData();
 
 protected:
+	void FillHosts();
+
 	MachineCallbacks* callbacks_;
 	PluginFinder* finder_;
 	std::vector<MachineHost*> hosts_;

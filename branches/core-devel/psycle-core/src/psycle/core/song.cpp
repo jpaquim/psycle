@@ -43,7 +43,7 @@ CoreSong::CoreSong()
 
 CoreSong::~CoreSong() {
 	DeleteAllMachines();
-	DestroyAllInstruments();
+	FreeInstrumentsMemory();
 }
 
 void CoreSong::clear() {
@@ -77,7 +77,22 @@ void CoreSong::clear() {
 
 	_saved=false;
 	fileName = "Untitled.psy";
+	addMachine(factory.CreateMachine(MachineKey::master(),MASTER_INDEX));
 }
+
+bool CoreSong::load(std::string filename)
+{
+	DeleteAllMachines();
+	FreeInstrumentsMemory();
+	serializer.loadSong(filename,*this,factory);
+}
+
+bool CoreSong::save(std::string filename, int version=4)
+{
+	serializer.saveSong(filename,version);
+}
+
+
 bool CoreSong::AddMachine(Machine* pmac) {
 	if(pmac->id() == -1)
 	{
@@ -615,17 +630,19 @@ bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/
 void CoreSong::/*Reset*/DeleteInstrument(Instrument::id_type id)
 {
 	Invalided=true;
-	_pInstrument[id]->Delete(); Invalided=false;
+	_pInstrument[id]->Reset();
+	Invalided=false;
 }
 
 void CoreSong::/*Reset*/DeleteInstruments() {
 	Invalided=true;
-	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
-	_pInstrument[id]->Delete();
+	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
+		_pInstrument[id]->Reset();
+	}
 	Invalided=false;
 }
 
-void CoreSong::/*Delete*/DestroyAllInstruments() {
+void CoreSong::/*Delete*/FreeInstrumentMemory() {
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 		delete _pInstrument[id];
 		_pInstrument[id] = 0;

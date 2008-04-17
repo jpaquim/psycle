@@ -1,6 +1,4 @@
 #include "configuration.hpp"
-#include <psycle/core/pluginfinder.h>
-#include <psycle/core/songfactory.h>
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
@@ -103,8 +101,8 @@ int main(int argument_count, char * arguments[]) {
 	
 	}
 	Player &player = *Player::Instance();
-	MachineFactory mfactory(&player,&PluginFinder::getInstance());
-	SongFactory<CoreSong> sfactory(mfactory);
+	// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory constructor
+	MachineFactory mfactory(&player);
 	Configuration configuration;
 
 	if(!configuration.pluginPath().length())
@@ -144,12 +142,12 @@ int main(int argument_count, char * arguments[]) {
 	
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
-		CoreSong* song = sfactory.loadSong(input_file_name);
-		if(!song) {
+		CoreSong song(mfactory);
+		if(!song.load(input_file_name)) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << "\n";
 			return 2;
 		}
-		player.song(song);
+		player.song(&song);
 
 		int itmp=256;
 		player.Work(&player,itmp);
@@ -166,7 +164,6 @@ int main(int argument_count, char * arguments[]) {
 		std::cout << std::endl << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
 		if(output_file_name.length()) player.stopRecording();
-		delete song;
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
