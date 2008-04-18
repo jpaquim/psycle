@@ -30,6 +30,8 @@ typedef outputs::
 		alsa
 	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
 		direct_sound
+	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DUMMY
+		dummy
 	#else
 		#error "no default output"
 	#endif
