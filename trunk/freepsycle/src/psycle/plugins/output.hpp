@@ -13,6 +13,8 @@
 	#include "outputs/alsa.hpp"
 #elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
 	#include "outputs/direct_sound.hpp"
+#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DUMMY
+	#include "outputs/dummy.hpp"
 #else
 	#error "no default output"
 #endif
