@@ -278,6 +278,7 @@ dummy_output_plugin_module = output_plugin_uniform_module(
 if not default_output_plugin_module: default_output_plugin_module = dummy_output_plugin_module
 
 if default_output_plugin_module:
+	project.information('selected ' + default_output_plugin_module.name() + ' as default output plugin module.')
 	defines = {'PSYCLE__PLUGINS__OUTPUTS__DEFAULT__' + default_output_plugin_module.short_name().upper() : None}
 	default_output_plugin_module = plugin_uniform_module(
 		name = 'output',
