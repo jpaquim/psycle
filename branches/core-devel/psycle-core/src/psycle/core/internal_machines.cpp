@@ -44,6 +44,16 @@ namespace psy {
 			return numSamples;
 		}
 
+		// Since Dummy is used by the loader to load broken/missing plugins, 
+		// its "LoadSpecificChunk" skips the data of the chunk so that the
+		// song loader can continue the sequence.
+		bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			std::uint32_t size;
+			pFile->Read(size); // size of this part params to load
+			pFile->Skip(size);
+			return true;
+		}
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 

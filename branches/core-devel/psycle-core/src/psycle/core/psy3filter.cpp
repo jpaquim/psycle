@@ -531,7 +531,7 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 		Machine::id_type const id(index);
 		// assume version 0 for now
 		std::int32_t type;
-		Machine* mac;
+		Machine* mac=0;
 		char dllName[256];
 		file->Read(type);
 		file->ReadString(dllName,256);

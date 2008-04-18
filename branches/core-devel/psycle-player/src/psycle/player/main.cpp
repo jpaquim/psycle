@@ -141,9 +141,9 @@ int main(int argument_count, char * arguments[]) {
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
 	
+	CoreSong song;
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
-		CoreSong song;
 		if(!song.load(input_file_name)) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << "\n";
 			return 2;
