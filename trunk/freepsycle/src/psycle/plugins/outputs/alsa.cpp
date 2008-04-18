@@ -11,7 +11,6 @@
 #include <poll.h>
 #include <alloca.h> // beware: this is not in posix, but this is available on *bsd and linux.
 #include <cstdio>
-#include <thread>
 namespace psycle { namespace plugins { namespace outputs {
 
 	using engine::exceptions::runtime_error;
