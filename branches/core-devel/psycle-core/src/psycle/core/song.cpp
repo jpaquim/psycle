@@ -20,14 +20,16 @@
 #include <psycle/core/psycleCorePch.hpp>
 #include "song.h"
 #include "datacompression.h"
-#include "file.h"
 #include "fileio.h"
 #include "machine.h"
+#include "machinefactory.h"
 #include "riff.h"
 #include <sstream>
 #include <iostream> // only for debug output
 
 namespace psy { namespace core {
+
+SongSerializer CoreSong::serializer;
 
 CoreSong::CoreSong()
 {
@@ -67,29 +69,22 @@ void CoreSong::clear() {
 	DeleteInstruments();
 	// Clear patterns
 	patternSequence()->removeAll();
-	// Cleaning pattern allocation info
-	for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
-	for(int i(0) ; i < MAX_MACHINES ; ++i)
-	{
-		if (machine_[i]) delete machine_[i];
-		machine_[i] = 0;
-	}
 
 	_saved=false;
 	fileName = "Untitled.psy";
-	addMachine(factory.CreateMachine(MachineKey::master(),MASTER_INDEX));
+	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX));
 }
 
 bool CoreSong::load(std::string filename)
 {
 	DeleteAllMachines();
 	FreeInstrumentsMemory();
-	serializer.loadSong(filename,*this,factory);
+	serializer.loadSong(filename,*this);
 }
 
-bool CoreSong::save(std::string filename, int version=4)
+bool CoreSong::save(std::string filename, int version)
 {
-	serializer.saveSong(filename,version);
+	serializer.saveSong(filename,*this,version);
 }
 
 
@@ -104,7 +99,13 @@ bool CoreSong::AddMachine(Machine* pmac) {
 	}
 	machine(pmac->id(),pmac);
 }
-
+bool CoreSong::ReplaceMachine(Machine* pmac, Machine::id_type idx)
+{
+	if (machine(idx)) {
+		DeleteMachine(machine(idx));
+	}
+	machine(idx,pmac);
+}
 void CoreSong::DeleteAllMachines(bool write_locked) {
 	_machineLock = true;
 	for(Machine::id_type c(0); c < MAX_MACHINES; ++c)
@@ -163,7 +164,7 @@ Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac) {
 bool CoreSong::ValidateMixerSendCandidate(Machine& mac,bool rewiring)
 {
 	// Basically, we dissallow a send comming from a generator as well as multiple-outs for sends.
-	if ( mac.mode() == MACHMODE_GENERATOR) return false;
+	if ( !mac.acceptsConnections()) return false;
 	if ( mac._connectedOutputs > 1 || (mac._connectedOutputs > 0 && !rewiring) ) return false;
 	for (int i(0); i<MAX_CONNECTIONS; ++i)
 	{
@@ -181,7 +182,7 @@ bool CoreSong::ValidateMixerSendCandidate(Machine& mac,bool rewiring)
 Wire::id_type CoreSong::InsertConnection(Machine &srcMac, Machine &dstMac, InPort::id_type srctype, OutPort::id_type dsttype,float volume) {
 	//CSingleLock lock(&door,TRUE);
 	// Verify that the destination is not a generator
-	if(dstMac.mode() == MACHMODE_GENERATOR) return -1;
+	if(!dstMac.acceptsConnections()) return -1;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if (srcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(srcMac.id()) > -1) return -1;
 	// disallow mixer as a sender of another mixer
@@ -200,7 +201,7 @@ bool CoreSong::ChangeWireDestMac(Machine& srcMac, Machine &newDstMac, OutPort::i
 {
 	//CSingleLock lock(&door,TRUE);
 	// Verify that the destination is not a generator
-	if(newDstMac.mode() == MACHMODE_GENERATOR) return false;
+	if(!newDstMac.acceptsConnections()) return false;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if (srcMac.FindOutputWire(newDstMac.id()) > -1 || newDstMac.FindOutputWire(srcMac.id()) > -1) return false;
 	if ( srcMac.getMachineKey() == MachineKey::mixer() && newDstMac.getMachineKey() == MachineKey::mixer() && wiretochange >=MAX_CONNECTIONS) return false;
@@ -218,7 +219,7 @@ bool CoreSong::ChangeWireSourceMac(Machine& newSrcMac, Machine &dstMac, InPort::
 {
 	//CSingleLock lock(&door,TRUE);
 	// Verify that the destination is not a generator
-	if(dstMac.mode() == MACHMODE_GENERATOR) return false;
+	if(!dstMac.acceptsConnections()) return false;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if (newSrcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(newSrcMac.id()) > -1) return false;
 	// disallow mixer as a sender of another mixer
@@ -642,7 +643,7 @@ void CoreSong::/*Reset*/DeleteInstruments() {
 	Invalided=false;
 }
 
-void CoreSong::/*Delete*/FreeInstrumentMemory() {
+void CoreSong::/*Delete*/FreeInstrumentsMemory() {
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 		delete _pInstrument[id];
 		_pInstrument[id] = 0;

@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -28,12 +29,12 @@ namespace psy { namespace core {
 /**
 @author  Psycledelics  
 */
-class Pattern;
+class SinglePattern;
 
 /**
 @author  Psycledelics  
 */
-class PatternCategory : public std::vector<Pattern*> {
+class PatternCategory : public std::vector<SinglePattern*> {
 	public:
 		PatternCategory();
 		PatternCategory(const std::string & name);
@@ -42,14 +43,14 @@ class PatternCategory : public std::vector<Pattern*> {
 		void setName(const std::string & name);
 		const std::string & name() const;
 
-		Pattern* createNewPattern(const std::string & name);
-		Pattern* clonePattern( const Pattern & src, const std::string & name);
-		bool removePattern(Pattern* pattern);
+		SinglePattern* createNewPattern(const std::string & name);
+											SinglePattern* clonePattern( const SinglePattern & src, const std::string & name);
+		bool removePattern(SinglePattern* pattern);
 
 		void setColor(long color);
 		long color() const;
 
-		Pattern* findById(int id);
+		SinglePattern* findById(int id);
 
 		void setID(int id);
 		int id() const;
@@ -76,11 +77,11 @@ class PatternPool : public std::vector<PatternCategory*> {
 		~PatternPool();
 
 		PatternCategory* createNewCategory(const std::string & name);
-		void removeSinglePattern(Pattern* pattern);
+		void removeSinglePattern(SinglePattern* pattern);
 		void removeAll();
 		void resetToDefault();
 
-		Pattern* findById(int id);
+		SinglePattern* findById(int id);
 
 		std::string toXml() const;
 

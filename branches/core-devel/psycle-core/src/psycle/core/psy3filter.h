@@ -27,7 +27,6 @@
 namespace psy { namespace core {
 
 class RiffFile;
-class MachineCallbacks;
 class PatternCategory;
 class SequenceLine;
 class PatternEvent;
@@ -78,9 +77,9 @@ class Psy3Filter : public PsyFilterBase
 		Psy3Filter( Psy3Filter const & );
 		Psy3Filter& operator=(Psy3Filter const&);
 	public:
-		static Psy3Filter* Instance() {
+		static Psy3Filter* getInstance() {
 			// don`t use multithreaded
-			static Psy4Filter s;
+			static Psy3Filter s;
 			return &s; 
 		}
 		///\}
@@ -89,17 +88,17 @@ class Psy3Filter : public PsyFilterBase
 		/*override*/ int version() const { return 3; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(const std::string & fileName, CoreSong& song, MachineFactory& factory);
+		/*override*/ bool load(const std::string & fileName, CoreSong& song);
 		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong& /*song*/) {  /* so saving for legacy file format */ return false; }
 
 
 	protected:
 		virtual int LoadSONGv0(RiffFile* file,CoreSong& song);
 		virtual bool LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
+		virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, MachineFactory& factory);
+		virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
 
 	protected:

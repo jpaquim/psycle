@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -30,81 +31,30 @@ namespace psy { namespace core {
 /**
 @author  Psycledelics  
 */
-/*!
-* \brief
-* Pattern Line storage information class.
-* 
-* A PatternLine stores all the events (notes and tweaks) that happen at a specific time (line) inside a pattern.
-* 
-* \remarks
-* noteMap and tweakMap store the actual data (noteMap holds events, and tweakMap holds the value of the tweak).
-* the key is used to indicate the track at which is located (for tweakMap, it corresponds to the Pattern::tweakInfoMap index.)
-* 
-* \see
-* Pattern.h
-*/
 class PatternLine {
 	public:
-		
-		typedef std::uint8_t track_t;
+		PatternLine() : sequencerTrack_(0) {}
 
-		typedef std::map<track_t, NoteEvent>::iterator noteiterator;
-		typedef std::map<track_t, NoteEvent>::const_iterator notec_iterator;
-		typedef std::map<track_t, TweakEvent>::iterator tweakiterator;
-		typedef std::map<track_t, TweakEvent>::const_iterator tweakc_iterator;
+		void setSequenceTrack(int track) { sequencerTrack_ = track; }
+		int sequenceTrack() const { return sequencerTrack_; }
 
-		PatternLine() {;}
-
-		///\todo: These functions are not fully usable as they are. This is an area of study right now
-/*		///{
-		inline iterator upper_bound(const double& _Keyval) { return noteMap.upper_bound(_Keyval); }
-		inline const_iterator upper_bound(const double& _Keyval) const { return noteMap.upper_bound(_Keyval); }
-		inline iterator lower_bound(const double& _Keyval) { return noteMap.lower_bound(_Keyval); }
-		inline const_iterator lower_bound(const double& _Keyval) const{ return noteMap.lower_bound(_Keyval); }
-		inline iterator begin() { noteMap.begin(); }
-		inline const_iterator begin() const { noteMap.begin(); }
-		inline iterator end() { noteMap.end(); }
-		inline const_iterator end() const { noteMap.end(); }
-		inline reverse_iterator rbegin() { noteMap.rbegin(); }
-		inline const_reverse_iterator rbegin() const { noteMap.rbegin(); }
-		inline reverse_iterator rend() { noteMap.rend(); }
-		inline const_reverse_iterator rend() const { noteMap.rend(); }
-		///}
-*/
-		void setNoteEvent(track_t,NoteEvent& pevent);
-		void replaceNoteEvent(track_t,NoteEvent& pevent);
-		void remNoteEvent(track_t);
-		inline NoteEvent & noteEvent(track_t index);
-		inline const NoteEvent & noteEvent(track_t index) const;
-		///\todo: verify the necessity of this function as a public one
-		inline bool isnotesempty() { return noteMap.empty(); }
-//		inline std::uint8_t noteEvents() { return noteMap.count(); }
-
-		void setTweak(track_t, TweakEvent& pevent);
-		void replacetweak(track_t,TweakEvent& pevent);
-		void remTweak(track_t);
-		inline TweakEvent & tweak(track_t index);
-		inline const TweakEvent & tweak(track_t index) const;
-		///\todo: verify the necessity of this function as a public one
-		inline bool istweaksempty() { return tweakMap.empty(); }
-//		inline std::size_t tweaks() { return tweakMap.count(); } const;
-
-		/**
-		* checks if the structure is in an empty state
-		* @return a boolean with the empty state value.
-		*/
-		inline bool empty() const { return noteMap.empty() && tweakMap.empty(); }
-
-		/**
-		* generates an xml output of the data, in order to save it.
-		* @return an std::string containing the xml output.
-		*/
 		std::string toXml( float pos ) const;
+
+		std::map<int, PatternEvent> & notes() { return noteMap; }
+		const std::map<int, PatternEvent> & notes() const { return noteMap; }
+
+		std::map<int, PatternEvent> & tweaks() { return tweakMap; }
+		const std::map<int, PatternEvent> & tweaks() const { return tweakMap; }
+
+		///\todo why is this virtual?
+		virtual bool empty() const { return noteMap.empty() && tweakMap.empty(); }
 
 	private:
 
-		std::map<track_t, NoteEvent> noteMap;///< Map with the notes in this line. The index corresponds to the track.
-		std::map<track_t, TweakEvent> tweakMap;///< Map with the tweaks in this line. The index corresponds to the Pattern::tweakInfoMap index.
+		int sequencerTrack_;
+
+		std::map<int, PatternEvent> noteMap;
+		std::map<int, PatternEvent> tweakMap;
 };
 
 }}

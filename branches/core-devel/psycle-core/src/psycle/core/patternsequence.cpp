@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -80,7 +81,7 @@ GlobalEvent::GlobalType GlobalEvent::type( ) const
 
 /**************************************************************************/
 // SequenceEntry
-// pattern Entry contains one ptr to a Pattern and the tickPosition for the absolute Sequencer pos
+// pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
 
 SequenceEntry::SequenceEntry( )
 {
@@ -107,19 +108,19 @@ SequenceEntry::~ SequenceEntry( )
 wasDeleted(this);
 }
 
-void SequenceEntry::setPattern( Pattern * pattern )
+void SequenceEntry::setPattern( SinglePattern * pattern )
 {
 	pattern_ = pattern;
 	startPos_ = 0;
 	endPos_   = pattern->beats();
 }
 
-Pattern * SequenceEntry::pattern( )
+SinglePattern * SequenceEntry::pattern( )
 {
 	return pattern_;
 }
 
-Pattern * SequenceEntry::pattern( ) const
+SinglePattern * SequenceEntry::pattern( ) const
 {
 	return pattern_;
 }
@@ -216,7 +217,7 @@ SequenceLine::~ SequenceLine( )
 wasDeleted(this);
 }
 
-SequenceEntry* SequenceLine::createEntry( Pattern * pattern, double position )
+SequenceEntry* SequenceLine::createEntry( SinglePattern * pattern, double position )
 {
 	SequenceEntry* entry = new SequenceEntry(this);
 	entry->setPattern(pattern);
@@ -241,7 +242,7 @@ void SequenceLine::moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLi
 	erase( it ); // Removes entry from this SequenceLine, but doesn't delete it.
 }
 
-void SequenceLine::removeSinglePatternEntries( Pattern* pattern )
+void SequenceLine::removeSinglePatternEntries( SinglePattern* pattern )
 {
 	iterator it = begin();
 	while ( it != end() ) {
@@ -364,13 +365,13 @@ void PatternSequence::removeLine( SequenceLine * line )
 	}
 }
 
-PatternPool* PatternSequence::getPatternPool() {
-	return &patternData_;
+PatternPool* PatternSequence::patternPool() {
+	return &patternPool_;
 }
 
-const PatternPool & PatternSequence::getPatternPool( ) const
+const PatternPool & PatternSequence::patternPool( ) const
 {
-	return patternData_;
+	return patternPool_;
 }
 
 /// returns the PatternLines that are active in the range [start, start+length).
@@ -379,8 +380,6 @@ const PatternPool & PatternSequence::getPatternPool( ) const
 ///\return events : A multimap of lines (multimap of beatposition and PatternLine )
 void PatternSequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
 {
-///FIXME: Adapt this to the new pattern Event style.
-#if 0
 	int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
 	// Iterate over each timeline of the sequence,
 	for( iterator seqIt = begin(); seqIt != end(); ++seqIt )
@@ -394,14 +393,14 @@ void PatternSequence::GetLinesInRange( double start, double length, std::multima
 		for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt )
 		{
 			// take the pattern,
-			Pattern* pPat = sLineIt->second->pattern();
+			SinglePattern* pPat = sLineIt->second->pattern();
 			double entryStart = sLineIt->first;
 			float entryStartOffset  = sLineIt->second->startPos();
 			float entryEndOffset  = sLineIt->second->endPos();
 			float entryLength = entryEndOffset - entryStartOffset;
 			double relativeStart = start - entryStart + entryStartOffset;
 			
-			Pattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
+			SinglePattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
 			patEnd = pPat->lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
 
 			// and iterate through the lines that are inside the range
@@ -422,15 +421,14 @@ void PatternSequence::GetLinesInRange( double start, double length, std::multima
 				// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
 				tmpline.setSequenceTrack(seqlineidx);
 				tmpline.tweaks()=thisline->tweaks();
-				events.insert( Pattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
+				events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 				}
 		}
 		seqlineidx++;
 	}
-#endif 	
 }
 
-bool PatternSequence::getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const {
+bool PatternSequence::getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const {
 	entryStart = 0;
 	PatternLine* searchLine = 0;
 
@@ -447,7 +445,7 @@ bool PatternSequence::getPlayInfo( Pattern* pattern, double start, double length
 		{
 			// take the pattern,
 
-			Pattern* pPat = sLineIt->second->pattern();
+			SinglePattern* pPat = sLineIt->second->pattern();
 
 			if ( pPat == pattern ) {
 				entryStart = sLineIt->first;
@@ -522,12 +520,12 @@ const PatternSequence::GlobalMap & PatternSequence::globalEvents( )
 	return globalEvents_;
 }
 
-void PatternSequence::removeSinglePattern( Pattern * pattern )
+void PatternSequence::removeSinglePattern( SinglePattern * pattern )
 {
 	for(iterator it = begin(); it != end(); ++it) {
 		(*it)->removeSinglePatternEntries(pattern);
 	}
-	patternData_.removeSinglePattern(pattern);
+	patternPool_.removeSinglePattern(pattern);
 }
 
 void PatternSequence::removeAll( )
@@ -537,7 +535,7 @@ void PatternSequence::removeAll( )
 		delete *it;
 	}
 	clear();
-	patternData_.removeAll();
+	patternPool_.removeAll();
 }
 
 double PatternSequence::tickLength( ) const

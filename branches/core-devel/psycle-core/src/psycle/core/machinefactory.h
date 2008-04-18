@@ -36,12 +36,22 @@ class MachineHost;
 // Here it's been choosen to use MachineKeys instead.
 class MachineFactory
 {
+private:
+	MachineFactory(){}
 public:
-	MachineFactory(MachineCallbacks* callbacks);
-	MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder);
+	// To create a MachineFactory do a getInstance().Initialize() with either
+	// of the Initialize Functions.
+	// If you use the one wihout PluginFinder, one will be created automatically.
+	void Initialize(MachineCallbacks* callbacks);
+	void Initialize(MachineCallbacks* callbacks, PluginFinder* finder);
+	static MachineFactory& getInstance() {
+		static MachineFactory factory;
+		return factory;
+	}
+
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
 	Machine* CloneMachine(Machine& mac);
-
+	
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }
 	MachineCallbacks* getCallbacks() const { return callbacks_; }
 

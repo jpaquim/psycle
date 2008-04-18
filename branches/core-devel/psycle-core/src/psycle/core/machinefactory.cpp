@@ -28,16 +28,16 @@
 #include "ladspahost.hpp"
 namespace psy{ namespace core {
 
-MachineFactory::MachineFactory(MachineCallbacks* callbacks)
-:callbacks_(callbacks)
+void MachineFactory::Initialize(MachineCallbacks* callbacks)
 {
+	callbacks_ = callbacks;
 	finder_= &PluginFinder::getInstance();
 	FillHosts();
 }
-MachineFactory::MachineFactory(MachineCallbacks* callbacks,PluginFinder* finder)
-:callbacks_(callbacks)
-,finder_(finder)
+void MachineFactory::Initialize(MachineCallbacks* callbacks,PluginFinder* finder)
 {
+	callbacks_ = callbacks;
+	finder_ = finder;
 	FillHosts();
 }
 void MachineFactory::FillHosts()

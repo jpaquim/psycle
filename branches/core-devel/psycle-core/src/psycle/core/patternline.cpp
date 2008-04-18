@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -22,90 +23,16 @@
 
 namespace psy { namespace core {
 
-void PatternLine::setNoteEvent(track_t index,NoteEvent& pevent)
-{
-	noteiterator it = noteMap.find(index);
-	if ( it == noteMap.end() ) 
-	{
-		noteMap[index]=pevent;
-	}
-	else
-	{
-		it->second = pevent;
-	}
-}
-void PatternLine::remNoteEvent(track_t index)
-{
-	noteiterator it = noteMap.find(index);
-	if ( it != noteMap.end() ) 
-	{
-		noteMap.erase(it);
-	}
-}
-NoteEvent & PatternLine::noteEvent(track_t index)
-{
-	noteiterator it = noteMap.find(index);
-	if ( it == noteMap.end() ) return emptyevent;
-	else return it->second;
-}
-const NoteEvent & PatternLine::noteEvent(track_t index) const
-{
-	notec_iterator it = noteMap.find(index);
-	if ( it == noteMap.end() ) return emptyevent;
-	else return it->second;
-}
-
-void PatternLine::setTweak(track_t index,TweakEvent& pevent)
-{
-	tweakiterator it = tweakMap.find(index);
-	if ( it == tweakMap.end() ) 
-	{
-		tweakMap[index]=pevent;
-	}
-	else
-	{
-		it->second = pevent;
-	}
-
-}
-void PatternLine::remTweak(track_t index)
-{
-	tweakiterator it = tweakMap.find(index);
-	if ( it != tweakMap.end() ) 
-	{
-		tweakMap.erase(it);
-	}
-}
-TweakEvent & PatternLine::tweak(track_t index)
-{
-	tweakiterator it = tweakMap.find(index);
-	if ( it == tweakMap.end() ) return emptytweak;
-	else return it->second;
-}
-const TweakEvent & PatternLine::tweak(track_t index) const
-{
-	tweakc_iterator it = tweakMap.find(index);
-	if ( it == tweakMap.end() ) return emptytweak;
-	else return it->second;
-}
-
-
 std::string PatternLine::toXml( float pos ) const
 {
 	std::ostringstream xml;
 	xml << "<patline pos='" << pos << "'>" << std::endl;
-	for ( notec_iterator it = noteMap.begin() ; it != noteMap.end() ; it++ ) {
+	for ( std::map<int, PatternEvent>::const_iterator it = noteMap.begin() ; it != noteMap.end() ; it++ ) {
 		int trackNumber = it->first;
-		const NoteEvent & event = it->second;
-		xml << event.toXml( trackNumber );
-	}
-	for ( tweakc_iterator it = tweakMap.begin() ; it != tweakMap.end() ; it++ ) {
-		int trackNumber = it->first;
-		const TweakEvent & event = it->second;
+		const PatternEvent & event = it->second;
 		xml << event.toXml( trackNumber );
 	}
 	xml << "</patline>" << std::endl;
-	///\todo: save tweaks.
 	return xml.str();
 }
 

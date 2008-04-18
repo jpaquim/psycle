@@ -20,6 +20,7 @@
 ***************************************************************************/
 //#include <psycle/core/psycleCorePch.hpp>
 #include "songserializer.h"
+#include "file.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
@@ -41,18 +42,18 @@ namespace psy
 			}
 		}
 		
-		bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song,MachineFactory& factory)
+		bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song)
 		{
 			if ( File::fileIsReadable( fileName ) ) {
 				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 					PsyFilterBase* filter = *it;
 					if ( filter->testFormat(fileName) ) {
-						return filter->load(fileName,song,factory);
+						return filter->load(fileName,song);
 						break;
 					}
 				}
 			}
-			std::cerr << "SongSerializer::loadSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
+			std::cerr << "SongSerializer::loadSong(): Couldn't find appropriate filter for file: " << fileName << std::endl;
 			return false;
 		}
 		bool SongSerializer::saveSong( const std::string & fileName, const CoreSong& song, int version )

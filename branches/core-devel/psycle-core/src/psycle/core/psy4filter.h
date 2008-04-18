@@ -25,8 +25,6 @@
 
 namespace psy { namespace core {
 
-class CoreSong;
-
 /**
 @author  Stefan Nattkemper
 */
@@ -40,7 +38,7 @@ class Psy4Filter : public Psy3Filter
 			Psy4Filter( Psy4Filter const & );
 			Psy4Filter& operator=(Psy4Filter const&);
 		public:
-			static Psy4Filter* Instance() {
+			static Psy4Filter* getInstance() {
 				// don`t use multithreaded
 				static Psy4Filter s;
 				return &s; 
@@ -51,7 +49,7 @@ class Psy4Filter : public Psy3Filter
 		/*override*/ int version() const { return 4; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(const std::string & fileName, CoreSong & song, MachineFactory& factory);
+		/*override*/ bool load(const std::string & fileName, CoreSong & song);
 		/*override*/ bool save( const std::string & fileName, const CoreSong & song );
 
 	protected:

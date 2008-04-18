@@ -417,7 +417,7 @@ namespace psy
 			id_type id() const throw() { return id_; }
 		private:
 			id_type id_;
-			void id(id_type id) { id_ = id; } friend class CoreSong;
+			void id(id_type id) { id_ = id; } friend class CoreSong; friend class Psy2Filter;
 		///\}
 		public:
 		

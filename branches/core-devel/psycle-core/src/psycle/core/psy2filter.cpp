@@ -30,8 +30,6 @@
 #include "sampler.h"
 #include "plugin.h"
 
-
-
 #include <sstream>
 #include <iostream>
 
@@ -75,7 +73,7 @@ void Psy2Filter::preparePatternSequence( CoreSong & song )
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-bool Psy2Filter::load(const std::string & fileName, CoreSong & song, MachineFactory& factory)
+bool Psy2Filter::load(const std::string & fileName, CoreSong & song)
 {
 	std::int32_t num;
 	RiffFile file;
@@ -103,7 +101,7 @@ bool Psy2Filter::load(const std::string & fileName, CoreSong & song, MachineFact
 	LoadWAVD(&file,song);
 	PreLoadVSTs(&file,song);
 	convert_internal_machines::Converter converter;
-	LoadMACD(&file,song,converter,factory);
+	LoadMACD(&file,song,converter);
 	TidyUp(&file,song,converter);
 	return true;
 }
@@ -412,8 +410,9 @@ bool Psy2Filter::PreLoadVSTs(RiffFile* file,CoreSong& /*song*/)
 	return true;
 }
 
-bool Psy2Filter::LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter, MachineFactory& factory)
+bool Psy2Filter::LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter)
 {
+	MachineFactory& factory = MachineFactory::getInstance();
 	std::int32_t i;
 	file->ReadArray(_machineActive,128);
 	std::memset(pMac,0,sizeof pMac);
@@ -744,8 +743,9 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	{
 		if (invmach[i] != 255)
 		{
-			song.machine(invmach[i], pMac[i]);
-			Machine *cMac = song.machine(invmach[i]);
+			pMac[i]->id(invmach[i]);
+			song.AddMachine(pMac[i]);
+			Machine *cMac = pMac[i];
 			_machineActive[i] = false; // mark as "converted"
 			cMac->_connectedInputs = 0;
 			cMac->_connectedOutputs = 0;
@@ -798,15 +798,16 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	{
 		if (_machineActive[i])
 		{
-			if ( pMac[i]->mode() == MACHMODE_GENERATOR)
-			{
-				while (song.machine(j) && j<64) j++;
-				song.machine(j,pMac[i]);
-			}
-			else
+			// Effect
+			if ( pMac[i]->acceptsConnections())
 			{
 				while (song.machine(k) && k<128) k++;
-				song.machine(k,pMac[i]);
+				pMac[i]->id(k);
+				song.AddMachine(pMac[i]);
+			} else {
+				while (song.machine(j) && j<64) j++;
+				pMac[i]->id(j);
+				song.AddMachine(pMac[i]);
 			}
 		}
 	}

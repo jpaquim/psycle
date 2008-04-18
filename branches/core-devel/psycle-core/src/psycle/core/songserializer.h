@@ -36,7 +36,7 @@ class SongSerializer
 		SongSerializer();
 		~SongSerializer();
 
-		bool loadSong(const std::string & fileName, CoreSong& song,MachineFactory& factory);
+		bool loadSong(const std::string & fileName, CoreSong& song);
 		bool saveSong(const std::string & fileName, const CoreSong& song, int version);
 
 	private:

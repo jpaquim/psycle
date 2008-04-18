@@ -25,7 +25,7 @@ namespace psy
 		class CoreSong
 		{
 		public:
-			CoreSong(MachineFactory&); 
+			CoreSong(); 
 			virtual ~CoreSong();
 			/// clears all song data
 			virtual void clear();
@@ -135,6 +135,7 @@ namespace psy
 		private:
 			void machine(Machine::id_type id, Machine * machine)
 			{
+				assert(id >= 0 && id < MAX_MACHINES);
 				machine_[id] = machine;
 				machine->id(id);
 			} 
@@ -174,9 +175,12 @@ namespace psy
 			///\name actions with machines
 			///\{
 		public:
-			/// add a new machine. The index comes from pmac. 
-			///\todo: set a value which indicates "get a free one"
+			/// add a new machine. The index comes from pmac.
+			//  if machine id is -1, a free index is taken.
 			virtual bool AddMachine(Machine* pmac);
+			/// (add or) replace the machine in index idx.
+			// idx cannot be -1.
+			virtual bool ReplaceMachine(Machine* pmac, Machine::id_type idx);
 			/// destroy a machine of this song.
 			virtual void DeleteMachine(Machine* machine, bool write_locked = false);
 			/// destroy a machine of this song.
@@ -217,7 +221,6 @@ namespace psy
 		protected:
 			bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
 
-			void RestoreMixerSendFlags();
 			///\}
 
 			///\name actions with instruments
@@ -239,7 +242,7 @@ namespace psy
 			void /*Reset*/DeleteInstruments();
 		protected:
 			/// deletes all instruments in this song.
-			void /*Delete*/DestroyAllInstruments();
+			void /*Delete*/FreeInstrumentsMemory();
 			/// removes the sample/layer of the instrument
 			void DeleteLayer(Instrument::id_type id);
 			///\}

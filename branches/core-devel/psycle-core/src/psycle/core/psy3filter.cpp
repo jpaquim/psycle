@@ -81,12 +81,12 @@ void Psy3Filter::preparePatternSequence( CoreSong & song )
 	seqList.clear();
 	song.patternSequence()->removeAll();
 	// creatse a single Pattern Category
-	singleCat = song.patternSequence()-> PatternPool()->createNewCategory("Pattern");
+	singleCat = song.patternSequence()-> patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFactory& factory)
+bool Psy3Filter::load(const std::string & fileName, CoreSong & song)
 {
 	RiffFile file;
 	file.Open(fileName);
@@ -135,7 +135,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFact
 			//song.progress.emit(2,0,"Loading... Song properties information...");
 			if ((version&0xFF00) == 0x0000) // chunkformat v0
 			{
-				LoadSNGIv0(&file,song,version&0x00FF,factory.getCallbacks());
+				LoadSNGIv0(&file,song,version&0x00FF);
 				//\ Fix for a bug existing in the Song Saver in the 1.7.x series
 				if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool); 
 			}
@@ -166,7 +166,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFact
 			//song.progress.emit(2,0,"Loading... Song machines...");
 			if ((version&0xFF00) == 0x0000) // chunkformat v0
 			{
-				LoadMACDv0(&file,song,version&0x00FF,factory);
+				LoadMACDv0(&file,song,version&0x00FF);
 			}
 			//else if ( (version&0xFF00) == 0x0100 ) //and so on
 		}
@@ -215,7 +215,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFact
 		#if 0
 		Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
 		#else
-		SinglePattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		SinglePattern* pat = song.patternSequence()->patternPool()->findById(*it);
 		#endif
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();
@@ -269,7 +269,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFact
 					else
 					{
 						mac->_connectedInputs++;
-						mac->_wireMultiplier=song.machine(mac->_inputMachines[c])->GetAudioRange()/mac->GetAudioRange();
+						mac->_wireMultiplier[c]=song.machine(mac->_inputMachines[c])->GetAudioRange()/mac->GetAudioRange();
 					}
 				}
 				else
@@ -279,13 +279,13 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song, MachineFact
 			}
 		}
 	}
-	song.RestoreMixerSendFlags();
+	RestoreMixerSendFlags(song);
 	//song.progress.emit(5,0,"");
 	if(chunkcount)
 	{
 		if (!song.machine(MASTER_INDEX) )
 		{
-			Machine* mac = factory.CreateMachine(MachineKey::master(),MASTER_INDEX);
+			Machine* mac = MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
 			mac->Init();
 			song.AddMachine(mac);
 		}
@@ -342,8 +342,9 @@ bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 		return result;
 }
 
-bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/, MachineCallbacks* callbacks)
+bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 {
+	MachineCallbacks* callbacks = MachineFactory::getInstance().getCallbacks();
 	std::int32_t temp(0);
 	std::int16_t temp16(0);
 	bool fileread = false;
@@ -519,8 +520,9 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 	return fileread;
 }
 
-bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, MachineFactory& factory)
+bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 {
+	MachineFactory& factory = MachineFactory::getInstance();
 	std::int32_t index = 0;
 
 	file->Read(index);
@@ -579,7 +581,7 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion, Mach
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 		}
-		song.machine(index).LoadFileChunk(file);
+		song.machine(index)->LoadFileChunk(file);
 	}
 	return song.machine(index) != 0;
 }

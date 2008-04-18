@@ -26,7 +26,6 @@
 namespace psy { namespace core {
 
 class CoreSong;
-class MachineFactory;
 
 /**
 @author  Psycledelics  
@@ -43,7 +42,7 @@ class PsyFilterBase
 		virtual int version() const = 0;
 		virtual std::string filePostfix() const = 0;
 		virtual bool testFormat(const std::string & fileName) = 0;
-		virtual bool load(const std::string & fileName, CoreSong& song, MachineFactory& factory) = 0;
+		virtual bool load(const std::string & fileName, CoreSong& song) = 0;
 		virtual bool save(const std::string & fileName, const CoreSong& song) = 0;
 };
 

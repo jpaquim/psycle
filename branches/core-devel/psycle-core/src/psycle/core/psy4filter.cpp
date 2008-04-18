@@ -102,14 +102,14 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	return root_element.get_name() == "psy4";
 }
 
-bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song, MachineFactory& factory )
+bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
 	std::map<int, SinglePattern*> patMap;
 	patMap.clear();
 
-	song.patternSequence()->PatternPool()->removeAll();
+	song.patternSequence()->patternPool()->removeAll();
 	song.patternSequence()->removeAll();
 	song.clear();
 	
@@ -177,7 +177,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song, MachineF
 				(dynamic_cast<xmlpp::Element const &>(**i));
 			
 			try {
-				lastCategory = song.patternSequence()->patternData()->createNewCategory(get_attribute(category,"name").get_value());
+				lastCategory = song.patternSequence()->patternPool()->createNewCategory(get_attribute(category,"name").get_value());
 			}
 			catch(...) {
 				std::cerr << "expected name attribute in category element\n";
@@ -437,7 +437,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song, MachineF
 				//progress.emit(2,0,"Loading... Song machines...");
 				if ((version&0xFF00) == 0x0000) // chunkformat v0
 				{
-					LoadMACDv0(&file,song,version&0x00FF,factory);
+					LoadMACDv0(&file,song,version&0x00FF);
 				}
 				//else if ( (version&0xFF00) == 0x0100 ) //and so on
 			}
@@ -537,7 +537,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song, MachineF
 		{
 			if (!song.machine(MASTER_INDEX) )
 			{
-				factory.CreateMachine(MachineKey::master(),MASTER_INDEX);
+				MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
 			}
 			std::ostringstream s;
 			s << "Error reading from file '" << file.file_name() << "'" << std::endl;
@@ -577,7 +577,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
-	xml << song.patternSequence().patternData().toXml();
+	xml << song.patternSequence().patternPool().toXml();
 	xml << song.patternSequence().toXml();
 	xml << "</psy4>" << std::endl;
 

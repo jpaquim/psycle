@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /**************************************************************************
 *   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
@@ -16,10 +17,10 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <psycle/core/psycleCorePch.hpp>
+//#include <psycle/core/psycleCorePch.hpp>
 #include "patternpool.h"
-#include "pattern.h"
 #include "helpers/xml.h"
+#include "singlepattern.h"
 #include <sstream>
 
 namespace psy { namespace core {
@@ -43,34 +44,34 @@ PatternCategory::PatternCategory( const std::string & name )
 
 PatternCategory::~ PatternCategory( )
 {
-	for (std::vector<Pattern*>::iterator it = begin(); it < end(); it++) {
+	for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
 		delete *it;
 	}
 }
 
-Pattern* PatternCategory::createNewPattern( const std::string & name )
+SinglePattern* PatternCategory::createNewPattern( const std::string & name )
 {
-	Pattern* pattern = new Pattern();
+	SinglePattern* pattern = new SinglePattern();
 	pattern->setCategory(this);
 	pattern->setName(name);
 	push_back(pattern);
 	return pattern;
 }
 						
-Pattern* PatternCategory::clonePattern( const Pattern & src, const std::string & name)
+SinglePattern* PatternCategory::clonePattern( const SinglePattern & src, const std::string & name)
 {
-	Pattern* pattern = new Pattern( src);
+	SinglePattern* pattern = new SinglePattern( src);
 	pattern->setCategory(this);
 	pattern->setName(name);
 	push_back(pattern);
 	return pattern;
 }
 
-bool PatternCategory::removePattern( Pattern * pattern )
+bool PatternCategory::removePattern( SinglePattern * pattern )
 {
 	iterator it = find(begin(), end(), pattern);
 	if ( it != end() ) {
-		Pattern* pattern = *it;
+		SinglePattern* pattern = *it;
 		erase(it);
 		delete(pattern);
 		return true;
@@ -98,10 +99,10 @@ long PatternCategory::color( ) const
 	return color_;
 }
 
-Pattern * psy::core::PatternCategory::findById( int id )
+SinglePattern * psy::core::PatternCategory::findById( int id )
 {
-	for (std::vector<Pattern*>::iterator it = begin(); it < end(); it++) {
-		Pattern* pat = *it;
+	for (std::vector<SinglePattern*>::iterator it = begin(); it < end(); it++) {
+		SinglePattern* pat = *it;
 		if (pat->id() == id) return pat;
 	}
 	return 0;
@@ -123,7 +124,7 @@ std::string PatternCategory::toXml( ) const
 	std::ostringstream xml;
 	xml << "<category name='" << replaceIllegalXmlChr( name() ) << "' color='" << color_ << "' >" << std::endl;
 	for ( const_iterator it = begin(); it < end(); it++) {
-		Pattern* pattern = *it;
+		SinglePattern* pattern = *it;
 		xml << pattern->toXml();
 	}
 	xml << "</category>" << std::endl;
@@ -154,7 +155,7 @@ PatternCategory * PatternPool::createNewCategory( const std::string & name )
 	return category;
 }
 
-void PatternPool::removeSinglePattern( Pattern * pattern )
+void PatternPool::removeSinglePattern( SinglePattern * pattern )
 {
 	iterator it = begin();
 	for ( ; it < end(); it++) {
@@ -179,12 +180,12 @@ void PatternPool::resetToDefault()
 
 }
 
-Pattern * PatternPool::findById( int id )
+SinglePattern * PatternPool::findById( int id )
 {
 	iterator it = begin();
 	for ( ; it < end(); it++) {
 		PatternCategory* cat = *it;
-		Pattern* pat = cat->findById(id);
+		SinglePattern* pat = cat->findById(id);
 		if (pat) return pat;
 	}
 	return 0;
@@ -193,12 +194,12 @@ Pattern * PatternPool::findById( int id )
 std::string PatternPool::toXml( ) const
 {
 	std::ostringstream xml;
-	xml << "<PatternPool>" << std::endl;
+	xml << "<patterndata>" << std::endl;
 	for ( const_iterator it = begin(); it < end(); it++) {
 		PatternCategory* category = *it;
 		xml << category->toXml();
 	}
-	xml << "</PatternPool>" << std::endl;
+	xml << "</patterndata>" << std::endl;
 	return xml.str();
 }
 

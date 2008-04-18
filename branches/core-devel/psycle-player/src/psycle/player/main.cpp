@@ -101,8 +101,9 @@ int main(int argument_count, char * arguments[]) {
 	
 	}
 	Player &player = *Player::Instance();
-	// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory constructor
-	MachineFactory mfactory(&player);
+	// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
+	MachineFactory& mfactory = MachineFactory::getInstance();
+	mfactory.Initialize(&player);
 	Configuration configuration;
 
 	if(!configuration.pluginPath().length())
@@ -142,7 +143,7 @@ int main(int argument_count, char * arguments[]) {
 	
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
-		CoreSong song(mfactory);
+		CoreSong song;
 		if(!song.load(input_file_name)) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << "\n";
 			return 2;

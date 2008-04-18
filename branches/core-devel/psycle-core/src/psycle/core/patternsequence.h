@@ -1,3 +1,4 @@
+// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************************************
 	*   Copyright (C) 2007 Psycledelics     *
 	*   psycle.sf.net   *
@@ -21,7 +22,7 @@
 #define PATTERNSEQUENCE_H
 
 #include "patternpool.h"
-#include "pattern.h"
+#include "singlepattern.h"
 
 /**
 @author  Psycledelics  
@@ -85,9 +86,9 @@ namespace psy
 			double tickPosition() const;
 			double tickEndPosition( ) const;
 
-			void setPattern(Pattern* pattern);
-			Pattern* pattern();
-			Pattern* pattern() const;
+			void setPattern(SinglePattern* pattern);
+			SinglePattern* pattern();
+			SinglePattern* pattern() const;
 
 			float patternBeats() const;
 
@@ -111,7 +112,7 @@ namespace psy
 			/// the sequence timeline that the sequenceEntry belongs to
 			SequenceLine* line_;
 			/// the wrapped pattern
-			Pattern* pattern_;
+			SinglePattern* pattern_;
 			/// here we can shrink the pattern of the entry
 			float startPos_;
 			/// endpos shrink (from begin of a pattern starting at 0)
@@ -135,10 +136,10 @@ namespace psy
 
 			boost::signal<void (SequenceLine*)> wasDeleted;
 
-			SequenceEntry* createEntry(Pattern* pattern, double position);
+			SequenceEntry* createEntry(SinglePattern* pattern, double position);
 			void insertEntry( SequenceEntry *entry );
 			void moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine );
-			void removeSinglePatternEntries(Pattern* pattern);
+			void removeSinglePatternEntries(SinglePattern* pattern);
 
 			double tickLength() const;
 
@@ -181,12 +182,12 @@ namespace psy
 
 			// playpos info
 
-			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
+			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
 
-			PatternPool* getPatternPool();
-			const PatternPool & getPatternPool() const;
+			PatternPool* patternPool();
+			const PatternPool & patternPool() const;
 
-			void removeSinglePattern(Pattern* pattern);
+			void removeSinglePattern(SinglePattern* pattern);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
@@ -230,7 +231,7 @@ namespace psy
 
 		private:
 
-			PatternPool patternData_;
+			PatternPool patternPool_;
 
 			int numTracks_;
 			std::vector<bool> mutedTrack_;
