@@ -78,17 +78,17 @@ void CoreSong::clear() {
 bool CoreSong::load(std::string filename)
 {
 	DeleteAllMachines();
-	FreeInstrumentsMemory();
-	serializer.loadSong(filename,*this);
+	DeleteInstruments();
+	return serializer.loadSong(filename,*this);
 }
 
 bool CoreSong::save(std::string filename, int version)
 {
-	serializer.saveSong(filename,*this,version);
+	return serializer.saveSong(filename,*this,version);
 }
 
 
-bool CoreSong::AddMachine(Machine* pmac) {
+void CoreSong::AddMachine(Machine* pmac) {
 	if(pmac->id() == -1)
 	{
 		if(pmac->acceptsConnections()) {
@@ -99,7 +99,7 @@ bool CoreSong::AddMachine(Machine* pmac) {
 	}
 	machine(pmac->id(),pmac);
 }
-bool CoreSong::ReplaceMachine(Machine* pmac, Machine::id_type idx)
+void CoreSong::ReplaceMachine(Machine* pmac, Machine::id_type idx)
 {
 	if (machine(idx)) {
 		DeleteMachine(machine(idx));

@@ -142,7 +142,7 @@ LADSPA_Descriptor_Function LadspaHost::LoadDescriptorFunction( void* libHandle_ 
 	#if defined __unix__ || defined __APPLE__
 		dlsym(  libHandle_, "ladspa_descriptor");
 	#else
-		GetProcAddress( static_cast<HINSTANCE>( hInstance ), "ladspa_descriptor");
+		GetProcAddress( static_cast<HINSTANCE>( libHandle_ ), "ladspa_descriptor");
 	#endif
 	return pfDescriptorFunction;
 }

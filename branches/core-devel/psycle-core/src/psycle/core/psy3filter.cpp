@@ -581,7 +581,8 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 		}
-		song.machine(index)->LoadFileChunk(file);
+		song.AddMachine(mac);
+		mac->LoadFileChunk(file);
 	}
 	return song.machine(index) != 0;
 }

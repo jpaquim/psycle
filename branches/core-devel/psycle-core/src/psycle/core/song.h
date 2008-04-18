@@ -177,10 +177,10 @@ namespace psy
 		public:
 			/// add a new machine. The index comes from pmac.
 			//  if machine id is -1, a free index is taken.
-			virtual bool AddMachine(Machine* pmac);
+			virtual void AddMachine(Machine* pmac);
 			/// (add or) replace the machine in index idx.
 			// idx cannot be -1.
-			virtual bool ReplaceMachine(Machine* pmac, Machine::id_type idx);
+			virtual void ReplaceMachine(Machine* pmac, Machine::id_type idx);
 			/// destroy a machine of this song.
 			virtual void DeleteMachine(Machine* machine, bool write_locked = false);
 			/// destroy a machine of this song.

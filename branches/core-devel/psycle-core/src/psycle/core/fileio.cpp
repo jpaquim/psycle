@@ -167,16 +167,16 @@ namespace psy
 		MemoryFile::MemoryFile() {}
 		MemoryFile::~MemoryFile(){}
 
-		bool MemoryFile::OpenMem(std::ptrdiff_t blocksize){}
-		bool MemoryFile::CloseMem(){}
-		std::size_t MemoryFile::FileSize(){}
-		std::size_t MemoryFile::GetPos(){}
-		int MemoryFile::Seek(std::ptrdiff_t const & bytes){}
-		int MemoryFile::Skip(std::ptrdiff_t const & bytes){}
-		bool MemoryFile::ReadString(char *, std::size_t const & max_length){}
-		bool MemoryFile::WriteChunk(void const *, std::size_t const &){}
-		bool MemoryFile::ReadChunk (void       *, std::size_t const &){}
-		bool MemoryFile::Expect    (void       *, std::size_t const &){}
+		bool MemoryFile::OpenMem(std::ptrdiff_t blocksize){return false;}
+		bool MemoryFile::CloseMem(){ return false;}
+		std::size_t MemoryFile::FileSize(){return 0;}
+		std::size_t MemoryFile::GetPos(){return 0;}
+		int MemoryFile::Seek(std::ptrdiff_t const & bytes){return 0;}
+		int MemoryFile::Skip(std::ptrdiff_t const & bytes){return 0;}
+		bool MemoryFile::ReadString(char *, std::size_t const & max_length){return false;}
+		bool MemoryFile::WriteChunk(void const *, std::size_t const &){return false;}
+		bool MemoryFile::ReadChunk (void       *, std::size_t const &){return false;}
+		bool MemoryFile::Expect    (void       *, std::size_t const &){return false;}
 
 		
 	}
