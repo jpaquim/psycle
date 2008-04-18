@@ -272,7 +272,7 @@ if gstreamer.result():
 	if not default_output_plugin_module: default_output_plugin_module = gstreamer_output_plugin_module
 
 dummy_output_plugin_module = output_plugin_uniform_module(
-	name = 'dummy,
+	name = 'dummy',
 	description = 'dummy, null, silent output plugin'
 )
 if not default_output_plugin_module: default_output_plugin_module = dummy_output_plugin_module
