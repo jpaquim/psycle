@@ -246,8 +246,10 @@ void scheduler::stop() {
 		else std::cout
 			<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
 			<< node.processing_count() << " = "
-			<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s"
-			", zeroes: " << node.processing_count() - node.processing_count_no_zeroes() << '\n';
+			<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s";
+			if(node.processing_count() > node.processing_count_no_zeroes())
+				std::cout << ", zeroes: " << node.processing_count() - node.processing_count_no_zeroes();
+			std::cout << '\n';
 			
 	}
 }
