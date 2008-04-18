@@ -139,7 +139,7 @@ class uniform_module(module):
 		else:
 			self.add_sources(find(self.project(), 'src', [os.path.join('psycle', self._path + '.cpp')]))
 			self.add_headers(find(self.project(), 'src', [os.path.join('psycle', self._path + '.hpp')]))
-		if not len(self.sources()): import sys; sys.exit(1)
+		if not len(self.sources()): self.project().abort('could not find sources for module ' + self.name())
 	
 	def pkg_config_package(self):
 		try: return self._pkg_config_package
@@ -270,6 +270,12 @@ if gstreamer.result():
 		dependencies = [gstreamer, stream_module.as_dependency()]
 	)
 	if not default_output_plugin_module: default_output_plugin_module = gstreamer_output_plugin_module
+
+dummy_output_plugin_module = output_plugin_uniform_module(
+	name = 'null',
+	description = 'null, silent, dummy output plugin'
+)
+if not default_output_plugin_module: default_output_plugin_module = dummy_output_plugin_module
 
 if default_output_plugin_module:
 	defines = {'PSYCLE__PLUGINS__OUTPUTS__DEFAULT__' + default_output_plugin_module.short_name().upper() : None}
