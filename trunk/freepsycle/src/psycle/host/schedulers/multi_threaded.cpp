@@ -292,6 +292,7 @@ void scheduler::stop() {
 
 	// dump time measurements
 	std::cout << "time measurements: \n";
+	std::nanoseconds total;
 	for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i) {
 		node & node(**i);
 		std::cout
@@ -300,14 +301,18 @@ void scheduler::stop() {
 			<< ", lib " << node.underlying().plugin_library_reference().name()
 			<< "): ";
 		if(!node.processing_count()) std::cout << "not processed\n";
-		else std::cout
-			<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
-			<< node.processing_count() << " = "
-			<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << "s";
+		else {
+			std::cout
+				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
+				<< node.processing_count() << " = "
+				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << 's';
 			if(node.processing_count() > node.processing_count_no_zeroes())
 				std::cout << ", zeroes: " << node.processing_count() - node.processing_count_no_zeroes();
 			std::cout << '\n';
+		}
+		total += node.accumulated_processing_time();
 	}
+	std::cout << "total: " << 1e-9 * total.get_count() << "s\n";
 }
 
 void scheduler::thread_function(std::size_t thread_number) {
