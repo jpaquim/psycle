@@ -51,7 +51,7 @@ void MachineFactory::FillHosts()
 	hosts_.push_back( &InternalHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::INTERNAL);
 	// InternalHost doesn't have a path, so we call FillFinderData now.
-	InternalHost::getInstance(callbacks_).FillFinderData(finder_);
+	InternalHost::getInstance(callbacks_).FillFinderData(*finder_);
 
 	hosts_.push_back( &NativeHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::NATIVE);

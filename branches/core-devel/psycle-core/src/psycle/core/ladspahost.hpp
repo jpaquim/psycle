@@ -46,7 +46,7 @@ public:
 	virtual void setPluginPath(std::string path);
 
 protected:
-	virtual void FillPluginInfo(const std::string&, const std::string&, std::map<MachineKey,PluginInfo>&);
+	virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder&);
 	void* LoadDll( const std::string &  ) const;
 	LADSPA_Descriptor_Function LoadDescriptorFunction(void*) const;
 	LADSPA_Handle Instantiate(const LADSPA_Descriptor*) const;

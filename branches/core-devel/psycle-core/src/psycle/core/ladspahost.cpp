@@ -75,10 +75,9 @@ Machine* LadspaHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine:
 	return 0;
 }
 
-void LadspaHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName, std::map<MachineKey,PluginInfo>& infoMap)
+void LadspaHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName,PluginFinder& finder)
 {
 	#if defined __unix__ || defined __APPLE__
-		///\todo problem of so.x.y.z .. .so all three times todo
 	#else
 		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#endif
@@ -92,14 +91,14 @@ void LadspaHost::FillPluginInfo(const std::string& currentPath, const std::strin
 		unsigned int index=0;
 		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(index);
 		while (psDescriptor) {
-			PluginInfo info;
-			info.setName( psDescriptor->Label );
+			PluginInfo pinfo;
+			pinfo.setName( psDescriptor->Label );
 			//info.setRole( plugin.mode() );
-			info.setLibName( currentPath + fileName );
+			pinfo.setLibName( currentPath + fileName );
 			//info.setVersion( version );
 			//info.setAuthor( plugin.GetInfo().Author );
 			MachineKey key( hostCode() , fileName, index );
-			infoMap[key] = info;
+			finder.AddInfo(key, pinfo);
 			psDescriptor = pfDescriptorFunction(++index);
 		}
 	}

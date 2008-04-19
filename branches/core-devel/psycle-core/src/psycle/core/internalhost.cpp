@@ -106,16 +106,14 @@ Machine* InternalHost::CreateMachine(PluginFinder& /*finder */, MachineKey key,M
 	return mac;
 }
 
-void InternalHost::FillFinderData(PluginFinder* finder, bool /*clearfirst*/)
+void InternalHost::FillFinderData(PluginFinder& finder, bool /*clearfirst*/)
 {
-	std::map<MachineKey,PluginInfo> infoMap = finder->getMap(Hosts::INTERNAL);
-
 	//InternalHost always regenerates its pluginInfo.
-	infoMap.clear();
+	finder.ClearMap(hostCode());
 	
 	// Master machine is skipped because it is never created by the user.
 	for(int  i=InternalMacs::type(1); i < InternalMacs::NUM_MACS; i++) {
-		infoMap[InternalMacs::keys[i]] = InternalMacs::infos[i];
+		finder.AddInfo(InternalMacs::keys[i], InternalMacs::infos[i]);
 	}
 }
 

@@ -48,14 +48,18 @@ bool PluginFinder::hasHost(Hosts::type type) const
 }
 
 std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::begin(Hosts::type host) const {
+	assert(host < maps_.size());
 	return maps_[host].begin();
 }
 std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::end(Hosts::type host) const {
+	assert(host < maps_.size());
 	return maps_[host].end();
 }
-std::map< MachineKey, PluginInfo >& PluginFinder::getMap(Hosts::type host) {
-	assert(host < maps_.size());
-	return maps_[host];
+
+void PluginFinder::AddInfo(const MachineKey & key, const PluginInfo& info) {
+	if (hasHost(key.host())){
+		maps_[key.host()][key]= info;
+	}
 }
 
 const PluginInfo & PluginFinder::info ( const MachineKey & key ) const {
@@ -96,5 +100,10 @@ bool PluginFinder::hasKey( const MachineKey& key ) const {
 		return false;
 	}
 }
-	
+void PluginFinder::ClearMap(Hosts::type host) {
+	if ( hasHost(host)) {
+		maps_[host].clear();
+	}
+}
+
 }}

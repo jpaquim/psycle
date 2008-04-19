@@ -73,10 +73,10 @@ Machine* NativeHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine:
 }
 
 
-void NativeHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName, std::map<MachineKey,PluginInfo>& infoMap)
+void NativeHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName, PluginFinder& finder)
 {
 	#if defined __unix__ || defined __APPLE__
-		///\todo problem of so.x.y.z .. .so all three times todo
+		if ( fileName.find( "lib-xpsycle.") == std::string::npos ) return;
 	#else
 		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#endif
@@ -87,7 +87,6 @@ void NativeHost::FillPluginInfo(const std::string& currentPath, const std::strin
 	CMachineInfo* minfo = LoadDescriptor(hInstance);
 	if (minfo) {
 		PluginInfo pinfo;
-		MachineKey key( hostCode() , fileName, 0 );
 		pinfo.setName( minfo->Name );
 		//pinfo.setRole( plugin.mode() );
 		pinfo.setLibName(currentPath + fileName);
@@ -96,7 +95,8 @@ void NativeHost::FillPluginInfo(const std::string& currentPath, const std::strin
 		if (!(o << minfo->Version )) version = o.str();
 		pinfo.setVersion( version );
 		pinfo.setAuthor( minfo->Author );
-		infoMap[key] = pinfo;
+		MachineKey key( hostCode(), fileName, 0);
+		finder.AddInfo( key, pinfo);
 	}
 	UnloadDll(hInstance);
 }

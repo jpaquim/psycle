@@ -51,7 +51,7 @@ public:
 	virtual void setPluginPath(std::string path) { plugin_path_ = path; }
 
 protected:
-	virtual void FillPluginInfo(const std::string&, const std::string&, std::map<MachineKey,PluginInfo>&);
+	virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder&);
 	void* LoadDll( const std::string& );
 	psycle::plugin_interface::CMachineInfo* LoadDescriptor(void* );
 	psycle::plugin_interface::CMachineInterface* Instantiate(void * );

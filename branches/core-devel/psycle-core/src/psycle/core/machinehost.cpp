@@ -33,10 +33,8 @@ MachineHost::MachineHost(MachineCallbacks*calls)
 
 void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) 
 {
-	std::map<MachineKey,PluginInfo>& infoMap = finder.getMap(hostCode());
-
 	if (clearfirst) {
-		infoMap.clear();
+		finder.ClearMap(hostCode());
 	}
 	for (int i=0; i < getNumPluginPaths();i++) 
 	{
@@ -45,13 +43,14 @@ void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst)
 		try {
 			fileList = File::fileList(currentPath, File::list_modes::files);
 		} catch ( std::exception& e ) {
-			std::cout << "Warning: Unable to scan your " << hostName() << " plugin directory. Please make sure the directory listed in your config file exists." << std::endl;
+			std::cout << "Warning: Unable to scan your " << hostName() << " plugin directory with path: " << currentPath
+				<< "." << std::endl << "Please make sure the directory exists." << std::endl;
 			return;
 		}
 		currentPath = currentPath + File::slash();
 		std::vector<std::string>::iterator it = fileList.begin();
 		for ( ; it < fileList.end(); ++it ) {
-			FillPluginInfo(currentPath,*it,infoMap);
+			FillPluginInfo(currentPath,*it,finder);
 		}
 	}
 }

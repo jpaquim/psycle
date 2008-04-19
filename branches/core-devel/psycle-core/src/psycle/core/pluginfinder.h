@@ -40,6 +40,7 @@ namespace psy
 				virtual void addHost(Hosts::type);
 				virtual bool hasHost(Hosts::type) const;
 
+				virtual void AddInfo(const MachineKey &, const PluginInfo& );
 				PluginInfo info(const MachineKey & key );
 				const PluginInfo& info( const MachineKey & key ) const;
 				bool hasKey( const MachineKey& key ) const;
@@ -47,13 +48,11 @@ namespace psy
 			
 				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
 				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
-				
-				std::map<MachineKey, PluginInfo> & getMap(Hosts::type);
+				virtual void ClearMap(Hosts::type);
 
 			protected:
 				PluginInfo empty_;
-				typedef std::map<MachineKey, PluginInfo> maptype;
-				std::vector<maptype> maps_;
+				std::vector<std::map<MachineKey, PluginInfo> > maps_;
 		};
 	}
 }

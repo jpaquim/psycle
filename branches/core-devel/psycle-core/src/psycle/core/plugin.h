@@ -61,8 +61,9 @@ class Proxy
 		Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 		~Proxy() throw ()
 		{
-			delete plugin_;
-			// (*this)(0);  ///\todo this segfaults under windows .. investigate 
+			// Proxy cannot free the interface, since its destructor happens after the destructor of Plugin,
+			// which has already freed the dll.
+			// (*this)(0); 
 		}
 		
 		const bool operator()() const throw();

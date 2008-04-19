@@ -48,7 +48,7 @@ public:
 	virtual int getNumPluginPaths() { return 0; }
 	virtual void setPluginPath(std::string ) {};
 protected:
-	virtual void FillPluginInfo(const std::string&, const std::string& , std::map<MachineKey,PluginInfo>& ) = 0;
+	virtual void FillPluginInfo(const std::string&, const std::string& , PluginFinder& ) = 0;
 
 	MachineCallbacks* mcallback_;
 };

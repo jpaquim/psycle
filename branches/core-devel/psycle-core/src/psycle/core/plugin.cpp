@@ -87,6 +87,9 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 
 Plugin::~ Plugin( ) throw()
 {
+	if (proxy_()) {
+		proxy_(0); // i.e. delete CMachineInterface.
+	}
 	if(libHandle_)
 	#if defined __unix__ || defined __APPLE__
 		::dlclose(libHandle_);
