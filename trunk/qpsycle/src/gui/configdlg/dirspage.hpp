@@ -44,6 +44,7 @@ private slots:
 	void onSongBrowse();
 	void onPluginsBrowse();
 	void onLadspaBrowse();
+	void onSamplesBrowse();
 
 private:
 	Configuration *config_;
@@ -51,6 +52,7 @@ private:
 	QLineEdit *songPathEdit_;
 	QLineEdit *pluginsPathEdit_;
 	QLineEdit *ladspaPathEdit_;
+	QLineEdit *samplesPathEdit_;
 
 	QSettings settings;
 };

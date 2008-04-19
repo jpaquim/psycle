@@ -37,6 +37,7 @@
 #include <QStandardItem>
 #include <QItemSelectionModel>
 #include <QModelIndexList>
+#include <QSettings>
 
 #include <iostream>
 #include <iomanip>
@@ -116,7 +117,8 @@ void SampleBrowser::createSampleBrowserTree()
 	dirTree_->setColumnHidden( 3, true ); // hide data modified column
 
 	// Set the top directory of the tree.
-	QString samplesPath = QString::fromStdString( Global::configuration().samplePath() );
+	QSettings settings;
+	QString samplesPath = settings.value("paths/samplesPath").toString();
 	if ( samplesPath.isEmpty() ) { // if sample path isn't set in config.
 		samplesPath = QDir::homePath();
 	}
