@@ -19,15 +19,10 @@
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
 #include "pluginfinder.h"
-#include "file.h"
-#include "ladspamachine.h"
-#include "plugin.h"
-#include <iostream> // only for debug output
-#include <sstream>
+
+#include <cassert>
 
 namespace psy { namespace core {
-
-const PluginInfo PluginFinder::empty_;
 
 PluginFinder::PluginFinder()
 {
@@ -67,7 +62,7 @@ const PluginInfo & PluginFinder::info ( const MachineKey & key ) const {
 	if (!hasHost(key.host())) {
 		return empty_;
 	}
-	
+
 	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
 	if ( it != maps_[key.host()].end() ) {
 		return it->second;
@@ -79,7 +74,7 @@ PluginInfo PluginFinder::info( const MachineKey & key ) {
 	if (!hasHost(key.host())) {
 		return empty_;
 	}
-	
+
 	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
 	if ( it != maps_[key.host()].end() ) {
 		return it->second;

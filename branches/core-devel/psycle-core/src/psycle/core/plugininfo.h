@@ -21,6 +21,8 @@
 #ifndef PSYCLE__CORE__PLUGIN_INFO
 #define PSYCLE__CORE__PLUGIN_INFO
 
+#include <string>
+
 namespace psy
 {
 	namespace core

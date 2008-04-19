@@ -31,9 +31,9 @@ MachineHost::MachineHost(MachineCallbacks*calls)
 {
 }
 
-void MachineHost::FillFinderData(PluginFinder* finder, bool clearfirst) 
+void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) 
 {
-	std::map<MachineKey,PluginInfo> infoMap = finder->getMap(hostCode());
+	std::map<MachineKey,PluginInfo>& infoMap = finder.getMap(hostCode());
 
 	if (clearfirst) {
 		infoMap.clear();

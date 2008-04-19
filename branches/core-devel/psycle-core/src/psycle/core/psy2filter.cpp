@@ -448,7 +448,14 @@ bool Psy2Filter::LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machine
 				char sDllName[256];
 				file->ReadArray(sDllName,256); // Plugin dll name
 				sDllName[255]='\0';
-				pMac[i] = factory.CreateMachine(MachineKey(Hosts::NATIVE,sDllName,0),i);
+
+				std::string dllName = sDllName;
+				unsigned int pos = dllName.find(".dll");
+				if (pos != std::string::npos) {
+					dllName = dllName.substr(0,pos);
+				}
+
+				pMac[i] = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),i);
 				if (!pMac[i]) {
 					pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
 				}

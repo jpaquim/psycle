@@ -37,7 +37,7 @@ public:
 	~LadspaHost();
 	static LadspaHost& getInstance(MachineCallbacks*);
 
-	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
+	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);
 
 	virtual const Hosts::type hostCode() const { return Hosts::LADSPA; }
 	virtual const std::string hostName() const { return "Ladspa"; }

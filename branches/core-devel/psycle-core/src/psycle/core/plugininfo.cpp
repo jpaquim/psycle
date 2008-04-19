@@ -18,12 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
-#include "pluginfinder.h"
-#include "file.h"
-#include "ladspamachine.h"
-#include "plugin.h"
-#include <iostream> // only for debug output
-#include <sstream>
+#include "plugininfo.h"
 
 namespace psy { namespace core {
 PluginInfo::PluginInfo(){}

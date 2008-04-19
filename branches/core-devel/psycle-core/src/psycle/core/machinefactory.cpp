@@ -28,6 +28,11 @@
 #include "ladspahost.hpp"
 namespace psy{ namespace core {
 
+MachineFactory::MachineFactory()
+:callbacks_(0)
+,finder_(0)
+{}
+
 void MachineFactory::Initialize(MachineCallbacks* callbacks)
 {
 	callbacks_ = callbacks;
@@ -61,7 +66,7 @@ void MachineFactory::FillHosts()
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 {
 	assert(key.host() < Hosts::NUM_HOSTS);
-	return hosts_[key.host()]->CreateMachine(finder_,key,id);
+	return hosts_[key.host()]->CreateMachine(*finder_,key,id);
 #if 0
 	for (int i=0; i< hosts_.size(); ++i)
 	{
@@ -85,7 +90,7 @@ std::string const & MachineFactory::getPsyclePath() const { return NativeHost::g
 void MachineFactory::setPsyclePath(std::string path,bool cleardata)
 {
 	NativeHost::getInstance(0).setPluginPath(path);
-	NativeHost::getInstance(0).FillFinderData(finder_,cleardata);
+	NativeHost::getInstance(0).FillFinderData(*finder_,cleardata);
 }
 
 ///\FIXME: This only returns the first path, should regenerate the string
@@ -93,14 +98,14 @@ std::string const & MachineFactory::getLadspaPath() const { return LadspaHost::g
 void MachineFactory::setLadspaPath(std::string path,bool cleardata)
 {
 	LadspaHost::getInstance(0).setPluginPath(path);
-	LadspaHost::getInstance(0).FillFinderData(finder_,cleardata);
+	LadspaHost::getInstance(0).FillFinderData(*finder_,cleardata);
 }
 
 void MachineFactory::RegenerateFinderData() 
 {
 	for (int i=0; i < hosts_.size(); ++i )
 	{
-		hosts_[i]->FillFinderData(finder_,true);
+		hosts_[i]->FillFinderData(*finder_,true);
 	}
 }
 

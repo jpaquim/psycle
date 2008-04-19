@@ -37,9 +37,6 @@ namespace psy
 			filters.push_back( Psy4Filter::getInstance() );
 		}
 		SongSerializer::~SongSerializer() {
-			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
-				delete *it;
-			}
 		}
 		
 		bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song)

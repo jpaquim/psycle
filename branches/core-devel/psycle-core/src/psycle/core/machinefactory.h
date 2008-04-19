@@ -37,7 +37,7 @@ class MachineHost;
 class MachineFactory
 {
 private:
-	MachineFactory(){}
+	MachineFactory();
 public:
 	// To create a MachineFactory do a getInstance().Initialize() with either
 	// of the Initialize Functions.

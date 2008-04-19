@@ -100,22 +100,22 @@ int main(int argument_count, char * arguments[]) {
 		}
 	
 	}
+	Configuration configuration;
+	if(!configuration.pluginPath().length()) {
+		std::cerr << "psycle: player: native plugin path not configured. You can set the PSYCLE_PATH environment variable.\n";
+	} else {
+		std::cout << "psycle: player: native plugins are looked for in: " << configuration.pluginPath() << "\n";
+	}
+	if(!configuration.ladspaPath().length()) {
+		std::cerr << "psycle: player: ladspa plugin path not configured. You can set the LADSPA_PATH environment variable.\n";
+	} else {
+		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << "\n";
+	}
+
 	Player &player = *Player::Instance();
 	// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
 	MachineFactory& mfactory = MachineFactory::getInstance();
 	mfactory.Initialize(&player);
-	Configuration configuration;
-
-	if(!configuration.pluginPath().length())
-		std::cerr << "psycle: player: native plugin path not configured. You can set the PSYCLE_PATH environment variable.\n";
-	else
-		std::cout << "psycle: player: native plugins are looked for in: " << configuration.pluginPath() << "\n";
-
-	if(!configuration.ladspaPath().length())
-		std::cerr << "psycle: player: ladspa plugin path not configured. You can set the LADSPA_PATH environment variable.\n";
-	else
-		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << "\n";
-
 	mfactory.setPsyclePath(configuration.pluginPath());
 	mfactory.setLadspaPath(configuration.ladspaPath());
 	
@@ -132,7 +132,6 @@ int main(int argument_count, char * arguments[]) {
 		output_driver.setSettings(settings); ///\todo why do we copy?
 	}
 	player.setDriver(output_driver);
-
 
 	if(output_file_name.length()) {
 		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
@@ -168,6 +167,7 @@ int main(int argument_count, char * arguments[]) {
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
+	sleep(1);
 	//configuration.setDriverByName("silent");
 	//player.setDriver(*configuration._pOutputDriver);
 	

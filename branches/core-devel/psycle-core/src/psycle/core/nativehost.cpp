@@ -50,10 +50,10 @@ NativeHost& NativeHost::getInstance(MachineCallbacks* callb)
 	return instance;
 }
 
-Machine* NativeHost::CreateMachine(PluginFinder* finder, MachineKey key,Machine::id_type id) 
+Machine* NativeHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_type id) 
 {
 	//FIXME: This is a good place where to use exceptions. (task for a later date)
-	std::string fullPath = finder->lookupDllName(key);
+	std::string fullPath = finder.lookupDllName(key);
 	if (fullPath.empty()) return 0;
 	void* hInstance = LoadDll(fullPath);
 	if (!hInstance) return 0;

@@ -65,10 +65,10 @@ namespace psy
 
 		class MachineKey
 		{
-		protected:
-			MachineKey( );
 		public:
-			MachineKey( const Hosts::type host, const std::string & dllName, int index = 0 );
+			MachineKey();
+			MachineKey(const Hosts::type host, const std::string & dllName, const int index = 0 );
+			MachineKey(const MachineKey& key);
 			~MachineKey();
 
 			static const MachineKey master();
@@ -86,9 +86,10 @@ namespace psy
 			const Hosts::type host() const;
 			int index() const;
 
-			bool operator<(const MachineKey & key) const;
+			bool operator<( const MachineKey & key) const;
 			bool operator==( const MachineKey & rhs ) const;
 			bool operator!=( const MachineKey & rhs ) const;
+			MachineKey& operator=( const MachineKey & key );
 		private:
 			std::string dllName_;
 			Hosts::type host_;

@@ -47,11 +47,11 @@ namespace psy
 			
 				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
 				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
-
+				
 				std::map<MachineKey, PluginInfo> & getMap(Hosts::type);
 
 			protected:
-				static const PluginInfo empty_;
+				PluginInfo empty_;
 				typedef std::map<MachineKey, PluginInfo> maptype;
 				std::vector<maptype> maps_;
 		};

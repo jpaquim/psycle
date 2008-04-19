@@ -35,7 +35,7 @@ public:
 	~InternalHost();
 	static InternalHost& getInstance(MachineCallbacks*);
 
-	virtual Machine* CreateMachine(PluginFinder*, MachineKey, Machine::id_type);
+	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);
 	virtual void FillFinderData(PluginFinder*, bool clearfirst=false);
 
 	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }

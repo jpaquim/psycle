@@ -532,9 +532,9 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 		// assume version 0 for now
 		std::int32_t type;
 		Machine* mac=0;
-		char dllName[256];
+		char sDllName[256];
 		file->Read(type);
-		file->ReadString(dllName,256);
+		file->ReadString(sDllName,256);
 
 		switch (type)
 		{
@@ -564,20 +564,35 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 			break;
 		case MACH_PLUGIN:
+		{
+			// PSY3 Format saves the postfix, so we have to remove it before creating the key.
+			std::string dllName = sDllName;
+			unsigned int pos = dllName.find(".dll");
+			if (pos != std::string::npos) {
+				dllName = dllName.substr(0,pos);
+			}
+
 			mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),id);
 			break;
+		}	
 		case MACH_VST:
 		//case MACH_VSTFX:
+		{
+			//unsigned int pos = dllName.find(".dll");
+			//if (pos != std::string::npos) {
+				//dllName = dllName.substr(0,pos);
+			//}
 			//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
 			//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 			break;
+		}
 		default:
 			break;
 		}
 		if (!mac) 
 		{
 			std::ostringstream s;
-			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << dllName;
+			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << sDllName;
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 		}

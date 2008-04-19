@@ -33,12 +33,20 @@ namespace psy
 		};
 
 
-		MachineKey::MachineKey( ) : index_(0) {
+		MachineKey::MachineKey( )
+			:host_(Hosts::INTERNAL)
+			,dllName_(),
+			index_(0) {
+		}
+		MachineKey::MachineKey( const MachineKey & key)
+			:host_(key.host())
+			,dllName_(key.dllName())
+			,index_(key.index()) {	
 		}
 
-		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, int index ) :
-			host_( host ),
-			index_( index )
+		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, int index )
+			:host_( host )
+			,index_( index )
 		{
 			if (!dllName.empty()) {
 				dllName_ = preprocessName(dllName);
@@ -101,13 +109,20 @@ namespace psy
 				return dllName() < key.dllName();
 			return index() < key.index();
 		}
+
 		bool MachineKey::operator ==( const MachineKey & rhs ) const {
 			return host() == rhs.host() && dllName() == rhs.dllName() && index() == rhs.index();
 		}
 		bool MachineKey::operator !=( const MachineKey & rhs ) const {
 			return host() != rhs.host() || dllName() != rhs.dllName() || index() != rhs.index();
 		}
-
+		MachineKey& MachineKey::operator=( const MachineKey & key ) {
+			host_ = key.host();
+			dllName_ = key.dllName();
+			index_ = index_;
+			return *this;
+		}
+		
 		const std::string & MachineKey::dllName() const {
 			return dllName_;
 		}
