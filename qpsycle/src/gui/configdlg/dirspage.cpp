@@ -91,6 +91,19 @@ namespace qpsycle {
 
 		connect( ladspaBrowse, SIGNAL( clicked() ), this, SLOT( onLadspaBrowse() ) );
 
+		dirsLay->addWidget( new QLabel("Samples Directory") );
+		samplesPathEdit_ = new QLineEdit();
+		samplesPathEdit_->setReadOnly( true );
+		QString samplesPathString = settings.value( "paths/samplesPath", "/home/samples" ).toString();
+		samplesPathEdit_->setText( samplesPathString );
+		dirsLay->addWidget( samplesPathEdit_ );
+
+		QPushButton *samplesBrowse = new QPushButton( "Browse..." );
+		dirsLay->addWidget( samplesBrowse );
+
+		connect( samplesBrowse, SIGNAL( clicked() ), this, SLOT( onSamplesBrowse() ) );
+
+
 
 
 
@@ -127,6 +140,16 @@ namespace qpsycle {
 
 		settings.setValue( "paths/ladspaPath", newLadspaPath );
 		ladspaPathEdit_->setText( newLadspaPath );
+	}
+
+	void DirsPage::onSamplesBrowse()
+	{
+		QString newSamplesPath = QFileDialog::getExistingDirectory(
+			this, "Choose Samples directory",
+			samplesPathEdit_->text() );
+
+		settings.setValue( "paths/samplesPath", newSamplesPath );
+		samplesPathEdit_->setText( newSamplesPath );
 	}
 
 
