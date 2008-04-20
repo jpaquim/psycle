@@ -2,11 +2,14 @@
 # N.B. dont run qmake --project! It will overwrite
 # this file and we don't want that.
 include(../psycle-core/qmake/platform.pri)
+
 TEMPLATE = app # This project builds an executable program.
-TARGET = 
+TARGET = qpsycle # name of the executable.
+
 CONFIG *= thread
 !warn_on:CONFIG *= warn_off
 message("Config is $$CONFIG")
+
 BUILD_DIR = ++build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
@@ -120,3 +123,20 @@ include(qmake/qt-xml.pri)
 message("INCLUDEPATH is $$INCLUDEPATH")
 message("LIBS are $$LIBS")
 message("PKGCONFIG is $$PKGCONFIG")
+
+# Check to see what build mode has been specified.
+CONFIG( debug ):CONFIG( release ) {
+	warning("debug and release are both specified, separately, in CONFIG. \
+	This is possibly not what you want.  Consider using CONFIG+=debug_and_release if \
+	you want to build debug and release versions concurrently, or CONFIG-=release \
+	or CONFIG-=debug if you want just one mode.")
+}
+CONFIG( debug ) {
+	message("Configured to make a debug mode Makefile.")
+} 
+CONFIG( release ) {
+	message("Configured to make a release mode Makefile.")
+}
+CONFIG( debug_and_release ) {
+	message("Configured to make both Makefile.Debug and Makefile.Release.")
+}
