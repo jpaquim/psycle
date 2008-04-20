@@ -56,6 +56,26 @@ namespace psy {
 			pFile->Skip(size);
 			return true;
 		}
+
+		void Dummy::CopyFrom(Machine* mac)
+		{
+			_bypass = mac->_bypass;
+			_mute = mac->_mute;
+			SetAudioRange(mac->GetAudioRange());
+			SetPan(mac->Pan());
+			SetEditName(mac->GetEditName());
+			_connectedInputs =  mac->_connectedInputs;
+			_connectedOutputs = mac->_connectedOutputs;
+			for (int i = 0; i<MAX_CONNECTIONS; i++)
+			{
+				_inputMachines[i]=mac->_inputMachines[i];
+				_outputMachines[i]=mac->_outputMachines[i];
+				_inputConVol[i]=mac->_inputConVol[i];
+				_wireMultiplier[i]=mac->_wireMultiplier[i];
+				_connection[i]=mac->_connection[i];
+				_inputCon[i]=mac->_inputCon[i];
+			}
+		}
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 

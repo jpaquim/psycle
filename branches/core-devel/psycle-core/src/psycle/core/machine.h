@@ -478,6 +478,10 @@ namespace psy
 			virtual Wire::id_type ConnectTo(Machine & dstMac, InPort::id_type dsttype = InPort::id_type(0), OutPort::id_type srctype = OutPort::id_type(0), float volume = 1.0f);
 			virtual bool MoveWireDestTo(Machine& dstMac, OutPort::id_type srctype, Wire::id_type srcwire, InPort::id_type dsttype = InPort::id_type(0));
 			virtual bool MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype = OutPort::id_type(0));
+		protected:
+			virtual bool MoveWireDestTo(Machine& dstMac, InPort::id_type srctype, Wire::id_type srcwire, OutPort::id_type dsttype, Machine& oldDest);
+			virtual bool MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype, Machine& oldSrc);
+		public:
 			virtual bool Disconnect(Machine & dst);
 			virtual void DeleteWires();
 		///\warning: This should be protected, but the class Mixer needs to call them. Do not use them from Song or "Outside World".
@@ -488,7 +492,8 @@ namespace psy
 			virtual void DeleteInputWire(Wire::id_type wireIndex, InPort::id_type dstType);
 			virtual void DeleteOutputWire(Wire::id_type wireIndex, OutPort::id_type srctype);
 			virtual void NotifyNewSendtoMixer(Machine & callerMac,Machine & senderMac);
-			virtual void SetMixerSendFlag();
+			// The parameter song is specifically for the psy3filter loader, since at loading time, the song in callbacks is not the one being loaded.
+			virtual void SetMixerSendFlag(CoreSong* song=0);
 			virtual void ClearMixerSendFlag();
 		///\}
 

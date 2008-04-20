@@ -52,6 +52,12 @@ NativeHost& NativeHost::getInstance(MachineCallbacks* callb)
 
 Machine* NativeHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_type id) 
 {
+	if (key == MachineKey::failednative()) 
+	{
+		Plugin *p = new Plugin(mcallback_, key, id, 0, 0, 0);
+		return p;
+	}
+
 	//FIXME: This is a good place where to use exceptions. (task for a later date)
 	std::string fullPath = finder.lookupDllName(key);
 	if (fullPath.empty()) return 0;

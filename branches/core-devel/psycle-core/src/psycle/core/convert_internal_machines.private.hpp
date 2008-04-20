@@ -26,6 +26,10 @@ namespace psy
 						plugin,
 						vsti, vstfx,
 						scope,
+						abass,
+						asynth1,
+						asynth2,
+						asynth21,
 						dummy = 255
 					};
 

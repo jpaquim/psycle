@@ -68,21 +68,24 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 {
 	SetAudioRange(32768.0f);
 
-	_isSynth = (info_->Flags == 3);
-	if(!_isSynth) {
-		defineInputAsStereo();
+	//Specific case of the Psy2Loader
+	if( info )
+	{
+		_isSynth = (info_->Flags == 3);
+		if(!_isSynth) {
+			defineInputAsStereo();
+		}
+		defineOutputAsStereo();
+
+		strncpy(_psShortName,info_->ShortName,15);
+		_psShortName[15]='\0';
+		char buf[32];
+		strncpy(buf, info_->ShortName,31);
+		buf[31]='\0';
+		SetEditName(buf);
+		_psAuthor = info_->Author;
+		_psName = info_->Name;
 	}
-	defineOutputAsStereo();
-
-	strncpy(_psShortName,info_->ShortName,15);
-	_psShortName[15]='\0';
-	char buf[32];
-	strncpy(buf, info_->ShortName,31);
-	buf[31]='\0';
-	SetEditName(buf);
-	_psAuthor = info_->Author;
-	_psName = info_->Name;
-
 }
 
 Plugin::~ Plugin( ) throw()

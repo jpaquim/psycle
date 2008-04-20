@@ -466,25 +466,28 @@ namespace psy { namespace core {
 		if ( !_connection[srcwire])
 			return false;
 
-		Machine *oldDst = callbacks->song().machine(_connection[srcwire]);
+		Machine *oldDst = callbacks->song().machine(_outputMachines[srcwire]);
 		if (oldDst)
 		{
-			Wire::id_type oldwire,dstwire;
-			if ((oldwire = oldDst->FindInputWire(id()))== -1)
-				return false;
-
-			if ((dstwire = dstMac.GetFreeInputWire(dsttype)) == -1)
-				return false;
-
-			float volume = 1.0f;
-			oldDst->GetWireVolume(oldwire,volume);
-			///\todo: Error dsttype may not be the correct type. FindInputWire should give that info to us.
-			oldDst->DeleteInputWire(oldwire,dsttype);
-			InsertOutputWire(dstMac,srcwire,srctype);
-			dstMac.InsertInputWire(*this,dstwire,dsttype,volume);
-			return true;
+			return MoveWireDestTo(dstMac, srctype, srcwire, dsttype, *oldDst);
 		}
 		return false;
+	}
+	bool Machine::MoveWireDestTo(Machine& dstMac, OutPort::id_type srctype, Wire::id_type srcwire, InPort::id_type dsttype, Machine& oldDst)
+	{
+			Wire::id_type oldwire,dstwire;
+		if ((oldwire = oldDst.FindInputWire(id()))== -1)
+			return false;
+		if ((dstwire = dstMac.GetFreeInputWire(dsttype)) == -1)
+			return false;
+
+		float volume = 1.0f;
+		oldDst.GetWireVolume(oldwire,volume);
+		///FIXME: Error dsttype may not be the correct type. FindInputWire should give that info to us.
+		oldDst.DeleteInputWire(oldwire,dsttype);
+		InsertOutputWire(dstMac,srcwire,srctype);
+		dstMac.InsertInputWire(*this,dstwire,dsttype,volume);
+		return true;
 	}
 	bool Machine::MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype)
 	{
@@ -492,24 +495,29 @@ namespace psy { namespace core {
 			return false;
 		if ( !_inputCon[dstwire])
 			return false;
-		if (_inputMachines[dstwire] == -1) 
-			return false;
 
-		Machine *oldDst = callbacks->song().machine(_connection[dstwire]);
-		if (oldDst)
+		Machine *oldSrc = callbacks->song().machine(_inputMachines[dstwire]);
+		if (oldSrc)
 		{
-			Wire::id_type oldwire;
-			float volume = 1.0f;
-			if ((oldwire =oldDst->FindOutputWire(id())) == -1)
-				return false;
-			///\todo: Error srctype may not be the correct type. FindOutputWire should give that info to us.
-			oldDst->DeleteOutputWire(oldwire,srctype);
-			srcMac.InsertOutputWire(*this,dstwire,dsttype);
-			GetWireVolume(dstwire,volume);
-			InsertInputWire(srcMac,dstwire,dsttype,volume);
-			return true;
+			return MoveWireSourceTo(srcMac,dsttype,dstwire,srctype,*oldSrc);
 		}
 		return false;
+	}
+	bool Machine::MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype, Machine& oldSrc)
+	{
+		Wire::id_type oldwire, srcwire;
+		float volume = 1.0f;
+		if ((oldwire = oldSrc.FindOutputWire(id())) == -1)
+			return false;
+		if ((srcwire = srcMac.GetFreeOutputWire(srctype)) == -1)
+			return false;
+
+		///\todo: Error srctype may not be the correct type. FindOutputWire should give that info to us.
+		oldSrc.DeleteOutputWire(oldwire,srctype);
+		srcMac.InsertOutputWire(*this,srcwire,srctype);
+		GetWireVolume(dstwire,volume);
+		InsertInputWire(srcMac,dstwire,dsttype,volume);
+		return true;
 	}
 
 	bool Machine::Disconnect( Machine& dstMac )
@@ -614,11 +622,15 @@ namespace psy { namespace core {
 		for (int i(0);i< MAX_CONNECTIONS; ++i)
 			if ( _connection[i]) callbacks->song().machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
 	}
-	void Machine::SetMixerSendFlag()
+	void Machine::SetMixerSendFlag(CoreSong* song)
 	{
+		if (!song) song = &callbacks->song();
 		for (int i(0);i<MAX_CONNECTIONS;++i)
 		{
-			if (_inputCon[i]) callbacks->song().machine(_inputMachines[i])->SetMixerSendFlag();
+			if (_inputCon[i]) {
+				
+				song->machine(_inputMachines[i])->SetMixerSendFlag();
+			}
 		}
 		_isMixerSend=true;
 	}

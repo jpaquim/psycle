@@ -17,6 +17,8 @@ namespace psy { namespace core {
 			Dummy(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 		public:
 			virtual ~Dummy() throw();
+			/// Loader for psycle fileformat version 2.
+			void CopyFrom(Machine* mac);
 			virtual bool LoadSpecificChunk(RiffFile*,int version);
 			virtual int GenerateAudio(int numSamples);
 			virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }

@@ -80,6 +80,10 @@ namespace psy
 		const MachineKey MachineKey::lfo() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::LFO );
 		}
+		const MachineKey MachineKey::failednative() {
+			return MachineKey(Hosts::NATIVE,"",0);
+		}
+
 
 		const std::string MachineKey::preprocessName(std::string dllName) {
 		#if defined __unix__ || defined __APPLE__

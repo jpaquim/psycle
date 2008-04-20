@@ -628,7 +628,9 @@ void Psy3Filter::RestoreMixerSendFlags(CoreSong& song)
 				for (int j(0); j<mac->numreturns(); ++j)
 				{
 					if ( mac->Return(j).IsValid())
-						song.machine(mac->Return(j).Wire().machine_)->SetMixerSendFlag();
+					{
+						song.machine(mac->Return(j).Wire().machine_)->SetMixerSendFlag(&song);
+					}
 				}
 			}
 		}

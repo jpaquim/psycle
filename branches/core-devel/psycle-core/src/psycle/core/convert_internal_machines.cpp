@@ -39,6 +39,101 @@ namespace psy {
 						riff.ReadArray(c, 16); c[15] = 0;
 						machine.SetEditName(c);
 					}
+					switch(type) {
+					case abass:
+					case asynth1:
+					case asynth2:
+					case asynth21:
+					{	
+						Plugin & plug = *((Plugin*)pointer_to_machine);
+						int numParameters;
+						riff.Read(numParameters);
+						if(plug.proxy()())
+						{
+							std::int32_t * Vals = new std::int32_t[numParameters];
+							riff.ReadArray(Vals, numParameters);
+							try
+							{
+								if (type == abass)
+								{
+									plug.proxy().ParameterTweak(0,Vals[0]);
+									for (int i=1;i<15;i++)
+									{
+										plug.proxy().ParameterTweak(i+4,Vals[i]);
+									}
+									plug.proxy().ParameterTweak(19,0);
+									plug.proxy().ParameterTweak(20,Vals[15]);
+									if (numParameters>16)
+									{
+										plug.proxy().ParameterTweak(24,Vals[16]);
+										plug.proxy().ParameterTweak(25,Vals[17]);
+									}
+									else
+									{
+										plug.proxy().ParameterTweak(24,0);
+										plug.proxy().ParameterTweak(25,0);
+									}
+								}
+								else
+								{
+									for (int i=0; i<numParameters; i++)
+									{
+										plug.proxy().ParameterTweak(i,Vals[i]);
+									}
+									if( type == asynth1) // Patch to replace Synth1 by Arguru Synth 2f
+									{
+										plug.proxy().ParameterTweak(17,Vals[17]+10);
+										plug.proxy().ParameterTweak(24,0);
+										plug.proxy().ParameterTweak(25,0);
+									}
+									else if(type == asynth2)
+									{
+										plug.proxy().ParameterTweak(24,0);
+										plug.proxy().ParameterTweak(25,0);
+									}
+								}
+							}
+							catch(const std::exception &)
+							{
+								//loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
+							}
+							try
+							{
+								int size = plug.proxy().GetDataSize();
+								//pFile->Read(size); // This would have been the right thing to do
+								if(size)
+								{
+									char * pData = new char[size];
+									riff.ReadArray(pData, size); // Number of parameters
+									try
+									{
+										plug.proxy().PutData(pData); // Internal load
+									}
+									catch(const std::exception &)
+									{
+									}
+									delete[] pData;
+								}
+							}
+							catch(std::exception const &)
+							{
+								// loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
+							}
+					
+							delete[] Vals;
+						}
+						else
+						{
+							riff.Skip(4*numParameters);
+							// If the machine had custom data (PutData()) the loader will crash.
+							// It cannot be fixed.
+						}
+
+					}
+					default:
+						break;
+					}
+
 					riff.ReadArray(machine._inputMachines,MAX_CONNECTIONS);
 					riff.ReadArray(machine._outputMachines,MAX_CONNECTIONS);
 					riff.ReadArray(machine._inputConVol,MAX_CONNECTIONS);
@@ -199,6 +294,10 @@ namespace psy {
 				(*this)[filter_2_poles] = new std::string("filter_2_poles");
 				(*this)[gainer] = new std::string("gainer");
 				(*this)[flanger] = new std::string("flanger");
+				(*this)[abass] = new std::string("arguru synth 2f");
+				(*this)[asynth1] = new std::string("arguru synth 2f");
+				(*this)[asynth2] = new std::string("arguru synth 2f");
+				(*this)[asynth21] = new std::string("arguru synth 2f");
 			}
 
 			Converter::Plugin_Names::~Plugin_Names()
@@ -209,6 +308,10 @@ namespace psy {
 				delete (*this)[filter_2_poles];
 				delete (*this)[gainer];
 				delete (*this)[flanger];
+				delete (*this)[abass];
+				delete (*this)[asynth1];
+				delete (*this)[asynth2];
+				delete (*this)[asynth21];
 			}
 
 			const bool Converter::Plugin_Names::exists(const int & type) const throw()

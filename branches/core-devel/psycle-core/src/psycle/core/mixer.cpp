@@ -271,32 +271,27 @@ namespace psy {
 		}
 		bool Mixer::MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype)
 		{
-			if ( dstwire < MAX_CONNECTIONS)
+			if ( dstwire >= MAX_CONNECTIONS ) 
 			{
+				dsttype = 1;
+				dstwire-=MAX_CONNECTIONS;
+			}
+			if ( dsttype == 1) 
+			{
+				if (!ReturnValid(dstwire))
+					return false;
+				//FIXME: is this going to work with chained sends??
+				Machine* oldSrc = callbacks->song().machine(Return(dstwire).Wire().machine_);
+				if (oldSrc)
+				{
+					return Machine::MoveWireSourceTo(srcMac, dsttype, dstwire, srctype, *oldSrc);
+				} else {
+					return false;
+				}
+
+			} else {
 				return Machine::MoveWireSourceTo(srcMac,dsttype,dstwire,srctype);
 			}
-			if (srctype >= srcMac.GetOutPorts() || dsttype >= GetInPorts())
-				return false;
-			if (!_inputCon[dstwire])
-				return false;
-			if (!ReturnValid(dstwire-MAX_CONNECTIONS))
-				return false;
-			
-			Machine* oldSrc = callbacks->song().machine(Return(dstwire-MAX_CONNECTIONS).Wire().machine_);
-			if (oldSrc)
-			{
-				Wire::id_type oldwire;
-				float volume = 1.0f;
-				if ((oldwire =oldSrc->FindOutputWire(id())) == -1)
-					return false;
-				///\todo: Error srctype may not be the correct type. FindOutputWire should give that info to us.
-				oldSrc->DeleteOutputWire(oldwire,srctype);
-				srcMac.InsertOutputWire(*this,dstwire,dsttype);
-				GetWireVolume(dstwire,volume);
-				InsertInputWire(srcMac,dstwire,dsttype,volume);
-				return true;
-			}
-			return false;
 		}
 		
 		void Mixer::ExchangeInputWires(Wire::id_type first,Wire::id_type second, InPort::id_type /*firstType*/, InPort::id_type /*secondType*/)
