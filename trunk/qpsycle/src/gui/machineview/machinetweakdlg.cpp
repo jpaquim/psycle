@@ -302,7 +302,7 @@ void MachineTweakDlg::randomiseParameters()
 
 void MachineTweakDlg::resetParameters()
 {
-	if ( pMachine_->type() == psy::core::MACH_PLUGIN)
+	if ( pMachine_->getMachineKey().host() == psy::core::Hosts::NATIVE)
 	{
 		int numpars = pMachine_->GetNumParams();
 		for (int c=0; c<numpars; c++)
@@ -326,7 +326,7 @@ void MachineTweakDlg::showPresetsDialog()
 
 void MachineTweakDlg::showAboutDialog()
 {
-	if ( pMachine_->type() == psy::core::MACH_PLUGIN )
+	if ( pMachine_->getMachineKey().host() == psy::core::Hosts::NATIVE )
 	{
 		QMessageBox::information( this,
 			"About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),

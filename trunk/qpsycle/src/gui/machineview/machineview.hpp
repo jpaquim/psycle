@@ -29,6 +29,7 @@ namespace psy { namespace core {
 
 #include <psycle/core/constants.h>
 #include <psycle/core/pluginfinder.h>
+#include <psycle/core/machine.h>
 
 #include <vector>
 
@@ -164,7 +165,6 @@ protected:
 private:
 	MachineView *macView_;
 	NewMachineDlg *newMachineDlg;
-	psy::core::PluginFinder pluginFinder_;
 };
 
 } // namespace qpsycle

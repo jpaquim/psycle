@@ -24,7 +24,8 @@
 #include <psycle/core/machine.h>
 #include <psycle/core/patternevent.h>
 #include <psycle/core/player.h>
-#include <psycle/core/pluginfinder.h>
+#include <psycle/core/machinekey.hpp>
+#include <psycle/core/machinefactory.h>
 #include <psycle/core/sampler.h>
 #include <psycle/core/song.h>
 
@@ -88,24 +89,18 @@ void MachineView::createMachineGuis()
 	*/
 MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 {
+	//FIXME: Find a good solution. (MachineRoles in machines?, get info using machinekey?)
 	MachineGui *macGui;
-	switch ( mac->mode() ) {
-		case psy::core::MACHMODE_GENERATOR:
-			macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-		break;
-		case psy::core::MACHMODE_FX:
-			macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
-		break;
-		case psy::core::MACHMODE_MASTER: 
-			macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
-		break;
-		default:
-			macGui = 0;
+	if ( !mac->acceptsConnections() ) {
+		macGui = new GeneratorGui(mac->GetPosX(), mac->GetPosY(), mac, this );
+	} else if (!mac->emitsConnections() ) {
+		macGui = new MasterGui(mac->GetPosX(), mac->GetPosY(), mac, this);
+	} else {
+		macGui = new EffectGui(mac->GetPosX(), mac->GetPosY(), mac, this );
 	}
 
 	if ( macGui ) {
-		if ( mac->mode() == psy::core::MACHMODE_GENERATOR ||
-				mac->mode() == psy::core::MACHMODE_FX ) {
+		if ( mac->emitsConnections() ) {
 			connect( macGui, SIGNAL( chosen( MachineGui* ) ), 
 					this, SLOT( onMachineChosen( MachineGui* ) ) );
 			connect( macGui, SIGNAL( deleteRequest( MachineGui* ) ),
@@ -254,8 +249,6 @@ void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui 
 	*/
 void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 {
-	int id = macGui->mac()->id();
-
 	// Remove machine and connections from the gui. 
 	std::vector<WireGui*>::iterator wireItr;
 	while ( true ) {
@@ -275,7 +268,8 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 	delete macGui;
 
 	// Remove machine and connections from the Song. 
-	song()->DestroyMachine( id );
+	int id = macGui->mac()->id();
+	song()->DeleteMachine( macGui->mac() );
 
 	emit machineDeleted( id ); 
 }
@@ -337,21 +331,12 @@ void MachineView::cloneMachine( MachineGui *macGui )
 	qDebug("in clone machine");
 	psy::core::Machine *pMachine = macGui->mac();
 	psy::core::Machine::id_type src( pMachine->id() );
-	psy::core::Machine::id_type dst(-1);
-
-	if ( pMachine->mode() == psy::core::MACHMODE_GENERATOR ) dst = song()->GetFreeBus();
-	else if ( pMachine->mode() == psy::core::MACHMODE_FX ) dst = song()->GetFreeFxBus();
-
-	if (dst >= 0)
-	{
-		if (!song()->CloneMac(src,dst))
-		{
-			qDebug("Cloning failed");
-		}
-		else {
-			qDebug("Cloning doesn't work yet."); // See Song::CloneMac().
-		}
-	} 
+	psy::core::Machine* newmac = psy::core::MachineFactory::getInstance().CloneMachine(*macGui->mac());
+	if (newmac) {
+		song()->AddMachine(newmac);
+	} else {
+		qDebug("Cloning failed");
+	}
 }
 
 
@@ -364,10 +349,10 @@ void MachineView::addNewMachineGui( psy::core::Machine *mac )
 {
 	MachineGui *macGui = createMachineGui( mac );
 
-	if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
-		setChosenMachine( macGui );
-		song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
-	}
+	//if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
+		//setChosenMachine( macGui );
+		//song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
+	//}
 	emit newMachineCreated( mac );
 
 	scene()->update( scene()->itemsBoundingRect() );
@@ -612,8 +597,7 @@ void MachineView::setChosenMachine( MachineGui *macGui )
 	*/
 MachineScene::MachineScene( MachineView *macView )
 	:
-	QGraphicsScene( macView ),
-	pluginFinder_(Global::configuration().pluginPath(), Global::configuration().ladspaPath())
+	QGraphicsScene( macView )
 {
 	macView_ = macView;
 	newMachineDlg = new NewMachineDlg(macView_);
@@ -632,14 +616,13 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 	{
 		int accepted = newMachineDlg->exec();
 		if (accepted) { // Add a new machine to the song.
-			psy::core::PluginFinderKey key = newMachineDlg->pluginKey(); 
+			psy::core::MachineKey key = newMachineDlg->pluginKey(); 
 
 			// Create machine, tell where to place the new machine--get from mouse.
-			psy::core::Machine *mac = macView_->song()->createMachine(
-				pluginFinder_, key, event->scenePos().toPoint().x(), event->scenePos().toPoint().y()
-			);
+			psy::core::Machine *mac = psy::core::MachineFactory::getInstance().CreateMachine(key);
 
 			if ( mac ) {
+				macView_->song()->AddMachine(mac);
 				macView_->addNewMachineGui( mac );
 
 				update();

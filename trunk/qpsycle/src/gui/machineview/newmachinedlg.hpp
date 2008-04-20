@@ -22,7 +22,7 @@
 #define NEWMACHINEDLG_H
 
 #include "psycle/core/fwd.hpp"
-#include "psycle/core/pluginFinderKey.hpp"
+#include "psycle/core/machinekey.hpp"
 
 #include <QWidget>
 #include <QDialog>
@@ -39,7 +39,7 @@ namespace qpsycle {
 		public:
 		NewMachineDlg(QWidget *parent = 0);
 
-		const psy::core::PluginFinderKey & pluginKey() const;
+		const psy::core::MachineKey & pluginKey() const;
 
 	protected:
 		void keyPressEvent( QKeyEvent *event );
@@ -54,8 +54,8 @@ namespace qpsycle {
 
 
 		QListWidgetItem* selectedItem;
-		psy::core::PluginFinderKey selectedKey_;
-		std::map< QListWidgetItem* , psy::core::PluginFinderKey > pluginIdentify_;
+		psy::core::MachineKey selectedKey_;
+		std::map< QListWidgetItem* , psy::core::MachineKey > pluginIdentify_;
 
 		void setPlugin( QListWidgetItem* item );
 
