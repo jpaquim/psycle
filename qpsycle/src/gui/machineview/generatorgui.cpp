@@ -68,7 +68,7 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
 	painter->setPen( Qt::white );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
 	painter->drawEllipse( *muteRect );
-	dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
+	dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
 	painter->drawEllipse( *soloRect );
 
 	//panning
@@ -93,7 +93,7 @@ void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		toggleMuteAct_->setText( muteText );
 	
 		QString soloText;
-		dynamic_cast<psy::core::Song*>(m_mac->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
+		dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 		toggleSoloAct_->setText( soloText );
 	
 		QMenu menu;

@@ -44,37 +44,42 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 	// Should we use a tree layout instead of tabs?
 	QTabWidget *machineTabs = new QTabWidget();
 
-	finder_ = new psy::core::PluginFinder(Global::configuration().pluginPath(), Global::configuration().ladspaPath());
+	finder_ = &psy::core::PluginFinder::getInstance();
 
 	genList = new QListWidget();
 	efxList = new QListWidget();
 	intList = new QListWidget();
 	ladList = new QListWidget();
 
-	std::map< psy::core::PluginFinderKey, psy::core::PluginInfo >::const_iterator it = finder_->begin();
-	for ( ; it != finder_->end(); it++ ) {
-		const psy::core::PluginFinderKey & key = it->first;
-		const psy::core::PluginInfo & info = it->second;
-		QListWidget* list=NULL;
-
-		switch(info.type()) {
-		case psy::core::MACH_SAMPLER:
-		case psy::core::MACH_MIXER:
-			list=intList;
-			break;
-		case psy::core::MACH_PLUGIN:
-			switch(info.mode()) {
-			case psy::core::MACHMODE_GENERATOR: list = genList; break;
-			case psy::core::MACHMODE_FX: list = efxList; break;
+	int i = psy::core::Hosts::INTERNAL;
+	for (; finder_->hasHost(psy::core::Hosts::type(i)); i++) {
+		std::map< psy::core::MachineKey, psy::core::PluginInfo >::const_iterator it = finder_->begin(psy::core::Hosts::type(i));
+		for ( ; it != finder_->end(psy::core::Hosts::type(i)); it++ ) {
+			const psy::core::MachineKey & key = it->first;
+			const psy::core::PluginInfo & info = it->second;
+			QListWidget* list=NULL;
+	
+			switch(key.host()) {
+			case psy::core::Hosts::INTERNAL:
+				list=intList;
+				break;
+			case psy::core::Hosts::NATIVE:
+				switch(info.role()) {
+				case psy::core::MachineRole::EFFECT: list = efxList; break;
+				case psy::core::MachineRole::GENERATOR: list = genList; break;
+				default: break;
+				}
+				break;
+			case psy::core::Hosts::LADSPA: list = ladList; break;
+			default:
+				break;
+			};
+	
+			if (list) {
+				QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
+				list->addItem(item);
+				pluginIdentify_[item] = key;
 			}
-			break;
-		case psy::core::MACH_LADSPA: list = ladList; break;
-		};
-
-		if (list) {
-			QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
-			list->addItem(item);
-			pluginIdentify_[item] = key;
 		}
 	}
 
@@ -151,12 +156,12 @@ void NewMachineDlg::itemSelectionChanged()
 
 void NewMachineDlg::setPlugin( QListWidgetItem* item ) 
 {
-	std::map< QListWidgetItem*, psy::core::PluginFinderKey >::iterator it;
+	std::map< QListWidgetItem*, psy::core::MachineKey >::iterator it;
 	it = pluginIdentify_.find( item );
 	
 	if ( it != pluginIdentify_.end() ) {
-	const psy::core::PluginInfo & info = finder_->info( it->second );
-		const psy::core::PluginFinderKey & key = it->second;
+		const psy::core::MachineKey & key = it->second;
+		const psy::core::PluginInfo & info = finder_->info( key );
 
 		#if 0
 		name->setText( info.name() );
@@ -180,7 +185,7 @@ void NewMachineDlg::tryAccept() {
 }
 
 
-const psy::core::PluginFinderKey & NewMachineDlg::pluginKey() const {
+const psy::core::MachineKey & NewMachineDlg::pluginKey() const {
 	return selectedKey_;
 }
 

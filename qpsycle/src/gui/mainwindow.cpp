@@ -21,11 +21,12 @@
 #include <qpsyclePch.hpp>
 
 #include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/core/patterndata.h>
+#include <psycle/core/patternpool.h>
 #include <psycle/core/patternsequence.h>
 #include <psycle/core/player.h>
 #include <psycle/core/singlepattern.h>
 #include <psycle/core/song.h>
+#include <psycle/core/machinefactory.h>
 
 #include "../model/instrumentsmodel.hpp"
 #include "configdlg/configdlg.hpp"
@@ -113,6 +114,16 @@ namespace qpsycle {
 		settingsDlg = 0;
 		instrumentsModel_ = 0;
 		playbackTimer_ = 0;
+
+		Global::Instance();
+		psy::core::Player &player = *psy::core::Player::Instance();
+		// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
+		psy::core::MachineFactory& mfactory = psy::core::MachineFactory::getInstance();
+		mfactory.Initialize(&player);
+		mfactory.setPsyclePath(Global::configuration().pluginPath());
+		mfactory.setLadspaPath(Global::configuration().ladspaPath());
+
+
 
 		song_ = createBlankSong();
 		setupSound();
@@ -292,9 +303,9 @@ namespace qpsycle {
 
 		if ( !fileName.isEmpty() ) {
 			psy::core::Player::Instance()->stop();
-			psy::core::Song *song = new psy::core::Song(psy::core::Player::Instance());
+			psy::core::Song *song = new psy::core::Song();
 			QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-			if( song->load(Global::configuration().pluginPath(), fileName.toStdString() ))
+			if( song->load(fileName.toStdString() ))
 			{
 				loadSong( song );
 			}
@@ -333,9 +344,8 @@ namespace qpsycle {
 
 	psy::core::Song *MainWindow::createBlankSong()
 	{
-		psy::core::Song *blankSong = new psy::core::Song( psy::core::Player::Instance() );
-		blankSong->clear();
-		psy::core::PatternCategory* category0 = blankSong->patternSequence()->patternData()->createNewCategory("New Category");
+		psy::core::Song *blankSong = new psy::core::Song( );
+		psy::core::PatternCategory* category0 = blankSong->patternSequence()->patternPool()->createNewCategory("New Category");
 		psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
 
 		psy::core::SequenceLine *seqLine = blankSong->patternSequence()->createNewLine();
@@ -706,8 +716,8 @@ namespace qpsycle {
 	void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
 	{
 		populateMachineCombo();
-		if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
-			macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
+		//if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
+			//macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
 		logConsole_->AddSuccessText("Machine Created Successfuly");
 	}
 

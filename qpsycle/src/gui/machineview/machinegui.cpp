@@ -92,7 +92,7 @@ void MachineGui::initActions()
 	m_mac->_mute ? muteText = "Unmute" : muteText = "Mute";
 	toggleMuteAct_ = new QAction( muteText, this );
 	QString soloText;   
-	dynamic_cast<psy::core::Song*>(m_mac->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
+	dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 	toggleSoloAct_ = new QAction( soloText, this );
 }
 
@@ -182,8 +182,8 @@ void MachineGui::onToggleMuteActionTriggered()
 	{
 		mac()->_volumeCounter = 0.0f;
 		mac()->_volumeDisplay = 0;
-		if ( dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed == mac()->id() ) {
-			dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed = -1;
+		if ( dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ) {
+			dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed = -1;
 		}
 	}
 
@@ -195,30 +195,30 @@ void MachineGui::onToggleMuteActionTriggered()
 	*/
 void MachineGui::onToggleSoloActionTriggered() 
 {
-	if (dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed == mac()->id() ) // Unsolo it.
+	if (dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ) // Unsolo it.
 	{
-		dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed = -1;
+		dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed = -1;
 		for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
-			if ( mac()->song()->machine(i) ) {
-				if (( mac()->song()->machine(i)->mode() == psy::core::MACHMODE_GENERATOR )) {
-					mac()->song()->machine(i)->_mute = false;
+			if ( m_macView->song()->machine(i) ) {
+				if ( !m_macView->song()->machine(i)->acceptsConnections() ) {
+					m_macView->song()->machine(i)->_mute = false;
 				}
 			}
 		}
 	} else { // Solo it.
 		for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
-			if ( mac()->song()->machine(i) )
+			if ( m_macView->song()->machine(i) )
 			{
-				if (( mac()->song()->machine(i)->mode() == psy::core::MACHMODE_GENERATOR ) && (i != mac()->id()))
+				if (( !m_macView->song()->machine(i)->acceptsConnections()) && (i != mac()->id()))
 				{
-					mac()->song()->machine(i)->_mute = true;
-					mac()->song()->machine(i)->_volumeCounter=0.0f;
-					mac()->song()->machine(i)->_volumeDisplay=0;
+					m_macView->song()->machine(i)->_mute = true;
+					m_macView->song()->machine(i)->_volumeCounter=0.0f;
+					m_macView->song()->machine(i)->_volumeDisplay=0;
 				}
 			}
 		}
 		mac()->_mute = false;
-		dynamic_cast<psy::core::Song*>(mac()->song())->machineSoloed = mac()->id();
+		dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed = mac()->id();
 	}
 
 	scene()->update(); // FIXME: possibly more efficient to update individual machines in the loop above.
