@@ -462,7 +462,7 @@ namespace psy
 		///\name (de)serialization
 		///\{
 		public:
-			bool LoadFileChunk(RiffFile* pFile);
+			bool LoadFileChunk(RiffFile* pFile,int version);
 			void SaveFileChunk(RiffFile * pFile) const;
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;

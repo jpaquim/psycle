@@ -888,9 +888,9 @@ namespace psy { namespace core {
 	#endif
 	}
 
-	bool Machine::LoadFileChunk(RiffFile* pFile)
+	bool Machine::LoadFileChunk(RiffFile* pFile,int version)
 	{
-		std::uint32_t temp, version;
+		std::uint32_t temp;
 		pFile->Read(_bypass);
 		pFile->Read(_mute);
 		pFile->Read(_panning);

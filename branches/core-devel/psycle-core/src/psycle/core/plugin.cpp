@@ -354,7 +354,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 {
 	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
 ///FIXME: Add the Information about the tweaks.
-#if 0
+
 	if(pData.note() == notetypes::tweak)
 	{
 		if( pData.instrument() < info_->numParameters)
@@ -462,7 +462,6 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			return;
 		}
 	}
-#endif
 }
 
 void Plugin::Stop( )

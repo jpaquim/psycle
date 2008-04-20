@@ -93,10 +93,10 @@ void LadspaHost::FillPluginInfo(const std::string& currentPath, const std::strin
 		while (psDescriptor) {
 			PluginInfo pinfo;
 			pinfo.setName( psDescriptor->Label );
-			//info.setRole( plugin.mode() );
+			pinfo.setRole( MachineRole::EFFECT );
 			pinfo.setLibName( currentPath + fileName );
-			//info.setVersion( version );
-			//info.setAuthor( plugin.GetInfo().Author );
+			//pinfo.setVersion( version );
+			//pinfo.setAuthor( plugin.GetInfo().Author );
 			MachineKey key( hostCode() , fileName, index );
 			finder.AddInfo(key, pinfo);
 			psDescriptor = pfDescriptorFunction(++index);

@@ -198,6 +198,7 @@ namespace psy
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
 			Machine::id_type GetFreeFxBus();
 			/// Returns the Bus index out of a machine id.
+		public:
 			Machine::id_type FindBusFromIndex(Machine::id_type);
 			///\}
 
@@ -210,7 +211,8 @@ namespace psy
 
 			/// Changes the destination of a wire connection.
 			///\param wiresource source mac index
-			///\param wiredest new dest mac index
+			
+			//\param wiredest new dest mac index
 			///\param wireindex index of the wire in wiresource to change
 			bool ChangeWireDestMac(Machine& srcMac, Machine &newDstMac, OutPort::id_type srctype, Wire::id_type wiretochange, InPort::id_type dsttype);
 			/// Changes the destination of a wire connection.
@@ -278,9 +280,8 @@ namespace psy
 		/// UI stuff moved here
 		class UISong : public CoreSong
 		{
-		protected:
-			UISong();
 		public:
+			UISong();
 			virtual ~UISong(){};
 		};
 
@@ -294,9 +295,8 @@ namespace psy
 		// can access the real machine via the VisualMachine class.
 		class Song : public UISong
 		{
-		protected:
+		public:	
 			Song();
-		public:
 			virtual ~Song(){};
 			virtual void clear();
 			virtual void DeleteMachine(Machine* mac, bool write_locked = false);

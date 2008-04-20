@@ -22,6 +22,8 @@ namespace psy {
 		:
 			Machine(callbacks, id)
 		{
+			defineInputAsStereo();
+			defineOutputAsStereo();
 			SetEditName(_psName);
 			//DefineStereoInput(1);
 			//DefineStereoOutput(1);
@@ -314,6 +316,7 @@ namespace psy {
 			_rMax(0),
 			_outDry(256)
 		{
+			defineInputAsStereo();
 			SetEditName(_psName);
 			_outDry = 256;
 			SetAudioRange(32768.0f);

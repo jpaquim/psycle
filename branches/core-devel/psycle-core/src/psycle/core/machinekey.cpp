@@ -119,7 +119,7 @@ namespace psy
 		MachineKey& MachineKey::operator=( const MachineKey & key ) {
 			host_ = key.host();
 			dllName_ = key.dllName();
-			index_ = index_;
+			index_ = key.index();
 			return *this;
 		}
 		

@@ -23,6 +23,8 @@ namespace psy {
 		:
 			Machine(callbacks, id)
 		{
+			defineInputAsStereo(2);
+			defineOutputAsStereo();
 			SetEditName(_psName);
 			_numPars = 255;
 			SetAudioRange(32768.0f);

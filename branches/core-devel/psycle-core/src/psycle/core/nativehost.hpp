@@ -47,7 +47,7 @@ public:
 	virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }
 	virtual const std::string hostName() const { return "Native"; }
 	virtual std::string const & getPluginPath(int) const { return plugin_path_; }
-	virtual int getNumPluginPaths() { return 1; }
+	virtual int getNumPluginPaths() const { return 1; }
 	virtual void setPluginPath(std::string path) { plugin_path_ = path; }
 
 protected:

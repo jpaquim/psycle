@@ -535,7 +535,7 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 		char sDllName[256];
 		file->Read(type);
 		file->ReadString(sDllName,256);
-
+		bool failedLoad=false;
 		switch (type)
 		{
 		case MACH_MASTER:
@@ -595,9 +595,11 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << sDllName;
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
+			failedLoad=true;
 		}
 		song.AddMachine(mac);
-		mac->LoadFileChunk(file);
+		mac->LoadFileChunk(file,minorversion);
+		if (failedLoad) mac->SetEditName(mac->GetEditName() + " (replaced)");
 	}
 	return song.machine(index) != 0;
 }

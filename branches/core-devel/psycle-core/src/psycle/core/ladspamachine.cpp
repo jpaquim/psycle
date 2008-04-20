@@ -178,7 +178,8 @@ namespace psy {
 			// Step five: Prepare the structures to use the plugin with the program.
 			std::cout << "step five" << std::endl;
 			prepareStructures();
-			
+			defineInputAsStereo();
+			defineOutputAsStereo();			
 			// and switch on:
 			std::cout << "step six" << std::endl;
 		

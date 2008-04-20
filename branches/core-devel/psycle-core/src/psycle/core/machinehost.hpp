@@ -45,7 +45,7 @@ public:
 	virtual const std::string hostName() const = 0;
 	
 	virtual std::string const & getPluginPath(int) const { static std::string ret = ""; return ret; };
-	virtual int getNumPluginPaths() { return 0; }
+	virtual int getNumPluginPaths() const { return 0; }
 	virtual void setPluginPath(std::string ) {};
 protected:
 	virtual void FillPluginInfo(const std::string&, const std::string& , PluginFinder& ) = 0;
