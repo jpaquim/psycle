@@ -75,14 +75,14 @@ Machine* LadspaHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine:
 	return 0;
 }
 
-void LadspaHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName,PluginFinder& finder)
+void LadspaHost::FillPluginInfo(const std::string& fullName, const std::string& fileName,PluginFinder& finder)
 {
 	#if defined __unix__ || defined __APPLE__
 	#else
 		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#endif
 
-	void* hInstance = LoadDll(fileName);
+	void* hInstance = LoadDll(fullName);
 	if (!hInstance) return;
 	
 	LADSPA_Descriptor_Function pfDescriptorFunction;
@@ -92,11 +92,11 @@ void LadspaHost::FillPluginInfo(const std::string& currentPath, const std::strin
 		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(index);
 		while (psDescriptor) {
 			PluginInfo pinfo;
-			pinfo.setName( psDescriptor->Label );
+			pinfo.setName( psDescriptor->Name );
 			pinfo.setRole( MachineRole::EFFECT );
-			pinfo.setLibName( currentPath + fileName );
+			pinfo.setLibName( fullName );
 			//pinfo.setVersion( version );
-			//pinfo.setAuthor( plugin.GetInfo().Author );
+			pinfo.setAuthor( psDescriptor->Maker );
 			MachineKey key( hostCode() , fileName, index );
 			finder.AddInfo(key, pinfo);
 			psDescriptor = pfDescriptorFunction(++index);
@@ -110,8 +110,9 @@ void LadspaHost::setPluginPath(std::string path)
 	//FIXME: this just uses the first path in getenv. Do this for each path.
 	// The best way would be pre-process and store a vector of strings.
 	#if defined __unix__ || defined __APPLE__
-		std::string::size_type dotpos = path.find(':',0);
+		std::string::size_type dotpos = path.find(':');
 		if ( dotpos != path.npos ) plugin_path_ = path.substr( 0, dotpos );
+		else plugin_path_ = path;
 	#else
 		plugin_path_ = path;
 	#endif
@@ -122,6 +123,7 @@ void* LadspaHost::LoadDll( const std::string & fileName ) const
 {
 	void* libHandle_ = 0;
 	// Step one: Open the shared library.
+	std::cout << "step one" << std::endl;
 #if defined __unix__ || defined __APPLE__
 	libHandle_ = dlopen( fileName.c_str() , RTLD_NOW);
 #else
@@ -136,6 +138,7 @@ void* LadspaHost::LoadDll( const std::string & fileName ) const
 
 LADSPA_Descriptor_Function LadspaHost::LoadDescriptorFunction( void* libHandle_ ) const {
 	// Step two: Get the entry function.
+	std::cout << "step two" << std::endl;
 	LADSPA_Descriptor_Function pfDescriptorFunction =
 		(LADSPA_Descriptor_Function)
 	#if defined __unix__ || defined __APPLE__

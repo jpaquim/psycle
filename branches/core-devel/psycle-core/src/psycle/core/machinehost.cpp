@@ -50,7 +50,8 @@ void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst)
 		currentPath = currentPath + File::slash();
 		std::vector<std::string>::iterator it = fileList.begin();
 		for ( ; it < fileList.end(); ++it ) {
-			FillPluginInfo(currentPath,*it,finder);
+			std::string fullName = currentPath + *it;
+			FillPluginInfo(fullName,*it,finder);
 		}
 	}
 }

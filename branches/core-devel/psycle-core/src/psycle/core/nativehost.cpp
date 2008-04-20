@@ -79,7 +79,7 @@ Machine* NativeHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine:
 }
 
 
-void NativeHost::FillPluginInfo(const std::string& currentPath, const std::string& fileName, PluginFinder& finder)
+void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& fileName, PluginFinder& finder)
 {
 	#if defined __unix__ || defined __APPLE__
 		if ( fileName.find( "lib-xpsycle.") == std::string::npos ) return;
@@ -87,7 +87,7 @@ void NativeHost::FillPluginInfo(const std::string& currentPath, const std::strin
 		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#endif
 	
-	void* hInstance = LoadDll(fileName);
+	void* hInstance = LoadDll(fullName);
 	if (!hInstance) return;
 	
 	CMachineInfo* minfo = LoadDescriptor(hInstance);
@@ -96,7 +96,7 @@ void NativeHost::FillPluginInfo(const std::string& currentPath, const std::strin
 		pinfo.setName( minfo->Name );
 		bool _isSynth = (minfo->Flags == 3);
 		pinfo.setRole( _isSynth?MachineRole::GENERATOR:MachineRole::EFFECT );
-		pinfo.setLibName(currentPath + fileName);
+		pinfo.setLibName(fullName);
 		std::ostringstream o;
 		std::string version;
 		if (!(o << minfo->Version )) version = o.str();

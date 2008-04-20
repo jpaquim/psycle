@@ -80,7 +80,6 @@ namespace psy {
 				virtual bool SetParameter(int numparam,int value);
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile) const;
-				std::string label() const { return psDescriptor ? psDescriptor->Label : ""; }
 
 			private:
 				void prepareStructures(void);

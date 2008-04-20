@@ -171,7 +171,7 @@ namespace psy {
 		, psDescriptor(psDescriptor1)
 		, pluginHandle(pluginHandle1)
 		{
-			SetEditName(label());
+			SetEditName(GetName());
 			SetAudioRange(1.0f);
 			//pOutSamplesL= new LADSPA_Data[STREAM_SIZE];
 			//pOutSamplesR= new LADSPA_Data[STREAM_SIZE];
