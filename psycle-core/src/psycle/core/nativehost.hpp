@@ -18,42 +18,46 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PLUGIN_FINDER
-#define PSYCLE__CORE__PLUGIN_FINDER
 
-#include "machinekey.hpp"
+#ifndef NATIVEHOST_HPP
+#define NATIVEHOST_HPP
+
+#include "machinehost.hpp"
 #include "plugininfo.h"
-#include <vector>
+
 #include <map>
 
-namespace psy
+namespace psycle { namespace plugin_interface {
+class CMachineInfo;
+class CMachineInterface;
+}}
+
+namespace psy{ namespace core{
+
+class NativeHost : public MachineHost
 {
-	namespace core
-	{
-		class PluginFinder
-		{
-			protected:
-				PluginFinder();
-				~PluginFinder();
-			public:
-				static PluginFinder& getInstance();
-				virtual void addHost(Hosts::type);
-				virtual bool hasHost(Hosts::type) const;
+protected:
+	NativeHost(MachineCallbacks*);
+public:
+	~NativeHost();
+	static NativeHost& getInstance(MachineCallbacks*);
 
-				virtual void AddInfo(const MachineKey &, const PluginInfo& );
-				PluginInfo info(const MachineKey & key );
-				const PluginInfo& info( const MachineKey & key ) const;
-				bool hasKey( const MachineKey& key ) const;
-				std::string lookupDllName( const MachineKey & key ) const;
-			
-				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
-				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
-				virtual void ClearMap(Hosts::type);
+	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);
 
-			protected:
-				PluginInfo empty_;
-				std::vector<std::map<MachineKey, PluginInfo> > maps_;
-		};
-	}
-}
-#endif
+	virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }
+	virtual const std::string hostName() const { return "Native"; }
+	virtual std::string const & getPluginPath(int) const { return plugin_path_; }
+	virtual int getNumPluginPaths() const { return 1; }
+	virtual void setPluginPath(std::string path) { plugin_path_ = path; }
+
+protected:
+	virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder&);
+	void* LoadDll( const std::string& );
+	psycle::plugin_interface::CMachineInfo* LoadDescriptor(void* );
+	psycle::plugin_interface::CMachineInterface* Instantiate(void * );
+	void UnloadDll( void*  );
+	std::string plugin_path_;
+};
+
+}}
+#endif // NATIVEHOST_HPP

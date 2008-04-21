@@ -23,18 +23,10 @@
 
 #include "machine.h"
 
-//#include "analyzer.h"
 #include "song.h"
 #include "dsp.h"
 #include "helpers/math/round.hpp"
 #include "fileio.h"
-
-// The inclusion of the following headers is needed because of a bad design.
-// The use of these subclasses in a function of the base class should be 
-// moved to the Song loader.
-#include "internal_machines.h"
-#include "plugin.h"
-#include "sampler.h"
 
 #include <cstddef>
 #include <cstdlib> // for posix_memalign
@@ -261,15 +253,12 @@ namespace psy { namespace core {
 		//An outport, by default, does nothing.
 	}
 
-	Machine::Machine(MachineCallbacks* callbacks, Machine::type_type type, Machine::mode_type mode, Machine::id_type id, CoreSong * song)
+	Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 	:
 		crashed_(),
 		//fpu_exception_mask_(),
-		type_(type),
-		mode_(mode),
 		id_(id),
 		callbacks(callbacks),
-		song_(song),
 		playColIndex(0),
 		_bypass(false),
 		_standby(false),
@@ -302,6 +291,7 @@ namespace psy { namespace core {
 		TWSActive(false),
 		TWSSamples(0)
 	{
+
 		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
 		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
 
@@ -311,7 +301,12 @@ namespace psy { namespace core {
 		
 		for (int c = 0; c<MAX_TRACKS; c++)
 		{
-			TriggerDelay[c].setCommand( 0 );
+			#if 0
+			CommandEvent event(0,0);
+			TriggerDelay[c].SetCommand(0,event);
+			#else
+			TriggerDelay[c].setCommand(0);
+			#endif
 			TriggerDelayCounter[c]=0;
 			RetriggerRate[c]=256;
 			ArpeggioCount[c]=0;
@@ -333,85 +328,76 @@ namespace psy { namespace core {
 			_inputCon[i]=false;
 		}
 	}
-	Machine::Machine(Machine* mac,type_type type,MachineMode mode)
-	://fpu_exception_mask_(),
-	crashed_()
-	,type_(type)
-	,mode_(mode)
-	,id_(mac->id_)
-	,callbacks(mac->callbacks)
-	,song_(mac->song_)
-	,playColIndex(0)
-	,_bypass(mac->_bypass)
-	,_standby(false)
-	,_mute(mac->_mute)
-	,_waitingForSound(false)
-	,_worked(false)
-	,audio_range_(1.0f)
-	,numInPorts(0)
-	,numOutPorts(0)
-	,inports(0)
-	,outports(0)
-	,_isMixerSend(false)
-	,_connectedInputs(mac->_connectedInputs)
-	,_connectedOutputs(mac->_connectedOutputs)
-	,_panning(mac->_panning)
-	,_lVol(mac->_lVol)
-	,_rVol(mac->_rVol)
-	,editName_(mac->GetEditName())
-	,_numPars(0)
-	,_nCols(1)
-	,_x(mac->_x)
-	,_y(mac->_y)
-	,_volumeCounter(0.0f)
-	,_volumeDisplay(0)
-	,_volumeMaxDisplay(0)
-	,_volumeMaxCounterLife(0)
-	,_scopePrevNumSamples(0)
-	,_scopeBufferIndex(0)
-	,_pScopeBufferL(0)
-	,_pScopeBufferR(0)
-	,TWSActive(false)
-	,TWSSamples(0)
-	{
-		aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
-		aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
-		
-		// Clear machine buffer samples
-		dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
-		dsp::Clear(_pSamplesR,MAX_BUFFER_LENGTH);
-
-		for (int c = 0; c<MAX_TRACKS; c++)
-		{
-			TriggerDelay[c].setCommand( 0 );
-			TriggerDelayCounter[c]=0;
-			RetriggerRate[c]=256;
-			ArpeggioCount[c]=0;
-		}
-		for (int c = 0; c<MAX_TWS; c++)
-		{
-			TWSInst[c] = 0;
-			TWSDelta[c] = 0;
-			TWSCurrent[c] = 0;
-			TWSDestination[c] = 0;
-		}
-		for (int i = 0; i<MAX_CONNECTIONS; i++)
-		{
-			_inputMachines[i]=mac->_inputMachines[i];
-			_outputMachines[i]=mac->_outputMachines[i];
-			_inputConVol[i]=mac->_inputConVol[i];
-			_wireMultiplier[i]=(mac->_wireMultiplier[i]*mac->GetAudioRange()/GetAudioRange());
-			_connection[i]=mac->_connection[i];
-			_inputCon[i]=mac->_inputCon[i];
-		}
-	}
 
 	Machine::~Machine()
 	{
 		aligned_dealloc(_pSamplesL);
 		aligned_dealloc(_pSamplesR);
 	}
+	void Machine::CloneFrom(Machine& src) 
+	{
+		// Only allow to copy from a machine of the same type.
+		if ( getMachineKey() != src.getMachineKey())
+			return;
+		SetPan(src.Pan());
+		SetPosX(src.GetPosX()+32);
+		SetPosY(src.GetPosY()+16);
+		#if 1
+		{
+			std::stringstream s;
+			s << src.GetEditName() << " " << std::hex << id() << " (cloned from " << std::hex << src.id() << ")";
+			SetEditName(s.str());
+		}
+		#else ///\todo rewrite this for std::string
+			int number = 1;
+			char buf[sizeof(machine_[dst]->_editName)+4];
+			strcpy (buf,machine_[dst]->_editName);
+			char* ps = strrchr(buf,' ');
+			if (ps)
+			{
+				number = atoi(ps);
+				if (number < 1)
+				{
+					number =1;
+				}
+				else
+				{
+					ps[0] = 0;
+					ps = strchr(machine_[dst]->_editName,' ');
+					ps[0] = 0;
+				}
+			}
 
+			for (int i = 0; i < MAX_MACHINES-1; i++)
+			{
+				if (i!=dst)
+				{
+					if (machine_[i])
+					{
+						if (strcmp(machine_[i]->_editName,buf)==0)
+						{
+							number++;
+							sprintf(buf,"%s %d",machine_[dst]->_editName.c_str(),number);
+							i = -1;
+						}
+					}
+				}
+			}
+
+			buf[sizeof(machine_[dst]->_editName)-1] = 0;
+			SetEditName(buf);
+		#endif
+
+		SetEditName(src.GetEditName());
+
+		///\FIXME: Implement MemoryFile.
+		MemoryFile file;
+		file.OpenMem(1000);
+		///FIXME: Version anyone?! 
+		src.SaveSpecificChunk(&file);
+		LoadSpecificChunk(&file,0);
+		file.CloseMem();
+	}
 	void Machine::Init()
 	{
 		// Standard gear initalization
@@ -480,25 +466,28 @@ namespace psy { namespace core {
 		if ( !_connection[srcwire])
 			return false;
 
-		Machine *oldDst = song()->machine(_connection[srcwire]);
+		Machine *oldDst = callbacks->song().machine(_outputMachines[srcwire]);
 		if (oldDst)
 		{
-			Wire::id_type oldwire,dstwire;
-			if ((oldwire = oldDst->FindInputWire(id()))== -1)
-				return false;
-
-			if ((dstwire = dstMac.GetFreeInputWire(dsttype)) == -1)
-				return false;
-
-			float volume = 1.0f;
-			oldDst->GetWireVolume(oldwire,volume);
-			///\todo: Error dsttype may not be the correct type. FindInputWire should give that info to us.
-			oldDst->DeleteInputWire(oldwire,dsttype);
-			InsertOutputWire(dstMac,srcwire,srctype);
-			dstMac.InsertInputWire(*this,dstwire,dsttype,volume);
-			return true;
+			return MoveWireDestTo(dstMac, srctype, srcwire, dsttype, *oldDst);
 		}
 		return false;
+	}
+	bool Machine::MoveWireDestTo(Machine& dstMac, OutPort::id_type srctype, Wire::id_type srcwire, InPort::id_type dsttype, Machine& oldDst)
+	{
+			Wire::id_type oldwire,dstwire;
+		if ((oldwire = oldDst.FindInputWire(id()))== -1)
+			return false;
+		if ((dstwire = dstMac.GetFreeInputWire(dsttype)) == -1)
+			return false;
+
+		float volume = 1.0f;
+		oldDst.GetWireVolume(oldwire,volume);
+		///FIXME: Error dsttype may not be the correct type. FindInputWire should give that info to us.
+		oldDst.DeleteInputWire(oldwire,dsttype);
+		InsertOutputWire(dstMac,srcwire,srctype);
+		dstMac.InsertInputWire(*this,dstwire,dsttype,volume);
+		return true;
 	}
 	bool Machine::MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype)
 	{
@@ -506,24 +495,29 @@ namespace psy { namespace core {
 			return false;
 		if ( !_inputCon[dstwire])
 			return false;
-		if (_inputMachines[dstwire] == -1) 
-			return false;
 
-		Machine *oldDst = song()->machine(_connection[dstwire]);
-		if (oldDst)
+		Machine *oldSrc = callbacks->song().machine(_inputMachines[dstwire]);
+		if (oldSrc)
 		{
-			Wire::id_type oldwire;
-			float volume = 1.0f;
-			if ((oldwire =oldDst->FindOutputWire(id())) == -1)
-				return false;
-			///\todo: Error srctype may not be the correct type. FindOutputWire should give that info to us.
-			oldDst->DeleteOutputWire(oldwire,srctype);
-			srcMac.InsertOutputWire(*this,dstwire,dsttype);
-			GetWireVolume(dstwire,volume);
-			InsertInputWire(srcMac,dstwire,dsttype,volume);
-			return true;
+			return MoveWireSourceTo(srcMac,dsttype,dstwire,srctype,*oldSrc);
 		}
 		return false;
+	}
+	bool Machine::MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype, Machine& oldSrc)
+	{
+		Wire::id_type oldwire, srcwire;
+		float volume = 1.0f;
+		if ((oldwire = oldSrc.FindOutputWire(id())) == -1)
+			return false;
+		if ((srcwire = srcMac.GetFreeOutputWire(srctype)) == -1)
+			return false;
+
+		///\todo: Error srctype may not be the correct type. FindOutputWire should give that info to us.
+		oldSrc.DeleteOutputWire(oldwire,srctype);
+		srcMac.InsertOutputWire(*this,srcwire,srctype);
+		GetWireVolume(dstwire,volume);
+		InsertInputWire(srcMac,dstwire,dsttype,volume);
+		return true;
 	}
 
 	bool Machine::Disconnect( Machine& dstMac )
@@ -550,7 +544,7 @@ namespace psy { namespace core {
 			{
 				if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
 				{
-					iMac = song()->machine(_inputMachines[w]);
+					iMac = callbacks->song().machine(_inputMachines[w]);
 					if (iMac)
 					{
 						Wire::id_type wix = iMac->FindOutputWire(id());
@@ -567,7 +561,7 @@ namespace psy { namespace core {
 			{
 				if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
 				{
-					iMac = song()->machine(_outputMachines[w]);
+					iMac = callbacks->song().machine(_outputMachines[w]);
 					if (iMac)
 					{
 						Wire::id_type wix = iMac->FindInputWire(id());
@@ -626,13 +620,16 @@ namespace psy { namespace core {
 	{
 		//Work down the connection wires until finding the mixer.
 		for (int i(0);i< MAX_CONNECTIONS; ++i)
-			if ( _connection[i]) song()->machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
+			if ( _connection[i]) callbacks->song().machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
 	}
-	void Machine::SetMixerSendFlag()
+	void Machine::SetMixerSendFlag(CoreSong* song)
 	{
+		if (!song) song = &callbacks->song();
 		for (int i(0);i<MAX_CONNECTIONS;++i)
 		{
-			if (_inputCon[i]) song()->machine(_inputMachines[i])->SetMixerSendFlag();
+			if (_inputCon[i]) {
+				song->machine(_inputMachines[i])->SetMixerSendFlag();
+			}
 		}
 		_isMixerSend=true;
 	}
@@ -642,7 +639,7 @@ namespace psy { namespace core {
 		for (int i(0);i< MAX_CONNECTIONS; ++i)
 			if ( _inputCon[i])
 			{
-				song()->machine(_inputMachines[i])->ClearMixerSendFlag();
+				callbacks->song().machine(_inputMachines[i])->ClearMixerSendFlag();
 			}
 			
 		_isMixerSend=false;
@@ -712,30 +709,11 @@ namespace psy { namespace core {
 		}
 		return Wire::id_type(-1);
 	}
-#if 0
-	bool Machine::acceptsConnections() const
-	{
-		if (mode() == MACHMODE_FX || mode() == MACHMODE_MASTER) {
-			return true;
-		} else {
-			return false;  
-		}
-	}
-
-	bool Machine::emitsConnections() const
-	{
-		if (mode() == MACHMODE_GENERATOR || mode() == MACHMODE_FX) {
-			return true;
-		} else {
-			return false;  
-		}
-	}
-#endif
 	bool Machine::SetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float value)
 	{
 		// Get reference to the destination machine
 		if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-		Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
+		Machine *_pDstMachine = callbacks->song().machine(_outputMachines[WireIndex]);
 		if (_pDstMachine)
 		{
 			Wire::id_type c;
@@ -752,7 +730,7 @@ namespace psy { namespace core {
 	{
 		// Get reference to the destination machine
 		if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-		const Machine *_pDstMachine = song()->machine(_outputMachines[WireIndex]);
+		const Machine *_pDstMachine = callbacks->song().machine(_outputMachines[WireIndex]);
 		if (_pDstMachine)
 		{
 			Wire::id_type c;
@@ -824,7 +802,7 @@ namespace psy { namespace core {
 		{
 			if (_inputCon[i])
 			{
-				Machine* pInMachine = song()->machine(_inputMachines[i]);
+				Machine* pInMachine = callbacks->song().machine(_inputMachines[i]);
 				if (pInMachine)
 				{
 					if (!pInMachine->_worked && !pInMachine->_waitingForSound)
@@ -856,25 +834,28 @@ namespace psy { namespace core {
 		//wire_cpu_cost(wire_cpu_cost() + wcost);
 	}
 
-#if 0
 
 	void Machine::defineInputAsStereo(int numports)
 	{
 		numInPorts=numports;
+		#if 0
 		///\todo: ArraY!!!!
 		inports = new InPort(*this,0,"Stereo In");
+		#endif
 	}
 
 	void Machine::defineOutputAsStereo(int numports)
 	{
 		numOutPorts=numports;
+		#if 0
 		///\todo: ArraY!!!!
 		outports = new OutPort(*this,0,"Stereo Out");
+		#endif
 	}
-#endif
+	
 	void Machine::UpdateVuAndStanbyFlag(int numSamples)
 	{
-#if defined PSYCLE__CONFIGURATION__RMS_VUS
+	#if defined PSYCLE__CONFIGURATION__RMS_VUS
 		_volumeCounter = dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
@@ -899,7 +880,7 @@ namespace psy { namespace core {
 				Standby(true);
 			}
 		}
-#else
+	#else
 		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 		//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 		int temp(common::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
@@ -915,7 +896,44 @@ namespace psy { namespace core {
 				Standby(true);
 			}
 		}
-#endif
+	#endif
+	}
+
+	bool Machine::LoadFileChunk(RiffFile* pFile,int version)
+	{
+		std::uint32_t temp;
+		pFile->Read(_bypass);
+		pFile->Read(_mute);
+		pFile->Read(_panning);
+		pFile->Read(temp);
+		SetPosX(temp);
+		pFile->Read(temp);
+		SetPosY(temp);
+		pFile->Read(_connectedInputs);
+		pFile->Read(_connectedOutputs);
+		for(int i = 0; i < MAX_CONNECTIONS; i++)
+		{
+			pFile->Read(_inputMachines[i]);
+			pFile->Read(_outputMachines[i]);
+			pFile->Read(_inputConVol[i]);
+			pFile->Read(_wireMultiplier[i]);
+			pFile->Read(_connection[i]);
+			pFile->Read(_inputCon[i]);
+		}
+		{
+			//see? no char arrays! god bless the stl
+			//it's still necessary to limit editname length, but i'm inclined to think 128 is plenty..
+			std::vector<char> nametemp(128);
+			pFile->ReadString(&nametemp[0], nametemp.size());
+			editName_.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
+		}
+		bool success = LoadSpecificChunk(pFile,version);
+		if (success) {
+			SetPan(_panning);
+			if (_bypass) Bypass(true);
+		}
+
+		return success;
 	}
 
 	bool Machine::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
@@ -934,186 +952,12 @@ namespace psy { namespace core {
 		return true;
 	}
 
-	Machine* Machine::LoadFileChunk(std::string const & plugin_path, CoreSong* pSong, RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen)
-	{
-		// assume version 0 for now
-		bool bDeleted(false);
-		Machine* pMachine;
-		type_type type;//,oldtype;
-		char dllName[256];
-		pFile->Read(type);
-		//oldtype=type;
-		pFile->ReadString(dllName,256);
-		switch (type)
-		{
-		case MACH_MASTER:
-			if (pSong->machine(MASTER_INDEX)) pMachine = pSong->machine(MASTER_INDEX);
-			else if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new Master(callbacks, index, pSong);
-			break;
-		case MACH_SAMPLER:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new Sampler(callbacks, index, pSong );
-			break;
-		case MACH_XMSAMPLER:
-			//if ( !fullopen ) 
-			pMachine = new Dummy(callbacks, index, pSong);
-			type = MACH_DUMMY;
-			//else pMachine = new XMSampler(index);
-			break;
-		case MACH_DUPLICATOR:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new DuplicatorMac(callbacks, index, pSong);
-			break;
-		case MACH_MIXER:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new Mixer(callbacks, index, pSong);
-			break;
-#if 0
-		case MACH_LFO:
-			if ( !fullopen ) pMachine = new Dummy(callbacks, index, pSong);
-			else pMachine = new LFO(callbacks, index, pSong);
-			break;
-#endif
-		case MACH_PLUGIN:
-			{
-				if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
-				else 
-				{
-					Plugin * p;
-					pMachine = p = new Plugin(callbacks, index, pSong);
-					if(!p->LoadDll(plugin_path, dllName))
-					{
-						pMachine = new Dummy(callbacks, index, pSong);
-						type = MACH_DUMMY;
-						delete p;
-						bDeleted = true;
-					}
-				}
-			}
-			break;
-		case MACH_VST:
-			{
-				if(!fullopen) pMachine = new Dummy(callbacks, index, pSong);
-				else 
-				{
-					//vst::instrument * p;
-					//pMachine = p = new vst::instrument(index);
-					//if(!p->LoadDll(dllName))
-					//{
-					pMachine = new Dummy(callbacks, index, pSong);
-					type = MACH_DUMMY;
-					//delete p;
-					//bDeleted = true;
-					//}
-				}
-			}
-			break;
-		case MACH_VSTFX:
-			{
-				//if(!fullopen) pMachine = new Dummy(callbacks, index);
-				//else 
-				//{
-				//vst::fx * p;
-				//pMachine = p = new vst::fx(callbacks, index);
-				//if(!p->LoadDll(dllName))
-				//{
-				pMachine = new Dummy(callbacks, index, pSong);
-				type = MACH_DUMMY;
-				//delete p;
-				//bDeleted = true;
-				//}
-				//}
-			}
-			break;
-		default:
-			//if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
-			std::cerr << "Please inform the devers about this message: unknown kind of machine while loading new file format" << std::endl;
-			pMachine = new Dummy(callbacks, index, pSong);
-			break;
-		}
-		pMachine->Init();
-		int temp;
-		if(!bDeleted)
-		{
-			///\todo: Is it even necessary???
-			/// for the winamp plugin maybe?
-			pMachine->type(type);
-		}
-		pFile->Read(pMachine->_bypass);
-		pFile->Read(pMachine->_mute);
-		pFile->Read(pMachine->_panning);
-		pFile->Read(temp);
-		pMachine->SetPosX(temp);
-		pFile->Read(temp);
-		pMachine->SetPosY(temp);
-		pFile->Read(pMachine->_connectedInputs);
-		pFile->Read(pMachine->_connectedOutputs);
-		for(int i = 0; i < MAX_CONNECTIONS; i++)
-		{
-			pFile->Read(pMachine->_inputMachines[i]);
-			pFile->Read(pMachine->_outputMachines[i]);
-			pFile->Read(pMachine->_inputConVol[i]);
-			pFile->Read(pMachine->_wireMultiplier[i]);
-			pFile->Read(pMachine->_connection[i]);
-			pFile->Read(pMachine->_inputCon[i]);
-		}
-		{
-			//see? no char arrays! god bless the stl
-			//it's still necessary to limit editname length, but i'm inclined to think 128 is plenty..
-			std::vector<char> nametemp(128);
-			pFile->ReadString(&nametemp[0], nametemp.size());
-			pMachine->editName_.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
-		}
-		if(bDeleted) pMachine->editName_ += " (replaced)";
-		if(!fullopen) return pMachine;
-		if(!pMachine->LoadSpecificChunk(pFile,version))
-		{
-			{
-				std::ostringstream s;
-				s << "Missing or Corrupted Machine Specific Chunk " << dllName << std::endl << "Replacing with Dummy.";
-				std::cerr << s.str() << std::endl;
-				//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-			}
-			Machine* p = new Dummy(callbacks, index, pSong);
-			p->Init();
-			p->type(MACH_DUMMY);
-			p->mode(pMachine->mode());
-			p->_bypass=pMachine->_bypass;
-			p->_mute=pMachine->_mute;
-			p->_panning=pMachine->_panning;
-			p->SetPosX(pMachine->GetPosX());
-			p->SetPosY(pMachine->GetPosY());
-			p->_connectedInputs=pMachine->_connectedInputs; // number of Incoming connections
-			p->_connectedOutputs=pMachine->_connectedOutputs; // number of Outgoing connections
-			for(int i = 0; i < MAX_CONNECTIONS; i++)
-			{
-				p->_inputMachines[i]=pMachine->_inputMachines[i];
-				p->_outputMachines[i]=pMachine->_outputMachines[i];
-				p->_inputConVol[i]=pMachine->_inputConVol[i];
-				p->_wireMultiplier[i]=pMachine->_wireMultiplier[i];
-				p->_connection[i]=pMachine->_connection[i];
-				p->_inputCon[i]=pMachine->_inputCon[i];
-			}
-			pMachine->editName_ += " (replaced)";
-			p->_numPars = 0;
-			delete pMachine;
-			pMachine = p;
-		}
-
-		if(index < MAX_BUSES) pMachine->mode(MACHMODE_GENERATOR);
-		else if (index < MAX_BUSES * 2) pMachine->mode(MACHMODE_FX);
-		else pMachine->mode(MACHMODE_MASTER);
-
-		pMachine->SetPan(pMachine->_panning);
-		if (pMachine->_bypass) pMachine->Bypass(true);
-		return pMachine;
-	}
-
 	void Machine::SaveFileChunk(RiffFile* pFile) const
 	{
+		/* FIXME: Move this to the psyfilter saver.
 		pFile->Write(type());
 		SaveDllName(pFile);
+		*/
 		pFile->Write(_bypass);
 		pFile->Write(_mute);
 		pFile->Write(_panning);
@@ -1130,8 +974,8 @@ namespace psy { namespace core {
 			pFile->Write(_connection[i]);
 			pFile->Write(_inputCon[i]);
 		}
-		pFile->WriteArray(GetEditName().c_str(), GetEditName().length()+1); //a max of 128 chars will be read on song load, but there's no real
-		// reason to limit what gets saved here.. (is there?)
+		pFile->WriteArray(GetEditName().c_str(), GetEditName().length()+1); //a max of 256 chars will be read on song load, but there's no real
+											// reason to limit what gets saved here.. (is there?)
 		SaveSpecificChunk(pFile);
 	}
 
@@ -1146,12 +990,6 @@ namespace psy { namespace core {
 			std::uint32_t temp = GetParamValue(i);
 			pFile->Write(temp);
 		}
-	}
-
-	void Machine::SaveDllName(RiffFile* pFile) const
-	{
-		char temp=0;
-		pFile->Write(temp);
 	}
 
 	void Machine::AddEvent( double offset, int track, const PatternEvent & event )

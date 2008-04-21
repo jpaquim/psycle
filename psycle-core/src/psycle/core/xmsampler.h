@@ -21,15 +21,17 @@
 #ifndef XMSAMPLER_H
 #define XMSAMPLER_H
 
+#include "machine.h"
 /**
 @author  Psycledelics
 */
-class XMSampler{
+namespace psy { namespace core {
+class XMSampler : public Machine {
 public:
-		XMSampler();
-
-		~XMSampler();
-
+	XMSampler(MachineCallbacks* callb,Machine::id_type id);
+	~XMSampler();
 };
 
+}}
 #endif
+

@@ -21,11 +21,15 @@
 #include "psy2filter.h"
 #include "commands.h"
 #include "fileio.h"
+#include "song.h"
+#include "machinefactory.h"
+#include "convert_internal_machines.private.hpp"
+
+//Needed since the psy2loading source has been moved here
 #include "internal_machines.h"
 #include "sampler.h"
 #include "plugin.h"
-#include "song.h"
-#include "convert_internal_machines.private.hpp"
+
 #include <sstream>
 #include <iostream>
 
@@ -64,12 +68,12 @@ void Psy2Filter::preparePatternSequence( CoreSong & song )
 	seqList.clear();
 	song.patternSequence()->removeAll();
 	// create a single Pattern Category
-	singleCat = song.patternSequence()-> patternData()->createNewCategory("SinglePattern");
+	singleCat = song.patternSequence()-> patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-bool Psy2Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks)
+bool Psy2Filter::load(const std::string & fileName, CoreSong & song)
 {
 	std::int32_t num;
 	RiffFile file;
@@ -96,9 +100,9 @@ bool Psy2Filter::load(std::string const & plugin_path, const std::string & fileN
 	LoadINSD(&file,song);
 	LoadWAVD(&file,song);
 	PreLoadVSTs(&file,song);
-	convert_internal_machines::Converter converter(plugin_path);
-	LoadMACD(plugin_path, &file,song,&converter,callbacks);
-	TidyUp(&file,song,&converter);
+	convert_internal_machines::Converter converter;
+	LoadMACD(&file,song,converter);
+	TidyUp(&file,song,converter);
 	return true;
 }
 
@@ -186,12 +190,16 @@ bool Psy2Filter::LoadPATD(RiffFile* file,CoreSong& song,int index)
 
 	if(numLines > 0)
 	{
-		// create a SinglePattern
+		// create a Pattern
 		std::string indexStr;
 		std::ostringstream o;
 		if (!(o << index)) indexStr = "error";
 		else indexStr = o.str();
+		#if 0
+		Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#else
 		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;
@@ -322,7 +330,7 @@ bool Psy2Filter::LoadINSD(RiffFile* file,CoreSong& song)
 	}
 	return true;
 }
-		
+
 bool Psy2Filter::LoadWAVD(RiffFile* file,CoreSong& song)
 {
 	std::int32_t i;
@@ -402,155 +410,116 @@ bool Psy2Filter::PreLoadVSTs(RiffFile* file,CoreSong& /*song*/)
 	return true;
 }
 
-bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks)
+bool Psy2Filter::LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter)
 {
+	MachineFactory& factory = MachineFactory::getInstance();
 	std::int32_t i;
 	file->ReadArray(_machineActive,128);
 	std::memset(pMac,0,sizeof pMac);
 
 	for (i=0; i<128; i++)
 	{
-		Sampler* pSampler=NULL;
-		//XMSampler* pXMSampler=NULL;
-		Plugin* pPlugin=NULL;
-		//vst::plugin * pVstPlugin(0);
 		std::int32_t x,y,type;
 		if (_machineActive[i])
 		{
 			//progress.emit(4,8192+i*(4096/128),"");
-
 			file->Read(x);
 			file->Read(y);
-
 			file->Read(type);
 
-			if(converter->plugin_names().exists(type))
-				pMac[i] = &converter->redirect(i, type, *file,song);
-			else switch (type)
-			{
-			case MACH_PLUGIN:
-			{
-				pMac[i] = pPlugin = new Plugin(callbacks,i,&song);
-				// Should the "Init()" function go here? -> No. Needs to load the dll first.
-				if (!pMac[i]->LoadPsy2FileFormat(plugin_path, file))
+			if(converter.plugin_names().exists(type)) {
+				pMac[i] = &converter.redirect(factory,i, type, *file);
+			} else {
+				switch (type)
 				{
-					Machine* pOldMachine = pMac[i];
-					pMac[i] = new Dummy(pOldMachine);
-					// dummy name goes here
-					std::stringstream s;
-					s << "X!" << pOldMachine->GetEditName();
-					pMac[i]->SetEditName(s.str());
-					delete pOldMachine; pOldMachine = 0;
-				}
-				break;
-			}
-			case MACH_MASTER:
-				pMac[i] = song.machine(MASTER_INDEX);
-				goto init_and_load;
-			case MACH_SAMPLER:
-				pMac[i] = pSampler = new Sampler(callbacks,i,&song);
-				goto init_and_load;
-			#if 0
-			case MACH_XMSAMPLER:
-				pMac[i] = pXMSampler = new XMSampler(i);
-				goto init_and_load;
-			#endif
-			case MACH_VST:
-			case MACH_VSTFX:
-				//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
-				//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
-				pMac[i] = new Dummy(callbacks,i,&song);
-				if (type == MACH_VST ) pMac[i]->mode(MACHMODE_FX);
-				else pMac[i]->mode(MACHMODE_GENERATOR);
-				static_cast<Dummy*>(pMac[i])->wasVST=true;
-				goto init_and_load_VST;
-			case MACH_SCOPE:
-			case MACH_DUMMY:
-				pMac[i] = new Dummy(callbacks,i,&song);
-				goto init_and_load;
-			default:
-				{
-					std::ostringstream s;
-					s << "unkown machine type: " << type;
-					//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
-				}
-				pMac[i] = new Dummy(callbacks,i,&song);
+				case MACH_PLUGIN:
+					{
+					char sDllName[256];
+					file->ReadArray(sDllName,256); // Plugin dll name
+					sDllName[255]='\0';
+	
+					std::string dllName = sDllName;
+					unsigned int pos = dllName.find(".dll");
+					if (pos != std::string::npos) {
+						dllName = dllName.substr(0,pos);
+					}
+					dllName = MachineKey::preprocessName(dllName);
+					if (dllName == "arguru_bass" )
+					{
+						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::abass, *file);
+					}
+					else if (dllName == "arguru_synth" )
+					{
+						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::asynth1, *file);
+					}
+					else if (dllName == "arguru_synth_2" )
+					{
+						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::asynth2, *file);
+					}
+					else if (dllName == "synth21" )
+					{
+						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::asynth21, *file);
+					}
+					else 
+					{
+						pMac[i] = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName,0),i);
+						if (pMac[i] == 0 )
+						{
+							Plugin *p = ((Plugin*)factory.CreateMachine(MachineKey::failednative(),i));
+							p->LoadPsy2FileFormat(file);
+							pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
+							((Dummy*)pMac[i])->CopyFrom(p);
+						} else {
+							pMac[i]->LoadPsy2FileFormat(file);
+						}
+					}
+					break;
+					}
+				case MACH_VST:
+				case MACH_VSTFX:
+					{
+						pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
+						pMac[i]->LoadPsy2FileFormat(file);
+						file->Skip(6);
+					}
+					//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+					//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
+					break;
+				default:
+					{
+					switch(type)
+					{
+					case MACH_MASTER:
+						pMac[i] = factory.CreateMachine(MachineKey::master(),i);
+						break;
+					case MACH_SAMPLER:
+						pMac[i] = factory.CreateMachine(MachineKey::sampler(),i);
+						break;
+					case MACH_SCOPE:
+					case MACH_DUMMY:
+						pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
+						break;
+					default:
+						{
+						std::ostringstream s;
+						s << "unkown machine type: " << type;
+						std::cout << s.str();
+						//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+						}
+					}
+					if (!pMac[i]) {
+						pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
+	
+						std::ostringstream s;
+						s << "Couldnt create machine index: " << i << ", type: " << type;
+						std::cout << s.str();
 
-			init_and_load:
-				pMac[i]->Init();
-				pMac[i]->LoadPsy2FileFormat(plugin_path, file);
-				break;
-			init_and_load_VST:
-				pMac[i]->LoadPsy2FileFormat(plugin_path, file);
-				std::stringstream s;
-				s << "X!" << pMac[i]->GetEditName();
-				pMac[i]->SetEditName(s.str());
-	
-				file->Skip(sizeof(bool)+5);
-				#if 0
-				if ((pMac[i]->LoadOldFileFormat(file)) && (vstL[pVstPlugin->_instance].valid)) // Machine::Init() is done Inside "Load()"
-				{
-					std::string path = vstL[pVstPlugin->_instance].dllName;
-					if(!Gloxxxxxxxxxxxxxxxxxxxxbal::dllfinder().LookupDllPath(path,MACH_VST)) 
-					{
-						try
-						{
-							pVstPlugin->LoadDll(path,false);
-						}
-						catch(...)
-						{
-							std::ostringstream ss;
-							ss << "Plugin instancation threw an exception " << path << " - replacing with Dummy.";
-							MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
-	
-							Machine* pOldMachine = pMac[i];
-							pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-							pOldMachine->_pSamplesL = NULL;
-							pOldMachine->_pSamplesR = NULL;
-							// dummy name goes here
-							std::stringstream ss2;
-							ss2 << "X!" << pOldMachine->GetEditName();
-							pOldMachine->SetEditName(ss2.str());
-							zapObject(pOldMachine);
-							pMac[i]->_subclass = MACH_DUMMY;
-							((Dummy*)pMac[i])->wasVST = true;
-						}
+						//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 					}
-					else
-					{
-						std::ostringstream ss;
-						ss << "Missing  or disabled VST plug-in: " << vstL[pVstPlugin->_instance].dllName;
-						MessageBox(NULL,ss.str().c_str(), "Loading Error", MB_OK);
-	
-						Machine* pOldMachine = pMac[i];
-						pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-						pOldMachine->_pSamplesL = NULL;
-						pOldMachine->_pSamplesR = NULL;
-						// dummy name goes here
-						std::stringstream ss2;
-						ss2 << "X!" << pOldMachine->GetEditName();
-						pOldMachine->SetEditName(ss2.str());
-						zapObject(pOldMachine);
-						pMac[i]->_subclass = MACH_DUMMY;
-						((Dummy*)pMac[i])->wasVST = true;
+					pMac[i]->LoadPsy2FileFormat(file);
+					break;
 					}
 				}
-				else
-				{
-					Machine* pOldMachine = pMac[i];
-					pMac[i] = new Dummy(*((Dummy*)pOldMachine));
-					pOldMachine->_pSamplesL = NULL;
-					pOldMachine->_pSamplesR = NULL;
-					// dummy name goes here
-					std::stringstream ss;
-					ss << "X!" << pOldMachine->GetEditName();
-					pOldMachine->SetEditName(ss.str());
-					zapObject(pOldMachine);
-					pMac[i]->_subclass = MACH_DUMMY;
-					((Dummy*)pMac[i])->wasVST = true;
-				}
-				#endif
-				break;
 			}
 			pMac[i]->SetPosX(x);
 			pMac[i]->SetPosY(y);
@@ -567,9 +536,9 @@ bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSo
 		file->Read(song._pInstrument[i]->_lines);
 	}
 
-	// Validate the machine arrays. At the same time we fill volMatrix that
+	// Validate the machine arrays. At the same time we fill the volMatrix array which 
 	// we will use later on to correctly initialize the wire volumes.
-	for (i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
+	for (i=0; i<128; i++) 
 	{
 		if (!_machineActive[i])
 		{
@@ -639,44 +608,15 @@ bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSo
 		{
 			if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
 				busEffect[i] = 255;
-			// If there's a dummy, force it to be an effect
-			else if (pMac[busEffect[i]]->type() == MACH_DUMMY ) 
-			{
-				pMac[busEffect[i]]->mode(MACHMODE_FX);
-			}
-			// Else if the machine is a generator, move it to gens bus.
-			// This can't happen, but it is here for completeness
-			else if (pMac[busEffect[i]]->mode() == MACHMODE_GENERATOR)
-			{
-				int k=0;
-				while (busEffect[k] != 255 && k<MAX_BUSES) 
-				{
-					k++;
-				}
-				busMachine[k]=busEffect[i];
-				busEffect[i]=255;
-			}
 		}
 		if (busMachine[i] != 255)
 		{
 			if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
 				busMachine[i] = 255;
 			// If there's a dummy, force it to be a Generator
-			else if (pMac[busMachine[i]]->type() == MACH_DUMMY ) 
+			else if (pMac[busMachine[i]]->getMachineKey() == MachineKey::dummy() ) 
 			{
-				pMac[busMachine[i]]->mode(MACHMODE_GENERATOR);
-			}
-			// Else if the machine is an fx, move it to FXs bus.
-			// This can't happen, but it is here for completeness
-			else if ( pMac[busMachine[i]]->mode() != MACHMODE_GENERATOR)
-			{
-				int j=0;
-				while (busEffect[j] != 255 && j<MAX_BUSES) 
-				{
-					j++;
-				}
-				busEffect[j]=busMachine[i];
-				busMachine[i]=255;
+				pMac[busMachine[i]]->defineInputAsStereo(0);
 			}
 		}
 	}
@@ -739,7 +679,7 @@ bool Psy2Filter::LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSo
 }
 
 //Finished all the file loading. Now Process the data to the current structures
-bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machines::Converter* converter)
+bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machines::Converter& converter)
 {
 	// The old fileformat had a pool of VST plugins, of which, the user could create
 	// machines that instanced them. vstL[] contains this pool.
@@ -760,7 +700,11 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	std::vector<int>::iterator it = seqList.begin();
 	for ( ; it < seqList.end(); ++it)
 	{
-		SinglePattern* pat = song.patternSequence()->patternData()->findById(*it);
+		#if 0
+		Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		#else
+		SinglePattern* pat = song.patternSequence()->patternPool()->findById(*it);
+		#endif
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();
 	}
@@ -821,8 +765,9 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	{
 		if (invmach[i] != 255)
 		{
-			song.machine(invmach[i], pMac[i]);
-			Machine *cMac = song.machine(invmach[i]);
+			pMac[i]->id(invmach[i]);
+			song.AddMachine(pMac[i]);
+			Machine *cMac = pMac[i];
 			_machineActive[i] = false; // mark as "converted"
 			cMac->_connectedInputs = 0;
 			cMac->_connectedOutputs = 0;
@@ -875,28 +820,29 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	{
 		if (_machineActive[i])
 		{
-			if ( pMac[i]->mode() == MACHMODE_GENERATOR)
-			{
-				while (song.machine(j) && j<64) j++;
-				song.machine(j,pMac[i]);
-			}
-			else
+			// Effect
+			if ( pMac[i]->acceptsConnections())
 			{
 				while (song.machine(k) && k<128) k++;
-				song.machine(k,pMac[i]);
+				pMac[i]->id(k);
+				song.AddMachine(pMac[i]);
+			} else {
+				while (song.machine(j) && j<64) j++;
+				pMac[i]->id(j);
+				song.AddMachine(pMac[i]);
 			}
 		}
 	}
 
 	// Reparse any pattern for converted machines.
-	converter->retweak(song);
+	converter.retweak(song);
 	//for (i =0; i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 	///\todo: resend this to song
 	//song.seqBus=0;
 	return true;
 }
 
-bool Machine::LoadPsy2FileFormat(std::string const & /*plugin_path*/, RiffFile* pFile)
+bool Machine::LoadPsy2FileFormat(RiffFile* pFile)
 {
 	char edName[32];
 	pFile->ReadArray(edName, 16); edName[15] = 0;
@@ -1001,7 +947,7 @@ bool Master::LoadPsy2FileFormat(RiffFile* pFile)
 	return true;
 }
 
-bool Sampler::LoadPsy2FileFormat(std::string const & /*plugin_path*/, RiffFile* pFile)
+bool Sampler::LoadPsy2FileFormat(RiffFile* pFile)
 {
 	int i;
 
@@ -1073,102 +1019,24 @@ bool Sampler::LoadPsy2FileFormat(std::string const & /*plugin_path*/, RiffFile* 
 	return true;
 }
 
-bool Plugin::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile)
+bool Plugin::LoadPsy2FileFormat(RiffFile* pFile)
 {
-	bool result = true;
-	char junk[256];
-	std::memset(junk, 0, sizeof junk);
-
-	char sDllName[256];
-	int numParameters;
-
-	pFile->ReadArray(sDllName,256); // Plugin dll name
-	sDllName[255]='\0';
-	std::string strname = sDllName;
-	std::transform(strname.begin(),strname.end(),strname.begin(),ToLower());
-
-	//Patch: Automatically replace old AS's by AS2F.
-	bool wasAB=false;
-	bool wasAS1=false;
-	bool wasAS2=false;
-	if (strname == "arguru bass.dll" )
-	{
-		strname = "arguru synth 2f.dll";
-		wasAB=true;
-	}
-	else if (strname == "arguru synth.dll" )
-	{
-		strname = "arguru synth 2f.dll";
-		wasAS1=true;
-	}
-	else if (strname == "arguru synth 2.dll" )
-	{
-		strname = "arguru synth 2f.dll";
-		wasAS2=true;
-	}
-	else if (strname == "synth21.dll" )
-	{
-		strname = "arguru synth 2f.dll";
-		wasAS2=true;
-	}
-
-	//Gloxxxxxxxxxxxxxxxxbal::dllfinder().LookupDllPath(strname,MACH_PLUGIN);
-	try
-	{
-		result = LoadDll(plugin_path, strname);
-	}
-	catch(...)
-	{
-		//char sError[_MAX_PATH];
-		//sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-		//MessageBox(NULL,sError, "Error", MB_OK);
-		result = false;
-	}
-
-	Init();
-
 	char edName[32];
 	pFile->ReadArray(edName, 16); edName[15] = 0;
 	SetEditName(edName);
 
+	int numParameters;
 	pFile->Read(numParameters);
-	if(result)
+	if (proxy()())
 	{
 		std::int32_t * Vals = new std::int32_t[numParameters];
 		pFile->ReadArray(Vals, numParameters);
 		try
 		{
-			if ( wasAB ) // Patch to replace Arguru Bass by Arguru Synth 2f
-			{
-				proxy().ParameterTweak(0,Vals[0]);
-				for (int i=1;i<15;i++)
-				{
-					proxy().ParameterTweak(i+4,Vals[i]);
-				}
-				proxy().ParameterTweak(19,0);
-				proxy().ParameterTweak(20,Vals[15]);
-				if (numParameters>16)
-				{
-					proxy().ParameterTweak(24,Vals[16]);
-					proxy().ParameterTweak(25,Vals[17]);
-				}
-				else
-				{
-					proxy().ParameterTweak(24,0);
-					proxy().ParameterTweak(25,0);
-				}
-			}
-			else for (int i=0; i<numParameters; i++)
+			for (int i=0; i<numParameters; i++)
 			{
 				proxy().ParameterTweak(i,Vals[i]);
 			}
-		}
-		catch(const std::exception &)
-		{
-			//loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
-		}
-		try
-		{
 			int size = proxy().GetDataSize();
 			//pFile->Read(size); // This would have been the right thing to do
 			if(size)
@@ -1189,37 +1057,14 @@ bool Plugin::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile
 		{
 			// loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
 		}
-		if(wasAS1) // Patch to replace Synth1 by Arguru Synth 2f
-		{
-			try
-			{
-				proxy().ParameterTweak(17,Vals[17]+10);
-				proxy().ParameterTweak(24,0);
-				proxy().ParameterTweak(25,0);
-			}
-			catch(const std::exception &)
-			{
-			}
-		}
-		if(wasAS2)
-		{
-			try
-			{
-				proxy().ParameterTweak(24,0);
-				proxy().ParameterTweak(25,0);
-			}
-			catch(const std::exception&)
-			{
-			}
-		}
+
 		delete[] Vals;
 	}
 	else
 	{
-		for (int i=0; i<numParameters; i++)
-		{
-			pFile->ReadArray(junk, 4);
-		}
+		pFile->Skip(4*numParameters);
+		// If the machine had custom data (PutData()) the loader will crash.
+		// It cannot be fixed.
 	}
 
 	pFile->ReadArray(_inputMachines,MAX_CONNECTIONS);
@@ -1264,7 +1109,7 @@ bool Plugin::LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile
 	pFile->Skip(4); // filterLfophase
 	pFile->Skip(4); // filterMode
 
-	return result;
+	return true;
 }
 #if 0
 namespace vst

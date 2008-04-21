@@ -22,32 +22,30 @@
 #define PSYCLE__CORE__PLUGIN_CATCHEr
 
 #include "machine.h"
-#include "pluginFinderKey.hpp"
+#include "machinekey.hpp"
 #include "pluginfinder.h"
 
 namespace psy
 {
 	namespace core
 	{
-
-		class PluginCatcher: public PluginFinder
+		//\todo: PluginFinderBase, else we can't have getInstance ?
+		class PluginFinderCache: public PluginFinder
 		{
+			protected:
+				PluginFinderCache();
+				~PluginFinderCache();
 			public:
-				PluginCatcher(std::string const & psycle_path, std::string const & ladspa_path);
-				virtual ~PluginCatcher();
+				//static PluginFinderCache& getInstance();
 
-				virtual void rescanAll();
-			
+				void Rescan();
+	
 			protected:
 				std::uint32_t _numPlugins;
 
-				virtual bool loadInfo();
 				bool loadCache();
 				bool saveCache();
 				void deleteCache();
-				virtual void scanInternal();
-				virtual void scanLadspa();
-				virtual void scanNatives();
 		};
 	}
 }

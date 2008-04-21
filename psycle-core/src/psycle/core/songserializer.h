@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-/***************************************************************************
-*   Copyright (C) 2007 Psycledelics     *
-*   psycle.sf.net   *
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
@@ -18,42 +17,31 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PLUGIN_FINDER
-#define PSYCLE__CORE__PLUGIN_FINDER
+#ifndef SONGFACTORY_HPP
+#define SONGFACTORY_HPP 
+#pragma once
 
-#include "machinekey.hpp"
-#include "plugininfo.h"
+#include <string>
 #include <vector>
-#include <map>
 
-namespace psy
+namespace psy { namespace core {
+
+class PsyFilterBase;
+class CoreSong;
+class MachineFactory;
+
+class SongSerializer
 {
-	namespace core
-	{
-		class PluginFinder
-		{
-			protected:
-				PluginFinder();
-				~PluginFinder();
-			public:
-				static PluginFinder& getInstance();
-				virtual void addHost(Hosts::type);
-				virtual bool hasHost(Hosts::type) const;
+	public:
+		SongSerializer();
+		~SongSerializer();
 
-				virtual void AddInfo(const MachineKey &, const PluginInfo& );
-				PluginInfo info(const MachineKey & key );
-				const PluginInfo& info( const MachineKey & key ) const;
-				bool hasKey( const MachineKey& key ) const;
-				std::string lookupDllName( const MachineKey & key ) const;
-			
-				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
-				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
-				virtual void ClearMap(Hosts::type);
+		bool loadSong(const std::string & fileName, CoreSong& song);
+		bool saveSong(const std::string & fileName, const CoreSong& song, int version);
 
-			protected:
-				PluginInfo empty_;
-				std::vector<std::map<MachineKey, PluginInfo> > maps_;
-		};
-	}
-}
-#endif
+	private:
+		std::vector<PsyFilterBase*>  filters;
+};
+
+}}
+#endif // SONGFACTORY_HPP

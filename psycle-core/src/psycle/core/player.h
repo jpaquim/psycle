@@ -132,6 +132,7 @@ namespace psy
 			///\{
 				public:
 					PlayerTimeInfo & timeInfo() { return timeInfo_; }
+					const PlayerTimeInfo & timeInfo() const { return timeInfo_; }
 				private:
 					PlayerTimeInfo timeInfo_;
 			///\}

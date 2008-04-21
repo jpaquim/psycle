@@ -8,6 +8,7 @@
 #include <fstream>
 #include <cstdint>
 #include <cassert>
+#include <vector>
 
 namespace psy { namespace core {
 
@@ -37,7 +38,7 @@ class RiffFile {
 	public:
 
 		RiffFile();
-		~RiffFile();
+		virtual ~RiffFile();
 
 		///\todo shouldn't be public
 		RiffChunkHeader _header;
@@ -47,15 +48,15 @@ class RiffFile {
 		bool Close();
 		bool Error();
 		bool Eof();
-		std::size_t FileSize();
-		std::size_t GetPos();
-		int Seek(std::ptrdiff_t const & bytes);
-		int Skip(std::ptrdiff_t const & bytes);
+		virtual std::size_t FileSize();
+		virtual std::size_t GetPos();
+		virtual int Seek(std::ptrdiff_t const & bytes);
+		virtual int Skip(std::ptrdiff_t const & bytes);
 
-	private:
-		bool WriteChunk(void const *, std::size_t const &);
-		bool ReadChunk (void       *, std::size_t const &);
-		bool Expect    (void       *, std::size_t const &);
+	protected:
+		virtual bool WriteChunk(void const *, std::size_t const &);
+		virtual bool ReadChunk (void       *, std::size_t const &);
+		virtual bool Expect    (void       *, std::size_t const &);
 
 	public:
 		#if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -209,6 +210,29 @@ class RiffFile {
 	private:
 		bool write_mode;
 		std::fstream _stream;
+};
+
+
+class MemoryFile : public RiffFile
+{
+public:
+	MemoryFile();
+	virtual ~MemoryFile();
+
+	bool OpenMem(std::ptrdiff_t blocksize);
+	bool CloseMem();
+	virtual std::size_t FileSize();
+	virtual std::size_t GetPos();
+	virtual int Seek(std::ptrdiff_t const & bytes);
+	virtual int Skip(std::ptrdiff_t const & bytes);
+	virtual bool ReadString(char *, std::size_t const & max_length);
+protected:
+	virtual bool WriteChunk(void const *, std::size_t const &);
+	virtual bool ReadChunk (void       *, std::size_t const &);
+	virtual bool Expect    (void       *, std::size_t const &);
+
+	std::vector<void*> memoryblocks_;
+	int blocksize_;
 };
 
 }}

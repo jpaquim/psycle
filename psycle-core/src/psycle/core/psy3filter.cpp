@@ -24,8 +24,10 @@
 #include "commands.h"
 #include "datacompression.h"
 #include "fileio.h"
-#include "internal_machines.h"
 #include "song.h"
+#include "machinefactory.h"
+
+#include "mixer.h"
 
 #include <sstream>
 #include <iostream>
@@ -79,12 +81,12 @@ void Psy3Filter::preparePatternSequence( CoreSong & song )
 	seqList.clear();
 	song.patternSequence()->removeAll();
 	// creatse a single Pattern Category
-	singleCat = song.patternSequence()-> patternData()->createNewCategory("SinglePattern");
+	singleCat = song.patternSequence()-> patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence()->createNewLine();
 }
 
-bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks )
+bool Psy3Filter::load(const std::string & fileName, CoreSong & song)
 {
 	RiffFile file;
 	file.Open(fileName);
@@ -133,7 +135,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 			//song.progress.emit(2,0,"Loading... Song properties information...");
 			if ((version&0xFF00) == 0x0000) // chunkformat v0
 			{
-				LoadSNGIv0(&file,song,version&0x00FF,callbacks);
+				LoadSNGIv0(&file,song,version&0x00FF);
 				//\ Fix for a bug existing in the Song Saver in the 1.7.x series
 				if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool); 
 			}
@@ -164,7 +166,7 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 			//song.progress.emit(2,0,"Loading... Song machines...");
 			if ((version&0xFF00) == 0x0000) // chunkformat v0
 			{
-				LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
+				LoadMACDv0(&file,song,version&0x00FF);
 			}
 			//else if ( (version&0xFF00) == 0x0100 ) //and so on
 		}
@@ -210,7 +212,11 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 	std::vector<int>::iterator it = seqList.begin();
 	for ( ; it < seqList.end(); ++it)
 	{
-		SinglePattern* pat = song.patternSequence()->patternData()->findById(*it);
+		#if 0
+		Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		#else
+		SinglePattern* pat = song.patternSequence()->patternPool()->findById(*it);
+		#endif
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();
 	}
@@ -220,47 +226,50 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 	{
 		if(song.machine(i))
 		{
-			song.machine(i)->_connectedInputs = 0;
-			song.machine(i)->_connectedOutputs = 0;
+			Machine* mac = song.machine(i);
+			mac->_connectedInputs = 0;
+			mac->_connectedOutputs = 0;
 			for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
 			{
-				if(song.machine(i)->_connection[c])
+				if(mac->_connection[c])
 				{
-					if(song.machine(i)->_outputMachines[c] < 0 || song.machine(i)->_outputMachines[c] >= MAX_MACHINES)
+					if(mac->_outputMachines[c] < 0 || mac->_outputMachines[c] >= MAX_MACHINES)
 					{
-						song.machine(i)->_connection[c] = false;
-						song.machine(i)->_outputMachines[c] = -1;
+						mac->_connection[c] = false;
+						mac->_outputMachines[c] = -1;
 					}
-					else if(!song.machine(song.machine(i)->_outputMachines[c]))
+					else if(!song.machine(mac->_outputMachines[c]))
 					{
-						song.machine(i)->_connection[c] = false;
-						song.machine(i)->_outputMachines[c] = -1;
+						mac->_connection[c] = false;
+						mac->_outputMachines[c] = -1;
 					}
 					else 
 					{
-						song.machine(i)->_connectedOutputs++;
+						mac->_connectedOutputs++;
+
 					}
 				}
 				else
 				{
-					song.machine(i)->_outputMachines[c] = -1;
+					mac->_outputMachines[c] = -1;
 				}
 
-				if (song.machine(i)->_inputCon[c])
+				if (mac->_inputCon[c])
 				{
-					if (song.machine(i)->_inputMachines[c] < 0 || song.machine(i)->_inputMachines[c] >= MAX_MACHINES)
+					if (mac->_inputMachines[c] < 0 || mac->_inputMachines[c] >= MAX_MACHINES)
 					{
-						song.machine(i)->_inputCon[c] = false;
-						song.machine(i)->_inputMachines[c] = -1;
+						mac->_inputCon[c] = false;
+						mac->_inputMachines[c] = -1;
 					}
-					else if (!song.machine(song.machine(i)->_inputMachines[c]))
+					else if (!song.machine(mac->_inputMachines[c]))
 					{
-						song.machine(i)->_inputCon[c] = false;
-						song.machine(i)->_inputMachines[c] = -1;
+						mac->_inputCon[c] = false;
+						mac->_inputMachines[c] = -1;
 					}
 					else
 					{
-						song.machine(i)->_connectedInputs++;
+						mac->_connectedInputs++;
+						mac->_wireMultiplier[c]=song.machine(mac->_inputMachines[c])->GetAudioRange()/mac->GetAudioRange();
 					}
 				}
 				else
@@ -270,14 +279,15 @@ bool Psy3Filter::load(std::string const & plugin_path, const std::string & fileN
 			}
 		}
 	}
-	song.RestoreMixerSendFlags();
+	RestoreMixerSendFlags(song);
 	//song.progress.emit(5,0,"");
 	if(chunkcount)
 	{
 		if (!song.machine(MASTER_INDEX) )
 		{
-			song.machine(MASTER_INDEX, new Master( callbacks, MASTER_INDEX, &song ));
-			song.machine(MASTER_INDEX)->Init();
+			Machine* mac = MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
+			mac->Init();
+			song.AddMachine(mac);
 		}
 		std::ostringstream s;
 		s << "Error reading from file '" << file.file_name() << "'" << std::endl;
@@ -332,8 +342,9 @@ bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 		return result;
 }
 
-bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/, MachineCallbacks* callbacks)
+bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 {
+	MachineCallbacks* callbacks = MachineFactory::getInstance().getCallbacks();
 	std::int32_t temp(0);
 	std::int16_t temp16(0);
 	bool fileread = false;
@@ -445,14 +456,18 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 		unsigned char * pDest;
 		DataCompression::BEERZ77Decomp2(pSource, &pDest);
 		delete[] pSource; pSource = pDest;
-		// create a SinglePattern
+		// create a Pattern
 		std::string indexStr;
 		std::ostringstream o;
 		if (!(o << index))
 			indexStr = "error";
 		else
 			indexStr = o.str();
+		#if 0
+		Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#else
 		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;
@@ -505,17 +520,86 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 	return fileread;
 }
 
-bool Psy3Filter::LoadMACDv0(std::string const & plugin_path, RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks)
+bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 {
+	MachineFactory& factory = MachineFactory::getInstance();
 	std::int32_t index = 0;
 
 	file->Read(index);
 	if(index < MAX_MACHINES)
 	{
 		Machine::id_type const id(index);
-		///\todo: song.clear() creates an empty song with a Master Machine. This loader doesn't
-		// try to free that allocated machine.
-		song.machine(index, Machine::LoadFileChunk(plugin_path, &song,file, callbacks, id, minorversion, true));
+		// assume version 0 for now
+		std::int32_t type;
+		Machine* mac=0;
+		char sDllName[256];
+		file->Read(type);
+		file->ReadString(sDllName,256);
+		bool failedLoad=false;
+		switch (type)
+		{
+		case MACH_MASTER:
+			mac = factory.CreateMachine(MachineKey::master(),MASTER_INDEX);
+			break;
+		case MACH_SAMPLER:
+			mac = factory.CreateMachine(MachineKey::sampler(),id);
+			break;
+		case MACH_MIXER:
+			mac = factory.CreateMachine(MachineKey::mixer(),id);
+			break;
+		case MACH_XMSAMPLER:
+			mac = factory.CreateMachine(MachineKey::sampulse(),id);
+			break;
+		case MACH_DUPLICATOR:
+			mac = factory.CreateMachine(MachineKey::duplicator(),id);
+			break;
+		case MACH_AUDIOINPUT:
+			mac = factory.CreateMachine(MachineKey::audioinput(),id);
+			break;
+		//case MACH_LFO:
+			//mac = factory.CreateMachine(MachineKey::lfo(),id);
+			//break;
+		//case MACH_SCOPE:
+		case MACH_DUMMY:
+			mac = factory.CreateMachine(MachineKey::dummy(),id);
+			break;
+		case MACH_PLUGIN:
+		{
+			// PSY3 Format saves the postfix, so we have to remove it before creating the key.
+			std::string dllName = sDllName;
+			unsigned int pos = dllName.find(".dll");
+			if (pos != std::string::npos) {
+				dllName = dllName.substr(0,pos);
+			}
+
+			mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),id);
+			break;
+		}	
+		case MACH_VST:
+		//case MACH_VSTFX:
+		{
+			//unsigned int pos = dllName.find(".dll");
+			//if (pos != std::string::npos) {
+				//dllName = dllName.substr(0,pos);
+			//}
+			//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+			//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
+			break;
+		}
+		default:
+			break;
+		}
+		if (!mac) 
+		{
+			std::ostringstream s;
+			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << sDllName;
+			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+			mac = factory.CreateMachine(MachineKey::dummy(),id);
+			failedLoad=true;
+		}
+		song.AddMachine(mac);
+		mac->LoadFileChunk(file,minorversion);
+		if (failedLoad) mac->SetEditName(mac->GetEditName() + " (replaced)");
 	}
 	return song.machine(index) != 0;
 }
@@ -531,6 +615,26 @@ bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion)
 	///\todo:
 	return true;
 }
-		
+
+void Psy3Filter::RestoreMixerSendFlags(CoreSong& song)
+{
+	for (int i(0);i < MAX_MACHINES; ++i)
+	{
+		if (song.machine(i))
+		{
+			if (song.machine(i)->getMachineKey() == MachineKey::mixer())
+			{
+				Mixer* mac = static_cast<Mixer*>(song.machine(i));
+				for (int j(0); j<mac->numreturns(); ++j)
+				{
+					if ( mac->Return(j).IsValid())
+					{
+						song.machine(mac->Return(j).Wire().machine_)->SetMixerSendFlag(&song);
+					}
+				}
+			}
+		}
+	}
+}		
 }}
 

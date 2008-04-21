@@ -22,39 +22,34 @@
 #pragma once
 
 #include "psy3filter.h"
-#include <fstream>
-#include <map>
 
 namespace psy { namespace core {
-
-class SinglePattern;
-class Machine;
 
 /**
 @author  Stefan Nattkemper
 */
 class Psy4Filter : public Psy3Filter
 {
-	///\name Singleton Pattern
+	///\name Singleton SinglePattern
 	///\{ 
 		protected:
-				Psy4Filter();
+			Psy4Filter();
 		private:
 			Psy4Filter( Psy4Filter const & );
 			Psy4Filter& operator=(Psy4Filter const&);
 		public:
-				static Psy4Filter* Instance() {
-					// don`t use multithreaded
-					static Psy4Filter s;
-					return &s; 
-				}
+			static Psy4Filter* getInstance() {
+				// don`t use multithreaded
+				static Psy4Filter s;
+				return &s; 
+			}
 	///\}
 
 	public:
 		/*override*/ int version() const { return 4; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
+		/*override*/ bool load(const std::string & fileName, CoreSong & song);
 		/*override*/ bool save( const std::string & fileName, const CoreSong & song );
 
 	protected:
@@ -64,18 +59,6 @@ class Psy4Filter : public Psy3Filter
 		bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
 		bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
 
-	private:
-		std::fstream _stream;
-
-		PatternCategory* lastCategory;
-		SinglePattern* lastPattern;
-		SequenceLine* lastSeqLine;
-		Machine* lastMachine;
-		float lastPatternPos;
-
-		std::map<int, SinglePattern*> patMap;
-
-		CoreSong* song_;
 };
 
 }}

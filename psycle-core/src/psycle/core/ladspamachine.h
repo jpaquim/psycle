@@ -60,15 +60,18 @@ namespace psy {
 	
 		class LADSPAMachine: public Machine
 		{
+			protected:
+				LADSPAMachine(MachineCallbacks*, MachineKey, Machine::id_type, void*,
+						const LADSPA_Descriptor* ,LADSPA_Handle); friend class LadspaHost;
 			public:
-				LADSPAMachine(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song );
 				virtual ~LADSPAMachine() throw();
 				virtual void Init();
 				virtual void PreWork(int numSamples);
 				virtual int GenerateAudio(int numSamples );
 				virtual void Tick(int channel, const PatternEvent & pEntry );
 				virtual void Stop(){}
-				inline virtual std::string GetDllName() const throw() { return libName_.c_str(); }
+				inline virtual std::string GetDllName() const throw() { return key_.dllName(); }
+				virtual MachineKey getMachineKey() const {  return key_; }
 				virtual std::string GetName() const { return (char *) psDescriptor ? psDescriptor->Name : ""; }
 				virtual void GetParamName(int numparam, char * name) const;
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) const;
@@ -77,22 +80,14 @@ namespace psy {
 				virtual bool SetParameter(int numparam,int value);
 				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile) const;
-				virtual void SaveDllName      (RiffFile * pFile) const;
-
-				LADSPA_Descriptor_Function loadDescriptorFunction( const std::string & fileName );
-				bool loadDll( const std::string & fileName ,int pluginIndex=0);
-				const LADSPA_Descriptor* pluginDescriptor() { return psDescriptor; }
-				std::string label() const { return psDescriptor ? psDescriptor->Label : ""; }
 
 			private:
-				void *dlopenLADSPA(const char * pcFilename, int iFlag);
 				void prepareStructures(void);
 				LADSPA_Data GetMinValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
 				LADSPA_Data GetMaxValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
 				void SetDefaultsForControls();
+				MachineKey key_;
 				void* libHandle_;
-				std::string libName_;
-
 				const LADSPA_Descriptor * psDescriptor;
 				/*const*/ LADSPA_Handle pluginHandle;
 				std::vector<LadspaParam> values_;
