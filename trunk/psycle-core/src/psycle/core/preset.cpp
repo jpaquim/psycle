@@ -72,6 +72,8 @@ namespace psy {
 
 		void Preset::tweakMachine( Machine & mac )
 		{
+			//FIXME: Implement with polymorphism
+			#if 0
 			if( mac.type() == MACH_PLUGIN ) {
 				int i = 0;
 				for (std::vector<int>::iterator it = params_.begin(); it < params_.end(); it++) {
@@ -94,6 +96,7 @@ namespace psy {
 				catch(...) {
 				}
 			}
+			#endif
 		}
 
 	}

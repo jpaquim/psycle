@@ -18,42 +18,40 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PLUGIN_FINDER
-#define PSYCLE__CORE__PLUGIN_FINDER
+
+#ifndef MACHINEHOST_HPP
+#define MACHINEHOST_HPP
 
 #include "machinekey.hpp"
 #include "plugininfo.h"
-#include <vector>
-#include <map>
+#include "machine.h"
+#include <string>
 
-namespace psy
+namespace psy{namespace core{
+
+class MachineCallbacks;
+class Machine;
+class PluginFinder;
+
+class MachineHost
 {
-	namespace core
-	{
-		class PluginFinder
-		{
-			protected:
-				PluginFinder();
-				~PluginFinder();
-			public:
-				static PluginFinder& getInstance();
-				virtual void addHost(Hosts::type);
-				virtual bool hasHost(Hosts::type) const;
+protected:
+	MachineHost(MachineCallbacks*);
+public:
+	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type) = 0;
+	virtual void FillFinderData(PluginFinder&, bool clearfirst=false);
+	
+	virtual const Hosts::type hostCode() const = 0;
+	virtual const std::string hostName() const = 0;
+	
+	virtual std::string const & getPluginPath(int) const { static std::string ret = ""; return ret; };
+	virtual int getNumPluginPaths() const { return 0; }
+	virtual void setPluginPath(std::string ) {};
+protected:
+	virtual void FillPluginInfo(const std::string&, const std::string& , PluginFinder& ) = 0;
 
-				virtual void AddInfo(const MachineKey &, const PluginInfo& );
-				PluginInfo info(const MachineKey & key );
-				const PluginInfo& info( const MachineKey & key ) const;
-				bool hasKey( const MachineKey& key ) const;
-				std::string lookupDllName( const MachineKey & key ) const;
-			
-				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
-				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
-				virtual void ClearMap(Hosts::type);
+	MachineCallbacks* mcallback_;
+};
 
-			protected:
-				PluginInfo empty_;
-				std::vector<std::map<MachineKey, PluginInfo> > maps_;
-		};
-	}
-}
-#endif
+}}
+#endif // MACHINEHOST_HPP

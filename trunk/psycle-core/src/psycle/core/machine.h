@@ -10,6 +10,7 @@
 #include "helpers.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
+#include "machinekey.hpp"
 
 #include <cassert>
 #include <deque>
@@ -275,32 +276,6 @@ namespace psy
 		}
 		*/
 
-
-
-
-		enum MachineType
-		{
-			MACH_UNDEFINED = -1, //< :-(
-			MACH_MASTER = 0,
-			MACH_SINE = 1, //< for psycle old fileformat version 2
-			MACH_DIST = 2, //< for psycle old fileformat version 2
-			MACH_SAMPLER = 3,
-			MACH_DELAY = 4, //< for psycle old fileformat version 2
-			MACH_2PFILTER = 5, //< for psycle old fileformat version 2
-			MACH_GAIN = 6, //< for psycle old fileformat version 2
-			MACH_FLANGER = 7, //< for psycle old fileformat version 2
-			MACH_PLUGIN = 8,
-			MACH_VST = 9,
-			MACH_VSTFX = 10,
-			MACH_SCOPE = 11,
-			MACH_XMSAMPLER = 12,
-			MACH_DUPLICATOR = 13,
-			MACH_MIXER = 14,
-			MACH_LFO = 15,
-			MACH_LADSPA = 16,
-			MACH_DUMMY = 255
-		};
-
 		enum MachineMode
 		{
 			MACHMODE_UNDEFINED = -1, //< :-(
@@ -323,12 +298,16 @@ namespace psy
 			int track_;
 			PatternEvent event_;
 		};
+		class Song;
 
 		class MachineCallbacks {
 		public:
-			virtual PlayerTimeInfo & timeInfo()  = 0;
-			virtual bool autoStopMachines() const = 0;
 			virtual ~MachineCallbacks() {}
+			virtual const PlayerTimeInfo & timeInfo() const = 0;
+			virtual PlayerTimeInfo &timeInfo() = 0;
+			virtual bool autoStopMachines() const = 0;
+			virtual const CoreSong & song() const = 0;
+			virtual CoreSong & song() = 0;
 		};
 
 		/// Base class for "Machines", the audio producing elements.
@@ -383,23 +362,16 @@ namespace psy
 		//////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////
 		// Draft for a new Machine Specification.
-		// A machine is created via pMachine = new Machine;
-		// Creation does not give a ready to use Machine. "The machine is over the table, but the power is off!"
-		// Use LoadDll(std::string) to load a specific plugin to operate this machine. The function does a loadlibrary, and
-		// the basic information becomes accessible (name, parameters...). Note that this call will only return "true" 
-		// [ there is another option, which would be a constructor that gets the std::string, and LoadDll() be protected and called from within ]
-		// for Plugin or vst::plugin, since any other machine do not use an external dll.
-		// Use UnloadDll() to undo the previous action. Else, the destructor will do it for you.
-		// Use SwitchOn() to obtain a ready-to-use machine. This will return false for Plugin and vst::plugin if
-		// OpenDll() has not been called, or if it has returned false.
+		// A machine is created using a MachineFactory.
+		// To tell the factory which machine it needs to generate, a MachineKey is passed to it.
+		// The factory creates the instance, loads any library (.dll/.so) that could be needed, and does
+		// an initialization (like calling Reset()) on it, so the machine becomes operational.
 		// Use Reset() to reinitialize the machine status and recall all default values for the parameters.
-		// Use SwitchOff() to stop using this machine. Else, the destructor will do it for you.
 		// Use StandBy(bool) to set or unset the machine to a stopped state. ("suspend" in vst terminology).
-		// "Process()" will still be called in order for the machine to update state, but will return with no data
-		// Everything else works as usual.
+		// "GenerateAudio()" will still be called so that the machine can update its state, but will return with no data
 		// This function can be used as an "audio-only" reset. (Panic button)
 		// Bypass(bool) un/sets the Bypass flag, and calls to StandBy() accordingly.
-		// Process() Call it to start the processing of input buffers and generate the output.
+		// GenerateAudio() Call it to start the processing of input buffers and generate the output.
 		// AddEvent(timestampedEvent)
 		// MasterChanged(changetype)
 		// SaveState(ofstream)
@@ -409,8 +381,6 @@ namespace psy
 		// Automation... calling, or being called? ( calling automata.work() or automata calling machine.work())
 		// Use the concept of "Ports" to define inputs/outputs.
 		//
-		// bool IsDllLoaded()
-		// bool IsPowered()
 		// bool IsBypass()
 		// bool IsStandBy()
 		//////////////////////////////////////////////////////////////////////////
@@ -418,7 +388,7 @@ namespace psy
 		//////////////////////////////////////////////////////////////////////////
 
 		///\name each machine has a type attribute so that we can make yummy switch statements
-		///\{
+/*		///\{
 		public:
 			///\see enum MachineType which defined somewhere outside
 			typedef std::int32_t type_type; // Was: MachineType type_type
@@ -438,7 +408,7 @@ namespace psy
 			void mode(mode_type mode) { mode_ = mode; } friend class Plugin;
 			mode_type mode_;
 		///\}
-
+*/
 		///\name machine's numeric identifier. It is required for pattern events<->machine association, gui, and obviusly, in file load/save.
 		///\{
 		public:
@@ -447,29 +417,24 @@ namespace psy
 			id_type id() const throw() { return id_; }
 		private:
 			id_type id_;
-			void id(id_type id) { id_ = id; } friend class Psy2Filter;
+			void id(id_type id) { id_ = id; } friend class CoreSong; friend class Psy2Filter;
 		///\}
-
+		public:
+		
+			virtual MachineKey getMachineKey() const = 0;
+		
 		///\name ctor/dtor
 		///\{
+		protected:
+			Machine(MachineCallbacks* callbacks, Machine::id_type id);
 		public:
-			Machine(MachineCallbacks* callbacks, type_type type, mode_type mode, id_type id, CoreSong * song);
-			Machine(Machine *mac,type_type type, mode_type mode);
 			virtual ~Machine();
+			virtual void CloneFrom(Machine& src);
 		///\}
 			
 		protected:
 			MachineCallbacks* callbacks;
 
-		///\name song
-		///\{
-		public:
-			/// the song this machine belongs to
-			CoreSong const * const song() const { return song_; }
-			CoreSong * const song() { return song_; }
-		private:
-			CoreSong* song_;
-		///\}
 
 		///\name the life cycle of a machine
 		///\{
@@ -497,13 +462,12 @@ namespace psy
 		///\name (de)serialization
 		///\{
 		public:
-			virtual void SaveDllName(RiffFile * pFile) const;
-			static Machine * LoadFileChunk(std::string const & plugin_path, CoreSong* pSong , RiffFile* pFile, MachineCallbacks* callbacks, Machine::id_type index, int version,bool fullopen=true);
-			virtual void SaveFileChunk(RiffFile * pFile) const;
+			bool LoadFileChunk(RiffFile* pFile,int version);
+			void SaveFileChunk(RiffFile * pFile) const;
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 			/// Loader for psycle fileformat version 2.
-			virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 		///\}
 
 		///\name connections ... ports
@@ -514,6 +478,10 @@ namespace psy
 			virtual Wire::id_type ConnectTo(Machine & dstMac, InPort::id_type dsttype = InPort::id_type(0), OutPort::id_type srctype = OutPort::id_type(0), float volume = 1.0f);
 			virtual bool MoveWireDestTo(Machine& dstMac, OutPort::id_type srctype, Wire::id_type srcwire, InPort::id_type dsttype = InPort::id_type(0));
 			virtual bool MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype = OutPort::id_type(0));
+		protected:
+			virtual bool MoveWireDestTo(Machine& dstMac, InPort::id_type srctype, Wire::id_type srcwire, OutPort::id_type dsttype, Machine& oldDest);
+			virtual bool MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype, Machine& oldSrc);
+		public:
 			virtual bool Disconnect(Machine & dst);
 			virtual void DeleteWires();
 		///\warning: This should be protected, but the class Mixer needs to call them. Do not use them from Song or "Outside World".
@@ -524,7 +492,8 @@ namespace psy
 			virtual void DeleteInputWire(Wire::id_type wireIndex, InPort::id_type dstType);
 			virtual void DeleteOutputWire(Wire::id_type wireIndex, OutPort::id_type srctype);
 			virtual void NotifyNewSendtoMixer(Machine & callerMac,Machine & senderMac);
-			virtual void SetMixerSendFlag();
+			// The parameter song is specifically for the psy3filter loader, since at loading time, the song in callbacks is not the one being loaded.
+			virtual void SetMixerSendFlag(CoreSong* song=0);
 			virtual void ClearMixerSendFlag();
 		///\}
 
@@ -597,28 +566,20 @@ namespace psy
 		///\name ports
 		///\{
 		public:
-			///\todo: to be enabled when enabling AudioPorts and Wires
-		#if 0
-			virtual unsigned int GetInPorts() const { return numInPorts; }
-			virtual unsigned int GetOutPorts() const { return numOutPorts; }
-			virtual AudioPort& GetInPort(InPort::id_type i) { assert(i<numInPorts); return inports[i]; }
-			virtual AudioPort& GetOutPort(OutPort::id_type i) { assert(i<numOutPorts); return inports[i]; }
-
 			void defineInputAsStereo(int numports=1);
 			void defineOutputAsStereo(int numports=1);
-			bool acceptsConnections() { return numInPorts>0; }
-			bool emitsConnections() { return numOutPorts>0; }
-		#else
+			bool acceptsConnections() const { return numInPorts>0; }
+			bool emitsConnections() const { return numOutPorts>0; }
+
+			virtual unsigned int GetInPorts() const { return numInPorts; }
+			virtual unsigned int GetOutPorts() const { return numOutPorts; }
+			virtual AudioPort& GetInPort(InPort::id_type i) const { assert(i<numInPorts); return inports[i]; }
+			virtual AudioPort& GetOutPort(OutPort::id_type i) const  { assert(i<numOutPorts); return inports[i]; }
 			virtual std::string GetPortInputName(InPort::id_type /*port*/) const { std::string rettxt = "Stereo Input"; return rettxt; }
 			virtual std::string GetPortOutputName(OutPort::id_type /*port*/)  const { std::string rettxt = "Stereo Output"; return rettxt; }
-			virtual int GetInPorts() const { return (mode() != MACHMODE_GENERATOR)?1:0; }
-			virtual int GetOutPorts() const { return 1; }
-			bool acceptsConnections() { return mode() != MACHMODE_GENERATOR; }
-			bool emitsConnections() { return mode() != MACHMODE_MASTER; }
 
-			virtual int GetAudioInputs() const{ return MAX_CONNECTIONS; }
+			virtual int GetAudioInputs() const { return MAX_CONNECTIONS; }
 			virtual int GetAudioOutputs() const { return MAX_CONNECTIONS; }
-		#endif
 		protected:
 			int numInPorts;
 			int numOutPorts;
@@ -691,7 +652,7 @@ namespace psy
 		///\name name
 		///\{
 		public:
-			virtual std::string GetDllName() const { return "built-in"; }
+			virtual std::string GetDllName() const { return ""; }
 			virtual std::string GetName() const = 0;
 
 		public:

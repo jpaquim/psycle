@@ -18,59 +18,31 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <psycle/core/psycleCorePch.hpp>
 
-#include "pluginFinderKey.hpp"
+#ifndef INTERNALHOST_HPP
+#define INTERNALHOST_HPP
 
-namespace psy
+#include "machinehost.hpp"
+
+namespace psy{ namespace core{
+
+
+class InternalHost : public MachineHost
 {
-	namespace core
-	{
+protected:
+	InternalHost(MachineCallbacks*);
+public:
+	~InternalHost();
+	static InternalHost& getInstance(MachineCallbacks*);
 
-		PluginFinderKey::PluginFinderKey( ) : index_(0) {
+	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);
+	virtual void FillFinderData(PluginFinder&, bool clearfirst=false);
 
-		}
+	virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
+	virtual const std::string hostName() const { return "Internal"; }
+protected:
+	virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder& ) {}
+};
 
-		PluginFinderKey::PluginFinderKey( const std::string & name, const std::string & dllPath, int index ) :
-			name_( name ),
-			dllPath_( dllPath ),
-			index_( index )
-		{
-		}
-
-		PluginFinderKey::~PluginFinderKey() {
-		}
-
-		PluginFinderKey PluginFinderKey::internalSampler() {
-			return PluginFinderKey("Psycle Internal Sampler", "none", 0 );
-		}
-		PluginFinderKey PluginFinderKey::internalMixer() {
-			return PluginFinderKey("Psycle Send/Return Mixer", "none", 0 );
-		}
-
-		bool PluginFinderKey::operator<(const PluginFinderKey & key) const {
-			if ( dllPath() != key.dllPath() )
-				return dllPath() < key.dllPath();
-			if ( name() != key.name() ) 
-				return name() < key.name();
-			return index() < key.index();
-		}
-
-		bool PluginFinderKey::operator ==( const PluginFinderKey & rhs ) const {
-			return dllPath() == rhs.dllPath() && name() == rhs.name() && index() == rhs.index();
-		}
-
-		const std::string & PluginFinderKey::name() const {
-			return name_;
-		}
-		
-		const std::string & PluginFinderKey::dllPath() const {
-			return dllPath_;
-		}
-
-		int PluginFinderKey::index() const {
-			return index_;
-		}
-
-	}
-}
+}}
+#endif // INTERNALHOST_HPP

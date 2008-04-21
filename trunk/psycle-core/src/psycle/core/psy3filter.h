@@ -20,8 +20,9 @@
 #ifndef PSYCLE__CORE__PSY3FILTER__INCLUDED
 #define PSYCLE__CORE__PSY3FILTER__INCLUDED
 
-#include "psyfilter.h"
+#include "psyfilterbase.h"
 #include <cstdint>
+#include <vector>
 
 namespace psy { namespace core {
 
@@ -29,64 +30,75 @@ class RiffFile;
 class PatternCategory;
 class SequenceLine;
 class PatternEvent;
-class MachineCallbacks;
 
 /**
 @author  Psycledelics  
 */
 class Psy3Filter : public PsyFilterBase
 {
+	protected:
+		typedef enum MachineClass
+		{
+			MACH_MASTER = 0,
+			MACH_SAMPLER = 3,
+			MACH_PLUGIN = 8,
+			MACH_VST = 9,
+			MACH_XMSAMPLER = 12,
+			MACH_DUPLICATOR = 13,
+			MACH_MIXER = 14,
+			MACH_AUDIOINPUT = 15,
+			MACH_DUMMY = 255
+		} machineclass_t;
+
+		class PatternEntry
+		{
+		public:
+			inline PatternEntry()
+				:
+				_note(255),
+				_inst(255),
+				_mach(255),
+				_cmd(0),
+				_parameter(0)
+			{}
+			
+			std::uint8_t _note;
+			std::uint8_t _inst;
+			std::uint8_t _mach;
+			std::uint8_t _cmd;
+			std::uint8_t _parameter;
+		};
+
 	///\name Singleton Pattern
 	///\{
-		protected:
-			Psy3Filter();          
-		private:
-			Psy3Filter( Psy3Filter const & );
-			Psy3Filter& operator=(Psy3Filter const&);
-		public:
-			class PatternEntry
-			{
-			public:
-				inline PatternEntry()
-					:
-				_note(255),
-					_inst(255),
-					_mach(255),
-					_cmd(0),
-					_parameter(0)
-				{}
-
-				std::uint8_t _note;
-				std::uint8_t _inst;
-				std::uint8_t _mach;
-				std::uint8_t _cmd;
-				std::uint8_t _parameter;
-			};
-
-			static Psy3Filter* Instance() {
-				// don`t use multithreaded
-				static Psy3Filter s;
-				return &s;
-			}
-	///\}
+	protected:
+		Psy3Filter(); 
+	private:
+		Psy3Filter( Psy3Filter const & );
+		Psy3Filter& operator=(Psy3Filter const&);
+	public:
+		static Psy3Filter* getInstance() {
+			// don`t use multithreaded
+			static Psy3Filter s;
+			return &s; 
+		}
+		///\}
 
 	protected:
 		/*override*/ int version() const { return 3; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-		/*override*/ bool loadExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
-		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong & /*song*/) {  /* so saving for legacy file format */ return false; }
-		/*override*/ bool saveExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
+		/*override*/ bool load(const std::string & fileName, CoreSong& song);
+		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong& /*song*/) {  /* so saving for legacy file format */ return false; }
 
 
 	protected:
 		virtual int LoadSONGv0(RiffFile* file,CoreSong& song);
 		virtual bool LoadINFOv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
+		virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadMACDv0(std::string const & plugin_path, RiffFile* file,CoreSong& song,int minorversion, MachineCallbacks* callbacks);
+		virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
 
 	protected:
@@ -109,7 +121,7 @@ class Psy3Filter : public PsyFilterBase
 		//inter-loading value.
 		int linesPerBeat;
 
-		//todo: psy3filtermfc, restore these two values.
+		//todo: psy3filtermfc, restore these values.
 		unsigned char octave;
 		int seqBus;
 		int instSelected;
@@ -119,10 +131,11 @@ class Psy3Filter : public PsyFilterBase
 		int trackSoloed;
 
 
+		void RestoreMixerSendFlags(CoreSong& song);
 
 		PatternEvent convertEntry( unsigned char* data) const;
 
-		void preparePatternSequence(CoreSong & song);
+		void preparePatternSequence(CoreSong& song);
 };
 
 }}

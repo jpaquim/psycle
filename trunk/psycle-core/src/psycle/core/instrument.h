@@ -21,7 +21,7 @@ namespace psy
 
 			Instrument();
 			~Instrument();
-			void Delete();
+			void Reset();
 			void DeleteLayer(void);
 			void LoadFileChunk(RiffFile* pFile,int version,bool fullopen=true);
 			void SaveFileChunk(RiffFile* pFile);

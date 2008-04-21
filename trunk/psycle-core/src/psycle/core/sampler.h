@@ -96,17 +96,20 @@ namespace psy {
 		/// sampler.
 		class Sampler : public Machine
 		{
+		protected:
+			Sampler(MachineCallbacks* callbacks, Machine::id_type id); friend class InternalHost;
 		public:
 			void Tick( );
-			Sampler(MachineCallbacks* callbacks, Machine::id_type id, CoreSong* song);
+
 			virtual void Init();
 			virtual int GenerateAudioInTicks( int startSample, int numSamples );
 			virtual void SetSampleRate(int sr);
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
+			virtual MachineKey getMachineKey() const { return MachineKey::sampler(); }
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
-			virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
+			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile* pFile) const;
 			void Update();

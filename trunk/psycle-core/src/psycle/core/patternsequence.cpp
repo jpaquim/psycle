@@ -365,13 +365,13 @@ void PatternSequence::removeLine( SequenceLine * line )
 	}
 }
 
-PatternData* PatternSequence::patternData() {
-	return &patternData_;
+PatternPool* PatternSequence::patternPool() {
+	return &patternPool_;
 }
 
-const PatternData & PatternSequence::patternData( ) const
+const PatternPool & PatternSequence::patternPool( ) const
 {
-	return patternData_;
+	return patternPool_;
 }
 
 /// returns the PatternLines that are active in the range [start, start+length).
@@ -525,7 +525,7 @@ void PatternSequence::removeSinglePattern( SinglePattern * pattern )
 	for(iterator it = begin(); it != end(); ++it) {
 		(*it)->removeSinglePatternEntries(pattern);
 	}
-	patternData_.removeSinglePattern(pattern);
+	patternPool_.removeSinglePattern(pattern);
 }
 
 void PatternSequence::removeAll( )
@@ -535,7 +535,7 @@ void PatternSequence::removeAll( )
 		delete *it;
 	}
 	clear();
-	patternData_.removeAll();
+	patternPool_.removeAll();
 }
 
 double PatternSequence::tickLength( ) const

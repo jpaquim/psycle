@@ -19,8 +19,7 @@
 ***************************************************************************/
 #include <psycle/core/psycleCorePch.hpp>
 #include "singlepattern.h"
-#include "patterndata.h"
-#include "helpers/xml.h"
+#include "patternpool.h"
 #include <sstream>
 
 namespace psy { namespace core {
@@ -373,6 +372,7 @@ int SinglePattern::id( ) const
 
 std::string SinglePattern::toXml( ) const
 {
+#if 0
 	std::ostringstream xml;
 	xml << "<pattern name='" << replaceIllegalXmlChr(name()) << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
 	std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
@@ -396,6 +396,8 @@ std::string SinglePattern::toXml( ) const
 	}
 	xml << "</pattern>" << std::endl;
 	return xml.str();
+#endif
+	return "";
 }
 
 SinglePattern::iterator SinglePattern::find_nearest( int line )

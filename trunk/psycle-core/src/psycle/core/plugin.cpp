@@ -23,21 +23,16 @@
 #include "player.h"
 #include "fileio.h"
 
-#include <iostream> // only for debug output
 #include <sstream>
-
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
 #elif defined _WIN32
 	#include <windows.h>
 #endif
-
 // win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 
 namespace psy { namespace core {
 
-typedef CMachineInfo * (* GETINFO) ();
-typedef CMachineInterface * (* CREATEMACHINE) ();
 
 /**************************************************************************/
 // PluginFxCallback
@@ -57,156 +52,54 @@ int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().ticksSpee
 
 // dummy body
 int PluginFxCallback::CallbackFunc(int, int, int, int) { return 0; }
-// dummy body
 float * PluginFxCallback::unused0(int, int) { return 0; }
-// dummy body
 float * PluginFxCallback::unused1(int, int) { return 0; }
 
 /**************************************************************************/
 // Plugin
 
-Plugin::Plugin(MachineCallbacks* callbacks, Machine::id_type id , CoreSong* song)
+Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, void* libHandle, CMachineInfo* info, CMachineInterface* macIface )
 :
-	Machine(callbacks, MACH_PLUGIN, MACHMODE_FX, id, song),
-	_dll(0),
-	proxy_(*this)
+	Machine(callbacks, id),
+	libHandle_(libHandle),
+	key_(key),
+	info_(info),
+	proxy_(*this,macIface)
 {
-	SetEditName("native plugin");
 	SetAudioRange(32768.0f);
+
+	//Psy2Filter can generate a plugin without info
+	if( info )
+	{
+		_isSynth = (info_->Flags == 3);
+		if(!_isSynth) {
+			defineInputAsStereo();
+		}
+		defineOutputAsStereo();
+
+		strncpy(_psShortName,info_->ShortName,15);
+		_psShortName[15]='\0';
+		char buf[32];
+		strncpy(buf, info_->ShortName,31);
+		buf[31]='\0';
+		SetEditName(buf);
+		_psAuthor = info_->Author;
+		_psName = info_->Name;
+	}
 }
 
 Plugin::~ Plugin( ) throw()
 {
-	if(_dll) {
-		#if defined __unix__ || defined __APPLE__
-			::dlclose(_dll);
-		#else
-			::FreeLibrary((HINSTANCE)_dll);
-		#endif
+	if (proxy_()) {
+		proxy_(0); // i.e. delete CMachineInterface.
 	}
+	if(libHandle_)
+	#if defined __unix__ || defined __APPLE__
+		::dlclose(libHandle_);
+	#else
+		::FreeLibrary((HINSTANCE)libHandle_);
+	#endif
 }
-
-bool Plugin::Instance( const std::string & file_name )
-{      
-	try {
-		#if 0
-			char const static path_env_var_name[] =
-			{
-				#if defined __unix__ || defined __APPLE__
-					"LD_LIBRARY_PATH"
-				#elif defined _WIN64 || or defined _WIN32
-					"PATH"
-				#else
-					#error unknown dynamic linker
-				#endif
-			};
-
-			// save the original path env var
-			std::string old_path;
-			{
-				char const * const env(std::getenv(path_env_var_name));
-				if(env) old_path = env;
-			}
-
-			// append the plugin dir to the path env var
-			std::string new_path(old_path);
-			if(new_path.length()) {
-				new_path +=
-					#if defined __unix__ || defined __APPLE__
-						":"
-					#elif defined _WIN64 || or defined _WIN32
-						";"
-					#else
-						#error unknown dynamic linker
-					#endif
-			}
-
-			///\todo new_path += dir_name(file_name), using boost::filesystem::path for portability
-
-			// append the plugin dir to the path env var
-			if(::putenv((path_env_var_name + ("=" + new_path)).c_str())) {
-				std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
-			}
-		#endif // 0
-
-		#if defined __unix__ || defined __APPLE__
-			_dll = ::dlopen(file_name.c_str(), RTLD_LAZY /*RTLD_NOW*/);
-		#else
-			if ( file_name.find(".dll") == std::string::npos) return false;
-			// Set error mode to disable system error pop-ups (for LoadLibrary)
-			UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-			_dll = LoadLibraryA( file_name.c_str() );
-			// Restore previous error mode
-			SetErrorMode( uOldErrorMode );
-		#endif
-
-		#if 0
-			// set the path env var back to its original value
-			if(::putenv((path_env_var_name + ("=" + old_path)).c_str())) {
-				std::cerr << "psycle: plugin: warning: could not set " << path_env_var_name << " env var back to its original value.\n";
-			}
-		#endif // 0
-
-		if (!_dll) {
-			#if defined __unix__ || defined __APPLE__
-				std::cerr << "Cannot load library: " << dlerror() << '\n';
-			#else
-				///\todo
-			#endif
-			return false;
-		} else {
-			GETINFO GetInfo  = 0;
-			#if defined __unix__ || defined __APPLE__
-				GetInfo = (GETINFO) dlsym( _dll, "GetInfo");
-			#else
-				GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( _dll ), "GetInfo" );
-			#endif
-			if (!GetInfo) {
-				#if defined __unix__ || defined __APPLE__
-					std::cerr << "Cannot load symbols: " << dlerror() << '\n';
-				#else
-					///\todo readd the original code here!
-				#endif
-				return false;
-			} else {
-				info_ = GetInfo();
-				if(info_->Version < MI_VERSION) std::cerr << "plugin format is too old" << info_->Version << file_name << "\n";
-				fflush(stdout);
-				_isSynth = info_->Flags == 3;
-				if(_isSynth) mode(MACHMODE_GENERATOR);
-				strncpy(_psShortName,info_->ShortName,15);
-				_psShortName[15]='\0';
-				char buf[32];
-				strncpy(buf, info_->ShortName,31);
-				buf[31]='\0';
-				SetEditName(buf);
-				_psAuthor = info_->Author;
-				_psName = info_->Name;
-				CREATEMACHINE GetInterface = 0;
-				#if defined __unix__ || defined __APPLE__
-					GetInterface =  (CREATEMACHINE) dlsym(_dll, "CreateMachine");
-				#else
-					GetInterface = (CREATEMACHINE) GetProcAddress( (HINSTANCE)_dll, "CreateMachine" );
-				#endif
-				if(!GetInterface) {
-					#if defined __unix__ || defined __APPLE__
-						std::cerr << "Cannot load symbol: " << dlerror() << "\n";
-					#else
-						///\todo
-					#endif
-					return false;
-				} else {
-					proxy()(GetInterface());
-				}
-			}
-		}
-		return true;
-	} catch (...) {
-		std::cerr << "exception while loading plugin\n";
-		return false;
-	}
-}
-
 
 void Plugin::Init( )
 {
@@ -226,15 +119,15 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 {
 	int ns = numSamples;
 	int us = startSample;
-	if(mode() == MACHMODE_GENERATOR)
+	if(_isSynth)
 	{
 		if (!_mute) Standby(false);
 		else Standby(true);
 	}
 
 	if (!_mute) {
-		if((mode() == MACHMODE_GENERATOR) || (!_bypass && !Standby())) {
-			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
+		if((_isSynth) || (!_bypass && !Standby())) {
+			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, callbacks->song().tracks());
 		}
 	}
 	//CPUCOST_CALC(cost, numSamples);
@@ -463,6 +356,7 @@ void Plugin::Tick( )
 void Plugin::Tick( int channel, const PatternEvent & pData )
 {
 	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
+///FIXME: Add the Information about the tweaks.
 
 	if(pData.note() == notetypes::tweak)
 	{
@@ -583,51 +477,6 @@ void Plugin::Stop( )
 	Machine::Stop();
 }
 
-struct ToLower
-{
-	char operator() (char c) const  { return std::tolower(c); }
-};
-
-bool Plugin::LoadDll( std::string const & path, std::string const & psFileName_ ) // const is here not possible cause we modify it -- stefan
-{
-	std::string prefix = "lib-xpsycle.plugin.";
-	std::string psFileName = psFileName_;
-	#if defined __unix__ || defined __APPLE__        
-		std::transform(psFileName.begin(),psFileName.end(),psFileName.begin(),ToLower());
-		if (psFileName.find(".so")== std::string::npos) {
-			_psDllName = psFileName;
-			int i = psFileName.find(".dll");
-			std::string withoutSuffix = psFileName.substr(0,i);
-			std::string soName = withoutSuffix + ".so";
-			psFileName = prefix + soName;
-			psFileName = path + psFileName; 
-			unsigned int pos;
-			while((pos = psFileName.find(' ')) != std::string::npos) psFileName[pos] = '_';
-		} else {
-			unsigned int i = psFileName.find(prefix);
-			if (i!=std::string::npos) {
-				int j = psFileName.find(".so");
-				if (j!=0) {
-					_psDllName = psFileName.substr(0,j);
-					_psDllName.erase(0, prefix.length());
-					_psDllName = _psDllName + ".dll";
-				} else {
-					_psDllName = psFileName;
-					_psDllName.erase(0, prefix.length());
-					_psDllName = _psDllName + ".dll";
-				}
-			} else _psDllName = psFileName;
-
-			psFileName = path + psFileName; 
-		}
-	#else
-		_psDllName = psFileName;
-		psFileName = path + psFileName;
-	#endif   
-	return Instance(psFileName);
-}
-
-
 void Plugin::GetParamName(int numparam, char * name) const
 {
 	if( numparam < info_->numParameters ) std::strcpy(name,info_->Parameters[numparam]->Name);
@@ -682,12 +531,6 @@ bool Plugin::SetParameter(int numparam,int value)
 		}
 		return true;
 	} else return false;
-}
-
-
-void Plugin::SaveDllName(RiffFile * pFile) const
-{
-	pFile->WriteArray(_psDllName.c_str(), _psDllName.length() + 1);
 }
 
 bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)

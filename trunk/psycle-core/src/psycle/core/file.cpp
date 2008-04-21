@@ -76,15 +76,15 @@ namespace psy { namespace core {
 			while((drecord = readdir(dhandle)) != 0) {
 				struct stat sbuf;
 				stat(drecord->d_name, &sbuf);
-				if(S_ISDIR(sbuf.st_mode)) { // dir
-					if(list_mode & list_modes::dirs) {
-						std::string name(drecord->d_name);
-						if(name != "." && name != "..")
-							destination.push_back(std::string(drecord->d_name));
-					}
-				} else { // file
-					if(list_mode & list_modes::files)
-						destination.push_back(std::string(drecord->d_name));
+				std::string name(drecord->d_name);
+				if(
+					((list_mode & list_modes::dirs)
+						&& S_ISDIR(sbuf.st_mode)
+						&& ( name != "." && name != "..")) ||
+					((list_mode & list_modes::files)
+						&& !S_ISDIR(sbuf.st_mode)) 
+				){
+					destination.push_back(name);
 				}
 			}
 			closedir(dhandle);
@@ -98,8 +98,8 @@ namespace psy { namespace core {
 			if((fhandle=FindFirstFileA(directory,&dir)) != INVALID_HANDLE_VALUE) {
 				do {  // readout directory
 					if(
-						(list_mode & list_modes::dirs) && (dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || 
-						(list_mode & list_modes::files) && !(dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+						((list_mode & list_modes::dirs) && (dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) || 
+						((list_mode & list_modes::files) && !(dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 					) destination.push_back( dir.cFileName );
 				} while(FindNextFileA(fhandle,&dir));
 			}
@@ -226,7 +226,7 @@ namespace psy { namespace core {
 	// Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true  replaces all.
 	std::string File::replaceIllegalXmlChr( const std::string & text, bool strict ) {
 		std::string xml = text;
-		std::string::size_type search_pos;
+		std::string::size_type search_pos = 0;
 		// replace ampersand
 		while((search_pos = xml.find("&", search_pos)) != std::string::npos) xml.replace(search_pos++, 1, "&amp;" );
 		// replace less than

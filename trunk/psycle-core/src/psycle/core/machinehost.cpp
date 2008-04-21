@@ -18,42 +18,44 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PLUGIN_FINDER
-#define PSYCLE__CORE__PLUGIN_FINDER
+#include <psycle/core/psycleCorePch.hpp>
 
-#include "machinekey.hpp"
-#include "plugininfo.h"
-#include <vector>
-#include <map>
+#include "machinehost.hpp"
+#include "pluginfinder.h"
+#include "file.h"
+#include <iostream>
 
-namespace psy
+namespace psy {namespace core {
+MachineHost::MachineHost(MachineCallbacks*calls)
+:mcallback_(calls)
 {
-	namespace core
+}
+
+void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) 
+{
+	if (clearfirst) {
+		finder.ClearMap(hostCode());
+	}
+	for (int i=0; i < getNumPluginPaths();i++) 
 	{
-		class PluginFinder
-		{
-			protected:
-				PluginFinder();
-				~PluginFinder();
-			public:
-				static PluginFinder& getInstance();
-				virtual void addHost(Hosts::type);
-				virtual bool hasHost(Hosts::type) const;
-
-				virtual void AddInfo(const MachineKey &, const PluginInfo& );
-				PluginInfo info(const MachineKey & key );
-				const PluginInfo& info( const MachineKey & key ) const;
-				bool hasKey( const MachineKey& key ) const;
-				std::string lookupDllName( const MachineKey & key ) const;
-			
-				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
-				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
-				virtual void ClearMap(Hosts::type);
-
-			protected:
-				PluginInfo empty_;
-				std::vector<std::map<MachineKey, PluginInfo> > maps_;
-		};
+		std::string currentPath = getPluginPath(i);
+		std::vector<std::string> fileList;
+		try {
+			fileList = File::fileList(currentPath, File::list_modes::files);
+		} catch ( std::exception& e ) {
+			std::cout << "Warning: Unable to scan your " << hostName() << " plugin directory with path: " << currentPath
+				<< "." << std::endl << "Please make sure the directory exists." << std::endl;
+			return;
+		}
+		currentPath = currentPath + File::slash();
+		std::vector<std::string>::iterator it = fileList.begin();
+		for ( ; it < fileList.end(); ++it ) {
+			std::string fullName = currentPath + *it;
+			FillPluginInfo(fullName,*it,finder);
+		}
 	}
 }
-#endif
+
+}}
+
+

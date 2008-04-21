@@ -21,7 +21,7 @@
 #ifndef PATTERNSEQUENCE_H
 #define PATTERNSEQUENCE_H
 
-#include "patterndata.h"
+#include "patternpool.h"
 #include "singlepattern.h"
 
 /**
@@ -184,8 +184,8 @@ namespace psy
 
 			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
 
-			PatternData* patternData();
-			const PatternData & patternData() const;
+			PatternPool* patternPool();
+			const PatternPool & patternPool() const;
 
 			void removeSinglePattern(SinglePattern* pattern);
 
@@ -231,7 +231,7 @@ namespace psy
 
 		private:
 
-			PatternData patternData_;
+			PatternPool patternPool_;
 
 			int numTracks_;
 			std::vector<bool> mutedTrack_;

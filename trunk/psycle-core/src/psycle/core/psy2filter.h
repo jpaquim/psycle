@@ -21,8 +21,9 @@
 #define PSYCLE__CORE__PSY2FILTER__INCLUDED
 #pragma once
 
-#include "psyfilter.h"
+#include "psyfilterbase.h"
 #include "cstdint.h"
+#include <vector>
 
 namespace psy { namespace core {
 
@@ -31,7 +32,6 @@ class PatternCategory;
 class SequenceLine;
 class Machine;
 class PatternEvent;
-class MachineCallbacks;
 
 namespace convert_internal_machines
 {
@@ -44,6 +44,24 @@ namespace convert_internal_machines
 class Psy2Filter : public PsyFilterBase
 {
 	protected:
+		//Note: convert_internal_machines uses its own enum.
+		typedef enum MachineClass
+		{
+			MACH_MASTER = 0,
+			MACH_SINE = 1, 
+			MACH_DIST = 2,
+			MACH_SAMPLER = 3,
+			MACH_DELAY = 4,
+			MACH_2PFILTER = 5,
+			MACH_GAIN = 6, 
+			MACH_FLANGER = 7, 
+			MACH_PLUGIN = 8,
+			MACH_VST = 9,
+			MACH_VSTFX = 10,
+			MACH_SCOPE = 11,
+			MACH_DUMMY = 255
+		} machineclass_t;
+
 		class VSTLoader
 		{
 			public:
@@ -73,27 +91,25 @@ class Psy2Filter : public PsyFilterBase
 
 	///\name Singleton Pattern
 	///\{
-		protected:
-				Psy2Filter();
-		private:
-			Psy2Filter( Psy2Filter const & );
-			Psy2Filter& operator=(Psy2Filter const &);
-		public:
-			static Psy2Filter* Instance() {
-					// don`t use multithreaded
-					static Psy2Filter s;
-					return &s; 
-			}
+	protected:
+		Psy2Filter();
+	private:
+		Psy2Filter( Psy2Filter const & );
+		Psy2Filter& operator=(Psy2Filter const &);
+	public:
+		static Psy2Filter* getInstance() {
+			// don`t use multithreaded
+			static Psy2Filter s;
+			return &s; 
+		}
 	///\}
 
 	public:
 		/*override*/ int version() const { return 2; }
 		/*override*/ std::string filePostfix() const { return "psy"; }
 		/*override*/ bool testFormat(const std::string & fileName);
-		/*override*/ bool load(std::string const & plugin_path, const std::string & fileName, CoreSong & song, MachineCallbacks* callbacks);
-		/*override*/ bool loadExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
-		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong & /*song*/) {  /* so saving for legacy file format */ return false; }
-		/*override*/ bool saveExtra(RiffFile* /*file*/,char* /*header*/, int /*version*/) {return false;}
+		/*override*/ bool load(const std::string & fileName, CoreSong& song);
+		/*override*/ bool save(const std::string & /*fileName*/, const CoreSong& /*song*/) {  /* so saving for legacy file format */ return false; }
 
 
 	protected:
@@ -104,8 +120,8 @@ class Psy2Filter : public PsyFilterBase
 		virtual bool LoadINSD(RiffFile* file,CoreSong& song);
 		virtual bool LoadWAVD(RiffFile* file,CoreSong& song);
 		virtual bool PreLoadVSTs(RiffFile* file,CoreSong& song);
-		virtual bool LoadMACD(std::string const & plugin_path, RiffFile* file,CoreSong& song,convert_internal_machines::Converter* converter, MachineCallbacks* callbacks);
-		virtual bool TidyUp(RiffFile* file,CoreSong &song,convert_internal_machines::Converter* converter);
+		virtual bool LoadMACD(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter);
+		virtual bool TidyUp(RiffFile* file,CoreSong& song,convert_internal_machines::Converter& converter);
 
 	protected:
 		static std::string const FILE_FOURCC;
@@ -133,7 +149,7 @@ class Psy2Filter : public PsyFilterBase
 		unsigned char octave;
 		int instSelected; //-> map to auxcolselected
 
-		void preparePatternSequence(CoreSong & song);
+		void preparePatternSequence(CoreSong& song);
 		PatternEvent convertEntry( unsigned char * data ) const;
 };
 

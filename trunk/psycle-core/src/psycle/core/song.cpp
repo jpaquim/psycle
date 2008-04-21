@@ -20,25 +20,18 @@
 #include <psycle/core/psycleCorePch.hpp>
 #include "song.h"
 #include "datacompression.h"
-#include "file.h"
-#include "internal_machines.h"
-#include "ladspamachine.h"
-#include "machine.h"
-#include "plugin.h"
-#include "pluginfinder.h"
-#include "psyfilter.h"
-#include "riff.h"
-#include "sampler.h"
-#include "xmsampler.h"
 #include "fileio.h"
+#include "machine.h"
+#include "machinefactory.h"
+#include "riff.h"
 #include <sstream>
 #include <iostream> // only for debug output
 
 namespace psy { namespace core {
 
-CoreSong::CoreSong(MachineCallbacks* callbacks)
-:
-	machinecallbacks(callbacks)
+SongSerializer CoreSong::serializer;
+
+CoreSong::CoreSong()
 {
 	_machineLock = false;
 	Invalided = false;
@@ -51,8 +44,8 @@ CoreSong::CoreSong(MachineCallbacks* callbacks)
 }
 
 CoreSong::~CoreSong() {
-	DestroyAllMachines();
-	DestroyAllInstruments();
+	DeleteAllMachines();
+	FreeInstrumentsMemory();
 }
 
 void CoreSong::clear() {
@@ -71,208 +64,49 @@ void CoreSong::clear() {
 		setTicksSpeed(4);
 	}
 	// Clean up allocated machines.
-	DestroyAllMachines(true);
+	DeleteAllMachines(true);
 	// Cleaning instruments
 	DeleteInstruments();
 	// Clear patterns
 	patternSequence()->removeAll();
-	// Cleaning pattern allocation info
-	for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
-	for(int i(0) ; i < MAX_MACHINES ; ++i)
-	{
-		if (machine_[i]) delete machine_[i];
-		machine_[i] = 0;
-	}
 
 	_saved=false;
 	fileName = "Untitled.psy";
-	
-	{
-		std::string plugin_path = ""; // master machine is not a plugin at the moment
-		CreateMachine(plugin_path, MACH_MASTER, 320, 200, "master", MASTER_INDEX);
-	}
-
+	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX));
 }
 
-UISong::UISong(MachineCallbacks* callbacks)
-	: CoreSong(callbacks)
-{}
+bool CoreSong::load(std::string filename)
+{
+	DeleteAllMachines();
+	DeleteInstruments();
+	return serializer.loadSong(filename,*this);
+}
 
-Machine * CoreSong::createMachine(const PluginFinder & finder, const PluginFinderKey & key, int x, int y ) {
-	int fb=-1;
-	if ( key == PluginFinderKey::internalSampler() ) {
-		fb = GetFreeBus();
-		CreateMachine(finder.psycle_path(), MACH_SAMPLER, x, y, "SAMPLER", fb );
-	}
-	else if ( key == PluginFinderKey::internalMixer() ) {
-		fb = GetFreeFxBus();
-		CreateMachine(finder.psycle_path(), MACH_MIXER, x, y, "Mixer", fb );
-	}
-	else if ( finder.info( key ).type() == MACH_PLUGIN ) 
+bool CoreSong::save(std::string filename, int version)
+{
+	return serializer.saveSong(filename,*this,version);
+}
+
+
+void CoreSong::AddMachine(Machine* pmac) {
+	if(pmac->id() == -1)
 	{
-		if ( finder.info( key ).mode() == MACHMODE_FX ) {
-			fb = GetFreeFxBus();
-		} else fb = GetFreeBus();
-		CreateMachine(finder.psycle_path(), MACH_PLUGIN, x, y, key.dllPath(), fb );
-	} else if ( finder.info( key ).type() == MACH_LADSPA )
-	{
-		fb = GetFreeFxBus();
-		LADSPAMachine* plugin = new LADSPAMachine( machinecallbacks, fb, this );
-		if(plugin->loadDll( key.dllPath(), key.index())) {
-			plugin->SetPosX( x );
-			plugin->SetPosY( y );
-			plugin->Init();
-			if( machine_[fb] ) DestroyMachine( fb );
-			machine_[ fb ] = plugin;
+		if(pmac->acceptsConnections()) {
+			pmac->id(GetFreeFxBus());
 		} else {
-			delete plugin;
+			pmac->id(GetFreeBus());
 		}
 	}
-	if ( fb != -1 ) return machine_[fb];
-	else return 0;
+	machine(pmac->id(),pmac);
 }
-
-Machine & CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name ) {
-	Machine::id_type const array_index(GetFreeMachine());
-	if(array_index < 0) throw std::runtime_error("sorry, psycle doesn't dynamically allocate memory.");
-	if(!CreateMachine(plugin_path, type, x, y, plugin_name, array_index))
-		throw std::runtime_error("something bad happened while i was trying to create a machine, but i forgot what it was.");
-	return *machine_[array_index];
+void CoreSong::ReplaceMachine(Machine* pmac, Machine::id_type idx)
+{
+	if (machine(idx)) {
+		DeleteMachine(machine(idx));
+	}
+	machine(idx,pmac);
 }
-
-bool CoreSong::CreateMachine(std::string const & plugin_path, Machine::type_type type, int x, int y, std::string const & plugin_name, Machine::id_type index ) {
-	Machine * machine(0);
-	switch (type)
-	{
-	case MACH_MASTER:
-		if(machine_[MASTER_INDEX]) return false;
-		index = MASTER_INDEX;
-		machine = new Master(machinecallbacks, index, this);
-		break;
-	case MACH_SAMPLER:
-		machine = new Sampler(machinecallbacks, index,this);
-		break;
-	case MACH_XMSAMPLER:
-		//machine = new XMSampler(machinecallbacks, index);
-		break;
-	case MACH_DUPLICATOR:
-		machine = new DuplicatorMac(machinecallbacks, index, this);
-		break;
-	case MACH_MIXER:
-		machine = new Mixer(machinecallbacks, index, this);
-		break;
-	#if 0
-	case MACH_LFO:
-		machine = new LFO(machinecallbacks, index, this);
-		break;
-	case MACH_AUTOMATOR:
-					machine = new Automator(machinecallbacks, index);
-					break;
-	#endif
-	case MACH_DUMMY:
-		machine = new Dummy(machinecallbacks, index, this);
-		break;
-	case MACH_PLUGIN:
-	{
-		Plugin* plugin = new Plugin( machinecallbacks, index, this );
-		plugin->LoadDll( plugin_path, plugin_name );
-		machine = plugin;
-	}
-	break;
-	#if 0
-	case MACH_LADSPA:
-		{
-		LADSPAMachine* plugin = new LADSPAMachine(machinecallbacks,index,this);
-		machine = plugin;
-		const char* pcLADSPAPath;
-		pcLADSPAPath = std::getenv("LADSPA_PATH");
-		if ( !pcLADSPAPath) {
-		#if defined __unix__ || defined __APPLE__
-		pcLADSPAPath = "/usr/lib/ladspa/";
-		#else
-		pcLADSPAPath = "I:\\Archivos de Programa\\Multimedia\\Audacity\\Plug-Ins\\";
-		#endif
-		}
-		std::string path;
-		if ( pcLADSPAPath ) path = pcLADSPAPath;
-		plugin->loadDll( path + plugin_name, pluginIndex);
-		}
-		break;
-	#endif
-	#if 0
-	case MACH_VST:
-	case MACH_VSTFX:
-		{
-			vst::plugin * plugin(0);
-			if (type == MACH_VST) machine = plugin = new vst::instrument(machinecallbacks,index);
-			else if (type == MACH_VSTFX) machine = plugin = new vst::fx(machinecallbacks,index);
-			if(!CNewMachine::TestFilename(plugin_name)) ///\todo that's a call to the GUI stuff :-(
-			{
-				delete plugin;
-				return false;
-			}
-			try
-			{
-				plugin->Instance(plugin_name);
-			}
-			catch(std::exception const & e)
-			{
-				loggers::exception(e.what());
-				delete plugin;
-				return false;
-			}
-			catch(...)
-			{
-				delete plugin;
-				return false;
-			}
-			break;
-		}
-	#endif
-	default:
-		//loggers::warning("failed to create requested machine type");
-		std::cerr << "psycle: failed to create requested machine type\n";
-		//return false;
-		machine = new Dummy(machinecallbacks, index, this);
-		break;
-	}
-
-	if(index < 0)
-	{
-		index = GetFreeMachine();
-		if(index < 0)
-		{
-			//loggers::warning("no more machine slots");
-			return false;
-		}
-	}
-
-	if(machine_[index]) DestroyMachine(index);
-
-	///\todo init problem
-	{
-		if(machine->type() == MACH_VSTFX || machine->type() == MACH_VST )
-		{
-			// Do not call VST Init() function after Instance.
-			machine->Machine::Init();
-		}
-		else machine->Init();
-	}
-	machine->SetPosX(x);
-	machine->SetPosY(y);
-
-	// Finally, activate the machine
-	machine_[index] = machine;
-	
-	return true;
-}
-
-Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac) {
-	if(!machine_[smac]) return Machine::id_type(255);
-	return smac;
-}
-
-void CoreSong::DestroyAllMachines(bool write_locked) {
+void CoreSong::DeleteAllMachines(bool write_locked) {
 	_machineLock = true;
 	for(Machine::id_type c(0); c < MAX_MACHINES; ++c)
 	{
@@ -293,25 +127,44 @@ void CoreSong::DestroyAllMachines(bool write_locked) {
 					machine_[j] = 0;
 				}
 			}
-			DestroyMachine(c, write_locked);
+			DeleteMachine(machine_[c], write_locked);
 		}
 		machine_[c] = 0;
 	}
 	_machineLock = false;
 }
-
-Machine::id_type CoreSong::GetFreeMachine() {
-	Machine::id_type tmac(0);
-	for(;;)
+void CoreSong::DeleteMachine(Machine* mac, bool /*write_locked*/)
+{
+	//CSingleLock lock(&door, TRUE);
+	mac->DeleteWires();
+	// If it's a (Vst)Plugin, the destructor calls to release the underlying library
+	try
 	{
-		if(!machine_[tmac]) return tmac;
-		if(tmac++ >= MAX_MACHINES) return Machine::id_type(-1); // that's why ids can't be unsigned :-(
-	}
+		Machine::id_type id = mac->id();
+		delete mac;
+		machine_[id]=0;
+	}catch(...){};
 }
+Machine::id_type CoreSong::GetFreeBus() {
+	for(int c(0) ; c < MAX_BUSES ; ++c) if(!machine_[c]) return c;
+	return -1; 
+}
+
+Machine::id_type CoreSong::GetFreeFxBus() {
+	for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!machine_[c]) return c;
+	return -1; 
+}
+
+
+Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac) {
+	if(!machine_[smac]) return Machine::id_type(255);
+	return smac;
+}
+
 bool CoreSong::ValidateMixerSendCandidate(Machine& mac,bool rewiring)
 {
 	// Basically, we dissallow a send comming from a generator as well as multiple-outs for sends.
-	if ( mac.mode() == MACHMODE_GENERATOR) return false;
+	if ( !mac.acceptsConnections()) return false;
 	if ( mac._connectedOutputs > 1 || (mac._connectedOutputs > 0 && !rewiring) ) return false;
 	for (int i(0); i<MAX_CONNECTIONS; ++i)
 	{
@@ -325,36 +178,19 @@ bool CoreSong::ValidateMixerSendCandidate(Machine& mac,bool rewiring)
 	}
 	return true;
 }
-void CoreSong::RestoreMixerSendFlags()
-{
-	for (int i(0);i < MAX_MACHINES; ++i)
-	{
-		if (machine(i))
-		{
-			if (machine(i)->type() == MACH_MIXER)
-			{
-				Mixer* mac = static_cast<Mixer*>(machine(i));
-				for (int j(0); j<mac->numreturns(); ++j)
-				{
-					if ( mac->Return(j).IsValid())
-						machine(mac->Return(j).Wire().machine_)->SetMixerSendFlag();
-				}
-			}
-		}
-	}
-}
+
 Wire::id_type CoreSong::InsertConnection(Machine &srcMac, Machine &dstMac, InPort::id_type srctype, OutPort::id_type dsttype,float volume) {
 	//CSingleLock lock(&door,TRUE);
 	// Verify that the destination is not a generator
-	if(dstMac.mode() == MACHMODE_GENERATOR) return -1;
+	if(!dstMac.acceptsConnections()) return -1;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if (srcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(srcMac.id()) > -1) return -1;
 	// disallow mixer as a sender of another mixer
-	if ( srcMac.type() == MACH_MIXER && dstMac.type() == MACH_MIXER && dsttype != 0) return -1;
+	if ( srcMac.getMachineKey() == MachineKey::mixer() && dstMac.getMachineKey() == MachineKey::mixer() && dsttype != 0) return -1;
 	// If source is in a mixer chain, dissallow the new connection.
 	if ( srcMac._isMixerSend ) return -1;
 	// If destination is in a mixer chain (or the mixer itself), validate the sender first
-	if ( dstMac._isMixerSend || (dstMac.type() == MACH_MIXER && dsttype == 1))
+	if ( dstMac._isMixerSend || (dstMac.getMachineKey() == MachineKey::mixer() && dsttype == 1))
 	{
 		if (!ValidateMixerSendCandidate(srcMac)) return -1;
 	}
@@ -365,13 +201,13 @@ bool CoreSong::ChangeWireDestMac(Machine& srcMac, Machine &newDstMac, OutPort::i
 {
 	//CSingleLock lock(&door,TRUE);
 	// Verify that the destination is not a generator
-	if(newDstMac.mode() == MACHMODE_GENERATOR) return false;
+	if(!newDstMac.acceptsConnections()) return false;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if (srcMac.FindOutputWire(newDstMac.id()) > -1 || newDstMac.FindOutputWire(srcMac.id()) > -1) return false;
-	if ( srcMac.type() == MACH_MIXER && newDstMac.type() == MACH_MIXER && wiretochange >=MAX_CONNECTIONS) return false;
+	if ( srcMac.getMachineKey() == MachineKey::mixer() && newDstMac.getMachineKey() == MachineKey::mixer() && wiretochange >=MAX_CONNECTIONS) return false;
 	// If source is in a mixer chain, dissallow the new connection.
 	// If destination is in a mixer chain (or the mixer itself), validate the sender first
-	if ( newDstMac._isMixerSend || (newDstMac.type() == MACH_MIXER && wiretochange >= MAX_CONNECTIONS))
+	if ( newDstMac._isMixerSend || (newDstMac.getMachineKey() == MachineKey::mixer() && wiretochange >= MAX_CONNECTIONS))
 	{
 		///\todo: validate for the case whre srcMac->_isMixerSend
 		if (!ValidateMixerSendCandidate(srcMac,true)) return false;
@@ -383,45 +219,20 @@ bool CoreSong::ChangeWireSourceMac(Machine& newSrcMac, Machine &dstMac, InPort::
 {
 	//CSingleLock lock(&door,TRUE);
 	// Verify that the destination is not a generator
-	if(dstMac.mode() == MACHMODE_GENERATOR) return false;
+	if(!dstMac.acceptsConnections()) return false;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if (newSrcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(newSrcMac.id()) > -1) return false;
 	// disallow mixer as a sender of another mixer
-	if ( newSrcMac.type() == MACH_MIXER && dstMac.type() == MACH_MIXER && wiretochange >= MAX_CONNECTIONS) return false;
+	if ( newSrcMac.getMachineKey() == MachineKey::mixer() && dstMac.getMachineKey() == MachineKey::mixer() && wiretochange >= MAX_CONNECTIONS) return false;
 	// If source is in a mixer chain, dissallow the new connection.
 	if ( newSrcMac._isMixerSend ) return false;
 	// If destination is in a mixer chain (or the mixer itself), validate the sender first
-	if ( dstMac._isMixerSend || (dstMac.type() == MACH_MIXER && wiretochange >= MAX_CONNECTIONS))
+	if ( dstMac._isMixerSend || (dstMac.getMachineKey() == MachineKey::mixer() && wiretochange >= MAX_CONNECTIONS))
 	{
 		if (!ValidateMixerSendCandidate(newSrcMac,false)) return false;
 	}
 	
 	return dstMac.MoveWireSourceTo(newSrcMac,dsttype,wiretochange,srctype);
-}
-
-void CoreSong::DestroyMachine(Machine::id_type mac, bool /*write_locked*/)
-{
-	//CSingleLock lock(&door, TRUE);
-	Machine *iMac = machine(mac);
-	if(iMac)
-	{
-		iMac->DeleteWires();
-		// If it's a (Vst)Plugin, the destructor calls to release the underlying library
-		try
-		{
-			delete machine(mac);
-			machine_[mac]=0;
-		}catch(...){};
-	}
-}
-int CoreSong::GetFreeBus() {
-	for(int c(0) ; c < MAX_BUSES ; ++c) if(!machine_[c]) return c;
-	return -1; 
-}
-
-int CoreSong::GetFreeFxBus() {
-	for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!machine_[c]) return c;
-	return -1; 
 }
 
 // IFF structure ripped by krokpitr
@@ -717,199 +528,6 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 	return true;
 }
 
-namespace {
-	PsyFilters filters;
-}
-
-bool CoreSong::load(std::string const & plugin_path, const std::string & fileName) {
-	return filters.loadSong(plugin_path, fileName, *this, machinecallbacks);
-}
-
-bool CoreSong::save(const std::string & fileName) {
-	return filters.saveSong(fileName, *this,4);
-}
-
-///\todo mfc+winapi->std
-bool CoreSong::CloneMac(Machine::id_type src, Machine::id_type dst) {
-	// src has to be occupied and dst must be empty
-	if (machine_[src] && machine_[dst])
-	{
-		return false;
-	}
-	if (machine_[dst])
-	{
-		int temp = src;
-		src = dst;
-		dst = temp;
-	}
-	if (!machine_[src])
-	{
-		return false;
-	}
-	// check to see both are same type
-	if (((dst < MAX_BUSES) && (src >= MAX_BUSES))
-		|| ((dst >= MAX_BUSES) && (src < MAX_BUSES)))
-	{
-		return false;
-	}
-
-	if ((src >= MAX_MACHINES-1) || (dst >= MAX_MACHINES-1))
-	{
-		return false;
-	}
-
-	// save our file
-
-	#if 0
-		boost::filesystem::path path(Gloxxxxxxxxxxxxxbal::configuration().GetSongDir(), boost::filesystem::native);
-		path /= "psycle.tmp";
-
-		boost::filesystem::remove(path);
-
-		RiffFile file;
-		if(!file.Create(path.string(), true)) return false;
-
-		file.WriteChunk("MACD",4);
-		std::uint32_t version = CURRENT_FILE_VERSION_MACD;
-		file.Write(version);
-		std::fpos_t pos = file.GetPos();
-		std::uint32_t size = 0;
-		file.Write(size);
-
-		std::uint32_t index = dst; // index
-		file.Write(index);
-
-		machine_[src]->SaveFileChunk(&file);
-
-		std::fpos_t pos2 = file.GetPos(); 
-		size = pos2 - pos - sizeof size;
-		file.Seek(pos);
-		file.Write(size);
-		file.Close();
-
-		// now load it
-
-		if(!file.Open(path.string()))
-		{
-			boost::filesystem::remove(path);
-			return false;
-		}
-
-		char Header[5];
-		file.ReadChunk(&Header, 4);
-		Header[4] = 0;
-		if (strcmp(Header,"MACD")==0)
-		{
-			file.Read(version);
-			file.Read(size);
-			if (version > CURRENT_FILE_VERSION_MACD)
-			{
-				// there is an error, this file is newer than this build of psycle
-				file.Close();
-				boost::filesystem::remove(path);
-				return false;
-			}
-			else
-			{
-				file.Read(index);
-				index = dst;
-				if (index < MAX_MACHINES)
-				{
-					Machine::id_type id(index);
-					// we had better load it
-					DestroyMachine(id);
-					machine_[index] = Machine::LoadFileChunk(&file,id,version);
-				}
-				else
-				{
-					file.Close();
-					boost::filesystem::remove(path);
-					return false;
-				}
-			}
-		}
-		else
-		{
-			file.Close();
-			boost::filesystem::remove(path);
-			return false;
-		}
-		file.Close();
-		boost::filesystem::remove(path);
-
-		machine_[dst]->SetPosX(machine_[dst]->GetPosX()+32);
-		machine_[dst]->SetPosY(machine_[dst]->GetPosY()+8);
-
-		// delete all connections
-
-		machine_[dst]->_connectedInputs = 0;
-		machine_[dst]->_connectedOutputs = 0;
-
-		for (int i = 0; i < MAX_CONNECTIONS; i++)
-		{
-			if (machine_[dst]->_connection[i])
-			{
-				machine_[dst]->_connection[i] = false;
-				machine_[dst]->_outputMachines[i] = -1;
-			}
-
-			if (machine_[dst]->_inputCon[i])
-			{
-				machine_[dst]->_inputCon[i] = false;
-				machine_[dst]->_inputMachines[i] = -1;
-			}
-		}
-
-		#if 1
-		{
-			std::stringstream s;
-			s << machine_[dst]->_editName << " " << std::hex << dst << " (cloned from " << std::hex << src << ")";
-			s >> machine_[dst]->_editName;
-		}
-		#else ///\todo rewrite this for std::string
-			int number = 1;
-			char buf[sizeof(machine_[dst]->_editName)+4];
-			strcpy (buf,machine_[dst]->_editName);
-			char* ps = strrchr(buf,' ');
-			if (ps)
-			{
-				number = atoi(ps);
-				if (number < 1)
-				{
-					number =1;
-				}
-				else
-				{
-					ps[0] = 0;
-					ps = strchr(machine_[dst]->_editName,' ');
-					ps[0] = 0;
-				}
-			}
-
-			for (int i = 0; i < MAX_MACHINES-1; i++)
-			{
-				if (i!=dst)
-				{
-					if (machine_[i])
-					{
-						if (strcmp(machine_[i]->_editName,buf)==0)
-						{
-							number++;
-							sprintf(buf,"%s %d",machine_[dst]->_editName.c_str(),number);
-							i = -1;
-						}
-					}
-				}
-			}
-
-			buf[sizeof(machine_[dst]->_editName)-1] = 0;
-			strcpy(machine_[dst]->_editName,buf);
-		#endif
-	#endif
-
-	return true;
-}
-
 ///\todo mfc+winapi->std
 bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/) {
 	// src has to be occupied and dst must be empty
@@ -1013,17 +631,19 @@ bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/
 void CoreSong::/*Reset*/DeleteInstrument(Instrument::id_type id)
 {
 	Invalided=true;
-	_pInstrument[id]->Delete(); Invalided=false;
+	_pInstrument[id]->Reset();
+	Invalided=false;
 }
 
 void CoreSong::/*Reset*/DeleteInstruments() {
 	Invalided=true;
-	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id)
-	_pInstrument[id]->Delete();
+	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
+		_pInstrument[id]->Reset();
+	}
 	Invalided=false;
 }
 
-void CoreSong::/*Delete*/DestroyAllInstruments() {
+void CoreSong::/*Delete*/FreeInstrumentsMemory() {
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 		delete _pInstrument[id];
 		_pInstrument[id] = 0;
@@ -1110,9 +730,12 @@ void CoreSong::setTicksSpeed(const unsigned int value, const bool isticks) {
 	isTicks_=isticks;
 }
 
+UISong::UISong()
+{}
 
-Song::Song(MachineCallbacks* callbacks)
-: UISong(callbacks)
+
+
+Song::Song()
 {
 	clearMyData();
 };
@@ -1131,9 +754,9 @@ void Song::clearMyData() {
 	auxcolSelected = 0;
 }
 
-void Song::DestroyMachine(Machine::id_type mac, bool write_locked ) 
+void Song::DeleteMachine(Machine* mac, bool write_locked ) 
 {
-	CoreSong::DestroyMachine(mac,write_locked);
-	if(mac == machineSoloed) machineSoloed = -1;
+	if(mac->id() == machineSoloed) machineSoloed = -1;
+	CoreSong::DeleteMachine(mac,write_locked);
 }
 }}

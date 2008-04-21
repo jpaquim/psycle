@@ -1,12 +1,10 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-//#include <psycle/core/psycleCorePch.hpp>
-
+#include <psycle/core/psycleCorePch.hpp>
 #include "convert_internal_machines.private.hpp"
-#include "internal_machines.h"
+#include "machinefactory.h"
 #include "plugin.h"
 #include "helpers/scale.hpp"
 #include "helpers/math/pi.hpp"
-#include "machine.h"
 #include "player.h"
 #include "song.h"
 #include "fileio.h"
@@ -17,9 +15,7 @@ namespace psy {
 			namespace math = common::math;
 			typedef common::Scale::Real Real;
 
-			Converter::Converter(std::string const & plugin_path)
-			:
-				plugin_path_(plugin_path)
+			Converter::Converter()
 			{}
 			
 			Converter::~Converter() throw()
@@ -27,16 +23,13 @@ namespace psy {
 				for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
 			}
 			
-			Machine & Converter::redirect(const int & index, const int & type, RiffFile & riff, CoreSong & song)
+			Machine & Converter::redirect(MachineFactory& factory, const int & index, const int& type, RiffFile & riff)
 			{
-				Plugin & plugin = * new Plugin(Player::Instance(), index, &song);
-				Machine * pointer_to_machine = &plugin;
+				Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::NATIVE,(plugin_names()(type).c_str()),0),index);
+				if (!pointer_to_machine){
+					pointer_to_machine = factory.CreateMachine(MachineKey::dummy(),index);
+				}
 				try {
-					if(!plugin.LoadDll(plugin_path_, const_cast<char *>((plugin_names()(type) + ".dll").c_str()))) {
-						pointer_to_machine = 0; // for delete pointer_to_machine in the catch clause
-						delete & plugin;
-						pointer_to_machine = new Dummy(Player::Instance(), index, &song);
-					}
 					Machine & machine = *pointer_to_machine;
 					machine_converted_from[&machine] = new int(type);
 					machine.Init();
@@ -46,6 +39,101 @@ namespace psy {
 						riff.ReadArray(c, 16); c[15] = 0;
 						machine.SetEditName(c);
 					}
+					switch(type) {
+					case abass:
+					case asynth1:
+					case asynth2:
+					case asynth21:
+					{	
+						Plugin & plug = *((Plugin*)pointer_to_machine);
+						int numParameters;
+						riff.Read(numParameters);
+						if(plug.proxy()())
+						{
+							std::int32_t * Vals = new std::int32_t[numParameters];
+							riff.ReadArray(Vals, numParameters);
+							try
+							{
+								if (type == abass)
+								{
+									plug.proxy().ParameterTweak(0,Vals[0]);
+									for (int i=1;i<15;i++)
+									{
+										plug.proxy().ParameterTweak(i+4,Vals[i]);
+									}
+									plug.proxy().ParameterTweak(19,0);
+									plug.proxy().ParameterTweak(20,Vals[15]);
+									if (numParameters>16)
+									{
+										plug.proxy().ParameterTweak(24,Vals[16]);
+										plug.proxy().ParameterTweak(25,Vals[17]);
+									}
+									else
+									{
+										plug.proxy().ParameterTweak(24,0);
+										plug.proxy().ParameterTweak(25,0);
+									}
+								}
+								else
+								{
+									for (int i=0; i<numParameters; i++)
+									{
+										plug.proxy().ParameterTweak(i,Vals[i]);
+									}
+									if( type == asynth1) // Patch to replace Synth1 by Arguru Synth 2f
+									{
+										plug.proxy().ParameterTweak(17,Vals[17]+10);
+										plug.proxy().ParameterTweak(24,0);
+										plug.proxy().ParameterTweak(25,0);
+									}
+									else if(type == asynth2)
+									{
+										plug.proxy().ParameterTweak(24,0);
+										plug.proxy().ParameterTweak(25,0);
+									}
+								}
+							}
+							catch(const std::exception &)
+							{
+								//loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
+							}
+							try
+							{
+								int size = plug.proxy().GetDataSize();
+								//pFile->Read(size); // This would have been the right thing to do
+								if(size)
+								{
+									char * pData = new char[size];
+									riff.ReadArray(pData, size); // Number of parameters
+									try
+									{
+										plug.proxy().PutData(pData); // Internal load
+									}
+									catch(const std::exception &)
+									{
+									}
+									delete[] pData;
+								}
+							}
+							catch(std::exception const &)
+							{
+								// loggers::warning(UNIVERSALIS__COMPILER__LOCATION);
+							}
+					
+							delete[] Vals;
+						}
+						else
+						{
+							riff.Skip(4*numParameters);
+							// If the machine had custom data (PutData()) the loader will crash.
+							// It cannot be fixed.
+						}
+
+					}
+					default:
+						break;
+					}
+
 					riff.ReadArray(machine._inputMachines,MAX_CONNECTIONS);
 					riff.ReadArray(machine._outputMachines,MAX_CONNECTIONS);
 					riff.ReadArray(machine._inputConVol,MAX_CONNECTIONS);
@@ -165,9 +253,8 @@ namespace psy {
 			}
 
 			void Converter::retweak(CoreSong & song) const {
-
 				// Get the first category (there's only one with imported psy's) and...
-				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->patternData()->begin();
+				std::vector<PatternCategory*>::iterator cit  = song.patternSequence()->patternPool()->begin();
 				// ... for all the patterns in this category...
 				for (std::vector<SinglePattern*>::iterator pit  = (*cit)->begin() ; pit != (*cit)->end(); pit++)
 				{
@@ -204,6 +291,10 @@ namespace psy {
 				(*this)[filter_2_poles] = new std::string("filter_2_poles");
 				(*this)[gainer] = new std::string("gainer");
 				(*this)[flanger] = new std::string("flanger");
+				(*this)[abass] = new std::string("arguru synth 2f");
+				(*this)[asynth1] = new std::string("arguru synth 2f");
+				(*this)[asynth2] = new std::string("arguru synth 2f");
+				(*this)[asynth21] = new std::string("arguru synth 2f");
 			}
 
 			Converter::Plugin_Names::~Plugin_Names()
@@ -214,6 +305,10 @@ namespace psy {
 				delete (*this)[filter_2_poles];
 				delete (*this)[gainer];
 				delete (*this)[flanger];
+				delete (*this)[abass];
+				delete (*this)[asynth1];
+				delete (*this)[asynth2];
+				delete (*this)[asynth21];
 			}
 
 			const bool Converter::Plugin_Names::exists(const int & type) const throw()

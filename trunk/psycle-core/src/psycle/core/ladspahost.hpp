@@ -18,42 +18,42 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#ifndef PSYCLE__CORE__PLUGIN_FINDER
-#define PSYCLE__CORE__PLUGIN_FINDER
 
-#include "machinekey.hpp"
-#include "plugininfo.h"
-#include <vector>
+#ifndef LADSPAHOST_HPP
+#define LADSPAHOST_HPP
+
+#include "machinehost.hpp"
+#include "ladspa.h"
+#include <string>
 #include <map>
 
-namespace psy
+namespace psy{ namespace core{
+
+class LadspaHost : public MachineHost
 {
-	namespace core
-	{
-		class PluginFinder
-		{
-			protected:
-				PluginFinder();
-				~PluginFinder();
-			public:
-				static PluginFinder& getInstance();
-				virtual void addHost(Hosts::type);
-				virtual bool hasHost(Hosts::type) const;
+protected:
+	LadspaHost(MachineCallbacks*);
+public:
+	~LadspaHost();
+	static LadspaHost& getInstance(MachineCallbacks*);
 
-				virtual void AddInfo(const MachineKey &, const PluginInfo& );
-				PluginInfo info(const MachineKey & key );
-				const PluginInfo& info( const MachineKey & key ) const;
-				bool hasKey( const MachineKey& key ) const;
-				std::string lookupDllName( const MachineKey & key ) const;
-			
-				std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
-				std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
-				virtual void ClearMap(Hosts::type);
+	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);
 
-			protected:
-				PluginInfo empty_;
-				std::vector<std::map<MachineKey, PluginInfo> > maps_;
-		};
-	}
-}
-#endif
+	virtual const Hosts::type hostCode() const { return Hosts::LADSPA; }
+	virtual const std::string hostName() const { return "Ladspa"; }
+	virtual std::string const & getPluginPath(int) const { return plugin_path_; }
+	virtual int getNumPluginPaths() const { return 1; }
+	virtual void setPluginPath(std::string path);
+
+protected:
+	virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder&);
+	void* LoadDll( const std::string &  ) const;
+	LADSPA_Descriptor_Function LoadDescriptorFunction(void*) const;
+	LADSPA_Handle Instantiate(const LADSPA_Descriptor*) const;
+	void UnloadDll( void* ) const;
+	void *dlopenLADSPA(const char * pcFilename, int iFlag) const;
+	std::string  plugin_path_;
+};
+
+}}
+#endif // LADSPAHOST_HPP

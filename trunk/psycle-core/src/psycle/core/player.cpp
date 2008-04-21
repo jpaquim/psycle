@@ -138,12 +138,12 @@ namespace psy
 					break;
 				case GlobalEvent::SET_BYPASS:
 					mIndex = event.target();
-					if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
+					if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) //i.e. Effect
 						song().machine(mIndex)->_bypass = true;
 					break;
 				case GlobalEvent::UNSET_BYPASS:
 					mIndex = event.target();
-					if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->mode() == MACHMODE_FX )
+					if ( mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) // i.e. Effect
 						song().machine(mIndex)->_bypass = false;
 					break;
 				case GlobalEvent::SET_MUTE:

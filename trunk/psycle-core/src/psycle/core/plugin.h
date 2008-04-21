@@ -16,7 +16,7 @@
 *   You should have received a copy of the GNU General Public License     *
 *   along with this program; if not, write to the                         *
 *   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.             *
+*   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.            *
 ***************************************************************************/
 #ifndef PLUGIN_H
 #define PLUGIN_H
@@ -60,8 +60,10 @@ class Proxy
 	public:
 		Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 		~Proxy() throw ()
-		{ 
-			// (*this)(0);  ///\todo this segfaults under windows .. investigate 
+		{
+			// Proxy cannot free the interface, since its destructor happens after the destructor of Plugin,
+			// which has already freed the dll.
+			// (*this)(0); 
 		}
 		
 		const bool operator()() const throw();
@@ -88,25 +90,34 @@ class Proxy
 		void callback() throw(); //exceptions::function_error);
 };
 
+class NativeHost;
+
 class Plugin : public Machine
 {
 	private:
 		static PluginFxCallback _callback;
 	public:
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
+	protected:
+		Plugin(MachineCallbacks*, MachineKey, Machine::id_type, void* hInstance,
+			CMachineInfo*, CMachineInterface*); friend class NativeHost;
 	public:
-		Plugin(MachineCallbacks* callbacks, Machine::id_type index, CoreSong* song);
-
 		virtual ~Plugin() throw();
-
 		virtual void Init();
 		virtual int GenerateAudioInTicks( int startSample, int numSamples );
 		virtual void Tick( );
 		virtual void Tick(int channel, const PatternEvent & pEntry );
 		virtual void Stop();
-		inline virtual std::string GetDllName() const throw() { return _psDllName; }
+		///\name (de)serialization
+		///\{
+		/// Loader for psycle fileformat version 2.
+		virtual bool LoadPsy2FileFormat(RiffFile* pFile);
+		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+		virtual void SaveSpecificChunk(RiffFile * pFile) const;
+		///\}
+		inline virtual std::string GetDllName() const { return key_.dllName(); }
+		virtual MachineKey getMachineKey() const { return key_; }
 		virtual std::string GetName() const { return _psName; }
-
 		virtual int GetNumParams() const { return GetInfo().numParameters; }
 		virtual int GetNumCols() const { return GetInfo().numCols; }
 		virtual void GetParamName(int numparam, char * name) const;
@@ -115,30 +126,16 @@ class Plugin : public Machine
 		virtual void GetParamValue(int numparam,char* parval) const;
 		virtual bool SetParameter(int numparam,int value);
 
-		inline Proxy const & proxy() const throw() { return proxy_; }
-		inline Proxy & proxy() throw() { return proxy_; }
-
-		bool Instance(const std::string & file_name);
-		bool LoadDll (std::string const & path, std::string const & file_name);
-
-		///\name (de)serialization
-		///\{
-			public:
-				/// Loader for psycle fileformat version 2.
-				virtual bool LoadPsy2FileFormat(std::string const & plugin_path, RiffFile* pFile);
-				virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-				virtual void SaveSpecificChunk(RiffFile * pFile) const;
-				virtual void SaveDllName      (RiffFile * pFile) const;
-		///\}
-
+		inline Proxy const & proxy() const { return proxy_; }
+		inline Proxy & proxy() { return proxy_; }
 		CMachineInfo const & GetInfo() const throw() { return *info_; }
 		
 	private:
-		void* _dll;
 		char _psShortName[16];
 		std::string _psAuthor;
-		std::string _psDllName;
 		std::string _psName;
+		MachineKey key_;
+		void* libHandle_;
 		bool _isSynth;
 		CMachineInfo * info_;
 		Proxy proxy_;
@@ -159,7 +156,8 @@ inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::f
 	if(plugin)
 	{
 		callback();
-		//Init(); // [bohan] i can't call that here. It would be best, some other parts of psycle want to call it to. We need to get rid of the other calls.
+		// Check if this could be done here. 
+		// Init(); 
 	}
 }
 inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw() { assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }

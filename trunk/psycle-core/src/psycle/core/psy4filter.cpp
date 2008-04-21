@@ -23,8 +23,9 @@
 
 #include "file.h"
 #include "fileio.h"
-#include "internal_machines.h"
 #include "song.h"
+#include "machinefactory.h"
+#include "singlepattern.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
@@ -60,8 +61,6 @@
 namespace psy { namespace core {
 
 Psy4Filter::Psy4Filter()
-:
-	song_()
 {}
 
 bool Psy4Filter::testFormat( const std::string & fileName )
@@ -103,20 +102,21 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	return root_element.get_name() == "psy4";
 }
 
-bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fileName*/, CoreSong & song, MachineCallbacks* callbacks )
+bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
+	std::map<int, SinglePattern*> patMap;
 	patMap.clear();
 
-	song.patternSequence()->patternData()->removeAll();
+	song.patternSequence()->patternPool()->removeAll();
 	song.patternSequence()->removeAll();
 	song.clear();
-	song_ = &song;
-	lastCategory = 0;
-	lastPattern  = 0;
-	lastSeqLine  = 0;
-	lastMachine  = 0;
+	
+	float lastPatternPos;
+	PatternCategory* lastCategory = 0;
+	SinglePattern* lastPattern  = 0;
+	SequenceLine* lastSeqLine  = 0;
 	std::cout << "psy4filter detected for load" << std::endl;
 
 	xmlpp::DomParser parser;
@@ -133,7 +133,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 			(get_first_element(root_element,"info"));
 
 		try {
-			song_->setName(
+			song.setName(
 				get_attribute(get_first_element(info,"name"),
 					"text"
 				).get_value());
@@ -143,7 +143,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 		}
 
 		try {
-			song_->setAuthor(
+			song.setAuthor(
 				get_attribute(get_first_element(info,"author"),
 					"text"
 				).get_value());
@@ -153,7 +153,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 		}
 
 		try {
-			song_->setComment(
+			song.setComment(
 				get_attribute(get_first_element(info,"comment"),
 					"text"
 				).get_value());
@@ -177,7 +177,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 				(dynamic_cast<xmlpp::Element const &>(**i));
 			
 			try {
-				lastCategory = song_->patternSequence()->patternData()->createNewCategory(get_attribute(category,"name").get_value());
+				lastCategory = song.patternSequence()->patternPool()->createNewCategory(get_attribute(category,"name").get_value());
 			}
 			catch(...) {
 				std::cerr << "expected name attribute in category element\n";
@@ -352,7 +352,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 		xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
 		for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i) {
 			xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
-			lastSeqLine = song_->patternSequence()->createNewLine();
+			lastSeqLine = song.patternSequence()->createNewLine();
 			xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
 			for(xmlpp::Node::NodeList::const_iterator i = sequencer_entries.begin(); i != sequencer_entries.end(); ++i) {
 				xmlpp::Element const & sequencer_entry(dynamic_cast<xmlpp::Element const &>(**i));
@@ -437,7 +437,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 				//progress.emit(2,0,"Loading... Song machines...");
 				if ((version&0xFF00) == 0x0000) // chunkformat v0
 				{
-					LoadMACDv0(plugin_path, &file,song,version&0x00FF,callbacks);
+					LoadMACDv0(&file,song,version&0x00FF);
 				}
 				//else if ( (version&0xFF00) == 0x0100 ) //and so on
 			}
@@ -537,8 +537,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 		{
 			if (!song.machine(MASTER_INDEX) )
 			{
-				song.machine(MASTER_INDEX, new Master( callbacks, MASTER_INDEX, &song ));
-				song.machine(MASTER_INDEX)->Init();
+				MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
 			}
 			std::ostringstream s;
 			s << "Error reading from file '" << file.file_name() << "'" << std::endl;
@@ -551,7 +550,7 @@ bool Psy4Filter::load(std::string const & plugin_path, const std::string & /*fil
 	return true;
 } // load
 
-bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
+bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 {
 	//FIXME: Verify if this was needed for something. It was preventing to save to the correct directory.
 	// std::string fileName = File::extractFileNameFromPath(file_Name);
@@ -578,7 +577,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong & song )
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
-	xml << song.patternSequence().patternData().toXml();
+	xml << song.patternSequence().patternPool().toXml();
 	xml << song.patternSequence().toXml();
 	xml << "</psy4>" << std::endl;
 
@@ -667,14 +666,14 @@ int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 	return chunkcount;
 }
 
-bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong & song )
+bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong& song )
 {
 	std::uint32_t chunkcount;
 	std::uint32_t version, size;
 	// chunk header;
 
 	file->WriteArray("SONG",4);
-	version = FILE_VERSION;
+	version = CURRENT_FILE_VERSION;
 	file->Write(version);
 	size = sizeof chunkcount;
 	file->Write(size);
@@ -690,7 +689,7 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong & song )
 	return true;
 }
 
-bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong & song, int index )
+bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong& song, int index )
 {
 	std::uint32_t version, size;
 	std::size_t pos;
@@ -721,7 +720,7 @@ bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong & song, int index )
 	return true;
 }
 
-bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong & song, int index )
+bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong& song, int index )
 {
 	std::uint32_t version, size;
 	std::size_t pos;
@@ -752,7 +751,7 @@ bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong & song, int index )
 	return true;
 }
 
-bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong & /*song*/, int /*index*/ )
+bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong& /*song*/, int /*index*/ )
 {
 	return false;
 }
