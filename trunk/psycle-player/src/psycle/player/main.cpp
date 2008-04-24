@@ -1,12 +1,13 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include "configuration.hpp"
-#include "psycle/audiodrivers/audiodriver.h"
-#include <psycle/core/player.h>
+#include <psycle/core/machinefactory.h>
 #include <psycle/core/song.h>
+#include <psycle/core/player.h>
+#include <psycle/audiodrivers/audiodriver.h>
 #include <iostream>
 #include <string>
 #include <sstream>
 
+using namespace psy::core;
 void usage() {
 		std::cerr <<
 			"Usage: psycle-player [options] [--input-file] <song file name>\n"
@@ -85,7 +86,7 @@ int main(int argument_count, char * arguments[]) {
 					usage();
 					return 0;
 				} else if(s == "--version") {
-					std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
+				std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
 					return 0;
 				} else if(s.length() && s[0] == '-') { // unrecognised option
 					std::cerr << "error: unknown option: " << s << '\n';
@@ -97,38 +98,31 @@ int main(int argument_count, char * arguments[]) {
 					token = tokens::none;
 				}
 		}
+	
 	}
-
-	psy::core::Player &player = *psy::core::Player::Instance();
-	///\todo: player is defined as a machine_callback. The correct design would utilize "timeInfo",
-	// or similar instead of passing all player.
-	psy::core::CoreSong song(&player);
-	//Song is passed to player, since in a good scenario, we would have one player, and several songs (MDI interface)
-	player.song(&song);
-
-
-	if(output_file_name.length()) {
-		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
-		player.setFileName(output_file_name);
-	}
-
 	Configuration configuration;
-
-	if(!configuration.pluginPath().length())
+	if(!configuration.pluginPath().length()) {
 		std::cerr << "psycle: player: native plugin path not configured. You can set the PSYCLE_PATH environment variable.\n";
-	else
+	} else {
 		std::cout << "psycle: player: native plugins are looked for in: " << configuration.pluginPath() << "\n";
-
-	if(!configuration.ladspaPath().length())
+	}
+	if(!configuration.ladspaPath().length()) {
 		std::cerr << "psycle: player: ladspa plugin path not configured. You can set the LADSPA_PATH environment variable.\n";
-	else
+	} else {
 		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << "\n";
+	}
 
+	Player &player = *Player::Instance();
+	// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
+	MachineFactory& mfactory = MachineFactory::getInstance();
+	mfactory.Initialize(&player);
+	mfactory.setPsyclePath(configuration.pluginPath());
+	mfactory.setLadspaPath(configuration.ladspaPath());
+	
 	if(output_driver_name.length()) {
 		std::cout << "psycle: player: setting output driver name to: " << output_driver_name << "\n";
 		configuration.setDriverByName(output_driver_name);
 	}
-
 	psy::core::AudioDriver & output_driver(*configuration._pOutputDriver); ///\todo needs a getter
 
 	if(output_device_name.length()) {
@@ -137,17 +131,23 @@ int main(int argument_count, char * arguments[]) {
 		settings.setDeviceName(output_device_name);
 		output_driver.setSettings(settings); ///\todo why do we copy?
 	}
-
 	player.setDriver(output_driver);
+
+	if(output_file_name.length()) {
+		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
+		player.setFileName(output_file_name);
+	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
 	
+	CoreSong song;
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
-		if(!song.load(configuration.pluginPath(), input_file_name)) {
+		if(!song.load(input_file_name)) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << "\n";
 			return 2;
 		}
+		player.song(&song);
 
 		int itmp=256;
 		player.Work(&player,itmp);
@@ -167,6 +167,7 @@ int main(int argument_count, char * arguments[]) {
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
+	sleep(1);
 	//configuration.setDriverByName("silent");
 	//player.setDriver(*configuration._pOutputDriver);
 	
