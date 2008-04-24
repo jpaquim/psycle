@@ -1,7 +1,7 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 #include <string>
 #include <map>
+/// configuration for the user interface
 namespace psy {
 	namespace core {
 		class AudioDriver;

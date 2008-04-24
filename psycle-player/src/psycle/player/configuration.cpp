@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /***************************************************************************
 *   Copyright (C) 2007 Psycledelics Community
 *   psycle.sf.net
@@ -51,6 +50,9 @@
 
 #if defined PSYCLE__LIBXMLPP_AVAILABLE
 	#include <libxml++/parsers/domparser.h>
+#elif defined QT_XML_LIB
+	#include <Qt/qfile.h>
+	#include <QDomDocument>
 #else
 	//no need to error. #error none of the supported xml parser libs appear to be available
 #endif
@@ -239,6 +241,63 @@ void Configuration::loadConfig( const std::string & path )
 									audiodriver.setSettings(settings); ///\todo why do we copy?
 								}
 							}
+						}
+					}
+				}
+			}
+		#elif defined QT_XML_LIB
+			///\todo this implementation lacks some checks. it may access null pointer if the xml document tree isn't as expected.
+			QFile *file = new QFile( QString::fromStdString( path ) );
+			if (file->open(QIODevice::ReadOnly | QIODevice::Text)) {
+				QDomDocument *doc = new QDomDocument();
+				doc->setContent( file );
+				QDomElement root = doc->firstChildElement();
+				// paths
+				{
+					QDomNodeList paths = root.elementsByTagName( "path" );
+					for ( int i = 0; i < paths.count(); i++ )
+					{
+						QDomElement path = paths.item( i ).toElement();
+						std::string id = path.attribute("id").toStdString();
+						std::string src = path.attribute("src").toStdString();
+						if ( id == "plugindir" ) pluginPath_ = src;
+						else if ( id == "ladspadir" ) ladspaPath_ = src;
+					}
+				}
+				// audio
+				{
+					// enable
+					{
+						QDomElement audioElm = root.firstChildElement( "audio" );
+						std::string enableStr = audioElm.attribute( "enable" ).toStdString();
+						int enable = 0;
+						if ( enableStr != "" ) enable = QString::fromStdString( enableStr ).toInt();
+						enableSound_ = enable;
+						if (enable == 0) {
+							setDriverByName( "silent" );
+							doEnableSound = false;
+						} else doEnableSound = true;
+					}
+					// driver
+					{
+						QDomElement driverElm = root.firstChildElement( "driver" );
+						if ( doEnableSound ) setDriverByName( driverElm.attribute("name").toStdString() );
+					}
+					// alsa driver
+					if ( _pOutputDriver->info().name() == "alsa" ) {
+						///\todo what if alsa settings are missing from xml document?
+						QDomElement alsaElm = root.firstChildElement( "alsa" ); 
+						std::string deviceName = alsaElm.attribute("device").toStdString();
+						std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
+						if ( ( it = driverMap_.find( "alsa" ) ) != driverMap_.end() ) {
+							psy::core::AudioDriverSettings settings = it->second->settings(); ///\todo why do we do a copy?
+							if(deviceName.length()) {
+								settings.setDeviceName( deviceName );
+							} else {
+								///\todo use the ALSA_CARD env var if present: char const * const device(std::getenv("ALSA_CARD"));
+								settings.setDeviceName("default");
+							}
+							it->second->setSettings( settings ); ///\todo why do we copy?
 						}
 					}
 				}
