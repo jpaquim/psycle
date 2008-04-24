@@ -41,7 +41,7 @@ namespace psy
 		MachineKey::MachineKey( const MachineKey & key)
 			:host_(key.host())
 			,dllName_(key.dllName())
-			,index_(key.index()) {	
+			,index_(key.index()) {
 		}
 
 		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, int index )

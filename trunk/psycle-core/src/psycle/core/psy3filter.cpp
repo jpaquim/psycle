@@ -574,7 +574,7 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 
 			mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),id);
 			break;
-		}	
+		}
 		case MACH_VST:
 		//case MACH_VSTFX:
 		{
@@ -635,6 +635,6 @@ void Psy3Filter::RestoreMixerSendFlags(CoreSong& song)
 			}
 		}
 	}
-}		
+}
 }}
 

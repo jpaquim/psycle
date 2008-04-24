@@ -44,7 +44,7 @@ namespace psy {
 					case asynth1:
 					case asynth2:
 					case asynth21:
-					{	
+					{
 						Plugin & plug = *((Plugin*)pointer_to_machine);
 						int numParameters;
 						riff.Read(numParameters);

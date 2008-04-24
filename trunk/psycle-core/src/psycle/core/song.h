@@ -295,7 +295,7 @@ namespace psy
 		// can access the real machine via the VisualMachine class.
 		class Song : public UISong
 		{
-		public:	
+		public:
 			Song();
 			virtual ~Song(){};
 			virtual void clear();
