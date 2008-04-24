@@ -179,7 +179,7 @@ namespace psy {
 			std::cout << "step five" << std::endl;
 			prepareStructures();
 			defineInputAsStereo();
-			defineOutputAsStereo();			
+			defineOutputAsStereo();
 			// and switch on:
 			std::cout << "step six" << std::endl;
 		
