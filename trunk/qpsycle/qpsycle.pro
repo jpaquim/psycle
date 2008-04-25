@@ -6,9 +6,11 @@ include(../psycle-core/qmake/platform.pri)
 TEMPLATE = app # This project builds an executable program.
 TARGET = qpsycle # name of the executable.
 
-CONFIG *= thread
+CONFIG *= thread precompile_header
 !warn_on:CONFIG *= warn_off
 message("Config is $$CONFIG")
+
+PRECOMPILED_HEADER = src/qpsyclePch.hpp
 
 BUILD_DIR = ++build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
@@ -25,6 +27,14 @@ DEPENDPATH += . \
 	src/gui/waveview \
 	src/configdlg
 INCLUDEPATH += \
+	../psycle-core/src \
+	../psycle-core/src/psycle/core \
+	../psycle-core/src/psycle/core/helpers \
+	../psycle-core/src/psycle/core/helpers/math \
+	../psycle-audiodrivers/src \
+	../diversalis/src \
+	../universalis/src
+INCLUDEPATH += \
 	src \
 	src/mididrivers \
 	src/model \
@@ -35,6 +45,7 @@ INCLUDEPATH += \
 	src/gui/sequencer \
 	src/gui/configdlg
 HEADERS += \
+	src/qpsyclePch.hpp \ 
 	src/gui/mainwindow.hpp \
 	src/model/instrumentsmodel.hpp \
 	src/gui/global.hpp \
@@ -74,7 +85,6 @@ HEADERS += \
 	src/gui/waveview/waveamp.hpp
 SOURCES += \
 	src/qpsycle.cpp \
-	src/qpsyclePch.cpp \
 	src/model/instrumentsmodel.cpp \
 	src/gui/mainwindow.cpp \
 	src/gui/global.cpp \
@@ -117,8 +127,13 @@ win32 {
 	RC_FILE = src/qpsycle.rc 
 	message("Adding $$RC_FILE for executable icon")
 }
-include(../psycle-core/qmake/psycle-core.pri)
+# include(../psycle-core/qmake/psycle-core.pri)
 include(../psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
+include(../psycle-core/qmake/boost.pri)
+include(../psycle-core/qmake/libxml++.pri)
+include(../psycle-core/qmake/zlib.pri)
+
+LIBS += -L../psycle-core/++build/ -lpsycle-core
 include(qmake/qt-xml.pri)
 #include(qmake/jdkmidi.pri) no need fot this now
 message("INCLUDEPATH is $$INCLUDEPATH")

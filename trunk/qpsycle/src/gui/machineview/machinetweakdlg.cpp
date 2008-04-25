@@ -26,8 +26,6 @@
  */
 
 
-#include <qpsyclePch.hpp>
-
 #include <psycle/core/machine.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/binread.h>

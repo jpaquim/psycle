@@ -85,7 +85,7 @@ public slots:
 	void onMachineChosen( MachineGui *macGui );
 	void onDeleteMachineRequest( MachineGui *macGui );
 	void onMachineRenamed();
-	void cloneMachine( MachineGui *macGui );
+	void onCloneMachine( MachineGui *macGui );
 
 signals:
 	void machineChosen( MachineGui *macGui );

@@ -1,6 +1,8 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief interface file for psy::core::dsp::Dither
+#ifndef PSY__CORE__DITHER_H
+#define PSY__CORE__DITHER_H
 
 #include "mersennetwister.h"
 
@@ -45,3 +47,5 @@ namespace psy
 		}
 	}
 }
+#endif
+

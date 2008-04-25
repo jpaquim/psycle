@@ -1,7 +1,8 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // Constants used by psycle
-#pragma once
+#ifndef PSYCLE__CONSTANTS
 #define PSYCLE__CONSTANTS
+#pragma once
 namespace psy
 {
 	namespace core
@@ -88,3 +89,5 @@ namespace psy
 
 	}
 }
+#endif
+

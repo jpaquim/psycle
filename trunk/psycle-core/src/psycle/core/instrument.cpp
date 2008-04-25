@@ -1,7 +1,7 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief interface file for psy::core::Filter. based on revision 2686
-#include <psycle/core/psycleCorePch.hpp>
+
 
 #include "instrument.h"
 #include "constants.h"

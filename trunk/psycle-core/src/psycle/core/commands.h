@@ -1,4 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
+#ifndef PSY__CORE__COMMANDS_H
+#define PSY__CORE__COMMANDS_H
 #pragma once
 
 // This is outside pattern, since this way, machines just need to know about events.
@@ -71,3 +73,5 @@ namespace psy
 		}
 	}
 }
+#endif
+

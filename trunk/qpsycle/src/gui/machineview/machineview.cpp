@@ -108,7 +108,7 @@ MachineGui * MachineView::createMachineGui( psy::core::Machine *mac )
 			connect( macGui, SIGNAL( renamed() ),
 					this, SLOT( onMachineRenamed() ) );
 			connect( macGui, SIGNAL( cloneRequest( MachineGui* ) ),
-					this, SLOT( cloneMachine( MachineGui* ) ) );
+					this, SLOT( onCloneMachine( MachineGui* ) ) );
 		}
 
 		scene()->addItem(macGui);
@@ -326,7 +326,7 @@ void MachineView::onMachineRenamed()
 /**
 	* Doesn't work yet as it isn't ready in psycore.
 	*/
-void MachineView::cloneMachine( MachineGui *macGui )
+void MachineView::onCloneMachine( MachineGui *macGui )
 {
 	qDebug("in clone machine");
 	psy::core::Machine *pMachine = macGui->mac();
