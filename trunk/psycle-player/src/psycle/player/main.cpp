@@ -179,7 +179,6 @@ int main(int argument_count, char * arguments[]) {
   		sleep(1);
 	#endif
 	
-	sleep(1);
 	//configuration.setDriverByName("silent");
 	//player.setDriver(*configuration._pOutputDriver);
 	
