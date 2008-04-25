@@ -46,6 +46,8 @@
 */
 
 //(c++-ified for psycle by dw aley)
+#ifndef PSY__CORE__MERSENNETWISTER_H
+#define PSY__CORE__MERSENNETWISTER_H
 
 namespace psy
 {
@@ -102,3 +104,5 @@ namespace psy
 		}
 	}
 }
+#endif
+

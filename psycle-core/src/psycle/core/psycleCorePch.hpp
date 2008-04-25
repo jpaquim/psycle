@@ -1,11 +1,4 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-#ifndef PYSCLE__CORE__PCH__INCLUDED
-#define PYSCLE__CORE__PCH__INCLUDED
-
-#pragma once
-
-///\todo qmake is currently not configured to create/use pre-compiled headers
-#if 0 // #ifndef PSYCLE__CORE__NO_PCH
 
 #ifdef _WIN32
 #define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR 5
@@ -16,11 +9,14 @@
 #include <windows.h>
 #endif
 
+#if defined __cplusplus
+// Standard headers
 #include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cfloat>
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <ctime>
 #include <exception>
@@ -35,7 +31,22 @@
 #include <stdexcept>
 #include <vector>
 
+//psycle-core headers
+#include "commands.h"
+#include "constants.h"
+#include "datacompression.h"
+#include "dither.h"
+#include "dsp.h"
+#include "file.h"
+#include "ladspa.h"
+#include "machinekey.hpp"
+#include "mersennetwister.h"
+#include "playertimeinfo.h"
+#include "plugin_interface.h"
+#include "riff.h"
 #include "signalslib.h"
-
-#endif
+#include "timesignature.h"
+#include "zipreader.h"
+#include "zipwriter.h"
+#include "zipwriterstream.h"
 #endif

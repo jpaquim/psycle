@@ -1,6 +1,8 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 ///\interface psycle native plugin interface api
 
+#ifndef PSYCLE__PLUGIN_INTERFACE_H
+#define PSYCLE__PLUGIN_INTERFACE_H
 #pragma once
 
 // *** Note ***
@@ -284,3 +286,5 @@ using psycle::plugin_interface::CFxCallback;
 using psycle::plugin_interface::uint8; // deprecated anyway
 using psycle::plugin_interface::uint16; // deprecated anyway
 using psycle::plugin_interface::uint32; // deprecated anyway
+#endif
+

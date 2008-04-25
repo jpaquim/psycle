@@ -9,7 +9,7 @@
 /// SoundSquash and SoundDesquash by jeremy evers
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content
-#include <psycle/core/psycleCorePch.hpp>
+
 #include "datacompression.h"
 #include <cstring>
 #include <cstdint>

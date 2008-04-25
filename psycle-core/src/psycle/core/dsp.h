@@ -1,6 +1,9 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief various signal processing utility functions and classes, psy::core::Cubic amongst others. based on revison  2663
+#ifndef PSY__CORE__DSP_H
+#define PSY__CORE__DSP_H
+
 #pragma once
 
 #include "helpers.h"
@@ -463,3 +466,5 @@ namespace psy
 		};
 	}
 }}
+#endif
+

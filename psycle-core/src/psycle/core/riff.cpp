@@ -31,7 +31,7 @@
 		==========================================================================
 	\endverbatim
 */
-#include <psycle/core/psycleCorePch.hpp>
+
 
 #include "riff.h"
 

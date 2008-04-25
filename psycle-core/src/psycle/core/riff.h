@@ -18,6 +18,8 @@
 		===========================================================================
 	\endverbatim
 */
+#ifndef PSY__CORE__RIFF_H
+#define PSY__CORE__RIFF_H
 #pragma once
 
 #include <stdio.h>
@@ -237,3 +239,5 @@ namespace psy
 		};
 	}
 }
+#endif
+

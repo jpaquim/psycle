@@ -26,8 +26,6 @@
  */
 
 
-#include <qpsyclePch.hpp>
-
 #include <psycle/core/internal_machines.h>
 #include <psycle/core/constants.h>
 

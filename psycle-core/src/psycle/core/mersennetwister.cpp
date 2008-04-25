@@ -47,7 +47,7 @@
 //(c++-ified for psycle by dw aley)
 ///\todo inlining and such
 
-#include <psycle/core/psycleCorePch.hpp>
+
 
 #include "mersennetwister.h"
 #include <cmath>

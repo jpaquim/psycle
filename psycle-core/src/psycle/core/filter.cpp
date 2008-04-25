@@ -1,7 +1,7 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief implementation file for psy::core::Filter. based on Revision 2623
-#include <psycle/core/psycleCorePch.hpp>
+
 
 #include "filter.h"
 #include <cmath>
