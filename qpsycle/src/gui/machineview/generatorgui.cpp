@@ -40,10 +40,7 @@ GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineVi
 	, isPanning(false)
 {
 	m_macTweakDlg = 0;
-	connect(m_macTweakDlg, SIGNAL( notePress( int, psy::core::Machine* )),
-					macView, SLOT( onNotePress( int, psy::core::Machine* ) ) );
-	connect(m_macTweakDlg, SIGNAL( noteRelease( int, psy::core::Machine* )),
-					macView, SLOT( onNoteRelease( int, psy::core::Machine* ) ) );
+
 	showMacTweakDlgAct_ = new QAction( "Tweak Parameters", this );
 	connect( showMacTweakDlgAct_, SIGNAL( triggered() ), this, SLOT( showMacTweakDlg() ) );
 
@@ -191,6 +188,14 @@ void GeneratorGui::showMacTweakDlg()
 		delete m_macTweakDlg;
 		m_macTweakDlg = new MachineTweakDlg( this, m_macView );
 	}
+	
+	// Make connections for keyjazz in the mac tweak dialog.
+	///\todo Is this the best place for this?
+	connect(m_macTweakDlg, SIGNAL( notePress( int, psy::core::Machine* )),
+					m_macView, SLOT( onNotePress( int, psy::core::Machine* ) ) );
+	connect(m_macTweakDlg, SIGNAL( noteRelease( int, psy::core::Machine* )),
+					m_macView, SLOT( onNoteRelease( int, psy::core::Machine* ) ) );
+
 	m_macTweakDlg->show();
 }
 
