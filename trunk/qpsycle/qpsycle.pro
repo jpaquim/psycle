@@ -120,7 +120,7 @@ win32 {
 include(../psycle-core/qmake/psycle-core.pri)
 include(../psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
 include(qmake/qt-xml.pri)
-#include(qmake/jdkmidi.pri)
+#include(qmake/jdkmidi.pri) no need fot this now
 message("INCLUDEPATH is $$INCLUDEPATH")
 message("LIBS are $$LIBS")
 message("PKGCONFIG is $$PKGCONFIG")
