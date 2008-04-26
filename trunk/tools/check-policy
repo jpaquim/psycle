@@ -171,6 +171,8 @@ if __name__ == '__main__':
 				'*.am',
 				'*.pc',
 				'*.pc.in',
+				'*.pro',
+				'*.pri',
 				'SConstruct',
 				'SConscript',
 				'README',
