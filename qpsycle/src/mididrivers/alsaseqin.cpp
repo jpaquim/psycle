@@ -4,8 +4,6 @@
 // Created by: User <Email>
 // Created on: Thu Jul 20 13:35:01 2007
 //
-#include <qpsyclePch.hpp>
-
 #include "alsaseqin.hpp"
 
 #if defined PSYCLE__ALSA_AVAILABLE
