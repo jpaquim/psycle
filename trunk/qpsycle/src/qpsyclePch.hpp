@@ -94,23 +94,6 @@
 #include <psycle/core/plugininfo.h>
 #include <psycle/core/singlepattern.h>
 
-
+#include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>
-#if defined PSYCLE__ALSA_AVAILABLE
-	#include <psycle/audiodrivers/alsaout.h>
-#endif
-#if defined PSYCLE__JACK_AVAILABLE
-	#include <psycle/audiodrivers/jackout.h>
-#endif
-#if defined PSYCLE__ESOUND_AVAILABLE
-	#include <psycle/audiodrivers/esoundout.h>
-#endif
-#if defined PSYCLE__GSTREAMER_AVAILABLE
-	#include <psycle/audiodrivers/gstreamerout.h>
-#endif
-#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
-	#include <psycle/audiodrivers/microsoftdirectsoundout.h>
-#endif
-#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
-	#include <psycle/audiodrivers/microsoftmmewaveout.h>
-#endif
+
