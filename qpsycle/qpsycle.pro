@@ -54,9 +54,9 @@ HEADERS += \
 	src/gui/patternbox.hpp \
 	src/gui/configdlg/audiopage.hpp \
 	src/gui/configdlg/behaviourpage.hpp \
-        src/gui/configdlg/configdlg.hpp \
-        src/gui/configdlg/lookspage.hpp \
-        src/gui/configdlg/dirspage.hpp \
+	src/gui/configdlg/configdlg.hpp \
+	src/gui/configdlg/lookspage.hpp \
+	src/gui/configdlg/dirspage.hpp \
 	src/gui/samplebrowser.hpp \
 	src/gui/logconsole.hpp \
 	src/gui/machineview/machinegui.hpp \
@@ -93,9 +93,9 @@ SOURCES += \
 	src/gui/patternbox.cpp \
 	src/gui/configdlg/audiopage.cpp \
 	src/gui/configdlg/behaviourpage.cpp \
-        src/gui/configdlg/configdlg.cpp \
-        src/gui/configdlg/lookspage.cpp \
-        src/gui/configdlg/dirspage.cpp \
+	src/gui/configdlg/configdlg.cpp \
+	src/gui/configdlg/lookspage.cpp \
+	src/gui/configdlg/dirspage.cpp \
 	src/gui/samplebrowser.cpp \
 	src/gui/logconsole.cpp \
 	src/gui/machineview/machinegui.cpp \
