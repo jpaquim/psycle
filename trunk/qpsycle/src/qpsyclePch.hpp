@@ -89,10 +89,9 @@
 //psycle-core defines
 #include <psycle/core/constants.h>
 #include <psycle/core/file.h>
-#include <psycle/core/machinefactory.h>
+#include <psycle/core/machinekey.hpp>
 #include <psycle/core/patternpool.h>
-#include <psycle/core/patternsequence.h>
-#include <psycle/core/pluginfinder.h>
+#include <psycle/core/plugininfo.h>
 #include <psycle/core/singlepattern.h>
 
 
