@@ -87,19 +87,13 @@
 #include <QtXml/QDomDocument> 
 
 //psycle-core defines
-#include <psycle/core/binread.h>
 #include <psycle/core/constants.h>
 #include <psycle/core/file.h>
-#include <psycle/core/internal_machines.h>
 #include <psycle/core/machinefactory.h>
-#include <psycle/core/machine.h>
 #include <psycle/core/patternpool.h>
 #include <psycle/core/patternsequence.h>
-#include <psycle/core/player.h>
-#include <psycle/core/plugin.h>
 #include <psycle/core/pluginfinder.h>
 #include <psycle/core/singlepattern.h>
-#include <psycle/core/song.h>
 
 
 #include <psycle/audiodrivers/wavefileout.h>

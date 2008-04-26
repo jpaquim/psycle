@@ -7,11 +7,11 @@
 #include <string>
 #include <sstream>
 
-  #if defined _WIN32   
-  #include <windows.h> // for Sleep(ms)   
-  #else   
-  #include <unistd.h> // for sleep(s)   
-  #endif 
+#if defined _WIN32   
+	#include <windows.h> // for Sleep(ms)   
+#else   
+	#include <unistd.h> // for sleep(s)   
+#endif 
 
 using namespace psy::core;
 void usage() {
@@ -176,7 +176,7 @@ int main(int argument_count, char * arguments[]) {
 	#if defined _WIN32 
 		Sleep(1000);
 	#else
-  		sleep(1);
+		sleep(1);
 	#endif
 	
 	//configuration.setDriverByName("silent");
