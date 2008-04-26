@@ -31,22 +31,27 @@
 #include <stdexcept>
 #include <vector>
 
+
+#include <diversalis/compiler.hpp>
+
 //psycle-core headers
 #include "commands.h"
 #include "constants.h"
 #include "datacompression.h"
-#include "dither.h"
-#include "dsp.h"
+//#include "dither.h"
+//#include "dsp.h"
 #include "file.h"
+#include "fileio.h"
 #include "ladspa.h"
 #include "machinekey.hpp"
 #include "mersennetwister.h"
 #include "playertimeinfo.h"
+#include "plugininfo.h"
 #include "plugin_interface.h"
 #include "riff.h"
 #include "signalslib.h"
 #include "timesignature.h"
 #include "zipreader.h"
 #include "zipwriter.h"
-#include "zipwriterstream.h"
+//#include "zipwriterstream.h"
 #endif
