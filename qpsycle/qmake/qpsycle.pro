@@ -1,40 +1,25 @@
-# Use qmake to generate your Makefile from this file.
-# N.B. dont run qmake --project! It will overwrite
-# this file and we don't want that.
-include(../psycle-core/qmake/platform.pri)
+include(../../psycle-core/qmake/common.pri)
 
 TEMPLATE = app # This project builds an executable program.
-TARGET = qpsycle # name of the executable.
 
-CONFIG *= thread precompile_header
-!warn_on:CONFIG *= warn_off
-message("Config is $$CONFIG")
+CONFIG *= link_prl
+include($$TOP_SRC_DIR/psycle-core/qmake/psycle-core.pri)
+unix | win32-g++:  LIBS *= -lpsycle-core
+else: win32-msvc*: LIBS *=   psycle-core.lib
 
-PRECOMPILED_HEADER = src/qpsyclePch.hpp
+include(qt-xml.pri)
+#include(jdkmidi.pri) no need for this now
 
-BUILD_DIR = ++build
+BUILD_DIR = ../++build
 OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 RCC_DIR = $$BUILD_DIR # Where intermediate resource files go.
 DESTDIR = $$BUILD_DIR # Where the final executable goes.
-DEPENDPATH += . \
-	src/ \
-	src/model \
-	src/gui \
-	src/gui/machineview \
-	src/gui/patternview \
-	src/gui/sequencer \
-	src/gui/waveview \
-	src/configdlg
-INCLUDEPATH += \
-	../psycle-core/src \
-	../psycle-core/src/psycle/core \
-	../psycle-core/src/psycle/core/helpers \
-	../psycle-core/src/psycle/core/helpers/math \
-	../psycle-audiodrivers/src \
-	../diversalis/src \
-	../universalis/src
-INCLUDEPATH += \
+
+CONFIG *= precompiled_header
+PRECOMPILED_HEADER = src/qpsyclePch.hpp
+
+local_includepath = \
 	src \
 	src/mididrivers \
 	src/model \
@@ -44,10 +29,12 @@ INCLUDEPATH += \
 	src/gui/waveview \
 	src/gui/sequencer \
 	src/gui/configdlg
+
+DEPENDPATH += $$local_includepath
+INCLUDEPATH += $$local_includepath
+
 HEADERS += \
-	src/qpsyclePch.hpp \ 
 	src/gui/mainwindow.hpp \
-	src/model/instrumentsmodel.hpp \
 	src/gui/global.hpp \
 	src/gui/configuration.hpp \
 	src/gui/inputhandler.hpp \
@@ -82,10 +69,11 @@ HEADERS += \
 	src/gui/sequencer/beatruler.hpp \
 	src/gui/waveview/waveview.hpp \
 	src/gui/waveview/wavedisplay.hpp \
-	src/gui/waveview/waveamp.hpp
+	src/gui/waveview/waveamp.hpp \
+	src/model/instrumentsmodel.hpp
+
 SOURCES += \
 	src/qpsycle.cpp \
-	src/model/instrumentsmodel.cpp \
 	src/gui/mainwindow.cpp \
 	src/gui/global.cpp \
 	src/gui/configuration.cpp \
@@ -121,38 +109,14 @@ SOURCES += \
 	src/gui/sequencer/beatruler.cpp \
 	src/gui/waveview/waveview.cpp \
 	src/gui/waveview/wavedisplay.cpp \
-	src/gui/waveview/waveamp.cpp
+	src/gui/waveview/waveamp.cpp \
+	src/model/instrumentsmodel.cpp
+
 RESOURCES += src/qpsycle.qrc
+
 win32 {
 	RC_FILE = src/qpsycle.rc 
 	message("Adding $$RC_FILE for executable icon")
 }
-# include(../psycle-core/qmake/psycle-core.pri)
-include(../psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
-include(../psycle-core/qmake/boost.pri)
-include(../psycle-core/qmake/libxml++.pri)
-include(../psycle-core/qmake/zlib.pri)
 
-LIBS += -L../psycle-core/++build/ -lpsycle-core
-include(qmake/qt-xml.pri)
-#include(qmake/jdkmidi.pri) no need fot this now
-message("INCLUDEPATH is $$INCLUDEPATH")
-message("LIBS are $$LIBS")
-message("PKGCONFIG is $$PKGCONFIG")
-
-# Check to see what build mode has been specified.
-CONFIG( debug ):CONFIG( release ) {
-	warning("debug and release are both specified, separately, in CONFIG. \
-	This is possibly not what you want.  Consider using CONFIG+=debug_and_release if \
-	you want to build debug and release versions concurrently, or CONFIG-=release \
-	or CONFIG-=debug if you want just one mode.")
-}
-CONFIG( debug ) {
-	message("Configured to make a debug mode Makefile.")
-} 
-CONFIG( release ) {
-	message("Configured to make a release mode Makefile.")
-}
-CONFIG( debug_and_release ) {
-	message("Configured to make both Makefile.Debug and Makefile.Release.")
-}
+include($$COMMON_DIR/display-vars.pri)
