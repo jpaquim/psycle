@@ -27,6 +27,8 @@
 #include <QKeyEvent>
 #include <QGridLayout>
 
+#include <cassert>
+
 namespace qpsycle {
 
 NewMachineDlg::NewMachineDlg(QWidget *parent) 

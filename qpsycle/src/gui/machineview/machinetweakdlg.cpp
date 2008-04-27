@@ -56,6 +56,8 @@
 #include <QCompleter>
 #include <QModelIndex>
 
+#include <sstream>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 

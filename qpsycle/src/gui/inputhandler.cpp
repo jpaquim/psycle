@@ -20,6 +20,7 @@
 ***************************************************************************/
 
 #include "inputhandler.hpp"
+#include <cassert>
 
 namespace qpsycle {
 

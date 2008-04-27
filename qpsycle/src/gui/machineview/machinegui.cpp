@@ -41,6 +41,7 @@
 #include <QAction>
 #include <QInputDialog>
 
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 
