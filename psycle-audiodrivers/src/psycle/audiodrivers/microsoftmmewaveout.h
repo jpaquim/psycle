@@ -25,7 +25,7 @@
 #pragma comment(lib, "winmm")
 #undef min
 #undef max
-#include <psycle/core/cstdint.h>
+#include <cstdint>
 #include <psycle/core/helpers.h>
 #include <iostream>
 namespace psy
