@@ -404,7 +404,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			// snd_pcm_sw_params_set_xfer_align() is deprecated, alignment is always 1
 		#else
 			// align all transfers to 1 sample
-			if (0 > (error = ::snd_pcm_sw_params_set_xfer_align(pcm_, pcm_sw_params, 1)) {
+			if (0 > (error = ::snd_pcm_sw_params_set_xfer_align(pcm_, pcm_sw_params, 1))) {
 				std::ostringstream s; s << "could not set transfer alignment: " << ::snd_strerror(error);
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
