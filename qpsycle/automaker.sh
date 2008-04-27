@@ -34,7 +34,7 @@ else
 fi
 
 echo "---"
-  $QMAKE_BINARY
+  $QMAKE_BINARY -recursive
 QMAKE_RETVAL="$?"
 echo "---"
 
@@ -73,4 +73,3 @@ fi
 echo ""
 
 exit $MAKE_RETVAL
-

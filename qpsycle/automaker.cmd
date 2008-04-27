@@ -12,7 +12,7 @@ goto HELP
 
 :DEBUG
 echo Running QMake
-qmake
+qmake -recursive
 echo QMake Complete
 echo Compiling Debug Version
 mingw32-make debug
@@ -21,7 +21,7 @@ pause
 
 :RELEASE
 echo Running QMake
-qmake
+qmake -recursive
 echo QMake Complete
 echo Compiling Release Version
 mingw32-make release
