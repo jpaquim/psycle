@@ -60,6 +60,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #define SUBVERSION_REVISION  "$Revision$"
 

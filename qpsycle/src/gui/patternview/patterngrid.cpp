@@ -27,6 +27,7 @@
 #include "patterngrid.hpp"
 #include "patterndraw.hpp"
 
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <memory> // auto_ptr
