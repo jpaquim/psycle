@@ -20,8 +20,6 @@
 #include <psycle/core/player.h>
 
 #include "behaviourpage.hpp"
-#include "../global.hpp"
-#include "../configuration.hpp"
 
 #include <iostream>
 
@@ -45,7 +43,6 @@ namespace qpsycle {
 		: QWidget( parent )
 	{
 		setWindowTitle("General Settings");
-		config_ = Global::pConfig();
 
 		QLabel *knobComboLabel = new QLabel("Knob behaviour: ");
 
@@ -56,8 +53,8 @@ namespace qpsycle {
 		knobBehaviourCombo_->addItem("Angular (QSynth)");
 		knobBehaviourCombo_->addItem("Linear");
 		knobBehaviourCombo_->addItem("Fixed Linear");
-
-		knobBehaviourCombo_->setCurrentIndex( (int)Global::configuration().knobBehaviour() );
+		QSettings settings;
+		knobBehaviourCombo_->setCurrentIndex( settings.value( "behaviour/machineview/knob" ).toInt() );
 		connect( knobBehaviourCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSettingsChanged() ) );
 
 		QVBoxLayout *mainLay = new QVBoxLayout();
@@ -97,10 +94,10 @@ namespace qpsycle {
 		wrapChk = new QCheckBox();
 		centerCursorChk = new QCheckBox();
 
-		homeEndChk->setChecked( Global::pConfig()->ft2HomeEndBehaviour() );
-		shiftChk->setChecked( Global::pConfig()->shiftArrowForSelect() );
-		wrapChk->setChecked( Global::pConfig()->wrapAround() );
-		centerCursorChk->setChecked( Global::pConfig()->centerCursor() );
+		homeEndChk->setChecked( settings.value( "behaviour/patternview/ft2HomeEnd" ).toBool() );
+		shiftChk->setChecked( settings.value( "behaviour/patternview/shiftArrowForSelect" ).toBool() );
+		wrapChk->setChecked( settings.value( "behaviour/patternview/wrapAround" ).toBool() );
+		centerCursorChk->setChecked( settings.value( "behaviour/patternview/centerCursor" ).toBool() );
 
 		connect( homeEndChk, SIGNAL( stateChanged( int ) ), SLOT( onSettingsChanged() ) );
 
@@ -133,11 +130,13 @@ namespace qpsycle {
 
 	void BehaviourPage::onSaveButtonClicked()
 	{
-		Global::pConfig()->setKnobBehaviour( (KnobMode)knobBehaviourCombo_->currentIndex() );
-		Global::pConfig()->setFT2HomeEndBehaviour( homeEndChk->checkState() == Qt::Checked? true: false );
-		Global::pConfig()->setShiftKeyBehaviour( shiftChk->checkState() == Qt::Checked? true: false );
-		Global::pConfig()->setWrapAround( wrapChk->checkState() == Qt::Checked? true: false );
-		Global::pConfig()->setCenterCursor( centerCursorChk->checkState() == Qt::Checked? true: false );
+		QSettings settings;
+		
+		settings.setValue( "behaviour/machineview/knob", knobBehaviourCombo_->currentIndex() );
+		settings.setValue( "behaviour/patternview/ft2HomeEnd", homeEndChk->checkState() == Qt::Checked? true: false );
+		settings.setValue( "behaviour/patternview/shiftArrowForSelect", shiftChk->checkState() == Qt::Checked? true: false );
+		settings.setValue( "behaviour/patternview/wrapAround", wrapChk->checkState() == Qt::Checked? true: false );
+		settings.setValue( "behaviour/patternview/centerCursor", centerCursorChk->checkState() == Qt::Checked? true: false );
 
 		saveBtn_->setEnabled( false );
 	}

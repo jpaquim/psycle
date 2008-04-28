@@ -39,7 +39,7 @@
 #include "effectgui.hpp"
 #include <cmath>
 
-
+#include <QSettings>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDial>
@@ -452,7 +452,8 @@ Knob::Knob( int param )
 {
 	setFixedSize( K_XSIZE, K_YSIZE ); // FIXME: unfix the size.
 
-	m_knobMode = Global::configuration().knobBehaviour();
+	QSettings settings;
+	m_knobMode = static_cast<KnobMode>( settings.value( "behaviour/machineview/knob" ).toInt() );
 }
 
 void Knob::paintEvent( QPaintEvent *ev )
@@ -484,7 +485,8 @@ double Knob::mouseAngle ( const QPoint& pos ) const
 
 void Knob::mousePressEvent( QMouseEvent *ev )
 {
-	m_knobMode = Global::configuration().knobBehaviour();
+	QSettings settings;
+	m_knobMode = static_cast<KnobMode>( settings.value( "behaviour/machineview/knob" ).toInt() );
 
 	if ( m_knobMode == QDialMode ) {
 		QDial::mousePressEvent(ev);

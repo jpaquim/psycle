@@ -43,7 +43,6 @@ public slots:
 	void onSettingsChanged();
 
 private:
-	Configuration *config_;
 	QComboBox *knobBehaviourCombo_;
 	QPushButton *saveBtn_;
 	QPushButton *closeBtn_;

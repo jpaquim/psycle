@@ -42,6 +42,7 @@
 #include <QDebug>
 #include <QStyleOptionGraphicsItem>
 #include <QVarLengthArray>
+#include <QSettings>
 
 namespace qpsycle {
 
@@ -1573,28 +1574,33 @@ void PatternGrid::navBottom()
 }
 
 bool PatternGrid::ft2HomeEndBehaviour() {
-	return Global::configuration().ft2HomeEndBehaviour();
+	QSettings settings;
+	return settings.value( "behaviour/patternview/ft2HomeEnd" ).toBool();
 }
 void PatternGrid::setFt2HomeEndBehaviour( bool setit ) {
 	ft2HomeEndBehaviour_ = setit;
 }
 
 bool PatternGrid::shiftArrowForSelect() {
-	return Global::configuration().shiftArrowForSelect();
+	QSettings settings;
+	return settings.value( "behaviour/patternview/shiftArrowForSelect" ).toBool();
 }
 void PatternGrid::setShiftArrowForSelect( bool setit ) {
 	shiftArrowForSelect_ = setit;
 }
 
 bool PatternGrid::wrapAround() {
-	return Global::configuration().wrapAround();
+	QSettings settings;
+	return settings.value( "behaviour/patternview/wrapAround" ).toBool();
 }
+
 void PatternGrid::setWrapAround( bool setit ) {
 	wrapAround_ = setit;
 }
 
 bool PatternGrid::centerCursor() {
-	return Global::configuration().centerCursor();
+	QSettings settings;
+	return settings.value( "behaviour/patternview/centerCursor" ).toBool();
 }
 void PatternGrid::setCenterCursor( bool setit ) {
 	centerCursor_ = setit;
