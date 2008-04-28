@@ -822,7 +822,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int numParameters = machine().numParams();
 			for(int c(0); c < numParameters ; ++c)
 			{
-				machine().SetParameter(c, rand());
+				machine().SetParameter(c, ((rand()/(float)RAND_MAX)*0.5)+0.5);
 			}
 			UpdateWindow();
 		}
