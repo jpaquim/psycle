@@ -137,14 +137,14 @@ namespace psy {
 							}
 							for (int j=0; j<i; j++)
 							{
-								if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j] != 0.0f || mixvolretpr[j] != 0.0f ))
+								if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j][i] != 0.0f || mixvolretpr[j][i] != 0.0f ))
 								{
 									Machine* pRetMachine = callbacks->song().machine(Return(j).Wire().machine_);
 									assert(pRetMachine);
 									if(!pRetMachine->_mute && !pRetMachine->Standby())
 									{
-										dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->lVol()*mixvolretpl[j]);
-										dsp::Add(pRetMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pRetMachine->rVol()*mixvolretpr[j]);
+										dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->lVol()*mixvolretpl[j][i]);
+										dsp::Add(pRetMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pRetMachine->rVol()*mixvolretpr[j][i]);
 										soundready=true;
 									}
 								}
@@ -183,27 +183,27 @@ namespace psy {
 				if ( solocolumn_ >= MAX_CONNECTIONS)
 				{
 					int i= solocolumn_-MAX_CONNECTIONS;
-					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i] != 0.0f || mixvolretpr[i] != 0.0f ))
+					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
 						Machine* pRetMachine = callbacks->song().machine(Return(i).Wire().machine_);
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
-							dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->lVol()*mixvolretpl[i]);
-							dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->rVol()*mixvolretpr[i]);
+							dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->lVol()*mixvolretpl[i][MAX_CONNECTIONS]);
+							dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->rVol()*mixvolretpr[i][MAX_CONNECTIONS]);
 						}
 					}
 				}
 				else for (int i=0; i<numreturns(); i++)
 				{
-					if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i] != 0.0f || mixvolretpr[i] != 0.0f ))
+					if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
 						Machine* pRetMachine = callbacks->song().machine(Return(i).Wire().machine_);
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
-							dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->lVol()*mixvolretpl[i]);
-							dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->rVol()*mixvolretpr[i]);
+							dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->lVol()*mixvolretpl[i][MAX_CONNECTIONS]);
+							dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->rVol()*mixvolretpr[i][MAX_CONNECTIONS]);
 						}
 					}
 				}
@@ -812,6 +812,7 @@ namespace psy {
 						Return(param-1).Send(i,(value&(2<<i))?true:false);
 					}
 					Return(param-1).MasterSend() = (value&(1<<13))?true:false;
+					RecalcReturn(param-1);
 				}
 				return true;
 			}
@@ -1033,18 +1034,30 @@ namespace psy {
 			float val;
 			GetWireVolume(idx,val);
 
+			for(int send=0; send < numsends(); ++send)
+			{
+				if (Return(idx).Send(send))
+				{
+					mixvolretpl[idx][send] = mixvolretpr[idx][send] = Return(idx).Volume()*( Return(idx).Wire().normalize_/ Send(send).normalize_);
+					if (Return(idx).Panning() >= 0.5f )
+					{
+						mixvolretpl[idx][send] *= (1.0f-Return(idx).Panning())*2.0f;
+					}
+					else mixvolretpr[idx][send] *= (Return(idx).Panning())*2.0f;
+				}
+			}
 			float wet = master_.Volume()*master_.Gain();
 			if (master_.DryWetMix() < 0.5f )
 			{
 				wet *= (master_.DryWetMix())*2.0f;
 			}
 
-			mixvolretpl[idx] = mixvolretpr[idx] = Return(idx).Volume()*val*wet/Return(idx).Wire().normalize_;
+			mixvolretpl[idx][MAX_CONNECTIONS] = mixvolretpr[idx][MAX_CONNECTIONS] = Return(idx).Volume()*val*wet/Return(idx).Wire().normalize_;
 			if (Return(idx).Panning() >= 0.5f )
 			{
-				mixvolretpl[idx] *= (1.0f-Return(idx).Panning())*2.0f;
+				mixvolretpl[idx][MAX_CONNECTIONS] *= (1.0f-Return(idx).Panning())*2.0f;
 			}
-			else mixvolretpr[idx] *= (Return(idx).Panning())*2.0f;
+			else mixvolretpr[idx][MAX_CONNECTIONS] *= (Return(idx).Panning())*2.0f;
 		}
 		void Mixer::RecalcChannel(int idx)
 		{

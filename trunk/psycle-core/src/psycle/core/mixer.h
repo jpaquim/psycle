@@ -271,8 +271,8 @@ namespace psy {
 			float _sendvolpr[MAX_CONNECTIONS][MAX_CONNECTIONS];
 			float mixvolpl[MAX_CONNECTIONS];
 			float mixvolpr[MAX_CONNECTIONS];
-			float mixvolretpl[MAX_CONNECTIONS];
-			float mixvolretpr[MAX_CONNECTIONS];
+			float mixvolretpl[MAX_CONNECTIONS][MAX_CONNECTIONS+1]; // +1 for master
+			float mixvolretpr[MAX_CONNECTIONS][MAX_CONNECTIONS+1];
 		
 		};
 		/// tweaks:
