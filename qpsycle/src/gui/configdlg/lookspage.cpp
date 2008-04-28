@@ -89,7 +89,7 @@ namespace qpsycle {
 		QSettings settings;
 		settings.setValue( "looks/sheet", sheetName );
 
-		QFile file( ":/themes/" + sheetName.toLower() );
+		QFile file( ":/colorschemes/" + sheetName.toLower() );
 		file.open( QFile::ReadOnly );
 		QString styleSheet = QLatin1String( file.readAll() );
 		
