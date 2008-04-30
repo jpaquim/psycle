@@ -121,11 +121,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				char str[kVstMaxProgNameLen+9], buf[kVstMaxProgNameLen+1];
 				std::memset(str, 0, kVstMaxProgNameLen+9);
-				machine().GetParamName(i, str);
+				machine().GetParamName(i, buf);
 				bool b = machine().CanBeAutomated(i);
-				if(b) std::sprintf(buf, "(A)%.3X: %s", i, str);
-				else std::sprintf(buf, "(_)%.3X: %s", i, str);
-				m_parlist.AddString(buf);
+				if(b) std::sprintf(str,"(A)%.3X: %s", i, buf);
+				else std::sprintf(str, "(_)%.3X: %s", i, buf);
+				m_parlist.AddString(str);
 			}
 			if ( nPar != -1 )
 				m_parlist.SetCurSel(nPar);

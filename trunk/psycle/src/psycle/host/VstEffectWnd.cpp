@@ -327,7 +327,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				std::sprintf(s1,"%d: %s",i,s2);
 				comboProgram.AddString(s1);
 			}
-			comboProgram.SetCurSel(machine().GetProgram());
+			int i = machine().GetProgram();
+			if ( i > nump || i < 0) {  i = 0; }
+			comboProgram.SetCurSel(i);
 		}
 		void CVstEffectWnd::OnSelchangeProgram() 
 		{

@@ -487,16 +487,35 @@ namespace seib {
 			inline VstInt32 GetProgram() { return Dispatch(effGetProgram); }
 			// size of ptr string limited to kVstMaxProgNameLen chars + \0 delimiter.
 			inline void SetProgramName(const char *ptr) { Dispatch(effSetProgramName, 0, 0, const_cast<char*>(ptr) ); }
-			inline void GetProgramName(char *ptr) { Dispatch(effGetProgramName, 0, 0, ptr); }
+			inline void GetProgramName(char *ptr) {
+				 char s1[kVstMaxProgNameLen*3+1];
+				 Dispatch(effGetProgramName, 0, 0, s1);
+				 s1[kVstMaxProgNameLen]='\0';
+				 std::strcpy(ptr,s1);
+			}
 			// Unit of the paramter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter
-			// NOTE-NOTE-NOTE-NOTE: Forget about the limit. Use the kVstMaxProgNameLen instead.
-			inline void GetParamLabel(VstInt32 index, char *ptr) { Dispatch(effGetParamLabel, index, 0, ptr); }
+			inline void GetParamLabel(VstInt32 index, char *ptr) {
+				 char s1[kVstMaxProgNameLen*3+1];
+				 Dispatch(effGetParamLabel, index, 0, s1);
+				 s1[kVstMaxParamStrLen]='\0';
+				 std::strcpy(ptr,s1);
+			}
 			// Value of the parameter. size of ptr string limited to kVstMaxParamStrLen + \0 delimiter for safety.
-			// NOTE-NOTE-NOTE-NOTE: Forget about the limit. It is exceeded sometimes. Use the kVstMaxProgNameLen instead.
-			inline void GetParamDisplay(VstInt32 index, char *ptr) { Dispatch(effGetParamDisplay, index, 0, ptr); }
+			inline void GetParamDisplay(VstInt32 index, char *ptr) {
+				char s1[kVstMaxProgNameLen*3+1];
+				Dispatch(effGetParamDisplay, index, 0, s1);
+				s1[kVstMaxParamStrLen]='\0';
+				std::strcpy(ptr,s1);
+			}
 			// Name of the parameter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter.
 			// NOTE-NOTE-NOTE-NOTE: Forget about the limit. It's *way* exceeded usually. Use the kVstMaxProgNameLen instead.
-			inline void GetParamName(VstInt32 index, char *ptr) { Dispatch(effGetParamName, index, 0, ptr); }
+			inline void GetParamName(VstInt32 index, char *ptr) {
+				char s1[kVstMaxProgNameLen*3+1]; 
+				 Dispatch(effGetParamName, index, 0, s1);
+				 s1[kVstMaxProgNameLen]='\0';
+				 std::strcpy(ptr,s1);
+				 
+			}
 			// Returns the vu value. Range [0-1] >1 -> clipped
 			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu); }
 			inline void SetSampleRate(float fSampleRate,bool ignorestate=false)
@@ -550,7 +569,9 @@ namespace seib {
 			// text is a string up to kVstMaxProgNameLen chars + \0 delimiter
 			inline bool GetProgramNameIndexed(long category, long index, char* text)
 			{
-				if (!Dispatch(effGetProgramNameIndexed, index, category, text))
+				char s1[kVstMaxProgNameLen*3+1]; // You know, there's always the plugin that don't like to follow the limits
+
+				if (!Dispatch(effGetProgramNameIndexed, index, category, s1))
 				{
 					VstInt32 cprog= GetProgram();
 					SetProgram(index);
@@ -558,6 +579,11 @@ namespace seib {
 					SetProgram(cprog);
 					if (!*text)
 						sprintf(text, "Program %d", index);
+				}
+				else 
+				{
+					s1[kVstMaxProgNameLen]='\0';
+					std::strcpy(text,s1);
 				}
 				return true;
 			}
