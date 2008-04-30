@@ -439,7 +439,10 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 				{
 					LoadMACDv0(&file,song,version&0x00FF);
 				}
-				//else if ( (version&0xFF00) == 0x0100 ) //and so on
+				else if ( (version&0xFF00) == 0x0100 ) //and so on
+				{
+					loadMACDv1(&file,song,version&0x00FF);
+				}
 			}
 			else if(std::strcmp(header,"INSD") == 0)
 			{
@@ -610,7 +613,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	{
 		if (song.machine(index))
 		{
-			saveMACDv0(&file,song,index);
+			saveMACDv1(&file,song,index);
 			if ( !autosave )
 			{
 				//progress.emit(4,-1,"");
@@ -689,7 +692,32 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong& song )
 	return true;
 }
 
-bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong& song, int index )
+bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
+{
+	MachineFactory& factory = MachineFactory::getInstance();
+	std::uint32_t index, host, keyindex;
+	char sDllName[256];
+
+	// chunk data
+	
+	file->Read(index);
+	file->Read(host);
+	file->ReadString(sDllName,256);
+	file->Read(keyindex);
+	MachineKey key(Hosts::type(host),sDllName,keyindex);
+	Machine* mac = factory.CreateMachine(key,index);
+	if (mac) {
+		song.AddMachine(mac);
+		return song.machine(index)->LoadFileChunk(file,minorversion);
+	} else {
+		mac = factory.CreateMachine(MachineKey::dummy(),index);
+		mac->SetEditName(mac->GetEditName() + " (replaced)");
+		song.AddMachine(mac);
+		return false;
+	}
+}
+
+bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 {
 	std::uint32_t version, size;
 	std::size_t pos;
@@ -705,7 +733,12 @@ bool Psy4Filter::saveMACDv0( RiffFile * file, const CoreSong& song, int index )
 
 	// chunk data
 
+	MachineKey key = song.machine(index)->getMachineKey();
 	file->Write(index);
+	file->Write(key.host());
+	file->WriteArray(key.dllName().c_str(),key.dllName().length()+1);
+	file->Write(key.index());
+	
 	song.machine(index)->SaveFileChunk(file);
 
 	// chunk size in header

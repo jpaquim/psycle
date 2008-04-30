@@ -620,6 +620,8 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 			psy::core::Machine *mac = psy::core::MachineFactory::getInstance().CreateMachine(key);
 
 			if ( mac ) {
+				mac->SetPosX(event->scenePos().toPoint().x());
+				mac->SetPosY(event->scenePos().toPoint().y());
 				macView_->song()->AddMachine(mac);
 				macView_->addNewMachineGui( mac );
 
