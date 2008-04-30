@@ -55,7 +55,8 @@ class Psy4Filter : public Psy3Filter
 	protected:
 		/*override*/ int LoadSONGv0(RiffFile* file,CoreSong& song);
 		bool saveSONGv0(RiffFile* file,const CoreSong& song);
-		bool saveMACDv0(RiffFile* file,const CoreSong& song,int index);
+		bool loadMACDv1(RiffFile* file,CoreSong& song, int minorversion);
+		bool saveMACDv1(RiffFile* file,const CoreSong& song,int index);
 		bool saveINSDv0(RiffFile* file,const CoreSong& song,int index);
 		bool saveWAVEv0(RiffFile* file,const CoreSong& song,int index);
 

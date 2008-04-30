@@ -65,8 +65,11 @@ void MachineFactory::FillHosts()
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 {
-	assert(key.host() < Hosts::NUM_HOSTS);
-	return hosts_[key.host()]->CreateMachine(*finder_,key,id);
+	if ( key.host() < 0 || key.host() > Hosts::NUM_HOSTS) {
+		return 0;
+	} else {
+		return hosts_[key.host()]->CreateMachine(*finder_,key,id);
+	}
 #if 0
 	for (int i=0; i< hosts_.size(); ++i)
 	{

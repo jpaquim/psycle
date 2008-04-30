@@ -954,10 +954,6 @@ namespace psy { namespace core {
 
 	void Machine::SaveFileChunk(RiffFile* pFile) const
 	{
-		/* FIXME: Move this to the psyfilter saver.
-		pFile->Write(type());
-		SaveDllName(pFile);
-		*/
 		pFile->Write(_bypass);
 		pFile->Write(_mute);
 		pFile->Write(_panning);
