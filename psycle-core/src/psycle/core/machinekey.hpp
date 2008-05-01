@@ -31,7 +31,7 @@ namespace psy
 		// type Hosts::type
 		// Allows to differentiate between machines of different hosts.
 		namespace Hosts {
-			typedef enum 
+			enum type
 			{
 				INTERNAL=0,
 				NATIVE,
@@ -39,7 +39,7 @@ namespace psy
 				VST,
 				//Keep at last position
 				NUM_HOSTS
-			} type;
+			};
 		}
 		// type InternalMacs::type
 		// Allows to differentiate between internal machines.
@@ -47,7 +47,7 @@ namespace psy
 		// so that MachineKey can return the keys of internal machines.
 		namespace InternalMacs
 		{
-			typedef enum 
+			enum type
 			{
 				MASTER = 0,
 				DUMMY,
@@ -59,7 +59,7 @@ namespace psy
 				LFO,
 				//Keep at Last position.
 				NUM_MACS
-			} type;
+			};
 		}
 
 
