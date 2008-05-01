@@ -769,7 +769,7 @@ bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong& song, int index )
 
 	// chunk data
 
-	file->Write(index);
+	file->Write(std::uint32_t(index));
 	song._pInstrument[index]->SaveFileChunk(file);
 
 	// chunk size in header
