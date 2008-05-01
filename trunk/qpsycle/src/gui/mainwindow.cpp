@@ -164,7 +164,6 @@ namespace qpsycle {
 		macView_->setOctave( 4 );
 		patView_->setOctave( 4 );
 
-		//setAttribute( Qt::WA_DeleteOnClose );
 		createUndoView();
 	}
 
@@ -300,13 +299,15 @@ namespace qpsycle {
 		QString songPath = settings.value( "paths/songPath", "." ).toString();
 		QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psycle Songs (*.psy)" );
 
-		if ( !fileName.isEmpty() ) {
+		if ( !fileName.isEmpty() ) 
+		{
 			psy::core::Player::Instance()->stop();
 			psy::core::Song *song = new psy::core::Song();
 			QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-			if( song->load(fileName.toStdString() ))
+			if ( song->load( fileName.toStdString() ) )
 			{
 				loadSong( song );
+				setCurrentFile( fileName );
 			}
 			else
 			{
@@ -331,6 +332,7 @@ namespace qpsycle {
 			QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
 		}
 		else {
+			setCurrentFile( fileName );
 			logConsole_->AddSuccessText("Song Saved");
 		}
 	}
@@ -397,6 +399,7 @@ namespace qpsycle {
 		// enable audio driver
 		psy::core::Player::Instance()->driver().Enable(true);
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
+
 	}
 
 	void MainWindow::undo()
@@ -457,6 +460,12 @@ namespace qpsycle {
 		connect( settingsConfAct, SIGNAL( triggered() ), this, SLOT( showSettingsDlg() ) );
 
 
+		for (int i = 0; i < 4; ++i) 
+		{
+			recentSongsActs[i] = new QAction(this);
+			recentSongsActs[i]->setVisible(false);
+			connect( recentSongsActs[i], SIGNAL( triggered() ), this, SLOT( openRecentFile() ) );
+		}
 
 		aboutAct = new QAction(tr("&About qpsycle"), this);
 		aboutAct->setStatusTip(tr("About qpsycle"));
@@ -556,6 +565,13 @@ namespace qpsycle {
 		fileMenu->addSeparator();
 		fileMenu->addAction( songPropsAct_ );
 		fileMenu->addSeparator();
+
+		recentMenu = fileMenu->addMenu( tr( "Recent songs" ) );
+		for (int i = 0; i < 4; ++i) {
+			recentMenu->addAction( recentSongsActs[i] );
+		}
+		updateRecentSongsActions();
+		fileMenu->addSeparator();
 		fileMenu->addAction(quitAct);
 
 		editMenu = menuBar()->addMenu(tr("&Edit"));
@@ -588,6 +604,84 @@ namespace qpsycle {
 
 		helpMenu = menuBar()->addMenu(tr("&Help"));
 		helpMenu->addAction(aboutAct);
+	}
+
+	void MainWindow::updateRecentSongsActions()
+	{
+		QSettings settings;
+		QStringList recentSongs = settings.value("recentSongsList").toStringList();
+		
+		int numRecentSongs = std::min( recentSongs.size(), 4 );
+		
+		for (int i = 0; i < numRecentSongs; ++i) {
+			recentSongsActs[i]->setText( recentSongs[i] );
+			recentSongsActs[i]->setData( recentSongs[i] );
+			recentSongsActs[i]->setVisible(true);
+		}
+		for (int j = numRecentSongs; j < 4; ++j)
+			recentSongsActs[j]->setVisible(false);
+
+		recentMenu->clear();
+		for (int i = 0; i < 4; ++i) {
+			recentMenu->addAction( recentSongsActs[i] );
+		}
+	}
+
+	void MainWindow::openRecentFile()
+	{
+		QAction *action = qobject_cast<QAction *>( sender() );
+		if ( action )
+		{			
+			if ( songHasChanged() )
+			{
+				int response = QMessageBox::warning( this, "Save changes?", "The song has been modified.\n Do you wish to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save ) ;
+
+				if ( response == QMessageBox::Save )
+					onSaveSongRequest();
+
+				if ( response == QMessageBox::Cancel )
+					return;
+			}
+
+			QString fileName = action->data().toString();
+
+			if ( !fileName.isEmpty() ) 
+			{
+				psy::core::Player::Instance()->stop();
+				psy::core::Song *song = new psy::core::Song();
+				QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+				if ( song->load( fileName.toStdString() ) )
+				{
+					loadSong( song );
+					setCurrentFile( fileName );
+				}
+				else
+				{
+					///\Show some error message.
+				}
+			}
+		}
+	}
+
+	void MainWindow::setCurrentFile(const QString &fileName)
+	{
+		curFile = fileName;
+		if ( curFile.isEmpty() )
+			setWindowTitle(tr("qpsycle"));
+		else
+			setWindowTitle(tr("%1 - %2").arg(curFile)
+				       .arg(tr("qpsycle")));
+
+		QSettings settings;
+		QStringList recentSongs = settings.value("recentSongsList").toStringList();
+		recentSongs.removeAll( fileName );
+		recentSongs.prepend( fileName );
+		while ( recentSongs.size() > 4 )
+			recentSongs.removeLast();
+
+		settings.setValue( "recentSongsList", recentSongs );
+
+		updateRecentSongsActions();
 	}
 
 	void MainWindow::createToolBars()
@@ -716,7 +810,7 @@ namespace qpsycle {
 	{
 		populateMachineCombo();
 		//if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
-			//macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
+		//macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
 		logConsole_->AddSuccessText("Machine Created Successfuly");
 	}
 

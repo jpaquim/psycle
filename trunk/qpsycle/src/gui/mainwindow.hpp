@@ -89,6 +89,7 @@ private slots:
 	void onNewSongRequest();
 	void onOpenSongRequest();
 	void onSaveSongRequest();
+	void openRecentFile();
 
 	void undo();
 	void redo();
@@ -154,9 +155,14 @@ private:
 
 	void createUndoView();
 
+
+	void setCurrentFile(const QString &fileName);
+	void updateRecentSongsActions();
+
 	QTimer *playbackTimer_;
 
 	QMenu *fileMenu;
+	QMenu *recentMenu;
 	QMenu *editMenu;
 	QMenu *viewMenu;
 	QMenu *configMenu;
@@ -229,6 +235,8 @@ private:
 	InstrumentsModel *instrumentsModel_;
 
 	QSettings settings;
+	QString curFile;
+	QAction *recentSongsActs[4];
 };
 
 }
