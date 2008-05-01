@@ -976,7 +976,8 @@ namespace psy {
 			inputs_[chann2] = tmp;
 			RecalcChannel(chann1);
 			RecalcChannel(chann2);
-
+			//The following line autocleans the left-out channels at the end.
+			DiscardChannel(numinputs()-1); 
 		}
 		void Mixer::ExchangeReturns(int chann1,int chann2)
 		{
@@ -986,6 +987,9 @@ namespace psy {
 			RecalcReturn(chann1);
 			RecalcReturn(chann2);
 			ExchangeSends(chann1,chann2);
+			//The following lines autoclean the left-out send/returns at the end.
+			DiscardReturn(numreturns()-1);
+			DiscardSend(numsends()-1);
 		}
 		void Mixer::ExchangeSends(int send1,int send2)
 		{

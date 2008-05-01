@@ -28,6 +28,7 @@ namespace psy {
 				InputChannel& operator=(const InputChannel &in) { Copy(in); return *this; }
 				void Copy(const InputChannel &in)
 				{
+					sends_.clear();
 					for(unsigned int i=0; i<in.sends_.size(); ++i)
 					{
 						sends_.push_back(in.sends_[i]);
@@ -103,6 +104,7 @@ namespace psy {
 				void Copy(const ReturnChannel& in)
 				{
 					wire_ = in.wire_;
+					sends_.clear();
 					for(unsigned int i=0; i<in.sends_.size(); ++i)
 					{
 						sends_.push_back(in.sends_[i]);
