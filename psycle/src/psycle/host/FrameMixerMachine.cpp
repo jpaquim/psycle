@@ -268,22 +268,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	bool CFrameMixerMachine::UpdateSendsandChans()
 	{
-		int sends(0),cols(0);
+		//int sends(0),cols(0);
 		for (int i=0; i<_pMixer->numreturns(); i++)
 		{
 			if (_pMixer->Return(i).IsValid()) {
 				sendNames[i]=Global::song()._pMachine[_pMixer->Return(i).Wire().machine_]->GetEditName();
-				sends++;
+				//sends++;
 			}
 			else sendNames[i]="";
 		}
-		for (int i=0; i<_pMixer->numinputs(); i++)
+		/*for (int i=0; i<_pMixer->numinputs(); i++)
 		{
 			if (_pMixer->ChannelValid(i)) cols++;
-		}
-		if ( numSends != sends || numChans != cols)
+		}*/
+
+		if ( numSends != _pMixer->numreturns()/*sends*/ || numChans != _pMixer->numinputs()/*cols*/)
 		{
-			numSends= sends; numChans = cols;
+			//numSends= sends; numChans = cols;
+			numSends = _pMixer->numreturns(); numChans = _pMixer->numinputs();
 			return true;
 		}
 		return false;
