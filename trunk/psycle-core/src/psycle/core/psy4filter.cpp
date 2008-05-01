@@ -734,10 +734,10 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 	// chunk data
 
 	MachineKey key = song.machine(index)->getMachineKey();
-	file->Write(index);
-	file->Write(key.host());
+	file->Write(std::uint32_t(index));
+	file->Write(std::uint32_t(key.host()));
 	file->WriteArray(key.dllName().c_str(),key.dllName().length()+1);
-	file->Write(key.index());
+	file->Write(std::uint32_t(key.index()));
 	
 	song.machine(index)->SaveFileChunk(file);
 
