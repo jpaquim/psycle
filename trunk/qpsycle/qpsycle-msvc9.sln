@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qpsycle", "msvc9\qpsycle.vcproj", "{AA883250-7A60-3838-ACA1-246AC3035BEE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psycle-audiodrivers", "..\psycle-audiodrivers\msvc9\psycle-audiodrivers.vcproj", "{1CC767A6-5CA9-37C7-8125-13FD288044AD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psycle-core", "..\psycle-core\msvc9\psycle-core.vcproj", "{54700809-4C12-3720-80A7-4D178D433633}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AA883250-7A60-3838-ACA1-246AC3035BEE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AA883250-7A60-3838-ACA1-246AC3035BEE}.Debug|Win32.Build.0 = Debug|Win32
+		{AA883250-7A60-3838-ACA1-246AC3035BEE}.Release|Win32.ActiveCfg = Release|Win32
+		{AA883250-7A60-3838-ACA1-246AC3035BEE}.Release|Win32.Build.0 = Release|Win32
+		{1CC767A6-5CA9-37C7-8125-13FD288044AD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1CC767A6-5CA9-37C7-8125-13FD288044AD}.Debug|Win32.Build.0 = Debug|Win32
+		{1CC767A6-5CA9-37C7-8125-13FD288044AD}.Release|Win32.ActiveCfg = Release|Win32
+		{1CC767A6-5CA9-37C7-8125-13FD288044AD}.Release|Win32.Build.0 = Release|Win32
+		{54700809-4C12-3720-80A7-4D178D433633}.Debug|Win32.ActiveCfg = Debug|Win32
+		{54700809-4C12-3720-80A7-4D178D433633}.Debug|Win32.Build.0 = Debug|Win32
+		{54700809-4C12-3720-80A7-4D178D433633}.Release|Win32.ActiveCfg = Release|Win32
+		{54700809-4C12-3720-80A7-4D178D433633}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
