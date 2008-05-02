@@ -1250,14 +1250,14 @@ void PatternGrid::copyBlock( bool cutit )
 	pasteBuffer.clear();
 	std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
 
-	float start = selection().top()    / (float) pattern()->beatZoom();
-	float end   = selection().bottom() / (float) pattern()->beatZoom();
+	float start = selection().top()    / static_cast<float>( pattern()->beatZoom() );
+	float end   = ( selection().bottom()+1 ) / static_cast<float>( pattern()->beatZoom() );
 
 	std::string xml = "<patsel beats='" + QString::number( end - start ).toStdString(); 
-	xml+= "' tracks='"+ QString::number( selection().right()+1 - selection().left() ).toStdString();
-	xml+= "'>"; 
-	xml+= copyPattern->toXml();
-	xml+= "</patsel>";
+	xml += "' tracks='"+ QString::number( selection().right()+1 - selection().left() ).toStdString();
+	xml += "'>"; 
+	xml += copyPattern->toXml();
+	xml += "</patsel>";
 
 	QApplication::clipboard()->setText( QString::fromStdString( xml ) );
 
@@ -1267,7 +1267,7 @@ void PatternGrid::copyBlock( bool cutit )
 	}
 }
 
-void PatternGrid::pasteBlock(int tx,int lx,bool mix )
+void PatternGrid::pasteBlock( int tx, int lx, bool mix )
 {
 	// If the clipboard isn't empty...
 	if ( QApplication::clipboard()->text() != "" ) 
@@ -1313,6 +1313,8 @@ void PatternGrid::pasteBlock(int tx,int lx,bool mix )
 		else
 			pattern()->mixBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
 	}
+	
+	moveCursor( 0, xmlBeats*beatZoom() );
 	update( boundingRect() ); // FIXME: inefficient, be more specific.
 }
 
