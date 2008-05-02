@@ -1347,9 +1347,17 @@ void PatternGrid::deleteBlock( )
 	update( boundingRect() ); // FIXME: be more specific.
 }
 
-void PatternGrid::insertRow() {
-	// \todo: implement
-	qDebug( "PatternGrid::insertRow() not yet implemented" );
+void PatternGrid::insertRow() 
+{
+	std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+
+ 	float start = cursor().line()    / static_cast<float>( pattern()->beatZoom() );
+ 	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
+	float beats = end - start;
+
+ 	pattern()->deleteBlock( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() );
+	pattern()->copyBlock( cursor().track(), cursor().line()+1, *copyPattern, 1, beats );
+	update( boundingRect() );
 }
 
 void PatternGrid::deleteRow() {
