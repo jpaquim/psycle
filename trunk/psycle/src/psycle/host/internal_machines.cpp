@@ -618,8 +618,15 @@ namespace psycle
 		{
 			if (wireIndex< MAX_CONNECTIONS)
 			{
+				// If we're replacing an existing connection, keep the sends
+				if (ChannelValid(wireIndex))
+				{
+					InputChannel chan = Channel(wireIndex);
+					InsertChannel(wireIndex,&chan);
+				} else {
+					InsertChannel(wireIndex);
+				}
 				Machine::InsertInputWireIndex(pSong,wireIndex,srcmac,wiremultiplier,initialvol);
-				InsertChannel(wireIndex);
 				RecalcChannel(wireIndex);
 				for (int i(0);i<numsends();++i)
 				{
@@ -631,8 +638,18 @@ namespace psycle
 				wireIndex-=MAX_CONNECTIONS;
 				SetMixerSendFlag(pSong,pSong->_pMachine[srcmac]);
 				MixerWire wire(srcmac,0);
-				InsertReturn(wireIndex,wire);
-				InsertSend(wireIndex,wire);
+				// If we're replacing an existing connection
+				if ( ReturnValid(wireIndex))
+				{
+					ReturnChannel ret = Return(wireIndex);
+					ret.Wire() = wire;
+					InsertReturn(wireIndex,&ret);
+					InsertSend(wireIndex,wire);
+
+				} else {
+					InsertReturn(wireIndex,wire);
+					InsertSend(wireIndex,wire);
+				}
 				Return(wireIndex).Wire().volume_ = initialvol;
 				Return(wireIndex).Wire().normalize_ = wiremultiplier;
 				sends_[wireIndex].volume_ = 1.0f;
