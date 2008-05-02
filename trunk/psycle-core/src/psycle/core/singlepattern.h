@@ -117,7 +117,8 @@ namespace psy
 			void scaleBlock(int left, int right, double top, double bottom, float factor);
 			void transposeBlock(int left, int right, double top, double bottom, int trp);
 			void deleteBlock(int left, int right, double top, double bottom);
-
+			
+			void blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t );
 
 			std::vector<TimeSignature> &  timeSignatures();
 			const std::vector<TimeSignature> &  timeSignatures() const;
