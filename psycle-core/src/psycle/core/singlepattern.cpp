@@ -314,6 +314,23 @@ void SinglePattern::transposeBlock(int left, int right, double top, double botto
 	}
 }
 
+		void SinglePattern::blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument )
+{
+	for( iterator lineIt = lower_bound(top)
+		; lineIt != end() && lineIt->first < bottom
+		; ++lineIt )
+	{
+		PatternLine & line = lineIt->second;
+		for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
+			; entryIt != line.notes().end() && entryIt->first < right
+			; ++entryIt)
+		{
+			PatternEvent & entry = entryIt->second;
+			entry.setInstrument( newInstrument );
+		}
+	}
+}
+
 void SinglePattern::deleteBlock(int left, int right, double top, double bottom)
 {
 	for( iterator lineIt = lower_bound(top)

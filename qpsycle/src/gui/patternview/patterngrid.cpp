@@ -590,6 +590,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 	case commands::transpose_block_dec12:
 		transposeBlock( -12 );
 		break;
+	case commands::block_set_instrument:
+		blockSetInstrument();
+		break;
 	default:
 		// If we got here, we didn't do anything with it, so officially ignore it.
 		event->ignore();
@@ -1692,10 +1695,22 @@ void PatternGrid::transposeBlock( int transposeAmount )
 {
 	int left =  selection().left();
 	int right = selection().right() + 1;
-	double top = selection().top() / (double)beatZoom();
-	double bottom = ( selection().bottom()+1 ) / (double)beatZoom();
+	double top = selection().top() / static_cast<double>( beatZoom() );
+	double bottom = ( selection().bottom()+1 ) / static_cast<double>( beatZoom() );
 
 	pattern()->transposeBlock( left, right, top, bottom, transposeAmount );
+
+	update( boundingRect() ); ///\todo just update the changed parts.
+}
+
+void PatternGrid::blockSetInstrument()
+{
+	int left =  selection().left();
+	int right = selection().right() + 1;
+	double top = selection().top() / static_cast<double>( beatZoom() );
+	double bottom = ( selection().bottom()+1 ) / static_cast<double>( beatZoom() );
+
+	pattern()->blockSetInstrument( left, right, top, bottom, patDraw_->patternView()->song()->instSelected() );
 
 	update( boundingRect() ); ///\todo just update the changed parts.
 }
