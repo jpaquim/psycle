@@ -34,7 +34,7 @@ namespace psy
 		{
 			protected:
 				PluginFinder();
-				~PluginFinder();
+				virtual ~PluginFinder();
 			public:
 				static PluginFinder& getInstance();
 				virtual void addHost(Hosts::type);
