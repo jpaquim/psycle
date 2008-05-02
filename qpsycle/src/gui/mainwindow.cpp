@@ -63,6 +63,7 @@
 #include <sstream>
 
 #define SUBVERSION_REVISION  "$Revision$"
+#define QPSYCLE_TITLE "qpsycle v0.1." SUBVERSION_REVISION
 
 namespace qpsycle {
 
@@ -114,6 +115,7 @@ namespace qpsycle {
 		instrumentsModel_ = 0;
 		playbackTimer_ = 0;
 
+		
 		Global::Instance();
 		psy::core::Player &player = *psy::core::Player::Instance();
 		// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
@@ -200,7 +202,7 @@ namespace qpsycle {
 	void MainWindow::setupGui()
 	{
 		QByteArray sheetName = settings.value( "looks/sheet", "default.qss" ).toByteArray();
-		QFile file( ":/themes/" + sheetName.toLower() );
+		QFile file( ":/colorschemes/" + sheetName.toLower() );
 		file.open( QFile::ReadOnly );
 		QString styleSheet = QLatin1String( file.readAll() );
 		qApp->setStyleSheet( styleSheet );
@@ -244,8 +246,7 @@ namespace qpsycle {
 		createToolBars();
 		createStatusBar();
 
-		setWindowTitle( " qpsycle v0.1." + QString(SUBVERSION_REVISION) );
-
+		updateWindowTitleSongName( "Untitled.psy" );
 	}
 
 	void MainWindow::setupSignals()
@@ -281,6 +282,7 @@ namespace qpsycle {
 	
 		psy::core::Song *blankSong = createBlankSong();
 		loadSong( blankSong );
+		updateWindowTitleSongName( "Untitled.psy" );
 	}
 
 	void MainWindow::onOpenSongRequest()
@@ -667,10 +669,9 @@ namespace qpsycle {
 	{
 		curFile = fileName;
 		if ( curFile.isEmpty() )
-			setWindowTitle(tr("qpsycle"));
+			setWindowTitle( QPSYCLE_TITLE );
 		else
-			setWindowTitle(tr("%1 - %2").arg(curFile)
-				       .arg(tr("qpsycle")));
+			updateWindowTitleSongName( curFile );
 
 		QSettings settings;
 		QStringList recentSongs = settings.value("recentSongsList").toStringList();
@@ -1074,6 +1075,11 @@ namespace qpsycle {
 					patView_->onTick( psy::core::Player::Instance()->playPos() - entryStart ) ;
 			}
 		}
+	}
+
+	void MainWindow::updateWindowTitleSongName( const QString & newSongName )
+	{
+		setWindowTitle( QString("[%1] - %2").arg( newSongName ).arg( QPSYCLE_TITLE ) );
 	}
 
 } // namespace qpsycle

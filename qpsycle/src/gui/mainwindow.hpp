@@ -158,6 +158,7 @@ private:
 
 	void setCurrentFile(const QString &fileName);
 	void updateRecentSongsActions();
+	void updateWindowTitleSongName( const QString &newSongName );
 
 	QTimer *playbackTimer_;
 
@@ -237,6 +238,8 @@ private:
 	QSettings settings;
 	QString curFile;
 	QAction *recentSongsActs[4];
+
+	static const QString qpsycleTitle;
 };
 
 }
