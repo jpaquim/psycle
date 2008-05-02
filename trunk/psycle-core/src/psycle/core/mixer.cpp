@@ -243,8 +243,15 @@ namespace psy {
 		{
 			if (dstWire< MAX_CONNECTIONS)
 			{
+				// If we're replacing an existing connection, keep the sends
+				if (ChannelValid(wireIndex))
+				{
+					InputChannel chan = Channel(wireIndex);
+					InsertChannel(wireIndex,&chan);
+				} else {
+					InsertChannel(dstWire);
+				}
 				Machine::InsertInputWire(srcMac,dstWire,dstType,initialVol);
-				InsertChannel(dstWire);
 				RecalcChannel(dstWire);
 				for (int i(0);i<numsends();++i)
 				{
@@ -256,8 +263,17 @@ namespace psy {
 				dstWire-=MAX_CONNECTIONS;
 				srcMac.SetMixerSendFlag();
 				MixerWire wire(srcMac.id(),0);
-				InsertReturn(dstWire,wire);
-				InsertSend(dstWire,wire);
+				// If we're replacing an existing connection
+				if ( ReturnValid(wireIndex))
+				{
+					ReturnChannel ret = Return(wireIndex);
+					ret.Wire() = wire;
+					InsertReturn(wireIndex,&ret);
+					InsertSend(wireIndex,wire);
+				} else {
+					InsertReturn(dstWire,wire);
+					InsertSend(dstWire,wire);
+				}
 				Return(dstWire).Wire().volume_ = initialVol;
 				Return(dstWire).Wire().normalize_ = srcMac.GetAudioRange()/GetAudioRange();
 				sends_[dstWire].volume_ = 1.0f;
