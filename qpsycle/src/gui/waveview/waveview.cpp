@@ -335,14 +335,13 @@ void WaveView::onLoadButtonClicked()
 
 void WaveView::onZoomInButtonClicked()
 {
-	///\todo limit zooming
-	waveDisplay_->scale( 1.5, 1 );
+	waveDisplay_->ZoomIn();
 }
 
 void WaveView::onZoomOutButtonClicked()
 {
 	///\todo limit zooming
-	waveDisplay_->scale( 2.0/3.0, 1 );
+	waveDisplay_->ZoomOut();
 }
 
 void WaveView::onKillButtonClicked()

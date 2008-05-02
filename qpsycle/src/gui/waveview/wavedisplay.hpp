@@ -46,6 +46,8 @@ public:
 
 public:
 	void resizeEvent(QResizeEvent *ev);
+	void ZoomIn();
+	void ZoomOut();
 
 private:
 	WaveItem *wave_;
@@ -65,12 +67,25 @@ public:
 		QWidget * widget = 0
 	);
 
+	int GetZoomLevel()
+	{
+		return zoomLevel;
+	}
+	void IncrementZoomLevel()
+	{
+		zoomLevel++;
+	}
+	void DecrementZoomLevel()
+	{
+		zoomLevel--;
+	}
 	void resize();
 
 public slots:
 	void resetInstrument();
 
 private:
+	int zoomLevel;
 	InstrumentsModel *instrumentsModel_;
 	psy::core::Instrument *inst_;
 	WaveDisplay *disp_;

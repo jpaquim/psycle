@@ -57,6 +57,20 @@ void WaveDisplay::resizeEvent(QResizeEvent *ev)
 	QGraphicsView::resizeEvent(ev);
 }
 
+void WaveDisplay::ZoomIn()
+{
+	scale( 1.5, 1 );
+	wave_->IncrementZoomLevel();
+}
+
+void WaveDisplay::ZoomOut()
+{
+	if (wave_->GetZoomLevel() > 0)
+	{
+	scale( 2.0/3.0, 1 );
+	wave_->DecrementZoomLevel();
+	}
+}
 
 WaveItem::WaveItem( WaveDisplay *disp, InstrumentsModel *instModel, QGraphicsScene *scene )
 	: QGraphicsRectItem( 0, scene )
@@ -92,6 +106,7 @@ void WaveItem::resetInstrument()
 	}
 
 	scene()->setSceneRect( rect() );
+	zoomLevel = 0;
 }
 
 void WaveItem::resize()
@@ -153,5 +168,4 @@ void WaveItem::paint (
 	}
 	
 }
-
 } // namespace qpsycle
