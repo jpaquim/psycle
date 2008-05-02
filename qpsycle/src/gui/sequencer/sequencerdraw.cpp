@@ -253,8 +253,8 @@ namespace qpsycle {
 	{
 		Q_UNUSED( item );
 		if ( gridSnap() ) {
-			int beatDiff = (int)diff.x() / 5;
-			int snappedBeatDiff = beatDiff * 5;
+			int beatDiff = static_cast<int>( diff.x() ) / beatPxLength_;
+			int snappedBeatDiff = beatDiff * beatPxLength_;
 			diff.setX( snappedBeatDiff );
 		}
 
