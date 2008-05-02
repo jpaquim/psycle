@@ -283,6 +283,7 @@ namespace qpsycle {
 		psy::core::Song *blankSong = createBlankSong();
 		loadSong( blankSong );
 		updateWindowTitleSongName( "Untitled.psy" );
+		curFile.clear();
 	}
 
 	void MainWindow::onOpenSongRequest()
@@ -320,6 +321,16 @@ namespace qpsycle {
 
 	void MainWindow::onSaveSongRequest()
 	{
+		if ( curFile.isEmpty() ) {
+			onSaveSongAsRequest();
+		}
+		else {
+			saveSong( curFile );
+		}
+	}
+
+	void MainWindow::onSaveSongAsRequest()
+	{
 		QString songPath = settings.value( "paths/songPath" ).toString();
 		QString fileName = QFileDialog::getSaveFileName(this,
 								tr("Choose a file name"), songPath,
@@ -327,16 +338,7 @@ namespace qpsycle {
 		if ( fileName.isEmpty() ) {
 			return;
 		}
-		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-		bool success = song_->save( fileName.toStdString() );
-
-		if (!success) {
-			QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
-		}
-		else {
-			setCurrentFile( fileName );
-			logConsole_->AddSuccessText("Song Saved");
-		}
+		saveSong( fileName );
 	}
 
 	bool MainWindow::songHasChanged()
@@ -355,6 +357,22 @@ namespace qpsycle {
 		seqLine->createEntry( pattern0, 0 );
 
 		return blankSong;
+	}
+
+	void MainWindow::saveSong( const QString & fileName )
+	{
+		qDebug( "Saving song." );
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+		bool success = song_->save( fileName.toStdString() );
+		
+		if (!success) {
+			QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
+		}
+		else {
+			setCurrentFile( fileName );
+			statusBar()->showMessage( tr("Song saved."), 5000 );
+			logConsole_->AddSuccessText("Song Saved");
+		}
 	}
 
 	void MainWindow::loadSong( psy::core::Song *song )
@@ -401,7 +419,6 @@ namespace qpsycle {
 		// enable audio driver
 		psy::core::Player::Instance()->driver().Enable(true);
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
-
 	}
 
 	void MainWindow::undo()
@@ -430,6 +447,10 @@ namespace qpsycle {
 		saveAct->setShortcut(tr("Ctrl+S"));
 		saveAct->setStatusTip(tr("Save the current song"));
 		connect(saveAct, SIGNAL(triggered()), this, SLOT(onSaveSongRequest()));
+
+		saveAsAct = new QAction(QIcon(":/images/saveAs.png"), tr("Save As..."), this);
+		saveAsAct->setStatusTip( tr("Save the current song with a new name") );
+		connect( saveAsAct, SIGNAL( triggered() ), this, SLOT( onSaveSongAsRequest() ) );
 
 		songPropsAct_ = new QAction( tr("Song &Properties"), this );
 		songPropsAct_->setStatusTip(tr("View/edit song properties"));
@@ -564,6 +585,7 @@ namespace qpsycle {
 		fileMenu->addAction(newAct);
 		fileMenu->addAction(openAct);
 		fileMenu->addAction(saveAct);
+		fileMenu->addAction(saveAsAct);
 		fileMenu->addSeparator();
 		fileMenu->addAction( songPropsAct_ );
 		fileMenu->addSeparator();
@@ -633,7 +655,7 @@ namespace qpsycle {
 	{
 		QAction *action = qobject_cast<QAction *>( sender() );
 		if ( action )
-		{			
+		{
 			if ( songHasChanged() )
 			{
 				int response = QMessageBox::warning( this, "Save changes?", "The song has been modified.\n Do you wish to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save ) ;

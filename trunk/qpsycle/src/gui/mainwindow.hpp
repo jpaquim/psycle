@@ -89,6 +89,7 @@ private slots:
 	void onNewSongRequest();
 	void onOpenSongRequest();
 	void onSaveSongRequest();
+	void onSaveSongAsRequest();
 	void openRecentFile();
 
 	void undo();
@@ -144,6 +145,7 @@ private:
 	bool songHasChanged();
 	psy::core::Song *createBlankSong();
 	void loadSong( psy::core::Song *song );
+	void saveSong( const QString &fileName );
 
 	void populateMachineCombo();
 	void initSampleCombo();
@@ -180,6 +182,7 @@ private:
 	QAction *newAct;
 	QAction *openAct;
 	QAction *saveAct;
+	QAction *saveAsAct;
 	QAction *songPropsAct_;
 	QAction *undoAct;
 	QAction *redoAct;
