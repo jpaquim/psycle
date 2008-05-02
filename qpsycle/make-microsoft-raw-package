@@ -2,6 +2,7 @@
 
 function main {
 	cd "$(dirname $0)" &&
+	rm -Rf ../*/++build && # We can't trust qmake's makefiles (unreliable when config is changed, etc), so we clean everything first.
 	qmake -recursive CONFIG-=debug CONFIG-=debug_and_release &&
 	mingw32-make &&
 	(cd ../psycle-plugins && scons) &&
