@@ -123,6 +123,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(!pConfig->GetSongDir()      .empty()) _dirDlg._songPathBuf   = pConfig->GetSongDir();
 			if(!pConfig->GetPluginDir()    .empty()) _dirDlg._pluginPathBuf = pConfig->GetPluginDir();
 			if(!pConfig->GetVstDir()       .empty()) _dirDlg._vstPathBuf    = pConfig->GetVstDir();
+			if(!pConfig->GetWaveRecDir()   .empty()) _dirDlg._waveRecPathBuf= pConfig->GetWaveRecDir();
 			if(!pConfig->GetSkinDir()      .empty())
 			{
 				_dirDlg ._skinPathBuf =
@@ -280,6 +281,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (_dirDlg._pluginPathChanged) _pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
 				if (_dirDlg._vstPathChanged) _pConfig->SetVstDir(_dirDlg._vstPathBuf);
 				if (_dirDlg._skinPathChanged) _pConfig->SetSkinDir(_dirDlg._skinPathBuf);
+				if (_dirDlg._waveRecPathChanged) _pConfig->SetWaveRecDir(_dirDlg._waveRecPathBuf);
 
 				if (_pConfig->Initialized() ) 
 				{

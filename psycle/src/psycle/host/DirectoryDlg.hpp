@@ -4,6 +4,7 @@
 #pragma once
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+#include "afxwin.h"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -22,6 +23,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			std::string _vstPathBuf;
 			bool _skinPathChanged;
 			std::string _skinPathBuf;
+			bool _waveRecPathChanged;
+			std::string _waveRecPathBuf;
 			bool initializingDlg;
 			CDirectoryDlg();
 			virtual ~CDirectoryDlg();
@@ -33,6 +36,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CEdit	m_songEdit;
 			CEdit	m_instEdit;
 			CEdit	m_skinEdit;
+			CEdit m_waveRec;
 			//}}AFX_DATA
 		// Overrides
 			// ClassWizard generate virtual function overrides
@@ -58,6 +62,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnChangeSkinedit();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+		public:
+			afx_msg void OnBnClickedBrowsewaverec();
+			afx_msg void OnEnChangeWaverecedit();
 		};
 
 		//{{AFX_INSERT_LOCATION}}

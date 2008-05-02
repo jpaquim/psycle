@@ -4,6 +4,7 @@
 #include <psycle/project.private.hpp>
 #include "DirectoryDlg.hpp"
 #include "Psycle.hpp"
+#include ".\directorydlg.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -24,6 +25,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			_vstPathBuf[0] = '\0';
 			_skinPathChanged = false;
 			_skinPathBuf[0] = '\0';
+			_waveRecPathChanged = false;
+			_waveRecPathBuf[0] = '\0';
 			initializingDlg = false;
 		}
 
@@ -40,6 +43,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_SONGEDIT, m_songEdit);
 			DDX_Control(pDX, IDC_INSTEDIT, m_instEdit);
 			DDX_Control(pDX, IDC_SKINEDIT, m_skinEdit);
+			DDX_Control(pDX, IDC_WAVERECEDIT, m_waveRec);
 			//}}AFX_DATA_MAP
 		}
 
@@ -56,6 +60,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_EN_CHANGE(IDC_VSTEDIT, OnChangeVstedit)
 			ON_BN_CLICKED(IDC_BROWSESKIN, OnBrowseSkin)
 			ON_EN_CHANGE(IDC_SKINEDIT, OnChangeSkinedit)
+			ON_BN_CLICKED(IDC_BROWSEWAVEREC, OnBnClickedBrowsewaverec)
+			ON_EN_CHANGE(IDC_WAVERECEDIT, OnEnChangeWaverecedit)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
@@ -150,6 +156,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pluginEdit.SetWindowText(_pluginPathBuf.c_str());
 			m_vstEdit.SetWindowText(_vstPathBuf.c_str());
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
+			m_waveRec.SetWindowText(_waveRecPathBuf.c_str());
 			initializingDlg=false;
 			
 			return TRUE;  // return TRUE unless you set the focus to a control
@@ -219,5 +226,28 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
+		void CDirectoryDlg::OnBnClickedBrowsewaverec()
+		{
+			if (BrowseForFolder(_waveRecPathBuf))
+			{
+				_waveRecPathChanged = true;
+				m_waveRec.SetWindowText(_waveRecPathBuf.c_str());
+			}
+		}
+
+
+		void CDirectoryDlg::OnEnChangeWaverecedit()
+		{
+			if (!initializingDlg)
+			{
+				_waveRecPathChanged = true;
+				CString temp;
+				m_waveRec.GetWindowText(temp);
+				_waveRecPathBuf=temp;
+			}
+		}
+
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
+
+

@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by resources.rc
@@ -118,6 +117,7 @@
 #define IDB_SWITCHON                    274
 #define IDB_SWITCHOFF                   275
 #define IDD_TRANSFORMPATTERN            277
+#define IDD_MIDI_REMAP                  278
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -156,7 +156,10 @@
 #define IDC_FT2DEL                      1033
 #define IDC_BROWSESKIN                  1033
 #define IDC_SHIFTARROWS                 1034
+#define IDC_WAVERECEDIT                 1034
 #define IDC_PLAY_R_CTRL                 1035
+#define IDC_BROWSESKIN2                 1035
+#define IDC_BROWSEWAVEREC               1035
 #define IDC_KEY0                        1036
 #define IDC_CMDLIST                     1037
 #define IDC_ROWC                        1038
@@ -1047,6 +1050,7 @@
 #define IDC_APPLYTOSONG                 1801
 #define IDC_APPLYTOBLOCK                1802
 #define IDC_LOCKINST                    1802
+#define IDC_LIST2                       1804
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1214,9 +1218,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        278
+#define _APS_NEXT_RESOURCE_VALUE        279
 #define _APS_NEXT_COMMAND_VALUE         34210
-#define _APS_NEXT_CONTROL_VALUE         1803
+#define _APS_NEXT_CONTROL_VALUE         1805
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

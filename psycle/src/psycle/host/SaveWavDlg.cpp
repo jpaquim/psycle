@@ -106,7 +106,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			lastlinetick=0;
 			saving=false;
 
-			std::string name = Global::pConfig->GetCurrentSongDir();
+			std::string name = Global::pConfig->GetCurrentWaveRecDir().c_str();
 			name+='\\';
 			name+=pSong->fileName;
 			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
@@ -305,7 +305,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CSaveWavDlg::OnFilebrowse() 
 		{
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
-			CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+			CString direct;
+			m_filename.GetWindowText(direct);
+			CFileDialog dlg(false,"wav",direct,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 			if ( dlg.DoModal() == IDOK ) 
 			{
 				CString str = dlg.GetPathName();
@@ -315,6 +317,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					str.Insert(str.GetLength(),".wav");
 				}
 				m_filename.SetWindowText(str);
+				std::string::size_type index = str.ReverseFind('\\');
+				if (index != std::string::npos)
+				{
+					str.Truncate(index);
+					Global::pConfig->SetCurrentWaveRecDir(str.GetString());
+				}
+
 			}
 		}
 

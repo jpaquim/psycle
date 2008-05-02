@@ -314,6 +314,15 @@ namespace psycle
 		private:
 			std::string vst_dir_;
 
+		public:
+			std::string const & GetWaveRecDir              () const throw() { return wave_rec_dir_; }
+			void SetWaveRecDir              (std::string const &);
+			std::string const & GetCurrentWaveRecDir      () const throw() { return current_wave_rec_dir_; }
+			void SetCurrentWaveRecDir      (std::string const &);
+		private:
+			std::string wave_rec_dir_;
+			std::string current_wave_rec_dir_;
+
 		protected:
 			void Error(std::string const &);
 		};
