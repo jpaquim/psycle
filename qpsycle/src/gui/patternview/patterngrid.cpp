@@ -503,82 +503,94 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 	}
 
 	switch ( command ) {
-		case commands::navigate_up:
+	case commands::navigate_up:
 		moveCursor( 0, -navStep() ); 
 		break;
-		case commands::navigate_down:
+	case commands::navigate_down:
 		moveCursor( 0, navStep() );
 		break;
-		case commands::navigate_left:
+	case commands::navigate_left:
 		moveCursor( -1, 0 );
 		break;
-		case commands::navigate_right:
+	case commands::navigate_right:
 		moveCursor( 1, 0 );
 		break;
-		case commands::track_prev:
+	case commands::track_prev:
 		trackPrev();
 		break;
-		case commands::track_next:
+	case commands::track_next:
 		trackNext();
 		break;
-		case commands::navigate_page_down:
+	case commands::navigate_page_down:
 		moveCursor( 0, 16 );
 		break;
-		case commands::navigate_page_up:
+	case commands::navigate_page_up:
 		moveCursor( 0, -16 );
 		break;
-		case commands::navigate_top:
+	case commands::navigate_top:
 		navTop();
 		break;
-		case commands::navigate_bottom:
+	case commands::navigate_bottom:
 		navBottom();
 		break;
-		case commands::select_up:
+	case commands::select_up:
 		if ( shiftArrowForSelect() ) selectUp();
 		break;
-		case commands::select_down:
+	case commands::select_down:
 		if ( shiftArrowForSelect() ) selectDown();
 		break;
-		case commands::select_left:
+	case commands::select_left:
 		if ( shiftArrowForSelect() ) selectLeft();
 		break;
-		case commands::select_right:
+	case commands::select_right:
 		if ( shiftArrowForSelect() ) selectRight();
 		break;
-		case commands::select_track:
+	case commands::select_track:
 		selectTrack();
 		break;
-		case commands::select_all:
+	case commands::select_all:
 		selectAll();
 		break;
-		case commands::block_start:
+	case commands::block_start:
 		if ( !shiftArrowForSelect() ) startBlock( cursor() );
 		break;
-		case commands::block_end:
+	case commands::block_end:
 		if ( !shiftArrowForSelect() ) endBlock( cursor() );
 		break;
-		case commands::block_unmark:
+	case commands::block_unmark:
 		if ( !shiftArrowForSelect() ) unmarkBlock();
 		break;
-		case commands::block_copy: 
+	case commands::block_copy: 
 		copyBlock( false );
 		break;
-		case commands::block_cut: 
+	case commands::block_cut: 
 		copyBlock( true );
 		break;
-		case commands::block_paste: 
+	case commands::block_paste: 
 		pasteBlock( cursor().track(), cursor().line(), false );
 		break;
-		case commands::block_delete: 
+	case commands::block_delete: 
 		deleteBlock();
 		break;
-		case commands::row_insert:
+	case commands::row_insert:
 		insertRow();
 		break;
-		case commands::row_delete:
+	case commands::row_delete:
 		deleteRow();
 		break;
-		default:
+	case commands::transpose_block_inc:
+		transposeBlock( 1 );
+		break;
+	case commands::transpose_block_inc12:
+		transposeBlock( 12 );
+		break;
+	case commands::transpose_block_dec:
+		transposeBlock( -1 );
+		break;
+	case commands::transpose_block_dec12:
+		transposeBlock( -12 );
+		break;
+	default:
 		// If we got here, we didn't do anything with it, so officially ignore it.
 		event->ignore();
 	}
@@ -1674,6 +1686,24 @@ void PatternGrid::unmarkBlock()
 
 	update( boundingRect() );
 }
+
+
+void PatternGrid::transposeBlock( int transposeAmount )
+{
+	int left =  selection().left();
+	int right = selection().right() + 1;
+	double top = selection().top() / (double)beatZoom();
+	double bottom = ( selection().bottom()+1 ) / (double)beatZoom();
+
+	pattern()->transposeBlock( left, right, top, bottom, transposeAmount );
+
+	update( boundingRect() ); ///\todo just update the changed parts.
+}
+
+
+
+
+
 
 /*****************************************************************************/
 // ColumnEvent implementation

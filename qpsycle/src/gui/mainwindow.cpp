@@ -363,7 +363,10 @@ namespace qpsycle {
 	{
 		qDebug( "Saving song." );
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+
+		QApplication::setOverrideCursor(Qt::WaitCursor);
 		bool success = song_->save( fileName.toStdString() );
+		QApplication::restoreOverrideCursor();
 		
 		if (!success) {
 			QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
@@ -377,6 +380,8 @@ namespace qpsycle {
 
 	void MainWindow::loadSong( psy::core::Song *song )
 	{
+		QApplication::setOverrideCursor(Qt::WaitCursor);
+
 		psy::core::Player::Instance()->driver().Enable(false);
 		if ( song_ ) delete song_;
 		song_ = song;
@@ -419,6 +424,8 @@ namespace qpsycle {
 		// enable audio driver
 		psy::core::Player::Instance()->driver().Enable(true);
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
+
+		QApplication::restoreOverrideCursor();
 	}
 
 	void MainWindow::undo()
