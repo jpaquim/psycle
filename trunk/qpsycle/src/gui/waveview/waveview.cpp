@@ -315,22 +315,26 @@ void WaveView::nameChanged()
 
 void WaveView::onLoadButtonClicked()
 {
-	QString samplePath = QString::fromStdString( Global::configuration().samplePath() );
-	QString pathToWavfile = QFileDialog::getOpenFileName( this, tr("Open File"),
+	QSettings settings;
+	QString samplePath = settings.value( "paths/samplesPath", "home/samples" ).toString();
+	QFileDialog fileDialog;
+	QString pathToWavfile = fileDialog.getOpenFileName( this, tr("Open File"),
 									samplePath,
 									tr("Wave files (*.wav)") );
 	int curInstrIndex = instrumentsModel_->selectedInstrumentIndex();
 
-	///\todo this warning is displayed even if the file open was canceled
-	if ( !instrumentsModel_->slotIsEmpty( curInstrIndex ) )
+	if (fileDialog.Accepted)
 	{
-		int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
-							tr("A sample is already loaded here.\n"
-							"Do you want to overwrite the current sample?"),
-							QMessageBox::Ok | QMessageBox::Cancel );
-		if ( ret == QMessageBox::Cancel ) return;
+		if ( !instrumentsModel_->slotIsEmpty( curInstrIndex ) )
+		{
+			int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
+								tr("A sample is already loaded here.\n"
+								"Do you want to overwrite the current sample?"),
+								QMessageBox::Ok | QMessageBox::Cancel );
+			if ( ret == QMessageBox::Cancel ) return;
+		}
+		instrumentsModel_->loadInstrument( curInstrIndex, pathToWavfile );
 	}
-	instrumentsModel_->loadInstrument( curInstrIndex, pathToWavfile );
 }
 
 void WaveView::onZoomInButtonClicked()
@@ -340,7 +344,6 @@ void WaveView::onZoomInButtonClicked()
 
 void WaveView::onZoomOutButtonClicked()
 {
-	///\todo limit zooming
 	waveDisplay_->ZoomOut();
 }
 
