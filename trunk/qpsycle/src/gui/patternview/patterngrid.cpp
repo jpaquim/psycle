@@ -1360,12 +1360,22 @@ void PatternGrid::insertRow()
 	update( boundingRect() );
 }
 
-void PatternGrid::deleteRow() {
-	// \todo: implement
-	qDebug( "PatternGrid::deleteRow() not yet implemented" );
+void PatternGrid::deleteRow() 
+{
+	std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+
+ 	float start = cursor().line()    / static_cast<float>( pattern()->beatZoom() );
+ 	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
+	float beats = end - start;
+
+ 	pattern()->deleteBlock( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() );
+	pattern()->copyBlock( cursor().track(), std::max(0,cursor().line()-1), *copyPattern, 1, beats );
+	moveCursor( 0, -1 );
+	update( boundingRect() );
 }
 
-QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const {
+QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const 
+{
 	int top    = startLine    * lineHeight()  + 0;//absoluteTop() - dy_;
 	int bottom = (endLine+1)  * lineHeight()  + 0;//absoluteTop();//  - dy_;
 	int left   = patDraw_->xOffByTrack( startTrack)  + 0;//absoluteLeft() - dx_;
