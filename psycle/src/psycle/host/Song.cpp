@@ -674,15 +674,9 @@ namespace psycle
 				return false;
 
 			Machine *oldmac(0);
-			if ( dstMac->_type == MACH_MIXER)
+			if ( dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS)
 			{
-				if ( wiredest < MAX_CONNECTIONS)
-				{
-					if (dstMac->_inputMachines[wiredest] == -1)
-						return false;
-					oldmac = _pMachine[dstMac->_inputMachines[wiredest]];
-				}
-				else if (!((Mixer*)dstMac)->ReturnValid(wiredest-MAX_CONNECTIONS))
+				if (!((Mixer*)dstMac)->ReturnValid(wiredest-MAX_CONNECTIONS))
 					return false;
 				else oldmac = _pMachine[((Mixer*)dstMac)->Return(wiredest-MAX_CONNECTIONS).Wire().machine_];
 			}

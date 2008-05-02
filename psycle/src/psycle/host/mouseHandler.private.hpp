@@ -158,18 +158,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						int srctype=0;
 						///\todo: for multi-io.
 						//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
-						///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
-						int w(-1);
-						if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
-						{
-							if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
-							{
-								w = dmac->GetFreeInputWire(1);
-							}
-							else { w = dmac->GetFreeInputWire(0); }
-						}
-						else { w = dmac->GetFreeInputWire(0); }
-
 						if (!_pSong->ChangeWireSourceMac(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
 						{
 							MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
