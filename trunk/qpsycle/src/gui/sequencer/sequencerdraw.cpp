@@ -170,8 +170,9 @@ namespace qpsycle {
 		if ( psy::core::Player::Instance()->loopSequenceEntry() == entry ) {
 			psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
 		}
-		//entry->track()->removeEntry(entry); // Remove from the song's pattern sequence.
-		//scene()->removeItem( item ); // Remove from the GUI. FIXME: think we need to delete the object itself here too.
+		entry->track()->removeEntry(entry); // Remove from the core song's pattern sequence.
+		// Note: Removing the entry from the core song triggers a (boost) signal in the core,
+		// which, when caught by the host, removes the SequencerItem's GUI from the host.
 	}
 
 	void SequencerDraw::onNewLineCreated(psy::core::SequenceLine* seqLine)
