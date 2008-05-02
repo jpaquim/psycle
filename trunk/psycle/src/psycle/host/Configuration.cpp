@@ -108,6 +108,8 @@ namespace psycle
 					SetSkinDir(appPath()+"skins");
 					SetPluginDir(appPath()+"PsyclePlugins");
 					SetVstDir(appPath()+"VstPlugins");
+					SetWaveRecDir(appPath()+"songs");
+					SetCurrentWaveRecDir(GetWaveRecDir());
 				}
 			}
 		}
@@ -350,6 +352,8 @@ namespace psycle
 				reg.QueryValue("SkinDir", skin_dir_);
 				reg.QueryValue("PluginDir", plugin_dir_);
 				reg.QueryValue("VstDir", vst_dir_);
+				reg.QueryValue("WaveRecDir", wave_rec_dir_);
+				SetCurrentWaveRecDir(GetWaveRecDir());
 			}
 			reg.CloseKey();
 			reg.CloseRootKey();
@@ -500,6 +504,7 @@ namespace psycle
 			reg.SetValue("PluginDir", GetPluginDir());
 			reg.SetValue("VstDir", GetVstDir());
 			reg.SetValue("SkinDir", GetSkinDir());
+			reg.SetValue("WaveRecDir", GetWaveRecDir());
 			reg.CloseKey();
 			reg.CloseRootKey();
 #endif // !defined WINAMP_PLUGIN
@@ -539,6 +544,15 @@ namespace psycle
 		void Configuration::SetVstDir(std::string const & s)
 		{
 			vst_dir_ = s;
+		}
+
+		void Configuration::SetWaveRecDir(std::string const & s)
+		{
+			wave_rec_dir_ = s;
+		}
+		void Configuration::SetCurrentWaveRecDir(std::string const & s)
+		{
+			current_wave_rec_dir_ = s;
 		}
 
 		void Configuration::Error(std::string const & what)
@@ -880,6 +894,8 @@ namespace psycle
 				reg.QueryValue("SkinDir", skin_dir_);
 				reg.QueryValue("PluginDir", plugin_dir_);
 				reg.QueryValue("VstDir", vst_dir_);
+				SetWaveRecDir(GetSongDir());
+				SetCurrentWaveRecDir(GetWaveRecDir());
 			}
 			reg.CloseKey();
 			reg.CloseRootKey();
