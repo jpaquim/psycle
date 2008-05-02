@@ -8,7 +8,10 @@ function main {
 	local install_dir=++install &&
 	rm -Rf $install_dir &&
 	mkdir -p $install_dir/bin &&
-	cp -f ++build/qpsycle.exe ../psycle-plugins/++packageneric/variants/default/stage-install/usr/local/bin/*.dll $install_dir/bin &&
+	cp -f \
+		{.,../psycle-{core,audiodrivers}/++build/*.{dll,exe} \
+		../psycle-plugins/++packageneric/variants/default/stage-install/usr/local/bin/*.dll \
+		$install_dir/bin &&
 	local tar_name=qpsycle &&
 	../packageneric/generic/microsoft-dll-collector $install_dir $tar_name &&
 	echo subversion revision "$(svnversion)" > $install_dir/$tar_name/version.text &&
