@@ -244,7 +244,7 @@ namespace psy {
 			if (dstWire< MAX_CONNECTIONS)
 			{
 				// If we're replacing an existing connection, keep the sends
-				if (ChannelValid(wireIndex))
+				if (ChannelValid(dstWire))
 				{
 					InputChannel chan = Channel(dstWire);
 					InsertChannel(dstWire,&chan);
@@ -264,7 +264,7 @@ namespace psy {
 				srcMac.SetMixerSendFlag();
 				MixerWire wire(srcMac.id(),0);
 				// If we're replacing an existing connection
-				if ( ReturnValid(wireIndex))
+				if ( ReturnValid(dstWire))
 				{
 					ReturnChannel ret = Return(dstWire);
 					ret.Wire() = wire;
