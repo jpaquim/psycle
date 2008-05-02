@@ -476,6 +476,7 @@ namespace qpsycle {
 		inputHandler_.changeKeyCode( commands::transpose_block_dec12, Key( Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_F11 ) );
 
 		inputHandler_.changeKeyCode( commands::block_set_instrument, Key( Qt::ControlModifier, Qt::Key_T ) );
+		inputHandler_.changeKeyCode( commands::block_set_machine, Key( Qt::ControlModifier, Qt::Key_G ) );
 
 		inputHandler_.changeKeyCode( commands::row_clear, Key(Qt::NoModifier, Qt::Key_Delete) );
 	}
