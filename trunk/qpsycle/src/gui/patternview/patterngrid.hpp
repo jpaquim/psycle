@@ -241,6 +241,8 @@ public:
 	void pasteBlock( int tx,int lx,bool mix );
 	void deleteBlock( );
 
+	void transposeBlock( int transposeAmount );
+
 	void insertRow();
 	void deleteRow();
 
