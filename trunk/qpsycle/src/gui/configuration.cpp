@@ -479,6 +479,8 @@ namespace qpsycle {
 		inputHandler_.changeKeyCode( commands::block_set_machine, Key( Qt::ControlModifier, Qt::Key_G ) );
 
 		inputHandler_.changeKeyCode( commands::row_clear, Key(Qt::NoModifier, Qt::Key_Delete) );
+		inputHandler_.changeKeyCode( commands::row_insert, Key(Qt::NoModifier, Qt::Key_Insert) );
+
 	}
 
 	void Configuration::setKnobBehaviour( KnobMode behaviourType )
