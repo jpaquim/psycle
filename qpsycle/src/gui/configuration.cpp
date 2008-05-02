@@ -480,6 +480,7 @@ namespace qpsycle {
 
 		inputHandler_.changeKeyCode( commands::row_clear, Key(Qt::NoModifier, Qt::Key_Delete) );
 		inputHandler_.changeKeyCode( commands::row_insert, Key(Qt::NoModifier, Qt::Key_Insert) );
+		inputHandler_.changeKeyCode( commands::row_delete, Key(Qt::NoModifier, Qt::Key_Backspace) );
 
 	}
 
