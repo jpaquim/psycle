@@ -243,6 +243,7 @@ public:
 
 	void transposeBlock( int transposeAmount );
 	void blockSetInstrument();
+	void blockSetMachine();
 
 	void insertRow();
 	void deleteRow();

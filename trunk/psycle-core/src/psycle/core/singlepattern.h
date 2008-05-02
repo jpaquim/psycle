@@ -118,7 +118,8 @@ namespace psy
 			void transposeBlock(int left, int right, double top, double bottom, int trp);
 			void deleteBlock(int left, int right, double top, double bottom);
 			
-			void blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t );
+			void blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument );
+			void blockSetMachine( int left, int right, double top, double bottom, std::uint8_t newMachine );
 
 			std::vector<TimeSignature> &  timeSignatures();
 			const std::vector<TimeSignature> &  timeSignatures() const;

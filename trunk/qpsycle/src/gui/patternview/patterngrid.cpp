@@ -593,6 +593,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 	case commands::block_set_instrument:
 		blockSetInstrument();
 		break;
+	case commands::block_set_machine:
+		blockSetMachine();
+		break;
 	default:
 		// If we got here, we didn't do anything with it, so officially ignore it.
 		event->ignore();
@@ -1713,6 +1716,21 @@ void PatternGrid::blockSetInstrument()
 	pattern()->blockSetInstrument( left, right, top, bottom, patDraw_->patternView()->song()->instSelected() );
 
 	update( boundingRect() ); ///\todo just update the changed parts.
+}
+
+void PatternGrid::blockSetMachine()
+{
+	int left =  selection().left();
+	int right = selection().right() + 1;
+	double top = selection().top() / static_cast<double>( beatZoom() );
+	double bottom = ( selection().bottom()+1 ) / static_cast<double>( beatZoom() );
+
+	psy::core::Machine* currentMac = patDraw_->patternView()->song()->machine( patDraw_->patternView()->song()->seqBus );
+	if ( currentMac != 0 ) {
+		std::uint8_t currentMacId = currentMac->id();
+		pattern()->blockSetMachine( left, right, top, bottom, currentMacId );
+		update( boundingRect() ); ///\todo just update the changed parts.
+	}
 }
 
 
