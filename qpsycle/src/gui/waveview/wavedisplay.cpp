@@ -131,9 +131,9 @@ void WaveItem::paint (
 		double startx = option->exposedRect.left();
 		double endx = option->exposedRect.right();
 
-		painter->setPen( Qt::darkGray );
+		painter->setPen( Qt::darkGreen );
 		painter->drawLine( QLineF( startx, midPoint, endx, midPoint ) );
-		painter->setPen( Qt::lightGray );
+		painter->setPen( Qt::green );
 
 		//inverse of the view's horizontal scaling factor
 		double samplesPerPixel = 1.0 / option->matrix.m11();
@@ -148,9 +148,9 @@ void WaveItem::paint (
 		if ( inst_->waveStereo ) {
 			midPoint *= 3;
 
-			painter->setPen( Qt::darkGray );
+			painter->setPen( Qt::darkGreen );
 			painter->drawLine( QLineF( startx, midPoint, endx, midPoint ) );
-			painter->setPen( Qt::lightGray );
+			painter->setPen( Qt::green );
 			for ( double i(startx); i < inst_->waveLength && i <= endx; i+=samplesPerPixel ) {
 				int sample = halfWaveHeight * *(inst_->waveDataR + (int)i) / (1<<15);
 				painter->drawLine( QLineF( i, midPoint, i, midPoint-sample ) );
