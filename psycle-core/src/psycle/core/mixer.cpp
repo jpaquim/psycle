@@ -246,8 +246,8 @@ namespace psy {
 				// If we're replacing an existing connection, keep the sends
 				if (ChannelValid(wireIndex))
 				{
-					InputChannel chan = Channel(wireIndex);
-					InsertChannel(wireIndex,&chan);
+					InputChannel chan = Channel(dstWire);
+					InsertChannel(dstWire,&chan);
 				} else {
 					InsertChannel(dstWire);
 				}
@@ -266,10 +266,10 @@ namespace psy {
 				// If we're replacing an existing connection
 				if ( ReturnValid(wireIndex))
 				{
-					ReturnChannel ret = Return(wireIndex);
+					ReturnChannel ret = Return(dstWire);
 					ret.Wire() = wire;
-					InsertReturn(wireIndex,&ret);
-					InsertSend(wireIndex,wire);
+					InsertReturn(dstWire,&ret);
+					InsertSend(dstWire,wire);
 				} else {
 					InsertReturn(dstWire,wire);
 					InsertSend(dstWire,wire);
