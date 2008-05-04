@@ -61,12 +61,19 @@ do
 	fi
 done
 
-for i in $(find "${@:-$(dirname $0)/..}" -type f -perm /+x ! -wholename \*/++\*)
-do
-	test -f "$i" || continue
-	test -d "$(dirname $i)/.svn" || continue
-	if ! svn proplist --verbose "$i" | grep -E '^ *svn:executable : \*$' --silent
-	then
-		svn propset svn:executable \* "$i"
-	fi
-done
+if echo "$OS" | grep -i windows --silent; then
+	# On windows, files are sometimes erroneously set as executable.
+	# So we don't do the "svn propset svn:executable" on this platform.
+else
+	# We're on a unix system.
+	# find all executable files and do svn propset svn:executable on them.
+	for i in $(find "${@:-$(dirname $0)/..}" -type f -perm /+x ! -wholename \*/++\*)
+	do
+		test -f "$i" || continue
+		test -d "$(dirname $i)/.svn" || continue
+		if ! svn proplist --verbose "$i" | grep -E '^ *svn:executable : \*$' --silent
+		then
+			svn propset svn:executable \* "$i"
+		fi
+	done
+fi
