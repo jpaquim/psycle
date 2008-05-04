@@ -28,7 +28,7 @@
 #include "ladspahost.hpp"
 namespace psy{ namespace core {
 
-static MachineFactory& MachineFactory::getInstance() {
+MachineFactory& MachineFactory::getInstance() {
 	static MachineFactory factory;
 	return factory;
 }
