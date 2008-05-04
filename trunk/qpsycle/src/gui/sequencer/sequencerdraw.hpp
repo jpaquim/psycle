@@ -33,6 +33,7 @@ namespace psy { namespace core {
 #include <QtGui/QGraphicsRectItem>
 
 class QGraphicsSceneMouseEvent;
+class QKeyEvent;
 
 namespace qpsycle {
 
@@ -79,6 +80,7 @@ public slots:
 	void onItemChangedLine( SequencerItem *item, int direction );
 
 protected:
+	virtual void keyPressEvent( QKeyEvent *event );
 	void drawBackground( QPainter * painter, const QRectF & rect );
 	void scrollContentsBy ( int dx, int dy );
 
@@ -104,6 +106,8 @@ private:
 	void onNewLineInserted(psy::core::SequenceLine* newSeqLine, psy::core::SequenceLine* position);
 	void onLineRemoved(psy::core::SequenceLine* seqLine);
 	void onLinesSwapped(psy::core::SequenceLine* a, psy::core::SequenceLine* b);
+
+	QList<SequencerItem*> copyBuffer_;
 };
 
 

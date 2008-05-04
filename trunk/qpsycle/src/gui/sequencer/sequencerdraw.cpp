@@ -44,10 +44,11 @@ namespace qpsycle {
 
 	SequencerDraw::SequencerDraw( SequencerView *seqView )
 		: seqView_(seqView),
-		beatPxLength_(6),
-		lineHeight_(30)
+		  beatPxLength_(6),
+		  lineHeight_(30)
 	{
 		setAlignment ( Qt::AlignLeft | Qt::AlignTop );
+		setDragMode( QGraphicsView::RubberBandDrag );
 
 		QGraphicsScene *scene_ = new QGraphicsScene(this);
 		setScene(scene_);
@@ -73,14 +74,14 @@ namespace qpsycle {
 			patternSequence->newLineInserted.connect
 				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
 			/*
-			Does not work because of a boost bug in boost 1.33
-			as of Mar 28 2007.
-			This bug is fixed in boost SVN. I put a workaround in
-			makeSequencerLine instead.
-			/ Magnus
+			  Does not work because of a boost bug in boost 1.33
+			  as of Mar 28 2007.
+			  This bug is fixed in boost SVN. I put a workaround in
+			  makeSequencerLine instead.
+			  / Magnus
 
-			patternSequence->lineRemoved.connect
-			(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+			  patternSequence->lineRemoved.connect
+			  (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 			*/
 			patternSequence->linesSwapped.connect
 				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
@@ -404,7 +405,37 @@ namespace qpsycle {
 		}
 	}
 
+	void SequencerDraw::keyPressEvent( QKeyEvent *event )
+	{
+		// Copy.
+		if ( event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_C )
+		{
+			copyBuffer_.clear();
+			QList<QGraphicsItem*> selectedItems = scene()->selectedItems();
 
+			foreach ( QGraphicsItem *uncastItem, selectedItems )
+			{
+				SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem );
+				if ( someItem != 0 )
+				{
+					copyBuffer_.append( someItem );
+				}
+			}
+		}
+
+		// Paste.
+		if ( event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_V )
+		{
+			if ( !copyBuffer_.empty() )
+			{
+				foreach ( SequencerItem *item, copyBuffer_ )
+				{
+					SequencerLine *line = qgraphicsitem_cast<SequencerLine*>( item->parentItem() );
+					line->addItem( item->sequenceEntry()->pattern() );
+				}
+			}
+		}
+	}
 
 
 
