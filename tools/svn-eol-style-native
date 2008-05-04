@@ -47,7 +47,7 @@ for i in $(find "${@:-$(dirname $0)/..}" \( \
 do
 	test -f "$i" || continue
 	test -d "$(dirname $i)/.svn" || continue
-	if svn proplist --verbose $i | grep -E '^ *svn:eol-style : native$' --silent
+	if svn proplist --verbose "$i" | grep -E '^ *svn:eol-style : native$' --silent
 	then
 		continue
 	fi
