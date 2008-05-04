@@ -1,9 +1,22 @@
 #! /bin/sh
 
+for i in $(find "${@:-$(dirname $0)/..}" -type f -perm /+x ! -wholename \*/++\*)
+do
+	test -f "$i" || continue
+	test -d "$(dirname $i)/.svn" || continue
+	if ! svn proplist --verbose $i | grep -E '^ *svn:executable : \*$' --silent
+	then
+		svn propset svn:executable \* "$i"
+	fi
+done
+
 for i in $(find "${@:-$(dirname $0)/..}" \( \
-	-name \*.sh -or \
-	-name \*.cmd -or \
-	-name \*.py -or \
+	-name \*.psy -or \
+	-name \*.png -or \
+	-name \*.jpeg -or \
+	-name \*.jpg -or \
+	-name \*.ico -or \
+	-name \*.bmp -or \
 	-name \*.cpp -or \
 	-name \*.hpp -or \
 	-name \*.hpp.in -or \
@@ -47,10 +60,13 @@ for i in $(find "${@:-$(dirname $0)/..}" \( \
 do
 	test -f "$i" || continue
 	test -d "$(dirname $i)/.svn" || continue
-	if svn proplist --verbose $i | grep -E '^ *svn:eol-style : native$' --silent
+	if test -x "$i"
 	then
-		continue
+		echo chmod a-x "$i"
+		chmod a-x "$i"
 	fi
-	svn propset svn:eol-style native "$i"
+	if svn proplist --verbose $i | grep -E '^ *svn:executable : \*$' --silent
+	then
+		svn propdel svn:executable "$i"
+	fi
 done
-
