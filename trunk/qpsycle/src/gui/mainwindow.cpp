@@ -337,6 +337,10 @@ namespace qpsycle {
 		if ( fileName.isEmpty() ) {
 			return;
 		}
+
+		if ( !fileName.endsWith(".psy") )
+			fileName.append(".psy");
+
 		saveSong( fileName );
 	}
 
@@ -361,6 +365,7 @@ namespace qpsycle {
 	void MainWindow::saveSong( const QString & fileName )
 	{
 		qDebug( "Saving song." );
+
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 
 		QApplication::setOverrideCursor(Qt::WaitCursor);
