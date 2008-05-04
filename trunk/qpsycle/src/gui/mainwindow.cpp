@@ -471,6 +471,7 @@ namespace qpsycle {
 		connect(saveAct, SIGNAL(triggered()), this, SLOT(onSaveSongRequest()));
 
 		saveAsAct = new QAction(QIcon(":/images/saveAs.png"), tr("Save As..."), this);
+		saveAsAct->setShortcut(tr("Ctrl+Shift+S"));
 		saveAsAct->setStatusTip( tr("Save the current song with a new name") );
 		connect( saveAsAct, SIGNAL( triggered() ), this, SLOT( onSaveSongAsRequest() ) );
 
