@@ -57,6 +57,7 @@
 #include <QTimer>
 #include <QUndoStack>
 #include <QUndoView>
+#include <QDir>
 
 #include <iomanip>
 #include <iostream>
@@ -298,7 +299,12 @@ namespace qpsycle {
 				return;
 		}
 
-		QString songPath = settings.value( "paths/songPath", "." ).toString();
+		QString songPath;
+		if ( currentSongDir_.isEmpty() )
+			songPath = settings.value( "paths/songPath", "." ).toString();
+		else
+			songPath = currentSongDir_;
+			
 		QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psycle Songs (*.psy)" );
 
 		if ( !fileName.isEmpty() ) 
@@ -330,7 +336,12 @@ namespace qpsycle {
 
 	void MainWindow::onSaveSongAsRequest()
 	{
-		QString songPath = settings.value( "paths/songPath" ).toString();
+		QString songPath;
+		if ( currentSongDir_.isEmpty() )
+			songPath = settings.value( "paths/songPath", "." ).toString();
+		else
+			songPath = currentSongDir_;
+
 		QString fileName = QFileDialog::getSaveFileName(this,
 								tr("Choose a file name"), songPath,
 								tr("Psycle Songs (*.psy)"));
@@ -701,6 +712,8 @@ namespace qpsycle {
 	void MainWindow::setCurrentFile(const QString &fileName)
 	{
 		curFile = fileName;
+		currentSongDir_ = QFileInfo( fileName ).absolutePath();
+
 		if ( curFile.isEmpty() )
 			setWindowTitle( QPSYCLE_TITLE );
 		else
