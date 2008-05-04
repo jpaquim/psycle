@@ -4,7 +4,7 @@ for i in $(find "${@:-$(dirname $0)/..}" -type f -perm /+x ! -wholename \*/++\*)
 do
 	test -f "$i" || continue
 	test -d "$(dirname $i)/.svn" || continue
-	if ! svn proplist --verbose $i | grep -E '^ *svn:executable : \*$' --silent
+	if ! svn proplist --verbose "$i" | grep -E '^ *svn:executable : \*$' --silent
 	then
 		svn propset svn:executable \* "$i"
 	fi
@@ -65,7 +65,7 @@ do
 		echo chmod a-x "$i"
 		chmod a-x "$i"
 	fi
-	if svn proplist --verbose $i | grep -E '^ *svn:executable : \*$' --silent
+	if svn proplist --verbose "$i" | grep -E '^ *svn:executable : \*$' --silent
 	then
 		svn propdel svn:executable "$i"
 	fi
