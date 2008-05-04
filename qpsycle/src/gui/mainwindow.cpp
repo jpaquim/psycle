@@ -121,10 +121,9 @@ namespace qpsycle {
 		// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
 		psy::core::MachineFactory& mfactory = psy::core::MachineFactory::getInstance();
 		mfactory.Initialize(&player);
-		mfactory.setPsyclePath(Global::configuration().pluginPath());
-		mfactory.setLadspaPath(Global::configuration().ladspaPath());
 
-
+		mfactory.setPsyclePath( settings.value( "paths/pluginsPath", "." ).toString().toStdString() );
+		mfactory.setLadspaPath( settings.value( "paths/ladspaPath", "." ).toString().toStdString() );
 
 		song_ = createBlankSong();
 		setupSound();
