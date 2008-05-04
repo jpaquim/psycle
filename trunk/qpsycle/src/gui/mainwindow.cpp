@@ -265,6 +265,8 @@ namespace qpsycle {
 		connect( macCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onMachineComboBoxIndexChanged( int ) ) );
 
 		connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
+
+		connect( seqView_->sequencerDraw(), SIGNAL( newPatternCreated( psy::core::SinglePattern* ) ), patternBox_, SLOT( onNewPatternCreated( psy::core::SinglePattern* ) ) );
 	}
 
 	void MainWindow::onNewSongRequest()

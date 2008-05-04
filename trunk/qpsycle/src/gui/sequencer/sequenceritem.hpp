@@ -66,6 +66,7 @@ namespace qpsycle {
 		QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 	private slots:
+		void onReplaceWithCloneActionTriggered();
 		void onLoopEntryActionTriggered();
 		void onDeleteEntryActionTriggered();
 
@@ -74,11 +75,14 @@ namespace qpsycle {
 		void deleteRequest( SequencerItem* );
 		void moved( SequencerItem*, QPointF diff );
 		void changedLine( SequencerItem*, int );
-
+		void newPatternCreated( psy::core::SinglePattern * );
 
 	private:
+		void setNewPattern( psy::core::SinglePattern *newPattern );
+
 		psy::core::SequenceEntry *sequenceEntry_;
 
+		QAction *replaceWithCloneAction_;
 		QAction *deleteEntryAction_;
 		QAction *loopEntryAction_;
 		const QColor QColorFromLongColor( long longCol ) const;
