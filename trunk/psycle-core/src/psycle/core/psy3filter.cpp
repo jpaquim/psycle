@@ -57,6 +57,12 @@ std::uint32_t const Psy3Filter::FILE_VERSION =
 	Psy3Filter::VERSION_INSD +
 	Psy3Filter::VERSION_WAVE;
 
+Psy3Filter* Psy3Filter::getInstance() {
+	// don`t use multithreaded
+	static Psy3Filter s;
+	return &s; 
+}
+
 Psy3Filter::Psy3Filter()
 :
 	singleCat(),

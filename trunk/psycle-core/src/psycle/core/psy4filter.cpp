@@ -60,6 +60,12 @@
 
 namespace psy { namespace core {
 
+Psy4Filter* Psy4Filter::getInstance() {
+	// don`t use multithreaded
+	static Psy4Filter s;
+	return &s; 
+}
+
 Psy4Filter::Psy4Filter()
 {}
 

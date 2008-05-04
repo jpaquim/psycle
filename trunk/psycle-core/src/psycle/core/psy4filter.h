@@ -38,11 +38,7 @@ class Psy4Filter : public Psy3Filter
 			Psy4Filter( Psy4Filter const & );
 			Psy4Filter& operator=(Psy4Filter const&);
 		public:
-			static Psy4Filter* getInstance() {
-				// don`t use multithreaded
-				static Psy4Filter s;
-				return &s; 
-			}
+			static Psy4Filter* getInstance();
 	///\}
 
 	public:

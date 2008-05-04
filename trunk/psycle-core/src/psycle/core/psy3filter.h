@@ -77,12 +77,8 @@ class Psy3Filter : public PsyFilterBase
 		Psy3Filter( Psy3Filter const & );
 		Psy3Filter& operator=(Psy3Filter const&);
 	public:
-		static Psy3Filter* getInstance() {
-			// don`t use multithreaded
-			static Psy3Filter s;
-			return &s; 
-		}
-		///\}
+		static Psy3Filter* getInstance();
+	///\}
 
 	protected:
 		/*override*/ int version() const { return 3; }
