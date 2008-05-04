@@ -46,6 +46,12 @@ const int Psy2Filter::PSY2_MAX_WAVES  = 16;
 const int Psy2Filter::PSY2_MAX_INSTRUMENTS = 255;
 const int Psy2Filter::PSY2_MAX_PLUGINS = 256;
 
+Psy2Filter* Psy2Filter::getInstance() {
+	// don`t use multithreaded
+	static Psy2Filter s;
+	return &s; 
+}
+
 Psy2Filter::Psy2Filter()
 :
 	singleCat(),

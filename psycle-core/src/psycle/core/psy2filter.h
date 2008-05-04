@@ -97,11 +97,7 @@ class Psy2Filter : public PsyFilterBase
 		Psy2Filter( Psy2Filter const & );
 		Psy2Filter& operator=(Psy2Filter const &);
 	public:
-		static Psy2Filter* getInstance() {
-			// don`t use multithreaded
-			static Psy2Filter s;
-			return &s; 
-		}
+		static Psy2Filter* getInstance();
 	///\}
 
 	public:
