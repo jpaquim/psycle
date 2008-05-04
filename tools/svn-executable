@@ -1,15 +1,5 @@
 #! /bin/sh
 
-for i in $(find "${@:-$(dirname $0)/..}" -type f -perm /+x ! -wholename \*/++\*)
-do
-	test -f "$i" || continue
-	test -d "$(dirname $i)/.svn" || continue
-	if ! svn proplist --verbose "$i" | grep -E '^ *svn:executable : \*$' --silent
-	then
-		svn propset svn:executable \* "$i"
-	fi
-done
-
 for i in $(find "${@:-$(dirname $0)/..}" \( \
 	-name \*.psy -or \
 	-name \*.png -or \
@@ -68,5 +58,15 @@ do
 	if svn proplist --verbose "$i" | grep -E '^ *svn:executable : \*$' --silent
 	then
 		svn propdel svn:executable "$i"
+	fi
+done
+
+for i in $(find "${@:-$(dirname $0)/..}" -type f -perm /+x ! -wholename \*/++\*)
+do
+	test -f "$i" || continue
+	test -d "$(dirname $i)/.svn" || continue
+	if ! svn proplist --verbose "$i" | grep -E '^ *svn:executable : \*$' --silent
+	then
+		svn propset svn:executable \* "$i"
 	fi
 done
