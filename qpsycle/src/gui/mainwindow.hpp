@@ -240,6 +240,7 @@ private:
 
 	QSettings settings;
 	QString curFile;
+	QString currentSongDir_;
 	QAction *recentSongsActs[4];
 
 	static const QString qpsycleTitle;
