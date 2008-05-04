@@ -43,9 +43,10 @@
 namespace qpsycle {
 
 	SequencerDraw::SequencerDraw( SequencerView *seqView )
-		: seqView_(seqView),
-		  beatPxLength_(6),
-		  lineHeight_(30)
+	:
+		seqView_(seqView),
+		beatPxLength_(6),
+		lineHeight_(30)
 	{
 		setAlignment ( Qt::AlignLeft | Qt::AlignTop );
 		setDragMode( QGraphicsView::RubberBandDrag );
@@ -73,16 +74,17 @@ namespace qpsycle {
 				(boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
 			patternSequence->newLineInserted.connect
 				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
-			/*
-			  Does not work because of a boost bug in boost 1.33
-			  as of Mar 28 2007.
-			  This bug is fixed in boost SVN. I put a workaround in
-			  makeSequencerLine instead.
-			  / Magnus
-
-			  patternSequence->lineRemoved.connect
-			  (boost::bind(&SequencerDraw::onLineRemoved,this,_1));
-			*/
+			#if 0
+				/*
+					Does not work because of a boost bug in boost 1.33
+					as of Mar 28 2007.
+					This bug is fixed in boost SVN. I put a workaround in
+					makeSequencerLine instead.
+					/ Magnus
+				*/
+				patternSequence->lineRemoved.connect
+				(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+			#endif
 			patternSequence->linesSwapped.connect
 				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 		}
