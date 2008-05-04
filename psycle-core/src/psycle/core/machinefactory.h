@@ -44,10 +44,7 @@ public:
 	// If you use the one wihout PluginFinder, one will be created automatically.
 	void Initialize(MachineCallbacks* callbacks);
 	void Initialize(MachineCallbacks* callbacks, PluginFinder* finder);
-	static MachineFactory& getInstance() {
-		static MachineFactory factory;
-		return factory;
-	}
+	static MachineFactory& getInstance();
 
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
 	Machine* CloneMachine(Machine& mac);
