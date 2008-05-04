@@ -78,6 +78,10 @@ public slots:
 	void onPlayLineMoved( double newXPos );
 	void onItemMoved( SequencerItem* item, QPointF diff );
 	void onItemChangedLine( SequencerItem *item, int direction );
+	void onNewPatternCreated( psy::core::SinglePattern *newPattern );
+
+signals:
+	void newPatternCreated( psy::core::SinglePattern * );
 
 protected:
 	virtual void keyPressEvent( QKeyEvent *event );

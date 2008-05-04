@@ -337,6 +337,11 @@ namespace qpsycle {
 	}
 
 
+	void SequencerDraw::onNewPatternCreated( psy::core::SinglePattern *newPattern )
+	{
+		emit newPatternCreated( newPattern );
+	}
+
 	bool SequencerDraw::gridSnap() const 
 	{
 		return true; ///\todo this should be a user option (so not hardcoded.)

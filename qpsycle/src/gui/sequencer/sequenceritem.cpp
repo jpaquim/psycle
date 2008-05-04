@@ -35,172 +35,196 @@
 
 namespace qpsycle {
 
-SequencerItem::SequencerItem( SequencerDraw *seqDraw ) 
-{
-	setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
-	seqDraw_ = seqDraw;
-}
+	SequencerItem::SequencerItem( SequencerDraw *seqDraw ) 
+	{
+		setFlags( ItemIsMovable | ItemIsSelectable | ItemIsFocusable );
+		seqDraw_ = seqDraw;
+	}
 
-SequencerItem::~SequencerItem() {
-}
+	SequencerItem::~SequencerItem() {
+	}
 
-QRectF SequencerItem::boundingRect() const
-{
-	return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*seqDraw_->beatPxLength(), parentItem()->boundingRect().height() );
-}
+	QRectF SequencerItem::boundingRect() const
+	{
+		return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*seqDraw_->beatPxLength(), parentItem()->boundingRect().height() );
+	}
 
-void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
-{
-	Q_UNUSED( option ); Q_UNUSED( widget );
-	if ( isSelected() ) {
-		painter->setPen( Qt::blue ); 
-	} else {
+	void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
+	{
+		Q_UNUSED( option ); Q_UNUSED( widget );
+		if ( isSelected() ) {
+			painter->setPen( Qt::blue ); 
+		} else {
+			painter->setPen( Qt::white ); 
+		}
+		QColor col = QColorFromLongColor( sequenceEntry_->pattern()->category()->color() );
+		painter->setBrush(col);
+		painter->drawRect( boundingRect() ); // FIXME: need to take border width into account.
 		painter->setPen( Qt::white ); 
+		painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
 	}
-	QColor col = QColorFromLongColor( sequenceEntry_->pattern()->category()->color() );
-	painter->setBrush(col);
-	painter->drawRect( boundingRect() ); // FIXME: need to take border width into account.
-	painter->setPen( Qt::white ); 
-	painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
-}
 
-const QColor SequencerItem::QColorFromLongColor( long longCol ) const
-{
-	unsigned int r, g, b;
-	b = (longCol>>16) & 0xff;
-	g = (longCol>>8 ) & 0xff;
-	r = (longCol    ) & 0xff;
-
-	return QColor( r, g, b );
-}
-
-void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
-{
-	sequenceEntry_ = sequenceEntry;
-}
-
-psy::core::SequenceEntry *SequencerItem::sequenceEntry() const {
-	return sequenceEntry_;
-}
-
-void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
-{
-	if ( event->modifiers() == Qt::NoModifier ) // Movement constrained to current line.
+	const QColor SequencerItem::QColorFromLongColor( long longCol ) const
 	{
-		QPointF newPos( mapToParent(event->pos()) - matrix().map( event->buttonDownPos(Qt::LeftButton) ) );
-		QPointF diff = newPos - pos();
-		emit moved( this, diff ); 
-		// <nmather> MoveEvent handling put in SequencerDraw -- seems more sensible
-		// as we may be moving groups of selected items (which this item shouldn't
-		// really know about).
+		unsigned int r, g, b;
+		b = (longCol>>16) & 0xff;
+		g = (longCol>>8 ) & 0xff;
+		r = (longCol    ) & 0xff;
+
+		return QColor( r, g, b );
 	}
-	if ( event->modifiers() == Qt::ShiftModifier ) // Movement allowed between lines.
-	{
-		QPointF newPos( mapToParent(event->pos()) - matrix().map( event->buttonDownPos(Qt::LeftButton) ) );
-		QPointF diff = newPos - pos();
-		emit moved( this, diff ); 
 
-		SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine*>( parentItem() );
-		SequencerLine *lineUnderCursor = 0;
-		QList<QGraphicsItem*> itemsUnderCursor = scene()->items( event->scenePos() );
-		for ( int i = 0; i < itemsUnderCursor.size(); ++i ) {
-			if ( qgraphicsitem_cast<SequencerLine *>( itemsUnderCursor.at(i) ) ) { // Make sure it's a SeqLine.
-				lineUnderCursor = qgraphicsitem_cast<SequencerLine*>( itemsUnderCursor.at(i) );
+	void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
+	{
+		sequenceEntry_ = sequenceEntry;
+	}
+
+	psy::core::SequenceEntry *SequencerItem::sequenceEntry() const {
+		return sequenceEntry_;
+	}
+
+	void SequencerItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
+	{
+		if ( event->modifiers() == Qt::NoModifier ) // Movement constrained to current line.
+		{
+			QPointF newPos( mapToParent(event->pos()) - matrix().map( event->buttonDownPos(Qt::LeftButton) ) );
+			QPointF diff = newPos - pos();
+			emit moved( this, diff ); 
+			// <nmather> MoveEvent handling put in SequencerDraw -- seems more sensible
+			// as we may be moving groups of selected items (which this item shouldn't
+			// really know about).
+		}
+		if ( event->modifiers() == Qt::ShiftModifier ) // Movement allowed between lines.
+		{
+			QPointF newPos( mapToParent(event->pos()) - matrix().map( event->buttonDownPos(Qt::LeftButton) ) );
+			QPointF diff = newPos - pos();
+			emit moved( this, diff ); 
+
+			SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine*>( parentItem() );
+			SequencerLine *lineUnderCursor = 0;
+			QList<QGraphicsItem*> itemsUnderCursor = scene()->items( event->scenePos() );
+			for ( int i = 0; i < itemsUnderCursor.size(); ++i ) {
+				if ( qgraphicsitem_cast<SequencerLine *>( itemsUnderCursor.at(i) ) ) { // Make sure it's a SeqLine.
+					lineUnderCursor = qgraphicsitem_cast<SequencerLine*>( itemsUnderCursor.at(i) );
+				}
+			}
+			if ( parentLine != lineUnderCursor && lineUnderCursor != 0 ) {
+				if ( diff.y() < 0 ) 
+					emit changedLine( this, 0 );
+				if ( diff.y() > 0 ) 
+					emit changedLine( this, 1 );
 			}
 		}
-		if ( parentLine != lineUnderCursor && lineUnderCursor != 0 ) {
-			if ( diff.y() < 0 ) 
-				emit changedLine( this, 0 );
-			if ( diff.y() > 0 ) 
-				emit changedLine( this, 1 );
+	}
+
+	void SequencerItem::constrainToParent() 
+	{
+		int currentLeftPos = pos().x();
+		int newLeftPos = std::max( 0, currentLeftPos );
+
+		setPos( newLeftPos, 0 );                 
+	
+		if ( true /*gridSnap()*/ ) {
+			int beatPos = pos().x() / seqDraw_->beatPxLength();
+			int snappedLeftPos = beatPos * seqDraw_->beatPxLength();
+			setPos( snappedLeftPos, 0 );
 		}
 	}
-}
 
-void SequencerItem::constrainToParent() 
-{
-	int currentLeftPos = pos().x();
-	int newLeftPos = std::max( 0, currentLeftPos );
-
-	setPos( newLeftPos, 0 );                 
-	
-	if ( true /*gridSnap()*/ ) {
-		int beatPos = pos().x() / seqDraw_->beatPxLength();
-		int snappedLeftPos = beatPos * seqDraw_->beatPxLength();
-		setPos( snappedLeftPos, 0 );
-	}
-}
-
-void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
-{
-	QGraphicsItem::mousePressEvent( event ); // Do normal business...
-	qDebug( "parentLine %p\n", qgraphicsitem_cast<SequencerLine*>(parentItem()) );
-	qDebug( "tickPos %f\n", sequenceEntry()->tickPosition() );
-
-	emit clicked(this);
-}
-
-void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-{
-	QMenu menu;
-	if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
-		loopEntryAction_ = new QAction( "Unloop Entry", this );
-	} else {
-		loopEntryAction_ = new QAction( "Loop Entry", this );
-	}
-	deleteEntryAction_ = new QAction( "Delete Entry", this );
-	connect( loopEntryAction_, SIGNAL( triggered() ), this, SLOT( onLoopEntryActionTriggered() ) );
-	connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
-	menu.addAction( loopEntryAction_ );
-	menu.addAction( deleteEntryAction_ );
-	menu.exec( event->screenPos() );
-}
-
-void SequencerItem::onLoopEntryActionTriggered()
-{
-	if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
-		psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
-	} else {
-		psy::core::Player::Instance()->setLoopSequenceEntry( sequenceEntry() );
-	}
-}
-
-void SequencerItem::onDeleteEntryActionTriggered()
-{
-	emit deleteRequest( this );
-}
-
-void SequencerItem::keyPressEvent( QKeyEvent *event )
-{
-	switch ( event->key() )
+	void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	{
+		QGraphicsItem::mousePressEvent( event ); // Do normal business...
+		qDebug( "parentLine %p\n", qgraphicsitem_cast<SequencerLine*>(parentItem()) );
+		qDebug( "tickPos %f\n", sequenceEntry()->tickPosition() );
+
+		emit clicked(this);
+	}
+
+	void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+	{
+		QMenu menu;
+
+		replaceWithCloneAction_ = new QAction( "Replace with clone", this );
+		if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
+			loopEntryAction_ = new QAction( "Unloop Entry", this );
+		} else {
+			loopEntryAction_ = new QAction( "Loop Entry", this );
+		}
+		deleteEntryAction_ = new QAction( "Delete Entry", this );
+
+		connect( replaceWithCloneAction_, SIGNAL( triggered() ), this, SLOT( onReplaceWithCloneActionTriggered() ) );
+		connect( loopEntryAction_, SIGNAL( triggered() ), this, SLOT( onLoopEntryActionTriggered() ) );
+		connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
+
+		menu.addAction( replaceWithCloneAction_ );
+		menu.addAction( loopEntryAction_ );
+		menu.addAction( deleteEntryAction_ );
+		menu.exec( event->screenPos() );
+	}
+
+	void SequencerItem::onReplaceWithCloneActionTriggered()
+	{
+		psy::core::SinglePattern* pattern = sequenceEntry()->pattern();
+		std::string clonedPatName = pattern->name()+" Clone";
+
+		// Clone the pattern in the song.
+		psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
+		setNewPattern( clonedPat );
+		update();
+
+		emit newPatternCreated( clonedPat );
+	}
+
+	void SequencerItem::setNewPattern( psy::core::SinglePattern *newPattern )
+	{
+		sequenceEntry_->setPattern( newPattern );
+	}
+
+	void SequencerItem::onLoopEntryActionTriggered()
+	{
+		if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
+			psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
+		} else {
+			psy::core::Player::Instance()->setLoopSequenceEntry( sequenceEntry() );
+		}
+	}
+
+	void SequencerItem::onDeleteEntryActionTriggered()
+	{
+		emit deleteRequest( this );
+	}
+
+	void SequencerItem::keyPressEvent( QKeyEvent *event )
+	{
+		switch ( event->key() )
+		{
 		case Qt::Key_Left:
 		{
-		QPointF diff( -seqDraw_->beatPxLength(), 0 );
-		emit moved( this, diff );
+			QPointF diff( -seqDraw_->beatPxLength(), 0 );
+			emit moved( this, diff );
 		}
 		break;
 		case Qt::Key_Right :
 		{
-		QPointF diff( seqDraw_->beatPxLength(), 0 );
-		emit moved( this, diff );
+			QPointF diff( seqDraw_->beatPxLength(), 0 );
+			emit moved( this, diff );
 		}
 		break;
 		case Qt::Key_Up:
-		emit changedLine( this, 0 ); 
-		break;
+			emit changedLine( this, 0 ); 
+			break;
 		case Qt::Key_Down:
-		emit changedLine( this, 1 );
-		break;
+			emit changedLine( this, 1 );
+			break;
 		default: event->ignore();
+		}
 	}
-}
 
-QVariant SequencerItem::itemChange(GraphicsItemChange change, const QVariant &value)
-{
-	if (change == ItemPositionChange)
-		return QPointF(value.toPointF().x(), pos().y()); // Constrains an item to present y pos.
-	return QGraphicsItem::itemChange(change, value);
-}
+	QVariant SequencerItem::itemChange(GraphicsItemChange change, const QVariant &value)
+	{
+		if (change == ItemPositionChange)
+			return QPointF(value.toPointF().x(), pos().y()); // Constrains an item to present y pos.
+		return QGraphicsItem::itemChange(change, value);
+	}
 
 } // namespace qpsycle

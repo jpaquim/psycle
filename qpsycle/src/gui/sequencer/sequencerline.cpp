@@ -94,14 +94,16 @@ void SequencerLine::addEntry( psy::core::SequenceEntry* entry )
 	item->setSequenceEntry( entry );
 	item->setParentItem( this );
 	items_.push_back( item );
+
 	connect( item, SIGNAL( deleteRequest( SequencerItem* ) ), 
 			sDraw_, SLOT( onSequencerItemDeleteRequest( SequencerItem* ) ) );
 	connect( item, SIGNAL( clicked( SequencerItem*) ),
 			this, SLOT( onItemClicked( SequencerItem*) ) );
 	connect( item, SIGNAL( moved( SequencerItem*, QPointF ) ),
 			sDraw_, SLOT( onItemMoved( SequencerItem*, QPointF ) ) );
-	connect( item, SIGNAL( changedLine( SequencerItem*, int ) ),
-			sDraw_, SLOT( onItemChangedLine( SequencerItem*, int ) ) );
+	connect( item, SIGNAL( changedLine( SequencerItem*, int ) ), sDraw_, SLOT( onItemChangedLine( SequencerItem*, int ) ) );
+	connect( item, SIGNAL( newPatternCreated( psy::core::SinglePattern* ) ), sDraw_, SLOT( onNewPatternCreated( psy::core::SinglePattern* ) ) );
+
 	item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 
 	entry->wasDeleted.connect(boost::bind(&SequencerLine::removeEntry,this,_1));
