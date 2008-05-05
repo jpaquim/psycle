@@ -108,6 +108,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		,ultrafinetweak(false)
 		,tweakpar(0)
 		,tweakbase(0)
+		,visualtweakvalue(0.0f);
 		,minval(0)
 		,maxval(0)
 		,sourcepoint(0)
@@ -211,8 +212,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(bDrawKnob && (max_v - min_v)>0)
 				{
 					int const amp_v = max_v - min_v;
-					int const rel_v = val_v - min_v;
-
+					float rel_v;
+					if ( istweak && c == tweakpar) 
+					{
+						rel_v = visualtweakvalue - min_v;
+					} else {
+						rel_v = val_v - min_v;
+					}
 					int const frame = (uiSetting().dialframes*rel_v)/amp_v;
 					int const xn = frame*uiSetting().dialwidth;
 
@@ -317,6 +323,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				prevval = tweakbase;
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
+				visualtweakvalue= tweakbase;
 //				wndView->AddMacViewUndo();
 				SetCapture();
 			}
@@ -382,7 +389,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				if (nv < minval) nv = minval;
 				if (nv > maxval) nv = maxval;
-
+				visualtweakvalue = nv;
 				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f));  // +0.5f to round correctly, not like "floor".
 				prevval=(int)(nv+0.5f);
 				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?

@@ -94,6 +94,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Enviroment
 			bool istweak;
 			bool finetweak;
+			float visualtweakvalue;
 			bool ultrafinetweak;
 			int tweakpar;
 			int tweakbase;

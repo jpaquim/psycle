@@ -34,6 +34,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int numParameters;
 
 			bool istweak;
+			float visualtweakvalue;
 			bool finetweak;
 			bool ultrafinetweak;
 			int tweakpar;
