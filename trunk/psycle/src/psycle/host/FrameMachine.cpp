@@ -69,6 +69,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			numParameters=0;
 			ncol=0;
 			parspercol=0;
+			visualtweakvalue=0.0f;
 
 			b_font.CreatePointFont(80,"Tahoma");
 //			b_font_bold.CreatePointFont(80,"Tahoma Bold");
@@ -108,6 +109,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
 		{
 			CFrameWnd::OnSetFocus(pOldWnd);
+			//((CMainFrame*)wndView->pParentFrame)->ChangeGen(_pMachine->_macIndex);
 			Invalidate(false);
 		}
 		void CFrameMachine::Generate()
@@ -231,13 +233,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(bDrawKnob && (max_v - min_v)>0)
 				{
 					int const amp_v = max_v - min_v;
-					int const rel_v = val_v - min_v;
-
+					float rel_v;
+					if ( istweak && c == tweakpar) 
+					{
+						rel_v = visualtweakvalue - min_v;
+					} else {
+						rel_v = val_v - min_v;
+					}
 					int const frame = (K_NUMFRAMES*rel_v)/amp_v;
 					int const xn = frame*K_XSIZE;
-
 					dc.BitBlt(x_knob,y_knob,K_XSIZE,K_YSIZE,&memDC,xn,0,SRCCOPY);
-				
+
 					//the old code which did the parameter highlight
 					/*int nc;
 					
@@ -365,6 +371,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				prevval = tweakbase;
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
+				visualtweakvalue = tweakbase;
 				wndView->AddMacViewUndo();
 				SetCapture();
 			}
@@ -432,6 +439,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (nv < minval) nv = minval;
 				if (nv > maxval) nv = maxval;
 
+				visualtweakvalue = nv;
 				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
 				prevval=(int)(nv+0.5f);
 				wndView->AddMacViewUndo();
@@ -534,6 +542,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			//wndView->KeyDown(nChar,nRepCnt,nFlags);
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
+			//wndView->OnKeyDown(nChar,nRepCnt,nFlags);
 		}
 
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -552,6 +561,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			//wndView->KeyUp(nChar, nRepCnt, nFlags);
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
+			//wndView->OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
 		void CFrameMachine::OnParametersRandomparameters() 
