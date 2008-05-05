@@ -108,7 +108,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		,ultrafinetweak(false)
 		,tweakpar(0)
 		,tweakbase(0)
-		,visualtweakvalue(0.0f);
+		,visualtweakvalue(0.0f)
 		,minval(0)
 		,maxval(0)
 		,sourcepoint(0)
