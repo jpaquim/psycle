@@ -75,31 +75,44 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 
 	zipreader *z;
 	zipreader_file *f;
-	int fd = open( fileName.c_str(), O_RDONLY );
+	//int fd = open( fileName.c_str(), O_RDONLY );
+	FILE* file1 = fopen( fileName.c_str(), "rb" );
+	int fd = fileno(file1);
 	z = zipreader_open( fd );
-	int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
+	//int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
+	FILE* file2 = fopen(std::string("psytemp.xml").c_str(), "wb+");
+	int outFd = fileno(file2);
 	f = zipreader_seek(z, "xml/song.xml");
 
 	if (!zipreader_extract(f, outFd )) {
 		zipreader_close( z );
-		close( outFd );
-		close( fd );
+		//close( outFd );
+		//close( fd );
+		fclose(file2);
+		fclose(file1);
 		return false;
 	}
-	close( outFd );
+	//close( outFd );
+	fclose(file2);
 
 	f = zipreader_seek(z, "bin/song.bin");
-	outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
+	//outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
+	file2 = fopen(std::string("psytemp.bin").c_str(), "wb+" );
+	outFd = fileno(file2);
 	if (!zipreader_extract(f, outFd )) {
 		zipreader_close( z );
-		close( outFd );
-		close( fd );
+		//close( outFd );
+		//close( fd );
+		fclose(file2);
+		fclose(file1);
 		return false;
 	}
-	close( outFd );
+	//close( outFd );
+	fclose(file2);
 	
 	zipreader_close( z );
-	close( fd );
+	//close( fd );
+	fclose(file1);
 
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
@@ -576,7 +589,9 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	// ideally, you should create a temporary file on the same physical
 	// disk as the target zipfile... 
 
-	zipwriter *z = zipwriter_start(open(fileName.c_str(), O_RDWR|O_CREAT, 0644));
+	//zipwriter *z = zipwriter_start(open(fileName.c_str(), O_RDWR|O_CREAT, 0644));
+	FILE* file1 = fopen(fileName.c_str(), "wb+");
+	zipwriter *z = zipwriter_start(fileno(file1));
 	zipwriterfilestream xmlFile(z, "xml/song.xml" );
 
 	std::ostringstream xml;
@@ -642,8 +657,10 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 
 	// copy the bin data to the zip
 	f = zipwriter_addfile(z, std::string("bin/song.bin").c_str(), 9);
-	zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
-
+	//zipwriter_copy(open("psycle_tmp.bin", O_RDONLY), f);
+	FILE* file2 = fopen("psycle_tmp.bin", "rb");
+	zipwriter_copy(fileno(file2), f);
+	fclose(file2);
 	if (!zipwriter_finish(z)) {
 		std::cerr << "Zipwriter failed." << std::endl;
 		return false;
@@ -651,7 +668,6 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 
 	// remove temp file
 	if( std::remove("psycle_tmp.bin") == -1 ) std::cerr << "Error deleting temp file" << std::endl;
-			
 	return true;
 }
 
@@ -796,3 +812,4 @@ bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong& /*song*/, int 
 }
 
 }}
+
