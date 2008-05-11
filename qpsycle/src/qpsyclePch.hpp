@@ -1,5 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 
+#if defined __cplusplus
 #ifdef _WIN32
 #define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR 5
 #define DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR 0
@@ -26,65 +27,33 @@
 
 #include <psycle/core/signalslib.h>
 // QT libraries
+#include <qglobal.h>
+#ifdef Q_WS_WIN
+# define _POSIX_
+# include <limits.h>
+# undef _POSIX_
+#endif
+#include <qcoreapplication.h>
+#include <qlist.h>
+#include <qvariant.h>  // All moc genereated code has this include
+#include <qobject.h>
+#include <qregexp.h>
+#include <qstring.h>
+#include <qstringlist.h>
+#include <qtextcodec.h>
 
-#include <QtCore> 
-#include <QAction>
-#include <QApplication>
-#include <QCheckBox>
-#include <QColorDialog>
-#include <QContextMenuEvent>
-#include <QComboBox>
-#include <QCompleter>
-#include <QDebug>
-#include <QDesktopWidget>
-#include <QDialog>
-#include <QDial>
-#include <QDir>
-#include <QDirModel>
-#include <QDockWidget>
-#include <QFile>
-#include <QFileDialog>
-#include <QtGui>
-#include <QGraphicsScene>
-#include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QHBoxLayout>
-#include <QInputDialog>
-#include <QItemSelectionModel>
-#include <QKeyEvent>
-#include <QLabel>
-#include <QLineEdit>
-#include <QListView>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QMenu>
-#include <QMenuBar>
-#include <QMessageBox>
-#include <QModelIndexList>
-#include <QModelIndex>
-#include <QPainter>
-#include <QPushButton>
-#include <QSettings>
-#include <QStandardItemModel>
-#include <QStandardItem>
-#include <QStatusBar>
-#include <QStyleOption>
-#include <QStyleFactory>
-#include <QString>
-#include <QTextCodec>
-#include <QTextEdit>
-#include <QTextStream>
-#include <QTimer>
-#include <QTreeWidget>
-#include <QToolBar>
-#include <QUndoStack>
-#include <QUndoView>
-#include <QVBoxLayout>
-#include <QWidget>
-
-#include <QtXml/QDomDocument> 
+#include <qapplication.h>
+#include <qbitmap.h>
+#include <qcursor.h>
+#include <qdesktopwidget.h>
+#include <qevent.h>
+#include <qimage.h>
+#include <qlayout.h>
+#include <qpainter.h>
+#include <qpixmap.h>
+#include <qstyle.h>
+#include <qtimer.h>
+#include <qwidget.h>
 
 //psycle-core defines
 #include <psycle/core/constants.h>
@@ -96,4 +65,4 @@
 
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>
-
+#endif

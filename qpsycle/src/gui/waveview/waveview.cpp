@@ -42,6 +42,7 @@
 #include <QLineEdit>
 #include <QSlider>
 #include <QCheckBox>
+#include <QSettings>
 
 #include <iostream>
 #include <iomanip>

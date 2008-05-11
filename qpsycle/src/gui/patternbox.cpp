@@ -32,6 +32,7 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QColorDialog>
+#include <QDebug>
 
 #include <iostream> // std::cerr
 
