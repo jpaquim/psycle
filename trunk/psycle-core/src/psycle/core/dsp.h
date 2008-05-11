@@ -16,6 +16,7 @@
 	#include <xmmintrin.h>
 #endif
 #include <cmath>
+#include <cstring>
 
 namespace psy
 {

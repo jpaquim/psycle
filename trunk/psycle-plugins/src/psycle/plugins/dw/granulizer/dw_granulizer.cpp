@@ -3,6 +3,7 @@
 #include <psycle/plugin_interface.hpp>
 #include <vector>
 #include <cmath>
+#include <cstdlib>
 
 //////////////////////////////////////////////////////////////////////
 // dw granulizer plugin

@@ -25,6 +25,7 @@
 #include <sstream>
 #include <cassert>
 #include <cerrno>
+#include <cstring>
 #include <cstdint>
 namespace psy {
 	namespace core {

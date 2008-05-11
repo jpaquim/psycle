@@ -23,9 +23,9 @@
 	***************************************************************************/
 //
 
-#include <cassert>
-
 #include "xminstrument.h"
+#include <cassert>
+#include <cstring>
 
 namespace psy { namespace core {
 
