@@ -17,6 +17,10 @@ function main {
 		$install_dir/bin &&
 	local tar_name=qpsycle &&
 	../packageneric/generic/microsoft-dll-collector $install_dir $tar_name &&
+	mkdir $install_dir/$tar_name/presets &&
+	cp -Rf \
+		../psycle-plugins/presets/*.prs \
+		$install_dir/$tar_name/presets/ &&
 	echo subversion revision "$(svnversion)" > $install_dir/$tar_name/version.text &&
 	tar cvjf $install_dir/$tar_name.tar.bz2 --directory=$install_dir $tar_name &&
 	ls -lh $install_dir/$tar_name.tar.bz2 &&
