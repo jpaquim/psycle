@@ -39,6 +39,8 @@
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include <cstdlib>
 
 namespace psy { namespace core {
 	using namespace std;

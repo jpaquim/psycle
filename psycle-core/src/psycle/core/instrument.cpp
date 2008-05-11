@@ -12,6 +12,7 @@
 #include <iostream> // only for debug output
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 template<class T> inline std::string toHex(T value , int nums = 8) {
 

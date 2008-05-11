@@ -144,7 +144,7 @@ namespace psycle
 	}
 }
 
-int main(unsigned const int argument_count, char const * arguments[])
+int main(int argument_count, char const * arguments[])
 {
 	if(argument_count != 2)
 	{

@@ -23,6 +23,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 namespace psy { namespace core {
 

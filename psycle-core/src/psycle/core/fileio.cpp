@@ -4,6 +4,7 @@
 
 #include "fileio.h"
 #include <stdexcept>
+#include <cstring>
 
 namespace psy
 {

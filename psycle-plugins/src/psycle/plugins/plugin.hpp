@@ -369,14 +369,6 @@ class Plugin : protected Host_Plugin {
 		///\internal
 		void help() const throw() {
 			std::ostringstream message;
-			/*
-			message <<
-				"(¯`'·.¸(¯`'·.¸¸.·'`¯)¸.·'`¯)\n"
-				" ¯`'·.¸              ¸.·'`¯ \n"
-				"       )PSYCLEDELICS(       \n"
-				" ¸.·'`¯              ¯`'·.¸ \n"
-				"(¸.·'`¯(¸.·'`¯¯`'·.¸)¯`'·.¸)" << std::endl;
-			*/
 			help(message);
 			this->message(information.help_caption, message.str());
 		}

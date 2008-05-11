@@ -37,7 +37,6 @@
 #include "../inputhandler.hpp"
 #include "machinegui.hpp"
 #include "effectgui.hpp"
-#include <cmath>
 
 #include <QSettings>
 #include <QVBoxLayout>
@@ -60,6 +59,8 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <cmath>
+#include <cstring>
 
 namespace qpsycle {
 

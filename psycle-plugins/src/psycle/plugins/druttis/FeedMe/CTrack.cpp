@@ -9,6 +9,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "CTrack.h"
 #include <memory>
+#include <cstring>
 //============================================================================
 //				Static variables
 //============================================================================
