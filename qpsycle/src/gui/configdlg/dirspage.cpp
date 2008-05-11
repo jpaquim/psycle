@@ -74,6 +74,18 @@ namespace qpsycle {
 		connect( pluginsBrowse, SIGNAL( clicked() ), this, SLOT( onPluginsBrowse() ) );
 
 
+		dirsLay->addWidget( new QLabel("Psycle Presets Directory") );
+		presetsPathEdit_ = new QLineEdit();
+		presetsPathEdit_->setReadOnly( true );
+		QString presetsPathString = settings.value( "paths/presetsPath", "." ).toString();
+		presetsPathEdit_->setText( presetsPathString );
+		dirsLay->addWidget( presetsPathEdit_ );
+
+		QPushButton *presetsBrowse = new QPushButton( "Browse..." );
+		dirsLay->addWidget( presetsBrowse );
+
+		connect( presetsBrowse, SIGNAL( clicked() ), this, SLOT( onPresetsBrowse() ) );
+
 
 
 
@@ -128,6 +140,17 @@ namespace qpsycle {
 
 		settings.setValue( "paths/pluginsPath", newPluginsPath );
 		pluginsPathEdit_->setText( newPluginsPath );
+	}
+
+
+	void DirsPage::onPresetsBrowse()
+	{
+		QString newPresetsPath = QFileDialog::getExistingDirectory(
+			this, "Choose presets directory",
+			presetsPathEdit_->text() );
+
+		settings.setValue( "paths/presetsPath", newPresetsPath );
+		presetsPathEdit_->setText( newPresetsPath );
 	}
 
 	void DirsPage::onLadspaBrowse()

@@ -548,7 +548,7 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 	switch ( m_knobMode ) {
 	case PsycleLinearMode:
 // Attempt to recreate psycle mfc behaviour...
-// Not quite right yet it seems...? but works well enough.
+///\todo Not quite right yet it seems...? but works well enough.
 // My guess is something to do with m_posMousePressed.y() or posMouseCurrent.y()
 // in double nv = ... line.
 	{
@@ -753,9 +753,14 @@ bool PresetsDialog::loadPresets()
 		filename = filename.substr(0,pos)+".prs";
 	}
 
-	std::ifstream prsIn( std::string( Global::configuration().prsPath() + filename).c_str() );
-	if ( !prsIn.is_open() )
+	QSettings settings;
+	QString presetsDir = settings.value( "paths/presetsPath" ).toString();
+	QString presetPath = presetsDir + QString::fromStdString( filename );
+
+	std::ifstream prsIn(  presetPath.toStdString().c_str() );
+	if ( !prsIn.is_open() ) {
 		return false; 
+	}
 
 	psy::core::BinRead binIn( prsIn );
 
@@ -766,7 +771,8 @@ bool PresetsDialog::loadPresets()
 		// old file format .. do not support so far ..
 	} else {
 		// new file format
-		if ( filenumpars == 1 ) {
+		if ( filenumpars == 1 ) 
+		{
 			int filepresetsize;
 			// new preset format version 1
 			// new preset format version 1
@@ -774,18 +780,19 @@ bool PresetsDialog::loadPresets()
 			int numParameters = ((psy::core::Plugin*) m_macGui->mac())->GetInfo().numParameters;
 			int sizeDataStruct = ((psy::core::Plugin *) m_macGui->mac())->proxy().GetDataSize();
 
-			//int numpresets = binIn.readInt4LE();
+			int numpresets = binIn.readInt4LE();
 			filenumpars = binIn.readInt4LE();
 			filepresetsize = binIn.readInt4LE();
 
-			if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) 
+			if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) {
 				return false;
+			}
 
-			while ( !prsIn.eof() ) {
-				qDebug("!prsIn.eof()");
+			while ( !prsIn.eof() ) 
+			{
 				psy::core::Preset newPreset(numParameters, sizeDataStruct);
-				if (newPreset.read( binIn )) {
-					qDebug("doin item");
+				if (newPreset.read( binIn )) 
+				{
 					QListWidgetItem *prsItm = new QListWidgetItem( QString::fromStdString( newPreset.name() ) );
 					
 					prsList->addItem( prsItm );
@@ -794,6 +801,7 @@ bool PresetsDialog::loadPresets()
 			}
 		}
 	}
+
 	return true;
 }
 
