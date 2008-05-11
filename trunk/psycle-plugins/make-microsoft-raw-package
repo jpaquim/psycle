@@ -10,6 +10,8 @@ all:
 	mkdir -p $(INSTALL_DIR)/bin
 	cp -f $(BUILD_DIR)/bin/*.dll $(INSTALL_DIR)/bin
 	../packageneric/generic/microsoft-dll-collector $(INSTALL_DIR) $(TAR_NAME)
+	mkdir $(INSTALL_DIR)/$(TAR_NAME)/presets
+	cp -Rf ../psycle-plugins/presets/*.prs $(INSTALL_DIR)/$(TAR_NAME)/presets/
 	echo subversion revision "$$(svnversion)" > $(INSTALL_DIR)/$(TAR_NAME)/version.text
 	tar cvjf $(INSTALL_DIR)/$(TAR_NAME).tar.bz2 --directory=$(INSTALL_DIR) $(TAR_NAME)
 	ls -lh $(INSTALL_DIR)/$(TAR_NAME).tar.bz2
