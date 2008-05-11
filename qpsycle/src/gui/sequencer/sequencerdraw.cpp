@@ -39,6 +39,7 @@
 #include <QGraphicsItem>
 #include <QDebug>
 #include <QVarLengthArray>
+#include <QKeyEvent>
 
 namespace qpsycle {
 
