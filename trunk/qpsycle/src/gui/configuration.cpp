@@ -68,7 +68,6 @@ namespace qpsycle {
 
 		setDriverByName("silent");
 		enableSound_ = false;
-		knobBehaviour_ = FixedLinearMode;
 
 #if defined PSYCLE__ALSA_AVAILABLE
 		addAudioDriver(new psy::core::AlsaOut);
@@ -97,154 +96,6 @@ namespace qpsycle {
 		configureKeyBindings();
 		loadConfig();
 	}
-
-#if 0
-	void Configuration::setXmlDefaults() {     
-		std::string xml_mem_;   
-
-		xml_mem_ =  " <!-- xpsycle configuration file --> ";
-		xml_mem_ += " <xpsycle> ";
-		xml_mem_ += " <path id='plugindir'";
-		xml_mem_ += " src='c:\\Programme\\Psycle\\PsyclePlugins' />";
-
-		//xml_mem_ += " <audio enable='1' />";
-		//xml_mem_ += " <driver name='mswaveout' />"; 
-
-		/*  xml_mem_ += " <!-- help configuration -->";
-		// bohan i don't know where to close that comment, so i close it here: */
-		//  xml_mem_ += " <path id='hlpdir' src='~/xpsycle/doc/' />";
-
-		xml_mem_ += " <!-- audio configuration -->";
-
-
-		xml_mem_ += " <!-- gui configuration -->";
-
-		//  xml_mem_ += " <path id='icondir' src='~/xpsycle/icons/' />";
-
-		//  xml_mem_ += " <path id='prsdir' src='~/.xpsycle/prs/'></path>";
-
-		xml_mem_ += " <!-- keyHandler configuration -->";
-		xml_mem_ += " <!-- general keys -->";
-
-		xml_mem_ += " <key id='current_machine-1' mod='ctrl' keychar='NK_Left' />";
-		xml_mem_ += " <key id='current_machine+1' mod='ctrl' keychar='NK_Right' />";
-		xml_mem_ += " <key id='current_instrument-1' mod='ctrl' keychar='NK_Up' />";
-		xml_mem_ += " <key id='current_instrument+1' mod='ctrl' keychar='NK_Down' />";
-
-		xml_mem_ += " <key id='screen_machines' keychar='F2' />";
-		xml_mem_ += " <key id='screen_patterns' keychar='F3' />";
-		xml_mem_ += " <key id='edit_instrument' keychar='F4' />";
-		xml_mem_ += " <key id='screen_sequencer' keychar='F5' />";
-		xml_mem_ += " <key id='play_song_start' keychar='F10' />";
-		xml_mem_ += " <key id='play_song_normal' keychar='F7' />";
-		xml_mem_ += " <key id='stop_playback' keychar='F8' />";
-		xml_mem_ += " <key id='add_new_machine' keychar='F9' />";
-
-		xml_mem_ += " <!-- patternview octave 0  -->";
-
-		xml_mem_ += " <key id='oct_C_0' keychar='Y'/>";
-		xml_mem_ += " <key id='oct_CS0' keychar='S'/>";
-		xml_mem_ += " <key id='oct_D_0' keychar='X'/>";
-		xml_mem_ += " <key id='oct_DS0' keychar='D'/>";
-		xml_mem_ += " <key id='oct_E_0' keychar='C'/>";
-		xml_mem_ += " <key id='oct_F_0' keychar='V'/>";
-		xml_mem_ += " <key id='oct_FS0' keychar='G'/>";
-		xml_mem_ += " <key id='oct_G_0' keychar='B'/>";
-		xml_mem_ += " <key id='oct_GS0' keychar='H'/>";
-		xml_mem_ += " <key id='oct_A_0' keychar='N'/>";
-		xml_mem_ += " <key id='oct_AS0' keychar='J'/>";
-		xml_mem_ += " <key id='oct_B_0' keychar='M'/>";
-
-		xml_mem_ += " <!-- patternview octave 1  -->";
-
-		xml_mem_ += " <key id='oct_C_1' keychar='Q'/>";
-		xml_mem_ += " <key id='oct_CS1' keychar='2'/>";
-		xml_mem_ += " <key id='oct_D_1' keychar='W'/>";
-		xml_mem_ += " <key id='oct_DS1' keychar='3'/>";
-		xml_mem_ += " <key id='oct_E_1' keychar='E'/>";
-		xml_mem_ += " <key id='oct_F_1' keychar='R'/>";
-		xml_mem_ += " <key id='oct_FS1' keychar='5'/>";
-		xml_mem_ += " <key id='oct_G_1' keychar='T'/>";
-		xml_mem_ += " <key id='oct_GS1' keychar='6'/>";
-		xml_mem_ += " <key id='oct_A_1' keychar='Z'/>";
-		xml_mem_ += " <key id='oct_AS1' keychar='7'/>";
-		xml_mem_ += " <key id='oct_B_1' keychar='U'/>";
-
-		xml_mem_ += " <!-- patternview octave 2  -->";
-
-		xml_mem_ += " <key id='oct_C_2' keychar='I' />";
-		xml_mem_ += " <key id='oct_CS2' keychar='9' />";
-		xml_mem_ += " <key id='oct_D_2' keychar='O' />";
-		xml_mem_ += " <key id='oct_DS2' keychar='0' />";
-
-		xml_mem_ += " <!-- patternview misc key options -->";
-
-		xml_mem_ += " <key id='edit_toggle' mod='ctrl' keychar=' ' />";
-		xml_mem_ += " <key id='key_stop' keychar='1' />";
-		xml_mem_ += " <key id='current_octave-1' mod='ctrl' keychar='+' />";
-		xml_mem_ += " <key id='current_octave+1' mod='ctrl' keychar='#' />";
-		xml_mem_ += " <key id='patternstep_dec' keychar='[' />";
-		xml_mem_ += " <key id='patternstep_inc' keychar=']' />";
-
-		xml_mem_ += " <!-- patternview navigation key options -->";
-		xml_mem_ += " <key id='nav_left' keychar='NK_Left' />";
-		xml_mem_ += " <key id='nav_right' keychar='NK_Right' />";
-		xml_mem_ += " <key id='nav_up' keychar='NK_Up' />";
-		xml_mem_ += " <key id='nav_down' keychar='NK_Down' />";
-		xml_mem_ += " <key id='nav_up_16' keychar='NK_Page_Up' />";
-		xml_mem_ += " <key id='nav_down_16' keychar='NK_Page_Down' />";
-		xml_mem_ += " <key id='nav_top' keychar='NK_Home' />";
-		xml_mem_ += " <key id='nav_bottom' keychar='NK_End' />";
-		xml_mem_ += " <key id='next_column' keychar='NK_Tab' />";
-		xml_mem_ += " <key id='prev_column' keychar='XK_ISO_Left_Tab' />";
-		xml_mem_ += " <key id='delete_row' keychar='NK_Delete' />";
-		xml_mem_ += " <key id='insert_row' keychar='NK_Insert' />";
-		xml_mem_ += " <key id='clear_row' keychar='NK_BackSpace' />";
-
-		xml_mem_ += " <!-- patternview block key options -->";
-
-		xml_mem_ += " <key id='block_copy' mod='ctrl' keychar='C' />";
-		xml_mem_ += " <key id='block_cut' mod='ctrl' keychar='X' />";
-		xml_mem_ += " <key id='block_delete' mod='ctrl' keychar='Y' />";
-		xml_mem_ += " <key id='block_double' mod='ctrl' keychar='D' />";
-		xml_mem_ += " <key id='block_halve' mod='ctrl' keychar='H' />";
-		xml_mem_ += " <key id='block_interpolate' mod='ctrl' keychar='I' />";
-		xml_mem_ += " <key id='block_mix' mod='ctrl' keychar='M' />";
-		xml_mem_ += " <key id='block_paste' mod='ctrl' keychar='V' />";
-		xml_mem_ += " <key id='block_select_all' mod='ctrl' keychar='A' />";
-		xml_mem_ += " <key id='block_select_bar' mod='ctrl' keychar='E' />";
-		xml_mem_ += " <key id='block_select_column' mod='ctrl' keychar='R' />";
-		xml_mem_ += " <key id='block_select_up' mod='shift' keychar='NK_Up' />";
-		xml_mem_ += " <key id='block_select_down' mod='shift' keychar='NK_Down' />";
-		xml_mem_ += " <key id='block_select_left' mod='shift' keychar='NK_Left' />";
-		xml_mem_ += " <key id='block_select_right' mod='shift' keychar='NK_Right' />";
-		xml_mem_ += " <key id='block_select_top' mod='shift' keychar='NK_Home' />";
-		xml_mem_ += " <key id='block_select_bottom' mod='shift' keychar='NK_End' />";
-		xml_mem_ += " <key id='block_set_instrument' mod='ctrl' keychar='T' />";
-		xml_mem_ += " <key id='block_set_machine' mod='ctrl' keychar='G' />";
-		xml_mem_ += " <key id='block_start' mod='ctrl' keychar='B' />";
-		xml_mem_ += " <key id='block_start' mod='ctrl' keychar='K' />";
-		xml_mem_ += " <key id='block_unmark' mod='ctrl' keychar='U' />";
-
-		xml_mem_ += " </xpsycle> ";
-
-		const char* pcLADSPAPath = std::getenv("LADSPA_PATH");
-		if ( !pcLADSPAPath) {
-#if defined __unix__ || defined __APPLE__
-			pcLADSPAPath = "/usr/lib/ladspa/";
-#else
-			///\todo hardcoded path. if env isn't set, maybe look in the registry db.
-			pcLADSPAPath = "I:\\Archivos de programa\\Multimedia\\Audacity\\Plug-Ins";
-#endif
-		}
-		ladspaPath_ = pcLADSPAPath;
-
-		///\todo uses ngrs xml parser
-		ngrs::XmlParser parser;
-		parser.tagParse.connect(this,&Configuration::onConfigTagParse);
-		parser.parseString ( xml_mem_ );
-	}
-#endif
 
 	void Configuration::addAudioDriver(AudioDriver* driver)
 	{
@@ -297,30 +148,11 @@ namespace qpsycle {
 		configFilePath_ = path;
 
 		QFile *file = new QFile( QString::fromStdString( path ) );
-		if (file->open(QIODevice::ReadOnly | QIODevice::Text)) {
+		if (file->open(QIODevice::ReadOnly | QIODevice::Text)) 
+		{
 			QDomDocument *doc = new QDomDocument();
 			doc->setContent( file );
 			QDomElement root = doc->firstChildElement();
-
-			// Paths.
-			QDomNodeList paths = root.elementsByTagName( "path" );
-			QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-			for ( int i = 0; i < paths.count(); i++ )
-			{
-				QDomElement path = paths.item( i ).toElement();
-				std::string id = path.attribute("id").toStdString();
-				std::string src = path.attribute("src").toStdString();
-
-				psy::core::File::ensurePathTerminated( src );
-
-				if ( id == "icondir" )   iconPath_   = src;
-				else if ( id == "plugindir" ) pluginPath_ = src;
-				else if ( id == "prsdir" ) prsPath_ = src;
-				else if ( id == "hlpdir" ) hlpPath_ = src; 
-				else if ( id == "ladspadir" ) ladspaPath_ = src;
-				else if ( id == "songdir" ) songPath_ = src;
-				else if ( id == "sampledir" ) samplePath_ = src;
-			}
 
 			// Audio.
 			QDomElement audioElm = root.firstChildElement( "audio" );
@@ -351,27 +183,7 @@ namespace qpsycle {
 					it->second->setSettings( settings );
 				}
 			}
-
-			// Options.
-			QDomNodeList options = root.elementsByTagName( "option" );
-			for ( int i = 0; i < options.count(); i++ )
-			{
-				QDomElement option = options.item( i ).toElement();
-				QString id = option.attribute("id");
-				QString value = option.attribute("value");
-				if ( id == "ft2-home-end-behaviour" )
-					ft2HomeEndBehaviour_ = value.toInt();     
-				if ( id == "shift-arrow-for-select" )
-					shiftArrowForSelect_ = value.toInt();     
-				if ( id == "wrap-around" )
-					wrapAround_ = value.toInt();     
-				if ( id == "center-cursor" )
-					centerCursor_ = value.toInt();     
-				if ( id == "knob-behaviour" )
-					knobBehaviour_ = (KnobMode)value.toInt();
-			}
 		}
-
 		doEnableSound = true;
 	}
 
@@ -482,63 +294,6 @@ namespace qpsycle {
 		inputHandler_.changeKeyCode( commands::row_insert, Key(Qt::NoModifier, Qt::Key_Insert) );
 		inputHandler_.changeKeyCode( commands::row_delete, Key(Qt::NoModifier, Qt::Key_Backspace) );
 
-	}
-
-	void Configuration::setKnobBehaviour( KnobMode behaviourType )
-	{
-		knobBehaviour_ = behaviourType;
-	
-		QFile *file = new QFile( QString::fromStdString( configFilePath_ ) );
-		if ( file->open( QIODevice::ReadWrite | QIODevice::Text ) ) {
-			QDomDocument *doc = new QDomDocument();
-			doc->setContent( file );
-			QDomElement root = doc->firstChildElement();
-
-			// Options.
-			QDomNodeList options = root.elementsByTagName( "option" );
-			for ( int i = 0; i < options.count(); i++ )
-			{
-				QDomElement option = options.item( i ).toElement();
-				QString id = option.attribute("id");
-				if ( id == "knob-behaviour" ) {
-
-					QDomElement newOption = option.cloneNode().toElement();
-					newOption.setAttribute( "value", (int)behaviourType );
-					root.replaceChild( newOption, option );
-				}
-			
-			}
-			file->resize(0); // Empty the file.
-			QTextStream out(file);
-			out << doc->toString(); // Write the new XmlDoc to the file.
-			file->close();
-		}
-
-	}
-
-	void Configuration::setFT2HomeEndBehaviour( bool state )
-	{
-		ft2HomeEndBehaviour_ = state;
-	}
-
-	void Configuration::setShiftKeyBehaviour( bool state )
-	{
-		shiftArrowForSelect_ = state;
-	}
-
-	void Configuration::setWrapAround( bool state )
-	{
-		wrapAround_ = state;
-	}
-
-	void Configuration::setCenterCursor( bool state )
-	{
-		centerCursor_ = state;
-	}
-
-	void Configuration::setSongPath( std::string songPath )
-	{
-		songPath_ = songPath;
 	}
 
 } // namespace qsycle
