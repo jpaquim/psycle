@@ -23,6 +23,7 @@
 
 namespace psy { namespace core {
 class SequenceEntry;
+class SinglePattern;
 }}
 
 #include <QGraphicsItem>

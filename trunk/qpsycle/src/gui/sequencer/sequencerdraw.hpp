@@ -33,7 +33,6 @@ namespace psy { namespace core {
 #include <QtGui/QGraphicsRectItem>
 
 class QGraphicsSceneMouseEvent;
-class QKeyEvent;
 
 namespace qpsycle {
 
