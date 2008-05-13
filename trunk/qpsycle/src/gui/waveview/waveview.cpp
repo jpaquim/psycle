@@ -322,10 +322,10 @@ void WaveView::onLoadButtonClicked()
 	QString pathToWavfile = fileDialog.getOpenFileName( this, tr("Open File"),
 									samplePath,
 									tr("Wave files (*.wav)") );
-	int curInstrIndex = instrumentsModel_->selectedInstrumentIndex();
 
-	if (fileDialog.Accepted)
+	if (pathToWavfile != "") //very strange fix... why cannot we use filedialog.Accepted?
 	{
+		int curInstrIndex = instrumentsModel_->selectedInstrumentIndex();
 		if ( !instrumentsModel_->slotIsEmpty( curInstrIndex ) )
 		{
 			int ret = QMessageBox::warning(this, tr("Overwrite sample?"),
