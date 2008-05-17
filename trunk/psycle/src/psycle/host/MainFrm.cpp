@@ -643,7 +643,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
-				cs->SetPos(newvalue);
+				if (cs->GetPos() != newvalue) {
+					cs->SetPos(newvalue);
+				}
 			}
 		}
 
