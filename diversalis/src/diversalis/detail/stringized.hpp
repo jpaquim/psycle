@@ -13,8 +13,8 @@
 
 	//#region DETAIL
 		///\internal
-		/// Don't call this macro directly ; call PACKAGENERIC__STRINGIZED, which calls this macro after macro expansion is done on the argument.
-		///\relates PACKAGENERIC__STRINGIZED
+		/// Don't call this macro directly ; call DIVERSALIS__STRINGIZED, which calls this macro after macro expansion is done on the argument.
+		///\relates DIVERSALIS__STRINGIZED
 		#define DIVERSALIS__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
 	//#endregion
 //#endregion
