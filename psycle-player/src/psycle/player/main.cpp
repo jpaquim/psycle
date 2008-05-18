@@ -16,30 +16,29 @@
 using namespace psy::core;
 void usage() {
 		std::cerr <<
-			"Usage: psycle-player [options] [--input-file] <song file name>\n"
-			"Plays a Psycle song file.\n"
-			"\n"
-			" -odrv, --output-driver <name>   name of the output driver to use.\n"
-			"                                 examples: silent, alsa, jack, esd, dsound, mmewaveout\n"
-			"\n"
-			" -odev, --output-device <name>   name of the output device the driver should use.\n"
-			"                                 The default device will be used if this option is not specified.\n"
-			"                                 examples for alsa: default, hw:0, plughw:0, pulse.\n"
-			//"                                 examples for gstreamer: autoaudiosink, gconfaudiosink.\n"
-			//"                                 examples for pulseaudio: hostname:port\n"
-			//"                                 examples for esound: hostname:port\n"
-			"\n"
-			" -of,   --output-file <riff wave file name>\n"
-			"                                 name of the output file to render to in riff-wave format.\n"
-			"\n"
-			" -if,   --input-file <song file name>\n"
-			"                                 name of the song file to play.\n"
-			"\n"
-			"        --help                   display this help and exit.\n"
-			"        --version                output version information and exit.\n"
-			"\n"
-			"Report bugs to the bug tracker at http://sourceforge.net/projects/psycle\n"
-			;
+			"Usage: psycle-player [options] [--input-file] <song file name>" << std::endl <<
+			"Plays a Psycle song file." << std::endl <<
+			"" << std::endl <<
+			" -odrv, --output-driver <name>   name of the output driver to use." << std::endl <<
+			"                                 examples: silent, alsa, jack, esd, dsound, mmewaveout" << std::endl <<
+			"" << std::endl <<
+			" -odev, --output-device <name>   name of the output device the driver should use." << std::endl <<
+			"                                 The default device will be used if this option is not specified." << std::endl <<
+			"                                 examples for alsa: default, hw:0, plughw:0, pulse." << std::endl <<
+			//"                                 examples for gstreamer: autoaudiosink, gconfaudiosink." << std::endl <<
+			//"                                 examples for pulseaudio: hostname:port" << std::endl <<
+			//"                                 examples for esound: hostname:port" << std::endl <<
+			"" << std::endl <<
+			" -of,   --output-file <riff wave file name>" << std::endl <<
+			"                                 name of the output file to render to in riff-wave format." << std::endl <<
+			"" << std::endl <<
+			" -if,   --input-file <song file name>" << std::endl <<
+			"                                 name of the song file to play." << std::endl <<
+			"" << std::endl <<
+			"        --help                   display this help and exit." << std::endl <<
+			"        --version                output version information and exit." << std::endl <<
+			"" << std::endl <<
+			"Report bugs to the bug tracker at http://sourceforge.net/projects/psycle" << std::endl;
 }
 
 int main(int argument_count, char * arguments[]) {
@@ -92,10 +91,10 @@ int main(int argument_count, char * arguments[]) {
 					usage();
 					return 0;
 				} else if(s == "--version") {
-				std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
+				std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")" << std::endl; ///\todo need a real version
 					return 0;
 				} else if(s.length() && s[0] == '-') { // unrecognised option
-					std::cerr << "error: unknown option: " << s << '\n';
+					std::cerr << "error: unknown option: " << s << std::endl;
 					usage();
 					return 1;
 				} else {
@@ -108,14 +107,14 @@ int main(int argument_count, char * arguments[]) {
 	}
 	Configuration configuration;
 	if(!configuration.pluginPath().length()) {
-		std::cerr << "psycle: player: native plugin path not configured. You can set the PSYCLE_PATH environment variable.\n";
+		std::cerr << "psycle: player: native plugin path not configured. You can set the PSYCLE_PATH environment variable." << std::endl;
 	} else {
-		std::cout << "psycle: player: native plugins are looked for in: " << configuration.pluginPath() << "\n";
+		std::cout << "psycle: player: native plugins are looked for in: " << configuration.pluginPath() << std::endl;
 	}
 	if(!configuration.ladspaPath().length()) {
-		std::cerr << "psycle: player: ladspa plugin path not configured. You can set the LADSPA_PATH environment variable.\n";
+		std::cerr << "psycle: player: ladspa plugin path not configured. You can set the LADSPA_PATH environment variable." << std::endl;
 	} else {
-		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << "\n";
+		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << std::endl;
 	}
 
 	Player &player = *Player::Instance();
@@ -126,13 +125,13 @@ int main(int argument_count, char * arguments[]) {
 	mfactory.setLadspaPath(configuration.ladspaPath());
 	
 	if(output_driver_name.length()) {
-		std::cout << "psycle: player: setting output driver name to: " << output_driver_name << "\n";
+		std::cout << "psycle: player: setting output driver name to: " << output_driver_name <<  std::endl;
 		configuration.setDriverByName(output_driver_name);
 	}
 	psy::core::AudioDriver & output_driver(*configuration._pOutputDriver); ///\todo needs a getter
 
 	if(output_device_name.length()) {
-		std::cout << "psycle: player: setting output driver device name to: " << output_device_name << "\n";
+		std::cout << "psycle: player: setting output driver device name to: " << output_device_name << std::endl;
 		psy::core::AudioDriverSettings settings(output_driver.settings()); ///\todo why do we do a copy?
 		settings.setDeviceName(output_device_name);
 		output_driver.setSettings(settings); ///\todo why do we copy?
@@ -140,7 +139,7 @@ int main(int argument_count, char * arguments[]) {
 	player.setDriver(output_driver);
 
 	if(output_file_name.length()) {
-		std::cout << "psycle: player: setting output file name to: " << output_file_name << "\n";
+		std::cout << "psycle: player: setting output file name to: " << output_file_name <<  std::endl;
 		player.setFileName(output_file_name);
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
@@ -148,9 +147,9 @@ int main(int argument_count, char * arguments[]) {
 	
 	CoreSong song;
 	if(input_file_name.length()) {
-		std::cout << "psycle: player: loading song file: " << input_file_name << "\n";
+		std::cout << "psycle: player: loading song file: " << input_file_name <<  std::endl;
 		if(!song.load(input_file_name)) {
-			std::cerr << "psycle: player: could not load song file: " << input_file_name << "\n";
+			std::cerr << "psycle: player: could not load song file: " << input_file_name << std::endl;
 			return 2;
 		}
 		player.song(&song);
