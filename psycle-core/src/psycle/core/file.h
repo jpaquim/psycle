@@ -32,7 +32,7 @@ namespace psy { namespace core {
 				int const static files = 1;
 				int const static dirs = 2;
 			};
-			char const static File::path_env_var_name[];
+			char const static path_env_var_name[];
 			/// lists the file in the dir
 			static std::vector<std::string> fileList(std::string const & path, int list_mode = list_modes::files | list_modes::dirs );   
 			/// the current dir
