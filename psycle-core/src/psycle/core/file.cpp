@@ -205,7 +205,7 @@ namespace psy { namespace core {
 		// append the plugin dir to the path env var
 		std::string pathToSet = path_env_var_name;
 		pathToSet += "=" + new_path;
-		if(::putenv(pathToSet.c_str())) {
+		if(::putenv(const_cast<char*>(pathToSet.c_str()))) {
 			std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
 			return false;
 		}
