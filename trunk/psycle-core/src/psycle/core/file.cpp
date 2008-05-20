@@ -45,6 +45,16 @@
 namespace psy { namespace core {
 	using namespace std;
 
+	char const File::path_env_var_name[] =
+	{
+		#if defined __unix__ || defined __APPLE__
+			"LD_LIBRARY_PATH"
+		#elif defined _WIN64 || defined _WIN32
+			"PATH"
+		#else
+			#error unknown dynamic linker
+		#endif
+	};
 	std::string File::readFile(std::string const & path) {
 		std::ifstream is(path.c_str());
 		if(!is) {
@@ -166,6 +176,47 @@ namespace psy { namespace core {
 		char buffer[8000];
 		if(getcwd(buffer,sizeof buffer)) nvr = buffer;
 		return nvr;
+	}
+	
+	
+	std::string File::appendDirToEnvPath(std::string const & path) {
+
+		// append the plugin dir to the path env var
+		std::string new_path(getEnvPath());
+		if(new_path.length()) {
+			new_path +=
+				#if defined __unix__ || defined __APPLE__
+					":";
+				#elif defined _WIN64 || defined _WIN32
+					";";
+				#else
+					#error unknown dynamic linker
+				#endif
+		}
+		new_path += path;
+		if ( setEnvPath(new_path) == true ) {
+			return new_path;
+		} else {
+			return getEnvPath();
+		}
+	}
+	
+	bool File::setEnvPath(std::string const & new_path) {
+		// append the plugin dir to the path env var
+		if(::putenv((path_env_var_name + ("=" + new_path)).c_str())) {
+			std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
+			return false;
+		}
+		return true;
+	}
+	
+	std::string File::getEnvPath() {
+		std::string path;
+		char const * const env(std::getenv(path_env_var_name));
+
+		if(env) path = env;
+
+		return path;
 	}
 
 	std::string File::parentWorkingDir() {

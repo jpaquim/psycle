@@ -32,10 +32,17 @@ namespace psy { namespace core {
 				int const static files = 1;
 				int const static dirs = 2;
 			};
+			char const static File::path_env_var_name[];
 			/// lists the file in the dir
 			static std::vector<std::string> fileList(std::string const & path, int list_mode = list_modes::files | list_modes::dirs );   
 			/// the current dir
 			static std::string workingDir();
+			/// append the specified path to the PATH environment and returns it.
+			static std::string appendDirToEnvPath(std::string const & path);
+			/// sets the PATH environment variable to the specified path and returns it.
+			static bool setEnvPath(std::string const & new_path);
+			/// gets the PATH environment variable.
+			static std::string getEnvPath();
 			/// whether the file can be read
 			static bool fileIsReadable(std::string const & path);
 			/// the parent of the current dir

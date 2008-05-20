@@ -111,71 +111,30 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 void* NativeHost::LoadDll( std::string const & file_name )
 {
 	void* hInstance;
-///FIXME: The disabled code was introduced in psyclemfc in order to load plugins that depend on external dll's.
-///       In such cases, the dll needs to be placed in the same dir than the .exe, not the one of the .dll, and this
-///       code allowed to place it with the dlls.
-#if 0
-	char const static path_env_var_name[] =
-	{
-		#if defined __unix__ || defined __APPLE__
-			"LD_LIBRARY_PATH"
-		#elif defined _WIN64 || or defined _WIN32
-			"PATH"
-		#else
-			#error unknown dynamic linker
-		#endif
-	};
-	// save the original path env var
-	std::string old_path;
-	{
-		char const * const env(std::getenv(path_env_var_name));
-		if(env) old_path = env;
-	}
-	// append the plugin dir to the path env var
-	std::string new_path(old_path);
-	if(new_path.length()) {
-		new_path +=
-			#if defined __unix__ || defined __APPLE__
-				":"
-			#elif defined _WIN64 || or defined _WIN32
-				";"
-			#else
-				#error unknown dynamic linker
-			#endif
-	}
-	///\todo new_path += dir_name(file_name), using boost::filesystem::path for portability
-	// append the plugin dir to the path env var
-	if(::putenv((path_env_var_name + ("=" + new_path)).c_str())) {
-		std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
-	}
-#endif // 0
+	
+	std::string old_path = File::appendDirToEnvPath(file_name);
 
 #if defined __unix__ || defined __APPLE__
 	hInstance = ::dlopen(file_name.c_str(), RTLD_LAZY /*RTLD_NOW*/);
+	if (!hInstance) {
+		std::cerr << "Cannot load library: " << dlerror() << '\n';
+	}
 #else
 	// Set error mode to disable system error pop-ups (for LoadLibrary)
 	UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 	hInstance = LoadLibraryA( file_name.c_str() );
 	// Restore previous error mode
 	SetErrorMode( uOldErrorMode );
+	if (!hInstance) {
+		///\todo
+	}
 #endif
 
-#if 0
-	// set the path env var back to its original value
-	if(::putenv((path_env_var_name + ("=" + old_path)).c_str())) {
-		std::cerr << "psycle: plugin: warning: could not set " << path_env_var_name << " env var back to its original value.\n";
-	}
-#endif // 0
-
-	if (!hInstance) {
-	#if defined __unix__ || defined __APPLE__
-		std::cerr << "Cannot load library: " << dlerror() << '\n';
-	#else
-		///\todo
-	#endif
-	}
+	File::setEnvPath(old_path);
+	
 	return hInstance;
 }
+
 
 CMachineInfo* NativeHost::LoadDescriptor(void* hInstance)
 {
