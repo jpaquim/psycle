@@ -294,36 +294,39 @@ when the pattern selected changes.
 
 	void PatternBox::currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem )
 	{
-		patternTree()->closePersistentEditor( prevItem, 0 ); // Closes the persistent editor if it's open.
-		// If new item is a pattern...
-		if ( currItem->type() == QTreeWidgetItem::UserType + 1 )
-		{
-			std::map<PatternItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( (PatternItem*)currItem );
-			if( patItr != patternMap.end() ) {
-				psy::core::SinglePattern *pattern = patItr->second;
-				currentPattern_ = pattern;
-				// emit a signal for main window to tell pat view.
-				emit patternSelectedInPatternBox( pattern );
-			}
-			else {
-				std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown pattern item was selected." << std::endl;
-			}
+		if(  prevItem != 0 ) {
+			patternTree()->closePersistentEditor( prevItem, 0 ); // Closes the persistent editor if it's open.
 		}
-
-		// If new item is a category...
-		if ( currItem->type() == QTreeWidgetItem::UserType + 2 )
-		{
-			std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)currItem );
-			if( catItr !=categoryMap.end() ) {
-				//psy::core::PatternCategory *category = catItr->second;
-				// FIXME: this needs to do something?
+		if ( currItem != 0 ) { 
+			// If new item is a pattern...
+			if ( currItem->type() == QTreeWidgetItem::UserType + 1 )
+			{
+				std::map<PatternItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( (PatternItem*)currItem );
+				if( patItr != patternMap.end() ) {
+					psy::core::SinglePattern *pattern = patItr->second;
+					currentPattern_ = pattern;
+					// emit a signal for main window to tell pat view.
+					emit patternSelectedInPatternBox( pattern );
+				}
+				else {
+					std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown pattern item was selected." << std::endl;
+				}
 			}
-			else {
-				std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown category item was selected." << std::endl;
+
+			// If new item is a category...
+			if ( currItem->type() == QTreeWidgetItem::UserType + 2 )
+			{
+				std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)currItem );
+				if( catItr !=categoryMap.end() ) {
+					//psy::core::PatternCategory *category = catItr->second;
+					// FIXME: this needs to do something?
+				}
+				else {
+					std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown category item was selected." << std::endl;
+				}
 			}
 		}
 	}
-
 	void PatternBox::onPatternNameEdited( const QString & newText )
 	{
 		QTreeWidgetItem *item = patternTree_->currentItem();
