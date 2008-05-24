@@ -66,9 +66,10 @@ static char buffer[] =
 		"\nthen the 2 knobs on either side will be linked to it and move as well."\
 		"\nThis means that you can set a fairly smooth"\
 		"\n31-point curve by moving only ten knobs."\
-		"\nNote that 31 knobs are displayed even when the Bands is 31,"\
+		"\nNote that 31 knobs are displayed even when the Bands is 10,"\
 		"\nin this case only the ten knobs with a (*) are active."\
 		"\n";
+static bool equalizerInitialized = false;
 
 static sIIRCoefficients MSVC_ALIGN iir_cf10[EQBANDS10] GNU_ALIGN;
 
@@ -77,10 +78,6 @@ static sIIRCoefficients MSVC_ALIGN iir_cf31[EQBANDS31] GNU_ALIGN;
 static const double band_f010[] = { 31.,62.,125.,250.,500.,1000.,2000.,4000.,8000.,16000. };
 
 static const double band_f031[] = { 20.,25.,31.5,40.,50.,63.,80.,100.,125.,160.,200.,250.,315.,400.,500.,630.,800.,1000.,1250.,1600.,2000.,2500.,3150.,4000.,5000.,6300.,8000.,10000.,12500.,16000.,20000. };
-
-/* History for two filters */
-sXYData MSVC_ALIGN data_history[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
-sXYData MSVC_ALIGN data_history2[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
 
 band bands[] =
 {
@@ -91,7 +88,7 @@ band bands[] =
 
 static const float slidertodb[] =
 {
--16.0, -15.5, -15.0, -14.5, -14.0, -13.5, -13.0, -12.5, -12.0, -11.5, -11.0, -10.5, -10.0,  -9.5, -9.0, -8.5,
+	-16.0, -15.5, -15.0, -14.5, -14.0, -13.5, -13.0, -12.5, -12.0, -11.5, -11.0, -10.5, -10.0,  -9.5, -9.0, -8.5,
 	-8.0,  -7.5,  -7.0,  -6.5,  -6.0,  -5.5,  -5.0,  -4.5,  -4.0,  -3.5,  -3.0,  -2.5,  -2.0,  -1.5, -1.0, -0.5,
 	0.0,   0.5,   1.0,   1.5,   2.0,   2.5,   3.0,   3.5,   4.0,   4.5,   5.0,   5.5,   6.0,   6.5,  7.0,  7.5,
 	8.0,   8.5,   9.0,   9.5,  10.0,  10.5,  11.0,  11.5,  12.0,  12.5,  13.0,  13.5,  14.0,  14.5, 15.0, 15.5,
@@ -107,41 +104,41 @@ inline float DBfromScaleGain(int value)
 
 CMachineParameter const paraB20 = { "20 Hz","20 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB25 = { "25 Hz","25 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB31 = { "* 31.5 Hz","* 31.5 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB31 = { "31.5 Hz *","* 31.5 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB40 = { "40 Hz","40 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB50 = { "50 Hz","50 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB62 = { "* 62.5 Hz","* 62.5 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB62 = { "62.5 Hz *","* 62.5 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB80 = { "80 Hz","80 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB100 = { "100 Hz","100 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB125 = { "* 125 Hz","* 125 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB125 = { "125 Hz *","* 125 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB160 = { "160 Hz","160 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB200 = { "200 Hz","200 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB250 = { "* 250 Hz","* 250 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB250 = { "250 Hz *","* 250 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB315 = { "315 Hz","315 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB400 = { "400 Hz","400 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB500 = { "* 500 Hz","* 500 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB500 = { "500 Hz *","* 500 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB630 = { "630 Hz","630 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB800 = { "800 Hz","800 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB1000 = { "* 1000 Hz","* 1000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB1000 = { "1000 Hz *","* 1000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB1250 = { "1250 Hz","1250 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32};
 CMachineParameter const paraB1600 = { "1600 Hz","1600 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB2000 = { "* 2000 Hz","* 2000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB2000 = { "2000 Hz *","* 2000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB2500 = { "2500 Hz","2500 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32, };
 CMachineParameter const paraB3150 = { "3150 Hz","3150 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB4000 = { "* 4000 Hz","* 4000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB4000 = { "4000 Hz *","* 4000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB5000 = { "5000 Hz","5000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB6300 = { "6300 Hz","6300 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB8000 = { "* 8000 Hz","* 8000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB8000 = { "8000 Hz *","* 8000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB10000 = { "10000 Hz","10000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB12500 = { "12500 Hz","12500 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
-CMachineParameter const paraB16000 = { "* 16000 Hz","* 16000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
+CMachineParameter const paraB16000 = { "16000 Hz *","* 16000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 CMachineParameter const paraB20000 = { "20000 Hz","20000 Hz",EQSLIDERMIN,EQSLIDERMAX,MPF_STATE,32 };
 
-CMachineParameter const paraDiv = { "","",0,0,0,0 };
+CMachineParameter const paraDiv = { "Parametrization","Parametrization",0,0,MPF_LABEL,0 };
 CMachineParameter const paraPreAmp = { "Preamp","Preamp",-16,16,MPF_STATE,0 };
 CMachineParameter const paraBands = { "Bands","Bands",0,1,MPF_STATE,0 };
 CMachineParameter const paraExtra = { "Extra filtering","Extra filtering",0,1,MPF_STATE,0 };
-CMachineParameter const paraLink = { "Link","Link",0,1,MPF_STATE,0 };
+CMachineParameter const paraLink = { "Link *","Link",0,1,MPF_STATE,0 };
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -225,8 +222,13 @@ private:
 	void clean_history();
 
 	sIIRCoefficients *iir_cf;
-	float *gains31;
-	float *gains10;
+	
+	/* History for two filters */
+	sXYData MSVC_ALIGN data_history[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
+	sXYData MSVC_ALIGN data_history2[EQ_MAX_BANDS][EQ_CHANNELS] GNU_ALIGN;
+
+	float gains31[EQBANDS31];
+	float gains10[EQBANDS31];
 
 	float *gains;
 
@@ -245,30 +247,28 @@ mi::mi()
 {
 	// The constructor zone
 	Vals = new int[NUMPARAMETERS];
-	//iir_cf = new sIIRCoefficients;
-	gains31 = new float[EQBANDS31];
-	gains10 = new float[EQBANDS10];
 	gains = this->gains10;
+	//iir_cf = new sIIRCoefficients;
 	iir_cf = NULL;
 }
 
 mi::~mi()
 {
 	delete [] Vals;
-	delete [] gains31;
-	delete [] gains10;
-	gains = NULL;
 }
 
 void mi::Init()
 {
 // Initialize your stuff here
 
+	bool forceupdate = ( srate != pCB->GetSamplingRate() );
 	srate = pCB->GetSamplingRate();
 
-	calc_coeffs();
+	if (!equalizerInitialized || forceupdate ) {
+		calc_coeffs();
 
-	clean_history();
+		clean_history();
+	}
 
 	bnds = EQBANDS10;
 
@@ -283,6 +283,7 @@ void mi::SequencerTick()
 // Called on each tick while sequencer is playing
 	if(this->srate != pCB->GetSamplingRate())
 	{
+		this->srate = pCB->GetSamplingRate();
 		this->calc_coeffs();
 		this->clean_history();
 	}
@@ -354,8 +355,8 @@ void mi::ParameterTweak(int par, int val)
 			default:
 				break;
 		}
-		this->maEqualizerSetLevels();
-	} else if (par<_DIV)
+	}
+	if (par<_DIV)
 	{
 		this->maEqualizerSetLevels();
 	} else 
@@ -371,6 +372,7 @@ void mi::ParameterTweak(int par, int val)
 				break;
 		}
 	}
+	
 }
 
 // Work... where all is cooked 
@@ -649,37 +651,42 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 
 	switch(param)
 	{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9:
-		case 10:
-		case 11:
-		case 12:
-		case 13:
-		case 14:
-		case 15:
-		case 16:
-		case 17:
-		case 18:
-		case 19:
-		case 20:
-		case 21:
-		case 22:
-		case 23:
-		case 24:
-		case 25:
-		case 26:
-		case 27:
-		case 28:
-		case 29:
-		case 30:
+		case B20:
+		case B25:
+		case B40:
+		case B50:
+		case B80:
+		case B100:
+		case B160:
+		case B200:
+		case B315:
+		case B400:
+		case B630:
+		case B800:
+		case B1250:
+		case B1600:
+		case B2500:
+		case B3150:
+		case B5000:
+		case B6300:
+		case B10000:
+		case B12500:
+		case B20000:
+			if (bnds == EQBANDS10) {
+				std::strcpy(txt,"--");
+				return true;
+			}
+			
+		case B31:
+		case B62:
+		case B125:
+		case B250:
+		case B500:
+		case B1000:
+		case B2000:
+		case B4000:
+		case B8000:
+		case B16000:
 			std::sprintf(txt,"%.1f dB",DBfromScaleGain(value));
 			return true;
 		case _DIV: return false;
@@ -719,12 +726,12 @@ void mi::maEqualizerSetLevels()
 		float factor = std::pow(10.f,(preamp + DBfromScaleGain(Vals[i])) / 20.0f);
 		//this->gains[i] = (factor==1.f)?0.0f:-0.2f + (factor / 5.125903437963185f);
 		gains31[i] = -0.2f + (factor / 5.125903437963185f);
-		}
+	}
 	for(int i=0;i<EQBANDS10;i++){
 		float factor = std::pow(10.f,(preamp + DBfromScaleGain(Vals[3*i+2])) / 20.0f);
 		//this->gains[i] = (factor==1.f)?0.0f:-0.2f + (factor / 5.125903437963185f);
 		gains10[i] = -0.2f + (factor / 5.125903437963185f);
-		}
+	}
 }
 
 /* Get the freqs at both sides of F0. These will be cut at -3dB */
