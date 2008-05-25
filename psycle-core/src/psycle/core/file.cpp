@@ -54,7 +54,7 @@ namespace psy { namespace core {
 		#else
 			#error unknown dynamic linker
 		#endif
-	}
+	};
 	
 	std::string File::readFile(std::string const & path) {
 		std::ifstream is(path.c_str());
