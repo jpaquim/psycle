@@ -244,6 +244,7 @@ public:
 	void transposeBlock( int transposeAmount );
 	void blockSetInstrument();
 	void blockSetMachine();
+	void selectMachineUnderCursor();
 
 	void insertRow();
 	void deleteRow();

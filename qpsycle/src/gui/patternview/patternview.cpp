@@ -28,6 +28,7 @@
 #include "patterndraw.hpp"
 #include "patterngrid.hpp"
 #include "linenumbercolumn.hpp"
+#include "../../model/instrumentsmodel.hpp"
 
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -43,11 +44,13 @@ int d2i(double d)
 	return (int) ( d<0?d-.5:d+.5);
 }
 
-PatternView::PatternView( psy::core::Song *song )
+	PatternView::PatternView( psy::core::Song *song, InstrumentsModel *instrumentsModel )
+		: 
+		song_(song),
+		instrumentsModel_(instrumentsModel)
 {
 	qDebug( "Created PatternView: 0x%p.\n", this);
 
-	song_ = song;
 	pattern_ = NULL;
 	patternStep_ = 1;
 	
@@ -313,5 +316,10 @@ void PatternView::showEvent( QShowEvent * event )
 	patDraw()->setFocus();
 	patDraw()->scene()->setFocusItem( patDraw()->patternGrid() );
 }
+
+	InstrumentsModel* PatternView::instrumentsModel()
+	{
+		return instrumentsModel_;
+	}
 
 } // namespace qpsycle

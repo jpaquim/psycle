@@ -41,6 +41,7 @@ class LineNumberColumn;
 class PatternDraw;
 class PatternGrid;
 class PatCursor;
+	class InstrumentsModel;
 /*!
  * \brief
  * Tab object for the Pattern View.
@@ -53,7 +54,7 @@ class PatternView : public QWidget {
 Q_OBJECT
 
 public:
-	PatternView( psy::core::Song *song );
+	PatternView( psy::core::Song *song, InstrumentsModel *instrumentsModel );
 	~PatternView();
 
 	//FIXME: These three functions should be placed inside patternGrid, and have a signal call for view update
@@ -69,6 +70,7 @@ public:
 	psy::core::SinglePattern *pattern() const { return pattern_; }
 	PatternDraw* patDraw() { return patDraw_; }
 	PatternGrid* patternGrid(); 
+	InstrumentsModel* instrumentsModel();
 
 	int numberOfLines() const;
 	int numberOfTracks() const;
@@ -99,6 +101,7 @@ private:
 	void createToolBar();
 
 	psy::core::Song *song_;
+	InstrumentsModel *instrumentsModel_;
 	psy::core::SinglePattern* pattern_;
 
 	// Settings.
