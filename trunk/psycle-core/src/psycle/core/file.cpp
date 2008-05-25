@@ -47,14 +47,15 @@ namespace psy { namespace core {
 
 	char const File::path_env_var_name[] =
 	{
-		#if defined __unix__ || defined __APPLE__
-			"LD_LIBRARY_PATH"
-		#elif defined _WIN64 || defined _WIN32
+		#if defined _WIN64 || defined _WIN32 || defined __CYGWIN__
 			"PATH"
+		#elif defined __unix__ || defined __APPLE__
+			"LD_LIBRARY_PATH"
 		#else
 			#error unknown dynamic linker
 		#endif
-	};
+	}
+	
 	std::string File::readFile(std::string const & path) {
 		std::ifstream is(path.c_str());
 		if(!is) {
@@ -62,9 +63,10 @@ namespace psy { namespace core {
 			s << "could not open file: " << path;
 			throw std::runtime_error(s.str().c_str());
 		}
-		std::ostringstream s;
-		s << is.rdbuf();
-		return s.str();
+		std::ostringstream oss;
+		oss << is.rdbuf();
+		std::string nvr(oss.str());
+		return nvr;
 	}
 
 	std::vector<std::string> File::fileList(std::string const & path, int list_mode) {
@@ -190,7 +192,7 @@ namespace psy { namespace core {
 				#elif defined _WIN64 || defined _WIN32
 					";";
 				#else
-					#error unknown dynamic linker
+					#error unknown path list separator
 				#endif
 		}
 		new_path += path;
@@ -240,8 +242,10 @@ namespace psy { namespace core {
 		std::string const static once(
 			#if defined __unix__ || defined __APPLE__
 				"/"
-			#else
+			#elif defined _WIN64 || defined _WIN32
 				"\\"
+			#else
+				#error unknown path separator
 			#endif
 		);
 		return once;
