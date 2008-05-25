@@ -133,7 +133,7 @@ namespace qpsycle {
 		instrumentsModel_ = new InstrumentsModel( song_ );
 
 		macView_ = new MachineView( song_ );
-		patView_ = new PatternView( song_ );
+		patView_ = new PatternView( song_, instrumentsModel_ );
 		wavView_ = new WaveView( instrumentsModel_ );
 		seqView_ = new SequencerView( song_ );
 		sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );
@@ -418,7 +418,7 @@ namespace qpsycle {
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 		macView_ = new MachineView( song_ );
-		patView_ = new PatternView( song_ );
+		patView_ = new PatternView( song_, instrumentsModel_ );
 		wavView_ = new WaveView( instrumentsModel_ );
 		seqView_ = new SequencerView( song_ );
 		sampleBrowser_ = new SampleBrowser( instrumentsModel_, this );

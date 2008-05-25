@@ -19,6 +19,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/player.h>
+#include <psycle/core/patternevent.h>
 
 #include "../global.hpp"
 #include "../configuration.hpp"
@@ -26,6 +27,7 @@
 #include "patternview.hpp"
 #include "patterngrid.hpp"
 #include "patterndraw.hpp"
+#include "../../model/instrumentsmodel.hpp"
 
 #include <sstream>
 #include <iostream>
@@ -596,6 +598,9 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 	case commands::block_set_machine:
 		blockSetMachine();
 		break;
+	case commands::select_machine:
+		selectMachineUnderCursor();
+		break;
 	default:
 		// If we got here, we didn't do anything with it, so officially ignore it.
 		event->ignore();
@@ -603,6 +608,28 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 
 }
 
+	void PatternGrid::selectMachineUnderCursor()
+	{
+		qDebug( "PatternGrid::selectMachineUnderCursor()" );
+		int currentLine = cursor().line();
+		int currentTrack = cursor().track();
+
+		psy::core::PatternEvent currentEvent = pattern()->event( currentLine, currentTrack );
+
+		std::uint8_t machine = currentEvent.machine();
+		std::uint8_t inst = currentEvent.instrument();
+
+		if ( machine < psy::core::MAX_BUSES*2 ) { // check that it's a generator. ///\ todo check better.
+			///\ todo update machines combo box.
+			// Seems a bit of a wasted effort to do this until we have a machines model.
+			// (i.e. at present... pass a signal all the way up to MainWindow, make
+			// a MainWindow slot to call populateMachinesCombo, and to change the selected mac
+			// in the MachineView.) 
+		}
+		if ( inst != 255 ) {
+			patDraw_->patternView()->instrumentsModel()->setSelectedInstrumentIndex( inst );
+		}
+	}
 
 void PatternGrid::doNoteEvent( int note )
 {
