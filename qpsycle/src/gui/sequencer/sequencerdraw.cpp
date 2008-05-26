@@ -263,11 +263,11 @@ namespace qpsycle {
 		Q_UNUSED( item );
 
 		// Determine how much to move all the items.
-		if ( gridSnap() ) {
-			int beatDiff = static_cast<int>( diff.x() ) / beatPxLength_;
-			int snappedBeatDiff = beatDiff * beatPxLength_;
-			diff.setX( snappedBeatDiff );
-		}
+// 		if ( gridSnap() ) {
+// 			int beatDiff = static_cast<int>( diff.x() ) / beatPxLength_;
+// 			int snappedBeatDiff = beatDiff * beatPxLength_;
+// 			diff.setX( snappedBeatDiff );			
+// 		}
 
 		QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
 
@@ -353,7 +353,7 @@ namespace qpsycle {
 
 	bool SequencerDraw::gridSnap() const 
 	{
-		return true; ///\todo this should be a user option (so not hardcoded.)
+		return seqView_->gridSnap();
 	}
 
 	int SequencerDraw::beatPxLength( ) const
