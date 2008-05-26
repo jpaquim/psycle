@@ -214,16 +214,20 @@ namespace qpsycle {
 			QPointF newPos = value.toPointF();
 			QPointF originalPos = pos();
 
+			int beatPxLength = seqDraw_->beatPxLength();
+
 			if ( seqDraw_->gridSnap() )
 			{
- 				int beatPxLength = seqDraw_->beatPxLength();
 				int newX = newPos.x();
 				if ( newX % beatPxLength != 0 ) {
 					newX = newX + ( beatPxLength - ( newX % beatPxLength ) );
 				}
+				sequenceEntry()->track()->MoveEntry( sequenceEntry(), newX / beatPxLength );
+
 				return QPointF( newX, originalPos.y() );
 			}
-			return QPointF( value.toPointF().x(), originalPos.y() ); // Constrains an item to present y pos.
+			sequenceEntry()->track()->MoveEntry( sequenceEntry(), newPos.x() / beatPxLength );
+			return QPointF( newPos.x(), originalPos.y() ); // Constrains an item to present y pos.
 		}
 		return QGraphicsItem::itemChange( change, value );
 	}
