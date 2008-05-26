@@ -262,13 +262,6 @@ namespace qpsycle {
 	{
 		Q_UNUSED( item );
 
-		// Determine how much to move all the items.
-// 		if ( gridSnap() ) {
-// 			int beatDiff = static_cast<int>( diff.x() ) / beatPxLength_;
-// 			int snappedBeatDiff = beatDiff * beatPxLength_;
-// 			diff.setX( snappedBeatDiff );			
-// 		}
-
 		QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
 
 		int leftMostX = 10000; // Of all selected items, find the left most x pos.
@@ -293,8 +286,8 @@ namespace qpsycle {
 			if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
 			{
 				someItem->moveBy( xMoveBy, 0 );
-				int newItemLeft = someItem->pos().x();
-				someItem->sequenceEntry()->track()->MoveEntry( someItem->sequenceEntry(), newItemLeft / beatPxLength() );
+				// Note: SeqItem::itemChange() deals with updating the entry
+				// position in the core. (itemChange is called if an item moves.)
 			}
 		}
 	}
