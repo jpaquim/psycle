@@ -27,7 +27,8 @@ class SinglePattern;
 }}
 
 #include <QtGui/QVBoxLayout>
-#include <QtGui/QToolBar>
+class QToolBar;
+class QCheckBox;
 
 namespace qpsycle {
 
@@ -49,6 +50,8 @@ public:
 	void onPatternNameChanged();
 	void onCategoryColorChanged();
 
+	bool gridSnap();
+
 public slots:
 	void zoomIn();
 	void zoomOut();
@@ -56,6 +59,8 @@ public slots:
 protected:
 
 private:
+	void setupToolbar();
+
 	psy::core::Song *song_;
 	QVBoxLayout *layout_;
 	SequencerDraw *seqDraw_;
@@ -64,6 +69,8 @@ private:
 	std::vector<SequencerLine*> *lines_;
 
 	QToolBar *toolBar_;
+	QCheckBox *snapCheckbox_;
+
 
 	double oldPlayPos_;
 };

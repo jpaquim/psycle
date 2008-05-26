@@ -32,6 +32,7 @@
 #include <QMenu>
 #include <QKeyEvent>
 #include <QGraphicsItemGroup>
+#include <QDebug>
 
 namespace qpsycle {
 
@@ -208,9 +209,23 @@ namespace qpsycle {
 
 	QVariant SequencerItem::itemChange(GraphicsItemChange change, const QVariant &value)
 	{
-		if (change == ItemPositionChange)
-			return QPointF(value.toPointF().x(), pos().y()); // Constrains an item to present y pos.
-		return QGraphicsItem::itemChange(change, value);
+		if ( change == ItemPositionChange ) 
+		{
+			QPointF newPos = value.toPointF();
+			QPointF originalPos = pos();
+
+			if ( seqDraw_->gridSnap() )
+			{
+ 				int beatPxLength = seqDraw_->beatPxLength();
+				int newX = newPos.x();
+				if ( newX % beatPxLength != 0 ) {
+					newX = newX + ( beatPxLength - ( newX % beatPxLength ) );
+				}
+				return QPointF( newX, originalPos.y() );
+			}
+			return QPointF( value.toPointF().x(), originalPos.y() ); // Constrains an item to present y pos.
+		}
+		return QGraphicsItem::itemChange( change, value );
 	}
 
 } // namespace qpsycle

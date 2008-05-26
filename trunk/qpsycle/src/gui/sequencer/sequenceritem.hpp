@@ -87,8 +87,6 @@ namespace qpsycle {
 		QAction *loopEntryAction_;
 		const QColor QColorFromLongColor( long longCol ) const;
 
-		int beatPxLength_;
-
 		SequencerDraw *seqDraw_;
 	};
 
